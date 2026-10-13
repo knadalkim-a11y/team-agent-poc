@@ -1,5 +1,5 @@
 diff --git a/src/app.html b/src/app.html
-index 667808e..eb67127 100644
+index 667808e..e801ee1 100644
 --- a/src/app.html
 +++ b/src/app.html
 @@ -2,6 +2,33 @@
@@ -41,7 +41,7 @@ index 667808e..eb67127 100644
  		</script>
  
 -		<title>Open WebUI</title>
-+		<title>EES Work</title>
++		<title>EES Workflow</title>
  
 +		<link rel="stylesheet" href="/_ees14/chat-theme.css?v=EES_THEME_SHA256" crossorigin="use-credentials" />
 +		<link rel="stylesheet" href="/_ees14/ees-work-launcher.css?v=EES_WORK_STYLE_SHA256" />
@@ -50,7 +50,7 @@ index 667808e..eb67127 100644
  	</head>
  
 diff --git a/src/lib/components/channel/Channel.svelte b/src/lib/components/channel/Channel.svelte
-index d552ba8..163b8ac 100644
+index d552ba8..384bf93 100644
 --- a/src/lib/components/channel/Channel.svelte
 +++ b/src/lib/components/channel/Channel.svelte
 @@ -310,10 +310,10 @@
@@ -58,11 +58,11 @@ index d552ba8..163b8ac 100644
  						return e.name;
  					}
 -				}, '')} / Open WebUI</title
-+				}, '')} / EES Work</title
++				}, '')} / EES Workflow</title
  		>
  	{:else}
 -		<title>#{channel?.name ?? 'Channel'} / Open WebUI</title>
-+		<title>#{channel?.name ?? 'Channel'} / EES Work</title>
++		<title>#{channel?.name ?? 'Channel'} / EES Workflow</title>
  	{/if}
  </svelte:head>
  
@@ -499,7 +499,7 @@ index 007df31..1d08067 100644
  								<HotkeyHint name="search" className=" hover-reveal " />
  							</button>
 diff --git a/src/lib/constants.ts b/src/lib/constants.ts
-index 172ed9a..21174d9 100644
+index 172ed9a..8873d62 100644
 --- a/src/lib/constants.ts
 +++ b/src/lib/constants.ts
 @@ -4,7 +4,7 @@
@@ -507,12 +507,12 @@ index 172ed9a..21174d9 100644
  // Do not alter, remove, obscure, or replace it except as LICENSE permits:
  // https://docs.openwebui.com/license.
 -export const APP_NAME = 'Open WebUI';
-+export const APP_NAME = 'EES Work';
++export const APP_NAME = 'EES Workflow';
  
  export const WEBUI_HOSTNAME = '';
  export const WEBUI_BASE_URL = '';
 diff --git a/src/routes/+layout.svelte b/src/routes/+layout.svelte
-index cd832fd..4db6f12 100644
+index cd832fd..49017b1 100644
 --- a/src/routes/+layout.svelte
 +++ b/src/routes/+layout.svelte
 @@ -603,7 +603,7 @@
@@ -520,7 +520,7 @@ index cd832fd..4db6f12 100644
  			if ($isLastActiveTab) {
  				if ($settings?.notificationEnabled ?? false) {
 -					new Notification(`${data.title} / Open WebUI`, {
-+					new Notification(`${data.title} / EES Work`, {
++					new Notification(`${data.title} / EES Workflow`, {
  						body: timeStr,
  						// LICENSE covers this Open WebUI notification identifier.
  						// Do not alter, remove, obscure, or replace it except as LICENSE permits:
@@ -529,7 +529,7 @@ index cd832fd..4db6f12 100644
  					if ($isLastActiveTab) {
  						if ($settings?.notificationEnabled ?? false) {
 -							new Notification(`${displayTitle} / Open WebUI`, {
-+							new Notification(`${displayTitle} / EES Work`, {
++							new Notification(`${displayTitle} / EES Workflow`, {
  								body: contentPreview,
  								// LICENSE covers this Open WebUI notification identifier.
  								// Do not alter, remove, obscure, or replace it except as LICENSE permits:
@@ -538,7 +538,7 @@ index cd832fd..4db6f12 100644
  						// Do not alter, remove, obscure, or replace it except as LICENSE permits:
  						// https://docs.openwebui.com/license.
 -						new Notification(`${title} / Open WebUI`, {
-+						new Notification(`${title} / EES Work`, {
++						new Notification(`${title} / EES Workflow`, {
  							body: data?.content,
  							icon: `${WEBUI_API_BASE_URL}/users/${data?.user?.id}/profile/image`
  						});

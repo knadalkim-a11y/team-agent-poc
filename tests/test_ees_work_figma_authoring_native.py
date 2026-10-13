@@ -599,7 +599,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('[data-action=mode][data-mode=author]')")
         self.click('[data-action=mode][data-mode=author]')
         self.assertEqual(menu_ids(), [])
-        self.assertIn('EES Work에서 열 수 있는 항목이 없습니다', self.text('#ees-work-entry'))
+        self.assertIn('EES Workflow에서 열 수 있는 항목이 없습니다', self.text('#ees-work-entry'))
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-action=tools],[data-action=workspace_admin]')"))
         directory = self.screenshot('menu-c18-tools-only-menu')
         (directory / 'menu-c18-role-scope.json').write_text(json.dumps({
@@ -782,7 +782,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         }, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         self.assertTrue(after['prompt'].startswith(before['prompt']))
         # Native Tiptap serializes a blank paragraph with interior spaces.
-        self.assertRegex(after['prompt'][len(before['prompt']):], r'^\n[ \t]*\nEES Work 도움말')
+        self.assertRegex(after['prompt'][len(before['prompt']):], r'^\n[ \t]*\nEES Workflow 도움말')
         for text in ('도움말 용어 ID: read_tool', '현재 화면:', '초안 이름: Jira 조회', '하는 일: 정보 읽기'):
             self.assertIn(text, after['prompt'])
         self.assertEqual({key: value for key, value in before.items() if key != 'prompt'},

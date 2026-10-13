@@ -162,5 +162,7 @@ test('view completion signal follows actual mount success and the creation card 
  const original=h.document.querySelector;h.document.querySelector=selector=>selector==='#sidebar-search-button'?null:original(selector);assert.equal(view.render(snapshot()),false);assert.equal(view.sync(snapshot()),false);
  const card=run(h.context,'workProcedureStartHTML({kind:"new"})');
  assert.ok(card.includes('새 업무 절차는 비슷한 예시를 복사해 고치는 것이 가장 쉽습니다. 오른쪽에서 예시를 고르거나 빈 절차로 시작하세요. 만드는 방법이 궁금하면 아래 질문을 보내 보세요. 지금은 대화 내용으로 초안을 바로 만들지는 않습니다. 초안은 게시하기 전까지 업무 화면에 나타나지 않습니다.'));
- assert.doesNotMatch(card,/하시는 일을 순서대로 말해 주시면/);
+ assert.doesNotMatch(card,/하시는 일을 순서대로 말해 주시면|예시 없이, 하는 일을 말로 설명해서 만들고 싶어/);
+ assert.equal(run(h.context,'workUI.procedureQuestions[2]'),'빈 절차로 시작하면 무엇부터 정하나요?');
+ assert.match(card,/data-question-index="2"[^>]*>.*?<span>빈 절차로 시작하면 무엇부터 정하나요\?<\/span>/);
 });

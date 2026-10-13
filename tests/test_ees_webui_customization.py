@@ -79,9 +79,9 @@ def make_wheel(extra=None, replacement=None, *, version=branding.VERSION, missin
         "open_webui/__init__.py": b"raise RuntimeError('never import this application')\n",
         "open_webui/env.py": b"# synthetic env module\n",
         "open_webui/main.py": b"# synthetic main module\n",
-        "open_webui/frontend/index.html": b"<title>EES Work</title>\n",
+        "open_webui/frontend/index.html": b"<title>EES Workflow</title>\n",
         app + "version.json": json.dumps({"version": version}).encode(),
-        app + "immutable/chunks/test.js": b"const title = 'EES Work';\n",
+        app + "immutable/chunks/test.js": b"const title = 'EES Workflow';\n",
     }
     if version in {"0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13", "0.11.3+ees.14"}:
         members.update({app + name: b"synthetic checked theme asset\n" for name in branding.THEME_FILES})
@@ -1714,7 +1714,7 @@ print("workflow_" + phase + "=pass")
             self.assertEqual(distributions[0].version, branding.VERSION)
             self.assertEqual(Path(distributions[0].locate_file("")), program)
             self.assertEqual(json.loads((program / (branding.TARGET_APP + "version.json")).read_bytes())["version"], branding.VERSION)
-            self.assertIn(b"EES Work", (program / "open_webui/frontend/index.html").read_bytes())
+            self.assertIn(b"EES Workflow", (program / "open_webui/frontend/index.html").read_bytes())
             # v0.11.3 config.py rewrites package/static from frontend/static
             # at startup. Reproduce those file operations without app imports.
             static = program / "open_webui/static"

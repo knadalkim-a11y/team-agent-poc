@@ -179,6 +179,11 @@ class SourcePatchTests(unittest.TestCase):
     def test_layout_hooks_preserve_native_elements_and_reject_source_drift(self):
         root = Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"])
         config = frontend.configuration()
+        for name in ("src/app.html", "src/lib/constants.ts", "src/routes/+layout.svelte",
+                     "src/lib/components/channel/Channel.svelte"):
+            current = (root / name).read_text(encoding="utf-8")
+            self.assertIn("EES Workflow", current, name)
+            self.assertNotRegex(current, r"EES Work(?!flow)", name)
         for name in ("src/lib/components/chat/Placeholder.svelte", "src/lib/components/chat/Navbar.svelte"):
             original = subprocess.check_output(["git", "show", config["commit"] + ":" + name], cwd=root)
             current = (root / name).read_bytes()

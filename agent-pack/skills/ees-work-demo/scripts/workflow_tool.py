@@ -73,7 +73,7 @@ class Tools:
         try:
             from open_webui.ees_workflow import workspace_state
         except ImportError:
-            return _error("program_upgrade_required", "EES Work 프로그램 업데이트가 필요합니다.")
+            return _error("program_upgrade_required", "EES Workflow 프로그램 업데이트가 필요합니다.")
         reference = _reference(__metadata__)
         historical = reference.get("reference_kind") == "historical"
         if historical and (reference.get("invalid") or any(value and value != reference.get(key) for key, value in (("workflow_id", workflow_id), ("run_id", run_id))) or system_id or factory_id):
@@ -87,7 +87,7 @@ class Tools:
             try:
                 from open_webui.ees_workflow_native import historical_work_projection
             except ImportError:
-                return _error("program_upgrade_required", "과거 기록 조회를 위한 EES Work 프로그램 업데이트가 필요합니다.")
+                return _error("program_upgrade_required", "과거 기록 조회를 위한 EES Workflow 프로그램 업데이트가 필요합니다.")
             return historical_work_projection(result, reference)
         # Personal UI state, approvals/intents, credentials and private chat
         # bodies do not belong in model context. The service filters scope and
@@ -125,7 +125,7 @@ class Tools:
             try:
                 from open_webui.ees_workflow import workspace_input_preview
             except ImportError:
-                return _error("program_upgrade_required", "EES Work 프로그램 업데이트가 필요합니다.")
+                return _error("program_upgrade_required", "EES Workflow 프로그램 업데이트가 필요합니다.")
             preview = await workspace_input_preview(__user__, {"workflow_id": workflow_id, "run_id": run_id, "job_id": job_id,
                 "expected_revision": base_revision, "context_id": context_id, "proposal": inputs})
             if not preview.get("ok"):
@@ -143,7 +143,7 @@ class Tools:
             from open_webui.ees_workflow_workspace import definition_check, _public
             from open_webui.ees_workflow_authoring import WorkflowError
         except ImportError:
-            return _error("program_upgrade_required", "EES Work 프로그램 업데이트가 필요합니다.")
+            return _error("program_upgrade_required", "EES Workflow 프로그램 업데이트가 필요합니다.")
         try:
             _public(definition)
             errors, _warnings = definition_check(definition, complete=False)

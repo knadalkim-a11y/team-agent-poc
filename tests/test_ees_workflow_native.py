@@ -273,7 +273,7 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(ui['workflows'], [])
             self.assertEqual(service.database.read_bytes(), before)
             self.assertIn('도움말에 없는 내용', ai['help']['answer_guidance']['unknown'])
-            self.assertTrue(all(term['evidence'].startswith('근거 · EES Work 도움말 ‘') for term in ai['help']['terms']))
+            self.assertTrue(all(term['evidence'].startswith('근거 · EES Workflow 도움말 ‘') for term in ai['help']['terms']))
             # A changed canonical file reaches UI and AI without changing the
             # registered Tool source, which is protected by its existing hash.
             view = sys.modules['open_webui.ees_workflow_view']

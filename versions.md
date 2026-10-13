@@ -15,7 +15,7 @@
 | 로컬 접속 예제 | http://127.0.0.1:8080 | 신규 설치 예제. 현재 서버는 등록한 기존 LAN IP·포트 사용 |
 | 작업 디렉터리 예제 | %LOCALAPPDATA%\EES-Agent-POC\open-webui | 신규 설치 예제. 기존 서버는 등록된 cwd 유지 |
 | DATA_DIR 예제 | 위 예제 작업 디렉터리의 data 폴더 | 신규 설치 예제. 기존 서버는 등록된 data_dir 유지; Git 제외 |
-| 표시 이름 | 새 기본값과 ees.7/ees.8 브랜딩: EES Work (공식본은 Open WebUI 접미사). 이전 ees.2/ees.3/ees.4/ees.5/ees.6: EES Portal | 별도로 지정한 서비스 이름과 기존 Assistant 모델 이름·ID는 유지. 실제 적용 원본은 [STATUS](docs/STATUS.md), ees.4의 대화 폭·조절 표시 정상 보고는 [화면 확인 기록](evals/scenarios.md#ees-stop-recovery)에서 관리 |
+| 표시 이름 | ees.14 기본값: EES Workflow. 이전 ees.7~ees.13: EES Work, ees.2/ees.3/ees.4/ees.5/ees.6: EES Portal | 별도로 지정한 서비스 이름과 기존 Assistant 모델 이름·ID는 유지. 실제 적용 원본은 [STATUS](docs/STATUS.md), ees.4의 대화 폭·조절 표시 정상 보고는 [화면 확인 기록](evals/scenarios.md#ees-stop-recovery)에서 관리 |
 | 모델·프록시 | 승인된 사내 값; 저장소에는 placeholder | 실제 주소·키·모델 경로는 Git에 저장하지 않음 |
 
 이 표의 예제 경로를 이미 등록한 서버에 다시 적용하지 않습니다. 실제 Python·작업 위치·DATA_DIR·수신 주소는 사내 등록 설정이 원본이며 값을 추측하거나 재등록하지 않습니다. [기존 등록과 기록 위치](docs/03-openwebui-native-agent.md#ees-local-state)를 따릅니다.
@@ -48,7 +48,7 @@ ees.9/v0.2.10의 [메인 채팅 업무 탐색·계획](docs/mockups/ees-work/TAS
 
 ees.10의 `ees-work.sqlite3`에는 첫 저장·실행의 중복 요청을 구분하는 `action_requests` 테이블을 추가합니다. 기존 정의·진행 건·결과·이력 테이블과 그 자료를 삭제하거나 재작성하지 않습니다. 이전 프로그램은 추가 테이블을 사용하지 않고 기존 진행 자료를 계속 읽고 변경할 수 있지만 새 첫 쓰기 중복 방지·선택 대상 계약을 제공하지 않습니다. 프로그램 Restore는 DB나 Agent Pack을 되돌리지 않습니다. 따라서 ees.9로 Restore한 뒤 새 Workflow Tool 0.3.0의 업무 선택·실행은 프로그램 갱신 필요로 중단하며, 구프로그램의 기존 화면과 저장 자료를 사용하는 범위만 호환 대상으로 봅니다. 실제 새 저장 자료의 구프로그램 재사용 검증 및 플랫폼별 미실행 범위는 [이번 평가 기록](evals/scenarios.md#work-panel-chat-implementation-20260917)에 따릅니다. 새 원본은 [09-17 고정 원본 시험 적용](docs/03-openwebui-native-agent.md#ees-work-panel-trial-20260917)으로 프로그램과 지정 자산을 함께 반영하며 마지막 확인된 사내 ees.9 설치와 구분합니다.
 
-[EES Work 단계별 진행](docs/03-openwebui-native-agent.md#ees-work-demo)와 기존 중앙 AI 대화·업무 패널·절차 편집은 그대로 연결됩니다. 업무 정의·사용자별 진행 건은 기존 DATA_DIR의 `ees-work.sqlite3`에 저장하며 DB/AP 점검은 모의 실행입니다. 아래 Selector 실행 파일은 공식 0.11.3만 허용하고 현재 미적용이므로 EES 전환에 함께 사용하지 않습니다.
+[EES Workflow 단계별 진행](docs/03-openwebui-native-agent.md#ees-work-demo)와 기존 중앙 AI 대화·업무 패널·절차 편집은 그대로 연결됩니다. 업무 정의·사용자별 진행 건은 기존 DATA_DIR의 `ees-work.sqlite3`에 저장하며 DB/AP 점검은 모의 실행입니다. 아래 Selector 실행 파일은 공식 0.11.3만 허용하고 현재 미적용이므로 EES 전환에 함께 사용하지 않습니다.
 
 Windows 접속 수락 오류용 [선택 실행 파일](scripts/serve_openwebui_windows.py)은 위 WebUI·Python 버전과 공식 고정 의존성 **Uvicorn 0.51.0**, 기존 SQLite·단일 worker에 한정합니다. 별도 설치·업그레이드를 수행하지 않으며 실제 사내 의존성 버전은 아직 미대조입니다. 사전검사에서 다르면 기존 환경을 보존한 채 검토합니다. [Selector 제한·적용 조건](docs/troubleshooting.md#windows-accept-winerror64).
 

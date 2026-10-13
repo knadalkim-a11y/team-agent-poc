@@ -4,7 +4,7 @@
 param(
     [string]$ProxyUrl = $env:CORP_PROXY_URL,
     [string]$NoProxy = $env:CORP_NO_PROXY,
-    [string]$WebUiName = "EES Work",
+    [string]$WebUiName = "EES Workflow",
     [switch]$ConfluenceReady
 )
 

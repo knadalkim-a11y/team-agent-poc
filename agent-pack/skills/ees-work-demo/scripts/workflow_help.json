@@ -1,5 +1,5 @@
 {
-  "source": "EES Work 도움말",
+  "source": "EES Workflow 도움말",
   "version": 1,
   "answer_guidance": {
     "grounding": "용어 id·이름·별칭으로 관련 항목을 찾아 summary와 example에 근거해 설명합니다. 답에 해당 항목의 evidence 문구를 표시합니다.",

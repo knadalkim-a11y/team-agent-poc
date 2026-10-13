@@ -145,8 +145,8 @@ PATCHES = {
     "open_webui/env.py": [(
         b"WEBUI_NAME = os.getenv('WEBUI_NAME', 'Open WebUI')\n"
         b"if WEBUI_NAME != 'Open WebUI':\n    WEBUI_NAME += ' (Open WebUI)'",
-        b"WEBUI_NAME = os.getenv('WEBUI_NAME', 'EES Work')\n"
-        b"if WEBUI_NAME in {'EES Assistant', 'EES Portal'}:\n    WEBUI_NAME = 'EES Work'", 1,
+        b"WEBUI_NAME = os.getenv('WEBUI_NAME', 'EES Workflow')\n"
+        b"if WEBUI_NAME in {'EES Assistant', 'EES Portal', 'EES Work'}:\n    WEBUI_NAME = 'EES Workflow'", 1,
     )],
     SOURCE_INFO + "METADATA": [(
         b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.14\n", 1,
@@ -443,23 +443,23 @@ def assemble_work_launcher(ui_dir=UI_DIR):
                 ("ees-work-designer.js", "createWorkDesigner"),
                 ("ees-work-launcher.js", None))
     if WORK_LAUNCHER_SOURCES != tuple(name for name, _ in expected):
-        raise ValueError("EES Work launcher source order differs.")
+        raise ValueError("EES Workflow launcher source order differs.")
     root = Path(ui_dir)
     if any(path.is_symlink() for path in (root, *root.parents)):
-        raise ValueError("Linked EES Work launcher source directory.")
+        raise ValueError("Linked EES Workflow launcher source directory.")
     parts = []
     declaration = re.compile(rb"\b(?:function\s+|(?:const|let|var)\s+)(createWorkView|createWorkDesigner)\b")
     for filename, factory in expected:
         path = root / filename
         if path.is_symlink() or not path.is_file():
-            raise ValueError(f"Missing or linked EES Work launcher source: {filename}")
+            raise ValueError(f"Missing or linked EES Workflow launcher source: {filename}")
         content = path.read_bytes()
         if not content.strip():
-            raise ValueError(f"Empty EES Work launcher source: {filename}")
+            raise ValueError(f"Empty EES Workflow launcher source: {filename}")
         wanted = [factory.encode("ascii")] if factory else []
         if declaration.findall(content) != wanted or (factory and not re.search(
                 rb"\bfunction\s+" + factory.encode("ascii") + rb"\s*\(", content)):
-            raise ValueError(f"EES Work launcher factory/order differs: {filename}")
+            raise ValueError(f"EES Workflow launcher factory/order differs: {filename}")
         parts.append(content)
     assembled = b"(() => {\n'use strict';\n" + b"\n;\n".join(parts) + b"\n})();\n"
     for relative in V4_ICON_FILES:
@@ -489,7 +489,7 @@ def prepare_additions(source, ui_dir, work_dir=WORK_DIR):
     for relative, target in WORK_ASSETS.items():
         path = Path(work_dir) / relative
         if path.is_symlink() or not path.is_file() or not path.stat().st_size:
-            raise ValueError(f"Missing, empty, or linked EES Work asset: {relative}")
+            raise ValueError(f"Missing, empty, or linked EES Workflow asset: {relative}")
         additions[target] = path.read_bytes()
     if ASSET_GUARD_SOURCE.is_symlink() or not ASSET_GUARD_SOURCE.is_file() or not ASSET_GUARD_SOURCE.stat().st_size:
         raise ValueError("Missing, empty, or linked asset guard runtime.")

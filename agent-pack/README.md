@@ -1,4 +1,4 @@
-# EES Work 관리 원본
+# EES Workflow 관리 원본
 
 현재 기준은 [통합 구현 계약](../docs/mockups/ees-work/TASK.md#integrated-work-20261002)이다. 새 설치에는 데모 절차·전문 Assistant·등록 Skill 콘텐츠가 없다. 콘텐츠 제거와 Native 도구/모델/Skill 관리 기능 제거를 구분한다.
 

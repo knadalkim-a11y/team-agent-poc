@@ -11,22 +11,22 @@
   "node": "v22.16.0",
   "npm": "10.9.2",
   "patched_files": {
-    "src/app.html": "a423b395718b1b8cb664fd3407bde043db65a2c02087c2b333ad8cbc5c325fea",
-    "src/lib/components/channel/Channel.svelte": "d1b2b57eb615641645b381f76af1e32328132c31dd7830b5edb1b2ad88bc7248",
+    "src/app.html": "61a75799656e590b26728650e3f38f15b701f3f0e5af308a2a73f545c4a8c9a9",
+    "src/lib/components/channel/Channel.svelte": "49454dd5aa86f0bc1424ca286d1a7ffccef3103a81c5ac36a99ffc9fe03e2bfc",
     "src/lib/components/chat/Chat.svelte": "1f783a1b5767f1b330ed4320abfa1706e2500d21aec7d70d50006f5bb514296c",
     "src/lib/components/chat/MessageInput.svelte": "65e4555e76155596256731f7092f09707b2af0cedcc9398ca38353574bef04ec",
     "src/lib/components/chat/Navbar.svelte": "8a3a831fb840b9b037d204039c5f1793b4ef3662ddce6c8b751d281b0283fa52",
     "src/lib/components/chat/Placeholder.svelte": "48cb4eaf9d094e7c22f3df8b6b8e0f965e10dddeeba59427b4fede7d7743560d",
     "src/lib/components/layout/Sidebar.svelte": "77ba2ae430b8e37c09d7ad44f8a9be17975a2840983242295dad752f9cf6a1a8",
-    "src/lib/constants.ts": "b7914c0438fec37cb634fcc2d0e75445b3d14f9799d52f2d3db544e6b584261c",
-    "src/routes/+layout.svelte": "36a683e10a948e47b64a3c2bba65e04eca2b840b07dfe042c9cb4afc3e3b6ea7",
+    "src/lib/constants.ts": "0fd43314837a2d7775810c3f08fc82b8042c34a5b6e52f1a7e4513f303a07b5d",
+    "src/routes/+layout.svelte": "6b71d56baa7e12380b9076682d35a75e5d59f2e6186ed0d005c105f5f563476c",
     "svelte.config.js": "95f9ac49b1c1c3c14f23f5a06300de631d974f725ce8c4958f799d42955e1f37",
     "vite.config.ts": "793bfdc367867f486b504434bbbb79d0b7c69a5b4bd8572c0368138b60598bd2"
   },
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "1bd014c47d57789247bdc6fbe08b1458c1022ac382bdbdf021b782d1e1b48024"
+      "sha256": "78e80c1d27d248f4e94382d24f293e40a0d190883ffa90791dabc816301492dd"
     }
   ],
   "pyodide_files": {

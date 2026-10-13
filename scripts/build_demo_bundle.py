@@ -176,7 +176,7 @@ def build_bundle(root, output_dir, branding_dir=None, allow_dirty=False):
         files.update(additions)
     source_url = REPOSITORY_URL + "/tree/" + commit
     files["BUNDLE-README.md"] = (
-        "# EES Work 검토용 배포 후보\n\n"
+        "# EES Workflow 검토용 배포 후보\n\n"
         "공통 도구·서버 원본과 사용 안내를 담은 검토용 자료입니다. 데모 콘텐츠는 등록하지 않습니다.\n"
         "이 ZIP은 서버 설치·재시작·데이터 이전을 실행하지 않습니다.\n\n"
         "팀원 안내: docs/07-team-quickstart.md\n\n"

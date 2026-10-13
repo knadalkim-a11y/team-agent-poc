@@ -564,7 +564,7 @@ class BrandingBuildTests(unittest.TestCase):
             digest = hashlib.sha256(content).hexdigest()
             links.append('<link href="/' + app_dir + '/' + filename + '?v=' + digest + '" />')
         self.frontend_files = {
-            "index.html": ('<!-- LICENSE synthetic source build -->\n<title>EES Work</title>\n'
+            "index.html": ('<!-- LICENSE synthetic source build -->\n<title>EES Workflow</title>\n'
                 '<link href="/static/custom.css" />\n' + "\n".join(links)
                 + '\n<script src="/' + app_dir + '/immutable/entry/start.source.js"></script>\n</head>\n').encode(),
             app_dir + "/version.json": json.dumps({"version": builder.VERSION}).encode(),
@@ -958,7 +958,7 @@ class BrandingBuildTests(unittest.TestCase):
     def test_missing_mock_runtime_fails_before_writing(self):
         with tempfile.TemporaryDirectory() as empty:
             with ZipFile(self.wheel) as archive:
-                with self.assertRaisesRegex(ValueError, "EES Work asset"):
+                with self.assertRaisesRegex(ValueError, "EES Workflow asset"):
                     builder.prepare_additions(archive, self.ui, Path(empty))
 
     def test_wrong_source_hash_fails_without_output(self):
@@ -987,9 +987,9 @@ class BrandingBuildTests(unittest.TestCase):
         self.build()
         with ZipFile(self.root / "release" / builder.WHEEL_FILENAME) as built:
             synthetic_env = built.read("open_webui/env.py")
-        for registered, expected in ((None, "EES Work"), ("EES Assistant", "EES Work"),
-                                     ("EES Portal", "EES Work"), ("EES Work", "EES Work"),
-                                     ("Team Custom", "Team Custom")):
+        for registered, expected in ((None, "EES Workflow"), ("EES Assistant", "EES Workflow"),
+                                     ("EES Portal", "EES Workflow"), ("EES Work", "EES Workflow"),
+                                     ("EES Workflow", "EES Workflow"), ("Team Custom", "Team Custom")):
             with self.subTest(registered=registered):
                 environment = {} if registered is None else {"WEBUI_NAME": registered}
                 with mock.patch.dict(os.environ, environment, clear=True):

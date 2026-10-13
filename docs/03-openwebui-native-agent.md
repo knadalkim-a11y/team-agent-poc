@@ -1,6 +1,6 @@
 # 03. Open WebUI Native 통합 Assistant
 
-현재 제품 기준은 [2026-10-02 통합 EES Work](#integrated-work-install-20261002)다. 아래 날짜별 시연·ApplyDemo·전문 Assistant·사전 Skill 구성은 당시 이력이다. 새 설치/업데이트에서 이 콘텐츠를 등록하지 않으며 옛 명령을 반복하지 않는다. 실제 도구/Native 관리/프로그램 적용과 복구 경로는 유지한다.
+현재 제품 이름은 **EES Workflow**이며 [2026-10-02 통합 구현 기준](#integrated-work-install-20261002)을 유지한다. 현재 `.13` 설치본의 업데이트는 [소스 프런트엔드 1단계 적용 안내](#source-frontend-apply-20261013)를 따른다. 아래 날짜별 시연·ApplyDemo·전문 Assistant·사전 Skill 구성은 당시 이력이다. 새 설치/업데이트에서 이 콘텐츠를 등록하지 않으며 옛 명령을 반복하지 않는다. 실제 도구/Native 관리/프로그램 적용과 복구 경로는 유지한다.
 
 > 문서 역할: Native Assistant 기준선 구성·확장 원칙
 >
@@ -13,7 +13,7 @@
 | 할 일 | 안내 |
 |---|---|
 | 소스 프런트엔드 1단계 적용 준비 | [CI ZIP 적용·대안·종료 복구](#source-frontend-apply-20261013) · [팀원 업무 안내](07-team-quickstart.md#first-work-20261012) |
-| 새 EES Work 후보·자산 정리 경계 | [통합 설치·복구](#integrated-work-install-20261002) |
+| 새 EES Workflow 후보·자산 정리 경계 | [통합 설치·복구](#integrated-work-install-20261002) |
 | 프로그램·래퍼 업데이트 | [Upgrade](#ees-wrapper-upgrade) |
 | 수동 적용·복구 | [Apply/Restore](#ees-wrapper-apply)·[종료 복구](#ees-stop-recovery) |
 | 실패 기록·등록 위치 확인 | [실패 판단](#ees-update-failure-causes)·[사내 기록](#ees-local-state) |
@@ -22,13 +22,19 @@
 
 ## 소스 프런트엔드 1단계 적용 준비 · 2026-10-13
 
-**현재는 Draft PR 검토용 안내다. 아직 실행하지 않는다.** 검토·별도 병합 승인 뒤 최종 main SHA와 그 SHA의 CI 성공·프로그램 ZIP을 확정해야 한다. Draft PR 산출물은 검토용이며 PR head를 아래 main SHA로 넣지 않는다. 현재 사내 `.13`의 예상 설치 원본은 사용자가 #83에서 적용했다고 보고한 `1c6ddaa04f05b2eea02bbf15155b8602f1e4a1a8`이다. 다르면 before 결과에서 중단하고 실제 원본을 확인한다.
+**사용자는 최종 병합 SHA와 해당 main CI 성공·프로그램 ZIP이 확정된 뒤 사내에서 직접 실행한다.** [PR #85](https://github.com/knadalkim-a11y/team-agent-poc/pull/85)에서 최종 병합 SHA와 CI 결과를 확인하고 전달받은 값을 사용한다. PR 검토용 산출물이나 PR head를 아래 main SHA로 넣지 않는다. 현재 사내 `.13`의 예상 설치 원본은 사용자가 #83에서 적용했다고 보고한 `1c6ddaa04f05b2eea02bbf15155b8602f1e4a1a8`이다. 다르면 before 결과에서 중단하고 실제 원본을 확인한다.
 
-이번 `.14`는 고정 Open WebUI0.11.3 소스 프런트엔드를 CI에서 만들고 기존 Python 프로그램 ZIP에 포함한다. 사내 Node/npm 설치·빌드는 없다. `Upgrade -TrialCommit`은 `.14`에서 다운로드·Stop 전에 `ci_frontend_artifact_required / next=use_ci_artifact`로 멈춘다. 아래 기본 CI 다운로드 또는 검토자가 지정한 브라우저 ZIP 대안 하나를 사용하며 TrialCommit으로 바꾸지 않는다.
+이번 `.14`는 고정 Open WebUI0.11.3 소스 프런트엔드를 CI에서 만들고 기존 Python 프로그램 ZIP에 포함하며, 화면 이름은 **EES Workflow**다. 사내 Node/npm 설치·빌드는 없다. `Upgrade -TrialCommit`은 `.14`에서 다운로드·Stop 전에 `ci_frontend_artifact_required / next=use_ci_artifact`로 멈춘다. 아래 CI 자동 다운로드 또는 브라우저 ZIP 경로 하나를 사용하며 TrialCommit으로 바꾸지 않는다.
 
-팀원이 사용하지 않는 시간에 기존 운영 계정 PowerShell에서 실행하고 끝날 때까지 창을 닫지 않는다. 기본 경로가 아니라면 `$eesRepo`·`$eesCfg` 두 줄만 기존 값으로 바꾼다. Update는 Git 인증을 재사용하고 새 토큰을 요구하지 않는다. 기본 Upgrade의 첫 GitHub 인증이 필요하면 `GitHub Actions read token (hidden, saved for this Windows user):` 입력창에 읽기 토큰을 넣는다. 같은 Windows 사용자에게 암호화해 저장된 토큰은 재사용하며 토큰 값을 채팅·복사 블록·환경변수에 적지 않는다. 사내 GitHub API/산출물 다운로드의 실제 도달 가능성은 미확인이다. 인증·API·다운로드·해시 검사는 서버를 멈추기 전에 끝난다.
+팀원이 사용하지 않는 시간에 기존 운영 계정 PowerShell에서 실행하고 끝날 때까지 창을 닫지 않는다. 기본 경로가 아니라면 `$eesRepo`·`$eesCfg` 두 줄만 기존 값으로 바꾼다. Update는 Git 인증을 재사용하고 새 토큰을 요구하지 않는다.
+
+**GitHub 토큰이 없으면 자동 다운로드를 먼저 시도하지 않고 [브라우저 ZIP 블록](#source-frontend-local-zip-20261013)을 처음부터 사용한다.** 브라우저 다운로드는 사내에서 사용한 경로이며, GitHub API를 통한 자동 다운로드의 실제 도달 가능성은 아직 미확인이다. 검토자가 성공한 최종 main CI의 바깥 Actions ZIP 링크와 SHA256을 확정해 전달한다.
+
+GitHub Actions 읽기 토큰이 있는 경우 아래 CI 자동 다운로드 블록을 사용할 수 있다. 첫 인증이 필요하면 `GitHub Actions read token (hidden, saved for this Windows user):` 입력창에 해당 토큰을 넣는다. 같은 Windows 사용자에게 암호화해 저장된 토큰은 재사용하며 토큰 값을 채팅·복사 블록·환경변수에 적지 않는다. 인증·API·다운로드·해시 검사는 서버를 멈추기 전에 끝난다.
 
 기본 순서는 **Status → Update/SHA 대조 → CI·산출물·시간대·프로그램 검증 → Stop → 검증 Backup/기록 → Apply → Start/health**다. 뒤늦게 main이 바뀌어도 `-Commit`과 다르면 적용 전에 중단한다. 백업·기록이 실패하면 Apply하지 않고, 실패를 자동 재시도하거나 복구하지 않는다.
+
+**토큰이 있는 경우: CI 자동 다운로드**
 
 ```powershell
 & {
@@ -60,9 +66,9 @@
 
 <a id="source-frontend-local-zip-20261013"></a>
 
-### 기본 다운로드가 Stop 전에 막혔을 때만: 브라우저 ZIP
+### 토큰이 없으면 처음부터: 브라우저 ZIP
 
-검토자가 **성공한 최종 main CI의 바깥 Actions ZIP 링크와 SHA256**을 확정해 준 경우의 대안이다. 기본 Upgrade가 인증/API/다운로드 단계에서 끝나 서버 Stop을 하지 않았을 때만 선택한다. 종료·백업·적용·health 실패 뒤 이 블록으로 다시 시작하지 않는다. 압축을 풀지 않은 바깥 ZIP을 브라우저로 받아 전체 로컬 경로를 따옴표 없이 입력한다. 이 경로는 API·토큰 없이 ZIP을 state_root의 이번 작업 폴더에 복사하고 바깥 해시·내부 ZIP·manifest를 검증한 뒤 같은 Stop/Backup/Apply/Start를 실행한다. 받은 원본 ZIP은 수정·삭제하지 않는다.
+GitHub 토큰이 없으면 이 블록을 처음부터 사용한다. 토큰이 있어 자동 다운로드를 시도했더라도 인증/API/다운로드 단계에서 끝나 서버 Stop을 하지 않았다면 이 경로를 선택할 수 있다. 두 경우 모두 검토자가 **성공한 최종 main CI의 바깥 Actions ZIP 링크와 SHA256**을 확정해 준 뒤 실행한다. 종료·백업·적용·health 실패 뒤 이 블록으로 다시 시작하지 않는다. 압축을 풀지 않은 바깥 ZIP을 브라우저로 받아 전체 로컬 경로를 따옴표 없이 입력한다. 이 경로는 API·토큰 없이 ZIP을 state_root의 이번 작업 폴더에 복사하고 바깥 해시·내부 ZIP·manifest를 검증한 뒤 같은 Stop/Backup/Apply/Start를 실행한다. 받은 원본 ZIP은 수정·삭제하지 않는다.
 
 ```powershell
 & {
@@ -568,7 +574,7 @@ Python 실행, API 호출, 별도 `references/`·`scripts/` 디렉터리 배포 
 
 공식 [Filter 설명](https://docs.openwebui.com/features/extensibility/plugin/functions/filter/)은 요청·응답 처리 지점을, [Function 설명](https://docs.openwebui.com/features/extensibility/plugin/functions/)은 Pipe의 다단계 처리 제어를 설명합니다. 이는 구현 후보의 역할 참고이며 현재 0.11.3 사내 환경에서 연결·검증했다는 뜻은 아닙니다. 실제 구현 단계에서 해당 버전과 EES에만 적용되는 범위·스트리밍·호출 횟수를 확인합니다.
 
-[EES Work 업무 절차](#ees-work-demo)는 기존 대화·패널·Native Tool에 입력·단계·선행 조건·완료 기준을 연결합니다. 관리자 정의는 업무 서비스에서 검증하고 실제 DB/AP 연결은 합성 점검과 별도 범위로 남깁니다. 단순 대화까지 계획·검토용 모델 호출을 매번 추가하지 않으며, 워크플로가 필요한 요청에만 추가 단계를 적용합니다. 모델 수·단계 수·외부 서버를 늘릴 때는 업무 효과와 호출/유지보수 비용을 비교합니다. 시각적 워크플로 편집기나 다중 Agent가 필수라는 뜻은 아닙니다.
+[EES Workflow 업무 절차](#ees-work-demo)는 기존 대화·패널·Native Tool에 입력·단계·선행 조건·완료 기준을 연결합니다. 관리자 정의는 업무 서비스에서 검증하고 실제 DB/AP 연결은 합성 점검과 별도 범위로 남깁니다. 단순 대화까지 계획·검토용 모델 호출을 매번 추가하지 않으며, 워크플로가 필요한 요청에만 추가 단계를 적용합니다. 모델 수·단계 수·외부 서버를 늘릴 때는 업무 효과와 호출/유지보수 비용을 비교합니다. 시각적 워크플로 편집기나 다중 Agent가 필수라는 뜻은 아닙니다.
 
 <a id="cross-system-orchestration"></a>
 

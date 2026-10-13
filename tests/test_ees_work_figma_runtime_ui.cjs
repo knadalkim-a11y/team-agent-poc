@@ -36,7 +36,7 @@ test('workspace menu uses server permissions for three groups and hides unavaila
 test('tools-only permission keeps D9 workspace access with an honest empty menu and no admin link',()=>{
  const capabilities=nativeCapabilities({native_access:{tools:true}});
  assert.equal(html('workCanWorkspace(capabilities)',{capabilities}),true);
- const output=html('workWorkspaceMenuHTML({capabilities}, {})',{capabilities});assert.match(output,/EES Work에서 열 수 있는 항목이 없습니다/);assert.doesNotMatch(output,/data-action=|기능 연결/);
+ const output=html('workWorkspaceMenuHTML({capabilities}, {})',{capabilities});assert.match(output,/EES Workflow에서 열 수 있는 항목이 없습니다/);assert.doesNotMatch(output,/data-action=|기능 연결/);
  assert.equal(html('workCanWorkspace(capabilities)',{capabilities:nativeCapabilities()}),false);
  assert.equal(html('workCanWorkspace(capabilities)',{capabilities:nativeCapabilities({managed_systems:['OTHER']})}),true);
 });

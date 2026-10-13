@@ -137,7 +137,7 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(ids), len(set(ids)))
         for term in actual['terms']:
             self.assertTrue(set(term['related']) <= set(ids))
-            self.assertEqual(term['evidence'], f"근거 · EES Work 도움말 ‘{term['name']}’")
+            self.assertEqual(term['evidence'], f"근거 · EES Workflow 도움말 ‘{term['name']}’")
         self.assertIn('도움말에 없는 내용', actual['answer_guidance']['unknown'])
         # Move the canonical source for this test only. The response must read
         # the changed file, not a duplicated hard-coded explanation or DB row.
