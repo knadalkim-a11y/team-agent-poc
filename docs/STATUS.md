@@ -1,5 +1,15 @@
 # 현재 작업 상태
 
+## 2026-10-13 · #85 검토 반영과 #83 설계안 보완
+
+- **기준과 범위:** main `1c6ddaa04f05b2eea02bbf15155b8602f1e4a1a8`에서 `feat/source-frontend-phase1-20261013`을 시작했다. [#83 설계·착수 댓글](https://github.com/knadalkim-a11y/team-agent-poc/issues/83#issuecomment-6133363909)과 [8문항 설계안](mockups/ees-work/TASK.md#source-frontend-phase1-20261013)을 게시했다. 이번 구현은 고정 0.11.3 소스/CI 빌드·컴파일 후 바이트 패치 제거·초기 깜빡임/안내 문구·CI ZIP 전달/복구까지다. 2단계 화면 이전과 #77·#79는 미구현이며 설계 검토·확정 뒤 별도로 시작한다.
+- **사내 상태:** #83에서 사용자가 PR #82 병합본 적용 뒤 Native 화면 깜빡임과 새 절차 안내의 문제를 보고했다. 이는 사용자 관찰이며 모든 로그인·첨부·팀원 완료 항목의 수락 결과로 확대하지 않는다. 새 `.14`는 아직 사내 적용하지 않았다. 아래 10-12의 결과 대기/착수 보류는 당시 기록이고 현재 작업 허가는 이번 #83 요청을 따른다.
+- **검토 반영:** 사용자가 [#85 검토](https://github.com/knadalkim-a11y/team-agent-poc/pull/85#issuecomment-6134606371)의 보완과 최종 head CI 성공 후 병합을 승인했다. 화면 제품명은 `EES Workflow`로 표시하고 코드 식별자·경로·등록 자산·과거 기록은 유지한다. 새 절차 안내의 세 번째 질문을 `빈 절차로 시작하면 무엇부터 정하나요?`로 바꾸고, 토큰이 없으면 처음부터 [브라우저 ZIP 안내](03-openwebui-native-agent.md#source-frontend-local-zip-20261013)를 따른다. [#83 검토](https://github.com/knadalkim-a11y/team-agent-poc/issues/83#issuecomment-6134603956)의 네 가지 보완은 설계안에 반영하며 2단계 구현은 별도 지시를 기다린다.
+- **검증:** 보완 전 head `101479e282f3a8305a908168839b611dea17f369`의 [CI38318606922](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38318606922)는27개 성공·main 전용1개 skip이었다. 표시명 변경 뒤 새 소스 빌드·실제 Native 표시/질문 입력은 통과했다. 보완 head4fa89ced CI는 Windows 설치 검사가 전체10분 제한에 걸려 미완료였고, 기존 실제 wheel1개를 양 OS 별도 필수 묶음으로 분리한다. 전체71개 설치/복구·검증식·10분 제한은 유지하며 새 head의 전체 CI를 판정한다. 최초 실패·로컬 결과·검증 한계는 [같은 기록](../evals/v4-ui-20260930.md#source-frontend-phase1-review-20261013)에 보존하고 최종 head와 병합 main CI는 [PR #85](https://github.com/knadalkim-a11y/team-agent-poc/pull/85)의 본문/Checks에서 확정한다.
+- **다음 작업 하나:** 최종 head CI 성공 후 승인된 PR #85를 병합하고, 병합 main CI 성공과 해당 프로그램 ZIP을 확인해 사용자가 사내 적용한다. 복사 블록은 각각2,500자 이하, 사용자 결과는1~2줄이다. 사내 적용·main 직접 push·Figma 수정은 하지 않는다. Native 초안 복원 유지·회차 대화 카드 우선 이전·제안 기록의 권한/호환성·처리/오류 표시를 반영한 [설계안 v2를 #83에 게시했으며](https://github.com/knadalkim-a11y/team-agent-poc/issues/83#issuecomment-6134977642) 2단계·#77·#79는 구현하지 않는다.
+
+아래는 선행 작업 당시의 기록이다.
+
 ## 2026-10-12 · PR #82 병합본의 사내 재실행
 
 - **현재 결정:** 사용자가 PR #82의 코드 보완을 승인했다. 문서를 병합 후 절차에 맞추고 최종 head CI 성공 후 병합한다. **적용 대상은 PR #82의 병합 SHA**이며, 해당 SHA의 main CI 성공을 확인한 뒤 [#78](https://github.com/knadalkim-a11y/team-agent-poc/issues/78)에 전체 40자리 SHA와 결과를 확정한다. f0148에는 긴 경로 보완이 없으므로 재실행 대상으로 사용하지 않는다.

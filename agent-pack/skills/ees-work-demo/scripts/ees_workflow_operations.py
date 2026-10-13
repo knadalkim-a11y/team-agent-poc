@@ -1667,7 +1667,7 @@ class OperationsRuntime:
             if not key: continue
             row = db.execute("SELECT data FROM work_tool_contracts WHERE id=?", (key,)).fetchone()
             if row and json.loads(row[0]).get("kind") == "direct":
-                warnings.append(job.get("id", "") + ": 직접 실행 · 예외 도구입니다. API 미제공 사유·담당자 소유·허용 명령·전용 계정과 효과 확인을 권장합니다. 실행 주체는 EES Work입니다.")
+                warnings.append(job.get("id", "") + ": 직접 실행 · 예외 도구입니다. API 미제공 사유·담당자 소유·허용 명령·전용 계정과 효과 확인을 권장합니다. 실행 주체는 EES Workflow입니다.")
         return warnings
 
     async def _skills(self, actor, job, definition=None):

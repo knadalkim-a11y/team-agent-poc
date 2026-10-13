@@ -138,7 +138,7 @@ test('B2-3 advisories do not block publication while blockers remain visible and
 });
 test('B5 direct execution stores only declared exception metadata and retains absent adapter reason',async()=>{
  const h=harness();h.selection.tab='tools';h.state.native_users=[{id:'owner',name:'시스템 담당자'}];h.state.reviewers=[{id:'owner',name:'시스템 담당자'}];h.state.can_author_direct=true;h.render();await h.example('restart-service');h.click('tool_direct');await flush();
- assert.match(h.markup,/직접 실행 · 예외/);assert.match(h.markup,/실행 주체는 EES Work/);assert.match(h.markup,/허용된 실행 연결이 없으면 실제 동작은 차단/);
+ assert.match(h.markup,/직접 실행 · 예외/);assert.match(h.markup,/실행 주체는 EES Workflow/);assert.match(h.markup,/허용된 실행 연결이 없으면 실제 동작은 차단/);
  h.field('name','담당자 소유 예외');h.field('exception:api_unavailable_reason','담당자 검토에서 API 제공 불가 확인');h.field('exception:owner_user_id','owner','change');h.field('exception:allowed_commands','approved-command-1\napproved-command-2');h.field('exception:account_reference','dedicated-account');h.field('exception:least_privilege',true,'change');h.field('responsible_user_id','owner','change');h.click('tool_save');await flush();
  const tool=h.operations[0].tool;assert.equal(tool.kind,'direct');assert.deepEqual(tool.exception_contract,{api_unavailable_reason:'담당자 검토에서 API 제공 불가 확인',owner_user_id:'owner',allowed_commands:['approved-command-1','approved-command-2'],account_reference:'dedicated-account',least_privilege:true});assert.equal(Object.keys(tool).some(key=>key.startsWith('exception:')),false);assert.equal(tool.reference,undefined);assert.equal(h.operations.some(body=>body.action.includes('execute')),false);
 });

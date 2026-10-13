@@ -1,0 +1,578 @@
+diff --git a/src/app.html b/src/app.html
+index 667808e..e801ee1 100644
+--- a/src/app.html
++++ b/src/app.html
+@@ -2,6 +2,33 @@
+ <html lang="en">
+ 	<head>
+ 		<meta charset="utf-8" />
++		<!-- EES startup gate: hide only authenticated chat hard loads, never re-arm on SPA navigation. -->
++		<style id="ees-startup-style">
++			html[data-ees-startup='pending'] body,
++			html[data-ees-startup='pending'] body :not([aria-modal='true'], [aria-modal='true'] *) { visibility: hidden !important; }
++			/* Native dialogs must retain focusable controls while their background waits.
++			   Inherit visibility normally inside them, preserving their own hidden children. */
++			html[data-ees-startup='pending'] body [aria-modal='true'] { visibility: visible !important; }
++		</style>
++		<script id="ees-startup-gate">
++			(() => {
++				if (!/^\/(?:c\/[^/]+\/?)?$/.test(location.pathname) ||
++					new URLSearchParams(location.search).get('settings')) return;
++				try { if (!localStorage.getItem('token')) return; } catch (_) { return; }
++				const root = document.documentElement;
++				const release = () => {
++					delete root.dataset.eesStartup;
++					clearTimeout(timeout);
++					window.removeEventListener('ees:startup-ready', release);
++				};
++				// Install the independent fallback before hiding anything. Missing or failed
++				// launcher/API/authentication must not leave an inaccessible blank page.
++				const timeout = setTimeout(release, 4000);
++				window.addEventListener('ees:startup-ready', release, { once: true });
++				root.dataset.eesStartup = 'pending';
++			})();
++		</script>
++
+ 		<!-- LICENSE covers this Open WebUI branding surface, including name, logo,
+ 		visual, textual, symbolic identifiers, metadata, and surrounding UI.
+ 		Do not alter, remove, obscure, or replace it except as LICENSE permits:
+@@ -125,8 +152,11 @@
+ 			})();
+ 		</script>
+ 
+-		<title>Open WebUI</title>
++		<title>EES Workflow</title>
+ 
++		<link rel="stylesheet" href="/_ees14/chat-theme.css?v=EES_THEME_SHA256" crossorigin="use-credentials" />
++		<link rel="stylesheet" href="/_ees14/ees-work-launcher.css?v=EES_WORK_STYLE_SHA256" />
++		<script defer src="/_ees14/ees-work-launcher.js?v=EES_WORK_SCRIPT_SHA256"></script>
+ 		%sveltekit.head%
+ 	</head>
+ 
+diff --git a/src/lib/components/channel/Channel.svelte b/src/lib/components/channel/Channel.svelte
+index d552ba8..384bf93 100644
+--- a/src/lib/components/channel/Channel.svelte
++++ b/src/lib/components/channel/Channel.svelte
+@@ -310,10 +310,10 @@
+ 					} else {
+ 						return e.name;
+ 					}
+-				}, '')} / Open WebUI</title
++				}, '')} / EES Workflow</title
+ 		>
+ 	{:else}
+-		<title>#{channel?.name ?? 'Channel'} / Open WebUI</title>
++		<title>#{channel?.name ?? 'Channel'} / EES Workflow</title>
+ 	{/if}
+ </svelte:head>
+ 
+diff --git a/src/lib/components/chat/Chat.svelte b/src/lib/components/chat/Chat.svelte
+index 875aee0..7641172 100644
+--- a/src/lib/components/chat/Chat.svelte
++++ b/src/lib/components/chat/Chat.svelte
+@@ -790,13 +790,20 @@
+ 		initEmbeddedDraft();
+ 	}
+ 
++	let eesNativeDraftLoads = 0;
++	const eesNativeDraftLoad = async (load) => {
++		eesNativeDraftLoads++;
++		try { return await load(); }
++		finally { eesNativeDraftLoads--; }
++	};
++
+ 	let saveControlsTimer;
+ 	$: if (!loading && !$temporaryChatEnabled && $chatId && params && chatFiles) {
+ 		clearTimeout(saveControlsTimer);
+ 		saveControlsTimer = setTimeout(saveControls, 400);
+ 	}
+ 
+-	const navigateHandler = async () => {
++	const navigateHandler = () => eesNativeDraftLoad(async () => {
+ 		noteChatDebug('navigateHandler start');
+ 		// Mark the outgoing chat as read before loading the new one.
+ 		// $chatId still holds the previous chat here — loadChat() updates it.
+@@ -859,9 +866,9 @@
+ 				activeChatId: $chatId
+ 			});
+ 		}
+-	};
++	});
+ 
+-	const initEmbeddedDraft = async () => {
++	const initEmbeddedDraft = () => eesNativeDraftLoad(async () => {
+ 		clearTimeout(saveControlsTimer);
+ 		await saveControls();
+ 
+@@ -899,7 +906,7 @@
+ 		loading = false;
+ 		await tick();
+ 		messageInput?.focus({ preventScroll: true });
+-	};
++	});
+ 
+ 	const onSelect = async (e) => {
+ 		const { type, data } = e;
+@@ -1530,6 +1537,47 @@
+ 	};
+ 
+ 	onMount(() => {
++		// The main Chat owns its Native draft bridge; embedded notes never replace it.
++		// Approval mode is user/chat policy, not transferable draft content.
++		const eesNativeDraftApi = {
++			ready: () => {
++				if (embedded || $temporaryChatEnabled || loading || !messageInput || eesNativeDraftLoads) return false;
++				const path = window.location.pathname;
++				const match = path.match(/^\/c\/([^/]+)\/?$/);
++				let expected;
++				try { expected = match ? decodeURIComponent(match[1]) : path === '/' ? '' : null; }
++				catch { return false; }
++				return expected !== null && (chatIdProp || '') === expected && ($chatId || '') === expected;
++			},
++			read: () => {
++				if (!eesNativeDraftApi.ready()) return null;
++				const snapshot = { ...getChatInputDraft() };
++				delete snapshot.toolApprovalMode;
++				return snapshot;
++			},
++			hasPendingContent: () => !eesNativeDraftApi.ready() || Boolean((prompt || '').trim() || (files || []).length),
++			workMessageIds: () => eesNativeDraftApi.ready()
++				? Object.values(history?.messages || {}).filter((message: any) => message?.role === 'assistant' && typeof message.id === 'string').map((message: any) => message.id)
++				: [],
++			flush: () => {
++				const snapshot = eesNativeDraftApi.read();
++				return snapshot ? saveDraft(snapshot, getDraftChatId(), false) : false;
++			},
++			restore: async (serialized) => {
++				if (!eesNativeDraftApi.ready() || typeof serialized !== 'string') return false;
++				let snapshot;
++				try {
++					snapshot = JSON.parse(serialized);
++					if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) return false;
++					delete snapshot.toolApprovalMode;
++				} catch { return false; }
++				if (saveDraftTimeout) clearTimeout(saveDraftTimeout);
++				const restored = await restoreChatInput(JSON.stringify(snapshot));
++				if (restored) await eesNativeDraftApi.flush();
++				return restored;
++			}
++		};
++		if (!embedded) window.__eesNativeDraftV1 = eesNativeDraftApi;
+ 		loading = true;
+ 		console.log('mounted');
+ 		window.addEventListener('message', onMessageHandler);
+@@ -1582,7 +1630,7 @@
+ 			`chat-input${chatIdProp ? `-${chatIdProp}` : ''}`
+ 		);
+ 
+-		const init = async () => {
++		const init = () => eesNativeDraftLoad(async () => {
+ 			if (!chatIdProp) {
+ 				loading = false;
+ 				await tick();
+@@ -1604,10 +1652,11 @@
+ 			}
+ 
+ 			messageInput?.focus({ preventScroll: true });
+-		};
++		});
+ 		init();
+ 
+ 		return () => {
++			if (window.__eesNativeDraftV1 === eesNativeDraftApi) delete window.__eesNativeDraftV1;
+ 			try {
+ 				clearTimeout(saveControlsTimer);
+ 				saveControls();
+@@ -1990,7 +2039,7 @@
+ 		}, 0);
+ 	};
+ 
+-	const initNewChat = async () => {
++	const initNewChat = () => eesNativeDraftLoad(async () => {
+ 		console.log('initNewChat');
+ 		resetWebSearchConfirmation();
+ 
+@@ -2233,7 +2282,7 @@
+ 
+ 		await tick();
+ 		messageInput?.focus({ preventScroll: true });
+-	};
++	});
+ 
+ 	const loadChat = async () => {
+ 		noteChatDebug('loadChat start');
+@@ -3545,6 +3594,9 @@
+ 		const useChatVariablesFallback =
+ 			!_chatId || $temporaryChatEnabled || isTemporaryChatId(_chatId);
+ 
++		const eesCompletionOwner = window.__eesNativeWorkV1;
++		let eesCompletionCreation = null;
++		try { if (!embedded && !$temporaryChatEnabled) eesCompletionCreation = eesCompletionOwner?.beginChatCreation?.(); } catch {}
+ 		const res = await generateOpenAIChatCompletion(
+ 			localStorage.token,
+ 			{
+@@ -3592,7 +3644,15 @@
+ 				id: responseMessageId,
+ 				...(messageIdsList ? { message_ids: messageIdsList } : {}),
+ 				parent_id: userMessage?.parentId ?? null,
+-				user_message: userMessage,
++				user_message: userMessage ? {
++					...userMessage,
++					meta: {
++						...(userMessage.meta || {}),
++						ees_work_reference: (!embedded && !$temporaryChatEnabled
++							? window.__eesNativeWorkV1?.captureReference?.(_chatId || '', responseMessageId, userMessage)
++							: null) || { kind: 'none' }
++					}
++				} : userMessage,
+ 				...(regenerationPrompt ? { regeneration_prompt: regenerationPrompt } : {}),
+ 				...(continueResponse ? { assistant_message_id: responseMessageId } : {}),
+ 
+@@ -3661,6 +3721,7 @@
+ 					});
+ 					await chatId.set(res.chat_id);
+ 					if (!$temporaryChatEnabled && !embedded) {
++						try { if (eesCompletionCreation) eesCompletionOwner?.finishChatCreation?.(eesCompletionCreation, res.chat_id); } catch {}
+ 						window.history.replaceState(history.state, '', `/c/${res.chat_id}`);
+ 						await refreshChatList(localStorage.token);
+ 
+@@ -3923,6 +3984,9 @@
+ 
+ 	const initChatHandler = async (history) => {
+ 		let _chatId = $chatId;
++		let eesCreation = null;
++		const eesWorkOwner = window.__eesNativeWorkV1;
++		try { if (!embedded && !$temporaryChatEnabled) eesCreation = eesWorkOwner?.beginChatCreation?.(); } catch {}
+ 		const selectedFolderId = $selectedFolder?.id;
+ 
+ 		if (!$temporaryChatEnabled) {
+@@ -3944,6 +4008,7 @@
+ 			);
+ 
+ 			_chatId = chat.id;
++			try { if (eesCreation) eesWorkOwner?.finishChatCreation?.(eesCreation, _chatId); } catch {}
+ 			await chatId.set(_chatId);
+ 
+ 			if (!embedded) {
+@@ -4574,7 +4639,7 @@
+ 								</div>
+ 							</div>
+ 						{:else}
+-							<div class="flex items-center h-full">
++							<div data-ees-native-empty-frame class="flex items-center h-full">
+ 								<Placeholder
+ 									{history}
+ 									bind:selectedModels
+diff --git a/src/lib/components/chat/MessageInput.svelte b/src/lib/components/chat/MessageInput.svelte
+index a2df614..d3dfc0e 100644
+--- a/src/lib/components/chat/MessageInput.svelte
++++ b/src/lib/components/chat/MessageInput.svelte
+@@ -2034,7 +2034,7 @@
+ 															navigator.maxTouchPoints > 0 ||
+ 															navigator.msMaxTouchPoints > 0
+ 														)}
+-													placeholder={placeholder ? placeholder : $i18n.t('Send a Message')}
++													placeholder={placeholder ? placeholder : $i18n.language?.startsWith('ko') ? '업무를 물어보거나, 필요한 작업을 요청하세요' : $i18n.t('Send a Message')}
+ 													largeTextAsFile={($settings?.largeTextAsFile ?? false) && !shiftKey}
+ 													autocomplete={$config?.features?.enable_autocomplete_generation &&
+ 														($settings?.promptAutocomplete ?? false)}
+@@ -2616,6 +2616,15 @@
+ 										{/if}
+ 
+ 										{#if !embedded && prompt === '' && files.length === 0 && ($_user?.role === 'admin' || ($_user?.permissions?.chat?.call ?? true))}
++											<details class="ees-native-voice-menu" on:keydown={(event) => {
++												if (event.key === 'Escape' && event.currentTarget.open) {
++													event.stopPropagation();
++													event.currentTarget.open = false;
++													event.currentTarget.querySelector('summary')?.focus();
++												}
++											}}>
++												<summary>{$i18n.t('Voice mode')}</summary>
++												<div>
+ 											<div class=" flex items-center">
+ 												<!-- {$i18n.t('Call')} -->
+ 												<Tooltip content={$i18n.t('Voice mode')}>
+@@ -2678,7 +2687,9 @@
+ 													</button>
+ 												</Tooltip>
+ 											</div>
+-										{:else}
++												</div>
++											</details>
++										{/if}
+ 											<div class=" flex items-center">
+ 												<Tooltip
+ 													content={uploadPending
+@@ -2712,7 +2723,6 @@
+ 													</button>
+ 												</Tooltip>
+ 											</div>
+-										{/if}
+ 									{/if}
+ 								</div>
+ 							</div>
+diff --git a/src/lib/components/chat/Navbar.svelte b/src/lib/components/chat/Navbar.svelte
+index b6a045e..492730c 100644
+--- a/src/lib/components/chat/Navbar.svelte
++++ b/src/lib/components/chat/Navbar.svelte
+@@ -79,6 +79,7 @@
+ />
+ 
+ <nav
++	data-ees-native-toolbar
+ 	class="sticky top-0 z-30 w-full {$mobile
+ 		? 'pt-1.5'
+ 		: 'pt-0.5'} pb-1 -mb-12 flex flex-col items-center drag-region"
+diff --git a/src/lib/components/chat/Placeholder.svelte b/src/lib/components/chat/Placeholder.svelte
+index c183993..3d6b7f1 100644
+--- a/src/lib/components/chat/Placeholder.svelte
++++ b/src/lib/components/chat/Placeholder.svelte
+@@ -94,7 +94,7 @@
+ 		$selectedFolder.permission !== 'write';
+ </script>
+ 
+-<div class="m-auto w-full max-w-[58rem] px-1 @2xl:px-20 translate-y-6 py-24 text-center">
++<div data-ees-native-empty-chat class="m-auto w-full max-w-[58rem] px-1 @2xl:px-20 translate-y-6 py-24 text-center">
+ 	{#if $temporaryChatEnabled}
+ 		<Tooltip
+ 			content={$i18n.t("This chat won't appear in history and your messages will not be saved.")}
+@@ -107,8 +107,8 @@
+ 		</Tooltip>
+ 	{/if}
+ 
+-	<div class="w-full text-3xl text-gray-800 dark:text-gray-100 text-center flex items-center gap-4">
+-		<div class="w-full flex flex-col justify-center items-center">
++	<div data-ees-native-empty-main class="w-full text-3xl text-gray-800 dark:text-gray-100 text-center flex items-center gap-4">
++		<div data-ees-native-empty-content class="w-full flex flex-col justify-center items-center">
+ 			{#if $selectedFolder}
+ 				<FolderTitle
+ 					folder={$selectedFolder}
+@@ -123,7 +123,7 @@
+ 					}}
+ 				/>
+ 			{:else}
+-				<div class="flex flex-row justify-center gap-2.5 @sm:gap-3 w-fit px-5 max-w-xl">
++				<div data-ees-native-empty-model class="flex flex-row justify-center gap-2.5 @sm:gap-3 w-fit px-5 max-w-xl">
+ 					<div class="flex shrink-0 justify-center">
+ 						<div class="flex -space-x-4 mb-0.5" in:fade={{ duration: 100 }}>
+ 							{#each models as model, modelIdx}
+@@ -180,7 +180,7 @@
+ 					</div>
+ 				</div>
+ 
+-				<div class="flex mt-1 mb-2">
++				<div data-ees-native-empty-description class="flex mt-1 mb-2">
+ 					<div in:fade={{ duration: 100, delay: 50 }}>
+ 						{#if models[selectedModelIdx]?.info?.meta?.description ?? null}
+ 							<Tooltip
+@@ -228,7 +228,7 @@
+ 				</div>
+ 			{/if}
+ 
+-			<div class="text-base font-normal @md:max-w-3xl w-full py-3 {atSelectedModel ? 'mt-2' : ''}">
++			<div data-ees-native-empty-composer class="text-base font-normal @md:max-w-3xl w-full py-3 {atSelectedModel ? 'mt-2' : ''}">
+ 				{#if !($selectedFolder && folderReadOnly)}
+ 					<MessageInput
+ 						bind:this={messageInput}
+@@ -273,11 +273,11 @@
+ 	</div>
+ 
+ 	{#if $selectedFolder}
+-		<div class="mx-auto px-4 md:max-w-3xl md:px-6 min-h-62" in:fade={{ duration: 200, delay: 200 }}>
++		<div data-ees-native-empty-folder class="mx-auto px-4 md:max-w-3xl md:px-6 min-h-62" in:fade={{ duration: 200, delay: 200 }}>
+ 			<FolderPlaceholder folder={$selectedFolder} />
+ 		</div>
+ 	{:else}
+-		<div class="mx-auto max-w-2xl mt-2" in:fade={{ duration: 200, delay: 200 }}>
++		<div data-ees-native-empty-suggestions class="mx-auto max-w-2xl mt-2" in:fade={{ duration: 200, delay: 200 }}>
+ 			<div class="mx-5">
+ 				<Suggestions
+ 					suggestionPrompts={atSelectedModel?.info?.meta?.suggestion_prompts ??
+diff --git a/src/lib/components/layout/Sidebar.svelte b/src/lib/components/layout/Sidebar.svelte
+index 007df31..1d08067 100644
+--- a/src/lib/components/layout/Sidebar.svelte
++++ b/src/lib/components/layout/Sidebar.svelte
+@@ -653,7 +653,8 @@
+ 
+ 	onMount(async () => {
+ 		try {
+-			const width = Number(localStorage.getItem('sidebarWidth'));
++			const savedWidth = localStorage.getItem('sidebarWidth');
++			const width = savedWidth === null ? (window.innerWidth < 1536 ? 224 : 256) : Number(savedWidth);
+ 			if (!Number.isNaN(width) && width >= MIN_WIDTH && width <= MAX_WIDTH) {
+ 				sidebarWidth.set(width);
+ 			}
+@@ -664,7 +665,7 @@
+ 			document.documentElement.style.setProperty('--sidebar-width', `${w}px`);
+ 		});
+ 
+-		showSidebar.set(!$mobile ? localStorage.sidebar === 'true' : false);
++		showSidebar.set(!$mobile ? (localStorage.getItem('sidebar') === null || localStorage.sidebar === 'true') : false);
+ 
+ 		const unsubscribers = [
+ 			mobile.subscribe((value) => {
+@@ -980,7 +981,7 @@
+ 
+ 				<div class="-gap-0.5">
+ 					<div class="">
+-						<Tooltip content={$i18n.t('New Chat')} placement="right">
++						<Tooltip content={$i18n.language?.startsWith('ko') ? '새 대화' : $i18n.t('New Chat')} placement="right">
+ 							<a
+ 								class=" cursor-pointer flex size-8 items-center justify-center transition group"
+ 								href="/"
+@@ -992,7 +993,7 @@
+ 									goto('/');
+ 									newChatHandler();
+ 								}}
+-								aria-label={$i18n.t('New Chat')}
++								aria-label={$i18n.language?.startsWith('ko') ? '새 대화' : $i18n.t('New Chat')}
+ 							>
+ 								<div
+ 									class="self-center flex size-[calc(30px*var(--app-text-scale,1))] items-center justify-center rounded-lg transition group-hover:bg-gray-100 dark:group-hover:bg-gray-900"
+@@ -1004,7 +1005,7 @@
+ 					</div>
+ 
+ 					<div>
+-						<Tooltip content={$i18n.t('Search')} placement="right">
++						<Tooltip content={$i18n.language?.startsWith('ko') ? '대화 검색' : $i18n.t('Search')} placement="right">
+ 							<button
+ 								class=" cursor-pointer flex size-8 items-center justify-center transition group"
+ 								on:click={(e) => {
+@@ -1014,7 +1015,7 @@
+ 									showSearch.set(true);
+ 								}}
+ 								draggable="false"
+-								aria-label={$i18n.t('Search')}
++								aria-label={$i18n.language?.startsWith('ko') ? '대화 검색' : $i18n.t('Search')}
+ 							>
+ 								<div
+ 									class="self-center flex size-[calc(30px*var(--app-text-scale,1))] items-center justify-center rounded-lg transition group-hover:bg-gray-100 dark:group-hover:bg-gray-900"
+@@ -1119,6 +1120,7 @@
+ 			bind:this={navElement}
+ 			id={visible ? 'sidebar' : undefined}
+ 			role="navigation"
++			data-ees-native-sidebar
+ 			aria-label={$i18n.t('Chat history')}
+ 			aria-hidden={!$showSidebar}
+ 			inert={!$showSidebar}
+@@ -1207,7 +1209,7 @@
+ 						}
+ 					}}
+ 				>
+-					<div class="pb-1">
++					<div class="pb-1" data-ees-native-navigation>
+ 						<div class="px-1 flex justify-center text-gray-700 dark:text-gray-300">
+ 							<a
+ 								id="sidebar-new-chat-button"
+@@ -1215,14 +1217,14 @@
+ 								href="/"
+ 								draggable="false"
+ 								on:click={newChatHandler}
+-								aria-label={$i18n.t('New Chat')}
++								aria-label={$i18n.language?.startsWith('ko') ? '새 대화' : $i18n.t('New Chat')}
+ 							>
+ 								<div class="self-center flex size-4 shrink-0 items-center justify-center">
+ 									<EditPencilIcon className=" size-4" strokeWidth="1.5" />
+ 								</div>
+ 
+ 								<div class="flex flex-1 self-center translate-y-[0.5px]">
+-									<div class=" self-center text-[0.8125rem] leading-5">{$i18n.t('New Chat')}</div>
++									<div class=" self-center text-[0.8125rem] leading-5">{$i18n.language?.startsWith('ko') ? '새 대화' : $i18n.t('New Chat')}</div>
+ 								</div>
+ 
+ 								<HotkeyHint name="newChat" className=" hover-reveal " />
+@@ -1237,14 +1239,14 @@
+ 									showSearch.set(true);
+ 								}}
+ 								draggable="false"
+-								aria-label={$i18n.t('Search')}
++								aria-label={$i18n.language?.startsWith('ko') ? '대화 검색' : $i18n.t('Search')}
+ 							>
+ 								<div class="self-center flex size-4 shrink-0 items-center justify-center">
+ 									<SearchIcon strokeWidth="1.5" className="size-4" />
+ 								</div>
+ 
+ 								<div class="flex flex-1 self-center translate-y-[0.5px]">
+-									<div class=" self-center text-[0.8125rem] leading-5">{$i18n.t('Search')}</div>
++									<div class=" self-center text-[0.8125rem] leading-5">{$i18n.language?.startsWith('ko') ? '대화 검색' : $i18n.t('Search')}</div>
+ 								</div>
+ 								<HotkeyHint name="search" className=" hover-reveal " />
+ 							</button>
+diff --git a/src/lib/constants.ts b/src/lib/constants.ts
+index 172ed9a..8873d62 100644
+--- a/src/lib/constants.ts
++++ b/src/lib/constants.ts
+@@ -4,7 +4,7 @@
+ // visual, textual, symbolic identifiers, metadata, and surrounding UI.
+ // Do not alter, remove, obscure, or replace it except as LICENSE permits:
+ // https://docs.openwebui.com/license.
+-export const APP_NAME = 'Open WebUI';
++export const APP_NAME = 'EES Workflow';
+ 
+ export const WEBUI_HOSTNAME = '';
+ export const WEBUI_BASE_URL = '';
+diff --git a/src/routes/+layout.svelte b/src/routes/+layout.svelte
+index cd832fd..49017b1 100644
+--- a/src/routes/+layout.svelte
++++ b/src/routes/+layout.svelte
+@@ -603,7 +603,7 @@
+ 
+ 			if ($isLastActiveTab) {
+ 				if ($settings?.notificationEnabled ?? false) {
+-					new Notification(`${data.title} / Open WebUI`, {
++					new Notification(`${data.title} / EES Workflow`, {
+ 						body: timeStr,
+ 						// LICENSE covers this Open WebUI notification identifier.
+ 						// Do not alter, remove, obscure, or replace it except as LICENSE permits:
+@@ -741,7 +741,7 @@
+ 
+ 					if ($isLastActiveTab) {
+ 						if ($settings?.notificationEnabled ?? false) {
+-							new Notification(`${displayTitle} / Open WebUI`, {
++							new Notification(`${displayTitle} / EES Workflow`, {
+ 								body: contentPreview,
+ 								// LICENSE covers this Open WebUI notification identifier.
+ 								// Do not alter, remove, obscure, or replace it except as LICENSE permits:
+@@ -854,7 +854,7 @@
+ 						// LICENSE covers this Open WebUI notification identifier.
+ 						// Do not alter, remove, obscure, or replace it except as LICENSE permits:
+ 						// https://docs.openwebui.com/license.
+-						new Notification(`${title} / Open WebUI`, {
++						new Notification(`${title} / EES Workflow`, {
+ 							body: data?.content,
+ 							icon: `${WEBUI_API_BASE_URL}/users/${data?.user?.id}/profile/image`
+ 						});
+diff --git a/svelte.config.js b/svelte.config.js
+index 82e0595..6f11820 100644
+--- a/svelte.config.js
++++ b/svelte.config.js
+@@ -9,6 +9,7 @@ const config = {
+ 	// for more information about preprocessors
+ 	preprocess: vitePreprocess(),
+ 	kit: {
++		appDir: '_ees14',
+ 		// adapter-auto only supports some environments, see https://kit.svelte.dev/docs/adapter-auto for a list.
+ 		// If your environment is not supported or you settled on a specific environment, switch out the adapter.
+ 		// See https://kit.svelte.dev/docs/adapters for more information about adapters.
+@@ -19,7 +20,7 @@ const config = {
+ 		}),
+ 		// poll for new version name every 60 seconds (to trigger reload mechanic in +layout.svelte)
+ 		version: {
+-			name: (() => {
++			name: process.env.EES_PROGRAM_VERSION || (() => {
+ 				try {
+ 					return child_process.execSync('git rev-parse HEAD').toString().trim();
+ 				} catch {
+diff --git a/vite.config.ts b/vite.config.ts
+index 5052e5d..405a897 100644
+--- a/vite.config.ts
++++ b/vite.config.ts
+@@ -19,7 +19,7 @@ export default defineConfig({
+ 		})
+ 	],
+ 	define: {
+-		APP_VERSION: JSON.stringify(process.env.npm_package_version),
++		APP_VERSION: JSON.stringify(process.env.EES_PROGRAM_VERSION || process.env.npm_package_version),
+ 		APP_BUILD_HASH: JSON.stringify(process.env.APP_BUILD_HASH || 'dev-build')
+ 	},
+ 	build: {

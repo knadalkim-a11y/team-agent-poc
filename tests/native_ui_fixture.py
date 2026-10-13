@@ -7,17 +7,19 @@ temporary database. This is not a live-model or in-house authentication test.
 """
 
 import asyncio
+import hashlib
 from email import policy
 from email.parser import BytesParser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import mimetypes
+from pathlib import Path
 import queue
 import threading
 from urllib.parse import parse_qs, urlsplit
 from zipfile import ZipFile
 
-from scripts.build_ees_webui import TARGET_APP, assemble_work_launcher
+from scripts.build_ees_webui import SOURCE_SHA256, TARGET_APP, assemble_work_launcher
 
 
 USER = {"id": "fixture-admin", "name": "Fixture Administrator", "email": "fixture@example.invalid",
@@ -43,16 +45,27 @@ def chat_record(chat_id="existing-chat"):
 class NativeUIServer(ThreadingHTTPServer):
     daemon_threads = True
 
-    def __init__(self, wheel_path):
+    def __init__(self, wheel_path, *, upstream_baseline=False, frontend_directory=None):
         # Use the production builder contract while continuing to serve the
         # actual wheel. A stale wheel must fail instead of silently testing a
         # source overlay that was never packaged for deployment.
-        with ZipFile(wheel_path) as wheel:
-            if wheel.read(TARGET_APP + "ees-work-launcher.js") != assemble_work_launcher():
-                raise ValueError("Native UI wheel launcher differs from the current assembled sources.")
+        if frontend_directory is not None and not upstream_baseline:
+            raise ValueError("Source frontend overlay is only allowed in the upstream baseline comparison.")
+        if upstream_baseline:
+            if hashlib.sha256(Path(wheel_path).read_bytes()).hexdigest() != SOURCE_SHA256:
+                raise ValueError("Upstream baseline requires the unchanged pinned official wheel.")
+        else:
+            with ZipFile(wheel_path) as wheel:
+                if wheel.read(TARGET_APP + "ees-work-launcher.js") != assemble_work_launcher():
+                    raise ValueError("Native UI wheel launcher differs from the current assembled sources.")
         super().__init__(("127.0.0.1", 0), NativeUIHandler)
         self.wheel = ZipFile(wheel_path)
         self.assets = set(self.wheel.namelist())
+        self.frontend_directory = Path(frontend_directory).resolve() if frontend_directory else None
+        if self.frontend_directory is not None:
+            self.assets = {name for name in self.assets if not name.startswith("open_webui/frontend/")}
+            self.assets.update("open_webui/frontend/" + path.relative_to(self.frontend_directory).as_posix()
+                               for path in self.frontend_directory.rglob("*") if path.is_file())
         self.requests = []
         self.unknown = []
         self.errors = []
@@ -97,6 +110,15 @@ class NativeUIServer(ThreadingHTTPServer):
     @property
     def url(self):
         return f"http://127.0.0.1:{self.server_port}"
+
+    def read_frontend(self, name):
+        if self.frontend_directory is not None and name.startswith("open_webui/frontend/"):
+            relative = name.removeprefix("open_webui/frontend/")
+            path = (self.frontend_directory / relative).resolve()
+            if not path.is_relative_to(self.frontend_directory):
+                raise ValueError("Frontend fixture path escaped its build directory.")
+            return path.read_bytes()
+        return self.wheel.read(name)
 
     def emit(self, name, value):
         packet = "42" + json.dumps([name, value], ensure_ascii=False)
@@ -209,7 +231,7 @@ class NativeUIHandler(BaseHTTPRequestHandler):
                     packet = "2"
                 return self.send_content(packet, "text/plain")
             if path == "/api/config":
-                return self.send_content({"status": True, "name": "EES Work", "version": "0.11.3",
+                return self.send_content({"status": True, "name": "EES Workflow", "version": "0.11.3",
                     "default_locale": "ko-KR", "default_models": "fixture-model", "default_prompt_suggestions": [],
                     "oauth": {"providers": {}}, "features": {"auth": True, "enable_websocket": False,
                     "enable_login_form": True, "enable_folders": True, "enable_version_update_check": False},
@@ -228,7 +250,7 @@ class NativeUIHandler(BaseHTTPRequestHandler):
             if path == "/api/events/webhooks":
                 return self.send_content([])
             if path in {"/api/v1/users/fixture-admin/profile/image", "/api/v1/models/model/profile/image"}:
-                return self.send_content(self.server.wheel.read("open_webui/frontend/static/user.png"), "image/png")
+                return self.send_content(self.server.read_frontend("open_webui/frontend/static/user.png"), "image/png")
             if path == "/api/v1/files/fixture-file/process/status":
                 return self.send_content('data: {"status":"completed"}\n\ndata: [DONE]\n\n', "text/event-stream")
             if path == "/api/v1/files/fixture-file/content" and self.server.uploaded_file:
@@ -314,7 +336,7 @@ class NativeUIHandler(BaseHTTPRequestHandler):
             if path in {"/", "/auth", "/workspace", "/admin/settings"} or path.startswith(("/c/", "/workspace/")):
                 name = "open_webui/frontend/index.html"
             if name in self.server.assets:
-                return self.send_content(self.server.wheel.read(name), mimetypes.guess_type(name)[0] or "application/octet-stream")
+                return self.send_content(self.server.read_frontend(name), mimetypes.guess_type(name)[0] or "application/octet-stream")
             self.server.unknown.append(("GET", path))
             self.send_content({"detail": "Explicit fixture route unavailable"}, status=404)
         except Exception as error:

@@ -5411,6 +5411,50 @@
         "test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_running_transport_is_visible_and_cannot_double_execute",
         "test_ees_work_demo.EESWorkNativeBrowserTests.test_native_message_send_stream_and_work_panel_are_independent"
       ]
+    },
+    "test_ees_branding_build.BrandingBuildTests.test_native_chunk_change_readdresses_entire_cyclic_graph_without_version_change": {
+      "classification": "preserved-protection",
+      "reason": "The compiler now owns its immutable graph. The packager preserves compiled cycles and source maps byte-for-byte and rejects mismatched runtime/cache hashes instead of renaming compiled modules.",
+      "tests": [
+        "test_ees_branding_build.BrandingBuildTests.test_source_built_cyclic_modules_and_source_maps_are_copied_without_rewriting",
+        "test_ees_branding_build.BrandingBuildTests.test_frontend_is_required_and_runtime_hash_mismatch_fails_before_output"
+      ]
+    },
+    "test_ees_branding_build.BrandingBuildTests.test_only_reviewed_content_changes_and_frontend_cache_namespace_moves": {
+      "classification": "preserved-protection",
+      "reason": "The reviewed source-built frontend replaces the complete frontend only after validation. Backend/license bytes, provenance and RECORD remain checked; no compiled chunk text is rewritten.",
+      "tests": [
+        "test_ees_branding_build.BrandingBuildTests.test_only_reviewed_backend_changes_and_whole_source_frontend_are_packaged",
+        "test_ees_branding_build.BrandingBuildTests.test_frontend_validator_failure_cannot_publish_a_wheel"
+      ]
+    },
+    "test_ees_branding_build.BrandingBuildTests.test_work_draft_hook_never_imports_or_persists_tool_approval_mode": {
+      "classification": "preserved-protection",
+      "reason": "The reviewed source hook is executed directly and still excludes approval settings from all read, flush and restore paths while retaining loading/owner guards. Compiled minifier variable names are no longer the contract.",
+      "tests": [
+        "test_ees_frontend_build.NativeDraftHookTests.test_exact_source_hook_preserves_approval_and_waits_for_all_native_loads"
+      ]
+    },
+    "test_ees_branding_build.OfficialWheelTests.test_native_chat_bridges_preserve_approval_and_bind_only_successful_main_creation": {
+      "classification": "preserved-protection",
+      "reason": "The exact patched Native source functions replace compiled-string probes. Their direct execution checks Native restore, successful explicit and completion-created chat ownership, late responses and per-message references.",
+      "tests": [
+        "test_ees_frontend_build.NativeSourceHookTests.test_real_native_restore_creation_and_late_completion_boundaries"
+      ]
+    },
+    "test_ees_branding_build.BrandingBuildTests.test_native_empty_layout_hooks_only_add_attributes_to_existing_factories": {
+      "classification": "preserved-protection",
+      "reason": "Source patch guards replace minified factory anchors. Tests inspect original element preservation and reject drift before applying a patch; actual Native layout gates still cover rendered behavior.",
+      "tests": [
+        "test_ees_frontend_build.SourcePatchTests.test_layout_hooks_preserve_native_elements_and_reject_source_drift"
+      ]
+    },
+    "test_ees_branding_build.BrandingBuildTests.test_native_empty_layout_template_drift_fails_before_output": {
+      "classification": "preserved-protection",
+      "reason": "Source patch guards replace minified factory anchors. Tests inspect original element preservation and reject drift before applying a patch; actual Native layout gates still cover rendered behavior.",
+      "tests": [
+        "test_ees_frontend_build.SourcePatchTests.test_layout_hooks_preserve_native_elements_and_reject_source_drift"
+      ]
     }
   },
   "javascript_migrations": {

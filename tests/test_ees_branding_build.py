@@ -1,7 +1,7 @@
 """Offline release integrity tests; real upstream wheel check is opt-in.
 
-Set EES_TEST_UPSTREAM_WHEEL to the verified official wheel path to additionally
-build and audit that wheel. The workflow probe imports emitted modules under
+Set EES_TEST_UPSTREAM_WHEEL and EES_TEST_FRONTEND_DIR to the verified official
+wheel and source frontend paths to additionally build and audit that wheel. The workflow probe imports emitted modules under
 their public package name with the unrelated CLI initializer isolated; it never
 installs or starts Open WebUI or accesses its user database.
 """
@@ -50,7 +50,7 @@ def assert_css_icon_cache_keys(test, original, built, icons):
                          "CSS bytes outside URL values changed")
         url = expected = before.group("url")
         for relative, content in icons.items():
-            if url in (b"./" + relative.encode("ascii"), b"/_ees13/" + relative.encode("ascii")):
+            if url in (b"./" + relative.encode("ascii"), b"/" + builder.PROGRAM_FRONTENDS[builder.VERSION].encode("ascii") + b"/" + relative.encode("ascii")):
                 expected += b"?v=" + hashlib.sha256(content).hexdigest().encode("ascii")
                 seen.add(relative)
                 break
@@ -122,7 +122,7 @@ class CssCacheIntegrityTests(unittest.TestCase):
     def test_accepts_only_reviewed_relative_absolute_and_repeated_icon_urls(self):
         icons = {"v4/721d7.svg": b"reviewed icon"}
         original = (b'.a{background:url("./v4/721d7.svg")}\r\n'
-                    b".b{mask:url( '/_ees13/v4/721d7.svg' )}"
+                    b".b{mask:url( '/_ees14/v4/721d7.svg' )}"
                     b'.c{mask:url(./v4/721d7.svg)}'
                     b'.font{src:url("./fonts/unchanged.ttf?v=keep")}\n/* keep */')
         # A fixed fixture digest keeps the successful sample independent of the
@@ -241,7 +241,7 @@ print("installed_workflow_contract=pass")
         root = Path(temporary)
         with ZipFile(wheel) as archive:
             retired = {"open_webui/ees_work_demo.py", "open_webui/workflow_seed.json",
-                       "open_webui/ees_workflow_examples.py", "open_webui/frontend/_ees13/ees-work-panel.js"}
+                       "open_webui/ees_workflow_examples.py", "open_webui/frontend/_ees14/ees-work-panel.js"}
             test.assertFalse(retired.intersection(archive.namelist()))
             test.assertFalse(any(name.startswith("open_webui/ees_work_demo_ui/") for name in archive.namelist()))
             test.assertEqual(archive.read("open_webui/ees_workflow_tool.py"),
@@ -369,18 +369,9 @@ def fixture_members():
         "open_webui/frontend/index.html": b"<!-- Open WebUI license notice -->\n<title>Open WebUI</title>\n"
         + b'<script src="/_app/immutable/entry/start.js"></script>\n' * 49
         + b'<link rel="stylesheet" href="/static/custom.css" />\n</head>\n',
-        app + "immutable/chunks/CHq18Uto.js": b'const ca="Open WebUI",other="Open WebUI documentation";',
-        app + "immutable/nodes/0.CvnwnD8l.js": b'new Notification(`${title} / Open WebUI`);' * 3,
-        app + "immutable/nodes/26.Ck8JdNW5.js": b'document.title=`${channel} / Open WebUI`;' * 2,
-        app + "immutable/nodes/2.Db9ODmx4.js": b';'.join(
-            before for before, _, count in builder.PATCHES[app + "immutable/nodes/2.Db9ODmx4.js"]
-            for _ in range(count)),
-        app + "immutable/chunks/DKj2ZiCb.js": b'const an="0.11.3";fetch(`${base}/_app/version.json`);',
-        app + "immutable/chunks/zKJlHFgk.js": b';'.join(
-            before for before, _, _ in builder.PATCHES[app + "immutable/chunks/zKJlHFgk.js"]),
+        app + "immutable/entry/start.js": b'import "../chunks/untouched.js";',
+        app + "immutable/chunks/untouched.js": b'const oldFrontend = "original upstream";',
         app + "version.json": b'{"version":"0.11.3"}',
-        app + "immutable/entry/start.js": b'import "../chunks/CHq18Uto.js";\n//# sourceMappingURL=start.js.map',
-        app + "immutable/entry/start.js.map": b'{"file":"_app/immutable/entry/start.js","sourcesContent":["Open WebUI"]}',
         info + "METADATA": b"Metadata-Version: 2.4\nName: open-webui\nVersion: 0.11.3\n"
         b"Requires-Dist: example==1.2.3; python_version >= '3.11'\nLicense-File: LICENSE\n\nOpen WebUI original description\n",
         info + "WHEEL": b"Wheel-Version: 1.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n",
@@ -538,10 +529,14 @@ class BrandingBuildTests(unittest.TestCase):
             "ees-work-launcher.js": b"(() => { window.fixture = [createWorkView(), createWorkDesigner()]; })();\n",
         }.items():
             (self.ui / name).write_bytes(content)
+        self.frontend_dir = self.root / "source-frontend"
+        self.frontend_dir.mkdir()
+        self.frontend_files = None
         self.members = fixture_members()
         self.guard_hashes = {name: hashlib.sha256(self.members[name]).hexdigest()
                              for name in builder.ASSET_GUARD_SOURCE_HASHES}
         self.write_fixture()
+        self.prepare_frontend()
 
     def write_fixture(self):
         with ZipFile(self.wheel, "w") as archive:
@@ -549,13 +544,71 @@ class BrandingBuildTests(unittest.TestCase):
                 archive.writestr(name, content)
         self.source_hash = builder.sha256_file(self.wheel)
 
-    def build(self, directory="release"):
+    def prepare_frontend(self):
+        """Synthetic validated bytes isolate packing from the source compiler.
+
+        Provenance verification, patch application and source-hook behavior run
+        in test_ees_frontend_build; the optional real-wheel audit below invokes
+        that real validator. This fixture never claims to be a Native build.
+        """
+        app_dir = builder.PROGRAM_FRONTENDS[builder.VERSION]
+        links = []
+        for filename in ("chat-theme.css", "ees-work-launcher.css", "ees-work-launcher.js"):
+            content = (builder.assemble_work_launcher(self.ui) if filename.endswith(".js")
+                       else (self.ui / filename).read_bytes())
+            if filename.endswith(".css"):
+                for relative in builder.V4_ICON_FILES:
+                    digest = hashlib.sha256((self.ui / relative).read_bytes()).hexdigest().encode("ascii")
+                    for url in (("/" + app_dir + "/" + relative).encode("ascii"), ("./" + relative).encode("ascii")):
+                        content = content.replace(url, url + b"?v=" + digest)
+            digest = hashlib.sha256(content).hexdigest()
+            links.append('<link href="/' + app_dir + '/' + filename + '?v=' + digest + '" />')
+        self.frontend_files = {
+            "index.html": ('<!-- LICENSE synthetic source build -->\n<title>EES Workflow</title>\n'
+                '<link href="/static/custom.css" />\n' + "\n".join(links)
+                + '\n<script src="/' + app_dir + '/immutable/entry/start.source.js"></script>\n</head>\n').encode(),
+            app_dir + "/version.json": json.dumps({"version": builder.VERSION}).encode(),
+            app_dir + "/immutable/entry/start.source.js": b'import "../chunks/a.source.js";\n//# sourceMappingURL=start.source.js.map',
+            app_dir + "/immutable/entry/start.source.js.map": b'{"sourcesContent":["Open WebUI / exact source map"]}',
+            app_dir + "/immutable/chunks/a.source.js": b'import "./b.source.js"; export const original = "Open WebUI";',
+            app_dir + "/immutable/chunks/b.source.js": b'import "./a.source.js"; export const unchanged = 1;',
+            "static/custom.css": b"/* original frontend style stays intact */\n",
+            "favicon.png": (self.assets / "favicon.png").read_bytes(),
+            **{"static/" + name: (self.assets / name).read_bytes() for name in builder.ASSET_NAMES},
+        }
+        self.write_frontend_manifest()
+
+    def write_frontend_manifest(self):
+        self.frontend_manifest = {
+            "schema": 1, "mode": "ees", "upstream_commit": "2a960a59fe1dbbd35282f0556b3666d81102e781",
+            "version": builder.VERSION, "app_dir": builder.PROGRAM_FRONTENDS[builder.VERSION],
+            "source_inputs": {"synthetic-packing-unit-fixture": "f" * 64},
+            "files": {name: hashlib.sha256(content).hexdigest() for name, content in sorted(self.frontend_files.items())},
+        }
+        (self.frontend_dir / "manifest.json").write_text(json.dumps(self.frontend_manifest), encoding="utf-8")
+
+    def build(self, directory="release", *, refresh_frontend=True):
         fonts = {name: (origin, hashlib.sha256(b"unchanged upstream font " + name.encode()).hexdigest())
                  for name, (origin, _) in builder.FONT_SOURCES.items()}
+        # Do not run the compiler for synthetic packaging fixtures. The real
+        # validator is exercised independently and in OfficialWheelTests.
+        from scripts import build_ees_frontend
         with (mock.patch.object(builder, "SOURCE_SHA256", self.source_hash),
               mock.patch.object(builder, "FONT_SOURCES", fonts),
               mock.patch.object(builder, "ASSET_GUARD_SOURCE_HASHES", self.guard_hashes)):
-            return builder.build(self.wheel, self.root / directory, self.assets, self.ui)
+            if refresh_frontend:
+                try:
+                    self.prepare_frontend()
+                except (OSError, ValueError):
+                    # A broken authored asset cannot be compiled. Retain the
+                    # last fixture so the real packer must reject that asset.
+                    # Do not call or mock its validation guards here.
+                    pass
+            with mock.patch.object(build_ees_frontend, "validate_frontend", return_value=self.frontend_files) as validate:
+                result = builder.build(self.wheel, self.root / directory, self.assets, self.ui,
+                                       frontend_dir=self.frontend_dir)
+                validate.assert_called_once_with(self.frontend_dir, mode="ees")
+                return result
 
     def test_reproducible_wheel_manifest_and_record_preserve_original(self):
         first = self.build("first")
@@ -601,7 +654,7 @@ class BrandingBuildTests(unittest.TestCase):
         source = self.ui / "ees-work-designer.js"
         source.write_text(source.read_text(encoding="utf-8") + "\n// revised designer\n", encoding="utf-8")
         second = self.build("after")
-        self.assertEqual(first["relocated_frontend"], second["relocated_frontend"])
+        self.assertEqual(first["version"], second["version"])
         with (ZipFile(self.root / "before" / builder.WHEEL_FILENAME) as before,
               ZipFile(self.root / "after" / builder.WHEEL_FILENAME) as after):
             indexes = [archive.read("open_webui/frontend/index.html") for archive in (before, after)]
@@ -609,7 +662,7 @@ class BrandingBuildTests(unittest.TestCase):
                 digests = [hashlib.sha256(archive.read(builder.TARGET_APP + filename)).hexdigest()
                            for archive in (before, after)]
                 for index, digest in zip(indexes, digests):
-                    self.assertIn(("/_ees13/" + filename + "?v=" + digest).encode("ascii"), index)
+                    self.assertIn(("/_ees14/" + filename + "?v=" + digest).encode("ascii"), index)
                 self.assertEqual(digests[0] == digests[1], filename != "ees-work-launcher.js")
             self.assertEqual(before.read(builder.TARGET_INFO + "METADATA"),
                              after.read(builder.TARGET_INFO + "METADATA"))
@@ -618,7 +671,7 @@ class BrandingBuildTests(unittest.TestCase):
         relative = builder.V4_ICON_FILES[0]
         name = Path(relative).name
         (self.ui / "ees-work-view.js").write_text('function createWorkView() { return "' + name + '"; }\n', encoding="utf-8")
-        (self.ui / "ees-work-launcher.css").write_text('.relative{background:url("./' + relative + '")} .absolute{background:url("/_ees13/' + relative + '")}', encoding="utf-8")
+        (self.ui / "ees-work-launcher.css").write_text('.relative{background:url("./' + relative + '")} .absolute{background:url("/_ees14/' + relative + '")}', encoding="utf-8")
         hashes = []
         for directory in ("icon-before", "icon-after"):
             if directory == "icon-after":
@@ -632,56 +685,97 @@ class BrandingBuildTests(unittest.TestCase):
                 css = archive.read(builder.TARGET_APP + "ees-work-launcher.css")
                 self.assertIn((name + "?v=" + digest).encode(), source)
                 self.assertIn(("./" + relative + "?v=" + digest).encode(), css)
-                self.assertIn(("/_ees13/" + relative + "?v=" + digest).encode(), css)
+                self.assertIn(("/_ees14/" + relative + "?v=" + digest).encode(), css)
                 self.assertNotIn(b"?v=" + digest.encode() + b"?v=", css)
                 assert_css_icon_cache_keys(self, (self.ui / "ees-work-launcher.css").read_bytes(),
                                            css, {relative: (self.ui / relative).read_bytes()})
         self.assertNotEqual(*hashes)
 
-    def test_native_chunk_change_readdresses_entire_cyclic_graph_without_version_change(self):
-        prefix = builder.SOURCE_APP + "immutable/"
-        self.members[prefix + "chunks/cycle-a.js"] = b'import "./cycle-b.js"; export const a = 1;'
-        self.members[prefix + "chunks/cycle-b.js"] = b'import "./cycle-a.js"; export const b = 2;'
-        self.write_fixture()
-        first = self.build("before")
-        self.members[prefix + "chunks/cycle-a.js"] += b"\n// revised Native chunk\n"
-        self.write_fixture()
-        second = self.build("after")
-        old_dir = first["relocated_frontend"]["immutable_directory"]
-        new_dir = second["relocated_frontend"]["immutable_directory"]
-        self.assertNotEqual(old_dir, new_dir)
-        self.assertEqual(first["version"], second["version"])
+    def test_source_built_cyclic_modules_and_source_maps_are_copied_without_rewriting(self):
+        self.prepare_frontend()
+        app_dir = builder.PROGRAM_FRONTENDS[builder.VERSION]
+        original = dict(self.frontend_files)
+        self.build("before", refresh_frontend=False)
+        changed = app_dir + "/immutable/chunks/a.source.js"
+        self.frontend_files[changed] += b"\n// revised source output\n"
+        self.write_frontend_manifest()
+        second = self.build("after", refresh_frontend=False)
         with (ZipFile(self.root / "before" / builder.WHEEL_FILENAME) as before,
               ZipFile(self.root / "after" / builder.WHEEL_FILENAME) as after):
-            for archive, directory in ((before, old_dir), (after, new_dir)):
-                index = archive.read("open_webui/frontend/index.html")
-                url = ("/_ees13/" + directory + "/").encode("ascii")
-                self.assertEqual(index.count(url), 49)
-                self.assertNotIn(b"/_ees13/immutable/", index)
-                self.assertFalse(any(name.startswith(builder.TARGET_APP + "immutable/")
-                                     for name in archive.namelist()))
-                self.assertEqual(archive.read(builder.TARGET_APP + directory + "/chunks/cycle-b.js"),
-                                 b'import "./cycle-a.js"; export const b = 2;')
-            self.assertEqual(before.read(builder.TARGET_INFO + "METADATA"),
-                             after.read(builder.TARGET_INFO + "METADATA"))
-            self.assertEqual(before.read(builder.TARGET_APP + "version.json"),
-                             after.read(builder.TARGET_APP + "version.json"))
-            self.assertFalse(any(name.startswith(builder.TARGET_APP + old_dir + "/")
-                                 for name in after.namelist()))
+            for relative, content in original.items():
+                name = "open_webui/frontend/" + relative
+                self.assertEqual(before.read(name), content)
+                self.assertEqual(after.read(name), self.frontend_files[relative])
+                if relative != changed:
+                    self.assertEqual(before.read(name), after.read(name))
+            self.assertFalse(any(name.startswith(builder.SOURCE_APP) for name in after.namelist()))
+        self.assertEqual(second["source_frontend"], self.frontend_manifest)
         assert_record(self, self.root / "after" / builder.WHEEL_FILENAME)
+
+    def test_frontend_is_required_and_runtime_hash_mismatch_fails_before_output(self):
+        self.prepare_frontend()
+        # A previously validated source build becomes unusable if its runtime
+        # assets change. Repacking may not silently edit compiled HTML to hide it.
+        (self.ui / "ees-work-designer.js").write_bytes(b"function createWorkDesigner() { return 'changed'; }\n")
+        with self.assertRaisesRegex(ValueError, "runtime asset hash differs"):
+            self.build("stale", refresh_frontend=False)
+        self.assertFalse((self.root / "stale").exists())
+        with mock.patch.object(builder, "SOURCE_SHA256", self.source_hash), \
+                mock.patch.object(builder, "prepare_replacements", return_value={}), \
+                mock.patch.object(builder, "prepare_additions", return_value={}):
+            with self.assertRaisesRegex(ValueError, "source frontend is required"):
+                builder.build(self.wheel, self.root / "missing-frontend")
+        self.assertFalse((self.root / "missing-frontend").exists())
+
+    def test_source_frontend_asset_overlap_or_missing_target_is_rejected(self):
+        cases = ((builder.PROGRAM_FRONTENDS[builder.VERSION] + "/ees-work-launcher.js", "overlaps"),
+                 ("static/favicon.svg", "Missing source-built static branding"),
+                 ("favicon.png", "Missing or mismatched source-built favicon"))
+        for relative, reason in cases:
+            with self.subTest(relative=relative):
+                self.prepare_frontend()
+                if "overlaps" == reason:
+                    self.frontend_files[relative] = b"unreviewed duplicate runtime"
+                else:
+                    del self.frontend_files[relative]
+                self.write_frontend_manifest()
+                with self.assertRaisesRegex(ValueError, reason):
+                    self.build("bad-source-frontend", refresh_frontend=False)
+                self.assertFalse((self.root / "bad-source-frontend").exists())
+
+    def test_source_frontend_branding_mismatch_is_not_silently_rewritten(self):
+        for relative in ("static/favicon.svg", "favicon.png"):
+            with self.subTest(relative=relative):
+                self.prepare_frontend()
+                self.frontend_files[relative] = b"stale source-built branding"
+                self.write_frontend_manifest()
+                with self.assertRaisesRegex(ValueError, "branding differs|mismatched source-built favicon"):
+                    self.build("bad-branding", refresh_frontend=False)
+                self.assertFalse((self.root / "bad-branding").exists())
+
+    def test_frontend_validator_failure_cannot_publish_a_wheel(self):
+        from scripts import build_ees_frontend
+        with mock.patch.object(builder, "SOURCE_SHA256", self.source_hash), \
+                mock.patch.object(builder, "prepare_replacements", return_value={}), \
+                mock.patch.object(builder, "prepare_additions", return_value={}), \
+                mock.patch.object(build_ees_frontend, "validate_frontend", side_effect=ValueError("provenance differs")) as validate:
+            with self.assertRaisesRegex(ValueError, "provenance differs"):
+                builder.build(self.wheel, self.root / "untrusted", frontend_dir=self.frontend_dir)
+            validate.assert_called_once_with(self.frontend_dir, mode="ees")
+        self.assertFalse((self.root / "untrusted").exists())
 
     def test_theme_content_change_gets_new_url_without_readdressing_native_modules(self):
         first = self.build("before")
         source = self.ui / "chat-theme.css"
         source.write_bytes(source.read_bytes() + b"\n/* revised shell */\n")
         second = self.build("after")
-        self.assertEqual(first["relocated_frontend"], second["relocated_frontend"])
+        self.assertEqual(first["version"], second["version"])
         digests = []
         for directory in ("before", "after"):
             with ZipFile(self.root / directory / builder.WHEEL_FILENAME) as archive:
                 digest = hashlib.sha256(archive.read(builder.TARGET_APP + "chat-theme.css")).hexdigest()
                 digests.append(digest)
-                self.assertIn(("/_ees13/chat-theme.css?v=" + digest).encode("ascii"),
+                self.assertIn(("/_ees14/chat-theme.css?v=" + digest).encode("ascii"),
                               archive.read("open_webui/frontend/index.html"))
         self.assertNotEqual(*digests)
 
@@ -755,39 +849,32 @@ class BrandingBuildTests(unittest.TestCase):
                 self.assertRaisesRegex(ValueError, "assembled sources"):
             native_ui_fixture.NativeUIServer(self.root / "release" / builder.WHEEL_FILENAME)
 
-    def test_only_reviewed_content_changes_and_frontend_cache_namespace_moves(self):
+    def test_only_reviewed_backend_changes_and_whole_source_frontend_are_packaged(self):
         manifest = self.build()
-        immutable_dir = manifest["relocated_frontend"]["immutable_directory"]
+        prefix = "open_webui/frontend/"
+        self.assertFalse(any(name.startswith(prefix) for name in builder.PATCHES),
+                         "Compiled frontend substitutions must not return")
+        self.assertEqual(manifest["source_frontend"], self.frontend_manifest)
         with ZipFile(self.root / "release" / builder.WHEEL_FILENAME) as built:
             self.assertFalse(any(name.startswith(builder.SOURCE_APP) for name in built.namelist()))
-            self.assertEqual(len(built.namelist()), len(self.members) + len(builder.UI_FILES)
-                             + len(builder.FONT_SOURCES) + len(builder.WORK_ASSETS)
-                             + len(builder.ASSET_GUARD_FILES))
             for name, original in self.members.items():
-                target = builder.target_name(name, immutable_dir)
+                if name.startswith(prefix):
+                    continue
+                target = builder.target_name(name)
                 if target not in manifest["changed_files"]:
                     self.assertEqual(built.read(target), original, name)
+            for relative, content in self.frontend_files.items():
+                self.assertEqual(built.read(prefix + relative), content, relative)
             self.assertEqual(built.read(builder.TARGET_INFO + "licenses/LICENSE"), LICENSE)
             self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", b"Version: 0.11.3+ees.13\n"))
+                             self.members[builder.SOURCE_INFO + "METADATA"].replace(b"Version: 0.11.3\n", ("Version: " + builder.VERSION + "\n").encode()))
             self.assertEqual(built.read("open_webui/env.py").count(NOTICE), 2)
             self.assertNotIn(b"WEBUI_NAME +=", built.read("open_webui/env.py"))
-            self.assertIn(b"EES Work", built.read("open_webui/frontend/index.html"))
-            self.assertNotIn(b"/_app/", built.read("open_webui/frontend/index.html"))
-            index = built.read("open_webui/frontend/index.html")
-            theme_url = ("/_ees13/chat-theme.css?v=" + hashlib.sha256(
-                built.read(builder.TARGET_APP + "chat-theme.css")).hexdigest()).encode("ascii")
-            self.assertEqual(index.count(theme_url), 1)
-            for filename in ("ees-work-launcher.css", "ees-work-launcher.js"):
-                digest = hashlib.sha256(built.read(builder.TARGET_APP + filename)).hexdigest()
-                self.assertIn(("/_ees13/" + filename + "?v=" + digest).encode("ascii"), index)
             main = built.read("open_webui/main.py")
             self.assertLess(main.index(b"install_ees_workflow(app, get_verified_user)"), main.index(b"app.mount"))
             for relative, target in builder.WORK_ASSETS.items():
                 self.assertEqual(built.read(target), (builder.WORK_DIR / relative).read_bytes())
-                self.assertFalse(target.startswith("open_webui/frontend/"))
-            self.assertLess(index.index(b"/static/custom.css"), index.index(theme_url))
-            self.assertLess(index.index(theme_url), index.index(b"</head>"))
+                self.assertFalse(target.startswith(prefix))
             for name, relative in builder.UI_FILES.items():
                 expected = (builder.assemble_work_launcher(self.ui) if name == "ees-work-launcher.js"
                             else (self.ui / name).read_bytes())
@@ -796,15 +883,11 @@ class BrandingBuildTests(unittest.TestCase):
             self.assertNotIn(builder.TARGET_APP + "ees-work-designer.js", built.namelist())
             for name, (origin, _) in builder.FONT_SOURCES.items():
                 self.assertEqual(built.read(builder.TARGET_APP + "fonts/" + name), self.members[origin])
-            runtime = built.read(builder.TARGET_APP + immutable_dir + "/chunks/DKj2ZiCb.js")
-            self.assertIn(b"/_ees13/version.json", runtime)
-            chat = built.read(builder.TARGET_APP + immutable_dir + "/chunks/zKJlHFgk.js")
-            self.assertIn(builder.NATIVE_DRAFT_HOOK, chat)
-            self.assertIn(b'if(window.__eesNativeDraftV1===eesNativeDraftApi)delete window.__eesNativeDraftV1;', chat)
             self.assertEqual(json.loads(built.read(builder.TARGET_APP + "version.json"))["version"], builder.VERSION)
-            for prefix in ("open_webui/static/", "open_webui/frontend/static/"):
+            for image_prefix in ("open_webui/static/", prefix + "static/"):
                 for name in builder.ASSET_NAMES:
-                    self.assertEqual(built.read(prefix + name), (self.assets / name).read_bytes())
+                    self.assertEqual(built.read(image_prefix + name), (self.assets / name).read_bytes())
+        assert_record(self, self.root / "release" / builder.WHEEL_FILENAME)
 
     def test_asset_guard_inventory_and_emitted_lifecycle_cache_order(self):
         self.assertEqual(GUARD_METHODS, builder.ASSET_GUARD_HOOKS)
@@ -875,7 +958,7 @@ class BrandingBuildTests(unittest.TestCase):
     def test_missing_mock_runtime_fails_before_writing(self):
         with tempfile.TemporaryDirectory() as empty:
             with ZipFile(self.wheel) as archive:
-                with self.assertRaisesRegex(ValueError, "EES Work asset"):
+                with self.assertRaisesRegex(ValueError, "EES Workflow asset"):
                     builder.prepare_additions(archive, self.ui, Path(empty))
 
     def test_wrong_source_hash_fails_without_output(self):
@@ -904,9 +987,9 @@ class BrandingBuildTests(unittest.TestCase):
         self.build()
         with ZipFile(self.root / "release" / builder.WHEEL_FILENAME) as built:
             synthetic_env = built.read("open_webui/env.py")
-        for registered, expected in ((None, "EES Work"), ("EES Assistant", "EES Work"),
-                                     ("EES Portal", "EES Work"), ("EES Work", "EES Work"),
-                                     ("Team Custom", "Team Custom")):
+        for registered, expected in ((None, "EES Workflow"), ("EES Assistant", "EES Workflow"),
+                                     ("EES Portal", "EES Workflow"), ("EES Work", "EES Workflow"),
+                                     ("EES Workflow", "EES Workflow"), ("Team Custom", "Team Custom")):
             with self.subTest(registered=registered):
                 environment = {} if registered is None else {"WEBUI_NAME": registered}
                 with mock.patch.dict(os.environ, environment, clear=True):
@@ -915,125 +998,8 @@ class BrandingBuildTests(unittest.TestCase):
                     self.assertEqual(namespace["WEBUI_NAME"], expected)
                     self.assertEqual(dict(os.environ), environment)
 
-    def test_native_empty_layout_hooks_only_add_attributes_to_existing_factories(self):
-        name = builder.SOURCE_APP + "immutable/chunks/zKJlHFgk.js"
-        patches = [patch for patch in builder.PATCHES[name]
-                   if b"data-ees-native-empty-" in patch[1]]
-        expected = {
-            b"Z8": {b"frame"},
-            b"E8": {b"chat", b"main", b"content", b"composer"},
-            b"S8": {b"model", b"description"},
-            b"C8": {b"suggestions"},
-            b"k8": {b"folder"},
-        }
-        self.assertEqual(len(patches), len(expected))
-        for before, after, count in patches:
-            factory = before.split(b"=", 1)[0]
-            with self.subTest(factory=factory.decode()):
-                self.assertEqual(count, 1)
-                hooks = re.findall(rb" data-ees-native-empty-([a-z]+)", after)
-                self.assertEqual(set(hooks), expected[factory])
-                self.assertEqual(len(hooks), len(expected[factory]))
-                # Exact equality after stripping only static attributes proves
-                # nodes/comments/order and the compiled traversal stay intact.
-                self.assertEqual(re.sub(rb" data-ees-native-empty-[a-z]+", b"", after), before)
-                self.assertNotIn(b"landingPageMode", after)
-                self.assertNotIn(b"localStorage", after)
-        self.build()
-        manifest = json.loads((self.root / "release/manifest.json").read_text(encoding="utf-8"))
-        immutable_dir = manifest["relocated_frontend"]["immutable_directory"]
-        with ZipFile(self.root / "release" / builder.WHEEL_FILENAME) as built:
-            chat = built.read(builder.TARGET_APP + immutable_dir + "/chunks/zKJlHFgk.js")
-        for before, after, _ in patches:
-            self.assertEqual(chat.count(after), 1)
-            self.assertNotIn(before, chat)
 
-    def test_native_empty_layout_template_drift_fails_before_output(self):
-        name = builder.SOURCE_APP + "immutable/chunks/zKJlHFgk.js"
-        original = self.members[name]
-        patches = [patch for patch in builder.PATCHES[name]
-                   if b"data-ees-native-empty-" in patch[1]]
-        for index, (before, _, _) in enumerate(patches):
-            for mode in ("missing", "duplicate"):
-                directory = f"native-layout-drift-{index}-{mode}"
-                with self.subTest(factory=before.split(b"=", 1)[0].decode(), mode=mode):
-                    self.members[name] = (original.replace(before, b"changed native factory")
-                                          if mode == "missing" else original + before)
-                    self.write_fixture()
-                    with self.assertRaisesRegex(ValueError, "Patch precondition failed"):
-                        self.build(directory)
-                    self.assertFalse((self.root / directory).exists())
 
-    @unittest.skipUnless(shutil.which("node"), "Node is required for the native draft boundary probe.")
-    def test_work_draft_hook_never_imports_or_persists_tool_approval_mode(self):
-        # Run the exact emitted hook against the native qi/Ps boundary. The
-        # import boundary simulates Ci's side effect if mode reaches it, so an
-        # accidental restore of `full` is observable rather than a text check.
-        probe = r'''
-process.stderr.write('ees_probe=node-entry version=' + process.version + '\n', () => {
-const assert = require('node:assert/strict');
-let current = {prompt:'original', selectedToolIds:['existing'], toolApprovalMode:'ask'};
-let approvalCalls = 0, imported = [], persisted = [], _r = null;
-const window = {location:{pathname:'/'}}, ce = false, le = {}, r = value => value;
-const Ae = {messages:{u:{id:'native-user',role:'user'},a:{id:'native-assistant',role:'assistant'}}};
-const j = () => false, g = () => false, Fr = () => 'native-chat',G=()=>'',d=()=>'';
-const us = () => current;
-const Ps = async (draft, chatId, debounce) => persisted.push({draft, chatId, debounce});
-const qi = async serialized => {
-  const incoming = JSON.parse(serialized);
-  imported.push(incoming);
-  if (incoming.toolApprovalMode) {
-    approvalCalls += incoming.toolApprovalMode === 'full' ? 1 : 0;
-    current.toolApprovalMode = incoming.toolApprovalMode;
-  }
-  current = {...current, ...incoming};
-  return true;
-};
-'''+builder.NATIVE_DRAFT_LOAD_GUARD.decode()+builder.NATIVE_DRAFT_HOOK.decode()+r'''
-(async () => {
-  const hook = window.__eesNativeDraftV1;
-  let finishFirst,finishSecond;
-  const first=eesNativeDraftLoad(()=>new Promise(resolve=>{finishFirst=resolve;}));
-  const second=eesNativeDraftLoad(()=>new Promise(resolve=>{finishSecond=resolve;}));
-  assert.equal(hook.ready(),false);
-  finishFirst();await first;assert.equal(hook.ready(),false);
-  finishSecond();await second;assert.equal(hook.ready(),true);
-  assert.deepEqual(hook.workMessageIds(),['native-assistant']);
-  window.location.pathname='/c/other';assert.equal(hook.ready(),false);
-  assert.deepEqual(hook.workMessageIds(),[],'A loading or foreign route cannot expose old message IDs');
-  window.location.pathname='/';
-  const draft = hook.read();
-  assert.equal(Object.hasOwn(draft, 'toolApprovalMode'), false);
-  assert.equal(current.toolApprovalMode, 'ask');
-  await hook.flush();
-  assert.equal(await hook.restore(JSON.stringify({prompt:'restored', selectedToolIds:['kept'], toolApprovalMode:'full'})), true);
-  assert.equal(current.prompt, 'restored');
-  assert.deepEqual(current.selectedToolIds, ['kept']);
-  assert.equal(current.toolApprovalMode, 'ask');
-  assert.equal(approvalCalls, 0);
-  assert.equal(imported.length, 1);
-  assert.equal(Object.hasOwn(imported[0], 'toolApprovalMode'), false);
-  assert.equal(persisted.length, 2);
-  assert.equal(persisted.every(item => !Object.hasOwn(item.draft, 'toolApprovalMode') && item.chatId === 'native-chat' && item.debounce === false), true);
-  for (const invalid of ['{', 'null', '[]', '"text"', 'false']) assert.equal(await hook.restore(invalid), false);
-  assert.equal(imported.length, 1);
-  await new Promise(resolve => process.stderr.write('ees_probe=node-complete\n', resolve));
-  console.log('draft_approval_boundary=pass');
-})().catch(error => {console.error(error); process.exitCode = 1;});
-});
-'''
-        try:
-            result = subprocess.run([shutil.which("node"), "-e", probe], capture_output=True,
-                                    text=True, encoding="utf-8", timeout=10)
-        except subprocess.TimeoutExpired as error:
-            stderr = error.stderr or ""
-            if isinstance(stderr, bytes):
-                stderr = stderr.decode("utf-8", errors="replace")
-            stages = [line for line in stderr.splitlines() if line.startswith("ees_probe=")]
-            raise AssertionError("Node draft probe timed out after 10s; stderr stages: "
-                                 + (", ".join(stages) or "entry not observed")) from None
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout.strip(), "draft_approval_boundary=pass")
 
     def test_patch_drift_fails_before_writing(self):
         self.members["open_webui/env.py"] += self.members["open_webui/env.py"]
@@ -1082,116 +1048,36 @@ const qi = async serialized => {
                 elif mode == "missing-font":
                     del self.members[origin]
                 else:
-                    self.members[builder.SOURCE_APP + "chat-theme.css"] = b"unexpected upstream target"
+                    self.members[builder.TARGET_APP + "chat-theme.css"] = b"unexpected upstream target"
                 self.write_fixture()
                 with self.assertRaisesRegex(ValueError, error):
                     self.build()
                 self.assertFalse((self.root / "release").exists())
 
 
-@unittest.skipUnless(os.environ.get("EES_TEST_UPSTREAM_WHEEL"), "Set EES_TEST_UPSTREAM_WHEEL for the offline official wheel audit.")
+@unittest.skipUnless(os.environ.get("EES_TEST_UPSTREAM_WHEEL") and os.environ.get("EES_TEST_FRONTEND_DIR"),
+                     "Set EES_TEST_UPSTREAM_WHEEL and EES_TEST_FRONTEND_DIR for the offline official wheel audit.")
 class OfficialWheelTests(unittest.TestCase):
-    @unittest.skipUnless(shutil.which("node"), "Node is required for the pinned native Chat probe.")
-    def test_native_chat_bridges_preserve_approval_and_bind_only_successful_main_creation(self):
-        with ZipFile(Path(os.environ["EES_TEST_UPSTREAM_WHEEL"])) as source:
-            name = builder.SOURCE_APP + "immutable/chunks/zKJlHFgk.js"
-            chat = source.read(name)
-        for before, after, count in builder.PATCHES[name]:
-            self.assertEqual(chat.count(before), count)
-            chat = chat.replace(before, after)
-        chat = chat.decode()
-        # Execute actual pinned native functions with only stores/API/UI
-        # boundaries stubbed. In particular qi's real Ci(mode) branch remains.
-        native_functions = []
-        for start, end in ((",qi=async x=>", ",po=x=>"),
-                           (",us=()=>", ",Ps=async"),
-                           (",kt=async x=>", ",Ht=async")):
-            index = chat.index(start)
-            native_functions.append("const " + chat[index + 1:chat.index(end, index)] + ";")
-        completion_start = chat.index("Ot&&(Ot.error?await Ko(Ot.error,me)")
-        completion_end = chat.index(",await Ft(),rs()&&os()},Ko=async", completion_start)
-        native_functions.append("const eesProbeCompletion=async response=>{const ue=d(),me={},Tt=true,"
-            + builder.NATIVE_COMPLETION_CAPTURE.decode() + "Ot=await response;"
-            + chat[completion_start:completion_end] + ";};")
-        probe = r'''
-const assert = require('node:assert/strict');
-const state = value => ({value}), r = item => item.value, c = (item, value) => item.value = value;
-const Qr=state('draft'),mr=state([]),Ut=state(['tool']),Qt=state([]),Lt=state([]),cr=state(false),Sr=state(false),$r=state(false),L=state('ask');
-const ce=state(false),le=state({setText(){}}),Br=state(null),oe=state(['model']),Hr=state({}),ls=state({});
-const Ae=state({state:{}}),Fn={update:callback=>callback({})},Ki=()=>{},Ko=async()=>{},Io=async()=>{};
-let embedded=false,temporary=false,nativeId='',failCreation=false,approvalCalls=0,beginCalls=0,_r=null;
-const j=()=>embedded,g=()=>temporary,d=()=>nativeId,G=()=>nativeId,H=()=>null,R=()=>null,Fr=()=>nativeId||null;
-const Ci=async mode=>{approvalCalls++;c(L,mode);},Ps=async()=>{},Ft=async()=>{},fn=async()=>{},wl=async()=>{};
-const xi={set:async id=>{nativeId=id;}},aa={set(){}},wu=()=> 'temporary',l=()=>({t:s=>s}),n=()=>({}),ti=()=>[];
-const localStorage={token:'synthetic'},notifications=[];
-const window={location:{pathname:'/'},history:{replaceState(state,title,path){window.location.pathname=path;}},__eesNativeWorkV1:{
-  beginChatCreation(){if(window.location.pathname!=='/')return null;beginCalls++;return {sequence:beginCalls};},
-  finishChatCreation(ticket,id){notifications.push({ticket,id});}
-}};
-const bu=async()=>{if(failCreation)throw Error('synthetic create failure');return {id:'server-created-chat'};};
-'''+"\n".join(native_functions)+builder.NATIVE_DRAFT_LOAD_GUARD.decode()+builder.NATIVE_DRAFT_HOOK.decode()+r'''
-(async()=>{
-  assert.equal(await window.__eesNativeDraftV1.restore(JSON.stringify({prompt:'restored',selectedToolIds:['kept'],toolApprovalMode:'full'})),true);
-  assert.equal(r(Qr),'restored');assert.deepEqual(r(Ut),['kept']);assert.equal(r(L),'ask');assert.equal(approvalCalls,0);
-  assert.equal(Object.hasOwn(window.__eesNativeDraftV1.read(),'toolApprovalMode'),false);
-  nativeId='provisional';failCreation=true;
-  await assert.rejects(kt({currentId:'message',state:{}}),/synthetic create failure/);
-  assert.equal(beginCalls,1);assert.equal(notifications.length,0);
-  failCreation=false;
-  assert.equal(await kt({currentId:'message',state:{}}),'server-created-chat');
-  assert.equal(notifications.length,1);assert.equal(notifications[0].id,'server-created-chat');
-  assert.equal(notifications[0].ticket.sequence,2);
-  await kt({currentId:'message',state:{}});
-  assert.equal(beginCalls,2);assert.equal(notifications.length,1);
-  nativeId='';temporary=true;await kt({currentId:'message',state:{}});
-  assert.equal(beginCalls,2);assert.equal(notifications.length,1);
-  nativeId='';temporary=false;embedded=true;await kt({currentId:'message',state:{}});
-  assert.equal(beginCalls,2);assert.equal(notifications.length,1);
-  embedded=false;nativeId='provisional-2';window.location.pathname='/';
-  await eesProbeCompletion({chat_id:'completion-created-chat'});
-  assert.equal(notifications.length,2);assert.equal(notifications[1].id,'completion-created-chat');
-  assert.equal(window.location.pathname,'/c/completion-created-chat');
-  nativeId='provisional-3';window.location.pathname='/';
-  await eesProbeCompletion({error:'synthetic response error',chat_id:'must-not-bind'});
-  await eesProbeCompletion(null);
-  assert.equal(notifications.length,2);
-  temporary=true;await eesProbeCompletion({chat_id:'temporary-result'});
-  temporary=false;embedded=true;await eesProbeCompletion({chat_id:'embedded-result'});
-  assert.equal(notifications.length,2);
-  embedded=false;nativeId='provisional-4';window.location.pathname='/';
-  let finishResponse;
-  const pending=eesProbeCompletion(new Promise(resolve=>{finishResponse=resolve;}));
-  nativeId='another-chat';window.location.pathname='/c/another-chat';
-  finishResponse({chat_id:'late-result'});await pending;
-  assert.equal(notifications.length,2);
-  console.log('pinned_native_bridges=pass');
-})().catch(error=>{console.error(error);process.exitCode=1;});
-'''
-        result = subprocess.run([shutil.which("node"), "-e", probe], capture_output=True,
-                                text=True, encoding="utf-8", timeout=10)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout.strip(), "pinned_native_bridges=pass")
 
     def test_real_pinned_wheel_patches_records_and_unrelated_content(self):
         source_path = Path(os.environ["EES_TEST_UPSTREAM_WHEEL"])
         with tempfile.TemporaryDirectory() as temporary:
-            manifest = builder.build(source_path, temporary)
+            manifest = builder.build(source_path, temporary, frontend_dir=Path(os.environ["EES_TEST_FRONTEND_DIR"]))
             built_path = Path(temporary) / builder.WHEEL_FILENAME
             assert_record(self, built_path)
             with ZipFile(source_path) as source, ZipFile(built_path) as built:
-                self.assertEqual(len(source.namelist()) + len(builder.UI_FILES) + len(builder.FONT_SOURCES)
-                                 + len(builder.WORK_ASSETS) + len(builder.ASSET_GUARD_FILES),
-                                 len(built.namelist()))
                 assert_asset_guard_patches(self, built)
                 self.assertEqual(built.read(builder.ASSET_GUARD_FILES[0]), builder.ASSET_GUARD_SOURCE.read_bytes())
                 changed = set(manifest["changed_files"])
                 for name in source.namelist():
-                    target = builder.target_name(name, manifest["relocated_frontend"]["immutable_directory"])
+                    if name.startswith("open_webui/frontend/"):
+                        continue
+                    target = builder.target_name(name)
                     if target not in changed:
                         self.assertEqual(built.read(target), source.read(name), name)
                 metadata = source.read(builder.SOURCE_INFO + "METADATA")
                 self.assertEqual(built.read(builder.TARGET_INFO + "METADATA"),
-                                 metadata.replace(b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.13\n"))
+                                 metadata.replace(b"\nVersion: 0.11.3\n", ("\nVersion: " + builder.VERSION + "\n").encode()))
                 for filename, (origin, expected) in builder.FONT_SOURCES.items():
                     copied = built.read(builder.TARGET_APP + "fonts/" + filename)
                     self.assertEqual(copied, source.read(origin))
@@ -1216,7 +1102,14 @@ const bu=async()=>{if(failCreation)throw Error('synthetic create failure');retur
                                  (builder.UI_DIR / "font-licenses.txt").read_bytes())
                 self.assertEqual(built.read(builder.TARGET_APP + "ees-work-launcher.js"),
                                  builder.assemble_work_launcher())
-                for name in ("open_webui/env.py", "open_webui/frontend/index.html"):
+                # The complete frontend is the validated compiler output;
+                # original frontend file counts and minified offsets are not
+                # packaging invariants after a source rebuild.
+                from scripts.build_ees_frontend import validate_frontend
+                frontend = validate_frontend(Path(os.environ["EES_TEST_FRONTEND_DIR"]))
+                for relative, content in frontend.items():
+                    self.assertEqual(built.read("open_webui/frontend/" + relative), content, relative)
+                for name in ("open_webui/env.py",):
                     self.assertEqual(source.read(name).count(b"LICENSE"), built.read(name).count(b"LICENSE"))
             assert_workflow_package(self, built_path)
 

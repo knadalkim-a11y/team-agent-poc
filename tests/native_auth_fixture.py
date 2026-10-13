@@ -388,7 +388,7 @@ class NativeAuthUIHandler(NativeUIHandler):
         path = self.path.split("?", 1)[0]
         if path == "/api/config":
             signup = self.server.native.run(self.server.native.config.get("ui.enable_signup"))
-            return self.send_content({"status": True, "name": "EES Work", "version": "0.11.3",
+            return self.send_content({"status": True, "name": "EES Workflow", "version": "0.11.3",
                 "default_locale": "ko-KR", "default_models": "fixture-model", "default_prompt_suggestions": [],
                 "oauth": {"providers": {}}, "features": {"auth": True, "enable_websocket": False,
                     "enable_signup": signup, "enable_login_form": True, "enable_folders": True,

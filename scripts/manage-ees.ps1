@@ -17,6 +17,7 @@ param(
     [string]$Bundle,
     [string]$Commit,
     [string]$TrialCommit,
+    [string]$ArtifactSha256,
     [string]$Wheelhouse,
     [ValidateRange(1, 900)]
     [int]$HealthTimeout,
@@ -44,8 +45,16 @@ if (($ResetDemoToken -or $WebUIUrl -or $EesModelId -or $WebUICaFile) -and $Actio
 if ($Action -eq 'ApplyDemo' -and ($Bundle -or $Commit -or $Wheelhouse -or $GitProxy -or $HealthTimeout)) {
     throw 'ApplyDemo reuses the saved environment and verified main checkout; omit program deployment options.'
 }
-if ($Action -eq 'Upgrade' -and ($Bundle -or $Commit -or $Wheelhouse -or $GitProxy)) {
-    throw 'Upgrade selects a verified artifact and reuses the saved Git proxy; omit Bundle/Commit/Wheelhouse/GitProxy.'
+if ($ArtifactSha256 -and $Action -ne 'Upgrade') { throw 'ArtifactSha256 requires Upgrade.' }
+if ($Action -eq 'Upgrade') {
+    if ($Wheelhouse -or $GitProxy) { throw 'Upgrade reuses the registered environment and saved Git proxy.' }
+    if ($Commit -and $Commit -cnotmatch '\A[0-9a-f]{40}\z') { throw 'Upgrade Commit requires a full lowercase SHA.' }
+    if ($TrialCommit -and $Commit) { throw 'Use only TrialCommit or Commit.' }
+    if (($Bundle -or $ArtifactSha256) -and
+        (-not $Bundle -or $Commit -cnotmatch '\A[0-9a-f]{40}\z' -or
+         $ArtifactSha256 -cnotmatch '\A[0-9a-f]{64}\z' -or $TrialCommit -or $ResetUpdateToken)) {
+        throw 'Local Actions ZIP requires Bundle, full Commit and ArtifactSha256; omit TrialCommit/ResetUpdateToken.'
+    }
 }
 if ($UseWindowsCA -and $Action -notin @('Deploy', 'Start')) {
     throw 'UseWindowsCA is supported only with Deploy or Start.'
@@ -120,6 +129,8 @@ if ($Action -eq 'Upgrade') {
     if ($PSBoundParameters.ContainsKey('TrialCommit')) { $upgradeArgs += @('--trial-commit', $TrialCommit) }
     if ($PSBoundParameters.ContainsKey('HealthTimeout')) { $upgradeArgs += @('--health-timeout', "$HealthTimeout") }
     if ($ResetUpdateToken) { $upgradeArgs += '--reset-token' }
+    if ($Bundle) { $upgradeArgs += @('--local-artifact', $Bundle, '--artifact-commit', $Commit, '--artifact-sha256', $ArtifactSha256) }
+    elseif ($Commit) { $upgradeArgs += @('--expected-commit', $Commit) }
     & $operatorPython @upgradeArgs
     if ($LASTEXITCODE -ne 0) { throw 'EES upgrade stopped; use the final EES summary.' }
     return

@@ -102,3 +102,67 @@ test('width conflict recovery stops on account change and never retries twice',a
  const second=controller();second.setReply(call=>call.body?{httpError:true,status:409,error:{code:'revision_conflict',message:'changed again'}}:{ok:true,ui_state:{revision:2,state:{selection:{}}}});
  second.view.callbacks.panelWidth(720);[...second.timers.values()].at(-1)();await new Promise(setImmediate);assert.equal(second.calls.filter(c=>c.body).length,2);assert.match(second.api.snapshot().error,/자동 저장 실패/);assert.equal(second.api.snapshot().selection.panel_width,720);
 });
+
+// Execute the source app.html gate that the pinned build applies, rather than a
+// separately maintained copy of its timing or route logic.
+function startupGate({pathname='/',search='',token='fixture-token',storageError=false,execute=true}={}){
+ const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+ const patch=fs.readFileSync(path.join(__dirname,'../frontend/patches/0001-ees-native-hooks.patch'),'utf8');
+ const added=patch.split(/\r?\n/).filter(line=>line.startsWith('+')&&!line.startsWith('+++')).map(line=>line.slice(1)).join('\n');
+ const scripts=[...added.matchAll(/<script id="ees-startup-gate">([\s\S]*?)<\/script>/g)];
+ assert.equal(scripts.length,1,'The exact source app.html startup gate must be present once');
+ const css=added.match(/<style id="ees-startup-style">([\s\S]*?)<\/style>/)?.[1];
+ assert.match(css,/body :not\(\[aria-modal='true'\], \[aria-modal='true'\] \*\)\s*\{ visibility: hidden !important; \}/);
+ assert.match(css,/body \[aria-modal='true'\]\s*\{ visibility: visible !important; \}/);
+ assert.doesNotMatch(css,/\[aria-modal='true'\] \*\s*\{ visibility: visible/,'Native hidden modal children retain their own visibility');
+ const dataset={},timers=new Map(),listeners=new Map();let id=0,now=0;
+ const window={addEventListener(type,callback){listeners.set(type,callback);},removeEventListener(type,callback){if(listeners.get(type)===callback)listeners.delete(type);},dispatchEvent(event){listeners.get(event.type)?.(event);}};
+ const context={document:{documentElement:{dataset}},location:{pathname,search},URLSearchParams,window,localStorage:{getItem(){if(storageError)throw Error('Storage unavailable');return token;}},setTimeout(callback,ms){const key=++id;timers.set(key,{at:now+ms,callback});return key;},clearTimeout:key=>timers.delete(key)};
+ if(execute)vm.runInNewContext(scripts[0][1],context);
+ return {dataset,window,context,timers,listeners,advance(ms){now+=ms;for(const [key,timer] of [...timers])if(timer.at<=now){timers.delete(key);timer.callback();}}};
+}
+test('source head gate hides root and existing conversation until successful EES layout',()=>{
+ for(const pathname of ['/','/c/existing-chat','/c/existing-chat/']){
+  const h=startupGate({pathname});assert.equal(h.dataset.eesStartup,'pending');
+  h.advance(3999);assert.equal(h.dataset.eesStartup,'pending');
+  h.window.dispatchEvent({type:'ees:startup-ready'});assert.equal(h.dataset.eesStartup,undefined);assert.equal(h.timers.size,0);assert.equal(h.listeners.size,0);
+  h.context.location.pathname='/c/another-chat';h.window.dispatchEvent({type:'popstate'});assert.equal(h.dataset.eesStartup,undefined,'SPA navigation does not re-arm a completed gate');
+ }
+});
+test('missing launcher and stalled API always fail open at the independent four-second bound',()=>{
+ for(const pathname of ['/','/c/existing-chat']){
+  const h=startupGate({pathname});assert.equal(h.dataset.eesStartup,'pending');
+  h.advance(4000);assert.equal(h.dataset.eesStartup,undefined);assert.equal(h.listeners.size,0);
+  h.window.dispatchEvent({type:'ees:startup-ready'});assert.equal(h.dataset.eesStartup,undefined);
+ }
+});
+test('Native routes, signed-out or unavailable storage and disabled JavaScript are never hidden',()=>{
+ for(const pathname of ['/auth','/logout','/workspace/models','/admin/settings','/c/extra/path','/s/shared'])assert.equal(startupGate({pathname}).dataset.eesStartup,undefined,pathname);
+ for(const pathname of ['/','/c/existing-chat'])for(const search of ['?settings=admin:general','?settings=general','?settings=account','?settings=about'])assert.equal(startupGate({pathname,search}).dataset.eesStartup,undefined,pathname+search);
+ for(const options of [{token:''},{storageError:true},{execute:false}])assert.equal(startupGate(options).dataset.eesStartup,undefined,JSON.stringify(options));
+});
+test('launcher releases startup only after a completed view and authoring render',async()=>{
+ const h=controller(),events=[];h.context.document.documentElement.dataset={eesStartup:'pending'};h.context.Event=class{constructor(type){this.type=type;}};
+ h.context.window.dispatchEvent=event=>events.push(event.type);
+ h.api.setSelection({mode:'author'});
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a',can_author:true},systems:[],workflows:[],runs:[],ui_state:{revision:0,state:{}}}:{ok:true});
+ const order=[];h.view.render=()=>{order.push('view');return true;};h.designer.render=()=>{order.push('designer');assert.equal(events.length,0);};
+ await h.api.refresh();assert.deepEqual(order,['view','designer']);assert.deepEqual(events,['ees:startup-ready']);
+});
+test('a missing mount or throwing layout never reports successful startup',async()=>{
+ for(const behavior of ['missing','exception']){
+  const h=controller(),events=[];h.context.document.documentElement.dataset={eesStartup:'pending'};h.context.Event=class{constructor(type){this.type=type;}};h.context.window.dispatchEvent=event=>events.push(event.type);
+  h.view.render=()=>{if(behavior==='exception')throw Error('layout_failed');return false;};
+  if(behavior==='exception')await assert.rejects(h.api.refresh(),/layout_failed/);else await h.api.refresh();
+  assert.deepEqual(events,[],behavior);assert.equal(h.context.document.documentElement.dataset.eesStartup,'pending');
+ }
+});
+test('view completion signal follows actual mount success and the creation card states current capability exactly',()=>{
+ const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})');assert.equal(view.render(snapshot()),true);
+ const original=h.document.querySelector;h.document.querySelector=selector=>selector==='#sidebar-search-button'?null:original(selector);assert.equal(view.render(snapshot()),false);assert.equal(view.sync(snapshot()),false);
+ const card=run(h.context,'workProcedureStartHTML({kind:"new"})');
+ assert.ok(card.includes('새 업무 절차는 비슷한 예시를 복사해 고치는 것이 가장 쉽습니다. 오른쪽에서 예시를 고르거나 빈 절차로 시작하세요. 만드는 방법이 궁금하면 아래 질문을 보내 보세요. 지금은 대화 내용으로 초안을 바로 만들지는 않습니다. 초안은 게시하기 전까지 업무 화면에 나타나지 않습니다.'));
+ assert.doesNotMatch(card,/하시는 일을 순서대로 말해 주시면|예시 없이, 하는 일을 말로 설명해서 만들고 싶어/);
+ assert.equal(run(h.context,'workUI.procedureQuestions[2]'),'빈 절차로 시작하면 무엇부터 정하나요?');
+ assert.match(card,/data-question-index="2"[^>]*>.*?<span>빈 절차로 시작하면 무엇부터 정하나요\?<\/span>/);
+});

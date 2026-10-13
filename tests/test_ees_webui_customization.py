@@ -58,7 +58,7 @@ PRE_C18_INVENTORY_SHA256 = "e523bfb0eb8455e0b9d778a0a07940d0a7d834b24039144eafb4
 EASY_TOOLS_FILES = ("open_webui/workflow_help.json", "open_webui/workflow_tool_examples.json")
 PROCEDURE_EXAMPLES_FILE = "open_webui/workflow_procedure_examples.json"
 AUTHORING_FILES = EASY_TOOLS_FILES + (PROCEDURE_EXAMPLES_FILE,)
-C18_ICON_FILES = tuple("open_webui/frontend/_ees13/v4/" + name for name in (
+C18_ICON_FILES = tuple(branding.TARGET_APP + "v4/" + name for name in (
     "83565.svg", "54b2e.svg", "4d978.svg", "4308e.svg",
 ))
 
@@ -79,17 +79,19 @@ def make_wheel(extra=None, replacement=None, *, version=branding.VERSION, missin
         "open_webui/__init__.py": b"raise RuntimeError('never import this application')\n",
         "open_webui/env.py": b"# synthetic env module\n",
         "open_webui/main.py": b"# synthetic main module\n",
-        "open_webui/frontend/index.html": b"<title>EES Work</title>\n",
+        "open_webui/frontend/index.html": b"<title>EES Workflow</title>\n",
         app + "version.json": json.dumps({"version": version}).encode(),
-        app + "immutable/chunks/test.js": b"const title = 'EES Work';\n",
+        app + "immutable/chunks/test.js": b"const title = 'EES Workflow';\n",
     }
-    if version in {"0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13"}:
+    if version in {"0.11.3+ees.3", "0.11.3+ees.4", "0.11.3+ees.5", "0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13", "0.11.3+ees.14"}:
         members.update({app + name: b"synthetic checked theme asset\n" for name in branding.THEME_FILES})
     if version == "0.11.3+ees.5":
         members.update({name: b"synthetic checked work asset\n" for name in branding.LEGACY_WORK_FILES})
-    if version in {"0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13"}:
-        if version == "0.11.3+ees.13":
+    if version in {"0.11.3+ees.6", "0.11.3+ees.7", "0.11.3+ees.8", "0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13", "0.11.3+ees.14"}:
+        if version == "0.11.3+ees.14":
             work_files = branding.WORK_FILES
+        elif version == "0.11.3+ees.13":
+            work_files = branding.WORK_FILES_V13_COMPLETE
         elif version == "0.11.3+ees.12":
             work_files = PRE_INTEGRATED_WORK_FILES
         elif version == "0.11.3+ees.11":
@@ -100,11 +102,12 @@ def make_wheel(extra=None, replacement=None, *, version=branding.VERSION, missin
             work_files = PRE_SPLIT_WORK_FILES
         members.update({app + name[len(branding.TARGET_APP):] if name.startswith(branding.TARGET_APP) else name:
                         b"synthetic checked work asset\n" for name in work_files})
-    if version in {"0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13"}:
+    if version in {"0.11.3+ees.9", "0.11.3+ees.10", "0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13", "0.11.3+ees.14"}:
         members.update({name: b"# synthetic checked asset guard\n" for name in branding.ASSET_GUARD_FILES})
     members.update(extra or {})
     members.update(replacement or {})
     for name in missing:
+        name = app + name[len(branding.TARGET_APP):] if name.startswith(branding.TARGET_APP) else name
         members.pop(name)
     record = io.StringIO()
     writer = csv.writer(record, lineterminator="\n")
@@ -488,7 +491,7 @@ class CustomizationTests(unittest.TestCase):
         self.assertEqual(set(branding.WORK_FILES_V12), set(PRE_INTEGRATED_WORK_FILES))
         previous = "0.11.3+ees.12"
         previous_app = "open_webui/frontend/_ees12/"
-        new_app = "open_webui/frontend/_ees13/"
+        new_app = "open_webui/frontend/_ees14/"
         self.assertEqual(custom._version_paths(previous)[1], previous_app)
         self.assertEqual(branding.TARGET_APP, new_app)
         for version in (previous, branding.VERSION):
@@ -518,6 +521,12 @@ class CustomizationTests(unittest.TestCase):
             "0.11.3+ees.12", "3a51f9d2bc604e768a59a522d6f34a34c2cb05d3",
             "9dac33de8c93b722bf055ececdde77e68d85db953dc74ba9993bba70dfa8e57c",
             previous_visual=True, exercise_work_database=True)
+
+    def test_real_ees13_to_source_frontend_apply_restore_preserves_program_and_data(self):
+        self._real_previous_apply_restore(
+            "EES_TEST_PREVIOUS13_WHEEL", "EES_REQUIRE_PREVIOUS13",
+            "0.11.3+ees.13", "1c6ddaa04f05b2eea02bbf15155b8602f1e4a1a8",
+            "ccdb59a37f8d5e5024abfc0044fd892baa4f6f1d156f79d97f7725476cec2681")
 
     def _real_previous_apply_restore(self, previous_env, required_env, version, commit, wheel_hash, *,
                                      exercise_resume=False, previous_visual=False, exercise_work_database=False):
@@ -583,8 +592,8 @@ class CustomizationTests(unittest.TestCase):
         custom.validate_program(self.program, selected)
         if version == "0.11.3+ees.12":
             self.assertTrue((self.program / branding.TARGET_APP / "brand-layers.svg").is_file())
-            self.assertFalse((self.program / branding.TARGET_APP / "immutable").exists())
-            self.assertTrue(any((self.program / branding.TARGET_APP).glob("immutable-c*")))
+            self.assertTrue((self.program / branding.TARGET_APP / "immutable").is_dir())
+            self.assertFalse(any((self.program / branding.TARGET_APP).glob("immutable-c*")))
         self.assertTrue((self.program / "open_webui/ees_workflow_authoring.py").is_file())
         for name in ("execution", "native", "contract", "model", "workspace", "operations"):
             self.assertTrue((self.program / ("open_webui/ees_workflow_" + name + ".py")).is_file())
@@ -605,13 +614,15 @@ class CustomizationTests(unittest.TestCase):
                          version in {"0.11.3+ees.11", "0.11.3+ees.12", "0.11.3+ees.13"})
         for name in ("execution", "native", "contract", "examples", "model"):
             self.assertEqual((self.program / ("open_webui/ees_workflow_" + name + ".py")).exists(),
-                             version == "0.11.3+ees.12")
-        if version == "0.11.3+ees.12":
+                             version in {"0.11.3+ees.12", "0.11.3+ees.13"} and name != "examples"
+                             or version == "0.11.3+ees.12" and name == "examples")
+        if version in {"0.11.3+ees.12", "0.11.3+ees.13"}:
             old_app = custom._version_paths(version)[1]
             self.assertFalse((self.program / branding.TARGET_APP).exists(), "Restore removes the new frontend namespace")
-            self.assertEqual((self.program / old_app / "brand-layers.svg").exists(), previous_visual)
-            self.assertEqual((self.program / old_app / "immutable").is_dir(), not previous_visual)
-            self.assertEqual(bool(list((self.program / old_app).glob("immutable-c*"))), previous_visual)
+            visual = previous_visual or version == "0.11.3+ees.13"
+            self.assertEqual((self.program / old_app / "brand-layers.svg").exists(), visual)
+            self.assertEqual((self.program / old_app / "immutable").is_dir(), not visual)
+            self.assertEqual(bool(list((self.program / old_app).glob("immutable-c*"))), visual)
         for path, value in preserved.items():
             self.assertEqual(path.read_bytes(), value)
 
@@ -772,19 +783,20 @@ print("v4_database_" + phase + "=pass")
                 self.assertEqual(self.events, [])
 
     def test_ees13_previous_inventory_is_frozen_and_old_incoming_bundle_is_rejected(self):
-        previous = sorted(branding.WORK_FILES_V13)
+        prior_names = lambda names: sorted(name.replace(branding.TARGET_APP, "open_webui/frontend/_ees13/", 1) for name in names)
+        previous = prior_names(branding.WORK_FILES_V13)
         self.assertEqual(len(previous), 112)
         self.assertEqual(digest("\n".join(previous).encode("utf-8")), PRE_EASY_TOOLS_INVENTORY_SHA256)
-        easy_tools = sorted(branding.WORK_FILES_V13_EASY_AUTHORING)
+        easy_tools = prior_names(branding.WORK_FILES_V13_EASY_AUTHORING)
         self.assertEqual(len(easy_tools), 114)
         self.assertEqual(digest("\n".join(easy_tools).encode("utf-8")), PRE_PROCEDURE_EXAMPLES_INVENTORY_SHA256)
         self.assertEqual(set(easy_tools) - set(previous), set(EASY_TOOLS_FILES))
-        procedure_examples = sorted(branding.WORK_FILES_V13_PROCEDURE_EXAMPLES)
+        procedure_examples = prior_names(branding.WORK_FILES_V13_PROCEDURE_EXAMPLES)
         self.assertEqual(len(procedure_examples), 115)
         self.assertEqual(digest("\n".join(procedure_examples).encode("utf-8")), PRE_C18_INVENTORY_SHA256)
         self.assertEqual(set(procedure_examples) - set(easy_tools), {PROCEDURE_EXAMPLES_FILE})
-        self.assertEqual(set(branding.WORK_FILES) - set(procedure_examples), set(C18_ICON_FILES))
-        self.assertEqual(len(branding.WORK_FILES), 119)
+        self.assertEqual(set(prior_names(branding.WORK_FILES_V13_COMPLETE)) - set(procedure_examples), set(prior_names(C18_ICON_FILES)))
+        self.assertEqual(len(branding.WORK_FILES_V13_COMPLETE), 119)
         for missing in (AUTHORING_FILES + C18_ICON_FILES, (PROCEDURE_EXAMPLES_FILE,) + C18_ICON_FILES, C18_ICON_FILES):
             with self.subTest(previous_inventory=119-len(missing)):
                 self.write_bundle(make_wheel(missing=missing))
@@ -1702,7 +1714,7 @@ print("workflow_" + phase + "=pass")
             self.assertEqual(distributions[0].version, branding.VERSION)
             self.assertEqual(Path(distributions[0].locate_file("")), program)
             self.assertEqual(json.loads((program / (branding.TARGET_APP + "version.json")).read_bytes())["version"], branding.VERSION)
-            self.assertIn(b"EES Work", (program / "open_webui/frontend/index.html").read_bytes())
+            self.assertIn(b"EES Workflow", (program / "open_webui/frontend/index.html").read_bytes())
             # v0.11.3 config.py rewrites package/static from frontend/static
             # at startup. Reproduce those file operations without app imports.
             static = program / "open_webui/static"

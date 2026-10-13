@@ -2,6 +2,7 @@
 
 import argparse
 import getpass
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -10,6 +11,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import zlib
+from zipfile import BadZipFile
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import manage_ees as manager
@@ -25,6 +28,7 @@ PROGRAM_INPUTS = (
     "agent-pack/skills/cross-system-analysis/ui/work-panel.js",
     "scripts/render_ees_brand_assets.py", "scripts/ees_asset_guard.py", "tests/test_ees_branding_build.py",
     "tests/test_demo_bundle.py", ".github/workflows/ees-delivery.yml",
+    "frontend", "scripts/build_ees_frontend.py", ".gitattributes",
 )
 
 
@@ -140,6 +144,8 @@ def bootstrap(config, args, client, progress, *, runner="ees_upgrade.py", runner
         checkout(args.prepared_head)
         if git("rev-parse", "origin/main")[1] != args.prepared_head:
             raise UpgradeError("checkout_changed")
+        if getattr(args, "expected_commit", None) and args.prepared_head != args.expected_commit:
+            raise UpgradeError("checkout_changed")
         return None, args.prepared_head, args.wrapper_before
     progress["stage"] = "git_fetch"
     if (Path(config["state_root"]) / "deployment.lock").exists():
@@ -147,6 +153,8 @@ def bootstrap(config, args, client, progress, *, runner="ees_upgrade.py", runner
     git("fetch", "origin", "main")
     target = git("rev-parse", "origin/main")[1]
     if not HEX40.fullmatch(target):
+        raise UpgradeError("checkout_changed")
+    if getattr(args, "expected_commit", None) and target != args.expected_commit:
         raise UpgradeError("checkout_changed")
     if git("merge-base", "--is-ancestor", before, target, optional=True)[0]:
         raise UpgradeError("local_main_ahead_or_diverged")
@@ -166,6 +174,8 @@ def bootstrap(config, args, client, progress, *, runner="ees_upgrade.py", runner
                "--wrapper-before", before]
     command += (["--health-timeout", str(args.health_timeout)]
                 if runner_options is None else list(runner_options))
+    if getattr(args, "expected_commit", None):
+        command += ["--expected-commit", args.expected_commit]
     try:
         child = subprocess.Popen(command)
     except OSError:
@@ -222,7 +232,36 @@ def preflight(config, registry, env):
 
 
 def artifact_key(artifact):
+    if "local_sha256" in artifact:
+        return {name: artifact[name] for name in ("local_sha256", "source_commit")}
     return {name: artifact[name] for name in ("id", "digest", "source_commit")}
+
+
+def local_artifact_bundle(path, digest, commit, directory):
+    """Verify a copied browser Actions ZIP; never modify the chosen original."""
+    path = manager.states._regular(Path(path))
+    if (not re.fullmatch(r"[0-9a-f]{64}", digest)
+            or not 0 < path.stat().st_size <= downloads.MAX_DOWNLOAD_BYTES):
+        raise UpgradeError("local_artifact_invalid")
+    outer = directory / "browser-artifact.zip"
+    actual, size = hashlib.sha256(), 0
+    try:
+        with path.open("rb") as source, outer.open("xb") as target:
+            while chunk := source.read(1024 * 1024):
+                size += len(chunk)
+                if size > downloads.MAX_DOWNLOAD_BYTES:
+                    raise UpgradeError("local_artifact_invalid")
+                actual.update(chunk)
+                target.write(chunk)
+        if actual.hexdigest() != digest:
+            raise UpgradeError("artifact_digest_mismatch")
+        inner = directory / ("EES-demo-" + commit[:12] + ".zip")
+        downloads._extract_inner(outer, inner, commit)
+        return inner
+    except (BadZipFile, UnicodeError, zlib.error):
+        raise UpgradeError("local_artifact_invalid") from None
+    finally:
+        outer.unlink(missing_ok=True)
 
 
 def receipt_matches(config, artifact, active):
@@ -257,9 +296,12 @@ def same_program(active, selected):
                                 for key in ("wheel_sha256", "record_sha256", "webui_version"))
 
 
-def deploy(config, client, head, timeout, progress):
+def deploy(config, client, head, timeout, progress, *, local_artifact=None):
     progress["stage"] = "artifact_select"
-    artifact = downloads.select_program(client, head, lambda sha: compatible_program(sha, head))
+    artifact = ({"source_commit": head, "local_sha256": local_artifact[1]}
+                if local_artifact else downloads.select_program(client, head, lambda sha: compatible_program(sha, head)))
+    progress["artifact_commit"] = artifact["source_commit"]
+    progress["source_verification"] = "local_ci_artifact" if local_artifact else "github_actions"
     with manager.locked(config, track_owner=True):
         checkout(head)
         env = manager.states.runtime_environment(config)
@@ -277,7 +319,8 @@ def deploy(config, client, head, timeout, progress):
     directory = Path(tempfile.mkdtemp(prefix="upgrade-", dir=config["state_root"]))
     completed = False
     try:
-        bundle = client.download_artifact(artifact, Path(directory))
+        bundle = (local_artifact_bundle(*local_artifact, head, Path(directory)) if local_artifact
+                  else client.download_artifact(artifact, Path(directory)))
         progress["bundle"] = str(bundle)
         with manager.locked(config, track_owner=True) as owner:
             checkout(head)
@@ -299,6 +342,12 @@ def deploy(config, client, head, timeout, progress):
                 checkout(head)
                 manager.stop_registered(config, registry, progress=progress)
                 manager.require_stopped(config, registry)
+                progress["stage"] = "backup"
+                print("EES upgrade step=backup", flush=True)
+                registry["last_backup"] = manager.states.backup_state(config)
+                progress["stage"] = "backup_record"
+                manager.record(config, registry, "data_backup_verified")
+                progress["backup_verified"] = True
                 progress["stage"] = "apply"
                 progress["changed"] = None
                 print("EES upgrade step=apply", flush=True)
@@ -314,6 +363,7 @@ def deploy(config, client, head, timeout, progress):
             save_receipt(config, artifact, active)
             completed = True
             return {"changed": changed, "downloaded": True, "started": True,
+                    "backup_verified": progress.get("backup_verified", False),
                     "version": active["webui_version"], **manager.program_result(registry)}
     finally:
         # An interrupted Apply may require its exact ZIP for explicit Resume.
@@ -378,12 +428,24 @@ def main(argv=None):
     parser.add_argument("--git-proxy", help=argparse.SUPPRESS)
     parser.add_argument("--prepared-head", help=argparse.SUPPRESS)
     parser.add_argument("--wrapper-before", help=argparse.SUPPRESS)
+    parser.add_argument("--local-artifact", type=Path,
+                        help="Browser-downloaded outer Actions ZIP reviewed after successful main CI.")
+    parser.add_argument("--artifact-sha256", help="Reviewed SHA256 of the outer Actions ZIP.")
+    parser.add_argument("--artifact-commit", help="Reviewed full main SHA, already checked out by Update.")
+    parser.add_argument("--expected-commit", help="Require this reviewed full main SHA for automatic Upgrade.")
     args = parser.parse_args(argv)
     if (bool(args.prepared_head) != bool(args.wrapper_before)
             or any(value and not HEX40.fullmatch(value) for value in (args.prepared_head, args.wrapper_before))):
         parser.error("Invalid prepared update identity.")
     if (args.git_proxy and not args.update_only) or (args.update_only and (args.reset_token or args.prepared_head)):
         parser.error("Invalid manual Update options.")
+    if args.expected_commit and (not HEX40.fullmatch(args.expected_commit) or args.update_only or args.local_artifact):
+        parser.error("Expected commit requires automatic Upgrade and a full lowercase main SHA.")
+    local_options = (args.local_artifact, args.artifact_sha256, args.artifact_commit)
+    if any(local_options) and (not all(local_options) or args.update_only or args.reset_token
+            or args.prepared_head or not HEX40.fullmatch(args.artifact_commit)
+            or not re.fullmatch(r"[0-9a-f]{64}", args.artifact_sha256)):
+        parser.error("Local Actions ZIP requires only its reviewed full commit and SHA256 with Upgrade.")
     progress = {"stage": "configuration", "changed": False}
     head = before = None
     try:
@@ -394,14 +456,24 @@ def main(argv=None):
             result = update_only(config, args.git_proxy)
             report(args, result)
             return 0
-        progress["stage"] = "authentication"
-        client = github_client(config, args.reset_token)
-        print("EES upgrade step=check_release", flush=True)
-        child, head, before = bootstrap(config, args, client, progress)
-        if child is not None:
-            return child
-        result = deploy(config, client, head, args.health_timeout, progress)
+        if args.local_artifact:
+            progress["stage"] = "local_artifact_source"
+            head = before = checkout(args.artifact_commit)
+            progress.update(wrapper_commit=head, wrapper_changed=False)
+            if git("rev-parse", "origin/main")[1] != head:
+                raise UpgradeError("checkout_changed")
+            result = deploy(config, None, head, args.health_timeout, progress,
+                            local_artifact=(args.local_artifact, args.artifact_sha256))
+        else:
+            progress["stage"] = "authentication"
+            client = github_client(config, args.reset_token)
+            print("EES upgrade step=check_release", flush=True)
+            child, head, before = bootstrap(config, args, client, progress)
+            if child is not None:
+                return child
+            result = deploy(config, client, head, args.health_timeout, progress)
         result.update(wrapper_commit=head, wrapper_changed=head != before,
+                      source_verification=progress.get("source_verification"),
                       asset_registration="not_applicable",
                       asset_registration_reason="demo_registration_retired")
     except (ValueError, RuntimeError, OSError, KeyError, TypeError, EOFError, KeyboardInterrupt) as error:
@@ -425,6 +497,10 @@ def main(argv=None):
                   "wrapper_changed": head != before if head and before else progress.get("wrapper_changed"),
                   "next": next_step, "process": manager.failure_detail(progress, error),
                   "local_error": manager.local_error_detail(error)}
+        result["backup_verified"] = progress.get("backup_verified", False)
+        for key in ("artifact_commit", "source_verification"):
+            if key in progress:
+                result[key] = progress[key]
         if "bundle" in progress:
             result["bundle"] = progress["bundle"]
         if rename:

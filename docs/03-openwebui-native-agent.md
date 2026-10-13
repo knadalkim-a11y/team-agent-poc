@@ -1,6 +1,6 @@
 # 03. Open WebUI Native 통합 Assistant
 
-현재 제품 기준은 [2026-10-02 통합 EES Work](#integrated-work-install-20261002)다. 아래 날짜별 시연·ApplyDemo·전문 Assistant·사전 Skill 구성은 당시 이력이다. 새 설치/업데이트에서 이 콘텐츠를 등록하지 않으며 옛 명령을 반복하지 않는다. 실제 도구/Native 관리/프로그램 적용과 복구 경로는 유지한다.
+현재 제품 이름은 **EES Workflow**이며 [2026-10-02 통합 구현 기준](#integrated-work-install-20261002)을 유지한다. 현재 `.13` 설치본의 업데이트는 [소스 프런트엔드 1단계 적용 안내](#source-frontend-apply-20261013)를 따른다. 아래 날짜별 시연·ApplyDemo·전문 Assistant·사전 Skill 구성은 당시 이력이다. 새 설치/업데이트에서 이 콘텐츠를 등록하지 않으며 옛 명령을 반복하지 않는다. 실제 도구/Native 관리/프로그램 적용과 복구 경로는 유지한다.
 
 > 문서 역할: Native Assistant 기준선 구성·확장 원칙
 >
@@ -12,15 +12,137 @@
 
 | 할 일 | 안내 |
 |---|---|
-| 확인된 사내 설치본 → 검토된 main, 첫 실제 업무 | [한 번 적용·실패 대응·확인 5개](#internal-pilot-20261012) · [팀원 업무 안내](07-team-quickstart.md#first-work-20261012) |
-| 새 EES Work 후보·자산 정리 경계 | [통합 설치·복구](#integrated-work-install-20261002) |
+| 소스 프런트엔드 1단계 적용 준비 | [CI ZIP 적용·대안·종료 복구](#source-frontend-apply-20261013) · [팀원 업무 안내](07-team-quickstart.md#first-work-20261012) |
+| 새 EES Workflow 후보·자산 정리 경계 | [통합 설치·복구](#integrated-work-install-20261002) |
 | 프로그램·래퍼 업데이트 | [Upgrade](#ees-wrapper-upgrade) |
 | 수동 적용·복구 | [Apply/Restore](#ees-wrapper-apply)·[종료 복구](#ees-stop-recovery) |
 | 실패 기록·등록 위치 확인 | [실패 판단](#ees-update-failure-causes)·[사내 기록](#ees-local-state) |
 
+<a id="source-frontend-apply-20261013"></a>
+
+## 소스 프런트엔드 1단계 적용 준비 · 2026-10-13
+
+**사용자는 최종 병합 SHA와 해당 main CI 성공·프로그램 ZIP이 확정된 뒤 사내에서 직접 실행한다.** [PR #85](https://github.com/knadalkim-a11y/team-agent-poc/pull/85)에서 최종 병합 SHA와 CI 결과를 확인하고 전달받은 값을 사용한다. PR 검토용 산출물이나 PR head를 아래 main SHA로 넣지 않는다. 현재 사내 `.13`의 예상 설치 원본은 사용자가 #83에서 적용했다고 보고한 `1c6ddaa04f05b2eea02bbf15155b8602f1e4a1a8`이다. 다르면 before 결과에서 중단하고 실제 원본을 확인한다.
+
+이번 `.14`는 고정 Open WebUI0.11.3 소스 프런트엔드를 CI에서 만들고 기존 Python 프로그램 ZIP에 포함하며, 화면 이름은 **EES Workflow**다. 사내 Node/npm 설치·빌드는 없다. `Upgrade -TrialCommit`은 `.14`에서 다운로드·Stop 전에 `ci_frontend_artifact_required / next=use_ci_artifact`로 멈춘다. 아래 CI 자동 다운로드 또는 브라우저 ZIP 경로 하나를 사용하며 TrialCommit으로 바꾸지 않는다.
+
+팀원이 사용하지 않는 시간에 기존 운영 계정 PowerShell에서 실행하고 끝날 때까지 창을 닫지 않는다. 기본 경로가 아니라면 `$eesRepo`·`$eesCfg` 두 줄만 기존 값으로 바꾼다. Update는 Git 인증을 재사용하고 새 토큰을 요구하지 않는다.
+
+**GitHub 토큰이 없으면 자동 다운로드를 먼저 시도하지 않고 [브라우저 ZIP 블록](#source-frontend-local-zip-20261013)을 처음부터 사용한다.** 브라우저 다운로드는 사내에서 사용한 경로이며, GitHub API를 통한 자동 다운로드의 실제 도달 가능성은 아직 미확인이다. 검토자가 성공한 최종 main CI의 바깥 Actions ZIP 링크와 SHA256을 확정해 전달한다.
+
+GitHub Actions 읽기 토큰이 있는 경우 아래 CI 자동 다운로드 블록을 사용할 수 있다. 첫 인증이 필요하면 `GitHub Actions read token (hidden, saved for this Windows user):` 입력창에 해당 토큰을 넣는다. 같은 Windows 사용자에게 암호화해 저장된 토큰은 재사용하며 토큰 값을 채팅·복사 블록·환경변수에 적지 않는다. 인증·API·다운로드·해시 검사는 서버를 멈추기 전에 끝난다.
+
+기본 순서는 **Status → Update/SHA 대조 → CI·산출물·시간대·프로그램 검증 → Stop → 검증 Backup/기록 → Apply → Start/health**다. 뒤늦게 main이 바뀌어도 `-Commit`과 다르면 적용 전에 중단한다. 백업·기록이 실패하면 Apply하지 않고, 실패를 자동 재시도하거나 복구하지 않는다.
+
+**토큰이 있는 경우: CI 자동 다운로드**
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesRepo = Join-Path $env:USERPROFILE 'team-agent-poc'
+    $eesCfg = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+    $eesManager = Join-Path $eesRepo 'scripts\manage-ees.ps1'
+    $eesCommit = Read-Host '검토·병합·main CI 확인 후 전달받은 전체 40자리 SHA'
+    if ($eesCommit -cnotmatch '\A[0-9a-f]{40}\z') { throw '확정한 전체 SHA가 필요합니다.' }
+    $eesStatus = & $eesManager -Action Status -Config $eesCfg | ConvertFrom-Json
+    Write-Host ('EES before commit={0} valid={1} running={2}' -f $eesStatus.current_commit, $eesStatus.program_valid, $eesStatus.managed_process_running)
+    if ($eesStatus.program_valid -ne $true -or $eesStatus.program_incomplete -or
+        $eesStatus.current_commit -cne '1c6ddaa04f05b2eea02bbf15155b8602f1e4a1a8') {
+        throw '설치 원본/상태가 예상과 다릅니다. before 한 줄로 확인하고 중단합니다.'
+    }
+    & $eesManager -Action Update -Config $eesCfg
+    $eesHead = & git -C $eesRepo rev-parse HEAD
+    if ($LASTEXITCODE -ne 0) { throw 'HEAD 조회 실패' }
+    $eesMain = & git -C $eesRepo rev-parse origin/main
+    if ($LASTEXITCODE -ne 0) { throw 'origin/main 조회 실패' }
+    if ($eesHead -cne $eesCommit -or $eesMain -cne $eesCommit) {
+        throw '검토 원본과 다릅니다. 적용하지 않고 중단합니다.'
+    }
+    & $eesManager -Action Upgrade -Config $eesCfg -Commit $eesCommit -HealthTimeout 120 -Summary
+}
+```
+
+**직접 타이핑할 결과는1~2줄이다.** 전단 중단이면 `EES before ...` 또는 오류 문장만 보낸다. Upgrade까지 실행했다면 마지막 EES 줄에서 `result / stage / code / running / commit`만 보내고, 성공 후 두 번째 줄은 `login=OK / chat=OK / work=OK / flash=없음 / card=OK`처럼 실제 확인한 상태를 적는다. `card`는 새 업무 절차 안내가 ‘예시 복사 또는 빈 절차’이며 대화에서 초안을 바로 만들지 않는다고 안내하는지다. 새로고침과 기존 `/c/...` 직접 열기에서 깜빡임도 확인한다. 준비 실패 시4초 내 Native 화면이 보이는 것은 숨김 해제 보호이며 새 구조 화면 이전 완료를 뜻하지 않는다.
+
+<a id="source-frontend-local-zip-20261013"></a>
+
+### 토큰이 없으면 처음부터: 브라우저 ZIP
+
+GitHub 토큰이 없으면 이 블록을 처음부터 사용한다. 토큰이 있어 자동 다운로드를 시도했더라도 인증/API/다운로드 단계에서 끝나 서버 Stop을 하지 않았다면 이 경로를 선택할 수 있다. 두 경우 모두 검토자가 **성공한 최종 main CI의 바깥 Actions ZIP 링크와 SHA256**을 확정해 준 뒤 실행한다. 종료·백업·적용·health 실패 뒤 이 블록으로 다시 시작하지 않는다. 압축을 풀지 않은 바깥 ZIP을 브라우저로 받아 전체 로컬 경로를 따옴표 없이 입력한다. 이 경로는 API·토큰 없이 ZIP을 state_root의 이번 작업 폴더에 복사하고 바깥 해시·내부 ZIP·manifest를 검증한 뒤 같은 Stop/Backup/Apply/Start를 실행한다. 받은 원본 ZIP은 수정·삭제하지 않는다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesRepo = Join-Path $env:USERPROFILE 'team-agent-poc'
+    $eesCfg = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+    $eesManager = Join-Path $eesRepo 'scripts\manage-ees.ps1'
+    $eesCommit = Read-Host '검토·병합·main CI 확인 후 전달받은 전체 40자리 SHA'
+    if ($eesCommit -cnotmatch '\A[0-9a-f]{40}\z') { throw '확정한 전체 SHA가 필요합니다.' }
+    $eesStatus = & $eesManager -Action Status -Config $eesCfg | ConvertFrom-Json
+    Write-Host ('EES before commit={0} valid={1} running={2}' -f $eesStatus.current_commit, $eesStatus.program_valid, $eesStatus.managed_process_running)
+    if ($eesStatus.program_valid -ne $true -or $eesStatus.program_incomplete -or
+        $eesStatus.current_commit -cne '1c6ddaa04f05b2eea02bbf15155b8602f1e4a1a8') {
+        throw '설치 원본/상태가 예상과 다릅니다. before 한 줄로 확인하고 중단합니다.'
+    }
+    & $eesManager -Action Update -Config $eesCfg
+    $eesHead = & git -C $eesRepo rev-parse HEAD
+    if ($LASTEXITCODE -ne 0) { throw 'HEAD 조회 실패' }
+    $eesMain = & git -C $eesRepo rev-parse origin/main
+    if ($LASTEXITCODE -ne 0) { throw 'origin/main 조회 실패' }
+    if ($eesHead -cne $eesCommit -or $eesMain -cne $eesCommit) {
+        throw '검토 원본과 다릅니다. 적용하지 않고 중단합니다.'
+    }
+    $eesZip = Read-Host '브라우저로 받은 바깥 Actions ZIP의 전체 로컬 파일 경로'
+    $eesHash = Read-Host '같은 산출물로 확정된 바깥 ZIP SHA256 전체 64자리'
+    if ($eesHash -cnotmatch '\A[0-9a-f]{64}\z') { throw '확정한 SHA256이 필요합니다.' }
+    & $eesManager -Action Upgrade -Config $eesCfg -Bundle $eesZip -Commit $eesCommit -ArtifactSha256 $eesHash -HealthTimeout 120 -Summary
+}
+```
+
+<a id="source-frontend-stop-recovery-20261013"></a>
+
+### stage=process_stop일 때만 실행
+
+접속이 돌아오지 않았고 사용자가 복구를 선택했을 때만 실행한다. 그 밖의 단계·원본·상태에서는 블록이 스스로 멈춘다. 실패 뒤 Update·Upgrade·Stop을 먼저 반복하지 않는다. 이 블록은 이번 실패와 registry를 보존하고 동일 wrapper SHA의 기존 복구 도구를 사용한다. 검증된 단일 프로세스의 명시적 강제 종료 뒤 검증 백업·보관 ZIP Apply·Start를 수행한다. CI가 호환 산출물을 이전 SHA에서 재사용한 경우 wrapper SHA와 artifact SHA를 별도로 검사한다. 성공은 `result=ok / backup=verified / running=true`와 로그인·기존 대화 확인으로 판단한다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesRepo = Join-Path $env:USERPROFILE 'team-agent-poc'
+    $eesCfg = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+    $eesCommit = & git -C $eesRepo rev-parse HEAD
+    if ($LASTEXITCODE -ne 0 -or $eesCommit -cnotmatch '\A[0-9a-f]{40}\z') { throw 'HEAD 조회 실패' }
+    $eesChanges = & git -C $eesRepo status --porcelain --untracked-files=no
+    if ($LASTEXITCODE -ne 0 -or $eesChanges) { throw '로컬 변경을 보존하고 복구를 중단합니다.' }
+    $eesConfig = Get-Content -Raw -Encoding UTF8 $eesCfg | ConvertFrom-Json
+    $eesFailure = Get-Content -Raw -Encoding UTF8 (Join-Path $eesConfig.state_root 'last-operation.json')
+    $eesLast = $eesFailure | ConvertFrom-Json
+    if ($eesLast.action -cne 'upgrade' -or $eesLast.failed -isnot [bool] -or
+        $eesLast.failed -ne $true -or $eesLast.result.stage -cne 'process_stop' -or
+        $eesLast.result.changed -isnot [bool] -or $eesLast.result.changed -ne $false -or
+        $eesLast.result.wrapper_commit -cne $eesCommit) {
+        throw '이번 종료 실패/원본과 다릅니다. 기록을 보존하고 중단합니다.'
+    }
+    $eesRegistry = Get-Content -Raw -Encoding UTF8 (Join-Path $eesConfig.state_root 'deployment.json')
+    $eesRequest = Join-Path $eesConfig.state_root ('stop-recovery-' + [guid]::NewGuid().ToString('N') + '.json')
+    $eesJson = '{"failure":' + $eesFailure + ',"registry":' + $eesRegistry + '}'
+    [IO.File]::WriteAllText($eesRequest, $eesJson, [Text.UTF8Encoding]::new($false))
+    & $eesConfig.source_python -I -B (Join-Path $eesRepo 'scripts\ees_deploy_stop_recovery.py') `
+        --config $eesCfg --request $eesRequest --commit $eesCommit `
+        --terminate-recorded-process --health-timeout 120
+    if ($LASTEXITCODE -ne 0) { throw '복구 중단: 마지막 EES 결과로 확인합니다.' }
+}
+```
+
+다른 실패는 [단계별 판단](#internal-pilot-failures-20261012)의 해당 행을 따른다. `.14`의 `artifact_select`·`local_artifact_source`·`download`·`inspect_bundle`·`preflight` 실패는 Stop 이전이다. `backup`·`backup_record` 실패는 서버가 종료됐을 수 있으므로 상태 확인 없이 다른 적용 블록을 실행하지 않는다. `process_stop` 근본원인은 여전히 미확정이며 복구 성공을 원인 해결로 기록하지 않는다.
+
+정상 적용 뒤 이전 프로그램으로 돌아가야 하면 기존 **Stop → Restore → Start**를 사용한다. 현재 `.13`의 정확한 프로그램 파일 inventory와 hash를 검증하고 복원한다. `.14`는 업무 DB/API 저장 형식을 바꾸지 않으며 프로그램 Restore가 DB·대화·개인 PAT·설정의 과거 복원을 뜻하지 않는다. 데이터 자체의 복원은 [별도 데이터 복원 경계](#integrated-work-install-20261002)를 따른다. 검증 결과와 실제 사내 수락은 [1단계 기록](../evals/v4-ui-20260930.md#source-frontend-phase1-evidence-20261013)에서 구분한다.
+
 <a id="internal-pilot-20261012"></a>
 
 ## 확인된 사내 설치본에서 EES Work 적용 · 2026-10-12
+
+> 아래 두 복사 블록과 f0148/7670a1b 기준은 당시 재실행 이력이다. `.14`에는 사용하지 않고 위 [소스 프런트엔드 안내](#source-frontend-apply-20261013)를 따른다. 원문·당시 검증은 보존한다.
 
 **적용 대상은 임시 원본 경로 보완을 포함한 PR #82의 병합 SHA다.** 해당 SHA의 main CI 성공을 확인한 뒤 [#78](https://github.com/knadalkim-a11y/team-agent-poc/issues/78)에 확정한 전체 40자리 값을 아래 적용 블록의 질문에 입력한다. 사용자가 직접 사내 재실행을 진행하며, 적용·로그인·기존 대화의 실제 결과는 별도로 확인한다.
 
@@ -452,7 +574,7 @@ Python 실행, API 호출, 별도 `references/`·`scripts/` 디렉터리 배포 
 
 공식 [Filter 설명](https://docs.openwebui.com/features/extensibility/plugin/functions/filter/)은 요청·응답 처리 지점을, [Function 설명](https://docs.openwebui.com/features/extensibility/plugin/functions/)은 Pipe의 다단계 처리 제어를 설명합니다. 이는 구현 후보의 역할 참고이며 현재 0.11.3 사내 환경에서 연결·검증했다는 뜻은 아닙니다. 실제 구현 단계에서 해당 버전과 EES에만 적용되는 범위·스트리밍·호출 횟수를 확인합니다.
 
-[EES Work 업무 절차](#ees-work-demo)는 기존 대화·패널·Native Tool에 입력·단계·선행 조건·완료 기준을 연결합니다. 관리자 정의는 업무 서비스에서 검증하고 실제 DB/AP 연결은 합성 점검과 별도 범위로 남깁니다. 단순 대화까지 계획·검토용 모델 호출을 매번 추가하지 않으며, 워크플로가 필요한 요청에만 추가 단계를 적용합니다. 모델 수·단계 수·외부 서버를 늘릴 때는 업무 효과와 호출/유지보수 비용을 비교합니다. 시각적 워크플로 편집기나 다중 Agent가 필수라는 뜻은 아닙니다.
+[EES Workflow 업무 절차](#ees-work-demo)는 기존 대화·패널·Native Tool에 입력·단계·선행 조건·완료 기준을 연결합니다. 관리자 정의는 업무 서비스에서 검증하고 실제 DB/AP 연결은 합성 점검과 별도 범위로 남깁니다. 단순 대화까지 계획·검토용 모델 호출을 매번 추가하지 않으며, 워크플로가 필요한 요청에만 추가 단계를 적용합니다. 모델 수·단계 수·외부 서버를 늘릴 때는 업무 효과와 호출/유지보수 비용을 비교합니다. 시각적 워크플로 편집기나 다중 Agent가 필수라는 뜻은 아닙니다.
 
 <a id="cross-system-orchestration"></a>
 
@@ -990,7 +1112,7 @@ Set-Location "$env:USERPROFILE\team-agent-poc"
 
 ### 공식 패키지와 래퍼의 단순 유지보수
 
-**Apply/CheckOnly·직전 Restore와 기존 Start/Stop/Status 연결을 구현했습니다.** 구현·자동 검증과 사내 적용 성공은 별개이며 [이번 검증 기록](../evals/scenarios.md#ees-wrapper-implementation)에 구분합니다. 관리 원본은 공식 Open WebUI와 이 저장소의 사내 래퍼 두 개입니다. 기존 Python·호환 라이브러리를 재사용하며 이름·아이콘 수정에 새 가상환경·전체 의존성 재설치·자동 전환 체계를 붙이지 않습니다.
+**Apply/CheckOnly·직전 Restore와 기존 Start/Stop/Status 연결을 구현했습니다.** 구현·자동 검증과 사내 적용 성공은 별개이며 [이번 검증 기록](../evals/scenarios.md#ees-wrapper-implementation)에 구분합니다. 관리 원본은 고정 Open WebUI0.11.3 소스/공식 Python wheel과 이 저장소 래퍼입니다. 프런트엔드는 CI에서 소스 패치를 컴파일하고 사내에는 완성 ZIP만 전달합니다. 기존 Python·호환 라이브러리를 재사용하며 이름·아이콘 수정에 새 가상환경·전체 의존성 재설치·자동 전환 체계를 붙이지 않습니다.
 
 | 관리 대상 | 책임 |
 |---|---|
@@ -1012,7 +1134,7 @@ Set-Location "$env:USERPROFILE\team-agent-poc"
 | 별도 가상환경에 전체 의존성 복제 | 제외. 중단한 후보 환경 방식이며 현재 커스터마이징에 불필요 |
 | 수정된 Open WebUI 프로그램만 별도 위치에 두고 기존 Python/의존성 사용 | 채택. 기존 브랜딩 wheel을 재사용하고 실제 교체 범위를 앱 파일로 제한 |
 
-`build_ees_webui.py`의 공식 wheel SHA·정확한 패치 위치/횟수 확인·이름/아이콘 변경·manifest/RECORD 생성은 재사용합니다. **현재 manifest의 changed_files는 설치용 파일 목록이 아닙니다.** 공식 `_app/`에서 브랜딩별 `_ees1/`(기존)·`_ees2/`(Portal 이름)·`_ees3/`(초기 대화 스타일)·`_ees4/`(대화 폭·조절 표시)로의 전체 frontend 이동과 버전 metadata 변경도 있으므로 일부 파일 복사 대신 검증된 앱과 metadata 전체를 함께 적용합니다. 다른 upstream 버전·의존성 변경·범용 wheel 설치는 이번 지원 범위가 아닙니다. 공식 wheel에 함께 들어 있는 Docker 참고 파일 `requirements-min.txt`·`data/readme.txt`는 전체 wheel 해시/RECORD 검증 후 추출에서 제외합니다. 앱·metadata만 포함한 RECORD를 재생성하고 원본 wheel 해시와 별도로 기록하므로 보존한 프로그램 ZIP을 그대로 사용할 수 있습니다.
+`build_ees_frontend.py`가 고정 소스 SHA·lock·소스 패치·라이선스·Pyodide와 산출물 해시를 검사합니다. `build_ees_webui.py`는 그 프런트엔드를 바이트 변경 없이 기존 고정 공식 Python wheel에 묶고 Python 통합 패치·manifest/RECORD를 유지합니다. 컴파일된 JS/CSS/HTML 치환은 사용하지 않습니다. **현재 manifest의 changed_files는 설치용 파일 목록이 아닙니다.** 공식 `_app/`에서 브랜딩별 `_ees1/`(기존)·`_ees2/`(Portal 이름)·`_ees3/`(초기 대화 스타일)·`_ees4/`(대화 폭·조절 표시)로의 전체 frontend 이동과 버전 metadata 변경도 있으므로 일부 파일 복사 대신 검증된 앱과 metadata 전체를 함께 적용합니다. 다른 upstream 버전·의존성 변경·범용 wheel 설치는 이번 지원 범위가 아닙니다. 공식 wheel에 함께 들어 있는 Docker 참고 파일 `requirements-min.txt`·`data/readme.txt`는 전체 wheel 해시/RECORD 검증 후 추출에서 제외합니다. 앱·metadata만 포함한 RECORD를 재생성하고 원본 wheel 해시와 별도로 기록하므로 보존한 프로그램 ZIP을 그대로 사용할 수 있습니다.
 
 #### 실행 경로와 데이터 경계
 
@@ -1029,7 +1151,7 @@ Set-Location "$env:USERPROFILE\team-agent-poc"
 | 작업 | 동작·끝나는 조건 |
 |---|---|
 | 기존 Update | 래퍼 Git 갱신만 수행. 서버·프로그램을 자동 교체하지 않음 |
-| `Upgrade` | main CI 확인·래퍼 갱신·호환 프로그램 ZIP 다운로드/검증 후 기존 Stop/Apply/Start 실행. 이미 적용된 프로그램은 재시작 생략. [최초 준비·결과 안내](#ees-wrapper-upgrade) |
+| `Upgrade` | main CI 확인·래퍼 갱신·호환 프로그램 ZIP 다운로드/검증 후 Stop/검증 Backup/Apply/Start 실행. 이미 적용된 프로그램은 재시작 생략. [최초 준비·결과 안내](#ees-wrapper-upgrade) |
 | `Apply -Bundle <ZIP> -Commit <40자리 SHA> -CheckOnly` | 저장 설정·버전/의존성 요구·전달물·설치 경로와 적용 가능 여부를 읽어 표시. 앱 import·서버 중지·쓰기 없음 |
 | `Apply -Bundle <ZIP> -Commit <40자리 SHA>` | 서버가 종료됐음을 확인한 뒤 검증된 프로그램만 적용. 같은 커밋/해시이면 변경 없음. 자동 시작·health 대기 없음 |
 | `Apply -Bundle <ZIP> -Commit <40자리 SHA> -Resume` | promote에서 중단된 실제 적용의 폴더를 사용자가 옮긴 뒤, 같은 ZIP·기록·전체 파일을 대조해 완료 기록만 남김. 파일 이동/추출·자동 시작 없음. `-CheckOnly`를 함께 쓰면 읽기 검증만 수행 |
@@ -1038,7 +1160,7 @@ Set-Location "$env:USERPROFILE\team-agent-poc"
 | 기존 Start / Stop / Status | 같은 interpreter/cwd/데이터로 시작·정상 종료·상태 표시. 실제 앱 원본/사내 수정 여부와 적용 커밋을 구분 |
 | `Start -UseWindowsCA` | 종료된 서버에 Windows 신뢰 CA 스냅샷을 선택하고 시작. 이후 일반 Start에서도 재사용. [SSL 복구 절차](#ees-start-windows-ca) |
 
-일상 흐름은 **Upgrade → 변경 부분 확인**이며, 내부에서 전달물·사전 확인을 마친 뒤 필요한 경우에만 Stop → Apply → Start를 실행합니다. 수동 Apply도 같은 순서를 따릅니다. 사전 확인이 실패하면 서버를 중지하지 않습니다. 적용 실패 시 결과에서 멈추며 필요하면 사용자가 상태를 확인하고 명시적 Resume 또는 Restore·Start를 실행합니다. 기존 Start의 한 번의 health 대기만 사용하며 같은 실패를 자동 반복하지 않습니다.
+일상 흐름은 **Upgrade → 변경 부분 확인**이며, 내부에서 전달물·사전 확인을 마친 뒤 필요한 경우에만 Stop → 검증 Backup/기록 → Apply → Start를 실행합니다. 수동 Apply도 같은 순서를 따릅니다. 사전 확인이 실패하면 서버를 중지하지 않습니다. 적용 실패 시 결과에서 멈추며 필요하면 사용자가 상태를 확인하고 명시적 Resume 또는 Restore·Start를 실행합니다. 기존 Start의 한 번의 health 대기만 사용하며 같은 실패를 자동 반복하지 않습니다.
 
 전달물은 기존 CI·Git 전달 방식을 재사용합니다. `Apply/Restore/Start/Stop/Status -Summary`는 상태·변경 여부·적용 커밋·실패 단계·프로그램 선택을 한 줄로 출력합니다. `-Summary`를 사용한 Apply/Restore/Start/Stop의 마지막 상세 결과는 `state_root/last-operation.json`에 저장하며, CheckOnly와 Status는 결과 파일이나 잠금을 쓰지 않습니다. 상세 결과 저장이 실패하면 `report=unavailable`로 표시하므로 이전 파일을 새 결과로 해석하지 않습니다. 파일 적용과 실제 기동 결과를 구분하고 외부 전달은 **마지막 요약과 화면 확인 1~2줄**로 제한합니다. 이미 실행한 결과를 요약 형식 때문에 다시 측정하지 않습니다. Tool/Skill/Prompt는 지금처럼 바뀐 항목만 기존 ID에 반영하며 자동 API 동기화는 추가하지 않습니다.
 
@@ -1865,7 +1987,7 @@ Resume은 정상 작업 잠금과 서버 종료·포트 검사를 유지합니�
 
 ### 검사와 전달물 생성
 
-관련 PR과 모든 main 변경에 Python 3.11 / Windows·Linux의 패키징 시험, 문서·diff 점검을 실행합니다. Upgrade가 정확한 main HEAD의 성공 CI를 요구하므로 main은 문서만 바뀌어도 검사합니다. main에서는 `EES-demo-<commit>.zip`을 Actions artifact로 생성합니다. Prompt·Skill 수정만 있으면 작은 Agent Pack 묶음만 만들며 브랜딩 자산·패키징 도구/검사·workflow가 바뀐 커밋에만 프로그램 wheel도 포함합니다. 프로그램을 다시 만들려면 Actions → **EES delivery → Run workflow → main → include_branding=true**를 선택합니다. 자동 검사에는 패키징, 배포 상태·백업, 고정 의존성의 오프라인 설치, 실제 합성 서버의 시작·정상 종료와 Upgrade의 선택/다운로드/실패 경계가 포함됩니다. Linux CI는 기본 Chrome에서 실제 wheel의 CSS·폰트와 기본 대화 구조의 fixture를 사용해 밝은/어두운/좁은 화면의 계산된 스타일도 확인합니다. 전체 WebUI 로그인·스트리밍 통합이나 사내 실제 화면 확인을 대신하지 않습니다.
+관련 PR과 모든 main 변경에 Python 3.11 / Windows·Linux의 패키징 시험, 문서·diff 점검을 실행합니다. Upgrade가 정확한 main HEAD의 성공 CI를 요구하므로 main은 문서만 바뀌어도 검사합니다. main에서는 `EES-demo-<commit>.zip`을 Actions artifact로 생성합니다. Draft PR도 실제 제품 검사를 통과한 동일 wheel로 `ees-review-candidate-<PR head SHA>` 검토 ZIP을 만듭니다. 이 산출물은 병합/사내 실행 승인이 아니며 기본 Upgrade는 성공한 main CI만 선택합니다. Prompt·Skill 수정만 있으면 작은 Agent Pack 묶음만 만들며 브랜딩 자산·패키징 도구/검사·workflow가 바뀐 커밋에만 프로그램 wheel도 포함합니다. 프로그램을 다시 만들려면 Actions → **EES delivery → Run workflow → main → include_branding=true**를 선택합니다. 자동 검사에는 패키징, 배포 상태·백업, 고정 의존성의 오프라인 설치, 실제 합성 서버의 시작·정상 종료와 Upgrade의 선택/다운로드/실패 경계가 포함됩니다. Linux CI는 기본 Chrome에서 실제 wheel의 CSS·폰트와 기본 대화 구조의 fixture를 사용해 밝은/어두운/좁은 화면의 계산된 스타일도 확인합니다. 전체 WebUI 로그인·스트리밍 통합이나 사내 실제 화면 확인을 대신하지 않습니다.
 
 프로그램 포함 artifact는 `ees-program-<40자리 SHA>`로 **90일**, Agent Pack 전용은 `ees-demo-<40자리 SHA>`로 **14일** 보존합니다. 한 실행에서는 둘 중 해당하는 artifact 한 개만 만들며 안쪽 ZIP 이름은 계속 `EES-demo-<commit>.zip`입니다. Upgrade는 이름으로 프로그램 산출물을 구분하고 내용도 검증합니다. 적용할 ZIP과 직전 배포 ZIP은 승인된 내부 위치에 보관합니다. ZIP의 `manifest.json`에 원본 커밋·파일별 SHA-256/크기를 기록하며 브랜딩 포함 시 그 manifest도 넣습니다. 배포 도구는 Git 추적 파일 중 정한 경로만 포함하고 `.env`·DB·키·비추적 파일을 제외합니다. 운영 데이터나 사용자 작성물을 Git/전달 폴더에 넣지 않습니다.
 
@@ -1875,15 +1997,15 @@ Resume은 정상 작업 잠금과 서버 종료·포트 검사를 유지합니�
 python scripts/build_demo_bundle.py --output-dir dist/delivery
 ```
 
-프로그램 묶음이 필요한 경우에만 같은 checkout에서 실행합니다. `pip download`는 현재 환경에 WebUI나 의존성을 설치하지 않습니다.
+아래는 개발/CI 재포장용 명령이다. 같은 소스/패치/자산으로 CI가 검증한 `dist/frontend`가 먼저 있어야 한다. 전체 원본 비교·Node 빌드 순서는 [source-frontend job](../.github/workflows/ees-delivery.yml)이 관리하며 사내에서는 실행하지 않는다. `pip download`는 현재 환경에 WebUI나 의존성을 설치하지 않는다.
 
 ```powershell
 python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
-python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding
+python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --frontend-dir dist/frontend --output-dir dist/branding
 python scripts/build_demo_bundle.py --output-dir dist/delivery --branding-dir dist/branding
 ```
 
-[브랜딩 빌더](../scripts/build_ees_webui.py)는 공식 wheel의 고정 SHA-256과 패치 위치를 확인한 뒤 별도 파일을 만듭니다. 이름 기본값·자동 접미사·브라우저 제목/알림·아이콘과 대화 스타일을 변경하고, frontend 경로를 릴리스별로 바꿔 이전 JavaScript 캐시와 분리합니다. upstream 라이선스·주석·의존성 요구는 보존하고 wheel RECORD를 다시 계산합니다. 버전·원본 파일이나 패치 위치가 다르면 중단합니다. 임의 버전에 패치를 강제 적용하지 않습니다.
+[소스 빌더](../scripts/build_ees_frontend.py)는 원본 SHA/lock·순서가 있는 소스 패치를 검증한 뒤 컴파일합니다. [프로그램 빌더](../scripts/build_ees_webui.py)는 공식 wheel의 고정 SHA-256·기존 Python 통합 위치와 frontend manifest/전체 해시를 확인해 묶습니다. 이름·제목·Native 연결 지점은 원본 Svelte 패치로 관리하고 `/_ees14/`와 Vite의 내용 기반 파일명으로 캐시를 구분합니다. upstream 라이선스·주석·의존성 요구는 보존하고 wheel RECORD를 다시 계산합니다. 버전·원본 파일이나 패치 위치가 다르면 중단합니다. 임의 버전에 패치를 강제 적용하지 않습니다.
 
 아이콘은 저장소의 SVG가 원본입니다. 그림을 수정할 때만 개발 환경의 CairoSVG 2.8.2·Pillow 12.3.0과 시스템 Cairo로 [렌더 스크립트](../scripts/render_ees_brand_assets.py)를 실행하고 파생 파일을 함께 커밋합니다. 일반 wheel 빌드와 사내 서버에는 이 렌더 의존성이 필요하지 않습니다. 다음 브랜딩 변경은 패키지 버전·frontend 경로를 함께 올려 별도 릴리스로 관리합니다.
 

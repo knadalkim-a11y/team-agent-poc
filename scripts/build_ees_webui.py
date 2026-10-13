@@ -1,4 +1,4 @@
-"""Repack the pinned official wheel with reviewed EES branding, without installing it.
+"""Package the verified source-built frontend with the pinned official Python wheel.
 
 Requires only Python's standard library. No network, credentials, runtime data,
 dependency resolution, or upstream code execution is involved. Branding use must
@@ -20,15 +20,16 @@ from zipfile import ZIP_DEFLATED, BadZipFile, ZipFile, ZipInfo
 
 
 UPSTREAM_VERSION = "0.11.3"
-VERSION = "0.11.3+ees.13"
-PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4", "0.11.3+ees.5": "_ees5", "0.11.3+ees.6": "_ees6", "0.11.3+ees.7": "_ees7", "0.11.3+ees.8": "_ees8", "0.11.3+ees.9": "_ees9", "0.11.3+ees.10": "_ees10", "0.11.3+ees.11": "_ees11", "0.11.3+ees.12": "_ees12", "0.11.3+ees.13": "_ees13"}
+VERSION = "0.11.3+ees.14"
+SOURCE_FRONTEND_REQUIRED = True
+PROGRAM_FRONTENDS = {"0.11.3+ees.1": "_ees1", "0.11.3+ees.2": "_ees2", "0.11.3+ees.3": "_ees3", "0.11.3+ees.4": "_ees4", "0.11.3+ees.5": "_ees5", "0.11.3+ees.6": "_ees6", "0.11.3+ees.7": "_ees7", "0.11.3+ees.8": "_ees8", "0.11.3+ees.9": "_ees9", "0.11.3+ees.10": "_ees10", "0.11.3+ees.11": "_ees11", "0.11.3+ees.12": "_ees12", "0.11.3+ees.13": "_ees13", "0.11.3+ees.14": "_ees14"}
 SOURCE_FILENAME = "open_webui-0.11.3-py3-none-any.whl"
 SOURCE_SHA256 = "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
 WHEEL_FILENAME = f"open_webui-{VERSION}-py3-none-any.whl"
 SOURCE_INFO = f"open_webui-{UPSTREAM_VERSION}.dist-info/"
 TARGET_INFO = f"open_webui-{VERSION}.dist-info/"
 SOURCE_APP = "open_webui/frontend/_app/"
-TARGET_APP = "open_webui/frontend/_ees13/"
+TARGET_APP = "open_webui/frontend/_ees14/"
 ASSET_DIR = Path(__file__).resolve().parents[1] / "branding" / "ees" / "assets"
 UI_DIR = ASSET_DIR.parent / "ui"
 ASSET_NAMES = (
@@ -117,6 +118,8 @@ MENU_ICON_FILES = tuple("v4/" + name for name in (
 V4_ICON_FILES += MENU_ICON_FILES
 UI_FILES.update({name: name for name in MENU_ICON_FILES})
 WORK_FILES += tuple(TARGET_APP + name for name in MENU_ICON_FILES)
+# Freeze the complete C18 ees.13 inventory before any ees.14 additions.
+WORK_FILES_V13_COMPLETE = WORK_FILES
 # Copy these already bundled upstream fonts byte-for-byte into the new cache
 # namespace; no font download, transformation, or runtime dependency is needed.
 FONT_SOURCES = {
@@ -126,72 +129,12 @@ FONT_SOURCES = {
                                 "2d2267a83d089cb1a517a4f901676d05d283346e650d1b1845d601cbd696a98e"),
 }
 THEME_FILES = ("chat-theme.css", "fonts/LICENSE.txt") + tuple("fonts/" + name for name in FONT_SOURCES)
-THEME_LINK = b'<link rel="stylesheet" href="/_ees13/chat-theme.css" crossorigin="use-credentials" />'
-WORK_LINK = (b'<link rel="stylesheet" href="/_ees13/ees-work-launcher.css" />'
-             b'<script defer src="/_ees13/ees-work-launcher.js"></script>')
-
-# The pinned Chat component already owns draft serialization, editor updates,
-# file/tool selections and debounced native sessionStorage writes. Expose only
-# those operations so switching work scopes can flush the last keystroke and
-# restore a root-chat draft without reproducing or mutating editor DOM.
-# A note/embedded Chat must not replace the main Chat's hook. Its owner removes
-# the hook on unmount, and callers wait for the native editor to finish loading.
-# Tool approval mode is a user/chat setting, not work-scope draft content. The
-# native import applies it through Ci(), which may approve pending tool calls;
-# therefore never export, persist or import that field through this hook.
-NATIVE_DRAFT_MOUNT = b'ii(()=>{var Ne,Pe,me,Ve,vt;c(ce,!0),window.addEventListener("message",Uo)'
-NATIVE_DRAFT_UNMOUNT = b'()=>{var Ie,ct;try{clearTimeout(r(Ii)),sr(),G()&&!g()&&Yi(G()),$(),K(),ie()'
-NATIVE_DRAFT_LOAD_DECLARATION = b'let Ii=P();const ro=async()=>{var K,ie;'
-NATIVE_DRAFT_LOAD_GUARD = (
-    b'let eesNativeDraftLoads=0;const eesNativeDraftLoad=async load=>{'
-    b'eesNativeDraftLoads++;try{return await load();}finally{eesNativeDraftLoads--;}};'
-)
-NATIVE_COMPLETION_CREATE_BEGIN = b'Tt=!ue||g()||la(ue),Ot=await Qm('
-NATIVE_COMPLETION_CREATE_END = b'!g()&&!j()&&(window.history.replaceState(r(Ae).state,"",`/c/${Ot.chat_id}`)'
-NATIVE_COMPLETION_CAPTURE = (
-    b'eesCompletionOwner=window.__eesNativeWorkV1,eesCompletionCreation=(()=>{'
-    b'try{return!j()&&!g()?eesCompletionOwner?.beginChatCreation?.():null;}catch{return null;}})(),'
-)
-NATIVE_COMPLETION_NOTIFY = (
-    b'(()=>{try{if(eesCompletionCreation)eesCompletionOwner?.finishChatCreation?.(eesCompletionCreation,Ot.chat_id);}catch{}})(),'
-)
-NATIVE_CHAT_CREATE_BEGIN = b'kt=async x=>{var ie,ue,Te;let $=d();const K='
-NATIVE_CHAT_CREATE_END = b'$=r(Br).id,await xi.set($),j()||window.history.replaceState(x.state,"",`/c/${$}`)'
-NATIVE_CHAT_CREATE_CAPTURE = (
-    b'let eesCreation=null;const eesWorkOwner=window.__eesNativeWorkV1;'
-    b'try{if(!j()&&!g())eesCreation=eesWorkOwner?.beginChatCreation?.();}catch{}'
-)
-NATIVE_CHAT_CREATE_NOTIFY = (
-    b'(()=>{try{if(eesCreation)eesWorkOwner?.finishChatCreation?.(eesCreation,$);}catch{}})(),'
-)
-NATIVE_DRAFT_HOOK = (
-    b'const eesNativeDraftApi={ready:()=>{'
-    b'if(j()||g()||r(ce)||!r(le)||eesNativeDraftLoads)return!1;'
-    br'const path=window.location.pathname,match=path.match(/^\/c\/([^/]+)\/?$/);'
-    b'let expected;try{expected=match?decodeURIComponent(match[1]):path==="/"?"":null;}catch{return!1;}'
-    b'return expected!==null&&(G()||"")===expected&&(d()||"")===expected;},'
-    b'read:()=>{if(!eesNativeDraftApi.ready())return null;'
-    b'const snapshot={...us()};delete snapshot.toolApprovalMode;return snapshot;},'
-    b'hasPendingContent:()=>!eesNativeDraftApi.ready()||Boolean((r(Qr)||"").trim()||(r(mr)||[]).length),'
-    b'workMessageIds:()=>eesNativeDraftApi.ready()?Object.values(r(Ae)?.messages||{}).filter(message=>message?.role==="assistant"&&typeof message.id==="string").map(message=>message.id):[],'
-    b'flush:()=>{const snapshot=eesNativeDraftApi.read();return snapshot?Ps(snapshot,Fr(),!1):!1;},'
-    b'restore:async serialized=>{if(!eesNativeDraftApi.ready()||typeof serialized!=="string")return!1;'
-    b'let snapshot;try{snapshot=JSON.parse(serialized);'
-    b'if(!snapshot||typeof snapshot!=="object"||Array.isArray(snapshot))return!1;'
-    b'delete snapshot.toolApprovalMode;}catch{return!1;}'
-    b'_r&&clearTimeout(_r);const restored=await qi(JSON.stringify(snapshot));'
-    b'if(restored)await eesNativeDraftApi.flush();return restored;}};'
-    b'if(!j())window.__eesNativeDraftV1=eesNativeDraftApi;'
-)
-
-# Every replacement is pinned to one reviewed upstream file and occurrence count.
-# Upstream comments, attribution strings, documentation, and source maps remain.
+# Frontend changes are reviewed source patches compiled before this packager.
+# Only the existing Python integration and wheel metadata remain byte patches.
 PATCHES = {
-    # Only the program-owned fallback changes. Native custom model images keep
-    # their existing validation, authorization, forwarding and safe-static paths.
     "open_webui/routers/models.py": [(
         b"url='/static/favicon.png'",
-        b"url='/_ees13/assistant-default.svg'", 2,
+        b"url='/_ees14/assistant-default.svg'", 2,
     )],
     "open_webui/main.py": [(
         b"if os.path.exists(FRONTEND_BUILD_DIR):",
@@ -202,129 +145,12 @@ PATCHES = {
     "open_webui/env.py": [(
         b"WEBUI_NAME = os.getenv('WEBUI_NAME', 'Open WebUI')\n"
         b"if WEBUI_NAME != 'Open WebUI':\n    WEBUI_NAME += ' (Open WebUI)'",
-        b"WEBUI_NAME = os.getenv('WEBUI_NAME', 'EES Work')\n"
-        b"if WEBUI_NAME in {'EES Assistant', 'EES Portal'}:\n    WEBUI_NAME = 'EES Work'", 1,
+        b"WEBUI_NAME = os.getenv('WEBUI_NAME', 'EES Workflow')\n"
+        b"if WEBUI_NAME in {'EES Assistant', 'EES Portal', 'EES Work'}:\n    WEBUI_NAME = 'EES Workflow'", 1,
     )],
-    "open_webui/frontend/index.html": [
-        (b"<title>Open WebUI</title>", b"<title>EES Work</title>", 1),
-        (b"/_app/", b"/_ees13/", 49),
-        (b"</head>", THEME_LINK + WORK_LINK + b"\n\t</head>", 1),
-    ],
-    SOURCE_APP + "immutable/chunks/CHq18Uto.js": [
-        (b'const ca="Open WebUI"', b'const ca="EES Work"', 1),
-    ],
-    SOURCE_APP + "immutable/nodes/0.CvnwnD8l.js": [
-        (b" / Open WebUI`", b" / EES Work`", 3),
-    ],
-    SOURCE_APP + "immutable/nodes/26.Ck8JdNW5.js": [
-        (b" / Open WebUI`", b" / EES Work`", 2),
-    ],
-    SOURCE_APP + "immutable/nodes/2.Db9ODmx4.js": [
-        # C's initial layout is 312px wide and expanded. The native store,
-        # resize limits, persistence and explicit saved closed state still own
-        # subsequent layout; no existing user width is migrated or overwritten.
-        (b'const _t=Number(localStorage.getItem("sidebarWidth"));',
-         b'const eesSavedSidebarWidth=localStorage.getItem("sidebarWidth");'
-         b'const _t=eesSavedSidebarWidth===null?(window.innerWidth<1536?224:256):Number(eesSavedSidebarWidth);', 1),
-        (b'$a.set(R()?!1:localStorage.sidebar==="true")',
-         b'$a.set(R()?!1:localStorage.getItem("sidebar")===null?!0:localStorage.sidebar==="true")', 1),
-        # Keep the current locale's translations; only the Korean C labels
-        # differ from the upstream new-chat/search wording.
-        (b'c().t("New Chat")',
-         'c().language?.startsWith("ko")?"새 대화":c().t("New Chat")'.encode("utf-8"), 4),
-        (b'c().t("Search")',
-         'c().language?.startsWith("ko")?"대화 검색":c().t("Search")'.encode("utf-8"), 4),
-        # Attribute hooks change no Svelte child traversal or native handlers.
-        (b'<div role="navigation">', b'<div role="navigation" data-ees-native-sidebar>', 1),
-        (b'<div class="pb-1"><div class="px-1 flex justify-center text-gray-700 dark:text-gray-300"><a id="sidebar-new-chat-button"',
-         b'<div class="pb-1" data-ees-native-navigation><div class="px-1 flex justify-center text-gray-700 dark:text-gray-300"><a id="sidebar-new-chat-button"', 1),
-    ],
-    SOURCE_APP + "immutable/chunks/DKj2ZiCb.js": [
-        (b"/_app/version.json", b"/_ees13/version.json", 1),
-        (b'an="0.11.3"', b'an="0.11.3+ees.13"', 1),
-    ],
-    SOURCE_APP + "immutable/chunks/zKJlHFgk.js": [
-        (b'<nav><div><div id="navbar-bg-gradient-to-b">',
-         b'<nav data-ees-native-toolbar><div><div id="navbar-bg-gradient-to-b">', 1),
-        # Mark the real empty-chat branch for scoped layout. Only attributes
-        # change: Svelte child traversal, model/folder controls, composer and
-        # prompt suggestions stay in their original Native factories.
-        (b'Z8=F(\'<div class="flex items-center h-full svelte-vhdo11"><!></div>\')',
-         b'Z8=F(\'<div data-ees-native-empty-frame class="flex items-center h-full svelte-vhdo11"><!></div>\')', 1),
-        (b'E8=F(\'<div class="m-auto w-full max-w-[58rem] px-1 @2xl:px-20 translate-y-6 py-24 text-center"><!> <div class="w-full text-3xl text-gray-800 dark:text-gray-100 text-center flex items-center gap-4"><div class="w-full flex flex-col justify-center items-center"><!> <div><!></div></div></div> <!></div>\')',
-         b'E8=F(\'<div data-ees-native-empty-chat class="m-auto w-full max-w-[58rem] px-1 @2xl:px-20 translate-y-6 py-24 text-center"><!> <div data-ees-native-empty-main class="w-full text-3xl text-gray-800 dark:text-gray-100 text-center flex items-center gap-4"><div data-ees-native-empty-content class="w-full flex flex-col justify-center items-center"><!> <div data-ees-native-empty-composer><!></div></div></div> <!></div>\')', 1),
-        (b'S8=F(\'<div class="flex flex-row justify-center gap-2.5 @sm:gap-3 w-fit px-5 max-w-xl"><div class="flex shrink-0 justify-center"><div class="flex -space-x-4 mb-0.5"></div></div> <div class=" text-2xl @sm:text-2xl line-clamp-1 flex items-center"><!></div></div> <div class="flex mt-1 mb-2"><div><!></div></div>\',1)',
-         b'S8=F(\'<div data-ees-native-empty-model class="flex flex-row justify-center gap-2.5 @sm:gap-3 w-fit px-5 max-w-xl"><div class="flex shrink-0 justify-center"><div class="flex -space-x-4 mb-0.5"></div></div> <div class=" text-2xl @sm:text-2xl line-clamp-1 flex items-center"><!></div></div> <div data-ees-native-empty-description class="flex mt-1 mb-2"><div><!></div></div>\',1)', 1),
-        (b'C8=F(\'<div class="mx-auto max-w-2xl mt-2"><div class="mx-5"><!></div></div>\')',
-         b'C8=F(\'<div data-ees-native-empty-suggestions class="mx-auto max-w-2xl mt-2"><div class="mx-5"><!></div></div>\')', 1),
-        (b'k8=F(\'<div class="mx-auto px-4 md:max-w-3xl md:px-6 min-h-62"><!></div>\')',
-         b'k8=F(\'<div data-ees-native-empty-folder class="mx-auto px-4 md:max-w-3xl md:px-6 min-h-62"><!></div>\')', 1),
-        # Preserve an explicitly supplied native editor placeholder. C changes
-        # the Korean product default, not editor contents or draft persistence.
-        (b'Ln()?Ln():n().t("Send a Message")',
-         'Ln()?Ln():n().language?.startsWith("ko")?"업무를 물어보거나, 필요한 작업을 요청하세요":n().t("Send a Message")'.encode("utf-8"), 1),
-        # Reuse both existing Native factories. The empty editor keeps its real
-        # disabled submit button; voice mode stays reachable in a disclosure.
-        # Native permission tests, click handlers and upload guards are intact.
-        (b'jb=F("<!> <!>",1),Kb=',
-         b'jb=F("<!> <!>",1),eesNativeVoiceControls=F(\'<details class="ees-native-voice-menu"><summary> </summary><div><!></div></details> <!>\',1),Kb=', 1),
-        (b'})?Te(ie):Te(ue,-1)})',
-         b'})?Te(eesAnchor=>{'
-         b'const eesFragment=eesNativeVoiceControls(),eesVoice=wt(eesFragment);'
-         b'const eesSummary=eesVoice.querySelector("summary"),eesVoiceBody=eesVoice.querySelector("div");'
-         b'eesSummary.textContent=n().t("Voice mode");'
-         b'ie(eesVoiceBody.firstChild);ue(eesFragment.lastChild);f(eesVoiceBody);f(eesVoice);f(eesFragment);'
-         b'eesVoice.addEventListener("keydown",event=>{if(event.key==="Escape"&&eesVoice.open){event.stopPropagation();eesVoice.open=!1;eesSummary.focus();}});'
-         b'S(eesAnchor,eesFragment);'
-         b'}):Te(ue,-1)})', 1),
-        # Loading may turn its spinner off before native cached drafts finish
-        # restoring. Count all overlapping native draft loads in Chat's scope;
-        # workflow restoration waits until each completes and route IDs match.
-        (NATIVE_DRAFT_LOAD_DECLARATION,
-         NATIVE_DRAFT_LOAD_GUARD + b'let Ii=P();const ro=()=>eesNativeDraftLoad(async()=>{var K,ie;', 1),
-        (b')):await To("/")},li=async()=>{var x,$;',
-         b')):await To("/")}),li=()=>eesNativeDraftLoad(async()=>{var x,$;', 1),
-        (b'($=r(le))==null||$.focus({preventScroll:!0})},yo=async x=>',
-         b'($=r(le))==null||$.focus({preventScroll:!0})}),yo=async x=>', 1),
-        (b',ns=async()=>{var ue,Te,Ne,Pe,me,Ve,vt,Ie,ct,tt,Qe,Pt,_t,ot,Mt,Tt,Ot,It,Dt,lr,Vt,Mr,ss,rr,Lr;',
-         b',ns=()=>eesNativeDraftLoad(async()=>{var ue,Te,Ne,Pe,me,Ve,vt,Ie,ct,tt,Qe,Pt,_t,ot,Mt,Tt,Ot,It,Dt,lr,Vt,Mr,ss,rr,Lr;', 1),
-        (b'(Lr=r(le))==null||Lr.focus({preventScroll:!0})},ts=async()=>',
-         b'(Lr=r(le))==null||Lr.focus({preventScroll:!0})}),ts=async()=>', 1),
-        (b'return(async()=>{var Ie,ct;G()||(c(ce,!1),await Ft()),ue&&',
-         b'return eesNativeDraftLoad(async()=>{var Ie,ct;G()||(c(ce,!1),await Ft()),ue&&', 1),
-        (b'(ct=r(le))==null||ct.focus({preventScroll:!0})})(),()=>{var Ie,ct;try{',
-         b'(ct=r(le))==null||ct.focus({preventScroll:!0})}),()=>{var Ie,ct;try{', 1),
-        (NATIVE_DRAFT_MOUNT,
-         b'ii(()=>{var Ne,Pe,me,Ve,vt;' + NATIVE_DRAFT_HOOK +
-         b'c(ce,!0),window.addEventListener("message",Uo)', 1),
-        (NATIVE_DRAFT_UNMOUNT,
-         b'()=>{var Ie,ct;if(window.__eesNativeDraftV1===eesNativeDraftApi)delete window.__eesNativeDraftV1;'
-         b'try{clearTimeout(r(Ii)),sr(),G()&&!g()&&Yi(G()),$(),K(),ie()', 1),
-        # Only the main Chat's first successful server creation can bind a work
-        # case. A submit gesture or an unrelated API chat import is not proof.
-        (NATIVE_CHAT_CREATE_BEGIN,
-         b'kt=async x=>{var ie,ue,Te;let $=d();' + NATIVE_CHAT_CREATE_CAPTURE + b'const K=', 1),
-        (NATIVE_CHAT_CREATE_END,
-         b'$=r(Br).id,' + NATIVE_CHAT_CREATE_NOTIFY +
-         b'await xi.set($),j()||window.history.replaceState(x.state,"",`/c/${$}`)', 1),
-        # Normal first prompts create their chat through the completions API;
-        # kt above covers the native explicit-message creation path as well.
-        (NATIVE_COMPLETION_CREATE_BEGIN,
-         b'Tt=!ue||g()||la(ue),' + NATIVE_COMPLETION_CAPTURE + b'Ot=await Qm(', 1),
-        (NATIVE_COMPLETION_CREATE_END,
-         b'!g()&&!j()&&(' + NATIVE_COMPLETION_NOTIFY +
-         b'window.history.replaceState(r(Ae).state,"",`/c/${Ot.chat_id}`)', 1),
-        # The existing Native message meta column persists this per-message
-        # reference. It is captured once, never inferred from a later screen.
-        (b'user_message:Ve,...Ne?{regeneration_prompt:Ne}',
-         b'user_message:Ve?{...Ve,meta:{...(Ve.meta||{}),ees_work_reference:(!j()&&!g()?window.__eesNativeWorkV1?.captureReference?.(ue||"",ie,Ve):null)||{kind:"none"}}}:Ve,...Ne?{regeneration_prompt:Ne}', 1),
-    ],
-    SOURCE_APP + "version.json": [
-        (b'{"version":"0.11.3"}', b'{"version":"0.11.3+ees.13"}', 1),
-    ],
-    SOURCE_INFO + "METADATA": [
-        (b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.13\n", 1),
-    ],
+    SOURCE_INFO + "METADATA": [(
+        b"\nVersion: 0.11.3\n", b"\nVersion: 0.11.3+ees.14\n", 1,
+    )],
 }
 
 
@@ -551,37 +377,10 @@ def sha256_file(path):
     return digest.hexdigest()
 
 
-def target_name(name, immutable_dir="immutable"):
+def target_name(name):
     if name.startswith(SOURCE_INFO):
         return TARGET_INFO + name[len(SOURCE_INFO):]
-    if name.startswith(SOURCE_APP):
-        relative = name[len(SOURCE_APP):]
-        if relative.startswith("immutable/"):
-            relative = immutable_dir + "/" + relative[len("immutable/"):]
-        return TARGET_APP + relative
     return name
-
-
-def immutable_revision(source, replacements):
-    """Address the complete pinned module graph by its patched bytes.
-
-    All runtime module/asset references stay relative within this tree. Hashing
-    before directory relocation avoids a self-referential hash and gives every
-    importer in a cyclic dependency graph the same fresh cache namespace.
-    Program version/approval identity and historical Restore roots stay intact.
-    """
-    digest = hashlib.sha256()
-    prefix = SOURCE_APP + "immutable/"
-    for name in sorted(name for name in source.namelist() if name.startswith(prefix)):
-        relative = name[len(prefix):].encode("utf-8")
-        content = replacements.get(name)
-        if content is None:
-            content = source.read(name)
-        digest.update(len(relative).to_bytes(8, "big"))
-        digest.update(relative)
-        digest.update(len(content).to_bytes(8, "big"))
-        digest.update(content)
-    return digest.hexdigest()
 
 
 def prepare_replacements(source, asset_dir):
@@ -597,10 +396,9 @@ def prepare_replacements(source, asset_dir):
     required = set(PATCHES) | set(ASSET_GUARD_SOURCE_HASHES) | {SOURCE_INFO + "RECORD", SOURCE_INFO + "WHEEL"}
     asset_targets = {
         prefix + name: name
-        for prefix in ("open_webui/static/", "open_webui/frontend/static/")
+        for prefix in ("open_webui/static/",)
         for name in ASSET_NAMES
     }
-    asset_targets["open_webui/frontend/favicon.png"] = "favicon.png"
     required.update(asset_targets)
     missing = required - set(names)
     if missing:
@@ -645,23 +443,23 @@ def assemble_work_launcher(ui_dir=UI_DIR):
                 ("ees-work-designer.js", "createWorkDesigner"),
                 ("ees-work-launcher.js", None))
     if WORK_LAUNCHER_SOURCES != tuple(name for name, _ in expected):
-        raise ValueError("EES Work launcher source order differs.")
+        raise ValueError("EES Workflow launcher source order differs.")
     root = Path(ui_dir)
     if any(path.is_symlink() for path in (root, *root.parents)):
-        raise ValueError("Linked EES Work launcher source directory.")
+        raise ValueError("Linked EES Workflow launcher source directory.")
     parts = []
     declaration = re.compile(rb"\b(?:function\s+|(?:const|let|var)\s+)(createWorkView|createWorkDesigner)\b")
     for filename, factory in expected:
         path = root / filename
         if path.is_symlink() or not path.is_file():
-            raise ValueError(f"Missing or linked EES Work launcher source: {filename}")
+            raise ValueError(f"Missing or linked EES Workflow launcher source: {filename}")
         content = path.read_bytes()
         if not content.strip():
-            raise ValueError(f"Empty EES Work launcher source: {filename}")
+            raise ValueError(f"Empty EES Workflow launcher source: {filename}")
         wanted = [factory.encode("ascii")] if factory else []
         if declaration.findall(content) != wanted or (factory and not re.search(
                 rb"\bfunction\s+" + factory.encode("ascii") + rb"\s*\(", content)):
-            raise ValueError(f"EES Work launcher factory/order differs: {filename}")
+            raise ValueError(f"EES Workflow launcher factory/order differs: {filename}")
         parts.append(content)
     assembled = b"(() => {\n'use strict';\n" + b"\n;\n".join(parts) + b"\n})();\n"
     for relative in V4_ICON_FILES:
@@ -683,7 +481,7 @@ def prepare_additions(source, ui_dir, work_dir=WORK_DIR):
         additions[TARGET_APP + relative] = (assemble_work_launcher(ui_dir)
             if filename == "ees-work-launcher.js" else path.read_bytes())
     for relative in V4_ICON_FILES:
-        url = ("/_ees13/" + relative).encode("ascii")
+        url = ("/" + TARGET_APP.removeprefix("open_webui/frontend/") + relative).encode("ascii")
         digest = hashlib.sha256(additions[TARGET_APP + relative]).hexdigest().encode("ascii")
         for filename in ("chat-theme.css", "ees-work-launcher.css"):
             for source_url in (url, ("./" + relative).encode("ascii")):
@@ -691,7 +489,7 @@ def prepare_additions(source, ui_dir, work_dir=WORK_DIR):
     for relative, target in WORK_ASSETS.items():
         path = Path(work_dir) / relative
         if path.is_symlink() or not path.is_file() or not path.stat().st_size:
-            raise ValueError(f"Missing, empty, or linked EES Work asset: {relative}")
+            raise ValueError(f"Missing, empty, or linked EES Workflow asset: {relative}")
         additions[target] = path.read_bytes()
     if ASSET_GUARD_SOURCE.is_symlink() or not ASSET_GUARD_SOURCE.is_file() or not ASSET_GUARD_SOURCE.stat().st_size:
         raise ValueError("Missing, empty, or linked asset guard runtime.")
@@ -708,7 +506,7 @@ def prepare_additions(source, ui_dir, work_dir=WORK_DIR):
     return additions
 
 
-def build(wheel, output_dir, asset_dir=ASSET_DIR, ui_dir=UI_DIR):
+def build(wheel, output_dir, asset_dir=ASSET_DIR, ui_dir=UI_DIR, frontend_dir=None):
     wheel, output_dir = Path(wheel), Path(output_dir)
     if wheel.name != SOURCE_FILENAME or sha256_file(wheel) != SOURCE_SHA256:
         raise ValueError("Expected the unchanged, pinned official Open WebUI 0.11.3 wheel.")
@@ -720,24 +518,40 @@ def build(wheel, output_dir, asset_dir=ASSET_DIR, ui_dir=UI_DIR):
     with ZipFile(wheel) as source:
         replacements = prepare_replacements(source, asset_dir)
         additions = prepare_additions(source, ui_dir)
-        immutable_hash = immutable_revision(source, replacements)
-        immutable_dir = "immutable-c" + immutable_hash[:16]
-        renamed = lambda name: target_name(name, immutable_dir)
-        # Trial revisions can share a program version. Address each Work asset
-        # by its actual bytes without changing supported Restore namespaces.
-        index_name = "open_webui/frontend/index.html"
-        old_immutable = ("/" + TARGET_APP.removeprefix("open_webui/frontend/") + "immutable/").encode("ascii")
-        new_immutable = ("/" + TARGET_APP.removeprefix("open_webui/frontend/") + immutable_dir + "/").encode("ascii")
-        if replacements[index_name].count(old_immutable) != 49:
-            raise ValueError("Pinned immutable entry references differ from the 49 reviewed links.")
-        replacements[index_name] = replacements[index_name].replace(old_immutable, new_immutable)
+        if frontend_dir is None:
+            raise ValueError("A verified CI source frontend is required (--frontend-dir).")
+        try:
+            from build_ees_frontend import validate_frontend
+        except ModuleNotFoundError:
+            from scripts.build_ees_frontend import validate_frontend
+        frontend = validate_frontend(frontend_dir, mode="ees")
+        frontend_manifest = json.loads((Path(frontend_dir) / "manifest.json").read_text(encoding="utf-8"))
+        prefix = "open_webui/frontend/"
+        frontend_entries = {prefix + name: content for name, content in frontend.items()}
+        # The source build already contains the reviewed binary branding.
+        # Verify every copied image and preserve every frontend byte unchanged.
+        for name in ASSET_NAMES:
+            target = prefix + "static/" + name
+            if target not in frontend_entries:
+                raise ValueError("Missing source-built static branding target: " + name)
+            if frontend_entries[target] != (Path(asset_dir) / name).read_bytes():
+                raise ValueError("Source-built static branding differs: " + name)
+        if frontend_entries.get(prefix + "favicon.png") != (Path(asset_dir) / "favicon.png").read_bytes():
+            raise ValueError("Missing or mismatched source-built favicon target.")
+        if set(frontend_entries) & set(additions):
+            raise ValueError("Source frontend overlaps separately packaged EES assets.")
+        # A source build cannot silently reference older EES runtime assets.
+        # Verify the URLs produced before compilation; never edit built HTML.
+        index = frontend_entries[prefix + "index.html"]
         for filename in ("chat-theme.css", "ees-work-launcher.css", "ees-work-launcher.js"):
             path = TARGET_APP + filename
-            url = ("/" + path.removeprefix("open_webui/frontend/")).encode("ascii")
-            digest = hashlib.sha256(additions[path]).hexdigest().encode("ascii")
-            replacements[index_name] = _one_replace(
-                replacements[index_name], url + b'"', url + b'?v=' + digest + b'"', index_name)
-        entries = sorted(source.infolist(), key=lambda entry: renamed(entry.filename))
+            digest = hashlib.sha256(additions[path]).hexdigest()
+            url = ("/" + path.removeprefix(prefix) + "?v=" + digest + '"').encode("ascii")
+            if index.count(url) != 1:
+                raise ValueError("Source frontend runtime asset hash differs: " + filename)
+        additions.update(frontend_entries)
+        entries = sorted((entry for entry in source.infolist()
+                          if not entry.filename.startswith(prefix)), key=lambda entry: target_name(entry.filename))
         output_dir.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix=".ees-build-", dir=output_dir) as temporary:
             built = Path(temporary) / WHEEL_FILENAME
@@ -746,7 +560,7 @@ def build(wheel, output_dir, asset_dir=ASSET_DIR, ui_dir=UI_DIR):
                 for entry in entries:
                     if entry.filename == SOURCE_INFO + "RECORD":
                         continue
-                    name = renamed(entry.filename)
+                    name = target_name(entry.filename)
                     content = replacements.get(entry.filename)
                     if content is None:
                         content = source.read(entry)
@@ -778,13 +592,8 @@ def build(wheel, output_dir, asset_dir=ASSET_DIR, ui_dir=UI_DIR):
                 "version": VERSION,
                 "source": {"filename": SOURCE_FILENAME, "sha256": SOURCE_SHA256},
                 "wheel": {"filename": WHEEL_FILENAME, "sha256": sha256_file(built), "size": built.stat().st_size},
-                "changed_files": sorted([renamed(name) for name in replacements] + list(additions) + [record_name]),
-                "relocated_frontend": {
-                    "from": SOURCE_APP, "to": TARGET_APP,
-                    "immutable_directory": immutable_dir,
-                    "immutable_sha256": immutable_hash,
-                    "file_count": sum(entry.filename.startswith(SOURCE_APP) for entry in entries),
-                },
+                "changed_files": sorted([target_name(name) for name in replacements] + list(additions) + [record_name]),
+                "source_frontend": frontend_manifest,
             }
             manifest_file = Path(temporary) / "manifest.json"
             manifest_file.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
@@ -802,9 +611,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--wheel", required=True, type=Path)
     parser.add_argument("--output-dir", required=True, type=Path)
+    parser.add_argument("--frontend-dir", required=True, type=Path)
     args = parser.parse_args()
     try:
-        manifest = build(args.wheel, args.output_dir)
+        manifest = build(args.wheel, args.output_dir, frontend_dir=args.frontend_dir)
     except (OSError, ValueError) as error:
         parser.exit(1, f"Build stopped: {error}\n")
     print(f"Prepared {manifest['wheel']['filename']}")

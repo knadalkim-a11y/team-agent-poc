@@ -6,6 +6,7 @@ on:
       - '.gitattributes'
       - '.github/workflows/ees-delivery.yml'
       - 'branding/**'
+      - 'frontend/**'
       - 'agent-pack/**'
       - 'scripts/build_*.py'
       - 'scripts/render_ees_brand_assets.py'
@@ -68,6 +69,8 @@ on:
       - 'tests/native_auth_fixture.py'
       - 'tests/workflow_fixture.py'
       - 'tests/native_ui_fixture.py'
+      - 'tests/ees_frontend_native_baseline.py'
+      - 'tests/test_ees_frontend*.py'
       - 'tests/test_demo_bundle.py'
       - 'docs/**'
       - 'README.md'
@@ -88,8 +91,80 @@ env:
   EES_FIXED_TEST_DEPENDENCIES: uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
 
 jobs:
+  source-frontend:
+    name: Pinned Native source baseline and EES frontend build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: open-webui/open-webui
+          ref: 2a960a59fe1dbbd35282f0556b3666d81102e781
+          path: dist/open-webui-source
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+          cache-dependency-path: dist/open-webui-source/package-lock.json
+      - name: Install the exact upstream frontend dependencies
+        working-directory: dist/open-webui-source
+        env:
+          CYPRESS_INSTALL_BINARY: '0'
+          # The frontend uses onnxruntime-web. Only the optional development
+          # Node CUDA binary download is disabled through its official option.
+          ONNXRUNTIME_NODE_INSTALL_CUDA: skip
+        run: |
+          test "$(node --version)" = v22.16.0
+          test "$(npm --version)" = 10.9.2
+          npm ci --force --no-audit --no-fund
+      - name: Download the fixed official wheel
+        run: |
+          python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
+      - name: Build the unchanged pinned Native frontend
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: python scripts/build_ees_frontend.py --source-dir dist/open-webui-source --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/frontend-baseline --baseline
+      - name: Compare official and source-built Native behavior
+        id: baseline
+        run: python tests/ees_frontend_native_baseline.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --frontend-dir dist/frontend-baseline --chrome "$(command -v google-chrome)" --output dist/ees-source-baseline
+      - name: Build the reviewed EES source patches
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: python scripts/build_ees_frontend.py --source-dir dist/open-webui-source --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/frontend
+      - name: Verify the actual patched Native source hooks
+        env:
+          EES_TEST_FRONTEND_SOURCE_DIR: dist/open-webui-source
+        run: python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_frontend_build -v
+      - name: Share the verified frontend bytes
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ees-source-frontend-${{ github.sha }}
+          path: dist/frontend
+          if-no-files-found: error
+          include-hidden-files: true
+          compression-level: 0
+          retention-days: 7
+      - name: Keep the first Native baseline result and screenshots
+        if: always() && steps.baseline.outcome != 'skipped'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ees-source-baseline-${{ github.sha }}
+          path: |
+            dist/ees-source-baseline
+            dist/frontend-baseline/manifest.json
+          if-no-files-found: error
+          retention-days: 7
+
   fixtures:
     name: Prepare pinned program fixtures and test coverage
+    needs: source-frontend
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -100,6 +175,10 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.11'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ees-source-frontend-${{ github.sha }}
+          path: dist/frontend
       - name: Audit every retained or explicitly replaced test ID
         run: python tests/ees_delivery_suite.py --audit --output dist/ees-delivery-coverage
       - name: Verify source-only packaging checks
@@ -111,7 +190,7 @@ jobs:
           python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
       - name: Build current and unchanged historical program fixtures once
         run: |
-          python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding
+          python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --frontend-dir dist/frontend --output-dir dist/branding
           git -c core.autocrlf=false -c core.eol=lf archive --format=tar --output=dist/legacy-source.tar a443d30c6694df0e1cbe082a0b99aa5f2d566917
           python -c "import tarfile; tarfile.open('dist/legacy-source.tar').extractall('dist/legacy-source', filter='data')"
           python dist/legacy-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/legacy-branding
@@ -124,12 +203,16 @@ jobs:
           git -c core.autocrlf=false -c core.eol=lf archive --format=tar --output=dist/previous-v4-source.tar 3a51f9d2bc604e768a59a522d6f34a34c2cb05d3
           python -c "import tarfile; tarfile.open('dist/previous-v4-source.tar').extractall('dist/previous-v4-source', filter='data')"
           python dist/previous-v4-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/previous-v4-branding
+          git -c core.autocrlf=false -c core.eol=lf archive --format=tar --output=dist/previous13-source.tar 1c6ddaa04f05b2eea02bbf15155b8602f1e4a1a8
+          python -c "import tarfile; tarfile.open('dist/previous13-source.tar').extractall('dist/previous13-source', filter='data')"
+          python dist/previous13-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/previous13-branding
       - name: Share exact program bytes with all required suites
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ees-pinned-fixtures-${{ github.sha }}
           path: |
             dist/upstream
+            dist/frontend
             dist/branding
             dist/legacy-branding
             dist/previous-branding
@@ -139,6 +222,8 @@ jobs:
             dist/previous12-branding
             dist/previous-v4-source
             dist/previous-v4-branding
+            dist/previous13-source
+            dist/previous13-branding
           if-no-files-found: error
           # Fixed Git archives include .github links; preserve those source bytes.
           include-hidden-files: true
@@ -160,12 +245,13 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04, windows-2022]
-        suite: [services, contracts, native-contracts, platform, program-install, restore-ees10, restore-ees11, restore-ees12]
+        suite: [services, contracts, native-contracts, platform, program-install, program-wheel, restore-ees10, restore-ees11, restore-ees12, restore-ees13]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     env:
       EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
       EES_TEST_BRANDING_DIR: dist/branding
+      EES_TEST_FRONTEND_DIR: dist/frontend
       EES_TEST_LEGACY_WORKFLOW_WHEEL: dist/legacy-branding/open_webui-0.11.3+ees.10-py3-none-any.whl
       EES_TEST_PREVIOUS_WORKFLOW_WHEEL: dist/previous-branding/open_webui-0.11.3+ees.11-py3-none-any.whl
       EES_REQUIRE_WORK_ROUTES: '1'
@@ -177,6 +263,8 @@ jobs:
       EES_REQUIRE_PREVIOUS_C: '1'
       EES_TEST_PREVIOUS_V4_WHEEL: dist/previous-v4-branding/open_webui-0.11.3+ees.12-py3-none-any.whl
       EES_REQUIRE_PREVIOUS_V4: '1'
+      EES_TEST_PREVIOUS13_WHEEL: dist/previous13-branding/open_webui-0.11.3+ees.13-py3-none-any.whl
+      EES_REQUIRE_PREVIOUS13: '1'
       EES_REQUIRE_PREVIOUS_WORKFLOW: '1'
       EES_RUN_REAL_UV_TEST: '1'
       EES_RUN_REAL_NLTK_TEST: '1'
@@ -197,7 +285,7 @@ jobs:
       - name: Retain real Windows build and LF archive validation
         if: runner.os == 'Windows' && matrix.suite == 'platform'
         run: |
-          python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/windows-branding
+          python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --frontend-dir dist/frontend --output-dir dist/windows-branding
           git -c core.autocrlf=false -c core.eol=lf archive --format=tar --output=dist/windows-legacy-source.tar a443d30c6694df0e1cbe082a0b99aa5f2d566917
           python -c "import tarfile; tarfile.open('dist/windows-legacy-source.tar').extractall('dist/windows-legacy-source', filter='data')"
           python dist/windows-legacy-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/windows-legacy-branding
@@ -251,7 +339,7 @@ jobs:
             (Join-Path $PWD 'scripts/manage-ees.ps1'), [ref]$tokens, [ref]$parseErrors)
           if ($parseErrors.Count -gt 0) { throw 'PowerShell entry point has syntax errors.' }
           $guide = Get-Content -Raw -Encoding UTF8 docs/03-openwebui-native-agent.md
-          foreach ($anchor in @('internal-pilot-20261012', 'internal-pilot-stop-recovery-20261012')) {
+          foreach ($anchor in @('internal-pilot-20261012', 'internal-pilot-stop-recovery-20261012', 'source-frontend-apply-20261013', 'source-frontend-local-zip-20261013', 'source-frontend-stop-recovery-20261013')) {
             $pattern = '(?s)<a id="' + [regex]::Escape($anchor) + '"></a>.*?```powershell\r?\n(.*?)```'
             $pilotBlock = [regex]::Match($guide, $pattern).Groups[1].Value
             if (-not $pilotBlock -or $pilotBlock.Length -gt 2500) { throw "Missing or oversized pilot block: $anchor" }
@@ -295,6 +383,7 @@ jobs:
       EES_TEST_CHROME: google-chrome
       EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
       EES_TEST_BRANDING_DIR: dist/branding
+      EES_TEST_FRONTEND_DIR: dist/frontend
       EES_TEST_SCREENSHOT_DIR: dist/ees-work-screenshots
       EES_REQUIRE_AUTHORING_NATIVE: '1'
     steps:
@@ -355,10 +444,10 @@ jobs:
           python -c "import ftfy,importlib.metadata; assert importlib.metadata.version('ftfy')=='6.3.1'; assert importlib.metadata.version('wcwidth')=='0.2.13'; assert 'wcwidth' in ' '.join(importlib.metadata.requires('ftfy')); assert ftfy.fix_text('한글')=='한글'"
       - name: Start the actual CLI and verify browser writes, reload and restart
         id: product
-        run: python tests/ees_work_integrated_app.py --wheel dist/branding/open_webui-0.11.3+ees.13-py3-none-any.whl --chrome "$(command -v google-chrome)" --output dist/ees-native-product
+        run: python tests/ees_work_integrated_app.py --wheel dist/branding/open_webui-0.11.3+ees.14-py3-none-any.whl --chrome "$(command -v google-chrome)" --output dist/ees-native-product
       - name: Verify central Native chat with actual registered read and proposal tools
         id: native_chat
-        run: python tests/ees_work_native_chat.py --wheel dist/branding/open_webui-0.11.3+ees.13-py3-none-any.whl --chrome "$(command -v google-chrome)" --output dist/ees-native-product/central-chat
+        run: python tests/ees_work_native_chat.py --wheel dist/branding/open_webui-0.11.3+ees.14-py3-none-any.whl --chrome "$(command -v google-chrome)" --output dist/ees-native-product/central-chat
       - name: Record the successfully tested integration tree
         run: |
           echo "EES_TESTED_TREE=$(git rev-parse 'HEAD^{tree}')" >> "$GITHUB_ENV"
@@ -421,7 +510,7 @@ jobs:
     # Preserve the previous required check names. Neither a cancelled shard nor
     # an unexecuted dependency can make these release gates green.
     name: Delivery checks (${{ matrix.os }})
-    needs: [fixtures, service, native, native-product]
+    needs: [source-frontend, fixtures, service, native, native-product]
     if: always()
     strategy:
       matrix:
@@ -431,11 +520,12 @@ jobs:
     steps:
       - name: Require every fixture, service, platform and Native result
         env:
+          FRONTEND_RESULT: ${{ needs.source-frontend.result }}
           FIXTURES_RESULT: ${{ needs.fixtures.result }}
           SERVICE_RESULT: ${{ needs.service.result }}
           NATIVE_RESULT: ${{ needs.native.result }}
           PRODUCT_RESULT: ${{ needs.native-product.result }}
-        run: python -c "import os; results={key:os.environ[key] for key in ('FIXTURES_RESULT','SERVICE_RESULT','NATIVE_RESULT','PRODUCT_RESULT')}; print(results); assert all(value=='success' for value in results.values()), results"
+        run: python -c "import os; results={key:os.environ[key] for key in ('FRONTEND_RESULT','FIXTURES_RESULT','SERVICE_RESULT','NATIVE_RESULT','PRODUCT_RESULT')}; print(results); assert all(value=='success' for value in results.values()), results"
 
   package:
     name: Prepare delivery files
@@ -466,23 +556,23 @@ jobs:
               enabled=true
             else
               git diff --name-only "$BEFORE_SHA" HEAD > "$RUNNER_TEMP/ees-changed.txt"
-              if grep -Eq '^(branding/|agent-pack/skills/ees-work-demo/|agent-pack/skills/cross-system-analysis/ui/work-panel\.js$|scripts/build_(ees_webui|demo_bundle)\.py$|scripts/(render_ees_brand_assets|ees_asset_guard)\.py$|tests/test_(ees_branding_build|demo_bundle)\.py$|\.github/workflows/ees-delivery\.yml$)' "$RUNNER_TEMP/ees-changed.txt"; then
+              if grep -Eq '^(\.gitattributes$|frontend/|branding/|agent-pack/skills/ees-work-demo/|agent-pack/skills/cross-system-analysis/ui/work-panel\.js$|scripts/build_(ees_frontend|ees_webui|demo_bundle)\.py$|scripts/(render_ees_brand_assets|ees_asset_guard)\.py$|tests/test_(ees_branding_build|demo_bundle)\.py$|\.github/workflows/ees-delivery\.yml$)' "$RUNNER_TEMP/ees-changed.txt"; then
                 enabled=true
               fi
             fi
           fi
           echo "enabled=$enabled" >> "$GITHUB_OUTPUT"
-      - name: Download the fixed upstream wheel
+      - name: Reuse the exact program bytes that passed all required suites
         if: steps.branding.outputs.enabled == 'true'
-        run: |
-          python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
-      - name: Build the EES wheel
-        if: steps.branding.outputs.enabled == 'true'
-        run: python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/branding
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ees-pinned-fixtures-${{ github.sha }}
+          path: dist
       - name: Verify the real wheel can be selected as a standalone program
         if: steps.branding.outputs.enabled == 'true'
         env:
           EES_TEST_BRANDING_DIR: dist/branding
+          EES_TEST_FRONTEND_DIR: dist/frontend
         run: python -m unittest discover -s tests -p test_ees_webui_customization.py -v
       - name: Bundle with branding
         if: steps.branding.outputs.enabled == 'true'

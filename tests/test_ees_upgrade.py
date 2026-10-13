@@ -2,6 +2,8 @@
 
 import argparse
 import copy
+import hashlib
+import zipfile
 from contextlib import contextmanager, nullcontext, redirect_stdout
 import io
 import json
@@ -131,6 +133,7 @@ class UpgradeDeploymentTests(unittest.TestCase):
             "stopped": patch.object(upgrade.manager, "require_stopped", side_effect=lambda *a: self.events.append("require_stopped")),
             "apply": patch.object(upgrade.manager.customization, "apply", side_effect=apply),
             "start": patch.object(upgrade.manager, "start_selected", side_effect=start),
+            "backup": patch.object(upgrade.manager.states, "backup_state", side_effect=lambda *_: self.events.append("backup") or {"verified": True}),
             "record": patch.object(upgrade.manager, "record"),
             "identity": patch.object(upgrade.manager.processes, "verify_identity", return_value=True),
             "health": patch.object(upgrade.manager.processes, "wait_healthy"),
@@ -144,7 +147,7 @@ class UpgradeDeploymentTests(unittest.TestCase):
             return upgrade.deploy(self.config, self.client, HEAD, 120, self.progress)
 
     def assert_no_server_changes(self):
-        for name in ("stop", "stopped", "apply", "start"):
+        for name in ("stop", "stopped", "backup", "apply", "start"):
             self.mock[name].assert_not_called()
 
     def test_download_and_preflight_failures_never_stop_server(self):
@@ -218,13 +221,102 @@ class UpgradeDeploymentTests(unittest.TestCase):
 
     def test_success_downloads_and_checks_before_stop_then_applies_and_starts(self):
         result = self.deploy()
-        self.assertEqual(self.events, ["download", "stop", "require_stopped", "apply", "start"])
+        self.assertEqual(self.events, ["download", "stop", "require_stopped", "backup", "apply", "start"])
         self.assertTrue(result["changed"])
         self.assertEqual(result["source_commit"], HEAD)
         self.assertEqual(self.mock["applicability"].call_count, 2)
         self.assertTrue(upgrade.receipt_matches(self.config, self.artifact, self.selected))
-        self.mock["record"].assert_called_once()
+        self.assertEqual([call.args[2] for call in self.mock["record"].call_args_list],
+                         ["data_backup_verified", "upgraded_by_operator"])
         self.assertFalse(Path(self.progress["bundle"]).exists())
+
+    def test_backup_failure_preserves_download_and_prevents_apply_or_start(self):
+        for failed in ("backup", "backup_record"):
+            with self.subTest(failed=failed):
+                self.events.clear()
+                self.progress.clear()
+                self.mock["backup"].side_effect = (ValueError("private backup failure") if failed == "backup"
+                                                   else lambda *_: self.events.append("backup") or {"verified": True})
+                self.mock["record"].side_effect = ValueError("private record failure") if failed == "backup_record" else None
+                with self.assertRaises(ValueError):
+                    self.deploy()
+                self.assertEqual(self.progress["stage"], failed)
+                self.assertFalse(self.progress.get("backup_verified", False))
+                self.assertTrue(Path(self.progress["bundle"]).is_file())
+                self.mock["apply"].assert_not_called()
+                self.mock["start"].assert_not_called()
+                self.assertFalse((self.root / "upgrade-receipt.json").exists())
+
+    def test_reused_artifact_commit_is_saved_separately_in_stop_failure(self):
+        self.artifact["source_commit"] = OLDER
+        def stop(*args, progress):
+            progress["stage"] = "process_stop"
+            raise upgrade.manager.processes.ProcessError("private stop failure")
+        self.mock["stop"].side_effect = stop
+        with patch.object(upgrade.manager.states, "load_config", return_value=self.config), \
+                patch.object(upgrade, "github_client", return_value=self.client), \
+                patch.object(upgrade, "bootstrap", return_value=(None, HEAD, OLDER)), redirect_stdout(self.output):
+            self.assertEqual(upgrade.main(["--config", "synthetic.json"]), 1)
+        result = json.loads((self.root / "last-failure.json").read_bytes())["result"]
+        self.assertEqual((result["wrapper_commit"], result["artifact_commit"], result["source_verification"]),
+                         (HEAD, OLDER, "github_actions"))
+        self.mock["backup"].assert_not_called()
+
+    def test_browser_artifact_uses_same_transaction_without_credentials_or_network(self):
+        outer = self.root / "browser.zip"
+        inner = io.BytesIO()
+        with zipfile.ZipFile(inner, "w") as archive:
+            archive.writestr("manifest.json", json.dumps({"source_commit": HEAD, "source_dirty": False, "branding": {}}))
+            archive.writestr("branding/manifest.json", "{}")
+        with zipfile.ZipFile(outer, "w") as archive:
+            archive.writestr("EES-demo-" + HEAD[:12] + ".zip", inner.getvalue())
+        original = outer.read_bytes()
+        with patch.object(upgrade.manager.states, "load_config", return_value=self.config), \
+                patch.object(upgrade, "github_client") as github, \
+                patch.object(upgrade, "bootstrap") as bootstrap, \
+                patch.object(upgrade, "git", return_value=(0, HEAD)), redirect_stdout(self.output):
+            self.assertEqual(upgrade.main(["--config", "synthetic.json", "--local-artifact", str(outer),
+                    "--artifact-commit", HEAD, "--artifact-sha256", hashlib.sha256(original).hexdigest()]), 0)
+        github.assert_not_called()
+        bootstrap.assert_not_called()
+        self.mock["artifact"].assert_not_called()
+        self.client.download_artifact.assert_not_called()
+        self.assertEqual(self.events, ["stop", "require_stopped", "backup", "apply", "start"])
+        self.assertEqual(outer.read_bytes(), original)
+        self.assertFalse([path for path in self.root.glob("upgrade-*") if path.is_dir()])
+        result = json.loads((self.root / "last-operation.json").read_bytes())["result"]
+        self.assertEqual(result["source_verification"], "local_ci_artifact")
+        self.assertTrue(result["backup_verified"])
+
+    def test_browser_bad_digest_or_wrong_checkout_never_stops_or_changes_original(self):
+        outer = self.root / "browser.zip"
+        outer.write_bytes(b"original browser file")
+        for current, code in ((HEAD, "artifact_digest_mismatch"), (OLDER, "checkout_changed")):
+            with self.subTest(current=current), \
+                    patch.object(upgrade.manager.states, "load_config", return_value=self.config), \
+                    patch.object(upgrade, "github_client") as github, \
+                    patch.object(upgrade, "git", return_value=(0, current)), redirect_stdout(self.output):
+                self.assertEqual(upgrade.main(["--config", "synthetic.json", "--local-artifact", str(outer),
+                        "--artifact-commit", HEAD, "--artifact-sha256", "0" * 64]), 1)
+                result = json.loads((self.root / "last-failure.json").read_bytes())["result"]
+                self.assertEqual(result["code"], code)
+                github.assert_not_called()
+                self.assert_no_server_changes()
+                self.assertEqual(outer.read_bytes(), b"original browser file")
+                self.assertFalse([path for path in self.root.glob("upgrade-*") if path.is_dir()])
+
+    def test_browser_malformed_zip_is_reported_without_touching_server(self):
+        payload = b"not a zip"
+        outer = self.root / "browser.zip"
+        outer.write_bytes(payload)
+        with patch.object(upgrade.manager.states, "load_config", return_value=self.config), \
+                patch.object(upgrade, "git", return_value=(0, HEAD)), redirect_stdout(self.output):
+            self.assertEqual(upgrade.main(["--config", "synthetic.json", "--local-artifact", str(outer),
+                    "--artifact-commit", HEAD, "--artifact-sha256", hashlib.sha256(payload).hexdigest()]), 1)
+        result = json.loads((self.root / "last-failure.json").read_bytes())["result"]
+        self.assertEqual(result["code"], "local_artifact_invalid")
+        self.assert_no_server_changes()
+        self.assertEqual(outer.read_bytes(), payload)
 
     def test_changed_deployment_during_download_blocks_stop(self):
         original = self.client.download_artifact.side_effect
@@ -261,7 +353,7 @@ class UpgradeDeploymentTests(unittest.TestCase):
         self.mock["start"].side_effect = unhealthy
         with self.assertRaises(upgrade.manager.processes.ProcessError):
             self.deploy()
-        self.assertEqual(self.events, ["download", "stop", "require_stopped", "apply", "start"])
+        self.assertEqual(self.events, ["download", "stop", "require_stopped", "backup", "apply", "start"])
         self.assertEqual(observed[0]["process"]["pid"], 456)
         self.assertEqual(observed[0]["customization"]["active"], self.selected)
         self.assertEqual(self.progress["stage"], "health_check")
@@ -626,6 +718,20 @@ class BootstrapTests(unittest.TestCase):
             "--wrapper-before", OLDER, "--health-timeout", "120"])
         self.process.wait.assert_called_once_with()
 
+    def test_reviewed_commit_pin_rejects_a_newer_main_before_ci_merge_or_child(self):
+        self.args.expected_commit = OLDER
+        with self.assertRaisesRegex(upgrade.UpgradeError, "checkout_changed"):
+            upgrade.bootstrap(self.config, self.args, object(), {})
+        self.assertEqual(self.events, ["fetch"])
+        self.ci.assert_not_called()
+        self.child.assert_not_called()
+        self.assertEqual(self.head, OLDER)
+
+    def test_reviewed_commit_pin_is_forwarded_to_reloaded_runner(self):
+        self.args.expected_commit = HEAD
+        upgrade.bootstrap(self.config, self.args, object(), {})
+        self.assertEqual(self.child.call_args.args[0][-2:], ["--expected-commit", HEAD])
+
     def test_failed_ci_prevents_wrapper_merge_and_child(self):
         self.ci.side_effect = upgrade.downloads.DownloadError("main_checks_not_successful")
         with self.assertRaises(upgrade.downloads.DownloadError):
@@ -788,9 +894,18 @@ class RealGitCompatibilityTests(unittest.TestCase):
                 panel.write_text("const panel = true;\n", encoding="utf-8")
                 panel_changed = commit("shared work panel changed")
                 self.assertFalse(upgrade.compatible_program(guard_updated, panel_changed))
+                frontend = root / "frontend" / "open-webui-source.json"
+                frontend.parent.mkdir()
+                frontend.write_text('{"commit": "synthetic-source-pin"}\n', encoding="utf-8")
+                source_changed = commit("frontend source changed")
+                self.assertFalse(upgrade.compatible_program(panel_changed, source_changed))
+                builder = root / "scripts" / "build_ees_frontend.py"
+                builder.write_text("# reviewed source compiler\n", encoding="utf-8")
+                builder_changed = commit("frontend builder changed")
+                self.assertFalse(upgrade.compatible_program(source_changed, builder_changed))
                 unrelated = git("commit-tree", "HEAD^{tree}", "-m", "unrelated history")
-                self.assertFalse(upgrade.compatible_program(unrelated, panel_changed))
-                self.assertEqual(upgrade.checkout(panel_changed), panel_changed)
+                self.assertFalse(upgrade.compatible_program(unrelated, builder_changed))
+                self.assertEqual(upgrade.checkout(builder_changed), builder_changed)
                 notes.write_text("uncommitted local notes\n", encoding="utf-8")
                 with self.assertRaisesRegex(upgrade.UpgradeError, "local_changes"):
                     upgrade.checkout()
@@ -926,6 +1041,14 @@ class PowerShellUpgradeTests(unittest.TestCase):
                                     capture_output=True, text=True, encoding="utf-8", timeout=30)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout), ["--config", str(config), "--health-timeout", "90", "--reset-token"])
+            result = subprocess.run(command + ["-Commit", HEAD], capture_output=True, text=True, encoding="utf-8", timeout=30)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout), ["--config", str(config), "--expected-commit", HEAD])
+            result = subprocess.run(command + ["-Bundle", str(root / "browser.zip"), "-Commit", HEAD,
+                                    "-ArtifactSha256", "1" * 64], capture_output=True, text=True, encoding="utf-8", timeout=30)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout), ["--config", str(config), "--local-artifact", str(root / "browser.zip"),
+                                                        "--artifact-commit", HEAD, "--artifact-sha256", "1" * 64])
             result = subprocess.run(command + ["-Bundle", "untrusted.zip"], capture_output=True, text=True, encoding="utf-8", timeout=30)
             self.assertNotEqual(result.returncode, 0)
             self.assertEqual(result.stdout.strip(), "")
