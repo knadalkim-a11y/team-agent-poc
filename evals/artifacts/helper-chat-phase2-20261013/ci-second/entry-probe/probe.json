@@ -1,0 +1,19 @@
+{
+  "scope": "Real compiled source UI, Chrome153 and Work SQLite; synthetic Native account/chat storage, helper permission and model transport. Does not prove full Native CLI/tool/ACL gate.",
+  "wheel_sha256": "6953639186f062f24ac851502d05831a1a67acc7ca2164140faeb4557ada1863",
+  "initial_editor": "워크스페이스\n합성 절차\n닫기\n업무 절차\nEMS\n업무 절차 목록\n합성 절차초안 r3\n절차 설정\n\n운영 · EMS · 게시 v1\n\n기본 절차\n구조\n실행 방식\n판정 규칙\n게시 기록\n1\n검증 단계\n합성 작업 0\n작업 추가\n기본 업무 설정단계 추가\n대화로 절차 초안 만들기\n저장 초안 r3\n게시 전 확인\n초안 저장",
+  "initial_create_count": 0,
+  "entry": "author -> list -> create",
+  "question": "신규 공장 횡전개 예시를 복사해서 우리 공장에 맞게 고치고 싶어",
+  "reference": {
+    "kind": "help",
+    "system_id": "EMS",
+    "context_id": "[7,true,\"/c/existing-chat\",\"\",\"EMS\",\"\",\"\",\"\",\"\"]",
+    "screen": "새 업무 절차",
+    "title": "신규 공장 횡전개"
+  },
+  "composer_preserved": true,
+  "completion_count": 1,
+  "same_chat_reloaded": true,
+  "work_unchanged": true
+}

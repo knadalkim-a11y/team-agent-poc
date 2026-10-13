@@ -347,7 +347,8 @@ def input_and_history_flow(g,key,chat_id):
 def helper_chat_flow(g,key,chat_id):
     """Physical helper send, actual isolated tool dispatch, then live ACL denial."""
     before=g.api('/api/ees-work/workspace?workflow_id='+key)
-    g.click('[data-action=mode][data-mode=author]');g.click('[data-author-action=create]')
+    g.click('[data-action=mode][data-mode=author]')
+    g.click('[data-author-action=list]');g.click('[data-author-action=create]')
     selector='#ees-work-procedure-start [data-action=procedure_question]'
     g.wait('document.querySelector('+json.dumps(selector)+') && !document.querySelector('+json.dumps(selector)+').disabled')
     question=g.browser.evaluate('document.querySelector('+json.dumps(selector)+').innerText.trim()')

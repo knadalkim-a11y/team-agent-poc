@@ -1,0 +1,73 @@
+{
+  "scope": "PR87 second CI first helper-entry failure and test-prerequisite-only focused verification",
+  "wheel_sha256": "6953639186f062f24ac851502d05831a1a67acc7ca2164140faeb4557ada1863",
+  "boundary": "CI executes actual Native auth/SQLite/tools/CLI with synthetic loopback model. Local UI probe uses real compiled UI/Work SQLite with synthetic Native session/chat storage, helper permission and model transport. Neither is company execution.",
+  "files": [
+    {
+      "path": "central-chat/failure.json",
+      "bytes": 49922,
+      "sha256": "b583a5b2aaf061f6742a9bedb291f851c749a20c630c8136b725d75194ff57bd",
+      "provenance": "CI artifact11799758772 unchanged file"
+    },
+    {
+      "path": "central-chat/failure.png",
+      "bytes": 158321,
+      "sha256": "d002513385e67496d8362dfe50e9dda25f6b403524322b1627fc559fa58a12b1",
+      "provenance": "CI artifact11799758772 unchanged file"
+    },
+    {
+      "path": "central-chat/report.json",
+      "bytes": 50944,
+      "sha256": "98f2b5129137f0b1469931641e10e6c46eb29b188a7f84c20794802a6daeaf6a",
+      "provenance": "CI artifact11799758772 unchanged file"
+    },
+    {
+      "path": "ci-summary.json",
+      "bytes": 2109,
+      "sha256": "21f00b778c09ff13962a04e40dfe5353b057c45490804939fee5c2a2f36065d7",
+      "provenance": "GitHub job115215674395 log/API and inspected CI/probe evidence"
+    },
+    {
+      "path": "entry-probe/helper-entry-existing-editor.png",
+      "bytes": 83351,
+      "sha256": "ddfaa2df654edf6c9a52edc1e5189951a0f54993d4df4eb95184298319a4f97e",
+      "provenance": "local immutable helper-build2 focused UI probe"
+    },
+    {
+      "path": "entry-probe/helper-existing-editor-fixed-reference-after-reload.png",
+      "bytes": 76221,
+      "sha256": "fbef2e2e96d2f31cf59daf5cdb1c721d31d023cea0806c1631ff1c3dcb0d7556",
+      "provenance": "local immutable helper-build2 focused UI probe"
+    },
+    {
+      "path": "entry-probe/helper-existing-editor-question-only-and-reference.png",
+      "bytes": 204834,
+      "sha256": "a47754616ddf82f445ad81a5a834275058de3acc6234aebbb3d2f90a894635d7",
+      "provenance": "local immutable helper-build2 focused UI probe"
+    },
+    {
+      "path": "entry-probe/probe.json",
+      "bytes": 1205,
+      "sha256": "bc3cd111d387513e48c679e089686373df699eb94ec5dcb02ca43e7f15f21ad8",
+      "provenance": "local immutable helper-build2 focused UI probe"
+    },
+    {
+      "path": "entry-probe/probe.log",
+      "bytes": 281,
+      "sha256": "e140556aaa4511d838b7ff4a38b1db3ab95baff05f80f95e2ca7692c7398ad92",
+      "provenance": "local immutable helper-build2 focused UI probe"
+    },
+    {
+      "path": "entry-probe/probe.py",
+      "bytes": 3726,
+      "sha256": "11f5e001a7daea2ab12ddc4512c90fd7e8cc6622049d5913308bf477ac034c7c",
+      "provenance": "local immutable helper-build2 focused UI probe"
+    },
+    {
+      "path": "native-product-failure.log",
+      "bytes": 3383,
+      "sha256": "77bded63f61b73ce3d5b2414a05432dc5bd178040faaabc2f1e5a4c5248c67d0",
+      "provenance": "GitHub job115215674395 log/API and inspected CI/probe evidence"
+    }
+  ]
+}
