@@ -329,7 +329,7 @@ def input_and_history_flow(g,key,chat_id):
     g.wait('document.querySelector("#ees-work-panel .ew-status[data-status=completed]")')
     latest=g.api('/api/ees-work/workspace?run_id='+run_id)['run'];assert len(latest['attempts'])==2
     assert latest['attempts'][0]==first_attempt
-    selector='#message-'+message['id']+' .ees-work-message-reference [data-action=open_reference]'
+    selector='#message-'+message['id']+' [data-ees-reference-slot] [data-action=open_reference]'
     g.wait('document.querySelector('+json.dumps(selector)+')')
     card=g.browser.evaluate('document.querySelector('+json.dumps(selector)+').innerText')
     assert '기준 시각' in card and '기록 없음' not in card,card

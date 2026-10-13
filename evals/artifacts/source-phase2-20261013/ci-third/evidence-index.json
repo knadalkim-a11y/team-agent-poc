@@ -1,0 +1,85 @@
+{
+  "scope": "PR86 third CI first failure and focused selector-only verification, including the first probe argument error",
+  "wheel_sha256": "1b9ffa24cfca97f2fa40f01652b01b918e3b19eadbb2f4856cf599d1dca35193",
+  "synthetic_boundary": "CI actual Native auth/storage/tools/CLI uses loopback synthetic model; local probe uses real compiled UI/Work SQLite with synthetic Native session/chat storage and external transport. Neither is company execution.",
+  "files": [
+    {
+      "path": "central-chat/failure.json",
+      "bytes": 47694,
+      "sha256": "52e061ffbcc467ef9739b166cb784bad399698f16182fabb6c3328c06876ad94",
+      "provenance": "CI artifact11798853924"
+    },
+    {
+      "path": "central-chat/failure.png",
+      "bytes": 160940,
+      "sha256": "bc8bd1d46ce821b2cffeae5af573466d9872b814ed7cb7cb2d95a0f7aa1333d2",
+      "provenance": "CI artifact11798853924"
+    },
+    {
+      "path": "central-chat/report.json",
+      "bytes": 49863,
+      "sha256": "da6824a00f6427290a7b80f58e09abe13f37d53564b4e4b4589762f8b557b104",
+      "provenance": "CI artifact11798853924"
+    },
+    {
+      "path": "ci-summary.json",
+      "bytes": 5654,
+      "sha256": "b713a2e8230c336ab6acdda152fe95b658a99e666e11464bb4d59f7e3ae5940d",
+      "provenance": "GitHub API final jobs and inspected failure/probe evidence"
+    },
+    {
+      "path": "reference-slot-probe/first/failure-cleanup.json",
+      "bytes": 5491,
+      "sha256": "2d3ac447a1cf0e7c41c33c0fa8f086df60987865cac1d1c57e7d96c9e4425efa",
+      "provenance": "local immutable build4 focused reference-slot probe"
+    },
+    {
+      "path": "reference-slot-probe/first/failure.json",
+      "bytes": 22732,
+      "sha256": "f6cb53efaa364691fc771308d433a425186b413327ee4fa1e0a0d68ae18cbb21",
+      "provenance": "local immutable build4 focused reference-slot probe"
+    },
+    {
+      "path": "reference-slot-probe/first/failure.png",
+      "bytes": 87391,
+      "sha256": "579a45799702b74a967a75dbb946788b98d54618b2b889d8f8adb94ee8328450",
+      "provenance": "local immutable build4 focused reference-slot probe"
+    },
+    {
+      "path": "reference-slot-probe/first/probe.log",
+      "bytes": 1198,
+      "sha256": "cdb70b956553fb77ceb922a2a4ca6defe3b693701a78d102df308e52ae60ad86",
+      "provenance": "local immutable build4 focused reference-slot probe"
+    },
+    {
+      "path": "reference-slot-probe/first/probe.py",
+      "bytes": 2876,
+      "sha256": "6344dd57605d8e0136928ba7c48e82244f7f33d868d8e75887bd3a9700afe21b",
+      "provenance": "local immutable build4 focused reference-slot probe"
+    },
+    {
+      "path": "reference-slot-probe/probe.json",
+      "bytes": 1616,
+      "sha256": "7a3f5d9a1d36457e4e7a06ce0823a8b0d893da1406383036831040ddb4c591ee",
+      "provenance": "local immutable build4 focused reference-slot probe"
+    },
+    {
+      "path": "reference-slot-probe/probe.log",
+      "bytes": 271,
+      "sha256": "8ae0164c8381bacadee6a5bb08a41be0b00aecfb02e4d872020367f04a3aa903",
+      "provenance": "local immutable build4 focused reference-slot probe"
+    },
+    {
+      "path": "reference-slot-probe/probe.py",
+      "bytes": 2876,
+      "sha256": "262c414ee144193fc00e0c49475856e180b183adae9b46b70d3a317815b3b08c",
+      "provenance": "local immutable build4 focused reference-slot probe"
+    },
+    {
+      "path": "reference-slot-probe/source-reference-slot-old-attempt.png",
+      "bytes": 91373,
+      "sha256": "2e5610dc9a90f6f4a9d4078c54b4c92a1d1ac0f9737cebd2a100e9633967fa5f",
+      "provenance": "local immutable build4 focused reference-slot probe"
+    }
+  ]
+}

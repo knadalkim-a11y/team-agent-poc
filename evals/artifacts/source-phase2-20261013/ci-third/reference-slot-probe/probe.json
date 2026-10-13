@@ -1,0 +1,23 @@
+{
+  "scope": "actual built Native UI and real Work SQLite; synthetic Native session/chat storage and external transport",
+  "wheel_sha256": "1b9ffa24cfca97f2fa40f01652b01b918e3b19eadbb2f4856cf599d1dca35193",
+  "reference": {
+    "kind": "workspace",
+    "workflow_id": "872ae182-bab7-4a05-81ce-cb9a659483d3",
+    "run_id": "a994efd4-e7bc-4c1e-ae81-b66ee8308232",
+    "job_id": "job-0",
+    "attempt_id": "65c43707-19df-4449-a0ea-fd462a0b3640",
+    "version": 1,
+    "result_revision": 1,
+    "created_at": "2026-10-13T08:44:04.234+00:00",
+    "system_id": "EMS",
+    "factory_id": "",
+    "context_id": "synthetic-retained-history"
+  },
+  "slot_html": "<div data-ees-work=\"\" data-ees-reference-slot=\"\"><button type=\"button\" data-action=\"open_reference\" data-message-id=\"previous-user\"><img class=\"ew-icon\" src=\"/_ees14/v4/522b5.svg\" alt=\"\" aria-hidden=\"true\"><span>업무 근거 · v1 · 1차<small>기준 시각 · 2026. 10. 13. 04:44</small></span></button></div>",
+  "historical_panel": "업무\n합성 절차\n닫기\n대화에서 참조한 과거 기록\n\n게시 v1 · 실행 시도 1 · 읽기 전용\n\n사람 확인 기록\n1차 · 2026. 10. 13. 04:44\n\n실행 당시 절차 v1 · 결과 r1\n\n이 실행에 쓴 값\n자료 메모\n첫 번째 입력\n이번 실행 입력\n도구 참조\n{}\n결과\n{\n  \"human_input\": {\n    \"note\": \"첫 번째 입력\"\n  }\n}\n\n사람 판정 · fixture-admin · completed · 2026-10-13T08:44:04.234+00:00\n\n 이 기록에 대해 묻기",
+  "old_selector_count": 0,
+  "new_selector_count": 1,
+  "latest_attempts": 2,
+  "work_unchanged": true
+}
