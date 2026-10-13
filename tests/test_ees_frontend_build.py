@@ -539,11 +539,13 @@ let actor={id:'actor-a'};global.localStorage={token:'token-a'};
 let response={ok:true,status:200,json:async()=>({ok:true,kept:'result'})},calls=[];
 global.fetch=async(url,options)=>{calls.push({url,options});return response;};
 const moduleValue={exports:{}};
-const requireStub=name=>name==='svelte/store'?{get:()=>actor}:name==='$lib/stores'?{user:{}}:{default:{t:(key,options)=>options.defaultValue}};
+const userStore={},readyStore={};let ready=true;
+const requireStub=name=>name==='svelte/store'?{get:store=>store===readyStore?ready:actor}:name==='$lib/stores'?{user:userStore}:name==='$lib/components/ees/state'?{eesSessionReady:readyStore}:{default:{t:(key,options)=>options.defaultValue}};
 new Function('require','module','exports',ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText)(requireStub,moduleValue,moduleValue.exports);
 const request=moduleValue.exports.eesRequest;
 (async()=>{
  const controller=new AbortController();
+ ready=false;await assert.rejects(request('state'),e=>e.status===401);assert.equal(calls.length,0);ready=true;
  assert.equal((await request('state',undefined,controller.signal)).kept,'result');
  assert.equal(calls[0].url,'/api/ees-work/state');assert.equal(calls[0].options.method,'GET');
  assert.equal(calls[0].options.headers.Authorization,'Bearer token-a');assert.equal(calls[0].options.credentials,'same-origin');
@@ -567,3 +569,51 @@ const request=moduleValue.exports.eesRequest;
                                 text=True, encoding="utf-8", timeout=15)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout.strip(), "source_api=pass")
+
+
+@unittest.skipUnless(os.environ.get("EES_TEST_FRONTEND_SOURCE_DIR") and shutil.which("node"),
+                     "Patched source and Node are required for Native session lifecycle probes.")
+class SourceSessionTests(unittest.TestCase):
+    run_node = NativeDraftHookTests.run_node
+
+    def test_cross_tab_session_owner_reload_same_owner_preservation_and_late_guards(self):
+        source = (Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"]).resolve() /
+                  "src/routes/+layout.svelte").read_text(encoding="utf-8")
+        handler = _between(source, "const eesRevalidateSession =", "\n\tonDestroy(() => { eesSessionAlive")
+        probe = r'''
+const assert=require('node:assert/strict');
+let eesSessionToken='token-a',eesSessionEpoch=0,eesSessionAlive=true,eesSessionFailed=false,$user={id:'a',token:'token-a'};
+let localStorage={token:'token-a'},ready=true,result={id:'a',token:'renewed-a'},held=false,finish,fail=false;
+const sessionStorage={'chat-input':'private draft','ees-source-draft-owner':'a',other:'keep',removeItem(key){delete this[key];}};
+const eesSessionReady={set(value){ready=value;}},user={set(value){$user=value;}},joined=[],paths=[];
+const $socket={emit:(event,value)=>joined.push(value)};
+const window={__eesNativeWorkV1:{sync(){}},location:{replace:path=>paths.push(path)}};
+const getSessionUser=async token=>{if(fail)throw Error('temporary offline');return held?await new Promise(r=>finish=r):result;};
+''' + handler + r'''
+(async()=>{
+ await eesRevalidateSession({type:'storage',key:'unrelated'});assert.equal(paths.length,0);
+ localStorage.token='renewed-a';await eesRevalidateSession({type:'focus'});
+ assert.equal(ready,true);assert.equal($user.id,'a');assert.equal(sessionStorage['chat-input'],'private draft');
+ assert.equal(paths.length,0);assert.equal(joined.length,1);
+ localStorage.token='token-b';result={id:'b',token:'token-b'};fail=true;
+ await eesRevalidateSession({type:'storage',key:'token'});assert.equal(ready,false);assert.equal(eesSessionFailed,true);assert.equal($user.id,'a');
+ assert.equal(eesSessionToken,'renewed-a');assert.equal(sessionStorage['chat-input'],'private draft');assert.equal(paths.length,0);
+ fail=false;held=true;const late=eesRevalidateSession({type:'focus'});
+ localStorage.token='token-c';$user={id:'c',token:'token-c'};
+ await eesRevalidateSession({type:'focus'});finish({id:'b',token:'token-b'});await late;
+ assert.equal($user.id,'c');assert.equal(paths.length,0);assert.equal(ready,true);
+ localStorage.token='token-b';const sameTokenCommit=eesRevalidateSession({type:'focus'});
+ $user={id:'b',token:'token-b',name:'new Native sign-in'};await eesRevalidateSession({type:'focus'});
+ finish({id:'b',token:'token-b',name:'older lookup'});await sameTokenCommit;
+ assert.equal($user.name,'new Native sign-in');assert.equal(paths.length,0);
+ $user={id:'c',token:'token-c'};eesSessionToken='token-c';
+ held=false;localStorage.token='token-b';result={id:'b',token:'token-b'};
+ await eesRevalidateSession({type:'focus'});assert.equal($user,null);assert.equal(ready,false);
+ assert.deepEqual(paths,['/']);assert.equal(sessionStorage['chat-input'],undefined);assert.equal(sessionStorage.other,'keep');
+ $user={id:'b',token:'token-b'};sessionStorage['chat-input']='b draft';localStorage.token='';
+ await eesRevalidateSession({type:'storage',key:'token'});assert.deepEqual(paths,['/','/auth']);assert.equal(sessionStorage['chat-input'],undefined);
+ eesSessionAlive=false;localStorage.token='token-c';await eesRevalidateSession({type:'focus'});assert.equal(paths.length,2);
+ console.log('source_session_owner=pass');
+})().catch(e=>{console.error(e);process.exitCode=1;});
+'''
+        self.assertEqual(self.run_node(probe), "source_session_owner=pass")

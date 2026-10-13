@@ -1,0 +1,21 @@
+{
+  "readyState": "complete",
+  "fontStatus": "loaded",
+  "text": "계정 활성화 대기 WebUI 접속을 위해서는 관리자에게 연락에 연락하십시오",
+  "fontFamily": "-apple-system, BlinkMacSystemFont, Inter, Vazirmatn, ui-sans-serif, system-ui, \"Segoe UI\", Roboto, Ubuntu, Cantarell, \"Noto Sans\", sans-serif, \"Helvetica Neue\", Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+  "koreanCharacters": 28,
+  "platformFonts": [
+    {
+      "familyName": "Noto Sans KR Thin",
+      "postScriptName": "NotoSansKR-Thin",
+      "isCustomFont": false,
+      "glyphCount": 28
+    },
+    {
+      "familyName": "Inter",
+      "postScriptName": "Inter-Regular",
+      "isCustomFont": true,
+      "glyphCount": 13
+    }
+  ]
+}

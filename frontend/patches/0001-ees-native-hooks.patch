@@ -25,12 +25,13 @@ index 667808e..67e457e 100644
  
 diff --git a/src/lib/apis/ees-work.ts b/src/lib/apis/ees-work.ts
 new file mode 100644
-index 0000000..62964f8
+index 0000000..569b354
 --- /dev/null
 +++ b/src/lib/apis/ees-work.ts
-@@ -0,0 +1,72 @@
+@@ -0,0 +1,73 @@
 +import { get } from 'svelte/store';
 +import { user } from '$lib/stores';
++import { eesSessionReady } from '$lib/components/ees/state';
 +import i18next from 'i18next';
 +
 +const message = (key: string, fallback: string) => i18next.t(key, { defaultValue: fallback });
@@ -39,13 +40,13 @@ index 0000000..62964f8
 +export async function eesRequest(path: string, body?: unknown, signal?: AbortSignal) {
 +	const actor = get(user)?.id;
 +	const token = localStorage.token;
-+	if (!actor || !token)
++	if (!actor || !token || !get(eesSessionReady))
 +		throw Object.assign(new Error(message('EES.Api.SignIn', 'Sign in and try again.')), {
 +			status: 401,
 +			code: 'auth_required'
 +		});
 +	const assertOwner = () => {
-+		if (get(user)?.id !== actor || localStorage.token !== token)
++		if (!get(eesSessionReady) || get(user)?.id !== actor || localStorage.token !== token)
 +			throw Object.assign(
 +				new Error(
 +					message('EES.Api.ContextChanged', 'Your session changed. Open this screen again.')
@@ -1265,10 +1266,10 @@ index 0000000..510f3ca
 +	</section>{/if}
 diff --git a/src/lib/components/ees/EesShell.svelte b/src/lib/components/ees/EesShell.svelte
 new file mode 100644
-index 0000000..14e2852
+index 0000000..0ab10ff
 --- /dev/null
 +++ b/src/lib/components/ees/EesShell.svelte
-@@ -0,0 +1,379 @@
+@@ -0,0 +1,391 @@
 +<script lang="ts">
 +	import { getContext, onMount, tick } from 'svelte';
 +	import { get } from 'svelte/store';
@@ -1280,7 +1281,14 @@ index 0000000..14e2852
 +	import Chat from '$lib/components/chat/Chat.svelte';
 +	import Navbar from '$lib/components/chat/Navbar.svelte';
 +	import Spinner from '$lib/components/common/Spinner.svelte';
-+	import { eesSnapshot, eesCompact, eesAction, eesSync, eesReferenceHosts } from './state';
++	import {
++		eesSnapshot,
++		eesCompact,
++		eesAction,
++		eesSync,
++		eesReferenceHosts,
++		eesSessionReady
++	} from './state';
 +	const i18n: any = getContext('i18n');
 +	export let loaded = false;
 +	let panel: HTMLElement, overlays: HTMLElement;
@@ -1320,6 +1328,7 @@ index 0000000..14e2852
 +		$page.url.pathname;
 +		$page.url.search;
 +		$user?.id;
++		$eesSessionReady;
 +		$showSettings;
 +		tick().then(eesSync);
 +	}
@@ -1417,10 +1426,14 @@ index 0000000..14e2852
 +		},
 +		hosts: () => ({ panel, overlays }),
 +		screen: () => ({
-+			active: Boolean(get(user)),
++			active: Boolean(get(user)) && get(eesSessionReady),
 +			native: nativeRoute || admin,
 +			admin,
-+			chatReady: chatRoute && folderReady && Boolean(window.__eesNativeDraftV1?.ready?.()),
++			chatReady:
++				get(eesSessionReady) &&
++				chatRoute &&
++				folderReady &&
++				Boolean(window.__eesNativeDraftV1?.ready?.()),
 +			path: location.pathname,
 +			search: location.search
 +		}),
@@ -1661,10 +1674,10 @@ index 0000000..59f7e8d
 +</svg>
 diff --git a/src/lib/components/ees/state.ts b/src/lib/components/ees/state.ts
 new file mode 100644
-index 0000000..fd0c757
+index 0000000..b0d72eb
 --- /dev/null
 +++ b/src/lib/components/ees/state.ts
-@@ -0,0 +1,29 @@
+@@ -0,0 +1,30 @@
 +import { writable } from 'svelte/store';
 +export const eesSnapshot = writable<any>({
 +	state: null,
@@ -1672,6 +1685,7 @@ index 0000000..fd0c757
 +	busy: false,
 +	error: ''
 +});
++export const eesSessionReady = writable(true);
 +export const eesCompact = writable(typeof window !== 'undefined' && window.innerWidth < 1440);
 +export const eesReferenceHosts = new Map<string, HTMLElement>();
 +export const eesSync = () => {
@@ -2318,10 +2332,10 @@ index 172ed9a..8873d62 100644
  export const WEBUI_HOSTNAME = '';
  export const WEBUI_BASE_URL = '';
 diff --git a/src/lib/i18n/locales/ko-KR/translation.json b/src/lib/i18n/locales/ko-KR/translation.json
-index 8eba682..a41234c 100644
+index 8eba682..34a0a48 100644
 --- a/src/lib/i18n/locales/ko-KR/translation.json
 +++ b/src/lib/i18n/locales/ko-KR/translation.json
-@@ -3081,5 +3081,74 @@
+@@ -3081,5 +3081,77 @@
  	"Youtube Language": "Youtube 언어",
  	"Youtube Proxy URL": "Youtube 프록시 URL",
  	"Zoom in": "",
@@ -2395,7 +2409,10 @@ index 8eba682..a41234c 100644
 +	"EES.Automatic.Failed": "실패",
 +	"EES.Automatic.Missed": "놓침",
 +	"EES.Automatic.Running": "실행 중",
-+	"EES.Automatic.Succeeded": "정상"
++	"EES.Automatic.Succeeded": "정상",
++	"EES.Session.Checking": "현재 로그인 상태를 확인하고 있습니다…",
++	"EES.Session.Failed": "로그인 정보를 확인하지 못했습니다. 다시 확인해 주세요.",
++	"EES.Session.Retry": "다시 확인"
  }
 diff --git a/src/routes/(app)/+layout.svelte b/src/routes/(app)/+layout.svelte
 index 633a9f7..943bf69 100644
@@ -2656,10 +2673,77 @@ index 11eed46..a11e88a 100644
  		<div
  			class="  pb-1 px-3 flex-1 min-w-0 max-h-full overflow-y-auto overflow-x-hidden"
 diff --git a/src/routes/+layout.svelte b/src/routes/+layout.svelte
-index cd832fd..49017b1 100644
+index cd832fd..fe3f661 100644
 --- a/src/routes/+layout.svelte
 +++ b/src/routes/+layout.svelte
-@@ -603,7 +603,7 @@
+@@ -9,6 +9,7 @@
+ 	});
+ 
+ 	import { onMount, tick, setContext, onDestroy } from 'svelte';
++	import { eesSessionReady } from '$lib/components/ees/state';
+ 	import {
+ 		config,
+ 		user,
+@@ -111,6 +112,58 @@
+ 	let tokenTimer = null;
+ 	let isAuthRedirectInProgress = false;
+ 
++	// This root outlives both authenticated pages and the Native sign-in page.
++	// Cross-tab credentials require an owner check before the old surface is usable.
++	let eesSessionToken = typeof localStorage === 'undefined' ? '' : (localStorage.token || '');
++	let eesSessionEpoch = 0;
++	let eesSessionAlive = true;
++	let eesSessionFailed = false;
++	const eesRevalidateSession = async (event) => {
++		if (!eesSessionAlive || (event?.type === 'storage' && event.key !== null && event.key !== 'token')) return;
++		const token = localStorage.token || '';
++		// Native sign-in has already committed this same-tab session itself.
++		if (token && $user?.token === token) {
++			eesSessionEpoch++;
++			eesSessionToken = token;
++			eesSessionReady.set(true);
++			window.__eesNativeWorkV1?.sync?.();
++			return;
++		}
++		if (token === eesSessionToken) {
++			window.__eesNativeWorkV1?.sync?.();
++			return;
++		}
++		const epoch = ++eesSessionEpoch;
++		eesSessionFailed = false;
++		eesSessionReady.set(false);
++		window.__eesNativeWorkV1?.sync?.();
++		let candidate = null;
++		try { candidate = token ? await getSessionUser(token) : null; } catch {
++			if (eesSessionAlive && epoch === eesSessionEpoch && token === (localStorage.token || '')) eesSessionFailed = true;
++			return;
++		}
++		if (!eesSessionAlive || epoch !== eesSessionEpoch || token !== (localStorage.token || '')) return;
++		// An inconclusive lookup keeps the old surface isolated and retries on next focus.
++		if (token && !candidate?.id) { eesSessionFailed = true; return; }
++		eesSessionToken = token;
++		if (candidate?.id && candidate.id === $user?.id) {
++			// Renewing the same account preserves live uploads and unsaved Native input.
++			await user.set(candidate);
++			$socket?.emit('user-join', { auth: { token } });
++			eesSessionReady.set(true);
++			window.__eesNativeWorkV1?.sync?.();
++			return;
++		}
++		if (!token || (candidate?.id && candidate.id !== $user?.id)) {
++			for (const key of Object.keys(sessionStorage))
++				if (key.startsWith('chat-input') || key === 'ees-source-draft-owner') sessionStorage.removeItem(key);
++		}
++		// Clear the old owner before Native component cleanup can save controls.
++		await user.set(null);
++		window.location.replace(token ? '/' : '/auth');
++	};
++	onDestroy(() => { eesSessionAlive = false; eesSessionEpoch++; });
++
+ 	let showRefresh = false;
+ 
+ 	let showSyncStatsModal = false;
+@@ -603,7 +656,7 @@
  
  			if ($isLastActiveTab) {
  				if ($settings?.notificationEnabled ?? false) {
@@ -2668,7 +2752,7 @@ index cd832fd..49017b1 100644
  						body: timeStr,
  						// LICENSE covers this Open WebUI notification identifier.
  						// Do not alter, remove, obscure, or replace it except as LICENSE permits:
-@@ -741,7 +741,7 @@
+@@ -741,7 +794,7 @@
  
  					if ($isLastActiveTab) {
  						if ($settings?.notificationEnabled ?? false) {
@@ -2677,7 +2761,7 @@ index cd832fd..49017b1 100644
  								body: contentPreview,
  								// LICENSE covers this Open WebUI notification identifier.
  								// Do not alter, remove, obscure, or replace it except as LICENSE permits:
-@@ -854,7 +854,7 @@
+@@ -854,7 +907,7 @@
  						// LICENSE covers this Open WebUI notification identifier.
  						// Do not alter, remove, obscure, or replace it except as LICENSE permits:
  						// https://docs.openwebui.com/license.
@@ -2686,6 +2770,39 @@ index cd832fd..49017b1 100644
  							body: data?.content,
  							icon: `${WEBUI_API_BASE_URL}/users/${data?.user?.id}/profile/image`
  						});
+@@ -1368,6 +1421,8 @@
+ 	});
+ </script>
+ 
++<svelte:window on:storage={eesRevalidateSession} on:focus={eesRevalidateSession} />
++
+ <svelte:head>
+ 	<!-- LICENSE covers this Open WebUI branding surface, including name, logo,
+ 	visual, textual, symbolic identifiers, metadata, and surrounding UI.
+@@ -1401,6 +1456,15 @@
+ {/if}
+ 
+ {#if loaded}
++	{#if !$eesSessionReady}
++		<div data-ees-session-loading role="status" class="flex h-screen flex-col gap-3 items-center justify-center text-sm">
++			{#if eesSessionFailed}
++				<p>{$i18n.t('EES.Session.Failed', {defaultValue: 'Your sign-in could not be checked. Try again.'})}</p>
++				<button type="button" class="rounded-md border px-4 py-2 focus-visible:outline-2" on:click={() => eesRevalidateSession()}>{$i18n.t('EES.Session.Retry', {defaultValue: 'Check again'})}</button>
++			{:else}{$i18n.t('EES.Session.Checking', {defaultValue: 'Checking your current sign-in…'})}{/if}
++		</div>
++	{/if}
++	<div data-ees-session-surface style:display={$eesSessionReady ? 'contents' : 'none'} inert={!$eesSessionReady}>
+ 	{#if $isApp}
+ 		<div class="flex flex-row h-screen">
+ 			<AppSidebar />
+@@ -1412,6 +1476,7 @@
+ 	{:else}
+ 		<slot />
+ 	{/if}
++	</div>
+ {/if}
+ 
+ {#if $config?.features.enable_community_sharing}
 diff --git a/svelte.config.js b/svelte.config.js
 index 82e0595..6f11820 100644
 --- a/svelte.config.js

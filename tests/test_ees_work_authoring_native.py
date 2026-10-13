@@ -478,17 +478,22 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.click("[data-native-test-target]")
 
     def open_sidebar(self):
-        # Native restores its own sidebar preference after navigation. A chat
-        # composer can be ready with the sidebar already open; do not toggle it.
-        opened = """(()=>{const e=document.querySelector('#sidebar'),r=e?.getBoundingClientRect();
-            return e?.getAttribute('aria-hidden')==='false'&&!e.inert&&r.width>200&&r.x>=0
-                &&r.right<=innerWidth&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+50));})()"""
-        opening = """[...document.querySelectorAll('button[aria-label="사이드바 열기"]')].some(e=>{
-            const r=e.getBoundingClientRect();return !e.disabled&&r.width>0&&r.height>0
+        # The source sidebar owns expansion from first render. Its visible
+        # geometry and trusted pointer target are the readiness boundary.
+        opened = """(()=>{const e=document.querySelector('[data-ees-source-sidebar]'),
+            r=e?.getBoundingClientRect(),toggle=e?.querySelector('[data-ees-sidebar-toggle]');
+            return !!e&&e.dataset.compact==='false'&&toggle?.getAttribute('aria-expanded')==='true'
+                &&!e.closest('[inert]')&&r.width>200&&r.height>50&&r.x>=0&&r.y>=0
+                &&r.right<=innerWidth&&getComputedStyle(e).visibility==='visible'
+                &&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+50));})()"""
+        opening = """[...document.querySelectorAll('[data-ees-source-sidebar] [data-ees-sidebar-toggle][aria-expanded="false"]')].some(e=>{
+            const r=e.getBoundingClientRect();return !e.disabled&&!e.closest('[inert]')&&r.width>0&&r.height>0
+                &&r.x>=0&&r.y>=0&&r.right<=innerWidth&&r.bottom<=innerHeight
+                &&getComputedStyle(e).visibility==='visible'
                 &&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));})"""
         self.wait(opened + " || " + opening)
         if not self.browser.evaluate(opened):
-            self.click('button[aria-label="사이드바 열기"]')
+            self.click('[data-ees-source-sidebar] [data-ees-sidebar-toggle]')
         self.wait(opened)
 
     def login_ui(self, email, password):

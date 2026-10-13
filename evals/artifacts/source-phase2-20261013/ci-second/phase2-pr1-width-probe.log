@@ -1,0 +1,88 @@
+test_same_profile_native_logout_login_discards_late_a_read_and_ai (__main__.Probe.test_same_profile_native_logout_login_discards_late_a_read_and_ai) ... /workspace/scratch/f5cd50d81fb4/team-agent-poc-phase1/.venv/lib/python3.12/site-packages/ldap3/utils/asn1.py:50: DeprecationWarning: tagMap is deprecated. Please use TAG_MAP instead.
+  from pyasn1.codec.ber.encoder import tagMap, typeMap, AbstractItemEncoder
+/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase1/.venv/lib/python3.12/site-packages/ldap3/utils/asn1.py:50: DeprecationWarning: typeMap is deprecated. Please use TYPE_MAP instead.
+  from pyasn1.codec.ber.encoder import tagMap, typeMap, AbstractItemEncoder
+Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 229.18483700050274, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+
+======================================================================
+FAIL: test_same_profile_native_logout_login_discards_late_a_read_and_ai (__main__.Probe.test_same_profile_native_logout_login_discards_late_a_read_and_ai)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_work_authoring_account_switch.py", line 70, in test_same_profile_native_logout_login_discards_late_a_read_and_ai
+    self.wait("document.querySelector('#ees-work-panel')?.getBoundingClientRect().width===720")
+  File "/tmp/phase2-pr1-width-probe.py", line 14, in wait
+    try:return super().wait(expr,timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/test_ees_work_authoring_native.py", line 455, in wait
+    self.fail("Timed out: " + expression + "\n" + self.text("body") + "\nReadiness: " + repr(readiness) + "\nUnknown: " + repr(self.server.unknown))
+AssertionError: Timed out: document.querySelector('#ees-work-panel')?.getBoundingClientRect().width===720
+Skip to main content
+E
+EES Workflow
+업무
+워크스페이스
+
+관리 시스템
+
+시스템
+EMS
+업무 만들기
+업무 절차
+1
+도구
+0
+
+최근 편집
+
+A 전용 합성 절차
+새 대화
+대화 검색
+합성 계정 A
+A 전용 합성 절차
+참고
+일반 대화
+새 대화
+
+
+
+
+음성 모드 사용
+워크스페이스
+닫기
+업무 절차
+EMS
+업무 절차 목록
+A 전용 합성 절차초안 r1
+절차 설정
+
+운영 · EMS · 게시본 없음 · 저장 안 됨
+
+기본 절차
+구조
+실행 방식
+판정 규칙
+게시 기록
+구조
+새 단계
+작업 이름
+설명
+수행 안내
+사람이 정하는 값
+값 이름	형식	쓰이는 곳	저장 범위	편집
+선언한 값이 없습니다.
+값 추가
+위로
+아래로
+삭제
+변경 있음 · 저장 안 됨
+게시 전 확인
+초안 저장
+EES Workflow
+Readiness: {'route': '/', 'nativeReady': True}
+Unknown: []
+
+----------------------------------------------------------------------
+Ran 1 test in 14.237s
+
+FAILED (failures=1)

@@ -1,0 +1,17 @@
+test_exact_product_geometry_probe_on_native_source_fixture (__main__.SourceQ1Probe.test_exact_product_geometry_probe_on_native_source_fixture) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 126.09431400051108, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+
+======================================================================
+FAIL: test_exact_product_geometry_probe_on_native_source_fixture (__main__.SourceQ1Probe.test_exact_product_geometry_probe_on_native_source_fixture)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<stdin>", line 16, in test_exact_product_geometry_probe_on_native_source_fixture
+  File "/workspace/scratch/f5cd50d81fb4/team-agent-poc-phase2/tests/ees_work_integrated_app.py", line 421, in q1_native_geometry
+    assert abs(geometry['panel']['width']-480)<1,geometry
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'viewport': [1366, 768], 'document_width': 1366, 'sidebar': {'x': 0, 'y': 0, 'width': 56, 'height': 768, 'bottom': 768, 'right': 56}, 'panel': {'x': 887, 'y': 0, 'width': 479, 'height': 768, 'bottom': 768, 'right': 1366}, 'chat': {'x': 56, 'y': 0, 'width': 830, 'height': 768, 'bottom': 768, 'right': 886}, 'action': {'x': 887, 'y': 709, 'width': 479, 'height': 59, 'bottom': 768, 'right': 1366}, 'messages': [{'x': 91, 'y': 128, 'width': 760, 'height': 108.75, 'bottom': 236.75, 'right': 851}, {'x': 91, 'y': 264.75, 'width': 760, 'height': 75.25, 'bottom': 340, 'right': 851}]}
+
+----------------------------------------------------------------------
+Ran 1 test in 1.850s
+
+FAILED (failures=1)
