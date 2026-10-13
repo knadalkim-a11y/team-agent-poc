@@ -1,0 +1,16 @@
+runTest (__main__.ReferenceSlotProbe.runTest) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 184.4245120009873, "product": "HeadlessChrome/153.0.8010.52"}
+FAIL
+
+======================================================================
+FAIL: runTest (__main__.ReferenceSlotProbe.runTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/phase2-reference-slot-probe.py", line 27, in runTest
+    self.assertIn('첫 번째 입력',visible);self.assertNotIn('나중 입력',visible)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '첫 번째 입력' not found in '업무\n합성 절차\n닫기\n대화에서 참조한 과거 기록\n\n게시 v1 · 실행 시도 1 · 읽기 전용\n\n사람 확인 기록\n1차 · 2026. 10. 13. 04:43\n\n실행 당시 절차 v1 · 결과 r1\n\n이 실행에 쓴 값\n\n기록된 입력 없음\n\n도구 참조\n{}\n결과\n{\n  "human_input": {}\n}\n\n사람 판정 · fixture-admin · completed · 2026-10-13T08:43:10.293+00:00\n\n 이 기록에 대해 묻기'
+
+----------------------------------------------------------------------
+Ran 1 test in 3.139s
+
+FAILED (failures=1)
