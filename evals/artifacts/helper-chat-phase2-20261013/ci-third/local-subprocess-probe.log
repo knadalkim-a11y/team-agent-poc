@@ -1,0 +1,6 @@
+test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown (test_ees_workflow_execution.ExecutionTests.test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.204s
+
+OK

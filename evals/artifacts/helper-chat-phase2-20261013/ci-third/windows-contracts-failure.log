@@ -1,0 +1,54 @@
+Source: https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38375410891/job/115225542333
+Head: 0a8a0a6cefbffc9b38829aa841114aa8a15ddfb3
+Raw excerpt, original timestamps retained; CRLF normalized to LF.
+
+2026-10-13T09:31:22.5667394Z Executing <Task finished name='Task-238' coro=<ExecutionTests.test_protocol_writer_guard_rejects_actual_previous_program() done, defined at D:\a\team-agent-poc\team-agent-poc\tests\test_ees_workflow_execution.py:765> result=None created at C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\asyncio\runners.py:100> took 0.234 seconds
+2026-10-13T09:31:22.5690784Z ok
+2026-10-13T09:31:23.1360772Z test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown (test_ees_workflow_execution.ExecutionTests.test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown) ... Executing <Task pending name='Task-248' coro=<ExecutionTests.test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown() running at D:\a\team-agent-poc\team-agent-poc\tests\test_ees_workflow_execution.py:812> wait_for=<Future pending cb=[_chain_future.<locals>._call_check_cancel() at C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\asyncio\futures.py:387, Task.task_wakeup()] created at C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\asyncio\base_events.py:428> cb=[_run_until_complete_cb() at C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\asyncio\base_events.py:181] created at C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\asyncio\runners.py:100> took 0.469 seconds
+2026-10-13T09:31:34.4201191Z ERROR
+2026-10-13T09:31:34.6041553Z Executing <Task finished name='Task-250' coro=<ExecutionRuntime.stop() done, defined at D:\a\team-agent-poc\team-agent-poc\agent-pack\skills\ees-work-demo\scripts\ees_workflow_execution.py:95> result=None created at C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\asyncio\runners.py:100> took 0.188 seconds
+2026-10-13T09:31:34.8443052Z test_request_content_conflict_and_owner_isolation (test_ees_workflow_execution.ExecutionTests.test_request_content_conflict_and_owner_isolation) ... Executing <Task finished name='Task-253' coro=<ExecutionTests.asyncSetUp() done, defined at D:\a\team-agent-poc\team-agent-poc\tests\test_ees_workflow_execution.py:104> result=None created at C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\asyncio\runners.py:100> took 0.234 seconds
+2026-10-13T09:31:35.3586204Z Executing <Task finished name='Task-254' coro=<ExecutionTests.test_request_content_conflict_and_owner_isolation() done, defined at D:\a\team-agent-poc\team-agent-poc\tests\test_ees_workflow_execution.py:233> result=None created at C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\asyncio\runners.py:100> took 0.516 seconds
+2026-10-13T09:31:35.3611186Z ok
+2026-10-13T09:31:36.4346232Z test_result_commit_failure_rolls_back_and_recovers_unknown (test_ees_workflow_execution.ExecutionTests.test_result_commit_failure_rolls_back_and_recovers_unknown) ... Executing <Task finished name='Task-259' coro=<ExecutionTests.asyncSetUp() done, defined at D:\a\team-agent-poc\team-agent-poc\tests\test_ees_workflow_execution.py:104> result=None created at C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\asyncio\runners.py:100> took 1.094 seconds
+
+2026-10-13T09:31:52.5839489Z ======================================================================
+2026-10-13T09:31:52.5840527Z ERROR: test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown (test_ees_workflow_execution.ExecutionTests.test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown)
+2026-10-13T09:31:52.5841240Z ----------------------------------------------------------------------
+2026-10-13T09:31:52.5841527Z Traceback (most recent call last):
+2026-10-13T09:31:52.5847497Z   File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\unittest\async_case.py", line 90, in _callTestMethod
+2026-10-13T09:31:52.5848009Z     if self._callMaybeAsync(method) is not None:
+2026-10-13T09:31:52.5848260Z        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-13T09:31:52.5848683Z   File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\unittest\async_case.py", line 112, in _callMaybeAsync
+2026-10-13T09:31:52.5849081Z     return self._asyncioRunner.run(
+2026-10-13T09:31:52.5849284Z            ^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-13T09:31:52.5849629Z   File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\asyncio\runners.py", line 118, in run
+2026-10-13T09:31:52.5849990Z     return self._loop.run_until_complete(task)
+2026-10-13T09:31:52.5850214Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-13T09:31:52.5850601Z   File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\asyncio\base_events.py", line 654, in run_until_complete
+2026-10-13T09:31:52.5850972Z     return future.result()
+2026-10-13T09:31:52.5851144Z            ^^^^^^^^^^^^^^^
+2026-10-13T09:31:52.5851678Z   File "D:\a\team-agent-poc\team-agent-poc\tests\test_ees_workflow_execution.py", line 812, in test_real_subprocess_queued_work_recovers_and_killed_dispatch_stays_unknown
+2026-10-13T09:31:52.5852537Z     completed = await asyncio.to_thread(subprocess.run, [sys.executable, "-c", program, str(self.database), "fast", ""], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", timeout=10)
+2026-10-13T09:31:52.5853192Z                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-13T09:31:52.5853688Z   File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\asyncio\threads.py", line 25, in to_thread
+2026-10-13T09:31:52.5854065Z     return await loop.run_in_executor(None, func_call)
+2026-10-13T09:31:52.5854300Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-13T09:31:52.5854705Z   File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\concurrent\futures\thread.py", line 58, in run
+2026-10-13T09:31:52.5855278Z     result = self.fn(*self.args, **self.kwargs)
+2026-10-13T09:31:52.5855507Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-13T09:31:52.5855835Z   File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\subprocess.py", line 550, in run
+2026-10-13T09:31:52.5856218Z     stdout, stderr = process.communicate(input, timeout=timeout)
+2026-10-13T09:31:52.5856486Z                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-13T09:31:52.5856856Z   File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\subprocess.py", line 1209, in communicate
+2026-10-13T09:31:52.5857246Z     stdout, stderr = self._communicate(input, endtime, timeout)
+2026-10-13T09:31:52.5857506Z                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-13T09:31:52.5857858Z   File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\subprocess.py", line 1630, in _communicate
+2026-10-13T09:31:52.5858359Z     raise TimeoutExpired(self.args, orig_timeout)
+2026-10-13T09:31:52.5860403Z subprocess.TimeoutExpired: Command '['C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\python.exe', '-c', "\nimport asyncio,sys\nfrom pathlib import Path\nsys.path.insert(0, str(Path.cwd()/'tests'))\nfrom test_ees_workflow_execution import build_service,Bridge\nasync def main():\n    bridge=Bridge()\n    service=build_service(sys.argv[1],bridge)\n    if sys.argv[2]=='slow':\n        original=bridge.invoke\n        async def slow(*args):\n            Path(sys.argv[3]).write_text('dispatched',encoding='utf-8')\n            await asyncio.sleep(60)\n            return await original(*args)\n        bridge.invoke=slow\n    for _ in range(12):\n        if not await service.execution.process_once(): break\nasyncio.run(main())\n", 'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\tmpvvru1aai\\work.sqlite3', 'fast', '']' timed out after 10 seconds
+2026-10-13T09:31:52.5862277Z 
+2026-10-13T09:31:52.5862396Z ----------------------------------------------------------------------
+2026-10-13T09:31:52.5862653Z Ran 37 tests in 48.149s
+2026-10-13T09:31:52.5862767Z 
+2026-10-13T09:31:52.5862830Z FAILED (errors=1)
+
