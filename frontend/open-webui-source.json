@@ -15,21 +15,22 @@
     "src/lib/apis/ees-work.ts": "b0b65b445bf94d7a4ad54c6ccb497f20ec72ffa2fb5e7379b523f77ccc7fa252",
     "src/lib/apis/openai/index.ts": "4fc60216e9fdfc930bef83fc34a739ce1767ad2f0a3a3525592f7bd9a0f199e5",
     "src/lib/components/channel/Channel.svelte": "49454dd5aa86f0bc1424ca286d1a7ffccef3103a81c5ac36a99ffc9fe03e2bfc",
-    "src/lib/components/chat/Chat.svelte": "df24b194c8f49a1e4590e60f9d012f546ee184cac21188f9c7e42dd4a6d58a06",
+    "src/lib/components/chat/Chat.svelte": "e2b1de2211f0345ca528000394bca756d298da15db1cf06662b473c5ba561619",
     "src/lib/components/chat/MessageInput.svelte": "15268374d960172401c29ad671feb4955cfa681df6688da78a859ae6ad1425fb",
-    "src/lib/components/chat/Messages/ResponseMessage.svelte": "88a64c5d18ef5f39cab0bac897c6cd47f9aa742d253a789ecf3e97280e5c3ed8",
+    "src/lib/components/chat/Messages/ResponseMessage.svelte": "64fb38010aa936ec0eea0d9c0dd79a087b9c5026f94be8d08139fbd6529c1270",
     "src/lib/components/chat/Messages/UserMessage.svelte": "c677b13bf160de1bf0fafceef00ba5df098d661e6728c0dd5b1e6427b3e2eef8",
     "src/lib/components/chat/Navbar.svelte": "4b22e695898df3f082b997eafb1c57fd0b06dc26659396f1dc9c80cc724016ab",
     "src/lib/components/chat/Placeholder.svelte": "54e33b3997e9ce6bd78ea2b39f0d5b3bf280f8c494549eeb3d440df290cd6f97",
+    "src/lib/components/ees/EesHelperNotice.svelte": "22ceccc7ad93c5d820f73269baaa9b19f12c5c99054b76ecc8c89f7757f8bba0",
     "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
     "src/lib/components/ees/EesNavigation.svelte": "66406fb93ecf29a395be0827358b19e518381df564511e85e75dbb6f6e36439a",
-    "src/lib/components/ees/EesProcedureIntro.svelte": "42d6ec5f8236059057bd5d8900cdbd161fd33d38c6c4192d5e8c962e107a49fd",
+    "src/lib/components/ees/EesProcedureIntro.svelte": "815ecc9164df95671f784bab30304013b5541c1fc98584092cc2742d8dc03b3b",
     "src/lib/components/ees/EesShell.svelte": "63cf62375b08665a1314e0313173345c6480af7a46fbace6c48148e9b0bf7edb",
     "src/lib/components/ees/icons/5bc95.svg": "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7",
     "src/lib/components/ees/state.ts": "560ef1a21f46fc2a1beabf3012a74933002af586c507ac42bb144f40fe305a43",
     "src/lib/components/layout/Sidebar.svelte": "9d08f54fdaa101ef2cf06c159e5defe421b366c695f26a15c4045bf3ba556096",
     "src/lib/constants.ts": "0fd43314837a2d7775810c3f08fc82b8042c34a5b6e52f1a7e4513f303a07b5d",
-    "src/lib/i18n/locales/ko-KR/translation.json": "67943c9f468cf9874c0344264706f67bfb34474be826eb39dd24816e275fb7e3",
+    "src/lib/i18n/locales/ko-KR/translation.json": "d15670ef33efb023c9a9de08929e5a0ce10c83ffbf4d82d80b36ecfbc3bf07c3",
     "src/routes/(app)/+layout.svelte": "6e235011199f1eb11107a2d444e5db8c6fb89d13b6e93b9e5980523bf87226f6",
     "src/routes/(app)/+page.svelte": "7cdd5f35c6d1064663d2bafd03263585ca270ce24d26788a656d465339e6cb03",
     "src/routes/(app)/c/[id]/+page.svelte": "2cf8b7796915e7711e467a4142d96ad1d4afc0366221236620719193d91d0ad2",
@@ -42,7 +43,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "10b6107a90b7f32cac58b99e167ce2f60313082bd606541e9027699ed63f9939"
+      "sha256": "1d8060bcbc5296a65bf62a4660a9033e484d535738b3a2c1e87cb864a7c316e4"
     }
   ],
   "pyodide_files": {

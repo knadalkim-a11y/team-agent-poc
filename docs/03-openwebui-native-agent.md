@@ -1,6 +1,6 @@
 # 03. Open WebUI Native 통합 Assistant
 
-현재 제품 이름은 **EES Workflow**이며 [2026-10-02 통합 구현 기준](#integrated-work-install-20261002)을 유지한다. 사용자는 2026-10-13 main4e89341의 `.14` 적용 성공을 보고했다. [1단계 적용 안내](#source-frontend-apply-20261013)는 당시 원문으로 보존한다. 2단계는 두 PR을 모두 병합한 뒤 최종 main CI·ZIP 하나로 적용 안내를 확정하므로 현재 후보를 사내에서 실행하지 않는다. 아래 날짜별 시연·ApplyDemo·전문 Assistant·사전 Skill 구성은 당시 이력이다. 새 설치/업데이트에서 이 콘텐츠를 등록하지 않으며 옛 명령을 반복하지 않는다. 실제 도구/Native 관리/프로그램 적용과 복구 경로는 유지한다.
+현재 제품 이름은 **EES Workflow**이며 [2026-10-02 통합 구현 기준](#integrated-work-install-20261002)을 유지한다. 사용자는 2026-10-13 main4e89341의 `.14` 적용 성공을 보고했다. [1단계 적용 안내](#source-frontend-apply-20261013)는 당시 원문으로 보존한다. [2단계 통합 적용](#source-phase2-local-zip-20261014)은 #86·#87 모두 병합하고 최종 main CI·ZIP을 확정한 뒤 한 번만 수행한다. 아래 날짜별 시연·ApplyDemo·전문 Assistant·사전 Skill 구성은 당시 이력이다. 새 설치/업데이트에서 이 콘텐츠를 등록하지 않으며 옛 명령을 반복하지 않는다. 실제 도구/Native 관리/프로그램 적용과 복구 경로는 유지한다.
 
 > 문서 역할: Native Assistant 기준선 구성·확장 원칙
 >
@@ -12,11 +12,61 @@
 
 | 할 일 | 안내 |
 |---|---|
+| 소스 화면·대화 도우미 2단계 통합 적용 | [최종 main 브라우저 ZIP 한 번 적용](#source-phase2-local-zip-20261014) |
 | 소스 프런트엔드 1단계 적용 준비 | [CI ZIP 적용·대안·종료 복구](#source-frontend-apply-20261013) · [팀원 업무 안내](07-team-quickstart.md#first-work-20261012) |
 | 새 EES Workflow 후보·자산 정리 경계 | [통합 설치·복구](#integrated-work-install-20261002) |
 | 프로그램·래퍼 업데이트 | [Upgrade](#ees-wrapper-upgrade) |
 | 수동 적용·복구 | [Apply/Restore](#ees-wrapper-apply)·[종료 복구](#ees-stop-recovery) |
 | 실패 기록·등록 위치 확인 | [실패 판단](#ees-update-failure-causes)·[사내 기록](#ees-local-state) |
+
+<a id="source-phase2-local-zip-20261014"></a>
+
+## 소스 화면·대화 도우미 2단계 통합 적용 · 2026-10-14
+
+**#86 다음 #87을 병합하고 최종 main CI가 성공한 뒤, 그 main의 프로그램 ZIP 하나를 적용한다.** 최종 전체 main SHA·성공 CI·바깥 Actions ZIP 다운로드 링크·그 바깥 ZIP의 SHA256은 [PR #87의 최종 전달 댓글](https://github.com/knadalkim-a11y/team-agent-poc/pull/87)에서 확정한다. PR head·#86 단독 산출물이나 내부 프로그램 ZIP의 해시를 섞지 않는다. 예상 현재 설치 원본은 사용자가 적용 성공을 보고한 `4e89341a4db453bab16fc91baa0af7884b92fef9`이며, 다르거나 invalid/incomplete이면 Update·Stop 전에 중단한다. 실제 사내 적용은 사용자가 직접 수행하고 결과를 별도로 확인한다.
+
+확정된 **압축을 풀지 않은 바깥 Actions ZIP**을 브라우저로 받은 뒤, 팀원이 사용하지 않는 시간에 기존 운영 계정의 PowerShell에서 아래 한 블록을 실행한다. 기본 경로가 다르면 `$eesRepo`·`$eesCfg`만 기존 값으로 바꾼다. ZIP 경로는 따옴표 없이 입력한다. Git Update는 기존 인증을 사용하며 ZIP 적용에는 GitHub API 토큰이 필요하지 않다. 사내 Node/npm 설치·빌드나 사용자 자산 재등록은 하지 않는다.
+
+```powershell
+& {
+    $ErrorActionPreference = 'Stop'
+    $eesRepo = Join-Path $env:USERPROFILE 'team-agent-poc'
+    $eesCfg = Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+    $eesManager = Join-Path $eesRepo 'scripts\manage-ees.ps1'
+    $eesCommit = Read-Host '#86·#87 병합·main CI 확인 후 전달받은 전체 40자리 SHA'
+    if ($eesCommit -cnotmatch '\A[0-9a-f]{40}\z') { throw '확정한 전체 SHA가 필요합니다.' }
+    $eesStatus = & $eesManager -Action Status -Config $eesCfg | ConvertFrom-Json
+    Write-Host ('EES before commit={0} valid={1} running={2}' -f $eesStatus.current_commit, $eesStatus.program_valid, $eesStatus.managed_process_running)
+    if ($eesStatus.program_valid -ne $true -or $eesStatus.program_incomplete -or
+        $eesStatus.current_commit -cne '4e89341a4db453bab16fc91baa0af7884b92fef9') {
+        throw '설치 원본/상태가 예상과 다릅니다. before 한 줄로 확인하고 중단합니다.'
+    }
+    & $eesManager -Action Update -Config $eesCfg
+    $eesHead = & git -C $eesRepo rev-parse HEAD
+    if ($LASTEXITCODE -ne 0) { throw 'HEAD 조회 실패' }
+    $eesMain = & git -C $eesRepo rev-parse origin/main
+    if ($LASTEXITCODE -ne 0) { throw 'origin/main 조회 실패' }
+    if ($eesHead -cne $eesCommit -or $eesMain -cne $eesCommit) {
+        throw '검토 원본과 다릅니다. 적용하지 않고 중단합니다.'
+    }
+    $eesZip = Read-Host '브라우저로 받은 바깥 Actions ZIP의 전체 로컬 파일 경로'
+    $eesHash = Read-Host '같은 산출물로 확정된 바깥 ZIP SHA256 전체 64자리'
+    if ($eesHash -cnotmatch '\A[0-9a-f]{64}\z') { throw '확정한 SHA256이 필요합니다.' }
+    & $eesManager -Action Upgrade -Config $eesCfg -Bundle $eesZip -Commit $eesCommit -ArtifactSha256 $eesHash -HealthTimeout 120 -Summary
+}
+```
+
+기존 **Status → Update/SHA 대조 → ZIP·manifest·시간대·프로그램 사전 검증 → Stop → 검증 백업/기록 → Apply → Start/health** 순서를 유지한다. 받은 원본 ZIP은 수정·삭제하지 않는다. 검증된 백업과 기록이 없으면 Apply하지 않으며, Stop 이후 실패를 새 ZIP 블록이나 자동 재시도로 덮지 않는다. `stage=process_stop`이면 이번 실패와 wrapper SHA를 보존하는 [기존 명시적 종료 복구](#source-frontend-stop-recovery-20261013), 다른 실패면 [단계별 판단](#internal-pilot-failures-20261012)을 따른다. 정상 적용 뒤 프로그램 복원은 기존 Stop → Restore → Start이며, DB·대화·첨부·개인 키의 과거 복원을 뜻하지 않는다.
+
+성공 뒤 다음 항목을 한 번에 확인한다. 미확인 항목은 `미확인`, 이상이 있으면 `이상`으로 남긴다.
+
+| 항목 | 실제 확인 |
+|---|---|
+| `login`·`chat`·`work` | 로그인, 기존 대화·첨부, 기존 업무 화면을 열 수 있음 |
+| `menu_flash` | 새로고침·기존 대화 주소 직접 열기와 대화 목록·새 대화·업무·관리 화면 왕복·오른쪽 패널 이동 때 원래 메뉴가 먼저 보이지 않음. 관리자 설정 창은 원래 화면 유지 |
+| `helper_chat` | 새 절차 안내는 대화 안, 기존 대화는 입력창 바로 위 질문만 표시. 1366×768에서도 입력창을 가리지 않음. 질문/더 묻기는 바로 전송하고 답에 모델 이름 하나만 표시. 기존 글·첨부 보존, 답변 중 질문 비활성화, 사용 불가 시 무전송과 질문 목록 바로 위 안내 |
+
+**전달할 결과는1~2줄만 쓴다.** 적용 전 중단이면 `EES before ...` 또는 오류 문장 한 줄, Upgrade 실행 뒤에는 `result=… / stage=… / code=… / running=… / commit=…` 한 줄이다. 성공 후 두 번째 줄은 `login=OK / chat=OK / work=OK / menu_flash=없음 / helper_chat=OK`처럼 실제 확인 결과를 보낸다. 긴 로그·파일·화면 사진은 요구하지 않는다. 합성 모델·브라우저 검증은 실제 사내 모델의 설명 품질이나 사용자 수락을 대신하지 않는다.
 
 <a id="source-frontend-apply-20261013"></a>
 
@@ -2217,7 +2267,7 @@ C18 PR 1에서는 Open WebUI 항목을 원래 화면으로 열면서 왼쪽 EES 
 
 **빈 절차로 시작**은 이름만 입력합니다. 분류는 운영, 실행 방식은 수시이며 수행 범위는 아직 정하지 않습니다. 이후 **절차 설정**에서 변경할 수 있습니다. 예시는 합성 초안이며 실제 담당자·공장 주소·운영 도구가 연결되어 있지 않습니다. 단계와 작업을 맞게 고친 뒤 사용할 도구와 모델·판정 기준을 설정하고 **초안 저장 → 검사 → 게시** 순서로 진행합니다. **도구 연결 전**인 작업은 게시 검사에서 차단됩니다. 일정 제안만으로 예약이나 자동 실행이 등록되지 않으며, 게시 전에는 업무 화면에 나타나지 않습니다. AP 응답 장애 예시는 전체 구성이 확정되기 전까지 제공하지 않습니다.
 
-새 절차의 **업무 도우미** 안내와 질문은 가운데 대화에 나타납니다. 질문을 누르면 바로 보내고 같은 대화에서 답합니다. 쓰던 글·첨부·모델 선택은 그대로 두며, 보낸 질문에는 클릭 당시 화면의 **참고**가 붙습니다. 답변 중에는 질문 버튼을 사용할 수 없고, 도우미 연결이나 사용 권한을 확인하지 못하면 보내지 않고 한 줄 안내를 표시합니다. 도우미는 공통 도움말을 바탕으로 설명·안내만 하며 대화로 절차 초안을 만들지는 않습니다. 초안을 만든 뒤의 기존 절차 편집·AI 제안 검토 흐름과 구분하고, 실제 사내 모델의 답변 품질은 별도로 확인합니다. 이2단계 후보의 실제 적용 여부는 [STATUS](STATUS.md)를 확인하세요.
+새 절차의 **업무 도우미** 안내와 질문은 가운데 대화에 나타납니다. 기존 대화에서는 이름·설명 없이 질문 목록만 입력창 바로 위에 보입니다. 질문을 누르면 바로 보내고 같은 대화에서 답하며, 답변은 다른 답과 같은 모양으로 모델 이름 하나만 표시합니다. 쓰던 글·첨부·모델 선택은 그대로 두며, 보낸 질문에는 클릭 당시 화면의 **참고**가 붙습니다. 답변 중에는 질문 버튼을 사용할 수 없고, 도우미 연결이나 사용 권한을 확인하지 못하면 보내지 않고 누른 질문 목록 바로 위에 한 줄 안내를 표시합니다. 관리자의 조치가 필요한 경우 ‘관리자에게 … 요청하세요’로 안내합니다. 도우미는 공통 도움말을 바탕으로 설명·안내만 하며 대화로 절차 초안을 만들지는 않습니다. 초안을 만든 뒤의 기존 절차 편집·AI 제안 검토 흐름과 구분하고, 실제 사내 모델의 답변 품질은 별도로 확인합니다. 이2단계의 실제 적용 여부는 [STATUS](STATUS.md)를 확인하세요.
 
 [절차 예시 원본](../agent-pack/skills/ees-work-demo/scripts/workflow_procedure_examples.json)은 프로그램과 함께 배포됩니다. 서버가 예시 ID로 원본을 읽어 새 절차·단계·작업 ID를 발급하므로 기존 절차와 게시 이력을 변경하지 않습니다. 기존 `ees_workflow` 등록 원본·공개 함수·인자는 그대로입니다. 인증된 이전 ees.13 설치 목록 112개·114개·115개는 업데이트·Restore 검증 대상이며 C18 새 번들은 메뉴 원본 아이콘을 포함한 119개 파일이 모두 있어야 합니다. 실제 사내 배포 상태는 [STATUS](STATUS.md)에서 확인합니다.
 

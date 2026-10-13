@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-14",
+  "scope": "Local source22 PASS; browser evidence is final head CI, not a local pass",
+  "patch_sha256": "1d8060bcbc5296a65bf62a4660a9033e484d535738b3a2c1e87cb864a7c316e4",
+  "files": {
+    "source-tests.log": {
+      "bytes": 4424,
+      "sha256": "0be7588cf52aa4a064d3c0b381491ac676c8f8242a8ffd7aa057fb6e4d02aa1e"
+    },
+    "docs-check.log": {
+      "bytes": 59,
+      "sha256": "0b1471dace12a13704c131a36fe36e43e811dea5c4f98da973797f793a92f436"
+    }
+  }
+}

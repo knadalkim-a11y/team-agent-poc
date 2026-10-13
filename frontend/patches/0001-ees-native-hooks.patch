@@ -146,17 +146,18 @@ diff --git a/src/lib/components/chat/Chat.svelte b/src/lib/components/chat/Chat.
 index 875aee0..69c73bb 100644
 --- a/src/lib/components/chat/Chat.svelte
 +++ b/src/lib/components/chat/Chat.svelte
-@@ -109,6 +109,9 @@
+@@ -109,6 +109,10 @@
  	import MessageInput from '$lib/components/chat/MessageInput.svelte';
  	import Messages from '$lib/components/chat/Messages.svelte';
  	import Navbar from '$lib/components/chat/Navbar.svelte';
 +	import EesProcedureIntro from '$lib/components/ees/EesProcedureIntro.svelte';
++	import EesHelperNotice from '$lib/components/ees/EesHelperNotice.svelte';
 +	import { eesHelperState, eesSync, eesSnapshot } from '$lib/components/ees/state';
 +	import { eesRequest } from '$lib/apis/ees-work';
  	import ChatControls from './ChatControls.svelte';
  	import EventConfirmDialog from '../common/ConfirmDialog.svelte';
  	import DeleteConfirmDialog from '../common/ConfirmDialog.svelte';
-@@ -376,6 +379,7 @@
+@@ -376,6 +380,7 @@
  
  	// Read-only when viewing someone else's chat (e.g. via shared folder access)
  	$: readOnly = chat != null && chat.user_id !== $user?.id;
@@ -164,7 +165,7 @@ index 875aee0..69c73bb 100644
  
  	let chatOwner = null;
  
-@@ -404,6 +408,22 @@
+@@ -404,6 +409,22 @@
  	};
  
  	let taskIds = null;
@@ -187,7 +188,7 @@ index 875aee0..69c73bb 100644
  
  	// Chat Input
  	let prompt = '';
-@@ -790,13 +810,20 @@
+@@ -790,13 +811,20 @@
  		initEmbeddedDraft();
  	}
  
@@ -209,7 +210,7 @@ index 875aee0..69c73bb 100644
  		noteChatDebug('navigateHandler start');
  		// Mark the outgoing chat as read before loading the new one.
  		// $chatId still holds the previous chat here — loadChat() updates it.
-@@ -859,9 +886,9 @@
+@@ -859,9 +887,9 @@
  				activeChatId: $chatId
  			});
  		}
@@ -221,7 +222,7 @@ index 875aee0..69c73bb 100644
  		clearTimeout(saveControlsTimer);
  		await saveControls();
  
-@@ -899,7 +926,7 @@
+@@ -899,7 +927,7 @@
  		loading = false;
  		await tick();
  		messageInput?.focus({ preventScroll: true });
@@ -230,7 +231,7 @@ index 875aee0..69c73bb 100644
  
  	const onSelect = async (e) => {
  		const { type, data } = e;
-@@ -1530,6 +1557,53 @@
+@@ -1530,6 +1558,53 @@
  	};
  
  	onMount(() => {
@@ -284,7 +285,7 @@ index 875aee0..69c73bb 100644
  		loading = true;
  		console.log('mounted');
  		window.addEventListener('message', onMessageHandler);
-@@ -1553,7 +1627,7 @@
+@@ -1553,7 +1628,7 @@
  		}
  
  		const pageSubscribe = page.subscribe(async (p) => {
@@ -293,7 +294,7 @@ index 875aee0..69c73bb 100644
  				await tick();
  				initNewChat();
  			}
-@@ -1582,7 +1656,7 @@
+@@ -1582,7 +1657,7 @@
  			`chat-input${chatIdProp ? `-${chatIdProp}` : ''}`
  		);
  
@@ -302,7 +303,7 @@ index 875aee0..69c73bb 100644
  			if (!chatIdProp) {
  				loading = false;
  				await tick();
-@@ -1604,10 +1678,11 @@
+@@ -1604,10 +1679,11 @@
  			}
  
  			messageInput?.focus({ preventScroll: true });
@@ -315,7 +316,7 @@ index 875aee0..69c73bb 100644
  			try {
  				clearTimeout(saveControlsTimer);
  				saveControls();
-@@ -1990,7 +2065,12 @@
+@@ -1990,7 +2066,12 @@
  		}, 0);
  	};
  
@@ -329,7 +330,7 @@ index 875aee0..69c73bb 100644
  		console.log('initNewChat');
  		resetWebSearchConfirmation();
  
-@@ -2112,9 +2192,6 @@
+@@ -2112,9 +2193,6 @@
  		await showCallOverlay.set(false);
  		await showArtifacts.set(false);
  
@@ -339,7 +340,7 @@ index 875aee0..69c73bb 100644
  
  		autoScroll = true;
  
-@@ -2233,7 +2310,7 @@
+@@ -2233,7 +2311,7 @@
  
  		await tick();
  		messageInput?.focus({ preventScroll: true });
@@ -348,7 +349,7 @@ index 875aee0..69c73bb 100644
  
  	const loadChat = async () => {
  		noteChatDebug('loadChat start');
-@@ -2866,9 +2943,57 @@
+@@ -2866,9 +2944,57 @@
  	// Chat functions
  	//////////////////////////
  
@@ -356,7 +357,7 @@ index 875aee0..69c73bb 100644
 +
 +	const eesAskHelp = async (payload) => {
 +		const t = (key, fallback) => $i18n.t(key, { defaultValue: fallback });
-+		const unavailable = t('EES.Helper.Unavailable', 'The work assistant is unavailable. Check its setup and try again.');
++		const unavailable = t('EES.Helper.Unavailable', 'The work assistant is unavailable. Ask an administrator to check its tool registration, access permissions and program version.');
 +		const requestActor = $user?.id, requestToken = localStorage.token, requestChat = $chatId, requestContext = payload?.reference?.context_id;
 +		const ownsRequest = () => eesDraftAlive && $user?.id === eesDraftOwner && $user?.id === requestActor && localStorage.token === requestToken;
 +		const reject = (code, message = unavailable) => {
@@ -407,7 +408,7 @@ index 875aee0..69c73bb 100644
  		chatFiles.push(
  			..._files.filter(
  				(item) =>
-@@ -2881,6 +3006,8 @@
+@@ -2881,6 +3007,8 @@
  			(item, index, array) => array.findIndex((i) => equal(i, item)) === index
  		);
  
@@ -416,7 +417,7 @@ index 875aee0..69c73bb 100644
  		// Create user message
  		let userMessageId = uuidv4();
  		let userMessage = {
-@@ -2891,7 +3018,8 @@
+@@ -2891,7 +3019,8 @@
  			content: inputContent,
  			files: _files.length > 0 ? _files : undefined,
  			timestamp: Math.floor(Date.now() / 1000), // Unix epoch
@@ -426,7 +427,7 @@ index 875aee0..69c73bb 100644
  		};
  
  		// Add message to history and Set currentId to messageId
-@@ -2905,13 +3033,29 @@
+@@ -2905,13 +3034,29 @@
  		history.currentId = userMessageId;
  
  		// focus on chat input (skip during voice call to avoid triggering mobile keyboard)
@@ -460,7 +461,7 @@ index 875aee0..69c73bb 100644
  	};
  
  	const handleManualCompact = async () => {
-@@ -3201,12 +3345,14 @@
+@@ -3201,12 +3346,14 @@
  			messages = null,
  			modelId = null,
  			modelIdx = null,
@@ -476,7 +477,7 @@ index 875aee0..69c73bb 100644
  		} = {}
  	) => {
  		if (autoScroll) {
-@@ -3352,7 +3498,8 @@
+@@ -3352,7 +3499,8 @@
  						// regenerations in a duplicate-model chat, which would otherwise lose their
  						// column identity and collapse on reload.
  						messageIdsList: messageIdsList.length > 0 ? messageIdsList : undefined,
@@ -486,7 +487,7 @@ index 875aee0..69c73bb 100644
  					}
  				);
  			} finally {
-@@ -3407,29 +3554,33 @@
+@@ -3407,29 +3555,33 @@
  		{
  			messageIdsList,
  			regenerationPrompt,
@@ -524,7 +525,7 @@ index 875aee0..69c73bb 100644
  				(item) =>
  					['doc', 'text', 'note', 'chat', 'collection', 'folder'].includes(item.type) ||
  					(item.type === 'file' && !(item?.content_type ?? '').startsWith('image/'))
-@@ -3449,7 +3600,7 @@
+@@ -3449,7 +3601,7 @@
  		await tick();
  
  		let userLocation;
@@ -533,7 +534,7 @@ index 875aee0..69c73bb 100644
  			userLocation = await getAndUpdateUserLocation(localStorage.token).catch((err) => {
  				console.error(err);
  				return undefined;
-@@ -3522,7 +3673,7 @@
+@@ -3522,7 +3674,7 @@
  		const toolIds = [];
  		const toolServerIds = [];
  
@@ -542,7 +543,7 @@ index 875aee0..69c73bb 100644
  			if (toolId.startsWith('direct_server:')) {
  				let serverId = toolId.replace('direct_server:', '');
  				// Check if serverId is a number
-@@ -3538,18 +3689,25 @@
+@@ -3538,18 +3690,25 @@
  
  		// Menu-selected skills are sent as IDs; inline <$skillId|label> mentions stay
  		// in the message so the backend can inject their full content.
@@ -569,7 +570,7 @@ index 875aee0..69c73bb 100644
  				...(messages.length > 0 ? { messages } : {}),
  				params: {
  					...$settings?.params,
-@@ -3559,22 +3717,22 @@
+@@ -3559,22 +3718,22 @@
  
  				files: (files?.length ?? 0) > 0 ? files : undefined,
  
@@ -596,7 +597,7 @@ index 875aee0..69c73bb 100644
  				variables: {
  					...getPromptVariables(
  						$user?.name,
-@@ -3592,11 +3750,20 @@
+@@ -3592,11 +3751,20 @@
  				id: responseMessageId,
  				...(messageIdsList ? { message_ids: messageIdsList } : {}),
  				parent_id: userMessage?.parentId ?? null,
@@ -619,7 +620,7 @@ index 875aee0..69c73bb 100644
  					...(!$temporaryChatEnabled &&
  					(!_chatId ||
  						(embedded &&
-@@ -3610,8 +3777,10 @@
+@@ -3610,8 +3778,10 @@
  					follow_up_generation: $settings?.autoFollowUps ?? true
  				}
  			},
@@ -631,7 +632,7 @@ index 875aee0..69c73bb 100644
  			console.log(error);
  
  			let errorMessage = error;
-@@ -3661,7 +3830,10 @@
+@@ -3661,7 +3831,10 @@
  					});
  					await chatId.set(res.chat_id);
  					if (!$temporaryChatEnabled && !embedded) {
@@ -643,7 +644,7 @@ index 875aee0..69c73bb 100644
  						await refreshChatList(localStorage.token);
  
  						// Persist chat-level params (system prompt, advanced
-@@ -3923,6 +4095,9 @@
+@@ -3923,6 +4096,9 @@
  
  	const initChatHandler = async (history) => {
  		let _chatId = $chatId;
@@ -653,7 +654,7 @@ index 875aee0..69c73bb 100644
  		const selectedFolderId = $selectedFolder?.id;
  
  		if (!$temporaryChatEnabled) {
-@@ -3944,10 +4119,13 @@
+@@ -3944,10 +4120,13 @@
  			);
  
  			_chatId = chat.id;
@@ -668,7 +669,7 @@ index 875aee0..69c73bb 100644
  			}
  
  			await tick();
-@@ -3971,6 +4149,7 @@
+@@ -3971,6 +4150,7 @@
  	};
  
  	const saveChatHandler = async (_chatId, history) => {
@@ -676,7 +677,7 @@ index 875aee0..69c73bb 100644
  		if ($chatId == _chatId) {
  			if (!$temporaryChatEnabled) {
  				chat = await updateChatById(localStorage.token, _chatId, {
-@@ -3985,6 +4164,8 @@
+@@ -3985,6 +4165,8 @@
  	};
  
  	const saveControls = async () => {
@@ -685,7 +686,7 @@ index 875aee0..69c73bb 100644
  		if (!$chatId || $temporaryChatEnabled) return;
  		const loaded = chat?.chat ?? {};
  		if (equal(params, loaded.params ?? {}) && equal(chatFiles, loaded.files ?? [])) return;
-@@ -3997,9 +4178,12 @@
+@@ -3997,9 +4179,12 @@
  			return null;
  		});
  		// Refresh the dedupe baseline so a later revert still saves.
@@ -699,7 +700,7 @@ index 875aee0..69c73bb 100644
  	const MAX_DRAFT_LENGTH = 5000;
  	let saveDraftTimeout: ReturnType<typeof setTimeout> | null = null;
  	const getDraftChatId = () => chatIdProp || null;
-@@ -4023,13 +4207,14 @@
+@@ -4023,13 +4208,14 @@
  	});
  
  	const saveDraft = async (draft: any, chatId: string | null = null, debounce = true) => {
@@ -715,7 +716,7 @@ index 875aee0..69c73bb 100644
  			if (debounce) {
  				saveDraftTimeout = setTimeout(write, 500);
  			} else {
-@@ -4055,6 +4240,7 @@
+@@ -4055,6 +4241,7 @@
  	};
  
  	const clearDraft = async (chatId: string | null = null) => {
@@ -723,7 +724,7 @@ index 875aee0..69c73bb 100644
  		if (saveDraftTimeout) {
  			clearTimeout(saveDraftTimeout);
  		}
-@@ -4242,66 +4428,13 @@
+@@ -4242,66 +4429,13 @@
  <div
  	class="{embedded
  		? 'h-full'
@@ -793,11 +794,10 @@ index 875aee0..69c73bb 100644
  						<Navbar
  							bind:this={navbarElement}
  							{readOnly}
-@@ -4363,9 +4496,64 @@
+@@ -4363,9 +4497,63 @@
  								}
  							}}
  						/>
-+		{#if eesHelperNotice}<div data-ees-helper-notice role="status" class="px-6 py-2 text-sm text-gray-600">{eesHelperNotice}</div>{/if}
 +	{/if}
 +	{#if !loading}
 +		<div in:fade={{ duration: 50 }} class="w-full flex-1 min-h-0 flex flex-col">
@@ -884,15 +884,18 @@ index 875aee0..69c73bb 100644
  								<div class="pb-6 z-10">
  									<div class="text-xs text-gray-400 dark:text-gray-500 text-center">
  										{$i18n.t('Read only')}
-@@ -4422,6 +4616,7 @@
+@@ -4422,6 +4616,10 @@
  									id={embedded ? messageInputDropzoneId : undefined}
  									class=" pb-2 {dragged ? 'z-0' : 'z-10'}"
  								>
 +									{#if !embedded && history.currentId}<EesProcedureIntro />{/if}
++									{#if !embedded && !$eesSnapshot.procedure_start && eesHelperNotice}
++										<div class="px-6 py-2"><div class="max-w-[760px] mx-auto"><EesHelperNotice /></div></div>
++									{/if}
  									<MessageInput
  										bind:this={messageInput}
  										{history}
-@@ -4574,7 +4769,7 @@
+@@ -4574,7 +4772,7 @@
  								</div>
  							</div>
  						{:else}
@@ -965,64 +968,6 @@ index a2df614..ff81873 100644
  									{/if}
  								</div>
  							</div>
-diff --git a/src/lib/components/chat/Messages/ResponseMessage.svelte b/src/lib/components/chat/Messages/ResponseMessage.svelte
-index 312864d..febaa99 100644
---- a/src/lib/components/chat/Messages/ResponseMessage.svelte
-+++ b/src/lib/components/chat/Messages/ResponseMessage.svelte
-@@ -645,6 +645,7 @@
- 			contentContainerElement.removeEventListener('copy', contentCopyHandler);
- 		}
- 	});
-+	$: eesHelperResponse = history.messages[message.parentId]?.meta?.ees_work_help === 1 && history.messages[message.parentId]?.meta?.ees_work_reference?.kind === 'help';
- </script>
- 
- <DeleteConfirmDialog
-@@ -662,15 +663,23 @@
- 		dir={$settings.chatDirection}
- 		style="scroll-margin-top: 3rem;"
- 	>
-+		{#if !eesHelperResponse}
- 		<div class={`shrink-0 ltr:mr-2 rtl:ml-2 hidden @lg:flex mt-0.5 `}>
- 			<ProfileImage
- 				src={`${WEBUI_API_BASE_URL}/models/model/profile/image?id=${model?.id}&lang=${$i18n.language}`}
- 				className={'size-7 assistant-message-profile-image'}
- 			/>
- 		</div>
-+		{/if}
- 
- 		<div class="flex-auto w-0 pl-1 relative">
- 			{#if !compactPreview}
-+				{#if eesHelperResponse}
-+					<div data-ees-helper-label class="ees-helper-label">
-+						<span class="ees-helper-avatar">{$i18n.t('EES.Helper.Initial', { defaultValue: 'W' })}</span>
-+						{$i18n.t('EES.Helper', { defaultValue: 'Work assistant' })}
-+					</div>
-+				{:else}
- 				<Name>
- 					<Tooltip content={model?.name ?? message.model} placement="top-start">
- 						<span id="response-message-model-name" class="line-clamp-1 text-black dark:text-white">
-@@ -678,6 +687,7 @@
- 						</span>
- 					</Tooltip>
- 				</Name>
-+				{/if}
- 			{/if}
- 
- 			<div>
-@@ -1632,4 +1642,13 @@
- 		-ms-overflow-style: none; /* IE and Edge */
- 		scrollbar-width: none; /* Firefox */
- 	}
-+
-+	.ees-helper-label {
-+		display: flex; align-items: center; gap: 6px; font-size: 12px; line-height: 16px;
-+		font-weight: 500; color: #5c5e65; margin-bottom: 12px;
-+	}
-+	.ees-helper-avatar {
-+		width: 16px; height: 16px; border-radius: 8px; background: #eef3f9; color: #2f5f98;
-+		display: inline-flex; align-items: center; justify-content: center; font-size: 10px; line-height: 16px;
-+	}
- </style>
 diff --git a/src/lib/components/chat/Messages/UserMessage.svelte b/src/lib/components/chat/Messages/UserMessage.svelte
 index c7a4f3c..5fe51cf 100644
 --- a/src/lib/components/chat/Messages/UserMessage.svelte
@@ -1643,16 +1588,60 @@ index 0000000..374d8ed
 +			>{t('EES.Retry', 'Check again')}</button
 +		>{/if}
 +</section>
+diff --git a/src/lib/components/ees/EesHelperNotice.svelte b/src/lib/components/ees/EesHelperNotice.svelte
+new file mode 100644
+--- /dev/null
++++ b/src/lib/components/ees/EesHelperNotice.svelte
+@@ -0,0 +1,38 @@
++<script lang="ts">
++	import { eesHelperState } from './state';
++</script>
++
++{#if $eesHelperState.notice}
++	<div data-ees-helper-notice role="status" aria-live="polite" aria-atomic="true">
++		<svg data-ees-helper-notice-icon width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6b7280" stroke-width="1.4167" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
++			<path d="m7 1.75 1.11 3.37a1.17 1.17 0 0 0 .77.77L12.25 7l-3.37 1.11a1.17 1.17 0 0 0-.77.77L7 12.25l-1.11-3.37a1.17 1.17 0 0 0-.77-.77L1.75 7l3.37-1.11a1.17 1.17 0 0 0 .77-.77L7 1.75Z" />
++			<path d="M2.92 1.75v2.34M1.75 2.92h2.34M11.67 9.92v2.33M10.5 11.08h2.33" />
++		</svg>
++		<span data-ees-helper-notice-text>{$eesHelperState.notice}</span>
++	</div>
++{/if}
++
++<style>
++	div {
++		display: flex;
++		align-items: center;
++		gap: 8px;
++		width: fit-content;
++		max-width: 100%;
++		align-self: flex-start;
++		box-sizing: border-box;
++		padding: 8px 12px;
++		border: 0;
++		border-radius: 8px;
++		background: #fafafa;
++		box-shadow: none;
++		color: #5c5e65;
++		font-family: 'Noto Sans KR', sans-serif;
++		font-size: 13px;
++		font-weight: 400;
++		line-height: 16px;
++		text-align: left;
++	}
++	svg { flex: none; }
++	span { min-width: 0; overflow-wrap: anywhere; }
++</style>
 diff --git a/src/lib/components/ees/EesProcedureIntro.svelte b/src/lib/components/ees/EesProcedureIntro.svelte
 new file mode 100644
 index 0000000..6d5288b
 --- /dev/null
 +++ b/src/lib/components/ees/EesProcedureIntro.svelte
-@@ -0,0 +1,157 @@
+@@ -0,0 +1,171 @@
 +<script lang="ts">
 +	import { getContext } from 'svelte';
 +	import { eesSnapshot, eesAction, eesHelperState } from './state';
 +	import Icon from './EesIcon.svelte';
++	import EesHelperNotice from './EesHelperNotice.svelte';
 +	const i18n: any = getContext('i18n');
 +	export let empty = false;
 +	$: t = (key, fallback) => $i18n.t(key, { defaultValue: fallback });
@@ -1673,10 +1662,13 @@ index 0000000..6d5288b
 +	<section
 +		id="ees-work-procedure-start"
 +		data-ees-work
++		data-ees-procedure-intro
++		data-empty={empty}
 +		class:empty
 +		aria-label={t('EES.Procedure.Start', 'Start a procedure')}
 +	>
 +		<div class="ees-helper-intro">
++			{#if empty}
 +			<div class="ees-helper-label">
 +				<span class="ees-helper-avatar">{t('EES.Helper.Initial', 'W')}</span>{t(
 +					'EES.Helper',
@@ -1689,7 +1681,9 @@ index 0000000..6d5288b
 +					'Copy a similar example and adapt it, or start with an empty procedure. Ask a question below to learn how. The assistant explains the steps; it does not create drafts from this conversation yet. Drafts appear in work only after publication.'
 +				)}
 +			</p>
-+			<div class="ees-helper-questions">
++			{/if}
++			<EesHelperNotice />
++			<div class="ees-helper-questions" data-ees-helper-questions>
 +				{#each questions as question, index}
 +					<button
 +						type="button"
@@ -1707,12 +1701,14 @@ index 0000000..6d5288b
 +					</button>
 +				{/each}
 +			</div>
++			{#if empty}
 +			<small
 +				>{t(
 +					'EES.Procedure.SendNow',
 +					'Choose a question to send it now. The work assistant replies in this conversation; your draft and attachments stay as they are.'
 +				)}</small
 +			>
++			{/if}
 +		</div>
 +	</section>
 +{/if}
@@ -1720,11 +1716,11 @@ index 0000000..6d5288b
 +<style>
 +	section {
 +		flex: none;
-+		padding: 12px 24px;
++		padding: 8px 24px;
 +		text-align: left;
 +	}
 +	section.empty {
-+		padding-top: 32px;
++		padding: 32px 24px 12px;
 +	}
 +	.ees-helper-intro {
 +		max-width: 760px;
@@ -1777,6 +1773,12 @@ index 0000000..6d5288b
 +		background: var(--ees-surface-default, #fff);
 +		text-align: left;
 +		font: inherit;
++	}
++	section:not(.empty) button {
++		min-height: 28px;
++		padding: 4px 10px 4px 12px;
++		font-size: 13px;
++		line-height: 20px;
 +	}
 +	button + button {
 +		border-top: 1px solid #e6e6e9;
@@ -2957,7 +2959,7 @@ index 8eba682..4acf69f 100644
 +	"EES.Automatic.Succeeded": "정상",
 +	"EES.Helper.Initial": "업",
 +	"EES.Procedure.SendNow": "질문을 누르면 바로 보내고, 업무 도우미가 대화에서 답합니다. 쓰던 글과 첨부는 그대로 남습니다.",
-+	"EES.Helper.Unavailable": "업무 도우미를 사용할 수 없습니다. 설정을 확인한 뒤 다시 시도해 주세요.",
++	"EES.Helper.Unavailable": "업무 도우미를 사용할 수 없습니다. 관리자에게 도구 등록·사용 권한·프로그램 버전을 확인해 달라고 요청하세요.",
 +	"EES.Helper.Busy": "현재 답변이 끝난 뒤 질문해 주세요.",
 +	"EES.Helper.Variables": "모델에 필요한 대화 값을 먼저 입력해 주세요.",
 +	"EES.Helper.ContextChanged": "대화나 화면이 바뀌었습니다. 질문을 다시 눌러 주세요.",
@@ -3046,7 +3048,7 @@ diff --git a/src/routes/(app)/c/[id]/+page.svelte b/src/routes/(app)/c/[id]/+pag
 index 53a2b61..3f77d9a 100644
 --- a/src/routes/(app)/c/[id]/+page.svelte
 +++ b/src/routes/(app)/c/[id]/+page.svelte
-@@ -1,7 +1 @@
+@@ -1,7 +1,1 @@
 -<script lang="ts">
 -	import { page } from '$app/stores';
 -

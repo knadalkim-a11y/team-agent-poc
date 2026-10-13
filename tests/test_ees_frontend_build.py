@@ -612,6 +612,9 @@ const reference={kind:'help',system_id:'',context_id:'context-a',title:'original
  assert.deepEqual(selectedModels,['first','second']);assert.equal(persisted[0].value,draft);
  hold=false;status={available:false,protocol:1,code:'tool_unavailable',message:'Unavailable'};
  assert.equal((await ask({question:'blocked',reference})).accepted,false);assert.equal(sent.length,1);
+ status={available:false,protocol:1,code:'tool_unavailable'};
+ assert.equal((await ask({question:'missing reason',reference})).accepted,false);assert.equal(sent.length,1);
+ assert.match(eesHelperNotice,/administrator/i);assert.match(eesHelperNotice,/tool.*permission.*version/i);
  status={available:true,protocol:1,model_id:'first'};hold=true;
  const moved=ask({question:'moved',reference});context={system_id:'',context_id:'other'};finish(status);
  assert.equal((await moved).code,'context_changed');assert.equal(sent.length,1);

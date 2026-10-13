@@ -18,6 +18,8 @@ from native_ui_fixture import NativeUIHandler
 QUESTION = '#ees-work-procedure-start [data-action=procedure_question]'
 NOTICE = '[data-ees-helper-notice]'
 ANSWER = '실제 대화 입력이 전달되었습니다.'
+INTRO = '지금은 대화 내용으로 초안을 바로 만들지는 않습니다.'
+UNAVAILABLE = '업무 도우미를 사용할 수 없습니다. 관리자에게 도구 등록·사용 권한·프로그램 버전을 확인해 달라고 요청하세요.'
 
 
 def install_helper_status_fixture(case):
@@ -62,7 +64,13 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.wait('document.querySelector(' + json.dumps(QUESTION) + ')?.checkVisibility({visibilityProperty:true})')
         self.assertTrue(self.browser.evaluate("!!document.querySelector('#chat-container #ees-work-procedure-start')"))
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-panel #ees-work-procedure-start,#ees-work-panel .ew-procedure-intro')"))
-        self.assertIn('지금은 대화 내용으로 초안을 바로 만들지는 않습니다.', self.text('#ees-work-procedure-start'))
+        self.assertEqual(self.browser.evaluate('document.querySelectorAll(' + json.dumps(QUESTION) + ').length'), 3)
+        if self.read('#ees-work-procedure-start', 'getAttribute("data-empty")') == 'true':
+            self.assertIn(INTRO, self.text('#ees-work-procedure-start'))
+            self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start .ees-helper-label')"))
+        else:
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start .ees-helper-label,#ees-work-procedure-start p,#ees-work-procedure-start small')"))
+            self.assertNotIn(INTRO, self.text('#ees-work-procedure-start'))
         self.assertEqual(self.state()['workflows'], [])
         return self.text(QUESTION).strip()
 
@@ -82,7 +90,49 @@ class HelperChatNativeTests(IntegratedNativeCase):
     def wait_reply(self, count=1):
         self.wait("document.querySelector('#messages-container')?.textContent.includes(" + json.dumps(ANSWER) + ") && !window.__eesSourceShellV1?.helpState()?.busy")
         self.assertEqual(len(self.server.completions), count)
-        self.wait("!!document.querySelector('[data-ees-helper-label]')")
+        self.response_header()
+
+    def response_header(self, index=-1):
+        """Inspect the actual answer, not another model heading already on screen."""
+        selector = '#message-' + self.server.completions[index]['id']
+        self.wait('!!document.querySelector(' + json.dumps(selector + ' #response-message-model-name') + ')')
+        observed = self.browser.evaluate("""(selector=>{
+          const response=document.querySelector(selector),name=response.querySelector('#response-message-model-name');
+          const style=getComputedStyle(name),avatar=response.querySelector('.assistant-message-profile-image');
+          return {name:name.textContent.trim(),style:{fontFamily:style.fontFamily,fontSize:style.fontSize,
+            fontWeight:style.fontWeight,lineHeight:style.lineHeight,color:style.color},
+            avatar:!!avatar,avatarSource:avatar?.getAttribute('src'),
+            helperLabel:!!response.querySelector('[data-ees-helper-label]')};
+        })""" + '(' + json.dumps(selector) + ')')
+        self.assertEqual(observed['name'], 'Fixture AI')
+        self.assertTrue(observed['avatar'])
+        self.assertFalse(observed['helperLabel'])
+        return observed
+
+    def assert_notice_above_questions(self):
+        observed = self.browser.evaluate("""(()=>{
+          const notice=document.querySelector('[data-ees-helper-notice]'),questions=document.querySelector('[data-ees-helper-questions]');
+          const icon=notice?.querySelector('[data-ees-helper-notice-icon]'),text=notice?.querySelector('[data-ees-helper-notice-text]');
+          const rect=e=>{const r=e?.getBoundingClientRect();return r?{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}:null};
+          return {count:document.querySelectorAll('[data-ees-helper-notice]').length,
+            inGuide:!!notice?.closest('#ees-work-procedure-start'),role:notice?.getAttribute('role'),
+            live:notice?.getAttribute('aria-live'),notice:rect(notice),questions:rect(questions),icon:rect(icon),text:rect(text),
+            iconVisible:icon?.checkVisibility({visibilityProperty:true}),textVisible:text?.checkVisibility({visibilityProperty:true})};
+        })()""")
+        self.assertEqual(observed['count'], 1, observed)
+        self.assertTrue(observed['inGuide'], observed)
+        self.assertEqual(observed['role'], 'status')
+        self.assertEqual(observed['live'], 'polite')
+        self.assertTrue(observed['iconVisible'] and observed['textVisible'], observed)
+        self.assertAlmostEqual(observed['icon']['width'], 14, delta=.5)
+        self.assertAlmostEqual(observed['icon']['height'], 14, delta=.5)
+        self.assertLessEqual(observed['notice']['width'], 760.5)
+        self.assertAlmostEqual(observed['notice']['left'], observed['questions']['left'], delta=1)
+        self.assertLessEqual(observed['notice']['bottom'], observed['questions']['top'] + .5)
+        self.assertLessEqual(observed['questions']['top'] - observed['notice']['bottom'], 12.5)
+        self.assertLessEqual(observed['icon']['right'], observed['text']['left'])
+        self.assertGreater(observed['notice']['top'], 96, observed)
+        return observed
 
     def assert_helper_request(self, question, reference=None, index=-1):
         body = self.server.completions[index]
@@ -117,7 +167,11 @@ class HelperChatNativeTests(IntegratedNativeCase):
           guideInChat:!!document.querySelector('#chat-container #ees-work-procedure-start'),
           guideInPanel:!!document.querySelector('#ees-work-panel #ees-work-procedure-start'),
           references:[...document.querySelectorAll('[data-ees-helper-reference]')].map(e=>e.innerText),
-          helperLabels:[...document.querySelectorAll('[data-ees-helper-label]')].map(e=>e.innerText),
+          modelLabels:[...document.querySelectorAll('#response-message-model-name')].map(e=>e.innerText),
+          modelStyles:[...document.querySelectorAll('#response-message-model-name')].map(e=>{const s=getComputedStyle(e);return {name:e.innerText,font:s.font,color:s.color};}),
+          obsoleteHelperLabels:document.querySelectorAll('[data-ees-helper-label]').length,
+          guide:(()=>{const e=document.querySelector('[data-ees-procedure-intro]'),r=e?.getBoundingClientRect();return e?{empty:e.dataset.empty,text:e.innerText,height:r.height,width:r.width}:null;})(),
+          notice:(()=>{const e=document.querySelector('[data-ees-helper-notice]'),r=e?.getBoundingClientRect(),q=document.querySelector('[data-ees-helper-questions]')?.getBoundingClientRect();return e?{text:e.innerText,top:r.top,left:r.left,width:r.width,height:r.height,questionGap:q?q.top-r.bottom:null,hasIcon:!!e.querySelector('[data-ees-helper-notice-icon]')}:null;})(),
           horizontalOverflow:document.documentElement.scrollWidth>innerWidth
         }))()""")
         (directory / (label + '-dom.json')).write_text(json.dumps({
@@ -127,6 +181,9 @@ class HelperChatNativeTests(IntegratedNativeCase):
         return directory
 
     def test_inline_guide_sends_question_preserves_text_file_and_fixed_reference_after_reload(self):
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 1366, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+        self.wait('innerWidth === 1366 && innerHeight === 768')
         self.fill('#chat-input', '아직 보내지 않을 개인 질문')
         self.attach('personal-draft.txt', b'private synthetic attachment')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
@@ -138,6 +195,11 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.assertTrue(self.browser.evaluate('window.__eesNativeDraftV1.restore(' + json.dumps(json.dumps(draft, ensure_ascii=False)) + ')'))
         before = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         question = self.open_guide()
+        compact = self.browser.evaluate("""(()=>{const e=document.querySelector('#ees-work-procedure-start'),q=e.querySelector('[data-ees-helper-questions]');return {height:e.getBoundingClientRect().height,text:e.innerText.trim(),questions:q.innerText.trim(),width:q.getBoundingClientRect().width};})()""")
+        self.assertLessEqual(compact['height'], 120, compact)
+        self.assertEqual(compact['text'], compact['questions'])
+        self.assertLessEqual(compact['width'], 760)
+        self.screenshot('helper-chat-existing-compact-1366')
         reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
         self.browser.evaluate("window.__eesHelperComposer=document.querySelector('#chat-input');true")
         self.click(QUESTION)
@@ -157,7 +219,8 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.assertEqual(stored['meta']['ees_work_reference'], frozen)
         self.assertEqual(stored['meta']['ees_work_help'], 1)
         self.navigate('/c/existing-chat')
-        self.wait("window.__eesNativeDraftV1?.ready() && document.querySelector('#message-" + message_id + " [data-ees-helper-reference]') && document.querySelector('[data-ees-helper-label]')")
+        self.wait("window.__eesNativeDraftV1?.ready() && document.querySelector('#message-" + message_id + " [data-ees-helper-reference]')")
+        self.response_header()
         self.assertEqual(self.server.chats['existing-chat']['chat']['history']['messages'][message_id]['meta']['ees_work_reference'], frozen)
         self.assertEqual(self.server.chats['existing-chat']['chat']['history']['messages'][message_id]['meta']['ees_work_help'], 1)
         self.assertEqual(self.text('#message-' + message_id + ' .markdown-prose').strip(), question)
@@ -176,6 +239,9 @@ class HelperChatNativeTests(IntegratedNativeCase):
         before = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.browser.evaluate("window.__eesHelperImage=document.querySelector('#message-input-container [data-cy=image]');window.__eesHelperComposer=document.querySelector('#chat-input');true")
         question = self.open_guide()
+        self.assertEqual(self.read('#ees-work-procedure-start', 'getAttribute("data-empty")'), 'true')
+        self.assertIn(INTRO, self.text('#ees-work-procedure-start'))
+        self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start .ees-helper-label') && !!document.querySelector('#ees-work-procedure-start small')"))
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#messages-container img[alt=logo]')"))
         self.assertNotIn('Fixture AI', self.text('#messages-container'))
         self.assertTrue(self.browser.evaluate("document.querySelector('#chat-input')===window.__eesHelperComposer && document.querySelector('#message-input-container [data-cy=image]')===window.__eesHelperImage"))
@@ -259,10 +325,13 @@ class HelperChatNativeTests(IntegratedNativeCase):
         before = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         question = self.open_guide()
         history = deepcopy(self.server.chats['existing-chat']['chat']['history'])
-        self.helper_status['available'] = False
+        self.helper_status.update(available=False, message='')
         self.click(QUESTION)
         self.wait('document.querySelector(' + json.dumps(NOTICE) + ')?.textContent.trim() && !window.__eesSourceShellV1.helpState().busy')
         self.assertEqual(self.read(NOTICE, 'getAttribute("role")'), 'status')
+        self.assertEqual(self.text(NOTICE).strip(), UNAVAILABLE)
+        self.assert_notice_above_questions()
+        self.screenshot('helper-chat-unavailable-inline-administrator-guidance')
         self.assertEqual(self.text('body').count(self.text(NOTICE).strip()), 1)
         self.assertTrue(self.browser.evaluate("document.querySelector('#ew-procedure-name')?.checkVisibility({visibilityProperty:true})"))
         self.assertEqual(self.server.completions, [])
@@ -276,6 +345,7 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.helper_status.update(available=False, code='native_access_denied', message='현재 업무 도우미를 사용할 권한이 없습니다.')
         self.click(QUESTION)
         self.wait('document.querySelector(' + json.dumps(NOTICE) + ')?.textContent.includes("권한") && !window.__eesSourceShellV1.helpState().busy')
+        self.assert_notice_above_questions()
         self.assertEqual(len(self.server.completions), 1)
         self.assertEqual(self.server.chats['existing-chat']['chat']['history'], history)
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), before)
@@ -312,12 +382,19 @@ class HelperChatNativeTests(IntegratedNativeCase):
                      selectedSkillIds=['synthetic-personal-skill'],
                      selectedFilterIds=['synthetic-personal-filter'])
         self.assertTrue(self.browser.evaluate('window.__eesNativeDraftV1.restore(' + json.dumps(json.dumps(draft, ensure_ascii=False)) + ')'))
-        self.open_guide()
+        question = self.open_guide()
         self.assertEqual(self.browser.evaluate('window.__eesNativeWorkV1.captureReference().kind'), 'help')
+        self.click(QUESTION)
+        self.wait_reply()
+        self.assert_helper_request(question)
+        helper_header = self.response_header()
+        self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+        self.server.stream_started.clear()
         self.click('#send-message-button')
+        self.assertTrue(self.server.stream_started.wait(timeout=3))
         self.wait("document.querySelector('#messages-container')?.textContent.includes(" + json.dumps(ANSWER) + ") && !window.__eesSourceShellV1.helpState().busy")
-        self.assertEqual(len(self.server.completions), 1)
-        body = self.server.completions[0]
+        self.assertEqual(len(self.server.completions), 2)
+        body = self.server.completions[1]
         self.assertEqual(body['user_message']['content'], draft['prompt'])
         self.assertEqual(body['user_message']['files'], draft['files'])
         self.assertEqual(body['files'], draft['files'])
@@ -329,7 +406,8 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.assertEqual(body['user_message']['meta']['ees_work_reference']['kind'], 'help')
         self.assertNotEqual(body['user_message']['meta'].get('ees_work_help'), 1)
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-ees-helper-label]')"))
-        self.assertEqual(self.helper_status['requests'], [])
+        self.assertEqual(self.response_header(), helper_header)
+        self.assertEqual(len(self.helper_status['requests']), 1, 'Ordinary send must not run helper preflight')
         self.screenshot('helper-chat-ordinary-send-preserved')
 
     def test_english_question_sends_exact_visible_text_without_translation_keys(self):
@@ -352,7 +430,7 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.click(QUESTION)
         self.wait_reply()
         self.assert_helper_request(question)
-        self.assertIn('Work assistant', self.text('[data-ees-helper-label]'))
+        self.assertEqual(self.response_header()['name'], 'Fixture AI')
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), before)
         self.screenshot('helper-chat-english-visible-question')
 
@@ -409,6 +487,7 @@ class HelperChatNativeTests(IntegratedNativeCase):
         history = deepcopy(self.server.chats['existing-chat']['chat']['history'])
         self.click(QUESTION)
         self.wait('document.querySelector(' + json.dumps(NOTICE) + ')?.textContent.includes("권한") && !window.__eesSourceShellV1.helpState().busy')
+        self.assert_notice_above_questions()
         self.assertEqual(self.text('body').count(self.text(NOTICE).strip()), 1)
         self.assertTrue(self.browser.evaluate("document.querySelector('#ew-procedure-name')?.checkVisibility({visibilityProperty:true})"))
         self.assertEqual(len(rejected), 1)

@@ -373,7 +373,12 @@ def helper_chat_flow(g,key,chat_id):
     assert g.provider.helper_payloads[-1]['reference']=={name:value for name,value in reference.items() if name!='kind'}
     user_selector='#message-'+message['id']
     g.wait('document.querySelector('+json.dumps(user_selector+' [data-ees-helper-reference]')+')')
-    assert g.browser.evaluate('!!document.querySelector("[data-ees-helper-label]")')
+    answer=next(item for item in chat['history']['messages'].values()
+                if item.get('role')=='assistant' and item.get('parentId')==message['id'])
+    model_selector='#message-'+answer['id']+' #response-message-model-name'
+    g.wait('document.querySelector('+json.dumps(model_selector)+')')
+    assert g.browser.evaluate('document.querySelector('+json.dumps(model_selector)+').innerText.trim()')=='c3-synthetic-model'
+    assert not g.browser.evaluate('!!document.querySelector("[data-ees-helper-label]")')
     # Retain the real browser request as a local template without persisting its
     # credentials/session ID into evidence. Later API probes change only inputs.
     requests=[event['params']['request'] for event in g.browser.events[event_start:]
