@@ -48,6 +48,7 @@ SUITES = {
         "test_demo_bundle.py", "test_ees_trial_*.py", "test_ees_delivery_suite.py",
         "test_check_docs.py", "test_openwebui_windows_launcher.py"],
     "program-install": ["test_ees_webui_customization.py"],
+    "program-wheel": ["test_ees_webui_customization.py"],
     "native-contracts": ["test_ees_workflow_examples_native.py"],
     "restore-ees10": ["test_ees_webui_customization.py"],
     "restore-ees11": ["test_ees_webui_customization.py"],
@@ -64,10 +65,12 @@ SUITES = {
 # Each real fixed-wheel Apply/Restore performs a full filesystem walk. On
 # Windows one ees.10 case takes 157 seconds; isolate these cases without
 # changing their assertions, artifact pins, or the overall required gate.
-# The other 58 methods take 224 seconds on Windows and have their own job.
+# The current full-wheel Apply/Restore also has its own required job; all
+# remaining methods stay together without changing the ten-minute limit.
 CASE_PARTITIONS = {
     "test_ees_webui_customization.py": {
         "program-install": None,  # Every remaining/currently added method stays here.
+        "program-wheel": ["test_ees_webui_customization.RealBrandingWheelTests.test_real_built_wheel_has_complete_purelib_app_metadata_and_frontend"],
         "restore-ees10": ["test_ees_webui_customization.CustomizationTests.test_real_ees10_to_authoring_apply_restore_preserves_program_and_data"],
         "restore-ees11": ["test_ees_webui_customization.CustomizationTests.test_real_ees11_to_execution_apply_restore_preserves_program_and_data"],
         "restore-ees13": ["test_ees_webui_customization.CustomizationTests.test_real_ees13_to_source_frontend_apply_restore_preserves_program_and_data"],
