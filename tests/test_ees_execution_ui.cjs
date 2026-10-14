@@ -84,6 +84,53 @@ test('readonly Work tool setup needs Native admin and cancelling preview never w
 test('explicit Work tool confirmation sends preview token source hash and no public grants',async()=>{const h=controller();h.api.setState({capabilities:{is_admin:true},people:[],native_groups:[]});h.context.document.querySelector=()=>({addEventListener(){}});h.setReply(call=>call.url.endsWith('/status')?{state:'missing',id:'ees_workflow',source_sha256:'source-hash',expected_token:'preview-token',functions:['propose']}:call.url.endsWith('/setup')?{ok:true,changed:true}:{ok:true,systems:[],workflows:[],runs:[],ui_state:{revision:0,state:{}}});h.setDialog(()=>Promise.resolve(true));await h.api.setupWorkTool();const post=h.calls.find(call=>call.url.endsWith('/setup'));assert.equal(post.body.expected_token,'preview-token');assert.equal(post.body.source_sha256,'source-hash');assert.equal(post.body.confirmation,'register_readonly_work_tool');assert.deepEqual(post.body.access_grants,[]);});
 
 
+function workToolUpdateHarness(overrides={}){
+ const h=controller(),dialogs=[],listeners={};
+ h.api.setState({capabilities:{is_admin:true,actor_id:'admin'},people:[],native_groups:[]});
+ h.context.document.querySelector=()=>({addEventListener:(type,fn)=>{listeners[type]=fn;}});
+ const status={state:'update_available',id:'ees_workflow',source_sha256:'program-hash',registered_source_sha256:'previous-hash',expected_token:'review-token',known_source:true,registered_source:{sha256:'previous-hash',date:'2026-10-02',format:'original'},program_source:{sha256:'program-hash',date:'2026-10-13'},...overrides};
+ h.setReply(call=>call.url.endsWith('/status')?status:call.url.endsWith('/setup')||call.url.endsWith('/restore')?{ok:true,changed:true}:{ok:true,capabilities:{is_admin:true,actor_id:'admin'},systems:[],workflows:[],runs:[],my_work:[],ui_state:{revision:0,state:{}}});
+ h.setDialog(options=>{dialogs.push(options);return Promise.resolve(true);});
+ return {...h,status,dialogs,listeners};
+}
+test('known prior Work source needs explicit dated update confirmation and sends no ACL changes',async()=>{
+ const h=workToolUpdateHarness();await h.api.setupWorkTool();
+ assert.equal(h.dialogs[0].confirmLabel,'지금 프로그램 원본으로 바꾸기');
+ assert.match(h.dialogs[1].html,/2026-10-02.*→.*2026-10-13/);
+ for(const text of ['이름·소유자·읽기 권한·설정','코드 원본','비공개 백업'])assert.ok(h.dialogs[1].html.includes(text));
+ assert.doesNotMatch(h.dialogs[1].html,/data-work-grant/);
+ const posts=h.calls.filter(call=>call.options.method==='POST'&&call.url.includes('/assets/'));
+ assert.equal(posts.length,1);assert.equal(posts[0].url,'/api/v1/ees/assets/work-tool/setup');
+ assert.deepEqual(posts[0].body,{expected_token:'review-token',source_sha256:'program-hash',confirmation:'update_readonly_work_tool'});
+ assert.match(h.dialogs.at(-1).html,/원본으로 바꿨습니다/);
+});
+test('cancelling either Work update confirmation never writes and changed context cannot approve stale source',async()=>{
+ for(const rejectAt of [0,1]){const h=workToolUpdateHarness();let count=0;h.setDialog(()=>Promise.resolve(count++!==rejectAt));await h.api.setupWorkTool();assert.equal(h.calls.length,1);}
+ for(const change of ['account','scope']){const h=workToolUpdateHarness(),pending=deferred();let count=0;h.setDialog(()=>count++===0?Promise.resolve(true):pending.promise);const task=h.api.setupWorkTool();await new Promise(resolve=>setImmediate(resolve));if(change==='account')h.setAuth('another-user');else h.api.setSelection({system_id:'APC'});pending.resolve(true);await task;assert.equal(h.calls.length,1);}
+});
+test('unsupported Work source shows escaped hashes and support mismatch with no write controls',async()=>{
+ const h=workToolUpdateHarness({state:'blocked_existing',known_source:false,registered_source:null,registered_source_sha256:'<not-supported>',reason:'지원 형태와 다름',backup:{can_restore:true}});
+ await h.api.setupWorkTool();assert.equal(h.calls.length,1);assert.equal(h.dialogs.length,1);assert.equal(h.dialogs[0].readOnlyDetail,true);
+ assert.match(h.dialogs[0].html,/&lt;not-supported&gt;/);assert.match(h.dialogs[0].html,/program-hash/);assert.match(h.dialogs[0].title,/지원 형태와 다릅니다/);
+ assert.doesNotMatch(h.dialogs[0].html,/data-work-tool-restore|data-work-grant|사용자 수정/);assert.equal(h.dialogs[0].confirmLabel,undefined);
+});
+test('ready Work source restores only by separate backup action and explicit confirmation',async()=>{
+ const backup={id:'backup-id',sha256:'backup-receipt-hash',created_at:'2026-10-14T01:00:00Z',from_source_sha256:'previous-hash',to_source_sha256:'program-hash',can_restore:true};
+ for(const approve of [false,true]){const h=workToolUpdateHarness({state:'ready',backup}),initial=deferred();let count=0;
+  h.setDialog(options=>{h.dialogs.push(options);return count++===0?initial.promise:Promise.resolve(approve);});
+  const task=h.api.setupWorkTool();await new Promise(resolve=>setImmediate(resolve));assert.equal(h.dialogs[0].readOnlyDetail,true);assert.match(h.dialogs[0].html,/data-work-tool-restore/);
+  h.listeners.click({target:{closest:selector=>selector==='[data-work-tool-restore]'?{}:null}});initial.resolve(false);await task;
+  assert.match(h.dialogs[1].html,/previous-hash/);assert.match(h.dialogs[1].html,/이름·소유자·읽기 권한·설정/);
+  const posts=h.calls.filter(call=>call.options.method==='POST'&&call.url.includes('/assets/'));
+  assert.equal(posts.length,approve?1:0);
+  if(approve){assert.equal(posts[0].url,'/api/v1/ees/assets/work-tool/restore');assert.deepEqual(posts[0].body,{expected_token:'review-token',source_sha256:'program-hash',confirmation:'restore_previous_work_tool',backup_id:'backup-id',backup_sha256:'backup-receipt-hash'});}
+ }
+});
+test('unrestorable backup never offers restore and concurrent edits do not claim update success',async()=>{
+ const blocked=workToolUpdateHarness({state:'ready',backup:{id:'old-backup',can_restore:false}});await blocked.api.setupWorkTool();assert.doesNotMatch(blocked.dialogs[0].html,/data-work-tool-restore/);assert.equal(blocked.calls.length,1);
+ for(const code of ['concurrent_edit','work_tool_program_changed']){const h=workToolUpdateHarness();h.setReply(call=>call.url.endsWith('/status')?h.status:{httpError:true,status:409,detail:code});await assert.rejects(h.api.setupWorkTool(),new RegExp(code));assert.equal(h.dialogs.length,2);assert.match(h.api.snapshot().error,new RegExp(code));assert.equal(h.calls.filter(call=>call.options.method==='POST').length,1);}
+});
+
 test('input AI proposal preview and apply modify only the private draft until explicit save',()=>{const h=controller(),run={id:'r',workflow_id:'w',revision:2,definition:{nodes:{j:{inputs:[{id:'value',scope:'run',type:'text'}]}}}};h.api.setSelection({run_id:'r',workflow_id:'w',job_id:'j',tab:'current'});h.api.setState({run});h.view.readInputs=()=>({inputs:{old:'keep'},revision:2});let applied;h.view.applyInputValues=values=>{applied=values;};const preview=h.api.previewInputProposal({proposal_kind:'inputs',run_id:'r',workflow_id:'w',job_id:'j',base_revision:2,proposal:{value:'suggested'}});assert.equal(preview.saved,false);assert.equal(preview.executed,false);assert.equal(applied,undefined);h.api.applyInputProposal();assert.equal(applied.value,'suggested');assert.equal(h.calls.length,0);});
 test('AI input preview rejects unknown setting fields and stale apply after user typing',()=>{const h=controller(),run={id:'r',workflow_id:'w',revision:2,definition:{nodes:{j:{inputs:[{id:'value',scope:'run'},{id:'system_setting',scope:'workflow'}]}}}};h.api.setSelection({run_id:'r',workflow_id:'w',job_id:'j',tab:'current'});h.api.setState({run});let inputs={value:'before'};h.view.readInputs=()=>({inputs,revision:2});assert.throws(()=>h.api.previewInputProposal({proposal_kind:'inputs',run_id:'r',workflow_id:'w',job_id:'j',base_revision:2,proposal:{system_setting:'forbidden'}}));h.api.previewInputProposal({proposal_kind:'inputs',run_id:'r',workflow_id:'w',job_id:'j',base_revision:2,proposal:{value:'AI'}});inputs={value:'typed-later'};assert.throws(()=>h.api.applyInputProposal(),/바뀌었습니다/);assert.equal(h.calls.length,0);});
 

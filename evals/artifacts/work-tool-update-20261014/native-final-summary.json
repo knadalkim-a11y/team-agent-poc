@@ -1,0 +1,37 @@
+{
+  "completed_utc": "2026-10-14T06:32:57.429856+00:00",
+  "python": "3.11.17",
+  "platform": "Linux",
+  "upstream_wheel": "open_webui-0.11.3-py3-none-any.whl",
+  "command": "EES_TEST_UPSTREAM_WHEEL=/workspace/scratch/38e8d34a7e5f/team-agent-poc/dist/upstream/open_webui-0.11.3-py3-none-any.whl PYTHONPATH=tests ../team-agent-poc/.venv/bin/python -m unittest test_ees_asset_native test_ees_workflow_native -v",
+  "total": 79,
+  "passed": 79,
+  "skipped": 0,
+  "failures": 0,
+  "errors": 0,
+  "seconds": 103.121,
+  "new_test_ids": [
+    "test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_2770382_source_is_update_available",
+    "test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_2770382_editor_format_is_update_available",
+    "test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_update_rejects_nonadmin_and_stale_confirmation",
+    "test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_update_rejects_program_change_before_or_during_setup",
+    "test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_update_requires_explicit_confirmation_and_keeps_backup_private",
+    "test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_initial_backup_failure_does_not_write_code",
+    "test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_post_commit_backup_failure_restores_after_guard_restart",
+    "test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_2770382_source_is_update_available",
+    "test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_2770382_editor_format_is_update_available",
+    "test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_update_rejects_nonadmin_and_stale_confirmation",
+    "test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_update_rejects_program_change_before_or_during_setup",
+    "test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_update_requires_explicit_confirmation_and_keeps_backup_private",
+    "test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_initial_backup_failure_does_not_write_code",
+    "test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_post_commit_backup_failure_restores_after_guard_restart",
+    "test_ees_workflow_native.NativeReadBridgeTests.test_previous_work_tool_update_restores_helper_direct_chat_and_preserves_native_state",
+    "test_ees_workflow_native.NativeReadBridgeTests.test_previous_editor_formatted_work_tool_update_and_restore"
+  ],
+  "code_sha256": {
+    "scripts/ees_asset_guard.py": "095e56cca1021cf2a3b197041a1bc8d38cd6864598c66012d8b4676f825d48c6",
+    "tests/test_ees_asset_native.py": "a7b7ecdf0bdf5459dbe9587da320af5b92a99451944d20004a574b27b7d65784",
+    "tests/test_ees_workflow_native.py": "63a9567d228a2ccd15ff44f35bcb40b69783aa024e23c19432ff2639b066000c"
+  },
+  "scope": "Pinned Native tables, ACL, encryption, plugin binding and production builder output with synthetic Users/model transport; no internal site execution, real model IO, or sign-in claim."
+}

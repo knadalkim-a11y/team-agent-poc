@@ -1,0 +1,59 @@
+test_common_work_tool_2770382_source_is_update_available (test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_2770382_source_is_update_available) ... Executing <Task pending name='Task-1' coro=<NativeAssetCases.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_native.py:42> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 3.299 seconds
+FAIL
+test_common_work_tool_2770382_editor_format_is_update_available (test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_2770382_editor_format_is_update_available) ... Executing <Task pending name='Task-17' coro=<NativeAssetCases.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_native.py:42> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 1.411 seconds
+FAIL
+
+======================================================================
+FAIL: test_common_work_tool_2770382_source_is_update_available (test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_2770382_source_is_update_available)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_native.py", line 471, in test_common_work_tool_2770382_source_is_update_available
+    await self.assert_historical_work_tool_update_available()
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_native.py", line 464, in assert_historical_work_tool_update_available
+    self.assertEqual(status["state"], "update_available", status)
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+ : {'id': 'ees_workflow', 'state': 'blocked_existing', 'source_sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'expected_token': '78901ad4dbac50250fab4a93df760d501e2f48405d3db387a55fe8fd016976bd', 'functions': ['ees_workflow_display', 'ees_workflow_propose', 'ees_workflow_view'], 'reason': 'existing_source_differs_export_and_review_native_update', 'changed': False}
+
+======================================================================
+FAIL: test_common_work_tool_2770382_editor_format_is_update_available (test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_2770382_editor_format_is_update_available)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_native.py", line 474, in test_common_work_tool_2770382_editor_format_is_update_available
+    await self.assert_historical_work_tool_update_available(formatted=True)
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_native.py", line 464, in assert_historical_work_tool_update_available
+    self.assertEqual(status["state"], "update_available", status)
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+ : {'id': 'ees_workflow', 'state': 'blocked_existing', 'source_sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'expected_token': '7ec753d35a4af0ed60184c12dc99e354019d08ea5523e3534b92ea8e114c3362', 'functions': ['ees_workflow_display', 'ees_workflow_propose', 'ees_workflow_view'], 'reason': 'existing_source_differs_export_and_review_native_update', 'changed': False}
+
+----------------------------------------------------------------------
+Ran 2 tests in 5.027s
+
+FAILED (failures=2)

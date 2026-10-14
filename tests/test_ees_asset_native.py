@@ -385,6 +385,9 @@ class NativeAssetCases:
         self.assertEqual(status.status_code, 200, status.text)
         status = status.json()
         self.assertEqual(status["state"], "missing")
+        self.assertEqual(status["program_source"]["sha256"], status["source_sha256"],
+                         "Every shipped source edit must update the verified history catalogue")
+        self.assertEqual(status["program_source"]["format"], "git")
         self.assertIsNone(await self.fixture.tools.Tools.get_tool_by_id("ees_workflow"))
         payload = {"source_sha256": status["source_sha256"], "expected_token": status["expected_token"],
                    "confirmation": "register_readonly_work_tool", "access_grants": [
@@ -441,6 +444,185 @@ class NativeAssetCases:
         self.assertEqual(result.status_code, 409, result.text)
         self.assertEqual(result.json()["detail"], "work_tool_existing_source_requires_review")
         self.assertEqual((await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump(), before)
+
+    async def register_historical_work_tool(self, *, formatted=False):
+        suffix = "_black2651" if formatted else ""
+        path = Path(__file__).parent / "fixtures/work-tool-update" / ("workflow_tool_2770382" + suffix + ".py.txt")
+        source = path.read_text(encoding="utf-8")
+        expected = ("33331c70dcde27122587bfb1246c63b4e4d9abaa5c522ebd4bff56e5653f999f" if formatted
+                    else "12a538febf1843aeb7e0ccad64e72545c097858d94a165e046cba259f61ba8fe")
+        self.assertEqual(hashlib.sha256(source.encode()).hexdigest(), expected)
+        response = await self.fixture.request("POST", "/api/v1/tools/create", payload={
+            "id": "ees_workflow", "name": "현장 유지 이름", "content": source,
+            "meta": {"description": "현장 설명 보존", "custom_metadata": {"retained": True}},
+            "access_grants": [{"principal_type": "user", "principal_id": "reader", "permission": "read"}]})
+        self.assertEqual(response.status_code, 200, response.text)
+        return source
+
+    async def assert_historical_work_tool_update_available(self, *, formatted=False):
+        source = await self.register_historical_work_tool(formatted=formatted)
+        response = await self.fixture.request("GET", "/api/v1/ees/assets/work-tool/status")
+        self.assertEqual(response.status_code, 200, response.text)
+        status = response.json()
+        self.assertEqual(status["state"], "update_available", status)
+        self.assertTrue(status["known_source"])
+        self.assertEqual(status["registered_source_sha256"], hashlib.sha256(source.encode()).hexdigest())
+        self.assertEqual(status["registered_source"]["format"], "black-26.5.1" if formatted else "git")
+        return status
+
+    async def test_common_work_tool_2770382_source_is_update_available(self):
+        await self.assert_historical_work_tool_update_available()
+
+    async def test_common_work_tool_2770382_editor_format_is_update_available(self):
+        await self.assert_historical_work_tool_update_available(formatted=True)
+
+    @staticmethod
+    def work_tool_update_payload(status):
+        return {"source_sha256": status["source_sha256"], "expected_token": status["expected_token"],
+                "confirmation": "update_readonly_work_tool"}
+
+    async def test_common_work_tool_update_rejects_nonadmin_and_stale_confirmation(self):
+        status = await self.assert_historical_work_tool_update_available()
+        before = (await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump()
+        payload = self.work_tool_update_payload(status)
+        for route in ("status", "setup"):
+            forbidden = await self.fixture.request("GET" if route == "status" else "POST",
+                "/api/v1/ees/assets/work-tool/" + route, user="reader",
+                payload=None if route == "status" else payload)
+            self.assertEqual(forbidden.status_code, 403, forbidden.text)
+        self.assertEqual((await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump(), before)
+        await self.fixture.tools.Tools.update_tool_by_id("ees_workflow", {"content": before["content"] + "\n# concurrent edit\n"})
+        changed = (await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump()
+        rejected = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/setup", payload=payload)
+        self.assertEqual((rejected.status_code, rejected.json()), (409, {"detail": "concurrent_edit"}))
+        self.assertEqual((await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump(), changed)
+        status = (await self.fixture.request("GET", "/api/v1/ees/assets/work-tool/status")).json()
+        self.assertEqual(status["state"], "blocked_existing")
+        self.assertFalse(status["known_source"])
+        self.assertIsNone(status["registered_source"])
+        self.assertEqual(status["registered_source_sha256"], hashlib.sha256(changed["content"].encode()).hexdigest())
+        self.assertIsNone(status["backup"])
+        with patch.object(self.fixture.guard, "_apply", side_effect=AssertionError("Unknown source must never be written")):
+            rejected = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/setup",
+                payload=self.work_tool_update_payload(status))
+        self.assertEqual((rejected.status_code, rejected.json()),
+                         (409, {"detail": "work_tool_existing_source_requires_review"}))
+        self.assertEqual((await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump(), changed)
+
+    async def test_common_work_tool_update_rejects_program_change_before_or_during_setup(self):
+        status = await self.assert_historical_work_tool_update_available()
+        before = (await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump()
+        original = self.fixture.guard.work_tool_source()
+        changed = original[0] + "\n# synthetic program update\n"
+        newer = (changed, hashlib.sha256(changed.encode()).hexdigest())
+        for values in ([newer], [original, newer]):
+            with self.subTest(change="before setup" if len(values) == 1 else "during setup"):
+                with patch.object(self.fixture.guard, "work_tool_source", side_effect=values):
+                    rejected = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/setup",
+                        payload=self.work_tool_update_payload(status))
+                self.assertEqual((rejected.status_code, rejected.json()),
+                                 (409, {"detail": "work_tool_program_changed"}))
+                self.assertEqual((await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump(), before)
+
+    async def test_common_work_tool_update_requires_explicit_confirmation_and_keeps_backup_private(self):
+        status = await self.assert_historical_work_tool_update_available()
+        before = (await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump()
+        payload = self.work_tool_update_payload(status)
+        for extra, code in (({"confirmation": "register_readonly_work_tool"}, "work_tool_confirmation_required"),
+                ({"access_grants": [{"principal_type": "user", "principal_id": "*", "permission": "read"}]}, "work_tool_access_grants_preserved")):
+            refused = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/setup", payload={**payload, **extra})
+            self.assertIn(refused.status_code, (409, 422), refused.text)
+            self.assertEqual(refused.json()["detail"], code)
+            self.assertEqual((await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump(), before)
+        updated = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/setup", payload=payload)
+        self.assertEqual(updated.status_code, 200, updated.text)
+        backup = updated.json()["backup"]
+        directory = self.fixture.directory / "ees-work-tool-backups"
+        files = list(directory.glob("*.json"))
+        self.assertEqual(len(files), 1)
+        if os.name != "nt":
+            self.assertEqual(directory.stat().st_mode & 0o777, 0o700)
+            self.assertEqual(files[0].stat().st_mode & 0o777, 0o600)
+        saved = json.loads(files[0].read_text(encoding="utf-8"))
+        self.assertEqual(saved["before"]["content"], before["content"])
+        fresh = (await self.fixture.request("GET", "/api/v1/ees/assets/work-tool/status")).json()
+        self.assertTrue(fresh["backup"]["can_restore"])
+        self.assertNotIn("before", fresh["backup"])
+        self.assertNotIn(str(directory), json.dumps(fresh))
+        self.assertNotIn(before["content"], json.dumps(fresh))
+        current = (await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump()
+        refused = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/restore", payload={
+            "expected_token": fresh["expected_token"], "source_sha256": fresh["source_sha256"],
+            "backup_id": backup["id"], "backup_sha256": "0" * 64, "confirmation": "restore_previous_work_tool"})
+        self.assertEqual((refused.status_code, refused.json()), (403, {"detail": "work_tool_backup_access_denied"}))
+        self.assertEqual((await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump(), current)
+        # A different administrator may inspect the asset but cannot obtain or
+        # restore the original actor's private backup, even knowing its ID.
+        self.fixture.users["owner"].role = "admin"
+        await self.fixture.acl.AccessGrants.grant_access("tool", "ees_workflow", "user", "owner", "write")
+        other = await self.fixture.request("GET", "/api/v1/ees/assets/work-tool/status", user="owner")
+        self.assertEqual(other.status_code, 200, other.text)
+        self.assertIsNone(other.json()["backup"])
+        refused = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/restore", user="owner", payload={
+            "expected_token": other.json()["expected_token"], "source_sha256": other.json()["source_sha256"],
+            "backup_id": backup["id"], "backup_sha256": backup["sha256"], "confirmation": "restore_previous_work_tool"})
+        self.assertEqual(refused.status_code, 404, refused.text)
+        # Even a fresh token must not restore through an intervening ACL edit.
+        fresh = (await self.fixture.request("GET", "/api/v1/ees/assets/work-tool/status")).json()
+        self.assertFalse(fresh["backup"]["can_restore"])
+        current = (await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump()
+        refused = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/restore", payload={
+            "expected_token": fresh["expected_token"], "source_sha256": fresh["source_sha256"],
+            "backup_id": backup["id"], "backup_sha256": backup["sha256"], "confirmation": "restore_previous_work_tool"})
+        self.assertEqual((refused.status_code, refused.json()), (409, {"detail": "concurrent_edit"}))
+        self.assertEqual((await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump(), current)
+
+    async def test_common_work_tool_initial_backup_failure_does_not_write_code(self):
+        status = await self.assert_historical_work_tool_update_available()
+        before = (await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump()
+        with patch.object(self.fixture.guard, "_save_retirement", side_effect=OSError("synthetic disk unavailable")):
+            failed = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/setup",
+                payload=self.work_tool_update_payload(status))
+        self.assertEqual((failed.status_code, failed.json()), (503, {"detail": "work_tool_backup_write_failed"}))
+        self.assertEqual((await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).model_dump(), before)
+        fresh = (await self.fixture.request("GET", "/api/v1/ees/assets/work-tool/status")).json()
+        self.assertEqual(fresh["state"], "update_available")
+        self.assertIsNone(fresh["backup"])
+
+    async def test_common_work_tool_post_commit_backup_failure_restores_after_guard_restart(self):
+        status = await self.assert_historical_work_tool_update_available()
+        source = (await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).content
+        save = self.fixture.guard._save_retirement
+        writes = 0
+
+        def fail_second_save(path, receipt):
+            nonlocal writes
+            writes += 1
+            if writes == 2:
+                raise OSError("synthetic post-commit receipt failure")
+            return save(path, receipt)
+
+        with patch.object(self.fixture.guard, "_save_retirement", side_effect=fail_second_save):
+            failed = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/setup",
+                payload=self.work_tool_update_payload(status))
+        self.assertEqual((failed.status_code, failed.json()), (503, {"detail": "work_tool_backup_write_failed"}))
+        self.assertEqual(writes, 2)
+        self.assertEqual((await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).content.encode(),
+                         self.fixture.members["open_webui/ees_workflow_tool.py"])
+        saved = next((self.fixture.directory / "ees-work-tool-backups").glob("*.json"))
+        self.assertEqual(json.loads(saved.read_text(encoding="utf-8"))["status"], "prepared")
+        await self.fixture.guard.stop_asset_guard(self.fixture.app)
+        await self.fixture.guard.start_asset_guard(self.fixture.app)
+        fresh = (await self.fixture.request("GET", "/api/v1/ees/assets/work-tool/status")).json()
+        self.assertEqual(fresh["state"], "ready")
+        self.assertTrue(fresh["backup"]["can_restore"], fresh)
+        payload = {"expected_token": fresh["expected_token"], "source_sha256": fresh["source_sha256"],
+            "backup_id": fresh["backup"]["id"], "backup_sha256": fresh["backup"]["sha256"],
+            "confirmation": "restore_previous_work_tool"}
+        restored = await self.fixture.request("POST", "/api/v1/ees/assets/work-tool/restore", payload=payload)
+        self.assertEqual(restored.status_code, 200, restored.text)
+        self.assertTrue(restored.json()["changed"])
+        self.assertEqual((await self.fixture.tools.Tools.get_tool_by_id("ees_workflow")).content, source)
 
     async def test_retirement_preview_delete_retry_restore_preserves_unrelated_native_assets(self):
         # Create synthetic historical registration through the ordinary Native API,
