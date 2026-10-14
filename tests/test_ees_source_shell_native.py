@@ -5,9 +5,11 @@ and Native capabilities are explicit synthetic fixtures. The workflow service
 and its temporary SQLite state use the production implementation.
 """
 import importlib
+from copy import deepcopy
 import json
 import os
 from pathlib import Path
+import re
 import time
 from unittest.mock import patch
 from urllib.parse import urlparse
@@ -18,6 +20,244 @@ from native_ui_fixture import NativeUIHandler
 
 
 class SourceShellNativeTests(IntegratedNativeCase):
+    def scope_catalog_fixture(self, *, denied=False):
+        """Real saved factories with explicit synthetic option visibility.
+
+        The service normally omits inaccessible records. This fixture tests
+        the UI's supported allowed=false/role metadata without broadening the
+        real service's permission-filtered catalog or granting access.
+        """
+        for index in range(1, 9):
+            self.command('save_factory', factory_id='scope-factory-' + str(index),
+                         system_id='EMS', name='합성 공장 ' + str(index).zfill(2))
+        original = self.server.workflow.workspace_state
+        self.scope_catalog_filter = None
+
+        async def catalog(*args, **kwargs):
+            result = deepcopy(await original(*args, **kwargs))
+            if not result.get('ok'):
+                return result
+            result['systems'] = [{'id': item, 'name': item,
+                'role': 'owner' if item == 'EMS' else 'participant',
+                'allowed': not (denied and item == 'FDC')}
+                for item in result['systems'] if item != self.scope_catalog_filter]
+            for item in result['factories']:
+                item['role'] = 'owner' if item['id'] == 'scope-factory-1' else 'participant'
+                item['allowed'] = not (denied and item['id'] == 'scope-factory-8')
+            return result
+
+        fixture = patch.object(self.server.workflow, 'workspace_state', catalog)
+        fixture.start()
+        self.addCleanup(fixture.stop)
+        self.refresh()
+
+    def scope_open(self, kind):
+        trigger = '#ees-work-' + ('site' if kind == 'factory' else 'system') + '-trigger'
+        self.click(trigger)
+        self.wait('document.querySelector("[data-scope-dropdown=' + kind + ']")')
+        self.assertEqual(self.read(trigger, 'ariaExpanded'), 'true')
+        self.assertEqual(self.read(trigger, 'ariaHasPopup'), 'listbox')
+        self.assertEqual(self.browser.evaluate('document.querySelectorAll("[data-scope-dropdown]").length'), 1)
+        self.assertFalse(self.browser.evaluate('!!document.querySelector("#ees-work-dialog[open],dialog[open],[aria-modal=true]")'))
+        geometry = self.browser.evaluate('''(()=>{const field=document.querySelector(''' + json.dumps(trigger) + '''),
+          popup=document.querySelector('[data-scope-dropdown]'),list=popup.querySelector('[role=listbox]'),
+          f=field.getBoundingClientRect(),p=popup.getBoundingClientRect(),l=list.getBoundingClientRect();
+          return {field:{left:f.left,right:f.right,bottom:f.bottom},popup:{left:p.left,top:p.top,width:p.width,height:p.height},
+            list:{height:l.height,scrollHeight:list.scrollHeight,clientHeight:list.clientHeight,
+              overflow:getComputedStyle(list).overflowY},border:getComputedStyle(field).borderColor};})()''')
+        self.assertGreaterEqual(geometry['popup']['top'], geometry['field']['bottom'] - 1)
+        self.assertLessEqual(geometry['popup']['top'] - geometry['field']['bottom'], 12)
+        self.assertAlmostEqual(geometry['popup']['left'], geometry['field']['left'], delta=1)
+        self.assertLessEqual(geometry['list']['height'], 360.5)
+        self.assertLessEqual(geometry['popup']['height'], 360.5)
+        self.assertGreater(geometry['popup']['width'], 100)
+        # Open-state blue must be visible on the field itself.
+        colors = [int(value) for value in re.findall(r'\d+', geometry['border'])[:3]]
+        self.assertEqual(len(colors), 3, geometry)
+        self.assertGreater(colors[2], colors[0], geometry)
+        return trigger, geometry
+
+    def scope_closed(self, trigger, *, focus=True):
+        self.wait('!document.querySelector("[data-scope-dropdown]")')
+        self.assertEqual(self.read(trigger, 'ariaExpanded'), 'false')
+        if focus:
+            self.assertTrue(self.browser.evaluate('document.activeElement === document.querySelector(' + json.dumps(trigger) + ')'))
+
+    def test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus(self):
+        self.scope_catalog_fixture(denied=True)
+        self.fill('#chat-input', '범위를 골라도 유지할 개인 대화 초안')
+        draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        evidence = {}
+        # Each of the three A2 states gets open, Esc/focus, Enter/Space open,
+        # outside click and selection through real browser input events.
+        for variant, kind, target, expected in (
+                ('work-factory', 'factory', 'scope-factory-1', '합성 공장 01'),
+                ('work-system', 'system', 'APC', 'APC'),
+                ('workspace-system', 'system', 'EMS', 'EMS')):
+            if variant == 'workspace-system':
+                self.click('[data-action=mode][data-mode=author]')
+                self.wait("document.querySelector('#ees-work-designer')")
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-site-trigger')"))
+                self.assertIn('관리 시스템', self.text('#ees-work-entry'))
+            trigger, geometry = self.scope_open(kind)
+            evidence[variant] = geometry
+            self.screenshot('source-scope-' + variant)
+            self.key('Escape', 27)
+            self.scope_closed(trigger)
+            self.key('Enter', 13)
+            self.wait('document.querySelector("[data-scope-dropdown=' + kind + ']")')
+            self.key('Escape', 27)
+            self.scope_closed(trigger)
+            self.key(' ', 32)
+            self.wait('document.querySelector("[data-scope-dropdown=' + kind + ']")')
+            self.click('#chat-input')
+            self.scope_closed(trigger, focus=False)
+            self.scope_open(kind)
+            if kind == 'factory':
+                self.assertIn('전체 공장', self.text('[role=listbox] [role=option]:first-child'))
+                self.assertTrue(self.browser.evaluate("document.querySelector('[role=listbox] [role=option]:first-child').getAttribute('aria-selected') === 'true'"))
+                self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-factory-search')"))
+                self.assertGreater(geometry['list']['scrollHeight'], geometry['list']['clientHeight'])
+                self.assertIn(geometry['list']['overflow'], ('auto', 'scroll'))
+                page_scroll = self.browser.evaluate('window.scrollY')
+                point = self.browser.evaluate("(()=>{const r=document.querySelector('[data-scope-list=factory]').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()")
+                self.browser.call('Input.dispatchMouseEvent', {'type': 'mouseWheel', **point,
+                                  'deltaX': 0, 'deltaY': 140})
+                self.wait("document.querySelector('[data-scope-list=factory]').scrollTop > 0")
+                self.assertEqual(self.browser.evaluate('window.scrollY'), page_scroll)
+                self.assertIn('담당', self.text('[data-action=choose_factory][data-factory-id=scope-factory-1]'))
+                self.assertIn('참여', self.text('[data-action=choose_factory][data-factory-id=scope-factory-2]'))
+                self.fill('#ees-factory-search', '공장 07')
+                self.wait("!!document.querySelector('[data-action=choose_factory][data-factory-id=scope-factory-7]') && !document.querySelector('[data-action=choose_factory][data-factory-id=scope-factory-1]')")
+                self.fill('#ees-factory-search', '')
+                self.wait("document.querySelector('[data-action=choose_factory][data-factory-id=scope-factory-8]')")
+                denied = '[data-action=choose_factory][data-factory-id=scope-factory-8]'
+            else:
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-factory-search,[data-action=choose_factory]')"))
+                denied = '[data-action=choose_system][data-system-id=FDC]'
+            self.assertIn('권한 없음', self.text(denied))
+            self.assertTrue(self.read(denied, 'disabled'))
+            self.assertEqual(self.read(denied, 'ariaDisabled'), 'true')
+            prior = self.text(trigger)
+            denied_point = self.browser.evaluate('(()=>{const e=document.querySelector(' + json.dumps(denied) + ');e.scrollIntoView({block:"nearest"});const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()')
+            for event in ('mousePressed', 'mouseReleased'):
+                self.browser.call('Input.dispatchMouseEvent', {'type': event, **denied_point,
+                                  'button': 'left', 'clickCount': 1})
+            self.assertEqual(self.text(trigger), prior)
+            self.assertTrue(self.browser.evaluate('!!document.querySelector("[data-scope-dropdown]")'))
+            option = '[data-action=choose_' + kind + '][data-' + kind + '-id=' + target + ']'
+            self.click(option)
+            self.scope_closed(trigger)
+            self.wait('document.querySelector(' + json.dumps(trigger) + ').textContent.includes(' + json.dumps(expected) + ')')
+            self.assertIsNotNone(self.refresh(), 'Selected scope did not finish its real service refresh')
+            self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+            self.assertEqual(self.browser.evaluate('location.pathname'), '/c/existing-chat')
+            self.scope_open(kind)
+            self.assertEqual(self.read(option, 'ariaSelected'), 'true')
+            self.assertEqual(self.browser.evaluate('document.querySelector(' + json.dumps(option) + ').querySelectorAll("svg").length'), 2,
+                             'Selected option must show its own check as well as the scope icon')
+            # Arrow movement is bounded by enabled options; Enter selects the
+            # focused item and closes instead of submitting the chat.
+            self.key('ArrowDown', 40)
+            self.assertTrue(self.browser.evaluate('document.activeElement?.getAttribute("role") === "option" && !document.activeElement.disabled'))
+            for _ in range(self.browser.evaluate('document.querySelectorAll("[role=listbox] [role=option]").length') + 1):
+                self.key('ArrowDown', 40)
+                self.assertTrue(self.browser.evaluate('document.activeElement?.getAttribute("role") === "option" && !document.activeElement.disabled'))
+            self.key('ArrowUp', 38)
+            self.assertTrue(self.browser.evaluate('document.activeElement?.getAttribute("role") === "option" && !document.activeElement.disabled'))
+            self.key('Enter', 13)
+            self.scope_closed(trigger)
+            self.assertIsNotNone(self.refresh())
+        self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+        self.assertEqual(self.server.completions, [])
+        directory = self.screenshot('source-scope-three-dropdowns')
+        (directory / 'source-scope-three-dropdowns.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+    def test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading(self):
+        self.enable_native_menus()
+        self.scope_catalog_fixture()
+        self.author(name='범위 변경 보존 절차', jobs=1)
+        frame_monitor.install(self)
+        self.navigate('/c/existing-chat')
+        self.wait("document.querySelector('#ees-work-entry [data-action=my_work]') && window.__eesNativeDraftV1?.ready()")
+        self.open_sidebar()
+        self.assertIsNotNone(self.refresh())
+        self.fill('#chat-input', '범위 변경 중에도 그대로인 문장')
+        draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        self.wait("document.querySelector('#ees-work-entry .ew-workflows details')")
+        group = '#ees-work-entry .ew-workflows details'
+        if self.read(group, 'open'):
+            self.click(group + ' > summary')
+        self.assertFalse(self.read(group, 'open'))
+        self.delay_workspace_reads()
+        frame_monitor.guard_loading(self)
+        labels = []
+        for label, kind, target in (
+                ('scope-factory-first', 'factory', 'scope-factory-1'),
+                ('scope-factory-second', 'factory', 'scope-factory-2'),
+                ('scope-all-factories', 'factory', ''),
+                ('scope-system-apc', 'system', 'APC'),
+                ('scope-system-ems', 'system', 'EMS')):
+            trigger, _ = self.scope_open(kind)
+            start = len(self.server.navigation_reads)
+            frame_monitor.mark(self, label)
+            self.click('[data-action=choose_' + kind + '][data-' + kind + '-id="' + target + '"]')
+            self.scope_closed(trigger)
+            self.wait_delayed_reads(start)
+            labels.append(label)
+            self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+            self.assertEqual(self.browser.evaluate('location.pathname'), '/c/existing-chat')
+        self.assertFalse(self.read(group, 'open'), 'Range selection reset the collapsed workflow group')
+        # A new menu replaces the old one, and changing screens closes it.
+        self.scope_open('system')
+        self.scope_open('factory')
+        self.click('[data-action=mode][data-mode=author]')
+        self.wait('!document.querySelector("[data-scope-dropdown]")')
+        self.wait("document.querySelector('#ees-work-designer')")
+        self.scope_open('system')
+        start = len(self.server.navigation_reads)
+        frame_monitor.mark(self, 'scope-workspace-system-apc')
+        self.click('[data-action=choose_system][data-system-id=APC]')
+        self.scope_closed('#ees-work-system-trigger')
+        self.wait_delayed_reads(start)
+        labels.append('scope-workspace-system-apc')
+        self.delayed_step('scope-native-skills', '[data-action=native_open][data-native-id=skills]',
+                          "location.pathname === '/workspace/skills' && document.querySelector('#workspace-container input')",
+                          paths=('workspace',))
+        labels.append('scope-native-skills')
+        self.scope_open('system')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-site-trigger')"))
+        start = len(self.server.navigation_reads)
+        frame_monitor.mark(self, 'scope-native-system-ems')
+        self.click('[data-action=choose_system][data-system-id=EMS]')
+        self.scope_closed('#ees-work-system-trigger')
+        self.wait_delayed_reads(start, paths=('workspace',))
+        self.assertEqual(self.browser.evaluate('location.pathname'), '/workspace/skills')
+        self.assertIn('EMS', self.text('#ees-work-system-trigger'))
+        labels.append('scope-native-system-ems')
+        self.delayed_step('scope-native-return', '#ees-work-entry [data-action=procedures]',
+                          "location.pathname === '/c/existing-chat' && document.querySelector('#ees-work-designer')")
+        labels.append('scope-native-return')
+        # A changed server-provided catalog must invalidate an already open
+        # list; it may not keep old options interactive until the next click.
+        self.scope_open('system')
+        self.scope_catalog_filter = 'EMS'
+        start = len(self.server.navigation_reads)
+        frame_monitor.mark(self, 'scope-server-catalog-change')
+        self.browser.evaluate('void window.__eesNativeWorkV1.refresh()')
+        self.wait_delayed_reads(start)
+        self.wait('!document.querySelector("[data-scope-dropdown]")')
+        self.assertEqual(self.read('#ees-work-system-trigger', 'ariaExpanded'), 'false')
+        labels.append('scope-server-catalog-change')
+        self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+        self.assertEqual(self.server.completions, [])
+        evidence = frame_monitor.collect(self, labels=labels)
+        evidence['reads'] = self.server.navigation_reads
+        evidence['scope'] = 'A2 first-time scope selections, both real workspace and operations HTTP responses delayed 1000ms, physical browser input, unchanged Native draft and collapsed navigation.'
+        directory = self.screenshot('source-scope-delayed-navigation')
+        (directory / 'source-scope-delayed-frames.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        frame_monitor.assert_clean(self, evidence, labels=labels)
+
     def enable_native_menus(self):
         # Native Tools also checks its ordinary feature flag. The explicit
         # capability fixture alone does not bypass that compiled route guard.

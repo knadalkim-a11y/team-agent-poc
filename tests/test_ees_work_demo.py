@@ -31,13 +31,18 @@ class EESWorkNativeBrowserTests(IntegratedNativeCase):
                 self.screenshot('integrated-layout-' + str(width))
 
     def test_scope_dialog_escape_cancel_and_chat_draft_preservation(self):
+        # Retain the audited test ID; C41 replaces the modal with a dropdown
+        # while carrying over Escape cancellation and Native draft protection.
         self.command('save_factory', factory_id='factory-one', system_id='EMS', name='합성 공장')
         self.refresh(); self.fill('#chat-input', '전송 전 개인 대화 내용')
         self.click('#ees-work-site-trigger')
-        self.wait("document.querySelector('#ees-work-dialog')?.open")
-        self.assertTrue(self.browser.evaluate("document.activeElement?.hasAttribute('data-dialog-close')"))
+        self.wait("document.querySelector('[data-scope-dropdown=factory]')")
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog')?.open"))
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-factory-search')"))
+        self.assertEqual(self.read('#ees-work-site-trigger', 'ariaExpanded'), 'true')
         self.key('Escape', 27)
-        self.wait("!document.querySelector('#ees-work-dialog')?.open")
+        self.wait("!document.querySelector('[data-scope-dropdown]')")
+        self.assertEqual(self.browser.evaluate('document.activeElement?.id'), 'ees-work-site-trigger')
         self.assertEqual(self.text('#chat-input'), '전송 전 개인 대화 내용')
         self.click('#ees-work-site-trigger')
         self.click('[data-action="choose_factory"][data-factory-id="factory-one"]')

@@ -11,7 +11,7 @@
   const screen=()=>source()?.screen?.() || {};
   const available=()=>Boolean(token()&&screen().active&&!screen().native&&screen().chatReady);
   let state=null,identity='',epoch=0,serial=0,busy=false,scheduled=false,error='',commandError='',route='',readyRoute='',refreshTimer=null,uiTimer=null,uiRevision=0,restored=false,initialSelectionPatch=null;
-  let procedureStart=null,nativeCapabilities=null,stateKey='',targetLoading=false,evidenceUnavailable=false;
+  let procedureStart=null,nativeCapabilities=null,nativeScope=null,stateKey='',targetLoading=false,evidenceUnavailable=false;
   const workspaceCache=new Map();
   let nativeTicket=null,nativeNavigationBusy=false,pendingNativeAction=null;
   let selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};
@@ -20,7 +20,7 @@
   const view=createWorkView({callbacks:{panelWidth:width=>{if(!restored)initialSelectionPatch={...initialSelectionPatch,panel_width:width};selection.panel_width=width;remember(width);}}});
   const designer=createWorkDesigner({callbacks:{command,read,models:models,askHelp,helpState:()=>source()?.helpState?.(),startContextChanged:value=>{procedureStart=value;if(state&&available()&&chatPrepared())view.sync(snapshot());},openWorkflow:async id=>select({workflow_id:id,run_id:'',job_id:'',mode:'author',tab:'overview'}),changed:refresh,navigate:mode=>select({mode}),operationsRead,operationsCommand,options:async body=>{const at=context();const result=await api('workspace/options',body);if(at!==context())throw new Error('작업 위치가 바뀌어 선택 목록을 적용하지 않았습니다.');return result;},resources:async()=>{const at=context();const result=await api('resources');return at===context()?result:null;},propose:async({signal,...body})=>{const at=context();const result=await api('workspace/proposal',body,signal);if(at!==context())throw new Error('작업 위치가 변경되어 제안을 적용하지 않았습니다.');return result;}}});
   const capabilities=()=>nativeCapabilities ?? state?.capabilities;
-  const snapshot=()=>({state:state?{...state,input_proposal:pendingInputProposal?{values:pendingInputProposal.values,warnings:pendingInputProposal.warnings}:null}:null,native_capabilities:nativeCapabilities,target_loading:targetLoading,evidence_unavailable:evidenceUnavailable,selection:{...clone(selection),chat_id:chatId()},native_shell:nativePage(),native_id:nativePage()?(workNativeTargets.find(item=>location.pathname===item.path||location.pathname.startsWith(item.path+'/'))?.id || (adminNativePage()?'admin':'native')):'',busy,error:error || commandError,procedure_start:procedureStart});
+  const snapshot=()=>({state:state?{...state,input_proposal:pendingInputProposal?{values:pendingInputProposal.values,warnings:pendingInputProposal.warnings}:null}:null,native_capabilities:nativeCapabilities,native_scope:nativeScope,target_loading:targetLoading,evidence_unavailable:evidenceUnavailable,selection:{...clone(selection),chat_id:chatId()},native_shell:nativePage(),native_id:nativePage()?(workNativeTargets.find(item=>location.pathname===item.path||location.pathname.startsWith(item.path+'/'))?.id || (adminNativePage()?'admin':'native')):'',busy,error:error || commandError,procedure_start:procedureStart});
   // The last successful workspace remains visible during route validation.
   // References and queued actions still wait for the current route and Chat.
   const chatPrepared=()=>readyRoute===route&&(!route||route===location.pathname+location.search+'#chat')&&(!nativeTicket||nativeTicket.phase==='leaving');
@@ -198,11 +198,11 @@
       const previousActor=state?.capabilities?.actor_id || nativeCapabilities?.actor_id;
       if(previousActor&&result.capabilities?.actor_id&&previousActor!==result.capabilities.actor_id){reset();nativeCapabilities=result.capabilities;return refresh();}
       if(!restored){restored=true;uiRevision=Math.max(uiRevision,result.ui_state?.revision || 0);const saved=result.ui_state?.state?.selection,explicit=initialSelectionPatch;initialSelectionPatch=null;if(saved&&typeof saved==='object')selection={...selection,...saved,...explicit};if(!selection.system_id)selection.system_id=(result.systems?.[0]?.id || result.systems?.[0] || '');if(explicit)remember(explicit.panel_width ?? null);if(at!==context())return refresh();}
-      if(nativePage()){nativeCapabilities=result.capabilities || {};error='';render();refreshTimer=setTimeout(refresh,30000);return state;}
+      if(nativePage()){nativeCapabilities=result.capabilities || {};nativeScope={systems:result.systems || [],factories:result.factories || []};error='';render();refreshTimer=setTimeout(refresh,30000);return state;}
       let operations={};try{operations=await api('operations?'+new URLSearchParams({system_id:selection.system_id,run_id:selection.run_id}));}catch(failure){if(accessFailure(failure))throw failure;operations={error:failure.message};}if(at!==context()||n!==serial)return null;uiRevision=Math.max(uiRevision,result.ui_state?.revision ?? uiRevision);let legacy;if(selection.tab==='records'){try{legacy=await api('legacy');}catch(failure){legacy={error:failure.message};}if(at!==context()||n!==serial)return null;}acceptWorkspace(normalized({...result,operations,legacy}));if(selection.mode==='author'&&!workCanWorkspace(state.capabilities)){selection={...selection,mode:'work',tab:'my_work'};}error='';readyRoute=route;syncNativeReturn();render();loadOptions();
       const active=Object.values(state.run?.jobs || {}).some(job=>job.status==='running')||(state.operations?.scope_runs || []).some(scope=>['queued','running'].includes(scope.status))||(state.operations?.requests || []).some(request=>['requested','accepted','running','reported_complete'].includes(request.state));refreshTimer=setTimeout(refresh,active||busy?2500:30000);
       return state;
-    }catch(failure){if(at!==context()||n!==serial)return null;error=failure.message;if(nativePage())nativeCapabilities={};if(accessFailure(failure)){invalidateWorkspace();nativeCapabilities={};}
+    }catch(failure){if(at!==context()||n!==serial)return null;error=failure.message;if(nativePage()){nativeCapabilities={};nativeScope=null;}if(accessFailure(failure)){invalidateWorkspace();nativeCapabilities={};nativeScope=null;}
       else if(!nativePage()&&(selection.mode!=='author'||['history','records','historical_reference'].includes(selection.tab))){
         // Previously displayed attempts and their private inputs require a
         // successful current lookup. Preserve editor drafts and navigation,
@@ -419,8 +419,16 @@
     if(action==='workspace_admin'){if(capabilities()?.is_admin!==true)return;return select({mode:'author',tab:'workspace_admin',workflow_id:'',run_id:'',job_id:''});}
     if(action==='admin_factory'||action==='admin_access')return adminDialog(action==='admin_factory'?'factory':'access',target.dataset.id);
     if(action==='mode'){if(!['work','author'].includes(target.dataset.mode)||target.dataset.mode==='author'&&!workCanWorkspace(capabilities()))return;return select({mode:target.dataset.mode,tab:target.dataset.mode==='author'?'overview':'my_work'});}
-    if(action==='scope')return view.scopeDialog();
-    if(action==='choose_factory'||action==='choose_system'){closeDialog();return select({[action==='choose_factory'?'factory_id':'system_id']:target.dataset.factoryId ?? target.dataset.systemId,...(action==='choose_system'?{factory_id:''}:{}),workflow_id:'',run_id:'',job_id:'',tab:'my_work'});}
+    if(action==='choose_factory'||action==='choose_system'){
+      const factory=action==='choose_factory',id=factory?target.dataset.factoryId:target.dataset.systemId;
+      const catalog=nativePage()?nativeScope:state;
+      const item=(factory?catalog?.factories:catalog?.systems)?.find(value=>(typeof value==='string'?value:value.id)===id);
+      if(typeof id!=='string'||factory&&(nativePage()||selection.mode==='author')||!(factory&&id==='')&&(!item||item.allowed===false))return;
+      if(id===selection[factory?'factory_id':'system_id'])return;
+      designer.readDraft?.();
+      const author=nativePage()||selection.mode==='author';
+      return select({[factory?'factory_id':'system_id']:id,...(!factory?{factory_id:''}:{}),...(author?{mode:'author'}:{}),workflow_id:'',run_id:'',job_id:'',tab:author?'overview':'my_work'});
+    }
     if(action==='workflow'){const id=target.dataset.workflowId,workflow=(state?.workflows || []).find(item=>item.id===id),adhoc=(workflow?.execution_mode || workflow?.mode || 'on_demand')==='on_demand';const runs=(state?.runs || []).filter(run=>run.workflow_id===id&&!workUI.finished(run));return select({workflow_id:id,run_id:!adhoc&&runs.length===1?runs[0].id:'',job_id:'',tab:'overview',panel_open:true});}
     if(action==='my_work'||action==='records')return select({mode:'work',tab:action,panel_open:true,job_id:'',records_workflow:''});
     if(action==='open_task'){
@@ -475,7 +483,7 @@
   }
   async function sourceAction(dataset){
     if(!dataset||typeof dataset!=='object')return;
-    try{if(nativePage()&&!['native_open','refresh','category'].includes(dataset.action)){returnFromNative({dataset});return;}return await handleClick({dataset});}
+    try{if(nativePage()&&!['native_open','refresh','category','choose_system'].includes(dataset.action)){returnFromNative({dataset});return;}return await handleClick({dataset});}
     catch(failure){error=failure.message;render();}
   }
   function handleEvent(event){
@@ -483,7 +491,7 @@
     const target=event.target;if(event.type==='submit'&&target.closest?.('[data-ees-work]')){event.preventDefault();return;}if(event.type==='keydown'&&event.repeat&&target.closest?.('[data-mutation]')){event.preventDefault();event.stopImmediatePropagation();return;}if(!target?.closest?.('[data-ees-work]'))return;
     if(event.type==='click'){const buttonTarget=target.closest('button[data-action]');if(!buttonTarget||buttonTarget.disabled)return;event.preventDefault();if(nativePage()&&buttonTarget.closest('#ees-work-entry')&&!['native_open','refresh'].includes(buttonTarget.dataset.action)){returnFromNative(buttonTarget);return;}Promise.resolve(handleClick(buttonTarget)).catch(failure=>{error=failure.message;render();});}
     if(event.type==='input'){
-      if(target.id==='ees-factory-search'||target.id==='ees-workflow-search'){const list=$(target.id==='ees-factory-search'?'#ees-factory-list':'#ees-workflow-list');list?.querySelectorAll('button').forEach(item=>{item.hidden=!item.textContent.toLocaleLowerCase().includes(target.value.toLocaleLowerCase());});}
+      if(target.id==='ees-workflow-search'){const list=$('#ees-workflow-list');list?.querySelectorAll('button').forEach(item=>{item.hidden=!item.textContent.toLocaleLowerCase().includes(target.value.toLocaleLowerCase());});}
       if(target.closest?.('#ees-work-start')){const form=target.closest('#ees-work-start');selection.start_inputs ||= {};selection.start_inputs[selection.workflow_id]=workReadInputs(form);selection.start_groups ||= {};selection.start_groups[selection.workflow_id]=[...form.querySelectorAll('[data-start-group]:checked')].map(field=>field.value);remember();return;}
       if(target.id==='ees-request-reason'){selection.request_reasons ||= {};selection.request_reasons[selection.run_id+'/'+selection.job_id]=target.value;remember();return;}
       if(target.id==='ees-review-text'){view.capture();scheduleReviewSave();}
@@ -494,7 +502,7 @@
     if(event.type==='change'&&target.matches?.('[data-list-include]')){view.refreshResults();return;}
     if(event.type==='change'&&(target.matches?.('[data-item-verdict]')||target.matches?.('[data-item-confirm]'))){const verdict=target.matches('[data-item-confirm]')?(target.checked?'completed':'unknown'):target.value;if(verdict)mutate({action:'decide',run_id:selection.run_id,job_id:selection.job_id,item_id:target.dataset.itemId,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,verdict});}
   }
-  function reset(){helpWriting=null;nativeCapabilities=null;workspaceCache.clear();stateKey='';targetLoading=false;evidenceUnavailable=false;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;source()?.modelCount?.(0);selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};}
+  function reset(){helpWriting=null;nativeCapabilities=null;nativeScope=null;workspaceCache.clear();stateKey='';targetLoading=false;evidenceUnavailable=false;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;source()?.modelCount?.(0);selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};}
   function sync(){
     scheduled=false;bindHosts();syncHelpState();const auth=token();if(auth!==identity){reset();identity=auth;route='';}
     syncNativeReturn();
