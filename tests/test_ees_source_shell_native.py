@@ -183,8 +183,25 @@ class SourceShellNativeTests(IntegratedNativeCase):
             self.assertEqual(self.browser.evaluate('location.pathname'), '/c/existing-chat')
             self.scope_open(kind)
             self.assertEqual(self.read(option, 'ariaSelected'), 'true')
-            self.assertEqual(self.browser.evaluate('document.querySelector(' + json.dumps(option) + ').querySelectorAll("svg").length'), 2,
-                             'Selected option must show its own check as well as the scope icon')
+            # EesIcon renders an image asset, not inline SVG. Assert the actual
+            # selected check is loaded and visible, independently of its peer
+            # scope icon or how many descendants the option contains.
+            check_selector = option + ' img.ew-icon[src$="/9d8d5.svg"]'
+            self.assertEqual(self.browser.evaluate('document.querySelectorAll(' + json.dumps(check_selector) + ').length'), 1)
+            self.wait('document.querySelector(' + json.dumps(check_selector) + ')?.complete')
+            check = self.browser.evaluate('''(()=>{const e=document.querySelector(''' + json.dumps(check_selector) + '''),
+              r=e.getBoundingClientRect(),s=getComputedStyle(e),l=e.closest('[role=listbox]').getBoundingClientRect();
+              return {src:e.getAttribute('src'),naturalWidth:e.naturalWidth,width:r.width,height:r.height,
+                display:s.display,visibility:s.visibility,opacity:s.opacity,
+                insideList:r.top>=l.top&&r.bottom<=l.bottom&&r.left>=l.left&&r.right<=l.right};})()''')
+            self.assertGreater(check['naturalWidth'], 0, check)
+            self.assertGreater(check['width'], 0, check)
+            self.assertGreater(check['height'], 0, check)
+            self.assertNotEqual(check['display'], 'none', check)
+            self.assertEqual(check['visibility'], 'visible', check)
+            self.assertGreater(float(check['opacity']), 0, check)
+            self.assertTrue(check['insideList'], check)
+            evidence[variant]['selectedCheck'] = check
             # Arrow movement is bounded by enabled options; Enter selects the
             # focused item and closes instead of submitting the chat.
             self.key('ArrowDown', 40)
