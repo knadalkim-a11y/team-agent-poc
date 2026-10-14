@@ -50,6 +50,36 @@ test('forged denied Native and author actions do not navigate or mutate state',a
  await h.api.handleClick({dataset:{action:'mode',mode:'author'}});
  assert.equal(h.api.snapshot().selection.mode,'work');assert.equal(h.navigation.length,0);assert.equal(h.calls.length,0);
 });
+test('scope option labels never authorize a denied or undisclosed actual scope',async()=>{
+ const h=controller(),state={capabilities:nativeCapabilities(),systems:['EMS','APC'],factories:[{id:'allowed-factory',name:'Allowed',system_id:'EMS'},{id:'revoked-factory',name:'Revoked',system_id:'EMS'}],scope_options:{systems:[{id:'EMS',name:'EMS',allowed:true},{id:'APC',name:'APC',allowed:false},{id:'FDC',name:'FDC',allowed:false}],factories:[{id:'allowed-factory',allowed:true},{id:'revoked-factory',allowed:false},{id:'hidden-factory',allowed:false}]},workflows:[],runs:[],ui_state:{revision:0,state:{}}};
+ h.api.setState(state);h.api.setSelection({mode:'work',system_id:'EMS',factory_id:''});
+ for(const systemId of ['APC','FDC','unknown'])await h.api.handleClick({dataset:{action:'choose_system',systemId}});
+ for(const factoryId of ['revoked-factory','hidden-factory','unknown'])await h.api.handleClick({dataset:{action:'choose_factory',factoryId}});
+ assert.equal(h.calls.length,0);assert.equal(h.api.snapshot().selection.system_id,'EMS');assert.equal(h.api.snapshot().selection.factory_id,'');
+ state.scope_options.systems.push({id:'metadata-only',allowed:true});await h.api.handleClick({dataset:{action:'choose_system',systemId:'metadata-only'}});assert.equal(h.calls.length,0);
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,...state}:{ok:true});await h.api.handleClick({dataset:{action:'choose_factory',factoryId:'allowed-factory'}});
+ assert.equal(h.api.snapshot().selection.factory_id,'allowed-factory');assert.ok(h.calls.some(call=>call.url.includes('factory_id=allowed-factory')));
+});
+test('factory-scoped user can select another allowed system with factory cleared and composer preserved',async()=>{
+ const h=nativeNavigationHarness(nativeCapabilities()),draft=JSON.parse(JSON.stringify(h.readDraft()));
+ h.state.systems=['EMS','APC'];h.state.factories=[{id:'ems-factory',name:'EMS factory',system_id:'EMS'}];
+ h.state.scope_options={systems:[{id:'EMS',name:'EMS',allowed:true,role:'participant'},{id:'APC',name:'APC',allowed:true,role:'participant'},{id:'FDC',name:'FDC',allowed:false,role:''}],factories:[{id:'ems-factory',name:'EMS factory',system_id:'EMS',allowed:true,role:'participant'}]};
+ h.api.setSelection({mode:'work',system_id:'EMS',factory_id:'ems-factory',workflow_id:'ems-work',run_id:'ems-run',job_id:'ems-job',collapsed:['ops']});
+ await h.api.sourceAction({action:'choose_system',systemId:'APC'});
+ const selection=h.api.snapshot().selection;
+ assert.equal(selection.system_id,'APC');assert.equal(selection.factory_id,'');assert.equal(selection.workflow_id,'');assert.equal(selection.run_id,'');assert.equal(selection.job_id,'');assert.deepEqual(JSON.parse(JSON.stringify(selection.collapsed)),['ops']);
+ const workspace=h.calls.find(call=>call.url.startsWith('/api/ees-work/workspace?')),query=new URL(workspace.url,'http://native.test').searchParams;
+ assert.equal(query.get('system_id'),'APC');assert.equal(query.get('factory_id'),'');
+ assert.deepEqual(h.readDraft(),draft);assert.deepEqual(h.restores,[]);assert.deepEqual(h.navigation,[]);assert.equal(h.context.location.pathname,'/c/original');
+ const count=h.calls.length;await h.api.sourceAction({action:'choose_system',systemId:'FDC'});await h.api.sourceAction({action:'choose_system',systemId:'unknown'});assert.equal(h.calls.length,count);assert.equal(h.api.snapshot().selection.system_id,'APC');
+});
+test('Native scope preserves separate permission metadata and rejects disabled options without navigation',async()=>{
+ const h=nativeNavigationHarness();h.state.scope_options={systems:[{id:'EMS',name:'EMS',allowed:true,role:'owner'},{id:'FDC',name:'FDC',allowed:false,role:''}],factories:[]};await h.open();
+ assert.deepEqual(h.renders.at(-1).native_scope.scope_options,h.state.scope_options);
+ const before=h.calls.length;await h.api.sourceAction({action:'choose_system',systemId:'FDC'});
+ assert.equal(h.calls.length,before);assert.equal(h.context.location.pathname,'/workspace/skills');assert.equal(h.api.snapshot().selection.system_id,'EMS');
+ assert.deepEqual(h.navigation,['/workspace/skills']);
+});
 test('all six allowed Native destinations use direct static routes without a sidebar link',async()=>{
  for(const id of ['skills','models','knowledge','prompts','tools','admin']){const h=nativeNavigationHarness();await h.open(id);assert.deepEqual(h.navigation,[id==='admin'?'/admin/settings':'/workspace/'+id]);assert.equal(h.renders.at(-1)?.native_shell,true);assert.equal(h.renders.at(-1)?.native_id,id);assert.equal(h.calls.filter(call=>call.body).length,0);}
 });

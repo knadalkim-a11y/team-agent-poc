@@ -1378,9 +1378,9 @@ new file mode 100644
 +	$: current = (data.workflows || []).filter((w) => !s.system_id || w.system_id === s.system_id);
 +	let openedScope = '';
 +	$: scope = $eesSnapshot.native_shell && $eesSnapshot.native_scope ? $eesSnapshot.native_scope : data;
-+	$: scopeRole = (item) => item.role || (item.roles?.includes('manager') || cap.is_admin || cap.managed_systems?.includes(item.system_id || item.id) ? 'owner' : 'participant');
-+	$: systems = (scope.systems || []).map((item) => typeof item === 'string' ? { id: item, name: item } : item).map((item) => ({ ...item, role: scopeRole(item) }));
-+	$: factories = [{ id: '', name: t('EES.AllFactories', 'All factories') }, ...(scope.factories || []).map((item) => ({ ...item, role: scopeRole(item) }))];
++	$: scopeRole = (item) => item.allowed === false ? '' : item.role || (item.roles?.includes('manager') || cap.is_admin || cap.managed_systems?.includes(item.system_id || item.id) ? 'owner' : 'participant');
++	$: systems = (scope.scope_options?.systems ?? scope.systems ?? []).map((item) => typeof item === 'string' ? { id: item, name: item } : item).map((item) => ({ ...item, role: scopeRole(item) }));
++	$: factories = [{ id: '', name: t('EES.AllFactories', 'All factories') }, ...(scope.scope_options?.factories ?? scope.factories ?? []).map((item) => ({ ...item, role: scopeRole(item) }))];
 +	$: scopeBoundary = JSON.stringify([$page.url.pathname, $page.url.search, $eesSnapshot.native_id, s.mode, s.tab, s.workflow_id, s.run_id, s.job_id, s.system_id, s.factory_id, s.chat_id, $eesCompact, systems, factories]);
 +	$: nativeAllowed = (id) =>
 +		cap.native_access_available === true &&

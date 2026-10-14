@@ -1096,29 +1096,43 @@ class WorkspaceMixin:
                     elif not self._work_system_visible(db, actor, groups, system_id):
                         _fail('scope_forbidden', '이 작업 위치의 권한이 없습니다.')
                 factories, systems, workflows, runs, workflow_active_runs = [], [], [], [], []
+                # The scope picker may show denied names, not their settings,
+                # grants or work data. Keep these display-only options separate
+                # from the authorized collections consumed by other screens.
+                scope_options = {'systems': [], 'factories': []}
                 for system in (*SYSTEMS, 'COMMON'):
-                    try:
-                        if factory_id:
-                            self._work_authorize_scope(db, actor, groups, system, factory_id, 'viewer')
-                        elif not self._work_system_visible(db, actor, groups, system):
-                            continue
+                    # Switching system clears the current factory. Offer every
+                    # system the actor can enter in that target context; work
+                    # data below still uses the requested system/factory ACL.
+                    allowed, role = self._work_system_visible(db, actor, groups, system), ''
+                    if allowed:
                         systems.append(system)
-                    except WorkflowError:
-                        pass
+                        role = 'participant'
+                        try:
+                            self._work_authorize_scope(db, actor, groups, system, '', 'manager')
+                            role = 'owner'
+                        except WorkflowError:
+                            pass
+                    scope_options['systems'].append({'id': system, 'name': system, 'role': role, 'allowed': allowed})
                 for row in db.execute('SELECT * FROM work_factories ORDER BY name,id'):
+                    if system_id and row['system_id'] != system_id: continue
+                    allowed, role = False, ''
                     try:
                         self._work_authorize_scope(db, actor, groups, row['system_id'], row['id'], 'viewer')
+                        allowed, role = True, 'participant'
                     except WorkflowError:
-                        continue
-                    if system_id and row['system_id'] != system_id: continue
-                    item = dict(row); item['attributes'] = json.loads(item['attributes'])
+                        pass
                     # A manager for one factory is not a system-wide manager.
-                    # Label only already-visible factories using their own ACL.
-                    try:
-                        self._work_authorize_scope(db, actor, groups, row['system_id'], row['id'], 'manager')
-                        item['role'] = 'owner'
-                    except WorkflowError:
-                        item['role'] = 'participant'
+                    if allowed:
+                        try:
+                            self._work_authorize_scope(db, actor, groups, row['system_id'], row['id'], 'manager')
+                            role = 'owner'
+                        except WorkflowError:
+                            pass
+                    scope_options['factories'].append({key: row[key] for key in ('id', 'name', 'system_id')}
+                                                      | {'role': role, 'allowed': allowed})
+                    if not allowed: continue
+                    item = dict(row); item['attributes'] = json.loads(item['attributes']); item['role'] = role
                     factories.append(item)
                 for row in db.execute('SELECT * FROM work_definitions ORDER BY updated_at DESC,id'):
                     if system_id and row['system_id'] != system_id: continue
@@ -1170,7 +1184,7 @@ class WorkspaceMixin:
                 capabilities['can_author'] = bool(capabilities['managed_systems'])
                 access = [dict(row) | {'roles': json.loads(row['roles'])} for row in db.execute('SELECT * FROM work_access ORDER BY id')] if capabilities['is_admin'] else []
                 return {'ok': True, 'protocol': 2, 'help': workflow_help(), 'procedure_examples': _procedure_example_summaries(),
-                        'capabilities': capabilities, 'systems': systems, 'factories': factories,
+                        'capabilities': capabilities, 'systems': systems, 'factories': factories, 'scope_options': scope_options,
                         'workflows': workflows, 'runs': runs, 'workflow': selected_workflow, 'run': selected_run,
                         'workflow_active_runs': workflow_active_runs,
                         'my_work': my_work, 'my_work_count': len(my_work), 'access': access, 'people': people, 'native_groups': native_groups,

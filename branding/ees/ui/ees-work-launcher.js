@@ -198,7 +198,7 @@
       const previousActor=state?.capabilities?.actor_id || nativeCapabilities?.actor_id;
       if(previousActor&&result.capabilities?.actor_id&&previousActor!==result.capabilities.actor_id){reset();nativeCapabilities=result.capabilities;return refresh();}
       if(!restored){restored=true;uiRevision=Math.max(uiRevision,result.ui_state?.revision || 0);const saved=result.ui_state?.state?.selection,explicit=initialSelectionPatch;initialSelectionPatch=null;if(saved&&typeof saved==='object')selection={...selection,...saved,...explicit};if(!selection.system_id)selection.system_id=(result.systems?.[0]?.id || result.systems?.[0] || '');if(explicit)remember(explicit.panel_width ?? null);if(at!==context())return refresh();}
-      if(nativePage()){nativeCapabilities=result.capabilities || {};nativeScope={systems:result.systems || [],factories:result.factories || []};error='';render();refreshTimer=setTimeout(refresh,30000);return state;}
+      if(nativePage()){nativeCapabilities=result.capabilities || {};nativeScope={systems:result.systems || [],factories:result.factories || [],scope_options:result.scope_options};error='';render();refreshTimer=setTimeout(refresh,30000);return state;}
       let operations={};try{operations=await api('operations?'+new URLSearchParams({system_id:selection.system_id,run_id:selection.run_id}));}catch(failure){if(accessFailure(failure))throw failure;operations={error:failure.message};}if(at!==context()||n!==serial)return null;uiRevision=Math.max(uiRevision,result.ui_state?.revision ?? uiRevision);let legacy;if(selection.tab==='records'){try{legacy=await api('legacy');}catch(failure){legacy={error:failure.message};}if(at!==context()||n!==serial)return null;}acceptWorkspace(normalized({...result,operations,legacy}));if(selection.mode==='author'&&!workCanWorkspace(state.capabilities)){selection={...selection,mode:'work',tab:'my_work'};}error='';readyRoute=route;syncNativeReturn();render();loadOptions();
       const active=Object.values(state.run?.jobs || {}).some(job=>job.status==='running')||(state.operations?.scope_runs || []).some(scope=>['queued','running'].includes(scope.status))||(state.operations?.requests || []).some(request=>['requested','accepted','running','reported_complete'].includes(request.state));refreshTimer=setTimeout(refresh,active||busy?2500:30000);
       return state;
@@ -423,7 +423,8 @@
       const factory=action==='choose_factory',id=factory?target.dataset.factoryId:target.dataset.systemId;
       const catalog=nativePage()?nativeScope:state;
       const item=(factory?catalog?.factories:catalog?.systems)?.find(value=>(typeof value==='string'?value:value.id)===id);
-      if(typeof id!=='string'||factory&&(nativePage()||selection.mode==='author')||!(factory&&id==='')&&(!item||item.allowed===false))return;
+      const option=(factory?catalog?.scope_options?.factories:catalog?.scope_options?.systems)?.find(value=>value.id===id);
+      if(typeof id!=='string'||factory&&(nativePage()||selection.mode==='author')||!(factory&&id==='')&&(!item||item.allowed===false||option?.allowed===false))return;
       if(id===selection[factory?'factory_id':'system_id'])return;
       designer.readDraft?.();
       const author=nativePage()||selection.mode==='author';

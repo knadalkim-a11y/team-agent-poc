@@ -21,35 +21,71 @@ from native_ui_fixture import NativeUIHandler
 
 class SourceShellNativeTests(IntegratedNativeCase):
     def scope_catalog_fixture(self, *, denied=False):
-        """Real saved factories with explicit synthetic option visibility.
+        """Real saved factories and grants; never replace workspace responses.
 
-        The service normally omits inaccessible records. This fixture tests
-        the UI's supported allowed=false/role metadata without broadening the
-        real service's permission-filtered catalog or granting access.
+        Native login/chat storage remain synthetic, as in the shared fixture.
+        Scope visibility and roles come from the production service and its
+        actual HTTP response for the current limited account.
         """
         for index in range(1, 9):
             self.command('save_factory', factory_id='scope-factory-' + str(index),
-                         system_id='EMS', name='합성 공장 ' + str(index).zfill(2))
-        original = self.server.workflow.workspace_state
-        self.scope_catalog_filter = None
+                         system_id='EMS', name='합성 공장 ' + str(index).zfill(2),
+                         attributes={'scope_private_attribute': 'not-in-selector-metadata'})
+        if not denied:
+            self.refresh()
+            return
+        self.scope_admin = self.server.user
+        limited = deepcopy(self.scope_admin)
+        limited.update(id='scope-user', name='권한 범위 검증 사용자',
+                       email='scope-user@example.invalid', role='user')
+        self.users[limited['id']] = limited
+        for index in range(1, 8):
+            self.command('save_access', principal_kind='user', principal_id=limited['id'],
+                         system_id='EMS', factory_id='scope-factory-' + str(index),
+                         roles=['manager' if index == 1 else 'participant'])
+        self.scope_apc_grant = self.command('save_access', principal_kind='user',
+            principal_id=limited['id'], system_id='APC', factory_id='*', roles=['manager'])
+        self.server.user = limited
+        for chat in self.server.chats.values():
+            chat['user_id'] = limited['id']
+        # Reload the Native session as the limited actor before entering a
+        # draft. Updating only an in-memory service user would leave the
+        # frontend authenticated as its previous administrator.
+        self.navigate('/c/existing-chat')
+        self.wait("document.querySelector('#chat-input.ProseMirror') && document.querySelector('#ees-work-system-trigger') && window.__eesNativeDraftV1?.ready()")
+        self.open_sidebar()
+        self.assertIsNotNone(self.refresh())
+        response = self.scope_http_state()
+        self.assertFalse(response['capabilities']['is_admin'])
+        self.assertTrue(response['capabilities']['can_author'])
+        self.assertEqual(response['capabilities']['managed_systems'], ['APC'])
+        self.assertEqual(set(response['systems']), {'EMS', 'APC'})
+        allowed = {item['id'] for item in response['factories']}
+        self.assertEqual(allowed, {'scope-factory-' + str(index) for index in range(1, 8)})
+        options = response['scope_options']
+        systems = {item['id']: item for item in options['systems']}
+        factories = {item['id']: item for item in options['factories']}
+        self.assertEqual(len(factories), 8, 'Search threshold includes visible denied metadata')
+        self.assertEqual({key for key, item in systems.items() if item['allowed']}, {'EMS', 'APC'})
+        self.assertEqual((systems['EMS']['role'], systems['APC']['role']), ('participant', 'owner'))
+        self.assertFalse(systems['FDC']['allowed'])
+        self.assertEqual((factories['scope-factory-1']['role'], factories['scope-factory-2']['role']), ('owner', 'participant'))
+        self.assertFalse(factories['scope-factory-8']['allowed'])
+        self.assertEqual(factories['scope-factory-8']['role'], '')
+        for item in options['systems']:
+            self.assertEqual(set(item), {'id', 'name', 'role', 'allowed'})
+        for item in options['factories']:
+            self.assertEqual(set(item), {'id', 'name', 'system_id', 'role', 'allowed'})
+        self.assertNotIn('not-in-selector-metadata', json.dumps(options))
+        self.scope_api_evidence = {'source': 'Actual HTTP workspace response from production WorkflowService; real saved factory and access grants, synthetic Native session/chat storage only.',
+            'actor_id': limited['id'], 'is_admin': response['capabilities']['is_admin'],
+            'allowed_systems': response['systems'], 'allowed_factory_ids': sorted(allowed),
+            'scope_options': options}
 
-        async def catalog(*args, **kwargs):
-            result = deepcopy(await original(*args, **kwargs))
-            if not result.get('ok'):
-                return result
-            result['systems'] = [{'id': item, 'name': item,
-                'role': 'owner' if item == 'EMS' else 'participant',
-                'allowed': not (denied and item == 'FDC')}
-                for item in result['systems'] if item != self.scope_catalog_filter]
-            for item in result['factories']:
-                item['role'] = 'owner' if item['id'] == 'scope-factory-1' else 'participant'
-                item['allowed'] = not (denied and item['id'] == 'scope-factory-8')
-            return result
-
-        fixture = patch.object(self.server.workflow, 'workspace_state', catalog)
-        fixture.start()
-        self.addCleanup(fixture.stop)
-        self.refresh()
+    def scope_http_state(self):
+        response = self.browser.evaluate("fetch('/api/ees-work/workspace?system_id=EMS',{headers:{Authorization:'Bearer '+localStorage.getItem('token')}}).then(r=>r.json())")
+        self.assertTrue(response.get('ok'), response)
+        return response
 
     def scope_open(self, kind):
         trigger = '#ees-work-' + ('site' if kind == 'factory' else 'system') + '-trigger'
@@ -214,6 +250,24 @@ class SourceShellNativeTests(IntegratedNativeCase):
             self.scope_activate_key('Enter')
             self.scope_closed(trigger)
             self.assertIsNotNone(self.refresh())
+        # The server's current grant changes metadata without changing the
+        # selected scope. An already-open menu must stop showing the former
+        # manager authority once that real response arrives.
+        self.scope_open('system')
+        self.command('save_access', user=self.scope_admin,
+                     access_id=self.scope_apc_grant['access_id'],
+                     expected_revision=self.scope_apc_grant['revision'],
+                     principal_kind='user', principal_id=self.server.user['id'],
+                     system_id='APC', factory_id='*', roles=['participant'])
+        self.assertIsNotNone(self.refresh())
+        self.scope_closed('#ees-work-system-trigger', focus=False)
+        updated = self.scope_http_state()
+        self.assertFalse(updated['capabilities']['can_author'])
+        self.assertEqual(next(item['role'] for item in updated['scope_options']['systems']
+                              if item['id'] == 'APC'), 'participant')
+        self.scope_api_evidence['after_permission_change'] = {
+            'managed_systems': updated['capabilities']['managed_systems'],
+            'scope_options': updated['scope_options'], 'open_dropdowns': 0}
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
         self.assertEqual(self.server.completions, [])
         evidence['keyboard'] = self.browser.evaluate('window.__scopeKeyboardEvidence')
@@ -221,6 +275,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
                             for row in evidence['keyboard']))
         directory = self.screenshot('source-scope-three-dropdowns')
         (directory / 'source-scope-three-dropdowns.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        (directory / 'source-scope-api-permissions.json').write_text(json.dumps(self.scope_api_evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
     def test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading(self):
         self.enable_native_menus()
@@ -290,7 +345,8 @@ class SourceShellNativeTests(IntegratedNativeCase):
         # A changed server-provided catalog must invalidate an already open
         # list; it may not keep old options interactive until the next click.
         self.scope_open('system')
-        self.scope_catalog_filter = 'EMS'
+        self.command('save_factory', factory_id='scope-factory-1', system_id='EMS',
+                     expected_revision=1, name='서버에서 바뀐 합성 공장 01')
         start = len(self.server.navigation_reads)
         frame_monitor.mark(self, 'scope-server-catalog-change')
         self.browser.evaluate('void window.__eesNativeWorkV1.refresh()')
