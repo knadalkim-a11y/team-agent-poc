@@ -62,7 +62,7 @@
     if($LASTEXITCODE -ne 0 -or $eesActual -cne $eesCommit){throw '검토 원본과 달라 적용하지 않았습니다.'}
   }
   & $eesManager -Action Upgrade -Config $eesCfg -Bundle $eesZip -Commit $eesCommit -ArtifactSha256 $eesHash -HealthTimeout 120 -Summary
-  Write-Host '적용 뒤 [Work 도구 설정 확인] → [지금 프로그램 원본으로 바꾸기]를 확인하세요. 이미 ready면 유지하고, 지원 형태와 다름이면 해시 앞 8자리만 알려 주세요.'
+  Write-Host '적용 뒤 [Work 도구 설정 확인]을 열어 주세요.'
 }
 ```
 

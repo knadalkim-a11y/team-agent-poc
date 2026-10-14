@@ -348,6 +348,11 @@ jobs:
           foreach ($anchor in @('internal-pilot-20261012', 'internal-pilot-stop-recovery-20261012', 'source-frontend-apply-20261013', 'source-frontend-local-zip-20261013', 'source-frontend-stop-recovery-20261013', 'source-phase2-local-zip-20261014', 'source-phase2-route-cache-zip-20261014')) {
             $pattern = '(?s)<a id="' + [regex]::Escape($anchor) + '"></a>.*?```powershell\r?\n(.*?)```'
             $pilotBlock = [regex]::Match($guide, $pattern).Groups[1].Value
+            if ($anchor -eq 'source-phase2-route-cache-zip-20261014') {
+              $pilotBlock = $pilotBlock.Replace('MERGED_MAIN_SHA', ('a' * 40)).Replace('OUTER_ZIP_SHA256', ('b' * 64))
+              $pilotBlock = $pilotBlock.Replace('$eesBytes=0', '$eesBytes=9999999999')
+              $pilotBlock = $pilotBlock.Replace('FINAL_ACTIONS_ARTIFACT_URL', 'https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38650534953/artifacts/11935097176')
+            }
             if (-not $pilotBlock -or $pilotBlock.Length -gt 2500) { throw "Missing or oversized pilot block: $anchor" }
             [void][System.Management.Automation.Language.Parser]::ParseInput(
               $pilotBlock, [ref]$tokens, [ref]$parseErrors)

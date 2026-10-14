@@ -1,5 +1,11 @@
 # 현재 작업 상태
 
+## 2026-10-15 · #88·#89 순서 병합 승인과 적용 블록 길이 보완
+
+- **승인:** 사용자가 Claude 재검토 후 #88 → main을 #89에 통합 → 최종 head CI 성공 후 #89 병합을 승인했다. 저장소 관례인 merge commit을 사용한다. 아래 병합 보류 문구는 당시 기록이며 이번 승인으로 대체한다.
+- **보완/검증:** #88 적용 안내의 Write-Host를 줄이고 Windows CI가 40자리 SHA·64자리 ZIP 해시·10자리 바이트 수·실제 형식 Actions 링크를 채운 뒤 길이와 구문을 검사하도록 했다. 같은 값으로 이전 블록은 LF 2,522자, 수정본은 LF 2,456자/CRLF 2,491자다. 문서 검사·diff 검사를 통과했고 원격 Windows 검사는 [#88 Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/88/checks)에서 확인한다. [검증 근거](../evals/v4-ui-20260930.md#apply-block-length-20261015).
+- **다음 작업 하나:** #88 최종 CI 확인 후 지정 순서로 병합하고 문서 5개의 양쪽 기록을 보존한다. 최종 main CI 성공 뒤 바깥 Actions ZIP의 실제 SHA256·정확한 바이트·링크와 전체 main SHA를 채운 한 블록을 Claude 대조용으로 전달한다. 사내 설치는 사용자 확인42cc756이며 새 적용은 미실행이다. main 직접 push·사내 실행·Figma 수정·#77/#79 착수는 하지 않는다.
+
 ## 2026-10-15 · #88 검토 보완: 처음 범위의 받는 중·CI·선택 목록
 
 - **기준/범위:** 미병합 R11 head `1fd7f9a5f152e9e624370ddf27dfacdcfc1c63ce`의 Claude 검토4건을 같은 PR에서 수정했다. 사용자 확인 사내 설치는42cc756이다. [현재 계약](mockups/ees-work/TASK.md#scope-review-20261015).
