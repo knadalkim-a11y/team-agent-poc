@@ -1,0 +1,246 @@
+{
+  "run_id": 38515563587,
+  "job_id": 115695816611,
+  "head": "b4f370bfd97e782597372b775f78038baa07127a",
+  "ci_merge_commit": "a0a1d619640e8eb5cbc725a1173530fc81589de2",
+  "artifact_id": 11871782988,
+  "artifact_name": "ees-work-browser-evidence-native-compose",
+  "artifact_sha256": "21d141c71e50071269460d8cd87c7f3e129d7a8c6ec992c7a354f34e05be08df",
+  "tests": {
+    "module": "test_ees_source_shell_native.py",
+    "partition": null,
+    "selected_ids": null,
+    "seconds": 65.522,
+    "tests_run": 3,
+    "no_test_failures": true,
+    "status": "passed",
+    "counts": {
+      "passed": 3,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "expected-failure": 0,
+      "unexpected-success": 0
+    },
+    "outcomes": [
+      {
+        "id": "test_ees_source_shell_native.SourceShellNativeTests.test_background_refresh_and_native_return_keep_draft_nodes_expansion_and_scroll",
+        "status": "passed"
+      },
+      {
+        "id": "test_ees_source_shell_native.SourceShellNativeTests.test_delayed_navigation_never_replaces_loaded_menu_or_panel_with_loading",
+        "status": "passed"
+      },
+      {
+        "id": "test_ees_source_shell_native.SourceShellNativeTests.test_every_navigation_has_source_chrome_without_native_overlay_frames",
+        "status": "passed"
+      }
+    ]
+  },
+  "evidence": {
+    "source-shell-delayed-navigation-frames.json": {
+      "sha256": "86fbc460c436e1565845c22e4162f4727dec1783bb4586cbd45ff6afd2afdbed",
+      "sample_count": 2682,
+      "guarded_sample_count": 2644,
+      "menu_loading_frames": 0,
+      "panel_loading_frames": 0,
+      "legacy_frames": 0,
+      "source_missing_frames": 0,
+      "route_counts": {
+        "skills-to-procedures-enter-workspace": {
+          "frames": 127,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "skills-to-procedures-native": {
+          "frames": 69,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "skills-to-procedures": {
+          "frames": 129,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "skills-to-my-work-enter-workspace": {
+          "frames": 126,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "skills-to-my-work-native": {
+          "frames": 68,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "skills-to-my-work": {
+          "frames": 189,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "tools-to-procedures-enter-workspace": {
+          "frames": 126,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "tools-to-procedures-native": {
+          "frames": 69,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "tools-to-procedures": {
+          "frames": 129,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "tools-to-my-work-enter-workspace": {
+          "frames": 126,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "tools-to-my-work-native": {
+          "frames": 67,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "tools-to-my-work": {
+          "frames": 250,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "models-to-procedures-enter-workspace": {
+          "frames": 126,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "models-to-procedures-native": {
+          "frames": 68,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "models-to-procedures": {
+          "frames": 129,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "models-to-my-work-enter-workspace": {
+          "frames": 126,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "models-to-my-work-native": {
+          "frames": 68,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "models-to-my-work": {
+          "frames": 249,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "delayed-chat-list": {
+          "frames": 7,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "delayed-chat-switch": {
+          "frames": 132,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "delayed-new-chat": {
+          "frames": 128,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "delayed-chat-list-return": {
+          "frames": 6,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "delayed-existing-return": {
+          "frames": 130,
+          "menu_loading": 0,
+          "panel_loading": 0
+        }
+      },
+      "preservation": null
+    },
+    "source-shell-delayed-preservation-frames.json": {
+      "sha256": "848ead8107e912a545f8602ce82c87a6ff0837851092eec8f722919b5170ec2d",
+      "sample_count": 629,
+      "guarded_sample_count": 576,
+      "menu_loading_frames": 0,
+      "panel_loading_frames": 0,
+      "legacy_frames": 0,
+      "source_missing_frames": 0,
+      "route_counts": null,
+      "preservation": {
+        "before": {
+          "scroll": 215,
+          "value": "자동 갱신 중에도 유지할 미저장 완료 설명",
+          "open": true
+        },
+        "refreshed": {
+          "fieldSame": true,
+          "detailSame": true,
+          "scrollSame": true,
+          "value": "자동 갱신 중에도 유지할 미저장 완료 설명",
+          "open": true,
+          "scroll": 215
+        },
+        "returned": {
+          "fieldSame": true,
+          "detailSame": true,
+          "scrollSame": true,
+          "value": "자동 갱신 중에도 유지할 미저장 완료 설명",
+          "open": true,
+          "scroll": 215
+        },
+        "work_returned": {
+          "fieldSame": false,
+          "detailSame": false,
+          "scrollSame": false,
+          "value": "자동 갱신 중에도 유지할 미저장 완료 설명",
+          "open": true,
+          "scroll": 215
+        },
+        "updated_workflow_id": "af6b56c8-be2d-42f6-bacd-950f5160e93e",
+        "saved_revision": 3
+      }
+    },
+    "source-shell-all-navigation-frames.json": {
+      "sha256": "a1eaafd783ae823204b9580d49166269ae8808c9bc26890210c650ee26bd7565",
+      "sample_count": 145,
+      "guarded_sample_count": 103,
+      "menu_loading_frames": 0,
+      "panel_loading_frames": 0,
+      "legacy_frames": 0,
+      "source_missing_frames": 0,
+      "route_counts": {
+        "first-load": 28,
+        "work-open": 14,
+        "right-overview": 3,
+        "right-other-task": 4,
+        "chat-list": 4,
+        "chat-list-open": 8,
+        "new-chat": 6,
+        "chat-list-again": 4,
+        "chat-existing-return": 8,
+        "work-authoring": 6,
+        "work-tools": 4,
+        "work-access": 3,
+        "work-procedures": 4,
+        "native-models": 7,
+        "native-knowledge": 4,
+        "native-prompts": 6,
+        "native-skills": 4,
+        "native-tools": 6,
+        "native-return": 4,
+        "admin-open": 5,
+        "admin-return": 13
+      },
+      "preservation": null
+    }
+  },
+  "saved_evidence_sha256": "26f71a1801777e5a1000db7cdc542ac7c2a453a1d12d2f8a1f3e32f354162cd5"
+}

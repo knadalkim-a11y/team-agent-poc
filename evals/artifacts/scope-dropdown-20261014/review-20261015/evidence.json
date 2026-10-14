@@ -1,0 +1,57 @@
+{
+  "base_head": "1fd7f9a5f152e9e624370ddf27dfacdcfc1c63ce",
+  "environment": {
+    "python": "3.11.17",
+    "node": "22.16.0",
+    "native": "0.11.3",
+    "note": "scope ACL initial negative used Python3.12.14; pinned3.11 full63 rerun passed. UI initial negatives precede fixed Node22 final runs."
+  },
+  "files": [
+    {
+      "file": "scope-unread-negative.txt",
+      "bytes": 6327,
+      "sha256": "f76b7c4027724420867ad14b34699036402f96f168e01c857ce14a905888daf0"
+    },
+    {
+      "file": "scope-operations-negative-assertion.txt",
+      "bytes": 919,
+      "sha256": "85e6082977e9fce930cffece9f7f0631473fb1d7bdde6e43ed77df59f60bdb1d"
+    },
+    {
+      "file": "scope-ui-positive-node22-final.txt",
+      "bytes": 64708,
+      "sha256": "7883a4bd8c0379c7b3d8f25c1cdd32233b66ea9b3e6bba9c3e293e56b9dd7994"
+    },
+    {
+      "file": "scope-review-source-tests-positive.txt",
+      "bytes": 4802,
+      "sha256": "ddd9d7f0aaed310dd630c2e9e35466feacca7c9a795de1ad858fbc70df75b6ec"
+    },
+    {
+      "file": "scope-acl-review-negative.txt",
+      "bytes": 5526,
+      "sha256": "cb8ce6c4011b25c72886e415f4477468056acd16a038e1ab8d56ed6fc06b1d3f"
+    },
+    {
+      "file": "scope-acl-pinned-final.txt",
+      "bytes": 11701,
+      "sha256": "6dc4a3f298ed46f159937c83b3d4f151725bcc19a2ac7bab60a216f7399349f0"
+    },
+    {
+      "file": "scope-review-npm-before-env.txt",
+      "bytes": 3290,
+      "sha256": "ce2c30029dc7b5942a8998dbebd2778d3fcb5ae09443adb14b2f4424c5d37b1b"
+    },
+    {
+      "file": "scope-review-npm.txt",
+      "bytes": 1898,
+      "sha256": "61683b16c65eb3519e7090730cb4743174d87a657f9980bd85691a56ce6df2b0"
+    },
+    {
+      "file": "scope-review-source-tests.txt",
+      "bytes": 15352,
+      "sha256": "3783e9c5cbb8983552db0b4ae1b4ca12f275558f228be9f11131d84af2c5637c"
+    }
+  ],
+  "ci": "Final modified head CI is separately recorded in the existing PR Checks/body; local pass is not browser or Windows pass."
+}

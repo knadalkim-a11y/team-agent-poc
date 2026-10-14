@@ -1,0 +1,67 @@
+test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus (test_ees_source_shell_native.SourceShellNativeTests.test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus) ... FAIL
+test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading (test_ees_source_shell_native.SourceShellNativeTests.test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading) ... FAIL
+test_scope_dialog_escape_cancel_and_chat_draft_preservation (test_ees_work_demo.EESWorkNativeBrowserTests.test_scope_dialog_escape_cancel_and_chat_draft_preservation) ... FAIL
+
+======================================================================
+FAIL: test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus (test_ees_source_shell_native.SourceShellNativeTests.test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/ees_work_integrated_fixture.py", line 90, in setUp
+    self.browser.navigate('about:blank')
+  File "/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/test_ees_chat_theme.py", line 292, in navigate
+    version = self.call("Browser.getVersion", timeout=deadline - time.monotonic())
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/test_ees_chat_theme.py", line 265, in call
+    response = self.receive(deadline)
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/test_ees_chat_theme.py", line 244, in receive
+    raise AssertionError("Chrome DevTools pipe closed: " + self.diagnostics()["stderr_tail"][-2000:])
+AssertionError: Chrome DevTools pipe closed: [1014/022505.659906:WARNING:chrome/app/chrome_main_linux.cc:84] Read channel stable from /workspace/scratch/38e8d34a7e5f/chrome/opt/google/chrome/CHROME_VERSION_EXTRA
+[7:7:1014/022505.734523:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+[1014/022505.739765:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+
+
+======================================================================
+FAIL: test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading (test_ees_source_shell_native.SourceShellNativeTests.test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/ees_work_integrated_fixture.py", line 90, in setUp
+    self.browser.navigate('about:blank')
+  File "/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/test_ees_chat_theme.py", line 292, in navigate
+    version = self.call("Browser.getVersion", timeout=deadline - time.monotonic())
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/test_ees_chat_theme.py", line 265, in call
+    response = self.receive(deadline)
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/test_ees_chat_theme.py", line 244, in receive
+    raise AssertionError("Chrome DevTools pipe closed: " + self.diagnostics()["stderr_tail"][-2000:])
+AssertionError: Chrome DevTools pipe closed: [1014/022506.217564:WARNING:chrome/app/chrome_main_linux.cc:84] Read channel stable from /workspace/scratch/38e8d34a7e5f/chrome/opt/google/chrome/CHROME_VERSION_EXTRA
+[19:19:1014/022506.223124:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+[1014/022506.223297:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+[1014/022506.223365:ERROR:third_party/crashpad/crashpad/util/file/directory_reader_posix.cc:43] opendir /proc/19/task: No such file or directory (2)
+
+
+======================================================================
+FAIL: test_scope_dialog_escape_cancel_and_chat_draft_preservation (test_ees_work_demo.EESWorkNativeBrowserTests.test_scope_dialog_escape_cancel_and_chat_draft_preservation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/ees_work_integrated_fixture.py", line 90, in setUp
+    self.browser.navigate('about:blank')
+  File "/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/test_ees_chat_theme.py", line 292, in navigate
+    version = self.call("Browser.getVersion", timeout=deadline - time.monotonic())
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/test_ees_chat_theme.py", line 265, in call
+    response = self.receive(deadline)
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/test_ees_chat_theme.py", line 244, in receive
+    raise AssertionError("Chrome DevTools pipe closed: " + self.diagnostics()["stderr_tail"][-2000:])
+AssertionError: Chrome DevTools pipe closed: [1014/022511.848206:WARNING:chrome/app/chrome_main_linux.cc:84] Read channel stable from /workspace/scratch/38e8d34a7e5f/chrome/opt/google/chrome/CHROME_VERSION_EXTRA
+[31:31:1014/022511.855060:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+[1014/022511.855293:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+[1014/022511.855391:ERROR:third_party/crashpad/crashpad/util/file/directory_reader_posix.cc:43] opendir /proc/31/task: No such file or directory (2)
+
+
+----------------------------------------------------------------------
+Ran 3 tests in 11.849s
+
+FAILED (failures=3)

@@ -1,0 +1,53 @@
+{
+  "test": "test_ees_source_shell_native.SourceShellNativeTests.test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus",
+  "last_wait": null,
+  "last_click": null,
+  "capture_errors": [],
+  "browser": {
+    "stage": "browser_handshake",
+    "elapsed_ms": 270.12214199930895,
+    "pid": 7,
+    "exit_code": -6,
+    "browser_version": null,
+    "target_id": null,
+    "session_attached": false,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 1,
+      "method": "Browser.getVersion",
+      "session_attached": false,
+      "timeout_seconds": 29.924022695005988,
+      "elapsed_ms": 178.33049899491016,
+      "completed": false
+    },
+    "recent_responses": [],
+    "stderr_tail": "[1014/022505.659906:WARNING:chrome/app/chrome_main_linux.cc:84] Read channel stable from /workspace/scratch/38e8d34a7e5f/chrome/opt/google/chrome/CHROME_VERSION_EXTRA\n[7:7:1014/022505.734523:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)\n[1014/022505.739765:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)\n",
+    "first_failure": {
+      "stage": "browser_handshake",
+      "elapsed_ms": 254.4307589996606,
+      "pid": 7,
+      "exit_code": -6,
+      "browser_version": null,
+      "target_id": null,
+      "session_attached": false,
+      "buffer_bytes": 0,
+      "last_command": {
+        "id": 1,
+        "method": "Browser.getVersion",
+        "session_attached": false,
+        "timeout_seconds": 29.924022695005988,
+        "elapsed_ms": 178.33049899491016,
+        "completed": false
+      },
+      "recent_responses": [],
+      "stderr_tail": "[1014/022505.659906:WARNING:chrome/app/chrome_main_linux.cc:84] Read channel stable from /workspace/scratch/38e8d34a7e5f/chrome/opt/google/chrome/CHROME_VERSION_EXTRA\n[7:7:1014/022505.734523:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)\n[1014/022505.739765:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)\n",
+      "browser_startup": null,
+      "bootstrap_observation": null,
+      "error_type": "AssertionError",
+      "response_timeout": false
+    },
+    "browser_startup": null,
+    "bootstrap_observation": null
+  },
+  "page_capture": "unavailable_no_attached_session"
+}

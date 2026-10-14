@@ -1,0 +1,43 @@
+test_delayed_navigation_never_replaces_loaded_menu_or_panel_with_loading (test_ees_source_shell_native.SourceShellNativeTests.test_delayed_navigation_never_replaces_loaded_menu_or_panel_with_loading) ... FAIL
+
+======================================================================
+FAIL: test_delayed_navigation_never_replaces_loaded_menu_or_panel_with_loading (test_ees_source_shell_native.SourceShellNativeTests.test_delayed_navigation_never_replaces_loaded_menu_or_panel_with_loading)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/0d4e240820e3/team-agent-baseline-42cc756/tests/ees_work_integrated_fixture.py", line 90, in setUp
+    self.browser.navigate('about:blank')
+  File "/workspace/scratch/0d4e240820e3/team-agent-baseline-42cc756/tests/test_ees_chat_theme.py", line 292, in navigate
+    version = self.call("Browser.getVersion", timeout=deadline - time.monotonic())
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/0d4e240820e3/team-agent-baseline-42cc756/tests/test_ees_chat_theme.py", line 265, in call
+    response = self.receive(deadline)
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/0d4e240820e3/team-agent-baseline-42cc756/tests/test_ees_chat_theme.py", line 244, in receive
+    raise AssertionError("Chrome DevTools pipe closed: " + self.diagnostics()["stderr_tail"][-2000:])
+AssertionError: Chrome DevTools pipe closed: 55b0b625167a (/workspace/scratch/0d4e240820e3/team-agent-poc/dist/chrome/chrome-linux64/chrome+0x57c7679)
+#9 0x55b0b6251079 (/workspace/scratch/0d4e240820e3/team-agent-poc/dist/chrome/chrome-linux64/chrome+0x57c7078)
+#10 0x55b0bb381090 (/workspace/scratch/0d4e240820e3/team-agent-poc/dist/chrome/chrome-linux64/chrome+0xa8f708f)
+#11 0x55b0b5b42b19 (/workspace/scratch/0d4e240820e3/team-agent-poc/dist/chrome/chrome-linux64/chrome+0x50b8b18)
+#12 0x55b0b6d65ed9 (/workspace/scratch/0d4e240820e3/team-agent-poc/dist/chrome/chrome-linux64/chrome+0x62dbed8)
+#13 0x55b0b6d64ff1 (/workspace/scratch/0d4e240820e3/team-agent-poc/dist/chrome/chrome-linux64/chrome+0x62daff0)
+#14 0x55b0b6d65f45 (/workspace/scratch/0d4e240820e3/team-agent-poc/dist/chrome/chrome-linux64/chrome+0x62dbf44)
+#15 0x55b0b4ca6839 (/workspace/scratch/0d4e240820e3/team-agent-poc/dist/chrome/chrome-linux64/chrome+0x421c838)
+#16 0x55b0b5a29002 (/workspace/scratch/0d4e240820e3/team-agent-poc/dist/chrome/chrome-linux64/chrome+0x4f9f001)
+#17 0x55b0b5c23d67 (/workspace/scratch/0d4e240820e3/team-agent-poc/dist/chrome/chrome-linux64/chrome+0x5199d66)
+#18 0x55b0b5c232ff (/workspace/scratch/0d4e240820e3/team-agent-poc/dist/chrome/chrome-linux64/chrome+0x51992fe)
+#19 0x7f0c550921ca (/usr/lib/x86_64-linux-gnu/libc.so.6+0x2a1c9)
+#20 0x7f0c5509228b (/usr/lib/x86_64-linux-gnu/libc.so.6+0x2a28a)
+#21 0x55b0b7a385fa (/workspace/scratch/0d4e240820e3/team-agent-poc/dist/chrome/chrome-linux64/chrome+0x6fae5f9)
+  r8: 000020b80006ca89  r9: 0000000000000001 r10: 0000000000000008 r11: 0000000000000246
+ r12: 0000000000000006 r13: 000000000000008a r14: 0000000000000016 r15: 000020b800084500
+  di: 0000000000000007  si: 0000000000000007  bp: 00007ffd46252fd0  bx: 0000000000000007
+  dx: 0000000000000006  ax: 0000000000000000  cx: 00007f0c55106b2c  sp: 00007ffd46252f90
+  ip: 00007f0c55106b2c efl: 0000000000000246 cgf: 002b000000000033 erf: 0000000000000000
+ trp: 0000000000000000 msk: 0000000000000000 cr2: 0000000000000000
+[end of stack trace]
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.645s
+
+FAILED (failures=1)

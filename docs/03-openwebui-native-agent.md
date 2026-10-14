@@ -1,6 +1,6 @@
 # 03. Open WebUI Native 통합 Assistant
 
-현재 제품 이름은 **EES Workflow**이며 [2026-10-02 통합 구현 기준](#integrated-work-install-20261002)을 유지한다. 사용자는 2026-10-13 main4e89341의 `.14` 적용 성공을 보고했다. [1단계 적용 안내](#source-frontend-apply-20261013)는 당시 원문으로 보존한다. [2단계 통합 적용](#source-phase2-local-zip-20261014)은 #86·#87 모두 병합하고 최종 main CI·ZIP을 확정한 뒤 한 번만 수행한다. 아래 날짜별 시연·ApplyDemo·전문 Assistant·사전 Skill 구성은 당시 이력이다. 새 설치/업데이트에서 이 콘텐츠를 등록하지 않으며 옛 명령을 반복하지 않는다. 실제 도구/Native 관리/프로그램 적용과 복구 경로는 유지한다.
+현재 제품 이름은 **EES Workflow**이며 [2026-10-02 통합 구현 기준](#integrated-work-install-20261002)을 유지한다. 사용자는 2026-10-14 main `42cc756` 적용 완료를 보고했다. [후속 통합 적용 안내](#source-phase2-route-cache-zip-20261014)는 #88(2-1/A2)과 #89(Work 도구 갱신) 모두 검토·병합한 뒤 최종 main CI·ZIP을 확정해 한 번만 전달한다. [1단계](#source-frontend-apply-20261013)와 [2단계 통합 적용](#source-phase2-local-zip-20261014) 안내는 당시 원문으로 보존한다. 아래 날짜별 시연·ApplyDemo·전문 Assistant·사전 Skill 구성은 당시 이력이다. 새 설치/업데이트에서 이 콘텐츠를 등록하지 않으며 옛 명령을 반복하지 않는다. 실제 도구/Native 관리/프로그램 적용과 복구 경로는 유지한다.
 
 > 문서 역할: Native Assistant 기준선 구성·확장 원칙
 >
@@ -12,12 +12,65 @@
 
 | 할 일 | 안내 |
 |---|---|
-| 소스 화면·대화 도우미 2단계 통합 적용 | [최종 main 브라우저 ZIP 한 번 적용](#source-phase2-local-zip-20261014) |
+| 2-1/A2·Work 도구 후속 통합 적용 준비 | [병합 뒤 브라우저 열기·ZIP 대기·검사·적용 한 블록](#source-phase2-route-cache-zip-20261014) |
+| 소스 화면·대화 도우미 2단계 통합 적용 이력 | [당시 main 브라우저 ZIP 안내](#source-phase2-local-zip-20261014) |
 | 소스 프런트엔드 1단계 적용 준비 | [CI ZIP 적용·대안·종료 복구](#source-frontend-apply-20261013) · [팀원 업무 안내](07-team-quickstart.md#first-work-20261012) |
 | 새 EES Workflow 후보·자산 정리 경계 | [통합 설치·복구](#integrated-work-install-20261002) |
 | 프로그램·래퍼 업데이트 | [Upgrade](#ees-wrapper-upgrade) |
 | 수동 적용·복구 | [Apply/Restore](#ees-wrapper-apply)·[종료 복구](#ees-stop-recovery) |
 | 실패 기록·등록 위치 확인 | [실패 판단](#ees-update-failure-causes)·[사내 기록](#ees-local-state) |
+
+<a id="source-phase2-route-cache-zip-20261014"></a>
+
+## 후속 통합 적용 준비: 브라우저 열기부터 적용까지 · 2026-10-14
+
+**검토용 템플릿이며 지금 실행하지 않는다.** #88과 #89 모두 검토·병합하고 해당 최종 main CI가 성공한 뒤, 전달자가 아래 네 값에 **최종 전체 main SHA, 압축을 풀지 않은 바깥 Actions ZIP의 SHA256·정확한 바이트 크기·다운로드 링크**를 채워 2,500자 이하 한 블록으로 전달한다. 확정 전 자리표시자는 브라우저 열기·Update·Stop 전에 중단한다. PR head나 안쪽 프로그램 ZIP의 값은 넣지 않는다. 예상 설치 원본은 사용자가 적용 완료를 보고한 `42cc7568eb8477013abcf0a042617dd9e3279db2`다.
+
+팀원이 사용하지 않는 시간에 기존 운영 계정 PowerShell에서 완성된 블록 하나를 실행한다. 필요한 경우 기존 경로인 `$eesRepo`·`$eesCfg`·브라우저 다운로드 폴더 `$eesDownloads`만 맞춘다. 블록이 기본 브라우저의 GitHub 링크를 열면 로그인된 브라우저에서 다운로드를 마친다. 다운로드 위치를 묻는 브라우저는 지정한 다운로드 폴더에 **원래 ZIP 파일명**으로 저장한다. 추가 PowerShell 입력은 없다. 새 `ees-program-전체SHA.zip` 또는 브라우저가 붙인 ` (숫자).zip`만 최대 15분 기다리며, 크기와 두 번 연속 파일 상태를 확인한 뒤 해시를 검사한다. 기존 파일·미완료 확장자·다른 SHA·다른 크기는 선택하지 않고 다운로드 원본을 수정·삭제하지 않는다.
+
+```powershell
+& {
+  $ErrorActionPreference='Stop'
+  $eesCommit='MERGED_MAIN_SHA'
+  $eesHash='OUTER_ZIP_SHA256'
+  $eesBytes=0
+  $eesUrl='FINAL_ACTIONS_ARTIFACT_URL'
+  if($eesCommit -cnotmatch '\A[0-9a-f]{40}\z' -or $eesHash -cnotmatch '\A[0-9a-f]{64}\z' -or $eesBytes -le 0 -or $eesUrl -cnotmatch '\Ahttps://github\.com/knadalkim-a11y/team-agent-poc/actions/runs/[0-9]+/artifacts/[0-9]+\z'){throw '병합 후 확정한 배포 값이 필요합니다.'}
+  $eesRepo=Join-Path $env:USERPROFILE 'team-agent-poc'
+  $eesCfg=Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+  $eesDownloads=Join-Path $env:USERPROFILE 'Downloads'
+  $eesManager=Join-Path $eesRepo 'scripts\manage-ees.ps1'
+  $eesSince=[DateTime]::UtcNow
+  $eesUntil=$eesSince.AddMinutes(15)
+  $eesName='\Aees-program-'+$eesCommit+'(?: \([0-9]+\))?\.zip\z'
+  $eesZip=$null; $eesPrevious=''
+  Start-Process $eesUrl
+  while([DateTime]::UtcNow -lt $eesUntil){
+    $eesFile=@(Get-ChildItem -LiteralPath $eesDownloads -File | Where-Object {$_.Name -cmatch $eesName -and $_.Length -eq $eesBytes -and $_.LastWriteTimeUtc -ge $eesSince} | Sort-Object LastWriteTimeUtc -Descending)[0]
+    $eesStamp=if($eesFile){"$($eesFile.FullName)|$($eesFile.LastWriteTimeUtc.Ticks)"}else{''}
+    if($eesStamp -and $eesStamp -ceq $eesPrevious){$eesZip=$eesFile.FullName; break}
+    $eesPrevious=$eesStamp
+    Start-Sleep -Seconds 2
+  }
+  if(!$eesZip){throw 'ZIP 다운로드 15분 대기 만료. 적용하지 않았습니다.'}
+  if((Get-FileHash -LiteralPath $eesZip -Algorithm SHA256).Hash -ine $eesHash){throw 'ZIP 해시 불일치. 적용하지 않았습니다.'}
+  $eesStatus=& $eesManager -Action Status -Config $eesCfg | ConvertFrom-Json
+  if($eesStatus.program_valid -ne $true -or $eesStatus.program_incomplete -or $eesStatus.current_commit -cne '42cc7568eb8477013abcf0a042617dd9e3279db2'){throw ('EES before commit={0} valid={1} running={2}' -f $eesStatus.current_commit,$eesStatus.program_valid,$eesStatus.managed_process_running)}
+  & $eesManager -Action Update -Config $eesCfg
+  foreach($eesRef in @('HEAD','origin/main')){
+    $eesActual=& git -C $eesRepo rev-parse $eesRef
+    if($LASTEXITCODE -ne 0 -or $eesActual -cne $eesCommit){throw '검토 원본과 달라 적용하지 않았습니다.'}
+  }
+  & $eesManager -Action Upgrade -Config $eesCfg -Bundle $eesZip -Commit $eesCommit -ArtifactSha256 $eesHash -HealthTimeout 120 -Summary
+  Write-Host '적용 뒤 [Work 도구 설정 확인]을 열어 주세요.'
+}
+```
+
+순서는 **브라우저 열기/완료 ZIP 대기 → 바깥 ZIP 해시 검사 → 현재 설치 상태 확인 → 기존 Update/최종 main 대조 → 기존 Upgrade 사전 검증·Stop·검증 백업·Apply·Start/health**다. API 토큰·사내 Node/npm 빌드·자산 재등록은 필요하지 않다. 다운로드 만료/해시 불일치는 서버 변경 전에 중단한다. Upgrade는 바깥 ZIP·내부 ZIP·manifest·프로그램 원본·시간대와 기존 배포 보호를 다시 검사한다. 종료 이후 실패면 다운로드 블록을 재실행하지 않고 [기존 실패 판단](#internal-pilot-failures-20261012)·[명시적 종료 복구](#source-frontend-stop-recovery-20261013)를 따른다.
+
+이번 Work 도구 출하 파일은 설치 기준 `42cc756`과 같아 `work_tool=update_needed`가 나오지 않는다. 그래도 성공 적용 뒤 관리자가 **워크스페이스 → 공장·접근 범위 → [Work 도구 설정 확인]**을 직접 연다. 알려진 원본이면 **[지금 프로그램 원본으로 바꾸기]**에서 유지 항목·코드 변경을 확인해 바꾼다. 이미 `ready`면 그대로 두고, 지원 형태와 다르면 변경 없이 등록 해시 앞 8자리를 전달한다.
+
+전달 결과는 **1~2줄**이다. 첫 줄은 `result=… / stage=… / code=… / running=… / commit=…` 또는 적용 전 중단 문장이다. 성공 뒤 [기존 확인 항목](#source-phase2-local-zip-20261014)에 더해 스킬·도구·모델에서 업무 절차·내 업무 왕복, 대화 전환·새 대화에서 첫 로딩 후 메뉴·이미 연 패널의 ‘불러오는 중’ 표시가 재등장하지 않는지, 펼침·스크롤·작성 중 값이 유지되는지 확인한다. 두 번째 줄은 `login=OK / chat=OK / work=OK / menu_flash=없음 / helper_chat=OK / work_tool=바꿈`처럼 전달한다. `work_tool`은 `바꿈`, `이미ready`, `지원형태다름:해시8자리` 중 실제 결과 하나를 적고 미확인은 그대로 표시한다. `menu_flash`는 원래 메뉴 노출·메뉴 전체 로딩 재등장 여부다. 처음 고르는 범위의 목록 안에만 잠깐 보이는 `받는 중`은 정상이며, 응답 전 `없음`·`0개`가 보이면 안 된다.
 
 <a id="source-phase2-local-zip-20261014"></a>
 

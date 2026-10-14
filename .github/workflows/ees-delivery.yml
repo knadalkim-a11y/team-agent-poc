@@ -53,6 +53,7 @@ on:
       - 'tests/test_ees_source_shell_native.py'
       - 'tests/test_ees_helper_chat_native.py'
       - 'tests/ees_source_frame_monitor.py'
+      - 'tests/ees_source_navigation_baseline.py'
       - 'tests/test_ees_work_history_reference.py'
       - 'tests/ees_work_integrated*.py'
       - 'tests/ees_work_native_chat.py'
@@ -98,6 +99,8 @@ jobs:
     name: Pinned Native source baseline and EES frontend build
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -342,9 +345,14 @@ jobs:
             (Join-Path $PWD 'scripts/manage-ees.ps1'), [ref]$tokens, [ref]$parseErrors)
           if ($parseErrors.Count -gt 0) { throw 'PowerShell entry point has syntax errors.' }
           $guide = Get-Content -Raw -Encoding UTF8 docs/03-openwebui-native-agent.md
-          foreach ($anchor in @('internal-pilot-20261012', 'internal-pilot-stop-recovery-20261012', 'source-frontend-apply-20261013', 'source-frontend-local-zip-20261013', 'source-frontend-stop-recovery-20261013', 'source-phase2-local-zip-20261014')) {
+          foreach ($anchor in @('internal-pilot-20261012', 'internal-pilot-stop-recovery-20261012', 'source-frontend-apply-20261013', 'source-frontend-local-zip-20261013', 'source-frontend-stop-recovery-20261013', 'source-phase2-local-zip-20261014', 'source-phase2-route-cache-zip-20261014')) {
             $pattern = '(?s)<a id="' + [regex]::Escape($anchor) + '"></a>.*?```powershell\r?\n(.*?)```'
             $pilotBlock = [regex]::Match($guide, $pattern).Groups[1].Value
+            if ($anchor -eq 'source-phase2-route-cache-zip-20261014') {
+              $pilotBlock = $pilotBlock.Replace('MERGED_MAIN_SHA', ('a' * 40)).Replace('OUTER_ZIP_SHA256', ('b' * 64))
+              $pilotBlock = $pilotBlock.Replace('$eesBytes=0', '$eesBytes=9999999999')
+              $pilotBlock = $pilotBlock.Replace('FINAL_ACTIONS_ARTIFACT_URL', 'https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38650534953/artifacts/11935097176')
+            }
             if (-not $pilotBlock -or $pilotBlock.Length -gt 2500) { throw "Missing or oversized pilot block: $anchor" }
             [void][System.Management.Automation.Language.Parser]::ParseInput(
               $pilotBlock, [ref]$tokens, [ref]$parseErrors)
