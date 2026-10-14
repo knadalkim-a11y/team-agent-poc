@@ -136,3 +136,25 @@ test('token reset cannot render or restore a prior account cached workspace whil
  const h=controller();h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},workflow:{id:'w',private:'account-a'},workflows:[{id:'w'}],runs:[]}:{ok:true});await h.api.select({workflow_id:'w'});
  const pending=deferred();h.setReply(()=>pending.promise);h.setAuth('account-b-token');h.api.sync();assert.equal(h.api.snapshot().state,null);const selection=h.api.select({workflow_id:'w'});assert.equal(h.api.snapshot().state,null);pending.resolve({ok:true,capabilities:{actor_id:'b'},workflows:[],runs:[]});await selection;assert.doesNotMatch(JSON.stringify(h.api.snapshot().state),/account-a/);
 });
+
+test('semantic scope and target denial clears protected state even when a transport reports HTTP 200 or 400',async()=>{
+ for(const status of [200,400])for(const code of ['scope_forbidden','run_not_found','workflow_not_found','access_denied']){
+  const h=controller();h.api.setState({capabilities:{actor_id:'a'},run:{id:'r',attempts:[{private:'protected'}]}});h.setReply(()=>({ok:false,status,error:{code,message:'current access denied'}}));
+  await h.api.refresh();assert.equal(h.api.snapshot().state,null,`${status}/${code}`);assert.deepEqual(Object.keys(h.api.snapshot().native_capabilities),[]);assert.match(h.api.snapshot().error,/current access denied/);
+ }
+});
+test('failed work result or history lookup blocks evidence and references while preserving private form drafts and navigation state',async()=>{
+ for(const tab of ['current','history','records','historical_reference']){
+  const h=controller();let resets=0;h.view.reset=()=>resets++;
+  h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},workflow:{id:'w',revision:1},run:{id:'r',workflow_id:'w',revision:1,jobs:{},attempts:[{id:'a',inputs:{note:'private-result'}}]},workflows:[{id:'w'}],runs:[]}:{ok:true});
+  await h.api.select({mode:'work',tab,workflow_id:'w',run_id:'r'});const kept=h.api.snapshot().state;
+  h.setReply(()=>({httpError:true,status:503,error:{code:'workspace_unavailable',message:'failed current lookup'}}));await h.api.refresh();
+  assert.equal(h.api.snapshot().state,kept);assert.equal(h.api.snapshot().evidence_unavailable,true,tab);assert.equal(h.api.reference().kind,'none');assert.equal(resets,0);assert.equal(h.renders.at(-1).evidence_unavailable,true);
+  h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},workflows:[{id:'w'}],runs:[]}:{ok:true});await h.api.select({mode:'author',tab:'overview',workflow_id:'',run_id:''});assert.equal(h.api.snapshot().evidence_unavailable,false);
+  const pending=deferred();h.setReply(()=>pending.promise);const returning=h.api.select({mode:'work',tab,workflow_id:'w',run_id:'r'});assert.equal(h.api.snapshot().state.run,null);assert.equal(h.api.snapshot().target_loading,true);pending.resolve({httpError:true,status:503,error:{message:'still unavailable'}});await returning;
+ }
+});
+test('ordinary author background read outage keeps the live editor and its cached state without the work evidence block',async()=>{
+ const h=controller();h.api.setSelection({mode:'author',tab:'overview',workflow_id:'w'});h.api.setState({capabilities:{actor_id:'a',can_author:true},workflow:{id:'w',revision:2,draft:{name:'saved'}}});const kept=h.api.snapshot().state;let resets=0,rendered=0;h.view.reset=()=>resets++;h.designer.render=()=>rendered++;
+ h.setReply(()=>({httpError:true,status:503,error:{message:'temporary author read outage'}}));await h.api.refresh();assert.equal(h.api.snapshot().state,kept);assert.equal(h.api.snapshot().evidence_unavailable,false);assert.equal(resets,0);assert.equal(rendered,1);
+});
