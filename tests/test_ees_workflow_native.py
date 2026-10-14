@@ -337,8 +337,12 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
         unavailable = await self.native.help_chat_status(request, self.reader, 'helper-model', '', 'owned-chat')
         self.assertFalse(unavailable['available'])
         self.assertEqual(unavailable['code'], 'work_chat_tool_review_required')
-        status = (await self.fixture.request('GET', '/api/v1/ees/assets/work-tool/status')).json()
+        status_response = await self.fixture.request('GET', '/api/v1/ees/assets/work-tool/status')
+        self.assertEqual(status_response.status_code, 200, status_response.text)
+        status = status_response.json()
         self.assertEqual(status['state'], 'update_available', status)
+        self.assertIsNotNone(status['program_source'], 'Shipped source must match the verified history on every platform')
+        self.assertEqual(status['program_source']['sha256'], status['source_sha256'])
         self.assertEqual(status['registered_source_sha256'], hashlib.sha256(source.encode()).hexdigest())
         update = await self.fixture.request('POST', '/api/v1/ees/assets/work-tool/setup', payload={
             'source_sha256': status['source_sha256'], 'expected_token': status['expected_token'],
@@ -373,7 +377,9 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(selected, ['ees_workflow'], direct_request.state.ees_work_chat_status)
         self.assertNotIn('ees_work_help', metadata['user_message']['meta'], 'This must be ordinary typed chat, not a helper button request')
 
-        fresh = (await self.fixture.request('GET', '/api/v1/ees/assets/work-tool/status')).json()
+        fresh_response = await self.fixture.request('GET', '/api/v1/ees/assets/work-tool/status')
+        self.assertEqual(fresh_response.status_code, 200, fresh_response.text)
+        fresh = fresh_response.json()
         restore_payload = {'expected_token': fresh['expected_token'], 'source_sha256': fresh['source_sha256'],
             'backup_id': backup['id'], 'backup_sha256': backup['sha256'], 'confirmation': 'restore_previous_work_tool'}
         forbidden = await self.fixture.request('POST', '/api/v1/ees/assets/work-tool/restore', user='reader', payload=restore_payload)
@@ -383,7 +389,9 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual((await self.fixture.tools.Tools.get_tool_by_id('ees_workflow')).content, source)
         self.assertEqual(raw_preserved_state(), preserved)
         self.assertEqual(self.fixture.guard._grants((await self.fixture.tools.Tools.get_tool_by_id('ees_workflow')).model_dump()['access_grants']), grants)
-        self.assertEqual((await self.fixture.request('GET', '/api/v1/ees/assets/work-tool/status')).json()['state'], 'update_available')
+        restored_status = await self.fixture.request('GET', '/api/v1/ees/assets/work-tool/status')
+        self.assertEqual(restored_status.status_code, 200, restored_status.text)
+        self.assertEqual(restored_status.json()['state'], 'update_available')
 
     async def test_previous_work_tool_update_restores_helper_direct_chat_and_preserves_native_state(self):
         await self.assert_previous_work_tool_update_lifecycle()

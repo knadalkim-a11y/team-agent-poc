@@ -1,0 +1,5 @@
+NEGATIVE CONTROL: committed ffaef860 work_tool_source; actual installed LF source changed to CRLF, all other production code unchanged.
+{"before_update_http": 200, "program_source": null, "state": "update_available"}
+{"state": "ready", "update_http": 200}
+{"after_update_http": 409, "body": {"detail": "invalid_work_tool_backup"}}
+CONFIRMED: CRLF source reproduces post-update status failure; this is a build/CI finding, not a claim about the internal registered source.

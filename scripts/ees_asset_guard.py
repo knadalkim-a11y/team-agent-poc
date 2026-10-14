@@ -797,9 +797,12 @@ def work_tool_source():
         tree = ast.parse(content)
         tool = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == "Tools")
         public = {node.name for node in tool.body if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not node.name.startswith("_")}
-        if public != WORK_TOOL_FUNCTIONS:
+        digest = hashlib.sha256(raw).hexdigest()
+        if public != WORK_TOOL_FUNCTIONS or digest not in WORK_TOOL_SOURCE_HISTORY:
+            # Refuse an unverified installed form before preview or a backup /
+            # Native write. The build must ship the exact reviewed Git bytes.
             raise ValueError
-        return content, hashlib.sha256(raw).hexdigest()
+        return content, digest
     except (OSError, UnicodeError, ValueError, SyntaxError, StopIteration):
         raise HTTPException(503, "work_tool_source_unavailable") from None
 

@@ -1,6 +1,10 @@
 # Historical source fixtures are verified against their original Git blob bytes.
 /tests/fixtures/legacy_workflow_b41e239.py text eol=lf
 /tests/fixtures/legacy_authoring_b41e239.py text eol=lf
+/tests/fixtures/work-tool-update/*.py.txt text eol=lf
+
+# Registered Work source hashes and private restore receipts use exact bytes.
+/agent-pack/skills/ees-work-demo/scripts/workflow_tool.py text eol=lf
 
 # Source-build provenance and runtime asset hashes must match on Linux/Windows.
 /frontend/** text eol=lf
