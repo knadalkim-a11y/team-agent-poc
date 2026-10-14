@@ -1,4 +1,4 @@
-"""Reproduce the exact Git/Black Work Tool source allowlist; never run Tool code.
+"""Reproduce Git/Black Work Tool hashes and their EOL/edge-space recognition hashes.
 
 Development-only: run in a full repository clone with Black==26.5.1.
 Prints the literal for ees_asset_guard.WORK_TOOL_SOURCE_HISTORY unless --check.
@@ -47,7 +47,10 @@ def sources(ref='HEAD'):
             if any(old in content for old in (b'from utils', b'from apps', b'from main', b'from config')):
                 raise ValueError('Native import rewriting needs a separately reviewed form: ' + commit)
             digest = hashlib.sha256(content).hexdigest()
-            output.setdefault(digest, dict(date=date, commit=commit, format=form))
+            normalized = content.decode('utf-8').replace('\r\n', '\n').replace('\r', '\n').strip()
+            normalized_digest = hashlib.sha256(normalized.encode('utf-8')).hexdigest()
+            output.setdefault(digest, dict(date=date, commit=commit, format=form,
+                                          normalized_sha256=normalized_digest))
     return output
 
 
@@ -69,7 +72,7 @@ def main():
     if args.check:
         if history != checked_in():
             raise ValueError('Git/formatter source hashes differ from the shipped allowlist.')
-        print(f'Work Tool source history: {len(history)} exact forms verified with Black {FORMATTER}.')
+        print(f'Work Tool source history: {len(history)} exact forms and EOL/edge-space hashes verified with Black {FORMATTER}.')
     else:
         print('WORK_TOOL_SOURCE_HISTORY = ' + pprint.pformat(history, sort_dicts=False, width=110))
 

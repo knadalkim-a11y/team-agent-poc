@@ -1,5 +1,14 @@
 # 현재 작업 상태
 
+## 2026-10-15 · #89 검토 보완: 알려진 원본 줄바꿈과 안내
+
+- **기준:** 미병합 head `bdc8a4405a79e8befaccf3382b50a9dad59ef77b`의 Claude 검토2건을 같은 PR에서 고쳤다. 사내 설치는 사용자 확인42cc756이며 등록본 버전/사내 해결은 미확인이다.
+- **변경:** 알려진 원본 인식에만 CRLF/CR→LF·양끝 공백 정규화를 적용했다. ready·출하 검증·갱신·백업·복원은 정확 바이트를 유지한다. 불일치 창은 쉬운 설명·해시8자리·개발 담당에게 알릴 행동을 표시한다. [현재 계약](mockups/ees-work/TASK.md#work-tool-review-20261015).
+- **검증:** 변경 전 실제 Native의11개 변형이 모두 blocked_existing으로 실패함을 먼저 확인했다. 수정 뒤 실제 Native96개·guard19개·Git/Black24형태 재생성·고정Node UI70개가 통과했다. 정확한 결과와 최초 실패는 [기존 평가 기록](../evals/v4-ui-20260930.md#work-tool-review-evidence-20261015), 최신 head 전체 CI는 [PR Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/89/checks)에서 구분한다.
+- **전달/다음:**42cc756과 Work 출하 파일이 같으므로 update_needed 없이도 적용 뒤 설정 확인을 직접 안내한다. 둘째 회신 줄 work_tool 결과를 포함하며 두 PR은 검토·병합 후 한 번 적용한다. 현재 PR의 최종 CI를 확인해 재검토를 요청하며 병합·사내 실행은 하지 않는다.
+
+아래는 10-14 당시 구현·검증 이력이며, 알려진 원본 인식 조건은 위 보완을 따른다.
+
 ## 2026-10-14 · 2-2 후속: Work 도구 원본 갱신
 
 - **사내 상태:** 사용자 확인 설치는 main `42cc7568eb8477013abcf0a042617dd9e3279db2`다. 새 절차 질문의 업무 도우미 사용 불가와 설정의 `blocked_existing`이 보고됐다. 등록본의 정확한 해시/버전은 미확인이다.

@@ -1,0 +1,307 @@
+Reviewed head bdc8a4405a79e8befaccf3382b50a9dad59ef77b; guard SHA256=beac2a3c28d60e4628acac651d7f4d509501bf6dcaf4999a41154bc6443cefc6
+New lifecycle cases=11
+test_current_work_tool_crlf_requires_update_before_ready_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_current_work_tool_crlf_requires_update_before_ready_and_exact_restore) ... Executing <Task pending name='Task-1' coro=<NativeReadBridgeTests.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py:48> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 1.343 seconds
+FAIL
+test_previous_editor_work_tool_cr_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_editor_work_tool_cr_update_helper_chat_and_exact_restore) ... Executing <Task pending name='Task-39' coro=<NativeReadBridgeTests.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py:48> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 1.008 seconds
+FAIL
+test_previous_editor_work_tool_crlf_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_editor_work_tool_crlf_update_helper_chat_and_exact_restore) ... Executing <Task pending name='Task-77' coro=<NativeReadBridgeTests.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py:48> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 1.133 seconds
+FAIL
+test_previous_editor_work_tool_extra_final_newlines_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_editor_work_tool_extra_final_newlines_update_helper_chat_and_exact_restore) ... Executing <Task pending name='Task-115' coro=<NativeReadBridgeTests.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py:48> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 1.127 seconds
+Executing <Task pending name='Task-115' coro=<NativeReadBridgeTests.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py:48> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 0.109 seconds
+FAIL
+test_previous_editor_work_tool_no_final_newline_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_editor_work_tool_no_final_newline_update_helper_chat_and_exact_restore) ... Executing <Task pending name='Task-153' coro=<NativeReadBridgeTests.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py:48> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 1.133 seconds
+Executing <Task pending name='Task-153' coro=<NativeReadBridgeTests.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py:48> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 0.102 seconds
+FAIL
+test_previous_editor_work_tool_outer_whitespace_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_editor_work_tool_outer_whitespace_update_helper_chat_and_exact_restore) ... Executing <Task pending name='Task-191' coro=<NativeReadBridgeTests.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py:48> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 1.179 seconds
+Executing <Task pending name='Task-199' coro=<NativeReadBridgeTests.test_previous_editor_work_tool_outer_whitespace_update_helper_chat_and_exact_restore() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py:457> wait_for=<Future pending cb=[shield.<locals>._outer_done_callback() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/tasks.py:908, Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 0.114 seconds
+FAIL
+test_previous_work_tool_cr_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_work_tool_cr_update_helper_chat_and_exact_restore) ... Executing <Task pending name='Task-229' coro=<NativeReadBridgeTests.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py:48> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 1.337 seconds
+FAIL
+test_previous_work_tool_crlf_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_work_tool_crlf_update_helper_chat_and_exact_restore) ... Executing <Task pending name='Task-267' coro=<NativeReadBridgeTests.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py:48> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 1.378 seconds
+FAIL
+test_previous_work_tool_extra_final_newlines_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_work_tool_extra_final_newlines_update_helper_chat_and_exact_restore) ... Executing <Task pending name='Task-305' coro=<NativeReadBridgeTests.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py:48> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 1.455 seconds
+FAIL
+test_previous_work_tool_no_final_newline_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_work_tool_no_final_newline_update_helper_chat_and_exact_restore) ... Executing <Task pending name='Task-343' coro=<NativeReadBridgeTests.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py:48> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 1.505 seconds
+FAIL
+test_previous_work_tool_outer_whitespace_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_work_tool_outer_whitespace_update_helper_chat_and_exact_restore) ... Executing <Task pending name='Task-381' coro=<NativeReadBridgeTests.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py:48> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 1.571 seconds
+FAIL
+
+======================================================================
+FAIL: test_current_work_tool_crlf_requires_update_before_ready_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_current_work_tool_crlf_requires_update_before_ready_and_exact_restore)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 460, in test_current_work_tool_crlf_requires_update_before_ready_and_exact_restore
+    await self.assert_previous_work_tool_update_lifecycle(variant='crlf', current=True)
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 356, in assert_previous_work_tool_update_lifecycle
+    self.assertEqual(status['state'], 'update_available', status)
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+ : {'id': 'ees_workflow', 'state': 'blocked_existing', 'source_sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'registered_source_sha256': '6a0c221ad55b8af6665ccbf0c90f2a82853ae6f871b544bc6cf67d945e5671f4', 'known_source': False, 'registered_source': None, 'program_source': {'sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'date': '2026-10-13', 'commit': '4fa89ced249f9e05f8bccb3665dee691053ea9cb', 'format': 'git'}, 'expected_token': '1dfdb82242637b306541de67b830cd575fa1e87f07087c56129d84c0dd7b0d67', 'functions': ['ees_workflow_display', 'ees_workflow_propose', 'ees_workflow_view'], 'reason': 'unsupported_source_form', 'backup': None, 'changed': False}
+
+======================================================================
+FAIL: test_previous_editor_work_tool_cr_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_editor_work_tool_cr_update_helper_chat_and_exact_restore)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 439, in test_previous_editor_work_tool_cr_update_helper_chat_and_exact_restore
+    await self.assert_previous_work_tool_update_lifecycle(formatted=True, variant='cr')
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 356, in assert_previous_work_tool_update_lifecycle
+    self.assertEqual(status['state'], 'update_available', status)
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+ : {'id': 'ees_workflow', 'state': 'blocked_existing', 'source_sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'registered_source_sha256': 'a7c06511e8cffa3d65871c92f742296abc8f4db264beea7b9c0c23238bdbfce0', 'known_source': False, 'registered_source': None, 'program_source': {'sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'date': '2026-10-13', 'commit': '4fa89ced249f9e05f8bccb3665dee691053ea9cb', 'format': 'git'}, 'expected_token': '34d191f99c9b886099b2b3c4c6f68721cc16a0eb2299a61bc9ff09600b80c69a', 'functions': ['ees_workflow_display', 'ees_workflow_propose', 'ees_workflow_view'], 'reason': 'unsupported_source_form', 'backup': None, 'changed': False}
+
+======================================================================
+FAIL: test_previous_editor_work_tool_crlf_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_editor_work_tool_crlf_update_helper_chat_and_exact_restore)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 433, in test_previous_editor_work_tool_crlf_update_helper_chat_and_exact_restore
+    await self.assert_previous_work_tool_update_lifecycle(formatted=True, variant='crlf')
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 356, in assert_previous_work_tool_update_lifecycle
+    self.assertEqual(status['state'], 'update_available', status)
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+ : {'id': 'ees_workflow', 'state': 'blocked_existing', 'source_sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'registered_source_sha256': 'a5570c5d8611e439682c113cfefd192f945b9370357d250521044da3e6c99d5d', 'known_source': False, 'registered_source': None, 'program_source': {'sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'date': '2026-10-13', 'commit': '4fa89ced249f9e05f8bccb3665dee691053ea9cb', 'format': 'git'}, 'expected_token': '232ebf864bce44e473ab2886490e40523440e86f42b0a393a045a710bb51717a', 'functions': ['ees_workflow_display', 'ees_workflow_propose', 'ees_workflow_view'], 'reason': 'unsupported_source_form', 'backup': None, 'changed': False}
+
+======================================================================
+FAIL: test_previous_editor_work_tool_extra_final_newlines_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_editor_work_tool_extra_final_newlines_update_helper_chat_and_exact_restore)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 451, in test_previous_editor_work_tool_extra_final_newlines_update_helper_chat_and_exact_restore
+    await self.assert_previous_work_tool_update_lifecycle(formatted=True, variant='extra_final_newlines')
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 356, in assert_previous_work_tool_update_lifecycle
+    self.assertEqual(status['state'], 'update_available', status)
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+ : {'id': 'ees_workflow', 'state': 'blocked_existing', 'source_sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'registered_source_sha256': 'ddc6eb6f66743ecfa640898f031c4ac52d1b902925d17659f1949e21423e5f4c', 'known_source': False, 'registered_source': None, 'program_source': {'sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'date': '2026-10-13', 'commit': '4fa89ced249f9e05f8bccb3665dee691053ea9cb', 'format': 'git'}, 'expected_token': '7573537ec66cdb89ea98af36d9526c3f44d124341fbadd136d920f7bcfed87ec', 'functions': ['ees_workflow_display', 'ees_workflow_propose', 'ees_workflow_view'], 'reason': 'unsupported_source_form', 'backup': None, 'changed': False}
+
+======================================================================
+FAIL: test_previous_editor_work_tool_no_final_newline_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_editor_work_tool_no_final_newline_update_helper_chat_and_exact_restore)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 445, in test_previous_editor_work_tool_no_final_newline_update_helper_chat_and_exact_restore
+    await self.assert_previous_work_tool_update_lifecycle(formatted=True, variant='no_final_newline')
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 356, in assert_previous_work_tool_update_lifecycle
+    self.assertEqual(status['state'], 'update_available', status)
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+ : {'id': 'ees_workflow', 'state': 'blocked_existing', 'source_sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'registered_source_sha256': 'ee14b13cbe61b16984889d6433f1f21f768992d6df5ed8f31bf74ae05fcc1d8e', 'known_source': False, 'registered_source': None, 'program_source': {'sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'date': '2026-10-13', 'commit': '4fa89ced249f9e05f8bccb3665dee691053ea9cb', 'format': 'git'}, 'expected_token': '5f5193706b1da7655bf9344bcdfe43807fba4f83679e3ccbc0cba7d8862a22f3', 'functions': ['ees_workflow_display', 'ees_workflow_propose', 'ees_workflow_view'], 'reason': 'unsupported_source_form', 'backup': None, 'changed': False}
+
+======================================================================
+FAIL: test_previous_editor_work_tool_outer_whitespace_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_editor_work_tool_outer_whitespace_update_helper_chat_and_exact_restore)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 457, in test_previous_editor_work_tool_outer_whitespace_update_helper_chat_and_exact_restore
+    await self.assert_previous_work_tool_update_lifecycle(formatted=True, variant='outer_whitespace')
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 356, in assert_previous_work_tool_update_lifecycle
+    self.assertEqual(status['state'], 'update_available', status)
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+ : {'id': 'ees_workflow', 'state': 'blocked_existing', 'source_sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'registered_source_sha256': '75e4bd4b210b0068c0c74dc41c1e2fdc1342258e933ca88df05cbc3d9d45d44b', 'known_source': False, 'registered_source': None, 'program_source': {'sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'date': '2026-10-13', 'commit': '4fa89ced249f9e05f8bccb3665dee691053ea9cb', 'format': 'git'}, 'expected_token': 'a7206a0ddc1a2876b7e8211468fcc0d3fbf777b8d0d85e2aa329cf958277f928', 'functions': ['ees_workflow_display', 'ees_workflow_propose', 'ees_workflow_view'], 'reason': 'unsupported_source_form', 'backup': None, 'changed': False}
+
+======================================================================
+FAIL: test_previous_work_tool_cr_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_work_tool_cr_update_helper_chat_and_exact_restore)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 436, in test_previous_work_tool_cr_update_helper_chat_and_exact_restore
+    await self.assert_previous_work_tool_update_lifecycle(variant='cr')
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 356, in assert_previous_work_tool_update_lifecycle
+    self.assertEqual(status['state'], 'update_available', status)
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+ : {'id': 'ees_workflow', 'state': 'blocked_existing', 'source_sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'registered_source_sha256': '843082a795523586cda9bc878105ff9e398e70f2d5187f4269bd1320c3bcf419', 'known_source': False, 'registered_source': None, 'program_source': {'sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'date': '2026-10-13', 'commit': '4fa89ced249f9e05f8bccb3665dee691053ea9cb', 'format': 'git'}, 'expected_token': 'df699f9e37d5656e699b736e1edd66db8cd4d3c5a2a24228b34f628b92c59a92', 'functions': ['ees_workflow_display', 'ees_workflow_propose', 'ees_workflow_view'], 'reason': 'unsupported_source_form', 'backup': None, 'changed': False}
+
+======================================================================
+FAIL: test_previous_work_tool_crlf_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_work_tool_crlf_update_helper_chat_and_exact_restore)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 430, in test_previous_work_tool_crlf_update_helper_chat_and_exact_restore
+    await self.assert_previous_work_tool_update_lifecycle(variant='crlf')
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 356, in assert_previous_work_tool_update_lifecycle
+    self.assertEqual(status['state'], 'update_available', status)
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+ : {'id': 'ees_workflow', 'state': 'blocked_existing', 'source_sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'registered_source_sha256': '232bdd7768bd943e707279a82b536e186ac625d209b30eaa96c2d013fe058432', 'known_source': False, 'registered_source': None, 'program_source': {'sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'date': '2026-10-13', 'commit': '4fa89ced249f9e05f8bccb3665dee691053ea9cb', 'format': 'git'}, 'expected_token': '68104b6c2c2af60c323153bb18946302262ed162c37d39f48e3863eda6180176', 'functions': ['ees_workflow_display', 'ees_workflow_propose', 'ees_workflow_view'], 'reason': 'unsupported_source_form', 'backup': None, 'changed': False}
+
+======================================================================
+FAIL: test_previous_work_tool_extra_final_newlines_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_work_tool_extra_final_newlines_update_helper_chat_and_exact_restore)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 448, in test_previous_work_tool_extra_final_newlines_update_helper_chat_and_exact_restore
+    await self.assert_previous_work_tool_update_lifecycle(variant='extra_final_newlines')
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 356, in assert_previous_work_tool_update_lifecycle
+    self.assertEqual(status['state'], 'update_available', status)
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+ : {'id': 'ees_workflow', 'state': 'blocked_existing', 'source_sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'registered_source_sha256': '19d60b86bf1551a50ebe3699b39b417fafd7f802c0eea440c9668fc67eebf237', 'known_source': False, 'registered_source': None, 'program_source': {'sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'date': '2026-10-13', 'commit': '4fa89ced249f9e05f8bccb3665dee691053ea9cb', 'format': 'git'}, 'expected_token': '6aea2eec112fcd551ae6a84a1d35b14e488972f5676d38d43fddbe5c4ef56ba5', 'functions': ['ees_workflow_display', 'ees_workflow_propose', 'ees_workflow_view'], 'reason': 'unsupported_source_form', 'backup': None, 'changed': False}
+
+======================================================================
+FAIL: test_previous_work_tool_no_final_newline_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_work_tool_no_final_newline_update_helper_chat_and_exact_restore)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 442, in test_previous_work_tool_no_final_newline_update_helper_chat_and_exact_restore
+    await self.assert_previous_work_tool_update_lifecycle(variant='no_final_newline')
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 356, in assert_previous_work_tool_update_lifecycle
+    self.assertEqual(status['state'], 'update_available', status)
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+ : {'id': 'ees_workflow', 'state': 'blocked_existing', 'source_sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'registered_source_sha256': 'af957e5a02a6a068620cc27eca31eb129cddb9bbc1826667a1bb92ab163df971', 'known_source': False, 'registered_source': None, 'program_source': {'sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'date': '2026-10-13', 'commit': '4fa89ced249f9e05f8bccb3665dee691053ea9cb', 'format': 'git'}, 'expected_token': '74a95133d65397db78fedf081c32e8363d2eef25c8faf9c7db177ccc3183207e', 'functions': ['ees_workflow_display', 'ees_workflow_propose', 'ees_workflow_view'], 'reason': 'unsupported_source_form', 'backup': None, 'changed': False}
+
+======================================================================
+FAIL: test_previous_work_tool_outer_whitespace_update_helper_chat_and_exact_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_work_tool_outer_whitespace_update_helper_chat_and_exact_restore)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 454, in test_previous_work_tool_outer_whitespace_update_helper_chat_and_exact_restore
+    await self.assert_previous_work_tool_update_lifecycle(variant='outer_whitespace')
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 356, in assert_previous_work_tool_update_lifecycle
+    self.assertEqual(status['state'], 'update_available', status)
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+ : {'id': 'ees_workflow', 'state': 'blocked_existing', 'source_sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'registered_source_sha256': 'e4515d73e2f790a3ddf7002792891b9dc55f2b8f10143176403086fbae045b2d', 'known_source': False, 'registered_source': None, 'program_source': {'sha256': 'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085', 'date': '2026-10-13', 'commit': '4fa89ced249f9e05f8bccb3665dee691053ea9cb', 'format': 'git'}, 'expected_token': 'b5f0fb96279fee10bd3d84dc0c7b784676754241389f68a51094e5a0ce5cd2d3', 'functions': ['ees_workflow_display', 'ees_workflow_propose', 'ees_workflow_view'], 'reason': 'unsupported_source_form', 'backup': None, 'changed': False}
+
+----------------------------------------------------------------------
+Ran 11 tests in 17.533s
+
+FAILED (failures=11)

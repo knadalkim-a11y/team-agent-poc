@@ -1,0 +1,24 @@
+test_rejects_database_outside_data_directory (tests.test_ees_asset_guard.ProcessLockTests.test_rejects_database_outside_data_directory) ... ok
+test_rejects_hard_linked_database (tests.test_ees_asset_guard.ProcessLockTests.test_rejects_hard_linked_database) ... ok
+test_rejects_symbolic_lock_file (tests.test_ees_asset_guard.ProcessLockTests.test_rejects_symbolic_lock_file) ... ok
+test_second_process_refused_and_release_allows_restart (tests.test_ees_asset_guard.ProcessLockTests.test_second_process_refused_and_release_allows_restart) ... ok
+test_unsupported_worker_and_reload_settings_fail_closed (tests.test_ees_asset_guard.ProcessLockTests.test_unsupported_worker_and_reload_settings_fail_closed) ... ok
+test_dependencies_execute_and_close_inside_owner (tests.test_ees_asset_guard.RouteTests.test_dependencies_execute_and_close_inside_owner) ... ok
+test_cancelled_writer_keeps_lock_until_commit_and_cleanup (tests.test_ees_asset_guard.TaskGuardTests.test_cancelled_writer_keeps_lock_until_commit_and_cleanup) ... ok
+test_cancelling_waiter_does_not_write (tests.test_ees_asset_guard.TaskGuardTests.test_cancelling_waiter_does_not_write) ... ok
+test_child_task_cannot_inherit_owner (tests.test_ees_asset_guard.TaskGuardTests.test_child_task_cannot_inherit_owner) ... ok
+test_failed_write_releases_lock_after_cleanup (tests.test_ees_asset_guard.TaskGuardTests.test_failed_write_releases_lock_after_cleanup) ... ok
+test_model_token_covers_params_active_and_dynamic_meta (tests.test_ees_asset_guard.TaskGuardTests.test_model_token_covers_params_active_and_dynamic_meta) ... ok
+test_nested_calls_reenter_same_task_and_other_task_waits (tests.test_ees_asset_guard.TaskGuardTests.test_nested_calls_reenter_same_task_and_other_task_waits) ... ok
+test_non_asset_grants_do_not_require_asset_guard (tests.test_ees_asset_guard.TaskGuardTests.test_non_asset_grants_do_not_require_asset_guard) ... ok
+test_shutdown_drains_before_process_unlock (tests.test_ees_asset_guard.TaskGuardTests.test_shutdown_drains_before_process_unlock) ... ok
+test_table_entry_uses_fresh_session_and_rejects_live_transaction (tests.test_ees_asset_guard.TaskGuardTests.test_table_entry_uses_fresh_session_and_rejects_live_transaction) ... ok
+test_token_covers_all_supported_fields_and_parent_valves (tests.test_ees_asset_guard.TaskGuardTests.test_token_covers_all_supported_fields_and_parent_valves) ... ok
+test_comment_and_internal_whitespace_changes_remain_unknown (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_comment_and_internal_whitespace_changes_remain_unknown) ... ok
+test_current_program_line_endings_require_update_until_exact (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_current_program_line_endings_require_update_until_exact) ... ok
+test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.714s
+
+OK

@@ -708,80 +708,106 @@ async def _restore_asset(request, form, user, session):
 WORK_TOOL_ID = "ees_workflow"
 WORK_TOOL_FUNCTIONS = frozenset({"ees_workflow_view", "ees_workflow_propose", "ees_workflow_display"})
 
-# Exact Git source and pinned Native editor forms. Reproduce without running
+# Exact Git source and pinned Native editor forms, with recognition-only hashes
+# after CRLF/CR -> LF and strip(). Never normalize stored or applied source.
+# Reproduce without running
 # Tool code: python scripts/check_work_tool_sources.py --check (Black 26.5.1).
 WORK_TOOL_SOURCE_HISTORY = {'f4c1b758a49c8481bdd402c1073fb599a2131f91eba5d570dd24b60b2f66bdf3': {'date': '2026-09-14',
                                                                       'commit': '1b1bf49a62eef3efdf08941ab6b734d4da2934cb',
-                                                                      'format': 'git'},
+                                                                      'format': 'git',
+                                                                      'normalized_sha256': 'd93e5d00799f4326bdf977af1c12739d23794f41a9fbde8e95a8e4459dc10320'},
  '506813ca4132e6334d40e776f2e517a220212fee9c486eb085257bb1cb75cd89': {'date': '2026-09-14',
                                                                       'commit': '1b1bf49a62eef3efdf08941ab6b734d4da2934cb',
-                                                                      'format': 'black-26.5.1'},
+                                                                      'format': 'black-26.5.1',
+                                                                      'normalized_sha256': '23f7d22556db096574cb3b7713c07a49163ea835a4b6e5f9332e74d78082729a'},
  '484c87f53748be7a6a7b1b0472d3f602c700d0e36011e3fb596123cdca4cf414': {'date': '2026-09-14',
                                                                       'commit': 'dba0677ffe3ed64535f36e306721098f22206fe7',
-                                                                      'format': 'git'},
+                                                                      'format': 'git',
+                                                                      'normalized_sha256': '7cb05b1d2ce6c4ecb010ab87f54e149e7698a170ac3d5dd4467fae12ea164642'},
  'e94663160f59619d4b3d89e4bc98330405d033a9e194170a7cb9189cb52f2c68': {'date': '2026-09-14',
                                                                       'commit': 'dba0677ffe3ed64535f36e306721098f22206fe7',
-                                                                      'format': 'black-26.5.1'},
+                                                                      'format': 'black-26.5.1',
+                                                                      'normalized_sha256': '640113db67beccb459e3adb1596137d1763f68d8102d37d17012ed050b47305d'},
  '1a1806aaeb3f764dca0c598c4c8e63727ff060586267658d723101fcac1c0a99': {'date': '2026-09-15',
                                                                       'commit': 'f8608c09426aabf7971263b17dcbff0e21a046f9',
-                                                                      'format': 'git'},
+                                                                      'format': 'git',
+                                                                      'normalized_sha256': '4c08849c2f195e5a30eb5225260144d9126f740804c2485077625b3871f12584'},
  '800390fa89661de1cd68f3cf0f8d8aa5a3e57ae8cdbd262c8ec991a72e68cc62': {'date': '2026-09-15',
                                                                       'commit': 'f8608c09426aabf7971263b17dcbff0e21a046f9',
-                                                                      'format': 'black-26.5.1'},
+                                                                      'format': 'black-26.5.1',
+                                                                      'normalized_sha256': 'd772a3506963092b9b51d23d64acc7fb532556328e30081ebb781e48f9c7ab28'},
  '232d6da074eecb01a835cb2a500b5acca802171bb3c3c4ee9bc04b125a3fd758': {'date': '2026-09-17',
                                                                       'commit': 'cb48636887d144b0436e86e34f3669941ff3d64f',
-                                                                      'format': 'git'},
+                                                                      'format': 'git',
+                                                                      'normalized_sha256': '84e1394273ff51f40aab739aba741c31ec621ccbdc0098159b7c3a99c4ee2d1f'},
  'ae7021f1e9992680817c56f8f4a3ac8c575325d609f122542adfbcd09d0afbb4': {'date': '2026-09-17',
                                                                       'commit': 'cb48636887d144b0436e86e34f3669941ff3d64f',
-                                                                      'format': 'black-26.5.1'},
+                                                                      'format': 'black-26.5.1',
+                                                                      'normalized_sha256': '595d721e3982735f2187b1c8256dec33af611aec5075e789824808c24ebb6f3f'},
  'a3a3a8c2adc796ccd7f17e131761848d67c2324342191f3f186e2dd83057ef14': {'date': '2026-09-21',
                                                                       'commit': 'd006c38f44cc00240732b9bb78338a78809ca4bc',
-                                                                      'format': 'git'},
+                                                                      'format': 'git',
+                                                                      'normalized_sha256': 'cc6eda3cd74de5b6c4c31a6548b9884fd5f2984201a203f1867ee65648e7a20c'},
  '539bedb8dc308966c72c80842c753937a9f6706607b5362735e9afeaa7fa4a8e': {'date': '2026-09-21',
                                                                       'commit': 'd006c38f44cc00240732b9bb78338a78809ca4bc',
-                                                                      'format': 'black-26.5.1'},
+                                                                      'format': 'black-26.5.1',
+                                                                      'normalized_sha256': '8627c22694f31a12e6f551b400989f4c9b4b91d394bfddc11a4d153a5e83fb96'},
  'e51698e44302f1f832601f01baf22157b635f6a798e831f56a90616aa2c4e3fb': {'date': '2026-09-21',
                                                                       'commit': '81fad6f720b843408ba4aaf04c397f9fe1b5f65b',
-                                                                      'format': 'git'},
+                                                                      'format': 'git',
+                                                                      'normalized_sha256': '09298f396de7ff40f5b227852fd30d0a59626fb4f582e5c8963cb0c08544354f'},
  '0acfef6d7ea9726da4a2302706c884e69c7be0ff239d8c45a09e243a0988d021': {'date': '2026-09-21',
                                                                       'commit': '81fad6f720b843408ba4aaf04c397f9fe1b5f65b',
-                                                                      'format': 'black-26.5.1'},
+                                                                      'format': 'black-26.5.1',
+                                                                      'normalized_sha256': 'd9393f42d7ff4bca4e3e812ed50b8abc4649177154a9cd1d95bb8ef8d251ad5b'},
  '314c444534e7643518f17329d02894935fd4184f4595f31a54aad27d4e3b0939': {'date': '2026-09-25',
                                                                       'commit': 'e338b7ee00b738ed0f1ad8c8daefec408e4c262a',
-                                                                      'format': 'git'},
+                                                                      'format': 'git',
+                                                                      'normalized_sha256': '9e15d8da504051f4d4641bd3542dfeae358806734e1b7f3bb382266605e3c5db'},
  'b53332aca68fc89fdd9e32b5cc65aade74b46d028b82410b6616e09eec4dac22': {'date': '2026-09-25',
                                                                       'commit': 'e338b7ee00b738ed0f1ad8c8daefec408e4c262a',
-                                                                      'format': 'black-26.5.1'},
+                                                                      'format': 'black-26.5.1',
+                                                                      'normalized_sha256': '49629122e099d7de23d9d474a64766cc738b9c4271744e34192f3a52287b4293'},
  '124c6f0179c7580f9bc579fc427e5c8a32d424aace098b2549197aab7ccfafdf': {'date': '2026-09-25',
                                                                       'commit': '88a2e0f685a827f7cc4a4003d8a64863c7fc8ddb',
-                                                                      'format': 'git'},
+                                                                      'format': 'git',
+                                                                      'normalized_sha256': '1137c581a973f4554731f76855fd6360990ec16533a0b96133c50e502c1e4d9d'},
  'a7bfe7fcc0c95c228a6f4bf67d41e4f38f58bb53299953acba6bf7b2acdf579e': {'date': '2026-09-25',
                                                                       'commit': '88a2e0f685a827f7cc4a4003d8a64863c7fc8ddb',
-                                                                      'format': 'black-26.5.1'},
+                                                                      'format': 'black-26.5.1',
+                                                                      'normalized_sha256': '0f8f75a2cb4bd26fb6aacfed7e401340e6c034916d13eae1061734e6e7dba853'},
  'ec590d1c98dbbeb9f3e81646d0a59608cd7f1c4749b58b51a7a337e919d336f2': {'date': '2026-09-30',
                                                                       'commit': '6c4111a9afbaadda78256c8276b41cbb875673db',
-                                                                      'format': 'git'},
+                                                                      'format': 'git',
+                                                                      'normalized_sha256': 'ce49a91d54b7f9ef329aee9ed29d19d29803843c804d91fc62deb3bbdcf59e0b'},
  '4d999ece675efc270c3e0a4e2761cde3d86188d167548c81a951a941cce3c3a0': {'date': '2026-09-30',
                                                                       'commit': '6c4111a9afbaadda78256c8276b41cbb875673db',
-                                                                      'format': 'black-26.5.1'},
+                                                                      'format': 'black-26.5.1',
+                                                                      'normalized_sha256': '2cc8c7b45cdcbe44fcc76eca7123bb0e7134811b613611759cab4d77c929b5f2'},
  '74622ba69fe47340e7a497b320912871e547730d79e77d0eea77d64c681c61c8': {'date': '2026-10-02',
                                                                       'commit': '051f7facf5176edabd9dab0b886a4a4c2ad71ee3',
-                                                                      'format': 'git'},
+                                                                      'format': 'git',
+                                                                      'normalized_sha256': 'fdaf6457ec9ea2773f4de1cc531e1e1c615e237fdf3dba6f4f284985ad2ec4c6'},
  '5023ad04d1c081c1910d6150c052a32ef5ddf5c13ff1a76f705ed123b156ebd8': {'date': '2026-10-02',
                                                                       'commit': '051f7facf5176edabd9dab0b886a4a4c2ad71ee3',
-                                                                      'format': 'black-26.5.1'},
+                                                                      'format': 'black-26.5.1',
+                                                                      'normalized_sha256': 'f46320f9c0362eb1d1ab63a729e022025a201975b8f94a6fe5fc940474af848f'},
  '12a538febf1843aeb7e0ccad64e72545c097858d94a165e046cba259f61ba8fe': {'date': '2026-10-02',
                                                                       'commit': '2770382fa29968abe0d469ac9f49988806fbacc3',
-                                                                      'format': 'git'},
+                                                                      'format': 'git',
+                                                                      'normalized_sha256': 'af957e5a02a6a068620cc27eca31eb129cddb9bbc1826667a1bb92ab163df971'},
  '33331c70dcde27122587bfb1246c63b4e4d9abaa5c522ebd4bff56e5653f999f': {'date': '2026-10-02',
                                                                       'commit': '2770382fa29968abe0d469ac9f49988806fbacc3',
-                                                                      'format': 'black-26.5.1'},
+                                                                      'format': 'black-26.5.1',
+                                                                      'normalized_sha256': 'ee14b13cbe61b16984889d6433f1f21f768992d6df5ed8f31bf74ae05fcc1d8e'},
  'c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085': {'date': '2026-10-13',
                                                                       'commit': '4fa89ced249f9e05f8bccb3665dee691053ea9cb',
-                                                                      'format': 'git'},
+                                                                      'format': 'git',
+                                                                      'normalized_sha256': '09fd830669125c3861f5469bcb31d52ea72aa3c932e60e08fcec3ba36fd6ecd6'},
  'b5ed6807fbc4f669d3a08bb52b1b7723dca77cfe6104530a254c28613da0f95b': {'date': '2026-10-13',
                                                                       'commit': '4fa89ced249f9e05f8bccb3665dee691053ea9cb',
-                                                                      'format': 'black-26.5.1'}}
+                                                                      'format': 'black-26.5.1',
+                                                                      'normalized_sha256': 'b2b897133d3af46adfa517a46b64506c89609e04a0ddfe1e38619379e37e41af'}}
 
 
 def work_tool_source():
@@ -826,7 +852,21 @@ class WorkToolRestore(BaseModel):
 
 def _work_source_info(digest):
     known = WORK_TOOL_SOURCE_HISTORY.get(digest)
-    return {"sha256": digest, **known} if known else None
+    return {"sha256": digest, **{key: known[key] for key in ("date", "commit", "format")}} if known else None
+
+
+def _work_registered_source_info(content):
+    """Recognize reviewed forms while reporting the registered source's exact hash."""
+    digest = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    exact = _work_source_info(digest)
+    if exact:
+        return exact
+    normalized = content.replace("\r\n", "\n").replace("\r", "\n").strip()
+    normalized_digest = hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+    for original_digest, known in WORK_TOOL_SOURCE_HISTORY.items():
+        if normalized_digest == known["normalized_sha256"]:
+            return {**_work_source_info(original_digest), "sha256": digest}
+    return None
 
 
 async def _work_tool_state(snapshot, user, session):
@@ -914,7 +954,7 @@ def _read_work_backup(path, user):
                 receipt["sha256"] != _retirement_hash(before) or
                 before["id"] != WORK_TOOL_ID or
                 hashlib.sha256(before["content"].encode("utf-8")).hexdigest() != receipt["from_source_sha256"] or
-                receipt["from_source_sha256"] not in WORK_TOOL_SOURCE_HISTORY or
+                _work_registered_source_info(before["content"]) is None or
                 receipt["to_source_sha256"] not in WORK_TOOL_SOURCE_HISTORY or
                 path != _work_backup_path(user, receipt["id"])):
             raise ValueError
@@ -948,7 +988,7 @@ async def _work_tool_status(user, session):
     snapshot = await _snapshot(AssetTarget(kind="tool", id=WORK_TOOL_ID), user, session)
     asset = snapshot["asset"]
     registered_digest = hashlib.sha256(asset["content"].encode("utf-8")).hexdigest() if snapshot["exists"] else None
-    known = _work_source_info(registered_digest)
+    known = _work_registered_source_info(asset["content"]) if snapshot["exists"] else None
     state = ("missing" if not snapshot["exists"] else "ready" if asset.get("content") == source else
              "update_available" if known else "blocked_existing")
     current_state = await _work_tool_state(snapshot, user, session)
@@ -1057,7 +1097,7 @@ async def _restore_work_tool(request, form, user, session):
         raise HTTPException(500, "work_tool_restore_unconfirmed")
     receipt.update(status="restored", restored_sha256=_retirement_hash(final_state))
     _save_work_backup(path, receipt)
-    source_info = _work_source_info(receipt["from_source_sha256"])
+    source_info = _work_registered_source_info(original["content"])
     return {**status, "state": "ready" if receipt["from_source_sha256"] == source_digest else "update_available",
             "registered_source_sha256": receipt["from_source_sha256"], "registered_source": source_info,
             "known_source": True, "expected_token": after["token"], "changed": True,

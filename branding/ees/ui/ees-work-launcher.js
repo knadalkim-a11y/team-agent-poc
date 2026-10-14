@@ -334,7 +334,7 @@
     const preserve='<p>그대로 두는 것 · 이름·소유자·읽기 권한·설정</p><p>바뀌는 것 · 코드 원본</p>';
     const date=value=>esc(value || '날짜 확인 불가');
     let confirmation='register_readonly_work_tool',path='setup',body;
-    if(status.state==='blocked_existing')return dialog({title:'등록 원본이 지원 형태와 다릅니다',readOnlyDetail:true,html:description+`<p>${esc(status.reason || '등록 원본이 알려진 제품 원본 또는 편집기 정렬본과 일치하지 않습니다. 원본을 확인하기 전에는 변경하지 않습니다.')}</p>`});
+    if(status.state==='blocked_existing')return dialog({title:'등록 원본이 지원 형태와 다릅니다',readOnlyDetail:true,html:`<p>등록된 코드가 알려진 제품 원본과 다릅니다.</p><p>이 화면은 코드를 바꾸지 않습니다. 등록 해시 앞 8자리를 개발 담당에게 알려 주세요.</p><p>등록 해시 앞 8자리 · <code>${esc(String(status.registered_source_sha256 || '미확인').slice(0,8))}</code></p>`+description});
     if(['ready','update_available'].includes(status.state)){
       let restore=false;const canRestore=status.backup?.can_restore===true;
       const pending=dialog({title:status.state==='ready'?'Work 대화 도구가 연결되어 있습니다':'이전 제품 원본이 등록되어 있습니다',readOnlyDetail:status.state==='ready',confirmLabel:status.state==='update_available'?'지금 프로그램 원본으로 바꾸기':'',html:description+`<p>${esc(status.reason || '현재 등록 항목의 소유자·권한·설정을 유지합니다.')}</p>`+(canRestore?`<p>비공개 백업 · ${date(status.backup.created_at)}</p><button type="button" data-work-tool-restore class="ew-secondary">이전 코드 원본으로 되돌리기</button>`:'')});

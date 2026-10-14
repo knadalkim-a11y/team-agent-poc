@@ -12,7 +12,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
-| Work 도구 blocked_existing·과거 원본/편집기 정렬본·갱신·비공개 복원 | [2-2 후속 원인·main 음성 대조·보존과 동시 변경](v4-ui-20260930.md#work-tool-update-evidence-20261014) |
+| Work 도구 blocked_existing·줄바꿈·정렬본·갱신·복원 | [10-15 인식 보완·실패 대조·정확 바이트 보호](v4-ui-20260930.md#work-tool-review-evidence-20261015) |
 | #85 사내 `.14` 적용·이동 중 깜빡임·#83 소스 화면 전환 | [사용자 결과·원인 판단 범위·2단계 보존/프레임 검사](v4-ui-20260930.md#source-phase2-internal-20261013) |
 | #83 소스 빌드·원본 Native 동등성·CI ZIP·이전 프로그램 복원 | [1단계 검증·첫 빌드 실패·미확인 범위](v4-ui-20260930.md#source-frontend-phase1-evidence-20261013) |
 | 사내 ees.12 적용 준비·시간대/복원·팀원 첫 업무 | [준비 검증·실패·자동/사내 확인 경계](v4-ui-20260930.md#internal-pilot-prep-20261012) · [사내 확인5개](../docs/03-openwebui-native-agent.md#internal-pilot-checks-20261012) |

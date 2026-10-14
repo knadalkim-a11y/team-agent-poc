@@ -1,0 +1,29 @@
+✔ unsupported Work source shows escaped hashes and support mismatch with no write controls (8.051386ms)
+✖ unsupported Work source explains the mismatch and gives an eight-character support hash without exposing the reason code (2.023415ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 94.560259
+
+✖ failing tests:
+
+test at tests/test_ees_execution_ui.cjs:117:1
+✖ unsupported Work source explains the mismatch and gives an eight-character support hash without exposing the reason code (2.023415ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /등록된 코드가 알려진 제품 원본과 다릅니다\./. Input:
+  
+  '<p>Native 도구 ID · ees_workflow</p><p>등록 원본 SHA256</p><pre>deadc0de0123456789abcdef0123456789abcdef0123456789abcdef01234567</pre><p>지금 프로그램 원본 SHA256</p><pre>program-hash</pre><p>unsupported_source_form</p>'
+  
+      at TestContext.<anonymous> (/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_execution_ui.cjs:122:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '<p>Native 도구 ID · ees_workflow</p><p>등록 원본 SHA256</p><pre>deadc0de0123456789abcdef0123456789abcdef0123456789abcdef01234567</pre><p>지금 프로그램 원본 SHA256</p><pre>program-hash</pre><p>unsupported_source_form</p>',
+    expected: /등록된 코드가 알려진 제품 원본과 다릅니다\./,
+    operator: 'match',
+    diff: 'simple'
+  }

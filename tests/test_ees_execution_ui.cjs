@@ -109,10 +109,22 @@ test('cancelling either Work update confirmation never writes and changed contex
  for(const change of ['account','scope']){const h=workToolUpdateHarness(),pending=deferred();let count=0;h.setDialog(()=>count++===0?Promise.resolve(true):pending.promise);const task=h.api.setupWorkTool();await new Promise(resolve=>setImmediate(resolve));if(change==='account')h.setAuth('another-user');else h.api.setSelection({system_id:'APC'});pending.resolve(true);await task;assert.equal(h.calls.length,1);}
 });
 test('unsupported Work source shows escaped hashes and support mismatch with no write controls',async()=>{
- const h=workToolUpdateHarness({state:'blocked_existing',known_source:false,registered_source:null,registered_source_sha256:'<not-supported>',reason:'지원 형태와 다름',backup:{can_restore:true}});
+ const h=workToolUpdateHarness({state:'blocked_existing',known_source:false,registered_source:null,registered_source_sha256:'<not-supported>',reason:'unsupported_source_form',backup:{can_restore:true}});
  await h.api.setupWorkTool();assert.equal(h.calls.length,1);assert.equal(h.dialogs.length,1);assert.equal(h.dialogs[0].readOnlyDetail,true);
  assert.match(h.dialogs[0].html,/&lt;not-supported&gt;/);assert.match(h.dialogs[0].html,/program-hash/);assert.match(h.dialogs[0].title,/지원 형태와 다릅니다/);
  assert.doesNotMatch(h.dialogs[0].html,/data-work-tool-restore|data-work-grant|사용자 수정/);assert.equal(h.dialogs[0].confirmLabel,undefined);
+});
+test('unsupported Work source explains the mismatch and gives an eight-character support hash without exposing the reason code',async()=>{
+ const registeredHash='deadc0de'+'0123456789abcdef'.repeat(3)+'01234567';
+ const h=workToolUpdateHarness({state:'blocked_existing',known_source:false,registered_source:null,registered_source_sha256:registeredHash,reason:'unsupported_source_form',backup:{can_restore:true}});
+ await h.api.setupWorkTool();
+ assert.equal(h.dialogs.length,1);const dialog=h.dialogs[0];
+ assert.match(dialog.html,/등록된 코드가 알려진 제품 원본과 다릅니다\./);
+ assert.ok(dialog.html.includes('이 화면은 코드를 바꾸지 않습니다. 등록 해시 앞 8자리를 개발 담당에게 알려 주세요.'));
+ assert.match(dialog.html,/등록 해시 앞 8자리 · <code>deadc0de<\/code>/);
+ assert.doesNotMatch(dialog.html,/unsupported_source_form|data-work-tool-restore|data-work-grant|사용자 수정/);
+ assert.equal(dialog.readOnlyDetail,true);assert.equal(dialog.confirmLabel,undefined);
+ assert.deepEqual(h.calls.map(call=>[call.options.method,call.url]),[['GET','/api/v1/ees/assets/work-tool/status']]);
 });
 test('ready Work source restores only by separate backup action and explicit confirmation',async()=>{
  const backup={id:'backup-id',sha256:'backup-receipt-hash',created_at:'2026-10-14T01:00:00Z',from_source_sha256:'previous-hash',to_source_sha256:'program-hash',can_restore:true};
