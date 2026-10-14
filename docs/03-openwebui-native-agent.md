@@ -62,12 +62,15 @@
     if($LASTEXITCODE -ne 0 -or $eesActual -cne $eesCommit){throw '검토 원본과 달라 적용하지 않았습니다.'}
   }
   & $eesManager -Action Upgrade -Config $eesCfg -Bundle $eesZip -Commit $eesCommit -ArtifactSha256 $eesHash -HealthTimeout 120 -Summary
+  Write-Host '적용 뒤 [Work 도구 설정 확인] → [지금 프로그램 원본으로 바꾸기]를 확인하세요. 이미 ready면 유지하고, 지원 형태와 다름이면 해시 앞 8자리만 알려 주세요.'
 }
 ```
 
 순서는 **브라우저 열기/완료 ZIP 대기 → 바깥 ZIP 해시 검사 → 현재 설치 상태 확인 → 기존 Update/최종 main 대조 → 기존 Upgrade 사전 검증·Stop·검증 백업·Apply·Start/health**다. API 토큰·사내 Node/npm 빌드·자산 재등록은 필요하지 않다. 다운로드 만료/해시 불일치는 서버 변경 전에 중단한다. Upgrade는 바깥 ZIP·내부 ZIP·manifest·프로그램 원본·시간대와 기존 배포 보호를 다시 검사한다. 종료 이후 실패면 다운로드 블록을 재실행하지 않고 [기존 실패 판단](#internal-pilot-failures-20261012)·[명시적 종료 복구](#source-frontend-stop-recovery-20261013)를 따른다.
 
-전달 결과는 **1~2줄**이다. 첫 줄은 `result=… / stage=… / code=… / running=… / commit=…` 또는 적용 전 중단 문장이다. 성공 뒤 [기존 확인 항목](#source-phase2-local-zip-20261014)에 더해 스킬·도구·모델에서 업무 절차·내 업무 왕복, 대화 전환·새 대화에서 첫 로딩 후 메뉴·이미 연 패널의 ‘불러오는 중’ 표시가 재등장하지 않는지, 펼침·스크롤·작성 중 값이 유지되는지 확인한다. 두 번째 줄은 `login=OK / chat=OK / work=OK / menu_flash=없음 / helper_chat=OK`처럼 실제 결과만 전달하며 미확인은 그대로 표시한다. `menu_flash`에는 원래 메뉴 노출과 이동 중 로딩 자리표시자 깜빡임을 모두 포함한다.
+이번 Work 도구 출하 파일은 설치 기준 `42cc756`과 같아 `work_tool=update_needed`가 나오지 않는다. 그래도 성공 적용 뒤 관리자가 **워크스페이스 → 공장·접근 범위 → [Work 도구 설정 확인]**을 직접 연다. 알려진 원본이면 **[지금 프로그램 원본으로 바꾸기]**에서 유지 항목·코드 변경을 확인해 바꾼다. 이미 `ready`면 그대로 두고, 지원 형태와 다르면 변경 없이 등록 해시 앞 8자리를 전달한다.
+
+전달 결과는 **1~2줄**이다. 첫 줄은 `result=… / stage=… / code=… / running=… / commit=…` 또는 적용 전 중단 문장이다. 성공 뒤 [기존 확인 항목](#source-phase2-local-zip-20261014)에 더해 스킬·도구·모델에서 업무 절차·내 업무 왕복, 대화 전환·새 대화에서 첫 로딩 후 메뉴·이미 연 패널의 ‘불러오는 중’ 표시가 재등장하지 않는지, 펼침·스크롤·작성 중 값이 유지되는지 확인한다. 두 번째 줄은 `login=OK / chat=OK / work=OK / menu_flash=없음 / helper_chat=OK / work_tool=바꿈`처럼 전달한다. `work_tool`은 `바꿈`, `이미ready`, `지원형태다름:해시8자리` 중 실제 결과 하나를 적고 미확인은 그대로 표시한다. `menu_flash`는 원래 메뉴 노출·메뉴 전체 로딩 재등장 여부다. 처음 고르는 범위의 목록 안에만 잠깐 보이는 `받는 중`은 정상이며, 응답 전 `없음`·`0개`가 보이면 안 된다.
 
 <a id="source-phase2-local-zip-20261014"></a>
 

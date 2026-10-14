@@ -281,6 +281,11 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 self.assertIn('참여', self.text('[data-action=choose_factory][data-factory-id=scope-factory-2]'))
                 self.scope_search('공장 07')
                 self.wait("!!document.querySelector('[data-action=choose_factory][data-factory-id=scope-factory-7]') && !document.querySelector('[data-action=choose_factory][data-factory-id=scope-factory-1]')")
+                self.scope_search('존재하지 않는 공장 검색')
+                self.wait("document.querySelector('[data-scope-dropdown=factory]')?.textContent.includes('일치하는 항목이 없습니다')")
+                self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('[data-scope-list=factory] [role=option]')].map(e=>e.dataset.factoryId)"), [''])
+                self.assertIn('전체 공장', self.text('[data-scope-list=factory] [role=option]'))
+                evidence[variant]['zeroSearch'] = self.text('[data-scope-dropdown=factory]')
                 self.scope_search('')
                 self.wait("document.querySelector('[data-action=choose_factory][data-factory-id=scope-factory-8]')")
                 denied = '[data-action=choose_factory][data-factory-id=scope-factory-8]'
@@ -364,6 +369,80 @@ class SourceShellNativeTests(IntegratedNativeCase):
         (directory / 'source-scope-three-dropdowns.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         (directory / 'source-scope-api-permissions.json').write_text(json.dumps(self.scope_api_evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
+    def test_first_scope_lists_wait_for_response_before_empty_or_zero(self):
+        """The received/not-received boundary comes from observed HTTP bodies."""
+        self.enable_native_menus()
+        self.author(name='처음 범위 응답 전 빈 상태 검증', jobs=1)
+        frame_monitor.install(self)
+        self.navigate('/c/existing-chat')
+        self.wait("document.querySelector('#ees-work-entry [data-action=my_work]') && window.__eesNativeDraftV1?.ready()")
+        self.open_sidebar()
+        self.assertIsNotNone(self.refresh())
+        self.fill('#chat-input', '첫 범위를 받는 동안에도 남는 문장')
+        draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        self.delay_workspace_reads()
+        frame_monitor.guard_loading(self)
+        labels, unknown_labels, cached_labels = [], [], []
+        for label, system, screen, unknown in (
+                ('first-scope-my-work', 'APC', 'my_work', True),
+                ('cached-scope-my-work', 'EMS', 'my_work', False),
+                ('first-scope-records', 'FDC', 'records', True),
+                ('first-scope-procedures', 'EGIS', 'procedures', True),
+                ('cached-scope-procedures', 'EMS', 'procedures', False)):
+            if screen == 'procedures' and not self.browser.evaluate("!!document.querySelector('#ees-work-designer')"):
+                self.click('[data-action=mode][data-mode=author]')
+                self.wait("document.querySelector('#ees-work-designer')")
+                self.assertIsNotNone(self.refresh())
+            trigger, _ = self.scope_open('system')
+            start = len(self.server.navigation_reads)
+            frame_monitor.begin_scope_read(self, label, system=system, unknown=unknown)
+            self.click('[data-action=choose_system][data-system-id=' + system + ']')
+            self.scope_closed(trigger)
+            if screen == 'records':
+                # Scope selection opens My work; enter the other scope-dependent
+                # list while its first real workspace response is still delayed.
+                self.click('#ees-work-entry [data-action=records]')
+                self.wait("document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '실행 기록'")
+            self.wait('window.__eesSourceFrameEvidence.samples.filter(s=>s.scopeLabel===' +
+                      json.dumps(label) + ' && ' + ('s.scopePending' if unknown else 'true') + ').length >= 3')
+            if unknown:
+                self.screenshot(label + '-pending')
+            self.wait_delayed_reads(start)
+            self.wait('window.__eesSourceFrameEvidence.scopeExpectation.endpoints.every(p=>window.__eesSourceFrameEvidence.scopeExpectation.received[p])')
+            self.wait("!document.querySelector('[data-ees-scope-loading]')")
+            self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+            self.assertEqual(self.browser.evaluate('location.pathname'), '/c/existing-chat')
+            if screen == 'my_work':
+                self.assertIn('지금 처리할 내 업무가 없습니다', self.text('#ees-work-panel'))
+            elif screen == 'records':
+                self.assertIn('저장된 진행 건이 없습니다.', self.text('#ees-work-panel'))
+            elif unknown:
+                self.assertIn('업무 절차 0개', self.text('#ees-work-designer'))
+                self.assertEqual(self.text('#ees-work-entry [data-action=procedures] small'), '0')
+            labels.append(label)
+            (unknown_labels if unknown else cached_labels).append(label)
+        evidence = frame_monitor.collect(self, labels=labels)
+        evidence['reads'] = self.server.navigation_reads
+        evidence['scope'] = ('First visits to real APC/FDC/EGIS scope lists versus cached EMS, '
+                             'workspace and operations delayed 1000ms each; response delivery '
+                             'observed independently of product loading state, Native draft preserved.')
+        directory = self.screenshot('source-first-scope-final')
+        (directory / 'source-first-scope-frames.json').write_text(
+            json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        frame_monitor.assert_clean(self, evidence, labels=labels)
+        for label in unknown_labels:
+            pending = [row for row in evidence['samples'] if row['scopeLabel'] == label and row['scopePending']]
+            self.assertGreaterEqual(len(pending), 3, label)
+            self.assertTrue(all(row['scopeControls'] for row in pending), label + ': navigation controls disappeared')
+            for region in ('navigation', 'panel'):
+                self.assertGreaterEqual(sum(any(item['region'] == region and item['text'] == '받는 중'
+                                                for item in row['scopeLocalLoading']) for row in pending), 3,
+                                        label + ': missing list-local loading row in ' + region)
+        for label in cached_labels:
+            self.assertEqual([row for row in evidence['samples'] if row['scopeLabel'] == label
+                              and row['scopeLocalLoading']], [], label + ': cached scope showed a loader')
+        self.assertEqual(self.server.completions, [])
+
     def test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading(self):
         self.enable_native_menus()
         self.scope_catalog_fixture()
@@ -383,15 +462,16 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.delay_workspace_reads()
         frame_monitor.guard_loading(self)
         labels = []
-        for label, kind, target in (
-                ('scope-factory-first', 'factory', 'scope-factory-1'),
-                ('scope-factory-second', 'factory', 'scope-factory-2'),
-                ('scope-all-factories', 'factory', ''),
-                ('scope-system-apc', 'system', 'APC'),
-                ('scope-system-ems', 'system', 'EMS')):
+        for label, kind, target, unknown in (
+                ('scope-factory-first', 'factory', 'scope-factory-1', True),
+                ('scope-factory-second', 'factory', 'scope-factory-2', True),
+                ('scope-all-factories', 'factory', '', False),
+                ('scope-system-apc', 'system', 'APC', True),
+                ('scope-system-ems', 'system', 'EMS', False)):
             trigger, _ = self.scope_open(kind)
             start = len(self.server.navigation_reads)
-            frame_monitor.mark(self, label)
+            frame_monitor.begin_scope_read(self, label, system=target if kind == 'system' else 'EMS',
+                                           factory=target if kind == 'factory' else '', unknown=unknown)
             self.click('[data-action=choose_' + kind + '][data-' + kind + '-id="' + target + '"]')
             self.scope_closed(trigger)
             self.wait_delayed_reads(start)
@@ -592,7 +672,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         labels.append('delayed-existing-return')
 
         evidence = frame_monitor.collect(self, labels=labels)
-        evidence['scope'] = ('Same assertions for baseline 42cc756 and candidate; real compiled frontend, '
+        evidence['scope'] = ('Real compiled frontend candidate; historical 42cc756 failure is retained in evals, '
                              'physical CDP clicks, temporary production workflow service; both workspace '
                              'and operations HTTP GETs delayed by 1000ms; no DOM masking or expected failure.')
         evidence['reads'] = self.server.navigation_reads

@@ -1333,7 +1333,7 @@ new file mode 100644
 index 0000000..be842d3
 --- /dev/null
 +++ b/src/lib/components/ees/EesNavigation.svelte
-@@ -0,0 +1,248 @@
+@@ -0,0 +1,250 @@
 +<script lang="ts">
 +	import { getContext } from 'svelte';
 +	import { page } from '$app/stores';
@@ -1443,7 +1443,7 @@ index 0000000..be842d3
 +									: undefined}
 +								on:click={() => eesAction({ action })}
 +								><Icon name={icon} /><span>{t(key, label)}</span
-+								>{#if action === 'procedures' || !data.operations?.error}<small
++								>{#if !$eesSnapshot.scope_loading && (action === 'procedures' || !data.operations?.error)}<small
 +										>{action === 'procedures'
 +											? current.length
 +											: (data.operations?.tools || []).length}</small
@@ -1506,7 +1506,8 @@ index 0000000..be842d3
 +			{#if !create && !targets.some((item) => nativeAllowed(item[0]))}<p class="ew-empty">
 +					{t('EES.NoAccessibleScreens', 'No screens are available in EES Workflow.')}
 +				</p>{/if}
-+			{#if create && current.length}<p class="ew-nav-caption">
++			{#if create && $eesSnapshot.scope_loading}<p class="ew-empty" role="status" data-ees-scope-loading="navigation">{t($eesSnapshot.error ? 'EES.ListUnavailable' : 'EES.Receiving', $eesSnapshot.error ? 'Could not receive the list.' : 'Receiving')}</p>{/if}
++			{#if create && !$eesSnapshot.scope_loading && current.length}<p class="ew-nav-caption">
 +					{t('EES.Nav.Recent', 'Recently edited')}
 +				</p>
 +				<nav class="ew-workflows ew-recent">
@@ -1571,7 +1572,8 @@ index 0000000..be842d3
 +									>{/if}</button
 +							>{/each}
 +					</details>{/each}
-+				{#if !current.length}<p class="ew-empty">
++				{#if $eesSnapshot.scope_loading}<p class="ew-empty" role="status" data-ees-scope-loading="navigation">{t($eesSnapshot.error ? 'EES.ListUnavailable' : 'EES.Receiving', $eesSnapshot.error ? 'Could not receive the list.' : 'Receiving')}</p>
++				{:else if !current.length}<p class="ew-empty">
 +						{t('EES.NoProcedures', 'No procedures are registered.')}
 +					</p>{/if}
 +			</nav>
@@ -2884,7 +2886,7 @@ diff --git a/src/lib/i18n/locales/ko-KR/translation.json b/src/lib/i18n/locales/
 index 8eba682..38ee86b 100644
 --- a/src/lib/i18n/locales/ko-KR/translation.json
 +++ b/src/lib/i18n/locales/ko-KR/translation.json
-@@ -3081,5 +3081,86 @@
+@@ -3081,5 +3081,88 @@
  	"Youtube Language": "Youtube 언어",
  	"Youtube Proxy URL": "Youtube 프록시 URL",
  	"Zoom in": "",
@@ -2939,6 +2941,8 @@ index 8eba682..38ee86b 100644
 +	"EES.Panel": "업무 패널",
 +	"EES.PanelWidth": "업무 패널 너비",
 +	"EES.Loading": "불러오는 중…",
++	"EES.Receiving": "받는 중",
++	"EES.ListUnavailable": "목록을 받지 못했습니다.",
 +	"EES.Composer.Placeholder": "업무를 물어보거나, 필요한 작업을 요청하세요",
 +	"EES.Procedure.Start": "새 절차 작성 안내",
 +	"EES.Helper": "업무 도우미",
@@ -3497,7 +3501,7 @@ new file mode 100644
 +						{#if value === item.id}<Icon name="9d8d5" />{/if}
 +					</button>
 +				{/each}
-+				{#if !visible.length}<p class="ew-scope-no-results" role="status">{t('EES.Scope.NoResults', 'No matching items.')}</p>{/if}
++				{#if !visible.length || (query.trim() && !visible.some((item) => item.id !== ''))}<p class="ew-scope-no-results" role="status">{t('EES.Scope.NoResults', 'No matching items.')}</p>{/if}
 +			</div>
 +		</div>
 +	{/if}

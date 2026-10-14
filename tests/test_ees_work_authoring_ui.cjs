@@ -309,3 +309,10 @@ test('tool starter questions use the same source help callback without mutating 
  busy=false;h.designer.syncHelpState();assert.equal(h.buttons.filter(button=>button.dataset.authorAction==='tool_question').every(button=>!button.disabled),true);
  h.click('tool_question',{id:'0'});await flush();assert.equal(sent.length,1);assert.equal(sent[0].question,'정보 읽기 도구와 작업 부탁 도구는 뭐가 달라?');assert.equal(sent[0].context.screen,'새 도구 시작');assert.deepEqual(h.draft(),before);assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);assert.doesNotMatch(h.markup,/질문을 입력창에 채웁니다/);
 });
+
+test('unreceived procedure scope retains heading and controls without claiming an empty list or zero count',()=>{
+ const h=harness();h.selection={...h.selection,system_id:'APC',workflow_id:''};h.state={...h.state,workflow:null,workflows:[]};
+ h.designer.render({state:h.state,selection:h.selection,host:h.host,scope_loading:true});
+ assert.match(h.markup,/APC의 업무 절차/);assert.match(h.markup,/data-ees-scope-loading="panel"[^>]*>받는 중/);assert.match(h.markup,/id="ew-author-search"/);assert.match(h.markup,/data-author-action="create"/);assert.doesNotMatch(h.markup,/업무 절차 0개|아직 업무 절차가 없습니다/);
+ h.designer.render({state:h.state,selection:h.selection,host:h.host,scope_loading:false});assert.match(h.markup,/업무 절차 0개/);assert.match(h.markup,/아직 업무 절차가 없습니다/);
+});

@@ -1,0 +1,28 @@
+TAP version 13
+# Subtest: received scope fallback preserves common operations but removes prior run requests and scope runs
+not ok 1 - received scope fallback preserves common operations but removes prior run requests and scope runs
+  ---
+  duration_ms: 7.795843
+  type: 'test'
+  location: '/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/test_ees_execution_ui.cjs:219:1'
+  failureType: 'testCodeFailure'
+  error: 'tools list is retained'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/test_ees_execution_ui.cjs:225:131)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 60.151644

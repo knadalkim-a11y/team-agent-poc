@@ -852,8 +852,7 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(next(item for item in options['systems'] if item['id'] == 'FDC'),
                          {'id': 'FDC', 'name': 'FDC', 'role': '', 'allowed': False})
         all_options = (await self.state('c'))['scope_options']
-        self.assertEqual({item['id'] for item in all_options['factories']}, {'f1', 'f2', 'f3', 'fdc'})
-        self.assertFalse(next(item for item in all_options['factories'] if item['id'] == 'fdc')['allowed'])
+        self.assertEqual({item['id'] for item in all_options['factories']}, {'f1', 'f2', 'f3'})
         # An option's visible identity is not a data/read/execute grant.
         for query in ({'system_id': 'EMS', 'factory_id': 'f3'}, {'system_id': 'FDC'}):
             denied = await self.service.workspace_state(self.users['c'], **query)
@@ -864,6 +863,37 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         denied = await self.command('create_workflow', actor='c', system_id='FDC', name='금지된 절차')
         self.assertEqual(denied['error']['code'], 'scope_forbidden')
         self.assertEqual((await self.state('admin'))['runs'], [])
+
+    async def test_scope_options_without_system_hide_factories_of_inaccessible_systems(self):
+        for factory, system, name in (('f1', 'EMS', '허용 공장'), ('f2', 'EMS', '선택 불가 공장'),
+                                      ('fdc-private', 'FDC', '숨길 FDC 공장'),
+                                      ('apc-private', 'APC', '숨길 APC 공장')):
+            self.assertTrue((await self.command('save_factory', factory_id=factory, system_id=system,
+                name=name, attributes={'private_setting': 'not-for-the-selector'}))['ok'])
+        # With no visible systems even display-only factory identities must be
+        # absent. The fixed system labels may still explain denied choices.
+        empty = await self.state('c')
+        self.assertEqual(empty['systems'], [])
+        self.assertEqual(empty['scope_options']['factories'], [])
+        self.assertEqual(empty['factories'], [])
+        self.assertTrue((await self.command('save_access', principal_kind='user', principal_id='c',
+            system_id='EMS', factory_id='f1', roles=['participant']))['ok'])
+        limited = await self.state('c')
+        self.assertEqual(limited['systems'], ['EMS'])
+        self.assertEqual(limited['scope_options']['factories'], [
+            {'id': 'f2', 'name': '선택 불가 공장', 'system_id': 'EMS', 'role': '', 'allowed': False},
+            {'id': 'f1', 'name': '허용 공장', 'system_id': 'EMS', 'role': 'participant', 'allowed': True}])
+        self.assertEqual({item['id'] for item in limited['factories']}, {'f1'})
+        self.assertEqual(limited['scope_options']['factories'],
+                         (await self.state('c', system_id='EMS'))['scope_options']['factories'])
+        for private_value in ('fdc-private', '숨길 FDC 공장', 'apc-private', '숨길 APC 공장',
+                              'not-for-the-selector'):
+            self.assertNotIn(private_value, json.dumps(limited['scope_options'], ensure_ascii=False))
+        # Neither a hidden system nor a denied factory becomes readable.
+        for query in ({'system_id': 'FDC'}, {'system_id': 'APC'},
+                      {'system_id': 'EMS', 'factory_id': 'f2'}):
+            denied = await self.service.workspace_state(self.users['c'], **query)
+            self.assertEqual(denied['error']['code'], 'scope_forbidden')
 
     async def test_scope_options_recheck_current_grants_and_keep_denied_data_hidden(self):
         await self.command('save_factory', factory_id='f1', system_id='EMS', name='공장',
@@ -878,8 +908,7 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
                           system_id='EMS', factory_id='f1', roles=['manager'], active=False,
                           expected_revision=grant['revision'])
         denied = await self.state('c')
-        self.assertEqual(denied['scope_options']['factories'], [
-            {'id': 'f1', 'name': '공장', 'system_id': 'EMS', 'role': '', 'allowed': False}])
+        self.assertEqual(denied['scope_options']['factories'], [])
         self.assertTrue(all(not item['allowed'] and item['role'] == '' for item in denied['scope_options']['systems']))
         self.assertEqual((denied['systems'], denied['factories'], denied['workflows'], denied['runs'], denied['access']),
                          ([], [], [], [], []))

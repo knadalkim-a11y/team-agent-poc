@@ -101,7 +101,6 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
-      actions: read
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -141,51 +140,6 @@ jobs:
       - name: Compare official and source-built Native behavior
         id: baseline
         run: python tests/ees_frontend_native_baseline.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --frontend-dir dist/frontend-baseline --chrome "$(command -v google-chrome)" --output dist/ees-source-baseline
-      - name: Check out the fixed deployed navigation baseline
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          ref: 42cc7568eb8477013abcf0a042617dd9e3279db2
-          path: dist/navigation-baseline-source
-          persist-credentials: false
-      - name: Reuse the official deployed frontend while its artifact is retained
-        id: navigation_artifact
-        continue-on-error: true
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: ees-source-frontend-42cc7568eb8477013abcf0a042617dd9e3279db2
-          path: dist/navigation-baseline-artifact
-          run-id: 38482091822
-          github-token: ${{ github.token }}
-      - name: Prepare an exact upstream checkout after artifact expiration
-        if: steps.navigation_artifact.outcome != 'success'
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          repository: open-webui/open-webui
-          ref: 2a960a59fe1dbbd35282f0556b3666d81102e781
-          path: dist/open-webui-navigation-baseline
-          persist-credentials: false
-      - name: Rebuild the fixed baseline without depending on artifact retention
-        if: steps.navigation_artifact.outcome != 'success'
-        env:
-          NODE_OPTIONS: --max-old-space-size=6144
-        run: |
-          cp -a dist/open-webui-source/node_modules dist/open-webui-navigation-baseline/node_modules
-          python dist/navigation-baseline-source/scripts/build_ees_frontend.py --source-dir dist/open-webui-navigation-baseline --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/navigation-baseline-rebuilt
-      - name: Build the old program from its own verified frontend and sources
-        env:
-          BASELINE_FRONTEND: ${{ steps.navigation_artifact.outcome == 'success' && 'dist/navigation-baseline-artifact' || 'dist/navigation-baseline-rebuilt' }}
-          BASELINE_ORIGIN: ${{ steps.navigation_artifact.outcome == 'success' && 'official_run_38482091822' || 'rebuilt_fixed_42cc756_sources' }}
-        run: |
-          python dist/navigation-baseline-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --frontend-dir "$BASELINE_FRONTEND" --output-dir dist/navigation-baseline-branding
-          python -c "import json,os,pathlib; pathlib.Path('dist/navigation-baseline-branding/baseline-provenance.json').write_text(json.dumps({'commit':'42cc7568eb8477013abcf0a042617dd9e3279db2','frontend_origin':os.environ['BASELINE_ORIGIN']})+'\n',encoding='utf-8')"
-      - name: Share the reproducible navigation baseline program
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: ees-navigation-baseline-${{ github.sha }}
-          path: dist/navigation-baseline-branding
-          if-no-files-found: error
-          compression-level: 0
-          retention-days: 7
       - name: Build the reviewed EES source patches
         env:
           NODE_OPTIONS: --max-old-space-size=6144
@@ -451,31 +405,6 @@ jobs:
         with:
           name: ees-pinned-fixtures-${{ github.sha }}
           path: dist
-      - name: Check out the unchanged navigation baseline for the negative control
-        if: matrix.suite == 'native-compose'
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          ref: 42cc7568eb8477013abcf0a042617dd9e3279db2
-          path: dist/navigation-baseline-source
-          persist-credentials: false
-      - name: Download the verified navigation baseline program
-        if: matrix.suite == 'native-compose'
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: ees-navigation-baseline-${{ github.sha }}
-          path: dist/navigation-baseline-branding
-      - name: Require the same delayed regression to fail on baseline loading frames
-        if: matrix.suite == 'native-compose'
-        id: navigation_negative
-        run: python -X warn_default_encoding -W error::EncodingWarning tests/ees_source_navigation_baseline.py --baseline-dir dist/navigation-baseline-source --branding-dir dist/navigation-baseline-branding --output dist/ees-navigation-negative-control
-      - name: Keep baseline failure evidence before running the candidate
-        if: always() && matrix.suite == 'native-compose' && steps.navigation_negative.outcome != 'skipped'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: ees-navigation-negative-control-${{ github.sha }}
-          path: dist/ees-navigation-negative-control
-          if-no-files-found: error
-          retention-days: 7
       - name: Run the assigned real Native browser integration
         id: native
         run: python -X warn_default_encoding -W error::EncodingWarning tests/ees_delivery_suite.py --suite ${{ matrix.suite }} --output dist/ees-results

@@ -11,7 +11,7 @@
   const screen=()=>source()?.screen?.() || {};
   const available=()=>Boolean(token()&&screen().active&&!screen().native&&screen().chatReady);
   let state=null,identity='',epoch=0,serial=0,busy=false,scheduled=false,error='',commandError='',route='',readyRoute='',refreshTimer=null,uiTimer=null,uiRevision=0,restored=false,initialSelectionPatch=null;
-  let procedureStart=null,nativeCapabilities=null,nativeScope=null,stateKey='',targetLoading=false,evidenceUnavailable=false;
+  let procedureStart=null,nativeCapabilities=null,nativeScope=null,stateKey='',targetLoading=false,scopeLoading=false,evidenceUnavailable=false;
   const workspaceCache=new Map();
   let nativeTicket=null,nativeNavigationBusy=false,pendingNativeAction=null;
   let selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};
@@ -20,11 +20,11 @@
   const view=createWorkView({callbacks:{panelWidth:width=>{if(!restored)initialSelectionPatch={...initialSelectionPatch,panel_width:width};selection.panel_width=width;remember(width);}}});
   const designer=createWorkDesigner({callbacks:{command,read,models:models,askHelp,helpState:()=>source()?.helpState?.(),startContextChanged:value=>{procedureStart=value;if(state&&available()&&chatPrepared())view.sync(snapshot());},openWorkflow:async id=>select({workflow_id:id,run_id:'',job_id:'',mode:'author',tab:'overview'}),changed:refresh,navigate:mode=>select({mode}),operationsRead,operationsCommand,options:async body=>{const at=context();const result=await api('workspace/options',body);if(at!==context())throw new Error('작업 위치가 바뀌어 선택 목록을 적용하지 않았습니다.');return result;},resources:async()=>{const at=context();const result=await api('resources');return at===context()?result:null;},propose:async({signal,...body})=>{const at=context();const result=await api('workspace/proposal',body,signal);if(at!==context())throw new Error('작업 위치가 변경되어 제안을 적용하지 않았습니다.');return result;}}});
   const capabilities=()=>nativeCapabilities ?? state?.capabilities;
-  const snapshot=()=>({state:state?{...state,input_proposal:pendingInputProposal?{values:pendingInputProposal.values,warnings:pendingInputProposal.warnings}:null}:null,native_capabilities:nativeCapabilities,native_scope:nativeScope,target_loading:targetLoading,evidence_unavailable:evidenceUnavailable,selection:{...clone(selection),chat_id:chatId()},native_shell:nativePage(),native_id:nativePage()?(workNativeTargets.find(item=>location.pathname===item.path||location.pathname.startsWith(item.path+'/'))?.id || (adminNativePage()?'admin':'native')):'',busy,error:error || commandError,procedure_start:procedureStart});
+  const snapshot=()=>({state:state?{...state,input_proposal:pendingInputProposal?{values:pendingInputProposal.values,warnings:pendingInputProposal.warnings}:null}:null,native_capabilities:nativeCapabilities,native_scope:nativeScope,target_loading:targetLoading,scope_loading:scopeLoading,evidence_unavailable:evidenceUnavailable,selection:{...clone(selection),chat_id:chatId()},native_shell:nativePage(),native_id:nativePage()?(workNativeTargets.find(item=>location.pathname===item.path||location.pathname.startsWith(item.path+'/'))?.id || (adminNativePage()?'admin':'native')):'',busy,error:error || commandError,procedure_start:procedureStart});
   // The last successful workspace remains visible during route validation.
   // References and queued actions still wait for the current route and Chat.
   const chatPrepared=()=>readyRoute===route&&(!route||route===location.pathname+location.search+'#chat')&&(!nativeTicket||nativeTicket.phase==='leaving');
-  function render(){bindHosts();view.render(snapshot());if(available()&&!targetLoading&&!evidenceUnavailable&&state&&selection.mode==='author'&&selection.tab!=='workspace_admin'&&workCanCreate(capabilities()))designer.render({state:{...state,capabilities:capabilities()},selection:{...clone(selection),chat_id:chatId()},host:view.authoringHost()});}
+  function render(){bindHosts();view.render(snapshot());if(available()&&!targetLoading&&!evidenceUnavailable&&!(scopeLoading&&error)&&state&&selection.mode==='author'&&selection.tab!=='workspace_admin'&&workCanCreate(capabilities()))designer.render({state:{...state,capabilities:capabilities()},scope_loading:scopeLoading,selection:{...clone(selection),chat_id:chatId()},host:view.authoringHost()});}
   function setBusy(value){busy=value;view.setBusy(value);designer.setBusy?.(value);if(value){clearTimeout(refreshTimer);refreshTimer=setTimeout(refresh,250);}}
   const adminNativePage=()=>Boolean(screen().admin);
   const nativePage=()=>Boolean(screen().native);
@@ -162,7 +162,7 @@
   }
   const workspaceKey=()=>JSON.stringify([selection.system_id || '',selection.factory_id || '',selection.workflow_id || '',selection.run_id || '']);
   function cacheWorkspace(){
-    if(!state||targetLoading||evidenceUnavailable||!stateKey)return;
+    if(!state||targetLoading||scopeLoading||evidenceUnavailable||!stateKey)return;
     workspaceCache.delete(stateKey);workspaceCache.set(stateKey,state);
     // Private snapshots live only in this authenticated document. Retain each
     // visited target until account changes or access failures discard them.
@@ -170,13 +170,21 @@
   function changeWorkspace(previous){
     const key=workspaceKey();if(key===stateKey)return;
     const cached=workspaceCache.get(key);stateKey=key;
-    if(cached){state=cached;targetLoading=false;return;}
+    if(cached){state=cached;targetLoading=false;scopeLoading=false;return;}
     const sameScope=previous.system_id===selection.system_id&&previous.factory_id===selection.factory_id;
-    if(state)state={...state,workflow:null,run:null,settings:{values:{},revision:0},legacy:null,operations:{},...(!sameScope?{workflows:[],runs:[],my_work:[]}: {})};
+    // A list is known after any successful target read in that exact scope.
+    // Keep its received rows when returning without the old selected target.
+    const scopeKey=JSON.stringify([selection.system_id || '',selection.factory_id || '']);
+    const received=!sameScope&&[...workspaceCache].reverse().find(([key])=>JSON.stringify(JSON.parse(key).slice(0,2))===scopeKey)?.[1];
+    // Operations' requests and scope_runs belong to one run; the other
+    // received values describe this actor/system's tools, models and schedules.
+    const operations=received?{...received.operations,requests:[],scope_runs:[]}:{};
+    if(state||received)state={...(received || state),workflow:null,run:null,settings:{values:{},revision:0},legacy:null,operations,...(!sameScope&&!received?{workflows:[],runs:[],my_work:[]}: {})};
+    if(!sameScope)scopeLoading=!received;
     targetLoading=Boolean(selection.workflow_id||selection.run_id);
   }
   function invalidateWorkspace(){
-    workspaceCache.clear();state=null;stateKey='';targetLoading=false;pendingInputProposal=null;optionCache.clear();
+    workspaceCache.clear();state=null;stateKey='';targetLoading=false;scopeLoading=false;pendingInputProposal=null;optionCache.clear();
     view.reset();designer.reset();
   }
   function acceptWorkspace(next){
@@ -185,7 +193,7 @@
     // Unchanged sections retain their identity; renderers can update a changed
     // section without remounting unrelated menus, forms or their scroll areas.
     if(previous)for(const key of Object.keys(next))if(JSON.stringify(previous[key])===JSON.stringify(next[key]))next[key]=previous[key];
-    state=next;stateKey=workspaceKey();targetLoading=false;evidenceUnavailable=false;nativeCapabilities=null;cacheWorkspace();
+    state=next;stateKey=workspaceKey();targetLoading=false;scopeLoading=false;evidenceUnavailable=false;nativeCapabilities=null;cacheWorkspace();
   }
   const accessFailure=failure=>[401,403,404].includes(failure.status)||['auth_required','unauthorized','scope_forbidden','run_forbidden','access_denied','workflow_manage_forbidden','admin_required','workflow_not_found','run_not_found'].includes(failure.code);
   async function refresh(){
@@ -511,7 +519,7 @@
     if(event.type==='change'&&target.matches?.('[data-list-include]')){view.refreshResults();return;}
     if(event.type==='change'&&(target.matches?.('[data-item-verdict]')||target.matches?.('[data-item-confirm]'))){const verdict=target.matches('[data-item-confirm]')?(target.checked?'completed':'unknown'):target.value;if(verdict)mutate({action:'decide',run_id:selection.run_id,job_id:selection.job_id,item_id:target.dataset.itemId,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,verdict});}
   }
-  function reset(){helpWriting=null;nativeCapabilities=null;nativeScope=null;workspaceCache.clear();stateKey='';targetLoading=false;evidenceUnavailable=false;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;source()?.modelCount?.(0);selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};}
+  function reset(){helpWriting=null;nativeCapabilities=null;nativeScope=null;workspaceCache.clear();stateKey='';targetLoading=false;scopeLoading=false;evidenceUnavailable=false;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;source()?.modelCount?.(0);selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};}
   function sync(){
     scheduled=false;bindHosts();syncHelpState();const auth=token();if(auth!==identity){reset();identity=auth;route='';}
     syncNativeReturn();

@@ -1116,6 +1116,10 @@ class WorkspaceMixin:
                     scope_options['systems'].append({'id': system, 'name': system, 'role': role, 'allowed': allowed})
                 for row in db.execute('SELECT * FROM work_factories ORDER BY name,id'):
                     if system_id and row['system_id'] != system_id: continue
+                    # Without a selected system, keep factory identities within
+                    # systems this actor can enter. Denied factories inside a
+                    # visible system remain display-only picker options.
+                    if not system_id and row['system_id'] not in systems: continue
                     allowed, role = False, ''
                     try:
                         self._work_authorize_scope(db, actor, groups, row['system_id'], row['id'], 'viewer')

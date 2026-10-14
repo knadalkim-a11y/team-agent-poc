@@ -148,6 +148,35 @@ test('new target loads once while returning target uses only its own system and 
  const other=h.api.select({factory_id:'f2',workflow_id:'w1'});assert.equal(h.api.snapshot().state.workflow,null);assert.equal(h.api.snapshot().state.workflows.length,0);assert.equal(h.api.snapshot().target_loading,true);assert.equal(h.api.reference().kind,'none');
  pending.resolve({ok:true,capabilities:{actor_id:'a'},workflows:[],runs:[],workflow:{id:'w1',private:'f2'}});await Promise.all([returning,other]);assert.equal(h.api.snapshot().state.workflow.private,'f2');
 });
+test('first scope keeps its navigation catalog but marks lists unread until workspace and operations both arrive',async()=>{
+ for(const destination of [{system_id:'APC',factory_id:''},{system_id:'EMS',factory_id:'unvisited'}]){
+  const h=controller(),workspace=deferred(),operations=deferred(),catalog={systems:['EMS','APC'],factories:[{id:'unvisited',system_id:'EMS'}]};
+  h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,...catalog,capabilities:{actor_id:'a'},workflows:[{id:'old',system_id:'EMS'}],runs:[],my_work:[]}:{ok:true});
+  await h.api.select({system_id:'EMS',factory_id:'',workflow_id:'old',collapsed:['setup']});
+  h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?workspace.promise:operations.promise);
+  const changed=h.api.select({...destination,workflow_id:'',run_id:'',tab:'my_work'});
+  let rendered=h.renders.at(-1);assert.equal(rendered.scope_loading,true);assert.notEqual(rendered.state,null);assert.deepEqual(Array.from(rendered.state.systems),catalog.systems);assert.deepEqual(Array.from(rendered.selection.collapsed),['setup']);
+  workspace.resolve({ok:true,...catalog,capabilities:{actor_id:'a'},workflows:[],runs:[],my_work:[]});await new Promise(setImmediate);
+  assert.equal(h.renders.at(-1).scope_loading,true,'workspace response alone cannot claim the combined lists are empty');
+  operations.resolve({ok:true});await changed;assert.equal(h.renders.at(-1).scope_loading,false);assert.equal(h.api.snapshot().state.workflows.length,0);
+ }
+});
+test('returning to a received scope reuses its lists even when its previous selected workflow differs',async()=>{
+ const h=controller();h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},systems:['EMS','APC'],workflows:[{id:'kept',system_id:'EMS'}],runs:[],my_work:[{id:'task'}],workflow:{id:'kept'}}:{ok:true});
+ await h.api.select({system_id:'EMS',workflow_id:'kept'});
+ const pending=deferred();h.setReply(()=>pending.promise);const away=h.api.select({system_id:'APC',workflow_id:''});const back=h.api.select({system_id:'EMS',workflow_id:''});
+ const rendered=h.renders.at(-1);assert.equal(rendered.scope_loading,false);assert.equal(rendered.state.workflows[0]?.id,'kept');assert.equal(rendered.state.my_work[0]?.id,'task');assert.equal(rendered.state.workflow,null);
+ pending.resolve({ok:true,capabilities:{actor_id:'a'},systems:['EMS','APC'],workflows:[],runs:[]});await Promise.all([away,back]);
+});
+test('unreceived scope panels never render empty My Work or history before their first response',()=>{
+ for(const tab of ['my_work','records']){
+  const host={dataset:{},isConnected:true,querySelector:()=>null,querySelectorAll:()=>[],setAttribute(){},innerHTML:''};
+  const context=renderer({document:{activeElement:null,querySelector:()=>null}});context.window.__eesSourceShellV1={hosts:()=>({panel:host}),publish(){}};
+  const view=run(context,'createWorkView({callbacks:{}})'),state={capabilities:{actor_id:'a'},workflows:[],runs:[],my_work:[]},selection={mode:'work',tab,system_id:'APC'};
+  view.render({state,selection,scope_loading:true});assert.match(host.innerHTML,/data-ees-scope-loading="panel"[^>]*>받는 중/);assert.doesNotMatch(host.innerHTML,/지금 처리할 내 업무가 없습니다|저장된 진행 건이 없습니다/);
+  run(context,'createWorkView({callbacks:{}})').render({state,selection,scope_loading:false});assert.match(host.innerHTML,tab==='my_work'?/지금 처리할 내 업무가 없습니다/:/저장된 진행 건이 없습니다/);
+ }
+});
 test('denied target removes cached private evidence and cannot restore it on a later visit',async()=>{
  for(const status of [401,403,404]){const h=controller();h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},workflow:{id:'w',private:'protected'},workflows:[{id:'w'}],runs:[]}:{ok:true});await h.api.select({workflow_id:'w'});await h.api.select({workflow_id:''});
  h.setReply(()=>({httpError:true,status,error:{message:'access removed'}}));await h.api.select({workflow_id:'w'});assert.equal(h.api.snapshot().state,null);assert.match(h.api.snapshot().error,/access removed/);
@@ -185,4 +214,15 @@ test('failed work result or history lookup blocks evidence and references while 
 test('ordinary author background read outage keeps the live editor and its cached state without the work evidence block',async()=>{
  const h=controller();h.api.setSelection({mode:'author',tab:'overview',workflow_id:'w'});h.api.setState({capabilities:{actor_id:'a',can_author:true},workflow:{id:'w',revision:2,draft:{name:'saved'}}});const kept=h.api.snapshot().state;let resets=0,rendered=0;h.view.reset=()=>resets++;h.designer.render=()=>rendered++;
  h.setReply(()=>({httpError:true,status:503,error:{message:'temporary author read outage'}}));await h.api.refresh();assert.equal(h.api.snapshot().state,kept);assert.equal(h.api.snapshot().evidence_unavailable,false);assert.equal(resets,0);assert.equal(rendered,1);
+});
+
+test('received scope fallback preserves common operations but removes prior run requests and scope runs',async()=>{
+ const h=controller(),operations={ok:true,tools:[{id:'known-tool'}],schedules:[{id:'known-schedule',enabled:true,next_at:1792015200}],slots:[{id:'known-slot'}],automatic_statuses:[{workflow_id:'kept',status:'running'}],actionable:[],models:[{id:'known-model'}],requests:[{id:'private-request',inputs:{secret:'prior-run'}}],scope_runs:[{id:'private-execution',run_id:'old-run'}]};
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},systems:['EMS','APC'],workflows:[{id:'kept',system_id:'EMS'}],runs:[],my_work:[],workflow:{id:'kept'},run:{id:'old-run',jobs:{}}}:operations);
+ await h.api.select({system_id:'EMS',workflow_id:'kept',run_id:'old-run'});
+ const pending=deferred();h.setReply(()=>pending.promise);const away=h.api.select({system_id:'APC',workflow_id:'',run_id:''});assert.equal(Object.keys(h.renders.at(-1).state.operations).length,0);
+ const back=h.api.select({system_id:'EMS',workflow_id:'',run_id:''}),rendered=h.renders.at(-1);
+ assert.equal(rendered.scope_loading,false);for(const name of ['tools','schedules','slots','automatic_statuses','models']){assert.ok(Array.isArray(rendered.state.operations[name]),name+' list is retained');assert.deepEqual(JSON.parse(JSON.stringify(rendered.state.operations[name])),operations[name],name+' survives');}
+ assert.equal(rendered.state.run,null);assert.deepEqual(Array.from(rendered.state.operations.requests),[]);assert.deepEqual(Array.from(rendered.state.operations.scope_runs),[]);assert.doesNotMatch(JSON.stringify(rendered.state.operations),/private-request|private-execution|prior-run/);
+ pending.resolve({ok:true,capabilities:{actor_id:'a'},systems:['EMS','APC'],workflows:[],runs:[]});await Promise.all([away,back]);
 });
