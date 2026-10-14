@@ -97,3 +97,42 @@ test('execution names the sole currently authorized model and preserves explicit
 });
 test('single model label is visible while multiple actual models retain the chooser',()=>{const single=html('workExecutionModelHTML(operations)',{operations:{models:[{id:'only',name:'현재 모델'}]}});assert.match(single,/AI 모델 · 현재 모델/);assert.doesNotMatch(single,/<select/);const multi=html('workExecutionModelHTML(operations)',{operations:{models:[{id:'first'},{id:'arena-model'}]}});assert.match(multi,/id="ees-work-execution-model"/);assert.match(multi,/arena-model/);});
 test('unavailable dynamic inputs explain why AI omitted them without adding values',()=>{const h=controller(),run={id:'r',workflow_id:'w',revision:2,definition:{nodes:{j:{inputs:[{id:'value',scope:'run',type:'text'},{id:'cr',name:'CR',scope:'run',type:'single'}]}}}};h.api.setSelection({run_id:'r',workflow_id:'w',job_id:'j'});h.api.setState({run});h.view.readInputs=()=>({inputs:{},revision:2});h.api.previewInputProposal({proposal_kind:'inputs',run_id:'r',workflow_id:'w',job_id:'j',base_revision:2,proposal:{value:'draft'},unresolved_fields:[{field_id:'cr',reason:'options_dependency_required'}]});const proposal=h.renders.at(-1).state.input_proposal;assert.match(proposal.warnings[0],/CR · 선행 입력/);assert.equal(proposal.values.cr,undefined);assert.equal(h.calls.length,0);});
+
+test('cached workspace stays visible through delayed chat routes without accepting late old-route reads',async()=>{
+ const h=controller(),original=deferred(),current=deferred();await h.api.refresh();const kept=h.api.snapshot().state;
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?(h.context.location.pathname==='/c/old'?original.promise:current.promise):{ok:true});
+ h.context.location.pathname='/c/old';const start=h.renders.length;h.api.sync();h.context.location.pathname='/c/current';h.api.sync();
+ assert.ok(h.renders.slice(start).every(value=>value.state!==null));assert.equal(h.api.snapshot().state,kept);
+ original.resolve({ok:true,capabilities:{actor_id:'a'},workflows:[{id:'late'}],runs:[]});await new Promise(setImmediate);assert.equal(h.api.snapshot().state,kept);
+ current.resolve({ok:true,capabilities:{actor_id:'a'},workflows:[{id:'current'}],runs:[]});await new Promise(setImmediate);assert.equal(h.api.snapshot().state.workflows[0].id,'current');
+});
+test('Native capability refresh never replaces the retained selected workspace or its operations',async()=>{
+ const h=controller();h.api.setSelection({system_id:'EMS',workflow_id:'w',run_id:'r'});
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},workflow:{id:'w'},run:{id:'r',jobs:{}},workflows:[{id:'w'}],runs:[{id:'r'}]}:{ok:true,requests:[{id:'kept'}]});await h.api.refresh();const kept=h.api.snapshot().state;
+ h.context.location.pathname='/workspace/skills';h.setReply(()=>({ok:true,capabilities:{actor_id:'a',native_access_available:true,native_access:{skills:true}},workflow:null,run:null,workflows:[],runs:[]}));await h.api.refresh();
+ assert.equal(h.api.snapshot().state,kept);assert.equal(h.api.snapshot().state.operations.requests[0].id,'kept');assert.equal(h.api.snapshot().native_capabilities.native_access.skills,true);
+ assert.equal(h.calls.at(-1).url,'/api/ees-work/workspace?');
+});
+test('new target loads once while returning target uses only its own system and factory snapshot',async()=>{
+ const h=controller(),reply=call=>call.url.startsWith('/api/ees-work/workspace?')?(()=>{const query=new URL(call.url,'http://native.test').searchParams,id=query.get('workflow_id'),system=query.get('system_id'),factory=query.get('factory_id');return {ok:true,capabilities:{actor_id:'a'},workflows:[{id,system_id:system}],runs:[],workflow:{id,system_id:system,private:factory},systems:['EMS','FDC']};})():{ok:true};
+ h.setReply(reply);await h.api.select({system_id:'EMS',factory_id:'f1',workflow_id:'w1'});const first=h.api.snapshot().state;await h.api.select({workflow_id:'w2'});const pending=deferred();h.setReply(()=>pending.promise);
+ const returning=h.api.select({workflow_id:'w1'});assert.equal(h.api.snapshot().state,first);assert.equal(h.api.snapshot().target_loading,false);assert.equal(h.renders.at(-1).state.workflow.private,'f1');
+ const other=h.api.select({factory_id:'f2',workflow_id:'w1'});assert.equal(h.api.snapshot().state.workflow,null);assert.equal(h.api.snapshot().state.workflows.length,0);assert.equal(h.api.snapshot().target_loading,true);assert.equal(h.api.reference().kind,'none');
+ pending.resolve({ok:true,capabilities:{actor_id:'a'},workflows:[],runs:[],workflow:{id:'w1',private:'f2'}});await Promise.all([returning,other]);assert.equal(h.api.snapshot().state.workflow.private,'f2');
+});
+test('denied target removes cached private evidence and cannot restore it on a later visit',async()=>{
+ for(const status of [401,403,404]){const h=controller();h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},workflow:{id:'w',private:'protected'},workflows:[{id:'w'}],runs:[]}:{ok:true});await h.api.select({workflow_id:'w'});await h.api.select({workflow_id:''});
+ h.setReply(()=>({httpError:true,status,error:{message:'access removed'}}));await h.api.select({workflow_id:'w'});assert.equal(h.api.snapshot().state,null);assert.match(h.api.snapshot().error,/access removed/);
+ const pending=deferred();h.setReply(()=>pending.promise);const different=h.api.select({workflow_id:''}),returning=h.api.select({workflow_id:'w'});assert.equal(h.api.snapshot().state,null);assert.equal(h.api.snapshot().target_loading,true);pending.resolve({httpError:true,status,error:{message:'access removed'}});await Promise.all([different,returning]);}
+});
+test('transient background read failure retains last workspace and explicit error',async()=>{
+ const h=controller();await h.api.refresh();const kept=h.api.snapshot().state;h.setReply(()=>({httpError:true,status:503,error:{message:'temporary outage'}}));await h.api.refresh();assert.equal(h.api.snapshot().state,kept);assert.match(h.api.snapshot().error,/temporary outage/);assert.equal(h.renders.at(-1).state.capabilities.actor_id,'a');
+});
+test('unchanged refresh preserves section identities while a changed section alone gets a new value',async()=>{
+ const h=controller();let name='first';h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},systems:['EMS'],workflows:[{id:'w',name}],runs:[]}:{ok:true,models:[{id:'m'}]});await h.api.refresh();const first=h.api.snapshot().state;await h.api.refresh();assert.equal(h.api.snapshot().state.workflows,first.workflows);assert.equal(h.api.snapshot().state.operations,first.operations);
+ name='changed';await h.api.refresh();assert.notEqual(h.api.snapshot().state.workflows,first.workflows);assert.equal(h.api.snapshot().state.systems,first.systems);assert.equal(h.api.snapshot().state.operations,first.operations);
+});
+test('token reset cannot render or restore a prior account cached workspace while new reads wait',async()=>{
+ const h=controller();h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},workflow:{id:'w',private:'account-a'},workflows:[{id:'w'}],runs:[]}:{ok:true});await h.api.select({workflow_id:'w'});
+ const pending=deferred();h.setReply(()=>pending.promise);h.setAuth('account-b-token');h.api.sync();assert.equal(h.api.snapshot().state,null);const selection=h.api.select({workflow_id:'w'});assert.equal(h.api.snapshot().state,null);pending.resolve({ok:true,capabilities:{actor_id:'b'},workflows:[],runs:[]});await selection;assert.doesNotMatch(JSON.stringify(h.api.snapshot().state),/account-a/);
+});

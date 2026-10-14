@@ -9,7 +9,8 @@ import json
 
 FRAME_MONITOR = r"""(() => {
   const evidence = window.__eesSourceFrameEvidence = {
-    started: performance.now(), label: 'first-load', samples: [], sourceSeen: false
+    started: performance.now(), label: 'first-load', samples: [], sourceSeen: false,
+    loadingGuard: false
   };
   const visible = element => {
     if (!element || !element.getClientRects().length) return false;
@@ -23,6 +24,14 @@ FRAME_MONITOR = r"""(() => {
     }
     return true;
   };
+  // Observe the actual translated loading copy, including the legacy work
+  // panel. A source shell can stay visible while its entire contents flash.
+  const loading = selector => [...document.querySelectorAll(selector + ' *')]
+    .filter(node => visible(node) &&
+      /^(불러오는 중[….]*|업무 정보를 불러오는 중입니다[.]?|Loading[….]*|Loading work information[….]*)$/i
+        .test(node.textContent.trim()) &&
+      ![...node.children].some(child => visible(child) && child.textContent.trim() === node.textContent.trim()))
+    .map(node => node.textContent.trim());
   const observe = () => {
     const shell = document.querySelector('[data-ees-source-shell]');
     const sidebar = document.querySelector('[data-ees-source-sidebar]');
@@ -49,6 +58,8 @@ FRAME_MONITOR = r"""(() => {
     evidence.samples.push({
       at: performance.now(), label: evidence.label, path: location.pathname,
       source, menu, bodyHidden, missingSource, legacy,
+      loadingGuard: evidence.loadingGuard,
+      menuLoading: loading('#ees-work-entry'), panelLoading: loading('#ees-work-panel'),
       content: visible(chat) || visible(workspace), adminDialog: visible(dialog),
       sourceText: source && !!shell.textContent.trim(),
       startupGate: document.documentElement?.dataset.eesStartup || null
@@ -72,6 +83,11 @@ def mark(case, label):
     case.browser.evaluate('window.__eesSourceFrameEvidence.label=' + json.dumps(label))
 
 
+def guard_loading(case):
+    """Arm only after initial data and the tested panel targets are loaded."""
+    case.browser.evaluate('window.__eesSourceFrameEvidence.loadingGuard=true')
+
+
 def collect(case, *, labels=(), minimum_frames=3):
     # Wait on observed frames, not a sleep or a product DOM mutation.
     for label in labels:
@@ -87,6 +103,10 @@ def assert_clean(case, evidence, *, labels=()):
     failures = [item for item in samples if item['legacy'] or item['missingSource']
                 or item['bodyHidden'] or item['startupGate']]
     case.assertEqual(failures, [], 'Observed retired Native chrome or a page-wide hiding gate')
+    loading = [item for item in samples if item.get('loadingGuard')
+               and (item.get('menuLoading') or item.get('panelLoading'))]
+    case.assertEqual(loading[:10], [],
+                     'Observed EES loading placeholders after initial data: ' + str(len(loading)) + ' frames')
     for label in labels:
         selected = [item for item in samples if item['label'] == label]
         case.assertGreaterEqual(len(selected), 3, 'No meaningful frame coverage: ' + label)

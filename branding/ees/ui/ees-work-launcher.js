@@ -11,31 +11,33 @@
   const screen=()=>source()?.screen?.() || {};
   const available=()=>Boolean(token()&&screen().active&&!screen().native&&screen().chatReady);
   let state=null,identity='',epoch=0,serial=0,busy=false,scheduled=false,error='',commandError='',route='',readyRoute='',refreshTimer=null,uiTimer=null,uiRevision=0,restored=false,initialSelectionPatch=null;
-  let procedureStart=null;
+  let procedureStart=null,nativeCapabilities=null,stateKey='',targetLoading=false;
+  const workspaceCache=new Map();
   let nativeTicket=null,nativeNavigationBusy=false,pendingNativeAction=null;
   let selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};
   const receipts=new Map(),optionCache=new Map(),chatCreations=new Map(),chatAliases=new Map();let workEpoch=0;let referenceChat='',referenceTimer=null,referenceRead=0,messageReferences=new Map();let uiWrites=Promise.resolve(),optionTimer=null,pendingInputProposal=null,reviewTimer=null,reviewSaving=null;
   const context=()=>JSON.stringify([epoch,token()===identity,location.pathname,location.search,selection.system_id,selection.factory_id,selection.workflow_id,selection.run_id,selection.job_id]);
   const view=createWorkView({callbacks:{panelWidth:width=>{if(!restored)initialSelectionPatch={...initialSelectionPatch,panel_width:width};selection.panel_width=width;remember(width);}}});
   const designer=createWorkDesigner({callbacks:{command,read,models:models,askHelp,helpState:()=>source()?.helpState?.(),startContextChanged:value=>{procedureStart=value;if(state&&available()&&chatPrepared())view.sync(snapshot());},openWorkflow:async id=>select({workflow_id:id,run_id:'',job_id:'',mode:'author',tab:'overview'}),changed:refresh,navigate:mode=>select({mode}),operationsRead,operationsCommand,options:async body=>{const at=context();const result=await api('workspace/options',body);if(at!==context())throw new Error('작업 위치가 바뀌어 선택 목록을 적용하지 않았습니다.');return result;},resources:async()=>{const at=context();const result=await api('resources');return at===context()?result:null;},propose:async({signal,...body})=>{const at=context();const result=await api('workspace/proposal',body,signal);if(at!==context())throw new Error('작업 위치가 변경되어 제안을 적용하지 않았습니다.');return result;}}});
-  const snapshot=()=>({state:state?{...state,input_proposal:pendingInputProposal?{values:pendingInputProposal.values,warnings:pendingInputProposal.warnings}:null}:null,selection:{...clone(selection),chat_id:chatId()},native_shell:nativePage(),native_id:nativePage()?(workNativeTargets.find(item=>location.pathname===item.path||location.pathname.startsWith(item.path+'/'))?.id || (adminNativePage()?'admin':'native')):'',busy,error:error || commandError,procedure_start:procedureStart});
-  // A Native capability snapshot is not the selected workspace. Present the
-  // returning editor only after its workspace and Native draft are ready.
+  const capabilities=()=>nativeCapabilities ?? state?.capabilities;
+  const snapshot=()=>({state:state?{...state,input_proposal:pendingInputProposal?{values:pendingInputProposal.values,warnings:pendingInputProposal.warnings}:null}:null,native_capabilities:nativeCapabilities,target_loading:targetLoading,selection:{...clone(selection),chat_id:chatId()},native_shell:nativePage(),native_id:nativePage()?(workNativeTargets.find(item=>location.pathname===item.path||location.pathname.startsWith(item.path+'/'))?.id || (adminNativePage()?'admin':'native')):'',busy,error:error || commandError,procedure_start:procedureStart});
+  // The last successful workspace remains visible during route validation.
+  // References and queued actions still wait for the current route and Chat.
   const chatPrepared=()=>readyRoute===route&&(!route||route===location.pathname+location.search+'#chat')&&(!nativeTicket||nativeTicket.phase==='leaving');
-  function render(){bindHosts();if(!nativePage()&&!chatPrepared()){view.render({...snapshot(),state:null});return;}view.render(snapshot());if(available()&&selection.mode==='author'&&selection.tab!=='workspace_admin'&&workCanCreate(state?.capabilities))designer.render({state,selection:{...clone(selection),chat_id:chatId()},host:view.authoringHost()});}
+  function render(){bindHosts();view.render(snapshot());if(available()&&!targetLoading&&state&&selection.mode==='author'&&selection.tab!=='workspace_admin'&&workCanCreate(capabilities()))designer.render({state:{...state,capabilities:capabilities()},selection:{...clone(selection),chat_id:chatId()},host:view.authoringHost()});}
   function setBusy(value){busy=value;view.setBusy(value);designer.setBusy?.(value);if(value){clearTimeout(refreshTimer);refreshTimer=setTimeout(refresh,250);}}
   const adminNativePage=()=>Boolean(screen().admin);
   const nativePage=()=>Boolean(screen().native);
   const shellAvailable=()=>Boolean(token()&&screen().active&&nativePage());
   const screenAvailable=()=>available()||shellAvailable();
-  const actor=()=>state?.capabilities?.actor_id || '';
+  const actor=()=>capabilities()?.actor_id || '';
   const nativeTicketIdentity=ticket=>ticket&&ticket===nativeTicket&&ticket.auth===token()&&ticket.auth===identity;
   const nativeTicketCurrent=ticket=>nativeTicketIdentity(ticket)&&Boolean(actor())&&ticket.actor===actor();
   function clearNativeTicket(){nativeTicket=null;}
   function nativeAnchor(path){return source()?.navigate?.(path);}
   async function openNative(id){
     const target=workNativeTargets.find(item=>item.id===id);
-    if(!screenAvailable()||!actor()||!target||!workNativeAllowed(state?.capabilities,id))return;
+    if(!screenAvailable()||!actor()||!target||!workNativeAllowed(capabilities(),id))return;
     if(busy||helpWriting||reviewSaving||nativeNavigationBusy||designer.canNavigate?.()===false)throw new Error('저장 또는 화면 준비가 끝난 뒤 다시 열어 주세요. 작성 중인 내용은 유지됩니다.');
     if(nativePage()){
       if(nativeTicketCurrent(nativeTicket)){nativeTicket.target=id;nativeTicket.adminSeen=false;nativeTicket.phase='native';}
@@ -158,6 +160,33 @@
     }}
     return next;
   }
+  const workspaceKey=()=>JSON.stringify([selection.system_id || '',selection.factory_id || '',selection.workflow_id || '',selection.run_id || '']);
+  function cacheWorkspace(){
+    if(!state||targetLoading||!stateKey)return;
+    workspaceCache.delete(stateKey);workspaceCache.set(stateKey,state);
+    // Private snapshots live only in this authenticated document. Retain each
+    // visited target until account changes or access failures discard them.
+  }
+  function changeWorkspace(previous){
+    const key=workspaceKey();if(key===stateKey)return;
+    const cached=workspaceCache.get(key);stateKey=key;
+    if(cached){state=cached;targetLoading=false;return;}
+    const sameScope=previous.system_id===selection.system_id&&previous.factory_id===selection.factory_id;
+    if(state)state={...state,workflow:null,run:null,settings:{values:{},revision:0},legacy:null,operations:{},...(!sameScope?{workflows:[],runs:[],my_work:[]}: {})};
+    targetLoading=Boolean(selection.workflow_id||selection.run_id);
+  }
+  function invalidateWorkspace(){
+    workspaceCache.clear();state=null;stateKey='';targetLoading=false;pendingInputProposal=null;optionCache.clear();
+    view.reset();designer.reset();
+  }
+  function acceptWorkspace(next){
+    const previous=state;
+    if(previous&&JSON.stringify(previous.capabilities)!==JSON.stringify(next.capabilities))workspaceCache.clear();
+    // Unchanged sections retain their identity; renderers can update a changed
+    // section without remounting unrelated menus, forms or their scroll areas.
+    if(previous)for(const key of Object.keys(next))if(JSON.stringify(previous[key])===JSON.stringify(next[key]))next[key]=previous[key];
+    state=next;stateKey=workspaceKey();targetLoading=false;nativeCapabilities=null;cacheWorkspace();
+  }
   async function refresh(){
     if(!screenAvailable())return null;clearTimeout(refreshTimer);const at=context(),n=++serial;
     try{
@@ -165,12 +194,14 @@
       // EES run. The normal chat path validates the saved selection on return.
       const result=await api('workspace?'+new URLSearchParams(nativePage()?{}:{system_id:selection.system_id,factory_id:selection.factory_id,workflow_id:selection.workflow_id,run_id:selection.run_id}));
       if(at!==context()||n!==serial||!screenAvailable())return null;
+      const previousActor=state?.capabilities?.actor_id || nativeCapabilities?.actor_id;
+      if(previousActor&&result.capabilities?.actor_id&&previousActor!==result.capabilities.actor_id){reset();nativeCapabilities=result.capabilities;return refresh();}
       if(!restored){restored=true;uiRevision=Math.max(uiRevision,result.ui_state?.revision || 0);const saved=result.ui_state?.state?.selection,explicit=initialSelectionPatch;initialSelectionPatch=null;if(saved&&typeof saved==='object')selection={...selection,...saved,...explicit};if(!selection.system_id)selection.system_id=(result.systems?.[0]?.id || result.systems?.[0] || '');if(explicit)remember(explicit.panel_width ?? null);if(at!==context())return refresh();}
-      if(nativePage()){state=normalized({...result,operations:state?.operations || {}});error='';render();refreshTimer=setTimeout(refresh,30000);return state;}
-      let operations={};try{operations=await api('operations?'+new URLSearchParams({system_id:selection.system_id,run_id:selection.run_id}));}catch(failure){operations={error:failure.message};}if(at!==context()||n!==serial)return null;uiRevision=Math.max(uiRevision,result.ui_state?.revision ?? uiRevision);let legacy;if(selection.tab==='records'){try{legacy=await api('legacy');}catch(failure){legacy={error:failure.message};}if(at!==context()||n!==serial)return null;}state=normalized({...result,operations,legacy});if(selection.mode==='author'&&!workCanWorkspace(state.capabilities)){selection={...selection,mode:'work',tab:'my_work'};}error='';readyRoute=route;syncNativeReturn();render();loadOptions();
+      if(nativePage()){nativeCapabilities=result.capabilities || {};error='';render();refreshTimer=setTimeout(refresh,30000);return state;}
+      let operations={};try{operations=await api('operations?'+new URLSearchParams({system_id:selection.system_id,run_id:selection.run_id}));}catch(failure){if([401,403,404].includes(failure.status))throw failure;operations={error:failure.message};}if(at!==context()||n!==serial)return null;uiRevision=Math.max(uiRevision,result.ui_state?.revision ?? uiRevision);let legacy;if(selection.tab==='records'){try{legacy=await api('legacy');}catch(failure){legacy={error:failure.message};}if(at!==context()||n!==serial)return null;}acceptWorkspace(normalized({...result,operations,legacy}));if(selection.mode==='author'&&!workCanWorkspace(state.capabilities)){selection={...selection,mode:'work',tab:'my_work'};}error='';readyRoute=route;syncNativeReturn();render();loadOptions();
       const active=Object.values(state.run?.jobs || {}).some(job=>job.status==='running')||(state.operations?.scope_runs || []).some(scope=>['queued','running'].includes(scope.status))||(state.operations?.requests || []).some(request=>['requested','accepted','running','reported_complete'].includes(request.state));refreshTimer=setTimeout(refresh,active||busy?2500:30000);
       return state;
-    }catch(failure){if(at!==context()||n!==serial)return null;error=failure.message;state=null;readyRoute=route;render();return null;}
+    }catch(failure){if(at!==context()||n!==serial)return null;error=failure.message;if(nativePage())nativeCapabilities={};if([401,403,404].includes(failure.status)){invalidateWorkspace();nativeCapabilities={};}targetLoading=false;render();return null;}
   }
   function revisionFor(action){if(['save_draft','validate_workflow','publish_workflow','start_run','run_start'].includes(action))return state?.workflow?.revision || 0;if(action==='save_settings')return state?.settings?.revision || 0;if(action==='save_ui')return uiRevision;return state?.run?.revision || 0;}
   async function command(body){return sendCommand('workspace/command',body);}
@@ -201,7 +232,7 @@
       catch(failure){if(auth===token()&&at===context()&&(panelWidth!==null||Object.keys(saved.verdict_drafts || {}).length||Object.keys(saved.start_inputs || {}).length||Object.keys(saved.request_reasons || {}).length)){commandError='작성한 선택의 자동 저장 실패 · '+failure.message+' 화면의 값은 보존했습니다. 저장을 다시 시도해 주세요.';render();}}
     });},400);
   }
-  async function select(patch,{fetch=true}={}){workUI.closeHelp({restoreFocus:false});designer.closeStart?.();procedureStart=null;view.capture();const before=context();while(state?.run?.definition?.nodes?.[selection.job_id]?.result_block==='ai_review'&&view.readReview?.().dirty){if(!await saveReviewDraft()||before!==context())return null;view.capture();}clearTimeout(reviewTimer);if(!restored)initialSelectionPatch={...initialSelectionPatch,chat_reference:null,...patch};selection={...selection,chat_reference:null,...patch};epoch++;workEpoch++;chatCreations.clear();chatAliases.clear();pendingInputProposal=null;error='';commandError='';clearTimeout(refreshTimer);remember();render();if(fetch)return refresh();refreshTimer=setTimeout(refresh,2500);loadOptions();return state;}
+  async function select(patch,{fetch=true}={}){workUI.closeHelp({restoreFocus:false});designer.closeStart?.();procedureStart=null;view.capture();const before=context();while(state?.run?.definition?.nodes?.[selection.job_id]?.result_block==='ai_review'&&view.readReview?.().dirty){if(!await saveReviewDraft()||before!==context())return null;view.capture();}clearTimeout(reviewTimer);const previous={...selection};if(state&&!stateKey)stateKey=workspaceKey();cacheWorkspace();if(!restored)initialSelectionPatch={...initialSelectionPatch,chat_reference:null,...patch};selection={...selection,chat_reference:null,...patch};changeWorkspace(previous);epoch++;workEpoch++;chatCreations.clear();chatAliases.clear();pendingInputProposal=null;error='';commandError='';clearTimeout(refreshTimer);remember();render();if(fetch)return refresh();refreshTimer=setTimeout(refresh,2500);loadOptions();return state;}
   async function mutate(body,{refreshAfter=true,accept=null}={}){if(busy)return null;const at=context();setBusy(true);try{const result=await command(body);if(result&&accept)accept(result);if(result&&refreshAfter&&!await refresh())return null;return at===context()?result:null;}catch(failure){if(at===context()){commandError=failure.message;render();}return null;}finally{setBusy(false);}}
   async function models(){
     const auth=token(),headers={Accept:'application/json',Authorization:'Bearer '+auth};
@@ -377,9 +408,9 @@
     if(action==='export_json'||action==='export_text'||action==='export_result'){if(action==='export_result'&&!workUI.finished(state?.run)&&state?.run?.jobs?.[selection.job_id]?.can_decide!==false&&!await saveReviewDraft())return;return downloadRun(action==='export_json'?'json':'text',action==='export_result'?target.dataset.jobId:'');}
     if(action==='open_legacy')return openLegacy(target.dataset.caseId);
     if(action==='admin_work_tool')return setupWorkTool();
-    if(action==='workspace_admin'){if(state?.capabilities?.is_admin!==true)return;return select({mode:'author',tab:'workspace_admin',workflow_id:'',run_id:'',job_id:''});}
+    if(action==='workspace_admin'){if(capabilities()?.is_admin!==true)return;return select({mode:'author',tab:'workspace_admin',workflow_id:'',run_id:'',job_id:''});}
     if(action==='admin_factory'||action==='admin_access')return adminDialog(action==='admin_factory'?'factory':'access',target.dataset.id);
-    if(action==='mode'){if(!['work','author'].includes(target.dataset.mode)||target.dataset.mode==='author'&&!workCanWorkspace(state?.capabilities))return;return select({mode:target.dataset.mode,tab:target.dataset.mode==='author'?'overview':'my_work'});}
+    if(action==='mode'){if(!['work','author'].includes(target.dataset.mode)||target.dataset.mode==='author'&&!workCanWorkspace(capabilities()))return;return select({mode:target.dataset.mode,tab:target.dataset.mode==='author'?'overview':'my_work'});}
     if(action==='scope')return view.scopeDialog();
     if(action==='choose_factory'||action==='choose_system'){closeDialog();return select({[action==='choose_factory'?'factory_id':'system_id']:target.dataset.factoryId ?? target.dataset.systemId,...(action==='choose_system'?{factory_id:''}:{}),workflow_id:'',run_id:'',job_id:'',tab:'my_work'});}
     if(action==='workflow'){const id=target.dataset.workflowId,workflow=(state?.workflows || []).find(item=>item.id===id),adhoc=(workflow?.execution_mode || workflow?.mode || 'on_demand')==='on_demand';const runs=(state?.runs || []).filter(run=>run.workflow_id===id&&!workUI.finished(run));return select({workflow_id:id,run_id:!adhoc&&runs.length===1?runs[0].id:'',job_id:'',tab:'overview',panel_open:true});}
@@ -399,8 +430,8 @@
     if(action==='discard_inputs'){view.discardInputs();return;}
     if(action==='save_inputs')return saveInputs();
     if(action==='native_open')return openNative(target.dataset.nativeId);
-    if(action==='procedures'){if(!workCanCreate(state?.capabilities))return;return select({mode:'author',tab:'overview',workflow_id:'',run_id:'',job_id:''});}
-    if(action==='tools'){if(!workCanCreate(state?.capabilities))return;return select({mode:'author',tab:'tools',workflow_id:'',run_id:'',job_id:''});}
+    if(action==='procedures'){if(!workCanCreate(capabilities()))return;return select({mode:'author',tab:'overview',workflow_id:'',run_id:'',job_id:''});}
+    if(action==='tools'){if(!workCanCreate(capabilities()))return;return select({mode:'author',tab:'tools',workflow_id:'',run_id:'',job_id:''});}
     if(action==='new_chat'){return source()?.newChat?.();}
     if(action==='chats')return select({mode:'work',tab:'chats'},{fetch:false});
     if(action==='find')return dialog({title:'워크플로우 찾기',html:`<input id="ees-workflow-search" type="search" placeholder="업무 절차 검색" aria-label="업무 절차 검색"><div id="ees-workflow-list">${(state?.workflows || []).map(w=>button(w.name,'find_workflow',`data-workflow-id="${esc(w.id)}"`)).join('') || '<p>등록된 업무 절차가 없습니다.</p>'}</div>`});
@@ -455,7 +486,7 @@
     if(event.type==='change'&&target.matches?.('[data-list-include]')){view.refreshResults();return;}
     if(event.type==='change'&&(target.matches?.('[data-item-verdict]')||target.matches?.('[data-item-confirm]'))){const verdict=target.matches('[data-item-confirm]')?(target.checked?'completed':'unknown'):target.value;if(verdict)mutate({action:'decide',run_id:selection.run_id,job_id:selection.job_id,item_id:target.dataset.itemId,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,verdict});}
   }
-  function reset(){helpWriting=null;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;source()?.modelCount?.(0);selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};}
+  function reset(){helpWriting=null;nativeCapabilities=null;workspaceCache.clear();stateKey='';targetLoading=false;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;source()?.modelCount?.(0);selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};}
   function sync(){
     scheduled=false;bindHosts();syncHelpState();const auth=token();if(auth!==identity){reset();identity=auth;route='';}
     syncNativeReturn();
@@ -484,7 +515,7 @@
   // No observer, document event interception or history monkey patch is needed.
 
   window.__eesNativeWork=true;
-  const reference=()=>!chatPrepared()?{kind:'none'}:available()&&selection.mode==='author'&&(selection.tab==='tools'||designer.readStartContext?.())?{kind:'help',system_id:selection.system_id || '',context_id:context()}:available()&&selection.chat_reference&&selection.chat_reference.run_id===state?.run?.id?{...clone(selection.chat_reference),context_id:context()}:available()&&state&&selection.workflow_id?{kind:'workspace',workflow_id:selection.workflow_id,run_id:selection.run_id,job_id:selection.job_id,system_id:state?.run?.system_id || selection.system_id,factory_id:state?.run?.factory_id ?? selection.factory_id,version:state?.run?.version ?? state?.workflow?.published_version,workflow_revision:state?.workflow?.revision,attempt_id:state?.run?.jobs?.[selection.job_id]?.current_attempt,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,revision:state?.run?.revision ?? state?.workflow?.revision ?? 0,created_at:state?.run?.updated_at ?? state?.workflow?.updated_at,context_id:context()}:{kind:'none'};
+  const reference=()=>!chatPrepared()||targetLoading?{kind:'none'}:available()&&selection.mode==='author'&&(selection.tab==='tools'||designer.readStartContext?.())?{kind:'help',system_id:selection.system_id || '',context_id:context()}:available()&&selection.chat_reference&&selection.chat_reference.run_id===state?.run?.id?{...clone(selection.chat_reference),context_id:context()}:available()&&(state?.workflow||state?.run)&&selection.workflow_id?{kind:'workspace',workflow_id:selection.workflow_id,run_id:selection.run_id,job_id:selection.job_id,system_id:state?.run?.system_id || selection.system_id,factory_id:state?.run?.factory_id ?? selection.factory_id,version:state?.run?.version ?? state?.workflow?.published_version,workflow_revision:state?.workflow?.revision,attempt_id:state?.run?.jobs?.[selection.job_id]?.current_attempt,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,revision:state?.run?.revision ?? state?.workflow?.revision ?? 0,created_at:state?.run?.updated_at ?? state?.workflow?.updated_at,context_id:context()}:{kind:'none'};
   const renderedReferenceHosts=new Set();
   function clearMessageReferences(){for(const host of renderedReferenceHosts)host.replaceChildren();renderedReferenceHosts.clear();}
   function renderMessageReferences(){

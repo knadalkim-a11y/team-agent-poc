@@ -128,14 +128,14 @@ test('same-section tools menu restores its exact authoring selection without clo
 test('a different EES menu destination is applied only after returning to the original chat',async()=>{
  for(const [action,extra,mode,tab] of [['mode',{mode:'work'},'work','my_work'],['tools',{},'author','tools']]){const h=nativeNavigationHarness(),draft=JSON.parse(JSON.stringify(h.readDraft()));await h.open();await h.back(action,extra);assert.equal(h.navigation.at(-1),'/c/original?keep=1');assert.equal(h.api.snapshot().selection.mode,mode);assert.equal(h.api.snapshot().selection.tab,tab);assert.deepEqual(h.readDraft(),draft);assert.equal(h.restores.length,0);assert.equal(h.calls.filter(call=>call.body&&call.body.action!=='save_ui').length,0);}
 });
-test('Native return publishes a reference only after full state and the persistent Chat are ready',async()=>{
+test('Native return keeps the workspace visible but publishes a reference only after validation and Chat readiness',async()=>{
  for(const first of ['state','draft']){
   const h=nativeNavigationHarness(),stateRead=deferred(),draftRestore=deferred(),draft=JSON.parse(JSON.stringify(h.readDraft())),complete={...h.state,workflow:{id:'w',revision:7,published_version:3}};
   h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?(h.context.location.pathname.startsWith('/workspace')?{ok:true,...h.state,workflow:null,run:null}:stateRead.promise):{ok:true});
   await h.open();const before=h.renders.length;
   h.setReady(false);
   await h.back();
-  const assertWaiting=()=>{assert.equal(h.context.window.__eesNativeWorkV1.captureReference().kind,'none');assert.equal(h.renders.slice(before).filter(value=>!value.native_shell&&value.state).length,0);};
+  const assertWaiting=()=>{assert.equal(h.context.window.__eesNativeWorkV1.captureReference().kind,'none');assert.ok(h.renders.slice(before).filter(value=>!value.native_shell).every(value=>value.state?.capabilities.actor_id==='a'));};
   assertWaiting();
   if(first==='state')stateRead.resolve({ok:true,...complete});else {h.setReady(true);h.api.sync();}
   await new Promise(setImmediate);assertWaiting();
@@ -151,16 +151,16 @@ test('a queued EES menu action waits for full state even when the persistent Cha
  await h.open();await h.back('tools');assert.deepEqual(h.readDraft(),draft);assert.equal(h.api.snapshot().selection.tab,'overview');assert.equal(h.api.snapshot().selection.workflow_id,'w');
  stateRead.resolve({ok:true,...h.state});await new Promise(setImmediate);assert.equal(h.api.snapshot().selection.tab,'tools');assert.equal(h.api.snapshot().selection.workflow_id,'');
 });
-test('failed full state after Native return shows an error without publishing a zero-revision work reference',async()=>{
+test('transient full state failure after Native return keeps the workspace and error without a work reference',async()=>{
  for(const delayedDraft of [false,true]){
   const h=nativeNavigationHarness(),draftRestore=deferred();h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?(h.context.location.pathname.startsWith('/workspace')?{ok:true,...h.state}:{httpError:true,status:503,error:{message:'업무 조회 실패'}}):{ok:true});
   await h.open();if(delayedDraft)h.setReady(false);
-  await h.back();h.setReady(true);h.api.sync();await new Promise(setImmediate);assert.equal(h.api.snapshot().state,null);assert.match(h.api.snapshot().error,/업무 조회 실패/);assert.equal(h.context.window.__eesNativeWorkV1.captureReference().kind,'none');assert.equal(h.renders.at(-1).native_shell,false);assert.match(h.renders.at(-1).error,/업무 조회 실패/);
+  await h.back();h.setReady(true);h.api.sync();await new Promise(setImmediate);assert.equal(h.api.snapshot().state.capabilities.actor_id,'a');assert.match(h.api.snapshot().error,/업무 조회 실패/);assert.equal(h.context.window.__eesNativeWorkV1.captureReference().kind,'none');assert.equal(h.renders.at(-1).native_shell,false);assert.match(h.renders.at(-1).error,/업무 조회 실패/);
  }
 });
 test('explicit retry after a failed return finishes its ticket without a DOM observer lifecycle tick',async()=>{
  const h=nativeNavigationHarness();let fail=true;h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?(h.context.location.pathname.startsWith('/workspace')?{ok:true,...h.state}:fail?{httpError:true,status:503,error:{message:'업무 조회 실패'}}:{ok:true,...h.state,workflow:{id:'w',revision:9,published_version:2}}):{ok:true});
- await h.open();h.setReady(false);await h.back();assert.equal(h.api.snapshot().state,null);assert.equal(h.context.window.__eesNativeWorkV1.captureReference().kind,'none');
+ await h.open();h.setReady(false);await h.back();assert.equal(h.api.snapshot().state.capabilities.actor_id,'a');assert.equal(h.context.window.__eesNativeWorkV1.captureReference().kind,'none');
  h.setReady(true);fail=false;await h.api.handleClick({dataset:{action:'refresh'}});await new Promise(setImmediate);
  assert.equal(h.renders.at(-1).state.workflow.revision,9);assert.equal(h.context.window.__eesNativeWorkV1.captureReference().revision,9);assert.equal(h.restores.length,0);
 });
@@ -170,7 +170,7 @@ test('direct Native entry loads capabilities with no chat pane and EES destinati
 test('a failed Native capability read hides actions but keeps the original draft until explicit same-actor retry',async()=>{
  const h=nativeNavigationHarness(),draft=JSON.parse(JSON.stringify(h.readDraft())),before=JSON.parse(JSON.stringify(h.api.snapshot().selection));let failed=true;
  h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?(failed?{httpError:true,status:503,error:{message:'권한 조회 실패'}}:{ok:true,...h.state}):{ok:true});
- await h.open();h.api.sync();await new Promise(setImmediate);assert.equal(h.api.snapshot().state,null);assert.match(h.api.snapshot().error,/권한 조회 실패/);
+ await h.open();h.api.sync();await new Promise(setImmediate);assert.equal(h.api.snapshot().state.capabilities.actor_id,'a');assert.deepEqual(Object.keys(h.api.snapshot().native_capabilities),[]);assert.match(h.api.snapshot().error,/권한 조회 실패/);
  const menu=html('workWorkspaceMenuHTML({}, {}, error)',{error:h.api.snapshot().error});assert.match(menu,/data-action="refresh">다시 확인/);assert.doesNotMatch(menu,/data-action="(?:native_open|procedures|tools|workspace_admin)"/);
  await h.back('procedures');await h.open('models');assert.deepEqual(h.navigation,['/workspace/skills']);assert.equal(h.restores.length,0);assert.deepEqual(h.readDraft(),draft);
  failed=false;await h.back('refresh');assert.deepEqual(h.navigation,['/workspace/skills']);assert.equal(h.api.snapshot().state.capabilities.actor_id,'a');assert.equal(h.api.snapshot().error,'');assert.ok(h.calls.filter(call=>call.url.startsWith('/api/ees-work/workspace?')).every(call=>call.url==='/api/ees-work/workspace?'),'Native capability reads exclude stale EES scope and run identifiers');
@@ -178,8 +178,8 @@ test('a failed Native capability read hides actions but keeps the original draft
 });
 test('retry after a failed Native capability read never revives another actor or session return ticket',async()=>{
  for(const boundary of ['actor','session']){
-  const h=nativeNavigationHarness();h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{httpError:true,status:503,error:{message:'권한 조회 실패'}}:{ok:true});await h.open();h.api.sync();await new Promise(setImmediate);assert.equal(h.api.snapshot().state,null);
-  if(boundary==='session')h.setAuth('actor-b-token');const next={...h.state,capabilities:{...h.state.capabilities,actor_id:'b'}};h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,...next}:{ok:true});await h.back('refresh');h.api.sync();await new Promise(setImmediate);assert.equal(h.api.snapshot().state.capabilities.actor_id,'b');h.setDraft({prompt:'새 계정의 입력',files:[]});await h.back();assert.equal(h.navigation.at(-1),'/');assert.equal(h.navigation.includes('/c/original?keep=1'),false,boundary);assert.equal(h.restores.length,0,boundary);assert.equal(h.readDraft().prompt,'새 계정의 입력');
+  const h=nativeNavigationHarness();h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{httpError:true,status:503,error:{message:'권한 조회 실패'}}:{ok:true});await h.open();h.api.sync();await new Promise(setImmediate);assert.equal(h.api.snapshot().state.capabilities.actor_id,'a');assert.deepEqual(Object.keys(h.api.snapshot().native_capabilities),[]);
+  if(boundary==='session')h.setAuth('actor-b-token');const next={...h.state,capabilities:{...h.state.capabilities,actor_id:'b'}};h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,...next}:{ok:true});await h.back('refresh');h.api.sync();await new Promise(setImmediate);assert.equal(h.api.snapshot().native_capabilities.actor_id,'b');assert.equal(h.api.snapshot().state,null);h.setDraft({prompt:'새 계정의 입력',files:[]});await h.back();assert.equal(h.navigation.at(-1),'/');assert.equal(h.navigation.includes('/c/original?keep=1'),false,boundary);assert.equal(h.restores.length,0,boundary);assert.equal(h.readDraft().prompt,'새 계정의 입력');
  }
 });
 test('source availability is independent of Native sidebar and chat DOM anchors',async()=>{
@@ -259,7 +259,7 @@ test('author tools expose help-only metadata while workflow and historical refer
 
 test('procedure starter questions send visible text with separate help metadata until the starter closes',async()=>{
  const h=controller();let sent,active={screen:'새 업무 절차',draftName:'시험 공장 절차',templateId:'factory_rollout'},synced;
- h.designer.readStartContext=()=>active;h.view.sync=value=>{synced=value;};h.api.setState({capabilities:{actor_id:'a'}});h.api.setSelection({mode:'author',tab:'overview',system_id:'EMS',workflow_id:'existing-work',run_id:'existing-run'});
+ h.designer.readStartContext=()=>active;h.view.sync=value=>{synced=value;};h.api.setState({capabilities:{actor_id:'a'},workflow:{id:'existing-work',revision:1},run:{id:'existing-run',workflow_id:'existing-work',revision:1}});h.api.setSelection({mode:'author',tab:'overview',system_id:'EMS',workflow_id:'existing-work',run_id:'existing-run'});
  h.designer.callbacks.startContextChanged(active);assert.equal(synced.procedure_start.draftName,'시험 공장 절차');
  h.context.window.__eesSourceShellV1.askHelp=async value=>{sent=value;return {accepted:true};};
  const reference=h.api.reference();assert.equal(reference.kind,'help');assert.equal(Object.hasOwn(reference,'workflow_id'),false);

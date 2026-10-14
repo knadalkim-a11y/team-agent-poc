@@ -1367,7 +1367,7 @@ index 0000000..374d8ed
 +	];
 +	$: data = $eesSnapshot.state || {};
 +	$: s = $eesSnapshot.selection || {};
-+	$: cap = data.capabilities || {};
++	$: cap = $eesSnapshot.native_capabilities ?? data.capabilities ?? {};
 +	$: author = $eesSnapshot.native_shell || s.mode === 'author';
 +	$: create = cap.is_admin === true || cap.can_author === true || cap.can_manage === true;
 +	$: canWorkspace =
@@ -1385,7 +1385,7 @@ index 0000000..374d8ed
 +</script>
 +
 +<section id="ees-work-entry" data-ees-work aria-label={t('EES.Nav.Navigation', 'Work navigation')}>
-+	{#if $eesSnapshot.state === null}
++	{#if $eesSnapshot.state === null && $eesSnapshot.native_capabilities == null}
 +		{#if !$eesSnapshot.error}<p class="ew-empty" role="status">
 +				{t('EES.Loading', 'Loading…')}
 +			</p>{/if}

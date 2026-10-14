@@ -8,10 +8,13 @@ import importlib
 import json
 import os
 from pathlib import Path
+import time
 from unittest.mock import patch
+from urllib.parse import urlparse
 
 import ees_source_frame_monitor as frame_monitor
 from ees_work_integrated_fixture import IntegratedNativeCase
+from native_ui_fixture import NativeUIHandler
 
 
 class SourceShellNativeTests(IntegratedNativeCase):
@@ -50,6 +53,219 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.wait(condition)
         frame_monitor.collect(self, labels=(label,))
 
+    def delay_workspace_reads(self):
+        """Delay both real service GET responses, not product timers/state."""
+        original = NativeUIHandler.do_GET
+        server = self.server
+        server.navigation_reads = []
+
+        def delayed(handler):
+            path = urlparse(handler.path).path
+            if handler.server is not server or path not in (
+                    '/api/ees-work/workspace', '/api/ees-work/operations'):
+                return original(handler)
+            record = {'path': path, 'query': handler.path, 'started': time.monotonic(),
+                      'delay_ms': 1000, 'completed': False}
+            server.navigation_reads.append(record)
+            time.sleep(1)
+            record['released'] = time.monotonic()
+            try:
+                return original(handler)
+            finally:
+                record['completed'] = True
+                record['finished'] = time.monotonic()
+
+        fixture = patch.object(NativeUIHandler, 'do_GET', delayed)
+        fixture.start()
+        self.addCleanup(fixture.stop)
+
+    def wait_delayed_reads(self, start, paths=('workspace', 'operations')):
+        deadline = time.monotonic() + 12
+        while time.monotonic() < deadline:
+            reads = self.server.navigation_reads[start:]
+            if (all(any(row['path'].endswith('/' + path) and row['completed'] for row in reads)
+                    for path in paths) and all(row['completed'] for row in reads)):
+                # Include paints after the last HTTP response was released.
+                count = self.browser.evaluate('window.__eesSourceFrameEvidence.samples.length')
+                self.wait('window.__eesSourceFrameEvidence.samples.length >= ' + str(count + 3))
+                return
+            time.sleep(.025)
+        self.fail('Delayed response coverage incomplete: ' + repr(self.server.navigation_reads[start:]))
+
+    def delayed_step(self, label, selector, condition, paths=('workspace', 'operations')):
+        start = len(self.server.navigation_reads)
+        self.step(label, selector, condition)
+        self.wait_delayed_reads(start, paths)
+
+    def test_delayed_navigation_never_replaces_loaded_menu_or_panel_with_loading(self):
+        self.enable_native_menus()
+        workflow_id = self.author(name='지연 응답 이동 검증 절차', jobs=2)
+        self.start(workflow_id)
+        frame_monitor.install(self)
+        self.navigate('/c/existing-chat')
+        self.wait("document.querySelector('#ees-work-entry [data-action=my_work]') && document.querySelector('#ees-work-content') && window.__eesNativeDraftV1?.ready()")
+        self.open_sidebar()
+        # Warm each destination once. First acquisition may show a placeholder;
+        # every subsequent route transition below must use retained work data.
+        self.step('warm-procedures', '[data-action=mode][data-mode=author]',
+                  "document.querySelector('#ees-work-designer [data-author-action=create]')")
+        self.step('warm-my-work', '[data-action=mode][data-mode=work]',
+                  "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '내 업무'")
+        self.assertIsNotNone(self.refresh(), 'Initial workspace/operations refresh did not complete')
+        self.wait("document.querySelector('#ees-work-entry [data-action=my_work]') && document.querySelector('#ees-work-content .ew-todo, #ees-work-content .ew-my-work-empty')")
+        self.delay_workspace_reads()
+        frame_monitor.guard_loading(self)
+        labels = []
+
+        for native in ('skills', 'tools', 'models'):
+            for destination in ('procedures', 'my-work'):
+                label = native + '-to-' + destination
+                enter = label + '-enter-workspace'
+                self.delayed_step(enter, '[data-action=mode][data-mode=author]',
+                                  "document.querySelector('#ees-work-designer')")
+                labels.append(enter)
+                native_label = label + '-native'
+                self.delayed_step(native_label, '[data-action=native_open][data-native-id=' + native + ']',
+                                  'location.pathname === ' + json.dumps('/workspace/' + native)
+                                  + ' && !!document.querySelector("#workspace-container input")',
+                                  paths=('workspace',))
+                labels.append(native_label)
+                selector = ('[data-action=procedures]' if destination == 'procedures'
+                            else '[data-action=mode][data-mode=work]')
+                condition = ("document.querySelector('#ees-work-designer [data-author-action=create]')"
+                             if destination == 'procedures' else
+                             "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '내 업무'")
+                self.delayed_step(label, '#ees-work-entry ' + selector,
+                                  "location.pathname === '/c/existing-chat' && (" + condition + ')')
+                labels.append(label)
+
+        self.step('delayed-chat-list', '[data-action=chats]',
+                  "[...document.querySelectorAll('a[href=\"/c/other-chat\"]')].some(e=>e.getBoundingClientRect().height > 0)")
+        labels.append('delayed-chat-list')
+        self.delayed_step('delayed-chat-switch', 'a[href="/c/other-chat"]',
+                          "location.pathname === '/c/other-chat' && window.__eesNativeDraftV1?.ready()")
+        labels.append('delayed-chat-switch')
+        self.delayed_step('delayed-new-chat', '[data-action=new_chat]',
+                          "location.pathname === '/' && window.__eesNativeDraftV1?.ready()")
+        labels.append('delayed-new-chat')
+        self.step('delayed-chat-list-return', '[data-action=chats]',
+                  "[...document.querySelectorAll('a[href=\"/c/existing-chat\"]')].some(e=>e.getBoundingClientRect().height > 0)")
+        labels.append('delayed-chat-list-return')
+        self.delayed_step('delayed-existing-return', 'a[href="/c/existing-chat"]',
+                          "location.pathname === '/c/existing-chat' && window.__eesNativeDraftV1?.ready()")
+        labels.append('delayed-existing-return')
+
+        evidence = frame_monitor.collect(self, labels=labels)
+        evidence['scope'] = ('Same assertions for baseline 42cc756 and candidate; real compiled frontend, '
+                             'physical CDP clicks, temporary production workflow service; both workspace '
+                             'and operations HTTP GETs delayed by 1000ms; no DOM masking or expected failure.')
+        evidence['reads'] = self.server.navigation_reads
+        evidence['counts'] = {label: {
+            'frames': sum(row['label'] == label for row in evidence['samples']),
+            'menu_loading': sum(row['label'] == label and bool(row['menuLoading']) for row in evidence['samples']),
+            'panel_loading': sum(row['label'] == label and bool(row['panelLoading']) for row in evidence['samples'])}
+            for label in labels}
+        directory = self.screenshot('source-shell-delayed-navigation-final')
+        (directory / 'source-shell-delayed-navigation-frames.json').write_text(
+            json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        self.assertTrue(self.server.navigation_reads)
+        for row in self.server.navigation_reads:
+            self.assertGreaterEqual(row['released'] - row['started'], .99)
+        frame_monitor.assert_clean(self, evidence, labels=labels)
+        self.assertEqual(self.server.completions, [], 'Navigation must not submit a conversation')
+
+    def test_background_refresh_and_native_return_keep_draft_nodes_expansion_and_scroll(self):
+        self.enable_native_menus()
+        workflow_id = self.author(name='증분 갱신 보존 절차', jobs=2)
+        saved = self.state(workflow_id=workflow_id)['workflow']
+        frame_monitor.install(self)
+        self.navigate('/c/existing-chat')
+        self.wait("document.querySelector('#ees-work-entry [data-action=my_work]') && window.__eesNativeDraftV1?.ready()")
+        self.open_sidebar()
+        self.fill('#chat-input', '새로 받는 동안 그대로 둘 개인 질문')
+        composer = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        self.click('[data-action=mode][data-mode=author]')
+        selector = '[data-author-action=open][data-id="' + workflow_id + '"]'
+        self.wait('document.querySelector(' + json.dumps(selector) + ')')
+        self.click(selector)
+        self.wait("document.querySelector('[data-author-action=tab][data-tab=rules]')")
+        self.click('[data-author-action=tab][data-tab=rules]')
+        self.click('.ew-author-rule-policy > summary')
+        field = '#ew-author-policies [name=completion_notes]'
+        self.fill(field, '자동 갱신 중에도 유지할 미저장 완료 설명')
+        self.wait("document.querySelector('.ew-author-rule-policy')?.open")
+        # A real wheel gesture creates a nonzero scroll position. Saving DOM
+        # references below only observes identity; it never pins/masks nodes.
+        point = self.browser.evaluate("(()=>{const r=document.querySelector('.ew-author-scroll').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()")
+        self.browser.call('Input.dispatchMouseEvent', {'type': 'mouseWheel', **point,
+                          'deltaX': 0, 'deltaY': 120})
+        self.wait("document.querySelector('.ew-author-scroll').scrollTop > 20")
+        self.browser.evaluate("""new Promise(resolve=>{let previous=-1,stable=0;
+          function check(){const top=document.querySelector('.ew-author-scroll').scrollTop;
+            stable=top===previous?stable+1:0;previous=top;
+            if(stable>=3)return resolve(top);requestAnimationFrame(check);}check();})""")
+        self.browser.evaluate("""window.__retainedWorkNodes={
+          field:document.querySelector('#ew-author-policies [name=completion_notes]'),
+          detail:document.querySelector('.ew-author-rule-policy'),
+          scroll:document.querySelector('.ew-author-scroll')};""")
+        before = self.browser.evaluate("({scroll:window.__retainedWorkNodes.scroll.scrollTop,value:window.__retainedWorkNodes.field.value,open:window.__retainedWorkNodes.detail.open})")
+        self.delay_workspace_reads()
+        frame_monitor.guard_loading(self)
+
+        # A real service mutation by another author changes the shared list.
+        # The editor remains dirty and must neither lose its nodes nor save.
+        other = self.command('create_workflow', name='뒤에서 추가된 새 절차', system_id='EMS')
+        mark = len(self.server.navigation_reads)
+        frame_monitor.mark(self, 'changed-background-refresh')
+        self.browser.evaluate('void window.__eesNativeWorkV1.refresh()')
+        self.wait_delayed_reads(mark)
+        self.wait('document.querySelector(' + json.dumps('[data-action=workflow][data-workflow-id="' + other['workflow_id'] + '"]') + ')?.textContent.includes("뒤에서 추가된 새 절차")')
+
+        def assert_preserved(label, *, same_nodes=True):
+            observed = self.browser.evaluate("""(()=>{const old=window.__retainedWorkNodes,
+              field=document.querySelector('#ew-author-policies [name=completion_notes]'),
+              detail=document.querySelector('.ew-author-rule-policy'),scroll=document.querySelector('.ew-author-scroll');
+              return {fieldSame:field===old.field,detailSame:detail===old.detail,scrollSame:scroll===old.scroll,
+                value:field?.value,open:detail?.open,scroll:scroll?.scrollTop};})()""")
+            if same_nodes:
+                self.assertTrue(observed['fieldSame'], label + ': unchanged draft field was replaced')
+                self.assertTrue(observed['detailSame'], label + ': expanded section was replaced')
+                self.assertTrue(observed['scrollSame'], label + ': scroll container was replaced')
+            self.assertEqual(observed['value'], before['value'], label)
+            self.assertEqual(observed['open'], before['open'], label)
+            self.assertAlmostEqual(observed['scroll'], before['scroll'], delta=1, msg=label)
+            self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), composer)
+            return observed
+
+        refreshed = assert_preserved('background refresh')
+        self.delayed_step('preservation-native-skills', '[data-action=native_open][data-native-id=skills]',
+                          "location.pathname === '/workspace/skills' && document.querySelector('#workspace-container input')",
+                          paths=('workspace',))
+        self.delayed_step('preservation-native-return', '#ees-work-entry [data-action=procedures]',
+                          "location.pathname === '/c/existing-chat' && document.querySelector('#ew-author-policies [name=completion_notes]')")
+        returned = assert_preserved('Native return')
+        self.delayed_step('preservation-my-work', '[data-action=mode][data-mode=work]',
+                          "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '내 업무'")
+        self.delayed_step('preservation-author-return', '[data-action=mode][data-mode=author]',
+                          "document.querySelector('#ew-author-policies [name=completion_notes]')")
+        # Work mode deliberately mounts a different panel. Returning must
+        # restore editor state and position, rather than keep its DOM identity.
+        work_returned = assert_preserved('Work mode return', same_nodes=False)
+        self.assertEqual(self.state(workflow_id=workflow_id)['workflow'], saved)
+        self.assertEqual(self.server.completions, [])
+        evidence = frame_monitor.collect(self, labels=('changed-background-refresh',
+                                         'preservation-native-skills', 'preservation-native-return',
+                                         'preservation-my-work', 'preservation-author-return'))
+        evidence['preservation'] = {'before': before, 'refreshed': refreshed, 'returned': returned,
+                                    'work_returned': work_returned,
+                                    'updated_workflow_id': other['workflow_id'],
+                                    'saved_revision': saved['revision']}
+        evidence['reads'] = self.server.navigation_reads
+        directory = self.screenshot('source-shell-delayed-preservation-final')
+        (directory / 'source-shell-delayed-preservation-frames.json').write_text(
+            json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        frame_monitor.assert_clean(self, evidence)
+
     def test_every_navigation_has_source_chrome_without_native_overlay_frames(self):
         self.enable_native_menus()
         workflow_id = self.author(name='화면 이동 검증 절차', jobs=2)
@@ -65,6 +281,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.open_run(workflow_id, run)
         frame_monitor.collect(self, labels=('work-open',))
         labels.append('work-open')
+        frame_monitor.guard_loading(self)
         self.step('right-overview', '#ees-work-panel [data-action=overview]',
                   "document.querySelector('#ees-work-panel [data-action=job]')")
         labels.append('right-overview')
@@ -122,6 +339,9 @@ class SourceShellNativeTests(IntegratedNativeCase):
         evidence['counts'] = {label: sum(item['label'] == label for item in evidence['samples'])
                               for label in labels}
         evidence['native_bad_visible'] = sum(bool(item['legacy']) for item in evidence['samples'])
+        evidence['ees_loading_after_initial'] = sum(
+            item['loadingGuard'] and bool(item['menuLoading'] or item['panelLoading'])
+            for item in evidence['samples'])
         (directory / 'source-shell-all-navigation-frames.json').write_text(
             json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         frame_monitor.assert_clean(self, evidence, labels=labels)
