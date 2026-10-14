@@ -7,7 +7,8 @@
 - **검증:** 제품 수정 전에 main에10-02 원본과 정렬본을 등록한 두 시험이 `blocked_existing != update_available`로 실패함을 확인했다. 수정본의 실제 Native79개·기존 guard16개·UI Node69개가 통과했다. 갱신·도우미 available·직접 질문 Work 도구 연결, 설정 보존·복원·모르는 원본·권한·동시 변경·프로그램 교체를 포함한다. 배포/공통 요약80개 중77PASS/PowerShell3SKIP이며 Windows는 새 head CI로 판정한다. 최초 복원 실패와 독립 검토의 완료기록 저장 실패 보완은 [이번 평가](../evals/v4-ui-20260930.md#work-tool-update-evidence-20261014)에 보존한다. 최종 head CI 성공과 사내 해결은 구분한다.
 - **전달:** 성공 적용 뒤 출하 Work 도구 파일이 달라지면 설정 확인 안내를 추가했다. #88의 이동 상태/A2 드롭다운과 별도 검토하며 둘 다 병합한 뒤 예상 설치42cc756에서 한 번만 사내 적용하도록 안내한다. 원인별 전체 알림은2-3으로 남긴다.
 - **첫 CI 보완:** [Draft PR #89](https://github.com/knadalkim-a11y/team-agent-poc/pull/89)의 첫 CI는 Windows 출하 원본 줄바꿈/갱신 뒤 백업 판정과 기존 계정 전환의 단계 추가 대기로 실패했다. 제품 원본·fixture의 LF를 고정하고 미확인 출하 바이트는 쓰기 전에 막으며 영향12개 Native가 통과했다. 계정 화면 실패의 근본원인은 미확정이라 읽기 전용 클릭 진단만 추가해 새 head에서 재검한다. 최초 실패·재검 범위는 [같은 평가](../evals/v4-ui-20260930.md#work-tool-update-evidence-20261014)에 남기고 최종 판정은 [#89 Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/89/checks)에서 확인한다.
-- **다음 작업 하나:** 별도 PR의 최종 head CI·음성 대조/수정본 증거를 확인해 두 PR 검토를 요청한다. 병합·main 직접 push·사내 실행·Figma 수정·#77/#79 착수는 하지 않는다.
+- **보완 코드 검증:** head `848c769`의 [CI38525473317](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317)은31성공/정상1skip이다. Linux·Windows 각81개 Native 및 Windows upgrade59개가 통과했고 계정 전환11개도 통과했다. 최초 계정 클릭 실패의 근본원인은 미확정이며 재발 시 보존한 이벤트 진단으로 확인한다. 이후 문서·증거 전용 최종 커밋의 전체 CI는 PR Checks에서 별도로 확인한다.
+- **다음 작업 하나:** 두 PR의 최종 head CI를 확인해 검토를 요청한다. 검토·병합 뒤 최종 main/ZIP을 확정해 사내 적용 안내를 한 번만 전달한다. 병합·main 직접 push·사내 실행·Figma 수정·#77/#79 착수는 하지 않는다.
 
 아래는 이번 Work 도구 후속 요청 이전의 기록이다.
 

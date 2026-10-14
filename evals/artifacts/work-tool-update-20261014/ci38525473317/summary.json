@@ -1,0 +1,470 @@
+{
+  "schema_version": 1,
+  "verified_at_utc": "2026-10-14T07:19:02.451Z",
+  "run": {
+    "id": 38525473317,
+    "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317",
+    "event": "pull_request",
+    "attempt": 1,
+    "status": "completed",
+    "conclusion": "success",
+    "head_sha": "848c76908c8ef829c90bdccb42f580b36f9f2263",
+    "base_sha": "42cc7568eb8477013abcf0a042617dd9e3279db2",
+    "tested_merge_sha": "ff6b59f59929e6d24dc2ce4011343b8242ff0ff0",
+    "completed_updated_at_utc": "2026-10-14T07:16:54Z"
+  },
+  "job_counts": {
+    "total": 32,
+    "success": 31,
+    "skipped": 1,
+    "failure": 0,
+    "cancelled": 0
+  },
+  "jobs": [
+    {
+      "id": 115724697289,
+      "name": "Pinned Native source baseline and EES frontend build",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115724697289"
+    },
+    {
+      "id": 115726597727,
+      "name": "Prepare pinned program fixtures and test coverage",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115726597727"
+    },
+    {
+      "id": 115727328239,
+      "name": "Complete Native product (ubuntu-24.04)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328239"
+    },
+    {
+      "id": 115727328348,
+      "name": "native-work (ubuntu-24.04)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328348"
+    },
+    {
+      "id": 115727328356,
+      "name": "native-account (ubuntu-24.04)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328356"
+    },
+    {
+      "id": 115727328371,
+      "name": "native-execution (ubuntu-24.04)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328371"
+    },
+    {
+      "id": 115727328482,
+      "name": "platform (ubuntu-24.04)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328482"
+    },
+    {
+      "id": 115727328522,
+      "name": "native-compose (ubuntu-24.04)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328522"
+    },
+    {
+      "id": 115727328545,
+      "name": "program-install (ubuntu-24.04)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328545"
+    },
+    {
+      "id": 115727328618,
+      "name": "native-contracts (ubuntu-24.04)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328618"
+    },
+    {
+      "id": 115727328625,
+      "name": "services (windows-2022)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328625"
+    },
+    {
+      "id": 115727328636,
+      "name": "restore-ees11 (ubuntu-24.04)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328636"
+    },
+    {
+      "id": 115727328646,
+      "name": "native-grounding (ubuntu-24.04)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328646"
+    },
+    {
+      "id": 115727328662,
+      "name": "native-contracts (windows-2022)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328662"
+    },
+    {
+      "id": 115727328705,
+      "name": "restore-ees12 (ubuntu-24.04)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328705"
+    },
+    {
+      "id": 115727328740,
+      "name": "contracts (windows-2022)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328740"
+    },
+    {
+      "id": 115727328765,
+      "name": "services (ubuntu-24.04)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328765"
+    },
+    {
+      "id": 115727328767,
+      "name": "restore-ees13 (ubuntu-24.04)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328767"
+    },
+    {
+      "id": 115727328777,
+      "name": "restore-ees10 (windows-2022)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328777"
+    },
+    {
+      "id": 115727328808,
+      "name": "restore-ees12 (windows-2022)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328808"
+    },
+    {
+      "id": 115727328809,
+      "name": "restore-ees10 (ubuntu-24.04)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328809"
+    },
+    {
+      "id": 115727328825,
+      "name": "program-wheel (ubuntu-24.04)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328825"
+    },
+    {
+      "id": 115727328833,
+      "name": "platform (windows-2022)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328833"
+    },
+    {
+      "id": 115727328839,
+      "name": "contracts (ubuntu-24.04)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328839"
+    },
+    {
+      "id": 115727328850,
+      "name": "program-install (windows-2022)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328850"
+    },
+    {
+      "id": 115727328922,
+      "name": "program-wheel (windows-2022)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328922"
+    },
+    {
+      "id": 115727328977,
+      "name": "restore-ees11 (windows-2022)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328977"
+    },
+    {
+      "id": 115727328991,
+      "name": "native-grounding (windows-2022)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727328991"
+    },
+    {
+      "id": 115727329214,
+      "name": "restore-ees13 (windows-2022)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115727329214"
+    },
+    {
+      "id": 115730532619,
+      "name": "Delivery checks (ubuntu-24.04)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115730532619"
+    },
+    {
+      "id": 115730532668,
+      "name": "Delivery checks (windows-2022)",
+      "conclusion": "success",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115730532668"
+    },
+    {
+      "id": 115730576771,
+      "name": "Prepare delivery files",
+      "conclusion": "skipped",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/job/115730576771"
+    }
+  ],
+  "expected_skip": {
+    "job_id": 115730576771,
+    "name": "Prepare delivery files",
+    "reason": "The workflow packages delivery files only when github.event_name != 'pull_request'."
+  },
+  "related_test_results": [
+    {
+      "os": "ubuntu-24.04",
+      "asset_job_id": 115727328482,
+      "workflow_job_id": 115727328839,
+      "modules": {
+        "test_ees_asset_native.py": {
+          "tests": 60,
+          "passed": 60,
+          "skipped": 0,
+          "seconds": 94.071
+        },
+        "test_ees_workflow_native.py": {
+          "tests": 21,
+          "passed": 21,
+          "skipped": 0,
+          "seconds": 27.78
+        }
+      },
+      "backend_total_passed": 81,
+      "upgrade": {
+        "module": "test_ees_upgrade.py",
+        "tests": 59,
+        "passed": 59,
+        "skipped": 0,
+        "seconds": 5.612
+      }
+    },
+    {
+      "os": "windows-2022",
+      "asset_job_id": 115727328833,
+      "workflow_job_id": 115727328740,
+      "modules": {
+        "test_ees_asset_native.py": {
+          "tests": 60,
+          "passed": 60,
+          "skipped": 0,
+          "seconds": 144.825
+        },
+        "test_ees_workflow_native.py": {
+          "tests": 21,
+          "passed": 21,
+          "skipped": 0,
+          "seconds": 63.446
+        }
+      },
+      "backend_total_passed": 81,
+      "upgrade": {
+        "module": "test_ees_upgrade.py",
+        "tests": 59,
+        "passed": 59,
+        "skipped": 0,
+        "seconds": 6.174
+      }
+    }
+  ],
+  "other_related_suites": [
+    {
+      "job_id": 115727328618,
+      "suite": "native-contracts",
+      "os": "ubuntu-24.04",
+      "tests": 4,
+      "passed": 4,
+      "skipped": 0
+    },
+    {
+      "job_id": 115727328662,
+      "suite": "native-contracts",
+      "os": "windows-2022",
+      "tests": 4,
+      "passed": 4,
+      "skipped": 0
+    },
+    {
+      "job_id": 115727328646,
+      "suite": "native-grounding",
+      "os": "ubuntu-24.04",
+      "tests": 1,
+      "passed": 1,
+      "skipped": 0
+    },
+    {
+      "job_id": 115727328991,
+      "suite": "native-grounding",
+      "os": "windows-2022",
+      "tests": 1,
+      "passed": 1,
+      "skipped": 0
+    },
+    {
+      "job_id": 115727328765,
+      "suite": "services",
+      "os": "ubuntu-24.04",
+      "tests": 475,
+      "passed": 475,
+      "skipped": 0
+    },
+    {
+      "job_id": 115727328625,
+      "suite": "services",
+      "os": "windows-2022",
+      "tests": 475,
+      "passed": 475,
+      "skipped": 0
+    }
+  ],
+  "windows_failure_followup": {
+    "previous_run_id": 38523313895,
+    "previous_head_sha": "ffaef860ed7c37001ad8e77fd984fd0051b4b3fd",
+    "previous_failed_jobs": [
+      115719821993,
+      115719822045
+    ],
+    "verified_cases": [
+      "Current shipped source SHA appears in source history and matches registered source.",
+      "Unverified CRLF or unknown shipped source is rejected before asset writes.",
+      "Both raw and editor-formatted historical sources update and restore with helper/direct typed-chat availability.",
+      "Private backup remains usable after guard restart and a post-commit receipt-write failure."
+    ],
+    "result": "All corresponding cases passed in shared-session and independent-session Windows fixtures; original failures remain in the first run."
+  },
+  "account_failure_followup": {
+    "previous_run_id": 38523313895,
+    "previous_job_id": 115719821714,
+    "previous_symptom": "After signing in as synthetic account B, the stage editor did not appear after the physical add_stage click.",
+    "current_job_id": 115727328356,
+    "current_test": "test_same_profile_native_logout_login_discards_late_a_read_and_ai",
+    "current_result": "passed",
+    "current_test_seconds": 12.389,
+    "other_account_tests_passed": 10,
+    "other_account_test_seconds": 36.045,
+    "chrome_protocol_tests_passed": 21,
+    "passive_diagnostics": "Pointerdown, pointerup, click and designer DOM generation are observed without changing click delivery, readiness, timeout or assertions; diagnostics attach to failure JSON only.",
+    "diagnostic_installation_error_in_log": false,
+    "root_cause_status": "unconfirmed",
+    "limitation": "The original account-click failure did not recur in this run. Passing again does not establish a root-cause fix."
+  },
+  "delivery_gates": {
+    "ubuntu_job_id": 115730532619,
+    "windows_job_id": 115730532668,
+    "result": "success",
+    "dependency_results": {
+      "frontend": "success",
+      "fixtures": "success",
+      "service": "success",
+      "native": "success",
+      "product": "success"
+    }
+  },
+  "artifacts": [
+    {
+      "id": 11876625483,
+      "name": "ees-pinned-fixtures-ff6b59f59929e6d24dc2ce4011343b8242ff0ff0",
+      "size_bytes": 1392617069,
+      "digest": "sha256:3638359401e28104c6b1bf12a12698fee974ba724c5c9417059c351df1cf8157",
+      "expired": false,
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/artifacts/11876625483"
+    },
+    {
+      "id": 11876502089,
+      "name": "ees-results-services-windows-2022",
+      "size_bytes": 23327,
+      "digest": "sha256:309f9a9b5c1c9d08b15dab2bbdd38ea8070eaf0e1695a670c15118482723c3ab",
+      "expired": false,
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/artifacts/11876502089"
+    },
+    {
+      "id": 11876466103,
+      "name": "ees-results-native-contracts-windows-2022",
+      "size_bytes": 825,
+      "digest": "sha256:de4f0fddf36290ec42a8daeb3d81a0b20f53728335e202852cb2d35dbf6c8195",
+      "expired": false,
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/artifacts/11876466103"
+    },
+    {
+      "id": 11876361799,
+      "name": "ees-work-browser-evidence-native-account",
+      "size_bytes": 643113,
+      "digest": "sha256:68f2ee7814cc850b33e30280b453b1e9dc49e8ca02a283c63c53919690cda94d",
+      "expired": false,
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/artifacts/11876361799"
+    },
+    {
+      "id": 11876081364,
+      "name": "ees-results-platform-ubuntu-24.04",
+      "size_bytes": 26971,
+      "digest": "sha256:1d3d2f24717de8dd8b5eb5f71b132887447c2a20140886225e6a522136a1e765",
+      "expired": false,
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/artifacts/11876081364"
+    },
+    {
+      "id": 11875982290,
+      "name": "ees-results-services-ubuntu-24.04",
+      "size_bytes": 23186,
+      "digest": "sha256:b78468313fe2cbd0631059332fc3d76dd1b0f93310ba95bfdb18c454255ede7e",
+      "expired": false,
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/artifacts/11875982290"
+    },
+    {
+      "id": 11875952803,
+      "name": "ees-results-native-grounding-windows-2022",
+      "size_bytes": 709,
+      "digest": "sha256:f9799ea39e245679e3f865e38916d38a6be7ad55e103d05faad348bafd137ebc",
+      "expired": false,
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/artifacts/11875952803"
+    },
+    {
+      "id": 11875938345,
+      "name": "ees-results-platform-windows-2022",
+      "size_bytes": 26838,
+      "digest": "sha256:b377a9b7cf1f3896bc16e682e661e995de3d592df73704d772519002d2bda69b",
+      "expired": false,
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/artifacts/11875938345"
+    },
+    {
+      "id": 11875817611,
+      "name": "ees-results-contracts-windows-2022",
+      "size_bytes": 4586,
+      "digest": "sha256:3613c47e8d60d91c3fd48f30315ddabfa291c57129f7d463dac5bbaea7c40139",
+      "expired": false,
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/artifacts/11875817611"
+    },
+    {
+      "id": 11875801699,
+      "name": "ees-results-contracts-ubuntu-24.04",
+      "size_bytes": 4561,
+      "digest": "sha256:c755ec22858c67d859dd48a9f22c11e09914a5faab0f2a1c38dbc9b31e330098",
+      "expired": false,
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/artifacts/11875801699"
+    },
+    {
+      "id": 11875727833,
+      "name": "ees-results-native-grounding-ubuntu-24.04",
+      "size_bytes": 701,
+      "digest": "sha256:81510f45ce239b28e64a46884080d38e08175318e2311d0e500ff587d4704689",
+      "expired": false,
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/artifacts/11875727833"
+    },
+    {
+      "id": 11875683429,
+      "name": "ees-results-native-contracts-ubuntu-24.04",
+      "size_bytes": 818,
+      "digest": "sha256:452de105293266e8525f88bc32321714e1da4b1de886421602a1d7f9cfac37cc",
+      "expired": false,
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317/artifacts/11875683429"
+    }
+  ],
+  "evidence_method": "Read GitHub run/job metadata, completed job logs, and artifact metadata. Artifact digests are GitHub-reported metadata; artifacts were not downloaded and independently hashed locally. No merge, deployment, internal execution or remote mutation was performed."
+}
