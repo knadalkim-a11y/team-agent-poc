@@ -1111,7 +1111,15 @@ class WorkspaceMixin:
                     except WorkflowError:
                         continue
                     if system_id and row['system_id'] != system_id: continue
-                    item = dict(row); item['attributes'] = json.loads(item['attributes']); factories.append(item)
+                    item = dict(row); item['attributes'] = json.loads(item['attributes'])
+                    # A manager for one factory is not a system-wide manager.
+                    # Label only already-visible factories using their own ACL.
+                    try:
+                        self._work_authorize_scope(db, actor, groups, row['system_id'], row['id'], 'manager')
+                        item['role'] = 'owner'
+                    except WorkflowError:
+                        item['role'] = 'participant'
+                    factories.append(item)
                 for row in db.execute('SELECT * FROM work_definitions ORDER BY updated_at DESC,id'):
                     if system_id and row['system_id'] != system_id: continue
                     try:

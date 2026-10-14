@@ -801,6 +801,30 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         denied = await self.command('decide', actor='a', run_id=run['id'], job_id='j', item_id='job', verdict='completed', expected_revision=hidden['revision'], result_revision=1)
         self.assertEqual(denied['error']['code'], 'native_access_denied')
 
+    async def test_scope_factory_roles_use_each_factory_current_authority(self):
+        for factory, system in (('f1', 'EMS'), ('f2', 'EMS'), ('f3', 'EMS'), ('hidden', 'FDC')):
+            self.assertTrue((await self.command('save_factory', factory_id=factory, system_id=system, name=factory))['ok'])
+        for factory, role in (('f1', 'manager'), ('f2', 'participant'), ('f3', 'viewer')):
+            self.assertTrue((await self.command('save_access', principal_kind='user', principal_id='c',
+                system_id='EMS', factory_id=factory, roles=[role]))['ok'])
+        limited = await self.state('c')
+        self.assertEqual(limited['capabilities']['managed_systems'], [])
+        self.assertEqual({item['id']: item.get('role') for item in limited['factories']},
+                         {'f1': 'owner', 'f2': 'participant', 'f3': 'participant'})
+        # System-wide managers and administrators own each visible factory;
+        # adding a role label must not reveal factories hidden by the ACL.
+        self.assertEqual({item['id']: item.get('role') for item in (await self.state('a'))['factories']},
+                         {'f1': 'owner', 'f2': 'owner', 'f3': 'owner'})
+        self.assertEqual({item['id']: item.get('role') for item in (await self.state('admin'))['factories']},
+                         {'f1': 'owner', 'f2': 'owner', 'f3': 'owner', 'hidden': 'owner'})
+        grant = next(item for item in (await self.state('admin'))['access']
+                     if item['principal_id'] == 'c' and item['factory_id'] == 'f1')
+        self.assertTrue((await self.command('save_access', access_id=grant['id'], principal_kind='user',
+            principal_id='c', system_id='EMS', factory_id='f1', roles=['viewer'],
+            expected_revision=grant['revision']))['ok'])
+        self.assertEqual({item['id']: item.get('role') for item in (await self.state('c'))['factories']},
+                         {'f1': 'participant', 'f2': 'participant', 'f3': 'participant'})
+
     async def test_factory_manager_updates_only_own_override(self):
         await self.command('save_factory', factory_id='f1', system_id='EMS', name='f1', attributes={})
         await self.command('save_access', principal_kind='user', principal_id='c', system_id='EMS', factory_id='f1', roles=['manager'])

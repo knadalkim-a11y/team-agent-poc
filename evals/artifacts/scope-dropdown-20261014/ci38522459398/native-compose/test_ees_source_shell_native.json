@@ -1,0 +1,40 @@
+{
+  "module": "test_ees_source_shell_native.py",
+  "partition": null,
+  "selected_ids": null,
+  "seconds": 99.503,
+  "tests_run": 5,
+  "no_test_failures": false,
+  "status": "failed",
+  "counts": {
+    "passed": 4,
+    "failed": 1,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "outcomes": [
+    {
+      "id": "test_ees_source_shell_native.SourceShellNativeTests.test_background_refresh_and_native_return_keep_draft_nodes_expansion_and_scroll",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_source_shell_native.SourceShellNativeTests.test_delayed_navigation_never_replaces_loaded_menu_or_panel_with_loading",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_source_shell_native.SourceShellNativeTests.test_every_navigation_has_source_chrome_without_native_overlay_frames",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_source_shell_native.SourceShellNativeTests.test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading",
+      "status": "passed"
+    },
+    {
+      "id": "test_ees_source_shell_native.SourceShellNativeTests.test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus",
+      "status": "failed",
+      "detail": "Traceback (most recent call last):\n  File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_source_shell_native.py\", line 108, in test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus\n    self.wait('document.querySelector(\"[data-scope-dropdown=' + kind + ']\")')\n  File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_integrated_fixture.py\", line 190, in wait\n    self.fail('Timed out: ' + expression + '\\n' + self.text('body') + '\\nUnknown routes:' + repr(self.server.unknown))\nAssertionError: Timed out: document.querySelector(\"[data-scope-dropdown=factory]\")\nSkip to main content\nE\nEES Workflow\n업무\n워크스페이스\n\n작업 위치\n\n공장\n전체 공장\n시스템\nEMS\n내 업무\n워크플로우 찾기\n실행 기록\n대화 기록\n\n업무\n\n운영\n셋업\n장애대응\n\n등록된 업무 절차가 없습니다.\n\n새 대화\n대화 검색\nFixture Administrator\n대화\n참고\n일반 대화\n새 대화\n채팅 대화\n\n기존 질문\n\nFixture AI\n\n기존 대화 기록\n\n범위를 골라도 유지할 개인 대화 초안\n\n내 업무\n닫기\n지금 처리할 내 업무가 없습니다\nUnknown routes:[]\n"
+    }
+  ]
+}

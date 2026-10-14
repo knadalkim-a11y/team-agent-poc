@@ -83,8 +83,37 @@ class SourceShellNativeTests(IntegratedNativeCase):
         if focus:
             self.assertTrue(self.browser.evaluate('document.activeElement === document.querySelector(' + json.dumps(trigger) + ')'))
 
+    def scope_activate_key(self, key):
+        # CDP keyDown without text emits no keypress. Native buttons activate
+        # Enter through that default event, so send the full physical key as
+        # browser automation keyboards do; do not dispatch DOM click events.
+        code, virtual, text = ('Enter', 13, '\r') if key == 'Enter' else ('Space', 32, ' ')
+        self.browser.call('Input.dispatchKeyEvent', {'type': 'keyDown', 'key': key,
+                          'code': code, 'windowsVirtualKeyCode': virtual,
+                          'nativeVirtualKeyCode': virtual, 'text': text, 'unmodifiedText': text})
+        self.browser.call('Input.dispatchKeyEvent', {'type': 'keyUp', 'key': key,
+                          'code': code, 'windowsVirtualKeyCode': virtual,
+                          'nativeVirtualKeyCode': virtual})
+
+    def scope_search(self, text):
+        # The general form helper ends with Tab; scope menus correctly close
+        # on Tab. Keep focus in this search field while observing its results.
+        self.click('#ees-factory-search')
+        self.key('a', 65, 2)
+        if text:
+            self.browser.call('Input.insertText', {'text': text})
+        else:
+            self.key('Backspace', 8)
+
     def test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus(self):
         self.scope_catalog_fixture(denied=True)
+        self.browser.evaluate("""(()=>{window.__scopeKeyboardEvidence=[];
+          for(const type of ['keydown','keypress','keyup','click'])document.addEventListener(type,event=>{
+            const node=event.target?.closest?.('[data-scope-trigger],[role=option],#ees-factory-search');
+            if(node)window.__scopeKeyboardEvidence.push({type,key:event.key||'',code:event.code||'',
+              trusted:event.isTrusted,target:node.id||node.dataset.factoryId||node.dataset.systemId||'',
+              opened:!!document.querySelector('[data-scope-dropdown]')});
+          },true);})()""")
         self.fill('#chat-input', '범위를 골라도 유지할 개인 대화 초안')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         evidence = {}
@@ -104,11 +133,11 @@ class SourceShellNativeTests(IntegratedNativeCase):
             self.screenshot('source-scope-' + variant)
             self.key('Escape', 27)
             self.scope_closed(trigger)
-            self.key('Enter', 13)
+            self.scope_activate_key('Enter')
             self.wait('document.querySelector("[data-scope-dropdown=' + kind + ']")')
             self.key('Escape', 27)
             self.scope_closed(trigger)
-            self.key(' ', 32)
+            self.scope_activate_key(' ')
             self.wait('document.querySelector("[data-scope-dropdown=' + kind + ']")')
             self.click('#chat-input')
             self.scope_closed(trigger, focus=False)
@@ -127,9 +156,9 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 self.assertEqual(self.browser.evaluate('window.scrollY'), page_scroll)
                 self.assertIn('담당', self.text('[data-action=choose_factory][data-factory-id=scope-factory-1]'))
                 self.assertIn('참여', self.text('[data-action=choose_factory][data-factory-id=scope-factory-2]'))
-                self.fill('#ees-factory-search', '공장 07')
+                self.scope_search('공장 07')
                 self.wait("!!document.querySelector('[data-action=choose_factory][data-factory-id=scope-factory-7]') && !document.querySelector('[data-action=choose_factory][data-factory-id=scope-factory-1]')")
-                self.fill('#ees-factory-search', '')
+                self.scope_search('')
                 self.wait("document.querySelector('[data-action=choose_factory][data-factory-id=scope-factory-8]')")
                 denied = '[data-action=choose_factory][data-factory-id=scope-factory-8]'
             else:
@@ -165,11 +194,14 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 self.assertTrue(self.browser.evaluate('document.activeElement?.getAttribute("role") === "option" && !document.activeElement.disabled'))
             self.key('ArrowUp', 38)
             self.assertTrue(self.browser.evaluate('document.activeElement?.getAttribute("role") === "option" && !document.activeElement.disabled'))
-            self.key('Enter', 13)
+            self.scope_activate_key('Enter')
             self.scope_closed(trigger)
             self.assertIsNotNone(self.refresh())
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
         self.assertEqual(self.server.completions, [])
+        evidence['keyboard'] = self.browser.evaluate('window.__scopeKeyboardEvidence')
+        self.assertTrue(any(row['type'] == 'keypress' and row['key'] == 'Enter' and row['trusted']
+                            for row in evidence['keyboard']))
         directory = self.screenshot('source-scope-three-dropdowns')
         (directory / 'source-scope-three-dropdowns.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
@@ -286,6 +318,10 @@ class SourceShellNativeTests(IntegratedNativeCase):
         directory.mkdir(parents=True, exist_ok=True)
         (directory / (self._testMethodName + '-failure-frames.json')).write_text(
             json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        keyboard = self.browser.evaluate('window.__scopeKeyboardEvidence || null')
+        if keyboard is not None:
+            (directory / (self._testMethodName + '-failure-keyboard.json')).write_text(
+                json.dumps(keyboard, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
     def step(self, label, selector, condition):
         frame_monitor.mark(self, label)
