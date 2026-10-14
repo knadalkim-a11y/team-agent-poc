@@ -999,7 +999,7 @@ index c7a4f3c..5fe51cf 100644
  					<div class="flex {($settings?.chatBubble ?? true) ? 'justify-end pb-1' : 'w-full'}">
  						<div
 diff --git a/src/lib/components/chat/Navbar.svelte b/src/lib/components/chat/Navbar.svelte
-index b6a045e..4454074 100644
+index b6a045e..7fd3b5c 100644
 --- a/src/lib/components/chat/Navbar.svelte
 +++ b/src/lib/components/chat/Navbar.svelte
 @@ -1,4 +1,6 @@
@@ -1077,7 +1077,7 @@ index b6a045e..4454074 100644
  							</div>
  
  							{#if shareEnabled && chat && (chat.id || $temporaryChatEnabled)}
-@@ -150,18 +132,14 @@
+@@ -150,18 +132,21 @@
  								</Menu>
  							{/if}
  						</div>
@@ -1095,14 +1095,21 @@ index b6a045e..4454074 100644
  
 -				<div class="lg:mr-1 flex flex-none items-center gap-2 self-center">
 +				<div class="ees-context-actions flex flex-none items-center gap-2 self-center">
-+                    <span class="ees-reference-caption">{$i18n.t('EES.Reference',{defaultValue:'Reference'})}</span>
-+                    <span class="ew-reference">{$eesSnapshot.reference_label || $i18n.t('EES.GeneralConversation',{defaultValue:'General conversation'})}</span>
-+                    <button data-action="open_panel" aria-label={$i18n.t('EES.OpenPanel',{defaultValue:'Open work panel'})} on:click={()=>eesAction({action:'open_panel'})}><EesIcon name="a9175"/></button>
++                    {#if $eesSnapshot.selection?.panel_open === false}
++                        <button
++                            id="ees-work-panel-open"
++                            class="ees-panel-open"
++                            data-action="open_panel"
++                            aria-expanded={$eesSnapshot.selection?.panel_open !== false}
++                            aria-controls="ees-work-panel"
++                            on:click={()=>eesAction({action:'open_panel'})}
++                        ><EesIcon name="a9175"/>{$i18n.t('EES.OpenPanel',{defaultValue:'Open work panel'})}</button>
++                    {/if}
 +                    <button data-action="new_chat" on:click={()=>window.__eesSourceShellV1?.newChat?.()}>{$i18n.t('EES.Nav.NewChat',{defaultValue:'New chat'})}</button>
  					<!-- <div class="md:hidden flex self-center w-[0.0625rem] h-5 mx-2 bg-gray-300 dark:bg-stone-700" /> -->
  
  					{#if $user?.role === 'user' ? ($user?.permissions?.chat?.temporary ?? true) && !($user?.permissions?.chat?.temporary_enforced ?? false) : true}
-@@ -248,12 +226,6 @@
+@@ -248,12 +233,6 @@
  		</div>
  	</div>
  
@@ -1115,7 +1122,7 @@ index b6a045e..4454074 100644
  	<div class="absolute top-[100%] left-0 right-0 h-fit">
  		{#if !history.currentId && !$chatId && ($banners.length > 0 || ($config?.license_metadata?.type ?? null) === 'trial' || (($config?.license_metadata?.seats ?? null) !== null && $config?.user_count > $config?.license_metadata?.seats))}
  			<div class=" w-full z-30">
-@@ -310,3 +282,12 @@
+@@ -310,3 +289,12 @@
  		{/if}
  	</div>
  </nav>
@@ -1124,8 +1131,8 @@ index b6a045e..4454074 100644
 + #ees-work-context {height:48px;min-height:48px;padding:0;flex:none;display:flex;justify-content:center;border-bottom:1px solid #e6e6e9;background:#fff;font-size:14px;}
 + #ees-work-context > div:first-child {padding:0 24px;}
 + .ees-context-actions {min-width:0;font-size:13px;}
-+ .ees-reference-caption {color:#7a7d85;}
 + .ees-context-actions button {padding:4px;border-radius:6px;}
++ #ees-work-context button.ees-panel-open {display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid #d9dbde;font-size:13px;font-weight:500;color:#3f4147;white-space:nowrap;}
 + .ees-context-actions button:hover {background:#eef0f3;}
 +</style>
 diff --git a/src/lib/components/chat/Placeholder.svelte b/src/lib/components/chat/Placeholder.svelte
@@ -1323,9 +1330,10 @@ index 0000000..a509ea5
 +/>
 diff --git a/src/lib/components/ees/EesNavigation.svelte b/src/lib/components/ees/EesNavigation.svelte
 new file mode 100644
+index 0000000..be842d3
 --- /dev/null
 +++ b/src/lib/components/ees/EesNavigation.svelte
-@@ -0,0 +1,249 @@
+@@ -0,0 +1,248 @@
 +<script lang="ts">
 +	import { getContext } from 'svelte';
 +	import { page } from '$app/stores';
@@ -1357,7 +1365,6 @@ new file mode 100644
 +	};
 +	const normal = [
 +		['my_work', '4df0d', 'EES.Nav.MyWork', 'My work'],
-+		['find', '2e769', 'EES.Nav.Find', 'Find workflows'],
 +		['records', 'c325d', 'EES.Nav.Records', 'Execution history'],
 +		['chats', '093d6', 'EES.Nav.Chats', 'Chat history']
 +	];
@@ -1797,10 +1804,10 @@ index 0000000..6d5288b
 +</style>
 diff --git a/src/lib/components/ees/EesShell.svelte b/src/lib/components/ees/EesShell.svelte
 new file mode 100644
-index 0000000..aa5a5fe
+index 0000000..d55b5f0b
 --- /dev/null
 +++ b/src/lib/components/ees/EesShell.svelte
-@@ -0,0 +1,394 @@
+@@ -0,0 +1,401 @@
 +<script lang="ts">
 +	import { getContext, onMount, tick } from 'svelte';
 +	import { get } from 'svelte/store';
@@ -1978,6 +1985,12 @@ index 0000000..aa5a5fe
 +		newChat,
 +		searchChats: () => showSearch.set(true),
 +		focusComposer: () => window.__eesNativeDraftV1?.focus?.(),
++		focusPanel: async (open: boolean) => {
++			await tick();
++			if (!mounted || nativeRoute || admin || panelOpen !== open) return;
++			const target = open ? panel : document.getElementById('ees-work-panel-open');
++			target?.focus({ preventScroll: true });
++		},
 +		referenceHost: (id) => eesReferenceHosts.get(id),
 +		shouldInitChat: (path) => {
 +			if (
@@ -2100,6 +2113,7 @@ index 0000000..aa5a5fe
 +		></div>
 +		<aside
 +			id="ees-work-panel"
++			tabindex="-1"
 +			data-ees-work
 +			data-ees-source-slot
 +			bind:this={panel}
@@ -2867,10 +2881,10 @@ index 172ed9a..8873d62 100644
  export const WEBUI_HOSTNAME = '';
  export const WEBUI_BASE_URL = '';
 diff --git a/src/lib/i18n/locales/ko-KR/translation.json b/src/lib/i18n/locales/ko-KR/translation.json
-index 8eba682..4acf69f 100644
+index 8eba682..38ee86b 100644
 --- a/src/lib/i18n/locales/ko-KR/translation.json
 +++ b/src/lib/i18n/locales/ko-KR/translation.json
-@@ -3081,5 +3081,88 @@
+@@ -3081,5 +3081,86 @@
  	"Youtube Language": "Youtube 언어",
  	"Youtube Proxy URL": "Youtube 프록시 URL",
  	"Zoom in": "",
@@ -2908,7 +2922,6 @@ index 8eba682..4acf69f 100644
 +	"EES.Nav.Access": "공장·접근 범위",
 +	"EES.Nav.Recent": "최근 편집",
 +	"EES.Nav.MyWork": "내 업무",
-+	"EES.Nav.Find": "워크플로우 찾기",
 +	"EES.Nav.Records": "실행 기록",
 +	"EES.Nav.Chats": "대화 기록",
 +	"EES.Category.Operations": "운영",
@@ -2922,7 +2935,6 @@ index 8eba682..4acf69f 100644
 +	"EES.Nav.Search": "대화 검색",
 +	"EES.Conversation": "대화",
 +	"EES.Reference": "참고",
-+	"EES.GeneralConversation": "일반 대화",
 +	"EES.OpenPanel": "업무 패널 열기",
 +	"EES.Panel": "업무 패널",
 +	"EES.PanelWidth": "업무 패널 너비",

@@ -42,6 +42,34 @@ test('read-only tab changes retain polling rather than stopping current executio
 test('returning from a Native workspace page starts a fresh workspace read',async()=>{const h=controller();h.api.sync();await new Promise(resolve=>setImmediate(resolve));h.context.location.pathname='/workspace/models';h.context.document.querySelector=()=>null;h.api.sync();h.context.location.pathname='/';h.context.document.querySelector=()=>({});h.api.sync();await new Promise(resolve=>setImmediate(resolve));assert.equal(h.calls.filter(call=>call.url.startsWith('/api/ees-work/workspace?')).length,3);});
 function optionHarness(){const h=controller();h.api.setSelection({workflow_id:'w',run_id:'r',job_id:'j',tab:'current'});h.api.setState({run:{id:'r',revision:2,definition:{nodes:{j:{id:'j',inputs:[{id:'project',type:'text'},{id:'cr',type:'single',options_source:'tool',options:['forbidden-static']}]}}},jobs:{j:{effective_inputs:{project:'old'}}}},settings:{values:{},revision:0}});let inputs={project:'old'};h.view.readInputs=()=>({inputs});return {...h,setInputs:values=>{inputs=values;}};}
 test('dynamic options use authenticated current-job inputs and never send an execution command',async()=>{const h=optionHarness();h.setInputs({project:'new',unrelated:'do-not-send'});h.setReply(()=>({ok:true,options:[{id:'CR-1',name:'현재 CR'}],source:{kind:'tool'},context:{revision:2}}));await h.api.loadOptions();assert.equal(h.calls[0].url,'/api/ees-work/workspace/options');assert.deepEqual(h.calls[0].body.inputs,{project:'new'});assert.equal(h.calls[0].body.action,undefined);assert.match(h.calls[0].options.headers.Authorization,/Bearer/);assert.equal(h.api.snapshot().state.input_options.cr.status,'ready');});
+test('closing a panel during option lookup preserves the result and reference on reopening',async()=>{
+ for(const failed of [false,true]){
+  const h=optionHarness(),pending=deferred(),focus=[];
+  h.context.window.__eesSourceShellV1.focusPanel=open=>focus.push(open);
+  h.api.setSelection({chat_reference:{kind:'workspace',reference_kind:'historical',workflow_id:'w',run_id:'r',job_id:'j',attempt_id:'kept-attempt',version:2}});
+  h.setInputs({project:'typed project'});h.setReply(()=>pending.promise);
+  const reference=JSON.stringify(h.api.reference()),context=h.api.context(),selection=JSON.stringify(h.api.snapshot().selection);
+  assert.equal(h.api.reference().kind,'workspace');assert.equal(h.api.reference().attempt_id,'kept-attempt');
+  const waiting=h.api.loadOptions();
+  assert.equal(h.calls.length,1);assert.equal(h.api.snapshot().state.input_options.cr.status,'loading');
+  await h.api.handleClick({dataset:{action:'close_panel'}});
+  assert.equal(h.api.snapshot().selection.panel_open,false);
+  assert.equal(h.api.context(),context);assert.equal(JSON.stringify(h.api.reference()),reference);
+  await h.api.loadOptions();assert.equal(h.calls.length,1,'Hidden panels do not start more option requests');
+  pending.resolve(failed?{ok:false,httpError:true,status:403,error:{message:'source access denied'}}:{ok:true,options:[{id:'CR-1',name:'현재 CR'}],source:{kind:'tool'},context:{revision:2}});
+  await waiting;
+  const lookup=h.api.snapshot().state.input_options.cr;
+  assert.equal(lookup.status,failed?'failed':'ready','A hidden panel must settle an already requested lookup');
+  if(failed)assert.match(lookup.error,/source access denied/);else assert.equal(lookup.options[0].id,'CR-1');
+  await h.api.handleClick({dataset:{action:'open_panel'}});
+  await h.api.loadOptions();
+  assert.equal(h.api.snapshot().state.input_options.cr,lookup);
+  assert.equal(h.calls.length,1,'Reopening reuses the settled lookup without duplicate reads or work commands');
+  assert.equal(h.api.context(),context);assert.equal(JSON.stringify(h.api.reference()),reference);
+  assert.equal(JSON.stringify(h.api.snapshot().selection),selection);
+  assert.deepEqual(h.view.readInputs().inputs,{project:'typed project'});assert.deepEqual(focus,[false,true]);
+ }
+});
 test('late option results cannot replace a changed input dependency or another job',async()=>{for(const change of ['input','job','account']){const h=optionHarness(),pending=deferred();h.setReply(()=>pending.promise);const waiting=h.api.loadOptions();if(change==='input')h.setInputs({project:'changed'});else if(change==='job')h.api.setSelection({job_id:'other'});else h.setAuth('other');pending.resolve({ok:true,options:[{id:'stale'}]});await waiting;assert.equal(h.api.snapshot().state.input_options.cr.status,'loading');assert.equal(h.api.snapshot().state.input_options.cr.options.length,0);}});
 test('dynamic option failure disables selection without falling back to manual examples',async()=>{const h=optionHarness();h.setReply(()=>({ok:false,httpError:true,status:403,error:{message:'source access denied'}}));await h.api.loadOptions();const lookup=h.api.snapshot().state.input_options.cr;const out=html('workInputHTML(field,undefined,{lookup})',{field:{id:'cr',type:'single',options_source:'tool',options:['forbidden-static']},lookup});assert.match(out,/<select[^>]* disabled/);assert.match(out,/source access denied/);assert.doesNotMatch(out,/forbidden-static/);});
 test('removed dynamic selection stays explicit and no returned option is automatically chosen',()=>{const out=html('workInputHTML(field,"removed",{lookup})',{field:{id:'cr',type:'single',options_source:'common'},lookup:{status:'ready',options:[{id:'allowed',name:'현재 값'}],source:{kind:'common'}}});assert.match(out,/이전 선택 · 현재 목록 확인 필요/);assert.match(out,/removed[^>]* selected/);assert.doesNotMatch(out,/allowed[^>]* selected/);});

@@ -20,6 +20,93 @@ from native_ui_fixture import NativeUIHandler
 
 
 class SourceShellNativeTests(IntegratedNativeCase):
+    def r11_panel_roundtrip(self, key):
+        """Exercise native button activation and the resulting focus, not DOM clicks."""
+        opened = '#ees-work-context [data-action=open_panel]'
+        self.assertFalse(self.browser.evaluate('!!document.querySelector(' + json.dumps(opened) + ')'))
+        self.click('#ees-work-panel [data-action=close_panel]')
+        self.wait("document.querySelector('.ees-panel-region')?.hidden && document.querySelector('.ees-panel-region')?.inert")
+        self.wait('document.activeElement === document.querySelector(' + json.dumps(opened) + ')')
+        self.assertEqual(self.text(opened).strip(), '업무 패널 열기')
+        self.assertEqual(self.read(opened, 'ariaExpanded'), 'false')
+        style = self.browser.evaluate('(()=>{const s=getComputedStyle(document.querySelector(' + json.dumps(opened) + '));return {borderTopWidth:s.borderTopWidth,borderTopStyle:s.borderTopStyle,paddingTop:s.paddingTop,paddingRight:s.paddingRight,fontSize:s.fontSize};})()')
+        self.assertEqual(style, {'borderTopWidth': '1px', 'borderTopStyle': 'solid',
+                               'paddingTop': '4px', 'paddingRight': '10px', 'fontSize': '13px'})
+        target = self.read(opened, 'getAttribute("aria-controls")')
+        self.assertTrue(target, 'The open control must identify the work panel it opens')
+        self.assertTrue(self.browser.evaluate('!!document.getElementById(' + json.dumps(target) + ')'))
+        self.scope_activate_key(key)
+        self.wait("!document.querySelector('.ees-panel-region').hidden && !document.querySelector('.ees-panel-region').inert")
+        self.wait('!document.querySelector(' + json.dumps(opened) + ')')
+        self.wait("document.querySelector('#ees-work-panel').contains(document.activeElement)")
+
+    def test_r11_navigation_toolbar_and_keyboard_panel_focus_preserve_work(self):
+        workflow_id = self.author(fields=[{'id': 'note', 'type': 'text', 'scope': 'run'}])
+        run = self.start(workflow_id)
+        self.open_run(workflow_id, run)
+        self.fill('[data-work-input][name=note]', '패널을 다시 열어도 남을 업무 입력')
+        self.fill('#chat-input', '패널을 다시 열어도 남을 대화 초안')
+        draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
+        self.assertEqual(reference['kind'], 'workspace')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-entry [data-action=find],#ees-workflow-search,[data-action=find_workflow]')"))
+        self.assertNotIn('워크플로우 찾기', self.text('#ees-work-entry'))
+        toolbar = self.text('#ees-work-context')
+        self.assertNotIn('참고', toolbar)
+        self.assertNotIn('일반 대화', toolbar)
+        self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-work-context [data-action=new_chat]')"))
+        self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-work-context [aria-label=Controls]')"))
+        for key in ('Enter', ' '):
+            self.r11_panel_roundtrip(key)
+            self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+            self.assertEqual(self.browser.evaluate('window.__eesNativeWorkV1.captureReference()'), reference)
+            self.assertEqual(self.read('[data-work-input][name=note]', 'value'), '패널을 다시 열어도 남을 업무 입력')
+        # A later server publication is not another user request to focus the
+        # panel and must not pull the cursor out of the conversation composer.
+        self.click('#chat-input')
+        self.assertIsNotNone(self.refresh())
+        self.assertTrue(self.browser.evaluate("document.activeElement === document.querySelector('#chat-input')"))
+        self.assertEqual(self.server.completions, [])
+        self.assertEqual(self.state(run_id=run['id'])['run']['attempts'], [])
+        self.screenshot('source-r11-work-panel-keyboard-focus')
+
+    def test_r11_panel_toggle_keeps_procedure_start_and_native_toolbar_actions(self):
+        self.click('[data-action=mode][data-mode=author]')
+        self.click('[data-author-action=create]')
+        self.wait("document.querySelector('.ew-procedure-start') && document.querySelector('#ew-procedure-blank')")
+        self.click('label[for=ew-procedure-blank]')
+        self.wait("document.querySelector('#ew-procedure-name')")
+        self.fill('#ew-procedure-name', '닫았다 열어도 남을 새 절차 이름')
+        self.fill('#chat-input', '새 절차를 보며 작성한 질문')
+        draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
+        self.assertEqual(reference['kind'], 'help')
+        self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start [data-action=procedure_question]')"))
+        self.r11_panel_roundtrip('Enter')
+        self.assertEqual(self.read('#ew-procedure-name', 'value'), '닫았다 열어도 남을 새 절차 이름')
+        self.assertTrue(self.read('#ew-procedure-blank', 'checked'))
+        self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start [data-action=procedure_question]')"))
+        self.assertEqual(self.browser.evaluate('window.__eesNativeWorkV1.captureReference()'), reference)
+        self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+        self.assertEqual(self.state()['workflows'], [], 'Panel visibility must not create a procedure')
+
+        # Native controls still open and close through the original toolbar.
+        self.click('#ees-work-context [aria-label=Controls]')
+        self.wait("document.querySelector('#controls-container')?.getBoundingClientRect().height > 0")
+        self.click('#ees-work-context [aria-label=Controls]')
+        self.wait("!document.querySelector('#controls-container')?.getClientRects().length")
+        self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+        self.assertEqual(self.read('#ew-procedure-name', 'value'), '닫았다 열어도 남을 새 절차 이름')
+
+        self.click('#ees-work-context [data-action=new_chat]')
+        self.wait("location.pathname === '/' && !!document.querySelector('#temporary-chat-button')")
+        self.click('#temporary-chat-button')
+        self.wait("new URLSearchParams(location.search).get('temporary-chat') === 'true'")
+        self.click('#temporary-chat-button')
+        self.wait("!new URLSearchParams(location.search).has('temporary-chat')")
+        self.assertEqual(self.server.completions, [], 'Toolbar actions must not submit a conversation')
+        self.screenshot('source-r11-procedure-start-toolbar-preserved')
+
     def scope_catalog_fixture(self, *, denied=False):
         """Real saved factories and grants; never replace workspace responses.
 

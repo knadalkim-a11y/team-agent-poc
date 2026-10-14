@@ -436,10 +436,9 @@ function createWorkView({callbacks}){
     return true;
   }
   function publish(){
-    const node=job(),run=state().run,reference=selection().chat_reference;
+    const node=job();
     window.__eesSourceShellV1?.publish?.({...snapshot,
-      context_title:snapshot.procedure_start?'새 업무 절차 만들기':node?.name || state().workflow?.name || '대화',
-      reference_label:reference?`과거 기록 · v${reference.version} · ${reference.result_revision}차 · ${workUI.time(reference.created_at)}`:node?.name || (run?'진행 건':'일반 대화')});
+      context_title:snapshot.procedure_start?'새 업무 절차 만들기':node?.name || state().workflow?.name || '대화'});
   }
   function runOverview(){
     const data=state(),run=data.run,def=definition(),nodes=Object.values(def.nodes || {}),jobs=nodes.filter(node=>node.type==='j'),root=nodes.find(node=>node.type==='p'&&!node.parent),groups=nodes.filter(node=>node.type==='t');

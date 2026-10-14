@@ -186,6 +186,42 @@ const createNewChat=async()=>{if(failCreation)throw Error('synthetic creation fa
 @unittest.skipUnless(os.environ.get("EES_TEST_FRONTEND_SOURCE_DIR"),
                      "The CI patched source checkout is required for source comparison.")
 class SourcePatchTests(unittest.TestCase):
+    def test_r11_removed_search_and_reference_have_no_source_entry_points(self):
+        root = Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"]).resolve()
+        navigation = (root / "src/lib/components/ees/EesNavigation.svelte").read_text(encoding="utf-8")
+        navbar = (root / "src/lib/components/chat/Navbar.svelte").read_text(encoding="utf-8")
+        launcher = (Path(__file__).resolve().parents[1] / "branding/ees/ui/ees-work-launcher.js").read_text(encoding="utf-8")
+        for name, source, markers in (
+            ('navigation', navigation, ('EES.Nav.Find', "['find',")),
+            ('toolbar', navbar, ('reference_label', 'EES.GeneralConversation', 'ees-reference-caption', 'class="ew-reference"')),
+            ('launcher', launcher, ("action==='find'", "action==='find_workflow'", 'ees-workflow-search', 'ees-workflow-list')),
+        ):
+            for marker in markers:
+                with self.subTest(component=name, marker=marker):
+                    self.assertFalse(marker in source, name + ' still exposes ' + marker)
+
+    def test_r11_accessible_panel_control_preserves_native_toolbar_actions(self):
+        root = Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"]).resolve()
+        name = "src/lib/components/chat/Navbar.svelte"
+        navbar = (root / name).read_text(encoding="utf-8")
+        at = navbar.index('data-action="open_panel"')
+        control = navbar[navbar.rfind('<button', 0, at):navbar.index('</button>', at)]
+        self.assertIn('aria-expanded=', control)
+        self.assertIn('aria-controls=', control)
+        self.assertIn('EES.OpenPanel', control)
+        self.assertIn('data-action="new_chat"', navbar)
+        self.assertIn('window.__eesSourceShellV1?.newChat?.()', navbar)
+        config = frontend.configuration()
+        original = subprocess.check_output(["git", "show", config["commit"] + ":" + name], cwd=root).decode('utf-8')
+        # The original authorization guards and click handlers for temporary
+        # chat and Native controls are outside the R11 work-panel change.
+        for start, end in (
+            ("{#if $user?.role === 'user' ? ($user?.permissions?.chat?.temporary", "{#if $mobile && !$temporaryChatEnabled"),
+            ("{#if $user?.role === 'admin' || ($user?.permissions.chat?.controls", '</Tooltip>'),
+        ):
+            with self.subTest(native_control=start):
+                self.assertEqual(_between(navbar, start, end), _between(original, start, end))
+
     def test_layout_hooks_preserve_native_elements_and_reject_source_drift(self):
         root = Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"]).resolve()
         config = frontend.configuration()
@@ -487,6 +523,10 @@ const goto=async(path,options)=>{navigations.push({path,options});location.pathn
  console.log('source_routes=pass');
 })().catch(e=>{console.error(e);process.exitCode=1});
 """
+        # EesShell is TypeScript. Compile the extracted bridge just as the
+        # other source probes do; the pinned Node 22 cannot execute annotations.
+        probe = "const ts=require(" + json.dumps(str(root / "node_modules/typescript")) + ");\n" + \
+            "eval(ts.transpile(" + json.dumps(probe) + ", {target:ts.ScriptTarget.ES2022}));\n"
         result = subprocess.run([shutil.which("node"), "-e", probe], capture_output=True,
                                 text=True, encoding="utf-8", timeout=15)
         self.assertEqual(result.returncode, 0, result.stderr)

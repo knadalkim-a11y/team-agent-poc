@@ -240,6 +240,17 @@
       catch(failure){if(auth===token()&&at===context()&&(panelWidth!==null||Object.keys(saved.verdict_drafts || {}).length||Object.keys(saved.start_inputs || {}).length||Object.keys(saved.request_reasons || {}).length)){commandError='작성한 선택의 자동 저장 실패 · '+failure.message+' 화면의 값은 보존했습니다. 저장을 다시 시도해 주세요.';render();}}
     });},400);
   }
+  async function setPanelOpen(open){
+    if((selection.panel_open!==false)===open)return state;
+    // Visibility does not change the selected work, help context or chat epoch.
+    if(!open)workUI.closeHelp({restoreFocus:false});
+    view.capture();designer.readDraft?.();
+    if(!restored)initialSelectionPatch={...initialSelectionPatch,panel_open:open};
+    selection={...selection,panel_open:open};remember();render();
+    await source()?.focusPanel?.(open);
+    if(open)loadOptions();
+    return state;
+  }
   async function select(patch,{fetch=true}={}){workUI.closeHelp({restoreFocus:false});designer.closeStart?.();procedureStart=null;view.capture();const before=context();while(state?.run?.definition?.nodes?.[selection.job_id]?.result_block==='ai_review'&&view.readReview?.().dirty){if(!await saveReviewDraft()||before!==context())return null;view.capture();}clearTimeout(reviewTimer);const previous={...selection};if(state&&!stateKey)stateKey=workspaceKey();cacheWorkspace();if(!restored)initialSelectionPatch={...initialSelectionPatch,chat_reference:null,...patch};selection={...selection,chat_reference:null,...patch};changeWorkspace(previous);epoch++;workEpoch++;chatCreations.clear();chatAliases.clear();pendingInputProposal=null;error='';commandError='';clearTimeout(refreshTimer);remember();render();if(fetch)return refresh();refreshTimer=setTimeout(refresh,2500);loadOptions();return state;}
   async function mutate(body,{refreshAfter=true,accept=null}={}){if(busy)return null;const at=context();setBusy(true);try{const result=await command(body);if(result&&accept)accept(result);if(result&&refreshAfter&&!await refresh())return null;return at===context()?result:null;}catch(failure){if(at===context()){commandError=failure.message;render();}return null;}finally{setBusy(false);}}
   async function models(){
@@ -249,9 +260,9 @@
     const list=(result.data || []).filter(model=>model.id&&!model.direct&&model.type!=='embedding').map(model=>({id:model.id,name:model.name || model.id}));
     source()?.modelCount?.(list.length);return list;
   }
-  function optionContext(){
+  function optionContext({includeHidden=false}={}){
     const run=state?.run,node=run?.definition?.nodes?.[selection.job_id];
-    if(!node||selection.mode==='author'||selection.panel_open===false||!['current','settings'].includes(selection.tab))return null;
+    if(!node||selection.mode==='author'||!includeHidden&&selection.panel_open===false||!['current','settings'].includes(selection.tab))return null;
     const draft=view.readInputs(),values={...(run.jobs?.[node.id]?.effective_inputs || {}),...(state.settings?.values || {})};
     for(const field of node.inputs || [])if((['workflow','factory'].includes(field.scope))===(selection.tab==='settings'))delete values[field.id];Object.assign(values,draft.inputs || {});
     const inputs=Object.fromEntries((node.inputs || []).filter(field=>Object.hasOwn(values,field.id)).map(field=>[field.id,values[field.id]]));
@@ -268,9 +279,9 @@
       const entry={marker,status:'loading',options:[]};optionCache.set(key,entry);state.input_options[field.id]=entry;
       const body={workflow_id:selection.workflow_id,run_id:selection.run_id,job_id:selection.job_id,field_id:field.id,factory_id:state.settings?.factory_id ?? selection.factory_id,inputs:current.inputs};
       pending.push((async()=>{
-        try{const result=await api('workspace/options',body);if(at!==context()||optionContext()?.marker!==marker||optionCache.get(key)!==entry)return;
+        try{const result=await api('workspace/options',body);if(at!==context()||optionContext({includeHidden:true})?.marker!==marker||optionCache.get(key)!==entry)return;
           Object.assign(entry,{status:'ready',options:result.options || [],source:result.source,source_context:result.context});
-        }catch(failure){if(at!==context()||optionContext()?.marker!==marker||optionCache.get(key)!==entry)return;Object.assign(entry,{status:'failed',options:[],error:failure.message});}
+        }catch(failure){if(at!==context()||optionContext({includeHidden:true})?.marker!==marker||optionCache.get(key)!==entry)return;Object.assign(entry,{status:'failed',options:[],error:failure.message});}
       })());
     }
     if(!pending.length)return;render();await Promise.all(pending);if(at===context()&&optionContext()?.marker===current.marker)render();
@@ -441,7 +452,7 @@
     if(action==='job')return select({job_id:target.dataset.jobId,tab:'current'});
     if(action==='overview')return select({job_id:'',tab:'overview'},{fetch:false});
     if(action==='tab')return select({tab:target.dataset.tab},{fetch:false});
-    if(action==='close_panel'||action==='open_panel')return select({panel_open:action==='open_panel'},{fetch:false});
+    if(action==='close_panel'||action==='open_panel')return setPanelOpen(action==='open_panel');
     if(action==='refresh')return refresh();
     if(action==='reload_options')return loadOptions(target.dataset.fieldId);
     if(action==='discard_inputs'){view.discardInputs();return;}
@@ -451,8 +462,6 @@
     if(action==='tools'){if(!workCanCreate(capabilities()))return;return select({mode:'author',tab:'tools',workflow_id:'',run_id:'',job_id:''});}
     if(action==='new_chat'){return source()?.newChat?.();}
     if(action==='chats')return select({mode:'work',tab:'chats'},{fetch:false});
-    if(action==='find')return dialog({title:'워크플로우 찾기',html:`<input id="ees-workflow-search" type="search" placeholder="업무 절차 검색" aria-label="업무 절차 검색"><div id="ees-workflow-list">${(state?.workflows || []).map(w=>button(w.name,'find_workflow',`data-workflow-id="${esc(w.id)}"`)).join('') || '<p>등록된 업무 절차가 없습니다.</p>'}</div>`});
-    if(action==='find_workflow'){closeDialog();return select({workflow_id:target.dataset.workflowId,run_id:'',job_id:'',mode:'work',tab:'overview',panel_open:true});}
     if(action==='start_run'){
       const at=context(),workflow=state?.workflow;let version=workflow?.published_version,groups=[],link=false;
       if(target.dataset.startInline!==undefined){const form=$('#ees-work-start');if(!form||[...form.querySelectorAll('input,select,textarea')].some(field=>!field.reportValidity()))return;const def=workflow.definition || workflow.published?.definition || workflow.draft,factory=def.execution_scope==='system'?'':($('#ees-start-factory')?.value || ''),inputs=workReadInputs(form);const result=await mutate({action:'start_run',expected_revision:workflow.revision,workflow_id:workflow.id,factory_id:factory,version,inputs,sharing:{group_ids:[...form.querySelectorAll('[data-start-group]:checked')].map(field=>field.value)}},{refreshAfter:false});if(result&&at===context()){const id=result.run?.id || result.run_id || result.id;delete selection.start_inputs?.[workflow.id];await select({factory_id:factory,run_id:id,tab:'overview'});}return;}
@@ -492,7 +501,6 @@
     const target=event.target;if(event.type==='submit'&&target.closest?.('[data-ees-work]')){event.preventDefault();return;}if(event.type==='keydown'&&event.repeat&&target.closest?.('[data-mutation]')){event.preventDefault();event.stopImmediatePropagation();return;}if(!target?.closest?.('[data-ees-work]'))return;
     if(event.type==='click'){const buttonTarget=target.closest('button[data-action]');if(!buttonTarget||buttonTarget.disabled)return;event.preventDefault();if(nativePage()&&buttonTarget.closest('#ees-work-entry')&&!['native_open','refresh'].includes(buttonTarget.dataset.action)){returnFromNative(buttonTarget);return;}Promise.resolve(handleClick(buttonTarget)).catch(failure=>{error=failure.message;render();});}
     if(event.type==='input'){
-      if(target.id==='ees-workflow-search'){const list=$('#ees-workflow-list');list?.querySelectorAll('button').forEach(item=>{item.hidden=!item.textContent.toLocaleLowerCase().includes(target.value.toLocaleLowerCase());});}
       if(target.closest?.('#ees-work-start')){const form=target.closest('#ees-work-start');selection.start_inputs ||= {};selection.start_inputs[selection.workflow_id]=workReadInputs(form);selection.start_groups ||= {};selection.start_groups[selection.workflow_id]=[...form.querySelectorAll('[data-start-group]:checked')].map(field=>field.value);remember();return;}
       if(target.id==='ees-request-reason'){selection.request_reasons ||= {};selection.request_reasons[selection.run_id+'/'+selection.job_id]=target.value;remember();return;}
       if(target.id==='ees-review-text'){view.capture();scheduleReviewSave();}
@@ -595,6 +603,6 @@
     if(selection.mode==='author')designer.render({state,selection:{...clone(selection),chat_id:id},host:view.authoringHost()});
     return designer.acceptProposal(payload,{chatId:id});
   }
-  window.__eesNativeWorkV1=Object.freeze({sync:schedule,action:sourceAction,dismissHelp:workUI.dismissHelp,refresh,open:()=>select({panel_open:true},{fetch:false}),selection:id=>id===chatId()?{ok:true,...reference()}:{ok:false,code:'selection_unconfirmed'},captureReference:()=>reference(),helpContext:()=>available()&&chatPrepared()?{context_id:context(),system_id:selection.system_id || ''}:null,chatCreated,beginChatCreation,finishChatCreation,ensureChat:async()=>({ok:true}),refreshActionRecords:()=>{},propose:acceptNativeProposal,display:async(id,options)=>{if(id!==chatId()||!available())return {ok:false};const allowed=['panel_open','workflow_id','run_id','job_id'];if(Object.keys(options || {}).some(key=>!allowed.includes(key)))return {ok:false};const result=await select(options);if(!result||options.workflow_id&&result.workflow?.id!==options.workflow_id||options.run_id&&result.run?.id!==options.run_id||options.job_id&&!result.run?.definition?.nodes?.[options.job_id])return {ok:false};return {ok:true};}});
+  window.__eesNativeWorkV1=Object.freeze({sync:schedule,action:sourceAction,dismissHelp:workUI.dismissHelp,refresh,open:()=>setPanelOpen(true),selection:id=>id===chatId()?{ok:true,...reference()}:{ok:false,code:'selection_unconfirmed'},captureReference:()=>reference(),helpContext:()=>available()&&chatPrepared()?{context_id:context(),system_id:selection.system_id || ''}:null,chatCreated,beginChatCreation,finishChatCreation,ensureChat:async()=>({ok:true}),refreshActionRecords:()=>{},propose:acceptNativeProposal,display:async(id,options)=>{if(id!==chatId()||!available())return {ok:false};const allowed=['panel_open','workflow_id','run_id','job_id'];if(Object.keys(options || {}).some(key=>!allowed.includes(key)))return {ok:false};const result=await select(options);if(!result||options.workflow_id&&result.workflow?.id!==options.workflow_id||options.run_id&&result.run?.id!==options.run_id||options.job_id&&!result.run?.definition?.nodes?.[options.job_id])return {ok:false};return {ok:true};}});
   schedule();
 })();

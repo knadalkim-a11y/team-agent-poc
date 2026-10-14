@@ -19,19 +19,19 @@
     "src/lib/components/chat/MessageInput.svelte": "15268374d960172401c29ad671feb4955cfa681df6688da78a859ae6ad1425fb",
     "src/lib/components/chat/Messages/ResponseMessage.svelte": "64fb38010aa936ec0eea0d9c0dd79a087b9c5026f94be8d08139fbd6529c1270",
     "src/lib/components/chat/Messages/UserMessage.svelte": "c677b13bf160de1bf0fafceef00ba5df098d661e6728c0dd5b1e6427b3e2eef8",
-    "src/lib/components/chat/Navbar.svelte": "4b22e695898df3f082b997eafb1c57fd0b06dc26659396f1dc9c80cc724016ab",
+    "src/lib/components/chat/Navbar.svelte": "25a532a81e4e1403779b5baeec96fdd4b3531d3edcafbfe48498879468607e3b",
     "src/lib/components/chat/Placeholder.svelte": "54e33b3997e9ce6bd78ea2b39f0d5b3bf280f8c494549eeb3d440df290cd6f97",
     "src/lib/components/ees/EesHelperNotice.svelte": "22ceccc7ad93c5d820f73269baaa9b19f12c5c99054b76ecc8c89f7757f8bba0",
     "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
-    "src/lib/components/ees/EesNavigation.svelte": "239884170f76f27f6d4eb92332eae53938c61557bcf276a1b2fb322c9de55bcd",
+    "src/lib/components/ees/EesNavigation.svelte": "e4df8a93e8a037fd219019b8d4940ab24be0a7e264b5caee869acd03a03be4aa",
     "src/lib/components/ees/EesProcedureIntro.svelte": "815ecc9164df95671f784bab30304013b5541c1fc98584092cc2742d8dc03b3b",
     "src/lib/components/ees/EesScopeSelect.svelte": "e2bdc710a5790f183951381ba8742128a2ceb761a02569d43a39defa5cd2a0aa",
-    "src/lib/components/ees/EesShell.svelte": "63cf62375b08665a1314e0313173345c6480af7a46fbace6c48148e9b0bf7edb",
+    "src/lib/components/ees/EesShell.svelte": "67492c17c2c2b41dcdad2cf86a1a096cc218fd6e2de6e645eb909e9f59f84c46",
     "src/lib/components/ees/icons/5bc95.svg": "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7",
     "src/lib/components/ees/state.ts": "560ef1a21f46fc2a1beabf3012a74933002af586c507ac42bb144f40fe305a43",
     "src/lib/components/layout/Sidebar.svelte": "9d08f54fdaa101ef2cf06c159e5defe421b366c695f26a15c4045bf3ba556096",
     "src/lib/constants.ts": "0fd43314837a2d7775810c3f08fc82b8042c34a5b6e52f1a7e4513f303a07b5d",
-    "src/lib/i18n/locales/ko-KR/translation.json": "32ffbe25fe2d4ee71a1d7d799e2654430dd1790f1aba8ac8d2b01fc1ab19a474",
+    "src/lib/i18n/locales/ko-KR/translation.json": "18a51c11149af26a5ebffa83ca4ad13eead56fbf8584df9f329a6c0d8d5ce71c",
     "src/routes/(app)/+layout.svelte": "6e235011199f1eb11107a2d444e5db8c6fb89d13b6e93b9e5980523bf87226f6",
     "src/routes/(app)/+page.svelte": "7cdd5f35c6d1064663d2bafd03263585ca270ce24d26788a656d465339e6cb03",
     "src/routes/(app)/c/[id]/+page.svelte": "2cf8b7796915e7711e467a4142d96ad1d4afc0366221236620719193d91d0ad2",
@@ -44,7 +44,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "357a17909f33898a3ead056202a82e53a04a57014e0e513619c2ed9fab0ded56"
+      "sha256": "bff48846ad8224779ff09a6839c5d35418ec3ef3797b04134ced73ffe5b03208"
     }
   ],
   "pyodide_files": {

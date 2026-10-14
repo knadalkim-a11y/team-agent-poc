@@ -82,7 +82,6 @@
 #ees-work-context>span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 #ees-work-context>div{display:flex;align-items:center;gap:6px;}
 #ees-work-context button{font-size:12px;border:0;min-height:26px;padding:2px 6px;}
-#ees-work-context .ew-reference{border:1px solid var(--ees-line-control);border-radius:4px;padding:1px 5px;font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 #ees-work-panel .ew-work-heading{margin:8px 0 16px;}
 #ees-work-panel .ew-work-heading h2{margin:7px 0;}
 #ees-work-panel .ew-work-heading p{font-size:12px;color:var(--ees-text-secondary);margin:6px 0;}
@@ -163,8 +162,8 @@
 #ees-workflow-list>button{text-align:left;}
 /* Native composer, messages and menus retain their real handlers and focus. */
 /* Pinned Native S8 logo/name is decorative; the composer keeps its real model selector. */
-@media(max-width:1199px){#ees-work-context{padding-inline:12px;}#ees-work-context .ew-reference{max-width:100px;}}
-@media(max-width:960px){#ees-work-context>div>small,#ees-work-context .ew-reference{display:none;}}
+@media(max-width:1199px){#ees-work-context{padding-inline:12px;}}
+@media(max-width:960px){#ees-work-context>div>small{display:none;}}
 @media(max-width:600px){#ees-work-content{padding:12px 16px 20px;}#ees-work-panel>.ew-panel-header{padding-inline:16px;}.ew-input-row{display:block;padding:10px;}.ew-input-row>span:first-child{display:block;width:auto;padding:0;margin-bottom:5px;}.ew-scope-columns{grid-template-columns:1fr;gap:16px;}.ew-job-actions{margin-inline:-16px;bottom:-20px;padding:10px 16px;}#ees-work-dialog{padding:18px;}#ees-work-context>span{display:none;}}
 /* C13: new procedure examples use the existing authoring panel and tokens. */
 .ew-author .ew-procedure-start>.ew-author-back{border:0;min-height:22px;gap:6px;font-size:14px;line-height:22px;}
