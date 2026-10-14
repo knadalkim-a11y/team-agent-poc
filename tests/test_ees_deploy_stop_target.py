@@ -3,7 +3,7 @@
 import ctypes
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 import subprocess
 import sys
 import tempfile
@@ -13,6 +13,31 @@ import unittest
 from unittest.mock import Mock, patch
 
 from scripts import ees_deploy_stop_target as target
+
+
+def _venv_failure_snapshot(snapshot, launcher_pid, runtime_pid):
+    """Project only the disposable fixture's process relationships on failure."""
+    expected = {'launcher': launcher_pid, 'runtime': runtime_pid}
+    related = {pid for pid in expected.values() if type(pid) is int}
+    pending = set(related)
+    while pending:
+        descendants = {pid for pid, parent in snapshot.items() if parent in pending} - related
+        related.update(descendants)
+        pending = descendants
+    rows = []
+    for pid in sorted(related):
+        row = {'pid': pid, 'ppid': snapshot.get(pid), 'image': None,
+               'created_at': None, 'exists': None}
+        try:
+            identity = target.processes._identity(pid)
+            row['exists'] = identity is not None
+            if identity is not None:
+                row['image'] = PureWindowsPath(identity['executable']).name
+                row['created_at'] = identity['created_at']
+        except Exception as error:
+            row['read_error'] = type(error).__name__
+        rows.append(row)
+    return {'expected_synthetic_pid': expected, 'processes': rows}
 
 
 class TargetTests(unittest.TestCase):
@@ -211,6 +236,15 @@ class WindowsVenvTests(unittest.TestCase):
                                      stderr=subprocess.DEVNULL,
                                      creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
             server = None
+            actual_pid = None
+            snapshots = []
+            original_snapshot = target._windows_processes
+
+            def observe_snapshot():
+                snapshot = original_snapshot()
+                snapshots[:] = [snapshot]
+                return snapshot
+
             try:
                 deadline = time.monotonic() + 10
                 while not marker.exists() and time.monotonic() < deadline:
@@ -221,16 +255,28 @@ class WindowsVenvTests(unittest.TestCase):
                 parent = target.processes._identity(child.pid)
                 parent['group_id'] = child.pid
                 server = target.processes._identity(actual_pid)
-                selected = target.resolve_server_target(parent, str(python))
-                self.assertEqual(selected['target']['pid'], actual_pid)
-                self.assertEqual(selected['parent']['pid'], child.pid)
-                with patch.object(target.processes, 'terminate_registered_process',
-                                  wraps=target.processes.terminate_registered_process) as terminate:
-                    self.assertTrue(target.terminate_server_target(parent, str(python), timeout=5))
-                self.assertEqual(terminate.call_count, 1)
-                self.assertEqual(terminate.call_args.args[0]['pid'], actual_pid)
-                child.wait(timeout=5)
-                self.assertIsNone(target.processes._identity(actual_pid))
+                with patch.object(target, '_windows_processes', side_effect=observe_snapshot):
+                    selected = target.resolve_server_target(parent, str(python))
+                    self.assertEqual(selected['target']['pid'], actual_pid)
+                    self.assertEqual(selected['parent']['pid'], child.pid)
+                    with patch.object(target.processes, 'terminate_registered_process',
+                                      wraps=target.processes.terminate_registered_process) as terminate:
+                        self.assertTrue(target.terminate_server_target(parent, str(python), timeout=5))
+                    self.assertEqual(terminate.call_count, 1)
+                    self.assertEqual(terminate.call_args.args[0]['pid'], actual_pid)
+                    child.wait(timeout=5)
+                    self.assertIsNone(target.processes._identity(actual_pid))
+            except Exception as error:
+                # Reuse the exact resolver snapshot. Identity reads happen only
+                # after failure; no command line, environment or full path is logged.
+                try:
+                    snapshot = snapshots[-1] if snapshots else original_snapshot()
+                    diagnostic = _venv_failure_snapshot(snapshot, child.pid, actual_pid)
+                    diagnostic['snapshot_source'] = 'resolver' if snapshots else 'failure'
+                    error.add_note('Synthetic venv process snapshot: ' + json.dumps(diagnostic, sort_keys=True))
+                except Exception as capture_error:
+                    error.add_note('Synthetic venv process snapshot unavailable: ' + type(capture_error).__name__)
+                raise
             finally:
                 # Only disposable test-owned processes; never a process tree.
                 if server is not None and target.processes._same(

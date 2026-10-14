@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "run": {
+    "id": 38527638742,
+    "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38527638742",
+    "head_sha": "91f1db033bc6f91439c540c73308f272d9544883",
+    "tested_merge_sha": "f3b139c3cf36ba3ce79d45e4bb0a644649dd5465",
+    "conclusion": "failure",
+    "completed_updated_at_utc": "2026-10-14T07:37:20Z"
+  },
+  "job_counts": {
+    "total": 32,
+    "success": 28,
+    "failure": 2,
+    "cancelled": 1,
+    "skipped": 1
+  },
+  "non_success_jobs": [
+    {
+      "id": 115734689726,
+      "name": "platform (windows-2022)",
+      "conclusion": "failure",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38527638742/job/115734689726"
+    },
+    {
+      "id": 115737714666,
+      "name": "Delivery checks (ubuntu-24.04)",
+      "conclusion": "failure",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38527638742/job/115737714666"
+    },
+    {
+      "id": 115737714727,
+      "name": "Delivery checks (windows-2022)",
+      "conclusion": "cancelled",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38527638742/job/115737714727"
+    },
+    {
+      "id": 115737751211,
+      "name": "Prepare delivery files",
+      "conclusion": "skipped",
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38527638742/job/115737751211"
+    }
+  ],
+  "first_failure": {
+    "job_id": 115734689726,
+    "job": "platform (windows-2022)",
+    "test": "test_ees_deploy_stop_target.WindowsVenvTests.test_actual_venv_child_termination_releases_waiting_launcher",
+    "test_source": "tests/test_ees_deploy_stop_target.py:224",
+    "product_source": "scripts/ees_deploy_stop_target.py:153",
+    "exception": "ees_deploy_process.ProcessError",
+    "message": "The managed server has unexpected descendants; no process was terminated.",
+    "module_tests": 16,
+    "module_errors": 1,
+    "verbatim_excerpt": "windows-stop-failure.txt"
+  },
+  "confirmed": {
+    "phase": "The first ToolHelp PID/parent-PID snapshot gave the synthetic launcher one direct child, and that child had a descendant. Selection stopped before checking the child identity, probing the interpreter or terminating a target.",
+    "related_tests": {
+      "windows_asset_native": {
+        "tests": 60,
+        "passed": 60,
+        "seconds": 134.374
+      },
+      "windows_workflow_native": {
+        "tests": 21,
+        "passed": 21,
+        "seconds": 83.008
+      },
+      "windows_upgrade": {
+        "tests": 59,
+        "passed": 59,
+        "seconds": 6.175
+      },
+      "native_account": {
+        "account_switch_passed": 1,
+        "other_account_tests_passed": 10
+      }
+    },
+    "previous_success": {
+      "run_id": 38525473317,
+      "head_sha": "848c76908c8ef829c90bdccb42f580b36f9f2263",
+      "product_and_test_files_unchanged": true
+    },
+    "unchanged_files": [
+      "scripts/ees_deploy_stop_target.py",
+      "tests/test_ees_deploy_stop_target.py"
+    ]
+  },
+  "diagnosis": {
+    "root_cause": "unconfirmed",
+    "missing_evidence": "The original failure contains no descendant identity or creation time, so the cause of the unexpected PID/parent-PID relationship cannot be determined.",
+    "followup": "The existing disposable Windows venv fixture records the resolver's original snapshot without changing its return value. On failure only, it adds the expected synthetic PIDs and related PID/parent-PID, executable basename, creation time and existence/read status to the original exception note. No command line, environment, full image path, timeout, assertion, product guard or cleanup behavior is changed.",
+    "retry_bound": "One new CI run after adding diagnostics; a passing retry alone does not establish the root cause or a product fix."
+  },
+  "scope": "Read-only CI evidence and disposable fixture diagnostics; no internal execution, deployment, process guard relaxation, merge or remote retry was performed."
+}
