@@ -1,0 +1,139 @@
+{
+  "baseline_commit": "42cc7568eb8477013abcf0a042617dd9e3279db2",
+  "test": "test_ees_source_shell_native.SourceShellNativeTests.test_delayed_navigation_never_replaces_loaded_menu_or_panel_with_loading",
+  "status": "negative_control_verified",
+  "provenance": {
+    "commit": "42cc7568eb8477013abcf0a042617dd9e3279db2",
+    "frontend_origin": "official_run_38482091822"
+  },
+  "wheel_sha256": "c7cabc53cf95e7b91484afdd1b70ead6c5336983003ff6c55496da0161adede8",
+  "test_sources": {
+    "test_ees_source_shell_native.py": "920e5888fea0edaec82efb25a7e7c1a5e91716f7833ccbd2085d3ae2f26926e2",
+    "ees_source_frame_monitor.py": "71ff61eb7901e1b3face324857830cda15e83e5c2a1939e9e22f6b4b9a6da9b5"
+  },
+  "tests_run": 1,
+  "failures": [
+    "Traceback (most recent call last):\n  File \"/home/runner/work/team-agent-poc/team-agent-poc/dist/navigation-baseline-source/tests/test_ees_source_shell_native.py\", line 174, in test_delayed_navigation_never_replaces_loaded_menu_or_panel_with_loading\n    frame_monitor.assert_clean(self, evidence, labels=labels)\n  File \"/home/runner/work/team-agent-poc/team-agent-poc/dist/navigation-baseline-source/tests/ees_source_frame_monitor.py\", line 108, in assert_clean\n    case.assertEqual(loading[:10], [],\nAssertionError: Lists differ: [{'at': 4239.099999999977, 'label': 'skill[3212 chars]one}] != []\n\nFirst list contains 10 additional elements.\nFirst extra element 0:\n{'at': 4239.099999999977, 'label': 'skills-to-procedures', 'path': '/c/existing-chat', 'source': True, 'menu': True, 'bodyHidden': False, 'missingSource': False, 'legacy': [], 'loadingGuard': True, 'menuLoading': ['불러오는 중…'], 'panelLoading': [], 'content': True, 'adminDialog': False, 'sourceText': True, 'startupGate': None}\n\nDiff is 3854 characters long. Set self.maxDiff to None to see it. : Observed EES loading placeholders after initial data: 1082 frames\n"
+  ],
+  "errors": [],
+  "skipped": [],
+  "baseline_status": "failed_as_required",
+  "loading_frames": 1082,
+  "counts": {
+    "skills-to-procedures-enter-workspace": {
+      "frames": 127,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "skills-to-procedures-native": {
+      "frames": 69,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "skills-to-procedures": {
+      "frames": 129,
+      "menu_loading": 121,
+      "panel_loading": 0
+    },
+    "skills-to-my-work-enter-workspace": {
+      "frames": 127,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "skills-to-my-work-native": {
+      "frames": 68,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "skills-to-my-work": {
+      "frames": 249,
+      "menu_loading": 120,
+      "panel_loading": 0
+    },
+    "tools-to-procedures-enter-workspace": {
+      "frames": 126,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "tools-to-procedures-native": {
+      "frames": 69,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "tools-to-procedures": {
+      "frames": 128,
+      "menu_loading": 121,
+      "panel_loading": 0
+    },
+    "tools-to-my-work-enter-workspace": {
+      "frames": 127,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "tools-to-my-work-native": {
+      "frames": 67,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "tools-to-my-work": {
+      "frames": 249,
+      "menu_loading": 120,
+      "panel_loading": 0
+    },
+    "models-to-procedures-enter-workspace": {
+      "frames": 126,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "models-to-procedures-native": {
+      "frames": 68,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "models-to-procedures": {
+      "frames": 128,
+      "menu_loading": 121,
+      "panel_loading": 0
+    },
+    "models-to-my-work-enter-workspace": {
+      "frames": 126,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "models-to-my-work-native": {
+      "frames": 67,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "models-to-my-work": {
+      "frames": 249,
+      "menu_loading": 120,
+      "panel_loading": 0
+    },
+    "delayed-chat-list": {
+      "frames": 7,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "delayed-chat-switch": {
+      "frames": 132,
+      "menu_loading": 120,
+      "panel_loading": 120
+    },
+    "delayed-new-chat": {
+      "frames": 129,
+      "menu_loading": 120,
+      "panel_loading": 120
+    },
+    "delayed-chat-list-return": {
+      "frames": 6,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "delayed-existing-return": {
+      "frames": 129,
+      "menu_loading": 119,
+      "panel_loading": 119
+    }
+  }
+}

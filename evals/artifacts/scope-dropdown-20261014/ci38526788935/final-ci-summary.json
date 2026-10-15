@@ -1,0 +1,524 @@
+{
+  "run_id": 38526788935,
+  "head_sha": "fe936ba3294d4098780b2dc782ad01507332f5bf",
+  "merge_sha": "740a7fed77c557e01a0796dc225eab453262a62c",
+  "scope_conclusion": "A2 scope dropdown and loading-preservation Native tests passed",
+  "artifacts": {
+    "native-compose": {
+      "id": 11876629233,
+      "zip_sha256": "5322be58d7a6836ed4a938b68f1ecd1fd140eb64db9b9295e26b4b06aa3145c2",
+      "zip_bytes": 10015348
+    },
+    "native-work": {
+      "id": 11876364015,
+      "zip_sha256": "c5f7befda7e4a58c2b59776abf6f690ae66662daf20b1ea91c032f8ca87618ad",
+      "zip_bytes": 457535
+    },
+    "negative": {
+      "id": 11876457504,
+      "zip_sha256": "1366456cef3922d7b0e9b3d46ca5a4fb52f060af4c8a096b5e014ec09d142fe5",
+      "zip_bytes": 172171
+    }
+  },
+  "candidate_frames": {
+    "source-shell-delayed-navigation-frames.json": {
+      "frames": 2686,
+      "guarded_frames": 2646,
+      "loading_frames_after_initial": 0,
+      "shell_failures": 0,
+      "frames_by_label": {
+        "first-load": 31,
+        "warm-procedures": 5,
+        "warm-my-work": 4,
+        "skills-to-procedures-enter-workspace": 127,
+        "skills-to-procedures-native": 69,
+        "skills-to-procedures": 129,
+        "skills-to-my-work-enter-workspace": 126,
+        "skills-to-my-work-native": 69,
+        "skills-to-my-work": 189,
+        "tools-to-procedures-enter-workspace": 127,
+        "tools-to-procedures-native": 69,
+        "tools-to-procedures": 130,
+        "tools-to-my-work-enter-workspace": 126,
+        "tools-to-my-work-native": 67,
+        "tools-to-my-work": 249,
+        "models-to-procedures-enter-workspace": 127,
+        "models-to-procedures-native": 69,
+        "models-to-procedures": 129,
+        "models-to-my-work-enter-workspace": 127,
+        "models-to-my-work-native": 67,
+        "models-to-my-work": 249,
+        "delayed-chat-list": 6,
+        "delayed-chat-switch": 131,
+        "delayed-new-chat": 128,
+        "delayed-chat-list-return": 6,
+        "delayed-existing-return": 130
+      },
+      "delayed_reads": 42
+    },
+    "source-shell-all-navigation-frames.json": {
+      "frames": 147,
+      "guarded_frames": 104,
+      "loading_frames_after_initial": 0,
+      "shell_failures": 0,
+      "frames_by_label": {
+        "first-load": 28,
+        "work-open": 15,
+        "right-overview": 4,
+        "right-other-task": 4,
+        "chat-list": 4,
+        "chat-list-open": 8,
+        "new-chat": 5,
+        "chat-list-again": 4,
+        "chat-existing-return": 8,
+        "work-authoring": 6,
+        "work-tools": 3,
+        "work-access": 4,
+        "work-procedures": 4,
+        "native-models": 6,
+        "native-knowledge": 5,
+        "native-prompts": 5,
+        "native-skills": 5,
+        "native-tools": 6,
+        "native-return": 4,
+        "admin-open": 6,
+        "admin-return": 13
+      }
+    },
+    "source-scope-delayed-frames.json": {
+      "frames": 1209,
+      "guarded_frames": 1171,
+      "loading_frames_after_initial": 0,
+      "shell_failures": 0,
+      "frames_by_label": {
+        "first-load": 41,
+        "scope-factory-first": 129,
+        "scope-factory-second": 128,
+        "scope-all-factories": 128,
+        "scope-system-apc": 128,
+        "scope-system-ems": 137,
+        "scope-workspace-system-apc": 126,
+        "scope-native-skills": 70,
+        "scope-native-system-ems": 66,
+        "scope-native-return": 130,
+        "scope-server-catalog-change": 126
+      },
+      "delayed_reads": 19
+    },
+    "source-shell-delayed-preservation-frames.json": {
+      "frames": 634,
+      "guarded_frames": 576,
+      "loading_frames_after_initial": 0,
+      "shell_failures": 0,
+      "frames_by_label": {
+        "first-load": 58,
+        "changed-background-refresh": 124,
+        "preservation-native-skills": 69,
+        "preservation-native-return": 129,
+        "preservation-my-work": 126,
+        "preservation-author-return": 128
+      },
+      "delayed_reads": 9
+    }
+  },
+  "native_compose": {
+    "counts": {
+      "passed": 59,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "expected-failure": 0,
+      "unexpected-success": 0
+    },
+    "modules": [
+      {
+        "module": "test_ees_helper_chat_native.py",
+        "counts": {
+          "passed": 10,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0,
+          "expected-failure": 0,
+          "unexpected-success": 0
+        }
+      },
+      {
+        "module": "test_ees_source_shell_native.py",
+        "counts": {
+          "passed": 5,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0,
+          "expected-failure": 0,
+          "unexpected-success": 0
+        }
+      },
+      {
+        "module": "test_ees_work_c_phase1_native.py",
+        "counts": {
+          "passed": 5,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0,
+          "expected-failure": 0,
+          "unexpected-success": 0
+        }
+      },
+      {
+        "module": "test_ees_work_c_phase2_native.py",
+        "counts": {
+          "passed": 6,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0,
+          "expected-failure": 0,
+          "unexpected-success": 0
+        }
+      },
+      {
+        "module": "test_ees_work_figma_authoring_native.py",
+        "counts": {
+          "passed": 20,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0,
+          "expected-failure": 0,
+          "unexpected-success": 0
+        }
+      },
+      {
+        "module": "test_ees_work_figma_layout_native.py",
+        "counts": {
+          "passed": 5,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0,
+          "expected-failure": 0,
+          "unexpected-success": 0
+        }
+      },
+      {
+        "module": "test_ees_work_figma_runtime_native.py",
+        "counts": {
+          "passed": 8,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0,
+          "expected-failure": 0,
+          "unexpected-success": 0
+        }
+      }
+    ]
+  },
+  "baseline": {
+    "baseline_commit": "42cc7568eb8477013abcf0a042617dd9e3279db2",
+    "wheel_sha256": "c7cabc53cf95e7b91484afdd1b70ead6c5336983003ff6c55496da0161adede8",
+    "test_sources": {
+      "test_ees_source_shell_native.py": "4ef28bb2e7e51b0f4da2cd868bce3048e351cf02e72f6b3d60e363eb34f9f71c",
+      "ees_source_frame_monitor.py": "71ff61eb7901e1b3face324857830cda15e83e5c2a1939e9e22f6b4b9a6da9b5"
+    },
+    "baseline_status": "failed_as_required",
+    "loading_frames": 1080
+  },
+  "native_work": {
+    "passed": 12,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "scope_geometry": {
+    "work-factory": {
+      "field": {
+        "left": 8,
+        "right": 247,
+        "bottom": 162
+      },
+      "popup": {
+        "left": 8,
+        "top": 166,
+        "width": 239,
+        "height": 360
+      },
+      "list": {
+        "height": 307,
+        "scrollHeight": 494,
+        "clientHeight": 307,
+        "overflow": "auto"
+      },
+      "border": "rgb(47, 95, 152)",
+      "selectedCheck": {
+        "src": "/_ees14/v4/9d8d5.svg",
+        "naturalWidth": 16,
+        "width": 16,
+        "height": 16,
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "insideList": true
+      }
+    },
+    "work-system": {
+      "field": {
+        "left": 8,
+        "right": 247,
+        "bottom": 201
+      },
+      "popup": {
+        "left": 8,
+        "top": 205,
+        "width": 239,
+        "height": 334
+      },
+      "list": {
+        "height": 332,
+        "scrollHeight": 332,
+        "clientHeight": 332,
+        "overflow": "auto"
+      },
+      "border": "rgb(47, 95, 152)",
+      "selectedCheck": {
+        "src": "/_ees14/v4/9d8d5.svg",
+        "naturalWidth": 16,
+        "width": 16,
+        "height": 16,
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "insideList": true
+      }
+    },
+    "workspace-system": {
+      "field": {
+        "left": 8,
+        "right": 247,
+        "bottom": 162
+      },
+      "popup": {
+        "left": 8,
+        "top": 166,
+        "width": 239,
+        "height": 334
+      },
+      "list": {
+        "height": 332,
+        "scrollHeight": 332,
+        "clientHeight": 332,
+        "overflow": "auto"
+      },
+      "border": "rgb(47, 95, 152)",
+      "selectedCheck": {
+        "src": "/_ees14/v4/9d8d5.svg",
+        "naturalWidth": 16,
+        "width": 16,
+        "height": 16,
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "insideList": true
+      }
+    }
+  },
+  "keyboard": {
+    "events": 128,
+    "all_trusted": true,
+    "trusted_enter_keypress": 6,
+    "trusted_space_keypress": 3,
+    "keydown_by_key": {
+      "Escape": 6,
+      "Enter": 6,
+      " ": 3,
+      "a": 2,
+      "Backspace": 1,
+      "ArrowDown": 27,
+      "ArrowUp": 3
+    }
+  },
+  "asserted_behavior": [
+    "Factory, work-system and workspace-system open by click/Enter/Space; Escape restores trigger focus; outside click closes.",
+    "Immediate scope selection; selected aria/check asset; disabled factory/system cannot be selected.",
+    "Eight-factory search filters; factory list scrolls internally while page position stays fixed.",
+    "ArrowUp/ArrowDown focus enabled options; Enter selects and closes without chat submission.",
+    "Draft and chat identity preserved; only one dropdown; screen/server catalog changes close dropdown.",
+    "Delayed first-time factory/system selections, workspace and Native scope roundtrip: no loading frame after initial load, collapsed navigation and draft preserved."
+  ],
+  "visual_observation": "Three actual Native screenshots independently viewed: each dropdown aligns under its field with a blue open border, no centered dialog or dimmed background. Selected check, owner/participant subtitles, and disabled FDC are visible; workspace omits factory field. Chat draft remains visible.",
+  "screenshots": {
+    "source-scope-workspace-system.png": "9fe5ba490463ca73eaec9cac7a5076fddfe7f9c2988700ec3c0c092f44e075b5",
+    "source-scope-work-system.png": "1784d66fc1daff9fd8898e85506de1e0d271cfd49545d46603754d3e1fa83ac2",
+    "source-scope-work-factory.png": "faefbc9bc2704e44ce81b9badf96d72605ca4d1f0081b39c4d46d3551423f154"
+  },
+  "workflow": {
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 115728924260,
+        "name": "Pinned Native source baseline and EES frontend build",
+        "conclusion": "success"
+      },
+      {
+        "id": 115730860730,
+        "name": "Prepare pinned program fixtures and test coverage",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459086,
+        "name": "native-compose (ubuntu-24.04)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459189,
+        "name": "Complete Native product (ubuntu-24.04)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459207,
+        "name": "native-work (ubuntu-24.04)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459273,
+        "name": "native-execution (ubuntu-24.04)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459397,
+        "name": "native-account (ubuntu-24.04)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459433,
+        "name": "program-wheel (ubuntu-24.04)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459467,
+        "name": "services (windows-2022)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459476,
+        "name": "contracts (windows-2022)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459485,
+        "name": "restore-ees13 (ubuntu-24.04)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459492,
+        "name": "native-contracts (windows-2022)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459507,
+        "name": "contracts (ubuntu-24.04)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459524,
+        "name": "platform (ubuntu-24.04)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459542,
+        "name": "native-contracts (ubuntu-24.04)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459556,
+        "name": "native-grounding (windows-2022)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459559,
+        "name": "restore-ees11 (windows-2022)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459580,
+        "name": "program-install (ubuntu-24.04)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459582,
+        "name": "restore-ees10 (ubuntu-24.04)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459591,
+        "name": "restore-ees11 (ubuntu-24.04)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459613,
+        "name": "restore-ees10 (windows-2022)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459654,
+        "name": "program-wheel (windows-2022)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459656,
+        "name": "services (ubuntu-24.04)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459672,
+        "name": "restore-ees12 (ubuntu-24.04)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459743,
+        "name": "native-grounding (ubuntu-24.04)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459790,
+        "name": "restore-ees13 (windows-2022)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459812,
+        "name": "program-install (windows-2022)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459832,
+        "name": "restore-ees12 (windows-2022)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115731459858,
+        "name": "platform (windows-2022)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115734552501,
+        "name": "Delivery checks (ubuntu-24.04)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115734552632,
+        "name": "Delivery checks (windows-2022)",
+        "conclusion": "success"
+      },
+      {
+        "id": 115734587274,
+        "name": "Prepare delivery files",
+        "conclusion": "skipped"
+      }
+    ],
+    "job_counts": {
+      "total": 32,
+      "success": 31,
+      "skipped": 1,
+      "failed": 0
+    }
+  }
+}

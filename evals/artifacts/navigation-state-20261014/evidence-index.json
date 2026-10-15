@@ -1,0 +1,80 @@
+{
+  "date": "2026-10-14",
+  "scope": "Local source compilation and package identity. Browser negative-control and candidate acceptance must be determined independently by GitHub CI.",
+  "repository_commit": "b4f370bfd97e782597372b775f78038baa07127a",
+  "environment": {
+    "python": "3.12.14",
+    "node": "22.16.0",
+    "npm": "10.9.2",
+    "upstream_commit": "2a960a59fe1dbbd35282f0556b3666d81102e781",
+    "lock_sha256": "d881d8cc85238f1bed6530b2f12be268d6ccf01dc5a7285a19ba325919a4b5d2",
+    "official_wheel_sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
+  },
+  "final_build": {
+    "source_input_count": 128,
+    "source_inputs_sha256": "c9130618aad8d14a7b6118421b8bc14eaf93edfa59837026e4a2f86dfe13e132",
+    "source_inputs_unchanged": true,
+    "frontend_file_count": 5582,
+    "frontend_manifest_sha256": "8f954d586b33ea6b50309b588b40c480301015d51954c5ac61262497a6afe8c5",
+    "all_packaged_frontend_files_equal_compiled_files": true,
+    "assembled_launcher_bytes_equal_packaged_launcher": true,
+    "wheel_sha256": "3d22eb03569782cda996dba9f79a45648311b06862770bb7dd13942174ae362d",
+    "wheel_size": 152068194,
+    "source_config_sha256": "4b48ebe3bcd674e8d2b22b3c9391f315998639e957662a87fea25e4f672fa57b",
+    "patch_sha256": "2d486aeb30b32fdd8b12741c3ac2359111218955cf0e282e2abeb4c6cf54f747",
+    "build_elapsed": "2m 3s",
+    "large_outputs": "Kept only under ignored dist; not committed."
+  },
+  "tests": {
+    "compiled_source": {
+      "passed": 22,
+      "failed": 0,
+      "skipped": 0,
+      "log": "local-source-22.log"
+    },
+    "node_final": {
+      "passed": 278,
+      "failed": 0,
+      "skipped": 0,
+      "duration_ms": 624.394574,
+      "log": "local-node-278.log",
+      "boundary": "Final product source including closeStart capturePosition addition."
+    }
+  },
+  "local_browser": {
+    "product_test_executed": false,
+    "negative_control_observed": false,
+    "stage": "browser_handshake before any product page",
+    "cause": "Chrome process_singleton_posix.cc:292 socket() failed: Operation not permitted (1)",
+    "log": "local-browser-startup-blocked.log",
+    "response": "Did not bypass the runtime restriction; use the same regression on GitHub CI."
+  },
+  "earlier_attempts": [
+    {
+      "kind": "test_environment_setup",
+      "outcome": "not product evidence",
+      "details": "Corrected invocation paths, executable permission on extracted Chrome, and an incomplete extraction target; validated a separate complete baseline wheel against its original manifest before invoking the browser."
+    },
+    {
+      "kind": "frontend_preflight",
+      "outcome": "stopped before build",
+      "details": "Patch hash mismatch while edits were in flight. Regenerated patch and patched-file hashes from a clean pinned upstream worktree."
+    },
+    {
+      "kind": "source_test_environment",
+      "outcome": "5 missing-dependency failures; no product conclusion",
+      "details": "The temporary hash-only worktree lacked TypeScript; reused the exact installed upstream TypeScript, then all22source tests passed."
+    },
+    {
+      "kind": "first_compile",
+      "outcome": "success but superseded",
+      "details": "First source build and22tests passed, but a later capturePosition fix changed a source input. Preserved that build as an earlier input and rebuilt final from another clean upstream worktree; no compiled-byte rewriting."
+    }
+  ],
+  "reproduce": {
+    "frontend_build": "PATH=<pinned Node22.16.0 bin>:$PATH NODE_OPTIONS=--max-old-space-size=6144 .venv/bin/python scripts/build_ees_frontend.py --source-dir <clean pinned upstream with exact npm ci> --wheel <official pinned wheel> --output-dir <new output>",
+    "source_tests": "EES_TEST_FRONTEND_SOURCE_DIR=<patched upstream> .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_frontend_build -v",
+    "wheel_build": ".venv/bin/python scripts/build_ees_webui.py --wheel <official pinned wheel> --frontend-dir <validated frontend output> --output-dir <new branding output>"
+  },
+  "repository_tree": "f8a6211011268597e2292604b42b2f53cc90fec5"
+}

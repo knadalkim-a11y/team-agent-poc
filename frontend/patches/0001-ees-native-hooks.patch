@@ -999,7 +999,7 @@ index c7a4f3c..5fe51cf 100644
  					<div class="flex {($settings?.chatBubble ?? true) ? 'justify-end pb-1' : 'w-full'}">
  						<div
 diff --git a/src/lib/components/chat/Navbar.svelte b/src/lib/components/chat/Navbar.svelte
-index b6a045e..4454074 100644
+index b6a045e..7fd3b5c 100644
 --- a/src/lib/components/chat/Navbar.svelte
 +++ b/src/lib/components/chat/Navbar.svelte
 @@ -1,4 +1,6 @@
@@ -1077,7 +1077,7 @@ index b6a045e..4454074 100644
  							</div>
  
  							{#if shareEnabled && chat && (chat.id || $temporaryChatEnabled)}
-@@ -150,18 +132,14 @@
+@@ -150,18 +132,21 @@
  								</Menu>
  							{/if}
  						</div>
@@ -1095,14 +1095,21 @@ index b6a045e..4454074 100644
  
 -				<div class="lg:mr-1 flex flex-none items-center gap-2 self-center">
 +				<div class="ees-context-actions flex flex-none items-center gap-2 self-center">
-+                    <span class="ees-reference-caption">{$i18n.t('EES.Reference',{defaultValue:'Reference'})}</span>
-+                    <span class="ew-reference">{$eesSnapshot.reference_label || $i18n.t('EES.GeneralConversation',{defaultValue:'General conversation'})}</span>
-+                    <button data-action="open_panel" aria-label={$i18n.t('EES.OpenPanel',{defaultValue:'Open work panel'})} on:click={()=>eesAction({action:'open_panel'})}><EesIcon name="a9175"/></button>
++                    {#if $eesSnapshot.selection?.panel_open === false}
++                        <button
++                            id="ees-work-panel-open"
++                            class="ees-panel-open"
++                            data-action="open_panel"
++                            aria-expanded={$eesSnapshot.selection?.panel_open !== false}
++                            aria-controls="ees-work-panel"
++                            on:click={()=>eesAction({action:'open_panel'})}
++                        ><EesIcon name="a9175"/>{$i18n.t('EES.OpenPanel',{defaultValue:'Open work panel'})}</button>
++                    {/if}
 +                    <button data-action="new_chat" on:click={()=>window.__eesSourceShellV1?.newChat?.()}>{$i18n.t('EES.Nav.NewChat',{defaultValue:'New chat'})}</button>
  					<!-- <div class="md:hidden flex self-center w-[0.0625rem] h-5 mx-2 bg-gray-300 dark:bg-stone-700" /> -->
  
  					{#if $user?.role === 'user' ? ($user?.permissions?.chat?.temporary ?? true) && !($user?.permissions?.chat?.temporary_enforced ?? false) : true}
-@@ -248,12 +226,6 @@
+@@ -248,12 +233,6 @@
  		</div>
  	</div>
  
@@ -1115,7 +1122,7 @@ index b6a045e..4454074 100644
  	<div class="absolute top-[100%] left-0 right-0 h-fit">
  		{#if !history.currentId && !$chatId && ($banners.length > 0 || ($config?.license_metadata?.type ?? null) === 'trial' || (($config?.license_metadata?.seats ?? null) !== null && $config?.user_count > $config?.license_metadata?.seats))}
  			<div class=" w-full z-30">
-@@ -310,3 +282,12 @@
+@@ -310,3 +289,12 @@
  		{/if}
  	</div>
  </nav>
@@ -1124,8 +1131,8 @@ index b6a045e..4454074 100644
 + #ees-work-context {height:48px;min-height:48px;padding:0;flex:none;display:flex;justify-content:center;border-bottom:1px solid #e6e6e9;background:#fff;font-size:14px;}
 + #ees-work-context > div:first-child {padding:0 24px;}
 + .ees-context-actions {min-width:0;font-size:13px;}
-+ .ees-reference-caption {color:#7a7d85;}
 + .ees-context-actions button {padding:4px;border-radius:6px;}
++ #ees-work-context button.ees-panel-open {display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid #d9dbde;font-size:13px;font-weight:500;color:#3f4147;white-space:nowrap;}
 + .ees-context-actions button:hover {background:#eef0f3;}
 +</style>
 diff --git a/src/lib/components/chat/Placeholder.svelte b/src/lib/components/chat/Placeholder.svelte
@@ -1323,12 +1330,14 @@ index 0000000..a509ea5
 +/>
 diff --git a/src/lib/components/ees/EesNavigation.svelte b/src/lib/components/ees/EesNavigation.svelte
 new file mode 100644
-index 0000000..374d8ed
+index 0000000..be842d3
 --- /dev/null
 +++ b/src/lib/components/ees/EesNavigation.svelte
-@@ -0,0 +1,261 @@
+@@ -0,0 +1,250 @@
 +<script lang="ts">
 +	import { getContext } from 'svelte';
++	import { page } from '$app/stores';
++	import EesScopeSelect from './EesScopeSelect.svelte';
 +	import { eesSnapshot, eesAction, eesCompact } from './state';
 +	import Icon from './EesIcon.svelte';
 +	const i18n: any = getContext('i18n');
@@ -1356,7 +1365,6 @@ index 0000000..374d8ed
 +	};
 +	const normal = [
 +		['my_work', '4df0d', 'EES.Nav.MyWork', 'My work'],
-+		['find', '2e769', 'EES.Nav.Find', 'Find workflows'],
 +		['records', 'c325d', 'EES.Nav.Records', 'Execution history'],
 +		['chats', '093d6', 'EES.Nav.Chats', 'Chat history']
 +	];
@@ -1367,7 +1375,7 @@ index 0000000..374d8ed
 +	];
 +	$: data = $eesSnapshot.state || {};
 +	$: s = $eesSnapshot.selection || {};
-+	$: cap = data.capabilities || {};
++	$: cap = $eesSnapshot.native_capabilities ?? data.capabilities ?? {};
 +	$: author = $eesSnapshot.native_shell || s.mode === 'author';
 +	$: create = cap.is_admin === true || cap.can_author === true || cap.can_manage === true;
 +	$: canWorkspace =
@@ -1375,8 +1383,12 @@ index 0000000..374d8ed
 +		cap.managed_systems?.length ||
 +		(cap.native_access_available && Object.values(cap.native_access || {}).some(Boolean));
 +	$: current = (data.workflows || []).filter((w) => !s.system_id || w.system_id === s.system_id);
-+	$: system = (data.systems || []).find((x) => (x.id || x) === s.system_id);
-+	$: factory = (data.factories || []).find((x) => x.id === s.factory_id);
++	let openedScope = '';
++	$: scope = $eesSnapshot.native_shell && $eesSnapshot.native_scope ? $eesSnapshot.native_scope : data;
++	$: scopeRole = (item) => item.allowed === false ? '' : item.role || (item.roles?.includes('manager') || cap.is_admin || cap.managed_systems?.includes(item.system_id || item.id) ? 'owner' : 'participant');
++	$: systems = (scope.scope_options?.systems ?? scope.systems ?? []).map((item) => typeof item === 'string' ? { id: item, name: item } : item).map((item) => ({ ...item, role: scopeRole(item) }));
++	$: factories = [{ id: '', name: t('EES.AllFactories', 'All factories') }, ...(scope.scope_options?.factories ?? scope.factories ?? []).map((item) => ({ ...item, role: scopeRole(item) }))];
++	$: scopeBoundary = JSON.stringify([$page.url.pathname, $page.url.search, $eesSnapshot.native_id, s.mode, s.tab, s.workflow_id, s.run_id, s.job_id, s.system_id, s.factory_id, s.chat_id, $eesCompact, systems, factories]);
 +	$: nativeAllowed = (id) =>
 +		cap.native_access_available === true &&
 +		cap.native_access?.[id] === true &&
@@ -1385,7 +1397,7 @@ index 0000000..374d8ed
 +</script>
 +
 +<section id="ees-work-entry" data-ees-work aria-label={t('EES.Nav.Navigation', 'Work navigation')}>
-+	{#if $eesSnapshot.state === null}
++	{#if $eesSnapshot.state === null && $eesSnapshot.native_capabilities == null}
 +		{#if !$eesSnapshot.error}<p class="ew-empty" role="status">
 +				{t('EES.Loading', 'Loading…')}
 +			</p>{/if}
@@ -1413,26 +1425,8 @@ index 0000000..374d8ed
 +			)}
 +		</p>
 +		<div class="ew-scope">
-+			{#if !author}<button
-+					id="ees-work-site-trigger"
-+					data-action="scope"
-+					aria-label={t('EES.Nav.Factory', 'Choose factory')}
-+					aria-haspopup="dialog"
-+					on:click={() => eesAction({ action: 'scope' })}
-+					><Icon name="40095" /><small>{t('EES.Factory', 'Factory')}</small><span
-+						>{factory?.name || t('EES.AllFactories', 'All factories')}</span
-+					><Icon name="ead50" /></button
-+				>{/if}
-+			<button
-+				id="ees-work-system-trigger"
-+				data-action="scope"
-+				aria-label={t('EES.Nav.System', 'Choose system')}
-+				aria-haspopup="dialog"
-+				on:click={() => eesAction({ action: 'scope' })}
-+				><Icon name="f34f3" /><small>{t('EES.System', 'System')}</small><span
-+					>{system?.name || system?.id || system || t('EES.Select', 'Select')}</span
-+				><Icon name="ead50" /></button
-+			>
++			{#if !author}<EesScopeSelect kind="factory" label={t('EES.Factory', 'Factory')} value={s.factory_id || ''} options={factories} bind:opened={openedScope} boundary={scopeBoundary} />{/if}
++			<EesScopeSelect kind="system" compact={author} label={t('EES.System', 'System')} value={s.system_id || ''} options={systems} bind:opened={openedScope} boundary={scopeBoundary} />
 +		</div>
 +		{#if author}
 +			<section class="ew-nav-group">
@@ -1449,7 +1443,7 @@ index 0000000..374d8ed
 +									: undefined}
 +								on:click={() => eesAction({ action })}
 +								><Icon name={icon} /><span>{t(key, label)}</span
-+								>{#if action === 'procedures' || !data.operations?.error}<small
++								>{#if !$eesSnapshot.scope_loading && (action === 'procedures' || !data.operations?.error)}<small
 +										>{action === 'procedures'
 +											? current.length
 +											: (data.operations?.tools || []).length}</small
@@ -1512,7 +1506,8 @@ index 0000000..374d8ed
 +			{#if !create && !targets.some((item) => nativeAllowed(item[0]))}<p class="ew-empty">
 +					{t('EES.NoAccessibleScreens', 'No screens are available in EES Workflow.')}
 +				</p>{/if}
-+			{#if create && current.length}<p class="ew-nav-caption">
++			{#if create && $eesSnapshot.scope_loading}<p class="ew-empty" role="status" data-ees-scope-loading="navigation">{t($eesSnapshot.error ? 'EES.ListUnavailable' : 'EES.Receiving', $eesSnapshot.error ? 'Could not receive the list.' : 'Receiving')}</p>{/if}
++			{#if create && !$eesSnapshot.scope_loading && current.length}<p class="ew-nav-caption">
 +					{t('EES.Nav.Recent', 'Recently edited')}
 +				</p>
 +				<nav class="ew-workflows ew-recent">
@@ -1577,7 +1572,8 @@ index 0000000..374d8ed
 +									>{/if}</button
 +							>{/each}
 +					</details>{/each}
-+				{#if !current.length}<p class="ew-empty">
++				{#if $eesSnapshot.scope_loading}<p class="ew-empty" role="status" data-ees-scope-loading="navigation">{t($eesSnapshot.error ? 'EES.ListUnavailable' : 'EES.Receiving', $eesSnapshot.error ? 'Could not receive the list.' : 'Receiving')}</p>
++				{:else if !current.length}<p class="ew-empty">
 +						{t('EES.NoProcedures', 'No procedures are registered.')}
 +					</p>{/if}
 +			</nav>
@@ -1810,10 +1806,10 @@ index 0000000..6d5288b
 +</style>
 diff --git a/src/lib/components/ees/EesShell.svelte b/src/lib/components/ees/EesShell.svelte
 new file mode 100644
-index 0000000..aa5a5fe
+index 0000000..d55b5f0b
 --- /dev/null
 +++ b/src/lib/components/ees/EesShell.svelte
-@@ -0,0 +1,394 @@
+@@ -0,0 +1,401 @@
 +<script lang="ts">
 +	import { getContext, onMount, tick } from 'svelte';
 +	import { get } from 'svelte/store';
@@ -1991,6 +1987,12 @@ index 0000000..aa5a5fe
 +		newChat,
 +		searchChats: () => showSearch.set(true),
 +		focusComposer: () => window.__eesNativeDraftV1?.focus?.(),
++		focusPanel: async (open: boolean) => {
++			await tick();
++			if (!mounted || nativeRoute || admin || panelOpen !== open) return;
++			const target = open ? panel : document.getElementById('ees-work-panel-open');
++			target?.focus({ preventScroll: true });
++		},
 +		referenceHost: (id) => eesReferenceHosts.get(id),
 +		shouldInitChat: (path) => {
 +			if (
@@ -2113,6 +2115,7 @@ index 0000000..aa5a5fe
 +		></div>
 +		<aside
 +			id="ees-work-panel"
++			tabindex="-1"
 +			data-ees-work
 +			data-ees-source-slot
 +			bind:this={panel}
@@ -2880,10 +2883,10 @@ index 172ed9a..8873d62 100644
  export const WEBUI_HOSTNAME = '';
  export const WEBUI_BASE_URL = '';
 diff --git a/src/lib/i18n/locales/ko-KR/translation.json b/src/lib/i18n/locales/ko-KR/translation.json
-index 8eba682..4acf69f 100644
+index 8eba682..38ee86b 100644
 --- a/src/lib/i18n/locales/ko-KR/translation.json
 +++ b/src/lib/i18n/locales/ko-KR/translation.json
-@@ -3081,5 +3081,82 @@
+@@ -3081,5 +3081,88 @@
  	"Youtube Language": "Youtube 언어",
  	"Youtube Proxy URL": "Youtube 프록시 URL",
  	"Zoom in": "",
@@ -2899,6 +2902,12 @@ index 8eba682..4acf69f 100644
 +	"EES.Nav.System": "시스템 선택",
 +	"EES.Factory": "공장",
 +	"EES.AllFactories": "전체 공장",
++	"EES.Scope.SearchFactories": "공장 검색",
++	"EES.Scope.NoAccess": "권한 없음",
++	"EES.Scope.AllFactoriesNote": "시스템 단위 업무를 볼 때",
++	"EES.Scope.Owner": "담당",
++	"EES.Scope.Participant": "참여",
++	"EES.Scope.NoResults": "일치하는 항목이 없습니다.",
 +	"EES.System": "시스템",
 +	"EES.Select": "선택 필요",
 +	"EES.Nav.CreateWork": "업무 만들기",
@@ -2915,7 +2924,6 @@ index 8eba682..4acf69f 100644
 +	"EES.Nav.Access": "공장·접근 범위",
 +	"EES.Nav.Recent": "최근 편집",
 +	"EES.Nav.MyWork": "내 업무",
-+	"EES.Nav.Find": "워크플로우 찾기",
 +	"EES.Nav.Records": "실행 기록",
 +	"EES.Nav.Chats": "대화 기록",
 +	"EES.Category.Operations": "운영",
@@ -2929,11 +2937,12 @@ index 8eba682..4acf69f 100644
 +	"EES.Nav.Search": "대화 검색",
 +	"EES.Conversation": "대화",
 +	"EES.Reference": "참고",
-+	"EES.GeneralConversation": "일반 대화",
 +	"EES.OpenPanel": "업무 패널 열기",
 +	"EES.Panel": "업무 패널",
 +	"EES.PanelWidth": "업무 패널 너비",
 +	"EES.Loading": "불러오는 중…",
++	"EES.Receiving": "받는 중",
++	"EES.ListUnavailable": "목록을 받지 못했습니다.",
 +	"EES.Composer.Placeholder": "업무를 물어보거나, 필요한 작업을 요청하세요",
 +	"EES.Procedure.Start": "새 절차 작성 안내",
 +	"EES.Helper": "업무 도우미",
@@ -3390,3 +3399,110 @@ index 5052e5d..405a897 100644
  		APP_BUILD_HASH: JSON.stringify(process.env.APP_BUILD_HASH || 'dev-build')
  	},
  	build: {
+
+diff --git a/src/lib/components/ees/EesScopeSelect.svelte b/src/lib/components/ees/EesScopeSelect.svelte
+new file mode 100644
+--- /dev/null
++++ b/src/lib/components/ees/EesScopeSelect.svelte
+@@ -0,0 +1,101 @@
++<script lang="ts">
++	import { getContext, tick } from 'svelte';
++	import { eesAction } from './state';
++	import Icon from './EesIcon.svelte';
++	const i18n: any = getContext('i18n');
++	export let kind: 'factory' | 'system';
++	export let label = '';
++	export let compact = false;
++	export let value = '';
++	export let options: any[] = [];
++	export let opened = '';
++	export let boundary = '';
++	let root: HTMLDivElement;
++	let trigger: HTMLButtonElement;
++	let list: HTMLDivElement;
++	let search: HTMLInputElement;
++	let query = '';
++	let previousBoundary = '';
++	$: t = (key, fallback) => $i18n.t(key, { defaultValue: fallback });
++	$: open = opened === kind;
++	$: icon = kind === 'factory' ? '40095' : 'f34f3';
++	$: triggerId = kind === 'factory' ? 'ees-work-site-trigger' : 'ees-work-system-trigger';
++	$: listId = `ees-scope-${kind}-list`;
++	$: searchable = kind === 'factory' && options.filter((item) => item.id !== '').length >= 8;
++	$: visible = options.filter((item) => item.id === '' || !query.trim() || String(item.name || item.id).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
++	$: current = options.find((item) => item.id === value);
++	$: if (boundary !== previousBoundary) {
++		previousBoundary = boundary;
++		if (open) close(false);
++	}
++	function close(restore = true) {
++		if (opened !== kind) return;
++		opened = '';
++		query = '';
++		if (restore) trigger?.focus({ preventScroll: true });
++	}
++	function allowedOptions() {
++		return Array.from(list?.querySelectorAll<HTMLButtonElement>('button[role="option"]:not(:disabled)') || []);
++	}
++	async function toggle(direction = 0) {
++		if (open && !direction) { close(); return; }
++		query = '';
++		opened = kind;
++		await tick();
++		if (!open) return;
++		if (searchable && !direction) { search?.focus({ preventScroll: true }); return; }
++		const buttons = allowedOptions();
++		const selected = buttons.find((item) => item.getAttribute('aria-selected') === 'true');
++		(direction < 0 ? buttons.at(-1) : selected || buttons[0])?.focus({ preventScroll: true });
++	}
++	function choose(item) {
++		if (item.allowed === false) return;
++		close();
++		eesAction(kind === 'factory' ? { action: 'choose_factory', factoryId: item.id } : { action: 'choose_system', systemId: item.id });
++	}
++	function keydown(event: KeyboardEvent) {
++		if (!open || !root?.contains(event.target as Node)) return;
++		if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); return; }
++		if (event.key === 'Tab') { close(false); return; }
++		if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
++		if (event.target === search && ['Home', 'End'].includes(event.key)) return;
++		event.preventDefault();
++		const buttons = allowedOptions();
++		const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
++		const next = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1 : event.key === 'ArrowDown' ? (index + 1) % buttons.length : (index <= 0 ? buttons.length : index) - 1;
++		buttons[next]?.focus({ preventScroll: true });
++		const item = buttons[next]?.getBoundingClientRect(), bounds = list?.getBoundingClientRect();
++		if (item && bounds) {
++			if (item.top < bounds.top) list.scrollTop -= bounds.top - item.top;
++			else if (item.bottom > bounds.bottom) list.scrollTop += item.bottom - bounds.bottom;
++		}
++	}
++	function outside(event: Event) { if (open && !root?.contains(event.target as Node)) close(false); }
++</script>
++
++<svelte:document on:pointerdown={outside} on:focusin={outside} on:keydown={keydown} />
++<div class="ew-scope-field" bind:this={root}>
++	<button type="button" id={triggerId} data-scope-trigger={kind} bind:this={trigger}
++		aria-label={t(kind === 'factory' ? 'EES.Nav.Factory' : 'EES.Nav.System', kind === 'factory' ? 'Choose factory' : 'Choose system')}
++		aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? listId : undefined}
++		on:click={() => toggle()} on:keydown={(event) => {
++			if (!open && ['ArrowDown', 'ArrowUp'].includes(event.key)) { event.preventDefault(); toggle(event.key === 'ArrowUp' ? -1 : 1); }
++		}}>
++		<Icon name={icon} />{#if !compact}<small>{label}</small>{/if}<span>{current?.name || current?.id || (kind === 'factory' ? t('EES.AllFactories', 'All factories') : value || t('EES.Select', 'Select'))}</span>{#if compact && current}<small>{current.allowed === false ? t('EES.Scope.NoAccess', 'No access') : current.role === 'owner' ? t('EES.Scope.Owner', 'Owner') : t('EES.Scope.Participant', 'Participant')}</small>{/if}<Icon name="ead50" />
++	</button>
++	{#if open}
++		<div class="ew-scope-dropdown" data-scope-dropdown={kind}>
++			{#if searchable}<label class="ew-scope-search"><Icon name="b8bc6" /><input type="search" id="ees-factory-search" bind:this={search} bind:value={query} placeholder={t('EES.Scope.SearchFactories', 'Search factories')} aria-label={t('EES.Scope.SearchFactories', 'Search factories')} aria-controls={listId} /></label>{/if}
++			<div id={listId} data-scope-list={kind} role="listbox" aria-label={label} bind:this={list}>
++				{#each visible as item (item.id)}
++					<button type="button" role="option" tabindex="-1" data-action={kind === 'factory' ? 'choose_factory' : 'choose_system'} data-factory-id={kind === 'factory' ? item.id : undefined} data-system-id={kind === 'system' ? item.id : undefined}
++						aria-selected={value === item.id} aria-disabled={item.allowed === false} disabled={item.allowed === false} on:click={() => choose(item)}>
++						<Icon name={icon} /><span>{item.name || item.id}<small>{item.allowed === false ? t('EES.Scope.NoAccess', 'No access') : item.id === '' ? t('EES.Scope.AllFactoriesNote', 'View work across factories') : item.role === 'owner' ? t('EES.Scope.Owner', 'Owner') : t('EES.Scope.Participant', 'Participant')}</small></span>
++						{#if value === item.id}<Icon name="9d8d5" />{/if}
++					</button>
++				{/each}
++				{#if !visible.length || (query.trim() && !visible.some((item) => item.id !== ''))}<p class="ew-scope-no-results" role="status">{t('EES.Scope.NoResults', 'No matching items.')}</p>{/if}
++			</div>
++		</div>
++	{/if}
++</div>

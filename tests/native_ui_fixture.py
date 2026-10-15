@@ -250,7 +250,7 @@ class NativeUIHandler(BaseHTTPRequestHandler):
                 return self.send_content({"schema": "0.11.3", "events": []})
             if path == "/api/events/webhooks":
                 return self.send_content([])
-            if path in {"/api/v1/users/fixture-admin/profile/image", "/api/v1/models/model/profile/image"}:
+            if path in {f"/api/v1/users/{self.server.user['id']}/profile/image", "/api/v1/models/model/profile/image"}:
                 return self.send_content(self.server.read_frontend("open_webui/frontend/static/user.png"), "image/png")
             if path == "/api/v1/files/fixture-file/process/status":
                 return self.send_content('data: {"status":"completed"}\n\ndata: [DONE]\n\n', "text/event-stream")

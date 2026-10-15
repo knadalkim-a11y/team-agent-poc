@@ -1,0 +1,187 @@
+{
+  "run_id": 38515563587,
+  "job_id": 115695816611,
+  "head": "b4f370bfd97e782597372b775f78038baa07127a",
+  "ci_merge_commit": "a0a1d619640e8eb5cbc725a1173530fc81589de2",
+  "artifact_id": 11871878585,
+  "artifact_name": "ees-navigation-negative-control-a0a1d619640e8eb5cbc725a1173530fc81589de2",
+  "archive_sha256": "085d77ab1ed7c668a5e81f201e6fb67d40510584f3f442b2f0ea8a8c801c6f13",
+  "baseline_commit": "42cc7568eb8477013abcf0a042617dd9e3279db2",
+  "baseline_wheel_sha256": "c7cabc53cf95e7b91484afdd1b70ead6c5336983003ff6c55496da0161adede8",
+  "status": "negative_control_verified",
+  "baseline_status": "failed_as_required",
+  "sample_count": 2746,
+  "guarded_sample_count": 2702,
+  "loading_frames": 1082,
+  "menu_loading_frames": 1082,
+  "panel_loading_frames": 359,
+  "http_read_count": 42,
+  "min_delay_seconds": 1.0000365500000044,
+  "route_counts": {
+    "skills-to-procedures-enter-workspace": {
+      "frames": 127,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "skills-to-procedures-native": {
+      "frames": 69,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "skills-to-procedures": {
+      "frames": 129,
+      "menu_loading": 121,
+      "panel_loading": 0
+    },
+    "skills-to-my-work-enter-workspace": {
+      "frames": 127,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "skills-to-my-work-native": {
+      "frames": 68,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "skills-to-my-work": {
+      "frames": 249,
+      "menu_loading": 120,
+      "panel_loading": 0
+    },
+    "tools-to-procedures-enter-workspace": {
+      "frames": 126,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "tools-to-procedures-native": {
+      "frames": 69,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "tools-to-procedures": {
+      "frames": 128,
+      "menu_loading": 121,
+      "panel_loading": 0
+    },
+    "tools-to-my-work-enter-workspace": {
+      "frames": 127,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "tools-to-my-work-native": {
+      "frames": 67,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "tools-to-my-work": {
+      "frames": 249,
+      "menu_loading": 120,
+      "panel_loading": 0
+    },
+    "models-to-procedures-enter-workspace": {
+      "frames": 126,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "models-to-procedures-native": {
+      "frames": 68,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "models-to-procedures": {
+      "frames": 128,
+      "menu_loading": 121,
+      "panel_loading": 0
+    },
+    "models-to-my-work-enter-workspace": {
+      "frames": 126,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "models-to-my-work-native": {
+      "frames": 67,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "models-to-my-work": {
+      "frames": 249,
+      "menu_loading": 120,
+      "panel_loading": 0
+    },
+    "delayed-chat-list": {
+      "frames": 7,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "delayed-chat-switch": {
+      "frames": 132,
+      "menu_loading": 120,
+      "panel_loading": 120
+    },
+    "delayed-new-chat": {
+      "frames": 129,
+      "menu_loading": 120,
+      "panel_loading": 120
+    },
+    "delayed-chat-list-return": {
+      "frames": 6,
+      "menu_loading": 0,
+      "panel_loading": 0
+    },
+    "delayed-existing-return": {
+      "frames": 129,
+      "menu_loading": 119,
+      "panel_loading": 119
+    }
+  },
+  "first_menu_loading": {
+    "at": 4239.099999999977,
+    "label": "skills-to-procedures",
+    "path": "/c/existing-chat",
+    "source": true,
+    "menu": true,
+    "bodyHidden": false,
+    "missingSource": false,
+    "legacy": [],
+    "loadingGuard": true,
+    "menuLoading": [
+      "불러오는 중…"
+    ],
+    "panelLoading": [],
+    "content": true,
+    "adminDialog": false,
+    "sourceText": true,
+    "startupGate": null
+  },
+  "first_panel_loading": {
+    "at": 39548.29999999999,
+    "label": "delayed-chat-switch",
+    "path": "/c/other-chat",
+    "source": true,
+    "menu": true,
+    "bodyHidden": false,
+    "missingSource": false,
+    "legacy": [],
+    "loadingGuard": true,
+    "menuLoading": [
+      "불러오는 중…"
+    ],
+    "panelLoading": [
+      "업무 정보를 불러오는 중입니다."
+    ],
+    "content": true,
+    "adminDialog": false,
+    "sourceText": true,
+    "startupGate": null
+  },
+  "raw_files": {
+    "baseline-verification.json": {
+      "sha256": "a43babb502cdf3bad40a1318c808721ed3cdf9934772c9b6a3ed1d44e5e563bf",
+      "bytes": 4619
+    },
+    "source-shell-delayed-navigation-frames.json": {
+      "sha256": "a29336566505b20241bb83147c39c400505fa13e81bbf733d47985bbb6ee735b",
+      "bytes": 1227724
+    }
+  }
+}

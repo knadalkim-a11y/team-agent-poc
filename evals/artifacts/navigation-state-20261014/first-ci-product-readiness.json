@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-14",
+  "kind": "first CI failure diagnosis; revised browser gate pending next CI",
+  "workflow_run_id": 38515563587,
+  "workflow_run_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38515563587",
+  "job_id": 115695816578,
+  "job_name": "Complete Native product (ubuntu-24.04)",
+  "artifact_id": 11872163745,
+  "artifact_sha256": "6bdbb2c79bdf1229cf48b42b0f150da534b40521a394548e297edf348246b1b0",
+  "source_evidence": "ees-native-product/failure.json",
+  "failed_test": "tests/ees_work_integrated_app.py:936 (first CI checkout)",
+  "observation": {
+    "browser_errors": [],
+    "cached_active_run_count": 0,
+    "visible_cached_text": "수시 · 게시 v1 · 진행 중 0건 / 진행 중인 건이 없습니다.",
+    "last_browser_work_responses": [
+      {
+        "path": "/api/ees-work/operations",
+        "status": 200
+      },
+      {
+        "path": "/api/ees-work/operations",
+        "status": 200
+      },
+      {
+        "path": "/api/ees-work/workspace/command",
+        "status": 400
+      },
+      {
+        "path": "/api/ees-work/workspace",
+        "status": 200
+      }
+    ],
+    "last_workspace_response_followed_by_operations_response": false,
+    "limitation": "The capture records response order, not full response payloads or completion of requests still in flight."
+  },
+  "diagnosis": "The test waited only for .ew-active-runs, which also exists in the immediately painted cached pre-start overview. It asserted the disabled factory before the refreshed active-run list had reached the DOM.",
+  "change": {
+    "file": "tests/ees_work_integrated_app.py",
+    "readiness": "Wait for the visible .ew-active-runs [data-run-id=\"delivery_run_id\"] record before the unchanged factory/start disabled assertions.",
+    "assertions_preserved": [
+      "selected factory option disabled",
+      "known active run visible",
+      "inline start action disabled",
+      "server run unchanged"
+    ],
+    "product_code_changed_for_this_failure": false,
+    "syntax_validation": "python -m py_compile tests/ees_work_integrated_app.py: PASS",
+    "browser_recheck": "Pending next CI; no local browser pass claimed."
+  }
+}

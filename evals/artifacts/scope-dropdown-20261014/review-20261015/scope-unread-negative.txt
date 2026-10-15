@@ -1,0 +1,92 @@
+✖ first scope keeps its navigation catalog but marks lists unread until workspace and operations both arrive (8.28687ms)
+✖ returning to a received scope reuses its lists even when its previous selected workflow differs (1.711496ms)
+✖ unreceived scope panels never render empty My Work or history before their first response (1.808591ms)
+✖ unreceived procedure scope retains heading and controls without claiming an empty list or zero count (10.018827ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 0
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 97.404632
+
+✖ failing tests:
+
+test at tests/test_ees_execution_ui.cjs:151:1
+✖ first scope keeps its navigation catalog but marks lists unread until workspace and operations both arrive (8.28687ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + undefined
+  - true
+  
+      at TestContext.<anonymous> (/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/test_ees_execution_ui.cjs:158:40)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_execution_ui.cjs:164:1
+✖ returning to a received scope reuses its lists even when its previous selected workflow differs (1.711496ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + undefined
+  - false
+  
+      at TestContext.<anonymous> (/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/test_ees_execution_ui.cjs:168:41)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_execution_ui.cjs:171:1
+✖ unreceived scope panels never render empty My Work or history before their first response (1.808591ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /data-ees-scope-loading="panel"[^>]*>받는 중/. Input:
+  
+  '<header class="ew-panel-header"><strong>내 업무</strong><span></span><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button">닫기</button></header><div id="ees-work-content" class="ew-scroll"><div class="ew-empty ew-my-work-empty"><span class="ew-empty-symbol"><img class="ew-icon" src="/_ees14/v4/52271.svg" alt="" aria-hidden="true"></span><h3>지금 처리할 내 업무가 없습니다</h3></div></div>'
+  
+      at TestContext.<anonymous> (/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/test_ees_execution_ui.cjs:176:60)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '<header class="ew-panel-header"><strong>내 업무</strong><span></span><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button">닫기</button></header><div id="ees-work-content" class="ew-scroll"><div class="ew-empty ew-my-work-empty"><span class="ew-empty-symbol"><img class="ew-icon" src="/_ees14/v4/52271.svg" alt="" aria-hidden="true"></span><h3>지금 처리할 내 업무가 없습니다</h3></div></div>',
+    expected: /data-ees-scope-loading="panel"[^>]*>받는 중/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_authoring_ui.cjs:313:1
+✖ unreceived procedure scope retains heading and controls without claiming an empty list or zero count (10.018827ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /data-ees-scope-loading="panel"[^>]*>받는 중/. Input:
+  
+  '<section class="ew-author " id="ees-work-designer" data-ees-work><header>업무 절차<small>APC</small></header><div class="ew-author-scroll"><div class="ew-author-heading"><h2>APC의 업무 절차 0개</h2><button type="button" data-author-action="create" >새 절차</button></div><p class="ew-author-muted">절차를 만들거나 선택하세요. 게시한 변경은 새 진행 건부터 적용됩니다.</p><label class="ew-visually-hidden" for="ew-author-search">업무 절차 찾기</label><input id="ew-author-search" type="search" value="" placeholder="업무 절차 찾기"><div class="ew-author-empty">아직 업무 절차가 없습니다.<br>새 절차를 만들고 필요한 작업을 작성하세요.</div></div><footer></footer></section>'
+  
+      at TestContext.<anonymous> (/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/test_ees_work_authoring_ui.cjs:316:45)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '<section class="ew-author " id="ees-work-designer" data-ees-work><header>업무 절차<small>APC</small></header><div class="ew-author-scroll"><div class="ew-author-heading"><h2>APC의 업무 절차 0개</h2><button type="button" data-author-action="create" >새 절차</button></div><p class="ew-author-muted">절차를 만들거나 선택하세요. 게시한 변경은 새 진행 건부터 적용됩니다.</p><label class="ew-visually-hidden" for="ew-author-search">업무 절차 찾기</label><input id="ew-author-search" type="search" value="" placeholder="업무 절차 찾기"><div class="ew-author-empty">아직 업무 절차가 없습니다.<br>새 절차를 만들고 필요한 작업을 작성하세요.</div></div><footer></footer></section>',
+    expected: /data-ees-scope-loading="panel"[^>]*>받는 중/,
+    operator: 'match',
+    diff: 'simple'
+  }

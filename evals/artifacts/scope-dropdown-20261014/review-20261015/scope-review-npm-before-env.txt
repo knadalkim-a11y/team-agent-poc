@@ -1,0 +1,40 @@
+npm warn using --force Recommended protections disabled.
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated glob@8.1.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated i18next-parser@9.4.0: Project is deprecated, use i18next-cli instead
+npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated boolean@3.2.0: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+npm error code 1
+npm error path /workspace/scratch/38e8d34a7e5f/source-scope-review/node_modules/onnxruntime-node
+npm error command failed
+npm error command sh -c node ./script/install
+npm error Downloading "https://github.com/microsoft/onnxruntime/releases/download/v1.21.0/onnxruntime-linux-x64-gpu-1.21.0.tgz"...
+npm error `nvcc` not found. Assuming CUDA 12.
+npm error node:events:496
+npm error       throw er; // Unhandled 'error' event
+npm error       ^
+npm error
+npm error Error: getaddrinfo EAI_AGAIN github.com
+npm error     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26)
+npm error Emitted 'error' event on ClientRequest instance at:
+npm error     at emitErrorEvent (node:_http_client:104:11)
+npm error     at TLSSocket.socketErrorListener (node:_http_client:518:5)
+npm error     at TLSSocket.emit (node:events:518:28)
+npm error     at TLSSocket.emit (node:domain:489:12)
+npm error     at emitErrorNT (node:internal/streams/destroy:170:8)
+npm error     at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+npm error     at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+npm error   errno: -3001,
+npm error   code: 'EAI_AGAIN',
+npm error   syscall: 'getaddrinfo',
+npm error   hostname: 'github.com'
+npm error }
+npm error
+npm error Node.js v22.16.0
+npm error A complete log of this run can be found in: /root/.npm/_logs/2026-10-14T22_45_07_100Z-debug-0.log

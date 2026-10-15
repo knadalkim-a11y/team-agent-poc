@@ -328,6 +328,49 @@ function workAdminHTML(data){
   return `<header class="ew-work-heading"><h2>공장·접근 범위</h2><p>기존 Native 사용자와 그룹에 업무 범위를 연결합니다. 개인 PAT는 여기에서 관리하지 않습니다.</p></header><section><h3>Native 대화의 Work 연결</h3><p class="ew-muted">현재 제품의 읽기·제안 전용 도구를 확인하고, 선택한 Native 사용자·그룹에만 연결합니다.</p>${button('Work 도구 설정 확인','admin_work_tool','class="ew-secondary"')}</section><section><h3>공장 정보</h3>${button('공장 등록','admin_factory','class="ew-secondary"')}<div class="ew-admin-list">${(data.factories || []).map(item=>`<article><strong>${esc(item.name)}</strong><small>${esc(item.system_id)} · ${esc(item.id)} · r${esc(item.revision)}</small>${button('수정','admin_factory',`data-id="${esc(item.id)}"`)}</article>`).join('') || '<p class="ew-empty">등록된 공장이 없습니다.</p>'}</div></section><section><h3>업무 접근 범위</h3>${button('접근 범위 등록','admin_access','class="ew-secondary"')}<div class="ew-admin-list">${(data.access || []).map(item=>{const person=(data.people || []).find(person=>person.value?.id===item.principal_id&&person.value?.kind===item.principal_kind);return `<article><strong>${esc(person?.label || person?.name || item.principal_id)}</strong><small>${esc(item.principal_kind)} · ${esc(item.principal_id)}</small><p>${esc(item.system_id)} · ${esc(item.factory_id==='*'?'시스템 전체 범위':item.factory_id)} · ${esc(item.roles.map(role=>roles[role] || role).join(', '))} · ${item.active?'사용':'중지'}</p>${button('수정','admin_access',`data-id="${esc(item.id)}"`)}</article>`;}).join('') || '<p class="ew-empty">등록된 업무 접근 범위가 없습니다.</p>'}</div></section>`;
 }
 
+// Reconcile only the source-supplied EES content slot. Retained controls keep
+// focus, selection and browser state; no Native-owned DOM is read or changed.
+function workPatchContent(host,html){
+  const template=document.createElement('template');
+  if(!template.content){host.innerHTML=html;return;} // lightweight test DOM
+  template.innerHTML=html;
+  const footer=template.content.querySelector('#ees-work-content>.ew-job-actions, #ees-work-content>.ew-next-action');if(footer)template.content.append(footer);
+  const key=node=>node.nodeType===1?(node.id || ['name','data-key','data-author-action','data-action'].map(name=>node.getAttribute(name) || '').join('|')+'|'+['data-id','data-job-id','data-workflow-id','data-tab'].map(name=>node.getAttribute(name) || '').join('|')+(['checkbox','radio'].includes(node.type)||node.tagName==='OPTION'?'|'+node.getAttribute('value'):'')):'';
+  const same=(a,b)=>a.nodeType===b.nodeType&&a.nodeName===b.nodeName&&key(a)===key(b);
+  function children(parent,next){
+    let cursor=parent.firstChild;
+    for(const wanted of [...next.childNodes]){
+      let current=cursor;
+      if(!current||!same(current,wanted)){
+        current=[...parent.childNodes].slice(cursor?[...parent.childNodes].indexOf(cursor):parent.childNodes.length).find(node=>same(node,wanted));
+        if(current)parent.insertBefore(current,cursor);else{current=wanted.cloneNode(true);parent.insertBefore(current,cursor);}
+      }
+      patch(current,wanted);cursor=current.nextSibling;
+    }
+    while(cursor){const next=cursor.nextSibling;cursor.remove();cursor=next;}
+  }
+  function patch(current,wanted){
+    if(current.nodeType!==1){if(current.nodeValue!==wanted.nodeValue)current.nodeValue=wanted.nodeValue;return;}
+    const open=current.tagName==='DETAILS'&&!current.matches('.ew-author-ai,.ew-tool-advanced')?current.open:null;
+    for(const attr of [...current.attributes])if(!wanted.hasAttribute(attr.name))current.removeAttribute(attr.name);
+    for(const attr of [...wanted.attributes])if(current.getAttribute(attr.name)!==attr.value)current.setAttribute(attr.name,attr.value);
+    if(current.tagName==='TEXTAREA'){
+      if(current.value!==wanted.value)current.value=wanted.value;
+      if(current.defaultValue!==wanted.defaultValue)current.defaultValue=wanted.defaultValue;
+    }else{
+      children(current,wanted);
+      if(current.tagName==='INPUT'){
+        if(current.type!=='file'&&current.value!==wanted.value)current.value=wanted.value;
+        if(current.checked!==wanted.checked)current.checked=wanted.checked;
+      }else if(current.tagName==='SELECT'){
+        for(let i=0;i<current.options.length;i++)if(current.options[i].selected!==wanted.options[i]?.selected)current.options[i].selected=Boolean(wanted.options[i]?.selected);
+      }
+    }
+    if(open!==null)current.open=open;
+  }
+  children(host,template.content);
+}
+
 function workRestorePanelPosition(host,position){
   if(!position)return;
   const expanded=new Set(position.expanded || []);
@@ -370,7 +413,7 @@ function createWorkView({callbacks}){
   const {$,esc,button,icon,categories,badge,finished}=workUI;
   let snapshot={state:null,selection:{}},host=null,lastKey='';
   const drafts=createWorkInputDrafts(),reviewDrafts=createWorkInputDrafts(),listDrafts=new Map(),positions=new Map(),modelChoices=new Map();let currentDraftKey='';
-  const state=()=>snapshot.state || {},selection=()=>snapshot.selection || {};
+  const state=()=>snapshot.native_capabilities!=null?{...(snapshot.state || {}),capabilities:snapshot.native_capabilities}:snapshot.state || {},selection=()=>snapshot.selection || {};
   const definition=()=>state().run?.definition || state().workflow?.published?.definition || state().workflow?.published || state().workflow?.definition || state().workflow?.draft || {};
   const job=()=>definition().nodes?.[selection().job_id];
   const inputKey=()=>[state().capabilities?.actor_id,selection().system_id,selection().factory_id,state().run?.id,selection().job_id,selection().tab].join('/');
@@ -393,10 +436,9 @@ function createWorkView({callbacks}){
     return true;
   }
   function publish(){
-    const node=job(),run=state().run,reference=selection().chat_reference;
+    const node=job();
     window.__eesSourceShellV1?.publish?.({...snapshot,
-      context_title:snapshot.procedure_start?'새 업무 절차 만들기':node?.name || state().workflow?.name || '대화',
-      reference_label:reference?`과거 기록 · v${reference.version} · ${reference.result_revision}차 · ${workUI.time(reference.created_at)}`:node?.name || (run?'진행 건':'일반 대화')});
+      context_title:snapshot.procedure_start?'새 업무 절차 만들기':node?.name || state().workflow?.name || '대화'});
   }
   function runOverview(){
     const data=state(),run=data.run,def=definition(),nodes=Object.values(def.nodes || {}),jobs=nodes.filter(node=>node.type==='j'),root=nodes.find(node=>node.type==='p'&&!node.parent),groups=nodes.filter(node=>node.type==='t');
@@ -422,20 +464,23 @@ function createWorkView({callbacks}){
     const requestReason=node.result_block==='change_request'&&!settings?`<label class="ew-input-row"><span>요청 사유</span><textarea id="ees-request-reason" rows="2" maxlength="4000"${readonly||saved.can_request===false?' readonly':''}>${esc(s.request_reasons?.[run.id+'/'+node.id] || saved.request?.request_reason || '')}</textarea></label>${workRequestFields(node,data.operations?.tools)===null?workNoticeHTML('EES 입력 정의 확인 필요','도구의 입력 정의를 확인한 뒤 요청할 수 있습니다.'):''}`:'';
     return header+inputs+requestReason+proposalHTML+modelControls+querySummary+workPartialSourceHTML((run.attempts || []).find(attempt=>attempt.id===saved.attempt_id),run)+(settings?`<p class="ew-muted">개인 PAT와 비밀정보는 Native 개인 설정에서 관리합니다. 여기에 입력하지 마세요.</p>`:workResultHTML({...node,judgments:node.judgments || definition().judgments,execution_actor:data.operations?.tools?.find(tool=>tool.id===node.tool_contract_id)?.kind==='direct'?'EES Work':'EES'},saved,{readOnly:readonly||saved.can_decide===false,actorId:data.capabilities?.actor_id,verdictDraft:s.verdict_drafts?.[run.id+'/'+node.id+'/'+saved.attempt_id] || {},sourceCount:Array.isArray(queryAttempt?.result?.items)?queryAttempt.result.items.filter(item=>item.source?.kind!=='human_added').length:null,listDraft:node.result_block==='list_confirm'?listDraft():null,reviewDraft:node.result_block==='ai_review'?reviewDraft():null})+`<footer class="ew-job-actions">${(saved.block_reason || saved.reason)?`<p class="ew-warning">${esc((saved.block_reason || saved.reason)==='delivery_unconfigured'?'본문 검토는 저장했습니다. 실제 송부와 결과 확인 전에는 이 작업을 완료하지 않습니다.':workReasonText(saved.block_reason || saved.reason))}</p>`:''}${readonly||saved.can_execute===false?`<p>${esc(finished(run)?'종료된 진행 건 · 당시 기록을 조회하고 있습니다.':({assignee_required:'보기 전용 · 배정된 담당자나 그룹이 처리할 수 있습니다.',task_claimed:'보기 전용 · 다른 담당자가 처리 중입니다.',scope_forbidden:'보기 전용 · 업무 참여 권한이 필요합니다.',run_closed:'종료된 진행 건 · 당시 기록을 조회하고 있습니다.'}[saved.permission_reason || run.permission_reason] || '보기 전용 · 현재 계정은 이 작업을 수행할 수 없습니다.'))}</p>`:node.result_block==='change_request'?(saved.can_request===false?'<p>보기 전용 · EES 요청 권한이 있는 담당자가 처리할 수 있습니다.</p>':button('요청 내용 확인…','request_intent',`data-mutation class="ew-primary"${workRequestFields(node,data.operations?.tools)===null?' disabled data-own-disabled="true"':''}`)):node.mode==='human'?button('확인 완료','confirm','data-mutation class="ew-primary"'):button(saved.evidence_access==='requires_current_source_access'&&node.mode==='tool'?'현재 권한으로 다시 조회':['failed','unknown'].includes(saved.status)&&node.mode==='tool'?'다시 조회':saved.attempt_id?'다시 실행':'지금 실행','execute','data-mutation class="ew-primary"')+(saved.can_decide!==false&&!saved.decisions?.job&&node.human_confirmation!==false&&!['list_confirm','item_verdict','checklist'].includes(node.result_block)?button(node.completion?.kind==='delivery'?'본문 검토 확정':'판정 확정','confirm','data-mutation class="ew-secondary"'):'')}</footer>`);
   }
-  function panel(){if(!host)return;const s=selection(),data=state(),key=[s.mode,s.tab,s.run_id,s.workflow_id,s.job_id].join('/');lastKey=key;host.dataset.eesMode=s.mode || 'work';
+  function panel(){if(!host)return;const s=selection(),data=state(),key=[data.capabilities?.actor_id,s.system_id,s.factory_id,s.mode,s.tab,s.run_id,s.workflow_id,s.job_id].join('/'),sameTarget=lastKey===key;lastKey=key;host.dataset.eesMode=s.mode || 'work';
+    const paint=html=>{if(sameTarget)workPatchContent(host,html);else host.innerHTML=html;};
     const title=s.mode==='author'?'워크스페이스':s.tab==='my_work'?'내 업무':s.tab==='records'?'실행 기록':'업무';
     const top=`<header class="ew-panel-header"><strong>${title}</strong><span>${esc(data.workflow?.name || '')}</span>${button('닫기','close_panel','aria-label="업무 패널 닫기" class="ew-icon-button"')}</header>`;
-    if(s.mode==='author'&&s.tab!=='workspace_admin'){if(!workCanCreate(data.capabilities)){host.innerHTML=top+'<div class="ew-scroll"><p class="ew-empty">'+(workNativeTargets.some(target=>workNativeAllowed(data.capabilities,target.id))?'왼쪽 메뉴에서 사용할 화면을 여세요.':'현재 계정으로 EES Workflow에서 열 수 있는 항목이 없습니다.')+'</p></div>';return;}if(!$('#ees-work-authoring-panel',host))host.innerHTML=top+'<div id="ees-work-authoring-panel" class="ew-scroll"></div>';return;}
+    if(snapshot.evidence_unavailable){paint(top+`<div class="ew-scroll"><div class="ew-error" role="alert"><p>${esc(snapshot.error || '기록을 다시 조회해 주세요.')}</p>${button('다시 조회','refresh')}</div></div>`);setBusy(snapshot.busy);return;}
+    if(!snapshot.target_loading&&!(snapshot.scope_loading&&snapshot.error)&&snapshot.state&&s.mode==='author'&&s.tab!=='workspace_admin'){if(!workCanCreate(data.capabilities)){paint(top+'<div class="ew-scroll"><p class="ew-empty">'+(workNativeTargets.some(target=>workNativeAllowed(data.capabilities,target.id))?'왼쪽 메뉴에서 사용할 화면을 여세요.':'현재 계정으로 EES Workflow에서 열 수 있는 항목이 없습니다.')+'</p></div>');return;}if(!$('#ees-work-authoring-panel',host))paint(top+'<div id="ees-work-authoring-panel" class="ew-scroll"></div>');return;}
     let body='';currentDraftKey='';
     if(snapshot.error&&!snapshot.state)body=`<div class="ew-error" role="alert"><p>${esc(snapshot.error)}</p>${button('다시 조회','refresh')}</div>`;
-    else if(!snapshot.state)body='<p role="status" class="ew-empty">업무 정보를 불러오는 중입니다.</p>';
+    else if(snapshot.scope_loading&&snapshot.state)body='<p role="status" class="ew-empty" data-ees-scope-loading="panel">'+(snapshot.error?'목록을 받지 못했습니다.':'받는 중')+'</p>';
+    else if(!snapshot.state||snapshot.target_loading)body='<p role="status" class="ew-empty" data-ees-target-loading>업무 정보를 불러오는 중입니다.</p>';
     else if(s.tab==='historical_reference')body=workHistoricalReferenceHTML(data.run,s.historical_reference,data.workflow,data.settings?.values);
     else if(s.tab==='workspace_admin')body=workAdminHTML(data);
     else if(s.tab==='my_work')body=workMyWorkHTML(data.my_work || [],data.operations);
     else if(s.tab==='records')body=workRunRecordsHTML(data.runs || [],s.records_workflow || '',data.workflow?.name)+(s.records_workflow?'':workLegacyHTML(data.legacy));
     else if(!s.workflow_id)body='<div class="ew-empty"><h3>업무 절차를 선택해 주세요</h3><p>왼쪽에서 업무를 찾거나 워크스페이스에서 새 절차를 작성할 수 있습니다.</p></div>';
     else if(job()&&data.run)body=jobPanel();else body=runOverview();
-    host.innerHTML=top+`<div id="ees-work-content" class="ew-scroll">${snapshot.error&&snapshot.state?`<div class="ew-error" role="alert">${esc(snapshot.error)}${snapshot.error.startsWith('작성한 선택의 자동 저장 실패')?button('자동 저장 다시 시도','retry_private_save'):''}</div>`:''}${data.operations?.error?`<p class="ew-warning" role="alert">실행·예약 정보를 조회하지 못했습니다. ${esc(data.operations.error)}</p>`:''}${body}</div>`;
+    paint(top+`<div id="ees-work-content" class="ew-scroll">${snapshot.error&&snapshot.state?`<div class="ew-error" role="alert">${esc(snapshot.error)}${snapshot.error.startsWith('작성한 선택의 자동 저장 실패')?button('자동 저장 다시 시도','retry_private_save'):''}</div>`:''}${data.operations?.error?`<p class="ew-warning" role="alert">실행·예약 정보를 조회하지 못했습니다. ${esc(data.operations.error)}</p>`:''}${body}</div>`);
     const footer=host.querySelector('#ees-work-content>.ew-job-actions, #ees-work-content>.ew-next-action');if(footer)host.append(footer);
     workRestorePanelPosition(host,positions.get(key));setBusy(snapshot.busy);
   }
@@ -455,8 +500,8 @@ function createWorkView({callbacks}){
   function readInputs(){capture();const settings=selection().tab==='settings';return {...drafts.read(inputKey(),settings?state().settings?.values || {}:state().run?.inputs || {},settings?state().settings?.revision || 0:state().run?.revision || 0),key:inputKey(),settings};}
   function applyInputValues(values){capture();const source=state().run?.inputs || {},revision=state().run?.revision || 0,existing=drafts.read(inputKey(),source,revision);drafts.edit(inputKey(),{...existing.inputs,...values},revision,source);panel();}
   function clearInputs(key,serial,revision,values){drafts.acknowledge(key,serial,revision,values);}
-  function scopeDialog(){const data=state(),s=selection();return workUI.dialog({title:'작업 위치 선택',note:'공장과 시스템을 바꾸어도 대화와 작성 중인 글은 유지됩니다.',html:`<div class="ew-scope-columns${s.mode==='author'?' ew-system-only':''}"><section${s.mode==='author'?' hidden':''}><h3>공장</h3><input type="search" id="ees-factory-search" placeholder="공장 검색" aria-label="공장 검색"><div id="ees-factory-list"><button type="button" data-action="choose_factory" data-factory-id="" aria-pressed="${!s.factory_id}">${icon('40095')}<span>전체 공장<small>시스템 단위 업무를 볼 때</small></span></button>${(data.factories || []).map(f=>`<button type="button" data-action="choose_factory" data-factory-id="${esc(f.id)}" aria-pressed="${s.factory_id===f.id}"${f.allowed===false?' disabled':''}>${icon('40095')}<span>${esc(f.name)}<small>${esc([f.country,f.line].filter(Boolean).join(' · '))}</small></span></button>`).join('')}</div></section><section><h3>시스템</h3>${(data.systems || []).map(system=>typeof system==='string'?{id:system,name:system}:system).map(system=>`<button type="button" data-action="choose_system" data-system-id="${esc(system.id)}" aria-pressed="${s.system_id===system.id}"${system.allowed===false?' disabled':''}>${icon('f34f3')}<span>${esc(system.name || system.id)}<small>${system.allowed===false?'권한 없음':system.role==='owner'?'담당':'참여'}</small></span></button>`).join('')}</section></div>`});}
+
   function suspend(){workUI.closeDialog();capture();}
   function reset(){workUI.closeDialog();drafts.clear();reviewDrafts.clear();listDrafts.clear();positions.clear();modelChoices.clear();if(host)host.replaceChildren();host=null;snapshot={state:null,selection:{}};publish();}
-  return Object.freeze({render,sync,reset,suspend,setBusy,readList:()=>{capture();return workUI.clone(listDraft());},addListItem:item=>{capture();const draft=listDraft();if(draft.items.some(old=>old.id===item.id))throw new Error('이미 목록에 있는 항목입니다. 포함 여부를 확인해 주세요.');draft.items.push({...item,manual:true,selected:true});refreshResults();},readReview:()=>{capture();return reviewDraft();},clearReview:(key,serial,revision,text)=>reviewDrafts.acknowledge(key,serial,revision,{text}),refreshResults,readInputs,clearInputs,applyInputValues,discardInputs:()=>{drafts.discard(inputKey());panel();},scopeDialog,authoringHost:()=>$('#ees-work-authoring-panel',host),hasPendingInputs:()=>drafts.hasDirty([state().capabilities?.actor_id,selection().system_id,selection().factory_id,state().run?.id].join('/')+'/'),capture,handleEvent:()=>({handled:false})});
+  return Object.freeze({render,sync,reset,suspend,setBusy,readList:()=>{capture();return workUI.clone(listDraft());},addListItem:item=>{capture();const draft=listDraft();if(draft.items.some(old=>old.id===item.id))throw new Error('이미 목록에 있는 항목입니다. 포함 여부를 확인해 주세요.');draft.items.push({...item,manual:true,selected:true});refreshResults();},readReview:()=>{capture();return reviewDraft();},clearReview:(key,serial,revision,text)=>reviewDrafts.acknowledge(key,serial,revision,{text}),refreshResults,readInputs,clearInputs,applyInputValues,discardInputs:()=>{drafts.discard(inputKey());panel();},authoringHost:()=>$('#ees-work-authoring-panel',host),hasPendingInputs:()=>drafts.hasDirty([state().capabilities?.actor_id,selection().system_id,selection().factory_id,state().run?.id].join('/')+'/'),capture,handleEvent:()=>({handled:false})});
 }

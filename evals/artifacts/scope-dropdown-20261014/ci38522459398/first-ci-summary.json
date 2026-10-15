@@ -1,0 +1,120 @@
+{
+  "run_id": 38522459398,
+  "head_sha": "3e4d6c066f89d9632dfb1afc4373025894148c38",
+  "native_work": {
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0
+  },
+  "source_shell": {
+    "passed": 4,
+    "failed": 1,
+    "failed_test": "test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus",
+    "failure_stage": "Enter opening after Escape; CDP key helper omitted keypress text; corrected physical-input helper requires next CI confirmation."
+  },
+  "baseline_42cc756": {
+    "outcome": "expected failure",
+    "loading_frames_after_initial": 1083
+  },
+  "frames": {
+    "source-shell-delayed-navigation-frames.json": {
+      "observed_frames": 2740,
+      "guarded_frames": 2702,
+      "loading_frames_after_initial": 0,
+      "shell_failures": 0,
+      "frames_by_label": {
+        "first-load": 30,
+        "warm-procedures": 3,
+        "warm-my-work": 5,
+        "skills-to-procedures-enter-workspace": 126,
+        "skills-to-procedures-native": 70,
+        "skills-to-procedures": 129,
+        "skills-to-my-work-enter-workspace": 126,
+        "skills-to-my-work-native": 68,
+        "skills-to-my-work": 249,
+        "tools-to-procedures-enter-workspace": 126,
+        "tools-to-procedures-native": 69,
+        "tools-to-procedures": 128,
+        "tools-to-my-work-enter-workspace": 126,
+        "tools-to-my-work-native": 68,
+        "tools-to-my-work": 249,
+        "models-to-procedures-enter-workspace": 126,
+        "models-to-procedures-native": 68,
+        "models-to-procedures": 129,
+        "models-to-my-work-enter-workspace": 126,
+        "models-to-my-work-native": 67,
+        "models-to-my-work": 250,
+        "delayed-chat-list": 7,
+        "delayed-chat-switch": 132,
+        "delayed-new-chat": 128,
+        "delayed-chat-list-return": 6,
+        "delayed-existing-return": 129
+      },
+      "delayed_reads": 42
+    },
+    "source-shell-all-navigation-frames.json": {
+      "observed_frames": 141,
+      "guarded_frames": 101,
+      "loading_frames_after_initial": 0,
+      "shell_failures": 0,
+      "frames_by_label": {
+        "first-load": 27,
+        "work-open": 13,
+        "right-overview": 4,
+        "right-other-task": 4,
+        "chat-list": 4,
+        "chat-list-open": 7,
+        "new-chat": 5,
+        "chat-list-again": 3,
+        "chat-existing-return": 7,
+        "work-authoring": 7,
+        "work-tools": 4,
+        "work-access": 4,
+        "work-procedures": 4,
+        "native-models": 7,
+        "native-knowledge": 4,
+        "native-prompts": 5,
+        "native-skills": 5,
+        "native-tools": 5,
+        "native-return": 4,
+        "admin-open": 5,
+        "admin-return": 13
+      }
+    },
+    "source-scope-delayed-frames.json": {
+      "observed_frames": 1202,
+      "guarded_frames": 1169,
+      "loading_frames_after_initial": 0,
+      "shell_failures": 0,
+      "frames_by_label": {
+        "first-load": 35,
+        "scope-factory-first": 128,
+        "scope-factory-second": 128,
+        "scope-all-factories": 128,
+        "scope-system-apc": 128,
+        "scope-system-ems": 138,
+        "scope-workspace-system-apc": 126,
+        "scope-native-skills": 71,
+        "scope-native-system-ems": 65,
+        "scope-native-return": 131,
+        "scope-server-catalog-change": 124
+      },
+      "delayed_reads": 19
+    },
+    "source-shell-delayed-preservation-frames.json": {
+      "observed_frames": 630,
+      "guarded_frames": 576,
+      "loading_frames_after_initial": 0,
+      "shell_failures": 0,
+      "frames_by_label": {
+        "first-load": 54,
+        "changed-background-refresh": 124,
+        "preservation-native-skills": 69,
+        "preservation-native-return": 129,
+        "preservation-my-work": 127,
+        "preservation-author-return": 127
+      },
+      "delayed_reads": 9
+    }
+  }
+}

@@ -1,0 +1,42 @@
+test_scope_system_switch_uses_target_access_after_clearing_factory (test_ees_work_workspace.WorkspaceTests.test_scope_system_switch_uses_target_access_after_clearing_factory) ... 
+  test_scope_system_switch_uses_target_access_after_clearing_factory (test_ees_work_workspace.WorkspaceTests.test_scope_system_switch_uses_target_access_after_clearing_factory) (system='EMS') ... FAIL
+  test_scope_system_switch_uses_target_access_after_clearing_factory (test_ees_work_workspace.WorkspaceTests.test_scope_system_switch_uses_target_access_after_clearing_factory) (system='APC') ... FAIL
+
+======================================================================
+FAIL: test_scope_system_switch_uses_target_access_after_clearing_factory (test_ees_work_workspace.WorkspaceTests.test_scope_system_switch_uses_target_access_after_clearing_factory) (system='EMS')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/test_ees_work_workspace.py", line 904, in test_scope_system_switch_uses_target_access_after_clearing_factory
+    self.assertEqual(state['systems'], ['EMS', 'APC'])
+AssertionError: Lists differ: ['EMS'] != ['EMS', 'APC']
+
+Second list contains 1 additional elements.
+First extra element 1:
+'APC'
+
+- ['EMS']
++ ['EMS', 'APC']
+
+======================================================================
+FAIL: test_scope_system_switch_uses_target_access_after_clearing_factory (test_ees_work_workspace.WorkspaceTests.test_scope_system_switch_uses_target_access_after_clearing_factory) (system='APC')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/team-agent-poc/tests/test_ees_work_workspace.py", line 904, in test_scope_system_switch_uses_target_access_after_clearing_factory
+    self.assertEqual(state['systems'], ['EMS', 'APC'])
+AssertionError: Lists differ: ['APC'] != ['EMS', 'APC']
+
+First differing element 0:
+'APC'
+'EMS'
+
+Second list contains 1 additional elements.
+First extra element 1:
+'APC'
+
+- ['APC']
++ ['EMS', 'APC']
+
+----------------------------------------------------------------------
+Ran 1 test in 0.036s
+
+FAILED (failures=2)

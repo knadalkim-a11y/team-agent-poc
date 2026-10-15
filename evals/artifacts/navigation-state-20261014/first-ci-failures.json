@@ -1,0 +1,25 @@
+{
+  "run_id": 38515563587,
+  "head": "b4f370bfd97e782597372b775f78038baa07127a",
+  "scope": "First CI failure, retained after correction",
+  "failures": [
+    {
+      "job_id": 115695816655,
+      "test": "test_ees_work_demo.EESWorkNativeBrowserTests.test_lookup_failure_removes_previously_visible_private_evidence",
+      "symptom": "Previously displayed synthetic-private-evidence remained after the workspace lookup failed."
+    },
+    {
+      "job_id": 115695816607,
+      "test": "test_ees_work_c_phase3_privacy.CPhaseThreeLegacyPrivacyTests.test_failed_history_lookup_never_reveals_previous_attempt_or_input",
+      "symptom": "Previously displayed synthetic-private-history remained after history lookup failed."
+    },
+    {
+      "job_id": 115695816607,
+      "test": "test_ees_work_c_phase3_privacy.CPhaseThreeLegacyPrivacyTests.test_revoked_native_actor_scope_removes_open_result_and_author_controls",
+      "symptom": "Previously displayed synthetic-sensitive-result remained after the current scope was denied."
+    }
+  ],
+  "cause": "The initial cache retained execution evidence after read failure; semantic scope denial delivered as HTTP400 was not classified by the HTTP401/403/404 invalidation path.",
+  "correction": "Keep normal pending refresh and editor preservation, but fail closed for unavailable execution evidence/references and classify semantic access denials. Existing browser assertions remain unchanged.",
+  "verification": "Pending corrected-head CI; this file does not mark the first run successful."
+}

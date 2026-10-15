@@ -932,7 +932,11 @@ def figma_delta_flow(g):
         business_status='blocked',reason='delivery_unconfigured',actual_delivery=False)
     assert blocked['factory_id']==factory_id
     g.click('[data-action="workflow"][data-workflow-id="'+delivery_id+'"]')
-    g.wait('!!document.querySelector(".ew-active-runs")')
+    # Navigation first paints the cached pre-start overview. Its empty active
+    # list already exists before workspace/operations refresh completes. Wait
+    # for this known server run to reach the UI, then independently verify the
+    # factory option and start action are disabled; never manufacture either.
+    g.wait('document.querySelector(\'.ew-active-runs [data-run-id="'+delivery_run_id+'"]\')?.getClientRects().length>0')
     assert g.browser.evaluate('document.querySelector(\'#ees-start-factory option[value="'+factory_id+'"]\')?.disabled')
     assert g.browser.evaluate('document.querySelector(\'.ew-active-runs [data-run-id="'+delivery_run_id+'"]\')?.getClientRects().length>0')
     assert g.browser.evaluate('document.querySelector(\'[data-action="start_run"][data-start-inline]\')?.disabled')
