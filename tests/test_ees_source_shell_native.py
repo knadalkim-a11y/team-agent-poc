@@ -690,6 +690,92 @@ class SourceShellNativeTests(IntegratedNativeCase):
         frame_monitor.assert_clean(self, evidence, labels=labels)
         self.assertEqual(self.server.completions, [], 'Navigation must not submit a conversation')
 
+    def test_native_return_first_frame_selects_destination_without_previous_panel(self):
+        self.enable_native_menus()
+        frame_monitor.install(self)
+        self.navigate('/c/existing-chat')
+        self.wait("document.querySelector('#ees-work-entry [data-action=my_work]') && window.__eesNativeDraftV1?.ready()")
+        self.open_sidebar()
+        self.fill('#chat-input', '다른 칸으로 돌아와도 유지할 대화 초안')
+        draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        panels = {
+            'tools': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '도구'",
+            'procedures': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '업무 절차'",
+            'workspace_admin': "document.querySelector('#ees-work-panel .ew-work-heading h2')?.textContent === '공장·접근 범위'",
+            'my_work': "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '내 업무'",
+        }
+        # Warm the three author panels once before timing the return boundary.
+        # Existing same-menu preservation coverage below keeps dirty draft DOM,
+        # fields, expansion and scroll; this test targets different destinations.
+        self.click('[data-action=mode][data-mode=author]')
+        self.wait(panels['procedures'])
+        self.assertIsNotNone(self.refresh())
+        for origin in ('tools', 'workspace_admin', 'procedures'):
+            self.click('#ees-work-entry [data-action=' + origin + ']')
+            self.wait(panels[origin])
+            self.assertIsNotNone(self.refresh())
+        self.delay_workspace_reads()
+        frame_monitor.guard_loading(self)
+        labels = []
+
+        for origin in ('tools', 'procedures', 'workspace_admin'):
+            for destination in ('tools', 'procedures', 'workspace_admin', 'my_work'):
+                if destination == origin:
+                    continue
+                label = 'return-' + origin + '-to-' + destination
+                if self.browser.evaluate("document.querySelector('#ees-work-entry [data-mode=work]')?.getAttribute('aria-pressed') === 'true'"):
+                    self.delayed_step(label + '-author', '#ees-work-entry [data-action=mode][data-mode=author]',
+                                      "document.querySelector('#ees-work-entry [data-mode=author]')?.getAttribute('aria-pressed') === 'true'")
+                self.delayed_step(label + '-origin', '#ees-work-entry [data-action=' + origin + ']',
+                                  panels[origin])
+                # Cover both Guidance and the AI settings route with the same
+                # return contract. The administrator dialog's close/same path
+                # remains in test_every_navigation_has_source_chrome... .
+                native = 'models' if destination == 'my_work' else 'skills'
+                self.delayed_step(label + '-native',
+                    '#ees-work-entry [data-action=native_open][data-native-id=' + native + ']',
+                    'location.pathname === ' + json.dumps('/workspace/' + native) +
+                    ' && document.querySelector("#workspace-container input") && ' +
+                    'document.querySelector("#ees-work-entry [data-native-id=' + native + ']")?.getAttribute("aria-current") === "page"',
+                    paths=('workspace',))
+                selector = ('#ees-work-entry [data-action=mode][data-mode=work]' if destination == 'my_work'
+                            else '#ees-work-entry [data-action=' + destination + ']')
+                start = len(self.server.navigation_reads)
+                frame_monitor.begin_native_return(self, label, selector=selector, native=native,
+                                                 destination=destination, previous=origin)
+                self.click(selector)
+                self.wait("location.pathname === '/c/existing-chat' && (" + panels[destination] + ')')
+                self.wait_delayed_reads(start)
+                frame_monitor.collect(self, labels=(label,))
+                frame_monitor.end_native_return(self)
+                labels.append(label)
+                self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+
+        evidence = frame_monitor.collect(self, labels=labels)
+        evidence['scope'] = ('Real packaged frontend and physical CDP clicks: tools/procedures/factories-access '
+                             'each through Native guidance to both other author panels and through Native '
+                             'models to work mode (nine returns). Both real workspace and operations responses '
+                             'are delayed 1000ms; aria-current and visible right-panel identity are observed '
+                             'from the trusted destination click through response completion.')
+        evidence['reads'] = self.server.navigation_reads
+        evidence['counts'] = {label: {
+            'frames': sum(row['nativeReturnLabel'] == label for row in evidence['samples']),
+            'unexpected_selection': sum(row['nativeReturnLabel'] == label and row['nativeReturnUnexpectedSelection']
+                                        for row in evidence['samples']),
+            'previous_panel': sum(row['nativeReturnLabel'] == label and bool(row['nativeReturnPreviousPanel'])
+                                  for row in evidence['samples']),
+            'destination_local_loading': sum(row['nativeReturnLabel'] == label and row['nativeReturnDestinationLoading']
+                                              for row in evidence['samples']),
+        } for label in labels}
+        directory = self.screenshot('source-shell-native-return-selection-final')
+        (directory / 'source-shell-native-return-selection-frames.json').write_text(
+            json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        self.assertEqual(len(evidence['nativeReturns']), 9)
+        for row in self.server.navigation_reads:
+            self.assertGreaterEqual(row['released'] - row['started'], .99)
+        frame_monitor.assert_clean(self, evidence, labels=labels)
+        self.assertEqual(self.server.completions, [], 'Navigation must not submit a conversation')
+
     def test_background_refresh_and_native_return_keep_draft_nodes_expansion_and_scroll(self):
         self.enable_native_menus()
         workflow_id = self.author(name='증분 갱신 보존 절차', jobs=2)

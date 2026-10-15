@@ -1,0 +1,700 @@
+TAP version 13
+# Subtest: Native return selects procedures before any response: tools -> skills
+ok 1 - Native return selects procedures before any response: tools -> skills
+  ---
+  duration_ms: 23.483664
+  type: 'test'
+  ...
+# Subtest: Native return selects workspace_admin before any response: tools -> skills
+ok 2 - Native return selects workspace_admin before any response: tools -> skills
+  ---
+  duration_ms: 23.415452
+  type: 'test'
+  ...
+# Subtest: Native return selects work before any response: tools -> skills
+ok 3 - Native return selects work before any response: tools -> skills
+  ---
+  duration_ms: 8.21235
+  type: 'test'
+  ...
+# Subtest: Native return selects procedures before any response: tools -> models
+ok 4 - Native return selects procedures before any response: tools -> models
+  ---
+  duration_ms: 6.564402
+  type: 'test'
+  ...
+# Subtest: Native return selects workspace_admin before any response: tools -> models
+ok 5 - Native return selects workspace_admin before any response: tools -> models
+  ---
+  duration_ms: 6.307545
+  type: 'test'
+  ...
+# Subtest: Native return selects work before any response: tools -> models
+ok 6 - Native return selects work before any response: tools -> models
+  ---
+  duration_ms: 7.183382
+  type: 'test'
+  ...
+# Subtest: Native return selects tools before any response: procedures -> skills
+ok 7 - Native return selects tools before any response: procedures -> skills
+  ---
+  duration_ms: 8.386831
+  type: 'test'
+  ...
+# Subtest: Native return selects workspace_admin before any response: procedures -> skills
+ok 8 - Native return selects workspace_admin before any response: procedures -> skills
+  ---
+  duration_ms: 12.359857
+  type: 'test'
+  ...
+# Subtest: Native return selects work before any response: procedures -> skills
+ok 9 - Native return selects work before any response: procedures -> skills
+  ---
+  duration_ms: 5.771459
+  type: 'test'
+  ...
+# Subtest: Native return selects tools before any response: procedures -> models
+ok 10 - Native return selects tools before any response: procedures -> models
+  ---
+  duration_ms: 11.9467
+  type: 'test'
+  ...
+# Subtest: Native return selects workspace_admin before any response: procedures -> models
+ok 11 - Native return selects workspace_admin before any response: procedures -> models
+  ---
+  duration_ms: 15.96625
+  type: 'test'
+  ...
+# Subtest: Native return selects work before any response: procedures -> models
+ok 12 - Native return selects work before any response: procedures -> models
+  ---
+  duration_ms: 44.331705
+  type: 'test'
+  ...
+# Subtest: Native return selects tools before any response: workspace_admin -> skills
+ok 13 - Native return selects tools before any response: workspace_admin -> skills
+  ---
+  duration_ms: 11.349397
+  type: 'test'
+  ...
+# Subtest: Native return selects procedures before any response: workspace_admin -> skills
+ok 14 - Native return selects procedures before any response: workspace_admin -> skills
+  ---
+  duration_ms: 6.645753
+  type: 'test'
+  ...
+# Subtest: Native return selects work before any response: workspace_admin -> skills
+ok 15 - Native return selects work before any response: workspace_admin -> skills
+  ---
+  duration_ms: 5.04069
+  type: 'test'
+  ...
+# Subtest: Native return selects tools before any response: workspace_admin -> models
+ok 16 - Native return selects tools before any response: workspace_admin -> models
+  ---
+  duration_ms: 5.330256
+  type: 'test'
+  ...
+# Subtest: Native return selects procedures before any response: workspace_admin -> models
+ok 17 - Native return selects procedures before any response: workspace_admin -> models
+  ---
+  duration_ms: 5.015963
+  type: 'test'
+  ...
+# Subtest: Native return selects work before any response: workspace_admin -> models
+ok 18 - Native return selects work before any response: workspace_admin -> models
+  ---
+  duration_ms: 4.020125
+  type: 'test'
+  ...
+# Subtest: same Native destination retains the exact private author draft and selection during both delayed reads
+ok 19 - same Native destination retains the exact private author draft and selection during both delayed reads
+  ---
+  duration_ms: 12.740068
+  type: 'test'
+  ...
+# Subtest: Native return publishes no work reference until workspace operations and Chat readiness are confirmed
+ok 20 - Native return publishes no work reference until workspace operations and Chat readiness are confirmed
+  ---
+  duration_ms: 6.510791
+  type: 'test'
+  ...
+# Subtest: account reset discards a pending Native destination and all prior private state
+ok 21 - account reset discards a pending Native destination and all prior private state
+  ---
+  duration_ms: 3.569738
+  type: 'test'
+  ...
+# Subtest: a Native return permission denial discards cached author state and cannot execute the queued action
+ok 22 - a Native return permission denial discards cached author state and cannot execute the queued action
+  ---
+  duration_ms: 4.862852
+  type: 'test'
+  ...
+# Subtest: a queued Native destination cannot apply to an unrelated chat route
+ok 23 - a queued Native destination cannot apply to an unrelated chat route
+  ---
+  duration_ms: 5.039388
+  type: 'test'
+  ...
+# Subtest: workspace menu uses server permissions for three groups and hides unavailable Native destinations
+ok 24 - workspace menu uses server permissions for three groups and hides unavailable Native destinations
+  ---
+  duration_ms: 13.192163
+  type: 'test'
+  ...
+# Subtest: tools-only permission keeps D9 workspace access with an honest empty menu and no admin link
+ok 25 - tools-only permission keeps D9 workspace access with an honest empty menu and no admin link
+  ---
+  duration_ms: 10.427651
+  type: 'test'
+  ...
+# Subtest: blocked Native navigation has a visible escaped authoring alert without replacing its editor
+ok 26 - blocked Native navigation has a visible escaped authoring alert without replacing its editor
+  ---
+  duration_ms: 1.002217
+  type: 'test'
+  ...
+# Subtest: forged denied Native and author actions do not navigate or mutate state
+ok 27 - forged denied Native and author actions do not navigate or mutate state
+  ---
+  duration_ms: 4.60189
+  type: 'test'
+  ...
+# Subtest: scope option labels never authorize a denied or undisclosed actual scope
+ok 28 - scope option labels never authorize a denied or undisclosed actual scope
+  ---
+  duration_ms: 3.301705
+  type: 'test'
+  ...
+# Subtest: factory-scoped user can select another allowed system with factory cleared and composer preserved
+ok 29 - factory-scoped user can select another allowed system with factory cleared and composer preserved
+  ---
+  duration_ms: 4.678144
+  type: 'test'
+  ...
+# Subtest: Native scope preserves separate permission metadata and rejects disabled options without navigation
+ok 30 - Native scope preserves separate permission metadata and rejects disabled options without navigation
+  ---
+  duration_ms: 10.358567
+  type: 'test'
+  ...
+# Subtest: all six allowed Native destinations use direct static routes without a sidebar link
+ok 31 - all six allowed Native destinations use direct static routes without a sidebar link
+  ---
+  duration_ms: 8.44497
+  type: 'test'
+  ...
+# Subtest: same-section EES menu preserves selection and unsaved designer session plus the full composer without sending
+ok 32 - same-section EES menu preserves selection and unsaved designer session plus the full composer without sending
+  ---
+  duration_ms: 3.155976
+  type: 'test'
+  ...
+# Subtest: delayed first chat creation keeps Native open and returns root or folder drafts to the created chat
+ok 33 - delayed first chat creation keeps Native open and returns root or folder drafts to the created chat
+  ---
+  duration_ms: 4.775782
+  type: 'test'
+  ...
+# Subtest: late first chat signals cannot rewrite existing chat or another actor return tickets
+ok 34 - late first chat signals cannot rewrite existing chat or another actor return tickets
+  ---
+  duration_ms: 9.989391
+  type: 'test'
+  ...
+# Subtest: Native loaded draft is not reimported and different nonempty content is never overwritten
+ok 35 - Native loaded draft is not reimported and different nonempty content is never overwritten
+  ---
+  duration_ms: 4.802943
+  type: 'test'
+  ...
+# Subtest: return waits for the persistent Native editor and never imports over new interaction state
+ok 36 - return waits for the persistent Native editor and never imports over new interaction state
+  ---
+  duration_ms: 10.833811
+  type: 'test'
+  ...
+# Subtest: Native departure blocks busy editors and failed or changed draft flushes
+ok 37 - Native departure blocks busy editors and failed or changed draft flushes
+  ---
+  duration_ms: 5.894724
+  type: 'test'
+  ...
+# Subtest: missing persistent source Chat refuses departure without reconstructing Native DOM
+ok 38 - missing persistent source Chat refuses departure without reconstructing Native DOM
+  ---
+  duration_ms: 4.916003
+  type: 'test'
+  ...
+# Subtest: pending Native navigation cannot cross an account or work context change
+ok 39 - pending Native navigation cannot cross an account or work context change
+  ---
+  duration_ms: 7.422081
+  type: 'test'
+  ...
+# Subtest: account reset releases an old pending Native flush without unlocking the new account operation
+ok 40 - account reset releases an old pending Native flush without unlocking the new account operation
+  ---
+  duration_ms: 1.634428
+  type: 'test'
+  ...
+# Subtest: removed native_return action cannot navigate or alter the saved selection
+ok 41 - removed native_return action cannot navigate or alter the saved selection
+  ---
+  duration_ms: 8.773297
+  type: 'test'
+  ...
+# Subtest: chat history menu publishes its own selection and never opens the separate search dialog
+ok 42 - chat history menu publishes its own selection and never opens the separate search dialog
+  ---
+  duration_ms: 2.627831
+  type: 'test'
+  ...
+# Subtest: Native tickets cannot copy drafts across unrelated navigation logout actor or session changes
+ok 43 - Native tickets cannot copy drafts across unrelated navigation logout actor or session changes
+  ---
+  duration_ms: 12.629272
+  type: 'test'
+  ...
+# Subtest: Browser Back preserves the exact live draft without importing a snapshot
+ok 44 - Browser Back preserves the exact live draft without importing a snapshot
+  ---
+  duration_ms: 4.195149
+  type: 'test'
+  ...
+# Subtest: Native-to-Native menu navigation keeps the persistent Chat across all destinations
+ok 45 - Native-to-Native menu navigation keeps the persistent Chat across all destinations
+  ---
+  duration_ms: 3.20544
+  type: 'test'
+  ...
+# Subtest: same-section tools menu restores its exact authoring selection without closing the draft
+ok 46 - same-section tools menu restores its exact authoring selection without closing the draft
+  ---
+  duration_ms: 2.306389
+  type: 'test'
+  ...
+# Subtest: a different EES menu destination is applied only after returning to the original chat
+ok 47 - a different EES menu destination is applied only after returning to the original chat
+  ---
+  duration_ms: 4.118503
+  type: 'test'
+  ...
+# Subtest: Native return keeps the workspace visible but publishes a reference only after validation and Chat readiness
+ok 48 - Native return keeps the workspace visible but publishes a reference only after validation and Chat readiness
+  ---
+  duration_ms: 4.92736
+  type: 'test'
+  ...
+# Subtest: a queued EES menu destination is visible immediately while its reference waits for full state
+ok 49 - a queued EES menu destination is visible immediately while its reference waits for full state
+  ---
+  duration_ms: 2.545758
+  type: 'test'
+  ...
+# Subtest: transient full state failure after Native return keeps the workspace and error without a work reference
+ok 50 - transient full state failure after Native return keeps the workspace and error without a work reference
+  ---
+  duration_ms: 4.504193
+  type: 'test'
+  ...
+# Subtest: explicit retry after a failed return finishes its ticket without a DOM observer lifecycle tick
+ok 51 - explicit retry after a failed return finishes its ticket without a DOM observer lifecycle tick
+  ---
+  duration_ms: 2.795794
+  type: 'test'
+  ...
+# Subtest: direct Native entry loads capabilities with no chat pane and EES destinations use the chat root
+ok 52 - direct Native entry loads capabilities with no chat pane and EES destinations use the chat root
+  ---
+  duration_ms: 2.525608
+  type: 'test'
+  ...
+# Subtest: a failed Native capability read hides actions but keeps the original draft until explicit same-actor retry
+ok 53 - a failed Native capability read hides actions but keeps the original draft until explicit same-actor retry
+  ---
+  duration_ms: 3.457329
+  type: 'test'
+  ...
+# Subtest: retry after a failed Native capability read never revives another actor or session return ticket
+ok 54 - retry after a failed Native capability read never revives another actor or session return ticket
+  ---
+  duration_ms: 5.150155
+  type: 'test'
+  ...
+# Subtest: source availability is independent of Native sidebar and chat DOM anchors
+ok 55 - source availability is independent of Native sidebar and chat DOM anchors
+  ---
+  duration_ms: 1.888991
+  type: 'test'
+  ...
+# Subtest: source admin state stays inside the shell and explicit close preserves original chat
+ok 56 - source admin state stays inside the shell and explicit close preserves original chat
+  ---
+  duration_ms: 2.569885
+  type: 'test'
+  ...
+# Subtest: source admin close returns to saved chat without inspecting Native modal nodes
+ok 57 - source admin close returns to saved chat without inspecting Native modal nodes
+  ---
+  duration_ms: 2.614382
+  type: 'test'
+  ...
+# Subtest: source admin session may keep its Native personal tab open until explicitly closed
+ok 58 - source admin session may keep its Native personal tab open until explicitly closed
+  ---
+  duration_ms: 2.808413
+  type: 'test'
+  ...
+# Subtest: ordinary source settings do not claim admin state or inspect Native modal markup
+ok 59 - ordinary source settings do not claim admin state or inspect Native modal markup
+  ---
+  duration_ms: 5.182143
+  type: 'test'
+  ...
+# Subtest: persistent source Chat keeps live images and uploads through Native without reimport
+ok 60 - persistent source Chat keeps live images and uploads through Native without reimport
+  ---
+  duration_ms: 2.150604
+  type: 'test'
+  ...
+# Subtest: runtime owns only supplied slots and registers no document-wide event hooks or observer
+ok 61 - runtime owns only supplied slots and registers no document-wide event hooks or observer
+  ---
+  duration_ms: 1.136098
+  type: 'test'
+  ...
+# Subtest: source help context is available outside work references and fails closed until chat is ready
+ok 62 - source help context is available outside work references and fails closed until chat is ready
+  ---
+  duration_ms: 1.376139
+  type: 'test'
+  ...
+# Subtest: help question contains only visible question text and keeps context outside its content
+ok 63 - help question contains only visible question text and keeps context outside its content
+  ---
+  duration_ms: 0.650328
+  type: 'test'
+  ...
+# Subtest: help sends through source once with a frozen reference and never reads or changes the composer
+ok 64 - help sends through source once with a frozen reference and never reads or changes the composer
+  ---
+  duration_ms: 1.335598
+  type: 'test'
+  ...
+# Subtest: help refuses missing source or unready chat without a fallback send or composer mutation
+ok 65 - help refuses missing source or unready chat without a fallback send or composer mutation
+  ---
+  duration_ms: 1.193014
+  type: 'test'
+  ...
+# Subtest: help prevents duplicate requests through preflight and the full Native response then reports no-send failure
+ok 66 - help prevents duplicate requests through preflight and the full Native response then reports no-send failure
+  ---
+  duration_ms: 1.723001
+  type: 'test'
+  ...
+# Subtest: help rejects an account change before dispatch and never copies a private draft to another actor
+ok 67 - help rejects an account change before dispatch and never copies a private draft to another actor
+  ---
+  duration_ms: 1.12358
+  type: 'test'
+  ...
+# Subtest: late help acceptance cannot focus or repaint another conversation and retains its submitted reference
+ok 68 - late help acceptance cannot focus or repaint another conversation and retains its submitted reference
+  ---
+  duration_ms: 0.969588
+  type: 'test'
+  ...
+# Subtest: author tools expose help-only metadata while workflow and historical references remain unchanged
+ok 69 - author tools expose help-only metadata while workflow and historical references remain unchanged
+  ---
+  duration_ms: 1.182167
+  type: 'test'
+  ...
+# Subtest: procedure starter questions send visible text with separate help metadata until the starter closes
+ok 70 - procedure starter questions send visible text with separate help metadata until the starter closes
+  ---
+  duration_ms: 1.255348
+  type: 'test'
+  ...
+# Subtest: procedure question sends the visible translation unchanged while preserving index and length guards
+ok 71 - procedure question sends the visible translation unchanged while preserving index and length guards
+  ---
+  duration_ms: 1.101857
+  type: 'test'
+  ...
+# Subtest: procedure question choices reject unavailable or invalid context without dispatch
+ok 72 - procedure question choices reject unavailable or invalid context without dispatch
+  ---
+  duration_ms: 1.563432
+  type: 'test'
+  ...
+# Subtest: runtime keeps the three approved questions and has no old right-side introduction or fill-only copy
+ok 73 - runtime keeps the three approved questions and has no old right-side introduction or fill-only copy
+  ---
+  duration_ms: 0.980735
+  type: 'test'
+  ...
+# Subtest: input save keeps mutation controls busy until the acknowledged state finishes refreshing
+ok 74 - input save keeps mutation controls busy until the acknowledged state finishes refreshing
+  ---
+  duration_ms: 2.108761
+  type: 'test'
+  ...
+# Subtest: review save cannot continue confirmation after its refresh loses the selected work context
+ok 75 - review save cannot continue confirmation after its refresh loses the selected work context
+  ---
+  duration_ms: 1.840397
+  type: 'test'
+  ...
+# Subtest: an explicit early navigation survives initial saved-selection restoration and late startup reads
+ok 76 - an explicit early navigation survives initial saved-selection restoration and late startup reads
+  ---
+  duration_ms: 1.56338
+  type: 'test'
+  ...
+# Subtest: early selection patches are cleared on account reset and do not replace another account restoration
+ok 77 - early selection patches are cleared on account reset and do not replace another account restoration
+  ---
+  duration_ms: 1.485333
+  type: 'test'
+  ...
+# Subtest: history expansion restoration uses exact attempt keys and the current panel position
+ok 78 - history expansion restoration uses exact attempt keys and the current panel position
+  ---
+  duration_ms: 2.411977
+  type: 'test'
+  ...
+# Subtest: real view list reader returns an isolated snapshot without an undefined helper
+ok 79 - real view list reader returns an isolated snapshot without an undefined helper
+  ---
+  duration_ms: 1.169849
+  type: 'test'
+  ...
+# Subtest: assignment labels use only the permitted Native people list and preserve principal kind
+ok 80 - assignment labels use only the permitted Native people list and preserve principal kind
+  ---
+  duration_ms: 1.480666
+  type: 'test'
+  ...
+# Subtest: new delivery effect and retry failures are translated without masking human explanations
+ok 81 - new delivery effect and retry failures are translated without masking human explanations
+  ---
+  duration_ms: 6.761338
+  type: 'test'
+  ...
+# Subtest: list inclusion is a local preview and candidates are never selected by default
+ok 82 - list inclusion is a local preview and candidates are never selected by default
+  ---
+  duration_ms: 7.822884
+  type: 'test'
+  ...
+# Subtest: saved human additions retain their source label and never increase the immutable lookup count
+ok 83 - saved human additions retain their source label and never increase the immutable lookup count
+  ---
+  duration_ms: 5.709926
+  type: 'test'
+  ...
+# Subtest: failed lookup hides previous payload while partial keeps explicit incompleteness
+ok 84 - failed lookup hides previous payload while partial keeps explicit incompleteness
+  ---
+  duration_ms: 1.329259
+  type: 'test'
+  ...
+# Subtest: zero included items can be saved while completion policy remains explicitly unresolved
+ok 85 - zero included items can be saved while completion policy remains explicitly unresolved
+  ---
+  duration_ms: 0.792993
+  type: 'test'
+  ...
+# Subtest: a completed empty lookup permits explicit additions without pretending it was never executed
+ok 86 - a completed empty lookup permits explicit additions without pretending it was never executed
+  ---
+  duration_ms: 2.807141
+  type: 'test'
+  ...
+# Subtest: read-only report cannot edit or save and unavailable dispatch is never clickable
+ok 87 - read-only report cannot edit or save and unavailable dispatch is never clickable
+  ---
+  duration_ms: 2.529484
+  type: 'test'
+  ...
+# Subtest: revoked evidence never redisplays a locally preserved list or review draft
+ok 88 - revoked evidence never redisplays a locally preserved list or review draft
+  ---
+  duration_ms: 23.391019
+  type: 'test'
+  ...
+# Subtest: request reviewer and requester controls use distinct current capabilities
+ok 89 - request reviewer and requester controls use distinct current capabilities
+  ---
+  duration_ms: 12.034987
+  type: 'test'
+  ...
+# Subtest: failed or stale report never permits editing a previous result as current evidence
+ok 90 - failed or stale report never permits editing a previous result as current evidence
+  ---
+  duration_ms: 7.05513
+  type: 'test'
+  ...
+# Subtest: historical values compare only the stored shared input without replacing it
+ok 91 - historical values compare only the stored shared input without replacing it
+  ---
+  duration_ms: 13.603272
+  type: 'test'
+  ...
+# Subtest: records are scoped and put active runs first without inventing a date range
+ok 92 - records are scoped and put active runs first without inventing a date range
+  ---
+  duration_ms: 47.211635
+  type: 'test'
+  ...
+# Subtest: empty work shows only the earliest real scheduled execution
+ok 93 - empty work shows only the earliest real scheduled execution
+  ---
+  duration_ms: 1.334446
+  type: 'test'
+  ...
+# Subtest: asking about a historical record only changes private reference and never dispatches
+ok 94 - asking about a historical record only changes private reference and never dispatches
+  ---
+  duration_ms: 7.445676
+  type: 'test'
+  ...
+# Subtest: question from a historical row preserves its exact attempt instead of the newest row
+ok 95 - question from a historical row preserves its exact attempt instead of the newest row
+  ---
+  duration_ms: 10.527812
+  type: 'test'
+  ...
+# Subtest: draft save sends immutable attempt and both revisions without executing or deciding
+ok 96 - draft save sends immutable attempt and both revisions without executing or deciding
+  ---
+  duration_ms: 4.517684
+  type: 'test'
+  ...
+# Subtest: late draft save cannot acknowledge or repaint after another work target is selected
+ok 97 - late draft save cannot acknowledge or repaint after another work target is selected
+  ---
+  duration_ms: 1.659085
+  type: 'test'
+  ...
+# Subtest: request fields follow native schema types and bindings, with reason outside EES values
+ok 98 - request fields follow native schema types and bindings, with reason outside EES values
+  ---
+  duration_ms: 3.015855
+  type: 'test'
+  ...
+# Subtest: ad-hoc start lists active factories and disables only those with active work
+ok 99 - ad-hoc start lists active factories and disables only those with active work
+  ---
+  duration_ms: 1.658113
+  type: 'test'
+  ...
+# Subtest: item verdict options stay pending and AI suggestions cannot enable final confirmation
+ok 100 - item verdict options stay pending and AI suggestions cannot enable final confirmation
+  ---
+  duration_ms: 2.037934
+  type: 'test'
+  ...
+# Subtest: A7 has automatic save status and no save button, and basis cards expose actual time
+ok 101 - A7 has automatic save status and no save button, and basis cards expose actual time
+  ---
+  duration_ms: 2.071345
+  type: 'test'
+  ...
+# Subtest: navigation flushes edits made while an older review autosave is still in flight
+ok 102 - navigation flushes edits made while an older review autosave is still in flight
+  ---
+  duration_ms: 1.854319
+  type: 'test'
+  ...
+# Subtest: failed automatic review save keeps the current work and preserves its draft
+ok 103 - failed automatic review save keeps the current work and preserves its draft
+  ---
+  duration_ms: 1.474578
+  type: 'test'
+  ...
+# Subtest: same-status custom words retain distinct pending IDs and final immutable wording
+ok 104 - same-status custom words retain distinct pending IDs and final immutable wording
+  ---
+  duration_ms: 1.997253
+  type: 'test'
+  ...
+# Subtest: partial provenance survives a failed human verdict without changing its primary status
+ok 105 - partial provenance survives a failed human verdict without changing its primary status
+  ---
+  duration_ms: 1.325483
+  type: 'test'
+  ...
+# Subtest: private verdict autosave persists exact term without deciding and restores after reload
+ok 106 - private verdict autosave persists exact term without deciding and restores after reload
+  ---
+  duration_ms: 17.280691
+  type: 'test'
+  ...
+# Subtest: private draft storage failure is visible and never discards pending selection
+ok 107 - private draft storage failure is visible and never discards pending selection
+  ---
+  duration_ms: 2.441963
+  type: 'test'
+  ...
+# Subtest: schema field ordering is not an edit while changed values retain save protection
+ok 108 - schema field ordering is not an edit while changed values retain save protection
+  ---
+  duration_ms: 1.368688
+  type: 'test'
+  ...
+# Subtest: missing evidence and external request URLs never become local undefined links
+ok 109 - missing evidence and external request URLs never become local undefined links
+  ---
+  duration_ms: 62.235437
+  type: 'test'
+  ...
+# Subtest: shared ID helper prefers the native randomUUID with its receiver
+ok 110 - shared ID helper prefers the native randomUUID with its receiver
+  ---
+  duration_ms: 0.693794
+  type: 'test'
+  ...
+# Subtest: shared ID fallback sets UUID version and variant while preserving random bytes
+ok 111 - shared ID fallback sets UUID version and variant while preserving random bytes
+  ---
+  duration_ms: 5.957289
+  type: 'test'
+  ...
+# Subtest: shared ID generation refuses missing secure randomness
+ok 112 - shared ID generation refuses missing secure randomness
+  ---
+  duration_ms: 3.599182
+  type: 'test'
+  ...
+# Subtest: missing randomUUID preserves runtime command receipt and first-chat boundaries
+ok 113 - missing randomUUID preserves runtime command receipt and first-chat boundaries
+  ---
+  duration_ms: 1.65599
+  type: 'test'
+  ...
+# Subtest: missing source API fails closed with no duplicate runtime transport
+ok 114 - missing source API fails closed with no duplicate runtime transport
+  ---
+  duration_ms: 1.285423
+  type: 'test'
+  ...
+# Subtest: source API receives the original command contract and keeps runtime late-target guards
+ok 115 - source API receives the original command contract and keeps runtime late-target guards
+  ---
+  duration_ms: 1.05725
+  type: 'test'
+  ...
+1..115
+# tests 115
+# suites 0
+# pass 115
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 595.150409

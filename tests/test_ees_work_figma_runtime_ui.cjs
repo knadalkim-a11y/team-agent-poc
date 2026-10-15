@@ -175,10 +175,10 @@ test('Native return keeps the workspace visible but publishes a reference only a
   const reference=h.context.window.__eesNativeWorkV1.captureReference();assert.equal(reference.kind,'workspace');assert.equal(reference.revision,7);assert.equal(reference.version,3);
  }
 });
-test('a queued EES menu action waits for full state even when the persistent Chat is ready first',async()=>{
+test('a queued EES menu destination is visible immediately while its reference waits for full state',async()=>{
  const h=nativeNavigationHarness(),stateRead=deferred(),draft=JSON.parse(JSON.stringify(h.readDraft()));
  h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?(h.context.location.pathname.startsWith('/workspace')?{ok:true,...h.state}:stateRead.promise):{ok:true});
- await h.open();await h.back('tools');assert.deepEqual(h.readDraft(),draft);assert.equal(h.api.snapshot().selection.tab,'overview');assert.equal(h.api.snapshot().selection.workflow_id,'w');
+ await h.open();await h.back('tools');assert.deepEqual(h.readDraft(),draft);assert.equal(h.api.snapshot().selection.tab,'tools');assert.equal(h.api.snapshot().selection.workflow_id,'');assert.equal(h.context.window.__eesNativeWorkV1.captureReference().kind,'none');
  stateRead.resolve({ok:true,...h.state});await new Promise(setImmediate);assert.equal(h.api.snapshot().selection.tab,'tools');assert.equal(h.api.snapshot().selection.workflow_id,'');
 });
 test('transient full state failure after Native return keeps the workspace and error without a work reference',async()=>{

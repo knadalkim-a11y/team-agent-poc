@@ -1,0 +1,6 @@
+test_async_identity_receipt_and_evidence_contracts (test_ees_work_controller.IntegratedControllerTests.test_async_identity_receipt_and_evidence_contracts) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 1.046s
+
+OK

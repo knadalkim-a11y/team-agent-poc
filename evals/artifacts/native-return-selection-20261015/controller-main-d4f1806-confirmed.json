@@ -1,0 +1,2193 @@
+{
+  "runtime": "v24.19.0",
+  "source": "d4f18069db6ca6ac2804d5ed3007a840b71a72a9",
+  "level": "controller render callbacks, not browser animation frames",
+  "cases": [
+    {
+      "origin": "tools",
+      "native": "skills",
+      "destination": "procedures",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        }
+      ],
+      "author_renders": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": ""
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": ""
+        }
+      ],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 3,
+      "unexpected_aria_current": 3
+    },
+    {
+      "origin": "tools",
+      "native": "skills",
+      "destination": "workspace_admin",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        }
+      ],
+      "author_renders": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        }
+      ],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 3,
+      "unexpected_aria_current": 3
+    },
+    {
+      "origin": "tools",
+      "native": "skills",
+      "destination": "work",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "work",
+          "tab": "my_work",
+          "workflow_id": "",
+          "aria_current": []
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "work",
+          "tab": "my_work",
+          "workflow_id": "",
+          "aria_current": []
+        }
+      ],
+      "author_renders": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        }
+      ],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 3,
+      "unexpected_aria_current": 3
+    },
+    {
+      "origin": "tools",
+      "native": "models",
+      "destination": "procedures",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        }
+      ],
+      "author_renders": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": ""
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": ""
+        }
+      ],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 3,
+      "unexpected_aria_current": 3
+    },
+    {
+      "origin": "tools",
+      "native": "models",
+      "destination": "workspace_admin",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        }
+      ],
+      "author_renders": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        }
+      ],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 3,
+      "unexpected_aria_current": 3
+    },
+    {
+      "origin": "tools",
+      "native": "models",
+      "destination": "work",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "work",
+          "tab": "my_work",
+          "workflow_id": "",
+          "aria_current": []
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "work",
+          "tab": "my_work",
+          "workflow_id": "",
+          "aria_current": []
+        }
+      ],
+      "author_renders": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        }
+      ],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 3,
+      "unexpected_aria_current": 3
+    },
+    {
+      "origin": "procedures",
+      "native": "skills",
+      "destination": "tools",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=draft-workflow&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        }
+      ],
+      "author_renders": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        }
+      ],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 3,
+      "unexpected_aria_current": 3
+    },
+    {
+      "origin": "procedures",
+      "native": "skills",
+      "destination": "workspace_admin",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=draft-workflow&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        }
+      ],
+      "author_renders": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        }
+      ],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 3,
+      "unexpected_aria_current": 3
+    },
+    {
+      "origin": "procedures",
+      "native": "skills",
+      "destination": "work",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=draft-workflow&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=draft-workflow&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "work",
+          "tab": "my_work",
+          "workflow_id": "draft-workflow",
+          "aria_current": []
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "work",
+          "tab": "my_work",
+          "workflow_id": "draft-workflow",
+          "aria_current": []
+        }
+      ],
+      "author_renders": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        }
+      ],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 3,
+      "unexpected_aria_current": 3
+    },
+    {
+      "origin": "procedures",
+      "native": "models",
+      "destination": "tools",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=draft-workflow&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        }
+      ],
+      "author_renders": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        }
+      ],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 3,
+      "unexpected_aria_current": 3
+    },
+    {
+      "origin": "procedures",
+      "native": "models",
+      "destination": "workspace_admin",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=draft-workflow&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        }
+      ],
+      "author_renders": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        }
+      ],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 3,
+      "unexpected_aria_current": 3
+    },
+    {
+      "origin": "procedures",
+      "native": "models",
+      "destination": "work",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=draft-workflow&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=draft-workflow&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "work",
+          "tab": "my_work",
+          "workflow_id": "draft-workflow",
+          "aria_current": []
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "work",
+          "tab": "my_work",
+          "workflow_id": "draft-workflow",
+          "aria_current": []
+        }
+      ],
+      "author_renders": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "draft-workflow"
+        }
+      ],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 3,
+      "unexpected_aria_current": 3
+    },
+    {
+      "origin": "workspace_admin",
+      "native": "skills",
+      "destination": "tools",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        }
+      ],
+      "author_renders": [
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        }
+      ],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 0,
+      "unexpected_aria_current": 3
+    },
+    {
+      "origin": "workspace_admin",
+      "native": "skills",
+      "destination": "procedures",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        }
+      ],
+      "author_renders": [
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": ""
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": ""
+        }
+      ],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 0,
+      "unexpected_aria_current": 3
+    },
+    {
+      "origin": "workspace_admin",
+      "native": "skills",
+      "destination": "work",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "work",
+          "tab": "my_work",
+          "workflow_id": "",
+          "aria_current": []
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "work",
+          "tab": "my_work",
+          "workflow_id": "",
+          "aria_current": []
+        }
+      ],
+      "author_renders": [],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 0,
+      "unexpected_aria_current": 3
+    },
+    {
+      "origin": "workspace_admin",
+      "native": "models",
+      "destination": "tools",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "tools"
+            }
+          ]
+        }
+      ],
+      "author_renders": [
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "mode": "author",
+          "tab": "tools",
+          "workflow_id": ""
+        }
+      ],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 0,
+      "unexpected_aria_current": 3
+    },
+    {
+      "origin": "workspace_admin",
+      "native": "models",
+      "destination": "procedures",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "procedures"
+            }
+          ]
+        }
+      ],
+      "author_renders": [
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": ""
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "mode": "author",
+          "tab": "overview",
+          "workflow_id": ""
+        }
+      ],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 0,
+      "unexpected_aria_current": 3
+    },
+    {
+      "origin": "workspace_admin",
+      "native": "models",
+      "destination": "work",
+      "delay_ms": {
+        "workspace": 1000,
+        "operations": 1000
+      },
+      "reads": [
+        {
+          "kind": "workspace",
+          "time": 0,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 1000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        },
+        {
+          "kind": "workspace",
+          "time": 2000,
+          "url": "/api/ees-work/workspace?system_id=EMS&factory_id=&workflow_id=&run_id="
+        },
+        {
+          "kind": "operations",
+          "time": 3000,
+          "url": "/api/ees-work/operations?system_id=EMS&run_id="
+        }
+      ],
+      "frames": [
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "clicked",
+          "time": 0,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "author",
+          "tab": "workspace_admin",
+          "workflow_id": "",
+          "aria_current": [
+            {
+              "action": "workspace_admin"
+            }
+          ]
+        },
+        {
+          "phase": "operations-arrived-2000ms",
+          "time": 2000,
+          "native": false,
+          "mode": "work",
+          "tab": "my_work",
+          "workflow_id": "",
+          "aria_current": []
+        },
+        {
+          "phase": "settled",
+          "time": 4000,
+          "native": false,
+          "mode": "work",
+          "tab": "my_work",
+          "workflow_id": "",
+          "aria_current": []
+        }
+      ],
+      "author_renders": [],
+      "wrong_selection_renders": 3,
+      "stale_panel_snapshots": 3,
+      "stale_author_renders": 0,
+      "unexpected_aria_current": 3
+    }
+  ]
+}
