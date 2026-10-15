@@ -546,6 +546,23 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.addCleanup(provider.stop)
         self.refresh()
 
+    def native_link_selector(self, target, label, labels):
+        if target != 'tools':
+            return '[data-action=native_open][data-native-id=' + target + ']'
+        # C45 keeps Native tools reachable through B10-2, with the same frame
+        # observation and draft preservation checks as other Native screens.
+        for suffix, selector, condition in (
+            ('list', '[data-action=tools]', "document.querySelector('[data-author-action=shared_open]')"),
+            ('detail', '[data-author-action=shared_open][data-id=managed-search_pages]', "document.querySelector('[data-author-action=shared_native]')"),
+        ):
+            step_label = label + '-shared-' + suffix
+            if hasattr(self.server, 'navigation_reads'):
+                self.delayed_step(step_label, selector, condition, paths=())
+            else:
+                self.step(step_label, selector, condition)
+            labels.append(step_label)
+        return '[data-author-action=shared_native]'
+
     def capture_failure(self):
         super().capture_failure()
         if (not getattr(self, 'failure_evidence_captured', False)
@@ -641,7 +658,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
                                   "document.querySelector('#ees-work-designer')")
                 labels.append(enter)
                 native_label = label + '-native'
-                self.delayed_step(native_label, '[data-action=native_open][data-native-id=' + native + ']',
+                self.delayed_step(native_label, self.native_link_selector(native, native_label, labels),
                                   'location.pathname === ' + json.dumps('/workspace/' + native)
                                   + ' && !!document.querySelector("#workspace-container input")',
                                   paths=('workspace',))
@@ -835,7 +852,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         labels.append('work-procedures')
         for target in ('models', 'knowledge', 'prompts', 'skills', 'tools'):
             label = 'native-' + target
-            self.step(label, '[data-action=native_open][data-native-id=' + target + ']',
+            self.step(label, self.native_link_selector(target, label, labels),
                       'location.pathname === ' + json.dumps('/workspace/' + target)
                       + ' && document.querySelector("#workspace-container input")')
             labels.append(label)

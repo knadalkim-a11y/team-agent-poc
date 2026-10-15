@@ -23,7 +23,7 @@
     "src/lib/components/chat/Placeholder.svelte": "54e33b3997e9ce6bd78ea2b39f0d5b3bf280f8c494549eeb3d440df290cd6f97",
     "src/lib/components/ees/EesHelperNotice.svelte": "22ceccc7ad93c5d820f73269baaa9b19f12c5c99054b76ecc8c89f7757f8bba0",
     "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
-    "src/lib/components/ees/EesNavigation.svelte": "58e2cb6eb4fa2052430da45363844fe43fdf36cc098bff37d241479669b95eb0",
+    "src/lib/components/ees/EesNavigation.svelte": "ef90f84e0ee213b3ba65c860f1a2c4e8743db7a34d0dcbcfb9d4f3b038b66f54",
     "src/lib/components/ees/EesProcedureIntro.svelte": "815ecc9164df95671f784bab30304013b5541c1fc98584092cc2742d8dc03b3b",
     "src/lib/components/ees/EesScopeSelect.svelte": "921be8c7ab567a8410b55c7b41f29d704399ad1f99f22b8123259c4f12d37710",
     "src/lib/components/ees/EesShell.svelte": "67492c17c2c2b41dcdad2cf86a1a096cc218fd6e2de6e645eb909e9f59f84c46",
@@ -44,7 +44,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "760944e670b41997664042540c1f971fb419b1868644a5e5d1e0861ccc006904"
+      "sha256": "d539b25feff7d3d44d57703ce9bc1572c02f06fb207058a495d13d2a003c11bb"
     }
   ],
   "pyodide_files": {

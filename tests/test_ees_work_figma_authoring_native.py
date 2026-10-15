@@ -25,6 +25,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
     def test_b10_shared_tools_list_detail_picker_style_and_keyboard(self):
         # The product uses its real HTTP/SQLite paths; only installed Native
         # metadata and session are synthetic here (real Native is a separate gate).
+        self.server.native_plugins_enabled = True
         self.native_menu_fixture()
         native = importlib.import_module(self.backend.__package__ + '.ees_workflow_native')
         source = (Path(__file__).resolve().parents[1] / 'agent-pack/skills/confluence-read/scripts/confluence_tool.py').read_text(encoding='utf-8')
@@ -215,6 +216,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
         self.assert_work_panel_not_displayed()
         self.assert_source_shell()
+        self.wait("document.querySelector('[data-action=native_open][data-native-id=skills]')?.getAttribute('aria-current') === 'page'")
         self.assertEqual(self.read('[data-action=native_open][data-native-id=skills]', 'getAttribute("aria-current")'), 'page')
         self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('#ees-work-entry [aria-current=page]')].map(e=>e.dataset.nativeId)"), ['skills'])
         self.assertFalse(self.browser.evaluate("document.querySelector('#workspace-container')?.previousElementSibling?.querySelector('a[href=\"/workspace/skills\"]')?.getBoundingClientRect().height > 0"))

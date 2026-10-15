@@ -1446,7 +1446,7 @@ index 0000000..be842d3
 +								>{#if !$eesSnapshot.scope_loading && (action === 'procedures' || !data.operations?.error)}<small
 +										>{action === 'procedures'
 +											? current.length
-+											: (data.operations?.tools || []).length}</small
++											: (data.operations?.tools || []).length + (data.operations?.shared_tools || []).length}</small
 +									>{/if}</button
 +							>{/each}{/if}
 +					{#if nativeAllowed('skills')}<button

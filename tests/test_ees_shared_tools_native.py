@@ -85,7 +85,7 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
 
     def http(self, request, timeout=None):
         self.http_calls.append(request.get_header('Authorization'))
-        page = dict(id='123', title='Guide '+request.get_header('Authorization'), type='page', status='current', space={'key':'EMS'}, version={'number':1}, body={'storage':{'value':'<p>Guide</p>'}})
+        page = dict(id='123', title='Guide '+request.get_header('Authorization'), type='page', status='current', space={'key':'EMS'}, version={'number':1}, body={'storage':{'value':getattr(self, 'page_body', '<p>Guide</p>')}})
         return Response({'results':[page]} if request.full_url.split('?')[0].endswith('/search') else page)
 
     async def execute(self, run, revision=1, actor=None):
@@ -203,6 +203,11 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         result = await self.execute(run)
         self.assertEqual(result['attempt']['result']['result_kind'], 'evidence')
         self.assertNotIn('items', result['attempt']['result'])
+        self.page_body = '<p>' + '가' * 13000 + '</p>'
+        truncated_run = await self.execute(await self.start(wid, self.reader))
+        self.assertEqual(truncated_run['attempt']['result']['completeness'], 'truncated')
+        self.assertEqual(truncated_run['attempt']['result']['result_kind'], 'evidence')
+        self.assertNotIn('items', truncated_run['attempt']['result'])
         for code in ('pat_required','encryption_required','authentication_failed'):
             result = self.f.native.normalize_result('get_page', {'ok':False,'error':{'code':code,'message':'synthetic-reader-pat'}}, item['reference'], {}, ('synthetic-reader-pat',))
             self.assertNotIn('synthetic-reader-pat', json.dumps(result))
