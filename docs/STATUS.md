@@ -6,6 +6,8 @@
 - **검증/미확인:** Windows CI에서 실제 길이 값이 채워진 적용 블록2,491자와 PowerShell 구문을 통과했다. 첫 CI의 Chrome 준비 timeout과 실패 작업1회 재실행은 [기존 평가](../evals/v4-ui-20260930.md#apply-block-length-20261015)에 보존한다. 재실행 성공은 Chrome 지연의 근본원인 해결이나 사내 적용 성공이 아니다.
 - **다음 작업 하나:** 통합 #89의 [최종 head CI](https://github.com/knadalkim-a11y/team-agent-poc/pull/89/checks) 성공 후 merge commit으로 병합하고, 최종 main CI 성공과 실제 바깥 Actions ZIP 네 값을 대조해 단일 블록을 Claude 검토용으로 전달한다. 실제 사내 설치는42cc756이고 사내 실행·Figma 수정·#77/#79·main 직접 push는 하지 않는다.
 
+- **통합 CI 첫 실패:** 공식 Native baseline Chrome 시작 응답이30초 안에 오지 않아 EES 코드 검증 전에 멈췄다. [최초 실패·범위·1회 재검 조건](../evals/v4-ui-20260930.md#apply-block-length-20261015)을 보존했고 제품·검사·시간 제한 변경 없이 기록만 추가한 새 head에서 확인한다.
+
 아래는 각 단계 당시의 기록이다. 미병합/Draft 유지 지시는 위 승인과 순서로 대체한다.
 
 ## 2026-10-15 · #88·#89 순서 병합 승인과 적용 블록 길이 보완
