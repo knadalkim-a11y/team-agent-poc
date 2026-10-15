@@ -385,17 +385,36 @@
   }
   async function setupWorkTool(){
     if(!state?.capabilities?.is_admin)throw new Error('Native 관리자 권한이 필요합니다.');
-    const at=context(),auth=token();
-    const setupAPI=async body=>{const response=await fetch('/api/v1/ees/assets/work-tool/'+(body?'setup':'status'),{method:body?'POST':'GET',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json',Authorization:'Bearer '+auth,...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});const result=await response.json();if(!response.ok||result.ok===false)throw new Error(result.error?.message || result.detail?.message || (typeof result.detail==='string'?result.detail:result.reason) || 'Native Work 도구 설정을 확인하지 못했습니다.');return result;};
-    const status=await setupAPI();if(at!==context()||auth!==token())return;
-    const description=`<p>Native 도구 ID · ${esc(status.id)}</p><p>제품 관리 원본 SHA256</p><pre>${esc(status.source_sha256)}</pre><p>허용 함수</p><pre>${esc(JSON.stringify(status.functions || [],null,2))}</pre>`;
-    if(status.state!=='missing')return dialog({title:status.state==='ready'?'Work 대화 도구가 연결되어 있습니다':'기존 Native 도구를 먼저 검토해 주세요',readOnlyDetail:true,html:description+`<p>${esc(status.reason || '현재 등록 항목의 소유자·권한·개인 설정을 그대로 유지합니다.')}</p>`});
-    let grants=[];const people=(state.people || []).filter(person=>person.value?.kind==='user'),groups=state.native_groups || [];
-    const pending=dialog({title:'Native 대화에 Work 도구를 등록할까요?',note:'조회·제안 기능만 등록합니다. 저장·게시·실행·확정 도구를 AI에 추가하지 않습니다.',html:description+`<fieldset class="ew-admin-grants"><legend>읽기·제안 권한</legend><p>선택하지 않으면 등록 관리자 개인 범위입니다. 공개 권한은 만들지 않습니다.</p>${people.map(person=>`<label><input type="checkbox" data-work-grant data-kind="user" value="${esc(person.id)}">${esc(person.name)} · ${esc(person.id)}</label>`).join('')}${groups.map(group=>`<label><input type="checkbox" data-work-grant data-kind="group" value="${esc(group.id)}">${esc(group.name)} · ${esc(group.id)}</label>`).join('')}</fieldset>`,confirmLabel:'확인한 원본 등록'});
-    $('#ees-work-dialog').addEventListener('change',()=>{grants=[...document.querySelectorAll('#ees-work-dialog [data-work-grant]:checked')].map(field=>({principal_type:field.dataset.kind,principal_id:field.value,permission:'read'}));});
-    if(!await pending||at!==context()||auth!==token())return;
-    try{const result=await setupAPI({expected_token:status.expected_token,source_sha256:status.source_sha256,confirmation:'register_readonly_work_tool',access_grants:grants});if(at!==context()||auth!==token())return;commandError='';await refresh();return dialog({title:'Native Work 도구 확인',readOnlyDetail:true,html:`<p>${result.changed?'확인한 제품 원본을 등록했습니다.':'기존 원본과 권한을 유지했습니다.'}</p><p>대화의 Native 통합 도구에서 선택할 수 있습니다. 현재 대화의 도구 선택을 자동으로 바꾸지 않았습니다.</p>`});}
-    catch(failure){if(at===context()&&auth===token()){commandError=failure.message;render();}throw failure;}
+    const at=context(),auth=token(),current=()=>at===context()&&auth===token();
+    const setupAPI=async(body,path=body?'setup':'status')=>{const response=await fetch('/api/v1/ees/assets/work-tool/'+path,{method:body?'POST':'GET',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json',Authorization:'Bearer '+auth,...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});const result=await response.json();if(!response.ok||result.ok===false)throw new Error(result.error?.message || result.detail?.message || (typeof result.detail==='string'?result.detail:result.reason) || 'Native Work 도구 설정을 확인하지 못했습니다.');return result;};
+    const status=await setupAPI();if(!current())return;
+    const description=`<p>Native 도구 ID · ${esc(status.id)}</p><p>등록 원본 SHA256</p><pre>${esc(status.registered_source_sha256 || '미등록')}</pre><p>지금 프로그램 원본 SHA256</p><pre>${esc(status.source_sha256)}</pre>`;
+    const preserve='<p>그대로 두는 것 · 이름·소유자·읽기 권한·설정</p><p>바뀌는 것 · 코드 원본</p>';
+    const date=value=>esc(value || '날짜 확인 불가');
+    let confirmation='register_readonly_work_tool',path='setup',body;
+    if(status.state==='blocked_existing')return dialog({title:'등록 원본이 지원 형태와 다릅니다',readOnlyDetail:true,html:`<p>등록된 코드가 알려진 제품 원본과 다릅니다.</p><p>이 화면은 코드를 바꾸지 않습니다. 등록 해시 앞 8자리를 개발 담당에게 알려 주세요.</p><p>등록 해시 앞 8자리 · <code>${esc(String(status.registered_source_sha256 || '미확인').slice(0,8))}</code></p>`+description});
+    if(['ready','update_available'].includes(status.state)){
+      let restore=false;const canRestore=status.backup?.can_restore===true;
+      const pending=dialog({title:status.state==='ready'?'Work 대화 도구가 연결되어 있습니다':'이전 제품 원본이 등록되어 있습니다',readOnlyDetail:status.state==='ready',confirmLabel:status.state==='update_available'?'지금 프로그램 원본으로 바꾸기':'',html:description+`<p>${esc(status.reason || '현재 등록 항목의 소유자·권한·설정을 유지합니다.')}</p>`+(canRestore?`<p>비공개 백업 · ${date(status.backup.created_at)}</p><button type="button" data-work-tool-restore class="ew-secondary">이전 코드 원본으로 되돌리기</button>`:'')});
+      $('#ees-work-dialog')?.addEventListener('click',event=>{if(canRestore&&event.target.closest?.('[data-work-tool-restore]')){restore=true;closeDialog();}});
+      const accepted=await pending;if(!current()||!accepted&&!restore||!restore&&status.state!=='update_available')return;
+      if(restore){
+        const approved=await dialog({title:'이전 코드 원본으로 되돌릴까요?',confirmLabel:'백업 코드 원본으로 되돌리기',html:`<p>비공개 백업 시각 · ${date(status.backup.created_at)}</p><p>되돌릴 코드 SHA256</p><pre>${esc(status.backup.from_source_sha256)}</pre>${preserve}<p>이전 프로그램 원본으로 되돌리면 업무 도우미가 다시 사용 불가 상태가 될 수 있습니다.</p>`});
+        if(!approved||!current())return;
+        path='restore';confirmation='restore_previous_work_tool';body={backup_id:status.backup.id,backup_sha256:status.backup.sha256};
+      }else{
+        const approved=await dialog({title:'지금 프로그램 원본으로 바꿀까요?',confirmLabel:'지금 프로그램 원본으로 바꾸기',html:`<p>이전 원본 (${date(status.registered_source?.date)}) → 지금 원본 (${date(status.program_source?.date)})</p>${preserve}<p>바꾸기 전 코드 원본은 관리자만 접근하는 비공개 백업으로 남깁니다. 같은 설정 화면에서 백업 코드로 되돌릴 수 있습니다.</p>`});
+        if(!approved||!current())return;
+        confirmation='update_readonly_work_tool';body={};
+      }
+    }else if(status.state==='missing'){
+      let grants=[];const people=(state.people || []).filter(person=>person.value?.kind==='user'),groups=state.native_groups || [];
+      const pending=dialog({title:'Native 대화에 Work 도구를 등록할까요?',note:'조회·제안 기능만 등록합니다. 저장·게시·실행·확정 도구를 AI에 추가하지 않습니다.',html:description+`<p>허용 함수</p><pre>${esc(JSON.stringify(status.functions || [],null,2))}</pre><fieldset class="ew-admin-grants"><legend>읽기·제안 권한</legend><p>선택하지 않으면 등록 관리자 개인 범위입니다. 공개 권한은 만들지 않습니다.</p>${people.map(person=>`<label><input type="checkbox" data-work-grant data-kind="user" value="${esc(person.id)}">${esc(person.name)} · ${esc(person.id)}</label>`).join('')}${groups.map(group=>`<label><input type="checkbox" data-work-grant data-kind="group" value="${esc(group.id)}">${esc(group.name)} · ${esc(group.id)}</label>`).join('')}</fieldset>`,confirmLabel:'확인한 원본 등록'});
+      $('#ees-work-dialog')?.addEventListener('change',()=>{grants=[...document.querySelectorAll('#ees-work-dialog [data-work-grant]:checked')].map(field=>({principal_type:field.dataset.kind,principal_id:field.value,permission:'read'}));});
+      if(!await pending||!current())return;body={access_grants:grants};
+    }else return dialog({title:'Work 도구 상태를 확인해 주세요',readOnlyDetail:true,html:description+`<p>${esc(status.reason || '지원되는 상태를 확인하지 못해 변경하지 않았습니다.')}</p>`});
+    try{const result=await setupAPI({expected_token:status.expected_token,source_sha256:status.source_sha256,confirmation,...body},path);if(!current())return;commandError='';await refresh();if(!current())return;const message=path==='restore'?'비공개 백업의 코드 원본으로 되돌렸습니다.':confirmation==='update_readonly_work_tool'?'지금 프로그램 원본으로 바꿨습니다. 이전 코드 원본은 비공개 백업으로 보존했습니다.':result.changed?'확인한 제품 원본을 등록했습니다.':'기존 원본과 권한을 유지했습니다.';return dialog({title:'Native Work 도구 확인',readOnlyDetail:true,html:`<p>${esc(message)}</p>${confirmation==='register_readonly_work_tool'?'':'<p>이름·소유자·읽기 권한·설정을 유지했습니다.</p>'}<p>업무 도우미의 사용 가능 상태를 다시 확인해 주세요. 현재 대화의 도구 선택은 자동으로 바꾸지 않았습니다.</p>`});}
+    catch(failure){if(current()){commandError=failure.message;render();}throw failure;}
   }
   async function adminDialog(kind,id=''){
     if(!state?.capabilities?.is_admin)throw new Error('Native 관리자 권한이 필요합니다.');

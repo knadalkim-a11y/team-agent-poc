@@ -73,6 +73,69 @@ class RegisteredTimezoneTests(unittest.TestCase):
             self.assertEqual(env, before)
 
 
+class WorkToolUpgradeHintTests(unittest.TestCase):
+    def test_compares_only_installed_program_copies_and_preserves_all_bytes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            paths = [root / name / "open_webui" / "ees_workflow_tool.py"
+                     for name in ("program.previous", "program")]
+            for path in paths:
+                path.parent.mkdir(parents=True)
+                path.write_bytes(b"same tool source\n")
+            # Native assets are deliberately outside the two program trees.
+            user_assets = root / "native-user-assets.db"
+            user_assets.write_bytes(b"unmanaged-user-assets-and-settings")
+            config = {"state_root": temporary, "data_dir": "must-not-be-read"}
+            self.assertIsNone(upgrade.work_tool_update_status(config))
+            paths[1].write_bytes(b"new tool source\n")
+            before = {path: path.read_bytes() for path in (*paths, user_assets)}
+            self.assertEqual(upgrade.work_tool_update_status(config), "update_needed")
+            self.assertEqual({path: path.read_bytes() for path in before}, before)
+
+    def test_old_program_without_tool_is_changed_only_when_new_tool_exists(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            config = {"state_root": temporary}
+            self.assertIsNone(upgrade.work_tool_update_status(config))
+            current = Path(temporary) / "program" / "open_webui" / "ees_workflow_tool.py"
+            current.parent.mkdir(parents=True)
+            current.write_bytes(b"introduced work tool\n")
+            self.assertEqual(upgrade.work_tool_update_status(config), "update_needed")
+
+    def test_unreadable_or_unsafe_comparison_never_claims_a_confirmed_difference(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            for error in (OSError("private-path"), upgrade.manager.states.StateError("unsafe-path")):
+                with self.subTest(error=type(error).__name__), \
+                        patch.object(upgrade.manager.states, "_safe", side_effect=error):
+                    self.assertEqual(upgrade.work_tool_update_status({"state_root": temporary}), "check_needed")
+
+    def test_report_accepts_only_successful_changed_upgrade_hint_without_changing_next(self):
+        cases = ((False, False, True, "update_needed", True),
+                 (False, False, True, "check_needed", True),
+                 (True, False, True, "update_needed", False),
+                 (True, False, True, "check_needed", False),
+                 (False, True, True, "update_needed", False),
+                 (False, False, False, "update_needed", False),
+                 (False, False, "true", "update_needed", False),
+                 (False, False, True, "private-value\nwork_tool=update_needed", False),
+                 (False, False, True, None, False))
+        for failed, update_only, changed, value, expected in cases:
+            with self.subTest(failed=failed, update=update_only, changed=changed, value=value):
+                result = {"changed": changed, "work_tool": value, "next": "refresh_browser"}
+                original = copy.deepcopy(result)
+                output = io.StringIO()
+                with patch.object(upgrade.manager, "save_operation", return_value=True), redirect_stdout(output):
+                    upgrade.report(argparse.Namespace(config="synthetic.json", update_only=update_only),
+                                   result, failed=failed)
+                lines = output.getvalue().splitlines()
+                self.assertEqual(" work_tool=" in lines[0], expected)
+                if expected:
+                    self.assertIn(" work_tool=" + value, lines[0])
+                self.assertEqual("EES 적용 뒤 Work 도구 설정 확인" in lines, expected)
+                self.assertIn("next=refresh_browser", lines[0])
+                self.assertNotIn("private-value", output.getvalue())
+                self.assertEqual(result, original)
+
+
 class UpgradeDeploymentTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
@@ -229,6 +292,83 @@ class UpgradeDeploymentTests(unittest.TestCase):
         self.assertEqual([call.args[2] for call in self.mock["record"].call_args_list],
                          ["data_backup_verified", "upgraded_by_operator"])
         self.assertFalse(Path(self.progress["bundle"]).exists())
+
+    def test_success_hint_uses_applied_tool_change_without_changing_registry_or_receipt(self):
+        tool = self.root / "program" / "open_webui" / "ees_workflow_tool.py"
+        previous = self.root / "program.previous" / "open_webui" / "ees_workflow_tool.py"
+        tool.parent.mkdir(parents=True)
+        tool.write_bytes(b"old installed tool\n")
+        apply = self.mock["apply"].side_effect
+
+        def apply_changed(*args):
+            apply(*args)
+            previous.parent.mkdir(parents=True)
+            tool.replace(previous)
+            tool.write_bytes(b"new installed tool\n")
+
+        self.mock["apply"].side_effect = apply_changed
+        before = copy.deepcopy(self.registry)
+        with patch.object(upgrade.manager.states, "load_config", return_value=self.config), \
+                patch.object(upgrade, "github_client", return_value=self.client), \
+                patch.object(upgrade, "bootstrap", return_value=(None, HEAD, OLDER)), redirect_stdout(self.output):
+            self.assertEqual(upgrade.main(["--config", "synthetic.json"]), 0)
+        saved = json.loads((self.root / "last-operation.json").read_bytes())
+        self.assertEqual(saved["result"]["work_tool"], "update_needed")
+        self.assertIn("work_tool=update_needed", self.output.getvalue())
+        self.assertIn("적용 뒤 Work 도구 설정 확인", self.output.getvalue())
+        self.assertEqual(self.registry, before)
+        self.assertTrue(upgrade.receipt_matches(self.config, self.artifact, self.selected))
+        for call in self.mock["record"].call_args_list:
+            self.assertNotIn("work_tool", call.args[1])
+
+    def test_unchanged_program_and_first_install_do_not_compare_or_report_tool_update(self):
+        with patch.object(upgrade, "work_tool_update_status", return_value="update_needed") as hint:
+            self.selected = dict(self.active, source_commit=HEAD)
+            self.assertNotIn("work_tool", self.deploy())
+            hint.assert_not_called()
+            self.assertNotIn("work_tool", self.deploy())
+            hint.assert_not_called()
+            self.registry["customization"]["active"] = None
+            self.selected = dict(self.active, source_commit=HEAD, wheel_sha256="3" * 64)
+            self.assertNotIn("work_tool", self.deploy())
+            hint.assert_not_called()
+
+    def test_success_with_unchanged_tool_bytes_has_no_update_hint(self):
+        for name in ("program", "program.previous"):
+            tool = self.root / name / "open_webui" / "ees_workflow_tool.py"
+            tool.parent.mkdir(parents=True)
+            tool.write_bytes(b"same tool despite other program changes\n")
+        result = self.deploy()
+        self.assertTrue(result["changed"])
+        self.assertNotIn("work_tool", result)
+
+    def test_success_with_unreadable_tool_requires_check_without_failing_upgrade(self):
+        with patch.object(upgrade.manager.states, "_safe", side_effect=OSError("private-program-path")), \
+                patch.object(upgrade, "save_receipt"):
+            result = self.deploy()
+        self.assertTrue(result["changed"])
+        self.assertTrue(result["started"])
+        self.assertEqual(result["work_tool"], "check_needed")
+        self.assertNotIn("private-program-path", json.dumps(result))
+
+    def test_failed_apply_or_start_does_not_compare_or_report_tool_update(self):
+        for name in ("apply", "start"):
+            with self.subTest(stage=name):
+                original = self.mock[name].side_effect
+                self.mock[name].side_effect = ValueError("synthetic failure")
+                try:
+                    with patch.object(upgrade, "work_tool_update_status") as hint, \
+                            patch.object(upgrade.manager.states, "load_config", return_value=self.config), \
+                            patch.object(upgrade, "github_client", return_value=self.client), \
+                            patch.object(upgrade, "bootstrap", return_value=(None, HEAD, OLDER)), \
+                            redirect_stdout(self.output):
+                        self.assertEqual(upgrade.main(["--config", "synthetic.json"]), 1)
+                    hint.assert_not_called()
+                    saved = json.loads((self.root / "last-failure.json").read_bytes())
+                    self.assertNotIn("work_tool", saved["result"])
+                    self.assertNotIn("work_tool=", self.output.getvalue())
+                finally:
+                    self.mock[name].side_effect = original
 
     def test_backup_failure_preserves_download_and_prevents_apply_or_start(self):
         for failed in ("backup", "backup_record"):

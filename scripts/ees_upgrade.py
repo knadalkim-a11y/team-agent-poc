@@ -296,6 +296,27 @@ def same_program(active, selected):
                                 for key in ("wheel_sha256", "record_sha256", "webui_version"))
 
 
+def work_tool_update_status(config):
+    """Compare only the verified program copies; never inspect Native assets."""
+    def digest(program):
+        path = manager.states._safe(Path(config["state_root"]) / program /
+                                    "open_webui" / "ees_workflow_tool.py", exists=False)
+        if not path.exists():
+            return None
+        with manager.states._regular(path).open("rb") as source:
+            return hashlib.file_digest(source, "sha256").hexdigest()
+
+    try:
+        previous, current = digest("program.previous"), digest("program")
+    except (OSError, ValueError, manager.states.StateError):
+        # This post-success hint cannot turn a completed upgrade into a failed
+        # transaction. Existing preflight/apply checks still verify both trees.
+        return "check_needed"
+    if current is None:
+        return "check_needed" if previous is not None else None
+    return "update_needed" if current != previous else None
+
+
 def deploy(config, client, head, timeout, progress, *, local_artifact=None):
     progress["stage"] = "artifact_select"
     artifact = ({"source_commit": head, "local_sha256": local_artifact[1]}
@@ -362,8 +383,11 @@ def deploy(config, client, head, timeout, progress, *, local_artifact=None):
             progress["stage"] = "receipt"
             save_receipt(config, artifact, active)
             completed = True
+            work_tool = (work_tool_update_status(config)
+                         if changed and baseline.get("customization", {}).get("active") else None)
             return {"changed": changed, "downloaded": True, "started": True,
                     "backup_verified": progress.get("backup_verified", False),
+                    **({"work_tool": work_tool} if work_tool else {}),
                     "version": active["webui_version"], **manager.program_result(registry)}
     finally:
         # An interrupted Apply may require its exact ZIP for explicit Resume.
@@ -384,6 +408,9 @@ def report(args, result, failed=False):
         return value if isinstance(value, str) and re.fullmatch(r"[a-z0-9_.+-]{1,64}", value) else "-"
     version = result.get("version")
     version = version if version in manager.customization.branding.PROGRAM_FRONTENDS else "-"
+    work_tool = (result.get("work_tool") if not failed and action == "upgrade"
+                 and result.get("changed") is True
+                 and result.get("work_tool") in ("update_needed", "check_needed") else None)
     flag = lambda x: "true" if x is True else "false" if x is False else "-"
     print(f"EES action={action} result={'failed' if failed else 'ok'} "
           f"changed={flag(result.get('changed'))} wrapper_changed={flag(result.get('wrapper_changed'))} "
@@ -393,8 +420,11 @@ def report(args, result, failed=False):
           f"next={word(result.get('next', 'refresh_browser'))}"
           + (" registration=not_applicable reason=demo_registration_retired"
              if result.get("asset_registration") == "not_applicable" else "")
+          + (" work_tool=" + work_tool if work_tool else "")
           + (manager.failure_fields(result) if failed else "")
           + (" report=unavailable" if not saved else ""))
+    if work_tool:
+        print("EES 적용 뒤 Work 도구 설정 확인")
 
 
 def manual_promote_ready(config):

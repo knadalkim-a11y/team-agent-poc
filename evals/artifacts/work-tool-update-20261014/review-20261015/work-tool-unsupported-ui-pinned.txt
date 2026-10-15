@@ -1,0 +1,430 @@
+TAP version 13
+# Subtest: controller fixture exercises the same command and read boundaries with LF and Windows CRLF
+ok 1 - controller fixture exercises the same command and read boundaries with LF and Windows CRLF
+  ---
+  duration_ms: 9.840649
+  type: 'test'
+  ...
+# Subtest: controller fixture fails directly when its required injection marker is missing or duplicated
+ok 2 - controller fixture fails directly when its required injection marker is missing or duplicated
+  ---
+  duration_ms: 4.472441
+  type: 'test'
+  ...
+# Subtest: unknown partial failed and excluded states never render completion
+ok 3 - unknown partial failed and excluded states never render completion
+  ---
+  duration_ms: 2.761636
+  type: 'test'
+  ...
+# Subtest: all eight declared input kinds render typed named accessible controls
+ok 4 - all eight declared input kinds render typed named accessible controls
+  ---
+  duration_ms: 3.933109
+  type: 'test'
+  ...
+# Subtest: boolean false number zero and typed enum values survive input rendering
+ok 5 - boolean false number zero and typed enum values survive input rendering
+  ---
+  duration_ms: 5.179816
+  type: 'test'
+  ...
+# Subtest: form reading distinguishes unset from false zero and empty multiselect
+ok 6 - form reading distinguishes unset from false zero and empty multiselect
+  ---
+  duration_ms: 1.210201
+  type: 'test'
+  ...
+# Subtest: all eight result blocks render from the same job definition contract
+ok 7 - all eight result blocks render from the same job definition contract
+  ---
+  duration_ms: 8.194322
+  type: 'test'
+  ...
+# Subtest: untrusted job output and names are escaped and unsafe links omitted
+ok 8 - untrusted job output and names are escaped and unsafe links omitted
+  ---
+  duration_ms: 1.361218
+  type: 'test'
+  ...
+# Subtest: per-item AI proposal is visibly unconfirmed and requires human verdict
+ok 9 - per-item AI proposal is visibly unconfirmed and requires human verdict
+  ---
+  duration_ms: 1.268108
+  type: 'test'
+  ...
+# Subtest: read-only historical result blocks never permit input decisions
+ok 10 - read-only historical result blocks never permit input decisions
+  ---
+  duration_ms: 1.440017
+  type: 'test'
+  ...
+# Subtest: evidence presence does not claim attachment content adequacy
+ok 11 - evidence presence does not claim attachment content adequacy
+  ---
+  duration_ms: 0.973335
+  type: 'test'
+  ...
+# Subtest: request timeline preserves EES report and independent effect confirmation
+ok 12 - request timeline preserves EES report and independent effect confirmation
+  ---
+  duration_ms: 1.430673
+  type: 'test'
+  ...
+# Subtest: history uses immutable attempt inputs and result rather than current edited values
+ok 13 - history uses immutable attempt inputs and result rather than current edited values
+  ---
+  duration_ms: 1.979054
+  type: 'test'
+  ...
+# Subtest: missing history is explicitly unexecuted and never a success fixture
+ok 14 - missing history is explicitly unexecuted and never a success fixture
+  ---
+  duration_ms: 2.377978
+  type: 'test'
+  ...
+# Subtest: My Work uses actual tasks and incident-overdue-today-week-future-undated ordering
+ok 15 - My Work uses actual tasks and incident-overdue-today-week-future-undated ordering
+  ---
+  duration_ms: 2.420082
+  type: 'test'
+  ...
+# Subtest: empty My Work does not invent an actionable task or normal execution
+ok 16 - empty My Work does not invent an actionable task or normal execution
+  ---
+  duration_ms: 0.835106
+  type: 'test'
+  ...
+# Subtest: late workspace reads are discarded after account change
+ok 17 - late workspace reads are discarded after account change
+  ---
+  duration_ms: 2.243397
+  type: 'test'
+  ...
+# Subtest: late workspace reads are discarded after selected job changes
+ok 18 - late workspace reads are discarded after selected job changes
+  ---
+  duration_ms: 1.905017
+  type: 'test'
+  ...
+# Subtest: lookup failure clears stale private evidence and keeps an explicit read error
+ok 19 - lookup failure clears stale private evidence and keeps an explicit read error
+  ---
+  duration_ms: 1.371163
+  type: 'test'
+  ...
+# Subtest: lost mutation response reuses the exact request receipt and payload
+ok 20 - lost mutation response reuses the exact request receipt and payload
+  ---
+  duration_ms: 1.846799
+  type: 'test'
+  ...
+# Subtest: definitive rejection retires its receipt instead of replaying invalid intent
+ok 21 - definitive rejection retires its receipt instead of replaying invalid intent
+  ---
+  duration_ms: 1.260467
+  type: 'test'
+  ...
+# Subtest: operations and workspace receipts are distinct authenticated command paths
+ok 22 - operations and workspace receipts are distinct authenticated command paths
+  ---
+  duration_ms: 1.12284
+  type: 'test'
+  ...
+# Subtest: late successful mutation cannot repopulate another account or scope
+ok 23 - late successful mutation cannot repopulate another account or scope
+  ---
+  duration_ms: 2.282836
+  type: 'test'
+  ...
+# Subtest: normalization selects the exact current attempt and preserves historical decisions
+ok 24 - normalization selects the exact current attempt and preserves historical decisions
+  ---
+  duration_ms: 0.990922
+  type: 'test'
+  ...
+# Subtest: redacted evidence stays null instead of substituting another readable attempt
+ok 25 - redacted evidence stays null instead of substituting another readable attempt
+  ---
+  duration_ms: 1.138554
+  type: 'test'
+  ...
+# Subtest: Native model list keeps actual allowed identities and excludes direct embedding routes
+ok 26 - Native model list keeps actual allowed identities and excludes direct embedding routes
+  ---
+  duration_ms: 1.584204
+  type: 'test'
+  ...
+# Subtest: AI reference never contains Native authorization tokens or confirmation intents
+ok 27 - AI reference never contains Native authorization tokens or confirmation intents
+  ---
+  duration_ms: 1.258194
+  type: 'test'
+  ...
+# Subtest: late confirmation is rejected after account or selected work context changes
+ok 28 - late confirmation is rejected after account or selected work context changes
+  ---
+  duration_ms: 1.791726
+  type: 'test'
+  ...
+# Subtest: first workspace read refetches after default system selection before accepting operations
+ok 29 - first workspace read refetches after default system selection before accepting operations
+  ---
+  duration_ms: 2.241943
+  type: 'test'
+  ...
+# Subtest: allowed model count survives a work selection change but not account change
+ok 30 - allowed model count survives a work selection change but not account change
+  ---
+  duration_ms: 2.246541
+  type: 'test'
+  ...
+# Subtest: read-only tab changes retain polling rather than stopping current execution observation
+ok 31 - read-only tab changes retain polling rather than stopping current execution observation
+  ---
+  duration_ms: 1.421109
+  type: 'test'
+  ...
+# Subtest: returning from a Native workspace page starts a fresh workspace read
+ok 32 - returning from a Native workspace page starts a fresh workspace read
+  ---
+  duration_ms: 14.360421
+  type: 'test'
+  ...
+# Subtest: dynamic options use authenticated current-job inputs and never send an execution command
+ok 33 - dynamic options use authenticated current-job inputs and never send an execution command
+  ---
+  duration_ms: 1.817184
+  type: 'test'
+  ...
+# Subtest: late option results cannot replace a changed input dependency or another job
+ok 34 - late option results cannot replace a changed input dependency or another job
+  ---
+  duration_ms: 3.611325
+  type: 'test'
+  ...
+# Subtest: dynamic option failure disables selection without falling back to manual examples
+ok 35 - dynamic option failure disables selection without falling back to manual examples
+  ---
+  duration_ms: 2.06003
+  type: 'test'
+  ...
+# Subtest: removed dynamic selection stays explicit and no returned option is automatically chosen
+ok 36 - removed dynamic selection stays explicit and no returned option is automatically chosen
+  ---
+  duration_ms: 0.861757
+  type: 'test'
+  ...
+# Subtest: held Enter or Space cannot repeat a mutation while its ordinary first click still runs
+ok 37 - held Enter or Space cannot repeat a mutation while its ordinary first click still runs
+  ---
+  duration_ms: 6.315855
+  type: 'test'
+  ...
+# Subtest: scope execution uses the selected P or T and refuses unsaved run drafts
+ok 38 - scope execution uses the selected P or T and refuses unsaved run drafts
+  ---
+  duration_ms: 1.593708
+  type: 'test'
+  ...
+# Subtest: admin management renders existing Native identities and is absent for ordinary participants
+ok 39 - admin management renders existing Native identities and is absent for ordinary participants
+  ---
+  duration_ms: 1.666108
+  type: 'test'
+  ...
+# Subtest: admin dialog refuses nonadmin identity before any write or new dialog
+ok 40 - admin dialog refuses nonadmin identity before any write or new dialog
+  ---
+  duration_ms: 1.224653
+  type: 'test'
+  ...
+# Subtest: text export formats only fetched run history and retains redacted-source notice
+ok 41 - text export formats only fetched run history and retains redacted-source notice
+  ---
+  duration_ms: 0.849539
+  type: 'test'
+  ...
+# Subtest: legacy records have readonly navigation and escaped values with no execution controls
+ok 42 - legacy records have readonly navigation and escaped values with no execution controls
+  ---
+  duration_ms: 0.853755
+  type: 'test'
+  ...
+# Subtest: authenticated source navigation preserves private drafts and resets only for account change
+ok 43 - authenticated source navigation preserves private drafts and resets only for account change
+  ---
+  duration_ms: 2.780665
+  type: 'test'
+  ...
+# Subtest: AI item badge disappears only when a saved decision for that item is present
+ok 44 - AI item badge disappears only when a saved decision for that item is present
+  ---
+  duration_ms: 0.874727
+  type: 'test'
+  ...
+# Subtest: date-only and timezone-qualified saved inputs preserve their exact stored value
+ok 45 - date-only and timezone-qualified saved inputs preserve their exact stored value
+  ---
+  duration_ms: 1.576773
+  type: 'test'
+  ...
+# Subtest: first Native chat proposal accepts only the creation-bound old context without a DB write
+ok 46 - first Native chat proposal accepts only the creation-bound old context without a DB write
+  ---
+  duration_ms: 1.626217
+  type: 'test'
+  ...
+# Subtest: first-chat context alias rejects another chat account changed version draft or scope
+ok 47 - first-chat context alias rejects another chat account changed version draft or scope
+  ---
+  duration_ms: 6.136675
+  type: 'test'
+  ...
+# Subtest: unmatched Native creation finish cannot bless an arbitrary old chat context
+ok 48 - unmatched Native creation finish cannot bless an arbitrary old chat context
+  ---
+  duration_ms: 1.759158
+  type: 'test'
+  ...
+# Subtest: start-run mutation uses workflow revision rather than absent run revision
+ok 49 - start-run mutation uses workflow revision rather than absent run revision
+  ---
+  duration_ms: 1.544404
+  type: 'test'
+  ...
+# Subtest: start dialog retains its captured workflow revision across a concurrent refresh
+ok 50 - start dialog retains its captured workflow revision across a concurrent refresh
+  ---
+  duration_ms: 1.99948
+  type: 'test'
+  ...
+# Subtest: successful read polling preserves command rejection until successful command or explicit context change
+ok 51 - successful read polling preserves command rejection until successful command or explicit context change
+  ---
+  duration_ms: 2.293802
+  type: 'test'
+  ...
+# Subtest: first-chat alias is retired when navigating through another conversation
+ok 52 - first-chat alias is retired when navigating through another conversation
+  ---
+  duration_ms: 8.966158
+  type: 'test'
+  ...
+# Subtest: saving one factory setting never promotes unchanged inherited values to overrides
+ok 53 - saving one factory setting never promotes unchanged inherited values to overrides
+  ---
+  duration_ms: 1.757485
+  type: 'test'
+  ...
+# Subtest: run settings target the run factory while viewing all factories and retain raw overrides
+ok 54 - run settings target the run factory while viewing all factories and retain raw overrides
+  ---
+  duration_ms: 1.161187
+  type: 'test'
+  ...
+# Subtest: existing empty text and empty list stay distinct from never-assigned optional values
+ok 55 - existing empty text and empty list stay distinct from never-assigned optional values
+  ---
+  duration_ms: 0.546783
+  type: 'test'
+  ...
+# Subtest: readonly Work tool setup needs Native admin and cancelling preview never writes assets
+ok 56 - readonly Work tool setup needs Native admin and cancelling preview never writes assets
+  ---
+  duration_ms: 1.626788
+  type: 'test'
+  ...
+# Subtest: explicit Work tool confirmation sends preview token source hash and no public grants
+ok 57 - explicit Work tool confirmation sends preview token source hash and no public grants
+  ---
+  duration_ms: 1.490693
+  type: 'test'
+  ...
+# Subtest: known prior Work source needs explicit dated update confirmation and sends no ACL changes
+ok 58 - known prior Work source needs explicit dated update confirmation and sends no ACL changes
+  ---
+  duration_ms: 1.611716
+  type: 'test'
+  ...
+# Subtest: cancelling either Work update confirmation never writes and changed context cannot approve stale source
+ok 59 - cancelling either Work update confirmation never writes and changed context cannot approve stale source
+  ---
+  duration_ms: 6.08014
+  type: 'test'
+  ...
+# Subtest: unsupported Work source shows escaped hashes and support mismatch with no write controls
+ok 60 - unsupported Work source shows escaped hashes and support mismatch with no write controls
+  ---
+  duration_ms: 1.042239
+  type: 'test'
+  ...
+# Subtest: unsupported Work source explains the mismatch and gives an eight-character support hash without exposing the reason code
+ok 61 - unsupported Work source explains the mismatch and gives an eight-character support hash without exposing the reason code
+  ---
+  duration_ms: 1.47511
+  type: 'test'
+  ...
+# Subtest: ready Work source restores only by separate backup action and explicit confirmation
+ok 62 - ready Work source restores only by separate backup action and explicit confirmation
+  ---
+  duration_ms: 3.457143
+  type: 'test'
+  ...
+# Subtest: unrestorable backup never offers restore and concurrent edits do not claim update success
+ok 63 - unrestorable backup never offers restore and concurrent edits do not claim update success
+  ---
+  duration_ms: 3.048929
+  type: 'test'
+  ...
+# Subtest: input AI proposal preview and apply modify only the private draft until explicit save
+ok 64 - input AI proposal preview and apply modify only the private draft until explicit save
+  ---
+  duration_ms: 1.111012
+  type: 'test'
+  ...
+# Subtest: AI input preview rejects unknown setting fields and stale apply after user typing
+ok 65 - AI input preview rejects unknown setting fields and stale apply after user typing
+  ---
+  duration_ms: 0.981277
+  type: 'test'
+  ...
+# Subtest: per-message reference records exact immutable attempt and version without chat body or secrets
+ok 66 - per-message reference records exact immutable attempt and version without chat body or secrets
+  ---
+  duration_ms: 0.887015
+  type: 'test'
+  ...
+# Subtest: historical message chip never substitutes latest evidence for an old or absent attempt
+ok 67 - historical message chip never substitutes latest evidence for an old or absent attempt
+  ---
+  duration_ms: 1.838246
+  type: 'test'
+  ...
+# Subtest: execution names the sole currently authorized model and preserves explicit multi-model choice
+ok 68 - execution names the sole currently authorized model and preserves explicit multi-model choice
+  ---
+  duration_ms: 6.725401
+  type: 'test'
+  ...
+# Subtest: single model label is visible while multiple actual models retain the chooser
+ok 69 - single model label is visible while multiple actual models retain the chooser
+  ---
+  duration_ms: 1.230211
+  type: 'test'
+  ...
+# Subtest: unavailable dynamic inputs explain why AI omitted them without adding values
+ok 70 - unavailable dynamic inputs explain why AI omitted them without adding values
+  ---
+  duration_ms: 1.227387
+  type: 'test'
+  ...
+1..70
+# tests 70
+# suites 0
+# pass 70
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 230.244567

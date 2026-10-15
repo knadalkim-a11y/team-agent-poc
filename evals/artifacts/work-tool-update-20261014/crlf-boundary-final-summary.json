@@ -1,0 +1,34 @@
+{
+  "completed_utc": "2026-10-14T06:54:44.086445+00:00",
+  "python": "3.11.17",
+  "platform": "Linux",
+  "prior_commit": "ffaef860",
+  "total": 12,
+  "passed": 12,
+  "skipped": 0,
+  "failures": 0,
+  "errors": 0,
+  "seconds": 15.692,
+  "test_ids": [
+    "test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_unverified_program_source_is_rejected_before_asset_write",
+    "test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_program_change_after_confirmation_does_not_register",
+    "test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_update_rejects_program_change_before_or_during_setup",
+    "test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_explicit_registration_exact_source_and_grants",
+    "test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_post_commit_backup_failure_restores_after_guard_restart",
+    "test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_unverified_program_source_is_rejected_before_asset_write",
+    "test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_program_change_after_confirmation_does_not_register",
+    "test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_update_rejects_program_change_before_or_during_setup",
+    "test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_explicit_registration_exact_source_and_grants",
+    "test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_post_commit_backup_failure_restores_after_guard_restart",
+    "test_ees_workflow_native.NativeReadBridgeTests.test_previous_work_tool_update_restores_helper_direct_chat_and_preserves_native_state",
+    "test_ees_workflow_native.NativeReadBridgeTests.test_previous_editor_formatted_work_tool_update_and_restore"
+  ],
+  "command": "EES_TEST_UPSTREAM_WHEEL=/workspace/scratch/38e8d34a7e5f/team-agent-poc/dist/upstream/open_webui-0.11.3-py3-none-any.whl PYTHONPATH=tests ../team-agent-poc/.venv/bin/python -m unittest test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_unverified_program_source_is_rejected_before_asset_write test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_program_change_after_confirmation_does_not_register test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_update_rejects_program_change_before_or_during_setup test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_explicit_registration_exact_source_and_grants test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_post_commit_backup_failure_restores_after_guard_restart test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_unverified_program_source_is_rejected_before_asset_write test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_program_change_after_confirmation_does_not_register test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_update_rejects_program_change_before_or_during_setup test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_explicit_registration_exact_source_and_grants test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_post_commit_backup_failure_restores_after_guard_restart test_ees_workflow_native.NativeReadBridgeTests.test_previous_work_tool_update_restores_helper_direct_chat_and_preserves_native_state test_ees_workflow_native.NativeReadBridgeTests.test_previous_editor_formatted_work_tool_update_and_restore -v",
+  "code_sha256": {
+    ".gitattributes": "e69343e2f87e6278973eed82c1f93ce9cf6821dd8bc22d823bffe4e5f5f2bef7",
+    "scripts/ees_asset_guard.py": "beac2a3c28d60e4628acac651d7f4d509501bf6dcaf4999a41154bc6443cefc6",
+    "tests/test_ees_asset_native.py": "cc73a6a78ca176da6fc0c943a4c225114be2c962ecc4031fbd997d59612a1ec0",
+    "tests/test_ees_workflow_native.py": "c27241a5c9e7ff11e0e070ed8adaf1994c27b33ccbf09853f78ef2c23a06f4e6"
+  },
+  "scope": "Linux Native fixture; explicit actual installed-file CRLF/unverified source mutation, no-write rejection, canonical-source registration/update/restore. Actual Windows results require fresh CI."
+}

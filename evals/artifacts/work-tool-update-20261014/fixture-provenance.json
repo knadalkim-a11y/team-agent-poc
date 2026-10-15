@@ -1,0 +1,33 @@
+{
+  "baseline_commit": "42cc7568eb8477013abcf0a042617dd9e3279db2",
+  "source_commit": "2770382fa29968abe0d469ac9f49988806fbacc3",
+  "source_path": "agent-pack/skills/ees-work-demo/scripts/workflow_tool.py",
+  "source_date": "2026-10-02",
+  "formatter": "black==26.5.1",
+  "format_mode": "black.FileMode() / format_file_contents(fast=False)",
+  "raw_sha256": "12a538febf1843aeb7e0ccad64e72545c097858d94a165e046cba259f61ba8fe",
+  "formatted_sha256": "33331c70dcde27122587bfb1246c63b4e4d9abaa5c522ebd4bff56e5653f999f",
+  "git_blob_match": true,
+  "type_comment_ast_equal": true,
+  "fixtures": [
+    "tests/fixtures/work-tool-update/workflow_tool_2770382.py.txt",
+    "tests/fixtures/work-tool-update/workflow_tool_2770382_black2651.py.txt"
+  ],
+  "negative_control": {
+    "test_ids": [
+      "test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_2770382_source_is_update_available",
+      "test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_2770382_editor_format_is_update_available"
+    ],
+    "observed": "blocked_existing != update_available",
+    "failures": 2,
+    "errors": 0,
+    "elapsed_seconds": 5.027,
+    "product_changed": false
+  },
+  "fixture_iteration_notes": [
+    "Initial lifecycle fixture used AccessGrantModel objects with dict-only _grants; corrected to model_dump before status negative assertion. This was a test fixture error, not a product failure.",
+    "Lifecycle raw metadata comparison initially included Native-generated manifest and an unsupported ToolMeta custom key; narrowed to supported description and separately compared encrypted raw Valves/UserValves.",
+    "Native read and write grants are distinct. Added explicit admin read grant to direct-chat fixture while retaining separate owner/admin write ACL.",
+    "Product restore returned work_tool_restore_unconfirmed for both raw and formatted history because JSON ACL list rows were compared against runtime tuples; retained failing log and product normalization fix."
+  ]
+}

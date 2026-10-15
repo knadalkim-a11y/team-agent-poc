@@ -1,6 +1,7 @@
 """TR-01..06/10/19/20: real pinned Native read bridge, synthetic HTTP only."""
 import asyncio
 import ast
+from contextlib import closing
 from copy import deepcopy
 import hashlib
 import json
@@ -8,6 +9,7 @@ import os
 from pathlib import Path
 from types import SimpleNamespace
 import sys
+import sqlite3
 import unittest
 from unittest.mock import patch, AsyncMock
 from urllib.parse import parse_qs, urlsplit
@@ -303,6 +305,159 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
         denied = await self.native.help_chat_status(request, self.reader, 'helper-model')
         self.assertFalse(denied['available']); self.assertEqual(denied['code'], 'work_chat_access_denied')
         self.assertNotIn('source_sha256', denied); self.assertNotIn('https://', json.dumps(denied))
+
+    async def assert_previous_work_tool_update_lifecycle(self, *, formatted=False, variant='exact', current=False):
+        service = await self.help_send_fixture()
+        suffix = '_black2651' if formatted else ''
+        source = (self.fixture.members['open_webui/ees_workflow_tool.py'].decode('utf-8') if current else
+            (ROOT / 'tests/fixtures/work-tool-update' / ('workflow_tool_2770382' + suffix + '.py.txt')).read_text(encoding='utf-8'))
+        if variant == 'crlf':
+            source = source.replace('\n', '\r\n')
+        elif variant == 'cr':
+            source = source.replace('\n', '\r')
+        elif variant == 'no_final_newline':
+            source = source.rstrip('\n')
+        elif variant == 'extra_final_newlines':
+            source += '\n\n'
+        elif variant == 'outer_whitespace':
+            source = '\t \r\n' + source.replace('\n', '\r\n') + '\r\n \t'
+        else:
+            self.assertEqual(variant, 'exact')
+        # Preserve a distinct Native owner as well as a custom name and metadata.
+        # The acting admin has explicit write access, reader retains read access.
+        await self.fixture.tools.Tools.update_tool_by_id('ees_workflow', {
+            'content': source, 'user_id': 'owner', 'name': '현장에서 정한 업무 도구 이름',
+            'meta': {'description': '현장 설명'}})
+        await self.fixture.acl.AccessGrants.grant_access('tool', 'ees_workflow', 'user', 'admin', 'write')
+        await self.fixture.acl.AccessGrants.grant_access('tool', 'ees_workflow', 'user', 'admin', 'read')
+        await self.fixture.tools.Tools.update_tool_valves_by_id('ees_workflow', {'API_KEY': 'synthetic-admin-secret', 'unknown_setting': {'keep': True}})
+        for actor in ('owner', 'reader'):
+            await self.fixture.tools.Tools.update_user_valves_by_id_and_user_id('ees_workflow', actor,
+                {'PAT': 'synthetic-' + actor + '-secret', 'unmanaged': ['retain', actor]})
+
+        def raw_preserved_state():
+            with closing(sqlite3.connect(self.fixture.directory / 'webui.db')) as db:
+                owner, name, meta, valves = db.execute('SELECT user_id, name, meta, valves FROM tool WHERE id=?', ('ees_workflow',)).fetchone()
+                # Native regenerates frontmatter/spec metadata from code, while
+                # user metadata and encrypted settings remain unchanged.
+                custom_meta = {key: value for key, value in json.loads(meta).items()
+                               if key not in {'manifest', 'has_user_valves'}}
+                return (owner, name, custom_meta, valves, db.execute('SELECT id, settings FROM user ORDER BY id').fetchall())
+
+        preserved = raw_preserved_state()
+        grants = self.fixture.guard._grants((await self.fixture.tools.Tools.get_tool_by_id('ees_workflow')).model_dump()['access_grants'])
+        request, _, _ = self.help_send_input()
+        unavailable = await self.native.help_chat_status(request, self.reader, 'helper-model', '', 'owned-chat')
+        self.assertFalse(unavailable['available'])
+        self.assertEqual(unavailable['code'], 'work_chat_tool_review_required')
+        status_response = await self.fixture.request('GET', '/api/v1/ees/assets/work-tool/status')
+        self.assertEqual(status_response.status_code, 200, status_response.text)
+        status = status_response.json()
+        self.assertEqual(status['state'], 'update_available', status)
+        self.assertIsNotNone(status['program_source'], 'Shipped source must match the verified history on every platform')
+        self.assertEqual(status['program_source']['sha256'], status['source_sha256'])
+        self.assertEqual(status['registered_source_sha256'], hashlib.sha256(source.encode()).hexdigest())
+        self.assertEqual(status['registered_source']['sha256'], status['registered_source_sha256'])
+        self.assertEqual(status['registered_source']['format'], 'black-26.5.1' if formatted else 'git')
+        update = await self.fixture.request('POST', '/api/v1/ees/assets/work-tool/setup', payload={
+            'source_sha256': status['source_sha256'], 'expected_token': status['expected_token'],
+            'confirmation': 'update_readonly_work_tool'})
+        self.assertEqual(update.status_code, 200, update.text)
+        receipt = update.json()
+        self.assertEqual(receipt['state'], 'ready')
+        self.assertTrue(receipt['changed'])
+        backup = receipt['backup']
+        self.assertTrue(backup['can_restore'])
+        self.assertEqual(backup['from_source_sha256'], hashlib.sha256(source.encode()).hexdigest())
+        self.assertEqual(backup['to_source_sha256'], status['source_sha256'])
+        backups = list((self.fixture.directory / 'ees-work-tool-backups').glob('*.json'))
+        self.assertEqual(len(backups), 1)
+        saved = json.loads(backups[0].read_text(encoding='utf-8'))
+        self.assertEqual(saved['before']['content'].encode('utf-8'), source.encode('utf-8'),
+                         'Known-form comparison must not normalize the saved source bytes')
+        current = await self.fixture.tools.Tools.get_tool_by_id('ees_workflow')
+        self.assertEqual(current.content.encode(), self.fixture.members['open_webui/ees_workflow_tool.py'])
+        self.assertEqual(raw_preserved_state(), preserved, 'Owner/name/user metadata and raw encrypted Valves/UserValves must survive')
+        self.assertEqual(self.fixture.guard._grants(current.model_dump()['access_grants']), grants)
+        self.assertNotIn('synthetic-admin-secret', update.text)
+        self.assertNotIn('synthetic-reader-secret', update.text)
+        self.assertNotIn(source, update.text)
+        self.assertTrue((await self.native.help_chat_status(request, self.reader, 'helper-model', '', 'owned-chat'))['available'])
+
+        created = await service.workspace_command(self.admin, {'action': 'create_workflow', 'system_id': 'EMS',
+            'name': 'Updated Work tool direct chat', 'mode': 'on_demand', 'expected_revision': 0, 'request_id': 'update-chat-create'})
+        self.assertTrue(created['ok'], created)
+        self.chat_lookup.return_value = SimpleNamespace(user_id='admin')
+        metadata = {'chat_id': 'owned-chat', 'user_message': {'meta': {'ees_work_reference': {
+            'kind': 'workspace', 'workflow_id': created['workflow_id'], 'run_id': '', 'job_id': '',
+            'revision': 1, 'context_id': 'updated-procedure-context', 'created_at': created['workflow']['updated_at']}}}}
+        body = {'model': 'helper-model', 'messages': [{'role': 'user', 'content': '이 절차의 확인 항목을 설명해 주세요.'}]}
+        direct_request = Request({'type': 'http', 'app': self.fixture.app, 'headers': [], 'state': {}})
+        selected = await self.native.select_chat_work_tools(direct_request, self.admin, metadata, [], body)
+        self.assertEqual(selected, ['ees_workflow'], direct_request.state.ees_work_chat_status)
+        self.assertNotIn('ees_work_help', metadata['user_message']['meta'], 'This must be ordinary typed chat, not a helper button request')
+
+        if variant != 'exact':
+            # Re-read the durable backup through its validation boundary after
+            # the guard restarts; in-memory metadata must not hide EOL failures.
+            await self.fixture.guard.stop_asset_guard(self.fixture.app)
+            await self.fixture.guard.start_asset_guard(self.fixture.app)
+        fresh_response = await self.fixture.request('GET', '/api/v1/ees/assets/work-tool/status')
+        self.assertEqual(fresh_response.status_code, 200, fresh_response.text)
+        fresh = fresh_response.json()
+        self.assertEqual(fresh['state'], 'ready')
+        self.assertTrue(fresh['backup']['can_restore'])
+        restore_payload = {'expected_token': fresh['expected_token'], 'source_sha256': fresh['source_sha256'],
+            'backup_id': backup['id'], 'backup_sha256': backup['sha256'], 'confirmation': 'restore_previous_work_tool'}
+        forbidden = await self.fixture.request('POST', '/api/v1/ees/assets/work-tool/restore', user='reader', payload=restore_payload)
+        self.assertEqual(forbidden.status_code, 403)
+        restored = await self.fixture.request('POST', '/api/v1/ees/assets/work-tool/restore', payload=restore_payload)
+        self.assertEqual(restored.status_code, 200, restored.text)
+        self.assertEqual((await self.fixture.tools.Tools.get_tool_by_id('ees_workflow')).content, source)
+        self.assertEqual(raw_preserved_state(), preserved)
+        self.assertEqual(self.fixture.guard._grants((await self.fixture.tools.Tools.get_tool_by_id('ees_workflow')).model_dump()['access_grants']), grants)
+        restored_status = await self.fixture.request('GET', '/api/v1/ees/assets/work-tool/status')
+        self.assertEqual(restored_status.status_code, 200, restored_status.text)
+        self.assertEqual(restored_status.json()['state'], 'update_available')
+
+    async def test_previous_work_tool_update_restores_helper_direct_chat_and_preserves_native_state(self):
+        await self.assert_previous_work_tool_update_lifecycle()
+
+    async def test_previous_editor_formatted_work_tool_update_and_restore(self):
+        await self.assert_previous_work_tool_update_lifecycle(formatted=True)
+
+    async def test_previous_work_tool_crlf_update_helper_chat_and_exact_restore(self):
+        await self.assert_previous_work_tool_update_lifecycle(variant='crlf')
+
+    async def test_previous_editor_work_tool_crlf_update_helper_chat_and_exact_restore(self):
+        await self.assert_previous_work_tool_update_lifecycle(formatted=True, variant='crlf')
+
+    async def test_previous_work_tool_cr_update_helper_chat_and_exact_restore(self):
+        await self.assert_previous_work_tool_update_lifecycle(variant='cr')
+
+    async def test_previous_editor_work_tool_cr_update_helper_chat_and_exact_restore(self):
+        await self.assert_previous_work_tool_update_lifecycle(formatted=True, variant='cr')
+
+    async def test_previous_work_tool_no_final_newline_update_helper_chat_and_exact_restore(self):
+        await self.assert_previous_work_tool_update_lifecycle(variant='no_final_newline')
+
+    async def test_previous_editor_work_tool_no_final_newline_update_helper_chat_and_exact_restore(self):
+        await self.assert_previous_work_tool_update_lifecycle(formatted=True, variant='no_final_newline')
+
+    async def test_previous_work_tool_extra_final_newlines_update_helper_chat_and_exact_restore(self):
+        await self.assert_previous_work_tool_update_lifecycle(variant='extra_final_newlines')
+
+    async def test_previous_editor_work_tool_extra_final_newlines_update_helper_chat_and_exact_restore(self):
+        await self.assert_previous_work_tool_update_lifecycle(formatted=True, variant='extra_final_newlines')
+
+    async def test_previous_work_tool_outer_whitespace_update_helper_chat_and_exact_restore(self):
+        await self.assert_previous_work_tool_update_lifecycle(variant='outer_whitespace')
+
+    async def test_previous_editor_work_tool_outer_whitespace_update_helper_chat_and_exact_restore(self):
+        await self.assert_previous_work_tool_update_lifecycle(formatted=True, variant='outer_whitespace')
+
+    async def test_current_work_tool_crlf_requires_update_before_ready_and_exact_restore(self):
+        await self.assert_previous_work_tool_update_lifecycle(variant='crlf', current=True)
 
     async def test_helper_prepare_strips_only_this_request_before_persistence_and_no_fallback(self):
         await self.help_send_fixture()

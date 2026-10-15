@@ -1,0 +1,53 @@
+test_previous_work_tool_update_restores_helper_direct_chat_and_preserves_native_state (test_ees_workflow_native.NativeReadBridgeTests.test_previous_work_tool_update_restores_helper_direct_chat_and_preserves_native_state) ... Executing <Task pending name='Task-1' coro=<NativeReadBridgeTests.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py:48> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 1.309 seconds
+FAIL
+test_previous_editor_formatted_work_tool_update_and_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_editor_formatted_work_tool_update_and_restore) ... Executing <Task pending name='Task-65' coro=<NativeReadBridgeTests.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py:48> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 1.162 seconds
+FAIL
+
+======================================================================
+FAIL: test_previous_work_tool_update_restores_helper_direct_chat_and_preserves_native_state (test_ees_workflow_native.NativeReadBridgeTests.test_previous_work_tool_update_restores_helper_direct_chat_and_preserves_native_state)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 389, in test_previous_work_tool_update_restores_helper_direct_chat_and_preserves_native_state
+    await self.assert_previous_work_tool_update_lifecycle()
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 382, in assert_previous_work_tool_update_lifecycle
+    self.assertEqual(restored.status_code, 200, restored.text)
+AssertionError: 500 != 200 : {"detail":"work_tool_restore_unconfirmed"}
+
+======================================================================
+FAIL: test_previous_editor_formatted_work_tool_update_and_restore (test_ees_workflow_native.NativeReadBridgeTests.test_previous_editor_formatted_work_tool_update_and_restore)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/unittest/async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 392, in test_previous_editor_formatted_work_tool_update_and_restore
+    await self.assert_previous_work_tool_update_lifecycle(formatted=True)
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_workflow_native.py", line 382, in assert_previous_work_tool_update_lifecycle
+    self.assertEqual(restored.status_code, 200, restored.text)
+AssertionError: 500 != 200 : {"detail":"work_tool_restore_unconfirmed"}
+
+----------------------------------------------------------------------
+Ran 2 tests in 3.667s
+
+FAILED (failures=2)

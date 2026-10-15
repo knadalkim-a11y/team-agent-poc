@@ -1,0 +1,18 @@
+2026-10-14T07:36:07.1108207Z test_snapshot_reads_parent_relationships_and_closes_handle (test_ees_deploy_stop_target.ToolHelpTests.test_snapshot_reads_parent_relationships_and_closes_handle) ... ok
+2026-10-14T07:36:07.2459257Z test_actual_venv_child_termination_releases_waiting_launcher (test_ees_deploy_stop_target.WindowsVenvTests.test_actual_venv_child_termination_releases_waiting_launcher) ... ERROR
+2026-10-14T07:36:07.2462446Z 
+2026-10-14T07:36:07.2462730Z ======================================================================
+2026-10-14T07:36:07.2464021Z ERROR: test_actual_venv_child_termination_releases_waiting_launcher (test_ees_deploy_stop_target.WindowsVenvTests.test_actual_venv_child_termination_releases_waiting_launcher)
+2026-10-14T07:36:07.2464887Z ----------------------------------------------------------------------
+2026-10-14T07:36:07.2465253Z Traceback (most recent call last):
+2026-10-14T07:36:07.2473653Z   File "D:\a\team-agent-poc\team-agent-poc\tests\test_ees_deploy_stop_target.py", line 224, in test_actual_venv_child_termination_releases_waiting_launcher
+2026-10-14T07:36:07.2474495Z     selected = target.resolve_server_target(parent, str(python))
+2026-10-14T07:36:07.2474868Z                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-14T07:36:07.2475455Z   File "D:\a\team-agent-poc\team-agent-poc\scripts\ees_deploy_stop_target.py", line 153, in resolve_server_target
+2026-10-14T07:36:07.2505633Z ##[error]    raise _failure('The managed server has unexpected descendants; no process was terminated.')
+2026-10-14T07:36:07.2513548Z ees_deploy_process.ProcessError: The managed server has unexpected descendants; no process was terminated.
+2026-10-14T07:36:07.2513993Z 
+2026-10-14T07:36:07.2514146Z ----------------------------------------------------------------------
+2026-10-14T07:36:07.2514487Z Ran 16 tests in 0.174s
+2026-10-14T07:36:07.2514621Z 
+2026-10-14T07:36:07.2514703Z FAILED (errors=1)

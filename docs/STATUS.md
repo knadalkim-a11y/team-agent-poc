@@ -1,5 +1,17 @@
 # 현재 작업 상태
 
+## 2026-10-15 · #88 병합 완료·#89에 main 통합
+
+- **현재 원본:** #88 head `584e3c91a49402d81d449de869e32578deee4fcb`의 [CI 두 번째 시도](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38655286601/attempts/2)는31개 성공·배포파일1개 정상 제외다. 사용자 승인에 따라 merge commit `4da2d1c2cb18320778c392892c252388070891dd`로 병합하고 이 main을 #89에 통합했다. 문서5개 충돌에서 양쪽 기록을 모두 보존하고 CHANGELOG는 날짜별로 합쳤다.
+- **검증/미확인:** Windows CI에서 실제 길이 값이 채워진 적용 블록2,491자와 PowerShell 구문을 통과했다. 첫 CI의 Chrome 준비 timeout과 실패 작업1회 재실행은 [기존 평가](../evals/v4-ui-20260930.md#apply-block-length-20261015)에 보존한다. 재실행 성공은 Chrome 지연의 근본원인 해결이나 사내 적용 성공이 아니다.
+- **다음 작업 하나:** 통합 #89의 [최종 head CI](https://github.com/knadalkim-a11y/team-agent-poc/pull/89/checks) 성공 후 merge commit으로 병합하고, 최종 main CI 성공과 실제 바깥 Actions ZIP 네 값을 대조해 단일 블록을 Claude 검토용으로 전달한다. 실제 사내 설치는42cc756이고 사내 실행·Figma 수정·#77/#79·main 직접 push는 하지 않는다.
+
+- **통합 CI 첫 실패:** 공식 Native baseline Chrome 시작 응답이30초 안에 오지 않아 EES 코드 검증 전에 멈췄다. [최초 실패·범위·1회 재검 조건](../evals/v4-ui-20260930.md#apply-block-length-20261015)을 보존했고 제품·검사·시간 제한 변경 없이 기록만 추가한 새 head에서 확인한다.
+
+- **별도 Windows 미확인:** 새 실행은 Chrome 비교를 통과했으나 Windows 합성 launcher의 Node 시작 표식 미관측/10초 timeout1건으로 멈췄다. 같은 모듈33개와 전체28개 job은 통과했다. 원래 실패와 로컬 단일PASS·새 head1회 재검 조건을 같은 평가에 보존하며 검사 기준은 유지한다.
+
+아래는 각 단계 당시의 기록이다. 미병합/Draft 유지 지시는 위 승인과 순서로 대체한다.
+
 ## 2026-10-15 · #88·#89 순서 병합 승인과 적용 블록 길이 보완
 
 - **승인:** 사용자가 Claude 재검토 후 #88 → main을 #89에 통합 → 최종 head CI 성공 후 #89 병합을 승인했다. 저장소 관례인 merge commit을 사용한다. 아래 병합 보류 문구는 당시 기록이며 이번 승인으로 대체한다.
@@ -30,6 +42,27 @@
 - **다음 작업 하나:** R11을 포함한 #88의 실제 화면/포커스·보존 검사와 최종 head CI를 마치고 검토를 요청한다. 2-3은 #88 병합 뒤 최신 main에서 시작하며 #89와 별개다. 두 PR 병합 뒤 최종 main/ZIP의 사내 적용 안내는 한 번으로 합친다. 현재 병합·main 직접 push·사내 실행·Figma 수정·#77/#79 착수는 하지 않는다.
 
 아래는 후속 요청 이전의 준비·검토 기록이다.
+## 2026-10-15 · #89 검토 보완: 알려진 원본 줄바꿈과 안내
+
+- **기준:** 미병합 head `bdc8a4405a79e8befaccf3382b50a9dad59ef77b`의 Claude 검토2건을 같은 PR에서 고쳤다. 사내 설치는 사용자 확인42cc756이며 등록본 버전/사내 해결은 미확인이다.
+- **변경:** 알려진 원본 인식에만 CRLF/CR→LF·양끝 공백 정규화를 적용했다. ready·출하 검증·갱신·백업·복원은 정확 바이트를 유지한다. 불일치 창은 쉬운 설명·해시8자리·개발 담당에게 알릴 행동을 표시한다. [현재 계약](mockups/ees-work/TASK.md#work-tool-review-20261015).
+- **검증:** 변경 전 실제 Native의11개 변형이 모두 blocked_existing으로 실패함을 먼저 확인했다. 수정 뒤 실제 Native96개·guard19개·Git/Black24형태 재생성·고정Node UI70개가 통과했다. 정확한 결과와 최초 실패는 [기존 평가 기록](../evals/v4-ui-20260930.md#work-tool-review-evidence-20261015), 최신 head 전체 CI는 [PR Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/89/checks)에서 구분한다.
+- **전달/다음:**42cc756과 Work 출하 파일이 같으므로 update_needed 없이도 적용 뒤 설정 확인을 직접 안내한다. 둘째 회신 줄 work_tool 결과를 포함하며 두 PR은 검토·병합 후 한 번 적용한다. 현재 PR의 최종 CI를 확인해 재검토를 요청하며 병합·사내 실행은 하지 않는다.
+
+아래는 10-14 당시 구현·검증 이력이며, 알려진 원본 인식 조건은 위 보완을 따른다.
+
+## 2026-10-14 · 2-2 후속: Work 도구 원본 갱신
+
+- **사내 상태:** 사용자 확인 설치는 main `42cc7568eb8477013abcf0a042617dd9e3279db2`다. 새 절차 질문의 업무 도우미 사용 불가와 설정의 `blocked_existing`이 보고됐다. 등록본의 정확한 해시/버전은 미확인이다.
+- **수정:** main 기준 별도 PR에서 Git 이력의 제품 원본·고정 편집기 정렬본을 정확한 해시로 확인하고 알려진 이전 원본만 같은 ID로 바꾼다. 명시적 확인·예상 token·비공개 백업/복원으로 이름·소유자·읽기 권한·설정을 보존한다. 모르는 원본은 지원 형태와 다름으로 표시하며 쓰지 않는다. [사용 절차](03-openwebui-native-agent.md#work-tool-source-update-20261014).
+- **검증:** 제품 수정 전에 main에10-02 원본과 정렬본을 등록한 두 시험이 `blocked_existing != update_available`로 실패함을 확인했다. 수정본의 실제 Native79개·기존 guard16개·UI Node69개가 통과했다. 갱신·도우미 available·직접 질문 Work 도구 연결, 설정 보존·복원·모르는 원본·권한·동시 변경·프로그램 교체를 포함한다. 배포/공통 요약80개 중77PASS/PowerShell3SKIP이며 Windows는 새 head CI로 판정한다. 최초 복원 실패와 독립 검토의 완료기록 저장 실패 보완은 [이번 평가](../evals/v4-ui-20260930.md#work-tool-update-evidence-20261014)에 보존한다. 최종 head CI 성공과 사내 해결은 구분한다.
+- **전달:** 성공 적용 뒤 출하 Work 도구 파일이 달라지면 설정 확인 안내를 추가했다. #88의 이동 상태/A2 드롭다운과 별도 검토하며 둘 다 병합한 뒤 예상 설치42cc756에서 한 번만 사내 적용하도록 안내한다. 원인별 전체 알림은2-3으로 남긴다.
+- **첫 CI 보완:** [Draft PR #89](https://github.com/knadalkim-a11y/team-agent-poc/pull/89)의 첫 CI는 Windows 출하 원본 줄바꿈/갱신 뒤 백업 판정과 기존 계정 전환의 단계 추가 대기로 실패했다. 제품 원본·fixture의 LF를 고정하고 미확인 출하 바이트는 쓰기 전에 막으며 영향12개 Native가 통과했다. 계정 화면 실패의 근본원인은 미확정이라 읽기 전용 클릭 진단만 추가해 새 head에서 재검한다. 최초 실패·재검 범위는 [같은 평가](../evals/v4-ui-20260930.md#work-tool-update-evidence-20261014)에 남기고 최종 판정은 [#89 Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/89/checks)에서 확인한다.
+- **보완 코드 검증:** head `848c769`의 [CI38525473317](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38525473317)은31성공/정상1skip이다. Linux·Windows 각81개 Native 및 Windows upgrade59개가 통과했고 계정 전환11개도 통과했다. 최초 계정 클릭 실패의 근본원인은 미확정이며 재발 시 보존한 이벤트 진단으로 확인한다. 이후 문서·증거 전용 최종 커밋의 전체 CI는 PR Checks에서 별도로 확인한다.
+- **최종 기록 뒤 별도 실패:** `91f1db0`의 CI는 이번 갱신·복원 검사에 통과했지만 기존 Windows venv 종료 시험이 예상 밖 후손 관계를 감지해 안전 중단했다. 실제 후손의 원인은 미확정이며 제품·검사 기준·제한시간을 유지하고 실패 시 최소 프로세스 식별 진단만 추가해 새 head에서 확인한다. 최초 실패/재검 근거는 위 평가 기록에 보존한다.
+- **다음 작업 하나:** 두 PR의 최종 head CI를 확인해 검토를 요청한다. 검토·병합 뒤 최종 main/ZIP을 확정해 사내 적용 안내를 한 번만 전달한다. 병합·main 직접 push·사내 실행·Figma 수정·#77/#79 착수는 하지 않는다.
+
+아래는 이번 Work 도구 후속 요청 이전의 기록이다.
 
 ## 2026-10-14 · #86 병합·#87 검토 3건 반영과 통합 적용 준비
 

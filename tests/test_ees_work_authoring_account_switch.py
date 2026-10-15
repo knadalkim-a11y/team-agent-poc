@@ -27,6 +27,58 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
     def authoring_content(self):
         return self.browser.evaluate("(()=>{const root=document.querySelector('#ees-work-designer');return [root?.textContent||'',...[...(root?.querySelectorAll('input,textarea')||[])].map(e=>e.value)].join('\\n')})()")
 
+    def begin_stage_click_diagnostics(self):
+        # Observe the existing physical click without changing readiness,
+        # dispatch, waits, or editor state. Never collect text or field values.
+        self.browser.evaluate("""(()=>{
+            window.__eesAccountStageProbe?.stop();
+            const initial=document.querySelector('[data-author-action="add_stage"]');
+            let root=document.querySelector('#ees-work-designer'),generation=0;
+            const started=performance.now(),events=[];
+            const record=value=>{if(events.length<32)events.push({
+                elapsed_ms:Math.round(performance.now()-started),generation,
+                initial_control_connected:!!initial?.isConnected,...value});};
+            const updateGeneration=()=>{const current=document.querySelector('#ees-work-designer');
+                if(current!==root){root=current;generation++;record({type:'dom_generation'});}};
+            const observer=new MutationObserver(updateGeneration);
+            observer.observe(document.documentElement,{childList:true,subtree:true});
+            const listener=event=>{updateGeneration();const target=event.target;
+                const control=target.closest?.('[data-author-action],[data-action]');
+                const authorAction=control?.getAttribute('data-author-action');
+                const action=control?.getAttribute('data-action');
+                record({type:event.type,target_connected:!!target.isConnected,
+                    author_action:['add_stage','add_job','node','edit_workflow'].includes(authorAction)?authorAction:authorAction?'other':null,
+                    data_action:action==='mode'?action:action?'other':null});};
+            const types=['pointerdown','pointerup','click'];
+            for(const type of types)document.addEventListener(type,listener,{capture:true,passive:true});
+            window.__eesAccountStageProbe={snapshot:()=>({generation,events,
+                initial_control_connected:!!initial?.isConnected,
+                node_editor_present:!!document.querySelector('#ew-author-node [name=instructions]')}),
+                stop:()=>{observer.disconnect();for(const type of types)document.removeEventListener(type,listener,true);}};
+            return true;
+        })()""")
+
+    def collect_stage_click_diagnostics(self):
+        try:
+            value=self.browser.evaluate("""(()=>{const probe=window.__eesAccountStageProbe;
+                if(!probe)return null;const value=probe.snapshot();probe.stop();
+                delete window.__eesAccountStageProbe;return value;})()""")
+        except Exception as error:
+            value={'capture_error':type(error).__name__}
+        self.stage_click_diagnostics=getattr(self,'stage_click_diagnostics',[])+[value]
+
+    def capture_failure_evidence(self):
+        native.NativeAuthoringBrowserTests.capture_failure_evidence(self)
+        if not getattr(self,'failure_evidence_captured',False) or not hasattr(self,'stage_click_diagnostics'):
+            return
+        try:
+            path=self.evidence_directory()/(self._testMethodName+'-failure.json')
+            evidence=json.loads(path.read_text(encoding='utf-8'))
+            evidence['stage_click_diagnostics']=self.stage_click_diagnostics
+            path.write_text(json.dumps(evidence,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        except Exception as error:
+            print('Native stage click evidence unavailable: '+type(error).__name__)
+
     def arrange_account(self, suffix, system):
         email = 'switch.' + suffix.lower() + '@example.test'
         response = self.api('POST','/api/v1/auths/signup',{'name':'합성 계정 '+suffix,'email':email,'password':'Fixture-person-only-42!'})
@@ -53,8 +105,15 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.wait('document.querySelector('+json.dumps(selector)+')')
         self.click(selector)
         self.wait("document.querySelector('[data-author-action=edit_workflow]')")
-        self.click('[data-author-action="add_stage"]')
-        self.wait("document.querySelector('#ew-author-node [name=instructions]')")
+        try:
+            self.begin_stage_click_diagnostics()
+        except Exception as error:
+            print('Native stage click observation unavailable: '+type(error).__name__)
+        try:
+            self.click('[data-author-action="add_stage"]')
+            self.wait("document.querySelector('#ew-author-node [name=instructions]')")
+        finally:
+            self.collect_stage_click_diagnostics()
         self.assert_user_workspace_zero()
 
     def test_same_profile_native_logout_login_discards_late_a_read_and_ai(self):

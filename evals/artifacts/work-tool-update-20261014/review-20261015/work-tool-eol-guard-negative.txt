@@ -1,0 +1,189 @@
+Product baseline: bdc8a4405a79e8befaccf3382b50a9dad59ef77b; new regression suite on exact unchanged guard snapshot.
+test_comment_and_internal_whitespace_changes_remain_unknown (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_comment_and_internal_whitespace_changes_remain_unknown) ... ok
+test_current_program_line_endings_require_update_until_exact (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_current_program_line_endings_require_update_until_exact) ... 
+  test_current_program_line_endings_require_update_until_exact (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_current_program_line_endings_require_update_until_exact) (variant='CRLF') ... FAIL
+  test_current_program_line_endings_require_update_until_exact (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_current_program_line_endings_require_update_until_exact) (variant='CR') ... FAIL
+  test_current_program_line_endings_require_update_until_exact (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_current_program_line_endings_require_update_until_exact) (variant='no-final-newline') ... FAIL
+  test_current_program_line_endings_require_update_until_exact (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_current_program_line_endings_require_update_until_exact) (variant='extra-final-newlines') ... FAIL
+  test_current_program_line_endings_require_update_until_exact (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_current_program_line_endings_require_update_until_exact) (variant='outer-whitespace') ... FAIL
+test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) ... 
+  test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='git', variant='CRLF') ... FAIL
+  test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='git', variant='CR') ... FAIL
+  test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='git', variant='no-final-newline') ... FAIL
+  test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='git', variant='extra-final-newlines') ... FAIL
+  test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='git', variant='outer-whitespace') ... FAIL
+  test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='black-26.5.1', variant='CRLF') ... FAIL
+  test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='black-26.5.1', variant='CR') ... FAIL
+  test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='black-26.5.1', variant='no-final-newline') ... FAIL
+  test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='black-26.5.1', variant='extra-final-newlines') ... FAIL
+  test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='black-26.5.1', variant='outer-whitespace') ... FAIL
+
+======================================================================
+FAIL: test_current_program_line_endings_require_update_until_exact (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_current_program_line_endings_require_update_until_exact) (variant='CRLF')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_guard.py", line 72, in test_current_program_line_endings_require_update_until_exact
+    self.assertEqual((await self.source_status(changed))["state"], "update_available")
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+
+
+======================================================================
+FAIL: test_current_program_line_endings_require_update_until_exact (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_current_program_line_endings_require_update_until_exact) (variant='CR')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_guard.py", line 72, in test_current_program_line_endings_require_update_until_exact
+    self.assertEqual((await self.source_status(changed))["state"], "update_available")
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+
+
+======================================================================
+FAIL: test_current_program_line_endings_require_update_until_exact (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_current_program_line_endings_require_update_until_exact) (variant='no-final-newline')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_guard.py", line 72, in test_current_program_line_endings_require_update_until_exact
+    self.assertEqual((await self.source_status(changed))["state"], "update_available")
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+
+
+======================================================================
+FAIL: test_current_program_line_endings_require_update_until_exact (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_current_program_line_endings_require_update_until_exact) (variant='extra-final-newlines')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_guard.py", line 72, in test_current_program_line_endings_require_update_until_exact
+    self.assertEqual((await self.source_status(changed))["state"], "update_available")
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+
+
+======================================================================
+FAIL: test_current_program_line_endings_require_update_until_exact (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_current_program_line_endings_require_update_until_exact) (variant='outer-whitespace')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_guard.py", line 72, in test_current_program_line_endings_require_update_until_exact
+    self.assertEqual((await self.source_status(changed))["state"], "update_available")
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+
+
+======================================================================
+FAIL: test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='git', variant='CRLF')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_guard.py", line 60, in test_known_git_and_editor_line_endings_are_update_available_with_exact_hash
+    self.assertEqual(status["state"], "update_available")
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+
+
+======================================================================
+FAIL: test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='git', variant='CR')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_guard.py", line 60, in test_known_git_and_editor_line_endings_are_update_available_with_exact_hash
+    self.assertEqual(status["state"], "update_available")
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+
+
+======================================================================
+FAIL: test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='git', variant='no-final-newline')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_guard.py", line 60, in test_known_git_and_editor_line_endings_are_update_available_with_exact_hash
+    self.assertEqual(status["state"], "update_available")
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+
+
+======================================================================
+FAIL: test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='git', variant='extra-final-newlines')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_guard.py", line 60, in test_known_git_and_editor_line_endings_are_update_available_with_exact_hash
+    self.assertEqual(status["state"], "update_available")
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+
+
+======================================================================
+FAIL: test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='git', variant='outer-whitespace')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_guard.py", line 60, in test_known_git_and_editor_line_endings_are_update_available_with_exact_hash
+    self.assertEqual(status["state"], "update_available")
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+
+
+======================================================================
+FAIL: test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='black-26.5.1', variant='CRLF')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_guard.py", line 60, in test_known_git_and_editor_line_endings_are_update_available_with_exact_hash
+    self.assertEqual(status["state"], "update_available")
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+
+
+======================================================================
+FAIL: test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='black-26.5.1', variant='CR')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_guard.py", line 60, in test_known_git_and_editor_line_endings_are_update_available_with_exact_hash
+    self.assertEqual(status["state"], "update_available")
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+
+
+======================================================================
+FAIL: test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='black-26.5.1', variant='no-final-newline')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_guard.py", line 60, in test_known_git_and_editor_line_endings_are_update_available_with_exact_hash
+    self.assertEqual(status["state"], "update_available")
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+
+
+======================================================================
+FAIL: test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='black-26.5.1', variant='extra-final-newlines')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_guard.py", line 60, in test_known_git_and_editor_line_endings_are_update_available_with_exact_hash
+    self.assertEqual(status["state"], "update_available")
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+
+
+======================================================================
+FAIL: test_known_git_and_editor_line_endings_are_update_available_with_exact_hash (tests.test_ees_asset_guard.WorkToolKnownSourceTests.test_known_git_and_editor_line_endings_are_update_available_with_exact_hash) (form='black-26.5.1', variant='outer-whitespace')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_guard.py", line 60, in test_known_git_and_editor_line_endings_are_update_available_with_exact_hash
+    self.assertEqual(status["state"], "update_available")
+AssertionError: 'blocked_existing' != 'update_available'
+- blocked_existing
++ update_available
+
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.027s
+
+FAILED (failures=15)

@@ -3,6 +3,7 @@
 import asyncio
 from contextlib import asynccontextmanager
 import importlib.util
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -11,7 +12,7 @@ import sys
 import tempfile
 import types
 import unittest
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 
 SOURCE = Path(__file__).resolve().parents[1] / "scripts" / "ees_asset_guard.py"
@@ -19,6 +20,66 @@ spec = importlib.util.spec_from_file_location("ees_asset_guard_test_subject", SO
 guard_module = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = guard_module
 spec.loader.exec_module(guard_module)
+
+
+class WorkToolKnownSourceTests(unittest.IsolatedAsyncioTestCase):
+    @staticmethod
+    def source_forms():
+        fixtures = SOURCE.parents[1] / "tests/fixtures/work-tool-update"
+        return {
+            "git": (fixtures / "workflow_tool_2770382.py.txt").read_bytes().decode("utf-8"),
+            "black-26.5.1": (fixtures / "workflow_tool_2770382_black2651.py.txt").read_bytes().decode("utf-8"),
+        }
+
+    @staticmethod
+    def source_variants(source):
+        return {
+            "CRLF": source.replace("\n", "\r\n"),
+            "CR": source.replace("\n", "\r"),
+            "no-final-newline": source.rstrip("\n"),
+            "extra-final-newlines": source + "\n\n",
+            "outer-whitespace": " \t\r\n" + source.replace("\n", "\r\n") + "\r\n\t ",
+        }
+
+    async def source_status(self, content):
+        source = (SOURCE.parents[1] / "agent-pack/skills/ees-work-demo/scripts/workflow_tool.py").read_bytes().decode("utf-8")
+        digest = hashlib.sha256(source.encode("utf-8")).hexdigest()
+        snapshot = {"exists": True, "asset": {"content": content}, "token": "0" * 64}
+        with patch.object(guard_module, "work_tool_source", return_value=(source, digest)), \
+                patch.object(guard_module, "_snapshot", AsyncMock(return_value=snapshot)), \
+                patch.object(guard_module, "_work_tool_state", AsyncMock(return_value={})), \
+                patch.object(guard_module, "_latest_work_backup", return_value=None):
+            status, _ = await guard_module._work_tool_status(types.SimpleNamespace(id="admin"), None)
+        return status
+
+    async def test_known_git_and_editor_line_endings_are_update_available_with_exact_hash(self):
+        for form, original in self.source_forms().items():
+            for variant, source in self.source_variants(original).items():
+                with self.subTest(form=form, variant=variant):
+                    status = await self.source_status(source)
+                    self.assertEqual(status["state"], "update_available")
+                    self.assertTrue(status["known_source"])
+                    digest = hashlib.sha256(source.encode("utf-8")).hexdigest()
+                    self.assertEqual(status["registered_source_sha256"], digest)
+                    self.assertEqual(status["registered_source"]["sha256"], digest)
+                    self.assertEqual(status["registered_source"]["format"], form)
+
+    async def test_current_program_line_endings_require_update_until_exact(self):
+        source = (SOURCE.parents[1] / "agent-pack/skills/ees-work-demo/scripts/workflow_tool.py").read_bytes().decode("utf-8")
+        self.assertEqual((await self.source_status(source))["state"], "ready")
+        for variant, changed in self.source_variants(source).items():
+            with self.subTest(variant=variant):
+                self.assertEqual((await self.source_status(changed))["state"], "update_available")
+
+    async def test_comment_and_internal_whitespace_changes_remain_unknown(self):
+        for form, original in self.source_forms().items():
+            for label, changed in (("comment", original + "\n# local change\n"),
+                                   ("internal-blank-line", original.replace("\n", "\n\n", 1))):
+                with self.subTest(form=form, change=label):
+                    status = await self.source_status(changed)
+                    self.assertEqual(status["state"], "blocked_existing")
+                    self.assertFalse(status["known_source"])
+                    self.assertIsNone(status["registered_source"])
 
 
 class TaskGuardTests(unittest.IsolatedAsyncioTestCase):

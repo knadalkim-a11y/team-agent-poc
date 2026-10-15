@@ -1,0 +1,9 @@
+test_common_work_tool_backup_eol_tampering_is_rejected_without_writes (test_ees_asset_native.NativeAssetsSharedSessionTests.test_common_work_tool_backup_eol_tampering_is_rejected_without_writes) ... Executing <Task pending name='Task-1' coro=<NativeAssetCases.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_native.py:42> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 1.891 seconds
+ok
+test_common_work_tool_backup_eol_tampering_is_rejected_without_writes (test_ees_asset_native.NativeAssetsIndependentSessionTests.test_common_work_tool_backup_eol_tampering_is_rejected_without_writes) ... Executing <Task pending name='Task-35' coro=<NativeAssetCases.asyncSetUp() running at /workspace/scratch/38e8d34a7e5f/work-tool-update/tests/test_ees_asset_native.py:42> wait_for=<Future pending cb=[Task.task_wakeup()] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:428> cb=[_run_until_complete_cb() at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/base_events.py:181] created at /root/.local/share/uv/python/cpython-3.11.17-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py:100> took 1.278 seconds
+ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 4.349s
+
+OK

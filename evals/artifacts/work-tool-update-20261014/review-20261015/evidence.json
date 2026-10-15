@@ -1,0 +1,47 @@
+{
+  "base_head": "bdc8a4405a79e8befaccf3382b50a9dad59ef77b",
+  "environment": {
+    "python": "3.11.17",
+    "node": "22.16.0",
+    "native": "0.11.3",
+    "note": "Exact current-head old guard used for Native negative; fixed full94 plus exact backup tamper2 =96 pass."
+  },
+  "files": [
+    {
+      "file": "work-tool-eol-guard-negative.txt",
+      "bytes": 15713,
+      "sha256": "166a8f916621918d09ff2d75bcff41816b7a22272b485c438a651818f5a625b8"
+    },
+    {
+      "file": "work-tool-eol-guard-positive.txt",
+      "bytes": 3050,
+      "sha256": "35c4a1d21f84b2a90e1a2620142482913e226db5d7f3120349a0d778e669f9a0"
+    },
+    {
+      "file": "work-tool-unsupported-ui-negative.txt",
+      "bytes": 1661,
+      "sha256": "cae0dc35aa7055f3ad9e9be4e376a5752ed7415602b8e9f0750efd09f2da09d4"
+    },
+    {
+      "file": "work-tool-unsupported-ui-pinned.txt",
+      "bytes": 16301,
+      "sha256": "ebca688ce2d515293a39d9e58582ff6f53e700929f03cfe7f011c9bf61bbab43"
+    },
+    {
+      "file": "native-eol-before.txt",
+      "bytes": 39261,
+      "sha256": "25eec9dff672359e5041155b31bdb0283baf748e20ce4b68f7944dedb735ed8b"
+    },
+    {
+      "file": "native-eol-after.txt",
+      "bytes": 81146,
+      "sha256": "b25adedb4e75e52e23acdee05c89810ad582ef837ef9283622c37f89eaba520a"
+    },
+    {
+      "file": "native-eol-backup-tamper.txt",
+      "bytes": 1712,
+      "sha256": "e93cbccbc11dd463769d16d71bf5ef89e15169e0f5e16bd429346597a5779371"
+    }
+  ],
+  "ci": "Final modified head CI is separately recorded in the existing PR Checks/body; local pass is not browser or Windows pass."
+}

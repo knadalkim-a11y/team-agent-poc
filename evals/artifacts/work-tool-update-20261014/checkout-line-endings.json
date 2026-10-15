@@ -1,0 +1,24 @@
+{
+  "condition": "git checkout-index with core.autocrlf=true and core.eol=crlf; working-tree .gitattributes eol=lf",
+  "platform": "Linux (Windows checkout conversion settings, not an actual Windows execution)",
+  "files": [
+    {
+      "path": "agent-pack/skills/ees-work-demo/scripts/workflow_tool.py",
+      "sha256": "c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085",
+      "exact_git_bytes": true,
+      "crlf_count": 0
+    },
+    {
+      "path": "tests/fixtures/work-tool-update/workflow_tool_2770382.py.txt",
+      "sha256": "12a538febf1843aeb7e0ccad64e72545c097858d94a165e046cba259f61ba8fe",
+      "exact_git_bytes": true,
+      "crlf_count": 0
+    },
+    {
+      "path": "tests/fixtures/work-tool-update/workflow_tool_2770382_black2651.py.txt",
+      "sha256": "33331c70dcde27122587bfb1246c63b4e4d9abaa5c522ebd4bff56e5653f999f",
+      "exact_git_bytes": true,
+      "crlf_count": 0
+    }
+  ]
+}
