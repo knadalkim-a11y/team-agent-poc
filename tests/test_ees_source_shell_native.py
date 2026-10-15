@@ -651,8 +651,17 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 condition = ("document.querySelector('#ees-work-designer [data-author-action=create]')"
                              if destination == 'procedures' else
                              "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '내 업무'")
+                if destination == 'my-work':
+                    # The 10-15 contract permits a local destination placeholder
+                    # for a different-menu return, with destination selection
+                    # already visible. Same-menu returns keep zero loading.
+                    frame_monitor.begin_native_return(self, label,
+                        selector='#ees-work-entry ' + selector, native=native,
+                        destination='my_work', previous='procedures')
                 self.delayed_step(label, '#ees-work-entry ' + selector,
                                   "location.pathname === '/c/existing-chat' && (" + condition + ')')
+                if destination == 'my-work':
+                    frame_monitor.end_native_return(self)
                 labels.append(label)
 
         self.step('delayed-chat-list', '[data-action=chats]',
@@ -674,17 +683,27 @@ class SourceShellNativeTests(IntegratedNativeCase):
         evidence = frame_monitor.collect(self, labels=labels)
         evidence['scope'] = ('Real compiled frontend candidate; historical 42cc756 failure is retained in evals, '
                              'physical CDP clicks, temporary production workflow service; both workspace '
-                             'and operations HTTP GETs delayed by 1000ms; no DOM masking or expected failure.')
+                             'and operations HTTP GETs delayed by 1000ms; no DOM masking or expected failure. '
+                             'Only the three Native-to-my-work returns permit a local target placeholder '
+                             'with the exact destination selected; same-menu and other transitions retain zero loading.')
         evidence['reads'] = self.server.navigation_reads
         evidence['counts'] = {label: {
             'frames': sum(row['label'] == label for row in evidence['samples']),
             'menu_loading': sum(row['label'] == label and bool(row['menuLoading']) for row in evidence['samples']),
-            'panel_loading': sum(row['label'] == label and bool(row['panelLoading']) for row in evidence['samples'])}
+            'panel_loading': sum(row['label'] == label and bool(row['panelLoading']) for row in evidence['samples']),
+            'destination_local_loading': sum(row['label'] == label and row['nativeReturnDestinationLoading']
+                                              for row in evidence['samples']),
+            'unexpected_selection': sum(row['label'] == label and row['nativeReturnUnexpectedSelection']
+                                        for row in evidence['samples']),
+            'previous_panel': sum(row['label'] == label and bool(row['nativeReturnPreviousPanel'])
+                                  for row in evidence['samples'])}
             for label in labels}
         directory = self.screenshot('source-shell-delayed-navigation-final')
         (directory / 'source-shell-delayed-navigation-frames.json').write_text(
             json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         self.assertTrue(self.server.navigation_reads)
+        self.assertEqual([row['label'] for row in evidence['nativeReturns']],
+                         [native + '-to-my-work' for native in ('skills', 'tools', 'models')])
         for row in self.server.navigation_reads:
             self.assertGreaterEqual(row['released'] - row['started'], .99)
         frame_monitor.assert_clean(self, evidence, labels=labels)

@@ -136,6 +136,17 @@ test('pending Native return prepares only the destination placeholder without ol
  const host={dataset:{},isConnected:true,querySelector:()=>null,querySelectorAll:()=>[],setAttribute(){},innerHTML:''},published=[];
  const context=renderer({document:{activeElement:null,querySelector:()=>null}});context.window.__eesSourceShellV1={hosts:()=>({panel:host}),publish:value=>published.push(value)};
  const view=run(context,'createWorkView({callbacks:{}})');
- view.render({native_shell:true,native_return_pending:true,target_loading:true,state:{capabilities:{actor_id:'a',is_admin:true},workflow:{id:'w',name:'old private workflow'},run:{definition:{nodes:{j:{name:'old private job'}}}}},selection:{mode:'author',tab:'tools',workflow_id:'w',job_id:'j'}});
+ view.render({native_shell:false,native_return_pending:true,target_loading:true,state:{capabilities:{actor_id:'a',is_admin:true},workflow:{id:'w',name:'old private workflow'},run:{definition:{nodes:{j:{name:'old private job'}}}}},selection:{mode:'author',tab:'tools',workflow_id:'w',job_id:'j'}});
  assert.match(host.innerHTML,/data-ees-target-loading/);assert.doesNotMatch(host.innerHTML,/old private workflow|old private job|ees-work-authoring-panel/);assert.equal(published.at(-1).context_title,'대화');
+});
+
+test('Native destination publication precedes the physical route change and already selects its menu',async()=>{
+ const h=harness('procedures');await h.open('skills');
+ h.context.window.__eesSourceShellV1.navigate=()=>{}; // The source router has not changed screens yet.
+ await h.api.sourceAction({action:'tools'});
+ assert.equal(h.context.location.pathname,'/workspace/skills','exercise the pre-route publication itself');
+ const frame=h.frames.at(-1);assert.equal(frame.mode,'author');assert.equal(frame.tab,'tools');assert.equal(frame.target_loading,true);
+ assert.equal(frame.native,false,'the destination publication must not retain Native selection while its placeholder is ready');
+ assert.deepEqual(frame.aria_current,[{action:'tools',native_id:undefined}]);
+ assert.equal(h.api.reference().kind,'none');assert.equal(h.context.window.__eesNativeWorkV1.helpContext(),null);
 });

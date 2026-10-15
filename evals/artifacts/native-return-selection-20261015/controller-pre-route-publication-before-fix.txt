@@ -1,0 +1,32 @@
+TAP version 13
+# Subtest: Native destination publication precedes the physical route change and already selects its menu
+not ok 1 - Native destination publication precedes the physical route change and already selects its menu
+  ---
+  duration_ms: 27.503761
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:143:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    the destination publication must not retain Native selection while its placeholder is ready
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:149:9)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 146.45661

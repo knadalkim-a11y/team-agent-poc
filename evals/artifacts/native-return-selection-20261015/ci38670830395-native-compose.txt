@@ -1,0 +1,658 @@
+﻿2026-10-15T02:32:09.1365888Z Current runner version: '2.337.0'
+2026-10-15T02:32:09.1395492Z ##[group]Runner Image Provisioner
+2026-10-15T02:32:09.1396496Z Hosted Compute Agent
+2026-10-15T02:32:09.1397077Z Version: 20261012.601
+2026-10-15T02:32:09.1397805Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-15T02:32:09.1398602Z Build Date: 2026-10-12T17:48:21Z
+2026-10-15T02:32:09.1399737Z Worker ID: {00308d2f-60cc-45e3-9db4-b9ead0a78878}
+2026-10-15T02:32:09.1400538Z Region: westus
+2026-10-15T02:32:09.1401093Z Cloud: Azure
+2026-10-15T02:32:09.1401703Z ##[endgroup]
+2026-10-15T02:32:09.1403367Z ##[group]Operating System
+2026-10-15T02:32:09.1404107Z Ubuntu
+2026-10-15T02:32:09.1404657Z 24.04.5
+2026-10-15T02:32:09.1405171Z LTS
+2026-10-15T02:32:09.1405748Z ##[endgroup]
+2026-10-15T02:32:09.1406336Z ##[group]Runner Image
+2026-10-15T02:32:09.1406922Z Image: ubuntu-24.04
+2026-10-15T02:32:09.1407566Z Version: 20261012.334.1
+2026-10-15T02:32:09.1408890Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-15T02:32:09.1411023Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-15T02:32:09.1412016Z ##[endgroup]
+2026-10-15T02:32:09.1413277Z ##[group]GITHUB_TOKEN Permissions
+2026-10-15T02:32:09.1415471Z Contents: read
+2026-10-15T02:32:09.1416220Z Metadata: read
+2026-10-15T02:32:09.1416891Z ##[endgroup]
+2026-10-15T02:32:09.1419645Z Secret source: Actions
+2026-10-15T02:32:09.1420623Z Cache mode: write
+2026-10-15T02:32:09.1421428Z Prepare workflow directory
+2026-10-15T02:32:09.1920223Z Prepare all required actions
+2026-10-15T02:32:09.1974515Z Getting action download info
+2026-10-15T02:32:09.5533643Z Download action repository 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-15T02:32:09.6704338Z Download action repository 'actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-15T02:32:09.7625095Z Download action repository 'actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+2026-10-15T02:32:10.2511982Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-15T02:32:10.4803417Z Complete job name: native-compose (ubuntu-24.04)
+2026-10-15T02:32:10.5733365Z ##[group]Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+2026-10-15T02:32:10.5734528Z with:
+2026-10-15T02:32:10.5734994Z   persist-credentials: false
+2026-10-15T02:32:10.5735560Z   repository: knadalkim-a11y/team-agent-poc
+2026-10-15T02:32:10.5740301Z   token: ***
+2026-10-15T02:32:10.5740777Z   ssh-strict: true
+2026-10-15T02:32:10.5741230Z   ssh-user: git
+2026-10-15T02:32:10.5741680Z   clean: true
+2026-10-15T02:32:10.5742194Z   sparse-checkout-cone-mode: true
+2026-10-15T02:32:10.5742736Z   fetch-depth: 1
+2026-10-15T02:32:10.5743168Z   fetch-tags: false
+2026-10-15T02:32:10.5743625Z   show-progress: true
+2026-10-15T02:32:10.5744133Z   lfs: false
+2026-10-15T02:32:10.5744559Z   submodules: false
+2026-10-15T02:32:10.5745017Z   set-safe-directory: true
+2026-10-15T02:32:10.5745528Z   allow-unsafe-pr-checkout: false
+2026-10-15T02:32:10.5746385Z env:
+2026-10-15T02:32:10.5748175Z   EES_FIXED_TEST_DEPENDENCIES: uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
+2026-10-15T02:32:10.5750222Z   EES_TEST_CHROME: google-chrome
+2026-10-15T02:32:10.5750955Z   EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+2026-10-15T02:32:10.5751736Z   EES_TEST_BRANDING_DIR: dist/branding
+2026-10-15T02:32:10.5752292Z   EES_TEST_FRONTEND_DIR: dist/frontend
+2026-10-15T02:32:10.5752901Z   EES_TEST_SCREENSHOT_DIR: dist/ees-work-screenshots
+2026-10-15T02:32:10.5753529Z   EES_REQUIRE_AUTHORING_NATIVE: 1
+2026-10-15T02:32:10.5754458Z ##[endgroup]
+2026-10-15T02:32:10.6882143Z Syncing repository: knadalkim-a11y/team-agent-poc
+2026-10-15T02:32:10.6884862Z ##[group]Getting Git version info
+2026-10-15T02:32:10.6885823Z Working directory is '/home/runner/work/team-agent-poc/team-agent-poc'
+2026-10-15T02:32:10.6887158Z [command]/usr/bin/git version
+2026-10-15T02:32:10.7001317Z git version 2.55.0
+2026-10-15T02:32:10.7031027Z ##[endgroup]
+2026-10-15T02:32:10.7050577Z Temporarily overriding HOME='/home/runner/work/_temp/d30ff60a-fadc-4719-a7f2-e6d70643cee1' before making global git config changes
+2026-10-15T02:32:10.7053646Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-15T02:32:10.7057833Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/team-agent-poc/team-agent-poc
+2026-10-15T02:32:10.7128149Z Deleting the contents of '/home/runner/work/team-agent-poc/team-agent-poc'
+2026-10-15T02:32:10.7132303Z ##[group]Initializing the repository
+2026-10-15T02:32:10.7139231Z [command]/usr/bin/git init /home/runner/work/team-agent-poc/team-agent-poc
+2026-10-15T02:32:10.7272511Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-15T02:32:10.7275439Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-15T02:32:10.7278335Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-15T02:32:10.7281088Z hint: call:
+2026-10-15T02:32:10.7284084Z hint:
+2026-10-15T02:32:10.7285788Z hint: 	git config --global init.defaultBranch <name>
+2026-10-15T02:32:10.7287392Z hint:
+2026-10-15T02:32:10.7288782Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-15T02:32:10.7291164Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-15T02:32:10.7292972Z hint:
+2026-10-15T02:32:10.7294270Z hint: 	git branch -m <name>
+2026-10-15T02:32:10.7295837Z hint:
+2026-10-15T02:32:10.7297400Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-15T02:32:10.7300294Z Initialized empty Git repository in /home/runner/work/team-agent-poc/team-agent-poc/.git/
+2026-10-15T02:32:10.7304676Z [command]/usr/bin/git remote add origin https://github.com/knadalkim-a11y/team-agent-poc
+2026-10-15T02:32:10.7359938Z ##[endgroup]
+2026-10-15T02:32:10.7361916Z ##[group]Disabling automatic garbage collection
+2026-10-15T02:32:10.7364643Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-15T02:32:10.7408796Z ##[endgroup]
+2026-10-15T02:32:10.7410747Z ##[group]Setting up auth
+2026-10-15T02:32:10.7420082Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-15T02:32:10.7483408Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-15T02:32:10.7953284Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-15T02:32:10.8000679Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-15T02:32:10.8335708Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-15T02:32:10.8339665Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-15T02:32:10.8557592Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-15T02:32:10.8607105Z ##[endgroup]
+2026-10-15T02:32:10.8608075Z ##[group]Fetching the repository
+2026-10-15T02:32:10.8617820Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +38050e47d6f0bbfafd86201464f2af526f8ba39c:refs/remotes/pull/91/merge
+2026-10-15T02:32:14.5608373Z From https://github.com/knadalkim-a11y/team-agent-poc
+2026-10-15T02:32:14.5611330Z  * [new ref]         38050e47d6f0bbfafd86201464f2af526f8ba39c -> pull/91/merge
+2026-10-15T02:32:14.5614628Z ##[endgroup]
+2026-10-15T02:32:14.5616538Z ##[group]Determining the checkout info
+2026-10-15T02:32:14.5617772Z ##[endgroup]
+2026-10-15T02:32:14.5624196Z [command]/usr/bin/git sparse-checkout disable
+2026-10-15T02:32:14.5707028Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-15T02:32:14.5745663Z ##[group]Checking out the ref
+2026-10-15T02:32:14.5750171Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/91/merge
+2026-10-15T02:32:15.0028713Z Note: switching to 'refs/remotes/pull/91/merge'.
+2026-10-15T02:32:15.0030032Z 
+2026-10-15T02:32:15.0030508Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-15T02:32:15.0031578Z changes and commit them, and you can discard any commits you make in this
+2026-10-15T02:32:15.0032646Z state without impacting any branches by switching back to a branch.
+2026-10-15T02:32:15.0033358Z 
+2026-10-15T02:32:15.0033816Z If you want to create a new branch to retain commits you create, you may
+2026-10-15T02:32:15.0034799Z do so (now or later) by using -c with the switch command. Example:
+2026-10-15T02:32:15.0035356Z 
+2026-10-15T02:32:15.0035617Z   git switch -c <new-branch-name>
+2026-10-15T02:32:15.0035956Z 
+2026-10-15T02:32:15.0036176Z Or undo this operation with:
+2026-10-15T02:32:15.0036472Z 
+2026-10-15T02:32:15.0036642Z   git switch -
+2026-10-15T02:32:15.0036896Z 
+2026-10-15T02:32:15.0037280Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-15T02:32:15.0037839Z 
+2026-10-15T02:32:15.0038439Z HEAD is now at 38050e4 Merge 0efd8b072caf0b88a9dd58737cc51ba8b96a30c1 into d4f18069db6ca6ac2804d5ed3007a840b71a72a9
+2026-10-15T02:32:15.0067085Z ##[endgroup]
+2026-10-15T02:32:15.0123079Z [command]/usr/bin/git log -1 --format=%H
+2026-10-15T02:32:15.0154903Z 38050e47d6f0bbfafd86201464f2af526f8ba39c
+2026-10-15T02:32:15.0169264Z ##[group]Removing auth
+2026-10-15T02:32:15.0174375Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-15T02:32:15.0213818Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-15T02:32:15.0490910Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-15T02:32:15.0527262Z http.https://github.com/.extraheader
+2026-10-15T02:32:15.0538661Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-15T02:32:15.0585842Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-15T02:32:15.0877856Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-15T02:32:15.0924515Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-15T02:32:15.1208161Z ##[endgroup]
+2026-10-15T02:32:15.1513379Z ##[group]Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+2026-10-15T02:32:15.1513800Z with:
+2026-10-15T02:32:15.1514004Z   python-version: 3.11
+2026-10-15T02:32:15.1514235Z   check-latest: false
+2026-10-15T02:32:15.1516772Z   token: ***
+2026-10-15T02:32:15.1516985Z   update-environment: true
+2026-10-15T02:32:15.1517231Z   allow-prereleases: false
+2026-10-15T02:32:15.1517462Z   freethreaded: false
+2026-10-15T02:32:15.1517669Z env:
+2026-10-15T02:32:15.1518646Z   EES_FIXED_TEST_DEPENDENCIES: uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
+2026-10-15T02:32:15.1520438Z   EES_TEST_CHROME: google-chrome
+2026-10-15T02:32:15.1520813Z   EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+2026-10-15T02:32:15.1521288Z   EES_TEST_BRANDING_DIR: dist/branding
+2026-10-15T02:32:15.1521563Z   EES_TEST_FRONTEND_DIR: dist/frontend
+2026-10-15T02:32:15.1521862Z   EES_TEST_SCREENSHOT_DIR: dist/ees-work-screenshots
+2026-10-15T02:32:15.1522187Z   EES_REQUIRE_AUTHORING_NATIVE: 1
+2026-10-15T02:32:15.1522433Z ##[endgroup]
+2026-10-15T02:32:15.3028605Z ##[group]Installed versions
+2026-10-15T02:32:15.3131889Z (node:2400) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-15T02:32:15.3133011Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-15T02:32:15.3133839Z Successfully set up CPython (3.11.17)
+2026-10-15T02:32:15.3134926Z ##[endgroup]
+2026-10-15T02:32:15.3385189Z ##[group]Run python -m pip install uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
+2026-10-15T02:32:15.3388572Z [36;1mpython -m pip install uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0[0m
+2026-10-15T02:32:15.3761488Z shell: /usr/bin/bash -e {0}
+2026-10-15T02:32:15.3761934Z env:
+2026-10-15T02:32:15.3763612Z   EES_FIXED_TEST_DEPENDENCIES: uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
+2026-10-15T02:32:15.3765230Z   EES_TEST_CHROME: google-chrome
+2026-10-15T02:32:15.3765752Z   EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+2026-10-15T02:32:15.3766326Z   EES_TEST_BRANDING_DIR: dist/branding
+2026-10-15T02:32:15.3766709Z   EES_TEST_FRONTEND_DIR: dist/frontend
+2026-10-15T02:32:15.3767142Z   EES_TEST_SCREENSHOT_DIR: dist/ees-work-screenshots
+2026-10-15T02:32:15.3767595Z   EES_REQUIRE_AUTHORING_NATIVE: 1
+2026-10-15T02:32:15.3768037Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:32:15.3768639Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+2026-10-15T02:32:15.3769246Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:32:15.3769978Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:32:15.3770518Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:32:15.3771090Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+2026-10-15T02:32:15.3771564Z ##[endgroup]
+2026-10-15T02:32:16.6887171Z Collecting uv==0.12.7
+2026-10-15T02:32:16.7942348Z   Downloading uv-0.12.7-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (11 kB)
+2026-10-15T02:32:17.0028589Z Collecting cryptography==46.0.0
+2026-10-15T02:32:17.0261644Z   Downloading cryptography-46.0.0-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (5.7 kB)
+2026-10-15T02:32:17.0567735Z Collecting nltk==3.9.2
+2026-10-15T02:32:17.1088960Z   Downloading nltk-3.9.2-py3-none-any.whl.metadata (3.2 kB)
+2026-10-15T02:32:17.2326403Z Collecting pydantic==2.13.4
+2026-10-15T02:32:17.2542114Z   Downloading pydantic-2.13.4-py3-none-any.whl.metadata (109 kB)
+2026-10-15T02:32:17.3423834Z Collecting fastapi==0.136.3
+2026-10-15T02:32:17.3646112Z   Downloading fastapi-0.136.3-py3-none-any.whl.metadata (27 kB)
+2026-10-15T02:32:17.3963888Z Collecting httpx==0.28.1
+2026-10-15T02:32:17.4187954Z   Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+2026-10-15T02:32:17.7830389Z Collecting sqlalchemy==2.0.50
+2026-10-15T02:32:17.8278922Z   Downloading sqlalchemy-2.0.50-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (9.5 kB)
+2026-10-15T02:32:17.8587235Z Collecting aiosqlite==0.22.1
+2026-10-15T02:32:17.8804333Z   Downloading aiosqlite-0.22.1-py3-none-any.whl.metadata (4.3 kB)
+2026-10-15T02:32:17.9032880Z Collecting loguru==0.7.3
+2026-10-15T02:32:17.9245080Z   Downloading loguru-0.7.3-py3-none-any.whl.metadata (22 kB)
+2026-10-15T02:32:18.1888383Z Collecting orjson==3.11.9
+2026-10-15T02:32:18.2114189Z   Downloading orjson-3.11.9-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (41 kB)
+2026-10-15T02:32:18.7747932Z Collecting aiohttp==3.13.5
+2026-10-15T02:32:18.7976835Z   Downloading aiohttp-3.13.5-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.1 kB)
+2026-10-15T02:32:18.8469104Z Collecting bcrypt==5.0.0
+2026-10-15T02:32:18.8683165Z   Downloading bcrypt-5.0.0-cp39-abi3-manylinux_2_34_x86_64.whl.metadata (10 kB)
+2026-10-15T02:32:18.8952641Z Collecting PyJWT==2.15.0
+2026-10-15T02:32:18.9168992Z   Downloading pyjwt-2.15.0-py3-none-any.whl.metadata (3.5 kB)
+2026-10-15T02:32:18.9598580Z Collecting pytz==2026.4
+2026-10-15T02:32:18.9836987Z   Downloading pytz-2026.4-py2.py3-none-any.whl.metadata (22 kB)
+2026-10-15T02:32:19.0533786Z Collecting tzdata==2026.4
+2026-10-15T02:32:19.0746971Z   Downloading tzdata-2026.4-py2.py3-none-any.whl.metadata (1.4 kB)
+2026-10-15T02:32:19.1053949Z Collecting requests==2.34.2
+2026-10-15T02:32:19.1271117Z   Downloading requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+2026-10-15T02:32:19.1545479Z Collecting ldap3==2.9.1
+2026-10-15T02:32:19.1760718Z   Downloading ldap3-2.9.1-py2.py3-none-any.whl.metadata (5.4 kB)
+2026-10-15T02:32:19.2495670Z Collecting python-mimeparse==2.0.0
+2026-10-15T02:32:19.2726432Z   Downloading python_mimeparse-2.0.0-py3-none-any.whl.metadata (3.1 kB)
+2026-10-15T02:32:19.3895355Z Collecting cffi>=1.14 (from cryptography==46.0.0)
+2026-10-15T02:32:19.4114943Z   Downloading cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.5 kB)
+2026-10-15T02:32:19.4415506Z Collecting click (from nltk==3.9.2)
+2026-10-15T02:32:19.4631795Z   Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+2026-10-15T02:32:19.4923551Z Collecting joblib (from nltk==3.9.2)
+2026-10-15T02:32:19.5135073Z   Downloading joblib-1.6.0-py3-none-any.whl.metadata (6.5 kB)
+2026-10-15T02:32:19.9709957Z Collecting regex>=2021.8.3 (from nltk==3.9.2)
+2026-10-15T02:32:19.9925823Z   Downloading regex-2026.9.29-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (40 kB)
+2026-10-15T02:32:20.0374642Z Collecting tqdm (from nltk==3.9.2)
+2026-10-15T02:32:20.0587653Z   Downloading tqdm-4.70.1-py3-none-any.whl.metadata (57 kB)
+2026-10-15T02:32:20.0874511Z Collecting annotated-types>=0.6.0 (from pydantic==2.13.4)
+2026-10-15T02:32:20.1088761Z   Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+2026-10-15T02:32:20.8281178Z Collecting pydantic-core==2.46.4 (from pydantic==2.13.4)
+2026-10-15T02:32:20.8518021Z   Downloading pydantic_core-2.46.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+2026-10-15T02:32:20.8760633Z Collecting typing-extensions>=4.14.1 (from pydantic==2.13.4)
+2026-10-15T02:32:20.8974830Z   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+2026-10-15T02:32:20.9177077Z Collecting typing-inspection>=0.4.2 (from pydantic==2.13.4)
+2026-10-15T02:32:20.9393708Z   Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+2026-10-15T02:32:20.9737690Z Collecting starlette>=0.46.0 (from fastapi==0.136.3)
+2026-10-15T02:32:21.0572927Z   Downloading starlette-1.8.0-py3-none-any.whl.metadata (6.6 kB)
+2026-10-15T02:32:21.0802077Z Collecting annotated-doc>=0.0.2 (from fastapi==0.136.3)
+2026-10-15T02:32:21.1019815Z   Downloading annotated_doc-0.0.5-py3-none-any.whl.metadata (6.5 kB)
+2026-10-15T02:32:21.1308898Z Collecting anyio (from httpx==0.28.1)
+2026-10-15T02:32:21.1526846Z   Downloading anyio-4.15.1-py3-none-any.whl.metadata (4.7 kB)
+2026-10-15T02:32:21.1801310Z Collecting certifi (from httpx==0.28.1)
+2026-10-15T02:32:21.2016303Z   Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+2026-10-15T02:32:21.2257933Z Collecting httpcore==1.* (from httpx==0.28.1)
+2026-10-15T02:32:21.2474827Z   Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+2026-10-15T02:32:21.2727500Z Collecting idna (from httpx==0.28.1)
+2026-10-15T02:32:21.2943098Z   Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+2026-10-15T02:32:21.4453342Z Collecting greenlet>=1 (from sqlalchemy==2.0.50)
+2026-10-15T02:32:21.4663831Z   Downloading greenlet-3.5.6-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+2026-10-15T02:32:21.4938826Z Collecting aiohappyeyeballs>=2.5.0 (from aiohttp==3.13.5)
+2026-10-15T02:32:21.5163376Z   Downloading aiohappyeyeballs-2.7.1-py3-none-any.whl.metadata (5.9 kB)
+2026-10-15T02:32:21.5372497Z Collecting aiosignal>=1.4.0 (from aiohttp==3.13.5)
+2026-10-15T02:32:21.5583153Z   Downloading aiosignal-1.4.0-py3-none-any.whl.metadata (3.7 kB)
+2026-10-15T02:32:21.5830444Z Collecting attrs>=17.3.0 (from aiohttp==3.13.5)
+2026-10-15T02:32:21.6055256Z   Downloading attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+2026-10-15T02:32:21.6780883Z Collecting frozenlist>=1.1.1 (from aiohttp==3.13.5)
+2026-10-15T02:32:21.7011729Z   Downloading frozenlist-1.8.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (20 kB)
+2026-10-15T02:32:22.0389919Z Collecting multidict<7.0,>=4.5 (from aiohttp==3.13.5)
+2026-10-15T02:32:22.0603126Z   Downloading multidict-6.9.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (5.3 kB)
+2026-10-15T02:32:22.1403422Z Collecting propcache>=0.2.0 (from aiohttp==3.13.5)
+2026-10-15T02:32:22.1616745Z   Downloading propcache-0.5.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (25 kB)
+2026-10-15T02:32:22.4267497Z Collecting yarl<2.0,>=1.17.0 (from aiohttp==3.13.5)
+2026-10-15T02:32:22.4480164Z   Downloading yarl-1.25.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (111 kB)
+2026-10-15T02:32:22.6753429Z Collecting charset_normalizer<4,>=2 (from requests==2.34.2)
+2026-10-15T02:32:22.6971301Z   Downloading charset_normalizer-3.5.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (46 kB)
+2026-10-15T02:32:22.7312503Z Collecting urllib3<3,>=1.26 (from requests==2.34.2)
+2026-10-15T02:32:22.7522335Z   Downloading urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
+2026-10-15T02:32:22.7915547Z Collecting pyasn1>=0.4.6 (from ldap3==2.9.1)
+2026-10-15T02:32:22.8131168Z   Downloading pyasn1-0.6.4-py3-none-any.whl.metadata (8.4 kB)
+2026-10-15T02:32:22.8371550Z Collecting h11>=0.16 (from httpcore==1.*->httpx==0.28.1)
+2026-10-15T02:32:22.8586229Z   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+2026-10-15T02:32:22.8931587Z Collecting pycparser (from cffi>=1.14->cryptography==46.0.0)
+2026-10-15T02:32:22.9137906Z   Downloading pycparser-3.11-py3-none-any.whl.metadata (8.2 kB)
+2026-10-15T02:32:22.9481454Z Collecting cloudpickle>=3.0 (from joblib->nltk==3.9.2)
+2026-10-15T02:32:22.9694303Z   Downloading cloudpickle-3.1.2-py3-none-any.whl.metadata (7.1 kB)
+2026-10-15T02:32:22.9967146Z Downloading uv-0.12.7-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (20.1 MB)
+2026-10-15T02:32:23.2199262Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 20.1/20.1 MB 98.4 MB/s  0:00:00
+2026-10-15T02:32:23.2419298Z Downloading cryptography-46.0.0-cp311-abi3-manylinux_2_34_x86_64.whl (4.6 MB)
+2026-10-15T02:32:23.2606377Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.6/4.6 MB 297.6 MB/s  0:00:00
+2026-10-15T02:32:23.2827456Z Downloading nltk-3.9.2-py3-none-any.whl (1.5 MB)
+2026-10-15T02:32:23.2913567Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.5/1.5 MB 228.3 MB/s  0:00:00
+2026-10-15T02:32:23.3146719Z Downloading pydantic-2.13.4-py3-none-any.whl (472 kB)
+2026-10-15T02:32:23.3392113Z Downloading fastapi-0.136.3-py3-none-any.whl (117 kB)
+2026-10-15T02:32:23.3637016Z Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+2026-10-15T02:32:23.3893484Z Downloading sqlalchemy-2.0.50-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.3 MB)
+2026-10-15T02:32:23.4062227Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 232.0 MB/s  0:00:00
+2026-10-15T02:32:23.4286559Z Downloading aiosqlite-0.22.1-py3-none-any.whl (17 kB)
+2026-10-15T02:32:23.4526641Z Downloading loguru-0.7.3-py3-none-any.whl (61 kB)
+2026-10-15T02:32:23.4761549Z Downloading orjson-3.11.9-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (133 kB)
+2026-10-15T02:32:23.5007211Z Downloading aiohttp-3.13.5-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.8 MB)
+2026-10-15T02:32:23.5099209Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 248.2 MB/s  0:00:00
+2026-10-15T02:32:23.5311790Z Downloading bcrypt-5.0.0-cp39-abi3-manylinux_2_34_x86_64.whl (278 kB)
+2026-10-15T02:32:23.5676764Z Downloading pyjwt-2.15.0-py3-none-any.whl (33 kB)
+2026-10-15T02:32:23.5917059Z Downloading pytz-2026.4-py2.py3-none-any.whl (506 kB)
+2026-10-15T02:32:23.6170861Z Downloading tzdata-2026.4-py2.py3-none-any.whl (347 kB)
+2026-10-15T02:32:23.6478314Z Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+2026-10-15T02:32:23.6716206Z Downloading ldap3-2.9.1-py2.py3-none-any.whl (432 kB)
+2026-10-15T02:32:23.6965976Z Downloading python_mimeparse-2.0.0-py3-none-any.whl (5.6 kB)
+2026-10-15T02:32:23.7216540Z Downloading pydantic_core-2.46.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+2026-10-15T02:32:23.7321151Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 256.6 MB/s  0:00:00
+2026-10-15T02:32:23.7538905Z Downloading charset_normalizer-3.5.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (269 kB)
+2026-10-15T02:32:23.7797248Z Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+2026-10-15T02:32:23.8037206Z Downloading idna-3.20-py3-none-any.whl (69 kB)
+2026-10-15T02:32:23.8280487Z Downloading multidict-6.9.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (320 kB)
+2026-10-15T02:32:23.8523988Z Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
+2026-10-15T02:32:23.8769288Z Downloading yarl-1.25.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (117 kB)
+2026-10-15T02:32:23.9010883Z Downloading aiohappyeyeballs-2.7.1-py3-none-any.whl (15 kB)
+2026-10-15T02:32:23.9244165Z Downloading aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+2026-10-15T02:32:23.9476203Z Downloading annotated_doc-0.0.5-py3-none-any.whl (5.3 kB)
+2026-10-15T02:32:23.9708168Z Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+2026-10-15T02:32:23.9946180Z Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+2026-10-15T02:32:24.0196743Z Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+2026-10-15T02:32:24.0437122Z Downloading cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (217 kB)
+2026-10-15T02:32:24.0675215Z Downloading frozenlist-1.8.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (231 kB)
+2026-10-15T02:32:24.0914653Z Downloading greenlet-3.5.6-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (624 kB)
+2026-10-15T02:32:24.0979933Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 624.4/624.4 kB 98.0 MB/s  0:00:00
+2026-10-15T02:32:24.1294175Z Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+2026-10-15T02:32:24.1528270Z Downloading propcache-0.5.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (235 kB)
+2026-10-15T02:32:24.1770848Z Downloading pyasn1-0.6.4-py3-none-any.whl (84 kB)
+2026-10-15T02:32:24.2017155Z Downloading regex-2026.9.29-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (804 kB)
+2026-10-15T02:32:24.2080819Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 805.0/805.0 kB 143.3 MB/s  0:00:00
+2026-10-15T02:32:24.2293805Z Downloading starlette-1.8.0-py3-none-any.whl (79 kB)
+2026-10-15T02:32:24.2537509Z Downloading anyio-4.15.1-py3-none-any.whl (132 kB)
+2026-10-15T02:32:24.2773801Z Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+2026-10-15T02:32:24.3006762Z Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+2026-10-15T02:32:24.3247887Z Downloading click-8.5.0-py3-none-any.whl (125 kB)
+2026-10-15T02:32:24.3489775Z Downloading joblib-1.6.0-py3-none-any.whl (306 kB)
+2026-10-15T02:32:24.3733203Z Downloading cloudpickle-3.1.2-py3-none-any.whl (22 kB)
+2026-10-15T02:32:24.3965809Z Downloading pycparser-3.11-py3-none-any.whl (51 kB)
+2026-10-15T02:32:24.4200861Z Downloading tqdm-4.70.1-py3-none-any.whl (80 kB)
+2026-10-15T02:32:24.7094583Z Installing collected packages: pytz, uv, urllib3, tzdata, typing-extensions, tqdm, regex, python-mimeparse, PyJWT, pycparser, pyasn1, propcache, orjson, multidict, loguru, idna, h11, greenlet, frozenlist, cloudpickle, click, charset_normalizer, certifi, bcrypt, attrs, annotated-types, annotated-doc, aiosqlite, aiohappyeyeballs, yarl, typing-inspection, sqlalchemy, requests, pydantic-core, ldap3, joblib, httpcore, cffi, anyio, aiosignal, starlette, pydantic, nltk, httpx, cryptography, aiohttp, fastapi
+2026-10-15T02:32:29.6704346Z 
+2026-10-15T02:32:29.6732914Z Successfully installed PyJWT-2.15.0 aiohappyeyeballs-2.7.1 aiohttp-3.13.5 aiosignal-1.4.0 aiosqlite-0.22.1 annotated-doc-0.0.5 annotated-types-0.8.0 anyio-4.15.1 attrs-26.1.0 bcrypt-5.0.0 certifi-2026.7.22 cffi-2.1.1 charset_normalizer-3.5.2 click-8.5.0 cloudpickle-3.1.2 cryptography-46.0.0 fastapi-0.136.3 frozenlist-1.8.0 greenlet-3.5.6 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.20 joblib-1.6.0 ldap3-2.9.1 loguru-0.7.3 multidict-6.9.1 nltk-3.9.2 orjson-3.11.9 propcache-0.5.4 pyasn1-0.6.4 pycparser-3.11 pydantic-2.13.4 pydantic-core-2.46.4 python-mimeparse-2.0.0 pytz-2026.4 regex-2026.9.29 requests-2.34.2 sqlalchemy-2.0.50 starlette-1.8.0 tqdm-4.70.1 typing-extensions-4.16.0 typing-inspection-0.4.4 tzdata-2026.4 urllib3-2.8.0 uv-0.12.7 yarl-1.25.1
+2026-10-15T02:32:30.0865716Z ##[group]Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+2026-10-15T02:32:30.0866190Z with:
+2026-10-15T02:32:30.0866507Z   name: ees-pinned-fixtures-38050e47d6f0bbfafd86201464f2af526f8ba39c
+2026-10-15T02:32:30.0866875Z   path: dist
+2026-10-15T02:32:30.0867080Z   merge-multiple: false
+2026-10-15T02:32:30.0867337Z   repository: knadalkim-a11y/team-agent-poc
+2026-10-15T02:32:30.0867617Z   run-id: 38670830395
+2026-10-15T02:32:30.0867815Z env:
+2026-10-15T02:32:30.0868781Z   EES_FIXED_TEST_DEPENDENCIES: uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
+2026-10-15T02:32:30.0870051Z   EES_TEST_CHROME: google-chrome
+2026-10-15T02:32:30.0870423Z   EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+2026-10-15T02:32:30.0870879Z   EES_TEST_BRANDING_DIR: dist/branding
+2026-10-15T02:32:30.0871162Z   EES_TEST_FRONTEND_DIR: dist/frontend
+2026-10-15T02:32:30.0871465Z   EES_TEST_SCREENSHOT_DIR: dist/ees-work-screenshots
+2026-10-15T02:32:30.0871779Z   EES_REQUIRE_AUTHORING_NATIVE: 1
+2026-10-15T02:32:30.0872095Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:32:30.0872518Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+2026-10-15T02:32:30.0872939Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:32:30.0873325Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:32:30.0873699Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:32:30.0874073Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+2026-10-15T02:32:30.0874394Z ##[endgroup]
+2026-10-15T02:32:30.2566726Z Downloading single artifact
+2026-10-15T02:32:30.2736727Z (node:2444) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-15T02:32:30.2738493Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-15T02:32:30.5630101Z Preparing to download the following artifacts:
+2026-10-15T02:32:30.5631515Z - ees-pinned-fixtures-38050e47d6f0bbfafd86201464f2af526f8ba39c (ID: 11943722252, Size: 1392654568, Expected Digest: sha256:706ac7bbf5853aecf661dc0cd35197fac397c6e51e2088e135beb04b16501554)
+2026-10-15T02:32:30.8324064Z Redirecting to blob download url: https://productionresultssa10.blob.core.windows.net/actions-results/02a93d95-88f5-8bad-b7ed-9a6b9609506b/workflow-job-run-e2b10182-3213-5ed6-82b0-2ed12907724f/artifacts/6384b109b7508bdf12d7b9706cc1af4288d2307cb1fa3aeff1056eda7e603519.zip
+2026-10-15T02:32:30.8326426Z Starting download of artifact to: /home/runner/work/team-agent-poc/team-agent-poc/dist
+2026-10-15T02:32:31.1717576Z (node:2444) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-10-15T02:33:29.7192510Z SHA256 digest of downloaded artifact is 706ac7bbf5853aecf661dc0cd35197fac397c6e51e2088e135beb04b16501554
+2026-10-15T02:33:29.7193434Z Artifact download completed successfully.
+2026-10-15T02:33:29.7193957Z Total of 1 artifact(s) downloaded
+2026-10-15T02:33:29.7202508Z Download artifact has finished successfully
+2026-10-15T02:33:29.7554929Z ##[group]Run python -X warn_default_encoding -W error::EncodingWarning tests/ees_delivery_suite.py --suite native-compose --output dist/ees-results
+2026-10-15T02:33:29.7556043Z [36;1mpython -X warn_default_encoding -W error::EncodingWarning tests/ees_delivery_suite.py --suite native-compose --output dist/ees-results[0m
+2026-10-15T02:33:29.7621355Z shell: /usr/bin/bash -e {0}
+2026-10-15T02:33:29.7621616Z env:
+2026-10-15T02:33:29.7622596Z   EES_FIXED_TEST_DEPENDENCIES: uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
+2026-10-15T02:33:29.7623663Z   EES_TEST_CHROME: google-chrome
+2026-10-15T02:33:29.7624038Z   EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+2026-10-15T02:33:29.7624429Z   EES_TEST_BRANDING_DIR: dist/branding
+2026-10-15T02:33:29.7624741Z   EES_TEST_FRONTEND_DIR: dist/frontend
+2026-10-15T02:33:29.7625040Z   EES_TEST_SCREENSHOT_DIR: dist/ees-work-screenshots
+2026-10-15T02:33:29.7625351Z   EES_REQUIRE_AUTHORING_NATIVE: 1
+2026-10-15T02:33:29.7625669Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:33:29.7626098Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+2026-10-15T02:33:29.7626514Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:33:29.7626895Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:33:29.7627300Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:33:29.7627684Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+2026-10-15T02:33:29.7628021Z ##[endgroup]
+2026-10-15T02:33:31.9172371Z test_busy_and_double_click_send_one_question_and_disable_other_requests (test_ees_helper_chat_native.HelperChatNativeTests.test_busy_and_double_click_send_one_question_and_disable_other_requests) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 972.0990280000024, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:33:34.7550099Z ok
+2026-10-15T02:33:35.2075771Z test_english_question_sends_exact_visible_text_without_translation_keys (test_ees_helper_chat_native.HelperChatNativeTests.test_english_question_sends_exact_visible_text_without_translation_keys) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 355.9123040000145, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:33:38.3196420Z ok
+2026-10-15T02:33:38.7582227Z test_help_footer_sends_in_chat_with_term_reference_and_keeps_draft (test_ees_helper_chat_native.HelperChatNativeTests.test_help_footer_sends_in_chat_with_term_reference_and_keeps_draft) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 350.3065920000097, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:33:41.2719748Z ok
+2026-10-15T02:33:41.7618364Z test_helper_question_preserves_live_image_and_composer (test_ees_helper_chat_native.HelperChatNativeTests.test_helper_question_preserves_live_image_and_composer) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 369.38739199999304, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:33:44.9953441Z ok
+2026-10-15T02:33:45.4068234Z test_helper_question_preserves_upload_in_flight_until_completion (test_ees_helper_chat_native.HelperChatNativeTests.test_helper_question_preserves_upload_in_flight_until_completion) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 329.6131849999995, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:33:48.0440929Z ok
+2026-10-15T02:33:48.5153489Z test_inline_guide_sends_question_preserves_text_file_and_fixed_reference_after_reload (test_ees_helper_chat_native.HelperChatNativeTests.test_inline_guide_sends_question_preserves_text_file_and_fixed_reference_after_reload) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 349.6894670000188, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:33:52.1438075Z ok
+2026-10-15T02:33:52.5863715Z test_late_denied_preflight_after_screen_change_does_not_add_stale_notice (test_ees_helper_chat_native.HelperChatNativeTests.test_late_denied_preflight_after_screen_change_does_not_add_stale_notice) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 365.9876449999899, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:33:54.9364907Z ok
+2026-10-15T02:33:55.4302097Z test_manual_send_on_help_screen_keeps_native_file_assets_and_features (test_ees_helper_chat_native.HelperChatNativeTests.test_manual_send_on_help_screen_keeps_native_file_assets_and_features) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 365.28772200000503, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:33:58.0874667Z ok
+2026-10-15T02:33:58.5089917Z test_revocation_after_preflight_removes_optimistic_messages_without_losing_draft (test_ees_helper_chat_native.HelperChatNativeTests.test_revocation_after_preflight_removes_optimistic_messages_without_losing_draft) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 344.9043199999835, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:34:00.9041301Z ok
+2026-10-15T02:34:01.3820541Z test_unavailable_and_revoked_helper_do_not_add_messages_or_send (test_ees_helper_chat_native.HelperChatNativeTests.test_unavailable_and_revoked_helper_do_not_add_messages_or_send) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 359.75076500000114, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:34:04.0704885Z ok
+2026-10-15T02:34:04.0705141Z 
+2026-10-15T02:34:04.0705395Z ----------------------------------------------------------------------
+2026-10-15T02:34:04.0708201Z Ran 10 tests in 33.436s
+2026-10-15T02:34:04.0708489Z 
+2026-10-15T02:34:04.0708602Z OK
+2026-10-15T02:34:04.7441983Z test_background_refresh_and_native_return_keep_draft_nodes_expansion_and_scroll (test_ees_source_shell_native.SourceShellNativeTests.test_background_refresh_and_native_return_keep_draft_nodes_expansion_and_scroll) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 361.9591529999866, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:34:17.8705106Z ok
+2026-10-15T02:34:18.3522512Z test_delayed_navigation_never_replaces_loaded_menu_or_panel_with_loading (test_ees_source_shell_native.SourceShellNativeTests.test_delayed_navigation_never_replaces_loaded_menu_or_panel_with_loading) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 396.33145900000954, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:35:00.7143726Z FAIL
+2026-10-15T02:35:01.9742743Z test_every_navigation_has_source_chrome_without_native_overlay_frames (test_ees_source_shell_native.SourceShellNativeTests.test_every_navigation_has_source_chrome_without_native_overlay_frames) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 324.5969800000239, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:35:06.8113361Z ok
+2026-10-15T02:35:06.8116423Z test_first_scope_lists_wait_for_response_before_empty_or_zero (test_ees_source_shell_native.SourceShellNativeTests.test_first_scope_lists_wait_for_response_before_empty_or_zero)
+2026-10-15T02:35:07.2787553Z The received/not-received boundary comes from observed HTTP bodies. ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 350.42447500001117, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:35:23.0795994Z ok
+2026-10-15T02:35:23.5216965Z test_native_return_first_frame_selects_destination_without_previous_panel (test_ees_source_shell_native.SourceShellNativeTests.test_native_return_first_frame_selects_destination_without_previous_panel) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 358.78549299997076, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:36:20.3902452Z FAIL
+2026-10-15T02:36:21.7060367Z test_r11_navigation_toolbar_and_keyboard_panel_focus_preserve_work (test_ees_source_shell_native.SourceShellNativeTests.test_r11_navigation_toolbar_and_keyboard_panel_focus_preserve_work) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 356.682147000015, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:36:24.3677352Z ok
+2026-10-15T02:36:24.7939860Z test_r11_panel_toggle_keeps_procedure_start_and_native_toolbar_actions (test_ees_source_shell_native.SourceShellNativeTests.test_r11_panel_toggle_keeps_procedure_start_and_native_toolbar_actions) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 343.42691000000514, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:36:27.4115682Z ok
+2026-10-15T02:36:27.8915940Z test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading (test_ees_source_shell_native.SourceShellNativeTests.test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 354.86430800000335, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:36:50.5135054Z ok
+2026-10-15T02:36:51.0061223Z test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus (test_ees_source_shell_native.SourceShellNativeTests.test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 410.20282100004124, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:36:55.3880270Z ok
+2026-10-15T02:36:55.3880564Z 
+2026-10-15T02:36:55.3880809Z ======================================================================
+2026-10-15T02:36:55.3882345Z FAIL: test_delayed_navigation_never_replaces_loaded_menu_or_panel_with_loading (test_ees_source_shell_native.SourceShellNativeTests.test_delayed_navigation_never_replaces_loaded_menu_or_panel_with_loading)
+2026-10-15T02:36:55.3883971Z ----------------------------------------------------------------------
+2026-10-15T02:36:55.3884677Z Traceback (most recent call last):
+2026-10-15T02:36:55.3892645Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_source_shell_native.py", line 690, in test_delayed_navigation_never_replaces_loaded_menu_or_panel_with_loading
+2026-10-15T02:36:55.3893837Z     frame_monitor.assert_clean(self, evidence, labels=labels)
+2026-10-15T02:36:55.3894695Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_source_frame_monitor.py", line 235, in assert_clean
+2026-10-15T02:36:55.3895438Z     case.assertEqual(loading[:10], [],
+2026-10-15T02:36:55.3896001Z AssertionError: Lists differ: [{'at': 9688.399999999994, 'label': 'skill[2289 chars]one}] != []
+2026-10-15T02:36:55.3896465Z 
+2026-10-15T02:36:55.3896609Z First list contains 3 additional elements.
+2026-10-15T02:36:55.3896967Z First extra element 0:
+2026-10-15T02:36:55.3900664Z {'at': 9688.399999999994, 'label': 'skills-to-my-work', 'path': '/c/existing-chat', 'source': True, 'menu': True, 'bodyHidden': False, 'missingSource': False, 'legacy': [], 'menuCurrent': [{'key': 'native_open:skills', 'ariaCurrent': 'page', 'text': '스킬·지침스킬'}], 'rightPanels': ['my_work'], 'menuMode': ['author'], 'targetLoading': ['업무 정보를 불러오는 중입니다.'], 'nativeReturnLabel': None, 'nativeReturnUnexpectedSelection': False, 'nativeReturnPreviousPanel': [], 'nativeReturnDestinationLoading': False, 'loadingGuard': True, 'menuLoading': [], 'panelLoading': ['업무 정보를 불러오는 중입니다.'], 'scopeLabel': None, 'scopePending': False, 'scopeEmptyBeforeResponse': [], 'scopeLocalLoading': [], 'scopeControls': True, 'content': True, 'adminDialog': False, 'sourceText': True, 'startupGate': None}
+2026-10-15T02:36:55.3903497Z 
+2026-10-15T02:36:55.3903886Z Diff is 2800 characters long. Set self.maxDiff to None to see it. : Observed EES loading placeholders after initial data: 3 frames
+2026-10-15T02:36:55.3904356Z 
+2026-10-15T02:36:55.3904470Z ======================================================================
+2026-10-15T02:36:55.3905370Z FAIL: test_native_return_first_frame_selects_destination_without_previous_panel (test_ees_source_shell_native.SourceShellNativeTests.test_native_return_first_frame_selects_destination_without_previous_panel)
+2026-10-15T02:36:55.3906266Z ----------------------------------------------------------------------
+2026-10-15T02:36:55.3906602Z Traceback (most recent call last):
+2026-10-15T02:36:55.3907588Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_source_shell_native.py", line 776, in test_native_return_first_frame_selects_destination_without_previous_panel
+2026-10-15T02:36:55.3908421Z     frame_monitor.assert_clean(self, evidence, labels=labels)
+2026-10-15T02:36:55.3909038Z   File "/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_source_frame_monitor.py", line 235, in assert_clean
+2026-10-15T02:36:55.3909967Z     case.assertEqual(loading[:10], [],
+2026-10-15T02:36:55.3910394Z AssertionError: Lists differ: [{'at': 4422.099999999977, 'label': 'retur[7287 chars]one}] != []
+2026-10-15T02:36:55.3910742Z 
+2026-10-15T02:36:55.3910852Z First list contains 9 additional elements.
+2026-10-15T02:36:55.3911128Z First extra element 0:
+2026-10-15T02:36:55.3914267Z {'at': 4422.099999999977, 'label': 'return-tools-to-procedures', 'path': '/c/existing-chat', 'source': True, 'menu': True, 'bodyHidden': False, 'missingSource': False, 'legacy': [], 'menuCurrent': [{'key': 'native_open:skills', 'ariaCurrent': 'page', 'text': '스킬·지침스킬'}], 'rightPanels': [], 'menuMode': ['author'], 'targetLoading': ['업무 정보를 불러오는 중입니다.'], 'nativeReturnLabel': 'return-tools-to-procedures', 'nativeReturnUnexpectedSelection': False, 'nativeReturnPreviousPanel': [], 'nativeReturnDestinationLoading': False, 'loadingGuard': True, 'menuLoading': [], 'panelLoading': ['업무 정보를 불러오는 중입니다.'], 'scopeLabel': None, 'scopePending': False, 'scopeEmptyBeforeResponse': [], 'scopeLocalLoading': [], 'scopeControls': True, 'content': True, 'adminDialog': False, 'sourceText': True, 'startupGate': None}
+2026-10-15T02:36:55.3916750Z 
+2026-10-15T02:36:55.3917124Z Diff is 8716 characters long. Set self.maxDiff to None to see it. : Observed EES loading placeholders after initial data: 9 frames
+2026-10-15T02:36:55.3917578Z 
+2026-10-15T02:36:55.3917723Z ----------------------------------------------------------------------
+2026-10-15T02:36:55.3918059Z Ran 9 tests in 171.105s
+2026-10-15T02:36:55.3918195Z 
+2026-10-15T02:36:55.3918276Z FAILED (failures=2)
+2026-10-15T02:36:56.1082466Z test_closed_run_remains_readonly_and_uses_its_saved_completion (test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_closed_run_remains_readonly_and_uses_its_saved_completion) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 361.55210900000156, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:36:58.3619177Z ok
+2026-10-15T02:36:58.7869241Z test_eight_declared_native_input_types_survive_visible_save_and_reload (test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_eight_declared_native_input_types_survive_visible_save_and_reload) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 333.1396410000025, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:02.1305686Z ok
+2026-10-15T02:37:02.5620569Z test_long_form_scrolling_keeps_heading_and_unsaved_values (test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_long_form_scrolling_keeps_heading_and_unsaved_values) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 346.1611449999964, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:05.0362674Z ok
+2026-10-15T02:37:05.4722351Z test_retry_keeps_original_attempt_input_and_immutable_published_version (test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_retry_keeps_original_attempt_input_and_immutable_published_version) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 357.35028800002056, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:07.7699757Z ok
+2026-10-15T02:37:08.1868851Z test_run_and_workflow_setting_forms_preserve_zero_false_and_empty (test_ees_work_c_phase1_native.CPhaseOneNativeTests.test_run_and_workflow_setting_forms_preserve_zero_false_and_empty) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 339.2912639999963, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:10.4620727Z ok
+2026-10-15T02:37:10.4621366Z 
+2026-10-15T02:37:10.4622056Z ----------------------------------------------------------------------
+2026-10-15T02:37:10.4622718Z Ran 5 tests in 14.815s
+2026-10-15T02:37:10.4622956Z 
+2026-10-15T02:37:10.4623094Z OK
+2026-10-15T02:37:11.0786252Z test_human_confirmation_never_calls_external_tool (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_human_confirmation_never_calls_external_tool) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 333.93959900001846, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:13.4191259Z ok
+2026-10-15T02:37:13.8667179Z test_partial_failed_unknown_stay_distinct_and_never_auto_retry (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_partial_failed_unknown_stay_distinct_and_never_auto_retry) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 349.989149999999, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:16.9296300Z ok
+2026-10-15T02:37:17.3696864Z test_real_tool_call_snapshots_inputs_but_does_not_confirm_business_completion (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_real_tool_call_snapshots_inputs_but_does_not_confirm_business_completion) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 355.01912399996627, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:19.7356024Z ok
+2026-10-15T02:37:20.1861331Z test_required_input_blocks_before_any_transport_or_attempt (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_required_input_blocks_before_any_transport_or_attempt) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 371.32534500000247, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:22.4120795Z ok
+2026-10-15T02:37:22.8457687Z test_revoked_tool_access_blocks_a_new_attempt_before_transport (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_revoked_tool_access_blocks_a_new_attempt_before_transport) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 355.95410999997057, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:25.1284617Z ok
+2026-10-15T02:37:25.5966196Z test_running_transport_is_visible_and_cannot_double_execute (test_ees_work_c_phase2_native.CPhaseTwoNativeTests.test_running_transport_is_visible_and_cannot_double_execute) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 357.9096000000277, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:28.3685901Z ok
+2026-10-15T02:37:28.3686215Z 
+2026-10-15T02:37:28.3686547Z ----------------------------------------------------------------------
+2026-10-15T02:37:28.3687142Z Ran 6 tests in 17.724s
+2026-10-15T02:37:28.3687358Z 
+2026-10-15T02:37:28.3687693Z OK
+2026-10-15T02:37:28.9946788Z test_easy_request_choices_missing_output_and_legacy_time_values_roundtrip (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_easy_request_choices_missing_output_and_legacy_time_values_roundtrip) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 338.24211699999296, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:31.7813033Z ok
+2026-10-15T02:37:32.2396354Z test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_easy_tools_unconnected_example_and_live_read_confirmation_roundtrip) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 361.79278900004874, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:35.1662238Z ok
+2026-10-15T02:37:35.6031518Z test_help_keyboard_escape_and_questions_fill_native_composer_without_sending (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_help_keyboard_escape_and_questions_fill_native_composer_without_sending) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 355.5712620000122, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:38.7610642Z ok
+2026-10-15T02:37:39.2272012Z test_missing_random_uuid_creates_and_saves_draft_in_native_ui (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_missing_random_uuid_creates_and_saves_draft_in_native_ui) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 354.1477850000092, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:42.6775181Z ok
+2026-10-15T02:37:43.1221344Z test_native_admin_dialog_contains_keyboard_focus (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_admin_dialog_contains_keyboard_focus) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 362.95078199998443, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:47.2464376Z ok
+2026-10-15T02:37:47.7350948Z test_native_folder_uses_one_chat_and_preserves_draft_through_asset_navigation (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_folder_uses_one_chat_and_preserves_draft_through_asset_navigation) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 362.53241700001126, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:51.5927752Z ok
+2026-10-15T02:37:52.0226381Z test_native_initial_changelog_keeps_focus_while_chat_startup_is_hidden (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_initial_changelog_keeps_focus_while_chat_startup_is_hidden) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 352.8169960000014, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:55.0921050Z ok
+2026-10-15T02:37:55.5993646Z test_native_menu_admin_redirect_opens_original_settings_and_returns_without_saving (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_admin_redirect_opens_original_settings_and_returns_without_saving) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 377.7690399999756, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:37:58.7430475Z ok
+2026-10-15T02:37:59.1642346Z test_native_menu_image_attachment_blocks_departure_without_losing_image_or_prompt (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_image_attachment_blocks_departure_without_losing_image_or_prompt) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 342.71533700001555, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:38:01.9183073Z ok
+2026-10-15T02:38:02.3930181Z test_native_menu_missing_mount_and_direct_entry_keep_original_skills_search (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_missing_mount_and_direct_entry_keep_original_skills_search) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 352.3317980000229, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:38:06.7938424Z ok
+2026-10-15T02:38:07.2497774Z test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_skills_returns_to_unsaved_procedure_tool_and_start_with_nonimage_draft) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 374.445833999971, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:38:12.8218848Z ok
+2026-10-15T02:38:13.2554757Z test_native_menu_upload_in_flight_finishes_in_persistent_composer (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_upload_in_flight_finishes_in_persistent_composer) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 352.66945500001157, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:38:15.7335126Z ok
+2026-10-15T02:38:16.1746821Z test_native_menu_uses_server_capabilities_for_admin_author_member_and_tools_only (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_menu_uses_server_capabilities_for_admin_author_member_and_tools_only) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 357.0531459999984, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:38:18.7907832Z ok
+2026-10-15T02:38:19.2865966Z test_native_personal_key_uses_original_valves_controls_and_theme (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_personal_key_uses_original_valves_controls_and_theme) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 374.561290000031, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:38:22.6049654Z ok
+2026-10-15T02:38:23.0452132Z test_native_personal_settings_keep_original_tabs_and_close_controls (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_personal_settings_keep_original_tabs_and_close_controls) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 363.13696799999207, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:38:25.9555833Z ok
+2026-10-15T02:38:26.3946567Z test_native_shell_browser_back_preserves_draft_and_mobile_navigation (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_native_shell_browser_back_preserves_draft_and_mobile_navigation) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 360.9923920000142, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:38:28.8996599Z ok
+2026-10-15T02:38:29.3621559Z test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_procedure_example_preview_reentry_and_native_question_create_an_unpublished_draft) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 376.8356320000521, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:38:32.9660476Z ok
+2026-10-15T02:38:33.4467008Z test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 357.58665800000244, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:38:36.6998376Z ok
+2026-10-15T02:38:37.1588230Z test_schedule_mouse_field_transition_keeps_focus_and_saves_both_values (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_schedule_mouse_field_transition_keeps_focus_and_saves_both_values) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 382.5730780000072, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:38:39.6770173Z ok
+2026-10-15T02:38:40.1318521Z test_schedule_preview_save_publish_and_explicit_delegation_preserve_existing_cycle (test_ees_work_figma_authoring_native.FigmaAuthoringNativeTests.test_schedule_preview_save_publish_and_explicit_delegation_preserve_existing_cycle) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 341.38121600000204, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:38:43.2817910Z ok
+2026-10-15T02:38:43.2818269Z 
+2026-10-15T02:38:43.2818521Z ----------------------------------------------------------------------
+2026-10-15T02:38:43.2819060Z Ran 20 tests in 74.726s
+2026-10-15T02:38:43.2819576Z 
+2026-10-15T02:38:43.2819743Z OK
+2026-10-15T02:38:43.9243044Z test_c18_panel_cards_input_hover_and_keyboard_focus (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_c18_panel_cards_input_hover_and_keyboard_focus) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 356.2687699999856, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:38:46.0502202Z ok
+2026-10-15T02:38:46.4948944Z test_q1_geometry_reading_width_footer_and_baseline_overlay (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_geometry_reading_width_footer_and_baseline_overlay) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 345.3379800000107, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:38:49.2603081Z ok
+2026-10-15T02:38:49.7183314Z test_q1_physical_drag_restores_per_actor_width_and_contrast (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_q1_physical_drag_restores_per_actor_width_and_contrast) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 373.3785279999893, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:38:54.8797098Z ok
+2026-10-15T02:38:55.3253672Z test_source_startup_missing_launcher_fails_open_with_native_chat_accessible (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_source_startup_missing_launcher_fails_open_with_native_chat_accessible) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 366.6675550000491, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:38:58.0124338Z ok
+2026-10-15T02:38:58.4924230Z test_source_startup_root_and_existing_chat_reveal_only_after_ees_layout (test_ees_work_figma_layout_native.FigmaLayoutNativeTests.test_source_startup_root_and_existing_chat_reveal_only_after_ees_layout) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 399.48169299998426, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:39:01.8637045Z ok
+2026-10-15T02:39:01.8637319Z 
+2026-10-15T02:39:01.8637649Z ----------------------------------------------------------------------
+2026-10-15T02:39:01.8638555Z Ran 5 tests in 18.399s
+2026-10-15T02:39:01.8638746Z 
+2026-10-15T02:39:01.8638849Z OK
+2026-10-15T02:39:02.5442474Z test_ai_review_autosaves_without_sending_and_confirmation_freezes_text (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_ai_review_autosaves_without_sending_and_confirmation_freezes_text) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 344.67309700005444, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:39:05.6985796Z ok
+2026-10-15T02:39:06.1399291Z test_assigned_human_task_exposes_readonly_inputs_and_no_mutation_button (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_assigned_human_task_exposes_readonly_inputs_and_no_mutation_button) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 349.2078939999601, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:39:08.3904859Z ok
+2026-10-15T02:39:08.8215603Z test_checklist_criterion_and_tool_evidence_are_distinct_in_native_panel (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_checklist_criterion_and_tool_evidence_are_distinct_in_native_panel) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 347.98725600001035, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:39:11.1134013Z ok
+2026-10-15T02:39:11.5626804Z test_closed_record_uses_old_shared_values_and_asking_only_changes_reference (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_closed_record_uses_old_shared_values_and_asking_only_changes_reference) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 344.0930990000197, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:39:13.8409781Z ok
+2026-10-15T02:39:14.2875858Z test_delivery_purpose_review_is_recorded_but_completion_remains_blocked (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_delivery_purpose_review_is_recorded_but_completion_remains_blocked) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 363.6237880000408, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:39:17.5044750Z ok
+2026-10-15T02:39:18.0037371Z test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 371.13358999999946, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:39:20.5416110Z ok
+2026-10-15T02:39:20.9582424Z test_list_preview_add_exclude_confirm_and_history_preserve_original (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_list_preview_add_exclude_confirm_and_history_preserve_original) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 337.8049809999766, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:39:24.5066180Z ok
+2026-10-15T02:39:24.9551508Z test_pending_item_choices_survive_reload_before_atomic_confirmation (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_pending_item_choices_survive_reload_before_atomic_confirmation) ... Chrome startup: {"budget_seconds": 30, "ready_elapsed_ms": 340.5244780000203, "product": "Chrome/155.0.8059.39"}
+2026-10-15T02:39:28.6705809Z ok
+2026-10-15T02:39:28.6706113Z 
+2026-10-15T02:39:28.6706811Z ----------------------------------------------------------------------
+2026-10-15T02:39:28.6707494Z Ran 8 tests in 26.574s
+2026-10-15T02:39:28.6707756Z 
+2026-10-15T02:39:28.6707870Z OK
+2026-10-15T02:39:28.7814503Z ##[error]Process completed with exit code 1.
+2026-10-15T02:39:28.7890910Z ##[group]Run python tests/ees_delivery_suite.py --browser-evidence dist/ees-work-screenshots --output dist/ees-results
+2026-10-15T02:39:28.7891872Z [36;1mpython tests/ees_delivery_suite.py --browser-evidence dist/ees-work-screenshots --output dist/ees-results[0m
+2026-10-15T02:39:28.7958245Z shell: /usr/bin/bash -e {0}
+2026-10-15T02:39:28.7958933Z env:
+2026-10-15T02:39:28.7960496Z   EES_FIXED_TEST_DEPENDENCIES: uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
+2026-10-15T02:39:28.7961774Z   EES_TEST_CHROME: google-chrome
+2026-10-15T02:39:28.7962376Z   EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+2026-10-15T02:39:28.7962871Z   EES_TEST_BRANDING_DIR: dist/branding
+2026-10-15T02:39:28.7963439Z   EES_TEST_FRONTEND_DIR: dist/frontend
+2026-10-15T02:39:28.7963836Z   EES_TEST_SCREENSHOT_DIR: dist/ees-work-screenshots
+2026-10-15T02:39:28.7964360Z   EES_REQUIRE_AUTHORING_NATIVE: 1
+2026-10-15T02:39:28.7964827Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:39:28.7965429Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+2026-10-15T02:39:28.7965980Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:39:28.7966573Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:39:28.7967110Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:39:28.7967625Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+2026-10-15T02:39:28.7968112Z ##[endgroup]
+2026-10-15T02:39:28.8934833Z Actual browser evidence: 106 PNG files; valid: True
+2026-10-15T02:39:28.9121756Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-10-15T02:39:28.9122190Z with:
+2026-10-15T02:39:28.9122443Z   name: ees-work-browser-evidence-native-compose
+2026-10-15T02:39:28.9122811Z   path: dist/ees-results
+dist/ees-work-screenshots
+
+2026-10-15T02:39:28.9123129Z   if-no-files-found: error
+2026-10-15T02:39:28.9123364Z   retention-days: 7
+2026-10-15T02:39:28.9123577Z   compression-level: 6
+2026-10-15T02:39:28.9123819Z   overwrite: false
+2026-10-15T02:39:28.9124035Z   include-hidden-files: false
+2026-10-15T02:39:28.9124269Z env:
+2026-10-15T02:39:28.9125234Z   EES_FIXED_TEST_DEPENDENCIES: uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
+2026-10-15T02:39:28.9126310Z   EES_TEST_CHROME: google-chrome
+2026-10-15T02:39:28.9126727Z   EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+2026-10-15T02:39:28.9127137Z   EES_TEST_BRANDING_DIR: dist/branding
+2026-10-15T02:39:28.9127418Z   EES_TEST_FRONTEND_DIR: dist/frontend
+2026-10-15T02:39:28.9127730Z   EES_TEST_SCREENSHOT_DIR: dist/ees-work-screenshots
+2026-10-15T02:39:28.9128043Z   EES_REQUIRE_AUTHORING_NATIVE: 1
+2026-10-15T02:39:28.9128359Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:39:28.9129052Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+2026-10-15T02:39:28.9129784Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:39:28.9130172Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:39:28.9130555Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-15T02:39:28.9130939Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+2026-10-15T02:39:28.9131269Z ##[endgroup]
+2026-10-15T02:39:29.1119942Z (node:35031) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-15T02:39:29.1121680Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-15T02:39:29.1555326Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-10-15T02:39:29.1558442Z The least common ancestor is /home/runner/work/team-agent-poc/team-agent-poc/dist. This will be the root directory of the artifact
+2026-10-15T02:39:29.1560019Z With the provided path, there will be 206 files uploaded
+2026-10-15T02:39:29.1566444Z Artifact name is valid!
+2026-10-15T02:39:29.1566884Z Root directory input is valid!
+2026-10-15T02:39:29.5376555Z Beginning upload of artifact content to blob storage
+2026-10-15T02:39:29.9971792Z (node:35031) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-15T02:39:30.9350684Z Uploaded bytes 8388608
+2026-10-15T02:39:31.0593417Z Uploaded bytes 10543853
+2026-10-15T02:39:31.1377030Z Finished uploading artifact content to blob storage!
+2026-10-15T02:39:31.1378350Z SHA256 digest of uploaded artifact zip is eb4bd409e1fd6c83560f8813d081faa21b622d7cad5761b928ddf0c6069640cb
+2026-10-15T02:39:31.1380022Z Finalizing artifact upload
+2026-10-15T02:39:31.4138600Z Artifact ees-work-browser-evidence-native-compose.zip successfully finalized. Artifact ID 11944537771
+2026-10-15T02:39:31.4141109Z Artifact ees-work-browser-evidence-native-compose has been successfully uploaded! Final size is 10543853 bytes. Artifact ID is 11944537771
+2026-10-15T02:39:31.4145331Z Artifact download URL: https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38670830395/artifacts/11944537771
+2026-10-15T02:39:31.4410174Z Post job cleanup.
+2026-10-15T02:39:31.5334492Z [command]/usr/bin/git version
+2026-10-15T02:39:31.5385398Z git version 2.55.0
+2026-10-15T02:39:31.5430847Z Temporarily overriding HOME='/home/runner/work/_temp/65ffe527-5635-4fc9-b3b7-284e31f48f01' before making global git config changes
+2026-10-15T02:39:31.5438468Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-15T02:39:31.5442642Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/team-agent-poc/team-agent-poc
+2026-10-15T02:39:31.5489785Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-15T02:39:31.5541247Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-15T02:39:31.5831922Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-15T02:39:31.5877638Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-15T02:39:31.6174755Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-15T02:39:31.6223322Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-15T02:39:31.6716689Z Cleaning up orphan processes
+2026-10-15T02:39:31.7070697Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11d5960a326750d5838078e36cf38b85af677262, actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093, actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+

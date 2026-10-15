@@ -495,7 +495,7 @@ function createWorkView({callbacks}){
     for(const root of [host]){const target=[...(root?.querySelectorAll('button,input,select,textarea,a,summary,[data-ees-panel-resize]') || [])].find(item=>saved.attributes.every(([name,value])=>item.getAttribute(name)===value));if(!target||target.disabled)continue;target.focus({preventScroll:true});if(typeof saved.start==='number'&&typeof target.setSelectionRange==='function'){try{target.setSelectionRange(saved.start,saved.end,saved.direction);}catch(_){}}return;}
   }
   function refreshResults(){const focus=focusSnapshot();capture();panel();restoreFocus(focus);}
-  function render(value){const focus=focusSnapshot();capture();snapshot=value;publish();if(!ensure())return false;if(!snapshot.native_shell||snapshot.native_return_pending)panel();restoreFocus(focus);return true;}
+  function render(value){const focus=focusSnapshot();capture();snapshot=value;publish();if(!ensure())return false;if(!snapshot.native_shell)panel();restoreFocus(focus);return true;}
   function sync(value){snapshot=value;publish();if(!ensure())return false;if(!snapshot.native_shell&&!host.firstChild)panel();return true;}
   function readInputs(){capture();const settings=selection().tab==='settings';return {...drafts.read(inputKey(),settings?state().settings?.values || {}:state().run?.inputs || {},settings?state().settings?.revision || 0:state().run?.revision || 0),key:inputKey(),settings};}
   function applyInputValues(values){capture();const source=state().run?.inputs || {},revision=state().run?.revision || 0,existing=drafts.read(inputKey(),source,revision);drafts.edit(inputKey(),{...existing.inputs,...values},revision,source);panel();}
