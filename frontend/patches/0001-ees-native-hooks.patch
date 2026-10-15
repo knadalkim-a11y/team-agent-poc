@@ -1479,7 +1479,7 @@ index 0000000..be842d3
 +			{#if cap.is_admin === true}<section class="ew-nav-group">
 +					<h3 class="ew-nav-group-title">{t('EES.Nav.AdminOnly', 'Administrators only')}</h3>
 +					<nav class="ew-nav-links">
-+						{#each [targets[4], null, targets[5]] as target}
++						{#each [null, ...targets.filter(([id]) => id === 'admin')] as target}
 +							{#if target === null}<button
 +									class="ew-nav-button"
 +									data-action="workspace_admin"

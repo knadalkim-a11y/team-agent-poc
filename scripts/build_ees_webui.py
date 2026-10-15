@@ -88,7 +88,7 @@ RETIRED_WORK_SOURCES = {"scripts/ees_work_demo.py", "scripts/workflow_seed.json"
                         "ui/index.html", "ui/ees-work.css", "ui/ees-work.js"}
 WORK_ASSETS = {source: target for source, target in WORK_ASSETS.items() if source not in RETIRED_WORK_SOURCES}
 WORK_ASSETS.update({"scripts/" + name: "open_webui/" + name for name in (
-    "ees_workflow_workspace.py", "ees_workflow_operations.py", "ees_workflow_shared_tools.py",
+    "ees_workflow_workspace.py", "ees_workflow_operations.py",
 )})
 # Common read/proposal Native Tool source is available for explicit admin setup;
 # it is never a demo seed or an automatically registered user asset.
@@ -121,6 +121,11 @@ UI_FILES.update({name: name for name in MENU_ICON_FILES})
 WORK_FILES += tuple(TARGET_APP + name for name in MENU_ICON_FILES)
 # Freeze the complete C18 ees.13 inventory before any ees.14 additions.
 WORK_FILES_V13_COMPLETE = WORK_FILES
+# Existing ees.14 programs predate shared tools. Their recorded inventory must
+# stay restorable; new incoming wheels must include the new runtime module.
+WORK_FILES_V14_PRE_SHARED = WORK_FILES
+WORK_ASSETS["scripts/ees_workflow_shared_tools.py"] = "open_webui/ees_workflow_shared_tools.py"
+WORK_FILES += (WORK_ASSETS["scripts/ees_workflow_shared_tools.py"],)
 # Copy these already bundled upstream fonts byte-for-byte into the new cache
 # namespace; no font download, transformation, or runtime dependency is needed.
 FONT_SOURCES = {
