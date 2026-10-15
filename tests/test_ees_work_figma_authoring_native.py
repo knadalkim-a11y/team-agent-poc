@@ -38,7 +38,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         items = asyncio.run(self.server.workflow.shared_tools.discover(self.server.user))
         with self.server.workflow._db(write=True) as db:
             for item in items:
-                item.update(state='available' if item['function']=='search_pages' else 'disabled', version=1, revision=1, group_ids=['shared-readers'], responsible_user_id=self.server.user['id'])
+                if item['target']!='Confluence': continue
+                item.update(state='available', version=1, revision=1, group_ids=['shared-readers'] if item['function']=='search_pages' else ['other-readers'], responsible_user_id=self.server.user['id'])
                 db.execute('INSERT INTO work_shared_tools VALUES(?,?,?)',(item['id'],1,json.dumps(item,ensure_ascii=False)))
                 db.execute('INSERT INTO work_shared_tool_versions VALUES(?,?,?)',(item['id'],1,json.dumps({'version':1,'at':1792051200,'input_schema':schema,'output_schema':item['output_schema'],'reference':item['reference']},ensure_ascii=False)))
         wid = self.author(name='공용 도구 선택 시험', jobs=1)
@@ -52,6 +53,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action="shared_open"][data-id="managed-search_pages"]')
         for label in ('하는 일','입력과 결과','쓰는 곳','지금 버전','버전 기록','프로그램 갱신으로만 바뀝니다'):
             self.assertIn(label,self.text('#ees-work-designer'))
+        self.screenshot('shared-b10-2-detail-top')
         self.assertTrue(self.read('[data-author-action=shared_native]','checkVisibility()'))
         self.browser.evaluate("document.querySelector('[data-author-action=shared_native]').focus()")
         self.key('Tab',9)

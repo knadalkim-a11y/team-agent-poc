@@ -117,6 +117,10 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
     async def test_groups_disable_enable_and_unknown_source_never_dispatch_or_write_native(self):
         item = await self.review()
         self.assertEqual(await self.tools.list(self.f.users['outsider'], usable_only=True), [])
+        await self.f.native_users.Users.update_user_by_id('outsider', {'role':'admin'})
+        admin_outside=await self.f.native_users.Users.get_user_by_id('outsider')
+        self.assertFalse((await self.item(actor=admin_outside))['can_use'])
+        self.assertEqual(await self.tools.list(admin_outside, usable_only=True, summary=True), [])
         await self.assert_code('shared_tool_forbidden', self.tools.resolve(self.f.users['outsider'], self.key))
         wid = await self.workflow()
         run = await self.start(wid, self.reader)
@@ -130,9 +134,11 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         await self.f.tools.Tools.update_tool_by_id(tool.id, {'content': tool.content+'\n# locally modified unknown source\n'})
         unknown = await self.item()
         self.assertEqual(unknown['state'], 'unavailable')
+        before = self.service.database.read_bytes()
         with patch.object(self.f.tools.Tools, 'update_tool_by_id', side_effect=AssertionError('No product Native writes')):
             await self.assert_code('shared_tool_unavailable', self.review())
             await self.assert_code('shared_tool_unavailable', self.tools.resolve(self.reader, self.key))
+        self.assertEqual(self.service.database.read_bytes(), before)
         self.assertEqual((await self.f.tools.Tools.get_tool_by_id(tool.id)).content, tool.content+'\n# locally modified unknown source\n')
 
     async def test_configuration_drift_rereview_without_republication_and_human_run_upgrade(self):
@@ -151,6 +157,15 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual((await self.execute(old_run, 2))['attempt']['snapshot']['shared_tool']['version'], 2)
         with self.service._db() as db:
             self.assertEqual(db.execute('SELECT count(*) FROM work_versions WHERE workflow_id=?', (wid,)).fetchone()[0],1)
+
+    async def test_all_managed_functions_have_separate_entries_without_auto_install(self):
+        items=await self.tools.list(self.admin)
+        self.assertEqual({item['function'] for item in items},set(self.f.native.FUNCTIONS))
+        self.assertEqual(len({item['id'] for item in items}),10)
+        self.assertEqual({item['target'] for item in items},{'Confluence','Jira','GitHub'})
+        self.assertEqual(sum(item['state']=='unavailable' for item in items),8)
+        installed=await self.f.bridge.managed_tools()
+        self.assertEqual([item['id'] for item in installed],['installed-with-unpredictable-id'])
 
     async def test_review_requires_explicit_groups_and_evidence_and_replay_is_readonly(self):
         item=await self.item()

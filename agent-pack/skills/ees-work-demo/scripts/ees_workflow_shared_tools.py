@@ -14,6 +14,14 @@ from .ees_workflow_native import MANAGED_READ_SOURCE_HASHES, init_native, _get, 
 NAMES = {
     'search_pages': ('Confluence', '페이지 찾기', '찾을 말과 공간으로 페이지 목록을 찾습니다.'),
     'get_page': ('Confluence', '페이지 읽기', '페이지 번호로 본문과 출처를 읽습니다.'),
+    'jira_dashboard': ('Jira', '대시보드 보기', '프로젝트의 이슈 현황을 조회합니다.'),
+    'jira_get_issue': ('Jira', '이슈 읽기', '이슈 번호로 내용을 읽습니다.'),
+    'jira_project_metadata': ('Jira', '프로젝트 정보 보기', '프로젝트의 상태와 기본 정보를 읽습니다.'),
+    'jira_search_crs': ('Jira', 'CR 찾기', '조건에 맞는 CR 목록을 찾습니다.'),
+    'jira_issue_attachments': ('Jira', '이슈 첨부 조회', '이슈의 첨부 목록을 읽습니다.'),
+    'jira_cr_attachments': ('Jira', 'CR 첨부 조회', 'CR별 첨부 현황을 확인합니다.'),
+    'github_list_pull_requests': ('GitHub', 'PR 목록 보기', '저장소의 PR 목록을 찾습니다.'),
+    'github_get_pull_request': ('GitHub', 'PR 읽기', 'PR 번호로 내용을 읽습니다.'),
 }
 OUTPUTS = {name: {'kind': 'evidence', 'fields': ['data', 'evidence'], 'completeness': 'partial_possible'} for name in NAMES}
 OUTPUTS['search_pages'] = {'kind': 'list', 'fields': ['id', 'title', 'url'], 'completeness': 'page'}
@@ -115,7 +123,8 @@ class SharedTools:
                 item['state'] = 'unavailable'
             elif item.get('reference') != observed.get('reference'):
                 item['state'] = 'review_required'
-            if usable_only and item['state'] != 'available':
+            item['can_use'] = bool(set(item.get('group_ids', [])).intersection(groups))
+            if usable_only and (item['state'] != 'available' or not item['can_use']):
                 continue
             if summary:
                 safe = {key: deepcopy(item[key]) for key in ('id', 'name', 'target', 'description', 'output_schema', 'state')}
@@ -218,7 +227,7 @@ class SharedTools:
 
     def pin(self, db, actor, groups, kind, run_id, definition):
         keys = {node['shared_tool_id'] for node in definition.get('nodes', {}).values() if node.get('shared_tool_id')}
-        keys.update(call['shared_tool_id'] for node in definition.get('nodes', {}).values() for call in node.get('execution', {}).get('calls', []) if call.get('shared_tool_id'))
+        keys.update(call['shared_tool_id'] for node in definition.get('nodes', {}).values() for call in (node.get('execution') or {}).get('calls', []) if call.get('shared_tool_id'))
         for key in keys:
             item = self.get(db, key)
             self.authorize(item, actor, groups)

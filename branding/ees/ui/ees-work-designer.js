@@ -273,7 +273,7 @@ function createWorkDesigner({callbacks}) {
     if(!state.operations?.shared_tools)return select('tool_contract_id','사용하는 도구',selected,options);
     const current=sharedTools().find(item=>item.id===node.shared_tool_id)||allTools().find(item=>item.id===selected);
     const match=item=>(item.name+' '+(item.description||'')).toLowerCase().includes(sharedPickerSearch.toLowerCase());
-    const available=sharedTools().filter(item=>item.state==='available'&&match(item));
+    const available=sharedTools().filter(item=>item.state==='available'&&item.can_use!==false&&match(item));
     return `<label class="ew-shared-picker-label">쓰는 도구</label><details class="ew-shared-picker"><summary>${esc(current?.name || (node.shared_tool_id?'현재 연결 · 확인 필요':'도구 고르기'))}</summary><div class="ew-shared-picker-options"><input id="ew-shared-picker-search" aria-label="도구 이름이나 하는 일로 찾기" placeholder="도구 이름이나 하는 일로 찾기" value="${esc(sharedPickerSearch)}">${b('도구 없음','pick_job_tool','data-id=""')}${[...new Set(available.map(item=>item.target))].map(target=>`<h4>${esc(target)}</h4>${available.filter(item=>item.target===target).map(item=>b(`<strong>${esc(item.name)}</strong><small>${esc(item.description)}</small><span>v${item.version}</span>`,'pick_job_tool',`data-id="${esc(item.id)}" data-shared="true"`)).join('')}`).join('')}${allTools().some(item=>item.state==='approved'&&match(item))?`<h4>이전 방식 도구</h4>${allTools().filter(item=>item.state==='approved'&&match(item)).map(item=>b(esc(item.name),'pick_job_tool',`data-id="${esc(item.id)}"`)).join('')}`:''}${!available.length?'<p>쓸 수 있는 공용 도구가 없습니다.</p>':''}</div></details>`;
   }
   function sharedToolsHTML(){
@@ -289,6 +289,7 @@ function createWorkDesigner({callbacks}) {
       if(!canAuthor())return;const node=nodes(editor).find(item=>item.id===selectedNode);if(!node)return;
       const item=(target.dataset.shared?sharedTools():allTools()).find(item=>item.id===target.dataset.id);
       if(target.dataset.id&&!item)return;
+      if(target.dataset.shared&&(item.state!=='available'||item.can_use===false))return;
       delete node.shared_tool_id;delete node.tool_reference;delete node.tool_contract_id;delete node.tool_contract_revision;
       if(item){node.mode='tool';if(target.dataset.shared){node.shared_tool_id=item.id;node.result_block=item.function==='search_pages'?'list_confirm':'human_confirm';node.argument_bindings=Object.fromEntries(Object.keys(item.input_schema.properties||{}).map(key=>[key,{input:key}]));const types={string:'text',integer:'number',array:'multi'};for(const [key,value] of Object.entries(item.input_schema.properties||{})){if(!(node.inputs||[]).some(field=>field.id===key))(node.inputs ||= []).push({id:key,name:({query:'찾을 말',space_key:'공간',limit:'개수',page_id:'페이지 번호'})[key]||key,type:types[value.type]||'text',required:(item.input_schema.required||[]).includes(key),scope:'run',...(value.type==='array'?{options:[]}:{}),...(value.default!==undefined?{default:value.default}:{})});}}else{node.tool_contract_id=item.id;node.tool_contract_revision=item.revision;node.tool_reference=clone(item.reference);}}
       dirty=true;sharedPickerSearch='';stash();paint();host?.querySelector?.('.ew-shared-picker summary')?.focus();return;
