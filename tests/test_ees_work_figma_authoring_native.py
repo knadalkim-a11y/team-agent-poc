@@ -25,6 +25,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
     def test_b10_shared_tools_list_detail_picker_style_and_keyboard(self):
         # The product uses its real HTTP/SQLite paths; only installed Native
         # metadata and session are synthetic here (real Native is a separate gate).
+        self.native_menu_fixture()
         native = importlib.import_module(self.backend.__package__ + '.ees_workflow_native')
         source = (Path(__file__).resolve().parents[1] / 'agent-pack/skills/confluence-read/scripts/confluence_tool.py').read_text(encoding='utf-8')
         schema = {'type':'object','properties':{'query':{'type':'string'}},'required':['query']}
@@ -828,7 +829,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         def menu_ids():
             return self.browser.evaluate("[...document.querySelectorAll('#ees-work-entry [data-action=native_open]')].map(e=>e.dataset.nativeId)")
 
-        self.assertEqual(menu_ids(), ['skills', 'models', 'knowledge', 'prompts', 'tools', 'admin'])
+        self.assertEqual(menu_ids(), ['skills', 'models', 'knowledge', 'prompts', 'admin'])
+        self.assertNotIn('기능 연결', self.text('#ees-work-entry'))
         self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-nav-group-title')].map(e=>e.textContent)"),
                          ['업무 만들기', 'AI 설정', '관리자만'])
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-action=native_skills],[data-action=native_workspace]')"))
