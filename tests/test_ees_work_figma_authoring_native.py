@@ -27,6 +27,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         # metadata and session are synthetic here (real Native is a separate gate).
         self.server.native_plugins_enabled = True
         self.native_menu_fixture()
+        self.navigate('/c/existing-chat')  # Reload Native config after enabling the fixture flag.
         native = importlib.import_module(self.backend.__package__ + '.ees_workflow_native')
         source = (Path(__file__).resolve().parents[1] / 'agent-pack/skills/confluence-read/scripts/confluence_tool.py').read_text(encoding='utf-8')
         schema = {'type':'object','properties':{'query':{'type':'string'}},'required':['query']}
