@@ -292,6 +292,7 @@ function createWorkDesigner({callbacks}) {
       if(target.dataset.shared&&(item.state!=='available'||item.can_use===false))return;
       delete node.shared_tool_id;delete node.tool_reference;delete node.tool_contract_id;delete node.tool_contract_revision;
       if(item){node.mode='tool';if(target.dataset.shared){node.shared_tool_id=item.id;node.result_block=item.function==='search_pages'?'list_confirm':'human_confirm';node.argument_bindings=Object.fromEntries(Object.keys(item.input_schema.properties||{}).map(key=>[key,{input:key}]));const types={string:'text',integer:'number',array:'multi'};for(const [key,value] of Object.entries(item.input_schema.properties||{})){if(!(node.inputs||[]).some(field=>field.id===key))(node.inputs ||= []).push({id:key,name:({query:'찾을 말',space_key:'공간',limit:'개수',page_id:'페이지 번호'})[key]||key,type:types[value.type]||'text',required:(item.input_schema.required||[]).includes(key),scope:'run',...(value.type==='array'?{options:[]}:{}),...(value.default!==undefined?{default:value.default}:{})});}}else{node.tool_contract_id=item.id;node.tool_contract_revision=item.revision;node.tool_reference=clone(item.reference);}}
+      const picker=host?.querySelector?.('.ew-shared-picker');if(picker)picker.open=false;
       dirty=true;sharedPickerSearch='';stash();paint();host?.querySelector?.('.ew-shared-picker summary')?.focus();return;
     }
     if(!capability().is_admin)return;const item=sharedTools().find(item=>item.id===sharedToolId);if(!item)return;
