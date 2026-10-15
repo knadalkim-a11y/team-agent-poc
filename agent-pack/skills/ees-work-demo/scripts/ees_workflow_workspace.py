@@ -287,7 +287,10 @@ def definition_check(definition, complete=True):
                 errors.append(f'{field_id}: 현재 권한으로 조회하는 선택지 연결이 아직 구성되지 않았습니다.')
             if field['type'] in ('single', 'multi') and not isinstance(field.get('options', []), list):
                 errors.append(f'{field_id}: 선택지 목록을 확인해 주세요.')
-        if node.get('mode') == 'tool' and complete:
+        if node.get('shared_tool_id'):
+            if not _id(node['shared_tool_id']) or node.get('tool_reference') or node.get('tool_contract_id') or node.get('tool_contract_revision') or node.get('mode') != 'tool':
+                errors.append(f'{key}: 공용 도구 ID와 이전 방식 도구를 함께 저장할 수 없습니다.')
+        if node.get('mode') == 'tool' and complete and not node.get('shared_tool_id'):
             ref = node.get('tool_reference')
             if not isinstance(ref, dict) or any(not isinstance(ref.get(f), str) or not ref[f] for f in ('tool_id', 'function')):
                 errors.append(f'{key}: 검증된 Native 도구 참조가 필요합니다.')
@@ -589,11 +592,15 @@ class WorkspaceMixin:
         deadline_id = (job.get('deadline') or {}).get('input')
         deadline_source = {'input': deadline_id, 'value': deepcopy(values.get(deadline_id)), 'source': sources.get(deadline_id)} if deadline_id else None
         values = {field['id']: values[field['id']] for field in job.get('inputs', []) if field['id'] in values and (field.get('scope') != 'factory' or sources[field['id']]['scope'] == 'factory')}
+        pin = None
+        if job.get('shared_tool_id'):
+            row = db.execute('SELECT data FROM work_shared_tool_pins WHERE run_kind=? AND run_id=? AND tool_id=?', ('work', run['id'], job['shared_tool_id'])).fetchone()
+            pin = json.loads(row[0]) if row else None
         return {'job': deepcopy(job), 'definition': deepcopy(definition), 'version': run['version'],
                 'definition_hash': saved['definition_hash'], 'factory': saved.get('factory'),
                 'condition_results': saved.get('condition_results', {}), 'inputs': values,
                 'settings_sources': {key: sources[key] for key in values},
-                'tool_reference': deepcopy(job.get('tool_reference')), 'model_id': job.get('model_id'), 'deadline': deadline, 'deadline_source': deadline_source}
+                **({'shared_tool': pin} if pin else {}), 'tool_reference': deepcopy(pin['reference'] if pin else job.get('tool_reference')), 'model_id': job.get('model_id'), 'deadline': deadline, 'deadline_source': deadline_source}
 
     @staticmethod
     def _work_dependent_ids(definition, job_id):
@@ -764,6 +771,8 @@ class WorkspaceMixin:
         snapshot = json.loads(attempt['snapshot']) if isinstance(attempt['snapshot'], str) else attempt['snapshot']
         if attempt['actor_id'] != _value(actor, 'id'):
             _fail('evidence_access_required', '본인 권한으로 근거를 다시 조회해 주세요.')
+        if snapshot.get('shared_tool'):
+            await self.shared_tools.resolve(actor, snapshot['shared_tool']['id'], kind='work', run_id=attempt['run_id'])
         refs = self._work_evidence_references(snapshot)
         if snapshot['job'].get('mode') == 'ai' and self._work_prerequisite_jobs(snapshot['definition'], snapshot['job']['id']) and not snapshot.get('evidence_attempt_ids'):
             _fail('evidence_access_required', '근거의 권한을 다시 조회해 주세요.')
@@ -850,6 +859,8 @@ class WorkspaceMixin:
         for job in jobs.values():
             current_decisions = [item for item in job['decisions'] if item['attempt_id'] == job['current_attempt']]
             job['decision_summary'] = {'confirmed': len(current_decisions), 'all_approved': job['status'] == 'completed' and bool(current_decisions) and all(item['verdict'] == 'completed' for item in current_decisions)}
+        value['shared_tools'] = [{key: pin[key] for key in ('id', 'version')} for pin in
+            (json.loads(item[0]) for item in db.execute("SELECT data FROM work_shared_tool_pins WHERE run_kind='work' AND run_id=?", (row['id'],)))]
         value['jobs'], value['attempts'] = jobs, attempts
         value['progress'] = {'completed': sum(item['status'] == 'completed' for item in jobs.values()),
                              'total': sum(item['status'] != 'excluded' for item in jobs.values()),
@@ -1299,6 +1310,12 @@ class WorkspaceMixin:
                 for node in definition.get('nodes', {}).values():
                     if node.get('mode') != 'tool':
                         continue
+                    if node.get('shared_tool_id'):
+                        try:
+                            await self.shared_tools.resolve(actor, node['shared_tool_id'])
+                        except WorkflowError as error:
+                            publication_errors.append(node.get('id', '') + ': ' + error.message)
+                        continue
                     ref = deepcopy(node.get('tool_reference') or {})
                     ref.pop('contract_id', None)
                     if not bridge or not hasattr(bridge, 'check'):
@@ -1482,6 +1499,7 @@ class WorkspaceMixin:
                 conditions[key] = False if False in values else None if None in values else True
             snapshot = {'definition': definition, 'definition_hash': published['hash'], 'factory': dict(factory) | {'attributes': attributes} if factory else None, 'condition_results': conditions}
             key = str(uuid4()); mode = definition.get('mode', 'on_demand')
+            self.shared_tools.pin(db, actor, groups, 'work', key, definition)
             if body.get('mode', mode) != mode: _fail('invalid_mode', '게시된 실행 방식을 사용해 주세요.')
             db.execute('INSERT INTO work_runs VALUES(?,?,?,?,?,?,?,?,\'open\',1,?,?,?,?,NULL)', (key, row['id'], version, row['system_id'], factory_id, actor_id, _dump(sharing), mode, _dump(inputs), _dump(snapshot), now, now))
             for job_id, node in definition['nodes'].items():

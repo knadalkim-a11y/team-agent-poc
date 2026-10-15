@@ -20,7 +20,8 @@ function nativeNavigationHarness(capabilities=nativeCapabilities({is_admin:true,
 test('workspace menu uses server permissions for three groups and hides unavailable Native destinations',()=>{
  const admin=nativeCapabilities({is_admin:true,can_author:true,native_access:{models:true,knowledge:true,prompts:true,skills:true,tools:true,admin:true}});
  const rendered=html('workWorkspaceMenuHTML({capabilities}, {tab:"tools"})',{capabilities:admin});
- assert.equal((rendered.match(/class="ew-nav-group"/g)||[]).length,3);for(const label of ['업무 만들기','AI 설정','관리자만','스킬·지침','AI 도우미','참고 문서','빠른 문장','기능 연결','공장·접근 범위','관리자 설정'])assert.ok(rendered.includes(label),label);
+ assert.equal((rendered.match(/class="ew-nav-group"/g)||[]).length,3);for(const label of ['업무 만들기','AI 설정','관리자만','스킬·지침','AI 도우미','참고 문서','빠른 문장','공장·접근 범위','관리자 설정'])assert.ok(rendered.includes(label),label);
+ assert.doesNotMatch(rendered,/기능 연결|data-native-id="tools"/);
  assert.match(rendered,/<small class="ew-nav-native-name">모델<\/small>/);assert.doesNotMatch(rendered,/native_workspace|native_skills|Native 모델|Open WebUI에서 열기|native_return/);
  const nativeSelected=html('workWorkspaceMenuHTML({capabilities,workflows:[{id:"kept",name:"Previous draft",updated_at:"2026-10-11"}]}, {workflow_id:"kept",tab:"overview",native_id:"skills"})',{capabilities:admin});
  assert.equal((nativeSelected.match(/aria-current="page"/g)||[]).length,1);assert.match(nativeSelected,/data-native-id="skills"[^>]*aria-current="page"/);

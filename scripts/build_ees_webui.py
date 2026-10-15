@@ -88,7 +88,7 @@ RETIRED_WORK_SOURCES = {"scripts/ees_work_demo.py", "scripts/workflow_seed.json"
                         "ui/index.html", "ui/ees-work.css", "ui/ees-work.js"}
 WORK_ASSETS = {source: target for source, target in WORK_ASSETS.items() if source not in RETIRED_WORK_SOURCES}
 WORK_ASSETS.update({"scripts/" + name: "open_webui/" + name for name in (
-    "ees_workflow_workspace.py", "ees_workflow_operations.py",
+    "ees_workflow_workspace.py", "ees_workflow_operations.py", "ees_workflow_shared_tools.py",
 )})
 # Common read/proposal Native Tool source is available for explicit admin setup;
 # it is never a demo seed or an automatically registered user asset.

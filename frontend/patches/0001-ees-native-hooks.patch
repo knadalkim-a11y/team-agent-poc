@@ -1346,7 +1346,7 @@ index 0000000..be842d3
 +		['models', '83565', 'EES.Nav.Models', 'AI assistants'],
 +		['knowledge', '730b1', 'EES.Nav.Knowledge', 'Reference documents'],
 +		['prompts', '093d6', 'EES.Nav.Prompts', 'Quick phrases'],
-+		['tools', '5bc95', 'EES.Nav.Connections', 'Connections'],
++		// Native tools are opened from the shared tool detail, not a second menu.
 +		['admin', '4308e', 'EES.Nav.Admin', 'Administrator settings']
 +	];
 +	const nativeNames = {

@@ -275,7 +275,8 @@ def normalize_result(function, raw, reference, context, secrets=(), *, trusted_r
     if data["ok"] is not True and not structured_partial:
         code = _get(data.get("error", {}), "code", "native_call_failed")
         code = code if isinstance(code, str) and re.fullmatch(r"[a-z_]{1,80}", code) else "native_call_failed"
-        envelope["error"] = {"code": code, "message": "등록 도구의 조회가 완료되지 않았습니다. 연결·권한과 실행 상세를 확인해 주세요."}
+        personal = {"pat_required": "개인 PAT 필요 · 기존 도구의 개인 설정에 본인 PAT를 저장하세요. 채팅에 입력하지 마세요.", "encryption_required": "개인 PAT 필요 · 관리자에게 개인 설정 암호화를 요청하세요. 채팅에 PAT를 입력하지 마세요.", "authentication_failed": "개인 PAT 필요 · 기존 도구 개인 설정에서 본인 PAT의 만료·권한을 확인하세요. 채팅에 입력하지 마세요."}
+        envelope["error"] = {"code": code, "message": personal.get(code, "등록 도구의 조회가 완료되지 않았습니다. 연결·권한과 실행 상세를 확인해 주세요.")}
         # Do not persist arbitrary plugin exception/error strings.
         envelope["data"] = {"ok": False, "error": envelope["error"]}
         if trusted_read is True and function in FUNCTIONS and code == "upstream_error":
@@ -535,6 +536,14 @@ class NativeBridge:
                     continue
         return result
 
+    async def managed_tools(self):
+        from sqlalchemy import select
+        from open_webui.models.tools import Tool, get_async_db_context
+        # Discovery needs only identity/source, never owner settings or PAT.
+        async with get_async_db_context() as db:
+            rows = (await db.execute(select(Tool.id, Tool.content))).all()
+            return [{"id": row.id, "content": row.content} for row in rows]
+
     async def capabilities(self, user):
         """Access-filtered metadata for publication/pickers; no code loading."""
         from open_webui.config import BYPASS_ADMIN_ACCESS_CONTROL
@@ -629,6 +638,8 @@ class NativeBridge:
         if result["reference"] != reference:
             _fail("native_version_changed")
         if not result["executable"]:
+            if result["reason"] == "native_personal_connection_required":
+                _fail(result["reason"], "개인 PAT 필요 · 기존 도구의 개인 설정에 본인 PAT를 저장하세요. 채팅에 입력하지 마세요.")
             _fail(result["reason"])
         return result
 
@@ -669,6 +680,10 @@ class NativeBridge:
             # Changes while the loader yielded must block the actual external
             # dispatch too. No distributed atomicity is claimed with Native.
             await self.check(current, reference)
+            if context.get("shared_tool_id"):
+                pin = await self.service.shared_tools.resolve(current, context["shared_tool_id"], kind=context["shared_run_kind"], run_id=context["run_id"])
+                if pin["reference"] != reference:
+                    _fail("shared_tool_version_changed")
             raw = await bound(**deepcopy(arguments))
         except WorkflowError:
             raise
@@ -676,7 +691,14 @@ class NativeBridge:
             raw = {"ok": False, "error": {"code": "native_call_failed"}}
         family = "jira" if reference["function"].startswith("jira_") else "github" if reference["function"].startswith("github_") else "confluence"
         trusted_read = reference["function"] in FUNCTIONS and reference["content_hash"] == MANAGED_READ_SOURCE_HASHES[family]
-        return normalize_result(reference["function"], raw, reference, context, (user_valves["PAT"],), trusted_read=trusted_read)
+        result = normalize_result(reference["function"], raw, reference, context, (user_valves["PAT"],), trusted_read=trusted_read)
+        if context.get("shared_tool_id"):
+            if reference["function"] == "search_pages" and result["status"] == "succeeded":
+                result["items"] = [{"id": str(row["page_id"]), "title": str(row.get("title", "")), "url": str(row.get("url", ""))} for row in result.get("data", {}).get("results", []) if isinstance(row, dict) and row.get("page_id") is not None]
+                result.update(scope="single_page", completeness="partial", result_kind="list")
+            elif reference["function"] == "get_page":
+                result["result_kind"] = "evidence"
+        return result
 
 
 WORK_CHAT_FUNCTIONS = frozenset({"ees_workflow_view", "ees_workflow_propose", "ees_workflow_display"})
@@ -1074,10 +1096,11 @@ def wrap_chat_work_tools(request, user, tools):
                     with service._db() as db:
                         if help_context["system_id"] and not service._work_system_visible(db, actor, groups, help_context["system_id"]):
                             _fail("scope_forbidden")
-                    return {"ok": True, "help": workflow_help(), "help_context": {"kind": "help", **help_context}}
+                    return {"ok": True, "help": workflow_help(), "shared_tools": await service.shared_tools.list(actor, usable_only=True, summary=True), "help_context": {"kind": "help", **help_context}}
                 result = await _native(*args, **kwargs)
                 if _function == "ees_workflow_view" and isinstance(result, dict) and result.get("ok") and "historical" not in result:
-                    result = {**result, "help": workflow_help()}
+                    from .ees_workflow import _production_service
+                    result = {**result, "help": workflow_help(), "shared_tools": await _production_service().shared_tools.list(actor, usable_only=True, summary=True)}
                 return result
             except Exception:
                 if help_context is not None:

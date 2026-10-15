@@ -1,5 +1,12 @@
 # 현재 작업 상태
 
+## 2026-10-15 · 공용 Confluence 도구 1단계-1 진행
+
+- **기준/범위:** 최신 main `8a4a716`(#90 병합 포함), #92와 B10-1/2/5. [현재 계약](mockups/ees-work/TASK.md#shared-tools-phase1-20261015). 기존 계약은 보존하고 기본 제공 조회2개를 공용으로 확인·사용한다.
+- **병합 순서:** 열린 #91(Native 복귀 선택)과 launcher/view, 시험, TASK/STATUS/CHANGELOG/evals가 겹친다. #91 검토·병합 뒤 이 PR에 최신 main을 통합하고 양쪽 행동/기록을 보존한다. 이번 작업은 병합하지 않는다. #90은 이미 main에 반영되어 별도 병합 대기가 없다.
+- **현재 검증:** 새 Native11개·기존 Python133개(1개 제외)·메뉴 Node92개 통과. 로컬 소스 빌드 성공, Chrome 소켓 제한으로 실제 화면은 CI 대기. [초기 실패/검증 경계](../evals/v4-ui-20260930.md#shared-tools-phase1-evidence-20261015). 실제 제품의 배치·행동·computed style·가시 포커스 및 최종 head CI 확인 전 완료로 판정하지 않는다.
+- **사내:** Confluence 설치 원본·주소·허용 공간·개인 설정 암호화·팀원 PAT 저장은 미확인. 사내 실행/적용·Figma 수정·#77/#79 착수 없음.
+
 ## 2026-10-15 · #88 병합 완료·#89에 main 통합
 
 - **현재 원본:** #88 head `584e3c91a49402d81d449de869e32578deee4fcb`의 [CI 두 번째 시도](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38655286601/attempts/2)는31개 성공·배포파일1개 정상 제외다. 사용자 승인에 따라 merge commit `4da2d1c2cb18320778c392892c252388070891dd`로 병합하고 이 main을 #89에 통합했다. 문서5개 충돌에서 양쪽 기록을 모두 보존하고 CHANGELOG는 날짜별로 합쳤다.

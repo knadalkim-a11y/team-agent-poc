@@ -1,0 +1,40 @@
+{
+  "scope": "local synthetic Native and SQLite; no onsite claims",
+  "files": {
+    "build-attempts.txt": {
+      "sha256": "d3cc490189479e81c7e77249d410d9146a8bf7ef0683306b8aae166e8a66b2da",
+      "bytes": 531
+    },
+    "local-browser-blocked.log": {
+      "sha256": "b1236862680194d80667377ee4a34ba5047adc1867795fcf366d7759e8fc9678",
+      "bytes": 1754
+    },
+    "native-11.log": {
+      "sha256": "94e18398c91c78fb200ee21c160b52c3014f7a7dea7f8c0e5abe902e431daa10",
+      "bytes": 8101
+    },
+    "regression-134.log": {
+      "sha256": "22eeaca31a753d5cc50adcb9f58194ba74ae5cf16388c4f9fe6b2cff783d4ae3",
+      "bytes": 2142
+    },
+    "menu-92.log": {
+      "sha256": "b8c5944617929ce56fb3304a261c63855fcbbff76e373b104a8265480859a456",
+      "bytes": 9630
+    },
+    "suite-audit.json": {
+      "sha256": "c880cd72af9ca35cce99eddf0aecf686d25d5fc0abe6aa12be6e6beeb2ba2a77",
+      "bytes": 109
+    },
+    "read-only-help.log": {
+      "sha256": "bf7bc30ca8b476c33d9860b0172980153755fd8b3a32b21e2344202539b101a7",
+      "bytes": 704
+    }
+  },
+  "figma": {
+    "key": "XK2wTos6sEuxSHhIj7cqg6",
+    "B10-1": "1353:20386",
+    "B10-2": "1353:20597",
+    "B10-5": "1353:21167"
+  },
+  "product_comparison": "pending CI; local browser blocked before page load"
+}
