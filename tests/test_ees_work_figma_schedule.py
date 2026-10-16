@@ -217,6 +217,26 @@ class ScheduleContracts(unittest.IsolatedAsyncioTestCase):
         await self.runtime._close_cycles()
         self.assertEqual((await self.state(run['id']))['status'], 'completed')
 
+    async def test_automatic_cycle_closes_only_after_human_confirms_partial_read(self):
+        wid, definition = await self.published(mode='tool')
+        await self.reserve(wid, definition)
+        await self.runtime.process_once()
+        run = await self.state(self.slots()[0]['run_id'])
+        self.bridge.result = {'status':'succeeded','completeness':'partial','data':{'count':1}}
+        executed = await self.runtime.command(self.user, self.body('execute_job', run['revision'], run_id=run['id'], job_id='j1'))
+        await self.runtime._close_cycles()
+        current = await self.state(run['id'])
+        self.assertEqual(current['status'], 'open')
+        self.assertFalse(current['jobs']['j1']['partial_confirmed'])
+        await self.core('decide', current['revision'], run_id=run['id'], job_id='j1', result_revision=executed['attempt']['number'], verdict='completed')
+        # The bounded close scanner wraps its cursor after the previous pass.
+        await self.runtime._close_cycles()
+        await self.runtime._close_cycles()
+        closed = await self.state(run['id'])
+        self.assertEqual(closed['status'], 'completed')
+        self.assertEqual(closed['jobs']['j1']['status'], 'partial')
+        self.assertEqual(closed['closure_summary']['partial_jobs'][0]['job_id'], 'j1')
+
     def confirmed_failure(self, *, trusted=True, code='upstream_error'):
         return native.normalize_result('jira_dashboard', {'ok': False, 'failure_confirmed': True, 'error': {'code': code}}, fixture.REF, {}, trusted_read=trusted)
 

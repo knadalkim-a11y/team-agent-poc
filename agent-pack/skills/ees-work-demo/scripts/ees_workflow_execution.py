@@ -521,9 +521,13 @@ class ExecutionRuntime:
             await self._ready(user, case, list(run["jobs"]))
         selected_pin = None
         if action == "accept_tool_version":
+            from .ees_workflow_shared_tools import message_for
             selected_pin = await self.service.shared_tools.resolve(user, body.get("shared_tool_id"))
             if body.get("version") != selected_pin["version"]:
-                raise WorkflowError("shared_tool_version_changed", "지금 버전을 다시 확인해 주세요.")
+                with self.service._db() as db:
+                    previous_pin = db.execute("SELECT data FROM work_shared_tool_pins WHERE run_kind='execution' AND run_id=? AND tool_id=?", (run['id'], selected_pin['id'])).fetchone()
+                pinned_version = json.loads(previous_pin[0])['version'] if previous_pin else body.get('version')
+                raise WorkflowError("shared_tool_version_changed", message_for('shared_tool_version_changed', pinned=pinned_version, current=selected_pin['version']))
             user, _, shared_groups = await self.service._work_actor(user)
         with self.service._db(write=True) as db:
             receipt = db.execute("SELECT * FROM execution_requests WHERE owner=? AND request_id=?", (owner, body["request_id"])).fetchone()
@@ -544,7 +548,7 @@ class ExecutionRuntime:
                 self.service.shared_tools.authorize(latest, user, shared_groups)
                 previous = db.execute("SELECT data FROM work_shared_tool_pins WHERE run_kind='execution' AND run_id=? AND tool_id=?", (run["id"], selected_pin["id"])).fetchone()
                 if not previous or latest["state"] != "available" or latest["reference"] != selected_pin["reference"]:
-                    raise WorkflowError("shared_tool_review_required", "도구 확인 필요 · 지금 버전을 다시 확인해 주세요.")
+                    raise WorkflowError("shared_tool_review_required", message_for('shared_tool_review_required'))
                 db.execute("UPDATE work_shared_tool_pins SET data=? WHERE run_kind='execution' AND run_id=? AND tool_id=?", (_dump(selected_pin), run["id"], selected_pin["id"]))
                 self._event(db, run, "shared_tool_version_selected", {"before": json.loads(previous[0]), "after": selected_pin})
                 run["plan_hash"] = _hash({"previous": run["plan_hash"], "shared_tool": selected_pin})

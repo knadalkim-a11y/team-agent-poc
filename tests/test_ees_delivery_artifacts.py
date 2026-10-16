@@ -185,13 +185,44 @@ class DeliveryArtifactsTests(unittest.IsolatedAsyncioTestCase):
             await self.runtime.command(self.user,self.body('execute_job',current['revision'],run_id=self.run_id,job_id='documents'))
 
     async def test_partial_list_cannot_authorize_attachment_batch_or_hide_missing_crs(self):
+        # Preserve this regression ID. ST-RUN-7 (2026-10-16) now allows the
+        # received, human-confirmed subset to advance, including legacy reads.
+        # The subset must never become a complete CR listing or hide its source.
         await self.author(); self.http.tool.valves.MAX_CR_PAGES=1
         run=await self.state()
         partial=await self.runtime.command(self.user,self.body('execute_job',run['revision'],run_id=self.run_id,job_id='cr-list'))
         self.assertEqual(partial['attempt']['status'],'partial')
-        self.assertEqual(partial['attempt']['result']['data']['listing']['total'],3)
-        await self.decide('cr-list')
+        original=deepcopy(partial['attempt'])
+        self.assertEqual(original['result']['data']['listing']['total'],3)
+        self.assertEqual(original['result']['data']['listing']['returned'],2)
+        self.assertEqual(original['result']['data']['listing']['next_start_at'],2)
+        selected_ids=[item['id'] for item in original['result']['items']]
+        self.assertEqual(selected_ids,['APPX-1','APPX-2'])
+        for item in original['result']['items']:
+            current=await self.state(); before=len(self.bridge.calls)
+            # No confirmation, or only one of two required decisions, cannot
+            # authorize an attachment call or reuse an incomplete confirmation.
+            with self.assertRaises(workflow.WorkflowError) as denied:
+                await self.runtime.command(self.user,self.body('execute_job',current['revision'],run_id=self.run_id,job_id='documents'))
+            self.assertEqual(denied.exception.code,'confirmed_result_required')
+            self.assertEqual(len(self.bridge.calls),before)
+            await self.core('decide',current['revision'],run_id=self.run_id,job_id='cr-list',result_revision=original['number'],item_id=item['id'],verdict='completed',note='받은 부분 목록만 사람이 확인')
         current=await self.state(); self.assertEqual(current['jobs']['cr-list']['status'],'partial')
-        with self.assertRaises(workflow.WorkflowError):
-            await self.runtime.command(self.user,self.body('execute_job',current['revision'],run_id=self.run_id,job_id='documents'))
-        self.assertFalse(any(call[1]['function']=='jira_cr_attachments' for call in self.bridge.calls))
+        self.assertTrue(current['jobs']['cr-list']['partial_confirmed'])
+        sources=[{'job_id':'cr-list','name':current['definition']['nodes']['cr-list']['name'],'attempt_id':original['id']}]
+        self.assertEqual(current['jobs']['documents']['partial_prerequisites'],sources)
+        attachments=await self.execute('documents')
+        calls=[call for call in self.bridge.calls if call[1]['function']=='jira_cr_attachments']
+        self.assertEqual(len(calls),1)
+        self.assertEqual(calls[0][2]['issue_keys'],selected_ids)
+        self.assertEqual(attachments['result']['data']['requested'],selected_ids)
+        self.assertEqual([item['key'] for item in attachments['result']['data']['issues']],selected_ids)
+        self.assertFalse(any('/issue/APPX-3' in call['path'] for call in self.http.calls))
+        self.assertEqual(attachments['snapshot']['partial_prerequisites'],sources)
+        bound=attachments['snapshot']['argument_sources']['issue_keys']
+        self.assertEqual((bound['attempt_id'],bound['result_revision'],bound['ids']),(original['id'],original['number'],selected_ids))
+        saved=await self.state()
+        self.assertEqual(saved['jobs']['cr-list']['status'],'partial')
+        self.assertEqual(next(item for item in saved['attempts'] if item['id']==original['id'])['result'],original['result'])
+        self.assertEqual(saved['jobs']['documents']['status'],'waiting_confirmation')
+        self.assertFalse(attachments['result']['data']['content_reviewed'])

@@ -69,7 +69,7 @@ test('late model listing after reset cannot overwrite the new account choice',as
 
 test('a confirmation opened for one workflow cannot publish after context changes',async()=>{const h=harness();h.dialogs.push({});h.dialogHook=()=>h.open('q');h.click('publish');await flush();assert.equal(h.writes.length,0);assert.equal(h.draft().definition.id,'q');});
 test('conflict comparison can discard only by explicit choice and load exact new revision',async()=>{const h=harness();await h.node();h.field('instructions','내 변경');h.workflows.get('w').revision=3;h.workflows.get('w').draft.nodes.j.instructions='서버 변경';h.dialogs.push({choice:'keep'});h.click('compare');await flush();assert.equal(h.draft().definition.nodes.j.instructions,'내 변경');assert.equal(h.draft().revision,1);h.dialogs.push({choice:'discard'});h.click('compare');await flush();assert.equal(h.draft().definition.nodes.j.instructions,'서버 변경');assert.equal(h.draft().revision,3);assert.equal(h.draft().dirty,false);});
-test('tool navigation returns to workflow editor without retaining tool-only surface',async()=>{const h=harness();h.selection.tab='tools';h.render();assert.match(h.markup,/>도구</);h.selection.tab='overview';h.render();assert.match(h.markup,/>업무 절차</);assert.match(h.markup,/절차 설정/);});
+test('tool navigation returns to workflow editor without retaining tool-only surface',async()=>{const h=harness();h.selection.tab='tools';h.render();assert.match(h.markup,/>도구 · 공용</);h.selection.tab='overview';h.render();assert.match(h.markup,/>업무 절차</);assert.match(h.markup,/절차 설정/);});
 test('job trigger persists a bounded offset instead of a browser timer',async()=>{const h=harness();await h.node();h.field('trigger_kind','offset','change');h.field('trigger_offset','3600');assert.deepEqual(h.draft().definition.nodes.j.trigger,{offset_seconds:3600});assert.doesNotMatch(source,/setInterval|setTimeout/);});
 test('published periodic schedule explicitly pins user, version, jobs, timezone and delegation',async()=>{const h=harness(),record=h.workflows.get('w');record.published_version=2;record.draft.mode='periodic';record.draft.schedule={timezone:'Asia/Seoul',anchor:'2026-10-05T09:00',frequency:'weekly',interval:1};record.draft.nodes.j.mode='tool';record.published=copy(record.draft);h.render();h.dialogs.push({timezone:'Asia/Seoul',anchor:'2026-10-05T09:00',frequency:'weekly',interval:'1',grace_seconds:'300',delegated:true,'job:j':true});h.click('schedule_create');await flush();assert.equal(h.operations[0].action,'schedule_save');assert.equal(h.operations[0].expected_revision,0);assert.equal(h.operations[0].schedule.identity_user_id,'a');assert.equal(h.operations[0].schedule.version,2);assert.equal(h.operations[0].schedule.delegated,true);assert.deepEqual(h.operations[0].schedule.job_ids,['j']);assert.equal(h.operations[0].schedule.catch_up,'miss');assert.equal(h.writes.length,0);});
 
@@ -397,4 +397,27 @@ test('shared discovery failure is explicit while legacy tools remain usable',asy
  const h=harness();sharedReviewFixture(h);h.state.operations.shared_tools=[];h.state.operations.shared_tools_notice='공용 도구 목록을 불러오지 못했습니다.';h.state.operations.tools=[{id:'kept-legacy',name:'기존 계약 보존',kind:'read',state:'approved',revision:1,reference:{tool_id:'old',function:'search_pages'}}];
  h.selection.tab='tools';h.render();assert.match(h.markup,/공용 도구 목록을 불러오지 못했습니다/);assert.doesNotMatch(h.markup,/공용 도구 0개/);assert.match(h.markup,/기존 계약 보존/);
  h.selection.tab='overview';h.render();await h.node();assert.match(h.markup,/공용 도구 목록을 불러오지 못했습니다/);
+});
+
+
+test('B10 common heading empty list and unreviewed labels follow the specification cards',async()=>{
+ const h=harness();const {search}=sharedReviewFixture(h);h.state.capabilities.is_admin=true;h.selection.tab='tools';search.version=0;search.state='review_required';h.render();
+ assert.match(h.markup,/<header>도구 · 공용<\/header>/);assert.match(h.markup,/data-state="unreviewed">확인 전<\/span>/);assert.doesNotMatch(h.markup,/data-state="review_required">도구 확인 필요/);
+ h.click('shared_open',{id:search.id});await flush();assert.match(h.markup,/지금 버전 확인 전/);assert.match(h.markup,/data-state="unreviewed">확인 전<\/span>/);
+ h.click('shared_list');await flush();h.state.operations.shared_tools=[];h.render();assert.match(h.markup,/공용 도구 0개/);assert.match(h.markup,/쓸 수 있는 공용 도구가 없습니다. 필요한 도구는 관리자에게 요청하세요./);
+});
+test('B10 picker keeps read badges and the administrator guide below all choices',async()=>{
+ const h=harness();sharedReviewFixture(h);h.render();await h.node();
+ assert.match(h.markup,/<strong>[^<]+ <small class="ew-author-tag">조회<\/small><\/strong>/);
+ assert.match(h.markup,/필요한 도구가 없으면 관리자에게 요청하세요.<\/p><\/div><\/details>/);
+ h.state.operations.shared_tools=[];h.render();assert.match(h.markup,/쓸 수 있는 공용 도구가 없습니다./);assert.match(h.markup,/필요한 도구가 없으면 관리자에게 요청하세요./);
+});
+
+
+test('B10 neutral unreviewed badge does not alter server review state or conceal a reviewed tool warning',async()=>{
+ const h=harness(),{search}=sharedReviewFixture(h);h.state.capabilities.is_admin=true;h.selection.tab='tools';search.version=0;search.state='review_required';h.render();
+ assert.match(h.markup,/data-state="unreviewed">확인 전<\/span>/);assert.equal(search.state,'review_required');
+ h.click('shared_open',{id:search.id});await flush();assert.match(h.markup,/data-state="unreviewed">확인 전<\/span>/);assert.match(h.markup,/data-author-action="shared_review"/);
+ search.version=1;h.render();assert.match(h.markup,/data-state="review_required">도구 확인 필요<\/span>/);assert.doesNotMatch(h.markup,/data-state="unreviewed"/);assert.match(h.markup,/data-author-action="shared_review"/);
+ search.state='preparing';search.version=0;h.render();assert.match(h.markup,/data-state="preparing">준비 중<\/span>/);assert.doesNotMatch(h.markup,/data-state="unreviewed"/);
 });

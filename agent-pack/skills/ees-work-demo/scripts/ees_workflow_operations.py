@@ -221,12 +221,15 @@ def validate_read_retry(job):
     if policy is None:
         return {"count": 0}
     from .ees_workflow_native import FUNCTIONS
+    from .ees_workflow_shared_tools import PILOT_FUNCTIONS
     reference = job.get("tool_reference", job.get("execution", {}).get("reference", {}))
+    verified_read = ((isinstance(reference, dict) and reference.get("function") in FUNCTIONS)
+                     or job.get("shared_tool_id") in {'managed-' + name for name in PILOT_FUNCTIONS})
     if (not isinstance(policy, dict) or set(policy) != {"count", "deadline_seconds"}
             or type(policy.get("count")) is not int or not 0 <= policy["count"] <= 3
             or type(policy.get("deadline_seconds")) is not int or not 1 <= policy["deadline_seconds"] <= 300
             or job.get("mode") != "tool" or job.get("result_block") == "change_request"
-            or not isinstance(reference, dict) or reference.get("function") not in FUNCTIONS):
+            or not verified_read):
         fail("read_retry_invalid", "조회 재시도는 검증된 읽기 작업에만 0~3회, 전체 1~300초로 설정해 주세요.")
     return deepcopy(policy)
 
@@ -900,7 +903,7 @@ class OperationsRuntime:
         """Opted-in lifecycle uses the existing human/unknown completion guard."""
         cursor = getattr(self, "_close_cursor", None)
         with self.service._db() as db:
-            rows = db.execute("SELECT s.data AS schedule,l.data AS slot,l.id AS slot_id,l.scheduled_at,r.id AS run_id,r.revision FROM work_schedules s JOIN work_schedule_slots l ON l.schedule_id=s.id JOIN work_runs r ON r.id=json_extract(l.data,'$.run_id') WHERE s.enabled=1 AND json_extract(s.data,'$.lifecycle_enabled')=1 AND json_extract(s.data,'$.delegated')=1 AND json_extract(l.data,'$.schedule.rule.closing')='after_last_stage' AND r.status='open' AND json_extract(l.data,'$.schedule.lifecycle_enabled')=1 AND NOT EXISTS (SELECT 1 FROM work_jobs j WHERE j.run_id=r.id AND j.status NOT IN ('completed','excluded')) AND NOT EXISTS (SELECT 1 FROM work_external_requests e WHERE e.run_id=r.id AND e.state IN ('requested','accepted','running','reported_complete','unknown')) AND (? IS NULL OR (l.scheduled_at,l.id)>(?,?)) ORDER BY l.scheduled_at,l.id LIMIT 100", (cursor[0] if cursor else None, cursor[0] if cursor else 0, cursor[1] if cursor else '')).fetchall()
+            rows = db.execute("SELECT s.data AS schedule,l.data AS slot,l.id AS slot_id,l.scheduled_at,r.id AS run_id,r.revision FROM work_schedules s JOIN work_schedule_slots l ON l.schedule_id=s.id JOIN work_runs r ON r.id=json_extract(l.data,'$.run_id') WHERE s.enabled=1 AND json_extract(s.data,'$.lifecycle_enabled')=1 AND json_extract(s.data,'$.delegated')=1 AND json_extract(l.data,'$.schedule.rule.closing')='after_last_stage' AND r.status='open' AND json_extract(l.data,'$.schedule.lifecycle_enabled')=1 AND NOT EXISTS (SELECT 1 FROM work_jobs j WHERE j.run_id=r.id AND j.status NOT IN ('completed','excluded','partial')) AND NOT EXISTS (SELECT 1 FROM work_external_requests e WHERE e.run_id=r.id AND e.state IN ('requested','accepted','running','reported_complete','unknown')) AND (? IS NULL OR (l.scheduled_at,l.id)>(?,?)) ORDER BY l.scheduled_at,l.id LIMIT 100", (cursor[0] if cursor else None, cursor[0] if cursor else 0, cursor[1] if cursor else '')).fetchall()
         # Native permission failures cannot be filtered in SQL. Advance this
         # bounded scanner too, then wrap; a revoked actor cannot starve others.
         self._close_cursor = (rows[-1]['scheduled_at'], rows[-1]['slot_id']) if rows else None
@@ -1061,7 +1064,7 @@ class OperationsRuntime:
                 run = self.service._work_run(db, actor, groups, scope["run_id"], write=True)
                 for job_id in scope["job_ids"]:
                     row = db.execute("SELECT * FROM work_jobs WHERE run_id=? AND job_id=?", (run["id"], job_id)).fetchone()
-                    if row["status"] in {"completed", "excluded"}:
+                    if row["status"] in {"completed", "excluded"} or self.service._work_partial_confirmed(db, run, row):
                         continue
                     all_done = False
                     snapshot = self.service._work_snapshot(db, run, job_id)
@@ -1321,7 +1324,10 @@ class OperationsRuntime:
                 source_snapshot = json.loads(record["snapshot"])
                 source_references.extend(self.service._work_evidence_references(source_snapshot))
                 saved_result = json.loads(record["result"])
-                if record["status"] != "succeeded" and not (record["status"] == "waiting_confirmation" and saved_result.get("amendment")) and not (record["status"] == "partial" and job.get("result_block") == "ai_review" and job.get("dependency_policy") == "all_resolved"):
+                with self.service._db() as db:
+                    source_job = db.execute('SELECT * FROM work_jobs WHERE run_id=? AND job_id=?', (run['id'], record['job_id'])).fetchone()
+                    confirmed_partial = bool(source_job and self.service._work_partial_confirmed(db, run, source_job))
+                if record["status"] != "succeeded" and not (record["status"] == "waiting_confirmation" and saved_result.get("amendment")) and not confirmed_partial and not (record["status"] == "partial" and job.get("result_block") == "ai_review" and job.get("dependency_policy") == "all_resolved"):
                     fail("evidence_required")
                 stored_results.setdefault(record["job_id"], {})[record["id"]] = saved_result
                 evidence.append({"job_id": record["job_id"], "call_id": record["id"]})
@@ -1469,7 +1475,9 @@ class OperationsRuntime:
         await self.service._work_check_evidence(actor, {**attempt, "actor_id": value(actor, "id")})
         with self.service._db() as db:
             self.service._work_run(db, actor, groups, run["id"])
-        outcome = {"ok": status == "succeeded", "attempt": {**attempt, "status": status, "result": result}}
+        # A valid partial read is a processed command, not a transport failure.
+        # Its evidence/job status remains partial and still needs confirmation.
+        outcome = {"ok": status in {"succeeded", "partial"}, "attempt": {**attempt, "status": status, "result": result}}
         with self.service._db(write=True) as db:
             db.execute("UPDATE work_operation_receipts SET outcome=? WHERE actor=? AND request_id=? AND payload_hash=?", (dump(outcome), value(actor, "id"), body["request_id"], digest(body)))
         return outcome
@@ -1487,13 +1495,15 @@ class OperationsRuntime:
             if (not isinstance(spec, dict) or set(spec) != {"job_id", "path", "value_field", "confirmed"} or spec["confirmed"] is not True or spec["job_id"] not in prerequisites or spec["path"] != ["items"] or spec["value_field"] != "id"):
                 fail("result_binding_invalid")
             row = db.execute("SELECT a.*,j.status AS business_status FROM work_jobs j JOIN work_attempts a ON a.id=j.current_attempt WHERE j.run_id=? AND j.job_id=?", (run["id"], spec["job_id"])).fetchone()
-            if not row or row["business_status"] != "completed":
+            source_job = db.execute('SELECT * FROM work_jobs WHERE run_id=? AND job_id=?', (run['id'], spec['job_id'])).fetchone()
+            confirmed_partial = bool(source_job and self.service._work_partial_confirmed(db, run, source_job))
+            if not row or (row["business_status"] != "completed" and not confirmed_partial):
                 fail("confirmed_result_required")
             result = json.loads(row["result"])
-            if row["status"] != "succeeded" and not (row["status"] == "waiting_confirmation" and result.get("amendment")):
+            if row["status"] != "succeeded" and not (row["status"] == "waiting_confirmation" and result.get("amendment")) and not confirmed_partial:
                 fail("confirmed_result_required")
             items = result.get("items")
-            if result.get("completeness") not in {"complete", "empty"} or not isinstance(items, list):
+            if (result.get("completeness") not in {"complete", "empty"} and not confirmed_partial) or not isinstance(items, list):
                 fail("complete_result_required")
             if json.loads(row["inputs"]) != self.service._work_snapshot(db, run, spec["job_id"])["inputs"]:
                 fail("result_source_changed")
@@ -1614,7 +1624,9 @@ class OperationsRuntime:
             locations = [f"{frame.name}:{frame.lineno}" for frame in traceback.extract_tb(error.__traceback__)]
             logging.getLogger(__name__).warning("shared_tool_state_unavailable: %s at %s", type(error).__name__, " > ".join(locations))
             shared_tools, shared_notice = [], "공용 도구 목록을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요."
-        return {"shared_tools": shared_tools, "shared_tools_notice": shared_notice, "ok": True, "scope_runs": scopes, "tools": tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
+        from .ees_workflow_shared_tools import MESSAGES
+        shared_tool_access = await self.service.shared_tools.run_access(actor, run_id) if run_id else {}
+        return {"shared_tools": shared_tools, "shared_tools_notice": shared_notice, "shared_tool_messages": deepcopy(MESSAGES), "shared_tool_access": shared_tool_access, "ok": True, "scope_runs": scopes, "tools": tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
 
     def start(self):
         self._closing = False
