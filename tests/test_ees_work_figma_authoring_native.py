@@ -42,6 +42,16 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.server.workflow.group_lookup = lambda _: [{'id':'shared-readers','name':'조회 팀'}]
         self.server.workflow.group_list_lookup = lambda: [{'id':'shared-readers','name':'조회 팀'}]
         items = asyncio.run(self.server.workflow.shared_tools.discover(self.server.user))
+        self.refresh(); self.open_tools()
+        self.wait("document.querySelector('[data-author-action=shared_open][data-id=managed-search_pages]')")
+        self.assertEqual(self.text('#ees-work-designer > header'), '도구 · 공용')
+        self.assertEqual(self.text('[data-author-action=shared_open][data-id=managed-search_pages] .ew-author-tag'), '확인 전')
+        self.screenshot('shared-b10-1-before-review')
+        self.click('[data-author-action=shared_open][data-id=managed-search_pages]')
+        self.assertEqual(self.text('.ew-shared-card .ew-author-tag'), '확인 전')
+        self.assertTrue(self.read('[data-author-action=shared_review]', 'checkVisibility()'))
+        self.screenshot('shared-b10-2-before-review')
+        self.click('[data-author-action=shared_list]')
         with self.server.workflow._db(write=True) as db:
             for item in items:
                 if item['target']!='Confluence': continue
@@ -52,6 +62,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.refresh()
         self.open_tools()
         self.wait("document.querySelector('[data-author-action=shared_open]')")
+        self.assertEqual(self.text('#ees-work-designer > header'), '도구 · 공용')
         self.assertNotIn('기능 연결', self.text('#ees-work-entry'))
         self.assertIn('개인 PAT(기존 방식)', self.text('#ees-work-designer'))
         self.assertIn('이전 방식 도구(관리 시스템별)', self.text('#ees-work-designer'))
@@ -101,6 +112,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertTrue(self.read('.ew-shared-picker','open'))
         self.assertTrue(self.browser.evaluate("!!document.querySelector('[data-author-action=pick_job_tool][data-id=managed-search_pages]')"))
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-author-action=pick_job_tool][data-id=managed-get_page]')"))
+        self.assertIn('조회', self.text('[data-author-action=pick_job_tool][data-id=managed-search_pages]'))
+        self.assertIn('필요한 도구가 없으면 관리자에게 요청하세요.', self.text('.ew-shared-picker'))
         self.browser.evaluate("document.querySelector('#ew-shared-picker-search').focus()")
         self.key('Tab',9)
         self.assertTrue(self.browser.evaluate("document.activeElement.matches(':focus-visible')"))
@@ -112,6 +125,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertNotIn('확정 목록에서 도구 인자 연결', self.text('#ees-work-designer'))
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ew-author-node [name=result_argument],#ew-author-node [name=result_job_id]')"))
         self.screenshot('shared-b10-5-selected-no-handoff')
+        self.fill('#ew-author-node [name=read_retry_count]', '1')
+        self.fill('#ew-author-node [name=read_retry_deadline]', '30')
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장 초안')")
         stored=self.state(workflow_id=wid)['workflow']['draft']['nodes']['job-0']
@@ -119,7 +134,22 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertNotIn('tool_reference',stored)
         self.assertNotIn('tool_contract_revision',stored)
         self.assertEqual(set(stored['argument_bindings']), {'query','space_key','limit'})
-        (directory/'shared-b10-comparison.json').write_text(json.dumps({'scope':'actual built product with synthetic Native session/metadata; real HTTP and SQLite','figma':{'B10-1':'1353:20386','B10-2':'1353:20597','B10-5':'1353:21167'},'detail_cards':geometry,'review_layout':review_layout,'keyboard_focus':detail_focus,'checked':['target grouping','personal PAT label','legacy group','detail sections','admin Native link','no C45 menu','usable-only single-step picker','saved shared ID without fixed reference','real query/space_key/limit schema','no redundant review button','per-field current/new comparison','Native Tools title','changed category notice','group and owner separate rows','shared list handoff controls absent','only query/space_key/limit binding keys'],'onsite':'unverified'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        self.assertEqual(stored['read_retry'], {'count': 1, 'deadline_seconds': 30})
+        self.click('[data-author-action=validate]')
+        self.wait("document.querySelector('[data-author-action=publish]')?.disabled === false")
+        self.assertEqual(self.state(workflow_id=wid)['workflow']['validation']['errors'], [])
+        self.click('[data-author-action=publish]'); self.click('[data-dialog-confirm]')
+        self.wait("document.querySelector('#ees-work-designer')?.innerText.includes('게시 v2')")
+        self.screenshot('shared-b10-5-read-retry-published')
+        self.command('save_access', principal_kind='user', principal_id=self.server.user['id'],
+            system_id='EMS', factory_id='*', roles=['manager', 'participant'])
+        self.server.user['role'] = 'user'
+        self.server.workflow.group_lookup = lambda _: []
+        self.refresh(); self.open_tools()
+        self.wait("document.querySelector('#ees-work-designer')?.innerText.includes('공용 도구 0개')")
+        self.assertIn('쓸 수 있는 공용 도구가 없습니다. 필요한 도구는 관리자에게 요청하세요.', self.text('#ees-work-designer'))
+        self.screenshot('shared-b10-1-empty-list')
+        (directory/'shared-b10-comparison.json').write_text(json.dumps({'scope':'actual built product with synthetic Native session/metadata; real HTTP and SQLite','figma':{'B10-1':'1369:732','B10-2':'1368:724','B10-5':'1372:741'},'detail_cards':geometry,'review_layout':review_layout,'keyboard_focus':detail_focus,'checked':['common panel heading','before-review tags in list and detail','empty visible list notice','target grouping','personal PAT label','legacy group','detail sections','admin Native link','no C45 menu','usable-only single-step picker','picker read tag and footer notice','saved shared ID without fixed reference','real query/space_key/limit schema','no redundant review button','per-field current/new comparison','Native Tools title','changed category notice','group and owner separate rows','shared list handoff controls absent','only query/space_key/limit binding keys','read retry saved and published'],'onsite':'unverified'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
     def operations(self):
         return asyncio.run(self.server.workflow.operations.state(self.server.user, system_id='EMS'))

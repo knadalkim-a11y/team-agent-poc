@@ -582,8 +582,8 @@ test('source API receives the original command contract and keeps runtime late-t
 test('same shared-tool review leaves an ongoing run executable and changed versions require choice',()=>{
  const {viewSource}=require('./ees_workspace_ui_fixture.cjs'),context=renderer();
  // Expose the real render function only in this in-memory test copy.
- run(context,viewSource.slice(viewSource.indexOf('function createWorkView(')).replace('return Object.freeze({render,sync,','return Object.freeze({testJobPanel:jobPanel,render,sync,'));
- context.snapshot={selection:{job_id:'j',tab:'current'},state:{capabilities:{actor_id:'a'},operations:{shared_tools:[{id:'managed-search_pages',name:'페이지 찾기',version:1,state:'available',can_use:true}]},run:{id:'r',status:'running',revision:1,definition:{nodes:{j:{id:'j',name:'찾기',mode:'tool',shared_tool_id:'managed-search_pages',inputs:[],result_block:'human_confirm'}}},jobs:{j:{}},shared_tools:[{id:'managed-search_pages',version:1}],inputs:{}}}};
+ run(context,viewSource.slice(viewSource.indexOf('function createWorkView(')).replace('return Object.freeze({render,sync,','return Object.freeze({testJobPanel:jobPanel,testRunOverview:runOverview,render,sync,'));
+ context.snapshot={selection:{job_id:'j',tab:'current'},state:{capabilities:{actor_id:'a'},operations:{shared_tools:[{id:'managed-search_pages',name:'페이지 찾기',version:1,state:'available',can_use:true}],shared_tool_access:{j:{can_use:true,can_accept_version:true}}},run:{id:'r',status:'running',revision:1,definition:{nodes:{j:{id:'j',name:'찾기',mode:'tool',shared_tool_id:'managed-search_pages',inputs:[],result_block:'human_confirm'}}},jobs:{j:{}},shared_tools:[{id:'managed-search_pages',version:1}],inputs:{}}}};
  run(context,'globalThis.sharedView=createWorkView({callbacks:{}});sharedView.sync(snapshot)');
  const panel=()=>run(context,'sharedView.testJobPanel()');
  assert.match(panel(),/data-action="execute"[^>]*>/);assert.doesNotMatch(panel(),/data-action="execute"[^>]*disabled/);
@@ -615,4 +615,75 @@ test('cross-system tool use clears the previous factory and opens the target sco
  const selected=h.api.snapshot().selection;
  assert.equal(selected.system_id,'FDC');assert.equal(selected.factory_id,'');assert.equal(selected.workflow_id,'fdc-workflow');assert.equal(selected.run_id,'');assert.equal(selected.job_id,'');
  h.api.setSelection({factory_id:'fdc-factory'});await h.designer.callbacks.openWorkflow('other-fdc','FDC');assert.equal(h.api.snapshot().selection.factory_id,'fdc-factory');
+});
+
+
+function sharedRuntimeFixture(){
+ const {viewSource}=require('./ees_workspace_ui_fixture.cjs'),context=renderer();
+ run(context,viewSource.slice(viewSource.indexOf('function createWorkView(')).replace('return Object.freeze({render,sync,','return Object.freeze({testJobPanel:jobPanel,testRunOverview:runOverview,render,sync,'));
+ const snapshot={selection:{job_id:'j',tab:'current'},state:{capabilities:{actor_id:'a'},operations:{shared_tools:[{id:'shared',name:'페이지 찾기',target:'Confluence',version:2,state:'available',can_use:true,function:'search_pages'}],shared_tool_access:{j:{can_use:true,can_accept_version:true}},shared_tool_messages:{shared_tool_review_required:'확인 문구 원본',shared_tool_version_changed:'버전 원본 {pinned} → {current}'}},run:{id:'r',status:'open',can_write:true,revision:1,definition:{nodes:{j:{id:'j',name:'찾기',mode:'tool',shared_tool_id:'shared',inputs:[{id:'query',name:'찾을 말',type:'text',scope:'run'}],result_block:'list_confirm'}}},jobs:{j:{can_execute:true}},shared_tools:[{id:'shared',version:1}],inputs:{}}}};
+ context.snapshot=snapshot;run(context,'globalThis.sharedView=createWorkView({callbacks:{}});');
+ return {snapshot,panel(){run(context,'sharedView.sync(snapshot)');return run(context,'sharedView.testJobPanel()');},overview(){run(context,'sharedView.sync(snapshot)');return run(context,'sharedView.testRunOverview()');}};
+}
+test('shared execution uses canonical server wording and hides version changes while any job runs or automatic work is not stopped',()=>{
+ const h=sharedRuntimeFixture(),state=h.snapshot.state;assert.match(h.panel(),/버전 원본 1 → 2/);assert.match(h.panel(),/data-action="shared_accept_version"/);
+ state.run.jobs.other={status:'running'};assert.doesNotMatch(h.panel(),/data-action="shared_accept_version"/);
+ delete state.run.jobs.other;state.operations.shared_tool_access.j.can_accept_version=false;assert.doesNotMatch(h.panel(),/data-action="shared_accept_version"/);
+ delete state.operations.shared_tool_access.j.can_accept_version;assert.doesNotMatch(h.panel(),/data-action="shared_accept_version"/);
+ state.operations.shared_tools[0].state='review_required';assert.match(h.panel(),/확인 문구 원본/);assert.match(h.panel(),/data-action="execute"[^>]*disabled/);
+});
+test('shared group outsiders see allowed groups and current assignee with read-only inputs and no execution button',()=>{
+ const h=sharedRuntimeFixture(),state=h.snapshot.state;state.operations.shared_tools=[];state.operations.shared_tool_access.j={can_use:false,group_names:['운영 담당 <그룹>'],assignee_name:'담당 <이름>',can_accept_version:false};
+ const out=h.panel();assert.match(out,/보기 전용/);assert.match(out,/이 도구로 실행할 수 있는 사람 · 운영 담당 &lt;그룹&gt;/);assert.match(out,/지금 담당 · 담당 &lt;이름&gt;/);
+ assert.doesNotMatch(out,/data-action="execute"|data-action="shared_accept_version"|data-action="propose_inputs"|data-action="save_inputs"/);assert.match(out,/id="ew-run-query"[^>]*(?:disabled|readonly)/);
+});
+test('confirmed partial prerequisites appear on the next job heading before its first attempt',()=>{
+ const h=sharedRuntimeFixture();h.snapshot.state.run.jobs.j.partial_prerequisites=[{job_id:'prior',name:'앞쪽 문서 조회',attempt_id:'a'}];
+ assert.match(h.panel(),/부분 결과에서 시작함/);assert.ok(h.panel().indexOf('부분 결과에서 시작함')<h.panel().indexOf('aria-label="작업 보기"'));
+ h.snapshot.state.run.jobs.j.partial_prerequisites=[];assert.doesNotMatch(h.panel(),/부분 결과에서 시작함/);
+});
+test('shared search result cards allow zero confirmations while legacy lists stay blocked',()=>{
+ const partial={status:'partial',result:{scope:'single_page',completeness:'partial',items:[{id:'1',name:'문서'}]}};
+ const out=html('workResultHTML({shared_tool_id:"shared",result_block:"list_confirm"},saved)',{saved:partial});
+ assert.match(out,/찾은 문서 앞쪽 1건/);assert.match(out,/더 있을 수 있습니다. 필요한 문서를 골라 확정하면 다음 작업으로 넘어갑니다. 이 작업은 기록에 ‘부분 결과’로 남습니다./);
+ const empty={status:'awaiting_confirmation',result:{scope:'single_page',completeness:'empty',items:[]}};
+ const shared=html('workResultHTML({shared_tool_id:"shared",result_block:"list_confirm"},saved)',{saved:empty});
+ assert.match(shared,/결과 없음/);assert.match(shared,/찾은 문서가 없습니다./);assert.match(shared,/data-action="confirm_list"[^>]*>찾은 문서 없음 확인/);assert.doesNotMatch(shared,/data-action="confirm_list"[^>]*disabled|완료 정책/);
+ const noSelection=html('workResultHTML({shared_tool_id:"shared",result_block:"list_confirm"},saved,{listDraft:{items:[{id:"1",selected:false}]}})',{saved:partial});assert.match(noSelection,/data-action="confirm_list"[^>]*>목록 확정 \(0건\)/);assert.doesNotMatch(noSelection,/data-action="confirm_list"[^>]*disabled/);
+ const legacy=html('workResultHTML({result_block:"list_confirm"},saved)',{saved:empty});assert.match(legacy,/data-action="confirm_list"[^>]*disabled/);assert.match(legacy,/완료 정책/);
+});
+function sharedListController(items,shared=true){
+ const h=controller(),state={capabilities:{actor_id:'a'},systems:['EMS'],operations:{},run:{id:'r',revision:1,status:'open',definition:{nodes:{j:{id:'j',result_block:'list_confirm',...(shared?{shared_tool_id:'shared'}:{})}}}},ui_state:{revision:0,state:{}}};
+ state.run.jobs={j:{can_decide:true,attempt_id:'attempt',result_revision:1,result:{scope:'single_page',items}}};state.run.attempts=[{id:'attempt',job_id:'j',result:{scope:'single_page',items}}];
+ h.api.setState(state);h.api.setSelection({system_id:'EMS',run_id:'r',job_id:'j'});h.view.readList=()=>({attempt_id:'attempt',result_revision:1,items:items.map(item=>({...item,selected:false}))});h.setReply(call=>call.body?{ok:true}:{ok:true,...state});return h;
+}
+test('shared zero results confirm directly and zero selected asks exactly once while legacy zero stays rejected',async()=>{
+ const empty=sharedListController([]);let emptyDialogs=0;empty.setDialog(()=>{emptyDialogs++;return Promise.resolve(true);});await empty.api.handleClick({dataset:{action:'confirm_list'}});
+ const emptyCommand=empty.calls.find(call=>call.body?.action==='confirm_list');assert.ok(emptyCommand);assert.equal(emptyCommand.body.reason,'0건 확인');assert.equal(emptyDialogs,0);
+ const found=sharedListController([{id:'1',name:'문서'}]);const prompts=[];found.setDialog(options=>{prompts.push(options);return Promise.resolve(true);});await found.api.handleClick({dataset:{action:'confirm_list'}});
+ assert.equal(prompts.length,1);assert.equal(prompts[0].title,'맞는 문서가 없는 것으로 확정할까요?');assert.doesNotMatch(prompts[0].html,/input/);assert.equal(found.calls.find(call=>call.body?.action==='confirm_list').body.reason,'맞는 문서 없음 · 0개 선택');
+ const cancelled=sharedListController([{id:'1'}]);cancelled.setDialog(()=>Promise.resolve(false));await cancelled.api.handleClick({dataset:{action:'confirm_list'}});assert.equal(cancelled.calls.length,0);
+ const legacy=sharedListController([],false);await assert.rejects(legacy.api.handleClick({dataset:{action:'confirm_list'}}),/빈 목록의 완료 정책/);assert.equal(legacy.calls.length,0);
+});
+
+
+test('shared search failure without result scope uses the known function and never displays stale rows',()=>{
+ const h=sharedRuntimeFixture();h.snapshot.state.run.jobs.j={status:'failed',result:{result_kind:'structured',summary:'조회 실패',error:{code:'request_failed',message:'요청 실패'}}};
+ const out=h.panel();assert.match(out,/Confluence에서 결과를 받지 못했습니다/);assert.match(out,/지난 회차 목록이나 이전 결과는 보여주지 않습니다/);assert.doesNotMatch(out,/ew-list-table|data-action="confirm_list"/);
+ const legacy=html('workResultHTML({result_block:"list_confirm"},saved)',{saved:h.snapshot.state.run.jobs.j});assert.match(legacy,/조회 결과를 확인하지 못했습니다/);assert.doesNotMatch(legacy,/Confluence에서/);
+});
+test('finished run separates confirmed partial count and keeps a partial stage badge with zero remaining work',()=>{
+ const h=sharedRuntimeFixture(),runState=h.snapshot.state.run;
+ runState.status='completed';runState.definition.nodes={p:{id:'p',type:'p'},t:{id:'t',type:'t',parent:'p',name:'문서 확인'},j:{id:'j',type:'j',parent:'t',name:'문서 찾기',mode:'tool'},next:{id:'next',type:'j',parent:'t',name:'후속 확인',mode:'human'},skip:{id:'skip',type:'j',parent:'t',name:'적용 제외'}};
+ runState.jobs={j:{status:'partial',partial_confirmed:true},next:{status:'completed'},skip:{status:'excluded'}};runState.progress={completed:1,total:2,confirmed_partial:1,remaining:0};
+ let out=h.overview();assert.match(out,/완료 1 · 부분 결과 확정 1 · 남은 작업 0/);assert.match(out,/<h3>문서 확인<\/h3><span class="ew-status" data-status="partial">/);assert.match(out,/data-status="partial"[^>]*>[\s\S]*문서 찾기/);
+ delete runState.progress.confirmed_partial;delete runState.progress.excluded;delete runState.progress.remaining;out=h.overview();assert.match(out,/남은 작업 0/);
+ runState.status='open';runState.jobs.j.partial_confirmed=false;out=h.overview();assert.match(out,/남은 작업 1/);assert.doesNotMatch(out,/부분 결과 확정 1/);assert.match(out,/<h3>문서 확인<\/h3><span class="ew-status" data-status="in_progress">/);
+});
+
+
+test('run editors can accept a shared version even when another person has claimed the displayed job',()=>{
+ const h=sharedRuntimeFixture();h.snapshot.state.run.jobs.j={can_execute:false,permission_reason:'task_claimed',claim_actor:'another-user'};
+ assert.match(h.panel(),/data-action="shared_accept_version"/);assert.doesNotMatch(h.panel(),/data-action="execute"/);
+ h.snapshot.state.operations.shared_tool_access.j.can_accept_version=false;assert.doesNotMatch(h.panel(),/data-action="shared_accept_version"/);
 });

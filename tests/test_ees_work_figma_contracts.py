@@ -274,13 +274,33 @@ class FigmaWorkspaceContracts(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(self.rows(*before), before)
 
     async def test_partial_list_never_becomes_completed_or_closes_run(self):
-        run = await self.prepared(mode='tool', block='list_confirm', result={'items': [{'id': 'one'}]}, status='partial')
+        # Keep the original regression ID. ST-RUN-7 now permits closing after
+        # human confirmation while the read and job both remain partial.
+        def read_tool(definition):
+            definition['nodes']['j']['tool_reference']['function'] = 'jira_search_crs'
+        run = await self.prepared(mode='tool', block='list_confirm', result={'items': [{'id': 'one'}]}, status='partial', change=read_tool)
+        denied = await self.command('close_run', actor='a', run_id=run['id'], expected_revision=run['revision'])
+        self.assertEqual(denied['error']['code'], 'completion_required')
         result = await self.confirm(run, [{'id': 'one'}, {'id': 'added'}])
         self.assertTrue(result['ok'], result)
         self.assertEqual(result['run']['jobs']['j']['status'], 'partial')
         self.assertEqual(self.current(result['run'])['status'], 'partial')
-        denied = await self.command('close_run', actor='a', run_id=run['id'], expected_revision=result['revision'])
-        self.assertEqual(denied['error']['code'], 'completion_required')
+        closed = await self.command('close_run', actor='a', run_id=run['id'], expected_revision=result['revision'])
+        self.assertTrue(closed['ok'], closed)
+        self.assertEqual(closed['run']['closure_summary']['partial_jobs'][0]['attempt_id'], self.current(result['run'])['id'])
+
+    async def test_confirmed_partial_becomes_stale_when_input_changes(self):
+        def read_tool(definition):
+            definition['nodes']['j']['tool_reference']['function'] = 'jira_search_crs'
+        run = await self.prepared(mode='tool', block='list_confirm', result={'items':[{'id':'one'}]}, status='partial',
+                                  fields=[{'id':'query','type':'text','scope':'run'}], change=read_tool, dependent=True)
+        confirmed = await self.confirm(run, [{'id':'one'}])
+        self.assertTrue(confirmed['run']['jobs']['j']['partial_confirmed'])
+        changed = await self.command('save_inputs', actor='a', run_id=run['id'], expected_revision=confirmed['revision'], inputs={'query':'changed'})
+        self.assertTrue(changed['ok'], changed)
+        self.assertFalse(changed['run']['jobs']['j']['partial_confirmed'])
+        denied = await self.command('human_confirm', actor='a', run_id=run['id'], job_id='next', expected_revision=changed['revision'])
+        self.assertEqual(denied['error']['code'], 'prerequisite_required')
 
     async def test_empty_and_fully_excluded_lists_cannot_bypass_completion_policy(self):
         for original, items in (([], []), ([{'id': 'one'}], [{'id': 'one', 'selected': False, 'required': False}])):

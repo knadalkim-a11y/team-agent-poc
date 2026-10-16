@@ -59,7 +59,7 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(result['ok'], result)
         return result
 
-    async def workflow(self, system='EMS', key=None, periodic=False, legacy=None):
+    async def workflow(self, system='EMS', key=None, periodic=False, legacy=None, dependent=False, retry=None):
         key = key or self.key
         created = await self.core('create_workflow', system_id=system, name=system+' 조회 절차', mode='periodic' if periodic else 'on_demand')
         wid = created['workflow_id']
@@ -73,6 +73,10 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
             job.pop('shared_tool_id')
             job.update(tool_reference=legacy['reference'], tool_contract_id=legacy['id'], tool_contract_revision=legacy['revision'])
         definition['nodes']['j1'] = job
+        if retry is not None: job['read_retry'] = deepcopy(retry)
+        if dependent:
+            definition['nodes']['t1']['children'].append('next')
+            definition['nodes']['next'] = dict(id='next', type='j', name='다음 확인', parent='t1', children=[], deps=['j1'], mode='human', result_block='human_confirm')
         await self.core('save_draft', 1, workflow_id=wid, definition=definition)
         validated = await self.core('validate_workflow', 2, workflow_id=wid)
         self.assertEqual(validated['validation']['errors'], [])
@@ -358,6 +362,66 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         with self.service._db() as db:
             self.assertEqual(db.execute('SELECT count(*) FROM work_versions WHERE workflow_id=?', (wid,)).fetchone()[0],1)
 
+    async def test_outside_group_run_view_exposes_only_permitted_group_and_assignee_names(self):
+        await self.review()
+        run = await self.start(await self.workflow(), self.reader)
+        await self.core('claim_task', 1, actor=self.reader, run_id=run['run_id'], job_id='j1')
+        await self.f.native_groups.Groups.remove_users_from_group(self.group.id, ['reader'])
+        state = await self.service.operations.state(self.reader, run_id=run['run_id'])
+        access = state['shared_tool_access']['j1']
+        self.assertFalse(access['can_use'])
+        self.assertFalse(access['can_accept_version'])
+        self.assertEqual(access['group_names'], ['Readers'])
+        self.assertEqual(access['assignee_name'], self.reader.name)
+        self.assertEqual(state['shared_tools'], [])
+        self.assertEqual(set(access), {'can_use','can_accept_version','group_names','assignee_name'})
+        self.assertNotIn('synthetic-reader-pat', json.dumps(state))
+        await self.assert_code('shared_tool_forbidden', self.execute(run, 2))
+
+    async def test_running_and_unstopped_automatic_runs_hide_and_reject_version_acceptance(self):
+        await self.review()
+        run = await self.start(await self.workflow(), self.reader)
+        await self.f.tools.Tools.update_tool_valves_by_id('installed-with-unpredictable-id', {'ENABLED':True,'CONFLUENCE_BASE_URL':'https://confluence.invalid','ALLOWED_SPACES':'EMS,FDC'})
+        self.assertEqual((await self.review())['version'], 2)
+        self.assertTrue((await self.tools.run_access(self.reader, run['run_id']))['j1']['can_accept_version'])
+        with self.service._db(write=True) as db:
+            db.execute("UPDATE work_jobs SET status='running' WHERE run_id=? AND job_id='j1'", (run['run_id'],))
+        self.assertFalse((await self.tools.run_access(self.reader, run['run_id']))['j1']['can_accept_version'])
+        await self.assert_code('execution_running', self.tools.accept_version(self.reader, self.body('shared_tool_accept_version', 1, run_id=run['run_id'], shared_tool_id=self.key, version=2)))
+        with self.service._db(write=True) as db:
+            db.execute("UPDATE work_jobs SET status='pending' WHERE run_id=? AND job_id='j1'", (run['run_id'],))
+        # Queue records simulate a persisted scheduler/worker claim without
+        # actually starting it, so the guard can be checked deterministically.
+        for table in ('work_schedule_slots', 'work_scope_runs'):
+            for status in ('queued', 'running', 'waiting'):
+                with self.subTest(table=table, status=status):
+                    with self.service._db(write=True) as db:
+                        if table == 'work_schedule_slots':
+                            db.execute('INSERT INTO work_schedule_slots VALUES(?,?,?,?,?,?,NULL,NULL,?)', ('version-test','synthetic',run['run']['workflow_id'],'synthetic',0,status,json.dumps({'run_id':run['run_id']})))
+                        else:
+                            db.execute('INSERT INTO work_scope_runs VALUES(?,?,?,?,NULL,NULL,?)', ('version-test',run['run_id'],'reader',status,'{}'))
+                    self.assertFalse((await self.tools.run_access(self.reader, run['run_id']))['j1']['can_accept_version'])
+                    await self.assert_code('automatic_run_active', self.tools.accept_version(self.reader, self.body('shared_tool_accept_version', 1, run_id=run['run_id'], shared_tool_id=self.key, version=2)))
+                    with self.service._db(write=True) as db:
+                        db.execute('DELETE FROM ' + table + ' WHERE id=?', ('version-test',))
+        self.assertTrue((await self.tools.run_access(self.reader, run['run_id']))['j1']['can_accept_version'])
+        await self.tools.accept_version(self.reader, self.body('shared_tool_accept_version', 1, run_id=run['run_id'], shared_tool_id=self.key, version=2))
+        with self.service._db() as db:
+            pin = json.loads(db.execute("SELECT data FROM work_shared_tool_pins WHERE run_id=?", (run['run_id'],)).fetchone()[0])
+        self.assertEqual(pin['version'], 2)
+
+    async def test_version_change_server_and_screen_share_exact_pinned_current_message(self):
+        await self.review()
+        run = await self.start(await self.workflow(), self.reader)
+        await self.f.tools.Tools.update_tool_valves_by_id('installed-with-unpredictable-id', {'ENABLED':True,'CONFLUENCE_BASE_URL':'https://confluence.invalid','ALLOWED_SPACES':'EMS,FDC'})
+        await self.review()
+        error = await self.assert_code('shared_tool_version_changed', self.execute(run))
+        state = await self.service.operations.state(self.reader, run_id=run['run_id'])
+        expected = '회차 시작 뒤 도구가 v1에서 v2으로 바뀌었습니다. 이 회차를 새 버전으로 계속할지 고르세요.'
+        self.assertEqual(error.message, expected)
+        template = state['shared_tool_messages']['shared_tool_version_changed']
+        self.assertEqual(template.format(pinned=1, current=2), expected)
+
     async def test_all_managed_functions_have_separate_entries_without_auto_install(self):
         items=await self.tools.list(self.admin)
         self.assertEqual({item['function'] for item in items},set(self.f.native.FUNCTIONS))
@@ -582,9 +646,109 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result['attempt']['result']['completeness'],'empty')
         self.assertEqual(result['attempt']['result']['items'],[])
         current = await self.service.workspace_state(self.reader, run_id=run['run_id'])
-        denied = await self.service.workspace_command(self.reader, self.body('confirm_list', current['run']['revision'], run_id=run['run_id'], job_id='j1', attempt_id=result['attempt']['id'], result_revision=result['attempt']['number'], items=[], reason='조회 0건 확인'))
-        self.assertFalse(denied['ok'], denied)
-        self.assertEqual(denied['error']['code'], 'zero_selection_policy_required', denied)
+        # ST-RESULT-5 (2026-10-16): explicit empty-result confirmation completes
+        # only the shared search action; retain the original empty evidence.
+        confirmed = await self.core('confirm_list', current['run']['revision'], actor=self.reader, run_id=run['run_id'], job_id='j1', attempt_id=result['attempt']['id'], result_revision=result['attempt']['number'], items=[], reason='조회 0건 확인')
+        self.assertEqual(confirmed['run']['jobs']['j1']['status'], 'completed')
+        self.assertTrue(confirmed['run']['jobs']['j1']['decisions'][0]['note'].startswith('0건 확인'))
+        closed = await self.core('close_run', confirmed['revision'], actor=self.reader, run_id=run['run_id'])
+        self.assertEqual(closed['run']['status'], 'completed')
+        self.assertEqual(closed['run']['attempts'][0]['result']['completeness'], 'empty')
+
+    async def test_confirmed_shared_partial_advances_with_source_and_closure_history(self):
+        await self.review()
+        run = await self.start(await self.workflow(dependent=True), self.reader)
+        executed = await self.execute(run)
+        self.assertTrue(executed['ok'], executed)
+        current = (await self.service.workspace_state(self.reader, run_id=run['run_id']))['run']
+        for action, extra, code in [('human_confirm', {'job_id':'next'}, 'prerequisite_required'), ('close_run', {}, 'completion_required')]:
+            denied = await self.service.workspace_command(self.reader, self.body(action, current['revision'], run_id=run['run_id'], **extra))
+            self.assertEqual(denied['error']['code'], code, denied)
+        confirmed = await self.core('confirm_list', current['revision'], actor=self.reader, run_id=run['run_id'], job_id='j1', attempt_id=executed['attempt']['id'], result_revision=executed['attempt']['number'], items=executed['attempt']['result']['items'])
+        current = confirmed['run']
+        self.assertEqual(current['jobs']['j1']['status'], 'partial')
+        self.assertTrue(current['jobs']['j1']['partial_confirmed'])
+        sources = [{'job_id':'j1','name':'페이지 조회','attempt_id':executed['attempt']['id']}]
+        self.assertEqual(current['jobs']['next']['partial_prerequisites'], sources)
+        completed = await self.core('human_confirm', current['revision'], actor=self.reader, run_id=run['run_id'], job_id='next')
+        self.assertEqual(completed['run']['attempts'][-1]['snapshot']['partial_prerequisites'], sources)
+        closed = await self.core('close_run', completed['revision'], actor=self.reader, run_id=run['run_id'])
+        self.assertEqual(closed['run']['status'], 'completed')
+        self.assertEqual(closed['run']['jobs']['j1']['status'], 'partial')
+        self.assertEqual(closed['run']['progress'], {'total':2,'completed':1,'excluded':0,'confirmed_partial':1,'remaining':0})
+        self.assertEqual(closed['run']['closure_summary']['partial_jobs'], sources)
+        self.assertEqual(closed['run']['closure_summary']['closed_by'], 'reader')
+        # No migration is needed for the records, and restart retains history.
+        viewed = (await self.service.workspace_state(self.reader, run_id=run['run_id']))['run']
+        self.assertEqual(viewed['closure_summary'], closed['run']['closure_summary'])
+
+    async def test_shared_zero_selected_completes_but_keeps_original_partial_result(self):
+        await self.review()
+        run = await self.start(await self.workflow(dependent=True), self.reader)
+        executed = await self.execute(run)
+        current = (await self.service.workspace_state(self.reader, run_id=run['run_id']))['run']
+        items = [{**item, 'selected':False} for item in executed['attempt']['result']['items']]
+        confirmed = await self.core('confirm_list', current['revision'], actor=self.reader, run_id=run['run_id'], job_id='j1', attempt_id=executed['attempt']['id'], result_revision=executed['attempt']['number'], items=items, reason='맞는 문서가 없습니다.')
+        job = confirmed['run']['jobs']['j1']
+        self.assertEqual(job['status'], 'completed')
+        self.assertTrue(job['decisions'][0]['note'].startswith('맞는 문서 없음 · 0개 선택'))
+        self.assertEqual(confirmed['run']['attempts'][0]['result']['items'], executed['attempt']['result']['items'])
+        completed = await self.core('human_confirm', confirmed['revision'], actor=self.reader, run_id=run['run_id'], job_id='next')
+        self.assertEqual(completed['run']['jobs']['next']['partial_prerequisites'], [])
+        await self.core('close_run', completed['revision'], actor=self.reader, run_id=run['run_id'])
+
+    async def test_amended_shared_selection_preserves_original_pin_after_run_upgrade(self):
+        first = await self.review()
+        run = await self.start(await self.workflow(), self.reader)
+        executed = await self.execute(run)
+        await self.f.tools.Tools.update_tool_valves_by_id('installed-with-unpredictable-id', {'ENABLED':True,'CONFLUENCE_BASE_URL':'https://confluence.invalid','ALLOWED_SPACES':'EMS,FDC'})
+        await self.review()
+        current = (await self.service.workspace_state(self.reader, run_id=run['run_id']))['run']
+        await self.tools.accept_version(self.reader, self.body('shared_tool_accept_version', current['revision'], run_id=run['run_id'], shared_tool_id=self.key, version=2))
+        current = (await self.service.workspace_state(self.reader, run_id=run['run_id']))['run']
+        items = [{**item, 'selected':False} for item in executed['attempt']['result']['items']]
+        confirmed = await self.core('confirm_list', current['revision'], actor=self.reader, run_id=run['run_id'], job_id='j1', attempt_id=executed['attempt']['id'], result_revision=executed['attempt']['number'], items=items, reason='맞는 문서 없음 · 0개 선택')
+        amended = confirmed['run']['attempts'][-1]
+        self.assertEqual(amended['snapshot']['shared_tool']['version'], 1)
+        self.assertEqual(amended['snapshot']['tool_reference'], first['reference'])
+        self.assertEqual(confirmed['run']['shared_tools'][0]['version'], 2)
+        self.assertEqual(confirmed['run']['jobs']['j1']['status'], 'completed')
+
+    async def test_legacy_read_partial_confirmation_allows_next_and_close(self):
+        key = 'managed-get_page'
+        await self.review(key)
+        runtime = self.service.operations
+        tool = (await runtime.command(self.admin, self.body('tool_save', tool={'system_id':'EMS','kind':'read','name':'이전 방식 본문 읽기','reference':self.refs['get_page'],'guide_url':'https://guide.invalid/read'})))['tool']
+        tool = (await runtime.command(self.admin, self.body('tool_submit', tool['revision'], tool_contract_id=tool['id'])))['tool']
+        tool = (await runtime.command(self.admin, self.body('tool_review', tool['revision'], tool_contract_id=tool['id'], decision='approve')))['tool']
+        run = await self.start(await self.workflow(key=key, legacy=tool, dependent=True), self.reader)
+        self.page_body = '<p>' + '긴 문서 내용 ' * 5000 + '</p>'
+        executed = await self.execute(run)
+        self.assertEqual(executed['attempt']['status'], 'partial')
+        current = (await self.service.workspace_state(self.reader, run_id=run['run_id']))['run']
+        denied = await self.service.workspace_command(self.reader, self.body('human_confirm', current['revision'], run_id=run['run_id'], job_id='next'))
+        self.assertEqual(denied['error']['code'], 'prerequisite_required')
+        confirmed = await self.core('decide', current['revision'], actor=self.reader, run_id=run['run_id'], job_id='j1', result_revision=executed['attempt']['number'], verdict='completed')
+        self.assertTrue(confirmed['run']['jobs']['j1']['partial_confirmed'])
+        completed = await self.core('human_confirm', confirmed['revision'], actor=self.reader, run_id=run['run_id'], job_id='next')
+        closed = await self.core('close_run', completed['revision'], actor=self.reader, run_id=run['run_id'])
+        self.assertEqual(closed['run']['closure_summary']['partial_jobs'][0]['job_id'], 'j1')
+        self.assertNotIn('shared_tool', closed['run']['attempts'][0]['snapshot'])
+
+    async def test_shared_read_retry_publishes_and_keeps_bounded_native_attempts(self):
+        from urllib.error import HTTPError
+        await self.review()
+        run = await self.start(await self.workflow(retry={'count':2,'deadline_seconds':30}), self.reader)
+        body = self.body('execute_job', 1, run_id=run['run_id'], job_id='j1')
+        with patch('urllib.request.OpenerDirector.open', side_effect=HTTPError('https://confluence.invalid', 503, 'Synthetic upstream failure', {}, None)) as calls:
+            executed = await self.service.operations.command(self.reader, body)
+            count = calls.call_count
+            repeated = await self.service.operations.command(self.reader, body)
+            self.assertEqual(calls.call_count, count)
+        current = (await self.service.workspace_state(self.reader, run_id=run['run_id']))['run']
+        self.assertEqual([attempt['status'] for attempt in current['attempts']], ['failed'] * 3)
+        self.assertEqual(executed['attempt']['id'], repeated['attempt']['id'])
+        self.assertEqual(len(current['jobs']['j1']['decisions']), 0)
 
     async def test_nonpilot_functions_are_preparing_and_cannot_be_reviewed(self):
         await self.f.register_read_tool('jira', extended=True)
