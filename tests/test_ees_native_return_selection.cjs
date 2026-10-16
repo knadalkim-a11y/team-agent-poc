@@ -193,3 +193,14 @@ test('late rejected Native navigation cannot restore a previous account preview'
  navigation.reject(new Error('old route failed'));await returning;await settle();
  assert.equal(h.api.snapshot().state,null);assert.equal(h.api.snapshot().selection.tab,'my_work');assert.equal(h.api.snapshot().error,'');
 });
+
+test('failed fresh Native access clears the preview without exposing cache and allows retry',async()=>{
+ const h=harness('tools');await h.api.refresh();await h.api.select({workflow_id:'private'});await h.open('skills');
+ h.delayReplies({httpError:true,status:500,error:{message:'lookup unavailable'}});await h.click('procedures');await h.advance(1000);
+ assert.equal(h.frames.at(-1).native_return_pending,false,'failed access must not leave a permanent loading preview');
+ assert.equal(h.api.snapshot().state,null,'a failed check cannot reveal cached protected content');
+ assert.match(h.api.snapshot().error,/lookup unavailable/);
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?h.state:{ok:true,tools:[]});
+ await h.api.sourceAction({action:'refresh'});h.api.sync();await settle();
+ assert.equal(h.frames.at(-1).target_loading,false);assert.equal(h.frames.at(-1).tab,'overview');assert.equal(h.api.snapshot().error,'');assert.ok(h.api.snapshot().state);
+});

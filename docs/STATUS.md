@@ -3,7 +3,7 @@
 ## 2026-10-16 · #91 → #93 병합 승인·남은 리뷰 보완
 
 - **승인·순서:** 사용자가 두 PR의 병합까지 승인했다. 기존 Draft 유지·병합 금지는 이 요청으로 대체하며, #91의 최종 CI 성공 후 merge commit 병합 → 최신 main을 #93에 merge 통합 → 그 head CI 성공 후 #93 병합 → main CI 확인 순서다. main 직접 push·rebase·force-push는 하지 않는다.
-- **#91 보완:** 병합 전 자동 리뷰2건을 실제 controller에서 재현했다(새4시험 FAIL). 다른 목적지의 캐시 내용은 workspace·operations의 새 접근 확인이 끝날 때까지 가리고, 경로 이동 실패는 Native 선택·작성값을 유지하며 재시도 안내를 표시한다. 새 선택 우선과 이전 계정의 늦은 실패 무시도 검사했다. 전체 Node344개·Python controller 진입점1개 PASS. [첫 실패·보완·CI](../evals/v4-ui-20260930.md#native-return-selection-evidence-20261015).
+- **#91 보완:** 병합 전 자동 리뷰2건을 실제 controller에서 재현했다(새4시험 FAIL). 다른 목적지의 캐시 내용은 workspace·operations의 새 접근 확인이 끝날 때까지 가리고, 경로 이동 실패는 Native 선택·작성값을 유지하며 재시도 안내를 표시한다. 새 선택 우선과 이전 계정의 늦은 실패 무시도 검사했다. 조회 실패 시에는 preview와 캐시를 함께 폐기해 오류/재시도 화면으로 복구한다. 전체 Node345개·Python controller 진입점1개 PASS. [첫 실패·보완·CI](../evals/v4-ui-20260930.md#native-return-selection-evidence-20261015).
 - **#93 상태:** Claude 2차 재검토에서 이번1단계-1의 남은 지적 없음. 검토 head는 `e0b163a`이며 그 CI는31success/1정상skip이다. #91 뒤 main 통합과 새 head CI를 별도로 확인한다. #90과 양 PR의 기록·증거를 보존한다.
 - **다음 작업 하나:** 보완 #91 CI 성공을 확인하고 승인된 순서로 두 PR 병합과 최종 main CI 확인을 마친다. 사내 실행/적용·Figma 수정·#77/#79는 범위 밖이며 사내 적용본은 사용자 확인 `d4f1806`이다.
 
