@@ -17,7 +17,7 @@
 | 7 Confluence 시범 | search_pages 목록(페이지 번호·제목·주소)/한 쪽, get_page 본문 근거/잘리면 일부. 동작별 근거 확인 시 v1, 기존 읽기 승인 재사용. 모르는 원본/미설치는 안내만. 프로그램 갱신으로만 변경 |
 | 8 자료 호환 | 기존 work_tool_contracts와 작업의 시스템 범위·판 고정 보존, 이번에 옮기지 않음. 새 공용 테이블/회차 pin 분리. Native 도구·설정·PAT 삭제·초기화·재등록 없음 |
 
-저장은 새 `work_shared_tools`, `work_shared_tool_versions`, `work_shared_tool_pins` 세 테이블을 추가한다. 기존 계약·작업의 시스템 범위/판 고정 의미와 JSON을 옮기지 않는다. 이전 프로그램은 기존 자료를 계속 읽지만 공용 ID가 있는 새 작업은 실행할 수 없으므로 해당 작업은 이 버전 이상을 사용해야 한다. Native 도구·설정·암호화 키·개인 PAT에는 쓰지 않는다. 사내 설치 원본·주소·공간·암호화·팀원 PAT는 모두 미확인이다. [검증 기록](../../../evals/v4-ui-20260930.md#shared-tools-phase1-evidence-20261015).
+저장은 새 `work_shared_tools`, `work_shared_tool_versions`, `work_shared_tool_pins` 세 테이블을 추가한다. 기존 계약·작업의 시스템 범위/판 고정 의미와 JSON을 옮기지 않는다. 이전 프로그램은 기존 자료를 계속 읽지만 공용 ID가 있는 새 작업은 실행할 수 없으므로 해당 작업은 이 버전 이상을 사용해야 한다. Native 도구·설정·암호화 키·개인 PAT에는 쓰지 않는다. 사내 설치 원본·주소·공간·암호화·팀원 PAT는 모두 미확인이다. 실제 B10 대조에서 공통 패널은 기존 기본480px(내부479px)을 유지해 Figma580px와 차이가 있으며, 작업 편집의 기존 필드 배치도 유지한다. 대상별 목록·상세 카드·칸 아래 한 단계 선택과 동작/포커스는 실제 제품에서 검증한다. [검증 기록](../../../evals/v4-ui-20260930.md#shared-tools-phase1-evidence-20261015).
 
 <a id="scope-review-20261015"></a>
 

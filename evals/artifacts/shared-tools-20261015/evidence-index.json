@@ -1,5 +1,5 @@
 {
-  "scope": "local synthetic Native and SQLite; no onsite claims",
+  "scope": "Local real Native fixtures and CI compiled product; synthetic session/HTTP data; no onsite claims",
   "files": {
     "build-attempts.txt": {
       "sha256": "d3cc490189479e81c7e77249d410d9146a8bf7ef0683306b8aae166e8a66b2da",
@@ -28,6 +28,42 @@
     "read-only-help.log": {
       "sha256": "bf7bc30ca8b476c33d9860b0172980153755fd8b3a32b21e2344202539b101a7",
       "bytes": 704
+    },
+    "shared-b10-1-list-dom.json": {
+      "sha256": "14d2abc9f969149c50370ba31dfeee32ecb0fe1e5b59179b62a7d7fecdeee036",
+      "bytes": 34644
+    },
+    "shared-b10-1-list.png": {
+      "sha256": "84337d16dcf7d9cc13c78538dc72aa74de04106bd22bded3171f8de218c95991",
+      "bytes": 143861
+    },
+    "shared-b10-2-detail-dom.json": {
+      "sha256": "6e8e103e1a53eab0bf56fd130a70d104333bc87d1a2b00f4d7aa1575ed6c0549",
+      "bytes": 29507
+    },
+    "shared-b10-2-detail-top-dom.json": {
+      "sha256": "88f16c7e0e4843134798cc43a9152d55f16edbe2d592c1fc069cad54785b9074",
+      "bytes": 29489
+    },
+    "shared-b10-2-detail-top.png": {
+      "sha256": "1ed2399051a478513e203008d218386e73f9b422ffe00a9a89769c0ddeed9079",
+      "bytes": 114634
+    },
+    "shared-b10-2-detail.png": {
+      "sha256": "cbd316a4fbaaab226168ed7a40772f875f7184f674212480dc08bd59087a41c7",
+      "bytes": 115072
+    },
+    "shared-b10-5-picker-dom.json": {
+      "sha256": "2e617e9b3c66a3880e46612708ae4a6de5bd3e6d936d697a89557df11be826c2",
+      "bytes": 43552
+    },
+    "shared-b10-5-picker.png": {
+      "sha256": "50a7da1762ca469d74b73bb7e330e3a116b32e2425c7a26095e9e7b4c41593ac",
+      "bytes": 104399
+    },
+    "shared-b10-comparison.json": {
+      "sha256": "f28b6c0f777389806007d9f41999588534f2584dc0ae43e1b9861f708c567361",
+      "bytes": 1392
     }
   },
   "figma": {
@@ -36,5 +72,14 @@
     "B10-2": "1353:20597",
     "B10-5": "1353:21167"
   },
-  "product_comparison": "pending CI; local browser blocked before page load"
+  "product_comparison": {
+    "implementation_head": "f2029805be3e9745838e9e00cc5534e7c15b3c65",
+    "run_id": 38828228753,
+    "native_compose_job": 116742622742,
+    "artifact_id": 12016766416,
+    "artifact_sha256": "4488013a71ed756dcb49e31c60e3a54957c299b59fc120df4fd8205b3d7ee2c7",
+    "browser": "Chrome/155.0.8059.39",
+    "result": "PASS: list/detail/picker behavior, Native link, saved shared ID, computed style and keyboard focus",
+    "known_layout_difference": "Figma panel 580px; existing product default 480px (observed inner width 479px). Existing editor field layout retained; B10-6/7 excluded."
+  }
 }
