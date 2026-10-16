@@ -150,3 +150,46 @@ test('Native destination publication precedes the physical route change and alre
  assert.deepEqual(frame.aria_current,[{action:'tools',native_id:undefined}]);
  assert.equal(h.api.reference().kind,'none');assert.equal(h.context.window.__eesNativeWorkV1.helpContext(),null);
 });
+
+for(const denied of [false,true])test(`cached Native destination stays hidden until fresh access completes: denied=${denied}`,async()=>{
+ const h=harness('tools');h.state.workflows=[{id:'private',name:'cached protected workflow'}];
+ await h.api.refresh();await h.api.select({workflow_id:'private'});await h.open('skills');
+ const first=h.authorFrames.length;
+ h.delayReplies(denied?{httpError:true,status:403,error:{code:'scope_forbidden',message:'access removed'}}:h.state);
+ await h.click('procedures');h.api.sync();await settle();
+ assert.equal(h.frames.at(-1).target_loading,true,'cached target cannot be revealed before workspace access returns');
+ assert.equal(h.authorFrames.length,first);assert.equal(h.api.reference().kind,'none');
+ await h.advance(1000);
+ if(denied){assert.equal(h.api.snapshot().state,null);assert.equal(h.authorFrames.length,first);return;}
+ assert.equal(h.frames.at(-1).target_loading,true,'wait for operations access too');
+ await h.advance(2000);assert.equal(h.frames.at(-1).target_loading,false);assert.ok(h.authorFrames.length>first);
+ assert.equal(h.reads.length,2,'successful access does not add a second selection refresh');
+});
+
+for(const asynchronous of [false,true])test(`failed Native return restores Native selection and permits retry: async=${asynchronous}`,async()=>{
+ const h=harness('tools');await h.open('skills');
+ const normal=h.context.window.__eesSourceShellV1.navigate;
+ h.context.window.__eesSourceShellV1.navigate=()=>{if(asynchronous)return Promise.reject(new Error('route load failed'));throw new Error('route load failed');};
+ await h.api.sourceAction({action:'procedures'});await settle();
+ const frame=h.frames.at(-1);assert.equal(frame.native,true);assert.equal(frame.native_return_pending,false);
+ assert.equal(h.context.location.pathname,'/workspace/skills');assert.match(h.api.snapshot().error,/다시/);
+ assert.equal(h.designer.readDraft(),h.draft);assert.equal(h.context.window.__eesNativeDraftV1.read(),h.chat);
+ h.context.window.__eesSourceShellV1.navigate=normal;await h.click('procedures');await settle();
+ assert.equal(h.context.location.pathname+h.context.location.search,'/c/original?keep=1');assert.equal(h.api.snapshot().selection.tab,'overview');
+});
+
+test('a newer selection supersedes the applied Native return preview',async()=>{
+ const h=harness('tools');await h.open('skills');h.delayReplies();await h.click('procedures');
+ const changed=h.api.select({mode:'work',tab:'records',workflow_id:'',run_id:''});await settle();
+ assert.equal(h.frames.at(-1).mode,'work');assert.equal(h.frames.at(-1).tab,'records');
+ await h.advance(1000);await h.advance(2000);await changed;
+ assert.equal(h.api.snapshot().selection.tab,'records');
+});
+
+test('late rejected Native navigation cannot restore a previous account preview',async()=>{
+ const h=harness('tools'),navigation=deferred();await h.open('skills');
+ h.context.window.__eesSourceShellV1.navigate=()=>navigation.promise;
+ const returning=h.api.sourceAction({action:'procedures'});h.setAuth('account-b-token');h.api.reset();
+ navigation.reject(new Error('old route failed'));await returning;await settle();
+ assert.equal(h.api.snapshot().state,null);assert.equal(h.api.snapshot().selection.tab,'my_work');assert.equal(h.api.snapshot().error,'');
+});

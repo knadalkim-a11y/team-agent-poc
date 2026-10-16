@@ -69,7 +69,7 @@
     if(action==='chats')return {mode:'work',tab:'chats'};
     return null;
   }
-  function returnFromNative(target){
+  async function returnFromNative(target){
     if(!shellAvailable()||!actor())return;
     const ticket=nativeTicketCurrent(nativeTicket)?nativeTicket:null;
     // A menu click returns through Native's route, then applies its destination.
@@ -85,12 +85,20 @@
     if(!same&&pendingNativeAction.patch)render();
     source()?.closeSettings?.();
     if(ticket)ticket.phase='returning';
-    nativeAnchor(ticket?.path || '/');
+    const pending=pendingNativeAction;
+    try{await nativeAnchor(ticket?.path || '/');}
+    catch(_){
+      if(pendingNativeAction!==pending||pending.auth!==token()||pending.actor!==actor()||!nativePage())return;
+      pendingNativeAction=null;
+      if(nativeTicket===ticket&&ticket)ticket.phase='native';
+      error='화면으로 돌아가지 못했습니다. 현재 화면에서 메뉴를 다시 눌러 주세요.';render();
+    }
   }
   async function resumeNativeAction(){
     const pending=pendingNativeAction;
     if(!pending||pending.running||!available()||!chatPrepared()||nativeTicket)return;
     if(pending.auth!==token()||pending.actor!==actor()||pending.path!==location.pathname+location.search||pending.same){pendingNativeAction=null;return;}
+    if(pending.applied){if(readyRoute!==route)return;pendingNativeAction=null;render();return;}
     pending.running=true;
     try{
       if(pending.patch){
@@ -108,7 +116,7 @@
     // Dirty reviews use the existing guarded select path after validation.
     if(state?.run?.definition?.nodes?.[selection.job_id]?.result_block==='ai_review'&&view.readReview?.().dirty)return;
     workUI.closeHelp({restoreFocus:false});designer.closeStart?.();procedureStart=null;view.capture();
-    commitSelection(patch);pendingNativeAction=null;
+    commitSelection(patch);pending.applied=true; // Keep the placeholder until fresh workspace and operations access succeed.
   }
   function resumeNativeView(ticket){
     if(!nativeTicketCurrent(ticket)||location.pathname+location.search!==ticket.path)return;
@@ -288,7 +296,7 @@
     if(open)loadOptions();
     return state;
   }
-  function commitSelection(patch){clearTimeout(reviewTimer);const previous={...selection};if(state&&!stateKey)stateKey=workspaceKey();cacheWorkspace();if(!restored)initialSelectionPatch={...initialSelectionPatch,chat_reference:null,...patch};selection={...selection,chat_reference:null,...patch};changeWorkspace(previous);epoch++;workEpoch++;chatCreations.clear();chatAliases.clear();pendingInputProposal=null;error='';commandError='';clearTimeout(refreshTimer);remember();}
+  function commitSelection(patch){if(pendingNativeAction?.applied)pendingNativeAction=null;clearTimeout(reviewTimer);const previous={...selection};if(state&&!stateKey)stateKey=workspaceKey();cacheWorkspace();if(!restored)initialSelectionPatch={...initialSelectionPatch,chat_reference:null,...patch};selection={...selection,chat_reference:null,...patch};changeWorkspace(previous);epoch++;workEpoch++;chatCreations.clear();chatAliases.clear();pendingInputProposal=null;error='';commandError='';clearTimeout(refreshTimer);remember();}
   async function select(patch,{fetch=true,validate=null}={}){workUI.closeHelp({restoreFocus:false});designer.closeStart?.();procedureStart=null;view.capture();const before=context();while(state?.run?.definition?.nodes?.[selection.job_id]?.result_block==='ai_review'&&view.readReview?.().dirty){if(!await saveReviewDraft()||before!==context())return null;view.capture();}if(validate&&!validate())return null;commitSelection(patch);render();if(fetch)return refresh();refreshTimer=setTimeout(refresh,2500);loadOptions();return state;}
   async function mutate(body,{refreshAfter=true,accept=null}={}){if(busy)return null;const at=context();setBusy(true);try{const result=await command(body);if(result&&accept)accept(result);if(result&&refreshAfter&&!await refresh())return null;return at===context()?result:null;}catch(failure){if(at===context()){commandError=failure.message;render();}return null;}finally{setBusy(false);}}
   async function models(){
@@ -545,7 +553,7 @@
   }
   async function sourceAction(dataset){
     if(!dataset||typeof dataset!=='object')return;
-    try{if(nativePage()&&!['native_open','refresh','category','choose_system'].includes(dataset.action)){returnFromNative({dataset});return;}return await handleClick({dataset});}
+    try{if(nativePage()&&!['native_open','refresh','category','choose_system'].includes(dataset.action)){return await returnFromNative({dataset});}return await handleClick({dataset});}
     catch(failure){error=failure.message;render();}
   }
   function handleEvent(event){
