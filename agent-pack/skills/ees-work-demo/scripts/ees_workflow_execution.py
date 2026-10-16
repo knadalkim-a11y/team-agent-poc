@@ -406,7 +406,8 @@ class ExecutionRuntime:
         if _hash(case) != _hash(plan["case_snapshot"]):
             raise WorkflowError("revision_conflict", "진행 건이 변경되었습니다. 새 계획을 확인해 주세요.")
         await self._ready(user, case, plan["jobs"])
-        has_shared = any(call.get("shared_tool_id") for node in case["definition"]["nodes"].values() for call in node.get("execution", {}).get("calls", []))
+        selected_definition = {"nodes": {key: case["definition"]["nodes"][key] for key in plan["jobs"]}}
+        has_shared = any(call.get("shared_tool_id") for node in selected_definition["nodes"].values() for call in node.get("execution", {}).get("calls", []))
         if has_shared:
             actor, _, groups = await self.service._work_actor(user)
         with self.service._db(write=True) as db:
@@ -437,7 +438,7 @@ class ExecutionRuntime:
                    "status": "queued", "revision": 0, "created_at": time.time(), "updated_at": time.time(),
                    "deadline": time.time() + RUN_TTL, "reason": "", "jobs": {}}
             if has_shared:
-                self.service.shared_tools.pin(db, actor, groups, "execution", run["id"], case["definition"])
+                self.service.shared_tools.pin(db, actor, groups, "execution", run["id"], selected_definition)
             for job_id in plan["jobs"]:
                 saved = case["jobs"][job_id]
                 valid = saved.get("execution_validation")

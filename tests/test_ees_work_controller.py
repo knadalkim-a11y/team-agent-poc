@@ -18,7 +18,7 @@ class IntegratedControllerTests(unittest.TestCase):
     def test_async_identity_receipt_and_evidence_contracts(self):
         node = shutil.which("node")
         self.assertIsNotNone(node, "Required Node contract runtime is unavailable")
-        for filename in ['test_ees_execution_ui.cjs']:
+        for filename in ['test_ees_execution_ui.cjs', 'test_ees_native_return_selection.cjs']:
             with self.subTest(script=filename):
                 result = subprocess.run([node, "--test", "--test-reporter=tap", str(ROOT / "tests" / filename)],
                     cwd=ROOT, capture_output=True, text=True, encoding="utf-8", timeout=30)

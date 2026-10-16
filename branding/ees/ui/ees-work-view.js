@@ -439,7 +439,7 @@ function createWorkView({callbacks}){
   function publish(){
     const node=job();
     window.__eesSourceShellV1?.publish?.({...snapshot,
-      context_title:snapshot.procedure_start?'새 업무 절차 만들기':node?.name || state().workflow?.name || '대화'});
+      context_title:snapshot.native_return_pending?'대화':snapshot.procedure_start?'새 업무 절차 만들기':node?.name || state().workflow?.name || '대화'});
   }
   function runOverview(){
     const data=state(),run=data.run,def=definition(),nodes=Object.values(def.nodes || {}),jobs=nodes.filter(node=>node.type==='j'),root=nodes.find(node=>node.type==='p'&&!node.parent),groups=nodes.filter(node=>node.type==='t');
@@ -470,7 +470,7 @@ function createWorkView({callbacks}){
   function panel(){if(!host)return;const s=selection(),data=state(),key=[data.capabilities?.actor_id,s.system_id,s.factory_id,s.mode,s.tab,s.run_id,s.workflow_id,s.job_id].join('/'),sameTarget=lastKey===key;lastKey=key;host.dataset.eesMode=s.mode || 'work';
     const paint=html=>{if(sameTarget)workPatchContent(host,html);else host.innerHTML=html;};
     const title=s.mode==='author'?'워크스페이스':s.tab==='my_work'?'내 업무':s.tab==='records'?'실행 기록':'업무';
-    const top=`<header class="ew-panel-header"><strong>${title}</strong><span>${esc(data.workflow?.name || '')}</span>${button('닫기','close_panel','aria-label="업무 패널 닫기" class="ew-icon-button"')}</header>`;
+    const top=`<header class="ew-panel-header"><strong>${title}</strong><span>${esc(snapshot.native_return_pending?'':data.workflow?.name || '')}</span>${button('닫기','close_panel','aria-label="업무 패널 닫기" class="ew-icon-button"')}</header>`;
     if(snapshot.evidence_unavailable){paint(top+`<div class="ew-scroll"><div class="ew-error" role="alert"><p>${esc(snapshot.error || '기록을 다시 조회해 주세요.')}</p>${button('다시 조회','refresh')}</div></div>`);setBusy(snapshot.busy);return;}
     if(!snapshot.target_loading&&!(snapshot.scope_loading&&snapshot.error)&&snapshot.state&&s.mode==='author'&&s.tab!=='workspace_admin'){if(!workCanCreate(data.capabilities)){paint(top+'<div class="ew-scroll"><p class="ew-empty">'+(workNativeTargets.some(target=>workNativeAllowed(data.capabilities,target.id))?'왼쪽 메뉴에서 사용할 화면을 여세요.':'현재 계정으로 EES Workflow에서 열 수 있는 항목이 없습니다.')+'</p></div>');return;}if(!$('#ees-work-authoring-panel',host))paint(top+'<div id="ees-work-authoring-panel" class="ew-scroll"></div>');return;}
     let body='';currentDraftKey='';

@@ -151,6 +151,67 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
     async def test_publication_blocks_list_handoff_in_runtime_fallback_bindings(self):
         await self.rejected_shared_binding('query', {'result': {'job_id':'source', 'path':['items'], 'value_field':'id', 'confirmed':True}}, '이어 붙이기는 다음 단계에서 지원', nested=True)
 
+    async def test_publication_checks_required_constant_and_input_bindings(self):
+        await self.review()
+        cases = [({}, []), ({'query': {'constant': 7}}, []),
+                 ({'query': {'constant': 'guide'}, 'limit': {'constant': 0}}, []),
+                 ({'query': {'input': 'missing'}}, []),
+                 ({'query': {'input': 'count'}}, [dict(id='count', name='수', type='number', scope='run')])]
+        for bindings, inputs in cases:
+            with self.subTest(bindings=bindings):
+                wid = await self.workflow()
+                with self.service._db() as db:
+                    definition = json.loads(db.execute('SELECT draft FROM work_definitions WHERE id=?', (wid,)).fetchone()[0])
+                definition['nodes']['j1'].update(argument_bindings=bindings, inputs=inputs)
+                saved = await self.service.workspace_command(self.admin, self.body('save_draft', 3, workflow_id=wid, definition=definition))
+                if bindings == {'query': {'input': 'missing'}}:
+                    self.assertFalse(saved['ok'], saved)  # Existing definition validation rejects undeclared inputs earlier.
+                    continue
+                self.assertTrue(saved['ok'], saved)
+                validated = await self.core('validate_workflow', 4, workflow_id=wid)
+                self.assertTrue(validated['validation']['errors'], bindings)
+                rejected = await self.service.workspace_command(self.admin, self.body('publish_workflow', 4, workflow_id=wid))
+                self.assertFalse(rejected['ok'], rejected)
+
+    async def test_publication_accepts_compatible_manual_input_and_constant_bindings(self):
+        await self.review()
+        wid = await self.workflow()
+        with self.service._db() as db:
+            definition = json.loads(db.execute('SELECT draft FROM work_definitions WHERE id=?', (wid,)).fetchone()[0])
+        definition['nodes']['j1'].update(
+            inputs=[dict(id='custom_query', name='찾을 말', type='text', scope='run', required=True),
+                    dict(id='count', name='최대 개수', type='number', scope='run')],
+            argument_bindings={'query': {'input':'custom_query'}, 'space_key': {'constant':'EMS'}, 'limit': {'input':'count'}})
+        await self.core('save_draft', 3, workflow_id=wid, definition=definition)
+        validated = await self.core('validate_workflow', 4, workflow_id=wid)
+        self.assertEqual(validated['validation']['errors'], [])
+        await self.core('publish_workflow', 4, workflow_id=wid)
+
+    async def test_selected_execution_pins_only_selected_jobs_shared_tools(self):
+        from workflow_fixture import historical_facade, load_workflow_examples, arrange_legacy_catalog
+        from test_ees_workflow_execution import publish
+        await self.review()
+        page = await self.review('managed-get_page')
+        await self.tools.command(self.admin, self.body('shared_tool_disable', page['revision'], shared_tool_id=page['id'], reference=page['observed_reference']))
+        legacy = historical_facade('open_webui').WorkflowService(self.service.database, self.f.native_users.Users.get_user_by_id, lambda _:None, native_bridge=self.f.bridge)
+        arrange_legacy_catalog(legacy)
+        legacy.shared_tools = self.tools
+        legacy._work_actor = self.service._work_actor
+        fragment = load_workflow_examples('open_webui').installation_docs_workflow(self.refs)
+        for node in fragment['nodes'].values():
+            for call in node.get('execution', {}).get('calls', []):
+                call['shared_tool_id'] = 'managed-' + call.pop('reference')['function']
+        process = publish(legacy, fragment)
+        with legacy._db() as db: version = legacy._catalog(db)[0]['version']
+        plan = await legacy.execution_plan(self.reader, {'node_id':'new-documents-search-j', 'inputs':{'query':'guide', 'space_key':'EMS'}, 'scope':{'site_id':'us-a', 'system':'EMS', 'process_id':process, 'version':version}})
+        self.assertTrue(plan['ok'], plan)
+        started = await legacy.execution_action(self.reader, {'action':'start', 'plan_id':plan['plan']['id'], 'plan_hash':plan['plan']['hash'], 'request_id':'selected-shared-start'})
+        self.assertTrue(started['ok'], started)
+        with legacy._db() as db:
+            pins = db.execute('SELECT tool_id FROM work_shared_tool_pins WHERE run_id=?', (started['run']['id'],)).fetchall()
+        self.assertEqual([row[0] for row in pins], [self.key])
+        self.assertEqual(set(started['run']['jobs']), {'new-documents-search-j'})
+
     async def test_groups_disable_enable_and_unknown_source_never_dispatch_or_write_native(self):
         item = await self.review()
         self.assertEqual(await self.tools.list(self.f.users['outsider'], usable_only=True), [])

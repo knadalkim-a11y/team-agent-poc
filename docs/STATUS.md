@@ -1,5 +1,12 @@
 # 현재 작업 상태
 
+## 2026-10-16 · #91 병합 완료·#93 main 통합
+
+- **승인/순서:** 사용자가 두 PR의 병합까지 요청했다. #91 최종 CI 성공 → merge commit 병합 → #93에 main 통합 → 최종 CI 성공 → #93 merge commit 병합 순서다. 아래 Draft/병합 보류 문구는 당시 기록이다.
+- **현재:** #91 head7dd9132의 최종 CI38850315905가31성공/1정상제외로 끝나 merge commit `ff0641628860c78f13e8f33ab60eee8cd3491a4d`로 병합했다. 이 main을 #93에 merge 통합하고 문서3개 충돌의 양쪽 기록·증거를 보존했다. #93의 추가 자동 검토3건도 게시 필수 인자·자료형, 선택 범위 pin, 수동 연결 보존으로 보완했다. [첫 실패·회귀](../evals/v4-ui-20260930.md#shared-tools-merge-review-20261016).
+- **검증:** #93 로컬 Python111PASS/이전 source fixture 미준비1SKIP. main 통합 뒤 전체 Node354PASS·Python controller1PASS·문서/신규 diff 검사 통과. 실제 브라우저/Windows는 최종 통합 CI로 확인한다.
+- **다음 작업:** 통합 #93 최종 head CI 성공 후 merge commit 병합과 최종 main CI 확인. 사내 적용·설치 확인은 미실행이며 설치 원본·주소·허용 공간·암호화·팀원 PAT는 미확인이다. Figma 수정·#77/#79·main 직접 push는 하지 않는다.
+
 ## 2026-10-16 · 공용 Confluence 도구 #93 재검토 반영
 
 - **기준/범위:** 최신 main `8a4a716`(#90 병합 포함), #92와 B10-1/2/5. [현재 계약](mockups/ees-work/TASK.md#shared-tools-phase1-20261015). 기존 계약은 보존하고 기본 제공 조회2개를 공용으로 확인·사용한다.
@@ -7,6 +14,15 @@
 - **현재 검증:** head4778b97의 Claude 재검토3건과 확인창 보완을 같은 Draft #93에서 반영했다. 이전 방식→공용의 인자 정리, 게시 시 입력 키/목록 연결 거부, 관리자 운영 안내와 변경 요약·그룹/담당 분리다. 로컬 공용 Native24개(22개+호환 경로2개), 기존 operations48개, Node196개가 통과했다. [첫 실패·새 회귀·실제 화면/CI](../evals/v4-ui-20260930.md#shared-tools-rereview-20261016). 이전7건의 최종 CI38834234451 성공은 당시 증거이며 새 head 결과는 [Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/93/checks)가 원본이다.
 - **다음 작업:** 최종 head CI 성공 후 Claude 재검토. 항목별 답변/요청은 PR 댓글 하나로 남긴다. Draft 유지·병합 없음. 리뷰 마지막 묶음은1단계-2로 넘기며 #91 통합 순서를 유지한다.
 - **사내:** Confluence 설치 원본·주소·허용 공간·개인 설정 암호화·팀원 PAT 저장은 미확인. 사내 실행/적용·Figma 수정·#77/#79 착수 없음.
+
+## 2026-10-16 · #91 → #93 병합 승인·남은 리뷰 보완
+
+- **승인·순서:** 사용자가 두 PR의 병합까지 승인했다. 기존 Draft 유지·병합 금지는 이 요청으로 대체하며, #91의 최종 CI 성공 후 merge commit 병합 → 최신 main을 #93에 merge 통합 → 그 head CI 성공 후 #93 병합 → main CI 확인 순서다. main 직접 push·rebase·force-push는 하지 않는다.
+- **#91 보완:** 병합 전 자동 리뷰2건을 실제 controller에서 재현했다(새4시험 FAIL). 다른 목적지의 캐시 내용은 workspace·operations의 새 접근 확인이 끝날 때까지 가리고, 경로 이동 실패는 Native 선택·작성값을 유지하며 재시도 안내를 표시한다. 새 선택 우선과 이전 계정의 늦은 실패 무시도 검사했다. 조회 실패 시에는 preview와 캐시를 함께 폐기해 오류/재시도 화면으로 복구한다. 전체 Node345개·Python controller 진입점1개 PASS. [첫 실패·보완·CI](../evals/v4-ui-20260930.md#native-return-selection-evidence-20261015).
+- **#93 상태:** Claude 2차 재검토에서 이번1단계-1의 남은 지적 없음. 검토 head는 `e0b163a`이며 그 CI는31success/1정상skip이다. #91 뒤 main 통합과 새 head CI를 별도로 확인한다. #90과 양 PR의 기록·증거를 보존한다.
+- **다음 작업 하나:** 보완 #91 CI 성공을 확인하고 승인된 순서로 두 PR 병합과 최종 main CI 확인을 마친다. 사내 실행/적용·Figma 수정·#77/#79는 범위 밖이며 사내 적용본은 사용자 확인 `d4f1806`이다.
+
+아래는 각 단계 당시의 병합·적용 준비 기록이며 현재 설치 상태와 이번 작업 범위는 위 항목을 따른다.
 
 ## 2026-10-15 · #88 병합 완료·#89에 main 통합
 

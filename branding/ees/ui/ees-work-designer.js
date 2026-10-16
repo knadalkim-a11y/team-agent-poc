@@ -301,13 +301,15 @@ function createWorkDesigner({callbacks}) {
     }
   }
   function applySharedTool(node,item){
-    const bindings=Object.fromEntries(Object.keys(item.input_schema.properties||{}).map(key=>[key,{input:key}]));
+    const properties=item.input_schema.properties||{};
+    const retained=Object.fromEntries(Object.entries(node.argument_bindings||{}).filter(([key])=>Object.hasOwn(properties,key)));
+    const bindings=Object.fromEntries(Object.keys(properties).filter(key=>!Object.hasOwn(retained,key)).map(key=>[key,{input:key}]));
     const result=item.function==='search_pages'?'list_confirm':'human_confirm';
     node.shared_tool_generated={shared_tool_id:item.id,argument_bindings:clone(bindings),previous_result_block:node.result_block,result_block:result};
-    node.shared_tool_id=item.id;node.result_block=result;node.argument_bindings=bindings;
+    node.shared_tool_id=item.id;node.result_block=result;node.argument_bindings={...bindings,...retained};
     const types={string:'text',integer:'number',array:'multi'};
     for(const [key,value] of Object.entries(item.input_schema.properties||{})){
-      if(!(node.inputs||[]).some(field=>field.id===key))(node.inputs ||= []).push({id:key,name:sharedInputNames[key]||key,type:types[value.type]||'text',required:(item.input_schema.required||[]).includes(key),scope:'run',source:{shared_tool_id:item.id},...(value.type==='array'?{options:[]}:{}),...(value.default!==undefined?{default:value.default}:{})});
+      if(Object.hasOwn(bindings,key)&&!(node.inputs||[]).some(field=>field.id===key))(node.inputs ||= []).push({id:key,name:sharedInputNames[key]||key,type:types[value.type]||'text',required:(item.input_schema.required||[]).includes(key),scope:'run',source:{shared_tool_id:item.id},...(value.type==='array'?{options:[]}:{}),...(value.default!==undefined?{default:value.default}:{})});
     }
   }
   function sharedPickerHTML(node,selected,options){

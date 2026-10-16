@@ -1663,11 +1663,28 @@ class OperationsRuntime:
                     bindings = job.get("argument_bindings", job.get("execution", {}).get("argument_bindings", {}))
                     if not isinstance(bindings, dict):
                         fail("argument_bindings_invalid", "입력과 도구 인자 연결을 확인해 주세요.")
+                    for required in tool["input_schema"].get("required", []):
+                        if required not in bindings:
+                            errors.append(job["id"] + ": 공용 도구의 필수 입력을 연결해 주세요: " + required)
+                    fields = {field["id"]: field for field in job.get("inputs", [])}
+                    compatible = {"string": {"text", "datetime", "single", "person"}, "integer": {"number"}, "array": {"multi"}}
+                    constants = {}
                     for argument, binding in bindings.items():
                         if argument not in properties:
                             errors.append(job["id"] + ": 공용 도구 입력에 없는 인자 연결을 지워 주세요: " + argument)
+                            continue
                         if isinstance(binding, dict) and "result" in binding:
                             errors.append(job["id"] + ": 공용 도구로 목록 이어 붙이기는 다음 단계에서 지원합니다.")
+                            continue
+                        if isinstance(binding, dict) and set(binding) == {"constant"}:
+                            constants[argument] = binding["constant"]
+                            continue
+                        field_id = binding if isinstance(binding, str) else binding.get("input") if isinstance(binding, dict) and set(binding) == {"input"} else None
+                        field = fields.get(field_id) if isinstance(field_id, str) else None
+                        if not field or field.get("type") not in compatible.get(properties[argument].get("type"), set()):
+                            errors.append(job["id"] + ": 공용 도구에 연결할 입력과 자료형을 확인해 주세요: " + argument)
+                    from .ees_workflow_native import validate_arguments
+                    validate_arguments(tool["function"], {**tool["input_schema"], "required": []}, constants)
                 except WorkflowError as error:
                     errors.append(job.get("id", "") + ": " + error.message)
                 continue

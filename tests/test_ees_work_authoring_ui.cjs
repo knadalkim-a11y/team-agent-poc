@@ -362,3 +362,15 @@ test('shared review names changed categories without exposing references and sep
   const dialog=JSON.stringify(h.dialogHistory.at(-1));assert.match(dialog,new RegExp('바뀐 항목: '+label));assert.doesNotMatch(dialog,/private-|changed-private/);assert.match(dialog,/ew-shared-access/);assert.match(dialog,/<fieldset><legend>쓸 수 있는 그룹<\/legend>[\s\S]*<\/fieldset><label>담당/);
  }
 });
+
+test('shared tool reselection preserves customized compatible bindings and manual inputs',async()=>{
+ const h=harness();sharedReviewFixture(h);h.render();await h.node();
+ h.click('pick_job_tool',{id:'managed-search_pages',shared:'true'});await flush();
+ h.dialogs.push({id:'custom_query',name:'직접 지정한 검색어',type:'text',scope:'run',required:true,tool_argument:'query'});h.click('input_add');await flush();
+ for(const viaNone of [false,true]){
+  if(viaNone){h.click('pick_job_tool',{id:''});await flush();}
+  h.click('pick_job_tool',{id:'managed-search_pages',shared:'true'});await flush();
+  const job=h.draft().definition.nodes.j;assert.deepEqual(job.argument_bindings.query,{input:'custom_query'});
+  assert.ok(job.inputs.some(field=>field.id==='custom_query'));assert.ok(!job.inputs.some(field=>field.id==='query'));
+ }
+});

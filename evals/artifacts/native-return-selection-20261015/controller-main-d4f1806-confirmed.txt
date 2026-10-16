@@ -1,0 +1,436 @@
+TAP version 13
+# Subtest: Native return selects procedures before any response: tools -> skills
+not ok 1 - Native return selects procedures before any response: tools -> skills
+  ---
+  duration_ms: 27.083506
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"tools","native":"skills","destination":"procedures","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]}],"staleAuthors":[{"phase":"clicked","time":0,"mode":"author","tab":"tools","workflow_id":""},{"phase":"clicked","time":0,"mode":"author","tab":"tools","workflow_id":""},{"phase":"operations-arrived-2000ms","time":2000,"mode":"author","tab":"tools","workflow_id":""}]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
+  ...
+# Subtest: Native return selects workspace_admin before any response: tools -> skills
+not ok 2 - Native return selects workspace_admin before any response: tools -> skills
+  ---
+  duration_ms: 11.027054
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"tools","native":"skills","destination":"workspace_admin","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]}],"staleAuthors":[{"phase":"clicked","time":0,"mode":"author","tab":"tools","workflow_id":""},{"phase":"clicked","time":0,"mode":"author","tab":"tools","workflow_id":""},{"phase":"operations-arrived-2000ms","time":2000,"mode":"author","tab":"tools","workflow_id":""}]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: Native return selects work before any response: tools -> skills
+not ok 3 - Native return selects work before any response: tools -> skills
+  ---
+  duration_ms: 6.880854
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"tools","native":"skills","destination":"work","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]}],"staleAuthors":[{"phase":"clicked","time":0,"mode":"author","tab":"tools","workflow_id":""},{"phase":"clicked","time":0,"mode":"author","tab":"tools","workflow_id":""},{"phase":"operations-arrived-2000ms","time":2000,"mode":"author","tab":"tools","workflow_id":""}]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: Native return selects procedures before any response: tools -> models
+not ok 4 - Native return selects procedures before any response: tools -> models
+  ---
+  duration_ms: 7.674399
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"tools","native":"models","destination":"procedures","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]}],"staleAuthors":[{"phase":"clicked","time":0,"mode":"author","tab":"tools","workflow_id":""},{"phase":"clicked","time":0,"mode":"author","tab":"tools","workflow_id":""},{"phase":"operations-arrived-2000ms","time":2000,"mode":"author","tab":"tools","workflow_id":""}]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: Native return selects workspace_admin before any response: tools -> models
+not ok 5 - Native return selects workspace_admin before any response: tools -> models
+  ---
+  duration_ms: 8.006548
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"tools","native":"models","destination":"workspace_admin","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]}],"staleAuthors":[{"phase":"clicked","time":0,"mode":"author","tab":"tools","workflow_id":""},{"phase":"clicked","time":0,"mode":"author","tab":"tools","workflow_id":""},{"phase":"operations-arrived-2000ms","time":2000,"mode":"author","tab":"tools","workflow_id":""}]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: Native return selects work before any response: tools -> models
+not ok 6 - Native return selects work before any response: tools -> models
+  ---
+  duration_ms: 8.500261
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"tools","native":"models","destination":"work","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"tools","workflow_id":"","aria_current":[{"action":"tools"}]}],"staleAuthors":[{"phase":"clicked","time":0,"mode":"author","tab":"tools","workflow_id":""},{"phase":"clicked","time":0,"mode":"author","tab":"tools","workflow_id":""},{"phase":"operations-arrived-2000ms","time":2000,"mode":"author","tab":"tools","workflow_id":""}]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: Native return selects tools before any response: procedures -> skills
+not ok 7 - Native return selects tools before any response: procedures -> skills
+  ---
+  duration_ms: 8.60534
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"procedures","native":"skills","destination":"tools","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]}],"staleAuthors":[{"phase":"clicked","time":0,"mode":"author","tab":"overview","workflow_id":"draft-workflow"},{"phase":"clicked","time":0,"mode":"author","tab":"overview","workflow_id":"draft-workflow"},{"phase":"operations-arrived-2000ms","time":2000,"mode":"author","tab":"overview","workflow_id":"draft-workflow"}]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: Native return selects workspace_admin before any response: procedures -> skills
+not ok 8 - Native return selects workspace_admin before any response: procedures -> skills
+  ---
+  duration_ms: 7.951666
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"procedures","native":"skills","destination":"workspace_admin","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]}],"staleAuthors":[{"phase":"clicked","time":0,"mode":"author","tab":"overview","workflow_id":"draft-workflow"},{"phase":"clicked","time":0,"mode":"author","tab":"overview","workflow_id":"draft-workflow"},{"phase":"operations-arrived-2000ms","time":2000,"mode":"author","tab":"overview","workflow_id":"draft-workflow"}]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: Native return selects work before any response: procedures -> skills
+not ok 9 - Native return selects work before any response: procedures -> skills
+  ---
+  duration_ms: 11.395449
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"procedures","native":"skills","destination":"work","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]}],"staleAuthors":[{"phase":"clicked","time":0,"mode":"author","tab":"overview","workflow_id":"draft-workflow"},{"phase":"clicked","time":0,"mode":"author","tab":"overview","workflow_id":"draft-workflow"},{"phase":"operations-arrived-2000ms","time":2000,"mode":"author","tab":"overview","workflow_id":"draft-workflow"}]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: Native return selects tools before any response: procedures -> models
+not ok 10 - Native return selects tools before any response: procedures -> models
+  ---
+  duration_ms: 24.360018
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"procedures","native":"models","destination":"tools","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]}],"staleAuthors":[{"phase":"clicked","time":0,"mode":"author","tab":"overview","workflow_id":"draft-workflow"},{"phase":"clicked","time":0,"mode":"author","tab":"overview","workflow_id":"draft-workflow"},{"phase":"operations-arrived-2000ms","time":2000,"mode":"author","tab":"overview","workflow_id":"draft-workflow"}]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: Native return selects workspace_admin before any response: procedures -> models
+not ok 11 - Native return selects workspace_admin before any response: procedures -> models
+  ---
+  duration_ms: 8.546541
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"procedures","native":"models","destination":"workspace_admin","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]}],"staleAuthors":[{"phase":"clicked","time":0,"mode":"author","tab":"overview","workflow_id":"draft-workflow"},{"phase":"clicked","time":0,"mode":"author","tab":"overview","workflow_id":"draft-workflow"},{"phase":"operations-arrived-2000ms","time":2000,"mode":"author","tab":"overview","workflow_id":"draft-workflow"}]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: Native return selects work before any response: procedures -> models
+not ok 12 - Native return selects work before any response: procedures -> models
+  ---
+  duration_ms: 8.840268
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"procedures","native":"models","destination":"work","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"overview","workflow_id":"draft-workflow","aria_current":[{"action":"procedures"}]}],"staleAuthors":[{"phase":"clicked","time":0,"mode":"author","tab":"overview","workflow_id":"draft-workflow"},{"phase":"clicked","time":0,"mode":"author","tab":"overview","workflow_id":"draft-workflow"},{"phase":"operations-arrived-2000ms","time":2000,"mode":"author","tab":"overview","workflow_id":"draft-workflow"}]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: Native return selects tools before any response: workspace_admin -> skills
+not ok 13 - Native return selects tools before any response: workspace_admin -> skills
+  ---
+  duration_ms: 15.524001
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"workspace_admin","native":"skills","destination":"tools","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]}],"staleAuthors":[]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: Native return selects procedures before any response: workspace_admin -> skills
+not ok 14 - Native return selects procedures before any response: workspace_admin -> skills
+  ---
+  duration_ms: 8.740563
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"workspace_admin","native":"skills","destination":"procedures","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]}],"staleAuthors":[]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: Native return selects work before any response: workspace_admin -> skills
+not ok 15 - Native return selects work before any response: workspace_admin -> skills
+  ---
+  duration_ms: 8.228583
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"workspace_admin","native":"skills","destination":"work","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]}],"staleAuthors":[]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: Native return selects tools before any response: workspace_admin -> models
+not ok 16 - Native return selects tools before any response: workspace_admin -> models
+  ---
+  duration_ms: 8.421913
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"workspace_admin","native":"models","destination":"tools","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]}],"staleAuthors":[]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: Native return selects procedures before any response: workspace_admin -> models
+not ok 17 - Native return selects procedures before any response: workspace_admin -> models
+  ---
+  duration_ms: 18.096448
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"workspace_admin","native":"models","destination":"procedures","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]}],"staleAuthors":[]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: Native return selects work before any response: workspace_admin -> models
+not ok 18 - Native return selects work before any response: workspace_admin -> models
+  ---
+  duration_ms: 8.93149
+  type: 'test'
+  location: '/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:42:2'
+  failureType: 'testCodeFailure'
+  error: |-
+    {"origin":"workspace_admin","native":"models","destination":"work","wrong":[{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]},{"phase":"clicked","time":0,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]},{"phase":"operations-arrived-2000ms","time":2000,"native":false,"mode":"author","tab":"workspace_admin","workflow_id":"","aria_current":[{"action":"workspace_admin"}]}],"staleAuthors":[]}
+    
+    3 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/e6f4b425ad6d/native-return-selection/tests/test_ees_native_return_selection.cjs:59:10)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: same Native destination retains the exact private author draft and selection during both delayed reads
+ok 19 - same Native destination retains the exact private author draft and selection during both delayed reads
+  ---
+  duration_ms: 20.161711
+  type: 'test'
+  ...
+# Subtest: Native return publishes no work reference until workspace operations and Chat readiness are confirmed
+ok 20 - Native return publishes no work reference until workspace operations and Chat readiness are confirmed
+  ---
+  duration_ms: 9.846848
+  type: 'test'
+  ...
+# Subtest: account reset discards a pending Native destination and all prior private state
+ok 21 - account reset discards a pending Native destination and all prior private state
+  ---
+  duration_ms: 3.87449
+  type: 'test'
+  ...
+# Subtest: a Native return permission denial discards cached author state and cannot execute the queued action
+ok 22 - a Native return permission denial discards cached author state and cannot execute the queued action
+  ---
+  duration_ms: 5.846818
+  type: 'test'
+  ...
+# Subtest: a queued Native destination cannot apply to an unrelated chat route
+ok 23 - a queued Native destination cannot apply to an unrelated chat route
+  ---
+  duration_ms: 4.53831
+  type: 'test'
+  ...
+1..23
+# tests 23
+# suites 0
+# pass 5
+# fail 18
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 339.406673
