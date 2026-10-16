@@ -594,3 +594,16 @@ test('same shared-tool review leaves an ongoing run executable and changed versi
  context.snapshot.state.operations.shared_tools[0].state='unavailable';context.snapshot.state.operations.shared_tools[0].unavailable_message='Open WebUI 도구의 연결 설정을 확인해야 합니다.';
  run(context,'sharedView.sync(snapshot)');assert.match(panel(),/연결 설정을 확인해야/);assert.doesNotMatch(panel(),/버전으로 계속하기/);
 });
+
+test('scope frame monitor records delivered JSON before the consumer renders even when a clone lags',async()=>{
+ const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+ const source=fs.readFileSync(path.join(__dirname,'ees_source_frame_monitor.py'),'utf8').split('FRAME_MONITOR = r"""')[1].split('"""')[0];
+ const body={ok:true,workflows:[]},clone=deferred(),response={ok:true,json:async()=>body,clone:()=>({json:()=>clone.promise})};
+ const window={fetch:async()=>response},context={window,URL,location:{href:'http://native.test/c/chat'},performance:{now:()=>10},requestAnimationFrame:()=>1};
+ vm.runInNewContext(source,context);
+ window.__eesSourceFrameEvidence.scopeExpectation={label:'first',system:'APC',factory:'',unknown:true,endpoints:['workspace'],received:{}};
+ const result=await (await window.fetch('/api/ees-work/workspace?system_id=APC')).json();
+ assert.equal(result,body,'The observation must preserve the actual response body');
+ assert.equal(window.__eesSourceFrameEvidence.scopeExpectation.received.workspace,true,'Body delivery must be observed before its consumer can render an empty result');
+ clone.resolve(body);
+});

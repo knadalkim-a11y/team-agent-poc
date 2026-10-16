@@ -425,3 +425,6 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(result['kept'],'authorized view')
             else:
                 original.assert_not_awaited()
+
+
+if __name__ == '__main__': unittest.main()

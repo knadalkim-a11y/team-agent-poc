@@ -34,7 +34,8 @@ FRAME_MONITOR = r"""(() => {
     .map(node => node.textContent.trim());
   // Observe successful body delivery independently of the product snapshot.
   // A first-scope assertion must also fail against a version with no loading
-  // flag. Cloning a response records receipt without consuming or replacing it.
+  // flag. Observe the real consumer body: a cloned stream can finish parsing
+  // after the product has already rendered the delivered result.
   const originalFetch = window.fetch;
   window.fetch = function(input, options) {
     const url = new URL(typeof input === 'string' ? input : input.url, location.href);
@@ -50,12 +51,16 @@ FRAME_MONITOR = r"""(() => {
       evidence.scopeRequests.push(row);
     }
     return originalFetch.call(this, input, options).then(response => {
-      if (row && response.ok) response.clone().json().then(body => {
-        if (body.ok === true) {
-          row.received = performance.now();
-          expected.received[endpoint] = true;
-        }
-      }).catch(() => {});
+      if (row && response.ok) {
+        const originalJSON = response.json.bind(response);
+        response.json = (...args) => originalJSON(...args).then(body => {
+          if (body.ok === true) {
+            row.received = performance.now();
+            expected.received[endpoint] = true;
+          }
+          return body;
+        });
+      }
       return response;
     });
   };

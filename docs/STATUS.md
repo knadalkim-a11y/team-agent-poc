@@ -4,8 +4,8 @@
 
 - **기준/범위:** 최신 main `8a4a716`(#90 병합 포함), #92와 B10-1/2/5. [현재 계약](mockups/ees-work/TASK.md#shared-tools-phase1-20261015). 기존 계약은 보존하고 기본 제공 조회2개를 공용으로 확인·사용한다.
 - **병합 순서:** 열린 #91(Native 복귀 선택)과 launcher/view, 시험, TASK/STATUS/CHANGELOG/evals가 겹친다. #91 검토·병합 뒤 이 PR에 최신 main을 통합하고 양쪽 행동/기록을 보존한다. 이번 작업은 병합하지 않는다. #90은 이미 main에 반영되어 별도 병합 대기가 없다.
-- **현재 검증:** Claude 리뷰7건을 같은 Draft #93에서 보완했다. 새 Native20개와 작성·실행 화면 코드 회귀를 통과했다. 최초 실패와 실제 B10/최종 CI 경계는 [기존 평가](../evals/v4-ui-20260930.md#shared-tools-review-20261016)에 덧붙인다. 기존 구현 head f202980의 화면 검증은 당시 기록으로 유지한다.
-- **다음 작업:** 수정 head의 실제 B10 화면·최종 CI 성공을 확인하고 PR 댓글 하나로7건을 답한 뒤 Claude 재검토를 요청한다. Draft 유지·병합 없음. 리뷰 마지막 묶음은1단계-2로 넘기며 #91 통합 순서를 유지한다.
+- **현재 검증:** Claude 리뷰7건을 같은 Draft #93에서 보완했다. Native20개·기존 operations48개·Node193개 PASS. 수정 첫 CI의 실제 CLI 제품/B10 작성21개 PASS, 기존 범위 전환 감시1건은 clone 응답의 늦은 파싱을 새 회귀로 재현하여 실제 본문 전달 관측으로 고쳤다. [첫 실패·화면/스타일/포커스 증거](../evals/v4-ui-20260930.md#shared-tools-review-20261016). 최종 head 결과는 [Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/93/checks)가 원본이다.
+- **다음 작업:** 최종 head CI 성공 후 Claude 재검토. 항목별 답변/요청은 PR 댓글 하나로 남긴다. Draft 유지·병합 없음. 리뷰 마지막 묶음은1단계-2로 넘기며 #91 통합 순서를 유지한다.
 - **사내:** Confluence 설치 원본·주소·허용 공간·개인 설정 암호화·팀원 PAT 저장은 미확인. 사내 실행/적용·Figma 수정·#77/#79 착수 없음.
 
 ## 2026-10-15 · #88 병합 완료·#89에 main 통합

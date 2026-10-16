@@ -81,5 +81,64 @@
     "browser": "Chrome/155.0.8059.39",
     "result": "PASS: list/detail/picker behavior, Native link, saved shared ID, computed style and keyboard focus",
     "known_layout_difference": "Figma panel 580px; existing product default 480px (observed inner width 479px). Existing editor field layout retained; B10-6/7 excluded."
+  },
+  "review_20261016": {
+    "implementation_head": "67f5a485b3bebef9e66937c56e5572588321a824",
+    "run_id": 38832656587,
+    "native_compose_job": 116756852922,
+    "artifact_id": 12018107646,
+    "artifact_sha256": "81d15b7e1f574318fe73812cad24666927a2141272ef1d943ba4572e34ac8dfc",
+    "browser": "Chrome/155.0.8059.39",
+    "authoring_tests": "21 PASS including B10; whole native-compose failed one scope monitor race",
+    "files": {
+      "review-20261016-shared-b10-comparison.json": {
+        "sha256": "d2a82dcdd2eecda11c1c8901d6fe22de97f94cc1a929d1cce419bfd676025f42",
+        "bytes": 1533
+      },
+      "review-20261016-shared-b10-1-list-dom.json": {
+        "sha256": "d818e11a3a861f10f9c4ce82297388eb900f4f210a1269fa201f604cf954a2bb",
+        "bytes": 34330
+      },
+      "review-20261016-shared-b10-2-detail.png": {
+        "sha256": "dde69032fc327d9ba26bac119337e5fbc55435fe3db5fa0fcf169072771b0e36",
+        "bytes": 114820
+      },
+      "review-20261016-shared-b10-2-review-comparison.png": {
+        "sha256": "508bb5ec72b1315d362695871c7b78e6db5f220d6b981717ad520658a1297f35",
+        "bytes": 146772
+      },
+      "review-20261016-shared-b10-1-list.png": {
+        "sha256": "41139e55213fdcb06ec7449658d38a706147d176bb210c9ff41becca047dc81f",
+        "bytes": 142560
+      },
+      "review-20261016-shared-b10-2-review-comparison-dom.json": {
+        "sha256": "5ba21f0b5451bf92fe745cdf323083b842aae99a4639493548216dd6832481ed",
+        "bytes": 29721
+      },
+      "review-20261016-shared-b10-2-detail-dom.json": {
+        "sha256": "fdc775cb5b50355ee46dd4e25f2906b6a5a293a69b839e4367e7fbd6a288ec37",
+        "bytes": 29359
+      },
+      "review-20261016-shared-b10-2-detail-top-dom.json": {
+        "sha256": "5afbf40de61a984ffda723f4378180f4f55b5de5ffba8c70a7013fb45930c7ae",
+        "bytes": 29341
+      },
+      "review-20261016-shared-b10-5-picker-dom.json": {
+        "sha256": "2e617e9b3c66a3880e46612708ae4a6de5bd3e6d936d697a89557df11be826c2",
+        "bytes": 43552
+      },
+      "review-20261016-shared-b10-2-detail-top.png": {
+        "sha256": "e8264da8645aeda28dce73663d7bfdca6921c319505a5c9f8a57e5a2673f0c84",
+        "bytes": 114474
+      },
+      "review-20261016-shared-b10-5-picker.png": {
+        "sha256": "ea8a074a0f035d9c786be8498aa7317c5f0de90fb66cca6a2718539a391cf521",
+        "bytes": 104440
+      },
+      "review-20261016-scope-monitor-first-failure.json": {
+        "sha256": "d7a1c5b684cd4bc752dd414e99724e9cad65372451b3ae86a18f9da6ab9ef18f",
+        "bytes": 4994
+      }
+    }
   }
 }
