@@ -4,6 +4,12 @@
 
 이 문서는 항목별 판정과 검증 증거의 기준 기록입니다. 현재 진행 단계·다음 작업·배포 준비 상태는 [STATUS](../docs/STATUS.md)에서 확인합니다. 과거 PASS를 버전 변경 후의 재검증으로 간주하지 않습니다.
 
+## Native 복귀 목적지 선택 · 2026-10-15 · 검증 중
+
+사용자 확인 사내 적용본은 #88·#89 병합 main `d4f1806`이다. [이번 계약](../docs/mockups/ees-work/TASK.md#native-return-selection-20261015)의 수정 전 controller23시험은 목적지18조합 FAIL·보호5개 PASS이며 이전 선택54회·이전 작성기36회를 관측했다. 이는 controller 관측값으로 실제 브라우저 프레임 수와 구분한다. 수정 후 새28개와 기존 Native92개, 전체 Node338개·Python controller 진입점은 통과했다.18전환의 이전 선택·작성기·aria 오류는0건이다. 첫 실제 브라우저에서 새9복귀의 이전 선택/작성기0건을 확인했지만 첫프레임의 Native 선택+목적지 자리표시와 기존 기준에서2시험이 실패했다. 보완 후 [PR #91 최종 CI](https://github.com/knadalkim-a11y/team-agent-poc/pull/91/checks)는 최초 결과와 구분해 판정한다.
+
+수락 기준은 Native의 실제 목적지 클릭부터 완료까지 **직전 Native 항목/목적지 외 aria-current0건·이전 오른쪽 칸 가시 프레임0건**이다. 출발 칸3개에서 다른 칸2개·업무 모드로 돌아오는9조합에 workspace·operations 각1초 지연을 적용하고, 같은 칸 작성 상태 및 계정·권한·경로 보호 회귀를 유지한다. [최초 실패·수정·실행별 결과](v4-ui-20260930.md#native-return-selection-evidence-20261015)를 한곳에 보존한다. 작은 별도 PR의 검증 범위이며 2-3·병합·사내 실행은 포함하지 않는다.
+
 <a id="evidence-index"></a>
 
 ## 기록 찾기
@@ -12,6 +18,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
+| #88/#89 사내 적용 뒤 Native 복귀 때 이전 선택·작성기 재표시 | [main controller 최초 실패·목적지 첫 render·aria-current/오른쪽 칸 프레임과 보존 경계](v4-ui-20260930.md#native-return-selection-evidence-20261015) |
 | #53/#72 설계·복구 원문 보존과 #90 문서 정리 | [10-15 처리 기준·RT-P 미실행·복구 보고](v4-ui-20260930.md#open-pr-cleanup-20261015) |
 | 첫 범위 받기 전 없음/0개·선택 목록·CI 대조 | [10-15 검토·실패 대조·목록 수신 감시](v4-ui-20260930.md#scope-review-evidence-20261015) |
 | A2/C41 범위 칸 아래 드롭다운·검색·키보드·범위 변경 로딩 | [세 상태 실제 화면·보존·1초 지연 범위 전환 검사](v4-ui-20260930.md#scope-dropdown-evidence-20261014) |

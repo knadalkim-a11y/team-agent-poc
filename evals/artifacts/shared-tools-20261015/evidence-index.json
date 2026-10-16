@@ -1,0 +1,172 @@
+{
+  "scope": "Local real Native fixtures and CI compiled product; synthetic session/HTTP data; no onsite claims",
+  "files": {
+    "build-attempts.txt": {
+      "sha256": "d3cc490189479e81c7e77249d410d9146a8bf7ef0683306b8aae166e8a66b2da",
+      "bytes": 531
+    },
+    "local-browser-blocked.log": {
+      "sha256": "b1236862680194d80667377ee4a34ba5047adc1867795fcf366d7759e8fc9678",
+      "bytes": 1754
+    },
+    "native-11.log": {
+      "sha256": "94e18398c91c78fb200ee21c160b52c3014f7a7dea7f8c0e5abe902e431daa10",
+      "bytes": 8101
+    },
+    "regression-134.log": {
+      "sha256": "22eeaca31a753d5cc50adcb9f58194ba74ae5cf16388c4f9fe6b2cff783d4ae3",
+      "bytes": 2142
+    },
+    "menu-92.log": {
+      "sha256": "b8c5944617929ce56fb3304a261c63855fcbbff76e373b104a8265480859a456",
+      "bytes": 9630
+    },
+    "suite-audit.json": {
+      "sha256": "c880cd72af9ca35cce99eddf0aecf686d25d5fc0abe6aa12be6e6beeb2ba2a77",
+      "bytes": 109
+    },
+    "read-only-help.log": {
+      "sha256": "bf7bc30ca8b476c33d9860b0172980153755fd8b3a32b21e2344202539b101a7",
+      "bytes": 704
+    },
+    "shared-b10-1-list-dom.json": {
+      "sha256": "14d2abc9f969149c50370ba31dfeee32ecb0fe1e5b59179b62a7d7fecdeee036",
+      "bytes": 34644
+    },
+    "shared-b10-1-list.png": {
+      "sha256": "84337d16dcf7d9cc13c78538dc72aa74de04106bd22bded3171f8de218c95991",
+      "bytes": 143861
+    },
+    "shared-b10-2-detail-dom.json": {
+      "sha256": "6e8e103e1a53eab0bf56fd130a70d104333bc87d1a2b00f4d7aa1575ed6c0549",
+      "bytes": 29507
+    },
+    "shared-b10-2-detail-top-dom.json": {
+      "sha256": "88f16c7e0e4843134798cc43a9152d55f16edbe2d592c1fc069cad54785b9074",
+      "bytes": 29489
+    },
+    "shared-b10-2-detail-top.png": {
+      "sha256": "1ed2399051a478513e203008d218386e73f9b422ffe00a9a89769c0ddeed9079",
+      "bytes": 114634
+    },
+    "shared-b10-2-detail.png": {
+      "sha256": "cbd316a4fbaaab226168ed7a40772f875f7184f674212480dc08bd59087a41c7",
+      "bytes": 115072
+    },
+    "shared-b10-5-picker-dom.json": {
+      "sha256": "2e617e9b3c66a3880e46612708ae4a6de5bd3e6d936d697a89557df11be826c2",
+      "bytes": 43552
+    },
+    "shared-b10-5-picker.png": {
+      "sha256": "50a7da1762ca469d74b73bb7e330e3a116b32e2425c7a26095e9e7b4c41593ac",
+      "bytes": 104399
+    },
+    "shared-b10-comparison.json": {
+      "sha256": "f28b6c0f777389806007d9f41999588534f2584dc0ae43e1b9861f708c567361",
+      "bytes": 1392
+    }
+  },
+  "figma": {
+    "key": "XK2wTos6sEuxSHhIj7cqg6",
+    "B10-1": "1353:20386",
+    "B10-2": "1353:20597",
+    "B10-5": "1353:21167"
+  },
+  "product_comparison": {
+    "implementation_head": "f2029805be3e9745838e9e00cc5534e7c15b3c65",
+    "run_id": 38828228753,
+    "native_compose_job": 116742622742,
+    "artifact_id": 12016766416,
+    "artifact_sha256": "4488013a71ed756dcb49e31c60e3a54957c299b59fc120df4fd8205b3d7ee2c7",
+    "browser": "Chrome/155.0.8059.39",
+    "result": "PASS: list/detail/picker behavior, Native link, saved shared ID, computed style and keyboard focus",
+    "known_layout_difference": "Figma panel 580px; existing product default 480px (observed inner width 479px). Existing editor field layout retained; B10-6/7 excluded."
+  },
+  "review_20261016": {
+    "implementation_head": "67f5a485b3bebef9e66937c56e5572588321a824",
+    "run_id": 38832656587,
+    "native_compose_job": 116756852922,
+    "artifact_id": 12018107646,
+    "artifact_sha256": "81d15b7e1f574318fe73812cad24666927a2141272ef1d943ba4572e34ac8dfc",
+    "browser": "Chrome/155.0.8059.39",
+    "authoring_tests": "21 PASS including B10; whole native-compose failed one scope monitor race",
+    "files": {
+      "review-20261016-shared-b10-comparison.json": {
+        "sha256": "d2a82dcdd2eecda11c1c8901d6fe22de97f94cc1a929d1cce419bfd676025f42",
+        "bytes": 1533
+      },
+      "review-20261016-shared-b10-1-list-dom.json": {
+        "sha256": "d818e11a3a861f10f9c4ce82297388eb900f4f210a1269fa201f604cf954a2bb",
+        "bytes": 34330
+      },
+      "review-20261016-shared-b10-2-detail.png": {
+        "sha256": "dde69032fc327d9ba26bac119337e5fbc55435fe3db5fa0fcf169072771b0e36",
+        "bytes": 114820
+      },
+      "review-20261016-shared-b10-2-review-comparison.png": {
+        "sha256": "508bb5ec72b1315d362695871c7b78e6db5f220d6b981717ad520658a1297f35",
+        "bytes": 146772
+      },
+      "review-20261016-shared-b10-1-list.png": {
+        "sha256": "41139e55213fdcb06ec7449658d38a706147d176bb210c9ff41becca047dc81f",
+        "bytes": 142560
+      },
+      "review-20261016-shared-b10-2-review-comparison-dom.json": {
+        "sha256": "5ba21f0b5451bf92fe745cdf323083b842aae99a4639493548216dd6832481ed",
+        "bytes": 29721
+      },
+      "review-20261016-shared-b10-2-detail-dom.json": {
+        "sha256": "fdc775cb5b50355ee46dd4e25f2906b6a5a293a69b839e4367e7fbd6a288ec37",
+        "bytes": 29359
+      },
+      "review-20261016-shared-b10-2-detail-top-dom.json": {
+        "sha256": "5afbf40de61a984ffda723f4378180f4f55b5de5ffba8c70a7013fb45930c7ae",
+        "bytes": 29341
+      },
+      "review-20261016-shared-b10-5-picker-dom.json": {
+        "sha256": "2e617e9b3c66a3880e46612708ae4a6de5bd3e6d936d697a89557df11be826c2",
+        "bytes": 43552
+      },
+      "review-20261016-shared-b10-2-detail-top.png": {
+        "sha256": "e8264da8645aeda28dce73663d7bfdca6921c319505a5c9f8a57e5a2673f0c84",
+        "bytes": 114474
+      },
+      "review-20261016-shared-b10-5-picker.png": {
+        "sha256": "ea8a074a0f035d9c786be8498aa7317c5f0de90fb66cca6a2718539a391cf521",
+        "bytes": 104440
+      },
+      "review-20261016-scope-monitor-first-failure.json": {
+        "sha256": "d7a1c5b684cd4bc752dd414e99724e9cad65372451b3ae86a18f9da6ab9ef18f",
+        "bytes": 4994
+      }
+    }
+  },
+  "rereview_20261016": {
+    "implementation_head": "07a39fcd28446677ac7ffdfe71b5938e8c651c3a",
+    "run_id": 38841204501,
+    "native_compose_job": 116783476747,
+    "artifact_id": 12021886135,
+    "artifact_sha256": "a6618b3b06701decbbb370b9cda29a4a368757112359b357bef1f9c397230129",
+    "browser": "Chrome155.0.8059.39; 1920x1080",
+    "authoring_tests": "21 PASS; full native-compose 63 PASS",
+    "review_layout": {
+      "group_owner_gap_px": 12,
+      "display": "grid"
+    },
+    "files": {
+      "rereview-20261016-shared-b10-1-list-dom.json": "d818e11a3a861f10f9c4ce82297388eb900f4f210a1269fa201f604cf954a2bb",
+      "rereview-20261016-shared-b10-1-list.png": "262ef453a61919c37975249f6d0cac4b5a19302692b3ab45bfbfce2a6721d34e",
+      "rereview-20261016-shared-b10-2-detail-dom.json": "fdc775cb5b50355ee46dd4e25f2906b6a5a293a69b839e4367e7fbd6a288ec37",
+      "rereview-20261016-shared-b10-2-detail-top-dom.json": "5afbf40de61a984ffda723f4378180f4f55b5de5ffba8c70a7013fb45930c7ae",
+      "rereview-20261016-shared-b10-2-detail-top.png": "d595c3a9afc48cb72b3e48a7fc551e9156400f4542d6ebb1c24e059f8bdc37c5",
+      "rereview-20261016-shared-b10-2-detail.png": "d4221ff1e5afd1ab9a6c6344991d6d50179a667dddc38bbd2dce40c7fa16724d",
+      "rereview-20261016-shared-b10-2-review-comparison-dom.json": "5ba21f0b5451bf92fe745cdf323083b842aae99a4639493548216dd6832481ed",
+      "rereview-20261016-shared-b10-2-review-comparison.png": "473e85fe4c020c870318dfd8a3ee022804f555217614bbd0e203e794e8a6edee",
+      "rereview-20261016-shared-b10-5-picker-dom.json": "2e617e9b3c66a3880e46612708ae4a6de5bd3e6d936d697a89557df11be826c2",
+      "rereview-20261016-shared-b10-5-picker.png": "3c297acbaf40c63a95871eca21c2dc8590f3b90a66d8ea5a62ee6c8ec14166a0",
+      "rereview-20261016-shared-b10-5-selected-no-handoff-dom.json": "9ff0ef8038c703c139b60696efc6d97e3e750ecc2e84b501240780effe8a7113",
+      "rereview-20261016-shared-b10-5-selected-no-handoff.png": "fe4bceb918f14561654d062a9b71ce8334dc6e02d10086489cdbd4543471bd30",
+      "rereview-20261016-shared-b10-comparison.json": "5f4730988e0d03f68580749523eb46f59005cd7560bbe43cd92fc503a87d36f2"
+    }
+  }
+}

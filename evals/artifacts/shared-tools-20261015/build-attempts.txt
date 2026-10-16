@@ -1,0 +1,3 @@
+First frontend build: Node default heap exhausted (FATAL ERROR: Ineffective mark-compacts near heap limit). No UI evidence produced.
+Second build: same pinned Node22.16.0/npm10.9.2 and clean pinned source with CI NODE_OPTIONS=--max-old-space-size=6144. Success, files5582.
+First Playwright latest Chromium download: invalid archive. Pinned Playwright1.51 Chromium134 downloaded successfully; Chrome startup then failed on socket() Operation not permitted. No permission workaround or TLS change used. CI browser evidence required.

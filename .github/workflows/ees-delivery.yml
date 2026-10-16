@@ -58,6 +58,7 @@ on:
       - 'tests/ees_work_integrated*.py'
       - 'tests/ees_work_native_chat.py'
       - 'tests/ees_workspace_ui_fixture.cjs'
+      - 'tests/test_ees_native_return_selection.cjs'
       - 'tests/test_ees_v4*.cjs'
       - 'evals/assets/restructure-step0b-20261001/venv-final-inventory.json'
       - 'tests/ees_delivery_*.py'

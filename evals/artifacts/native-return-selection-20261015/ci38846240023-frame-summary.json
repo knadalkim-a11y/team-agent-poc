@@ -1,0 +1,93 @@
+{
+  "head": "971ff0ef938f85647f1391b4d0629916ff475772",
+  "parents": [
+    "5dd7a711564ebb65f527b43aee93cf6db779d757",
+    "8a4a716a36a4e668e8f078354298c4b5b4083975"
+  ],
+  "run_id": 38846240023,
+  "attempt": 1,
+  "jobs": {
+    "success": 31,
+    "skipped": 1
+  },
+  "native_compose": {
+    "passed": 63,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0
+  },
+  "chrome": "155.0.8059.39",
+  "artifact": {
+    "id": 12023936399,
+    "bytes": 10372118,
+    "sha256": "92897e2c5d0e3a3b0b581003f4102fd18c606372bff31b5e037bdd001ea56054"
+  },
+  "retained_zip": {
+    "path": "ci38846240023-frame-evidence.zip",
+    "sha256": "1580d96e761cb2ef17cb77f1df4331274c4bd7de5a45fac4285a7fca0a51ec22",
+    "bytes": 65119,
+    "members": [
+      "ees-work-screenshots/source-shell-native-return-selection-frames.json",
+      "ees-work-screenshots/source-shell-delayed-navigation-frames.json",
+      "ees-results/test_ees_source_shell_native.json"
+    ]
+  },
+  "return_counts": {
+    "return-tools-to-procedures": {
+      "frames": 128,
+      "unexpected_selection": 0,
+      "previous_panel": 0,
+      "destination_local_loading": 1
+    },
+    "return-tools-to-workspace_admin": {
+      "frames": 131,
+      "unexpected_selection": 0,
+      "previous_panel": 0,
+      "destination_local_loading": 1
+    },
+    "return-tools-to-my_work": {
+      "frames": 128,
+      "unexpected_selection": 0,
+      "previous_panel": 0,
+      "destination_local_loading": 1
+    },
+    "return-procedures-to-tools": {
+      "frames": 130,
+      "unexpected_selection": 0,
+      "previous_panel": 0,
+      "destination_local_loading": 1
+    },
+    "return-procedures-to-workspace_admin": {
+      "frames": 129,
+      "unexpected_selection": 0,
+      "previous_panel": 0,
+      "destination_local_loading": 1
+    },
+    "return-procedures-to-my_work": {
+      "frames": 129,
+      "unexpected_selection": 0,
+      "previous_panel": 0,
+      "destination_local_loading": 1
+    },
+    "return-workspace_admin-to-tools": {
+      "frames": 129,
+      "unexpected_selection": 0,
+      "previous_panel": 0,
+      "destination_local_loading": 1
+    },
+    "return-workspace_admin-to-procedures": {
+      "frames": 129,
+      "unexpected_selection": 0,
+      "previous_panel": 0,
+      "destination_local_loading": 1
+    },
+    "return-workspace_admin-to-my_work": {
+      "frames": 129,
+      "unexpected_selection": 0,
+      "previous_panel": 0,
+      "destination_local_loading": 1
+    }
+  },
+  "delayed_requests": 49,
+  "minimum_delay_ms": 1000.0747549999573
+}

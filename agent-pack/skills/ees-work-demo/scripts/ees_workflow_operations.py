@@ -364,6 +364,10 @@ class OperationsRuntime:
             fail("command_invalid")
         actor, caps, groups = await self._actor(user)
         action = body.get("action")
+        if action == "shared_tool_accept_version":
+            return await self.service.shared_tools.accept_version(actor, body)
+        if str(action).startswith("shared_tool_"):
+            return await self.service.shared_tools.command(actor, body)
         if action == "schedule_preview":
             return self._schedule_preview(actor, groups, body)
         if action == "execute_scope":
@@ -1277,12 +1281,17 @@ class OperationsRuntime:
             snapshot = self.service._work_snapshot(db, run, identifier(body.get("job_id")))
             job = snapshot["job"]
             self._check_read_contract(db, job)
+        shared_pin = None
+        if job.get("shared_tool_id"):
+            shared_pin = await self.service.shared_tools.resolve(actor, job["shared_tool_id"], kind="work", run_id=run["id"])
         options_snapshot = await self.service._work_resolve_job_options(actor, run["id"], job["id"])
         kind = self._job_kind(job)
         skill_snapshots = await self._skills(actor, job, snapshot["definition"])
         if kind in {"human", "request"}:
             fail("human_command_required", "사람 작업은 직접 확인하고, EES 요청은 요청 확인 창에서 진행해 주세요.")
         reference = deepcopy(job.get("tool_reference", job.get("execution", {}).get("reference", snapshot.get("tool_reference"))))
+        if shared_pin:
+            reference = deepcopy(shared_pin["reference"])
         if reference:
             reference.pop("contract_id", None)
         if kind == "tool":
@@ -1362,6 +1371,9 @@ class OperationsRuntime:
             if retry_context is not None:
                 attempt["snapshot"]["read_retry"] = deepcopy(retry_context)
             attempt["snapshot"]["skills"] = skill_snapshots
+            if shared_pin:
+                attempt["snapshot"]["shared_tool"] = deepcopy(shared_pin)
+                attempt["snapshot"]["tool_reference"] = deepcopy(shared_pin["reference"])
             if kind == "tool":
                 attempt["snapshot"]["arguments"] = arguments
                 attempt["snapshot"]["argument_sources"] = argument_sources
@@ -1388,7 +1400,10 @@ class OperationsRuntime:
             if kind == "tool":
                 with self.service._db() as db:
                     self._check_read_contract(db, job)
-                result = await self.bridge.invoke(actor, reference, arguments, {"run_id": run["id"], "job_id": job["id"], "call_id": attempt["id"]})
+                if shared_pin:
+                    await self.service.shared_tools.resolve(actor, job["shared_tool_id"], kind="work", run_id=run["id"])
+                result = await self.bridge.invoke(actor, reference, arguments, {"run_id": run["id"], "job_id": job["id"], "call_id": attempt["id"], **({"shared_tool_id": job["shared_tool_id"], "shared_run_kind": "work"} if shared_pin else {})})
+
             elif job.get("result_block") in {"item_verdict", "ai_review"}:
                 proposal_kind = "verdicts" if job["result_block"] == "item_verdict" else "report"
                 principal = job.get("result_source_job_id")
@@ -1494,6 +1509,9 @@ class OperationsRuntime:
             decisions = [dict(item) for item in db.execute("SELECT item_id,verdict,result_revision FROM work_decisions WHERE run_id=? AND job_id=? AND attempt_id=? ORDER BY item_id", (run["id"], spec["job_id"], row["id"]))]
             sources[name] = {"job_id": spec["job_id"], "attempt_id": row["id"], "result_revision": row["number"], "result_hash": digest(result), "ids": ids, "decisions_hash": digest(decisions)}
             records.append(dict(row))
+        if job.get("shared_tool_id"):
+            schema = self.service.shared_tools.get(db, job["shared_tool_id"])["input_schema"]
+            normal = {name: binding for name, binding in normal.items() if not (isinstance(binding, dict) and set(binding) == {"input"} and binding["input"] not in inputs and name not in schema.get("required", []))}
         return self._arguments({"argument_bindings": normal}, inputs), sources, records
 
     @staticmethod
@@ -1591,7 +1609,16 @@ class OperationsRuntime:
             if state is not None:
                 automatic[(slot["workflow_id"], slot["factory_id"])] = {"workflow_id": slot["workflow_id"], "factory_id": slot["factory_id"], "status": state, "scheduled_at": slot["scheduled_at"]}
         can_author_direct = value(actor, "role") == "admin" or any(item["id"] == value(actor, "id") for item in reviewers)
-        return {"ok": True, "scope_runs": scopes, "tools": tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
+        shared_notice = ""
+        try:
+            shared_tools = await self.service.shared_tools.list(actor)
+        except Exception as error:
+            import logging
+            import traceback
+            locations = [f"{frame.name}:{frame.lineno}" for frame in traceback.extract_tb(error.__traceback__)]
+            logging.getLogger(__name__).warning("shared_tool_state_unavailable: %s at %s", type(error).__name__, " > ".join(locations))
+            shared_tools, shared_notice = [], "공용 도구 목록을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요."
+        return {"shared_tools": shared_tools, "shared_tools_notice": shared_notice, "ok": True, "scope_runs": scopes, "tools": tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
 
     def start(self):
         self._closing = False
@@ -1639,6 +1666,41 @@ class OperationsRuntime:
         errors = []
         for job in definition.get("nodes", {}).values():
             if job.get("type") != "j":
+                continue
+            if job.get("shared_tool_id"):
+                try:
+                    tool = self.service.shared_tools.get(db, job["shared_tool_id"])
+                    self.service.shared_tools.authorize(tool, actor, groups)
+                    if job.get("result_block") == "list_confirm" and tool["output_schema"].get("kind") != "list":
+                        errors.append(job["id"] + ": 목록 결과를 돌려주는 도구에만 목록 확정을 사용할 수 있습니다.")
+                    properties = tool["input_schema"].get("properties", {})
+                    bindings = job.get("argument_bindings", job.get("execution", {}).get("argument_bindings", {}))
+                    if not isinstance(bindings, dict):
+                        fail("argument_bindings_invalid", "입력과 도구 인자 연결을 확인해 주세요.")
+                    for required in tool["input_schema"].get("required", []):
+                        if required not in bindings:
+                            errors.append(job["id"] + ": 공용 도구의 필수 입력을 연결해 주세요: " + required)
+                    fields = {field["id"]: field for field in job.get("inputs", [])}
+                    compatible = {"string": {"text", "datetime", "single", "person"}, "integer": {"number"}, "array": {"multi"}}
+                    constants = {}
+                    for argument, binding in bindings.items():
+                        if argument not in properties:
+                            errors.append(job["id"] + ": 공용 도구 입력에 없는 인자 연결을 지워 주세요: " + argument)
+                            continue
+                        if isinstance(binding, dict) and "result" in binding:
+                            errors.append(job["id"] + ": 공용 도구로 목록 이어 붙이기는 다음 단계에서 지원합니다.")
+                            continue
+                        if isinstance(binding, dict) and set(binding) == {"constant"}:
+                            constants[argument] = binding["constant"]
+                            continue
+                        field_id = binding if isinstance(binding, str) else binding.get("input") if isinstance(binding, dict) and set(binding) == {"input"} else None
+                        field = fields.get(field_id) if isinstance(field_id, str) else None
+                        if not field or field.get("type") not in compatible.get(properties[argument].get("type"), set()):
+                            errors.append(job["id"] + ": 공용 도구에 연결할 입력과 자료형을 확인해 주세요: " + argument)
+                    from .ees_workflow_native import validate_arguments
+                    validate_arguments(tool["function"], {**tool["input_schema"], "required": []}, constants)
+                except WorkflowError as error:
+                    errors.append(job.get("id", "") + ": " + error.message)
                 continue
             key = job.get("tool_contract_id") or (job.get("tool_reference") or {}).get("contract_id")
             if self._job_kind(job) != "request" and not key:

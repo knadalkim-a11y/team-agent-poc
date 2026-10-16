@@ -23,7 +23,7 @@
     "src/lib/components/chat/Placeholder.svelte": "54e33b3997e9ce6bd78ea2b39f0d5b3bf280f8c494549eeb3d440df290cd6f97",
     "src/lib/components/ees/EesHelperNotice.svelte": "22ceccc7ad93c5d820f73269baaa9b19f12c5c99054b76ecc8c89f7757f8bba0",
     "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
-    "src/lib/components/ees/EesNavigation.svelte": "5ff036c8baec150a69a62241e08b5225705e5816e47341f60043becf57292732",
+    "src/lib/components/ees/EesNavigation.svelte": "ef90f84e0ee213b3ba65c860f1a2c4e8743db7a34d0dcbcfb9d4f3b038b66f54",
     "src/lib/components/ees/EesProcedureIntro.svelte": "815ecc9164df95671f784bab30304013b5541c1fc98584092cc2742d8dc03b3b",
     "src/lib/components/ees/EesScopeSelect.svelte": "921be8c7ab567a8410b55c7b41f29d704399ad1f99f22b8123259c4f12d37710",
     "src/lib/components/ees/EesShell.svelte": "67492c17c2c2b41dcdad2cf86a1a096cc218fd6e2de6e645eb909e9f59f84c46",
@@ -31,7 +31,7 @@
     "src/lib/components/ees/state.ts": "560ef1a21f46fc2a1beabf3012a74933002af586c507ac42bb144f40fe305a43",
     "src/lib/components/layout/Sidebar.svelte": "9d08f54fdaa101ef2cf06c159e5defe421b366c695f26a15c4045bf3ba556096",
     "src/lib/constants.ts": "0fd43314837a2d7775810c3f08fc82b8042c34a5b6e52f1a7e4513f303a07b5d",
-    "src/lib/i18n/locales/ko-KR/translation.json": "5f065b6fca76dc47ef078604c41261d8a4974ac2dcd318afef0fea001e7c27b9",
+    "src/lib/i18n/locales/ko-KR/translation.json": "802545c50d8d87dbc82afacc5bd9e92587576e023392f426d415409de3ad5438",
     "src/routes/(app)/+layout.svelte": "6e235011199f1eb11107a2d444e5db8c6fb89d13b6e93b9e5980523bf87226f6",
     "src/routes/(app)/+page.svelte": "7cdd5f35c6d1064663d2bafd03263585ca270ce24d26788a656d465339e6cb03",
     "src/routes/(app)/c/[id]/+page.svelte": "2cf8b7796915e7711e467a4142d96ad1d4afc0366221236620719193d91d0ad2",
@@ -44,7 +44,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "ebafa889e0922c429eda73af30b15413506ca1c426e5776e4d981d8bb3f9ec20"
+      "sha256": "3020f35a05db3a128d4ca1aaa3f2a475ce694abccbbccde241290d7d2c8f44a6"
     }
   ],
   "pyodide_files": {

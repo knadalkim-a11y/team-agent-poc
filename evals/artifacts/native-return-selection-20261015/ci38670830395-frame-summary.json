@@ -1,0 +1,720 @@
+{
+  "head": "0efd8b072caf0b88a9dd58737cc51ba8b96a30c1",
+  "run_id": 38670830395,
+  "job_id": 116215416951,
+  "artifact_id": 11944537771,
+  "artifact_sha256": "eb4bd409e1fd6c83560f8813d081faa21b622d7cad5761b928ddf0c6069640cb",
+  "files": [
+    {
+      "name": "source-shell-native-return-selection-frames.json",
+      "sha256": "f4b307f85ad58b392aa000eaad6ce2adb495239c04a590d256737dafabaed31a",
+      "bytes": 3310941,
+      "frames": 3189,
+      "observed_return_frames": 1167,
+      "unexpected_selection": 0,
+      "previous_panel": 0,
+      "loading_frames": [
+        {
+          "at": 4422.099999999977,
+          "label": "return-tools-to-procedures",
+          "path": "/c/existing-chat",
+          "source": true,
+          "menu": true,
+          "bodyHidden": false,
+          "missingSource": false,
+          "legacy": [],
+          "menuCurrent": [
+            {
+              "key": "native_open:skills",
+              "ariaCurrent": "page",
+              "text": "스킬·지침스킬"
+            }
+          ],
+          "rightPanels": [],
+          "menuMode": [
+            "author"
+          ],
+          "targetLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "nativeReturnLabel": "return-tools-to-procedures",
+          "nativeReturnUnexpectedSelection": false,
+          "nativeReturnPreviousPanel": [],
+          "nativeReturnDestinationLoading": false,
+          "loadingGuard": true,
+          "menuLoading": [],
+          "panelLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "scopeLabel": null,
+          "scopePending": false,
+          "scopeEmptyBeforeResponse": [],
+          "scopeLocalLoading": [],
+          "scopeControls": true,
+          "content": true,
+          "adminDialog": false,
+          "sourceText": true,
+          "startupGate": null
+        },
+        {
+          "at": 9838.5,
+          "label": "return-tools-to-workspace_admin",
+          "path": "/c/existing-chat",
+          "source": true,
+          "menu": true,
+          "bodyHidden": false,
+          "missingSource": false,
+          "legacy": [],
+          "menuCurrent": [
+            {
+              "key": "native_open:skills",
+              "ariaCurrent": "page",
+              "text": "스킬·지침스킬"
+            }
+          ],
+          "rightPanels": [],
+          "menuMode": [
+            "author"
+          ],
+          "targetLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "nativeReturnLabel": "return-tools-to-workspace_admin",
+          "nativeReturnUnexpectedSelection": false,
+          "nativeReturnPreviousPanel": [],
+          "nativeReturnDestinationLoading": false,
+          "loadingGuard": true,
+          "menuLoading": [],
+          "panelLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "scopeLabel": null,
+          "scopePending": false,
+          "scopeEmptyBeforeResponse": [],
+          "scopeLocalLoading": [],
+          "scopeControls": true,
+          "content": true,
+          "adminDialog": false,
+          "sourceText": true,
+          "startupGate": null
+        },
+        {
+          "at": 15272.099999999977,
+          "label": "return-tools-to-my_work",
+          "path": "/c/existing-chat",
+          "source": true,
+          "menu": true,
+          "bodyHidden": false,
+          "missingSource": false,
+          "legacy": [],
+          "menuCurrent": [
+            {
+              "key": "native_open:models",
+              "ariaCurrent": "page",
+              "text": "AI 도우미모델"
+            }
+          ],
+          "rightPanels": [
+            "my_work"
+          ],
+          "menuMode": [
+            "author"
+          ],
+          "targetLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "nativeReturnLabel": "return-tools-to-my_work",
+          "nativeReturnUnexpectedSelection": false,
+          "nativeReturnPreviousPanel": [],
+          "nativeReturnDestinationLoading": false,
+          "loadingGuard": true,
+          "menuLoading": [],
+          "panelLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "scopeLabel": null,
+          "scopePending": false,
+          "scopeEmptyBeforeResponse": [],
+          "scopeLocalLoading": [],
+          "scopeControls": true,
+          "content": true,
+          "adminDialog": false,
+          "sourceText": true,
+          "startupGate": null
+        },
+        {
+          "at": 22839.20000000001,
+          "label": "return-procedures-to-tools",
+          "path": "/c/existing-chat",
+          "source": true,
+          "menu": true,
+          "bodyHidden": false,
+          "missingSource": false,
+          "legacy": [],
+          "menuCurrent": [
+            {
+              "key": "native_open:skills",
+              "ariaCurrent": "page",
+              "text": "스킬·지침스킬"
+            }
+          ],
+          "rightPanels": [],
+          "menuMode": [
+            "author"
+          ],
+          "targetLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "nativeReturnLabel": "return-procedures-to-tools",
+          "nativeReturnUnexpectedSelection": false,
+          "nativeReturnPreviousPanel": [],
+          "nativeReturnDestinationLoading": false,
+          "loadingGuard": true,
+          "menuLoading": [],
+          "panelLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "scopeLabel": null,
+          "scopePending": false,
+          "scopeEmptyBeforeResponse": [],
+          "scopeLocalLoading": [],
+          "scopeControls": true,
+          "content": true,
+          "adminDialog": false,
+          "sourceText": true,
+          "startupGate": null
+        },
+        {
+          "at": 28322,
+          "label": "return-procedures-to-workspace_admin",
+          "path": "/c/existing-chat",
+          "source": true,
+          "menu": true,
+          "bodyHidden": false,
+          "missingSource": false,
+          "legacy": [],
+          "menuCurrent": [
+            {
+              "key": "native_open:skills",
+              "ariaCurrent": "page",
+              "text": "스킬·지침스킬"
+            }
+          ],
+          "rightPanels": [],
+          "menuMode": [
+            "author"
+          ],
+          "targetLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "nativeReturnLabel": "return-procedures-to-workspace_admin",
+          "nativeReturnUnexpectedSelection": false,
+          "nativeReturnPreviousPanel": [],
+          "nativeReturnDestinationLoading": false,
+          "loadingGuard": true,
+          "menuLoading": [],
+          "panelLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "scopeLabel": null,
+          "scopePending": false,
+          "scopeEmptyBeforeResponse": [],
+          "scopeLocalLoading": [],
+          "scopeControls": true,
+          "content": true,
+          "adminDialog": false,
+          "sourceText": true,
+          "startupGate": null
+        },
+        {
+          "at": 33837.59999999998,
+          "label": "return-procedures-to-my_work",
+          "path": "/c/existing-chat",
+          "source": true,
+          "menu": true,
+          "bodyHidden": false,
+          "missingSource": false,
+          "legacy": [],
+          "menuCurrent": [
+            {
+              "key": "native_open:models",
+              "ariaCurrent": "page",
+              "text": "AI 도우미모델"
+            }
+          ],
+          "rightPanels": [
+            "my_work"
+          ],
+          "menuMode": [
+            "author"
+          ],
+          "targetLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "nativeReturnLabel": "return-procedures-to-my_work",
+          "nativeReturnUnexpectedSelection": false,
+          "nativeReturnPreviousPanel": [],
+          "nativeReturnDestinationLoading": false,
+          "loadingGuard": true,
+          "menuLoading": [],
+          "panelLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "scopeLabel": null,
+          "scopePending": false,
+          "scopeEmptyBeforeResponse": [],
+          "scopeLocalLoading": [],
+          "scopeControls": true,
+          "content": true,
+          "adminDialog": false,
+          "sourceText": true,
+          "startupGate": null
+        },
+        {
+          "at": 41488.09999999998,
+          "label": "return-workspace_admin-to-tools",
+          "path": "/c/existing-chat",
+          "source": true,
+          "menu": true,
+          "bodyHidden": false,
+          "missingSource": false,
+          "legacy": [],
+          "menuCurrent": [
+            {
+              "key": "native_open:skills",
+              "ariaCurrent": "page",
+              "text": "스킬·지침스킬"
+            }
+          ],
+          "rightPanels": [],
+          "menuMode": [
+            "author"
+          ],
+          "targetLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "nativeReturnLabel": "return-workspace_admin-to-tools",
+          "nativeReturnUnexpectedSelection": false,
+          "nativeReturnPreviousPanel": [],
+          "nativeReturnDestinationLoading": false,
+          "loadingGuard": true,
+          "menuLoading": [],
+          "panelLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "scopeLabel": null,
+          "scopePending": false,
+          "scopeEmptyBeforeResponse": [],
+          "scopeLocalLoading": [],
+          "scopeControls": true,
+          "content": true,
+          "adminDialog": false,
+          "sourceText": true,
+          "startupGate": null
+        },
+        {
+          "at": 47006.09999999998,
+          "label": "return-workspace_admin-to-procedures",
+          "path": "/c/existing-chat",
+          "source": true,
+          "menu": true,
+          "bodyHidden": false,
+          "missingSource": false,
+          "legacy": [],
+          "menuCurrent": [
+            {
+              "key": "native_open:skills",
+              "ariaCurrent": "page",
+              "text": "스킬·지침스킬"
+            }
+          ],
+          "rightPanels": [],
+          "menuMode": [
+            "author"
+          ],
+          "targetLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "nativeReturnLabel": "return-workspace_admin-to-procedures",
+          "nativeReturnUnexpectedSelection": false,
+          "nativeReturnPreviousPanel": [],
+          "nativeReturnDestinationLoading": false,
+          "loadingGuard": true,
+          "menuLoading": [],
+          "panelLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "scopeLabel": null,
+          "scopePending": false,
+          "scopeEmptyBeforeResponse": [],
+          "scopeLocalLoading": [],
+          "scopeControls": true,
+          "content": true,
+          "adminDialog": false,
+          "sourceText": true,
+          "startupGate": null
+        },
+        {
+          "at": 52588.79999999999,
+          "label": "return-workspace_admin-to-my_work",
+          "path": "/c/existing-chat",
+          "source": true,
+          "menu": true,
+          "bodyHidden": false,
+          "missingSource": false,
+          "legacy": [],
+          "menuCurrent": [
+            {
+              "key": "native_open:models",
+              "ariaCurrent": "page",
+              "text": "AI 도우미모델"
+            }
+          ],
+          "rightPanels": [
+            "my_work"
+          ],
+          "menuMode": [
+            "author"
+          ],
+          "targetLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "nativeReturnLabel": "return-workspace_admin-to-my_work",
+          "nativeReturnUnexpectedSelection": false,
+          "nativeReturnPreviousPanel": [],
+          "nativeReturnDestinationLoading": false,
+          "loadingGuard": true,
+          "menuLoading": [],
+          "panelLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "scopeLabel": null,
+          "scopePending": false,
+          "scopeEmptyBeforeResponse": [],
+          "scopeLocalLoading": [],
+          "scopeControls": true,
+          "content": true,
+          "adminDialog": false,
+          "sourceText": true,
+          "startupGate": null
+        }
+      ],
+      "counts": {
+        "return-tools-to-procedures": {
+          "frames": 128,
+          "unexpected_selection": 0,
+          "previous_panel": 0,
+          "destination_local_loading": 0
+        },
+        "return-tools-to-workspace_admin": {
+          "frames": 129,
+          "unexpected_selection": 0,
+          "previous_panel": 0,
+          "destination_local_loading": 0
+        },
+        "return-tools-to-my_work": {
+          "frames": 129,
+          "unexpected_selection": 0,
+          "previous_panel": 0,
+          "destination_local_loading": 0
+        },
+        "return-procedures-to-tools": {
+          "frames": 129,
+          "unexpected_selection": 0,
+          "previous_panel": 0,
+          "destination_local_loading": 0
+        },
+        "return-procedures-to-workspace_admin": {
+          "frames": 129,
+          "unexpected_selection": 0,
+          "previous_panel": 0,
+          "destination_local_loading": 0
+        },
+        "return-procedures-to-my_work": {
+          "frames": 130,
+          "unexpected_selection": 0,
+          "previous_panel": 0,
+          "destination_local_loading": 0
+        },
+        "return-workspace_admin-to-tools": {
+          "frames": 129,
+          "unexpected_selection": 0,
+          "previous_panel": 0,
+          "destination_local_loading": 0
+        },
+        "return-workspace_admin-to-procedures": {
+          "frames": 131,
+          "unexpected_selection": 0,
+          "previous_panel": 0,
+          "destination_local_loading": 0
+        },
+        "return-workspace_admin-to-my_work": {
+          "frames": 133,
+          "unexpected_selection": 0,
+          "previous_panel": 0,
+          "destination_local_loading": 0
+        }
+      }
+    },
+    {
+      "name": "source-shell-delayed-navigation-frames.json",
+      "sha256": "822b3f3e6ba1ae2e119492fbdfa8c58ec0162a403eead096231dc7a7d0b02287",
+      "bytes": 2379687,
+      "frames": 2356,
+      "observed_return_frames": 0,
+      "unexpected_selection": 0,
+      "previous_panel": 0,
+      "loading_frames": [
+        {
+          "at": 9688.399999999994,
+          "label": "skills-to-my-work",
+          "path": "/c/existing-chat",
+          "source": true,
+          "menu": true,
+          "bodyHidden": false,
+          "missingSource": false,
+          "legacy": [],
+          "menuCurrent": [
+            {
+              "key": "native_open:skills",
+              "ariaCurrent": "page",
+              "text": "스킬·지침스킬"
+            }
+          ],
+          "rightPanels": [
+            "my_work"
+          ],
+          "menuMode": [
+            "author"
+          ],
+          "targetLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "nativeReturnLabel": null,
+          "nativeReturnUnexpectedSelection": false,
+          "nativeReturnPreviousPanel": [],
+          "nativeReturnDestinationLoading": false,
+          "loadingGuard": true,
+          "menuLoading": [],
+          "panelLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "scopeLabel": null,
+          "scopePending": false,
+          "scopeEmptyBeforeResponse": [],
+          "scopeLocalLoading": [],
+          "scopeControls": true,
+          "content": true,
+          "adminDialog": false,
+          "sourceText": true,
+          "startupGate": null
+        },
+        {
+          "at": 20487.699999999983,
+          "label": "tools-to-my-work",
+          "path": "/c/existing-chat",
+          "source": true,
+          "menu": true,
+          "bodyHidden": false,
+          "missingSource": false,
+          "legacy": [],
+          "menuCurrent": [
+            {
+              "key": "native_open:tools",
+              "ariaCurrent": "page",
+              "text": "기능 연결도구"
+            }
+          ],
+          "rightPanels": [
+            "my_work"
+          ],
+          "menuMode": [
+            "author"
+          ],
+          "targetLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "nativeReturnLabel": null,
+          "nativeReturnUnexpectedSelection": false,
+          "nativeReturnPreviousPanel": [],
+          "nativeReturnDestinationLoading": false,
+          "loadingGuard": true,
+          "menuLoading": [],
+          "panelLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "scopeLabel": null,
+          "scopePending": false,
+          "scopeEmptyBeforeResponse": [],
+          "scopeLocalLoading": [],
+          "scopeControls": true,
+          "content": true,
+          "adminDialog": false,
+          "sourceText": true,
+          "startupGate": null
+        },
+        {
+          "at": 31320.5,
+          "label": "models-to-my-work",
+          "path": "/c/existing-chat",
+          "source": true,
+          "menu": true,
+          "bodyHidden": false,
+          "missingSource": false,
+          "legacy": [],
+          "menuCurrent": [
+            {
+              "key": "native_open:models",
+              "ariaCurrent": "page",
+              "text": "AI 도우미모델"
+            }
+          ],
+          "rightPanels": [
+            "my_work"
+          ],
+          "menuMode": [
+            "author"
+          ],
+          "targetLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "nativeReturnLabel": null,
+          "nativeReturnUnexpectedSelection": false,
+          "nativeReturnPreviousPanel": [],
+          "nativeReturnDestinationLoading": false,
+          "loadingGuard": true,
+          "menuLoading": [],
+          "panelLoading": [
+            "업무 정보를 불러오는 중입니다."
+          ],
+          "scopeLabel": null,
+          "scopePending": false,
+          "scopeEmptyBeforeResponse": [],
+          "scopeLocalLoading": [],
+          "scopeControls": true,
+          "content": true,
+          "adminDialog": false,
+          "sourceText": true,
+          "startupGate": null
+        }
+      ],
+      "counts": {
+        "skills-to-procedures-enter-workspace": {
+          "frames": 127,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "skills-to-procedures-native": {
+          "frames": 68,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "skills-to-procedures": {
+          "frames": 130,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "skills-to-my-work-enter-workspace": {
+          "frames": 126,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "skills-to-my-work-native": {
+          "frames": 68,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "skills-to-my-work": {
+          "frames": 129,
+          "menu_loading": 0,
+          "panel_loading": 1
+        },
+        "tools-to-procedures-enter-workspace": {
+          "frames": 127,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "tools-to-procedures-native": {
+          "frames": 68,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "tools-to-procedures": {
+          "frames": 127,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "tools-to-my-work-enter-workspace": {
+          "frames": 126,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "tools-to-my-work-native": {
+          "frames": 68,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "tools-to-my-work": {
+          "frames": 126,
+          "menu_loading": 0,
+          "panel_loading": 1
+        },
+        "models-to-procedures-enter-workspace": {
+          "frames": 123,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "models-to-procedures-native": {
+          "frames": 66,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "models-to-procedures": {
+          "frames": 129,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "models-to-my-work-enter-workspace": {
+          "frames": 123,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "models-to-my-work-native": {
+          "frames": 65,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "models-to-my-work": {
+          "frames": 125,
+          "menu_loading": 0,
+          "panel_loading": 1
+        },
+        "delayed-chat-list": {
+          "frames": 7,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "delayed-chat-switch": {
+          "frames": 129,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "delayed-new-chat": {
+          "frames": 123,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "delayed-chat-list-return": {
+          "frames": 7,
+          "menu_loading": 0,
+          "panel_loading": 0
+        },
+        "delayed-existing-return": {
+          "frames": 124,
+          "menu_loading": 0,
+          "panel_loading": 0
+        }
+      }
+    }
+  ]
+}

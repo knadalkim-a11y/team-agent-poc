@@ -259,10 +259,14 @@ def validate_execution(node, definition):
         errors.append("실행 방식에 맞는 한도를 지정해 주세요.")
     seen = []
     for call in calls:
-        if not isinstance(call, dict) or set(call) != {"id", "reference", "arguments"} or not isinstance(call.get("id"), str) or not IDENTIFIER.fullmatch(call["id"]) or call["id"] in seen:
+        if not isinstance(call, dict) or set(call) not in ({"id", "reference", "arguments"}, {"id", "shared_tool_id", "arguments"}) or not isinstance(call.get("id"), str) or not IDENTIFIER.fullmatch(call["id"]) or call["id"] in seen:
             errors.append("호출 식별자와 기능 연결을 확인해 주세요.")
             continue
-        errors.extend(reference_errors(call.get("reference")))
+        if "shared_tool_id" in call:
+            if not isinstance(call["shared_tool_id"], str) or not IDENTIFIER.fullmatch(call["shared_tool_id"]):
+                errors.append("공용 도구 ID를 확인해 주세요.")
+        else:
+            errors.extend(reference_errors(call.get("reference")))
         arguments = call.get("arguments")
         if not isinstance(arguments, dict) or len(arguments) > 32 or any(not _public_key(key) for key in arguments):
             errors.append("예약 인자·계정·주소·인증정보는 실행 입력으로 지정할 수 없습니다.")

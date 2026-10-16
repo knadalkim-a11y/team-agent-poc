@@ -31,6 +31,7 @@ from .ees_workflow_execution import ExecutionRuntime, init_execution
 from .ees_workflow_contract import validate_inputs
 from .ees_workflow_workspace import WorkspaceMixin
 from .ees_workflow_operations import OperationsRuntime
+from .ees_workflow_shared_tools import SharedTools
 
 _service = None
 
@@ -74,6 +75,7 @@ class WorkflowService(WorkspaceMixin, AuthoringMixin):
             self._init_workspace(db)
         self.execution = ExecutionRuntime(self, native_bridge, model_executor)
         self.operations = OperationsRuntime(self, bridge=native_bridge, model=model_executor)
+        self.shared_tools = SharedTools(self)
 
     @contextmanager
     def _db(self, write=False):

@@ -1,0 +1,76 @@
+✖ cached Native destination stays hidden until fresh access completes: denied=false (20.828635ms)
+✖ cached Native destination stays hidden until fresh access completes: denied=true (12.882218ms)
+✖ failed Native return restores Native selection and permits retry: async=false (6.136294ms)
+✖ failed Native return restores Native selection and permits retry: async=true (4.399614ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 0
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 132.822678
+
+✖ failing tests:
+
+test at tests/test_ees_native_return_selection.cjs:154:34
+✖ cached Native destination stays hidden until fresh access completes: denied=false (20.828635ms)
+  AssertionError [ERR_ASSERTION]: cached target cannot be revealed before workspace access returns
+  
+  false !== true
+  
+      at TestContext.<anonymous> (/workspace/scratch/1c4f60491bb1/team-agent-poc/tests/test_ees_native_return_selection.cjs:160:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_native_return_selection.cjs:154:34
+✖ cached Native destination stays hidden until fresh access completes: denied=true (12.882218ms)
+  AssertionError [ERR_ASSERTION]: cached target cannot be revealed before workspace access returns
+  
+  false !== true
+  
+      at TestContext.<anonymous> (/workspace/scratch/1c4f60491bb1/team-agent-poc/tests/test_ees_native_return_selection.cjs:160:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_native_return_selection.cjs:169:40
+✖ failed Native return restores Native selection and permits retry: async=false (6.136294ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  false !== true
+  
+      at TestContext.<anonymous> (/workspace/scratch/1c4f60491bb1/team-agent-poc/tests/test_ees_native_return_selection.cjs:174:37)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_native_return_selection.cjs:169:40
+✖ failed Native return restores Native selection and permits retry: async=true (4.399614ms)
+  Error: route load failed
+      at h.context.window.__eesSourceShellV1.navigate (/workspace/scratch/1c4f60491bb1/team-agent-poc/tests/test_ees_native_return_selection.cjs:172:90)
+      at nativeAnchor (evalmachine.<anonymous>:38:58)
+      at returnFromNative (evalmachine.<anonymous>:88:5)
+      at Object.sourceAction (evalmachine.<anonymous>:548:106)
+      at TestContext.<anonymous> (/workspace/scratch/1c4f60491bb1/team-agent-poc/tests/test_ees_native_return_selection.cjs:173:14)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)

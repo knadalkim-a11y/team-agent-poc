@@ -807,6 +807,22 @@ print("v4_database_" + phase + "=pass")
                 self.assertEqual(self.tree(), before)
                 self.assertEqual(self.events, [])
 
+    def test_pre_shared_tools_ees14_apply_restore_and_strict_incoming_inventory(self):
+        module = 'open_webui/ees_workflow_shared_tools.py'
+        previous = self.install_legacy_program(version='0.11.3+ees.14', missing=(module,))
+        custom.validate_program(self.program, previous)
+        before = self.tree()
+        self.assertTrue(self.apply()['changed'])
+        self.assertTrue((self.program / module).is_file())
+        self.assertEqual(self.restore()['source_commit'], previous['source_commit'])
+        custom.validate_program(self.program, previous)
+        self.assertEqual(self.tree(), before)
+        self.write_bundle(make_wheel(missing=(module,)))
+        before = self.tree()
+        with self.assertRaisesRegex(custom.CustomizationError, 'complete app'):
+            self.apply()
+        self.assertEqual(self.tree(), before)
+
     def test_pre_easy_tools_ees13_apply_restore_preserves_its_verified_inventory(self):
         previous = self.install_legacy_program(version="0.11.3+ees.13", missing=AUTHORING_FILES + C18_ICON_FILES)
         custom.validate_program(self.program, previous)

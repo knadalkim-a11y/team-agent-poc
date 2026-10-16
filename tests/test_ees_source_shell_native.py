@@ -546,6 +546,30 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.addCleanup(provider.stop)
         self.refresh()
 
+    def native_link_selector(self, target, label, labels, *, return_from=None):
+        if target != 'tools':
+            return '[data-action=native_open][data-native-id=' + target + ']'
+        # C45 keeps Native tools reachable through B10-2, with the same frame
+        # observation and draft preservation checks as other Native screens.
+        for suffix, selector, condition in (
+            ('list', '[data-action=tools]', "document.querySelector('[data-author-action=shared_open],[data-author-action=shared_native]')"),
+            ('detail', '[data-author-action=shared_open][data-id=managed-search_pages]', "document.querySelector('[data-author-action=shared_native]')"),
+        ):
+            if suffix == 'detail' and self.browser.evaluate("!!document.querySelector('[data-author-action=shared_native]')"):
+                continue  # Returning to the same detail preserves its selection.
+            step_label = label + '-shared-' + suffix
+            returning = suffix == 'list' and return_from is not None
+            if returning:
+                frame_monitor.begin_native_return(self, step_label, selector=selector, native=return_from, destination='tools', previous='procedures')
+            if hasattr(self.server, 'navigation_reads'):
+                self.delayed_step(step_label, selector, condition, paths=())
+            else:
+                self.step(step_label, selector, condition)
+            if returning:
+                frame_monitor.end_native_return(self)
+            labels.append(step_label)
+        return '[data-author-action=shared_native]'
+
     def capture_failure(self):
         super().capture_failure()
         if (not getattr(self, 'failure_evidence_captured', False)
@@ -641,7 +665,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
                                   "document.querySelector('#ees-work-designer')")
                 labels.append(enter)
                 native_label = label + '-native'
-                self.delayed_step(native_label, '[data-action=native_open][data-native-id=' + native + ']',
+                self.delayed_step(native_label, self.native_link_selector(native, native_label, labels),
                                   'location.pathname === ' + json.dumps('/workspace/' + native)
                                   + ' && !!document.querySelector("#workspace-container input")',
                                   paths=('workspace',))
@@ -651,8 +675,20 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 condition = ("document.querySelector('#ees-work-designer [data-author-action=create]')"
                              if destination == 'procedures' else
                              "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '내 업무'")
+                different = destination == 'my-work' or native == 'tools'
+                if different:
+                    # B10-2 departs from tools, so its procedures return also differs.
+                    # The 10-15 contract permits a local destination placeholder
+                    # for a different-menu return, with destination selection
+                    # already visible. Same-menu returns keep zero loading.
+                    frame_monitor.begin_native_return(self, label,
+                        selector='#ees-work-entry ' + selector, native=native,
+                        destination='my_work' if destination == 'my-work' else 'procedures',
+                        previous='tools' if native == 'tools' else 'procedures')
                 self.delayed_step(label, '#ees-work-entry ' + selector,
                                   "location.pathname === '/c/existing-chat' && (" + condition + ')')
+                if different:
+                    frame_monitor.end_native_return(self)
                 labels.append(label)
 
         self.step('delayed-chat-list', '[data-action=chats]',
@@ -674,17 +710,113 @@ class SourceShellNativeTests(IntegratedNativeCase):
         evidence = frame_monitor.collect(self, labels=labels)
         evidence['scope'] = ('Real compiled frontend candidate; historical 42cc756 failure is retained in evals, '
                              'physical CDP clicks, temporary production workflow service; both workspace '
-                             'and operations HTTP GETs delayed by 1000ms; no DOM masking or expected failure.')
+                             'and operations HTTP GETs delayed by 1000ms; no DOM masking or expected failure. '
+                             'Only different-menu returns (including B10-2 tools-to-procedures) permit a local target placeholder '
+                             'with the exact destination selected; same-menu and other transitions retain zero loading.')
         evidence['reads'] = self.server.navigation_reads
         evidence['counts'] = {label: {
             'frames': sum(row['label'] == label for row in evidence['samples']),
             'menu_loading': sum(row['label'] == label and bool(row['menuLoading']) for row in evidence['samples']),
-            'panel_loading': sum(row['label'] == label and bool(row['panelLoading']) for row in evidence['samples'])}
+            'panel_loading': sum(row['label'] == label and bool(row['panelLoading']) for row in evidence['samples']),
+            'destination_local_loading': sum(row['label'] == label and row['nativeReturnDestinationLoading']
+                                              for row in evidence['samples']),
+            'unexpected_selection': sum(row['label'] == label and row['nativeReturnUnexpectedSelection']
+                                        for row in evidence['samples']),
+            'previous_panel': sum(row['label'] == label and bool(row['nativeReturnPreviousPanel'])
+                                  for row in evidence['samples'])}
             for label in labels}
         directory = self.screenshot('source-shell-delayed-navigation-final')
         (directory / 'source-shell-delayed-navigation-frames.json').write_text(
             json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         self.assertTrue(self.server.navigation_reads)
+        self.assertEqual([row['label'] for row in evidence['nativeReturns']],
+                         ['skills-to-my-work', 'tools-to-procedures', 'tools-to-my-work', 'models-to-my-work'])
+        for row in self.server.navigation_reads:
+            self.assertGreaterEqual(row['released'] - row['started'], .99)
+        frame_monitor.assert_clean(self, evidence, labels=labels)
+        self.assertEqual(self.server.completions, [], 'Navigation must not submit a conversation')
+
+    def test_native_return_first_frame_selects_destination_without_previous_panel(self):
+        self.enable_native_menus()
+        frame_monitor.install(self)
+        self.navigate('/c/existing-chat')
+        self.wait("document.querySelector('#ees-work-entry [data-action=my_work]') && window.__eesNativeDraftV1?.ready()")
+        self.open_sidebar()
+        self.fill('#chat-input', '다른 칸으로 돌아와도 유지할 대화 초안')
+        draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        panels = {
+            'tools': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '도구'",
+            'procedures': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '업무 절차'",
+            'workspace_admin': "document.querySelector('#ees-work-panel .ew-work-heading h2')?.textContent === '공장·접근 범위'",
+            'my_work': "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '내 업무'",
+        }
+        # Warm the three author panels once before timing the return boundary.
+        # Existing same-menu preservation coverage below keeps dirty draft DOM,
+        # fields, expansion and scroll; this test targets different destinations.
+        self.click('[data-action=mode][data-mode=author]')
+        self.wait(panels['procedures'])
+        self.assertIsNotNone(self.refresh())
+        for origin in ('tools', 'workspace_admin', 'procedures'):
+            self.click('#ees-work-entry [data-action=' + origin + ']')
+            self.wait(panels[origin])
+            self.assertIsNotNone(self.refresh())
+        self.delay_workspace_reads()
+        frame_monitor.guard_loading(self)
+        labels = []
+
+        for origin in ('tools', 'procedures', 'workspace_admin'):
+            for destination in ('tools', 'procedures', 'workspace_admin', 'my_work'):
+                if destination == origin:
+                    continue
+                label = 'return-' + origin + '-to-' + destination
+                if self.browser.evaluate("document.querySelector('#ees-work-entry [data-mode=work]')?.getAttribute('aria-pressed') === 'true'"):
+                    self.delayed_step(label + '-author', '#ees-work-entry [data-action=mode][data-mode=author]',
+                                      "document.querySelector('#ees-work-entry [data-mode=author]')?.getAttribute('aria-pressed') === 'true'")
+                self.delayed_step(label + '-origin', '#ees-work-entry [data-action=' + origin + ']',
+                                  panels[origin])
+                # Cover both Guidance and the AI settings route with the same
+                # return contract. The administrator dialog's close/same path
+                # remains in test_every_navigation_has_source_chrome... .
+                native = 'models' if destination == 'my_work' else 'skills'
+                self.delayed_step(label + '-native',
+                    '#ees-work-entry [data-action=native_open][data-native-id=' + native + ']',
+                    'location.pathname === ' + json.dumps('/workspace/' + native) +
+                    ' && document.querySelector("#workspace-container input") && ' +
+                    'document.querySelector("#ees-work-entry [data-native-id=' + native + ']")?.getAttribute("aria-current") === "page"',
+                    paths=('workspace',))
+                selector = ('#ees-work-entry [data-action=mode][data-mode=work]' if destination == 'my_work'
+                            else '#ees-work-entry [data-action=' + destination + ']')
+                start = len(self.server.navigation_reads)
+                frame_monitor.begin_native_return(self, label, selector=selector, native=native,
+                                                 destination=destination, previous=origin)
+                self.click(selector)
+                self.wait("location.pathname === '/c/existing-chat' && (" + panels[destination] + ')')
+                self.wait_delayed_reads(start)
+                frame_monitor.collect(self, labels=(label,))
+                frame_monitor.end_native_return(self)
+                labels.append(label)
+                self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+
+        evidence = frame_monitor.collect(self, labels=labels)
+        evidence['scope'] = ('Real packaged frontend and physical CDP clicks: tools/procedures/factories-access '
+                             'each through Native guidance to both other author panels and through Native '
+                             'models to work mode (nine returns). Both real workspace and operations responses '
+                             'are delayed 1000ms; aria-current and visible right-panel identity are observed '
+                             'from the trusted destination click through response completion.')
+        evidence['reads'] = self.server.navigation_reads
+        evidence['counts'] = {label: {
+            'frames': sum(row['nativeReturnLabel'] == label for row in evidence['samples']),
+            'unexpected_selection': sum(row['nativeReturnLabel'] == label and row['nativeReturnUnexpectedSelection']
+                                        for row in evidence['samples']),
+            'previous_panel': sum(row['nativeReturnLabel'] == label and bool(row['nativeReturnPreviousPanel'])
+                                  for row in evidence['samples']),
+            'destination_local_loading': sum(row['nativeReturnLabel'] == label and row['nativeReturnDestinationLoading']
+                                              for row in evidence['samples']),
+        } for label in labels}
+        directory = self.screenshot('source-shell-native-return-selection-final')
+        (directory / 'source-shell-native-return-selection-frames.json').write_text(
+            json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        self.assertEqual(len(evidence['nativeReturns']), 9)
         for row in self.server.navigation_reads:
             self.assertGreaterEqual(row['released'] - row['started'], .99)
         frame_monitor.assert_clean(self, evidence, labels=labels)
@@ -835,12 +967,15 @@ class SourceShellNativeTests(IntegratedNativeCase):
         labels.append('work-procedures')
         for target in ('models', 'knowledge', 'prompts', 'skills', 'tools'):
             label = 'native-' + target
-            self.step(label, '[data-action=native_open][data-native-id=' + target + ']',
+            self.step(label, self.native_link_selector(target, label, labels, return_from='skills' if target == 'tools' else None),
                       'location.pathname === ' + json.dumps('/workspace/' + target)
                       + ' && document.querySelector("#workspace-container input")')
             labels.append(label)
+        frame_monitor.begin_native_return(self, 'native-return', selector='#ees-work-entry [data-action=procedures]',
+            native='tools', destination='procedures', previous='tools')
         self.step('native-return', '#ees-work-entry [data-action=procedures]',
-                  "location.pathname === '/c/existing-chat' && document.querySelector('#ees-work-designer')")
+                  "location.pathname === '/c/existing-chat' && document.querySelector('#ees-work-designer [data-author-action=create]')")
+        frame_monitor.end_native_return(self)
         labels.append('native-return')
         self.step('admin-open', '[data-action=native_open][data-native-id=admin]',
                   "document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-admin-general][aria-selected=true]')")
