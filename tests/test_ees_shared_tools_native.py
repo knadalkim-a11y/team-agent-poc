@@ -212,6 +212,64 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([row[0] for row in pins], [self.key])
         self.assertEqual(set(started['run']['jobs']), {'new-documents-search-j'})
 
+    async def test_excluded_shared_job_does_not_pin_disabled_tool(self):
+        item = await self.review()
+        wid = await self.workflow()
+        with self.service._db() as db:
+            definition = json.loads(db.execute('SELECT draft FROM work_definitions WHERE id=?', (wid,)).fetchone()[0])
+        definition['nodes']['j1']['condition'] = {'field':'factory_id', 'op':'eq', 'value':'another-factory'}
+        await self.core('save_draft', 3, workflow_id=wid, definition=definition)
+        await self.core('validate_workflow', 4, workflow_id=wid)
+        await self.core('publish_workflow', 4, workflow_id=wid)
+        await self.tools.command(self.admin, self.body('shared_tool_disable', item['revision'], shared_tool_id=self.key, reference=item['observed_reference']))
+        started = await self.core('start_run', 5, actor=self.reader, workflow_id=wid, inputs={}, sharing={'group_ids':[self.group.id]})
+        self.assertEqual(started['run']['jobs']['j1']['status'], 'excluded')
+        with self.service._db() as db:
+            self.assertEqual(db.execute('SELECT count(*) FROM work_shared_tool_pins WHERE run_id=?', (started['run_id'],)).fetchone()[0], 0)
+        disabled = await self.item()
+        await self.tools.command(self.admin, self.body('shared_tool_enable', disabled['revision'], shared_tool_id=self.key, reference=disabled['observed_reference']))
+        definition['nodes']['j1']['condition'] = {'field':'tier', 'op':'eq', 'value':'production'}
+        await self.core('save_draft', 5, workflow_id=wid, definition=definition)
+        await self.core('validate_workflow', 6, workflow_id=wid)
+        await self.core('publish_workflow', 6, workflow_id=wid)
+        enabled = await self.item()
+        await self.tools.command(self.admin, self.body('shared_tool_disable', enabled['revision'], shared_tool_id=self.key, reference=enabled['observed_reference']))
+        unknown = await self.service.workspace_command(self.reader, self.body('start_run', 7, workflow_id=wid, inputs={}, sharing={'group_ids':[self.group.id]}))
+        self.assertFalse(unknown['ok'], unknown)
+        self.assertEqual(unknown['error']['code'], 'shared_tool_disabled')  # Unknown is blocked, never excluded.
+
+    async def test_publication_rejects_evidence_tool_with_list_confirmation(self):
+        await self.review('managed-get_page')
+        wid = await self.workflow(key='managed-get_page')
+        with self.service._db() as db:
+            definition = json.loads(db.execute('SELECT draft FROM work_definitions WHERE id=?', (wid,)).fetchone()[0])
+        definition['nodes']['j1']['result_block'] = 'list_confirm'
+        await self.core('save_draft', 3, workflow_id=wid, definition=definition)
+        result = await self.core('validate_workflow', 4, workflow_id=wid)
+        self.assertIn('목록 결과', '\n'.join(result['validation']['errors']))
+        rejected = await self.service.workspace_command(self.admin, self.body('publish_workflow', 4, workflow_id=wid))
+        self.assertFalse(rejected['ok'], rejected)
+
+    async def test_unavailable_reviewed_tool_can_be_disabled_and_access_revoked_only(self):
+        first = await self.review()
+        tool = await self.f.tools.Tools.get_tool_by_id(first['reference']['tool_id'])
+        await self.f.tools.Tools.update_tool_by_id(tool.id, {'content':tool.content+'\n# unknown installed edit\n'})
+        with patch.object(self.f.tools.Tools, 'update_tool_by_id', side_effect=AssertionError('No Native writes')), patch.object(self.f.bridge, 'store_approval', side_effect=AssertionError('No approval writes')):
+            await self.tools.command(self.admin, self.body('shared_tool_disable', first['revision'], shared_tool_id=self.key, reference=first['reference']))
+            disabled = await self.item()
+            await self.tools.command(self.admin, self.body('shared_tool_access', disabled['revision'], shared_tool_id=self.key, reference=first['reference'], group_ids=[], responsible_user_id='admin'))
+            revoked = await self.item()
+            self.assertEqual(revoked['group_ids'], [])
+            await self.assert_code('shared_tool_forbidden', self.tools.command(self.admin, self.body('shared_tool_access', revoked['revision'], shared_tool_id=self.key, reference=first['reference'], group_ids=[self.group.id], responsible_user_id='admin')))
+            await self.assert_code('shared_tool_source_mismatch', self.tools.command(self.admin, self.body('shared_tool_enable', revoked['revision'], shared_tool_id=self.key, reference=first['reference'])))
+            await self.assert_code('shared_tool_source_mismatch', self.review())
+        await self.f.tools.Tools.update_tool_by_id(tool.id, {'content':tool.content})
+        restored = await self.item()
+        self.assertEqual(restored['state'], 'disabled')
+        self.assertEqual(restored['version'], first['version'])
+        self.assertEqual(restored['group_ids'], [])
+        self.assertEqual(await self.tools.list(self.reader, usable_only=True), [])
+
     async def test_groups_disable_enable_and_unknown_source_never_dispatch_or_write_native(self):
         item = await self.review()
         self.assertEqual(await self.tools.list(self.f.users['outsider'], usable_only=True), [])

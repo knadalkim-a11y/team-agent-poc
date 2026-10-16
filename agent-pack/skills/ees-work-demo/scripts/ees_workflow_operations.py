@@ -1659,6 +1659,8 @@ class OperationsRuntime:
                 try:
                     tool = self.service.shared_tools.get(db, job["shared_tool_id"])
                     self.service.shared_tools.authorize(tool, actor, groups)
+                    if job.get("result_block") == "list_confirm" and tool["output_schema"].get("kind") != "list":
+                        errors.append(job["id"] + ": 목록 결과를 돌려주는 도구에만 목록 확정을 사용할 수 있습니다.")
                     properties = tool["input_schema"].get("properties", {})
                     bindings = job.get("argument_bindings", job.get("execution", {}).get("argument_bindings", {}))
                     if not isinstance(bindings, dict):

@@ -4,6 +4,7 @@
 
 - **승인/순서:** 사용자가 두 PR의 병합까지 요청했다. #91 최종 CI 성공 → merge commit 병합 → #93에 main 통합 → 최종 CI 성공 → #93 merge commit 병합 순서다. 아래 Draft/병합 보류 문구는 당시 기록이다.
 - **현재:** #91 head7dd9132의 최종 CI38850315905가31성공/1정상제외로 끝나 merge commit `ff0641628860c78f13e8f33ab60eee8cd3491a4d`로 병합했다. 이 main을 #93에 merge 통합하고 문서3개 충돌의 양쪽 기록·증거를 보존했다. #93의 추가 자동 검토3건도 게시 필수 인자·자료형, 선택 범위 pin, 수동 연결 보존으로 보완했다. [첫 실패·회귀](../evals/v4-ui-20260930.md#shared-tools-merge-review-20261016).
+- **통합 첫 CI/추가 보완:** ba6aa64의 Native64개 중62PASS/2FAIL은 C45로 달라진 출발 칸을 기존 시험이 같은 칸으로 취급한 문제다. 원본 프레임을 보존하고 실제 목적지/이전 칸0 감시를 연결했다. 추가 자동 검토3건(제외 작업 pin·목록 결과 호환·장애 중 제한적 관리)도 회귀와 함께 보완했다. 공용 Native/workspace93PASS·Node355PASS. [실패·재검 조건](../evals/v4-ui-20260930.md#shared-tools-merge-review-20261016).
 - **검증:** #93 로컬 Python111PASS/이전 source fixture 미준비1SKIP. main 통합 뒤 전체 Node354PASS·Python controller1PASS·문서/신규 diff 검사 통과. 실제 브라우저/Windows는 최종 통합 CI로 확인한다.
 - **다음 작업:** 통합 #93 최종 head CI 성공 후 merge commit 병합과 최종 main CI 확인. 사내 적용·설치 확인은 미실행이며 설치 원본·주소·허용 공간·암호화·팀원 PAT는 미확인이다. Figma 수정·#77/#79·main 직접 push는 하지 않는다.
 

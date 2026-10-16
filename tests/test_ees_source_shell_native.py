@@ -546,7 +546,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.addCleanup(provider.stop)
         self.refresh()
 
-    def native_link_selector(self, target, label, labels):
+    def native_link_selector(self, target, label, labels, *, return_from=None):
         if target != 'tools':
             return '[data-action=native_open][data-native-id=' + target + ']'
         # C45 keeps Native tools reachable through B10-2, with the same frame
@@ -558,10 +558,15 @@ class SourceShellNativeTests(IntegratedNativeCase):
             if suffix == 'detail' and self.browser.evaluate("!!document.querySelector('[data-author-action=shared_native]')"):
                 continue  # Returning to the same detail preserves its selection.
             step_label = label + '-shared-' + suffix
+            returning = suffix == 'list' and return_from is not None
+            if returning:
+                frame_monitor.begin_native_return(self, step_label, selector=selector, native=return_from, destination='tools', previous='procedures')
             if hasattr(self.server, 'navigation_reads'):
                 self.delayed_step(step_label, selector, condition, paths=())
             else:
                 self.step(step_label, selector, condition)
+            if returning:
+                frame_monitor.end_native_return(self)
             labels.append(step_label)
         return '[data-author-action=shared_native]'
 
@@ -670,16 +675,19 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 condition = ("document.querySelector('#ees-work-designer [data-author-action=create]')"
                              if destination == 'procedures' else
                              "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '내 업무'")
-                if destination == 'my-work':
+                different = destination == 'my-work' or native == 'tools'
+                if different:
+                    # B10-2 departs from tools, so its procedures return also differs.
                     # The 10-15 contract permits a local destination placeholder
                     # for a different-menu return, with destination selection
                     # already visible. Same-menu returns keep zero loading.
                     frame_monitor.begin_native_return(self, label,
                         selector='#ees-work-entry ' + selector, native=native,
-                        destination='my_work', previous='procedures')
+                        destination='my_work' if destination == 'my-work' else 'procedures',
+                        previous='tools' if native == 'tools' else 'procedures')
                 self.delayed_step(label, '#ees-work-entry ' + selector,
                                   "location.pathname === '/c/existing-chat' && (" + condition + ')')
-                if destination == 'my-work':
+                if different:
                     frame_monitor.end_native_return(self)
                 labels.append(label)
 
@@ -703,7 +711,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         evidence['scope'] = ('Real compiled frontend candidate; historical 42cc756 failure is retained in evals, '
                              'physical CDP clicks, temporary production workflow service; both workspace '
                              'and operations HTTP GETs delayed by 1000ms; no DOM masking or expected failure. '
-                             'Only the three Native-to-my-work returns permit a local target placeholder '
+                             'Only different-menu returns (including B10-2 tools-to-procedures) permit a local target placeholder '
                              'with the exact destination selected; same-menu and other transitions retain zero loading.')
         evidence['reads'] = self.server.navigation_reads
         evidence['counts'] = {label: {
@@ -722,7 +730,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
             json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         self.assertTrue(self.server.navigation_reads)
         self.assertEqual([row['label'] for row in evidence['nativeReturns']],
-                         [native + '-to-my-work' for native in ('skills', 'tools', 'models')])
+                         ['skills-to-my-work', 'tools-to-procedures', 'tools-to-my-work', 'models-to-my-work'])
         for row in self.server.navigation_reads:
             self.assertGreaterEqual(row['released'] - row['started'], .99)
         frame_monitor.assert_clean(self, evidence, labels=labels)
@@ -959,12 +967,15 @@ class SourceShellNativeTests(IntegratedNativeCase):
         labels.append('work-procedures')
         for target in ('models', 'knowledge', 'prompts', 'skills', 'tools'):
             label = 'native-' + target
-            self.step(label, self.native_link_selector(target, label, labels),
+            self.step(label, self.native_link_selector(target, label, labels, return_from='skills' if target == 'tools' else None),
                       'location.pathname === ' + json.dumps('/workspace/' + target)
                       + ' && document.querySelector("#workspace-container input")')
             labels.append(label)
+        frame_monitor.begin_native_return(self, 'native-return', selector='#ees-work-entry [data-action=procedures]',
+            native='tools', destination='procedures', previous='tools')
         self.step('native-return', '#ees-work-entry [data-action=procedures]',
-                  "location.pathname === '/c/existing-chat' && document.querySelector('#ees-work-designer')")
+                  "location.pathname === '/c/existing-chat' && document.querySelector('#ees-work-designer [data-author-action=create]')")
+        frame_monitor.end_native_return(self)
         labels.append('native-return')
         self.step('admin-open', '[data-action=native_open][data-native-id=admin]',
                   "document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-admin-general][aria-selected=true]')")

@@ -206,9 +206,11 @@ def begin_scope_read(case, label, *, system, factory='', unknown=True):
 
 def begin_native_return(case, label, *, selector, native, destination, previous):
     """Observe a different-menu return from the actual physical click onward."""
+    # C45 removed the Native tools menu; its B10-2 route has no selected Native item.
+    before = [] if native == 'tools' else ['native_open:' + native]
     expected = {'label': label, 'selector': selector, 'native': native,
-                'destination': destination, 'previous': previous,
-                'allowed': ['native_open:' + native, destination],
+                'destination': destination, 'previous': previous, 'expectedBefore': before,
+                'allowed': before + [destination],
                 'clickedAt': None, 'trusted': False, 'beforeCurrent': []}
     case.browser.evaluate('(()=>{const e=window.__eesSourceFrameEvidence;'
                           'e.label=' + json.dumps(label) + ';e.nativeReturn=' + json.dumps(expected) +
@@ -250,7 +252,7 @@ def assert_clean(case, evidence, *, labels=()):
                      'Observed the previous right-hand panel during Native return: ' + str(len(previous_panel)) + ' frames')
     for expected in evidence.get('nativeReturns', []):
         case.assertTrue(expected['trusted'], 'Native return did not start with physical input: ' + expected['label'])
-        case.assertEqual([item['key'] for item in expected['beforeCurrent']], ['native_open:' + expected['native']])
+        case.assertEqual([item['key'] for item in expected['beforeCurrent']], expected['expectedBefore'])
         frames = [item for item in samples if item.get('nativeReturnLabel') == expected['label']]
         case.assertGreaterEqual(len(frames), 3, 'Missing Native return frame coverage: ' + expected['label'])
         case.assertTrue(any(expected['destination'] in item['rightPanels'] and

@@ -208,9 +208,10 @@ class SharedTools:
         observed = discovered.get(key)
         if not observed:
             fail('shared_tool_unavailable')
-        if observed['state'] in ('unavailable', 'preparing'):
+        restrictive = observed['state'] == 'unavailable' and action in ('shared_tool_disable', 'shared_tool_access')
+        if observed['state'] in ('unavailable', 'preparing') and not restrictive:
             fail(observed['unavailable_reason'])
-        if body.get('reference') != observed['reference']:
+        if not restrictive and body.get('reference') != observed['reference']:
             fail('shared_tool_review_required')
         from .ees_workflow import _resolve
         native_groups = await _resolve(self.service.group_list_lookup()) if self.service.group_list_lookup else []
@@ -227,11 +228,15 @@ class SharedTools:
             row = db.execute('SELECT data FROM work_shared_tools WHERE id=?', (key,)).fetchone()
             old = json.loads(row[0]) if row else None
             runtime._revision(body, old['revision'] if old else 0)
+            if restrictive and (not old or body.get('reference') != old['reference']):
+                fail('shared_tool_review_required')
             item = deepcopy(old or observed)
             if action in ('shared_tool_review', 'shared_tool_access'):
                 selected = body.get('group_ids')
                 known = {_get(group, 'id') for group in native_groups}
-                if not isinstance(selected, list) or not selected or any(not isinstance(g, str) or g not in known for g in selected):
+                if not isinstance(selected, list) or (not selected and not restrictive) or any(not isinstance(g, str) or g not in known for g in selected):
+                    fail('shared_tool_forbidden')
+                if restrictive and not set(selected) <= set(old['group_ids']):
                     fail('shared_tool_forbidden')
                 owner = body.get('responsible_user_id')
                 if not isinstance(owner, str) or not owner:

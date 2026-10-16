@@ -1499,7 +1499,8 @@ class WorkspaceMixin:
                 conditions[key] = False if False in values else None if None in values else True
             snapshot = {'definition': definition, 'definition_hash': published['hash'], 'factory': dict(factory) | {'attributes': attributes} if factory else None, 'condition_results': conditions}
             key = str(uuid4()); mode = definition.get('mode', 'on_demand')
-            self.shared_tools.pin(db, actor, groups, 'work', key, definition)
+            active_definition = {'nodes': {job_id: node for job_id, node in definition['nodes'].items() if node['type'] == 'j' and conditions[job_id] is not False}}
+            self.shared_tools.pin(db, actor, groups, 'work', key, active_definition)
             if body.get('mode', mode) != mode: _fail('invalid_mode', '게시된 실행 방식을 사용해 주세요.')
             db.execute('INSERT INTO work_runs VALUES(?,?,?,?,?,?,?,?,\'open\',1,?,?,?,?,NULL)', (key, row['id'], version, row['system_id'], factory_id, actor_id, _dump(sharing), mode, _dump(inputs), _dump(snapshot), now, now))
             for job_id, node in definition['nodes'].items():
