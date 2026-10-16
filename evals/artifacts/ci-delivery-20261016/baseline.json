@@ -1,0 +1,79 @@
+{
+  "captured_at": "2026-10-16",
+  "baseline": {
+    "commit": "ff0641628860c78f13e8f33ab60eee8cd3491a4d",
+    "run_id": 38852021564,
+    "event": "push",
+    "conclusion": "success",
+    "created_at": "2026-10-16T04:42:48Z",
+    "updated_at": "2026-10-16T04:59:59Z",
+    "gate_completed_at": "2026-10-16T04:58:00Z",
+    "artifacts": [
+      {
+        "name": "ees-pinned-fixtures-ff0641628860c78f13e8f33ab60eee8cd3491a4d",
+        "size_in_bytes": 1392654739
+      },
+      {
+        "name": "ees-source-frontend-ff0641628860c78f13e8f33ab60eee8cd3491a4d",
+        "size_in_bytes": 258137054
+      }
+    ],
+    "selected_jobs": [
+      {
+        "name": "Pinned Native source baseline and EES frontend build",
+        "started_at": "2026-10-16T04:42:50Z",
+        "completed_at": "2026-10-16T04:47:39Z",
+        "conclusion": "success"
+      },
+      {
+        "name": "Prepare pinned program fixtures and test coverage",
+        "started_at": "2026-10-16T04:47:41Z",
+        "completed_at": "2026-10-16T04:49:41Z",
+        "conclusion": "success"
+      },
+      {
+        "name": "program-install (ubuntu-24.04)",
+        "started_at": "2026-10-16T04:49:44Z",
+        "completed_at": "2026-10-16T04:50:58Z",
+        "conclusion": "success"
+      },
+      {
+        "name": "program-install (windows-2022)",
+        "started_at": "2026-10-16T04:50:48Z",
+        "completed_at": "2026-10-16T04:54:43Z",
+        "conclusion": "success"
+      },
+      {
+        "name": "Delivery checks (windows-2022)",
+        "started_at": "2026-10-16T04:57:54Z",
+        "completed_at": "2026-10-16T04:58:00Z",
+        "conclusion": "success"
+      },
+      {
+        "name": "Delivery checks (ubuntu-24.04)",
+        "started_at": "2026-10-16T04:57:54Z",
+        "completed_at": "2026-10-16T04:57:56Z",
+        "conclusion": "success"
+      },
+      {
+        "name": "Prepare delivery files",
+        "started_at": "2026-10-16T04:58:02Z",
+        "completed_at": "2026-10-16T04:59:58Z",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "prior_pr_observation": {
+    "commit": "b51ad908c5e38da581a3c29da12eedaf4b3e1bc1",
+    "run_id": 38853958726,
+    "total_seconds": 1049,
+    "fixtures_bytes": 1392669952,
+    "windows_program_install_download_seconds": 221,
+    "warning": "Different product revision; reference observation, not an equivalent-code benchmark."
+  },
+  "comparison_notes": [
+    "The baseline main run includes packaging. Compare Delivery checks completion separately.",
+    "Artifact bytes times consumers estimate transferred payload; parallel elapsed time is not summed.",
+    "Hosted runner/network variation prevents assigning a single-run difference entirely to these changes."
+  ]
+}
