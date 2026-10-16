@@ -772,12 +772,16 @@ class WorkspaceMixin:
         if attempt['actor_id'] != _value(actor, 'id'):
             _fail('evidence_access_required', '본인 권한으로 근거를 다시 조회해 주세요.')
         if snapshot.get('shared_tool'):
-            await self.shared_tools.resolve(actor, snapshot['shared_tool']['id'], kind='work', run_id=attempt['run_id'])
+            # Reading saved evidence checks current access, not permission to
+            # execute the historical pin. Upgrades never rewrite that evidence.
+            await self.shared_tools.resolve(actor, snapshot['shared_tool']['id'])
         refs = self._work_evidence_references(snapshot)
         if snapshot['job'].get('mode') == 'ai' and self._work_prerequisite_jobs(snapshot['definition'], snapshot['job']['id']) and not snapshot.get('evidence_attempt_ids'):
             _fail('evidence_access_required', '근거의 권한을 다시 조회해 주세요.')
         bridge = getattr(getattr(self, 'operations', None), 'bridge', None) or getattr(getattr(self, 'execution', None), 'bridge', None)
         for ref in refs:
+            if snapshot.get('shared_tool') and ref == snapshot['shared_tool']['reference']:
+                continue  # Current shared-tool ACL/source was checked above.
             if not bridge or not hasattr(bridge, 'check'):
                 _fail('evidence_access_required', '현재 Native 원본 접근권한을 확인해 주세요.')
             reference = deepcopy(ref); reference.pop('contract_id', None)

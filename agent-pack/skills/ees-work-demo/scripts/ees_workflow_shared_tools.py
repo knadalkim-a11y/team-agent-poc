@@ -42,6 +42,7 @@ MESSAGES = {
     'shared_tool_review_required': '도구 확인 필요 · 관리자에게 입력·결과와 연결 설정 확인을 요청하세요.',
     'shared_tool_disabled': '도구 사용 중지 · 관리자에게 다시 켜기를 요청하세요.',
     'shared_tool_forbidden': '이 도구를 쓸 수 있는 그룹 권한이 없습니다. 관리자에게 확인을 요청하세요.',
+    'shared_tool_plan_changed': '공용 도구가 바뀌었습니다. 새 실행 계획을 확인해 주세요.',
     'shared_tool_version_changed': '회차 시작 뒤 도구 버전이 바뀌었습니다. 새 버전으로 계속할지 직접 확인해 주세요.',
     'shared_tool_breaking_change': '입력·결과 모양이 호환되지 않아 같은 도구로 확인할 수 없습니다. 개발 담당자에게 새 도구를 요청하세요.',
 }
@@ -185,7 +186,16 @@ class SharedTools:
                     definition = json.loads(published[0]) if published else {}
                     for node in definition.get('nodes', {}).values():
                         if node.get('shared_tool_id') == item['id']:
-                            automated = db.execute('SELECT 1 FROM work_schedules WHERE workflow_id=? AND enabled=1', (row['id'],)).fetchone() is not None
+                            automated = False
+                            for scheduled in db.execute('SELECT data FROM work_schedules WHERE workflow_id=? AND enabled=1', (row['id'],)):
+                                schedule = json.loads(scheduled[0])
+                                if not schedule.get('delegated') or node['id'] not in schedule.get('job_ids', []):
+                                    continue
+                                version = db.execute('SELECT definition FROM work_versions WHERE workflow_id=? AND version=?', (row['id'], schedule['version'])).fetchone()
+                                scheduled_node = json.loads(version[0]).get('nodes', {}).get(node['id'], {}) if version else {}
+                                if scheduled_node.get('shared_tool_id') == item['id']:
+                                    automated = True
+                                    break
                             uses.append({'workflow_id': row['id'], 'workflow_name': definition.get('name', ''), 'job_id': node['id'], 'job_name': node['name'], 'system_id': row['system_id'], 'automatic': automated})
                 item['uses'] = uses
             if not admin:
@@ -277,7 +287,7 @@ class SharedTools:
             runtime._event(db, key, actor, action, {'version': item['version'], 'revision': item['revision']})
             return runtime._remember(db, actor, body, {'ok': True, 'shared_tool_id': key})
 
-    def pin(self, db, actor, groups, kind, run_id, definition):
+    def pin(self, db, actor, groups, kind, run_id, definition, *, expected=None):
         keys = {node['shared_tool_id'] for node in definition.get('nodes', {}).values() if node.get('shared_tool_id')}
         keys.update(call['shared_tool_id'] for node in definition.get('nodes', {}).values() for call in (node.get('execution') or {}).get('calls', []) if call.get('shared_tool_id'))
         for key in keys:
@@ -288,6 +298,8 @@ class SharedTools:
             if item['state'] != 'available':
                 fail('shared_tool_disabled' if item['state'] == 'disabled' else 'shared_tool_review_required')
             pin = {k: deepcopy(item[k]) for k in ('id', 'version', 'reference')}
+            if expected is not None and expected.get(key) != pin:
+                fail('shared_tool_plan_changed')
             db.execute('INSERT INTO work_shared_tool_pins VALUES(?,?,?,?)', (kind, run_id, key, _json(pin)))
 
     async def resolve(self, user, key, *, kind=None, run_id=None):

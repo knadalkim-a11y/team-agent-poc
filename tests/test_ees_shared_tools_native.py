@@ -217,6 +217,11 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(viewed['ok'], viewed)
         self.assertIn('result', viewed['run']['calls'][0], viewed)
         self.assertNotEqual(viewed['run'].get('evidence_available'), False)
+        await self.f.tools.Tools.update_tool_valves_by_id('installed-with-unpredictable-id', {'ENABLED':True, 'CONFLUENCE_BASE_URL':'https://confluence.invalid', 'ALLOWED_SPACES':'EMS,FDC'})
+        await self.review()
+        historical = await legacy.execution_state(self.reader, run_id=started['run']['id'])
+        self.assertIn('result', historical['run']['calls'][0], historical)
+        await self.assert_code('shared_tool_version_changed', legacy.execution._call_reference(self.reader, {'shared_tool_id':self.key}, started['run']['id']))
         item = await self.item()
         await self.tools.command(self.admin, self.body('shared_tool_disable', item['revision'], shared_tool_id=self.key, reference=item['reference']))
         denied = await legacy.execution_state(self.reader, run_id=started['run']['id'])
@@ -623,6 +628,104 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(result['kept'],'authorized view')
             else:
                 original.assert_not_awaited()
+
+
+
+    async def test_closed_work_evidence_survives_upgrade_but_checks_current_native_acl(self):
+        from open_webui.models.access_grants import AccessGrants
+        key = 'managed-get_page'
+        first = await self.review(key)
+        run = await self.start(await self.workflow(key=key), self.reader)
+        executed = await self.execute(run)
+        current = (await self.service.workspace_state(self.reader, run_id=run['run_id']))['run']
+        decided = await self.core('decide', current['revision'], actor=self.reader, run_id=run['run_id'], job_id='j1', item_id='job', verdict='completed', result_revision=executed['attempt']['number'])
+        await self.core('close_run', decided['revision'], actor=self.reader, run_id=run['run_id'])
+        before = (await self.service.workspace_state(self.reader, run_id=run['run_id']))['run']
+        await self.f.tools.Tools.update_tool_valves_by_id('installed-with-unpredictable-id', {'ENABLED':True, 'CONFLUENCE_BASE_URL':'https://confluence.invalid', 'ALLOWED_SPACES':'EMS,FDC'})
+        self.assertEqual((await self.review(key))['version'], 2)
+        after = (await self.service.workspace_state(self.reader, run_id=run['run_id']))['run']
+        self.assertIsNotNone(before['attempts'][0]['result'])
+        self.assertEqual(after['attempts'][0]['result'], before['attempts'][0]['result'])
+        self.assertEqual(after['shared_tools'][0]['version'], 1)
+        with self.service._db() as db:
+            saved = json.loads(db.execute('SELECT snapshot FROM work_attempts WHERE id=?', (executed['attempt']['id'],)).fetchone()[0])
+        self.assertEqual(saved['shared_tool']['reference'], first['reference'])
+        with patch.object(AccessGrants, 'has_access', return_value=False):
+            denied = (await self.service.workspace_state(self.reader, run_id=run['run_id']))['run']
+        self.assertIsNone(denied['attempts'][0]['result'])
+        self.assertEqual(denied['attempts'][0]['evidence_access'], 'requires_current_source_access')
+
+    async def test_shared_upgrade_between_plan_and_start_requires_new_plan(self):
+        from workflow_fixture import historical_facade, load_workflow_examples, arrange_legacy_catalog
+        from test_ees_workflow_execution import publish
+        await self.review()
+        legacy = historical_facade('open_webui').WorkflowService(self.service.database, self.f.native_users.Users.get_user_by_id, lambda _:None, native_bridge=self.f.bridge)
+        arrange_legacy_catalog(legacy); legacy.shared_tools = self.tools; legacy._work_actor = self.service._work_actor
+        fragment = load_workflow_examples('open_webui').installation_docs_workflow(self.refs)
+        call = fragment['nodes']['new-documents-search-j']['execution']['calls'][0]
+        call.pop('reference'); call['shared_tool_id'] = self.key
+        process = publish(legacy, fragment)
+        with legacy._db() as db: version = legacy._catalog(db)[0]['version']
+        body = {'node_id':'new-documents-search-j','inputs':{'query':'guide','space_key':'EMS'},'scope':{'site_id':'us-a','system':'EMS','process_id':process,'version':version}}
+        plan = (await legacy.execution_plan(self.reader, body))['plan']
+        self.assertEqual(plan['shared_tools'], [{'id':self.key, 'version':1}])
+        await self.f.tools.Tools.update_tool_valves_by_id('installed-with-unpredictable-id', {'ENABLED':True, 'CONFLUENCE_BASE_URL':'https://confluence.invalid', 'ALLOWED_SPACES':'EMS,FDC'})
+        await self.review()
+        denied = await legacy.execution_action(self.reader, {'action':'start','plan_id':plan['id'],'plan_hash':plan['hash'],'request_id':'stale-shared-plan'})
+        self.assertFalse(denied['ok'], denied)
+        self.assertEqual(denied['error']['code'], 'shared_tool_plan_changed')
+        with legacy._db() as db: self.assertEqual(db.execute('SELECT count(*) FROM execution_runs').fetchone()[0], 0)
+        fresh = (await legacy.execution_plan(self.reader, body))['plan']
+        self.assertEqual(fresh['shared_tools'], [{'id':self.key, 'version':2}])
+        original_ready = legacy.execution._ready
+        async def change_after_ready(*args):
+            observed = await original_ready(*args)
+            await self.f.tools.Tools.update_tool_valves_by_id('installed-with-unpredictable-id', {'ENABLED':True, 'CONFLUENCE_BASE_URL':'https://confluence.invalid', 'ALLOWED_SPACES':'EMS,FDC,APC'})
+            await self.review()
+            return observed
+        with patch.object(legacy.execution, '_ready', side_effect=change_after_ready):
+            raced = await legacy.execution_action(self.reader, {'action':'start','plan_id':fresh['id'],'plan_hash':fresh['hash'],'request_id':'racing-shared-plan'})
+        self.assertEqual(raced['error']['code'], 'shared_tool_plan_changed', raced)
+        with legacy._db() as db: self.assertEqual(db.execute('SELECT count(*) FROM execution_runs').fetchone()[0], 0)
+        fresh = (await legacy.execution_plan(self.reader, body))['plan']
+        started = await legacy.execution_action(self.reader, {'action':'start','plan_id':fresh['id'],'plan_hash':fresh['hash'],'request_id':'fresh-shared-plan'})
+        self.assertTrue(started['ok'], started)
+
+    async def test_automatic_use_requires_delegated_job_in_scheduled_version(self):
+        await self.review(); await self.review('managed-get_page')
+        wid = await self.workflow(key='managed-get_page', periodic=True)
+        schedule = dict(workflow_id=wid, version=1, rule={'frequency':'daily','timezone':'UTC','anchor':'2026-10-15T10:00:00'}, inputs={}, job_ids=['j1'], delegated=True, sharing={'group_ids':[self.group.id]})
+        saved = await self.service.operations.command(self.reader, self.body('schedule_save', schedule=schedule))
+        self.assertTrue(saved['ok'], saved)
+        with self.service._db() as db:
+            definition = json.loads(db.execute('SELECT draft FROM work_definitions WHERE id=?', (wid,)).fetchone()[0])
+        definition['nodes']['j1'].update(shared_tool_id=self.key, argument_bindings={'query':{'constant':'guide'}}, result_block='list_confirm')
+        await self.core('save_draft', 3, workflow_id=wid, definition=definition)
+        await self.core('validate_workflow', 4, workflow_id=wid)
+        await self.core('publish_workflow', 4, workflow_id=wid)
+        self.assertFalse((await self.item())['uses'][0]['automatic'])
+        for jobs, delegated, expected in (([],True,False), (['j1'],False,False), (['j1'],True,True)):
+            with self.service._db(write=True) as db:
+                updated = {**saved['schedule'], 'version':2, 'job_ids':jobs, 'delegated':delegated}
+                db.execute('UPDATE work_schedules SET data=? WHERE id=?', (json.dumps(updated), updated['id']))
+            self.assertEqual((await self.item())['uses'][0]['automatic'], expected)
+
+    async def test_operations_discovery_failure_preserves_other_sections(self):
+        await self.review()
+        await self.service.operations.command(self.admin, self.body('tool_save', tool={'system_id':'EMS','kind':'read','name':'이전 방식 보존','reference':self.refs['search_pages'],'guide_url':'https://guide.invalid/read'}))
+        wid = await self.workflow(periodic=True)
+        schedule = dict(workflow_id=wid, version=1, rule={'frequency':'daily','timezone':'UTC','anchor':'2026-10-15T10:00:00'}, inputs={}, job_ids=['j1'], delegated=True, sharing={'group_ids':[self.group.id]})
+        self.assertTrue((await self.service.operations.command(self.reader, self.body('schedule_save', schedule=schedule)))['ok'])
+        before = await self.service.operations.state(self.admin, system_id='EMS')
+        self.assertTrue(before['tools']); self.assertTrue(before['schedules'])
+        with patch.object(self.f.bridge, 'managed_tools', side_effect=RuntimeError('synthetic-secret')), self.assertLogs(level='WARNING') as logs:
+            after = await self.service.operations.state(self.admin, system_id='EMS')
+        self.assertTrue(after['ok'])
+        self.assertEqual(after['shared_tools'], [])
+        self.assertIn('불러오지 못', after['shared_tools_notice'])
+        for key in ('tools','schedules','slots','models','requests','native_functions'):
+            self.assertEqual(after[key], before[key], key)
+        self.assertNotIn('synthetic-secret', json.dumps(after)+str(logs.output))
 
 
 if __name__ == '__main__': unittest.main()

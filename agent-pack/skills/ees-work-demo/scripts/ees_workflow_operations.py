@@ -1605,8 +1605,16 @@ class OperationsRuntime:
             if state is not None:
                 automatic[(slot["workflow_id"], slot["factory_id"])] = {"workflow_id": slot["workflow_id"], "factory_id": slot["factory_id"], "status": state, "scheduled_at": slot["scheduled_at"]}
         can_author_direct = value(actor, "role") == "admin" or any(item["id"] == value(actor, "id") for item in reviewers)
-        shared_tools = await self.service.shared_tools.list(actor)
-        return {"shared_tools": shared_tools, "ok": True, "scope_runs": scopes, "tools": tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
+        shared_notice = ""
+        try:
+            shared_tools = await self.service.shared_tools.list(actor)
+        except Exception as error:
+            import logging
+            import traceback
+            locations = [f"{frame.name}:{frame.lineno}" for frame in traceback.extract_tb(error.__traceback__)]
+            logging.getLogger(__name__).warning("shared_tool_state_unavailable: %s at %s", type(error).__name__, " > ".join(locations))
+            shared_tools, shared_notice = [], "공용 도구 목록을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요."
+        return {"shared_tools": shared_tools, "shared_tools_notice": shared_notice, "ok": True, "scope_runs": scopes, "tools": tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
 
     def start(self):
         self._closing = False

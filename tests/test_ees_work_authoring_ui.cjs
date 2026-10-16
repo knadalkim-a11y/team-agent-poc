@@ -392,3 +392,9 @@ test('shared tool use opens its recorded system with the workflow',async()=>{
  const opened=[];h.callbacks.openWorkflow=async(...args)=>opened.push(args);
  h.click('open',{id:'fdc-workflow',systemId:'FDC'});await flush();assert.deepEqual(opened,[['fdc-workflow','FDC']]);
 });
+
+test('shared discovery failure is explicit while legacy tools remain usable',async()=>{
+ const h=harness();sharedReviewFixture(h);h.state.operations.shared_tools=[];h.state.operations.shared_tools_notice='공용 도구 목록을 불러오지 못했습니다.';h.state.operations.tools=[{id:'kept-legacy',name:'기존 계약 보존',kind:'read',state:'approved',revision:1,reference:{tool_id:'old',function:'search_pages'}}];
+ h.selection.tab='tools';h.render();assert.match(h.markup,/공용 도구 목록을 불러오지 못했습니다/);assert.doesNotMatch(h.markup,/공용 도구 0개/);assert.match(h.markup,/기존 계약 보존/);
+ h.selection.tab='overview';h.render();await h.node();assert.match(h.markup,/공용 도구 목록을 불러오지 못했습니다/);
+});

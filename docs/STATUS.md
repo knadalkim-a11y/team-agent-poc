@@ -7,6 +7,7 @@
 - **통합 첫 CI/추가 보완:** ba6aa64의 Native64개 중62PASS/2FAIL은 C45로 달라진 출발 칸을 기존 시험이 같은 칸으로 취급한 문제다. 원본 프레임을 보존하고 실제 목적지/이전 칸0 감시를 연결했다. 추가 자동 검토3건(제외 작업 pin·목록 결과 호환·장애 중 제한적 관리)도 회귀와 함께 보완했다. 공용 Native/workspace93PASS·Node355PASS. [실패·재검 조건](../evals/v4-ui-20260930.md#shared-tools-merge-review-20261016).
 - **검증:** #93 로컬 Python111PASS/이전 source fixture 미준비1SKIP. main 통합 뒤 전체 Node354PASS·Python controller1PASS·문서/신규 diff 검사 통과. 실제 브라우저/Windows는 최종 통합 CI로 확인한다.
 - **추가 통합 CI:** b51ad90의 CI38853958726은31성공/PR배포1정상제외, 실제 Native64PASS로 첫 통합 CI의2실패가 해소됐다. main의 #91 병합 CI38852021564도 성공했다. 후속 자동 검토의 execution 인자 검사·선택 결과 범위·다른 시스템 이동을 보완하고 새 head를 다시 검사한다.
+- **942a6f9 후속:** 자동 검토의 종료 회차 과거 근거·계획/시작 버전 경계·예약 사용처 표시·발견 장애 격리4건을 보완한다. 해당 CI native-work의1실패는 제품 접속 전 Chrome handshake30초 시간 초과이며 원본 JSON을 보존했다. 나머지11시험은 통과했다. 새 보완 head의 실제 Native 검사로 재확인한다.
 - **다음 작업:** 통합 #93 최종 head CI 성공 후 merge commit 병합과 최종 main CI 확인. 사내 적용·설치 확인은 미실행이며 설치 원본·주소·허용 공간·암호화·팀원 PAT는 미확인이다. Figma 수정·#77/#79·main 직접 push는 하지 않는다.
 
 ## 2026-10-16 · 공용 Confluence 도구 #93 재검토 반영
