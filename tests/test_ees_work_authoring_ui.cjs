@@ -402,8 +402,8 @@ test('shared discovery failure is explicit while legacy tools remain usable',asy
 
 test('B10 common heading empty list and unreviewed labels follow the specification cards',async()=>{
  const h=harness();const {search}=sharedReviewFixture(h);h.state.capabilities.is_admin=true;h.selection.tab='tools';search.version=0;search.state='review_required';h.render();
- assert.match(h.markup,/<header>도구 · 공용<\/header>/);assert.match(h.markup,/data-state="review_required">확인 전<\/span>/);assert.doesNotMatch(h.markup,/data-state="review_required">도구 확인 필요/);
- h.click('shared_open',{id:search.id});await flush();assert.match(h.markup,/지금 버전 확인 전/);assert.match(h.markup,/data-state="review_required">확인 전<\/span>/);
+ assert.match(h.markup,/<header>도구 · 공용<\/header>/);assert.match(h.markup,/data-state="unreviewed">확인 전<\/span>/);assert.doesNotMatch(h.markup,/data-state="review_required">도구 확인 필요/);
+ h.click('shared_open',{id:search.id});await flush();assert.match(h.markup,/지금 버전 확인 전/);assert.match(h.markup,/data-state="unreviewed">확인 전<\/span>/);
  h.click('shared_list');await flush();h.state.operations.shared_tools=[];h.render();assert.match(h.markup,/공용 도구 0개/);assert.match(h.markup,/쓸 수 있는 공용 도구가 없습니다. 필요한 도구는 관리자에게 요청하세요./);
 });
 test('B10 picker keeps read badges and the administrator guide below all choices',async()=>{
@@ -411,4 +411,13 @@ test('B10 picker keeps read badges and the administrator guide below all choices
  assert.match(h.markup,/<strong>[^<]+ <small class="ew-author-tag">조회<\/small><\/strong>/);
  assert.match(h.markup,/필요한 도구가 없으면 관리자에게 요청하세요.<\/p><\/div><\/details>/);
  h.state.operations.shared_tools=[];h.render();assert.match(h.markup,/쓸 수 있는 공용 도구가 없습니다./);assert.match(h.markup,/필요한 도구가 없으면 관리자에게 요청하세요./);
+});
+
+
+test('B10 neutral unreviewed badge does not alter server review state or conceal a reviewed tool warning',async()=>{
+ const h=harness(),{search}=sharedReviewFixture(h);h.state.capabilities.is_admin=true;h.selection.tab='tools';search.version=0;search.state='review_required';h.render();
+ assert.match(h.markup,/data-state="unreviewed">확인 전<\/span>/);assert.equal(search.state,'review_required');
+ h.click('shared_open',{id:search.id});await flush();assert.match(h.markup,/data-state="unreviewed">확인 전<\/span>/);assert.match(h.markup,/data-author-action="shared_review"/);
+ search.version=1;h.render();assert.match(h.markup,/data-state="review_required">도구 확인 필요<\/span>/);assert.doesNotMatch(h.markup,/data-state="unreviewed"/);assert.match(h.markup,/data-author-action="shared_review"/);
+ search.state='preparing';search.version=0;h.render();assert.match(h.markup,/data-state="preparing">준비 중<\/span>/);assert.doesNotMatch(h.markup,/data-state="unreviewed"/);
 });

@@ -1,0 +1,218 @@
+{
+  "head": "031fdc55d8786922bb35224fb72f4916aaebeaff",
+  "run_id": 38860002463,
+  "artifact_id": 12029495006,
+  "run_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/38860002463",
+  "original_artifact_bytes": 12954159,
+  "original_artifact_sha256": "9dd157d8428942f3b2468b9afa40c88ff3087e50a252a799182b15846575e3d6",
+  "bundle_bytes": 2439190,
+  "bundle_sha256": "fb74cac7cff1953d1e7dc50e42df83bf823a0f40bd21dfb42bc186aba62ce8f0",
+  "scope": "Built product with synthetic Native sessions and external results; real HTTP/SQLite; no onsite use",
+  "native_compose": {
+    "pass": 64,
+    "fail": 3
+  },
+  "runtime_module": {
+    "pass": 11,
+    "fail": 0,
+    "skip": 0
+  },
+  "new_runtime_tests_passed": 3,
+  "missing_first_ci_evidence": [
+    "shared-b10-1-empty-list.png",
+    "shared-b10-comparison.json"
+  ],
+  "note": "First run retains failed legacy header/admin-only selector expectations. Fixes and final head checks are recorded separately. Product code is unchanged by those test corrections.",
+  "files": [
+    {
+      "path": "ees-results/browser-evidence.json",
+      "bytes": 40236,
+      "sha256": "666317385209d1be95e0fcbe4ef8480a8cd03494ea1a7a3b7afeba195cc9a516"
+    },
+    {
+      "path": "ees-results/test_ees_source_shell_native.json",
+      "bytes": 4991,
+      "sha256": "db1dc6dd2b061aea2e12941a31a85461d231c25825499c2445c061345e173e6c"
+    },
+    {
+      "path": "ees-results/test_ees_work_figma_authoring_native.json",
+      "bytes": 6137,
+      "sha256": "64a0bc0e7d226f483da1ec0589f664d8c48f1645988586780bca3e327b0ed37d"
+    },
+    {
+      "path": "ees-results/test_ees_work_figma_runtime_native.json",
+      "bytes": 2365,
+      "sha256": "999070634f26fcc65313a51325d29608c0319d800d7739b532283ad75ba445f5"
+    },
+    {
+      "path": "ees-work-screenshots/integrated-test_b10_shared_tools_list_detail_picker_style_and_keyboard-failure.json",
+      "bytes": 23209,
+      "sha256": "a088561d0fcc709fcbf0cceace8c3a59099dfefa88b39b6eec4d5a26def425cb"
+    },
+    {
+      "path": "ees-work-screenshots/integrated-test_every_navigation_has_source_chrome_without_native_overlay_frames-failure.json",
+      "bytes": 24254,
+      "sha256": "207bbe02d9a51695198e1771bd761ca789f4f3af7ca92c33bb2576a7fcf9a4e1"
+    },
+    {
+      "path": "ees-work-screenshots/integrated-test_native_return_first_frame_selects_destination_without_previous_panel-failure.json",
+      "bytes": 25957,
+      "sha256": "b6b178b4509622f3fdc603ed0ffa10aca3b37f88a68ec895b26d1efc6963bd5a"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-1-before-review-dom.json",
+      "bytes": 34377,
+      "sha256": "339597f0593516ca729541d0cafedb975e8cbba7eb16cc4fe7e7de933b66ebaa"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-1-before-review.png",
+      "bytes": 140503,
+      "sha256": "35a6d62c505d6c5250441a13168211197464631f1d89c078ba994b55931ce0c9"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-1-list-dom.json",
+      "bytes": 34324,
+      "sha256": "3760b5f81a0838789c57c37d36240a927a228da5ea1d2c2351ae591672b39a72"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-1-list.png",
+      "bytes": 142649,
+      "sha256": "5c66aedd449ee38ded6aef674d5c4fa8031df7f8152ba42c7e4a59fa09c6c281"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-2-before-review-dom.json",
+      "bytes": 29168,
+      "sha256": "32b5648ce60e9cb0ff17f527f752a7a222d7c688b859f86f5acbadd3a658d108"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-2-before-review.png",
+      "bytes": 109390,
+      "sha256": "c7617f71564283dc2ca9af8e6538cd83f9f37e487ab3b693ed3a7fcb329b941b"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-2-detail-dom.json",
+      "bytes": 29353,
+      "sha256": "79ca23788892f0ae8b37d19c3ecb6fdb3aeea6349250cbe1b239caa4cdb1c3a7"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-2-detail-top-dom.json",
+      "bytes": 29335,
+      "sha256": "5385a4afc633aac699a37706b80e7ea8cb3fdf2ec557770941e54eb9892608e8"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-2-detail-top.png",
+      "bytes": 114583,
+      "sha256": "18d574664e1d6ab38ec610ffed2c52cea81431f3e1c46e03e93d0226f1aa4059"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-2-detail.png",
+      "bytes": 114928,
+      "sha256": "d3c9f8ee297f6de3b83c5e0b9769f1965beb67c428d90a251b2710d752a6cdce"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-2-review-comparison-dom.json",
+      "bytes": 29715,
+      "sha256": "6ed5b82bc29f907038e7cca5af8c654a5b468aa89e261b1a0fa614ec31048c12"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-2-review-comparison.png",
+      "bytes": 150592,
+      "sha256": "fdf723746f5203b029aa84cc4255bc7e91924cd5cbf0d1a87bac06d75a9e9282"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-5-picker-dom.json",
+      "bytes": 43984,
+      "sha256": "6ec6bdd0e09cf9e3fbd1295373a5ae830abfdac7a44748202d9340f86abd5046"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-5-picker.png",
+      "bytes": 107144,
+      "sha256": "92ea5b1ff2375127fe3f73948cad15c96399917c9de9d676fe8ac66acb6b9cd3"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-5-read-retry-published-dom.json",
+      "bytes": 28603,
+      "sha256": "d3ad6482b8a4f7736961e2067b1b5f78180d60a9f442c98f6b04939ac7e0526f"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-5-read-retry-published.png",
+      "bytes": 91768,
+      "sha256": "3d33ceb96fa8e3cea96a2c312761286383212d7ae79a4c399d4148f064b1dd00"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-5-selected-no-handoff-dom.json",
+      "bytes": 48105,
+      "sha256": "591aab641429954ed32e7126d68ce75d4d226f6fdc6cd9e8b836d2c8deed18fa"
+    },
+    {
+      "path": "ees-work-screenshots/shared-b10-5-selected-no-handoff.png",
+      "bytes": 102749,
+      "sha256": "8358cf55f19ba69ef379bde9152b7751622b68df00a0f17f5d6287f7446d9e7e"
+    },
+    {
+      "path": "ees-work-screenshots/shared-runtime-automatic-version-hidden.png",
+      "bytes": 101940,
+      "sha256": "3f6403de7bd1b59e939b25cbb8cf3754d65a5fb3c478392a04a0b32b258fcaaf"
+    },
+    {
+      "path": "ees-work-screenshots/shared-runtime-normal.png",
+      "bytes": 96710,
+      "sha256": "e99ca0ef18f90ad00030ff85ca3f56aaf5e539c5d7d00cf2de573ad3d3e1d1ca"
+    },
+    {
+      "path": "ees-work-screenshots/shared-runtime-outside-group.png",
+      "bytes": 97228,
+      "sha256": "de29041b11eec84b160c955557260a431c890ab79a15c835afb81dd63d364c62"
+    },
+    {
+      "path": "ees-work-screenshots/shared-runtime-partial-before-confirm.png",
+      "bytes": 130766,
+      "sha256": "54f672b2d548b9e2199ebb3bc49f8721db593bcd7a99b40760de686f2d660ec9"
+    },
+    {
+      "path": "ees-work-screenshots/shared-runtime-partial-closed.png",
+      "bytes": 103116,
+      "sha256": "1fe5edcbc93eee628bda83350e06568009d4b9a2d28ccabec2aba7cc8510faf8"
+    },
+    {
+      "path": "ees-work-screenshots/shared-runtime-partial-next-history.png",
+      "bytes": 108293,
+      "sha256": "79f25e718a37e7b907dc7cfe71ea29fb74ba30f9a28b646a15dbe3b322c5e34c"
+    },
+    {
+      "path": "ees-work-screenshots/shared-runtime-review-required.png",
+      "bytes": 100168,
+      "sha256": "c097696e449a129fb17f5351269f394dad63bac541582ec54698fb3ce9bff3d5"
+    },
+    {
+      "path": "ees-work-screenshots/shared-runtime-running-version-hidden.png",
+      "bytes": 112338,
+      "sha256": "5e3d0a35deb2c07f4bd8133da2afeb5b747998fc0a07d080ea677997b1131dc9"
+    },
+    {
+      "path": "ees-work-screenshots/shared-runtime-version-changed.png",
+      "bytes": 104742,
+      "sha256": "0d7159e212599c13d7443ed17f45dd91a62ed03ba5ce741c45d88a75104288e8"
+    },
+    {
+      "path": "ees-work-screenshots/shared-runtime-zero-confirmed.png",
+      "bytes": 120620,
+      "sha256": "ceeacd3a5fa398984007f8fae439545cdebffb1dddc525e36639aa684cba7f04"
+    },
+    {
+      "path": "ees-work-screenshots/shared-runtime-zero-rows.png",
+      "bytes": 126290,
+      "sha256": "e48ce9d7a5b3c832db3420dceaa17f8c0e6172539934544145773d7ded2e31b0"
+    },
+    {
+      "path": "ees-work-screenshots/shared-runtime-zero-selection-confirmed.png",
+      "bytes": 123194,
+      "sha256": "ea2ad961b22aed96c82f2171d31d41c02345055df7c5bb4d4ffbe016469fdee6"
+    },
+    {
+      "path": "ees-work-screenshots/shared-runtime-zero-selection-question.png",
+      "bytes": 150512,
+      "sha256": "e92489b65023d6e5f90da842ccf694a5b23912b0ed90fb0ee8ba1148beb38cf7"
+    }
+  ]
+}

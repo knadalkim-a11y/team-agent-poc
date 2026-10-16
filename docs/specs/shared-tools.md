@@ -7,7 +7,7 @@
 | 항목 | 내용 |
 |---|---|
 | 단계 | 1단계-1: 기본 제공 Confluence 페이지 찾기 · 읽기 |
-| 구현 | 기존 구현 `06a92e4`의 PR #93은 다른 세션에서 2026-10-16 15:01:03 KST에 `0f4c905e`로 병합됨. 명세 원본 `2e737ac`을 합친 로컬 merge commit `631f15d` 이후의 후속은 로컬 구현·회귀 검증 완료, 미게시 상태. 이번 후속의 검증 범위는 [이번 기록](../../evals/v4-ui-20260930.md#shared-tools-spec-20261016)이 원본이며 #93은 갱신할 수 없어 후속 Draft PR을 준비하며 실제 제품 화면·최종 CI 검증은 대기 |
+| 구현 | 기존 구현 `06a92e4`의 PR #93은 다른 세션에서 2026-10-16 15:01:03 KST에 `0f4c905e`로 병합됨. 명세 원본 `2e737ac`을 합친 두 부모 merge commit `1aaebd4`(로컬 검증본 `631f15d`) 이후의 후속은 [Draft #96](https://github.com/knadalkim-a11y/team-agent-poc/pull/96)에 게시됨. 이번 후속의 검증 범위는 [이번 기록](../../evals/v4-ui-20260930.md#shared-tools-spec-20261016)이 원본이며 #93은 갱신할 수 없어 #96에서 실제 제품 화면·최종 CI를 검증 |
 | 화면 | Figma `XK2wTos6sEuxSHhIj7cqg6` 워크-2 · B10-1 `1353:20386` · B10-2 `1353:20597` · B10-5 `1353:21167` |
 | 명세 카드 | 같은 페이지 화면 아래 · B10-1 `1369:732` · B10-2 `1368:724` · B10-5 `1372:741`. 화면 위 번호와 카드 표 번호가 같습니다. B10-5 카드에 공용 도구 작업의 실행 화면 상태(S1 블록 재사용)가 있습니다 |
 | 함께 쓰는 공통 규칙 | 공통-1 R7(권한별 메뉴) · 공통-3 S1 `944:1036`(정상이 아닐 때의 블록) |
@@ -38,7 +38,7 @@
 | ST-AUTH-5 | 기본 제공 도구는 실행하는 사람 본인의 기존 개인 설정 PAT로 접속합니다. 자동 실행은 예약을 맡긴 사람(`identity_user_id`)의 PAT와 그룹으로 판정합니다. PAT 값은 화면 · 실행 기록 · 로그 · 도우미 응답 어디에도 나오지 않습니다. 공용 PAT는 쓰지 않습니다. | 구현 |
 | ST-AUTH-6 | 게시하는 사람도 게시 시점에 그 도구를 실행할 수 있어야 합니다(그룹 · Open WebUI 권한 · 본인 PAT). | 구현 · 의도 확인 필요 ([ST-OPEN-4](#st-open)) |
 | ST-AUTH-7 | 쓰는 곳: 관리자는 전체를, 그 밖의 사람은 볼 수 있는 관리 시스템의 절차만 봅니다. | 구현 |
-| ST-AUTH-8 | 작업 화면에서 그룹 밖 사람에게는 실행 단추를 숨기고, 쓸 수 있는 그룹과 지금 담당을 보입니다(S1 ‘권한 없음 · 보기만 가능’). | 구현 · Native·UI 회귀 통과, 실제 제품 화면·최종 CI는 대기 |
+| ST-AUTH-8 | 작업 화면에서 그룹 밖 사람에게는 실행 단추를 숨기고, 쓸 수 있는 그룹과 지금 담당을 보입니다(S1 ‘권한 없음 · 보기만 가능’). | 구현 · Native·UI 회귀 통과, 실제 제품 화면·최종 CI는 [검증 기록](../../evals/v4-ui-20260930.md#shared-tools-spec-20261016)과 #96 Checks 참조 |
 
 ## 3. 상태
 
@@ -132,7 +132,7 @@
 
 ## 10. 완료 기준
 
-시험 이름은 파일 안의 함수 이름입니다. 아래 ‘구현’과 로컬 회귀 통과는 이번 후속 코드 기준이며 실제 제품 브라우저·최종 원격 CI·사내 적용 완료를 뜻하지 않습니다. #93은 후속 게시 전에 다른 세션에서 병합되어 같은 PR 갱신이 불가능하므로 후속 Draft PR을 준비하며, 최종 검증은 [이번 기록](../../evals/v4-ui-20260930.md#shared-tools-spec-20261016)에 따로 기록합니다.
+시험 이름은 파일 안의 함수 이름입니다. 아래 ‘구현’과 로컬 회귀 통과는 이번 후속 코드 기준이며 실제 제품 브라우저·최종 원격 CI·사내 적용 완료를 뜻하지 않습니다. #93은 후속 게시 전에 다른 세션에서 병합되어 같은 PR 갱신이 불가능하므로 후속 Draft #96에서 이어가며, 최종 검증은 [이번 기록](../../evals/v4-ui-20260930.md#shared-tools-spec-20261016)에 따로 기록합니다.
 
 | 기준 | 확인 |
 |---|---|
@@ -160,8 +160,8 @@
 | B10-1 머리·빈 목록·확인 전 꼬리표, B10-2 확인 전 꼬리표, B10-5 조회 꼬리표·하단 안내 | `tests/test_ees_work_authoring_ui.cjs` · B10 common heading, B10 picker keeps read badges (UI 회귀 통과) |
 | 그룹 밖 입력 읽기 전용·실행 단추 숨김·그룹/담당 표시, 실행 중·멈추지 않은 자동 회차의 버전 교체 숨김 | `tests/test_ees_work_figma_runtime_ui.cjs` · shared group outsiders, shared execution uses canonical server wording (UI 회귀 통과) |
 | 공용 0건 직접 확인·0개 선택 한 번 질문, 이전 방식 0개 완료 차단 | 같은 파일 · shared search result cards, shared zero results confirm directly (UI 회귀 통과) |
-| 실제 제품의 B10-1 · 2 · 5 배치 · 포커스 · 저장 | `tests/test_ees_work_figma_authoring_native.py` · b10_shared_tools (후속 실제 화면 검증 대기) |
-| 실제 실행 화면 정상·부분 확정/다음 작업/종료·0건·0개 선택·그룹 밖·확인 필요·버전 변경·실행 중/자동 회차 단추 | `tests/test_ees_work_figma_runtime_native.py` · shared_runtime_normal_partial_confirmation_next_job_and_close_evidence, shared_search_zero_rows_and_zero_selection_each_complete_once, shared_runtime_group_review_version_and_running_gates (시험 추가, 실제 브라우저/CI 검증 대기) |
+| 실제 제품의 B10-1 · 2 · 5 배치 · 포커스 · 저장 | `tests/test_ees_work_figma_authoring_native.py` · b10_shared_tools (실제 화면과 최초 관측 실패·보완은 검증 기록, 최종 판정은 #96 Checks 참조) |
+| 실제 실행 화면 정상·부분 확정/다음 작업/종료·0건·0개 선택·그룹 밖·확인 필요·버전 변경·실행 중/자동 회차 단추 | `tests/test_ees_work_figma_runtime_native.py` · shared_runtime_normal_partial_confirmation_next_job_and_close_evidence, shared_search_zero_rows_and_zero_selection_each_complete_once, shared_runtime_group_review_version_and_running_gates (첫 CI의 신규 3개 통과. 보완 뒤 최종 head는 #96 Checks 참조) |
 | **사내 확인(미확인)** | Confluence 기본 도구의 설치 원본 · 주소 · 허용 공간, 개인 설정 암호화, 팀원 PAT 저장, 공용 도구 그룹의 Open WebUI 도구 읽기 권한 |
 
 <a id="st-open"></a>
@@ -176,6 +176,6 @@
 | ST-OPEN-4 | 게시하는 사람에게도 본인 PAT를 요구하는 것(ST-AUTH-6)이 의도인지 | 1단계-2 구현 전 |
 | ST-OPEN-5 | 쓰는 곳에 자동 실행 계획(`execution.calls`)의 공용 도구 포함. `06a92e4`는 기존 `node.shared_tool_id` 사용처의 자동 실행 표시를 실제 위임 예약의 작업 목록·고정 게시본과 대조하도록 보완했으며, `execution.calls` 자체의 사용처 집계는 아직 없음. `test_automatic_use_requires_delegated_job_in_scheduled_version`가 전자의 근거 | 1단계-2: `execution.calls` 집계만 남음 |
 | ST-OPEN-6 | 판정 비용: 목록 · 요약 · 호출마다 설치 도구 전체를 다시 읽고 지문을 계산함 | 1단계-2 |
-| ST-OPEN-7 | 명세 작성 당시 같은 상태 문구가 서버와 화면 두 곳에 달랐음. B10-2 · B10-5 카드의 문구를 서버의 공용 문구 원본으로 통합하고 화면도 같은 값을 사용 | 구현 · Native·UI 회귀 통과, 실제 제품 화면·최종 CI는 대기 |
+| ST-OPEN-7 | 명세 작성 당시 같은 상태 문구가 서버와 화면 두 곳에 달랐음. B10-2 · B10-5 카드의 문구를 서버의 공용 문구 원본으로 통합하고 화면도 같은 값을 사용 | 구현 · Native·UI 회귀 통과, 실제 제품 화면·최종 CI는 [검증 기록](../../evals/v4-ui-20260930.md#shared-tools-spec-20261016)과 #96 Checks 참조 |
 | ST-OPEN-8 | 공통 패널 폭: Figma 580px, 제품 기본 480px. 공통-1에서 정함 | 공통-1을 고칠 때 |
 | ST-OPEN-9 | Jira 6 · GitHub 2의 결과 형식. 정하기 전에는 확인할 수 없음(준비 중) | 해당 도구를 켜기 전 |

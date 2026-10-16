@@ -745,7 +745,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.fill('#chat-input', '다른 칸으로 돌아와도 유지할 대화 초안')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         panels = {
-            'tools': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '도구'",
+            'tools': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '도구 · 공용'",
             'procedures': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '업무 절차'",
             'workspace_admin': "document.querySelector('#ees-work-panel .ew-work-heading h2')?.textContent === '공장·접근 범위'",
             'my_work': "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '내 업무'",

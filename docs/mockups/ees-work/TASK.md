@@ -1626,7 +1626,7 @@ Native 인증·사용자·그룹·대화·첨부 DB는 기존 원본이다. 업�
 
 주요 일반 명령은 `create_workflow`, `copy_workflow`, `save_draft`, `validate_workflow`, `publish_workflow`, `save_factory`, `save_access`, `save_settings`, `start_run`, `save_inputs`, `claim_task`, `release_task`, `human_confirm`, `decide`, `amend_items`, `close_run`, `cancel_run`, `link_chat`, `save_ui`다. 일반 명령과 실행 서비스 모두 인증·현재 대상 권한·expected_revision·request ID/지문을 검사한다. AI 공개 도구는 조회/초안 제안/화면 안내 세 가지이며 변경 endpoint를 제공하지 않는다.
 
-선택지와 선행 목록 인자 연결은 선언한 Native 함수·인자·결과 경로만 허용한다. 확정 목록 ID를 받는 후속 작업은 실제 확정된 현재 source attempt/revision/선택 ID를 snapshot하고, 부분 조회·미확정 목록·다른 사용자 비공개 근거를 자동 재사용하지 않는다. 결과의 `all_resolved`는 AI 보고 초안에만 허용하며 CR 미확인/보완 필요를 승인으로 바꾸지 않는다.
+선택지와 선행 목록 인자 연결은 선언한 Native 함수·인자·결과 경로만 허용한다. 확정 목록 ID를 받는 후속 작업은 실제 확정된 현재 source attempt/revision/선택 ID를 snapshot한다. **2026-10-02 당시**에는 부분 조회·미확정 목록·다른 사용자 비공개 근거를 자동 재사용하지 않았고, 부분 목록을 사람이 확정한 뒤에도 배치 첨부 조회를 차단했다. **2026-10-16 현재 조건**은 [명세 ST-RUN-7](../../specs/shared-tools.md#6-실행과-반영-시점)을 따른다. 이전 방식 읽기에서도 부분 목록은 확정 전에는 후속 호출을 막고, 사람이 확정한 뒤에는 실제로 받은 목록에서 선택한 ID만 전달한다. 원본 전체 건수·partial·원본 attempt는 보존하며 다음 작업과 실행 기록에 부분 결과 출처를 남긴다. 누락 CR의 ID를 추정하거나 해당 첨부를 호출하지 않는다. 미확정 목록·비공개 근거의 자동 재사용은 계속 금지한다. 결과의 `all_resolved`는 AI 보고 초안에만 허용하며 CR 미확인/보완 필요를 승인으로 바꾸지 않는다.
 
 모든 선행 의존은 실행 당시 attempt·판정 ID·상태·입력 해시를 보존한다. 선행 작업이 다시 실행되거나 입력/판정이 바뀌면 진행 중인 후속 호출의 반환값도 이전 근거로 완료 처리하지 않는다. 실제 결과를 보존하고 재검토 필요로 남기며, 오래된 결과의 사람 확정도 거절한다. 서로 다른 절차/진행 건/시스템/공장을 섞은 명시적 조회는 `target_mismatch`로 거절한다. P/T에서 상속한 의존성 순환도 게시 검사 대상이다.
 

@@ -87,7 +87,7 @@ FRAME_MONITOR = r"""(() => {
     for (const header of document.querySelectorAll('#ees-work-designer > header')) {
       if (!visible(header)) continue;
       const title = header.firstChild?.textContent.trim();
-      if (title === '도구') panels.push('tools');
+      if (title === '도구' || title === '도구 · 공용') panels.push('tools');
       if (title === '업무 절차') panels.push('procedures');
     }
     for (const header of document.querySelectorAll('#ees-work-panel .ew-work-heading h2'))
