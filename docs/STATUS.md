@@ -3,7 +3,7 @@
 ## 2026-10-16 · #91에 최신 main 통합·검증
 
 - **현재 범위:** #91 `5dd7a71`에 최신 main `8a4a716`을 merge commit으로 합친다. 문서3개 충돌은 양쪽 내용을 모두 보존해 해결했으며 #90 기록·증거와 #91 제품/시험/CI 코드를 유지했다. #93 변경은 포함하지 않는다.
-- **검증:** 로컬 전체 Node338개(목적지28·기존 Native92 포함), Python controller 진입점1개가 통과했다. 실제 Native·native-compose와 최종 head CI는 [#91 Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/91/checks)에서 확인한다. [통합 결과·최초 실패·검증 경계](../evals/v4-ui-20260930.md#native-return-selection-evidence-20261015).
+- **검증:** 로컬 전체 Node338개(목적지28·기존 Native92 포함), Python controller 진입점1개가 통과했다. 통합 `971ff0e`의 첫 CI38846240023은31success/1정상skip이며 native-compose63개·목적지9복귀1,162프레임의 잘못된 선택/이전 패널0건을 확인했다. 기록을 포함한 최종 head CI는 [#91 Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/91/checks)에서 확인한다. [통합 결과·최초 실패·검증 경계](../evals/v4-ui-20260930.md#native-return-selection-evidence-20261015).
 - **순서·미해결:** 병합 순서는 **#91 → #93**이다. 이번 작업은 #91 브랜치 통합까지이며 PR 병합은 하지 않는다. 기존 자동 리뷰의 캐시 접근 재검증·탐색 실패 복구는 통합으로 해결됐다고 간주하지 않는다. 사용자 확인 사내 적용본은 main `d4f1806`이며 새 사내 적용은 미실행이다.
 - **다음 작업 하나:** 통합 최종 head CI 성공을 확인하고 댓글 하나로 Claude 검토를 요청한다. main 직접 push·PR 병합·사내 실행·Figma 수정·#77/#79 착수는 하지 않는다.
 
