@@ -1660,7 +1660,10 @@ class OperationsRuntime:
                     tool = self.service.shared_tools.get(db, job["shared_tool_id"])
                     self.service.shared_tools.authorize(tool, actor, groups)
                     properties = tool["input_schema"].get("properties", {})
-                    for argument, binding in job.get("argument_bindings", {}).items():
+                    bindings = job.get("argument_bindings", job.get("execution", {}).get("argument_bindings", {}))
+                    if not isinstance(bindings, dict):
+                        fail("argument_bindings_invalid", "입력과 도구 인자 연결을 확인해 주세요.")
+                    for argument, binding in bindings.items():
                         if argument not in properties:
                             errors.append(job["id"] + ": 공용 도구 입력에 없는 인자 연결을 지워 주세요: " + argument)
                         if isinstance(binding, dict) and "result" in binding:

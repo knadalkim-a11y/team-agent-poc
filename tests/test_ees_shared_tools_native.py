@@ -115,7 +115,7 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(self.http_calls)
         self.assertEqual(set(self.http_calls), {'Bearer synthetic-reader-pat'})
 
-    async def rejected_shared_binding(self, argument, binding, notice):
+    async def rejected_shared_binding(self, argument, binding, notice, nested=False):
         await self.review()
         wid = await self.workflow()
         with self.service._db() as db:
@@ -127,6 +127,8 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         definition['nodes']['t1']['children'].insert(0, 'source')
         definition['nodes']['j1']['deps'] = ['source']
         definition['nodes']['j1']['argument_bindings'][argument] = binding
+        if nested:
+            definition['nodes']['j1']['execution'] = {'argument_bindings': definition['nodes']['j1'].pop('argument_bindings')}
         await self.core('save_draft', 3, workflow_id=wid, definition=definition)
         validated = await self.core('validate_workflow', 4, workflow_id=wid)
         self.assertIn(notice, '\n'.join(validated['validation']['errors']))
@@ -142,6 +144,12 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_publication_rejects_shared_list_handoff_even_with_a_valid_input_key(self):
         await self.rejected_shared_binding('query', {'result': {'job_id':'source', 'path':['items'], 'value_field':'id', 'confirmed':True}}, '이어 붙이기는 다음 단계에서 지원')
+
+    async def test_publication_checks_runtime_fallback_bindings_for_shared_jobs(self):
+        await self.rejected_shared_binding('issue_keys', {'constant': ['CR-1']}, '공용 도구 입력에 없는 인자 연결', nested=True)
+
+    async def test_publication_blocks_list_handoff_in_runtime_fallback_bindings(self):
+        await self.rejected_shared_binding('query', {'result': {'job_id':'source', 'path':['items'], 'value_field':'id', 'confirmed':True}}, '이어 붙이기는 다음 단계에서 지원', nested=True)
 
     async def test_groups_disable_enable_and_unknown_source_never_dispatch_or_write_native(self):
         item = await self.review()
