@@ -609,3 +609,4 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 
 .ew-shared-picker-options button{position:relative;border:0;border-radius:0;padding-right:38px}.ew-shared-picker-options button>span{position:absolute;right:8px;top:8px;font-size:12px;color:#6f717a}
 .ew-shared-comparison{width:100%;table-layout:fixed;border-collapse:collapse;margin:12px 0;font-size:13px;line-height:20px}.ew-shared-comparison caption{text-align:left;font-weight:600;padding-bottom:8px}.ew-shared-comparison th,.ew-shared-comparison td{text-align:left;vertical-align:top;padding:8px;border-bottom:1px solid var(--ees-line-divider);overflow-wrap:anywhere}.ew-shared-comparison th:first-child{width:24%}
+.ew-shared-access{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin:12px 0}.ew-shared-access fieldset{margin:0;min-width:0}.ew-shared-access>label{display:grid;gap:6px}.ew-shared-changes{font-size:13px;line-height:20px}

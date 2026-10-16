@@ -1,10 +1,10 @@
 # 현재 작업 상태
 
-## 2026-10-16 · 공용 Confluence 도구 #93 검토 반영
+## 2026-10-16 · 공용 Confluence 도구 #93 재검토 반영
 
 - **기준/범위:** 최신 main `8a4a716`(#90 병합 포함), #92와 B10-1/2/5. [현재 계약](mockups/ees-work/TASK.md#shared-tools-phase1-20261015). 기존 계약은 보존하고 기본 제공 조회2개를 공용으로 확인·사용한다.
 - **병합 순서:** 열린 #91(Native 복귀 선택)과 launcher/view, 시험, TASK/STATUS/CHANGELOG/evals가 겹친다. #91 검토·병합 뒤 이 PR에 최신 main을 통합하고 양쪽 행동/기록을 보존한다. 이번 작업은 병합하지 않는다. #90은 이미 main에 반영되어 별도 병합 대기가 없다.
-- **현재 검증:** Claude 리뷰7건을 같은 Draft #93에서 보완했다. Native20개·기존 operations48개·Node193개 PASS. 수정 첫 CI의 실제 CLI 제품/B10 작성21개 PASS, 기존 범위 전환 감시1건은 clone 응답의 늦은 파싱을 새 회귀로 재현하여 실제 본문 전달 관측으로 고쳤다. [첫 실패·화면/스타일/포커스 증거](../evals/v4-ui-20260930.md#shared-tools-review-20261016). 최종 head 결과는 [Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/93/checks)가 원본이다.
+- **현재 검증:** head4778b97의 Claude 재검토3건과 확인창 보완을 같은 Draft #93에서 반영했다. 이전 방식→공용의 인자 정리, 게시 시 입력 키/목록 연결 거부, 관리자 운영 안내와 변경 요약·그룹/담당 분리다. [첫 실패·새 회귀·실제 화면/CI](../evals/v4-ui-20260930.md#shared-tools-rereview-20261016). 이전7건의 최종 CI38834234451 성공은 당시 증거이며 새 head 결과는 [Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/93/checks)가 원본이다.
 - **다음 작업:** 최종 head CI 성공 후 Claude 재검토. 항목별 답변/요청은 PR 댓글 하나로 남긴다. Draft 유지·병합 없음. 리뷰 마지막 묶음은1단계-2로 넘기며 #91 통합 순서를 유지한다.
 - **사내:** Confluence 설치 원본·주소·허용 공간·개인 설정 암호화·팀원 PAT 저장은 미확인. 사내 실행/적용·Figma 수정·#77/#79 착수 없음.
 

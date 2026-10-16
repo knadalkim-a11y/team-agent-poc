@@ -1655,6 +1655,19 @@ class OperationsRuntime:
         for job in definition.get("nodes", {}).values():
             if job.get("type") != "j":
                 continue
+            if job.get("shared_tool_id"):
+                try:
+                    tool = self.service.shared_tools.get(db, job["shared_tool_id"])
+                    self.service.shared_tools.authorize(tool, actor, groups)
+                    properties = tool["input_schema"].get("properties", {})
+                    for argument, binding in job.get("argument_bindings", {}).items():
+                        if argument not in properties:
+                            errors.append(job["id"] + ": 공용 도구 입력에 없는 인자 연결을 지워 주세요: " + argument)
+                        if isinstance(binding, dict) and "result" in binding:
+                            errors.append(job["id"] + ": 공용 도구로 목록 이어 붙이기는 다음 단계에서 지원합니다.")
+                except WorkflowError as error:
+                    errors.append(job.get("id", "") + ": " + error.message)
+                continue
             key = job.get("tool_contract_id") or (job.get("tool_reference") or {}).get("contract_id")
             if self._job_kind(job) != "request" and not key:
                 continue

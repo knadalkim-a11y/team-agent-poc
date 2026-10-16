@@ -341,3 +341,24 @@ test('shared detail only offers review when needed and shows Korean input types'
  search.state='disabled';h.render();assert.doesNotMatch(h.markup,/data-author-action="shared_review"/);
  search.state='review_required';h.render();assert.match(h.markup,/data-author-action="shared_review"/);
 });
+test('legacy to shared selection drops foreign bindings and keeps manually declared inputs',async()=>{
+ const h=harness();sharedReviewFixture(h);const job=h.workflows.get('w').draft.nodes.j;
+ Object.assign(job,{mode:'tool',tool_contract_id:'legacy',tool_contract_revision:1,tool_reference:{tool_id:'native',function:'read'},inputs:[{id:'memo',name:'직접 만든 값',type:'text',scope:'run'}],argument_bindings:{issue_keys:{result:{job_id:'confirmed-list',path:['items'],value_field:'id',confirmed:true}},memo:{input:'memo'}}});
+ h.render();await h.node();assert.match(h.markup,/확정 목록에서 도구 인자 연결/);
+ h.click('pick_job_tool',{id:'managed-search_pages',shared:'true'});await flush();const selected=h.draft().definition.nodes.j;
+ assert.deepEqual(Object.keys(selected.argument_bindings).sort(),['limit','query','space_key']);assert.equal(selected.inputs[0].id,'memo');assert.equal(selected.tool_contract_id,undefined);assert.equal(selected.tool_reference,undefined);
+});
+test('shared jobs hide list handoff controls until B10-6 while legacy jobs retain them',async()=>{
+ const h=harness();sharedReviewFixture(h);h.render();await h.node();h.field('mode','tool','change');assert.match(h.markup,/확정 목록에서 도구 인자 연결/);
+ h.click('pick_job_tool',{id:'managed-search_pages',shared:'true'});await flush();assert.doesNotMatch(h.markup,/확정 목록에서 도구 인자 연결|name="result_argument"|name="result_job_id"/);
+ h.state.operations.tools=[{id:'legacy',name:'이전 계약',state:'approved',revision:1,reference:{tool_id:'native',function:'read'}}];h.render();h.click('pick_job_tool',{id:'legacy'});await flush();assert.match(h.markup,/확정 목록에서 도구 인자 연결/);
+});
+test('shared review names changed categories without exposing references and separates access controls',async()=>{
+ for(const [field,label] of [['content_hash','도구 코드'],['schema_hash','입력 형식'],['config_hash','연결 설정'],['environment','실행 환경']]){
+  const h=harness(),{search}=sharedReviewFixture(h);h.state.capabilities.is_admin=true;h.selection.tab='tools';search.state='review_required';
+  search.reference={tool_id:'private-native-id',function:'search_pages',content_hash:'private-code',schema_hash:'private-schema',config_hash:'private-config',environment:'private-runtime'};
+  search.observed_reference={...search.reference,[field]:'changed-private-value'};search.observed_input_schema=copy(search.input_schema);search.observed_output_schema=copy(search.output_schema);
+  h.render();h.click('shared_open',{id:search.id});await flush();h.dialogs.push(null);h.click('shared_review',{id:search.id});await flush();
+  const dialog=JSON.stringify(h.dialogHistory.at(-1));assert.match(dialog,new RegExp('바뀐 항목: '+label));assert.doesNotMatch(dialog,/private-|changed-private/);assert.match(dialog,/ew-shared-access/);assert.match(dialog,/<fieldset><legend>쓸 수 있는 그룹<\/legend>[\s\S]*<\/fieldset><label>담당/);
+ }
+});

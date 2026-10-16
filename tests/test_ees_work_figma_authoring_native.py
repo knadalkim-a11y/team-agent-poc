@@ -69,6 +69,11 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action=shared_review]')
         for label in ('항목별 비교', '현재', '새 내용', '찾을 말', '공간', '개수', '결과', '확인 근거 (필수)'):
             self.assertIn(label, self.text('#ees-work-dialog'))
+        self.assertIn('바뀐 항목: 연결 설정', self.text('#ees-work-dialog'))
+        self.assertNotIn('e'*64, self.text('#ees-work-dialog'))
+        review_layout = self.browser.evaluate("(()=>{const access=document.querySelector('.ew-shared-access'),g=access.querySelector('fieldset').getBoundingClientRect(),o=access.querySelector('[name=owner]').closest('label').getBoundingClientRect();return {display:getComputedStyle(access).display,group_bottom:g.bottom,owner_top:o.top,gap:o.top-g.bottom};})()")
+        self.assertEqual(review_layout['display'], 'grid')
+        self.assertGreaterEqual(review_layout['gap'], 10, review_layout)
         self.screenshot('shared-b10-2-review-comparison')
         self.click('#ees-work-dialog [data-dialog-cancel]')
         reference['config_hash'] = 'c'*64
@@ -104,13 +109,17 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action=pick_job_tool][data-id=managed-search_pages]')
         self.assertFalse(self.read('.ew-shared-picker','open'))
         self.assertIn('페이지 찾기',self.text('.ew-shared-picker summary'))
+        self.assertNotIn('확정 목록에서 도구 인자 연결', self.text('#ees-work-designer'))
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ew-author-node [name=result_argument],#ew-author-node [name=result_job_id]')"))
+        self.screenshot('shared-b10-5-selected-no-handoff')
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장 초안')")
         stored=self.state(workflow_id=wid)['workflow']['draft']['nodes']['job-0']
         self.assertEqual(stored['shared_tool_id'],'managed-search_pages')
         self.assertNotIn('tool_reference',stored)
         self.assertNotIn('tool_contract_revision',stored)
-        (directory/'shared-b10-comparison.json').write_text(json.dumps({'scope':'actual built product with synthetic Native session/metadata; real HTTP and SQLite','figma':{'B10-1':'1353:20386','B10-2':'1353:20597','B10-5':'1353:21167'},'detail_cards':geometry,'keyboard_focus':detail_focus,'checked':['target grouping','personal PAT label','legacy group','detail sections','admin Native link','no C45 menu','usable-only single-step picker','saved shared ID without fixed reference','real query/space_key/limit schema','no redundant review button','per-field current/new comparison','Native Tools title'],'onsite':'unverified'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        self.assertEqual(set(stored['argument_bindings']), {'query','space_key','limit'})
+        (directory/'shared-b10-comparison.json').write_text(json.dumps({'scope':'actual built product with synthetic Native session/metadata; real HTTP and SQLite','figma':{'B10-1':'1353:20386','B10-2':'1353:20597','B10-5':'1353:21167'},'detail_cards':geometry,'review_layout':review_layout,'keyboard_focus':detail_focus,'checked':['target grouping','personal PAT label','legacy group','detail sections','admin Native link','no C45 menu','usable-only single-step picker','saved shared ID without fixed reference','real query/space_key/limit schema','no redundant review button','per-field current/new comparison','Native Tools title','changed category notice','group and owner separate rows','shared list handoff controls absent','only query/space_key/limit binding keys'],'onsite':'unverified'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
     def operations(self):
         return asyncio.run(self.server.workflow.operations.state(self.server.user, system_id='EMS'))

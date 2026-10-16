@@ -115,6 +115,34 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(self.http_calls)
         self.assertEqual(set(self.http_calls), {'Bearer synthetic-reader-pat'})
 
+    async def rejected_shared_binding(self, argument, binding, notice):
+        await self.review()
+        wid = await self.workflow()
+        with self.service._db() as db:
+            definition = json.loads(db.execute('SELECT draft FROM work_definitions WHERE id=?', (wid,)).fetchone()[0])
+        source = deepcopy(definition['nodes']['j1'])
+        source.update(id='source', name='확정 목록의 근거', mode='human', argument_bindings={})
+        source.pop('shared_tool_id')
+        definition['nodes']['source'] = source
+        definition['nodes']['t1']['children'].insert(0, 'source')
+        definition['nodes']['j1']['deps'] = ['source']
+        definition['nodes']['j1']['argument_bindings'][argument] = binding
+        await self.core('save_draft', 3, workflow_id=wid, definition=definition)
+        validated = await self.core('validate_workflow', 4, workflow_id=wid)
+        self.assertIn(notice, '\n'.join(validated['validation']['errors']))
+        rejected = await self.service.workspace_command(self.admin, self.body('publish_workflow', 4, workflow_id=wid))
+        self.assertFalse(rejected['ok'], rejected)
+        self.assertEqual(rejected['error']['code'], 'validation_required')
+        self.assertIn(notice, rejected['error']['message'])
+        with self.service._db() as db:
+            self.assertEqual(db.execute('SELECT count(*) FROM work_versions WHERE workflow_id=?', (wid,)).fetchone()[0], 1)
+
+    async def test_publication_rejects_binding_keys_outside_shared_input_schema(self):
+        await self.rejected_shared_binding('issue_keys', {'constant': ['CR-1']}, '공용 도구 입력에 없는 인자 연결')
+
+    async def test_publication_rejects_shared_list_handoff_even_with_a_valid_input_key(self):
+        await self.rejected_shared_binding('query', {'result': {'job_id':'source', 'path':['items'], 'value_field':'id', 'confirmed':True}}, '이어 붙이기는 다음 단계에서 지원')
+
     async def test_groups_disable_enable_and_unknown_source_never_dispatch_or_write_native(self):
         item = await self.review()
         self.assertEqual(await self.tools.list(self.f.users['outsider'], usable_only=True), [])
