@@ -1,5 +1,12 @@
 # 현재 작업 상태
 
+## 2026-10-16 · #95 CI 개선의 최신 main 통합
+
+- **범위:** 사용자 후속 검토·진행 요청에 따라 [Draft PR #95](https://github.com/knadalkim-a11y/team-agent-poc/pull/95)의 `7a8b43a`에 최신 main `0f4c905`(#93 병합본)을 merge commit으로 통합한다. CHANGELOG·STATUS 충돌은 양쪽 기록을 보존하며 CI 자료 분할/캐시와 공용 도구의 기존 검사를 함께 유지한다. 미병합 #94·#96의 변경은 포함하지 않는다.
+- **근거/검증:** 기존 main CI는 최종 검사까지15분12초, 배포물 준비 포함17분11초이며 약1.39GB 전체 묶음을27개 검사에 전달했다. 관련65검사 중64PASS/실제frontend환경1SKIP, 시험ID감사·actionlint·docs/diff PASS다. 실제ees.13 고정자료의 생성·해시일치·재사용도 확인했다. [원자료·최초 실패·독립검토 보완·비교 한계](../evals/v4-ui-20260930.md#ci-delivery-efficiency-20261016). 최종 원격 판정은 CI 개선 PR의 Checks로 확인한다.
+- **현재/다음:** 통합 전 head `7a8b43a`의 CI38856937514는39성공/배포물1정상제외이고 전달 자료52.6%·최종 검사시간7.1% 감소를 확인했다. 통합 뒤 정확한 head의 전체 CI는 [PR #95 본문/Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/95/checks)에서 별도로 판정한다. Draft 유지·PR 병합/사내 적용 미실행이며 실제 사내 적용본은 기존 사용자 확인 `d4f1806`이다.
+
+아래 #91·#93 블록은 main에 보존된 당시 진행 기록이며, #93은 현재 `0f4c905`로 병합된 상태다.
 ## 2026-10-16 · #91 병합 완료·#93 main 통합
 
 - **승인/순서:** 사용자가 두 PR의 병합까지 요청했다. #91 최종 CI 성공 → merge commit 병합 → #93에 main 통합 → 최종 CI 성공 → #93 merge commit 병합 순서다. 아래 Draft/병합 보류 문구는 당시 기록이다.

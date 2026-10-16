@@ -13,3 +13,4 @@
 /branding/ees/** -text
 # Unified diff context starts with a space; preserve those required bytes.
 /frontend/patches/*.patch -whitespace
+/tests/ees_delivery_fixtures.py text eol=lf

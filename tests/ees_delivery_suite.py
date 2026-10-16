@@ -45,7 +45,7 @@ SUITES = {
     "platform": ["test_ees_deploy_*.py", "test_manage_ees.py", "test_ees_upgrade.py",
         "test_ees_update_download.py",
         "test_ees_asset_guard.py", "test_ees_asset_native.py", "test_ees_branding_build.py", "test_ees_frontend*.py",
-        "test_demo_bundle.py", "test_ees_trial_*.py", "test_ees_delivery_suite.py",
+        "test_demo_bundle.py", "test_ees_trial_*.py", "test_ees_delivery_suite.py", "test_ees_delivery_fixtures.py",
         "test_check_docs.py", "test_openwebui_windows_launcher.py"],
     "program-install": ["test_ees_webui_customization.py"],
     "program-wheel": ["test_ees_webui_customization.py"],
