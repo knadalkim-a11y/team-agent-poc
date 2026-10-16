@@ -384,3 +384,11 @@ test('unavailable reviewed shared tool offers persistent disable using its saved
  assert.deepEqual(h.operations[1].group_ids,[]);assert.deepEqual(h.operations[1].reference,search.reference);
  assert.match(h.dialogHistory.at(-1).html,/모두 해제/);assert.doesNotMatch(h.dialogHistory.at(-1).html,/group:other/);
 });
+
+test('shared tool use opens its recorded system with the workflow',async()=>{
+ const h=harness(),{search}=sharedReviewFixture(h);search.uses=[{workflow_id:'fdc-workflow',workflow_name:'FDC 절차',job_name:'조회',system_id:'FDC'}];
+ h.selection.tab='tools';h.render();h.click('shared_open',{id:search.id});await flush();
+ assert.match(h.markup,/data-id="fdc-workflow" data-system-id="FDC"/);
+ const opened=[];h.callbacks.openWorkflow=async(...args)=>opened.push(args);
+ h.click('open',{id:'fdc-workflow',systemId:'FDC'});await flush();assert.deepEqual(opened,[['fdc-workflow','FDC']]);
+});

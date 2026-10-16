@@ -211,6 +211,45 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
             pins = db.execute('SELECT tool_id FROM work_shared_tool_pins WHERE run_id=?', (started['run']['id'],)).fetchall()
         self.assertEqual([row[0] for row in pins], [self.key])
         self.assertEqual(set(started['run']['jobs']), {'new-documents-search-j'})
+        with patch('urllib.request.OpenerDirector.open', side_effect=self.http):
+            for _ in range(4): await legacy.execution.process_once()
+        viewed = await legacy.execution_state(self.reader, run_id=started['run']['id'])
+        self.assertTrue(viewed['ok'], viewed)
+        self.assertIn('result', viewed['run']['calls'][0], viewed)
+        self.assertNotEqual(viewed['run'].get('evidence_available'), False)
+        item = await self.item()
+        await self.tools.command(self.admin, self.body('shared_tool_disable', item['revision'], shared_tool_id=self.key, reference=item['reference']))
+        denied = await legacy.execution_state(self.reader, run_id=started['run']['id'])
+        self.assertFalse(denied['run']['evidence_available'])
+        self.assertNotIn('result', denied['run']['calls'][0])
+
+    async def test_execution_shared_bindings_are_checked_before_planning(self):
+        from workflow_fixture import historical_facade, load_workflow_examples, arrange_legacy_catalog
+        from test_ees_workflow_execution import publish
+        await self.review()
+        legacy = historical_facade('open_webui').WorkflowService(self.service.database, self.f.native_users.Users.get_user_by_id, lambda _:None, native_bridge=self.f.bridge)
+        arrange_legacy_catalog(legacy)
+        legacy.shared_tools = self.tools
+        legacy._work_actor = self.service._work_actor
+        base = load_workflow_examples('open_webui').installation_docs_workflow(self.refs)
+        for bindings, code in [({}, 'shared_tool_arguments_invalid'),
+                ({'query':{'source':'constant','value':7}}, 'native_input_invalid'),
+                ({'query':{'source':'input','key':'query','transform':'to_integer'}}, 'shared_tool_arguments_invalid'),
+                ({'query':{'source':'constant','value':'guide'},'unknown':{'source':'constant','value':'x'}}, 'shared_tool_arguments_invalid'),
+                ({'query':{'source':'constant','value':7,'transform':'to_string'}}, None)]:
+            with self.subTest(bindings=bindings):
+                fragment = deepcopy(base)
+                call = fragment['nodes']['new-documents-search-j']['execution']['calls'][0]
+                call.pop('reference'); call.update(shared_tool_id=self.key, arguments=bindings)
+                process = publish(legacy, fragment)
+                with legacy._db() as db: version = legacy._catalog(db)[0]['version']
+                result = await legacy.execution_plan(self.reader, {'node_id':'new-documents-search-j','inputs':{'query':'guide','space_key':'EMS'},'scope':{'site_id':'us-a','system':'EMS','process_id':process,'version':version}})
+                if code:
+                    self.assertFalse(result['ok'], result)
+                    self.assertEqual(result['error']['code'], code, result)
+                else:
+                    self.assertTrue(result['ok'], result)
+        self.assertEqual(self.http_calls, [])
 
     async def test_excluded_shared_job_does_not_pin_disabled_tool(self):
         item = await self.review()
@@ -537,6 +576,10 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
             result = await self.service.operations.command(self.reader,self.body('execute_job',1,run_id=run['run_id'],job_id='j1'))
         self.assertEqual(result['attempt']['result']['completeness'],'empty')
         self.assertEqual(result['attempt']['result']['items'],[])
+        current = await self.service.workspace_state(self.reader, run_id=run['run_id'])
+        denied = await self.service.workspace_command(self.reader, self.body('confirm_list', current['run']['revision'], run_id=run['run_id'], job_id='j1', attempt_id=result['attempt']['id'], result_revision=result['attempt']['number'], items=[], reason='조회 0건 확인'))
+        self.assertFalse(denied['ok'], denied)
+        self.assertEqual(denied['error']['code'], 'zero_selection_policy_required', denied)
 
     async def test_nonpilot_functions_are_preparing_and_cannot_be_reviewed(self):
         await self.f.register_read_tool('jira', extended=True)

@@ -170,6 +170,36 @@ class ExecutionRuntime:
         await self.bridge.check(user, call["reference"])
         return call["reference"]
 
+    def _shared_call_schema(self, case, call):
+        """Validate statically known bindings before planning or starting I/O."""
+        from .ees_workflow_native import validate_arguments
+        with self.service._db() as db:
+            tool = self.service.shared_tools.get(db, call["shared_tool_id"])
+        schema, bindings = tool["input_schema"], call["arguments"]
+        properties = schema.get("properties", {})
+        if set(bindings) - set(properties) or set(schema.get("required", [])) - set(bindings):
+            raise WorkflowError("shared_tool_arguments_invalid", "공용 도구의 필수 입력과 인자 이름을 확인해 주세요.")
+        inputs = case["definition"]["nodes"][case["process_id"]].get("execution_inputs", {}).get("properties", {})
+        constants = {}
+        for name, binding in bindings.items():
+            if binding["source"] == "constant":
+                constants[name] = binding
+            elif binding["source"] == "input":
+                kind = inputs.get(binding["key"], {}).get("type")
+                transform = binding.get("transform", "identity")
+                if transform == "to_string" and kind in {"string", "integer"}:
+                    kind = "string"
+                elif transform == "to_integer" and kind == "string":
+                    kind = "integer"
+                elif transform != "identity" and not (transform == "strip" and kind == "string"):
+                    kind = None
+                if kind != properties[name].get("type"):
+                    raise WorkflowError("shared_tool_arguments_invalid", "공용 도구에 연결할 입력과 자료형을 확인해 주세요.")
+        values = resolve_arguments({"arguments": constants}, {}, {})
+        validate_arguments(tool["function"], {**schema, "required": []}, values)
+        # Stored-result bindings retain their provenance checks; their resolved
+        # values also pass Native's argument validation immediately before I/O.
+
     async def _ready(self, user, case, jobs):
         self.configure()
         for job_id in jobs:
@@ -181,6 +211,8 @@ class ExecutionRuntime:
             await self._source_access(user, case, node)
             for call in node["execution"].get("calls", []):
                 await self._call_reference(user, call)
+                if call.get("shared_tool_id"):
+                    self._shared_call_schema(case, call)
 
     async def _source_access(self, user, case, node, visiting=None, checked=None):
         """Recheck every source behind a stored value, including human choices."""
@@ -877,13 +909,15 @@ class ExecutionRuntime:
         except sqlite3.Error:
             pass
 
-    async def _can_read_evidence(self, user, case):
+    async def _can_read_evidence(self, user, case, jobs=None):
         try:
             self.configure()
-            for job_id, node in case["definition"]["nodes"].items():
+            for job_id in case["definition"]["nodes"] if jobs is None else jobs:
+                node = case["definition"]["nodes"][job_id]
                 if not node.get("execution"):
                     continue
                 await self._skills(user, case, job_id)
+                await self._source_access(user, case, node)
                 for call in node["execution"].get("calls", []):
                     await self._call_reference(user, call, case.get("jobs", {}).get(job_id, {}).get("execution_run_id"))
             return True
@@ -893,7 +927,7 @@ class ExecutionRuntime:
     async def redact_run(self, user, public):
         with self.service._db() as db:
             case = self.service._case(db, _value(user, "id"), public["case_id"])
-        if await self._can_read_evidence(user, case):
+        if await self._can_read_evidence(user, case, public["jobs"]):
             return public
         public["evidence_available"] = False
         for call in public.get("calls", []):

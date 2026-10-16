@@ -607,3 +607,12 @@ test('scope frame monitor records delivered JSON before the consumer renders eve
  assert.equal(window.__eesSourceFrameEvidence.scopeExpectation.received.workspace,true,'Body delivery must be observed before its consumer can render an empty result');
  clone.resolve(body);
 });
+
+test('cross-system tool use clears the previous factory and opens the target scope',async()=>{
+ const h=controller();h.api.setState({capabilities:nativeCapabilities({is_admin:true,can_author:true,managed_systems:['EMS','FDC']}),systems:['EMS','FDC'],workflows:[],runs:[],operations:{},ui_state:{revision:0,state:{}}});
+ h.api.setSelection({system_id:'EMS',factory_id:'ems-factory',workflow_id:'ems-workflow',run_id:'old-run',job_id:'old-job'});
+ await h.designer.callbacks.openWorkflow('fdc-workflow','FDC');
+ const selected=h.api.snapshot().selection;
+ assert.equal(selected.system_id,'FDC');assert.equal(selected.factory_id,'');assert.equal(selected.workflow_id,'fdc-workflow');assert.equal(selected.run_id,'');assert.equal(selected.job_id,'');
+ h.api.setSelection({factory_id:'fdc-factory'});await h.designer.callbacks.openWorkflow('other-fdc','FDC');assert.equal(h.api.snapshot().selection.factory_id,'fdc-factory');
+});
