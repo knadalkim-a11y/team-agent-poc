@@ -85,7 +85,7 @@ Claude Code에서는 루트 [CLAUDE.md](CLAUDE.md)가 `AGENTS.md`를 가져오�
 
 | 경로 | 책임 |
 |---|---|
-| [AGENTS.md](AGENTS.md) | 이 프로젝트를 개발하는 GPT의 작업 규칙 |
+| [AGENTS.md](AGENTS.md) | 이 프로젝트를 개발하는 AI의 작업 규칙 |
 | [docs/STATUS.md](docs/STATUS.md) | 현재 목표·다음 작업·미해결·Git 준비와 WebUI 적용 상태 |
 | [agent-pack/](agent-pack/README.md) | 서비스 Assistant에 배포할 Prompt·정책·Skill·합성 Knowledge 원본 |
 | [agent-pack/skills/confluence-read/](agent-pack/skills/confluence-read/) | 기능 단위 묶음: 지침과 실행 코드를 함께 관리 |
@@ -201,7 +201,6 @@ factory는 배포 JS 내부에만 존재하고 기존 runtime UI/Tool 연결을 
 | 공통 화면 틀·탐색·반응형 | [소스 셸 Native](tests/test_ees_source_shell_native.py), [Figma 배치 Native](tests/test_ees_work_figma_layout_native.py), [Native 복귀 선택](tests/test_ees_native_return_selection.cjs) |
 | 공용 도구 조건·저장·실행 결과 | [공용 도구 Native](tests/test_ees_shared_tools_native.py), [workspace](tests/test_ees_work_workspace.py), [결과 계약](tests/test_ees_workflow_contract.py), [실행 UI](tests/test_ees_work_figma_runtime_ui.cjs) |
 
-
 ### 원본과 배포본
 
 팀원이 만든 개인·공유 프롬프트·Skill·Tool은 허용된 생성·공유·수정 권한 안에서 WebUI에서 관리합니다. 공유할 때마다 담당자의 채택이나 Git 반영을 거칠 필요는 없습니다. 담당자가 팀 공통 배포 대상으로 채택한 항목만 검토한 버전을 Git에 보관하고, 이후에는 Git에서 변경을 관리해 해당 배포 절차로 반영합니다. 교차 분석 시연에 `ApplyDemo`를 쓰던 절차는 과거 기록입니다. 현재 ApplyDemo 재등록은 중지됐으며, 기존 사용자 자산의 변경은 승인된 해당 관리 절차를 따릅니다. 개발 환경에 없는 사용자 자산도 계속 보존하며, 프로그램 내부 리팩토링을 자산 ID 변경·재등록·초기화와 결합하지 않습니다.
@@ -233,7 +232,7 @@ factory는 배포 JS 내부에만 존재하고 기존 runtime UI/Tool 연결을 
 | 사내 명령 한 번으로 프로그램·래퍼 업데이트 | [Upgrade 최초 준비·실행·실패 시 확인](docs/03-openwebui-native-agent.md#ees-wrapper-upgrade) |
 | 업데이트·패치 반복 실패의 원인과 조치 확인 | [확인한 원인·보존 로그의 해석 범위](docs/03-openwebui-native-agent.md#ees-update-failure-causes), [날짜별 실패·수정·사내 결과](evals/scenarios.md#ees-update-failure-causes) |
 | 승인된 Upgrade 종료 실패 복구 | [대상 식별·보관 ZIP 재사용](docs/03-openwebui-native-agent.md#ees-stop-recovery) |
-| 교차 분석 시연과 모델·Tool·Prompt 일괄 등록 | [ApplyDemo 최초 연결·한 번 적용·시연 질문](docs/03-openwebui-native-agent.md#demo-assets-deployment) |
+| 과거 교차 분석 시연·일괄 등록 이력(현재 중지) | [ApplyDemo 당시 절차](docs/03-openwebui-native-agent.md#demo-assets-deployment). 현재 적용 지시로 사용하지 않음 |
 | 기존 AI 대화에서 업무 탐색·실행·절차 관리 | [EES Workflow 적용·사용](docs/03-openwebui-native-agent.md#ees-work-demo) |
 | 팀 시연용 첫 화면 적용 준비 | [소개 문구·예시 질문 초안](docs/03-openwebui-native-agent.md#first-use-entry) |
 | Confluence Skill·Tool 등록 | [04-confluence-read-tool](docs/04-confluence-read-tool.md) |
@@ -248,7 +247,7 @@ factory는 배포 JS 내부에만 존재하고 기존 runtime UI/Tool 연결을 
 
 ## 문서가 쌓이지 않게 유지하는 방법
 
-개발하는 GPT가 [AGENTS.md](AGENTS.md)의 종료 절차에 따라 관련 문서를 갱신하고, [문서 점검기](scripts/check_docs.py)를 실행합니다. GPT가 검사를 실행할 수 있는 작업 환경에서는 사용자가 매번 별도로 정리를 요청하거나 사내 PC에서 실행할 필요는 없습니다. 직접 확인하려면 저장소 루트에서 실행합니다.
+개발 AI가 [AGENTS.md](AGENTS.md)의 종료 절차에 따라 관련 문서를 갱신하고, [문서 점검기](scripts/check_docs.py)를 실행합니다. AI가 검사를 실행할 수 있는 작업 환경에서는 사용자가 매번 별도로 정리를 요청하거나 사내 PC에서 실행할 필요는 없습니다. 직접 확인하려면 저장소 루트에서 실행합니다.
 
 ```powershell
 python scripts/check_docs.py
