@@ -552,9 +552,11 @@ class SourceShellNativeTests(IntegratedNativeCase):
         # C45 keeps Native tools reachable through B10-2, with the same frame
         # observation and draft preservation checks as other Native screens.
         for suffix, selector, condition in (
-            ('list', '[data-action=tools]', "document.querySelector('[data-author-action=shared_open]')"),
+            ('list', '[data-action=tools]', "document.querySelector('[data-author-action=shared_open],[data-author-action=shared_native]')"),
             ('detail', '[data-author-action=shared_open][data-id=managed-search_pages]', "document.querySelector('[data-author-action=shared_native]')"),
         ):
+            if suffix == 'detail' and self.browser.evaluate("!!document.querySelector('[data-author-action=shared_native]')"):
+                continue  # Returning to the same detail preserves its selection.
             step_label = label + '-shared-' + suffix
             if hasattr(self.server, 'navigation_reads'):
                 self.delayed_step(step_label, selector, condition, paths=())

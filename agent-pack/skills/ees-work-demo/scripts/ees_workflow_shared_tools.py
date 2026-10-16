@@ -133,6 +133,7 @@ class SharedTools:
                 continue
             item['observed_reference'] = observed.get('reference') if admin else None
             item['observed_input_schema'] = observed['input_schema'] if admin else None
+            item['observed_output_schema'] = observed['output_schema'] if admin else None
             with self.service._db() as db:
                 versions = [json.loads(row[0]) for row in db.execute('SELECT data FROM work_shared_tool_versions WHERE tool_id=? ORDER BY version DESC', (item['id'],))]
                 item['versions'] = [{k: v for k, v in version.items() if admin or k not in ('reference', 'actor', 'evidence')} for version in versions]

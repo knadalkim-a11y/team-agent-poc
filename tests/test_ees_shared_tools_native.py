@@ -95,6 +95,7 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
     async def test_two_systems_share_action_with_real_native_pat_and_run_resolution(self):
         item = await self.review()
         self.assertEqual(item['version'], 1)
+        self.assertEqual(item['observed_output_schema'], item['output_schema'])
         self.assertEqual(item['reference']['tool_id'], 'installed-with-unpredictable-id')
         self.assertEqual(item['reference'], self.refs['search_pages']) # reuse Native approval
         for system in ('EMS', 'FDC'):

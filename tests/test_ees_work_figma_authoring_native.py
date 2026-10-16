@@ -28,6 +28,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.server.native_plugins_enabled = True
         self.native_menu_fixture()
         self.navigate('/c/existing-chat')  # Reload Native config after enabling the fixture flag.
+        self.wait("document.querySelector('#chat-input.ProseMirror') && document.querySelector('#ees-work-entry') && window.__eesNativeWorkV1?.refresh")
+        self.open_sidebar()
+        self.wait("document.querySelector('#ees-work-panel') && document.querySelector('#ees-work-system-trigger')?.getBoundingClientRect().height > 0")
         native = importlib.import_module(self.backend.__package__ + '.ees_workflow_native')
         source = (Path(__file__).resolve().parents[1] / 'agent-pack/skills/confluence-read/scripts/confluence_tool.py').read_text(encoding='utf-8')
         schema = {'type':'object','properties':{'query':{'type':'string'}},'required':['query']}
@@ -57,6 +60,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         for label in ('하는 일','입력과 결과','쓰는 곳','지금 버전','버전 기록','프로그램 갱신으로만 바뀝니다'):
             self.assertIn(label,self.text('#ees-work-designer'))
         self.screenshot('shared-b10-2-detail-top')
+        self.click('[data-author-action=shared_review]')
+        for label in ('현재 입력:', '새 입력:', '현재 결과:', '새 결과:', '확인 근거 (필수)'):
+            self.assertIn(label, self.text('#ees-work-dialog'))
+        self.click('#ees-work-dialog [data-dialog-cancel]')
         self.assertTrue(self.read('[data-author-action=shared_native]','checkVisibility()'))
         self.browser.evaluate("document.querySelector('[data-author-action=shared_native]').focus()")
         self.key('Tab',9)
@@ -69,7 +76,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(len({round(item['x']) for item in geometry}),1)
         directory = self.screenshot('shared-b10-2-detail')
         self.click('[data-author-action=shared_native]')
-        self.wait("location.pathname==='/workspace/tools'")
+        self.wait("location.pathname==='/workspace/tools' && document.querySelector('#workspace-container input')")
         self.click('[data-action=procedures]')
         self.wait("document.querySelector('[data-author-action=open][data-id=\""+wid+"\"]')")
         self.click('[data-author-action="open"][data-id="'+wid+'"]')
