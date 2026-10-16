@@ -1,5 +1,7 @@
 """Integrated work contract tests using temporary SQLite and Native ID fixtures."""
 import asyncio
+from collections import Counter
+from contextlib import contextmanager
 from copy import deepcopy
 import importlib
 import json
@@ -81,6 +83,65 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual((await self.state('c'))['systems'], [])
         denied = await self.command('create_workflow', actor='c', system_id='EMS', name='무권한')
         self.assertEqual(denied['error']['code'], 'scope_forbidden')
+
+    async def test_state_reuses_reads_without_changing_or_aliasing_selected_views(self):
+        key, _, revision = await self.create(dependent=True)
+        run = await self.start(key, revision)
+        transactions = []
+        original_db = self.service._db
+
+        @contextmanager
+        def traced_db(write=False):
+            with original_db(write=write) as db:
+                statements = []
+                transactions.append(statements)
+                db.set_trace_callback(statements.append)
+                yield db
+
+        with patch.object(self.service, '_db', traced_db):
+            state = await self.state(system_id='EMS', workflow_id=key, run_id=run['id'])
+        statements = transactions[-1]
+        counts = Counter(statements)
+        # Final state snapshot after Native awaits; people/evidence reads use
+        # separate transactions. More jobs must not multiply these row reads.
+        self.assertEqual(counts["SELECT * FROM work_access WHERE system_id='EMS' AND active=1"], 1)
+        settings = [sql for sql in statements if sql.startswith('SELECT * FROM work_settings WHERE workflow_id=') and 'AND factory_id=' in sql]
+        self.assertEqual(len(settings), 1)  # The missing default is reusable too.
+        self.assertFalse(any(sql.startswith(('INSERT ', 'UPDATE ', 'DELETE ')) for sql in statements))
+        listed = next(item for item in state['runs'] if item['id'] == run['id'])
+        self.assertEqual(state['run'], listed)
+        self.assertIsNot(state['run']['jobs'], listed['jobs'])
+        selected = next(item for item in state['workflows'] if item['id'] == key)
+        self.assertEqual(state['workflow'], selected)
+        self.assertIsNot(state['workflow']['draft'], selected['draft'])
+
+    async def test_state_reads_new_settings_after_a_missing_or_cached_value(self):
+        key, _, revision = await self.create(fields=[{'id': 'n', 'type': 'number', 'scope': 'workflow', 'required': True}])
+        run = await self.start(key, revision)
+        query = dict(system_id='EMS', workflow_id=key, run_id=run['id'])
+        self.assertEqual((await self.state(**query))['run']['jobs']['j']['effective_inputs'], {})
+        for expected_revision, value in ((0, 0), (1, 8)):
+            saved = await self.command('save_settings', workflow_id=key, values={'n': value}, expected_revision=expected_revision)
+            self.assertTrue(saved['ok'], saved)
+            state = await self.state(**query)
+            self.assertEqual(state['run']['jobs']['j']['effective_inputs'], {'n': value})
+
+    async def test_state_drops_evidence_scope_rows_before_native_await(self):
+        key, _, revision = await self.create()
+        run = await self.start(key, revision)
+        native = importlib.import_module(PACKAGE.__name__ + '.ees_workflow_native')
+
+        async def revoke_while_reading(actor):
+            await asyncio.sleep(0)
+            with self.service._db(write=True) as db:
+                db.execute("UPDATE work_access SET active=0 WHERE principal_kind='user' AND principal_id='a'")
+            return {'native_access': dict.fromkeys(('models', 'knowledge', 'prompts', 'skills', 'tools', 'admin'), False),
+                    'native_access_available': True}
+
+        with patch.object(native, 'native_workspace_access', revoke_while_reading):
+            state = await self.service.workspace_state(self.users['a'], system_id='EMS', workflow_id=key, run_id=run['id'])
+        self.assertEqual(state['error']['code'], 'scope_forbidden')
+        self.assertNotIn('runs', state)
 
     async def test_native_menu_unavailable_preserves_separate_work_authority(self):
         # A standalone Work service must not infer Native access from its own
