@@ -1,0 +1,186 @@
+{
+  "head": "67f5a485b3bebef9e66937c56e5572588321a824",
+  "run_id": 38832656587,
+  "job_id": 116756852922,
+  "original_frames_sha256": "4a203439280bee5edcaed8f3e43568200e88ecb77df1348c8365c02c4be469d9",
+  "total_samples": 1213,
+  "failure_samples": [
+    {
+      "at": 9100.600000000006,
+      "label": "scope-system-apc",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": "scope-system-apc",
+      "scopePending": true,
+      "scopeEmptyBeforeResponse": [
+        "등록된 업무 절차가 없습니다.",
+        "지금 처리할 내 업무가 없습니다"
+      ],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    }
+  ],
+  "neighbor_samples": [
+    {
+      "at": 9060,
+      "label": "scope-system-apc",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": "scope-system-apc",
+      "scopePending": true,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [
+        {
+          "region": "navigation",
+          "text": "받는 중"
+        },
+        {
+          "region": "panel",
+          "text": "받는 중"
+        }
+      ],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 9076.700000000012,
+      "label": "scope-system-apc",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": "scope-system-apc",
+      "scopePending": true,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [
+        {
+          "region": "navigation",
+          "text": "받는 중"
+        },
+        {
+          "region": "panel",
+          "text": "받는 중"
+        }
+      ],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 9100.600000000006,
+      "label": "scope-system-apc",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": "scope-system-apc",
+      "scopePending": true,
+      "scopeEmptyBeforeResponse": [
+        "등록된 업무 절차가 없습니다.",
+        "지금 처리할 내 업무가 없습니다"
+      ],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 9110.299999999988,
+      "label": "scope-system-apc",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": "scope-system-apc",
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 9126.600000000006,
+      "label": "scope-system-apc",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": "scope-system-apc",
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    }
+  ],
+  "requests": [
+    {
+      "label": "scope-system-apc",
+      "endpoint": "workspace",
+      "system": "APC",
+      "factory": "",
+      "started": 7080.299999999988,
+      "received": 8085.700000000012
+    },
+    {
+      "label": "scope-system-apc",
+      "endpoint": "operations",
+      "system": "APC",
+      "factory": "",
+      "started": 8085.399999999994,
+      "received": 9104.299999999988
+    }
+  ],
+  "cause": "Cloned response JSON completion can lag actual consumer completion; reproduced with a delayed clone in the Node monitor regression. Monitor now observes actual response.json delivery before the consumer continues, independent of product flags."
+}

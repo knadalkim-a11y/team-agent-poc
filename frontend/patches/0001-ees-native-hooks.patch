@@ -1346,7 +1346,7 @@ index 0000000..be842d3
 +		['models', '83565', 'EES.Nav.Models', 'AI assistants'],
 +		['knowledge', '730b1', 'EES.Nav.Knowledge', 'Reference documents'],
 +		['prompts', '093d6', 'EES.Nav.Prompts', 'Quick phrases'],
-+		['tools', '5bc95', 'EES.Nav.Connections', 'Connections'],
++		// Native tools are opened from the shared tool detail, not a second menu.
 +		['admin', '4308e', 'EES.Nav.Admin', 'Administrator settings']
 +	];
 +	const nativeNames = {
@@ -1446,7 +1446,7 @@ index 0000000..be842d3
 +								>{#if !$eesSnapshot.scope_loading && (action === 'procedures' || !data.operations?.error)}<small
 +										>{action === 'procedures'
 +											? current.length
-+											: (data.operations?.tools || []).length}</small
++											: (data.operations?.tools || []).length + (data.operations?.shared_tools || []).length}</small
 +									>{/if}</button
 +							>{/each}{/if}
 +					{#if nativeAllowed('skills')}<button
@@ -1479,7 +1479,7 @@ index 0000000..be842d3
 +			{#if cap.is_admin === true}<section class="ew-nav-group">
 +					<h3 class="ew-nav-group-title">{t('EES.Nav.AdminOnly', 'Administrators only')}</h3>
 +					<nav class="ew-nav-links">
-+						{#each [targets[4], null, targets[5]] as target}
++						{#each [null, ...targets.filter(([id]) => id === 'admin')] as target}
 +							{#if target === null}<button
 +									class="ew-nav-button"
 +									data-action="workspace_admin"
@@ -2917,7 +2917,7 @@ index 8eba682..38ee86b 100644
 +	"EES.Nav.Models": "AI 도우미",
 +	"EES.Nav.Knowledge": "참고 문서",
 +	"EES.Nav.Prompts": "빠른 문장",
-+	"EES.Nav.Connections": "기능 연결",
++	"EES.Nav.Connections": "Open WebUI 도구",
 +	"EES.Nav.Admin": "관리자 설정",
 +	"EES.Nav.AI": "AI 설정",
 +	"EES.Nav.AdminOnly": "관리자만",

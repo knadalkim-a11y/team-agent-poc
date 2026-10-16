@@ -1,0 +1,5 @@
+Executing <Task pending name='Task-1' coro=<NativeReadBridgeTests.asyncSetUp() running at /workspace/scratch/e022f50c75dd/team-agent-poc/tests/test_ees_workflow_native.py:48> wait_for=<Future pending cb=[Task.task_wakeup()] created at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py:448> cb=[_run_until_complete_cb() at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py:181] created at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py:100> took 1.701 seconds
+----------------------------------------------------------------------
+Ran 1 test in 2.099s
+
+OK

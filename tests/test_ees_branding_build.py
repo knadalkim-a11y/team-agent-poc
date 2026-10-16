@@ -158,7 +158,7 @@ sys.modules["open_webui"] = package
 workflow = importlib.import_module("open_webui.ees_workflow")
 for name in ("ees_workflow", "ees_workflow_definition", "ees_workflow_view", "ees_workflow_authoring",
              "ees_workflow_execution", "ees_workflow_native", "ees_workflow_contract",
-             "ees_workflow_workspace", "ees_workflow_operations", "ees_workflow_model"):
+             "ees_workflow_workspace", "ees_workflow_operations", "ees_workflow_shared_tools", "ees_workflow_model"):
     module = importlib.import_module("open_webui." + name)
     assert Path(module.__file__).parent == root / "open_webui"
 seed = workflow._seed()
@@ -251,7 +251,7 @@ print("installed_workflow_contract=pass")
                                  (builder.WORK_DIR / "scripts" / name).read_bytes())
             for name in ("ees_workflow.py", "ees_workflow_definition.py", "ees_workflow_view.py", "ees_workflow_authoring.py",
                          "ees_workflow_execution.py", "ees_workflow_native.py", "ees_workflow_contract.py",
-                         "ees_workflow_workspace.py", "ees_workflow_operations.py", "ees_workflow_model.py",
+                         "ees_workflow_workspace.py", "ees_workflow_operations.py", "ees_workflow_shared_tools.py", "ees_workflow_model.py",
                          "ees_workflow_tool.py", "workflow_policy.json", "workflow_help.json", "workflow_tool_examples.json",
                          "workflow_procedure_examples.json"):
                 target = root / "open_webui" / name

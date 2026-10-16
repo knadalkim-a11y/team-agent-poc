@@ -1,0 +1,201 @@
+{
+  "run": 38852201377,
+  "head": "ba6aa64cee0d470ef9b9892f240d8eec948ac4a5",
+  "artifact": 12026078648,
+  "artifact_sha256": "8056604c2015ac1681b7efd798380a8f55c0dde41240c7170d0c3d7ba2cb412b",
+  "files": {
+    "source-shell-all-navigation-frames.json": {
+      "sha256": "877d06fd54e5060a0c02d9348a16674ec58d0d1d6b91732ed272e22c9e69067b",
+      "loading_failures": {
+        "native-tools-shared-list": {
+          "frames": 2,
+          "selections": [
+            [
+              "tools"
+            ]
+          ],
+          "panels": [
+            []
+          ],
+          "target_only": true
+        },
+        "native-return": {
+          "frames": 2,
+          "selections": [
+            [
+              "procedures"
+            ]
+          ],
+          "panels": [
+            []
+          ],
+          "target_only": true
+        }
+      },
+      "observed_returns": []
+    },
+    "source-shell-delayed-navigation-frames.json": {
+      "sha256": "d06b5c37fb7a2fd3a6bf1fe14a132021df3f12f32b0b66041a3e4ae6b25a3ef9",
+      "loading_failures": {
+        "tools-to-procedures": {
+          "frames": 122,
+          "selections": [
+            [
+              "procedures"
+            ]
+          ],
+          "panels": [
+            []
+          ],
+          "target_only": true
+        }
+      },
+      "observed_returns": [
+        {
+          "label": "skills-to-my-work",
+          "native": "skills",
+          "beforeCurrent": [
+            {
+              "key": "native_open:skills",
+              "ariaCurrent": "page",
+              "text": "스킬·지침스킬"
+            }
+          ],
+          "destination": "my_work"
+        },
+        {
+          "label": "tools-to-my-work",
+          "native": "tools",
+          "beforeCurrent": [],
+          "destination": "my_work"
+        },
+        {
+          "label": "models-to-my-work",
+          "native": "models",
+          "beforeCurrent": [
+            {
+              "key": "native_open:models",
+              "ariaCurrent": "page",
+              "text": "AI 도우미모델"
+            }
+          ],
+          "destination": "my_work"
+        }
+      ]
+    },
+    "source-shell-native-return-selection-frames.json": {
+      "sha256": "2b69cf1243edba223fc6cdb55c70c5e1d85ba43b06b850dd89c5c628bee1ee66",
+      "loading_failures": {},
+      "observed_returns": [
+        {
+          "label": "return-tools-to-procedures",
+          "native": "skills",
+          "beforeCurrent": [
+            {
+              "key": "native_open:skills",
+              "ariaCurrent": "page",
+              "text": "스킬·지침스킬"
+            }
+          ],
+          "destination": "procedures"
+        },
+        {
+          "label": "return-tools-to-workspace_admin",
+          "native": "skills",
+          "beforeCurrent": [
+            {
+              "key": "native_open:skills",
+              "ariaCurrent": "page",
+              "text": "스킬·지침스킬"
+            }
+          ],
+          "destination": "workspace_admin"
+        },
+        {
+          "label": "return-tools-to-my_work",
+          "native": "models",
+          "beforeCurrent": [
+            {
+              "key": "native_open:models",
+              "ariaCurrent": "page",
+              "text": "AI 도우미모델"
+            }
+          ],
+          "destination": "my_work"
+        },
+        {
+          "label": "return-procedures-to-tools",
+          "native": "skills",
+          "beforeCurrent": [
+            {
+              "key": "native_open:skills",
+              "ariaCurrent": "page",
+              "text": "스킬·지침스킬"
+            }
+          ],
+          "destination": "tools"
+        },
+        {
+          "label": "return-procedures-to-workspace_admin",
+          "native": "skills",
+          "beforeCurrent": [
+            {
+              "key": "native_open:skills",
+              "ariaCurrent": "page",
+              "text": "스킬·지침스킬"
+            }
+          ],
+          "destination": "workspace_admin"
+        },
+        {
+          "label": "return-procedures-to-my_work",
+          "native": "models",
+          "beforeCurrent": [
+            {
+              "key": "native_open:models",
+              "ariaCurrent": "page",
+              "text": "AI 도우미모델"
+            }
+          ],
+          "destination": "my_work"
+        },
+        {
+          "label": "return-workspace_admin-to-tools",
+          "native": "skills",
+          "beforeCurrent": [
+            {
+              "key": "native_open:skills",
+              "ariaCurrent": "page",
+              "text": "스킬·지침스킬"
+            }
+          ],
+          "destination": "tools"
+        },
+        {
+          "label": "return-workspace_admin-to-procedures",
+          "native": "skills",
+          "beforeCurrent": [
+            {
+              "key": "native_open:skills",
+              "ariaCurrent": "page",
+              "text": "스킬·지침스킬"
+            }
+          ],
+          "destination": "procedures"
+        },
+        {
+          "label": "return-workspace_admin-to-my_work",
+          "native": "models",
+          "beforeCurrent": [
+            {
+              "key": "native_open:models",
+              "ariaCurrent": "page",
+              "text": "AI 도우미모델"
+            }
+          ],
+          "destination": "my_work"
+        }
+      ]
+    }
+  }
+}
