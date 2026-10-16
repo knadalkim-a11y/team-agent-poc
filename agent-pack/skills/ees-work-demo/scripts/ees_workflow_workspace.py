@@ -1078,17 +1078,21 @@ class WorkspaceMixin:
                 results[field['id']] = {key: result[key] for key in ('options', 'source', 'context')}
         return results
 
+    def _work_people_user_ids(self, db, actor, groups, *, read=None):
+        user_ids = {_value(actor, 'id')}
+        for row in db.execute("SELECT DISTINCT principal_id,system_id,factory_id FROM work_access WHERE active=1 AND principal_kind='user'"):
+            try:
+                self._work_authorize_scope(db, actor, groups, row['system_id'], '' if row['factory_id'] == '*' else row['factory_id'], 'viewer', read=read)
+                user_ids.add(row['principal_id'])
+            except WorkflowError:
+                pass
+        return user_ids
+
     async def _work_people(self, actor, capabilities, groups):
         native_groups = await self._native_groups()
         native_groups = [group for group in native_groups if capabilities['is_admin'] or group['id'] in groups]
-        user_ids = {_value(actor, 'id')}
         with self._db() as db:
-            for row in db.execute("SELECT DISTINCT principal_id,system_id,factory_id FROM work_access WHERE active=1 AND principal_kind='user'"):
-                try:
-                    self._work_authorize_scope(db, actor, groups, row['system_id'], '' if row['factory_id'] == '*' else row['factory_id'], 'viewer')
-                    user_ids.add(row['principal_id'])
-                except WorkflowError:
-                    pass
+            user_ids = self._work_people_user_ids(db, actor, groups)
         people = []
         for user_id in sorted(user_ids):
             person = await _resolve(self.user_lookup(user_id))
@@ -1117,6 +1121,13 @@ class WorkspaceMixin:
                 # This cache ends with this synchronous SQLite snapshot. Never
                 # carry it across Native awaits, commands or later requests.
                 read = {}
+                # Directory candidates were fetched before Native awaits. Scope
+                # grants can change even when the actor's role/groups do not.
+                # Filter without another await using this final DB snapshot.
+                user_ids = self._work_people_user_ids(db, actor, groups, read=read)
+                native_groups = [group for group in native_groups if capabilities['is_admin'] or group['id'] in groups]
+                visible_ids = {'user': user_ids, 'group': {group['id'] for group in native_groups}}
+                people = [person for person in people if person['value']['id'] in visible_ids[person['value']['kind']]]
                 if system_id:
                     if factory_id:
                         self._work_authorize_scope(db, actor, groups, system_id, factory_id, 'viewer', read=read)

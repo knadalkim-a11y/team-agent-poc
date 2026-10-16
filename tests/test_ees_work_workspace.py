@@ -185,6 +185,67 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
                     self.assertFalse(caps['native_access_available'])
                     self.assertFalse(caps['is_admin'])
                     self.assertEqual(caps['can_author'], change == 'groups')
+                    self.assertEqual(state['native_groups'], [])
+                    self.assertFalse(any(person['value']['kind'] == 'group' for person in state['people']))
+                    if change == 'role':
+                        self.assertEqual([person['id'] for person in state['people']], ['admin'])
+
+    async def test_people_hide_revoked_group_scope_in_the_same_response(self):
+        with self.service._db(write=True) as db:
+            db.execute("UPDATE work_access SET active=0 WHERE principal_kind='user' AND principal_id='a'")
+        grant = await self.command('save_access', principal_kind='group', principal_id='g',
+                                   system_id='EMS', factory_id='*', roles=['viewer'])
+        self.assertTrue(grant['ok'], grant)
+        native = importlib.import_module(PACKAGE.__name__ + '.ees_workflow_native')
+
+        async def revoke(actor):
+            await asyncio.sleep(0)
+            self.memberships['a'] = []
+            return {'native_access': {}, 'native_access_available': False}
+
+        with patch.object(native, 'native_workspace_access', revoke):
+            state = await self.state()
+        self.assertEqual(state['systems'], [])
+        self.assertEqual(state['native_groups'], [])
+        self.assertEqual([person['value'] for person in state['people']], [{'kind': 'user', 'id': 'a'}])
+
+    async def test_people_recheck_database_grants_even_when_identity_is_unchanged(self):
+        native = importlib.import_module(PACKAGE.__name__ + '.ees_workflow_native')
+
+        async def revoke(actor):
+            await asyncio.sleep(0)
+            with self.service._db(write=True) as db:
+                db.execute("UPDATE work_access SET active=0 WHERE principal_kind='user' AND principal_id='a'")
+            return {'native_access': {}, 'native_access_available': False}
+
+        with patch.object(native, 'native_workspace_access', revoke):
+            state = await self.state()
+        self.assertEqual(state['systems'], [])
+        self.assertEqual([group['id'] for group in state['native_groups']], ['g'])
+        self.assertEqual([person['value'] for person in state['people']],
+                         [{'kind': 'user', 'id': 'a'}, {'kind': 'group', 'id': 'g'}])
+
+    async def test_people_keep_visible_factory_users_when_same_id_group_is_revoked(self):
+        for factory in ('f1', 'f2'):
+            await self.command('save_factory', factory_id=factory, system_id='EMS', name=factory)
+        for actor, factory in (('c', 'f1'), ('a', 'f1'), ('b', 'f2')):
+            grant = await self.command('save_access', principal_kind='user', principal_id=actor,
+                                       system_id='EMS', factory_id=factory, roles=['viewer'])
+            self.assertTrue(grant['ok'], grant)
+        self.memberships['c'] = ['a']
+        self.service.group_list_lookup = lambda: [{'id': 'a', 'name': 'Same ID group'}]
+        native = importlib.import_module(PACKAGE.__name__ + '.ees_workflow_native')
+
+        async def revoke(actor):
+            await asyncio.sleep(0)
+            self.memberships['c'] = []
+            return {'native_access': {}, 'native_access_available': False}
+
+        with patch.object(native, 'native_workspace_access', revoke):
+            state = await self.state('c', system_id='EMS', factory_id='f1')
+        self.assertEqual(state['native_groups'], [])
+        self.assertEqual([person['value'] for person in state['people']],
+                         [{'kind': 'user', 'id': 'a'}, {'kind': 'user', 'id': 'c'}])
 
     async def test_help_reads_the_shipped_single_source_without_persisting_a_copy(self):
         view = importlib.import_module(PACKAGE.__name__ + '.ees_workflow_view')
