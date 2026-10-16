@@ -121,6 +121,11 @@ UI_FILES.update({name: name for name in MENU_ICON_FILES})
 WORK_FILES += tuple(TARGET_APP + name for name in MENU_ICON_FILES)
 # Freeze the complete C18 ees.13 inventory before any ees.14 additions.
 WORK_FILES_V13_COMPLETE = WORK_FILES
+# Existing ees.14 programs predate shared tools. Their recorded inventory must
+# stay restorable; new incoming wheels must include the new runtime module.
+WORK_FILES_V14_PRE_SHARED = WORK_FILES
+WORK_ASSETS["scripts/ees_workflow_shared_tools.py"] = "open_webui/ees_workflow_shared_tools.py"
+WORK_FILES += (WORK_ASSETS["scripts/ees_workflow_shared_tools.py"],)
 # Copy these already bundled upstream fonts byte-for-byte into the new cache
 # namespace; no font download, transformation, or runtime dependency is needed.
 FONT_SOURCES = {

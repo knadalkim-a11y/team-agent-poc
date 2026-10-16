@@ -115,7 +115,7 @@ def _record_rows(content, *, allow_packaging=False, version=branding.VERSION, al
         # Previous installations keep their own frontend namespace after the
         # wrapper upgrades. Validate their files before Apply/Restore as well.
         prior13_files = branding.WORK_FILES_V13 if allow_legacy_inventory else branding.WORK_FILES_V13_COMPLETE
-        work_files = (branding.WORK_FILES if version == "0.11.3+ees.14" else
+        work_files = ((branding.WORK_FILES_V14_PRE_SHARED if allow_legacy_inventory else branding.WORK_FILES) if version == "0.11.3+ees.14" else
                       prior13_files if version == "0.11.3+ees.13" else
                       branding.WORK_FILES_V12 if version == "0.11.3+ees.12" else
                       branding.WORK_FILES_V11 if version == "0.11.3+ees.11" else
@@ -298,7 +298,8 @@ def _check_tree(path, selection, *, partial=False, staging=False):
         raise CustomizationError("The selected program RECORD changed; preserve it for review.")
     # The recorded hash identifies the exact selected installation. Existing
     # ees.13 programs may predate the help/tool pair, procedure examples or C18 icons;
-    # incoming wheels still use the strict current inventory in _wheel_layout.
+    # ees.14 programs may predate the shared-tool module. Incoming wheels still
+    # use the strict current inventory in _wheel_layout.
     # Exact file and RECORD checks below cover current programs and cleanup.
     rows = _record_rows(record, version=version, allow_legacy_inventory=True)
     if (not set(files).issubset(rows) or (not partial and set(files) != set(rows))):

@@ -20,7 +20,8 @@ function nativeNavigationHarness(capabilities=nativeCapabilities({is_admin:true,
 test('workspace menu uses server permissions for three groups and hides unavailable Native destinations',()=>{
  const admin=nativeCapabilities({is_admin:true,can_author:true,native_access:{models:true,knowledge:true,prompts:true,skills:true,tools:true,admin:true}});
  const rendered=html('workWorkspaceMenuHTML({capabilities}, {tab:"tools"})',{capabilities:admin});
- assert.equal((rendered.match(/class="ew-nav-group"/g)||[]).length,3);for(const label of ['업무 만들기','AI 설정','관리자만','스킬·지침','AI 도우미','참고 문서','빠른 문장','기능 연결','공장·접근 범위','관리자 설정'])assert.ok(rendered.includes(label),label);
+ assert.equal((rendered.match(/class="ew-nav-group"/g)||[]).length,3);for(const label of ['업무 만들기','AI 설정','관리자만','스킬·지침','AI 도우미','참고 문서','빠른 문장','공장·접근 범위','관리자 설정'])assert.ok(rendered.includes(label),label);
+ assert.doesNotMatch(rendered,/기능 연결|data-native-id="tools"/);
  assert.match(rendered,/<small class="ew-nav-native-name">모델<\/small>/);assert.doesNotMatch(rendered,/native_workspace|native_skills|Native 모델|Open WebUI에서 열기|native_return/);
  const nativeSelected=html('workWorkspaceMenuHTML({capabilities,workflows:[{id:"kept",name:"Previous draft",updated_at:"2026-10-11"}]}, {workflow_id:"kept",tab:"overview",native_id:"skills"})',{capabilities:admin});
  assert.equal((nativeSelected.match(/aria-current="page"/g)||[]).length,1);assert.match(nativeSelected,/data-native-id="skills"[^>]*aria-current="page"/);
@@ -576,4 +577,42 @@ test('source API receives the original command contract and keeps runtime late-t
  const h=controller(),pending=deferred(),calls=[];
  h.context.window.__eesSourceShellV1.request=(path,body,signal)=>{calls.push({path,body,signal});return pending.promise;};
  h.api.setSelection({run_id:'r',job_id:'j'});const request=h.api.command({action:'save_inputs',run_id:'r',inputs:{value:'old'}});h.api.setSelection({job_id:'other'});pending.resolve({ok:true,revision:2});assert.equal(await request,null);assert.equal(calls.length,1);assert.equal(calls[0].path,'workspace/command');assert.equal(calls[0].body.inputs.value,'old');assert.equal(h.api.snapshot().state,null);
+});
+
+test('same shared-tool review leaves an ongoing run executable and changed versions require choice',()=>{
+ const {viewSource}=require('./ees_workspace_ui_fixture.cjs'),context=renderer();
+ // Expose the real render function only in this in-memory test copy.
+ run(context,viewSource.slice(viewSource.indexOf('function createWorkView(')).replace('return Object.freeze({render,sync,','return Object.freeze({testJobPanel:jobPanel,render,sync,'));
+ context.snapshot={selection:{job_id:'j',tab:'current'},state:{capabilities:{actor_id:'a'},operations:{shared_tools:[{id:'managed-search_pages',name:'페이지 찾기',version:1,state:'available',can_use:true}]},run:{id:'r',status:'running',revision:1,definition:{nodes:{j:{id:'j',name:'찾기',mode:'tool',shared_tool_id:'managed-search_pages',inputs:[],result_block:'human_confirm'}}},jobs:{j:{}},shared_tools:[{id:'managed-search_pages',version:1}],inputs:{}}}};
+ run(context,'globalThis.sharedView=createWorkView({callbacks:{}});sharedView.sync(snapshot)');
+ const panel=()=>run(context,'sharedView.testJobPanel()');
+ assert.match(panel(),/data-action="execute"[^>]*>/);assert.doesNotMatch(panel(),/data-action="execute"[^>]*disabled/);
+ context.snapshot.state.operations.shared_tools[0].revision=2; // evidence-only review
+ run(context,'sharedView.sync(snapshot)');assert.doesNotMatch(panel(),/data-action="execute"[^>]*disabled/);
+ context.snapshot.state.operations.shared_tools[0].version=2;
+ run(context,'sharedView.sync(snapshot)');assert.match(panel(),/v2 버전으로 계속하기/);assert.match(panel(),/data-action="execute"[^>]*disabled/);
+ context.snapshot.state.operations.shared_tools[0].state='unavailable';context.snapshot.state.operations.shared_tools[0].unavailable_message='Open WebUI 도구의 연결 설정을 확인해야 합니다.';
+ run(context,'sharedView.sync(snapshot)');assert.match(panel(),/연결 설정을 확인해야/);assert.doesNotMatch(panel(),/버전으로 계속하기/);
+});
+
+test('scope frame monitor records delivered JSON before the consumer renders even when a clone lags',async()=>{
+ const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+ const source=fs.readFileSync(path.join(__dirname,'ees_source_frame_monitor.py'),'utf8').split('FRAME_MONITOR = r"""')[1].split('"""')[0];
+ const body={ok:true,workflows:[]},clone=deferred(),response={ok:true,json:async()=>body,clone:()=>({json:()=>clone.promise})};
+ const window={fetch:async()=>response},context={window,URL,document:{addEventListener:()=>{}},location:{href:'http://native.test/c/chat'},performance:{now:()=>10},requestAnimationFrame:()=>1};
+ vm.runInNewContext(source,context);
+ window.__eesSourceFrameEvidence.scopeExpectation={label:'first',system:'APC',factory:'',unknown:true,endpoints:['workspace'],received:{}};
+ const result=await (await window.fetch('/api/ees-work/workspace?system_id=APC')).json();
+ assert.equal(result,body,'The observation must preserve the actual response body');
+ assert.equal(window.__eesSourceFrameEvidence.scopeExpectation.received.workspace,true,'Body delivery must be observed before its consumer can render an empty result');
+ clone.resolve(body);
+});
+
+test('cross-system tool use clears the previous factory and opens the target scope',async()=>{
+ const h=controller();h.api.setState({capabilities:nativeCapabilities({is_admin:true,can_author:true,managed_systems:['EMS','FDC']}),systems:['EMS','FDC'],workflows:[],runs:[],operations:{},ui_state:{revision:0,state:{}}});
+ h.api.setSelection({system_id:'EMS',factory_id:'ems-factory',workflow_id:'ems-workflow',run_id:'old-run',job_id:'old-job'});
+ await h.designer.callbacks.openWorkflow('fdc-workflow','FDC');
+ const selected=h.api.snapshot().selection;
+ assert.equal(selected.system_id,'FDC');assert.equal(selected.factory_id,'');assert.equal(selected.workflow_id,'fdc-workflow');assert.equal(selected.run_id,'');assert.equal(selected.job_id,'');
+ h.api.setSelection({factory_id:'fdc-factory'});await h.designer.callbacks.openWorkflow('other-fdc','FDC');assert.equal(h.api.snapshot().selection.factory_id,'fdc-factory');
 });

@@ -1,0 +1,81 @@
+{
+  "scope": "actual built product with synthetic Native session/metadata; real HTTP and SQLite",
+  "figma": {
+    "B10-1": "1353:20386",
+    "B10-2": "1353:20597",
+    "B10-5": "1353:21167"
+  },
+  "detail_cards": [
+    {
+      "width": 439,
+      "x": 1461,
+      "border": "6px",
+      "background": "rgb(255, 255, 255)",
+      "padding": "14px"
+    },
+    {
+      "width": 439,
+      "x": 1461,
+      "border": "6px",
+      "background": "rgb(255, 255, 255)",
+      "padding": "14px"
+    },
+    {
+      "width": 439,
+      "x": 1461,
+      "border": "6px",
+      "background": "rgb(255, 255, 255)",
+      "padding": "14px"
+    },
+    {
+      "width": 439,
+      "x": 1461,
+      "border": "6px",
+      "background": "rgb(255, 255, 255)",
+      "padding": "14px"
+    },
+    {
+      "width": 439,
+      "x": 1461,
+      "border": "6px",
+      "background": "rgb(255, 255, 255)",
+      "padding": "14px"
+    },
+    {
+      "width": 439,
+      "x": 1461,
+      "border": "6px",
+      "background": "rgb(255, 255, 255)",
+      "padding": "14px"
+    }
+  ],
+  "review_layout": {
+    "display": "grid",
+    "group_bottom": 365.5,
+    "owner_top": 377.5,
+    "gap": 12
+  },
+  "keyboard_focus": {
+    "visible": true,
+    "outline": "solid"
+  },
+  "checked": [
+    "target grouping",
+    "personal PAT label",
+    "legacy group",
+    "detail sections",
+    "admin Native link",
+    "no C45 menu",
+    "usable-only single-step picker",
+    "saved shared ID without fixed reference",
+    "real query/space_key/limit schema",
+    "no redundant review button",
+    "per-field current/new comparison",
+    "Native Tools title",
+    "changed category notice",
+    "group and owner separate rows",
+    "shared list handoff controls absent",
+    "only query/space_key/limit binding keys"
+  ],
+  "onsite": "unverified"
+}

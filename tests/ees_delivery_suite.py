@@ -39,7 +39,7 @@ SUITES = {
         "test_ees_work_workspace.py", "test_ees_work_operations.py", "test_ees_delivery_artifacts.py",
         "test_ees_work_figma_authoring.py", "test_ees_work_figma_contracts.py",
         "test_ees_work_figma_schedule.py", "test_ees_work_history_reference.py"],
-    "contracts": ["test_ees_workflow_execution.py", "test_ees_workflow_native.py",
+    "contracts": ["test_ees_workflow_execution.py", "test_ees_workflow_native.py", "test_ees_shared_tools_native.py",
         "test_ees_workflow_model_native.py",
         "test_ees_work_authoring.py"],
     "platform": ["test_ees_deploy_*.py", "test_manage_ees.py", "test_ees_upgrade.py",

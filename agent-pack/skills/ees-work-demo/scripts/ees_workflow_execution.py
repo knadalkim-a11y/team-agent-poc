@@ -164,8 +164,48 @@ class ExecutionRuntime:
                 raise WorkflowError("skill_changed", "검증된 업무 지침의 현재 권한·내용을 다시 확인해 주세요.")
         return {"skills": skills, "instructions": instructions}
 
+    async def _call_reference(self, user, call, run_id=None, *, evidence=False):
+        if call.get("shared_tool_id"):
+            return (await self.service.shared_tools.resolve(user, call["shared_tool_id"], kind="execution", run_id=None if evidence else run_id))["reference"]
+        await self.bridge.check(user, call["reference"])
+        return call["reference"]
+
+    def _shared_call_schema(self, case, call, reference):
+        """Validate statically known bindings before planning or starting I/O."""
+        from .ees_workflow_native import validate_arguments
+        with self.service._db() as db:
+            tool = self.service.shared_tools.get(db, call["shared_tool_id"])
+        if tool["reference"] != reference:
+            raise WorkflowError("shared_tool_plan_changed", "공용 도구가 바뀌었습니다. 새 실행 계획을 확인해 주세요.")
+        schema, bindings = tool["input_schema"], call["arguments"]
+        properties = schema.get("properties", {})
+        if set(bindings) - set(properties) or set(schema.get("required", [])) - set(bindings):
+            raise WorkflowError("shared_tool_arguments_invalid", "공용 도구의 필수 입력과 인자 이름을 확인해 주세요.")
+        inputs = case["definition"]["nodes"][case["process_id"]].get("execution_inputs", {}).get("properties", {})
+        constants = {}
+        for name, binding in bindings.items():
+            if binding["source"] == "constant":
+                constants[name] = binding
+            elif binding["source"] == "input":
+                kind = inputs.get(binding["key"], {}).get("type")
+                transform = binding.get("transform", "identity")
+                if transform == "to_string" and kind in {"string", "integer"}:
+                    kind = "string"
+                elif transform == "to_integer" and kind == "string":
+                    kind = "integer"
+                elif transform != "identity" and not (transform == "strip" and kind == "string"):
+                    kind = None
+                if kind != properties[name].get("type"):
+                    raise WorkflowError("shared_tool_arguments_invalid", "공용 도구에 연결할 입력과 자료형을 확인해 주세요.")
+        values = resolve_arguments({"arguments": constants}, {}, {})
+        validate_arguments(tool["function"], {**schema, "required": []}, values)
+        # Stored-result bindings retain their provenance checks; their resolved
+        # values also pass Native's argument validation immediately before I/O.
+        return {key: deepcopy(tool[key]) for key in ("id", "version", "reference")}
+
     async def _ready(self, user, case, jobs):
         self.configure()
+        shared = {}
         for job_id in jobs:
             node = case["definition"]["nodes"][job_id]
             errors = validate_execution(node, case["definition"])
@@ -174,9 +214,12 @@ class ExecutionRuntime:
             await self._skills(user, case, job_id)
             await self._source_access(user, case, node)
             for call in node["execution"].get("calls", []):
-                await self.bridge.check(user, call["reference"])
+                reference = await self._call_reference(user, call)
+                if call.get("shared_tool_id"):
+                    shared[call["shared_tool_id"]] = self._shared_call_schema(case, call, reference)
+        return shared
 
-    async def _source_access(self, user, case, node, visiting=None, checked=None):
+    async def _source_access(self, user, case, node, visiting=None, checked=None, *, evidence=False):
         """Recheck every source behind a stored value, including human choices."""
         visiting, checked = (set() if visiting is None else visiting), (set() if checked is None else checked)
         node_id = node["id"]
@@ -203,14 +246,14 @@ class ExecutionRuntime:
                 await self._skills(user, case, source["id"])
                 call = next((item for item in source["execution"].get("calls", []) if item["id"] == ref["call_id"]), None)
                 if call:
-                    await self.bridge.check(user, call["reference"])
+                    await self._call_reference(user, call, case.get("jobs", {}).get(source["id"], {}).get("execution_run_id"), evidence=evidence)
                 elif source["execution"]["kind"] != "ai" or ref["call_id"] != "summary":
                     raise WorkflowError("result_unavailable", "허용된 선행 호출을 확인해 주세요.")
                 # Earlier calls in this same J are validated by the contract;
                 # their bindings are already in refs. Every cross-J source,
                 # whether fixed, AI or human, must also recheck its ancestors.
                 if source["id"] != node_id:
-                    await self._source_access(user, case, source, visiting, checked)
+                    await self._source_access(user, case, source, visiting, checked, evidence=evidence)
             checked.add(node_id)
         finally:
             visiting.remove(node_id)
@@ -244,7 +287,7 @@ class ExecutionRuntime:
             jobs = [key for key in _leaves(case["definition"]["nodes"], node["id"]) if _applicable(case, key)]
             if not jobs:
                 raise WorkflowError("not_applicable", "선택 대상에는 적용할 작업이 없습니다.")
-            await self._ready(current, case, jobs)
+            shared = await self._ready(current, case, jobs)
             root = case["definition"]["nodes"][case["process_id"]]
             schema = root.get("execution_inputs", {"type": "object", "properties": {}, "additionalProperties": False})
             previous_inputs = case.get("execution_inputs", {})
@@ -259,7 +302,7 @@ class ExecutionRuntime:
             values = self._inputs(schema, {**previous_inputs, **supplied_inputs})
             data = {"id": str(uuid4()), "protocol": 1, "owner": _value(current, "id"),
                     "case_id": body.get("case_id", ""), "case_snapshot": case, "node_id": node["id"],
-                    "jobs": jobs, "inputs": values, "input_schema": schema, "created_at": time.time(),
+                    "jobs": jobs, "shared_tools": shared, "inputs": values, "input_schema": schema, "created_at": time.time(),
                     "expires_at": time.time() + PLAN_TTL, "limits": {"duration_seconds": RUN_TTL},
                     "missing_inputs": [key for key in schema.get("required", []) if key not in values]}
             data["hash"] = _hash(data)
@@ -273,7 +316,9 @@ class ExecutionRuntime:
 
     @staticmethod
     def _public_plan(plan):
-        return {key: deepcopy(value) for key, value in plan.items() if key not in {"owner", "case_snapshot"}}
+        public = {key: deepcopy(value) for key, value in plan.items() if key not in {"owner", "case_snapshot", "shared_tools"}}
+        public["shared_tools"] = [{"id": pin["id"], "version": pin["version"]} for pin in plan.get("shared_tools", {}).values()]
+        return public
 
     def _load_run(self, db, owner, run_id):
         row = db.execute("SELECT * FROM execution_runs WHERE id=? AND owner=?", (run_id, owner)).fetchone()
@@ -353,6 +398,8 @@ class ExecutionRuntime:
             if not isinstance(body, dict) or len(_dump(body).encode("utf-8")) > 40_000:
                 raise WorkflowError("invalid_request", "실행 요청을 확인해 주세요.")
             allowed = {"action", "plan_id", "plan_hash", "request_id", "run_id", "expected_revision", "inputs", "job_id", "chat_id"}
+            if body.get("action") == "accept_tool_version":
+                allowed.update({"shared_tool_id", "version"})
             if set(body) - allowed:
                 raise WorkflowError("invalid_request", "실행 요청에 허용되지 않은 값이 있습니다.")
             request_id = body.get("request_id")
@@ -397,7 +444,13 @@ class ExecutionRuntime:
         case = case or deepcopy(plan["case_snapshot"])
         if _hash(case) != _hash(plan["case_snapshot"]):
             raise WorkflowError("revision_conflict", "진행 건이 변경되었습니다. 새 계획을 확인해 주세요.")
-        await self._ready(user, case, plan["jobs"])
+        shared = await self._ready(user, case, plan["jobs"])
+        if shared != plan.get("shared_tools", {}):
+            raise WorkflowError("shared_tool_plan_changed", "공용 도구가 바뀌었습니다. 새 실행 계획을 확인해 주세요.")
+        selected_definition = {"nodes": {key: case["definition"]["nodes"][key] for key in plan["jobs"]}}
+        has_shared = any(call.get("shared_tool_id") for node in selected_definition["nodes"].values() for call in node.get("execution", {}).get("calls", []))
+        if has_shared:
+            actor, _, groups = await self.service._work_actor(user)
         with self.service._db(write=True) as db:
             receipt = db.execute("SELECT * FROM execution_requests WHERE owner=? AND request_id=?", (owner, body["request_id"])).fetchone()
             if receipt:
@@ -425,6 +478,8 @@ class ExecutionRuntime:
                    "inputs": plan["inputs"], "input_schema": plan["input_schema"], "missing_inputs": plan["missing_inputs"],
                    "status": "queued", "revision": 0, "created_at": time.time(), "updated_at": time.time(),
                    "deadline": time.time() + RUN_TTL, "reason": "", "jobs": {}}
+            if has_shared:
+                self.service.shared_tools.pin(db, actor, groups, "execution", run["id"], selected_definition, expected=shared)
             for job_id in plan["jobs"]:
                 saved = case["jobs"][job_id]
                 valid = saved.get("execution_validation")
@@ -460,10 +515,16 @@ class ExecutionRuntime:
             _, run = self._load_run(db, owner, body.get("run_id"))
             self._require_resolved(db, run)
         action = body.get("action")
-        if action not in {"pause", "cancel", "resume", "inputs", "confirm"}:
+        if action not in {"pause", "cancel", "resume", "inputs", "confirm", "accept_tool_version"}:
             raise WorkflowError("invalid_action", "실행의 지원 동작을 선택해 주세요.")
         if action in {"resume", "inputs", "confirm"}:
             await self._ready(user, case, list(run["jobs"]))
+        selected_pin = None
+        if action == "accept_tool_version":
+            selected_pin = await self.service.shared_tools.resolve(user, body.get("shared_tool_id"))
+            if body.get("version") != selected_pin["version"]:
+                raise WorkflowError("shared_tool_version_changed", "지금 버전을 다시 확인해 주세요.")
+            user, _, shared_groups = await self.service._work_actor(user)
         with self.service._db(write=True) as db:
             receipt = db.execute("SELECT * FROM execution_requests WHERE owner=? AND request_id=?", (owner, body["request_id"])).fetchone()
             if receipt:
@@ -476,7 +537,18 @@ class ExecutionRuntime:
             if run["status"] in TERMINAL:
                 raise WorkflowError("run_completed", "종료된 실행 기록은 변경하지 않습니다.")
             inflight = db.execute("SELECT id FROM execution_calls WHERE run_id=? AND state='running'", (run["id"],)).fetchone()
-            if action == "pause":
+            if action == "accept_tool_version":
+                if inflight or run["status"] in {"queued", "running"}:
+                    raise WorkflowError("pause_required", "실행을 멈춘 뒤 새 도구 버전을 선택해 주세요.")
+                latest = self.service.shared_tools.get(db, selected_pin["id"])
+                self.service.shared_tools.authorize(latest, user, shared_groups)
+                previous = db.execute("SELECT data FROM work_shared_tool_pins WHERE run_kind='execution' AND run_id=? AND tool_id=?", (run["id"], selected_pin["id"])).fetchone()
+                if not previous or latest["state"] != "available" or latest["reference"] != selected_pin["reference"]:
+                    raise WorkflowError("shared_tool_review_required", "도구 확인 필요 · 지금 버전을 다시 확인해 주세요.")
+                db.execute("UPDATE work_shared_tool_pins SET data=? WHERE run_kind='execution' AND run_id=? AND tool_id=?", (_dump(selected_pin), run["id"], selected_pin["id"]))
+                self._event(db, run, "shared_tool_version_selected", {"before": json.loads(previous[0]), "after": selected_pin})
+                run["plan_hash"] = _hash({"previous": run["plan_hash"], "shared_tool": selected_pin})
+            elif action == "pause":
                 run["status"], run["reason"] = "paused", "pause_requested"
             elif action == "cancel":
                 run["status"] = "unknown" if inflight else "cancelled"
@@ -685,7 +757,7 @@ class ExecutionRuntime:
             arguments = {} if job["kind"] == "ai" else resolve_arguments(call, run["inputs"], results)
             self.configure()
             if job["kind"] != "ai":
-                await self.bridge.check(current, call["reference"])
+                reference = await self._call_reference(current, call, run["id"])
             context.update(run_id=run["id"], case_id=run["case_id"], job_id=job_id, call_id=call["id"], plan_hash=run["plan_hash"],
                            limits=node["execution"].get("limits", {}), untrusted_results=True)
             with self.service._db(write=True) as db:
@@ -707,9 +779,13 @@ class ExecutionRuntime:
                     return True
                 record = {"id": str(uuid4()), "run_id": run["id"], "job_id": job_id, "call_id": call["id"],
                           "attempt": attempt, "job_attempt": case["jobs"][job_id]["attempt"] + 1,
-                          "status": "running", "kind": job["kind"], "reference": call.get("reference"),
+                          "status": "running", "kind": job["kind"], "reference": reference if job["kind"] != "ai" else None,
+                          "shared_tool_id": call.get("shared_tool_id"),
                           "arguments": arguments, "arguments_hash": _hash(arguments), "started_at": time.time(),
                           "worker": self.worker_id, "generation": generation, "input_sources": deepcopy(call.get("arguments", {}))}
+                if call.get("shared_tool_id"):
+                    pinned = db.execute("SELECT data FROM work_shared_tool_pins WHERE run_kind='execution' AND run_id=? AND tool_id=?", (run["id"], call["shared_tool_id"])).fetchone()
+                    record["shared_tool"] = json.loads(pinned[0])
                 context["attempt"] = attempt
                 db.execute("INSERT INTO execution_calls VALUES(?,?,?,?,?,?,?,?)", (record["id"], run["id"], job_id, call["id"], attempt, "running", self.worker_id, _dump(record)))
                 latest["jobs"][job_id]["status"] = "running"
@@ -720,7 +796,9 @@ class ExecutionRuntime:
                     raise WorkflowError("model_unavailable", "요약에 사용할 모델 연결을 확인해 주세요.")
                 operation = self.model.invoke(current, node, context, results, run["inputs"])
             else:
-                operation = self.bridge.invoke(current, call["reference"], arguments, context)
+                if call.get("shared_tool_id"):
+                    context.update(shared_tool_id=call["shared_tool_id"], shared_run_kind="execution")
+                operation = self.bridge.invoke(current, reference, arguments, context)
             task = asyncio.create_task(operation)
             self._pending.add(task)
             task.add_done_callback(self._pending.discard)
@@ -840,15 +918,17 @@ class ExecutionRuntime:
         except sqlite3.Error:
             pass
 
-    async def _can_read_evidence(self, user, case):
+    async def _can_read_evidence(self, user, case, jobs=None):
         try:
             self.configure()
-            for job_id, node in case["definition"]["nodes"].items():
+            for job_id in case["definition"]["nodes"] if jobs is None else jobs:
+                node = case["definition"]["nodes"][job_id]
                 if not node.get("execution"):
                     continue
                 await self._skills(user, case, job_id)
+                await self._source_access(user, case, node, evidence=True)
                 for call in node["execution"].get("calls", []):
-                    await self.bridge.check(user, call["reference"])
+                    await self._call_reference(user, call, case.get("jobs", {}).get(job_id, {}).get("execution_run_id"), evidence=True)
             return True
         except (WorkflowError, ContractError):
             return False
@@ -856,7 +936,7 @@ class ExecutionRuntime:
     async def redact_run(self, user, public):
         with self.service._db() as db:
             case = self.service._case(db, _value(user, "id"), public["case_id"])
-        if await self._can_read_evidence(user, case):
+        if await self._can_read_evidence(user, case, public["jobs"]):
             return public
         public["evidence_available"] = False
         for call in public.get("calls", []):

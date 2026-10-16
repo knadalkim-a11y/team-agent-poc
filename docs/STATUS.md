@@ -1,5 +1,23 @@
 # 현재 작업 상태
 
+## 2026-10-16 · #91 병합 완료·#93 main 통합
+
+- **승인/순서:** 사용자가 두 PR의 병합까지 요청했다. #91 최종 CI 성공 → merge commit 병합 → #93에 main 통합 → 최종 CI 성공 → #93 merge commit 병합 순서다. 아래 Draft/병합 보류 문구는 당시 기록이다.
+- **현재:** #91 head7dd9132의 최종 CI38850315905가31성공/1정상제외로 끝나 merge commit `ff0641628860c78f13e8f33ab60eee8cd3491a4d`로 병합했다. 이 main을 #93에 merge 통합하고 문서3개 충돌의 양쪽 기록·증거를 보존했다. #93의 추가 자동 검토3건도 게시 필수 인자·자료형, 선택 범위 pin, 수동 연결 보존으로 보완했다. [첫 실패·회귀](../evals/v4-ui-20260930.md#shared-tools-merge-review-20261016).
+- **통합 첫 CI/추가 보완:** ba6aa64의 Native64개 중62PASS/2FAIL은 C45로 달라진 출발 칸을 기존 시험이 같은 칸으로 취급한 문제다. 원본 프레임을 보존하고 실제 목적지/이전 칸0 감시를 연결했다. 추가 자동 검토3건(제외 작업 pin·목록 결과 호환·장애 중 제한적 관리)도 회귀와 함께 보완했다. 공용 Native/workspace93PASS·Node355PASS. [실패·재검 조건](../evals/v4-ui-20260930.md#shared-tools-merge-review-20261016).
+- **검증:** #93 로컬 Python111PASS/이전 source fixture 미준비1SKIP. main 통합 뒤 전체 Node354PASS·Python controller1PASS·문서/신규 diff 검사 통과. 실제 브라우저/Windows는 최종 통합 CI로 확인한다.
+- **추가 통합 CI:** b51ad90의 CI38853958726은31성공/PR배포1정상제외, 실제 Native64PASS로 첫 통합 CI의2실패가 해소됐다. main의 #91 병합 CI38852021564도 성공했다. 후속 자동 검토의 execution 인자 검사·선택 결과 범위·다른 시스템 이동을 보완하고 새 head를 다시 검사한다.
+- **942a6f9 후속:** 자동 검토의 종료 회차 과거 근거·계획/시작 버전 경계·예약 사용처 표시·발견 장애 격리4건을 보완한다. 해당 CI native-work의1실패는 제품 접속 전 Chrome handshake30초 시간 초과이며 원본 JSON을 보존했다. 나머지11시험은 통과했다. 새 보완 head의 실제 Native 검사로 재확인한다.
+- **다음 작업:** 통합 #93 최종 head CI 성공 후 merge commit 병합과 최종 main CI 확인. 사내 적용·설치 확인은 미실행이며 설치 원본·주소·허용 공간·암호화·팀원 PAT는 미확인이다. Figma 수정·#77/#79·main 직접 push는 하지 않는다.
+
+## 2026-10-16 · 공용 Confluence 도구 #93 재검토 반영
+
+- **기준/범위:** 최신 main `8a4a716`(#90 병합 포함), #92와 B10-1/2/5. [현재 계약](mockups/ees-work/TASK.md#shared-tools-phase1-20261015). 기존 계약은 보존하고 기본 제공 조회2개를 공용으로 확인·사용한다.
+- **병합 순서:** 열린 #91(Native 복귀 선택)과 launcher/view, 시험, TASK/STATUS/CHANGELOG/evals가 겹친다. #91 검토·병합 뒤 이 PR에 최신 main을 통합하고 양쪽 행동/기록을 보존한다. 이번 작업은 병합하지 않는다. #90은 이미 main에 반영되어 별도 병합 대기가 없다.
+- **현재 검증:** head4778b97의 Claude 재검토3건과 확인창 보완을 같은 Draft #93에서 반영했다. 이전 방식→공용의 인자 정리, 게시 시 입력 키/목록 연결 거부, 관리자 운영 안내와 변경 요약·그룹/담당 분리다. 로컬 공용 Native24개(22개+호환 경로2개), 기존 operations48개, Node196개가 통과했다. [첫 실패·새 회귀·실제 화면/CI](../evals/v4-ui-20260930.md#shared-tools-rereview-20261016). 이전7건의 최종 CI38834234451 성공은 당시 증거이며 새 head 결과는 [Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/93/checks)가 원본이다.
+- **다음 작업:** 최종 head CI 성공 후 Claude 재검토. 항목별 답변/요청은 PR 댓글 하나로 남긴다. Draft 유지·병합 없음. 리뷰 마지막 묶음은1단계-2로 넘기며 #91 통합 순서를 유지한다.
+- **사내:** Confluence 설치 원본·주소·허용 공간·개인 설정 암호화·팀원 PAT 저장은 미확인. 사내 실행/적용·Figma 수정·#77/#79 착수 없음.
+
 ## 2026-10-16 · #91 → #93 병합 승인·남은 리뷰 보완
 
 - **승인·순서:** 사용자가 두 PR의 병합까지 승인했다. 기존 Draft 유지·병합 금지는 이 요청으로 대체하며, #91의 최종 CI 성공 후 merge commit 병합 → 최신 main을 #93에 merge 통합 → 그 head CI 성공 후 #93 병합 → main CI 확인 순서다. main 직접 push·rebase·force-push는 하지 않는다.
