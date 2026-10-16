@@ -43,7 +43,7 @@ MESSAGES = {
     'shared_tool_disabled': '도구 사용 중지 · 관리자에게 다시 켜기를 요청하세요.',
     'shared_tool_forbidden': '이 도구를 쓸 수 있는 그룹 권한이 없습니다. 관리자에게 확인을 요청하세요.',
     'shared_tool_plan_changed': '공용 도구가 바뀌었습니다. 새 실행 계획을 확인해 주세요.',
-    'shared_tool_version_changed': '회차 시작 뒤 도구가 v{pinned}에서 v{current}으로 바뀌었습니다. 이 회차를 새 버전으로 계속할지 고르세요.',
+    'shared_tool_version_changed': '회차 시작 뒤 도구가 v{pinned}에서 v{current} 버전으로 바뀌었습니다. 이 회차를 새 버전으로 계속할지 고르세요.',
     'shared_tool_breaking_change': '입력·결과 모양이 호환되지 않아 같은 도구로 확인할 수 없습니다. 개발 담당자에게 새 도구를 요청하세요.',
     'native_personal_connection_required': '개인 PAT 필요 · 기존 도구의 개인 설정에 본인 PAT를 저장하세요. 채팅에 입력하지 마세요.',
     'encryption_required': '개인 설정 암호화 필요 · 관리자에게 요청하세요. 채팅에 PAT를 입력하지 마세요.',

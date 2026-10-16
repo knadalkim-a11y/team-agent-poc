@@ -417,7 +417,7 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         await self.review()
         error = await self.assert_code('shared_tool_version_changed', self.execute(run))
         state = await self.service.operations.state(self.reader, run_id=run['run_id'])
-        expected = '회차 시작 뒤 도구가 v1에서 v2으로 바뀌었습니다. 이 회차를 새 버전으로 계속할지 고르세요.'
+        expected = '회차 시작 뒤 도구가 v1에서 v2 버전으로 바뀌었습니다. 이 회차를 새 버전으로 계속할지 고르세요.'
         self.assertEqual(error.message, expected)
         template = state['shared_tool_messages']['shared_tool_version_changed']
         self.assertEqual(template.format(pinned=1, current=2), expected)

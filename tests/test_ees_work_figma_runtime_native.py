@@ -165,6 +165,8 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
                 if empty:
                     self.assertIn('결과 없음', self.text('#ees-work-panel'))
                     self.assertIn('찾은 문서가 없습니다.', self.text('#ees-work-panel'))
+                    self.assertNotIn('완결성 · 한 쪽', self.text('#ees-work-panel'))
+                    self.assertNotIn('이번 검색에서 받은 페이지 목록입니다.', self.text('#ees-work-panel'))
                     self.assertEqual(self.text('[data-action=confirm_list]'), '찾은 문서 없음 확인')
                     self.screenshot('shared-runtime-zero-rows')
                 else:
@@ -210,7 +212,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.screenshot('shared-runtime-review-required')
         self.review_shared(); self.refresh()
         self.wait("document.querySelector('[data-action=shared_accept_version]')?.innerText === 'v2 버전으로 계속하기'")
-        self.assertIn('회차 시작 뒤 도구가 v1에서 v2으로 바뀌었습니다. 이 회차를 새 버전으로 계속할지 고르세요.', self.text('.ew-shared-runtime'))
+        self.assertIn('회차 시작 뒤 도구가 v1에서 v2 버전으로 바뀌었습니다. 이 회차를 새 버전으로 계속할지 고르세요.', self.text('.ew-shared-runtime'))
         self.assertTrue(self.read('[data-action=execute]', 'disabled'))
         self.screenshot('shared-runtime-version-changed')
         # Queue the production coordinator without starting its worker. A queued
