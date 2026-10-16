@@ -481,17 +481,28 @@ class WorkspaceMixin:
             _fail('authorization_unavailable', '현재 Native 그룹 권한을 확인하지 못했습니다.')
         return actor, {'actor_id': _value(actor, 'id'), 'is_admin': _value(actor, 'role') == 'admin'}, groups
 
-    def _work_authorize_scope(self, db, actor, groups, system_id, factory_id='', role='participant'):
+    def _work_authorize_scope(self, db, actor, groups, system_id, factory_id='', role='participant', *, read=None):
         if system_id not in (*SYSTEMS, 'COMMON'):
             _fail('scope_forbidden', '접근할 수 있는 작업 위치를 선택해 주세요.')
         if _value(actor, 'role') == 'admin':
             return
         actor_id = _value(actor, 'id')
+        # Only synchronous read transactions opt in. Cache rows, not an
+        # actor's grant decision; writes and later requests always read anew.
+        key = ('scope', system_id)
+        if read is not None and key in read:
+            mapping, access = read[key]
+        else:
+            mapping = (db.execute('SELECT group_id FROM system_groups WHERE system_id=? AND active=1', (system_id,)).fetchone()
+                       if read is not None or role in ('manager', 'viewer', 'participant') else None)
+            access = None
+            if read is not None:
+                access = tuple(db.execute('SELECT * FROM work_access WHERE system_id=? AND active=1', (system_id,)))
+                read[key] = (mapping, access)
         if role in ('manager', 'viewer', 'participant'):
-            mapping = db.execute('SELECT group_id FROM system_groups WHERE system_id=? AND active=1', (system_id,)).fetchone()
             if mapping and mapping['group_id'] in groups:
                 return
-        for row in db.execute('SELECT * FROM work_access WHERE system_id=? AND active=1', (system_id,)):
+        for row in access if access is not None else db.execute('SELECT * FROM work_access WHERE system_id=? AND active=1', (system_id,)):
             if row['principal_id'] not in ({actor_id} if row['principal_kind'] == 'user' else groups):
                 continue
             if row['factory_id'] not in ('*', factory_id):
@@ -501,46 +512,49 @@ class WorkspaceMixin:
                 return
         _fail('scope_forbidden', '이 작업 위치의 권한이 없습니다.')
 
-    def _work_system_visible(self, db, actor, groups, system_id):
+    def _work_system_visible(self, db, actor, groups, system_id, *, read=None):
         try:
-            self._work_authorize_scope(db, actor, groups, system_id, '', 'viewer')
+            self._work_authorize_scope(db, actor, groups, system_id, '', 'viewer', read=read)
             return True
         except WorkflowError:
             for factory in db.execute('SELECT id FROM work_factories WHERE system_id=?', (system_id,)):
                 try:
-                    self._work_authorize_scope(db, actor, groups, system_id, factory['id'], 'viewer')
+                    self._work_authorize_scope(db, actor, groups, system_id, factory['id'], 'viewer', read=read)
                     return True
                 except WorkflowError:
                     pass
         return False
 
-    def _work_definition(self, db, actor, groups, workflow_id, manage=False):
+    def _work_definition(self, db, actor, groups, workflow_id, manage=False, *, read=None):
         row = db.execute('SELECT * FROM work_definitions WHERE id=?', (workflow_id,)).fetchone()
         if not row:
             _fail('workflow_not_found', '접근할 수 있는 절차가 없습니다.')
         try:
-            self._work_authorize_scope(db, actor, groups, row['system_id'], '', 'manager' if manage else 'viewer')
+            self._work_authorize_scope(db, actor, groups, row['system_id'], '', 'manager' if manage else 'viewer', read=read)
         except WorkflowError:
             if manage:
                 raise
             allowed = False
             for factory in db.execute('SELECT id FROM work_factories WHERE system_id=?', (row['system_id'],)):
                 try:
-                    self._work_authorize_scope(db, actor, groups, row['system_id'], factory['id'], 'viewer'); allowed = True; break
+                    self._work_authorize_scope(db, actor, groups, row['system_id'], factory['id'], 'viewer', read=read); allowed = True; break
                 except WorkflowError:
                     pass
             if not allowed:
                 raise
         return row
 
-    def _work_run(self, db, actor, groups, run_id, write=False):
+    def _work_run(self, db, actor, groups, run_id, write=False, *, read=None):
         row = db.execute('SELECT * FROM work_runs WHERE id=?', (run_id,)).fetchone()
+        return self._work_check_run(db, actor, groups, row, write=write, read=read)
+
+    def _work_check_run(self, db, actor, groups, row, write=False, *, read=None):
         if not row:
             _fail('run_not_found', '접근할 수 있는 진행 건이 없습니다.')
         sharing = json.loads(row['sharing'])
         if row['owner'] != _value(actor, 'id') and not groups.intersection(sharing.get('group_ids', [])):
             _fail('run_not_found', '접근할 수 있는 진행 건이 없습니다.')
-        self._work_authorize_scope(db, actor, groups, row['system_id'], row['factory_id'], 'participant' if write else 'viewer')
+        self._work_authorize_scope(db, actor, groups, row['system_id'], row['factory_id'], 'participant' if write else 'viewer', read=read)
         if write and row['status'] in TERMINAL:
             _fail('run_closed', '종료된 진행 건은 기록으로 보존됩니다.')
         return row
@@ -571,7 +585,7 @@ class WorkspaceMixin:
         except (ValueError, AttributeError, TypeError, ZoneInfoNotFoundError):
             return {'at': None, 'calendar_status': 'unknown', 'reason': 'deadline_invalid'}
 
-    def _work_snapshot(self, db, run, job_id):
+    def _work_snapshot(self, db, run, job_id, *, read=None):
         saved = json.loads(run['snapshot'])
         definition = saved['definition']
         job = definition['nodes'].get(job_id)
@@ -581,7 +595,13 @@ class WorkspaceMixin:
         for factory in ('', run['factory_id']):
             if factory == '' and '' in sources:
                 continue
-            setting = db.execute('SELECT * FROM work_settings WHERE workflow_id=? AND factory_id=?', (run['workflow_id'], factory)).fetchone()
+            key = ('settings', run['workflow_id'], factory)
+            if read is not None and key in read:
+                setting = read[key]
+            else:
+                setting = db.execute('SELECT * FROM work_settings WHERE workflow_id=? AND factory_id=?', (run['workflow_id'], factory)).fetchone()
+                if read is not None:
+                    read[key] = setting
             if setting:
                 for key, value in json.loads(setting['values_json']).items():
                     values[key] = value
@@ -790,8 +810,9 @@ class WorkspaceMixin:
     async def _work_evidence_access(self, actor, groups, run_id=''):
         allowed, records = set(), []
         with self._db() as db:
+            read = {}
             for run in db.execute('SELECT * FROM work_runs' + (' WHERE id=?' if run_id else ''), (run_id,) if run_id else ()):
-                try: self._work_run(db, actor, groups, run['id'])
+                try: self._work_check_run(db, actor, groups, run, read=read)
                 except WorkflowError: continue
                 records.extend(dict(row) for row in db.execute('SELECT * FROM work_attempts WHERE run_id=? AND actor_id=?', (run['id'], _value(actor, 'id'))))
         for attempt in records:
@@ -802,17 +823,20 @@ class WorkspaceMixin:
                 pass
         return allowed
 
-    def _work_run_view(self, db, actor, groups, row, evidence_access=None):
+    def _work_run_view(self, db, actor, groups, row, evidence_access=None, *, read=None):
         value = dict(row)
         value['can_write'], value['permission_reason'] = True, ''
         try:
-            self._work_run(db, actor, groups, row['id'], write=True)
+            if read is None:
+                self._work_run(db, actor, groups, row['id'], write=True)
+            else:
+                self._work_check_run(db, actor, groups, row, write=True, read=read)
         except WorkflowError as error:
             value['can_write'], value['permission_reason'] = False, error.code
         request_roles = {}
         for role in ('requester', 'reviewer'):
             try:
-                self._work_authorize_scope(db, actor, groups, row['system_id'], row['factory_id'], role)
+                self._work_authorize_scope(db, actor, groups, row['system_id'], row['factory_id'], role, read=read)
                 request_roles[role] = True
             except WorkflowError:
                 request_roles[role] = False
@@ -848,12 +872,12 @@ class WorkspaceMixin:
             job['can_reconcile'] = request_roles['requester']
             job['can_manage_settings'] = True
             try:
-                self._work_authorize_scope(db, actor, groups, row['system_id'], row['factory_id'], 'manager')
+                self._work_authorize_scope(db, actor, groups, row['system_id'], row['factory_id'], 'manager', read=read)
             except WorkflowError:
                 job['can_manage_settings'] = False
             job['review_draft'] = deepcopy(current['review_history'][-1]) if current and current.get('review_history') else None
             job['result_revision'] = current['number'] if current else None
-            effective = ({'inputs': current['inputs'], 'settings_sources': current.get('snapshot', {}).get('settings_sources', {}), 'deadline': current.get('snapshot', {}).get('deadline')} if row['status'] in TERMINAL and current else self._work_snapshot(db, row, job['job_id']))
+            effective = ({'inputs': current['inputs'], 'settings_sources': current.get('snapshot', {}).get('settings_sources', {}), 'deadline': current.get('snapshot', {}).get('deadline')} if row['status'] in TERMINAL and current else self._work_snapshot(db, row, job['job_id'], read=read))
             job['effective_inputs'] = effective['inputs']
             job['deadline'] = effective.get('deadline')
             job['settings_sources'] = effective['settings_sources']
@@ -872,10 +896,10 @@ class WorkspaceMixin:
         value['chat_links'] = [item['chat_id'] for item in db.execute('SELECT chat_id FROM work_chat_links WHERE actor_id=? AND run_id=?', (_value(actor, 'id'), row['id']))]
         return value
 
-    def _work_workflow_view(self, db, actor, groups, row):
+    def _work_workflow_view(self, db, actor, groups, row, *, read=None):
         value = {key: row[key] for key in ('id', 'system_id', 'revision', 'published_version', 'created_by', 'updated_at')}
         try:
-            self._work_authorize_scope(db, actor, groups, row['system_id'], '', 'manager')
+            self._work_authorize_scope(db, actor, groups, row['system_id'], '', 'manager', read=read)
             value['draft'] = json.loads(row['draft']); value['can_manage'] = True
             value['validation'] = json.loads(row['validation']) if row['validation'] else None
         except WorkflowError:
@@ -890,7 +914,7 @@ class WorkspaceMixin:
         value['settings'] = []
         for setting in db.execute('SELECT * FROM work_settings WHERE workflow_id=?', (row['id'],)):
             try:
-                self._work_authorize_scope(db, actor, groups, row['system_id'], setting['factory_id'], 'viewer')
+                self._work_authorize_scope(db, actor, groups, row['system_id'], setting['factory_id'], 'viewer', read=read)
             except WorkflowError:
                 continue
             value['settings'].append({'factory_id': setting['factory_id'], 'values': json.loads(setting['values_json']), 'revision': setting['revision']})
@@ -1069,17 +1093,21 @@ class WorkspaceMixin:
                 results[field['id']] = {key: result[key] for key in ('options', 'source', 'context')}
         return results
 
+    def _work_people_user_ids(self, db, actor, groups, *, read=None):
+        user_ids = {_value(actor, 'id')}
+        for row in db.execute("SELECT DISTINCT principal_id,system_id,factory_id FROM work_access WHERE active=1 AND principal_kind='user'"):
+            try:
+                self._work_authorize_scope(db, actor, groups, row['system_id'], '' if row['factory_id'] == '*' else row['factory_id'], 'viewer', read=read)
+                user_ids.add(row['principal_id'])
+            except WorkflowError:
+                pass
+        return user_ids
+
     async def _work_people(self, actor, capabilities, groups):
         native_groups = await self._native_groups()
         native_groups = [group for group in native_groups if capabilities['is_admin'] or group['id'] in groups]
-        user_ids = {_value(actor, 'id')}
         with self._db() as db:
-            for row in db.execute("SELECT DISTINCT principal_id,system_id,factory_id FROM work_access WHERE active=1 AND principal_kind='user'"):
-                try:
-                    self._work_authorize_scope(db, actor, groups, row['system_id'], '' if row['factory_id'] == '*' else row['factory_id'], 'viewer')
-                    user_ids.add(row['principal_id'])
-                except WorkflowError:
-                    pass
+            user_ids = self._work_people_user_ids(db, actor, groups)
         people = []
         for user_id in sorted(user_ids):
             person = await _resolve(self.user_lookup(user_id))
@@ -1105,10 +1133,20 @@ class WorkspaceMixin:
                                  'native_access_available': False}
             capabilities.update(native_access)
             with self._db() as db:
+                # This cache ends with this synchronous SQLite snapshot. Never
+                # carry it across Native awaits, commands or later requests.
+                read = {}
+                # Directory candidates were fetched before Native awaits. Scope
+                # grants can change even when the actor's role/groups do not.
+                # Filter without another await using this final DB snapshot.
+                user_ids = self._work_people_user_ids(db, actor, groups, read=read)
+                native_groups = [group for group in native_groups if capabilities['is_admin'] or group['id'] in groups]
+                visible_ids = {'user': user_ids, 'group': {group['id'] for group in native_groups}}
+                people = [person for person in people if person['value']['id'] in visible_ids[person['value']['kind']]]
                 if system_id:
                     if factory_id:
-                        self._work_authorize_scope(db, actor, groups, system_id, factory_id, 'viewer')
-                    elif not self._work_system_visible(db, actor, groups, system_id):
+                        self._work_authorize_scope(db, actor, groups, system_id, factory_id, 'viewer', read=read)
+                    elif not self._work_system_visible(db, actor, groups, system_id, read=read):
                         _fail('scope_forbidden', '이 작업 위치의 권한이 없습니다.')
                 factories, systems, workflows, runs, workflow_active_runs = [], [], [], [], []
                 # The scope picker may show denied names, not their settings,
@@ -1119,12 +1157,12 @@ class WorkspaceMixin:
                     # Switching system clears the current factory. Offer every
                     # system the actor can enter in that target context; work
                     # data below still uses the requested system/factory ACL.
-                    allowed, role = self._work_system_visible(db, actor, groups, system), ''
+                    allowed, role = self._work_system_visible(db, actor, groups, system, read=read), ''
                     if allowed:
                         systems.append(system)
                         role = 'participant'
                         try:
-                            self._work_authorize_scope(db, actor, groups, system, '', 'manager')
+                            self._work_authorize_scope(db, actor, groups, system, '', 'manager', read=read)
                             role = 'owner'
                         except WorkflowError:
                             pass
@@ -1137,14 +1175,14 @@ class WorkspaceMixin:
                     if not system_id and row['system_id'] not in systems: continue
                     allowed, role = False, ''
                     try:
-                        self._work_authorize_scope(db, actor, groups, row['system_id'], row['id'], 'viewer')
+                        self._work_authorize_scope(db, actor, groups, row['system_id'], row['id'], 'viewer', read=read)
                         allowed, role = True, 'participant'
                     except WorkflowError:
                         pass
                     # A manager for one factory is not a system-wide manager.
                     if allowed:
                         try:
-                            self._work_authorize_scope(db, actor, groups, row['system_id'], row['id'], 'manager')
+                            self._work_authorize_scope(db, actor, groups, row['system_id'], row['id'], 'manager', read=read)
                             role = 'owner'
                         except WorkflowError:
                             pass
@@ -1157,33 +1195,37 @@ class WorkspaceMixin:
                     if system_id and row['system_id'] != system_id: continue
                     try:
                         if factory_id:
-                            self._work_authorize_scope(db, actor, groups, row['system_id'], factory_id, 'viewer')
-                        elif not self._work_system_visible(db, actor, groups, row['system_id']):
+                            self._work_authorize_scope(db, actor, groups, row['system_id'], factory_id, 'viewer', read=read)
+                        elif not self._work_system_visible(db, actor, groups, row['system_id'], read=read):
                             continue
-                        item = self._work_workflow_view(db, actor, groups, row)
+                        item = self._work_workflow_view(db, actor, groups, row, read=read)
                         if item['can_manage'] or item['published_version'] is not None: workflows.append(item)
                     except WorkflowError:
                         continue
                 for row in db.execute('SELECT * FROM work_runs ORDER BY created_at DESC,id'):
                     if workflow_id and row['workflow_id'] == workflow_id and row['status'] not in TERMINAL:
                         try:
-                            self._work_run(db, actor, groups, row['id'])
+                            self._work_check_run(db, actor, groups, row, read=read)
                             workflow_active_runs.append({key: row[key] for key in ('id', 'workflow_id', 'system_id', 'factory_id', 'owner', 'status', 'version', 'revision', 'created_at')})
                         except WorkflowError:
                             pass
                     system_scope = json.loads(row['snapshot'])['definition'].get('execution_scope') == 'system'
                     if system_id and row['system_id'] != system_id or factory_id and row['factory_id'] != factory_id and not system_scope: continue
                     try:
-                        self._work_run(db, actor, groups, row['id'])
+                        self._work_check_run(db, actor, groups, row, read=read)
                     except WorkflowError:
                         continue
-                    runs.append(self._work_run_view(db, actor, groups, row, evidence_access))
+                    runs.append(self._work_run_view(db, actor, groups, row, evidence_access, read=read))
                 selected_workflow = None
                 if workflow_id:
-                    selected_workflow = self._work_workflow_view(db, actor, groups, self._work_definition(db, actor, groups, workflow_id))
+                    row = self._work_definition(db, actor, groups, workflow_id, read=read)
+                    existing = next((item for item in workflows if item['id'] == workflow_id), None)
+                    selected_workflow = deepcopy(existing) if existing is not None else self._work_workflow_view(db, actor, groups, row, read=read)
                 selected_run = None
                 if run_id:
-                    selected_run = self._work_run_view(db, actor, groups, self._work_run(db, actor, groups, run_id), evidence_access)
+                    row = self._work_run(db, actor, groups, run_id, read=read)
+                    existing = next((item for item in runs if item['id'] == run_id), None)
+                    selected_run = deepcopy(existing) if existing is not None else self._work_run_view(db, actor, groups, row, evidence_access, read=read)
                 if (selected_workflow and system_id and selected_workflow['system_id'] != system_id
                         or selected_run and (workflow_id and selected_run['workflow_id'] != workflow_id
                                              or system_id and selected_run['system_id'] != system_id
@@ -1198,7 +1240,7 @@ class WorkspaceMixin:
                 capabilities['managed_systems'] = []
                 for system in systems:
                     try:
-                        self._work_authorize_scope(db, actor, groups, system, '', 'manager'); capabilities['managed_systems'].append(system)
+                        self._work_authorize_scope(db, actor, groups, system, '', 'manager', read=read); capabilities['managed_systems'].append(system)
                     except WorkflowError: pass
                 capabilities['can_author'] = bool(capabilities['managed_systems'])
                 access = [dict(row) | {'roles': json.loads(row['roles'])} for row in db.execute('SELECT * FROM work_access ORDER BY id')] if capabilities['is_admin'] else []

@@ -630,6 +630,53 @@ class RuntimeTests(unittest.IsolatedAsyncioTestCase):
         with self.service._db() as db:
             self.assertIsNone(db.execute("SELECT name FROM sqlite_master WHERE name='work_operation_events'").fetchone())
 
+    def test_history_indexes_upgrade_existing_rows_without_changing_reads(self):
+        queries = (
+            ('work_schedule_slots', 'work_schedule_history', 'SELECT data FROM work_schedule_slots WHERE schedule_id=? ORDER BY scheduled_at DESC LIMIT 100'),
+            ('work_operation_events', 'work_operation_target', 'SELECT * FROM work_operation_events WHERE target=? ORDER BY id'),
+            ('work_scope_runs', 'work_scope_run', 'SELECT data FROM work_scope_runs WHERE run_id=? ORDER BY id'),
+            ('work_external_requests', 'work_request_run', 'SELECT data FROM work_external_requests WHERE run_id=? ORDER BY id'),
+        )
+        with self.service._db(write=True) as db:
+            # Model a populated v1 database from before the additive indexes.
+            for _, index, _ in queries:
+                db.execute(f'DROP INDEX IF EXISTS {index}')
+            for parent in ('selected', 'other'):
+                for number in range(105):
+                    key = f'{parent}-{number:03d}'
+                    data = json.dumps({'id': key, 'note': '보존할 실행 기록'}, ensure_ascii=False)
+                    db.execute('INSERT INTO work_schedule_slots VALUES(?,?,?,?,?,?,?,?,?)',
+                               (key, parent, 'workflow', parent, number, 'succeeded', None, None, data))
+                    db.execute('INSERT INTO work_operation_events(target,actor,kind,created_at,data) VALUES(?,?,?,?,?)',
+                               (parent, 'alice', 'completed', number, data))
+                    db.execute('INSERT INTO work_scope_runs VALUES(?,?,?,?,?,?,?)',
+                               (key, parent, 'alice', 'succeeded', None, None, data))
+                    db.execute('INSERT INTO work_external_requests VALUES(?,?,?,?,?,?,?)',
+                               (key, parent, 'job', 'alice', 3, 'succeeded', data))
+            tables = [row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")]
+            original = {table: [tuple(row) for row in db.execute(f'SELECT * FROM {table} ORDER BY rowid')] for table in tables}
+            expected = {table: [tuple(row) for row in db.execute(query, ('selected',))] for table, _, query in queries}
+            self.assertEqual(len(expected['work_schedule_slots']), 100)
+            self.assertEqual(json.loads(expected['work_schedule_slots'][0][0])['id'], 'selected-104')
+            self.assertEqual(json.loads(expected['work_schedule_slots'][-1][0])['id'], 'selected-005')
+            for table, _, query in queries:
+                self.assertTrue(any('SCAN ' in row[3] for row in db.execute('EXPLAIN QUERY PLAN '+query, ('selected',))), table)
+        # Reopen through production initialization twice: no marker bump or
+        # data rewrite, and an already-upgraded database remains valid.
+        for _ in range(2):
+            ops.OperationsRuntime(self.service, bridge=self.bridge)
+        with self.service._db() as db:
+            self.assertEqual([row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")], tables)
+            for table in tables:
+                self.assertEqual([tuple(row) for row in db.execute(f'SELECT * FROM {table} ORDER BY rowid')], original[table], table)
+            self.assertEqual(db.execute('SELECT version FROM work_operations_schema WHERE id=1').fetchone()[0], 1)
+            for table, index, query in queries:
+                with self.subTest(table=table):
+                    self.assertEqual([tuple(row) for row in db.execute(query, ('selected',))], expected[table])
+                    plan = ' '.join(row[3] for row in db.execute('EXPLAIN QUERY PLAN '+query, ('selected',)))
+                    self.assertIn('SEARCH '+table+' USING INDEX '+index, plan)
+                    self.assertNotIn('USE TEMP B-TREE', plan)
+
     def test_calendar_timezones_month_end_and_dst_are_explicit(self):
         after=datetime(2026,1,31,10,tzinfo=timezone.utc).timestamp()
         result=ops.next_slot({'frequency':'monthly','timezone':'UTC','anchor':'2026-01-31T10:00:00'},after)
