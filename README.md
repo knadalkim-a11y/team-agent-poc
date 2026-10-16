@@ -68,6 +68,7 @@
 | [tests/](tests/) | 자동 실행하는 검증 코드 |
 | [evals/](evals/) | 합격 기준·실환경 판정·날짜별 검증 증거 |
 | [docs/](docs/) | 설치·연동·장애 대응 방법 |
+| [docs/specs/](docs/specs/shared-tools.md) | 기능별 명세(시범): 입력 조건·상태 변화·권한·저장/반영 시점·완료 기준. 화면 배치·문구는 Figma 명세 카드 |
 | [versions.md](versions.md) | 의존 버전·환경 기준 |
 | [CHANGELOG.md](CHANGELOG.md) | 완료된 변경과 과거 관찰·결정 |
 
