@@ -316,3 +316,28 @@ test('unreceived procedure scope retains heading and controls without claiming a
  assert.match(h.markup,/APC의 업무 절차/);assert.match(h.markup,/data-ees-scope-loading="panel"[^>]*>받는 중/);assert.match(h.markup,/id="ew-author-search"/);assert.match(h.markup,/data-author-action="create"/);assert.doesNotMatch(h.markup,/업무 절차 0개|아직 업무 절차가 없습니다/);
  h.designer.render({state:h.state,selection:h.selection,host:h.host,scope_loading:false});assert.match(h.markup,/업무 절차 0개/);assert.match(h.markup,/아직 업무 절차가 없습니다/);
 });
+
+function sharedReviewFixture(h){
+ const search={id:'managed-search_pages',function:'search_pages',name:'Confluence 페이지 찾기',target:'Confluence',state:'available',can_use:true,version:1,revision:1,input_schema:{properties:{query:{type:'string'},space_key:{type:'string',default:''},limit:{type:'integer',default:10}},required:['query']},output_schema:{kind:'list',fields:['id','title','url']}};
+ const read={...copy(search),id:'managed-get_page',function:'get_page',name:'Confluence 페이지 읽기',input_schema:{properties:{page_id:{type:'string'}},required:['page_id']},output_schema:{kind:'evidence',fields:['data','evidence']}};
+ h.state.operations={shared_tools:[search,read],tools:[]};return {search,read};
+}
+test('shared tool switching removes only generated inputs bindings and result shape',async()=>{
+ const h=harness();sharedReviewFixture(h);h.workflows.get('w').draft.nodes.j.inputs=[{id:'memo',name:'직접 입력',type:'text',scope:'run',required:false}];h.render();await h.node();
+ h.click('pick_job_tool',{id:'managed-search_pages',shared:'true'});await flush();
+ assert.equal(h.draft().definition.nodes.j.inputs.find(x=>x.id==='query').source.shared_tool_id,'managed-search_pages');
+ h.click('pick_job_tool',{id:'managed-get_page',shared:'true'});await flush();
+ let j=h.draft().definition.nodes.j;assert.deepEqual(j.inputs.map(x=>x.id),['memo','page_id']);assert.deepEqual(Object.keys(j.argument_bindings),['page_id']);
+ h.click('pick_job_tool',{id:''});await flush();j=h.draft().definition.nodes.j;
+ assert.deepEqual(j.inputs.map(x=>x.id),['memo']);assert.deepEqual(j.argument_bindings||{},{});assert.equal(j.result_block,'human_confirm');assert.equal(j.shared_tool_id,undefined);
+ h.click('pick_job_tool',{id:'managed-search_pages',shared:'true'});await flush();
+ h.state.operations.tools=[{id:'legacy',name:'이전 계약',state:'approved',revision:2,reference:{tool_id:'native',function:'read'}}];h.render();
+ h.click('pick_job_tool',{id:'legacy'});await flush();j=h.draft().definition.nodes.j;
+ assert.deepEqual(j.inputs.map(x=>x.id),['memo']);assert.deepEqual(j.argument_bindings||{},{});assert.equal(j.tool_contract_id,'legacy');assert.equal(j.result_block,'human_confirm');
+});
+test('shared detail only offers review when needed and shows Korean input types',async()=>{
+ const h=harness();const {search}=sharedReviewFixture(h);h.state.capabilities.is_admin=true;h.selection.tab='tools';h.render();h.click('shared_open',{id:search.id});await flush();
+ assert.doesNotMatch(h.markup,/data-author-action="shared_review"/);assert.match(h.markup,/찾을 말/);assert.match(h.markup,/글자/);assert.match(h.markup,/숫자/);assert.doesNotMatch(h.markup,/query · string/);
+ search.state='disabled';h.render();assert.doesNotMatch(h.markup,/data-author-action="shared_review"/);
+ search.state='review_required';h.render();assert.match(h.markup,/data-author-action="shared_review"/);
+});

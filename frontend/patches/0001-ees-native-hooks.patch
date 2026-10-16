@@ -2917,7 +2917,7 @@ index 8eba682..38ee86b 100644
 +	"EES.Nav.Models": "AI 도우미",
 +	"EES.Nav.Knowledge": "참고 문서",
 +	"EES.Nav.Prompts": "빠른 문장",
-+	"EES.Nav.Connections": "기능 연결",
++	"EES.Nav.Connections": "Open WebUI 도구",
 +	"EES.Nav.Admin": "관리자 설정",
 +	"EES.Nav.AI": "AI 설정",
 +	"EES.Nav.AdminOnly": "관리자만",

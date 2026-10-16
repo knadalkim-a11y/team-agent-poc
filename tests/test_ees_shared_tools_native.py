@@ -137,8 +137,8 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(unknown['state'], 'unavailable')
         before = self.service.database.read_bytes()
         with patch.object(self.f.tools.Tools, 'update_tool_by_id', side_effect=AssertionError('No product Native writes')):
-            await self.assert_code('shared_tool_unavailable', self.review())
-            await self.assert_code('shared_tool_unavailable', self.tools.resolve(self.reader, self.key))
+            await self.assert_code('shared_tool_source_mismatch', self.review())
+            await self.assert_code('shared_tool_source_mismatch', self.tools.resolve(self.reader, self.key))
         self.assertEqual(self.service.database.read_bytes(), before)
         self.assertEqual((await self.f.tools.Tools.get_tool_by_id(tool.id)).content, tool.content+'\n# locally modified unknown source\n')
 
@@ -164,7 +164,7 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual({item['function'] for item in items},set(self.f.native.FUNCTIONS))
         self.assertEqual(len({item['id'] for item in items}),10)
         self.assertEqual({item['target'] for item in items},{'Confluence','Jira','GitHub'})
-        self.assertEqual(sum(item['state']=='unavailable' for item in items),8)
+        self.assertEqual(sum(item['state']=='preparing' for item in items),8)
         installed=await self.f.bridge.managed_tools()
         self.assertEqual([item['id'] for item in installed],['installed-with-unpredictable-id'])
 
@@ -193,7 +193,7 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         for forbidden in ('hash','reference','config','responsible_user','group_ids','synthetic-reader-pat','default'):
             self.assertNotIn(forbidden, json.dumps(summary))
         with patch.object(self.f.bridge, 'managed_tools', return_value=[]):
-            await self.assert_code('shared_tool_unavailable', self.review())
+            await self.assert_code('shared_tool_not_installed', self.review())
         with self.service._db() as db: self.assertEqual(db.execute('SELECT count(*) FROM work_shared_tool_versions').fetchone()[0],1)
 
     async def test_get_page_evidence_truncation_and_pat_guidance(self):
@@ -333,4 +333,95 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         await self.assert_code('shared_tool_disabled',legacy.execution._call_reference(self.reader,call,run['id']))
         self.assertEqual(set(self.http_calls),{'Bearer synthetic-reader-pat'})
 
-if __name__ == '__main__': unittest.main()
+
+    async def test_same_review_keeps_version_run_and_disabled_state(self):
+        first = await self.review()
+        run = await self.start(await self.workflow(), self.reader)
+        same = await self.review()
+        self.assertEqual(same['version'], first['version'])
+        self.assertEqual((await self.execute(run))['attempt']['snapshot']['shared_tool']['version'], 1)
+        await self.tools.command(self.admin, self.body('shared_tool_disable', same['revision'], shared_tool_id=self.key, reference=same['observed_reference']))
+        self.assertEqual((await self.review())['state'], 'disabled')
+        await self.f.tools.Tools.update_tool_valves_by_id(first['reference']['tool_id'], {'ENABLED':True,'CONFLUENCE_BASE_URL':'https://confluence.invalid','ALLOWED_SPACES':'EMS,FDC'})
+        changed = await self.review()
+        self.assertEqual(changed['version'], 2)
+        self.assertEqual(changed['state'], 'disabled')
+        await self.assert_code('shared_tool_disabled', self.tools.resolve(self.reader, self.key))
+
+    async def test_duplicate_install_keeps_saved_candidate_and_rejects_ambiguous_first_review(self):
+        first = await self.review()
+        await self.f.register_read_tool('confluence', identifier='second-installation')
+        item = await self.item(actor=self.reader)
+        self.assertEqual(item['state'], 'available')
+        self.assertEqual((await self.tools.resolve(self.reader,self.key))['reference'],first['reference'])
+        unresolved = await self.item('managed-get_page')
+        self.assertEqual(unresolved['unavailable_reason'], 'shared_tool_duplicate_install')
+        await self.assert_code('shared_tool_duplicate_install',self.review('managed-get_page'))
+
+    async def test_native_permission_reason_matches_list_and_execution(self):
+        item = await self.review()
+        from open_webui.models.access_grants import AccessGrants
+        with patch.object(AccessGrants, 'has_access', return_value=False):
+            observed = await self.item(actor=self.reader)
+            self.assertEqual(observed['unavailable_reason'], 'native_access_denied')
+            self.assertIn('권한',observed['unavailable_message'])
+            await self.assert_code('native_access_denied',self.tools.resolve(self.reader,self.key))
+
+    async def test_native_configuration_reason_matches_list_and_execution(self):
+        item = await self.review()
+        await self.f.tools.Tools.update_tool_valves_by_id(item['reference']['tool_id'], {'ENABLED':True,'UNSUPPORTED':'synthetic-secret'})
+        observed = await self.item(actor=self.reader)
+        self.assertEqual(observed['unavailable_reason'],'native_configuration_unsupported')
+        self.assertNotIn('synthetic-secret',json.dumps(observed))
+        await self.assert_code('native_configuration_unsupported',self.tools.resolve(self.reader,self.key))
+
+    async def test_shared_empty_search_preserves_empty_completeness(self):
+        await self.review()
+        run = await self.start(await self.workflow(), self.reader)
+        with patch('urllib.request.OpenerDirector.open', return_value=Response({'results':[]})):
+            result = await self.service.operations.command(self.reader,self.body('execute_job',1,run_id=run['run_id'],job_id='j1'))
+        self.assertEqual(result['attempt']['result']['completeness'],'empty')
+        self.assertEqual(result['attempt']['result']['items'],[])
+
+    async def test_nonpilot_functions_are_preparing_and_cannot_be_reviewed(self):
+        await self.f.register_read_tool('jira', extended=True)
+        await self.f.register_read_tool('github')
+        others = [x for x in await self.tools.list(self.admin) if x['target']!='Confluence']
+        self.assertEqual(len(others),8)
+        for item in others:
+            self.assertEqual(item['state'],'preparing')
+            await self.assert_code('shared_tool_preparing',self.review(item['id']))
+        self.assertEqual(await self.tools.list(self.reader,usable_only=True),[])
+
+    async def test_published_function_and_output_contracts_remain_compatible(self):
+        import importlib
+        shared=importlib.import_module(self.tools.__class__.__module__)
+        expected={
+            'search_pages': ({'query':'string','space_key':'string','limit':'integer'}, ['query'], {'kind':'list','fields':['id','title','url'],'completeness':'page'}),
+            'get_page': ({'page_id':'string'}, ['page_id'], {'kind':'evidence','fields':['data','evidence'],'completeness':'partial_possible'}),
+        }
+        for name,(properties,required,output) in expected.items():
+            self.assertEqual(self.f.native.FUNCTIONS[name],properties)
+            before={'input_schema':{'properties':{k:{'type':v} for k,v in properties.items()},'required':required},'output_schema':output}
+            after=await self.item('managed-'+name)
+            self.assertTrue(shared.compatible(before,after),name)
+            self.assertEqual(shared.OUTPUTS[name]['completeness'],output['completeness'])
+
+    async def test_optional_summary_failure_preserves_help_and_view_without_secret(self):
+        from types import SimpleNamespace
+        from unittest.mock import AsyncMock
+        for help_context in (None, {'system_id':'','context_id':'draft'}):
+            request=SimpleNamespace(state=SimpleNamespace(ees_work_tool_source_hash='expected',ees_work_help_context=help_context))
+            original=AsyncMock(return_value={'ok':True,'kept':'authorized view'})
+            with patch.object(self.f.native,'_chat_work_access',return_value=(self.admin,'expected')), patch.object(self.f.workflow,'_production_service',return_value=self.service), patch.object(self.tools,'list',side_effect=RuntimeError('synthetic-secret')), self.assertLogs(self.f.native.__name__,level='WARNING') as logs:
+                wrapped=self.f.native.wrap_chat_work_tools(request,self.admin,{'view':{'tool_id':'ees_workflow','spec':{'name':'ees_workflow_view'},'callable':original}})
+                result=await wrapped['view']['callable']()
+            self.assertTrue(result['ok'])
+            self.assertEqual(result['shared_tools'],[])
+            self.assertIn('불러오지 못',result['shared_tools_notice'])
+            self.assertIn('help',result)
+            self.assertNotIn('synthetic-secret',json.dumps(result)+str(logs.output))
+            if help_context is None:
+                self.assertEqual(result['kept'],'authorized view')
+            else:
+                original.assert_not_awaited()

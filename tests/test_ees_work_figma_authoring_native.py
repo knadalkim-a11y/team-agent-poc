@@ -33,11 +33,11 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('#ees-work-panel') && document.querySelector('#ees-work-system-trigger')?.getBoundingClientRect().height > 0")
         native = importlib.import_module(self.backend.__package__ + '.ees_workflow_native')
         source = (Path(__file__).resolve().parents[1] / 'agent-pack/skills/confluence-read/scripts/confluence_tool.py').read_text(encoding='utf-8')
-        schema = {'type':'object','properties':{'query':{'type':'string'}},'required':['query']}
+        schemas = {'search_pages': {'type':'object','properties':{'query':{'type':'string'},'space_key':{'type':'string','default':''},'limit':{'type':'integer','default':5}},'required':['query']}, 'get_page': {'type':'object','properties':{'page_id':{'type':'string'}},'required':['page_id']}}
         reference = {'tool_id':'arbitrary-installed-id','function':'search_pages','revision':1,'content_hash':native.MANAGED_READ_SOURCE_HASHES['confluence'],'schema_hash':'b'*64,'config_hash':'c'*64,'environment':'d'*64}
         async def managed(): return [{'id':'arbitrary-installed-id','content':source}]
         async def inspect(actor, tool_id, function):
-            return {'reference':{**reference,'function':function},'schema':schema,'state':'allowed'}
+            return {'reference':{**reference,'function':function},'schema':schemas[function],'state':'allowed'}
         self.bridge.managed_tools, self.bridge.inspect = managed, inspect
         self.server.workflow.group_lookup = lambda _: [{'id':'shared-readers','name':'조회 팀'}]
         self.server.workflow.group_list_lookup = lambda: [{'id':'shared-readers','name':'조회 팀'}]
@@ -47,7 +47,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 if item['target']!='Confluence': continue
                 item.update(state='available', version=1, revision=1, group_ids=['shared-readers'] if item['function']=='search_pages' else ['other-readers'], responsible_user_id=self.server.user['id'])
                 db.execute('INSERT INTO work_shared_tools VALUES(?,?,?)',(item['id'],1,json.dumps(item,ensure_ascii=False)))
-                db.execute('INSERT INTO work_shared_tool_versions VALUES(?,?,?)',(item['id'],1,json.dumps({'version':1,'at':1792051200,'input_schema':schema,'output_schema':item['output_schema'],'reference':item['reference']},ensure_ascii=False)))
+                db.execute('INSERT INTO work_shared_tool_versions VALUES(?,?,?)',(item['id'],1,json.dumps({'version':1,'at':1792051200,'input_schema':item['input_schema'],'output_schema':item['output_schema'],'reference':item['reference']},ensure_ascii=False)))
         wid = self.author(name='공용 도구 선택 시험', jobs=1)
         self.refresh()
         self.open_tools()
@@ -60,10 +60,20 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         for label in ('하는 일','입력과 결과','쓰는 곳','지금 버전','버전 기록','프로그램 갱신으로만 바뀝니다'):
             self.assertIn(label,self.text('#ees-work-designer'))
         self.screenshot('shared-b10-2-detail-top')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-author-action=shared_review]')"))
+        for label in ('찾을 말', '공간', '개수', '글자', '숫자'):
+            self.assertIn(label, self.text('#ees-work-designer'))
+        reference['config_hash'] = 'e'*64
+        self.refresh()
+        self.wait("!!document.querySelector('[data-author-action=shared_review]')")
         self.click('[data-author-action=shared_review]')
-        for label in ('현재 입력:', '새 입력:', '현재 결과:', '새 결과:', '확인 근거 (필수)'):
+        for label in ('항목별 비교', '현재', '새 내용', '찾을 말', '공간', '개수', '결과', '확인 근거 (필수)'):
             self.assertIn(label, self.text('#ees-work-dialog'))
+        self.screenshot('shared-b10-2-review-comparison')
         self.click('#ees-work-dialog [data-dialog-cancel]')
+        reference['config_hash'] = 'c'*64
+        self.refresh()
+        self.wait("!document.querySelector('[data-author-action=shared_review]')")
         self.assertTrue(self.read('[data-author-action=shared_native]','checkVisibility()'))
         self.browser.evaluate("document.querySelector('[data-author-action=shared_native]').focus()")
         self.key('Tab',9)
@@ -77,6 +87,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         directory = self.screenshot('shared-b10-2-detail')
         self.click('[data-author-action=shared_native]')
         self.wait("location.pathname==='/workspace/tools' && document.querySelector('#workspace-container input')")
+        self.assertNotIn('기능 연결', self.text('#workspace-container'))
         self.click('[data-action=procedures]')
         self.wait("document.querySelector('[data-author-action=open][data-id=\""+wid+"\"]')")
         self.click('[data-author-action="open"][data-id="'+wid+'"]')
@@ -99,7 +110,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(stored['shared_tool_id'],'managed-search_pages')
         self.assertNotIn('tool_reference',stored)
         self.assertNotIn('tool_contract_revision',stored)
-        (directory/'shared-b10-comparison.json').write_text(json.dumps({'scope':'actual built product with synthetic Native session/metadata; real HTTP and SQLite','figma':{'B10-1':'1353:20386','B10-2':'1353:20597','B10-5':'1353:21167'},'detail_cards':geometry,'keyboard_focus':detail_focus,'checked':['target grouping','personal PAT label','legacy group','detail sections','admin Native link','no C45 menu','usable-only single-step picker','saved shared ID without fixed reference'],'onsite':'unverified'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        (directory/'shared-b10-comparison.json').write_text(json.dumps({'scope':'actual built product with synthetic Native session/metadata; real HTTP and SQLite','figma':{'B10-1':'1353:20386','B10-2':'1353:20597','B10-5':'1353:21167'},'detail_cards':geometry,'keyboard_focus':detail_focus,'checked':['target grouping','personal PAT label','legacy group','detail sections','admin Native link','no C45 menu','usable-only single-step picker','saved shared ID without fixed reference','real query/space_key/limit schema','no redundant review button','per-field current/new comparison','Native Tools title'],'onsite':'unverified'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
     def operations(self):
         return asyncio.run(self.server.workflow.operations.state(self.server.user, system_id='EMS'))

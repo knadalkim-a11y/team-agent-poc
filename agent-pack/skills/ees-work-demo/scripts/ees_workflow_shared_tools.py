@@ -26,7 +26,18 @@ NAMES = {
 OUTPUTS = {name: {'kind': 'evidence', 'fields': ['data', 'evidence'], 'completeness': 'partial_possible'} for name in NAMES}
 OUTPUTS['search_pages'] = {'kind': 'list', 'fields': ['id', 'title', 'url'], 'completeness': 'page'}
 OUTPUTS['get_page'] = {'kind': 'evidence', 'fields': ['data', 'evidence'], 'completeness': 'partial_possible'}
+PILOT_FUNCTIONS = frozenset({'search_pages', 'get_page'})
 MESSAGES = {
+    'shared_tool_preparing': '준비 중 · 이번 시범에서는 Confluence 페이지 찾기·읽기만 쓸 수 있습니다.',
+    'shared_tool_not_installed': '기본 제공 도구가 설치되어 있지 않습니다. 관리자에게 설치 확인을 요청하세요.',
+    'shared_tool_source_mismatch': '설치된 도구 원본이 지원하는 원본과 다릅니다. 관리자에게 확인을 요청하세요.',
+    'shared_tool_duplicate_install': '같은 기본 제공 도구가 여러 개 설치되어 있습니다. 관리자에게 사용할 설치본 확인을 요청하세요.',
+    'native_access_denied': 'Open WebUI 도구를 읽을 권한이 없습니다. 관리자에게 권한 확인을 요청하세요.',
+    'native_configuration_unavailable': 'Open WebUI 도구의 연결 설정을 읽을 수 없습니다. 관리자에게 확인을 요청하세요.',
+    'native_configuration_unsupported': 'Open WebUI 도구의 연결 설정을 확인해야 합니다. 관리자에게 설정 수정을 요청하세요.',
+    'native_connection_disabled': 'Open WebUI 도구의 연결이 꺼져 있습니다. 관리자에게 확인을 요청하세요.',
+    'native_plugins_disabled': 'Open WebUI 도구 기능이 꺼져 있습니다. 관리자에게 확인을 요청하세요.',
+    'native_schema_invalid': '설치된 도구의 입력 형식을 확인해야 합니다. 관리자에게 확인을 요청하세요.',
     'shared_tool_unavailable': '기본 제공 도구가 설치되어 있지 않거나 원본이 다릅니다. 관리자에게 확인을 요청하세요.',
     'shared_tool_review_required': '도구 확인 필요 · 관리자에게 입력·결과와 연결 설정 확인을 요청하세요.',
     'shared_tool_disabled': '도구 사용 중지 · 관리자에게 다시 켜기를 요청하세요.',
@@ -90,6 +101,8 @@ class SharedTools:
     async def discover(self, actor):
         # Discovery reads installed content. Function names alone are not trust.
         tools = await self.bridge.managed_tools() if hasattr(self.bridge, "managed_tools") else []
+        with self.service._db() as db:
+            saved = {row['id']: json.loads(row['data']) for row in db.execute('SELECT * FROM work_shared_tools')}
         result = []
         for function, (target, label, description) in NAMES.items():
             family = target.lower()
@@ -98,13 +111,32 @@ class SharedTools:
                     'target': target, 'description': description, 'kind': 'read', 'auth': '개인 PAT(기존 방식)',
                     'state': 'unavailable', 'revision': 0, 'version': 0, 'group_ids': [], 'responsible_user_id': '',
                     'input_schema': {}, 'output_schema': deepcopy(OUTPUTS[function])}
-            # Ambiguous registrations cannot silently pick a new source.
-            if len(matches) == 1:
-                try:
-                    checked = await self.bridge.inspect(actor, _get(matches[0], 'id'), function)
-                    item.update(reference=checked['reference'], input_schema=checked['schema'], state='review_required')
-                except WorkflowError:
-                    pass
+            if function not in PILOT_FUNCTIONS:
+                item.update(state='preparing', unavailable_reason='shared_tool_preparing')
+            else:
+                previous = saved.get(item['id'], {}).get('reference', {}).get('tool_id')
+                chosen = next((tool for tool in matches if _get(tool, 'id') == previous), None)
+                if chosen is None and len(matches) == 1:
+                    chosen = matches[0]
+                reason = ''
+                if chosen is None:
+                    related = any(_get(tool, 'id') == previous or any(spec.get('name') == function for spec in (_get(tool, 'specs', []) or []) if isinstance(spec, dict)) for tool in tools)
+                    reason = 'shared_tool_duplicate_install' if matches else 'shared_tool_source_mismatch' if related else 'shared_tool_not_installed'
+                else:
+                    try:
+                        checked = await self.bridge.inspect(actor, _get(chosen, 'id'), function)
+                        # PAT is per-user and is checked at execution; it does
+                        # not prevent an administrator from reviewing a tool.
+                        reason = checked.get('reason', '')
+                        if reason == 'native_personal_connection_required':
+                            reason = ''
+                        item.update(reference=checked['reference'], input_schema=checked['schema'], state='review_required', native_state=checked['state'])
+                    except WorkflowError as error:
+                        reason = error.code
+                if reason:
+                    item.update(state='unavailable', unavailable_reason=reason)
+            if item.get('unavailable_reason'):
+                item['unavailable_message'] = MESSAGES.get(item['unavailable_reason'], 'Open WebUI 도구를 확인하지 못했습니다. 관리자에게 확인을 요청하세요.')
             result.append(item)
         return result
 
@@ -119,9 +151,15 @@ class SharedTools:
             item = deepcopy(saved.get(observed['id'], observed))
             if not admin and not set(item.get('group_ids', [])).intersection(groups):
                 continue
-            if observed['state'] == 'unavailable':
-                item['state'] = 'unavailable'
-            elif item.get('reference') != observed.get('reference'):
+            item['review_required'] = (item.get('reference') != observed.get('reference')
+                                       or item.get('input_schema') != observed.get('input_schema')
+                                       or item.get('output_schema') != observed.get('output_schema')
+                                       or observed.get('native_state') != 'allowed')
+            item['unavailable_reason'] = observed.get('unavailable_reason', '')
+            item['unavailable_message'] = observed.get('unavailable_message', '')
+            if observed['state'] in ('unavailable', 'preparing'):
+                item['state'] = observed['state']
+            elif item['state'] != 'disabled' and item['review_required']:
                 item['state'] = 'review_required'
             item['can_use'] = bool(set(item.get('group_ids', [])).intersection(groups))
             if usable_only and (item['state'] != 'available' or not item['can_use']):
@@ -168,8 +206,10 @@ class SharedTools:
                 return receipt
         discovered = {item['id']: item for item in await self.discover(actor)}
         observed = discovered.get(key)
-        if not observed or observed['state'] == 'unavailable':
+        if not observed:
             fail('shared_tool_unavailable')
+        if observed['state'] in ('unavailable', 'preparing'):
+            fail(observed['unavailable_reason'])
         if body.get('reference') != observed['reference']:
             fail('shared_tool_review_required')
         from .ees_workflow import _resolve
@@ -209,10 +249,16 @@ class SharedTools:
                 approval = db.execute('SELECT reference,state FROM native_approvals WHERE tool_id=? AND function=?', (reference['tool_id'], reference['function'])).fetchone()
                 if not approval or approval['state'] != 'allowed' or json.loads(approval['reference']) != reference:
                     reference = self.bridge.store_approval(db, actor, reference, evidence)['reference']
-                item.update(reference=reference, input_schema=observed['input_schema'], output_schema=observed['output_schema'], state='available', version=item['version'] + 1)
-                version = {k: deepcopy(item[k]) for k in ('version', 'reference', 'input_schema', 'output_schema')}
-                version.update(actor=_get(actor, 'id'), evidence=evidence.strip(), at=time.time())
-                db.execute('INSERT INTO work_shared_tool_versions VALUES(?,?,?)', (key, item['version'], _json(version)))
+                unchanged = old and all(old.get(k) == observed.get(k) for k in ('reference', 'input_schema', 'output_schema'))
+                state = 'disabled' if old and old['state'] == 'disabled' else 'available'
+                item.update(reference=reference, input_schema=observed['input_schema'], output_schema=observed['output_schema'], state=state)
+                if not unchanged:
+                    item['version'] += 1
+                    version = {k: deepcopy(item[k]) for k in ('version', 'reference', 'input_schema', 'output_schema')}
+                    version.update(actor=_get(actor, 'id'), evidence=evidence.strip(), at=time.time())
+                    db.execute('INSERT INTO work_shared_tool_versions VALUES(?,?,?)', (key, item['version'], _json(version)))
+                else:
+                    runtime._event(db, key, actor, 'shared_tool_review_evidence', {'version': item['version'], 'evidence': evidence.strip()})
             elif not old:
                 fail('shared_tool_review_required')
             elif action == 'shared_tool_disable':
@@ -231,6 +277,8 @@ class SharedTools:
         keys.update(call['shared_tool_id'] for node in definition.get('nodes', {}).values() for call in (node.get('execution') or {}).get('calls', []) if call.get('shared_tool_id'))
         for key in keys:
             item = self.get(db, key)
+            if item['function'] not in PILOT_FUNCTIONS:
+                fail('shared_tool_preparing')
             self.authorize(item, actor, groups)
             if item['state'] != 'available':
                 fail('shared_tool_disabled' if item['state'] == 'disabled' else 'shared_tool_review_required')
@@ -241,6 +289,8 @@ class SharedTools:
         actor, _, groups = await self.service._work_actor(user)
         with self.service._db() as db:
             item = self.get(db, key)
+            if item['function'] not in PILOT_FUNCTIONS:
+                fail('shared_tool_preparing')
             self.authorize(item, actor, groups)
             if item['state'] != 'available':
                 fail('shared_tool_disabled' if item['state'] == 'disabled' else 'shared_tool_review_required')
@@ -250,13 +300,13 @@ class SharedTools:
                 if not row:
                     fail('shared_tool_review_required')
                 pin = json.loads(row[0])
-        family = NAMES[item['function']][0].lower()
-        checked = await self.bridge.inspect(actor, item['reference']['tool_id'], item['function'])
-        if checked['reference']['content_hash'] != MANAGED_READ_SOURCE_HASHES[family]:
-            fail('shared_tool_unavailable')
-        if checked['reference'] != item['reference'] or checked['state'] != 'allowed':
+        observed = next(entry for entry in await self.discover(actor) if entry['id'] == key)
+        if observed['state'] in ('unavailable', 'preparing'):
+            fail(observed['unavailable_reason'])
+        if (observed['reference'] != item['reference'] or observed.get('native_state') != 'allowed'
+                or observed['input_schema'] != item['input_schema'] or observed['output_schema'] != item['output_schema']):
             fail('shared_tool_review_required')
-        if pin['reference'] != checked['reference']:
+        if pin['reference'] != observed['reference'] or pin['version'] != item['version']:
             fail('shared_tool_version_changed')
         await self.bridge.check(actor, pin['reference'])
         actor, _, groups = await self.service._work_actor(actor)

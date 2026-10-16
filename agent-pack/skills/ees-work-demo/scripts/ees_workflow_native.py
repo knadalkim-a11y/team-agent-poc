@@ -541,8 +541,8 @@ class NativeBridge:
         from open_webui.models.tools import Tool, get_async_db_context
         # Discovery needs only identity/source, never owner settings or PAT.
         async with get_async_db_context() as db:
-            rows = (await db.execute(select(Tool.id, Tool.content))).all()
-            return [{"id": row.id, "content": row.content} for row in rows]
+            rows = (await db.execute(select(Tool.id, Tool.content, Tool.specs))).all()
+            return [{"id": row.id, "content": row.content, "specs": row.specs} for row in rows]
 
     async def capabilities(self, user):
         """Access-filtered metadata for publication/pickers; no code loading."""
@@ -695,7 +695,7 @@ class NativeBridge:
         if context.get("shared_tool_id"):
             if reference["function"] == "search_pages" and result["status"] == "succeeded":
                 result["items"] = [{"id": str(row["page_id"]), "title": str(row.get("title", "")), "url": str(row.get("url", ""))} for row in result.get("data", {}).get("results", []) if isinstance(row, dict) and row.get("page_id") is not None]
-                result.update(scope="single_page", completeness="partial", result_kind="list")
+                result.update(scope="single_page", completeness="partial" if result["items"] else "empty", result_kind="list")
             elif reference["function"] == "get_page":
                 result["result_kind"] = "evidence"
         return result
@@ -1059,6 +1059,19 @@ async def check_chat_work_tool(request, user, tool):
         request.state.ees_work_tool_source_hash = observed
 
 
+async def shared_tool_summary(service, actor):
+    """Optional public context must not discard successful help/view results."""
+    try:
+        return {"shared_tools": await service.shared_tools.list(actor, usable_only=True, summary=True)}
+    except Exception as error:
+        import logging
+        import traceback
+        # Keep call-site diagnostics, never exception text, source lines or locals.
+        locations = [f"{frame.name}:{frame.lineno}" for frame in traceback.extract_tb(error.__traceback__)]
+        logging.getLogger(__name__).warning("shared_tool_summary_unavailable: %s at %s", type(error).__name__, " > ".join(locations))
+        return {"shared_tools": [], "shared_tools_notice": "도구 목록을 불러오지 못했습니다."}
+
+
 def wrap_chat_work_tools(request, user, tools):
     """Preserve Native tool callables; refresh ACL/source before each call."""
     expected = getattr(request.state, "ees_work_tool_source_hash", None)
@@ -1096,11 +1109,11 @@ def wrap_chat_work_tools(request, user, tools):
                     with service._db() as db:
                         if help_context["system_id"] and not service._work_system_visible(db, actor, groups, help_context["system_id"]):
                             _fail("scope_forbidden")
-                    return {"ok": True, "help": workflow_help(), "shared_tools": await service.shared_tools.list(actor, usable_only=True, summary=True), "help_context": {"kind": "help", **help_context}}
+                    return {"ok": True, "help": workflow_help(), **await shared_tool_summary(service, actor), "help_context": {"kind": "help", **help_context}}
                 result = await _native(*args, **kwargs)
                 if _function == "ees_workflow_view" and isinstance(result, dict) and result.get("ok") and "historical" not in result:
                     from .ees_workflow import _production_service
-                    result = {**result, "help": workflow_help(), "shared_tools": await _production_service().shared_tools.list(actor, usable_only=True, summary=True)}
+                    result = {**result, "help": workflow_help(), **await shared_tool_summary(_production_service(), actor)}
                 return result
             except Exception:
                 if help_context is not None:

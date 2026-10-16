@@ -608,3 +608,4 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 .ew-shared-groups button{border-radius:0;border:0;border-bottom:1px solid #e6e6e9}.ew-shared-groups button strong small{display:inline;margin-left:6px;font-size:11px;background:#ececef;padding:0 4px;border-radius:3px}
 
 .ew-shared-picker-options button{position:relative;border:0;border-radius:0;padding-right:38px}.ew-shared-picker-options button>span{position:absolute;right:8px;top:8px;font-size:12px;color:#6f717a}
+.ew-shared-comparison{width:100%;table-layout:fixed;border-collapse:collapse;margin:12px 0;font-size:13px;line-height:20px}.ew-shared-comparison caption{text-align:left;font-weight:600;padding-bottom:8px}.ew-shared-comparison th,.ew-shared-comparison td{text-align:left;vertical-align:top;padding:8px;border-bottom:1px solid var(--ees-line-divider);overflow-wrap:anywhere}.ew-shared-comparison th:first-child{width:24%}

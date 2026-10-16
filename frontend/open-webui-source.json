@@ -31,7 +31,7 @@
     "src/lib/components/ees/state.ts": "560ef1a21f46fc2a1beabf3012a74933002af586c507ac42bb144f40fe305a43",
     "src/lib/components/layout/Sidebar.svelte": "9d08f54fdaa101ef2cf06c159e5defe421b366c695f26a15c4045bf3ba556096",
     "src/lib/constants.ts": "0fd43314837a2d7775810c3f08fc82b8042c34a5b6e52f1a7e4513f303a07b5d",
-    "src/lib/i18n/locales/ko-KR/translation.json": "5f065b6fca76dc47ef078604c41261d8a4974ac2dcd318afef0fea001e7c27b9",
+    "src/lib/i18n/locales/ko-KR/translation.json": "802545c50d8d87dbc82afacc5bd9e92587576e023392f426d415409de3ad5438",
     "src/routes/(app)/+layout.svelte": "6e235011199f1eb11107a2d444e5db8c6fb89d13b6e93b9e5980523bf87226f6",
     "src/routes/(app)/+page.svelte": "7cdd5f35c6d1064663d2bafd03263585ca270ce24d26788a656d465339e6cb03",
     "src/routes/(app)/c/[id]/+page.svelte": "2cf8b7796915e7711e467a4142d96ad1d4afc0366221236620719193d91d0ad2",
@@ -44,7 +44,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "d539b25feff7d3d44d57703ce9bc1572c02f06fb207058a495d13d2a003c11bb"
+      "sha256": "3020f35a05db3a128d4ca1aaa3f2a475ce694abccbbccde241290d7d2c8f44a6"
     }
   ],
   "pyodide_files": {

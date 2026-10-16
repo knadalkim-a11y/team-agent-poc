@@ -578,3 +578,19 @@ test('source API receives the original command contract and keeps runtime late-t
  h.context.window.__eesSourceShellV1.request=(path,body,signal)=>{calls.push({path,body,signal});return pending.promise;};
  h.api.setSelection({run_id:'r',job_id:'j'});const request=h.api.command({action:'save_inputs',run_id:'r',inputs:{value:'old'}});h.api.setSelection({job_id:'other'});pending.resolve({ok:true,revision:2});assert.equal(await request,null);assert.equal(calls.length,1);assert.equal(calls[0].path,'workspace/command');assert.equal(calls[0].body.inputs.value,'old');assert.equal(h.api.snapshot().state,null);
 });
+
+test('same shared-tool review leaves an ongoing run executable and changed versions require choice',()=>{
+ const {viewSource}=require('./ees_workspace_ui_fixture.cjs'),context=renderer();
+ // Expose the real render function only in this in-memory test copy.
+ run(context,viewSource.slice(viewSource.indexOf('function createWorkView(')).replace('return Object.freeze({render,sync,','return Object.freeze({testJobPanel:jobPanel,render,sync,'));
+ context.snapshot={selection:{job_id:'j',tab:'current'},state:{capabilities:{actor_id:'a'},operations:{shared_tools:[{id:'managed-search_pages',name:'페이지 찾기',version:1,state:'available',can_use:true}]},run:{id:'r',status:'running',revision:1,definition:{nodes:{j:{id:'j',name:'찾기',mode:'tool',shared_tool_id:'managed-search_pages',inputs:[],result_block:'human_confirm'}}},jobs:{j:{}},shared_tools:[{id:'managed-search_pages',version:1}],inputs:{}}}};
+ run(context,'globalThis.sharedView=createWorkView({callbacks:{}});sharedView.sync(snapshot)');
+ const panel=()=>run(context,'sharedView.testJobPanel()');
+ assert.match(panel(),/data-action="execute"[^>]*>/);assert.doesNotMatch(panel(),/data-action="execute"[^>]*disabled/);
+ context.snapshot.state.operations.shared_tools[0].revision=2; // evidence-only review
+ run(context,'sharedView.sync(snapshot)');assert.doesNotMatch(panel(),/data-action="execute"[^>]*disabled/);
+ context.snapshot.state.operations.shared_tools[0].version=2;
+ run(context,'sharedView.sync(snapshot)');assert.match(panel(),/v2 버전으로 계속하기/);assert.match(panel(),/data-action="execute"[^>]*disabled/);
+ context.snapshot.state.operations.shared_tools[0].state='unavailable';context.snapshot.state.operations.shared_tools[0].unavailable_message='Open WebUI 도구의 연결 설정을 확인해야 합니다.';
+ run(context,'sharedView.sync(snapshot)');assert.match(panel(),/연결 설정을 확인해야/);assert.doesNotMatch(panel(),/버전으로 계속하기/);
+});
