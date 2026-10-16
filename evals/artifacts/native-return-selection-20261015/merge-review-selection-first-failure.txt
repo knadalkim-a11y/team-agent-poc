@@ -1,0 +1,28 @@
+✖ a newer selection supersedes the applied Native return preview (16.003589ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 101.207286
+
+✖ failing tests:
+
+test at tests/test_ees_native_return_selection.cjs:181:1
+✖ a newer selection supersedes the applied Native return preview (16.003589ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  'author' !== 'work'
+  
+      at TestContext.<anonymous> (/workspace/scratch/1c4f60491bb1/team-agent-poc/tests/test_ees_native_return_selection.cjs:184:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'author',
+    expected: 'work',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
