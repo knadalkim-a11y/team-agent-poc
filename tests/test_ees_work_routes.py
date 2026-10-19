@@ -67,6 +67,37 @@ class WorkRouteTests(unittest.IsolatedAsyncioTestCase):
         result=await self.command('save_draft',actor='reader',workflow_id=self.identifier,definition={})
         self.assertNotEqual(result.status_code,200)
 
+    async def test_initial_procedure_registration_requires_authenticated_scope_and_get_is_read_only(self):
+        body = dict(action='initialize_procedures', system_id='EMS', expected_revision=0, request_id=str(uuid4()))
+        denied = await self.client.post('/api/ees-work/workspace/command', json=body)
+        self.assertEqual(denied.status_code, 401)
+        denied = await self.command('initialize_procedures', actor='reader', system_id='EMS')
+        self.assertEqual(denied.status_code, 403)
+        before = self.service.database.read_bytes()
+        read = await self.client.get('/api/ees-work/workspace?system_id=EMS', headers={'Authorization': 'Bearer admin'})
+        self.assertFalse(read.json()['initial_procedures_ready'])
+        self.assertEqual(self.service.database.read_bytes(), before)
+        result = await self.client.post('/api/ees-work/workspace/command', headers={'Authorization': 'Bearer admin'}, json=body)
+        self.assertEqual(result.status_code, 200, result.text)
+        self.assertEqual(len(result.json()['created_workflow_ids']), 3)
+        again = await self.command('initialize_procedures', system_id='EMS')
+        self.assertEqual(again.json()['created_workflow_ids'], [])
+
+    async def test_builtin_preview_requires_login_but_does_not_require_authorship_or_write(self):
+        path = '/api/ees-work/workspace?example_id=factory_rollout'
+        before = self.service.database.read_bytes()
+        denied = await self.client.get(path)
+        self.assertEqual(denied.status_code, 401)
+        response = await self.client.get(path, headers={'Authorization': 'Bearer reader'})
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()['procedure_example']['id'], 'factory_rollout')
+        self.assertTrue(response.json()['procedure_example']['definition']['nodes'])
+        self.assertEqual(response.json()['workflows'], [])
+        missing = await self.client.get('/api/ees-work/workspace?example_id=missing',
+                                        headers={'Authorization': 'Bearer reader'})
+        self.assertEqual(missing.json()['error']['code'], 'procedure_example_not_found')
+        self.assertEqual(self.service.database.read_bytes(), before)
+
     async def test_retired_routes_reject_instead_of_recreate_demo_or_mutate_old_records(self):
         for path in ('action','authoring/action','execution/plan','execution/action','input-draft/validate','input-draft/undo-record'):
             with self.subTest(path=path):

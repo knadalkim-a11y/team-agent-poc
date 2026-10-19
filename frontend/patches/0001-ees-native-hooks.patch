@@ -867,7 +867,7 @@ index 875aee0..69c73bb 100644
 +										<EesProcedureIntro empty />
 +										{#if $selectedFolder}<Placeholder {history} {selectedModels} {stopResponse} {createMessagePair} showComposer={false} />{/if}
 +									{/if}
-+									{#if embedded || history.currentId || !$eesSnapshot.procedure_start}
++									{#if embedded || history.currentId || (!$eesSnapshot.procedure_start && !($eesSnapshot.selection?.mode === 'author' && $eesSnapshot.state?.workflow && !$models.length))}
  									<Messages
  										bind:this={messagesRef}
  										chatId={$chatId}
@@ -884,7 +884,7 @@ index 875aee0..69c73bb 100644
  								<div class="pb-6 z-10">
  									<div class="text-xs text-gray-400 dark:text-gray-500 text-center">
  										{$i18n.t('Read only')}
-@@ -4422,6 +4616,10 @@
+@@ -4422,6 +4616,11 @@
  									id={embedded ? messageInputDropzoneId : undefined}
  									class=" pb-2 {dragged ? 'z-0' : 'z-10'}"
  								>
@@ -893,9 +893,10 @@ index 875aee0..69c73bb 100644
 +										<div class="px-6 py-2"><div class="max-w-[760px] mx-auto"><EesHelperNotice /></div></div>
 +									{/if}
  									<MessageInput
++										placeholder={!embedded && $eesSnapshot.selection?.mode === 'author' && !$models.length ? '업무 도우미 연결 전' : undefined}
  										bind:this={messageInput}
  										{history}
-@@ -4574,7 +4772,7 @@
+@@ -4574,7 +4773,7 @@
  								</div>
  							</div>
  						{:else}
@@ -1632,10 +1633,11 @@ new file mode 100644
 index 0000000..6d5288b
 --- /dev/null
 +++ b/src/lib/components/ees/EesProcedureIntro.svelte
-@@ -0,0 +1,171 @@
+@@ -0,0 +1,192 @@
 +<script lang="ts">
 +	import { getContext } from 'svelte';
 +	import { eesSnapshot, eesAction, eesHelperState } from './state';
++	import { models } from '$lib/stores';
 +	import Icon from './EesIcon.svelte';
 +	import EesHelperNotice from './EesHelperNotice.svelte';
 +	const i18n: any = getContext('i18n');
@@ -1654,7 +1656,14 @@ index 0000000..6d5288b
 +	];
 +</script>
 +
-+{#if $eesSnapshot.procedure_start}
++{#if empty && $eesSnapshot.selection?.mode === 'author' && $eesSnapshot.state?.workflow && !$models.length}
++	<section class="empty" data-ees-work data-ees-procedure-fallback>
++		<div class="ees-helper-intro">
++			<div class="ees-helper-unavailable" role="status"><Icon name="0a3bb" /><span>업무 도우미가 아직 연결되지 않았습니다. 관리자에게 연결을 요청하세요.</span></div>
++			<p>대화 없이 오른쪽 ‘요약’에서 하나씩 직접 정할 수 있습니다. 도우미가 연결되면 지금까지 정한 것을 참고하여 대화를 이어갈 수 있습니다.</p>
++		</div>
++	</section>
++{:else if $eesSnapshot.procedure_start}
 +	<section
 +		id="ees-work-procedure-start"
 +		data-ees-work
@@ -1718,6 +1727,19 @@ index 0000000..6d5288b
 +	section.empty {
 +		padding: 32px 24px 12px;
 +	}
++	.ees-helper-unavailable {
++		display: flex;
++		align-items: center;
++		gap: 8px;
++		padding: 8px 12px;
++		border-radius: 8px;
++		background: var(--ees-surface-sidebar);
++		font-size: 13px;
++		line-height: 20px;
++		width: fit-content;
++	}
++	.ees-helper-unavailable :global(.ew-icon) { width: 14px; height: 14px; flex: none; }
++	[data-ees-procedure-fallback] .ees-helper-intro { color: var(--ees-text-secondary); gap: 24px; }
 +	.ees-helper-intro {
 +		max-width: 760px;
 +		margin: 0 auto;
@@ -1809,7 +1831,7 @@ new file mode 100644
 index 0000000..d55b5f0b
 --- /dev/null
 +++ b/src/lib/components/ees/EesShell.svelte
-@@ -0,0 +1,401 @@
+@@ -0,0 +1,402 @@
 +<script lang="ts">
 +	import { getContext, onMount, tick } from 'svelte';
 +	import { get } from 'svelte/store';
@@ -1861,10 +1883,11 @@ index 0000000..d55b5f0b
 +		if (retainedChatId) lastChatPath = $page.url.pathname;
 +	}
 +	$: s = $eesSnapshot.selection || {};
-+	$: panelWidth = transientWidth ?? ($eesSnapshot.procedure_start ? 580 : clamp(s.panel_width));
++	$: procedurePanel = s.mode === 'author' && !['tools', 'workspace_admin'].includes(s.tab);
++	$: panelWidth = transientWidth ?? (procedurePanel || $eesSnapshot.procedure_start ? 580 : clamp(s.panel_width));
 +	$: panelOpen = !nativeRoute && s.panel_open !== false;
 +	$: panelOverlay =
-+		width - ($eesCompact ? 56 : 256) - ($eesSnapshot.procedure_start ? 580 : 480) < 560;
++		width - ($eesCompact ? 56 : 256) - (procedurePanel || $eesSnapshot.procedure_start ? 580 : 480) < 560;
 +	$: if (mounted) {
 +		$page.url.pathname;
 +		$page.url.search;
@@ -2085,7 +2108,7 @@ index 0000000..d55b5f0b
 +		<div
 +			class="ees-panel-resize"
 +			data-ees-panel-resize
-+			hidden={Boolean($eesSnapshot.procedure_start)}
++			hidden={procedurePanel || Boolean($eesSnapshot.procedure_start)}
 +			role="separator"
 +			tabindex="0"
 +			aria-label={t('EES.PanelWidth', 'Work panel width')}

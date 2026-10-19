@@ -15,10 +15,9 @@ from ees_work_integrated_fixture import IntegratedNativeCase
 from native_ui_fixture import NativeUIHandler
 
 
-QUESTION = '#ees-work-procedure-start [data-action=procedure_question]'
+QUESTION = '[data-author-action=tool_question]'
 NOTICE = '[data-ees-helper-notice]'
 ANSWER = '실제 대화 입력이 전달되었습니다.'
-INTRO = '지금은 대화 내용으로 초안을 바로 만들지는 않습니다.'
 UNAVAILABLE = '업무 도우미를 사용할 수 없습니다. 관리자에게 도구 등록·사용 권한·프로그램 버전을 확인해 달라고 요청하세요.'
 
 
@@ -60,18 +59,13 @@ class HelperChatNativeTests(IntegratedNativeCase):
 
     def open_guide(self):
         self.click('[data-action=mode][data-mode=author]')
-        self.click('[data-author-action=create]')
+        self.click('[data-action=tools]')
+        self.click('[data-author-action=tool_create]')
         self.wait('document.querySelector(' + json.dumps(QUESTION) + ')?.checkVisibility({visibilityProperty:true})')
-        self.assertTrue(self.browser.evaluate("!!document.querySelector('#chat-container #ees-work-procedure-start')"))
-        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-panel #ees-work-procedure-start,#ees-work-panel .ew-procedure-intro')"))
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start')"))
         self.assertEqual(self.browser.evaluate('document.querySelectorAll(' + json.dumps(QUESTION) + ').length'), 3)
-        if self.read('#ees-work-procedure-start', 'getAttribute("data-empty")') == 'true':
-            self.assertIn(INTRO, self.text('#ees-work-procedure-start'))
-            self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start .ees-helper-label')"))
-        else:
-            self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start .ees-helper-label,#ees-work-procedure-start p,#ees-work-procedure-start small')"))
-            self.assertNotIn(INTRO, self.text('#ees-work-procedure-start'))
-        self.assertEqual(self.state()['workflows'], [])
+        self.assertEqual(self.state()['runs'], [])
+        self.browser.evaluate('document.querySelector(' + json.dumps(QUESTION) + ').scrollIntoView({block:"center"})')
         return self.text(QUESTION).strip()
 
     def attach(self, name, data, *, wait=True):
@@ -109,13 +103,13 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.assertFalse(observed['helperLabel'])
         return observed
 
-    def assert_notice_above_questions(self):
+    def assert_notice_above_composer(self):
         observed = self.browser.evaluate("""(()=>{
-          const notice=document.querySelector('[data-ees-helper-notice]'),questions=document.querySelector('[data-ees-helper-questions]');
+          const notice=document.querySelector('[data-ees-helper-notice]'),questions=document.querySelector('#message-input-container');
           const icon=notice?.querySelector('[data-ees-helper-notice-icon]'),text=notice?.querySelector('[data-ees-helper-notice-text]');
           const rect=e=>{const r=e?.getBoundingClientRect();return r?{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}:null};
           return {count:document.querySelectorAll('[data-ees-helper-notice]').length,
-            inGuide:!!notice?.closest('#ees-work-procedure-start'),role:notice?.getAttribute('role'),
+            inGuide:!!notice?.closest('#chat-container'),role:notice?.getAttribute('role'),
             live:notice?.getAttribute('aria-live'),notice:rect(notice),questions:rect(questions),icon:rect(icon),text:rect(text),
             iconVisible:icon?.checkVisibility({visibilityProperty:true}),textVisible:text?.checkVisibility({visibilityProperty:true})};
         })()""")
@@ -127,9 +121,7 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.assertAlmostEqual(observed['icon']['width'], 14, delta=.5)
         self.assertAlmostEqual(observed['icon']['height'], 14, delta=.5)
         self.assertLessEqual(observed['notice']['width'], 760.5)
-        self.assertAlmostEqual(observed['notice']['left'], observed['questions']['left'], delta=1)
         self.assertLessEqual(observed['notice']['bottom'], observed['questions']['top'] + .5)
-        self.assertLessEqual(observed['questions']['top'] - observed['notice']['bottom'], 12.5)
         self.assertLessEqual(observed['icon']['right'], observed['text']['left'])
         self.assertGreater(observed['notice']['top'], 96, observed)
         return observed
@@ -156,7 +148,10 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.assertNotIn('context_id', self.text(message))
         self.assertNotIn(saved['context_id'], self.text(message))
         self.assertEqual(self.bridge.calls, [])
-        self.assertEqual(self.state()['workflows'], [])
+        workflows = self.state()['workflows']
+        self.assertTrue({item['name'] for item in workflows}.issubset({'배포 산출물 점검', '신규 공장 횡전개', '일일 시스템 점검'}))
+        self.assertTrue(all(item['revision'] == 1 and item['published_version'] is None for item in workflows))
+        self.assertEqual(self.state()['runs'], [])
         return deepcopy(saved)
 
     def screenshot(self, label, **kwargs):
@@ -164,8 +159,8 @@ class HelperChatNativeTests(IntegratedNativeCase):
         evidence = self.browser.evaluate("""(()=>({
           path:location.pathname,helperState:window.__eesSourceShellV1?.helpState(),
           draft:window.__eesNativeDraftV1?.read(),
-          guideInChat:!!document.querySelector('#chat-container #ees-work-procedure-start'),
-          guideInPanel:!!document.querySelector('#ees-work-panel #ees-work-procedure-start'),
+          guideInChat:!!document.querySelector('#chat-container .ew-tool-questions'),
+          guideInPanel:!!document.querySelector('#ees-work-panel .ew-tool-questions'),
           references:[...document.querySelectorAll('[data-ees-helper-reference]')].map(e=>e.innerText),
           modelLabels:[...document.querySelectorAll('#response-message-model-name')].map(e=>e.innerText),
           modelStyles:[...document.querySelectorAll('#response-message-model-name')].map(e=>{const s=getComputedStyle(e);return {name:e.innerText,font:s.font,color:s.color};}),
@@ -195,10 +190,8 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.assertTrue(self.browser.evaluate('window.__eesNativeDraftV1.restore(' + json.dumps(json.dumps(draft, ensure_ascii=False)) + ')'))
         before = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         question = self.open_guide()
-        compact = self.browser.evaluate("""(()=>{const e=document.querySelector('#ees-work-procedure-start'),q=e.querySelector('[data-ees-helper-questions]');return {height:e.getBoundingClientRect().height,text:e.innerText.trim(),questions:q.innerText.trim(),width:q.getBoundingClientRect().width};})()""")
-        self.assertLessEqual(compact['height'], 120, compact)
-        self.assertEqual(compact['text'], compact['questions'])
-        self.assertLessEqual(compact['width'], 760)
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start')"))
+        self.assertFalse(self.browser.evaluate('document.documentElement.scrollWidth > innerWidth'))
         self.screenshot('helper-chat-existing-compact-1366')
         reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
         self.browser.evaluate("window.__eesHelperComposer=document.querySelector('#chat-input');true")
@@ -211,7 +204,7 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.assertEqual(self.helper_status['requests'][0]['chat_id'], 'existing-chat')
         self.screenshot('helper-chat-question-and-personal-file')
         message_id = self.server.completions[0]['user_message']['id']
-        self.click('[data-author-action=procedure_cancel]')
+        self.click('[data-author-action=tool_start_back]')
         self.click('#ees-work-system-trigger')
         self.click('[data-action=choose_system][data-system-id=APC]')
         self.wait("document.querySelector('#ees-work-system-trigger')?.textContent.includes('APC')")
@@ -239,11 +232,9 @@ class HelperChatNativeTests(IntegratedNativeCase):
         before = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.browser.evaluate("window.__eesHelperImage=document.querySelector('#message-input-container [data-cy=image]');window.__eesHelperComposer=document.querySelector('#chat-input');true")
         question = self.open_guide()
-        self.assertEqual(self.read('#ees-work-procedure-start', 'getAttribute("data-empty")'), 'true')
-        self.assertIn(INTRO, self.text('#ees-work-procedure-start'))
-        self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start .ees-helper-label') && !!document.querySelector('#ees-work-procedure-start small')"))
-        self.assertFalse(self.browser.evaluate("!!document.querySelector('#messages-container img[alt=logo]')"))
-        self.assertNotIn('Fixture AI', self.text('#messages-container'))
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start')"))
+        self.assertTrue(self.browser.evaluate("!!document.querySelector('#messages-container img[alt=logo]')"))
+        self.assertIn('Fixture AI', self.text('#messages-container'))
         self.assertTrue(self.browser.evaluate("document.querySelector('#chat-input')===window.__eesHelperComposer && document.querySelector('#message-input-container [data-cy=image]')===window.__eesHelperImage"))
         self.screenshot('helper-chat-empty-guide-image-preserved')
         self.click(QUESTION)
@@ -299,14 +290,14 @@ class HelperChatNativeTests(IntegratedNativeCase):
                 self.browser.call('Input.dispatchMouseEvent', {'type': kind, **point,
                     'button': 'left', 'buttons': int(kind == 'mousePressed'), 'clickCount': count})
         self.assertTrue(self.server.completion_response_started.wait(timeout=3))
-        self.wait("window.__eesSourceShellV1.helpState().busy && [...document.querySelectorAll('#ees-work-procedure-start [data-action=procedure_question]')].every(e=>e.disabled)")
+        self.wait("window.__eesSourceShellV1.helpState().busy && [...document.querySelectorAll('[data-author-action=tool_question]')].every(e=>e.disabled)")
         self.assertEqual(len(self.server.completions), 1)
         self.assertEqual(len(self.helper_status['requests']), 1)
         self.screenshot('helper-chat-pending-disabled')
         self.server.completion_response_hold.set()
         self.wait_reply()
         self.assert_helper_request(question)
-        self.wait("[...document.querySelectorAll('#ees-work-procedure-start [data-action=procedure_question]')].every(e=>!e.disabled)")
+        self.wait("[...document.querySelectorAll('[data-author-action=tool_question]')].every(e=>!e.disabled)")
         # A normal Native answer is also busy: helper actions must not enqueue
         # another request while the ordinary conversation is streaming.
         self.server.stream_started.clear()
@@ -314,7 +305,7 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.fill('#chat-input', '일반 대화의 답변 중에는 기다립니다')
         self.click('#send-message-button')
         self.assertTrue(self.server.stream_started.wait(timeout=3))
-        self.wait("[...document.querySelectorAll('#ees-work-procedure-start [data-action=procedure_question]')].every(e=>e.disabled)")
+        self.wait("[...document.querySelectorAll('[data-author-action=tool_question]')].every(e=>e.disabled)")
         self.assertEqual(len(self.server.completions), 2)
         self.server.stream_hold.set()
         self.wait('!window.__eesSourceShellV1.helpState().busy')
@@ -330,10 +321,10 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.wait('document.querySelector(' + json.dumps(NOTICE) + ')?.textContent.trim() && !window.__eesSourceShellV1.helpState().busy')
         self.assertEqual(self.read(NOTICE, 'getAttribute("role")'), 'status')
         self.assertEqual(self.text(NOTICE).strip(), UNAVAILABLE)
-        self.assert_notice_above_questions()
+        self.assert_notice_above_composer()
         self.screenshot('helper-chat-unavailable-inline-administrator-guidance')
         self.assertEqual(self.text('body').count(self.text(NOTICE).strip()), 1)
-        self.assertTrue(self.browser.evaluate("document.querySelector('#ew-procedure-name')?.checkVisibility({visibilityProperty:true})"))
+        self.assertTrue(self.browser.evaluate("document.querySelector('.ew-tool-questions')?.checkVisibility({visibilityProperty:true})"))
         self.assertEqual(self.server.completions, [])
         self.assertEqual(self.server.chats['existing-chat']['chat']['history'], history)
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), before)
@@ -345,7 +336,7 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.helper_status.update(available=False, code='native_access_denied', message='현재 업무 도우미를 사용할 권한이 없습니다.')
         self.click(QUESTION)
         self.wait('document.querySelector(' + json.dumps(NOTICE) + ')?.textContent.includes("권한") && !window.__eesSourceShellV1.helpState().busy')
-        self.assert_notice_above_questions()
+        self.assert_notice_above_composer()
         self.assertEqual(len(self.server.completions), 1)
         self.assertEqual(self.server.chats['existing-chat']['chat']['history'], history)
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), before)
@@ -410,7 +401,7 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.assertEqual(len(self.helper_status['requests']), 1, 'Ordinary send must not run helper preflight')
         self.screenshot('helper-chat-ordinary-send-preserved')
 
-    def test_english_question_sends_exact_visible_text_without_translation_keys(self):
+    def test_english_locale_sends_exact_visible_tool_question_without_translation_keys(self):
         locale_script = self.browser.call('Page.addScriptToEvaluateOnNewDocument', {
             'source': "localStorage.setItem('locale','en-US');"})['identifier']
         self.addCleanup(lambda: self.browser.call('Page.removeScriptToEvaluateOnNewDocument',
@@ -420,13 +411,9 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.open_sidebar()
         self.fill('#chat-input', 'A separate personal draft')
         before = self.browser.evaluate('window.__eesNativeDraftV1.read()')
-        self.click('[data-action=mode][data-mode=author]')
-        self.click('[data-author-action=create]')
-        self.wait('document.querySelector(' + json.dumps(QUESTION) + ')?.textContent.includes("copy")')
-        question = self.text(QUESTION).strip()
-        self.assertRegex(question, r'[A-Za-z]')
-        self.assertNotRegex(question, r'[가-힣]')
-        self.assertNotRegex(self.text('#ees-work-procedure-start'), r'EES\.[A-Za-z]')
+        question = self.open_guide()
+        self.assertTrue(question)
+        self.assertNotRegex(self.text('.ew-tool-questions'), r'EES\.[A-Za-z]')
         self.click(QUESTION)
         self.wait_reply()
         self.assert_helper_request(question)
@@ -487,9 +474,9 @@ class HelperChatNativeTests(IntegratedNativeCase):
         history = deepcopy(self.server.chats['existing-chat']['chat']['history'])
         self.click(QUESTION)
         self.wait('document.querySelector(' + json.dumps(NOTICE) + ')?.textContent.includes("권한") && !window.__eesSourceShellV1.helpState().busy')
-        self.assert_notice_above_questions()
+        self.assert_notice_above_composer()
         self.assertEqual(self.text('body').count(self.text(NOTICE).strip()), 1)
-        self.assertTrue(self.browser.evaluate("document.querySelector('#ew-procedure-name')?.checkVisibility({visibilityProperty:true})"))
+        self.assertTrue(self.browser.evaluate("document.querySelector('.ew-tool-questions')?.checkVisibility({visibilityProperty:true})"))
         self.assertEqual(len(rejected), 1)
         self.assertEqual(rejected[0]['user_message']['content'], question)
         self.assertEqual(self.server.completions, [])

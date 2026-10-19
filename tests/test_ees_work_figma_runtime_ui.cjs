@@ -4,6 +4,42 @@ const test=require('node:test'),assert=require('node:assert/strict'),crypto=requ
 const {renderer,run,controller,deferred}=require('./ees_workspace_ui_fixture.cjs');
 const html=(source,values={})=>run(renderer(values),source);
 
+test('handled author Escape keeps focus local without swallowing unrelated Native keys',()=>{
+ const harness=controller();
+ harness.designer.handleEvent=()=>({handled:true,preventDefault:true});
+ for(const key of ['Escape','Enter']){
+  let prevented=0,stopped=0;
+  harness.api.handleEvent({type:'keydown',key,target:{},preventDefault(){prevented++;},stopPropagation(){stopped++;}});
+  assert.equal(prevented,1);assert.equal(stopped,key==='Escape'?1:0);
+ }
+ harness.designer.handleEvent=()=>({handled:false});
+ harness.api.handleEvent({type:'keydown',key:'Escape',target:{closest:()=>null},preventDefault(){assert.fail('Native key prevented');},stopPropagation(){assert.fail('Native key stopped');}});
+});
+
+test('procedure entry initializes once through POST then renders ordinary workflows',async()=>{
+ const h=controller(),state={ok:true,capabilities:{actor_id:'a',can_author:true,managed_systems:['EMS']},systems:['EMS'],initial_procedures_ready:false,workflows:[],runs:[],ui_state:{revision:0,state:{}}};
+ h.api.setState(state);h.api.setSelection({mode:'author',tab:'overview',system_id:'EMS'});
+ h.setReply(call=>{if(call.body?.action==='initialize_procedures'){assert.equal(call.body.system_id,'EMS');assert.equal(call.body.expected_revision,0);state.initial_procedures_ready=true;state.workflows=[{id:'initial',name:'Initial procedure',system_id:'EMS'}];return {ok:true};}return call.url.includes('workspace?')?state:{ok:true};});
+ await h.api.refresh();await h.api.refresh();
+ assert.equal(h.calls.filter(call=>call.body?.action==='initialize_procedures').length,1);
+ assert.equal(h.api.snapshot().state.workflows[0].id,'initial');
+});
+
+test('initial registration is not attempted by readers, tools pages or ordinary work views',async()=>{
+ for(const [mode,tab,managed] of [['author','overview',[]],['author','tools',['EMS']],['work','my_work',['EMS']]]){
+  const h=controller(),state={ok:true,capabilities:{actor_id:'a',can_author:!!managed.length,managed_systems:managed},systems:['EMS'],initial_procedures_ready:false,workflows:[],runs:[],ui_state:{revision:0,state:{}}};
+  h.api.setState(state);h.api.setSelection({mode,tab,system_id:'EMS'});h.setReply(call=>call.url.includes('workspace?')?state:{ok:true});await h.api.refresh();
+  assert.equal(h.calls.filter(call=>call.body?.action==='initialize_procedures').length,0);
+ }
+});
+
+test('initial registration failure is reported without pretending procedures exist',async()=>{
+ const h=controller(),state={ok:true,capabilities:{actor_id:'a',can_author:true,managed_systems:['EMS']},systems:['EMS'],initial_procedures_ready:false,workflows:[],runs:[],ui_state:{revision:0,state:{}}};
+ h.api.setState(state);h.api.setSelection({mode:'author',tab:'overview',system_id:'EMS'});
+ h.setReply(call=>call.body?.action==='initialize_procedures'?{ok:false,error:{message:'Registration failed'}}:call.url.includes('workspace?')?state:{ok:true});
+ assert.equal(await h.api.refresh(),null);assert.match(h.api.snapshot().error,/Registration failed/);assert.equal(h.api.snapshot().state.workflows.length,0);
+});
+
 const nativeCapabilities=(overrides={})=>({actor_id:'a',is_admin:false,can_author:false,managed_systems:[],native_access_available:true,native_access:{models:false,knowledge:false,prompts:false,skills:false,tools:false,admin:false},...overrides});
 function nativeNavigationHarness(capabilities=nativeCapabilities({is_admin:true,can_author:true,native_access:{models:true,knowledge:true,prompts:true,skills:true,tools:true,admin:true}})){
  const h=controller(),navigation=[],restores=[];let current={prompt:'대화 초안',files:[{id:'kept-file'}],selectedToolIds:['kept-tool'],selectedModels:['kept-model'],params:{temperature:.2}},ready=true;

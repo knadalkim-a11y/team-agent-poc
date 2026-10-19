@@ -8,6 +8,50 @@
 
 이 단계에서는 사내 vLLM과 Hermes를 아직 연결하지 않습니다.
 
+<a id="personal-windows-development"></a>
+
+## 개인 Windows PC의 EES 개발 환경
+
+회사 설치와 분리된 신규 개인 개발용이다. 아래 기존 초기 설치의 `start-openwebui.ps1`는 공식 Open WebUI를 실행하므로 EES 수정본의 실행 명령으로 사용하지 않는다. 최초 설치 기준은 main `0f4c905ea6cb277b0704af32c40dd198fab3f959`, 프로그램 `0.11.3+ees.14`다. 이후 #97 문서 병합과 Figma UI 개발본의 반영 상태는 [STATUS](STATUS.md)를 따른다. 미병합 PR #94–96은 포함하지 않는다.
+
+- checkout: 사용자 폴더의 `source/repos/team-agent-poc`, Python: 그 안의 `.venv/Scripts/python.exe`(3.11). 기존 시스템 Python/Node는 교체하지 않는다.
+- 초기 공식 의존성은 `uv venv --python 3.11 --seed .venv`, `uv pip install --python .venv/Scripts/python.exe open-webui==0.11.3`으로 준비한다. 개인망에서는 사내 프록시·주소·인증값을 설정하지 않는다.
+- 최초 프로그램은 해당 main의 성공한 EES delivery 실행 `38858836722` / artifact `12028799532`다. 바깥 ZIP의 SHA256 `45c8b0f589be342073b7048b16e569b7b988bfc66e3d5ff1d0ea489041ceded7`과 내부 manifest의 파일 해시를 검증한 뒤 `branding/manifest.json`과 wheel을 `dist/main-branding/`에 둔다. `install-main`은 이 준비된 고정본을 설치한다. 다른 커밋의 파일로 이 폴더를 덮어쓰지 않는다.
+- 데이터·새 키는 `%LOCALAPPDATA%/EES-Workflow-Dev/`, 설치 영수증·프로세스 신원·로그는 checkout의 `runtime/local-dev/`에 보관한다. 둘 다 Git에 넣지 않는다. 사내 DB·키·PAT를 복사하지 않는다.
+- 브라우저는 `http://localhost:8080` 또는 `http://127.0.0.1:8080`을 사용한다. 서버는 IPv4 loopback에만 바인드한다. 첫 계정은 새 개인 테스트 관리자다.
+
+저장소 폴더의 PowerShell에서 실행한다.
+
+```powershell
+.\.venv\Scripts\python.exe scripts\dev_ees.py install-main
+.\.venv\Scripts\python.exe scripts\dev_ees.py start
+.\.venv\Scripts\python.exe scripts\dev_ees.py status
+.\.venv\Scripts\python.exe scripts\dev_ees.py stop
+```
+
+`start`는 기존 프로세스 관리 코드를 사용하고 로그 경로를 먼저 출력한다. 첫 기동에는 Python import·새 DB 준비·기본 임베딩 모델 다운로드가 필요할 수 있어 최대 600초 기다린다. 시간 초과 뒤 프로세스가 남아 있으면 `status`의 `running`과 `healthy`, 출력된 로그를 확인한다. 같은 포트에 새 서버를 중복 실행하지 않는다. 종료는 기록한 실행 파일·생성 시각이 맞는 프로세스에만 정상 종료 신호를 보낸다.
+
+### 소스 수정 반영
+
+고정 빌드 도구는 `frontend/open-webui-source.json`의 Node 22.16.0/npm 10.9.2다. Node 공식 Windows ZIP과 SHA256을 확인하여 `dist/tools/node-v22.16.0-win-x64/`에 풀고, 고정 Open WebUI 소스 `2a960a59fe1dbbd35282f0556b3666d81102e781`을 `dist/open-webui-source/`에 준비한다. 공식 wheel은 다음 명령으로 준비하며 기존 빌더가 고정 해시를 다시 검증한다.
+
+```powershell
+.\.venv\Scripts\python.exe -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
+.\.venv\Scripts\python.exe scripts\dev_ees.py stop
+$env:EES_DEV_BUILD_ROOT = 'D:\EES-Workflow-Dev-Builds'
+.\.venv\Scripts\python.exe scripts\dev_ees.py build
+.\.venv\Scripts\python.exe scripts\dev_ees.py start
+.\.venv\Scripts\python.exe scripts\dev_ees.py status
+```
+
+`EES_DEV_BUILD_ROOT`는 임시 소스·npm 의존성·빌드 산출물의 위치만 바꾼다. 이 PC에서는 C 드라이브 빌드 중 공간 부족이 발생해 여유 있는 D 드라이브를 사용한다. 다른 PC에서는 충분한 공간이 있는 폴더로 바꾸거나, 변수를 생략해 기본 `dist/local-builds`를 사용한다. 저장소·Python 실행 환경·사용자 데이터·키·로그 위치는 이동하지 않는다. 실패한 빌드 뒤 기존 실행본을 계속 쓰려면 `start`로 시작한다. 새 빌드가 검증되기 전에는 설치 영수증이 교체되지 않는다.
+
+`build`는 새 원본 checkout에서 고정 npm lock 설치 → 기존 프런트엔드 빌드 → 기존 EES wheel 빌드 → 격리 환경에 의존성 재설치 없이 적용한다. 실패한 소스/로그를 지우지 않는다. 빌드 중 소스가 바뀌면 적용하지 않는다. 반복 빌드의 큰 산출물은 `dist/local-builds/`에 보존하므로 여유 공간을 확인한다.
+
+UI는 `frontend/patches/`와 연결된 원본을 수정하며 생성된 JS나 `.venv`의 파일을 직접 고치지 않는다. 패치 변경 시 `frontend/open-webui-source.json`의 패치·패치 결과 해시도 함께 갱신해야 한다. 업무 Python 원본은 README의 서버 책임표를 따른다. 실행 중인 앱은 자동 reload하지 않는다. `status`는 설치한 커밋/dirty/wheel SHA와 현재 checkout을 별도로 표시한다. 수정 후 빌드를 건너뛰면 이전 실행본이며, 커밋하지 않은 개발본을 검증된 main으로 표시하지 않는다.
+
+모델 API는 기본 비활성이다. 화면·가입·업무 작성/저장과 실제 모델 대화·Confluence/Jira/EMS 연동은 별도로 판정한다. 기본 임베딩 모델 다운로드는 사내 채팅 모델 연결 성공이 아니다. 사내 연결·회원·자동 시작·LAN 공개는 이 절차에 포함하지 않는다. 회사 운영용 `manage-ees.ps1`의 설정이나 배포 상태도 수정하지 않는다.
+
 ## 초기 설치 기록 (2026-09-03)
 
 사용자 보고로 uv 설치, GitHub·PyPI·Hugging Face 프록시 접근 HTTP 200, Open WebUI 실행 명령 입력을 확인했습니다. 이 기록은 최초 설치 과정의 관찰이며 최신 기동 상태를 대신하지 않습니다.

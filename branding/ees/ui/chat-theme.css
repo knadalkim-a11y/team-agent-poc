@@ -18,14 +18,14 @@
   font-display: swap;
 }
 :root {
-  --ees-font: "EES Inter", "EES Noto Sans KR", "Segoe UI", sans-serif;
+  --ees-font: "EES Noto Sans KR", "EES Inter", "Segoe UI", sans-serif;
   --ees-paper: #ffffff;
   --ees-side: #f5f7fa;
   --ees-soft: #f0f4f8;
-  --ees-ink: #202c3e;
-  --ees-muted: #647187;
-  --ees-line: #e4e9ef;
-  --ees-blue: #37658b;
+  --ees-ink: #1f2023;
+  --ees-muted: #5c5e65;
+  --ees-line: #d5d6da;
+  --ees-blue: #2f5f98;
   --ees-tint: #eef5fa;
   --ees-warning: #7e673e;
 }
@@ -180,7 +180,7 @@ nav:has(a[href="/workspace/models"]),
   color: var(--ees-ink);
   background-color: var(--ees-paper);
   border-color: var(--ees-line);
-  border-radius: .75rem;
+  border-radius: 8px;
   box-shadow: none;
   backdrop-filter: none;
 }
@@ -196,8 +196,8 @@ nav:has(a[href="/workspace/models"]),
 #chat-container #chat-input {
   color: var(--ees-ink);
   font-family: var(--ees-font);
-  font-size: .8125rem;
-  line-height: 1.7;
+  font-size: 14px;
+  line-height: 22px;
 }
 #chat-container #chat-input::placeholder,
 #chat-container #chat-input [data-placeholder]::before {
