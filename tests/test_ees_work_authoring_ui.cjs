@@ -3,7 +3,6 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),crypto=require('node:crypto'),path=require('node:path');
 const {renderer,run}=require('./ees_workspace_ui_fixture.cjs');
 const source=fs.readFileSync(path.join(__dirname,'../branding/ees/ui/ees-work-designer.js'),'utf8');
-test('name-only creation does not publish the retired example-helper screen',async()=>{const h=harness();await h.open('');h.dialogs.push(false);h.click('create');await flush();assert.ok(h.startContexts.length);assert.ok(h.startContexts.every(value=>value===null));assert.equal(h.writes.length,0);});
 const copy=value=>JSON.parse(JSON.stringify(value));
 const toolExamples=[
  {id:'jira-query',name:'Jira 조회',description:'배포 전에 CR 승인 상태를 확인합니다.',kind:'read',match:{function:'jira_search_crs'}},
@@ -37,6 +36,7 @@ function harness({cryptoProvider=crypto}={}){const h={startContexts:[],writes:[]
 }
 
 test('new Figma authoring keeps Native conversation untouched and has exact right-panel structure',async()=>{const h=harness();await flush();assert.match(h.markup,/class="ew-author(?:\s[^"]*)?"/);assert.match(h.markup,/구조/);assert.doesNotMatch(source,/hideWorkspaceContent|chat\.hidden|ees-work-native-hidden/);});
+test('name-only creation does not publish the retired example-helper screen',async()=>{const h=harness();await h.open('');h.dialogs.push(false);h.click('create');await flush();assert.ok(h.startContexts.length);assert.ok(h.startContexts.every(value=>value===null));assert.equal(h.writes.length,0);});
 test('empty workspace listing does not create drafts or runs',async()=>{const h=harness();h.state.workflows=[];await h.open('');assert.match(h.markup,/아직 업무 절차가 없습니다/);assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);});
 test('direct editing saves only the chosen definition with current revision and request ID',async()=>{const h=harness();await h.node();h.field('instructions','직접 수정');h.click('save');await flush();assert.equal(h.writes[0].action,'save_draft');assert.equal(h.writes[0].workflow_id,'w');assert.equal(h.writes[0].expected_revision,1);assert.ok(h.writes[0].request_id);assert.equal(h.writes[0].definition.nodes.j.instructions,'직접 수정');assert.equal(h.workflows.get('q').draft.nodes.j.instructions,'원래 안내');assert.equal(h.draft().revision,2);assert.equal(h.draft().dirty,false);});
 test('dirty drafts and per-workflow node selection survive navigation',async()=>{const h=harness();await h.node();h.field('instructions','W 비공개 초안');await h.open('q');await h.node();h.field('instructions','Q 초안');await h.open('w');assert.equal(h.draft().definition.nodes.j.instructions,'W 비공개 초안');assert.match(h.markup,/W 비공개 초안/);assert.equal(h.writes.length,0);});

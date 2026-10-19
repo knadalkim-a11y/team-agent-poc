@@ -105,6 +105,7 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.wait('document.querySelector('+json.dumps(selector)+')')
         self.click(selector)
         self.wait("document.querySelector('[data-author-action=edit_workflow]')")
+        self.click('.ew-author-tabs [data-author-action=tab][data-tab=structure]')
         try:
             self.begin_stage_click_diagnostics()
         except Exception as error:

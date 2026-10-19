@@ -39,7 +39,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.fill('#ew-summary-editor [name=description]', '개인 PC 개발 준비 · 취소할 내용')
         self.click('[data-author-action=summary_cancel]')
         self.assertEqual(self.state(workflow_id=identifier)['workflow']['draft']['category'], 'ops')
-        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=summary_edit][data-id=business]')"))
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=summary_edit][data-id=business]')"),
+                        self.browser.evaluate('document.activeElement?.outerHTML'))
         self.click('[data-author-action=summary_edit][data-id=business]')
         self.choose('#ew-summary-editor [name=category]', 'setup')
         self.fill('#ew-summary-editor [name=description]', '개인 PC에서 개발 환경 준비')
@@ -299,6 +300,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-action=procedures]')
         self.wait("document.querySelector('[data-author-action=open][data-id=\""+wid+"\"]')")
         self.click('[data-author-action="open"][data-id="'+wid+'"]')
+        self.click('.ew-author-tabs [data-author-action=tab][data-tab=structure]')
         self.click('[data-author-action="node"][data-id="job-0"]')
         self.click('.ew-shared-picker summary')
         self.assertTrue(self.read('.ew-shared-picker','open'))
@@ -316,7 +318,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ew-author-node [name=result_argument],#ew-author-node [name=result_job_id]')"))
         self.screenshot('shared-b10-5-selected-no-handoff')
         self.click('[data-author-action=save]')
-        self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장 초안')")
+        self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
         stored=self.state(workflow_id=wid)['workflow']['draft']['nodes']['job-0']
         self.assertEqual(stored['shared_tool_id'],'managed-search_pages')
         self.assertNotIn('tool_reference',stored)
@@ -435,6 +437,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.fail('Native skills search request/response not observed for ' + query)
 
     def skills_roundtrip(self, label):
+        if label == 'procedure-start':
+            self.wait("window.__eesNativeWorkV1.captureReference()?.kind === 'none'")
         before = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         model = self.read('#model-selector-model-button', 'getAttribute("aria-label")')
         self.assertIn('Fixture AI', model)
@@ -582,7 +586,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.click('[data-action=mode][data-mode=author]')
         self.click('[data-author-action=create]')
-        self.fill('#ew-procedure-name', '관리자 설정을 다녀올 새 절차')
+        self.fill('#ees-work-dialog [name=name]', '관리자 설정을 다녀올 새 절차')
+        self.click('#ees-work-dialog [data-dialog-cancel]')
+        initial_workflows = self.state()['workflows']
         reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
         self.click('[data-action=native_open][data-native-id=admin]')
         self.wait("document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-admin-general][aria-selected=true]') && document.querySelector('[role=dialog][aria-modal=true] input[type=text][placeholder*=\"localhost:3000\"]')")
@@ -595,8 +601,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.read('[role=dialog] input[type=text][placeholder*="localhost:3000"]', 'value'), 'https://unsaved-fixture.invalid')
         self.screenshot('menu-c18-native-admin-unsaved')
         self.click('#settings-tabs-container > button')
-        self.wait("location.pathname === '/c/existing-chat' && window.__eesNativeDraftV1?.ready() && document.querySelector('#ew-procedure-name') && !document.querySelector('#settings-tabs-container') && !document.querySelector('#ees-work-native-return')")
-        self.assertEqual(self.read('#ew-procedure-name', 'value'), '관리자 설정을 다녀올 새 절차')
+        self.wait("location.pathname === '/c/existing-chat' && window.__eesNativeDraftV1?.ready() && document.querySelector('[data-author-action=create]') && !document.querySelector('#settings-tabs-container') && !document.querySelector('#ees-work-native-return')")
+        self.click('[data-author-action=create]')
+        self.assertEqual(self.read('#ees-work-dialog [name=name]', 'value'), '관리자 설정을 다녀올 새 절차')
+        self.click('#ees-work-dialog [data-dialog-cancel]')
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
         # Opening the original modal now leaves the source route and Chat in
         # place. Its reference remains the same, rather than a new route token.
@@ -609,7 +617,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             '/api/v1/auths/admin/config', '/api/v1/auths/admin/config/update',
             '/api/v1/configs/banners', '/api/events/webhooks'} for method, path in self.server.requests))
         self.assertEqual(self.server.completions, [])
-        self.assertEqual(self.state()['workflows'], [])
+        self.assertEqual(self.state()['workflows'], initial_workflows)
         self.click('#settings-tabs-container [role=tab][aria-controls=tab-general]')
         self.wait("document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-general][aria-selected=true]')")
         self.assertEqual(self.browser.evaluate('location.pathname'), '/c/existing-chat')
@@ -1033,7 +1041,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assert_source_shell()
         self.click('#ees-work-entry [data-action=procedures]')
         self.wait("location.pathname === '/' && window.__eesNativeDraftV1?.ready() && document.querySelector('#ees-work-designer')")
-        self.assertEqual(self.state()['workflows'], [])
+        self.wait("document.querySelectorAll('[data-author-action=open]').length === 3")
+        self.assertEqual(len(self.state()['workflows']), 3)
+        self.assertEqual(self.state()['runs'], [])
 
     def test_native_shell_browser_back_preserves_draft_and_mobile_navigation(self):
         self.native_menu_fixture()
@@ -1041,7 +1051,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.click('[data-action=mode][data-mode=author]')
         self.click('[data-author-action=create]')
-        self.fill('#ew-procedure-name', '브라우저 뒤로 가기 중인 미저장 절차')
+        self.fill('#ees-work-dialog [name=name]', '브라우저 뒤로 가기 중인 미저장 절차')
+        self.click('#ees-work-dialog [data-dialog-cancel]')
         self.click('[data-action=native_open][data-native-id=skills]')
         self.wait("location.pathname === '/workspace/skills' && document.querySelector('#workspace-container input[aria-label]')")
         self.browser.call('Emulation.setDeviceMetricsOverride', {
@@ -1056,9 +1067,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertFalse(self.browser.evaluate('document.documentElement.scrollWidth > innerWidth'))
         self.screenshot('menu-c18-native-mobile')
         self.browser.evaluate('history.back()')
-        self.wait("location.pathname === '/c/existing-chat' && window.__eesNativeDraftV1?.ready() && window.__eesNativeWorkV1?.captureReference()?.context_id && document.querySelector('#ew-procedure-name')")
+        self.wait("location.pathname === '/c/existing-chat' && window.__eesNativeDraftV1?.ready() && document.querySelector('[data-author-action=create]')")
+        self.click('[data-author-action=create]')
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
-        self.assertEqual(self.read('#ew-procedure-name', 'value'), '브라우저 뒤로 가기 중인 미저장 절차')
+        self.assertEqual(self.read('#ees-work-dialog [name=name]', 'value'), '브라우저 뒤로 가기 중인 미저장 절차')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
         self.assertEqual(self.server.completions, [])
         self.screenshot('menu-c18-mobile-browser-back')
@@ -1138,7 +1150,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         # Menu selection has its own debounced personal UI save. Its timing
         # must not change the required single business command for this draft.
         self.assertEqual([body['action'] for body in self.server.workspace_commands
-                          if body['action'] != 'save_ui'], ['tool_save'])
+                          if body['action'] not in ('save_ui', 'initialize_procedures')], ['tool_save'])
         self.screenshot('easy-tools-unconnected-saved')
 
         self.connected_tools.append(function('jira', '합성 Jira', 'jira_search_crs', 'read'))
@@ -1382,15 +1394,15 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertIn('도구 연결 전', self.text('#ees-work-designer'))
         self.click('.ew-procedure-menu summary')
         self.click('[data-author-action="edit_workflow"]')
-        category_help = '#ees-work-dialog [data-author-action=help][data-id=category]'
-        self.click(category_help)
-        self.wait("document.querySelector('#ees-work-help')")
-        self.assertIn('분류', self.text('#ees-work-help'))
+        self.wait("document.querySelector('#ew-summary-editor')")
+        self.assertIn('분류 변경은 같은 시스템 안에서 목록 위치만 바꿉니다', self.text('#ew-summary-editor'))
+        self.click('#ew-summary-editor [name=name]')
+        self.key('Tab', 9)
+        self.assertEqual(self.browser.evaluate('document.activeElement.name'), 'category')
         self.key('Escape', 27)
-        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-help')"))
-        self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-work-dialog')"))
-        self.assertTrue(self.browser.evaluate('document.activeElement === document.querySelector(' + json.dumps(category_help) + ')'))
-        self.click('#ees-work-dialog-cancel')
+        self.wait("!document.querySelector('#ew-summary-editor')")
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=summary_edit][data-id=business]')"),
+                        self.browser.evaluate('document.activeElement?.outerHTML'))
         self.assertEqual(self.state(workflow_id=record['id'])['workflow']['revision'], 1)
         self.click('[data-author-action="validate"]')
         self.wait("document.querySelector('.ew-author-validation')")
@@ -1541,7 +1553,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-action="mode"][data-mode="author"]')
         self.wait("document.querySelector('[data-author-action=open][data-id=\"" + key + "\"]')")
         self.click('[data-author-action="open"][data-id="' + key + '"]')
-        self.click('[data-author-action="tab"][data-tab="schedule"]')
+        self.wait("document.querySelector('.ew-summary-card')")
+        self.click('.ew-author-tabs [data-author-action="tab"][data-tab="schedule"]')
         self.wait("document.querySelector('#ew-author-schedule [name=interval]')")
         self.assertEqual(self.read('#ew-author-schedule [name=interval]', 'value'), '1')
         self.fill('#ew-author-schedule [name=interval]', '2')
@@ -1634,6 +1647,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-action="mode"][data-mode="author"]')
         self.wait("document.querySelector('[data-author-action=open][data-id=\"" + key + "\"]')")
         self.click('[data-author-action="open"][data-id="' + key + '"]')
+        self.click('.ew-author-tabs [data-author-action=tab][data-tab=structure]')
         self.click('[data-author-action="node"][data-id="job-0"]')
         self.assertEqual(self.read('#ew-author-node [name=read_retry_count]', 'value'), '0')
         self.assertNotIn('read_retry', self.state(workflow_id=key)['workflow']['draft']['nodes']['job-0'])

@@ -417,8 +417,9 @@ class SourceShellNativeTests(IntegratedNativeCase):
             elif screen == 'records':
                 self.assertIn('저장된 진행 건이 없습니다.', self.text('#ees-work-panel'))
             elif unknown:
-                self.assertIn('업무 절차 0개', self.text('#ees-work-designer'))
-                self.assertEqual(self.text('#ees-work-entry [data-action=procedures] small'), '0')
+                self.wait("document.querySelectorAll('[data-author-action=open]').length === 3")
+                self.assertIn('업무 절차 3개', self.text('#ees-work-designer'))
+                self.assertEqual(self.text('#ees-work-entry [data-action=procedures] small'), '3')
             labels.append(label)
             (unknown_labels if unknown else cached_labels).append(label)
         evidence = frame_monitor.collect(self, labels=labels)
@@ -975,6 +976,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
             native='tools', destination='procedures', previous='tools')
         self.step('native-return', '#ees-work-entry [data-action=procedures]',
                   "location.pathname === '/c/existing-chat' && document.querySelector('#ees-work-designer [data-author-action=create]')")
+        self.wait("window.__eesSourceFrameEvidence.samples.some(sample=>sample.label==='native-return' && sample.rightPanels.includes('procedures') && sample.menuCurrent.length===1 && sample.menuCurrent[0].key==='procedures')")
         frame_monitor.end_native_return(self)
         labels.append('native-return')
         self.step('admin-open', '[data-action=native_open][data-native-id=admin]',

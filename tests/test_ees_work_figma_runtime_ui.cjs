@@ -4,6 +4,18 @@ const test=require('node:test'),assert=require('node:assert/strict'),crypto=requ
 const {renderer,run,controller,deferred}=require('./ees_workspace_ui_fixture.cjs');
 const html=(source,values={})=>run(renderer(values),source);
 
+test('handled author Escape keeps focus local without swallowing unrelated Native keys',()=>{
+ const harness=controller();
+ harness.designer.handleEvent=()=>({handled:true,preventDefault:true});
+ for(const key of ['Escape','Enter']){
+  let prevented=0,stopped=0;
+  harness.api.handleEvent({type:'keydown',key,target:{},preventDefault(){prevented++;},stopPropagation(){stopped++;}});
+  assert.equal(prevented,1);assert.equal(stopped,key==='Escape'?1:0);
+ }
+ harness.designer.handleEvent=()=>({handled:false});
+ harness.api.handleEvent({type:'keydown',key:'Escape',target:{closest:()=>null},preventDefault(){assert.fail('Native key prevented');},stopPropagation(){assert.fail('Native key stopped');}});
+});
+
 test('procedure entry initializes once through POST then renders ordinary workflows',async()=>{
  const h=controller(),state={ok:true,capabilities:{actor_id:'a',can_author:true,managed_systems:['EMS']},systems:['EMS'],initial_procedures_ready:false,workflows:[],runs:[],ui_state:{revision:0,state:{}}};
  h.api.setState(state);h.api.setSelection({mode:'author',tab:'overview',system_id:'EMS'});
