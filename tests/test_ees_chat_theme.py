@@ -323,9 +323,9 @@ class ChromePipe:
             self.events.append(self.receive(deadline))
         self.stage = "ready"
 
-    def evaluate(self, expression):
+    def evaluate(self, expression, *, timeout=15):
         result = self.call("Runtime.evaluate", {
-            "expression": expression, "returnByValue": True, "awaitPromise": True})
+            "expression": expression, "returnByValue": True, "awaitPromise": True}, timeout=timeout)
         if "exceptionDetails" in result:
             raise AssertionError(result["exceptionDetails"])
         return result["result"].get("value")

@@ -8,7 +8,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 from zipfile import ZipFile
 
 from scripts import build_ees_frontend as frontend
@@ -35,6 +35,79 @@ def _hook_source():
     hook = _between(added, "const eesNativeDraftApi =", "if (!embedded) window.__eesNativeDraftV1 = eesNativeDraftApi;")
     hook += "if (!embedded) window.__eesNativeDraftV1 = eesNativeDraftApi;"
     return (load + "\n" + hook).replace("(message: any)", "(message)")
+
+
+class NativeBaselineWaitTests(unittest.TestCase):
+    def setUp(self):
+        import ees_frontend_native_baseline as baseline
+        self.baseline = baseline
+        self.now = 100.0
+        clock = patch.object(baseline.time, "monotonic", side_effect=lambda: self.now)
+        sleep = patch.object(baseline.time, "sleep", side_effect=self.advance)
+        clock.start()
+        sleep.start()
+        self.addCleanup(clock.stop)
+        self.addCleanup(sleep.stop)
+
+    def advance(self, seconds):
+        self.now += seconds
+
+    def navigation_error(self):
+        return AssertionError("Runtime.evaluate: {'code': -32000, 'message': 'Inspected target navigated or closed'}")
+
+    def test_reload_retries_destroyed_context_then_requires_new_complete_document(self):
+        browser = Mock()
+        browser.evaluate.side_effect = [42, self.navigation_error(), False, True]
+        self.baseline.reload_page(browser)
+        browser.call.assert_called_once_with("Page.reload", {"ignoreCache": True})
+        evaluations = browser.evaluate.call_args_list[1:]
+        for invocation in evaluations:
+            self.assertEqual(invocation.args, ("performance.timeOrigin !== 42 && document.readyState === 'complete'",))
+        self.assertEqual(len(evaluations), 3)
+        for invocation, budget in zip(evaluations, (15, 14.95, 14.9)):
+            self.assertAlmostEqual(invocation.kwargs["timeout"], budget)
+
+    def test_persistent_navigation_failure_exhausts_one_original_deadline(self):
+        browser = Mock()
+        browser.evaluate.side_effect = self.navigation_error()
+        with self.assertRaisesRegex(AssertionError, "Native baseline condition timed out"):
+            self.baseline.wait(browser, "ready", seconds=0.12, retry_navigation=True)
+        self.assertAlmostEqual(self.now, 100.12)
+        self.assertEqual(browser.evaluate.call_count, 3)
+        for invocation, budget in zip(browser.evaluate.call_args_list, (0.12, 0.07, 0.02)):
+            self.assertAlmostEqual(invocation.kwargs["timeout"], budget)
+
+    def test_non_navigation_failures_and_navigation_outside_reload_propagate(self):
+        for error, retry in ((AssertionError("Runtime.evaluate: {'code': -32601, 'message': 'Method not found'}"), True),
+                             (AssertionError("JavaScript assertion: Inspected target navigated or closed"), True),
+                             (AssertionError("Chrome DevTools response timed out."), True),
+                             (OSError("Chrome pipe closed"), True),
+                             (self.navigation_error(), False)):
+            with self.subTest(error=str(error), retry=retry):
+                browser = Mock()
+                browser.evaluate.side_effect = error
+                with self.assertRaises(type(error)) as raised:
+                    self.baseline.wait(browser, "ready", seconds=1, retry_navigation=retry)
+                self.assertIs(raised.exception, error)
+                browser.evaluate.assert_called_once()
+                self.assertEqual(self.now, 100)
+
+    def test_true_result_arriving_at_deadline_is_not_success(self):
+        browser = Mock()
+        def evaluate(*args, **kwargs):
+            self.advance(kwargs["timeout"])
+            return True
+        browser.evaluate.side_effect = evaluate
+        with self.assertRaisesRegex(AssertionError, "Native baseline condition timed out"):
+            self.baseline.wait(browser, "ready", seconds=1, retry_navigation=True)
+        browser.evaluate.assert_called_once()
+
+    def test_chrome_evaluation_passes_remaining_budget_to_cdp(self):
+        browser = Mock()
+        browser.call.return_value = {"result": {"value": True}}
+        self.assertTrue(self.baseline.ChromePipe.evaluate(browser, "ready", timeout=0.25))
+        browser.call.assert_called_once_with("Runtime.evaluate", {
+            "expression": "ready", "returnByValue": True, "awaitPromise": True}, timeout=0.25)
 
 
 @unittest.skipUnless(shutil.which("node"), "Node is required for Native source probes.")
@@ -101,6 +174,49 @@ const restoreChatInput=async serialized=>{
         self.assertIn("if (window.__eesNativeDraftV1 === eesNativeDraftApi) delete window.__eesNativeDraftV1", source)
         for name in ("navigateHandler", "initEmbeddedDraft", "initNewChat", "init"):
             self.assertIn("const " + name + " = () => eesNativeDraftLoad(async () => {", source)
+
+
+class BuildExecutableTests(unittest.TestCase):
+    def test_command_resolution_preserves_arguments_and_environment(self):
+        environment = {"PATH": "pinned-node"}
+        with patch.object(frontend.shutil, "which", return_value="C:/Node Tools/npm.cmd") as resolve:
+            with patch.object(frontend.subprocess, "run") as execute:
+                execute.return_value.stdout = "10.9.2\n"
+                self.assertEqual(frontend._run(["npm", "--version"], "source", env=environment), "10.9.2")
+        resolve.assert_called_once_with("npm", path="pinned-node")
+        self.assertEqual(execute.call_args.args[0], ["C:/Node Tools/npm.cmd", "--version"])
+        self.assertIs(execute.call_args.kwargs["env"], environment)
+        self.assertNotIn("shell", execute.call_args.kwargs)
+
+    def test_missing_executable_stops_before_launch(self):
+        with patch.object(frontend.shutil, "which", return_value=None):
+            with patch.object(frontend.subprocess, "run") as execute:
+                with self.assertRaisesRegex(FileNotFoundError, "Required build executable"):
+                    frontend._run(["npm", "--version"], "source")
+        execute.assert_not_called()
+
+    def test_patches_keep_lf_with_windows_autocrlf_enabled(self):
+        from scripts import build_ees_webui as builder
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            source.mkdir()
+            frontend._run(["git", "init"], source)
+            frontend._run(["git", "config", "core.autocrlf", "true"], source)
+            patch_file = root / "new.patch"
+            patch_file.write_text("diff --git a/icon.svg b/icon.svg\nnew file mode 100644\n"
+                                  "--- /dev/null\n+++ b/icon.svg\n@@ -0,0 +1,2 @@\n"
+                                  "+<svg>\n+</svg>\n", encoding="utf-8", newline="\n")
+            wheel = root / "empty.whl"
+            with ZipFile(wheel, "w"):
+                pass
+            config = {"patches": [{"path": "new.patch"}],
+                      "patched_files": {"icon.svg": frontend._sha(b"<svg>\n</svg>\n")}}
+            with patch.object(frontend, "SOURCE_CONFIG", root / "config.json"):
+                with patch.object(builder, "prepare_additions", side_effect=RuntimeError("hashes verified")):
+                    with self.assertRaisesRegex(RuntimeError, "hashes verified"):
+                        frontend._apply_ees(source, config, wheel)
+            self.assertEqual((source / "icon.svg").read_bytes(), b"<svg>\n</svg>\n")
 
 
 @unittest.skipUnless(os.environ.get("EES_TEST_FRONTEND_SOURCE_DIR") and shutil.which("node"),

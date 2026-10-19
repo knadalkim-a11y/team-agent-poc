@@ -1,8 +1,30 @@
 # Team Agent POC
 
-현재 작업은 [#83 소스 화면 전환 2단계](docs/mockups/ees-work/TASK.md#source-phase2-20261013)다. 왼쪽 작업 위치·탐색, 가운데 Native 대화, 오른쪽 업무/작성 패널을 변경 가능한 Figma 기준으로 구현한다. 기존 Native 인증·대화·첨부·모델 연결과 GitHub/Jira/Confluence의 실제 도구·개인 설정을 재사용한다. 새 설치는 데모 절차·전문 Assistant preset·등록 Skill 콘텐츠 없이 시작하며 ApplyDemo 재등록은 중지된다. 과거 조사/실패와 실제 사내 적용 상태는 [STATUS](docs/STATUS.md) 및 연결된 평가에 보존한다. 새 프로그램 준비를 실제 사내 적용 완료로 해석하지 않는다.
+EES 팀의 문서 조회와 업무 처리를 대화·워크플로우 화면으로 연결하는 플랫폼 PoC입니다. 왼쪽 작업 위치·탐색, 가운데 Native 대화, 오른쪽 업무/작성 패널을 사용하며 기존 Open WebUI 인증·대화·첨부·모델과 실제 도구·개인 설정을 재사용합니다. 현재 개발·미해결·사내 적용 상태는 [STATUS](docs/STATUS.md)가 원본입니다. 새 설치의 기본 콘텐츠와 프로그램·사용자 자료의 관리 경계는 아래 [원본과 배포본](#원본과-배포본)을 따릅니다.
 
 비개발자가 EES Workflow의 Chat UI에서 사내 문서와 업무 시스템을 활용하고, 관리자가 정한 공통 정책과 업무 처리 절차를 적용받는 플랫폼 POC입니다. 범용 대화·업무용 Prompt/Skill 공유를 유지하며 Open WebUI Native를 활용합니다. **공식 Open WebUI 패키지와 우리 프로젝트 래퍼** 두 구성으로 관리하며, 이 저장소는 사내 설정·Agent Pack과 Open WebUI 수정사항·빌드/적용 절차를 관리합니다. 기존 Python·호환 의존성을 재사용하고 데이터·키는 프로그램 변경과 분리합니다. [단순 유지보수 기준](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)과 실제 구현·적용 상태는 [STATUS](docs/STATUS.md)를 따릅니다.
+
+<a id="project-design"></a>
+
+## 프로젝트 설계 읽기
+
+이 README를 프로젝트 설계의 진입점으로 사용합니다. 처음 참여한 사람과 개발 AI는 [목표](#프로젝트-목표) → [전체 구조와 데이터 관계](#실행-구조와-관리-원본) → [문서 역할](#design-sources)을 읽고, 이후에는 바꾸는 기능의 원본만 따라갑니다. 코드 경로는 아래 기존 책임 표에서 찾으며 전체 API·DB 테이블·시험 목록을 여기에 복제하지 않습니다. 대상 범위는 EES 팀과 EES 관리 시스템입니다.
+
+<a id="design-sources"></a>
+
+### 설계 문서의 역할과 찾는 순서
+
+| 필요한 답 | 관리 원본 | 읽고 고치는 범위 |
+|---|---|---|
+| 무엇을 만들고 각 부분은 어떻게 연결되는가 | 이 README의 목표·실행 구조·코드 책임 표 | 기능 간 책임이나 데이터·권한 경계가 바뀔 때 갱신 |
+| 어떤 화면과 문구를 보여 주는가 | [Figma 기능 지도](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1288-2) → 해당 화면·명세 카드, 공통 부품은 [C1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=948-1078)·상태는 [S1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=944-1036)·반응형 기준은 [Q1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=979-1252) | 배치·표시 문구·화면 이동·상태 표현. 작업실 시안과 보관 화면은 채택된 설계와 구분 |
+| 어떤 조건에서 저장·실행·완료되는가 | 대상 브랜치의 기능 명세가 있으면 그 명세, 없으면 [TASK의 해당 기능 계약](docs/mockups/ees-work/TASK.md) | 입력·권한·상태 변화·저장/반영·완료 조건. 화면 카드에는 규칙 ID와 기능별 표시 차이만 연결 |
+| 어디까지 구현·검증·사내 적용됐는가 | [STATUS](docs/STATUS.md)와 거기서 연결한 PR·Checks·[평가 기록](evals/v4-ui-20260930.md) | 설계 확정·코드 구현·CI 검증·사내 확인을 구분 |
+| 개발 AI는 어떻게 작업하는가 | [AGENTS.md](AGENTS.md), Claude Code 진입은 [CLAUDE.md](CLAUDE.md) | 같은 지침 원본을 사용하며 기능별 상세 문서는 필요할 때 읽음 |
+
+**공용 도구를 찾는 예:** [main의 기능 계약](docs/mockups/ees-work/TASK.md#shared-tools-phase1-20261015)에서 시작해 [B10-1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1369-732)·[B10-2](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1368-724)·[B10-5](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1372-741) 카드를 연결합니다. 명세 시범의 [검토본](https://github.com/knadalkim-a11y/team-agent-poc/blob/9de04fb42120ca99dff7b17065b4d14faf47078b/docs/specs/shared-tools.md)은 [PR #96](https://github.com/knadalkim-a11y/team-agent-poc/pull/96)의 별도 변경입니다. 대상 브랜치에 반영됐는지 먼저 확인하고, 미병합 검토본의 동작을 main 구현으로 간주하지 않습니다. 기능 명세가 반영된 브랜치에서는 명세 → 카드 → 명세에 연결된 코드·시험 순서로 읽습니다.
+
+설계 관리의 이번 정리 범위와 Figma 후속 대상은 [작은 개선 계획](docs/mockups/ees-work/TASK.md#design-maintenance-20261016)에 모았습니다.
 
 ## 프로젝트 목표
 
@@ -21,7 +43,7 @@
 
 ## 어디부터 읽나
 
-- **개발을 이어갈 GPT**: [AGENTS.md](AGENTS.md) → [현재 상태](docs/STATUS.md) → 해당 기능 파일과 테스트.
+- **개발을 이어갈 AI**: [AGENTS.md](AGENTS.md) → [현재 상태](docs/STATUS.md) → 해당 기능 파일과 테스트.
 - **설치·운영할 사람**: [환경 기준](versions.md)을 읽고, 최초 설치는 [설치·기동](docs/01-openwebui-install.md), 기존 EES 환경의 업데이트는 [래퍼 운영](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)에서 시작합니다.
 - **1단계 적용 이력·첫 실제 업무**: [소스 프런트엔드 적용·실패 대응](docs/03-openwebui-native-agent.md#source-frontend-apply-20261013) → [도구 등록·게시·팀원 완료](docs/07-team-quickstart.md#first-work-20261012). GitHub 토큰이 없으면 [브라우저 ZIP 적용](docs/03-openwebui-native-agent.md#source-frontend-local-zip-20261013)을 처음부터 사용합니다.
 - **팀원 안내 초안**: [EES Workflow 시작 안내](docs/07-team-quickstart.md) — 팀 시연용 준비본. 실제 전달 상태는 STATUS에서 확인.
@@ -31,11 +53,13 @@
 - **이전 EES Work 4차 UI 구현 근거**: [v1.1 구현 범위·재사용](docs/mockups/ees-work/TASK.md#v4-ui-20260930) → [V4-01~15·실제 검증 경계](evals/v4-ui-20260930.md). 왼쪽은 공장/시스템 작업 공간과 업무 탐색, 중앙은 목록·입력/실행/결과와 상세 정보, 오른쪽은 실제 Native EES Assistant입니다. 초안·저장값·실행 snapshot과 다음 질문 참고·메시지 당시 참고·실행 대상을 구분합니다. 실제 schema·저장/승인/실행·P/T·Workspace/게시·권한 서비스를 재사용하며 기존 대화/첨부와 사용자 자산을 유지합니다. [09-28 C안](docs/mockups/ees-work/TASK.md#c-design-phase1-20260928), [09-23 A안](docs/mockups/ees-work/TASK.md#a-design-20260923), [09-22 진행/기록](docs/mockups/ees-work/TASK.md#right-panel-20260922), [업무 패널·대화 계약](docs/mockups/ees-work/TASK.md#work-panel-chat-design-20260916)은 당시 기능/검사 근거로 보존하며 당시 V4 외형 기준을 대체하지 않습니다. 새 재구성의 화면 기준은 위 Step 0-A의 현재 Figma입니다. 장기 [공동 진행과 개인 대화 분리](docs/mockups/ees-work/TASK.md#ees-work-shared-target)는 현재 사용자별 진행 건과 별개입니다.
 - **준비·배포·검증 여부 확인**: [STATUS](docs/STATUS.md)의 요약과 연결된 [평가표](evals/scenarios.md)를 확인합니다. README에는 진행 상태를 복제하지 않습니다.
 
-매번 시작 문구를 입력하는 대신 아래의 일회성 프로젝트 지침을 사용합니다. 현재 상태는 대화 기억이 아니라 저장소에서 확인합니다.
+ChatGPT·Claude의 웹 대화에서 개발할 때는 아래 시작 지침을 프로젝트 지침 또는 작업 요청에 연결합니다. 파일이 존재한다는 이유만으로 웹 대화가 자동으로 읽었다고 가정하지 않습니다. 현재 상태는 대화 기억이 아니라 저장소에서 확인합니다.
 
-## GPT 프로젝트 최초 설정
+<a id="gpt-프로젝트-최초-설정"></a>
 
-1. ChatGPT에서 이 개발 작업을 이어갈 프로젝트를 만들거나 기존 프로젝트를 엽니다. 예: `EES Assistant POC`.
+## 개발 AI 최초 설정
+
+1. ChatGPT 또는 Claude에서 이 개발 작업을 이어갈 프로젝트를 만들거나 기존 프로젝트를 엽니다. 예: `EES Assistant POC`.
 2. 해당 프로젝트의 **지침 / Instructions**에 아래 내용을 저장합니다. 메뉴 이름은 사용하는 앱에 따라 다를 수 있습니다.
 3. 그 프로젝트 안에서 개발 대화를 시작하고, GitHub 연결이 `knadalkim-a11y/team-agent-poc`에 접근 가능한지 확인합니다. PAT를 지침이나 채팅에 넣지 않습니다.
 
@@ -43,9 +67,13 @@
 이 프로젝트의 개발 원본은 GitHub knadalkim-a11y/team-agent-poc이다.
 개발 작업 시작 시 요청 대상 브랜치(미지정 시 main)의 최신 커밋을 확인하고,
 그 커밋의 AGENTS.md와 docs/STATUS.md를 읽어 작업 범위·검증·문서 관리·종료 규칙을 따른다.
-그다음 이번 요청에 필요한 파일만 읽고, 기존 사용자 변경을 보존한다.
+그다음 README.md의 project-design·design-sources에서 해당 기능의 명세·Figma·코드·시험만 찾아 읽는다.
+작업 전에 읽은 커밋과 설계 근거를 짧게 밝히고, 동작 변경은 같은 PR에서 해당 명세를 갱신한다.
+읽지 못한 문서를 기억으로 대신하지 않고, 기존 사용자 변경을 보존한다.
 저장소 접근이나 검사 실행이 불가능하면 추정해서 완료 처리하지 말고 제한을 알린다.
 ```
+
+Claude Code에서는 루트 [CLAUDE.md](CLAUDE.md)가 `AGENTS.md`를 가져오도록 연결합니다. 규칙 본문은 AGENTS 한 곳에서 관리하고 README·STATUS·TASK 전체를 자동으로 가져오지 않습니다. 실제 로드 여부는 설치 환경의 `/context`로 확인하며, 조직 설정에 의한 제한은 그대로 따릅니다. [공식 설명](https://code.claude.com/docs/en/memory#share-one-file-with-other-coding-tools).
 
 관련 열린 PR을 확인하는 세부 시작 규칙은 [AGENTS.md](AGENTS.md#1-세션-시작)에서 관리합니다. 위 지침을 이미 저장했다면 같은 문구를 다시 입력할 필요는 없습니다. 변경된 규칙이 요청 대상 브랜치에 반영되면 해당 파일을 읽을 때 적용하며, 미병합 PR을 이어갈 때는 PR 번호나 브랜치를 지정하면 됩니다.
 
@@ -57,7 +85,7 @@
 
 | 경로 | 책임 |
 |---|---|
-| [AGENTS.md](AGENTS.md) | 이 프로젝트를 개발하는 GPT의 작업 규칙 |
+| [AGENTS.md](AGENTS.md) | 이 프로젝트를 개발하는 AI의 작업 규칙 |
 | [docs/STATUS.md](docs/STATUS.md) | 현재 목표·다음 작업·미해결·Git 준비와 WebUI 적용 상태 |
 | [agent-pack/](agent-pack/README.md) | 서비스 Assistant에 배포할 Prompt·정책·Skill·합성 Knowledge 원본 |
 | [agent-pack/skills/confluence-read/](agent-pack/skills/confluence-read/) | 기능 단위 묶음: 지침과 실행 코드를 함께 관리 |
@@ -74,6 +102,52 @@
 폴더 상세는 `rg --files`로 확인합니다. 파일 목록을 별도 문서에 계속 복사하지 않습니다. 기능에 필요한 참고자료가 생기면 해당 Skill 아래에 `references/`를 추가하되 빈 디렉터리는 미리 만들지 않습니다.
 
 ## 실행 구조와 관리 원본
+
+### 전체 구성과 화면의 역할
+
+아래는 같은 Open WebUI 안의 논리적 책임과 외부 연결입니다. 별도 서버를 추가하는 배포 설계가 아닙니다. 외부 연결의 실제 사용 가능 여부는 설치·권한·개인 설정과 해당 기능의 검증 상태를 따릅니다.
+
+```mermaid
+flowchart TD
+  UI["EES 화면: 탐색·대화·업무 패널"]
+  Native["Open WebUI Native: 인증·대화·모델·자산"]
+  Work["업무 서비스: 검증·저장·실행·판정"]
+  DB["업무 SQLite: 초안·게시본·회차·기록"]
+  Model["사내 모델"]
+  Tool["Native 도구와 실행자의 개인 설정"]
+  Source["Confluence·Jira·GitHub"]
+  UI -->|"대화·계정·자산 관리"| Native
+  UI -->|"인증된 업무 명령"| Work
+  Native -->|"조회·제안용 업무 도구"| Work
+  Native -->|"대화"| Model
+  Work -->|"업무 상태 보존"| DB
+  Work -->|"실행 때 현재 권한 확인"| Tool
+  Native -->|"허용된 대화 도구 호출"| Tool
+  Tool -->|"승인된 조회"| Source
+```
+
+| 사용자 화면 | 역할 | 바꿀 때 함께 확인할 것 |
+|---|---|---|
+| 왼쪽 탐색 | 업무/워크스페이스 전환, 작업 위치와 대상 선택 | 선택 권한·범위, 이동 뒤 목적지, 미저장 내용 |
+| 가운데 대화 | 설명·질문·근거·도우미 제안 | 개인 대화·첨부 보존, 현재 참고와 메시지 당시 참고, 제안 반영 여부 |
+| 오른쪽 업무 패널 | 구조화된 입력·결과·저장·게시·실행·확정 | 저장 전/후, 실행 권한, 회차와 게시 버전, 완료 기준 |
+
+일부 자산 관리는 Native 화면을 사용합니다. EES 화면 틀과 Native 관리 화면의 전환 범위는 [메뉴 안내](docs/03-openwebui-native-agent.md#menu-integration-20261006)가 원본입니다. Figma의 목표 화면과 현재 구현의 예외를 구분합니다.
+
+### 핵심 데이터와 변경 영향
+
+| 대상 | 관계와 책임 | 변경 영향의 확인점 |
+|---|---|---|
+| 초안 | 작성자가 고치는 워크플로우 정의. 저장과 게시는 다른 행동 | 저장한 변경이 어느 게시본·회차부터 쓰이는지 |
+| 게시본 | 검사와 게시로 확정된 불변 버전 | 새 게시가 이미 열린 회차의 기준을 임의로 바꾸지 않는지 |
+| 회차·진행 건 | 게시 버전, 대상과 실행 범위를 가진 업무 진행 단위 | 개인 화면 선택·대화와 공동 업무 상태를 혼동하지 않는지 |
+| 실행 시도·사람 판정 | 회차의 작업 실행·결과·확정 근거와 당시 기록 | 재실행 결과와 이전 근거, 현재 권한, 확정 전/후 조건 |
+| 공용 도구·스킬·참고 문서 | 여러 작업이나 도우미가 참조하는 재사용 자산 | 쓰는 곳, 버전·입력/결과 호환, 저장 뒤 반영 시점·추가 조치 |
+| Native 개인 자료 | 사용자 계정·대화·첨부·개인 설정·PAT | 업무 공유와 별개인 접근 권한·보존. 프로그램 갱신으로 재등록·초기화하지 않음 |
+
+저장·게시·회차 시작·실행·결과 확정은 각각 다른 경계입니다. 도구·스킬·문서의 변경 반영 시점은 서로 같다고 가정하지 않고 해당 기능 계약을 확인합니다. 기능을 삭제·교체·병합할 때는 직접 참조하는 작업·게시본·열린 회차·기록을 확인하며, 새 규칙은 해당 기능의 원본에 한 번만 정합니다.
+
+### 코드와 배포 원본 찾기
 
 Native 대화와 업무 서비스는 같은 Open WebUI 프로세스에 있다. 업무 SQLite는 초안·불변 게시본·진행 건·실행 시도·사람 판정·예약·외부 요청을 구분한다. 사용자 화면 상태와 개인 대화는 공동 업무 상태와 분리한다. AI는 조회·제안·안내만 하고 저장·게시·실행·확정은 인증된 사용자 명령이 검증한다. 실제 EES 연결이 없는 요청은 명시적으로 차단하며 성공 응답을 합성하지 않는다.
 
@@ -96,6 +170,7 @@ AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs
 | 정의 읽기·참조/입력/게시 검증 | [ees_workflow_definition.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_definition.py) |
 | 진행률·선행 대기·표시 상태 계산 | [ees_workflow_view.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_view.py) |
 | 영속 계획·실행·호출·중단/재개·worker | [ees_workflow_execution.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_execution.py) |
+| 공용 도구 확인·그룹·버전·현재 사용 가능 상태 | [ees_workflow_shared_tools.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_shared_tools.py) |
 | 기존 Native 등록본 승인·현재 권한·개인 설정·호출 | [ees_workflow_native.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_native.py) |
 | 입력/결과 연결·완료 검증·두 재사용 예제 | [ees_workflow_contract.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_contract.py), [ees_workflow_examples.py](https://github.com/knadalkim-a11y/team-agent-poc/blob/b41e23917273e1d2d0ead1ddadfea75b2dda1e32/agent-pack/skills/ees-work-demo/scripts/ees_workflow_examples.py) |
 | 제한된 근거 정리와 Native 모델 호출 | [ees_workflow_model.py](agent-pack/skills/ees-work-demo/scripts/ees_workflow_model.py) |
@@ -104,10 +179,13 @@ AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs
 
 정책과 예시의 분리는 현재 저장된 게시본·초안·진행 건을 재작성하지 않습니다. AI Tool의 [workflow_tool.py](agent-pack/skills/ees-work-demo/scripts/workflow_tool.py)와 UI는 같은 공개 서비스와 권한 판정을 사용합니다.
 
-업무 화면 변경은 다음 책임에서 시작합니다. 세 JS 소스는 기존 Python 빌더의 `assemble_work_launcher`에서 하나의 배포 JS로 조립되며 별도 로더나 서버를 추가하지 않습니다.
+업무 화면의 바깥 틀·탐색·Native 대화 연결은 [고정 소스 패치](frontend/patches/0001-ees-native-hooks.patch)의 Svelte 구성에서 시작합니다. 아래 `src/lib/...` 경로는 이 저장소의 별도 디렉터리가 아니라 패치가 고정 upstream 소스에 만드는 경로입니다. 기존 세 JS 소스는 명시적으로 제공된 패널·오버레이 host 안의 업무 제어·표시·편집을 담당하며 `assemble_work_launcher`에서 배포 JS로 조립됩니다.
 
 | 변경할 책임 | 원본 |
 |---|---|
+| 화면 틀·Native 경로/대화·패널 크기/초점 | [소스 패치](frontend/patches/0001-ees-native-hooks.patch)의 `src/lib/components/ees/EesShell.svelte` |
+| 왼쪽 탐색·범위 드롭다운 | 같은 패치의 `EesNavigation.svelte` · `EesScopeSelect.svelte` |
+| Svelte 공유 상태·현재 로그인 세션의 API 요청 | 같은 패치의 `src/lib/components/ees/state.ts` · `src/lib/apis/ees-work.ts` |
 | 서버 요청·대화 연결·개인 초안·응답 순서 | [ees-work-launcher.js](branding/ees/ui/ees-work-launcher.js) |
 | 공장 선택·단계별 진행·업무 패널·조건 탐색/복귀·읽기 전용 수행 상세·크기 | [ees-work-view.js](branding/ees/ui/ees-work-view.js) |
 | 시스템/P별 절차 편집·미저장 초안·권한 상태·Native 셸 복원 | [ees-work-designer.js](branding/ees/ui/ees-work-designer.js) |
@@ -116,9 +194,16 @@ AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs
 
 factory는 배포 JS 내부에만 존재하고 기존 runtime UI/Tool 연결을 유지합니다. ees.11의 P별 작성 프로토콜·추가 메타데이터와 기존 전체 초안 호환은 [별도 계약](docs/mockups/ees-work/TASK.md#system-authoring-20260924)을 따릅니다. 화면 분리와 이전 프로그램 복원 검증의 실제 범위는 [R2/R3 기록](evals/scenarios.md#work-ui-refactor-20260915)을 따릅니다.
 
+시험은 바꾸는 책임에서 시작합니다. 아래는 대표 진입점이며 전체 시험 목록과 통과 판정을 복제하지 않습니다. 실제 실행 명령·묶음은 [기존 CI](.github/workflows/ees-delivery.yml), 합격 기준·이력은 [평가표](evals/scenarios.md)에서 확인합니다.
+
+| 변경 범위 | 먼저 확인할 기존 시험 |
+|---|---|
+| 공통 화면 틀·탐색·반응형 | [소스 셸 Native](tests/test_ees_source_shell_native.py), [Figma 배치 Native](tests/test_ees_work_figma_layout_native.py), [Native 복귀 선택](tests/test_ees_native_return_selection.cjs) |
+| 공용 도구 조건·저장·실행 결과 | [공용 도구 Native](tests/test_ees_shared_tools_native.py), [workspace](tests/test_ees_work_workspace.py), [결과 계약](tests/test_ees_workflow_contract.py), [실행 UI](tests/test_ees_work_figma_runtime_ui.cjs) |
+
 ### 원본과 배포본
 
-팀원이 만든 개인·공유 프롬프트·Skill·Tool은 허용된 생성·공유·수정 권한 안에서 WebUI에서 관리합니다. 공유할 때마다 담당자의 채택이나 Git 반영을 거칠 필요는 없습니다. 담당자가 팀 공통 배포 대상으로 채택한 항목만 검토한 버전을 Git에 보관하고, 이후에는 Git에서 변경을 관리해 해당 배포 절차로 반영합니다. 교차 분석 시연의 지정 자산은 `ApplyDemo`, 그 밖의 기존 자산은 해당 가이드의 수동 절차를 사용합니다. 개발 환경에 없는 사용자 자산도 계속 보존하며, 프로그램 내부 리팩토링을 자산 ID 변경·재등록·초기화와 결합하지 않습니다.
+팀원이 만든 개인·공유 프롬프트·Skill·Tool은 허용된 생성·공유·수정 권한 안에서 WebUI에서 관리합니다. 공유할 때마다 담당자의 채택이나 Git 반영을 거칠 필요는 없습니다. 담당자가 팀 공통 배포 대상으로 채택한 항목만 검토한 버전을 Git에 보관하고, 이후에는 Git에서 변경을 관리해 해당 배포 절차로 반영합니다. 교차 분석 시연에 `ApplyDemo`를 쓰던 절차는 과거 기록입니다. 현재 ApplyDemo 재등록은 중지됐으며, 기존 사용자 자산의 변경은 승인된 해당 관리 절차를 따릅니다. 개발 환경에 없는 사용자 자산도 계속 보존하며, 프로그램 내부 리팩토링을 자산 ID 변경·재등록·초기화와 결합하지 않습니다.
 
 사용자 작성물은 WebUI 실행 데이터와 함께 승인된 내부 백업으로 보존하는 운영 방침이며, 모든 작성물을 Git에 수집하지 않습니다. 이는 실제 사용자 권한 설정·공유 시험·백업이 완료됐다는 뜻이 아니며 자동 동기화도 구성하지 않았습니다. 실제 적용 상태는 [STATUS](docs/STATUS.md)에서 확인합니다.
 
@@ -147,7 +232,7 @@ factory는 배포 JS 내부에만 존재하고 기존 runtime UI/Tool 연결을 
 | 사내 명령 한 번으로 프로그램·래퍼 업데이트 | [Upgrade 최초 준비·실행·실패 시 확인](docs/03-openwebui-native-agent.md#ees-wrapper-upgrade) |
 | 업데이트·패치 반복 실패의 원인과 조치 확인 | [확인한 원인·보존 로그의 해석 범위](docs/03-openwebui-native-agent.md#ees-update-failure-causes), [날짜별 실패·수정·사내 결과](evals/scenarios.md#ees-update-failure-causes) |
 | 승인된 Upgrade 종료 실패 복구 | [대상 식별·보관 ZIP 재사용](docs/03-openwebui-native-agent.md#ees-stop-recovery) |
-| 교차 분석 시연과 모델·Tool·Prompt 일괄 등록 | [ApplyDemo 최초 연결·한 번 적용·시연 질문](docs/03-openwebui-native-agent.md#demo-assets-deployment) |
+| 과거 교차 분석 시연·일괄 등록 이력(현재 중지) | [ApplyDemo 당시 절차](docs/03-openwebui-native-agent.md#demo-assets-deployment). 현재 적용 지시로 사용하지 않음 |
 | 기존 AI 대화에서 업무 탐색·실행·절차 관리 | [EES Workflow 적용·사용](docs/03-openwebui-native-agent.md#ees-work-demo) |
 | 팀 시연용 첫 화면 적용 준비 | [소개 문구·예시 질문 초안](docs/03-openwebui-native-agent.md#first-use-entry) |
 | Confluence Skill·Tool 등록 | [04-confluence-read-tool](docs/04-confluence-read-tool.md) |
@@ -162,7 +247,7 @@ factory는 배포 JS 내부에만 존재하고 기존 runtime UI/Tool 연결을 
 
 ## 문서가 쌓이지 않게 유지하는 방법
 
-개발하는 GPT가 [AGENTS.md](AGENTS.md)의 종료 절차에 따라 관련 문서를 갱신하고, [문서 점검기](scripts/check_docs.py)를 실행합니다. GPT가 검사를 실행할 수 있는 작업 환경에서는 사용자가 매번 별도로 정리를 요청하거나 사내 PC에서 실행할 필요는 없습니다. 직접 확인하려면 저장소 루트에서 실행합니다.
+개발 AI가 [AGENTS.md](AGENTS.md)의 종료 절차에 따라 관련 문서를 갱신하고, [문서 점검기](scripts/check_docs.py)를 실행합니다. AI가 검사를 실행할 수 있는 작업 환경에서는 사용자가 매번 별도로 정리를 요청하거나 사내 PC에서 실행할 필요는 없습니다. 직접 확인하려면 저장소 루트에서 실행합니다.
 
 ```powershell
 python scripts/check_docs.py

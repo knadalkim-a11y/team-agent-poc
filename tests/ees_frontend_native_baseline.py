@@ -24,13 +24,23 @@ from test_ees_chat_theme import ChromePipe
 from scripts.build_ees_frontend import validate_frontend
 
 
-def wait(browser, expression, *, seconds=15):
+def wait(browser, expression, *, seconds=15, retry_navigation=False):
     deadline = time.monotonic() + seconds
-    while time.monotonic() < deadline:
-        value = browser.evaluate(expression)
-        if value:
+    while (remaining := deadline - time.monotonic()) > 0:
+        try:
+            value = browser.evaluate(expression, timeout=remaining)
+        except AssertionError as error:
+            # Page.reload can destroy the old execution context while CDP is
+            # evaluating readiness. Retry only this protocol error, and retain
+            # the original deadline for every request and polling interval.
+            message = str(error)
+            if not (retry_navigation and message.startswith("Runtime.evaluate: ")
+                    and "'message': 'Inspected target navigated or closed'" in message):
+                raise
+            value = False
+        if value and time.monotonic() < deadline:
             return value
-        time.sleep(0.05)
+        time.sleep(min(0.05, max(0, deadline - time.monotonic())))
     raise AssertionError("Native baseline condition timed out: " + expression)
 
 
@@ -55,7 +65,7 @@ def reload_page(browser):
     previous = browser.evaluate("performance.timeOrigin")
     browser.call("Page.reload", {"ignoreCache": True})
     wait(browser, "performance.timeOrigin !== " + json.dumps(previous)
-        + " && document.readyState === 'complete'")
+        + " && document.readyState === 'complete'", retry_navigation=True)
 
 
 def exercise(wheel, chrome, output, frontend=None):

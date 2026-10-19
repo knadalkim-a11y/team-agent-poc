@@ -15,7 +15,7 @@
     "src/lib/apis/ees-work.ts": "b0b65b445bf94d7a4ad54c6ccb497f20ec72ffa2fb5e7379b523f77ccc7fa252",
     "src/lib/apis/openai/index.ts": "4fc60216e9fdfc930bef83fc34a739ce1767ad2f0a3a3525592f7bd9a0f199e5",
     "src/lib/components/channel/Channel.svelte": "49454dd5aa86f0bc1424ca286d1a7ffccef3103a81c5ac36a99ffc9fe03e2bfc",
-    "src/lib/components/chat/Chat.svelte": "e2b1de2211f0345ca528000394bca756d298da15db1cf06662b473c5ba561619",
+    "src/lib/components/chat/Chat.svelte": "66671dfa23921fb099979b7e8ca4660ce6f09b53e8cd07fa56f230603e8f4675",
     "src/lib/components/chat/MessageInput.svelte": "15268374d960172401c29ad671feb4955cfa681df6688da78a859ae6ad1425fb",
     "src/lib/components/chat/Messages/ResponseMessage.svelte": "64fb38010aa936ec0eea0d9c0dd79a087b9c5026f94be8d08139fbd6529c1270",
     "src/lib/components/chat/Messages/UserMessage.svelte": "c677b13bf160de1bf0fafceef00ba5df098d661e6728c0dd5b1e6427b3e2eef8",
@@ -24,9 +24,9 @@
     "src/lib/components/ees/EesHelperNotice.svelte": "22ceccc7ad93c5d820f73269baaa9b19f12c5c99054b76ecc8c89f7757f8bba0",
     "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
     "src/lib/components/ees/EesNavigation.svelte": "ef90f84e0ee213b3ba65c860f1a2c4e8743db7a34d0dcbcfb9d4f3b038b66f54",
-    "src/lib/components/ees/EesProcedureIntro.svelte": "815ecc9164df95671f784bab30304013b5541c1fc98584092cc2742d8dc03b3b",
+    "src/lib/components/ees/EesProcedureIntro.svelte": "8e9e92baa499c6acf66f73643ce17e8b047a6d932844cc3158a252d23718a9a5",
     "src/lib/components/ees/EesScopeSelect.svelte": "921be8c7ab567a8410b55c7b41f29d704399ad1f99f22b8123259c4f12d37710",
-    "src/lib/components/ees/EesShell.svelte": "67492c17c2c2b41dcdad2cf86a1a096cc218fd6e2de6e645eb909e9f59f84c46",
+    "src/lib/components/ees/EesShell.svelte": "18e882a9b2fb9a2882f4b863d99b4965d0a87e8c5298d9c8462127210387e003",
     "src/lib/components/ees/icons/5bc95.svg": "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7",
     "src/lib/components/ees/state.ts": "560ef1a21f46fc2a1beabf3012a74933002af586c507ac42bb144f40fe305a43",
     "src/lib/components/layout/Sidebar.svelte": "9d08f54fdaa101ef2cf06c159e5defe421b366c695f26a15c4045bf3ba556096",
@@ -44,7 +44,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "3020f35a05db3a128d4ca1aaa3f2a475ce694abccbbccde241290d7d2c8f44a6"
+      "sha256": "243eb7e1ed5c15baf4afe3ce6694876e9e26c1bd31a37f3ae246c25efa507efa"
     }
   ],
   "pyodide_files": {
