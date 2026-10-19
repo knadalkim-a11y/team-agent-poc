@@ -8,7 +8,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 from zipfile import ZipFile
 
 from scripts import build_ees_frontend as frontend
@@ -35,6 +35,82 @@ def _hook_source():
     hook = _between(added, "const eesNativeDraftApi =", "if (!embedded) window.__eesNativeDraftV1 = eesNativeDraftApi;")
     hook += "if (!embedded) window.__eesNativeDraftV1 = eesNativeDraftApi;"
     return (load + "\n" + hook).replace("(message: any)", "(message)")
+
+
+class NativeBaselineWaitTests(unittest.TestCase):
+    def setUp(self):
+        if __package__:
+            from . import ees_frontend_native_baseline as baseline
+        else:
+            import ees_frontend_native_baseline as baseline
+        self.baseline = baseline
+        self.now = 100.0
+        clock = patch.object(baseline.time, "monotonic", side_effect=lambda: self.now)
+        sleep = patch.object(baseline.time, "sleep", side_effect=self.advance)
+        clock.start()
+        sleep.start()
+        self.addCleanup(clock.stop)
+        self.addCleanup(sleep.stop)
+
+    def advance(self, seconds):
+        self.now += seconds
+
+    def navigation_error(self):
+        return AssertionError("Runtime.evaluate: {'code': -32000, 'message': 'Inspected target navigated or closed'}")
+
+    def test_reload_retries_destroyed_context_then_requires_new_complete_document(self):
+        browser = Mock()
+        browser.evaluate.side_effect = [42, self.navigation_error(), False, True]
+        self.baseline.reload_page(browser)
+        browser.call.assert_called_once_with("Page.reload", {"ignoreCache": True})
+        evaluations = browser.evaluate.call_args_list[1:]
+        for invocation in evaluations:
+            self.assertEqual(invocation.args, ("performance.timeOrigin !== 42 && document.readyState === 'complete'",))
+        self.assertEqual(len(evaluations), 3)
+        for invocation, budget in zip(evaluations, (15, 14.95, 14.9)):
+            self.assertAlmostEqual(invocation.kwargs["timeout"], budget)
+
+    def test_persistent_navigation_failure_exhausts_one_original_deadline(self):
+        browser = Mock()
+        browser.evaluate.side_effect = self.navigation_error()
+        with self.assertRaisesRegex(AssertionError, "Native baseline condition timed out"):
+            self.baseline.wait(browser, "ready", seconds=0.12, retry_navigation=True)
+        self.assertAlmostEqual(self.now, 100.12)
+        self.assertEqual(browser.evaluate.call_count, 3)
+        for invocation, budget in zip(browser.evaluate.call_args_list, (0.12, 0.07, 0.02)):
+            self.assertAlmostEqual(invocation.kwargs["timeout"], budget)
+
+    def test_non_navigation_failures_and_navigation_outside_reload_propagate(self):
+        for error, retry in ((AssertionError("Runtime.evaluate: {'code': -32601, 'message': 'Method not found'}"), True),
+                             (AssertionError("JavaScript assertion: Inspected target navigated or closed"), True),
+                             (AssertionError("Chrome DevTools response timed out."), True),
+                             (OSError("Chrome pipe closed"), True),
+                             (self.navigation_error(), False)):
+            with self.subTest(error=str(error), retry=retry):
+                browser = Mock()
+                browser.evaluate.side_effect = error
+                with self.assertRaises(type(error)) as raised:
+                    self.baseline.wait(browser, "ready", seconds=1, retry_navigation=retry)
+                self.assertIs(raised.exception, error)
+                browser.evaluate.assert_called_once()
+                self.assertEqual(self.now, 100)
+
+    def test_true_result_arriving_at_deadline_is_not_success(self):
+        browser = Mock()
+        def evaluate(*args, **kwargs):
+            self.advance(kwargs["timeout"])
+            return True
+        browser.evaluate.side_effect = evaluate
+        with self.assertRaisesRegex(AssertionError, "Native baseline condition timed out"):
+            self.baseline.wait(browser, "ready", seconds=1, retry_navigation=True)
+        browser.evaluate.assert_called_once()
+
+    def test_chrome_evaluation_passes_remaining_budget_to_cdp(self):
+        browser = Mock()
+        browser.call.return_value = {"result": {"value": True}}
+        self.assertTrue(self.baseline.ChromePipe.evaluate(browser, "ready", timeout=0.25))
+        browser.call.assert_called_once_with("Runtime.evaluate", {
+            "expression": "ready", "returnByValue": True, "awaitPromise": True}, timeout=0.25)
 
 
 @unittest.skipUnless(shutil.which("node"), "Node is required for Native source probes.")

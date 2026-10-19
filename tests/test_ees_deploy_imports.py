@@ -73,7 +73,9 @@ class ImportProbeTests(unittest.TestCase):
         self.assertFalse(result["import_completed"])
         self.assertGreaterEqual(result["watchdog_arm_seconds"], 2)
         self.assertGreater(result["watchdog_budget_seconds"], 0)
-        self.assertLess(result["watchdog_budget_seconds"], 1)
+        # A coarse monotonic clock can report exactly two seconds at arming.
+        # One second still proves the bootstrap consumed the three-second budget.
+        self.assertLessEqual(result["watchdog_budget_seconds"], 1)
         self.assertAlmostEqual(result["watchdog_arm_seconds"] + result["watchdog_budget_seconds"], 3, places=5)
         self.assertLess(result["elapsed_seconds"], 4)
 

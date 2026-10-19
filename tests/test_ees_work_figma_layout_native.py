@@ -14,10 +14,17 @@ import ees_source_frame_monitor as frame_monitor
 class FigmaLayoutNativeTests(IntegratedNativeCase):
     def wait_saved_width(self, width):
         deadline=time.monotonic()+5
+        saved_width=None
         while time.monotonic()<deadline:
-            if self.state().get('ui_state',{}).get('state',{}).get('selection',{}).get('panel_width')==width:return
+            saved_width=self.state().get('ui_state',{}).get('state',{}).get('selection',{}).get('panel_width')
+            if saved_width==width:return
             time.sleep(.025)
-        self.fail('Private panel width did not persist: '+str(width))
+        observed={'saved_width':saved_width}
+        try:
+            observed.update(self.browser.evaluate("({panel_width:document.querySelector('.ees-panel-region')?.getBoundingClientRect().width,resize_focused:!!document.activeElement?.matches('[data-ees-panel-resize]'),native_ready:!!window.__eesNativeDraftV1?.ready?.()})"))
+        except AssertionError as error:
+            observed['capture_error']=str(error)
+        self.fail('Private panel width did not persist: '+str(width)+'; '+json.dumps(observed))
 
     def viewport(self, width, height=768):
         self.browser.call('Emulation.setDeviceMetricsOverride', {
@@ -37,8 +44,16 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         (directory/(label+'.json')).write_text(json.dumps(self.geometry(),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
     def resize_keyboard(self, key, code):
+        # The source shell shows its default width before Native finishes
+        # loading and focusing the composer. Start keyboard input only after
+        # that lifecycle ends, then verify the physical click owns focus.
+        self.wait("window.__eesNativeDraftV1?.ready?.() && window.__eesSourceShellV1?.screen?.().chatReady")
         self.click('[data-ees-panel-resize]')
+        self.wait("document.activeElement?.matches('[data-ees-panel-resize]')")
         self.key(key,code)
+        expected={'Home':400,'End':720}.get(key)
+        if expected is not None:
+            self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width === "+str(expected))
 
     def test_q1_geometry_reading_width_footer_and_baseline_overlay(self):
         key=self.author(fields=[{'id':'field-'+str(i),'name':'확인 값 '+str(i),'type':'text'} for i in range(18)],jobs=1)
