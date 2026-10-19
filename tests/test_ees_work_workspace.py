@@ -23,6 +23,34 @@ workspace = importlib.import_module(PACKAGE.__name__ + '.ees_workflow_workspace'
 
 
 class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
+    async def test_authoring_review_metadata_survives_save_without_bypassing_validation(self):
+        created = await self.command('create_workflow', name='합성 셋업', system_id='EMS')
+        identifier = created['workflow_id']
+        definition = created['workflow']['draft']
+        definition['authoring_review'] = {'inputs': True, 'rules': True}
+        saved = await self.command('save_draft', workflow_id=identifier, definition=definition, expected_revision=1)
+        self.assertTrue(saved['ok'], saved)
+        self.service = self.new_service()
+        reopened = await self.service.workspace_state(self.users['admin'], workflow_id=identifier)
+        self.assertEqual(reopened['workflow']['draft']['authoring_review'], definition['authoring_review'])
+        checked = await self.command('validate_workflow', workflow_id=identifier, expected_revision=2)
+        self.assertTrue(checked['validation']['errors'])
+        denied = await self.command('publish_workflow', workflow_id=identifier, expected_revision=2)
+        self.assertFalse(denied['ok'])
+        root = next(iter(definition['nodes']))
+        definition['nodes'][root]['children'] = ['stage']
+        definition['nodes']['stage'] = {'id': 'stage', 'type': 't', 'name': '준비', 'parent': root, 'children': ['job']}
+        definition['nodes']['job'] = {'id': 'job', 'type': 'j', 'name': '설치 확인', 'parent': 'stage', 'children': [], 'mode': 'human', 'inputs': [], 'result_block': 'human_confirm'}
+        saved = await self.command('save_draft', workflow_id=identifier, definition=definition, expected_revision=2)
+        self.assertTrue(saved['ok'], saved)
+        checked = await self.command('validate_workflow', workflow_id=identifier, expected_revision=3)
+        self.assertEqual(checked['validation']['errors'], [])
+        published = await self.command('publish_workflow', workflow_id=identifier, expected_revision=3)
+        self.assertTrue(published['ok'], published)
+        started = await self.command('start_run', workflow_id=identifier, expected_revision=4)
+        self.assertTrue(started['ok'], started)
+        self.assertEqual(started['run']['definition']['authoring_review'], definition['authoring_review'])
+
     async def asyncSetUp(self):
         self.temp = tempfile.TemporaryDirectory(); self.addCleanup(self.temp.cleanup)
         self.database = Path(self.temp.name) / 'work.sqlite3'
@@ -142,6 +170,69 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
             state = await self.service.workspace_state(self.users['a'], system_id='EMS', workflow_id=key, run_id=run['id'])
         self.assertEqual(state['error']['code'], 'scope_forbidden')
         self.assertNotIn('runs', state)
+
+    async def test_initial_procedures_are_normal_editable_drafts_and_survive_restart(self):
+        self.assertFalse((await self.state(system_id='EMS'))['initial_procedures_ready'])
+        result = await self.command('initialize_procedures', actor='a', system_id='EMS')
+        self.assertTrue(result['ok'], result)
+        self.assertEqual(len(result['created_workflow_ids']), 3)
+        state = await self.state(system_id='EMS')
+        self.assertTrue(state['initial_procedures_ready'])
+        self.assertEqual(len(state['workflows']), 3)
+        selected = result['created_workflow_ids'][0]
+        record = (await self.state(workflow_id=selected))['workflow']
+        self.assertIsNone(record['published_version'])
+        record['draft']['name'] = '사용자가 고친 절차'
+        saved = await self.command('save_draft', actor='a', workflow_id=selected, expected_revision=1, definition=record['draft'])
+        self.assertTrue(saved['ok'], saved)
+        before = await self.state(workflow_id=selected)
+        self.service = self.new_service()
+        repeated = await self.command('initialize_procedures', actor='b', system_id='EMS')
+        self.assertEqual(repeated['created_workflow_ids'], [])
+        self.assertEqual((await self.state(workflow_id=selected))['workflow'], before['workflow'])
+        self.assertEqual(len((await self.state(system_id='EMS'))['workflows']), 3)
+        self.assertEqual((await self.state())['runs'], [])
+
+    async def test_initial_procedures_preserve_existing_names_and_other_systems(self):
+        original = await self.command('create_workflow', system_id='EMS', name='배포 산출물 점검')
+        before = (await self.state(workflow_id=original['workflow_id']))['workflow']
+        initialized = await self.command('initialize_procedures', system_id='EMS')
+        self.assertEqual(len(initialized['created_workflow_ids']), 2)
+        self.assertEqual((await self.state(workflow_id=original['workflow_id']))['workflow'], before)
+        self.assertFalse((await self.state('admin', system_id='APC'))['initial_procedures_ready'])
+        self.assertEqual((await self.state('admin', system_id='APC'))['workflows'], [])
+
+    async def test_initial_procedures_do_not_recreate_removed_records(self):
+        initialized = await self.command('initialize_procedures', system_id='EMS')
+        with self.service._db(write=True) as db:
+            db.execute('DELETE FROM work_definitions WHERE id=?', (initialized['created_workflow_ids'][0],))
+        self.service = self.new_service()
+        self.assertEqual((await self.command('initialize_procedures', system_id='EMS'))['created_workflow_ids'], [])
+        self.assertEqual(len((await self.state(system_id='EMS'))['workflows']), 2)
+
+    async def test_initial_procedures_require_current_system_manager_even_on_retry(self):
+        denied = await self.command('initialize_procedures', actor='c', system_id='EMS')
+        self.assertEqual(denied['error']['code'], 'scope_forbidden')
+        denied = await self.command('initialize_procedures', actor='a', system_id='APC')
+        self.assertEqual(denied['error']['code'], 'scope_forbidden')
+        body = dict(action='initialize_procedures', request_id=str(uuid4()), expected_revision=0, system_id='EMS')
+        result = await self.service.workspace_command(self.users['a'], body)
+        self.assertTrue(result['ok'], result)
+        with self.service._db(write=True) as db:
+            db.execute("UPDATE work_access SET roles='[\"reader\"]' WHERE principal_id='a'")
+        denied = await self.service.workspace_command(self.users['a'], body)
+        self.assertEqual(denied['error']['code'], 'scope_forbidden')
+
+    async def test_initial_procedures_roll_back_partial_failure(self):
+        examples = workspace._procedure_examples()
+        examples[-1]['definition']['category'] = 'invalid-category'
+        with patch.object(workspace, '_procedure_examples', return_value=examples):
+            result = await self.command('initialize_procedures', system_id='EMS')
+        self.assertFalse(result['ok'])
+        state = await self.state(system_id='EMS')
+        self.assertFalse(state['initial_procedures_ready'])
+        self.assertEqual(state['workflows'], [])
+        self.assertEqual(len((await self.command('initialize_procedures', system_id='EMS'))['created_workflow_ids']), 3)
 
     async def test_native_menu_unavailable_preserves_separate_work_authority(self):
         # A standalone Work service must not infer Native access from its own
@@ -299,6 +390,18 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(created['workflow']['draft']['name'], '변경된 합성 예시')
         self.assertIn('변경된 합성 단계', [node['name'] for node in created['workflow']['draft']['nodes'].values()])
         self.assertEqual((await self.state())['procedure_examples'], summaries)
+
+    async def test_builtin_preview_reads_definition_without_creating_assets(self):
+        before = self.database.read_bytes()
+        result = await self.state('c', example_id='factory_rollout')
+        self.assertEqual(result['procedure_example']['id'], 'factory_rollout')
+        self.assertTrue(result['procedure_example']['definition']['nodes'])
+        self.assertEqual(result['workflows'], [])
+        self.assertEqual(result['runs'], [])
+        self.assertEqual(self.database.read_bytes(), before)
+        self.assertTrue(all('definition' not in item for item in result['procedure_examples']))
+        missing = await self.service.workspace_state(self.users['c'], example_id='missing')
+        self.assertEqual(missing['error']['code'], 'procedure_example_not_found')
 
     async def test_procedure_examples_create_fresh_unpublished_unconnected_drafts_only(self):
         existing_id, existing_definition, _ = await self.create()

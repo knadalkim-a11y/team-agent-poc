@@ -461,6 +461,7 @@ class WorkspaceMixin:
         db.execute('INSERT OR IGNORE INTO work_schema VALUES(1,2)')
         db.execute('UPDATE work_schema SET version=2 WHERE id=1 AND version=1')
         db.execute('CREATE INDEX IF NOT EXISTS work_run_scope ON work_runs(system_id,factory_id,status)')
+        db.execute('CREATE TABLE IF NOT EXISTS work_initial_procedures (system_id TEXT PRIMARY KEY, created_by TEXT NOT NULL, created_at TEXT NOT NULL)')
         db.execute('CREATE INDEX IF NOT EXISTS work_attempt_job ON work_attempts(run_id,job_id,number)')
         db.execute("CREATE TRIGGER IF NOT EXISTS work_attempt_finished_immutable BEFORE UPDATE ON work_attempts WHEN OLD.status <> 'running' BEGIN SELECT RAISE(ABORT,'immutable completed attempt'); END")
         db.execute("CREATE TRIGGER IF NOT EXISTS work_attempt_delete_immutable BEFORE DELETE ON work_attempts BEGIN SELECT RAISE(ABORT,'immutable attempt history'); END")
@@ -1117,7 +1118,7 @@ class WorkspaceMixin:
         people.extend({'id': group['id'], 'name': group['name'], 'label': group['name'], 'value': {'kind': 'group', 'id': group['id']}} for group in native_groups)
         return people, native_groups
 
-    async def workspace_state(self, user, workflow_id='', run_id='', system_id='', factory_id=''):
+    async def workspace_state(self, user, workflow_id='', run_id='', system_id='', factory_id='', example_id=''):
         try:
             from .ees_workflow_native import native_workspace_access
             actor, capabilities, groups = await self._work_actor(user)
@@ -1244,8 +1245,13 @@ class WorkspaceMixin:
                     except WorkflowError: pass
                 capabilities['can_author'] = bool(capabilities['managed_systems'])
                 access = [dict(row) | {'roles': json.loads(row['roles'])} for row in db.execute('SELECT * FROM work_access ORDER BY id')] if capabilities['is_admin'] else []
+                example = next((item for item in _procedure_examples() if item['id'] == example_id), None) if example_id else None
+                if example_id and example is None:
+                    _fail('procedure_example_not_found', '기본 제공 절차를 다시 선택해 주세요.')
                 return {'ok': True, 'protocol': 2, 'help': workflow_help(), 'procedure_examples': _procedure_example_summaries(),
+                        **({'procedure_example': example} if example is not None else {}),
                         'capabilities': capabilities, 'systems': systems, 'factories': factories, 'scope_options': scope_options,
+                        'initial_procedures_ready': bool(db.execute('SELECT 1 FROM work_initial_procedures WHERE system_id=?', (system_id,)).fetchone()) if system_id in systems else None,
                         'workflows': workflows, 'runs': runs, 'workflow': selected_workflow, 'run': selected_run,
                         'workflow_active_runs': workflow_active_runs,
                         'my_work': my_work, 'my_work_count': len(my_work), 'access': access, 'people': people, 'native_groups': native_groups,
@@ -1285,6 +1291,8 @@ class WorkspaceMixin:
                     await self._work_validate_people(child)
 
     def _work_receipt_authorize(self, db, actor, groups, body, response, evidence_access=None):
+        if body.get('action') == 'initialize_procedures':
+            self._work_authorize_scope(db, actor, groups, body.get('system_id'), '', 'manager')
         if response.get('run_id'):
             run = self._work_run(db, actor, groups, response['run_id'])
             if response.get('run'):
@@ -1399,6 +1407,24 @@ class WorkspaceMixin:
 
     def _workspace_mutation(self, db, actor, capabilities, groups, body, native_groups, publication_errors=(), publication_resources=None, options_snapshot=None, evidence_access=None):
         action, actor_id, now = body['action'], _value(actor, 'id'), _now()
+        if action == 'initialize_procedures':
+            system = body.get('system_id')
+            self._work_authorize_scope(db, actor, groups, system, '', 'manager')
+            _revision(body, 0)
+            if db.execute('SELECT 1 FROM work_initial_procedures WHERE system_id=?', (system,)).fetchone():
+                return {'system_id': system, 'created_workflow_ids': []}
+            names = {json.loads(row['draft'])['name'] for row in db.execute('SELECT draft FROM work_definitions WHERE system_id=?', (system,))}
+            created = []
+            for example in _procedure_examples():
+                if example['name'] in names:
+                    continue
+                result = self._workspace_mutation(db, actor, capabilities, groups, {
+                    'action': 'create_workflow', 'system_id': system, 'expected_revision': 0,
+                    'template_id': example['id'], 'name': example['name'],
+                }, native_groups)
+                created.append(result['workflow_id'])
+            db.execute('INSERT INTO work_initial_procedures VALUES(?,?,?)', (system, actor_id, now))
+            return {'system_id': system, 'created_workflow_ids': created}
         if action == 'save_ui':
             row = db.execute('SELECT revision FROM work_ui WHERE actor_id=?', (actor_id,)).fetchone()
             revision = row['revision'] if row else 0; _revision(body, revision)

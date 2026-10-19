@@ -1,0 +1,166 @@
+{
+  "python": "3.11.17",
+  "baseline": "/workspace/scratch/72583d296f44/benchmark-baseline-471236a",
+  "candidate": "/workspace/scratch/72583d296f44/team-agent-poc",
+  "clock": "2026-10-16T00:00:00+00:00",
+  "timed_repeats": 5,
+  "trace_in_timing": false,
+  "limits": "Synthetic pending human jobs, one procedure, no attempts/reviews/deadlines; local SQLite and in-process service only; no network/browser/Native integration.",
+  "cases": [
+    {
+      "runs": 1,
+      "jobs_per_run": 1,
+      "before": {
+        "selects": 90,
+        "json_bytes": 18790,
+        "median_ms": 3.34,
+        "samples_ms": [
+          3.508,
+          3.249,
+          3.34,
+          3.441,
+          3.307
+        ]
+      },
+      "after": {
+        "selects": 44,
+        "json_bytes": 18790,
+        "median_ms": 2.715,
+        "samples_ms": [
+          3.398,
+          2.734,
+          2.577,
+          2.715,
+          2.612
+        ]
+      },
+      "exact_json_equal": true,
+      "same_database_unchanged": true,
+      "response_sha256": "3ed66a4e604f7fc8f585c6bc37d6c9394d3cf64a968da9df7ae9a1fc50e3f094"
+    },
+    {
+      "runs": 10,
+      "jobs_per_run": 1,
+      "before": {
+        "selects": 315,
+        "json_bytes": 40544,
+        "median_ms": 5.577,
+        "samples_ms": [
+          6.436,
+          5.357,
+          5.577,
+          5.743,
+          5.092
+        ]
+      },
+      "after": {
+        "selects": 107,
+        "json_bytes": 40544,
+        "median_ms": 3.81,
+        "samples_ms": [
+          4.157,
+          3.808,
+          3.81,
+          4.224,
+          3.708
+        ]
+      },
+      "exact_json_equal": true,
+      "same_database_unchanged": true,
+      "response_sha256": "a2d0e641577a3d6c71176e4a29f2d998a46bb099db2d50f6ddf90d0fce6f204e"
+    },
+    {
+      "runs": 100,
+      "jobs_per_run": 1,
+      "before": {
+        "selects": 2565,
+        "json_bytes": 258075,
+        "median_ms": 30.086,
+        "samples_ms": [
+          34.036,
+          32.599,
+          30.086,
+          22.52,
+          24.046
+        ]
+      },
+      "after": {
+        "selects": 737,
+        "json_bytes": 258075,
+        "median_ms": 24.197,
+        "samples_ms": [
+          23.873,
+          24.202,
+          24.197,
+          31.001,
+          23.646
+        ]
+      },
+      "exact_json_equal": true,
+      "same_database_unchanged": true,
+      "response_sha256": "1c688e6eed5ac2e87926e2e262d1d2a7b3c170a162b1de2199b543fee0d12562"
+    },
+    {
+      "runs": 500,
+      "jobs_per_run": 1,
+      "before": {
+        "selects": 12565,
+        "json_bytes": 1224875,
+        "median_ms": 148.01,
+        "samples_ms": [
+          150.607,
+          194.726,
+          146.572,
+          134.199,
+          148.01
+        ]
+      },
+      "after": {
+        "selects": 3537,
+        "json_bytes": 1224875,
+        "median_ms": 99.239,
+        "samples_ms": [
+          94.705,
+          108.053,
+          106.399,
+          93.658,
+          99.239
+        ]
+      },
+      "exact_json_equal": true,
+      "same_database_unchanged": true,
+      "response_sha256": "06704be7542639e12a70c1e3310351ab3f34912c80679b223f883a0ef4c02d2b"
+    },
+    {
+      "runs": 100,
+      "jobs_per_run": 10,
+      "before": {
+        "selects": 8010,
+        "json_bytes": 1275134,
+        "median_ms": 189.007,
+        "samples_ms": [
+          189.007,
+          195.638,
+          176.726,
+          208.941,
+          176.239
+        ]
+      },
+      "after": {
+        "selects": 2537,
+        "json_bytes": 1275134,
+        "median_ms": 180.419,
+        "samples_ms": [
+          180.419,
+          176.999,
+          198.503,
+          172.045,
+          187.059
+        ]
+      },
+      "exact_json_equal": true,
+      "same_database_unchanged": true,
+      "response_sha256": "8be0fb7e1bca4b013eab33f631f18edd93d17a9d6784054db0d443d6c9cc568d"
+    }
+  ]
+}
