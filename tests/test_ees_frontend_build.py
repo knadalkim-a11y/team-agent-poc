@@ -39,7 +39,10 @@ def _hook_source():
 
 class NativeBaselineWaitTests(unittest.TestCase):
     def setUp(self):
-        import ees_frontend_native_baseline as baseline
+        if __package__:
+            from . import ees_frontend_native_baseline as baseline
+        else:
+            import ees_frontend_native_baseline as baseline
         self.baseline = baseline
         self.now = 100.0
         clock = patch.object(baseline.time, "monotonic", side_effect=lambda: self.now)

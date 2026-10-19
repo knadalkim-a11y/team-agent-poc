@@ -19,8 +19,12 @@ import time
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from native_ui_fixture import NativeUIServer
-from test_ees_chat_theme import ChromePipe
+if __package__:
+    from .native_ui_fixture import NativeUIServer
+    from .test_ees_chat_theme import ChromePipe
+else:
+    from native_ui_fixture import NativeUIServer
+    from test_ees_chat_theme import ChromePipe
 from scripts.build_ees_frontend import validate_frontend
 
 
