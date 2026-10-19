@@ -103,6 +103,49 @@ const restoreChatInput=async serialized=>{
             self.assertIn("const " + name + " = () => eesNativeDraftLoad(async () => {", source)
 
 
+class BuildExecutableTests(unittest.TestCase):
+    def test_command_resolution_preserves_arguments_and_environment(self):
+        environment = {"PATH": "pinned-node"}
+        with patch.object(frontend.shutil, "which", return_value="C:/Node Tools/npm.cmd") as resolve:
+            with patch.object(frontend.subprocess, "run") as execute:
+                execute.return_value.stdout = "10.9.2\n"
+                self.assertEqual(frontend._run(["npm", "--version"], "source", env=environment), "10.9.2")
+        resolve.assert_called_once_with("npm", path="pinned-node")
+        self.assertEqual(execute.call_args.args[0], ["C:/Node Tools/npm.cmd", "--version"])
+        self.assertIs(execute.call_args.kwargs["env"], environment)
+        self.assertNotIn("shell", execute.call_args.kwargs)
+
+    def test_missing_executable_stops_before_launch(self):
+        with patch.object(frontend.shutil, "which", return_value=None):
+            with patch.object(frontend.subprocess, "run") as execute:
+                with self.assertRaisesRegex(FileNotFoundError, "Required build executable"):
+                    frontend._run(["npm", "--version"], "source")
+        execute.assert_not_called()
+
+    def test_patches_keep_lf_with_windows_autocrlf_enabled(self):
+        from scripts import build_ees_webui as builder
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            source.mkdir()
+            frontend._run(["git", "init"], source)
+            frontend._run(["git", "config", "core.autocrlf", "true"], source)
+            patch_file = root / "new.patch"
+            patch_file.write_text("diff --git a/icon.svg b/icon.svg\nnew file mode 100644\n"
+                                  "--- /dev/null\n+++ b/icon.svg\n@@ -0,0 +1,2 @@\n"
+                                  "+<svg>\n+</svg>\n", encoding="utf-8", newline="\n")
+            wheel = root / "empty.whl"
+            with ZipFile(wheel, "w"):
+                pass
+            config = {"patches": [{"path": "new.patch"}],
+                      "patched_files": {"icon.svg": frontend._sha(b"<svg>\n</svg>\n")}}
+            with patch.object(frontend, "SOURCE_CONFIG", root / "config.json"):
+                with patch.object(builder, "prepare_additions", side_effect=RuntimeError("hashes verified")):
+                    with self.assertRaisesRegex(RuntimeError, "hashes verified"):
+                        frontend._apply_ees(source, config, wheel)
+            self.assertEqual((source / "icon.svg").read_bytes(), b"<svg>\n</svg>\n")
+
+
 @unittest.skipUnless(os.environ.get("EES_TEST_FRONTEND_SOURCE_DIR") and shutil.which("node"),
                      "The CI patched source checkout is required for full Native function probes.")
 class NativeSourceHookTests(unittest.TestCase):

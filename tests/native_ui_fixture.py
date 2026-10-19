@@ -43,6 +43,7 @@ def chat_record(chat_id="existing-chat"):
 
 
 class NativeUIServer(ThreadingHTTPServer):
+    request_queue_size = 64
     daemon_threads = True
 
     def __init__(self, wheel_path, *, upstream_baseline=False, frontend_directory=None):
@@ -191,14 +192,14 @@ class NativeUIHandler(BaseHTTPRequestHandler):
     def send_content(self, data, content_type="application/json", status=200):
         if not isinstance(data, bytes):
             data = data.encode() if isinstance(data, str) else json.dumps(data, ensure_ascii=False).encode()
-        self.send_response(status)
-        self.send_header("Content-Type", content_type)
-        self.send_header("Content-Length", str(len(data)))
-        self.send_header("Cache-Control", "no-store")
-        self.end_headers()
         try:
+            self.send_response(status)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Content-Length", str(len(data)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
             self.wfile.write(data)
-        except (BrokenPipeError, ConnectionResetError):
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
             pass
 
     def send_workflow(self, value):
@@ -274,7 +275,8 @@ class NativeUIHandler(BaseHTTPRequestHandler):
                 self.server.workspace_queries.append(query)
                 result = asyncio.run(self.server.workflow.workspace_state(self.server.user,
                     workflow_id=query.get("workflow_id", [""])[0], run_id=query.get("run_id", [""])[0],
-                    system_id=query.get("system_id", [""])[0], factory_id=query.get("factory_id", [""])[0]))
+                    system_id=query.get("system_id", [""])[0], factory_id=query.get("factory_id", [""])[0],
+                    example_id=query.get("example_id", [""])[0]))
                 if self.server.delay_next_workspace:
                     self.server.delay_next_workspace = False
                     self.server.workspace_response_started.set()
@@ -339,7 +341,8 @@ class NativeUIHandler(BaseHTTPRequestHandler):
             if path in {"/", "/auth", "/workspace", "/admin/settings"} or path.startswith(("/c/", "/workspace/")):
                 name = "open_webui/frontend/index.html"
             if name in self.server.assets:
-                return self.send_content(self.server.read_frontend(name), mimetypes.guess_type(name)[0] or "application/octet-stream")
+                content_type = "text/javascript" if name.endswith((".js", ".mjs")) else mimetypes.guess_type(name)[0]
+                return self.send_content(self.server.read_frontend(name), content_type or "application/octet-stream")
             self.server.unknown.append(("GET", path))
             self.send_content({"detail": "Explicit fixture route unavailable"}, status=404)
         except Exception as error:

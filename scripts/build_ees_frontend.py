@@ -54,6 +54,10 @@ def _relative(name):
 
 
 def _run(args, source, *, capture=True, env=None):
+    executable = shutil.which(args[0], path=(env or os.environ).get("PATH"))
+    if executable is None:
+        raise FileNotFoundError("Required build executable was not found: " + args[0])
+    args = [executable, *args[1:]]
     result = subprocess.run(args, cwd=source, check=True, env=env,
                             stdout=subprocess.PIPE if capture else None,
                             text=True, encoding="utf-8")
@@ -164,8 +168,8 @@ def _copy_official_pyodide(source, wheel, config):
 def _apply_ees(source, config, wheel):
     for entry in config["patches"]:
         path = SOURCE_CONFIG.parent / entry["path"]
-        _run(["git", "apply", "--check", str(path)], source)
-        _run(["git", "apply", "--whitespace=nowarn", str(path)], source)
+        _run(["git", "-c", "core.autocrlf=false", "-c", "core.eol=lf", "apply", "--check", str(path)], source)
+        _run(["git", "-c", "core.autocrlf=false", "-c", "core.eol=lf", "apply", "--whitespace=nowarn", str(path)], source)
     for name, expected in config["patched_files"].items():
         if _sha((source / name).read_bytes()) != expected:
             raise ValueError("Patched frontend source differs: " + name)
@@ -188,7 +192,7 @@ def _apply_ees(source, config, wheel):
         if content.count(token) != 1:
             raise ValueError("Frontend source cache token differs: " + token)
         content = content.replace(token, value)
-    template.write_text(content, encoding="utf-8")
+    template.write_text(content, encoding="utf-8", newline="\n")
     for name in builder.ASSET_NAMES:
         path = _plain(source / "static" / "static" / name)
         path.write_bytes((ROOT / "branding" / "ees" / "assets" / name).read_bytes())
