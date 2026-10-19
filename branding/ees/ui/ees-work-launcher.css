@@ -591,6 +591,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
  * #ECECEF (C33/Q1). Selected, disabled and status colors remain distinct. */
 #ees-work-panel :is(.ew-author-list>button,.ew-author-job,.ew-phase-job,.ew-todo):hover:not(:disabled):not([aria-current]):not([aria-pressed=true]){background:var(--ees-surface-hover);}
 #ees-work-panel>.ew-panel-header .ew-icon-button:hover:not(:disabled),
+#ees-work-panel .ew-author>header .ew-icon-button:hover:not(:disabled),
 #ees-work-panel :is(.ew-tabs,.ew-author-tabs,.ew-author-factories)>button:hover:not(:disabled),
 #ees-work-panel .ew-author-back:hover:not(:disabled),
 #ees-work-panel>footer .ew-text:hover:not(:disabled),
