@@ -1498,8 +1498,14 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                      expected_revision=workflow['revision'], definition=definition)
         self.refresh()
         self.click('[data-action="mode"][data-mode="author"]')
+        # First entry adds three initial procedures; wait for the final list
+        # before a physical row click, as in the schedule/delegation test.
+        self.wait("document.querySelectorAll('.ew-author-list>[data-author-action=open]').length === 4")
         self.click('[data-author-action="open"][data-id="' + key + '"]')
-        self.click('[data-author-action="tab"][data-tab="schedule"]')
+        self.wait('window.__eesNativeWorkV1?.captureReference()?.workflow_id === ' + json.dumps(key))
+        self.wait("document.querySelector('.ew-summary-card')")
+        self.click('.ew-author-tabs [data-author-action="tab"][data-tab="schedule"]')
+        self.wait("document.querySelector('#ew-author-schedule [name=run_mode]')?.value === 'periodic'")
         self.click('[data-author-action="schedule_preview"]')
         self.wait("document.querySelector('.ew-schedule-preview')?.textContent.includes('다음 회차 기존')")
         self.click('#ew-author-schedule [name=interval]')
