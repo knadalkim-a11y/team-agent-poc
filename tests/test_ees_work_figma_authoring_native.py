@@ -1551,8 +1551,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
 
         self.refresh()
         self.click('[data-action="mode"][data-mode="author"]')
+        self.wait("document.querySelectorAll('.ew-author-list>[data-author-action=open]').length === 4")
         self.wait("document.querySelector('[data-author-action=open][data-id=\"" + key + "\"]')")
         self.click('[data-author-action="open"][data-id="' + key + '"]')
+        self.wait('window.__eesNativeWorkV1?.captureReference()?.workflow_id === ' + json.dumps(key))
         self.wait("document.querySelector('.ew-summary-card')")
         self.click('.ew-author-tabs [data-author-action="tab"][data-tab="schedule"]')
         self.wait("document.querySelector('#ew-author-schedule [name=interval]')")
