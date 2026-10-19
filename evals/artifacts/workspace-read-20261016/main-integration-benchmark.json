@@ -1,0 +1,169 @@
+{
+  "python": "3.12.14",
+  "baseline": "exact main source export",
+  "candidate": "PR #94 main integration; product diff unchanged",
+  "clock": "2026-10-16T00:00:00+00:00",
+  "timed_repeats": 5,
+  "trace_in_timing": false,
+  "limits": "Synthetic pending human jobs, one procedure, no attempts/reviews/deadlines; local SQLite and in-process service only; no network/browser/Native integration.",
+  "cases": [
+    {
+      "runs": 1,
+      "jobs_per_run": 1,
+      "before": {
+        "selects": 89,
+        "json_bytes": 18757,
+        "median_ms": 2.124,
+        "samples_ms": [
+          1.997,
+          2.124,
+          2.545,
+          2.16,
+          2.018
+        ]
+      },
+      "after": {
+        "selects": 43,
+        "json_bytes": 18757,
+        "median_ms": 2.044,
+        "samples_ms": [
+          1.908,
+          1.914,
+          2.113,
+          2.044,
+          2.076
+        ]
+      },
+      "exact_json_equal": true,
+      "same_database_unchanged": true,
+      "response_sha256": "5a7004aa34f1584b5da8f7e9fb6782f1a2d14de47c219e393c9b7946174704e3"
+    },
+    {
+      "runs": 10,
+      "jobs_per_run": 1,
+      "before": {
+        "selects": 314,
+        "json_bytes": 40511,
+        "median_ms": 3.948,
+        "samples_ms": [
+          3.948,
+          4.058,
+          4.157,
+          3.707,
+          3.455
+        ]
+      },
+      "after": {
+        "selects": 106,
+        "json_bytes": 40511,
+        "median_ms": 3.077,
+        "samples_ms": [
+          3.023,
+          2.896,
+          3.468,
+          3.077,
+          3.104
+        ]
+      },
+      "exact_json_equal": true,
+      "same_database_unchanged": true,
+      "response_sha256": "91a5d29b4d58f6dfa0bc70c1b95d43d3e239d85cc4f14a20aa59406aa1657f93"
+    },
+    {
+      "runs": 100,
+      "jobs_per_run": 1,
+      "before": {
+        "selects": 2564,
+        "json_bytes": 258042,
+        "median_ms": 19.158,
+        "samples_ms": [
+          17.821,
+          22.723,
+          19.432,
+          19.158,
+          18.452
+        ]
+      },
+      "after": {
+        "selects": 736,
+        "json_bytes": 258042,
+        "median_ms": 15.437,
+        "samples_ms": [
+          15.437,
+          24.264,
+          16.415,
+          14.213,
+          13.186
+        ]
+      },
+      "exact_json_equal": true,
+      "same_database_unchanged": true,
+      "response_sha256": "0319734f93282e0f8e63d535190120e1301e5a3de38bc893333b3d3754fce6c7"
+    },
+    {
+      "runs": 500,
+      "jobs_per_run": 1,
+      "before": {
+        "selects": 12564,
+        "json_bytes": 1224842,
+        "median_ms": 91.01,
+        "samples_ms": [
+          88.18,
+          90.995,
+          99.194,
+          91.325,
+          91.01
+        ]
+      },
+      "after": {
+        "selects": 3536,
+        "json_bytes": 1224842,
+        "median_ms": 69.587,
+        "samples_ms": [
+          73.399,
+          64.654,
+          76.947,
+          69.587,
+          67.088
+        ]
+      },
+      "exact_json_equal": true,
+      "same_database_unchanged": true,
+      "response_sha256": "78c688b3ff184b982629c1f7a0c3dc7868b9f1181a38f22e753396f739c777aa"
+    },
+    {
+      "runs": 100,
+      "jobs_per_run": 10,
+      "before": {
+        "selects": 8009,
+        "json_bytes": 1275101,
+        "median_ms": 140.355,
+        "samples_ms": [
+          140.355,
+          138.911,
+          139.571,
+          148.238,
+          147.643
+        ]
+      },
+      "after": {
+        "selects": 2536,
+        "json_bytes": 1275101,
+        "median_ms": 124.07,
+        "samples_ms": [
+          124.006,
+          128.094,
+          151.885,
+          124.07,
+          123.585
+        ]
+      },
+      "exact_json_equal": true,
+      "same_database_unchanged": true,
+      "response_sha256": "e674f98dc01b6bb1c0dd52e6dcc72d10ddb2c15c467454782a93ff128a2223c2"
+    }
+  ],
+  "baseline_sha": "0f4c905ea6cb277b0704af32c40dd198fab3f959",
+  "candidate_before_merge_sha": "ffab0a295d07575d6be7f01a44648b4d4ffff9e7",
+  "scope": "Synthetic pending human jobs only; no company execution or network calls."
+}

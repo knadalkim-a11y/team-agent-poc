@@ -2,9 +2,10 @@
 
 ## 2026-10-20 · #95 → #94 → #96 승인 범위 검증·병합
 
-- **현재:** #95에 main `4cc7961`(#98)을 두 부모 병합으로 통합한다. Windows watchdog 시험 경계·Native reload 대기·폭 조절 시험의 Native 준비·포커스 경계·Windows 문서 크기와 audit 실패 전파만 보완한다. [최초 실패·재현·검증](../evals/v4-ui-20260930.md#pr95-merge-reliability-20261020).
-- **다음 하나:** #95 최종 head 전체 CI·관련 시험·문서/diff·PR 본문 검증을 확인하고 merge commit 병합한다. 병합 main CI 성공과 배포 ZIP이 확인돼야 #94에 그 main을 합치며 #96에도 같은 조건을 적용한다. 재실행 성공은 첫 실패를 지우지 않는다.
-- **보존/범위:** 세 브랜치를 유지하고 main 직접 push·rebase·force-push·사내 실행/적용·Figma 수정·#77/#79 착수는 하지 않는다. 기존 사내 적용 기록은 아래에 보존한다. 아래 Draft/병합 대기 문구는 각각 당시 상태다.
+- **완료한 선행 조건:** #95를 merge commit `471236a47939275d1cfeea637166642388b072f8`로 병합했다. 이 main의 [push CI39338337583](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39338337583)는 첫 시도 completed/success이며, 해당 실행의 [프로그램 ZIP12228507651](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39338337583/artifacts/12228507651), 155,193,025 bytes를 확인한 뒤 #94 통합을 시작했다. [#95 최초 실패·재현·검증](../evals/v4-ui-20260930.md#pr95-merge-reliability-20261020)은 보존한다.
+- **현재:** #94 head `7b8d2a1e3869d008e16b7ab5bf554ba368efbda9`에 위 main을 merge commit으로 통합 중이다. 문서3개와 workspace 시험 충돌에서 양쪽 기록·검사를 보존한다. 기존 읽기 최적화·권한 보호 범위를 유지하며 #96은 아직 통합하지 않았다. [이번 통합·검증 기록](../evals/v4-ui-20260930.md#pr94-merge-validation-20261020).
+- **다음 하나:** #94의 관련 시험·문서/diff·최종 head 전체 CI·PR 본문 검증을 마친 뒤 merge commit으로 병합한다. 그 main의 push CI 성공과 배포 ZIP 확인이 끝나야 #96에 main을 합친다. 관련 로컬135PASS/Native wheel 미준비35SKIP, 시험 ID 감사1535개 오류0, 최신 main 합성5규모의 전체 JSON·DB 보존을 확인했다. 최종 head CI 결과는 대기 중이며 과거 통과로 대신하지 않는다.
+- **보존/범위:** 세 브랜치를 유지하고 main 직접 push·rebase·force-push·사내 실행/적용·Figma 수정·#77/#79 착수는 하지 않는다. 재실행 성공으로 첫 실패를 지우지 않으며, 기존 사내 적용 기록은 아래에 보존한다. 아래 Draft/병합 대기 문구는 각각 당시 상태다.
 
 ## 2026-10-19 · 8081 검증본 main 병합 검증
 
@@ -62,6 +63,16 @@
 - **현재/다음:** 통합 전 head `7a8b43a`의 CI38856937514는39성공/배포물1정상제외이고 전달 자료52.6%·최종 검사시간7.1% 감소를 확인했다. 통합 뒤 정확한 head의 전체 CI는 [PR #95 본문/Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/95/checks)에서 별도로 판정한다. Draft 유지·PR 병합/사내 적용 미실행이며 실제 사내 적용본은 기존 사용자 확인 `d4f1806`이다.
 
 아래 #91·#93 블록은 main에 보존된 당시 진행 기록이며, #93은 현재 `0f4c905`로 병합된 상태다.
+
+## 2026-10-16 · #94 최신 main 통합·최적화 재검토
+
+- **범위/현재:** 사용자 후속 진행 요청으로 [Draft PR #94](https://github.com/knadalkim-a11y/team-agent-poc/pull/94)의 `ffab0a2`에 #91·#93 병합 main `0f4c905ea6cb277b0704af32c40dd198fab3f959`를 merge commit으로 통합했다. 문서3개의 양쪽 기록·실패 증거를 보존하고 기존 조회 최적화·권한 회수 보완의 제품 증분은 그대로 유지했다. [통합 검토·검증](../evals/v4-ui-20260930.md#workspace-main-integration-20261016).
+- **검증:** 통합본 workspace69·operations49·공용 Native35=153개 전부 통과·skip0. 권한 회수·공장별 접근·선택 상세 독립성·공용 pin/근거 보호와4개 인덱스를 포함한다. 동일 최신 main 기준의 합성5규모에서 전체 JSON과 조회 전후 DB 해시가 같고 SELECT 감소가 유지됐다. 이전 head CI38851073280의31성공/1정상제외는 보존하며 통합 최종 head의 원격 CI는 [#94 Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/94/checks)에서 별도로 판정한다.
+- **효과/한계:** 최신 main 합성500건×1작업의 SELECT12,564→3,536, 서버 중앙값91.010→69.587ms를 관찰했다. 과거8a4a716 대비 약25%와 이번 측정은 기준이 다르며 사내 화면 성능으로 확대하지 않는다. 실제 Native 연동·HTTP/직렬화·브라우저·인덱스 최초 생성/쓰기 비용은 미확정이다.
+- **관계/다음:** 미병합 #95·#96은 포함하지 않았다. #96의 공용 `run_access` 그룹/사용자 조회 비용은 이번 동기 SQLite 읽기 재사용과 별도 경로이며 최적화 완료로 보지 않는다. 최종 통합 head CI 성공을 확인해 같은 Draft PR 검토를 마무리한다. main 직접 push·PR 병합·사내 실행/적용·Figma 변경은 하지 않는다. 사내 적용본은 앞선 사용자 확인 `d4f1806`이며 이번 적용은 미실행이다.
+
+아래는 #91·#93 통합 당시 기록이다. #91·#93은 main0f4c905에 반영됐으며 당시 병합 지시는 #94의 병합 승인이 아니다.
+
 ## 2026-10-16 · #91 병합 완료·#93 main 통합
 
 - **승인/순서:** 사용자가 두 PR의 병합까지 요청했다. #91 최종 CI 성공 → merge commit 병합 → #93에 main 통합 → 최종 CI 성공 → #93 merge commit 병합 순서다. 아래 Draft/병합 보류 문구는 당시 기록이다.
