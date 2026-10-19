@@ -274,7 +274,9 @@ def input_and_history_flow(g,key,chat_id):
     # the same visible editor controls a user uses; no seeded procedure/API write.
     g.click('[data-author-action=node][data-id=""]');g.click('[data-author-action=add_job]')
     g.type('#ew-author-node [name=name]','입력 제안과 과거 근거')
+    g.click('#ew-author-node .ew-job-advanced:has([data-author-action=input_add]) > summary')
     g.click('[data-author-action=input_add]');g.type('#ees-work-dialog [name=name]','자료 메모')
+    g.click('#ees-work-dialog .ew-input-advanced > summary')
     g.type('#ees-work-dialog [name=id]','note');g.click('#ees-work-dialog [data-dialog-confirm]')
     g.click('[data-author-action=save]');g.wait('!document.querySelector("[data-author-action=validate]")?.disabled')
     g.click('[data-author-action=validate]');g.click('[data-author-action=publish]');g.click('#ees-work-dialog [data-dialog-confirm]')
@@ -350,8 +352,8 @@ def helper_chat_flow(g,key,chat_id):
     """Physical helper send, actual isolated tool dispatch, then live ACL denial."""
     before=g.api('/api/ees-work/workspace?workflow_id='+key)
     g.click('[data-action=mode][data-mode=author]')
-    g.click('[data-author-action=list]');g.click('[data-author-action=create]')
-    selector='#ees-work-procedure-start [data-action=procedure_question]'
+    g.click('[data-action=tools]');g.click('[data-author-action=tool_create]')
+    selector='[data-author-action=tool_question]'
     g.wait('document.querySelector('+json.dumps(selector)+') && !document.querySelector('+json.dumps(selector)+').disabled')
     question=g.browser.evaluate('document.querySelector('+json.dumps(selector)+').innerText.trim()')
     assert question
@@ -366,7 +368,7 @@ def helper_chat_flow(g,key,chat_id):
     users=[item for item in chat['history']['messages'].values() if item.get('role')=='user' and item.get('content')==question]
     assert len(users)==1,users
     message=users[0];reference=deepcopy(message['meta']['ees_work_reference'])
-    assert reference['kind']=='help' and reference['screen']=='새 업무 절차' and reference['context_id'],reference
+    assert reference['kind']=='help' and reference['screen']=='새 도구 시작' and reference['context_id'],reference
     assert message['meta'].get('ees_work_help')==1,message
     assert not message.get('files') and message.get('models')==['c3-synthetic-model'],message
     assert g.browser.evaluate('document.querySelector("#chat-input").innerText')==draft
