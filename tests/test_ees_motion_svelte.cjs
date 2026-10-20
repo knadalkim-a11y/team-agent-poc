@@ -23,8 +23,8 @@ function motion() {
   };
   return { api, pending, opened };
 }
-function scopeHarness() {
-  const m = motion(), env = { window: { __eesMotionV1: m.api }, tick: () => Promise.resolve(), scopeVersion: 0, pendingSelection: null, previousBoundary: 'initial', selectionContext: 'route-and-permissions', value: 'old', kind: 'factory', document: { activeElement: null, body: element(), documentElement: element() }, shown: false, open: false, opened: '', restoreOnClose: true, query: 'kept while closing', dropdown: element(), trigger: element() };
+function scopeHarness(kind = 'factory') {
+  const m = motion(), env = { window: { __eesMotionV1: m.api }, tick: () => Promise.resolve(), scopeVersion: 0, pendingSelection: null, selectionExitBoundary: null, previousBoundary: 'initial', selectionContext: 'route-and-permissions', value: 'old', kind, document: { activeElement: null, body: element(), documentElement: element() }, shown: false, open: false, opened: '', restoreOnClose: true, query: 'kept while closing', dropdown: element(), trigger: element() };
   const source = between(component('EesScopeSelect'), 'function syncScope(', '\n\tonDestroy(').replace('wantsOpen: boolean, activeKind: string', 'wantsOpen, activeKind');
   const sync = bind(source, env, 'syncScope');
   env.syncScope = sync;
@@ -32,10 +32,10 @@ function scopeHarness() {
   const react = Function('env', `with(env) { ${reactiveCall}; }`);
   env.retireScope = bind(between(component('EesScopeSelect'), 'function retireScope()', '\n\t$: syncScope'), env, 'retireScope');
   env.close = bind(between(component('EesScopeSelect'), 'function close(', '\n\tfunction allowedOptions'), env, 'close');
-  const boundary = bind(between(component('EesScopeSelect'), 'function syncBoundary(', '\n\tfunction retireScope').replace('next: string, context: string, selected: string', 'next, context, selected'), env, 'syncBoundary');
+  const boundary = bind(between(component('EesScopeSelect'), 'function syncBoundary(', '\n\tfunction retireScope').replace('next: string, context: string, selected: string, exit: string', 'next, context, selected, exit'), env, 'syncBoundary');
   const choose = bind(between(component('EesScopeSelect'), 'function choose(', '\n\tfunction keydown'), env, 'choose');
-  env.eesAction = action => { env.value = action.factoryId; };
-  return { env, m, choose, react() { react(env); }, boundary(next, context = env.selectionContext, selected = env.value) { boundary(next, context, selected); }, set(open, opened = open ? 'factory' : '') { env.open = open; env.opened = opened; sync(open, opened); } };
+  env.eesAction = action => { env.value = action.factoryId ?? action.systemId; };
+  return { env, m, choose, react() { react(env); }, boundary(next, context = env.selectionContext, selected = env.value, exit = next) { boundary(next, context, selected, exit); }, set(open, opened = open ? kind : '') { env.open = open; env.opened = opened; sync(open, opened); } };
 }
 function panelHarness() {
   const m = motion(), trigger = element(), env = { window: { __eesMotionV1: m.api }, tick: () => Promise.resolve(), previousPanelOpen: null, previousPanelOverlay: null, panelOpen: false, panelOverlay: true, panelClosing: false, panelClose: Promise.resolve(true), nativeRoute: false, mounted: true, admin: false, panelRegion: element(), panelBackdrop: element(), panel: element(), document: { getElementById: () => trigger }, $showSettings: false, actions: [] };
@@ -174,4 +174,54 @@ test('external boundary retirement cannot reopen from a stale derived open value
   assert.equal(h.env.shown, false); assert.equal(h.m.pending.size, 0);
   assert.equal(h.m.opened.length, 1, 'No new opening animation after external invalidation');
   assert.equal(h.env.trigger.focused, 0);
+});
+
+function navigationScopeProps(kind, { system, factories, systems = [{ id: 'EMS', allowed: true }, { id: 'APC', allowed: true }], actor = 'actor', path = '/c/chat', tab = 'my_work' }) {
+  const source = component('EesNavigation');
+  const env = { $page: { url: { pathname: path, search: '' } }, cap: { actor_id: actor }, $eesSnapshot: { native_id: '' },
+    s: { mode: 'work', tab, system_id: system, factory_id: '', chat_id: 'chat' }, $eesCompact: false, author: false, systems, factories };
+  const evaluate = expression => Function('env', `with(env) { return (${expression}); }`)(env);
+  for (const name of ['scopeLocation', 'scopeBoundary', 'scopeSystemExitBoundary', 'scopeSelectionContext']) {
+    const statement = source.split('\n').find(line => line.includes(`$: ${name} = `));
+    env[name] = evaluate(statement.slice(statement.indexOf(' = ') + 3, -1));
+  }
+  const markup = source.split('\n').find(line => line.includes(`options={${kind === 'factory' ? 'factories' : 'systems'}}`));
+  const prop = name => evaluate(markup.match(new RegExp(`${name}=\\{([^}]+)\\}`))[1]);
+  return { boundary: env.scopeBoundary, context: prop('selectionContext'), exit: prop('exitBoundary') };
+}
+for (const cached of [true, false]) test(`own system selection keeps exit and focus across ${cached ? 'cached' : 'responding'} factory catalog replacement`, async () => {
+  const emsFactories = [{ id: '', name: 'All factories' }, { id: 'factory-1', system_id: 'EMS', allowed: true }];
+  const apcFactories = [{ id: '', name: 'All factories' }];
+    const h = scopeHarness('system');
+    const origin = navigationScopeProps('system', { system: 'EMS', factories: emsFactories });
+    h.env.selectionContext = origin.context; h.env.previousBoundary = origin.boundary; h.env.value = 'EMS';
+    h.set(true); await flush(); h.choose({ id: 'APC' }); h.set(false);
+    const first = navigationScopeProps('system', { system: 'APC', factories: cached ? apcFactories : emsFactories });
+    h.boundary(first.boundary, first.context, 'APC', first.exit);
+    assert.equal(h.env.shown, true); assert.equal(h.m.pending.size, 1);
+    const response = navigationScopeProps('system', { system: 'APC', factories: apcFactories });
+    h.boundary(response.boundary, response.context, 'APC', response.exit);
+    assert.equal(h.env.shown, true); assert.equal(h.m.pending.size, 1); assert.equal(h.env.trigger.focused, 0);
+    h.m.api.finish(h.env.dropdown);
+    assert.equal(h.env.shown, false); assert.equal(h.env.trigger.focused, 1);
+});
+test('system exit exception never covers system permission, account, route, destination or opened-catalog invalidation', async () => {
+  const factories = [{ id: 'factory-1', system_id: 'EMS', name: 'Factory 1' }];
+  const origin = navigationScopeProps('system', { system: 'EMS', factories });
+  const selected = navigationScopeProps('system', { system: 'APC', factories });
+  for (const change of [{ systems: [{ id: 'APC', allowed: false }] }, { actor: 'another-actor' }, { path: '/workspace/skills' }, { tab: 'records' }, { system: 'EMS' }]) {
+    const h = scopeHarness('system'); h.env.selectionContext = origin.context; h.env.previousBoundary = origin.boundary; h.env.value = 'EMS';
+    h.set(true); await flush(); h.choose({ id: 'APC' }); h.set(false);
+    h.boundary(selected.boundary, selected.context, 'APC', selected.exit);
+    const next = navigationScopeProps('system', { system: 'APC', factories, ...change });
+    h.boundary(next.boundary, next.context, change.system || 'APC', next.exit);
+    assert.equal(h.env.shown, false); assert.equal(h.m.pending.size, 0); assert.equal(h.env.trigger.focused, 0);
+  }
+  for (const kind of ['system', 'factory']) {
+    const h = scopeHarness(kind), initial = navigationScopeProps(kind, { system: 'EMS', factories });
+    h.env.previousBoundary = initial.boundary; h.set(true); await flush();
+    const renamed = navigationScopeProps(kind, { system: 'EMS', factories: [{ ...factories[0], name: 'Renamed factory' }] });
+    h.boundary(renamed.boundary, renamed.context, h.env.value, renamed.exit); h.react();
+    assert.equal(h.env.shown, false); assert.equal(h.env.opened, ''); assert.equal(h.env.trigger.focused, 0);
+  }
 });

@@ -1,0 +1,229 @@
+{
+  "head": "7514760853195dd5215598b213bc1d426257ec10",
+  "run": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39353959267",
+  "job": 118406134762,
+  "artifact": 12234663015,
+  "artifact_zip_sha256": "2111892fbce25e4f9ecae109db8cb4bf6c029748e7ce89dc0dbac004eac5150a",
+  "format": "Selected original JSON fields and job-log lines from the failed run; full artifact contains 264 files. Generated interpretation is separated below. All user and business values are synthetic fixture data.",
+  "job_log_sha256": "9e46f99c18ead3e7f9717afaaa71143dba2d711dd61e6095f4a674e59e85d3cd",
+  "cases": [
+    {
+      "source_file": "integrated-test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading-failure.json",
+      "source_sha256": "763a8e2f048f743b947af20d3299003cd73f0eb3c1048f2a842a56a4a49a718f",
+      "original_record": {
+        "test": "test_ees_source_shell_native.SourceShellNativeTests.test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading",
+        "last_wait": "!document.querySelector(\"[data-scope-dropdown]\")",
+        "last_click": "[data-action=choose_system][data-system-id=\"EMS\"]",
+        "capture_errors": []
+      },
+      "original_dom_selection": {
+        "route": "/c/existing-chat",
+        "controls": [
+          {
+            "id": "ees-work-site-trigger",
+            "label": "공장 선택",
+            "text": "공장전체 공장",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 122,
+              "width": 239,
+              "height": 40
+            }
+          },
+          {
+            "id": "ees-work-system-trigger",
+            "label": "시스템 선택",
+            "text": "시스템EMS",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 161,
+              "width": 239,
+              "height": 40
+            }
+          }
+        ]
+      },
+      "original_job_log_lines": [
+        "2026-10-20T01:42:22.6088065Z FAIL: test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading (test_ees_source_shell_native.SourceShellNativeTests.test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading)",
+        "2026-10-20T01:42:22.6089736Z ----------------------------------------------------------------------",
+        "2026-10-20T01:42:22.6090339Z Traceback (most recent call last):",
+        "2026-10-20T01:42:22.6096508Z   File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_source_shell_native.py\", line 481, in test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading",
+        "2026-10-20T01:42:22.6097440Z     self.scope_closed(trigger)",
+        "2026-10-20T01:42:22.6098140Z   File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_source_shell_native.py\", line 211, in scope_closed",
+        "2026-10-20T01:42:22.6099425Z     self.assertTrue(observed['restored'], observed)",
+        "2026-10-20T01:42:22.6099949Z AssertionError: False is not true : {'restored': False, 'tag': 'BODY', 'id': ''}"
+      ]
+    },
+    {
+      "source_file": "integrated-test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus-failure.json",
+      "source_sha256": "605965c497db67fda36d4ac38a19145755815c8a8e362e8defeb247278852f29",
+      "original_record": {
+        "test": "test_ees_source_shell_native.SourceShellNativeTests.test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus",
+        "last_wait": "!document.querySelector(\"[data-scope-dropdown]\")",
+        "last_click": "[data-action=choose_system][data-system-id=APC]",
+        "capture_errors": []
+      },
+      "original_dom_selection": {
+        "route": "/c/existing-chat",
+        "controls": [
+          {
+            "id": "ees-work-site-trigger",
+            "label": "공장 선택",
+            "text": "공장전체 공장",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 122,
+              "width": 239,
+              "height": 40
+            }
+          },
+          {
+            "id": "ees-work-system-trigger",
+            "label": "시스템 선택",
+            "text": "시스템APC",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 161,
+              "width": 239,
+              "height": 40
+            }
+          }
+        ]
+      },
+      "original_job_log_lines": [
+        "2026-10-20T01:42:22.6101419Z FAIL: test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus (test_ees_source_shell_native.SourceShellNativeTests.test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus)",
+        "2026-10-20T01:42:22.6102353Z ----------------------------------------------------------------------",
+        "2026-10-20T01:42:22.6102752Z Traceback (most recent call last):",
+        "2026-10-20T01:42:22.6103637Z   File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_source_shell_native.py\", line 311, in test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus",
+        "2026-10-20T01:42:22.6104633Z     self.scope_closed(trigger)",
+        "2026-10-20T01:42:22.6105261Z   File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_source_shell_native.py\", line 211, in scope_closed",
+        "2026-10-20T01:42:22.6105911Z     self.assertTrue(observed['restored'], observed)",
+        "2026-10-20T01:42:22.6106401Z AssertionError: False is not true : {'restored': False, 'tag': 'BODY', 'id': ''}"
+      ]
+    }
+  ],
+  "delayed_response_frames": {
+    "source_file": "test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading-failure-frames.json",
+    "source_sha256": "91271a926d8ec68df526dc7966d566164ed30630f5ba683f7827d03339e9936a",
+    "original_record": {
+      "label": "scope-system-ems",
+      "scopeRequests": [
+        {
+          "label": "scope-system-apc",
+          "endpoint": "workspace",
+          "system": "APC",
+          "factory": "",
+          "started": 8233.299999999988,
+          "received": 9239.299999999988
+        },
+        {
+          "label": "scope-system-apc",
+          "endpoint": "operations",
+          "system": "APC",
+          "factory": "",
+          "started": 9239.399999999965,
+          "received": 10250.399999999965
+        },
+        {
+          "label": "scope-system-ems",
+          "endpoint": "workspace",
+          "system": "EMS",
+          "factory": "",
+          "started": 10603.299999999988,
+          "received": null
+        }
+      ],
+      "samples": [
+        {
+          "at": 10679.899999999965,
+          "label": "scope-system-ems",
+          "path": "/c/existing-chat",
+          "source": true,
+          "menu": true,
+          "bodyHidden": false,
+          "missingSource": false,
+          "legacy": [],
+          "menuCurrent": [
+            {
+              "key": "my_work",
+              "ariaCurrent": "page",
+              "text": "내 업무"
+            }
+          ],
+          "rightPanels": [
+            "my_work"
+          ],
+          "menuMode": [
+            "work"
+          ],
+          "targetLoading": [],
+          "nativeReturnLabel": null,
+          "nativeReturnUnexpectedSelection": false,
+          "nativeReturnPreviousPanel": [],
+          "nativeReturnDestinationLoading": false,
+          "loadingGuard": true,
+          "menuLoading": [],
+          "panelLoading": [],
+          "scopeLabel": "scope-system-ems",
+          "scopePending": false,
+          "scopeEmptyBeforeResponse": [],
+          "scopeLocalLoading": [],
+          "scopeControls": true,
+          "content": true,
+          "adminDialog": false,
+          "sourceText": true,
+          "startupGate": null
+        },
+        {
+          "at": 10696.299999999988,
+          "label": "scope-system-ems",
+          "path": "/c/existing-chat",
+          "source": true,
+          "menu": true,
+          "bodyHidden": false,
+          "missingSource": false,
+          "legacy": [],
+          "menuCurrent": [
+            {
+              "key": "my_work",
+              "ariaCurrent": "page",
+              "text": "내 업무"
+            }
+          ],
+          "rightPanels": [
+            "my_work"
+          ],
+          "menuMode": [
+            "work"
+          ],
+          "targetLoading": [],
+          "nativeReturnLabel": null,
+          "nativeReturnUnexpectedSelection": false,
+          "nativeReturnPreviousPanel": [],
+          "nativeReturnDestinationLoading": false,
+          "loadingGuard": true,
+          "menuLoading": [],
+          "panelLoading": [],
+          "scopeLabel": "scope-system-ems",
+          "scopePending": false,
+          "scopeEmptyBeforeResponse": [],
+          "scopeLocalLoading": [],
+          "scopeControls": true,
+          "content": true,
+          "adminDialog": false,
+          "sourceText": true,
+          "startupGate": null
+        }
+      ]
+    }
+  },
+  "generated_interpretation": {
+    "observation": "Both original log failures report active BODY after a selected system menu disappears. The delayed case last selected EMS; its last captured request has received=null and the final sample is 93 ms after request start.",
+    "diagnosis": "Product review traced the system menu invalidation boundary to the unrelated per-system factory catalog. APC response or cached EMS replacement can cancel the selected menu exit and its focus return.",
+    "limits": "The legacy source-shell frame recorder does not capture motion state or selectionContext, so the frame subset establishes response timing but does not itself show the exact retirement call. CI5 reached neither later external-permission nor catalog-invalidation assertion in the failed cases."
+  }
+}

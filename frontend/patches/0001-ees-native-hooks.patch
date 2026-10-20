@@ -1334,7 +1334,7 @@ new file mode 100644
 index 0000000..be842d3
 --- /dev/null
 +++ b/src/lib/components/ees/EesNavigation.svelte
-@@ -0,0 +1,251 @@
+@@ -0,0 +1,253 @@
 +<script lang="ts">
 +	import { getContext } from 'svelte';
 +	import { page } from '$app/stores';
@@ -1389,8 +1389,10 @@ index 0000000..be842d3
 +	$: scopeRole = (item) => item.allowed === false ? '' : item.role || (item.roles?.includes('manager') || cap.is_admin || cap.managed_systems?.includes(item.system_id || item.id) ? 'owner' : 'participant');
 +	$: systems = (scope.scope_options?.systems ?? scope.systems ?? []).map((item) => typeof item === 'string' ? { id: item, name: item } : item).map((item) => ({ ...item, role: scopeRole(item) }));
 +	$: factories = [{ id: '', name: t('EES.AllFactories', 'All factories') }, ...(scope.scope_options?.factories ?? scope.factories ?? []).map((item) => ({ ...item, role: scopeRole(item) }))];
-+	$: scopeBoundary = JSON.stringify([$page.url.pathname, $page.url.search, cap.actor_id, $eesSnapshot.native_id, s.mode, s.tab, s.workflow_id, s.run_id, s.job_id, s.system_id, s.factory_id, s.chat_id, $eesCompact, systems, factories]);
-+	$: scopeSelectionContext = JSON.stringify([$page.url.pathname, $page.url.search, cap.actor_id, $eesSnapshot.native_id, author, s.chat_id, $eesCompact, systems, factories]);
++	$: scopeLocation = JSON.stringify([$page.url.pathname, $page.url.search, cap.actor_id, $eesSnapshot.native_id, s.mode, s.tab, s.workflow_id, s.run_id, s.job_id, s.system_id, s.factory_id, s.chat_id, $eesCompact]);
++	$: scopeBoundary = JSON.stringify([scopeLocation, systems, factories]);
++	$: scopeSystemExitBoundary = JSON.stringify([scopeLocation, systems]);
++	$: scopeSelectionContext = JSON.stringify([$page.url.pathname, $page.url.search, cap.actor_id, $eesSnapshot.native_id, author, s.chat_id, $eesCompact, systems]);
 +	$: nativeAllowed = (id) =>
 +		cap.native_access_available === true &&
 +		cap.native_access?.[id] === true &&
@@ -1427,8 +1429,8 @@ index 0000000..be842d3
 +			)}
 +		</p>
 +		<div class="ew-scope">
-+			{#if !author}<EesScopeSelect kind="factory" label={t('EES.Factory', 'Factory')} value={s.factory_id || ''} options={factories} bind:opened={openedScope} boundary={scopeBoundary} selectionContext={JSON.stringify([scopeSelectionContext, s.system_id])} />{/if}
-+			<EesScopeSelect kind="system" compact={author} label={t('EES.System', 'System')} value={s.system_id || ''} options={systems} bind:opened={openedScope} boundary={scopeBoundary} selectionContext={scopeSelectionContext} />
++			{#if !author}<EesScopeSelect kind="factory" label={t('EES.Factory', 'Factory')} value={s.factory_id || ''} options={factories} bind:opened={openedScope} boundary={scopeBoundary} selectionContext={JSON.stringify([scopeSelectionContext, s.system_id, factories])} exitBoundary={scopeBoundary} />{/if}
++			<EesScopeSelect kind="system" compact={author} label={t('EES.System', 'System')} value={s.system_id || ''} options={systems} bind:opened={openedScope} boundary={scopeBoundary} selectionContext={scopeSelectionContext} exitBoundary={scopeSystemExitBoundary} />
 +		</div>
 +		{#if author}
 +			<section class="ew-nav-group">
@@ -3525,7 +3527,7 @@ diff --git a/src/lib/components/ees/EesScopeSelect.svelte b/src/lib/components/e
 new file mode 100644
 --- /dev/null
 +++ b/src/lib/components/ees/EesScopeSelect.svelte
-@@ -0,0 +1,161 @@
+@@ -0,0 +1,169 @@
 +<script lang="ts">
 +	import { getContext, onDestroy, tick } from 'svelte';
 +	import { eesAction } from './state';
@@ -3539,6 +3541,7 @@ new file mode 100644
 +	export let opened = '';
 +	export let boundary = '';
 +	export let selectionContext = '';
++	export let exitBoundary = '';
 +	let root: HTMLDivElement;
 +	let trigger: HTMLButtonElement;
 +	let list: HTMLDivElement;
@@ -3546,6 +3549,7 @@ new file mode 100644
 +	let shown = false, scopeVersion = 0;
 +	let restoreOnClose = true;
 +	let pendingSelection: { value: string; context: string } | null = null;
++	let selectionExitBoundary: string | null = null;
 +	let search: HTMLInputElement;
 +	let query = '';
 +	let previousBoundary = '';
@@ -3556,19 +3560,23 @@ new file mode 100644
 +	$: searchable = kind === 'factory' && options.filter((item) => item.id !== '').length >= 8;
 +	$: visible = options.filter((item) => item.id === '' || !query.trim() || String(item.name || item.id).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
 +	$: current = options.find((item) => item.id === value);
-+	$: syncBoundary(boundary, selectionContext, value);
-+	function syncBoundary(next: string, context: string, selected: string) {
++	$: syncBoundary(boundary, selectionContext, value, exitBoundary);
++	function syncBoundary(next: string, context: string, selected: string, exit: string) {
 +		if (next === previousBoundary) return;
 +		previousBoundary = next;
-+		// Only the first boundary caused by this option may retain its inert exit.
-+		// Permission, route and later navigation changes retire stale choices now.
-+		const ownSelection = !opened && pendingSelection?.value === selected && pendingSelection?.context === context;
++		const ownSelection = pendingSelection?.value === selected && pendingSelection?.context === context;
++		// A system choice also replaces the sibling factory catalog, from cache
++		// or its response. Its inert exit may continue only while its own catalog,
++		// selected destination and all account/navigation fields remain unchanged.
++		const ownExit = shown && !opened && (ownSelection || selectionExitBoundary === exit);
++		selectionExitBoundary = ownExit ? exit : null;
 +		pendingSelection = null;
 +		if (opened === kind) close(false);
-+		if (shown && !ownSelection) retireScope();
++		if (shown && !ownExit) retireScope();
 +	}
 +	function retireScope() {
 +		pendingSelection = null;
++		selectionExitBoundary = null;
 +		scopeVersion++;
 +		window.__eesMotionV1?.finish(dropdown, { restoreFocus: false });
 +		window.__eesMotionV1?.cancel(dropdown);
@@ -3582,6 +3590,7 @@ new file mode 100644
 +			const retained = shown && dropdown;
 +			shown = true;
 +			pendingSelection = null;
++			selectionExitBoundary = null;
 +			const enter = () => {
 +				if (version !== scopeVersion || opened !== kind || !dropdown) return;
 +				window.__eesMotionV1?.open(dropdown);
@@ -3600,6 +3609,7 @@ new file mode 100644
 +			shown = false;
 +			query = '';
 +			pendingSelection = null;
++			selectionExitBoundary = null;
 +		};
 +		const motion = window.__eesMotionV1;
 +		// Only one scope menu exists, including when a sibling opens during closing.

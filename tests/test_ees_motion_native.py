@@ -170,6 +170,11 @@ class MotionNativeTests(IntegratedNativeCase):
 
     def test_c3_scope_immediate_escape_reopen_replacement_and_reduced_motion(self):
         trigger = '#ees-work-system-trigger'
+        # Production workspace responses filter factories by system. Exercise
+        # both the asynchronous APC response and cached EMS catalog replacement.
+        self.command('save_factory', factory_id='c3-ems-factory',
+                     system_id='EMS', name='C3 시스템별 공장')
+        self.assertIsNotNone(self.refresh())
         self.observe('scope-rapid')
         self.click(trigger)
         self.wait("document.querySelector('[data-scope-dropdown=system]')")
@@ -193,21 +198,23 @@ class MotionNativeTests(IntegratedNativeCase):
                         'Escape was not actually delivered during opening')
         # An explicit choice updates scope immediately, but its own retained
         # menu still completes the shared close before returning focus.
-        self.observe('scope-selection')
-        self.click(trigger)
-        self.wait("document.querySelector('[data-scope-dropdown=system]') && !document.querySelector('[data-ees-motion=opening]')")
-        self.click('[data-action=choose_system][data-system-id=APC]')
-        self.wait("!document.querySelector('[data-scope-dropdown]') && document.activeElement?.id==='ees-work-system-trigger'")
-        self.assertIn('APC', self.text(trigger))
-        evidence = self.finish_evidence('c3-scope-selection-close-focus')
-        self.assertTrue(any(row['trusted'] and row['scopeChoice'] == 'APC' for row in evidence['inputs']))
-        self.assert_effect(evidence, 'scope', 'closing')
-        closing_frames = [frame for frame in evidence['frames'] if any(
-            node['kind'] == 'scope' and node['state'] == 'closing' for node in frame['nodes'])]
-        self.assertTrue(all('APC' in frame['system'] for frame in closing_frames),
-                        'Selected scope was delayed until its close effect finished')
-        self.assertTrue(all(frame['focus']['id'] != 'ees-work-system-trigger' for frame in closing_frames),
-                        'Selected scope returned focus before its close effect finished')
+        for target in ('APC', 'EMS'):
+            self.observe('scope-selection-' + target)
+            self.click(trigger)
+            self.wait("document.querySelector('[data-scope-dropdown=system]') && !document.querySelector('[data-ees-motion=opening]')")
+            self.click('[data-action=choose_system][data-system-id=' + target + ']')
+            self.wait("!document.querySelector('[data-scope-dropdown]') && document.activeElement?.id==='ees-work-system-trigger'")
+            self.assertIn(target, self.text(trigger))
+            evidence = self.finish_evidence('c3-scope-selection-close-focus-' + target.lower())
+            self.assertTrue(any(row['trusted'] and row['scopeChoice'] == target for row in evidence['inputs']))
+            self.assert_effect(evidence, 'scope', 'closing')
+            closing_frames = [frame for frame in evidence['frames'] if any(
+                node['kind'] == 'scope' and node['state'] == 'closing' for node in frame['nodes'])]
+            self.assertTrue(all(target in frame['system'] for frame in closing_frames),
+                            'Selected scope was delayed until its close effect finished')
+            self.assertTrue(all(frame['focus']['id'] != 'ees-work-system-trigger' for frame in closing_frames),
+                            'Selected scope returned focus before its close effect finished')
+            self.assertIsNotNone(self.refresh())
         self.browser.call('Emulation.setEmulatedMedia', {'features': [{'name': 'prefers-reduced-motion', 'value': 'reduce'}]})
         self.addCleanup(lambda: self.browser.call('Emulation.setEmulatedMedia', {'features': []}))
         self.observe('scope-reduced')
