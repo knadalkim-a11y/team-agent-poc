@@ -377,7 +377,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             metrics = self.browser.evaluate("""(() => {
               const bounds = selector => {const box=document.querySelector(selector).getBoundingClientRect();return {x:box.x,y:box.y,width:box.width,height:box.height};};
               const style = selector => {const value=getComputedStyle(document.querySelector(selector));return {font:value.fontFamily,size:value.fontSize,line:value.lineHeight,background:value.backgroundColor};};
-              return {panel:bounds('.ees-panel-region'),header:bounds('.ew-author>header'),
+              return {panel:bounds('.ees-panel-region'),frame:bounds('[data-ees-source-shell]'),sidebar:bounds('#sidebar'),
+                overlay:document.querySelector('.ees-panel-region').getAttribute('data-overlay'),header:bounds('.ew-author>header'),
                 card:bounds('.ew-work-content'),purpose:bounds('.ew-content-purpose'),needs:bounds('.ew-content-needs'),steps:bounds('.ew-content-heading'),list:bounds('.ew-stage-list'),footer:bounds('.ew-author>footer'),
                 availableWidth:document.querySelector('.ees-panel-region').parentElement.getBoundingClientRect().width,
                 badge:style('.ew-author-heading>.ew-author-tag'),detail:style('.ew-content-purpose>p'),
@@ -388,8 +389,17 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 factoryViews:[...document.querySelectorAll('.ew-author-factories [data-author-action=factory]')].map(e=>({id:e.dataset.id,label:e.textContent.trim(),selected:e.getAttribute('aria-selected')})),
                 overflow:document.querySelector('.ew-author-scroll').scrollWidth-document.querySelector('.ew-author-scroll').clientWidth};
             })()""")
-            self.assertEqual(metrics['panel']['width'], min(580, metrics['availableWidth']))
+            self.assertEqual(metrics['overlay'], 'true' if width == 480 else 'false')
+            # Overlay retains the existing 56 px navigation rail even when the
+            # authoring panel's preferred 580 px width cannot fit the frame.
+            available_panel_width = metrics['availableWidth'] - (56 if metrics['overlay'] == 'true' else 0)
+            metrics['expectedPanelWidth'] = min(580, available_panel_width)
+            metrics['panelFrameLeftGap'] = metrics['panel']['x'] - metrics['frame']['x']
+            self.assertEqual(metrics['panel']['width'], metrics['expectedPanelWidth'])
             self.assertEqual(metrics['panel']['x'] + metrics['panel']['width'], width)
+            if metrics['overlay'] == 'true':
+                self.assertEqual(metrics['sidebar']['width'], 56)
+                self.assertEqual(metrics['panelFrameLeftGap'], max(56, metrics['availableWidth'] - 580))
             self.assertEqual(metrics['header']['height'], 48)
             self.assertEqual(metrics['extraHeader'], 0)
             self.assertEqual(metrics['factoryTabs'], 1)
@@ -412,7 +422,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertLessEqual(metrics['overflow'], 1)
             self.assertEqual(self.text('.ew-author-heading>.ew-author-tag'), '초안')
             self.assertIn('초안 r1 · 저장됨', self.text('[data-author-status]'))
-            self.screenshot('procedure-visual-content-empty-' + str(width))
+            directory = self.screenshot('procedure-visual-content-empty-' + str(width))
+            (directory / ('procedure-visual-content-empty-' + str(width) + '-geometry.json')).write_text(
+                json.dumps(metrics, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         self.wait("[...document.querySelectorAll('#ees-work-designer img')].every(image=>image.complete&&image.naturalWidth>0)")
         assets = self.browser.evaluate("[...document.querySelectorAll('.ew-author-back img,.ew-content-heading img')].map(image=>[image.naturalWidth,image.getBoundingClientRect().width])")
         self.assertTrue(assets)

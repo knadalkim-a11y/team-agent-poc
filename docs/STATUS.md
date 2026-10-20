@@ -3,9 +3,9 @@
 ## 2026-10-20 · 업무 내용·단계와 작업 · 대화 제안 E1·E2
 
 - **선행 완료:** 사용자 요청으로 [PR #100](https://github.com/knadalkim-a11y/team-agent-poc/pull/100)을 `3c343ce` 에 병합했다. 최종 head `2a3ddf5` 의 CI 39420778057 성공과 C60 실제 Native 증거를 확인했다. 이 main 에서 새 `feat/work-content-chat-proposals-20261020` 을 시작한다. 아래 C60 Draft·병합 대기는 당시 기록이다.
-- **현재 범위:** 작성의 요약·구조를 업무 내용으로 합치고 단계 접힘·이름 먼저 추가·수정/삭제/왕복을 구현한다. 패널 AI 요청은 제거하고 대화에서 받은 정의·입력 제안의 검토/반영/버리기를 유지한다. 단계 삭제 시 기간 설정 잔류 결함을 함께 고친다. [계약](mockups/ees-work/TASK.md#work-content-chat-proposals-20261020) · [최초 실패·검증](../evals/v4-ui-20260930.md#work-content-chat-proposals-20261020).
-- **최근 검증:** 관련 Node 439 PASS, 문서 26파일 / 2148링크 오류 0, 시험 ID 감사 1332 → 1557 / 오류 0, diff 검사 통과. 기간 삭제의 실제 저장·주기 게시 검사도 통과했다. 로컬 Python 확장 검사는 의존성 부재 1 ERROR / Native 자료 부재 6 SKIP 을 별도 기록했다. 첫 CI 의 실제 계정/업무/실행·전체 제품·Windows 검사는 통과했다. 작성 시험 2개와 화면 대조에서 발견한 편집 차단 경고 가시성을 보완하며 최초 실패를 평가에 보존했다. 두 폭의 실제 화면과 전체 CI 는 새 최종 head 에서 확인한다.
-- **PR·다음 하나:** [Draft #101](https://github.com/knadalkim-a11y/team-agent-poc/pull/101)에서 최종 CI 와 480 px / 1366 × 768 의 Figma 화면 대조를 확인한다. #100 병합 main 의 [CI 39425795994](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39425795994)는 전체 성공이며 프로그램 산출물도 생성됐다. 이번 새 PR 의 병합은 사용자가 한다. 사내 실행·적용, 서버 API 변경, 작업 상세 재설계, Figma 수정은 하지 않는다.
+- **현재 범위:** 작성의 요약·구조를 업무 내용으로 합치고 단계 접힘·이름 먼저 추가·수정/삭제/왕복을 구현했다. 패널 AI 요청은 제거하고 대화에서 받은 정의·입력 제안의 검토/반영/버리기를 유지한다. 단계 삭제 시 기간 설정 잔류 결함을 함께 고쳤다. [계약](mockups/ees-work/TASK.md#work-content-chat-proposals-20261020) · [최초 실패·검증](../evals/v4-ui-20260930.md#work-content-chat-proposals-20261020).
+- **최근 검증:** 관련 Node 439 PASS, 기간 삭제 뒤 실제 저장·주기 게시 검사 통과. CI 의 새 480 px / 1366 × 768 변형 시험과 38개 화면 관찰을 통과했고 경고 가시성·포커스·스크롤 복원을 확인했다. 실제 대화 제안·계정/업무/실행·전체 제품도 통과했다. 두 번째 CI 에서 드러난 좁은 화면의 기존 56 px 여유 단언과 CSS 아이콘 검토 목록 누락은 시험에 반영했다. 최초 실패·시각 보완·로컬 의존성 부재와 미실행을 평가에 보존한다.
+- **PR·다음 하나:** [PR #101](https://github.com/knadalkim-a11y/team-agent-poc/pull/101)의 정확한 최종 head CI 와 최종 화면 판정은 PR 본문/Checks 를 원본으로 확인한다. 필수 검증을 통과한 새 PR 을 사용자가 검토·병합한다. #100 병합 main 의 [CI 39425795994](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39425795994)는 전체 성공이며 프로그램 산출물도 생성됐다. 사내 실행·적용, 서버 API 변경, 작업 상세 재설계, Figma 수정은 하지 않았다.
 
 ## 2026-10-20 · C3 겹친 패널 Escape 범위 · C60 정정
 

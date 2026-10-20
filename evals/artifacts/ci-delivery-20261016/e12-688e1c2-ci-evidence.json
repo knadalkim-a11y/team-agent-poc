@@ -1,0 +1,409 @@
+{
+  "head": "688e1c2cadfe9cbf46022827c28b4cd70710b04a",
+  "run_id": 39431626755,
+  "compose_job_id": 118660995126,
+  "compose_artifact_id": 12269336550,
+  "compose_zip_sha256": "327700cd304c57fae502740c3cc6d89326f90e83f8cc36880e19c376daffdef1",
+  "product_artifact_id": 12269501386,
+  "product_zip_sha256": "54618d291dc88ff94d921da036a8e385216aa91ba222a03f5e603e5fd003d8ba",
+  "native_compose_result": "76 PASS / 1 FAIL; new 480/1366 variants PASS",
+  "failure": "The new 480 px geometry case expected full container width and omitted the existing 56 px overlay gutter. Actual panel width 424 is correct.",
+  "source_contract": "main 3c343ce EesShell overlay max-width: calc(100% - 56px)",
+  "change": "Keep product width policy; assert exact overlay-adjusted width, left gutter and right edge.",
+  "observation_count": 38,
+  "max_overflow": 0,
+  "guard_observations": [
+    {
+      "viewport": [
+        1366,
+        768
+      ],
+      "scrollTop": 444,
+      "overflow": 0,
+      "stages": [
+        {
+          "id": "stage-0",
+          "expanded": "true",
+          "width": 537,
+          "height": 52,
+          "fontSize": "14px",
+          "lineHeight": "22px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "stage-1",
+          "expanded": "false",
+          "width": 537,
+          "height": 52,
+          "fontSize": "14px",
+          "lineHeight": "22px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "stage-2",
+          "expanded": "false",
+          "width": 537,
+          "height": 52,
+          "fontSize": "14px",
+          "lineHeight": "22px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "stage-3",
+          "expanded": "false",
+          "width": 537,
+          "height": 52,
+          "fontSize": "14px",
+          "lineHeight": "22px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "stage-4",
+          "expanded": "false",
+          "width": 537,
+          "height": 52,
+          "fontSize": "14px",
+          "lineHeight": "22px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "stage-5",
+          "expanded": "false",
+          "width": 537,
+          "height": 68,
+          "fontSize": "14px",
+          "lineHeight": "22px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ],
+      "jobs": [
+        {
+          "id": "job-0-0",
+          "returned": "false",
+          "width": 477,
+          "height": 44,
+          "fontSize": "14px",
+          "lineHeight": "22px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "job-0-1",
+          "returned": "false",
+          "width": 477,
+          "height": 45,
+          "fontSize": "14px",
+          "lineHeight": "22px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ],
+      "focus": {
+        "name": "name"
+      },
+      "inline": true,
+      "invalid": false,
+      "inlineAlert": {
+        "text": "편집 중인 항목을 먼저 적용하거나 취소해 주세요.",
+        "rect": {
+          "left": 866,
+          "right": 1321,
+          "top": 48,
+          "bottom": 66
+        },
+        "withinScroll": true,
+        "withinPanel": true,
+        "withinViewport": true,
+        "visible": true,
+        "hitTest": true,
+        "focusInsideEditor": true
+      },
+      "surfaces": [],
+      "proposal": false,
+      "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+      "icons": [
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/676c3.svg",
+          "natural": 16,
+          "rendered": 16
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/f0554.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/41b38.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/e1049.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/f0554.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/a953c.svg",
+          "natural": 16,
+          "rendered": 16
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/f0554.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/a953c.svg",
+          "natural": 16,
+          "rendered": 16
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/f0554.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/f0554.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/f0554.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/f0554.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/f0554.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/9ce50.svg",
+          "natural": 14,
+          "rendered": 14
+        }
+      ],
+      "label": "e1-example7-dirty-guard-1366"
+    },
+    {
+      "viewport": [
+        480,
+        768
+      ],
+      "scrollTop": 444,
+      "overflow": 0,
+      "stages": [
+        {
+          "id": "stage-0",
+          "expanded": "true",
+          "width": 381,
+          "height": 52,
+          "fontSize": "14px",
+          "lineHeight": "22px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "stage-1",
+          "expanded": "false",
+          "width": 381,
+          "height": 52,
+          "fontSize": "14px",
+          "lineHeight": "22px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "stage-2",
+          "expanded": "false",
+          "width": 381,
+          "height": 52,
+          "fontSize": "14px",
+          "lineHeight": "22px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "stage-3",
+          "expanded": "false",
+          "width": 381,
+          "height": 52,
+          "fontSize": "14px",
+          "lineHeight": "22px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "stage-4",
+          "expanded": "false",
+          "width": 381,
+          "height": 52,
+          "fontSize": "14px",
+          "lineHeight": "22px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "stage-5",
+          "expanded": "false",
+          "width": 381,
+          "height": 68,
+          "fontSize": "14px",
+          "lineHeight": "22px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ],
+      "jobs": [
+        {
+          "id": "job-0-0",
+          "returned": "false",
+          "width": 321,
+          "height": 44,
+          "fontSize": "14px",
+          "lineHeight": "22px",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "id": "job-0-1",
+          "returned": "false",
+          "width": 321,
+          "height": 45,
+          "fontSize": "14px",
+          "lineHeight": "22px",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ],
+      "focus": {
+        "name": "name"
+      },
+      "inline": true,
+      "invalid": false,
+      "inlineAlert": {
+        "text": "편집 중인 항목을 먼저 적용하거나 취소해 주세요.",
+        "rect": {
+          "left": 136,
+          "right": 435,
+          "top": 48,
+          "bottom": 66
+        },
+        "withinScroll": true,
+        "withinPanel": true,
+        "withinViewport": true,
+        "visible": true,
+        "hitTest": true,
+        "focusInsideEditor": true
+      },
+      "surfaces": [],
+      "proposal": false,
+      "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+      "icons": [
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/676c3.svg",
+          "natural": 16,
+          "rendered": 16
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/f0554.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/41b38.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/e1049.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/f0554.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/a953c.svg",
+          "natural": 16,
+          "rendered": 16
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/f0554.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/a953c.svg",
+          "natural": 16,
+          "rendered": 16
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/f0554.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/f0554.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/f0554.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/f0554.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/f0554.svg",
+          "natural": 14,
+          "rendered": 14
+        },
+        {
+          "src": "http://127.0.0.1:36005/_ees14/v4/9ce50.svg",
+          "natural": 14,
+          "rendered": 14
+        }
+      ],
+      "label": "e1-example7-dirty-guard-480"
+    }
+  ],
+  "return_observations": [
+    {
+      "label": "e1-d-job-return-1366",
+      "scrollTop": 286,
+      "focus": {
+        "action": "node",
+        "id": "job-0-0",
+        "name": ""
+      }
+    },
+    {
+      "label": "e1-d-job-return-480",
+      "scrollTop": 286,
+      "focus": {
+        "action": "node",
+        "id": "job-0-0",
+        "name": ""
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "evals/artifacts/ci-delivery-20261016/e12-688e1c2-geometry.json",
+      "source_name": "integrated-test_procedure_visual_geometry_matches_figma_and_preserves_native_draft-failure.json",
+      "sha256": "7a6186f1617b937077a8ec8de7fba41b1a2084525ab75186bff362b2472335c7"
+    },
+    {
+      "path": "evals/artifacts/ci-delivery-20261016/e12-688e1c2-geometry.png",
+      "source_name": "integrated-test_procedure_visual_geometry_matches_figma_and_preserves_native_draft-failure.png",
+      "sha256": "3fa3779386a6a4a72a5b642edff82e1d6245224c03f1ba059ea2756165413406"
+    }
+  ]
+}
