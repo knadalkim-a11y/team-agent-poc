@@ -1,5 +1,23 @@
 /* Figma page 832:131, current A/B family. Common tokens, no procedure-specific UI. */
 :root{--ees-font-sans:"EES Noto Sans KR","EES Inter","Segoe UI",sans-serif;--ees-surface-default:#fff;--ees-surface-sidebar:#fafafa;--ees-surface-hover:#f3f3f5;--ees-surface-panel:#f3f3f5;--ees-surface-panel-hover:#ececef;--ees-surface-selected:#eef3f9;--ees-surface-muted:#ececef;--ees-text-primary:#1f2023;--ees-text-strong:#3f4147;--ees-text-secondary:#5c5e65;--ees-text-tertiary:#6f717a;--ees-text-inverse:#fff;--ees-line-divider:#e6e6e9;--ees-line-control:#d5d6da;--ees-brand-solid:#2f5f98;--ees-brand-text:#2f5f98;--ees-brand-hover:#254e7e;--ees-focus-ring:0 0 0 2px #2f5f9826;}
+/* C3 · one source for CSS, JavaScript and source-patched Svelte surfaces. */
+:root{--ees-motion-fast:120ms;--ees-motion-open:200ms;--ees-motion-close:150ms;--ees-motion-open-easing:cubic-bezier(0.2,0.8,0.2,1);--ees-motion-close-easing:cubic-bezier(0.4,0,1,1);}
+@media(prefers-reduced-motion:reduce){:root{--ees-motion-fast:0ms;--ees-motion-open:0ms;--ees-motion-close:0ms;}}
+[data-ees-motion-kind]{--ees-motion-offset:translateY(-4px);}
+[data-ees-motion-kind="dialog"],[data-ees-motion-kind="help"]{--ees-motion-offset:scale(.98);}
+[data-ees-motion-kind="panel-overlay"]{--ees-motion-offset:translateX(16px);}
+[data-ees-motion-kind="panel-content"],[data-ees-motion-kind="backdrop"]{--ees-motion-offset:none;}
+[data-ees-motion-kind][data-ees-motion="opening"]{animation:ees-motion-open var(--ees-motion-open) var(--ees-motion-open-easing) both;}
+[data-ees-motion-kind][data-ees-motion="closing"]{animation:ees-motion-close var(--ees-motion-close) var(--ees-motion-close-easing) both;pointer-events:none!important;}
+@keyframes ees-motion-open{from{opacity:var(--ees-motion-from-opacity,0);transform:var(--ees-motion-from-transform,var(--ees-motion-offset));}to{opacity:1;transform:none;}}
+@keyframes ees-motion-close{from{opacity:var(--ees-motion-from-opacity,1);transform:var(--ees-motion-from-transform,none);}to{opacity:0;transform:var(--ees-motion-offset);}}
+[data-ees-work] :is(button,summary,a){transition:background-color var(--ees-motion-fast) var(--ees-motion-open-easing),border-color var(--ees-motion-fast) var(--ees-motion-open-easing),color var(--ees-motion-fast) var(--ees-motion-open-easing),box-shadow var(--ees-motion-fast) var(--ees-motion-open-easing);}
+[data-ees-work] :is(button,summary,a):focus-visible,[data-ees-work] [data-scope-trigger]:focus{transition:none;}
+/* Native modal blocking ends before the exit, while this same dialog remains visible. */
+#ees-work-dialog[data-ees-motion="closing"]{display:block;position:fixed;z-index:10019;}
+.ew-dialog-exit-backdrop{position:fixed;inset:0;z-index:10018;background:#1f202330;pointer-events:none;}
+#ees-work-dialog[data-ees-motion="opening"]::backdrop{animation:ees-motion-backdrop-open var(--ees-motion-open) var(--ees-motion-open-easing) both;}
+@keyframes ees-motion-backdrop-open{from{opacity:0;}to{opacity:1;}}
 [data-ees-work]{--ew-bg:var(--ees-surface-default);--ew-soft:var(--ees-surface-sidebar);--ew-ink:var(--ees-text-primary);--ew-muted:var(--ees-text-secondary);--ew-line:var(--ees-line-divider);--ew-blue:var(--ees-brand-solid);--ew-tint:var(--ees-surface-selected);font:400 14px/22px var(--ees-font-sans);letter-spacing:-.042px;color:var(--ew-ink);background:var(--ew-bg);box-sizing:border-box;color-scheme:light;}
 [data-ees-work] *,[data-ees-work] *::before,[data-ees-work] *::after{box-sizing:border-box;}
 [data-ees-work][hidden],[data-ees-work] [hidden]{display:none!important;}

@@ -800,7 +800,7 @@ index 875aee0..69c73bb 100644
  						/>
 +	{/if}
 +	{#if !loading}
-+		<div in:fade={{ duration: 50 }} class="w-full flex-1 min-h-0 flex flex-col">
++		<div class="w-full flex-1 min-h-0 flex flex-col">
 +			{#if !embedded && $selectedFolder && $selectedFolder?.meta?.background_image_url}
 +				<div
 +					class="absolute top-0 left-0 w-full h-full bg-cover bg-center bg-no-repeat"
@@ -1294,7 +1294,7 @@ index c183993..94a5ac5 100644
  
  	{#if $selectedFolder}
 -		<div class="mx-auto px-4 md:max-w-3xl md:px-6 min-h-62" in:fade={{ duration: 200, delay: 200 }}>
-+		<div data-ees-native-empty-folder class="mx-auto px-4 md:max-w-3xl md:px-6 min-h-62" in:fade={{ duration: 200, delay: 200 }}>
++		<div data-ees-native-empty-folder class="mx-auto px-4 md:max-w-3xl md:px-6 min-h-62">
  			<FolderPlaceholder folder={$selectedFolder} />
  		</div>
 -	{:else}
@@ -1831,7 +1831,7 @@ new file mode 100644
 index 0000000..d55b5f0b
 --- /dev/null
 +++ b/src/lib/components/ees/EesShell.svelte
-@@ -0,0 +1,402 @@
+@@ -0,0 +1,492 @@
 +<script lang="ts">
 +	import { getContext, onMount, tick } from 'svelte';
 +	import { get } from 'svelte/store';
@@ -1854,7 +1854,10 @@ index 0000000..d55b5f0b
 +	} from './state';
 +	const i18n: any = getContext('i18n');
 +	export let loaded = false;
-+	let panel: HTMLElement, overlays: HTMLElement;
++	let panel: HTMLElement, panelRegion: HTMLElement, panelBackdrop: HTMLElement, overlays: HTMLElement;
++	let panelClosing = false, previousPanelOpen: boolean | null = null;
++	let previousPanelOverlay: boolean | null = null;
++	let panelClose: Promise<boolean> = Promise.resolve(true);
 +	let mounted = false,
 +		width = typeof window !== 'undefined' ? window.innerWidth : 1440;
 +	let retainedChatId = $page.params.id || '',
@@ -1888,6 +1891,57 @@ index 0000000..d55b5f0b
 +	$: panelOpen = !nativeRoute && s.panel_open !== false;
 +	$: panelOverlay =
 +		width - ($eesCompact ? 56 : 256) - (procedurePanel || $eesSnapshot.procedure_start ? 580 : 480) < 560;
++	$: if (mounted && panelRegion) syncPanelMotion(panelOpen, panelOverlay, nativeRoute);
++	function syncPanelMotion(open: boolean, overlay: boolean, native: boolean) {
++		const motion = window.__eesMotionV1;
++		const modeChanged = previousPanelOverlay !== null && overlay !== previousPanelOverlay;
++		previousPanelOverlay = overlay;
++		if (modeChanged) {
++			motion?.cancel(panelRegion);
++			motion?.cancel(panelBackdrop);
++			motion?.cancel(panel);
++			panelClosing = false;
++			panelClose = Promise.resolve(true);
++		}
++		if (native && panelClosing) {
++			motion?.cancel(panelRegion);
++			motion?.cancel(panelBackdrop);
++			panelClosing = false;
++			panelClose = Promise.resolve(false);
++		}
++		if (open === previousPanelOpen) return;
++		previousPanelOpen = open;
++		if (open) {
++			panelClosing = false;
++			// Attached layout changes immediately; only its contents fade in.
++			tick().then(() => {
++				if (!mounted || !panelOpen || !panelRegion || !panel) return;
++				if (panelOverlay) {
++					motion?.open(panelRegion);
++					motion?.open(panelBackdrop);
++				} else {
++					motion?.cancel(panelRegion);
++					motion?.cancel(panelBackdrop);
++					motion?.open(panel);
++				}
++				panelRegion.inert = false;
++				panelRegion.removeAttribute('aria-hidden');
++			});
++		} else if (overlay && !nativeRoute && motion) {
++			panelClosing = true;
++			panelClose = Promise.all([motion.close(panelRegion), motion.close(panelBackdrop)]).then((results) => {
++				const finished = results.every(Boolean);
++				if (finished && !panelOpen) panelClosing = false;
++				return finished;
++			});
++		} else {
++			motion?.cancel(panelRegion);
++			motion?.cancel(panel);
++			motion?.cancel(panelBackdrop);
++			panelClosing = false;
++			panelClose = Promise.resolve(true);
++		}
++	}
 +	$: if (mounted) {
 +		$page.url.pathname;
 +		$page.url.search;
@@ -1895,6 +1949,12 @@ index 0000000..d55b5f0b
 +		$eesSessionReady;
 +		$showSettings;
 +		tick().then(eesSync);
++	}
++	function panelKeydown(event: KeyboardEvent) {
++		// Nested menus/dialogs consume Escape before this window bubble handler.
++		if (event.key !== 'Escape' || event.defaultPrevented || !panelOpen || !panelOverlay || nativeRoute || $showSettings) return;
++		event.preventDefault();
++		eesAction({ action: 'close_panel' });
 +	}
 +	function clearPrivateDrafts() {
 +		lastChatPath = null;
@@ -2011,7 +2071,13 @@ index 0000000..d55b5f0b
 +		searchChats: () => showSearch.set(true),
 +		focusComposer: () => window.__eesNativeDraftV1?.focus?.(),
 +		focusPanel: async (open: boolean) => {
++			const focusAtStart = document.activeElement;
 +			await tick();
++			if (!open) {
++				if (!(await panelClose)) return;
++				const active = document.activeElement;
++				if (active && active !== document.body && active !== document.documentElement && active !== focusAtStart && !panelRegion?.contains(active)) return;
++			}
 +			if (!mounted || nativeRoute || admin || panelOpen !== open) return;
 +			const target = open ? panel : document.getElementById('ees-work-panel-open');
 +			target?.focus({ preventScroll: true });
@@ -2058,12 +2124,15 @@ index 0000000..d55b5f0b
 +		return () => {
 +			unsubscribe();
 +			mounted = false;
++			window.__eesMotionV1?.cancel(panelRegion);
++			window.__eesMotionV1?.cancel(panel);
++			window.__eesMotionV1?.cancel(panelBackdrop);
 +			if (window.__eesSourceShellV1 === bridge) delete window.__eesSourceShellV1;
 +		};
 +	});
 +</script>
 +
-+<svelte:window bind:innerWidth={width} />
++<svelte:window bind:innerWidth={width} on:keydown={panelKeydown} />
 +<div
 +	data-ees-source-shell
 +	data-ees-route={nativeRoute ? 'native' : 'chat'}
@@ -2097,11 +2166,22 @@ index 0000000..d55b5f0b
 +				</div>{/if}
 +		</main>
 +	</section>
++	<div
++		class="ees-panel-backdrop"
++		data-ees-motion-kind="backdrop"
++		data-ees-panel-backdrop
++		bind:this={panelBackdrop}
++		style:left={`${$eesCompact ? 56 : 256}px`}
++		hidden={!panelOverlay || (!panelOpen && !panelClosing)}
++		aria-hidden="true"
++	></div>
 +	<section
 +		class="ees-panel-region"
 +		style:width={`${panelWidth}px`}
 +		data-overlay={panelOverlay}
-+		hidden={!panelOpen}
++		data-ees-motion-kind="panel-overlay"
++		bind:this={panelRegion}
++		hidden={!panelOpen && !panelClosing}
 +		inert={!panelOpen}
 +		aria-label={t('EES.Panel', 'Work panel')}
 +	>
@@ -2138,6 +2218,7 @@ index 0000000..d55b5f0b
 +		></div>
 +		<aside
 +			id="ees-work-panel"
++			data-ees-motion-kind="panel-content"
 +			tabindex="-1"
 +			data-ees-work
 +			data-ees-source-slot
@@ -2181,7 +2262,8 @@ index 0000000..d55b5f0b
 +		flex-direction: column;
 +	}
 +	.ees-chat-region[hidden],
-+	.ees-panel-region[hidden] {
++	.ees-panel-region[hidden],
++	.ees-panel-backdrop[hidden] {
 +		display: none;
 +	}
 +	.ees-native-region {
@@ -2194,6 +2276,14 @@ index 0000000..d55b5f0b
 +		gap: 8px;
 +		height: 100%;
 +		font-size: 14px;
++	}
++	.ees-panel-backdrop {
++		position: absolute;
++		top: 0;
++		right: 0;
++		bottom: 0;
++		z-index: 34;
++		background: #1f202330;
 +	}
 +	.ees-panel-region {
 +		position: relative;
@@ -3427,9 +3517,9 @@ diff --git a/src/lib/components/ees/EesScopeSelect.svelte b/src/lib/components/e
 new file mode 100644
 --- /dev/null
 +++ b/src/lib/components/ees/EesScopeSelect.svelte
-@@ -0,0 +1,101 @@
+@@ -0,0 +1,146 @@
 +<script lang="ts">
-+	import { getContext, tick } from 'svelte';
++	import { getContext, onDestroy, tick } from 'svelte';
 +	import { eesAction } from './state';
 +	import Icon from './EesIcon.svelte';
 +	const i18n: any = getContext('i18n');
@@ -3443,6 +3533,9 @@ new file mode 100644
 +	let root: HTMLDivElement;
 +	let trigger: HTMLButtonElement;
 +	let list: HTMLDivElement;
++	let dropdown: HTMLDivElement;
++	let shown = false, scopeVersion = 0;
++	let restoreOnClose = true;
 +	let search: HTMLInputElement;
 +	let query = '';
 +	let previousBoundary = '';
@@ -3457,12 +3550,54 @@ new file mode 100644
 +	$: if (boundary !== previousBoundary) {
 +		previousBoundary = boundary;
 +		if (open) close(false);
++		// A changed permission/navigation boundary must retire stale choices immediately.
++		if (shown) {
++			scopeVersion++;
++			window.__eesMotionV1?.finish(dropdown, { restoreFocus: false });
++			shown = false;
++			query = '';
++		}
 +	}
++	$: syncScope(open, opened);
++	function syncScope(wantsOpen: boolean, activeKind: string) {
++		const version = ++scopeVersion;
++		if (wantsOpen) {
++			shown = true;
++			tick().then(() => {
++				if (version !== scopeVersion || !open || !dropdown) return;
++				window.__eesMotionV1?.open(dropdown);
++				dropdown.inert = false;
++				dropdown.removeAttribute('aria-hidden');
++			});
++			return;
++		}
++		if (!shown) return;
++		const restore = restoreOnClose;
++		restoreOnClose = true;
++		const cleanup = () => {
++			if (version !== scopeVersion) return;
++			shown = false;
++			query = '';
++		};
++		const motion = window.__eesMotionV1;
++		// Only one scope menu exists, including when a sibling opens during closing.
++		if (activeKind) {
++			motion?.finish(dropdown, { restoreFocus: false });
++			cleanup();
++		} else if (motion && dropdown) {
++			motion.close(dropdown, { cleanup, restoreFocus: () => {
++				if (restore && version === scopeVersion && !opened) trigger?.focus({ preventScroll: true });
++			} });
++		} else {
++			cleanup();
++			if (restore) trigger?.focus({ preventScroll: true });
++		}
++	}
++	onDestroy(() => { scopeVersion++; if (typeof window !== 'undefined') window.__eesMotionV1?.cancel(dropdown); });
 +	function close(restore = true) {
 +		if (opened !== kind) return;
++		restoreOnClose = restore;
 +		opened = '';
-+		query = '';
-+		if (restore) trigger?.focus({ preventScroll: true });
 +	}
 +	function allowedOptions() {
 +		return Array.from(list?.querySelectorAll<HTMLButtonElement>('button[role="option"]:not(:disabled)') || []);
@@ -3513,8 +3648,8 @@ new file mode 100644
 +		}}>
 +		<Icon name={icon} />{#if !compact}<small>{label}</small>{/if}<span>{current?.name || current?.id || (kind === 'factory' ? t('EES.AllFactories', 'All factories') : value || t('EES.Select', 'Select'))}</span>{#if compact && current}<small>{current.allowed === false ? t('EES.Scope.NoAccess', 'No access') : current.role === 'owner' ? t('EES.Scope.Owner', 'Owner') : t('EES.Scope.Participant', 'Participant')}</small>{/if}<Icon name="ead50" />
 +	</button>
-+	{#if open}
-+		<div class="ew-scope-dropdown" data-scope-dropdown={kind}>
++	{#if shown}
++		<div class="ew-scope-dropdown" data-scope-dropdown={kind} data-ees-motion-kind="scope" bind:this={dropdown} inert={!open} aria-hidden={!open}>
 +			{#if searchable}<label class="ew-scope-search"><Icon name="b8bc6" /><input type="search" id="ees-factory-search" bind:this={search} bind:value={query} placeholder={t('EES.Scope.SearchFactories', 'Search factories')} aria-label={t('EES.Scope.SearchFactories', 'Search factories')} aria-controls={listId} /></label>{/if}
 +			<div id={listId} data-scope-list={kind} role="listbox" aria-label={label} bind:this={list}>
 +				{#each visible as item (item.id)}

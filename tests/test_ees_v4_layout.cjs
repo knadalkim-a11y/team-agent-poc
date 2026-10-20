@@ -1,7 +1,7 @@
 /* DOM lifecycle checks only; Native browser geometry is checked separately. */
 const test=require('node:test'),assert=require('node:assert/strict');
 const {renderer,run,controller,deferred}=require('./ees_workspace_ui_fixture.cjs');
-function dom(){
+function dom(extra={}){
  const ids=new Map();let doc;
  function element(id=''){
   const classes=new Set(),events=new Map();let html='';
@@ -17,7 +17,7 @@ function dom(){
  body.isConnected=true;body.append(sidebar);sidebar.append(anchorParent);anchorParent.append(anchor);body.append(row);row.append(column);column.append(pane);
  doc={body,activeElement:body,createElement:()=>element(),querySelector:selector=>selector==='#chat-container #chat-pane'?pane:ids.get(selector.slice(1)) || null,querySelectorAll:selector=>selector==='nav'?[]:[],getElementById:id=>ids.get(id)};
  const panel=element('ees-work-panel'),overlays=element('ees-work-overlays');row.append(panel);body.append(overlays);const published=[];
- const context=renderer({document:doc});context.window.__eesSourceShellV1={hosts:()=>({panel,overlays}),publish:value=>published.push(value)};return {context,ids,body,row,column,pane,panel,overlays,published,document:doc,element};
+ const context=renderer({...extra,document:doc});context.window.__eesSourceShellV1={hosts:()=>({panel,overlays}),publish:value=>published.push(value)};return {context,ids,body,row,column,pane,panel,overlays,published,document:doc,element};
 }
 const snapshot=(patch={})=>({state:{capabilities:{actor_id:'a'},systems:['EMS'],factories:[],workflows:[],runs:[],my_work:[]},selection:{mode:'work',tab:'my_work',panel_open:true,system_id:'EMS',factory_id:'',...patch}});
 test('legacy content uses only the source-supplied right slot without mutating Native nodes',()=>{const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})'),before=[...h.row.children];view.render(snapshot());assert.deepEqual(h.row.children,before);assert.equal(h.pane.parentElement,h.column);assert.equal(h.column.classList.contains('ees-integrated-chat'),false);assert.equal(h.ids.has('ees-work-entry'),false);assert.match(h.panel.innerHTML,/내 업무/);assert.equal(h.published.at(-1).context_title,'대화');});
@@ -41,7 +41,7 @@ test('missing source content slot fails closed without constructing a replacemen
  const h=dom();h.context.window.__eesSourceShellV1.hosts=()=>({});const children=[...h.body.children],view=run(h.context,'createWorkView({callbacks:{}})');assert.equal(view.render({...snapshot(),native_shell:true,native_id:'skills'}),false);assert.deepEqual(h.body.children,children);assert.equal(h.ids.has('ees-work-entry'),false);assert.equal(h.body.dataset.eesIntegrated,undefined);
 });
 test('panel scroll restores per personal target and never writes a shared run selection',()=>{const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})');view.render(snapshot());h.ids.get('ees-work-content').scrollTop=157;view.render(snapshot({tab:'records'}));h.ids.get('ees-work-content').scrollTop=22;view.render(snapshot());assert.equal(h.ids.get('ees-work-content').scrollTop,157);assert.equal(h.context.document.body.dataset.eesIntegrated,undefined);});
-test('confirmation dialog starts on cancel and Escape closure never accepts the command',async()=>{const h=dom();const waiting=run(h.context,'workUI.dialog({title:"요청 확인",html:"<p>대상</p>",confirmLabel:"요청"})');const dialog=h.overlays.children.find(item=>item.id==='ees-work-dialog');assert.equal(h.document.activeElement.id,'cancel');dialog.dispatch('cancel');dialog.close();assert.equal(await waiting,false);assert.equal(h.document.activeElement,h.body);});
+test('confirmation dialog starts on its body and Escape closure never accepts the command',async()=>{const h=dom();const waiting=run(h.context,'workUI.dialog({title:"요청 확인",html:"<p>대상</p>",confirmLabel:"요청"})');const dialog=h.overlays.children.find(item=>item.id==='ees-work-dialog');assert.equal(h.document.activeElement.id,'ees-work-dialog-body');dialog.dispatch('cancel');dialog.close();assert.equal(await waiting,false);assert.equal(h.document.activeElement,h.body);});
 test('dialog capture closes nested help before closing the confirmation and cleans it on programmatic close',async()=>{
  const h=dom();h.context.window.innerHeight=800;const waiting=run(h.context,'workUI.dialog({title:"요청 확인",confirmLabel:"요청"})'),dialog=h.overlays.children.find(item=>item.id==='ees-work-dialog'),trigger=h.element('help-trigger');dialog.append(trigger);h.context.trigger=trigger;
  const show=()=>run(h.context,'workUI.showHelp({termId:"category",help:{terms:[{id:"category",name:"분류",summary:"절차 분류"}]},trigger})');let help=show();assert.equal(help.parentElement,dialog);
@@ -144,4 +144,12 @@ test('Native portal skin is gated by the first-render source without hiding or m
  assert.doesNotMatch(sourceSkin,/body\[data-ees-integrated\]|visibility:|display:\s*none|position:/);
  for(const selector of sourceSkin.matchAll(/([^{}]+)\{/g))assert.ok(selector[1].includes('body:has([data-ees-source-shell])'),selector[1]);
  assert.match(sourceSkin,/\.modal\[role="dialog"\]>div/);assert.doesNotMatch(sourceSkin,/::backdrop/);assert.match(sourceSkin,/:focus-visible/);assert.match(sourceSkin,/\.cm-editor/);assert.match(sourceSkin,/\.katex/);
+});
+
+test('rapid dialog replacement reverses current visual without duplicate windows or stale focus and resolves decisions immediately',async()=>{
+ const timers=new Map();let serial=0;
+ const h=dom({getComputedStyle:()=>({opacity:'.38',transform:'matrix(.99, 0, 0, .99, 0, 0)',getPropertyValue:name=>name==='--ees-motion-close'?'150ms':name==='--ees-motion-open'?'200ms':''}),setTimeout:(fn,delay)=>{const id=++serial;timers.set(id,{fn,delay});return id;},clearTimeout:id=>timers.delete(id)});
+ const first=run(h.context,'workUI.dialog({title:"first",confirmLabel:"확인"})'),old=h.overlays.children.find(el=>el.id==='ees-work-dialog');old.eesClose();assert.equal(await first,false);assert.equal(old.isConnected,true);assert.equal(old.getAttribute('data-ees-motion'),'closing');
+ const second=run(h.context,'workUI.dialog({title:"second",confirmLabel:"확인"})'),current=h.overlays.children.find(el=>el.id==='ees-work-dialog');assert.notEqual(current,old);assert.equal(old.isConnected,false);assert.equal(h.overlays.children.filter(el=>el.id==='ees-work-dialog').length,1);assert.equal(current.style['--ees-motion-from-opacity'],'.38');assert.equal(h.document.activeElement.id,'ees-work-dialog-body');
+ current.eesClose();assert.equal(await second,false);run(h.context,'workMotion.finish(document.querySelector("#ees-work-dialog"))');
 });

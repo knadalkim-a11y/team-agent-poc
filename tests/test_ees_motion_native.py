@@ -1,0 +1,332 @@
+"""C3 motion in the actual packaged Svelte frontend, with trusted CDP input.
+
+Native account/chat responses and external transports are synthetic; the built
+frontend and temporary workflow service are real. Frame/style observations are
+retained alongside screenshots so still images cannot count as motion evidence.
+"""
+import json
+import os
+from pathlib import Path
+import threading
+from unittest.mock import patch
+from urllib.parse import parse_qs, urlsplit
+
+from ees_work_integrated_fixture import IntegratedNativeCase
+from native_ui_fixture import NativeUIHandler
+
+
+class MotionNativeTests(IntegratedNativeCase):
+    def capture_failure(self):
+        super().capture_failure()
+        if (not getattr(self, 'failure_evidence_captured', False)
+                or getattr(self, 'motion_failure_captured', False)
+                or not self.browser.session):
+            return
+        self.motion_failure_captured = True
+        evidence = self.browser.evaluate('window.__c3?.evidence || null')
+        directory = Path(os.environ.get('EES_TEST_SCREENSHOT_DIR',
+                         Path(__file__).resolve().parents[1] / 'dist/ees-work-screenshots'))
+        directory.mkdir(parents=True, exist_ok=True)
+        (directory / (self._testMethodName + '-failure-frames.json')).write_text(
+            json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+    def viewport(self, width, height):
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
+        self.wait('innerWidth === ' + str(width) + ' && innerHeight === ' + str(height))
+        self.wait("document.querySelector('.ees-panel-region')?.dataset.overlay === " +
+                  json.dumps('true' if width < 1096 else 'false'))
+
+    def observe(self, label):
+        self.browser.evaluate("""(()=>{
+          window.__c3?.stop();
+          const evidence={label:""" + json.dumps(label) + """,frames:[],events:[],inputs:[]};
+          let active=true;
+          const snapshot=element=>{const s=getComputedStyle(element),r=element.getBoundingClientRect();
+            return {kind:element.dataset.eesMotionKind,state:element.dataset.eesMotion||'',
+              id:element.id,opacity:Number(s.opacity),transform:s.transform,width:r.width,
+              duration:s.animationDuration,easing:s.animationTimingFunction,name:s.animationName,
+              transitionProperty:s.transitionProperty,inert:element.inert,hidden:element.hidden,
+              ariaHidden:element.getAttribute('aria-hidden'),pointerEvents:s.pointerEvents,
+              modal:element.matches(':modal')};};
+          const sample=()=>{if(!active)return;const nodes=[...document.querySelectorAll('[data-ees-motion-kind]')];
+            evidence.frames.push({t:performance.now(),nodes:nodes.map(snapshot),
+              scopeCount:document.querySelectorAll('[data-scope-dropdown]').length,
+              dialogCount:document.querySelectorAll('#ees-work-dialog').length,
+              chatWidth:document.querySelector('.ees-chat-region')?.getBoundingClientRect().width,
+              panelWidth:document.querySelector('.ees-panel-region')?.getBoundingClientRect().width});
+            requestAnimationFrame(sample);};
+          const animation=event=>{if(event.target.matches('[data-ees-motion-kind]'))
+            evidence.events.push({t:performance.now(),type:event.type,...snapshot(event.target)});};
+          const input=event=>evidence.inputs.push({type:event.type,key:event.key||'',trusted:event.isTrusted,
+            t:performance.now(),opening:!!document.querySelector('[data-ees-motion=opening]')});
+          for(const name of ['animationstart','animationend','animationcancel'])document.addEventListener(name,animation,true);
+          for(const name of ['keydown','pointerdown'])document.addEventListener(name,input,true);
+          const mutations=new MutationObserver(records=>{for(const record of records){
+            const e=record.target;if(e.matches?.('[data-ees-motion-kind]')&&e.isConnected)
+              evidence.events.push({t:performance.now(),type:'state',...snapshot(e)});}});
+          mutations.observe(document,{subtree:true,attributes:true,attributeFilter:['data-ees-motion','inert']});
+          window.__c3={evidence,stop:()=>{active=false;mutations.disconnect();
+            for(const name of ['animationstart','animationend','animationcancel'])document.removeEventListener(name,animation,true);
+            for(const name of ['keydown','pointerdown'])document.removeEventListener(name,input,true);}};
+          requestAnimationFrame(sample);
+        })()""")
+
+    def finish_evidence(self, label):
+        evidence = self.browser.evaluate('(()=>{window.__c3.stop();return window.__c3.evidence;})()')
+        directory = self.screenshot(label)
+        (directory / (label + '-frames.json')).write_text(
+            json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        self.assertTrue(evidence['frames'], 'No rendered animation frames observed')
+        self.assertTrue(evidence['inputs'], 'No trusted browser input observed')
+        self.assertTrue(all(event['trusted'] for event in evidence['inputs']))
+        self.assertTrue(all(row['scopeCount'] <= 1 and row['dialogCount'] <= 1 for row in evidence['frames']))
+        return evidence
+
+    def assert_effect(self, evidence, kind, state, *, reduced=False):
+        rows = [row for row in evidence['events'] if row['kind'] == kind and row['state'] == state]
+        if reduced:
+            self.assertFalse([row for row in rows if row['duration'] not in ('0s', '0ms')], rows)
+            return
+        self.assertTrue(rows, 'No observed ' + kind + ' ' + state + ' style')
+        duration = '0.2s' if state == 'opening' else '0.15s'
+        easing = 'cubic-bezier(0.2, 0.8, 0.2, 1)' if state == 'opening' else 'cubic-bezier(0.4, 0, 1, 1)'
+        self.assertTrue(any(row['duration'] == duration and row['easing'] == easing for row in rows), rows)
+        frames = [node for frame in evidence['frames'] for node in frame['nodes']
+                  if node['kind'] == kind and node['state'] == state]
+        self.assertTrue(any(0 < node['opacity'] < 1 for node in frames),
+                        'No rendered intermediate opacity for ' + kind + ' ' + state)
+        if state == 'closing':
+            self.assertTrue(all(row['inert'] and row['pointerEvents'] == 'none' for row in rows), rows)
+
+    def activate(self, key='Enter'):
+        code, number, text = ('Enter', 13, '\r') if key == 'Enter' else ('Space', 32, ' ')
+        self.browser.call('Input.dispatchKeyEvent', {'type': 'keyDown', 'key': key, 'code': code,
+            'windowsVirtualKeyCode': number, 'nativeVirtualKeyCode': number,
+            'text': text, 'unmodifiedText': text})
+        self.browser.call('Input.dispatchKeyEvent', {'type': 'keyUp', 'key': key, 'code': code,
+            'windowsVirtualKeyCode': number, 'nativeVirtualKeyCode': number})
+
+    def click_now(self, selector):
+        """Trusted input at the current visible point, during an opening tween."""
+        point = self.browser.evaluate('(()=>{const e=document.querySelector(' + json.dumps(selector) +
+            '),r=e.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2;'
+            'return e.contains(document.elementFromPoint(x,y))?{x,y}:null;})()')
+        self.assertIsNotNone(point, 'Animated control is not hit-testable: ' + selector)
+        for kind in ('mousePressed', 'mouseReleased'):
+            self.browser.call('Input.dispatchMouseEvent', {'type': kind, **point, 'button': 'left',
+                'buttons': int(kind == 'mousePressed'), 'clickCount': 1})
+
+    def test_c3_attached_panel_fades_content_without_width_tween_and_preserves_work(self):
+        identifier = self.author(fields=[{'id': 'note', 'type': 'text', 'scope': 'run'}] +
+            [{'id': 'field-' + str(index), 'type': 'text'} for index in range(20)], jobs=1)
+        run = self.start(identifier)
+        self.open_run(identifier, run)
+        self.fill('[data-work-input][name=note]', '전환해도 보존할 미저장 입력')
+        self.fill('#chat-input', '전환해도 보존할 대화 초안')
+        draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        settings = self.browser.evaluate("window.__eesMotionV1.settings(document.querySelector('#ees-work-panel'))")
+        self.assertEqual({key: settings[key] for key in ('fast', 'open', 'close')},
+                         {'fast': 120, 'open': 200, 'close': 150})
+        for width, height in ((1366, 768), (1920, 1080)):
+            self.viewport(width, height)
+            self.observe('attached-' + str(width))
+            self.click('#ees-work-panel [data-action=close_panel]')
+            self.wait("document.querySelector('.ees-panel-region').hidden")
+            self.wait("document.activeElement?.matches('[data-action=open_panel]')")
+            self.activate()
+            self.wait("!document.querySelector('.ees-panel-region').hidden")
+            self.wait("!document.querySelector('[data-ees-motion=opening]')")
+            evidence = self.finish_evidence('c3-attached-' + str(width) + 'x' + str(height))
+            self.assert_effect(evidence, 'panel-content', 'opening')
+            widths = {round(row['panelWidth'], 3) for row in evidence['frames']}
+            self.assertTrue(widths <= {0, 480}, widths)
+            self.assertFalse([row for row in evidence['events'] if row['kind'] == 'panel-overlay'
+                              and row['state'] in ('opening', 'closing')])
+            self.assertEqual(self.read('[data-work-input][name=note]', 'value'), '전환해도 보존할 미저장 입력')
+            self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+            self.assertIn('기존 대화 기록', self.text('body'))
+        # Actual pointer movement must resize before pointer-up, without waiting
+        # for the 120/200ms motion durations.
+        point = self.browser.evaluate("(()=>{const r=document.querySelector('[data-ees-panel-resize]').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+80};})()")
+        self.browser.call('Input.dispatchMouseEvent', {'type': 'mousePressed', **point, 'button': 'left', 'buttons': 1, 'clickCount': 1})
+        self.browser.call('Input.dispatchMouseEvent', {'type': 'mouseMoved', 'x': point['x'] - 80,
+            'y': point['y'], 'button': 'left', 'buttons': 1})
+        self.assertEqual(self.read('.ees-panel-region', 'getBoundingClientRect().width'), 560)
+        self.browser.call('Input.dispatchMouseEvent', {'type': 'mouseReleased', 'x': point['x'] - 80,
+            'y': point['y'], 'button': 'left', 'buttons': 0, 'clickCount': 1})
+        self.assertEqual(self.state(run_id=run['id'])['run']['inputs'], {})
+        self.assertEqual(self.server.completions, [])
+
+    def test_c3_scope_immediate_escape_reopen_replacement_and_reduced_motion(self):
+        trigger = '#ees-work-system-trigger'
+        self.observe('scope-rapid')
+        self.click(trigger)
+        self.wait("document.querySelector('[data-scope-dropdown=system]')")
+        self.key('Escape', 27)
+        # The trigger remains an actual clickable target during exit.
+        self.click(trigger)
+        self.wait("document.querySelector('[data-scope-dropdown=system]') && document.querySelector('#ees-work-system-trigger').ariaExpanded === 'true'")
+        self.wait("!document.querySelector('[data-ees-motion=opening]')")
+        self.click('#ees-work-site-trigger')
+        self.wait("document.querySelector('[data-scope-dropdown=factory]') && document.querySelectorAll('[data-scope-dropdown]').length===1")
+        self.key('Escape', 27)
+        self.wait("!document.querySelector('[data-scope-dropdown]')")
+        self.wait("document.activeElement?.id === 'ees-work-site-trigger'")
+        evidence = self.finish_evidence('c3-scope-rapid-reopen')
+        self.assert_effect(evidence, 'scope', 'opening')
+        self.assert_effect(evidence, 'scope', 'closing')
+        self.assertTrue(any(row['key'] == 'Escape' and row['opening'] for row in evidence['inputs']),
+                        'Escape was not actually delivered during opening')
+        self.browser.call('Emulation.setEmulatedMedia', {'features': [{'name': 'prefers-reduced-motion', 'value': 'reduce'}]})
+        self.addCleanup(lambda: self.browser.call('Emulation.setEmulatedMedia', {'features': []}))
+        self.observe('scope-reduced')
+        self.click(trigger)
+        self.wait("document.querySelector('[data-scope-dropdown=system]')")
+        computed = self.browser.evaluate("(()=>{const e=document.querySelector('[data-scope-dropdown]'),s=getComputedStyle(e);return {settings:window.__eesMotionV1.settings(e),duration:s.animationDuration};})()")
+        self.assertEqual([computed['settings'][key] for key in ('fast', 'open', 'close')], [0, 0, 0])
+        self.assertEqual(computed['duration'], '0s')
+        self.key('Escape', 27)
+        self.wait("!document.querySelector('[data-scope-dropdown]') && document.activeElement?.id==='ees-work-system-trigger'")
+        evidence = self.finish_evidence('c3-scope-reduced-motion')
+        self.assert_effect(evidence, 'scope', 'opening', reduced=True)
+        self.assert_effect(evidence, 'scope', 'closing', reduced=True)
+
+    def test_c3_overlay_panel_closing_releases_hit_testing_and_restores_focus(self):
+        self.viewport(1000, 768)
+        self.observe('overlay-rapid')
+        self.click('#ees-work-panel [data-action=close_panel]')
+        self.wait("document.querySelector('.ees-panel-region').hidden")
+        self.wait("document.activeElement?.matches('[data-action=open_panel]')")
+        self.activate()
+        self.wait("!document.querySelector('.ees-panel-region').hidden")
+        # Reopen during the existing close button's exit, then exercise the C3
+        # overlay Escape path separately with no nested dialog/menu present.
+        self.click_now('#ees-work-panel [data-action=close_panel]')
+        self.click('[data-action=open_panel]')
+        self.wait("!document.querySelector('.ees-panel-region').hidden && !document.querySelector('[data-ees-motion=opening]')")
+        self.click('#ees-work-panel [data-action=close_panel]')
+        self.wait("document.querySelector('.ees-panel-region').hidden")
+        self.wait("document.activeElement?.matches('[data-action=open_panel]')")
+        self.activate(' ')
+        self.wait("!document.querySelector('.ees-panel-region').hidden && !document.querySelector('[data-ees-motion=opening]')")
+        self.key('Escape', 27)
+        self.wait("document.querySelector('.ees-panel-region').hidden")
+        self.wait("document.activeElement?.matches('[data-action=open_panel]')")
+        self.activate()
+        self.wait("!document.querySelector('.ees-panel-region').hidden && !document.querySelector('[data-ees-motion=opening]')")
+        self.click('#ees-work-system-trigger')
+        self.wait("document.querySelector('[data-scope-dropdown=system]')")
+        self.key('Escape', 27)
+        self.wait("!document.querySelector('[data-scope-dropdown]')")
+        self.assertFalse(self.read('.ees-panel-region', 'hidden'), 'Menu Escape also closed its underlying panel')
+        evidence = self.finish_evidence('c3-overlay-close-reopen')
+        self.assert_effect(evidence, 'panel-overlay', 'opening')
+        self.assert_effect(evidence, 'panel-overlay', 'closing')
+        self.assertTrue(all(abs(row['chatWidth'] - 944) < .02 for row in evidence['frames']),
+                        'Overlay animation changed the conversation layout')
+
+    def test_c3_dialog_and_help_close_preserve_draft_and_release_modal_blocker(self):
+        self.fill('#chat-input', '확인 창과 도움말 왕복 후 보존할 문장')
+        draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        self.click('[data-action=mode][data-mode=author]')
+        self.viewport(1000, 768)
+        self.observe('dialog-help')
+        self.click('[data-author-action=create]')
+        self.wait("document.querySelector('#ees-work-dialog')?.open")
+        self.key('Escape', 27)
+        self.wait("!document.querySelector('#ees-work-dialog')")
+        self.assertFalse(self.read('.ees-panel-region', 'hidden'), 'Dialog Escape also closed its underlying panel')
+        self.wait("document.activeElement?.matches('[data-author-action=create]')")
+        self.activate()
+        self.wait("document.querySelector('#ees-work-dialog [name=name]')")
+        self.fill('#ees-work-dialog [name=name]', '다시 열어도 남는 이름')
+        self.click('[data-dialog-cancel]')
+        self.wait("!document.querySelector('#ees-work-dialog')")
+        self.click('[data-author-action=create]')
+        self.assertEqual(self.read('#ees-work-dialog [name=name]', 'value'), '다시 열어도 남는 이름')
+        self.key('Escape', 27)
+        self.wait("!document.querySelector('#ees-work-dialog')")
+        self.click('[data-action=tools]')
+        self.click('[data-author-action=tool_create]')
+        self.click('[data-author-action=tool_example][data-id=jira-query]')
+        self.click('[data-author-action=help][data-id=read_tool]')
+        self.wait("document.querySelector('#ees-work-help')")
+        self.key('Escape', 27)
+        self.wait("!document.querySelector('#ees-work-help')")
+        self.assertFalse(self.read('.ees-panel-region', 'hidden'), 'Help Escape also closed its underlying panel')
+        self.wait("document.activeElement?.matches('[data-author-action=help][data-id=read_tool]')")
+        evidence = self.finish_evidence('c3-dialog-help-focus')
+        for kind in ('dialog', 'help'):
+            self.assert_effect(evidence, kind, 'opening')
+            self.assert_effect(evidence, kind, 'closing')
+        closing = [row for row in evidence['events'] if row['kind'] == 'dialog' and row['state'] == 'closing']
+        self.assertTrue(all(not row['modal'] for row in closing), closing)
+        self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+        self.assertEqual(self.server.completions, [])
+
+    def test_c3_scope_slow_failure_and_out_of_order_responses_do_not_restore_stale_scope(self):
+        self.fill('#chat-input', '느린 응답 중 보존할 문장')
+        draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        release, started, finished, ems_finished = (threading.Event() for _ in range(4))
+        self.addCleanup(release.set)
+        original = NativeUIHandler.do_GET
+        server = self.server
+        deliveries = []
+
+        def transport(handler):
+            url = urlsplit(handler.path)
+            system = parse_qs(url.query).get('system_id', [''])[0]
+            if handler.server is not server or url.path != '/api/ees-work/workspace':
+                return original(handler)
+            if system == 'APC':
+                started.set()
+                release.wait(timeout=8)
+                try:
+                    return original(handler)
+                finally:
+                    deliveries.append('APC')
+                    finished.set()
+            if system == 'FDC':
+                deliveries.append('FDC-error')
+                return handler.send_workflow({'ok': False, 'error': {
+                    'code': 'workspace_unavailable', 'message': '합성 범위 조회 실패'}})
+            try:
+                return original(handler)
+            finally:
+                deliveries.append(system)
+                if system == 'EMS':
+                    ems_finished.set()
+
+        with patch.object(NativeUIHandler, 'do_GET', transport):
+            self.observe('scope-response-order')
+            self.click('#ees-work-system-trigger')
+            self.click('[data-action=choose_system][data-system-id=APC]')
+            self.assertTrue(started.wait(timeout=2))
+            self.assertIn('APC', self.text('#ees-work-system-trigger'))
+            self.assertIn('받는 중', self.text('#ees-work-entry'))
+            self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+            self.click('#ees-work-system-trigger')
+            self.click('[data-action=choose_system][data-system-id=EMS]')
+            self.wait("document.querySelector('#ees-work-system-trigger')?.textContent.includes('EMS') && !document.querySelector('[data-ees-scope-loading]')")
+            self.assertTrue(ems_finished.wait(timeout=3))
+            release.set()
+            self.assertTrue(finished.wait(timeout=3))
+            self.browser.evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+            self.assertIn('EMS', self.text('#ees-work-system-trigger'))
+            self.assertLess(deliveries.index('EMS'), deliveries.index('APC'))
+            self.click('#ees-work-system-trigger')
+            self.click('[data-action=choose_system][data-system-id=FDC]')
+            self.wait("document.querySelector('#ees-work-panel')?.textContent.includes('합성 범위 조회 실패')")
+            self.assertIn('FDC', self.text('#ees-work-system-trigger'))
+            self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+            self.click('#ees-work-system-trigger')
+            self.click('[data-action=choose_system][data-system-id=EMS]')
+            self.wait("document.querySelector('#ees-work-system-trigger')?.textContent.includes('EMS') && !document.querySelector('#ees-work-panel')?.textContent.includes('합성 범위 조회 실패')")
+            evidence = self.finish_evidence('c3-scope-response-order')
+            evidence['delivery_order'] = deliveries
+            directory = self.screenshot('c3-scope-response-order-final')
+            (directory / 'c3-scope-response-order-deliveries.json').write_text(
+                json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+        self.assertEqual(self.server.completions, [])

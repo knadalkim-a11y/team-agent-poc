@@ -1,5 +1,12 @@
 # 현재 작업 상태
 
+## 2026-10-20 · C3 공통 움직임
+
+- **현재 원본/범위:** #96 병합 main `2a4b82a`에서 새 `feat/common-motion-c3-20261020` 작업. [C3 계약](mockups/ees-work/TASK.md#common-motion-c3-20261020)에 따라 전환만 보완한다. #96의 병합 전 문구는 아래 당시 이력이다.
+- **검증:** C3·Q1·UI 의도 원문과 미확인 코드 대조 완료. 공통 코드·소스 패치 반영, Node와 소스/패키징 로컬 검사 통과. 실제 브라우저·최종 CI 확인 중. 설계/코드/실제 조작/미확인은 [기존 평가](../evals/v4-ui-20260930.md#common-motion-c3-20261020)에서 나눈다.
+- **다음 하나:** Node·실제 브라우저·문서·CI 검증 후 Draft PR 댓글1개로 Claude 검토 요청. main 직접 push·병합·사내 실행/적용·Figma 수정·#77/#79는 하지 않는다. 기존 설치·실제 사용자 자료는 보존한다.
+
+
 ## 2026-10-20 · #96 최신 main 통합·최종 병합 검증
 
 - **완료한 선행 조건:** #95·#94에 이어 main 시험 신뢰성 보완 [#99](https://github.com/knadalkim-a11y/team-agent-poc/pull/99)를 main `b1cee7d1a678891caff7c332c9a7fd5595628ddd`로 병합했다. 이 main의 [push CI39345522634](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39345522634) 첫 시도40개 성공과 [Agent Pack ZIP12232065133](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39345522634/artifacts/12232065133), 1,200,576 bytes 확인 뒤 #96 통합을 시작했다. 시험·문서 변경인 #99의 산출물은 Agent Pack ZIP이며 새 프로그램 ZIP으로 표시하지 않는다. [#94 최초 실패·#99 보완 완료](../evals/v4-ui-20260930.md#main-native-reliability-20261020)는 보존한다.

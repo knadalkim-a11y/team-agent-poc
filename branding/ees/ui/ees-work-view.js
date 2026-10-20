@@ -1,5 +1,81 @@
 /* EES Work: shared schema renderers and the Native conversation's side panels.
  * The server owns business state. This file owns only an actor's display/drafts. */
+/* C3 timings live only in CSS. This lifecycle is shared with the Svelte shell.
+ * A closing surface releases interaction first; completion owns cleanup/focus. */
+const workMotion = (() => {
+  const closing=new WeakMap(),opening=new WeakMap(),released=new WeakMap();
+  const styleOf=element=>typeof getComputedStyle==='function'?getComputedStyle(element):null;
+  function settings(element=document.documentElement){
+    const style=styleOf(element),read=name=>style?.getPropertyValue?.(name)?.trim() || '';
+    const reduced=Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+    const duration=name=>{const value=read(name),number=parseFloat(value);return reduced||!Number.isFinite(number)?0:Math.max(0,number*(value.endsWith('ms')?1:1000));};
+    return {fast:duration('--ees-motion-fast'),open:duration('--ees-motion-open'),close:duration('--ees-motion-close'),openEasing:read('--ees-motion-open-easing'),closeEasing:read('--ees-motion-close-easing'),reduced};
+  }
+  function restoreInteraction(element){
+    const saved=released.get(element);if(!saved)return;
+    element.inert=saved.inert;
+    if(saved.hidden===null)element.removeAttribute('aria-hidden');else element.setAttribute('aria-hidden',saved.hidden);
+    released.delete(element);
+  }
+  function stopOpening(element){opening.get(element)?.();}
+  function cancel(element){
+    stopOpening(element);
+    const pending=closing.get(element);if(pending){pending.stop();closing.delete(element);pending.resolve(false);}
+    restoreInteraction(element);element?.removeAttribute?.('data-ees-motion');
+  }
+  function capture(element){
+    const style=styleOf(element);return {opacity:style?.opacity || '1',transform:style?.transform || 'none'};
+  }
+  function open(element,{from=null}={}){
+    if(!element)return;
+    const interrupted=from || (closing.has(element)?capture(element):null);
+    cancel(element);
+    for(const [key,value] of Object.entries(interrupted || {opacity:'',transform:''})){
+      if(value)element.style?.setProperty?.('--ees-motion-from-'+key,value);
+      else element.style?.removeProperty?.('--ees-motion-from-'+key);
+    }
+    // Reset only the surface animation. No width or surrounding layout tween.
+    void element.offsetWidth;
+    element.setAttribute('data-ees-motion','opening');
+    const duration=settings(element).open;if(!duration){element.removeAttribute('data-ees-motion');return;}
+    const media=window.matchMedia?.('(prefers-reduced-motion: reduce)');let timer=null;
+    const complete=()=>{if(opening.get(element)!==stop)return;stop();if(element.getAttribute('data-ees-motion')==='opening')element.removeAttribute('data-ees-motion');};
+    const onEnd=event=>{if(event.target===element&&event.animationName==='ees-motion-open')complete();};
+    const onReduced=()=>{if(media?.matches)complete();};
+    const stop=()=>{if(timer!==null)clearTimeout(timer);element.removeEventListener('animationend',onEnd);media?.removeEventListener?.('change',onReduced);opening.delete(element);};
+    opening.set(element,stop);element.addEventListener('animationend',onEnd);media?.addEventListener?.('change',onReduced);timer=setTimeout(complete,duration+50);
+  }
+  function finish(element,{restoreFocus=true}={}){closing.get(element)?.finish(restoreFocus);}
+  function close(element,{cleanup=()=>{},release=()=>{},restoreFocus=null}={}){
+    if(!element)return Promise.resolve(true);
+    if(closing.has(element))return closing.get(element).promise;
+    const from=capture(element);stopOpening(element);
+    const duration=settings(element).close,media=window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    for(const [key,value] of Object.entries(from))element.style?.setProperty?.('--ees-motion-from-'+key,value);
+    if(!released.has(element))released.set(element,{inert:Boolean(element.inert),hidden:element.getAttribute('aria-hidden')});
+    let resolve,timer=null,done=false;const focusAtStart=document.activeElement;
+    const promise=new Promise(yes=>{resolve=yes;});
+    const stop=()=>{if(timer!==null)clearTimeout(timer);element.removeEventListener('animationend',onEnd);element.removeEventListener('transitionend',onEnd);media?.removeEventListener?.('change',onReduced);};
+    const complete=(focus=true)=>{
+      if(done||closing.get(element)!==pending)return;done=true;stop();closing.delete(element);
+      const active=document.activeElement,focusStillOwned=!active||active===document.body||active===document.documentElement||active===focusAtStart||element.contains?.(active);
+      element.removeAttribute('data-ees-motion');cleanup();
+      if(focus&&focusStillOwned){if(typeof restoreFocus==='function')restoreFocus();else if(restoreFocus?.isConnected)restoreFocus.focus({preventScroll:true});}
+      resolve(true);
+    };
+    const onReduced=()=>{if(media?.matches)complete();};
+    const onEnd=event=>{if(event.target!==element)return;if(event.type==='animationend'&&event.animationName&&!event.animationName.startsWith('ees-motion-close'))return;if(event.type==='transitionend'&&event.propertyName&&!['opacity','transform'].includes(event.propertyName))return;complete();};
+    const pending={promise,resolve,stop,finish:complete};closing.set(element,pending);
+    element.setAttribute('data-ees-motion','closing');element.inert=true;element.setAttribute('aria-hidden','true');
+    element.addEventListener('animationend',onEnd);element.addEventListener('transitionend',onEnd);
+    media?.addEventListener?.('change',onReduced);
+    release();
+    if(duration===0)complete();else timer=setTimeout(complete,duration+50);
+    return promise;
+  }
+  return Object.freeze({settings,open,close,cancel,finish,frame:capture});
+})();
+window.__eesMotionV1=workMotion;
 const workUI = (() => {
   const $ = (selector, parent = document) => parent?.querySelector(selector) || null;
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -28,16 +104,47 @@ const workUI = (() => {
   const badge = status => `<span class="ew-badge" data-status="${esc(status)}">${esc(statuses[status] || status || '미확인')}</span>`;
   const time = value => {if(value===undefined||value===null||value==='')return '';const date=typeof value==='number'?new Date(value*1000):new Date(value);return Number.isNaN(date.getTime())?String(value):new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(date);};
   const safeURL = value => {if(typeof value!=='string'||!value.trim())return '';try{const url=new URL(value,location.origin);return ['https:','http:'].includes(url.protocol)?url.href:'';}catch(_){return '';}};
-  let activeDialog=null,activeHelp=null;
+  let activeDialog=null,activeHelp=null,activeMenu=null;
   const overlayHost=()=>window.__eesSourceShellV1?.hosts?.()?.overlays;
   function mountOverlay(element,trigger=null){const host=trigger&&activeDialog?.contains?.(trigger)?activeDialog:overlayHost();if(!host)throw new Error('업무 화면을 준비한 뒤 다시 시도해 주세요.');host.append(element);}
-  function dismissHelp(event){if(activeHelp&&!activeHelp.element.contains(event.target)&&!activeHelp.trigger?.contains?.(event.target))activeHelp.close(false);}
+  function dismissHelp(event){if(activeMenu&&!activeMenu.details.contains(event.target))closeMenu(false);if(activeHelp&&!activeHelp.element.contains(event.target)&&!activeHelp.trigger?.contains?.(event.target))activeHelp.close(false);}
+  function closeMenu(restoreFocus=true){
+    if(!activeMenu)return;const menu=activeMenu;
+    return workMotion.close(menu.content,{release:()=>menu.summary.setAttribute('aria-expanded','false'),cleanup:()=>{menu.details.open=false;if(activeMenu===menu)activeMenu=null;},restoreFocus:restoreFocus?menu.summary:null});
+  }
+  function menuEvent(event){
+    const target=event.target,details=target?.closest?.('.ew-procedure-menu,.ew-shared-picker');
+    if(event.type==='click'&&activeMenu&&!activeMenu.details.contains(target))closeMenu(false);
+    if(!details)return false;
+    if(event.type==='keydown'&&event.key==='Escape'&&details.open){closeMenu();event.preventDefault();event.stopPropagation();return true;}
+    const summary=details.querySelector('summary'),content=details.querySelector(':scope > div');if(!summary||!content)return false;
+    const opening=()=>{
+      if(activeMenu&&activeMenu.details!==details){const old=activeMenu;closeMenu(false);workMotion.finish(old.content,{restoreFocus:false});}
+      activeMenu={details,summary,content};content.dataset.eesMotionKind='menu';details.open=true;summary.setAttribute('aria-expanded','true');workMotion.open(content);
+    };
+    if(event.type==='click'&&summary.contains(target)){
+      event.preventDefault();
+      if(!details.open||content.getAttribute('data-ees-motion')==='closing')opening();else closeMenu();
+      return true;
+    }
+    // Search repaints may supply a fresh, already-open details node.
+    if(event.type==='toggle'&&details.open&&activeMenu?.details!==details){
+      if(activeMenu&&!activeMenu.details.isConnected&&activeMenu.details.className===details.className){
+        // Filtering repaints an existing popup: retain its visible state without
+        // replaying an entrance on every typed character.
+        workMotion.cancel(activeMenu.content);activeMenu={details,summary,content};content.dataset.eesMotionKind='menu';summary.setAttribute('aria-expanded','true');
+      }else opening();
+    }
+    if(event.type==='click'&&content.contains(target)&&target.closest?.('button'))closeMenu(false);
+    return false;
+  }
   const helpQuestion=term=>`EES Workflow 도움말 ‘${term.name || term.id}’의 뜻과 지금 화면에서 쓰는 방법을 알려줘.`;
   function syncHelpState(){if(activeHelp)activeHelp.element.querySelector('[data-help-ask]').disabled=typeof activeHelp.onAsk!=='function'||Boolean(window.__eesSourceShellV1?.helpState?.()?.busy);}
-  function closeHelp({restoreFocus=true}={}){activeHelp?.close(restoreFocus);}
+  function closeHelp({restoreFocus=true,immediate=false}={}){if(!activeHelp)return;const element=activeHelp.element;activeHelp.close(restoreFocus);if(immediate)workMotion.finish(element,{restoreFocus});}
   function reanchorHelp(root,context){activeHelp?.reanchor(root,context);}
   function showHelp({termId,help,context={},trigger,onAsk}){
-    closeHelp({restoreFocus:false});
+    if(activeHelp?.termId===termId&&activeHelp.trigger===trigger){activeHelp.reopen();return activeHelp.element;}
+    closeHelp({restoreFocus:false,immediate:true});
     const terms=Array.isArray(help?.terms)?help.terms:[],term=terms.find(item=>item.id===termId);
     const selected=term || {id:termId,name:'도움말 확인',summary:'도움말에 없는 내용입니다. 담당자에게 확인해 주세요.'};
     const related=(selected.related || []).map(id=>terms.find(item=>item.id===id)).filter(Boolean);
@@ -51,16 +158,19 @@ const workUI = (() => {
       const height=element.getBoundingClientRect().height,below=rect.bottom+8;
       element.style.top=Math.max(12,below+height<=viewportHeight-12?below:Math.min(rect.top-height-8,viewportHeight-height-12))+'px';
     };
-    element.id='ees-work-help';element.className='ew-help-popover';element.dataset.eesWork='';element.setAttribute('role','dialog');element.setAttribute('aria-labelledby','ees-work-help-title');
+    element.id='ees-work-help';element.className='ew-help-popover';element.dataset.eesWork='';element.dataset.eesMotionKind='help';element.setAttribute('role','dialog');element.setAttribute('aria-labelledby','ees-work-help-title');
     const aliases=item=>(item.aliases || []).length?`<small>예전 이름: ${esc(item.aliases.join(' · '))}</small>`:'';
-    element.innerHTML=`<header><div><strong id="ees-work-help-title">${esc(selected.name)}</strong>${aliases(selected)}</div><button type="button" class="ew-help-close" data-help-close aria-label="도움말 닫기">닫기</button></header><p class="ew-help-summary">${esc(selected.summary)}</p>${selected.example?`<p class="ew-help-example">예: ${esc(selected.example)}</p>`:''}${related.length?`<section class="ew-help-related"><h3>관련 도움말</h3>${related.map(item=>`<article><div><strong>${esc(item.name)}</strong>${aliases(item)}</div><p>${esc(item.summary)}</p></article>`).join('')}</section>`:''}<p class="ew-help-error" data-help-error role="alert" hidden></p><footer><button type="button" class="ew-help-ask" data-help-ask${typeof onAsk!=='function'?' disabled':''}>${icon('1c98e')}대화창에서 더 묻기</button><small>도움말 · ${esc(selected.name)}</small></footer>`;
+    element.innerHTML=`<header><div><strong id="ees-work-help-title">${esc(selected.name)}</strong>${aliases(selected)}</div><button type="button" class="ew-help-close" data-help-close aria-label="도움말 닫기">닫기</button></header><p class="ew-help-summary" id="ees-work-help-body" tabindex="-1">${esc(selected.summary)}</p>${selected.example?`<p class="ew-help-example">예: ${esc(selected.example)}</p>`:''}${related.length?`<section class="ew-help-related"><h3>관련 도움말</h3>${related.map(item=>`<article><div><strong>${esc(item.name)}</strong>${aliases(item)}</div><p>${esc(item.summary)}</p></article>`).join('')}</section>`:''}<p class="ew-help-error" data-help-error role="alert" hidden></p><footer><button type="button" class="ew-help-ask" data-help-ask${typeof onAsk!=='function'?' disabled':''}>${icon('1c98e')}대화창에서 더 묻기</button><small>도움말 · ${esc(selected.name)}</small></footer>`;
     const priorExpanded=previous?.getAttribute?.('aria-expanded'),priorControls=previous?.getAttribute?.('aria-controls');
     previous?.setAttribute?.('aria-expanded','true');previous?.setAttribute?.('aria-controls',element.id);
     const restoreAttribute=(name,value)=>value===null||value===undefined?previous?.removeAttribute?.(name):previous?.setAttribute?.(name,value);
+    const reopen=()=>{workMotion.open(element);previous?.setAttribute?.('aria-expanded','true');previous?.setAttribute?.('aria-controls',element.id);element.querySelector('#ees-work-help-body').focus({preventScroll:true});};
     const close=restoreFocus=>{
-      if(activeHelp?.element!==element)return;activeHelp=null;element.remove();
-      element.removeEventListener('keydown',onKey,true);window.removeEventListener('resize',position);for(const host of scrollHosts)host.removeEventListener('scroll',position,true);
-      restoreAttribute('aria-expanded',priorExpanded);restoreAttribute('aria-controls',priorControls);if(restoreFocus&&previous?.isConnected)previous.focus({preventScroll:true});
+      if(activeHelp?.element!==element)return;
+      return workMotion.close(element,{release:()=>{restoreAttribute('aria-expanded',priorExpanded);restoreAttribute('aria-controls',priorControls);},cleanup:()=>{
+        if(activeHelp?.element===element)activeHelp=null;element.remove();
+        element.removeEventListener('keydown',onKey,true);window.removeEventListener('resize',position);for(const host of scrollHosts)host.removeEventListener('scroll',position,true);
+      },restoreFocus:restoreFocus?()=>{if(previous?.isConnected)previous.focus({preventScroll:true});}:null});
     };
     const onKey=event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();close(true);}};
     const reanchor=(root,nextContext)=>{
@@ -69,32 +179,53 @@ const workUI = (() => {
       if(trigger!==replacement){restoreAttribute('aria-expanded',priorExpanded);restoreAttribute('aria-controls',priorControls);trigger=replacement;previous=replacement;previous.setAttribute('aria-expanded','true');previous.setAttribute('aria-controls',element.id);}
       if(nextContext)context=nextContext;position();
     };
-    activeHelp={element,close,reanchor,trigger,onAsk};mountOverlay(element,trigger);position();syncHelpState();
+    activeHelp={element,close,reopen,reanchor,trigger,onAsk,termId};mountOverlay(element,trigger);position();syncHelpState();workMotion.open(element);
     element.addEventListener('keydown',onKey,true);window.addEventListener('resize',position);for(const host of scrollHosts)host.addEventListener('scroll',position,true);
     element.querySelector('[data-help-close]').addEventListener('click',()=>close(true));
     element.querySelector('[data-help-ask]').addEventListener('click',async()=>{
       const button=element.querySelector('[data-help-ask]'),message=element.querySelector('[data-help-error]');button.disabled=true;message.hidden=true;
       try{const result=await onAsk(helpQuestion(selected),{...context,term_id:selected.id});if(result===false)return;close(false);}catch(error){if(activeHelp?.element===element){message.textContent=error.message || '질문을 보내지 못했습니다. 다시 시도해 주세요.';message.hidden=false;position();}}finally{syncHelpState();}
     });
-    element.querySelector('[data-help-close]').focus({preventScroll:true});return element;
+    element.querySelector('#ees-work-help-body').focus({preventScroll:true});return element;
   }
-  function closeDialog(){activeDialog?.close();}
+  function closeDialog(){activeDialog?.eesClose?.();}
   function dialog({title,html='',confirmLabel='',note='',restoreFocus=null,readOnlyDetail=false}){
-    closeDialog();const previous=document.activeElement,element=document.createElement('dialog');
-    element.id='ees-work-dialog';element.dataset.eesWork='';element.setAttribute('aria-labelledby','ees-work-dialog-title');
-    element.innerHTML=`<h2 id="ees-work-dialog-title">${esc(title)}</h2>${note?`<p class="ew-muted">${esc(note)}</p>`:''}<div class="ew-dialog-body">${html}</div><footer><button type="button" data-dialog-close data-dialog-cancel id="ees-work-dialog-cancel">${confirmLabel?'취소':'닫기'}</button>${confirmLabel&&!readOnlyDetail?`<button type="button" class="ew-primary" data-dialog-confirm>${esc(confirmLabel)}</button>`:''}</footer>`;
+    // Flush a replaced window before mounting the next one: no duplicate IDs,
+    // stale focus return, or old completion removing a newly opened window.
+    const previous=activeDialog?.eesPrevious || document.activeElement;
+    const openingFrame=activeDialog?.getAttribute('data-ees-motion')==='closing'?workMotion.frame(activeDialog):null;
+    if(activeDialog){const previousDialog=activeDialog;previousDialog.eesClose?.();workMotion.finish(previousDialog,{restoreFocus:false});}
+    const element=document.createElement('dialog');element.eesPrevious=previous;
+    element.id='ees-work-dialog';element.dataset.eesWork='';element.dataset.eesMotionKind='dialog';element.setAttribute('aria-labelledby','ees-work-dialog-title');
+    element.innerHTML=`<h2 id="ees-work-dialog-title">${esc(title)}</h2>${note?`<p class="ew-muted">${esc(note)}</p>`:''}<div class="ew-dialog-body" id="ees-work-dialog-body" tabindex="-1">${html}</div><footer><button type="button" data-dialog-close data-dialog-cancel id="ees-work-dialog-cancel">${confirmLabel?'취소':'닫기'}</button>${confirmLabel&&!readOnlyDetail?`<button type="button" class="ew-primary" data-dialog-confirm>${esc(confirmLabel)}</button>`:''}</footer>`;
     mountOverlay(element);activeDialog=element;
     return new Promise(resolve=>{
-      let accepted=false;
-      element.querySelector('[data-dialog-confirm]')?.addEventListener('click',()=>{const invalid=[...element.querySelectorAll('input,select,textarea')].find(field=>!field.checkValidity());if(invalid){invalid.reportValidity();return;}accepted=true;element.close();});
-      element.querySelector('[data-dialog-close]').addEventListener('click',()=>element.close());
-      element.addEventListener('cancel',()=>{accepted=false;});
-      element.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();if(activeHelp&&element.contains(activeHelp.element)){closeHelp();return;}accepted=false;element.close();}},true);
-      element.addEventListener('close',()=>{if(activeHelp&&element.contains(activeHelp.element))closeHelp({restoreFocus:false});element.remove();if(activeDialog===element)activeDialog=null;if(previous?.isConnected)previous.focus({preventScroll:true});else restoreFocus?.();resolve(accepted);},{once:true});
-      element.showModal();element.querySelector('[data-dialog-close]').focus({preventScroll:true});
+      let accepted=false,closing=false,backdrop=null;
+      const nativeClose=element.close.bind(element);
+      const close=()=>{
+        if(closing)return;closing=true;
+        if(activeHelp&&element.contains(activeHelp.element))closeHelp({restoreFocus:false,immediate:true});
+        const duration=workMotion.settings(element).close;
+        if(duration){backdrop=document.createElement('div');backdrop.className='ew-dialog-exit-backdrop';backdrop.dataset.eesMotionKind='backdrop';backdrop.style.opacity=typeof getComputedStyle==='function'?getComputedStyle(element,'::backdrop').opacity || '1':'1';backdrop.setAttribute('aria-hidden','true');mountOverlay(backdrop);workMotion.close(backdrop,{cleanup:()=>backdrop.remove()});}
+        const motion=workMotion.close(element,{release:()=>{if(element.open){const wasInert=previous?.inert;if(previous)previous.inert=true;try{nativeClose();}finally{if(previous)previous.inert=wasInert;}}},cleanup:()=>{
+          if(backdrop){workMotion.finish(backdrop,{restoreFocus:false});backdrop.remove();}
+          element.remove();if(activeDialog===element)activeDialog=null;
+        },restoreFocus:()=>{if(previous?.isConnected)previous.focus({preventScroll:true});else restoreFocus?.();}});
+        // The decision is immediate; animation never delays save/publish/run.
+        resolve(accepted);return motion;
+      };
+      element.eesClose=close;
+      element.querySelector('[data-dialog-confirm]')?.addEventListener('click',()=>{const invalid=[...element.querySelectorAll('input,select,textarea')].find(field=>!field.checkValidity());if(invalid){invalid.reportValidity();return;}accepted=true;close();});
+      element.querySelector('[data-dialog-close]').addEventListener('click',close);
+      element.addEventListener('cancel',event=>{event.preventDefault?.();accepted=false;close();});
+      element.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();if(activeHelp&&element.contains(activeHelp.element)){closeHelp();return;}accepted=false;close();}},true);
+      // Native programmatic closure follows the same lifecycle as Escape/buttons.
+      element.addEventListener('close',close);
+      element.showModal();workMotion.open(element,{from:openingFrame});(element.querySelector('input:not([type=hidden]):not([disabled]),select:not([disabled]),textarea:not([disabled])') || element.querySelector('#ees-work-dialog-body')).focus({preventScroll:true});
     });
   }
-  return Object.freeze({$,esc,clone,newId,categories,procedureQuestions,executionActorLabel,levels,statuses,icon,button,finished,lineage,badge,safeURL,time,dialog,closeDialog,helpQuestion,showHelp,closeHelp,reanchorHelp,dismissHelp,syncHelpState});
+
+  return Object.freeze({$,esc,clone,newId,categories,procedureQuestions,executionActorLabel,levels,statuses,icon,button,finished,lineage,badge,safeURL,time,dialog,closeDialog,helpQuestion,showHelp,closeHelp,reanchorHelp,dismissHelp,syncHelpState,menuEvent});
 })();
 
 function workStatusHTML(status,label=''){
