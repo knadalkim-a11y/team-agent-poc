@@ -1834,7 +1834,7 @@ new file mode 100644
 index 0000000..d55b5f0b
 --- /dev/null
 +++ b/src/lib/components/ees/EesShell.svelte
-@@ -0,0 +1,499 @@
+@@ -0,0 +1,474 @@
 +<script lang="ts">
 +	import { getContext, onMount, tick } from 'svelte';
 +	import { get } from 'svelte/store';
@@ -1857,7 +1857,7 @@ index 0000000..d55b5f0b
 +	} from './state';
 +	const i18n: any = getContext('i18n');
 +	export let loaded = false;
-+	let panel: HTMLElement, panelRegion: HTMLElement, panelBackdrop: HTMLElement, overlays: HTMLElement;
++	let panel: HTMLElement, panelRegion: HTMLElement, overlays: HTMLElement;
 +	let panelClosing = false, previousPanelOpen: boolean | null = null;
 +	let previousPanelOverlay: boolean | null = null;
 +	let panelClose: Promise<boolean> = Promise.resolve(true);
@@ -1901,14 +1901,12 @@ index 0000000..d55b5f0b
 +		previousPanelOverlay = overlay;
 +		if (modeChanged) {
 +			motion?.cancel(panelRegion);
-+			motion?.cancel(panelBackdrop);
 +			motion?.cancel(panel);
 +			panelClosing = false;
 +			panelClose = Promise.resolve(true);
 +		}
 +		if (native && panelClosing) {
 +			motion?.cancel(panelRegion);
-+			motion?.cancel(panelBackdrop);
 +			panelClosing = false;
 +			panelClose = Promise.resolve(false);
 +		}
@@ -1922,10 +1920,8 @@ index 0000000..d55b5f0b
 +				if (!mounted || !panelOpen || !panelRegion || !panel) return;
 +				if (panelOverlay) {
 +					motion?.open(panelRegion);
-+					motion?.open(panelBackdrop);
 +				} else {
 +					motion?.cancel(panelRegion);
-+					motion?.cancel(panelBackdrop);
 +					motion?.open(panel);
 +				}
 +				panelRegion.inert = false;
@@ -1935,15 +1931,13 @@ index 0000000..d55b5f0b
 +			if (reopening) enter(); else tick().then(enter);
 +		} else if (overlay && !nativeRoute && motion) {
 +			panelClosing = true;
-+			panelClose = Promise.all([motion.close(panelRegion), motion.close(panelBackdrop)]).then((results) => {
-+				const finished = results.every(Boolean);
++			panelClose = motion.close(panelRegion).then((finished) => {
 +				if (finished && !panelOpen) panelClosing = false;
 +				return finished;
 +			});
 +		} else {
 +			motion?.cancel(panelRegion);
 +			motion?.cancel(panel);
-+			motion?.cancel(panelBackdrop);
 +			panelClosing = false;
 +			panelClose = Promise.resolve(true);
 +		}
@@ -2135,7 +2129,6 @@ index 0000000..d55b5f0b
 +			mounted = false;
 +			window.__eesMotionV1?.cancel(panelRegion);
 +			window.__eesMotionV1?.cancel(panel);
-+			window.__eesMotionV1?.cancel(panelBackdrop);
 +			if (window.__eesSourceShellV1 === bridge) delete window.__eesSourceShellV1;
 +		};
 +	});
@@ -2176,15 +2169,6 @@ index 0000000..d55b5f0b
 +				</div>{/if}
 +		</main>
 +	</section>
-+	<div
-+		class="ees-panel-backdrop"
-+		data-ees-motion-kind="backdrop"
-+		data-ees-panel-backdrop
-+		bind:this={panelBackdrop}
-+		style:left={`${$eesCompact ? 56 : 256}px`}
-+		hidden={!panelOverlay || (!panelOpen && !panelClosing)}
-+		aria-hidden="true"
-+	></div>
 +	<section
 +		class="ees-panel-region"
 +		style:width={`${panelWidth}px`}
@@ -2272,8 +2256,7 @@ index 0000000..d55b5f0b
 +		flex-direction: column;
 +	}
 +	.ees-chat-region[hidden],
-+	.ees-panel-region[hidden],
-+	.ees-panel-backdrop[hidden] {
++	.ees-panel-region[hidden] {
 +		display: none;
 +	}
 +	.ees-native-region {
@@ -2286,14 +2269,6 @@ index 0000000..d55b5f0b
 +		gap: 8px;
 +		height: 100%;
 +		font-size: 14px;
-+	}
-+	.ees-panel-backdrop {
-+		position: absolute;
-+		top: 0;
-+		right: 0;
-+		bottom: 0;
-+		z-index: 34;
-+		background: #1f202330;
 +	}
 +	.ees-panel-region {
 +		position: relative;

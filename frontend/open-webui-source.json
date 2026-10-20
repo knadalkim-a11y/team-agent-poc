@@ -26,7 +26,7 @@
     "src/lib/components/ees/EesNavigation.svelte": "0fa6fc4a7cd399ea117fd602039962f1d0ce31ab412a845dc26009c4e561148b",
     "src/lib/components/ees/EesProcedureIntro.svelte": "8e9e92baa499c6acf66f73643ce17e8b047a6d932844cc3158a252d23718a9a5",
     "src/lib/components/ees/EesScopeSelect.svelte": "b488d5e53c337fc6e3d0de1c1cae06fc753217d54e36ebcc9fc6fc0ca60603fa",
-    "src/lib/components/ees/EesShell.svelte": "6f83fd9ba5f2b10062acbfde648e8c58895ce5c8adab0a7ca73356292b3e795e",
+    "src/lib/components/ees/EesShell.svelte": "5017b7e1c2d8c4313b87905808178db485ff309224933ae77fb444e29014a6d2",
     "src/lib/components/ees/icons/5bc95.svg": "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7",
     "src/lib/components/ees/state.ts": "560ef1a21f46fc2a1beabf3012a74933002af586c507ac42bb144f40fe305a43",
     "src/lib/components/layout/Sidebar.svelte": "9d08f54fdaa101ef2cf06c159e5defe421b366c695f26a15c4045bf3ba556096",
@@ -44,7 +44,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "8a877ef48489f80d4a175b1062b2bb20aa13a14ef66fc0981741109514e563f0"
+      "sha256": "5562ad93cbd5cceb62c3b20c67aec69a68c66785a888f676c4df2853fcb6f4fe"
     }
   ],
   "pyodide_files": {

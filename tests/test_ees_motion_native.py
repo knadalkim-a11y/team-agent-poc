@@ -65,6 +65,7 @@ class MotionNativeTests(IntegratedNativeCase):
           const input=event=>{const row={type:event.type,key:event.key||'',trusted:event.isTrusted,
             t:performance.now(),opening:!!document.querySelector('[data-ees-motion=opening]'),
             closing:!!document.querySelector('[data-ees-motion=closing]'),
+            overlayOpen:!!document.querySelector('.ees-panel-region[data-overlay=true]:not([hidden])'),
             composer:!!event.target.closest?.('#chat-input'),target:identify(event.target),
             scopeChoice:event.target.closest?.('[data-action=choose_system]')?.dataset.systemId||'',
             defaultPreventedAtCapture:event.defaultPrevented,eventPhaseAtCapture:event.eventPhase};
@@ -230,7 +231,7 @@ class MotionNativeTests(IntegratedNativeCase):
         self.assert_effect(evidence, 'scope', 'closing', reduced=True)
 
     def test_c3_overlay_panel_closing_releases_hit_testing_and_restores_focus(self):
-        self.viewport(1000, 768)
+        self.viewport(1095, 768)
         self.observe('overlay-rapid')
         self.click('#ees-work-panel [data-action=close_panel]')
         self.wait("document.querySelector('.ees-panel-region').hidden")
@@ -242,6 +243,14 @@ class MotionNativeTests(IntegratedNativeCase):
         self.click_now('#ees-work-panel [data-action=close_panel]')
         self.click('[data-action=open_panel]')
         self.wait("!document.querySelector('.ees-panel-region').hidden && !document.querySelector('[data-ees-motion=opening]')")
+        # C54: the visible conversation remains usable while the overlapping
+        # panel is fully open, not only after its close has released a blocker.
+        self.click_now('#chat-input')
+        self.assertTrue(self.browser.evaluate("document.activeElement === document.querySelector('#chat-input')"))
+        self.browser.call('Input.insertText', {'text': '겹친 패널이 열린 동안 입력한 대화 초안'})
+        self.assertIn('겹친 패널이 열린 동안 입력한 대화 초안', self.text('#chat-input'))
+        self.assertFalse(self.read('.ees-panel-region', 'hidden'))
+        draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.click('#ees-work-panel [data-action=close_panel]')
         self.wait("document.querySelector('.ees-panel-region').hidden")
         self.wait("document.activeElement?.matches('[data-action=open_panel]')")
@@ -266,9 +275,13 @@ class MotionNativeTests(IntegratedNativeCase):
         evidence = self.finish_evidence('c3-overlay-close-reopen')
         self.assert_effect(evidence, 'panel-overlay', 'opening')
         self.assert_effect(evidence, 'panel-overlay', 'closing')
+        self.assertTrue(any(row['composer'] and row['overlayOpen']
+                            and not row['opening'] and not row['closing'] for row in evidence['inputs']),
+                        'The visible composer was not actually clicked while the overlay panel was open')
         self.assertTrue(any(row['composer'] and row['closing'] for row in evidence['inputs']),
                         'The composer was not actually clicked during panel exit')
-        self.assertTrue(all(abs(row['chatWidth'] - 944) < .02 for row in evidence['frames']),
+        self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+        self.assertTrue(all(abs(row['chatWidth'] - 1039) < .02 for row in evidence['frames']),
                         'Overlay animation changed the conversation layout')
 
     def test_c3_dialog_and_help_close_preserve_draft_and_release_modal_blocker(self):
@@ -276,8 +289,7 @@ class MotionNativeTests(IntegratedNativeCase):
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.click('[data-action=mode][data-mode=author]')
         self.observe('dialog-help')
-        # Attached mode isolates the modal blocker from the narrow panel's
-        # independent backdrop, then the remaining checks use a nested panel.
+        # Check the modal blocker in attached mode, then use a nested panel.
         self.viewport(1920, 1080)
         self.click('[data-author-action=create]')
         self.wait("document.querySelector('#ees-work-dialog')?.open")

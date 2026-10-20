@@ -38,7 +38,7 @@ function scopeHarness(kind = 'factory') {
   return { env, m, choose, react() { react(env); }, boundary(next, context = env.selectionContext, selected = env.value, exit = next) { boundary(next, context, selected, exit); }, set(open, opened = open ? kind : '') { env.open = open; env.opened = opened; sync(open, opened); } };
 }
 function panelHarness() {
-  const m = motion(), trigger = element(), env = { window: { __eesMotionV1: m.api }, tick: () => Promise.resolve(), previousPanelOpen: null, previousPanelOverlay: null, panelOpen: false, panelOverlay: true, panelClosing: false, panelClose: Promise.resolve(true), nativeRoute: false, mounted: true, admin: false, panelRegion: element(), panelBackdrop: element(), panel: element(), document: { getElementById: () => trigger }, $showSettings: false, actions: [] };
+  const m = motion(), trigger = element(), env = { window: { __eesMotionV1: m.api }, tick: () => Promise.resolve(), previousPanelOpen: null, previousPanelOverlay: null, panelOpen: false, panelOverlay: true, panelClosing: false, panelClose: Promise.resolve(true), nativeRoute: false, mounted: true, admin: false, panelRegion: element(), panel: element(), document: { getElementById: () => trigger }, $showSettings: false, actions: [] };
   env.eesAction = action => env.actions.push(action);
   const shell = component('EesShell');
   const sync = bind(between(shell, 'function syncPanelMotion(', '\n\t$: if (mounted)').replace('open: boolean, overlay: boolean, native: boolean', 'open, overlay, native'), env, 'syncPanelMotion');
@@ -64,10 +64,14 @@ test('attached panel changes layout immediately and only fades content on open',
   const h = panelHarness(); h.set(true, false); await flush(); assert.deepEqual(h.m.opened, [h.env.panel]);
   h.set(false, false); assert.equal(h.env.panelClosing, false); assert.equal(h.m.pending.size, 0); await h.focus(false); assert.equal(h.trigger.focused, 1);
 });
-test('overlay panel and backdrop finish together before focus return', async () => {
-  const h = panelHarness(); h.set(true); await flush(); h.set(false); const focus = h.focus(false); await flush();
-  assert.equal(h.env.panelClosing, true); assert.equal(h.trigger.focused, 0); h.m.api.finish(h.env.panelRegion); await flush(); assert.equal(h.trigger.focused, 0);
-  h.m.api.finish(h.env.panelBackdrop); await focus; assert.equal(h.env.panelClosing, false); assert.equal(h.trigger.focused, 1);
+test('overlay animates only the panel and returns focus after its completion', async () => {
+  const h = panelHarness(); h.set(true); await flush();
+  assert.deepEqual(h.m.opened, [h.env.panelRegion], 'Conversation has no panel backdrop animation');
+  h.set(false); const focus = h.focus(false); await flush();
+  assert.equal(h.env.panelClosing, true); assert.equal(h.trigger.focused, 0);
+  assert.equal(h.m.pending.size, 1, 'Panel completion must be the only exit gate');
+  h.m.api.finish(h.env.panelRegion); await focus;
+  assert.equal(h.env.panelClosing, false); assert.equal(h.trigger.focused, 1);
 });
 test('overlay reopening cancels old cleanup and focus without leaving interaction inert', async () => {
   const h = panelHarness(); h.set(true); await flush(); h.set(false); const focus = h.focus(false); h.set(true); await flush(); await focus;
@@ -88,7 +92,7 @@ test('overlay Escape preserves nested consumed keys and ignores attached/native/
 test('overlay close completion does not steal a new focus chosen on the released conversation', async () => {
   const h = panelHarness(); h.set(true); await flush(); h.env.document.activeElement = h.env.panelRegion;
   h.set(false); const focus = h.focus(false); await flush(); h.env.document.activeElement = element();
-  h.m.api.finish(h.env.panelRegion); h.m.api.finish(h.env.panelBackdrop); await focus;
+  h.m.api.finish(h.env.panelRegion); await focus;
   assert.equal(h.trigger.focused, 0);
 });
 
