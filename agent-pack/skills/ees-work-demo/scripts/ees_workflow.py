@@ -337,9 +337,9 @@ async def _retired_for(user):
         return {"ok": False, "error": {"code": error.code, "message": error.message}}
 
 
-async def workspace_state(user, workflow_id="", run_id="", system_id="", factory_id=""):
+async def workspace_state(user, workflow_id="", run_id="", system_id="", factory_id="", example_id=""):
     return await _production_service().workspace_state(user, workflow_id=workflow_id,
-        run_id=run_id, system_id=system_id, factory_id=factory_id)
+        run_id=run_id, system_id=system_id, factory_id=factory_id, example_id=example_id)
 
 
 async def workspace_command(user, body):
@@ -723,8 +723,8 @@ def install(app, verified_user):
 
     @app.get("/api/ees-work/workspace", include_in_schema=False)
     async def workspace_route(workflow_id: str = "", run_id: str = "", system_id: str = "",
-                              factory_id: str = "", user=Depends(verified_user)):
-        return response(await workspace_state(user, workflow_id, run_id, system_id, factory_id))
+                              factory_id: str = "", example_id: str = "", user=Depends(verified_user)):
+        return response(await workspace_state(user, workflow_id, run_id, system_id, factory_id, example_id))
 
     @app.get("/api/ees-work/help/status", include_in_schema=False)
     async def help_status_route(request: Request, model_id: str = "", system_id: str = "",

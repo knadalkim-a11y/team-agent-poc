@@ -270,14 +270,18 @@ def init_operations(db):
     db.execute("CREATE TABLE IF NOT EXISTS work_tool_contracts(id TEXT PRIMARY KEY,system_id TEXT NOT NULL,revision INTEGER NOT NULL,state TEXT NOT NULL,data TEXT NOT NULL)")
     db.execute("CREATE TABLE IF NOT EXISTS work_operation_receipts(actor TEXT NOT NULL,request_id TEXT NOT NULL,payload_hash TEXT NOT NULL,outcome TEXT NOT NULL,PRIMARY KEY(actor,request_id))")
     db.execute("CREATE TABLE IF NOT EXISTS work_operation_events(id INTEGER PRIMARY KEY AUTOINCREMENT,target TEXT NOT NULL,actor TEXT NOT NULL,kind TEXT NOT NULL,created_at REAL NOT NULL,data TEXT NOT NULL)")
+    db.execute("CREATE INDEX IF NOT EXISTS work_operation_target ON work_operation_events(target,id)")
     db.execute("CREATE TABLE IF NOT EXISTS work_external_requests(id TEXT PRIMARY KEY,run_id TEXT NOT NULL,job_id TEXT NOT NULL,actor TEXT NOT NULL,revision INTEGER NOT NULL,state TEXT NOT NULL,data TEXT NOT NULL)")
+    db.execute("CREATE INDEX IF NOT EXISTS work_request_run ON work_external_requests(run_id,id)")
     db.execute("CREATE TABLE IF NOT EXISTS work_request_intents(hash TEXT PRIMARY KEY,request_id TEXT NOT NULL,actor TEXT NOT NULL,binding TEXT NOT NULL,expires REAL NOT NULL,consumed INTEGER NOT NULL DEFAULT 0)")
     db.execute("CREATE TABLE IF NOT EXISTS work_schedules(id TEXT PRIMARY KEY,workflow_id TEXT NOT NULL,scope TEXT NOT NULL,actor TEXT NOT NULL,revision INTEGER NOT NULL,enabled INTEGER NOT NULL,next_at REAL NOT NULL,data TEXT NOT NULL)")
     db.execute("CREATE TABLE IF NOT EXISTS work_schedule_slots(id TEXT PRIMARY KEY,schedule_id TEXT NOT NULL,workflow_id TEXT NOT NULL,scope TEXT NOT NULL,scheduled_at REAL NOT NULL,status TEXT NOT NULL,worker TEXT,lease REAL,data TEXT NOT NULL,UNIQUE(workflow_id,scope,scheduled_at))")
     db.execute("CREATE INDEX IF NOT EXISTS work_schedule_due ON work_schedules(enabled,next_at)")
     db.execute("CREATE INDEX IF NOT EXISTS work_schedule_queue ON work_schedule_slots(status,lease)")
+    db.execute("CREATE INDEX IF NOT EXISTS work_schedule_history ON work_schedule_slots(schedule_id,scheduled_at)")
     db.execute("CREATE TABLE IF NOT EXISTS work_scope_runs(id TEXT PRIMARY KEY,run_id TEXT NOT NULL,actor TEXT NOT NULL,status TEXT NOT NULL,worker TEXT,lease REAL,data TEXT NOT NULL)")
     db.execute("CREATE INDEX IF NOT EXISTS work_scope_queue ON work_scope_runs(status,lease)")
+    db.execute("CREATE INDEX IF NOT EXISTS work_scope_run ON work_scope_runs(run_id,id)")
     db.execute("CREATE TABLE IF NOT EXISTS work_job_claims(attempt_id TEXT PRIMARY KEY,actor TEXT NOT NULL,worker TEXT,lease REAL,state TEXT NOT NULL)")
 
 
