@@ -1,5 +1,11 @@
 # 현재 작업 상태
 
+## 2026-10-20 · C3 겹친 패널 Escape 범위 · C60 정정
+
+- **현재 범위:** 같은 Draft #100 의 `aa32500` 에서 C60 을 반영한다. 대화 Escape 가 겹친 패널을 닫고 포커스를 옮기던 문제를 패널 안 target 조건과 닫기 시작 시 바깥 포커스 보호로 수정했다. 기존 제외 조건·붙은 패널·움직임과 C54 를 유지한다. [현재 계약](mockups/ees-work/TASK.md#common-motion-c3-20261020).
+- **검증:** 기존 시험은 패널 안 Escape 만 검사해 대화 경로를 놓쳤다. 새 단언은 수정 전 22 PASS / 2 FAIL, 수정 후 Svelte 24 PASS 이며 관련 Node 전체 59 PASS 이다. Native 회귀에 대화 Escape 의 document 버블 도달과 패널 Escape 의 미도달 증거를 추가했다. [최초 실패·환경·남은 검증](../evals/v4-ui-20260930.md#common-motion-c3-20261020). 정확한 최종 head CI 결과는 [PR #100](https://github.com/knadalkim-a11y/team-agent-poc/pull/100)에서 확인한다.
+- **다음 하나:** 최종 head 의 실제 브라우저 포함 CI 를 확인한 뒤 같은 PR 에 댓글 1개로 Claude 재검토를 요청한다. Draft 유지·병합 없음·사내 실행/적용 미실행이다. E1·E2 는 착수하지 않는다. 아래 기록은 C54 당시의 상태와 이전 증거다.
+
 ## 2026-10-20 · C3 공통 움직임 · C54 정정
 
 - **현재 원본/범위:** Draft #100 head `2bbbdd3`의 Claude 검토와 C54에 따라 겹친 업무 패널의 배경막만 제거한다. 패널16px/투명도·Escape·닫기·포커스와 붙은 패널, 확인 창·도움말 배경막은 유지한다. [C3 계약](mockups/ees-work/TASK.md#common-motion-c3-20261020).

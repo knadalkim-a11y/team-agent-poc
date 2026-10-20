@@ -38,13 +38,13 @@ function scopeHarness(kind = 'factory') {
   return { env, m, choose, react() { react(env); }, boundary(next, context = env.selectionContext, selected = env.value, exit = next) { boundary(next, context, selected, exit); }, set(open, opened = open ? kind : '') { env.open = open; env.opened = opened; sync(open, opened); } };
 }
 function panelHarness() {
-  const m = motion(), trigger = element(), env = { window: { __eesMotionV1: m.api }, tick: () => Promise.resolve(), previousPanelOpen: null, previousPanelOverlay: null, panelOpen: false, panelOverlay: true, panelClosing: false, panelClose: Promise.resolve(true), nativeRoute: false, mounted: true, admin: false, panelRegion: element(), panel: element(), document: { getElementById: () => trigger }, $showSettings: false, actions: [] };
+  const m = motion(), trigger = element(), env = { window: { __eesMotionV1: m.api }, tick: () => Promise.resolve(), previousPanelOpen: null, previousPanelOverlay: null, panelOpen: false, panelOverlay: true, panelClosing: false, panelClose: Promise.resolve(true), nativeRoute: false, mounted: true, admin: false, panelRegion: element(), panel: element(), document: { getElementById: () => trigger, body: element(), documentElement: element() }, $showSettings: false, actions: [] };
   env.eesAction = action => env.actions.push(action);
   const shell = component('EesShell');
   const sync = bind(between(shell, 'function syncPanelMotion(', '\n\t$: if (mounted)').replace('open: boolean, overlay: boolean, native: boolean', 'open, overlay, native'), env, 'syncPanelMotion');
   const focusSource = between(shell, 'focusPanel: async', '\n\t\treferenceHost:').replace('(open: boolean)', '(open)');
   const focus = Function('env', `with(env) { return { ${focusSource} }.focusPanel; }`)(env);
-  const key = bind(between(shell, 'function panelKeydown(', '\n\tfunction clearPrivateDrafts').replace('event: KeyboardEvent', 'event').replace('(event.target as Element)', 'event.target'), env, 'panelKeydown');
+  const key = bind(between(shell, 'function panelKeydown(', '\n\tfunction clearPrivateDrafts').replace('event: KeyboardEvent', 'event').replaceAll('(event.target as Element)', 'event.target'), env, 'panelKeydown');
   return { env, m, trigger, focus, key, set(open, overlay = true, native = false) { env.panelOpen = open; env.panelOverlay = overlay; env.nativeRoute = native; sync(open, overlay, native); } };
 }
 test('scope close before its opening tick never opens a stale menu and restores focus after completion', async () => {
@@ -82,7 +82,7 @@ test('a responsive overlay-to-attached change cancels exit instead of reserving 
   assert.equal(h.env.panelClosing, false); assert.equal(h.m.pending.size, 0);
 });
 test('overlay Escape preserves nested consumed keys and ignores attached/native/settings surfaces', () => {
-  const h = panelHarness(), event = () => ({ key: 'Escape', defaultPrevented: false, stopPropagation() { this.stopped = true; }, preventDefault() { this.defaultPrevented = true; } });
+  const h = panelHarness(), event = () => ({ key: 'Escape', target: h.env.panelRegion, defaultPrevented: false, stopPropagation() { this.stopped = true; }, preventDefault() { this.defaultPrevented = true; } });
   h.set(true); h.key({ ...event(), defaultPrevented: true }); assert.equal(h.env.actions.length, 0);
   h.set(true, false); h.key(event()); assert.equal(h.env.actions.length, 0);
   h.set(true, true); h.env.$showSettings = true; h.key(event()); assert.equal(h.env.actions.length, 0);
@@ -146,11 +146,46 @@ test('overlay Escape owns shell bubbling before Native unconditional document CL
   assert.doesNotMatch(shell, /<svelte:window[^>]*on:keydown/);
   const h = panelHarness(); h.set(true); let nativeCalls = 0;
   const event = { key: 'Escape', defaultPrevented: false, stopped: false,
-    target: { closest() { return null; } }, preventDefault() { this.defaultPrevented = true; }, stopPropagation() { this.stopped = true; } };
+    target: h.env.panelRegion, preventDefault() { this.defaultPrevented = true; }, stopPropagation() { this.stopped = true; } };
   h.key(event); if (!event.stopped) { nativeCalls++; event.preventDefault(); }
   assert.equal(nativeCalls, 0); assert.deepEqual(h.env.actions, [{ action: 'close_panel' }]);
   const scopeEvent = { ...event, stopped: false, defaultPrevented: false, target: { closest() { return {}; } } };
   h.key(scopeEvent); assert.equal(scopeEvent.stopped, false); assert.equal(h.env.actions.length, 1);
+});
+
+test('overlay Escape outside the panel leaves Native bubbling and panel state untouched', () => {
+  for (const location of ['composer', 'sidebar']) {
+    const h = panelHarness(); h.set(true); let nativeCalls = 0;
+    const event = { key: 'Escape', target: { ...element(), location }, defaultPrevented: false, stopped: false, prevented: 0,
+      preventDefault() { this.prevented++; this.defaultPrevented = true; }, stopPropagation() { this.stopped = true; } };
+    h.key(event);
+    assert.deepEqual(h.env.actions, [], location);
+    assert.equal(event.prevented, 0, location); assert.equal(event.stopped, false, location);
+    if (!event.stopped) { nativeCalls++; event.preventDefault(); }
+    assert.equal(nativeCalls, 1, 'Native document CLOSE_MODAL still handles the outside Escape once');
+    assert.equal(h.env.panelOpen, true);
+  }
+});
+
+test('panel close never restores the opener when focus started outside the panel', async () => {
+  for (const overlay of [true, false]) {
+    const h = panelHarness(); h.set(true, overlay); await flush();
+    const composer = element(); h.env.document.activeElement = composer;
+    h.set(false, overlay); const focus = h.focus(false); await flush();
+    h.m.api.finish(h.env.panelRegion); await focus;
+    assert.equal(h.trigger.focused, 0, `outside focus with overlay=${overlay}`);
+    assert.equal(h.env.document.activeElement, composer);
+  }
+});
+
+test('panel close restores the opener when panel focus falls back to body during closing', async () => {
+  for (const overlay of [true, false]) {
+    const h = panelHarness(); h.set(true, overlay); await flush();
+    h.env.document.activeElement = h.env.panelRegion;
+    h.set(false, overlay); const focus = h.focus(false); h.env.document.activeElement = h.env.document.body;
+    await flush(); h.m.api.finish(h.env.panelRegion); await focus;
+    assert.equal(h.trigger.focused, 1, `panel-owned focus with overlay=${overlay}`);
+  }
 });
 
 test('Native dialog and menu targets keep their own Escape handling', () => {

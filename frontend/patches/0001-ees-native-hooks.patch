@@ -1831,10 +1831,10 @@ index 0000000..6d5288b
 +</style>
 diff --git a/src/lib/components/ees/EesShell.svelte b/src/lib/components/ees/EesShell.svelte
 new file mode 100644
-index 0000000..d55b5f0b
+index 0000000..75b667c
 --- /dev/null
 +++ b/src/lib/components/ees/EesShell.svelte
-@@ -0,0 +1,474 @@
+@@ -0,0 +1,476 @@
 +<script lang="ts">
 +	import { getContext, onMount, tick } from 'svelte';
 +	import { get } from 'svelte/store';
@@ -1951,10 +1951,11 @@ index 0000000..d55b5f0b
 +		tick().then(eesSync);
 +	}
 +	function panelKeydown(event: KeyboardEvent) {
-+		// Own Escape before Native's document-level CLOSE_MODAL shortcut.
++		// Own panel Escape only; outside keys keep Native's document-level CLOSE_MODAL shortcut.
 +		// Scope menus handle their key at document; other nested surfaces consume it locally.
 +		if ((event.target as Element)?.closest?.('dialog, [role="dialog"], [role="menu"], [data-scope-dropdown], [data-scope-trigger][aria-expanded="true"]')) return;
 +		if (event.key !== 'Escape' || event.defaultPrevented || !panelOpen || !panelOverlay || nativeRoute || $showSettings) return;
++		if (!panelRegion?.contains((event.target as Element))) return;
 +		event.preventDefault();
 +		event.stopPropagation();
 +		eesAction({ action: 'close_panel' });
@@ -2075,6 +2076,7 @@ index 0000000..d55b5f0b
 +		focusComposer: () => window.__eesNativeDraftV1?.focus?.(),
 +		focusPanel: async (open: boolean) => {
 +			const focusAtStart = document.activeElement;
++			if (!open && focusAtStart && focusAtStart !== document.body && focusAtStart !== document.documentElement && !panelRegion?.contains(focusAtStart)) return;
 +			await tick();
 +			if (!open) {
 +				if (!(await panelClose)) return;

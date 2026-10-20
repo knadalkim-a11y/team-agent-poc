@@ -251,6 +251,49 @@ class MotionNativeTests(IntegratedNativeCase):
         self.assertIn('겹친 패널이 열린 동안 입력한 대화 초안', self.text('#chat-input'))
         self.assertFalse(self.read('.ees-panel-region', 'hidden'))
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        # C60: observe the actual target and document bubbling, independently of
+        # capture/defaultPrevented (Native CLOSE_MODAL legitimately prevents it).
+        self.browser.evaluate("""(()=>{
+          const composer=document.querySelector('#chat-input');
+          const panel=document.querySelector('.ees-panel-region');
+          const deliveries=window.__c3.evidence.escapeDeliveries=[];
+          const ids=new WeakMap();let nextId=0;
+          const record=location=>event=>{if(event.key!=='Escape')return;
+            if(!ids.has(event))ids.set(event,++nextId);
+            deliveries.push({id:ids.get(event),location,phase:event.eventPhase,
+              trusted:event.isTrusted,t:performance.now(),
+              composer:composer.contains(event.target),panel:panel.contains(event.target),
+              overlayOpen:panel.dataset.overlay==='true'&&!panel.hidden,
+              opening:panel.dataset.eesMotion==='opening',closing:panel.dataset.eesMotion==='closing'});};
+          const targets=[[composer,record('composer')],[panel,record('panel')],
+            [document,record('document')]];
+          for(const [target,listener]of targets)target.addEventListener('keydown',listener);
+          const stop=window.__c3.stop;
+          window.__c3.stop=()=>{for(const [target,listener]of targets)
+            target.removeEventListener('keydown',listener);stop();};
+        })()""")
+        self.key('Escape', 27)
+        composer_escape = self.browser.evaluate("""new Promise(resolve=>{
+          const panel=document.querySelector('.ees-panel-region');
+          const close=window.__eesMotionV1.settings(panel).close;
+          setTimeout(()=>{const result={t:performance.now(),close,
+            hidden:panel.hidden,closing:panel.dataset.eesMotion==='closing',
+            focus:document.activeElement?.id,
+            draft:window.__eesNativeDraftV1.read(),
+            deliveries:window.__c3.evidence.escapeDeliveries.slice()};
+            window.__c3.evidence.composerEscapeAfter=result;resolve(result);},close+100);
+        })""")
+        self.assertFalse(composer_escape['hidden'], composer_escape)
+        self.assertFalse(composer_escape['closing'], composer_escape)
+        self.assertEqual(composer_escape['focus'], 'chat-input')
+        self.assertEqual(composer_escape['draft'], draft)
+        composer_deliveries = composer_escape['deliveries']
+        self.assertEqual([row['location'] for row in composer_deliveries], ['composer', 'document'])
+        self.assertEqual(len({row['id'] for row in composer_deliveries}), 1)
+        self.assertTrue(all(row['trusted'] and row['composer'] and row['overlayOpen']
+                            and not row['opening'] and not row['closing'] for row in composer_deliveries))
+        self.assertEqual(composer_deliveries[-1]['phase'], 3, 'Escape did not reach document bubbling')
+        self.assertGreater(composer_escape['t'] - composer_deliveries[0]['t'], composer_escape['close'])
         self.click('#ees-work-panel [data-action=close_panel]')
         self.wait("document.querySelector('.ees-panel-region').hidden")
         self.wait("document.activeElement?.matches('[data-action=open_panel]')")
@@ -259,6 +302,12 @@ class MotionNativeTests(IntegratedNativeCase):
         self.key('Escape', 27)
         self.wait("document.querySelector('.ees-panel-region').hidden")
         self.wait("document.activeElement?.matches('[data-action=open_panel]')")
+        panel_deliveries = self.browser.evaluate('window.__c3.evidence.escapeDeliveries.slice(' +
+                                                  str(len(composer_deliveries)) + ')')
+        self.assertEqual([row['location'] for row in panel_deliveries], ['panel'],
+                         'Panel Escape reached document bubbling')
+        self.assertTrue(panel_deliveries[0]['trusted'] and panel_deliveries[0]['panel']
+                        and panel_deliveries[0]['overlayOpen'], panel_deliveries)
         self.activate()
         self.wait("!document.querySelector('.ees-panel-region').hidden && !document.querySelector('[data-ees-motion=opening]')")
         self.click('#ees-work-system-trigger')
