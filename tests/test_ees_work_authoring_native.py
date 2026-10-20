@@ -577,22 +577,82 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.click('[data-author-action="create"]')
         self.wait("document.querySelector('#ees-work-dialog [name=name]')")
         self.fill('#ees-work-dialog [name=name]',name);self.click('#ees-work-dialog [data-dialog-confirm]')
-        self.wait("document.querySelector('.ew-summary-card')")
-        self.click('[data-author-action=tab][data-tab=structure]')
+        self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
         self.wait("document.querySelector('[data-author-action=add_stage]')")
         state=self.browser_api("GET","/api/ees-work/workspace")["data"]
         return next(item["id"] for item in state["workflows"] if item["name"]==name)
 
+    def add_stage_ui(self, name):
+        self.click('[data-author-action=add_stage]')
+        self.wait("document.querySelector('#ew-stage-editor [name=name]')")
+        self.fill('#ew-stage-editor [name=name]', name)
+        self.click('[data-author-action=inline_apply]')
+        self.wait("!document.querySelector('#ew-stage-editor') && document.querySelector('[data-author-action=add_job]')")
+
+    def add_job_ui(self, name):
+        self.click('[data-author-action=add_job]')
+        self.wait("document.querySelector('#ew-stage-editor [name=name]')")
+        self.fill('#ew-stage-editor [name=name]', name)
+        self.click('[data-author-action=inline_apply]')
+        self.wait("document.querySelector('#ew-author-node [name=instructions]')")
+
+    def send_native_chat_question(self, question):
+        before = len(self.server.completions)
+        self.click('.ew-author>header [data-action=close_panel]')
+        self.wait("document.querySelector('.ees-panel-region')?.hidden")
+        self.fill('#chat-input', question)
+        self.click('#send-message-button')
+        self.eventually(lambda: len(self.server.completions) > before)
+        request = deepcopy(self.server.completions[-1])
+        self.click('#ees-work-panel-open')
+        self.wait("!document.querySelector('.ees-panel-region')?.hidden && document.querySelector('#ees-work-designer')")
+        return request
+
+    def prepare_native_chat_proposal(self, definition, question='설명 제안'):
+        """Actual installed Tool validation; only its event transport is queued.
+
+        The complete central-chat suite covers socket delivery and tool history.
+        This account fixture captures that same fixed callback before delivering
+        it to the real browser, so a late A callback can be tested after B login.
+        It never calls the retired panel workspace/proposal request endpoint.
+        """
+        import importlib
+        tool = importlib.import_module('open_webui.ees_workflow_tool').Tools()
+        reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
+        chat_id = self.browser.evaluate("location.pathname.split('/c/')[1] || ''")
+        self.assertTrue(chat_id, 'Native proposal requires an actual personal chat route')
+        current = self.browser_api('GET', '/api/v1/auths/')['data']
+        user = self.fixture.run(self.fixture.users.Users.get_user_by_id(current['id']))
+        captured = []
+        async def queue_event(event):
+            self.assertEqual(event['type'], 'execute')
+            self.assertIn('api.propose(chatId,payload)', event['data']['code'])
+            captured.append(event['data']['code'])
+            return {'ok': False, 'code': 'synthetic_delivery_queued'}
+        result = self.fixture.run(tool.ees_workflow_propose(
+            workflow_id=reference['workflow_id'], base_revision=reference['revision'],
+            definition=deepcopy(definition), context_id=reference['context_id'],
+            __user__=user, __metadata__={'chat_id': chat_id, 'ees_work_reference': reference},
+            __event_call__=queue_event))
+        self.assertFalse(result['ok'], result)
+        self.assertEqual(len(captured), 1, result)
+        request = {'actor_id': current['id'], 'context': {'reference': reference, 'source': deepcopy(definition)}, 'instruction': question}
+        self.server.proposal_requests.append(request)
+        return captured[0]
+
+    def deliver_native_chat_proposal(self, code):
+        return self.browser.evaluate('(async()=>{' + code + '})()')
+
     def test_native_authoring_conflict_keeps_unsaved_draft_and_published_version(self):
         self.login_ui("administrator@example.test","Fixture-admin-only-42!")
         key=self.create_ui_procedure("동시 편집 검증")
-        self.click('[data-author-action="add_stage"]');self.fill('#ew-author-node [name="name"]','아직 저장하지 않은 단계')
+        self.add_stage_ui('아직 저장하지 않은 단계')
         prior=self.browser_api("GET","/api/ees-work/workspace?workflow_id="+key)["data"]["workflow"]
         changed=deepcopy(prior["draft"]);changed["name"]='다른 요청의 저장'
         saved=self.work_command('save_draft',expected_revision=prior['revision'],workflow_id=key,definition=changed)
         self.click('[data-author-action="save"]')
         self.wait("document.querySelector('#ees-work-designer [role=alert]')")
-        self.assertEqual(self.read('#ew-author-node [name="name"]','value'),'아직 저장하지 않은 단계')
+        self.assertIn('아직 저장하지 않은 단계', self.text('[data-author-action=stage_toggle]'))
         after=self.browser_api("GET","/api/ees-work/workspace?workflow_id="+key)["data"]["workflow"]
         self.assertEqual(after['draft']['name'],'다른 요청의 저장');self.assertEqual(after['revision'],saved['revision'])
         self.assertIsNone(after['published_version']);self.screenshot('integrated-native-authoring-conflict')
@@ -600,38 +660,45 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
 
     def test_native_ai_proposal_requires_apply_save_and_cancel_preserves_draft(self):
         self.login_ui("administrator@example.test", "Fixture-admin-only-42!")
-        key=self.create_ui_procedure("제안 경계 검증")
-        self.click('[data-author-action=add_stage]')
-        self.fill('#ew-author-node [name=instructions]', '직접 편집한 미저장 값')
-        self.click('[data-author-action=node][data-id=""]')
-        self.click('.ew-author-ai > summary'); self.fill('[name=ai_prompt]', '설명 제안')
-        self.wait("!document.querySelector('[data-author-action=ai_propose]')?.disabled")
-        self.server.proposal_answer='반영 전 합성 제안'
-        self.click('[data-author-action=ai_propose]')
-        self.wait("document.querySelector('[data-author-action=ai_apply]')")
-        self.click('.ew-author-stage [data-author-action=node]')
-        self.assertEqual(self.read('#ew-author-node [name=instructions]','value'),'직접 편집한 미저장 값')
-        before=self.browser_api('GET','/api/ees-work/workspace?workflow_id='+key)['data']['workflow']
-        self.assertEqual(before['revision'],1); self.assertNotEqual(before['draft'].get('description'),'반영 전 합성 제안')
-        self.click('[data-author-action=ai_apply]')
-        self.assertEqual(self.read('#ew-author-node [name=instructions]','value'),'반영 전 합성 제안')
-        self.assertEqual(self.browser_api('GET','/api/ees-work/workspace?workflow_id='+key)['data']['workflow'],before)
-        gate={'workflow_id':key,'started':threading.Event(),'release':threading.Event(),'finished':threading.Event()}
-        self.server.proposal_gate=gate;self.addCleanup(gate['release'].set)
-        self.click('[data-author-action=node][data-id=""]')
-        if not self.read('.ew-author-ai','open'):
-            self.click('.ew-author-ai > summary')
-        self.fill('[name=ai_prompt]','취소할 추가 제안'); self.click('[data-author-action=ai_propose]')
-        self.assertTrue(gate['started'].wait(5)); self.click('[data-author-action=ai_cancel]'); gate['release'].set()
-        self.assertTrue(gate['finished'].wait(5))
-        self.wait("!document.querySelector('[data-author-action=ai_apply]')")
-        self.click('.ew-author-stage [data-author-action=node]')
-        self.assertEqual(self.read('#ew-author-node [name=instructions]','value'),'반영 전 합성 제안')
-        self.assertEqual(self.browser_api('GET','/api/ees-work/workspace?workflow_id='+key)['data']['workflow'],before)
+        from native_ui_fixture import chat_record
+        chat = chat_record('native-authoring-proposal-chat')
+        chat['user_id'] = self.admin['id']
+        self.fixture.chats[chat['id']] = chat
+        self.navigate('/c/' + chat['id'])
+        key = self.create_ui_procedure("제안 경계 검증")
+        self.add_stage_ui('제안 검증 단계')
+        self.add_job_ui('직접 편집할 작업')
         self.click('[data-author-action=save]')
-        self.wait("document.querySelector('#ees-work-designer')?.innerText.includes('초안 r2')")
-        after=self.browser_api('GET','/api/ees-work/workspace?workflow_id='+key)['data']['workflow']
-        self.assertEqual(after['draft']['description'],'반영 전 합성 제안');self.assertIsNone(after['published_version'])
+        self.wait("document.querySelector('[data-author-status]')?.textContent.includes('초안 r2 · 저장됨')")
+        before = self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['workflow']
+        self.fill('#ew-author-node [name=instructions]', '직접 편집한 미저장 값')
+        proposed = deepcopy(before['draft'])
+        proposed['description'] = '반영 전 합성 제안'
+        job = next(node for node in proposed['nodes'].values() if node['type'] == 'j')
+        job['instructions'] = '반영 전 합성 제안'
+        code = self.prepare_native_chat_proposal(proposed)
+        accepted = self.deliver_native_chat_proposal(code)
+        self.assertTrue(accepted['ok'], accepted)
+        self.wait("document.querySelector('footer [data-author-action=ai_apply]')")
+        self.assertEqual(self.read('#ew-author-node [name=instructions]', 'value'), '직접 편집한 미저장 값')
+        self.assertEqual(self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['workflow'], before)
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[name=ai_prompt],[data-author-action=ai_propose],[data-author-action=ai_cancel]')"))
+        self.click('footer [data-author-action=ai_apply]')
+        self.assertEqual(self.read('#ew-author-node [name=instructions]', 'value'), '반영 전 합성 제안')
+        self.assertEqual(self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['workflow'], before)
+        discarded = deepcopy(proposed)
+        discarded['description'] = '버릴 추가 제안'
+        discarded['nodes'][job['id']]['instructions'] = '버릴 추가 제안'
+        self.assertTrue(self.deliver_native_chat_proposal(self.prepare_native_chat_proposal(discarded))['ok'])
+        self.click('footer [data-author-action=ai_discard]')
+        self.wait("!document.querySelector('[data-author-action=ai_apply]')")
+        self.assertEqual(self.read('#ew-author-node [name=instructions]', 'value'), '반영 전 합성 제안')
+        self.assertEqual(self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['workflow'], before)
+        self.click('[data-author-action=save]')
+        self.wait("document.querySelector('#ees-work-designer')?.innerText.includes('초안 r3')")
+        after = self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['workflow']
+        self.assertEqual(after['draft']['description'], '반영 전 합성 제안')
+        self.assertIsNone(after['published_version'])
         self.screenshot('integrated-native-ai-proposal-not-auto-save')
 
     def test_native_new_signup_and_approval_ui(self):
@@ -699,9 +766,8 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.wait("document.querySelector('[data-action=choose_system][data-system-id=EMS]')")
         self.click('[data-action=choose_system][data-system-id=EMS]')
         key=self.create_ui_procedure('합성 담당자 작성 절차')
-        self.click('[data-author-action="add_stage"]');self.fill('#ew-author-node [name="name"]','현장 확인')
-        self.click('[data-author-action="node"][data-id=""]');self.click('[data-author-action="add_job"]')
-        self.fill('#ew-author-node [name="name"]','사람의 명시적 판정')
+        self.add_stage_ui('현장 확인')
+        self.add_job_ui('사람의 명시적 판정')
         self.click('[data-author-action="save"]');self.wait("document.querySelector('[data-author-status]')?.textContent.includes('초안 r2 · 저장됨')")
         self.click('[data-author-action="validate"]');self.wait("document.querySelector('[data-author-action=publish]')")
         self.click('[data-author-action="publish"]');self.click('[data-dialog-confirm]')

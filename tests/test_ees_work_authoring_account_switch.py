@@ -16,7 +16,8 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
     setUpClass = classmethod(native.NativeAuthoringBrowserTests.setUpClass.__func__)
     for _name in ('setUp','tearDown','evidence_directory','screenshot','capture_failure_evidence',
                   'api','wait','eventually','browser_api','click_text','login_ui','logout_ui',
-                  'select_native','assert_user_workspace_zero','open_sidebar','enter_authoring','work_command'):
+                  'select_native','assert_user_workspace_zero','open_sidebar','enter_authoring','work_command',
+                  'prepare_native_chat_proposal','deliver_native_chat_proposal','send_native_chat_question'):
         locals()[_name] = getattr(native.NativeAuthoringBrowserTests, _name)
 
     def activate_tab(self, session):
@@ -32,7 +33,7 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         # dispatch, waits, or editor state. Never collect text or field values.
         self.browser.evaluate("""(()=>{
             window.__eesAccountStageProbe?.stop();
-            const initial=document.querySelector('[data-author-action="add_stage"]');
+            const initial=document.querySelector('[data-author-action="stage_toggle"][data-id=stage]');
             let root=document.querySelector('#ees-work-designer'),generation=0;
             const started=performance.now(),events=[];
             const record=value=>{if(events.length<32)events.push({
@@ -47,7 +48,7 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
                 const authorAction=control?.getAttribute('data-author-action');
                 const action=control?.getAttribute('data-action');
                 record({type:event.type,target_connected:!!target.isConnected,
-                    author_action:['add_stage','add_job','node','edit_workflow'].includes(authorAction)?authorAction:authorAction?'other':null,
+                    author_action:['stage_toggle','node','edit_workflow'].includes(authorAction)?authorAction:authorAction?'other':null,
                     data_action:action==='mode'?action:action?'other':null});};
             const types=['pointerdown','pointerup','click'];
             for(const type of types)document.addEventListener(type,listener,{capture:true,passive:true});
@@ -97,7 +98,17 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.assertEqual(settings.status_code,200,settings.text)
         created=self.api('POST','/api/ees-work/workspace/command',{'action':'create_workflow','name':suffix+' 전용 합성 절차','system_id':system,'expected_revision':0,'request_id':str(uuid4())},signed['token'])
         self.assertEqual(created.status_code,200,created.text)
-        return signed,created.json()['workflow']
+        workflow = created.json()['workflow']
+        definition = deepcopy(workflow['draft'])
+        root = next(iter(definition['nodes']))
+        definition['nodes'][root]['children'] = ['stage']
+        definition['nodes']['stage'] = {'id': 'stage', 'type': 't', 'name': '개인 단계', 'parent': root, 'children': ['job'], 'deps': []}
+        definition['nodes']['job'] = {'id': 'job', 'type': 'j', 'name': '개인 작업', 'parent': 'stage', 'children': [], 'deps': [], 'instructions': '', 'mode': 'human', 'inputs': [], 'result_block': 'human_confirm', 'human_confirmation': True}
+        saved = self.api('POST', '/api/ees-work/workspace/command', {'action': 'save_draft', 'workflow_id': workflow['id'], 'definition': definition, 'expected_revision': 1, 'request_id': str(uuid4())}, signed['token'])
+        self.assertEqual(saved.status_code, 200, saved.text)
+        stored = self.api('GET', '/api/ees-work/workspace?workflow_id=' + workflow['id'], token=signed['token'])
+        self.assertEqual(stored.status_code, 200, stored.text)
+        return signed,stored.json()['workflow']
 
     def open_workflow(self, workflow):
         self.enter_authoring()
@@ -105,13 +116,14 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.wait('document.querySelector('+json.dumps(selector)+')')
         self.click(selector)
         self.wait("document.querySelector('[data-author-action=edit_workflow]')")
-        self.click('.ew-author-tabs [data-author-action=tab][data-tab=structure]')
+        self.click('.ew-author-tabs [data-author-action=tab][data-tab=content]')
         try:
             self.begin_stage_click_diagnostics()
         except Exception as error:
             print('Native stage click observation unavailable: '+type(error).__name__)
         try:
-            self.click('[data-author-action="add_stage"]')
+            self.click('[data-author-action=stage_toggle][data-id=stage]')
+            self.click('[data-author-action=node][data-id=job]')
             self.wait("document.querySelector('#ew-author-node [name=instructions]')")
         finally:
             self.collect_stage_click_diagnostics()
@@ -125,7 +137,7 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
             record=chat_record(identifier);record['user_id']=account['id'];record['title']=record['chat']['title']=title
             self.fixture.chats[identifier]=record
         a_text='A만의 저장하지 않은 수행 안내';a_question='A의 비공개 작성 질문';a_answer='늦게 도착한 계정 A 전용 응답';b_text='B가 현재 직접 작성한 수행 안내'
-        self.login_ui(account_a['email'],'Fixture-person-only-42!');self.enter_authoring()
+        self.login_ui(account_a['email'],'Fixture-person-only-42!');self.navigate('/c/private-account-a-chat');self.enter_authoring()
         self.click('[data-action=tools]')
         self.click('[data-ees-panel-resize]');self.key('End',35)
         self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width===720")
@@ -133,14 +145,14 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.open_workflow(workflow_a)
         self.assertEqual(self.browser.evaluate("document.querySelector('.ees-panel-region').getBoundingClientRect().width"),580)
         self.fill('#ew-author-node [name=instructions]',a_text)
-        self.click('[data-author-action=node][data-id=""]')
-        self.click('.ew-author-ai > summary');self.fill('[name=ai_prompt]',a_question)
-        self.wait("!document.querySelector('[data-author-action=ai_propose]')?.disabled")
-        self.server.proposal_answer=a_answer
-        proposal={'workflow_id':workflow_a['id'],'started':threading.Event(),'release':threading.Event(),'finished':threading.Event()}
-        self.server.proposal_gate=proposal;self.addCleanup(proposal['release'].set)
-        self.click('[data-author-action=ai_propose]');self.assertTrue(proposal['started'].wait(5),'A authorized proposal did not reach response barrier')
-        self.assertIn(a_text,json.dumps(self.server.proposal_requests[-1],ensure_ascii=False))
+        a_proposed = deepcopy(workflow_a['draft'])
+        a_proposed['description'] = a_answer
+        a_proposed['nodes']['job']['instructions'] = a_text
+        # The explicit chat question supplies the fixture's desired text; E1
+        # does not promise automatic unsaved editor content in model context.
+        a_model_request = self.send_native_chat_question(a_question + '\n' + a_text)
+        self.assertIn(a_text, json.dumps(a_model_request, ensure_ascii=False))
+        a_delivery = self.prepare_native_chat_proposal(a_proposed, a_question)
         read={'actor_id':account_a['id'],'workflow_id':workflow_a['id'],'started':threading.Event(),'release':threading.Event(),'finished':threading.Event()}
         self.server.authoring_read_gate=read;self.addCleanup(read['release'].set)
         self.browser.evaluate('void window.__eesNativeWorkV1.refresh()')
@@ -148,7 +160,7 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         old_session=self.browser.session
         self.browser.navigate('about:blank');self.browser.call('Runtime.enable');self.browser.call('Network.enable')
         self.navigate('/');self.wait("document.querySelector('#chat-input.ProseMirror')")
-        self.logout_ui(account_a['name']);self.login_ui(account_b['email'],'Fixture-person-only-42!');self.enter_authoring()
+        self.logout_ui(account_a['name']);self.login_ui(account_b['email'],'Fixture-person-only-42!');self.navigate('/c/private-account-b-chat');self.enter_authoring()
         self.click('[data-action=tools]')
         self.assertEqual(self.browser.evaluate("document.querySelector('.ees-panel-region').getBoundingClientRect().width"),480)
         self.click('[data-ees-panel-resize]');self.key('Home',36)
@@ -164,8 +176,10 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.assertEqual([row['id'] for row in self.browser_api('GET','/api/v1/chats/?page=1')['data']],['private-account-b-chat'])
         self.assertEqual(self.browser_api('GET','/api/v1/chats/private-account-a-chat')['status'],403)
         self.assertEqual(self.browser_api('GET','/api/v1/chats/private-account-b-chat')['status'],200)
-        read['release'].set();proposal['release'].set()
-        self.assertTrue(read['finished'].wait(5));self.assertTrue(proposal['finished'].wait(5))
+        read['release'].set()
+        self.assertTrue(read['finished'].wait(5))
+        late_on_b = self.deliver_native_chat_proposal(a_delivery)
+        self.assertEqual(late_on_b, {'ok': False, 'code': 'context_changed'})
         self.assertEqual(self.read('#ew-author-node [name=instructions]','value'),b_text)
         for secret in (a_text,a_question,a_answer,'NU05 A private chat title'):
             self.assertNotIn(secret,self.authoring_content()+self.text('body'))
@@ -173,20 +187,25 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.activate_tab(old_session)
         self.wait("document.querySelector('#ees-work-system-trigger')?.textContent.includes('FDC')")
         self.assertEqual(self.browser_api('GET','/api/v1/auths/')['data']['id'],account_b['id'])
+        late_on_former_a = self.deliver_native_chat_proposal(a_delivery)
+        self.assertEqual(late_on_former_a, {'ok': False, 'code': 'context_changed'})
         # This background tab restored B before B changed the preference. Its
         # active display may stay at B's previous width, never A's private 720.
         self.assertNotEqual(self.browser.evaluate("document.querySelector('.ees-panel-region').getBoundingClientRect().width"),720)
         for secret in (a_text,a_question,a_answer):self.assertNotIn(secret,self.authoring_content())
         self.assertEqual(self.browser_api('GET','/api/v1/users/user/settings')['data']['ui']['params']['system'],'NU05 private Native setting B')
         self.screenshot('nu05-former-a-tab-now-b')
-        self.activate_tab(new_session);self.server.proposal_gate=None;self.server.authoring_read_gate=None
-        self.server.proposal_answer='B만의 합성 응답'
-        self.click('[data-author-action=node][data-id=""]')
-        self.click('.ew-author-ai > summary');self.fill('[name=ai_prompt]','현재 B 절차 설명')
-        self.click('[data-author-action=ai_propose]');self.wait("document.querySelector('[data-author-action=ai_apply]')")
-        self.click('.ew-author-stage [data-author-action=node]')
-        context=json.dumps(self.server.proposal_requests[-1],ensure_ascii=False)
+        self.activate_tab(new_session);self.server.authoring_read_gate=None
+        b_proposed = deepcopy(workflow_b['draft'])
+        b_proposed['description'] = 'B만의 합성 응답'
+        b_proposed['nodes']['job']['instructions'] = b_text
+        b_model_request = self.send_native_chat_question('현재 B 절차 설명\n' + b_text)
+        accepted = self.deliver_native_chat_proposal(self.prepare_native_chat_proposal(b_proposed, '현재 B 절차 설명'))
+        self.assertTrue(accepted['ok'], accepted)
+        self.wait("document.querySelector('footer [data-author-action=ai_apply]')")
+        context=json.dumps(b_model_request,ensure_ascii=False)
         self.assertIn(b_text,context)
+        self.assertEqual(b_model_request['user_message']['meta']['ees_work_reference']['workflow_id'], workflow_b['id'])
         for secret in (a_text,a_question,a_answer):self.assertNotIn(secret,context)
         self.assertEqual(self.read('#ew-author-node [name=instructions]','value'),b_text)
         # After all original late-response/privacy assertions, reloading the
@@ -201,7 +220,7 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
             self.assertEqual(stored.json()['ui_state']['state']['selection']['panel_width'],720 if account['id']==account_a['id'] else 400)
             self.assertEqual(stored.json()['workflow']['revision'],workflow['revision'])
             self.assertEqual(stored.json()['workflow']['draft'],workflow['draft'])
-        (self.evidence_directory()/'sa26-nu05-account-switch.json').write_text(json.dumps({'same_profile':True,'native_logout_signin_ui':True,'actual_native_acl':True,'delayed_authenticated_a_read_and_proposal':True,'b_unsaved_draft_preserved':True,'old_tab_a_private_state_cleared':True,'b_model_context_excludes_a':True,'native_settings_and_chat_ownership_separate':True,'private_panel_widths':{'A':720,'B':400},'automatic_authoring_persistence':False,'synthetic_boundary':'Only model transport/chat storage are synthetic; Native auth, users, membership, ACL and workspace storage are real.'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        (self.evidence_directory()/'sa26-nu05-account-switch.json').write_text(json.dumps({'same_profile':True,'native_logout_signin_ui':True,'actual_native_acl':True,'delayed_authenticated_a_read_and_native_proposal':True,'late_callback_rejected_on_b_and_former_a':True,'b_unsaved_draft_preserved':True,'old_tab_a_private_state_cleared':True,'b_model_context_excludes_a':True,'native_settings_and_chat_ownership_separate':True,'private_panel_widths':{'A':720,'B':400},'automatic_authoring_persistence':False,'synthetic_boundary':'Only model replies, chat storage and queued Native Tool event delivery are synthetic; installed Tool validation, Native auth, users, membership, ACL and workspace storage are real. Actual central chat delivery is covered by ees_work_native_chat.py.'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
 
 if __name__=='__main__':

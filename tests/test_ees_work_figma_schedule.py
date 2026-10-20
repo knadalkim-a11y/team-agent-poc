@@ -8,6 +8,9 @@ import asyncio
 from copy import deepcopy
 import importlib
 import json
+from pathlib import Path
+import shutil
+import subprocess
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
@@ -69,6 +72,45 @@ class ScheduleContracts(unittest.IsolatedAsyncioTestCase):
         result = await self.service.workspace_state(self.user, run_id=run_id)
         self.assertTrue(result['ok'], result)
         return result['run']
+
+    @unittest.skipUnless(shutil.which('node'), 'Node is required for the authoring deletion contract.')
+    async def test_stage_deletion_cleans_deadline_before_periodic_publication(self):
+        """Use the actual UI deletion output in save/validate/publish commands."""
+        wid, definition = await self.published()
+        root = next(node for node in definition['nodes'].values() if node['type'] == 'p')
+        root['children'].append('t2')
+        definition['nodes']['t2'] = {'id': 't2', 'type': 't', 'name': '남길 단계',
+                                   'parent': root['id'], 'children': ['j2'], 'deps': []}
+        definition['nodes']['j2'] = {**deepcopy(definition['nodes']['j1']),
+                                   'id': 'j2', 'parent': 't2', 'name': '남길 작업'}
+        definition['schedule']['stage_deadlines']['t2'] = {'offset_days': 0}
+        repo = Path(__file__).resolve().parents[1]
+        prelude = (repo / 'tests/test_ees_work_authoring_ui.cjs').read_text(encoding='utf-8').split('\ntest(', 1)[0]
+        script = r"""
+(async()=>{
+const h=harness(),draft=JSON.parse(process.argv[1]);
+h.workflows.get('w').draft=draft;h.render();await h.node('t1');
+h.dialogs.push({});h.click('delete_node',{id:'t1'});await flush();
+const result=h.draft();assert.equal(result.dirty,true);assert.equal(h.writes.length,0);
+assert.equal(result.definition.nodes.t1,undefined);assert.equal(result.definition.nodes.j1,undefined);
+assert.match(h.dialogHistory.at(-1).html,/이 단계의 기간 설정\(실행 방식\)도 함께 지웁니다/);
+process.stdout.write(JSON.stringify(result.definition));
+})().catch(error=>{console.error(error);process.exitCode=1;});
+"""
+        result = subprocess.run([shutil.which('node'), '-e', prelude + '\n' + script,
+                                 json.dumps(definition, ensure_ascii=False)],
+                                cwd=repo / 'tests', capture_output=True, encoding='utf-8',
+                                timeout=30, check=False)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        edited = json.loads(result.stdout)
+        self.assertNotIn('t1', edited['schedule']['stage_deadlines'])
+        self.assertEqual(edited['schedule']['stage_deadlines']['t2'], {'offset_days': 0})
+        self.assertEqual(edited['nodes']['j2'], definition['nodes']['j2'])
+        await self.core('save_draft', 3, workflow_id=wid, definition=edited)
+        checked = await self.core('validate_workflow', 4, workflow_id=wid)
+        self.assertEqual(checked['validation']['errors'], [])
+        published = await self.core('publish_workflow', 4, workflow_id=wid)
+        self.assertEqual(published['version'], 2)
 
     def slots(self):
         with self.service._db() as db:

@@ -8,10 +8,12 @@ message persistence/model dispatch when current tool/model access is missing.
 """
 import argparse
 from copy import deepcopy
+from html import unescape
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import hashlib
 from pathlib import Path
+import re
 import threading
 import time
 from unittest.mock import patch
@@ -80,16 +82,6 @@ class NativeToolProvider:
         messages=body['messages'];tools=body.get('tools',[])
         names=[tool['function']['name'] for tool in tools if tool.get('type')=='function']
         self.models.append({'mode':self.mode,'advertised_tool_names':names,'stream':bool(body.get('stream')),'roles':[message['role'] for message in messages]})
-        # The product's separate unsaved-input proposal path sends its exact
-        # scoped context as JSON and explicitly prohibits tool execution.
-        if not body.get('stream') and not names:
-            try:scoped=json.loads(messages[-1].get('content',''))
-            except (ValueError,TypeError):scoped={}
-            if scoped.get('context',{}).get('kind')=='inputs':
-                assert not tools and not body.get('tool_ids')
-                fields=scoped['untrusted_source']['fields'];assert [field['id'] for field in fields]==['note']
-                self.input_proposals.append(deepcopy(scoped))
-                return {'role':'assistant','content':json.dumps({'context':scoped['context'],'proposal':{'note':'AI가 제안한 첫 입력'}},ensure_ascii=False)},'stop'
         if self.mode=='plain':return {'role':'assistant','content':self.plain_reply},'stop'
         if self.mode=='help':return self.reply_help(body,names)
         last_user=max(i for i,message in enumerate(messages) if message['role']=='user')
@@ -103,7 +95,9 @@ class NativeToolProvider:
             else:
                 proposal=self.find_proposal(results)
                 assert proposal and proposal.get('ok') is True and proposal.get('proposal',{}).get('ok') is True,('Actual Native proposal did not reach the current editor',results)
-            return {'role':'assistant','content':'중앙 도구 조회 완료' if self.mode=='read' else '중앙 제안은 검토 전이며 저장하지 않았습니다'},'stop'
+                if self.mode=='inputs':assert proposal.get('proposal_kind')=='inputs' and proposal.get('executed') is False,proposal
+            reply='중앙 도구 조회 완료' if self.mode=='read' else '중앙 입력 제안은 검토 전이며 저장하지 않았습니다' if self.mode=='inputs' else '중앙 제안은 검토 전이며 저장하지 않았습니다'
+            return {'role':'assistant','content':reply},'stop'
         expected='ees_workflow_view' if self.mode=='read' else 'ees_workflow_propose'
         candidates=[name for name in names if name==expected or name.endswith('__'+expected)]
         assert len(candidates)==1,(expected,names)
@@ -118,11 +112,18 @@ class NativeToolProvider:
         # handing expected values to this synthetic model cannot satisfy this.
         assert references and references[-1]['workflow_id']==self.reference['workflow_id'] and references[-1]['context_id']==self.reference['context_id'] and references[-1]['revision']==self.reference['revision'],'Current Work reference absent or stale in actual model context'
         if self.mode=='read':arguments={'workflow_id':self.reference['workflow_id']}
+        elif self.mode=='inputs':
+            assert references[-1]['run_id']==self.reference['run_id'] and references[-1]['job_id']==self.reference['job_id'],references[-1]
+            arguments={'workflow_id':self.reference['workflow_id'],'base_revision':self.reference['revision'],
+                       'context_id':self.reference['context_id'],'proposal_kind':'inputs',
+                       'run_id':self.reference['run_id'],'job_id':self.reference['job_id'],
+                       'inputs':{'note':'AI가 제안한 첫 입력'}}
+            self.input_proposals.append(deepcopy(arguments))
         else:
             assert self.definition is not None,'A real read result is required before a proposal'
             proposed=deepcopy(self.definition);proposed['description']='중앙 대화에서 제안한 미저장 설명'
             for node in proposed['nodes'].values():
-                if node['type']=='t':node['instructions']='중앙 대화 제안 · 사람 반영 전'
+                if node['type']=='t':node['description']='중앙 대화 제안 · 사람 반영 전'
             self.proposed=deepcopy(proposed)
             arguments={'workflow_id':self.reference['workflow_id'],'base_revision':self.reference['revision'],'definition':proposed,'context_id':self.reference['context_id']}
         self.calls.append({'mode':self.mode,'function':candidates[0],'arguments':deepcopy(arguments)})
@@ -217,10 +218,11 @@ def central_flow(g):
     g.record('explicit packaged read-only Work tool registration',id='ees_workflow',source_sha256=status['source_sha256'],private_native_grant=True,model_presets_created=False)
     g.click('[data-action="mode"][data-mode="author"]');g.click('[data-author-action="create"]')
     g.type('#ees-work-dialog [name=name]','중앙 대화 제안 검증');g.click('#ees-work-dialog [data-dialog-confirm]')
-    g.wait('document.querySelector(".ew-summary-card")')
-    g.click('[data-author-action=tab][data-tab=structure]')
     g.wait('document.querySelector("[data-author-action=add_stage]")')
-    g.click('[data-author-action=add_stage]');g.type('#ew-author-node [name=instructions]','저장된 기준 안내')
+    g.click('[data-author-action=add_stage]');g.type('#ew-stage-editor [name=name]','대화 제안 검토 단계')
+    g.click('[data-author-action=inline_apply]')
+    g.click('[data-author-action=stage_edit]');g.type('#ew-stage-editor [name=description]','저장된 기준 안내')
+    g.click('[data-author-action=inline_apply]')
     g.click('[data-author-action=save]');g.wait('document.querySelector("#ees-work-designer")?.innerText.includes("초안 r2")')
     workflow=next(item for item in g.api('/api/ees-work/workspace')['workflows'] if item['name']=='중앙 대화 제안 검증')
     key=workflow['id'];before=g.api('/api/ees-work/workspace?workflow_id='+key)['workflow']
@@ -244,14 +246,15 @@ def central_flow(g):
     g.provider.reference=g.browser.evaluate('window.__eesNativeWorkV1.captureReference()');g.provider.mode='propose'
     g.type('#chat-input','설명을 보완한 초안을 제안해 줘. 저장하지 말고 검토하게 해 줘');g.click('#send-message-button')
     g.wait('document.querySelector("#chat-container")?.innerText.includes("중앙 제안은 검토 전이며 저장하지 않았습니다")',20000)
-    g.wait('document.querySelector("[data-author-action=ai_apply]")')
+    g.wait('document.querySelector(".ew-author > footer [data-author-action=ai_apply]")')
     assert len(g.provider.calls)==2 and g.provider.calls[1]['mode']=='propose',g.provider.calls
     assert g.api('/api/ees-work/workspace?workflow_id='+key)['workflow']==before
-    assert g.browser.evaluate('document.querySelector("#ew-author-node [name=instructions]")?.value')=='저장된 기준 안내'
-    if not g.browser.evaluate('document.querySelector(".ew-author-ai")?.open'):g.click('.ew-author-ai > summary')
+    assert g.browser.evaluate('document.querySelector(".ew-stage-description p")?.textContent')=='저장된 기준 안내'
+    assert g.browser.evaluate('document.querySelector("#ees-work-designer")?.innerText.includes("업무 도우미 제안 · 반영 전")')
+    assert not g.browser.evaluate('!!document.querySelector(".ew-author-ai,[name=ai_prompt],[data-author-action=ai_propose],#ees-work-designer pre")')
     g.capture('native-central-proposal-before-human')
-    g.click('[data-author-action=ai_apply]')
-    g.wait('document.querySelector("#ew-author-node [name=instructions]")?.value === "중앙 대화 제안 · 사람 반영 전"')
+    g.click('.ew-author > footer [data-author-action=ai_apply]')
+    g.wait('document.querySelector(".ew-stage-description p")?.textContent === "중앙 대화 제안 · 사람 반영 전"')
     assert g.api('/api/ees-work/workspace?workflow_id='+key)['workflow']==before
     g.capture('native-central-human-applied-unsaved')
     g.click('[data-author-action=save]');g.wait('document.querySelector("#ees-work-designer")?.innerText.includes("초안 r3")')
@@ -272,8 +275,8 @@ def input_and_history_flow(g,key,chat_id):
     g.provider.mode='plain'
     # Extend the same authored draft with an actual declared human task, using
     # the same visible editor controls a user uses; no seeded procedure/API write.
-    g.click('[data-author-action=node][data-id=""]');g.click('[data-author-action=add_job]')
-    g.type('#ew-author-node [name=name]','입력 제안과 과거 근거')
+    g.click('[data-author-action=add_job]')
+    g.type('#ew-stage-editor [name=name]','입력 제안과 과거 근거');g.click('[data-author-action=inline_apply]')
     g.click('#ew-author-node .ew-job-advanced:has([data-author-action=input_add]) > summary')
     g.click('[data-author-action=input_add]');g.type('#ees-work-dialog [name=name]','자료 메모')
     g.click('#ees-work-dialog .ew-input-advanced > summary')
@@ -290,30 +293,33 @@ def input_and_history_flow(g,key,chat_id):
     job=next(node for node in run['definition']['nodes'].values() if node['type']=='j')
     g.click('[data-action=job][data-job-id="'+job['id']+'"]')
     before=g.api('/api/ees-work/workspace?run_id='+run_id)['run']
-    g.click('[data-action=propose_inputs]');g.type('#ees-input-proposal-prompt','개발용 자료 메모를 제안해 줘. 저장하지 마.')
-    if g.browser.evaluate('!!document.querySelector("#ees-input-proposal-model")'):
-        # Native select is changed by physical keyboard input, never DOM value.
-        index=g.browser.evaluate('[...document.querySelector("#ees-input-proposal-model").options].findIndex(option=>option.value === "c3-synthetic-model")')
-        assert index>=0,'The approved synthetic model must be an actual offered choice'
-        g.click('#ees-input-proposal-model')
-        for kind in ('keyDown','keyUp'):g.browser.call('Input.dispatchKeyEvent',{'type':kind,'key':'Home','windowsVirtualKeyCode':36})
-        for _ in range(index):
-            for kind in ('keyDown','keyUp'):g.browser.call('Input.dispatchKeyEvent',{'type':kind,'key':'ArrowDown','windowsVirtualKeyCode':40})
-        for kind in ('keyDown','keyUp'):g.browser.call('Input.dispatchKeyEvent',{'type':kind,'key':'Enter','windowsVirtualKeyCode':13})
-        assert g.browser.evaluate('document.querySelector("#ees-input-proposal-model").value')=='c3-synthetic-model'
-    g.click('#ees-work-dialog [data-dialog-confirm]');g.wait('document.querySelector("[data-action=apply_input_proposal]")')
+    assert not g.browser.evaluate('!!document.querySelector("[data-action=propose_inputs],#ees-input-proposal-prompt,#ees-input-proposal-model")')
+    g.provider.reference=g.browser.evaluate('window.__eesNativeWorkV1.captureReference()');g.provider.mode='inputs'
+    assert g.provider.reference['run_id']==run_id and g.provider.reference['job_id']==job['id']
+    g.type('#chat-input','개발용 자료 메모를 제안해 줘. 저장하지 마.');g.click('#send-message-button')
+    g.wait('document.querySelector("#chat-container")?.innerText.includes("중앙 입력 제안은 검토 전이며 저장하지 않았습니다")',20000)
+    g.wait('document.querySelector(".ew-input-proposal-bar [data-action=apply_input_proposal]")')
     assert len(g.provider.input_proposals)==1
+    assert g.provider.calls[-1]['mode']=='inputs' and g.provider.calls[-1]['arguments']['proposal_kind']=='inputs',g.provider.calls
     assert g.api('/api/ees-work/workspace?run_id='+run_id)['run']==before
     assert g.browser.evaluate('document.querySelector("[data-work-input][name=note]").value')==''
+    assert g.browser.evaluate('document.querySelector(".ew-input-proposal-status")?.textContent')=='업무 도우미 제안 · 반영 전'
+    assert g.browser.evaluate('document.querySelector(".ew-input-proposed[data-proposal-field=note] .ew-input-proposal-value")?.textContent.includes("AI가 제안한 첫 입력")')
+    assert not g.browser.evaluate('!!document.querySelector(".ew-input-proposal pre")')
+    input_chat=g.api('/api/v1/chats/'+chat_id)['chat']
+    recorded_inputs=unescape(json.dumps(input_chat,ensure_ascii=False).replace('\\"','"'))
+    assert 'ees_workflow_propose' in recorded_inputs and re.search(r'"proposal_kind"\s*:\s*"inputs"',recorded_inputs),'Native input proposal tool arguments must be preserved in chat history'
     g.capture('input-proposal-before-human')
-    g.click('[data-action=apply_input_proposal]')
+    g.click('.ew-input-proposal-bar [data-action=apply_input_proposal]')
     g.wait('document.querySelector("[data-work-input][name=note]")?.value === "AI가 제안한 첫 입력"')
+    assert g.browser.evaluate('document.querySelector(".ew-input-proposal-applied")?.textContent.startsWith("반영됨 · ")')
     assert g.api('/api/ees-work/workspace?run_id='+run_id)['run']==before
     g.click('[data-action=save_inputs]');g.wait('!document.querySelector("[data-action=save_inputs]")?.disabled')
     saved=g.api('/api/ees-work/workspace?run_id='+run_id)['run']
     assert saved['inputs']=={'note':'AI가 제안한 첫 입력'} and saved['attempts']==[]
     g.capture('input-proposal-human-saved-not-executed')
-    g.record('physical input suggestion preview apply then separate save',run_id=run_id,proposal_count=1,attempts=0)
+    g.record('physical central input suggestion preview apply then separate save',run_id=run_id,proposal_count=1,attempts=0,native_tool_history_saved=True)
+    g.provider.mode='plain'
     g.click('[data-action=confirm]');g.click('#ees-work-dialog [data-dialog-confirm]')
     g.wait('document.querySelector("#ees-work-panel .ew-status[data-status=completed]")')
     first=g.api('/api/ees-work/workspace?run_id='+run_id)['run'];assert len(first['attempts'])==1
