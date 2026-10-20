@@ -42,6 +42,8 @@ class MotionNativeTests(IntegratedNativeCase):
           window.__c3?.stop();
           const evidence={label:""" + json.dumps(label) + """,frames:[],events:[],inputs:[]};
           let active=true;
+          const identify=element=>({tag:element?.tagName||'',id:element?.id||'',
+            action:element?.dataset?.action||element?.dataset?.authorAction||''});
           const snapshot=element=>{const s=getComputedStyle(element),r=element.getBoundingClientRect();
             return {kind:element.dataset.eesMotionKind,state:element.dataset.eesMotion||'',
               id:element.id,opacity:Number(s.opacity),transform:s.transform,width:r.width,
@@ -51,6 +53,7 @@ class MotionNativeTests(IntegratedNativeCase):
               modal:element.matches(':modal')};};
           const sample=()=>{if(!active)return;const nodes=[...document.querySelectorAll('[data-ees-motion-kind]')];
             evidence.frames.push({t:performance.now(),nodes:nodes.map(snapshot),
+              focus:identify(document.activeElement),
               scopeCount:document.querySelectorAll('[data-scope-dropdown]').length,
               dialogCount:document.querySelectorAll('#ees-work-dialog').length,
               chatWidth:document.querySelector('.ees-chat-region')?.getBoundingClientRect().width,
@@ -58,10 +61,13 @@ class MotionNativeTests(IntegratedNativeCase):
             requestAnimationFrame(sample);};
           const animation=event=>{if(event.target.matches('[data-ees-motion-kind]'))
             evidence.events.push({t:performance.now(),type:event.type,...snapshot(event.target)});};
-          const input=event=>evidence.inputs.push({type:event.type,key:event.key||'',trusted:event.isTrusted,
+          const input=event=>{const row={type:event.type,key:event.key||'',trusted:event.isTrusted,
             t:performance.now(),opening:!!document.querySelector('[data-ees-motion=opening]'),
             closing:!!document.querySelector('[data-ees-motion=closing]'),
-            composer:!!event.target.closest?.('#chat-input')});
+            composer:!!event.target.closest?.('#chat-input'),target:identify(event.target),
+            defaultPreventedAtCapture:event.defaultPrevented,eventPhaseAtCapture:event.eventPhase};
+            evidence.inputs.push(row);queueMicrotask(()=>{row.defaultPreventedAfter=event.defaultPrevented;
+              row.focusAfter=identify(document.activeElement);});};
           for(const name of ['animationstart','animationend','animationcancel'])document.addEventListener(name,animation,true);
           for(const name of ['keydown','pointerdown'])document.addEventListener(name,input,true);
           const mutations=new MutationObserver(records=>{for(const record of records){

@@ -1831,7 +1831,7 @@ new file mode 100644
 index 0000000..d55b5f0b
 --- /dev/null
 +++ b/src/lib/components/ees/EesShell.svelte
-@@ -0,0 +1,492 @@
+@@ -0,0 +1,499 @@
 +<script lang="ts">
 +	import { getContext, onMount, tick } from 'svelte';
 +	import { get } from 'svelte/store';
@@ -1912,9 +1912,10 @@ index 0000000..d55b5f0b
 +		if (open === previousPanelOpen) return;
 +		previousPanelOpen = open;
 +		if (open) {
++			const reopening = panelClosing;
 +			panelClosing = false;
 +			// Attached layout changes immediately; only its contents fade in.
-+			tick().then(() => {
++			const enter = () => {
 +				if (!mounted || !panelOpen || !panelRegion || !panel) return;
 +				if (panelOverlay) {
 +					motion?.open(panelRegion);
@@ -1926,7 +1927,9 @@ index 0000000..d55b5f0b
 +				}
 +				panelRegion.inert = false;
 +				panelRegion.removeAttribute('aria-hidden');
-+			});
++			};
++			// A retained exit must stop before Svelte makes the panel interactive.
++			if (reopening) enter(); else tick().then(enter);
 +		} else if (overlay && !nativeRoute && motion) {
 +			panelClosing = true;
 +			panelClose = Promise.all([motion.close(panelRegion), motion.close(panelBackdrop)]).then((results) => {
@@ -1951,9 +1954,12 @@ index 0000000..d55b5f0b
 +		tick().then(eesSync);
 +	}
 +	function panelKeydown(event: KeyboardEvent) {
-+		// Nested menus/dialogs consume Escape before this window bubble handler.
++		// Own Escape before Native's document-level CLOSE_MODAL shortcut.
++		// Scope menus handle their key at document; other nested surfaces consume it locally.
++		if ((event.target as Element)?.closest?.('dialog, [role="dialog"], [role="menu"], [data-scope-dropdown], [data-scope-trigger][aria-expanded="true"]')) return;
 +		if (event.key !== 'Escape' || event.defaultPrevented || !panelOpen || !panelOverlay || nativeRoute || $showSettings) return;
 +		event.preventDefault();
++		event.stopPropagation();
 +		eesAction({ action: 'close_panel' });
 +	}
 +	function clearPrivateDrafts() {
@@ -2132,11 +2138,12 @@ index 0000000..d55b5f0b
 +	});
 +</script>
 +
-+<svelte:window bind:innerWidth={width} on:keydown={panelKeydown} />
++<svelte:window bind:innerWidth={width} />
 +<div
 +	data-ees-source-shell
 +	data-ees-route={nativeRoute ? 'native' : 'chat'}
 +	class="ees-source-shell"
++	on:keydown={panelKeydown}
 +	on:pointerdown={(event) => window.__eesNativeWorkV1?.dismissHelp?.(event)}
 +>
 +	<Sidebar />
@@ -3517,7 +3524,7 @@ diff --git a/src/lib/components/ees/EesScopeSelect.svelte b/src/lib/components/e
 new file mode 100644
 --- /dev/null
 +++ b/src/lib/components/ees/EesScopeSelect.svelte
-@@ -0,0 +1,146 @@
+@@ -0,0 +1,161 @@
 +<script lang="ts">
 +	import { getContext, onDestroy, tick } from 'svelte';
 +	import { eesAction } from './state';
@@ -3536,6 +3543,7 @@ new file mode 100644
 +	let dropdown: HTMLDivElement;
 +	let shown = false, scopeVersion = 0;
 +	let restoreOnClose = true;
++	let selectionFocus: Element | null = null;
 +	let search: HTMLInputElement;
 +	let query = '';
 +	let previousBoundary = '';
@@ -3551,24 +3559,36 @@ new file mode 100644
 +		previousBoundary = boundary;
 +		if (open) close(false);
 +		// A changed permission/navigation boundary must retire stale choices immediately.
-+		if (shown) {
-+			scopeVersion++;
-+			window.__eesMotionV1?.finish(dropdown, { restoreFocus: false });
-+			shown = false;
-+			query = '';
-+		}
++		if (shown) retireScope();
++	}
++	function retireScope() {
++		const selectedFocus = selectionFocus;
++		selectionFocus = null;
++		scopeVersion++;
++		window.__eesMotionV1?.finish(dropdown, { restoreFocus: false });
++		window.__eesMotionV1?.cancel(dropdown);
++		shown = false;
++		query = '';
++		const active = document.activeElement;
++		// An option's own selection changes the boundary, but still returns focus.
++		// Permission/navigation updates have no selection focus to restore.
++		if (selectedFocus && (!active || active === document.body || active === document.documentElement || active === selectedFocus || dropdown?.contains(active))) trigger?.focus({ preventScroll: true });
 +	}
 +	$: syncScope(open, opened);
 +	function syncScope(wantsOpen: boolean, activeKind: string) {
 +		const version = ++scopeVersion;
 +		if (wantsOpen) {
++			const retained = shown && dropdown;
 +			shown = true;
-+			tick().then(() => {
++			selectionFocus = null;
++			const enter = () => {
 +				if (version !== scopeVersion || !open || !dropdown) return;
 +				window.__eesMotionV1?.open(dropdown);
 +				dropdown.inert = false;
 +				dropdown.removeAttribute('aria-hidden');
-+			});
++			};
++			// Retire the closing state before Svelte restores interaction bindings.
++			if (retained) enter(); else tick().then(enter);
 +			return;
 +		}
 +		if (!shown) return;
@@ -3578,6 +3598,7 @@ new file mode 100644
 +			if (version !== scopeVersion) return;
 +			shown = false;
 +			query = '';
++			selectionFocus = null;
 +		};
 +		const motion = window.__eesMotionV1;
 +		// Only one scope menu exists, including when a sibling opens during closing.
@@ -3615,6 +3636,7 @@ new file mode 100644
 +	}
 +	function choose(item) {
 +		if (item.allowed === false) return;
++		selectionFocus = document.activeElement;
 +		close();
 +		eesAction(kind === 'factory' ? { action: 'choose_factory', factoryId: item.id } : { action: 'choose_system', systemId: item.id });
 +	}

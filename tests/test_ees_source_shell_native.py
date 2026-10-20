@@ -206,7 +206,9 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.wait('!document.querySelector("[data-scope-dropdown]")')
         self.assertEqual(self.read(trigger, 'ariaExpanded'), 'false')
         if focus:
-            self.assertTrue(self.browser.evaluate('document.activeElement === document.querySelector(' + json.dumps(trigger) + ')'))
+            observed = self.browser.evaluate('(()=>{const active=document.activeElement;return {restored:active===document.querySelector(' +
+                json.dumps(trigger) + '),tag:active?.tagName,id:active?.id,action:active?.dataset?.action};})()')
+            self.assertTrue(observed['restored'], observed)
 
     def scope_activate_key(self, key):
         # CDP keyDown without text emits no keypress. Native buttons activate

@@ -153,3 +153,8 @@ test('rapid dialog replacement reverses current visual without duplicate windows
  const second=run(h.context,'workUI.dialog({title:"second",confirmLabel:"확인"})'),current=h.overlays.children.find(el=>el.id==='ees-work-dialog');assert.notEqual(current,old);assert.equal(old.isConnected,false);assert.equal(h.overlays.children.filter(el=>el.id==='ees-work-dialog').length,1);assert.equal(current.style['--ees-motion-from-opacity'],'.38');assert.equal(h.document.activeElement.id,'ees-work-dialog-body');
  current.eesClose();assert.equal(await second,false);run(h.context,'workMotion.finish(document.querySelector("#ees-work-dialog"))');
 });
+
+test('dialog caller restores a repainted trigger even when its captured previous focus is connected body',async()=>{
+ const h=dom(),replacement=h.element('repainted-create');h.body.append(replacement);h.context.restoreCreate=()=>replacement.focus();
+ const pending=run(h.context,'workUI.dialog({title:"새 업무 절차",restoreFocus:restoreCreate})');const dialog=h.overlays.children.find(el=>el.id==='ees-work-dialog');dialog.eesClose();assert.equal(await pending,false);assert.equal(h.document.activeElement,replacement);
+});

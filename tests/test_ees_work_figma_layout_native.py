@@ -156,6 +156,13 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         hover('.ew-author-list>button', 'rgb(243, 243, 245)')
         observed['cardHover'] = background('.ew-author-list>button')
         self.assertEqual(observed['cardHover'], 'rgb(243, 243, 245)')
+        observed['cardMotion'] = self.browser.evaluate("(()=>{const e=document.querySelector('.ew-author-list>button'),s=getComputedStyle(e);return {focusVisible:e.matches(':focus-visible'),property:s.transitionProperty,duration:s.transitionDuration,easing:s.transitionTimingFunction};})()")
+        self.assertFalse(observed['cardMotion']['focusVisible'])
+        self.assertEqual(observed['cardMotion']['property'].split(', '),
+                         ['background-color', 'border-color', 'color', 'box-shadow'])
+        self.assertEqual(observed['cardMotion']['duration'].split(', '), ['0.12s'] * 4)
+        self.assertEqual(observed['cardMotion']['easing'],
+                         ', '.join(['cubic-bezier(0.2, 0.8, 0.2, 1)'] * 4))
         hover('#ees-work-designer>header .ew-icon-button', 'rgb(236, 236, 239)')
         observed['headerHover'] = background('#ees-work-designer>header .ew-icon-button')
         self.assertEqual(observed['headerHover'], 'rgb(236, 236, 239)')

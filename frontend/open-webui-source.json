@@ -25,8 +25,8 @@
     "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
     "src/lib/components/ees/EesNavigation.svelte": "ef90f84e0ee213b3ba65c860f1a2c4e8743db7a34d0dcbcfb9d4f3b038b66f54",
     "src/lib/components/ees/EesProcedureIntro.svelte": "8e9e92baa499c6acf66f73643ce17e8b047a6d932844cc3158a252d23718a9a5",
-    "src/lib/components/ees/EesScopeSelect.svelte": "5b670f593772593a439ab4893487ea462010c754701f1cab02204e206c4f5190",
-    "src/lib/components/ees/EesShell.svelte": "4f257264575dcec8d5deed778ef1d9380fd93c87d0a7157f1bdda06696896ef1",
+    "src/lib/components/ees/EesScopeSelect.svelte": "cf81632ce8bb15715464b1d0477e07ec93ea2f997efe94d3d8ce39eede9c1767",
+    "src/lib/components/ees/EesShell.svelte": "6f83fd9ba5f2b10062acbfde648e8c58895ce5c8adab0a7ca73356292b3e795e",
     "src/lib/components/ees/icons/5bc95.svg": "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7",
     "src/lib/components/ees/state.ts": "560ef1a21f46fc2a1beabf3012a74933002af586c507ac42bb144f40fe305a43",
     "src/lib/components/layout/Sidebar.svelte": "9d08f54fdaa101ef2cf06c159e5defe421b366c695f26a15c4045bf3ba556096",
@@ -44,7 +44,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "eab91aaca83e7f90762644290e6a5782e975f37d6b5f69724cd3be538ca80d8f"
+      "sha256": "4b07c366faaa562876f50765df847afa1b602f338639e89c65ad0557b7090d47"
     }
   ],
   "pyodide_files": {

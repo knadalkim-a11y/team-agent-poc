@@ -210,7 +210,7 @@ const workUI = (() => {
         const motion=workMotion.close(element,{release:()=>{if(element.open){const wasInert=previous?.inert;if(previous)previous.inert=true;try{nativeClose();}finally{if(previous)previous.inert=wasInert;}}},cleanup:()=>{
           if(backdrop){workMotion.finish(backdrop,{restoreFocus:false});backdrop.remove();}
           element.remove();if(activeDialog===element)activeDialog=null;
-        },restoreFocus:()=>{if(previous?.isConnected)previous.focus({preventScroll:true});else restoreFocus?.();}});
+        },restoreFocus:()=>{if(restoreFocus)restoreFocus();else if(previous?.isConnected)previous.focus({preventScroll:true});}});
         // The decision is immediate; animation never delays save/publish/run.
         resolve(accepted);return motion;
       };
