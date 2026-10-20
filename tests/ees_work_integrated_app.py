@@ -331,9 +331,10 @@ def integrated_flow(gate):
     assert g.browser.evaluate('!document.querySelector(\'[data-author-action="publish"]\').disabled')
     g.capture('figma-b23-publish-review')
     g.click('[data-author-action="publish"]')
-    g.wait("document.activeElement?.matches('#ees-work-dialog [data-dialog-cancel]')")
+    # C3 puts initial focus on the body when this confirmation has no inputs.
+    g.wait("document.activeElement?.id === 'ees-work-dialog-body'")
     assert g.browser.evaluate("(()=>{const r=document.querySelector('#ees-work-dialog').getBoundingClientRect();return Math.abs(r.x+r.width/2-innerWidth/2)<2&&Math.abs(r.y+r.height/2-innerHeight/2)<2})()"), 'confirmation dialog must be centered'
-    g.capture('publish-confirmation-cancel-focus')
+    g.capture('publish-confirmation-body-focus')
     g.click('#ees-work-dialog [data-dialog-confirm]')
     g.wait('document.querySelector("#ees-work-designer")?.innerText.includes("게시 v1")')
     published=g.api('/api/ees-work/workspace?workflow_id='+identifier)['workflow']
@@ -362,7 +363,7 @@ def integrated_flow(gate):
     q1_native_geometry(g,'figma-q1-1366x768-human-action',require_action=True)
     g.browser.call('Emulation.setDeviceMetricsOverride',{'width':1920,'height':1080,'deviceScaleFactor':1,'mobile':False})
     g.click('[data-action="confirm"]')
-    g.wait("document.activeElement?.matches('#ees-work-dialog [data-dialog-cancel]')")
+    g.wait("document.activeElement?.id === 'ees-work-dialog-body'")
     g.browser.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Escape','windowsVirtualKeyCode':27})
     g.browser.call('Input.dispatchKeyEvent',{'type':'keyUp','key':'Escape','windowsVirtualKeyCode':27})
     assert g.api('/api/ees-work/workspace?run_id='+run_id)['run']['jobs'][job_id]['status']!='completed'
@@ -780,7 +781,7 @@ def figma_delta_flow(g):
     g.click('[data-action="add_list_item"]');g.type('#ees-list-add-id','SYNTHETIC-MANUAL-2');g.type('#ees-list-add-name','합성 수동 검토 항목')
     g.click('#ees-work-dialog [data-dialog-confirm]');assert len(run_state()['attempts'])==2
     assets('figma-a6-list',{'f1e53.svg':13,'b456d.svg':13});g.capture('figma-a6-list-local-selection')
-    g.click('[data-action="confirm_list"]');g.wait("document.activeElement?.matches('#ees-work-dialog [data-dialog-cancel]')")
+    g.click('[data-action="confirm_list"]');g.wait("document.activeElement?.id === 'ees-list-confirm-reason'")
     g.type('#ees-list-confirm-reason','합성 검토자가 원본 목록과 추가 항목을 확인했습니다.');g.click('#ees-work-dialog [data-dialog-confirm]')
     g.wait('document.querySelector(".ew-list-confirm")?.innerText.includes("사람 확정 기록 있음")')
     confirmed=run_state();assert confirmed['jobs']['qa-list']['status']=='completed'

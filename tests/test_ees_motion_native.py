@@ -59,7 +59,9 @@ class MotionNativeTests(IntegratedNativeCase):
           const animation=event=>{if(event.target.matches('[data-ees-motion-kind]'))
             evidence.events.push({t:performance.now(),type:event.type,...snapshot(event.target)});};
           const input=event=>evidence.inputs.push({type:event.type,key:event.key||'',trusted:event.isTrusted,
-            t:performance.now(),opening:!!document.querySelector('[data-ees-motion=opening]')});
+            t:performance.now(),opening:!!document.querySelector('[data-ees-motion=opening]'),
+            closing:!!document.querySelector('[data-ees-motion=closing]'),
+            composer:!!event.target.closest?.('#chat-input')});
           for(const name of ['animationstart','animationend','animationcancel'])document.addEventListener(name,animation,true);
           for(const name of ['keydown','pointerdown'])document.addEventListener(name,input,true);
           const mutations=new MutationObserver(records=>{for(const record of records){
@@ -170,6 +172,9 @@ class MotionNativeTests(IntegratedNativeCase):
         self.wait("!document.querySelector('[data-ees-motion=opening]')")
         self.click('#ees-work-site-trigger')
         self.wait("document.querySelector('[data-scope-dropdown=factory]') && document.querySelectorAll('[data-scope-dropdown]').length===1")
+        # The first system Escape intentionally interrupts entry. Also close a
+        # fully entered surface so intermediate exit opacity is observable.
+        self.wait("!document.querySelector('[data-ees-motion=opening]')")
         self.key('Escape', 27)
         self.wait("!document.querySelector('[data-scope-dropdown]')")
         self.wait("document.activeElement?.id === 'ees-work-site-trigger'")
@@ -220,9 +225,17 @@ class MotionNativeTests(IntegratedNativeCase):
         self.key('Escape', 27)
         self.wait("!document.querySelector('[data-scope-dropdown]')")
         self.assertFalse(self.read('.ees-panel-region', 'hidden'), 'Menu Escape also closed its underlying panel')
+        # Exit releases hit testing immediately. A real new focus choice must
+        # survive completion instead of the old close task stealing it back.
+        self.click('#ees-work-panel [data-action=close_panel]')
+        self.click_now('#chat-input')
+        self.wait("document.querySelector('.ees-panel-region').hidden")
+        self.assertTrue(self.browser.evaluate("document.activeElement === document.querySelector('#chat-input')"))
         evidence = self.finish_evidence('c3-overlay-close-reopen')
         self.assert_effect(evidence, 'panel-overlay', 'opening')
         self.assert_effect(evidence, 'panel-overlay', 'closing')
+        self.assertTrue(any(row['composer'] and row['closing'] for row in evidence['inputs']),
+                        'The composer was not actually clicked during panel exit')
         self.assertTrue(all(abs(row['chatWidth'] - 944) < .02 for row in evidence['frames']),
                         'Overlay animation changed the conversation layout')
 
@@ -230,8 +243,17 @@ class MotionNativeTests(IntegratedNativeCase):
         self.fill('#chat-input', '확인 창과 도움말 왕복 후 보존할 문장')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.click('[data-action=mode][data-mode=author]')
-        self.viewport(1000, 768)
         self.observe('dialog-help')
+        # Attached mode isolates the modal blocker from the narrow panel's
+        # independent backdrop, then the remaining checks use a nested panel.
+        self.viewport(1920, 1080)
+        self.click('[data-author-action=create]')
+        self.wait("document.querySelector('#ees-work-dialog')?.open")
+        self.key('Escape', 27)
+        self.click_now('#chat-input')
+        self.wait("!document.querySelector('#ees-work-dialog')")
+        self.assertTrue(self.browser.evaluate("document.activeElement === document.querySelector('#chat-input')"))
+        self.viewport(1000, 768)
         self.click('[data-author-action=create]')
         self.wait("document.querySelector('#ees-work-dialog')?.open")
         self.key('Escape', 27)
@@ -252,11 +274,14 @@ class MotionNativeTests(IntegratedNativeCase):
         self.click('[data-author-action=tool_example][data-id=jira-query]')
         self.click('[data-author-action=help][data-id=read_tool]')
         self.wait("document.querySelector('#ees-work-help')")
+        self.wait("!document.querySelector('#ees-work-help[data-ees-motion=opening]')")
         self.key('Escape', 27)
         self.wait("!document.querySelector('#ees-work-help')")
         self.assertFalse(self.read('.ees-panel-region', 'hidden'), 'Help Escape also closed its underlying panel')
         self.wait("document.activeElement?.matches('[data-author-action=help][data-id=read_tool]')")
         evidence = self.finish_evidence('c3-dialog-help-focus')
+        self.assertTrue(any(row['composer'] and row['closing'] for row in evidence['inputs']),
+                        'The composer was not actually clicked during dialog exit')
         for kind in ('dialog', 'help'):
             self.assert_effect(evidence, kind, 'opening')
             self.assert_effect(evidence, kind, 'closing')

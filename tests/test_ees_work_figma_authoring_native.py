@@ -1341,7 +1341,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         source_term = next(item for item in self.state()['help']['terms'] if item['id'] == 'read_tool')
         self.assertEqual(self.text('#ees-work-help .ew-help-summary'), source_term['summary'])
         self.assertIn(source_term['example'], self.text('#ees-work-help .ew-help-example'))
-        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-help-close]')"))
+        # C3 reads the help content first; the close control remains keyboard reachable.
+        self.assertTrue(self.browser.evaluate("document.activeElement?.id === 'ees-work-help-body'"))
         self.screenshot('easy-tools-help-keyboard-open')
         # Normal workspace refresh replaces authoring controls. An open help
         # popover must keep its content and return focus to the current button.
@@ -1349,7 +1350,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('#ees-work-help')")
         self.assertEqual(self.text('#ees-work-help .ew-help-summary'), source_term['summary'])
         self.key('Escape', 27)
-        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-help')"))
+        self.wait("!document.querySelector('#ees-work-help')")
         focus = self.browser.evaluate("(()=>{const e=document.activeElement,s=getComputedStyle(e);return {trigger:e.matches('[data-author-action=help][data-id=read_tool]'),visible:e.matches(':focus-visible'),style:s.outlineStyle,width:parseFloat(s.outlineWidth)};})()")
         self.assertTrue(focus['trigger'], focus)
         self.assertTrue(focus['visible'], focus)
@@ -1385,6 +1386,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.text('#ees-work-help-title'), '결과 형식')
         self.screenshot('easy-tools-help-advanced-refresh')
         self.key('Escape', 27)
+        self.wait("!document.querySelector('#ees-work-help')")
         advanced_focus = self.browser.evaluate("(()=>{const e=document.activeElement;return {trigger:e.matches('[data-author-action=help][data-id=output_schema]'),visible:e.getClientRects().length>0,open:document.querySelector('.ew-tool-advanced')?.open};})()")
         self.assertEqual(advanced_focus, {'trigger': True, 'visible': True, 'open': True})
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-help')"))
