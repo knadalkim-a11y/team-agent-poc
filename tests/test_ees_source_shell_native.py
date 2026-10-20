@@ -562,6 +562,13 @@ class SourceShellNativeTests(IntegratedNativeCase):
             returning = suffix == 'list' and return_from is not None
             if returning:
                 frame_monitor.begin_native_return(self, step_label, selector=selector, native=return_from, destination='tools', previous='procedures')
+                # The DOM can be ready between animation frames, after three
+                # loading samples already satisfied collect(). Keep the return
+                # boundary open until its destination is actually observed,
+                # using the same step timeout as the DOM readiness condition.
+                condition += (' && window.__eesSourceFrameEvidence.samples.some(sample=>'
+                              'sample.nativeReturnLabel===' + json.dumps(step_label) +
+                              " && sample.rightPanels.includes('tools') && sample.menuCurrent.length===1 && sample.menuCurrent[0].key==='tools')")
             if hasattr(self.server, 'navigation_reads'):
                 self.delayed_step(step_label, selector, condition, paths=())
             else:

@@ -1,0 +1,406 @@
+{
+  "scope": "built Native UI; synthetic session and data",
+  "path": "/c/existing-chat",
+  "ready": "complete",
+  "fonts": "loaded",
+  "nativeMount": {
+    "chatPane": true,
+    "sidebarSearch": true,
+    "sidebarToggle": false
+  },
+  "sourceShell": {
+    "root": {
+      "x": 0,
+      "y": 0,
+      "bottom": 1080,
+      "width": 1920,
+      "height": 1080,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "relative",
+      "flex": "0 1 auto",
+      "font": "16px / 24px -apple-system, BlinkMacSystemFont, Inter, Vazirmatn, ui-sans-serif, system-ui, \"Segoe UI\", Roboto, Ubuntu, Cantarell, \"Noto Sans\", sans-serif, \"Helvetica Neue\", Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "maskImage": "none",
+      "background": "rgb(255, 255, 255)"
+    },
+    "sidebar": {
+      "x": 0,
+      "y": 0,
+      "bottom": 1080,
+      "width": 256,
+      "height": 1080,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "relative",
+      "flex": "0 0 auto",
+      "font": "14px / 21px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+      "maskImage": "none",
+      "background": "rgb(250, 250, 250)"
+    },
+    "panelSlot": {
+      "x": 1341,
+      "y": 0,
+      "bottom": 1080,
+      "width": 579,
+      "height": 1080,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "relative",
+      "flex": "0 0 480px",
+      "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+      "maskImage": "none",
+      "background": "rgb(243, 243, 245)"
+    },
+    "persistentChat": true,
+    "startupGate": null
+  },
+  "viewport": [
+    1920,
+    1080
+  ],
+  "active": {
+    "tag": "BODY",
+    "id": ""
+  },
+  "panel": {
+    "text": "업무 절차\nEMS\n업무 절차 목록\n신규 공장 횡전개\n초안\n\nEMS · 게시본 없음\n\n요약\n구조\n실행 방식\n판정 규칙\n게시 기록\n실행 방식\n주기\n수시\n비상\n\n일정 규칙에 따라 회차가 열리고 닫힙니다. 수시는 사람이 대상을 정해 시작하고, 비상은 장애를 인지한 사람이 바로 시작합니다.\n\n시작할 때 받는 값\n\n사람이 대상 공장 등 이번 진행 건에 필요한 값을 정해 시작합니다. 입력 항목은 절차 작성자가 직접 선언합니다.\n\n값 이름\t형식\t쓰이는 곳\t저장 범위\t편집\n선언한 값이 없습니다.\n시작 입력 추가\n초안 r1 · 저장됨\n게시 전 확인\n초안 저장",
+    "html": "<aside id=\"ees-work-panel\" tabindex=\"-1\" data-ees-work=\"\" data-ees-source-slot=\"\" aria-label=\"업무 패널\" data-ees-mode=\"author\" aria-busy=\"false\"><div id=\"ees-work-authoring-panel\" class=\"ew-scroll\"><section class=\"ew-author \" id=\"ees-work-designer\" data-ees-work=\"\" data-author-tab=\"schedule\"><header><strong>업무 절차</strong><small>EMS</small><button type=\"button\" data-action=\"close_panel\" aria-label=\"업무 패널 닫기\" class=\"ew-icon-button\"><img class=\"ew-icon\" src=\"/_ees14/v4/7bb4a.svg\" alt=\"\" aria-hidden=\"true\"></button></header><div class=\"ew-author-scroll\"><button type=\"button\" data-author-action=\"list\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees14/v4/9acc8.svg\" alt=\"\" aria-hidden=\"true\">업무 절차 목록</button><div class=\"ew-author-definition-head\"><div class=\"ew-author-heading\"><h2>신규 공장 횡전개</h2><span class=\"ew-author-tag\" data-state=\"draft\" title=\"아직 게시하지 않은 편집본\">초안</span><details class=\"ew-procedure-menu\"><summary aria-label=\"절차 메뉴\"><img class=\"ew-icon\" src=\"/_ees14/v4/cb8e2.svg\" alt=\"\" aria-hidden=\"true\"></summary><div><button type=\"button\" data-author-action=\"edit_workflow\" class=\"ew-author-link\">절차 정보·분류 수정</button><button type=\"button\" data-author-action=\"copy\" class=\"ew-author-link\">다른 이름으로 저장</button></div></details></div><p class=\"ew-author-muted\">EMS · 게시본 없음</p></div><nav class=\"ew-author-tabs\" aria-label=\"절차 편집\"><button type=\"button\" data-author-action=\"tab\" data-tab=\"summary\" aria-selected=\"false\">요약</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"structure\" aria-selected=\"false\">구조</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"schedule\" aria-selected=\"true\">실행 방식</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"rules\" aria-selected=\"false\">판정 규칙</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"history\" aria-selected=\"false\">게시 기록</button></nav><form id=\"ew-author-schedule\" class=\"ew-schedule-card\"><section class=\"ew-schedule-section\"><h3>실행 방식</h3><input type=\"hidden\" name=\"run_mode\" value=\"on_demand\"><div class=\"ew-schedule-modes\" role=\"group\" aria-label=\"진행 건 시작 방식\"><button type=\"button\" data-author-action=\"run_mode\" data-id=\"periodic\" aria-pressed=\"false\" data-mutation=\"\">주기</button><button type=\"button\" data-author-action=\"run_mode\" data-id=\"on_demand\" aria-pressed=\"true\" data-mutation=\"\">수시</button><button type=\"button\" data-author-action=\"run_mode\" data-id=\"emergency\" aria-pressed=\"false\" data-mutation=\"\">비상</button></div><p class=\"ew-schedule-note\">일정 규칙에 따라 회차가 열리고 닫힙니다. 수시는 사람이 대상을 정해 시작하고, 비상은 장애를 인지한 사람이 바로 시작합니다.</p></section><section class=\"ew-schedule-section\"><h3>시작할 때 받는 값</h3><p class=\"ew-schedule-note\">사람이 대상 공장 등 이번 진행 건에 필요한 값을 정해 시작합니다. 입력 항목은 절차 작성자가 직접 선언합니다.</p><table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody><tr><td colspan=\"5\">선언한 값이 없습니다.</td></tr></tbody></table><button type=\"button\" data-author-action=\"start_input_add\" class=\"ew-author-link\" data-mutation=\"\"><img class=\"ew-icon\" src=\"/_ees14/v4/7d31f.svg\" alt=\"\" aria-hidden=\"true\">시작 입력 추가</button></section></form>\n      </div><footer><small data-author-status=\"\">초안 r1 · 저장됨</small><button type=\"button\" data-author-action=\"validate\" data-mutation=\"\">게시 전 확인</button><button type=\"button\" data-author-action=\"save\" data-mutation=\"\" class=\"ew-primary\">초안 저장</button></footer></section></div></aside>"
+  },
+  "authoring": {
+    "text": "업무 절차\nEMS\n업무 절차 목록\n신규 공장 횡전개\n초안\n\nEMS · 게시본 없음\n\n요약\n구조\n실행 방식\n판정 규칙\n게시 기록\n실행 방식\n주기\n수시\n비상\n\n일정 규칙에 따라 회차가 열리고 닫힙니다. 수시는 사람이 대상을 정해 시작하고, 비상은 장애를 인지한 사람이 바로 시작합니다.\n\n시작할 때 받는 값\n\n사람이 대상 공장 등 이번 진행 건에 필요한 값을 정해 시작합니다. 입력 항목은 절차 작성자가 직접 선언합니다.\n\n값 이름\t형식\t쓰이는 곳\t저장 범위\t편집\n선언한 값이 없습니다.\n시작 입력 추가\n초안 r1 · 저장됨\n게시 전 확인\n초안 저장",
+    "html": "<section class=\"ew-author \" id=\"ees-work-designer\" data-ees-work=\"\" data-author-tab=\"schedule\"><header><strong>업무 절차</strong><small>EMS</small><button type=\"button\" data-action=\"close_panel\" aria-label=\"업무 패널 닫기\" class=\"ew-icon-button\"><img class=\"ew-icon\" src=\"/_ees14/v4/7bb4a.svg\" alt=\"\" aria-hidden=\"true\"></button></header><div class=\"ew-author-scroll\"><button type=\"button\" data-author-action=\"list\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees14/v4/9acc8.svg\" alt=\"\" aria-hidden=\"true\">업무 절차 목록</button><div class=\"ew-author-definition-head\"><div class=\"ew-author-heading\"><h2>신규 공장 횡전개</h2><span class=\"ew-author-tag\" data-state=\"draft\" title=\"아직 게시하지 않은 편집본\">초안</span><details class=\"ew-procedure-menu\"><summary aria-label=\"절차 메뉴\"><img class=\"ew-icon\" src=\"/_ees14/v4/cb8e2.svg\" alt=\"\" aria-hidden=\"true\"></summary><div><button type=\"button\" data-author-action=\"edit_workflow\" class=\"ew-author-link\">절차 정보·분류 수정</button><button type=\"button\" data-author-action=\"copy\" class=\"ew-author-link\">다른 이름으로 저장</button></div></details></div><p class=\"ew-author-muted\">EMS · 게시본 없음</p></div><nav class=\"ew-author-tabs\" aria-label=\"절차 편집\"><button type=\"button\" data-author-action=\"tab\" data-tab=\"summary\" aria-selected=\"false\">요약</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"structure\" aria-selected=\"false\">구조</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"schedule\" aria-selected=\"true\">실행 방식</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"rules\" aria-selected=\"false\">판정 규칙</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"history\" aria-selected=\"false\">게시 기록</button></nav><form id=\"ew-author-schedule\" class=\"ew-schedule-card\"><section class=\"ew-schedule-section\"><h3>실행 방식</h3><input type=\"hidden\" name=\"run_mode\" value=\"on_demand\"><div class=\"ew-schedule-modes\" role=\"group\" aria-label=\"진행 건 시작 방식\"><button type=\"button\" data-author-action=\"run_mode\" data-id=\"periodic\" aria-pressed=\"false\" data-mutation=\"\">주기</button><button type=\"button\" data-author-action=\"run_mode\" data-id=\"on_demand\" aria-pressed=\"true\" data-mutation=\"\">수시</button><button type=\"button\" data-author-action=\"run_mode\" data-id=\"emergency\" aria-pressed=\"false\" data-mutation=\"\">비상</button></div><p class=\"ew-schedule-note\">일정 규칙에 따라 회차가 열리고 닫힙니다. 수시는 사람이 대상을 정해 시작하고, 비상은 장애를 인지한 사람이 바로 시작합니다.</p></section><section class=\"ew-schedule-section\"><h3>시작할 때 받는 값</h3><p class=\"ew-schedule-note\">사람이 대상 공장 등 이번 진행 건에 필요한 값을 정해 시작합니다. 입력 항목은 절차 작성자가 직접 선언합니다.</p><table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody><tr><td colspan=\"5\">선언한 값이 없습니다.</td></tr></tbody></table><button type=\"button\" data-author-action=\"start_input_add\" class=\"ew-author-link\" data-mutation=\"\"><img class=\"ew-icon\" src=\"/_ees14/v4/7d31f.svg\" alt=\"\" aria-hidden=\"true\">시작 입력 추가</button></section></form>\n      </div><footer><small data-author-status=\"\">초안 r1 · 저장됨</small><button type=\"button\" data-author-action=\"validate\" data-mutation=\"\">게시 전 확인</button><button type=\"button\" data-author-action=\"save\" data-mutation=\"\" class=\"ew-primary\">초안 저장</button></footer></section>"
+  },
+  "nativeTheme": {
+    "modalSurface": null,
+    "selectedSettingsTab": null,
+    "valves": null,
+    "valveInput": null
+  },
+  "nativeMenu": {
+    "draftReady": true,
+    "settingsTabs": null,
+    "returnBar": null,
+    "workspace": null,
+    "workspaceNav": null,
+    "workspaceTabs": [],
+    "search": null,
+    "items": [
+      {
+        "text": "업무 절차4",
+        "button": {
+          "x": 8,
+          "y": 200,
+          "bottom": 236,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "500 14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgb(238, 243, 249)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 210,
+              "bottom": 226,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "500 14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "업무 절차",
+            "layout": {
+              "x": 42,
+              "y": 207,
+              "bottom": 229,
+              "width": 180.375,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "500 14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SMALL",
+            "text": "4",
+            "layout": {
+              "x": 232.375,
+              "y": 209,
+              "bottom": 227,
+              "width": 6.625,
+              "height": 18,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 1 auto",
+              "font": "12px / 18px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      },
+      {
+        "text": "도구10",
+        "button": {
+          "x": 8,
+          "y": 237,
+          "bottom": 273,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 247,
+              "bottom": 263,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "도구",
+            "layout": {
+              "x": 42,
+              "y": 244,
+              "bottom": 266,
+              "width": 173.75,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SMALL",
+            "text": "10",
+            "layout": {
+              "x": 225.75,
+              "y": 246,
+              "bottom": 264,
+              "width": 13.25,
+              "height": 18,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 1 auto",
+              "font": "12px / 18px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      },
+      {
+        "text": "공장·접근 범위",
+        "button": {
+          "x": 8,
+          "y": 309,
+          "bottom": 345,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 319,
+              "bottom": 335,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "공장·접근 범위",
+            "layout": {
+              "x": 42,
+              "y": 316,
+              "bottom": 338,
+              "width": 197,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      }
+    ],
+    "captions": [
+      {
+        "text": "업무 만들기",
+        "layout": {
+          "x": 8,
+          "y": 174,
+          "bottom": 200,
+          "width": 239,
+          "height": 26,
+          "display": "block",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "500 12px / 16px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "text": "관리자만",
+        "layout": {
+          "x": 8,
+          "y": 273,
+          "bottom": 309,
+          "width": 239,
+          "height": 36,
+          "display": "block",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "500 12px / 16px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      }
+    ]
+  },
+  "layout": {
+    "panel": {
+      "x": 1341,
+      "y": 0,
+      "width": 579,
+      "height": 1080,
+      "clientWidth": 579,
+      "scrollWidth": 579,
+      "clientHeight": 1080,
+      "scrollHeight": 1080,
+      "scrollTop": 0,
+      "overflowY": "visible",
+      "background": "rgb(243, 243, 245)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "0px",
+      "borderRadius": "0px",
+      "minHeight": "0px"
+    },
+    "scroll": {
+      "x": 1341,
+      "y": 48,
+      "width": 579,
+      "height": 973,
+      "clientWidth": 579,
+      "scrollWidth": 579,
+      "clientHeight": 973,
+      "scrollHeight": 973,
+      "scrollTop": 0,
+      "overflowY": "auto",
+      "background": "rgba(0, 0, 0, 0)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "0px",
+      "borderRadius": "0px",
+      "minHeight": "0px"
+    },
+    "radio": null,
+    "selected": null,
+    "unselected": null,
+    "name": null,
+    "footer": {
+      "x": 1341,
+      "y": 1021,
+      "width": 579,
+      "height": 59,
+      "clientWidth": 579,
+      "scrollWidth": 579,
+      "clientHeight": 58,
+      "scrollHeight": 58,
+      "scrollTop": 0,
+      "overflowY": "visible",
+      "background": "rgb(255, 255, 255)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "1px 0px 0px",
+      "borderRadius": "0px",
+      "minHeight": "auto"
+    },
+    "back": null,
+    "questionGroup": null,
+    "firstQuestion": null,
+    "cardGaps": []
+  },
+  "nativeDraft": {
+    "prompt": "",
+    "files": [],
+    "selectedToolIds": [],
+    "selectedSkillIds": [],
+    "selectedFilterIds": [],
+    "imageGenerationEnabled": false,
+    "webSearchEnabled": false,
+    "codeInterpreterEnabled": false
+  },
+  "nativeInput": {
+    "text": "\n",
+    "html": "<div contenteditable=\"true\" translate=\"no\" class=\"tiptap ProseMirror\" tabindex=\"0\" id=\"chat-input\" aria-label=\"업무를 물어보거나, 필요한 작업을 요청하세요\"><p data-placeholder=\"업무를 물어보거나, 필요한 작업을 요청하세요\" class=\"is-empty is-editor-empty\"><br class=\"ProseMirror-trailingBreak\"></p></div>"
+  },
+  "native_search": null
+}

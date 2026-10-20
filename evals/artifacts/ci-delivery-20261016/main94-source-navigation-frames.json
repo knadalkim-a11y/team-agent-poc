@@ -1,0 +1,5686 @@
+{
+  "started": 16.900000000023283,
+  "label": "admin-return",
+  "samples": [
+    {
+      "at": 77.40000000002328,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": false,
+      "menu": false,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": false,
+      "startupGate": null
+    },
+    {
+      "at": 82.20000000001164,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": false,
+      "menu": false,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": false,
+      "startupGate": null
+    },
+    {
+      "at": 86.30000000001746,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": false,
+      "menu": false,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": false,
+      "startupGate": null
+    },
+    {
+      "at": 104.10000000000582,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": false,
+      "menu": false,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": false,
+      "startupGate": null
+    },
+    {
+      "at": 119.80000000001746,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": false,
+      "menu": false,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": false,
+      "startupGate": null
+    },
+    {
+      "at": 136.60000000000582,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": false,
+      "menu": false,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": false,
+      "startupGate": null
+    },
+    {
+      "at": 153.80000000001746,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": false,
+      "menu": false,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": false,
+      "startupGate": null
+    },
+    {
+      "at": 171.30000000001746,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": false,
+      "menu": false,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": false,
+      "startupGate": null
+    },
+    {
+      "at": 187.10000000000582,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": false,
+      "menu": false,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": false,
+      "startupGate": null
+    },
+    {
+      "at": 206.30000000001746,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": false,
+      "menu": false,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": false,
+      "startupGate": null
+    },
+    {
+      "at": 231.30000000001746,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": false,
+      "menu": false,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": false,
+      "startupGate": null
+    },
+    {
+      "at": 237.60000000000582,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": false,
+      "menu": false,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": false,
+      "startupGate": null
+    },
+    {
+      "at": 271.9000000000233,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": false,
+      "menu": false,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": false,
+      "startupGate": null
+    },
+    {
+      "at": 276.1000000000058,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": false,
+      "menu": false,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": false,
+      "startupGate": null
+    },
+    {
+      "at": 287.4000000000233,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": false,
+      "menu": false,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": false,
+      "startupGate": null
+    },
+    {
+      "at": 321.30000000001746,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [
+        "Loading…"
+      ],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 331.80000000001746,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [
+        "불러오는 중…"
+      ],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 345.20000000001164,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [
+        "불러오는 중…"
+      ],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": false,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 355.9000000000233,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [
+        "불러오는 중…"
+      ],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 466.80000000001746,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [
+        "불러오는 중…"
+      ],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 486.4000000000233,
+      "label": "first-load",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [
+        "my_work"
+      ],
+      "menuMode": [],
+      "targetLoading": [
+        "업무 정보를 불러오는 중입니다."
+      ],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [
+        "불러오는 중…"
+      ],
+      "panelLoading": [
+        "업무 정보를 불러오는 중입니다."
+      ],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 505.1000000000058,
+      "label": "work-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [
+        "my_work"
+      ],
+      "menuMode": [],
+      "targetLoading": [
+        "업무 정보를 불러오는 중입니다."
+      ],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [
+        "불러오는 중…"
+      ],
+      "panelLoading": [
+        "업무 정보를 불러오는 중입니다."
+      ],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": false,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 533.1000000000058,
+      "label": "work-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "my_work",
+          "ariaCurrent": "page",
+          "text": "내 업무2"
+        }
+      ],
+      "rightPanels": [
+        "my_work"
+      ],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 547.5,
+      "label": "work-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "my_work",
+          "ariaCurrent": "page",
+          "text": "내 업무2"
+        }
+      ],
+      "rightPanels": [
+        "my_work"
+      ],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 555.5,
+      "label": "work-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "my_work",
+          "ariaCurrent": "page",
+          "text": "내 업무2"
+        }
+      ],
+      "rightPanels": [
+        "my_work"
+      ],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 571.3000000000175,
+      "label": "work-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "my_work",
+          "ariaCurrent": "page",
+          "text": "내 업무2"
+        }
+      ],
+      "rightPanels": [
+        "my_work"
+      ],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 587.8000000000175,
+      "label": "work-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [
+        "업무 정보를 불러오는 중입니다."
+      ],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [
+        "업무 정보를 불러오는 중입니다."
+      ],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 610.7000000000116,
+      "label": "work-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 621.5,
+      "label": "work-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 638.1000000000058,
+      "label": "work-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 654.6000000000058,
+      "label": "work-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [
+        "업무 정보를 불러오는 중입니다."
+      ],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [
+        "업무 정보를 불러오는 중입니다."
+      ],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 675.4000000000233,
+      "label": "work-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 688.3000000000175,
+      "label": "work-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 704.8000000000175,
+      "label": "work-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": false,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 721.3000000000175,
+      "label": "right-overview",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 738,
+      "label": "right-overview",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 754.8000000000175,
+      "label": "right-overview",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 771.4000000000233,
+      "label": "right-overview",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 788.1000000000058,
+      "label": "right-other-task",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 804.6000000000058,
+      "label": "right-other-task",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 821.2000000000116,
+      "label": "right-other-task",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 837.9000000000233,
+      "label": "right-other-task",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 854.4000000000233,
+      "label": "chat-list",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 871,
+      "label": "chat-list",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 887.9000000000233,
+      "label": "chat-list",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 904.6000000000058,
+      "label": "chat-list",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 921.4000000000233,
+      "label": "chat-list-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 938,
+      "label": "chat-list-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 954.8000000000175,
+      "label": "chat-list-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 982.3000000000175,
+      "label": "chat-list-open",
+      "path": "/c/other-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 988.2000000000116,
+      "label": "chat-list-open",
+      "path": "/c/other-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1025.8000000000175,
+      "label": "chat-list-open",
+      "path": "/c/other-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1039.9000000000233,
+      "label": "chat-list-open",
+      "path": "/c/other-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1045.2000000000116,
+      "label": "chat-list-open",
+      "path": "/c/other-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1057,
+      "label": "new-chat",
+      "path": "/c/other-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1075.8000000000175,
+      "label": "new-chat",
+      "path": "/c/other-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1088.7000000000116,
+      "label": "new-chat",
+      "path": "/c/other-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1132.2000000000116,
+      "label": "new-chat",
+      "path": "/",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1141.3000000000175,
+      "label": "new-chat",
+      "path": "/",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1155.6000000000058,
+      "label": "chat-list-again",
+      "path": "/",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1173,
+      "label": "chat-list-again",
+      "path": "/",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1188.5,
+      "label": "chat-list-again",
+      "path": "/",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1208.1000000000058,
+      "label": "chat-list-again",
+      "path": "/",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1222.3000000000175,
+      "label": "chat-existing-return",
+      "path": "/",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1238.5,
+      "label": "chat-existing-return",
+      "path": "/",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1254.9000000000233,
+      "label": "chat-existing-return",
+      "path": "/",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1277.6000000000058,
+      "label": "chat-existing-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1322.9000000000233,
+      "label": "chat-existing-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1338.6000000000058,
+      "label": "chat-existing-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1343.3000000000175,
+      "label": "chat-existing-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1358,
+      "label": "chat-existing-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1373,
+      "label": "work-authoring",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1388.7000000000116,
+      "label": "work-authoring",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "chats",
+          "ariaCurrent": "page",
+          "text": "대화 기록"
+        },
+        {
+          "key": "workflow",
+          "ariaCurrent": "page",
+          "text": "화면 이동 검증 절차"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "work"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1425,
+      "label": "work-authoring",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차1"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1432.8000000000175,
+      "label": "work-authoring",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차1"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1440.6000000000058,
+      "label": "work-authoring",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차1"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1460.1000000000058,
+      "label": "work-authoring",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차1"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1475.4000000000233,
+      "label": "work-tools",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차1"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1495.5,
+      "label": "work-tools",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1516.5,
+      "label": "work-tools",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "tools",
+          "ariaCurrent": "page",
+          "text": "도구10"
+        }
+      ],
+      "rightPanels": [
+        "tools"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1524.4000000000233,
+      "label": "work-tools",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "tools",
+          "ariaCurrent": "page",
+          "text": "도구10"
+        }
+      ],
+      "rightPanels": [
+        "tools"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1540.7000000000116,
+      "label": "work-access",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "tools",
+          "ariaCurrent": "page",
+          "text": "도구10"
+        }
+      ],
+      "rightPanels": [
+        "tools"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1556.2000000000116,
+      "label": "work-access",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "tools",
+          "ariaCurrent": "page",
+          "text": "도구10"
+        }
+      ],
+      "rightPanels": [
+        "tools"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1571.5,
+      "label": "work-access",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workspace_admin",
+          "ariaCurrent": "page",
+          "text": "공장·접근 범위"
+        }
+      ],
+      "rightPanels": [
+        "workspace_admin"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1588.4000000000233,
+      "label": "work-access",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workspace_admin",
+          "ariaCurrent": "page",
+          "text": "공장·접근 범위"
+        }
+      ],
+      "rightPanels": [
+        "workspace_admin"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1604.6000000000058,
+      "label": "work-procedures",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workspace_admin",
+          "ariaCurrent": "page",
+          "text": "공장·접근 범위"
+        }
+      ],
+      "rightPanels": [
+        "workspace_admin"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1621.3000000000175,
+      "label": "work-procedures",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "workspace_admin",
+          "ariaCurrent": "page",
+          "text": "공장·접근 범위"
+        }
+      ],
+      "rightPanels": [
+        "workspace_admin"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1638.5,
+      "label": "work-procedures",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1655.3000000000175,
+      "label": "work-procedures",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1671.8000000000175,
+      "label": "native-models",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1688.3000000000175,
+      "label": "native-models",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1705.2000000000116,
+      "label": "native-models",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1727.6000000000058,
+      "label": "native-models",
+      "path": "/workspace/models",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1744.6000000000058,
+      "label": "native-models",
+      "path": "/workspace/models",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "native_open:models",
+          "ariaCurrent": "page",
+          "text": "AI 도우미모델"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1756.8000000000175,
+      "label": "native-models",
+      "path": "/workspace/models",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "native_open:models",
+          "ariaCurrent": "page",
+          "text": "AI 도우미모델"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1770.8000000000175,
+      "label": "native-knowledge",
+      "path": "/workspace/models",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "native_open:models",
+          "ariaCurrent": "page",
+          "text": "AI 도우미모델"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1787.4000000000233,
+      "label": "native-knowledge",
+      "path": "/workspace/models",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "native_open:models",
+          "ariaCurrent": "page",
+          "text": "AI 도우미모델"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1804.1000000000058,
+      "label": "native-knowledge",
+      "path": "/workspace/models",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "native_open:models",
+          "ariaCurrent": "page",
+          "text": "AI 도우미모델"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1821.8000000000175,
+      "label": "native-knowledge",
+      "path": "/workspace/knowledge",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "native_open:models",
+          "ariaCurrent": "page",
+          "text": "AI 도우미모델"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1837.4000000000233,
+      "label": "native-prompts",
+      "path": "/workspace/knowledge",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "native_open:knowledge",
+          "ariaCurrent": "page",
+          "text": "참고 문서지식"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1854.1000000000058,
+      "label": "native-prompts",
+      "path": "/workspace/knowledge",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "native_open:knowledge",
+          "ariaCurrent": "page",
+          "text": "참고 문서지식"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1870.8000000000175,
+      "label": "native-prompts",
+      "path": "/workspace/knowledge",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "native_open:knowledge",
+          "ariaCurrent": "page",
+          "text": "참고 문서지식"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1889.3000000000175,
+      "label": "native-prompts",
+      "path": "/workspace/prompts",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "native_open:knowledge",
+          "ariaCurrent": "page",
+          "text": "참고 문서지식"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1904.6000000000058,
+      "label": "native-skills",
+      "path": "/workspace/prompts",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "native_open:prompts",
+          "ariaCurrent": "page",
+          "text": "빠른 문장프롬프트"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1921,
+      "label": "native-skills",
+      "path": "/workspace/prompts",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "native_open:prompts",
+          "ariaCurrent": "page",
+          "text": "빠른 문장프롬프트"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1937.4000000000233,
+      "label": "native-skills",
+      "path": "/workspace/prompts",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "native_open:prompts",
+          "ariaCurrent": "page",
+          "text": "빠른 문장프롬프트"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1955.5,
+      "label": "native-skills",
+      "path": "/workspace/skills",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "native_open:prompts",
+          "ariaCurrent": "page",
+          "text": "빠른 문장프롬프트"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1970.8000000000175,
+      "label": "native-tools-shared-list",
+      "path": "/workspace/skills",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "native_open:skills",
+          "ariaCurrent": "page",
+          "text": "스킬·지침스킬"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 1987.5,
+      "label": "native-tools-shared-list",
+      "path": "/workspace/skills",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "native_open:skills",
+          "ariaCurrent": "page",
+          "text": "스킬·지침스킬"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2004.1000000000058,
+      "label": "native-tools-shared-list",
+      "path": "/workspace/skills",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "tools",
+          "ariaCurrent": "page",
+          "text": "도구10"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": "native-tools-shared-list",
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2021.4000000000233,
+      "label": "native-tools-shared-list",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "tools",
+          "ariaCurrent": "page",
+          "text": "도구10"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [
+        "업무 정보를 불러오는 중입니다."
+      ],
+      "nativeReturnLabel": "native-tools-shared-list",
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": true,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [
+        "업무 정보를 불러오는 중입니다."
+      ],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2038,
+      "label": "native-tools-shared-list",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "tools",
+          "ariaCurrent": "page",
+          "text": "도구10"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [
+        "업무 정보를 불러오는 중입니다."
+      ],
+      "nativeReturnLabel": "native-tools-shared-list",
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": true,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [
+        "업무 정보를 불러오는 중입니다."
+      ],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2055.8000000000175,
+      "label": "native-tools-shared-detail",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "tools",
+          "ariaCurrent": "page",
+          "text": "도구10"
+        }
+      ],
+      "rightPanels": [
+        "tools"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2073.5,
+      "label": "native-tools-shared-detail",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "tools",
+          "ariaCurrent": "page",
+          "text": "도구10"
+        }
+      ],
+      "rightPanels": [
+        "tools"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2092.3000000000175,
+      "label": "native-tools-shared-detail",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "tools",
+          "ariaCurrent": "page",
+          "text": "도구10"
+        }
+      ],
+      "rightPanels": [
+        "tools"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2107.600000000006,
+      "label": "native-tools-shared-detail",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "tools",
+          "ariaCurrent": "page",
+          "text": "도구10"
+        }
+      ],
+      "rightPanels": [
+        "tools"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2121.5,
+      "label": "native-tools",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "tools",
+          "ariaCurrent": "page",
+          "text": "도구10"
+        }
+      ],
+      "rightPanels": [
+        "tools"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2138.2000000000116,
+      "label": "native-tools",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "tools",
+          "ariaCurrent": "page",
+          "text": "도구10"
+        }
+      ],
+      "rightPanels": [
+        "tools"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2155,
+      "label": "native-tools",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "tools",
+          "ariaCurrent": "page",
+          "text": "도구10"
+        }
+      ],
+      "rightPanels": [
+        "tools"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2172.2000000000116,
+      "label": "native-tools",
+      "path": "/workspace/tools",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "tools",
+          "ariaCurrent": "page",
+          "text": "도구10"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2187.5,
+      "label": "native-tools",
+      "path": "/workspace/tools",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2204,
+      "label": "native-return",
+      "path": "/workspace/tools",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2220.7000000000116,
+      "label": "native-return",
+      "path": "/workspace/tools",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2237.4000000000233,
+      "label": "native-return",
+      "path": "/workspace/tools",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": "native-return",
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2254.600000000006,
+      "label": "native-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [
+        "업무 정보를 불러오는 중입니다."
+      ],
+      "nativeReturnLabel": "native-return",
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": true,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [
+        "업무 정보를 불러오는 중입니다."
+      ],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2277.5,
+      "label": "native-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": "native-return",
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2288.600000000006,
+      "label": "admin-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2305.2000000000116,
+      "label": "admin-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2332.5,
+      "label": "admin-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2363.9000000000233,
+      "label": "admin-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2368.3000000000175,
+      "label": "admin-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": true,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2376.5,
+      "label": "admin-open",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": true,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2395.9000000000233,
+      "label": "admin-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": true,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2413.100000000006,
+      "label": "admin-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": true,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2422.8000000000175,
+      "label": "admin-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": true,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2438.8000000000175,
+      "label": "admin-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": true,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2455.600000000006,
+      "label": "admin-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": true,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2472.3000000000175,
+      "label": "admin-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": true,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2488.8000000000175,
+      "label": "admin-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": true,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2505.4000000000233,
+      "label": "admin-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": true,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2522.2000000000116,
+      "label": "admin-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": true,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2538.7000000000116,
+      "label": "admin-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": true,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2555.7000000000116,
+      "label": "admin-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": true,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2572.100000000006,
+      "label": "admin-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": true,
+      "sourceText": true,
+      "startupGate": null
+    },
+    {
+      "at": 2589.9000000000233,
+      "label": "admin-return",
+      "path": "/c/existing-chat",
+      "source": true,
+      "menu": true,
+      "bodyHidden": false,
+      "missingSource": false,
+      "legacy": [],
+      "menuCurrent": [
+        {
+          "key": "procedures",
+          "ariaCurrent": "page",
+          "text": "업무 절차4"
+        }
+      ],
+      "rightPanels": [
+        "procedures"
+      ],
+      "menuMode": [
+        "author"
+      ],
+      "targetLoading": [],
+      "nativeReturnLabel": null,
+      "nativeReturnUnexpectedSelection": false,
+      "nativeReturnPreviousPanel": [],
+      "nativeReturnDestinationLoading": false,
+      "loadingGuard": true,
+      "menuLoading": [],
+      "panelLoading": [],
+      "scopeLabel": null,
+      "scopePending": false,
+      "scopeEmptyBeforeResponse": [],
+      "scopeLocalLoading": [],
+      "scopeControls": true,
+      "content": true,
+      "adminDialog": false,
+      "sourceText": true,
+      "startupGate": null
+    }
+  ],
+  "sourceSeen": true,
+  "loadingGuard": true,
+  "scopeExpectation": null,
+  "scopeRequests": [],
+  "nativeReturn": null,
+  "nativeReturns": [
+    {
+      "label": "native-tools-shared-list",
+      "selector": "[data-action=tools]",
+      "native": "skills",
+      "destination": "tools",
+      "previous": "procedures",
+      "expectedBefore": [
+        "native_open:skills"
+      ],
+      "allowed": [
+        "native_open:skills",
+        "tools"
+      ],
+      "clickedAt": 1989.1000000000058,
+      "trusted": true,
+      "beforeCurrent": [
+        {
+          "key": "native_open:skills",
+          "ariaCurrent": "page",
+          "text": "스킬·지침스킬"
+        }
+      ]
+    },
+    {
+      "label": "native-return",
+      "selector": "#ees-work-entry [data-action=procedures]",
+      "native": "tools",
+      "destination": "procedures",
+      "previous": "tools",
+      "expectedBefore": [],
+      "allowed": [
+        "procedures"
+      ],
+      "clickedAt": 2222.2000000000116,
+      "trusted": true,
+      "beforeCurrent": []
+    }
+  ],
+  "frame": 255,
+  "scope": "Real packaged source frontend and physical CDP clicks; every animation frame, synthetic Native session/data, real temporary workflow service. Retained Native settings dialog is intentional.",
+  "counts": {
+    "first-load": 21,
+    "work-open": 13,
+    "right-overview": 4,
+    "right-other-task": 4,
+    "chat-list": 4,
+    "chat-list-open": 8,
+    "new-chat": 5,
+    "chat-list-again": 4,
+    "chat-existing-return": 8,
+    "work-authoring": 6,
+    "work-tools": 4,
+    "work-access": 4,
+    "work-procedures": 4,
+    "native-models": 6,
+    "native-knowledge": 4,
+    "native-prompts": 4,
+    "native-skills": 4,
+    "native-tools-shared-list": 5,
+    "native-tools-shared-detail": 4,
+    "native-tools": 5,
+    "native-return": 5,
+    "admin-open": 6,
+    "admin-return": 13
+  },
+  "native_bad_visible": 0,
+  "ees_loading_after_initial": 3
+}

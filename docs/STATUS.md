@@ -1,11 +1,11 @@
 # 현재 작업 상태
 
-## 2026-10-20 · #95 → #94 → #96 승인 범위 검증·병합
+## 2026-10-20 · #94 병합 main CI 실패·Native 시험 보완
 
-- **완료한 선행 조건:** #95를 merge commit `471236a47939275d1cfeea637166642388b072f8`로 병합했다. 이 main의 [push CI39338337583](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39338337583)는 첫 시도 completed/success이며, 해당 실행의 [프로그램 ZIP12228507651](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39338337583/artifacts/12228507651), 155,193,025 bytes를 확인한 뒤 #94 통합을 시작했다. [#95 최초 실패·재현·검증](../evals/v4-ui-20260930.md#pr95-merge-reliability-20261020)은 보존한다.
-- **현재:** #94 head `7b8d2a1e3869d008e16b7ab5bf554ba368efbda9`에 위 main을 merge commit으로 통합 중이다. 문서3개와 workspace 시험 충돌에서 양쪽 기록·검사를 보존한다. 기존 읽기 최적화·권한 보호 범위를 유지하며 #96은 아직 통합하지 않았다. [이번 통합·검증 기록](../evals/v4-ui-20260930.md#pr94-merge-validation-20261020).
-- **다음 하나:** #94의 관련 시험·문서/diff·최종 head 전체 CI·PR 본문 검증을 마친 뒤 merge commit으로 병합한다. 그 main의 push CI 성공과 배포 ZIP 확인이 끝나야 #96에 main을 합친다. 관련 로컬135PASS/Native wheel 미준비35SKIP, 시험 ID 감사1535개 오류0, 최신 main 합성5규모의 전체 JSON·DB 보존을 확인했다. 최종 head CI 결과는 대기 중이며 과거 통과로 대신하지 않는다.
-- **보존/범위:** 세 브랜치를 유지하고 main 직접 push·rebase·force-push·사내 실행/적용·Figma 수정·#77/#79 착수는 하지 않는다. 재실행 성공으로 첫 실패를 지우지 않으며, 기존 사내 적용 기록은 아래에 보존한다. 아래 Draft/병합 대기 문구는 각각 당시 상태다.
+- **완료한 선행 조건:** #95 merge main `471236a47939275d1cfeea637166642388b072f8`의 [push CI39338337583](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39338337583) 첫 시도 성공과 [프로그램 ZIP12228507651](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39338337583/artifacts/12228507651), 155,193,025 bytes 확인 후 #94를 통합했다. #94 최종 head `930d7c29ca1751fc1b71e89899ea70a81ba96443`의 [PR CI39340559323](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39340559323) 성공 뒤 main `7e71b615cb0c751781b731c55cd9a0439252a6a8`로 병합했다. [#95 최초 실패·검증](../evals/v4-ui-20260930.md#pr95-merge-reliability-20261020)과 [#94 통합·검증](../evals/v4-ui-20260930.md#pr94-merge-validation-20261020)은 보존한다.
+- **현재·중단 조건:** #94 병합 main의 [push CI39342237471](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39342237471)는 첫 시도 completed/failure다. native-compose2시험이 실패했고 배포 artifact0건으로 ZIP 조건을 충족하지 못했다. #96에는 main을 합치지 않았다. source-shell은 정상 목적지 프레임 직전 관측 경계를 닫았고, 일정 필드 시험은 다른 초기 절차를 클릭했다. 원인별 확신 범위·원본 증거·실행 환경은 [기존 평가 기록](../evals/v4-ui-20260930.md#main-native-reliability-20261020)에 남겼다.
+- **다음 하나:** 사용자 승인6항에 따라 최신 main 기반 `test/main-native-readiness-20261020` 새 PR에서 두 시험의 준비·관측 경계만 보완한다. 제품 파일은 변경하지 않으며 관련 시험·문서/diff·최종 head 전체 CI·PR 본문 검증을 확인한다. 승인 조건으로 merge commit 병합 후 해당 main push CI 성공과 배포 ZIP을 확인해야 #96 통합을 재개한다. 로컬 구문 검사 통과와 Native 환경 부재 SKIP를 실제 브라우저 성공으로 세지 않는다.
+- **보존/범위:** 세 PR과 보완 PR의 브랜치를 유지하고 main 직접 push·rebase·force-push·사내 실행/적용·Figma 수정·#77/#79 착수는 하지 않는다. 재실행 성공으로 첫 실패를 지우지 않으며, 기존 사내 적용 기록은 아래에 보존한다. 아래 Draft/병합 대기 문구는 각각 당시 상태다.
 
 ## 2026-10-19 · 8081 검증본 main 병합 검증
 
