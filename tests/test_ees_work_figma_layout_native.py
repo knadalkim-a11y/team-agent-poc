@@ -138,10 +138,14 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         def background(selector):
             return self.browser.evaluate('getComputedStyle(document.querySelector(' + json.dumps(selector) + ')).backgroundColor')
 
-        def hover(selector):
+        def hover(selector, expected_background):
             point = self.browser.evaluate('(()=>{const r=document.querySelector(' + json.dumps(selector) + ').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()')
             self.browser.call('Input.dispatchMouseEvent', {'type': 'mouseMoved', **point})
             self.wait('document.querySelector(' + json.dumps(selector) + ').matches(":hover")')
+            # C3 interpolates hover colors for 120ms. Assert the endpoint once
+            # computed style reaches it, not the first interpolated frame.
+            self.wait('getComputedStyle(document.querySelector(' + json.dumps(selector) +
+                      ')).backgroundColor === ' + json.dumps(expected_background))
 
         observed = {name: background(selector) for name, selector in {
             'panel': '#ees-work-panel', 'author': '#ees-work-designer',
@@ -149,10 +153,10 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
             'chat': '#chat-container #chat-pane'}.items()}
         self.assertEqual(observed, {'panel': 'rgb(243, 243, 245)', 'author': 'rgb(243, 243, 245)',
             'card': 'rgb(255, 255, 255)', 'input': 'rgb(255, 255, 255)', 'chat': 'rgb(255, 255, 255)'})
-        hover('.ew-author-list>button')
+        hover('.ew-author-list>button', 'rgb(243, 243, 245)')
         observed['cardHover'] = background('.ew-author-list>button')
         self.assertEqual(observed['cardHover'], 'rgb(243, 243, 245)')
-        hover('#ees-work-designer>header .ew-icon-button')
+        hover('#ees-work-designer>header .ew-icon-button', 'rgb(236, 236, 239)')
         observed['headerHover'] = background('#ees-work-designer>header .ew-icon-button')
         self.assertEqual(observed['headerHover'], 'rgb(236, 236, 239)')
         self.click('#ew-author-search')

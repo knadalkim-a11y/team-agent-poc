@@ -79,6 +79,8 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.click('[data-author-action=create]')
         self.wait("document.querySelector('#ees-work-dialog [name=name]')")
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start')"))
+        # C3 scales the dialog during entry; measure its settled design width.
+        self.wait("!document.querySelector('#ees-work-dialog[data-ees-motion=opening]')")
         self.assertAlmostEqual(self.read('#ees-work-dialog', 'getBoundingClientRect().width'), 484, delta=1)
         self.fill('#ees-work-dialog [name=name]', '닫았다 열어도 남을 새 절차 이름')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[name=procedure_template]')"))

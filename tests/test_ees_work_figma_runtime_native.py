@@ -181,7 +181,9 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
                     self.screenshot('shared-runtime-zero-selection-question')
                     self.click('[data-dialog-confirm]')
                 self.wait("document.querySelector('#ees-work-panel .ew-work-heading .ew-status')?.dataset.status === 'completed'")
-                self.assertFalse(self.browser.evaluate('!!document.querySelector("#ees-work-dialog")'))
+                # Acceptance is immediate; the C3 exit may finish after the
+                # service has already returned its completed business state.
+                self.wait('!document.querySelector("#ees-work-dialog")')
                 saved = self.state(run_id=run['id'])['run']
                 self.assertEqual(saved['jobs']['job-0']['status'], 'completed')
                 self.assertEqual(saved['attempts'][0]['result'], original)
