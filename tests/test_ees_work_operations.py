@@ -466,6 +466,45 @@ class RuntimeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result['attempt']['snapshot']['argument_sources']['issue_keys']['ids'],['SYN-1','SYN-2'])
         self.assertTrue(result['attempt']['snapshot']['evidence_attempt_ids'])
 
+    async def test_confirmed_partial_list_advances_scope_and_binds_only_confirmed_ids(self):
+        run = await self.chain(result_binding=True)
+        self.bridge.result = {'status':'succeeded','completeness':'partial','items':[{'id':'SYN-1','required':True}]}
+        await self.runtime.command(self.user, self.body('execute_scope', 1, run_id=run['run_id'], node_id='t1'))
+        await self.runtime.process_once()
+        await self.runtime.process_once()
+        self.assertEqual(len(self.bridge.calls), 1)
+        with self.service._db() as db:
+            self.assertEqual(db.execute('SELECT status FROM work_scope_runs').fetchone()[0], 'waiting')
+        confirmed = await self.confirm_current(run['run_id'], item_id='SYN-1')
+        self.assertEqual(confirmed['run']['jobs']['j1']['status'], 'partial')
+        self.bridge.result = {'status':'succeeded','completeness':'complete','data':{'ok':True}}
+        await self.runtime.process_once()
+        self.assertEqual(self.bridge.calls[-1][1], {'issue_keys':['SYN-1']})
+        viewed = (await self.service.workspace_state(self.user, run_id=run['run_id']))['run']
+        next_attempt = next(row for row in viewed['attempts'] if row['job_id'] == 'j2')
+        self.assertEqual(next_attempt['snapshot']['partial_prerequisites'][0]['job_id'], 'j1')
+        await self.confirm_current(run['run_id'], 'j2')
+        await self.runtime.process_once()
+        with self.service._db() as db:
+            self.assertEqual(db.execute('SELECT status FROM work_scope_runs').fetchone()[0], 'completed')
+
+    async def test_ai_successor_can_review_human_confirmed_partial_read(self):
+        run = await self.chain(second_mode='ai', block='ai_review')
+        self.bridge.result = {'status':'succeeded','completeness':'partial','items':[{'id':'SYN-1','required':True}]}
+        await self.runtime.command(self.user, self.body('execute_job', 1, run_id=run['run_id'], job_id='j1'))
+        with self.assertRaises(workflow.WorkflowError) as raised:
+            await self.runtime.command(self.user, self.body('execute_job', 3, run_id=run['run_id'], job_id='j2', model_id='synthetic'))
+        self.assertEqual(raised.exception.code, 'evidence_required')
+        confirmed = await self.confirm_current(run['run_id'], item_id='SYN-1')
+        class Model:
+            async def resolve(self, actor, selected): return {'id':'synthetic'}
+            async def propose(self, actor, model_id, context, instruction):
+                return {'ok':True, 'context':{key:context[key] for key in ('context_id','target_id','revision','kind')}, 'proposal':'일부 근거를 확인한 합성 보고 초안'}
+        self.runtime.model = Model()
+        result = await self.runtime.command(self.user, self.body('execute_job', confirmed['revision'], run_id=run['run_id'], job_id='j2', model_id='synthetic'))
+        self.assertEqual(result['attempt']['status'], 'succeeded', result)
+        self.assertEqual(result['attempt']['snapshot']['partial_prerequisites'][0]['job_id'], 'j1')
+
     async def test_ai_per_item_suggestions_are_not_human_decisions_and_keep_source_acl(self):
         run=await self.chain(second_mode='ai',block='item_verdict')
         self.bridge.result={'status':'succeeded','completeness':'complete','items':[{'id':'SYN-1','required':True,'content_reviewed':False}]}

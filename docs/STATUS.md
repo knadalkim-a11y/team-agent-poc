@@ -1,5 +1,13 @@
 # 현재 작업 상태
 
+## 2026-10-20 · #96 최신 main 통합·최종 병합 검증
+
+- **완료한 선행 조건:** #95·#94에 이어 main 시험 신뢰성 보완 [#99](https://github.com/knadalkim-a11y/team-agent-poc/pull/99)를 main `b1cee7d1a678891caff7c332c9a7fd5595628ddd`로 병합했다. 이 main의 [push CI39345522634](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39345522634) 첫 시도40개 성공과 [Agent Pack ZIP12232065133](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39345522634/artifacts/12232065133), 1,200,576 bytes 확인 뒤 #96 통합을 시작했다. 시험·문서 변경인 #99의 산출물은 Agent Pack ZIP이며 새 프로그램 ZIP으로 표시하지 않는다. [#94 최초 실패·#99 보완 완료](../evals/v4-ui-20260930.md#main-native-reliability-20261020)는 보존한다.
+- **현재 범위:** #96 head `9de04fb42120ca99dff7b17065b4d14faf47078b`에 위 main을 merge commit으로 통합 중이다. 양쪽 기록·시험과 main의 작성 머리 구조를 유지하며 #96의 `도구 · 공용`·시스템 이름 숨김을 결합한다. README는 [기능 명세](specs/shared-tools.md)를 현재 진입점으로 연결한다. 기존 ST-OPEN-3/4/5/6/8/9 결정 필요 항목은 다루지 않는다. [이번 통합·검증](../evals/v4-ui-20260930.md#pr96-merge-validation-20261020).
+- **통합 검사:** 충돌0, Node224PASS·strict Python209PASS/77SKIP(고정 Native 자료 미준비). 추가 실행 모듈명 오기1ERROR는 평가에 보존하고 정확한 모듈의35PASS/2SKIP로 확인했다. 시험 ID 감사1550개/오류0·전체 diff 통과. 실제 Native/Windows를 포함한 최종 head CI와 병합 main CI/ZIP은 순차 확인한다.
+- **다음 하나:** 충돌 해소·관련 시험·문서/diff·최종 head 전체 CI·PR 본문 검증을 마친 뒤 #96 Draft를 해제하고 merge commit으로 병합한다. 병합 main push CI 성공과 해당 배포 ZIP을 확인한다. 기존 head 성공을 이번 통합 검증으로 대신하지 않으며 새 실패는 원인 판단과 함께 보존한다.
+- **보존/범위:** main 직접 push·rebase·force-push·브랜치 삭제·사내 실행/적용·Figma 수정·#77/#79 착수는 하지 않는다. Figma 카드의 ‘미병합’ 표기는 Claude가 정리한다. 아래는 당시의 중단·Draft·병합 대기·실제 적용 이력이며 현재 진행 상태는 이 절을 따른다.
+
 ## 2026-10-20 · #94 병합 main CI 실패·Native 시험 보완
 
 - **완료한 선행 조건:** #95 merge main `471236a47939275d1cfeea637166642388b072f8`의 [push CI39338337583](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39338337583) 첫 시도 성공과 [프로그램 ZIP12228507651](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39338337583/artifacts/12228507651), 155,193,025 bytes 확인 후 #94를 통합했다. #94 최종 head `930d7c29ca1751fc1b71e89899ea70a81ba96443`의 [PR CI39340559323](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39340559323) 성공 뒤 main `7e71b615cb0c751781b731c55cd9a0439252a6a8`로 병합했다. [#95 최초 실패·검증](../evals/v4-ui-20260930.md#pr95-merge-reliability-20261020)과 [#94 통합·검증](../evals/v4-ui-20260930.md#pr94-merge-validation-20261020)은 보존한다.
@@ -72,6 +80,17 @@
 - **관계/다음:** 미병합 #95·#96은 포함하지 않았다. #96의 공용 `run_access` 그룹/사용자 조회 비용은 이번 동기 SQLite 읽기 재사용과 별도 경로이며 최적화 완료로 보지 않는다. 최종 통합 head CI 성공을 확인해 같은 Draft PR 검토를 마무리한다. main 직접 push·PR 병합·사내 실행/적용·Figma 변경은 하지 않는다. 사내 적용본은 앞선 사용자 확인 `d4f1806`이며 이번 적용은 미실행이다.
 
 아래는 #91·#93 통합 당시 기록이다. #91·#93은 main0f4c905에 반영됐으며 당시 병합 지시는 #94의 병합 승인이 아니다.
+
+## 2026-10-16 · #93 후속 기능 명세 시범 · Draft #96
+
+- **현재 지시:** [#96 Claude 재검토](https://github.com/knadalkim-a11y/team-agent-poc/pull/96#pullrequestreview-5544185853)(head `6748300`)와 Figma C51의 작은 수정만 같은 Draft #96에서 마무리한다. 버전 문구 조사와 공용 찾기의 중복 완결성 줄을 고치고, 장애 중 관리 ST-ADMIN-8 · 부분 결과 인자 전달 · 자동 회차와 집계 규칙 · 상태 조회 비용 · 시범 중간 측정을 문서에 반영한다. 기존 관리 코드는 그대로이며 화면 다듬기는 이후 기능별 UI/UX 개선에서 다룬다.
+- **#93 병합 경계:** 최초 후속 요청은 같은 PR #93의 **Draft 유지·PR 병합 금지**였다. 작업 도중 다른 세션이 원격 head `06a92e4`의 #93을 2026-10-16 15:01:03 KST에 merge commit `0f4c905ea6cb277b0704af32c40dd198fab3f959`로 병합했음을 확인했다. 이 세션은 PR을 병합하지 않았다. 명세 후속은 [Draft #96](https://github.com/knadalkim-a11y/team-agent-poc/pull/96)에 게시했으며, 이미 병합된 #93에는 같은 PR 갱신이 불가능해 승인된 GitHub 반영·Draft·CI·Claude 재검토를 #96에서 이어간다. 아래 #91 → #93 병합 승인은 당시 기록으로 보존한다.
+- **원본/통합:** `ccr-5c97dda0-jb5rxv`의 `2e737ac`을 #93의 `06a92e4`에 두 부모 원격 merge commit `1aaebd44d94672c59254ae927e5a56ee23b19b4e`(같은 tree의 로컬 검증본 `631f15d`)로 합쳤다. rebase·force-push 없이 CHANGELOG 양쪽 항목을 보존했다. [기능 명세](specs/shared-tools.md), B10-1 `1369:732`·B10-2 `1368:724`·B10-5 `1372:741`와 공통-3 S1 `944:1036`을 먼저 읽고 구현한다. 조건·권한·저장/반영 시점은 명세, 배치·문구·상태 표현은 카드가 기준이다.
+- **범위:** 카드의 ‘다름’, 공용 읽기 재조회, 그룹 밖 실행 단추 숨김, 실행 중/멈추지 않은 자동 회차의 버전 교체 단추 숨김, 서버·화면 문구 원본 통합을 반영한다. 사람이 확정한 부분 결과의 다음 작업·회차 종료와 공용 찾기 0건/0개 선택 완료를 구현하며, 확정 전 부분 결과 차단과 이전 방식 0개 완료 거부는 유지한다. 게시자의 PAT(ST-OPEN-4)는 바꾸지 않는다.
+- **검증/다음 작업:** C51 관련 로컬 UI103개 · Native 문구 일치1개를 통과했다. [이번 구현·최초 실패·C51 검증](../evals/v4-ui-20260930.md#shared-tools-spec-20261016)은 원본을 보존하며, 기록 커밋 이후 **최종 head CI·버전 바뀜/0건 2장 판정은 [#96 본문/Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/96/checks)가 원본**이다. 이전 head의 성공으로 대신하지 않는다. 다음은 같은 Draft #96의 최종 CI·2장 확인 뒤 댓글 하나로 Claude 재검토를 요청하는 것이다.
+- **금지/미확인:** main 직접 push·PR 병합·사내 실행/적용·Figma 수정·#77/#79 착수·사내 도구 삭제/재등록/덮어쓰기·TLS 검증 해제·공용 PAT를 하지 않는다. 사내 Confluence 설치 원본·주소·허용 공간·암호화·팀원 PAT와 실제 적용은 미확인이다.
+
+아래는 이번 명세 시범 지시 이전의 승인·구현·실패·검증 기록이다. #93의 현재 범위와 병합 여부는 위 항목을 따른다.
 
 ## 2026-10-16 · #91 병합 완료·#93 main 통합
 

@@ -837,6 +837,20 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(malformed_truncated["status"], "failed")
         leaked = self.native.normalize_result("get_page", {"ok": False, "error": {"code": "failure", "message": "synthetic-secret"}}, ref, {}, ("synthetic-secret",))
         self.assertNotIn("synthetic-secret", json.dumps(leaked))
+        # ST-OPEN-7: transport failures and preflight failures use the same
+        # shipped copy as the UI, without retaining arbitrary plugin strings.
+        for code, expected in (
+            ('pat_required', '개인 PAT 필요 · 기존 도구의 개인 설정에 본인 PAT를 저장하세요. 채팅에 입력하지 마세요.'),
+            ('encryption_required', '개인 설정 암호화 필요 · 관리자에게 요청하세요. 채팅에 PAT를 입력하지 마세요.'),
+            ('authentication_failed', '개인 PAT 인증 실패 · 기존 도구 개인 설정에서 본인 PAT의 만료·권한을 확인하세요. 채팅에 입력하지 마세요.'),
+        ):
+            with self.subTest(personal_reason=code):
+                failed = self.native.normalize_result('get_page', {'ok': False, 'error': {'code': code, 'message': 'synthetic-secret'}}, ref, {}, ('synthetic-secret',))
+                self.assertEqual(failed['error']['message'], expected)
+                self.assertNotIn('synthetic-secret', json.dumps(failed))
+                with self.assertRaises(self.native.WorkflowError) as raised:
+                    self.native._fail(code)
+                self.assertEqual(raised.exception.message, expected)
         # Plugin-provided flags are not transport evidence. Only the bridge's
         # canonical current managed-source path may certify a known HTTP error.
         for code in ("upstream_error", "connection_failed", "native_call_failed", "tool_error", "unauthorized", "forbidden", "rate_limited"):

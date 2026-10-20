@@ -373,9 +373,12 @@
   async function confirmList(confirm=true){
     if(busy||!inputsSaved())return;const at=context(),run=state?.run,jobId=selection.job_id,saved=run?.jobs?.[jobId],draft=view.readList();
     if(!saved||saved.can_decide===false||draft.attempt_id!==saved.attempt_id||draft.result_revision!==saved.result_revision)throw new Error('현재 목록의 근거와 처리 권한을 다시 확인해 주세요.');
-    if(confirm&&!draft.items.some(item=>item.selected))throw new Error('포함할 항목이 없습니다. 빈 목록의 완료 정책을 먼저 확인해 주세요.');
-    let reason='';const pending=dialog({title:confirm?'이 목록으로 확정할까요?':'선택한 목록을 저장할까요?',note:confirm?'선택한 포함·제외와 사람의 확인을 함께 저장합니다. AI 후보를 자동 확정하지 않습니다.':'새 검토 시도로 선택 상태를 저장합니다. 업무 완료로 확정하지 않습니다.',html:`<p>포함 ${draft.items.filter(item=>item.selected).length}건 · 제외 ${draft.items.filter(item=>!item.selected).length}건</p><label>확인·변경 이유<input id="ees-list-confirm-reason" required></label>`,confirmLabel:confirm?'목록 확정':'선택 목록 저장'});
-    $('#ees-list-confirm-reason').addEventListener('input',event=>{reason=event.target.value;});
+    const selected=draft.items.filter(item=>item.selected),sharedSearch=Boolean(run.definition?.nodes?.[jobId]?.shared_tool_id)&&saved.result?.scope==='single_page',emptyConfirmation=confirm&&!selected.length;
+    if(emptyConfirmation&&!sharedSearch)throw new Error('포함할 항목이 없습니다. 빈 목록의 완료 정책을 먼저 확인해 주세요.');
+    const source=workListSourceAttempt(run,saved.attempt_id),noResults=emptyConfirmation&&Array.isArray(source?.result?.items)&&source.result.items.length===0;
+    let reason=noResults?'0건 확인':emptyConfirmation?'맞는 문서 없음 · 0개 선택':'';
+    const pending=noResults?Promise.resolve(true):dialog({title:emptyConfirmation?'맞는 문서가 없는 것으로 확정할까요?':confirm?'이 목록으로 확정할까요?':'선택한 목록을 저장할까요?',note:confirm?'선택한 포함·제외와 사람의 확인을 함께 저장합니다. AI 후보를 자동 확정하지 않습니다.':'새 검토 시도로 선택 상태를 저장합니다. 업무 완료로 확정하지 않습니다.',html:`<p>포함 ${selected.length}건 · 제외 ${draft.items.filter(item=>!item.selected).length}건</p>${emptyConfirmation?'':'<label>확인·변경 이유<input id="ees-list-confirm-reason" required></label>'}`,confirmLabel:confirm?'목록 확정':'선택 목록 저장'});
+    if(!emptyConfirmation)$('#ees-list-confirm-reason').addEventListener('input',event=>{reason=event.target.value;});
     if(await pending&&at===context())await mutate({action:confirm?'confirm_list':'amend_items',run_id:run.id,job_id:jobId,attempt_id:draft.attempt_id,result_revision:draft.result_revision,expected_revision:run.revision,items:draft.items.filter(item=>!item.candidate||item.selected).map(item=>({...clone(item),selected:Boolean(item.selected),required:Boolean(item.selected)})),reason});
   }
   function saveReviewDraft(){if(reviewSaving)return reviewSaving;const pending=performSaveReviewDraft().finally(()=>{if(reviewSaving===pending)reviewSaving=null;});reviewSaving=pending;return pending;}

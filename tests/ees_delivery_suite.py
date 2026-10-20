@@ -39,7 +39,7 @@ SUITES = {
         "test_ees_work_workspace.py", "test_ees_work_operations.py", "test_ees_delivery_artifacts.py",
         "test_ees_work_figma_authoring.py", "test_ees_work_figma_contracts.py",
         "test_ees_work_figma_schedule.py", "test_ees_work_history_reference.py"],
-    "contracts": ["test_ees_workflow_execution.py", "test_ees_workflow_native.py", "test_ees_shared_tools_native.py",
+    "contracts": ["test_ees_workflow_execution.py", "test_ees_shared_tools_native.py",
         "test_ees_workflow_model_native.py",
         "test_ees_work_authoring.py"],
     "platform": ["test_ees_deploy_*.py", "test_manage_ees.py", "test_ees_upgrade.py",
@@ -49,7 +49,9 @@ SUITES = {
         "test_check_docs.py", "test_openwebui_windows_launcher.py", "test_dev_ees.py"],
     "program-install": ["test_ees_webui_customization.py"],
     "program-wheel": ["test_ees_webui_customization.py"],
-    "native-contracts": ["test_ees_workflow_examples_native.py"],
+    # Keep the same tests and ten-minute jobs: Windows contracts spent 501s
+    # testing plus 98s preparing. Move its 141s Native bridge module here (279s).
+    "native-contracts": ["test_ees_workflow_examples_native.py", "test_ees_workflow_native.py"],
     "native-grounding": ["test_ees_workflow_examples_native.py"],
     "restore-ees10": ["test_ees_webui_customization.py"],
     "restore-ees11": ["test_ees_webui_customization.py"],

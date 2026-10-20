@@ -38,18 +38,29 @@ MESSAGES = {
     'native_connection_disabled': 'Open WebUI 도구의 연결이 꺼져 있습니다. 관리자에게 확인을 요청하세요.',
     'native_plugins_disabled': 'Open WebUI 도구 기능이 꺼져 있습니다. 관리자에게 확인을 요청하세요.',
     'native_schema_invalid': '설치된 도구의 입력 형식을 확인해야 합니다. 관리자에게 확인을 요청하세요.',
-    'shared_tool_unavailable': '기본 제공 도구가 설치되어 있지 않거나 원본이 다릅니다. 관리자에게 확인을 요청하세요.',
+    'shared_tool_unavailable': 'Open WebUI 도구를 확인하지 못했습니다. 관리자에게 확인을 요청하세요.',
     'shared_tool_review_required': '도구 확인 필요 · 관리자에게 입력·결과와 연결 설정 확인을 요청하세요.',
     'shared_tool_disabled': '도구 사용 중지 · 관리자에게 다시 켜기를 요청하세요.',
     'shared_tool_forbidden': '이 도구를 쓸 수 있는 그룹 권한이 없습니다. 관리자에게 확인을 요청하세요.',
     'shared_tool_plan_changed': '공용 도구가 바뀌었습니다. 새 실행 계획을 확인해 주세요.',
-    'shared_tool_version_changed': '회차 시작 뒤 도구 버전이 바뀌었습니다. 새 버전으로 계속할지 직접 확인해 주세요.',
+    'shared_tool_version_changed': '회차 시작 뒤 도구가 v{pinned}에서 v{current} 버전으로 바뀌었습니다. 이 회차를 새 버전으로 계속할지 고르세요.',
     'shared_tool_breaking_change': '입력·결과 모양이 호환되지 않아 같은 도구로 확인할 수 없습니다. 개발 담당자에게 새 도구를 요청하세요.',
+    'native_personal_connection_required': '개인 PAT 필요 · 기존 도구의 개인 설정에 본인 PAT를 저장하세요. 채팅에 입력하지 마세요.',
+    'encryption_required': '개인 설정 암호화 필요 · 관리자에게 요청하세요. 채팅에 PAT를 입력하지 마세요.',
+    'authentication_failed': '개인 PAT 인증 실패 · 기존 도구 개인 설정에서 본인 PAT의 만료·권한을 확인하세요. 채팅에 입력하지 마세요.',
+    'automatic_run_active': '자동 실행 회차가 멈춘 뒤 도구 버전을 바꿀 수 있습니다.',
+    'execution_running': '실행 중인 작업이 끝난 뒤 도구 버전을 바꿀 수 있습니다.',
 }
+MESSAGES['pat_required'] = MESSAGES['native_personal_connection_required']
 
 
-def fail(code):
-    raise WorkflowError(code, MESSAGES.get(code, '도구의 현재 권한·입력·버전을 확인해 주세요.'))
+def message_for(code, fallback='도구의 현재 권한·입력·버전을 확인해 주세요.', **values):
+    text = MESSAGES.get(code, fallback)
+    return text.format(**values) if values else text
+
+
+def fail(code, **values):
+    raise WorkflowError(code, message_for(code, **values))
 
 
 def init_shared(db):
@@ -137,7 +148,7 @@ class SharedTools:
                 if reason:
                     item.update(state='unavailable', unavailable_reason=reason)
             if item.get('unavailable_reason'):
-                item['unavailable_message'] = MESSAGES.get(item['unavailable_reason'], 'Open WebUI 도구를 확인하지 못했습니다. 관리자에게 확인을 요청하세요.')
+                item['unavailable_message'] = message_for(item['unavailable_reason'], MESSAGES['shared_tool_unavailable'])
             result.append(item)
         return result
 
@@ -324,7 +335,7 @@ class SharedTools:
                 or observed['input_schema'] != item['input_schema'] or observed['output_schema'] != item['output_schema']):
             fail('shared_tool_review_required')
         if pin['reference'] != observed['reference'] or pin['version'] != item['version']:
-            fail('shared_tool_version_changed')
+            fail('shared_tool_version_changed', pinned=pin['version'], current=item['version'])
         await self.bridge.check(actor, pin['reference'])
         actor, _, groups = await self.service._work_actor(actor)
         with self.service._db() as db:
@@ -333,6 +344,68 @@ class SharedTools:
             if latest["state"] != "available" or latest["reference"] != item["reference"]:
                 fail("shared_tool_review_required")
         return pin
+
+    @staticmethod
+    def version_change_blocker(db, run_id):
+        if db.execute("SELECT 1 FROM work_jobs WHERE run_id=? AND status='running'", (run_id,)).fetchone():
+            return 'execution_running'
+        if db.execute("SELECT 1 FROM work_schedule_slots WHERE json_extract(data,'$.run_id')=? AND status IN ('queued','running','waiting')", (run_id,)).fetchone():
+            return 'automatic_run_active'
+        if db.execute("SELECT 1 FROM work_scope_runs WHERE run_id=? AND status IN ('queued','running','waiting')", (run_id,)).fetchone():
+            return 'automatic_run_active'
+        return ''
+
+    async def run_access(self, user, run_id):
+        """Names needed by S1 for an already visible run; no tool/PAT data."""
+        from .ees_workflow_authoring import _resolve
+        actor, _, groups = await self.service._work_actor(user)
+        with self.service._db() as db:
+            run = self.service._work_run(db, actor, groups, run_id)
+            nodes = json.loads(run['snapshot'])['definition']['nodes']
+            jobs = [dict(row) for row in db.execute('SELECT * FROM work_jobs WHERE run_id=?', (run_id,)) if nodes[row['job_id']].get('shared_tool_id')]
+        if not jobs:
+            return {}
+        native_groups = {group['id']: group['name'] for group in await self.service._native_groups()}
+        names = {}
+        for job in jobs:
+            assignee = nodes[job['job_id']].get('assignee') or {}
+            person_id = job['claim_actor'] or (assignee.get('id') if assignee.get('kind') == 'user' else '')
+            if person_id and person_id not in names:
+                person = await _resolve(self.service.user_lookup(person_id))
+                names[person_id] = _get(person, 'name', '') if person and _get(person, 'role') in ('user', 'admin') else ''
+        # Recheck authorization after Native directory awaits. Never turn the
+        # display names into a new grant or expose the full Native directory.
+        actor, _, groups = await self.service._work_actor(actor)
+        with self.service._db() as db:
+            run = self.service._work_run(db, actor, groups, run_id)
+            can_write = True
+            try:
+                self.service._work_run(db, actor, groups, run_id, write=True)
+            except WorkflowError:
+                can_write = False
+            blocked = self.version_change_blocker(db, run_id)
+            result = {}
+            for saved in db.execute('SELECT * FROM work_jobs WHERE run_id=?', (run_id,)):
+                node = nodes[saved['job_id']]
+                if not node.get('shared_tool_id'):
+                    continue
+                row = db.execute('SELECT data FROM work_shared_tools WHERE id=?', (node['shared_tool_id'],)).fetchone()
+                tool = json.loads(row[0]) if row else {}
+                allowed = bool(set(tool.get('group_ids', [])).intersection(groups))
+                assignee = node.get('assignee') or {}
+                if saved['claim_actor']:
+                    assignee_name = names.get(saved['claim_actor']) or '담당 확인 필요'
+                elif assignee.get('kind') == 'user':
+                    assignee_name = names.get(assignee.get('id')) or '담당 확인 필요'
+                elif assignee.get('kind') == 'group':
+                    assignee_name = native_groups.get(assignee.get('id')) or '담당 확인 필요'
+                else:
+                    assignee_name = '미지정'
+                result[saved['job_id']] = {'can_use': allowed,
+                    'group_names': [native_groups.get(key) or '그룹 확인 필요' for key in tool.get('group_ids', [])],
+                    'assignee_name': assignee_name,
+                    'can_accept_version': bool(can_write and allowed and not blocked)}
+            return result
 
 
     async def accept_version(self, user, body):
@@ -354,9 +427,11 @@ class SharedTools:
                 fail('shared_tool_review_required')
             previous = db.execute('SELECT data FROM work_shared_tool_pins WHERE run_kind=? AND run_id=? AND tool_id=?', ('work', run_id, key)).fetchone()
             if not previous or body.get('version') != pin['version'] or self.get(db, key)['reference'] != pin['reference']:
-                fail('shared_tool_version_changed')
-            if db.execute("SELECT 1 FROM work_jobs WHERE run_id=? AND status='running'", (run_id,)).fetchone():
-                fail('execution_running')
+                old_version = json.loads(previous[0])['version'] if previous else '미확인'
+                fail('shared_tool_version_changed', pinned=old_version, current=pin['version'])
+            blocked = self.version_change_blocker(db, run_id)
+            if blocked:
+                fail(blocked)
             db.execute('UPDATE work_shared_tool_pins SET data=? WHERE run_kind=? AND run_id=? AND tool_id=?', (_json(pin), 'work', run_id, key))
             db.execute('UPDATE work_runs SET revision=revision+1 WHERE id=?', (run_id,))
             self.service.operations._event(db, run_id, actor, 'shared_tool_accept_version', {'before': json.loads(previous[0]), 'after': pin})

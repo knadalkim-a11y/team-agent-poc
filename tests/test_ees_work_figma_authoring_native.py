@@ -229,6 +229,20 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
     def test_b10_shared_tools_list_detail_picker_style_and_keyboard(self):
         # The product uses its real HTTP/SQLite paths; only installed Native
         # metadata and session are synthetic here (real Native is a separate gate).
+        def badge_colors(selector):
+            return self.browser.evaluate("(()=>{const s=getComputedStyle(document.querySelector("+json.dumps(selector)+"));return {background:s.backgroundColor.match(/[\\d.]+/g).map(Number),foreground:s.color.match(/[\\d.]+/g).map(Number)};})()")
+
+        def assert_neutral_badge(colors):
+            # The B10 cards distinguish unreviewed gray from the warm warning
+            # badge. Check rendered colors, independent of CSS token/class names.
+            for channels in colors.values():
+                self.assertLessEqual(max(channels[:3])-min(channels[:3]), 20, colors)
+                if len(channels) == 4:
+                    self.assertGreaterEqual(channels[3], 0.95, colors)
+            self.assertGreater(sum(colors['background'][:3])/3, 180, colors)
+            self.assertLess(sum(colors['background'][:3])/3, 250, colors)
+            self.assertGreater(sum(colors['background'][:3])-sum(colors['foreground'][:3]), 240, colors)
+
         self.server.native_plugins_enabled = True
         self.native_menu_fixture()
         self.navigate('/c/existing-chat')  # Reload Native config after enabling the fixture flag.
@@ -246,6 +260,20 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.server.workflow.group_lookup = lambda _: [{'id':'shared-readers','name':'조회 팀'}]
         self.server.workflow.group_list_lookup = lambda: [{'id':'shared-readers','name':'조회 팀'}]
         items = asyncio.run(self.server.workflow.shared_tools.discover(self.server.user))
+        self.refresh(); self.open_tools(shared_list=True)
+        self.wait("document.querySelector('[data-author-action=shared_open][data-id=managed-search_pages]')")
+        self.assertEqual(self.text('#ees-work-designer > header'), '도구 · 공용')
+        self.assertEqual(self.text('[data-author-action=shared_open][data-id=managed-search_pages] .ew-author-tag'), '확인 전')
+        unreviewed_list_colors = badge_colors('[data-author-action=shared_open][data-id=managed-search_pages] .ew-author-tag')
+        assert_neutral_badge(unreviewed_list_colors)
+        self.screenshot('shared-b10-1-before-review')
+        self.click('[data-author-action=shared_open][data-id=managed-search_pages]')
+        self.assertEqual(self.text('.ew-shared-card .ew-author-tag'), '확인 전')
+        unreviewed_detail_colors = badge_colors('.ew-shared-card .ew-author-tag')
+        assert_neutral_badge(unreviewed_detail_colors)
+        self.assertTrue(self.read('[data-author-action=shared_review]', 'checkVisibility()'))
+        self.screenshot('shared-b10-2-before-review')
+        self.click('[data-author-action=shared_list]')
         with self.server.workflow._db(write=True) as db:
             for item in items:
                 if item['target']!='Confluence': continue
@@ -254,8 +282,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 db.execute('INSERT INTO work_shared_tool_versions VALUES(?,?,?)',(item['id'],1,json.dumps({'version':1,'at':1792051200,'input_schema':item['input_schema'],'output_schema':item['output_schema'],'reference':item['reference']},ensure_ascii=False)))
         wid = self.author(name='공용 도구 선택 시험', jobs=1)
         self.refresh()
-        self.open_tools()
+        self.open_tools(shared_list=True)
         self.wait("document.querySelector('[data-author-action=shared_open]')")
+        self.assertEqual(self.text('#ees-work-designer > header'), '도구 · 공용')
         self.assertNotIn('기능 연결', self.text('#ees-work-entry'))
         self.assertIn('개인 PAT(기존 방식)', self.text('#ees-work-designer'))
         self.assertIn('이전 방식 도구(관리 시스템별)', self.text('#ees-work-designer'))
@@ -270,6 +299,11 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         reference['config_hash'] = 'e'*64
         self.refresh()
         self.wait("!!document.querySelector('[data-author-action=shared_review]')")
+        self.assertEqual(self.text('.ew-shared-card .ew-author-tag'), '도구 확인 필요')
+        review_colors = badge_colors('.ew-shared-card .ew-author-tag')
+        self.assertGreater(review_colors['foreground'][0]-review_colors['foreground'][2], 40, review_colors)
+        self.assertNotEqual(unreviewed_list_colors, review_colors)
+        self.assertNotEqual(unreviewed_detail_colors, review_colors)
         self.click('[data-author-action=shared_review]')
         for label in ('항목별 비교', '현재', '새 내용', '찾을 말', '공간', '개수', '결과', '확인 근거 (필수)'):
             self.assertIn(label, self.text('#ees-work-dialog'))
@@ -306,6 +340,17 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertTrue(self.read('.ew-shared-picker','open'))
         self.assertTrue(self.browser.evaluate("!!document.querySelector('[data-author-action=pick_job_tool][data-id=managed-search_pages]')"))
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-author-action=pick_job_tool][data-id=managed-get_page]')"))
+        self.assertIn('조회', self.text('[data-author-action=pick_job_tool][data-id=managed-search_pages]'))
+        self.assertIn('필요한 도구가 없으면 관리자에게 요청하세요.', self.text('.ew-shared-picker'))
+        picker_geometry = self.browser.evaluate("(()=>{const row=document.querySelector('[data-author-action=pick_job_tool][data-id=managed-search_pages]'),name=row.querySelector('strong'),range=document.createRange();range.selectNodeContents(name.firstChild);const rect=r=>({left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height});return {row:rect(row.getBoundingClientRect()),name:rect(range.getBoundingClientRect()),badge:rect(row.querySelector('.ew-author-tag').getBoundingClientRect()),description:rect(row.querySelector(':scope > small').getBoundingClientRect())};})()")
+        badge_rect, name_rect = picker_geometry['badge'], picker_geometry['name']
+        # The card puts the read badge beside the name, with the description on
+        # its own row. A full-width badge fails both horizontal and line checks.
+        self.assertGreater(badge_rect['width'], 0, picker_geometry)
+        self.assertLess(badge_rect['width'], picker_geometry['row']['width']/2, picker_geometry)
+        self.assertGreaterEqual(badge_rect['left'], name_rect['right']-1, picker_geometry)
+        self.assertGreater(min(badge_rect['bottom'],name_rect['bottom'])-max(badge_rect['top'],name_rect['top']), min(badge_rect['height'],name_rect['height'])/2, picker_geometry)
+        self.assertGreaterEqual(picker_geometry['description']['top'], max(badge_rect['bottom'],name_rect['bottom'])-1, picker_geometry)
         self.browser.evaluate("document.querySelector('#ew-shared-picker-search').focus()")
         self.key('Tab',9)
         self.assertTrue(self.browser.evaluate("document.activeElement.matches(':focus-visible')"))
@@ -317,6 +362,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertNotIn('확정 목록에서 도구 인자 연결', self.text('#ees-work-designer'))
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ew-author-node [name=result_argument],#ew-author-node [name=result_job_id]')"))
         self.screenshot('shared-b10-5-selected-no-handoff')
+        self.fill('#ew-author-node [name=read_retry_count]', '1')
+        self.fill('#ew-author-node [name=read_retry_deadline]', '30')
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
         stored=self.state(workflow_id=wid)['workflow']['draft']['nodes']['job-0']
@@ -324,7 +371,22 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertNotIn('tool_reference',stored)
         self.assertNotIn('tool_contract_revision',stored)
         self.assertEqual(set(stored['argument_bindings']), {'query','space_key','limit'})
-        (directory/'shared-b10-comparison.json').write_text(json.dumps({'scope':'actual built product with synthetic Native session/metadata; real HTTP and SQLite','figma':{'B10-1':'1353:20386','B10-2':'1353:20597','B10-5':'1353:21167'},'detail_cards':geometry,'review_layout':review_layout,'keyboard_focus':detail_focus,'checked':['target grouping','personal PAT label','legacy group','detail sections','admin Native link','no C45 menu','usable-only single-step picker','saved shared ID without fixed reference','real query/space_key/limit schema','no redundant review button','per-field current/new comparison','Native Tools title','changed category notice','group and owner separate rows','shared list handoff controls absent','only query/space_key/limit binding keys'],'onsite':'unverified'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        self.assertEqual(stored['read_retry'], {'count': 1, 'deadline_seconds': 30})
+        self.click('[data-author-action=validate]')
+        self.wait("document.querySelector('[data-author-action=publish]')?.disabled === false")
+        self.assertEqual(self.state(workflow_id=wid)['workflow']['validation']['errors'], [])
+        self.click('[data-author-action=publish]'); self.click('[data-dialog-confirm]')
+        self.wait("document.querySelector('#ees-work-designer')?.innerText.includes('게시 v2')")
+        self.screenshot('shared-b10-5-read-retry-published')
+        self.command('save_access', principal_kind='user', principal_id=self.server.user['id'],
+            system_id='EMS', factory_id='*', roles=['manager', 'participant'])
+        self.server.user['role'] = 'user'
+        self.server.workflow.group_lookup = lambda _: []
+        self.refresh(); self.open_tools(shared_list=True)
+        self.wait("document.querySelector('#ees-work-designer')?.innerText.includes('공용 도구 0개')")
+        self.assertIn('쓸 수 있는 공용 도구가 없습니다. 필요한 도구는 관리자에게 요청하세요.', self.text('#ees-work-designer'))
+        self.screenshot('shared-b10-1-empty-list')
+        (directory/'shared-b10-comparison.json').write_text(json.dumps({'scope':'actual built product with synthetic Native session/metadata; real HTTP and SQLite','figma':{'B10-1':'1369:732','B10-2':'1368:724','B10-5':'1372:741'},'detail_cards':geometry,'review_layout':review_layout,'keyboard_focus':detail_focus,'badge_colors':{'unreviewed_list':unreviewed_list_colors,'unreviewed_detail':unreviewed_detail_colors,'review_required':review_colors},'picker_geometry':picker_geometry,'checked':['common panel heading','before-review tags in list and detail','neutral before-review badges distinct from review warning','empty visible list notice','target grouping','personal PAT label','legacy group','detail sections','admin Native link','no C45 menu','usable-only single-step picker','picker read tag beside name with description below','picker read tag and footer notice','saved shared ID without fixed reference','real query/space_key/limit schema','no redundant review button','per-field current/new comparison','Native Tools title','changed category notice','group and owner separate rows','shared list handoff controls absent','only query/space_key/limit binding keys','read retry saved and published'],'onsite':'unverified'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
     def operations(self):
         return asyncio.run(self.server.workflow.operations.state(self.server.user, system_id='EMS'))
@@ -364,10 +426,13 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertTrue(result['ok'], result)
         return result
 
-    def open_tools(self):
+    def open_tools(self, *, shared_list=False):
         self.click('[data-action="mode"][data-mode="author"]')
         self.click('[data-action="tools"]')
-        self.wait("document.querySelector('[data-author-action=tool_create]')")
+        if shared_list:
+            self.wait("document.querySelector('#ees-work-designer > header')?.textContent.trim() === '도구 · 공용' && document.querySelector('#ees-work-designer .ew-author-scroll > h2')?.textContent.startsWith('공용 도구')")
+        else:
+            self.wait("document.querySelector('[data-author-action=tool_create]')")
 
     def native_menu_fixture(self, **grants):
         """UI capability fixture only; real Native ACL is tested separately."""

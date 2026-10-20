@@ -644,6 +644,48 @@ class WorkspaceMixin:
                     impacted.add(key); changed = True
         return impacted - {job_id}
 
+    def _work_partial_confirmed(self, db, run, job):
+        """A current human-confirmed read may advance without claiming completeness."""
+        if job['status'] != 'partial' or not job['current_attempt']:
+            return False
+        attempt = db.execute('SELECT * FROM work_attempts WHERE id=?', (job['current_attempt'],)).fetchone()
+        if not attempt or attempt['status'] != 'partial': return False
+        prior = json.loads(attempt['snapshot']); node = prior['job']
+        from .ees_workflow_native import FUNCTIONS
+        reference = prior.get('tool_reference') or node.get('tool_reference') or node.get('execution', {}).get('reference') or {}
+        if node.get('mode') != 'tool' or node.get('result_block') == 'change_request' or reference.get('function') not in FUNCTIONS:
+            return False
+        if (node.get('completion') or {}).get('kind') == 'delivery': return False
+        current = self._work_snapshot(db, run, job['job_id'])
+        if run['status'] not in TERMINAL and (json.loads(attempt['inputs']) != current['inputs'] or
+                (prior.get('deadline_source') or {}).get('value') != (current.get('deadline_source') or {}).get('value') or
+                not self._work_sources_current(db, run, prior)):
+            return False
+        result = json.loads(attempt['result'] or '{}')
+        required = {str(item['id']) for item in result.get('items', []) if isinstance(item, dict) and 'id' in item and item.get('required', True)
+                    and (node.get('result_block') != 'list_confirm' or item.get('selected', True))}
+        if node.get('result_block') == 'list_confirm' and not required: return False
+        decisions = {row['item_id']: row['verdict'] for row in db.execute('SELECT item_id,verdict FROM work_decisions WHERE attempt_id=?', (attempt['id'],))}
+        return all(decisions.get(item) == 'completed' for item in (required or {'job'}))
+
+    def _work_partial_prerequisites(self, db, run, job_id):
+        definition = json.loads(run['snapshot'])['definition']
+        pending = list(self._work_prerequisite_jobs(definition, job_id)); seen = set(); partials = []
+        while pending:
+            key = pending.pop()
+            if key in seen: continue
+            seen.add(key)
+            row = db.execute('SELECT * FROM work_jobs WHERE run_id=? AND job_id=?', (run['id'], key)).fetchone()
+            if row and self._work_partial_confirmed(db, run, row):
+                partials.append({'job_id': key, 'name': definition['nodes'][key]['name'], 'attempt_id': row['current_attempt']})
+            pending.extend(self._work_prerequisite_jobs(definition, key))
+        return sorted(partials, key=lambda item: item['job_id'])
+
+    @staticmethod
+    def _work_shared_search(node, attempt):
+        snapshot = json.loads(attempt['snapshot'])
+        return bool(node.get('shared_tool_id') and snapshot.get('shared_tool', {}).get('reference', {}).get('function') == 'search_pages')
+
     def _work_dependencies_ready(self, db, run_id, definition, job_id):
         node = definition['nodes'][job_id]
         resolved_policy = node.get('dependency_policy') == 'all_resolved' and node.get('mode') == 'ai' and node.get('result_block') == 'ai_review'
@@ -653,6 +695,7 @@ class WorkspaceMixin:
             if not job: return False
             if job['reason'] == 'delivery_unconfigured': return False
             if job['status'] == 'completed': continue
+            if self._work_partial_confirmed(db, run, job): continue
             if not resolved_policy or not job['current_attempt']: return False
             attempt = db.execute('SELECT * FROM work_attempts WHERE id=?', (job['current_attempt'],)).fetchone()
             current = self._work_snapshot(db, run, dependency)
@@ -734,6 +777,7 @@ class WorkspaceMixin:
         snapshot['actor_id'] = actor_id
         snapshot['options'] = deepcopy(options_snapshot or {})
         snapshot['prerequisite_sources'] = self._work_prerequisite_sources(db, run, job_id)
+        snapshot['partial_prerequisites'] = self._work_partial_prerequisites(db, run, job_id)
         db.execute('INSERT INTO work_attempts VALUES(?,?,?,?,?,?,?,?,NULL,?,NULL)',
                    (attempt_id, run_id, job_id, number, actor_id, _dump(snapshot['inputs']), _dump(snapshot), 'running', now))
         db.execute("UPDATE work_jobs SET status='running',revision=revision+1,current_attempt=?,claim_actor=?,reason='' WHERE run_id=? AND job_id=?", (attempt_id, actor_id, run_id, job_id))
@@ -885,6 +929,10 @@ class WorkspaceMixin:
             job['missing_inputs'] = input_errors(value['definition']['nodes'][job['job_id']].get('inputs', []), effective['inputs'], options_snapshot=(current or {}).get('snapshot', {}).get('options'))
             job['result_stale'] = bool(row['status'] not in TERMINAL and current and current['actor_id'] == _value(actor, 'id') and not current.get('evidence_access') and (current['inputs'] != effective['inputs'] or (current['snapshot'].get('deadline_source') or {}).get('value') != (effective.get('deadline_source') or {}).get('value') or not self._work_sources_current(db, row, current['snapshot'])))
             job['decisions'] = [dict(item) for item in db.execute('SELECT * FROM work_decisions WHERE run_id=? AND job_id=? ORDER BY created_at,id', (row['id'], job['job_id']))]
+            job['partial_confirmed'] = self._work_partial_confirmed(db, row, job)
+            job['partial_prerequisites'] = (current.get('snapshot', {}).get('partial_prerequisites') if current else None)
+            if job['partial_prerequisites'] is None:
+                job['partial_prerequisites'] = self._work_partial_prerequisites(db, row, job['job_id'])
         for job in jobs.values():
             current_decisions = [item for item in job['decisions'] if item['attempt_id'] == job['current_attempt']]
             job['decision_summary'] = {'confirmed': len(current_decisions), 'all_approved': job['status'] == 'completed' and bool(current_decisions) and all(item['verdict'] == 'completed' for item in current_decisions)}
@@ -893,7 +941,9 @@ class WorkspaceMixin:
         value['jobs'], value['attempts'] = jobs, attempts
         value['progress'] = {'completed': sum(item['status'] == 'completed' for item in jobs.values()),
                              'total': sum(item['status'] != 'excluded' for item in jobs.values()),
-                             'excluded': sum(item['status'] == 'excluded' for item in jobs.values())}
+                             'excluded': sum(item['status'] == 'excluded' for item in jobs.values()),
+                             'confirmed_partial': sum(item['partial_confirmed'] for item in jobs.values())}
+        value['progress']['remaining'] = value['progress']['total'] - value['progress']['completed'] - value['progress']['confirmed_partial']
         value['chat_links'] = [item['chat_id'] for item in db.execute('SELECT chat_id FROM work_chat_links WHERE actor_id=? AND run_id=?', (_value(actor, 'id'), row['id']))]
         return value
 
@@ -937,6 +987,7 @@ class WorkspaceMixin:
                 if assigned and assigned.get('id') not in ({_value(actor, 'id')} if assigned.get('kind') == 'user' else groups):
                     continue
                 actionable = bool(job.get('missing_inputs') and job['status'] == 'pending') or job['status'] in ('waiting_input', 'waiting_confirmation', 'review_required', 'failed', 'partial', 'unknown', 'blocked', 'missed') or (node.get('mode', 'human') == 'human' and job['status'] == 'pending')
+                if job.get('partial_confirmed'): actionable = False
                 if not actionable:
                     continue
                 if not self._work_dependencies_ready(db, run['id'], definition, key):
@@ -1599,15 +1650,20 @@ class WorkspaceMixin:
                 for key, node in definition['nodes'].items():
                     if changed.intersection({field['id'] for field in node.get('inputs', [])} | {(node.get('deadline') or {}).get('input')}):
                         for affected in {key} | self._work_dependent_ids(definition, key):
-                            db.execute("UPDATE work_jobs SET status='review_required',revision=revision+1,reason='입력 변경 후 재확인 필요' WHERE run_id=? AND job_id=? AND status IN ('completed','waiting_confirmation')", (row['id'], affected))
+                            db.execute("UPDATE work_jobs SET status='review_required',revision=revision+1,reason='입력 변경 후 재확인 필요' WHERE run_id=? AND job_id=? AND status IN ('completed','waiting_confirmation','partial')", (row['id'], affected))
             elif action in ('close_run', 'cancel_run'):
                 unresolved = db.execute("SELECT 1 FROM work_external_requests WHERE run_id=? AND state IN ('requested','accepted','running','reported_complete','unknown') LIMIT 1", (row['id'],)).fetchone()
                 if unresolved:
                     _fail('external_request_unresolved', '이전 EES 요청의 접수와 효과를 먼저 확인해 주세요. 종료는 요청 취소나 복구를 대신하지 않습니다.')
                 jobs = list(db.execute('SELECT * FROM work_jobs WHERE run_id=?', (row['id'],)))
                 if any(job['status'] == 'running' for job in jobs): _fail('execution_running', '실행 결과를 확인한 뒤 종료해 주세요.')
-                if action == 'close_run' and any(job['status'] not in ('completed', 'excluded') for job in jobs): _fail('completion_required', '필수 작업의 판정을 먼저 해결해 주세요.')
+                confirmed_partials = [job for job in jobs if self._work_partial_confirmed(db, row, job)]
+                if action == 'close_run' and any(job['status'] not in ('completed', 'excluded') and job not in confirmed_partials for job in jobs): _fail('completion_required', '필수 작업의 판정을 먼저 해결해 주세요.')
                 if action == 'cancel_run' and not str(body.get('reason', '')).strip(): _fail('reason_required', '취소 이유를 기록해 주세요.')
+                if action == 'close_run':
+                    snapshot = json.loads(row['snapshot'])
+                    snapshot['closure_summary'] = {'partial_jobs': [{'job_id': job['job_id'], 'name': snapshot['definition']['nodes'][job['job_id']]['name'], 'attempt_id': job['current_attempt']} for job in confirmed_partials], 'closed_by': actor_id, 'closed_at': now}
+                    db.execute('UPDATE work_runs SET snapshot=? WHERE id=?', (_dump(snapshot), row['id']))
                 db.execute('UPDATE work_runs SET status=?,closed_at=? WHERE id=?', ('completed' if action == 'close_run' else 'cancelled', now, row['id']))
             else:
                 job_id = body.get('job_id'); job = db.execute('SELECT * FROM work_jobs WHERE run_id=? AND job_id=?', (row['id'], job_id)).fetchone()
@@ -1666,7 +1722,8 @@ class WorkspaceMixin:
                     for item in items:
                         item['selected'] = item.get('selected', True)
                         item['required'] = item['selected']
-                    if not any(item['selected'] for item in items):
+                    empty_selection = not any(item['selected'] for item in items)
+                    if empty_selection and not self._work_shared_search(node, current):
                         _fail('zero_selection_policy_required', '선택 항목이 없는 목록의 완료 정책이 정해지지 않았습니다. 확정을 보류합니다.')
                     original = json.loads(current['result']) or {}
                     previous = original.get('items', [])
@@ -1684,6 +1741,8 @@ class WorkspaceMixin:
                     for item in items:
                         if item['selected']:
                             self._work_decide(db, actor, row, job, node, {'result_revision': current['number'], 'item_id': item['id'], 'verdict': 'completed', 'note': str(body.get('reason', ''))})
+                    if empty_selection:
+                        self._work_decide(db, actor, row, job, node, {'result_revision': current['number'], 'item_id': 'job', 'verdict': 'completed', 'note': str(body.get('reason', ''))})
                 elif action == 'release_task':
                     if job['claim_actor'] != actor_id:
                         _fail('claim_owner_required', '현재 담당자 본인만 맡은 작업을 내려놓을 수 있습니다.')
@@ -1718,7 +1777,7 @@ class WorkspaceMixin:
                     attempt = self._work_begin_attempt(db, actor, groups, row['id'], job_id, row['revision'], options_snapshot=options_snapshot)
                     # Manual list edits retain the source/model evidence that
                     # justified the original result, including future ACL checks.
-                    for field in ('source_references', 'evidence_attempt_ids', 'model', 'skills', 'argument_sources', 'arguments'):
+                    for field in ('source_references', 'evidence_attempt_ids', 'model', 'skills', 'argument_sources', 'arguments', 'shared_tool', 'tool_reference'):
                         if field in prior_snapshot:
                             attempt['snapshot'][field] = deepcopy(prior_snapshot[field])
                     db.execute("UPDATE work_attempts SET snapshot=? WHERE id=? AND status='running'", (_dump(attempt['snapshot']), attempt['id']))
@@ -1777,10 +1836,17 @@ class WorkspaceMixin:
         result = json.loads(attempt['result']) if attempt['result'] else {}
         items = result.get('items', []) if isinstance(result, dict) else []
         required = {str(item['id']) for item in items if isinstance(item, dict) and 'id' in item and item.get('required', True)}
+        shared_empty_selection = False
         if node.get('result_block') == 'list_confirm':
             required = {str(item['id']) for item in items if isinstance(item, dict) and 'id' in item and item.get('required', True) and item.get('selected', True)}
             if not required and verdict == 'completed':
-                _fail('zero_selection_policy_required', '선택 항목이 없는 목록의 완료 정책이 정해지지 않았습니다. 확정을 보류합니다.')
+                shared_empty_selection = self._work_shared_search(node, attempt)
+                if not shared_empty_selection:
+                    _fail('zero_selection_policy_required', '선택 항목이 없는 목록의 완료 정책이 정해지지 않았습니다. 확정을 보류합니다.')
+                # The source classification survives amendments and is never
+                # inferred from a user-edited list becoming empty.
+                message = '0건 확인' if result.get('completeness') == 'empty' else '맞는 문서 없음 · 0개 선택'
+                note = message + ('\n' + note[:3900] if note and note != message else '')
         if node.get('result_block') == 'item_verdict' and items:
             if item_id not in {str(item['id']) for item in items if isinstance(item, dict) and 'id' in item}:
                 _fail('item_not_found', '현재 결과의 항목을 선택해 주세요.')
@@ -1809,7 +1875,7 @@ class WorkspaceMixin:
         if resolved:
             meanings = {item['verdict'] for item in decisions if not required or item['item_id'] in required}
             state = 'completed' if meanings == {'completed'} else 'failed' if 'failed' in meanings else 'unknown' if 'unknown' in meanings else 'waiting_input'
-            if attempt['status'] == 'partial' and state == 'completed': state = 'partial'
+            if attempt['status'] == 'partial' and state == 'completed' and not shared_empty_selection: state = 'partial'
         reason = job['reason']
         if state == 'completed' and isinstance(node.get('completion'), dict) and node['completion'].get('kind') == 'delivery':
             # Reviewing a draft is evidence of review, never evidence of send.

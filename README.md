@@ -22,7 +22,7 @@ EES 팀의 문서 조회와 업무 처리를 대화·워크플로우 화면으�
 | 어디까지 구현·검증·사내 적용됐는가 | [STATUS](docs/STATUS.md)와 거기서 연결한 PR·Checks·[평가 기록](evals/v4-ui-20260930.md) | 설계 확정·코드 구현·CI 검증·사내 확인을 구분 |
 | 개발 AI는 어떻게 작업하는가 | [AGENTS.md](AGENTS.md), Claude Code 진입은 [CLAUDE.md](CLAUDE.md) | 같은 지침 원본을 사용하며 기능별 상세 문서는 필요할 때 읽음 |
 
-**공용 도구를 찾는 예:** [main의 기능 계약](docs/mockups/ees-work/TASK.md#shared-tools-phase1-20261015)에서 시작해 [B10-1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1369-732)·[B10-2](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1368-724)·[B10-5](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1372-741) 카드를 연결합니다. 명세 시범의 [검토본](https://github.com/knadalkim-a11y/team-agent-poc/blob/9de04fb42120ca99dff7b17065b4d14faf47078b/docs/specs/shared-tools.md)은 [PR #96](https://github.com/knadalkim-a11y/team-agent-poc/pull/96)의 별도 변경입니다. 대상 브랜치에 반영됐는지 먼저 확인하고, 미병합 검토본의 동작을 main 구현으로 간주하지 않습니다. 기능 명세가 반영된 브랜치에서는 명세 → 카드 → 명세에 연결된 코드·시험 순서로 읽습니다.
+**공용 도구를 찾는 예:** [공용 도구 기능 명세](docs/specs/shared-tools.md)에서 시작해 [B10-1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1369-732)·[B10-2](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1368-724)·[B10-5](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1372-741) 카드와 명세에 연결된 코드·시험 순서로 읽습니다. 이전 설계·결정 과정은 [TASK의 기능 계약](docs/mockups/ees-work/TASK.md#shared-tools-phase1-20261015)과 [PR #96](https://github.com/knadalkim-a11y/team-agent-poc/pull/96)에 보존하며, 구현·최종 검증·실제 적용 상태는 [STATUS](docs/STATUS.md)에서 구분합니다.
 
 설계 관리의 이번 정리 범위와 Figma 후속 대상은 [작은 개선 계획](docs/mockups/ees-work/TASK.md#design-maintenance-20261016)에 모았습니다.
 
@@ -96,6 +96,7 @@ Claude Code에서는 루트 [CLAUDE.md](CLAUDE.md)가 `AGENTS.md`를 가져오�
 | [tests/](tests/) | 자동 실행하는 검증 코드 |
 | [evals/](evals/) | 합격 기준·실환경 판정·날짜별 검증 증거 |
 | [docs/](docs/) | 설치·연동·장애 대응 방법 |
+| [docs/specs/](docs/specs/shared-tools.md) | 기능별 명세(시범): 입력 조건·상태 변화·권한·저장/반영 시점·완료 기준. 화면 배치·문구는 Figma 명세 카드 |
 | [versions.md](versions.md) | 의존 버전·환경 기준 |
 | [CHANGELOG.md](CHANGELOG.md) | 완료된 변경과 과거 관찰·결정 |
 

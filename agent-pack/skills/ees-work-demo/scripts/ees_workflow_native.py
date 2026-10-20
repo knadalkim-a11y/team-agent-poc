@@ -91,8 +91,9 @@ def _hash(value):
     return hashlib.sha256((value if isinstance(value, str) else _json(value)).encode("utf-8")).hexdigest()
 
 
-def _fail(code, message="등록 기능의 현재 권한·검증 버전을 확인해 주세요."):
-    raise WorkflowError(code, message)
+def _fail(code, message="등록 기능의 현재 권한·검증 버전을 확인해 주세요.", **values):
+    from .ees_workflow_shared_tools import message_for
+    raise WorkflowError(code, message_for(code, message, **values))
 
 
 def _now():
@@ -275,8 +276,8 @@ def normalize_result(function, raw, reference, context, secrets=(), *, trusted_r
     if data["ok"] is not True and not structured_partial:
         code = _get(data.get("error", {}), "code", "native_call_failed")
         code = code if isinstance(code, str) and re.fullmatch(r"[a-z_]{1,80}", code) else "native_call_failed"
-        personal = {"pat_required": "개인 PAT 필요 · 기존 도구의 개인 설정에 본인 PAT를 저장하세요. 채팅에 입력하지 마세요.", "encryption_required": "개인 PAT 필요 · 관리자에게 개인 설정 암호화를 요청하세요. 채팅에 PAT를 입력하지 마세요.", "authentication_failed": "개인 PAT 필요 · 기존 도구 개인 설정에서 본인 PAT의 만료·권한을 확인하세요. 채팅에 입력하지 마세요."}
-        envelope["error"] = {"code": code, "message": personal.get(code, "등록 도구의 조회가 완료되지 않았습니다. 연결·권한과 실행 상세를 확인해 주세요.")}
+        from .ees_workflow_shared_tools import message_for
+        envelope["error"] = {"code": code, "message": message_for(code, "등록 도구의 조회가 완료되지 않았습니다. 연결·권한과 실행 상세를 확인해 주세요.")}
         # Do not persist arbitrary plugin exception/error strings.
         envelope["data"] = {"ok": False, "error": envelope["error"]}
         if trusted_read is True and function in FUNCTIONS and code == "upstream_error":
@@ -639,7 +640,7 @@ class NativeBridge:
             _fail("native_version_changed")
         if not result["executable"]:
             if result["reason"] == "native_personal_connection_required":
-                _fail(result["reason"], "개인 PAT 필요 · 기존 도구의 개인 설정에 본인 PAT를 저장하세요. 채팅에 입력하지 마세요.")
+                _fail(result["reason"])
             _fail(result["reason"])
         return result
 
@@ -655,7 +656,7 @@ class NativeBridge:
         from open_webui.utils.tools import get_async_tool_function_and_apply_extra_params
         user_valves = await Tools.get_user_valves_by_id_and_user_id(reference["tool_id"], _get(current, "id"))
         if not isinstance(user_valves, dict) or not isinstance(user_valves.get("PAT"), str) or not user_valves["PAT"]:
-            _fail("native_personal_connection_required", "본인의 기존 도구 개인 설정에서 연결을 준비해 주세요.")
+            _fail("native_personal_connection_required")
         # A final current check closes reads that awaited Native settings. Pass
         # the exact content snapshot explicitly; get_tools' shared cache is not
         # suitable for concurrent per-user workflow calls. The loader's own
@@ -683,7 +684,14 @@ class NativeBridge:
             if context.get("shared_tool_id"):
                 pin = await self.service.shared_tools.resolve(current, context["shared_tool_id"], kind=context["shared_run_kind"], run_id=context["run_id"])
                 if pin["reference"] != reference:
-                    _fail("shared_tool_version_changed")
+                    previous_version = '미확인'
+                    with self.service._db() as db:
+                        for row in db.execute('SELECT data FROM work_shared_tool_versions WHERE tool_id=?', (context['shared_tool_id'],)):
+                            version = json.loads(row[0])
+                            if version['reference'] == reference:
+                                previous_version = version['version']
+                                break
+                    _fail("shared_tool_version_changed", pinned=previous_version, current=pin['version'])
             raw = await bound(**deepcopy(arguments))
         except WorkflowError:
             raise
