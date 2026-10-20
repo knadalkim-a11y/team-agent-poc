@@ -1,0 +1,7043 @@
+{
+  "head": "27082302d6465fc94db9b394fc061ed7ca4ecd2f",
+  "run": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39350471568",
+  "job": 118394782986,
+  "artifact": 12233810369,
+  "artifact_zip_sha256": "8aabdd94555d7df9f970ece5318d6677eb1a66efb82e22cdc296ae257d243876",
+  "format": "Selected original records; not complete frame captures. Source SHA256 identifies downloaded original files. Raw artifact retains all 266 files.",
+  "cases": [
+    {
+      "test": "test_ees_motion_native.MotionNativeTests.test_c3_dialog_and_help_close_preserve_draft_and_release_modal_blocker",
+      "failure_json_sha256": "92de68ed234c1c1452a87fcba83b25c3250e9f965e9f42c2df92092312cbf74a",
+      "last_wait": "document.activeElement?.matches('[data-author-action=create]')",
+      "last_click": "[data-author-action=create]",
+      "capture_errors": [],
+      "dom": {
+        "route": "/c/existing-chat",
+        "ready": "complete",
+        "fonts": "loaded",
+        "controls": [
+          {
+            "id": "",
+            "label": "사이드바 펼치기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 15.5,
+              "y": 12,
+              "width": 24,
+              "height": 24
+            }
+          },
+          {
+            "id": "",
+            "action": "mode",
+            "label": null,
+            "text": "업무",
+            "disabled": false,
+            "rect": {
+              "x": 11,
+              "y": 51,
+              "width": 33,
+              "height": 38
+            }
+          },
+          {
+            "id": "",
+            "action": "mode",
+            "label": null,
+            "text": "워크스페이스",
+            "disabled": false,
+            "rect": {
+              "x": 11,
+              "y": 91,
+              "width": 33,
+              "height": 38
+            }
+          },
+          {
+            "id": "ees-work-system-trigger",
+            "label": "시스템 선택",
+            "text": "EMS담당",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 142,
+              "width": 39,
+              "height": 38
+            }
+          },
+          {
+            "id": "",
+            "action": "procedures",
+            "label": null,
+            "text": "업무 절차3",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 192,
+              "width": 39,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "tools",
+            "label": null,
+            "text": "도구10",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 229,
+              "width": 39,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "workspace_admin",
+            "label": null,
+            "text": "공장·접근 범위",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 265,
+              "width": 39,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "workflow",
+            "label": null,
+            "text": "일일 시스템 점검",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "action": "workflow",
+            "label": null,
+            "text": "신규 공장 횡전개",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "action": "workflow",
+            "label": null,
+            "text": "배포 산출물 점검",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "sidebar-new-chat-button",
+            "label": null,
+            "text": "새 대화",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 309,
+              "width": 39,
+              "height": 34
+            }
+          },
+          {
+            "id": "sidebar-search-button",
+            "label": null,
+            "text": "대화 검색",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 347,
+              "width": 39,
+              "height": 34
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "폴더 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "새 폴더",
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "채팅 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "더보기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "sidebar-chat-item",
+            "label": null,
+            "text": "   기존 대화 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "Chat Menu",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "delete-chat-button",
+            "label": "삭제",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "sidebar-chat-item",
+            "label": null,
+            "text": "   기존 대화 56년 전",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "Chat Menu",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "  Fixture Administrator",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "사용자 메뉴",
+            "text": "  Fixture Administrator",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 726,
+              "width": 39,
+              "height": 34
+            }
+          },
+          {
+            "id": "new-chat-button",
+            "label": "New Chat",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "chat-context-menu-button",
+            "label": "Chat actions",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 113.6875,
+              "y": 10.5,
+              "width": 24,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "action": "new_chat",
+            "label": null,
+            "text": "새 대화",
+            "disabled": false,
+            "rect": {
+              "x": 895.6875,
+              "y": 10.5,
+              "width": 48.3125,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "label": "Controls",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 952,
+              "y": 10.5,
+              "width": 24,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "label": "편집",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 852,
+              "y": 208.75,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "복사",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 880,
+              "y": 208.75,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "질문",
+            "text": " 질문",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "설명",
+            "text": " 설명",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "편집",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 188,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "복사",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 216,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "speak-button-previous-answer",
+            "label": "읽어주기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 244,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "좋은 응답",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 272,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "잘못된 응답",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 300,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "continue-response-button",
+            "label": "응답 이어 받기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 328,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "재생성",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 356,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "Fork chat",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 384,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "confirm-recording-button",
+            "label": "Confirm recording",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "generate-message-pair-button",
+            "label": "Generate message pair",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "input-menu-button",
+            "label": "더보기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 157,
+              "y": 713,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "voice-input-button",
+            "label": "Voice Input",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 832.5,
+              "y": 713,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "send-message-button",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 869,
+              "y": 713,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "",
+            "action": "close_panel",
+            "label": "업무 패널 닫기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 960,
+              "y": 9.5,
+              "width": 30,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "새 절차",
+            "disabled": false,
+            "rect": {
+              "x": 627.25,
+              "y": 62,
+              "width": 65.359375,
+              "height": 34
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "신규 공장 횡전개 초안2026. 10. 20. 01:02 저장 · 미게시 · 이어서 작성하기",
+            "disabled": false,
+            "rect": {
+              "x": 442,
+              "y": 209,
+              "width": 537,
+              "height": 65
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "일일 시스템 점검 초안2026. 10. 20. 01:02 저장 · 미게시 · 이어서 작성하기",
+            "disabled": false,
+            "rect": {
+              "x": 442,
+              "y": 326,
+              "width": 537,
+              "height": 65
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "배포 산출물 점검 초안2026. 10. 20. 01:02 저장 · 미게시 · 이어서 작성하기",
+            "disabled": false,
+            "rect": {
+              "x": 442,
+              "y": 391,
+              "width": 537,
+              "height": 66
+            }
+          }
+        ],
+        "navigationAncestors": [
+          {
+            "tag": "SECTION",
+            "id": "ees-work-entry",
+            "display": "block",
+            "visibility": "visible",
+            "width": 55,
+            "height": 253
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 55,
+            "height": 669
+          },
+          {
+            "tag": "ASIDE",
+            "id": "sidebar",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 56,
+            "height": 768
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 1000,
+            "height": 768
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 1000,
+            "height": 768
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1000,
+            "height": 768
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "contents",
+            "visibility": "visible",
+            "width": 0,
+            "height": 0
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "contents",
+            "visibility": "visible",
+            "width": 0,
+            "height": 0
+          },
+          {
+            "tag": "BODY",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1000,
+            "height": 768
+          },
+          {
+            "tag": "HTML",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1000,
+            "height": 768
+          }
+        ]
+      },
+      "browser_product": "Chrome/155.0.8059.84",
+      "frames_json_sha256": "255245467afeae8500c69d1fe16eeac7129a8aa929b7280d7328038946f472fb",
+      "frame_count": 574,
+      "first_frame": {
+        "t": 1372,
+        "nodes": [
+          {
+            "kind": "backdrop",
+            "state": "",
+            "id": "",
+            "opacity": 1,
+            "transform": "none",
+            "width": 0,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": true,
+            "ariaHidden": "true",
+            "pointerEvents": "auto",
+            "modal": false
+          },
+          {
+            "kind": "panel-overlay",
+            "state": "",
+            "id": "",
+            "opacity": 1,
+            "transform": "none",
+            "width": 580,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": false,
+            "ariaHidden": null,
+            "pointerEvents": "auto",
+            "modal": false
+          },
+          {
+            "kind": "panel-content",
+            "state": "",
+            "id": "ees-work-panel",
+            "opacity": 1,
+            "transform": "none",
+            "width": 579,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": false,
+            "ariaHidden": null,
+            "pointerEvents": "auto",
+            "modal": false
+          }
+        ],
+        "scopeCount": 0,
+        "dialogCount": 0,
+        "chatWidth": 1084,
+        "panelWidth": 580
+      },
+      "last_frame": {
+        "t": 10921.199999999997,
+        "nodes": [
+          {
+            "kind": "backdrop",
+            "state": "",
+            "id": "",
+            "opacity": 1,
+            "transform": "none",
+            "width": 944,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": false,
+            "ariaHidden": "true",
+            "pointerEvents": "auto",
+            "modal": false
+          },
+          {
+            "kind": "panel-overlay",
+            "state": "",
+            "id": "",
+            "opacity": 1,
+            "transform": "none",
+            "width": 580,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": false,
+            "ariaHidden": null,
+            "pointerEvents": "auto",
+            "modal": false
+          },
+          {
+            "kind": "panel-content",
+            "state": "",
+            "id": "ees-work-panel",
+            "opacity": 1,
+            "transform": "none",
+            "width": 579,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": false,
+            "ariaHidden": null,
+            "pointerEvents": "auto",
+            "modal": false
+          }
+        ],
+        "scopeCount": 0,
+        "dialogCount": 0,
+        "chatWidth": 944,
+        "panelWidth": 580
+      },
+      "inputs": [
+        {
+          "type": "pointerdown",
+          "key": "",
+          "trusted": true,
+          "t": 1397.300000000003,
+          "opening": false,
+          "closing": false,
+          "composer": false
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "trusted": true,
+          "t": 1418.800000000003,
+          "opening": true,
+          "closing": false,
+          "composer": false
+        },
+        {
+          "type": "pointerdown",
+          "key": "",
+          "trusted": true,
+          "t": 1434.5,
+          "opening": false,
+          "closing": true,
+          "composer": true
+        },
+        {
+          "type": "pointerdown",
+          "key": "",
+          "trusted": true,
+          "t": 1672.5,
+          "opening": false,
+          "closing": false,
+          "composer": false
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "trusted": true,
+          "t": 1686.300000000003,
+          "opening": true,
+          "closing": false,
+          "composer": false
+        }
+      ],
+      "events": [
+        {
+          "t": 1411.699999999997,
+          "type": "state",
+          "kind": "dialog",
+          "state": "opening",
+          "id": "ees-work-dialog",
+          "opacity": 0,
+          "transform": "matrix(0.98, 0, 0, 0.98, 0, 0)",
+          "width": 474.3199462890625,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": true
+        },
+        {
+          "t": 1426.800000000003,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 1920,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1426.8999999999942,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 1920,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1426.8999999999942,
+          "type": "state",
+          "kind": "dialog",
+          "state": "closing",
+          "id": "ees-work-dialog",
+          "opacity": 0,
+          "transform": "matrix(0.98, 0, 0, 0.98, 0, 0)",
+          "width": 474.320068359375,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1427,
+          "type": "state",
+          "kind": "dialog",
+          "state": "closing",
+          "id": "ees-work-dialog",
+          "opacity": 0,
+          "transform": "matrix(0.98, 0, 0, 0.98, 0, 0)",
+          "width": 474.320068359375,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1455.199999999997,
+          "type": "animationstart",
+          "kind": "dialog",
+          "state": "closing",
+          "id": "ees-work-dialog",
+          "opacity": 0,
+          "transform": "matrix(0.98, 0, 0, 0.98, 0, 0)",
+          "width": 474.320068359375,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1455.699999999997,
+          "type": "animationstart",
+          "kind": "backdrop",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 1920,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1605,
+          "type": "animationend",
+          "kind": "dialog",
+          "state": "closing",
+          "id": "ees-work-dialog",
+          "opacity": 0,
+          "transform": "matrix(0.98, 0, 0, 0.98, 0, 0)",
+          "width": 474.320068359375,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1685.0999999999913,
+          "type": "state",
+          "kind": "dialog",
+          "state": "opening",
+          "id": "ees-work-dialog",
+          "opacity": 0,
+          "transform": "matrix(0.98, 0, 0, 0.98, 0, 0)",
+          "width": 474.3200378417969,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": true
+        },
+        {
+          "t": 1692.3999999999942,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 1000,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1692.5,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 1000,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1692.5,
+          "type": "state",
+          "kind": "dialog",
+          "state": "closing",
+          "id": "ees-work-dialog",
+          "opacity": 0,
+          "transform": "matrix(0.98, 0, 0, 0.98, 0, 0)",
+          "width": 474.3200378417969,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1692.5,
+          "type": "state",
+          "kind": "dialog",
+          "state": "closing",
+          "id": "ees-work-dialog",
+          "opacity": 0,
+          "transform": "matrix(0.98, 0, 0, 0.98, 0, 0)",
+          "width": 474.3200378417969,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1704.8999999999942,
+          "type": "animationstart",
+          "kind": "dialog",
+          "state": "closing",
+          "id": "ees-work-dialog",
+          "opacity": 0,
+          "transform": "matrix(0.98, 0, 0, 0.98, 0, 0)",
+          "width": 474.3200378417969,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1705,
+          "type": "animationstart",
+          "kind": "backdrop",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 1000,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1838.199999999997,
+          "type": "animationend",
+          "kind": "dialog",
+          "state": "closing",
+          "id": "ees-work-dialog",
+          "opacity": 0,
+          "transform": "matrix(0.98, 0, 0, 0.98, 0, 0)",
+          "width": 474.3200378417969,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        }
+      ],
+      "rendered_closing_inert_false": []
+    },
+    {
+      "test": "test_ees_motion_native.MotionNativeTests.test_c3_overlay_panel_closing_releases_hit_testing_and_restores_focus",
+      "failure_json_sha256": "1bd21c845715e762df620eb14d2b62eeff55b7d579535f1ef1aef27eb5877934",
+      "last_wait": "document.querySelector('.ees-panel-region').hidden",
+      "last_click": "#ees-work-panel [data-action=close_panel]",
+      "capture_errors": [],
+      "dom": {
+        "route": "/c/existing-chat",
+        "ready": "complete",
+        "fonts": "loaded",
+        "controls": [
+          {
+            "id": "",
+            "label": "사이드바 펼치기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 15.5,
+              "y": 12,
+              "width": 24,
+              "height": 24
+            }
+          },
+          {
+            "id": "",
+            "action": "mode",
+            "label": null,
+            "text": "업무",
+            "disabled": false,
+            "rect": {
+              "x": 11,
+              "y": 51,
+              "width": 33,
+              "height": 38
+            }
+          },
+          {
+            "id": "",
+            "action": "mode",
+            "label": null,
+            "text": "워크스페이스",
+            "disabled": false,
+            "rect": {
+              "x": 11,
+              "y": 91,
+              "width": 33,
+              "height": 38
+            }
+          },
+          {
+            "id": "ees-work-site-trigger",
+            "label": "공장 선택",
+            "text": "공장전체 공장",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 142,
+              "width": 39,
+              "height": 38
+            }
+          },
+          {
+            "id": "ees-work-system-trigger",
+            "label": "시스템 선택",
+            "text": "시스템EMS",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 179,
+              "width": 39,
+              "height": 38
+            }
+          },
+          {
+            "id": "",
+            "action": "my_work",
+            "label": "내 업무",
+            "text": "내 업무",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 229,
+              "width": 39,
+              "height": 34
+            }
+          },
+          {
+            "id": "",
+            "action": "records",
+            "label": "실행 기록",
+            "text": "실행 기록",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 263,
+              "width": 39,
+              "height": 34
+            }
+          },
+          {
+            "id": "",
+            "action": "chats",
+            "label": "대화 기록",
+            "text": "대화 기록",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 297,
+              "width": 39,
+              "height": 34
+            }
+          },
+          {
+            "id": "",
+            "label": "운영",
+            "text": "운영",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 346,
+              "width": 39,
+              "height": 32
+            }
+          },
+          {
+            "id": "",
+            "label": "셋업",
+            "text": "셋업",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 382,
+              "width": 39,
+              "height": 32
+            }
+          },
+          {
+            "id": "",
+            "label": "장애대응",
+            "text": "장애대응",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 418,
+              "width": 39,
+              "height": 32
+            }
+          },
+          {
+            "id": "sidebar-new-chat-button",
+            "label": null,
+            "text": "새 대화",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 462,
+              "width": 39,
+              "height": 34
+            }
+          },
+          {
+            "id": "sidebar-search-button",
+            "label": null,
+            "text": "대화 검색",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 500,
+              "width": 39,
+              "height": 34
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "폴더 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "새 폴더",
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "채팅 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "더보기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "sidebar-chat-item",
+            "label": null,
+            "text": "   기존 대화 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "Chat Menu",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "delete-chat-button",
+            "label": "삭제",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "sidebar-chat-item",
+            "label": null,
+            "text": "   기존 대화 56년 전",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "Chat Menu",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "  Fixture Administrator",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "사용자 메뉴",
+            "text": "  Fixture Administrator",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 726,
+              "width": 39,
+              "height": 34
+            }
+          },
+          {
+            "id": "new-chat-button",
+            "label": "New Chat",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "chat-context-menu-button",
+            "label": "Chat actions",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 113.6875,
+              "y": 10.5,
+              "width": 24,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "action": "new_chat",
+            "label": null,
+            "text": "새 대화",
+            "disabled": false,
+            "rect": {
+              "x": 895.6875,
+              "y": 10.5,
+              "width": 48.3125,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "label": "Controls",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 952,
+              "y": 10.5,
+              "width": 24,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "label": "편집",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 852,
+              "y": 208.75,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "복사",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 880,
+              "y": 208.75,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "질문",
+            "text": " 질문",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "설명",
+            "text": " 설명",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "편집",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 188,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "복사",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 216,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "speak-button-previous-answer",
+            "label": "읽어주기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 244,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "좋은 응답",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 272,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "잘못된 응답",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 300,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "continue-response-button",
+            "label": "응답 이어 받기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 328,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "재생성",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 356,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "Fork chat",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 384,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "confirm-recording-button",
+            "label": "Confirm recording",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "generate-message-pair-button",
+            "label": "Generate message pair",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "input-menu-button",
+            "label": "더보기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 157,
+              "y": 713,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "voice-input-button",
+            "label": "Voice Input",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 743.03125,
+              "y": 713,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "음성 모드 사용",
+            "disabled": false,
+            "rect": {
+              "x": 779.53125,
+              "y": 713,
+              "width": 84.96875,
+              "height": 30
+            }
+          },
+          {
+            "id": "",
+            "label": "음성 모드 사용",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 821.5,
+              "y": 692,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "send-message-button",
+            "label": null,
+            "text": "",
+            "disabled": true,
+            "rect": {
+              "x": 869,
+              "y": 713,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "",
+            "action": "close_panel",
+            "label": "업무 패널 닫기",
+            "text": "닫기",
+            "disabled": false,
+            "rect": {
+              "x": 946,
+              "y": 9.5,
+              "width": 38,
+              "height": 28
+            }
+          }
+        ],
+        "navigationAncestors": [
+          {
+            "tag": "SECTION",
+            "id": "ees-work-entry",
+            "display": "block",
+            "visibility": "visible",
+            "width": 55,
+            "height": 402
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 55,
+            "height": 669
+          },
+          {
+            "tag": "ASIDE",
+            "id": "sidebar",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 56,
+            "height": 768
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 1000,
+            "height": 768
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 1000,
+            "height": 768
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1000,
+            "height": 768
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "contents",
+            "visibility": "visible",
+            "width": 0,
+            "height": 0
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "contents",
+            "visibility": "visible",
+            "width": 0,
+            "height": 0
+          },
+          {
+            "tag": "BODY",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1000,
+            "height": 768
+          },
+          {
+            "tag": "HTML",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1000,
+            "height": 768
+          }
+        ]
+      },
+      "browser_product": "Chrome/155.0.8059.84",
+      "frames_json_sha256": "9ddfc8bde9b93bfc4ac65b99e338b427a0c54edbafd850604222bcf15d8598c7",
+      "frame_count": 603,
+      "first_frame": {
+        "t": 921.1000000000058,
+        "nodes": [
+          {
+            "kind": "backdrop",
+            "state": "",
+            "id": "",
+            "opacity": 1,
+            "transform": "none",
+            "width": 944,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": false,
+            "ariaHidden": "true",
+            "pointerEvents": "auto",
+            "modal": false
+          },
+          {
+            "kind": "panel-overlay",
+            "state": "",
+            "id": "",
+            "opacity": 1,
+            "transform": "none",
+            "width": 480,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": false,
+            "ariaHidden": null,
+            "pointerEvents": "auto",
+            "modal": false
+          },
+          {
+            "kind": "panel-content",
+            "state": "",
+            "id": "ees-work-panel",
+            "opacity": 1,
+            "transform": "none",
+            "width": 479,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": false,
+            "ariaHidden": null,
+            "pointerEvents": "auto",
+            "modal": false
+          }
+        ],
+        "scopeCount": 0,
+        "dialogCount": 0,
+        "chatWidth": 944,
+        "panelWidth": 480
+      },
+      "last_frame": {
+        "t": 10952.199999999983,
+        "nodes": [
+          {
+            "kind": "backdrop",
+            "state": "",
+            "id": "",
+            "opacity": 1,
+            "transform": "none",
+            "width": 944,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": false,
+            "ariaHidden": "true",
+            "pointerEvents": "auto",
+            "modal": false
+          },
+          {
+            "kind": "panel-overlay",
+            "state": "",
+            "id": "",
+            "opacity": 1,
+            "transform": "none",
+            "width": 480,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": false,
+            "ariaHidden": null,
+            "pointerEvents": "auto",
+            "modal": false
+          },
+          {
+            "kind": "panel-content",
+            "state": "",
+            "id": "ees-work-panel",
+            "opacity": 1,
+            "transform": "none",
+            "width": 479,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": false,
+            "ariaHidden": null,
+            "pointerEvents": "auto",
+            "modal": false
+          }
+        ],
+        "scopeCount": 0,
+        "dialogCount": 0,
+        "chatWidth": 944,
+        "panelWidth": 480
+      },
+      "inputs": [
+        {
+          "type": "pointerdown",
+          "key": "",
+          "trusted": true,
+          "t": 954,
+          "opening": false,
+          "closing": false,
+          "composer": false
+        },
+        {
+          "type": "keydown",
+          "key": "Enter",
+          "trusted": true,
+          "t": 1170.5,
+          "opening": false,
+          "closing": false,
+          "composer": false
+        },
+        {
+          "type": "pointerdown",
+          "key": "",
+          "trusted": true,
+          "t": 1178.3999999999942,
+          "opening": true,
+          "closing": false,
+          "composer": false
+        },
+        {
+          "type": "pointerdown",
+          "key": "",
+          "trusted": true,
+          "t": 1203.8999999999942,
+          "opening": false,
+          "closing": true,
+          "composer": false
+        },
+        {
+          "type": "pointerdown",
+          "key": "",
+          "trusted": true,
+          "t": 1470,
+          "opening": false,
+          "closing": false,
+          "composer": false
+        },
+        {
+          "type": "keydown",
+          "key": " ",
+          "trusted": true,
+          "t": 1655.7999999999884,
+          "opening": false,
+          "closing": false,
+          "composer": false
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "trusted": true,
+          "t": 1892.7999999999884,
+          "opening": false,
+          "closing": false,
+          "composer": false
+        }
+      ],
+      "events": [
+        {
+          "t": 960.2999999999884,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "closing",
+          "id": "",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "width": 480,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 963.8999999999942,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "closing",
+          "id": "",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "width": 480,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 963.8999999999942,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "closing",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 963.8999999999942,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "closing",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 963.8999999999942,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "closing",
+          "id": "",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "width": 480,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1002.5,
+          "type": "animationstart",
+          "kind": "backdrop",
+          "state": "closing",
+          "id": "",
+          "opacity": 0.977668,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1002.7999999999884,
+          "type": "animationstart",
+          "kind": "panel-overlay",
+          "state": "closing",
+          "id": "",
+          "opacity": 0.977668,
+          "transform": "matrix(1, 0, 0, 1, 0.357315, 0)",
+          "width": 480,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1152.6000000000058,
+          "type": "animationend",
+          "kind": "backdrop",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1153,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 944,
+          "duration": "0s",
+          "easing": "ease",
+          "name": "none",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1153.1000000000058,
+          "type": "animationend",
+          "kind": "panel-overlay",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 16, 0)",
+          "width": 480,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1153.1000000000058,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 480,
+          "duration": "0s",
+          "easing": "ease",
+          "name": "none",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1154.1999999999825,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 0,
+          "duration": "0s",
+          "easing": "ease",
+          "name": "none",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": true,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1172.6999999999825,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 480,
+          "duration": "0s",
+          "easing": "ease",
+          "name": "none",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1176.5,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 16, 0)",
+          "width": 480,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1176.5,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1176.5,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1181.6000000000058,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 16, 0)",
+          "width": 480,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1184.2999999999884,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 16, 0)",
+          "width": 480,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1184.3999999999942,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1184.3999999999942,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1184.3999999999942,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 16, 0)",
+          "width": 480,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1202.6000000000058,
+          "type": "animationstart",
+          "kind": "backdrop",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1202.6999999999825,
+          "type": "animationstart",
+          "kind": "panel-overlay",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 16, 0)",
+          "width": 480,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1206.1999999999825,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 16, 0)",
+          "width": 480,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1210,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 16, 0)",
+          "width": 480,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1210,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 16, 0)",
+          "width": 480,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1210,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1210,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1210,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1219.1999999999825,
+          "type": "animationcancel",
+          "kind": "panel-overlay",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 16, 0)",
+          "width": 480,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1219.3999999999942,
+          "type": "animationcancel",
+          "kind": "backdrop",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1235.8999999999942,
+          "type": "animationstart",
+          "kind": "backdrop",
+          "state": "opening",
+          "id": "",
+          "opacity": 0.335129,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1236.1000000000058,
+          "type": "animationstart",
+          "kind": "panel-overlay",
+          "state": "opening",
+          "id": "",
+          "opacity": 0.335129,
+          "transform": "matrix(1, 0, 0, 1, 10.6379, 0)",
+          "width": 480,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1419.1999999999825,
+          "type": "animationend",
+          "kind": "backdrop",
+          "state": "opening",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1419.3999999999942,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 944,
+          "duration": "0s",
+          "easing": "ease",
+          "name": "none",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1419.5,
+          "type": "animationend",
+          "kind": "panel-overlay",
+          "state": "opening",
+          "id": "",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "width": 480,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1419.5,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 480,
+          "duration": "0s",
+          "easing": "ease",
+          "name": "none",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1472.8999999999942,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "closing",
+          "id": "",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "width": 480,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1475.6999999999825,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "closing",
+          "id": "",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "width": 480,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1475.6999999999825,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "closing",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1475.6999999999825,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "closing",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1475.6999999999825,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "closing",
+          "id": "",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "width": 480,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1502.6000000000058,
+          "type": "animationstart",
+          "kind": "backdrop",
+          "state": "closing",
+          "id": "",
+          "opacity": 0.977617,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1502.6999999999825,
+          "type": "animationstart",
+          "kind": "panel-overlay",
+          "state": "closing",
+          "id": "",
+          "opacity": 0.977617,
+          "transform": "matrix(1, 0, 0, 1, 0.358121, 0)",
+          "width": 480,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1635.7999999999884,
+          "type": "animationend",
+          "kind": "backdrop",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1636,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 944,
+          "duration": "0s",
+          "easing": "ease",
+          "name": "none",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1636.1999999999825,
+          "type": "animationend",
+          "kind": "panel-overlay",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 16, 0)",
+          "width": 480,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1636.2999999999884,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 480,
+          "duration": "0s",
+          "easing": "ease",
+          "name": "none",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1637.1000000000058,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 0,
+          "duration": "0s",
+          "easing": "ease",
+          "name": "none",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": true,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1658.1000000000058,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 480,
+          "duration": "0s",
+          "easing": "ease",
+          "name": "none",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1661.8999999999942,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 16, 0)",
+          "width": 480,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1661.8999999999942,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1661.8999999999942,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1685.7999999999884,
+          "type": "animationstart",
+          "kind": "backdrop",
+          "state": "opening",
+          "id": "",
+          "opacity": 0.335474,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1686.1000000000058,
+          "type": "animationstart",
+          "kind": "panel-overlay",
+          "state": "opening",
+          "id": "",
+          "opacity": 0.335474,
+          "transform": "matrix(1, 0, 0, 1, 10.6324, 0)",
+          "width": 480,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1869.1000000000058,
+          "type": "animationend",
+          "kind": "backdrop",
+          "state": "opening",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 944,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1869.2999999999884,
+          "type": "state",
+          "kind": "backdrop",
+          "state": "",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 944,
+          "duration": "0s",
+          "easing": "ease",
+          "name": "none",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1869.3999999999942,
+          "type": "animationend",
+          "kind": "panel-overlay",
+          "state": "opening",
+          "id": "",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "width": 480,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1869.5,
+          "type": "state",
+          "kind": "panel-overlay",
+          "state": "",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 480,
+          "duration": "0s",
+          "easing": "ease",
+          "name": "none",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        }
+      ],
+      "rendered_closing_inert_false": []
+    },
+    {
+      "test": "test_ees_motion_native.MotionNativeTests.test_c3_scope_immediate_escape_reopen_replacement_and_reduced_motion",
+      "failure_json_sha256": "962e5b79460228ba9d742bc0d6cefcd8a4aaa238f03eded433eff0d999f3aef3",
+      "last_wait": "document.activeElement?.id === 'ees-work-site-trigger'",
+      "last_click": "#ees-work-site-trigger",
+      "capture_errors": [],
+      "dom": {
+        "route": "/c/existing-chat",
+        "ready": "complete",
+        "fonts": "loaded",
+        "controls": [
+          {
+            "id": "",
+            "label": "사이드바 접기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 219,
+              "y": 12,
+              "width": 24,
+              "height": 24
+            }
+          },
+          {
+            "id": "",
+            "action": "mode",
+            "label": null,
+            "text": "업무",
+            "disabled": false,
+            "rect": {
+              "x": 11,
+              "y": 51,
+              "width": 115.5,
+              "height": 32
+            }
+          },
+          {
+            "id": "",
+            "action": "mode",
+            "label": null,
+            "text": "워크스페이스",
+            "disabled": false,
+            "rect": {
+              "x": 128.5,
+              "y": 51,
+              "width": 115.5,
+              "height": 32
+            }
+          },
+          {
+            "id": "ees-work-site-trigger",
+            "label": "공장 선택",
+            "text": "공장전체 공장",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 122,
+              "width": 239,
+              "height": 40
+            }
+          },
+          {
+            "id": "ees-work-system-trigger",
+            "label": "시스템 선택",
+            "text": "시스템EMS",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 161,
+              "width": 239,
+              "height": 40
+            }
+          },
+          {
+            "id": "",
+            "action": "my_work",
+            "label": "내 업무",
+            "text": "내 업무",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 213,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "records",
+            "label": "실행 기록",
+            "text": "실행 기록",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 249,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "chats",
+            "label": "대화 기록",
+            "text": "대화 기록",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 285,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "label": "운영",
+            "text": "운영",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 368,
+              "width": 239,
+              "height": 32
+            }
+          },
+          {
+            "id": "",
+            "label": "셋업",
+            "text": "셋업",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 404,
+              "width": 239,
+              "height": 32
+            }
+          },
+          {
+            "id": "",
+            "label": "장애대응",
+            "text": "장애대응",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 440,
+              "width": 239,
+              "height": 32
+            }
+          },
+          {
+            "id": "sidebar-new-chat-button",
+            "label": null,
+            "text": "새 대화",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 552,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "sidebar-search-button",
+            "label": null,
+            "text": "대화 검색",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 590,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "폴더 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "새 폴더",
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "채팅 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "더보기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "sidebar-chat-item",
+            "label": null,
+            "text": "   기존 대화 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "Chat Menu",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "delete-chat-button",
+            "label": "삭제",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "sidebar-chat-item",
+            "label": null,
+            "text": "   기존 대화 56년 전",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "Chat Menu",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "  Fixture Administrator",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "사용자 메뉴",
+            "text": "  Fixture Administrator",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 1038,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "new-chat-button",
+            "label": "New Chat",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "chat-context-menu-button",
+            "label": "Chat actions",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 313.6875,
+              "y": 10.5,
+              "width": 24,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "action": "new_chat",
+            "label": null,
+            "text": "새 대화",
+            "disabled": false,
+            "rect": {
+              "x": 1335.6875,
+              "y": 10.5,
+              "width": 48.3125,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "label": "Controls",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1392,
+              "y": 10.5,
+              "width": 24,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "label": "편집",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1172,
+              "y": 208.75,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "복사",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1200,
+              "y": 208.75,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "질문",
+            "text": " 질문",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "설명",
+            "text": " 설명",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "편집",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 508,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "복사",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 536,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "speak-button-previous-answer",
+            "label": "읽어주기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 564,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "좋은 응답",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 592,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "잘못된 응답",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 620,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "continue-response-button",
+            "label": "응답 이어 받기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 648,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "재생성",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 676,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "Fork chat",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 704,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "confirm-recording-button",
+            "label": "Confirm recording",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "generate-message-pair-button",
+            "label": "Generate message pair",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "input-menu-button",
+            "label": "더보기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 477,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "voice-input-button",
+            "label": "Voice Input",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1063.03125,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "음성 모드 사용",
+            "disabled": false,
+            "rect": {
+              "x": 1099.53125,
+              "y": 1025,
+              "width": 84.96875,
+              "height": 30
+            }
+          },
+          {
+            "id": "",
+            "label": "음성 모드 사용",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1141.5,
+              "y": 1004,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "send-message-button",
+            "label": null,
+            "text": "",
+            "disabled": true,
+            "rect": {
+              "x": 1189,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "",
+            "action": "close_panel",
+            "label": "업무 패널 닫기",
+            "text": "닫기",
+            "disabled": false,
+            "rect": {
+              "x": 1866,
+              "y": 9.5,
+              "width": 38,
+              "height": 28
+            }
+          }
+        ],
+        "navigationAncestors": [
+          {
+            "tag": "SECTION",
+            "id": "ees-work-entry",
+            "display": "block",
+            "visibility": "visible",
+            "width": 255,
+            "height": 496
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 255,
+            "height": 981
+          },
+          {
+            "tag": "ASIDE",
+            "id": "sidebar",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 256,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "contents",
+            "visibility": "visible",
+            "width": 0,
+            "height": 0
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "contents",
+            "visibility": "visible",
+            "width": 0,
+            "height": 0
+          },
+          {
+            "tag": "BODY",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "HTML",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          }
+        ]
+      },
+      "browser_product": "Chrome/155.0.8059.84",
+      "frames_json_sha256": "efb9e549d4ffcbb9e31bcfe1e692d396db231b2f5bd0b89f7494cca798813c4f",
+      "frame_count": 46,
+      "first_frame": {
+        "t": 962.6000000000058,
+        "nodes": [
+          {
+            "kind": "backdrop",
+            "state": "",
+            "id": "",
+            "opacity": 1,
+            "transform": "none",
+            "width": 0,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": true,
+            "ariaHidden": "true",
+            "pointerEvents": "auto",
+            "modal": false
+          },
+          {
+            "kind": "panel-overlay",
+            "state": "",
+            "id": "",
+            "opacity": 1,
+            "transform": "none",
+            "width": 480,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": false,
+            "ariaHidden": null,
+            "pointerEvents": "auto",
+            "modal": false
+          },
+          {
+            "kind": "panel-content",
+            "state": "",
+            "id": "ees-work-panel",
+            "opacity": 1,
+            "transform": "none",
+            "width": 479,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": false,
+            "ariaHidden": null,
+            "pointerEvents": "auto",
+            "modal": false
+          }
+        ],
+        "scopeCount": 0,
+        "dialogCount": 0,
+        "chatWidth": 1184,
+        "panelWidth": 480
+      },
+      "last_frame": {
+        "t": 1712.5,
+        "nodes": [
+          {
+            "kind": "backdrop",
+            "state": "",
+            "id": "",
+            "opacity": 1,
+            "transform": "none",
+            "width": 0,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": true,
+            "ariaHidden": "true",
+            "pointerEvents": "auto",
+            "modal": false
+          },
+          {
+            "kind": "panel-overlay",
+            "state": "",
+            "id": "",
+            "opacity": 1,
+            "transform": "none",
+            "width": 480,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": false,
+            "ariaHidden": null,
+            "pointerEvents": "auto",
+            "modal": false
+          },
+          {
+            "kind": "panel-content",
+            "state": "",
+            "id": "ees-work-panel",
+            "opacity": 1,
+            "transform": "none",
+            "width": 479,
+            "duration": "0s",
+            "easing": "ease",
+            "name": "none",
+            "transitionProperty": "all",
+            "inert": false,
+            "hidden": false,
+            "ariaHidden": null,
+            "pointerEvents": "auto",
+            "modal": false
+          }
+        ],
+        "scopeCount": 0,
+        "dialogCount": 0,
+        "chatWidth": 1184,
+        "panelWidth": 480
+      },
+      "inputs": [
+        {
+          "type": "pointerdown",
+          "key": "",
+          "trusted": true,
+          "t": 981.5,
+          "opening": false,
+          "closing": false,
+          "composer": false
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "trusted": true,
+          "t": 993.3999999999942,
+          "opening": true,
+          "closing": false,
+          "composer": false
+        },
+        {
+          "type": "pointerdown",
+          "key": "",
+          "trusted": true,
+          "t": 1030.5,
+          "opening": false,
+          "closing": true,
+          "composer": false
+        },
+        {
+          "type": "pointerdown",
+          "key": "",
+          "trusted": true,
+          "t": 1296.7000000000116,
+          "opening": false,
+          "closing": false,
+          "composer": false
+        },
+        {
+          "type": "keydown",
+          "key": "Escape",
+          "trusted": true,
+          "t": 1534.8999999999942,
+          "opening": false,
+          "closing": false,
+          "composer": false
+        }
+      ],
+      "events": [
+        {
+          "t": 992,
+          "type": "state",
+          "kind": "scope",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, -4)",
+          "width": 239,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 994.2000000000116,
+          "type": "state",
+          "kind": "scope",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, -4)",
+          "width": 239,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 994.8999999999942,
+          "type": "state",
+          "kind": "scope",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, -4)",
+          "width": 239,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 994.8999999999942,
+          "type": "state",
+          "kind": "scope",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, -4)",
+          "width": 239,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1029.1000000000058,
+          "type": "animationstart",
+          "kind": "scope",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, -4)",
+          "width": 239,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1031.8999999999942,
+          "type": "state",
+          "kind": "scope",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, -4)",
+          "width": 239,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": "false",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1033.3000000000175,
+          "type": "state",
+          "kind": "scope",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, -4)",
+          "width": 239,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1033.3999999999942,
+          "type": "state",
+          "kind": "scope",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, -4)",
+          "width": 239,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1045.8000000000175,
+          "type": "animationcancel",
+          "kind": "scope",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, -4)",
+          "width": 239,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1079,
+          "type": "animationstart",
+          "kind": "scope",
+          "state": "opening",
+          "id": "",
+          "opacity": 0.335359,
+          "transform": "matrix(1, 0, 0, 1, 0, -2.65856)",
+          "width": 239,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1262.3999999999942,
+          "type": "animationend",
+          "kind": "scope",
+          "state": "opening",
+          "id": "",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "width": 239,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1262.7000000000116,
+          "type": "state",
+          "kind": "scope",
+          "state": "",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 239,
+          "duration": "0s",
+          "easing": "ease",
+          "name": "none",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1297.3999999999942,
+          "type": "state",
+          "kind": "scope",
+          "state": "closing",
+          "id": "",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "width": 239,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1298.1000000000058,
+          "type": "state",
+          "kind": "scope",
+          "state": "closing",
+          "id": "",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "width": 239,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1298.1000000000058,
+          "type": "state",
+          "kind": "scope",
+          "state": "closing",
+          "id": "",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "width": 239,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1303.5,
+          "type": "state",
+          "kind": "scope",
+          "state": "opening",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, -4)",
+          "width": 239,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1329,
+          "type": "animationstart",
+          "kind": "scope",
+          "state": "opening",
+          "id": "",
+          "opacity": 0.333632,
+          "transform": "matrix(1, 0, 0, 1, 0, -2.66547)",
+          "width": 239,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1512.3000000000175,
+          "type": "animationend",
+          "kind": "scope",
+          "state": "opening",
+          "id": "",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "width": 239,
+          "duration": "0.2s",
+          "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          "name": "ees-motion-open",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1512.3999999999942,
+          "type": "state",
+          "kind": "scope",
+          "state": "",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 239,
+          "duration": "0s",
+          "easing": "ease",
+          "name": "none",
+          "transitionProperty": "all",
+          "inert": false,
+          "hidden": false,
+          "ariaHidden": null,
+          "pointerEvents": "auto",
+          "modal": false
+        },
+        {
+          "t": 1535.5,
+          "type": "state",
+          "kind": "scope",
+          "state": "closing",
+          "id": "",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "width": 239,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1536,
+          "type": "state",
+          "kind": "scope",
+          "state": "closing",
+          "id": "",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "width": 239,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1536,
+          "type": "state",
+          "kind": "scope",
+          "state": "closing",
+          "id": "",
+          "opacity": 1,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "width": 239,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1562.3999999999942,
+          "type": "animationstart",
+          "kind": "scope",
+          "state": "closing",
+          "id": "",
+          "opacity": 0.977481,
+          "transform": "matrix(1, 0, 0, 1, 0, -0.0900753)",
+          "width": 239,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1695.7000000000116,
+          "type": "animationend",
+          "kind": "scope",
+          "state": "closing",
+          "id": "",
+          "opacity": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, -4)",
+          "width": 239,
+          "duration": "0.15s",
+          "easing": "cubic-bezier(0.4, 0, 1, 1)",
+          "name": "ees-motion-close",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "none",
+          "modal": false
+        },
+        {
+          "t": 1696.5,
+          "type": "state",
+          "kind": "scope",
+          "state": "",
+          "id": "",
+          "opacity": 1,
+          "transform": "none",
+          "width": 239,
+          "duration": "0s",
+          "easing": "ease",
+          "name": "none",
+          "transitionProperty": "all",
+          "inert": true,
+          "hidden": false,
+          "ariaHidden": "true",
+          "pointerEvents": "auto",
+          "modal": false
+        }
+      ],
+      "rendered_closing_inert_false": []
+    },
+    {
+      "test": "test_ees_source_shell_native.SourceShellNativeTests.test_first_scope_lists_wait_for_response_before_empty_or_zero",
+      "failure_json_sha256": "c6bcb2372e659b3301eaf436d9f21c8aabbe19442b714818351a05826f79d1f3",
+      "last_wait": "!document.querySelector(\"[data-scope-dropdown]\")",
+      "last_click": "[data-action=choose_system][data-system-id=APC]",
+      "capture_errors": [],
+      "dom": {
+        "route": "/c/existing-chat",
+        "ready": "complete",
+        "fonts": "loaded",
+        "controls": [
+          {
+            "id": "",
+            "label": "사이드바 접기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 219,
+              "y": 12,
+              "width": 24,
+              "height": 24
+            }
+          },
+          {
+            "id": "",
+            "action": "mode",
+            "label": null,
+            "text": "업무",
+            "disabled": false,
+            "rect": {
+              "x": 11,
+              "y": 51,
+              "width": 115.5,
+              "height": 32
+            }
+          },
+          {
+            "id": "",
+            "action": "mode",
+            "label": null,
+            "text": "워크스페이스",
+            "disabled": false,
+            "rect": {
+              "x": 128.5,
+              "y": 51,
+              "width": 115.5,
+              "height": 32
+            }
+          },
+          {
+            "id": "ees-work-site-trigger",
+            "label": "공장 선택",
+            "text": "공장전체 공장",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 122,
+              "width": 239,
+              "height": 40
+            }
+          },
+          {
+            "id": "ees-work-system-trigger",
+            "label": "시스템 선택",
+            "text": "시스템APC",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 161,
+              "width": 239,
+              "height": 40
+            }
+          },
+          {
+            "id": "",
+            "action": "my_work",
+            "label": "내 업무",
+            "text": "내 업무",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 213,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "records",
+            "label": "실행 기록",
+            "text": "실행 기록",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 249,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "chats",
+            "label": "대화 기록",
+            "text": "대화 기록",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 285,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "label": "운영",
+            "text": "운영",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 368,
+              "width": 239,
+              "height": 32
+            }
+          },
+          {
+            "id": "",
+            "label": "셋업",
+            "text": "셋업",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 404,
+              "width": 239,
+              "height": 32
+            }
+          },
+          {
+            "id": "",
+            "label": "장애대응",
+            "text": "장애대응",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 440,
+              "width": 239,
+              "height": 32
+            }
+          },
+          {
+            "id": "sidebar-new-chat-button",
+            "label": null,
+            "text": "새 대화",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 552,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "sidebar-search-button",
+            "label": null,
+            "text": "대화 검색",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 590,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "폴더 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "새 폴더",
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "채팅 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "더보기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "sidebar-chat-item",
+            "label": null,
+            "text": "   기존 대화 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "Chat Menu",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "delete-chat-button",
+            "label": "삭제",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "sidebar-chat-item",
+            "label": null,
+            "text": "   기존 대화 56년 전",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "Chat Menu",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "  Fixture Administrator",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "사용자 메뉴",
+            "text": "  Fixture Administrator",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 1038,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "new-chat-button",
+            "label": "New Chat",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "chat-context-menu-button",
+            "label": "Chat actions",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 313.6875,
+              "y": 10.5,
+              "width": 24,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "action": "new_chat",
+            "label": null,
+            "text": "새 대화",
+            "disabled": false,
+            "rect": {
+              "x": 1335.6875,
+              "y": 10.5,
+              "width": 48.3125,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "label": "Controls",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1392,
+              "y": 10.5,
+              "width": 24,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "label": "편집",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1172,
+              "y": 208.75,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "복사",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1200,
+              "y": 208.75,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "질문",
+            "text": " 질문",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "설명",
+            "text": " 설명",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "편집",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 508,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "복사",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 536,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "speak-button-previous-answer",
+            "label": "읽어주기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 564,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "좋은 응답",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 592,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "잘못된 응답",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 620,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "continue-response-button",
+            "label": "응답 이어 받기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 648,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "재생성",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 676,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "Fork chat",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 704,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "confirm-recording-button",
+            "label": "Confirm recording",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "generate-message-pair-button",
+            "label": "Generate message pair",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "input-menu-button",
+            "label": "더보기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 477,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "voice-input-button",
+            "label": "Voice Input",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1152.5,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "send-message-button",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1189,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "",
+            "action": "close_panel",
+            "label": "업무 패널 닫기",
+            "text": "닫기",
+            "disabled": false,
+            "rect": {
+              "x": 1866,
+              "y": 9.5,
+              "width": 38,
+              "height": 28
+            }
+          }
+        ],
+        "navigationAncestors": [
+          {
+            "tag": "SECTION",
+            "id": "ees-work-entry",
+            "display": "block",
+            "visibility": "visible",
+            "width": 255,
+            "height": 496
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 255,
+            "height": 981
+          },
+          {
+            "tag": "ASIDE",
+            "id": "sidebar",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 256,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "contents",
+            "visibility": "visible",
+            "width": 0,
+            "height": 0
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "contents",
+            "visibility": "visible",
+            "width": 0,
+            "height": 0
+          },
+          {
+            "tag": "BODY",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "HTML",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          }
+        ]
+      },
+      "browser_product": "Chrome/155.0.8059.84"
+    },
+    {
+      "test": "test_ees_source_shell_native.SourceShellNativeTests.test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading",
+      "failure_json_sha256": "28c75e33d58e4645e8a80eefb2dc2defa01c385bc5277a0a40a5c14eb873f42b",
+      "last_wait": "!document.querySelector(\"[data-scope-dropdown]\")",
+      "last_click": "[data-action=choose_factory][data-factory-id=\"scope-factory-1\"]",
+      "capture_errors": [],
+      "dom": {
+        "route": "/c/existing-chat",
+        "ready": "complete",
+        "fonts": "loaded",
+        "controls": [
+          {
+            "id": "",
+            "label": "사이드바 접기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 219,
+              "y": 12,
+              "width": 24,
+              "height": 24
+            }
+          },
+          {
+            "id": "",
+            "action": "mode",
+            "label": null,
+            "text": "업무",
+            "disabled": false,
+            "rect": {
+              "x": 11,
+              "y": 51,
+              "width": 115.5,
+              "height": 32
+            }
+          },
+          {
+            "id": "",
+            "action": "mode",
+            "label": null,
+            "text": "워크스페이스",
+            "disabled": false,
+            "rect": {
+              "x": 128.5,
+              "y": 51,
+              "width": 115.5,
+              "height": 32
+            }
+          },
+          {
+            "id": "ees-work-site-trigger",
+            "label": "공장 선택",
+            "text": "공장합성 공장 01",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 122,
+              "width": 239,
+              "height": 40
+            }
+          },
+          {
+            "id": "ees-work-system-trigger",
+            "label": "시스템 선택",
+            "text": "시스템EMS",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 161,
+              "width": 239,
+              "height": 40
+            }
+          },
+          {
+            "id": "",
+            "action": "my_work",
+            "label": "내 업무",
+            "text": "내 업무",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 213,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "records",
+            "label": "실행 기록",
+            "text": "실행 기록",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 249,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "chats",
+            "label": "대화 기록",
+            "text": "대화 기록",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 285,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "label": "운영",
+            "text": "운영",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 368,
+              "width": 239,
+              "height": 32
+            }
+          },
+          {
+            "id": "",
+            "label": "셋업",
+            "text": "셋업",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 404,
+              "width": 239,
+              "height": 32
+            }
+          },
+          {
+            "id": "",
+            "label": "장애대응",
+            "text": "장애대응",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 440,
+              "width": 239,
+              "height": 32
+            }
+          },
+          {
+            "id": "sidebar-new-chat-button",
+            "label": null,
+            "text": "새 대화",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 552,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "sidebar-search-button",
+            "label": null,
+            "text": "대화 검색",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 590,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "폴더 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "새 폴더",
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "채팅 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "더보기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "sidebar-chat-item",
+            "label": null,
+            "text": "   기존 대화 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "Chat Menu",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "delete-chat-button",
+            "label": "삭제",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "sidebar-chat-item",
+            "label": null,
+            "text": "   기존 대화 56년 전",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "Chat Menu",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "  Fixture Administrator",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "사용자 메뉴",
+            "text": "  Fixture Administrator",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 1038,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "new-chat-button",
+            "label": "New Chat",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "chat-context-menu-button",
+            "label": "Chat actions",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 313.6875,
+              "y": 10.5,
+              "width": 24,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "action": "new_chat",
+            "label": null,
+            "text": "새 대화",
+            "disabled": false,
+            "rect": {
+              "x": 1335.6875,
+              "y": 10.5,
+              "width": 48.3125,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "label": "Controls",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1392,
+              "y": 10.5,
+              "width": 24,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "label": "편집",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1172,
+              "y": 208.75,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "복사",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1200,
+              "y": 208.75,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "질문",
+            "text": " 질문",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "설명",
+            "text": " 설명",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "편집",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 508,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "복사",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 536,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "speak-button-previous-answer",
+            "label": "읽어주기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 564,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "좋은 응답",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 592,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "잘못된 응답",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 620,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "continue-response-button",
+            "label": "응답 이어 받기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 648,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "재생성",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 676,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "Fork chat",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 704,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "confirm-recording-button",
+            "label": "Confirm recording",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "generate-message-pair-button",
+            "label": "Generate message pair",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "input-menu-button",
+            "label": "더보기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 477,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "voice-input-button",
+            "label": "Voice Input",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1152.5,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "send-message-button",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1189,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "",
+            "action": "close_panel",
+            "label": "업무 패널 닫기",
+            "text": "닫기",
+            "disabled": false,
+            "rect": {
+              "x": 1866,
+              "y": 9.5,
+              "width": 38,
+              "height": 28
+            }
+          }
+        ],
+        "navigationAncestors": [
+          {
+            "tag": "SECTION",
+            "id": "ees-work-entry",
+            "display": "block",
+            "visibility": "visible",
+            "width": 255,
+            "height": 496
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 255,
+            "height": 981
+          },
+          {
+            "tag": "ASIDE",
+            "id": "sidebar",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 256,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "contents",
+            "visibility": "visible",
+            "width": 0,
+            "height": 0
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "contents",
+            "visibility": "visible",
+            "width": 0,
+            "height": 0
+          },
+          {
+            "tag": "BODY",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "HTML",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          }
+        ]
+      },
+      "browser_product": "Chrome/155.0.8059.84"
+    },
+    {
+      "test": "test_ees_source_shell_native.SourceShellNativeTests.test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus",
+      "failure_json_sha256": "afe7dbadd38405df46b8d7a294cd611f25211981420d10fba1e13ad93d89ffc7",
+      "last_wait": "!document.querySelector(\"[data-scope-dropdown]\")",
+      "last_click": "[data-action=choose_factory][data-factory-id=scope-factory-1]",
+      "capture_errors": [],
+      "dom": {
+        "route": "/c/existing-chat",
+        "ready": "complete",
+        "fonts": "loaded",
+        "controls": [
+          {
+            "id": "",
+            "label": "사이드바 접기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 219,
+              "y": 12,
+              "width": 24,
+              "height": 24
+            }
+          },
+          {
+            "id": "",
+            "action": "mode",
+            "label": null,
+            "text": "업무",
+            "disabled": false,
+            "rect": {
+              "x": 11,
+              "y": 51,
+              "width": 115.5,
+              "height": 32
+            }
+          },
+          {
+            "id": "",
+            "action": "mode",
+            "label": null,
+            "text": "워크스페이스",
+            "disabled": false,
+            "rect": {
+              "x": 128.5,
+              "y": 51,
+              "width": 115.5,
+              "height": 32
+            }
+          },
+          {
+            "id": "ees-work-site-trigger",
+            "label": "공장 선택",
+            "text": "공장합성 공장 01",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 122,
+              "width": 239,
+              "height": 40
+            }
+          },
+          {
+            "id": "ees-work-system-trigger",
+            "label": "시스템 선택",
+            "text": "시스템EMS",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 161,
+              "width": 239,
+              "height": 40
+            }
+          },
+          {
+            "id": "",
+            "action": "my_work",
+            "label": "내 업무",
+            "text": "내 업무",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 213,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "records",
+            "label": "실행 기록",
+            "text": "실행 기록",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 249,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "chats",
+            "label": "대화 기록",
+            "text": "대화 기록",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 285,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "label": "운영",
+            "text": "운영",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 368,
+              "width": 239,
+              "height": 32
+            }
+          },
+          {
+            "id": "",
+            "label": "셋업",
+            "text": "셋업",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 404,
+              "width": 239,
+              "height": 32
+            }
+          },
+          {
+            "id": "",
+            "label": "장애대응",
+            "text": "장애대응",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 440,
+              "width": 239,
+              "height": 32
+            }
+          },
+          {
+            "id": "sidebar-new-chat-button",
+            "label": null,
+            "text": "새 대화",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 552,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "sidebar-search-button",
+            "label": null,
+            "text": "대화 검색",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 590,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "폴더 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "새 폴더",
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "채팅 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "더보기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "sidebar-chat-item",
+            "label": null,
+            "text": "   기존 대화 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "Chat Menu",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "delete-chat-button",
+            "label": "삭제",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "sidebar-chat-item",
+            "label": null,
+            "text": "   기존 대화 56년 전",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "Chat Menu",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "  권한 범위 검증 사용자",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "사용자 메뉴",
+            "text": "  권한 범위 검증 사용자",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 1038,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "new-chat-button",
+            "label": "New Chat",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "chat-context-menu-button",
+            "label": "Chat actions",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 313.6875,
+              "y": 10.5,
+              "width": 24,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "action": "new_chat",
+            "label": null,
+            "text": "새 대화",
+            "disabled": false,
+            "rect": {
+              "x": 1335.6875,
+              "y": 10.5,
+              "width": 48.3125,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "label": "Controls",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1392,
+              "y": 10.5,
+              "width": 24,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "label": "편집",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1172,
+              "y": 208.75,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "복사",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1200,
+              "y": 208.75,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "질문",
+            "text": " 질문",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "설명",
+            "text": " 설명",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "편집",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 508,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "복사",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 536,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "speak-button-previous-answer",
+            "label": "읽어주기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 564,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "좋은 응답",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 592,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "잘못된 응답",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 620,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "continue-response-button",
+            "label": "응답 이어 받기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 648,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "재생성",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 676,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "Fork chat",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 704,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "confirm-recording-button",
+            "label": "Confirm recording",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "generate-message-pair-button",
+            "label": "Generate message pair",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "input-menu-button",
+            "label": "더보기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 477,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "voice-input-button",
+            "label": "Voice Input",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1152.5,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "send-message-button",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1189,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "",
+            "action": "close_panel",
+            "label": "업무 패널 닫기",
+            "text": "닫기",
+            "disabled": false,
+            "rect": {
+              "x": 1866,
+              "y": 9.5,
+              "width": 38,
+              "height": 28
+            }
+          }
+        ],
+        "navigationAncestors": [
+          {
+            "tag": "SECTION",
+            "id": "ees-work-entry",
+            "display": "block",
+            "visibility": "visible",
+            "width": 255,
+            "height": 496
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 255,
+            "height": 981
+          },
+          {
+            "tag": "ASIDE",
+            "id": "sidebar",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 256,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "contents",
+            "visibility": "visible",
+            "width": 0,
+            "height": 0
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "contents",
+            "visibility": "visible",
+            "width": 0,
+            "height": 0
+          },
+          {
+            "tag": "BODY",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "HTML",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          }
+        ]
+      },
+      "browser_product": "Chrome/155.0.8059.84"
+    }
+  ]
+}

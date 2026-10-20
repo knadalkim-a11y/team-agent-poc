@@ -79,6 +79,8 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.click('[data-author-action=create]')
         self.wait("document.querySelector('#ees-work-dialog [name=name]')")
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start')"))
+        # C3 scales the dialog during entry; measure its settled design width.
+        self.wait("!document.querySelector('#ees-work-dialog[data-ees-motion=opening]')")
         self.assertAlmostEqual(self.read('#ees-work-dialog', 'getBoundingClientRect().width'), 484, delta=1)
         self.fill('#ees-work-dialog [name=name]', '닫았다 열어도 남을 새 절차 이름')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[name=procedure_template]')"))
@@ -204,7 +206,9 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.wait('!document.querySelector("[data-scope-dropdown]")')
         self.assertEqual(self.read(trigger, 'ariaExpanded'), 'false')
         if focus:
-            self.assertTrue(self.browser.evaluate('document.activeElement === document.querySelector(' + json.dumps(trigger) + ')'))
+            observed = self.browser.evaluate('(()=>{const active=document.activeElement;return {restored:active===document.querySelector(' +
+                json.dumps(trigger) + '),tag:active?.tagName,id:active?.id,action:active?.dataset?.action};})()')
+            self.assertTrue(observed['restored'], observed)
 
     def scope_activate_key(self, key):
         # CDP keyDown without text emits no keypress. Native buttons activate

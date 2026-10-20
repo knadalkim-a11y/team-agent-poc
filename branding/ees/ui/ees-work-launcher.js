@@ -566,6 +566,7 @@
     catch(failure){error=failure.message;render();}
   }
   function handleEvent(event){
+    if(workUI.menuEvent(event))return;
     const author=designer.handleEvent?.(event);if(author?.handled){if(author.preventDefault){event.preventDefault();if(event.type==='keydown'&&event.key==='Escape')event.stopPropagation();}return;}
     const target=event.target;if(event.type==='submit'&&target.closest?.('[data-ees-work]')){event.preventDefault();return;}if(event.type==='keydown'&&event.repeat&&target.closest?.('[data-mutation]')){event.preventDefault();event.stopImmediatePropagation();return;}if(!target?.closest?.('[data-ees-work]'))return;
     if(event.type==='click'){const buttonTarget=target.closest('button[data-action]');if(!buttonTarget||buttonTarget.disabled)return;event.preventDefault();if(nativePage()&&buttonTarget.closest('#ees-work-entry')&&!['native_open','refresh'].includes(buttonTarget.dataset.action)){returnFromNative(buttonTarget);return;}Promise.resolve(handleClick(buttonTarget)).catch(failure=>{error=failure.message;render();});}
@@ -599,9 +600,10 @@
     if(available())syncMessageReferences();
   }
   function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(sync);}}
-  const boundHosts=new Set(),eventTypes=['click','input','change','toggle','keydown','submit'];
+  const boundHosts=new Set(),renderedReferenceHosts=new Set(),eventTypes=['click','input','change','toggle','keydown','submit'];
   function bindHosts(){
-    const hosts=source()?.hosts?.() || {},current=new Set([hosts.panel,hosts.overlays].filter(Boolean));
+    // Visible message cards remain owned hosts between reference polls.
+    const hosts=source()?.hosts?.() || {},current=new Set([hosts.panel,hosts.overlays,...[...renderedReferenceHosts].filter(host=>host.isConnected)].filter(Boolean));
     for(const host of boundHosts)if(!current.has(host)){for(const type of eventTypes)host.removeEventListener(type,handleEvent,true);boundHosts.delete(host);}
     for(const host of current)if(!boundHosts.has(host)){for(const type of eventTypes)host.addEventListener(type,handleEvent,true);boundHosts.add(host);}
   }
@@ -610,7 +612,6 @@
 
   window.__eesNativeWork=true;
   const reference=()=>!chatPrepared()||nativeReturnPreview()||targetLoading||evidenceUnavailable?{kind:'none'}:available()&&selection.mode==='author'&&(selection.tab==='tools'||designer.readStartContext?.())?{kind:'help',system_id:selection.system_id || '',context_id:context()}:available()&&selection.chat_reference&&selection.chat_reference.run_id===state?.run?.id?{...clone(selection.chat_reference),context_id:context()}:available()&&(state?.workflow||state?.run)&&selection.workflow_id?{kind:'workspace',workflow_id:selection.workflow_id,run_id:selection.run_id,job_id:selection.job_id,system_id:state?.run?.system_id || selection.system_id,factory_id:state?.run?.factory_id ?? selection.factory_id,version:state?.run?.version ?? state?.workflow?.published_version,workflow_revision:state?.workflow?.revision,attempt_id:state?.run?.jobs?.[selection.job_id]?.current_attempt,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,revision:state?.run?.revision ?? state?.workflow?.revision ?? 0,created_at:state?.run?.updated_at ?? state?.workflow?.updated_at,context_id:context()}:{kind:'none'};
-  const renderedReferenceHosts=new Set();
   function clearMessageReferences(){for(const host of renderedReferenceHosts)host.replaceChildren();renderedReferenceHosts.clear();}
   function renderMessageReferences(){
     if(!chatId()||referenceChat!==chatId())return;

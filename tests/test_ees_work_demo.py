@@ -83,7 +83,8 @@ class EESWorkNativeBrowserTests(IntegratedNativeCase):
     def test_human_cancel_then_explicit_confirm_and_history(self):
         key = self.author(); run = self.start(key); self.open_run(key, run)
         self.click('[data-action="confirm"]'); self.wait("document.querySelector('#ees-work-dialog')?.open")
-        self.assertTrue(self.browser.evaluate("document.activeElement?.hasAttribute('data-dialog-close')"))
+        # C3 focuses the content when the confirmation has no editable field.
+        self.assertTrue(self.browser.evaluate("document.activeElement?.id === 'ees-work-dialog-body'"))
         self.key('Escape', 27)
         self.assertEqual(self.state(run_id=run['id'])['run']['attempts'], [])
         self.click('[data-action="confirm"]'); self.click('[data-dialog-confirm]')

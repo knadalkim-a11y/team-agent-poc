@@ -1,0 +1,1773 @@
+{
+  "head": "f234b7928331aa7499234c108bb0328907752104",
+  "run": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39352242155",
+  "job": 118400747067,
+  "artifact": 12234161887,
+  "artifact_zip_sha256": "866135887bc2683be08d5c419bdf1feec6aab40a61baf38a20e2168e584d09ee",
+  "format": "Selected original failure records; full artifact contains263files.",
+  "cases": [
+    {
+      "source_file": "integrated-test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading-failure.json",
+      "source_sha256": "732103388fbb8ebe2908660a94ae8341b6595f7bd839f45b0ade17620ac2948f",
+      "test": "test_ees_source_shell_native.SourceShellNativeTests.test_scope_change_delayed_reads_keep_draft_expansion_and_zero_loading",
+      "last_wait": "!document.querySelector(\"[data-scope-dropdown]\")",
+      "last_click": "#ees-work-system-trigger",
+      "capture_errors": [],
+      "dom": {
+        "route": "/c/existing-chat",
+        "ready": "complete",
+        "fonts": "loaded",
+        "controls": [
+          {
+            "id": "",
+            "label": "사이드바 접기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 219,
+              "y": 12,
+              "width": 24,
+              "height": 24
+            }
+          },
+          {
+            "id": "",
+            "action": "mode",
+            "label": null,
+            "text": "업무",
+            "disabled": false,
+            "rect": {
+              "x": 11,
+              "y": 51,
+              "width": 115.5,
+              "height": 32
+            }
+          },
+          {
+            "id": "",
+            "action": "mode",
+            "label": null,
+            "text": "워크스페이스",
+            "disabled": false,
+            "rect": {
+              "x": 128.5,
+              "y": 51,
+              "width": 115.5,
+              "height": 32
+            }
+          },
+          {
+            "id": "ees-work-system-trigger",
+            "label": "시스템 선택",
+            "text": "EMS담당",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 122,
+              "width": 239,
+              "height": 40
+            }
+          },
+          {
+            "id": "",
+            "action": "choose_system",
+            "label": null,
+            "text": "EMS담당 ",
+            "disabled": false,
+            "rect": {
+              "x": 13,
+              "y": 171,
+              "width": 229,
+              "height": 54
+            }
+          },
+          {
+            "id": "",
+            "action": "choose_system",
+            "label": null,
+            "text": "APC담당 ",
+            "disabled": false,
+            "rect": {
+              "x": 13,
+              "y": 225,
+              "width": 229,
+              "height": 54
+            }
+          },
+          {
+            "id": "",
+            "action": "choose_system",
+            "label": null,
+            "text": "FDC담당 ",
+            "disabled": false,
+            "rect": {
+              "x": 13,
+              "y": 279,
+              "width": 229,
+              "height": 54
+            }
+          },
+          {
+            "id": "",
+            "action": "choose_system",
+            "label": null,
+            "text": "EGIS담당 ",
+            "disabled": false,
+            "rect": {
+              "x": 13,
+              "y": 333,
+              "width": 229,
+              "height": 54
+            }
+          },
+          {
+            "id": "",
+            "action": "choose_system",
+            "label": null,
+            "text": "EPT담당 ",
+            "disabled": false,
+            "rect": {
+              "x": 13,
+              "y": 387,
+              "width": 229,
+              "height": 54
+            }
+          },
+          {
+            "id": "",
+            "action": "choose_system",
+            "label": null,
+            "text": "COMMON담당 ",
+            "disabled": false,
+            "rect": {
+              "x": 13,
+              "y": 441,
+              "width": 229,
+              "height": 54
+            }
+          },
+          {
+            "id": "",
+            "action": "procedures",
+            "label": null,
+            "text": "업무 절차4",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 200,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "tools",
+            "label": null,
+            "text": "도구10",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 237,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "native_open",
+            "label": null,
+            "text": "스킬·지침스킬",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 274,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "native_open",
+            "label": null,
+            "text": "AI 도우미모델",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 346,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "native_open",
+            "label": null,
+            "text": "참고 문서지식",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 383,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "native_open",
+            "label": null,
+            "text": "빠른 문장프롬프트",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 420,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "workspace_admin",
+            "label": null,
+            "text": "공장·접근 범위",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 492,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "native_open",
+            "label": null,
+            "text": "관리자 설정관리자",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 529,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "workflow",
+            "label": null,
+            "text": "일일 시스템 점검",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 601,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "workflow",
+            "label": null,
+            "text": "신규 공장 횡전개",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 637,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "workflow",
+            "label": null,
+            "text": "배포 산출물 점검",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 673,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "workflow",
+            "label": null,
+            "text": "범위 변경 보존 절차",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 709,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "sidebar-new-chat-button",
+            "label": null,
+            "text": "새 대화",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 753,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "sidebar-search-button",
+            "label": null,
+            "text": "대화 검색",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 791,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "폴더 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "새 폴더",
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "채팅 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "더보기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "sidebar-chat-item",
+            "label": null,
+            "text": "   기존 대화 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "Chat Menu",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "delete-chat-button",
+            "label": "삭제",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "sidebar-chat-item",
+            "label": null,
+            "text": "   기존 대화 56년 전",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "Chat Menu",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "  Fixture Administrator",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "사용자 메뉴",
+            "text": "  Fixture Administrator",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 1038,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "new-chat-button",
+            "label": "New Chat",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "chat-context-menu-button",
+            "label": "Chat actions",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 313.6875,
+              "y": 10.5,
+              "width": 24,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "action": "new_chat",
+            "label": null,
+            "text": "새 대화",
+            "disabled": false,
+            "rect": {
+              "x": 1235.6875,
+              "y": 10.5,
+              "width": 48.3125,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "label": "Controls",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1292,
+              "y": 10.5,
+              "width": 24,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "label": "편집",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1122,
+              "y": 208.75,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "복사",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1150,
+              "y": 208.75,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "질문",
+            "text": " 질문",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "설명",
+            "text": " 설명",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "편집",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 458,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "복사",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 486,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "speak-button-previous-answer",
+            "label": "읽어주기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 514,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "좋은 응답",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 542,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "잘못된 응답",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 570,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "continue-response-button",
+            "label": "응답 이어 받기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 598,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "재생성",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 626,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "Fork chat",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 654,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "confirm-recording-button",
+            "label": "Confirm recording",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "generate-message-pair-button",
+            "label": "Generate message pair",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "input-menu-button",
+            "label": "더보기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 427,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "voice-input-button",
+            "label": "Voice Input",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1102.5,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "send-message-button",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1139,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "",
+            "action": "close_panel",
+            "label": "업무 패널 닫기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1880,
+              "y": 9.5,
+              "width": 30,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "새 절차",
+            "disabled": false,
+            "rect": {
+              "x": 1547.25,
+              "y": 62,
+              "width": 65.359375,
+              "height": 34
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "신규 공장 횡전개 초안2026. 10. 20. 01:24 저장 · 미게시 · 이어서 작성하기",
+            "disabled": false,
+            "rect": {
+              "x": 1362,
+              "y": 209,
+              "width": 537,
+              "height": 65
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "일일 시스템 점검 초안2026. 10. 20. 01:24 저장 · 미게시 · 이어서 작성하기",
+            "disabled": false,
+            "rect": {
+              "x": 1362,
+              "y": 326,
+              "width": 537,
+              "height": 65
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "배포 산출물 점검 초안2026. 10. 20. 01:24 저장 · 미게시 · 이어서 작성하기",
+            "disabled": false,
+            "rect": {
+              "x": 1362,
+              "y": 391,
+              "width": 537,
+              "height": 66
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "범위 변경 보존 절차 게시 v12026. 10. 20. 01:23 저장 · 게시본 유지 · 초안 수정하기",
+            "disabled": false,
+            "rect": {
+              "x": 1362,
+              "y": 457,
+              "width": 537,
+              "height": 66
+            }
+          }
+        ],
+        "navigationAncestors": [
+          {
+            "tag": "SECTION",
+            "id": "ees-work-entry",
+            "display": "block",
+            "visibility": "visible",
+            "width": 255,
+            "height": 697
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 255,
+            "height": 981
+          },
+          {
+            "tag": "ASIDE",
+            "id": "sidebar",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 256,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "contents",
+            "visibility": "visible",
+            "width": 0,
+            "height": 0
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "contents",
+            "visibility": "visible",
+            "width": 0,
+            "height": 0
+          },
+          {
+            "tag": "BODY",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "HTML",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          }
+        ]
+      }
+    },
+    {
+      "source_file": "integrated-test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus-failure.json",
+      "source_sha256": "7d0367a564d1604f61aeee19b27818444d4c2987c3adb13d9a9f7adda1497fa1",
+      "test": "test_ees_source_shell_native.SourceShellNativeTests.test_scope_three_dropdowns_anchor_keyboard_search_denied_and_focus",
+      "last_wait": "!document.querySelector(\"[data-scope-dropdown]\")",
+      "last_click": "#ees-work-system-trigger",
+      "capture_errors": [],
+      "dom": {
+        "route": "/c/existing-chat",
+        "ready": "complete",
+        "fonts": "loaded",
+        "controls": [
+          {
+            "id": "",
+            "label": "사이드바 접기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 219,
+              "y": 12,
+              "width": 24,
+              "height": 24
+            }
+          },
+          {
+            "id": "ees-work-site-trigger",
+            "label": "공장 선택",
+            "text": "공장전체 공장",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 84,
+              "width": 239,
+              "height": 40
+            }
+          },
+          {
+            "id": "ees-work-system-trigger",
+            "label": "시스템 선택",
+            "text": "시스템APC",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 123,
+              "width": 239,
+              "height": 40
+            }
+          },
+          {
+            "id": "",
+            "action": "choose_system",
+            "label": null,
+            "text": "EMS참여 ",
+            "disabled": false,
+            "rect": {
+              "x": 13,
+              "y": 172,
+              "width": 229,
+              "height": 54
+            }
+          },
+          {
+            "id": "",
+            "action": "choose_system",
+            "label": null,
+            "text": "APC참여 ",
+            "disabled": false,
+            "rect": {
+              "x": 13,
+              "y": 226,
+              "width": 229,
+              "height": 54
+            }
+          },
+          {
+            "id": "",
+            "action": "choose_system",
+            "label": null,
+            "text": "FDC권한 없음 ",
+            "disabled": true,
+            "rect": {
+              "x": 13,
+              "y": 280,
+              "width": 229,
+              "height": 54
+            }
+          },
+          {
+            "id": "",
+            "action": "choose_system",
+            "label": null,
+            "text": "EGIS권한 없음 ",
+            "disabled": true,
+            "rect": {
+              "x": 13,
+              "y": 334,
+              "width": 229,
+              "height": 54
+            }
+          },
+          {
+            "id": "",
+            "action": "choose_system",
+            "label": null,
+            "text": "EPT권한 없음 ",
+            "disabled": true,
+            "rect": {
+              "x": 13,
+              "y": 388,
+              "width": 229,
+              "height": 54
+            }
+          },
+          {
+            "id": "",
+            "action": "choose_system",
+            "label": null,
+            "text": "COMMON권한 없음 ",
+            "disabled": true,
+            "rect": {
+              "x": 13,
+              "y": 442,
+              "width": 229,
+              "height": 54
+            }
+          },
+          {
+            "id": "",
+            "action": "my_work",
+            "label": "내 업무",
+            "text": "내 업무",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 175,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "records",
+            "label": "실행 기록",
+            "text": "실행 기록",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 211,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "action": "chats",
+            "label": "대화 기록",
+            "text": "대화 기록",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 247,
+              "width": 239,
+              "height": 36
+            }
+          },
+          {
+            "id": "",
+            "label": "운영",
+            "text": "운영",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 330,
+              "width": 239,
+              "height": 32
+            }
+          },
+          {
+            "id": "",
+            "label": "셋업",
+            "text": "셋업",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 366,
+              "width": 239,
+              "height": 32
+            }
+          },
+          {
+            "id": "",
+            "label": "장애대응",
+            "text": "장애대응",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 402,
+              "width": 239,
+              "height": 32
+            }
+          },
+          {
+            "id": "sidebar-new-chat-button",
+            "label": null,
+            "text": "새 대화",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 514,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "sidebar-search-button",
+            "label": null,
+            "text": "대화 검색",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 552,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "폴더 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "새 폴더",
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "채팅 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "더보기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "sidebar-chat-item",
+            "label": null,
+            "text": "   기존 대화 ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "Chat Menu",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "delete-chat-button",
+            "label": "삭제",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "sidebar-chat-item",
+            "label": null,
+            "text": "   기존 대화 56년 전",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "Chat Menu",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "  권한 범위 검증 사용자",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "사용자 메뉴",
+            "text": "  권한 범위 검증 사용자",
+            "disabled": false,
+            "rect": {
+              "x": 8,
+              "y": 1038,
+              "width": 239,
+              "height": 34
+            }
+          },
+          {
+            "id": "new-chat-button",
+            "label": "New Chat",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "chat-context-menu-button",
+            "label": "Chat actions",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 313.6875,
+              "y": 10.5,
+              "width": 24,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "action": "new_chat",
+            "label": null,
+            "text": "새 대화",
+            "disabled": false,
+            "rect": {
+              "x": 1335.6875,
+              "y": 10.5,
+              "width": 48.3125,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "label": "Controls",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1392,
+              "y": 10.5,
+              "width": 24,
+              "height": 26
+            }
+          },
+          {
+            "id": "",
+            "label": "편집",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1172,
+              "y": 208.75,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "복사",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1200,
+              "y": 208.75,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "질문",
+            "text": " 질문",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "설명",
+            "text": " 설명",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "편집",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 508,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "복사",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 536,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "speak-button-previous-answer",
+            "label": "읽어주기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 564,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "좋은 응답",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 592,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "잘못된 응답",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 620,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "continue-response-button",
+            "label": "응답 이어 받기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 648,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": "재생성",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 676,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": "Fork chat",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 704,
+              "y": 312,
+              "width": 28,
+              "height": 28
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "confirm-recording-button",
+            "label": "Confirm recording",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "generate-message-pair-button",
+            "label": "Generate message pair",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "",
+            "label": null,
+            "text": " ",
+            "disabled": false,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "id": "input-menu-button",
+            "label": "더보기",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 477,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "voice-input-button",
+            "label": "Voice Input",
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1152.5,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "send-message-button",
+            "label": null,
+            "text": "",
+            "disabled": false,
+            "rect": {
+              "x": 1189,
+              "y": 1025,
+              "width": 30,
+              "height": 30
+            }
+          },
+          {
+            "id": "",
+            "action": "close_panel",
+            "label": "업무 패널 닫기",
+            "text": "닫기",
+            "disabled": false,
+            "rect": {
+              "x": 1866,
+              "y": 9.5,
+              "width": 38,
+              "height": 28
+            }
+          }
+        ],
+        "navigationAncestors": [
+          {
+            "tag": "SECTION",
+            "id": "ees-work-entry",
+            "display": "block",
+            "visibility": "visible",
+            "width": 255,
+            "height": 446
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 255,
+            "height": 981
+          },
+          {
+            "tag": "ASIDE",
+            "id": "sidebar",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 256,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "contents",
+            "visibility": "visible",
+            "width": 0,
+            "height": 0
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "display": "contents",
+            "visibility": "visible",
+            "width": 0,
+            "height": 0
+          },
+          {
+            "tag": "BODY",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "tag": "HTML",
+            "id": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 1920,
+            "height": 1080
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,5 +1,18 @@
 # 현재 작업 상태
 
+## 2026-10-20 · C3 겹친 패널 Escape 범위 · C60 정정
+
+- **현재 범위:** 같은 Draft #100 의 `aa32500` 에서 C60 을 반영한다. 대화 Escape 가 겹친 패널을 닫고 포커스를 옮기던 문제를 패널 안 target 조건과 닫기 시작 시 바깥 포커스 보호로 수정했다. 기존 제외 조건·붙은 패널·움직임과 C54 를 유지한다. [현재 계약](mockups/ees-work/TASK.md#common-motion-c3-20261020).
+- **검증:** 기존 시험은 패널 안 Escape 만 검사해 대화 경로를 놓쳤다. 새 단언은 수정 전 22 PASS / 2 FAIL, 수정 후 Svelte 24 PASS 이며 관련 Node 전체 59 PASS 이다. Native 회귀에 대화 Escape 의 document 버블 도달과 패널 Escape 의 미도달 증거를 추가했다. [최초 실패·환경·남은 검증](../evals/v4-ui-20260930.md#common-motion-c3-20261020). 정확한 최종 head CI 결과는 [PR #100](https://github.com/knadalkim-a11y/team-agent-poc/pull/100)에서 확인한다.
+- **첫 CI:** `c0e7d81` 의 CI 39420123286 은 변경 전 공식 wheel 의 Chrome 시작 응답 시간 초과로 실패했다. C60 패치 빌드와 EES 실제 브라우저는 미진입이다. 기록만 더한 head 를 새 실행기에서 1회 재검하며 제품·시험·시간 제한은 유지한다. 원인 미확정과 첫 실패는 위 평가에 보존한다.
+- **다음 하나:** 최종 head 의 실제 브라우저 포함 CI 를 확인한 뒤 같은 PR 에 댓글 1개로 Claude 재검토를 요청한다. Draft 유지·병합 없음·사내 실행/적용 미실행이다. E1·E2 는 착수하지 않는다. 아래 기록은 C54 당시의 상태와 이전 증거다.
+
+## 2026-10-20 · C3 공통 움직임 · C54 정정
+
+- **현재 원본/범위:** Draft #100 head `2bbbdd3`의 Claude 검토와 C54에 따라 겹친 업무 패널의 배경막만 제거한다. 패널16px/투명도·Escape·닫기·포커스와 붙은 패널, 확인 창·도움말 배경막은 유지한다. [C3 계약](mockups/ees-work/TASK.md#common-motion-c3-20261020).
+- **검증:** 선행2bbbdd3의 CI39355663661은39작업 성공/PR 배포 준비1생략으로 성공했다. 당시 시험은 닫기 중 대화 클릭만 확인해 열린 패널의 차단을 놓쳤다. 이번에는1095px에서 열린 패널 옆 대화의 실제 클릭·입력과 초안 보존을 추가한다. 최초 구현·수정 전 재현과 후속 결과는 [기존 평가](../evals/v4-ui-20260930.md#common-motion-c3-20261020)에 보존하며 최종 head/CI는 [Draft #100](https://github.com/knadalkim-a11y/team-agent-poc/pull/100)에서 확정한다.
+- **다음 하나:** 관련 Node·Native·문서·최종 CI 확인 후 같은 PR 댓글1개로 Claude 재검토 요청. Draft 유지, main 직접 push·병합·사내 실행/적용·Figma 수정·#77/#79는 하지 않는다.
+
 ## 2026-10-20 · #96 최신 main 통합·최종 병합 검증
 
 - **완료한 선행 조건:** #95·#94에 이어 main 시험 신뢰성 보완 [#99](https://github.com/knadalkim-a11y/team-agent-poc/pull/99)를 main `b1cee7d1a678891caff7c332c9a7fd5595628ddd`로 병합했다. 이 main의 [push CI39345522634](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39345522634) 첫 시도40개 성공과 [Agent Pack ZIP12232065133](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39345522634/artifacts/12232065133), 1,200,576 bytes 확인 뒤 #96 통합을 시작했다. 시험·문서 변경인 #99의 산출물은 Agent Pack ZIP이며 새 프로그램 ZIP으로 표시하지 않는다. [#94 최초 실패·#99 보완 완료](../evals/v4-ui-20260930.md#main-native-reliability-20261020)는 보존한다.

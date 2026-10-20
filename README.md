@@ -17,7 +17,7 @@ EES 팀의 문서 조회와 업무 처리를 대화·워크플로우 화면으�
 | 필요한 답 | 관리 원본 | 읽고 고치는 범위 |
 |---|---|---|
 | 무엇을 만들고 각 부분은 어떻게 연결되는가 | 이 README의 목표·실행 구조·코드 책임 표 | 기능 간 책임이나 데이터·권한 경계가 바뀔 때 갱신 |
-| 어떤 화면과 문구를 보여 주는가 | [Figma 기능 지도](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1288-2) → 해당 화면·명세 카드, 공통 부품은 [C1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=948-1078)·상태는 [S1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=944-1036)·반응형 기준은 [Q1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=979-1252) | 배치·표시 문구·화면 이동·상태 표현. 작업실 시안과 보관 화면은 채택된 설계와 구분 |
+| 어떤 화면과 문구를 보여 주는가 | [Figma 기능 지도](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1288-2) → 해당 화면·명세 카드, 공통 부품은 [C1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=948-1078)·상태는 [S1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=944-1036)·움직임 기준은 [C3](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1443-137)·반응형 기준은 [Q1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=979-1252) | 배치·표시 문구·화면 이동·상태 표현. 작업실 시안과 보관 화면은 채택된 설계와 구분 |
 | 어떤 조건에서 저장·실행·완료되는가 | 대상 브랜치의 기능 명세가 있으면 그 명세, 없으면 [TASK의 해당 기능 계약](docs/mockups/ees-work/TASK.md) | 입력·권한·상태 변화·저장/반영·완료 조건. 화면 카드에는 규칙 ID와 기능별 표시 차이만 연결 |
 | 어디까지 구현·검증·사내 적용됐는가 | [STATUS](docs/STATUS.md)와 거기서 연결한 PR·Checks·[평가 기록](evals/v4-ui-20260930.md) | 설계 확정·코드 구현·CI 검증·사내 확인을 구분 |
 | 개발 AI는 어떻게 작업하는가 | [AGENTS.md](AGENTS.md), Claude Code 진입은 [CLAUDE.md](CLAUDE.md) | 같은 지침 원본을 사용하며 기능별 상세 문서는 필요할 때 읽음 |

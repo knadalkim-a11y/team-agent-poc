@@ -5458,9 +5458,10 @@
     }
   },
   "javascript_migrations": {
-    "reason": "Integrated contract replaces legacy workflow/demo layouts. Each old module retains its safety categories in new unit fixtures, with real Native browser tests separately validating geometry and interactions. Phase 2-1 replaces DOM-mounted layout with source-owned slots; renamed layout tests retain exact Native node ownership, independent panel visibility, private target scroll, cancel focus and draft preservation without hiding or moving Native DOM.",
+    "reason": "Integrated contract replaces legacy workflow/demo layouts. Each old module retains its safety categories in new unit fixtures, with real Native browser tests separately validating geometry and interactions. Phase 2-1 replaces DOM-mounted layout with source-owned slots; renamed layout tests retain exact Native node ownership, independent panel visibility, private target scroll, cancel focus and draft preservation without hiding or moving Native DOM. C3 (2026-10-20) changes initial dialog focus from cancel to the first input or body; the renamed test preserves Escape rejection and completed-close focus return.",
     "old": {
       "test_ees_v4_layout.cjs": [
+        "confirmation dialog starts on cancel and Escape closure never accepts the command",
         "initial sidebar, open, close, detached refresh and route exit keep separate shell and panel lifecycles",
         "real detail, whole-detail small screen and list horizontal/vertical scroll survive target refresh and return",
         "actual available row width enables overlay without overwriting sidebar or Assistant preferences",
@@ -5511,7 +5512,7 @@
         "legacy content uses only the source-supplied right slot without mutating Native nodes",
         "panel visibility is source state and reset preserves source-owned mount boundary",
         "panel scroll restores per personal target and never writes a shared run selection",
-        "confirmation dialog starts on cancel and Escape closure never accepts the command"
+        "confirmation dialog starts on its body and Escape closure never accepts the command"
       ],
       "test_ees_v4_drafts.cjs": [
         "typed draft preserves false zero empty arrays and an explicitly removed optional field",

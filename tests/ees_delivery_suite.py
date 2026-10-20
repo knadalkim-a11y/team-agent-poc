@@ -63,7 +63,7 @@ SUITES = {
     "native-compose": ["test_ees_work_c_phase1_native.py", "test_ees_work_c_phase2_native.py",
         "test_ees_work_figma_authoring_native.py", "test_ees_work_figma_runtime_native.py",
         "test_ees_work_figma_layout_native.py", "test_ees_source_shell_native.py",
-        "test_ees_helper_chat_native.py"],
+        "test_ees_helper_chat_native.py", "test_ees_motion_native.py"],
     "native-execution": ["test_ees_work_c_phase3_native.py", "test_ees_work_c_phase3_privacy.py"],
 }
 # Each real fixed-wheel Apply/Restore performs a full filesystem walk. On
@@ -94,7 +94,7 @@ CASE_PARTITIONS = {
 NODE_SCRIPTS = {
     "services": ["test_wo_demo_state.cjs", "test_ees_cooperation_panel.cjs", "test_ees_execution_ui.cjs",
                  "test_ees_work_authoring_ui.cjs", "test_ees_v4_layout.cjs", "test_ees_v4_drafts.cjs",
-                 "test_ees_work_figma_runtime_ui.cjs"],
+                 "test_ees_work_figma_runtime_ui.cjs", "test_ees_motion.cjs", "test_ees_motion_svelte.cjs"],
 }
 
 
