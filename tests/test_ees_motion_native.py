@@ -54,6 +54,7 @@ class MotionNativeTests(IntegratedNativeCase):
           const sample=()=>{if(!active)return;const nodes=[...document.querySelectorAll('[data-ees-motion-kind]')];
             evidence.frames.push({t:performance.now(),nodes:nodes.map(snapshot),
               focus:identify(document.activeElement),
+              system:document.querySelector('#ees-work-system-trigger')?.textContent||'',
               scopeCount:document.querySelectorAll('[data-scope-dropdown]').length,
               dialogCount:document.querySelectorAll('#ees-work-dialog').length,
               chatWidth:document.querySelector('.ees-chat-region')?.getBoundingClientRect().width,
@@ -65,6 +66,7 @@ class MotionNativeTests(IntegratedNativeCase):
             t:performance.now(),opening:!!document.querySelector('[data-ees-motion=opening]'),
             closing:!!document.querySelector('[data-ees-motion=closing]'),
             composer:!!event.target.closest?.('#chat-input'),target:identify(event.target),
+            scopeChoice:event.target.closest?.('[data-action=choose_system]')?.dataset.systemId||'',
             defaultPreventedAtCapture:event.defaultPrevented,eventPhaseAtCapture:event.eventPhase};
             evidence.inputs.push(row);queueMicrotask(()=>{row.defaultPreventedAfter=event.defaultPrevented;
               row.focusAfter=identify(document.activeElement);});};
@@ -189,6 +191,23 @@ class MotionNativeTests(IntegratedNativeCase):
         self.assert_effect(evidence, 'scope', 'closing')
         self.assertTrue(any(row['key'] == 'Escape' and row['opening'] for row in evidence['inputs']),
                         'Escape was not actually delivered during opening')
+        # An explicit choice updates scope immediately, but its own retained
+        # menu still completes the shared close before returning focus.
+        self.observe('scope-selection')
+        self.click(trigger)
+        self.wait("document.querySelector('[data-scope-dropdown=system]') && !document.querySelector('[data-ees-motion=opening]')")
+        self.click('[data-action=choose_system][data-system-id=APC]')
+        self.wait("!document.querySelector('[data-scope-dropdown]') && document.activeElement?.id==='ees-work-system-trigger'")
+        self.assertIn('APC', self.text(trigger))
+        evidence = self.finish_evidence('c3-scope-selection-close-focus')
+        self.assertTrue(any(row['trusted'] and row['scopeChoice'] == 'APC' for row in evidence['inputs']))
+        self.assert_effect(evidence, 'scope', 'closing')
+        closing_frames = [frame for frame in evidence['frames'] if any(
+            node['kind'] == 'scope' and node['state'] == 'closing' for node in frame['nodes'])]
+        self.assertTrue(all('APC' in frame['system'] for frame in closing_frames),
+                        'Selected scope was delayed until its close effect finished')
+        self.assertTrue(all(frame['focus']['id'] != 'ees-work-system-trigger' for frame in closing_frames),
+                        'Selected scope returned focus before its close effect finished')
         self.browser.call('Emulation.setEmulatedMedia', {'features': [{'name': 'prefers-reduced-motion', 'value': 'reduce'}]})
         self.addCleanup(lambda: self.browser.call('Emulation.setEmulatedMedia', {'features': []}))
         self.observe('scope-reduced')

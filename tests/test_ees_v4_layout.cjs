@@ -1,6 +1,6 @@
 /* DOM lifecycle checks only; Native browser geometry is checked separately. */
 const test=require('node:test'),assert=require('node:assert/strict');
-const {renderer,run,controller,deferred}=require('./ees_workspace_ui_fixture.cjs');
+const {renderer,run,controller,deferred,launcherSource}=require('./ees_workspace_ui_fixture.cjs');
 function dom(extra={}){
  const ids=new Map();let doc;
  function element(id=''){
@@ -157,4 +157,18 @@ test('rapid dialog replacement reverses current visual without duplicate windows
 test('dialog caller restores a repainted trigger even when its captured previous focus is connected body',async()=>{
  const h=dom(),replacement=h.element('repainted-create');h.body.append(replacement);h.context.restoreCreate=()=>replacement.focus();
  const pending=run(h.context,'workUI.dialog({title:"새 업무 절차",restoreFocus:restoreCreate})');const dialog=h.overlays.children.find(el=>el.id==='ees-work-dialog');dialog.eesClose();assert.equal(await pending,false);assert.equal(h.document.activeElement,replacement);
+});
+
+test('visible message reference hosts retain click handling across work renders until cleared or detached',async()=>{
+ const marker='  schedule();\n})();';
+ const source=launcherSource.replace(/\r\n?/g,'\n').replace(marker,`  window.referenceHostProbe={render,bindHosts,renderMessageReferences,clearMessageReferences,set(){referenceChat=chatId();messageReferences=new Map([['old-message',{kind:'workspace',workflow_id:'w',run_id:'r',job_id:'j',attempt_id:'old-attempt',version:1,result_revision:1}]])}};\n${marker}`);
+ const h=controller(source);h.context.location.pathname='/c/existing-chat';const handlers=new Map();
+ const host={innerHTML:'',isConnected:true,addEventListener(type,fn){handlers.set(type,fn);},removeEventListener(type,fn){if(handlers.get(type)===fn)handlers.delete(type);},replaceChildren(){this.innerHTML='';}};
+ h.context.window.__eesSourceShellV1.referenceHost=()=>host;const probe=h.context.window.referenceHostProbe;probe.set();probe.renderMessageReferences();assert.match(host.innerHTML,/open_reference/);assert.equal(handlers.has('click'),true);
+ probe.render();assert.equal(handlers.has('click'),true,'Work render must not leave a visible reference card waiting for the next poll');
+ const button={dataset:{action:'open_reference',messageId:'old-message'},closest:selector=>selector==='button[data-action]'?button:selector==='[data-ees-work]'?host:null};
+ handlers.get('click')({type:'click',target:button,preventDefault(){}});await new Promise(setImmediate);
+ assert.equal(h.api.snapshot().selection.tab,'historical_reference');assert.equal(h.api.snapshot().selection.historical_reference.attempt_id,'old-attempt');
+ host.isConnected=false;probe.bindHosts();assert.equal(handlers.has('click'),false);host.isConnected=true;probe.renderMessageReferences();assert.equal(handlers.has('click'),true);
+ probe.clearMessageReferences();probe.bindHosts();assert.equal(handlers.has('click'),false);assert.equal(host.innerHTML,'');
 });

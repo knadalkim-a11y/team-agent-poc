@@ -1,0 +1,291 @@
+{
+  "head": "f234b7928331aa7499234c108bb0328907752104",
+  "run": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39352242155",
+  "job": 118400747143,
+  "artifact": 12234065924,
+  "artifact_zip_sha256": "9dd151a39cc93cb69175502f193005a6bb9bf36c613457b235934f56c46fbc6c",
+  "source_file": "ees-native-product/central-chat/failure.json",
+  "source_sha256": "8ff4f2a91c58cdb96b318dbb6532f44a23a678da47e71a25423b05bf449adafa",
+  "format": "Selected original failure fields; browser transport diagnostics omitted. Synthetic test account/data only.",
+  "browser_product": "Chrome/155.0.8059.39",
+  "path": "/c/c1ef22e3-3e6d-4417-a243-27872acd3c89",
+  "ready": "complete",
+  "viewport": [
+    1920,
+    1080
+  ],
+  "active": {
+    "tag": "BUTTON",
+    "id": "",
+    "text": "업무 근거 · v1 · 1차기준 시각 · 2026. 10. 20. 01:22",
+    "html": "<button type=\"button\" data-action=\"open_reference\" data-message-id=\"9d1d4bee-7395-4723-aa9d-56a0361de494\"><img class=\"ew-icon\" src=\"/_ees14/v4/522b5.svg\" alt=\"\" aria-hidden=\"true\"><span>업무 근거 · v1 · 1차<small>기준 시각 · 2026. 10. 20. 01:22</small></span></button>"
+  },
+  "text": "Skip to main content\nE\nEES Workflow\n업무\n워크스페이스\n\n작업 위치\n\n공장\n전체 공장\n시스템\nEMS\n내 업무\n실행 기록\n대화 기록\n\n업무\n\n운영\n중앙 대화 제안 검증\n일일 시스템 점검\n배포 산출물 점검\n셋업\n신규 공장 횡전개\n장애대응\n새 대화\n대화 검색\n통합 검증 관리자\n입력 제안과 과거 근거\n새 대화\n채팅 대화\n업무 절차 참조기준 시각 · 2026. 10. 20. 01:22\n\n중앙 대화 준비\n\nOct 20, 1:22 AM\nc3-synthetic-model\n\n중앙 대화의 합성 연결 준비 완료\n\nOct 20, 1:22 AM\n업무 절차 참조기준 시각 · 2026. 10. 20. 01:22\n\n중앙 도구로 현재 절차를 조회해 줘\n\nOct 20, 1:22 AM\nc3-synthetic-model\nView Result from ees_workflow_view\n\n중앙 도구 조회 완료\n\nOct 20, 1:22 AM\n업무 절차 참조기준 시각 · 2026. 10. 20. 01:22\n\n설명을 보완한 초안을 제안해 줘. 저장하지 말고 검토하게 해 줘\n\nOct 20, 1:22 AM\nc3-synthetic-model\nView Result from ees_workflow_propose\n\n중앙 제안은 검토 전이며 저장하지 않았습니다\n\nOct 20, 1:22 AM\n업무 근거 · v1 · 1차기준 시각 · 2026. 10. 20. 01:22\n\n첫 번째 완료 근거를 대화에 남겨 줘\n\nOct 20, 1:22 AM\nc3-synthetic-model\n\n첫 번째 완료 근거를 참조한 대화 응답\n\nOct 20, 1:22 AM\n\n\n\n\nc3-synthetic-model\n음성 모드 사용\n업무\n중앙 대화 제안 검증\n닫기\n진행 건\n중앙 대화 제안 검증\n2026. 10. 20. 01:22 개시 · 1/1단계\n다른 진행 건\n← 회차 개요\n입력 제안과 과거 근거\n완료\n\n현재 담당 · 통합 검증 관리자\n\n맡기 해제\n현재 상태\n실행 기록\n업무 설정\n이번 진행 건 입력 이번 실행에 사용\nAI 입력 초안\n자료 메모\n입력 저장\n사람 확인\n\n항목별 확인 기준이 등록되지 않았습니다. 작업의 확인 기준을 따릅니다.\n\n결과와 근거를 확인한 뒤 직접 확인해 주세요.\n\n확인 완료\nEES Workflow",
+  "work_state": {
+    "busy": "false",
+    "loading": false,
+    "reference": {
+      "kind": "workspace",
+      "workflow_id": "8a28614c-195c-4adb-aafd-fa7c6de2269d",
+      "run_id": "81ca4a20-78c7-4498-a6c3-da81c1ec2fb0",
+      "job_id": "job-2b87e0d7-9aa5-47dd-8317-a93441c9c98a",
+      "system_id": "EMS",
+      "factory_id": "",
+      "version": 1,
+      "workflow_revision": 5,
+      "attempt_id": "ac722b73-0caa-4664-b3de-6b63a2009244",
+      "result_revision": 2,
+      "revision": 9,
+      "created_at": "2026-10-20T01:22:46.984+00:00",
+      "context_id": "[10,true,\"/c/c1ef22e3-3e6d-4417-a243-27872acd3c89\",\"\",\"EMS\",\"\",\"8a28614c-195c-4adb-aafd-fa7c6de2269d\",\"81ca4a20-78c7-4498-a6c3-da81c1ec2fb0\",\"job-2b87e0d7-9aa5-47dd-8317-a93441c9c98a\"]"
+    },
+    "review": null,
+    "open_history": [],
+    "scroll": {
+      "top": 0,
+      "height": 973,
+      "total": 973,
+      "width": 479,
+      "total_width": 479
+    }
+  },
+  "errors": [],
+  "requests": [
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace/command",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace/command",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace/command",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/resources",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace/command",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace/command",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace/command",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace/command",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace/command",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace/command",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace/command",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace/command",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace/proposal",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace/command",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace/command",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace/command",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace/command",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/workspace",
+      "status": 200
+    },
+    {
+      "path": "/api/ees-work/operations",
+      "status": 200
+    }
+  ]
+}

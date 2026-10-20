@@ -24,11 +24,18 @@ function motion() {
   return { api, pending, opened };
 }
 function scopeHarness() {
-  const m = motion(), env = { window: { __eesMotionV1: m.api }, tick: () => Promise.resolve(), scopeVersion: 0, selectionFocus: null, document: { activeElement: null, body: element(), documentElement: element() }, shown: false, open: false, opened: '', restoreOnClose: true, query: 'kept while closing', dropdown: element(), trigger: element() };
+  const m = motion(), env = { window: { __eesMotionV1: m.api }, tick: () => Promise.resolve(), scopeVersion: 0, pendingSelection: null, previousBoundary: 'initial', selectionContext: 'route-and-permissions', value: 'old', kind: 'factory', document: { activeElement: null, body: element(), documentElement: element() }, shown: false, open: false, opened: '', restoreOnClose: true, query: 'kept while closing', dropdown: element(), trigger: element() };
   const source = between(component('EesScopeSelect'), 'function syncScope(', '\n\tonDestroy(').replace('wantsOpen: boolean, activeKind: string', 'wantsOpen, activeKind');
   const sync = bind(source, env, 'syncScope');
-  const retire = bind(between(component('EesScopeSelect'), 'function retireScope()', '\n\t$: syncScope'), env, 'retireScope');
-  return { env, m, retire, set(open, opened = open ? 'factory' : '') { env.open = open; env.opened = opened; sync(open, opened); } };
+  env.syncScope = sync;
+  const reactiveCall = component('EesScopeSelect').match(/\$:\s*(syncScope\([^;]+\));/)[1];
+  const react = Function('env', `with(env) { ${reactiveCall}; }`);
+  env.retireScope = bind(between(component('EesScopeSelect'), 'function retireScope()', '\n\t$: syncScope'), env, 'retireScope');
+  env.close = bind(between(component('EesScopeSelect'), 'function close(', '\n\tfunction allowedOptions'), env, 'close');
+  const boundary = bind(between(component('EesScopeSelect'), 'function syncBoundary(', '\n\tfunction retireScope').replace('next: string, context: string, selected: string', 'next, context, selected'), env, 'syncBoundary');
+  const choose = bind(between(component('EesScopeSelect'), 'function choose(', '\n\tfunction keydown'), env, 'choose');
+  env.eesAction = action => { env.value = action.factoryId; };
+  return { env, m, choose, react() { react(env); }, boundary(next, context = env.selectionContext, selected = env.value) { boundary(next, context, selected); }, set(open, opened = open ? 'factory' : '') { env.open = open; env.opened = opened; sync(open, opened); } };
 }
 function panelHarness() {
   const m = motion(), trigger = element(), env = { window: { __eesMotionV1: m.api }, tick: () => Promise.resolve(), previousPanelOpen: null, previousPanelOverlay: null, panelOpen: false, panelOverlay: true, panelClosing: false, panelClose: Promise.resolve(true), nativeRoute: false, mounted: true, admin: false, panelRegion: element(), panelBackdrop: element(), panel: element(), document: { getElementById: () => trigger }, $showSettings: false, actions: [] };
@@ -96,17 +103,38 @@ test('retained scope and overlay stop closing synchronously before reactive iner
   const panel = panelHarness(); panel.set(true); await flush(); panel.set(false); panel.set(true);
   assert.equal(panel.m.pending.size, 0); assert.equal(panel.env.panelRegion.inert, false);
 });
-test('scope selection boundary retires stale choices immediately and preserves its explicit focus return', async () => {
-  const h = scopeHarness(); h.set(true); await flush(); const option = element();
-  h.env.document.activeElement = option; h.env.selectionFocus = option; h.set(false); h.retire();
-  assert.equal(h.env.shown, false); assert.equal(h.m.pending.size, 0); assert.equal(h.env.trigger.focused, 1);
-});
-test('scope permission or navigation boundary never requests selection focus or steals a newer focus', async () => {
-  for (const selection of [false, true]) {
-    const h = scopeHarness(); h.set(true); await flush(); h.env.selectionFocus = selection ? element() : null;
-    h.env.document.activeElement = element(); h.set(false); h.retire();
-    assert.equal(h.env.shown, false); assert.equal(h.env.trigger.focused, 0);
+test('own scope selection updates business value immediately and keeps the common exit until completion', async () => {
+  for (const boundaryFirst of [true, false]) {
+    const h = scopeHarness(); h.set(true); await flush(); h.choose({ id: 'new' });
+    assert.equal(h.env.value, 'new'); assert.equal(h.env.opened, ''); assert.equal(h.env.trigger.focused, 0);
+    h.env.open = false;
+    if (boundaryFirst) h.boundary('selected-new');
+    h.set(false);
+    if (!boundaryFirst) h.boundary('selected-new');
+    assert.equal(h.env.shown, true); assert.equal(h.env.dropdown.inert, true);
+    assert.equal(h.m.pending.size, 1); assert.equal(h.env.trigger.focused, 0);
+    h.m.api.finish(h.env.dropdown);
+    assert.equal(h.env.shown, false); assert.equal(h.env.trigger.focused, 1);
   }
+});
+test('scope selection cannot exempt a different option or a changed permission/navigation context', async () => {
+  for (const [context, selected] of [['changed-route-or-permissions', 'new'], ['route-and-permissions', 'another']]) {
+    const h = scopeHarness(); h.set(true); await flush(); h.choose({ id: 'new' }); h.set(false);
+    h.boundary('invalidated', context, selected);
+    assert.equal(h.env.shown, false); assert.equal(h.m.pending.size, 0); assert.equal(h.env.trigger.focused, 0);
+  }
+});
+test('own selection exemption is consumed once and does not cover later navigation', async () => {
+  const h = scopeHarness(); h.set(true); await flush(); h.choose({ id: 'new' }); h.set(false);
+  h.boundary('selected-new'); assert.equal(h.env.shown, true);
+  h.boundary('another-workflow');
+  assert.equal(h.env.shown, false); assert.equal(h.m.pending.size, 0); assert.equal(h.env.trigger.focused, 0);
+});
+test('choosing the already selected option does not exempt a later navigation boundary', async () => {
+  const h = scopeHarness(); h.set(true); await flush(); h.choose({ id: h.env.value }); h.set(false);
+  assert.equal(h.m.pending.size, 1); assert.equal(h.env.pendingSelection, null);
+  h.boundary('another-workflow');
+  assert.equal(h.env.shown, false); assert.equal(h.m.pending.size, 0); assert.equal(h.env.trigger.focused, 0);
 });
 test('overlay Escape owns shell bubbling before Native unconditional document CLOSE_MODAL handling', () => {
   const shell = component('EesShell');
@@ -129,4 +157,21 @@ test('Native dialog and menu targets keep their own Escape handling', () => {
     h.key(event);
   }
   assert.equal(h.env.actions.length, 0);
+});
+
+test('external boundary retirement cannot reopen from a stale derived open value in the same flush', async () => {
+  const h = scopeHarness(); h.set(true); await flush();
+  h.boundary('new-server-permissions');
+  assert.equal(h.env.opened, ''); assert.equal(h.env.open, true, 'Simulate derived value from before boundary close');
+  assert.equal(h.env.shown, false);
+  h.react(); await flush();
+  const source = component('EesScopeSelect');
+  for (const [attribute, expected] of [['aria-expanded', false], ['aria-controls', undefined], ['inert', true], ['aria-hidden', true]]) {
+    const expression = source.match(new RegExp(`${attribute}=\\{([^}]+)\\}`))[1];
+    const actual = Function('env', `with(env) { return (${expression}); }`)(h.env);
+    assert.equal(actual, expected, `${attribute} follows the same live opened state`);
+  }
+  assert.equal(h.env.shown, false); assert.equal(h.m.pending.size, 0);
+  assert.equal(h.m.opened.length, 1, 'No new opening animation after external invalidation');
+  assert.equal(h.env.trigger.focused, 0);
 });

@@ -1334,7 +1334,7 @@ new file mode 100644
 index 0000000..be842d3
 --- /dev/null
 +++ b/src/lib/components/ees/EesNavigation.svelte
-@@ -0,0 +1,250 @@
+@@ -0,0 +1,251 @@
 +<script lang="ts">
 +	import { getContext } from 'svelte';
 +	import { page } from '$app/stores';
@@ -1389,7 +1389,8 @@ index 0000000..be842d3
 +	$: scopeRole = (item) => item.allowed === false ? '' : item.role || (item.roles?.includes('manager') || cap.is_admin || cap.managed_systems?.includes(item.system_id || item.id) ? 'owner' : 'participant');
 +	$: systems = (scope.scope_options?.systems ?? scope.systems ?? []).map((item) => typeof item === 'string' ? { id: item, name: item } : item).map((item) => ({ ...item, role: scopeRole(item) }));
 +	$: factories = [{ id: '', name: t('EES.AllFactories', 'All factories') }, ...(scope.scope_options?.factories ?? scope.factories ?? []).map((item) => ({ ...item, role: scopeRole(item) }))];
-+	$: scopeBoundary = JSON.stringify([$page.url.pathname, $page.url.search, $eesSnapshot.native_id, s.mode, s.tab, s.workflow_id, s.run_id, s.job_id, s.system_id, s.factory_id, s.chat_id, $eesCompact, systems, factories]);
++	$: scopeBoundary = JSON.stringify([$page.url.pathname, $page.url.search, cap.actor_id, $eesSnapshot.native_id, s.mode, s.tab, s.workflow_id, s.run_id, s.job_id, s.system_id, s.factory_id, s.chat_id, $eesCompact, systems, factories]);
++	$: scopeSelectionContext = JSON.stringify([$page.url.pathname, $page.url.search, cap.actor_id, $eesSnapshot.native_id, author, s.chat_id, $eesCompact, systems, factories]);
 +	$: nativeAllowed = (id) =>
 +		cap.native_access_available === true &&
 +		cap.native_access?.[id] === true &&
@@ -1426,8 +1427,8 @@ index 0000000..be842d3
 +			)}
 +		</p>
 +		<div class="ew-scope">
-+			{#if !author}<EesScopeSelect kind="factory" label={t('EES.Factory', 'Factory')} value={s.factory_id || ''} options={factories} bind:opened={openedScope} boundary={scopeBoundary} />{/if}
-+			<EesScopeSelect kind="system" compact={author} label={t('EES.System', 'System')} value={s.system_id || ''} options={systems} bind:opened={openedScope} boundary={scopeBoundary} />
++			{#if !author}<EesScopeSelect kind="factory" label={t('EES.Factory', 'Factory')} value={s.factory_id || ''} options={factories} bind:opened={openedScope} boundary={scopeBoundary} selectionContext={JSON.stringify([scopeSelectionContext, s.system_id])} />{/if}
++			<EesScopeSelect kind="system" compact={author} label={t('EES.System', 'System')} value={s.system_id || ''} options={systems} bind:opened={openedScope} boundary={scopeBoundary} selectionContext={scopeSelectionContext} />
 +		</div>
 +		{#if author}
 +			<section class="ew-nav-group">
@@ -3537,52 +3538,52 @@ new file mode 100644
 +	export let options: any[] = [];
 +	export let opened = '';
 +	export let boundary = '';
++	export let selectionContext = '';
 +	let root: HTMLDivElement;
 +	let trigger: HTMLButtonElement;
 +	let list: HTMLDivElement;
 +	let dropdown: HTMLDivElement;
 +	let shown = false, scopeVersion = 0;
 +	let restoreOnClose = true;
-+	let selectionFocus: Element | null = null;
++	let pendingSelection: { value: string; context: string } | null = null;
 +	let search: HTMLInputElement;
 +	let query = '';
 +	let previousBoundary = '';
 +	$: t = (key, fallback) => $i18n.t(key, { defaultValue: fallback });
-+	$: open = opened === kind;
 +	$: icon = kind === 'factory' ? '40095' : 'f34f3';
 +	$: triggerId = kind === 'factory' ? 'ees-work-site-trigger' : 'ees-work-system-trigger';
 +	$: listId = `ees-scope-${kind}-list`;
 +	$: searchable = kind === 'factory' && options.filter((item) => item.id !== '').length >= 8;
 +	$: visible = options.filter((item) => item.id === '' || !query.trim() || String(item.name || item.id).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
 +	$: current = options.find((item) => item.id === value);
-+	$: if (boundary !== previousBoundary) {
-+		previousBoundary = boundary;
-+		if (open) close(false);
-+		// A changed permission/navigation boundary must retire stale choices immediately.
-+		if (shown) retireScope();
++	$: syncBoundary(boundary, selectionContext, value);
++	function syncBoundary(next: string, context: string, selected: string) {
++		if (next === previousBoundary) return;
++		previousBoundary = next;
++		// Only the first boundary caused by this option may retain its inert exit.
++		// Permission, route and later navigation changes retire stale choices now.
++		const ownSelection = !opened && pendingSelection?.value === selected && pendingSelection?.context === context;
++		pendingSelection = null;
++		if (opened === kind) close(false);
++		if (shown && !ownSelection) retireScope();
 +	}
 +	function retireScope() {
-+		const selectedFocus = selectionFocus;
-+		selectionFocus = null;
++		pendingSelection = null;
 +		scopeVersion++;
 +		window.__eesMotionV1?.finish(dropdown, { restoreFocus: false });
 +		window.__eesMotionV1?.cancel(dropdown);
 +		shown = false;
 +		query = '';
-+		const active = document.activeElement;
-+		// An option's own selection changes the boundary, but still returns focus.
-+		// Permission/navigation updates have no selection focus to restore.
-+		if (selectedFocus && (!active || active === document.body || active === document.documentElement || active === selectedFocus || dropdown?.contains(active))) trigger?.focus({ preventScroll: true });
 +	}
-+	$: syncScope(open, opened);
++	$: syncScope(opened === kind, opened);
 +	function syncScope(wantsOpen: boolean, activeKind: string) {
 +		const version = ++scopeVersion;
 +		if (wantsOpen) {
 +			const retained = shown && dropdown;
 +			shown = true;
-+			selectionFocus = null;
++			pendingSelection = null;
 +			const enter = () => {
-+				if (version !== scopeVersion || !open || !dropdown) return;
++				if (version !== scopeVersion || opened !== kind || !dropdown) return;
 +				window.__eesMotionV1?.open(dropdown);
 +				dropdown.inert = false;
 +				dropdown.removeAttribute('aria-hidden');
@@ -3598,7 +3599,7 @@ new file mode 100644
 +			if (version !== scopeVersion) return;
 +			shown = false;
 +			query = '';
-+			selectionFocus = null;
++			pendingSelection = null;
 +		};
 +		const motion = window.__eesMotionV1;
 +		// Only one scope menu exists, including when a sibling opens during closing.
@@ -3624,11 +3625,11 @@ new file mode 100644
 +		return Array.from(list?.querySelectorAll<HTMLButtonElement>('button[role="option"]:not(:disabled)') || []);
 +	}
 +	async function toggle(direction = 0) {
-+		if (open && !direction) { close(); return; }
++		if (opened === kind && !direction) { close(); return; }
 +		query = '';
 +		opened = kind;
 +		await tick();
-+		if (!open) return;
++		if (opened !== kind) return;
 +		if (searchable && !direction) { search?.focus({ preventScroll: true }); return; }
 +		const buttons = allowedOptions();
 +		const selected = buttons.find((item) => item.getAttribute('aria-selected') === 'true');
@@ -3636,12 +3637,12 @@ new file mode 100644
 +	}
 +	function choose(item) {
 +		if (item.allowed === false) return;
-+		selectionFocus = document.activeElement;
++		pendingSelection = item.id === value ? null : { value: item.id, context: selectionContext };
 +		close();
 +		eesAction(kind === 'factory' ? { action: 'choose_factory', factoryId: item.id } : { action: 'choose_system', systemId: item.id });
 +	}
 +	function keydown(event: KeyboardEvent) {
-+		if (!open || !root?.contains(event.target as Node)) return;
++		if (opened !== kind || !root?.contains(event.target as Node)) return;
 +		if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); return; }
 +		if (event.key === 'Tab') { close(false); return; }
 +		if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
@@ -3657,21 +3658,21 @@ new file mode 100644
 +			else if (item.bottom > bounds.bottom) list.scrollTop += item.bottom - bounds.bottom;
 +		}
 +	}
-+	function outside(event: Event) { if (open && !root?.contains(event.target as Node)) close(false); }
++	function outside(event: Event) { if (opened === kind && !root?.contains(event.target as Node)) close(false); }
 +</script>
 +
 +<svelte:document on:pointerdown={outside} on:focusin={outside} on:keydown={keydown} />
 +<div class="ew-scope-field" bind:this={root}>
 +	<button type="button" id={triggerId} data-scope-trigger={kind} bind:this={trigger}
 +		aria-label={t(kind === 'factory' ? 'EES.Nav.Factory' : 'EES.Nav.System', kind === 'factory' ? 'Choose factory' : 'Choose system')}
-+		aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? listId : undefined}
++		aria-haspopup="listbox" aria-expanded={opened === kind} aria-controls={opened === kind ? listId : undefined}
 +		on:click={() => toggle()} on:keydown={(event) => {
-+			if (!open && ['ArrowDown', 'ArrowUp'].includes(event.key)) { event.preventDefault(); toggle(event.key === 'ArrowUp' ? -1 : 1); }
++			if (opened !== kind && ['ArrowDown', 'ArrowUp'].includes(event.key)) { event.preventDefault(); toggle(event.key === 'ArrowUp' ? -1 : 1); }
 +		}}>
 +		<Icon name={icon} />{#if !compact}<small>{label}</small>{/if}<span>{current?.name || current?.id || (kind === 'factory' ? t('EES.AllFactories', 'All factories') : value || t('EES.Select', 'Select'))}</span>{#if compact && current}<small>{current.allowed === false ? t('EES.Scope.NoAccess', 'No access') : current.role === 'owner' ? t('EES.Scope.Owner', 'Owner') : t('EES.Scope.Participant', 'Participant')}</small>{/if}<Icon name="ead50" />
 +	</button>
 +	{#if shown}
-+		<div class="ew-scope-dropdown" data-scope-dropdown={kind} data-ees-motion-kind="scope" bind:this={dropdown} inert={!open} aria-hidden={!open}>
++		<div class="ew-scope-dropdown" data-scope-dropdown={kind} data-ees-motion-kind="scope" bind:this={dropdown} inert={opened !== kind} aria-hidden={opened !== kind}>
 +			{#if searchable}<label class="ew-scope-search"><Icon name="b8bc6" /><input type="search" id="ees-factory-search" bind:this={search} bind:value={query} placeholder={t('EES.Scope.SearchFactories', 'Search factories')} aria-label={t('EES.Scope.SearchFactories', 'Search factories')} aria-controls={listId} /></label>{/if}
 +			<div id={listId} data-scope-list={kind} role="listbox" aria-label={label} bind:this={list}>
 +				{#each visible as item (item.id)}
