@@ -1,0 +1,63 @@
+{
+  "head": "beb47edda89571d5d0fdd4e69608aa9aa284d8e4",
+  "run_id": 39428157718,
+  "job_id": 118648967822,
+  "artifact_id": 12267502308,
+  "zip_sha256": "200c7d4c337e803db0f20d5bceaefa6cd1740edcc09fd35ababf17380cb3fe63",
+  "failures": [
+    {
+      "test": "test_e1_content_variants_keep_names_focus_and_drafts_at_480_and_1366",
+      "actual": "480 px sidebar readiness timed out after all 1366 px captures passed; open right panel covers sidebar hit-test point",
+      "change": "Prepare navigation at 1366 px, then resize to target viewport before actual content actions/captures. Preserve sidebar hit-testing and timeout."
+    },
+    {
+      "test": "test_procedure_visual_geometry_matches_figma_and_preserves_native_draft",
+      "actual": "factoryTabs 1 != expected 0 from obsolete summary-only geometry",
+      "change": "Assert one factory view and exact base/factory choices and selection."
+    }
+  ],
+  "files": [
+    {
+      "path": "evals/artifacts/ci-delivery-20261016/e12-beb47ed-narrow-setup.json",
+      "source_name": "integrated-test_e1_content_variants_keep_names_focus_and_drafts_at_480_and_1366-failure.json",
+      "sha256": "6206029b5e34bdc3647851daca7a6c89348fc7b86b848ed1172bc1a6bbb26546"
+    },
+    {
+      "path": "evals/artifacts/ci-delivery-20261016/e12-beb47ed-narrow-setup.png",
+      "source_name": "integrated-test_e1_content_variants_keep_names_focus_and_drafts_at_480_and_1366-failure.png",
+      "sha256": "40443428795a215a00abd40ac6b24ddde1737aeb6d8515ae1af51e4ed3d3efad"
+    },
+    {
+      "path": "evals/artifacts/ci-delivery-20261016/e12-beb47ed-factory-view.json",
+      "source_name": "integrated-test_procedure_visual_geometry_matches_figma_and_preserves_native_draft-failure.json",
+      "sha256": "146adb2f934369dfac1962082effec749984e899370d296bf6056d5bed5ed238"
+    },
+    {
+      "path": "evals/artifacts/ci-delivery-20261016/e12-beb47ed-factory-view.png",
+      "source_name": "integrated-test_procedure_visual_geometry_matches_figma_and_preserves_native_draft-failure.png",
+      "sha256": "3fd60728e42d61dafd1a81fce3f187090efafe2249843741bbdc72d1905c3b3a"
+    },
+    {
+      "path": "evals/artifacts/ci-delivery-20261016/e12-beb47ed-1366-observations.json",
+      "source_name": "e1-content-variants-observations.json",
+      "sha256": "2424f9dfd93dfbb33934ce8b71087997d7a3e93fd6e5ffc73507cd9d6553432a"
+    },
+    {
+      "path": "evals/artifacts/ci-delivery-20261016/e12-beb47ed-dirty-guard.png",
+      "source_name": "e1-example7-dirty-guard-1366.png",
+      "sha256": "95be41208e95b29800213ebdfd4ba6f9dff9d6e060cd9111e20bf115882642ed"
+    }
+  ],
+  "visual_findings": [
+    {
+      "state": "example 7 dirty guard at 1366 px",
+      "actual": "Existing text-only assertion passed but warning was clipped above viewport at scrollTop 582; focus stayed on blocked stage-1 button.",
+      "change": "Focus the active inline form name and reveal its warning; add actual viewport/focus assertions."
+    },
+    {
+      "state": "delete/help and next C2 screenshots",
+      "actual": "Capture occurred while common motion was opening or closing.",
+      "change": "Wait for existing finite transitions to settle before capture; preserve motion and timeout."
+    }
+  ]
+}

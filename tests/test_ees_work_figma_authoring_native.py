@@ -196,14 +196,29 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
 
         def capture(label):
             self.wait("[...document.querySelectorAll('.ew-work-content img')].every(image=>image.complete&&image.naturalWidth>0)")
+            self.wait("""!document.querySelector('[data-ees-motion=opening],[data-ees-motion=closing],.ew-dialog-exit-backdrop') &&
+                [...document.querySelectorAll('#ees-work-designer,#ees-work-dialog,#ees-work-help')]
+                    .every(surface=>surface.getAnimations({subtree:true}).every(animation=>!animation.pending&&animation.playState!=='running'))""")
             observed = self.browser.evaluate("""(() => {
                 const scroll=document.querySelector('.ew-author-scroll'), active=document.activeElement;
                 const box=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return {width:r.width,height:r.height,fontSize:s.fontSize,lineHeight:s.lineHeight,background:s.backgroundColor};};
+                const alert=document.querySelector('#ew-stage-editor [role=alert]');
+                let inlineAlert=null;
+                if(alert){
+                    const rect=alert.getBoundingClientRect(),scrollRect=scroll.getBoundingClientRect(),panelRect=document.querySelector('.ees-panel-region').getBoundingClientRect(),style=getComputedStyle(alert);
+                    const contains=outer=>rect.left>=outer.left-1&&rect.right<=outer.right+1&&rect.top>=outer.top-1&&rect.bottom<=outer.bottom+1;
+                    const hit=document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2);
+                    inlineAlert={text:alert.textContent,rect:{left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom},
+                        withinScroll:contains(scrollRect),withinPanel:contains(panelRect),withinViewport:contains({left:0,right:innerWidth,top:0,bottom:innerHeight}),
+                        visible:rect.width>0&&rect.height>0&&style.visibility==='visible'&&Number(style.opacity)>0,
+                        hitTest:!!hit&&(hit===alert||alert.contains(hit)),focusInsideEditor:!!active?.closest('#ew-stage-editor')};
+                }
                 return {viewport:[innerWidth,innerHeight],scrollTop:scroll.scrollTop,overflow:scroll.scrollWidth-scroll.clientWidth,
                     stages:[...document.querySelectorAll('.ew-stage-toggle')].map(e=>({id:e.dataset.id,expanded:e.getAttribute('aria-expanded'),...box(e)})),
                     jobs:[...document.querySelectorAll('.ew-job-row')].map(e=>({id:e.dataset.jobId,returned:e.dataset.returned,...box(e)})),
                     focus:{action:active?.dataset.authorAction,id:active?.dataset.id,name:active?.name},
                     inline:!!document.querySelector('#ew-stage-editor'),invalid:!!document.querySelector('#ew-stage-editor [aria-invalid=true]'),
+                    inlineAlert,surfaces:[...document.querySelectorAll('#ees-work-dialog[open],#ees-work-help')].map(e=>({id:e.id,opacity:getComputedStyle(e).opacity})),
                     proposal:!!document.querySelector('.ew-author-proposal'),footer:document.querySelector('#ees-work-designer>footer')?.innerText,
                     icons:[...document.querySelectorAll('.ew-work-content img')].map(e=>({src:e.src,natural:e.naturalWidth,rendered:e.getBoundingClientRect().width}))};
             })()""")
@@ -215,16 +230,22 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             directory = self.screenshot(label)
             (directory / 'e1-content-variants-observations.json').write_text(
                 json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+            return observed
 
         for width in (1366, 480):
-            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
-            self.wait('innerWidth === ' + str(width))
+            # Establish the authoring destination while its sidebar is exposed.
+            # At 480 px the open overlay correctly covers that sidebar; all
+            # content actions and evidence below still use the requested width.
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1366, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+            self.wait('innerWidth === 1366')
             self.navigate('/c/existing-chat')
             self.wait("document.querySelector('#ees-work-entry')")
             self.open_sidebar(); self.click('[data-action=mode][data-mode=author]'); self.refresh()
             self.wait("document.querySelector('#ees-work-designer')")
             if self.browser.evaluate("!!document.querySelector('[data-author-action=list]')"):
                 self.click('[data-author-action=list]')
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+            self.wait('innerWidth === ' + str(width))
             for count in (0, 1, 3, 6):
                 key, definition = fixtures[count]
                 selector = '[data-author-action=open][data-id="' + key + '"]'
@@ -248,7 +269,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.click('[data-author-action=stage_toggle][data-id=stage-1]')
             self.assertIn('편집 중인 항목을 먼저 적용하거나 취소해 주세요.', self.text('#ew-stage-editor'))
             self.assertEqual(self.read('[data-author-action=stage_toggle][data-id=stage-0]', 'ariaExpanded'), 'true')
-            capture('e1-example7-dirty-guard-' + str(width))
+            guard = capture('e1-example7-dirty-guard-' + str(width))['inlineAlert']
+            self.assertIsNotNone(guard)
+            for boundary in ('withinScroll', 'withinPanel', 'withinViewport', 'visible', 'hitTest', 'focusInsideEditor'):
+                self.assertTrue(guard[boundary], guard)
             self.click('[data-author-action=inline_apply]')
             self.assertIn('두 번째 줄', self.text('[data-stage-id=stage-0] .ew-stage-description'))
             self.click('[data-author-action=job_menu][data-id=job-0-0]')
@@ -335,7 +359,11 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
     def test_procedure_visual_geometry_matches_figma_and_preserves_native_draft(self):
         created = self.command('create_workflow', name='시각 대조 절차', system_id='EMS')
         identifier = created['workflow_id']
-        original = self.state(workflow_id=identifier)['workflow']
+        workspace = self.state(workflow_id=identifier)
+        original = workspace['workflow']
+        expected_factory_views = [{'id': '', 'label': '기본 절차', 'selected': 'true'}] + [
+            {'id': item['id'], 'label': item.get('name') or item['id'], 'selected': 'false'}
+            for item in workspace.get('factories', [])]
         self.fill('#chat-input', '화면 전환 전 개인 입력')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.click('[data-action="mode"][data-mode="author"]')
@@ -356,13 +384,17 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 tabs:style('.ew-author-tabs>button'),heading:style('.ew-author h2'),
                 extraHeader:document.querySelectorAll('#ees-work-panel>.ew-panel-header').length,
                 factoryTabs:document.querySelectorAll('.ew-author-factories').length,
+                factoryLabel:document.querySelector('.ew-author-factories')?.getAttribute('aria-label'),
+                factoryViews:[...document.querySelectorAll('.ew-author-factories [data-author-action=factory]')].map(e=>({id:e.dataset.id,label:e.textContent.trim(),selected:e.getAttribute('aria-selected')})),
                 overflow:document.querySelector('.ew-author-scroll').scrollWidth-document.querySelector('.ew-author-scroll').clientWidth};
             })()""")
             self.assertEqual(metrics['panel']['width'], min(580, metrics['availableWidth']))
             self.assertEqual(metrics['panel']['x'] + metrics['panel']['width'], width)
             self.assertEqual(metrics['header']['height'], 48)
             self.assertEqual(metrics['extraHeader'], 0)
-            self.assertEqual(metrics['factoryTabs'], 0)
+            self.assertEqual(metrics['factoryTabs'], 1)
+            self.assertEqual(metrics['factoryLabel'], '공장별 차이')
+            self.assertEqual(metrics['factoryViews'], expected_factory_views)
             self.assertAlmostEqual(metrics['card']['x'] - metrics['panel']['x'], 21, delta=1)
             self.assertLess(metrics['purpose']['y'], metrics['needs']['y'])
             self.assertLess(metrics['needs']['y'], metrics['steps']['y'])

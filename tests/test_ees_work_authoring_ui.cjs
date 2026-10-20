@@ -37,13 +37,15 @@ function harness({cryptoProvider=crypto}={}){const h={startContexts:[],writes:[]
  };
  const decorate=(node,attributes={})=>{
   let disabled=Boolean(node.disabled);Object.defineProperty(node,'disabled',{get:()=>disabled,set:value=>{disabled=Boolean(value);},enumerable:true,configurable:true});node.attributes=attributes;node.dataset ||= {};for(const [key,value] of Object.entries(attributes))if(key.startsWith('data-'))node.dataset[key.slice(5).replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]=value;node.isConnected=true;node.focus=()=>{h.document.activeElement=node;};node.setSelectionRange=(start,end)=>{node.selectionStart=start;node.selectionEnd=end;};
-  node.getAttribute=name=>Object.hasOwn(node.attributes,name)?node.attributes[name]:null;node.setAttribute=(name,value)=>{node.attributes[name]=String(value);};
+  node.scrollIntoView=options=>{(h.scrollRequests ||= []).push({node,options});};node.getAttribute=name=>Object.hasOwn(node.attributes,name)?node.attributes[name]:null;node.setAttribute=(name,value)=>{node.attributes[name]=String(value);};
   node.closest=selector=>selector==='#ees-work-designer'?host:selector==='#'+node.formId?h.forms[node.formId]:matches(node,selector)?node:null;
   return node;
  };
  const host={isConnected:true,contains:node=>Boolean(node&&(h.fields.includes(node)||h.buttons.includes(node)||Object.values(h.forms).includes(node))),querySelector(selector){
   if(selector==='footer')return h.footer;if(h.footerNodes?.[selector])return h.footerNodes[selector];if(selector==='.ew-author-ai')return h.composer;if(selector==='.ew-author-scroll')return h.scroll;if(selector==='[data-author-status]')return h.status;
   if(selector.includes(','))return selector.split(',').map(part=>host.querySelector(part)).find(Boolean) || null;
+  const formError=selector.match(/^#([^ ]+) \.ew-inline-error$/);if(formError)return h.forms[formError[1]]?.inlineError || null;
+  const namedFormControl=selector.match(/^#([^ ]+) (\[name=[^\]]+\])$/);if(namedFormControl)return h.forms[namedFormControl[1]]?.controls.find(field=>matches(field,namedFormControl[2])) || null;
   const formControl=selector.match(/^#([^ ]+) (input|select|textarea)/);if(formControl)return h.forms[formControl[1]]?.controls.find(field=>field.type!=='hidden') || null;
   if(selector.startsWith('#')&&h.forms[selector.slice(1)])return h.forms[selector.slice(1)];
   return [...h.fields,...h.buttons,...(h.details || [])].find(node=>matches(node,selector)) || null;
@@ -56,10 +58,10 @@ function harness({cryptoProvider=crypto}={}){const h={startContexts:[],writes:[]
   const footer=html.match(/<footer(?:\s[^>]*)?>([\s\S]*?)<\/footer>/)?.[1];h.footerNodes=footerNodes(footer || '');h.footer=footer===undefined?null:{};
   if(h.footer)Object.defineProperty(h.footer,'innerHTML',{get:()=>footer,set:value=>{h.footerReplacements=(h.footerReplacements || 0)+1;h.footerNodes=footerNodes(value);h.buttons=h.buttons.map(button=>['procedure_create','procedure_cancel','tool_save','tool_review','tool_approve','tool_reject'].includes(button.dataset.authorAction)?{...button}:button);}});
   h.details=[...html.matchAll(/<details\b([^>]*)>/g)].map(m=>decorate({className:attr(m[1],'class'),open:/\bopen\b/.test(m[1])},{class:attr(m[1],'class')}));h.composer=h.details.find(node=>node.className==='ew-author-ai') || null;
-  h.scroll={scrollTop:0,querySelectorAll:()=>h.details};h.fields=controls(html).map(field=>decorate(field,{name:field.name,id:field.id}));h.forms={};
+  h.scroll={scrollTop:0,querySelectorAll:selector=>h.details.filter(node=>![...selector.matchAll(/:not\(\.([^)]*)\)/g)].some(([,name])=>(node.className || '').split(' ').includes(name)))};h.fields=controls(html).map(field=>decorate(field,{name:field.name,id:field.id}));h.forms={};
   for(const m of html.matchAll(/<form\b([^>]*)>([\s\S]*?)<\/form>/g)){
    const id=attr(m[1],'id'),c=controls(m[2]).map(field=>decorate({...field,formId:id},{name:field.name,id:field.id}));
-   h.forms[id]=decorate({id,controls:c});
+   h.forms[id]=decorate({id,controls:c});if(m[2].includes('class="ew-inline-error"'))h.forms[id].inlineError=decorate({className:'ew-inline-error',formId:id});
    for(const field of c){const old=h.fields.findIndex(f=>f.name===field.name&&(field.type!=='radio'||f.value===field.value));if(old>=0)h.fields[old]=field;}
   }
   h.buttons=[...html.matchAll(/<button\b([^>]*)>/g)].map(m=>{const attributes=Object.fromEntries([...m[1].matchAll(/([\w-]+)="([^"]*)"/g)].map(([,k,v])=>[k,decode(v)]));return decorate({id:attr(m[1],'id'),className:attr(m[1],'class'),dataset:{authorAction:attr(m[1],'data-author-action'),id:attr(m[1],'data-id'),tab:attr(m[1],'data-tab'),parent:attr(m[1],'data-parent')},disabled:/\bdisabled\b/.test(m[1]),mutation:/data-mutation/.test(m[1])},attributes);});
@@ -569,8 +571,8 @@ test('stage inline edit changes only name and multiline description and has no j
 });
 test('changed inline stage form blocks stage job add and menu actions until apply or cancel',async()=>{
  for(const [action,data] of [['stage_toggle',{id:'t1'}],['node',{id:'j0-0'}],['add_stage',{}],['add_job',{parent:'t0'}],['job_menu',{id:'j0-0'}]]){
-  const h=harness();installDefinition(h,stagedDefinition());h.click('stage_toggle',{id:'t0'});h.click('stage_edit',{id:'t0'});await flush();h.field('name','아직 적용 안 함');const before=h.draft();h.click(action,data);await flush();
-  assert.match(h.markup,/편집 중인 항목을 먼저 적용하거나 취소해 주세요./);assert.equal(h.fields.find(field=>field.name==='name').value,'아직 적용 안 함');assert.deepEqual(h.draft(),before);assert.equal(stageButton(h,'t0').getAttribute('aria-expanded'),'true');assert.equal(h.writes.length,0);
+  const h=harness();installDefinition(h,stagedDefinition());h.click('stage_toggle',{id:'t0'});h.click('stage_edit',{id:'t0'});await flush();h.field('name','아직 적용 안 함');h.scroll.scrollTop=777;const before=h.draft();h.click(action,data);await flush();
+  assert.match(h.markup,/편집 중인 항목을 먼저 적용하거나 취소해 주세요./);assert.equal(h.fields.find(field=>field.name==='name').value,'아직 적용 안 함');assert.equal(h.document.activeElement,h.forms['ew-stage-editor'].controls.find(field=>field.name==='name'));assert.equal(h.scrollRequests?.length,1);assert.equal(h.scrollRequests[0].node,h.forms['ew-stage-editor'].inlineError);assert.deepEqual(copy(h.scrollRequests[0].options),{block:'nearest',inline:'nearest',behavior:'instant'});assert.deepEqual(h.draft(),before);assert.equal(stageButton(h,'t0').getAttribute('aria-expanded'),'true');assert.equal(h.writes.length,0);
   h.click('inline_cancel');await flush();assert.equal(h.draft().dirty,false);assert.equal(h.draft().definition.nodes.t0.name,'단계 1');
  }
 });
@@ -633,4 +635,12 @@ test('unapplied business purpose edit blocks proposal application and preserves 
 });
 test('stage help supplies both exact paragraphs to the shared help dialog',async()=>{
  const h=harness();h.click('help',{id:'stages_and_jobs'});await flush();assert.equal(h.helpCalls.length,1);const call=h.helpCalls[0],term=call.help.terms.find(term=>term.id==='stages_and_jobs');assert.equal(call.termId,'stages_and_jobs');assert.equal(term.name,'단계와 작업');assert.equal(term.summary,'단계는 작업을 묶는 이름입니다. 개수·이름·순서는 업무에 맞게 정합니다.\n\n단계 순서는 화면에 보이는 순서입니다. 먼저 끝나야 하는 작업은 작업 상세의 ‘앞 작업’에서 정합니다.');assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);
+});
+
+
+test('proposal other settings initially collapse with counts and retain only their own disclosure state',async()=>{
+ const h=harness();const menu=h.host.querySelector('.ew-procedure-menu');menu.open=true;h.render();const proposed=definition();proposed.nodes.j.instructions='첫 수행 안내 제안';h.proposal(proposed);
+ assert.match(h.markup,/<div class="ew-proposal-changes"><h3>바뀌는 것 1<\/h3>/);let other=h.host.querySelector('.ew-proposal-other');assert.ok(other);assert.equal(other.open,false);assert.match(h.markup,/<details class="ew-proposal-other"[^>]*><summary>[\s\S]*?그 밖의 설정 1곳/);assert.match(h.markup,/확인 작업 › 수행 안내/);assert.match(h.markup,/업무 도우미 수정 제안 · 1곳/);
+ other.open=true;h.render();other=h.host.querySelector('.ew-proposal-other');assert.equal(other.open,true);assert.match(h.markup,/그 밖의 설정 1곳/);assert.equal(h.draft().dirty,false);
+ const next=definition();next.nodes.j.instructions='두 번째 제안';next.description='업무 목적 제안';h.proposal(next);other=h.host.querySelector('.ew-proposal-other');assert.equal(other.open,false);assert.match(h.markup,/바뀌는 것 2/);assert.match(h.markup,/그 밖의 설정 2곳/);assert.match(h.markup,/업무 도우미 수정 제안 · 2곳/);assert.equal(h.writes.length,0);
 });
