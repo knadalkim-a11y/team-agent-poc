@@ -569,6 +569,31 @@ test('stage inline edit changes only name and multiline description and has no j
  assert.match(h.markup,/<details[^>]*>[\s\S]*?<summary>추가 설정/);h.field('name','새 단계 이름');h.field('description','바뀐 첫 줄\n바뀐 둘째 줄');assert.deepEqual(h.draft().definition.nodes.t0,value.nodes.t0);
  h.click('inline_apply');await flush();const updated=h.draft().definition.nodes.t0;assert.equal(updated.description,'바뀐 첫 줄\n바뀐 둘째 줄');assert.deepEqual(updated,{...value.nodes.t0,name:'새 단계 이름',description:'바뀐 첫 줄\n바뀐 둘째 줄'});assert.equal(h.draft().dirty,true);assert.equal(h.writes.length,0);
 });
+test('stage inline revision conflict preserves the buffer and latest draft across workflow reentry',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(1,1));h.click('stage_edit',{id:'t0'});await flush();h.field('name','내가 작성한 단계');h.field('description','내가 작성한 설명');
+ const record=h.workflows.get('w');record.revision=2;Object.assign(record.draft.nodes.t0,{name:'다른 작성자의 단계',description:'다른 작성자의 설명'});h.render();
+ assert.equal(h.draft().revision,2);assert.equal(h.fields.find(field=>field.name==='name').value,'내가 작성한 단계');const latest=h.draft();
+ h.click('inline_apply');await flush();assert.deepEqual(h.draft(),latest);assert.equal(h.forms['ew-stage-editor'].controls.find(field=>field.name==='description').value,'내가 작성한 설명');assert.match(h.markup,/저장된 초안이 바뀌었습니다/);assert.equal(h.document.activeElement,h.forms['ew-stage-editor'].controls.find(field=>field.name==='name'));assert.equal(h.writes.length,0);
+ await h.open('q');await h.open('w');h.click('inline_apply');await flush();assert.deepEqual(h.draft(),latest);assert.equal(h.fields.find(field=>field.name==='name').value,'내가 작성한 단계');assert.match(h.markup,/저장된 초안이 바뀌었습니다/);
+ h.click('inline_cancel');h.click('stage_edit',{id:'t0'});await flush();assert.equal(h.fields.find(field=>field.name==='name').value,'다른 작성자의 단계');assert.equal(h.fields.find(field=>field.name==='description').value,'다른 작성자의 설명');await h.inline('최신 초안에서 수정');assert.equal(h.draft().definition.nodes.t0.name,'최신 초안에서 수정');assert.equal(h.draft().definition.nodes.t0.description,'다른 작성자의 설명');assert.equal(h.draft().revision,2);assert.equal(h.draft().dirty,true);assert.equal(h.writes.length,0);
+});
+for(const kind of ['add_stage','add_job'])test(kind+' inline form cannot attach an old buffer to a newer saved draft',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(1,1));h.click(kind,kind==='add_job'?{parent:'t0'}:{});await flush();h.field('name','아직 추가하지 않은 이름');
+ const record=h.workflows.get('w');record.revision=2;record.draft.nodes.t0.name='최신 단계';h.render();const latest=h.draft();assert.equal(latest.revision,2);
+ h.click('inline_apply');await flush();assert.deepEqual(h.draft(),latest);assert.equal(h.fields.find(field=>field.name==='name').value,'아직 추가하지 않은 이름');assert.match(h.markup,/저장된 초안이 바뀌었습니다/);assert.equal(h.writes.length,0);
+});
+for(const kind of ['stage','add_job'])test('remote stage deletion keeps the '+kind+' inline buffer reviewable and cancellable',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(2,1));h.click(kind==='stage'?'stage_edit':kind,kind==='stage'?{id:'t0'}:{parent:'t0'});await flush();h.field('name','삭제 전 작성한 이름');if(kind==='stage')h.field('description','삭제 전 작성한 설명');
+ const record=h.workflows.get('w');record.revision=2;h.helpers.removeNode(record.draft,'t0');h.render();const latest=h.draft();assert.equal(latest.revision,2);assert.equal(latest.definition.nodes.t0,undefined);
+ h.click('add_stage');await flush();assert.deepEqual(h.draft(),latest);assert.ok(h.forms['ew-stage-editor'],'remote deletion must leave a visible way to review and cancel the blocked buffer');assert.equal(h.forms['ew-stage-editor'].controls.find(field=>field.name==='name').value,'삭제 전 작성한 이름');if(kind==='stage')assert.equal(h.fields.find(field=>field.name==='description').value,'삭제 전 작성한 설명');assert.match(h.markup,/편집하던 단계가 최신 초안에서 삭제되었습니다/);assert.ok(h.buttons.find(button=>button.dataset.authorAction==='inline_cancel'));
+ h.click('inline_apply');await flush();assert.deepEqual(h.draft(),latest);assert.match(h.markup,/저장된 초안이 바뀌었습니다/);assert.equal(h.writes.length,0);
+ h.click('inline_cancel');await flush();assert.equal(h.forms['ew-stage-editor'],undefined);assert.deepEqual(h.draft(),latest);assert.equal(h.document.activeElement.dataset.authorAction,'add_stage');h.click('stage_toggle',{id:'t1'});await flush();assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');assert.equal(h.writes.length,0);
+});
+test('same revision polls allow inline apply and same revision proposal replacement closes only a clean form',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(1,1));h.click('stage_edit',{id:'t0'});await flush();h.field('name','같은 버전에서 수정');h.render();await h.inline('같은 버전에서 수정');assert.equal(h.draft().definition.nodes.t0.name,'같은 버전에서 수정');assert.equal(h.draft().revision,1);
+ h.click('stage_edit',{id:'t0'});await flush();const next=h.draft().definition;next.nodes.t0.name='대화 제안의 단계';h.proposal(next);h.click('ai_apply');await flush();assert.equal(h.forms['ew-stage-editor'],undefined);assert.equal(h.draft().definition.nodes.t0.name,'대화 제안의 단계');assert.equal(h.writes.length,0);
+ h.click('stage_edit',{id:'t0'});await flush();h.field('description','아직 적용 안 한 설명');const later=h.draft().definition;later.nodes.t0.name='적용하면 안 되는 제안';h.proposal(later);h.click('ai_apply');await flush();assert.equal(h.fields.find(field=>field.name==='description').value,'아직 적용 안 한 설명');assert.equal(h.draft().definition.nodes.t0.name,'대화 제안의 단계');assert.match(h.markup,/편집 중인 항목을 먼저 적용하거나 취소/);assert.equal(h.writes.length,0);
+});
 test('changed inline stage form blocks stage job add and menu actions until apply or cancel',async()=>{
  for(const [action,data] of [['stage_toggle',{id:'t1'}],['node',{id:'j0-0'}],['add_stage',{}],['add_job',{parent:'t0'}],['job_menu',{id:'j0-0'}]]){
   const h=harness();installDefinition(h,stagedDefinition());h.click('stage_toggle',{id:'t0'});h.click('stage_edit',{id:'t0'});await flush();h.field('name','아직 적용 안 함');h.scroll.scrollTop=777;const before=h.draft();h.click(action,data);await flush();

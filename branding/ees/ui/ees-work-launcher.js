@@ -231,6 +231,10 @@
     // Unchanged sections retain their identity; renderers can update a changed
     // section without remounting unrelated menus, forms or their scroll areas.
     if(previous)for(const key of Object.keys(next))if(JSON.stringify(previous[key])===JSON.stringify(next[key]))next[key]=previous[key];
+    if(inputProposalApplied&&next.run?.id===selection.run_id){
+      for(const [key,value] of Object.entries(inputProposalApplied.values))if(workValuesEqual(value,next.run.inputs?.[key]))delete inputProposalApplied.values[key];
+      if(!Object.keys(inputProposalApplied.values).length)inputProposalApplied=null;
+    }
     state=next;stateKey=workspaceKey();targetLoading=false;scopeLoading=false;evidenceUnavailable=false;nativeCapabilities=null;cacheWorkspace();
   }
   const accessFailure=failure=>[401,403,404].includes(failure.status)||['auth_required','unauthorized','scope_forbidden','run_forbidden','access_denied','workflow_manage_forbidden','admin_required','workflow_not_found','run_not_found'].includes(failure.code);
@@ -592,7 +596,12 @@
       view.capture();clearTimeout(optionTimer);
       const applied=inputProposalApplied&&selection.tab==='current';
       if(applied&&event.isComposing)return;
-      if(applied)render();
+      if(applied){
+        // Keep this proposal identity for any in-flight save acknowledgement.
+        delete inputProposalApplied.values[target.name];
+        if(!Object.keys(inputProposalApplied.values).length)inputProposalApplied=null;
+        render();
+      }
       optionTimer=setTimeout(()=>loadOptions(),300);
     }
     if(event.type==='change'&&target.id==='ees-start-factory'){select({factory_id:target.value,start_factory_id:target.value});return;}

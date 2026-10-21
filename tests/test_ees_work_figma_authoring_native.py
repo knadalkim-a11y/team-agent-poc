@@ -133,6 +133,61 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertFalse(any(body.get('action') in ('publish_workflow', 'start_run', 'schedule_save') for body in self.server.workspace_commands))
         self.screenshot('c44-manual-validation')
 
+        self.click('[data-author-action=tab][data-tab=content]')
+        if self.read('[data-author-action=stage_toggle][data-id="' + stage_id + '"]', 'ariaExpanded') != 'true':
+            self.click('[data-author-action=stage_toggle][data-id="' + stage_id + '"]')
+        self.click('[data-author-action=stage_edit][data-id="' + stage_id + '"]')
+        self.fill('#ew-stage-editor [name=name]', '이전 버전에서 작성한 단계 이름')
+        self.fill('#ew-stage-editor [name=description]', '이전 버전에서 작성한 단계 설명')
+        remote = deepcopy(checked['draft'])
+        remote['nodes'][stage_id].update(name='다른 작성자의 최신 단계', description='다른 작성자가 저장한 최신 설명')
+        self.users['other-user']['role'] = 'admin'
+        changed = self.command('save_draft', user=self.users['other-user'], workflow_id=identifier,
+            expected_revision=checked['revision'], definition=remote)
+        writes = len(self.server.workspace_commands)
+        self.refresh()
+        self.wait("document.querySelector('[data-author-status]')?.textContent.includes(" + json.dumps('r' + str(changed['revision'])) + ")")
+        self.assertEqual(self.text('[data-stage-id="' + stage_id + '"] .ew-stage-name'), '다른 작성자의 최신 단계')
+        self.click('[data-author-action=inline_apply]')
+        self.wait("document.querySelector('#ew-stage-name-error')?.textContent.includes('저장된 초안이 바뀌었습니다.')")
+        self.assertEqual(self.read('#ew-stage-editor [name=name]', 'value'), '이전 버전에서 작성한 단계 이름')
+        self.assertEqual(self.read('#ew-stage-editor [name=description]', 'value'), '이전 버전에서 작성한 단계 설명')
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('#ew-stage-editor [name=name]')"))
+        self.screenshot('e1-stale-stage-buffer-preserved')
+        self.click('[data-author-action=inline_cancel]')
+        self.assertEqual(self.text('[data-stage-id="' + stage_id + '"] .ew-stage-name'), '다른 작성자의 최신 단계')
+        self.assertIn('다른 작성자가 저장한 최신 설명', self.text('[data-stage-id="' + stage_id + '"] .ew-stage-description'))
+        latest = self.state(workflow_id=identifier)['workflow']
+        self.assertEqual(latest['draft'], remote)
+        self.assertEqual(latest['revision'], changed['revision'])
+        self.assertEqual([body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui'], [])
+
+        self.click('[data-author-action=stage_edit][data-id="' + stage_id + '"]')
+        self.fill('#ew-stage-editor [name=name]', '삭제 전에 작성한 단계 이름')
+        removed = deepcopy(latest['draft'])
+        stage = removed['nodes'][stage_id]
+        removed['nodes'][stage['parent']]['children'].remove(stage_id)
+        for child_id in stage['children']:
+            del removed['nodes'][child_id]
+        del removed['nodes'][stage_id]
+        changed = self.command('save_draft', user=self.users['other-user'], workflow_id=identifier,
+            expected_revision=latest['revision'], definition=removed)
+        writes = len(self.server.workspace_commands)
+        self.refresh()
+        self.wait("document.querySelector('#ew-stage-editor')?.textContent.includes('편집하던 단계가 최신 초안에서 삭제되었습니다.')")
+        self.assertGreater(self.browser.evaluate("document.querySelector('#ew-stage-editor').getBoundingClientRect().height"), 0)
+        self.click('[data-author-action=inline_apply]')
+        self.wait("document.querySelector('#ew-stage-name-error')?.textContent.includes('저장된 초안이 바뀌었습니다.')")
+        self.assertEqual(self.read('#ew-stage-editor [name=name]', 'value'), '삭제 전에 작성한 단계 이름')
+        self.assertEqual(self.browser.evaluate("document.querySelectorAll('.ew-content-stage').length"), 0)
+        self.screenshot('e1-deleted-stage-buffer-preserved')
+        self.click('[data-author-action=inline_cancel]')
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=add_stage]')"))
+        latest = self.state(workflow_id=identifier)['workflow']
+        self.assertEqual(latest['draft'], removed)
+        self.assertEqual(latest['revision'], changed['revision'])
+        self.assertEqual([body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui'], [])
+
     def test_c44_input_definition_dialog_preserves_cancelled_values_and_narrow_focus(self):
         created = self.command('create_workflow', name='합성 입력 절차', system_id='EMS')
         identifier = created['workflow_id']

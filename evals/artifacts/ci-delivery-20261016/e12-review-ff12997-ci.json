@@ -1,0 +1,301 @@
+{
+  "date": "2026-10-21",
+  "head": "ff129979ff1de44cf20c11fd425492deb6a1ec8a",
+  "ci_run_id": 39546957533,
+  "ci_run_number": 323,
+  "result": {
+    "success": 36,
+    "failure": 2,
+    "cancelled": 1,
+    "skipped": 1,
+    "native_compose": {
+      "total": 81,
+      "pass": 80,
+      "fail": 1
+    }
+  },
+  "log": {
+    "bytes": 83898,
+    "sha256": "d97d6bd4511cfcc08d14c6a7839e34e16c5add9521c3d66a23e46803cc8aae2e",
+    "error": "2026-10-21T05:12:55.5308148Z FAIL: test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch)\n2026-10-21T05:12:55.5309933Z ----------------------------------------------------------------------\n2026-10-21T05:12:55.5310350Z Traceback (most recent call last):\n2026-10-21T05:12:55.5316225Z   File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_figma_runtime_native.py\", line 573, in test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch\n2026-10-21T05:12:55.5317959Z     self.assertEqual(self.browser.evaluate(\"[...document.querySelectorAll('[data-work-input]')].map(field=>field.name)\"), ['target', 'stop', 'wait'])\n2026-10-21T05:12:55.5318785Z AssertionError: Lists differ: ['stop', 'target', 'wait'] != ['target', 'stop', 'wait']\n2026-10-21T05:12:55.5319144Z \n2026-10-21T05:12:55.5319251Z First differing element 0:\n2026-10-21T05:12:55.5319492Z 'stop'\n2026-10-21T05:12:55.5319684Z 'target'\n2026-10-21T05:12:55.5319795Z \n2026-10-21T05:12:55.5319890Z - ['stop', 'target', 'wait']\n2026-10-21T05:12:55.5320152Z + ['target', 'stop', 'wait']\n2026-10-21T05:12:55.5320308Z \n2026-10-21T05:12:55.5320461Z ----------------------------------------------------------------------\n2026-10-21T05:12:55.5320824Z Ran 14 tests in 50.716s\n2026-10-21T05:12:55.5320974Z \n2026-10-21T05:12:55.5321064Z FAILED (failures=1)\n2026-10-21T05:12:55.5923580Z ##[error]Process completed with exit code 1."
+  },
+  "artifacts": [
+    {
+      "id": 12322043712,
+      "name": "native-compose",
+      "bytes": 17805844,
+      "sha256": "82d23e438791e1b407a997ba4d56101133d9d68fbeacce9dc7cb0679678f0baf",
+      "crc_verified": true,
+      "png_count": 191
+    },
+    {
+      "id": 12322800797,
+      "name": "native-product",
+      "bytes": 6542343,
+      "sha256": "3f0f38f6f364525d1c777a77a23c45ea9dd3a41bce22ff6878a68219f274be91",
+      "crc_verified": true
+    }
+  ],
+  "provenance": {
+    "pr_synthetic_merge": "7fe9cf2938a06459304004079435eb7388effe5e",
+    "merge_parents": [
+      "3c343ce44d1ba9c6f62ba0b035ab32208f5b2caa",
+      "ff129979ff1de44cf20c11fd425492deb6a1ec8a"
+    ],
+    "same_tree_as_head": "ad6b45b2c95556d16164d6f3d381783b117f3168"
+  },
+  "observations": {
+    "settings": "Previously failing settings response-path test passed. No-op and successive proposal Native boundaries passed.",
+    "request": "Exact field order test failed before hidden mixed proposal assertion and 480/1366 request loops; later checks are not counted as passed.",
+    "final_screen_gate": "Latest successor head actual browser CI/screenshots and hashes will be recorded in PR #101 body and Checks."
+  },
+  "ordered_schema_contract": "operations.py dump(sort_keys=True) persists canonical JSON; workspace returns approved input_schema; workRequestFields uses Object.entries. Assert exact list(tool[input_schema][properties]) preserving both count and order, not sorted/ignored order.",
+  "local_reproduction": "AST prefix of actual Native method with actual SQLite save/approval and Node production functions. DOM boundary substitute only; not a browser PASS. Setup import error preserved separately.",
+  "review_comments": [
+    4333216782,
+    4333216791
+  ],
+  "followup_logs": [
+    {
+      "name": "pr101-ff12997-inline-red.log",
+      "bytes": 20832,
+      "sha256": "eec9e823affadb8dd110cf5be6e49ec78193c0655d9895261e3d9aeb32eedb4a",
+      "failures": [
+        "✖ stage inline revision conflict preserves the buffer and latest draft across workflow reentry (6.144523ms)",
+        "✖ add_stage inline form cannot attach an old buffer to a newer saved draft (6.029701ms)",
+        "✖ add_job inline form cannot attach an old buffer to a newer saved draft (5.858853ms)",
+        "✖ failing tests:",
+        "✖ stage inline revision conflict preserves the buffer and latest draft across workflow reentry (6.144523ms)",
+        "✖ add_stage inline form cannot attach an old buffer to a newer saved draft (6.029701ms)",
+        "✖ add_job inline form cannot attach an old buffer to a newer saved draft (5.858853ms)"
+      ],
+      "summary": [
+        "      at TestContext.<anonymous> (/workspace/scratch/6708539543cf/team-agent-poc/tests/test_ees_work_authoring_ui.cjs:583:47)",
+        "      at async Test.run (node:internal/test_runner/test:1389:7)",
+        "      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {",
+        "    generatedMessage: true,",
+        "    code: 'ERR_ASSERTION',",
+        "    actual: { definition: { id: 'w', name: '절차 w', system_id: 'EMS', category: 'ops', mode: 'on_demand', nodes: [Object] }, revision: 2, dirty: true },",
+        "    expected: { definition: { id: 'w', name: '절차 w', system_id: 'EMS', category: 'ops', mode: 'on_demand', nodes: [Object] }, revision: 2, dirty: false },",
+        "    operator: 'deepStrictEqual',",
+        "    diff: 'simple'",
+        "  }"
+      ]
+    },
+    {
+      "name": "pr101-ff12997-inline-green.log",
+      "bytes": 15370,
+      "sha256": "e1368ba7a19541b0c726e8b169dfd404eabdbd7be50c3d84b5357e823fac7faf",
+      "failures": [],
+      "summary": [
+        "✔ empty stage advanced entry preserves unapplied names and stays absent on new stage forms (7.054853ms)",
+        "✔ proposal ordinals count only same kind siblings without changing LCS counts (2.183879ms)",
+        "ℹ tests 152",
+        "ℹ suites 0",
+        "ℹ pass 152",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 1419.671209"
+      ]
+    },
+    {
+      "name": "pr101-ff12997-inline-deleted-red.log",
+      "bytes": 16952,
+      "sha256": "bbec5781a6da0867c5d2637e9a78c8bbaf902c7338e07ece53d1f0ba34c44ea1",
+      "failures": [
+        "✖ remote stage deletion keeps the stage inline buffer reviewable and cancellable (6.572091ms)",
+        "✖ remote stage deletion keeps the add_job inline buffer reviewable and cancellable (13.325549ms)",
+        "✖ failing tests:",
+        "✖ remote stage deletion keeps the stage inline buffer reviewable and cancellable (6.572091ms)",
+        "✖ remote stage deletion keeps the add_job inline buffer reviewable and cancellable (13.325549ms)"
+      ],
+      "summary": [
+        "      at TestContext.<anonymous> (/workspace/scratch/6708539543cf/team-agent-poc/tests/test_ees_work_authoring_ui.cjs:588:79)",
+        "      at async Test.run (node:internal/test_runner/test:1389:7)",
+        "      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {",
+        "    generatedMessage: false,",
+        "    code: 'ERR_ASSERTION',",
+        "    actual: undefined,",
+        "    expected: true,",
+        "    operator: '==',",
+        "    diff: 'simple'",
+        "  }"
+      ]
+    },
+    {
+      "name": "pr101-ff12997-inline-deleted-green.log",
+      "bytes": 15552,
+      "sha256": "d0aa273ce0f8860557e8783ac67ac89840c6447366cc62ee58e529bc1cc4ca1d",
+      "failures": [],
+      "summary": [
+        "✔ empty stage advanced entry preserves unapplied names and stays absent on new stage forms (7.462441ms)",
+        "✔ proposal ordinals count only same kind siblings without changing LCS counts (2.31739ms)",
+        "ℹ tests 154",
+        "ℹ suites 0",
+        "ℹ pass 154",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 1309.910682"
+      ]
+    },
+    {
+      "name": "pr101-ff12997-inline-deleted-python-green.log",
+      "bytes": 1928,
+      "sha256": "ae9f5ff71493bb103a4e7b56b67485614d42e097ae2e41036e709d699367bdba",
+      "failures": [],
+      "summary": [
+        "test_preview_is_read_only_and_late_results_cannot_replace_edited_or_other_account_state (test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_preview_is_read_only_and_late_results_cannot_replace_edited_or_other_account_state) ... ok",
+        "test_read_retry_is_explicit_bounded_draft_policy_without_default_registration (test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_read_retry_is_explicit_bounded_draft_policy_without_default_registration) ... ok",
+        "test_schedule_value_change_keeps_existing_controls_for_mouse_focus_transition (test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_schedule_value_change_keeps_existing_controls_for_mouse_focus_transition) ... ok",
+        "test_start_input_edit_and_published_schedule_use_real_definition_and_explicit_delegation (test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_start_input_edit_and_published_schedule_use_real_definition_and_explicit_delegation) ... ok",
+        "test_workflow_selection_ignores_previous_response_and_preserves_private_dirty_drafts (test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_workflow_selection_ignores_previous_response_and_preserves_private_dirty_drafts) ... ok",
+        "",
+        "----------------------------------------------------------------------",
+        "Ran 8 tests in 0.691s",
+        "",
+        "OK"
+      ]
+    },
+    {
+      "name": "pr101-retired-provenance-red.log",
+      "bytes": 17109,
+      "sha256": "0585028edb44b6e4cc5466b70066c8fbafe229d4a32913f90c47eb2258cecde1",
+      "failures": [
+        "✖ manually retyping an accepted value cannot restore its retired assistant attribution (3.15459ms)",
+        "✖ restoring all accepted inputs to saved values retires the applied footer before later manual edits (3.549675ms)",
+        "✖ IME retires only the composed input contribution after composition ends even at its former proposal value (3.177996ms)",
+        "✖ editing one accepted input during save retires it and lets acknowledgement clear the other saved contribution (3.052106ms)",
+        "✖ failing tests:",
+        "✖ manually retyping an accepted value cannot restore its retired assistant attribution (3.15459ms)",
+        "✖ restoring all accepted inputs to saved values retires the applied footer before later manual edits (3.549675ms)",
+        "✖ IME retires only the composed input contribution after composition ends even at its former proposal value (3.177996ms)",
+        "✖ editing one accepted input during save retires it and lets acknowledgement clear the other saved contribution (3.052106ms)"
+      ],
+      "summary": [
+        "      at Test.postRun (node:internal/test_runner/test:1522:19)",
+        "      at Test.run (node:internal/test_runner/test:1447:12)",
+        "      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {",
+        "    generatedMessage: true,",
+        "    code: 'ERR_ASSERTION',",
+        "    actual: [ 'first', 'other' ],",
+        "    expected: [ 'other' ],",
+        "    operator: 'deepStrictEqual',",
+        "    diff: 'simple'",
+        "  }"
+      ]
+    },
+    {
+      "name": "pr101-refreshed-provenance-red.log",
+      "bytes": 14813,
+      "sha256": "acce931ff3a288731e3de23d86738b1eaaa91b6503d4563c0665dfa9138c7d66",
+      "failures": [
+        "✖ workspace refresh retires accepted values that are now saved before later manual edits (3.833123ms)",
+        "✖ workspace refresh retires only saved contributions and keeps the remaining unsaved proposal value (3.71195ms)",
+        "✖ failing tests:",
+        "✖ workspace refresh retires accepted values that are now saved before later manual edits (3.833123ms)",
+        "✖ workspace refresh retires only saved contributions and keeps the remaining unsaved proposal value (3.71195ms)"
+      ],
+      "summary": [
+        "      at TestContext.<anonymous> (/workspace/scratch/6708539543cf/team-agent-poc/tests/test_ees_execution_ui.cjs:483:9)",
+        "      at async Test.run (node:internal/test_runner/test:1389:7)",
+        "      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {",
+        "    generatedMessage: true,",
+        "    code: 'ERR_ASSERTION',",
+        "    actual: [ 'first', 'other' ],",
+        "    expected: [ 'other' ],",
+        "    operator: 'deepStrictEqual',",
+        "    diff: 'simple'",
+        "  }"
+      ]
+    },
+    {
+      "name": "pr101-retired-provenance-green.log",
+      "bytes": 30935,
+      "sha256": "0838a61ef91b96b3b893cbce20cc4baa0e961d18dcfd1a8780933981d691062a",
+      "failures": [],
+      "summary": [
+        "✔ finished run separates confirmed partial count and keeps a partial stage badge with zero remaining work (2.207333ms)",
+        "✔ run editors can accept a shared version even when another person has claimed the displayed job (9.401357ms)",
+        "ℹ tests 305",
+        "ℹ suites 0",
+        "ℹ pass 305",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 596.326257"
+      ]
+    },
+    {
+      "name": "pr101-request-schema-red.log",
+      "bytes": 1386,
+      "sha256": "d82bdb111e1bfb19d73a74e9e1debfa2bb2d43c30bdc4cac221bad3a69dea8d8",
+      "failures": [
+        "AssertionError: Lists differ: ['stop', 'target', 'wait'] != ['target', 'stop', 'wait']"
+      ],
+      "summary": [
+        "  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/case.py\", line 715, in fail",
+        "    raise self.failureException(msg)",
+        "AssertionError: Lists differ: ['stop', 'target', 'wait'] != ['target', 'stop', 'wait']",
+        "",
+        "First differing element 0:",
+        "'stop'",
+        "'target'",
+        "",
+        "- ['stop', 'target', 'wait']",
+        "+ ['target', 'stop', 'wait']"
+      ]
+    },
+    {
+      "name": "pr101-request-schema-green.log",
+      "bytes": 265,
+      "sha256": "cb5af643caee9065f0d3e6a1be81e4e8a60a8086b107137c773275c8883647ea",
+      "failures": [],
+      "summary": [
+        "Node observed: ['stop', 'target', 'wait']",
+        "Node observed: {'error': '현재 진행 건·작업·저장 버전과 다른 입력 제안입니다.'}",
+        "PASS: actual Native prefix uses canonical SQLite order and rejects hidden mixed proposal synchronously; no browser run."
+      ]
+    },
+    {
+      "name": "pr101-request-schema-setup-error.log",
+      "bytes": 769,
+      "sha256": "b0cea9e8dcfdee9ffce9fc1a552808df3b91e90ad4af4276694ef5bd40d08f29",
+      "failures": [],
+      "summary": [
+        "Traceback (most recent call last):",
+        "  File \"/tmp/pr101-request-schema-repro.py\", line 10, in <module>",
+        "    from test_ees_work_figma_runtime_native import FigmaRuntimeNativeTests",
+        "  File \"/workspace/scratch/6708539543cf/team-agent-poc/tests/test_ees_work_figma_runtime_native.py\", line 13, in <module>",
+        "    from ees_work_integrated_fixture import IntegratedNativeCase",
+        "  File \"/workspace/scratch/6708539543cf/team-agent-poc/tests/ees_work_integrated_fixture.py\", line 23, in <module>",
+        "    from native_ui_fixture import NativeUIServer",
+        "  File \"/workspace/scratch/6708539543cf/team-agent-poc/tests/native_ui_fixture.py\", line 22, in <module>",
+        "    from scripts.build_ees_webui import SOURCE_SHA256, TARGET_APP, assemble_work_launcher",
+        "ModuleNotFoundError: No module named 'scripts'"
+      ]
+    },
+    {
+      "name": "pr101-head7-node-final.log",
+      "bytes": 50883,
+      "sha256": "b2e835db9a1aa16f79c0ccd6337be9d084e02e01a5d96ebb5285a0606a6ab956",
+      "failures": [],
+      "summary": [
+        "✔ finished run separates confirmed partial count and keeps a partial stage badge with zero remaining work (1.752289ms)",
+        "✔ run editors can accept a shared version even when another person has claimed the displayed job (1.071193ms)",
+        "ℹ tests 505",
+        "ℹ suites 0",
+        "ℹ pass 505",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 1497.711264"
+      ]
+    }
+  ]
+}
