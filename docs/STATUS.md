@@ -4,6 +4,7 @@
 
 - **현재 범위:** 같은 `feat/work-content-chat-proposals-20261020`의 `6b1944a`에서 사용자 수정 7건과 이름 안내를 반영한다. 위치 변경의 LCS 계산·묶음 목록, 제안 삭제의 기간 정리, A4a 입력 저장 전·되돌리기, 탭 왕복 보존, 메뉴 Escape·차단 안내·숨긴 순서 알림이다. [정정 계약](mockups/ees-work/TASK.md#work-content-chat-proposals-20261020).
 - **검증:** 제품 수정 전에 새 Node 단언의 작성 9개·입력 13개 실패와 제안 기간 Python 통합 실패를 확인했다. 시험 준비 오류·문서 참조 오류와 이전 CI 실패도 [기존 평가](../evals/v4-ui-20260930.md#work-content-chat-proposals-20261020)에 보존한다. 최종 head의 실제 브라우저 포함 CI와 480·1366 화면 대조는 [PR #101](https://github.com/knadalkim-a11y/team-agent-poc/pull/101)의 본문/Checks에서 확정한다.
+- **첫 실제 화면 확인:** `d91e619`의 CI 39541400685는 Native 구성 79 PASS / 기존 시험의 Python 지역 import 오류 1 ERROR였다. 새 예시 12·탭/되돌리기·차단 안내는 통과했다. 오류를 최소 수정하고 실제 480 캡처에서 드러난 A4a 막대의 단어 중간 줄바꿈·색상도 보완한다. 첫 실패·원본 화면 해시·새 단언 실패는 위 평가에 보존하며 후속 head 전체 CI를 다시 확인한다.
 - **다음 하나:** Codex 스레드 3건에는 수정 커밋 `0bd38de`를 답하고 해결 처리했다. 최신 head의 실제 브라우저 포함 CI·화면을 확인한 뒤 Claude 재검토 댓글 하나를 남긴다. 새 PR·병합·main 직접 push·사내 실행/적용·서버 API·Figma 변경은 하지 않는다. 아래 10-20 기록은 당시 상태다.
 
 ## 2026-10-20 · 업무 내용·단계와 작업 · 대화 제안 E1·E2

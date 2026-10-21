@@ -59,17 +59,26 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('#ees-work-inputs .ew-input-proposal-source')].map(e=>e.textContent)"), ['도우미'] * fields)
         self.browser.evaluate("document.querySelector('.ew-input-proposal-applied').scrollIntoView({block:'center',inline:'nearest'})")
         observed = self.browser.evaluate("""(() => {
-            const panel=document.querySelector('#ees-work-panel'),bar=document.querySelector('.ew-input-applied-bar'),badge=document.querySelector('.ew-input-proposal-applied');
+            const panel=document.querySelector('#ees-work-panel'),bar=document.querySelector('.ew-input-applied-bar'),badge=document.querySelector('.ew-input-proposal-applied'),hint=bar.querySelector('p'),hintStyle=getComputedStyle(hint);
             const box=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height,color:s.color,background:s.backgroundColor};};
-            return {width:innerWidth,bar:box(bar),badge:box(badge),buttons:[...bar.querySelectorAll('button')].map(e=>({text:e.textContent,...box(e)})),overflow:panel.scrollWidth-panel.clientWidth};
+            return {width:innerWidth,bar:{...box(bar),gap:getComputedStyle(bar).gap},badge:box(badge),
+                hint:{...box(hint),text:hint.textContent,wordBreak:hintStyle.wordBreak,overflowWrap:hintStyle.overflowWrap,fontSize:hintStyle.fontSize,lineHeight:hintStyle.lineHeight},
+                buttons:[...bar.querySelectorAll('button')].map(e=>({text:e.textContent,...box(e)})),overflow:panel.scrollWidth-panel.clientWidth};
         })()""")
         self.assertLessEqual(observed['overflow'], 1, observed)
+        self.assertEqual(observed['bar']['background'], 'rgb(255, 255, 255)', observed)
+        self.assertEqual(observed['bar']['gap'], '10px', observed)
+        self.assertEqual(observed['hint']['wordBreak'], 'keep-all', observed)
+        self.assertEqual(observed['hint']['overflowWrap'], 'normal', observed)
+        self.assertEqual(observed['hint']['color'], 'rgb(92, 94, 101)', observed)
+        self.assertEqual(observed['hint']['fontSize'], '12px', observed)
+        self.assertEqual(observed['hint']['lineHeight'], '18px', observed)
         self.assertGreater(observed['badge']['height'], 0, observed)
         self.assertGreaterEqual(observed['badge']['top'], 0, observed)
         self.assertLessEqual(observed['badge']['bottom'], observed['bar']['top'], observed)
         self.assertNotIn(observed['badge']['background'], ('rgba(0, 0, 0, 0)', 'transparent'), observed)
         for button in observed['buttons']:
-            self.assertGreater(button['height'], 0, observed)
+            self.assertAlmostEqual(button['height'], 34, delta=1, msg=observed)
             self.assertGreaterEqual(button['left'], observed['bar']['left'] - 1, observed)
             self.assertLessEqual(button['right'], observed['bar']['right'] + 1, observed)
             self.assertGreaterEqual(button['top'], observed['bar']['top'] - 1, observed)
@@ -453,7 +462,6 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.click('[data-dialog-confirm]')
         self.wait("document.querySelector('#ees-work-panel')?.innerText.includes('연결')")
         with self.server.workflow._db() as db:
-            import json
             request = json.loads(db.execute('SELECT data FROM work_external_requests WHERE run_id=?', (run['id'],)).fetchone()[0])
         self.assertEqual(request['inputs'], {'target': 'SYNTHETIC-AP', 'stop': 'graceful', 'wait': 60})
         self.assertEqual(request['request_reason'], '합성 확인 사유')

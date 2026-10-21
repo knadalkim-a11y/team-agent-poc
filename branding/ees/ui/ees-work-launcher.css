@@ -812,4 +812,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-panel>.ew-input-proposal-bar{background:var(--ees-surface-default);}
 [data-ees-work] .ew-input-proposal-bar>p{min-width:0;font-size:12px;line-height:18px;color:var(--ees-text-tertiary);word-break:keep-all;overflow-wrap:anywhere;}
 [data-ees-work] .ew-input-proposal-bar>button{flex:none;}
+#ees-work-panel>.ew-input-applied-bar{background:var(--ees-surface-default);padding:12px 20px;gap:10px;}
+#ees-work-panel>.ew-input-applied-bar>p{min-width:0;font-size:12px;line-height:18px;color:var(--ees-text-secondary);word-break:keep-all;overflow-wrap:normal;}
+#ees-work-panel>.ew-input-applied-bar>button{flex:none;}
 @media(max-width:600px){#ees-work-designer .ew-stage-description{align-items:flex-start;flex-wrap:wrap;}#ees-work-designer .ew-stage-description>p{flex-basis:180px;}#ees-work-designer .ew-proposal-bar{flex-wrap:wrap;}#ees-work-designer .ew-proposal-bar>span{flex-basis:100%;}#ees-work-designer .ew-proposal-bar>button:first-of-type{margin-left:auto;}}
