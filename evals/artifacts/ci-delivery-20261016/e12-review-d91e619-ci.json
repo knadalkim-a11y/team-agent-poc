@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-21",
+  "head": "d91e619bb5406e37ae10c34d81dca09d9852b66a",
+  "run_id": 39541400685,
+  "job_id": 119031747488,
+  "environment": {
+    "os": "Ubuntu 24.04",
+    "python": "3.11.17",
+    "chrome": "155.0.8059.39"
+  },
+  "native_compose": {
+    "total": 80,
+    "passed": 79,
+    "errors": 1,
+    "skipped": 0
+  },
+  "failure_excerpt": "ERROR: test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch)\n2026-10-21T04:12:34.7654022Z ----------------------------------------------------------------------\n2026-10-21T04:12:34.7654413Z Traceback (most recent call last):\n2026-10-21T04:12:34.7662204Z   File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_figma_runtime_native.py\", line 443, in test_ees_schema_typed_values_and_reason_stay_separate_before_blocked_dispatch\n2026-10-21T04:12:34.7663311Z     self.assertEqual(json.loads(self.read('[data-work-input][name=stop]', 'value')), 'graceful')\n2026-10-21T04:12:34.7663794Z                      ^^^^\n2026-10-21T04:12:34.7664232Z UnboundLocalError: cannot access local variable 'json' where it is not associated with a value\n2026-10-21T04:12:34.7664612Z \n2026-10-21T04:12:34.7664774Z ----------------------------------------------------------------------\n2026-10-21T04:12:34.7665465Z Ran 13 tests in 47.025s\n2026-10-21T04:12:34.7665625Z \n2026-10-21T04:12:34.7665716Z FAILED (errors=1)",
+  "log_sha256": "5967f64c09befd581da1eb173ff2a5962163098d9c7cf8f60ca95ac17cd6bb56",
+  "artifact": {
+    "id": 12319913029,
+    "bytes": 17854121,
+    "sha256": "ea4341fd026566885894c2a3cd9e1b393e1f9e2f74d9669bb20f3e6b6b24fbec",
+    "crc_valid": true,
+    "png_count": 192
+  },
+  "cause": "New earlier json.loads call in an existing test encountered that function's late local import json before assignment. The module already imports json; remove the redundant local import only.",
+  "a4a_observation": {
+    "width": 480,
+    "text_wrap": "있습 / 니다",
+    "bar_background": "rgb(243, 243, 245)",
+    "target_background": "rgb(255, 255, 255)",
+    "action": "Scope typography, background and word wrapping to the applied input footer; retain button dimensions and existing action semantics."
+  },
+  "limits": "This failed run is not final-head validation. The request 480px capture was not reached before the Python binding error. Final-head CI must run every existing assertion."
+}

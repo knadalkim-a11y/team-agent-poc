@@ -285,3 +285,228 @@ test('received scope fallback preserves common operations but removes prior run 
  assert.equal(rendered.state.run,null);assert.deepEqual(Array.from(rendered.state.operations.requests),[]);assert.deepEqual(Array.from(rendered.state.operations.scope_runs),[]);assert.doesNotMatch(JSON.stringify(rendered.state.operations),/private-request|private-execution|prior-run/);
  pending.resolve({ok:true,capabilities:{actor_id:'a'},systems:['EMS','APC'],workflows:[],runs:[]});await Promise.all([away,back]);
 });
+
+function inputProposalPanel({proposal=null,applied=null}={}){
+ const host={dataset:{},isConnected:true,querySelector:()=>null,querySelectorAll:()=>[],setAttribute(){},innerHTML:''};
+ const context=renderer({document:{activeElement:null,querySelector:()=>null}});context.window.__eesSourceShellV1={hosts:()=>({panel:host}),publish(){}};
+ // This renderer-only host has no DOM tree; Native tests cover incremental patching.
+ run(context,'workPatchContent=(host,html)=>{host.innerHTML=html;};');
+ const view=run(context,'createWorkView({callbacks:{}})'),state={capabilities:{actor_id:'a'},run:{id:'r',workflow_id:'w',revision:2,status:'open',inputs:{first:'사람이 쓴 값',other:'유지'},jobs:{j:{can_execute:true}},definition:{nodes:{j:{id:'j',name:'입력 확인',type:'j',mode:'tool',result_block:'values',inputs:[{id:'first',name:'첫 칸',type:'text',scope:'run'},{id:'other',name:'다른 칸',type:'text',scope:'run'}]}}}},input_proposal:proposal,input_proposal_applied:applied},selection={mode:'work',tab:'current',system_id:'EMS',workflow_id:'w',run_id:'r',job_id:'j'};
+ view.render({state,selection});return {host,view,state,selection,context,render:()=>view.render({state,selection})};
+}
+test('chat input preview highlights proposed fields without changing controls or exposing JSON',()=>{
+ const h=inputProposalPanel({proposal:{values:{first:'제안한 값'},warnings:['선택 목록 확인 필요']}}),out=h.host.innerHTML;
+ assert.match(out,/class="ew-input-row ew-input-proposed" data-proposal-field="first"/);assert.doesNotMatch(out,/data-proposal-field="other"/);
+ assert.match(out,/name="first"[^>]*value="사람이 쓴 값"/);assert.match(out,/ew-input-proposal-value">제안 · 제안한 값/);assert.match(out,/name="other"[^>]*value="유지"/);
+ assert.match(out,/업무 도우미 제안 · 반영 전/);assert.match(out,/업무 도우미 입력 제안 · 1칸 · 반영하거나 버린 뒤 저장합니다/);assert.match(out,/선택 목록 확인 필요/);
+ assert.match(out,/data-action="discard_input_proposal"[^>]*>버리기</);assert.match(out,/data-action="apply_input_proposal"[^>]*>반영</);
+ assert.doesNotMatch(out,/propose_inputs|AI 입력 초안|<pre>|data-action="save_inputs"|data-action="execute"/);
+ assert.equal(h.view.readInputs().inputs.first,'사람이 쓴 값');assert.equal(h.view.readInputs().dirty,false);
+});
+test('applied input proposal displays unsaved state and both explicit input actions',()=>{
+ const h=inputProposalPanel();h.view.applyInputValues({first:'반영한 값'});h.state.input_proposal_applied={values:{first:'반영한 값'},at:'2026-10-20T12:00:00Z'};h.render();
+ assert.match(h.host.innerHTML,/ew-input-proposal-applied[^>]*>저장 전</);assert.doesNotMatch(h.host.innerHTML,/반영됨 · /);assert.match(h.host.innerHTML,/name="first"[^>]*value="반영한 값"/);assert.match(h.host.innerHTML,/ew-input-proposal-source">도우미/);
+ assert.match(h.host.innerHTML,/ew-input-applied-bar/);assert.match(h.host.innerHTML,/저장해야 실행할 수 있습니다/);assert.match(h.host.innerHTML,/data-action="discard_inputs"[^>]*>최신 값으로 돌아가기</);assert.equal((h.host.innerHTML.match(/data-action="save_inputs"/g)||[]).length,1);assert.match(h.host.innerHTML,/data-action="save_inputs"[^>]*>입력 저장</);
+ assert.doesNotMatch(h.host.innerHTML,/data-action="execute"|ew-input-proposed|apply_input_proposal/);assert.equal(h.view.readInputs().dirty,true);assert.equal(h.state.run.inputs.first,'사람이 쓴 값');
+});
+test('input proposal formatting keeps typed false zero choices and escaped text readable',()=>{
+ assert.equal(html('workInputProposalValue({type:"boolean"},false)'),'아니요');assert.equal(html('workInputProposalValue({type:"number"},0)'),'0');
+ assert.equal(html('workInputProposalValue({type:"single",options:[{value:"code",label:"표시 이름"}]},"code")'),'표시 이름');
+ const out=html('workInputHTML({id:"value",type:"text"},"kept",{proposal:{value:"<script>bad</script>"}})');assert.match(out,/value="kept"/);assert.match(out,/&lt;script&gt;/);assert.doesNotMatch(out,/<script>/);
+ assert.match(html('workInputProposalBar({values:{a:1,b:2}},{result_block:"change_request"})'),/2칸 · 반영하거나 버린 뒤 요청합니다/);
+});
+test('pending input proposal blocks save and execution until explicitly discarded or applied',async()=>{
+ const h=controller(),run={id:'r',workflow_id:'w',revision:2,definition:{nodes:{j:{inputs:[{id:'value',scope:'run',type:'text'}]}}}};h.api.setSelection({run_id:'r',workflow_id:'w',job_id:'j',tab:'current'});h.api.setState({run});h.view.readInputs=()=>({inputs:{value:'kept'},revision:2});
+ h.api.previewInputProposal({proposal_kind:'inputs',run_id:'r',workflow_id:'w',job_id:'j',base_revision:2,proposal:{value:'suggested'}});
+ for(const action of ['save_inputs','execute','execute_scope','confirm','request_intent'])await h.api.handleClick({dataset:{action,nodeId:'j'}});
+ assert.equal(h.calls.length,0);await h.api.handleClick({dataset:{action:'discard_input_proposal'}});assert.equal(h.renders.at(-1).state.input_proposal,null);assert.equal(h.view.readInputs().inputs.value,'kept');assert.equal(h.calls.length,0);
+});
+test('panel no longer exposes authoring or execution proposal request transports',async()=>{
+ const h=controller();assert.equal(h.designer.callbacks.propose,undefined);await h.api.handleClick({dataset:{action:'propose_inputs'}});assert.equal(h.calls.length,0);assert.doesNotMatch(launcherSource,/workspace\/proposal|ees-input-proposal-prompt|function proposeInputs\(/);
+});
+test('input proposal application preserves account target and saved version rejection',()=>{
+ for(const change of ['account','job','version']){const h=controller(),run={id:'r',workflow_id:'w',revision:2,definition:{nodes:{j:{inputs:[{id:'value',scope:'run'}]}}}};h.api.setSelection({run_id:'r',workflow_id:'w',job_id:'j',tab:'current'});h.api.setState({run});h.view.readInputs=()=>({inputs:{value:'kept'},revision:2});let applied=false;h.view.applyInputValues=()=>{applied=true;};h.api.previewInputProposal({proposal_kind:'inputs',run_id:'r',workflow_id:'w',job_id:'j',base_revision:2,proposal:{value:'suggested'}});
+ if(change==='account')h.setAuth('another-account');else if(change==='job')h.api.setSelection({job_id:'different'});else h.api.setState({run:{...run,revision:3}});assert.throws(()=>h.api.applyInputProposal(),/바뀌었습니다/);assert.equal(applied,false);assert.equal(h.calls.length,0);}
+});
+
+for(const [block,mode,hint] of [['change_request','tool','저장해야 요청할 수 있습니다'],['human_confirm','human','저장해야 확인할 수 있습니다'],['values','tool','저장해야 실행할 수 있습니다']])test('A4a applied input footer explains the next '+block+' action',()=>{
+ const h=inputProposalPanel();Object.assign(h.state.run.definition.nodes.j,{mode,result_block:block});h.view.applyInputValues({first:'반영한 값'});h.state.input_proposal_applied={values:{first:'반영한 값'},at:'2026-10-20T12:00:00Z'};h.render();
+ assert.ok(h.host.innerHTML.includes(hint));assert.match(h.host.innerHTML,/data-action="discard_inputs"[^>]*>최신 값으로 돌아가기</);assert.match(h.host.innerHTML,/data-action="save_inputs"[^>]*>입력 저장</);
+});
+function inputProposalController(){
+ const h=controller(),panel=inputProposalPanel();h.api.setSelection(panel.selection);h.api.setState(panel.state);
+ for(const method of ['readInputs','applyInputValues','discardInputs','clearInputs','capture'])h.view[method]=panel.view[method];
+ h.view.render=snapshot=>{h.renders.push(snapshot);panel.view.render(snapshot);};
+ const preview=()=>h.api.previewInputProposal({proposal_kind:'inputs',run_id:'r',workflow_id:'w',job_id:'j',base_revision:2,proposal:{first:'제안한 값',other:'다른 제안'}});
+ return {...h,panel,preview};
+}
+test('discarding applied inputs restores all saved values and removes proposal attribution without a save',async()=>{
+ const h=inputProposalController();h.preview();h.api.applyInputProposal();assert.equal(h.view.readInputs().inputs.first,'제안한 값');
+ await h.api.handleClick({dataset:{action:'discard_inputs'}});
+ assert.equal(h.view.readInputs().inputs.first,'사람이 쓴 값');assert.equal(h.view.readInputs().inputs.other,'유지');assert.equal(h.view.readInputs().dirty,false);
+ assert.equal(h.renders.at(-1).state.input_proposal_applied,null);assert.doesNotMatch(h.panel.host.innerHTML,/ew-input-proposal-applied|ew-input-proposal-source|ew-input-applied-bar/);assert.equal(h.calls.length,0);
+});
+test('same-job history and settings tab visits retain pending input proposal and permit a later apply',async()=>{
+ const h=inputProposalController();h.preview();
+ for(const tab of ['history','settings','current']){await h.api.select({tab},{fetch:false});assert.equal(h.renders.at(-1).state.input_proposal.values.first,'제안한 값');}
+ assert.match(h.panel.host.innerHTML,/업무 도우미 입력 제안 · 2칸/);h.api.applyInputProposal();assert.equal(h.view.readInputs().inputs.first,'제안한 값');assert.equal(h.calls.length,0);
+});
+test('same-job history and settings tab visits retain applied input attribution and unsaved values',async()=>{
+ const h=inputProposalController();h.preview();h.api.applyInputProposal();
+ for(const tab of ['history','settings','current']){await h.api.select({tab},{fetch:false});assert.equal(h.renders.at(-1).state.input_proposal_applied.values.first,'제안한 값');}
+ assert.equal(h.view.readInputs().inputs.first,'제안한 값');assert.match(h.panel.host.innerHTML,/ew-input-proposal-source">도우미/);assert.match(h.panel.host.innerHTML,/저장 전/);assert.equal(h.calls.length,0);
+});
+for(const kind of ['pending','applied'])test('changing input proposal task or scope clears '+kind+' state',async()=>{
+ for(const patch of [{job_id:'other'},{run_id:'other'},{workflow_id:'other'},{system_id:'other'},{factory_id:'other'},{mode:'author'}]){
+  const h=inputProposalController();h.preview();if(kind==='applied')h.api.applyInputProposal();await h.api.select(patch,{fetch:false});
+  assert.equal(h.renders.at(-1).state?.input_proposal??null,null);assert.equal(h.renders.at(-1).state?.input_proposal_applied??null,null);
+ }
+});
+test('an account change cannot retain input proposal state through tab navigation',async()=>{
+ for(const applied of [false,true]){const h=inputProposalController();h.preview();if(applied)h.api.applyInputProposal();h.setAuth('account-b');await h.api.select({tab:'history'},{fetch:false});assert.equal(h.renders.at(-1).state?.input_proposal??null,null);assert.equal(h.renders.at(-1).state?.input_proposal_applied??null,null);}
+});
+for(const action of ['confirm_list','confirm','confirm_verdicts','request_intent','execute','execute_scope'])test('pending input proposal explains blocked result action '+action,async()=>{
+ const h=inputProposalController();h.preview();await h.api.handleClick({dataset:{action,nodeId:'j'}});
+ assert.equal(h.calls.length,0);assert.equal(h.renders.at(-1).error,'업무 도우미 입력 제안을 먼저 반영하거나 버려 주세요.');assert.match(h.panel.host.innerHTML,/업무 도우미 입력 제안을 먼저 반영하거나 버려 주세요\./);
+});
+for(const action of ['apply_input_proposal','discard_input_proposal'])test('resolving input proposal clears its blocked-action guidance via '+action,async()=>{
+ const h=inputProposalController();h.preview();await h.api.handleClick({dataset:{action:'confirm_list'}});assert.match(h.renders.at(-1).error,/입력 제안을 먼저/);
+ await h.api.handleClick({dataset:{action}});assert.equal(h.renders.at(-1).error,'');assert.doesNotMatch(h.panel.host.innerHTML,/업무 도우미 입력 제안을 먼저 반영하거나 버려 주세요\./);assert.equal(h.calls.length,0);
+});
+
+for(const factoryId of ['', 'factory-a'])test('pending run input proposal permits independent settings save for '+(factoryId||'workflow'),async()=>{
+ const h=controller(),run={id:'r',workflow_id:'w',revision:2,definition:{nodes:{j:{id:'j',inputs:[{id:'value',scope:'run'},{id:'shared',scope:'workflow'}]}}}},settings={factory_id:factoryId,revision:4,values:{shared:'saved setting'}};
+ h.api.setSelection({system_id:'EMS',factory_id:factoryId,run_id:'r',workflow_id:'w',job_id:'j',tab:'current'});h.api.setState({run,settings});h.view.readInputs=()=>({inputs:{value:'kept'},revision:2});
+ h.api.previewInputProposal({proposal_kind:'inputs',run_id:'r',workflow_id:'w',job_id:'j',base_revision:2,proposal:{value:'suggested'}});await h.api.select({tab:'settings'},{fetch:false});
+ h.view.readInputs=()=>({inputs:{shared:'edited setting'},revision:4,settings:true,key:'settings-key',serial:1});let saved;h.view.clearInputs=(...args)=>{saved=args;};
+ h.setReply(call=>call.body?.action==='save_settings'?{ok:true,revision:5}:call.url.startsWith('/api/ees-work/workspace?')?{ok:true,run:{...run,revision:3},settings:{...settings,revision:5,values:{shared:'edited setting'}},capabilities:{actor_id:'a'}}:{ok:true});
+ await h.api.handleClick({dataset:{action:'save_inputs'}});
+ const writes=h.calls.filter(call=>call.body?.action);assert.equal(writes.length,1);assert.equal(writes[0].body.action,'save_settings');assert.equal(writes[0].body.factory_id,factoryId);assert.equal(writes[0].body.values.shared,'edited setting');assert.equal(writes[0].body.expected_revision,4);assert.equal(saved[0],'settings-key');assert.equal(h.renders.at(-1).state.input_proposal.values.value,'suggested');
+ // Changed effective settings can increment the run revision; retaining the
+ // proposal must not weaken its saved-version guard.
+ await h.api.select({tab:'current'},{fetch:false});h.view.readInputs=()=>({inputs:{value:'kept'},revision:3});assert.throws(()=>h.api.applyInputProposal(),/바뀌었습니다/);assert.equal(h.calls.filter(call=>call.body?.action).length,1);
+});
+test('proposal received on settings snapshots the unsaved current inputs and applies after returning',async()=>{
+ const h=inputProposalController();h.panel.state.settings={revision:4,values:{shared:'saved setting'}};h.panel.state.run.definition.nodes.j.inputs.push({id:'shared',name:'업무 값',type:'text',scope:'workflow'});
+ h.view.applyInputValues({first:'직접 쓴 값',other:'직접 남긴 값'});await h.api.select({tab:'settings'},{fetch:false});assert.equal(h.view.readInputs().inputs.shared,'saved setting');
+ h.api.previewInputProposal({proposal_kind:'inputs',run_id:'r',workflow_id:'w',job_id:'j',base_revision:2,proposal:{first:'제안한 값'}});
+ assert.equal(h.view.readInputs().inputs.shared,'saved setting');await h.api.select({tab:'current'},{fetch:false});assert.equal(h.view.readInputs().inputs.first,'직접 쓴 값');
+ h.api.applyInputProposal();assert.equal(h.view.readInputs().inputs.first,'제안한 값');assert.equal(h.view.readInputs().inputs.other,'직접 남긴 값');assert.equal(h.panel.state.run.inputs.first,'사람이 쓴 값');
+ await h.api.select({tab:'settings'},{fetch:false});assert.equal(h.view.readInputs().inputs.shared,'saved setting');assert.equal(h.view.readInputs().inputs.first,undefined);assert.equal(h.calls.length,0);
+});
+test('settings-tab proposal still rejects later current-input changes',async()=>{
+ const h=inputProposalController();h.panel.state.settings={revision:4,values:{shared:'saved setting'}};await h.api.select({tab:'settings'},{fetch:false});h.preview();await h.api.select({tab:'current'},{fetch:false});
+ h.view.applyInputValues({first:'제안 뒤 직접 수정'});assert.throws(()=>h.api.applyInputProposal(),/바뀌었습니다/);assert.equal(h.view.readInputs().inputs.first,'제안 뒤 직접 수정');assert.equal(h.calls.length,0);
+});
+
+function proposalSaveReply(h,{pending=null,failure=false}={}){
+ const original=h.panel.state;let savedRun=original.run,savedSettings=original.settings;
+ h.setReply(async call=>{
+  if(call.body?.action==='save_inputs'){
+   if(failure)return {ok:false,httpError:true,status:409,error:{message:'저장 거부'}};
+   if(pending)await pending.promise;
+   savedRun={...savedRun,revision:savedRun.revision+1,inputs:{...call.body.inputs}};return {ok:true,revision:savedRun.revision};
+  }
+  if(call.body?.action==='save_settings'){savedSettings={...savedSettings,revision:savedSettings.revision+1,values:{...call.body.values}};return {ok:true,revision:savedSettings.revision};}
+  if(call.url.startsWith('/api/ees-work/workspace?'))return {...original,ok:true,run:savedRun,settings:savedSettings};
+  return {ok:true};
+ });
+}
+test('successful run input save retires applied provenance before later manual edits',async()=>{
+ const h=inputProposalController();h.preview();h.api.applyInputProposal();proposalSaveReply(h);await h.api.handleClick({dataset:{action:'save_inputs'}});
+ assert.equal(h.view.readInputs().dirty,false);assert.equal(h.renders.at(-1).state.input_proposal_applied,null);assert.doesNotMatch(h.panel.host.innerHTML,/ew-input-proposal-applied|ew-input-proposal-source|ew-input-applied-bar/);
+ h.view.applyInputValues({other:'나중에 직접 수정'});assert.equal(h.view.readInputs().dirty,true);assert.doesNotMatch(h.panel.host.innerHTML,/ew-input-proposal-applied|ew-input-proposal-source|ew-input-applied-bar/);assert.equal(h.calls.filter(call=>call.body?.action==='save_inputs').length,1);
+});
+test('failed run input save retains applied provenance and the input draft',async()=>{
+ const h=inputProposalController();h.preview();h.api.applyInputProposal();proposalSaveReply(h,{failure:true});await h.api.handleClick({dataset:{action:'save_inputs'}});
+ assert.equal(h.view.readInputs().dirty,true);assert.equal(h.view.readInputs().inputs.first,'제안한 값');assert.equal(h.renders.at(-1).state.input_proposal_applied.values.first,'제안한 값');assert.match(h.panel.host.innerHTML,/ew-input-proposal-source/);assert.match(h.api.snapshot().error,/저장 거부/);
+});
+test('run input acknowledgement keeps edits made during save while retiring the saved proposal marker',async()=>{
+ const h=inputProposalController(),pending=deferred();h.preview();h.api.applyInputProposal();proposalSaveReply(h,{pending});const saving=h.api.handleClick({dataset:{action:'save_inputs'}});
+ assert.equal(h.calls.filter(call=>call.body?.action==='save_inputs').length,1);h.view.applyInputValues({other:'저장 중에 직접 수정'});pending.resolve();await saving;
+ const draft=h.view.readInputs();assert.equal(draft.inputs.first,'제안한 값');assert.equal(draft.inputs.other,'저장 중에 직접 수정');assert.equal(draft.dirty,true);assert.equal(draft.conflict,false);assert.equal(draft.revision,3);assert.equal(h.api.snapshot().state.run.inputs.other,'다른 제안');assert.equal(h.renders.at(-1).state.input_proposal_applied,null);assert.doesNotMatch(h.panel.host.innerHTML,/ew-input-proposal-source|ew-input-applied-bar/);
+});
+for(const action of ['save_inputs','discard_inputs'])test('settings '+action+' preserves the independent applied run-input marker',async()=>{
+ const h=inputProposalController();h.panel.state.settings={revision:4,values:{shared:'기존 설정'}};h.panel.state.run.definition.nodes.j.inputs.push({id:'shared',name:'업무 값',type:'text',scope:'workflow'});h.preview();h.api.applyInputProposal();await h.api.select({tab:'settings'},{fetch:false});
+ if(action==='save_inputs'){const read=h.view.readInputs;h.view.readInputs=options=>{const draft=read(options);return draft.settings?{...draft,inputs:{shared:'수정한 설정'}}:draft;};proposalSaveReply(h);}
+ await h.api.handleClick({dataset:{action}});await h.api.select({tab:'current'},{fetch:false});assert.equal(h.view.readInputs().inputs.first,'제안한 값');assert.equal(h.view.readInputs().dirty,true);assert.equal(h.renders.at(-1).state.input_proposal_applied.values.first,'제안한 값');assert.match(h.panel.host.innerHTML,/ew-input-proposal-source/);assert.match(h.panel.host.innerHTML,/ew-input-applied-bar/);
+ assert.equal(h.calls.filter(call=>call.body?.action==='save_inputs').length,0);assert.equal(h.calls.filter(call=>call.body?.action==='save_settings').length,action==='save_inputs'?1:0);
+});
+
+function appliedInputEditingController(){
+ const h=inputProposalController();h.preview();h.api.applyInputProposal();const doc=h.panel.context.document;
+ const fields=['first','other'].map(name=>({id:'ew-run-'+name,name,value:h.view.readInputs().inputs[name],dataset:{workInput:'',inputType:'text'},disabled:false,selectionStart:2,selectionEnd:2,selectionDirection:'none',
+  closest:selector=>selector==='[data-ees-work]'?h.panel.host:null,matches:selector=>selector==='[data-work-input]',hasAttribute:attribute=>['id','name'].includes(attribute),getAttribute(attribute){return this[attribute]??null;},focus(){doc.activeElement=this;},setSelectionRange(start,end,direction){this.selectionStart=start;this.selectionEnd=end;this.selectionDirection=direction;}}));
+ const form={dataset:{settings:'false',revision:'2'},querySelectorAll:selector=>selector==='[data-work-input]'?fields:[]};
+ h.panel.host.querySelector=selector=>selector==='#ees-work-inputs'?form:null;h.panel.host.querySelectorAll=selector=>selector==='button,input,select,textarea,a,summary,[data-ees-panel-resize]'?fields:[];h.panel.host.contains=target=>fields.includes(target);doc.activeElement=fields[0];
+ return {...h,fields,doc};
+}
+test('editing one applied text input immediately refreshes attribution and keeps the other field and caret',()=>{
+ const h=appliedInputEditingController(),first=h.fields[0],before=h.renders.length;first.value='사람이 직접 수정';h.api.handleEvent({type:'input',target:first,isComposing:false});
+ assert.equal(h.renders.length,before+1);assert.equal(h.view.readInputs().inputs.first,'사람이 직접 수정');assert.equal(h.view.readInputs().inputs.other,'다른 제안');assert.equal((h.panel.host.innerHTML.match(/ew-input-proposal-source/g)||[]).length,1);assert.match(h.panel.host.innerHTML,/name="first"[^>]*value="사람이 직접 수정"/);assert.equal(h.doc.activeElement,first);assert.deepEqual([first.selectionStart,first.selectionEnd,first.selectionDirection],[2,2,'none']);assert.equal(h.calls.length,0);
+});
+test('applied input IME composition keeps its DOM and updates attribution on composition end',()=>{
+ const h=appliedInputEditingController(),first=h.fields[0],before=h.renders.length;first.value='ㅎ';h.api.handleEvent({type:'input',target:first,isComposing:true});
+ assert.equal(h.renders.length,before);assert.equal(h.doc.activeElement,first);assert.equal((h.panel.host.innerHTML.match(/ew-input-proposal-source/g)||[]).length,2);
+ first.value='한글 입력';h.api.handleEvent({type:'compositionend',target:first});assert.equal(h.renders.length,before+1);assert.equal((h.panel.host.innerHTML.match(/ew-input-proposal-source/g)||[]).length,1);assert.equal(h.view.readInputs().inputs.first,'한글 입력');assert.equal(h.doc.activeElement,first);assert.deepEqual([first.selectionStart,first.selectionEnd],[2,2]);assert.equal(h.calls.length,0);
+});
+test('manually retyping an accepted value cannot restore its retired assistant attribution',()=>{
+ const h=appliedInputEditingController(),first=h.fields[0];first.value='사람이 직접 수정';h.api.handleEvent({type:'input',target:first,isComposing:false});
+ assert.deepEqual(Object.keys(h.renders.at(-1).state.input_proposal_applied.values),['other']);first.value='제안한 값';h.api.handleEvent({type:'input',target:first,isComposing:false});
+ assert.equal(h.view.readInputs().inputs.first,'제안한 값');assert.equal((h.panel.host.innerHTML.match(/ew-input-proposal-source/g)||[]).length,1);assert.equal(h.renders.at(-1).state.input_proposal_applied.values.other,'다른 제안');assert.equal(h.doc.activeElement,first);assert.deepEqual([first.selectionStart,first.selectionEnd],[2,2]);assert.equal(h.calls.length,0);
+});
+test('restoring all accepted inputs to saved values retires the applied footer before later manual edits',()=>{
+ const h=appliedInputEditingController();for(const field of h.fields){field.value=h.panel.state.run.inputs[field.name];h.api.handleEvent({type:'input',target:field,isComposing:false});}
+ assert.equal(h.view.readInputs().dirty,false);assert.equal(h.renders.at(-1).state.input_proposal_applied,null);assert.doesNotMatch(h.panel.host.innerHTML,/ew-input-proposal-applied|ew-input-proposal-source|ew-input-applied-bar/);
+ h.fields[1].value='별도 수동 입력';h.api.handleEvent({type:'input',target:h.fields[1],isComposing:false});h.view.render(h.renders.at(-1));
+ assert.equal(h.view.readInputs().dirty,true);assert.equal(h.view.readInputs().inputs.other,'별도 수동 입력');assert.doesNotMatch(h.panel.host.innerHTML,/ew-input-proposal-applied|ew-input-proposal-source|ew-input-applied-bar/);assert.equal(h.calls.length,0);
+});
+test('IME retires only the composed input contribution after composition ends even at its former proposal value',()=>{
+ const h=appliedInputEditingController(),first=h.fields[0],before=h.renders.length;first.value='ㅈ';h.api.handleEvent({type:'input',target:first,isComposing:true});
+ assert.deepEqual(Object.keys(h.renders.at(-1).state.input_proposal_applied.values),['first','other']);assert.equal(h.renders.length,before);first.value='제안한 값';h.api.handleEvent({type:'compositionend',target:first});
+ assert.deepEqual(Object.keys(h.renders.at(-1).state.input_proposal_applied.values),['other']);assert.equal((h.panel.host.innerHTML.match(/ew-input-proposal-source/g)||[]).length,1);assert.equal(h.doc.activeElement,first);assert.deepEqual([first.selectionStart,first.selectionEnd],[2,2]);assert.equal(h.calls.length,0);
+});
+test('editing one accepted input during save retires it and lets acknowledgement clear the other saved contribution',async()=>{
+ const h=appliedInputEditingController(),pending=deferred(),first=h.fields[0];proposalSaveReply(h,{pending});const saving=h.api.handleClick({dataset:{action:'save_inputs'}});
+ first.value='저장 중 직접 수정';h.api.handleEvent({type:'input',target:first,isComposing:false});assert.deepEqual(Object.keys(h.renders.at(-1).state.input_proposal_applied.values),['other']);pending.resolve();await saving;
+ assert.equal(h.renders.at(-1).state.input_proposal_applied,null);assert.equal(h.view.readInputs().inputs.first,'저장 중 직접 수정');assert.equal(h.view.readInputs().inputs.other,'다른 제안');assert.equal(h.view.readInputs().dirty,true);assert.equal(h.view.readInputs().conflict,false);assert.equal(h.view.readInputs().revision,3);assert.doesNotMatch(h.panel.host.innerHTML,/ew-input-proposal-source|ew-input-applied-bar/);assert.equal(h.calls.filter(call=>call.body?.action==='save_inputs').length,1);
+});
+test('workspace refresh retires accepted values that are now saved before later manual edits',async()=>{
+ const h=inputProposalController();h.preview();h.api.applyInputProposal();const original=h.panel.state,saved={...original.run,revision:3,inputs:{...h.view.readInputs().inputs}};
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{...original,ok:true,run:saved}:{ok:true});await h.api.refresh();
+ assert.equal(h.view.readInputs().dirty,false);assert.equal(h.view.readInputs().revision,3);assert.equal(h.renders.at(-1).state.input_proposal_applied,null);assert.doesNotMatch(h.panel.host.innerHTML,/ew-input-proposal-applied|ew-input-proposal-source|ew-input-applied-bar/);
+ h.view.applyInputValues({other:'나중에 직접 수정'});h.view.render(h.renders.at(-1));assert.equal(h.view.readInputs().dirty,true);assert.doesNotMatch(h.panel.host.innerHTML,/ew-input-proposal-applied|ew-input-proposal-source|ew-input-applied-bar/);assert.equal(h.calls.filter(call=>call.body).length,0);
+});
+test('workspace refresh retires only saved contributions and keeps the remaining unsaved proposal value',async()=>{
+ const h=inputProposalController();h.preview();h.api.applyInputProposal();const original=h.panel.state,saved={...original.run,revision:3,inputs:{...original.run.inputs,first:'제안한 값'}};
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{...original,ok:true,run:saved}:{ok:true});await h.api.refresh();
+ assert.deepEqual(Object.keys(h.renders.at(-1).state.input_proposal_applied.values),['other']);assert.equal(h.view.readInputs().inputs.first,'제안한 값');assert.equal(h.view.readInputs().inputs.other,'다른 제안');assert.equal(h.view.readInputs().dirty,true);assert.equal((h.panel.host.innerHTML.match(/ew-input-proposal-source/g)||[]).length,1);assert.match(h.panel.host.innerHTML,/ew-input-applied-bar/);assert.equal(h.calls.filter(call=>call.body).length,0);
+});
+
+function previewValues(h,proposal){return h.api.previewInputProposal({proposal_kind:'inputs',run_id:'r',workflow_id:'w',job_id:'j',base_revision:2,proposal});}
+test('applying a proposal identical to saved run values leaves no unsaved state or attribution',()=>{
+ const h=inputProposalController();previewValues(h,{first:'사람이 쓴 값',other:'유지'});h.api.applyInputProposal();
+ assert.equal(h.view.readInputs().dirty,false);assert.equal(h.view.readInputs().serial,0);assert.equal(h.renders.at(-1).state.input_proposal,null);assert.equal(h.renders.at(-1).state.input_proposal_applied,null);assert.doesNotMatch(h.panel.host.innerHTML,/ew-input-proposal-applied|ew-input-proposal-source|ew-input-applied-bar/);assert.equal(h.calls.length,0);
+});
+test('partial proposal attributes only values that actually change the private draft',()=>{
+ const h=inputProposalController();h.view.applyInputValues({other:'사람이 먼저 입력'});previewValues(h,{first:'새 제안',other:'사람이 먼저 입력'});h.api.applyInputProposal();
+ assert.deepEqual(Object.keys(h.renders.at(-1).state.input_proposal_applied.values),['first']);assert.equal(h.view.readInputs().inputs.other,'사람이 먼저 입력');assert.equal((h.panel.host.innerHTML.match(/ew-input-proposal-source/g)||[]).length,1);assert.equal(h.calls.length,0);
+});
+test('receiving and discarding proposal B preserves applied proposal A and its revert action',async()=>{
+ const h=inputProposalController();previewValues(h,{first:'제안 A'});h.api.applyInputProposal();const applied=h.renders.at(-1).state.input_proposal_applied;
+ previewValues(h,{other:'제안 B'});assert.equal(h.renders.at(-1).state.input_proposal_applied,applied);assert.equal(h.view.readInputs().inputs.first,'제안 A');assert.equal(h.view.readInputs().inputs.other,'유지');assert.match(h.panel.host.innerHTML,/ew-input-proposal-source/);
+ await h.api.handleClick({dataset:{action:'discard_input_proposal'}});assert.equal(h.renders.at(-1).state.input_proposal_applied,applied);assert.match(h.panel.host.innerHTML,/ew-input-applied-bar/);assert.match(h.panel.host.innerHTML,/data-action="discard_inputs"/);assert.equal(h.calls.length,0);
+});
+test('applying proposal B merges its changed values with valid unsaved contributions from A',()=>{
+ const h=inputProposalController();previewValues(h,{first:'제안 A'});h.api.applyInputProposal();previewValues(h,{other:'제안 B'});h.api.applyInputProposal();
+ const applied=h.renders.at(-1).state.input_proposal_applied;assert.equal(applied.values.first,'제안 A');assert.equal(applied.values.other,'제안 B');assert.equal((h.panel.host.innerHTML.match(/ew-input-proposal-source/g)||[]).length,2);assert.equal(h.calls.length,0);
+});
+test('a no-op proposal B preserves A without attributing an unchanged manual value',()=>{
+ const h=inputProposalController();h.view.applyInputValues({other:'직접 입력'});previewValues(h,{first:'제안 A'});h.api.applyInputProposal();const applied=h.renders.at(-1).state.input_proposal_applied,serial=h.view.readInputs().serial;
+ previewValues(h,{first:'제안 A',other:'직접 입력'});h.api.applyInputProposal();assert.equal(h.renders.at(-1).state.input_proposal_applied,applied);assert.equal(h.view.readInputs().serial,serial);assert.deepEqual(Object.keys(applied.values),['first']);assert.equal(h.calls.length,0);
+});
+test('proposal B drops attribution overwritten by a person and values restored to their saved baseline',()=>{
+ const h=inputProposalController();h.preview();h.api.applyInputProposal();h.view.applyInputValues({first:'사람이 수정'});previewValues(h,{other:'새 제안 B'});h.api.applyInputProposal();
+ assert.deepEqual(Object.keys(h.renders.at(-1).state.input_proposal_applied.values),['other']);assert.equal(h.view.readInputs().inputs.first,'사람이 수정');
+ previewValues(h,{other:'유지'});h.api.applyInputProposal();assert.equal(h.renders.at(-1).state.input_proposal_applied,null);assert.equal(h.view.readInputs().inputs.other,'유지');assert.equal(h.view.readInputs().dirty,true);assert.doesNotMatch(h.panel.host.innerHTML,/ew-input-proposal-source|ew-input-applied-bar/);assert.equal(h.calls.length,0);
+});

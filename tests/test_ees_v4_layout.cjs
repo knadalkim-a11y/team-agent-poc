@@ -172,3 +172,11 @@ test('visible message reference hosts retain click handling across work renders 
  host.isConnected=false;probe.bindHosts();assert.equal(handlers.has('click'),false);host.isConnected=true;probe.renderMessageReferences();assert.equal(handlers.has('click'),true);
  probe.clearMessageReferences();probe.bindHosts();assert.equal(handlers.has('click'),false);assert.equal(host.innerHTML,'');
 });
+
+test('A4a applied input footer keeps the Figma surface spacing and Korean word wrapping scoped to its bar',()=>{
+ const fs=require('node:fs'),path=require('node:path'),css=fs.readFileSync(path.join(__dirname,'../branding/ees/ui/ees-work-launcher.css'),'utf8');
+ const rule=selector=>{const start=css.indexOf(selector+'{');assert.notEqual(start,-1,'Missing A4a scoped rule: '+selector);return Object.fromEntries(css.slice(start+selector.length+1,css.indexOf('}',start)).split(';').filter(Boolean).map(item=>item.split(':')));};
+ const bar=rule('#ees-work-panel>.ew-input-applied-bar'),text=rule('#ees-work-panel>.ew-input-applied-bar>p'),button=rule('#ees-work-panel>.ew-input-applied-bar>button');
+ assert.equal(bar.background,'var(--ees-surface-default)');assert.equal(bar.padding,'12px 20px');assert.equal(bar.gap,'10px');
+ assert.equal(text.color,'var(--ees-text-secondary)');assert.equal(text['font-size'],'12px');assert.equal(text['line-height'],'18px');assert.equal(text['word-break'],'keep-all');assert.equal(text['overflow-wrap'],'normal');assert.equal(button.flex,'none');
+});

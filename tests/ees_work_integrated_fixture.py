@@ -148,6 +148,27 @@ class IntegratedNativeCase(unittest.TestCase):
         self.command('publish_workflow', workflow_id=key, expected_revision=2)
         return key
 
+    def add_stage_ui(self, name):
+        self.click('[data-author-action=add_stage]')
+        self.wait("document.querySelector('#ew-stage-editor [name=name]')")
+        self.fill('#ew-stage-editor [name=name]', name)
+        self.click('[data-author-action=inline_apply]')
+        self.wait("!document.querySelector('#ew-stage-editor') && document.querySelector('[data-author-action=add_job]')")
+
+    def add_job_ui(self, name):
+        self.click('[data-author-action=add_job]')
+        self.wait("document.querySelector('#ew-stage-editor [name=name]')")
+        self.fill('#ew-stage-editor [name=name]', name)
+        self.click('[data-author-action=inline_apply]')
+        self.wait("document.querySelector('#ew-author-node [name=instructions]')")
+
+    def open_author_job_ui(self, job_id, stage_id='stage'):
+        selector = '[data-author-action=node][data-id="' + job_id + '"]'
+        if not self.browser.evaluate('!!document.querySelector(' + json.dumps(selector) + ')'):
+            self.click('[data-author-action=stage_toggle][data-id="' + stage_id + '"]')
+        self.click(selector)
+        self.wait("document.querySelector('#ew-author-node [name=instructions]')")
+
     def start(self, key, **values):
         revision = self.state(workflow_id=key)['workflow']['revision']
         return self.command('start_run', workflow_id=key, expected_revision=revision, **values)['run']

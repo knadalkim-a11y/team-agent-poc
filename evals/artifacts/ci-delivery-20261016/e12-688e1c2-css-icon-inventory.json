@@ -1,0 +1,29 @@
+{
+  "head": "688e1c2cadfe9cbf46022827c28b4cd70710b04a",
+  "run_id": 39431626755,
+  "job_id": 118660995847,
+  "test": "test_ees_branding_build.OfficialWheelTests.test_real_pinned_wheel_patches_records_and_unrelated_content",
+  "original_log_sha256": "3b02b9236f7cee7dad2fa4f12ca27cad685c90ec1adfead826920cfe561c83f2",
+  "original_failure_lines": [
+    "2026-10-20T13:44:04.0008231Z FAIL: test_real_pinned_wheel_patches_records_and_unrelated_content (test_ees_branding_build.OfficialWheelTests.test_real_pinned_wheel_patches_records_and_unrelated_content)",
+    "2026-10-20T13:44:04.0009074Z ----------------------------------------------------------------------",
+    "2026-10-20T13:44:04.0009455Z Traceback (most recent call last):",
+    "2026-10-20T13:44:04.0019379Z   File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_branding_build.py\", line 1217, in test_real_pinned_wheel_patches_records_and_unrelated_content",
+    "2026-10-20T13:44:04.0020585Z     assert_css_icon_cache_keys(self, (builder.UI_DIR / filename).read_bytes(),",
+    "2026-10-20T13:44:04.0021398Z   File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_branding_build.py\", line 57, in assert_css_icon_cache_keys",
+    "2026-10-20T13:44:04.0022164Z     test.assertEqual(after.group(\"url\"), expected, \"CSS URL or icon digest differs\")",
+    "2026-10-20T13:44:04.0022974Z AssertionError: b'/_ees14/v4/f0554.svg?v=d1bdcb858f96c33f26e5384fdef670c6474990[22 chars]ffb8' != b'/_ees14/v4/f0554.svg' : CSS URL or icon digest differs",
+    "2026-10-20T13:44:04.0023536Z ",
+    "2026-10-20T13:44:04.0023700Z ----------------------------------------------------------------------",
+    "2026-10-20T13:44:04.0024061Z Ran 34 tests in 20.715s",
+    "2026-10-20T13:44:04.0024209Z ",
+    "2026-10-20T13:44:04.0024307Z FAILED (failures=1)"
+  ],
+  "reviewed_icon": "v4/f0554.svg",
+  "source_icon_sha256": "d1bdcb858f96c33f26e5384fdef670c64749905fba318a24688c0695ec96ffb8",
+  "cause": "The independently reviewed CSS icon inventory omitted the new E1 additional-settings chevron. The builder correctly appended its content digest.",
+  "change": "Add only v4/f0554.svg to the explicit reviewed inventory; keep URL count, hash, source presence and unrelated-byte assertions unchanged.",
+  "local_result": "34 tests: 33 PASS / 1 SKIP (official wheel unavailable)",
+  "windows_job_id": 118660996029,
+  "windows_log_sha256": "76ea340d5ee7a316d0b2ac83576b9b4f321499e02ab3bc55f5d5c557023abd08"
+}

@@ -1,0 +1,162 @@
+{
+  "date": "2026-10-21",
+  "base_head": "4109ccd2ea68e106dc9b9aefef0343232ca9a7b9",
+  "environment": {
+    "node": "v24.19.0",
+    "python": "3.12.14",
+    "browser": "not run locally; final head CI required"
+  },
+  "review_comments": [
+    4333013206,
+    4333013215,
+    4333048465
+  ],
+  "logs": [
+    {
+      "name": "pr101-provenance-red.log",
+      "sha256": "0595ad4dfcc67f2b241f877d1fdd20739b0a331e4507b2815f8cddb7243c619b",
+      "bytes": 13915,
+      "failures": [
+        "✖ successful run input save retires applied provenance before later manual edits (7.151974ms)",
+        "✖ run input acknowledgement keeps edits made during save while retiring the saved proposal marker (5.582326ms)",
+        "✖ settings discard_inputs preserves the independent applied run-input marker (4.634462ms)",
+        "✖ failing tests:",
+        "✖ successful run input save retires applied provenance before later manual edits (7.151974ms)",
+        "✖ run input acknowledgement keeps edits made during save while retiring the saved proposal marker (5.582326ms)",
+        "✖ settings discard_inputs preserves the independent applied run-input marker (4.634462ms)"
+      ],
+      "summary": [
+        "  }",
+        "",
+        "test at tests/test_ees_execution_ui.cjs:429:54",
+        "✖ settings discard_inputs preserves the independent applied run-input marker (4.634462ms)",
+        "  TypeError: Cannot read properties of null (reading 'values')",
+        "      at TestContext.<anonymous> (/workspace/scratch/6708539543cf/team-agent-poc/tests/test_ees_execution_ui.cjs:432:254)",
+        "      at async Test.run (node:internal/test_runner/test:1389:7)",
+        "      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)"
+      ]
+    },
+    {
+      "name": "pr101-provenance-green.log",
+      "sha256": "bca6c5bc1b5be35ce7a4123612a80ba8514e1c95362cfb2eb8dfea72808e6e8d",
+      "bytes": 17697,
+      "failures": [],
+      "summary": [
+        "ℹ tests 178",
+        "ℹ suites 0",
+        "ℹ pass 178",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 549.886172"
+      ]
+    },
+    {
+      "name": "pr101-4109-review-red.log",
+      "sha256": "692ffd3677267657de9203092412a942d461f98db0c396be9967353193368075",
+      "bytes": 17470,
+      "failures": [
+        "✖ an existing stage with empty advanced values can open its full editor (15.260384ms)",
+        "✖ empty stage advanced entry preserves unapplied names and stays absent on new stage forms (6.581807ms)",
+        "✖ proposal ordinals count only same kind siblings without changing LCS counts (2.654517ms)",
+        "✖ failing tests:",
+        "✖ an existing stage with empty advanced values can open its full editor (15.260384ms)",
+        "✖ empty stage advanced entry preserves unapplied names and stays absent on new stage forms (6.581807ms)",
+        "✖ proposal ordinals count only same kind siblings without changing LCS counts (2.654517ms)"
+      ],
+      "summary": [
+        "      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {",
+        "    generatedMessage: true,",
+        "    code: 'ERR_ASSERTION',",
+        "    actual: '단계 ‘단계 1’ · 3번째',",
+        "    expected: '단계 ‘단계 1’ · 2번째',",
+        "    operator: 'strictEqual',",
+        "    diff: 'simple'",
+        "  }"
+      ]
+    },
+    {
+      "name": "pr101-4109-review-green.log",
+      "sha256": "b51f9b7ace5142f6107feb884419bbf1d1b425203a03d5821799205de440e0fa",
+      "bytes": 14966,
+      "failures": [],
+      "summary": [
+        "ℹ tests 148",
+        "ℹ suites 0",
+        "ℹ pass 148",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 1495.688748"
+      ]
+    },
+    {
+      "name": "pr101-live-provenance-red.log",
+      "sha256": "8e6a483d0fc8a6881457405031fde129202250604ab1d37a11be15f4739dfc1b",
+      "bytes": 13669,
+      "failures": [
+        "✖ editing one applied text input immediately refreshes attribution and keeps the other field and caret (2.764552ms)",
+        "✖ applied input IME composition keeps its DOM and updates attribution on composition end (2.455897ms)",
+        "✖ failing tests:",
+        "✖ editing one applied text input immediately refreshes attribution and keeps the other field and caret (2.764552ms)",
+        "✖ applied input IME composition keeps its DOM and updates attribution on composition end (2.455897ms)"
+      ],
+      "summary": [
+        "      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {",
+        "    generatedMessage: true,",
+        "    code: 'ERR_ASSERTION',",
+        "    actual: 2,",
+        "    expected: 3,",
+        "    operator: 'strictEqual',",
+        "    diff: 'simple'",
+        "  }"
+      ]
+    },
+    {
+      "name": "pr101-live-provenance-green.log",
+      "sha256": "79e9c99628a6bd84087660fea3570bb6cbe5e8f758ab2db4428e0111287d5419",
+      "bytes": 17904,
+      "failures": [],
+      "summary": [
+        "ℹ tests 180",
+        "ℹ suites 0",
+        "ℹ pass 180",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 493.359127"
+      ]
+    },
+    {
+      "name": "pr101-node-lifecycle-final.log",
+      "sha256": "63a978bbc0329208110c02f9a9e66ad931621da567102156f960f0375134ac51",
+      "bytes": 48408,
+      "failures": [],
+      "summary": [
+        "ℹ tests 481",
+        "ℹ suites 0",
+        "ℹ pass 481",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 1407.441325"
+      ]
+    }
+  ],
+  "manual_edit_reproduction": {
+    "value": "manually changed",
+    "appliedValue": "assistant",
+    "immediateRepaints": 0,
+    "repaintsAfterOptions": 0,
+    "calls": 0
+  },
+  "scope": "Client input provenance lifecycle, existing empty stage settings entry, same-kind sibling display ordinal; no server/API changes",
+  "preparation_errors": [
+    "Initial temporary manual-edit repro had an unmatched brace; corrected before conclusions.",
+    "First documentation patch failed context matching before applying changes."
+  ]
+}

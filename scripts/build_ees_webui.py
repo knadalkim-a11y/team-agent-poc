@@ -128,6 +128,7 @@ WORK_ASSETS["scripts/ees_workflow_shared_tools.py"] = "open_webui/ees_workflow_s
 WORK_FILES += (WORK_ASSETS["scripts/ees_workflow_shared_tools.py"],)
 AUTHORING_ICON_FILES = tuple("v4/" + name for name in (
     "0a3bb.svg", "9acc8.svg", "cb8e2.svg", "7f185.svg", "f95ba.svg", "d73ca.svg",
+    "41b38.svg", "676c3.svg", "f0554.svg", "9ce50.svg",
 ))
 V4_ICON_FILES += AUTHORING_ICON_FILES
 UI_FILES.update({name: name for name in AUTHORING_ICON_FILES})

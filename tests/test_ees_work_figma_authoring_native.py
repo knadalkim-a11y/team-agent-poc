@@ -31,7 +31,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action=create]')
         self.fill('#ees-work-dialog [name=name]', 'EES Workflow 셋업 · 합성 검증')
         self.click('#ees-work-dialog [data-dialog-confirm]')
-        self.wait("document.querySelector('.ew-summary-card')")
+        self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
         identifier = next(item['id'] for item in self.state()['workflows'] if item['name'] == 'EES Workflow 셋업 · 합성 검증')
         self.assertIn('업무 도우미가 아직 연결되지 않았습니다', self.text('[data-ees-procedure-fallback]'))
         self.click('[data-author-action=summary_edit][data-id=business]')
@@ -44,14 +44,15 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action=summary_edit][data-id=business]')
         self.choose('#ew-summary-editor [name=category]', 'setup')
         self.fill('#ew-summary-editor [name=description]', '개인 PC에서 개발 환경 준비')
-        self.click('[data-author-action=tab][data-tab=structure]')
-        self.click('[data-author-action=tab][data-tab=summary]')
+        self.click('[data-author-action=tab][data-tab=history]')
+        self.click('[data-author-action=tab][data-tab=content]')
         self.assertEqual(self.read('#ew-summary-editor [name=description]', 'value'), '개인 PC에서 개발 환경 준비')
         self.click('[data-author-action=save]')
         self.assertIn('적용하거나 취소', self.text('[role=alert]'))
         self.assertEqual(self.state(workflow_id=identifier)['workflow']['revision'], 1)
         self.click('[data-author-action=summary_apply]')
         self.assertEqual(self.state(workflow_id=identifier)['workflow']['revision'], 1)
+        self.click('[data-author-action=summary_open]')
         self.click('[data-summary=inputs] .ew-summary-help>summary')
         self.assertIn('실제 경로 값은 실행자', self.text('[data-summary=inputs]'))
         self.click('[data-author-action=summary_optional][data-id=inputs]')
@@ -76,23 +77,40 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('.ew-author-validation')")
         self.assertTrue(self.state(workflow_id=identifier)['workflow']['validation']['errors'])
         self.click('[data-author-action=validation_open][data-id="errors:0"]')
-        self.click('[data-author-action=tab][data-tab=structure]')
-        self.click('[data-author-action=add_stage]')
-        self.fill('#ew-author-node [name=name]', '개발 환경 준비')
-        self.click('[data-author-action=tab][data-tab=structure]')
-        self.click('[data-author-action=add_job]')
-        self.fill('#ew-author-node [name=name]', 'Python 버전 확인')
+        self.click('[data-author-action=tab][data-tab=content]')
+        self.add_stage_ui('개발 환경 준비')
+        stage_id = self.browser.evaluate("document.querySelector('[data-author-action=stage_edit]').dataset.id")
+        self.click('[data-author-action=stage_edit][data-id="' + stage_id + '"]')
+        self.assertIn('아직 설정 없음', self.text('#ew-stage-editor .ew-stage-advanced > summary'))
+        self.click('#ew-stage-editor .ew-stage-advanced > summary')
+        self.click('#ew-stage-editor [data-author-action=node][data-id="' + stage_id + '"]')
+        self.wait("document.querySelector('#ew-author-node [name=instructions]')")
+        self.assertEqual(self.read('#ew-author-node [name=instructions]', 'value'), '')
+        self.fill('#ew-author-node [name=instructions]', '작업을 시작하기 전에 개발 준비 사항을 확인합니다.')
+        self.click('#ew-author-node .ew-job-advanced > summary')
+        self.click('#ew-author-node [data-author-action=input_add]')
+        self.fill('#ees-work-dialog [name=name]', '개발 준비 메모')
+        self.fill('#ees-work-dialog [name=description]', '이번 진행 건의 개발 준비 사항입니다.')
+        self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.wait("!document.querySelector('#ees-work-dialog')")
+        self.click('[data-author-action=node][data-id=""]')
+        self.add_job_ui('Python 버전 확인')
         self.fill('#ew-author-node [name=instructions]', '터미널에서 Python 버전을 확인하고 결과를 기록합니다.')
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
         saved = self.state(workflow_id=identifier)['workflow']['draft']
+        self.assertEqual(saved['nodes'][stage_id]['instructions'], '작업을 시작하기 전에 개발 준비 사항을 확인합니다.')
+        self.assertEqual(len(saved['nodes'][stage_id]['inputs']), 1)
+        self.assertEqual(saved['nodes'][stage_id]['inputs'][0]['name'], '개발 준비 메모')
+        self.assertEqual(saved['nodes'][stage_id]['inputs'][0]['scope'], 'run')
+        self.assertNotIn('value', saved['nodes'][stage_id]['inputs'][0])
         self.click('[data-author-action=list]')
         self.wait("document.querySelector('.ew-author-list')?.textContent.includes('미게시 · 이어서 작성하기')")
         self.assertIn('미게시 · 이어서 작성하기', self.text('.ew-author-list'))
         self.click('[data-author-action=open][data-id="' + identifier + '"]')
-        self.wait("document.querySelector('[data-author-action=tab][data-tab=summary]')")
-        self.click('[data-author-action=tab][data-tab=summary]')
-        self.wait("document.querySelector('.ew-summary-card')")
+        self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
+        self.click('[data-author-action=tab][data-tab=content]')
+        self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
         self.assertEqual(self.state(workflow_id=identifier)['workflow']['draft'], saved)
         for width in (1366, 540):
             self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
@@ -115,12 +133,160 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertFalse(any(body.get('action') in ('publish_workflow', 'start_run', 'schedule_save') for body in self.server.workspace_commands))
         self.screenshot('c44-manual-validation')
 
+        concurrency_evidence = []
+
+        def assert_unavailable_inline(message):
+            observed = self.browser.evaluate("""(() => {
+                const form=document.querySelector('#ew-stage-editor'), warning=form?.querySelector('#ew-stage-inline-warning');
+                const name=form?.querySelector('[name=name]');
+                return {warning:warning?.textContent,first:form?.firstElementChild===warning,
+                    alerts:form?.querySelectorAll('[role=alert]').length,
+                    invalid:name?.getAttribute('aria-invalid'),describedby:name?.getAttribute('aria-describedby'),
+                    error:!!form?.querySelector('#ew-stage-name-error'),
+                    actions:[...form.querySelectorAll('.ew-summary-actions [data-author-action]')].map(e=>e.dataset.authorAction),
+                    submit:!!form?.querySelector('[data-author-action=inline_apply]'),
+                    hint:!!form?.querySelector(':scope > .ew-author-muted'),text:form?.textContent};
+            })()""")
+            self.assertEqual(observed['warning'], message, observed)
+            self.assertTrue(observed['first'], observed)
+            self.assertEqual(observed['alerts'], 1, observed)
+            self.assertIsNone(observed['invalid'], observed)
+            self.assertIsNone(observed['describedby'], observed)
+            self.assertFalse(observed['error'], observed)
+            self.assertEqual(observed['actions'], ['inline_cancel'], observed)
+            self.assertFalse(observed['submit'], observed)
+            self.assertFalse(observed['hint'], observed)
+            self.assertNotIn('먼저 적용하거나', observed['text'])
+
+        def capture_unavailable_inline(label):
+            for width in (1366, 480):
+                self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+                self.wait('innerWidth === ' + str(width))
+                self.wait("""!document.querySelector('[data-ees-motion=opening],[data-ees-motion=closing]') &&
+                    [...document.querySelectorAll('#ees-work-designer')].every(surface=>
+                        surface.getAnimations({subtree:true}).every(animation=>!animation.pending&&animation.playState!=='running'))""")
+                self.browser.evaluate("document.querySelector('#ew-stage-inline-warning').scrollIntoView({block:'start',inline:'nearest'})")
+                warning_geometry = self.browser.evaluate("""(() => {
+                    const e=document.querySelector('#ew-stage-inline-warning'),r=e.getBoundingClientRect(),s=e.closest('.ew-author-scroll').getBoundingClientRect();
+                    return {top:r.top,bottom:r.bottom,height:r.height,withinScroll:r.top>=s.top-1&&r.bottom<=s.bottom+1,
+                        withinViewport:r.top>=0&&r.bottom<=innerHeight,
+                        hitTest:e.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2))};
+                })()""")
+                self.assertGreater(warning_geometry['height'], 0, warning_geometry)
+                for key in ('withinScroll', 'withinViewport', 'hitTest'):
+                    self.assertTrue(warning_geometry[key], warning_geometry)
+                self.screenshot(label + '-' + str(width))
+                # Keep a second capture if the complete action row is below the
+                # scroll viewport; all controls must be reachable, not clipped.
+                geometry = """(() => {
+                    const form=document.querySelector('#ew-stage-editor'),scroll=form.closest('.ew-author-scroll');
+                    const row=form.querySelector('.ew-summary-actions'),button=row.querySelector('[data-author-action=inline_cancel]');
+                    const bounds=e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};};
+                    const rect=bounds(row),hit=bounds(button),scrollRect=bounds(scroll),panelRect=bounds(document.querySelector('.ees-panel-region'));
+                    const contains=outer=>rect.left>=outer.left-1&&rect.right<=outer.right+1&&rect.top>=outer.top-1&&rect.bottom<=outer.bottom+1;
+                    return {viewport:[innerWidth,innerHeight],row:rect,scroll:scrollRect,panel:panelRect,
+                        withinScroll:contains(scrollRect),withinPanel:contains(panelRect),withinViewport:contains({left:0,right:innerWidth,top:0,bottom:innerHeight}),
+                        hitTest:button.contains(document.elementFromPoint((hit.left+hit.right)/2,(hit.top+hit.bottom)/2)),
+                        overflow:scroll.scrollWidth-scroll.clientWidth};
+                })()"""
+                observed = self.browser.evaluate(geometry)
+                if not all(observed[key] for key in ('withinScroll', 'withinPanel', 'withinViewport', 'hitTest')):
+                    self.browser.evaluate("document.querySelector('#ew-stage-editor .ew-summary-actions').scrollIntoView({block:'center',inline:'nearest'})")
+                    self.wait("""(() => {const e=document.querySelector('[data-author-action=inline_cancel]'),r=e.getBoundingClientRect();
+                        return e.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2));})()""")
+                    observed = self.browser.evaluate(geometry)
+                    capture_label = label + '-actions-' + str(width)
+                else:
+                    capture_label = label + '-' + str(width)
+                for key in ('withinScroll', 'withinPanel', 'withinViewport', 'hitTest'):
+                    self.assertTrue(observed[key], observed)
+                self.assertLessEqual(observed['overflow'], 1, observed)
+                observed.update(label=capture_label, warning=warning_geometry, warning_capture=label + '-' + str(width))
+                concurrency_evidence.append(observed)
+                directory = self.screenshot(capture_label)
+                (directory / 'e1-concurrent-inline-observations.json').write_text(
+                    json.dumps(concurrency_evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+        self.click('[data-author-action=tab][data-tab=content]')
+        if self.read('[data-author-action=stage_toggle][data-id="' + stage_id + '"]', 'ariaExpanded') != 'true':
+            self.click('[data-author-action=stage_toggle][data-id="' + stage_id + '"]')
+        self.click('[data-author-action=stage_edit][data-id="' + stage_id + '"]')
+        self.fill('#ew-stage-editor [name=name]', '이전 버전에서 작성한 단계 이름')
+        self.fill('#ew-stage-editor [name=description]', '이전 버전에서 작성한 단계 설명')
+        remote = deepcopy(checked['draft'])
+        remote['nodes'][stage_id].update(name='다른 작성자의 최신 단계', description='다른 작성자가 저장한 최신 설명')
+        self.users['other-user']['role'] = 'admin'
+        changed = self.command('save_draft', user=self.users['other-user'], workflow_id=identifier,
+            expected_revision=checked['revision'], definition=remote)
+        writes = len(self.server.workspace_commands)
+        self.click('#ew-stage-editor [name=description]')
+        self.refresh()
+        self.wait("document.querySelector('[data-author-status]')?.textContent.includes(" + json.dumps('r' + str(changed['revision'])) + ")")
+        self.assertEqual(self.text('[data-stage-id="' + stage_id + '"] .ew-stage-name'), '다른 작성자의 최신 단계')
+        # C61 replaces the obsolete click -> name-error expectation. The form
+        # becomes unavailable immediately, while both drafts remain protected.
+        stale_message = '저장된 초안이 바뀌었습니다. 입력한 내용은 보존했습니다. 취소한 뒤 최신 내용을 확인하고 다시 편집해 주세요.'
+        assert_unavailable_inline(stale_message)
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('#ew-stage-editor [name=description]')"))
+        self.assertEqual(self.read('#ew-stage-editor [name=name]', 'value'), '이전 버전에서 작성한 단계 이름')
+        self.assertEqual(self.read('#ew-stage-editor [name=description]', 'value'), '이전 버전에서 작성한 단계 설명')
+        self.click('#ew-stage-editor [name=name]')
+        self.key('Enter', 13)
+        assert_unavailable_inline(stale_message)
+        self.assertEqual(self.state(workflow_id=identifier)['workflow']['draft'], remote)
+        self.assertEqual([body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui'], [])
+        capture_unavailable_inline('e1-stale-stage-buffer-preserved')
+        self.click('[data-author-action=inline_cancel]')
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=stage_edit][data-id=" + json.dumps(stage_id) + "]')"))
+        self.assertEqual(self.text('[data-stage-id="' + stage_id + '"] .ew-stage-name'), '다른 작성자의 최신 단계')
+        self.assertIn('다른 작성자가 저장한 최신 설명', self.text('[data-stage-id="' + stage_id + '"] .ew-stage-description'))
+        latest = self.state(workflow_id=identifier)['workflow']
+        self.assertEqual(latest['draft'], remote)
+        self.assertEqual(latest['revision'], changed['revision'])
+        self.assertEqual([body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui'], [])
+
+        self.click('[data-author-action=stage_edit][data-id="' + stage_id + '"]')
+        self.fill('#ew-stage-editor [name=name]', '삭제 전에 작성한 단계 이름')
+        removed = deepcopy(latest['draft'])
+        stage = removed['nodes'][stage_id]
+        removed['nodes'][stage['parent']]['children'].remove(stage_id)
+        for child_id in stage['children']:
+            del removed['nodes'][child_id]
+        del removed['nodes'][stage_id]
+        changed = self.command('save_draft', user=self.users['other-user'], workflow_id=identifier,
+            expected_revision=latest['revision'], definition=removed)
+        writes = len(self.server.workspace_commands)
+        self.browser.evaluate("document.querySelector('[data-author-action=inline_apply]').focus()")
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=inline_apply]')"))
+        self.refresh()
+        self.wait("document.querySelector('#ew-stage-editor')?.textContent.includes('편집하던 단계가 최신 초안에서 삭제되었습니다.')")
+        self.assertGreater(self.browser.evaluate("document.querySelector('#ew-stage-editor').getBoundingClientRect().height"), 0)
+        deleted_message = '편집하던 단계가 최신 초안에서 삭제되었습니다. 입력한 내용은 보존했습니다. 필요하면 복사한 뒤 취소해 주세요.'
+        assert_unavailable_inline(deleted_message)
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=inline_cancel]')"))
+        self.assertNotIn('저장된 초안이 바뀌었습니다.', self.text('#ew-stage-editor'))
+        self.assertEqual(self.read('#ew-stage-editor [name=name]', 'value'), '삭제 전에 작성한 단계 이름')
+        self.assertEqual(self.browser.evaluate("document.querySelectorAll('.ew-content-stage').length"), 0)
+        self.click('#ew-stage-editor [name=name]')
+        self.key('Enter', 13)
+        assert_unavailable_inline(deleted_message)
+        self.assertEqual(self.state(workflow_id=identifier)['workflow']['draft'], removed)
+        self.assertEqual([body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui'], [])
+        capture_unavailable_inline('e1-deleted-stage-buffer-preserved')
+        self.click('[data-author-action=inline_cancel]')
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=add_stage]')"))
+        latest = self.state(workflow_id=identifier)['workflow']
+        self.assertEqual(latest['draft'], removed)
+        self.assertEqual(latest['revision'], changed['revision'])
+        self.assertEqual([body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui'], [])
+
     def test_c44_input_definition_dialog_preserves_cancelled_values_and_narrow_focus(self):
         created = self.command('create_workflow', name='합성 입력 절차', system_id='EMS')
         identifier = created['workflow_id']
         self.click('[data-action="mode"][data-mode="author"]')
         self.click('[data-author-action=open][data-id="' + identifier + '"]')
-        self.wait("document.querySelector('.ew-summary-card')")
+        self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
+        self.click('[data-author-action=summary_open]')
         self.click('[data-author-action=summary_edit][data-id=inputs]')
         self.click('[data-author-action=start_input_add]')
         self.fill('#ees-work-dialog [name=name]', '취소할 입력')
@@ -168,40 +334,375 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-ees-procedure-fallback]')"))
         self.assertEqual(self.server.completions, [])
 
+    def test_e1_content_variants_keep_names_focus_and_drafts_at_480_and_1366(self):
+        """Figma A–D and examples 1–12 use real controls and synthetic records."""
+        fixtures = {}
+        for count in (0, 1, 3, 6):
+            created = self.command('create_workflow', name='단계 화면 대조 ' + str(count), system_id='EMS')
+            key = created['workflow_id']; definition = deepcopy(created['workflow']['draft'])
+            root = next(node for node in definition['nodes'].values() if node['type'] == 'p')
+            root['children'] = ['stage-' + str(index) for index in range(count)]
+            definition['description'] = '새 공장에 EES 시스템을 설치하고 연결을 확인하는 업무'
+            definition['schedule'] = {'frequency': 'daily', 'interval': 1, 'anchor': '2026-10-20T09:00',
+                                      'timezone': 'Asia/Seoul', 'stage_deadlines': {'stage-0': {'offset_days': 0}}} if count else {}
+            for index in range(count):
+                stage_id = 'stage-' + str(index)
+                jobs = ['job-' + str(index) + '-' + str(value) for value in range(2 if index == 0 else 1)]
+                definition['nodes'][stage_id] = {'id': stage_id, 'type': 't', 'parent': root['id'], 'children': jobs,
+                    'name': '사전준비' if index == 0 else ('긴 단계 이름 · 설치 환경과 시스템 연결 및 인계 조건을 빠짐없이 확인합니다' if index == count - 1 else '단계 ' + str(index + 1)),
+                    'description': '셋업 범위와 설치 가이드를 확인합니다.\n승인된 자료를 함께 봅니다.',
+                    'instructions': '기존 수행 안내 유지', 'deps': []}
+                for job_id in jobs:
+                    definition['nodes'][job_id] = {'id': job_id, 'type': 'j', 'parent': stage_id,
+                        'children': [], 'deps': [], 'name': '셋업 가이드 찾기 ' + job_id,
+                        'description': '', 'instructions': '직접 확인합니다.', 'mode': 'human', 'inputs': [],
+                        'result_block': 'human_confirm', 'human_confirmation': True, 'completion': {'rule': ''}}
+            self.command('save_draft', workflow_id=key, expected_revision=1, definition=definition)
+            fixtures[count] = (key, definition)
+        evidence = []
+
+        def capture(label, extra=None):
+            self.wait("[...document.querySelectorAll('.ew-work-content img')].every(image=>image.complete&&image.naturalWidth>0)")
+            self.wait("""!document.querySelector('[data-ees-motion=opening],[data-ees-motion=closing],.ew-dialog-exit-backdrop') &&
+                [...document.querySelectorAll('#ees-work-designer,#ees-work-dialog,#ees-work-help')]
+                    .every(surface=>surface.getAnimations({subtree:true}).every(animation=>!animation.pending&&animation.playState!=='running'))""")
+            observed = self.browser.evaluate("""(() => {
+                const scroll=document.querySelector('.ew-author-scroll'), active=document.activeElement;
+                const box=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return {width:r.width,height:r.height,fontSize:s.fontSize,lineHeight:s.lineHeight,background:s.backgroundColor};};
+                const alert=document.querySelector('#ew-stage-editor [role=alert]');
+                let inlineAlert=null;
+                if(alert){
+                    const rect=alert.getBoundingClientRect(),scrollRect=scroll.getBoundingClientRect(),panelRect=document.querySelector('.ees-panel-region').getBoundingClientRect(),style=getComputedStyle(alert);
+                    const contains=outer=>rect.left>=outer.left-1&&rect.right<=outer.right+1&&rect.top>=outer.top-1&&rect.bottom<=outer.bottom+1;
+                    const hit=document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2);
+                    inlineAlert={text:alert.textContent,rect:{left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom},
+                        withinScroll:contains(scrollRect),withinPanel:contains(panelRect),withinViewport:contains({left:0,right:innerWidth,top:0,bottom:innerHeight}),
+                        visible:rect.width>0&&rect.height>0&&style.visibility==='visible'&&Number(style.opacity)>0,
+                        hitTest:!!hit&&(hit===alert||alert.contains(hit)),focusInsideEditor:!!active?.closest('#ew-stage-editor')};
+                }
+                return {viewport:[innerWidth,innerHeight],scrollTop:scroll.scrollTop,overflow:scroll.scrollWidth-scroll.clientWidth,
+                    stages:[...document.querySelectorAll('.ew-stage-toggle')].map(e=>({id:e.dataset.id,expanded:e.getAttribute('aria-expanded'),...box(e)})),
+                    jobs:[...document.querySelectorAll('.ew-job-row')].map(e=>({id:e.dataset.jobId,returned:e.dataset.returned,...box(e)})),
+                    focus:{action:active?.dataset.authorAction,id:active?.dataset.id,name:active?.name},
+                    inline:!!document.querySelector('#ew-stage-editor'),invalid:!!document.querySelector('#ew-stage-editor [aria-invalid=true]'),
+                    inlineAlert,surfaces:[...document.querySelectorAll('#ees-work-dialog[open],#ees-work-help')].map(e=>({id:e.id,opacity:getComputedStyle(e).opacity})),
+                    proposal:!!document.querySelector('.ew-author-proposal'),footer:document.querySelector('#ees-work-designer>footer')?.innerText,
+                    icons:[...document.querySelectorAll('.ew-work-content img')].map(e=>({src:e.src,natural:e.naturalWidth,rendered:e.getBoundingClientRect().width}))};
+            })()""")
+            self.assertLessEqual(observed['overflow'], 1, observed)
+            self.assertLessEqual(sum(stage['expanded'] == 'true' for stage in observed['stages']), 1)
+            self.assertTrue(all(stage['height'] >= 52 for stage in observed['stages']), observed)
+            self.assertTrue(all(icon['natural'] == icon['rendered'] for icon in observed['icons']), observed)
+            observed.update(extra or {})
+            observed['label'] = label; evidence.append(observed)
+            directory = self.screenshot(label)
+            (directory / 'e1-content-variants-observations.json').write_text(
+                json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+            return observed
+
+        for width in (1366, 480):
+            # Establish the authoring destination while its sidebar is exposed.
+            # At 480 px the open overlay correctly covers that sidebar; all
+            # content actions and evidence below still use the requested width.
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1366, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+            self.wait('innerWidth === 1366')
+            self.navigate('/c/existing-chat')
+            self.wait("document.querySelector('#ees-work-entry')")
+            self.open_sidebar(); self.click('[data-action=mode][data-mode=author]'); self.refresh()
+            self.wait("document.querySelector('#ees-work-designer')")
+            if self.browser.evaluate("!!document.querySelector('[data-author-action=list]')"):
+                self.click('[data-author-action=list]')
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+            self.wait('innerWidth === ' + str(width))
+            for count in (0, 1, 3, 6):
+                key, definition = fixtures[count]
+                selector = '[data-author-action=open][data-id="' + key + '"]'
+                self.wait('document.querySelector(' + json.dumps(selector) + ')')
+                self.click(selector)
+                self.wait("document.querySelector('.ew-work-content')")
+                self.assertEqual(self.browser.evaluate("document.querySelectorAll('.ew-stage-toggle').length"), count)
+                self.assertEqual(self.browser.evaluate("document.querySelectorAll('.ew-stage-toggle[aria-expanded=true]').length"), 0)
+                capture('e1-a-stage-count-' + str(count) + '-' + str(width))
+                if count != 6:
+                    self.click('[data-author-action=list]')
+            key, original = fixtures[6]
+            self.click('[data-author-action=stage_toggle][data-id=stage-0]')
+            self.assertEqual(self.read('[data-author-action=move_up][data-id=stage-0]', 'disabled'), True)
+            capture('e1-b-expanded-' + str(width))
+            self.click('[data-author-action=stage_edit][data-id=stage-0]')
+            self.assertEqual(self.browser.evaluate('document.activeElement.name'), 'name')
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('#ew-stage-editor [name=mode],#ew-stage-editor [name=result_block]')"))
+            capture('e1-c1-stage-edit-' + str(width))
+            self.fill('#ew-stage-editor [name=description]', '여러 줄 설명 보존\n두 번째 줄')
+            self.click('[data-author-action=stage_toggle][data-id=stage-1]')
+            self.assertIn('편집 중인 항목을 먼저 적용하거나 취소해 주세요.', self.text('#ew-stage-editor'))
+            self.assertEqual(self.read('[data-author-action=stage_toggle][data-id=stage-0]', 'ariaExpanded'), 'true')
+            guard = capture('e1-example7-dirty-guard-' + str(width))['inlineAlert']
+            self.assertIsNotNone(guard)
+            for boundary in ('withinScroll', 'withinPanel', 'withinViewport', 'visible', 'hitTest', 'focusInsideEditor'):
+                self.assertTrue(guard[boundary], guard)
+            self.click('[data-author-action=inline_apply]')
+            self.assertIn('두 번째 줄', self.text('[data-stage-id=stage-0] .ew-stage-description'))
+            self.click('[data-author-action=job_menu][data-id=job-0-0]')
+            capture('e1-example4-job-menu-' + str(width))
+            self.key('Escape', 27)
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-job-menu')"))
+            self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=job_menu][data-id=job-0-0]')"))
+            self.assertFalse(self.read('.ees-panel-region', 'hidden'))
+            if width == 480:
+                # The just-closed menu trigger must yield Escape to C60.
+                self.key('Escape', 27)
+                self.wait("document.querySelector('.ees-panel-region').hidden")
+                self.click('[data-action=open_panel]')
+                self.wait("!document.querySelector('.ees-panel-region').hidden && !document.querySelector('[data-ees-motion=opening]')")
+            self.browser.evaluate("document.querySelector('[data-author-action=move_down][data-id=stage-0]').scrollIntoView({block:'center'})")
+            before_move = self.browser.evaluate("""(() => {
+                const button=document.querySelector('[data-author-action=move_down][data-id=stage-0]'),
+                    current=document.querySelector('[data-stage-id=stage-0]').getBoundingClientRect(),
+                    next=document.querySelector('[data-stage-id=stage-1]').getBoundingClientRect(),
+                    rect=button.getBoundingClientRect();
+                return {x:rect.x+rect.width/2,y:rect.y+rect.height/2,top:rect.top,
+                    scroll:document.querySelector('.ew-author-scroll').scrollTop,
+                    step:next.height+next.top-current.bottom,hitTest:button.contains(document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2))};
+            })()""")
+            self.assertTrue(before_move['hitTest'], before_move)
+            for kind in ('mousePressed', 'mouseReleased'):
+                self.browser.call('Input.dispatchMouseEvent', {'type':kind,'x':before_move['x'],'y':before_move['y'],
+                    'button':'left','buttons':int(kind == 'mousePressed'),'clickCount':1})
+            self.wait("document.querySelector('[data-author-live]')?.textContent === '2번째로 옮겼습니다'")
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-author-scroll > .ew-author-note[role=status]')"))
+            move = self.browser.evaluate("""(() => {
+                const button=document.querySelector('[data-author-action=move_down][data-id=stage-0]'),
+                    live=document.querySelector('[data-author-live]'),rect=live.getBoundingClientRect(),style=getComputedStyle(live);
+                return {top:button.getBoundingClientRect().top,scroll:document.querySelector('.ew-author-scroll').scrollTop,
+                    focus:document.activeElement===button,live:live.textContent,livePosition:style.position,
+                    liveWidth:rect.width,liveHeight:rect.height};
+            })()""")
+            self.assertAlmostEqual(move['top'] + move['scroll'] - before_move['top'] - before_move['scroll'], before_move['step'], delta=1)
+            self.assertTrue(move['focus'], move)
+            self.assertEqual(move['livePosition'], 'absolute', move)
+            self.assertLessEqual(move['liveWidth'], 1, move)
+            self.assertLessEqual(move['liveHeight'], 1, move)
+
+            self.assertEqual(self.read('[data-author-action=stage_toggle][data-id=stage-0]', 'ariaExpanded'), 'true')
+            capture('e1-example8-stage-moved-' + str(width), {'reorder': {'before': before_move, 'after': move}})
+            self.browser.evaluate("document.querySelector('[data-author-action=node][data-id=job-0-0]').scrollIntoView({block:'center',inline:'nearest'})")
+            return_scroll = self.read('.ew-author-scroll', 'scrollTop')
+            self.click('[data-author-action=node][data-id=job-0-0]')
+            self.wait("document.querySelector('#ew-author-node')")
+            self.fill('#ew-author-node [name=instructions]', '돌아와도 유지할 작업 초안')
+            self.click('[data-author-action=node][data-id=""]')
+            self.wait("document.querySelector('.ew-job-row[data-returned=true]')")
+            self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=node][data-id=job-0-0]')"))
+            self.assertIn('변경 있음 · 저장 안 됨', self.text('[data-author-status]'))
+            self.assertAlmostEqual(self.read('.ew-author-scroll', 'scrollTop'), return_scroll, delta=1)
+            capture('e1-d-job-return-' + str(width))
+            self.click('[data-author-action=delete_node][data-id=stage-0]')
+            self.wait("document.querySelector('#ees-work-dialog[open]')")
+            self.assertIn('2개 작업', self.text('#ees-work-dialog'))
+            self.assertIn('이 단계의 기간 설정(실행 방식)도 함께 지웁니다.', self.text('#ees-work-dialog'))
+            self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-dialog-cancel]')"))
+            capture('e1-example3-stage-delete-' + str(width))
+            self.key('Escape', 27)
+            self.click('[data-author-action=add_stage]')
+            self.assertEqual(self.read('#ew-stage-editor [name=name]', 'placeholder'), '예: 운영 인계')
+            capture('e1-c2-stage-add-' + str(width))
+            self.click('[data-author-action=inline_apply]')
+            self.assertIn('단계 이름을 입력해 주세요.', self.text('#ew-stage-editor'))
+            capture('e1-example6-empty-name-' + str(width))
+            self.fill('#ew-stage-editor [name=name]', '운영 인계')
+            self.click('[data-author-action=inline_apply]')
+            self.wait("document.activeElement?.matches('[data-author-action=add_job]')")
+            self.assertIn('이 단계에는 아직 작업이 없습니다.', self.text('.ew-stage-body'))
+            capture('e1-example2-empty-stage-' + str(width))
+            self.click('[data-author-action=add_job]')
+            self.assertEqual(self.read('#ew-stage-editor [name=name]', 'placeholder'), '예: 설치 상태 확인')
+            capture('e1-example5-job-add-' + str(width))
+            self.key('Escape', 27)
+            self.click('[data-author-action=help][data-id=stages_and_jobs]')
+            self.wait("document.querySelector('#ees-work-help')")
+            self.assertIn('단계는 작업을 묶는 이름입니다. 개수·이름·순서는 업무에 맞게 정합니다.', self.text('#ees-work-help'))
+            self.assertIn('단계 순서는 화면에 보이는 순서입니다.', self.text('#ees-work-help'))
+            self.assertIn('먼저 끝나야 하는 작업은 작업 상세의 ‘앞 작업’에서 정합니다.', self.text('#ees-work-help'))
+            capture('e1-example10-stage-help-' + str(width))
+            self.key('Escape', 27)
+            self.click('[data-author-action=stage_toggle][data-id=stage-0]')
+            proposed = deepcopy(original)
+            proposed['nodes']['job-0-0']['name'] = 'DB 연결·계정 확인'
+            proposed['nodes']['job-0-0']['instructions'] = '제안된 수행 안내'
+            reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
+            payload = {'workflow_id': key, 'base_revision': 2, 'context_id': reference['context_id'], 'definition': proposed}
+            result = self.browser.evaluate("window.__eesNativeWorkV1.propose('existing-chat'," + json.dumps(payload, ensure_ascii=False) + ")")
+            self.assertTrue(result['ok'], result)
+            self.assertIn('바뀌는 것', self.text('.ew-author-proposal'))
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-author-proposal pre,.ew-author-proposal textarea')"))
+            self.assertTrue(self.browser.evaluate("!!document.querySelector('.ew-proposal-bar [data-author-action=ai_apply]')"))
+            self.assertTrue(self.browser.evaluate("!!document.querySelector('.ew-proposal-bar [data-author-action=ai_discard]')"))
+            self.browser.evaluate("document.querySelector('.ew-author-scroll').scrollTop=0")
+            capture('e1-example12-proposal-' + str(width))
+            self.browser.evaluate("document.querySelector('.ew-job-row[data-job-id=job-0-0]').scrollIntoView({block:'center'})")
+            self.assertTrue(self.browser.evaluate("!!document.querySelector('.ew-job-row[data-job-id=job-0-0] .ew-proposal-mark')"))
+            capture('e1-example12-changed-row-' + str(width))
+            self.click('[data-author-action=ai_discard]')
+            current_state = self.server.workflow.workspace_state
+
+            async def read_only_state(user, **query):
+                result = await current_state(user, **query)
+                if result.get('workflow'):
+                    result['workflow']['can_edit'] = False; result['workflow']['can_manage'] = False
+                return result
+
+            with patch.object(self.server.workflow, 'workspace_state', side_effect=read_only_state):
+                self.refresh()
+                self.wait("!document.querySelector('[data-author-action=add_stage]')")
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-stage-actions,.ew-job-menu-button,[data-author-action=stage_edit],[data-author-action=add_job]')"))
+                self.click('[data-author-action=stage_toggle][data-id=stage-1]')
+                self.click('[data-author-action=stage_toggle][data-id=stage-0]')
+                capture('e1-example9-read-only-' + str(width))
+            self.assertEqual(self.state(workflow_id=key)['workflow']['draft'], original)
+            self.assertEqual(self.state(workflow_id=key)['workflow']['revision'], 2)
+        self.assertEqual(self.server.completions, [])
+
+    def test_e1_proposal_position_counts_and_grouped_rows_at_480_and_1366(self):
+        created = self.command('create_workflow', name='제안 변경 위치 합성 검증', system_id='EMS')
+        key = created['workflow_id']; original = deepcopy(created['workflow']['draft'])
+        root = next(node for node in original['nodes'].values() if node['type'] == 'p')
+        root['children'] = ['stage-0', 'stage-1', 'stage-2']
+        original['schedule'] = {'frequency': 'daily', 'interval': 1, 'anchor': '2026-10-20T09:00',
+            'timezone': 'Asia/Seoul', 'stage_deadlines': {'stage-0': {'offset_days': 0}}}
+        for index, name in enumerate(('사전준비', '시스템 설치', '운영 인계')):
+            stage = 'stage-' + str(index)
+            children = [stage + '-job-' + str(number) for number in range(2)]
+            original['nodes'][stage] = {'id': stage, 'type': 't', 'name': name, 'parent': root['id'], 'children': children, 'deps': []}
+            for number, job in enumerate(children):
+                original['nodes'][job] = {'id': job, 'type': 'j', 'name': name + ' 작업 ' + str(number + 1),
+                    'parent': stage, 'children': [], 'deps': [], 'mode': 'human', 'inputs': [],
+                    'instructions': '합성 확인', 'result_block': 'human_confirm'}
+        self.command('save_draft', workflow_id=key, expected_revision=1, definition=original)
+
+        def propose(definition, count):
+            reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
+            payload = {'workflow_id': key, 'base_revision': 2, 'context_id': reference['context_id'], 'definition': definition}
+            result = self.browser.evaluate("window.__eesNativeWorkV1.propose('existing-chat'," + json.dumps(payload, ensure_ascii=False) + ")")
+            self.assertTrue(result['ok'], result)
+            self.assertEqual(self.text('.ew-proposal-changes h3'), '바뀌는 것 ' + str(count))
+            self.assertIn(str(count) + '곳', self.text('.ew-proposal-bar'))
+            return self.browser.evaluate("[...document.querySelectorAll('.ew-proposal-change-list>li')].map(e=>({kind:e.dataset.change,text:e.textContent}))")
+
+        observations = []
+        for width in (1366, 480):
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1366, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+            self.navigate('/c/existing-chat'); self.wait("document.querySelector('#ees-work-entry')")
+            self.open_sidebar(); self.click('[data-action=mode][data-mode=author]'); self.refresh()
+            if self.browser.evaluate("!!document.querySelector('[data-author-action=list]')"):
+                self.click('[data-author-action=list]')
+            self.click('[data-author-action=open][data-id="' + key + '"]')
+            self.wait("document.querySelectorAll('.ew-stage-toggle').length===3")
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+            self.wait('innerWidth === ' + str(width))
+            removed = deepcopy(original)
+            removed['nodes'][root['id']]['children'].remove('stage-0')
+            for identifier in ['stage-0', *original['nodes']['stage-0']['children']]:
+                del removed['nodes'][identifier]
+            # Deliberately retain the deadline key sent by the current chat tool.
+            rows = propose(removed, 3)
+            self.assertEqual([row['kind'] for row in rows], ['removed'], rows)
+            self.assertIn('기간 설정도 함께 지웁니다', rows[0]['text'])
+            for identifier in ('stage-1', 'stage-2'):
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-stage-id=" + identifier + "] .ew-proposal-mark')"))
+            self.screenshot('e1-example12-delete-only-' + str(width))
+            self.click('[data-author-action=ai_discard]')
+
+            inserted = deepcopy(original)
+            inserted['nodes']['inserted'] = {'id': 'inserted', 'type': 't', 'name': '맨 앞 단계', 'parent': root['id'], 'children': [], 'deps': []}
+            inserted['nodes'][root['id']]['children'].insert(0, 'inserted')
+            self.assertEqual([row['kind'] for row in propose(inserted, 1)], ['added'])
+            self.click('[data-author-action=ai_discard]')
+            swapped = deepcopy(original)
+            swapped['nodes']['stage-1']['children'].reverse()
+            self.assertEqual([row['kind'] for row in propose(swapped, 1)], ['changed'])
+            self.click('[data-author-action=ai_discard]')
+            moved = deepcopy(original)
+            job = moved['nodes']['stage-1']['children'].pop(0)
+            moved['nodes']['stage-2']['children'].append(job); moved['nodes'][job]['parent'] = 'stage-2'
+            self.assertEqual([row['kind'] for row in propose(moved, 1)], ['changed'])
+            self.click('[data-author-action=ai_discard]')
+
+            grouped = deepcopy(removed)
+            for identifier, name in (('new-a', '인계 문서 확인'), ('new-b', '담당자 인계')):
+                grouped['nodes'][identifier] = {**deepcopy(original['nodes']['stage-2-job-0']), 'id': identifier, 'name': name}
+                grouped['nodes']['stage-2']['children'].append(identifier)
+            grouped['nodes']['stage-1-job-0']['name'] = '설치·계정 확인'
+            rows = propose(grouped, 6)
+            self.assertEqual([row['kind'] for row in rows], ['removed', 'added', 'changed'], rows)
+            self.assertIn('인계 문서 확인', rows[1]['text']); self.assertIn('담당자 인계', rows[1]['text'])
+            self.assertIn('— 운영 인계', rows[1]['text'])
+            self.browser.evaluate("document.querySelector('.ew-author-scroll').scrollTop=0")
+            self.wait("!document.querySelector('[data-ees-motion=opening],[data-ees-motion=closing]')")
+            self.assertLessEqual(self.browser.evaluate("document.querySelector('.ew-author-scroll').scrollWidth-document.querySelector('.ew-author-scroll').clientWidth"), 1)
+            directory = self.screenshot('e1-example12-grouped-' + str(width))
+            observations.append({'width': width, 'rows': rows, 'count': 6, 'deletionOnlyCount': 3,
+                'frontInsertionCount': 1, 'adjacentSwapCount': 1, 'crossStageMoveCount': 1})
+            (directory / 'e1-proposal-review-observations.json').write_text(json.dumps(observations, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+            self.click('[data-author-action=ai_discard]')
+            self.assertEqual(self.state(workflow_id=key)['workflow']['draft'], original)
+            self.assertEqual(self.state(workflow_id=key)['workflow']['revision'], 2)
+
     def test_procedure_visual_geometry_matches_figma_and_preserves_native_draft(self):
         created = self.command('create_workflow', name='시각 대조 절차', system_id='EMS')
         identifier = created['workflow_id']
-        original = self.state(workflow_id=identifier)['workflow']
+        workspace = self.state(workflow_id=identifier)
+        original = workspace['workflow']
+        expected_factory_views = [{'id': '', 'label': '기본 절차', 'selected': 'true'}] + [
+            {'id': item['id'], 'label': item.get('name') or item['id'], 'selected': 'false'}
+            for item in workspace.get('factories', [])]
         self.fill('#chat-input', '화면 전환 전 개인 입력')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.click('[data-action="mode"][data-mode="author"]')
         self.wait("document.querySelector('[data-author-action=open][data-id=" + json.dumps(identifier) + "]')")
         self.click('[data-author-action="open"][data-id="' + identifier + '"]')
-        self.wait("document.querySelector('.ew-summary-card')")
-        for width in (1920, 1440):
+        self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
+        for width, height in ((1920, 1080), (1440, 1080), (1366, 768), (480, 768)):
             self.browser.call('Emulation.setDeviceMetricsOverride', {
-                'width': width, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+                'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
             self.wait('innerWidth === ' + str(width))
             metrics = self.browser.evaluate("""(() => {
               const bounds = selector => {const box=document.querySelector(selector).getBoundingClientRect();return {x:box.x,y:box.y,width:box.width,height:box.height};};
               const style = selector => {const value=getComputedStyle(document.querySelector(selector));return {font:value.fontFamily,size:value.fontSize,line:value.lineHeight,background:value.backgroundColor};};
-              return {panel:bounds('.ees-panel-region'),header:bounds('.ew-author>header'),
-                card:bounds('.ew-summary-card'),row:bounds('.ew-summary-row'),footer:bounds('.ew-author>footer'),
-                badge:style('.ew-author-heading>.ew-author-tag'),detail:style('.ew-summary-row p'),
+              return {panel:bounds('.ees-panel-region'),frame:bounds('[data-ees-source-shell]'),sidebar:bounds('#sidebar'),
+                overlay:document.querySelector('.ees-panel-region').getAttribute('data-overlay'),header:bounds('.ew-author>header'),
+                card:bounds('.ew-work-content'),purpose:bounds('.ew-content-purpose'),needs:bounds('.ew-content-needs'),steps:bounds('.ew-content-heading'),list:bounds('.ew-stage-list'),footer:bounds('.ew-author>footer'),
+                availableWidth:document.querySelector('.ees-panel-region').parentElement.getBoundingClientRect().width,
+                badge:style('.ew-author-heading>.ew-author-tag'),detail:style('.ew-content-purpose>p'),
                 tabs:style('.ew-author-tabs>button'),heading:style('.ew-author h2'),
                 extraHeader:document.querySelectorAll('#ees-work-panel>.ew-panel-header').length,
                 factoryTabs:document.querySelectorAll('.ew-author-factories').length,
+                factoryLabel:document.querySelector('.ew-author-factories')?.getAttribute('aria-label'),
+                factoryViews:[...document.querySelectorAll('.ew-author-factories [data-author-action=factory]')].map(e=>({id:e.dataset.id,label:e.textContent.trim(),selected:e.getAttribute('aria-selected')})),
                 overflow:document.querySelector('.ew-author-scroll').scrollWidth-document.querySelector('.ew-author-scroll').clientWidth};
             })()""")
-            self.assertEqual(metrics['panel']['width'], 580)
-            self.assertEqual(metrics['panel']['x'], width - 580)
+            self.assertEqual(metrics['overlay'], 'true' if width == 480 else 'false')
+            # Overlay retains the existing 56 px navigation rail even when the
+            # authoring panel's preferred 580 px width cannot fit the frame.
+            available_panel_width = metrics['availableWidth'] - (56 if metrics['overlay'] == 'true' else 0)
+            metrics['expectedPanelWidth'] = min(580, available_panel_width)
+            metrics['panelFrameLeftGap'] = metrics['panel']['x'] - metrics['frame']['x']
+            self.assertEqual(metrics['panel']['width'], metrics['expectedPanelWidth'])
+            self.assertEqual(metrics['panel']['x'] + metrics['panel']['width'], width)
+            if metrics['overlay'] == 'true':
+                self.assertEqual(metrics['sidebar']['width'], 56)
+                self.assertEqual(metrics['panelFrameLeftGap'], max(56, metrics['availableWidth'] - 580))
             self.assertEqual(metrics['header']['height'], 48)
             self.assertEqual(metrics['extraHeader'], 0)
-            self.assertEqual(metrics['factoryTabs'], 0)
+            self.assertEqual(metrics['factoryTabs'], 1)
+            self.assertEqual(metrics['factoryLabel'], '공장별 차이')
+            self.assertEqual(metrics['factoryViews'], expected_factory_views)
             self.assertAlmostEqual(metrics['card']['x'] - metrics['panel']['x'], 21, delta=1)
-            self.assertAlmostEqual(metrics['card']['y'], 211, delta=2)
-            self.assertGreaterEqual(metrics['row']['height'], 86)
-            self.assertLessEqual(metrics['row']['height'], 92)
+            self.assertLess(metrics['purpose']['y'], metrics['needs']['y'])
+            self.assertLess(metrics['needs']['y'], metrics['steps']['y'])
+            self.assertLess(metrics['steps']['y'], metrics['list']['y'])
+            self.assertEqual(self.browser.evaluate("document.querySelectorAll('[data-author-action=stage_toggle]').length"), 0)
+            self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim())"), ['업무 내용', '실행 방식', '판정 규칙', '게시 기록'])
             self.assertEqual(metrics['footer']['height'], 59)
             self.assertEqual(metrics['heading']['size'], '20px')
             self.assertTrue(metrics['heading']['font'].startswith('"EES Noto Sans KR"'))
@@ -213,9 +714,11 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertLessEqual(metrics['overflow'], 1)
             self.assertEqual(self.text('.ew-author-heading>.ew-author-tag'), '초안')
             self.assertIn('초안 r1 · 저장됨', self.text('[data-author-status]'))
-            self.screenshot('procedure-visual-summary-' + str(width))
+            directory = self.screenshot('procedure-visual-content-empty-' + str(width))
+            (directory / ('procedure-visual-content-empty-' + str(width) + '-geometry.json')).write_text(
+                json.dumps(metrics, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         self.wait("[...document.querySelectorAll('#ees-work-designer img')].every(image=>image.complete&&image.naturalWidth>0)")
-        assets = self.browser.evaluate("[...document.querySelectorAll('.ew-author-back img,.ew-summary-check img')].map(image=>[image.naturalWidth,image.getBoundingClientRect().width])")
+        assets = self.browser.evaluate("[...document.querySelectorAll('.ew-author-back img,.ew-content-heading img')].map(image=>[image.naturalWidth,image.getBoundingClientRect().width])")
         self.assertTrue(assets)
         self.assertTrue(all(natural == rendered for natural, rendered in assets), assets)
         self.click('.ew-author>header [data-action=close_panel]')
@@ -334,8 +837,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-action=procedures]')
         self.wait("document.querySelector('[data-author-action=open][data-id=\""+wid+"\"]')")
         self.click('[data-author-action="open"][data-id="'+wid+'"]')
-        self.click('.ew-author-tabs [data-author-action=tab][data-tab=structure]')
-        self.click('[data-author-action="node"][data-id="job-0"]')
+        self.click('.ew-author-tabs [data-author-action=tab][data-tab=content]')
+        self.open_author_job_ui('job-0')
         self.click('.ew-shared-picker summary')
         self.assertTrue(self.read('.ew-shared-picker','open'))
         self.assertTrue(self.browser.evaluate("!!document.querySelector('[data-author-action=pick_job_tool][data-id=managed-search_pages]')"))
@@ -599,16 +1102,16 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-action=mode][data-mode=author]')
         self.wait('document.querySelector(' + json.dumps('[data-author-action=open][data-id="' + workflow_id + '"]') + ')')
         self.click('[data-author-action=open][data-id="' + workflow_id + '"]')
-        self.wait("document.querySelector('.ew-summary-card')")
-        self.click('[data-author-action=tab][data-tab=structure]')
+        self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
+        self.click('[data-author-action=tab][data-tab=content]')
         self.wait("document.querySelector('[data-author-action=add_stage]')")
-        self.click('[data-author-action=add_stage]')
-        self.fill('#ew-author-node [name=name]', '아직 저장하지 않은 메뉴 단계')
+        self.add_stage_ui('아직 저장하지 않은 메뉴 단계')
+        self.add_job_ui('아직 저장하지 않은 메뉴 작업')
         self.fill('#ew-author-node [name=instructions]', '복귀 후에도 유지할 미저장 설명')
         saved = self.state(workflow_id=workflow_id)['workflow']
         self.screenshot('menu-c18-admin-workspace')
         self.assertEqual(self.skills_roundtrip('procedure'), full_draft)
-        self.assertEqual(self.read('#ew-author-node [name=name]', 'value'), '아직 저장하지 않은 메뉴 단계')
+        self.assertEqual(self.read('#ew-author-node [name=name]', 'value'), '아직 저장하지 않은 메뉴 작업')
         self.assertEqual(self.read('#ew-author-node [name=instructions]', 'value'), '복귀 후에도 유지할 미저장 설명')
         self.assertEqual(self.state(workflow_id=workflow_id)['workflow'], saved)
         self.screenshot('menu-c18-procedure-returned')
@@ -1411,7 +1914,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         record = next(item for item in self.state()['workflows'] if item['name'] == '신규 공장 횡전개')
         self.click('[data-author-action="open"][data-id="' + record['id'] + '"]')
         self.wait("document.querySelector('[data-author-action=save]')")
-        self.click('.ew-author-tabs [data-author-action="tab"][data-tab="structure"]')
+        self.click('.ew-author-tabs [data-author-action="tab"][data-tab="content"]')
         for stage in ('사전준비', 'AP·DB 인프라 준비', '시스템 설치', '시스템 간 인터페이스 확인'):
             self.assertIn(stage, self.text('#ees-work-designer'))
         self.assertEqual(self.operations()['schedules'], [])
@@ -1424,10 +1927,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[name=procedure_template]')"))
         self.assertIn('게시 기록', self.text('#ees-work-dialog'))
         self.click('#ees-work-dialog [data-dialog-confirm]')
-        self.wait("document.querySelector('.ew-summary-card')")
+        self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), before)
         self.assertEqual(self.server.completions, [])
-        self.click('[data-author-action="tab"][data-tab="structure"]')
+        self.click('[data-author-action="tab"][data-tab="content"]')
         created = [body for body in self.server.workspace_commands if body.get('action') == 'copy_workflow']
         self.assertEqual(len(created), 1)
         self.assertEqual(created[0]['workflow_id'], record['id'])
@@ -1458,6 +1961,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertTrue(all(not node.get('tool_reference') and not node.get('tool_contract_id') for node in tool_jobs))
         self.assertEqual(self.operations()['schedules'], [])
         self.assertEqual(self.bridge.calls, [])
+        self.click('[data-author-action=stage_toggle][data-id="' + tool_jobs[0]['parent'] + '"]')
         self.assertIn('도구 연결 전', self.text('#ees-work-designer'))
         self.click('.ew-procedure-menu summary')
         self.click('[data-author-action="edit_workflow"]')
@@ -1507,8 +2011,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action="create"]')
         self.fill('#ees-work-dialog [name=name]', 'HTTP 초안 생성 검증')
         self.click('#ees-work-dialog [data-dialog-confirm]')
-        self.wait("document.querySelector('.ew-summary-card')")
-        self.click('[data-author-action="tab"][data-tab="structure"]')
+        self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
+        self.click('[data-author-action="tab"][data-tab="content"]')
         creations = [body for body in self.server.workspace_commands
                      if body.get('action') == 'create_workflow']
         self.assertEqual(len(creations), 1)
@@ -1518,9 +2022,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         record = next(item for item in self.state()['workflows']
                       if item['name'] == created['name'])
         key = record['id']
-        self.click('[data-author-action="add_stage"]')
-        self.click('[data-author-action="tab"][data-tab="structure"]')
-        self.click('[data-author-action="add_job"]')
+        self.add_stage_ui('HTTP 생성 단계')
+        self.add_job_ui('HTTP 생성 작업')
         self.click('[data-author-action="save"]')
         self.wait("!document.querySelector('[data-author-action=validate]')?.disabled")
         saved = self.state(workflow_id=key)['workflow']
@@ -1570,7 +2073,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("document.querySelectorAll('.ew-author-list>[data-author-action=open]').length === 4")
         self.click('[data-author-action="open"][data-id="' + key + '"]')
         self.wait('window.__eesNativeWorkV1?.captureReference()?.workflow_id === ' + json.dumps(key))
-        self.wait("document.querySelector('.ew-summary-card')")
+        self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
         self.click('.ew-author-tabs [data-author-action="tab"][data-tab="schedule"]')
         self.wait("document.querySelector('#ew-author-schedule [name=run_mode]')?.value === 'periodic'")
         self.click('[data-author-action="schedule_preview"]')
@@ -1628,7 +2131,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('[data-author-action=open][data-id=\"" + key + "\"]')")
         self.click('[data-author-action="open"][data-id="' + key + '"]')
         self.wait('window.__eesNativeWorkV1?.captureReference()?.workflow_id === ' + json.dumps(key))
-        self.wait("document.querySelector('.ew-summary-card')")
+        self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
         self.click('.ew-author-tabs [data-author-action="tab"][data-tab="schedule"]')
         self.wait("document.querySelector('#ew-author-schedule [name=interval]')")
         self.assertEqual(self.read('#ew-author-schedule [name=interval]', 'value'), '1')
@@ -1722,8 +2225,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-action="mode"][data-mode="author"]')
         self.wait("document.querySelector('[data-author-action=open][data-id=\"" + key + "\"]')")
         self.click('[data-author-action="open"][data-id="' + key + '"]')
-        self.click('.ew-author-tabs [data-author-action=tab][data-tab=structure]')
-        self.click('[data-author-action="node"][data-id="job-0"]')
+        self.click('.ew-author-tabs [data-author-action=tab][data-tab=content]')
+        self.open_author_job_ui('job-0')
         self.assertEqual(self.read('#ew-author-node [name=read_retry_count]', 'value'), '0')
         self.assertNotIn('read_retry', self.state(workflow_id=key)['workflow']['draft']['nodes']['job-0'])
         # Read-only observation captures any asynchronous control replacement;
