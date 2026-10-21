@@ -123,6 +123,67 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
                 self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-input-proposal-bar,.ew-input-proposal-applied,.ew-input-proposal-source')"))
             self.assertEqual(self.state(run_id=run['id'])['run'], before)
 
+    def test_e2_settings_tab_proposal_uses_run_draft_and_allows_separate_settings_save(self):
+        key = self.author(name='업무 설정과 진행 건 제안 분리', jobs=1, fields=[
+            {'id': 'note', 'name': '이번 메모', 'type': 'text', 'scope': 'run'},
+            {'id': 'kept', 'name': '보존할 메모', 'type': 'text', 'scope': 'run'},
+            {'id': 'setting', 'name': '공통 설정', 'type': 'text', 'scope': 'workflow'}])
+        self.command('save_settings', workflow_id=key, values={'setting': '저장된 업무 설정'})
+        run = self.start(key, inputs={'note': '저장된 진행 건 입력', 'kept': '저장된 보존 값'})
+        self.open_run(key, run)
+        before = deepcopy(self.state(run_id=run['id'])['run'])
+        self.fill('[data-work-input][name=note]', '직접 작성한 진행 건 초안')
+        self.fill('[data-work-input][name=kept]', '제안이 바꾸지 않을 개인 초안')
+        self.click('[data-action=tab][data-tab=settings]')
+        self.wait("document.querySelector('[data-work-input][name=setting]')?.value === '저장된 업무 설정'")
+
+        def propose_on_settings(value):
+            reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
+            payload = {'proposal_kind': 'inputs', 'workflow_id': key, 'run_id': run['id'], 'job_id': 'job-0',
+                'base_revision': run['revision'], 'context_id': reference['context_id'], 'proposal': {'note': value}}
+            result = self.browser.evaluate("window.__eesNativeWorkV1.propose('existing-chat'," + json.dumps(payload, ensure_ascii=False) + ")")
+            self.assertTrue(result['ok'], result)
+            self.assertFalse(result['saved'], result)
+            self.assertEqual(self.read('[data-work-input][name=setting]', 'value'), '저장된 업무 설정')
+
+        writes = len(self.server.workspace_commands)
+        propose_on_settings('업무 설정에서 받은 진행 건 제안')
+        self.click('[data-action=tab][data-tab=current]')
+        self.wait("document.querySelector('.ew-input-proposal-bar [data-action=apply_input_proposal]')")
+        self.assertEqual(self.read('[data-work-input][name=note]', 'value'), '직접 작성한 진행 건 초안')
+        self.click('[data-action=apply_input_proposal]')
+        self.wait("document.querySelector('[data-work-input][name=note]')?.value === '업무 설정에서 받은 진행 건 제안'")
+        self.assertEqual(self.read('[data-work-input][name=kept]', 'value'), '제안이 바꾸지 않을 개인 초안')
+        self.assertEqual(self.text('.ew-input-proposal-applied'), '저장 전')
+        self.assertEqual(self.state(run_id=run['id'])['run'], before)
+        self.assert_only_selection_remembered(writes)
+        self.click('.ew-input-applied-bar [data-action=discard_inputs]')
+        self.wait("document.querySelector('[data-work-input][name=note]')?.value === '저장된 진행 건 입력'")
+
+        self.click('[data-action=tab][data-tab=settings]')
+        self.wait("document.querySelector('[data-work-input][name=setting]')?.value === '저장된 업무 설정'")
+        writes = len(self.server.workspace_commands)
+        propose_on_settings('아직 반영하지 않은 다음 제안')
+        self.fill('[data-work-input][name=setting]', '별도로 저장한 업무 설정')
+        self.assertEqual(self.text('[data-action=save_inputs]'), '설정 저장')
+        self.click('[data-action=save_inputs]')
+        self.wait("document.querySelector('#ees-work-inputs[data-settings=true]')?.dataset.revision === '2'")
+        saved = self.state(workflow_id=key, run_id=run['id'])
+        self.assertEqual(saved['settings']['values']['setting'], '별도로 저장한 업무 설정')
+        self.assertEqual(saved['settings']['revision'], 2)
+        self.assertEqual(saved['run']['inputs'], before['inputs'])
+        self.assertEqual(saved['run']['attempts'], before['attempts'])
+        # The real server invalidates the effective work snapshot when a shared
+        # input changes. Do not bypass that revision's existing stale protection.
+        self.assertEqual(saved['run']['revision'], before['revision'] + 1)
+        commands = self.server.workspace_commands[writes:]
+        business = [body for body in commands if body.get('action') != 'save_ui']
+        self.assertEqual([body.get('action') for body in business], ['save_settings'], commands)
+        self.assertEqual(business[0]['values'], {'setting': '별도로 저장한 업무 설정'})
+        self.assertEqual(business[0]['expected_revision'], 1)
+        self.assertNotIn('inputs', business[0])
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-panel .ew-error[role=alert]')"))
+
     def test_e2_pending_input_proposal_reports_blocked_result_confirmation_without_call(self):
         self.shared_fixture()
         self.bridge.result = {'status': 'succeeded', 'completeness': 'complete',

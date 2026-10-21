@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-21",
+  "base_head": "170041bed0c645dc8a4deb646ec6a02605f863f8",
+  "review_commit": "d91e619bb5406e37ae10c34d81dca09d9852b66a",
+  "review_created_at": "2026-10-21T04:04:27Z",
+  "threads": [
+    "PRRT_kwDOUMpL-c6unpAz",
+    "PRRT_kwDOUMpL-c6unpA1",
+    "PRRT_kwDOUMpL-c6unpA5",
+    "PRRT_kwDOUMpL-c6unpA6"
+  ],
+  "red": {
+    "input": {
+      "passed": 109,
+      "failed": 3
+    },
+    "authoring": {
+      "passed": 142,
+      "failed": 3
+    }
+  },
+  "green": {
+    "input_related": 173,
+    "authoring": 145,
+    "node_eight_modules": 471,
+    "strict_python_schedule": 22,
+    "strict_python_authoring": 8
+  },
+  "render_observation": {
+    "nodes": 250,
+    "jobs": 248,
+    "before": {
+      "comparisons": 251,
+      "milliseconds": 3215.954
+    },
+    "after": {
+      "comparisons": 1,
+      "milliseconds": 33.044
+    },
+    "gate": "Exact comparison count and unchanged rendered content; no elapsed-time threshold."
+  },
+  "scope_notes": [
+    "Mixed root stage/job data is an incomplete or legacy draft, not currently publish-valid; server validation is unchanged.",
+    "Settings-tab proposals compare against the current run draft; workflow/factory settings may be saved separately.",
+    "A settings save that changes effective inputs increments run revision; existing stale proposal protection remains."
+  ],
+  "logs": [
+    {
+      "file": "pr101-settings-red.log",
+      "bytes": 13053,
+      "sha256": "1cb9a685b9728d5b56e8531013e7c7a582c89d4c83182fe866a32dab52b7921c"
+    },
+    {
+      "file": "pr101-settings-related-green.log",
+      "bytes": 17211,
+      "sha256": "6eb84032cf54eba17600cd7b250a0a92a59f7e4aace592e04199191093f7b4ca"
+    },
+    {
+      "file": "pr101-d91-review-red.log",
+      "bytes": 16914,
+      "sha256": "18ab5b0fecf780bafc290b3fd4cd456f7b982b12c1de344ef21eb28e9978b204"
+    },
+    {
+      "file": "pr101-d91-review-green.log",
+      "bytes": 14666,
+      "sha256": "b47dcbe0e16a2962540e7573254786af5e15775605a8c610f2861632eec88880"
+    },
+    {
+      "file": "pr101-node-followup-final.log",
+      "bytes": 47412,
+      "sha256": "b05f4ea55fa6a160bc3c7d65c50676f2995ad15d21baea41dcb451d7ee16bcfb"
+    }
+  ],
+  "native_limit": "One new actual settings-tab integration case is prepared; local syntax verification is not actual browser success. Final-head CI is required."
+}

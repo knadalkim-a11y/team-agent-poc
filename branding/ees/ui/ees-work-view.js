@@ -568,7 +568,7 @@ function createWorkView({callbacks}){
   const state=()=>snapshot.native_capabilities!=null?{...(snapshot.state || {}),capabilities:snapshot.native_capabilities}:snapshot.state || {},selection=()=>snapshot.selection || {};
   const definition=()=>state().run?.definition || state().workflow?.published?.definition || state().workflow?.published || state().workflow?.definition || state().workflow?.draft || {};
   const job=()=>definition().nodes?.[selection().job_id];
-  const inputKey=()=>[state().capabilities?.actor_id,selection().system_id,selection().factory_id,state().run?.id,selection().job_id,selection().tab].join('/');
+  const inputKey=(tab=selection().tab)=>[state().capabilities?.actor_id,selection().system_id,selection().factory_id,state().run?.id,selection().job_id,tab].join('/');
   const modelKey=()=>[state().capabilities?.actor_id,selection().workflow_id,selection().run_id,selection().job_id].join('/');
   function executionModels(){const operations=state().operations || {},models=operations.models || [],key=modelKey();if(operations.error||models.length<=1||!models.some(model=>model.id===modelChoices.get(key)))modelChoices.delete(key);return workExecutionModelHTML(operations,modelChoices.get(key));}
   const resultKey=()=>[state().capabilities?.actor_id,state().run?.id,selection().job_id,state().run?.jobs?.[selection().job_id]?.attempt_id].join('/');
@@ -656,8 +656,8 @@ function createWorkView({callbacks}){
   function refreshResults(){const focus=focusSnapshot();capture();panel();restoreFocus(focus);}
   function render(value){const focus=focusSnapshot();capture();snapshot=value;publish();if(!ensure())return false;if(!snapshot.native_shell)panel();restoreFocus(focus);return true;}
   function sync(value){snapshot=value;publish();if(!ensure())return false;if(!snapshot.native_shell&&!host.firstChild)panel();return true;}
-  function readInputs(){capture();const settings=selection().tab==='settings';return {...drafts.read(inputKey(),settings?state().settings?.values || {}:state().run?.inputs || {},settings?state().settings?.revision || 0:state().run?.revision || 0),key:inputKey(),settings};}
-  function applyInputValues(values){capture();const source=state().run?.inputs || {},revision=state().run?.revision || 0,existing=drafts.read(inputKey(),source,revision);drafts.edit(inputKey(),{...existing.inputs,...values},revision,source);panel();}
+  function readInputs({runInputs=false}={}){capture();const settings=!runInputs&&selection().tab==='settings',key=inputKey(runInputs?'current':selection().tab);return {...drafts.read(key,settings?state().settings?.values || {}:state().run?.inputs || {},settings?state().settings?.revision || 0:state().run?.revision || 0),key,settings};}
+  function applyInputValues(values){capture();const source=state().run?.inputs || {},revision=state().run?.revision || 0,key=inputKey('current'),existing=drafts.read(key,source,revision);drafts.edit(key,{...existing.inputs,...values},revision,source);panel();}
   function clearInputs(key,serial,revision,values){drafts.acknowledge(key,serial,revision,values);}
 
   function suspend(){workUI.closeDialog();capture();}

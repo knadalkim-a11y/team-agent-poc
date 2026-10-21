@@ -373,3 +373,28 @@ for(const action of ['apply_input_proposal','discard_input_proposal'])test('reso
  const h=inputProposalController();h.preview();await h.api.handleClick({dataset:{action:'confirm_list'}});assert.match(h.renders.at(-1).error,/입력 제안을 먼저/);
  await h.api.handleClick({dataset:{action}});assert.equal(h.renders.at(-1).error,'');assert.doesNotMatch(h.panel.host.innerHTML,/업무 도우미 입력 제안을 먼저 반영하거나 버려 주세요\./);assert.equal(h.calls.length,0);
 });
+
+for(const factoryId of ['', 'factory-a'])test('pending run input proposal permits independent settings save for '+(factoryId||'workflow'),async()=>{
+ const h=controller(),run={id:'r',workflow_id:'w',revision:2,definition:{nodes:{j:{id:'j',inputs:[{id:'value',scope:'run'},{id:'shared',scope:'workflow'}]}}}},settings={factory_id:factoryId,revision:4,values:{shared:'saved setting'}};
+ h.api.setSelection({system_id:'EMS',factory_id:factoryId,run_id:'r',workflow_id:'w',job_id:'j',tab:'current'});h.api.setState({run,settings});h.view.readInputs=()=>({inputs:{value:'kept'},revision:2});
+ h.api.previewInputProposal({proposal_kind:'inputs',run_id:'r',workflow_id:'w',job_id:'j',base_revision:2,proposal:{value:'suggested'}});await h.api.select({tab:'settings'},{fetch:false});
+ h.view.readInputs=()=>({inputs:{shared:'edited setting'},revision:4,settings:true,key:'settings-key',serial:1});let saved;h.view.clearInputs=(...args)=>{saved=args;};
+ h.setReply(call=>call.body?.action==='save_settings'?{ok:true,revision:5}:call.url.startsWith('/api/ees-work/workspace?')?{ok:true,run:{...run,revision:3},settings:{...settings,revision:5,values:{shared:'edited setting'}},capabilities:{actor_id:'a'}}:{ok:true});
+ await h.api.handleClick({dataset:{action:'save_inputs'}});
+ const writes=h.calls.filter(call=>call.body?.action);assert.equal(writes.length,1);assert.equal(writes[0].body.action,'save_settings');assert.equal(writes[0].body.factory_id,factoryId);assert.equal(writes[0].body.values.shared,'edited setting');assert.equal(writes[0].body.expected_revision,4);assert.equal(saved[0],'settings-key');assert.equal(h.renders.at(-1).state.input_proposal.values.value,'suggested');
+ // Changed effective settings can increment the run revision; retaining the
+ // proposal must not weaken its saved-version guard.
+ await h.api.select({tab:'current'},{fetch:false});h.view.readInputs=()=>({inputs:{value:'kept'},revision:3});assert.throws(()=>h.api.applyInputProposal(),/바뀌었습니다/);assert.equal(h.calls.filter(call=>call.body?.action).length,1);
+});
+test('proposal received on settings snapshots the unsaved current inputs and applies after returning',async()=>{
+ const h=inputProposalController();h.panel.state.settings={revision:4,values:{shared:'saved setting'}};h.panel.state.run.definition.nodes.j.inputs.push({id:'shared',name:'업무 값',type:'text',scope:'workflow'});
+ h.view.applyInputValues({first:'직접 쓴 값',other:'직접 남긴 값'});await h.api.select({tab:'settings'},{fetch:false});assert.equal(h.view.readInputs().inputs.shared,'saved setting');
+ h.api.previewInputProposal({proposal_kind:'inputs',run_id:'r',workflow_id:'w',job_id:'j',base_revision:2,proposal:{first:'제안한 값'}});
+ assert.equal(h.view.readInputs().inputs.shared,'saved setting');await h.api.select({tab:'current'},{fetch:false});assert.equal(h.view.readInputs().inputs.first,'직접 쓴 값');
+ h.api.applyInputProposal();assert.equal(h.view.readInputs().inputs.first,'제안한 값');assert.equal(h.view.readInputs().inputs.other,'직접 남긴 값');assert.equal(h.panel.state.run.inputs.first,'사람이 쓴 값');
+ await h.api.select({tab:'settings'},{fetch:false});assert.equal(h.view.readInputs().inputs.shared,'saved setting');assert.equal(h.view.readInputs().inputs.first,undefined);assert.equal(h.calls.length,0);
+});
+test('settings-tab proposal still rejects later current-input changes',async()=>{
+ const h=inputProposalController();h.panel.state.settings={revision:4,values:{shared:'saved setting'}};await h.api.select({tab:'settings'},{fetch:false});h.preview();await h.api.select({tab:'current'},{fetch:false});
+ h.view.applyInputValues({first:'제안 뒤 직접 수정'});assert.throws(()=>h.api.applyInputProposal(),/바뀌었습니다/);assert.equal(h.view.readInputs().inputs.first,'제안 뒤 직접 수정');assert.equal(h.calls.length,0);
+});
