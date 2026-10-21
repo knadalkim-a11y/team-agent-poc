@@ -450,3 +450,31 @@ test('applied input IME composition keeps its DOM and updates attribution on com
  assert.equal(h.renders.length,before);assert.equal(h.doc.activeElement,first);assert.equal((h.panel.host.innerHTML.match(/ew-input-proposal-source/g)||[]).length,2);
  first.value='한글 입력';h.api.handleEvent({type:'compositionend',target:first});assert.equal(h.renders.length,before+1);assert.equal((h.panel.host.innerHTML.match(/ew-input-proposal-source/g)||[]).length,1);assert.equal(h.view.readInputs().inputs.first,'한글 입력');assert.equal(h.doc.activeElement,first);assert.deepEqual([first.selectionStart,first.selectionEnd],[2,2]);assert.equal(h.calls.length,0);
 });
+
+function previewValues(h,proposal){return h.api.previewInputProposal({proposal_kind:'inputs',run_id:'r',workflow_id:'w',job_id:'j',base_revision:2,proposal});}
+test('applying a proposal identical to saved run values leaves no unsaved state or attribution',()=>{
+ const h=inputProposalController();previewValues(h,{first:'사람이 쓴 값',other:'유지'});h.api.applyInputProposal();
+ assert.equal(h.view.readInputs().dirty,false);assert.equal(h.view.readInputs().serial,0);assert.equal(h.renders.at(-1).state.input_proposal,null);assert.equal(h.renders.at(-1).state.input_proposal_applied,null);assert.doesNotMatch(h.panel.host.innerHTML,/ew-input-proposal-applied|ew-input-proposal-source|ew-input-applied-bar/);assert.equal(h.calls.length,0);
+});
+test('partial proposal attributes only values that actually change the private draft',()=>{
+ const h=inputProposalController();h.view.applyInputValues({other:'사람이 먼저 입력'});previewValues(h,{first:'새 제안',other:'사람이 먼저 입력'});h.api.applyInputProposal();
+ assert.deepEqual(Object.keys(h.renders.at(-1).state.input_proposal_applied.values),['first']);assert.equal(h.view.readInputs().inputs.other,'사람이 먼저 입력');assert.equal((h.panel.host.innerHTML.match(/ew-input-proposal-source/g)||[]).length,1);assert.equal(h.calls.length,0);
+});
+test('receiving and discarding proposal B preserves applied proposal A and its revert action',async()=>{
+ const h=inputProposalController();previewValues(h,{first:'제안 A'});h.api.applyInputProposal();const applied=h.renders.at(-1).state.input_proposal_applied;
+ previewValues(h,{other:'제안 B'});assert.equal(h.renders.at(-1).state.input_proposal_applied,applied);assert.equal(h.view.readInputs().inputs.first,'제안 A');assert.equal(h.view.readInputs().inputs.other,'유지');assert.match(h.panel.host.innerHTML,/ew-input-proposal-source/);
+ await h.api.handleClick({dataset:{action:'discard_input_proposal'}});assert.equal(h.renders.at(-1).state.input_proposal_applied,applied);assert.match(h.panel.host.innerHTML,/ew-input-applied-bar/);assert.match(h.panel.host.innerHTML,/data-action="discard_inputs"/);assert.equal(h.calls.length,0);
+});
+test('applying proposal B merges its changed values with valid unsaved contributions from A',()=>{
+ const h=inputProposalController();previewValues(h,{first:'제안 A'});h.api.applyInputProposal();previewValues(h,{other:'제안 B'});h.api.applyInputProposal();
+ const applied=h.renders.at(-1).state.input_proposal_applied;assert.equal(applied.values.first,'제안 A');assert.equal(applied.values.other,'제안 B');assert.equal((h.panel.host.innerHTML.match(/ew-input-proposal-source/g)||[]).length,2);assert.equal(h.calls.length,0);
+});
+test('a no-op proposal B preserves A without attributing an unchanged manual value',()=>{
+ const h=inputProposalController();h.view.applyInputValues({other:'직접 입력'});previewValues(h,{first:'제안 A'});h.api.applyInputProposal();const applied=h.renders.at(-1).state.input_proposal_applied,serial=h.view.readInputs().serial;
+ previewValues(h,{first:'제안 A',other:'직접 입력'});h.api.applyInputProposal();assert.equal(h.renders.at(-1).state.input_proposal_applied,applied);assert.equal(h.view.readInputs().serial,serial);assert.deepEqual(Object.keys(applied.values),['first']);assert.equal(h.calls.length,0);
+});
+test('proposal B drops attribution overwritten by a person and values restored to their saved baseline',()=>{
+ const h=inputProposalController();h.preview();h.api.applyInputProposal();h.view.applyInputValues({first:'사람이 수정'});previewValues(h,{other:'새 제안 B'});h.api.applyInputProposal();
+ assert.deepEqual(Object.keys(h.renders.at(-1).state.input_proposal_applied.values),['other']);assert.equal(h.view.readInputs().inputs.first,'사람이 수정');
+ previewValues(h,{other:'유지'});h.api.applyInputProposal();assert.equal(h.renders.at(-1).state.input_proposal_applied,null);assert.equal(h.view.readInputs().inputs.other,'유지');assert.equal(h.view.readInputs().dirty,true);assert.doesNotMatch(h.panel.host.innerHTML,/ew-input-proposal-source|ew-input-applied-bar/);assert.equal(h.calls.length,0);
+});

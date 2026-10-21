@@ -507,6 +507,42 @@ test('request fields follow native schema types and bindings, with reason outsid
  const out=html('workInputHTML(field,60)',{field:fields[0]});assert.match(out,/type="number" step="1" min="0" max="300"/);
  assert.equal(html('workRequestFields(node,[])',{node}),null);
 });
+function requestProposalFixture(){
+ const node={id:'j',type:'j',result_block:'change_request',tool_contract_id:'restart',inputs:[{id:'wait',scope:'run'},{id:'stop',scope:'run'},{id:'target'},{id:'hidden',scope:'run'},{id:'fixed',scope:'run'},{id:'setting',scope:'workflow'},{id:'factory',scope:'factory'}],argument_bindings:{timeout:{input:'wait'},mode:'stop',fixed:{constant:false}}};
+ const tools=[{id:'restart',input_schema:{type:'object',properties:{timeout:{type:'integer'},mode:{type:'string',enum:['graceful','force']},target:{type:'string'},fixed:{type:'boolean'},setting:{type:'string'},factory:{type:'string'}}}}];
+ const runState={id:'r',workflow_id:'w',revision:2,inputs:{wait:60,stop:'graceful',target:'kept',hidden:'private kept'},definition:{nodes:{j:node}}};
+ const payload=values=>({proposal_kind:'inputs',workflow_id:'w',run_id:'r',job_id:'j',base_revision:2,proposal:values});
+ return {node,tools,runState,payload};
+}
+for(const [kind,values,missingTools] of [['unbound',{wait:30,hidden:'unseen suggestion'},false],['constant',{fixed:true},false],['unavailable schema',{wait:30},true]])test('change request proposal rejects '+kind+' inputs before review',()=>{
+ const {tools,runState,payload}=requestProposalFixture();
+ assert.throws(()=>html('workInputProposal(payload,runState,"j",tools)',{payload:payload(values),runState,tools:missingTools?[]:tools}),/현재 진행 건·작업·저장 버전과 다른 입력 제안/);
+ assert.equal(runState.inputs.hidden,'private kept');assert.equal(runState.inputs.wait,60);
+});
+test('change request proposal preserves visible bindings typed values and setting scope boundaries',()=>{
+ const {node,tools,runState,payload}=requestProposalFixture(),values={wait:0,stop:'force',target:'new target'};
+ const accepted=html('workInputProposal(payload,runState,"j",tools)',{payload:payload(values),runState,tools});assert.deepEqual(JSON.parse(JSON.stringify(accepted)),values);
+ const fields=html('workRequestFields(node,tools)',{node,tools}).filter(field=>!field.constant&&(field.scope || 'run')==='run');assert.deepEqual(Array.from(fields,field=>field.id),Object.keys(values));
+ assert.match(html('workInputProposalBar({values},node)',{values:accepted,node}),/3칸/);
+ for(const name of ['setting','factory'])assert.throws(()=>html('workInputProposal(payload,runState,"j",tools)',{payload:payload({[name]:'do not change'}),runState,tools}),/다른 입력 제안/);
+ node.result_block='values';assert.equal(html('workInputProposal(payload,runState,"j",[])',{payload:payload({hidden:'ordinary input'}),runState}).hidden,'ordinary input');
+});
+test('request proposal controller rejects hidden values before preview and applies only reviewed fields',()=>{
+ const h=controller(),{tools,runState,payload}=requestProposalFixture();let inputs={...runState.inputs},applied=0;
+ h.api.setSelection({mode:'work',system_id:'EMS',workflow_id:'w',run_id:'r',job_id:'j',tab:'current'});h.api.setState({run:runState,operations:{tools}});
+ h.view.readInputs=()=>({inputs,revision:2});h.view.applyInputValues=values=>{applied++;inputs={...inputs,...values};};
+ assert.throws(()=>h.api.previewInputProposal(payload({wait:30,hidden:'unseen suggestion'})),/다른 입력 제안/);assert.equal(h.renders.length,0);assert.equal(applied,0);
+ h.api.previewInputProposal(payload({wait:30,stop:'force'}));assert.deepEqual(Object.keys(h.renders.at(-1).state.input_proposal.values),['wait','stop']);h.api.applyInputProposal();
+ assert.equal(applied,1);assert.equal(inputs.wait,30);assert.equal(inputs.stop,'force');assert.equal(inputs.hidden,'private kept');assert.equal(runState.inputs.wait,60);assert.equal(h.calls.length,0);
+});
+test('request proposal cannot apply a field hidden by a later schema refresh',()=>{
+ const h=controller(),{tools,runState,payload}=requestProposalFixture();let applied=0;
+ h.api.setSelection({mode:'work',system_id:'EMS',workflow_id:'w',run_id:'r',job_id:'j',tab:'current'});h.api.setState({run:runState,operations:{tools}});
+ h.view.readInputs=()=>({inputs:{...runState.inputs},revision:2});h.view.applyInputValues=()=>{applied++;};
+ h.api.previewInputProposal(payload({wait:30}));const timeout=tools[0].input_schema.properties.timeout;delete tools[0].input_schema.properties.timeout;
+ assert.throws(()=>h.api.applyInputProposal(),/다른 입력 제안/);assert.equal(applied,0);assert.equal(runState.inputs.wait,60);assert.equal(h.calls.length,0);
+ tools[0].input_schema.properties.timeout=timeout;h.api.applyInputProposal();assert.equal(applied,1);assert.equal(h.calls.length,0);
+});
 test('ad-hoc start lists active factories and disables only those with active work',()=>{
  const data={workflow:{id:'w',name:'Setup',published_version:2},factories:[{id:'a',name:'Alpha',system_id:'EMS'},{id:'b',name:'Beta',system_id:'EMS'}],workflow_active_runs:[{id:'existing',workflow_id:'w',factory_id:'a',status:'open',progress:{}}]},selection={system_id:'EMS',factory_id:'b'},definition={execution_scope:'factory',nodes:{}};
  const out=html('workAdhocStartHTML(data,selection,definition)',{data,selection,definition});assert.match(out,/data-run-id="existing"/);assert.match(out,/<option value="a" disabled>Alpha · 이미 진행 중/);assert.match(out,/<option value="b" selected>Beta/);assert.match(out,/data-action="start_run" data-start-inline/);assert.doesNotMatch(out,/김도윤|미국 공장|완료 0\/0/);

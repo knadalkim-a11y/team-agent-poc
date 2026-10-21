@@ -1,0 +1,342 @@
+{
+  "head": "31c4e1f4c43d8d9abc3a0d341a523bd78e906edc",
+  "run_id": 39545049473,
+  "run_number": 322,
+  "result": {
+    "success": 36,
+    "failure": 2,
+    "cancelled": 1,
+    "skipped": 1,
+    "native_compose": {
+      "total": 81,
+      "pass": 80,
+      "error": 1
+    }
+  },
+  "log": {
+    "bytes": 83540,
+    "sha256": "51a345b7765f9f54a803cb55dcd37bbe72b0a24214a862d04c5a671f49c36a30",
+    "error": "ERROR: test_e2_settings_tab_proposal_uses_run_draft_and_allows_separate_settings_save (test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_e2_settings_tab_proposal_uses_run_draft_and_allows_separate_settings_save)\n2026-10-21T04:52:31.7573101Z ----------------------------------------------------------------------\n2026-10-21T04:52:31.7573453Z Traceback (most recent call last):\n2026-10-21T04:52:31.7581233Z   File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/test_ees_work_figma_runtime_native.py\", line 214, in test_e2_settings_tab_proposal_uses_run_draft_and_allows_separate_settings_save\n2026-10-21T04:52:31.7582287Z     self.assertEqual(saved['settings']['values']['setting'], '별도로 저장한 업무 설정')\n2026-10-21T04:52:31.7582618Z                      ~~~~~^^^^^^^^^^^^\n2026-10-21T04:52:31.7582846Z KeyError: 'settings'\n2026-10-21T04:52:31.7582963Z \n2026-10-21T04:52:31.7583099Z ----------------------------------------------------------------------\n2026-10-21T04:52:31.7583382Z Ran 14 tests in 48.490s\n2026-10-21T04:52:31.7583506Z \n2026-10-21T04:52:31.7583579Z FAILED (errors=1)\n2026-10-21T04:52:31.8209257Z "
+  },
+  "artifacts": [
+    {
+      "id": 12321199957,
+      "name": "native-compose",
+      "bytes": 17942801,
+      "sha256": "3b80748f0a9aa49aac14f7b6a8d9678903998f00dacffcf19fcac2c7690f86cd",
+      "crc_verified": true,
+      "png_count": 194
+    },
+    {
+      "id": 12321527520,
+      "name": "native-product",
+      "bytes": 6545496,
+      "sha256": "d85f9c6193d3b694e9640e4e0f199eb63811515345c419e28f0c52201e650266",
+      "crc_verified": true
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "e1-example12-delete-only-1366-dom.json",
+      "bytes": 25299,
+      "sha256": "b93868dd4e9470fbcabae349e6c553e3d0c61819b453ffc16ad7c4e7678c07f2"
+    },
+    {
+      "name": "e1-example12-delete-only-1366.png",
+      "bytes": 105438,
+      "sha256": "e70d0303ed04a14413f0e4ace3d7fd770fc7fd3cddcde586d4fb637458369015"
+    },
+    {
+      "name": "e1-example12-delete-only-480-dom.json",
+      "bytes": 25293,
+      "sha256": "028f5a05d02b546489e07dd33963ee99bd1fbf78b46521934b6148013737e0ee"
+    },
+    {
+      "name": "e1-example12-delete-only-480.png",
+      "bytes": 66966,
+      "sha256": "7574e66720abb8f4139c129dde0ad4cf1dec2b8cfb6b5e16dfa15388deb0c318"
+    },
+    {
+      "name": "e1-example12-grouped-1366-dom.json",
+      "bytes": 26723,
+      "sha256": "d5b9b00295c6cf6e77d15664ec6e49e29d29fb47095e027388eb6ad1701f7d24"
+    },
+    {
+      "name": "e1-example12-grouped-1366.png",
+      "bytes": 111152,
+      "sha256": "d541b840ec705756c2d0973aa9b3f4f4da9d680ba2fa0eadae1b46bbdca2397f"
+    },
+    {
+      "name": "e1-example12-grouped-480-dom.json",
+      "bytes": 26717,
+      "sha256": "2f5c3be22b8e91b116efc223e4f8fb3e4b60e40a2203ebbf1645d7c3b10a0c09"
+    },
+    {
+      "name": "e1-example12-grouped-480.png",
+      "bytes": 70069,
+      "sha256": "c1ef7e6c03531a361fd71d917c8778adf4631660ce22aa36063541542115a211"
+    },
+    {
+      "name": "e1-example8-stage-moved-1366-dom.json",
+      "bytes": 31428,
+      "sha256": "6c9ceb0c8237ceb8f2292930d6f9c0aff38c8ee5e8a3da1094c4d5dd02fc1f9e"
+    },
+    {
+      "name": "e1-example8-stage-moved-1366.png",
+      "bytes": 99044,
+      "sha256": "b4233384d0867f10ea2f608ff86b60974d0ed8f4c030522d4dd830979a65efe1"
+    },
+    {
+      "name": "e1-example8-stage-moved-480-dom.json",
+      "bytes": 31422,
+      "sha256": "62e09a167cb9e0bbd5f1292c8d2e466af11cc3d6e5169fd64b19818556fe59bf"
+    },
+    {
+      "name": "e1-example8-stage-moved-480.png",
+      "bytes": 62314,
+      "sha256": "2a39cf0c5a904559f02748d1aaebb8dbda29c14afe154543a21d9bd14c56e600"
+    },
+    {
+      "name": "e1-proposal-review-observations.json",
+      "bytes": 1346,
+      "sha256": "b082eaa77741b895f7504026fcb6dd81755e75add9b688c9a5e41846cdef3398"
+    },
+    {
+      "name": "e2-a4a-human-1366.json",
+      "bytes": 1384,
+      "sha256": "b488c5bf510b6f7e9e5aff4cfc18b5ce234041a21dd58ac8c7064ec62acc111f"
+    },
+    {
+      "name": "e2-a4a-human-1366.png",
+      "bytes": 90822,
+      "sha256": "71e402930da2d2e93f818ec4c68f1b9c39997c30ca309d2d3a9b785a4af8a9ff"
+    },
+    {
+      "name": "e2-a4a-human-480.json",
+      "bytes": 1373,
+      "sha256": "2e6d8720d157a5c022f8bc65d703927b39959a789ed10f3e0f30f7dd391ee534"
+    },
+    {
+      "name": "e2-a4a-human-480.png",
+      "bytes": 55428,
+      "sha256": "11a508114fd264701f53ea14941c5042df35e1d1f69d9da9590f458762ebcf5b"
+    },
+    {
+      "name": "e2-a4a-request-1366.json",
+      "bytes": 1384,
+      "sha256": "d4ef87e04d0125f2f0a88e00d64895047daf36608ae9a75c6a885e1b511c4dd3"
+    },
+    {
+      "name": "e2-a4a-request-1366.png",
+      "bytes": 74364,
+      "sha256": "7184ce10722b01f9d9f3047eda4d161084b48e3ae3474c67d09fd0b072225277"
+    },
+    {
+      "name": "e2-a4a-request-480.json",
+      "bytes": 1373,
+      "sha256": "997bf6826c716b6f7adb53e6a0211669676cb7021c5e94e5ae11511764cb6e14"
+    },
+    {
+      "name": "e2-a4a-request-480.png",
+      "bytes": 47291,
+      "sha256": "829279e1f420e615e275cb4a42697f20dfbb5cd461560f349a7ded0faa3dd9aa"
+    },
+    {
+      "name": "e2-a4a-tool-1366.json",
+      "bytes": 1384,
+      "sha256": "ca56c9e7b0b47d7337feeb6543ec07e91a6ff15342cc09f56b789b6030c2c96c"
+    },
+    {
+      "name": "e2-a4a-tool-1366.png",
+      "bytes": 86875,
+      "sha256": "f49a5adfcb2449dab25446f83a8ecd1d4894b280437466d0b002fc1d4af09dad"
+    },
+    {
+      "name": "e2-a4a-tool-480.json",
+      "bytes": 1373,
+      "sha256": "6df5058cb84fc3140a4343c37f6be3dd5bda7654dcc1fc94d796ad39be0ea8d8"
+    },
+    {
+      "name": "e2-a4a-tool-480.png",
+      "bytes": 50393,
+      "sha256": "84ebc5a778780dbb024cffb33f64dd704e653c0343038eecd445b10cb6e61af8"
+    },
+    {
+      "name": "integrated-test_e2_settings_tab_proposal_uses_run_draft_and_allows_separate_settings_save-failure-cleanup.json",
+      "bytes": 7542,
+      "sha256": "d744da14d704811e6a7460e6d46b731bb880850c6b2f537eaf8a7ff50718d98b"
+    },
+    {
+      "name": "integrated-test_e2_settings_tab_proposal_uses_run_draft_and_allows_separate_settings_save-failure.json",
+      "bytes": 24964,
+      "sha256": "38a64f6e307a231f458ba693bb854da27e9e062473141ed8970976b94e36f88a"
+    },
+    {
+      "name": "integrated-test_e2_settings_tab_proposal_uses_run_draft_and_allows_separate_settings_save-failure.png",
+      "bytes": 89686,
+      "sha256": "15535bad4c09d3591a4fef35c1362e5d7d02d68c14802d876df61c3f0fbd2db0"
+    }
+  ],
+  "observations": {
+    "example12": "480/1366 grouped delete/add/change 3 rows and 6 items; delete-only 1 row and 3 items; remaining stages unmarked",
+    "movement": "Both widths +53px; scrollTop 297; focus/hitTest true; live hidden 1x1; no notice/overflow",
+    "a4a": "All human/tool/request 480/1366 screenshots inspected. White footer, #5c5e65 hint, 12/18px, gap10, keep-all, both34px buttons, amber save-before and per-field blue helpers. Overflow0.",
+    "input_lifecycle": "human/tool save and subsequent manual edit passed; settings test passed its one-field manual edit badge/focus/caret boundary before the response-path error. Later settings stale checks did not run.",
+    "central_chat": "Apply leaves request list and input revision1 unchanged; save yields revision2, attempts0. Saved display removes attribution but keeps values. API errors empty."
+  },
+  "provenance": {
+    "pr_synthetic_merge": "53e26f06802ca0069526e9fbb3e844bb3af70eae",
+    "merge_parents": [
+      "3c343ce44d1ba9c6f62ba0b035ab32208f5b2caa",
+      "31c4e1f4c43d8d9abc3a0d341a523bd78e906edc"
+    ],
+    "same_tree_as_head": "b93a88a01abfdbcd72294f9e0699a225289d8a60",
+    "product_source_dirty": "ProductGate includes untracked files. CI creates untracked/unignored product-verification-requirements.txt; candidate gate separately checks tracked source clean."
+  },
+  "response_contract": "Raw workspace_state has workflow.settings rows; launcher normalized() constructs top-level settings. Test now selects the workflow-scope row (factory_id empty) without weakening values/revisions/run/command assertions.",
+  "local_response_reproduction": [
+    {
+      "name": "pr101-settings-response-red.log",
+      "bytes": 1369,
+      "sha256": "9903e4f33e48e560bc5c9304bd4b95e13e30c72e41480d5560badcb4c904f3f6",
+      "output": "Production workspace_state top-level settings: False\nProduction workflow.settings: [{'factory_id': '', 'values': {'setting': '별도로 저장한 업무 설정'}, 'revision': 2}]\nProduction run revision: 1 -> 2\nTraceback (most recent call last):\n  File \"/tmp/pr101-settings-response-repro.py\", line 56, in <module>\n    asyncio.run(main())\n  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py\", line 195, in run\n    return runner.run(main)\n           ^^^^^^^^^^^^^^^^\n  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py\", line 118, in run\n    return self._loop.run_until_complete(task)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py\", line 691, in run_until_complete\n    return future.result()\n           ^^^^^^^^^^^^^^^\n  File \"/tmp/pr101-settings-response-repro.py\", line 51, in main\n    namespace['check_native_response_tail'](checker, key, run, before, 0)\n  File \"/workspace/scratch/6708539543cf/team-agent-poc/tests/test_ees_work_figma_runtime_native.py\", line 214, in check_native_response_tail\n    self.assertEqual(saved['settings']['values']['setting'], '별도로 저장한 업무 설정')\n                     ~~~~~^^^^^^^^^^^^\nKeyError: 'settings'\n"
+    },
+    {
+      "name": "pr101-settings-response-green.log",
+      "bytes": 306,
+      "sha256": "5603800ac63eef1cee0aedf310c19b44d24c8f7fd5347f287e1f3b2f9f293ea3",
+      "output": "Production workspace_state top-level settings: False\nProduction workflow.settings: [{'factory_id': '', 'values': {'setting': '별도로 저장한 업무 설정'}, 'revision': 2}]\nProduction run revision: 1 -> 2\nPASS: original Native assertion tail with real production workspace response; browser not run.\n"
+    }
+  ],
+  "followup_review_comments": [
+    4333134186,
+    4333134190,
+    4333134194
+  ],
+  "followup_logs": [
+    {
+      "name": "pr101-successive-proposals-red.log",
+      "bytes": 18940,
+      "sha256": "042622c587bb4b50f4a603fcf46b9a2ad2a61bb0acc30284fbdb2f2d1de0ce2f",
+      "failures": [
+        "✖ applying a proposal identical to saved run values leaves no unsaved state or attribution (3.533125ms)",
+        "✖ partial proposal attributes only values that actually change the private draft (3.226863ms)",
+        "✖ receiving and discarding proposal B preserves applied proposal A and its revert action (2.925159ms)",
+        "✖ applying proposal B merges its changed values with valid unsaved contributions from A (3.494907ms)",
+        "✖ a no-op proposal B preserves A without attributing an unchanged manual value (3.714819ms)",
+        "✖ proposal B drops attribution overwritten by a person and values restored to their saved baseline (3.713897ms)",
+        "✖ failing tests:",
+        "✖ applying a proposal identical to saved run values leaves no unsaved state or attribution (3.533125ms)",
+        "✖ partial proposal attributes only values that actually change the private draft (3.226863ms)",
+        "✖ receiving and discarding proposal B preserves applied proposal A and its revert action (2.925159ms)",
+        "✖ applying proposal B merges its changed values with valid unsaved contributions from A (3.494907ms)",
+        "✖ a no-op proposal B preserves A without attributing an unchanged manual value (3.714819ms)",
+        "✖ proposal B drops attribution overwritten by a person and values restored to their saved baseline (3.713897ms)"
+      ],
+      "summary": [
+        "      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {",
+        "    generatedMessage: true,",
+        "    code: 'ERR_ASSERTION',",
+        "    actual: { values: { other: '유지' }, at: '2026-10-21T04:54:53.139Z' },",
+        "    expected: null,",
+        "    operator: 'strictEqual',",
+        "    diff: 'simple'",
+        "  }"
+      ]
+    },
+    {
+      "name": "pr101-successive-proposals-green.log",
+      "bytes": 18527,
+      "sha256": "2ee912a0e075578a5619e06ef2bf2bd62c2c1c387df94c716833fbdbf321f3eb",
+      "failures": [],
+      "summary": [
+        "ℹ tests 186",
+        "ℹ suites 0",
+        "ℹ pass 186",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 562.666525"
+      ]
+    },
+    {
+      "name": "pr101-request-fields-red.log",
+      "bytes": 15502,
+      "sha256": "b4da45aa31da4c095b09d9df3153b45502fff12bf3b310220bd8328d724900d0",
+      "failures": [
+        "✖ change request proposal rejects unbound inputs before review (1.335352ms)",
+        "✖ change request proposal rejects constant inputs before review (0.74968ms)",
+        "✖ change request proposal rejects unavailable schema inputs before review (0.66365ms)",
+        "✖ request proposal controller rejects hidden values before preview and applies only reviewed fields (1.424566ms)",
+        "✖ failing tests:",
+        "✖ change request proposal rejects unbound inputs before review (1.335352ms)",
+        "✖ change request proposal rejects constant inputs before review (0.74968ms)",
+        "✖ change request proposal rejects unavailable schema inputs before review (0.66365ms)",
+        "✖ request proposal controller rejects hidden values before preview and applies only reviewed fields (1.424566ms)"
+      ],
+      "summary": [
+        "      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {",
+        "    generatedMessage: false,",
+        "    code: 'ERR_ASSERTION',",
+        "    actual: undefined,",
+        "    expected: /다른 입력 제안/,",
+        "    operator: 'throws',",
+        "    diff: 'simple'",
+        "  }"
+      ]
+    },
+    {
+      "name": "pr101-request-fields-apply-red.log",
+      "bytes": 12760,
+      "sha256": "47b8d581ab941f0d6f15273d1c5cbdc10d19f29c617ecce8932bf8556c61b1d0",
+      "failures": [
+        "✖ request proposal cannot apply a field hidden by a later schema refresh (1.938149ms)",
+        "✖ failing tests:",
+        "✖ request proposal cannot apply a field hidden by a later schema refresh (1.938149ms)"
+      ],
+      "summary": [
+        "      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {",
+        "    generatedMessage: false,",
+        "    code: 'ERR_ASSERTION',",
+        "    actual: undefined,",
+        "    expected: /다른 입력 제안/,",
+        "    operator: 'throws',",
+        "    diff: 'simple'",
+        "  }"
+      ]
+    },
+    {
+      "name": "pr101-request-fields-final-green.log",
+      "bytes": 11843,
+      "sha256": "74997885eb9798e7eb38134b6e6bded8749ed64d80c01ffe4cfa23806d41e207",
+      "failures": [],
+      "summary": [
+        "ℹ tests 113",
+        "ℹ suites 0",
+        "ℹ pass 113",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 457.102478"
+      ]
+    },
+    {
+      "name": "pr101-node-guard-final.log",
+      "bytes": 49598,
+      "sha256": "10bd5b49c2714ef915e984c4e8a8dab2211d4a14dec091ecef42d2e9b0e763de",
+      "failures": [],
+      "summary": [
+        "ℹ tests 493",
+        "ℹ suites 0",
+        "ℹ pass 493",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 1492.901576"
+      ]
+    }
+  ]
+}

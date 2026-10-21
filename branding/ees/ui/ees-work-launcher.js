@@ -408,15 +408,25 @@
   function scheduleReviewSave(){const at=context();clearTimeout(reviewTimer);reviewTimer=setTimeout(()=>{if(at!==context())return;if(busy){scheduleReviewSave();return;}saveReviewDraft().catch(failure=>{if(at===context()){error=failure.message;render();}});},600);}
   async function confirmDialog(options){const at=context();const accepted=await dialog(options);return accepted&&at===context();}
   function previewInputProposal(payload){
-    const values=workInputProposal(payload,state?.run,selection.job_id),draft=view.readInputs({runInputs:true});
+    const values=workInputProposal(payload,state?.run,selection.job_id,state?.operations?.tools || []),draft=view.readInputs({runInputs:true});
     const fields=state.run.definition.nodes[selection.job_id]?.inputs || [],reasons={options_dependency_required:'선행 입력을 먼저 보완해 주세요.',options_unconfigured:'선택 목록 연결을 먼저 설정해 주세요.',options_unavailable:'현재 권한의 선택 목록을 조회하지 못했습니다.'};
     const warnings=[...(payload.warnings || []),...(payload.unresolved_fields || []).map(item=>`${fields.find(field=>field.id===item.field_id)?.name || item.field_id} · ${reasons[item.reason] || '현재 선택 목록을 먼저 확인해 주세요.'} 이 항목은 AI 초안에 포함하지 않았습니다.`)];
-    inputProposalApplied=null;pendingInputProposal={values,warnings,context:context(),run_id:selection.run_id,job_id:selection.job_id,revision:state.run.revision,draft:JSON.stringify(draft.inputs)};render();return {ok:true,preview:true,saved:false,executed:false};
+    pendingInputProposal={values,warnings,context:context(),run_id:selection.run_id,job_id:selection.job_id,revision:state.run.revision,draft:JSON.stringify(draft.inputs)};render();return {ok:true,preview:true,saved:false,executed:false};
   }
   function applyInputProposal(){
     const pending=pendingInputProposal,draft=view.readInputs({runInputs:true});
     if(!pending||pending.context!==context()||pending.run_id!==selection.run_id||pending.job_id!==selection.job_id||pending.revision!==state?.run?.revision||pending.draft!==JSON.stringify(draft.inputs))throw new Error('제안 이후 입력이나 저장 상태가 바뀌었습니다. 현재 값을 보존하고 새 제안을 요청해 주세요.');
-    pendingInputProposal=null;if(error===pendingInputMessage)error='';view.applyInputValues(pending.values);inputProposalApplied={values:clone(pending.values),at:new Date().toISOString()};render();loadOptions();
+    workInputProposal({proposal_kind:'inputs',workflow_id:state.run.workflow_id,run_id:pending.run_id,job_id:pending.job_id,base_revision:pending.revision,proposal:pending.values},state.run,selection.job_id,state.operations?.tools || []);
+    // A later preview does not erase an earlier accepted draft. Attribute only
+    // actual changes that remain different from the saved run values.
+    const previous=inputProposalApplied,saved=state.run.inputs || {};
+    const changes=Object.fromEntries(Object.entries(pending.values).filter(([key,value])=>!workValuesEqual(value,draft.inputs[key])));
+    const values=Object.fromEntries(Object.entries(previous?.values || {}).filter(([key,value])=>workValuesEqual(value,draft.inputs[key])&&!workValuesEqual(value,saved[key])));
+    for(const [key,value] of Object.entries(changes)){delete values[key];if(!workValuesEqual(value,saved[key]))values[key]=clone(value);}
+    pendingInputProposal=null;if(error===pendingInputMessage)error='';
+    if(Object.keys(changes).length)view.applyInputValues(changes);
+    inputProposalApplied=Object.keys(values).length?(previous&&workValuesEqual(values,previous.values)?previous:{values,at:new Date().toISOString()}):null;
+    render();if(Object.keys(changes).length)loadOptions();
   }
   async function downloadRun(format,jobId=''){
     const at=context(),runId=state?.run?.id;if(!runId)return;

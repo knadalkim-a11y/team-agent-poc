@@ -290,8 +290,8 @@ function workReadInputs(container){
   }
   return values;
 }
-function workInputProposal(payload,run,jobId){
-  const fields=run?.definition?.nodes?.[jobId]?.inputs || [],allowed=new Set(fields.filter(field=>(field.scope || 'run')==='run').map(field=>field.id));
+function workInputProposal(payload,run,jobId,tools=[]){
+  const node=run?.definition?.nodes?.[jobId],fields=node?.result_block==='change_request'?(workRequestFields(node,tools) || []):node?.inputs || [],allowed=new Set(fields.filter(field=>!field.constant&&(field.scope || 'run')==='run').map(field=>field.id));
   if(payload?.proposal_kind!=='inputs'||payload.run_id!==run?.id||payload.workflow_id!==run.workflow_id||payload.job_id!==jobId||payload.base_revision!==run.revision||!payload.proposal||typeof payload.proposal!=='object'||Array.isArray(payload.proposal)||Object.keys(payload.proposal).some(key=>!allowed.has(key)))throw new Error('현재 진행 건·작업·저장 버전과 다른 입력 제안입니다.');
   return workUI.clone(payload.proposal);
 }
