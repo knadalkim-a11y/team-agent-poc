@@ -352,7 +352,7 @@
     }
     if(!pending.length)return;render();await Promise.all(pending);if(at===context()&&optionContext()?.marker===current.marker)render();
   }
-  async function saveInputs(){if(busy)return;const form=$('#ees-work-inputs');if(form?.querySelectorAll&&[...form.querySelectorAll('input,select,textarea')].some(field=>!field.reportValidity()))return;const draft=view.readInputs();if(pendingInputProposal&&!draft.settings){error=pendingInputMessage;render();return;}if(draft.conflict){error='다른 사람이 바꾼 값과 먼저 비교해 주세요.';render();return;}const body=draft.settings?{action:'save_settings',workflow_id:selection.workflow_id,factory_id:state.settings?.factory_id ?? selection.factory_id,values:state.settings?.factory_id?workSettingsOverrides(state.settings,draft.inputs,state.run?.definition?.nodes?.[selection.job_id]?.inputs):draft.inputs}:{action:'save_inputs',run_id:selection.run_id,inputs:draft.inputs};await mutate({...body,expected_revision:draft.revision},{accept:result=>view.clearInputs(draft.key,draft.serial,result.revision || draft.revision+1,draft.inputs)});}
+  async function saveInputs(){if(busy)return;const form=$('#ees-work-inputs');if(form?.querySelectorAll&&[...form.querySelectorAll('input,select,textarea')].some(field=>!field.reportValidity()))return;const draft=view.readInputs(),applied=inputProposalApplied;if(pendingInputProposal&&!draft.settings){error=pendingInputMessage;render();return;}if(draft.conflict){error='다른 사람이 바꾼 값과 먼저 비교해 주세요.';render();return;}const body=draft.settings?{action:'save_settings',workflow_id:selection.workflow_id,factory_id:state.settings?.factory_id ?? selection.factory_id,values:state.settings?.factory_id?workSettingsOverrides(state.settings,draft.inputs,state.run?.definition?.nodes?.[selection.job_id]?.inputs):draft.inputs}:{action:'save_inputs',run_id:selection.run_id,inputs:draft.inputs};await mutate({...body,expected_revision:draft.revision},{accept:result=>{view.clearInputs(draft.key,draft.serial,result.revision || draft.revision+1,draft.inputs);if(!draft.settings&&inputProposalApplied===applied)inputProposalApplied=null;}});}
   function executionModel(){const available=state?.operations?.error?[]:state?.operations?.models || [];return available.length===1?available[0].id:$('#ees-work-execution-model')?.value;}
   function inputsSaved(all=false){if(pendingInputProposal){error=pendingInputMessage;render();return false;}const draft=view.readInputs();if(draft.dirty||(all&&view.hasPendingInputs?.())){error='변경한 입력을 먼저 저장해 주세요. 저장하지 않은 값으로 실행하거나 판정하지 않았습니다.';render();return false;}return true;}
   async function requestIntent(){
@@ -529,7 +529,7 @@
     if(action==='close_panel'||action==='open_panel')return setPanelOpen(action==='open_panel');
     if(action==='refresh')return refresh();
     if(action==='reload_options')return loadOptions(target.dataset.fieldId);
-    if(action==='discard_inputs'){inputProposalApplied=null;view.discardInputs();render();return;}
+    if(action==='discard_inputs'){if(!view.readInputs().settings)inputProposalApplied=null;view.discardInputs();render();return;}
     if(action==='save_inputs')return saveInputs();
     if(action==='native_open')return openNative(target.dataset.nativeId);
     if(action==='new_chat'){return source()?.newChat?.();}
@@ -577,7 +577,13 @@
       if(target.closest?.('#ees-work-start')){const form=target.closest('#ees-work-start');selection.start_inputs ||= {};selection.start_inputs[selection.workflow_id]=workReadInputs(form);selection.start_groups ||= {};selection.start_groups[selection.workflow_id]=[...form.querySelectorAll('[data-start-group]:checked')].map(field=>field.value);remember();return;}
       if(target.id==='ees-request-reason'){selection.request_reasons ||= {};selection.request_reasons[selection.run_id+'/'+selection.job_id]=target.value;remember();return;}
       if(target.id==='ees-review-text'){view.capture();scheduleReviewSave();}
-      if(target.matches?.('[data-work-input]')){view.capture();clearTimeout(optionTimer);optionTimer=setTimeout(()=>loadOptions(),300);}
+    }
+    if((event.type==='input'||event.type==='compositionend'&&inputProposalApplied&&selection.tab==='current')&&target.matches?.('[data-work-input]')){
+      view.capture();clearTimeout(optionTimer);
+      const applied=inputProposalApplied&&selection.tab==='current';
+      if(applied&&event.isComposing)return;
+      if(applied)render();
+      optionTimer=setTimeout(()=>loadOptions(),300);
     }
     if(event.type==='change'&&target.id==='ees-start-factory'){select({factory_id:target.value,start_factory_id:target.value});return;}
     if(event.type==='change'&&target.matches?.('[data-item-verdict]')){const saved=state?.run?.jobs?.[selection.job_id];if(!saved||saved.can_decide===false||saved.decisions?.[target.dataset.itemId])return;const key=selection.run_id+'/'+selection.job_id+'/'+saved.attempt_id;selection.verdict_drafts ||= {};selection.verdict_drafts[key] ||= {};const option=target.selectedOptions?.[0];selection.verdict_drafts[key][target.dataset.itemId]={verdict:option?.dataset.verdict || target.value,...(option?.dataset.judgmentId?{judgment_id:option.dataset.judgmentId}:{})};remember();render();return;}
@@ -603,7 +609,7 @@
     if(available())syncMessageReferences();
   }
   function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(sync);}}
-  const boundHosts=new Set(),renderedReferenceHosts=new Set(),eventTypes=['click','input','change','toggle','keydown','submit'];
+  const boundHosts=new Set(),renderedReferenceHosts=new Set(),eventTypes=['click','input','compositionend','change','toggle','keydown','submit'];
   function bindHosts(){
     // Visible message cards remain owned hosts between reference polls.
     const hosts=source()?.hosts?.() || {},current=new Set([hosts.panel,hosts.overlays,...[...renderedReferenceHosts].filter(host=>host.isConnected)].filter(Boolean));

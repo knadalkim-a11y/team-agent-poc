@@ -719,3 +719,24 @@ test('one proposal comparison feeds all 248 job marks list and footer per paint'
  const markup=h.markup;comparisons=0;h.render();assert.equal(comparisons,1);assert.equal(h.markup,markup);
  h.click('ai_discard');await flush();comparisons=0;h.render();assert.equal(comparisons,0);assert.doesNotMatch(h.markup,/ew-proposal-mark/);
 });
+
+
+test('an existing stage with empty advanced values can open its full editor',async()=>{
+ const h=harness(),value=stagedDefinition(1,1);installDefinition(h,value);h.click('stage_toggle',{id:'t0'});await flush();h.click('stage_edit',{id:'t0'});await flush();
+ assert.ok(h.host.querySelector('.ew-stage-advanced'));assert.match(h.markup,/추가 설정 수정/);assert.doesNotMatch(h.markup,/수행 안내 있음|사람이 정하는 값 있음/);assert.ok(actionButton(h,'node','t0'));
+ h.click('node',{id:'t0'});await flush();assert.ok(h.forms['ew-author-node']);assert.ok(h.fields.find(field=>field.name==='instructions'));assert.equal(h.draft().dirty,false);assert.deepEqual(h.draft().definition,value);assert.equal(h.writes.length,0);
+});
+
+test('empty stage advanced entry preserves unapplied names and stays absent on new stage forms',async()=>{
+ const h=harness(),value=stagedDefinition(1,1);installDefinition(h,value);h.click('stage_toggle',{id:'t0'});await flush();h.click('stage_edit',{id:'t0'});await flush();assert.ok(actionButton(h,'node','t0'));
+ h.field('name','미적용 단계 이름');h.field('description','미적용 설명');h.click('node',{id:'t0'});await flush();assert.ok(h.forms['ew-stage-editor']);assert.equal(h.forms['ew-author-node'],undefined);assert.match(h.markup,/편집 중인 항목을 먼저 적용하거나 취소해 주세요/);assert.equal(h.fields.find(field=>field.name==='name').value,'미적용 단계 이름');assert.equal(h.fields.find(field=>field.name==='description').value,'미적용 설명');assert.deepEqual(h.draft().definition,value);
+ h.click('inline_apply');await flush();h.click('stage_edit',{id:'t0'});await flush();h.click('node',{id:'t0'});await flush();assert.ok(h.forms['ew-author-node']);assert.equal(h.draft().definition.nodes.t0.name,'미적용 단계 이름');assert.equal(h.draft().definition.nodes.t0.description,'미적용 설명');assert.equal(h.writes.length,0);
+ h.click('node',{id:''});await flush();h.click('add_stage');await flush();assert.equal(h.host.querySelector('.ew-stage-advanced'),null);assert.doesNotMatch(h.markup,/추가 설정 수정/);
+});
+
+test('proposal ordinals count only same kind siblings without changing LCS counts',()=>{
+ const h=harness(),before=stagedDefinition(2,1);before.nodes.rootJob={...copy(before.nodes['j0-0']),id:'rootJob',parent:'p',name:'단계 밖 초안 작업'};before.nodes.p.children=['t0','rootJob','t1'];
+ const moved=copy(before);moved.nodes.p.children=['t1','rootJob','t0'];const move=copy(h.helpers.proposalChanges(before,moved));assert.equal(move.count,1);assert.equal(move.changes[0].text,'단계 ‘단계 1’ · 2번째');
+ const added=copy(before);added.nodes.t2={id:'t2',type:'t',parent:'p',name:'추가 단계',children:[],deps:[]};added.nodes.p.children.push('t2');const addition=copy(h.helpers.proposalChanges(before,added));assert.equal(addition.count,1);assert.equal(addition.changes[0].text,'단계 ‘추가 단계’ (3번째)');
+ const jobBefore=stagedDefinition(1,2);jobBefore.nodes.mixed={id:'mixed',type:'t',parent:'t0',name:'초안 구조 확인 대상',children:[],deps:[]};jobBefore.nodes.t0.children=['j0-0','mixed','j0-1'];const jobAfter=copy(jobBefore);jobAfter.nodes.t0.children=['j0-1','mixed','j0-0'];const jobMove=copy(h.helpers.proposalChanges(jobBefore,jobAfter));assert.equal(jobMove.count,1);assert.equal(jobMove.changes[0].text,'작업 ‘작업 1-1’ · 2번째');
+});
