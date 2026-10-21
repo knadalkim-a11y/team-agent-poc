@@ -312,7 +312,11 @@ def input_and_history_flow(g,key,chat_id):
     g.capture('input-proposal-before-human')
     g.click('.ew-input-proposal-bar [data-action=apply_input_proposal]')
     g.wait('document.querySelector("[data-work-input][name=note]")?.value === "AI가 제안한 첫 입력"')
-    assert g.browser.evaluate('document.querySelector(".ew-input-proposal-applied")?.textContent.startsWith("반영됨 · ")')
+    assert g.browser.evaluate('document.querySelector(".ew-input-proposal-applied")?.textContent')=='저장 전'
+    assert g.browser.evaluate('document.querySelector(".ew-input-applied-bar p")?.textContent')=='저장해야 확인할 수 있습니다'
+    assert g.browser.evaluate('document.querySelector(".ew-input-applied-bar [data-action=discard_inputs]")?.textContent')=='최신 값으로 돌아가기'
+    assert g.browser.evaluate('document.querySelector(".ew-input-applied-bar [data-action=save_inputs]")?.textContent')=='입력 저장'
+    g.capture('input-proposal-human-applied-unsaved')
     assert g.api('/api/ees-work/workspace?run_id='+run_id)['run']==before
     g.click('[data-action=save_inputs]');g.wait('!document.querySelector("[data-action=save_inputs]")?.disabled')
     saved=g.api('/api/ees-work/workspace?run_id='+run_id)['run']

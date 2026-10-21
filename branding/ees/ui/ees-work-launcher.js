@@ -13,6 +13,7 @@
   let state=null,identity='',epoch=0,serial=0,busy=false,scheduled=false,error='',commandError='',route='',readyRoute='',refreshTimer=null,uiTimer=null,uiRevision=0,restored=false,initialSelectionPatch=null;
   let procedureStart=null,nativeCapabilities=null,nativeScope=null,stateKey='',targetLoading=false,scopeLoading=false,evidenceUnavailable=false;
   const workspaceCache=new Map();
+  const pendingInputMessage='업무 도우미 입력 제안을 먼저 반영하거나 버려 주세요.';
   let nativeTicket=null,nativeNavigationBusy=false,pendingNativeAction=null;
   let selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};
   const receipts=new Map(),optionCache=new Map(),chatCreations=new Map(),chatAliases=new Map();let workEpoch=0;let referenceChat='',referenceTimer=null,referenceRead=0,messageReferences=new Map();let uiWrites=Promise.resolve(),optionTimer=null,pendingInputProposal=null,inputProposalApplied=null,reviewTimer=null,reviewSaving=null;
@@ -301,7 +302,21 @@
     if(open)loadOptions();
     return state;
   }
-  function commitSelection(patch){if(pendingNativeAction?.applied)pendingNativeAction=null;clearTimeout(reviewTimer);const previous={...selection};if(state&&!stateKey)stateKey=workspaceKey();cacheWorkspace();if(!restored)initialSelectionPatch={...initialSelectionPatch,chat_reference:null,...patch};selection={...selection,chat_reference:null,...patch};changeWorkspace(previous);epoch++;workEpoch++;chatCreations.clear();chatAliases.clear();pendingInputProposal=null;inputProposalApplied=null;error='';commandError='';clearTimeout(refreshTimer);remember();}
+  function commitSelection(patch){
+    if(pendingNativeAction?.applied)pendingNativeAction=null;clearTimeout(reviewTimer);
+    const previous={...selection},before=context(),next={...selection,chat_reference:null,...patch};
+    const sameInputTarget=token()===identity&&previous.run_id&&previous.job_id&&
+      ['mode','system_id','factory_id','workflow_id','run_id','job_id'].every(key=>previous[key]===next[key])&&
+      Object.keys(patch).every(key=>key==='tab'||JSON.stringify(patch[key])===JSON.stringify(previous[key]));
+    if(state&&!stateKey)stateKey=workspaceKey();cacheWorkspace();
+    if(!restored)initialSelectionPatch={...initialSelectionPatch,chat_reference:null,...patch};
+    selection=next;changeWorkspace(previous);epoch++;workEpoch++;chatCreations.clear();chatAliases.clear();
+    // A tab visit changes request epochs, but the same job's unsaved proposal
+    // remains reviewable. Never revive one invalidated before this navigation.
+    if(sameInputTarget){if(pendingInputProposal?.context===before)pendingInputProposal.context=context();else pendingInputProposal=null;}
+    else{pendingInputProposal=null;inputProposalApplied=null;}
+    error='';commandError='';clearTimeout(refreshTimer);remember();
+  }
   async function select(patch,{fetch=true,validate=null}={}){workUI.closeHelp({restoreFocus:false});designer.closeStart?.();procedureStart=null;view.capture();const before=context();while(state?.run?.definition?.nodes?.[selection.job_id]?.result_block==='ai_review'&&view.readReview?.().dirty){if(!await saveReviewDraft()||before!==context())return null;view.capture();}if(validate&&!validate())return null;commitSelection(patch);render();if(fetch)return refresh();refreshTimer=setTimeout(refresh,2500);loadOptions();return state;}
   async function mutate(body,{refreshAfter=true,accept=null}={}){if(busy)return null;const at=context();setBusy(true);try{const result=await command(body);if(result&&accept)accept(result);if(result&&refreshAfter&&!await refresh())return null;return at===context()?result:null;}catch(failure){if(at===context()){commandError=failure.message;render();}return null;}finally{setBusy(false);}}
   async function models(){
@@ -339,7 +354,7 @@
   }
   async function saveInputs(){if(busy||pendingInputProposal)return;const form=$('#ees-work-inputs');if(form?.querySelectorAll&&[...form.querySelectorAll('input,select,textarea')].some(field=>!field.reportValidity()))return;const draft=view.readInputs();if(draft.conflict){error='다른 사람이 바꾼 값과 먼저 비교해 주세요.';render();return;}const body=draft.settings?{action:'save_settings',workflow_id:selection.workflow_id,factory_id:state.settings?.factory_id ?? selection.factory_id,values:state.settings?.factory_id?workSettingsOverrides(state.settings,draft.inputs,state.run?.definition?.nodes?.[selection.job_id]?.inputs):draft.inputs}:{action:'save_inputs',run_id:selection.run_id,inputs:draft.inputs};await mutate({...body,expected_revision:draft.revision},{accept:result=>view.clearInputs(draft.key,draft.serial,result.revision || draft.revision+1,draft.inputs)});}
   function executionModel(){const available=state?.operations?.error?[]:state?.operations?.models || [];return available.length===1?available[0].id:$('#ees-work-execution-model')?.value;}
-  function inputsSaved(all=false){if(pendingInputProposal)return false;const draft=view.readInputs();if(draft.dirty||(all&&view.hasPendingInputs?.())){error='변경한 입력을 먼저 저장해 주세요. 저장하지 않은 값으로 실행하거나 판정하지 않았습니다.';render();return false;}return true;}
+  function inputsSaved(all=false){if(pendingInputProposal){error=pendingInputMessage;render();return false;}const draft=view.readInputs();if(draft.dirty||(all&&view.hasPendingInputs?.())){error='변경한 입력을 먼저 저장해 주세요. 저장하지 않은 값으로 실행하거나 판정하지 않았습니다.';render();return false;}return true;}
   async function requestIntent(){
     if(!inputsSaved())return;
     const at=context(),run=state?.run,node=run?.definition?.nodes?.[selection.job_id];if(!node)return;
@@ -401,7 +416,7 @@
   function applyInputProposal(){
     const pending=pendingInputProposal,draft=view.readInputs();
     if(!pending||pending.context!==context()||pending.run_id!==selection.run_id||pending.job_id!==selection.job_id||pending.revision!==state?.run?.revision||pending.draft!==JSON.stringify(draft.inputs))throw new Error('제안 이후 입력이나 저장 상태가 바뀌었습니다. 현재 값을 보존하고 새 제안을 요청해 주세요.');
-    pendingInputProposal=null;view.applyInputValues(pending.values);inputProposalApplied={values:clone(pending.values),at:new Date().toISOString()};render();loadOptions();
+    pendingInputProposal=null;if(error===pendingInputMessage)error='';view.applyInputValues(pending.values);inputProposalApplied={values:clone(pending.values),at:new Date().toISOString()};render();loadOptions();
   }
   async function downloadRun(format,jobId=''){
     const at=context(),runId=state?.run?.id;if(!runId)return;
@@ -484,7 +499,7 @@
     if(action==='all_records')return select({tab:'records',records_workflow:'',workflow_id:'',run_id:'',job_id:''});
     if(action==='ask_record'){const run=state?.run,attempts=(run?.attempts || []).filter(attempt=>!target.dataset.jobId||attempt.job_id===target.dataset.jobId).slice().sort((a,b)=>String(a.created_at || '').localeCompare(String(b.created_at || ''))||a.number-b.number),attempt=target.dataset.attemptId?attempts.find(item=>item.id===target.dataset.attemptId):attempts.at(-1);if(!run||!attempt)throw new Error('참고할 당시 실행 기록이 없습니다.');selection.chat_reference={kind:'workspace',reference_kind:'historical',workflow_id:run.workflow_id,run_id:run.id,job_id:attempt.job_id,attempt_id:attempt.id,version:run.version,result_revision:attempt.number,created_at:attempt.created_at,revision:run.revision,system_id:run.system_id,factory_id:run.factory_id};remember();render();source()?.focusComposer?.();return;}
     if(action==='apply_input_proposal')return applyInputProposal();
-    if(action==='discard_input_proposal'){pendingInputProposal=null;render();return;}
+    if(action==='discard_input_proposal'){pendingInputProposal=null;if(error===pendingInputMessage)error='';render();return;}
     if(action==='export_json'||action==='export_text'||action==='export_result'){if(action==='export_result'&&!workUI.finished(state?.run)&&state?.run?.jobs?.[selection.job_id]?.can_decide!==false&&!await saveReviewDraft())return;return downloadRun(action==='export_json'?'json':'text',action==='export_result'?target.dataset.jobId:'');}
     if(action==='open_legacy')return openLegacy(target.dataset.caseId);
     if(action==='admin_work_tool')return setupWorkTool();
@@ -514,7 +529,7 @@
     if(action==='close_panel'||action==='open_panel')return setPanelOpen(action==='open_panel');
     if(action==='refresh')return refresh();
     if(action==='reload_options')return loadOptions(target.dataset.fieldId);
-    if(action==='discard_inputs'){view.discardInputs();return;}
+    if(action==='discard_inputs'){inputProposalApplied=null;view.discardInputs();render();return;}
     if(action==='save_inputs')return saveInputs();
     if(action==='native_open')return openNative(target.dataset.nativeId);
     if(action==='new_chat'){return source()?.newChat?.();}

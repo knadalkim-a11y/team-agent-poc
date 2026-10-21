@@ -28,6 +28,101 @@ class SyntheticReviewModel:
 
 
 class FigmaRuntimeNativeTests(IntegratedNativeCase):
+    def preview_inputs(self, run, values, job='job-0'):
+        reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
+        payload = {'proposal_kind': 'inputs', 'workflow_id': run['workflow_id'], 'run_id': run['id'], 'job_id': job,
+            'base_revision': run['revision'], 'context_id': reference['context_id'], 'proposal': values}
+        result = self.browser.evaluate("window.__eesNativeWorkV1.propose('existing-chat'," + json.dumps(payload, ensure_ascii=False) + ")")
+        self.assertTrue(result['ok'], result)
+        self.wait("document.querySelector('.ew-input-proposal-bar [data-action=apply_input_proposal]')")
+
+    def input_tabs_roundtrip(self):
+        self.click('[data-action=tab][data-tab=history]')
+        self.wait("document.querySelector('[data-action=tab][data-tab=history][aria-pressed=true]')")
+        self.click('[data-action=tab][data-tab=current]')
+        self.wait("document.querySelector('[data-action=tab][data-tab=current][aria-pressed=true]')")
+
+    def applied_inputs_evidence(self, hint, fields, label):
+        self.assertEqual(self.text('.ew-input-proposal-applied'), '저장 전')
+        self.assertEqual(self.text('.ew-input-applied-bar > p'), hint)
+        self.assertEqual(self.text('.ew-input-applied-bar [data-action=discard_inputs]'), '최신 값으로 돌아가기')
+        self.assertEqual(self.text('.ew-input-applied-bar [data-action=save_inputs]'), '입력 저장')
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('#ees-work-inputs .ew-input-proposal-source')].map(e=>e.textContent)"), ['도우미'] * fields)
+        self.browser.evaluate("document.querySelector('.ew-input-proposal-applied').scrollIntoView({block:'center',inline:'nearest'})")
+        observed = self.browser.evaluate("""(() => {
+            const panel=document.querySelector('#ees-work-panel'),bar=document.querySelector('.ew-input-applied-bar'),badge=document.querySelector('.ew-input-proposal-applied');
+            const box=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height,color:s.color,background:s.backgroundColor};};
+            return {width:innerWidth,bar:box(bar),badge:box(badge),buttons:[...bar.querySelectorAll('button')].map(e=>({text:e.textContent,...box(e)})),overflow:panel.scrollWidth-panel.clientWidth};
+        })()""")
+        self.assertLessEqual(observed['overflow'], 1, observed)
+        self.assertGreater(observed['badge']['height'], 0, observed)
+        self.assertGreaterEqual(observed['badge']['top'], 0, observed)
+        self.assertLessEqual(observed['badge']['bottom'], observed['bar']['top'], observed)
+        self.assertNotIn(observed['badge']['background'], ('rgba(0, 0, 0, 0)', 'transparent'), observed)
+        for button in observed['buttons']:
+            self.assertGreater(button['height'], 0, observed)
+            self.assertGreaterEqual(button['left'], observed['bar']['left'] - 1, observed)
+            self.assertLessEqual(button['right'], observed['bar']['right'] + 1, observed)
+            self.assertGreaterEqual(button['top'], observed['bar']['top'] - 1, observed)
+            self.assertLessEqual(button['bottom'], observed['bar']['bottom'] + 1, observed)
+        self.wait("!document.querySelector('[data-ees-motion=opening],[data-ees-motion=closing]')")
+        directory = self.screenshot(label)
+        (directory / (label + '.json')).write_text(json.dumps(observed, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+    def test_e2_input_proposal_tabs_discard_scope_and_a4a_at_480_and_1366(self):
+        fields = [{'id': 'note', 'name': '자료 메모', 'type': 'text', 'scope': 'run'}]
+        for mode, hint in (('human', '저장해야 확인할 수 있습니다'), ('tool', '저장해야 실행할 수 있습니다')):
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1366, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+            key = self.author(name='입력 제안 보존 ' + mode, fields=fields, mode=mode,
+                block='human_confirm' if mode == 'human' else 'values', jobs=2)
+            run = self.start(key, inputs={'note': '서버에 저장된 값'}); self.open_run(key, run)
+            before = deepcopy(self.state(run_id=run['id'])['run'])
+            for width in (1366, 480):
+                self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+                self.wait('innerWidth === ' + str(width))
+                writes = len(self.server.workspace_commands)
+                self.preview_inputs(run, {'note': '도우미가 제안한 값'})
+                self.input_tabs_roundtrip()
+                self.assertTrue(self.browser.evaluate("!!document.querySelector('.ew-input-proposal-bar [data-action=apply_input_proposal]')"))
+                self.assertEqual(self.read('[data-work-input][name=note]', 'value'), '서버에 저장된 값')
+                self.click('[data-action=apply_input_proposal]')
+                self.wait("document.querySelector('[data-work-input][name=note]')?.value === '도우미가 제안한 값'")
+                self.input_tabs_roundtrip()
+                self.applied_inputs_evidence(hint, 1, 'e2-a4a-' + mode + '-' + str(width))
+                self.click('.ew-input-applied-bar [data-action=discard_inputs]')
+                self.wait("document.querySelector('[data-work-input][name=note]')?.value === '서버에 저장된 값'")
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-input-applied-bar,.ew-input-proposal-applied,.ew-input-proposal-source')"))
+                self.assertEqual(len(self.server.workspace_commands), writes, self.server.workspace_commands[writes:])
+                self.assertEqual(self.state(run_id=run['id'])['run'], before)
+            # Scope changes clear both pending proposals and applied provenance.
+            for applied in (False, True):
+                self.preview_inputs(run, {'note': '다른 작업으로 가기 전 제안'})
+                if applied:
+                    self.click('[data-action=apply_input_proposal]')
+                self.click('[data-action=overview]'); self.click('[data-action=job][data-job-id=job-1]')
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-input-proposal-bar,.ew-input-proposal-applied,.ew-input-proposal-source')"))
+                self.click('[data-action=overview]'); self.click('[data-action=job][data-job-id=job-0]')
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-input-proposal-bar,.ew-input-proposal-applied,.ew-input-proposal-source')"))
+            self.assertEqual(self.state(run_id=run['id'])['run'], before)
+
+    def test_e2_pending_input_proposal_reports_blocked_result_confirmation_without_call(self):
+        self.shared_fixture()
+        self.bridge.result = {'status': 'succeeded', 'completeness': 'complete',
+            'items': [{'id': 'DOC-1', 'title': '합성 운영 문서', 'url': 'https://example.invalid/doc-1'}]}
+        key = self.shared_workflow(jobs=1)
+        run = self.execute(self.start(key, inputs={'query': '원래 찾을 말'})); self.open_run(key, run)
+        self.wait("document.querySelector('[data-action=confirm_list]')")
+        self.preview_inputs(run, {'query': '새로 제안한 찾을 말'})
+        before = deepcopy(self.state(run_id=run['id'])['run'])
+        writes = len(self.server.workspace_commands); calls = len(self.bridge.calls)
+        self.click('[data-action=confirm_list]')
+        self.wait("document.querySelector('#ees-work-panel [role=alert]')?.textContent.includes('업무 도우미 입력 제안을 먼저 반영하거나 버려 주세요.')")
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog')"))
+        self.assertEqual(len(self.server.workspace_commands), writes, self.server.workspace_commands[writes:])
+        self.assertEqual(len(self.bridge.calls), calls)
+        self.assertEqual(self.state(run_id=run['id'])['run'], before)
+        self.screenshot('e2-pending-proposal-blocked-confirmation')
+
     def execute(self, run, job='job-0'):
         result = asyncio.run(self.server.workflow.operations.command(self.server.user,
             {'action': 'execute_job', 'run_id': run['id'], 'job_id': job,
@@ -325,6 +420,23 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.assertEqual(self.read('[data-work-input][name=wait]', 'type'), 'number')
         self.assertEqual(self.read('[data-work-input][name=wait]', 'max'), '300')
         self.assertEqual(self.read('[data-work-input][name=stop]', 'tagName'), 'SELECT')
+        for width in (1366, 480):
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+            self.wait('innerWidth === ' + str(width))
+            writes = len(self.server.workspace_commands)
+            self.preview_inputs(run, {'target': 'SYNTHETIC-AP-02', 'stop': 'force', 'wait': 30})
+            self.click('[data-action=apply_input_proposal]')
+            self.wait("document.querySelector('[data-work-input][name=target]')?.value === 'SYNTHETIC-AP-02'")
+            self.input_tabs_roundtrip()
+            self.applied_inputs_evidence('저장해야 요청할 수 있습니다', 3, 'e2-a4a-request-' + str(width))
+            self.click('.ew-input-applied-bar [data-action=discard_inputs]')
+            self.wait("document.querySelector('[data-work-input][name=target]')?.value === 'SYNTHETIC-AP'")
+            self.assertEqual(json.loads(self.read('[data-work-input][name=stop]', 'value')), 'graceful')
+            self.assertEqual(self.read('[data-work-input][name=wait]', 'value'), '60')
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-input-proposal-applied,.ew-input-proposal-source')"))
+            self.assertEqual(len(self.server.workspace_commands), writes, self.server.workspace_commands[writes:])
+            self.assertEqual(self.state(run_id=run['id'])['run']['inputs'], {'target': 'SYNTHETIC-AP', 'stop': 'graceful', 'wait': 60})
+        self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1366, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
         self.fill('#ees-request-reason', '합성 확인 사유')
         self.click('[data-action=request_intent]')
         self.wait("document.querySelector('#ees-work-dialog')?.innerText.includes('합성 확인 사유')")

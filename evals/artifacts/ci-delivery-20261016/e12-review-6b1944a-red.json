@@ -1,0 +1,157 @@
+{
+  "date": "2026-10-21",
+  "base_head": "6b1944a4016d21f3b96d1b3c98d03f9538d6aeaa",
+  "environment": "Linux / Node v24.19.0 / Python 3.12.14",
+  "scope": "PR #101 review regression assertions before corresponding product fixes",
+  "logs": [
+    {
+      "file": "pr101-designer-red.log",
+      "sha256": "e434c84939980b064e6bd0511baa68b71d391a60faaab5faed84e5c5fff2dc67",
+      "bytes": 66412,
+      "summary": [
+        "ℹ tests 142",
+        "ℹ pass 133",
+        "ℹ fail 9"
+      ],
+      "failures": [
+        "✖ stage and job ordering targets explicit IDs and preserves parents deadlines expansion and focus (6.422563ms)",
+        "✖ proposal changes are computed locally with deletions first and settings counts without raw JSON (3.51183ms)",
+        "✖ proposal deletion and front insertion do not mark unchanged surviving siblings (4.246376ms)",
+        "✖ proposal moves use an LCS of common siblings and count a parent move once (2.225903ms)",
+        "✖ proposal groups added sibling jobs and orders deletions additions changes and settings (2.266875ms)",
+        "✖ proposal stage deletion warns and cleans deadlines on apply while preserving unsaved and saved definitions (4.259376ms)",
+        "✖ closed job menu does not handle Escape and open menu returns focus to its trigger (7.676192ms)",
+        "✖ stage reorder updates hidden live text without adding a visible notice and preserves scroll (5.207493ms)",
+        "✖ new stage and job name fields show the Figma examples (4.004332ms)"
+      ],
+      "python_evidence": [
+        "  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /<span class=\"ew-visually-hidden\" data-author-live aria-live=\"polite\" aria-atomic=\"true\">1번째로 옮겼습니다/. Input:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /기간 설정도 함께 지웁니다/. Input:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:",
+        "  AssertionError [ERR_ASSERTION]: The input was expected to not match the regular expression /class=\"ew-author-note\"/. Input:",
+        "  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /name=\"name\"[^>]*placeholder=\"예: 운영 인계\"/. Input:"
+      ]
+    },
+    {
+      "file": "pr101-input-red.log",
+      "sha256": "bac8aa4762dde038dd0dc25bf72fc5a3f63bb2e9cdc33294e6286d08d97b80f6",
+      "bytes": 25528,
+      "summary": [
+        "ℹ tests 106",
+        "ℹ pass 93",
+        "ℹ fail 13"
+      ],
+      "failures": [
+        "✖ applied input proposal displays unsaved state and both explicit input actions (16.729584ms)",
+        "✖ A4a applied input footer explains the next change_request action (4.936655ms)",
+        "✖ A4a applied input footer explains the next human_confirm action (1.461578ms)",
+        "✖ A4a applied input footer explains the next values action (1.319434ms)",
+        "✖ discarding applied inputs restores all saved values and removes proposal attribution without a save (3.731022ms)",
+        "✖ same-job history and settings tab visits retain pending input proposal and permit a later apply (2.830818ms)",
+        "✖ same-job history and settings tab visits retain applied input attribution and unsaved values (2.719972ms)",
+        "✖ pending input proposal explains blocked result action confirm_list (2.708393ms)",
+        "✖ pending input proposal explains blocked result action confirm (2.165788ms)",
+        "✖ pending input proposal explains blocked result action confirm_verdicts (1.993558ms)",
+        "✖ pending input proposal explains blocked result action request_intent (1.853478ms)",
+        "✖ pending input proposal explains blocked result action execute (1.868521ms)",
+        "✖ pending input proposal explains blocked result action execute_scope (1.983273ms)"
+      ],
+      "python_evidence": [
+        "  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /ew-input-proposal-applied[^>]*>저장 전</. Input:",
+        "  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:",
+        "  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:",
+        "  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+      ]
+    },
+    {
+      "file": "pr101-input-test-setup-red.log",
+      "sha256": "6c725cc5f5c3e17e4bbcfdacace3d13fcd697dc30059cbdcb32c24a038a8acf7",
+      "bytes": 25516,
+      "summary": [
+        "ℹ tests 106",
+        "ℹ pass 93",
+        "ℹ fail 13"
+      ],
+      "failures": [
+        "✖ applied input proposal displays unsaved state and both explicit input actions (41.039676ms)",
+        "✖ A4a applied input footer explains the next change_request action (7.585037ms)",
+        "✖ A4a applied input footer explains the next human_confirm action (1.693081ms)",
+        "✖ A4a applied input footer explains the next values action (1.551628ms)",
+        "✖ discarding applied inputs restores all saved values and removes proposal attribution without a save (3.987016ms)",
+        "✖ same-job history and settings tab visits retain pending input proposal and permit a later apply (2.80714ms)",
+        "✖ same-job history and settings tab visits retain applied input attribution and unsaved values (3.365841ms)",
+        "✖ pending input proposal explains blocked result action list_confirm (2.839017ms)",
+        "✖ pending input proposal explains blocked result action confirm (2.494258ms)",
+        "✖ pending input proposal explains blocked result action confirm_items (3.797451ms)",
+        "✖ pending input proposal explains blocked result action request_intent (2.423972ms)",
+        "✖ pending input proposal explains blocked result action execute (3.446021ms)",
+        "✖ pending input proposal explains blocked result action execute_scope (2.630953ms)"
+      ],
+      "python_evidence": [
+        "  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /ew-input-proposal-applied[^>]*>저장 전</. Input:",
+        "  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:",
+        "  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:",
+        "  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+        "  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+      ]
+    },
+    {
+      "file": "pr101-schedule-red.log",
+      "sha256": "363564c145e05c4325820bbb63d443860773eb72f021308a1a9f8fdcb0c75194",
+      "bytes": 2161,
+      "summary": [
+        "Ran 22 tests in 2.614s",
+        "FAILED (failures=1)"
+      ],
+      "failures": [],
+      "python_evidence": [
+        "FAIL: test_proposal_stage_deletion_cleans_deadline_before_periodic_publication (test_ees_work_figma_schedule.ScheduleContracts.test_proposal_stage_deletion_cleans_deadline_before_periodic_publication)",
+        "AssertionError: 1 != 0 : Error: 현재 절차와 다른 제안입니다."
+      ]
+    },
+    {
+      "file": "pr101-schedule-red-valid.log",
+      "sha256": "6fdee522bdff5ffb9177450105a2ea016241366acaf29ce0d0ef2de9375afdec",
+      "bytes": 11627,
+      "summary": [
+        "Ran 22 tests in 2.420s",
+        "FAILED (failures=1)"
+      ],
+      "failures": [],
+      "python_evidence": [
+        "FAIL: test_proposal_stage_deletion_cleans_deadline_before_periodic_publication (test_ees_work_figma_schedule.ScheduleContracts.test_proposal_stage_deletion_cleans_deadline_before_periodic_publication)",
+        "AssertionError: 1 != 0 : AssertionError [ERR_ASSERTION]: The input did not match the regular expression /기간 설정도 함께 지웁니다/. Input:"
+      ]
+    },
+    {
+      "file": "pr101-input-guidance-red.log",
+      "sha256": "4a35cb8b44df2237a1f28e6090f86a05503c7c5c6f79bea7229171c3b7ccf891",
+      "summary": [
+        "ℹ tests 108",
+        "ℹ pass 106",
+        "ℹ fail 2"
+      ],
+      "failure": "Resolving a pending proposal left its blocking guidance visible after apply/discard. Added assertions failed before clearing only this message."
+    }
+  ],
+  "fixture_corrections": "input-test-setup: wrong action names corrected to confirm_list/confirm_verdicts; schedule-red: synthetic workflow ID corrected before the valid unchanged-product rerun",
+  "browser": "Local Native browser unavailable; final-head CI required",
+  "count_correction": "8→6: one deletion-shift false positive and both adjacent-swap participants counted instead of one LCS move; corrected total = deletion1 + addition2 + rename1 + move1 + settings1"
+}

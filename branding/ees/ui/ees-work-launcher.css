@@ -806,7 +806,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 /* E2 · proposals mark only the proposed fields; values remain in the inputs. */
 [data-ees-work] .ew-input-row.ew-input-proposed{background:var(--ees-surface-selected);}
 [data-ees-work] .ew-input-proposal-status{display:inline-flex;margin-left:6px;padding:1px 6px;border-radius:4px;background:var(--ees-surface-selected);color:var(--ees-brand-text);font-size:12px;line-height:16px;font-weight:500;}
-[data-ees-work] .ew-input-proposal-applied{margin-left:6px;color:var(--ees-text-tertiary);font-size:12px;line-height:18px;font-weight:400;}
+[data-ees-work] .ew-input-proposal-applied{display:inline-flex;margin-left:6px;padding:1px 6px;border-radius:4px;background:var(--ees-status-attention-bg);color:var(--ees-status-attention);font-size:12px;line-height:16px;font-weight:500;}
 [data-ees-work] .ew-input-control .ew-input-proposal-value{font-size:12px;line-height:18px;color:var(--ees-brand-text);white-space:pre-wrap;overflow-wrap:anywhere;}
 [data-ees-work] .ew-input-control .ew-input-proposal-source{display:inline-flex;align-items:center;flex:none;padding:1px 6px;border-radius:4px;background:var(--ees-surface-selected);color:var(--ees-brand-text);font-size:12px;line-height:16px;font-weight:500;white-space:nowrap;}
 #ees-work-panel>.ew-input-proposal-bar{background:var(--ees-surface-default);}

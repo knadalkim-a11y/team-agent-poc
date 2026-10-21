@@ -194,7 +194,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             fixtures[count] = (key, definition)
         evidence = []
 
-        def capture(label):
+        def capture(label, extra=None):
             self.wait("[...document.querySelectorAll('.ew-work-content img')].every(image=>image.complete&&image.naturalWidth>0)")
             self.wait("""!document.querySelector('[data-ees-motion=opening],[data-ees-motion=closing],.ew-dialog-exit-backdrop') &&
                 [...document.querySelectorAll('#ees-work-designer,#ees-work-dialog,#ees-work-help')]
@@ -226,6 +226,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertLessEqual(sum(stage['expanded'] == 'true' for stage in observed['stages']), 1)
             self.assertTrue(all(stage['height'] >= 52 for stage in observed['stages']), observed)
             self.assertTrue(all(icon['natural'] == icon['rendered'] for icon in observed['icons']), observed)
+            observed.update(extra or {})
             observed['label'] = label; evidence.append(observed)
             directory = self.screenshot(label)
             (directory / 'e1-content-variants-observations.json').write_text(
@@ -278,9 +279,46 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.click('[data-author-action=job_menu][data-id=job-0-0]')
             capture('e1-example4-job-menu-' + str(width))
             self.key('Escape', 27)
-            self.click('[data-author-action=move_down][data-id=stage-0]')
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-job-menu')"))
+            self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=job_menu][data-id=job-0-0]')"))
+            self.assertFalse(self.read('.ees-panel-region', 'hidden'))
+            if width == 480:
+                # The just-closed menu trigger must yield Escape to C60.
+                self.key('Escape', 27)
+                self.wait("document.querySelector('.ees-panel-region').hidden")
+                self.click('[data-action=open_panel]')
+                self.wait("!document.querySelector('.ees-panel-region').hidden && !document.querySelector('[data-ees-motion=opening]')")
+            self.browser.evaluate("document.querySelector('[data-author-action=move_down][data-id=stage-0]').scrollIntoView({block:'center'})")
+            before_move = self.browser.evaluate("""(() => {
+                const button=document.querySelector('[data-author-action=move_down][data-id=stage-0]'),
+                    current=document.querySelector('[data-stage-id=stage-0]').getBoundingClientRect(),
+                    next=document.querySelector('[data-stage-id=stage-1]').getBoundingClientRect(),
+                    rect=button.getBoundingClientRect();
+                return {x:rect.x+rect.width/2,y:rect.y+rect.height/2,top:rect.top,
+                    scroll:document.querySelector('.ew-author-scroll').scrollTop,
+                    step:next.height+next.top-current.bottom,hitTest:button.contains(document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2))};
+            })()""")
+            self.assertTrue(before_move['hitTest'], before_move)
+            for kind in ('mousePressed', 'mouseReleased'):
+                self.browser.call('Input.dispatchMouseEvent', {'type':kind,'x':before_move['x'],'y':before_move['y'],
+                    'button':'left','buttons':int(kind == 'mousePressed'),'clickCount':1})
+            self.wait("document.querySelector('[data-author-live]')?.textContent === '2번째로 옮겼습니다'")
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-author-scroll > .ew-author-note[role=status]')"))
+            move = self.browser.evaluate("""(() => {
+                const button=document.querySelector('[data-author-action=move_down][data-id=stage-0]'),
+                    live=document.querySelector('[data-author-live]'),rect=live.getBoundingClientRect(),style=getComputedStyle(live);
+                return {top:button.getBoundingClientRect().top,scroll:document.querySelector('.ew-author-scroll').scrollTop,
+                    focus:document.activeElement===button,live:live.textContent,livePosition:style.position,
+                    liveWidth:rect.width,liveHeight:rect.height};
+            })()""")
+            self.assertAlmostEqual(move['top'] + move['scroll'] - before_move['top'] - before_move['scroll'], before_move['step'], delta=1)
+            self.assertTrue(move['focus'], move)
+            self.assertEqual(move['livePosition'], 'absolute', move)
+            self.assertLessEqual(move['liveWidth'], 1, move)
+            self.assertLessEqual(move['liveHeight'], 1, move)
+
             self.assertEqual(self.read('[data-author-action=stage_toggle][data-id=stage-0]', 'ariaExpanded'), 'true')
-            capture('e1-example8-stage-moved-' + str(width))
+            capture('e1-example8-stage-moved-' + str(width), {'reorder': {'before': before_move, 'after': move}})
             self.browser.evaluate("document.querySelector('[data-author-action=node][data-id=job-0-0]').scrollIntoView({block:'center',inline:'nearest'})")
             return_scroll = self.read('.ew-author-scroll', 'scrollTop')
             self.click('[data-author-action=node][data-id=job-0-0]')
@@ -300,6 +338,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             capture('e1-example3-stage-delete-' + str(width))
             self.key('Escape', 27)
             self.click('[data-author-action=add_stage]')
+            self.assertEqual(self.read('#ew-stage-editor [name=name]', 'placeholder'), '예: 운영 인계')
             capture('e1-c2-stage-add-' + str(width))
             self.click('[data-author-action=inline_apply]')
             self.assertIn('단계 이름을 입력해 주세요.', self.text('#ew-stage-editor'))
@@ -310,6 +349,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertIn('이 단계에는 아직 작업이 없습니다.', self.text('.ew-stage-body'))
             capture('e1-example2-empty-stage-' + str(width))
             self.click('[data-author-action=add_job]')
+            self.assertEqual(self.read('#ew-stage-editor [name=name]', 'placeholder'), '예: 설치 상태 확인')
             capture('e1-example5-job-add-' + str(width))
             self.key('Escape', 27)
             self.click('[data-author-action=help][data-id=stages_and_jobs]')
@@ -355,6 +395,91 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertEqual(self.state(workflow_id=key)['workflow']['draft'], original)
             self.assertEqual(self.state(workflow_id=key)['workflow']['revision'], 2)
         self.assertEqual(self.server.completions, [])
+
+    def test_e1_proposal_position_counts_and_grouped_rows_at_480_and_1366(self):
+        created = self.command('create_workflow', name='제안 변경 위치 합성 검증', system_id='EMS')
+        key = created['workflow_id']; original = deepcopy(created['workflow']['draft'])
+        root = next(node for node in original['nodes'].values() if node['type'] == 'p')
+        root['children'] = ['stage-0', 'stage-1', 'stage-2']
+        original['schedule'] = {'frequency': 'daily', 'interval': 1, 'anchor': '2026-10-20T09:00',
+            'timezone': 'Asia/Seoul', 'stage_deadlines': {'stage-0': {'offset_days': 0}}}
+        for index, name in enumerate(('사전준비', '시스템 설치', '운영 인계')):
+            stage = 'stage-' + str(index)
+            children = [stage + '-job-' + str(number) for number in range(2)]
+            original['nodes'][stage] = {'id': stage, 'type': 't', 'name': name, 'parent': root['id'], 'children': children, 'deps': []}
+            for number, job in enumerate(children):
+                original['nodes'][job] = {'id': job, 'type': 'j', 'name': name + ' 작업 ' + str(number + 1),
+                    'parent': stage, 'children': [], 'deps': [], 'mode': 'human', 'inputs': [],
+                    'instructions': '합성 확인', 'result_block': 'human_confirm'}
+        self.command('save_draft', workflow_id=key, expected_revision=1, definition=original)
+
+        def propose(definition, count):
+            reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
+            payload = {'workflow_id': key, 'base_revision': 2, 'context_id': reference['context_id'], 'definition': definition}
+            result = self.browser.evaluate("window.__eesNativeWorkV1.propose('existing-chat'," + json.dumps(payload, ensure_ascii=False) + ")")
+            self.assertTrue(result['ok'], result)
+            self.assertEqual(self.text('.ew-proposal-changes h3'), '바뀌는 것 ' + str(count))
+            self.assertIn(str(count) + '곳', self.text('.ew-proposal-bar'))
+            return self.browser.evaluate("[...document.querySelectorAll('.ew-proposal-change-list>li')].map(e=>({kind:e.dataset.change,text:e.textContent}))")
+
+        observations = []
+        for width in (1366, 480):
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1366, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+            self.navigate('/c/existing-chat'); self.wait("document.querySelector('#ees-work-entry')")
+            self.open_sidebar(); self.click('[data-action=mode][data-mode=author]'); self.refresh()
+            if self.browser.evaluate("!!document.querySelector('[data-author-action=list]')"):
+                self.click('[data-author-action=list]')
+            self.click('[data-author-action=open][data-id="' + key + '"]')
+            self.wait("document.querySelectorAll('.ew-stage-toggle').length===3")
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+            self.wait('innerWidth === ' + str(width))
+            removed = deepcopy(original)
+            removed['nodes'][root['id']]['children'].remove('stage-0')
+            for identifier in ['stage-0', *original['nodes']['stage-0']['children']]:
+                del removed['nodes'][identifier]
+            # Deliberately retain the deadline key sent by the current chat tool.
+            rows = propose(removed, 3)
+            self.assertEqual([row['kind'] for row in rows], ['removed'], rows)
+            self.assertIn('기간 설정도 함께 지웁니다', rows[0]['text'])
+            for identifier in ('stage-1', 'stage-2'):
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-stage-id=" + identifier + "] .ew-proposal-mark')"))
+            self.screenshot('e1-example12-delete-only-' + str(width))
+            self.click('[data-author-action=ai_discard]')
+
+            inserted = deepcopy(original)
+            inserted['nodes']['inserted'] = {'id': 'inserted', 'type': 't', 'name': '맨 앞 단계', 'parent': root['id'], 'children': [], 'deps': []}
+            inserted['nodes'][root['id']]['children'].insert(0, 'inserted')
+            self.assertEqual([row['kind'] for row in propose(inserted, 1)], ['added'])
+            self.click('[data-author-action=ai_discard]')
+            swapped = deepcopy(original)
+            swapped['nodes']['stage-1']['children'].reverse()
+            self.assertEqual([row['kind'] for row in propose(swapped, 1)], ['changed'])
+            self.click('[data-author-action=ai_discard]')
+            moved = deepcopy(original)
+            job = moved['nodes']['stage-1']['children'].pop(0)
+            moved['nodes']['stage-2']['children'].append(job); moved['nodes'][job]['parent'] = 'stage-2'
+            self.assertEqual([row['kind'] for row in propose(moved, 1)], ['changed'])
+            self.click('[data-author-action=ai_discard]')
+
+            grouped = deepcopy(removed)
+            for identifier, name in (('new-a', '인계 문서 확인'), ('new-b', '담당자 인계')):
+                grouped['nodes'][identifier] = {**deepcopy(original['nodes']['stage-2-job-0']), 'id': identifier, 'name': name}
+                grouped['nodes']['stage-2']['children'].append(identifier)
+            grouped['nodes']['stage-1-job-0']['name'] = '설치·계정 확인'
+            rows = propose(grouped, 6)
+            self.assertEqual([row['kind'] for row in rows], ['removed', 'added', 'changed'], rows)
+            self.assertIn('인계 문서 확인', rows[1]['text']); self.assertIn('담당자 인계', rows[1]['text'])
+            self.assertIn('— 운영 인계', rows[1]['text'])
+            self.browser.evaluate("document.querySelector('.ew-author-scroll').scrollTop=0")
+            self.wait("!document.querySelector('[data-ees-motion=opening],[data-ees-motion=closing]')")
+            self.assertLessEqual(self.browser.evaluate("document.querySelector('.ew-author-scroll').scrollWidth-document.querySelector('.ew-author-scroll').clientWidth"), 1)
+            directory = self.screenshot('e1-example12-grouped-' + str(width))
+            observations.append({'width': width, 'rows': rows, 'count': 6, 'deletionOnlyCount': 3,
+                'frontInsertionCount': 1, 'adjacentSwapCount': 1, 'crossStageMoveCount': 1})
+            (directory / 'e1-proposal-review-observations.json').write_text(json.dumps(observations, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+            self.click('[data-author-action=ai_discard]')
+            self.assertEqual(self.state(workflow_id=key)['workflow']['draft'], original)
+            self.assertEqual(self.state(workflow_id=key)['workflow']['revision'], 2)
 
     def test_procedure_visual_geometry_matches_figma_and_preserves_native_draft(self):
         created = self.command('create_workflow', name='시각 대조 절차', system_id='EMS')

@@ -589,7 +589,7 @@ test('stage and job creation require names and retain existing add defaults with
 test('stage and job ordering targets explicit IDs and preserves parents deadlines expansion and focus',async()=>{
  const h=harness(),value=stagedDefinition(3,3);value.schedule={stage_deadlines:{t0:{offset_days:-2},t1:{offset_days:0},t2:{offset_days:2}}};installDefinition(h,value);
  h.click('stage_toggle',{id:'t0'});await flush();assert.equal(actionButton(h,'move_up','t0').disabled,true);h.click('stage_toggle',{id:'t2'});await flush();assert.equal(actionButton(h,'move_down','t2').disabled,true);
- h.click('stage_toggle',{id:'t1'});await flush();h.click('move_up',{id:'t1'});await flush();assert.deepEqual(h.draft().definition.nodes.p.children,['t1','t0','t2']);assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');assert.equal(h.document.activeElement.dataset.id,'t1');assert.match(h.markup,/<p role="status"[^>]*>1번째로 옮겼습니다/);
+ h.click('stage_toggle',{id:'t1'});await flush();h.click('move_up',{id:'t1'});await flush();assert.deepEqual(h.draft().definition.nodes.p.children,['t1','t0','t2']);assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');assert.equal(h.document.activeElement.dataset.id,'t1');assert.match(h.markup,/<span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true">1번째로 옮겼습니다/);assert.doesNotMatch(h.markup,/class="ew-author-note"/);
  h.click('job_menu',{id:'j1-0'});await flush();assert.equal(actionButton(h,'move_up','j1-0').disabled,true);h.click('job_menu',{id:'j1-2'});await flush();assert.equal(actionButton(h,'move_down','j1-2').disabled,true);h.click('move_up',{id:'j1-2'});await flush();const draft=h.draft().definition;assert.deepEqual(draft.nodes.t1.children,['j1-0','j1-2','j1-1']);assert.equal(draft.nodes['j1-2'].parent,'t1');assert.deepEqual(draft.schedule,value.schedule);assert.deepEqual(Object.keys(draft.nodes),Object.keys(value.nodes));assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');assert.equal(h.writes.length,0);
 });
 test('stage deletion confirmation lists affected jobs and deadline cleanup only when present',async()=>{
@@ -606,9 +606,11 @@ test('read-only content permits expanding and opening jobs without management co
  h.click('stage_toggle',{id:'t0'});await flush();assert.equal(stageButton(h,'t0').getAttribute('aria-expanded'),'true');
  const managed=['stage_edit','add_stage','add_job','job_menu','move_up','move_down','delete_node','summary_edit'];assert.equal(h.buttons.some(button=>managed.includes(button.dataset.authorAction)),false);assert.match(h.markup,/이 범위를 수정할 담당 권한이 없습니다/);h.click('node',{id:'j0-0'});await flush();assert.ok(h.forms['ew-author-node']);assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);
 });
+// Six changes: delete 1, add 2, rename 1, adjacent swap 1, settings 1.
+// The former eight also counted a deletion-induced shift and both sides of a swap.
 test('proposal changes are computed locally with deletions first and settings counts without raw JSON',async()=>{
- const h=harness(),value=stagedDefinition(2,2);installDefinition(h,value);const proposal=copy(value);delete proposal.nodes['j0-0'];proposal.nodes.t0.children=['j0-1'];proposal.nodes['j0-1'].name='변경된 작업 이름';proposal.nodes['j0-1'].instructions='제안된 수행 안내';proposal.nodes.t1.children.reverse();proposal.nodes.t2={id:'t2',type:'t',parent:'p',children:['j2-0'],name:'추가 단계',deps:[]};proposal.nodes['j2-0']={...copy(value.nodes['j0-0']),id:'j2-0',parent:'t2',name:'추가 작업'};proposal.nodes.p.children.push('t2');const diff=copy(h.helpers.proposalChanges(value,proposal));assert.equal(diff.otherCount,1);assert.equal(diff.count,8);assert.equal(diff.changes.filter(change=>change.kind==='added').length,2);assert.equal(diff.changes.filter(change=>change.kind==='removed').length,1);assert.equal(diff.changes[0].kind,'removed');assert.equal(diff.marks.t0,'changed');assert.equal(diff.marks['j0-1'],'changed');h.proposal(proposal);
- assert.match(h.markup,/업무 도우미 제안 · 반영 전/);assert.match(h.markup,/바뀌는 것/);assert.match(h.markup,/삭제/);assert.match(h.markup,/추가/);assert.match(h.markup,/변경된 작업 이름/);assert.match(h.markup,/그 밖의 설정 1곳/);assert.match(h.markup,/업무 도우미 수정 제안 · 8곳/);assert.doesNotMatch(h.markup,/<pre|&quot;nodes&quot;|&quot;instructions&quot;/);assert.ok(h.markup.indexOf('삭제')<h.markup.indexOf('추가 단계'));assert.equal(h.buttons.filter(button=>button.dataset.authorAction==='ai_discard').length,1);assert.equal(h.buttons.filter(button=>button.dataset.authorAction==='ai_apply').length,1);assert.deepEqual(h.draft().definition,value);assert.equal(h.writes.length,0);
+ const h=harness(),value=stagedDefinition(2,2);installDefinition(h,value);const proposal=copy(value);delete proposal.nodes['j0-0'];proposal.nodes.t0.children=['j0-1'];proposal.nodes['j0-1'].name='변경된 작업 이름';proposal.nodes['j0-1'].instructions='제안된 수행 안내';proposal.nodes.t1.children.reverse();proposal.nodes.t2={id:'t2',type:'t',parent:'p',children:['j2-0'],name:'추가 단계',deps:[]};proposal.nodes['j2-0']={...copy(value.nodes['j0-0']),id:'j2-0',parent:'t2',name:'추가 작업'};proposal.nodes.p.children.push('t2');const diff=copy(h.helpers.proposalChanges(value,proposal));assert.equal(diff.otherCount,1);assert.equal(diff.count,6);assert.equal(diff.changes.filter(change=>change.kind==='added').length,2);assert.equal(diff.changes.filter(change=>change.kind==='removed').length,1);assert.equal(diff.changes[0].kind,'removed');assert.equal(diff.marks.t0,'changed');assert.equal(diff.marks['j0-1'],'changed');h.proposal(proposal);
+ assert.match(h.markup,/업무 도우미 제안 · 반영 전/);assert.match(h.markup,/바뀌는 것/);assert.match(h.markup,/삭제/);assert.match(h.markup,/추가/);assert.match(h.markup,/변경된 작업 이름/);assert.match(h.markup,/그 밖의 설정 1곳/);assert.match(h.markup,/업무 도우미 수정 제안 · 6곳/);assert.doesNotMatch(h.markup,/<pre|&quot;nodes&quot;|&quot;instructions&quot;/);assert.ok(h.markup.indexOf('삭제')<h.markup.indexOf('추가 단계'));assert.equal(h.buttons.filter(button=>button.dataset.authorAction==='ai_discard').length,1);assert.equal(h.buttons.filter(button=>button.dataset.authorAction==='ai_apply').length,1);assert.deepEqual(h.draft().definition,value);assert.equal(h.writes.length,0);
  h.click('stage_toggle',{id:'t0'});await flush();assert.match(h.markup,/바뀜|삭제/);h.click('ai_apply');await flush();assert.deepEqual(h.draft().definition,proposal);assert.equal(h.draft().dirty,true);assert.equal(h.writes.length,0);
 });
 
@@ -643,4 +645,53 @@ test('proposal other settings initially collapse with counts and retain only the
  assert.match(h.markup,/<div class="ew-proposal-changes"><h3>바뀌는 것 1<\/h3>/);let other=h.host.querySelector('.ew-proposal-other');assert.ok(other);assert.equal(other.open,false);assert.match(h.markup,/<details class="ew-proposal-other"[^>]*><summary>[\s\S]*?그 밖의 설정 1곳/);assert.match(h.markup,/확인 작업 › 수행 안내/);assert.match(h.markup,/업무 도우미 수정 제안 · 1곳/);
  other.open=true;h.render();other=h.host.querySelector('.ew-proposal-other');assert.equal(other.open,true);assert.match(h.markup,/그 밖의 설정 1곳/);assert.equal(h.draft().dirty,false);
  const next=definition();next.nodes.j.instructions='두 번째 제안';next.description='업무 목적 제안';h.proposal(next);other=h.host.querySelector('.ew-proposal-other');assert.equal(other.open,false);assert.match(h.markup,/바뀌는 것 2/);assert.match(h.markup,/그 밖의 설정 2곳/);assert.match(h.markup,/업무 도우미 수정 제안 · 2곳/);assert.equal(h.writes.length,0);
+});
+
+
+test('proposal deletion and front insertion do not mark unchanged surviving siblings',async()=>{
+ const h=harness(),before=stagedDefinition(4,3);installDefinition(h,before);
+ const removed=copy(before);for(const id of ['t0',...before.nodes.t0.children])delete removed.nodes[id];removed.nodes.p.children.shift();
+ const diff=copy(h.helpers.proposalChanges(before,removed));assert.equal(diff.count,4);assert.equal(diff.changes.length,1);assert.equal(diff.changes[0].kind,'removed');assert.match(diff.changes[0].text,/작업 1-1.*작업 1-2.*작업 1-3/);
+ for(const id of ['t1','t2','t3'])assert.equal(diff.marks[id],undefined);
+ h.proposal(removed);assert.match(h.markup,/바뀌는 것 4/);for(const id of ['t1','t2','t3']){const row=h.markup.match(new RegExp('<section class="ew-content-stage" data-stage-id="'+id+'">([\\s\\S]*?)<\\/section>'))?.[1];assert.ok(row);assert.doesNotMatch(row,/ew-proposal-mark/);}
+ const added=copy(before);added.nodes.front={id:'front',type:'t',name:'맨 앞 단계',parent:'p',children:[],deps:[]};added.nodes.p.children.unshift('front');
+ const insertion=copy(h.helpers.proposalChanges(before,added));assert.equal(insertion.count,1);assert.equal(insertion.changes.length,1);assert.equal(insertion.changes[0].kind,'added');assert.equal(insertion.marks.t0,undefined);
+});
+
+test('proposal moves use an LCS of common siblings and count a parent move once',()=>{
+ const h=harness(),before=stagedDefinition(2,3),swapped=copy(before);swapped.nodes.t0.children=['j0-1','j0-0','j0-2'];
+ const diff=copy(h.helpers.proposalChanges(before,swapped));assert.equal(diff.count,1);assert.equal(diff.changes.filter(row=>row.kind==='changed').length,1);
+ const moved=copy(before);moved.nodes.t0.children.shift();moved.nodes.t1.children.unshift('j0-0');moved.nodes['j0-0'].parent='t1';
+ const parentDiff=copy(h.helpers.proposalChanges(before,moved));assert.equal(parentDiff.count,1);assert.equal(parentDiff.changes[0].id,'j0-0');assert.match(parentDiff.changes[0].text,/단계 2/);
+ const arrayBefore={...before,nodes:Object.values(before.nodes)},arrayAfter={...swapped,nodes:Object.values(swapped.nodes)};assert.equal(h.helpers.proposalChanges(arrayBefore,arrayAfter).count,1);
+});
+
+test('proposal groups added sibling jobs and orders deletions additions changes and settings',()=>{
+ const h=harness(),before=stagedDefinition(2,2),after=copy(before);delete after.nodes['j1-0'];after.nodes.t1.children.shift();after.nodes['j0-0'].name='이름 변경';after.nodes['j0-0'].instructions='설명 변경';
+ for(const [id,name] of [['new-a','A'],['new-b','B']]){after.nodes[id]={...copy(before.nodes['j0-0']),id,name,parent:'t1'};after.nodes.t1.children.push(id);}
+ const diff=copy(h.helpers.proposalChanges(before,after));assert.equal(diff.count,5);assert.deepEqual(diff.changes.map(row=>row.kind),['removed','added','changed','changed']);assert.equal(diff.changes[1].text,'작업 ‘A’ · ‘B’ — 단계 2');assert.equal(diff.marks['new-a'],'added');assert.equal(diff.marks['new-b'],'added');assert.equal(diff.changes.at(-1).text,'그 밖의 설정 1곳');
+});
+
+test('proposal stage deletion warns and cleans deadlines on apply while preserving unsaved and saved definitions',async()=>{
+ const h=harness(),before=stagedDefinition(2,2);before.schedule={stage_deadlines:{t0:{offset_days:-1},t1:{offset_days:1}},extension:'preserve'};installDefinition(h,before);
+ const after=copy(before);for(const id of ['t0',...before.nodes.t0.children])delete after.nodes[id];after.nodes.p.children.shift();
+ h.proposal(after);assert.match(h.markup,/기간 설정도 함께 지웁니다/);assert.deepEqual(h.draft().definition,before);h.click('ai_apply');await flush();
+ const draft=h.draft();assert.equal(Object.hasOwn(draft.definition.schedule.stage_deadlines,'t0'),false);assert.deepEqual(draft.definition.schedule.stage_deadlines.t1,{offset_days:1});assert.equal(draft.definition.schedule.extension,'preserve');assert.equal(draft.dirty,true);assert.deepEqual(h.workflows.get('w').draft,before);assert.deepEqual(after.schedule,before.schedule);assert.equal(h.writes.length,0);
+});
+
+test('closed job menu does not handle Escape and open menu returns focus to its trigger',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(1,2));h.click('stage_toggle',{id:'t0'});await flush();
+ const escape=()=>h.designer.handleEvent({type:'keydown',key:'Escape',target:{closest:selector=>selector==='#ees-work-designer'?h.host:selector==='.ew-job-menu,.ew-job-menu-button'?actionButton(h,'job_menu','j0-0'):null}});
+ actionButton(h,'job_menu','j0-0').focus();assert.deepEqual(copy(escape()),{handled:false,preventDefault:false});
+ h.click('job_menu',{id:'j0-0'});await flush();assert.deepEqual(copy(escape()),{handled:true,preventDefault:true});assert.doesNotMatch(h.markup,/class="ew-job-menu"/);assert.equal(h.document.activeElement.dataset.authorAction,'job_menu');assert.equal(h.document.activeElement.dataset.id,'j0-0');
+});
+
+test('stage reorder updates hidden live text without adding a visible notice and preserves scroll',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(4,2));h.click('stage_toggle',{id:'t1'});await flush();h.scroll.scrollTop=217;
+ h.click('move_down',{id:'t1'});await flush();assert.doesNotMatch(h.markup,/class="ew-author-note"/);assert.match(h.markup,/data-author-live aria-live="polite" aria-atomic="true">3번째로 옮겼습니다/);assert.equal(h.scroll.scrollTop,217);assert.equal(h.document.activeElement.dataset.id,'t1');
+ h.click('move_up',{id:'t1'});await flush();assert.match(h.markup,/data-author-live aria-live="polite" aria-atomic="true">2번째로 옮겼습니다/);assert.doesNotMatch(h.markup,/3번째로 옮겼습니다/);
+});
+
+test('new stage and job name fields show the Figma examples',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(1,1));h.click('add_stage');await flush();assert.match(h.markup,/name="name"[^>]*placeholder="예: 운영 인계"/);h.click('inline_cancel');await flush();h.click('stage_toggle',{id:'t0'});await flush();h.click('add_job',{parent:'t0'});await flush();assert.match(h.markup,/name="name"[^>]*placeholder="예: 설치 상태 확인"/);
 });
