@@ -42,6 +42,15 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.click('[data-action=tab][data-tab=current]')
         self.wait("document.querySelector('[data-action=tab][data-tab=current][aria-pressed=true]')")
 
+    def assert_only_selection_remembered(self, start):
+        # Tab changes legitimately persist private navigation after 400 ms.
+        # Every business mutation remains forbidden, including input saves.
+        for body in self.server.workspace_commands[start:]:
+            self.assertEqual(body.get('action'), 'save_ui', body)
+            self.assertEqual(set(body), {'action', 'expected_revision', 'request_id', 'state'}, body)
+            self.assertEqual(set(body['state']), {'selection'}, body)
+            self.assertIsInstance(body['state']['selection'], dict, body)
+
     def applied_inputs_evidence(self, hint, fields, label):
         self.assertEqual(self.text('.ew-input-proposal-applied'), '저장 전')
         self.assertEqual(self.text('.ew-input-applied-bar > p'), hint)
@@ -92,7 +101,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
                 self.click('.ew-input-applied-bar [data-action=discard_inputs]')
                 self.wait("document.querySelector('[data-work-input][name=note]')?.value === '서버에 저장된 값'")
                 self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-input-applied-bar,.ew-input-proposal-applied,.ew-input-proposal-source')"))
-                self.assertEqual(len(self.server.workspace_commands), writes, self.server.workspace_commands[writes:])
+                self.assert_only_selection_remembered(writes)
                 self.assertEqual(self.state(run_id=run['id'])['run'], before)
             # Scope changes clear both pending proposals and applied provenance.
             for applied in (False, True):
@@ -118,7 +127,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.click('[data-action=confirm_list]')
         self.wait("document.querySelector('#ees-work-panel [role=alert]')?.textContent.includes('업무 도우미 입력 제안을 먼저 반영하거나 버려 주세요.')")
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog')"))
-        self.assertEqual(len(self.server.workspace_commands), writes, self.server.workspace_commands[writes:])
+        self.assert_only_selection_remembered(writes)
         self.assertEqual(len(self.bridge.calls), calls)
         self.assertEqual(self.state(run_id=run['id'])['run'], before)
         self.screenshot('e2-pending-proposal-blocked-confirmation')
@@ -434,7 +443,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             self.assertEqual(json.loads(self.read('[data-work-input][name=stop]', 'value')), 'graceful')
             self.assertEqual(self.read('[data-work-input][name=wait]', 'value'), '60')
             self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-input-proposal-applied,.ew-input-proposal-source')"))
-            self.assertEqual(len(self.server.workspace_commands), writes, self.server.workspace_commands[writes:])
+            self.assert_only_selection_remembered(writes)
             self.assertEqual(self.state(run_id=run['id'])['run']['inputs'], {'target': 'SYNTHETIC-AP', 'stop': 'graceful', 'wait': 60})
         self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1366, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
         self.fill('#ees-request-reason', '합성 확인 사유')
