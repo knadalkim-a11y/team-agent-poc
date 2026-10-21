@@ -1,5 +1,11 @@
 # 현재 작업 상태
 
+## 2026-10-21 · PR #101 C61 동시 편집 안내
+
+- **현재 범위:** 미병합 `ce099f2`에서 같은 PR의 안내 위치·시점·취소 단추 3건만 변경한다. revision과 버퍼/최신 초안 보존·쓰기 차단은 유지한다. [계약](mockups/ees-work/TASK.md#work-content-chat-proposals-20261020).
+- **최초 검증:** 제품 수정 전 새 Node 17건 실패, 추가 경계를 원본 ce099f2로 확인한 22건 실패를 보존했다. 이름 오류로 쓰던 동시 편집 안내를 C61에 따라 즉시 폼 안내로 교체한다. 수정 후 관련 Node458 PASS·작성/일정 Python30 PASS·문서/diff를 통과했다. 실제 Native는 로컬 자료 부재로 SKIP이며 최종 CI에서 실행한다. [최초 실패·검증](../evals/v4-ui-20260930.md#work-content-chat-proposals-20261020).
+- **다음 하나:** 관련 시험·문서/diff·최종 head CI(native-compose)와 480/1366 예시13·14 캡처를 확인하고 같은 PR에 Claude 재검토 댓글 하나를 남긴다. 병합·main 직접 push·사내 적용·Figma 변경은 하지 않는다. 아래 기록은 이전 단계의 상태다.
+
 ## 2026-10-21 · PR #101 검토 수정
 
 - **현재 범위:** 같은 `feat/work-content-chat-proposals-20261020`의 `6b1944a`에서 사용자 수정 7건과 이름 안내를 반영한다. 위치 변경의 LCS 계산·묶음 목록, 제안 삭제의 기간 정리, A4a 입력 저장 전·되돌리기, 탭 왕복 보존, 메뉴 Escape·차단 안내·숨긴 순서 알림이다. [정정 계약](mockups/ees-work/TASK.md#work-content-chat-proposals-20261020).

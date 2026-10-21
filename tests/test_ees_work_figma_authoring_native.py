@@ -133,6 +133,80 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertFalse(any(body.get('action') in ('publish_workflow', 'start_run', 'schedule_save') for body in self.server.workspace_commands))
         self.screenshot('c44-manual-validation')
 
+        concurrency_evidence = []
+
+        def assert_unavailable_inline(message):
+            observed = self.browser.evaluate("""(() => {
+                const form=document.querySelector('#ew-stage-editor'), warning=form?.querySelector('#ew-stage-inline-warning');
+                const name=form?.querySelector('[name=name]');
+                return {warning:warning?.textContent,first:form?.firstElementChild===warning,
+                    alerts:form?.querySelectorAll('[role=alert]').length,
+                    invalid:name?.getAttribute('aria-invalid'),describedby:name?.getAttribute('aria-describedby'),
+                    error:!!form?.querySelector('#ew-stage-name-error'),
+                    actions:[...form.querySelectorAll('.ew-summary-actions [data-author-action]')].map(e=>e.dataset.authorAction),
+                    submit:!!form?.querySelector('[data-author-action=inline_apply]'),
+                    hint:!!form?.querySelector(':scope > .ew-author-muted'),text:form?.textContent};
+            })()""")
+            self.assertEqual(observed['warning'], message, observed)
+            self.assertTrue(observed['first'], observed)
+            self.assertEqual(observed['alerts'], 1, observed)
+            self.assertIsNone(observed['invalid'], observed)
+            self.assertIsNone(observed['describedby'], observed)
+            self.assertFalse(observed['error'], observed)
+            self.assertEqual(observed['actions'], ['inline_cancel'], observed)
+            self.assertFalse(observed['submit'], observed)
+            self.assertFalse(observed['hint'], observed)
+            self.assertNotIn('먼저 적용하거나', observed['text'])
+
+        def capture_unavailable_inline(label):
+            for width in (1366, 480):
+                self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+                self.wait('innerWidth === ' + str(width))
+                self.wait("""!document.querySelector('[data-ees-motion=opening],[data-ees-motion=closing]') &&
+                    [...document.querySelectorAll('#ees-work-designer')].every(surface=>
+                        surface.getAnimations({subtree:true}).every(animation=>!animation.pending&&animation.playState!=='running'))""")
+                self.browser.evaluate("document.querySelector('#ew-stage-inline-warning').scrollIntoView({block:'start',inline:'nearest'})")
+                warning_geometry = self.browser.evaluate("""(() => {
+                    const e=document.querySelector('#ew-stage-inline-warning'),r=e.getBoundingClientRect(),s=e.closest('.ew-author-scroll').getBoundingClientRect();
+                    return {top:r.top,bottom:r.bottom,height:r.height,withinScroll:r.top>=s.top-1&&r.bottom<=s.bottom+1,
+                        withinViewport:r.top>=0&&r.bottom<=innerHeight,
+                        hitTest:e.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2))};
+                })()""")
+                self.assertGreater(warning_geometry['height'], 0, warning_geometry)
+                for key in ('withinScroll', 'withinViewport', 'hitTest'):
+                    self.assertTrue(warning_geometry[key], warning_geometry)
+                self.screenshot(label + '-' + str(width))
+                # Keep a second capture if the complete action row is below the
+                # scroll viewport; all controls must be reachable, not clipped.
+                geometry = """(() => {
+                    const form=document.querySelector('#ew-stage-editor'),scroll=form.closest('.ew-author-scroll');
+                    const row=form.querySelector('.ew-summary-actions'),button=row.querySelector('[data-author-action=inline_cancel]');
+                    const bounds=e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};};
+                    const rect=bounds(row),hit=bounds(button),scrollRect=bounds(scroll),panelRect=bounds(document.querySelector('.ees-panel-region'));
+                    const contains=outer=>rect.left>=outer.left-1&&rect.right<=outer.right+1&&rect.top>=outer.top-1&&rect.bottom<=outer.bottom+1;
+                    return {viewport:[innerWidth,innerHeight],row:rect,scroll:scrollRect,panel:panelRect,
+                        withinScroll:contains(scrollRect),withinPanel:contains(panelRect),withinViewport:contains({left:0,right:innerWidth,top:0,bottom:innerHeight}),
+                        hitTest:button.contains(document.elementFromPoint((hit.left+hit.right)/2,(hit.top+hit.bottom)/2)),
+                        overflow:scroll.scrollWidth-scroll.clientWidth};
+                })()"""
+                observed = self.browser.evaluate(geometry)
+                if not all(observed[key] for key in ('withinScroll', 'withinPanel', 'withinViewport', 'hitTest')):
+                    self.browser.evaluate("document.querySelector('#ew-stage-editor .ew-summary-actions').scrollIntoView({block:'center',inline:'nearest'})")
+                    self.wait("""(() => {const e=document.querySelector('[data-author-action=inline_cancel]'),r=e.getBoundingClientRect();
+                        return e.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2));})()""")
+                    observed = self.browser.evaluate(geometry)
+                    capture_label = label + '-actions-' + str(width)
+                else:
+                    capture_label = label + '-' + str(width)
+                for key in ('withinScroll', 'withinPanel', 'withinViewport', 'hitTest'):
+                    self.assertTrue(observed[key], observed)
+                self.assertLessEqual(observed['overflow'], 1, observed)
+                observed.update(label=capture_label, warning=warning_geometry, warning_capture=label + '-' + str(width))
+                concurrency_evidence.append(observed)
+                directory = self.screenshot(capture_label)
+                (directory / 'e1-concurrent-inline-observations.json').write_text(
+                    json.dumps(concurrency_evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
         self.click('[data-author-action=tab][data-tab=content]')
         if self.read('[data-author-action=stage_toggle][data-id="' + stage_id + '"]', 'ariaExpanded') != 'true':
             self.click('[data-author-action=stage_toggle][data-id="' + stage_id + '"]')
@@ -145,16 +219,25 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         changed = self.command('save_draft', user=self.users['other-user'], workflow_id=identifier,
             expected_revision=checked['revision'], definition=remote)
         writes = len(self.server.workspace_commands)
+        self.click('#ew-stage-editor [name=description]')
         self.refresh()
         self.wait("document.querySelector('[data-author-status]')?.textContent.includes(" + json.dumps('r' + str(changed['revision'])) + ")")
         self.assertEqual(self.text('[data-stage-id="' + stage_id + '"] .ew-stage-name'), '다른 작성자의 최신 단계')
-        self.click('[data-author-action=inline_apply]')
-        self.wait("document.querySelector('#ew-stage-name-error')?.textContent.includes('저장된 초안이 바뀌었습니다.')")
+        # C61 replaces the obsolete click -> name-error expectation. The form
+        # becomes unavailable immediately, while both drafts remain protected.
+        stale_message = '저장된 초안이 바뀌었습니다. 입력한 내용은 보존했습니다. 취소한 뒤 최신 내용을 확인하고 다시 편집해 주세요.'
+        assert_unavailable_inline(stale_message)
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('#ew-stage-editor [name=description]')"))
         self.assertEqual(self.read('#ew-stage-editor [name=name]', 'value'), '이전 버전에서 작성한 단계 이름')
         self.assertEqual(self.read('#ew-stage-editor [name=description]', 'value'), '이전 버전에서 작성한 단계 설명')
-        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('#ew-stage-editor [name=name]')"))
-        self.screenshot('e1-stale-stage-buffer-preserved')
+        self.click('#ew-stage-editor [name=name]')
+        self.key('Enter', 13)
+        assert_unavailable_inline(stale_message)
+        self.assertEqual(self.state(workflow_id=identifier)['workflow']['draft'], remote)
+        self.assertEqual([body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui'], [])
+        capture_unavailable_inline('e1-stale-stage-buffer-preserved')
         self.click('[data-author-action=inline_cancel]')
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=stage_edit][data-id=" + json.dumps(stage_id) + "]')"))
         self.assertEqual(self.text('[data-stage-id="' + stage_id + '"] .ew-stage-name'), '다른 작성자의 최신 단계')
         self.assertIn('다른 작성자가 저장한 최신 설명', self.text('[data-stage-id="' + stage_id + '"] .ew-stage-description'))
         latest = self.state(workflow_id=identifier)['workflow']
@@ -173,14 +256,23 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         changed = self.command('save_draft', user=self.users['other-user'], workflow_id=identifier,
             expected_revision=latest['revision'], definition=removed)
         writes = len(self.server.workspace_commands)
+        self.browser.evaluate("document.querySelector('[data-author-action=inline_apply]').focus()")
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=inline_apply]')"))
         self.refresh()
         self.wait("document.querySelector('#ew-stage-editor')?.textContent.includes('편집하던 단계가 최신 초안에서 삭제되었습니다.')")
         self.assertGreater(self.browser.evaluate("document.querySelector('#ew-stage-editor').getBoundingClientRect().height"), 0)
-        self.click('[data-author-action=inline_apply]')
-        self.wait("document.querySelector('#ew-stage-name-error')?.textContent.includes('저장된 초안이 바뀌었습니다.')")
+        deleted_message = '편집하던 단계가 최신 초안에서 삭제되었습니다. 입력한 내용은 보존했습니다. 필요하면 복사한 뒤 취소해 주세요.'
+        assert_unavailable_inline(deleted_message)
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=inline_cancel]')"))
+        self.assertNotIn('저장된 초안이 바뀌었습니다.', self.text('#ew-stage-editor'))
         self.assertEqual(self.read('#ew-stage-editor [name=name]', 'value'), '삭제 전에 작성한 단계 이름')
         self.assertEqual(self.browser.evaluate("document.querySelectorAll('.ew-content-stage').length"), 0)
-        self.screenshot('e1-deleted-stage-buffer-preserved')
+        self.click('#ew-stage-editor [name=name]')
+        self.key('Enter', 13)
+        assert_unavailable_inline(deleted_message)
+        self.assertEqual(self.state(workflow_id=identifier)['workflow']['draft'], removed)
+        self.assertEqual([body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui'], [])
+        capture_unavailable_inline('e1-deleted-stage-buffer-preserved')
         self.click('[data-author-action=inline_cancel]')
         self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=add_stage]')"))
         latest = self.state(workflow_id=identifier)['workflow']
