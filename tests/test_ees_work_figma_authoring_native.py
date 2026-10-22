@@ -220,7 +220,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.wait("document.querySelector('.ew-author-validation')")
             self.assertTrue(self.state(workflow_id=key)['workflow']['validation']['errors'])
             self.assertTrue(self.read('[data-author-action=publish]', 'disabled'))
-            self.click('[data-author-action=node][data-id=""]')
+            # Validation renders its own tab. Return through the real content
+            # tab before opening the saved job detail for the round-trip checks.
+            self.click('[data-author-action=tab][data-tab=content]')
             self.open_author_job_ui('job-0')
             self.assertIn('고정값 · 설치 가이드', self.text('[data-argument-id=query]'))
             self.click('[data-author-action=job_argument][data-id=limit]')
@@ -234,6 +236,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.wait("document.querySelector('[data-author-action=publish]')?.disabled===false")
             self.assertEqual(self.state(workflow_id=key)['workflow']['validation']['errors'], [])
             saved_tool = deepcopy(self.state(workflow_id=key)['workflow'])
+            self.click('[data-author-action=tab][data-tab=content]')
+            self.open_author_job_ui('job-0')
             writes = len(self.server.workspace_commands)
             # B3-6b: a changed synthetic installed-tool fingerprint must show
             # the canonical server message without losing configured arguments.
@@ -842,6 +846,24 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.key('Escape', 27)
             self.wait("!document.querySelector('#ees-work-dialog') && document.activeElement?.matches('[data-author-action=stage_menu][data-id=stage-0]')")
             self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=stage_menu][data-id=stage-0]')"))
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-stage-id=stage-0] [role=menu]')"))
+            # A physical cancel click travels through the document click handler;
+            # cover it separately from Escape without mutating the saved draft.
+            before_cancel = deepcopy(self.state(workflow_id=key)['workflow'])
+            before_cancel_text = self.text('.ew-work-content')
+            cancel_writes = len(self.server.workspace_commands)
+            self.click('[data-author-action=stage_menu][data-id=stage-0]')
+            self.click('[data-author-action=delete_node][data-id=stage-0]')
+            self.wait("document.querySelector('#ees-work-dialog[open]')")
+            self.click('#ees-work-dialog [data-dialog-cancel]')
+            self.wait("!document.querySelector('#ees-work-dialog') && document.activeElement?.matches('[data-author-action=stage_menu][data-id=stage-0]')")
+            self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=stage_menu][data-id=stage-0]')"))
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-stage-id=stage-0] [role=menu]')"))
+            self.assertEqual(self.read('[data-author-action=stage_toggle][data-id=stage-0]', 'ariaExpanded'), 'true')
+            self.assertEqual(self.text('.ew-work-content'), before_cancel_text)
+            self.assertIn('변경 있음 · 저장 안 됨', self.text('[data-author-status]'))
+            self.assertEqual(self.state(workflow_id=key)['workflow'], before_cancel)
+            self.assertEqual([body for body in self.server.workspace_commands[cancel_writes:] if body.get('action') != 'save_ui'], [])
             self.click('[data-author-action=add_stage]')
             self.assertEqual(self.read('#ew-stage-editor [name=name]', 'placeholder'), '예: 운영 인계')
             capture('e1-c2-stage-add-' + str(width))
