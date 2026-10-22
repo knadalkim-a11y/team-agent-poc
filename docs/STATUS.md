@@ -1,5 +1,11 @@
 # 현재 작업 상태
 
+## 2026-10-22 · main 1c1efff 사내 적용 준비
+
+- **현재 원본:** #101까지 main `1c1efff8abe19da3e6e8921859b52858fc6cacfb`에 병합됐다. main [CI 39694472521 / #326](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39694472521) 첫 시도 40개 작업 성공·native-compose 81 PASS와 프로그램 ZIP을 확인했다. 준비 착수 시 열린 PR은 0개였다. 아래 #101 재검토·병합 대기는 당시 상태다.
+- **사내 적용:** 사용자 확인 `d4f18069db6ca6ac2804d5ed3007a840b71a72a9` 유지. 이번 #90~#101 통합 적용·기동·새 공용 도구 설정은 **미실행**이다. C64·C65는 사용자 설명에 따른 설계 정정이며 이번 제품 코드 변경·Figma 수정은 없다.
+- **다음 하나:** [확정 ZIP을 넣은 2,500자 이내 한 블록](03-openwebui-native-agent.md#main-1c1efff-apply-prep-20261022)을 Claude가 실행 전에 대조한다. 실제 바깥 ZIP 크기·해시·내부 manifest, d4f1806 대비 동일 Apply/Restore 경로, Work 등록 원본 읽기 확인·Confluence 초기 설정·Restore 뒤 새 자료의 사용 제한을 함께 검토한다. [근거와 검사](../evals/v4-ui-20260930.md#main-1c1efff-apply-evidence-20261022). 이 문서 준비 PR은 병합하지 않고 사내 실행·도구 변경도 하지 않는다.
+
 ## 2026-10-21 · PR #101 C61 동시 편집 안내
 
 - **현재 범위:** 미병합 `ce099f2`에서 같은 PR의 안내 위치·시점·취소 단추 3건만 변경한다. revision과 버퍼/최신 초안 보존·쓰기 차단은 유지한다. [계약](mockups/ees-work/TASK.md#work-content-chat-proposals-20261020).

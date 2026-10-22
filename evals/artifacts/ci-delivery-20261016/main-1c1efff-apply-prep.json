@@ -1,0 +1,111 @@
+{
+  "observed_at_kst": "2026-10-22T11:46:29.795439+09:00",
+  "source_main": "1c1efff8abe19da3e6e8921859b52858fc6cacfb",
+  "installed_user_report": "d4f18069db6ca6ac2804d5ed3007a840b71a72a9",
+  "main_run": 39694472521,
+  "main_jobs_success": 40,
+  "native_compose_pass": 81,
+  "artifact": {
+    "id": 12391585139,
+    "outer_bytes": 155237507,
+    "outer_sha256": "30ae32d6b69aca9c86b3a492cbb46a85868232f5ea6aa3d2bde38356a3dac41e",
+    "inner_name": "EES-demo-1c1efff8abe1.zip",
+    "inner_bytes": 155237343,
+    "inner_sha256": "af9f66687b79ae2427eb7394e9cd9b9d418c6ada2c9bce96f04912bf30493d6b",
+    "both_crc_valid": true,
+    "existing_bundle_validator": "PASS"
+  },
+  "delivery_block": {
+    "LF_chars": 2442,
+    "CRLF_chars": 2483,
+    "sha256_utf8": "3a525c2559aae4356787296fbf9ee17e86a5b2c29ba9a8f37898d4f39110e316",
+    "source_anchor": "main-1c1efff-apply-prep-20261022"
+  },
+  "byte_comparison": [
+    {
+      "path": "scripts/manage-ees.ps1",
+      "identical": true,
+      "bytes": 8736,
+      "sha256": "94f59450a2980d728ebf007e89cdb0f1acfee77b509c4ee747b3366402b33e82"
+    },
+    {
+      "path": "scripts/manage_ees.py",
+      "identical": true,
+      "bytes": 55662,
+      "sha256": "53b4c197c5d5d147c19f45f2530aaa1fb371c646240abe1ebba90a87a894c9e7"
+    },
+    {
+      "path": "scripts/ees_upgrade.py",
+      "identical": true,
+      "bytes": 27013,
+      "sha256": "8d71a2560a1ef79af3eba3f9f41d338da27ab805bc32591438fa9504fb962fac"
+    },
+    {
+      "path": "scripts/ees_update_download.py",
+      "identical": true,
+      "bytes": 14248,
+      "sha256": "1badaa06186dce96fb3a5fdeaec6df9af490be91bd94be33c080154c9da75a97"
+    },
+    {
+      "path": "scripts/build_demo_bundle.py",
+      "identical": true,
+      "bytes": 11078,
+      "sha256": "fa286c3581b9f1c84ed924c173dd544dc238db496e247b5dbc12cdc201652f2f"
+    },
+    {
+      "path": "agent-pack/skills/ees-work-demo/scripts/workflow_tool.py",
+      "identical": true,
+      "bytes": 12161,
+      "sha256": "c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085"
+    },
+    {
+      "path": "agent-pack/skills/confluence-read/scripts/confluence_tool.py",
+      "identical": true,
+      "bytes": 19326,
+      "sha256": "1820a07b67b630f041c0d4fa7dbdc9ba84186866309942f35fa6a74e91f31dde"
+    }
+  ],
+  "compatibility_probes": [
+    {
+      "file_name": "ees_restore_compat_probe.py",
+      "source_path": "/tmp/ees_restore_compat_probe.py",
+      "sha256": "d32c97ab4322bfce21d80f9fa7d9ebf0a96e9fc59b7bc85b39c12205f60d11c8",
+      "text": "import asyncio,importlib,io,json,sqlite3,subprocess,sys,tarfile,tempfile\nfrom pathlib import Path\nfrom types import ModuleType\nfrom uuid import uuid4\nROOT=Path('/workspace/scratch/690395b7dc56/repo')\nTMP=tempfile.TemporaryDirectory(prefix='ees-restore-compat-');td=Path(TMP.name)\nblob=subprocess.check_output(['git','archive','d4f1806','agent-pack/skills/ees-work-demo/scripts'],cwd=ROOT)\nwith tarfile.open(fileobj=io.BytesIO(blob)) as archive: archive.extractall(td,filter='data')\ndef load(name,path):\n package=ModuleType(name);package.__path__=[str(path)];sys.modules[name]=package\n return importlib.import_module(name+'.ees_workflow')\nold=load('ees_restore_old',td/'agent-pack/skills/ees-work-demo/scripts')\nnew=load('ees_restore_new',ROOT/'agent-pack/skills/ees-work-demo/scripts')\nuser={'id':'admin','role':'admin'}; db=td/'work.sqlite3'\ndef service(module): return module.WorkflowService(db,lambda _:user,lambda _:{'user_id':'admin'},group_lookup=lambda _:[],group_list_lookup=lambda:[])\nasync def cmd(s,action,revision=0,**kw):\n r=await s.workspace_command(user,dict(action=action,request_id=str(uuid4()),expected_revision=revision,**kw));assert r['ok'],r;return r\nasync def main():\n n=service(new); r=await cmd(n,'create_workflow',name='Restore compatibility synthetic',system_id='EMS');wid=r['workflow_id'];d=r['workflow']['draft'];root=next(iter(d['nodes']));d['nodes'][root]['children']=['t'];d['nodes']['t']={'id':'t','type':'t','name':'Stage','parent':root,'children':['j'],'deps':[]};d['nodes']['j']={'id':'j','type':'j','name':'Human job','parent':'t','children':[],'deps':[],'mode':'human','result_block':'human_confirm','inputs':[{'id':'value','name':'value','type':'text','scope':'run'}]};d['authoring_review']={'inputs':True,'rules':True};d['mode']='periodic';d['schedule']={'frequency':'daily','interval':1,'timezone':'UTC','anchor':'2026-10-22T10:00:00','name_template':'{date} cycle','opening':'on_schedule','closing':'after_last_stage','non_working_days':'notify_no_shift','catch_up':'miss','stage_deadlines':{'t':{'offset_days':-1,'end_offset_days':1}}}\n await cmd(n,'save_draft',1,workflow_id=wid,definition=d)\n result=await cmd(n,'validate_workflow',2,workflow_id=wid);assert not result['validation']['errors'],result\n await cmd(n,'publish_workflow',2,workflow_id=wid)\n started=await cmd(n,'start_run',3,workflow_id=wid,inputs={'value':'new saved input'})\n run_id=started['run']['id']\n with sqlite3.connect(db) as con:\n  con.execute('INSERT INTO work_initial_procedures VALUES(?,?,?)',('EMS','admin','synthetic'))\n  tables_before={r[0] for r in con.execute(\"select name from sqlite_master where type='table'\")}\n o=service(old); state=await o.workspace_state(user,workflow_id=wid,run_id=run_id);assert state['ok'],state\n assert state['workflow']['draft']==d\n assert state['run']['inputs']['value']=='new saved input'\n assert state['run']['definition']['authoring_review']==d['authoring_review']\n assert state['run']['definition']['schedule']==d['schedule']\n d2=json.loads(json.dumps(d));d2['name']='Edited by restored program';await cmd(o,'save_draft',3,workflow_id=wid,definition=d2)\n check=await cmd(o,'validate_workflow',4,workflow_id=wid);assert not check['validation']['errors'],check\n await cmd(o,'publish_workflow',4,workflow_id=wid)\n started_old=await cmd(o,'start_run',5,workflow_id=wid,inputs={'value':'old saved input'});assert started_old['run']['definition']['authoring_review']==d2['authoring_review'];assert started_old['run']['definition']['schedule']==d2['schedule'];assert started_old['run']['inputs']['value']=='old saved input'\n definition_differences={k:{'expected':d2.get(k),'actual':started_old['run']['definition'].get(k)} for k in set(d2)|set(started_old['run']['definition']) if d2.get(k)!=started_old['run']['definition'].get(k)}\n assert started_old['run']['definition']==dict(d2,resource_versions={'skills':{}})\n print(json.dumps({'fixture_exact_equality_difference':definition_differences,'exact_comparison_with_publication_metadata':'PASS'},ensure_ascii=False))\n with sqlite3.connect(db) as con:\n  assert tables_before=={r[0] for r in con.execute(\"select name from sqlite_master where type='table'\")}\n  assert con.execute('select count(*) from work_initial_procedures').fetchone()[0]==1\n  schemas={table:con.execute('select * from '+table).fetchall() for table in ['work_schema','work_operations_schema']}\n print(json.dumps({'result':'PASS','old':'d4f1806','new':'1c1efff','checked':['old startup on current initialized DB','read new workflow/run/input','authoring_review and periodic schedule preserved','old save+validate+publish+start_run','additive tables+initial marker preserved'],'schema':schemas,'limits':'Synthetic temporary SQLite only. No real Native program Apply/Restore or shared-tool execution.'},ensure_ascii=False,indent=2))\nasyncio.run(main())\n"
+    },
+    {
+      "file_name": "ees_restore_compat_probe.out",
+      "source_path": "/tmp/ees_restore_compat_probe.out",
+      "sha256": "1b0e5127ad04468a7150fb5497a6e69dadf8fea04db65dc25c6cd965b1aecc3a",
+      "text": "{\"fixture_exact_equality_difference\": {\"resource_versions\": {\"expected\": null, \"actual\": {\"skills\": {}}}}, \"exact_comparison_with_publication_metadata\": \"PASS\"}\n{\n  \"result\": \"PASS\",\n  \"old\": \"d4f1806\",\n  \"new\": \"1c1efff\",\n  \"checked\": [\n    \"old startup on current initialized DB\",\n    \"read new workflow/run/input\",\n    \"authoring_review and periodic schedule preserved\",\n    \"old save+validate+publish+start_run\",\n    \"additive tables+initial marker preserved\"\n  ],\n  \"schema\": {\n    \"work_schema\": [\n      [\n        1,\n        2\n      ]\n    ],\n    \"work_operations_schema\": [\n      [\n        1,\n        1\n      ]\n    ]\n  },\n  \"limits\": \"Synthetic temporary SQLite only. No real Native program Apply/Restore or shared-tool execution.\"\n}\n"
+    },
+    {
+      "file_name": "probe.py",
+      "source_path": "/tmp/ees-shared-restore-compat/probe.py",
+      "sha256": "71a9071db559053cdc8f43cfd8af6d5b9d68c49edf43c404884acb22a721c20f",
+      "text": "\"\"\"Synthetic SQLite roundtrip. No Native/Confluence execution or real assets.\nPinned source: new 1c1efff; restored program: d4f1806.\n\"\"\"\nimport asyncio, copy, importlib, io, json, subprocess, sys, tarfile, types\nfrom pathlib import Path\nfrom uuid import uuid4\nROOT=Path('/workspace/scratch/690395b7dc56/repo')\nOUT=Path('/tmp/ees-shared-restore-compat')\nSOURCE='agent-pack/skills/ees-work-demo/scripts'\nREPORT=[]\ndef record(name, **data):\n    REPORT.append({'check':name,**data}); print(json.dumps(REPORT[-1],ensure_ascii=False))\ndef module(revision):\n    dest=OUT/revision; dest.mkdir(exist_ok=True)\n    raw=subprocess.check_output(['git','archive',revision,SOURCE],cwd=ROOT)\n    with tarfile.open(fileobj=io.BytesIO(raw)) as archive: archive.extractall(dest,filter='data')\n    package=types.ModuleType('shared_compat_'+revision); package.__path__=[str(dest/SOURCE)]; sys.modules[package.__name__]=package\n    return importlib.import_module(package.__name__+'.ees_workflow')\ndef j(value): return json.dumps(value,ensure_ascii=False,sort_keys=True)\ndef insert(db,table,values):\n    db.execute('INSERT INTO '+table+'('+','.join(values)+') VALUES('+','.join('?' for _ in values)+')',tuple(values.values()))\nclass SyntheticNativePermission:\n    def __init__(self): self.checks=[]\n    async def check(self,actor,reference): self.checks.append(copy.deepcopy(reference))\nasync def main():\n    newmod,oldmod=module('1c1efff'),module('d4f1806')\n    dbpath=OUT/('fixture-'+uuid4().hex+'.sqlite3')\n    actor={'id':'compat-admin','role':'admin'}\n    users=lambda key: actor if key==actor['id'] else None\n    lookups={'group_lookup':lambda key:[],'group_list_lookup':lambda:[]}\n    new=newmod.WorkflowService(dbpath,users,lambda key:None,**lookups)\n    async def command(service, action,revision=0,**values):\n        result=await service.workspace_command(actor,dict(action=action,expected_revision=revision,request_id='compat-'+uuid4().hex,**values))\n        assert result['ok'],result\n        return result\n    created=await command(new,'create_workflow',system_id='EMS',name='Synthetic Confluence shared query')\n    wid=created['workflow_id']; definition=copy.deepcopy(created['workflow']['draft']); root=next(iter(definition['nodes']))\n    definition['nodes'][root]['children']=['t1']\n    definition['nodes']['t1']={'id':'t1','type':'t','name':'Synthetic stage','parent':root,'children':['search','page'],'deps':[]}\n    for jobid,function,key,value,block in [('search','search_pages','query','Synthetic search text','list_confirm'),('page','get_page','page_id','synthetic-123','human_confirm')]:\n        sid='managed-'+function\n        definition['nodes'][jobid]={'id':jobid,'type':'j','name':jobid,'parent':'t1','children':[],'deps':[],'mode':'tool','result_block':block,'human_confirmation':True,'shared_tool_id':sid,'inputs':[{'id':key,'name':key,'type':'text','required':True,'scope':'run','source':{'shared_tool_id':sid}}],'argument_bindings':{key:{'input':key}},'shared_tool_generated':{'shared_tool_id':sid,'argument_bindings':{key:{'input':key}},'previous_result_block':'human_confirm','result_block':block}}\n    saved=await command(new,'save_draft',1,workflow_id=wid,definition=definition)\n    new_state=await new.workspace_state(actor,workflow_id=wid)\n    assert new_state['workflow']['draft']==definition\n    record('new_service_save_shared_search_and_page',ok=True,revision=saved['revision'])\n    # Fixture rows represent already saved query results; no external tool executes.\n    runid='synthetic-run'; now='2026-10-22T00:00:00+00:00'; inputs={'query':'Synthetic search text','page_id':'synthetic-123'}\n    runvalues=dict(id=runid,workflow_id=wid,version=1,system_id='EMS',factory_id='',owner=actor['id'],sharing=j({'group_ids':[]}),mode='on_demand',status='completed',revision=1,inputs=j(inputs),snapshot=j({'definition':definition,'definition_hash':__import__('hashlib').sha256(j(definition).encode()).hexdigest(),'factory':None,'condition_results':{}}),created_at=now,updated_at=now,closed_at=now)\n    expected_results={}\n    with new._db(write=True) as db:\n        insert(db,'work_versions',dict(workflow_id=wid,version=1,definition=j(definition),hash=__import__('hashlib').sha256(j(definition).encode()).hexdigest(),publisher=actor['id'],published_at=now))\n        insert(db,'work_runs',runvalues)\n        for jobid,function in [('search','search_pages'),('page','get_page')]:\n            sid='managed-'+function; reference={'tool_id':'synthetic-confluence','function':function,'content_hash':'synthetic-hash'}\n            registry={'id':sid,'version':1,'revision':1,'function':function,'reference':reference,'state':'available','group_ids':['synthetic-group']}\n            pin={key:registry[key] for key in ('id','version','reference')}\n            insert(db,'work_shared_tools',dict(id=sid,revision=1,data=j(registry)))\n            insert(db,'work_shared_tool_versions',dict(tool_id=sid,version=1,data=j(registry)))\n            insert(db,'work_shared_tool_pins',dict(run_kind='work',run_id=runid,tool_id=sid,data=j(pin)))\n            run=db.execute('SELECT * FROM work_runs WHERE id=?',(runid,)).fetchone()\n            snapshot=new._work_snapshot(db,run,jobid)\n            result={'items':[{'id':'synthetic-123','title':'Synthetic stored search result','url':'https://example.invalid/wiki/synthetic-123'}],'complete':True} if jobid=='search' else {'id':'synthetic-123','title':'Synthetic stored page','body':'Synthetic stored content','url':'https://example.invalid/wiki/synthetic-123'}\n            expected_results[jobid]=result\n            insert(db,'work_attempts',dict(id='attempt-'+jobid,run_id=runid,job_id=jobid,number=1,actor_id=actor['id'],inputs=j(snapshot['inputs']),snapshot=j(snapshot),status='succeeded',result=j(result),created_at=now,finished_at=now))\n            insert(db,'work_jobs',dict(run_id=runid,job_id=jobid,status='completed',revision=1,current_attempt='attempt-'+jobid,claim_actor=None,reason=''))\n    protected=['work_shared_tools','work_shared_tool_versions','work_shared_tool_pins','work_versions','work_runs','work_jobs','work_attempts']\n    def rows(service):\n        with service._db() as db: return {table:[dict(row) for row in db.execute('SELECT * FROM '+table+' ORDER BY rowid')] for table in protected}\n    before=rows(new)\n    bridge=SyntheticNativePermission()\n    old=oldmod.WorkflowService(dbpath,users,lambda key:None,native_bridge=bridge,**lookups)\n    state=await old.workspace_state(actor,workflow_id=wid,run_id=runid)\n    assert state['ok'],state\n    assert state['workflow']['draft']==definition\n    actual_results={item['job_id']:item['result'] for item in state['run']['attempts']}\n    assert actual_results==expected_results,(actual_results,expected_results)\n    record('old_service_read_shared_query_and_saved_results',ok=True,full_draft_equal=True,results_equal=True,native_permission_checks=len(bridge.checks),native_permission='synthetic allow; shared registry group/state is not checked by old code')\n    edited=copy.deepcopy(state['workflow']['draft']); edited['name']='Synthetic renamed only'\n    saved_old=await command(old,'save_draft',2,workflow_id=wid,definition=edited)\n    after=rows(old)\n    assert before==after\n    with old._db() as db: raw=json.loads(db.execute('SELECT draft FROM work_definitions WHERE id=?',(wid,)).fetchone()[0])\n    assert raw==edited\n    assert raw['nodes']==definition['nodes']\n    record('old_service_save_roundtrip_no_silent_deletion',ok=True,full_saved_draft_equal=True,nodes_unchanged=True,protected_tables_unchanged=protected,revision=saved_old['revision'])\n    errors,warnings=importlib.import_module(oldmod.__package__+'.ees_workflow_workspace').definition_check(edited)\n    assert len(errors)==2 and all('검증된 Native 도구 참조가 필요합니다.' in error for error in errors),errors\n    record('old_complete_validation_rejects_shared_only_jobs',errors=errors)\n    # Explicitly query-only fake bridge above never implements/executes a tool.\n    record('scope',database=str(dbpath),actual_new_and_old_service_commands=True,synthetic_result_rows_seeded=True,real_native_or_confluence_execution=False,external_requests=0,claims_exclude_browser_ui_and_real_acl=True)\n    (OUT/'report.json').write_text(json.dumps(REPORT,ensure_ascii=False,indent=2)+'\\n')\nasyncio.run(main())\n"
+    },
+    {
+      "file_name": "report.json",
+      "source_path": "/tmp/ees-shared-restore-compat/report.json",
+      "sha256": "44d80e29b45d862025e9e4f8d03e829c43858cd5b7c98f1d4609adc08a829894",
+      "text": "[\n  {\n    \"check\": \"new_service_save_shared_search_and_page\",\n    \"ok\": true,\n    \"revision\": 2\n  },\n  {\n    \"check\": \"old_service_read_shared_query_and_saved_results\",\n    \"ok\": true,\n    \"full_draft_equal\": true,\n    \"results_equal\": true,\n    \"native_permission_checks\": 2,\n    \"native_permission\": \"synthetic allow; shared registry group/state is not checked by old code\"\n  },\n  {\n    \"check\": \"old_service_save_roundtrip_no_silent_deletion\",\n    \"ok\": true,\n    \"full_saved_draft_equal\": true,\n    \"nodes_unchanged\": true,\n    \"protected_tables_unchanged\": [\n      \"work_shared_tools\",\n      \"work_shared_tool_versions\",\n      \"work_shared_tool_pins\",\n      \"work_versions\",\n      \"work_runs\",\n      \"work_jobs\",\n      \"work_attempts\"\n    ],\n    \"revision\": 3\n  },\n  {\n    \"check\": \"old_complete_validation_rejects_shared_only_jobs\",\n    \"errors\": [\n      \"search: 검증된 Native 도구 참조가 필요합니다.\",\n      \"page: 검증된 Native 도구 참조가 필요합니다.\"\n    ]\n  },\n  {\n    \"check\": \"scope\",\n    \"database\": \"/tmp/ees-shared-restore-compat/fixture-2b158bf5d0294072a78a91601a93e77f.sqlite3\",\n    \"actual_new_and_old_service_commands\": true,\n    \"synthetic_result_rows_seeded\": true,\n    \"real_native_or_confluence_execution\": false,\n    \"external_requests\": 0,\n    \"claims_exclude_browser_ui_and_real_acl\": true\n  }\n]\n"
+    },
+    {
+      "file_name": "first-probe-error.txt",
+      "source_path": "/tmp/ees-shared-restore-compat/first-probe-error.txt",
+      "sha256": "5a1d6b7fb6ae1c1e344046d29a20bb31485dae0237814412239625d4eed25930",
+      "text": "Traceback (most recent call last):\n  File \"/tmp/ees-shared-restore-compat/probe.py\", line 92, in <module>\n    asyncio.run(main())\n  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py\", line 195, in run\n    return runner.run(main)\n           ^^^^^^^^^^^^^^^^\n  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py\", line 118, in run\n    return self._loop.run_until_complete(task)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py\", line 691, in run_until_complete\n    return future.result()\n           ^^^^^^^^^^^^^^^\n  File \"/tmp/ees-shared-restore-compat/probe.py\", line 44, in main\n    assert saved['workflow']['draft']==definition\n           ~~~~~^^^^^^^^^^^^\nKeyError: 'workflow'\n"
+    }
+  ],
+  "limits": [
+    "Synthetic temporary SQLite; no company execution or assets",
+    "Shared stored result rows seeded, Native permission is synthetic",
+    "No true program Restore, browser, Confluence or actual ACL validation",
+    "Local PowerShell absent; exact guide block parser and length check added to existing Windows CI loop"
+  ],
+  "related_tests": {
+    "command": "python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_upgrade.UpgradeDeploymentTests.test_browser_artifact_uses_same_transaction_without_credentials_or_network tests.test_ees_upgrade.UpgradeDeploymentTests.test_browser_bad_digest_or_wrong_checkout_never_stops_or_changes_original tests.test_ees_webui_customization.CustomizationTests.test_pre_shared_tools_ees14_apply_restore_and_strict_incoming_inventory -v",
+    "pass": 3,
+    "fail": 0
+  }
+}
