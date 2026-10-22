@@ -1,6 +1,6 @@
 # 03. Open WebUI Native 통합 Assistant
 
-현재 제품 이름은 **EES Workflow**이며 [2026-10-02 통합 구현 기준](#integrated-work-install-20261002)을 유지한다. 사용자 확인 사내 적용본은 main `d4f1806`이다. 최신 [main 1c1efff 적용 준비](#main-1c1efff-apply-prep-20261022)는 Claude 대조용이며 **사내 적용 미실행**이다. 아래 42cc756·#88/#89 및 날짜별 적용·시연·ApplyDemo 안내는 당시 기록으로 보존하며 현재 실행 목록으로 반복하지 않는다. 실제 도구/Native 관리와 기존 Apply/Restore 경로는 유지한다.
+현재 제품 이름은 **EES Workflow**이며 [2026-10-02 통합 구현 기준](#integrated-work-install-20261002)을 유지한다. 최신 사용자 보고의 사내 설치 커밋 접두어는 main `2a4b82a5f482`(#96)와 일치한다. 최신 [main 1c1efff 적용 준비](#main-1c1efff-apply-prep-20261022)는 검토 뒤 사용자 시도에서 설치 기준 불일치로 사전 중단됐으며 **1c1efff 적용 미실행**이다. 아래 42cc756·#88/#89 및 날짜별 적용·시연·ApplyDemo 안내는 당시 기록으로 보존하며 현재 실행 목록으로 반복하지 않는다. 실제 도구/Native 관리와 기존 Apply/Restore 경로는 유지한다.
 
 > 문서 역할: Native Assistant 기준선 구성·확장 원칙
 >
@@ -25,7 +25,7 @@
 
 ## main 1c1efff 사내 적용 준비 · 2026-10-22
 
-**Claude 대조용이며 아직 실행하지 않는다.** 사용자 확인 사내 적용본은 `d4f18069db6ca6ac2804d5ed3007a840b71a72a9`이고, 이번 대상은 #90~#101이 함께 들어 있는 `1c1efff8abe19da3e6e8921859b52858fc6cacfb`다. [main CI 39694472521 / #326](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39694472521)는 첫 시도 40개 작업 모두 성공했고 native-compose 81 PASS(C44 27개 포함)다. C64·C65는 사용자 설명에 따른 설계 정정이며 이번에 제품 코드·Figma를 바꾸지 않는다. 사내 적용·기동·새 기능 설정은 **미실행**이다.
+**2026-10-22 설치 기준 정정:** 사용자는 Claude 검토 뒤 실행했으나 `EES before commit=2a4b82a5f482… valid=true running=true`로 사전 중단됐다고 보고했다. 이는 #96 병합 main `2a4b82a5f482b6b1677b40cad171589c71bae13f`와 일치한다. 최초 준비는 `d4f18069db6ca6ac2804d5ed3007a840b71a72a9`를 전제로 했지만 실제 기준은 더 최신이다. 아래 블록의 예상 설치 SHA만 정정하며 목표는 `1c1efff8abe19da3e6e8921859b52858fc6cacfb` 그대로다. 남은 main 변경은 #100·#101이다. [main CI 39694472521 / #326](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39694472521)는 첫 시도 40개 작업 모두 성공했고 native-compose 81 PASS(C44 27개 포함)다. 첫 시도는 Update·Stop·Apply 전이므로 **1c1efff 적용·기동 미실행**이며 Restore는 필요하지 않다. C64·C65는 사용자 설명에 따른 설계 정정이고 이번 제품 코드·Figma 변경은 없다.
 
 | 대조 항목 | 확정 값 |
 |---|---|
@@ -41,14 +41,14 @@
 검토 뒤 사용자가 적용을 승인한 때, 필요한 제안 반영·입력을 먼저 명시적으로 저장하고 팀원이 사용하지 않는 시간에 기존 운영 계정 PowerShell에서 아래 **한 블록**을 사용한다. 기존 경로가 다르면 `$er`(저장소)·`$ecfg`(등록 설정)·`$ed`(다운로드 폴더)만 맞춘다. 브라우저가 열리면 원래 ZIP 이름으로 새 다운로드를 마친다. 블록은 새 파일/같은 이름의 `(숫자)` 파일만 15분 기다리고 두 번 연속 파일 상태·정확한 크기·해시를 확인한다. 다른 설치 원본, 무효/미완료 설치, 검토 SHA와 다른 HEAD/origin/main이면 Stop 전에 중단한다. main이 더 진행됐어도 강제 reset하거나 최신 ZIP으로 임의 대체하지 않는다.
 
 ```powershell
-# Claude 대조용·실행 미승인. 검토 뒤 기존 운영 계정에서만 사용.
+# 실제 설치 기준 정정. 기존 운영 계정에서만 사용.
 # 적용 전 필요한 제안·입력을 명시적으로 저장.
 # #95 후에도 바깥 ZIP→Upgrade(검사·Stop·백업·Apply·Start), Restore 절차 동일.
 # 적용 후: 새로고침·로그인/기존 대화·Native 왕복·저장된 업무·입력 확인.
 # 공장·접근 범위 > Work 도구 설정 확인: 이번 파일 동일. ready 확인만, 변경/재등록 금지.
 # 도구·공용: Confluence 페이지 찾기/읽기 각각 입력·결과, 그룹·담당·근거 확인, Native 읽기 권한·본인 PAT 필요.
 # 설정 전 '확인 전'; 팀원 '쓸 수 있는 공용 도구가 없습니다.' 가능. 못 씀이면 원인 확인.
-# Restore는 DB/PAT/도구 설정을 되돌리지 않음. d4f1806에서 공용 도구 작업·일부 결과 확정 회차는 사용 중단.
+# Restore는 직전 2a4b82a 프로그램만 복원. DB/PAT/도구 설정은 되돌리지 않음.
 # 회신 1~2줄: result/stage/running/commit + 화면·도구 설정 확인 결과. 실패 시 재실행하지 않음.
 & {
 $ErrorActionPreference='Stop'
@@ -74,7 +74,7 @@ $ev=$es; Start-Sleep -Seconds 2
 if(!$ez){throw 'ZIP 대기 만료: 미적용'}
 if((Get-FileHash -LiteralPath $ez -Algorithm SHA256).Hash -ine $eh){throw 'ZIP 해시 불일치: 미적용'}
 $eb=& $em -Action Status -Config $ecfg | ConvertFrom-Json
-if($eb.program_valid -ne $true -or $eb.program_incomplete -or $eb.current_commit -cne 'd4f18069db6ca6ac2804d5ed3007a840b71a72a9'){throw ('EES before commit={0} valid={1} running={2}' -f $eb.current_commit,$eb.program_valid,$eb.managed_process_running)}
+if($eb.program_valid -ne $true -or $eb.program_incomplete -or $eb.current_commit -cne '2a4b82a5f482b6b1677b40cad171589c71bae13f'){throw ('EES before commit={0} valid={1} running={2}' -f $eb.current_commit,$eb.program_valid,$eb.managed_process_running)}
 & $em -Action Update -Config $ecfg
 foreach($ex in @('HEAD','origin/main')){
 $ea=& git -C $er rev-parse $ex
@@ -96,7 +96,9 @@ if($LASTEXITCODE -ne 0 -or $ea -cne $ec){throw '검토 원본 불일치: 미적�
 
 Confluence 페이지 조회를 사용할 때는 관리자가 **워크스페이스 → 도구(도구 · 공용) → Confluence 페이지 찾기 / 페이지 읽기**에서 두 함수를 각각 설정한다. **입력·결과 확인**에서 원본·연결·입력/결과를 대조하고, **쓸 수 있는 그룹** 1개 이상·담당 1명·8~2,000자의 검토 근거를 직접 정한 뒤 확인하면 v1 **쓸 수 있음**이 된다. 관리자의 사용에도 그룹 소속이 필요하다. 상세의 **연결 설정 → Open WebUI 도구**에서 같은 그룹의 기존 Confluence 도구 **읽기 권한**, 연결 활성화·주소·허용 공간·개인 설정 암호화를 따로 확인한다. 각 사용자는 **자기 기존 개인 PAT**를 사용한다. 공용 그룹 지정만으로 Native 권한이 생기지 않으며 공용 PAT를 만들지 않는다. 이 설명은 향후 관리자 설정 절차이며 이번 준비에서 설정·권한·등록 코드를 변경하지 않았다. [관리자 상세 안내](#shared-tools-admin-20261016)와 [ST-AUTH/ADMIN 규칙](specs/shared-tools.md#shared-tools)을 따른다.
 
-**Restore와 새 자료의 호환 범위:** 프로그램 Restore는 DB·대화·첨부·PAT·Native 등록 도구·공용 도구 확인 기록을 되돌리지 않는다. 이번 저장 변화는 기존 work schema 2 / operations schema 1 위에 초기 워크플로우 중복 생성 방지 표와 공용 도구 확인·버전·회차 고정 표, 작업/회차 필드를 추가하는 방식이다. 이전 프로그램의 원본·새 DB를 이용한 합성 대조 결과와 한계는 [적용 준비 근거](../evals/v4-ui-20260930.md#main-1c1efff-apply-evidence-20261022)에 남겼다.
+**현재 Restore 대상과 자료:** 이번 적용이 성공한 뒤 직전 프로그램 Restore 대상은 `2a4b82a`다. `2a4b82a..1c1efff`의 운영 Update/Upgrade/Apply/Restore 코드와 업무 Python 백엔드는 모두 동일하며 두 버전 모두 `0.11.3+ees.14`다. 공용 도구·부분 결과 지원은 이미 2a4b82a에 들어 있다. 아래 d4f1806의 미지원 제한을 현재 Restore에 그대로 적용하지 않는다. Restore는 DB·PAT·Native 등록/공용 설정을 되돌리지 않으며, 실제 PC 자료의 왕복 검증 완료를 뜻하지 않는다.
+
+**최초 d4f1806 기준 호환 조사(당시 기록):** 프로그램 Restore는 DB·대화·첨부·PAT·Native 등록 도구·공용 도구 확인 기록을 되돌리지 않는다. 이번 저장 변화는 기존 work schema 2 / operations schema 1 위에 초기 워크플로우 중복 생성 방지 표와 공용 도구 확인·버전·회차 고정 표, 작업/회차 필드를 추가하는 방식이다. 이전 프로그램의 원본·새 DB를 이용한 합성 대조 결과와 한계는 [적용 준비 근거](../evals/v4-ui-20260930.md#main-1c1efff-apply-evidence-20261022)에 남겼다.
 
 | 새 자료 | d4f1806으로 프로그램 Restore한 뒤 |
 |---|---|

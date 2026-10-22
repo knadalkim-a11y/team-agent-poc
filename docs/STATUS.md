@@ -3,8 +3,8 @@
 ## 2026-10-22 · main 1c1efff 사내 적용 준비
 
 - **현재 원본:** #101까지 main `1c1efff8abe19da3e6e8921859b52858fc6cacfb`에 병합됐다. main [CI 39694472521 / #326](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39694472521) 첫 시도 40개 작업 성공·native-compose 81 PASS와 프로그램 ZIP을 확인했다. 준비 착수 시 열린 PR은 0개였다. 아래 #101 재검토·병합 대기는 당시 상태다.
-- **사내 적용:** 사용자 확인 `d4f18069db6ca6ac2804d5ed3007a840b71a72a9` 유지. 이번 #90~#101 통합 적용·기동·새 공용 도구 설정은 **미실행**이다. C64·C65는 사용자 설명에 따른 설계 정정이며 이번 제품 코드 변경·Figma 수정은 없다.
-- **다음 하나:** [확정 ZIP을 넣은 2,500자 이내 한 블록](03-openwebui-native-agent.md#main-1c1efff-apply-prep-20261022)을 Claude가 실행 전에 대조한다. 실제 바깥 ZIP 크기·해시·내부 manifest, d4f1806 대비 동일 Apply/Restore 경로, Work 등록 원본 읽기 확인·Confluence 초기 설정·Restore 뒤 새 자료의 사용 제한을 함께 검토한다. [근거와 검사](../evals/v4-ui-20260930.md#main-1c1efff-apply-evidence-20261022). 이 문서 준비 PR은 병합하지 않고 사내 실행·도구 변경도 하지 않는다.
+- **사내 적용·최초 시도:** 2026-10-22 사용자가 Claude 검토 후 실행했고 `EES before commit=2a4b82a5f482… valid=true running=true`로 중단됐다고 보고했다. 접두어는 #96 병합 main `2a4b82a5f482b6b1677b40cad171589c71bae13f`와 일치한다. 최초 준비의 d4f1806 기준이 실제보다 오래돼 Update·Stop·Apply **전**에 차단됐다. 1c1efff 적용·새 기동·설정 변경은 **미실행**이며 보고 당시 기존 프로그램은 유효·실행 중이다. 실제 PC 파일·DB를 직접 확인한 것은 아니다.
+- **다음 하나:** [설치 기준을 실제 2a4b82a로 정정한 한 블록](03-openwebui-native-agent.md#main-1c1efff-apply-prep-20261022)을 사용하고 기존 `result/stage/running/commit` 1~2줄로 적용 결과를 받는다. 목표 ZIP·해시·정상/미완료 설치 검사·정확한 SHA 비교는 유지한다. 남은 main 변경은 #100·#101이며 운영/업무 Python 코드는 동일하다. [최초 중단과 근거](../evals/v4-ui-20260930.md#main-1c1efff-apply-evidence-20261022). 이 문서 PR 병합과 에이전트의 사내 실행·도구 변경은 하지 않는다.
 
 ## 2026-10-21 · PR #101 C61 동시 편집 안내
 
