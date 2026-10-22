@@ -2,11 +2,11 @@
 
 ## 2026-10-22 · C66 업무 내용·작업 상세 1단계
 
-- **현재 범위:** #101 병합 main `1c1efff8abe19da3e6e8921859b52858fc6cacfb`에서 별도 `feat/work-content-job-detail-c66-20261022`, [Draft PR #103](https://github.com/knadalkim-a11y/team-agent-poc/pull/103)으로 화면만 구현한다. [계약](mockups/ees-work/TASK.md#work-content-job-detail-c66-20261022) · [최초 실패·검증](../evals/v4-ui-20260930.md#work-content-job-detail-c66-20261022). 아래 #101 재검토 문구는 당시 기록이다.
+- **현재 범위:** #101 병합 main `1c1efff8abe19da3e6e8921859b52858fc6cacfb`에서 별도 `feat/work-content-job-detail-c66-20261022`, [PR #103](https://github.com/knadalkim-a11y/team-agent-poc/pull/103)의 화면 구현·제품 검증을 완료했다. [계약](mockups/ees-work/TASK.md#work-content-job-detail-c66-20261022) · [최초 실패·검증](../evals/v4-ui-20260930.md#work-content-job-detail-c66-20261022). 아래 #101 재검토 문구는 당시 기록이다.
 - **별도 적용 문서:** [PR #102](https://github.com/knadalkim-a11y/team-agent-poc/pull/102)는 섞지 않는다. 적용 전 출력에서 확인된 기존 프로그램은 `2a4b82a5f482…`, valid/running=true이며 `1c1efff` 적용 성공은 아직 보고되지 않았다. 이번 C66의 사내 실행·적용은 **미실행**이다. 겹치는 STATUS·가이드·평가/변경 기록은 #102를 먼저 병합한 뒤 이 PR에 main을 통합하며 함께 보존한다.
-- **첫 CI·보완:** `2eaee68`의 CI39749317764는 36작업 성공이며 Native 구성의 5 FAIL/1 ERROR로 실패했다. 새 화면 경로·비동기 준비·150ms 닫기 완료를 검사하도록 시험을 고치고, 삭제 취소 뒤 ⋯ 포커스와 실제 화면의 공통 CSS 간격/테두리/상태색을 보완했다. 추가 삭제 취소 단언은 수정 전1 PASS/2 FAIL, 수정 후 관련 Node507 PASS다. 첫 실패·미도달한 480 화면은 평가에 보존한다.
-- **후속 CI:** `aeae92d`의 CI39756628022는 Native82 PASS/1 FAIL이다. 실제 Enter·완료 조건 재개·상수 저장/게시 검사·B3-6b·읽기 전용과 새 하단 캡처는 통과했다. D5 초기 포커스의 새 시험 기대를 기존 공통 dialog 본문에 정확히 맞추고 안내/출력 순서를 원본대로 정리한다. D5 확인 뒤 정리·B480은 후속 head에서 검증하며, 앞선 실패와 미도달 범위는 평가에 보존했다.
-- **다음 하나:** 같은 #103에서 보완한 새·기존 시험, 480/1366 실제 화면과 Figma 대조, 문서/diff와 최종 head 전체 CI를 확인한다. 완료한 PR은 사용자가 병합하며 main 직접 push·사내 적용·Figma/API/저장 형식 변경은 하지 않는다.
+- **검증:** 제품 head `537cda97799dabcaa62e07324ce481f32587b170`의 [CI39759230676/#334](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39759230676)는 39작업 성공/PR 배포 준비1생략이다. Native 구성83/83·작성29/29, 관련 Node507 PASS이며 D5 취소/정리·상수 왕복/게시 검사·기존 자료·공장 초기화·메뉴/포커스를 통과했다. 480/1366 실제 단계32장·작업 상세26장과 Figma 대조, 하단 단추 가시성·넘침0을 [증거 색인](../evals/artifacts/work-content-job-detail-c66-20261022/ci334-evidence.json)에 보존했다. 최초 실패와 #330~333의 미도달 범위·수정 이유는 평가에 그대로 남겼다.
+- **남은 경계:** 서버 오류에 구조화 인자 ID가 없어 게시 오류의 개별 입력 줄 연결은 후속이다. 기존 전체 오류 안내를 유지하며 문구 파싱/API·저장·검증기 변경은 없다. 실제 사내 도구/모델 연결·사용자 사용성 확인은 이번 합성 Native 검증에 포함하지 않는다.
+- **다음 하나:** 사용자가 #103의 최종 head Checks와 실제 화면을 검토하고 병합한다. 제품 검증 뒤 증거·문서만 추가한 최종 커밋의 전체 CI 결과는 같은 PR Checks를 원본으로 확인한다. #102 선병합 시 최신 main을 통합해 양쪽 기록을 보존하고 통합 head를 다시 검증한다. main 직접 push·사내 적용·Figma/API/저장 형식 변경은 하지 않는다.
 
 ## 2026-10-21 · PR #101 C61 동시 편집 안내
 
