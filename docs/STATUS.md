@@ -4,7 +4,8 @@
 
 - **현재 범위:** #101 병합 main `1c1efff8abe19da3e6e8921859b52858fc6cacfb`에서 별도 `feat/work-content-job-detail-c66-20261022`, [Draft PR #103](https://github.com/knadalkim-a11y/team-agent-poc/pull/103)으로 화면만 구현한다. [계약](mockups/ees-work/TASK.md#work-content-job-detail-c66-20261022) · [최초 실패·검증](../evals/v4-ui-20260930.md#work-content-job-detail-c66-20261022). 아래 #101 재검토 문구는 당시 기록이다.
 - **별도 적용 문서:** [PR #102](https://github.com/knadalkim-a11y/team-agent-poc/pull/102)는 섞지 않는다. 적용 전 출력에서 확인된 기존 프로그램은 `2a4b82a5f482…`, valid/running=true이며 `1c1efff` 적용 성공은 아직 보고되지 않았다. 이번 C66의 사내 실행·적용은 **미실행**이다. 겹치는 STATUS·가이드·평가/변경 기록은 #102를 먼저 병합한 뒤 이 PR에 main을 통합하며 함께 보존한다.
-- **첫 CI·보완:** `2eaee68`의 CI39749317764는 36작업 성공이며 Native 구성의 5 FAIL/1 ERROR로 실패했다. 새 화면 경로·비동기 준비·150ms 닫기 완료를 검사하도록 시험을 고치고, 삭제 취소 뒤 ⋯ 포커스와 실제 화면의 공통 CSS 간격/테두리/상태색을 보완했다. 추가 삭제 취소 단언은 수정 전1 PASS/2 FAIL, 수정 후 관련 Node505 PASS다. 첫 실패·미도달한 480 화면은 평가에 보존한다.
+- **첫 CI·보완:** `2eaee68`의 CI39749317764는 36작업 성공이며 Native 구성의 5 FAIL/1 ERROR로 실패했다. 새 화면 경로·비동기 준비·150ms 닫기 완료를 검사하도록 시험을 고치고, 삭제 취소 뒤 ⋯ 포커스와 실제 화면의 공통 CSS 간격/테두리/상태색을 보완했다. 추가 삭제 취소 단언은 수정 전1 PASS/2 FAIL, 수정 후 관련 Node507 PASS다. 첫 실패·미도달한 480 화면은 평가에 보존한다.
+- **후속 CI:** `ed81754`의 CI39753379041는 Native82 PASS/1 FAIL이다. 단계480/1366·공장·삭제 취소·기존 C44는 통과했다. 완료 조건 Enter 재개는 시험 입력의 문자 이벤트 누락을 보완하며 제품 키 동작은 유지한다. B3의 미도달 상태와 실제 테두리·행 높이·하단 캡처 보완을 같은 PR에서 검증한다.
 - **다음 하나:** 같은 #103에서 보완한 새·기존 시험, 480/1366 실제 화면과 Figma 대조, 문서/diff와 최종 head 전체 CI를 확인한다. 완료한 PR은 사용자가 병합하며 main 직접 push·사내 적용·Figma/API/저장 형식 변경은 하지 않는다.
 
 ## 2026-10-21 · PR #101 C61 동시 편집 안내

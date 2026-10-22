@@ -237,8 +237,13 @@ class IntegratedNativeCase(unittest.TestCase):
 
     def key(self, key, code, modifiers=0):
         for kind in ('keyDown', 'keyUp'):
-            self.browser.call('Input.dispatchKeyEvent', {'type': kind, 'key': key, 'code': key,
-                'windowsVirtualKeyCode': code, 'nativeVirtualKeyCode': code, 'modifiers': modifiers})
+            event = {'type': kind, 'key': key, 'code': key,
+                'windowsVirtualKeyCode': code, 'nativeVirtualKeyCode': code, 'modifiers': modifiers}
+            # Chromium activates native buttons on Enter's keypress character.
+            # A key code without text omits that event in the CDP transport.
+            if kind == 'keyDown' and key == 'Enter' and not modifiers:
+                event.update(text='\r', unmodifiedText='\r')
+            self.browser.call('Input.dispatchKeyEvent', event)
 
     def fill(self, selector, value):
         self.click(selector); self.key('a', 65, 2)

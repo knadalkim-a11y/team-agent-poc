@@ -31,6 +31,24 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
 
     def test_c66_job_methods_arguments_d5_and_read_only_at_480_and_1366(self):
         """C66 uses real controls/SQLite; installed Confluence metadata is synthetic."""
+        # Verify the browser's own Enter activation independently of product
+        # handlers; this temporary bare button exists only in the test fixture.
+        self.browser.evaluate("""(() => {
+            const button=document.createElement('button');button.id='c66-native-enter-probe';
+            button.type='button';button.textContent='Native Enter 검증';
+            button.style.cssText='position:fixed;top:8px;left:8px;z-index:2147483647';
+            button.events=[];for(const type of ['keydown','keypress','click','keyup'])
+                button.addEventListener(type,event=>button.events.push({type:event.type,key:event.key||'',charCode:event.charCode||0,trusted:event.isTrusted}));
+            document.body.append(button);
+        })()""")
+        self.click('#c66-native-enter-probe')
+        self.browser.evaluate("document.querySelector('#c66-native-enter-probe').events=[]")
+        self.key('Enter', 13)
+        enter_probe = self.browser.evaluate("document.querySelector('#c66-native-enter-probe').events")
+        self.browser.evaluate("document.querySelector('#c66-native-enter-probe').remove()")
+        self.assertEqual(len([event for event in enter_probe if event['type'] == 'click']), 1, enter_probe)
+        self.assertEqual([event['charCode'] for event in enter_probe if event['type'] == 'keypress'], [13], enter_probe)
+        self.assertTrue(all(event['trusted'] for event in enter_probe), enter_probe)
         native = importlib.import_module(self.backend.__package__ + '.ees_workflow_native')
         source = (Path(__file__).resolve().parents[1] / 'agent-pack/skills/confluence-read/scripts/confluence_tool.py').read_text(encoding='utf-8')
         schemas = {
@@ -72,15 +90,20 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 const scroll=document.querySelector('.ew-author-scroll'), active=document.activeElement,
                     cards=[...document.querySelectorAll('.ew-job-detail #ew-author-node > .ew-job-card')],
                     unconnected=document.querySelector('.ew-job-main>.ew-procedure-unconnected'),
-                    picker=document.querySelector('.ew-job-main .ew-shared-picker>summary,.ew-job-main select[name=tool_contract_id]');
+                    picker=document.querySelector('.ew-job-main .ew-shared-picker,.ew-job-main select[name=tool_contract_id]');
                 return {viewport:[innerWidth,innerHeight],overflow:scroll.scrollWidth-scroll.clientWidth,
                     method:document.querySelector('.ew-job-method [name=mode]:checked')?.value,
                     focus:{action:active?.dataset.authorAction,id:active?.dataset.id,name:active?.name},
                     sections:[...document.querySelectorAll('[data-author-action=job_section]')].map(e=>({id:e.dataset.id,expanded:e.getAttribute('aria-expanded'),disabled:e.disabled})),
                     arguments:[...document.querySelectorAll('.ew-job-argument')].map(e=>({id:e.dataset.argumentId,text:e.innerText})),
+                    argumentGeometry:[...document.querySelectorAll('.ew-job-argument')].map(e=>{
+                        const toggle=e.querySelector('.ew-job-argument-toggle'),name=toggle.querySelector('strong'),summary=toggle.querySelector(':scope>span>small');
+                        const singleLine=[name,summary].every(text=>text.getBoundingClientRect().height<=parseFloat(getComputedStyle(text).lineHeight)+1);
+                        return {id:e.dataset.argumentId,normalCollapsed:toggle.getAttribute('aria-expanded')==='false'&&singleLine&&!e.querySelector('.ew-job-argument-required,.ew-job-argument-error'),
+                            rowHeight:e.getBoundingClientRect().height,toggleHeight:toggle.getBoundingClientRect().height,borderTop:parseFloat(getComputedStyle(e).borderTopWidth)};}),
                     factoryTabs:document.querySelectorAll('.ew-author-factories').length,
                     methodLabels:[...document.querySelectorAll('.ew-job-method label span')].map(e=>e.textContent),
-                    unconnectedColors:unconnected?{notice:getComputedStyle(unconnected).color,pickerBorder:picker?getComputedStyle(picker).borderColor:null}:null,
+                    unconnectedColors:unconnected?{notice:getComputedStyle(unconnected).color,pickerBorder:picker?getComputedStyle(picker).borderColor:null,pickerBorderWidth:picker?parseFloat(getComputedStyle(picker).borderTopWidth):null}:null,
                     sectionMargins:[...document.querySelectorAll('.ew-job-detail section+section')].map(e=>({className:e.className,marginTop:parseFloat(getComputedStyle(e).marginTop)})),
                     cardGaps:cards.slice(1).map((e,i)=>({before:cards[i].className,after:e.className,gap:e.getBoundingClientRect().top-cards[i].getBoundingClientRect().bottom})),
                     toggleBorders:[...document.querySelectorAll('.ew-job-detail .ew-job-argument-toggle,.ew-job-detail .ew-job-section-toggle')].map(e=>{
@@ -93,19 +116,25 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertEqual(observed['factoryTabs'], 0, observed)
             self.assertEqual(observed['methodLabels'], ['사람이 확인', '도구로 처리', 'AI 초안'])
             if observed['unconnectedColors'] is not None:
-                self.assertEqual(observed['unconnectedColors'], {'notice': 'rgb(150, 89, 12)', 'pickerBorder': 'rgb(150, 89, 12)'})
+                self.assertEqual(observed['unconnectedColors'], {'notice': 'rgb(150, 89, 12)', 'pickerBorder': 'rgb(150, 89, 12)', 'pickerBorderWidth': 1})
             # First CI showed inherited section margins (36 px card gap) and
             # generic button borders. Keep the C66 geometry independently checked.
             for section in observed['sectionMargins']:
                 self.assertEqual(section['marginTop'], 0, section)
             for gap in observed['cardGaps']:
                 self.assertAlmostEqual(gap['gap'], 12, delta=1, msg=gap)
+            for row in observed['argumentGeometry']:
+                if row['normalCollapsed']:
+                    self.assertAlmostEqual(row['toggleHeight'], 59, delta=1, msg=row)
+                    self.assertEqual(row['borderTop'], 1, row)
+                    self.assertAlmostEqual(row['rowHeight'], 60, delta=1, msg=row)
             for toggle in observed['toggleBorders']:
                 self.assertEqual(toggle['widths'], [0, 0, 0, 0], toggle)
                 self.assertEqual(toggle['radii'], [0, 0, 0, 0], toggle)
             observed['label'] = label; observations.append(observed)
             directory = self.screenshot(label)
             (directory / 'c66-job-detail-observations.json').write_text(json.dumps(observations, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+            (directory / 'c66-native-enter-events.json').write_text(json.dumps(enter_probe, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
         for width in (1366, 480):
             self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1366, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
@@ -182,6 +211,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertTrue(self.read('[name=human_required]', 'checked'))
             self.assertIn('항상 자동으로 확인', self.text('#ew-job-section-completion'))
             capture('c66-b3-completion-' + str(width))
+            self.browser.evaluate("document.querySelector('#ew-job-section-completion').scrollIntoView({block:'end',inline:'nearest'})")
+            self.assertTrue(self.browser.evaluate("document.querySelector('#ew-job-section-completion').getBoundingClientRect().bottom<=document.querySelector('.ew-author-scroll').getBoundingClientRect().bottom+1"))
+            self.assertTrue(self.browser.evaluate("(()=>{const box=document.querySelector('[name=human_required]').getBoundingClientRect(),scroll=document.querySelector('.ew-author-scroll').getBoundingClientRect();return box.top>=scroll.top&&box.bottom<=scroll.bottom;})()"))
+            capture('c66-b3-completion-bottom-' + str(width))
             self.key('Escape', 27)
             self.wait("document.querySelector('[data-author-action=job_section][data-id=completion]')?.getAttribute('aria-expanded')==='false'")
             self.assertEqual(self.read('[data-author-action=job_section][data-id=completion]', 'ariaExpanded'), 'false')
@@ -717,6 +750,23 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
             return observed
 
+        def capture_inline_bottom(label):
+            self.browser.evaluate("document.querySelector('#ew-stage-editor').scrollIntoView({block:'end',inline:'nearest'})")
+            geometry = self.browser.evaluate("""(() => {
+                const form=document.querySelector('#ew-stage-editor'),scroll=document.querySelector('.ew-author-scroll').getBoundingClientRect(),box=form.getBoundingClientRect();
+                return {formBottom:box.bottom,scrollBottom:scroll.bottom,bottomVisible:box.bottom<=scroll.bottom+1,
+                    buttons:[...form.querySelectorAll('.ew-summary-actions button')].map(button=>{
+                        const r=button.getBoundingClientRect();return {action:button.dataset.authorAction,top:r.top,bottom:r.bottom,
+                            withinScroll:r.top>=scroll.top&&r.bottom<=scroll.bottom,
+                            hitTest:button.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2))};})};
+            })()""")
+            self.assertTrue(geometry['bottomVisible'], geometry)
+            self.assertEqual(len(geometry['buttons']), 2, geometry)
+            for button in geometry['buttons']:
+                self.assertTrue(button['withinScroll'], geometry)
+                self.assertTrue(button['hitTest'], geometry)
+            capture(label, {'inlineBottom': geometry})
+
         for width in (1366, 480):
             # Establish the authoring destination while its sidebar is exposed.
             # At 480 px the open overlay correctly covers that sidebar; all
@@ -867,6 +917,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.click('[data-author-action=add_stage]')
             self.assertEqual(self.read('#ew-stage-editor [name=name]', 'placeholder'), '예: 운영 인계')
             capture('e1-c2-stage-add-' + str(width))
+            capture_inline_bottom('e1-c2-stage-add-bottom-' + str(width))
             self.click('[data-author-action=inline_apply]')
             self.assertIn('단계 이름을 입력해 주세요.', self.text('#ew-stage-editor'))
             capture('e1-example6-empty-name-' + str(width))
@@ -878,6 +929,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.click('[data-author-action=add_job]')
             self.assertEqual(self.read('#ew-stage-editor [name=name]', 'placeholder'), '예: 설치 상태 확인')
             capture('e1-example5-job-add-' + str(width))
+            capture_inline_bottom('e1-example5-job-add-bottom-' + str(width))
             self.key('Escape', 27)
             self.click('[data-author-action=help][data-id=stages_and_jobs]')
             self.wait("document.querySelector('#ees-work-help')")
