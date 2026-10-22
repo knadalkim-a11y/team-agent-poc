@@ -519,7 +519,7 @@ jobs:
         if: runner.os == 'Windows' && matrix.suite == 'platform'
         run: python -X warn_default_encoding -W error::EncodingWarning tests/ees_workflow_windows_diagnostics.py --output dist/ees-windows-diagnostics --previous-wheel $env:EES_TEST_PREVIOUS_WORKFLOW_WHEEL --previous-source $env:EES_TEST_PREVIOUS_WORKFLOW_SOURCE
       - name: Parse the Windows PowerShell entry point
-        if: runner.os == 'Windows' && matrix.suite == 'platform'
+        if: always() && runner.os == 'Windows' && matrix.suite == 'platform'
         shell: powershell
         run: |
           $tokens = $null

@@ -107,5 +107,36 @@
     "command": "python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_upgrade.UpgradeDeploymentTests.test_browser_artifact_uses_same_transaction_without_credentials_or_network tests.test_ees_upgrade.UpgradeDeploymentTests.test_browser_bad_digest_or_wrong_checkout_never_stops_or_changes_original tests.test_ees_webui_customization.CustomizationTests.test_pre_shared_tools_ees14_apply_restore_and_strict_incoming_inventory -v",
     "pass": 3,
     "fail": 0
+  },
+  "first_document_ci_failure": {
+    "run": 39713423774,
+    "job": 119611540638,
+    "head": "974e597bc78b8d7f0fe3578fc89251bafe8c9422",
+    "failure": "2026-10-22T03:00:46.8377966Z FAIL: test_another_process_can_stop_saved_identity (test_ees_deploy_process.DeployProcessTests.test_another_process_can_stop_saved_identity)\r\n2026-10-22T03:00:46.8378922Z ----------------------------------------------------------------------\r\n2026-10-22T03:00:46.8379480Z Traceback (most recent call last):\r\n2026-10-22T03:00:46.8387804Z   File \"D:\\a\\team-agent-poc\\team-agent-poc\\tests\\test_ees_deploy_process.py\", line 192, in test_another_process_can_stop_saved_identity\r\n2026-10-22T03:00:46.8388885Z     self.assertEqual(completed.returncode, 0, completed.stderr.decode(errors='replace'))\r\n2026-10-22T03:00:46.8389535Z AssertionError: 1 != 0 : Traceback (most recent call last):\r\n2026-10-22T03:00:46.8389864Z \r\n2026-10-22T03:00:46.8390060Z   File \"<string>\", line 1, in <module>\r\n2026-10-22T03:00:46.8390314Z \r\n2026-10-22T03:00:46.8390798Z   File \"D:\\a\\team-agent-poc\\team-agent-poc\\scripts\\ees_deploy_process.py\", line 711, in stop_server\r\n2026-10-22T03:00:46.8391293Z \r\n2026-10-22T03:00:46.8391443Z     raise failure from None\r\n2026-10-22T03:00:46.8391635Z \r\n2026-10-22T03:00:46.8392144Z m.ProcessError: Graceful stop failed; inspect the saved operation details.\r\n2026-10-22T03:00:46.8392526Z \r\n2026-10-22T03:00:46.8392530Z \r\n2026-10-22T03:00:46.8392572Z \r\n2026-10-22T03:00:46.8392762Z ----------------------------------------------------------------------\r\n2026-10-22T03:00:46.8393210Z Ran 67 tests in 33.516s\r\n2026-10-22T03:00:46.8393422Z \r\n2026-10-22T03:00:46.8393562Z FAILED (failures=1)\r\n2026-10-22T03:00:47.1550118Z test_active_or_uncertain_deployment_is_never_renamed (test_ees_deploy_recover.CachedWheelRecoveryTests.test_active_or_uncertain_deployment_is_never_renamed) ... ok\r\n2026-10-22T03:00:47.2471732Z test_already_prepared_rechecks_without_duplicate_rename (test_ees_deploy_recover.CachedWheelRecoveryTests.test_already_prepared_rechecks_without_duplicate_rename) ... ok\r\n2026-10-22T03:00:47.2806568Z test_existing_operation_lock_blocks_recovery (test_ees_deploy_recover.CachedWheelRecoveryTests.test_existing_operation_lock_blocks_recovery) ... ok\r\n2026-10-22T03:00:47.3202524Z test_existing_wheel_conflict_does_not_overwrite_or_move (test_ees_deploy_recover.CachedWheelRecoveryTests.test_existing_wheel_conflict_does_not_overwrite_or_move) ... ok\r\n2026-10-22T03:00:47.3621208Z test_failed_retry_keeps_original_failure_and_original_runtime (test_ees_deploy_recover.CachedWheelRecoveryTests.test_failed_retry_keeps_original_failure_and_original_runtime) ... ok\r\n2026-10-22T03:00:47.5675639Z test_links_at_candidate_manifest_cache_and_wheelhouse_are_rejected (test_ees_deploy_recover.CachedWheelRecoveryTests.test_links_at_candidate_manifest_cache_and_wheelhouse_are_rejected) ... ok\r\n2026-10-22T03:00:47.6426260Z test_manifest_mismatch_and_wrong_source_inventory_preserve_candidate (test_ees_deploy_recover.CachedWheelRecoveryTests.test_manifest_mismatch_and_wrong_source_inventory_preserve_candidate) ... ok\r",
+    "artifact": {
+      "id": 12397999216,
+      "node_id": "MDg6QXJ0aWZhY3QxMjM5Nzk5OTIxNg==",
+      "name": "ees-results-platform-windows-2022",
+      "size_in_bytes": 28833,
+      "url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/12397999216",
+      "archive_download_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/artifacts/12397999216/zip",
+      "expired": false,
+      "digest": "sha256:942ce6bb20a53a306d7f4cf2cebe3deed80f02528880f3e2e2bbe7da2547e4e5",
+      "created_at": "2026-10-22T03:01:33Z",
+      "updated_at": "2026-10-22T03:01:33Z",
+      "expires_at": "2026-10-29T03:01:32Z",
+      "workflow_run": {
+        "id": 39713423774,
+        "repository_id": 1355435001,
+        "head_repository_id": 1355435001,
+        "head_branch": "docs/internal-apply-1c1efff-20261022",
+        "head_sha": "974e597bc78b8d7f0fe3578fc89251bafe8c9422"
+      }
+    },
+    "download_verified": {
+      "bytes": 28833,
+      "sha256": "942ce6bb20a53a306d7f4cf2cebe3deed80f02528880f3e2e2bbe7da2547e4e5",
+      "crc_valid": true
+    }
   }
 }
