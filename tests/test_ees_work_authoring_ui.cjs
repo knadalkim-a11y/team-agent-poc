@@ -2,7 +2,8 @@
  * is separate: these do not claim browser layout or operational EES success. */
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),crypto=require('node:crypto'),path=require('node:path');
 const {renderer,run}=require('./ees_workspace_ui_fixture.cjs');
-const source=fs.readFileSync(path.join(__dirname,'../branding/ees/ui/ees-work-designer.js'),'utf8');
+// A captured main source can prove new requirements fail before parallel product edits.
+const source=fs.readFileSync(process.env.EES_AUTHORING_TEST_SOURCE || path.join(__dirname,'../branding/ees/ui/ees-work-designer.js'),'utf8');
 const copy=value=>JSON.parse(JSON.stringify(value));
 const toolExamples=[
  {id:'jira-query',name:'Jira 조회',description:'배포 전에 CR 승인 상태를 확인합니다.',kind:'read',match:{function:'jira_search_crs'}},
@@ -20,7 +21,23 @@ const flush=async()=>{for(let i=0;i<8;i++)await new Promise(r=>setImmediate(r));
 const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};};
 const decode=value=>String(value).replaceAll('&quot;','"').replaceAll('&#39;',"'").replaceAll('&lt;','<').replaceAll('&gt;','>').replaceAll('&amp;','&');
 const attr=(text,name)=>decode(text.match(new RegExp('(?:^|\\s)'+name+'="([^"]*)"'))?.[1] || '');
-function controls(html){const result=[];for(const m of html.matchAll(/<input\b([^>]*)>/g))result.push({name:attr(m[1],'name'),id:attr(m[1],'id'),value:attr(m[1],'value'),type:attr(m[1],'type'),checked:/\bchecked\b/.test(m[1]),disabled:/\bdisabled\b/.test(m[1])});for(const m of html.matchAll(/<textarea\b([^>]*)>([\s\S]*?)<\/textarea>/g))result.push({name:attr(m[1],'name'),id:attr(m[1],'id'),value:decode(m[2]),type:'textarea'});for(const m of html.matchAll(/<select\b([^>]*)>([\s\S]*?)<\/select>/g)){const options=[...m[2].matchAll(/<option\b([^>]*)>([^<]*)<\/option>/g)],o=options.find(o=>/\bselected\b/.test(o[1])) || options[0];result.push({name:attr(m[1],'name'),id:attr(m[1],'id'),value:o?attr(o[1],'value'):'',type:'select'});}return result;}
+function controlAttributes(text){const attributes=Object.fromEntries([...text.matchAll(/([\w-]+)="([^"]*)"/g)].map(([,key,value])=>[key,decode(value)]));for(const key of ['disabled','readonly','required','checked'])if(new RegExp('\\b'+key+'\\b').test(text))attributes[key]='';return attributes;}
+function controls(html){
+ const result=[];
+ for(const m of html.matchAll(/<input\b([^>]*)>/g))result.push({offset:m.index,name:attr(m[1],'name'),id:attr(m[1],'id'),value:attr(m[1],'value'),type:attr(m[1],'type'),checked:/\bchecked\b/.test(m[1]),disabled:/\bdisabled\b/.test(m[1]),attributes:controlAttributes(m[1])});
+ for(const m of html.matchAll(/<textarea\b([^>]*)>([\s\S]*?)<\/textarea>/g))result.push({offset:m.index,name:attr(m[1],'name'),id:attr(m[1],'id'),value:decode(m[2]),type:'textarea',disabled:/\bdisabled\b/.test(m[1]),attributes:controlAttributes(m[1])});
+ for(const m of html.matchAll(/<select\b([^>]*)>([\s\S]*?)<\/select>/g)){const options=[...m[2].matchAll(/<option\b([^>]*)>([^<]*)<\/option>/g)],o=options.find(o=>/\bselected\b/.test(o[1])) || options[0];result.push({offset:m.index,name:attr(m[1],'name'),id:attr(m[1],'id'),value:o?attr(o[1],'value'):'',type:'select',disabled:/\bdisabled\b/.test(m[1]),attributes:controlAttributes(m[1])});}
+ return result;
+}
+function ancestorMap(html){
+ const parents=new Map(),stack=[],voids=new Set(['input','img','br','hr','meta','link']);
+ for(const match of html.matchAll(/<(\/?)([a-z][\w-]*)\b([^>]*)>/gi)){
+  const [,closing,tag,raw]=match;if(closing){for(let i=stack.length-1;i>=0;i--)if(stack[i].tagName===tag){stack.length=i;break;}continue;}
+  const parent=stack.at(-1)||null,node={tagName:tag,id:attr(raw,'id'),className:attr(raw,'class'),attributes:controlAttributes(raw),parentElement:parent};parents.set(match.index,parent);if(!voids.has(tag))stack.push(node);
+ }
+ return parents;
+}
+
 function definition(id='w'){return {id,name:'절차 '+id,system_id:'EMS',category:'ops',mode:'on_demand',nodes:{p:{id:'p',type:'p',parent:null,children:['t'],deps:[],name:'절차'},t:{id:'t',type:'t',parent:'p',children:['j'],deps:[],name:'단계'},j:{id:'j',type:'j',parent:'t',children:[],deps:[],name:'확인 작업',instructions:'원래 안내',mode:'human',inputs:[],result_block:'human_confirm',human_confirmation:true}}};}
 function stagedDefinition(count=3,jobsPerStage=2){const value=definition();value.nodes={p:{id:'p',type:'p',parent:null,children:[],deps:[],name:'절차'}};for(let i=0;i<count;i++){const id='t'+i;value.nodes.p.children.push(id);value.nodes[id]={id,type:'t',parent:'p',children:[],deps:[],name:'단계 '+(i+1),description:'첫 줄\n둘째 줄'};for(let j=0;j<jobsPerStage;j++){const job='j'+i+'-'+j;value.nodes[id].children.push(job);value.nodes[job]={...copy(definition().nodes.j),id:job,parent:id,name:'작업 '+(i+1)+'-'+(j+1)};}}return value;}
 function installDefinition(h,value){h.workflows.get('w').draft=copy(value);h.state.workflow=h.workflows.get('w');h.render();}
@@ -44,6 +61,7 @@ function footerNodes(html){const result={};for(const m of html.matchAll(/<(small
 function harness({cryptoProvider=crypto,proposalChangesObserver=null}={}){const h={startContexts:[],writes:[],operations:[],reads:[],dialogs:[],proposals:[],markup:'',forms:{},buttons:[],fields:[]};h.workflows=new Map(['w','q'].map(id=>[id,{id,name:'절차 '+id,system_id:'EMS',can_manage:true,revision:1,published_version:null,draft:definition(id),validation:{revision:1,errors:[],warnings:[]},versions:[]}]));h.state={capabilities:{actor_id:'a',can_author:true,managed_systems:['EMS']},workflows:[...h.workflows.values()],workflow:h.workflows.get('w'),factories:[{id:'f',name:'공장'}],tools:[],native_functions:[],tool_examples:copy(toolExamples),procedure_examples:copy(procedureExamples)};h.selection={system_id:'EMS',workflow_id:'w',mode:'author',chat_id:'private-chat'};
  const noop=()=>{};let dialog=null;
  const matches=(node,selector)=>{
+  if(selector.includes(','))return selector.split(',').some(part=>matches(node,part.trim()));
   if(selector.startsWith('#'))return node.id===selector.slice(1);
   if(selector.startsWith('.'))return (node.className || '').split(' ').includes(selector.slice(1));
   const attrs=[...selector.matchAll(/\[([^=\]]+)(?:=["']?([^"'\]]*)["']?)?\]/g)];
@@ -52,11 +70,11 @@ function harness({cryptoProvider=crypto,proposalChangesObserver=null}={}){const 
  const decorate=(node,attributes={})=>{
   let disabled=Boolean(node.disabled);Object.defineProperty(node,'disabled',{get:()=>disabled,set:value=>{disabled=Boolean(value);},enumerable:true,configurable:true});node.attributes=attributes;node.dataset ||= {};for(const [key,value] of Object.entries(attributes))if(key.startsWith('data-'))node.dataset[key.slice(5).replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]=value;node.isConnected=true;node.focus=()=>{h.document.activeElement=node;};node.setSelectionRange=(start,end)=>{node.selectionStart=start;node.selectionEnd=end;};
   node.scrollIntoView=options=>{(h.scrollRequests ||= []).push({node,options});};node.getAttribute=name=>Object.hasOwn(node.attributes,name)?node.attributes[name]:null;node.setAttribute=(name,value)=>{node.attributes[name]=String(value);};
-  node.closest=selector=>selector==='#ees-work-designer'?host:selector==='#'+node.formId?h.forms[node.formId]:matches(node,selector)?node:null;
+  node.closest=selector=>{if(selector==='#ees-work-designer')return host;if(selector==='#'+node.formId)return h.forms[node.formId];for(let current=node;current;current=current.parentElement)if(matches(current,selector))return current;return null;};
   return node;
  };
  const host={isConnected:true,contains:node=>Boolean(node&&(h.fields.includes(node)||h.buttons.includes(node)||Object.values(h.forms).includes(node))),querySelector(selector){
-  if(selector==='footer')return h.footer;if(h.footerNodes?.[selector])return h.footerNodes[selector];if(selector==='.ew-author-ai')return h.composer;if(selector==='.ew-author-scroll')return h.scroll;if(selector==='[data-author-status]')return h.status;
+  if(selector==='footer')return h.footer;if(h.footerNodes?.[selector])return h.footerNodes[selector];if(selector==='.ew-author-ai')return h.composer;if(selector==='.ew-author-scroll')return h.scroll;if(selector==='[data-author-status]')return h.status;if(selector==='.ew-schedule-preview')return h.schedulePreview;
   if(selector.includes(','))return selector.split(',').map(part=>host.querySelector(part)).find(Boolean) || null;
   const formError=selector.match(/^#([^ ]+) \.ew-inline-error$/);if(formError)return h.forms[formError[1]]?.inlineError || null;
   const namedFormControl=selector.match(/^#([^ ]+) (\[name=[^\]]+\])$/);if(namedFormControl)return h.forms[namedFormControl[1]]?.controls.find(field=>matches(field,namedFormControl[2])) || null;
@@ -68,30 +86,87 @@ function harness({cryptoProvider=crypto,proposalChangesObserver=null}={}){const 
   return [...h.buttons,...h.fields].filter(node=>matches(node,selector));
  },set innerHTML(html){
   const ownedFocus=host.contains(h.document?.activeElement);for(const node of [...h.fields,...h.buttons])node.isConnected=false;if(ownedFocus)h.document.activeElement=null;
-  h.markup=html;h.status={textContent:decode(html.match(/data-author-status[^>]*>([^<]*)/)?.[1] || '')};
+  h.markup=html;const parents=ancestorMap(html);h.status={textContent:decode(html.match(/data-author-status[^>]*>([^<]*)/)?.[1] || '')};
   const footer=html.match(/<footer(?:\s[^>]*)?>([\s\S]*?)<\/footer>/)?.[1];h.footerNodes=footerNodes(footer || '');h.footer=footer===undefined?null:{};
   if(h.footer)Object.defineProperty(h.footer,'innerHTML',{get:()=>footer,set:value=>{h.footerReplacements=(h.footerReplacements || 0)+1;h.footerNodes=footerNodes(value);h.buttons=h.buttons.map(button=>['procedure_create','procedure_cancel','tool_save','tool_review','tool_approve','tool_reject'].includes(button.dataset.authorAction)?{...button}:button);}});
   h.details=[...html.matchAll(/<details\b([^>]*)>/g)].map(m=>decorate({className:attr(m[1],'class'),open:/\bopen\b/.test(m[1])},{class:attr(m[1],'class')}));h.composer=h.details.find(node=>node.className==='ew-author-ai') || null;
-  h.scroll={scrollTop:0,querySelectorAll:selector=>h.details.filter(node=>![...selector.matchAll(/:not\(\.([^)]*)\)/g)].some(([,name])=>(node.className || '').split(' ').includes(name)))};h.fields=controls(html).map(field=>decorate(field,{name:field.name,id:field.id}));h.forms={};
+  h.scroll={scrollTop:0,querySelectorAll:selector=>h.details.filter(node=>![...selector.matchAll(/:not\(\.([^)]*)\)/g)].some(([,name])=>(node.className || '').split(' ').includes(name)))};h.fields=controls(html).map(field=>decorate({...field,parentElement:parents.get(field.offset)},field.attributes));h.forms={};
   const formMatches=[...html.matchAll(/<form\b([^>]*)>([\s\S]*?)<\/form>/g)];
   for(const m of formMatches){
-   const id=attr(m[1],'id'),c=controls(m[2]).map(field=>decorate({...field,formId:id},{name:field.name,id:field.id}));
+   const id=attr(m[1],'id'),c=controls(m[2]).map(field=>decorate({...field,formId:id,parentElement:parents.get(m.index+m[0].indexOf('>')+1+field.offset)},field.attributes));
    h.forms[id]=decorate({id,controls:c});if(m[2].includes('class="ew-inline-error"'))h.forms[id].inlineError=decorate({className:'ew-inline-error',formId:id});
    for(const field of c){const old=h.fields.findIndex(f=>f.name===field.name&&(field.type!=='radio'||f.value===field.value));if(old>=0)h.fields[old]=field;}
   }
-  h.buttons=[...html.matchAll(/<button\b([^>]*)>/g)].map(m=>{const attributes=Object.fromEntries([...m[1].matchAll(/([\w-]+)="([^"]*)"/g)].map(([,k,v])=>[k,decode(v)]));const formMatch=formMatches.find(form=>m.index>form.index&&m.index<form.index+form[0].length);return decorate({tagName:'BUTTON',formId:formMatch?attr(formMatch[1],'id'):'',id:attr(m[1],'id'),className:attr(m[1],'class'),dataset:{authorAction:attr(m[1],'data-author-action'),id:attr(m[1],'data-id'),tab:attr(m[1],'data-tab'),parent:attr(m[1],'data-parent')},disabled:/\bdisabled\b/.test(m[1]),mutation:/data-mutation/.test(m[1])},attributes);});
+  h.buttons=[...html.matchAll(/<button\b([^>]*)>/g)].map(m=>{const attributes=Object.fromEntries([...m[1].matchAll(/([\w-]+)="([^"]*)"/g)].map(([,k,v])=>[k,decode(v)]));const formMatch=formMatches.find(form=>m.index>form.index&&m.index<form.index+form[0].length);return decorate({tagName:'BUTTON',parentElement:parents.get(m.index),formId:formMatch?attr(formMatch[1],'id'):'',id:attr(m[1],'id'),className:attr(m[1],'class'),dataset:{authorAction:attr(m[1],'data-author-action'),id:attr(m[1],'data-id'),tab:attr(m[1],'data-tab'),parent:attr(m[1],'data-parent')},disabled:/\bdisabled\b/.test(m[1]),mutation:/data-mutation/.test(m[1])},attributes);});
+  const previewMatch=html.match(/<section class="ew-schedule-preview"[^>]*>([\s\S]*?)<\/section>/);h.schedulePreview=previewMatch?{}:null;
+  if(h.schedulePreview){let value=previewMatch[1];Object.defineProperty(h.schedulePreview,'innerHTML',{get:()=>value,set:next=>{
+   value=next;h.markup=h.markup.replace(/(<section class="ew-schedule-preview"[^>]*>)[\s\S]*?(<\/section>)/,(_,start,end)=>start+next+end);
+   for(const button of h.buttons.filter(b=>b.dataset.authorAction==='schedule_preview'))button.isConnected=false;
+   h.buttons=h.buttons.filter(b=>b.dataset.authorAction!=='schedule_preview');for(const m of next.matchAll(/<button\b([^>]*)>/g)){const attributes=controlAttributes(m[1]);h.buttons.push(decorate({tagName:'BUTTON',className:attr(m[1],'class'),disabled:/\bdisabled\b/.test(m[1]),mutation:/data-mutation/.test(m[1])},attributes));}
+  }});}
  },get innerHTML(){return h.markup;}};
  const callbacks={startContextChanged:value=>h.startContexts.push(value),read:async query=>{h.reads.push(copy(query));if(h.readOverride)return h.readOverride(query);return {workflow:copy(h.workflows.get(query.workflow_id)),capabilities:copy(h.state.capabilities)};},command:async body=>{h.writes.push(copy(body));if(h.writeOverride)return h.writeOverride(body);if(body.action==='create_workflow'){const id='created-'+h.writes.length,draft=definition(id);draft.name=body.name;draft.system_id=body.system_id;draft.nodes={p:{id:'p',type:'p',name:body.name,parent:null,children:[]}};const record={id,name:body.name,system_id:body.system_id,can_manage:true,revision:1,published_version:null,draft,validation:null,versions:[]};h.workflows.set(id,record);h.state.workflows=[...h.workflows.values()];return {ok:true,workflow_id:id,revision:1,workflow:copy(record)};}const record=h.workflows.get(body.workflow_id);if(body.action==='save_draft'){record.draft=copy(body.definition);record.revision++;record.validation=null;return {ok:true,revision:record.revision};}if(body.action==='validate_workflow'){record.validation={revision:record.revision,errors:[],warnings:[]};return {ok:true,revision:record.revision,validation:copy(record.validation)};}if(body.action==='publish_workflow'){record.revision++;record.published_version=(record.published_version || 0)+1;record.validation=null;return {ok:true,revision:record.revision,version:record.published_version};}return {ok:true};},operationsCommand:async body=>{h.operations.push(copy(body));if(h.operationOverride)return h.operationOverride(body);return {ok:true,tool:{...copy(body.tool || h.state.tools.find(t=>t.id===body.tool_contract_id)),id:'tool',revision:2,state:body.action==='tool_submit'?'review_requested':'draft'}};},models:async()=>{h.modelReads=(h.modelReads || 0)+1;return h.modelsOverride?h.modelsOverride():{models:[{id:'m',name:'Native 모델'}],preferred:['m']};},propose:async body=>{h.proposals.push(body);return h.proposeOverride?h.proposeOverride(body):{workflow_id:body.workflow_id,base_revision:body.expected_revision,context_id:body.context_id,definition:{...copy(body.definition),name:'AI 제안'},summary:'초안 제안'};},openWorkflow:async id=>{h.selection.workflow_id=id;h.state.workflow=h.workflows.get(id) || null;h.designer.render({state:h.state,selection:h.selection,host});},changed:async()=>{h.state.workflow=h.workflows.get(h.selection.workflow_id) || null;h.designer.render({state:h.state,selection:h.selection,host});}};
  const workUI={showHelp:options=>{(h.helpCalls ||= []).push(options);},newId:run(renderer({crypto:cryptoProvider}),'workUI.newId'),esc:value=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'),icon:id=>'<img src="/_ees13/v4/'+id+'.svg" alt="">',$:selector=>selector==='#ees-work-dialog'?dialog:null,dialog:options=>{h.dialogHistory ||= [];h.dialogHistory.push(options);const answer=h.dialogs.shift();assert.notEqual(answer,undefined,'dialog answer is explicit');const listeners={};dialog={addEventListener:(event,cb)=>{(listeners[event] ||= []).push(cb);},querySelectorAll:()=>Object.entries(answer || {}).map(([name,value])=>({name,value,type:typeof value==='boolean'?'checkbox':'text',checked:!!value}))};return Promise.resolve().then(async()=>{await h.dialogHook?.();for(const listener of listeners.click || [])listener({target:{closest:selector=>selector==='[data-dialog-confirm]'?true:null},preventDefault:noop,stopPropagation:noop});return answer!==null;});}};
  const FormData=class{constructor(form){this.data=form.controls.filter(c=>c.name&&!c.disabled&&(!['checkbox','radio'].includes(c.type)||c.checked)).map(c=>[c.name,c.value || (c.type==='checkbox'?'on':'')]);}has(key){return this.data.some(([name])=>name===key);}get(key){return this.data.find(([name])=>name===key)?.[1]??null;}getAll(key){return this.data.filter(([name])=>name===key).map(([,v])=>v);}entries(){return this.data.values();}};
  const context={workUI,crypto:cryptoProvider,AbortController,FormData,document:{activeElement:null},console,proposalChangesObserver};vm.createContext(context);const observedSource=proposalChangesObserver?source.replace('function proposalChanges(before,after) {','function proposalChanges(before,after) { proposalChangesObserver();'):source;vm.runInContext(observedSource,context);context.callbacks=callbacks;h.designer=vm.runInContext('createWorkDesigner({callbacks})',context);h.helpers=vm.runInContext('workAuthoring',context);h.host=host;h.callbacks=callbacks;h.document=context.document;
  h.render=()=>h.designer.render({state:h.state,selection:h.selection,host});h.render();
- h.click=(action,data={})=>{const button=h.buttons.find(node=>node.dataset.authorAction===action&&Object.entries(data).every(([key,value])=>node.dataset[key]===value));button?.focus();const control={dataset:{authorAction:action,...data}};h.designer.handleEvent({type:'click',target:{closest:selector=>selector==='#ees-work-designer'?host:control}});};
- h.field=(name,value,event='input')=>{const field=h.fields.find(f=>f.name===name || f.id===name);assert.ok(field,'field '+name);if(field.type==='checkbox')field.checked=value;else field.value=value;field.focus();h.designer.handleEvent({type:event,target:field});};
+ h.click=(action,data={})=>{const button=h.buttons.find(node=>node.dataset.authorAction===action&&Object.entries(data).every(([key,value])=>node.dataset[key]===value));button?.focus();const control={dataset:{authorAction:action,...data}};h.designer.handleEvent({type:'click',target:button || {closest:selector=>selector==='#ees-work-designer'?host:selector==='[data-author-action]'?control:null}});};
+ h.field=(name,value,event='input')=>{const field=h.fields.find(f=>(f.name===name || f.id===name)&&(f.type!=='radio'||f.value===value));assert.ok(field,'field '+name);if(field.type==='checkbox')field.checked=value;else if(field.type==='radio'){for(const item of h.fields.filter(f=>f.name===name))item.checked=item===field;}else field.value=value;field.focus();h.designer.handleEvent({type:event,target:field});};
  h.pick=async(id)=>{h.click('tool_create');await flush();h.click('tool_pick',{id});await flush();};h.example=async(id)=>{h.click('tool_create');await flush();h.click('tool_example',{id});await flush();};h.chooseTemplate=async value=>{const field=h.fields.find(field=>field.name==='procedure_template'&&field.value===value);assert.ok(field,'procedure radio '+value);for(const item of h.fields.filter(item=>item.name==='procedure_template'))item.checked=item===field;h.designer.handleEvent({type:'change',target:{...field,closest:()=>host}});await flush();};h.node=async(id='j')=>{h.click('node',{id});await flush();};h.open=async id=>{await callbacks.openWorkflow(id);};h.draft=()=>copy(h.designer.readDraft());h.proposal=(definitionValue,extra={})=>h.designer.acceptProposal({workflow_id:h.selection.workflow_id,base_revision:h.draft().revision,context_id:'native-context',definition:copy(definitionValue),...extra},{chatId:h.selection.chat_id});h.inline=async(name)=>{h.field('name',name);h.click('inline_apply');await flush();};h.escape=selector=>h.designer.handleEvent({type:'keydown',key:'Escape',target:{closest:query=>query==='#ees-work-designer'?host:query===selector?h.host.querySelector(selector):null}});return h;
 }
 
 test('new Figma authoring keeps Native conversation untouched and has exact right-panel structure',async()=>{const h=harness();await flush();assert.match(h.markup,/class="ew-author(?:\s[^"]*)?"/);assert.match(h.markup,/업무 내용/);assert.doesNotMatch(h.markup,/data-tab="(?:summary|structure)"/);assert.doesNotMatch(source,/hideWorkspaceContent|chat\.hidden|ees-work-native-hidden/);});
+test('C66 content removes the needed-summary surface while preserving stored review decisions',async()=>{
+ const h=harness(),value=definition();value.authoring_review={inputs:true,rules:false,custom:{keep:'opaque'}};installDefinition(h,value);
+ assert.doesNotMatch(h.markup,/정해야 할 것|data-author-action="summary_open"|ew-content-needs/);
+ await h.node();h.field('instructions','검토 기록을 보존할 안내');h.click('save');await flush();
+ assert.deepEqual(h.writes.at(-1).definition.authoring_review,value.authoring_review);assert.equal(h.writes.at(-1).definition.nodes.j.instructions,'검토 기록을 보존할 안내');
+});
+test('C66 expanded stages keep edit visible and disclose move and delete only through their menu',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(3));
+ assert.equal(h.buttons.some(button=>button.dataset.authorAction==='stage_menu'),false);
+ h.click('stage_toggle',{id:'t1'});await flush();assert.ok(actionButton(h,'stage_edit','t1'));assert.ok(actionButton(h,'stage_menu','t1'));
+ for(const action of ['move_up','move_down','delete_node'])assert.equal(Boolean(actionButton(h,action,'t1')),false,action+' is not an always-visible stage action');
+ h.click('stage_menu',{id:'t1'});await flush();assert.equal(actionButton(h,'stage_menu','t1').getAttribute('aria-expanded'),'true');
+ for(const action of ['move_up','move_down','delete_node'])assert.ok(actionButton(h,action,'t1'),action+' is available in the open menu');
+ assert.equal(h.writes.length,0);assert.equal(h.draft().dirty,false);
+});
+test('C66 stage menu Escape closes only an open menu and restores its trigger',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(2));h.click('stage_toggle',{id:'t0'});await flush();
+ const escape=()=>h.designer.handleEvent({type:'keydown',key:'Escape',target:actionButton(h,'stage_menu','t0')});
+ assert.ok(actionButton(h,'stage_menu','t0'));actionButton(h,'stage_menu','t0').focus();assert.deepEqual(copy(escape()),{handled:false,preventDefault:false});
+ h.click('stage_menu',{id:'t0'});await flush();assert.deepEqual(copy(escape()),{handled:true,preventDefault:true});
+ assert.equal(actionButton(h,'stage_menu','t0').getAttribute('aria-expanded'),'false');assert.equal(h.document.activeElement,actionButton(h,'stage_menu','t0'));
+ assert.equal(stageButton(h,'t0').getAttribute('aria-expanded'),'true');assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);
+});
+test('C66 outside clicks close stage and job menus while preserving the clicked focus and draft',async()=>{
+ for(const [action,id] of [['stage_menu','t0'],['job_menu','j0-0']]){
+  const h=harness();installDefinition(h,stagedDefinition(2));h.click('stage_toggle',{id:'t0'});h.click(action,{id});await flush();assert.equal(actionButton(h,action,id).getAttribute('aria-expanded'),'true');const before=h.draft();
+  const outside={id:'conversation-editor',closest:()=>null};h.document.activeElement=outside;h.designer.handleEvent({type:'click',target:outside});await flush();
+  assert.equal(actionButton(h,action,id).getAttribute('aria-expanded'),'false');assert.equal(h.document.activeElement,outside);assert.deepEqual(h.draft(),before);assert.equal(h.writes.length,0);
+ }
+});
+for(const scope of [undefined,'system','factory'])for(const count of [0,1])for(const saved of [false,true])test(`C66 factory viewing requires factories and scope or stored overrides: ${scope || 'undecided'} / ${count} / ${saved}`,async()=>{
+ const h=harness(),value=definition();if(scope)value.execution_scope=scope;h.state.factories=count?[{id:'f',name:'공장'}]:[];
+ h.workflows.get('w').settings=saved?[{factory_id:'f',revision:2,values:{target:'보존할 공장 값'}}]:[{factory_id:'',revision:1,values:{target:'기본값'}}];installDefinition(h,value);
+ const expected=count>0&&(scope==='factory'||saved);assert.equal(/class="ew-author-factories"/.test(h.markup),expected);
+ assert.deepEqual(h.draft().definition,value);assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);
+});
+test('C66 factory conditions alone do not expose the factory view and hidden selection resets to base',async()=>{
+ const h=harness(),value=definition();value.execution_scope='system';value.nodes.j.condition={field:'factory_id',op:'eq',value:'f'};installDefinition(h,value);
+ assert.doesNotMatch(h.markup,/class="ew-author-factories"/);assert.deepEqual(h.draft().definition,value);
+ value.execution_scope='factory';installDefinition(h,value);h.click('factory',{id:'f'});await flush();assert.equal(actionButton(h,'factory','f').getAttribute('aria-selected'),'true');
+ await h.node();assert.doesNotMatch(h.markup,/class="ew-author-factories"/);h.click('node',{id:''});await flush();
+ assert.equal(actionButton(h,'factory','').getAttribute('aria-selected'),'true');assert.equal(actionButton(h,'factory','f').getAttribute('aria-selected'),'false');
+ h.click('factory',{id:'f'});await flush();h.click('tab',{tab:'schedule'});await flush();assert.doesNotMatch(h.markup,/class="ew-author-factories"/);
+ h.click('tab',{tab:'content'});await flush();assert.equal(actionButton(h,'factory','').getAttribute('aria-selected'),'true');assert.equal(h.writes.length,0);assert.equal(h.draft().dirty,false);
+});
+test('C66 losing factory visibility removes hidden selection without changing saved factory values',async()=>{
+ const h=harness(),value=definition();value.execution_scope='factory';value.nodes.j.inputs=[{id:'target',name:'대상',type:'text',scope:'workflow'}];installDefinition(h,value);h.click('factory',{id:'f'});await flush();
+ h.click('summary_edit',{id:'business'});await flush();h.field('execution_scope','system','change');h.click('summary_apply');await flush();assert.doesNotMatch(h.markup,/class="ew-author-factories"/);
+ h.dialogs.push({'override:target':true,'value:target':'기본에만 저장'});h.click('factory_settings');await flush();assert.equal(h.writes.at(-1).factory_id,'');
+ assert.deepEqual(h.writes.at(-1).values,{target:'기본에만 저장'});assert.equal(h.draft().definition.execution_scope,'system');
+});
 test('name-only creation does not publish the retired example-helper screen',async()=>{const h=harness();await h.open('');h.dialogs.push(false);h.click('create');await flush();assert.ok(h.startContexts.length);assert.ok(h.startContexts.every(value=>value===null));assert.equal(h.writes.length,0);});
 test('empty workspace listing does not create drafts or runs',async()=>{const h=harness();h.state.workflows=[];await h.open('');assert.match(h.markup,/아직 업무 절차가 없습니다/);assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);});
 test('direct editing saves only the chosen definition with current revision and request ID',async()=>{const h=harness();await h.node();h.field('instructions','직접 수정');h.click('save');await flush();assert.equal(h.writes[0].action,'save_draft');assert.equal(h.writes[0].workflow_id,'w');assert.equal(h.writes[0].expected_revision,1);assert.ok(h.writes[0].request_id);assert.equal(h.writes[0].definition.nodes.j.instructions,'직접 수정');assert.equal(h.workflows.get('q').draft.nodes.j.instructions,'원래 안내');assert.equal(h.draft().revision,2);assert.equal(h.draft().dirty,false);});
@@ -106,7 +181,7 @@ test('publish requires exact saved validated revision and explicit confirmation'
 test('all eight input types and result blocks are represented without workflow-specific HTML',()=>{const h=harness();assert.equal(Object.keys(h.helpers.inputTypes).length,8);assert.equal(Object.keys(h.helpers.blocks).length,8);assert.deepEqual(Object.keys(h.helpers.inputTypes),['text','number','datetime','single','multi','list','person','boolean']);assert.ok(h.helpers.blocks.change_request);});
 test('declared input and tool argument binding are saved together',async()=>{const h=harness();await h.node();h.dialogs.push({id:'project',name:'Jira 프로젝트',type:'single',scope:'workflow',required:true,unit:'',options_source:'manual',options:'PROJA\nPROJB',depends_on:'',tool_argument:'project_key'});h.click('input_add');await flush();const node=h.draft().definition.nodes.j;assert.equal(node.inputs[0].id,'project');assert.equal(node.inputs[0].required,true);assert.deepEqual(node.inputs[0].options,['PROJA','PROJB']);assert.deepEqual(node.argument_bindings.project_key,{input:'project'});assert.equal(node.inputs[0].scope,'workflow');});
 test('stage/job insertion and removal keep referential defects visible for publish validation',async()=>{const h=harness();h.click('add_stage');await flush();await h.inline('추가 단계');const stage=Object.values(h.draft().definition.nodes).find(n=>n.id.startsWith('stage-'));assert.equal(stage.parent,'p');h.click('add_job',{parent:stage.id});await flush();await h.inline('추가 작업');const job=Object.values(h.draft().definition.nodes).find(n=>n.id.startsWith('job-'));assert.equal(job.parent,stage.id);const d=h.draft().definition;d.nodes.j.deps=[job.id];const removed=h.helpers.removeNode(d,stage.id);assert.ok(removed.includes(job.id));assert.deepEqual(d.nodes.j.deps,[job.id]);assert.ok(d.nodes.j);});
-test('factory overrides distinguish an explicit empty value, zero, and absent value',async()=>{const h=harness();h.workflows.get('w').draft.nodes.j.inputs=[{id:'target',name:'대상',type:'text',scope:'workflow'},{id:'limit',name:'한도',type:'number',scope:'workflow'},{id:'unused',name:'기본 사용',type:'text',scope:'workflow'}];h.render();h.click('factory',{id:'f'});h.dialogs.push({'override:target':true,'value:target':'','override:limit':true,'value:limit':'0','override:unused':false,'value:unused':'무시'});h.click('factory_settings');await flush();const body=h.writes.at(-1);assert.equal(body.action,'save_settings');assert.equal(body.factory_id,'f');assert.deepEqual(body.values,{target:'',limit:0});});
+test('factory overrides distinguish an explicit empty value, zero, and absent value',async()=>{const h=harness();h.workflows.get('w').draft.execution_scope='factory';h.workflows.get('w').draft.nodes.j.inputs=[{id:'target',name:'대상',type:'text',scope:'workflow'},{id:'limit',name:'한도',type:'number',scope:'workflow'},{id:'unused',name:'기본 사용',type:'text',scope:'workflow'}];h.render();h.click('factory',{id:'f'});h.dialogs.push({'override:target':true,'value:target':'','override:limit':true,'value:limit':'0','override:unused':false,'value:unused':'무시'});h.click('factory_settings');await flush();const body=h.writes.at(-1);assert.equal(body.action,'save_settings');assert.equal(body.factory_id,'f');assert.deepEqual(body.values,{target:'',limit:0});});
 test('authoring panel never requests model metadata or offers an AI request form',async()=>{const h=harness();await flush();assert.equal(h.modelReads || 0,0);assert.equal(h.proposals.length,0);assert.doesNotMatch(h.markup,/name="(?:model_id|ai_prompt)"|data-author-action="ai_(?:propose|cancel)"|초안 제안 요청|대화로 절차 초안 만들기/);assert.doesNotMatch(source,/callbacks\.propose|async function propose\(|aiController/);});
 
 test('0 models and model listing failure preserve direct authoring and save',async()=>{for(const fails of [false,true]){const h=harness();h.designer.reset();h.modelsOverride=async()=>{if(fails)throw new Error('no model listing');return {models:[]};};h.render();await flush();await h.node();h.field('instructions','모델 없이 작성');h.click('save');await flush();assert.equal(h.writes[0].definition.nodes.j.instructions,'모델 없이 작성');assert.equal(h.proposals.length,0);assert.equal(h.modelReads || 0,0);}});
@@ -142,9 +217,14 @@ test('a late skill-list response cannot expose the previous account metadata',as
 test('dynamic Jira options pin discovered Native reference and declared project dependency without static examples',async()=>{const h=harness(),reference={tool_id:'jira-native',function:'jira_project_metadata',revision:7,content_hash:'current'};h.state.native_functions=[{kind:'read',name:'Jira metadata',reference}];await h.node();h.dialogs.push({id:'cr_status',name:'CR 상태',type:'multi',scope:'run',required:true,options_source:'tool',source_reference:'jira-native:jira_project_metadata',source_list:'statuses',depends_on:'project',options:'must disappear',tool_argument:'status_ids'});h.click('input_add');await flush();const field=h.draft().definition.nodes.j.inputs[0];assert.deepEqual(field.depends_on,['project']);assert.deepEqual(field.options,[]);assert.deepEqual(field.options_query,{reference,argument_bindings:{project_key:{input:'project'}},result_path:['statuses'],value_field:'id',label_field:'name'});assert.equal(field.source_reference,undefined);});
 test('dynamic options cannot invent an unconfigured Native reference or fall back to static entries',async()=>{const h=harness();await h.node();h.dialogs.push({id:'project',name:'프로젝트',type:'single',scope:'run',options_source:'tool',source_reference:'not-permitted',source_list:'projects',options:'EMS'});h.click('input_add');await flush();assert.deepEqual(h.draft().definition.nodes.j.inputs,[]);assert.match(h.markup,/현재 계정으로 확인한 선택지 조회 기능/);});
 test('common options use current authorized entities and preserve an opaque tool source on description edit',async()=>{const h=harness(),query={reference:{tool_id:'private',function:'custom'},argument_bindings:{x:{constant:'fixed'}},result_path:['permitted'],value_field:'key',label_field:'title'};h.workflows.get('w').draft.nodes.j.inputs=[{id:'opaque',name:'기존',type:'single',scope:'run',options_source:'tool',options_query:query,depends_on:[]}];h.render();await h.node();h.dialogs.push({id:'opaque',name:'설명만 변경',type:'single',scope:'run',options_source:'tool',source_reference:'private:custom'});h.click('input_edit',{id:'opaque'});await flush();assert.deepEqual(h.draft().definition.nodes.j.inputs[0].options_query,query);h.dialogs.push({id:'group',name:'그룹',type:'single',scope:'run',options_source:'common',source_common:'groups',options:'fake'});h.click('input_add');await flush();assert.deepEqual(h.draft().definition.nodes.j.inputs[1].options_query,{kind:'groups'});assert.deepEqual(h.draft().definition.nodes.j.inputs[1].options,[]);});
-test('tool selection pins contract revision and unrelated edits cannot silently upgrade an old published reference',async()=>{const h=harness(),reference={tool_id:'native',function:'read',content_hash:'v2'};h.state.tools=[{id:'approved-tool',state:'approved',revision:2,reference}];await h.node();h.field('tool_contract_id','approved-tool','change');assert.equal(h.draft().definition.nodes.j.tool_contract_revision,2);h.state.tools[0].revision=3;h.state.tools[0].reference={...reference,content_hash:'v3'};h.field('instructions','안내만 수정');const node=h.draft().definition.nodes.j;assert.equal(node.tool_contract_revision,2);assert.equal(node.tool_reference.content_hash,'v2');});
+test('tool selection pins contract revision and unrelated edits cannot silently upgrade an old published reference',async()=>{const h=harness(),reference={tool_id:'native',function:'read',content_hash:'v2'};h.state.tools=[{id:'approved-tool',state:'approved',revision:2,reference}];await h.node();h.field('mode','tool','change');await flush();h.field('tool_contract_id','approved-tool','change');assert.equal(h.draft().definition.nodes.j.tool_contract_revision,2);h.state.tools[0].revision=3;h.state.tools[0].reference={...reference,content_hash:'v3'};h.field('instructions','안내만 수정');const node=h.draft().definition.nodes.j;assert.equal(node.tool_contract_revision,2);assert.equal(node.tool_reference.content_hash,'v2');});
 test('AI item verdicts declare their source job and EES requests retain explicit effect criteria',async()=>{const h=harness();await h.node();h.field('mode','ai','change');h.field('result_block','item_verdict','change');h.field('result_source_job_id','cr-list','change');assert.equal(h.draft().definition.nodes.j.result_source_job_id,'cr-list');h.field('result_block','change_request','change');h.field('effect_job_id','verify');h.field('effect_description','승인된 상태 조회에서 효과를 확인');assert.deepEqual(h.draft().definition.nodes.j.effect_criterion,{job_id:'verify',description:'승인된 상태 조회에서 효과를 확인'});});
-test('confirmed list bindings and deadline rules store declared references instead of browser calculations',async()=>{const h=harness();h.workflows.get('w').draft.nodes.j.inputs=[{id:'deployment',name:'배포일',type:'datetime',scope:'run'}];h.render();await h.node();h.field('mode','tool','change');h.field('result_argument','issue_keys');h.field('result_job_id','confirmed-list','change');h.field('deadline_input','deployment','change');h.field('deadline_offset','-2');h.field('deadline_timezone','Asia/Seoul');h.field('deadline_calendar','business','change');const node=h.draft().definition.nodes.j;assert.deepEqual(node.argument_bindings.issue_keys,{result:{job_id:'confirmed-list',path:['items'],value_field:'id',confirmed:true}});assert.deepEqual(node.deadline,{input:'deployment',offset_days:-2,timezone:'Asia/Seoul',calendar:'business'});assert.equal(node.due_at,undefined);});
+test('confirmed list bindings and deadline rules store declared references instead of browser calculations',async()=>{
+ // C66 moves the legacy list handoff into the matching tool-argument row; saved reference checks stay exact.
+ const h=harness(),tool=c66LegacyTool(h,{properties:{issue_keys:{type:'array'}}}),value=definition();Object.assign(value.nodes.j,{mode:'tool',tool_contract_id:tool.id,tool_reference:copy(tool.reference),deps:['confirmed-list'],inputs:[{id:'deployment',name:'배포일',type:'datetime',scope:'run'}]});value.nodes['confirmed-list']={...copy(value.nodes.j),id:'confirmed-list',name:'확정 목록',result_block:'list_confirm',deps:[]};value.nodes.t.children.unshift('confirmed-list');installDefinition(h,value);await h.node();
+ h.click('job_argument',{id:'issue_keys'});await flush();h.field('argument_source','result','change');await flush();h.field('argument_result_job','confirmed-list','change');h.click('job_section',{id:'advanced'});await flush();h.field('deadline_input','deployment','change');h.field('deadline_offset','-2');h.field('deadline_timezone','Asia/Seoul');h.field('deadline_calendar','business','change');const node=h.draft().definition.nodes.j;
+ assert.deepEqual(node.argument_bindings.issue_keys,{result:{job_id:'confirmed-list',path:['items'],value_field:'id',confirmed:true}});assert.deepEqual(node.deadline,{input:'deployment',offset_days:-2,timezone:'Asia/Seoul',calendar:'business'});assert.equal(node.due_at,undefined);
+});
 test('a result report can record all resolved verdicts without converting unknown CRs into approved completion',async()=>{const h=harness();await h.node();h.field('mode','ai','change');h.field('result_block','ai_review','change');h.field('dependency_policy','all_resolved','change');assert.equal(h.draft().definition.nodes.j.dependency_policy,'all_resolved');assert.equal(h.draft().definition.nodes.j.human_confirmation,true);});
 test('factory settings fetch dynamic choices from the saved definition and never substitute examples after failure',async()=>{const h=harness();h.workflows.get('w').draft.nodes.j.inputs=[{id:'project',name:'실제 프로젝트',type:'single',scope:'workflow',options_source:'tool',options_query:{reference:{tool_id:'jira',function:'jira_project_metadata',content_hash:'x'},argument_bindings:{project_key:{constant:''}},result_path:['projects'],value_field:'id',label_field:'name'}}];h.render();const queries=[];h.callbacks.options=async body=>{queries.push(copy(body));return {ok:true,options:[{id:'APPX',name:'실제 프로젝트 표시'}]};};h.dialogs.push({'override:project':true,'value:project':'APPX'});h.click('factory_settings');await flush();assert.equal(queries[0].job_id,'j');assert.equal(queries[0].workflow_id,'w');assert.match(h.dialogHistory.at(-1).html,/실제 프로젝트 표시/);assert.deepEqual(h.writes.at(-1).values,{project:'APPX'});h.callbacks.options=async()=>{throw new Error('현재 권한 없음');};h.dialogs.push({'override:project':true,'value:project':'EMS'});const before=h.writes.length;h.click('factory_settings');await flush();assert.equal(h.writes.length,before);assert.match(h.markup,/현재 선택지를 확인한 뒤/);});
 test('person settings use current Native people metadata without making free-text users',async()=>{const h=harness();h.workflows.get('w').draft.nodes.j.inputs=[{id:'reviewer',name:'검토자',type:'person',scope:'workflow'}];h.state.people=[{id:'a',name:'실제 사용자',value:{kind:'user',id:'a'}},{id:'g',name:'실제 그룹',value:{kind:'group',id:'g'}}];h.render();h.dialogs.push({'override:reviewer':true,'value:reviewer':'group:g'});h.click('factory_settings');await flush();assert.match(h.dialogHistory.at(-1).html,/실제 사용자/);assert.match(h.dialogHistory.at(-1).html,/실제 그룹/);assert.deepEqual(h.writes.at(-1).values,{reviewer:{kind:'group',id:'g'}});});
@@ -360,12 +440,14 @@ test('late creation response never opens a procedure in a different system',asyn
  assert.equal(h.selection.system_id,'APC');assert.notEqual(h.selection.workflow_id,'late-created');
 });
 test('needed information remains direct-editable without a model and publication is explicit',async()=>{
- const h=harness();h.click('summary_open');await flush();assert.match(h.markup,/필요한 정보/);assert.match(h.markup,/게시 전 확인/);
- h.click('tab',{tab:'content'});await h.node();h.field('instructions','직접 고침');h.click('summary_open');await flush();
+ // C66 removes the needed-information summary. Direct editing and the saved-validation gate remain.
+ const h=harness();assert.doesNotMatch(h.markup,/정해야 할 것|data-author-action="summary_open"/);assert.match(h.markup,/게시 전 확인/);
+ await h.node();h.field('instructions','직접 고침');h.click('validate');await flush();
  assert.match(h.markup,/초안을 저장/);assert.equal(h.writes.length,0);assert.equal(h.draft().definition.nodes.j.instructions,'직접 고침');
+ h.click('publish');await flush();assert.equal(h.writes.length,0);assert.equal(h.modelReads || 0,0);
 });
 test('advanced job settings are collapsed but existing values and links are preserved on save',async()=>{
- const h=harness();await h.node();assert.match(h.markup,/<details class="ew-job-advanced"><summary>기한 · 예약 실행/);
+ const h=harness();await h.node();assert.equal(c66Section(h,'advanced').getAttribute('aria-expanded'),'false');h.click('job_section',{id:'advanced'});await flush();assert.match(h.markup,/<legend>기한 · 예약 실행/);
  h.field('deadline_notes','기존 기한 메모');h.field('instructions','작업 안내');h.click('save');await flush();
  assert.equal(h.writes[0].definition.nodes.j.deadline_notes,'기존 기한 메모');assert.equal(h.writes[0].definition.nodes.j.instructions,'작업 안내');
 });
@@ -419,14 +501,15 @@ test('shared detail only offers review when needed and shows Korean input types'
 test('legacy to shared selection drops foreign bindings and keeps manually declared inputs',async()=>{
  const h=harness();sharedReviewFixture(h);const job=h.workflows.get('w').draft.nodes.j;
  Object.assign(job,{mode:'tool',tool_contract_id:'legacy',tool_contract_revision:1,tool_reference:{tool_id:'native',function:'read'},inputs:[{id:'memo',name:'직접 만든 값',type:'text',scope:'run'}],argument_bindings:{issue_keys:{result:{job_id:'confirmed-list',path:['items'],value_field:'id',confirmed:true}},memo:{input:'memo'}}});
- h.render();await h.node();assert.match(h.markup,/확정 목록에서 도구 인자 연결/);
+ h.render();await h.node();h.click('job_argument',{id:'issue_keys'});await flush();assert.equal(h.fields.find(f=>f.name==='argument_source'&&f.value==='result').disabled,false);
  h.click('pick_job_tool',{id:'managed-search_pages',shared:'true'});await flush();const selected=h.draft().definition.nodes.j;
  assert.deepEqual(Object.keys(selected.argument_bindings).sort(),['limit','query','space_key']);assert.equal(selected.inputs[0].id,'memo');assert.equal(selected.tool_contract_id,undefined);assert.equal(selected.tool_reference,undefined);
 });
 test('shared jobs hide list handoff controls until B10-6 while legacy jobs retain them',async()=>{
- const h=harness();sharedReviewFixture(h);h.render();await h.node();h.field('mode','tool','change');assert.match(h.markup,/확정 목록에서 도구 인자 연결/);
- h.click('pick_job_tool',{id:'managed-search_pages',shared:'true'});await flush();assert.doesNotMatch(h.markup,/확정 목록에서 도구 인자 연결|name="result_argument"|name="result_job_id"/);
- h.state.operations.tools=[{id:'legacy',name:'이전 계약',state:'approved',revision:1,reference:{tool_id:'native',function:'read'}}];h.render();h.click('pick_job_tool',{id:'legacy'});await flush();assert.match(h.markup,/확정 목록에서 도구 인자 연결/);
+ // C66 replaces the separate handoff editor with a row source choice: unavailable for shared, available for legacy.
+ const h=harness();await c66SelectShared(h);h.click('job_argument',{id:'query'});await flush();
+ assert.equal(h.fields.find(field=>field.name==='argument_source'&&field.value==='result').disabled,true);assert.match(h.markup,/아직 앞 작업의 결과를 받을 수 없습니다/);assert.doesNotMatch(h.markup,/name="result_argument"|name="result_job_id"/);
+ h.state.operations.tools=[{id:'legacy',name:'이전 계약',state:'approved',revision:1,reference:{tool_id:'native',function:'read'},input_schema:{properties:{target:{type:'string'}}}}];h.render();h.click('pick_job_tool',{id:'legacy'});await flush();h.click('job_argument',{id:'target'});await flush();assert.equal(h.fields.find(field=>field.name==='argument_source'&&field.value==='result').disabled,false);
 });
 test('shared review names changed categories without exposing references and separates access controls',async()=>{
  for(const [field,label] of [['content_hash','도구 코드'],['schema_hash','입력 형식'],['config_hash','연결 설정'],['environment','실행 환경']]){
@@ -471,7 +554,7 @@ test('shared tool use opens its recorded system with the workflow',async()=>{
 test('shared discovery failure is explicit while legacy tools remain usable',async()=>{
  const h=harness();sharedReviewFixture(h);h.state.operations.shared_tools=[];h.state.operations.shared_tools_notice='공용 도구 목록을 불러오지 못했습니다.';h.state.operations.tools=[{id:'kept-legacy',name:'기존 계약 보존',kind:'read',state:'approved',revision:1,reference:{tool_id:'old',function:'search_pages'}}];
  h.selection.tab='tools';h.render();assert.match(h.markup,/공용 도구 목록을 불러오지 못했습니다/);assert.doesNotMatch(h.markup,/공용 도구 0개/);assert.match(h.markup,/기존 계약 보존/);
- h.selection.tab='overview';h.render();await h.node();assert.match(h.markup,/공용 도구 목록을 불러오지 못했습니다/);
+ h.selection.tab='overview';h.render();await h.node();h.field('mode','tool','change');await flush();assert.match(h.markup,/공용 도구 목록을 불러오지 못했습니다/);
 });
 
 
@@ -482,7 +565,7 @@ test('B10 common heading empty list and unreviewed labels follow the specificati
  h.click('shared_list');await flush();h.state.operations.shared_tools=[];h.render();assert.match(h.markup,/공용 도구 0개/);assert.match(h.markup,/쓸 수 있는 공용 도구가 없습니다. 필요한 도구는 관리자에게 요청하세요./);
 });
 test('B10 picker keeps read badges and the administrator guide below all choices',async()=>{
- const h=harness();sharedReviewFixture(h);h.render();await h.node();
+ const h=harness();sharedReviewFixture(h);h.render();await h.node();h.field('mode','tool','change');await flush();
  assert.match(h.markup,/<strong>[^<]+ <small class="ew-author-tag">조회<\/small><\/strong>/);
  assert.match(h.markup,/필요한 도구가 없으면 관리자에게 요청하세요.<\/p><\/div><\/details>/);
  h.state.operations.shared_tools=[];h.render();assert.match(h.markup,/쓸 수 있는 공용 도구가 없습니다./);assert.match(h.markup,/필요한 도구가 없으면 관리자에게 요청하세요./);
@@ -510,19 +593,22 @@ test('C44 inline edits are isolated until apply, survive tabs, and cancel only t
  h.click('save');await flush();assert.equal(h.writes.at(-1).definition.nodes.j.instructions,'미저장 작업 안내');assert.equal(h.writes.at(-1).definition.description,'개인 PC 준비');
 });
 test('C44 optional settings require explicit review and never replace server validation',async()=>{
- const h=harness();h.workflows.get('w').validation=null;h.render();h.click('summary_open');await flush();
- assert.doesNotMatch(h.markup,/6개 중/);assert.match(h.markup,/필요 여부 확인/);assert.match(h.markup,/검사 필요/);
- h.click('summary_optional',{id:'inputs'});h.click('summary_optional',{id:'rules'});await flush();
- assert.equal(h.draft().definition.authoring_review.inputs,true);assert.match(h.markup,/해당 없음/);assert.match(h.markup,/검사 필요/);assert.equal(h.writes.length,0);
- await h.node();h.field('result_block','item_verdict');await flush();h.click('summary_open');await flush();assert.match(h.markup,/판정·후속 확인이 필요한 작업 1개/);
- h.click('save');await flush();await h.open('q');await h.open('w');h.click('tab',{tab:'content'});await flush();assert.equal(h.draft().definition.authoring_review.inputs,true);
+ // C66 retires summary review controls, not stored authoring_review decisions or server validation.
+ const h=harness(),review={inputs:true,rules:true,unknown_review:{keep:true}};h.workflows.get('w').validation=null;h.workflows.get('w').draft.authoring_review=copy(review);h.render();
+ assert.doesNotMatch(h.markup,/6개 중|data-author-action="summary_optional"|정해야 할 것/);
+ assert.equal(h.buttons.some(button=>button.dataset.authorAction==='publish'&&!button.disabled),false);assert.equal(h.writes.length,0);
+ await h.node();h.field('result_block','item_verdict');await flush();assert.deepEqual(h.draft().definition.authoring_review,review);
+ h.click('save');await flush();assert.deepEqual(h.writes.at(-1).definition.authoring_review,review);assert.equal(h.workflows.get('w').validation,null);
+ h.click('publish');await flush();assert.equal(h.writes.length,1,'stored optional review never substitutes for server validation');
+ await h.open('q');await h.open('w');h.click('tab',{tab:'content'});await flush();assert.deepEqual(h.draft().definition.authoring_review,review);
 });
 test('C44 when editor preserves schedule extensions and cancelled mode changes',async()=>{
  const h=harness();h.workflows.get('w').draft.schedule={stage_deadlines:{t:{offset_days:-2}},opening:'on_schedule'};h.render();
- h.click('summary_edit',{id:'when'});await flush();h.click('summary_mode',{id:'periodic'});await flush();
- h.field('frequency','weekly');h.field('anchor','2026-10-19T09:00');h.field('interval','2');h.click('summary_apply');await flush();
+ // C66 removes the summary-only "when" editor. Use the existing schedule tab and retain extension/cancel isolation checks.
+ h.click('tab',{tab:'schedule'});await flush();h.click('run_mode',{id:'periodic'});await flush();
+ h.field('frequency','weekly');h.field('anchor','2026-10-19T09:00');h.field('interval','2');await flush();
  const draft=h.draft().definition;assert.equal(draft.mode,'periodic');assert.deepEqual(draft.schedule.stage_deadlines,{t:{offset_days:-2}});assert.equal(draft.schedule.interval,2);assert.equal(h.writes.length,0);
- h.click('summary_edit',{id:'when'});await flush();h.click('summary_mode',{id:'emergency'});await flush();h.click('summary_cancel');await flush();assert.deepEqual(h.draft().definition,draft);
+ h.click('tab',{tab:'content'});h.click('summary_edit',{id:'business'});await flush();h.field('execution_scope','factory','change');h.click('summary_cancel');await flush();assert.deepEqual(h.draft().definition,draft);assert.deepEqual(h.workflows.get('w').draft.schedule,{stage_deadlines:{t:{offset_days:-2}},opening:'on_schedule'});
 });
 test('C44 save and validation failures retain input and allow explicit retry',async()=>{
  const h=harness();h.click('edit_workflow');await flush();h.field('description','재시도할 내용');h.click('summary_apply');await flush();
@@ -639,7 +725,7 @@ for(const kind of ['stage','add_stage','add_job']){
  });
  test('C61 '+kind+' dirty stale buffer blocks other stage job and add actions with its own notice',async()=>{
   const h=harness();installDefinition(h,stagedDefinition(2,1));await beginInline(h,kind);h.field('name','보존할 입력');h.workflows.get('w').revision=2;h.render();const latest=h.draft();
-  for(const [action,data] of [['stage_toggle',{id:'t1'}],['node',{id:'j0-0'}],['add_stage',{}],['add_job',{parent:'t1'}]]){h.click(action,data);await flush();assertUnavailableInline(h,staleInlineMessage);assert.equal(h.fields.find(field=>field.name==='name').value,'보존할 입력');assert.deepEqual(h.draft(),latest);assert.equal(h.scrollRequests.at(-1).node,h.forms['ew-stage-editor'].inlineError);assert.deepEqual(copy(h.scrollRequests.at(-1).options),{block:'nearest',inline:'nearest',behavior:'instant'});}
+  for(const [action,data] of [['stage_toggle',{id:'t1'}],['node',{id:'j0-0'}],['add_stage',{}],['add_job',{parent:'t1'}],['stage_menu',{id:'t0'}]]){h.click(action,data);await flush();assertUnavailableInline(h,staleInlineMessage);assert.equal(h.fields.find(field=>field.name==='name').value,'보존할 입력');assert.deepEqual(h.draft(),latest);assert.equal(h.scrollRequests.at(-1).node,h.forms['ew-stage-editor'].inlineError);assert.deepEqual(copy(h.scrollRequests.at(-1).options),{block:'nearest',inline:'nearest',behavior:'instant'});}
   assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);const result=h.escape('#ew-stage-editor');await flush();assert.deepEqual(copy(result),{handled:true,preventDefault:true});assert.equal(h.forms['ew-stage-editor'],undefined);assert.deepEqual(h.draft(),latest);
  });
  test('C61 '+kind+' same revision keeps Apply and submit while name validation remains field-specific',async()=>{
@@ -654,7 +740,7 @@ test('same revision polls allow inline apply and same revision proposal replacem
  h.click('stage_edit',{id:'t0'});await flush();h.field('description','아직 적용 안 한 설명');const later=h.draft().definition;later.nodes.t0.name='적용하면 안 되는 제안';h.proposal(later);h.click('ai_apply');await flush();assert.equal(h.fields.find(field=>field.name==='description').value,'아직 적용 안 한 설명');assert.equal(h.draft().definition.nodes.t0.name,'대화 제안의 단계');assert.match(h.markup,/편집 중인 항목을 먼저 적용하거나 취소/);assert.equal(h.writes.length,0);
 });
 test('changed inline stage form blocks stage job add and menu actions until apply or cancel',async()=>{
- for(const [action,data] of [['stage_toggle',{id:'t1'}],['node',{id:'j0-0'}],['add_stage',{}],['add_job',{parent:'t0'}],['job_menu',{id:'j0-0'}]]){
+ for(const [action,data] of [['stage_toggle',{id:'t1'}],['node',{id:'j0-0'}],['add_stage',{}],['add_job',{parent:'t0'}],['job_menu',{id:'j0-0'}],['stage_menu',{id:'t0'}]]){
   const h=harness();installDefinition(h,stagedDefinition());h.click('stage_toggle',{id:'t0'});h.click('stage_edit',{id:'t0'});await flush();h.field('name','아직 적용 안 함');h.scroll.scrollTop=777;const before=h.draft();h.click(action,data);await flush();
   assert.match(h.markup,/편집 중인 항목을 먼저 적용하거나 취소해 주세요./);assert.equal(h.fields.find(field=>field.name==='name').value,'아직 적용 안 함');assert.equal(h.document.activeElement,h.forms['ew-stage-editor'].controls.find(field=>field.name==='name'));assert.equal(h.scrollRequests?.length,1);assert.equal(h.scrollRequests[0].node,h.forms['ew-stage-editor'].inlineError);assert.deepEqual(copy(h.scrollRequests[0].options),{block:'nearest',inline:'nearest',behavior:'instant'});assert.deepEqual(h.draft(),before);assert.equal(stageButton(h,'t0').getAttribute('aria-expanded'),'true');assert.equal(h.writes.length,0);
   h.click('inline_cancel');await flush();assert.equal(h.draft().dirty,false);assert.equal(h.draft().definition.nodes.t0.name,'단계 1');
@@ -672,8 +758,8 @@ test('stage and job creation require names and retain existing add defaults with
 });
 test('stage and job ordering targets explicit IDs and preserves parents deadlines expansion and focus',async()=>{
  const h=harness(),value=stagedDefinition(3,3);value.schedule={stage_deadlines:{t0:{offset_days:-2},t1:{offset_days:0},t2:{offset_days:2}}};installDefinition(h,value);
- h.click('stage_toggle',{id:'t0'});await flush();assert.equal(actionButton(h,'move_up','t0').disabled,true);h.click('stage_toggle',{id:'t2'});await flush();assert.equal(actionButton(h,'move_down','t2').disabled,true);
- h.click('stage_toggle',{id:'t1'});await flush();h.click('move_up',{id:'t1'});await flush();assert.deepEqual(h.draft().definition.nodes.p.children,['t1','t0','t2']);assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');assert.equal(h.document.activeElement.dataset.id,'t1');assert.match(h.markup,/<span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true">1번째로 옮겼습니다/);assert.doesNotMatch(h.markup,/class="ew-author-note"/);
+ h.click('stage_toggle',{id:'t0'});h.click('stage_menu',{id:'t0'});await flush();assert.equal(actionButton(h,'move_up','t0').disabled,true);h.click('stage_toggle',{id:'t2'});h.click('stage_menu',{id:'t2'});await flush();assert.equal(actionButton(h,'move_down','t2').disabled,true);
+ h.click('stage_toggle',{id:'t1'});h.click('stage_menu',{id:'t1'});await flush();h.click('move_up',{id:'t1'});await flush();assert.deepEqual(h.draft().definition.nodes.p.children,['t1','t0','t2']);assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');assert.equal(h.document.activeElement.dataset.id,'t1');assert.equal(h.document.activeElement.dataset.authorAction,'stage_menu');assert.equal(actionButton(h,'stage_menu','t1').getAttribute('aria-expanded'),'false');assert.match(h.markup,/<span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true">1번째로 옮겼습니다/);assert.doesNotMatch(h.markup,/class="ew-author-note"/);
  h.click('job_menu',{id:'j1-0'});await flush();assert.equal(actionButton(h,'move_up','j1-0').disabled,true);h.click('job_menu',{id:'j1-2'});await flush();assert.equal(actionButton(h,'move_down','j1-2').disabled,true);h.click('move_up',{id:'j1-2'});await flush();const draft=h.draft().definition;assert.deepEqual(draft.nodes.t1.children,['j1-0','j1-2','j1-1']);assert.equal(draft.nodes['j1-2'].parent,'t1');assert.deepEqual(draft.schedule,value.schedule);assert.deepEqual(Object.keys(draft.nodes),Object.keys(value.nodes));assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');assert.equal(h.writes.length,0);
 });
 test('stage deletion confirmation lists affected jobs and deadline cleanup only when present',async()=>{
@@ -688,7 +774,7 @@ test('returning from a job preserves per-workflow expanded stage scroll dirty dr
 test('read-only content permits expanding and opening jobs without management controls',async()=>{
  const h=harness();installDefinition(h,stagedDefinition());h.state.capabilities.can_author=false;h.state.capabilities.managed_systems=[];h.state.workflow.can_manage=false;h.render();
  h.click('stage_toggle',{id:'t0'});await flush();assert.equal(stageButton(h,'t0').getAttribute('aria-expanded'),'true');
- const managed=['stage_edit','add_stage','add_job','job_menu','move_up','move_down','delete_node','summary_edit'];assert.equal(h.buttons.some(button=>managed.includes(button.dataset.authorAction)),false);assert.match(h.markup,/이 범위를 수정할 담당 권한이 없습니다/);h.click('node',{id:'j0-0'});await flush();assert.ok(h.forms['ew-author-node']);assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);
+ const managed=['stage_edit','stage_menu','add_stage','add_job','job_menu','move_up','move_down','delete_node','summary_edit'];assert.equal(h.buttons.some(button=>managed.includes(button.dataset.authorAction)),false);assert.match(h.markup,/이 범위를 수정할 담당 권한이 없습니다/);h.click('node',{id:'j0-0'});await flush();assert.ok(h.forms['ew-author-node']);assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);
 });
 // Six changes: delete 1, add 2, rename 1, adjacent swap 1, settings 1.
 // The former eight also counted a deletion-induced shift and both sides of a swap.
@@ -772,8 +858,8 @@ test('closed job menu does not handle Escape and open menu returns focus to its 
 
 test('stage reorder updates hidden live text without adding a visible notice and preserves scroll',async()=>{
  const h=harness();installDefinition(h,stagedDefinition(4,2));h.click('stage_toggle',{id:'t1'});await flush();h.scroll.scrollTop=217;
- h.click('move_down',{id:'t1'});await flush();assert.doesNotMatch(h.markup,/class="ew-author-note"/);assert.match(h.markup,/data-author-live aria-live="polite" aria-atomic="true">3번째로 옮겼습니다/);assert.equal(h.scroll.scrollTop,217);assert.equal(h.document.activeElement.dataset.id,'t1');
- h.click('move_up',{id:'t1'});await flush();assert.match(h.markup,/data-author-live aria-live="polite" aria-atomic="true">2번째로 옮겼습니다/);assert.doesNotMatch(h.markup,/3번째로 옮겼습니다/);
+ h.click('stage_menu',{id:'t1'});h.click('move_down',{id:'t1'});await flush();assert.doesNotMatch(h.markup,/class="ew-author-note"/);assert.match(h.markup,/data-author-live aria-live="polite" aria-atomic="true">3번째로 옮겼습니다/);assert.equal(h.scroll.scrollTop,217);assert.equal(h.document.activeElement.dataset.id,'t1');assert.equal(h.document.activeElement.dataset.authorAction,'stage_menu');
+ h.click('stage_menu',{id:'t1'});h.click('move_up',{id:'t1'});await flush();assert.match(h.markup,/data-author-live aria-live="polite" aria-atomic="true">2번째로 옮겼습니다/);assert.doesNotMatch(h.markup,/3번째로 옮겼습니다/);
 });
 
 test('new stage and job name fields show the Figma examples',async()=>{
@@ -783,14 +869,14 @@ test('new stage and job name fields show the Figma examples',async()=>{
 
 test('stage movement skips other kinds in a mixed draft and preserves their slots',async()=>{
  const h=harness(),value=stagedDefinition(2,1);value.nodes.rootJob={...copy(value.nodes['j0-0']),id:'rootJob',parent:'p',name:'단계 밖 초안 작업'};value.nodes.p.children=['t0','rootJob','t1'];installDefinition(h,value);
- h.click('stage_toggle',{id:'t0'});await flush();assert.equal(actionButton(h,'move_down','t0').disabled,false);h.click('move_down',{id:'t0'});await flush();
- assert.deepEqual(h.draft().definition.nodes.p.children,['t1','rootJob','t0']);assert.deepEqual(h.draft().definition.nodes.rootJob,value.nodes.rootJob);assert.match(h.markup,/data-author-live[^>]*>2번째로 옮겼습니다/);assert.equal(h.document.activeElement.dataset.authorAction,'move_up');assert.equal(actionButton(h,'move_down','t0').disabled,true);
- h.click('move_up',{id:'t0'});await flush();assert.deepEqual(h.draft().definition.nodes.p.children,value.nodes.p.children);assert.match(h.markup,/data-author-live[^>]*>1번째로 옮겼습니다/);assert.equal(h.writes.length,0);
+ h.click('stage_toggle',{id:'t0'});h.click('stage_menu',{id:'t0'});await flush();assert.equal(actionButton(h,'move_down','t0').disabled,false);h.click('move_down',{id:'t0'});await flush();
+ assert.deepEqual(h.draft().definition.nodes.p.children,['t1','rootJob','t0']);assert.deepEqual(h.draft().definition.nodes.rootJob,value.nodes.rootJob);assert.match(h.markup,/data-author-live[^>]*>2번째로 옮겼습니다/);assert.equal(h.document.activeElement.dataset.authorAction,'stage_menu');assert.equal(actionButton(h,'stage_menu','t0').getAttribute('aria-expanded'),'false');
+ h.click('stage_menu',{id:'t0'});await flush();assert.equal(actionButton(h,'move_down','t0').disabled,true);h.click('move_up',{id:'t0'});await flush();assert.deepEqual(h.draft().definition.nodes.p.children,value.nodes.p.children);assert.match(h.markup,/data-author-live[^>]*>1번째로 옮겼습니다/);assert.equal(h.writes.length,0);
 });
 
 test('job movement skips other kinds in a mixed draft and keeps endpoints unchanged',async()=>{
  const h=harness(),value=stagedDefinition(1,2);value.nodes.mixed={id:'mixed',type:'t',name:'초안 구조 확인 대상',parent:'t0',children:[],deps:[]};value.nodes.t0.children=['j0-0','mixed','j0-1'];installDefinition(h,value);
- h.click('stage_toggle',{id:'t0'});await flush();h.click('job_menu',{id:'j0-0'});await flush();h.click('move_down',{id:'j0-0'});await flush();assert.deepEqual(h.draft().definition.nodes.t0.children,['j0-1','mixed','j0-0']);assert.deepEqual(h.draft().definition.nodes.mixed,value.nodes.mixed);assert.equal(h.document.activeElement.dataset.authorAction,'move_up');assert.equal(actionButton(h,'move_down','j0-0').disabled,true);
+ h.click('stage_toggle',{id:'t0'});await flush();h.click('job_menu',{id:'j0-0'});await flush();h.click('move_down',{id:'j0-0'});await flush();assert.deepEqual(h.draft().definition.nodes.t0.children,['j0-1','mixed','j0-0']);assert.deepEqual(h.draft().definition.nodes.mixed,value.nodes.mixed);assert.equal(h.document.activeElement.dataset.authorAction,'job_menu');assert.equal(actionButton(h,'job_menu','j0-0').getAttribute('aria-expanded'),'false');h.click('job_menu',{id:'j0-0'});await flush();assert.equal(actionButton(h,'move_down','j0-0').disabled,true);
  h.click('move_down',{id:'j0-0'});await flush();assert.deepEqual(h.draft().definition.nodes.t0.children,['j0-1','mixed','j0-0']);assert.equal(h.writes.length,0);
 });
 
@@ -823,4 +909,132 @@ test('proposal ordinals count only same kind siblings without changing LCS count
  const moved=copy(before);moved.nodes.p.children=['t1','rootJob','t0'];const move=copy(h.helpers.proposalChanges(before,moved));assert.equal(move.count,1);assert.equal(move.changes[0].text,'단계 ‘단계 1’ · 2번째');
  const added=copy(before);added.nodes.t2={id:'t2',type:'t',parent:'p',name:'추가 단계',children:[],deps:[]};added.nodes.p.children.push('t2');const addition=copy(h.helpers.proposalChanges(before,added));assert.equal(addition.count,1);assert.equal(addition.changes[0].text,'단계 ‘추가 단계’ (3번째)');
  const jobBefore=stagedDefinition(1,2);jobBefore.nodes.mixed={id:'mixed',type:'t',parent:'t0',name:'초안 구조 확인 대상',children:[],deps:[]};jobBefore.nodes.t0.children=['j0-0','mixed','j0-1'];const jobAfter=copy(jobBefore);jobAfter.nodes.t0.children=['j0-1','mixed','j0-0'];const jobMove=copy(h.helpers.proposalChanges(jobBefore,jobAfter));assert.equal(jobMove.count,1);assert.equal(jobMove.changes[0].text,'작업 ‘작업 1-1’ · 2번째');
+});
+
+function c66LegacyTool(h,schema={type:'object',properties:{target:{type:'string'},limit:{type:'integer',minimum:1,maximum:100}},required:['target']}){
+ const tool={id:'legacy',name:'기존 확인 도구',description:'확인 대상을 조회합니다.',state:'approved',revision:3,kind:'read',reference:{tool_id:'private-tool',function:'read',content_hash:'keep'},input_schema:copy(schema)};
+ h.state.operations={tools:[tool],shared_tools:[]};return tool;
+}
+async function c66SelectShared(h){sharedReviewFixture(h);h.render();await h.node();h.click('pick_job_tool',{id:'managed-search_pages',shared:'true'});await flush();}
+const c66Section=(h,id)=>actionButton(h,'job_section',id);
+const c66Argument=(h,id)=>actionButton(h,'job_argument',id);
+
+test('C66 human detail uses the compact breadcrumb and three real mode radios',async()=>{
+ const h=harness();await h.node();assert.match(h.markup,/ew-job-detail/);assert.match(h.markup,/단계와 작업[\s\S]*1[\s\S]*단계/);
+ assert.doesNotMatch(h.markup,/<h2>확인 작업<\/h2>|class="ew-author-inline"|Native/);
+ assert.deepEqual(h.fields.filter(f=>f.name==='mode').map(f=>[f.type,f.value,f.checked]),[['radio','human',true],['radio','tool',false],['radio','ai',false]]);
+ assert.match(h.markup,/role="radiogroup"/);assert.match(h.markup,/무엇을 확인하나요/);assert.match(h.markup,/확인 방법/);assert.match(h.markup,/완료 기준/);
+ assert.equal(h.fields.find(f=>f.name==='name').getAttribute('maxlength'),'160');assert.equal(h.fields.find(f=>f.name==='name').getAttribute('required'),'');
+ assert.ok(actionButton(h,'job_menu','j'));assert.equal(c66Section(h,'completion'),undefined);assert.equal(c66Argument(h,'target'),undefined);assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);
+});
+for(const oldBlock of ['change_request','schedule','list_confirm'])test('C66 human detail preserves an older result kind outside the four ordinary choices: '+oldBlock,async()=>{
+ const h=harness(),value=definition();value.nodes.j.result_block=oldBlock;value.nodes.j.completion={rule:'기존 완료 기준',opaque:'keep'};installDefinition(h,value);await h.node();
+ assert.equal(h.fields.find(f=>f.name==='result_block').value,oldBlock);h.field('instructions','확인 안내만 수정');h.click('save');await flush();
+ assert.equal(h.writes.at(-1).definition.nodes.j.result_block,oldBlock);assert.deepEqual(h.writes.at(-1).definition.nodes.j.completion,value.nodes.j.completion);
+});
+test('C66 tool selection before connection never fabricates arguments results or completion settings',async()=>{
+ const h=harness();await h.node();h.field('mode','tool','change');await flush();assert.equal(h.draft().definition.nodes.j.mode,'tool');assert.match(h.markup,/도구 연결 전/);
+ assert.doesNotMatch(h.markup,/도구에 넣을 값|돌려주는 것|항상 자동으로 확인/);assert.equal(h.buttons.some(b=>b.dataset.authorAction==='job_argument'),false);
+ assert.equal(h.draft().definition.nodes.j.shared_tool_id,undefined);assert.equal(h.writes.length,0);
+});
+test('C66 AI mode retains its existing completion dependency and source controls',async()=>{
+ const h=harness(),value=definition();Object.assign(value.nodes.j,{mode:'ai',result_block:'ai_review',completion:{kind:'delivery',rule:'송부 근거 확인',extra:true},dependency_policy:'all_resolved',skills:['private-skill'],human_confirmation:false});installDefinition(h,value);await h.node();
+ assert.equal(h.fields.find(f=>f.name==='mode'&&f.checked).value,'ai');assert.equal(h.fields.find(f=>f.name==='completion_kind').value,'delivery');assert.equal(h.fields.find(f=>f.name==='dependency_policy').value,'all_resolved');
+ h.field('instructions','AI 안내만 변경');h.click('save');await flush();const saved=h.writes.at(-1).definition.nodes.j;assert.equal(saved.mode,'ai');assert.deepEqual(saved.completion,value.nodes.j.completion);assert.equal(saved.dependency_policy,'all_resolved');assert.deepEqual(saved.skills,['private-skill']);assert.equal(saved.human_confirmation,false);
+});
+for(const mode of ['human','ai'])test('C66 D5 mode switch requires confirmation and matches Tool None cleanup: '+mode,async()=>{
+ const h=harness();h.workflows.get('w').draft.nodes.j.inputs=[{id:'manual',name:'직접 만든 값',type:'text',scope:'factory',custom:{keep:true}}];await c66SelectShared(h);
+ const original=copy(h.draft().definition),originalJob=original.nodes.j;const reference=harness();sharedReviewFixture(reference);installDefinition(reference,original);await reference.node();reference.click('pick_job_tool',{id:''});await flush();const expected=reference.draft().definition.nodes.j;expected.mode=mode;
+ h.dialogs.push(null);h.field('mode',mode,'change');await flush();assert.equal(h.dialogHistory.length,1);assert.deepEqual(h.draft().definition,original);assert.equal(h.fields.find(f=>f.name==='mode'&&f.checked).value,'tool');
+ h.dialogs.push({});h.field('mode',mode,'change');await flush();const job=h.draft().definition.nodes.j;assert.deepEqual(job,expected);assert.deepEqual(job.inputs,[originalJob.inputs.find(f=>f.id==='manual')]);assert.equal(job.shared_tool_id,undefined);assert.equal(job.shared_tool_generated,undefined);assert.equal(job.result_block,'human_confirm');assert.equal(h.writes.length,0);
+});
+test('C66 D5 cancellation and confirmation preserve manually customized generated bindings',async()=>{
+ const h=harness();await c66SelectShared(h);const value=h.draft().definition;value.nodes.j.argument_bindings.query={constant:'사람이 고친 검색어'};value.nodes.j.inputs.push({id:'manual',name:'개인 입력',type:'text',scope:'run'});h.designer.reset();installDefinition(h,value);await h.node();
+ h.dialogs.push({});h.field('mode','human','change');await flush();assert.deepEqual(h.draft().definition.nodes.j.argument_bindings.query,{constant:'사람이 고친 검색어'});assert.ok(h.draft().definition.nodes.j.inputs.some(f=>f.id==='manual'));assert.equal(h.writes.length,0);
+});
+test('C66 connected shared tool describes its known output and opens exactly one argument row',async()=>{
+ const h=harness();await c66SelectShared(h);assert.match(h.markup,/문서 목록 · 페이지 번호, 제목, 주소 · 한 번에 한 쪽/);
+ assert.deepEqual(h.buttons.filter(b=>b.dataset.authorAction==='job_argument').map(b=>b.dataset.id),['query','space_key','limit']);assert.equal(h.buttons.filter(b=>b.dataset.authorAction==='job_argument'&&b.getAttribute('aria-expanded')==='true').length,0);
+ h.click('job_argument',{id:'query'});await flush();assert.equal(c66Argument(h,'query').getAttribute('aria-expanded'),'true');
+ h.click('job_argument',{id:'limit'});await flush();assert.equal(c66Argument(h,'query').getAttribute('aria-expanded'),'false');assert.equal(c66Argument(h,'limit').getAttribute('aria-expanded'),'true');
+ const response=h.designer.handleEvent({type:'keydown',key:'Escape',target:h.fields.find(f=>f.name==='argument_source'&&f.checked)});await flush();assert.deepEqual(copy(response),{handled:true,preventDefault:true});assert.equal(c66Argument(h,'limit').getAttribute('aria-expanded'),'false');assert.equal(h.document.activeElement,c66Argument(h,'limit'));assert.equal(h.writes.length,0);
+});
+test('C66 argument input scope roundtrips through the existing declaration and preserves factory scope',async()=>{
+ const h=harness();await c66SelectShared(h);h.click('job_argument',{id:'query'});await flush();h.field('argument_scope',true,'change');await flush();
+ assert.deepEqual(h.draft().definition.nodes.j.argument_bindings.query,{input:'query'});assert.equal(h.draft().definition.nodes.j.inputs.find(f=>f.id==='query').scope,'workflow');h.click('save');await flush();await h.open('q');await h.open('w');await h.node();
+ assert.equal(h.draft().definition.nodes.j.inputs.find(f=>f.id==='query').scope,'workflow');
+ const value=h.draft().definition;value.nodes.j.inputs.find(f=>f.id==='query').scope='factory';h.designer.reset();installDefinition(h,value);await h.node();h.click('job_argument',{id:'query'});await flush();assert.equal(h.fields.find(f=>f.name==='argument_scope').disabled,true);
+ h.field('name','다른 작업 이름');h.click('save');await flush();assert.equal(h.writes.at(-1).definition.nodes.j.inputs.find(f=>f.id==='query').scope,'factory');
+});
+test('C66 constant values roundtrip with exact JSON types and range checking stays at publish validation',async()=>{
+ const h=harness();const tool=c66LegacyTool(h);Object.assign(h.workflows.get('w').draft.nodes.j,{mode:'tool',tool_contract_id:tool.id,tool_contract_revision:3,tool_reference:copy(tool.reference),argument_bindings:{target:{constant:'원래 값'},limit:{constant:1}}});h.render();await h.node();h.click('job_argument',{id:'limit'});await flush();h.field('argument_constant','500');await flush();assert.deepEqual(h.draft().definition.nodes.j.argument_bindings.limit,{constant:500});
+ h.click('save');await flush();assert.equal(h.writes.at(-1).definition.nodes.j.argument_bindings.limit.constant,500);await h.open('q');await h.open('w');await h.node();if(c66Argument(h,'limit').getAttribute('aria-expanded')!=='true')h.click('job_argument',{id:'limit'});await flush();assert.equal(h.fields.find(f=>f.name==='argument_constant').value,'500');
+ h.writeOverride=async body=>{const validation={revision:body.expected_revision,errors:[{code:'invalid_argument',message:'한도는 100 이하여야 합니다.',node_id:'j',argument_id:'limit'}],warnings:[]};h.workflows.get('w').validation=copy(validation);return {ok:true,revision:body.expected_revision,validation};};h.click('validate');await flush();assert.equal(h.writes.at(-1).action,'validate_workflow');assert.match(h.markup,/한도는 100 이하여야 합니다/);assert.equal(h.draft().definition.nodes.j.argument_bindings.limit.constant,500);
+});
+test('C66 an invalid numeric constant is rejected without replacing its previous value',async()=>{
+ const h=harness();await c66SelectShared(h);h.click('job_argument',{id:'limit'});await flush();h.field('argument_source','constant','change');await flush();h.field('argument_constant','12');await flush();const before=copy(h.draft().definition.nodes.j.argument_bindings.limit);
+ h.field('argument_constant','not a number');await flush();assert.deepEqual(h.draft().definition.nodes.j.argument_bindings.limit,before);assert.match(h.markup,/숫자|형식/);assert.equal(h.writes.length,0);
+ for(const action of ['save','validate','publish']){h.click(action);await flush();assert.equal(h.writes.length,0);assert.equal(h.fields.find(f=>f.name==='argument_constant').value,'not a number');assert.deepEqual(h.draft().definition.nodes.j.argument_bindings.limit,before);}
+ h.field('argument_constant','13');h.click('save');await flush();assert.equal(h.writes.length,1);assert.deepEqual(h.writes[0].definition.nodes.j.argument_bindings.limit,{constant:13});
+});
+test('C66 changing the selected tool clears only its abandoned argument buffer',async()=>{
+ const h=harness();await c66SelectShared(h);h.click('job_argument',{id:'limit'});await flush();h.field('argument_source','constant','change');await flush();h.field('argument_constant','invalid old number');await flush();assert.equal(h.fields.find(f=>f.name==='argument_constant').value,'invalid old number');
+ h.click('pick_job_tool',{id:'managed-get_page',shared:'true'});await flush();h.click('job_argument',{id:'page_id'});await flush();assert.equal(h.fields.find(f=>f.name==='argument_source'&&f.checked).value,'input');assert.equal(h.fields.find(f=>f.name==='argument_input').value,'page_id');assert.doesNotMatch(h.markup,/invalid old number/);
+ h.click('save');await flush();assert.equal(h.writes.length,1);assert.equal(h.writes[0].definition.nodes.j.shared_tool_id,'managed-get_page');assert.deepEqual(h.writes[0].definition.nodes.j.argument_bindings.page_id,{input:'page_id'});
+});
+test('C66 shared result source remains disabled with a reason and cannot replace existing input bindings',async()=>{
+ const h=harness();await c66SelectShared(h);h.click('job_argument',{id:'query'});await flush();const field=h.fields.find(f=>f.name==='argument_source'&&f.value==='result');assert.ok(field);assert.equal(field.disabled,true);assert.match(h.markup,/앞 작업 결과/);assert.match(h.markup,/아직|지원하지|연결할 수/);
+ const before=h.draft().definition;h.field('argument_source','result','change');await flush();assert.deepEqual(h.draft().definition,before);assert.equal(h.writes.length,0);
+});
+test('C66 legacy confirmed-list result binding roundtrips without losing opaque result metadata',async()=>{
+ const h=harness(),tool=c66LegacyTool(h),value=stagedDefinition(1,2);const node=value.nodes['j0-1'];value.nodes['j0-0'].result_block='list_confirm';Object.assign(node,{mode:'tool',tool_contract_id:tool.id,tool_contract_revision:tool.revision,tool_reference:copy(tool.reference),deps:['j0-0'],argument_bindings:{target:{result:{job_id:'j0-0',path:['items'],value_field:'id',confirmed:true,extension:'keep'}},limit:{constant:10}}});installDefinition(h,value);await h.node('j0-1');h.click('job_argument',{id:'target'});await flush();assert.equal(h.fields.find(f=>f.name==='argument_source'&&f.checked).value,'result');assert.equal(h.fields.find(f=>f.name==='argument_result_job').value,'j0-0');
+ h.field('name','결과 연결 이름만 변경');h.click('save');await flush();assert.deepEqual(h.writes.at(-1).definition.nodes['j0-1'].argument_bindings,node.argument_bindings);
+ h.click('job_argument',{id:'target'});await flush();if(!h.fields.some(f=>f.name==='argument_source')){h.click('job_argument',{id:'target'});await flush();}h.field('argument_source','constant','change');await flush();h.field('argument_constant','직접 대상');h.field('argument_source','result','change');await flush();h.field('argument_result_job','j0-0','change');await flush();
+ assert.deepEqual(h.draft().definition.nodes['j0-1'].argument_bindings.target,{result:{job_id:'j0-0',path:['items'],value_field:'id',confirmed:true}});assert.equal(h.writes.length,1);
+ h.field('argument_result_job','','change');await flush();assert.equal(h.draft().definition.nodes['j0-1'].argument_bindings.target,undefined);assert.deepEqual(h.draft().definition.nodes['j0-1'].argument_bindings.limit,{constant:10});assert.deepEqual(h.draft().definition.nodes['j0-1'].deps,['j0-0']);
+});
+test('C66 completion and additional disclosures are view-only until a displayed field changes',async()=>{
+ const h=harness();await c66SelectShared(h);const before=h.draft();assert.equal(c66Section(h,'completion').getAttribute('aria-expanded'),'false');assert.equal(c66Section(h,'advanced').getAttribute('aria-expanded'),'false');
+ h.click('job_section',{id:'completion'});await flush();assert.match(h.markup,/항상 자동으로 확인/);assert.equal(h.fields.find(f=>f.name==='human_required').checked,true);assert.deepEqual(h.draft(),before);
+ h.field('human_required',false,'change');await flush();assert.equal(h.draft().definition.nodes.j.human_confirmation,false);h.click('job_section',{id:'advanced'});await flush();assert.ok(h.fields.find(f=>f.name==='assignee'));assert.doesNotMatch(h.markup,/결과 내용 확인|이렇게 판정됩니다|Native/);assert.equal(h.writes.length,0);
+ const result=h.designer.handleEvent({type:'keydown',key:'Escape',target:h.fields.find(f=>f.name==='instructions')});await flush();assert.deepEqual(copy(result),{handled:true,preventDefault:true});assert.equal(c66Section(h,'advanced').getAttribute('aria-expanded'),'false');assert.equal(h.document.activeElement,c66Section(h,'advanced'));
+});
+for(const mode of ['human','tool','ai'])test('C66 read-only job detail exposes saved values without allowing edits: '+mode,async()=>{
+ const h=harness(),value=definition();value.nodes.j.mode=mode;value.nodes.j.instructions='보존할 수행 안내';if(mode==='tool'){const tool=c66LegacyTool(h);Object.assign(value.nodes.j,{tool_contract_id:tool.id,tool_reference:copy(tool.reference),argument_bindings:{target:{constant:'보존할 대상'}}});}installDefinition(h,value);h.state.capabilities.can_author=false;h.state.capabilities.managed_systems=[];h.state.workflow.can_manage=false;h.render();await h.node();const before=h.draft();
+ assert.match(h.markup,/ew-job-detail/);assert.equal(h.buttons.some(b=>['job_menu','delete_node','move_up','move_down','save'].includes(b.dataset.authorAction)),false);
+ if(mode==='tool'){h.click('job_argument',{id:'target'});h.click('job_section',{id:'advanced'});await flush();}
+ assert.ok(h.fields.filter(f=>f.type!=='hidden').every(f=>f.disabled));h.field('name','권한 없는 수정');h.field('mode',mode==='tool'?'human':'tool','change');h.click('save');await flush();assert.deepEqual(h.draft(),before);assert.equal(h.writes.length,0);
+});
+
+test('C66 inspection and an unrelated edit preserve every stored tool input and binding value',async()=>{
+ const h=harness(),schema={properties:{text:{type:'string'},zero:{type:'number'},flag:{type:'boolean'},list:{type:'array'},object:{type:'object'},nullable:{type:['string','null']},prompt:{type:'string'}}},tool=c66LegacyTool(h,schema),value=definition();
+ Object.assign(value.nodes.j,{mode:'tool',tool_contract_id:tool.id,tool_contract_revision:2,tool_reference:{...copy(tool.reference),content_hash:'older-preserved'},argument_bindings:{text:{constant:''},zero:{constant:0},flag:{constant:false},list:{constant:['x',0,false]},object:{constant:{nested:['x'],nullable:null}},nullable:{constant:null},prompt:{input:'private-input'}},inputs:[{id:'private-input',name:'기존 입력',type:'text',scope:'factory',options_query:{extension:'keep'},opaque:{keep:true}}],condition:{all:[{field:'factory_id',op:'eq',value:'f'}]},completion:{rule:'기존 기준',opaque:'keep'},read_retry:{count:2,deadline_seconds:45},skills:['opaque-skill'],human_confirmation:false,extension:{private:'keep'}});
+ installDefinition(h,value);await h.node();for(const id of Object.keys(schema.properties)){h.click('job_argument',{id});await flush();assert.deepEqual(h.draft().definition,value,'opening '+id+' cannot normalize stored data');}
+ h.click('job_section',{id:'advanced'});h.click('job_section',{id:'completion'});await flush();assert.deepEqual(h.draft().definition,value);h.field('instructions','안내만 바꿨습니다');h.click('save');await flush();const expected=copy(value);expected.nodes.j.instructions='안내만 바꿨습니다';assert.deepEqual(h.writes.at(-1).definition,expected);
+});
+test('C66 editing constants saves strings numbers booleans arrays and objects as their declared JSON types',async()=>{
+ for(const [type,initial,raw,expected] of [['string','old','0','0'],['number',1,'0',0],['boolean',true,'false',false],['array',['old'],'["new",0,false]',['new',0,false]],['object',{old:1},'{"new":false,"empty":null}',{new:false,empty:null}]]){
+  const h=harness(),tool=c66LegacyTool(h,{properties:{value:{type}}}),definitionValue=definition();Object.assign(definitionValue.nodes.j,{mode:'tool',tool_contract_id:tool.id,tool_reference:copy(tool.reference),argument_bindings:{value:{constant:initial}}});installDefinition(h,definitionValue);await h.node();h.click('job_argument',{id:'value'});await flush();h.field('argument_constant',raw);await flush();assert.deepEqual(h.draft().definition.nodes.j.argument_bindings.value,{constant:expected},type);
+  h.click('save');await flush();assert.deepEqual(h.writes.at(-1).definition.nodes.j.argument_bindings.value,{constant:expected},type+' saved');await h.open('q');await h.open('w');assert.deepEqual(h.draft().definition.nodes.j.argument_bindings.value,{constant:expected},type+' reloaded');
+ }
+});
+test('C66 D5 confirmation cannot change a different workflow after navigation',async()=>{
+ const h=harness();await c66SelectShared(h);const before=h.draft().definition;h.dialogs.push({});h.dialogHook=()=>h.open('q');h.field('mode','human','change');await flush();assert.equal(h.draft().definition.id,'q');assert.equal(h.draft().definition.nodes.j.mode,'human');await h.open('w');assert.deepEqual(h.draft().definition,before);assert.equal(h.writes.length,0);
+});
+test('C66 tool output text describes only the known document schemas without inventing unknown fields',async()=>{
+ for(const [output_schema,expected] of [[{kind:'list',fields:['id','title','url']},'문서 목록 · 페이지 번호, 제목, 주소 · 한 번에 한 쪽'],[{kind:'evidence',fields:['data','evidence']},'본문 근거 · 잘리면 일부 결과'],[{kind:'list',fields:['ticket','status']},null],[{kind:'evidence',fields:['unknown']},null],[{type:'object',properties:{anything:{type:'string'}}},null]]){
+  const h=harness(),tool=c66LegacyTool(h),value=definition();tool.output_schema=output_schema;Object.assign(value.nodes.j,{mode:'tool',tool_contract_id:tool.id,tool_reference:copy(tool.reference)});installDefinition(h,value);await h.node();
+  if(expected)assert.ok(h.markup.includes(expected));else assert.doesNotMatch(h.markup,/class="ew-job-tool-output"|문서 목록 · 페이지 번호|본문 근거 · 잘리면/);
+  assert.deepEqual(h.draft().definition,value);assert.equal(h.writes.length,0);
+ }
+});
+test('C66 choosing a result source without a result job removes the old constant and shows its required notice',async()=>{
+ const h=harness(),tool=c66LegacyTool(h),value=definition();Object.assign(value.nodes.j,{mode:'tool',tool_contract_id:tool.id,tool_reference:copy(tool.reference),argument_bindings:{target:{constant:'OLD'},limit:{constant:10}}});installDefinition(h,value);await h.node();h.click('job_argument',{id:'target'});await flush();h.field('argument_source','result','change');await flush();
+ assert.equal(h.fields.find(f=>f.name==='argument_source'&&f.checked).value,'result');assert.equal(h.fields.find(f=>f.name==='argument_result_job').value,'');assert.equal(h.draft().definition.nodes.j.argument_bindings.target,undefined);assert.deepEqual(h.draft().definition.nodes.j.argument_bindings.limit,{constant:10});assert.match(h.markup,/ew-job-argument-required/);
+ h.click('save');await flush();assert.equal(h.writes.at(-1).definition.nodes.j.argument_bindings.target,undefined);assert.deepEqual(h.writes.at(-1).definition.nodes.j.argument_bindings.limit,{constant:10});
+});
+test('C66 the legacy tool select redraws argument rows and completion immediately after selecting a tool',async()=>{
+ const h=harness(),tool=c66LegacyTool(h),value=definition();delete h.state.operations.shared_tools;value.nodes.j.mode='tool';installDefinition(h,value);await h.node();assert.match(h.markup,/도구 연결 전/);assert.equal(h.buttons.some(b=>b.dataset.authorAction==='job_argument'),false);
+ h.field('tool_contract_id',tool.id,'change');await flush();assert.equal(h.draft().definition.nodes.j.tool_contract_id,tool.id);assert.doesNotMatch(h.markup,/도구 연결 전|도구를 고른 뒤 정합니다/);assert.deepEqual(h.buttons.filter(b=>b.dataset.authorAction==='job_argument').map(b=>b.dataset.id),['target','limit']);assert.equal(c66Section(h,'completion').disabled,false);assert.equal(h.writes.length,0);
+ h.field('tool_contract_id','','change');await flush();assert.match(h.markup,/도구 연결 전/);assert.equal(h.buttons.some(b=>b.dataset.authorAction==='job_argument'),false);assert.match(h.markup,/도구를 고른 뒤 정합니다/);assert.equal(h.writes.length,0);
 });

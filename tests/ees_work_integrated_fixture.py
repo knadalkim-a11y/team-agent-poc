@@ -167,7 +167,10 @@ class IntegratedNativeCase(unittest.TestCase):
         if not self.browser.evaluate('!!document.querySelector(' + json.dumps(selector) + ')'):
             self.click('[data-author-action=stage_toggle][data-id="' + stage_id + '"]')
         self.click(selector)
-        self.wait("document.querySelector('#ew-author-node [name=instructions]')")
+        # C66 tool instructions live in the collapsed additional-settings
+        # section. The always-visible name and method identify a ready detail;
+        # callers explicitly open additional settings before editing them.
+        self.wait("document.querySelector('.ew-job-detail #ew-author-node [name=name]') && document.querySelector('.ew-job-method [name=mode]:checked')")
 
     def start(self, key, **values):
         revision = self.state(workflow_id=key)['workflow']['revision']

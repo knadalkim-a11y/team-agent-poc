@@ -1,0 +1,77 @@
+{
+  "date_utc": "2026-10-22",
+  "base": "1c1efff8abe19da3e6e8921859b52858fc6cacfb",
+  "environment": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "records": [
+    {
+      "path": "c66-node-red-initial.log",
+      "bytes": 9354,
+      "sha256": "1830045734bc95decbaef6ff8ad4399511c8c0fd150a6c3e767c7b377997f66c"
+    },
+    {
+      "path": "c66-node-red-expanded.log",
+      "bytes": 129029,
+      "sha256": "197502855fd72eb32a7f065dad7d33517653f71ffe37243e74906684affd924d"
+    },
+    {
+      "path": "c66-node-red-final-guards.log",
+      "bytes": 137584,
+      "sha256": "5b23de84c179316911a7e28a48656a380321f5eab3eb3541f9307d22220a6572"
+    },
+    {
+      "path": "c66-node-first-integrated.log",
+      "bytes": 143904,
+      "sha256": "09867e0e546ace3c877eacc34f373010a57d28eb7b1af78dc0930fd003cf5938"
+    },
+    {
+      "path": "c66-node-final-guards.log",
+      "bytes": 51712,
+      "sha256": "01fe466e189f994492a1bad3a52c988b5f427f0d26344f0ae6b477dadbd621bd"
+    },
+    {
+      "path": "c66-python-contract.log",
+      "bytes": 16581,
+      "sha256": "98c4f60ad32715fa9517eafe8288ad7dd12ea06d71bc2017c34468348573d7ea"
+    },
+    {
+      "path": "c66-python-contract-fixed.log",
+      "bytes": 876,
+      "sha256": "64a2735bdcdc184616b6a9488cacb5c8e80bc713a8dbd2e075791fc257bc30f9"
+    },
+    {
+      "path": "c66-node-regression.log",
+      "bytes": 25918,
+      "sha256": "ef8f94b3e09841e6f412dc2cd4b4e36537d32fc2b0989cd786223a934fb40613"
+    },
+    {
+      "path": "c66-python-assets.log",
+      "bytes": 746,
+      "sha256": "831286d85be7808fce9f82e9545074d524052238782460a3950b5c7801c1b4bc"
+    },
+    {
+      "path": "c66-root-a-check.log",
+      "bytes": 15524,
+      "sha256": "980fc23db96657b334696baf996a053c54d9502c57e191092f81b47809a59783"
+    },
+    {
+      "path": "c66-node-pre-ci.log",
+      "bytes": 50615,
+      "sha256": "e8410230e0178837a54389f326e8ef54366a3b54db19aed12d0638bf3afe2997"
+    },
+    {
+      "path": "c66-python-pre-ci.log",
+      "bytes": 1523,
+      "sha256": "70e93c91db1a23a544d86295f01c606bd05fec813e091539728b1702cf2ddc35"
+    },
+    {
+      "path": "c66-node-frozen.log",
+      "bytes": 50957,
+      "sha256": "5f6b1c4aac2e2f4395ac0b8a012a1ae2232df4991a8315692ca9cdd41b6923fd"
+    }
+  ],
+  "note": "각 로그의 최초 실패/작업 중 통합 실패/최종 검사를 구분한다. Native 실제 브라우저는 최종 CI로 판정한다.",
+  "product_sha256": {
+    "branding/ees/ui/ees-work-designer.js": "b4c1b1d729d9e3a1fa6c2642c62c36b099d4a343771e07209ed9ca9d7f193f48",
+    "branding/ees/ui/ees-work-launcher.css": "759c45067a1845131cfc962485232e61f4633e765080c565bce66923ba4595bb"
+  }
+}

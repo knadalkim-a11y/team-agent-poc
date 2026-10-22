@@ -1,0 +1,48 @@
+✖ C66 content removes the needed-summary surface while preserving stored review decisions (16.970133ms)
+✖ C66 expanded stages keep edit visible and disclose move and delete only through their menu (15.236014ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 134.049685
+
+✖ failing tests:
+
+test at tests/test_ees_work_authoring_ui.cjs:96:1
+✖ C66 content removes the needed-summary surface while preserving stored review decisions (16.970133ms)
+  AssertionError [ERR_ASSERTION]: The input was expected to not match the regular expression /정해야 할 것|data-author-action="summary_open"|ew-content-needs/. Input:
+  
+  '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span><details class="ew-procedure-menu"><summary aria-label="절차 메뉴"><img src="/_ees13/v4/cb8e2.svg" alt=""></summary><div><button type="button" data-author-action="edit_workflow" class="ew-author-link">절차 정보·분류 수정</button><button type="button" data-author-action="copy" class="ew-author-link">다른 이름으로 저장</button></div></details></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="true">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="false">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><section class="ew-work-content"><div class="ew-content-purpose"><p>목적을 입력해 주세요.</p><button type="button" data-author-action="summary_edit" data-id="business" class="ew-author-link">수정</button></div><button type="button" data-author-action="summary_open" class="ew-content-needs"><img src="/_ees13/v4/676c3.svg" alt=""><span><strong>정해야 할 것 1</strong><small>판정 · 보내기</small></span><img src="/_ees13/v4/f0554.svg" alt=""></button><div class="ew-content-heading"><h3>단계와 작업</h3><small>1개 단계</small><button type="button" data-author-action="help" data-id="stages_and_jobs" class="ew-help-trigger" aria-label="단계와 작업 도움말" aria-haspopup="dialog"><img src="/_ees13/v4/41b38.svg" alt=""></button></div><div class="ew-stage-list"><section class="ew-content-stage" data-stage-id="t"><button type="button" data-author-action="stage_toggle" data-id="t" class="ew-stage-toggle" aria-expanded="false" aria-controls="ew-stage-body-t"><span class="ew-author-stage-number">1</span><span class="ew-stage-name">단계</span><small class="ew-stage-count">1개 작업</small><img src="/_ees13/v4/f0554.svg" alt=""></button></section></div><button type="button" data-author-action="add_stage" class="ew-author-link"><img src="/_ees13/v4/9ce50.svg" alt="">단계 추가</button></section></div><footer><small data-author-status>초안 r1 · 저장됨</small><button type="button" data-author-action="validate" data-mutation >게시 전 확인</button><button type="button" data-author-action="save" data-mutation class="ew-primary">초안 저장</button><button type="button" data-author-action="publish" data-mutation>게시</button></footer></section>'
+  
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:98:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span><details class="ew-procedure-menu"><summary aria-label="절차 메뉴"><img src="/_ees13/v4/cb8e2.svg" alt=""></summary><div><button type="button" data-author-action="edit_workflow" class="ew-author-link">절차 정보·분류 수정</button><button type="button" data-author-action="copy" class="ew-author-link">다른 이름으로 저장</button></div></details></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="true">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="false">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><section class="ew-work-content"><div class="ew-content-purpose"><p>목적을 입력해 주세요.</p><button type="button" data-author-action="summary_edit" data-id="business" class="ew-author-link">수정</button></div><button type="button" data-author-action="summary_open" class="ew-content-needs"><img src="/_ees13/v4/676c3.svg" alt=""><span><strong>정해야 할 것 1</strong><small>판정 · 보내기</small></span><img src="/_ees13/v4/f0554.svg" alt=""></button><div class="ew-content-heading"><h3>단계와 작업</h3><small>1개 단계</small><button type="button" data-author-action="help" data-id="stages_and_jobs" class="ew-help-trigger" aria-label="단계와 작업 도움말" aria-haspopup="dialog"><img src="/_ees13/v4/41b38.svg" alt=""></button></div><div class="ew-stage-list"><section class="ew-content-stage" data-stage-id="t"><button type="button" data-author-action="stage_toggle" data-id="t" class="ew-stage-toggle" aria-expanded="false" aria-controls="ew-stage-body-t"><span class="ew-author-stage-number">1</span><span class="ew-stage-name">단계</span><small class="ew-stage-count">1개 작업</small><img src="/_ees13/v4/f0554.svg" alt=""></button></section></div><button type="button" data-author-action="add_stage" class="ew-author-link"><img src="/_ees13/v4/9ce50.svg" alt="">단계 추가</button></section></div><footer><small data-author-status>초안 r1 · 저장됨</small><button type="button" data-author-action="validate" data-mutation >게시 전 확인</button><button type="button" data-author-action="save" data-mutation class="ew-primary">초안 저장</button><button type="button" data-author-action="publish" data-mutation>게시</button></footer></section>',
+    expected: /정해야 할 것|data-author-action="summary_open"|ew-content-needs/,
+    operator: 'doesNotMatch',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_authoring_ui.cjs:102:1
+✖ C66 expanded stages keep edit visible and disclose move and delete only through their menu (15.236014ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(actionButton(h,'stage_menu','t1'))
+  
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:105:102)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

@@ -22,6 +22,270 @@ from test_ees_helper_chat_native import install_helper_status_fixture
 
 
 class FigmaAuthoringNativeTests(IntegratedNativeCase):
+    def open_job_section(self, section):
+        """Use the C66 disclosure control, without changing its DOM state."""
+        selector = '[data-author-action=job_section][data-id="' + section + '"]'
+        if self.read(selector, 'ariaExpanded') != 'true':
+            self.click(selector)
+        self.wait('document.querySelector(' + json.dumps(selector) + ')?.getAttribute("aria-expanded")==="true"')
+
+    def test_c66_job_methods_arguments_d5_and_read_only_at_480_and_1366(self):
+        """C66 uses real controls/SQLite; installed Confluence metadata is synthetic."""
+        native = importlib.import_module(self.backend.__package__ + '.ees_workflow_native')
+        source = (Path(__file__).resolve().parents[1] / 'agent-pack/skills/confluence-read/scripts/confluence_tool.py').read_text(encoding='utf-8')
+        schemas = {
+            'search_pages': {'type': 'object', 'properties': {
+                'query': {'type': 'string'}, 'space_key': {'type': 'string', 'default': ''},
+                'limit': {'type': 'integer', 'default': 5}}, 'required': ['query']},
+            'get_page': {'type': 'object', 'properties': {'page_id': {'type': 'string'}}, 'required': ['page_id']},
+        }
+        reference = {'tool_id': 'c66-installed-confluence', 'revision': 1,
+                     'content_hash': native.MANAGED_READ_SOURCE_HASHES['confluence'],
+                     'schema_hash': 'b' * 64, 'config_hash': 'c' * 64, 'environment': 'd' * 64}
+
+        async def managed():
+            return [{'id': reference['tool_id'], 'content': source}]
+
+        async def inspect(actor, tool_id, function):
+            return {'reference': {**reference, 'function': function}, 'schema': schemas[function], 'state': 'allowed'}
+
+        self.bridge.managed_tools, self.bridge.inspect = managed, inspect
+        self.server.workflow.group_lookup = lambda _: [{'id': 'c66-readers', 'name': '합성 조회 팀'}]
+        self.server.workflow.group_list_lookup = lambda: [{'id': 'c66-readers', 'name': '합성 조회 팀'}]
+        items = asyncio.run(self.server.workflow.shared_tools.discover(self.server.user))
+        # This is the same approved-metadata fixture as B10, not a registration
+        # or a call to a user's Native tool. Workflow saves below use real APIs.
+        with self.server.workflow._db(write=True) as db:
+            for item in items:
+                if item['target'] != 'Confluence':
+                    continue
+                item.update(state='available', version=1, revision=1, group_ids=['c66-readers'], responsible_user_id=self.server.user['id'])
+                db.execute('INSERT INTO work_shared_tools VALUES(?,?,?)', (item['id'], 1, json.dumps(item, ensure_ascii=False)))
+                db.execute('INSERT INTO work_shared_tool_versions VALUES(?,?,?)', (item['id'], 1, json.dumps({
+                    'version': 1, 'at': 1792051200, 'input_schema': item['input_schema'],
+                    'output_schema': item['output_schema'], 'reference': item['reference']}, ensure_ascii=False)))
+        observations = []
+
+        def capture(label):
+            self.wait("[...document.querySelectorAll('#ees-work-designer')].every(surface=>surface.getAnimations({subtree:true}).every(animation=>!animation.pending&&animation.playState!=='running'))")
+            observed = self.browser.evaluate("""(() => {
+                const scroll=document.querySelector('.ew-author-scroll'), active=document.activeElement;
+                return {viewport:[innerWidth,innerHeight],overflow:scroll.scrollWidth-scroll.clientWidth,
+                    method:document.querySelector('.ew-job-method [name=mode]:checked')?.value,
+                    focus:{action:active?.dataset.authorAction,id:active?.dataset.id,name:active?.name},
+                    sections:[...document.querySelectorAll('[data-author-action=job_section]')].map(e=>({id:e.dataset.id,expanded:e.getAttribute('aria-expanded'),disabled:e.disabled})),
+                    arguments:[...document.querySelectorAll('.ew-job-argument')].map(e=>({id:e.dataset.argumentId,text:e.innerText})),
+                    factoryTabs:document.querySelectorAll('.ew-author-factories').length,
+                    methodLabels:[...document.querySelectorAll('.ew-job-method label span')].map(e=>e.textContent),
+                    invalid:[...document.querySelectorAll('[aria-invalid=true]')].map(e=>e.name)};
+            })()""")
+            self.assertLessEqual(observed['overflow'], 1, observed)
+            self.assertEqual(observed['factoryTabs'], 0, observed)
+            self.assertEqual(observed['methodLabels'], ['사람이 확인', '도구로 처리', 'AI 초안'])
+            observed['label'] = label; observations.append(observed)
+            directory = self.screenshot(label)
+            (directory / 'c66-job-detail-observations.json').write_text(json.dumps(observations, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+        for width in (1366, 480):
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1366, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+            self.navigate('/c/existing-chat')
+            self.wait("document.querySelector('#ees-work-entry')")
+            self.open_sidebar()
+            key = self.author(name='C66 작업 상세 ' + str(width), jobs=1)
+            initial = self.state(workflow_id=key)['workflow']
+            original = deepcopy(initial['draft'])
+            original['authoring_review'] = {'inputs': True, 'rules': False}
+            manual = {'id': 'manual-note', 'name': '직접 만든 메모', 'type': 'text', 'scope': 'run', 'required': False}
+            original['nodes']['job-0']['inputs'] = [manual]
+            self.command('save_draft', workflow_id=key, expected_revision=initial['revision'], definition=original)
+            self.refresh(); self.click('[data-action=mode][data-mode=author]')
+            if self.browser.evaluate("!!document.querySelector('[data-author-action=list]')"):
+                self.click('[data-author-action=list]')
+            self.click('[data-author-action=open][data-id="' + key + '"]')
+            self.open_author_job_ui('job-0')
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+            self.wait('innerWidth===' + str(width))
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-job-detail h2,#ew-author-node>.ew-author-inline')"))
+            self.assertIn('1 검증 단계', self.text('.ew-job-detail-header'))
+            self.assertEqual(self.read('#ew-author-node [name=name]', 'maxLength'), 160)
+            self.assertIn('무엇을 확인하나요', self.text('.ew-job-main'))
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-job-arguments,[data-author-action=job_section][data-id=completion]')"))
+            capture('c66-b3-human-' + str(width))
+            # Native radio arrow behavior must continue after each product paint.
+            self.click('.ew-job-method [name=mode][value=human]')
+            self.key('ArrowRight', 39)
+            self.wait("document.querySelector('.ew-job-method [value=tool]')?.checked")
+            self.assertIn('도구 연결 전', self.text('.ew-job-main'))
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-job-arguments,.ew-job-tool-output')"))
+            self.assertTrue(self.read('[data-author-action=job_section][data-id=completion]', 'disabled'))
+            capture('c66-b3-tool-unconnected-' + str(width))
+            self.key('ArrowRight', 39)
+            self.wait("document.querySelector('.ew-job-method [value=ai]')?.checked")
+            self.assertTrue(self.read('#ew-author-node [name=instructions]', 'checkVisibility()'))
+            self.assertTrue(self.read('#ew-author-node [name=result_block]', 'checkVisibility()'))
+            capture('c66-b3-ai-' + str(width))
+            self.click('.ew-job-method [name=mode][value=tool]')
+            self.click('.ew-shared-picker summary')
+            self.wait("document.querySelector('[data-author-action=pick_job_tool][data-id=managed-search_pages]')?.checkVisibility()")
+            capture('c66-b3-tool-picker-' + str(width))
+            self.click('[data-author-action=pick_job_tool][data-id=managed-search_pages]')
+            self.assertIn('문서 목록 · 페이지 번호, 제목, 주소 · 한 번에 한 쪽', self.text('.ew-job-tool-output'))
+            self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-job-argument')].map(e=>e.dataset.argumentId)"), ['query', 'space_key', 'limit'])
+            capture('c66-b3-tool-connected-' + str(width))
+            self.click('[data-author-action=job_argument][data-id=query]')
+            self.assertTrue(self.read('[name=argument_source][value=result]', 'disabled'))
+            self.assertIn('이 도구는 아직 앞 작업의 결과를 받을 수 없습니다. 다음 단계에서 지원합니다.', self.text('.ew-job-argument-editor'))
+            self.click('[name=argument_source][value=constant]')
+            self.fill('[name=argument_constant]', '설치 가이드')
+            capture('c66-b3-argument-expanded-' + str(width))
+            self.key('Escape', 27)
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-job-argument-editor')"))
+            self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=job_argument][data-id=query]')"))
+            self.key(' ', 32)
+            self.wait("document.querySelector('[data-author-action=job_argument][data-id=query]')?.getAttribute('aria-expanded')==='true'")
+            self.click('[data-author-action=job_argument][data-id=limit]')
+            self.assertEqual(self.browser.evaluate("document.querySelectorAll('.ew-job-argument-editor').length"), 1)
+            self.assertEqual(self.read('[data-author-action=job_argument][data-id=query]', 'ariaExpanded'), 'false')
+            self.click('[name=argument_source][value=constant]')
+            self.fill('[name=argument_constant]', '숫자 아님')
+            self.assertTrue(self.browser.evaluate("!!document.querySelector('[name=argument_constant][aria-invalid=true]')"))
+            self.fill('[name=argument_constant]', '0')
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('[name=argument_constant][aria-invalid=true]')"))
+            self.click('[data-author-action=job_argument_close][data-id=limit]')
+            self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=job_argument][data-id=limit]')"))
+            self.open_job_section('completion')
+            self.assertTrue(self.read('[name=human_required]', 'checked'))
+            self.assertIn('항상 자동으로 확인', self.text('#ew-job-section-completion'))
+            capture('c66-b3-completion-' + str(width))
+            self.key('Escape', 27)
+            self.assertEqual(self.read('[data-author-action=job_section][data-id=completion]', 'ariaExpanded'), 'false')
+            self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=job_section][data-id=completion]')"))
+            self.key('Enter', 13)
+            self.wait("document.querySelector('[data-author-action=job_section][data-id=completion]')?.getAttribute('aria-expanded')==='true'")
+            self.wait("document.querySelector('#ew-job-section-completion').getAnimations({subtree:true}).every(a=>!a.pending&&a.playState!=='running')")
+            reopened = self.browser.evaluate("(()=>{const e=document.querySelector('#ew-job-section-completion');return {height:e.getBoundingClientRect().height,opacity:getComputedStyle(e).opacity,visible:e.checkVisibility()};})()")
+            self.assertGreater(reopened['height'], 0, reopened)
+            self.assertEqual(reopened['opacity'], '1', reopened)
+            self.assertTrue(reopened['visible'], reopened)
+            self.key('Escape', 27)
+            self.open_job_section('advanced')
+            self.assertEqual(self.read('#ew-author-node [name=description]', 'value'), original['nodes']['job-0'].get('description', ''))
+            capture('c66-b3-additional-settings-' + str(width))
+            self.key('Escape', 27)
+            self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=job_section][data-id=advanced]')"))
+            self.key('Enter', 13)
+            self.wait("document.querySelector('#ew-job-section-advanced')?.checkVisibility()")
+            self.assertTrue(self.read('#ew-author-node [name=description]', 'checkVisibility()'))
+            self.key('Escape', 27)
+            self.click('[data-author-action=save]')
+            self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
+            stored = self.state(workflow_id=key)['workflow']['draft']
+            self.assertEqual(stored['nodes']['job-0']['argument_bindings']['query'], {'constant': '설치 가이드'})
+            self.assertEqual(stored['nodes']['job-0']['argument_bindings']['limit'], {'constant': 0})
+            self.assertIn(manual, stored['nodes']['job-0']['inputs'])
+            self.assertEqual(stored['authoring_review'], original['authoring_review'])
+            self.click('[data-author-action=validate]')
+            self.wait("document.querySelector('.ew-author-validation')")
+            self.assertTrue(self.state(workflow_id=key)['workflow']['validation']['errors'])
+            self.assertTrue(self.read('[data-author-action=publish]', 'disabled'))
+            self.click('[data-author-action=node][data-id=""]')
+            self.open_author_job_ui('job-0')
+            self.assertIn('고정값 · 설치 가이드', self.text('[data-argument-id=query]'))
+            self.click('[data-author-action=job_argument][data-id=limit]')
+            self.assertEqual(self.read('[name=argument_constant]', 'value'), '0')
+            self.fill('[name=argument_constant]', '5')
+            self.click('[data-author-action=job_argument_close][data-id=limit]')
+            self.click('[data-author-action=save]')
+            self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
+            self.click('[data-author-action=validate]')
+            self.wait("document.querySelector('[data-author-action=publish]')?.disabled===false")
+            self.assertEqual(self.state(workflow_id=key)['workflow']['validation']['errors'], [])
+            saved_tool = deepcopy(self.state(workflow_id=key)['workflow'])
+            writes = len(self.server.workspace_commands)
+            current_state = self.server.workflow.workspace_state
+
+            async def read_only_state(user, **query):
+                result = await current_state(user, **query)
+                if result.get('workflow'):
+                    result['workflow']['can_edit'] = False; result['workflow']['can_manage'] = False
+                return result
+
+            with patch.object(self.server.workflow, 'workspace_state', side_effect=read_only_state):
+                self.refresh()
+                self.wait("document.querySelector('.ew-job-method [value=tool]')?.disabled")
+                self.assertEqual(self.read('#ew-author-node [name=name]', 'value'), saved_tool['draft']['nodes']['job-0']['name'])
+                self.click('[data-author-action=job_argument][data-id=query]')
+                self.assertTrue(self.read('[name=argument_constant]', 'disabled'))
+                self.assertEqual(self.read('[name=argument_constant]', 'value'), '설치 가이드')
+                self.key('Escape', 27)
+                self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=job_argument][data-id=query]')"))
+                capture('c66-b3-read-only-' + str(width))
+            self.assertEqual(self.state(workflow_id=key)['workflow'], saved_tool)
+            self.assertEqual([body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui'], [])
+            self.refresh()
+            self.wait("document.querySelector('.ew-job-method [value=tool]')?.disabled===false")
+            self.click('.ew-job-method [name=mode][value=human]')
+            self.wait("document.querySelector('#ees-work-dialog[open]')")
+            self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-dialog-cancel]')"))
+            capture('c66-b3-method-change-confirm-' + str(width))
+            self.key('Escape', 27)
+            self.assertTrue(self.read('.ew-job-method [value=tool]', 'checked'))
+            self.assertIn('페이지 찾기', self.text('.ew-shared-picker summary'))
+            self.assertEqual(self.state(workflow_id=key)['workflow'], saved_tool)
+            self.click('.ew-job-method [name=mode][value=human]')
+            self.click('#ees-work-dialog [data-dialog-confirm]')
+            self.wait("document.querySelector('.ew-job-method [value=human]')?.checked")
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-job-arguments,.ew-shared-picker')"))
+            self.click('[data-author-action=save]')
+            self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
+            cleaned = self.state(workflow_id=key)['workflow']['draft']
+            job = cleaned['nodes']['job-0']
+            self.assertEqual(job['inputs'], [manual])
+            self.assertNotIn('shared_tool_id', job)
+            self.assertNotIn('shared_tool_generated', job)
+            self.assertEqual(job['argument_bindings'], {'query': {'constant': '설치 가이드'}, 'limit': {'constant': 5}})
+            self.assertEqual(job['result_block'], 'human_confirm')
+            self.assertEqual(cleaned['authoring_review'], original['authoring_review'])
+            self.assertEqual(self.state(workflow_id=key)['workflow']['published_version'], 1)
+        self.assertEqual(self.bridge.calls, [])
+        self.assertEqual(self.server.completions, [])
+
+    def test_c66_factory_view_resets_in_job_detail_and_preserves_saved_values(self):
+        self.command('save_factory', factory_id='c66-factory', system_id='EMS', name='C66 합성 공장', attributes={})
+        key = self.author(name='C66 공장 보기 보존', jobs=1)
+        initial = self.state(workflow_id=key)['workflow']
+        original = deepcopy(initial['draft'])
+        original['execution_scope'] = 'system'
+        original['nodes']['job-0']['inputs'] = [{'id': 'site-note', 'name': '공장 메모', 'type': 'text', 'scope': 'workflow'}]
+        self.command('save_draft', workflow_id=key, expected_revision=initial['revision'], definition=original)
+        self.command('save_settings', workflow_id=key, factory_id='c66-factory', values={'site-note': '이미 저장된 공장 값'})
+        saved = deepcopy(self.state(workflow_id=key)['workflow'])
+        self.refresh(); self.click('[data-action=mode][data-mode=author]')
+        if self.browser.evaluate("!!document.querySelector('[data-author-action=list]')"):
+            self.click('[data-author-action=list]')
+        self.click('[data-author-action=open][data-id="' + key + '"]')
+        writes = len(self.server.workspace_commands)
+        for width in (1366, 480):
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+            self.wait('innerWidth===' + str(width))
+            self.assertEqual(self.read('.ew-author-factories', 'ariaLabel'), '공장별 차이')
+            self.click('[data-author-action=factory][data-id=c66-factory]')
+            self.assertEqual(self.read('[data-author-action=factory][data-id=c66-factory]', 'ariaSelected'), 'true')
+            self.assertIn('C66 합성 공장에 적용되는 절차', self.text('.ew-work-content'))
+            self.screenshot('c66-stage-saved-factory-' + str(width))
+            self.open_author_job_ui('job-0')
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-author-factories')"))
+            self.assertLessEqual(self.browser.evaluate("document.querySelector('.ew-author-scroll').scrollWidth-document.querySelector('.ew-author-scroll').clientWidth"), 1)
+            self.click('[data-author-action=node][data-id=""]')
+            self.assertEqual(self.read('[data-author-action=factory][data-id=""]', 'ariaSelected'), 'true')
+            self.assertEqual(self.read('[data-author-action=factory][data-id=c66-factory]', 'ariaSelected'), 'false')
+            self.assertNotIn('C66 합성 공장에 적용되는 절차', self.text('.ew-work-content'))
+            self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=node][data-id=job-0]')"))
+            self.screenshot('c66-stage-factory-reset-' + str(width))
+        self.assertEqual(self.state(workflow_id=key)['workflow'], saved)
+        self.assertEqual([body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui'], [])
+        self.assertEqual(self.bridge.calls, [])
+
     def test_c44_manual_authoring_inline_cancel_save_reopen_and_fix_validation(self):
         self.server.models = []
         self.navigate('/')
@@ -52,12 +316,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.state(workflow_id=identifier)['workflow']['revision'], 1)
         self.click('[data-author-action=summary_apply]')
         self.assertEqual(self.state(workflow_id=identifier)['workflow']['revision'], 1)
-        self.click('[data-author-action=summary_open]')
-        self.click('[data-summary=inputs] .ew-summary-help>summary')
-        self.assertIn('실제 경로 값은 실행자', self.text('[data-summary=inputs]'))
-        self.click('[data-author-action=summary_optional][data-id=inputs]')
-        self.click('[data-summary=rules] .ew-summary-help>summary')
-        self.click('[data-author-action=summary_optional][data-id=rules]')
+        # C66 removes the needed-summary surface; editing the procedure must
+        # keep its former review decisions instead of recreating that screen.
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-content-needs,[data-author-action=summary_open]')"))
+        self.assertNotIn('정해야 할 것', self.text('.ew-work-content'))
         original_command = self.server.workflow.workspace_command
 
         async def reject_save(user, body, **kwargs):
@@ -286,8 +548,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-action="mode"][data-mode="author"]')
         self.click('[data-author-action=open][data-id="' + identifier + '"]')
         self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
-        self.click('[data-author-action=summary_open]')
-        self.click('[data-author-action=summary_edit][data-id=inputs]')
+        # C66 retires the summary shortcut; start inputs keep their existing
+        # execution-method editor and the same cancel/save contract.
+        self.click('[data-author-action=tab][data-tab=settings]')
         self.click('[data-author-action=start_input_add]')
         self.fill('#ees-work-dialog [name=name]', '취소할 입력')
         self.key('Escape', 27)
@@ -426,9 +689,25 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 if count != 6:
                     self.click('[data-author-action=list]')
             key, original = fixtures[6]
+            self.click('[data-author-action=stage_toggle][data-id=stage-5]')
+            self.click('[data-author-action=stage_menu][data-id=stage-5]')
+            self.assertTrue(self.read('[data-author-action=move_down][data-id=stage-5]', 'disabled'))
+            capture('c66-stage-last-menu-' + str(width))
+            self.key('Escape', 27)
+            self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=stage_menu][data-id=stage-5]')"))
             self.click('[data-author-action=stage_toggle][data-id=stage-0]')
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-author-action=move_up][data-id=stage-0]')"))
+            self.click('[data-author-action=stage_menu][data-id=stage-0]')
             self.assertEqual(self.read('[data-author-action=move_up][data-id=stage-0]', 'disabled'), True)
+            self.key('Escape', 27)
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-stage-id=stage-0] [role=menu]')"))
+            self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=stage_menu][data-id=stage-0]')"))
             capture('e1-b-expanded-' + str(width))
+            self.click('[data-author-action=stage_menu][data-id=stage-0]')
+            capture('c66-example16-stage-menu-' + str(width))
+            self.click('.ew-content-heading h3')
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-stage-id=stage-0] [role=menu]')"))
+            self.assertEqual(self.read('[data-author-action=stage_toggle][data-id=stage-0]', 'ariaExpanded'), 'true')
             self.click('[data-author-action=stage_edit][data-id=stage-0]')
             self.assertEqual(self.browser.evaluate('document.activeElement.name'), 'name')
             self.assertFalse(self.browser.evaluate("!!document.querySelector('#ew-stage-editor [name=mode],#ew-stage-editor [name=result_block]')"))
@@ -455,13 +734,18 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 self.wait("document.querySelector('.ees-panel-region').hidden")
                 self.click('[data-action=open_panel]')
                 self.wait("!document.querySelector('.ees-panel-region').hidden && !document.querySelector('[data-ees-motion=opening]')")
-            self.browser.evaluate("document.querySelector('[data-author-action=move_down][data-id=stage-0]').scrollIntoView({block:'center'})")
+            # C66 moves the actions into the expanded-stage menu. Preserve the
+            # physical click/order/scroll checks, measuring its persistent
+            # trigger because the menu must close after the move.
+            self.browser.evaluate("document.querySelector('[data-author-action=stage_menu][data-id=stage-0]').scrollIntoView({block:'center'})")
+            self.click('[data-author-action=stage_menu][data-id=stage-0]')
             before_move = self.browser.evaluate("""(() => {
                 const button=document.querySelector('[data-author-action=move_down][data-id=stage-0]'),
+                    trigger=document.querySelector('[data-author-action=stage_menu][data-id=stage-0]'),
                     current=document.querySelector('[data-stage-id=stage-0]').getBoundingClientRect(),
                     next=document.querySelector('[data-stage-id=stage-1]').getBoundingClientRect(),
                     rect=button.getBoundingClientRect();
-                return {x:rect.x+rect.width/2,y:rect.y+rect.height/2,top:rect.top,
+                return {x:rect.x+rect.width/2,y:rect.y+rect.height/2,top:trigger.getBoundingClientRect().top,
                     scroll:document.querySelector('.ew-author-scroll').scrollTop,
                     step:next.height+next.top-current.bottom,hitTest:button.contains(document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2))};
             })()""")
@@ -472,14 +756,15 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.wait("document.querySelector('[data-author-live]')?.textContent === '2번째로 옮겼습니다'")
             self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-author-scroll > .ew-author-note[role=status]')"))
             move = self.browser.evaluate("""(() => {
-                const button=document.querySelector('[data-author-action=move_down][data-id=stage-0]'),
+                const button=document.querySelector('[data-author-action=stage_menu][data-id=stage-0]'),
                     live=document.querySelector('[data-author-live]'),rect=live.getBoundingClientRect(),style=getComputedStyle(live);
                 return {top:button.getBoundingClientRect().top,scroll:document.querySelector('.ew-author-scroll').scrollTop,
-                    focus:document.activeElement===button,live:live.textContent,livePosition:style.position,
+                    focus:document.activeElement===button,menu:!!document.querySelector('[data-stage-id=stage-0] [role=menu]'),live:live.textContent,livePosition:style.position,
                     liveWidth:rect.width,liveHeight:rect.height};
             })()""")
             self.assertAlmostEqual(move['top'] + move['scroll'] - before_move['top'] - before_move['scroll'], before_move['step'], delta=1)
             self.assertTrue(move['focus'], move)
+            self.assertFalse(move['menu'], move)
             self.assertEqual(move['livePosition'], 'absolute', move)
             self.assertLessEqual(move['liveWidth'], 1, move)
             self.assertLessEqual(move['liveHeight'], 1, move)
@@ -497,6 +782,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertIn('변경 있음 · 저장 안 됨', self.text('[data-author-status]'))
             self.assertAlmostEqual(self.read('.ew-author-scroll', 'scrollTop'), return_scroll, delta=1)
             capture('e1-d-job-return-' + str(width))
+            self.click('[data-author-action=stage_menu][data-id=stage-0]')
             self.click('[data-author-action=delete_node][data-id=stage-0]')
             self.wait("document.querySelector('#ees-work-dialog[open]')")
             self.assertIn('2개 작업', self.text('#ees-work-dialog'))
@@ -504,6 +790,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-dialog-cancel]')"))
             capture('e1-example3-stage-delete-' + str(width))
             self.key('Escape', 27)
+            self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=stage_menu][data-id=stage-0]')"))
             self.click('[data-author-action=add_stage]')
             self.assertEqual(self.read('#ew-stage-editor [name=name]', 'placeholder'), '예: 운영 인계')
             capture('e1-c2-stage-add-' + str(width))
@@ -555,7 +842,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             with patch.object(self.server.workflow, 'workspace_state', side_effect=read_only_state):
                 self.refresh()
                 self.wait("!document.querySelector('[data-author-action=add_stage]')")
-                self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-stage-actions,.ew-job-menu-button,[data-author-action=stage_edit],[data-author-action=add_job]')"))
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-stage-actions,.ew-job-menu-button,[data-author-action=stage_menu],[data-author-action=stage_edit],[data-author-action=add_job]')"))
                 self.click('[data-author-action=stage_toggle][data-id=stage-1]')
                 self.click('[data-author-action=stage_toggle][data-id=stage-0]')
                 capture('e1-example9-read-only-' + str(width))
@@ -653,9 +940,6 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         identifier = created['workflow_id']
         workspace = self.state(workflow_id=identifier)
         original = workspace['workflow']
-        expected_factory_views = [{'id': '', 'label': '기본 절차', 'selected': 'true'}] + [
-            {'id': item['id'], 'label': item.get('name') or item['id'], 'selected': 'false'}
-            for item in workspace.get('factories', [])]
         self.fill('#chat-input', '화면 전환 전 개인 입력')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.click('[data-action="mode"][data-mode="author"]')
@@ -671,7 +955,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
               const style = selector => {const value=getComputedStyle(document.querySelector(selector));return {font:value.fontFamily,size:value.fontSize,line:value.lineHeight,background:value.backgroundColor};};
               return {panel:bounds('.ees-panel-region'),frame:bounds('[data-ees-source-shell]'),sidebar:bounds('#sidebar'),
                 overlay:document.querySelector('.ees-panel-region').getAttribute('data-overlay'),header:bounds('.ew-author>header'),
-                card:bounds('.ew-work-content'),purpose:bounds('.ew-content-purpose'),needs:bounds('.ew-content-needs'),steps:bounds('.ew-content-heading'),list:bounds('.ew-stage-list'),footer:bounds('.ew-author>footer'),
+                card:bounds('.ew-work-content'),purpose:bounds('.ew-content-purpose'),steps:bounds('.ew-content-heading'),list:bounds('.ew-stage-list'),footer:bounds('.ew-author>footer'),
+                retiredSummary:!!document.querySelector('.ew-content-needs,[data-author-action=summary_open]'),
                 availableWidth:document.querySelector('.ees-panel-region').parentElement.getBoundingClientRect().width,
                 badge:style('.ew-author-heading>.ew-author-tag'),detail:style('.ew-content-purpose>p'),
                 tabs:style('.ew-author-tabs>button'),heading:style('.ew-author h2'),
@@ -694,12 +979,14 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 self.assertEqual(metrics['panelFrameLeftGap'], max(56, metrics['availableWidth'] - 580))
             self.assertEqual(metrics['header']['height'], 48)
             self.assertEqual(metrics['extraHeader'], 0)
-            self.assertEqual(metrics['factoryTabs'], 1)
-            self.assertEqual(metrics['factoryLabel'], '공장별 차이')
-            self.assertEqual(metrics['factoryViews'], expected_factory_views)
+            # R2-5/C66 hides factory views for a new, unspecified procedure.
+            self.assertEqual(metrics['factoryTabs'], 0)
+            self.assertIsNone(metrics['factoryLabel'])
+            self.assertEqual(metrics['factoryViews'], [])
             self.assertAlmostEqual(metrics['card']['x'] - metrics['panel']['x'], 21, delta=1)
-            self.assertLess(metrics['purpose']['y'], metrics['needs']['y'])
-            self.assertLess(metrics['needs']['y'], metrics['steps']['y'])
+            # C66 removes the middle summary row, leaving purpose then stages.
+            self.assertFalse(metrics['retiredSummary'])
+            self.assertLess(metrics['purpose']['y'], metrics['steps']['y'])
             self.assertLess(metrics['steps']['y'], metrics['list']['y'])
             self.assertEqual(self.browser.evaluate("document.querySelectorAll('[data-author-action=stage_toggle]').length"), 0)
             self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim())"), ['업무 내용', '실행 방식', '판정 규칙', '게시 기록'])
@@ -865,6 +1152,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertNotIn('확정 목록에서 도구 인자 연결', self.text('#ees-work-designer'))
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ew-author-node [name=result_argument],#ew-author-node [name=result_job_id]')"))
         self.screenshot('shared-b10-5-selected-no-handoff')
+        self.open_job_section('advanced')
         self.fill('#ew-author-node [name=read_retry_count]', '1')
         self.fill('#ew-author-node [name=read_retry_deadline]', '30')
         self.click('[data-author-action=save]')
@@ -2227,11 +2515,12 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action="open"][data-id="' + key + '"]')
         self.click('.ew-author-tabs [data-author-action=tab][data-tab=content]')
         self.open_author_job_ui('job-0')
+        self.open_job_section('advanced')
         self.assertEqual(self.read('#ew-author-node [name=read_retry_count]', 'value'), '0')
         self.assertNotIn('read_retry', self.state(workflow_id=key)['workflow']['draft']['nodes']['job-0'])
         # Read-only observation captures any asynchronous control replacement;
         # it never enables a control or changes product state.
-        self.browser.evaluate("""(()=>{window.__eesAuthoringObservations=[];const record=()=>{const f=document.querySelector('#ew-author-node');const row={time:performance.now(),mode:f?.querySelector('[name=mode]')?.value,read_retry_count:f?.querySelector('[name=read_retry_count]')?.value,status:document.querySelector('[data-author-status]')?.textContent};if(window.__eesAuthoringObservations.length<100)window.__eesAuthoringObservations.push(row);};window.__eesAuthoringObserver=new MutationObserver(record);window.__eesAuthoringObserver.observe(document.querySelector('#ees-work-authoring-panel'),{childList:true,subtree:true});record();return true;})()""")
+        self.browser.evaluate("""(()=>{window.__eesAuthoringObservations=[];const record=()=>{const f=document.querySelector('#ew-author-node');const row={time:performance.now(),mode:f?.querySelector('[name=mode]:checked')?.value,read_retry_count:f?.querySelector('[name=read_retry_count]')?.value,status:document.querySelector('[data-author-status]')?.textContent};if(window.__eesAuthoringObservations.length<100)window.__eesAuthoringObservations.push(row);};window.__eesAuthoringObserver=new MutationObserver(record);window.__eesAuthoringObserver.observe(document.querySelector('#ees-work-authoring-panel'),{childList:true,subtree:true});record();return true;})()""")
         try:
             self.fill('#ew-author-node [name=read_retry_count]', '2')
         finally:
@@ -2251,6 +2540,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertTrue(self.read('[data-author-action="publish"]', 'disabled'))
         self.screenshot('integrated-figma-read-retry-publication-blocker')
         self.click('[data-author-action="validation_open"][data-id="errors:0"]')
+        self.open_job_section('advanced')
         self.wait("document.querySelector('#ew-author-node [name=read_retry_deadline]')")
         self.assertEqual(self.read('#ew-author-node [name=read_retry_count]', 'value'), '2')
         self.fill('#ew-author-node [name=read_retry_deadline]', '30')

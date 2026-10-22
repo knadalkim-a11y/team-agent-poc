@@ -1,0 +1,84 @@
+...FF...E
+======================================================================
+ERROR: test_ees_work_figma_schedule (unittest.loader._FailedTest.test_ees_work_figma_schedule)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_ees_work_figma_schedule
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_figma_schedule.py", line 18, in <module>
+    import test_ees_work_operations as fixture
+ModuleNotFoundError: No module named 'test_ees_work_operations'
+
+
+======================================================================
+FAIL: test_preview_is_read_only_and_late_results_cannot_replace_edited_or_other_account_state (tests.test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_preview_is_read_only_and_late_results_cannot_replace_edited_or_other_account_state)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_figma_authoring.py", line 56, in test_preview_is_read_only_and_late_results_cannot_replace_edited_or_other_account_state
+    self.run_contract(r"""
+  File "/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_figma_authoring.py", line 22, in run_contract
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+AssertionError: 1 != 0 : AssertionError [ERR_ASSERTION]: The input did not match the regular expression /검증된 첫 회차/. Input:
+
+'<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="schedule"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span><details class="ew-procedure-menu"><summary aria-label="절차 메뉴"><img src="/_ees13/v4/cb8e2.svg" alt=""></summary><div><button type="button" data-author-action="edit_workflow" class="ew-author-link">절차 정보·분류 수정</button><button type="button" data-author-action="copy" class="ew-author-link">다른 이름으로 저장</button></div></details></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="false">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="true">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><form id="ew-author-schedule" class="ew-schedule-card"><section class="ew-schedule-section"><h3>실행 방식</h3><input type="hidden" name="run_mode" value="periodic"><div class="ew-schedule-modes" role="group" aria-label="진행 건 시작 방식"><button type="button" data-author-action="run_mode" data-id="periodic" aria-pressed="true" data-mutation>주기</button><button type="button" data-author-action="run_mode" data-id="on_demand" aria-pressed="false" data-mutation>수시</button><button type="button" data-author-action="run_mode" data-id="emergency" aria-pressed="false" data-mutation>비상</button></div><p class="ew-schedule-note">일정 규칙에 따라 회차가 열리고 닫힙니다. 수시는 사람이 대상을 정해 시작하고, 비상은 장애를 인지한 사람이 바로 시작합니다.</p></section><section class="ew-schedule-section"><h3>일정 규칙</h3>\n' +
+  '      <div class="ew-schedule-row"><span>반복</span><span class="ew-schedule-control ew-schedule-repeat"><input name="interval" value="2" type="number" min="1" max="366" aria-label="반복 간격"><select name="frequency"><option value="" >단위 선택</option><option value="daily" >일마다</option><option value="weekly" selected>주마다</option><option value="monthly" >개월마다</option></select><img src="/_ees13/v4/ead50.svg" alt=""></span></div>\n' +
+  '      <label class="ew-schedule-row"><span>요일</span><span class="ew-schedule-control"><select name="weekday"><option value="0" >월요일</option><option value="1" >화요일</option><option value="2" >수요일</option><option value="3" >목요일</option><option value="4" >금요일</option><option value="5" >토요일</option><option value="6" >일요일</option><option value="" selected>요일 선택</option></select><img src="/_ees13/v4/ead50.svg" alt=""></span></label>\n' +
+  '      <label class="ew-schedule-row"><span>기준일</span><span class="ew-schedule-control"><input name="anchor" value="2026-10-06T09:00" type="datetime-local"><img src="/_ees13/v4/ead50.svg" alt=""></span></label>\n' +
+  '      <label class="ew-schedule-row"><span>시간대</span><span class="ew-schedule-control"><input name="timezone" value="Asia/Seoul" placeholder="예: Asia/Seoul"></span></label>\n' +
+  '      <label class="ew-schedule-row"><span>회차 이름</span><span class="ew-schedule-control"><input name="name_template" value="" maxlength="160" placeholder="예: {date} 회차"><img src="/_ees13/v4/ead50.svg" alt=""></span></label>\n' +
+  '      <p class="ew-schedule-note">회차 이름의 {date}는 일정의 기준 날짜입니다. 업무에서 입력하는 날짜와는 별개이며, 기준일의 시각과 시간대로 계산합니다.</p></section>\n' +
+  '      <section class="ew-schedule-section"><h3>단계 기한 <small>회차 기준일 기준 · D±일</small></h3><div class="ew-schedule-row"><span>1 단계</span><span class="ew-schedule-control ew-schedule-offsets"><input name="stage_start:t" value="" type="number" min="-366" max="366" aria-label="단계 시작 일수" placeholder="시작 일수"><span>~</span><input name="stage_end:t" value="" type="number" min="-366" max="366" aria-label="단계 종료 일수" placeholder="종료 일수 · 선택"></span></div></section>\n' +
+  '      <section class="ew-schedule-section"><h3>회차 열기와 닫기</h3>\n' +
+  '      <label class="ew-schedule-row"><span>열림</span><span class="ew-schedule-control"><select name="opening"><option value="" selected>열림 규칙 선택</option><option value="on_schedule" >직전 회차가 남아도 일정대로 열림</option></select><img src="/_ees13/v4/ead50.svg" alt=""></span></label>\n' +
+  '      <label class="ew-schedule-row"><span>닫힘</span><span class="ew-schedule-control"><select name="closing"><option value="" selected>닫힘 규칙 선택</option><option value="after_last_stage" >마지막 단계가 끝나면</option></select><img src="/_ees13/v4/ead50.svg" alt=""></span></label>\n' +
+  '      <label class="ew-schedule-row"><span>공휴일·주말</span><span class="ew-schedule-control"><select name="non_working_days"><option value="" selected>처리 규칙 선택</option><option value="notify_no_shift" >기한이 걸리면 담당자에게 알림 · 날짜는 자동으로 옮기지 않음</option></select><img src="/_ees13/v4/ead50.svg" alt=""></span></label>\n' +
+  '      <p class="ew-schedule-note">첫 회차는 게시 버전의 서버 예약을 만들고 실행을 위임한 뒤 다음 기준일에 열립니다. 열림 규칙을 게시하고 실행을 위임한 예약에서만, 직전 회차가 남아도 이후 회차가 일정대로 열립니다. 각 회차의 작업과 기록은 분리되며 미래 작업의 요청 시각은 그대로 유지합니다.</p><p class="ew-schedule-note">주말에 걸린 기한은 업무 안에서 확인합니다. 공휴일 달력과 외부 알림은 연결되지 않아 공휴일 판정·알림 송부는 할 수 없습니다.</p></section>\n' +
+  '      <section class="ew-schedule-preview" aria-live="polite"><h4><img src="/_ees13/v4/1fc4e.svg" alt="">미리보기</h4><p>일정 규칙을 입력하고 다음 두 회차를 확인하세요.</p><button type="button" data-author-action="schedule_preview" class="ew-author-link" disabled>계산 중…</button><p class="ew-schedule-note">일정이 바뀌어도 이미 열린 회차와 기록은 유지합니다. 새로 게시하고 예약에 적용한 이후 회차부터 바뀝니다.</p></section></form>\n' +
+  '      <details class="ew-author-schedules"><summary>서버 예약 · 실행 위임</summary><p class="ew-author-note">초안 저장·게시만으로 실행 권한을 위임하지 않습니다. 아래에서 게시 버전과 실행 계정을 확인해 예약을 적용하세요.</p><p class="ew-author-muted">아직 서버 예약이 없습니다.</p><button type="button" data-author-action="schedule_create" class="ew-author-link" disabled>게시 버전 예약 만들기</button></details></div><footer><small data-author-status>초안 r1 · 저장됨</small><button type="button" data-author-action="validate" data-mutation >게시 전 확인</button><button type="button" data-author-action="save" data-mutation class="ew-primary">초안 저장</button><button type="button" data-author-action="publish" data-mutation>게시</button></footer></section>'
+
+    at [eval]:120:50 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="schedule"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span><details class="ew-procedure-menu"><summary aria-label="절차 메뉴"><img src="/_ees13/v4/cb8e2.svg" alt=""></summary><div><button type="button" data-author-action="edit_workflow" class="ew-author-link">절차 정보·분류 수정</button><button type="button" data-author-action="copy" class="ew-author-link">다른 이름으로 저장</button></div></details></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="false">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="true">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><form id="ew-author-schedule" class="ew-schedule-card"><section class="ew-schedule-section"><h3>실행 방식</h3><input type="hidden" name="run_mode" value="periodic"><div class="ew-schedule-modes" role="group" aria-label="진행 건 시작 방식"><button type="button" data-author-action="run_mode" data-id="periodic" aria-pressed="true" data-mutation>주기</button><button type="button" data-author-action="run_mode" data-id="on_demand" aria-pressed="false" data-mutation>수시</button><button type="button" data-author-action="run_mode" data-id="emergency" aria-pressed="false" data-mutation>비상</button></div><p class="ew-schedule-note">일정 규칙에 따라 회차가 열리고 닫힙니다. 수시는 사람이 대상을 정해 시작하고, 비상은 장애를 인지한 사람이 바로 시작합니다.</p></section><section class="ew-schedule-section"><h3>일정 규칙</h3>\n' +
+    '      <div class="ew-schedule-row"><span>반복</span><span class="ew-schedule-control ew-schedule-repeat"><input name="interval" value="2" type="number" min="1" max="366" aria-label="반복 간격"><select name="frequency"><option value="" >단위 선택</option><option value="daily" >일마다</option><option value="weekly" selected>주마다</option><option value="monthly" >개월마다</option></select><img src="/_ees13/v4/ead50.svg" alt=""></span></div>\n' +
+    '      <label class="ew-schedule-row"><span>요일</span><span class="ew-schedule-control"><select name="weekday"><option value="0" >월요일</option><option value="1" >화요일</option><option value="2" >수요일</option><option value="3" >목요일</option><option value="4" >금요일</option><option value="5" >토요일</option><option value="6" >일요일</option><option value="" selected>요일 선택</option></select><img src="/_ees13/v4/ead50.svg" alt=""></span></label>\n' +
+    '      <label class="ew-schedule-row"><span>기준일</span><span class="ew-schedule-control"><input name="anchor" value="2026-10-06T09:00" type="datetime-local"><img src="/_ees13/v4/ead50.svg" alt=""></span></label>\n' +
+    '      <label class="ew-schedule-row"><span>시간대</span><span class="ew-schedule-control"><input name="timezone" value="Asia/Seoul" placeholder="예: Asia/Seoul"></span></label>\n' +
+    '      <label class="ew-schedule-row"><span>회차 이름</span><span class="ew-schedule-control"><input name="name_template" value="" maxlength="160" placeholder="예: {date} 회차"><img src="/_ees13/v4/ead50.svg" alt=""></span></label>\n' +
+    '      <p class="ew-schedule-note">회차 이름의 {date}는 일정의 기준 날짜입니다. 업무에서 입력하는 날짜와는 별개이며, 기준일의 시각과 시간대로 계산합니다.</p></section>\n' +
+    '      <section class="ew-schedule-section"><h3>단계 기한 <small>회차 기준일 기준 · D±일</small></h3><div class="ew-schedule-row"><span>1 단계</span><span class="ew-schedule-control ew-schedule-offsets"><input name="stage_start:t" value="" type="number" min="-366" max="366" aria-label="단계 시작 일수" placeholder="시작 일수"><span>~</span><input name="stage_end:t" value="" type="number" min="-366" max="366" aria-label="단계 종료 일수" placeholder="종료 일수 · 선택"></span></div></section>\n' +
+    '      <section class="ew-schedule-section"><h3>회차 열기와 닫기</h3>\n' +
+    '      <label class="ew-schedule-row"><span>열림</span><span class="ew-schedule-control"><select name="opening"><option value="" selected>열림 규칙 선택</option><option value="on_schedule" >직전 회차가 남아도 일정대로 열림</option></select><img src="/_ees13/v4/ead50.svg" alt=""></span></label>\n' +
+    '...',
+  expected: /검증된 첫 회차/,
+  operator: 'match',
+  diff: 'simple'
+}
+
+
+======================================================================
+FAIL: test_read_retry_is_explicit_bounded_draft_policy_without_default_registration (tests.test_ees_work_figma_authoring.FigmaAuthoringScheduleTests.test_read_retry_is_explicit_bounded_draft_policy_without_default_registration)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_figma_authoring.py", line 106, in test_read_retry_is_explicit_bounded_draft_policy_without_default_registration
+    self.run_contract(r"""
+  File "/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_figma_authoring.py", line 22, in run_contract
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+AssertionError: 1 != 0 : AssertionError [ERR_ASSERTION]: field result_block
+    at h.field ([eval]:108:144)
+    at [eval]:121:71 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: undefined,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.886s
+
+FAILED (failures=2, errors=1)

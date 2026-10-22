@@ -1,0 +1,307 @@
+const assetPathPrefix = "https://www.figma.com/api/mcp/asset/129a63b5-63ae-4f4f-a190-e58f88589630";
+const imgIconPanelRight = `${assetPathPrefix}/7bb4a.svg`;
+const imgIconArrowLeft = `${assetPathPrefix}/9acc8.svg`;
+const imgIconMore = `${assetPathPrefix}/cb8e2.svg`;
+const imgIconFactory = `${assetPathPrefix}/1c8fd.svg`;
+const imgIconCircleHelp = `${assetPathPrefix}/41b38.svg`;
+const imgIconChevronRight = `${assetPathPrefix}/f0554.svg`;
+const imgIconPlus = `${assetPathPrefix}/9ce50.svg`;
+
+type ButtonV4Props = {
+  className?: string;
+  label?: string;
+  style?: "Primary" | "Secondary" | "Text";
+};
+
+function ButtonV4({ className, label = "버튼", style = "Primary" }: ButtonV4Props) {
+  const isSecondary = style === "Secondary";
+  const isText = style === "Text";
+  return (
+    <div className={className || `content-stretch flex h-[34px] items-center justify-center relative rounded-[6px] ${isText ? "px-[6px]" : isSecondary ? "bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-control,#d5d6da)] border-solid px-[14px]" : "bg-[var(--ees-brand-solid,#2f5f98)] px-[14px]"}`} id={isText ? "node-746_645" : isSecondary ? "node-746_643" : "node-746_641"}>
+      {style === "Primary" && (
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-inverse,white)] tracking-[-0.042px] whitespace-nowrap" data-node-id="746:642">
+          {label}
+        </p>
+      )}
+      {isSecondary && (
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-strong,#3f4147)] tracking-[-0.042px] whitespace-nowrap" data-node-id="746:644">
+          {label}
+        </p>
+      )}
+      {isText && (
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-brand-text,#2f5f98)] tracking-[-0.042px] whitespace-nowrap" data-node-id="746:646">
+          {label}
+        </p>
+      )}
+    </div>
+  );
+}
+
+type TagProps = {
+  className?: string;
+  label?: string;
+  tone?: "Attention";
+};
+
+function Tag({ className, label = "상태", tone = "Attention" }: TagProps) {
+  return (
+    <div className={className || "bg-[var(--ees-status-attention-bg,#faf1e4)] content-stretch flex items-center px-[6px] py-px relative rounded-[4px]"} data-node-id="948:1095">
+      <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-status-attention,#96590c)] whitespace-nowrap" data-node-id="948:1096">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+export default function B26A() {
+  return (
+    <div className="bg-[var(--surface\/panel,#f3f3f5)] border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex flex-col items-start relative size-full" data-node-id="1524:1253" data-name="B2-6 · 업무 내용 · 단계 A · 기본 (모두 접힘 · 단계 이름과 작업 수만)">
+      <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[6px] h-[48px] items-center overflow-clip pl-[20px] pr-[10px] relative shrink-0 w-full" data-node-id="1524:1254" data-name="Header">
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Bold'] font-bold leading-[20px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.07px] whitespace-nowrap" data-node-id="1524:1255">
+          업무 절차
+        </p>
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="1524:1256">
+          EMS
+        </p>
+        <div className="flex-[1_0_0] h-px min-w-px relative" data-node-id="1524:1257" data-name="Flex" />
+        <div className="content-stretch flex items-center justify-center overflow-clip relative rounded-[6px] shrink-0 size-[30px]" data-node-id="1524:1258" data-name="Frame">
+          <div className="relative shrink-0 size-[16px]" data-node-id="1524:1259" data-name="Icon/panel-right">
+            <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconPanelRight} />
+          </div>
+        </div>
+      </div>
+      <div className="content-stretch flex flex-col gap-[12px] items-start overflow-clip pb-[24px] pt-[14px] px-[20px] relative shrink-0 w-full" data-node-id="1524:1260" data-name="Body">
+        <div className="content-stretch flex gap-[6px] items-center overflow-clip relative shrink-0" data-node-id="1524:1261" data-name="Back link">
+          <div className="relative shrink-0 size-[14px]" data-node-id="1524:1262" data-name="Icon/arrow-left">
+            <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconArrowLeft} />
+          </div>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="1524:1263">
+            업무 절차 목록
+          </p>
+        </div>
+        <div className="content-stretch flex flex-col gap-[4px] items-start overflow-clip relative shrink-0 w-full" data-node-id="1524:1264" data-name="Head">
+          <div className="content-stretch flex gap-[8px] items-center overflow-clip relative shrink-0 w-full" data-node-id="1524:1265" data-name="Title row">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Bold'] font-bold leading-[28px] relative shrink-0 text-[20px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.2px] whitespace-nowrap" data-node-id="1524:1266">
+              신규 공장 횡전개
+            </p>
+            <Tag className="bg-[var(--ees-status-attention-bg,#faf1e4)] content-stretch flex items-center px-[6px] py-px relative rounded-[4px] shrink-0" label="초안" />
+            <div className="flex-[1_0_0] h-px min-w-px relative" data-node-id="1524:1268" data-name="Flex" />
+            <div className="content-stretch flex items-center justify-center overflow-clip relative rounded-[6px] shrink-0 size-[30px]" data-node-id="1524:1269" data-name="IconButton / more">
+              <div className="relative shrink-0 size-[16px]" data-node-id="1524:1270" data-name="Icon/more">
+                <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconMore} />
+              </div>
+            </div>
+          </div>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="1524:1271">
+            EMS · 게시본 없음
+          </p>
+        </div>
+        <div className="content-stretch flex gap-[8px] items-center overflow-clip relative shrink-0 w-full" data-node-id="1524:1272" data-name="View (factory)">
+          <div className="relative shrink-0 size-[16px]" data-node-id="1524:1273" data-name="Icon/factory">
+            <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconFactory} />
+          </div>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="1524:1274">
+            보기
+          </p>
+          <div className="bg-[var(--ees-surface-muted,#ececef)] content-stretch flex gap-[2px] items-center overflow-clip p-[3px] relative rounded-[8px] shrink-0" data-node-id="1524:1275" data-name="Segmented">
+            <div className="bg-[var(--ees-surface-default,white)] content-stretch flex items-center overflow-clip px-[12px] py-[4px] relative rounded-[6px] shadow-[0px_1px_2px_0px_rgba(17,24,39,0.05)] shrink-0" data-node-id="1524:1276" data-name="Seg / 기본 절차">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] whitespace-nowrap" data-node-id="1524:1277">
+                기본 절차
+              </p>
+            </div>
+            <div className="content-stretch flex items-center overflow-clip px-[12px] py-[4px] relative rounded-[6px] shrink-0" data-node-id="1524:1278" data-name="Seg / 천안">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="1524:1279">
+                천안
+              </p>
+            </div>
+            <div className="content-stretch flex items-center overflow-clip px-[12px] py-[4px] relative rounded-[6px] shrink-0" data-node-id="1524:1280" data-name="Seg / 미국 A">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="1524:1281">
+                미국 A
+              </p>
+            </div>
+            <div className="content-stretch flex items-center overflow-clip px-[12px] py-[4px] relative rounded-[6px] shrink-0" data-node-id="1524:1282" data-name="Seg / 헝가리 A">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="1524:1283">
+                헝가리 A
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="border-[var(--ees-line-divider,#e6e6e9)] border-b border-solid content-stretch flex gap-[20px] items-end overflow-clip relative shrink-0 w-full" data-node-id="1524:1284" data-name="Tabs">
+          <div className="content-stretch flex flex-col gap-[8px] items-center overflow-clip pt-[6px] relative shrink-0" data-node-id="1524:1285" data-name="Tab / 업무 내용">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] whitespace-nowrap" data-node-id="1524:1286">
+              업무 내용
+            </p>
+            <div className="bg-[var(--ees-brand-solid,#2f5f98)] h-[2px] relative shrink-0 w-full" data-node-id="1524:1287" data-name="Underline" />
+          </div>
+          <div className="content-stretch flex flex-col gap-[8px] items-center overflow-clip pt-[6px] relative shrink-0" data-node-id="1524:1288" data-name="Tab / 실행 방식">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="1524:1289">
+              실행 방식
+            </p>
+            <div className="h-[2px] relative shrink-0 w-full" data-node-id="1524:1290" data-name="Underline" />
+          </div>
+          <div className="content-stretch flex flex-col gap-[8px] items-center overflow-clip pt-[6px] relative shrink-0" data-node-id="1524:1291" data-name="Tab / 판정 규칙">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="1524:1292">
+              판정 규칙
+            </p>
+            <div className="h-[2px] relative shrink-0 w-full" data-node-id="1524:1293" data-name="Underline" />
+          </div>
+          <div className="content-stretch flex flex-col gap-[8px] items-center overflow-clip pt-[6px] relative shrink-0" data-node-id="1524:1294" data-name="Tab / 게시 기록">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px] whitespace-nowrap" data-node-id="1524:1295">
+              게시 기록
+            </p>
+            <div className="h-[2px] relative shrink-0 w-full" data-node-id="1524:1296" data-name="Underline" />
+          </div>
+        </div>
+        <div className="content-stretch flex gap-[8px] items-center overflow-clip relative shrink-0 w-full" data-node-id="1524:1297" data-name="목적 (업무 정보)">
+          <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-secondary,#5c5e65)] tracking-[-0.042px]" data-node-id="1524:1298">
+            새 공장에 EES 시스템을 설치하고 연결을 확인하는 업무
+          </p>
+          <ButtonV4 className="content-stretch flex h-[34px] items-center justify-center px-[6px] relative rounded-[6px] shrink-0" label="수정" style="Text" />
+        </div>
+        <div className="content-stretch flex gap-[6px] items-center overflow-clip pt-[6px] relative shrink-0 w-full" data-node-id="1524:1307" data-name="단계와 작업 제목">
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Bold'] font-bold leading-[20px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.07px] whitespace-nowrap" data-node-id="1524:1308">
+            단계와 작업
+          </p>
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="1524:1309">
+            4개 단계
+          </p>
+          <div className="content-stretch flex items-center justify-center overflow-clip relative rounded-[6px] shrink-0 size-[24px]" data-node-id="1524:1310" data-name="IconButton / 단계 도움말">
+            <div className="relative shrink-0 size-[14px]" data-node-id="1524:1311" data-name="Icon/circle-help">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconCircleHelp} />
+            </div>
+          </div>
+        </div>
+        <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex flex-col items-start overflow-clip relative rounded-[8px] shrink-0 w-full" data-node-id="1524:1312" data-name="Stage list">
+          <div className="bg-[var(--ees-surface-default,white)] content-stretch flex gap-[10px] h-[52px] items-center pl-[14px] pr-[12px] py-[12px] relative shrink-0 w-full" data-node-id="1524:1313" data-name="Stage / 1 사전준비">
+            <div className="border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex items-center justify-center overflow-clip relative rounded-[11px] shrink-0 size-[22px]" data-node-id="I1524:1313;1462:4861" data-name="Number">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-strong,#3f4147)] whitespace-nowrap" data-node-id="I1524:1313;1462:4862">
+                1
+              </p>
+            </div>
+            <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px]" data-node-id="I1524:1313;1462:4863">
+              사전준비
+            </p>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="I1524:1313;1462:4866">
+              3개 작업
+            </p>
+            <div className="relative shrink-0 size-[14px]" data-node-id="I1524:1313;1462:4867" data-name="Icon/chevron-right">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronRight} />
+            </div>
+          </div>
+          <div className="bg-[var(--ees-surface-default,white)] border-[var(--ees-line-divider,#e6e6e9)] border-solid border-t content-stretch flex gap-[10px] h-[52px] items-center pl-[14px] pr-[12px] py-[12px] relative shrink-0 w-full" data-node-id="1524:1314" data-name="Stage / 2 AP·DB 인프라 준비">
+            <div className="border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex items-center justify-center overflow-clip relative rounded-[11px] shrink-0 size-[22px]" data-node-id="I1524:1314;1462:4861" data-name="Number">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-strong,#3f4147)] whitespace-nowrap" data-node-id="I1524:1314;1462:4862">
+                2
+              </p>
+            </div>
+            <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px]" data-node-id="I1524:1314;1462:4863">
+              AP·DB 인프라 준비
+            </p>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="I1524:1314;1462:4866">
+              1개 작업
+            </p>
+            <div className="relative shrink-0 size-[14px]" data-node-id="I1524:1314;1462:4867" data-name="Icon/chevron-right">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronRight} />
+            </div>
+          </div>
+          <div className="bg-[var(--ees-surface-default,white)] border-[var(--ees-line-divider,#e6e6e9)] border-solid border-t content-stretch flex gap-[10px] h-[52px] items-center pl-[14px] pr-[12px] py-[12px] relative shrink-0 w-full" data-node-id="1524:1315" data-name="Stage / 3 시스템 설치">
+            <div className="border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex items-center justify-center overflow-clip relative rounded-[11px] shrink-0 size-[22px]" data-node-id="I1524:1315;1462:4861" data-name="Number">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-strong,#3f4147)] whitespace-nowrap" data-node-id="I1524:1315;1462:4862">
+                3
+              </p>
+            </div>
+            <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px]" data-node-id="I1524:1315;1462:4863">
+              시스템 설치
+            </p>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="I1524:1315;1462:4866">
+              3개 작업
+            </p>
+            <div className="relative shrink-0 size-[14px]" data-node-id="I1524:1315;1462:4867" data-name="Icon/chevron-right">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronRight} />
+            </div>
+          </div>
+          <div className="bg-[var(--ees-surface-default,white)] border-[var(--ees-line-divider,#e6e6e9)] border-solid border-t content-stretch flex gap-[10px] h-[52px] items-center pl-[14px] pr-[12px] py-[12px] relative shrink-0 w-full" data-node-id="1524:1316" data-name="Stage / 4 시스템 간 인터페이스 확인">
+            <div className="border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex items-center justify-center overflow-clip relative rounded-[11px] shrink-0 size-[22px]" data-node-id="I1524:1316;1462:4861" data-name="Number">
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-strong,#3f4147)] whitespace-nowrap" data-node-id="I1524:1316;1462:4862">
+                4
+              </p>
+            </div>
+            <p className="[word-break:break-word] flex-[1_0_0] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] min-w-px relative text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px]" data-node-id="I1524:1316;1462:4863">
+              시스템 간 인터페이스 확인
+            </p>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="I1524:1316;1462:4866">
+              1개 작업
+            </p>
+            <div className="relative shrink-0 size-[14px]" data-node-id="I1524:1316;1462:4867" data-name="Icon/chevron-right">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronRight} />
+            </div>
+          </div>
+        </div>
+        <div className="content-stretch flex items-center overflow-clip relative shrink-0 w-full" data-node-id="1524:1317" data-name="Stage add">
+          <div className="content-stretch flex gap-[6px] items-center overflow-clip py-[6px] relative shrink-0" data-node-id="1524:1318" data-name="Text button / 단계 추가">
+            <div className="relative shrink-0 size-[14px]" data-node-id="1524:1319" data-name="Icon/plus">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconPlus} />
+            </div>
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-brand-text,#2f5f98)] tracking-[-0.042px] whitespace-nowrap" data-node-id="1524:1320">
+              단계 추가
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="bg-[var(--ees-surface-default,white)] border-[var(--ees-line-divider,#e6e6e9)] border-solid border-t content-stretch flex gap-[8px] items-center overflow-clip px-[20px] py-[12px] relative shrink-0 w-full" data-node-id="1524:1321" data-name="Action bar">
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="1524:1323">
+          초안 r2 · 저장됨
+        </p>
+        <div className="flex-[1_0_0] h-px min-w-px relative" data-node-id="1524:1324" data-name="Flex" />
+        <ButtonV4 className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex h-[34px] items-center justify-center px-[14px] relative rounded-[6px] shrink-0" label="게시 전 확인" style="Secondary" />
+        <ButtonV4 className="bg-[var(--ees-brand-solid,#2f5f98)] content-stretch flex h-[34px] items-center justify-center px-[14px] relative rounded-[6px] shrink-0" label="초안 저장" />
+      </div>
+      <div className="absolute bg-[var(--ees-brand-solid,#2f5f98)] border-2 border-[var(--ees-text-inverse,white)] border-solid content-stretch flex items-center justify-center left-[-39px] rounded-[14px] size-[28px] top-[262px]" data-node-id="1524:1327" data-name="명세 번호 11">
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Bold'] font-bold leading-[normal] relative shrink-0 text-[14px] text-[color:var(--ees-text-inverse,white)] text-center whitespace-nowrap" data-node-id="I1524:1327;1367:19994">
+          11
+        </p>
+      </div>
+      <div className="absolute bg-[var(--ees-brand-solid,#2f5f98)] border-2 border-[var(--ees-text-inverse,white)] border-solid content-stretch flex items-center justify-center left-[-39px] rounded-[14px] size-[28px] top-[306px]" data-node-id="1524:1328" data-name="명세 번호 2">
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Bold'] font-bold leading-[normal] relative shrink-0 text-[14px] text-[color:var(--ees-text-inverse,white)] text-center whitespace-nowrap" data-node-id="I1524:1328;1367:19994">
+          2
+        </p>
+      </div>
+      <div className="absolute bg-[var(--ees-brand-solid,#2f5f98)] border-2 border-[var(--ees-text-inverse,white)] border-solid content-stretch flex items-center justify-center left-[-39px] rounded-[14px] size-[28px] top-[360px]" data-node-id="1524:1329" data-name="명세 번호 1">
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Bold'] font-bold leading-[normal] relative shrink-0 text-[14px] text-[color:var(--ees-text-inverse,white)] text-center whitespace-nowrap" data-node-id="I1524:1329;1367:19994">
+          1
+        </p>
+      </div>
+      <div className="absolute bg-[var(--ees-brand-solid,#2f5f98)] border-2 border-[var(--ees-text-inverse,white)] border-solid content-stretch flex items-center justify-center left-[-39px] rounded-[14px] size-[28px] top-[572px]" data-node-id="1524:1330" data-name="명세 번호 9">
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Bold'] font-bold leading-[normal] relative shrink-0 text-[14px] text-[color:var(--ees-text-inverse,white)] text-center whitespace-nowrap" data-node-id="I1524:1330;1367:19994">
+          9
+        </p>
+      </div>
+    </div>
+  );
+}
+
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+
+These styles are contained in the design: EES v4/Section: Font(family: "Noto Sans KR", style: Bold, size: 14, weight: 700, lineHeight: 20, letterSpacing: -0.5), EES v4/Meta: Font(family: "Noto Sans KR", style: Regular, size: 12, weight: 400, lineHeight: 18, letterSpacing: 0), EES v4/Body: Font(family: "Noto Sans KR", style: Regular, size: 14, weight: 400, lineHeight: 22, letterSpacing: -0.30000001192092896), EES v4/Title: Font(family: "Noto Sans KR", style: Bold, size: 20, weight: 700, lineHeight: 28, letterSpacing: -1), EES v4/Label: Font(family: "Noto Sans KR", style: Medium, size: 12, weight: 500, lineHeight: 16, letterSpacing: 0), EES v4/Body Medium: Font(family: "Noto Sans KR", style: Medium, size: 14, weight: 500, lineHeight: 22, letterSpacing: -0.30000001192092896).
+
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## Button v4
+**Node ID:** 746:647
+
+높이 34, 반경 6. 영역당 Primary 하나. Text는 표 안의 행동과 보조 링크.
+
+## 명세 / 번호
+**Node ID:** 1367:19993
+
+명세 카드의 요소 번호. 화면 위에 얹어 요소별 동작 표와 연결한다. 숫자만 쓴다.
+
+The generated code contains image and SVG URL constants, e.g. const image = `${assetPathPrefix}/<asset file name>`, where assetPathPrefix is declared once at the top of the code and every asset URL interpolates it. These URLs are temporary download sources and expire after 7 days. Download each asset into the project with curl -L, then replace its URL in the generated code with a reference to the downloaded asset. Never use the temporary URLs as runtime image sources.

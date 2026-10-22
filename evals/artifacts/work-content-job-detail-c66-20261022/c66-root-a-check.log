@@ -1,0 +1,244 @@
+✖ C66 content removes the needed-summary surface while preserving stored review decisions (27.798729ms)
+✔ C66 expanded stages keep edit visible and disclose move and delete only through their menu (8.245799ms)
+✔ C66 stage menu Escape closes only an open menu and restores its trigger (9.623664ms)
+✔ C66 factory viewing requires factories and scope or stored overrides: undecided / 0 / false (6.050692ms)
+✔ C66 factory viewing requires factories and scope or stored overrides: undecided / 0 / true (2.789539ms)
+✔ C66 factory viewing requires factories and scope or stored overrides: undecided / 1 / false (2.364756ms)
+✔ C66 factory viewing requires factories and scope or stored overrides: undecided / 1 / true (2.670725ms)
+✔ C66 factory viewing requires factories and scope or stored overrides: system / 0 / false (3.423832ms)
+✔ C66 factory viewing requires factories and scope or stored overrides: system / 0 / true (2.398024ms)
+✔ C66 factory viewing requires factories and scope or stored overrides: system / 1 / false (2.136951ms)
+✔ C66 factory viewing requires factories and scope or stored overrides: system / 1 / true (2.122379ms)
+✔ C66 factory viewing requires factories and scope or stored overrides: factory / 0 / false (2.249987ms)
+✔ C66 factory viewing requires factories and scope or stored overrides: factory / 0 / true (3.872381ms)
+✔ C66 factory viewing requires factories and scope or stored overrides: factory / 1 / false (2.223288ms)
+✔ C66 factory viewing requires factories and scope or stored overrides: factory / 1 / true (2.497831ms)
+✔ C66 factory conditions alone do not expose the factory view and hidden selection resets to base (29.992568ms)
+✔ C66 losing factory visibility removes hidden selection without changing saved factory values (8.556696ms)
+✖ needed information remains direct-editable without a model and publication is explicit (4.071654ms)
+✔ changed inline stage form blocks stage job add and menu actions until apply or cancel (42.051437ms)
+✔ C66 human detail uses the compact breadcrumb and three real mode radios (3.909616ms)
+✖ C66 human detail preserves an older result kind outside the four ordinary choices: change_request (4.556016ms)
+✖ C66 human detail preserves an older result kind outside the four ordinary choices: schedule (4.741609ms)
+✖ C66 human detail preserves an older result kind outside the four ordinary choices: list_confirm (4.88574ms)
+✖ C66 tool selection before connection never fabricates arguments results or completion settings (6.55216ms)
+✖ C66 AI mode retains its existing completion dependency and source controls (4.230318ms)
+✖ C66 D5 mode switch requires confirmation and matches Tool None cleanup: human (17.062036ms)
+✖ C66 D5 mode switch requires confirmation and matches Tool None cleanup: ai (13.69994ms)
+✖ C66 D5 cancellation and confirmation preserve manually customized generated bindings (8.711693ms)
+✖ C66 connected shared tool describes its known output and opens exactly one argument row (9.00223ms)
+✖ C66 argument input scope roundtrips through the existing declaration and preserves factory scope (9.191118ms)
+✖ C66 constant values roundtrip with exact JSON types and range checking stays at publish validation (5.025365ms)
+✖ C66 an invalid numeric constant is rejected without replacing its previous value (5.42267ms)
+✖ C66 shared result source remains disabled with a reason and cannot replace existing input bindings (12.32233ms)
+✖ C66 legacy confirmed-list result binding roundtrips without losing opaque result metadata (7.704713ms)
+✖ C66 completion and additional disclosures are view-only until a displayed field changes (9.603715ms)
+✔ C66 read-only job detail exposes saved values without allowing edits: human (9.396189ms)
+✔ C66 read-only job detail exposes saved values without allowing edits: tool (7.132031ms)
+✔ C66 read-only job detail exposes saved values without allowing edits: ai (6.352156ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 21
+ℹ fail 17
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 426.849785
+
+✖ failing tests:
+
+test at tests/test_ees_work_authoring_ui.cjs:104:1
+✖ C66 content removes the needed-summary surface while preserving stored review decisions (27.798729ms)
+  ReferenceError: captureJob is not defined
+      at capture (evalmachine.<anonymous>:553:283)
+      at Object.handleEvent (evalmachine.<anonymous>:722:1999)
+      at h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:99:372)
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:107:19)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
+
+test at tests/test_ees_work_authoring_ui.cjs:415:1
+✖ needed information remains direct-editable without a model and publication is explicit (4.071654ms)
+  ReferenceError: captureJob is not defined
+      at capture (evalmachine.<anonymous>:553:283)
+      at Object.handleEvent (evalmachine.<anonymous>:722:1999)
+      at h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:99:372)
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:418:19)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/test_ees_work_authoring_ui.cjs:901:68
+✖ C66 human detail preserves an older result kind outside the four ordinary choices: change_request (4.556016ms)
+  ReferenceError: captureJob is not defined
+      at capture (evalmachine.<anonymous>:553:283)
+      at Object.handleEvent (evalmachine.<anonymous>:722:1999)
+      at h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:99:372)
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:903:75)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/test_ees_work_authoring_ui.cjs:901:68
+✖ C66 human detail preserves an older result kind outside the four ordinary choices: schedule (4.741609ms)
+  ReferenceError: captureJob is not defined
+      at capture (evalmachine.<anonymous>:553:283)
+      at Object.handleEvent (evalmachine.<anonymous>:722:1999)
+      at h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:99:372)
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:903:75)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/test_ees_work_authoring_ui.cjs:901:68
+✖ C66 human detail preserves an older result kind outside the four ordinary choices: list_confirm (4.88574ms)
+  ReferenceError: captureJob is not defined
+      at capture (evalmachine.<anonymous>:553:283)
+      at Object.handleEvent (evalmachine.<anonymous>:722:1999)
+      at h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:99:372)
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:903:75)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/test_ees_work_authoring_ui.cjs:906:1
+✖ C66 tool selection before connection never fabricates arguments results or completion settings (6.55216ms)
+  ReferenceError: captureJob is not defined
+      at capture (evalmachine.<anonymous>:553:283)
+      at Object.handleEvent (evalmachine.<anonymous>:722:1999)
+      at h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:99:372)
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:907:37)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/test_ees_work_authoring_ui.cjs:911:1
+✖ C66 AI mode retains its existing completion dependency and source controls (4.230318ms)
+  ReferenceError: captureJob is not defined
+      at capture (evalmachine.<anonymous>:553:283)
+      at Object.handleEvent (evalmachine.<anonymous>:722:1999)
+      at h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:99:372)
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:914:4)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/test_ees_work_authoring_ui.cjs:916:34
+✖ C66 D5 mode switch requires confirmation and matches Tool None cleanup: human (17.062036ms)
+  ReferenceError: captureJob is not defined
+      at capture (evalmachine.<anonymous>:553:283)
+      at Object.handleEvent (evalmachine.<anonymous>:722:1999)
+      at h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:99:372)
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:919:25)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/test_ees_work_authoring_ui.cjs:916:34
+✖ C66 D5 mode switch requires confirmation and matches Tool None cleanup: ai (13.69994ms)
+  ReferenceError: captureJob is not defined
+      at capture (evalmachine.<anonymous>:553:283)
+      at Object.handleEvent (evalmachine.<anonymous>:722:1999)
+      at h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:99:372)
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:919:25)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/test_ees_work_authoring_ui.cjs:922:1
+✖ C66 D5 cancellation and confirmation preserve manually customized generated bindings (8.711693ms)
+  ReferenceError: captureJob is not defined
+      at capture (evalmachine.<anonymous>:553:283)
+      at Object.handleEvent (evalmachine.<anonymous>:722:1999)
+      at h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:99:372)
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:924:23)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/test_ees_work_authoring_ui.cjs:926:1
+✖ C66 connected shared tool describes its known output and opens exactly one argument row (9.00223ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  'false' !== 'true'
+  
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:929:60)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'false',
+    expected: 'true',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_authoring_ui.cjs:933:1
+✖ C66 argument input scope roundtrips through the existing declaration and preserves factory scope (9.191118ms)
+  AssertionError [ERR_ASSERTION]: field argument_scope
+      at h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:99:144)
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:934:98)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_authoring_ui.cjs:940:1
+✖ C66 constant values roundtrip with exact JSON types and range checking stays at publish validation (5.025365ms)
+  AssertionError [ERR_ASSERTION]: field argument_constant
+      at h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:99:144)
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:941:341)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_authoring_ui.cjs:945:1
+✖ C66 an invalid numeric constant is rejected without replacing its previous value (5.42267ms)
+  AssertionError [ERR_ASSERTION]: field argument_source
+      at h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:99:144)
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:946:98)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_authoring_ui.cjs:949:1
+✖ C66 shared result source remains disabled with a reason and cannot replace existing input bindings (12.32233ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(field)
+  
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:950:180)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at tests/test_ees_work_authoring_ui.cjs:953:1
+✖ C66 legacy confirmed-list result binding roundtrips without losing opaque result metadata (7.704713ms)
+  TypeError: Cannot read properties of undefined (reading 'value')
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:954:585)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/test_ees_work_authoring_ui.cjs:959:1
+✖ C66 completion and additional disclosures are view-only until a displayed field changes (9.603715ms)
+  ReferenceError: captureJob is not defined
+      at capture (evalmachine.<anonymous>:553:283)
+      at Object.handleEvent (evalmachine.<anonymous>:722:1999)
+      at h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:99:372)
+      at TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:962:4)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
