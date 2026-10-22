@@ -105,8 +105,9 @@ record.draft.schedule={timezone:'Asia/Seoul',anchor:'2026-10-06T09:00',frequency
     def test_read_retry_is_explicit_bounded_draft_policy_without_default_registration(self):
         self.run_contract(r"""
 (async()=>{
-const h=harness();await h.node();assert.doesNotMatch(h.markup,/name="read_retry_count"/);
-h.field('mode','tool','change');assert.equal(h.draft().definition.nodes.j.read_retry,undefined);
+const h=harness();h.state.tools=[{id:'retry-read',name:'확인된 조회',state:'approved',revision:1,kind:'read',reference:{tool_id:'read',function:'read'},input_schema:{properties:{}}}];await h.node();assert.doesNotMatch(h.markup,/name="read_retry_count"/);
+// C66 exposes a legacy result selector after choosing its tool, inside Completion.
+h.field('mode','tool','change');await flush();h.field('tool_contract_id','retry-read','change');h.click('job_section',{id:'completion'});h.click('job_section',{id:'advanced'});await flush();assert.equal(h.draft().definition.nodes.j.read_retry,undefined);
 h.field('instructions','도구 설명만 수정');assert.equal(h.draft().definition.nodes.j.read_retry,undefined);
 h.field('read_retry_count','2');assert.deepEqual(h.draft().definition.nodes.j.read_retry,{count:2,deadline_seconds:null});
 h.field('read_retry_deadline','45');h.click('save');await flush();assert.deepEqual(h.writes[0].definition.nodes.j.read_retry,{count:2,deadline_seconds:45});

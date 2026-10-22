@@ -1,0 +1,49 @@
+{
+  "baseline_head": "75f80017e490c6a383df36c0216727695f3db17a",
+  "first_failure": {
+    "passed": 0,
+    "failed": 2,
+    "observed": "Physical dialog cancel click clears the menu and removes its focus trigger before the dialog promise resolves"
+  },
+  "fix": "Exclude #ees-work-dialog clicks from the menu outside-click handler; retain original context guards",
+  "verification": {
+    "cancel_cases_passed": 5,
+    "related_node_passed": 507,
+    "related_node_failed": 0,
+    "native": "pending on follow-up head; original timeouts and assertions retained"
+  },
+  "files": [
+    {
+      "path": "node-cancel-click-red.log.gz",
+      "bytes": 1255,
+      "sha256": "e61dd300136241085717c127ef861f91ac0472abdb55dd7b9173ec82e4135125",
+      "encoding": "gzip; original bytes preserved",
+      "original_bytes": 6038,
+      "original_sha256": "b54a34cd0c3e77f45f9bc215e5fd1ef8704548f9485681d55ce69ab8894973e4"
+    },
+    {
+      "path": "node-cancel-click-red-selectors.log.gz",
+      "bytes": 1257,
+      "sha256": "c804a17fc53071a12ddae69e090335f562525a9092c30a207e725b7bb548cbef",
+      "encoding": "gzip; original bytes preserved",
+      "original_bytes": 6041,
+      "original_sha256": "81594e2c3fb56849f45d69a07b566281c55d64ab0e492e3d1815eaeb1509d7d9"
+    },
+    {
+      "path": "node-cancel-click-green.log.gz",
+      "bytes": 313,
+      "sha256": "a7fa1691f2543170e84c225129f60d8dabebfc95765708856b684d9451516c68",
+      "encoding": "gzip; original bytes preserved",
+      "original_bytes": 663,
+      "original_sha256": "eec514412bac55fd3153836574335c663194962f9f3aea7ec06081e2686f4437"
+    },
+    {
+      "path": "node-cancel-click-regression-507.log.gz",
+      "bytes": 16815,
+      "sha256": "d3265a6ea17a5d3e3379948fd4cef03b35d89c86089bfdbf20a392d04e14e7ce",
+      "encoding": "gzip; original bytes preserved",
+      "original_bytes": 51522,
+      "original_sha256": "5dc71bd643450e754cc534bbff00c366258d5e8f8986be7db625c06b5fd23850"
+    }
+  ]
+}

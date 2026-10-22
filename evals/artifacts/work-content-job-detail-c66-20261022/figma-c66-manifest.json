@@ -1,0 +1,280 @@
+{
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "page": "워크-1",
+  "change": "C66",
+  "baseCommit": "1c1efff8abe19da3e6e8921859b52858fc6cacfb",
+  "mutatedFigma": false,
+  "nodes": [
+    {
+      "id": "1524:1253",
+      "name": "B2-6 · 업무 내용 · 단계 A · 기본 (모두 접힘 · 단계 이름과 작업 수만)",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:19:23.451Z"
+    },
+    {
+      "id": "1524:1332",
+      "name": "B2-7 · 업무 내용 · 단계 B · 한 단계 펼침 (단계 관리 + 작업 목록)",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:19:23.451Z"
+    },
+    {
+      "id": "1524:1431",
+      "name": "B2-8 · 업무 내용 · 단계 C-1 · 단계 정보 수정 (펼친 단계 안 인라인)",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:19:23.451Z"
+    },
+    {
+      "id": "1524:1527",
+      "name": "B2-9 · 업무 내용 · 단계 C-2 · 단계 추가 (목록 아래 이름 입력)",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:19:23.451Z"
+    },
+    {
+      "id": "1524:1610",
+      "name": "B2-10 · 업무 내용 · 단계 D · 작업 상세에서 돌아옴 (펼친 단계·스크롤·초안 유지)",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:19:23.451Z"
+    },
+    {
+      "id": "1546:23",
+      "name": "B2-11 · 업무 내용 · 새 절차 직후 (단계 0개 · 공장 보기 없음 · 정해야 할 것 없음)",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:19:23.451Z"
+    },
+    {
+      "id": "1462:4887",
+      "name": "업무 내용 / 단계 줄",
+      "type": "COMPONENT_SET",
+      "textRetrievedAtUTC": "2026-10-22T08:19:23.451Z"
+    },
+    {
+      "id": "1524:1716",
+      "name": "B2-6~B2-10 · 업무 내용 · 상태 변형 (예시 1~15)",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:19:22.649Z"
+    },
+    {
+      "id": "1524:2058",
+      "name": "명세 카드 · B2-6~B2-10 업무 내용 · 단계와 작업 (C56 설계 · C61 보완 · C63 메인 반영)",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:19:22.649Z"
+    },
+    {
+      "id": "864:8706",
+      "name": "R2 · 규칙: 기본 절차와 공장별 차이",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:19:22.649Z"
+    },
+    {
+      "id": "1459:4794",
+      "name": "Note · B3-1~B3-6b · 작업 상세 (10-20 시안 · C66 메인 반영 · 1단계 화면 / 2단계 서버)",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:16:31.116Z"
+    },
+    {
+      "id": "1460:4813",
+      "name": "명세 카드 · B3-1~B3-6b 작업 상세 (10-20 시안 · C66 메인 반영)",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:16:31.116Z"
+    },
+    {
+      "id": "1456:4557",
+      "name": "B3-1 · 작업 상세 · 기본 (도구 연결됨 · 모두 접힘)",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:16:31.116Z"
+    },
+    {
+      "id": "1457:4495",
+      "name": "B3-2 · 작업 상세 · 도구에 넣을 값 편집 (공간 → 고정값)",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:16:31.116Z"
+    },
+    {
+      "id": "1457:4642",
+      "name": "B3-2a · 작업 상세 · 넣을 값 편집기 견본 (가·나·다)",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:16:31.116Z"
+    },
+    {
+      "id": "1548:2",
+      "name": "B3-3 · 작업 상세 · 완료 조건 펼침 · 1단계 (자동 확인 + 담당자 확인)",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:16:31.116Z"
+    },
+    {
+      "id": "1458:4720",
+      "name": "B3-5 · 작업 상세 · 사람이 확인 (도구 칸 없음)",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:16:31.116Z"
+    },
+    {
+      "id": "1458:4801",
+      "name": "B3-6a · 작업 상세 · 도구 고르기 전",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:16:31.116Z"
+    },
+    {
+      "id": "1458:4880",
+      "name": "B3-6b · 작업 상세 · 연결한 도구를 지금 쓸 수 없음 (도구 확인 필요)",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:16:31.116Z"
+    },
+    {
+      "id": "1454:4364",
+      "name": "C1 작업 상세 부품 · 입력 줄 · 판정 줄 · 선택 단추 · 켜기 스위치 · 확인 상자 (10-20 시안 · C66)",
+      "type": "FRAME",
+      "textRetrievedAtUTC": "2026-10-22T08:16:31.116Z"
+    }
+  ],
+  "contexts": [
+    {
+      "id": "1457:4495",
+      "requestedAtUTC": null,
+      "context": "figma-1457-4495-context.txt",
+      "render": "figma-1457-4495.png"
+    },
+    {
+      "id": "1548:2",
+      "requestedAtUTC": null,
+      "context": "figma-1548-2-context.txt",
+      "render": "figma-1548-2.png"
+    },
+    {
+      "id": "1524:1253",
+      "requestedAtUTC": null,
+      "context": "figma-1524-1253-context.txt",
+      "render": "figma-1524-1253.png"
+    },
+    {
+      "id": "1456:4557",
+      "requestedAtUTC": "2026-10-22T08:19:55.162Z",
+      "context": "figma-1456-4557-context.txt",
+      "render": "figma-1456-4557.png"
+    },
+    {
+      "id": "1457:4642",
+      "requestedAtUTC": "2026-10-22T08:19:55.162Z",
+      "context": "figma-1457-4642-context.txt",
+      "render": "figma-1457-4642.png"
+    },
+    {
+      "id": "1458:4720",
+      "requestedAtUTC": "2026-10-22T08:19:55.162Z",
+      "context": "figma-1458-4720-context.txt",
+      "render": "figma-1458-4720.png"
+    },
+    {
+      "id": "1458:4801",
+      "requestedAtUTC": "2026-10-22T08:19:55.162Z",
+      "context": "figma-1458-4801-context.txt",
+      "render": "figma-1458-4801.png"
+    },
+    {
+      "id": "1458:4880",
+      "requestedAtUTC": "2026-10-22T08:19:55.162Z",
+      "context": "figma-1458-4880-context.txt",
+      "render": "figma-1458-4880.png"
+    },
+    {
+      "id": "1454:4364",
+      "requestedAtUTC": "2026-10-22T08:19:55.162Z",
+      "context": "figma-1454-4364-context.txt",
+      "render": "figma-1454-4364.png"
+    },
+    {
+      "id": "1524:1332",
+      "requestedAtUTC": "2026-10-22T08:20:35.035Z",
+      "context": "figma-1524-1332-context.txt",
+      "render": "figma-1524-1332.png"
+    },
+    {
+      "id": "1524:1431",
+      "requestedAtUTC": "2026-10-22T08:20:35.035Z",
+      "context": "figma-1524-1431-context.txt",
+      "render": "figma-1524-1431.png"
+    },
+    {
+      "id": "1524:1527",
+      "requestedAtUTC": "2026-10-22T08:20:35.035Z",
+      "context": "figma-1524-1527-context.txt",
+      "render": "figma-1524-1527.png"
+    },
+    {
+      "id": "1524:1610",
+      "requestedAtUTC": "2026-10-22T08:20:35.035Z",
+      "context": "figma-1524-1610-context.txt",
+      "render": "figma-1524-1610.png"
+    },
+    {
+      "id": "1546:23",
+      "requestedAtUTC": "2026-10-22T08:20:35.035Z",
+      "context": "figma-1546-23-context.txt",
+      "render": "figma-1546-23.png"
+    },
+    {
+      "id": "1462:4887",
+      "requestedAtUTC": "2026-10-22T08:20:35.035Z",
+      "context": "figma-1462-4887-context.txt",
+      "render": "figma-1462-4887.png"
+    },
+    {
+      "id": "1524:1757",
+      "requestedAtUTC": "2026-10-22T08:21:34.382Z",
+      "context": "figma-1524-1757-context.txt",
+      "render": "figma-1524-1757.png"
+    },
+    {
+      "id": "1524:1867",
+      "requestedAtUTC": "2026-10-22T08:21:34.382Z",
+      "context": "figma-1524-1867-context.txt",
+      "render": "figma-1524-1867.png"
+    },
+    {
+      "id": "1546:115",
+      "requestedAtUTC": "2026-10-22T08:21:34.382Z",
+      "context": "figma-1546-115-context.txt",
+      "render": "figma-1546-115.png"
+    }
+  ],
+  "excludedNodes": [
+    {
+      "id": "1457:4744",
+      "reason": "B3-3b phase2; excluded by user"
+    },
+    {
+      "id": "1457:4921",
+      "reason": "B3-4 phase2; excluded by user"
+    },
+    {
+      "id": "832:8468",
+      "reason": "old B3; excluded by user"
+    }
+  ],
+  "failures": [
+    {
+      "stage": "initial all-node text and geometry read",
+      "result": "output limit: 453840 bytes > 48000",
+      "debugUuid": "4171e5dd-9380-4886-97e8-f42f122894da",
+      "resolution": "bounded text-only job read and separate screen contexts"
+    },
+    {
+      "stage": "stage all-ten text read",
+      "result": "output limit: 48128 bytes > 48000",
+      "debugUuid": "ded85a23-b250-4375-9d28-cb963aa9f5ed",
+      "resolution": "bounded 7-screen and 3-spec/state batches succeeded"
+    },
+    {
+      "stage": "asset URL download",
+      "result": "curl exited 0 but response was 195-byte Site Unavailable HTML, not SVG",
+      "resolution": "did not use response; read-only exportAsync SVG_STRING retrieved select-chevron source"
+    }
+  ],
+  "notes": [
+    "Spec cards/memos are ordinary canvas FRAME+TEXT, not native SPEC_BLOCK; text read through canvas API.",
+    "Initial three context calls did not log an exact start timestamp; later text read provides exact node retrieval timestamp. Remaining context calls log requestedAtUTC.",
+    "PNG files are unmodified Figma get_design_context included renders; long edge capped by service default. These are design source images, not actual product captures.",
+    "Canvas text scans may omit text within instances; high-fidelity screen contexts and renders preserve instance content.",
+    "D5 dialog wording is not defined in the supplied nodes; user instruction broadens confirmation to every non-tool mode.",
+    "Phase2 table/switch content exists in spec/component reference but is excluded from implementation by user."
+  ]
+}

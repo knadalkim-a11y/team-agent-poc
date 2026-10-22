@@ -1,0 +1,206 @@
+{
+  "run_id": 39759230676,
+  "head": "537cda97799dabcaa62e07324ce481f32587b170",
+  "jobs": [
+    {
+      "id": 119758940934,
+      "name": "Pinned Native source baseline and EES frontend build",
+      "conclusion": "success"
+    },
+    {
+      "id": 119758941220,
+      "name": "Source audit (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119758941421,
+      "name": "Verify the fixed official wheel",
+      "conclusion": "success"
+    },
+    {
+      "id": 119758941517,
+      "name": "Source audit (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119759034742,
+      "name": "Verify cached historical fixture (previous12)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119759034758,
+      "name": "Verify cached historical fixture (previous)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119759034790,
+      "name": "Verify cached historical fixture (previous-v4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119759034812,
+      "name": "Verify cached historical fixture (legacy)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119759034904,
+      "name": "Verify cached historical fixture (previous13)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760711257,
+      "name": "Prepare current program fixtures",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760974282,
+      "name": "Complete Native product (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760974373,
+      "name": "native-execution (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760974389,
+      "name": "native-account (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760974445,
+      "name": "native-compose (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760974508,
+      "name": "native-work (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975106,
+      "name": "platform (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975135,
+      "name": "native-grounding (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975136,
+      "name": "services (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975155,
+      "name": "native-contracts (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975225,
+      "name": "program-install (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975268,
+      "name": "program-wheel (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975292,
+      "name": "restore-ees12 (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975327,
+      "name": "native-contracts (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975342,
+      "name": "restore-ees11 (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975382,
+      "name": "restore-ees10 (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975396,
+      "name": "contracts (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975420,
+      "name": "platform (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975427,
+      "name": "program-install (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975437,
+      "name": "program-wheel (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975443,
+      "name": "restore-ees13 (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975453,
+      "name": "services (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975463,
+      "name": "restore-ees11 (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975467,
+      "name": "restore-ees13 (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975490,
+      "name": "restore-ees10 (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975495,
+      "name": "native-grounding (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975498,
+      "name": "restore-ees12 (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119760975611,
+      "name": "contracts (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119764849257,
+      "name": "Delivery checks (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119764849311,
+      "name": "Delivery checks (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 119764903717,
+      "name": "Prepare delivery files",
+      "conclusion": "skipped"
+    }
+  ]
+}

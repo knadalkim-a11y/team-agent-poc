@@ -1,0 +1,1670 @@
+[
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "human",
+    "focus": {},
+    "sections": [
+      {
+        "id": "advanced",
+        "expanded": "false",
+        "disabled": false
+      }
+    ],
+    "arguments": [],
+    "argumentGeometry": [],
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리",
+      "AI 초안"
+    ],
+    "unconnectedColors": null,
+    "sectionMargins": [],
+    "cardGaps": [
+      {
+        "before": "ew-job-card ew-job-main",
+        "after": "ew-job-card ew-job-sections",
+        "gap": 12
+      }
+    ],
+    "toggleBorders": [
+      {
+        "action": "job_section",
+        "id": "advanced",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [],
+    "label": "c66-b3-human-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "focus": {
+      "name": "mode"
+    },
+    "sections": [
+      {
+        "id": "completion",
+        "expanded": "false",
+        "disabled": true
+      },
+      {
+        "id": "advanced",
+        "expanded": "false",
+        "disabled": false
+      }
+    ],
+    "arguments": [],
+    "argumentGeometry": [],
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리",
+      "AI 초안"
+    ],
+    "unconnectedColors": {
+      "notice": "rgb(150, 89, 12)",
+      "pickerBorder": "rgb(150, 89, 12)",
+      "pickerBorderWidth": 1
+    },
+    "sectionMargins": [
+      {
+        "className": "ew-job-section",
+        "marginTop": 0
+      }
+    ],
+    "cardGaps": [
+      {
+        "before": "ew-job-card ew-job-main",
+        "after": "ew-job-card ew-job-sections",
+        "gap": 12
+      }
+    ],
+    "toggleBorders": [
+      {
+        "action": "job_section",
+        "id": "completion",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "advanced",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [],
+    "label": "c66-b3-tool-unconnected-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "ai",
+    "focus": {
+      "name": "mode"
+    },
+    "sections": [
+      {
+        "id": "advanced",
+        "expanded": "false",
+        "disabled": false
+      }
+    ],
+    "arguments": [],
+    "argumentGeometry": [],
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리",
+      "AI 초안"
+    ],
+    "unconnectedColors": null,
+    "sectionMargins": [],
+    "cardGaps": [
+      {
+        "before": "ew-job-card ew-job-main",
+        "after": "ew-job-card ew-job-sections",
+        "gap": 12
+      }
+    ],
+    "toggleBorders": [
+      {
+        "action": "job_section",
+        "id": "advanced",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [],
+    "label": "c66-b3-ai-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "focus": {},
+    "sections": [
+      {
+        "id": "completion",
+        "expanded": "false",
+        "disabled": true
+      },
+      {
+        "id": "advanced",
+        "expanded": "false",
+        "disabled": false
+      }
+    ],
+    "arguments": [],
+    "argumentGeometry": [],
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리",
+      "AI 초안"
+    ],
+    "unconnectedColors": {
+      "notice": "rgb(150, 89, 12)",
+      "pickerBorder": "rgb(150, 89, 12)",
+      "pickerBorderWidth": 1
+    },
+    "sectionMargins": [
+      {
+        "className": "ew-job-section",
+        "marginTop": 0
+      }
+    ],
+    "cardGaps": [
+      {
+        "before": "ew-job-card ew-job-main",
+        "after": "ew-job-card ew-job-sections",
+        "gap": 12
+      }
+    ],
+    "toggleBorders": [
+      {
+        "action": "job_section",
+        "id": "completion",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "advanced",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [],
+    "label": "c66-b3-tool-picker-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "focus": {},
+    "sections": [
+      {
+        "id": "completion",
+        "expanded": "false",
+        "disabled": false
+      },
+      {
+        "id": "advanced",
+        "expanded": "false",
+        "disabled": false
+      }
+    ],
+    "arguments": [
+      {
+        "id": "query",
+        "text": "찾을 말\n필수\n실행할 때 입력 · 담당자가 넣습니다"
+      },
+      {
+        "id": "space_key",
+        "text": "공간\n실행할 때 입력 · 담당자가 넣습니다"
+      },
+      {
+        "id": "limit",
+        "text": "개수\n실행할 때 입력 · 담당자가 넣습니다"
+      }
+    ],
+    "argumentGeometry": [
+      {
+        "id": "query",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      },
+      {
+        "id": "space_key",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      },
+      {
+        "id": "limit",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      }
+    ],
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리",
+      "AI 초안"
+    ],
+    "unconnectedColors": null,
+    "sectionMargins": [
+      {
+        "className": "ew-job-card ew-job-arguments",
+        "marginTop": 0
+      },
+      {
+        "className": "ew-job-section",
+        "marginTop": 0
+      }
+    ],
+    "cardGaps": [
+      {
+        "before": "ew-job-card ew-job-main",
+        "after": "ew-job-card ew-job-arguments",
+        "gap": 12
+      },
+      {
+        "before": "ew-job-card ew-job-arguments",
+        "after": "ew-job-card ew-job-sections",
+        "gap": 12
+      }
+    ],
+    "toggleBorders": [
+      {
+        "action": "job_argument",
+        "id": "query",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_argument",
+        "id": "space_key",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_argument",
+        "id": "limit",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "completion",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "advanced",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [],
+    "label": "c66-b3-tool-connected-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "focus": {
+      "action": "job_argument_close",
+      "id": "query",
+      "name": ""
+    },
+    "sections": [
+      {
+        "id": "completion",
+        "expanded": "false",
+        "disabled": false
+      },
+      {
+        "id": "advanced",
+        "expanded": "false",
+        "disabled": false
+      }
+    ],
+    "arguments": [
+      {
+        "id": "query",
+        "text": "찾을 말\n필수\n고정값 · 설치 가이드\n이 값은 어디서 가져오나요?\n실행할 때 입력\n진행 건마다 담당자가 넣습니다\n고정값\n이 절차에 적어 둡니다. 바꾸려면 다시 게시합니다.\n글자\n\n형식은 바로 확인합니다. 범위와 길이는 게시 전 확인에서 한 번 더 검사합니다.\n\n앞 작업 결과\n이 도구는 아직 앞 작업의 결과를 받을 수 없습니다. 다음 단계에서 지원합니다.\n닫기"
+      },
+      {
+        "id": "space_key",
+        "text": "공간\n실행할 때 입력 · 담당자가 넣습니다"
+      },
+      {
+        "id": "limit",
+        "text": "개수\n실행할 때 입력 · 담당자가 넣습니다"
+      }
+    ],
+    "argumentGeometry": [
+      {
+        "id": "query",
+        "normalCollapsed": false,
+        "rowHeight": 414,
+        "toggleHeight": 59,
+        "borderTop": 1
+      },
+      {
+        "id": "space_key",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      },
+      {
+        "id": "limit",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      }
+    ],
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리",
+      "AI 초안"
+    ],
+    "unconnectedColors": null,
+    "sectionMargins": [
+      {
+        "className": "ew-job-card ew-job-arguments",
+        "marginTop": 0
+      },
+      {
+        "className": "ew-job-section",
+        "marginTop": 0
+      }
+    ],
+    "cardGaps": [
+      {
+        "before": "ew-job-card ew-job-main",
+        "after": "ew-job-card ew-job-arguments",
+        "gap": 12
+      },
+      {
+        "before": "ew-job-card ew-job-arguments",
+        "after": "ew-job-card ew-job-sections",
+        "gap": 12
+      }
+    ],
+    "toggleBorders": [
+      {
+        "action": "job_argument",
+        "id": "query",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_argument",
+        "id": "space_key",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_argument",
+        "id": "limit",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "completion",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "advanced",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [],
+    "label": "c66-b3-argument-expanded-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "focus": {
+      "action": "job_section",
+      "id": "completion",
+      "name": ""
+    },
+    "sections": [
+      {
+        "id": "completion",
+        "expanded": "true",
+        "disabled": false
+      },
+      {
+        "id": "advanced",
+        "expanded": "false",
+        "disabled": false
+      }
+    ],
+    "arguments": [
+      {
+        "id": "query",
+        "text": "찾을 말\n필수\n고정값 · 설치 가이드"
+      },
+      {
+        "id": "space_key",
+        "text": "공간\n실행할 때 입력 · 담당자가 넣습니다"
+      },
+      {
+        "id": "limit",
+        "text": "개수\n고정값 · 0"
+      }
+    ],
+    "argumentGeometry": [
+      {
+        "id": "query",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      },
+      {
+        "id": "space_key",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      },
+      {
+        "id": "limit",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      }
+    ],
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리",
+      "AI 초안"
+    ],
+    "unconnectedColors": null,
+    "sectionMargins": [
+      {
+        "className": "ew-job-card ew-job-arguments",
+        "marginTop": 0
+      },
+      {
+        "className": "ew-job-section",
+        "marginTop": 0
+      }
+    ],
+    "cardGaps": [
+      {
+        "before": "ew-job-card ew-job-main",
+        "after": "ew-job-card ew-job-arguments",
+        "gap": 12
+      },
+      {
+        "before": "ew-job-card ew-job-arguments",
+        "after": "ew-job-card ew-job-sections",
+        "gap": 12
+      }
+    ],
+    "toggleBorders": [
+      {
+        "action": "job_argument",
+        "id": "query",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_argument",
+        "id": "space_key",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_argument",
+        "id": "limit",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "completion",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "advanced",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [],
+    "label": "c66-b3-completion-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "focus": {
+      "action": "job_section",
+      "id": "completion",
+      "name": ""
+    },
+    "sections": [
+      {
+        "id": "completion",
+        "expanded": "true",
+        "disabled": false
+      },
+      {
+        "id": "advanced",
+        "expanded": "false",
+        "disabled": false
+      }
+    ],
+    "arguments": [
+      {
+        "id": "query",
+        "text": "찾을 말\n필수\n고정값 · 설치 가이드"
+      },
+      {
+        "id": "space_key",
+        "text": "공간\n실행할 때 입력 · 담당자가 넣습니다"
+      },
+      {
+        "id": "limit",
+        "text": "개수\n고정값 · 0"
+      }
+    ],
+    "argumentGeometry": [
+      {
+        "id": "query",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      },
+      {
+        "id": "space_key",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      },
+      {
+        "id": "limit",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      }
+    ],
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리",
+      "AI 초안"
+    ],
+    "unconnectedColors": null,
+    "sectionMargins": [
+      {
+        "className": "ew-job-card ew-job-arguments",
+        "marginTop": 0
+      },
+      {
+        "className": "ew-job-section",
+        "marginTop": 0
+      }
+    ],
+    "cardGaps": [
+      {
+        "before": "ew-job-card ew-job-main",
+        "after": "ew-job-card ew-job-arguments",
+        "gap": 12
+      },
+      {
+        "before": "ew-job-card ew-job-arguments",
+        "after": "ew-job-card ew-job-sections",
+        "gap": 12
+      }
+    ],
+    "toggleBorders": [
+      {
+        "action": "job_argument",
+        "id": "query",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_argument",
+        "id": "space_key",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_argument",
+        "id": "limit",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "completion",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "advanced",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [],
+    "label": "c66-b3-completion-bottom-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "focus": {
+      "action": "job_section",
+      "id": "advanced",
+      "name": ""
+    },
+    "sections": [
+      {
+        "id": "completion",
+        "expanded": "false",
+        "disabled": false
+      },
+      {
+        "id": "advanced",
+        "expanded": "true",
+        "disabled": false
+      }
+    ],
+    "arguments": [
+      {
+        "id": "query",
+        "text": "찾을 말\n필수\n고정값 · 설치 가이드"
+      },
+      {
+        "id": "space_key",
+        "text": "공간\n실행할 때 입력 · 담당자가 넣습니다"
+      },
+      {
+        "id": "limit",
+        "text": "개수\n고정값 · 0"
+      }
+    ],
+    "argumentGeometry": [
+      {
+        "id": "query",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      },
+      {
+        "id": "space_key",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      },
+      {
+        "id": "limit",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      }
+    ],
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리",
+      "AI 초안"
+    ],
+    "unconnectedColors": null,
+    "sectionMargins": [
+      {
+        "className": "ew-job-card ew-job-arguments",
+        "marginTop": 0
+      },
+      {
+        "className": "ew-job-section",
+        "marginTop": 0
+      }
+    ],
+    "cardGaps": [
+      {
+        "before": "ew-job-card ew-job-main",
+        "after": "ew-job-card ew-job-arguments",
+        "gap": 12
+      },
+      {
+        "before": "ew-job-card ew-job-arguments",
+        "after": "ew-job-card ew-job-sections",
+        "gap": 12
+      }
+    ],
+    "toggleBorders": [
+      {
+        "action": "job_argument",
+        "id": "query",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_argument",
+        "id": "space_key",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_argument",
+        "id": "limit",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "completion",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "advanced",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [],
+    "label": "c66-b3-additional-settings-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "focus": {
+      "action": "job_section",
+      "id": "advanced",
+      "name": ""
+    },
+    "sections": [
+      {
+        "id": "completion",
+        "expanded": "false",
+        "disabled": false
+      },
+      {
+        "id": "advanced",
+        "expanded": "true",
+        "disabled": false
+      }
+    ],
+    "arguments": [
+      {
+        "id": "query",
+        "text": "찾을 말\n필수\n고정값 · 설치 가이드"
+      },
+      {
+        "id": "space_key",
+        "text": "공간\n실행할 때 입력 · 담당자가 넣습니다"
+      },
+      {
+        "id": "limit",
+        "text": "개수\n고정값 · 0"
+      }
+    ],
+    "argumentGeometry": [
+      {
+        "id": "query",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      },
+      {
+        "id": "space_key",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      },
+      {
+        "id": "limit",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      }
+    ],
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리",
+      "AI 초안"
+    ],
+    "unconnectedColors": null,
+    "sectionMargins": [
+      {
+        "className": "ew-job-card ew-job-arguments",
+        "marginTop": 0
+      },
+      {
+        "className": "ew-job-section",
+        "marginTop": 0
+      }
+    ],
+    "cardGaps": [
+      {
+        "before": "ew-job-card ew-job-main",
+        "after": "ew-job-card ew-job-arguments",
+        "gap": 12
+      },
+      {
+        "before": "ew-job-card ew-job-arguments",
+        "after": "ew-job-card ew-job-sections",
+        "gap": 12
+      }
+    ],
+    "toggleBorders": [
+      {
+        "action": "job_argument",
+        "id": "query",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_argument",
+        "id": "space_key",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_argument",
+        "id": "limit",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "completion",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "advanced",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [],
+    "label": "c66-b3-additional-settings-bottom-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "focus": {},
+    "sections": [
+      {
+        "id": "completion",
+        "expanded": "false",
+        "disabled": false
+      },
+      {
+        "id": "advanced",
+        "expanded": "false",
+        "disabled": false
+      }
+    ],
+    "arguments": [
+      {
+        "id": "query",
+        "text": "찾을 말\n필수\n고정값 · 설치 가이드"
+      },
+      {
+        "id": "space_key",
+        "text": "공간\n실행할 때 입력 · 담당자가 넣습니다"
+      },
+      {
+        "id": "limit",
+        "text": "개수\n고정값 · 5"
+      }
+    ],
+    "argumentGeometry": [
+      {
+        "id": "query",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      },
+      {
+        "id": "space_key",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      },
+      {
+        "id": "limit",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      }
+    ],
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리",
+      "AI 초안"
+    ],
+    "unconnectedColors": null,
+    "sectionMargins": [
+      {
+        "className": "ew-job-card ew-job-arguments",
+        "marginTop": 0
+      },
+      {
+        "className": "ew-job-section",
+        "marginTop": 0
+      }
+    ],
+    "cardGaps": [
+      {
+        "before": "ew-job-card ew-job-main",
+        "after": "ew-job-card ew-job-arguments",
+        "gap": 12
+      },
+      {
+        "before": "ew-job-card ew-job-arguments",
+        "after": "ew-job-card ew-job-sections",
+        "gap": 12
+      }
+    ],
+    "toggleBorders": [
+      {
+        "action": "job_argument",
+        "id": "query",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_argument",
+        "id": "space_key",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_argument",
+        "id": "limit",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "completion",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "advanced",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [],
+    "label": "c66-b3-tool-review-required-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "focus": {
+      "action": "job_argument",
+      "id": "query",
+      "name": ""
+    },
+    "sections": [
+      {
+        "id": "completion",
+        "expanded": "false",
+        "disabled": false
+      },
+      {
+        "id": "advanced",
+        "expanded": "false",
+        "disabled": false
+      }
+    ],
+    "arguments": [
+      {
+        "id": "query",
+        "text": "찾을 말\n필수\n고정값 · 설치 가이드"
+      },
+      {
+        "id": "space_key",
+        "text": "공간\n실행할 때 입력 · 담당자가 넣습니다"
+      },
+      {
+        "id": "limit",
+        "text": "개수\n고정값 · 5"
+      }
+    ],
+    "argumentGeometry": [
+      {
+        "id": "query",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      },
+      {
+        "id": "space_key",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      },
+      {
+        "id": "limit",
+        "normalCollapsed": true,
+        "rowHeight": 60,
+        "toggleHeight": 59,
+        "borderTop": 1
+      }
+    ],
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리",
+      "AI 초안"
+    ],
+    "unconnectedColors": null,
+    "sectionMargins": [
+      {
+        "className": "ew-job-card ew-job-arguments",
+        "marginTop": 0
+      },
+      {
+        "className": "ew-job-section",
+        "marginTop": 0
+      }
+    ],
+    "cardGaps": [
+      {
+        "before": "ew-job-card ew-job-main",
+        "after": "ew-job-card ew-job-arguments",
+        "gap": 12
+      },
+      {
+        "before": "ew-job-card ew-job-arguments",
+        "after": "ew-job-card ew-job-sections",
+        "gap": 12
+      }
+    ],
+    "toggleBorders": [
+      {
+        "action": "job_argument",
+        "id": "query",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_argument",
+        "id": "space_key",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_argument",
+        "id": "limit",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "completion",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "advanced",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [],
+    "label": "c66-b3-read-only-1366"
+  }
+]

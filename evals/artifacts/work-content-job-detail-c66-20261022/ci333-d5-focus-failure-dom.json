@@ -1,0 +1,406 @@
+{
+  "scope": "built Native UI; synthetic session and data",
+  "path": "/c/existing-chat",
+  "ready": "complete",
+  "fonts": "loaded",
+  "nativeMount": {
+    "chatPane": true,
+    "sidebarSearch": true,
+    "sidebarToggle": false
+  },
+  "sourceShell": {
+    "root": {
+      "x": 0,
+      "y": 0,
+      "bottom": 768,
+      "width": 1366,
+      "height": 768,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "relative",
+      "flex": "0 1 auto",
+      "font": "16px / 24px -apple-system, BlinkMacSystemFont, Inter, Vazirmatn, ui-sans-serif, system-ui, \"Segoe UI\", Roboto, Ubuntu, Cantarell, \"Noto Sans\", sans-serif, \"Helvetica Neue\", Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "maskImage": "none",
+      "background": "rgb(255, 255, 255)"
+    },
+    "sidebar": {
+      "x": 0,
+      "y": 0,
+      "bottom": 768,
+      "width": 256,
+      "height": 768,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "relative",
+      "flex": "0 0 auto",
+      "font": "14px / 21px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+      "maskImage": "none",
+      "background": "rgb(250, 250, 250)"
+    },
+    "panelSlot": {
+      "x": 787,
+      "y": 0,
+      "bottom": 768,
+      "width": 579,
+      "height": 768,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "relative",
+      "flex": "0 0 480px",
+      "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+      "maskImage": "none",
+      "background": "rgb(243, 243, 245)"
+    },
+    "persistentChat": true,
+    "startupGate": null
+  },
+  "viewport": [
+    1366,
+    768
+  ],
+  "active": {
+    "tag": "DIV",
+    "id": "ees-work-dialog-body"
+  },
+  "panel": {
+    "text": "업무 절차\nEMS\n업무 절차 목록\nC66 작업 상세 1366\n초안\n\nEMS · 게시 v1\n\n업무 내용\n실행 방식\n판정 규칙\n게시 기록\n단계와 작업\n/ 1 검증 단계\n작업 이름\n수행 방법\n사람이 확인\n도구로 처리\nAI 초안\n쓰는 도구\nConfluence 페이지 찾기\n\n하는 일 찾을 말과 공간으로 페이지 목록을 찾습니다.\n\n돌려주는 것 문서 목록 · 페이지 번호, 제목, 주소 · 한 번에 한 쪽\n\n도구에 넣을 값\n3개\n\n값마다 어디서 가져올지 정합니다.\n\n찾을 말\n필수\n고정값 · 설치 가이드\n공간\n실행할 때 입력 · 담당자가 넣습니다\n개수\n고정값 · 5\n완료 조건\n자동 확인 · 담당자가 목록을 확정하면 완료\n추가 설정\n수행 안내 · 직접 만든 입력 1개\n초안 r6 · 저장됨\n게시 전 확인\n초안 저장\n게시",
+    "html": "<aside id=\"ees-work-panel\" data-ees-motion-kind=\"panel-content\" tabindex=\"-1\" data-ees-work=\"\" data-ees-source-slot=\"\" aria-label=\"업무 패널\" data-ees-mode=\"author\" aria-busy=\"false\"><div id=\"ees-work-authoring-panel\" class=\"ew-scroll\"><section class=\"ew-author \" id=\"ees-work-designer\" data-ees-work=\"\" data-author-tab=\"content\"><header><strong>업무 절차</strong><small>EMS</small><button type=\"button\" data-action=\"close_panel\" aria-label=\"업무 패널 닫기\" class=\"ew-icon-button\"><img class=\"ew-icon\" src=\"/_ees14/v4/7bb4a.svg\" alt=\"\" aria-hidden=\"true\"></button></header><span class=\"ew-visually-hidden\" data-author-live=\"\" aria-live=\"polite\" aria-atomic=\"true\"></span><div class=\"ew-author-scroll\"><button type=\"button\" data-author-action=\"list\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees14/v4/9acc8.svg\" alt=\"\" aria-hidden=\"true\">업무 절차 목록</button><div class=\"ew-author-definition-head\"><div class=\"ew-author-heading\"><h2>C66 작업 상세 1366</h2><span class=\"ew-author-tag\" data-state=\"draft\" title=\"아직 게시하지 않은 편집본\">초안</span><details class=\"ew-procedure-menu\"><summary aria-label=\"절차 메뉴\"><img class=\"ew-icon\" src=\"/_ees14/v4/cb8e2.svg\" alt=\"\" aria-hidden=\"true\"></summary><div><button type=\"button\" data-author-action=\"edit_workflow\" class=\"ew-author-link\">절차 정보·분류 수정</button><button type=\"button\" data-author-action=\"copy\" class=\"ew-author-link\">다른 이름으로 저장</button></div></details></div><p class=\"ew-author-muted\">EMS · 게시 v1</p></div><nav class=\"ew-author-tabs\" aria-label=\"절차 편집\"><button type=\"button\" data-author-action=\"tab\" data-tab=\"content\" aria-selected=\"true\">업무 내용</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"schedule\" aria-selected=\"false\">실행 방식</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"rules\" aria-selected=\"false\">판정 규칙</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"history\" aria-selected=\"false\">게시 기록</button></nav><section class=\"ew-job-detail\"><header class=\"ew-job-detail-header\"><button type=\"button\" data-author-action=\"node\" data-id=\"\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees14/v4/9acc8.svg\" alt=\"\" aria-hidden=\"true\">단계와 작업</button><span>/ 1 검증 단계</span><button type=\"button\" data-author-action=\"job_menu\" data-id=\"job-0\" class=\"ew-job-menu-button\" aria-label=\"합성 작업 0 메뉴\" aria-expanded=\"false\" aria-haspopup=\"menu\"><img class=\"ew-icon\" src=\"/_ees14/v4/a953c.svg\" alt=\"\" aria-hidden=\"true\"></button></header><form id=\"ew-author-node\"><section class=\"ew-job-card ew-job-main\"><label>작업 이름<input name=\"name\" value=\"합성 작업 0\" required=\"\" maxlength=\"160\"></label><fieldset class=\"ew-job-method\" role=\"radiogroup\"><legend>수행 방법</legend><div><label><input type=\"radio\" name=\"mode\" id=\"ew-job-mode-human\" value=\"human\"><span>사람이 확인</span></label><label><input type=\"radio\" name=\"mode\" id=\"ew-job-mode-tool\" value=\"tool\" checked=\"\"><span>도구로 처리</span></label><label><input type=\"radio\" name=\"mode\" id=\"ew-job-mode-ai\" value=\"ai\"><span>AI 초안</span></label></div></fieldset><label class=\"ew-shared-picker-label\">쓰는 도구</label><details class=\"ew-shared-picker\"><summary>Confluence 페이지 찾기</summary><div class=\"ew-shared-picker-options\"><input id=\"ew-shared-picker-search\" aria-label=\"도구 이름이나 하는 일로 찾기\" placeholder=\"도구 이름이나 하는 일로 찾기\" value=\"\"><button type=\"button\" data-author-action=\"pick_job_tool\" data-id=\"\">도구 없음</button><h4>Confluence</h4><button type=\"button\" data-author-action=\"pick_job_tool\" data-id=\"managed-search_pages\" data-shared=\"true\"><strong>Confluence 페이지 찾기 <small class=\"ew-author-tag\">조회</small></strong><small>찾을 말과 공간으로 페이지 목록을 찾습니다.</small><span>v1</span></button><button type=\"button\" data-author-action=\"pick_job_tool\" data-id=\"managed-get_page\" data-shared=\"true\"><strong>Confluence 페이지 읽기 <small class=\"ew-author-tag\">조회</small></strong><small>페이지 번호로 본문과 출처를 읽습니다.</small><span>v1</span></button><p class=\"ew-author-muted\">필요한 도구가 없으면 관리자에게 요청하세요.</p></div></details><p class=\"ew-job-tool-description\"><span>하는 일</span> 찾을 말과 공간으로 페이지 목록을 찾습니다.</p><p class=\"ew-job-tool-output\"><span>돌려주는 것</span> 문서 목록 · 페이지 번호, 제목, 주소 · 한 번에 한 쪽</p></section><section class=\"ew-job-card ew-job-arguments\"><header><h3>도구에 넣을 값</h3><small>3개</small><p>값마다 어디서 가져올지 정합니다.</p></header><div class=\"ew-job-argument\" data-argument-id=\"query\"><button type=\"button\" data-author-action=\"job_argument\" data-id=\"query\" class=\"ew-job-argument-toggle\" aria-expanded=\"false\" aria-controls=\"ew-job-argument-query\"><span><strong>찾을 말 <small class=\"ew-author-tag\">필수</small></strong><small>고정값 · 설치 가이드</small></span><img class=\"ew-icon\" src=\"/_ees14/v4/f0554.svg\" alt=\"\" aria-hidden=\"true\"></button><div id=\"ew-job-argument-query\" class=\"ew-job-disclosure\" hidden=\"\"></div></div><div class=\"ew-job-argument\" data-argument-id=\"space_key\"><button type=\"button\" data-author-action=\"job_argument\" data-id=\"space_key\" class=\"ew-job-argument-toggle\" aria-expanded=\"false\" aria-controls=\"ew-job-argument-space_key\"><span><strong>공간 </strong><small>실행할 때 입력 · 담당자가 넣습니다</small></span><img class=\"ew-icon\" src=\"/_ees14/v4/f0554.svg\" alt=\"\" aria-hidden=\"true\"></button><div id=\"ew-job-argument-space_key\" class=\"ew-job-disclosure\" hidden=\"\"></div></div><div class=\"ew-job-argument\" data-argument-id=\"limit\"><button type=\"button\" data-author-action=\"job_argument\" data-id=\"limit\" class=\"ew-job-argument-toggle\" aria-expanded=\"false\" aria-controls=\"ew-job-argument-limit\"><span><strong>개수 </strong><small>고정값 · 5</small></span><img class=\"ew-icon\" src=\"/_ees14/v4/f0554.svg\" alt=\"\" aria-hidden=\"true\"></button><div id=\"ew-job-argument-limit\" class=\"ew-job-disclosure\" hidden=\"\"></div></div></section><div class=\"ew-job-card ew-job-sections\"><section class=\"ew-job-section\"><button type=\"button\" data-author-action=\"job_section\" data-id=\"completion\" class=\"ew-job-section-toggle\" aria-expanded=\"false\" aria-controls=\"ew-job-section-completion\"><img class=\"ew-icon\" src=\"/_ees14/v4/f0554.svg\" alt=\"\" aria-hidden=\"true\"><strong>완료 조건</strong><small>자동 확인 · 담당자가 목록을 확정하면 완료</small></button><div id=\"ew-job-section-completion\" class=\"ew-job-disclosure\" hidden=\"\"><div class=\"ew-job-section-content\"><h4>항상 자동으로 확인</h4><p>도구가 정상 응답했는지, 지금 쓸 수 있는 도구·버전인지, 실행한 사람에게 권한이 있는지, 결과를 끝까지 받았는지 봅니다.</p><label class=\"ew-author-inline\"><input type=\"checkbox\" name=\"human_required\" checked=\"\">자동 확인을 통과해도 담당자가 확인해야 완료</label><p>찾은 문서가 있으면 이 설정과 관계없이 담당자가 목록을 확정합니다. 한 번에 한 쪽만 받기 때문입니다.</p></div></div></section><section class=\"ew-job-section\"><button type=\"button\" data-author-action=\"job_section\" data-id=\"advanced\" class=\"ew-job-section-toggle\" aria-expanded=\"false\" aria-controls=\"ew-job-section-advanced\"><img class=\"ew-icon\" src=\"/_ees14/v4/f0554.svg\" alt=\"\" aria-hidden=\"true\"><strong>추가 설정</strong><small>수행 안내 · 직접 만든 입력 1개</small></button><div id=\"ew-job-section-advanced\" class=\"ew-job-disclosure\" hidden=\"\"><div class=\"ew-job-section-content\"><label>담당<select name=\"assignee\"><option value=\"\" selected=\"\">담당자 미지정</option><option value=\"user:fixture-admin\">Fixture Administrator</option><option value=\"group:c66-readers\">합성 조회 팀</option></select></label><fieldset><legend>앞 작업</legend><p class=\"ew-author-muted\">다른 작업이 없습니다.</p></fieldset><fieldset><legend>적용 조건</legend><div class=\"ew-author-fields\"><label>조건 종류<select name=\"condition_kind\"><option value=\"\" selected=\"\">모든 공장</option><option value=\"attribute\">공장 속성</option><option value=\"factory\">특정 공장</option></select></label><label>공장 속성 ID<input name=\"condition_field\" value=\"\"></label><label>비교<select name=\"condition_op\"><option value=\"eq\" selected=\"\">같음</option><option value=\"ne\">다름</option><option value=\"in\">목록에 포함</option><option value=\"not_in\">목록에 없음</option><option value=\"gt\">초과</option><option value=\"gte\">이상</option><option value=\"lt\">미만</option><option value=\"lte\">이하</option></select></label><label>비교 값<input name=\"condition_value\" value=\"\"></label><label>값 형식<select name=\"condition_type\"><option value=\"text\" selected=\"\">문자</option><option value=\"number\">숫자</option><option value=\"boolean\">예 / 아니오</option><option value=\"list\">목록 · JSON 배열</option></select></label></div></fieldset><fieldset><legend>기한 · 예약 실행</legend><label>기한 설명<input name=\"deadline_notes\" value=\"\"></label><label>기한 계산의 날짜 입력<select name=\"deadline_input\"><option value=\"\" selected=\"\">계산 안 함</option></select></label><label>기준 날짜에서 일수<input name=\"deadline_offset\" value=\"\" type=\"number\" min=\"-3660\" max=\"3660\"></label><label>기한 계산 시간대<input name=\"deadline_timezone\" value=\"\" placeholder=\"예: Asia/Seoul\"></label><label>날짜 기준<select name=\"deadline_calendar\"><option value=\"calendar\" selected=\"\">달력 날짜</option><option value=\"business\">영업일 · 공휴일 달력 필요</option></select></label><label>예약 실행 시점<select name=\"trigger_kind\"><option value=\"\" selected=\"\">선행 조건 충족 후</option><option value=\"offset\">회차 시작에서 지정 시간 후</option><option value=\"at\">지정한 시각</option></select></label><label>회차 시작 후 · 초<input name=\"trigger_offset\" value=\"\" type=\"number\" min=\"0\" max=\"31622400\"></label><label>예약 시각 · 시간대 포함<input name=\"trigger_at\" value=\"\" placeholder=\"ISO 날짜·시각과 시간대\"></label></fieldset><fieldset><legend>읽기 실패 시 다시 읽기</legend><div class=\"ew-author-fields\"><label>추가 재조회 횟수 · 0이면 사용 안 함<input name=\"read_retry_count\" value=\"0\" type=\"number\" min=\"0\" max=\"3\"></label><label>전체 조회·재조회 제한 · 초<input name=\"read_retry_deadline\" value=\"\" type=\"number\" min=\"1\" max=\"300\"></label></div><p class=\"ew-author-note\">허용된 읽기 기능의 명확한 실패만 첫 조회부터 지정한 시간과 추가 횟수 안에서 재조회합니다. 부분 결과·결과 불명·변경 요청은 자동 재실행하지 않으며 매번 현재 권한을 확인합니다. 각 시도와 기존 결과는 별도로 보존합니다.</p></fieldset><label>수행 안내<textarea name=\"instructions\">합성 자료로 저장·판정 경계를 검증합니다.</textarea></label><label>설명<textarea name=\"description\"></textarea></label><fieldset><legend>스킬 · 지침</legend><p class=\"ew-author-muted\">현재 권한으로 사용할 수 있는 스킬을 연결합니다. 스킬이 없어도 사람 작업을 작성할 수 있습니다.</p><p class=\"ew-author-muted\">사용 가능한 스킬이 없습니다. 기존 스킬 관리에서 작성할 수 있습니다.</p></fieldset><fieldset><legend>직접 만든 입력할 값</legend><table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody><tr><td><button type=\"button\" data-author-action=\"input_edit\" data-id=\"manual-note\">직접 만든 메모</button></td><td>텍스트</td><td>미연결</td><td>이번 진행 건</td><td><button type=\"button\" data-author-action=\"input_delete\" data-id=\"manual-note\" aria-label=\"직접 만든 메모 삭제\">삭제</button></td></tr></tbody></table><button type=\"button\" data-author-action=\"input_add\" class=\"ew-author-link\" data-mutation=\"\"><img class=\"ew-icon\" src=\"/_ees14/v4/7d31f.svg\" alt=\"\" aria-hidden=\"true\">값 추가</button></fieldset></div></div></section></div></form></section></div><footer><small data-author-status=\"\">초안 r6 · 저장됨</small><button type=\"button\" data-author-action=\"validate\" data-mutation=\"\">게시 전 확인</button><button type=\"button\" data-author-action=\"save\" data-mutation=\"\" class=\"ew-primary\">초안 저장</button><button type=\"button\" data-author-action=\"publish\" data-mutation=\"\">게시</button></footer></section></div></aside>"
+  },
+  "authoring": {
+    "text": "업무 절차\nEMS\n업무 절차 목록\nC66 작업 상세 1366\n초안\n\nEMS · 게시 v1\n\n업무 내용\n실행 방식\n판정 규칙\n게시 기록\n단계와 작업\n/ 1 검증 단계\n작업 이름\n수행 방법\n사람이 확인\n도구로 처리\nAI 초안\n쓰는 도구\nConfluence 페이지 찾기\n\n하는 일 찾을 말과 공간으로 페이지 목록을 찾습니다.\n\n돌려주는 것 문서 목록 · 페이지 번호, 제목, 주소 · 한 번에 한 쪽\n\n도구에 넣을 값\n3개\n\n값마다 어디서 가져올지 정합니다.\n\n찾을 말\n필수\n고정값 · 설치 가이드\n공간\n실행할 때 입력 · 담당자가 넣습니다\n개수\n고정값 · 5\n완료 조건\n자동 확인 · 담당자가 목록을 확정하면 완료\n추가 설정\n수행 안내 · 직접 만든 입력 1개\n초안 r6 · 저장됨\n게시 전 확인\n초안 저장\n게시",
+    "html": "<section class=\"ew-author \" id=\"ees-work-designer\" data-ees-work=\"\" data-author-tab=\"content\"><header><strong>업무 절차</strong><small>EMS</small><button type=\"button\" data-action=\"close_panel\" aria-label=\"업무 패널 닫기\" class=\"ew-icon-button\"><img class=\"ew-icon\" src=\"/_ees14/v4/7bb4a.svg\" alt=\"\" aria-hidden=\"true\"></button></header><span class=\"ew-visually-hidden\" data-author-live=\"\" aria-live=\"polite\" aria-atomic=\"true\"></span><div class=\"ew-author-scroll\"><button type=\"button\" data-author-action=\"list\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees14/v4/9acc8.svg\" alt=\"\" aria-hidden=\"true\">업무 절차 목록</button><div class=\"ew-author-definition-head\"><div class=\"ew-author-heading\"><h2>C66 작업 상세 1366</h2><span class=\"ew-author-tag\" data-state=\"draft\" title=\"아직 게시하지 않은 편집본\">초안</span><details class=\"ew-procedure-menu\"><summary aria-label=\"절차 메뉴\"><img class=\"ew-icon\" src=\"/_ees14/v4/cb8e2.svg\" alt=\"\" aria-hidden=\"true\"></summary><div><button type=\"button\" data-author-action=\"edit_workflow\" class=\"ew-author-link\">절차 정보·분류 수정</button><button type=\"button\" data-author-action=\"copy\" class=\"ew-author-link\">다른 이름으로 저장</button></div></details></div><p class=\"ew-author-muted\">EMS · 게시 v1</p></div><nav class=\"ew-author-tabs\" aria-label=\"절차 편집\"><button type=\"button\" data-author-action=\"tab\" data-tab=\"content\" aria-selected=\"true\">업무 내용</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"schedule\" aria-selected=\"false\">실행 방식</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"rules\" aria-selected=\"false\">판정 규칙</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"history\" aria-selected=\"false\">게시 기록</button></nav><section class=\"ew-job-detail\"><header class=\"ew-job-detail-header\"><button type=\"button\" data-author-action=\"node\" data-id=\"\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees14/v4/9acc8.svg\" alt=\"\" aria-hidden=\"true\">단계와 작업</button><span>/ 1 검증 단계</span><button type=\"button\" data-author-action=\"job_menu\" data-id=\"job-0\" class=\"ew-job-menu-button\" aria-label=\"합성 작업 0 메뉴\" aria-expanded=\"false\" aria-haspopup=\"menu\"><img class=\"ew-icon\" src=\"/_ees14/v4/a953c.svg\" alt=\"\" aria-hidden=\"true\"></button></header><form id=\"ew-author-node\"><section class=\"ew-job-card ew-job-main\"><label>작업 이름<input name=\"name\" value=\"합성 작업 0\" required=\"\" maxlength=\"160\"></label><fieldset class=\"ew-job-method\" role=\"radiogroup\"><legend>수행 방법</legend><div><label><input type=\"radio\" name=\"mode\" id=\"ew-job-mode-human\" value=\"human\"><span>사람이 확인</span></label><label><input type=\"radio\" name=\"mode\" id=\"ew-job-mode-tool\" value=\"tool\" checked=\"\"><span>도구로 처리</span></label><label><input type=\"radio\" name=\"mode\" id=\"ew-job-mode-ai\" value=\"ai\"><span>AI 초안</span></label></div></fieldset><label class=\"ew-shared-picker-label\">쓰는 도구</label><details class=\"ew-shared-picker\"><summary>Confluence 페이지 찾기</summary><div class=\"ew-shared-picker-options\"><input id=\"ew-shared-picker-search\" aria-label=\"도구 이름이나 하는 일로 찾기\" placeholder=\"도구 이름이나 하는 일로 찾기\" value=\"\"><button type=\"button\" data-author-action=\"pick_job_tool\" data-id=\"\">도구 없음</button><h4>Confluence</h4><button type=\"button\" data-author-action=\"pick_job_tool\" data-id=\"managed-search_pages\" data-shared=\"true\"><strong>Confluence 페이지 찾기 <small class=\"ew-author-tag\">조회</small></strong><small>찾을 말과 공간으로 페이지 목록을 찾습니다.</small><span>v1</span></button><button type=\"button\" data-author-action=\"pick_job_tool\" data-id=\"managed-get_page\" data-shared=\"true\"><strong>Confluence 페이지 읽기 <small class=\"ew-author-tag\">조회</small></strong><small>페이지 번호로 본문과 출처를 읽습니다.</small><span>v1</span></button><p class=\"ew-author-muted\">필요한 도구가 없으면 관리자에게 요청하세요.</p></div></details><p class=\"ew-job-tool-description\"><span>하는 일</span> 찾을 말과 공간으로 페이지 목록을 찾습니다.</p><p class=\"ew-job-tool-output\"><span>돌려주는 것</span> 문서 목록 · 페이지 번호, 제목, 주소 · 한 번에 한 쪽</p></section><section class=\"ew-job-card ew-job-arguments\"><header><h3>도구에 넣을 값</h3><small>3개</small><p>값마다 어디서 가져올지 정합니다.</p></header><div class=\"ew-job-argument\" data-argument-id=\"query\"><button type=\"button\" data-author-action=\"job_argument\" data-id=\"query\" class=\"ew-job-argument-toggle\" aria-expanded=\"false\" aria-controls=\"ew-job-argument-query\"><span><strong>찾을 말 <small class=\"ew-author-tag\">필수</small></strong><small>고정값 · 설치 가이드</small></span><img class=\"ew-icon\" src=\"/_ees14/v4/f0554.svg\" alt=\"\" aria-hidden=\"true\"></button><div id=\"ew-job-argument-query\" class=\"ew-job-disclosure\" hidden=\"\"></div></div><div class=\"ew-job-argument\" data-argument-id=\"space_key\"><button type=\"button\" data-author-action=\"job_argument\" data-id=\"space_key\" class=\"ew-job-argument-toggle\" aria-expanded=\"false\" aria-controls=\"ew-job-argument-space_key\"><span><strong>공간 </strong><small>실행할 때 입력 · 담당자가 넣습니다</small></span><img class=\"ew-icon\" src=\"/_ees14/v4/f0554.svg\" alt=\"\" aria-hidden=\"true\"></button><div id=\"ew-job-argument-space_key\" class=\"ew-job-disclosure\" hidden=\"\"></div></div><div class=\"ew-job-argument\" data-argument-id=\"limit\"><button type=\"button\" data-author-action=\"job_argument\" data-id=\"limit\" class=\"ew-job-argument-toggle\" aria-expanded=\"false\" aria-controls=\"ew-job-argument-limit\"><span><strong>개수 </strong><small>고정값 · 5</small></span><img class=\"ew-icon\" src=\"/_ees14/v4/f0554.svg\" alt=\"\" aria-hidden=\"true\"></button><div id=\"ew-job-argument-limit\" class=\"ew-job-disclosure\" hidden=\"\"></div></div></section><div class=\"ew-job-card ew-job-sections\"><section class=\"ew-job-section\"><button type=\"button\" data-author-action=\"job_section\" data-id=\"completion\" class=\"ew-job-section-toggle\" aria-expanded=\"false\" aria-controls=\"ew-job-section-completion\"><img class=\"ew-icon\" src=\"/_ees14/v4/f0554.svg\" alt=\"\" aria-hidden=\"true\"><strong>완료 조건</strong><small>자동 확인 · 담당자가 목록을 확정하면 완료</small></button><div id=\"ew-job-section-completion\" class=\"ew-job-disclosure\" hidden=\"\"><div class=\"ew-job-section-content\"><h4>항상 자동으로 확인</h4><p>도구가 정상 응답했는지, 지금 쓸 수 있는 도구·버전인지, 실행한 사람에게 권한이 있는지, 결과를 끝까지 받았는지 봅니다.</p><label class=\"ew-author-inline\"><input type=\"checkbox\" name=\"human_required\" checked=\"\">자동 확인을 통과해도 담당자가 확인해야 완료</label><p>찾은 문서가 있으면 이 설정과 관계없이 담당자가 목록을 확정합니다. 한 번에 한 쪽만 받기 때문입니다.</p></div></div></section><section class=\"ew-job-section\"><button type=\"button\" data-author-action=\"job_section\" data-id=\"advanced\" class=\"ew-job-section-toggle\" aria-expanded=\"false\" aria-controls=\"ew-job-section-advanced\"><img class=\"ew-icon\" src=\"/_ees14/v4/f0554.svg\" alt=\"\" aria-hidden=\"true\"><strong>추가 설정</strong><small>수행 안내 · 직접 만든 입력 1개</small></button><div id=\"ew-job-section-advanced\" class=\"ew-job-disclosure\" hidden=\"\"><div class=\"ew-job-section-content\"><label>담당<select name=\"assignee\"><option value=\"\" selected=\"\">담당자 미지정</option><option value=\"user:fixture-admin\">Fixture Administrator</option><option value=\"group:c66-readers\">합성 조회 팀</option></select></label><fieldset><legend>앞 작업</legend><p class=\"ew-author-muted\">다른 작업이 없습니다.</p></fieldset><fieldset><legend>적용 조건</legend><div class=\"ew-author-fields\"><label>조건 종류<select name=\"condition_kind\"><option value=\"\" selected=\"\">모든 공장</option><option value=\"attribute\">공장 속성</option><option value=\"factory\">특정 공장</option></select></label><label>공장 속성 ID<input name=\"condition_field\" value=\"\"></label><label>비교<select name=\"condition_op\"><option value=\"eq\" selected=\"\">같음</option><option value=\"ne\">다름</option><option value=\"in\">목록에 포함</option><option value=\"not_in\">목록에 없음</option><option value=\"gt\">초과</option><option value=\"gte\">이상</option><option value=\"lt\">미만</option><option value=\"lte\">이하</option></select></label><label>비교 값<input name=\"condition_value\" value=\"\"></label><label>값 형식<select name=\"condition_type\"><option value=\"text\" selected=\"\">문자</option><option value=\"number\">숫자</option><option value=\"boolean\">예 / 아니오</option><option value=\"list\">목록 · JSON 배열</option></select></label></div></fieldset><fieldset><legend>기한 · 예약 실행</legend><label>기한 설명<input name=\"deadline_notes\" value=\"\"></label><label>기한 계산의 날짜 입력<select name=\"deadline_input\"><option value=\"\" selected=\"\">계산 안 함</option></select></label><label>기준 날짜에서 일수<input name=\"deadline_offset\" value=\"\" type=\"number\" min=\"-3660\" max=\"3660\"></label><label>기한 계산 시간대<input name=\"deadline_timezone\" value=\"\" placeholder=\"예: Asia/Seoul\"></label><label>날짜 기준<select name=\"deadline_calendar\"><option value=\"calendar\" selected=\"\">달력 날짜</option><option value=\"business\">영업일 · 공휴일 달력 필요</option></select></label><label>예약 실행 시점<select name=\"trigger_kind\"><option value=\"\" selected=\"\">선행 조건 충족 후</option><option value=\"offset\">회차 시작에서 지정 시간 후</option><option value=\"at\">지정한 시각</option></select></label><label>회차 시작 후 · 초<input name=\"trigger_offset\" value=\"\" type=\"number\" min=\"0\" max=\"31622400\"></label><label>예약 시각 · 시간대 포함<input name=\"trigger_at\" value=\"\" placeholder=\"ISO 날짜·시각과 시간대\"></label></fieldset><fieldset><legend>읽기 실패 시 다시 읽기</legend><div class=\"ew-author-fields\"><label>추가 재조회 횟수 · 0이면 사용 안 함<input name=\"read_retry_count\" value=\"0\" type=\"number\" min=\"0\" max=\"3\"></label><label>전체 조회·재조회 제한 · 초<input name=\"read_retry_deadline\" value=\"\" type=\"number\" min=\"1\" max=\"300\"></label></div><p class=\"ew-author-note\">허용된 읽기 기능의 명확한 실패만 첫 조회부터 지정한 시간과 추가 횟수 안에서 재조회합니다. 부분 결과·결과 불명·변경 요청은 자동 재실행하지 않으며 매번 현재 권한을 확인합니다. 각 시도와 기존 결과는 별도로 보존합니다.</p></fieldset><label>수행 안내<textarea name=\"instructions\">합성 자료로 저장·판정 경계를 검증합니다.</textarea></label><label>설명<textarea name=\"description\"></textarea></label><fieldset><legend>스킬 · 지침</legend><p class=\"ew-author-muted\">현재 권한으로 사용할 수 있는 스킬을 연결합니다. 스킬이 없어도 사람 작업을 작성할 수 있습니다.</p><p class=\"ew-author-muted\">사용 가능한 스킬이 없습니다. 기존 스킬 관리에서 작성할 수 있습니다.</p></fieldset><fieldset><legend>직접 만든 입력할 값</legend><table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody><tr><td><button type=\"button\" data-author-action=\"input_edit\" data-id=\"manual-note\">직접 만든 메모</button></td><td>텍스트</td><td>미연결</td><td>이번 진행 건</td><td><button type=\"button\" data-author-action=\"input_delete\" data-id=\"manual-note\" aria-label=\"직접 만든 메모 삭제\">삭제</button></td></tr></tbody></table><button type=\"button\" data-author-action=\"input_add\" class=\"ew-author-link\" data-mutation=\"\"><img class=\"ew-icon\" src=\"/_ees14/v4/7d31f.svg\" alt=\"\" aria-hidden=\"true\">값 추가</button></fieldset></div></div></section></div></form></section></div><footer><small data-author-status=\"\">초안 r6 · 저장됨</small><button type=\"button\" data-author-action=\"validate\" data-mutation=\"\">게시 전 확인</button><button type=\"button\" data-author-action=\"save\" data-mutation=\"\" class=\"ew-primary\">초안 저장</button><button type=\"button\" data-author-action=\"publish\" data-mutation=\"\">게시</button></footer></section>"
+  },
+  "nativeTheme": {
+    "modalSurface": null,
+    "selectedSettingsTab": null,
+    "valves": null,
+    "valveInput": null
+  },
+  "nativeMenu": {
+    "draftReady": true,
+    "settingsTabs": null,
+    "returnBar": null,
+    "workspace": null,
+    "workspaceNav": null,
+    "workspaceTabs": [],
+    "search": null,
+    "items": [
+      {
+        "text": "업무 절차4",
+        "button": {
+          "x": 8,
+          "y": 200,
+          "bottom": 236,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "500 14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgb(238, 243, 249)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 210,
+              "bottom": 226,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "500 14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "업무 절차",
+            "layout": {
+              "x": 42,
+              "y": 207,
+              "bottom": 229,
+              "width": 180.375,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "500 14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SMALL",
+            "text": "4",
+            "layout": {
+              "x": 232.375,
+              "y": 209,
+              "bottom": 227,
+              "width": 6.625,
+              "height": 18,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 1 auto",
+              "font": "12px / 18px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      },
+      {
+        "text": "도구10",
+        "button": {
+          "x": 8,
+          "y": 237,
+          "bottom": 273,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 247,
+              "bottom": 263,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "도구",
+            "layout": {
+              "x": 42,
+              "y": 244,
+              "bottom": 266,
+              "width": 173.75,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SMALL",
+            "text": "10",
+            "layout": {
+              "x": 225.75,
+              "y": 246,
+              "bottom": 264,
+              "width": 13.25,
+              "height": 18,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 1 auto",
+              "font": "12px / 18px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      },
+      {
+        "text": "공장·접근 범위",
+        "button": {
+          "x": 8,
+          "y": 309,
+          "bottom": 345,
+          "width": 239,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 319,
+              "bottom": 335,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "공장·접근 범위",
+            "layout": {
+              "x": 42,
+              "y": 316,
+              "bottom": 338,
+              "width": 197,
+              "height": 22,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      }
+    ],
+    "captions": [
+      {
+        "text": "업무 만들기",
+        "layout": {
+          "x": 8,
+          "y": 174,
+          "bottom": 200,
+          "width": 239,
+          "height": 26,
+          "display": "block",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "500 12px / 16px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "text": "관리자만",
+        "layout": {
+          "x": 8,
+          "y": 273,
+          "bottom": 309,
+          "width": 239,
+          "height": 36,
+          "display": "block",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "500 12px / 16px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      }
+    ]
+  },
+  "layout": {
+    "panel": {
+      "x": 787,
+      "y": 0,
+      "width": 579,
+      "height": 768,
+      "clientWidth": 579,
+      "scrollWidth": 579,
+      "clientHeight": 768,
+      "scrollHeight": 768,
+      "scrollTop": 0,
+      "overflowY": "visible",
+      "background": "rgb(243, 243, 245)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "0px",
+      "borderRadius": "0px",
+      "minHeight": "0px"
+    },
+    "scroll": {
+      "x": 787,
+      "y": 48,
+      "width": 579,
+      "height": 661,
+      "clientWidth": 579,
+      "scrollWidth": 579,
+      "clientHeight": 661,
+      "scrollHeight": 902,
+      "scrollTop": 3,
+      "overflowY": "auto",
+      "background": "rgba(0, 0, 0, 0)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "0px",
+      "borderRadius": "0px",
+      "minHeight": "0px"
+    },
+    "radio": null,
+    "selected": null,
+    "unselected": null,
+    "name": null,
+    "footer": {
+      "x": 787,
+      "y": 709,
+      "width": 579,
+      "height": 59,
+      "clientWidth": 579,
+      "scrollWidth": 579,
+      "clientHeight": 58,
+      "scrollHeight": 58,
+      "scrollTop": 0,
+      "overflowY": "visible",
+      "background": "rgb(255, 255, 255)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "1px 0px 0px",
+      "borderRadius": "0px",
+      "minHeight": "auto"
+    },
+    "back": null,
+    "questionGroup": null,
+    "firstQuestion": null,
+    "cardGaps": []
+  },
+  "nativeDraft": {
+    "prompt": "",
+    "files": [],
+    "selectedToolIds": [],
+    "selectedSkillIds": [],
+    "selectedFilterIds": [],
+    "imageGenerationEnabled": false,
+    "webSearchEnabled": false,
+    "codeInterpreterEnabled": false
+  },
+  "nativeInput": {
+    "text": "\n",
+    "html": "<div contenteditable=\"true\" translate=\"no\" class=\"tiptap ProseMirror\" tabindex=\"0\" id=\"chat-input\" aria-label=\"업무를 물어보거나, 필요한 작업을 요청하세요\"><p data-placeholder=\"업무를 물어보거나, 필요한 작업을 요청하세요\" class=\"is-empty is-editor-empty\"><br class=\"ProseMirror-trailingBreak\"></p></div>"
+  },
+  "native_search": null
+}

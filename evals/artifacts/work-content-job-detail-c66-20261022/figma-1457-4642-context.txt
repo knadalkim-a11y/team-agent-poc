@@ -1,0 +1,306 @@
+const assetPathPrefix = "https://www.figma.com/api/mcp/asset/744ef8ad-45e8-414b-a866-a86562eac003";
+const imgIconChevronDown = `${assetPathPrefix}/e1049.svg`;
+const imgIconChevronRight = `${assetPathPrefix}/f0554.svg`;
+const imgIconChevronDown1 = `${assetPathPrefix}/f17e6.svg`;
+
+type ComponentProps = {
+  className?: string;
+  propValue?: "켬" | "끔" | "쓸 수 없음";
+};
+
+function Component({ className, propValue = "켬" }: ComponentProps) {
+  const is = propValue === "끔";
+  const is1 = propValue === "쓸 수 없음";
+  return <div className={className || `border-solid relative rounded-[8px] size-[16px] ${is1 ? "bg-[var(--ees-surface-muted,#ececef)] border-[1.5px] border-[var(--ees-icon-faint,#a3a5ac)]" : is ? "bg-[var(--ees-surface-default,white)] border-[1.5px] border-[var(--ees-line-control,#d5d6da)]" : "bg-[var(--ees-surface-default,white)] border-5 border-[var(--ees-brand-solid,#2f5f98)]"}`} id={is1 ? "node-1454_4469" : is ? "node-1454_4468" : "node-1454_4467"} />;
+}
+
+type Component1Props = {
+  className?: string;
+  propValue?: "펼침" | "확인 오류";
+};
+
+function Component1({ className, propValue = "펼침" }: Component1Props) {
+  const is = propValue === "확인 오류";
+  return (
+    <div className={className || "bg-[var(--ees-surface-default,white)] border-[var(--ees-line-divider,#e6e6e9)] border-solid border-t content-stretch flex gap-[10px] h-[60px] items-center pl-[14px] pr-[12px] py-[12px] relative w-[440px]"} id={is ? "node-1454_4395" : "node-1454_4377"}>
+      <div className="content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px overflow-clip relative" id={is ? "node-1454_4396" : "node-1454_4378"} data-name="Text">
+        <div className="content-stretch flex gap-[6px] items-center overflow-clip relative shrink-0" id={is ? "node-1454_4397" : "node-1454_4379"} data-name="Name line">
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] whitespace-nowrap" id={is ? "node-1454_4398" : "node-1454_4380"}>
+            {is ? "개수" : "공간"}
+          </p>
+        </div>
+        <p className={`[word-break:break-word] font-["Noto_Sans_KR:Regular"] font-normal leading-[18px] min-w-full relative shrink-0 text-[12px] w-[min-content] ${is ? "text-[color:var(--ees-status-danger,#bf3a2b)]" : "text-[color:var(--ees-text-secondary,#5c5e65)]"}`} id={is ? "node-1454_4401" : "node-1454_4383"}>
+          {is ? "고정값 · 0 · 게시 전 확인: 1 이상이어야 합니다" : "고정값 · EES"}
+        </p>
+      </div>
+      {propValue === "펼침" && (
+        <div className="relative shrink-0 size-[14px]" data-node-id="1454:4384" data-name="Icon/chevron-down">
+          <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown} />
+        </div>
+      )}
+      {is && (
+        <div className="relative shrink-0 size-[14px]" data-node-id="1454:4402" data-name="Icon/chevron-right">
+          <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronRight} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+type Component2Props = {
+  className?: string;
+  propValue?: "끔";
+};
+
+function Component2({ className, propValue = "끔" }: Component2Props) {
+  return <div className={className || "bg-[var(--ees-surface-default,white)] border-[1.5px] border-[var(--ees-line-control,#d5d6da)] border-solid relative rounded-[4px] size-[16px]"} data-node-id="1454:4479" />;
+}
+
+export default function B32A() {
+  return (
+    <div className="bg-[var(--surface\/panel,#f3f3f5)] border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex flex-col gap-[16px] items-start pb-[24px] pt-[20px] px-[20px] relative size-full" data-node-id="1457:4642" data-name="B3-2a · 작업 상세 · 넣을 값 편집기 견본 (가·나·다)">
+      <p className="[word-break:break-word] font-['Noto_Sans_KR:Bold'] font-bold leading-[20px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.07px] whitespace-nowrap" data-node-id="1457:4643">
+        편집기 견본 · 넣을 값 한 줄을 펼친 모습
+      </p>
+      <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-full relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-[min-content]" data-node-id="1457:4644">
+        한 번에 한 줄만 펼칩니다. 고른 내용은 바로 초안에 반영되고, 저장은 아래 초안 저장으로 합니다.
+      </p>
+      <div className="content-stretch flex flex-col gap-[8px] items-start overflow-clip relative shrink-0 w-full" data-node-id="1457:4645" data-name="(가) 실행할 때 입력 · 다음 진행 건에도 그대로 쓰기">
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="1457:4646">
+          (가) 실행할 때 입력 · 다음 진행 건에도 그대로 쓰기
+        </p>
+        <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex flex-col items-start overflow-clip relative rounded-[8px] shrink-0 w-full" data-node-id="1457:4647" data-name="Card">
+          <div className="bg-[var(--ees-surface-default,white)] border-[var(--ees-line-divider,#e6e6e9)] border-solid border-t content-stretch flex gap-[10px] h-[60px] items-center pl-[14px] pr-[12px] py-[12px] relative shrink-0 w-full" data-node-id="1457:4648" data-name="작업 상세 / 입력 줄">
+            <div className="content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px overflow-clip relative" data-node-id="I1457:4648;1454:4378" data-name="Text">
+              <div className="content-stretch flex gap-[6px] items-center overflow-clip relative shrink-0" data-node-id="I1457:4648;1454:4379" data-name="Name line">
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] whitespace-nowrap" data-node-id="I1457:4648;1454:4380">
+                  찾을 말
+                </p>
+              </div>
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-full relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-[min-content]" data-node-id="I1457:4648;1454:4383">
+                실행할 때 입력 · 담당자가 넣습니다
+              </p>
+            </div>
+            <div className="relative shrink-0 size-[14px]" data-node-id="I1457:4648;1454:4384" data-name="Icon/chevron-down">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown} />
+            </div>
+          </div>
+          <div className="bg-[var(--ees-surface-default,white)] content-stretch flex flex-col gap-[12px] items-start overflow-clip pb-[14px] pt-[2px] px-[14px] relative shrink-0 w-full" data-node-id="1457:4656" data-name="Editor / 찾을 말">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="1457:4657">
+              이 값은 어디서 가져오나요?
+            </p>
+            <div className="content-stretch flex gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="1457:4658" data-name="Option / 실행할 때 입력">
+              <div className="content-stretch flex items-start overflow-clip pt-[3px] relative shrink-0" data-node-id="1457:4659" data-name="Control">
+                <Component className="bg-[var(--ees-surface-default,white)] border-5 border-[var(--ees-brand-solid,#2f5f98)] border-solid relative rounded-[8px] shrink-0 size-[16px]" />
+              </div>
+              <div className="content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px overflow-clip relative" data-node-id="1457:4661" data-name="Text">
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] w-full" data-node-id="1457:4662">
+                  실행할 때 입력
+                </p>
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-full" data-node-id="1457:4663">
+                  진행 건마다 담당자가 넣습니다
+                </p>
+                <div className="content-stretch flex flex-col items-start overflow-clip pt-[6px] relative shrink-0 w-full" data-node-id="1457:4664" data-name="Keep">
+                  <div className="content-stretch flex gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="1457:4665" data-name="Option / 한 번 넣으면 다음 진행 건에도 그대로 씁니다">
+                    <div className="content-stretch flex items-start overflow-clip pt-[3px] relative shrink-0" data-node-id="1457:4666" data-name="Control">
+                      <Component2 className="bg-[var(--ees-surface-default,white)] border-[1.5px] border-[var(--ees-line-control,#d5d6da)] border-solid relative rounded-[4px] shrink-0 size-[16px]" />
+                    </div>
+                    <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px overflow-clip relative" data-node-id="1457:4668" data-name="Text">
+                      <p className="font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] w-full" data-node-id="1457:4669">
+                        한 번 넣으면 다음 진행 건에도 그대로 씁니다
+                      </p>
+                      <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-full" data-node-id="1457:4670">
+                        업무 설정 값이 됩니다. 공장마다 다르게 둘 수 있습니다.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="content-stretch flex gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="1457:4671" data-name="Option / 고정값">
+              <div className="content-stretch flex items-start overflow-clip pt-[3px] relative shrink-0" data-node-id="1457:4672" data-name="Control">
+                <Component className="bg-[var(--ees-surface-default,white)] border-[1.5px] border-[var(--ees-line-control,#d5d6da)] border-solid relative rounded-[8px] shrink-0 size-[16px]" propValue="끔" />
+              </div>
+              <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px overflow-clip relative" data-node-id="1457:4674" data-name="Text">
+                <p className="font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] w-full" data-node-id="1457:4675">
+                  고정값
+                </p>
+                <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-full" data-node-id="1457:4676">
+                  이 절차에 적어 둡니다. 바꾸려면 다시 게시합니다.
+                </p>
+              </div>
+            </div>
+            <div className="content-stretch flex gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="1457:4677" data-name="Option / 앞 작업 결과">
+              <div className="content-stretch flex items-start overflow-clip pt-[3px] relative shrink-0" data-node-id="1457:4678" data-name="Control">
+                <Component className="bg-[var(--ees-surface-muted,#ececef)] border-[1.5px] border-[var(--ees-icon-faint,#a3a5ac)] border-solid relative rounded-[8px] shrink-0 size-[16px]" propValue="쓸 수 없음" />
+              </div>
+              <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px overflow-clip relative text-[color:var(--ees-text-tertiary,#6f717a)]" data-node-id="1457:4680" data-name="Text">
+                <p className="font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full" data-node-id="1457:4681">
+                  앞 작업 결과
+                </p>
+                <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] w-full" data-node-id="1457:4682">
+                  이 도구는 아직 앞 작업의 결과를 받을 수 없습니다. 다음 단계에서 지원합니다.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="content-stretch flex flex-col gap-[8px] items-start overflow-clip relative shrink-0 w-full" data-node-id="1457:4683" data-name="(나) 고정값 · 숫자 · 게시 전 확인에서 걸린 경우">
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="1457:4684">
+          (나) 고정값 · 숫자 · 게시 전 확인에서 걸린 경우
+        </p>
+        <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex flex-col items-start overflow-clip relative rounded-[8px] shrink-0 w-full" data-node-id="1457:4685" data-name="Card">
+          <Component1 className="bg-[var(--ees-surface-default,white)] border-[var(--ees-line-divider,#e6e6e9)] border-solid border-t content-stretch flex gap-[10px] h-[60px] items-center pl-[14px] pr-[12px] py-[12px] relative shrink-0 w-full" propValue="확인 오류" />
+          <div className="bg-[var(--ees-surface-default,white)] content-stretch flex flex-col gap-[12px] items-start overflow-clip pb-[14px] pt-[2px] px-[14px] relative shrink-0 w-full" data-node-id="1457:4694" data-name="Editor / 개수">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="1457:4695">
+              이 값은 어디서 가져오나요?
+            </p>
+            <div className="content-stretch flex gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="1457:4696" data-name="Option / 실행할 때 입력">
+              <div className="content-stretch flex items-start overflow-clip pt-[3px] relative shrink-0" data-node-id="1457:4697" data-name="Control">
+                <Component className="bg-[var(--ees-surface-default,white)] border-[1.5px] border-[var(--ees-line-control,#d5d6da)] border-solid relative rounded-[8px] shrink-0 size-[16px]" propValue="끔" />
+              </div>
+              <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px overflow-clip relative" data-node-id="1457:4699" data-name="Text">
+                <p className="font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] w-full" data-node-id="1457:4700">
+                  실행할 때 입력
+                </p>
+                <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-full" data-node-id="1457:4701">
+                  진행 건마다 담당자가 넣습니다
+                </p>
+              </div>
+            </div>
+            <div className="content-stretch flex gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="1457:4702" data-name="Option / 고정값">
+              <div className="content-stretch flex items-start overflow-clip pt-[3px] relative shrink-0" data-node-id="1457:4703" data-name="Control">
+                <Component className="bg-[var(--ees-surface-default,white)] border-5 border-[var(--ees-brand-solid,#2f5f98)] border-solid relative rounded-[8px] shrink-0 size-[16px]" />
+              </div>
+              <div className="content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px overflow-clip relative" data-node-id="1457:4705" data-name="Text">
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] w-full" data-node-id="1457:4706">
+                  고정값
+                </p>
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-full" data-node-id="1457:4707">
+                  이 절차에 적어 둡니다. 바꾸려면 다시 게시합니다.
+                </p>
+                <div className="content-stretch flex flex-col gap-[4px] items-start overflow-clip pt-[4px] relative shrink-0 w-full" data-node-id="1457:4708" data-name="Fixed value">
+                  <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-status-danger,#bf3a2b)] border-solid content-stretch flex items-center overflow-clip px-[12px] py-[8px] relative rounded-[6px] shrink-0 w-full" data-node-id="1457:4709" data-name="Input">
+                    <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] whitespace-nowrap" data-node-id="1457:4710">
+                      0
+                    </p>
+                  </div>
+                  <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-status-danger,#bf3a2b)] w-full" data-node-id="1457:4711">
+                    1 이상의 숫자를 넣어 주세요. (게시 전 확인 결과)
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="content-stretch flex flex-col gap-[8px] items-start overflow-clip relative shrink-0 w-full" data-node-id="1457:4712" data-name="(다) 앞 작업 결과 · 이전 방식 도구에서만 · 사람이 확정한 목록">
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="1457:4713">
+          (다) 앞 작업 결과 · 이전 방식 도구에서만 · 사람이 확정한 목록
+        </p>
+        <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex flex-col items-start overflow-clip relative rounded-[8px] shrink-0 w-full" data-node-id="1457:4714" data-name="Card">
+          <div className="bg-[var(--ees-surface-default,white)] border-[var(--ees-line-divider,#e6e6e9)] border-solid border-t content-stretch flex gap-[10px] h-[60px] items-center pl-[14px] pr-[12px] py-[12px] relative shrink-0 w-full" data-node-id="1457:4715" data-name="작업 상세 / 입력 줄">
+            <div className="content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px overflow-clip relative" data-node-id="I1457:4715;1454:4378" data-name="Text">
+              <div className="content-stretch flex gap-[6px] items-center overflow-clip relative shrink-0" data-node-id="I1457:4715;1454:4379" data-name="Name line">
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] whitespace-nowrap" data-node-id="I1457:4715;1454:4380">
+                  CR 번호 목록
+                </p>
+              </div>
+              <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] min-w-full relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-[min-content]" data-node-id="I1457:4715;1454:4383">
+                앞 작업 결과 · CR 목록 만들기
+              </p>
+            </div>
+            <div className="relative shrink-0 size-[14px]" data-node-id="I1457:4715;1454:4384" data-name="Icon/chevron-down">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown} />
+            </div>
+          </div>
+          <div className="bg-[var(--ees-surface-default,white)] content-stretch flex flex-col gap-[12px] items-start overflow-clip pb-[14px] pt-[2px] px-[14px] relative shrink-0 w-full" data-node-id="1457:4723" data-name="Editor / CR 번호 목록">
+            <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] whitespace-nowrap" data-node-id="1457:4724">
+              이 값은 어디서 가져오나요?
+            </p>
+            <div className="content-stretch flex gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="1457:4725" data-name="Option / 실행할 때 입력">
+              <div className="content-stretch flex items-start overflow-clip pt-[3px] relative shrink-0" data-node-id="1457:4726" data-name="Control">
+                <Component className="bg-[var(--ees-surface-default,white)] border-[1.5px] border-[var(--ees-line-control,#d5d6da)] border-solid relative rounded-[8px] shrink-0 size-[16px]" propValue="끔" />
+              </div>
+              <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px overflow-clip relative" data-node-id="1457:4728" data-name="Text">
+                <p className="font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] w-full" data-node-id="1457:4729">
+                  실행할 때 입력
+                </p>
+                <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-full" data-node-id="1457:4730">
+                  진행 건마다 담당자가 넣습니다
+                </p>
+              </div>
+            </div>
+            <div className="content-stretch flex gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="1458:20774" data-name="Option / 고정값">
+              <div className="content-stretch flex items-start overflow-clip pt-[3px] relative shrink-0" data-node-id="1458:20775" data-name="Control">
+                <Component className="bg-[var(--ees-surface-default,white)] border-[1.5px] border-[var(--ees-line-control,#d5d6da)] border-solid relative rounded-[8px] shrink-0 size-[16px]" propValue="끔" />
+              </div>
+              <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px overflow-clip relative" data-node-id="1458:20777" data-name="Text">
+                <p className="font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] w-full" data-node-id="1458:20778">
+                  고정값
+                </p>
+                <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-full" data-node-id="1458:20779">
+                  이 절차에 적어 둡니다. 바꾸려면 다시 게시합니다.
+                </p>
+              </div>
+            </div>
+            <div className="content-stretch flex gap-[10px] items-start overflow-clip relative shrink-0 w-full" data-node-id="1457:4731" data-name="Option / 앞 작업 결과">
+              <div className="content-stretch flex items-start overflow-clip pt-[3px] relative shrink-0" data-node-id="1457:4732" data-name="Control">
+                <Component className="bg-[var(--ees-surface-default,white)] border-5 border-[var(--ees-brand-solid,#2f5f98)] border-solid relative rounded-[8px] shrink-0 size-[16px]" />
+              </div>
+              <div className="content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px overflow-clip relative" data-node-id="1457:4734" data-name="Text">
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] w-full" data-node-id="1457:4735">
+                  앞 작업 결과
+                </p>
+                <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-full" data-node-id="1457:4736">
+                  앞 작업에서 사람이 확정한 목록의 번호만 넘깁니다.
+                </p>
+                <div className="content-stretch flex flex-col gap-[4px] items-start overflow-clip pt-[4px] relative shrink-0 w-full" data-node-id="1457:4737" data-name="Prior result">
+                  <div className="bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex gap-[8px] items-center overflow-clip px-[12px] py-[8px] relative rounded-[6px] shrink-0 w-full" data-node-id="1457:4738" data-name="Select">
+                    <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] whitespace-nowrap" data-node-id="1457:4739">
+                      CR 목록 만들기 · 확정한 목록
+                    </p>
+                    <div className="flex-[1_0_0] h-px min-w-px relative" data-node-id="1457:4742" data-name="Flex" />
+                    <div className="relative shrink-0 size-[14px]" data-node-id="1457:4740" data-name="Icon/chevron-down">
+                      <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown1} />
+                    </div>
+                  </div>
+                  <p className="[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] w-full" data-node-id="1457:4743">
+                    목록을 다시 확정하면 이 작업도 다시 확인합니다. 선행 작업으로 연결된 작업만 고를 수 있습니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="absolute bg-[var(--ees-brand-solid,#2f5f98)] border-2 border-[var(--ees-text-inverse,white)] border-solid content-stretch flex items-center justify-center left-[-39px] rounded-[14px] size-[28px] top-[487px]" data-node-id="1459:4829" data-name="명세 번호 10">
+        <p className="[word-break:break-word] font-['Noto_Sans_KR:Bold'] font-bold leading-[normal] relative shrink-0 text-[14px] text-[color:var(--ees-text-inverse,white)] text-center whitespace-nowrap" data-node-id="I1459:4829;1367:19994">
+          10
+        </p>
+      </div>
+    </div>
+  );
+}
+
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+
+These styles are contained in the design: EES v4/Section: Font(family: "Noto Sans KR", style: Bold, size: 14, weight: 700, lineHeight: 20, letterSpacing: -0.5), EES v4/Meta: Font(family: "Noto Sans KR", style: Regular, size: 12, weight: 400, lineHeight: 18, letterSpacing: 0), EES v4/Label: Font(family: "Noto Sans KR", style: Medium, size: 12, weight: 500, lineHeight: 16, letterSpacing: 0), EES v4/Body Medium: Font(family: "Noto Sans KR", style: Medium, size: 14, weight: 500, lineHeight: 22, letterSpacing: -0.30000001192092896), EES v4/Body: Font(family: "Noto Sans KR", style: Regular, size: 14, weight: 400, lineHeight: 22, letterSpacing: -0.30000001192092896).
+
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## 명세 / 번호
+**Node ID:** 1367:19993
+
+명세 카드의 요소 번호. 화면 위에 얹어 요소별 동작 표와 연결한다. 숫자만 쓴다.
+
+The generated code contains image and SVG URL constants, e.g. const image = `${assetPathPrefix}/<asset file name>`, where assetPathPrefix is declared once at the top of the code and every asset URL interpolates it. These URLs are temporary download sources and expire after 7 days. Download each asset into the project with curl -L, then replace its URL in the generated code with a reference to the downloaded asset. Never use the temporary URLs as runtime image sources.

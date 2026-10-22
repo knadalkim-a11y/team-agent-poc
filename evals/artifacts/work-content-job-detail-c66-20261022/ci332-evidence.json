@@ -1,0 +1,293 @@
+{
+  "head": "ed817548ca19fec620a09dcc0c981c348a3ad5a1",
+  "ci_merge_commit": "582c7fdaca24ae1085ce98eeb15c44c4bd20757e",
+  "run_id": 39753379041,
+  "run_number": 332,
+  "job_id": 119742445095,
+  "job_counts": {
+    "success": 36,
+    "failure": 2,
+    "cancelled": 1,
+    "skipped": 1
+  },
+  "native_compose": {
+    "total": 83,
+    "passed": 82,
+    "failed": 1
+  },
+  "authoring": {
+    "total": 29,
+    "passed": 28,
+    "failed": 1
+  },
+  "artifact": {
+    "id": 12414919507,
+    "bytes": 19506679,
+    "sha256": "b322ecb3bc75c786a323488141c7e05179a18324be805a43eeeee127732fe5cc",
+    "zip_crc_failure": null
+  },
+  "environment": {
+    "os": "ubuntu-24.04",
+    "python": "3.11.17",
+    "chrome": "155.0.8059.84"
+  },
+  "failure": {
+    "test": "test_c66_job_methods_arguments_d5_and_read_only_at_480_and_1366",
+    "line": 190,
+    "condition": "completion button Enter after Escape must reopen",
+    "focus_assertion_before_enter": "passed",
+    "timeout_seconds": 9,
+    "native_helper_missing": "Enter text/character event; keyDown and keyUp only",
+    "chromium_source": "https://chromium.googlesource.com/chromium/src/+/e8324e4457466252853f8f6b7731de6bca797e2a/third_party/blink/renderer/core/html/html_element.cc",
+    "remaining_confirmation": "actual keypress charCode13/click and same reopen assertion in next Native run"
+  },
+  "visual_scope": {
+    "stage_viewports": [
+      480,
+      1366
+    ],
+    "stage_capture_nodes": {
+      "e1-a-stage-count-0": [
+        "1524:1253"
+      ],
+      "e1-a-stage-count-3": [
+        "1524:1253"
+      ],
+      "e1-b-expanded": [
+        "1524:1332"
+      ],
+      "e1-c1-stage-edit": [
+        "1524:1431"
+      ],
+      "e1-c2-stage-add": [
+        "1524:1527"
+      ],
+      "e1-example5-job-add": [
+        "1524:1610"
+      ],
+      "e1-example3-stage-delete": [
+        "1524:1757"
+      ],
+      "e1-example8-stage-moved": [
+        "1524:1867"
+      ],
+      "c66-example16-stage-menu": [
+        "1546:115",
+        "1462:4887"
+      ],
+      "c66-stage-last-menu": [
+        "1546:115",
+        "1462:4887"
+      ],
+      "c66-stage-saved-factory": [
+        "864:8706"
+      ],
+      "c66-stage-factory-reset": [
+        "864:8706"
+      ],
+      "procedure-visual-content-empty": [
+        "1546:23"
+      ]
+    },
+    "new_job_detail_viewports": [
+      1366
+    ],
+    "new_job_detail_states_reached": 7,
+    "new_480_not_reached": true,
+    "fixed_first_findings": [
+      "card gap12",
+      "section margin0",
+      "flat disclosure rows",
+      "unconnected notice attention color"
+    ],
+    "remaining_findings": [
+      "unconnected border rule targeted borderless summary; actual border belongs to parent details",
+      "normal argument row69px versus component60px",
+      "completion checkbox and stage/job add buttons need scrolled bottom captures"
+    ]
+  },
+  "files": [
+    {
+      "path": "ci332-e1-a-stage-count-0-480.png",
+      "bytes": 46607,
+      "sha256": "bed2206955c3e6ba704c54d6f4418b548e5fe619a5a213999ff40c3eed063a77"
+    },
+    {
+      "path": "ci332-e1-a-stage-count-0-1366.png",
+      "bytes": 82427,
+      "sha256": "88b566b045390fff04e07bc4a6f75ba646ffb9d5dfffeaeb337fef7399fd9096"
+    },
+    {
+      "path": "ci332-e1-a-stage-count-3-480.png",
+      "bytes": 55994,
+      "sha256": "35a0eb959f561eda96f470b9cdd87616fd0d8835aefc0748dd89d334b7d06c8e"
+    },
+    {
+      "path": "ci332-e1-a-stage-count-3-1366.png",
+      "bytes": 92187,
+      "sha256": "8a86b14eac9010ba81570ec991e0838b8caa0dc09c5f2ce399c4e535c873d48c"
+    },
+    {
+      "path": "ci332-e1-b-expanded-480.png",
+      "bytes": 64870,
+      "sha256": "933eba4c205a3a2e0f71d7119984ab9e0607203fc1306426204da0eb83a83f28"
+    },
+    {
+      "path": "ci332-e1-b-expanded-1366.png",
+      "bytes": 101562,
+      "sha256": "d3427006f08402d9a7d8e77a4d7abbf91ed9936a338cc6f2d32e732c5ed57f20"
+    },
+    {
+      "path": "ci332-e1-c1-stage-edit-480.png",
+      "bytes": 64090,
+      "sha256": "f15ab24d3ac3ee9b6b9310807ff55f263f43ca6f0902df50b357db11e5b6e52a"
+    },
+    {
+      "path": "ci332-e1-c1-stage-edit-1366.png",
+      "bytes": 101321,
+      "sha256": "24c8ecc34942db5d0d8922f295e1d830fc03edda3e3e44efc63cd5784e094fd6"
+    },
+    {
+      "path": "ci332-e1-c2-stage-add-480.png",
+      "bytes": 65475,
+      "sha256": "74c86f0dda41388f52e405e2332faac0f845a8c27be41fde4ba69a22551ed385"
+    },
+    {
+      "path": "ci332-e1-c2-stage-add-1366.png",
+      "bytes": 102140,
+      "sha256": "526ee54302ebd42e29945b74a737a68302417ad82481438251ad4ee459a70c67"
+    },
+    {
+      "path": "ci332-e1-example5-job-add-480.png",
+      "bytes": 66376,
+      "sha256": "b9177589f4251c630655fc480c7a876c8f9c1e52d7222b055566043983068dd0"
+    },
+    {
+      "path": "ci332-e1-example5-job-add-1366.png",
+      "bytes": 103518,
+      "sha256": "35e12b8bb7b92af65c7d22afafb606a4ebe0bb635787e1fff519a1c7ff3ec29a"
+    },
+    {
+      "path": "ci332-e1-example3-stage-delete-480.png",
+      "bytes": 75879,
+      "sha256": "4ff615476f7c545b74ce5e31b29fedef3d3f8fa905c246fa7b6dbe2b59d9d3bd"
+    },
+    {
+      "path": "ci332-e1-example3-stage-delete-1366.png",
+      "bytes": 123191,
+      "sha256": "255d4c68af55cef5470eea02e83fa84389105941441ac3595e2c1d0c55caf8dd"
+    },
+    {
+      "path": "ci332-e1-example8-stage-moved-480.png",
+      "bytes": 61954,
+      "sha256": "51c55c62e76799b762925e838b26975a26192714c31181bc0eafd710d86229b5"
+    },
+    {
+      "path": "ci332-e1-example8-stage-moved-1366.png",
+      "bytes": 98586,
+      "sha256": "43dccea189839ffed2bb2c45b728c9088a1d7f0dff6d32614007e5c28d2e6679"
+    },
+    {
+      "path": "ci332-c66-example16-stage-menu-480.png",
+      "bytes": 65666,
+      "sha256": "33957e02e8219210eeedce771061ef8d7777e21c046e804f4996538d925653bb"
+    },
+    {
+      "path": "ci332-c66-example16-stage-menu-1366.png",
+      "bytes": 102615,
+      "sha256": "4b89c8a038af322b157ce363d9aaf5ccaaa5adcac6bf0925801484ff03014965"
+    },
+    {
+      "path": "ci332-c66-stage-last-menu-480.png",
+      "bytes": 64505,
+      "sha256": "8978529ef83946dbc69b1f50f9efa13eb8c94f9cff99e34e01e386a1ddaa9bf9"
+    },
+    {
+      "path": "ci332-c66-stage-last-menu-1366.png",
+      "bytes": 103433,
+      "sha256": "72e9bfa0c77618bad9fdc19570c0945d9ea93e14f36f381619305ede0d8fb818"
+    },
+    {
+      "path": "ci332-c66-stage-saved-factory-480.png",
+      "bytes": 49552,
+      "sha256": "7fae01d6fdef2f6cc3b8c5b443e806ba50b15a4b8bafd9842fd0023448e464af"
+    },
+    {
+      "path": "ci332-c66-stage-saved-factory-1366.png",
+      "bytes": 65847,
+      "sha256": "50bcac0e20c1c9b30ba38edf279402d0f63d3e77d07a4c2cff1f025b82f1218b"
+    },
+    {
+      "path": "ci332-c66-stage-factory-reset-480.png",
+      "bytes": 44277,
+      "sha256": "e6a6b30d1a2a21841d8fc21a64bb259011a42f9e8ceadd4db58bc04e35fee5b9"
+    },
+    {
+      "path": "ci332-c66-stage-factory-reset-1366.png",
+      "bytes": 65340,
+      "sha256": "603a0dfee70673e813241a52ca5441ab7954e94a9611dc4bcac1bc2dde0cc3e2"
+    },
+    {
+      "path": "ci332-procedure-visual-content-empty-480.png",
+      "bytes": 34870,
+      "sha256": "35d222023d2a485ae8439f441a6837e54520d606739a785f26dba5c3cbebb698"
+    },
+    {
+      "path": "ci332-procedure-visual-content-empty-1366.png",
+      "bytes": 51632,
+      "sha256": "2f6f9c628e33879a9b49efbb390875c3087edefed0cdc1c241447fabb1d4f113"
+    },
+    {
+      "path": "ci332-c66-b3-tool-unconnected-1366.png",
+      "bytes": 93573,
+      "sha256": "2d99d6a23f73efc2270ddb6a838dd823bd89203ffe72be3089dd18195150062f"
+    },
+    {
+      "path": "ci332-c66-b3-completion-1366.png",
+      "bytes": 102405,
+      "sha256": "4b46a2debea1401affba736de220ea1bf7b41799a1c872044fbc5d462d9ce820"
+    },
+    {
+      "path": "ci332-enter-failure-dom.json",
+      "bytes": 39777,
+      "sha256": "e44599f02d74cea924d611812f0b8b6ac067f7ec665513ceba6ef95a3ca85597"
+    },
+    {
+      "path": "ci332-enter-failure.json",
+      "bytes": 29225,
+      "sha256": "33f167fbf2c211564d2dff022005c7d33ef55395f35f10e67be48e2fa5527b76"
+    },
+    {
+      "path": "ci332-enter-failure.png",
+      "bytes": 95457,
+      "sha256": "b7e762241f297143caf714d6f7f7fb8adea73b57f3b489c9f7280b0e9a34fd1f"
+    },
+    {
+      "path": "ci332-c66-job-detail-observations.json",
+      "bytes": 13155,
+      "sha256": "e15293acac9dc113443113227ab7a35a49192cdd442e12a3d395cd50f734fa58"
+    },
+    {
+      "path": "ci332-e1-content-variants-observations.json",
+      "bytes": 142791,
+      "sha256": "8483b3a6249935be0b1c49e01aa61b27531893aeca1b02ee7c1ef8f83fbf8eb5"
+    },
+    {
+      "path": "ci332-e1-concurrent-inline-observations.json",
+      "bytes": 2990,
+      "sha256": "c9e940bef186c2132b4d862293f0559b21bfa4e09a8ddb18c35973607445cdcf"
+    },
+    {
+      "path": "ci332-authoring-results.json",
+      "bytes": 7992,
+      "sha256": "02fdd666110924518ad305063dad33398c174440a3855a2a73e0512ae4706c90"
+    },
+    {
+      "path": "ci332-native-compose.log.gz",
+      "bytes": 19301,
+      "sha256": "81998345844e364deffacf4f55edfaafe0033c9ca3621270456d353a4b3fecbc",
+      "original_bytes": 88693,
+      "original_sha256": "0937381a0a68e72f555c89857c5b40e0a901dce7e16129052916c9d13e24887d"
+    }
+  ]
+}

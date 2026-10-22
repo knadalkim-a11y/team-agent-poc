@@ -1,0 +1,7 @@
+....................Executing <Task finished name='Task-87' coro=<ScheduleContracts.test_proposal_stage_deletion_cleans_deadline_before_periodic_publication() done, defined at /workspace/scratch/690395b7dc56/c66/tests/test_ees_work_figma_schedule.py:115> result=None created at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py:100> took 0.123 seconds
+.......Executing <Task finished name='Task-143' coro=<ScheduleContracts.test_stage_deletion_cleans_deadline_before_periodic_publication() done, defined at /workspace/scratch/690395b7dc56/c66/tests/test_ees_work_figma_schedule.py:76> result=None created at /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py:100> took 0.106 seconds
+...
+----------------------------------------------------------------------
+Ran 30 tests in 3.802s
+
+OK

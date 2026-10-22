@@ -1,0 +1,258 @@
+[
+  {
+    "file": "figma-1454-4364-context.txt",
+    "bytes": 15028,
+    "sha256": "baaf1863bed0da2ca1d7c1f7b5f2f8eb64f354ca634ab591bb33c8518b866fd6"
+  },
+  {
+    "file": "figma-1454-4364.png",
+    "bytes": 71356,
+    "sha256": "a25987a20ae4b39fa1c9a11952822b1cf2d7fb66d1e885421d0fc6b228090f6d",
+    "width": 941,
+    "height": 1024
+  },
+  {
+    "file": "figma-1456-4557-context.txt",
+    "bytes": 35967,
+    "sha256": "054fe7605afb4863d44e8ae137fd95917c08fd83ca92183bab8a26d0bdcd6cd1"
+  },
+  {
+    "file": "figma-1456-4557.png",
+    "bytes": 64842,
+    "sha256": "135b889d6a8a7e0e208b7487e8b9d1f48d5402be039c488a0edd2546b6db2d15",
+    "width": 558,
+    "height": 958
+  },
+  {
+    "file": "figma-1457-4495-context.txt",
+    "bytes": 38698,
+    "sha256": "ad7dd5f10fa28f13617fd484f7bf765ebc8f268178ebeb6a0ff7664f3de3d838"
+  },
+  {
+    "file": "figma-1457-4495.png",
+    "bytes": 63989,
+    "sha256": "800992c4b8c115a4524ac63095c25b5de8974826759ee53eae984d6078ff725c",
+    "width": 421,
+    "height": 1024
+  },
+  {
+    "file": "figma-1457-4642-context.txt",
+    "bytes": 30523,
+    "sha256": "020f8794f0d485aebdbdc397922d91ca2755961bcf040835e5ce54e665c7c729"
+  },
+  {
+    "file": "figma-1457-4642.png",
+    "bytes": 82333,
+    "sha256": "820b759e243f73a58251a35d4b9258d19e6716c93d9981ebd6ce41c5514c7c0b",
+    "width": 461,
+    "height": 1024
+  },
+  {
+    "file": "figma-1458-4720-context.txt",
+    "bytes": 24186,
+    "sha256": "6dbf01dc8fb8971ba23ed28a1a34ccf28021e05709f827f35a1d45b7b832e6a4"
+  },
+  {
+    "file": "figma-1458-4720.png",
+    "bytes": 49530,
+    "sha256": "515270cf72911bd49ee410b4f162220c99a2d814db33f68105ed4f350718ae29",
+    "width": 520,
+    "height": 806
+  },
+  {
+    "file": "figma-1458-4801-context.txt",
+    "bytes": 23938,
+    "sha256": "2043b9379c1b010508bddec6f28681df48faf2562a7d3e32d73ef8682e0de397"
+  },
+  {
+    "file": "figma-1458-4801.png",
+    "bytes": 41366,
+    "sha256": "fecf2a81eaebc48676bd7f7faa4b0a4625599b7f09e1d1dd8c60f952ebc5065a",
+    "width": 520,
+    "height": 698
+  },
+  {
+    "file": "figma-1458-4880-context.txt",
+    "bytes": 30205,
+    "sha256": "8374ef8c79ebe0f8b7f5a4f8ea9632d4892c5390e8c4a6e48c1886d5516d450a"
+  },
+  {
+    "file": "figma-1458-4880.png",
+    "bytes": 63655,
+    "sha256": "0df364632b71ac572bcf89ee65122d2149e04ad789ac9d330fbc899c7ba72ce0",
+    "width": 520,
+    "height": 924
+  },
+  {
+    "file": "figma-1462-4887-context.txt",
+    "bytes": 4913,
+    "sha256": "4d07ec9f9845b48a25ea897fc47a6a95da8ea29cf34c61df8cfabfa94c7384ec"
+  },
+  {
+    "file": "figma-1462-4887.png",
+    "bytes": 6116,
+    "sha256": "63ebc91a0e929ba32dc56de2638d81cd3b8eaf420395e84dc73ad142d1b74738",
+    "width": 472,
+    "height": 148
+  },
+  {
+    "file": "figma-1524-1253-context.txt",
+    "bytes": 28331,
+    "sha256": "037eac766c8d23f8f9f6c512171d3c2f3eec7db5ae1408f5042d7ebfeaf58227"
+  },
+  {
+    "file": "figma-1524-1253.png",
+    "bytes": 45240,
+    "sha256": "d69235c49fbc9b87029a45c2b151166e67a3e0f5eb1ea22c9dcf76c91ce0989e",
+    "width": 520,
+    "height": 688
+  },
+  {
+    "file": "figma-1524-1332-context.txt",
+    "bytes": 38000,
+    "sha256": "34d9b691366ba9a318651c3946092e788ebb616fefa7a852c1ef8def78bcf192"
+  },
+  {
+    "file": "figma-1524-1332.png",
+    "bytes": 57621,
+    "sha256": "00366312c3c4d2898aed8a5e51ce42eeb2602696365232bedf4525833a8b4645",
+    "width": 592,
+    "height": 913
+  },
+  {
+    "file": "figma-1524-1431-context.txt",
+    "bytes": 37931,
+    "sha256": "911833eea14cd832e1ffc96dbca5462a21c29e9e254477687170638a2cdf45e3"
+  },
+  {
+    "file": "figma-1524-1431.png",
+    "bytes": 58377,
+    "sha256": "72f795b5a2a3903e7b64c874be5ed8955c02315c08ecb0f79ab5c6481b2cc54e",
+    "width": 459,
+    "height": 1024
+  },
+  {
+    "file": "figma-1524-1527-context.txt",
+    "bytes": 28371,
+    "sha256": "1c362f44ccb28f128b70cd07b0cb3d6f0062a48a2febeb35a87564b5406aeaec"
+  },
+  {
+    "file": "figma-1524-1527.png",
+    "bytes": 48978,
+    "sha256": "f497d32796904f5829c36fba3494045d0c0a4c392fa4a3d19ef3bd7ee3c0cfe5",
+    "width": 520,
+    "height": 816
+  },
+  {
+    "file": "figma-1524-1610-context.txt",
+    "bytes": 35689,
+    "sha256": "2e2e89ad92e39d609004fea5d62e6e0adebe5b23916874787e884b8d46012260"
+  },
+  {
+    "file": "figma-1524-1610.png",
+    "bytes": 37822,
+    "sha256": "955d41a8f663f6054b4d66e504937510cb2ebe56d811244bc5f305e8103c93c6",
+    "width": 520,
+    "height": 722
+  },
+  {
+    "file": "figma-1524-1757-context.txt",
+    "bytes": 8285,
+    "sha256": "a4dd7add20b4524b011a4753b6fd500cd231eae48e6e09ea1b77774f9cde000d"
+  },
+  {
+    "file": "figma-1524-1757.png",
+    "bytes": 59724,
+    "sha256": "7605f22fab93da2af462bc0cb6af3b84cf0efb169098c57e10053556ff6f1a06",
+    "width": 440,
+    "height": 526
+  },
+  {
+    "file": "figma-1524-1867-context.txt",
+    "bytes": 14093,
+    "sha256": "0068f61eddee14592e7a1acb07129af65fabeeb51d8031a81c3c9a9efc18058e"
+  },
+  {
+    "file": "figma-1524-1867.png",
+    "bytes": 27283,
+    "sha256": "699914e9810fd0cff2ccfa5dd835cb1446988d4f65d9cac1aa6cb391afb70f57",
+    "width": 440,
+    "height": 423
+  },
+  {
+    "file": "figma-1546-115-context.txt",
+    "bytes": 15938,
+    "sha256": "4f81f51a510a5b76298b6d174d088177ad1a9f34814731ac15de8a7054eaf6ae"
+  },
+  {
+    "file": "figma-1546-115.png",
+    "bytes": 30600,
+    "sha256": "f2541348b40658ac26dd067ffc39713c44ab5d85c63f80e61e1f1a145e2828cd",
+    "width": 440,
+    "height": 407
+  },
+  {
+    "file": "figma-1546-23-context.txt",
+    "bytes": 16235,
+    "sha256": "b206cb68d01ed549e908a67a142c7ee466aa059a077076130effd754411d698e"
+  },
+  {
+    "file": "figma-1546-23.png",
+    "bytes": 25062,
+    "sha256": "bf26b91a9fc6909a498eb7ee7b581ef0fe0766884cc04a628e9274e86da40457",
+    "width": 480,
+    "height": 486
+  },
+  {
+    "file": "figma-1548-2-context.txt",
+    "bytes": 35360,
+    "sha256": "9c96ee101e583e14b5a881719ab9edc14c033f0e8b1fce2a70fbdd6cee2e8ad4"
+  },
+  {
+    "file": "figma-1548-2.png",
+    "bytes": 68615,
+    "sha256": "544f151fe5c3dfe3709ec9b8bfca546e8066f4e20adc982369d875e3a4f0171f",
+    "width": 449,
+    "height": 1024
+  },
+  {
+    "file": "figma-c66-manifest.json",
+    "bytes": 9478,
+    "sha256": "7e0a040d60f3cb8c2cc55c1ef26af661a54b3c081a30e5c9d46eeabea1802313"
+  },
+  {
+    "file": "figma-f17e6-select-chevron.svg",
+    "bytes": 230,
+    "sha256": "fa3409ab86e4be66d8f463645a1ff9ac71203ba4752b714f0593385101c963c7"
+  },
+  {
+    "file": "figma-icon-vectors.json",
+    "bytes": 2331,
+    "sha256": "9181b333e09a6a68bc2a01098d352e87c9703ee24329ae36161c6d45aadc0765"
+  },
+  {
+    "file": "figma-job-texts.json",
+    "bytes": 51326,
+    "sha256": "b8d13f5fcfa23c56c176b2345da11dbfd2e6dc9fcd5cc80e08b9cbdb1a4fdc95"
+  },
+  {
+    "file": "figma-select-chevron-export.json",
+    "bytes": 342,
+    "sha256": "011d4d836ff386c0916db8d7b98b68246e278ef31909c53ea9a12e670bf9e713"
+  },
+  {
+    "file": "figma-stage-geometry.json",
+    "bytes": 4487,
+    "sha256": "4adfb6ef35c6a42e590bf374fe6dc4f099378c90496fab98546ed4fa1d72e336"
+  },
+  {
+    "file": "figma-stage-texts-0.json",
+    "bytes": 12656,
+    "sha256": "bb958da9ba236d7b3098205f11c0151de48986c89eabe25392a8705120f1ffac"
+  },
+  {
+    "file": "figma-stage-texts-1.json",
+    "bytes": 57295,
+    "sha256": "498f28a2806dafe1064153e563fb8f75ee83aead5180f5b56ba73c2621bc63e9"
+  }
+]

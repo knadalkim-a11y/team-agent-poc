@@ -1,0 +1,208 @@
+const assetPathPrefix = "https://www.figma.com/api/mcp/asset/6e5d11d3-34a8-4d66-bf9f-2ab236900277";
+const imgIconCheck = `${assetPathPrefix}/30f27.svg`;
+const img = `${assetPathPrefix}/f7078.svg`;
+const img1 = `${assetPathPrefix}/04add.svg`;
+const imgStateAction = `${assetPathPrefix}/9c63b.svg`;
+const imgStateFailed = `${assetPathPrefix}/44a96.svg`;
+const imgStateDone = `${assetPathPrefix}/f4cb1.svg`;
+const imgGlyph = `${assetPathPrefix}/304a4.svg`;
+const imgIconChevronRight = `${assetPathPrefix}/f0554.svg`;
+const imgIconChevronDown = `${assetPathPrefix}/e1049.svg`;
+
+type ComponentProps = {
+  className?: string;
+  propValue?: "켬" | "끔";
+};
+
+function Component({ className, propValue = "켬" }: ComponentProps) {
+  const is = propValue === "끔";
+  return (
+    <div className={className || `relative rounded-[4px] size-[16px] ${is ? "bg-[var(--ees-surface-default,white)] border-[1.5px] border-[var(--ees-line-control,#d5d6da)] border-solid" : "bg-[var(--ees-brand-solid,#2f5f98)] content-stretch flex items-center justify-center"}`} id={is ? "node-1454_4479" : "node-1454_4476"}>
+      {propValue === "켬" && (
+        <div className="relative shrink-0 size-[12px]" data-node-id="1454:4477" data-name="Icon/check">
+          <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconCheck} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+type Component1Props = {
+  className?: string;
+  propValue?: "켬" | "끔";
+};
+
+function Component1({ className, propValue = "켬" }: Component1Props) {
+  const is = propValue === "끔";
+  return (
+    <div className={className || "h-[18px] relative w-[32px]"} id={is ? "node-1454_4473" : "node-1454_4471"}>
+      <img alt="" className="absolute block inset-0 max-w-none size-full" src={is ? img1 : img} />
+    </div>
+  );
+}
+
+type Component2Props = {
+  className?: string;
+  propValue?: "켬" | "끔" | "쓸 수 없음";
+};
+
+function Component2({ className, propValue = "켬" }: Component2Props) {
+  const is = propValue === "끔";
+  const is1 = propValue === "쓸 수 없음";
+  return <div className={className || `border-solid relative rounded-[8px] size-[16px] ${is1 ? "bg-[var(--ees-surface-muted,#ececef)] border-[1.5px] border-[var(--ees-icon-faint,#a3a5ac)]" : is ? "bg-[var(--ees-surface-default,white)] border-[1.5px] border-[var(--ees-line-control,#d5d6da)]" : "bg-[var(--ees-surface-default,white)] border-5 border-[var(--ees-brand-solid,#2f5f98)]"}`} id={is1 ? "node-1454_4469" : is ? "node-1454_4468" : "node-1454_4467"} />;
+}
+
+type StatusGlyphV4Props = {
+  className?: string;
+  state?: "Action" | "Failed" | "Done";
+};
+
+function StatusGlyphV4({ className, state = "Action" }: StatusGlyphV4Props) {
+  const isDone = state === "Done";
+  const isFailed = state === "Failed";
+  return (
+    <div className={className || "relative size-[16px]"} id={isDone ? "node-746_634" : isFailed ? "node-746_623" : "node-746_619"}>
+      <img alt="" className="absolute block inset-0 max-w-none size-full" src={isDone ? imgStateDone : isFailed ? imgStateFailed : imgStateAction} />
+    </div>
+  );
+}
+
+type Component3Props = {
+  className?: string;
+  propValue?: "바로 완료" | "담당자 확인" | "조건 미충족" | "실행 실패";
+};
+
+function Component3({ className, propValue = "바로 완료" }: Component3Props) {
+  const is = propValue === "담당자 확인";
+  const is1 = propValue === "조건 미충족";
+  const is2 = propValue === "실행 실패";
+  const isOrOr = ["바로 완료", "담당자 확인", "실행 실패"].includes(propValue);
+  return (
+    <div className={className || "border-[var(--ees-line-divider,#e6e6e9)] border-solid border-t content-stretch flex gap-[12px] h-[60px] items-start py-[10px] relative w-[408px]"} id={is2 ? "node-1454_4455" : is1 ? "node-1454_4443" : is ? "node-1454_4432" : "node-1454_4421"}>
+      <div className="[word-break:break-word] content-stretch flex flex-col gap-[2px] items-start overflow-clip relative shrink-0 w-[136px]" id={is2 ? "node-1454_4456" : is1 ? "node-1454_4444" : is ? "node-1454_4433" : "node-1454_4422"} data-name="Case">
+        <p className="font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] w-full" id={is2 ? "node-1454_4457" : is1 ? "node-1454_4445" : is ? "node-1454_4434" : "node-1454_4423"}>
+          {is2 ? "도구 실행 실패" : is1 ? "찾은 문서 없음" : is ? "문서를 찾음" : "본문을 받음"}
+        </p>
+        <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)] w-full" id={is2 ? "node-1454_4458" : is1 ? "node-1454_4446" : is ? "node-1454_4435" : "node-1454_4424"}>
+          {is2 ? "응답 없음 · 권한 · 연결" : is1 ? "0건" : is ? "한 번에 한 쪽" : "끝까지 받음"}
+        </p>
+      </div>
+      <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-start min-w-px overflow-clip relative" id={is2 ? "node-1454_4459" : is1 ? "node-1454_4447" : is ? "node-1454_4436" : "node-1454_4425"} data-name="Verdict">
+        {isOrOr && (
+          <>
+            <StatusGlyphV4 className="relative shrink-0 size-[16px]" state={is2 ? "Failed" : propValue === "바로 완료" ? "Done" : undefined} />
+            <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px overflow-clip relative" id={is2 ? "node-1454_4463" : is ? "node-1454_4440" : "node-1454_4429"} data-name="Verdict text">
+              <p className={`font-["Noto_Sans_KR:Medium"] font-medium leading-[22px] relative shrink-0 text-[14px] tracking-[-0.042px] w-full ${is2 ? "text-[color:var(--ees-status-danger,#bf3a2b)]" : is ? "text-[color:var(--ees-text-primary,#1f2023)]" : "text-[color:var(--ees-status-success,#2a744c)]"}`} id={is2 ? "node-1454_4464" : is ? "node-1454_4441" : "node-1454_4430"}>
+                {is2 ? "실행 실패 · 판정하지 않음" : is ? "담당자가 목록 확정 → 완료" : "바로 완료"}
+              </p>
+              <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-full" id={is2 ? "node-1454_4465" : is ? "node-1454_4442" : "node-1454_4431"}>
+                {is2 ? "원인을 보여 주고 다시 실행할 수 있습니다" : is ? "일부 결과로 기록됩니다" : "담당자 확인 없이 다음 작업으로"}
+              </p>
+            </div>
+          </>
+        )}
+        {is1 && (
+          <>
+            <div className="relative shrink-0 size-[16px]" data-node-id="1454:4448" data-name="Glyph">
+              <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgGlyph} />
+            </div>
+            <div className="[word-break:break-word] content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px overflow-clip relative" data-node-id="1454:4452" data-name="Verdict text">
+              <p className="font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-status-attention,#96590c)] tracking-[-0.042px] w-full" data-node-id="1454:4453">
+                업무 조건 미충족
+              </p>
+              <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-full" data-node-id="1454:4454">
+                도구는 정상입니다. 이 작업은 끝나지 않습니다
+              </p>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+type TagProps = {
+  className?: string;
+  label?: string;
+  tone?: "Neutral";
+};
+
+function Tag({ className, label = "상태", tone = "Neutral" }: TagProps) {
+  return (
+    <div className={className || "bg-[var(--ees-surface-muted,#ececef)] content-stretch flex items-center px-[6px] py-px relative rounded-[4px]"} data-node-id="948:1091">
+      <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[16px] relative shrink-0 text-[12px] text-[color:var(--ees-text-strong,#3f4147)] whitespace-nowrap" data-node-id="948:1092">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+type Component4Props = {
+  className?: string;
+  propValue?: "기본" | "펼침" | "정해야 함" | "확인 오류";
+};
+
+function Component4({ className, propValue = "기본" }: Component4Props) {
+  const is = propValue === "펼침";
+  const is1 = propValue === "정해야 함";
+  const is2 = propValue === "확인 오류";
+  return (
+    <div className={className || "bg-[var(--ees-surface-default,white)] border-[var(--ees-line-divider,#e6e6e9)] border-solid border-t content-stretch flex gap-[10px] h-[60px] items-center pl-[14px] pr-[12px] py-[12px] relative w-[440px]"} id={is2 ? "node-1454_4395" : is1 ? "node-1454_4386" : is ? "node-1454_4377" : "node-1454_4368"}>
+      <div className="content-stretch flex flex-[1_0_0] flex-col gap-[2px] items-start min-w-px overflow-clip relative" id={is2 ? "node-1454_4396" : is1 ? "node-1454_4387" : is ? "node-1454_4378" : "node-1454_4369"} data-name="Text">
+        <div className="content-stretch flex gap-[6px] items-center overflow-clip relative shrink-0" id={is2 ? "node-1454_4397" : is1 ? "node-1454_4388" : is ? "node-1454_4379" : "node-1454_4370"} data-name="Name line">
+          <p className="[word-break:break-word] font-['Noto_Sans_KR:Medium'] font-medium leading-[22px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.042px] whitespace-nowrap" id={is2 ? "node-1454_4398" : is1 ? "node-1454_4389" : is ? "node-1454_4380" : "node-1454_4371"}>
+            {is2 ? "개수" : is ? "공간" : is1 ? "찾을 말" : "찾을 말"}
+          </p>
+          {["기본", "정해야 함"].includes(propValue) && <Tag className="bg-[var(--ees-surface-muted,#ececef)] content-stretch flex items-center px-[6px] py-px relative rounded-[4px] shrink-0" label="필수" />}
+        </div>
+        <p className={`[word-break:break-word] font-["Noto_Sans_KR:Regular"] font-normal leading-[18px] min-w-full relative shrink-0 text-[12px] w-[min-content] ${is2 ? "text-[color:var(--ees-status-danger,#bf3a2b)]" : is1 ? "text-[color:var(--ees-status-attention,#96590c)]" : "text-[color:var(--ees-text-secondary,#5c5e65)]"}`} id={is2 ? "node-1454_4401" : is1 ? "node-1454_4392" : is ? "node-1454_4383" : "node-1454_4374"}>
+          {is2 ? "고정값 · 0 · 게시 전 확인: 1 이상이어야 합니다" : is1 ? "입력 방법을 정해 주세요" : is ? "고정값 · EES" : "실행할 때 입력 · 담당자가 넣습니다"}
+        </p>
+      </div>
+      {["기본", "정해야 함", "확인 오류"].includes(propValue) && (
+        <div className="relative shrink-0 size-[14px]" id={is2 ? "node-1454_4402" : is1 ? "node-1454_4393" : "node-1454_4375"} data-name="Icon/chevron-right">
+          <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronRight} />
+        </div>
+      )}
+      {is && (
+        <div className="relative shrink-0 size-[14px]" data-node-id="1454:4384" data-name="Icon/chevron-down">
+          <img alt="" className="absolute block inset-0 max-w-none size-full" src={imgIconChevronDown} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function C11020C66() {
+  return (
+    <div className="[word-break:break-word] bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-divider,#e6e6e9)] border-solid content-stretch flex flex-col gap-[28px] items-start p-[32px] relative size-full" data-node-id="1454:4364" data-name="C1 작업 상세 부품 · 입력 줄 · 판정 줄 · 선택 단추 · 켜기 스위치 · 확인 상자 (10-20 시안 · C66)">
+      <p className="font-['Noto_Sans_KR:Bold'] font-bold leading-[20px] relative shrink-0 text-[14px] text-[color:var(--ees-text-primary,#1f2023)] tracking-[-0.07px] whitespace-nowrap" data-node-id="1454:4365">
+        작업 상세 · 단계 화면 시안 부품 · 입력 줄 · 접힘 줄 · 판정 줄 · 선택 단추 · 켜기 스위치 · 확인 상자 · 단계 줄 · 작업 줄 · C66에서 작업실 → 공통-3으로 옮김
+      </p>
+      <p className="font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-secondary,#5c5e65)] w-[900px]" data-node-id="1454:4366">
+        작업 상세 시안 8장에서 같은 모양으로 쓰는 줄과 조작 부품입니다. 기존 C1의 Tag · Status glyph v4 · Icon · Button v4를 그대로 쓰고, 없는 것만 여기서 만들었습니다. 메인에 반영할 때 C1로 옮기고 이 이름을 유지합니다.
+      </p>
+    </div>
+  );
+}
+
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+
+These styles are contained in the design: EES v4/Section: Font(family: "Noto Sans KR", style: Bold, size: 14, weight: 700, lineHeight: 20, letterSpacing: -0.5), EES v4/Meta: Font(family: "Noto Sans KR", style: Regular, size: 12, weight: 400, lineHeight: 18, letterSpacing: 0), EES v4/Body Medium: Font(family: "Noto Sans KR", style: Medium, size: 14, weight: 500, lineHeight: 22, letterSpacing: -0.30000001192092896), EES v4/Label: Font(family: "Noto Sans KR", style: Medium, size: 12, weight: 500, lineHeight: 16, letterSpacing: 0).
+
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## Status glyph v4
+**Node ID:** 746:640
+
+16px 상태 기호. Action=사람 조치 필요, Running=실행 중(끊긴 원 · 실제 화면에서 1초에 한 바퀴 회전, 동작 줄이기 설정 시 정지), Failed=실패, Done=완료, Waiting=대기·미실행, Unknown=판정 미확인·놓침. 항상 상태 문구 또는 툴팁과 함께.
+
+The generated code contains image and SVG URL constants, e.g. const image = `${assetPathPrefix}/<asset file name>`, where assetPathPrefix is declared once at the top of the code and every asset URL interpolates it. These URLs are temporary download sources and expire after 7 days. Download each asset into the project with curl -L, then replace its URL in the generated code with a reference to the downloaded asset. Never use the temporary URLs as runtime image sources.
