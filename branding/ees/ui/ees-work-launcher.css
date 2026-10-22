@@ -795,6 +795,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 
 /* C66 · B3 job detail. Existing type t editors retain their own layout. */
 #ees-work-designer .ew-job-detail{display:grid;gap:16px;min-width:0;}
+#ees-work-designer .ew-job-detail section+section{margin-top:0;}
 #ees-work-designer .ew-job-detail-header{position:relative;display:flex;align-items:center;gap:8px;min-width:0;min-height:24px;color:var(--ees-text-secondary);font-size:12px;line-height:18px;}
 #ees-work-designer .ew-job-detail-header>.ew-author-back{display:inline-flex;align-items:center;gap:6px;margin:0;padding:0;flex:none;color:var(--ees-text-secondary);font-size:12px;line-height:18px;}
 #ees-work-designer .ew-job-detail-header>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -823,6 +824,8 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer .ew-job-main .ew-shared-picker>summary{min-height:40px;border-radius:6px;font-size:14px;line-height:22px;}
 #ees-work-designer .ew-job-main .ew-shared-picker-options{min-width:0;max-width:100%;}
 #ees-work-designer .ew-job-main>p,#ees-work-designer .ew-job-section-content>p{margin:0;color:var(--ees-text-secondary);font-size:12px;line-height:18px;overflow-wrap:anywhere;}
+#ees-work-designer .ew-job-main>.ew-procedure-unconnected{color:var(--ees-status-attention);}
+#ees-work-designer .ew-job-main:has(>.ew-procedure-unconnected) :is(.ew-shared-picker>summary,select[name=tool_contract_id]){border-color:var(--ees-status-attention);}
 #ees-work-designer .ew-job-main>.ew-job-tool-description,#ees-work-designer .ew-job-main>.ew-job-tool-output{margin-top:-6px;}
 #ees-work-designer .ew-job-tool-description>span,#ees-work-designer .ew-job-tool-output>span{font-weight:500;}
 #ees-work-designer .ew-job-tool-state{padding:12px;border-radius:6px;background:var(--ees-status-attention-bg);color:var(--ees-text-primary);font-size:12px;line-height:18px;overflow-wrap:anywhere;}
@@ -832,6 +835,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer .ew-job-arguments>header>p{grid-column:1/-1;}
 #ees-work-designer .ew-job-argument{min-width:0;border-top:1px solid var(--ees-line-divider);}
 #ees-work-designer .ew-job-argument-toggle{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:12px 16px;text-align:left;}
+#ees-work-designer .ew-job-argument-toggle,#ees-work-designer .ew-job-section-toggle{border:0;border-radius:0;background:transparent;}
 #ees-work-designer .ew-job-argument-toggle>span{display:grid;flex:1;gap:4px;min-width:0;}
 #ees-work-designer .ew-job-argument-toggle strong{display:flex;gap:6px;align-items:center;min-width:0;font-size:14px;line-height:22px;font-weight:500;}
 #ees-work-designer .ew-job-argument-toggle>span>small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ees-text-secondary);font-size:12px;line-height:18px;}

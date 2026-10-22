@@ -739,8 +739,10 @@ function createWorkDesigner({callbacks}) {
       const id=target.dataset.id || selectedNode,node=nodes(editor).find(item=>item.id===id);if(!node||node.type==='p')return;
       const all=orderedNodes(),stages=all.filter(item=>item.type==='t'),children=all.filter(item=>item.type==='j'&&(item.parent_id || item.parent)===id),stage=node.type==='t',hasDeadline=stage&&Object.hasOwn(editor.schedule?.stage_deadlines || {},id);
       const html=stage?`<p>${stages.findIndex(item=>item.id===id)+1} ${esc(node.name)} · ${children.length}개 작업</p>${children.length?'<p>'+children.map(item=>esc(item.name)).join(' · ')+'</p>':''}<p>이 단계와 작업 ${children.length}개를 편집 초안에서 뺍니다. 저장본에는 ‘초안 저장’ 뒤에 반영됩니다.</p><p>이미 시작한 진행 건과 과거 기록, 게시된 버전은 그대로 남습니다.</p><p>이 작업들을 ‘앞 작업’으로 쓰는 작업이 있으면 게시 전 확인에서 알려 드립니다.</p>${hasDeadline?'<p>이 단계의 기간 설정(실행 방식)도 함께 지웁니다.</p>':''}`:`<p>${esc(node.name)}와 하위 작업을 초안에서 삭제합니다. 이미 시작한 진행 건과 과거 기록은 유지합니다. 이 작업을 참조한 조건은 게시 검사에서 다시 확인합니다.</p>`;
+      const menuOrigin=jobMenu===id?{epoch,key:key(),revision,selectedNode}:null;
       const pending=confirmDialog({title:stage?'‘'+node.name+'’ 단계를 초안에서 삭제할까요?':'초안에서 삭제할까요?',html,confirmLabel:'초안에서 삭제'});workUI.$?.('#ees-work-dialog')?.querySelector?.('[data-dialog-cancel]')?.focus?.();
       if(await pending){workAuthoring.removeNode(editor,id);if(selectedNode===id||children.some(item=>item.id===selectedNode))selectedNode='';if(expandedStage===id)expandedStage='';jobMenu='';dirty=true;if(stage)focusAction('add_stage');else focusAction('add_job','',node.parent_id || node.parent);stash();paint();}
+      else if(menuOrigin&&menuOrigin.epoch===epoch&&menuOrigin.key===key()&&menuOrigin.revision===revision&&menuOrigin.selectedNode===selectedNode&&jobMenu===id&&canAuthor()){jobMenu='';focusAction(nodeMenuAction(id),id);paint();}
     }
     else if(['move_up','move_down'].includes(action)){
       const all=nodes(editor),id=target.dataset.id || selectedNode,node=all.find(item=>item.id===id),parent=all.find(item=>item.id===(node?.parent_id || node?.parent)),list=parent?.children;

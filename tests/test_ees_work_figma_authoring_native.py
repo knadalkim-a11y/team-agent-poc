@@ -69,7 +69,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         def capture(label):
             self.wait("[...document.querySelectorAll('#ees-work-designer')].every(surface=>surface.getAnimations({subtree:true}).every(animation=>!animation.pending&&animation.playState!=='running'))")
             observed = self.browser.evaluate("""(() => {
-                const scroll=document.querySelector('.ew-author-scroll'), active=document.activeElement;
+                const scroll=document.querySelector('.ew-author-scroll'), active=document.activeElement,
+                    cards=[...document.querySelectorAll('.ew-job-detail #ew-author-node > .ew-job-card')],
+                    unconnected=document.querySelector('.ew-job-main>.ew-procedure-unconnected'),
+                    picker=document.querySelector('.ew-job-main .ew-shared-picker>summary,.ew-job-main select[name=tool_contract_id]');
                 return {viewport:[innerWidth,innerHeight],overflow:scroll.scrollWidth-scroll.clientWidth,
                     method:document.querySelector('.ew-job-method [name=mode]:checked')?.value,
                     focus:{action:active?.dataset.authorAction,id:active?.dataset.id,name:active?.name},
@@ -77,11 +80,29 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                     arguments:[...document.querySelectorAll('.ew-job-argument')].map(e=>({id:e.dataset.argumentId,text:e.innerText})),
                     factoryTabs:document.querySelectorAll('.ew-author-factories').length,
                     methodLabels:[...document.querySelectorAll('.ew-job-method label span')].map(e=>e.textContent),
+                    unconnectedColors:unconnected?{notice:getComputedStyle(unconnected).color,pickerBorder:picker?getComputedStyle(picker).borderColor:null}:null,
+                    sectionMargins:[...document.querySelectorAll('.ew-job-detail section+section')].map(e=>({className:e.className,marginTop:parseFloat(getComputedStyle(e).marginTop)})),
+                    cardGaps:cards.slice(1).map((e,i)=>({before:cards[i].className,after:e.className,gap:e.getBoundingClientRect().top-cards[i].getBoundingClientRect().bottom})),
+                    toggleBorders:[...document.querySelectorAll('.ew-job-detail .ew-job-argument-toggle,.ew-job-detail .ew-job-section-toggle')].map(e=>{
+                        const s=getComputedStyle(e);return {action:e.dataset.authorAction,id:e.dataset.id,
+                            widths:[s.borderTopWidth,s.borderRightWidth,s.borderBottomWidth,s.borderLeftWidth].map(parseFloat),
+                            radii:[s.borderTopLeftRadius,s.borderTopRightRadius,s.borderBottomRightRadius,s.borderBottomLeftRadius].map(parseFloat)};}),
                     invalid:[...document.querySelectorAll('[aria-invalid=true]')].map(e=>e.name)};
             })()""")
             self.assertLessEqual(observed['overflow'], 1, observed)
             self.assertEqual(observed['factoryTabs'], 0, observed)
             self.assertEqual(observed['methodLabels'], ['사람이 확인', '도구로 처리', 'AI 초안'])
+            if observed['unconnectedColors'] is not None:
+                self.assertEqual(observed['unconnectedColors'], {'notice': 'rgb(150, 89, 12)', 'pickerBorder': 'rgb(150, 89, 12)'})
+            # First CI showed inherited section margins (36 px card gap) and
+            # generic button borders. Keep the C66 geometry independently checked.
+            for section in observed['sectionMargins']:
+                self.assertEqual(section['marginTop'], 0, section)
+            for gap in observed['cardGaps']:
+                self.assertAlmostEqual(gap['gap'], 12, delta=1, msg=gap)
+            for toggle in observed['toggleBorders']:
+                self.assertEqual(toggle['widths'], [0, 0, 0, 0], toggle)
+                self.assertEqual(toggle['radii'], [0, 0, 0, 0], toggle)
             observed['label'] = label; observations.append(observed)
             directory = self.screenshot(label)
             (directory / 'c66-job-detail-observations.json').write_text(json.dumps(observations, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
@@ -139,6 +160,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.fill('[name=argument_constant]', '설치 가이드')
             capture('c66-b3-argument-expanded-' + str(width))
             self.key('Escape', 27)
+            # C3 closes over 150 ms; observe the completed DOM/focus contract
+            # using the existing readiness budget, not the animation midpoint.
+            self.wait("!document.querySelector('.ew-job-argument-editor')")
             self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-job-argument-editor')"))
             self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=job_argument][data-id=query]')"))
             self.key(' ', 32)
@@ -152,12 +176,14 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.fill('[name=argument_constant]', '0')
             self.assertFalse(self.browser.evaluate("!!document.querySelector('[name=argument_constant][aria-invalid=true]')"))
             self.click('[data-author-action=job_argument_close][data-id=limit]')
+            self.wait("!document.querySelector('.ew-job-argument-editor')")
             self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=job_argument][data-id=limit]')"))
             self.open_job_section('completion')
             self.assertTrue(self.read('[name=human_required]', 'checked'))
             self.assertIn('항상 자동으로 확인', self.text('#ew-job-section-completion'))
             capture('c66-b3-completion-' + str(width))
             self.key('Escape', 27)
+            self.wait("document.querySelector('[data-author-action=job_section][data-id=completion]')?.getAttribute('aria-expanded')==='false'")
             self.assertEqual(self.read('[data-author-action=job_section][data-id=completion]', 'ariaExpanded'), 'false')
             self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=job_section][data-id=completion]')"))
             self.key('Enter', 13)
@@ -168,15 +194,21 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertEqual(reopened['opacity'], '1', reopened)
             self.assertTrue(reopened['visible'], reopened)
             self.key('Escape', 27)
+            self.wait("document.querySelector('[data-author-action=job_section][data-id=completion]')?.getAttribute('aria-expanded')==='false'")
             self.open_job_section('advanced')
             self.assertEqual(self.read('#ew-author-node [name=description]', 'value'), original['nodes']['job-0'].get('description', ''))
             capture('c66-b3-additional-settings-' + str(width))
+            self.browser.evaluate("document.querySelector('.ew-author-scroll').scrollTop=document.querySelector('.ew-author-scroll').scrollHeight")
+            self.assertTrue(self.browser.evaluate("document.querySelector('#ew-job-section-advanced').getBoundingClientRect().bottom<=document.querySelector('.ew-author-scroll').getBoundingClientRect().bottom+1"))
+            capture('c66-b3-additional-settings-bottom-' + str(width))
             self.key('Escape', 27)
+            self.wait("document.querySelector('[data-author-action=job_section][data-id=advanced]')?.getAttribute('aria-expanded')==='false'")
             self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=job_section][data-id=advanced]')"))
             self.key('Enter', 13)
             self.wait("document.querySelector('#ew-job-section-advanced')?.checkVisibility()")
             self.assertTrue(self.read('#ew-author-node [name=description]', 'checkVisibility()'))
             self.key('Escape', 27)
+            self.wait("document.querySelector('[data-author-action=job_section][data-id=advanced]')?.getAttribute('aria-expanded')==='false'")
             self.click('[data-author-action=save]')
             self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
             stored = self.state(workflow_id=key)['workflow']['draft']
@@ -195,6 +227,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertEqual(self.read('[name=argument_constant]', 'value'), '0')
             self.fill('[name=argument_constant]', '5')
             self.click('[data-author-action=job_argument_close][data-id=limit]')
+            self.wait("!document.querySelector('.ew-job-argument-editor')")
             self.click('[data-author-action=save]')
             self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
             self.click('[data-author-action=validate]')
@@ -202,26 +235,42 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertEqual(self.state(workflow_id=key)['workflow']['validation']['errors'], [])
             saved_tool = deepcopy(self.state(workflow_id=key)['workflow'])
             writes = len(self.server.workspace_commands)
+            # B3-6b: a changed synthetic installed-tool fingerprint must show
+            # the canonical server message without losing configured arguments.
+            reference['config_hash'] = 'e' * 64
+            self.refresh()
+            unavailable = '도구 확인 필요 · 관리자에게 입력·결과와 연결 설정 확인을 요청하세요.'
+            self.wait("document.querySelector('.ew-job-tool-state')?.textContent.includes(" + json.dumps(unavailable) + ")")
+            self.assertIn(unavailable, self.text('.ew-job-tool-state'))
+            self.assertTrue(self.read('.ew-job-tool-state [data-author-action=shared_open]', 'checkVisibility()'))
+            self.assertIn('고정값 · 설치 가이드', self.text('[data-argument-id=query]'))
+            self.assertIn('고정값 · 5', self.text('[data-argument-id=limit]'))
+            capture('c66-b3-tool-review-required-' + str(width))
             current_state = self.server.workflow.workspace_state
 
             async def read_only_state(user, **query):
                 result = await current_state(user, **query)
                 if result.get('workflow'):
                     result['workflow']['can_edit'] = False; result['workflow']['can_manage'] = False
+                result['capabilities']['is_admin'] = False
                 return result
 
             with patch.object(self.server.workflow, 'workspace_state', side_effect=read_only_state):
                 self.refresh()
                 self.wait("document.querySelector('.ew-job-method [value=tool]')?.disabled")
+                self.assertIn(unavailable, self.text('.ew-job-tool-state'))
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-job-tool-state [data-author-action=shared_open]')"))
                 self.assertEqual(self.read('#ew-author-node [name=name]', 'value'), saved_tool['draft']['nodes']['job-0']['name'])
                 self.click('[data-author-action=job_argument][data-id=query]')
                 self.assertTrue(self.read('[name=argument_constant]', 'disabled'))
                 self.assertEqual(self.read('[name=argument_constant]', 'value'), '설치 가이드')
                 self.key('Escape', 27)
+                self.wait("!document.querySelector('.ew-job-argument-editor')")
                 self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=job_argument][data-id=query]')"))
                 capture('c66-b3-read-only-' + str(width))
             self.assertEqual(self.state(workflow_id=key)['workflow'], saved_tool)
             self.assertEqual([body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui'], [])
+            reference['config_hash'] = 'c' * 64
             self.refresh()
             self.wait("document.querySelector('.ew-job-method [value=tool]')?.disabled===false")
             self.click('.ew-job-method [name=mode][value=human]')
@@ -264,6 +313,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         if self.browser.evaluate("!!document.querySelector('[data-author-action=list]')"):
             self.click('[data-author-action=list]')
         self.click('[data-author-action=open][data-id="' + key + '"]')
+        self.wait("document.querySelector('.ew-author-factories')")
         writes = len(self.server.workspace_commands)
         for width in (1366, 480):
             self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
@@ -550,7 +600,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
         # C66 retires the summary shortcut; start inputs keep their existing
         # execution-method editor and the same cancel/save contract.
-        self.click('[data-author-action=tab][data-tab=settings]')
+        self.click('[data-author-action=tab][data-tab=schedule]')
         self.click('[data-author-action=start_input_add]')
         self.fill('#ees-work-dialog [name=name]', '취소할 입력')
         self.key('Escape', 27)
@@ -790,6 +840,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-dialog-cancel]')"))
             capture('e1-example3-stage-delete-' + str(width))
             self.key('Escape', 27)
+            self.wait("!document.querySelector('#ees-work-dialog') && document.activeElement?.matches('[data-author-action=stage_menu][data-id=stage-0]')")
             self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=stage_menu][data-id=stage-0]')"))
             self.click('[data-author-action=add_stage]')
             self.assertEqual(self.read('#ew-stage-editor [name=name]', 'placeholder'), '예: 운영 인계')
@@ -962,7 +1013,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 tabs:style('.ew-author-tabs>button'),heading:style('.ew-author h2'),
                 extraHeader:document.querySelectorAll('#ees-work-panel>.ew-panel-header').length,
                 factoryTabs:document.querySelectorAll('.ew-author-factories').length,
-                factoryLabel:document.querySelector('.ew-author-factories')?.getAttribute('aria-label'),
+                factoryLabel:document.querySelector('.ew-author-factories')?.getAttribute('aria-label')??null,
                 factoryViews:[...document.querySelectorAll('.ew-author-factories [data-author-action=factory]')].map(e=>({id:e.dataset.id,label:e.textContent.trim(),selected:e.getAttribute('aria-selected')})),
                 overflow:document.querySelector('.ew-author-scroll').scrollWidth-document.querySelector('.ew-author-scroll').clientWidth};
             })()""")
@@ -1126,6 +1177,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action="open"][data-id="'+wid+'"]')
         self.click('.ew-author-tabs [data-author-action=tab][data-tab=content]')
         self.open_author_job_ui('job-0')
+        # C66 shows the picker only for a tool method. This fixture starts as
+        # human; choose the method through its actual control before B10 checks.
+        self.click('.ew-job-method [name=mode][value=tool]')
+        self.wait("document.querySelector('.ew-job-method [value=tool]')?.checked")
         self.click('.ew-shared-picker summary')
         self.assertTrue(self.read('.ew-shared-picker','open'))
         self.assertTrue(self.browser.evaluate("!!document.querySelector('[data-author-action=pick_job_tool][data-id=managed-search_pages]')"))

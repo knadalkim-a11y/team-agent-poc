@@ -146,6 +146,20 @@ test('C66 outside clicks close stage and job menus while preserving the clicked 
   assert.equal(actionButton(h,action,id).getAttribute('aria-expanded'),'false');assert.equal(h.document.activeElement,outside);assert.deepEqual(h.draft(),before);assert.equal(h.writes.length,0);
  }
 });
+for(const view of ['stage','job detail'])test('C66 cancelling deletion closes the '+view+' menu and returns focus without changing the draft',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(2));h.click('stage_toggle',{id:'t0'});await flush();
+ const id=view==='stage'?'t0':'j0-0',action=view==='stage'?'stage_menu':'job_menu';if(view==='job detail')await h.node(id);
+ h.click(action,{id});await flush();assert.equal(actionButton(h,action,id).getAttribute('aria-expanded'),'true');const before=h.draft();
+ h.dialogs.push(null);h.click('delete_node',{id});await flush();assert.equal(h.dialogHistory.length,1);assert.equal(h.dialogHistory[0].confirmLabel,'초안에서 삭제');
+ assert.deepEqual(h.draft(),before);assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);
+ assert.equal(actionButton(h,action,id).getAttribute('aria-expanded'),'false');assert.equal(h.document.activeElement,actionButton(h,action,id));
+ if(view==='stage')assert.equal(stageButton(h,id).getAttribute('aria-expanded'),'true');else assert.ok(h.forms['ew-author-node']);
+});
+test('C66 a stale deletion cancellation cannot close another workflow menu with the same stage ID',async()=>{
+ const h=harness(),other=stagedDefinition(1);other.id='q';other.name='다른 절차';h.workflows.get('q').draft=copy(other);installDefinition(h,stagedDefinition(2));h.click('stage_toggle',{id:'t0'});h.click('stage_menu',{id:'t0'});await flush();
+ h.dialogs.push(null);h.dialogHook=async()=>{await h.open('q');h.click('stage_toggle',{id:'t0'});h.click('stage_menu',{id:'t0'});await flush();};h.click('delete_node',{id:'t0'});await flush();
+ assert.equal(h.draft().definition.id,'q');assert.deepEqual(h.draft().definition,other);assert.equal(actionButton(h,'stage_menu','t0').getAttribute('aria-expanded'),'true');assert.equal(h.document.activeElement,actionButton(h,'stage_menu','t0'));assert.equal(h.writes.length,0);
+});
 for(const scope of [undefined,'system','factory'])for(const count of [0,1])for(const saved of [false,true])test(`C66 factory viewing requires factories and scope or stored overrides: ${scope || 'undecided'} / ${count} / ${saved}`,async()=>{
  const h=harness(),value=definition();if(scope)value.execution_scope=scope;h.state.factories=count?[{id:'f',name:'공장'}]:[];
  h.workflows.get('w').settings=saved?[{factory_id:'f',revision:2,values:{target:'보존할 공장 값'}}]:[{factory_id:'',revision:1,values:{target:'기본값'}}];installDefinition(h,value);
