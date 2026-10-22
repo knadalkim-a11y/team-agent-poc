@@ -85,11 +85,12 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         observations = []
 
         def capture(label):
-            self.wait("[...document.querySelectorAll('#ees-work-designer')].every(surface=>surface.getAnimations({subtree:true}).every(animation=>!animation.pending&&animation.playState!=='running'))")
+            self.wait("[...document.querySelectorAll('#ees-work-designer,#ees-work-dialog')].every(surface=>surface.getAnimations({subtree:true}).every(animation=>!animation.pending&&animation.playState!=='running'))")
             observed = self.browser.evaluate("""(() => {
                 const scroll=document.querySelector('.ew-author-scroll'), active=document.activeElement,
                     cards=[...document.querySelectorAll('.ew-job-detail #ew-author-node > .ew-job-card')],
                     unconnected=document.querySelector('.ew-job-main>.ew-procedure-unconnected'),
+                    toolState=document.querySelector('.ew-job-tool-state'),toolOutput=document.querySelector('.ew-job-tool-output'),
                     picker=document.querySelector('.ew-job-main .ew-shared-picker,.ew-job-main select[name=tool_contract_id]');
                 return {viewport:[innerWidth,innerHeight],overflow:scroll.scrollWidth-scroll.clientWidth,
                     method:document.querySelector('.ew-job-method [name=mode]:checked')?.value,
@@ -104,6 +105,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                     factoryTabs:document.querySelectorAll('.ew-author-factories').length,
                     methodLabels:[...document.querySelectorAll('.ew-job-method label span')].map(e=>e.textContent),
                     unconnectedColors:unconnected?{notice:getComputedStyle(unconnected).color,pickerBorder:picker?getComputedStyle(picker).borderColor:null,pickerBorderWidth:picker?parseFloat(getComputedStyle(picker).borderTopWidth):null}:null,
+                    toolStateOrder:toolState&&toolOutput?{stateBottom:toolState.getBoundingClientRect().bottom,outputTop:toolOutput.getBoundingClientRect().top}:null,
                     sectionMargins:[...document.querySelectorAll('.ew-job-detail section+section')].map(e=>({className:e.className,marginTop:parseFloat(getComputedStyle(e).marginTop)})),
                     cardGaps:cards.slice(1).map((e,i)=>({before:cards[i].className,after:e.className,gap:e.getBoundingClientRect().top-cards[i].getBoundingClientRect().bottom})),
                     toggleBorders:[...document.querySelectorAll('.ew-job-detail .ew-job-argument-toggle,.ew-job-detail .ew-job-section-toggle')].map(e=>{
@@ -117,6 +119,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertEqual(observed['methodLabels'], ['사람이 확인', '도구로 처리', 'AI 초안'])
             if observed['unconnectedColors'] is not None:
                 self.assertEqual(observed['unconnectedColors'], {'notice': 'rgb(150, 89, 12)', 'pickerBorder': 'rgb(150, 89, 12)', 'pickerBorderWidth': 1})
+            if observed['toolStateOrder'] is not None:
+                self.assertLessEqual(observed['toolStateOrder']['stateBottom'], observed['toolStateOrder']['outputTop'], observed['toolStateOrder'])
             # First CI showed inherited section margins (36 px card gap) and
             # generic button borders. Keep the C66 geometry independently checked.
             for section in observed['sectionMargins']:
@@ -312,15 +316,19 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.wait("document.querySelector('.ew-job-method [value=tool]')?.disabled===false")
             self.click('.ew-job-method [name=mode][value=human]')
             self.wait("document.querySelector('#ees-work-dialog[open]')")
-            self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-dialog-cancel]')"))
+            # D5 reuses the common confirmation dialog: without input fields,
+            # its initial focus is the dialog body, as in the existing C3 flow.
+            self.assertTrue(self.browser.evaluate("document.activeElement?.matches('#ees-work-dialog-body')"))
             capture('c66-b3-method-change-confirm-' + str(width))
             self.key('Escape', 27)
+            self.wait("!document.querySelector('#ees-work-dialog') && document.activeElement?.matches('.ew-job-method [name=mode][value=tool]')")
+            self.assertTrue(self.browser.evaluate("document.activeElement?.matches('.ew-job-method [name=mode][value=tool]')"))
             self.assertTrue(self.read('.ew-job-method [value=tool]', 'checked'))
             self.assertIn('페이지 찾기', self.text('.ew-shared-picker summary'))
             self.assertEqual(self.state(workflow_id=key)['workflow'], saved_tool)
             self.click('.ew-job-method [name=mode][value=human]')
             self.click('#ees-work-dialog [data-dialog-confirm]')
-            self.wait("document.querySelector('.ew-job-method [value=human]')?.checked")
+            self.wait("!document.querySelector('#ees-work-dialog') && document.querySelector('.ew-job-method [value=human]')?.checked")
             self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-job-arguments,.ew-shared-picker')"))
             self.click('[data-author-action=save]')
             self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
