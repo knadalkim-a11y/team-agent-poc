@@ -114,7 +114,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                             arrow=pickerSummary.querySelector('img[src$="/f17e6.svg"]');
                         return {classPresent:pickerSummary.classList.contains('ew-job-tool-picker-summary'),
                             display:style.display,listStyleType:style.listStyleType,rect:rect(pickerSummary),controlRect:rect(picker),
-                            name:name?.textContent,nameRect:rect(name),version:version?.textContent??null,versionRect:rect(version),versionColor:version?getComputedStyle(version).color:null,
+                            name:name?.textContent,nameRect:rect(name),nameColor:name?getComputedStyle(name).color:null,
+                            version:version?.textContent??null,versionRect:rect(version),versionColor:version?getComputedStyle(version).color:null,
                             arrow:rect(arrow),badges:[...pickerSummary.querySelectorAll('.ew-author-tag')].map(e=>({
                                 text:e.textContent,state:e.dataset.state??null,rect:rect(e),
                                 color:getComputedStyle(e).color,background:getComputedStyle(e).backgroundColor,
@@ -155,6 +156,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 self.assertEqual((bounds['height'], summary['controlRect']['height']), (38, 40), summary)
                 self.assertEqual(summary['version'], 'v1' if summary['connected'] else None, summary)
                 self.assertEqual(summary['versionColor'], 'rgb(111, 113, 122)' if summary['connected'] else None, summary)
+                if not summary['connected']:
+                    self.assertEqual(summary['nameColor'], 'rgb(111, 113, 122)', summary)
                 expected_badges = ['도구 확인 필요' if summary['unavailable'] else '조회'] if summary['connected'] else []
                 self.assertEqual([badge['text'] for badge in summary['badges']], expected_badges, summary)
                 for badge in summary['badges']:

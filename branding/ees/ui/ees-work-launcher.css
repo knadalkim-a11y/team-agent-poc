@@ -828,7 +828,8 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer .ew-job-detail .ew-job-tool-picker-name{min-width:0;overflow-wrap:anywhere;}
 #ees-work-designer .ew-job-detail .ew-job-tool-picker-summary>.ew-author-tag{flex:none;margin:0;padding:1px 6px;border-radius:4px;background:var(--ees-surface-muted);color:var(--ees-text-strong);font-size:12px;font-weight:500;line-height:16px;}
 #ees-work-designer .ew-job-detail .ew-job-tool-picker-summary>.ew-author-tag[data-state=review_required]{background:#faf1e4;color:var(--ees-status-attention);}
-#ees-work-designer .ew-job-detail .ew-job-tool-picker-version{flex:none;color:var(--ees-text-tertiary);font-size:12px;line-height:18px;}
+#ees-work-designer .ew-job-detail .ew-job-tool-picker-version{flex:none;color:#6f717a;font-size:12px;line-height:18px;}
+#ees-work-designer .ew-job-detail .ew-job-main:has(>.ew-procedure-unconnected) .ew-job-tool-picker-name{color:#6f717a;}
 #ees-work-designer .ew-job-detail .ew-job-tool-picker-summary>.ew-icon{flex:none;width:14px;height:14px;margin-left:auto;}
 #ees-work-designer .ew-job-main .ew-shared-picker-options{min-width:0;max-width:100%;}
 #ees-work-designer .ew-job-main>p,#ees-work-designer .ew-job-section-content>p{margin:0;color:var(--ees-text-secondary);font-size:12px;line-height:18px;overflow-wrap:anywhere;}
