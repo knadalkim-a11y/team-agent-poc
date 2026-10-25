@@ -1,0 +1,26 @@
+[
+  {
+    "type": "keydown",
+    "key": "Enter",
+    "charCode": 0,
+    "trusted": true
+  },
+  {
+    "type": "keypress",
+    "key": "Enter",
+    "charCode": 13,
+    "trusted": true
+  },
+  {
+    "type": "click",
+    "key": "",
+    "charCode": 0,
+    "trusted": true
+  },
+  {
+    "type": "keyup",
+    "key": "Enter",
+    "charCode": 0,
+    "trusted": true
+  }
+]

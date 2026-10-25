@@ -1,0 +1,612 @@
+{
+  "head": "62c9515d3e861f98445071bc29328ae1abd33c97",
+  "ci_merge_commit": "387e031b5455f58bdb0c6920fa00060ec02cd512",
+  "run_id": 40241391858,
+  "run_number": 339,
+  "job_id": 121315567067,
+  "native_compose": {
+    "passed": 83,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "expected-failure": 0,
+    "unexpected-success": 0
+  },
+  "authoring": {
+    "passed": 29,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0
+  },
+  "artifact": {
+    "id": 12617850119,
+    "bytes": 21248467,
+    "sha256": "6d3048ace57ed3a80f22caf02ce84ac64b92617aaf899279ba929715bc215cc3",
+    "zip_crc": "PASS",
+    "members": 457,
+    "valid_png": 235
+  },
+  "environment": {
+    "os": "ubuntu-24.04",
+    "python": "3.11.17",
+    "chrome": "155.0.8059.39"
+  },
+  "capture_mapping": {
+    "B3-1": {
+      "figma": "1456:4557",
+      "label": "c66-b3-tool-connected"
+    },
+    "B3-2/B3-2a": {
+      "figma": [
+        "1457:4495",
+        "1457:4642"
+      ],
+      "label": "c66-b3-argument-expanded"
+    },
+    "B3-3": {
+      "figma": "1548:2",
+      "labels": [
+        "c66-b3-completion",
+        "c66-b3-completion-bottom"
+      ]
+    },
+    "B3-5": {
+      "figma": "1458:4720",
+      "label": "c66-b3-human"
+    },
+    "B3-6a": {
+      "figma": "1458:4801",
+      "label": "c66-b3-tool-unconnected"
+    },
+    "B3-6b": {
+      "figma": "1458:4880",
+      "label": "c66-b3-tool-review-required"
+    }
+  },
+  "visual_review": {
+    "widths": [
+      480,
+      1366
+    ],
+    "directly_compared_images": 14,
+    "all_captured_states": 26,
+    "blockers": [],
+    "scope": "Six requested states at both widths plus completion-bottom at both widths. Other captures retained with computed observations. Human view comparison covers visible fields; this viewport does not show the entire human card below the fold.",
+    "findings": [
+      "Name then normal/attention badge then v1 then right f17e6, no left marker.",
+      "Correct placeholder/version tertiary, normal and attention badge colors.",
+      "No horizontal overflow in all26 observations.",
+      "Full completion confirmation checkbox, explanation and footer buttons visible in bottom captures."
+    ]
+  },
+  "confirmed": [
+    "human/ai advanced summary contains only directly made input; tool also shows visible instructions",
+    "40px picker control, 38px summary, 14px chevron",
+    "exact badge 18px/12px/16px/500/4px colors",
+    "Enter and Space open, Escape closes and restores exact summary focus; existing Native focus-visible solid2px blue500 retained",
+    "D5, constant save/validation, stored data, read-only, zero external calls and C61 protections passed"
+  ],
+  "previous_run_338": {
+    "head": "06344f7c0159186e55055483b226ef3e7d4a6cce",
+    "run_id": 40241232833,
+    "conclusion": "cancelled",
+    "job_counts": {
+      "success": 8,
+      "cancelled": 7,
+      "failure": 1
+    },
+    "aggregate_failure_job": 121313941928,
+    "native_executed": false
+  },
+  "source_sha256": {
+    "branding/ees/ui/ees-work-designer.js": "6036afcc4cbb251bd8b5decc0e0c9b0fc29dc8793b4eb945d3c04bd7a62ad835",
+    "branding/ees/ui/ees-work-launcher.css": "698051c603c221fee6be6e63ae1bc5b27330edeb32d47b3cfc91f68915c48dbd",
+    "tests/test_ees_work_authoring_ui.cjs": "ed214ea8abe04bb51c13c614315e1bd9ac1c045367423a207cf56bf3205c0c81",
+    "tests/test_ees_work_figma_authoring_native.py": "8c1a2996142f76d2a86235c6b239a0b1da5c1959b1e9050c12136cfa18fb9754"
+  },
+  "files": [
+    {
+      "path": "review-20261026-ci339-c66-b3-additional-settings-1366.png",
+      "bytes": 96984,
+      "sha256": "7b5eec05a03b4493ed8f15075eafca303c56d75a4d6785078e617d7e49e02dfe"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-additional-settings-480.png",
+      "bytes": 63178,
+      "sha256": "51ac17f2e5d2027fa1eec4cb0fc08bacde6bd22243c2590d4737600773e1c73d"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-additional-settings-bottom-1366.png",
+      "bytes": 101997,
+      "sha256": "801b312d0c9cb37ef739e89dafcd7161cebcadee624fc7ab49fd63c6cdb1f7ca"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-additional-settings-bottom-480.png",
+      "bytes": 64985,
+      "sha256": "a49bcc7e642eac6c44e2bd29a862fd79c388a77599973990a909f24b001ffb52"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-ai-1366.png",
+      "bytes": 88393,
+      "sha256": "746dab5bf905bd25404347d72e8eccd3da554454bc478ac4e400681e8a0db168"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-ai-480.png",
+      "bytes": 55541,
+      "sha256": "501d024041f852840e2ec2b09beb347bd907dc3241ae86c09ff03cb4ed6a32e6"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-argument-expanded-1366.png",
+      "bytes": 102933,
+      "sha256": "bb0954aeae5f93d20daa403131a9aadd163a3c3607dac8c0dc2ee7a2b4c6488f"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-argument-expanded-480.png",
+      "bytes": 65836,
+      "sha256": "c1c57775c995e4647517ca16248db08e08de59aff4d5e74898b672cbcc202b7c"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-completion-1366.png",
+      "bytes": 103793,
+      "sha256": "d90e04d6540197d3aff3e1737e7b527012af125b7b956a603e77f8084ff8244a"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-completion-480.png",
+      "bytes": 69248,
+      "sha256": "4e50d5e1b6d9f89aa08445a3eccd1a073ef6c7c0c3428b0864690fa4acf46535"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-completion-bottom-1366.png",
+      "bytes": 113434,
+      "sha256": "dbb88d285502fae4191a557c8105b06fa79617399c8f75421c5aeb5668ac7c2c"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-completion-bottom-480.png",
+      "bytes": 75787,
+      "sha256": "19b5ac3c7c11a2939e43134032401dfc3852ed2525ab7b4723bbb50a7d7464e0"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-human-1366.png",
+      "bytes": 87608,
+      "sha256": "c063c30764b2d6818f7cd803a94ca438868551dec9d1370ccf9189e8fc775c0c"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-human-480.png",
+      "bytes": 54810,
+      "sha256": "73b1770e83aec1cc3447eba3eefeafde980cfdab0aa21ad0801e105b12d84361"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-method-change-confirm-1366.png",
+      "bytes": 102130,
+      "sha256": "fd4f9f20f4ba27946cb4551cfc87729e1db075a0abf8853c682b2ec070ef1a8b"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-method-change-confirm-480.png",
+      "bytes": 63932,
+      "sha256": "ccef9d6edd91800b868fce2f23319b6e8f8ff64a9757539ce6704e22db145b99"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-read-only-1366.png",
+      "bytes": 95174,
+      "sha256": "6e11a36fde499977dc61cf809e6c4949336d49e81e298a13b035cba4997ae31d"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-read-only-480.png",
+      "bytes": 63038,
+      "sha256": "4e5c777c0e8815db07a4affea790ae172fab34568fbd88b765af7a2ddd1f3675"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-tool-connected-1366.png",
+      "bytes": 98168,
+      "sha256": "e0568c10f78bfa1dcb20e81dee832a0124648a8411ca7f50c71c7dd5583f72b9"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-tool-connected-480.png",
+      "bytes": 65004,
+      "sha256": "5d41c72f88c1354a98f1697037907f6e829ba0b9f0d8fa518121ab6bc70ef04c"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-tool-picker-1366.png",
+      "bytes": 95244,
+      "sha256": "bf80b4980e86d1b70a7523f44cf48523ecbf5e150fa67c6e578c88b70e2d5eb4"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-tool-picker-480.png",
+      "bytes": 61671,
+      "sha256": "3e0420b0f839a8813bfa3a0417b5ad7811fbf9da49681cc6c4f44bd1df3eb270"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-tool-review-required-1366.png",
+      "bytes": 95903,
+      "sha256": "33d731e059e43c1f63ccfd7a2396a0a583bd98e425d4e6b52d65bb5ab2268025"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-tool-review-required-480.png",
+      "bytes": 62121,
+      "sha256": "ab62e6ddb29a9f30bff9fd36d41d50f1dbccdd8d7908204b00ecbb6ff60b52cb"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-tool-unconnected-1366.png",
+      "bytes": 93553,
+      "sha256": "254e3a5304c59e7b1960b3c7c43a9456a909b190676ddf81a708d333e978f977"
+    },
+    {
+      "path": "review-20261026-ci339-c66-b3-tool-unconnected-480.png",
+      "bytes": 60463,
+      "sha256": "724505fd9afd718b5282b794a31857e50a3f66029cb210850ca62c0e423cd758"
+    },
+    {
+      "path": "review-20261026-ci339-c66-job-detail-observations.json",
+      "bytes": 105206,
+      "sha256": "185e8e865eba8e7211e9f6aa42ee174485d07f7e1bf45380a836274b1ced7f3a"
+    },
+    {
+      "path": "review-20261026-ci339-c66-native-enter-events.json",
+      "bytes": 360,
+      "sha256": "f287afc23a5cd30dbeba4488618142e84380f4fccb5c33fd9dbd3f07ed636e85"
+    },
+    {
+      "path": "review-20261026-ci339-suite.json",
+      "bytes": 745,
+      "sha256": "2d05149a614634448210de4cae55f747e7530f7cc528beb98f7ab4bd0accd962"
+    },
+    {
+      "path": "review-20261026-ci339-test_ees_work_figma_authoring_native.json",
+      "bytes": 5818,
+      "sha256": "8415df0be88a29bca098b633ee7cc1f64b3bcb12f834e94b3498d1815c1a542a"
+    },
+    {
+      "path": "review-20261026-ci339-native-compose.log.gz",
+      "bytes": 17672,
+      "sha256": "d2bdd20073ebe9c477ff9c37655d3e5d57b771c1ec34440b413fe35a77ed7a47",
+      "decoded_source_bytes": 83910,
+      "decoded_source_sha256": "bc71bd801586c250fc83683dcd17e2aaf968b5a8f198e524339eb53cc9b9e8a4"
+    },
+    {
+      "path": "review-20261026-color-regression.log.gz",
+      "bytes": 17134,
+      "sha256": "8972d0127a38991722db28bc7b2d19c9133bb6fb4f85dd9dc0242685d0d4c632",
+      "decoded_source_bytes": 52873,
+      "decoded_source_sha256": "f2f98aced17784e6db9966e0333eee1375eec05e6666e55508e6af3380d2ee8a"
+    },
+    {
+      "path": "review-20261026-ci339-native-results.json",
+      "bytes": 18676,
+      "sha256": "74142beab102c578d09c5663343e41d4ffd269ed3cbd23ba44ef343a8facc761"
+    },
+    {
+      "path": "review-20261026-ci338-cancelled-delivery.log.gz",
+      "bytes": 1455,
+      "sha256": "01fccc14a93be051c882468b6f6bd78256506d02656b1ac1eda3f982a1cdfe01",
+      "decoded_source_bytes": 4158,
+      "decoded_source_sha256": "2aa3a779bd838c218797263df3bcc4955e09126ef63efb9c51abea2d5848956d"
+    }
+  ],
+  "job_counts": {
+    "success": 39,
+    "skipped": 1
+  },
+  "workflow_conclusion": "success",
+  "jobs": [
+    {
+      "id": 121313969779,
+      "name": "Verify the fixed official wheel",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:42:40Z",
+      "completed_at": "2026-10-25T22:42:52Z"
+    },
+    {
+      "id": 121313969977,
+      "name": "Source audit (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:42:40Z",
+      "completed_at": "2026-10-25T22:42:57Z"
+    },
+    {
+      "id": 121313969999,
+      "name": "Source audit (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:42:40Z",
+      "completed_at": "2026-10-25T22:43:03Z"
+    },
+    {
+      "id": 121313970140,
+      "name": "Pinned Native source baseline and EES frontend build",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:42:40Z",
+      "completed_at": "2026-10-25T22:47:54Z"
+    },
+    {
+      "id": 121314024605,
+      "name": "Verify cached historical fixture (previous-v4)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:42:54Z",
+      "completed_at": "2026-10-25T22:43:09Z"
+    },
+    {
+      "id": 121314024639,
+      "name": "Verify cached historical fixture (previous12)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:42:54Z",
+      "completed_at": "2026-10-25T22:43:12Z"
+    },
+    {
+      "id": 121314024655,
+      "name": "Verify cached historical fixture (legacy)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:42:54Z",
+      "completed_at": "2026-10-25T22:43:13Z"
+    },
+    {
+      "id": 121314024657,
+      "name": "Verify cached historical fixture (previous)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:42:54Z",
+      "completed_at": "2026-10-25T22:43:09Z"
+    },
+    {
+      "id": 121314024661,
+      "name": "Verify cached historical fixture (previous13)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:42:54Z",
+      "completed_at": "2026-10-25T22:43:09Z"
+    },
+    {
+      "id": 121315153867,
+      "name": "Prepare current program fixtures",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:47:56Z",
+      "completed_at": "2026-10-25T22:49:47Z"
+    },
+    {
+      "id": 121315567052,
+      "name": "native-work (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:51:36Z"
+    },
+    {
+      "id": 121315567058,
+      "name": "native-account (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:52:11Z"
+    },
+    {
+      "id": 121315567060,
+      "name": "native-execution (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:51:22Z"
+    },
+    {
+      "id": 121315567067,
+      "name": "native-compose (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:57:30Z"
+    },
+    {
+      "id": 121315567069,
+      "name": "Complete Native product (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:52:09Z"
+    },
+    {
+      "id": 121315567251,
+      "name": "restore-ees11 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:53:46Z"
+    },
+    {
+      "id": 121315567258,
+      "name": "program-install (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:51:26Z"
+    },
+    {
+      "id": 121315567260,
+      "name": "program-wheel (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:51:00Z"
+    },
+    {
+      "id": 121315567261,
+      "name": "native-contracts (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:53Z",
+      "completed_at": "2026-10-25T22:52:52Z"
+    },
+    {
+      "id": 121315567262,
+      "name": "native-contracts (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:57:51Z"
+    },
+    {
+      "id": 121315567264,
+      "name": "platform (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:53:11Z"
+    },
+    {
+      "id": 121315567270,
+      "name": "restore-ees12 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:51:28Z"
+    },
+    {
+      "id": 121315567271,
+      "name": "contracts (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:52:51Z"
+    },
+    {
+      "id": 121315567272,
+      "name": "program-wheel (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:51:20Z",
+      "completed_at": "2026-10-25T22:55:47Z"
+    },
+    {
+      "id": 121315567284,
+      "name": "contracts (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:51:19Z",
+      "completed_at": "2026-10-25T23:00:04Z"
+    },
+    {
+      "id": 121315567289,
+      "name": "restore-ees13 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:51:03Z"
+    },
+    {
+      "id": 121315567302,
+      "name": "platform (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:57:55Z"
+    },
+    {
+      "id": 121315567308,
+      "name": "native-grounding (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:51:24Z",
+      "completed_at": "2026-10-25T22:53:55Z"
+    },
+    {
+      "id": 121315567313,
+      "name": "services (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:51:19Z"
+    },
+    {
+      "id": 121315567314,
+      "name": "restore-ees13 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:51:02Z",
+      "completed_at": "2026-10-25T22:54:32Z"
+    },
+    {
+      "id": 121315567317,
+      "name": "restore-ees11 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:50:48Z"
+    },
+    {
+      "id": 121315567321,
+      "name": "restore-ees10 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:54:31Z"
+    },
+    {
+      "id": 121315567330,
+      "name": "services (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:54:32Z"
+    },
+    {
+      "id": 121315567355,
+      "name": "program-install (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:50:50Z",
+      "completed_at": "2026-10-25T22:54:42Z"
+    },
+    {
+      "id": 121315567371,
+      "name": "restore-ees10 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:49:49Z",
+      "completed_at": "2026-10-25T22:51:17Z"
+    },
+    {
+      "id": 121315567377,
+      "name": "native-grounding (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:51:04Z",
+      "completed_at": "2026-10-25T22:54:25Z"
+    },
+    {
+      "id": 121315567414,
+      "name": "restore-ees12 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T22:51:27Z",
+      "completed_at": "2026-10-25T22:57:56Z"
+    },
+    {
+      "id": 121317837228,
+      "name": "Delivery checks (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T23:00:07Z",
+      "completed_at": "2026-10-25T23:00:11Z"
+    },
+    {
+      "id": 121317837248,
+      "name": "Delivery checks (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-25T23:00:06Z",
+      "completed_at": "2026-10-25T23:00:10Z"
+    },
+    {
+      "id": 121317869566,
+      "name": "Prepare delivery files",
+      "status": "completed",
+      "conclusion": "skipped",
+      "started_at": "2026-10-25T23:00:11Z",
+      "completed_at": "2026-10-25T23:00:11Z"
+    }
+  ]
+}
