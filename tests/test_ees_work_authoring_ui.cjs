@@ -945,6 +945,53 @@ async function c66SelectShared(h){sharedReviewFixture(h);h.render();await h.node
 const c66Section=(h,id)=>actionButton(h,'job_section',id);
 const c66Argument=(h,id)=>actionButton(h,'job_argument',id);
 
+const c66SectionSummary=(h,id)=>{const button=[...h.markup.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)].find(match=>attr(match[1],'data-author-action')==='job_section'&&attr(match[1],'data-id')===id);assert.ok(button,'the '+id+' disclosure exists');return decode(button[2].match(/<small>([\s\S]*?)<\/small>/)?.[1] || '');};
+for(const [mode,resultBlock] of [['human','human_confirm'],['ai','human_confirm'],['tool','human_confirm'],['tool','change_request']])test('C66 followup extra settings summarizes only fields shown inside it for '+mode+(resultBlock==='change_request'?' change request':''),async()=>{
+ const h=harness(),value=definition();Object.assign(value.nodes.j,{mode,result_block:resultBlock,instructions:'보존할 수행 안내',read_retry:{count:2,deadline_seconds:45,extension:'보존'},description:'추가 설정에서 볼 설명'});installDefinition(h,value);await h.node();
+ const summary=c66SectionSummary(h,'advanced');assert.match(summary,/설명/);
+ if(mode==='tool'){assert.match(summary,/수행 안내/);if(resultBlock==='change_request')assert.doesNotMatch(summary,/다시 읽기/);else assert.match(summary,/다시 읽기/);}else assert.doesNotMatch(summary,/수행 안내|다시 읽기/);
+ h.click('job_section',{id:'advanced'});await flush();h.click('job_section',{id:'advanced'});await flush();
+ assert.deepEqual(h.draft().definition,value);assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);
+ h.field('name','이름만 수정');h.click('save');await flush();const expected=copy(value);expected.nodes.j.name='이름만 수정';assert.equal(h.writes.length,1);assert.deepEqual(h.writes[0].definition,expected);
+});
+
+function c66PickerSummary(h){const match=h.markup.match(/<details class="ew-shared-picker"><summary\b([^>]*)>([\s\S]*?)<\/summary>/);assert.ok(match,'the selected-tool disclosure remains present');return {attributes:match[1],html:match[2],text:decode(match[2].replace(/<[^>]*>/g,''))};}
+function c66PickerTag(summary,state){return [...summary.html.matchAll(/<(small|span)\b([^>]*)>([\s\S]*?)<\/\1>/g)].find(match=>attr(match[2],'class').split(' ').includes('ew-author-tag')&&(state===undefined||attr(match[2],'data-state')===state));}
+test('C66 followup selected shared tool summary shows its name read status and current version without pinning the draft',async()=>{
+ const h=harness(),{search}=sharedReviewFixture(h),value=definition();search.version=7;Object.assign(value.nodes.j,{mode:'tool',shared_tool_id:search.id,inputs:[{id:'query',name:'검색어',type:'text',scope:'factory'}],argument_bindings:{query:{input:'query'}}});installDefinition(h,value);await h.node();
+ const summary=c66PickerSummary(h);assert.equal(attr(summary.attributes,'class'),'ew-job-tool-picker-summary');
+ assert.match(summary.html,/class="ew-job-tool-picker-name"/);assert.match(summary.html,/class="ew-job-tool-picker-version"/);
+ const tag=c66PickerTag(summary);assert.ok(tag,'the selected usable tool has a read status badge');assert.equal(decode(tag[3]),'조회');assert.match(summary.text,/Confluence 페이지 찾기[\s\S]*조회[\s\S]*v7/);
+ search.version=8;h.render();assert.match(c66PickerSummary(h).text,/v8/);assert.doesNotMatch(c66PickerSummary(h).text,/v7/);
+ assert.deepEqual(h.draft().definition,value);assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);
+});
+test('C66 followup unconnected tool summary keeps choosing clearing and prior workflow isolation unchanged',async()=>{
+ const h=harness(),{search,read}=sharedReviewFixture(h),value=definition();value.nodes.j.mode='tool';value.nodes.j.inputs=[{id:'manual',name:'직접 만든 값',type:'text',scope:'workflow'}];installDefinition(h,value);await h.node();
+ let summary=c66PickerSummary(h);assert.equal(summary.text,'도구 고르기');assert.doesNotMatch(summary.html,/ew-author-tag|ew-job-tool-picker-version/);
+ const beforeOther=copy(h.workflows.get('q').draft);assert.ok(actionButton(h,'pick_job_tool',search.id));assert.ok(actionButton(h,'pick_job_tool',read.id));h.click('pick_job_tool',{id:search.id,shared:'true'});await flush();
+ assert.equal(h.draft().definition.nodes.j.shared_tool_id,search.id);assert.match(c66PickerSummary(h).text,/Confluence 페이지 찾기[\s\S]*조회[\s\S]*v1/);
+ h.click('pick_job_tool',{id:read.id,shared:'true'});await flush();assert.equal(h.draft().definition.nodes.j.shared_tool_id,read.id);assert.match(c66PickerSummary(h).text,/Confluence 페이지 읽기[\s\S]*조회[\s\S]*v1/);
+ h.click('pick_job_tool',{id:''});await flush();summary=c66PickerSummary(h);assert.equal(summary.text,'도구 고르기');assert.doesNotMatch(summary.html,/ew-author-tag|ew-job-tool-picker-version/);assert.deepEqual(h.draft().definition.nodes.j.inputs,value.nodes.j.inputs);
+ await h.open('q');assert.deepEqual(h.draft().definition,beforeOther);assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);
+});
+
+for(const condition of ['review_required','unavailable','disabled','forbidden','missing'])test('C66 followup selected shared tool keeps its connection and shows attention when '+condition,async()=>{
+ const h=harness(),{search}=sharedReviewFixture(h),value=definition();search.version=7;Object.assign(value.nodes.j,{mode:'tool',shared_tool_id:search.id,inputs:[{id:'query',name:'보존할 검색어',type:'text',scope:'workflow'}],argument_bindings:{query:{constant:'보존할 조건'}},read_retry:{count:1,deadline_seconds:30}});
+ const reason='이 도구의 현재 연결을 확인해 주세요.';search.unavailable_message=reason;h.state.operations.shared_tool_messages={shared_tool_review_required:reason,shared_tool_disabled:reason,shared_tool_forbidden:reason};
+ if(condition==='missing')h.state.operations.shared_tools=[];else if(condition==='forbidden')search.can_use=false;else search.state=condition;
+ installDefinition(h,value);await h.node();const summary=c66PickerSummary(h),tag=c66PickerTag(summary,'review_required');assert.ok(tag,'the selected unavailable tool has the attention badge');assert.equal(decode(tag[3]),'도구 확인 필요');assert.doesNotMatch(summary.text,/조회/);
+ if(condition==='missing'){assert.match(summary.text,/현재 연결 · 확인 필요/);assert.doesNotMatch(summary.html,/ew-job-tool-picker-version|vundefined|vnull/);}else{assert.match(summary.text,/Confluence 페이지 찾기/);assert.match(summary.text,/v7/);}
+ assert.match(h.markup,/이 도구의 현재 연결을 확인해 주세요./);assert.equal(Boolean(actionButton(h,'pick_job_tool',search.id)),false,'unavailable tool is not offered as a new selection');
+ h.click('pick_job_tool',{id:search.id,shared:'true'});await flush();assert.deepEqual(h.draft().definition,value);assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);
+});
+test('C66 followup legacy tool picker keeps its existing name and select without inventing a shared version',async()=>{
+ for(const sharedCatalog of [true,false]){
+  const h=harness(),tool=c66LegacyTool(h),value=definition();Object.assign(value.nodes.j,{mode:'tool',tool_contract_id:tool.id,tool_contract_revision:tool.revision,tool_reference:copy(tool.reference)});if(!sharedCatalog)delete h.state.operations.shared_tools;installDefinition(h,value);await h.node();
+  if(sharedCatalog){const summary=c66PickerSummary(h);assert.equal(summary.text,tool.name);assert.doesNotMatch(summary.html,/ew-author-tag|ew-job-tool-picker-version/);}else{assert.equal(h.fields.find(field=>field.name==='tool_contract_id').value,tool.id);assert.doesNotMatch(h.markup,/ew-job-tool-picker-summary/);}
+  assert.deepEqual(h.draft().definition,value);assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);
+ }
+});
+
 test('C66 human detail uses the compact breadcrumb and three real mode radios',async()=>{
  const h=harness();await h.node();assert.match(h.markup,/ew-job-detail/);assert.match(h.markup,/단계와 작업[\s\S]*1[\s\S]*단계/);
  assert.doesNotMatch(h.markup,/<h2>확인 작업<\/h2>|class="ew-author-inline"|Native/);

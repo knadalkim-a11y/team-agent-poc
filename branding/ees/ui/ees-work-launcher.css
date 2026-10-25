@@ -822,6 +822,14 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer .ew-job-main .ew-shared-picker-label{margin-bottom:-8px;}
 #ees-work-designer .ew-job-main .ew-shared-picker{margin:0;}
 #ees-work-designer .ew-job-main .ew-shared-picker>summary{min-height:40px;border-radius:6px;font-size:14px;line-height:22px;}
+#ees-work-designer .ew-job-detail .ew-shared-picker>.ew-job-tool-picker-summary{display:flex;align-items:center;gap:8px;min-height:38px;padding:8px 12px;box-sizing:border-box;list-style:none;color:var(--ees-text-primary);}
+#ees-work-designer .ew-job-detail .ew-job-tool-picker-summary::-webkit-details-marker{display:none;}
+#ees-work-designer .ew-job-detail .ew-job-tool-picker-summary::marker{content:'';}
+#ees-work-designer .ew-job-detail .ew-job-tool-picker-name{min-width:0;overflow-wrap:anywhere;}
+#ees-work-designer .ew-job-detail .ew-job-tool-picker-summary>.ew-author-tag{flex:none;margin:0;padding:1px 6px;border-radius:4px;background:var(--ees-surface-muted);color:var(--ees-text-strong);font-size:12px;font-weight:500;line-height:16px;}
+#ees-work-designer .ew-job-detail .ew-job-tool-picker-summary>.ew-author-tag[data-state=review_required]{background:#faf1e4;color:var(--ees-status-attention);}
+#ees-work-designer .ew-job-detail .ew-job-tool-picker-version{flex:none;color:var(--ees-text-tertiary);font-size:12px;line-height:18px;}
+#ees-work-designer .ew-job-detail .ew-job-tool-picker-summary>.ew-icon{flex:none;width:14px;height:14px;margin-left:auto;}
 #ees-work-designer .ew-job-main .ew-shared-picker-options{min-width:0;max-width:100%;}
 #ees-work-designer .ew-job-main>p,#ees-work-designer .ew-job-section-content>p{margin:0;color:var(--ees-text-secondary);font-size:12px;line-height:18px;overflow-wrap:anywhere;}
 #ees-work-designer .ew-job-main>.ew-procedure-unconnected{color:var(--ees-status-attention);}

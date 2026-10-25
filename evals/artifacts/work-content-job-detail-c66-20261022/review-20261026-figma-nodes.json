@@ -1,0 +1,1532 @@
+{
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "page": {
+    "id": "1285:1829",
+    "name": "워크-1 · 업무 절차 · 초안"
+  },
+  "queriedAtUTC": "2026-10-25T22:14:25.873Z",
+  "readOnly": true,
+  "mutatedNodeIds": [],
+  "nodes": [
+    {
+      "id": "1456:4557",
+      "naturalBounds": {
+        "width": 480,
+        "height": 958
+      },
+      "name": "B3-1 · 작업 상세 · 기본 (도구 연결됨 · 모두 접힘)",
+      "type": "FRAME",
+      "texts": [
+        {
+          "id": "1456:4559",
+          "text": "업무 절차"
+        },
+        {
+          "id": "1456:4560",
+          "text": "EMS"
+        },
+        {
+          "id": "1456:4567",
+          "text": "신규 공장 횡전개"
+        },
+        {
+          "id": "I1456:4568;948:1096",
+          "text": "초안"
+        },
+        {
+          "id": "1456:4572",
+          "text": "EMS · 게시본 없음"
+        },
+        {
+          "id": "1456:4576",
+          "text": "업무 내용"
+        },
+        {
+          "id": "1456:4579",
+          "text": "실행 방식"
+        },
+        {
+          "id": "1456:4582",
+          "text": "판정 규칙"
+        },
+        {
+          "id": "1456:4585",
+          "text": "게시 기록"
+        },
+        {
+          "id": "1456:4590",
+          "text": "단계와 작업"
+        },
+        {
+          "id": "1456:4591",
+          "text": "/"
+        },
+        {
+          "id": "1456:4592",
+          "text": "1 사전준비"
+        },
+        {
+          "id": "1456:4602",
+          "text": "작업 이름"
+        },
+        {
+          "id": "1456:4600",
+          "text": "셋업 가이드 찾기"
+        },
+        {
+          "id": "1456:4611",
+          "text": "수행 방법"
+        },
+        {
+          "id": "1456:4605",
+          "text": "사람이 확인"
+        },
+        {
+          "id": "1456:4607",
+          "text": "도구로 처리"
+        },
+        {
+          "id": "1456:4609",
+          "text": "AI 초안"
+        },
+        {
+          "id": "1456:4621",
+          "text": "쓰는 도구"
+        },
+        {
+          "id": "1456:4613",
+          "text": "Confluence · 페이지 찾기"
+        },
+        {
+          "id": "I1456:4616;948:1092",
+          "text": "조회"
+        },
+        {
+          "id": "1456:4618",
+          "text": "v1"
+        },
+        {
+          "id": "1456:4622",
+          "text": "찾을 말과 공간으로 문서 목록을 찾습니다."
+        },
+        {
+          "id": "1456:4624",
+          "text": "돌려주는 것"
+        },
+        {
+          "id": "1456:4625",
+          "text": "문서 목록 · 페이지 번호, 제목, 주소 · 한 번에 한 쪽"
+        },
+        {
+          "id": "1456:4629",
+          "text": "도구에 넣을 값"
+        },
+        {
+          "id": "1456:4631",
+          "text": "3개"
+        },
+        {
+          "id": "1456:4632",
+          "text": "값마다 어디서 가져올지 정합니다."
+        },
+        {
+          "id": "I1456:4633;1454:4371",
+          "text": "찾을 말"
+        },
+        {
+          "id": "I1456:4633;1454:4372;948:1092",
+          "text": "필수"
+        },
+        {
+          "id": "I1456:4633;1454:4374",
+          "text": "실행할 때 입력 · 담당자가 넣습니다"
+        },
+        {
+          "id": "I1456:4642;1454:4371",
+          "text": "공간"
+        },
+        {
+          "id": "I1456:4642;1454:4374",
+          "text": "고정값 · EES"
+        },
+        {
+          "id": "I1456:4651;1454:4371",
+          "text": "개수"
+        },
+        {
+          "id": "I1456:4651;1454:4374",
+          "text": "고정값 · 10"
+        },
+        {
+          "id": "I1456:4661;1454:4408",
+          "text": "완료 조건"
+        },
+        {
+          "id": "I1456:4661;1454:4409",
+          "text": "자동 확인 · 담당자가 목록을 확정하면 완료"
+        },
+        {
+          "id": "I1456:4666;1454:4408",
+          "text": "추가 설정"
+        },
+        {
+          "id": "I1456:4666;1454:4409",
+          "text": "담당 미지정 · 앞 작업 1개"
+        },
+        {
+          "id": "1456:4673",
+          "text": "변경 있음 · 저장 안 됨"
+        },
+        {
+          "id": "I1456:4675;746:644",
+          "text": "게시 전 확인"
+        },
+        {
+          "id": "I1456:4676;746:642",
+          "text": "초안 저장"
+        },
+        {
+          "id": "I1459:4815;1367:19994",
+          "text": "3"
+        },
+        {
+          "id": "I1459:4817;1367:19994",
+          "text": "4"
+        },
+        {
+          "id": "I1459:4819;1367:19994",
+          "text": "5"
+        },
+        {
+          "id": "I1459:4821;1367:19994",
+          "text": "6"
+        },
+        {
+          "id": "I1459:4823;1367:19994",
+          "text": "7"
+        },
+        {
+          "id": "I1459:4825;1367:19994",
+          "text": "8"
+        },
+        {
+          "id": "I1459:4831;1367:19994",
+          "text": "11"
+        },
+        {
+          "id": "I1459:4841;1367:19994",
+          "text": "16"
+        }
+      ],
+      "selectionNodes": [
+        {
+          "id": "1456:4621",
+          "name": "Label",
+          "type": "TEXT",
+          "parentId": "1456:4620",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "width": 47,
+          "height": 16,
+          "absoluteBoundingBox": {
+            "x": 38,
+            "y": 15353,
+            "width": 47,
+            "height": 16
+          },
+          "opacity": 1,
+          "fills": [
+            {
+              "type": "SOLID",
+              "visible": true,
+              "opacity": 1,
+              "blendMode": "NORMAL",
+              "color": {
+                "r": 0.3607843220233917,
+                "g": 0.3686274588108063,
+                "b": 0.3960784375667572
+              },
+              "boundVariables": {
+                "color": {
+                  "type": "VARIABLE_ALIAS",
+                  "id": "VariableID:746:162"
+                }
+              }
+            }
+          ],
+          "strokes": [],
+          "strokeWeight": 1,
+          "strokeAlign": "OUTSIDE",
+          "characters": "쓰는 도구",
+          "textSegments": [
+            {
+              "characters": "쓰는 도구",
+              "start": 0,
+              "end": 5,
+              "fontSize": 12,
+              "fontName": {
+                "family": "Noto Sans KR",
+                "style": "Medium",
+                "variationSettings": {
+                  "wght": 500
+                }
+              },
+              "fontWeight": 500,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 16
+              },
+              "letterSpacing": {
+                "unit": "PERCENT",
+                "value": 0
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "visible": true,
+                  "opacity": 1,
+                  "blendMode": "NORMAL",
+                  "color": {
+                    "r": 0.3607843220233917,
+                    "g": 0.3686274588108063,
+                    "b": 0.3960784375667572
+                  },
+                  "boundVariables": {
+                    "color": {
+                      "type": "VARIABLE_ALIAS",
+                      "id": "VariableID:746:162"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "1456:4613",
+          "name": "Confluence · 페이지 찾기",
+          "type": "TEXT",
+          "parentId": "1456:4612",
+          "visible": true,
+          "x": 13,
+          "y": 9,
+          "width": 155,
+          "height": 22,
+          "absoluteBoundingBox": {
+            "x": 51,
+            "y": 15384,
+            "width": 155,
+            "height": 22
+          },
+          "opacity": 1,
+          "fills": [
+            {
+              "type": "SOLID",
+              "visible": true,
+              "opacity": 1,
+              "blendMode": "NORMAL",
+              "color": {
+                "r": 0.12156862765550613,
+                "g": 0.125490203499794,
+                "b": 0.13725490868091583
+              },
+              "boundVariables": {
+                "color": {
+                  "type": "VARIABLE_ALIAS",
+                  "id": "VariableID:746:160"
+                }
+              }
+            }
+          ],
+          "strokes": [],
+          "strokeWeight": 1,
+          "strokeAlign": "OUTSIDE",
+          "characters": "Confluence · 페이지 찾기",
+          "textSegments": [
+            {
+              "characters": "Confluence · 페이지 찾기",
+              "start": 0,
+              "end": 19,
+              "fontSize": 14,
+              "fontName": {
+                "family": "Noto Sans KR",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontWeight": 400,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 22
+              },
+              "letterSpacing": {
+                "unit": "PERCENT",
+                "value": -0.30000001192092896
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "visible": true,
+                  "opacity": 1,
+                  "blendMode": "NORMAL",
+                  "color": {
+                    "r": 0.12156862765550613,
+                    "g": 0.125490203499794,
+                    "b": 0.13725490868091583
+                  },
+                  "boundVariables": {
+                    "color": {
+                      "type": "VARIABLE_ALIAS",
+                      "id": "VariableID:746:160"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "1456:4612",
+          "name": "Select",
+          "type": "FRAME",
+          "parentId": "1456:4620",
+          "visible": true,
+          "x": 0,
+          "y": 22,
+          "width": 404,
+          "height": 40,
+          "absoluteBoundingBox": {
+            "x": 38,
+            "y": 15375,
+            "width": 404,
+            "height": 40
+          },
+          "layoutMode": "HORIZONTAL",
+          "itemSpacing": 8,
+          "paddingTop": 8,
+          "paddingRight": 12,
+          "paddingBottom": 8,
+          "paddingLeft": 12,
+          "primaryAxisAlignItems": "MIN",
+          "counterAxisAlignItems": "CENTER",
+          "cornerRadius": 6,
+          "opacity": 1,
+          "fills": [
+            {
+              "type": "SOLID",
+              "visible": true,
+              "opacity": 1,
+              "blendMode": "NORMAL",
+              "color": {
+                "r": 1,
+                "g": 1,
+                "b": 1
+              },
+              "boundVariables": {
+                "color": {
+                  "type": "VARIABLE_ALIAS",
+                  "id": "VariableID:746:153"
+                }
+              }
+            }
+          ],
+          "strokes": [
+            {
+              "type": "SOLID",
+              "visible": true,
+              "opacity": 1,
+              "blendMode": "NORMAL",
+              "color": {
+                "r": 0.8352941274642944,
+                "g": 0.8392156958580017,
+                "b": 0.8549019694328308
+              },
+              "boundVariables": {
+                "color": {
+                  "type": "VARIABLE_ALIAS",
+                  "id": "VariableID:746:159"
+                }
+              }
+            }
+          ],
+          "strokeWeight": 1,
+          "strokeAlign": "INSIDE"
+        },
+        {
+          "id": "1456:4616",
+          "name": "Tag / 조회",
+          "type": "INSTANCE",
+          "parentId": "1456:4612",
+          "visible": true,
+          "x": 176,
+          "y": 11,
+          "width": 35,
+          "height": 18,
+          "absoluteBoundingBox": {
+            "x": 214,
+            "y": 15386,
+            "width": 35,
+            "height": 18
+          },
+          "layoutMode": "HORIZONTAL",
+          "itemSpacing": 0,
+          "paddingTop": 1,
+          "paddingRight": 6,
+          "paddingBottom": 1,
+          "paddingLeft": 6,
+          "primaryAxisAlignItems": "MIN",
+          "counterAxisAlignItems": "CENTER",
+          "cornerRadius": 4,
+          "opacity": 1,
+          "fills": [
+            {
+              "type": "SOLID",
+              "visible": true,
+              "opacity": 1,
+              "blendMode": "NORMAL",
+              "color": {
+                "r": 0.9254902005195618,
+                "g": 0.9254902005195618,
+                "b": 0.9372549057006836
+              },
+              "boundVariables": {
+                "color": {
+                  "type": "VARIABLE_ALIAS",
+                  "id": "VariableID:746:156"
+                }
+              }
+            }
+          ],
+          "strokes": [],
+          "strokeWeight": 1,
+          "strokeAlign": "INSIDE"
+        },
+        {
+          "id": "I1456:4616;948:1092",
+          "name": "상태",
+          "type": "TEXT",
+          "parentId": "1456:4616",
+          "visible": true,
+          "x": 6,
+          "y": 1,
+          "width": 23,
+          "height": 16,
+          "absoluteBoundingBox": {
+            "x": 220,
+            "y": 15387,
+            "width": 23,
+            "height": 16
+          },
+          "opacity": 1,
+          "fills": [
+            {
+              "type": "SOLID",
+              "visible": true,
+              "opacity": 1,
+              "blendMode": "NORMAL",
+              "color": {
+                "r": 0.24705882370471954,
+                "g": 0.2549019753932953,
+                "b": 0.27843138575553894
+              },
+              "boundVariables": {
+                "color": {
+                  "type": "VARIABLE_ALIAS",
+                  "id": "VariableID:746:161"
+                }
+              }
+            }
+          ],
+          "strokes": [],
+          "strokeWeight": 1,
+          "strokeAlign": "OUTSIDE",
+          "characters": "조회",
+          "textSegments": [
+            {
+              "characters": "조회",
+              "start": 0,
+              "end": 2,
+              "fontSize": 12,
+              "fontName": {
+                "family": "Noto Sans KR",
+                "style": "Medium",
+                "variationSettings": {
+                  "wght": 500
+                }
+              },
+              "fontWeight": 500,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 16
+              },
+              "letterSpacing": {
+                "unit": "PERCENT",
+                "value": 0
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "visible": true,
+                  "opacity": 1,
+                  "blendMode": "NORMAL",
+                  "color": {
+                    "r": 0.24705882370471954,
+                    "g": 0.2549019753932953,
+                    "b": 0.27843138575553894
+                  },
+                  "boundVariables": {
+                    "color": {
+                      "type": "VARIABLE_ALIAS",
+                      "id": "VariableID:746:161"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "1456:4618",
+          "name": "Version",
+          "type": "TEXT",
+          "parentId": "1456:4612",
+          "visible": true,
+          "x": 219,
+          "y": 11,
+          "width": 13,
+          "height": 18,
+          "absoluteBoundingBox": {
+            "x": 257,
+            "y": 15386,
+            "width": 13,
+            "height": 18
+          },
+          "opacity": 1,
+          "fills": [
+            {
+              "type": "SOLID",
+              "visible": true,
+              "opacity": 1,
+              "blendMode": "NORMAL",
+              "color": {
+                "r": 0.43529412150382996,
+                "g": 0.4431372582912445,
+                "b": 0.47843137383461
+              },
+              "boundVariables": {
+                "color": {
+                  "type": "VARIABLE_ALIAS",
+                  "id": "VariableID:746:163"
+                }
+              }
+            }
+          ],
+          "strokes": [],
+          "strokeWeight": 1,
+          "strokeAlign": "OUTSIDE",
+          "characters": "v1",
+          "textSegments": [
+            {
+              "characters": "v1",
+              "start": 0,
+              "end": 2,
+              "fontSize": 12,
+              "fontName": {
+                "family": "Noto Sans KR",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontWeight": 400,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 18
+              },
+              "letterSpacing": {
+                "unit": "PERCENT",
+                "value": 0
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "visible": true,
+                  "opacity": 1,
+                  "blendMode": "NORMAL",
+                  "color": {
+                    "r": 0.43529412150382996,
+                    "g": 0.4431372582912445,
+                    "b": 0.47843137383461
+                  },
+                  "boundVariables": {
+                    "color": {
+                      "type": "VARIABLE_ALIAS",
+                      "id": "VariableID:746:163"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "1456:4619",
+          "name": "Flex",
+          "type": "FRAME",
+          "parentId": "1456:4612",
+          "visible": true,
+          "x": 240,
+          "y": 19.5,
+          "width": 129,
+          "height": 1,
+          "absoluteBoundingBox": {
+            "x": 278,
+            "y": 15394.5,
+            "width": 129,
+            "height": 1
+          },
+          "layoutMode": "NONE",
+          "itemSpacing": 0,
+          "paddingTop": 0,
+          "paddingRight": 0,
+          "paddingBottom": 0,
+          "paddingLeft": 0,
+          "primaryAxisAlignItems": "MIN",
+          "counterAxisAlignItems": "MIN",
+          "cornerRadius": 0,
+          "opacity": 1,
+          "fills": [],
+          "strokes": [],
+          "strokeWeight": 1,
+          "strokeAlign": "INSIDE"
+        },
+        {
+          "id": "1456:4614",
+          "name": "Icon/chevron-down",
+          "type": "INSTANCE",
+          "parentId": "1456:4612",
+          "visible": true,
+          "x": 377,
+          "y": 13,
+          "width": 14,
+          "height": 14,
+          "absoluteBoundingBox": {
+            "x": 415,
+            "y": 15388,
+            "width": 14,
+            "height": 14
+          },
+          "layoutMode": "NONE",
+          "itemSpacing": 0,
+          "paddingTop": 0,
+          "paddingRight": 0,
+          "paddingBottom": 0,
+          "paddingLeft": 0,
+          "primaryAxisAlignItems": "MIN",
+          "counterAxisAlignItems": "MIN",
+          "cornerRadius": 0,
+          "opacity": 1,
+          "fills": [],
+          "strokes": [],
+          "strokeWeight": 0.699999988079071,
+          "strokeAlign": "INSIDE"
+        },
+        {
+          "id": "I1456:4614;726:215",
+          "name": "Vector",
+          "type": "VECTOR",
+          "parentId": "1456:4614",
+          "visible": true,
+          "x": 3.5,
+          "y": 5.25,
+          "width": 7,
+          "height": 3.5,
+          "absoluteBoundingBox": {
+            "x": 418.5,
+            "y": 15393.25,
+            "width": 7,
+            "height": 3.5
+          },
+          "cornerRadius": 0,
+          "opacity": 1,
+          "fills": [],
+          "strokes": [
+            {
+              "type": "SOLID",
+              "visible": true,
+              "opacity": 1,
+              "blendMode": "NORMAL",
+              "color": {
+                "r": 0.43529412150382996,
+                "g": 0.4431372582912445,
+                "b": 0.47843137383461
+              },
+              "boundVariables": {
+                "color": {
+                  "type": "VARIABLE_ALIAS",
+                  "id": "VariableID:746:165"
+                }
+              }
+            }
+          ],
+          "strokeWeight": 0.9916666150093079,
+          "strokeAlign": "CENTER",
+          "vectorPaths": [
+            {
+              "windingRule": "NONE",
+              "data": "M 0 0 L 3.5 3.5 L 7 0"
+            }
+          ],
+          "strokeCap": "ROUND",
+          "strokeJoin": "ROUND"
+        }
+      ]
+    },
+    {
+      "id": "1458:4880",
+      "naturalBounds": {
+        "width": 480,
+        "height": 924
+      },
+      "name": "B3-6b · 작업 상세 · 연결한 도구를 지금 쓸 수 없음 (도구 확인 필요)",
+      "type": "FRAME",
+      "texts": [
+        {
+          "id": "1458:4882",
+          "text": "업무 절차"
+        },
+        {
+          "id": "1458:4883",
+          "text": "EMS"
+        },
+        {
+          "id": "1458:4890",
+          "text": "신규 공장 횡전개"
+        },
+        {
+          "id": "I1458:4891;948:1096",
+          "text": "초안"
+        },
+        {
+          "id": "1458:4895",
+          "text": "EMS · 게시본 없음"
+        },
+        {
+          "id": "1458:4899",
+          "text": "업무 내용"
+        },
+        {
+          "id": "1458:4902",
+          "text": "실행 방식"
+        },
+        {
+          "id": "1458:4905",
+          "text": "판정 규칙"
+        },
+        {
+          "id": "1458:4908",
+          "text": "게시 기록"
+        },
+        {
+          "id": "1458:4913",
+          "text": "단계와 작업"
+        },
+        {
+          "id": "1458:4914",
+          "text": "/"
+        },
+        {
+          "id": "1458:4915",
+          "text": "1 사전준비"
+        },
+        {
+          "id": "1458:4925",
+          "text": "작업 이름"
+        },
+        {
+          "id": "1458:4923",
+          "text": "셋업 가이드 읽기"
+        },
+        {
+          "id": "1458:4934",
+          "text": "수행 방법"
+        },
+        {
+          "id": "1458:4928",
+          "text": "사람이 확인"
+        },
+        {
+          "id": "1458:4930",
+          "text": "도구로 처리"
+        },
+        {
+          "id": "1458:4932",
+          "text": "AI 초안"
+        },
+        {
+          "id": "1458:4944",
+          "text": "쓰는 도구"
+        },
+        {
+          "id": "1458:4936",
+          "text": "Confluence · 페이지 읽기"
+        },
+        {
+          "id": "I1458:4939;948:1096",
+          "text": "도구 확인 필요"
+        },
+        {
+          "id": "1458:4941",
+          "text": "v1"
+        },
+        {
+          "id": "1458:4952",
+          "text": "지금은 이 작업을 실행할 수 없습니다"
+        },
+        {
+          "id": "1458:4953",
+          "text": "관리자가 이 도구를 다시 확인해야 합니다. 정해 둔 넣을 값은 그대로 남아 있고, 확인이 끝날 때까지 게시 전 확인에서 이 작업이 걸립니다."
+        },
+        {
+          "id": "1458:4955",
+          "text": "도구 열기"
+        },
+        {
+          "id": "1458:4956",
+          "text": "관리자에게만 보임"
+        },
+        {
+          "id": "1458:4958",
+          "text": "돌려주는 것"
+        },
+        {
+          "id": "1458:4959",
+          "text": "본문과 출처 · 길면 잘려서 일부 결과"
+        },
+        {
+          "id": "1458:4963",
+          "text": "도구에 넣을 값"
+        },
+        {
+          "id": "1458:4965",
+          "text": "1개"
+        },
+        {
+          "id": "1458:4966",
+          "text": "값마다 어디서 가져올지 정합니다."
+        },
+        {
+          "id": "I1458:4967;1454:4371",
+          "text": "페이지 번호"
+        },
+        {
+          "id": "I1458:4967;1454:4372;948:1092",
+          "text": "필수"
+        },
+        {
+          "id": "I1458:4967;1454:4374",
+          "text": "실행할 때 입력 · 담당자가 넣습니다"
+        },
+        {
+          "id": "I1458:4977;1454:4408",
+          "text": "완료 조건"
+        },
+        {
+          "id": "I1458:4977;1454:4409",
+          "text": "자동 확인 · 담당자가 확인하면 완료"
+        },
+        {
+          "id": "I1458:4982;1454:4408",
+          "text": "추가 설정"
+        },
+        {
+          "id": "I1458:4982;1454:4409",
+          "text": "담당 미지정 · 앞 작업 1개"
+        },
+        {
+          "id": "1458:4989",
+          "text": "초안 r2 · 저장됨"
+        },
+        {
+          "id": "I1458:4991;746:644",
+          "text": "게시 전 확인"
+        },
+        {
+          "id": "I1458:4992;746:642",
+          "text": "초안 저장"
+        },
+        {
+          "id": "I1459:4847;1367:19994",
+          "text": "19"
+        }
+      ],
+      "selectionNodes": [
+        {
+          "id": "1458:4944",
+          "name": "Label",
+          "type": "TEXT",
+          "parentId": "1458:4943",
+          "visible": true,
+          "x": 0,
+          "y": 0,
+          "width": 47,
+          "height": 16,
+          "absoluteBoundingBox": {
+            "x": 4838,
+            "y": 15353,
+            "width": 47,
+            "height": 16
+          },
+          "opacity": 1,
+          "fills": [
+            {
+              "type": "SOLID",
+              "visible": true,
+              "opacity": 1,
+              "blendMode": "NORMAL",
+              "color": {
+                "r": 0.3607843220233917,
+                "g": 0.3686274588108063,
+                "b": 0.3960784375667572
+              },
+              "boundVariables": {
+                "color": {
+                  "type": "VARIABLE_ALIAS",
+                  "id": "VariableID:746:162"
+                }
+              }
+            }
+          ],
+          "strokes": [],
+          "strokeWeight": 1,
+          "strokeAlign": "OUTSIDE",
+          "characters": "쓰는 도구",
+          "textSegments": [
+            {
+              "characters": "쓰는 도구",
+              "start": 0,
+              "end": 5,
+              "fontSize": 12,
+              "fontName": {
+                "family": "Noto Sans KR",
+                "style": "Medium",
+                "variationSettings": {
+                  "wght": 500
+                }
+              },
+              "fontWeight": 500,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 16
+              },
+              "letterSpacing": {
+                "unit": "PERCENT",
+                "value": 0
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "visible": true,
+                  "opacity": 1,
+                  "blendMode": "NORMAL",
+                  "color": {
+                    "r": 0.3607843220233917,
+                    "g": 0.3686274588108063,
+                    "b": 0.3960784375667572
+                  },
+                  "boundVariables": {
+                    "color": {
+                      "type": "VARIABLE_ALIAS",
+                      "id": "VariableID:746:162"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "1458:4936",
+          "name": "Confluence · 페이지 읽기",
+          "type": "TEXT",
+          "parentId": "1458:4935",
+          "visible": true,
+          "x": 13,
+          "y": 9,
+          "width": 155,
+          "height": 22,
+          "absoluteBoundingBox": {
+            "x": 4851,
+            "y": 15384,
+            "width": 155,
+            "height": 22
+          },
+          "opacity": 1,
+          "fills": [
+            {
+              "type": "SOLID",
+              "visible": true,
+              "opacity": 1,
+              "blendMode": "NORMAL",
+              "color": {
+                "r": 0.12156862765550613,
+                "g": 0.125490203499794,
+                "b": 0.13725490868091583
+              },
+              "boundVariables": {
+                "color": {
+                  "type": "VARIABLE_ALIAS",
+                  "id": "VariableID:746:160"
+                }
+              }
+            }
+          ],
+          "strokes": [],
+          "strokeWeight": 1,
+          "strokeAlign": "OUTSIDE",
+          "characters": "Confluence · 페이지 읽기",
+          "textSegments": [
+            {
+              "characters": "Confluence · 페이지 읽기",
+              "start": 0,
+              "end": 19,
+              "fontSize": 14,
+              "fontName": {
+                "family": "Noto Sans KR",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontWeight": 400,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 22
+              },
+              "letterSpacing": {
+                "unit": "PERCENT",
+                "value": -0.30000001192092896
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "visible": true,
+                  "opacity": 1,
+                  "blendMode": "NORMAL",
+                  "color": {
+                    "r": 0.12156862765550613,
+                    "g": 0.125490203499794,
+                    "b": 0.13725490868091583
+                  },
+                  "boundVariables": {
+                    "color": {
+                      "type": "VARIABLE_ALIAS",
+                      "id": "VariableID:746:160"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "1458:4935",
+          "name": "Select",
+          "type": "FRAME",
+          "parentId": "1458:4943",
+          "visible": true,
+          "x": 0,
+          "y": 22,
+          "width": 404,
+          "height": 40,
+          "absoluteBoundingBox": {
+            "x": 4838,
+            "y": 15375,
+            "width": 404,
+            "height": 40
+          },
+          "layoutMode": "HORIZONTAL",
+          "itemSpacing": 8,
+          "paddingTop": 8,
+          "paddingRight": 12,
+          "paddingBottom": 8,
+          "paddingLeft": 12,
+          "primaryAxisAlignItems": "MIN",
+          "counterAxisAlignItems": "CENTER",
+          "cornerRadius": 6,
+          "opacity": 1,
+          "fills": [
+            {
+              "type": "SOLID",
+              "visible": true,
+              "opacity": 1,
+              "blendMode": "NORMAL",
+              "color": {
+                "r": 1,
+                "g": 1,
+                "b": 1
+              },
+              "boundVariables": {
+                "color": {
+                  "type": "VARIABLE_ALIAS",
+                  "id": "VariableID:746:153"
+                }
+              }
+            }
+          ],
+          "strokes": [
+            {
+              "type": "SOLID",
+              "visible": true,
+              "opacity": 1,
+              "blendMode": "NORMAL",
+              "color": {
+                "r": 0.8352941274642944,
+                "g": 0.8392156958580017,
+                "b": 0.8549019694328308
+              },
+              "boundVariables": {
+                "color": {
+                  "type": "VARIABLE_ALIAS",
+                  "id": "VariableID:746:159"
+                }
+              }
+            }
+          ],
+          "strokeWeight": 1,
+          "strokeAlign": "INSIDE"
+        },
+        {
+          "id": "1458:4939",
+          "name": "Tag / 도구 확인 필요",
+          "type": "INSTANCE",
+          "parentId": "1458:4935",
+          "visible": true,
+          "x": 176,
+          "y": 11,
+          "width": 84,
+          "height": 18,
+          "absoluteBoundingBox": {
+            "x": 5014,
+            "y": 15386,
+            "width": 84,
+            "height": 18
+          },
+          "layoutMode": "HORIZONTAL",
+          "itemSpacing": 0,
+          "paddingTop": 1,
+          "paddingRight": 6,
+          "paddingBottom": 1,
+          "paddingLeft": 6,
+          "primaryAxisAlignItems": "MIN",
+          "counterAxisAlignItems": "CENTER",
+          "cornerRadius": 4,
+          "opacity": 1,
+          "fills": [
+            {
+              "type": "SOLID",
+              "visible": true,
+              "opacity": 1,
+              "blendMode": "NORMAL",
+              "color": {
+                "r": 0.9803921580314636,
+                "g": 0.9450980424880981,
+                "b": 0.8941176533699036
+              },
+              "boundVariables": {
+                "color": {
+                  "type": "VARIABLE_ALIAS",
+                  "id": "VariableID:746:178"
+                }
+              }
+            }
+          ],
+          "strokes": [],
+          "strokeWeight": 1,
+          "strokeAlign": "INSIDE"
+        },
+        {
+          "id": "I1458:4939;948:1096",
+          "name": "상태",
+          "type": "TEXT",
+          "parentId": "1458:4939",
+          "visible": true,
+          "x": 6,
+          "y": 1,
+          "width": 72,
+          "height": 16,
+          "absoluteBoundingBox": {
+            "x": 5020,
+            "y": 15387,
+            "width": 72,
+            "height": 16
+          },
+          "opacity": 1,
+          "fills": [
+            {
+              "type": "SOLID",
+              "visible": true,
+              "opacity": 1,
+              "blendMode": "NORMAL",
+              "color": {
+                "r": 0.5882353186607361,
+                "g": 0.3490196168422699,
+                "b": 0.0470588244497776
+              },
+              "boundVariables": {
+                "color": {
+                  "type": "VARIABLE_ALIAS",
+                  "id": "VariableID:746:177"
+                }
+              }
+            }
+          ],
+          "strokes": [],
+          "strokeWeight": 1,
+          "strokeAlign": "OUTSIDE",
+          "characters": "도구 확인 필요",
+          "textSegments": [
+            {
+              "characters": "도구 확인 필요",
+              "start": 0,
+              "end": 8,
+              "fontSize": 12,
+              "fontName": {
+                "family": "Noto Sans KR",
+                "style": "Medium",
+                "variationSettings": {
+                  "wght": 500
+                }
+              },
+              "fontWeight": 500,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 16
+              },
+              "letterSpacing": {
+                "unit": "PERCENT",
+                "value": 0
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "visible": true,
+                  "opacity": 1,
+                  "blendMode": "NORMAL",
+                  "color": {
+                    "r": 0.5882353186607361,
+                    "g": 0.3490196168422699,
+                    "b": 0.0470588244497776
+                  },
+                  "boundVariables": {
+                    "color": {
+                      "type": "VARIABLE_ALIAS",
+                      "id": "VariableID:746:177"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "1458:4941",
+          "name": "Version",
+          "type": "TEXT",
+          "parentId": "1458:4935",
+          "visible": true,
+          "x": 268,
+          "y": 11,
+          "width": 13,
+          "height": 18,
+          "absoluteBoundingBox": {
+            "x": 5106,
+            "y": 15386,
+            "width": 13,
+            "height": 18
+          },
+          "opacity": 1,
+          "fills": [
+            {
+              "type": "SOLID",
+              "visible": true,
+              "opacity": 1,
+              "blendMode": "NORMAL",
+              "color": {
+                "r": 0.43529412150382996,
+                "g": 0.4431372582912445,
+                "b": 0.47843137383461
+              },
+              "boundVariables": {
+                "color": {
+                  "type": "VARIABLE_ALIAS",
+                  "id": "VariableID:746:163"
+                }
+              }
+            }
+          ],
+          "strokes": [],
+          "strokeWeight": 1,
+          "strokeAlign": "OUTSIDE",
+          "characters": "v1",
+          "textSegments": [
+            {
+              "characters": "v1",
+              "start": 0,
+              "end": 2,
+              "fontSize": 12,
+              "fontName": {
+                "family": "Noto Sans KR",
+                "style": "Regular",
+                "variationSettings": {
+                  "wght": 400
+                }
+              },
+              "fontWeight": 400,
+              "lineHeight": {
+                "unit": "PIXELS",
+                "value": 18
+              },
+              "letterSpacing": {
+                "unit": "PERCENT",
+                "value": 0
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "visible": true,
+                  "opacity": 1,
+                  "blendMode": "NORMAL",
+                  "color": {
+                    "r": 0.43529412150382996,
+                    "g": 0.4431372582912445,
+                    "b": 0.47843137383461
+                  },
+                  "boundVariables": {
+                    "color": {
+                      "type": "VARIABLE_ALIAS",
+                      "id": "VariableID:746:163"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "1458:4942",
+          "name": "Flex",
+          "type": "FRAME",
+          "parentId": "1458:4935",
+          "visible": true,
+          "x": 289,
+          "y": 19.5,
+          "width": 80,
+          "height": 1,
+          "absoluteBoundingBox": {
+            "x": 5127,
+            "y": 15394.5,
+            "width": 80,
+            "height": 1
+          },
+          "layoutMode": "NONE",
+          "itemSpacing": 0,
+          "paddingTop": 0,
+          "paddingRight": 0,
+          "paddingBottom": 0,
+          "paddingLeft": 0,
+          "primaryAxisAlignItems": "MIN",
+          "counterAxisAlignItems": "MIN",
+          "cornerRadius": 0,
+          "opacity": 1,
+          "fills": [],
+          "strokes": [],
+          "strokeWeight": 1,
+          "strokeAlign": "INSIDE"
+        },
+        {
+          "id": "1458:4937",
+          "name": "Icon/chevron-down",
+          "type": "INSTANCE",
+          "parentId": "1458:4935",
+          "visible": true,
+          "x": 377,
+          "y": 13,
+          "width": 14,
+          "height": 14,
+          "absoluteBoundingBox": {
+            "x": 5215,
+            "y": 15388,
+            "width": 14,
+            "height": 14
+          },
+          "layoutMode": "NONE",
+          "itemSpacing": 0,
+          "paddingTop": 0,
+          "paddingRight": 0,
+          "paddingBottom": 0,
+          "paddingLeft": 0,
+          "primaryAxisAlignItems": "MIN",
+          "counterAxisAlignItems": "MIN",
+          "cornerRadius": 0,
+          "opacity": 1,
+          "fills": [],
+          "strokes": [],
+          "strokeWeight": 0.699999988079071,
+          "strokeAlign": "INSIDE"
+        },
+        {
+          "id": "I1458:4937;726:215",
+          "name": "Vector",
+          "type": "VECTOR",
+          "parentId": "1458:4937",
+          "visible": true,
+          "x": 3.5,
+          "y": 5.25,
+          "width": 7,
+          "height": 3.5,
+          "absoluteBoundingBox": {
+            "x": 5218.5,
+            "y": 15393.25,
+            "width": 7,
+            "height": 3.5
+          },
+          "cornerRadius": 0,
+          "opacity": 1,
+          "fills": [],
+          "strokes": [
+            {
+              "type": "SOLID",
+              "visible": true,
+              "opacity": 1,
+              "blendMode": "NORMAL",
+              "color": {
+                "r": 0.43529412150382996,
+                "g": 0.4431372582912445,
+                "b": 0.47843137383461
+              },
+              "boundVariables": {
+                "color": {
+                  "type": "VARIABLE_ALIAS",
+                  "id": "VariableID:746:165"
+                }
+              }
+            }
+          ],
+          "strokeWeight": 0.9916666150093079,
+          "strokeAlign": "CENTER",
+          "vectorPaths": [
+            {
+              "windingRule": "NONE",
+              "data": "M 0 0 L 3.5 3.5 L 7 0"
+            }
+          ],
+          "strokeCap": "ROUND",
+          "strokeJoin": "ROUND"
+        }
+      ]
+    }
+  ]
+}

@@ -91,11 +91,12 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                     cards=[...document.querySelectorAll('.ew-job-detail #ew-author-node > .ew-job-card')],
                     unconnected=document.querySelector('.ew-job-main>.ew-procedure-unconnected'),
                     toolState=document.querySelector('.ew-job-tool-state'),toolOutput=document.querySelector('.ew-job-tool-output'),
-                    picker=document.querySelector('.ew-job-main .ew-shared-picker,.ew-job-main select[name=tool_contract_id]');
+                    picker=document.querySelector('.ew-job-main .ew-shared-picker,.ew-job-main select[name=tool_contract_id]'),
+                    pickerSummary=picker?.querySelector('summary');
                 return {viewport:[innerWidth,innerHeight],overflow:scroll.scrollWidth-scroll.clientWidth,
                     method:document.querySelector('.ew-job-method [name=mode]:checked')?.value,
                     focus:{action:active?.dataset.authorAction,id:active?.dataset.id,name:active?.name},
-                    sections:[...document.querySelectorAll('[data-author-action=job_section]')].map(e=>({id:e.dataset.id,expanded:e.getAttribute('aria-expanded'),disabled:e.disabled})),
+                    sections:[...document.querySelectorAll('[data-author-action=job_section]')].map(e=>({id:e.dataset.id,expanded:e.getAttribute('aria-expanded'),disabled:e.disabled,summary:e.querySelector('small')?.textContent})),
                     arguments:[...document.querySelectorAll('.ew-job-argument')].map(e=>({id:e.dataset.argumentId,text:e.innerText})),
                     argumentGeometry:[...document.querySelectorAll('.ew-job-argument')].map(e=>{
                         const toggle=e.querySelector('.ew-job-argument-toggle'),name=toggle.querySelector('strong'),summary=toggle.querySelector(':scope>span>small');
@@ -106,6 +107,20 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                     methodLabels:[...document.querySelectorAll('.ew-job-method label span')].map(e=>e.textContent),
                     unconnectedColors:unconnected?{notice:getComputedStyle(unconnected).color,pickerBorder:picker?getComputedStyle(picker).borderColor:null,pickerBorderWidth:picker?parseFloat(getComputedStyle(picker).borderTopWidth):null}:null,
                     toolStateOrder:toolState&&toolOutput?{stateBottom:toolState.getBoundingClientRect().bottom,outputTop:toolOutput.getBoundingClientRect().top}:null,
+                    pickerSummary:pickerSummary?(()=>{
+                        const rect=e=>{if(!e)return null;const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};},
+                            style=getComputedStyle(pickerSummary),name=pickerSummary.querySelector('.ew-job-tool-picker-name'),
+                            version=pickerSummary.querySelector('.ew-job-tool-picker-version'),
+                            arrow=pickerSummary.querySelector('img[src$="/f17e6.svg"]');
+                        return {classPresent:pickerSummary.classList.contains('ew-job-tool-picker-summary'),
+                            display:style.display,listStyleType:style.listStyleType,rect:rect(pickerSummary),controlRect:rect(picker),
+                            name:name?.textContent,nameRect:rect(name),version:version?.textContent??null,versionRect:rect(version),versionColor:version?getComputedStyle(version).color:null,
+                            arrow:rect(arrow),badges:[...pickerSummary.querySelectorAll('.ew-author-tag')].map(e=>({
+                                text:e.textContent,state:e.dataset.state??null,rect:rect(e),
+                                color:getComputedStyle(e).color,background:getComputedStyle(e).backgroundColor,
+                                fontSize:getComputedStyle(e).fontSize,lineHeight:getComputedStyle(e).lineHeight,
+                                fontWeight:getComputedStyle(e).fontWeight,borderRadius:getComputedStyle(e).borderRadius})),
+                            connected:!!document.querySelector('.ew-job-arguments'),unavailable:!!toolState};})():null,
                     sectionMargins:[...document.querySelectorAll('.ew-job-detail section+section')].map(e=>({className:e.className,marginTop:parseFloat(getComputedStyle(e).marginTop)})),
                     cardGaps:cards.slice(1).map((e,i)=>({before:cards[i].className,after:e.className,gap:e.getBoundingClientRect().top-cards[i].getBoundingClientRect().bottom})),
                     toggleBorders:[...document.querySelectorAll('.ew-job-detail .ew-job-argument-toggle,.ew-job-detail .ew-job-section-toggle')].map(e=>{
@@ -121,6 +136,34 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 self.assertEqual(observed['unconnectedColors'], {'notice': 'rgb(150, 89, 12)', 'pickerBorder': 'rgb(150, 89, 12)', 'pickerBorderWidth': 1})
             if observed['toolStateOrder'] is not None:
                 self.assertLessEqual(observed['toolStateOrder']['stateBottom'], observed['toolStateOrder']['outputTop'], observed['toolStateOrder'])
+            if observed['pickerSummary'] is not None:
+                summary = observed['pickerSummary']
+                self.assertTrue(summary['classPresent'], summary)
+                self.assertEqual((summary['display'], summary['listStyleType']), ('flex', 'none'), summary)
+                self.assertIsNotNone(summary['nameRect'], summary)
+                self.assertIsNotNone(summary['arrow'], summary)
+                arrow, bounds = summary['arrow'], summary['rect']
+                self.assertEqual((arrow['width'], arrow['height']), (14, 14), summary)
+                content = [summary['nameRect']] + [badge['rect'] for badge in summary['badges']]
+                if summary['versionRect']:
+                    content.append(summary['versionRect'])
+                self.assertGreaterEqual(arrow['left'], max(part['right'] for part in content), summary)
+                self.assertGreaterEqual(arrow['right'], bounds['right'] - 16, summary)
+                self.assertLessEqual(arrow['right'], bounds['right'], summary)
+                self.assertGreaterEqual(arrow['top'], bounds['top'], summary)
+                self.assertLessEqual(arrow['bottom'], bounds['bottom'], summary)
+                self.assertEqual((bounds['height'], summary['controlRect']['height']), (38, 40), summary)
+                self.assertEqual(summary['version'], 'v1' if summary['connected'] else None, summary)
+                self.assertEqual(summary['versionColor'], 'rgb(111, 113, 122)' if summary['connected'] else None, summary)
+                expected_badges = ['도구 확인 필요' if summary['unavailable'] else '조회'] if summary['connected'] else []
+                self.assertEqual([badge['text'] for badge in summary['badges']], expected_badges, summary)
+                for badge in summary['badges']:
+                    self.assertEqual((badge['rect']['height'], badge['fontSize'], badge['lineHeight'], badge['fontWeight'], badge['borderRadius']),
+                                     (18, '12px', '16px', '500', '4px'), badge)
+                    self.assertEqual((badge['color'], badge['background']),
+                                     ('rgb(150, 89, 12)', 'rgb(250, 241, 228)') if summary['unavailable'] else ('rgb(63, 65, 71)', 'rgb(236, 236, 239)'), badge)
+                    if summary['unavailable']:
+                        self.assertEqual(badge['state'], 'review_required', badge)
             # First CI showed inherited section margins (36 px card gap) and
             # generic button borders. Keep the C66 geometry independently checked.
             for section in observed['sectionMargins']:
@@ -164,6 +207,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertEqual(self.read('#ew-author-node [name=name]', 'maxLength'), 160)
             self.assertIn('무엇을 확인하나요', self.text('.ew-job-main'))
             self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-job-arguments,[data-author-action=job_section][data-id=completion]')"))
+            self.assertEqual(self.text('[data-author-action=job_section][data-id=advanced] > small'), '직접 만든 입력 1개')
             capture('c66-b3-human-' + str(width))
             # Native radio arrow behavior must continue after each product paint.
             self.click('.ew-job-method [name=mode][value=human]')
@@ -172,15 +216,30 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertIn('도구 연결 전', self.text('.ew-job-main'))
             self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-job-arguments,.ew-job-tool-output')"))
             self.assertTrue(self.read('[data-author-action=job_section][data-id=completion]', 'disabled'))
+            self.assertEqual(self.text('[data-author-action=job_section][data-id=advanced] > small'), '수행 안내 · 직접 만든 입력 1개')
             capture('c66-b3-tool-unconnected-' + str(width))
             self.key('ArrowRight', 39)
             self.wait("document.querySelector('.ew-job-method [value=ai]')?.checked")
             self.assertTrue(self.read('#ew-author-node [name=instructions]', 'checkVisibility()'))
             self.assertTrue(self.read('#ew-author-node [name=result_block]', 'checkVisibility()'))
+            self.assertEqual(self.text('[data-author-action=job_section][data-id=advanced] > small'), '직접 만든 입력 1개')
             capture('c66-b3-ai-' + str(width))
             self.click('.ew-job-method [name=mode][value=tool]')
             self.click('.ew-shared-picker summary')
             self.wait("document.querySelector('[data-author-action=pick_job_tool][data-id=managed-search_pages]')?.checkVisibility()")
+            # Keep the native summary activation and Escape focus behavior
+            # while the C66 summary's marker and contents are restyled.
+            self.key('Escape', 27)
+            self.wait("!document.querySelector('.ew-shared-picker').open && document.activeElement?.matches('.ew-shared-picker summary')")
+            for key, code in (('Enter', 13), (' ', 32)):
+                self.key(key, code)
+                self.wait("document.querySelector('.ew-shared-picker').open && document.querySelector('[data-author-action=pick_job_tool][data-id=managed-search_pages]')?.checkVisibility()")
+                self.assertTrue(self.browser.evaluate("document.activeElement?.matches('.ew-shared-picker summary')"))
+                self.assertEqual(self.browser.evaluate("(()=>{const e=document.activeElement,s=getComputedStyle(e);return [e.matches(':focus-visible'),s.outlineStyle,s.outlineWidth,s.outlineColor];})()"),
+                                 [True, 'solid', '2px', 'rgb(47, 95, 152)'])
+                if key == 'Enter':
+                    self.key('Escape', 27)
+                    self.wait("!document.querySelector('.ew-shared-picker').open && document.activeElement?.matches('.ew-shared-picker summary')")
             capture('c66-b3-tool-picker-' + str(width))
             self.click('[data-author-action=pick_job_tool][data-id=managed-search_pages]')
             self.assertIn('문서 목록 · 페이지 번호, 제목, 주소 · 한 번에 한 쪽', self.text('.ew-job-tool-output'))
