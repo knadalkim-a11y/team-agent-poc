@@ -1,0 +1,89 @@
+{
+  "head": "c4183cf6e2bcf0b85580824631948aef052f91c9",
+  "run": 40239800071,
+  "run_number": 337,
+  "job": 121310700622,
+  "artifact": {
+    "id": 12616197929,
+    "bytes": 19450139,
+    "sha256": "d6857393bfbc160d017ce54103f728138b5912aa075047ff608a3b4ac4c1df27",
+    "zip_crc": "PASS"
+  },
+  "native": {
+    "passed": 82,
+    "failed": 1,
+    "authoring_passed": 28,
+    "authoring_failed": 1
+  },
+  "failure": "New focus outline color expectation rgb(47, 95, 152) differs from preserved Native blue-500 oklch(0.623 0.214 259.815).",
+  "source": "https://github.com/open-webui/open-webui/blob/2a960a59fe1dbbd35282f0556b3666d81102e781/src/app.css",
+  "remedy": "Keep exact focus-visible, solid, 2px and all keyboard/focus/time-limit assertions; correct only new exact color expectation to pinned Native blue-500. No product change.",
+  "reached": [
+    "1366 human summary",
+    "1366 unconnected 40px, f17e6, marker removal, attention",
+    "1366 ai summary",
+    "1366 picker Enter open and exact summary focus"
+  ],
+  "not_reached": [
+    "selected tool badge/version",
+    "unavailable badge/version",
+    "480 new assertions"
+  ],
+  "previous_run_336": {
+    "run": 40239575233,
+    "conclusion": "cancelled",
+    "jobs": {
+      "success": 8,
+      "cancelled": 7,
+      "failure": 1
+    },
+    "failure_job": 121309246696,
+    "reason": "Delivery aggregate rejected cancelled upstream jobs after superseding head; Native never executed."
+  },
+  "files": [
+    {
+      "path": "review-20261026-ci337-suite.json",
+      "source_path": "ees-results/suite.json",
+      "bytes": 745,
+      "sha256": "6e7d6fafb9366996236de5428977cb53094bfb9663fd0690da6bd782d0094cee"
+    },
+    {
+      "path": "review-20261026-ci337-test_ees_work_figma_authoring_native.json",
+      "source_path": "ees-results/test_ees_work_figma_authoring_native.json",
+      "bytes": 6569,
+      "sha256": "fa0cbc6aa955ce642440687e4645c87a8bdb15c4769906e848dc7678b7ca498f"
+    },
+    {
+      "path": "review-20261026-ci337-c66-job-detail-observations.json",
+      "source_path": "ees-work-screenshots/c66-job-detail-observations.json",
+      "bytes": 4694,
+      "sha256": "2755dbf2be2b2efb404fe04648bf85190d024791d192bb155b34cd97148a98da"
+    },
+    {
+      "path": "review-20261026-ci337-integrated-test_c66_job_methods_arguments_d5_and_read_only_at_480_and_1366-failure-dom.json",
+      "source_path": "ees-work-screenshots/integrated-test_c66_job_methods_arguments_d5_and_read_only_at_480_and_1366-failure-dom.json",
+      "bytes": 35758,
+      "sha256": "f563e93970f0757a87619c909b6ca4f9496a99bd2e4e246d62d0b0beb449476f"
+    },
+    {
+      "path": "review-20261026-ci337-integrated-test_c66_job_methods_arguments_d5_and_read_only_at_480_and_1366-failure.png",
+      "source_path": "ees-work-screenshots/integrated-test_c66_job_methods_arguments_d5_and_read_only_at_480_and_1366-failure.png",
+      "bytes": 109182,
+      "sha256": "9c340021474f4b8d73b354dd1bc3218cd43d36a97533afd3a79edc968c0e92b9"
+    },
+    {
+      "path": "review-20261026-ci337-native-compose.log.gz",
+      "bytes": 18051,
+      "sha256": "ab4e347b933abc80ad096992e44da0e69589ae845b1f5897d4d9731002db7a59",
+      "decoded_source_bytes": 85218,
+      "decoded_source_sha256": "e49f20533eadd950698079b1e00e673c7a92c05b1e1fd6cd11e1ba95a719d014"
+    },
+    {
+      "path": "review-20261026-ci336-cancelled-delivery.log.gz",
+      "bytes": 1510,
+      "sha256": "1b3f9af1ac680e5f8b7efda26ac508a45e44bfda3d3d274abfafb7c0a737ad49",
+      "decoded_source_bytes": 4272,
+      "decoded_source_sha256": "adc142aac72c3058bd51037329dbdc0775ad82ebda4d326a341d25acf09f1f7d"
+    }
+  ]
+}

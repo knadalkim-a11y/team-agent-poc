@@ -235,8 +235,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 self.key(key_name, key_code)
                 self.wait("document.querySelector('.ew-shared-picker').open && document.querySelector('[data-author-action=pick_job_tool][data-id=managed-search_pages]')?.checkVisibility()")
                 self.assertTrue(self.browser.evaluate("document.activeElement?.matches('.ew-shared-picker summary')"))
+                # Pinned Native src/app.css (2a960a59) uses blue-500 for this
+                # more-specific :focus-visible rule; preserve its existing color.
                 self.assertEqual(self.browser.evaluate("(()=>{const e=document.activeElement,s=getComputedStyle(e);return [e.matches(':focus-visible'),s.outlineStyle,s.outlineWidth,s.outlineColor];})()"),
-                                 [True, 'solid', '2px', 'rgb(47, 95, 152)'])
+                                 [True, 'solid', '2px', 'oklch(0.623 0.214 259.815)'])
                 if key_name == 'Enter':
                     self.key('Escape', 27)
                     self.wait("!document.querySelector('.ew-shared-picker').open && document.activeElement?.matches('.ew-shared-picker summary')")
