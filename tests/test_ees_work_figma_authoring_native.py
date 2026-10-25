@@ -231,13 +231,13 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             # while the C66 summary's marker and contents are restyled.
             self.key('Escape', 27)
             self.wait("!document.querySelector('.ew-shared-picker').open && document.activeElement?.matches('.ew-shared-picker summary')")
-            for key, code in (('Enter', 13), (' ', 32)):
-                self.key(key, code)
+            for key_name, key_code in (('Enter', 13), (' ', 32)):
+                self.key(key_name, key_code)
                 self.wait("document.querySelector('.ew-shared-picker').open && document.querySelector('[data-author-action=pick_job_tool][data-id=managed-search_pages]')?.checkVisibility()")
                 self.assertTrue(self.browser.evaluate("document.activeElement?.matches('.ew-shared-picker summary')"))
                 self.assertEqual(self.browser.evaluate("(()=>{const e=document.activeElement,s=getComputedStyle(e);return [e.matches(':focus-visible'),s.outlineStyle,s.outlineWidth,s.outlineColor];})()"),
                                  [True, 'solid', '2px', 'rgb(47, 95, 152)'])
-                if key == 'Enter':
+                if key_name == 'Enter':
                     self.key('Escape', 27)
                     self.wait("!document.querySelector('.ew-shared-picker').open && document.activeElement?.matches('.ew-shared-picker summary')")
             capture('c66-b3-tool-picker-' + str(width))
