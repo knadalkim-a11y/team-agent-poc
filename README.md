@@ -192,6 +192,7 @@ AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs
 | 시스템/P별 절차 편집·미저장 초안·권한 상태·Native 셸 복원 | [ees-work-designer.js](branding/ees/ui/ees-work-designer.js) |
 | 고정 소스 프런트엔드 빌드·검증 | [build_ees_frontend.py](scripts/build_ees_frontend.py) |
 | 소스 조립·wheel 파일 목록·해시 | [build_ees_webui.py](scripts/build_ees_webui.py) |
+| 사내 확인용 디자인 목업(제품 CSS·아이콘·글꼴로 만든 단일 HTML) | [build_design_mock.py](scripts/build_design_mock.py), 원본 `docs/mockups/ees-work/design-mock-src/`, [개발 순서](AGENTS.md#design-mock-first) |
 
 factory는 배포 JS 내부에만 존재하고 기존 runtime UI/Tool 연결을 유지합니다. ees.11의 P별 작성 프로토콜·추가 메타데이터와 기존 전체 초안 호환은 [별도 계약](docs/mockups/ees-work/TASK.md#system-authoring-20260924)을 따릅니다. 화면 분리와 이전 프로그램 복원 검증의 실제 범위는 [R2/R3 기록](evals/scenarios.md#work-ui-refactor-20260915)을 따릅니다.
 
