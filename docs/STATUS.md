@@ -1,5 +1,15 @@
 # 현재 작업 상태
 
+## 2026-10-26 · PR #103에 #102 병합 main 통합
+
+- **완료한 선행 조건:** 사용자 승인으로 [#102](https://github.com/knadalkim-a11y/team-agent-poc/pull/102)를 **2026-10-26 10:15:03 KST**, main `4d27de76fe4bbc4aad70ec009bb7d478d0bbe29f`에 merge commit으로 병합했다. 최종 head41c0a4b의 [CI40252075901/#341](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40252075901)는39성공/PR 출하1정상 생략, Native81/81·작성27/27·Windows Node probe와2454자 PowerShell 파싱을 통과했다. 첫 실패와 원인 미확정은 보존했다.
+- **현재 통합:** [#103](https://github.com/knadalkim-a11y/team-agent-poc/pull/103)의 검증된0b885d3에 위 최신 main을 merge commit으로 통합했다. STATUS 상단1곳의 충돌은 양쪽 기록을 모두 남기고 이 현재 상태를 앞에 두어 해결했다. 가이드·evals·증거와 CI의 읽기 전용 PowerShell 파싱은 함께 보존한다. C66 제품/시험 소스는0b885d3 그대로이며 API·저장 형식·시험 단언·시간 제한은 바꾸지 않는다.
+- **검증 구분:** 통합 전 #103의 [CI40242894489/#340](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40242894489)는39성공/1정상 생략·Native83/83·작성29/29다. 통합 head의 전체 CI와 병합 main의 push CI는 각각 같은 PR 본문/Checks와 [main 커밋](https://github.com/knadalkim-a11y/team-agent-poc/commit/4d27de76fe4bbc4aad70ec009bb7d478d0bbe29f)을 원본으로 확인하며 이전 성공으로 대신하지 않는다. [통합 기록](../evals/v4-ui-20260930.md#work-content-job-detail-c66-20261022).
+- **사내 적용:** **미실행**이다. 기존2a4b82a의 유효/실행 중 사용자 보고를 유지한다.1c1efff 블록은 당시 검토 기록이며 새 적용 때 목표·성공 CI 프로그램 ZIP·바이트/SHA256·설치 원본을 함께 확정한다. 보호 조건·PowerShell 실행문은 바꾸지 않는다.
+- **다음 하나:** 통합 head의 CI 결과를 확인한 뒤 사용자가 #103을 검토·병합한다. #103은 Draft가 해제된 상태이며 이번 승인으로 #103 자체를 병합하지 않는다. main 직접 push·사내 실행·Figma/서버 API/사용자 자산 변경은 하지 않는다.
+
+> 아래 #103 보완·#102 승인 및10-22 적용 준비 절은 통합 전의 기록이다. ‘#102 미병합’, ‘main1c1efff’, 당시 ‘다음 하나’는 위 현재 상태로 대체하며 최초 검증·실패 내용은 보존한다.
+
 ## 2026-10-26 · PR #103 C66 검토 보완 완료
 
 - **현재 범위:** #101 병합 main `1c1efff8abe19da3e6e8921859b52858fc6cacfb`의 별도 `feat/work-content-job-detail-c66-20261022`, [PR #103](https://github.com/knadalkim-a11y/team-agent-poc/pull/103)에서 추가 설정 요약·도구 선택 줄의 검토 보완을 완료했다. [계약](mockups/ees-work/TASK.md#work-content-job-detail-c66-20261022) · [최초 실패·검증](../evals/v4-ui-20260930.md#work-content-job-detail-c66-20261022). 아래 #101 재검토 문구는 당시 기록이다.
@@ -10,6 +20,19 @@
 - **이전 기록 보존:** 기존 기록 head78bc879의 CI #335도39성공/1정상 생략이었다. #334/#335와 이번 #339를 구분하며, 앞선 실패·취소·미도달 범위를 성공 뒤에도 보존한다.
 - **남은 경계:** 서버 오류에 구조화 인자 ID가 없어 게시 오류의 개별 입력 줄 연결은 후속이다. 기존 전체 오류 안내를 유지하며 문구 파싱/API·저장·검증기 변경은 없다. 실제 사내 도구/모델 연결·사용자 사용성 확인은 이번 합성 Native 검증에 포함하지 않는다.
 - **다음 하나:** 사용자가 **#102를 먼저 병합 → #103에 최신 main 통합(양쪽 기록 보존) → 통합 head CI 확인** 후 #103을 검토·병합한다. #103은 Draft가 해제된 상태이며 현재 main은1c1efff다. main 직접 push·PR 병합·사내 적용·Figma/API/저장 형식 변경은 하지 않았다.
+
+## 2026-10-26 · PR #102 병합 승인·검증
+
+- **현재 범위:** 사용자가 #102 병합을 명시 승인했다. [문서 PR #102](https://github.com/knadalkim-a11y/team-agent-poc/pull/102)의 기존 head5f047c8·main1c1efff에서 최종 검증한다. 제품·서버 API·시험 단언·시간 제한은 변경하지 않는다. #103 병합·사내 실행/적용 승인은 포함하지 않는다.
+- **확인한 실패:** 최신 [CI39738417918/#329](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39738417918)는 Windows 합성 Node launcher probe가 진입 표식 없이10초 제한에 걸린1건으로 실패했다. 이전 종료 시험67개와 정정 PowerShell 블록2454자 파싱은 통과했으므로 이전 종료 실패와 구분한다. 원인 미확정·원문·최초 실패를 [기존 평가](../evals/v4-ui-20260930.md#main-1c1efff-apply-evidence-20261022)에 보존한다.
+- **적용 경계:** 기존1c1efff 블록은 당시 검토 기록이다. main이 진행되면 정확 SHA 보호로 중단하므로 다음 사내 적용에는 목표·CI ZIP·바이트/해시·설치 원본을 함께 다시 확정한다. 기존2a4b82a의 유효/실행 중 사용자 보고 이후 새 적용 성공은 없으며 사내 적용은 **미실행**이다. 아래10-22의 ‘다음 하나’는 당시 상태다.
+- **다음 하나:** 기록을 포함한 새 head를 새 실행기에서1회 검증하고 전체 필수 CI 성공 뒤 #102를 merge commit으로 병합한다. 같은 Node 실패가 재발하면 자동 반복·제한 완화 없이 진단한다. 정확한 최종 head·CI·병합 결과는 같은 PR 본문/Checks를 원본으로 확인한다. 이후 앞서 정한 #103 최신 main 통합 순서를 따르되 #103 자체는 병합하지 않는다.
+
+## 2026-10-22 · main 1c1efff 사내 적용 준비
+
+- **현재 원본:** #101까지 main `1c1efff8abe19da3e6e8921859b52858fc6cacfb`에 병합됐다. main [CI 39694472521 / #326](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39694472521) 첫 시도 40개 작업 성공·native-compose 81 PASS와 프로그램 ZIP을 확인했다. 준비 착수 시 열린 PR은 0개였다. 아래 #101 재검토·병합 대기는 당시 상태다.
+- **사내 적용·최초 시도:** 2026-10-22 사용자가 Claude 검토 후 실행했고 `EES before commit=2a4b82a5f482… valid=true running=true`로 중단됐다고 보고했다. 접두어는 #96 병합 main `2a4b82a5f482b6b1677b40cad171589c71bae13f`와 일치한다. 최초 준비의 d4f1806 기준이 실제보다 오래돼 Update·Stop·Apply **전**에 차단됐다. 1c1efff 적용·새 기동·설정 변경은 **미실행**이며 보고 당시 기존 프로그램은 유효·실행 중이다. 실제 PC 파일·DB를 직접 확인한 것은 아니다.
+- **다음 하나:** [설치 기준을 실제 2a4b82a로 정정한 한 블록](03-openwebui-native-agent.md#main-1c1efff-apply-prep-20261022)을 사용하고 기존 `result/stage/running/commit` 1~2줄로 적용 결과를 받는다. 목표 ZIP·해시·정상/미완료 설치 검사·정확한 SHA 비교는 유지한다. 남은 main 변경은 #100·#101이며 운영/업무 Python 코드는 동일하다. [최초 중단과 근거](../evals/v4-ui-20260930.md#main-1c1efff-apply-evidence-20261022). 이 문서 PR 병합과 에이전트의 사내 실행·도구 변경은 하지 않는다.
 
 ## 2026-10-21 · PR #101 C61 동시 편집 안내
 

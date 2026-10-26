@@ -1,6 +1,6 @@
 # 03. Open WebUI Native 통합 Assistant
 
-현재 제품 이름은 **EES Workflow**이며 [2026-10-02 통합 구현 기준](#integrated-work-install-20261002)을 유지한다. 사용자는 2026-10-14 main `42cc756` 적용 완료를 보고했다. [후속 통합 적용 안내](#source-phase2-route-cache-zip-20261014)는 #88(2-1/A2)과 #89(Work 도구 갱신) 모두 검토·병합한 뒤 최종 main CI·ZIP을 확정해 한 번만 전달한다. [1단계](#source-frontend-apply-20261013)와 [2단계 통합 적용](#source-phase2-local-zip-20261014) 안내는 당시 원문으로 보존한다. 아래 날짜별 시연·ApplyDemo·전문 Assistant·사전 Skill 구성은 당시 이력이다. 새 설치/업데이트에서 이 콘텐츠를 등록하지 않으며 옛 명령을 반복하지 않는다. 실제 도구/Native 관리/프로그램 적용과 복구 경로는 유지한다.
+현재 제품 이름은 **EES Workflow**이며 [2026-10-02 통합 구현 기준](#integrated-work-install-20261002)을 유지한다. 최신 사용자 보고의 사내 설치 커밋 접두어는 main `2a4b82a5f482`(#96)와 일치한다. [2026-10-22 main 1c1efff 적용 검토 기록](#main-1c1efff-apply-prep-20261022)는 검토 뒤 사용자 시도에서 설치 기준 불일치로 사전 중단됐으며 **1c1efff 적용 미실행**이다. 아래 42cc756·#88/#89 및 날짜별 적용·시연·ApplyDemo 안내는 당시 기록으로 보존하며 현재 실행 목록으로 반복하지 않는다. 실제 도구/Native 관리와 기존 Apply/Restore 경로는 유지한다.
 
 > 문서 역할: Native Assistant 기준선 구성·확장 원칙
 >
@@ -12,13 +12,103 @@
 
 | 할 일 | 안내 |
 |---|---|
-| 2-1/A2·Work 도구 후속 통합 적용 준비 | [병합 뒤 브라우저 열기·ZIP 대기·검사·적용 한 블록](#source-phase2-route-cache-zip-20261014) |
+| main 1c1efff 적용 검토 기록·Claude 대조 | [확정 ZIP·한 블록·설정·Restore 경계](#main-1c1efff-apply-prep-20261022) |
+| 2-1/A2·Work 도구 후속 통합 적용 이력 | [병합 뒤 브라우저 열기·ZIP 대기·검사·적용 한 블록](#source-phase2-route-cache-zip-20261014) |
 | 소스 화면·대화 도우미 2단계 통합 적용 이력 | [당시 main 브라우저 ZIP 안내](#source-phase2-local-zip-20261014) |
 | 소스 프런트엔드 1단계 적용 준비 | [CI ZIP 적용·대안·종료 복구](#source-frontend-apply-20261013) · [팀원 업무 안내](07-team-quickstart.md#first-work-20261012) |
 | 새 EES Workflow 후보·자산 정리 경계 | [통합 설치·복구](#integrated-work-install-20261002) |
 | 프로그램·래퍼 업데이트 | [Upgrade](#ees-wrapper-upgrade) |
 | 수동 적용·복구 | [Apply/Restore](#ees-wrapper-apply)·[종료 복구](#ees-stop-recovery) |
 | 실패 기록·등록 위치 확인 | [실패 판단](#ees-update-failure-causes)·[사내 기록](#ees-local-state) |
+
+<a id="main-1c1efff-apply-prep-20261022"></a>
+
+## main 1c1efff 사내 적용 검토 기록 · 2026-10-22
+
+**2026-10-26 문서 병합 시점의 사용 범위:** 아래는 목표 `1c1efff`를 검토한 당시 기록이다. #102 병합 등으로 main이 더 진행되면 블록의 HEAD/origin/main 정확 일치 검사가 Stop 전에 중단한다. 현재 적용 명령으로 그대로 재사용하지 않으며, 다음 사내 적용 때 목표 main·성공한 CI의 프로그램 ZIP·정확한 바이트/SHA256·실제 설치 기준을 함께 다시 확정한다. SHA 검사를 없애거나 SHA/ZIP 한 곳만 임의로 바꾸지 않는다. 이번 문서 병합은 사내 실행·적용 승인이 아니며 실제 적용은 미실행이다.
+
+**2026-10-22 설치 기준 정정:** 사용자는 Claude 검토 뒤 실행했으나 `EES before commit=2a4b82a5f482… valid=true running=true`로 사전 중단됐다고 보고했다. 이는 #96 병합 main `2a4b82a5f482b6b1677b40cad171589c71bae13f`와 일치한다. 최초 준비는 `d4f18069db6ca6ac2804d5ed3007a840b71a72a9`를 전제로 했지만 실제 기준은 더 최신이다. 아래 블록의 예상 설치 SHA만 정정하며 목표는 `1c1efff8abe19da3e6e8921859b52858fc6cacfb` 그대로다. 남은 main 변경은 #100·#101이다. [main CI 39694472521 / #326](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39694472521)는 첫 시도 40개 작업 모두 성공했고 native-compose 81 PASS(C44 27개 포함)다. 첫 시도는 Update·Stop·Apply 전이므로 **1c1efff 적용·기동 미실행**이며 Restore는 필요하지 않다. C64·C65는 사용자 설명에 따른 설계 정정이고 이번 제품 코드·Figma 변경은 없다.
+
+| 대조 항목 | 확정 값 |
+|---|---|
+| 브라우저에서 받는 바깥 Actions ZIP | [ees-program-1c1efff8abe19da3e6e8921859b52858fc6cacfb.zip](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39694472521/artifacts/12391585139) |
+| 바깥 ZIP 크기 / SHA256 | **155,237,507 bytes** / `30ae32d6b69aca9c86b3a492cbb46a85868232f5ea6aa3d2bde38356a3dac41e` |
+| 내부 프로그램 ZIP | `EES-demo-1c1efff8abe1.zip`, 155,237,343 bytes / SHA256 `af9f66687b79ae2427eb7394e9cd9b9d418c6ada2c9bce96f04912bf30493d6b` |
+| 프로그램 | `0.11.3+ees.14`; 내부 manifest의 clean `source_commit`은 위 전체 main SHA와 일치 |
+
+실제 바깥 ZIP을 내려받아 크기·SHA256·두 ZIP의 CRC를 대조하고, 기존 `ees_deploy_release.py validate`로 내부 manifest·모든 포함 파일·wheel을 검사했다. **아래 블록에는 바깥 ZIP 값만 쓴다.** GitHub 브라우저 다운로드 링크이며 API 토큰이 필요하지 않다. 로컬에서 프로그램을 설치하거나 실행한 검사가 아니다.
+
+#95는 CI 시험 자료를 분할·캐시하고 최종 패키지 입력 이름을 바꿨다. 사용자 전달 구조(바깥 ZIP 안 프로그램 ZIP 하나)와 `Update → Upgrade`의 검사·정상 Stop·검증 백업·Apply·Start/health, 명시적인 `Stop → Restore → Start`는 d4f1806과 같다. `manage-ees.ps1`·`manage_ees.py`·`ees_upgrade.py`·`ees_update_download.py`·`build_demo_bundle.py`는 이 구간에 변경되지 않았다. 새 프로그램에는 공용 도구 모듈·작성 아이콘이 추가됐지만, 정확한 이전 `.14` 설치 파일 목록도 Apply/Restore 검증 대상으로 유지한다. 사내 Node/npm 빌드·전체 의존성 재설치·Init·ApplyDemo를 추가하지 않는다.
+
+아래 **한 블록**은 2026-10-22의 검토된 실행문 원본을 보존한 것이다. 당시에는 별도 적용 승인 뒤 필요한 제안·입력을 먼저 명시적으로 저장하고 팀원이 사용하지 않는 시간에 기존 운영 계정 PowerShell에서 사용하도록 안내했다. 기존 경로가 다르면 `$er`(저장소)·`$ecfg`(등록 설정)·`$ed`(다운로드 폴더)만 맞춘다. 브라우저가 열리면 원래 ZIP 이름으로 새 다운로드를 마친다. 블록은 새 파일/같은 이름의 `(숫자)` 파일만 15분 기다리고 두 번 연속 파일 상태·정확한 크기·해시를 확인한다. 다른 설치 원본, 무효/미완료 설치, 검토 SHA와 다른 HEAD/origin/main이면 Stop 전에 중단한다. main이 더 진행됐어도 강제 reset하거나 최신 ZIP으로 임의 대체하지 않는다.
+
+```powershell
+# 실제 설치 기준 정정. 기존 운영 계정에서만 사용.
+# 적용 전 필요한 제안·입력을 명시적으로 저장.
+# #95 후에도 바깥 ZIP→Upgrade(검사·Stop·백업·Apply·Start), Restore 절차 동일.
+# 적용 후: 새로고침·로그인/기존 대화·Native 왕복·저장된 업무·입력 확인.
+# 공장·접근 범위 > Work 도구 설정 확인: 이번 파일 동일. ready 확인만, 변경/재등록 금지.
+# 도구·공용: Confluence 페이지 찾기/읽기 각각 입력·결과, 그룹·담당·근거 확인, Native 읽기 권한·본인 PAT 필요.
+# 설정 전 '확인 전'; 팀원 '쓸 수 있는 공용 도구가 없습니다.' 가능. 못 씀이면 원인 확인.
+# Restore는 직전 2a4b82a 프로그램만 복원. DB/PAT/도구 설정은 되돌리지 않음.
+# 회신 1~2줄: result/stage/running/commit + 화면·도구 설정 확인 결과. 실패 시 재실행하지 않음.
+& {
+$ErrorActionPreference='Stop'
+$ec='1c1efff8abe19da3e6e8921859b52858fc6cacfb'
+$eh='30ae32d6b69aca9c86b3a492cbb46a85868232f5ea6aa3d2bde38356a3dac41e'
+$en=155237507
+$eu='https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39694472521/artifacts/12391585139'
+if($ec -cnotmatch '\A[0-9a-f]{40}\z' -or $eh -cnotmatch '\A[0-9a-f]{64}\z' -or $en -le 0 -or $eu -cnotmatch '\Ahttps://github\.com/knadalkim-a11y/team-agent-poc/actions/runs/[0-9]+/artifacts/[0-9]+\z'){throw '배포 값 오류'}
+$er=Join-Path $env:USERPROFILE 'team-agent-poc'
+$ecfg=Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+$ed=Join-Path $env:USERPROFILE 'Downloads'
+$em=Join-Path $er 'scripts\manage-ees.ps1'
+$et=[DateTime]::UtcNow; $ee=$et.AddMinutes(15)
+$ep='\Aees-program-'+$ec+'(?: \([0-9]+\))?\.zip\z'
+$ez=$null; $ev=''
+Start-Process $eu
+while([DateTime]::UtcNow -lt $ee){
+$ef=@(Get-ChildItem -LiteralPath $ed -File | Where-Object {$_.Name -cmatch $ep -and $_.Length -eq $en -and $_.LastWriteTimeUtc -ge $et} | Sort-Object LastWriteTimeUtc -Descending)[0]
+$es=if($ef){"$($ef.FullName)|$($ef.LastWriteTimeUtc.Ticks)"}else{''}
+if($es -and $es -ceq $ev){$ez=$ef.FullName; break}
+$ev=$es; Start-Sleep -Seconds 2
+}
+if(!$ez){throw 'ZIP 대기 만료: 미적용'}
+if((Get-FileHash -LiteralPath $ez -Algorithm SHA256).Hash -ine $eh){throw 'ZIP 해시 불일치: 미적용'}
+$eb=& $em -Action Status -Config $ecfg | ConvertFrom-Json
+if($eb.program_valid -ne $true -or $eb.program_incomplete -or $eb.current_commit -cne '2a4b82a5f482b6b1677b40cad171589c71bae13f'){throw ('EES before commit={0} valid={1} running={2}' -f $eb.current_commit,$eb.program_valid,$eb.managed_process_running)}
+& $em -Action Update -Config $ecfg
+foreach($ex in @('HEAD','origin/main')){
+$ea=& git -C $er rev-parse $ex
+if($LASTEXITCODE -ne 0 -or $ea -cne $ec){throw '검토 원본 불일치: 미적용'}
+}
+& $em -Action Upgrade -Config $ecfg -Bundle $ez -Commit $ec -ArtifactSha256 $eh -HealthTimeout 120 -Summary
+}
+```
+
+실패하면 마지막 `result/stage/code/running/commit`을 전달하고 반복 실행하지 않는다. Stop 이후 실패는 [단계별 판단](#internal-pilot-failures-20261012)을 따른다. Restore는 사용자 선택과 현재 상태 확인 뒤 기존 경로로 수행하며 자동 복원하지 않는다. 데이터·사용자 자산을 삭제하거나 과거 DB로 임의 덮어쓰지 않는다.
+
+적용 후 확인은 다음 범위로 묶는다. 현재는 안내 준비만 했으며 실제 결과는 미확인이다.
+
+| 확인 | 확인할 내용과 후속 행동 |
+|---|---|
+| 기존 사용과 화면 | 로그인·기존 대화·저장된 업무가 유지되는지, 스킬/도구/모델에서 업무로 돌아올 때 이전 메뉴가 잠깐 선택되지 않는지 확인한다. 업무 내용의 접힌 단계·대화 제안 표시와 입력 보존, 겹친 패널 옆 대화 클릭·Escape 범위를 실제 사용에서 확인한다. 새로고침이 저장하지 않은 입력까지 보존한다는 의미는 아니다. |
+| Work 도구 설정 | **워크스페이스 → 공장·접근 범위 → Work 도구 설정 확인**을 열어 상태만 읽는다. 출하 `workflow_tool.py`는 d4f1806과 같은 12,161 bytes / SHA256 `c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085`여서 이번 파일 비교로 `work_tool=update_needed`가 생기지 않는다. 그래도 실제 등록본 ready 여부는 별개다. `ready`는 그대로 두고, 이전 원본/미등록/지원 형태 다름이면 상태와 등록 해시 앞 8자리만 보고한다. **등록·지금 원본으로 바꾸기·이전 코드로 되돌리기 확정은 하지 않는다.** 아래 10-14 안내의 42cc756 기준 변경 절차는 당시 기록이다. |
+| 공용 Confluence 초기 설정 | 이번 프로그램 적용이 기존 Native 도구나 공용 설정을 자동 변경하지 않는다. 설정 전 관리자는 **확인 전**, 사용 가능한 항목이 없는 팀원은 **쓸 수 있는 공용 도구가 없습니다.**를 본다. 미설치/원본 불일치/권한·연결 설정 실패는 **못 씀**, 기존 확인본의 참조가 바뀌면 **도구 확인 필요**다. 오류를 삭제·재등록·덮어쓰기로 해결하지 않는다. |
+
+Confluence 페이지 조회를 사용할 때는 관리자가 **워크스페이스 → 도구(도구 · 공용) → Confluence 페이지 찾기 / 페이지 읽기**에서 두 함수를 각각 설정한다. **입력·결과 확인**에서 원본·연결·입력/결과를 대조하고, **쓸 수 있는 그룹** 1개 이상·담당 1명·8~2,000자의 검토 근거를 직접 정한 뒤 확인하면 v1 **쓸 수 있음**이 된다. 관리자의 사용에도 그룹 소속이 필요하다. 상세의 **연결 설정 → Open WebUI 도구**에서 같은 그룹의 기존 Confluence 도구 **읽기 권한**, 연결 활성화·주소·허용 공간·개인 설정 암호화를 따로 확인한다. 각 사용자는 **자기 기존 개인 PAT**를 사용한다. 공용 그룹 지정만으로 Native 권한이 생기지 않으며 공용 PAT를 만들지 않는다. 이 설명은 향후 관리자 설정 절차이며 이번 준비에서 설정·권한·등록 코드를 변경하지 않았다. [관리자 상세 안내](#shared-tools-admin-20261016)와 [ST-AUTH/ADMIN 규칙](specs/shared-tools.md#shared-tools)을 따른다.
+
+**현재 Restore 대상과 자료:** 이번 적용이 성공한 뒤 직전 프로그램 Restore 대상은 `2a4b82a`다. `2a4b82a..1c1efff`의 운영 Update/Upgrade/Apply/Restore 코드와 업무 Python 백엔드는 모두 동일하며 두 버전 모두 `0.11.3+ees.14`다. 공용 도구·부분 결과 지원은 이미 2a4b82a에 들어 있다. 아래 d4f1806의 미지원 제한을 현재 Restore에 그대로 적용하지 않는다. Restore는 DB·PAT·Native 등록/공용 설정을 되돌리지 않으며, 실제 PC 자료의 왕복 검증 완료를 뜻하지 않는다.
+
+**최초 d4f1806 기준 호환 조사(당시 기록):** 프로그램 Restore는 DB·대화·첨부·PAT·Native 등록 도구·공용 도구 확인 기록을 되돌리지 않는다. 이번 저장 변화는 기존 work schema 2 / operations schema 1 위에 초기 워크플로우 중복 생성 방지 표와 공용 도구 확인·버전·회차 고정 표, 작업/회차 필드를 추가하는 방식이다. 이전 프로그램의 원본·새 DB를 이용한 합성 대조 결과와 한계는 [적용 준비 근거](../evals/v4-ui-20260930.md#main-1c1efff-apply-evidence-20261022)에 남겼다.
+
+| 새 자료 | d4f1806으로 프로그램 Restore한 뒤 |
+|---|---|
+| 일반 사람 작업·저장 입력·단계 기간·주기/시작·마감/이름 설정 | 합성 자료에서 읽기·저장·검사·게시·회차 시작이 가능하고 관련 필드를 보존했다. 명시적으로 저장한 정의·입력과 `authoring_review`도 남는다. 미반영 제안은 브라우저 메모리이므로 프로그램 재시작·새로고침 뒤의 복원을 약속하지 않는다. 모든 실제 사용자 자료의 호환을 보증한 것은 아니다. |
+| `shared_tool_id`로 연결한 공용 도구 작업·회차 | 데이터가 남아도 이전 프로그램에는 공용 도구 그룹·버전·현재 상태 판정과 실행 지원이 없다. 게시 검사에서 검증된 Native 참조가 필요하다고 거부한다. **이 워크플로우와 회차는 편집·재게시·계속 실행하지 않고 사용을 중단한다.** 과거 결과 일부가 읽혀도 새 권한 의미까지 동일하다고 보지 않는다. |
+| 사람이 확정한 일부 조회 결과로 진행/종료한 회차 | 새 `partial_prerequisites`·`closure_summary`가 남지만 이전 프로그램은 일부 결과를 일반 완료로 취급하지 않고 종료를 거부한다. **이 회차도 계속 편집·실행·종료하지 않는다.** |
+
+회신은 기존 **1~2줄**로 유지한다. 첫 줄은 `result=… / stage=… / running=… / commit=…`(실패면 표시된 `code` 포함), 두 번째 줄은 `login=… / chat=… / work=… / work_tool=ready·상태·미확인 / shared_tool=확인전·상태·미확인`처럼 실제 확인한 것만 적는다. 전체 로그·파일·화면 사진·PAT는 보내지 않는다. 사내 적용 완료는 이 결과를 받은 뒤 기록하며 지금은 **미실행**이다.
 
 <a id="source-phase2-route-cache-zip-20261014"></a>
 
