@@ -519,7 +519,7 @@ jobs:
         if: runner.os == 'Windows' && matrix.suite == 'platform'
         run: python -X warn_default_encoding -W error::EncodingWarning tests/ees_workflow_windows_diagnostics.py --output dist/ees-windows-diagnostics --previous-wheel $env:EES_TEST_PREVIOUS_WORKFLOW_WHEEL --previous-source $env:EES_TEST_PREVIOUS_WORKFLOW_SOURCE
       - name: Parse the Windows PowerShell entry point
-        if: runner.os == 'Windows' && matrix.suite == 'platform'
+        if: always() && runner.os == 'Windows' && matrix.suite == 'platform'
         shell: powershell
         run: |
           $tokens = $null
@@ -528,7 +528,7 @@ jobs:
             (Join-Path $PWD 'scripts/manage-ees.ps1'), [ref]$tokens, [ref]$parseErrors)
           if ($parseErrors.Count -gt 0) { throw 'PowerShell entry point has syntax errors.' }
           $guide = Get-Content -Raw -Encoding UTF8 docs/03-openwebui-native-agent.md
-          foreach ($anchor in @('internal-pilot-20261012', 'internal-pilot-stop-recovery-20261012', 'source-frontend-apply-20261013', 'source-frontend-local-zip-20261013', 'source-frontend-stop-recovery-20261013', 'source-phase2-local-zip-20261014', 'source-phase2-route-cache-zip-20261014')) {
+          foreach ($anchor in @('internal-pilot-20261012', 'internal-pilot-stop-recovery-20261012', 'source-frontend-apply-20261013', 'source-frontend-local-zip-20261013', 'source-frontend-stop-recovery-20261013', 'source-phase2-local-zip-20261014', 'source-phase2-route-cache-zip-20261014', 'main-1c1efff-apply-prep-20261022')) {
             $pattern = '(?s)<a id="' + [regex]::Escape($anchor) + '"></a>.*?```powershell\r?\n(.*?)```'
             $pilotBlock = [regex]::Match($guide, $pattern).Groups[1].Value
             if ($anchor -eq 'source-phase2-route-cache-zip-20261014') {
