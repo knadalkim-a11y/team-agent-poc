@@ -1,0 +1,124 @@
+{
+  "head": "2eaee68ab0535f746c19e3e39660981acd794b2f",
+  "ci_merge_commit": "5b883503e89afccf52203418278ce801f1486ea3",
+  "run_id": 39749317764,
+  "run_number": 330,
+  "job_id": 119728369470,
+  "job_counts": {
+    "success": 36,
+    "failure": 2,
+    "cancelled": 1,
+    "skipped": 1
+  },
+  "native_compose": {
+    "total": 83,
+    "passed": 77,
+    "failed": 5,
+    "error": 1
+  },
+  "artifact": {
+    "id": 12414385119,
+    "bytes": 16789238,
+    "sha256": "b0b82b0da1c0f7fc3de088aacfa9329614958a2d8a585ae316ae3f7098a84235",
+    "zip_crc_failure": null,
+    "png_count": 175
+  },
+  "environment": {
+    "os": "ubuntu-24.04",
+    "python": "3.11.17",
+    "chrome": "155.0.8059.39"
+  },
+  "visual_scope": {
+    "new_job_detail_viewports": [
+      1366
+    ],
+    "new_job_detail_observations": 6,
+    "new_480_not_reached": true,
+    "findings": [
+      "C66 main-to-arguments gap is 36px because global section margin adds 24px to grid gap12",
+      "C66 completion/advanced rows have an extra24px margin and inherited rounded button borders",
+      "unconnected tool notice and picker border lack Figma attention color"
+    ],
+    "preserved_existing_c61": {
+      "viewports": [
+        480,
+        1366
+      ],
+      "stale_and_deleted_buffer": true,
+      "overflow": 0,
+      "cancel_visible": true
+    }
+  },
+  "files": [
+    {
+      "path": "first-ci-tool-unconnected-1366.png",
+      "bytes": 93811,
+      "sha256": "59e33aa41b4542d1c6024dc5bdab8765cd8bafdcc4d3c39ec51ecb4ba13b7f3c"
+    },
+    {
+      "path": "first-ci-tool-connected-1366.png",
+      "bytes": 97043,
+      "sha256": "3dbce05879274faaa5f3633a879f8e83b2860bf95f460991827f1d5cdd4ee801"
+    },
+    {
+      "path": "first-ci-delete-cancel-failure-1366.png",
+      "bytes": 155064,
+      "sha256": "ece9a5ce5ff29367d97d4806656dd3047c7a0e0fe79f26b54bab86a7cb1fa4aa"
+    },
+    {
+      "path": "first-ci-factory-ready-failure-dom.json",
+      "bytes": 20656,
+      "sha256": "0d431bccbcbbf480554047198b95dca9a3ed93943f498a7989e7f14e23858c65"
+    },
+    {
+      "path": "first-ci-authoring-results.json",
+      "bytes": 8617,
+      "sha256": "4b373dc2b11593dde4da40ba99b509251de2e05da5ddae810577e2c51740a098"
+    },
+    {
+      "path": "first-ci-job-observations.json",
+      "bytes": 4305,
+      "sha256": "2c8c1368bf430f701b59285f2dbc1929f8699043b9bf1e8302d24bc5d9551af8"
+    },
+    {
+      "path": "first-ci-native-compose.log.gz",
+      "bytes": 18460,
+      "sha256": "b61817f5c1a3bd1dd559a8d20314d5d3816974428a21b09d17ac24eae353b08f",
+      "original_bytes": 89877,
+      "original_sha256": "e569bc7b3ffd2a8d8f3a1116b54a15ecf0f594d8814154cc24ef8e88c478e02b",
+      "encoding": "gzip; original bytes preserved"
+    },
+    {
+      "path": "node-delete-cancel-red.log.gz",
+      "bytes": 564,
+      "sha256": "f43c9c3c580a75996870c13baa0e521c3718443235119c12f6b8fac787c4cb90",
+      "original_bytes": 1809,
+      "original_sha256": "027acebd90201bec0d8154102d7ec9cf69fd9becf1b13974f239ef507e27033c",
+      "encoding": "gzip; original bytes preserved"
+    },
+    {
+      "path": "node-delete-cancel-red-context.log.gz",
+      "bytes": 629,
+      "sha256": "d45484a8b10d5dc22cc2a41b9d7d67cb18c3e0e9a9bd476891878c8b3d5cffb3",
+      "original_bytes": 2061,
+      "original_sha256": "9ae0e8330335cc681a46a9f5e3aa1e05d60787a3df3166cea28381a81d52386f",
+      "encoding": "gzip; original bytes preserved"
+    },
+    {
+      "path": "node-delete-cancel-green.log.gz",
+      "bytes": 309,
+      "sha256": "780238d050dbd1c890f75cabd2ee925c5e8723de1ae56a1f4db89f9a4f721ba5",
+      "original_bytes": 887,
+      "original_sha256": "5733d538c418f99e5d3dcaacab00fd0acfafa9b29455f107cd78e9a278eb7c92",
+      "encoding": "gzip; original bytes preserved"
+    },
+    {
+      "path": "node-delete-cancel-regression-505.log.gz",
+      "bytes": 22192,
+      "sha256": "7c91fe9002a0d72dcb448a2631b0dc0391747b1fb523d31948c5dcedd17a8688",
+      "original_bytes": 120912,
+      "original_sha256": "5456684ad636fb0e51cbae818c749e0c33df409480004d0933f288b16a276bea",
+      "encoding": "gzip; original bytes preserved"
+    }
+  ]
+}

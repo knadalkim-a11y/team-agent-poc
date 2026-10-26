@@ -1,0 +1,206 @@
+{
+  "head": "aeae92d1440cbf170d0c9ae81eb1848faafca843",
+  "ci_merge_commit": "32879d89e2bb3d6411776b6ad02dfae53c0273c0",
+  "run_id": 39756628022,
+  "run_number": 333,
+  "job_id": 119752295348,
+  "job_counts": {
+    "success": 36,
+    "failure": 3,
+    "skipped": 1
+  },
+  "native_compose": {
+    "total": 83,
+    "passed": 82,
+    "failed": 1
+  },
+  "authoring": {
+    "total": 29,
+    "passed": 28,
+    "failed": 1
+  },
+  "artifact": {
+    "id": 12416124092,
+    "bytes": 20373438,
+    "sha256": "3ee5614e0b6ef681842d6ffad7eae223b2c4339d941a7f3e46f1a5771d3bbf92",
+    "zip_crc_failure": null
+  },
+  "environment": {
+    "os": "ubuntu-24.04",
+    "python": "3.11.17",
+    "chrome": "155.0.8059.39"
+  },
+  "failure": {
+    "test": "test_c66_job_methods_arguments_d5_and_read_only_at_480_and_1366",
+    "line": 315,
+    "incorrect_new_expectation": "initial D5 dialog focus is cancel button",
+    "actual": "#ees-work-dialog-body, existing common dialog C3 behavior",
+    "correction": "assert exact existing body; preserve cancel return to exact tool radio and data assertions; wait existing animation budget for final capture",
+    "product_focus_change": false
+  },
+  "confirmed": {
+    "native_enter": {
+      "trusted": true,
+      "keypress_char_code": 13,
+      "click_count": 1
+    },
+    "job_detail_viewports": [
+      1366
+    ],
+    "job_detail_captures": 12,
+    "horizontal_overflow": 0,
+    "argument_row_height": 60,
+    "argument_toggle_height": 59,
+    "argument_separator": 1,
+    "unconnected_actual_details_border_color": "rgb(150, 89, 12)",
+    "unconnected_actual_details_border_width": 1,
+    "completion_checkbox_bottom_visible": true,
+    "additional_settings_bottom_visible": true,
+    "readonly_values_preserved": true,
+    "admin_only_tool_open": true,
+    "constant_save_and_existing_publish_check": true,
+    "stage_job_add_bottom_viewports": [
+      480,
+      1366
+    ]
+  },
+  "not_reached": [
+    "D5 accepted cleanup",
+    "job detail480"
+  ],
+  "visual_followup": [
+    "place canonical tool state before output summary to match B3-6b",
+    "wait dialog opening animation before D5 capture"
+  ],
+  "files": [
+    {
+      "path": "ci333-c66-b3-additional-settings-1366.png",
+      "bytes": 96211,
+      "sha256": "f3fb9a71c9e070b0e2605ec50417a3f698185cfe09fe1a7ca434a576ba365fe6"
+    },
+    {
+      "path": "ci333-c66-b3-additional-settings-bottom-1366.png",
+      "bytes": 102006,
+      "sha256": "345be7854fb1c066c6ca60369cd24c7f39e8b428ba42df0685e7a5085a8f432a"
+    },
+    {
+      "path": "ci333-c66-b3-ai-1366.png",
+      "bytes": 88359,
+      "sha256": "614d4113748e06bf5988623a6ec3fe46760d5587343610ba3cf9e171eb02052a"
+    },
+    {
+      "path": "ci333-c66-b3-argument-expanded-1366.png",
+      "bytes": 102542,
+      "sha256": "814640e92114eff7aca0bdbcdc7ef34b69817fa1040791714a8bad410c985d63"
+    },
+    {
+      "path": "ci333-c66-b3-completion-1366.png",
+      "bytes": 102992,
+      "sha256": "c8a55a1fa482152a36b56578079e9c5d55a5cf30d7aa4a822d3cc0e6830e45e2"
+    },
+    {
+      "path": "ci333-c66-b3-completion-bottom-1366.png",
+      "bytes": 112260,
+      "sha256": "07f87c9797949bf050f4ec0bb5fb56dd73da0838d7d793bcad78366a57c6e0cf"
+    },
+    {
+      "path": "ci333-c66-b3-human-1366.png",
+      "bytes": 87563,
+      "sha256": "18506e54206ee6ebdc55323177effb0e1e133fd9693872479d29bc6b2c695569"
+    },
+    {
+      "path": "ci333-c66-b3-read-only-1366.png",
+      "bytes": 93511,
+      "sha256": "daa9b179eec8d22c3a1e2629777b5f46af1aaf82a96fcdc36be72901173107e6"
+    },
+    {
+      "path": "ci333-c66-b3-tool-connected-1366.png",
+      "bytes": 97388,
+      "sha256": "88f65073629ce0fc37443678129985a071738dc8adcace6cb4b6aa3fb2ca4adc"
+    },
+    {
+      "path": "ci333-c66-b3-tool-picker-1366.png",
+      "bytes": 94418,
+      "sha256": "f52ae063ff4029c1abcceabf66eab9e0c2c0fd6b963355206e3e86158d7409f5"
+    },
+    {
+      "path": "ci333-c66-b3-tool-review-required-1366.png",
+      "bytes": 94239,
+      "sha256": "bb85de2c84f743599483e581cb70008a1a8bf5d563977e89f19327c94100da88"
+    },
+    {
+      "path": "ci333-c66-b3-tool-unconnected-1366.png",
+      "bytes": 93528,
+      "sha256": "247491aa75c799c39f1de0b9815e78bb1414fc1834c791d36aed86f17529a376"
+    },
+    {
+      "path": "ci333-e1-c2-stage-add-bottom-480.png",
+      "bytes": 61454,
+      "sha256": "45b9e139156568fb2642b1aea327348b9120f81d82beb47f3affd14f6cfcc176"
+    },
+    {
+      "path": "ci333-e1-c2-stage-add-bottom-1366.png",
+      "bytes": 98457,
+      "sha256": "fadac4d3d1bc5284fffe6e72d217a8afc4ad52245de02bbbf36395da408e555b"
+    },
+    {
+      "path": "ci333-e1-example5-job-add-bottom-480.png",
+      "bytes": 62367,
+      "sha256": "4c8e414b829255e45f41ac7ef73a329d9f0a161ff5258173f523f67ce181c1cd"
+    },
+    {
+      "path": "ci333-e1-example5-job-add-bottom-1366.png",
+      "bytes": 99031,
+      "sha256": "4a0291bd73837248ae8f3d1f59f53badbb0fd9eba1a57b7b426602b7d31f7ec7"
+    },
+    {
+      "path": "ci333-d5-focus-failure-dom.json",
+      "bytes": 39906,
+      "sha256": "5fc6de650ac12bcff4e6809b41f751cf63310803c93680038ebaae34039c3409"
+    },
+    {
+      "path": "ci333-d5-focus-failure.json",
+      "bytes": 30713,
+      "sha256": "f685e92634a73f3db6c05842c6dfc49ad4c6bc0ce6488ff5c7e053ead8245b87"
+    },
+    {
+      "path": "ci333-d5-focus-failure.png",
+      "bytes": 117507,
+      "sha256": "3e9ecfe8dd10a4a657f44df4496931688a810d4aa40db6ef633ec85e5623a62c"
+    },
+    {
+      "path": "ci333-c66-job-detail-observations.json",
+      "bytes": 30469,
+      "sha256": "39ed62cf23124b4878c761e82e2d76f29c3f3a8d0c515d810c3a528b141c9e0d"
+    },
+    {
+      "path": "ci333-c66-native-enter-events.json",
+      "bytes": 360,
+      "sha256": "f287afc23a5cd30dbeba4488618142e84380f4fccb5c33fd9dbd3f07ed636e85"
+    },
+    {
+      "path": "ci333-e1-content-variants-observations.json",
+      "bytes": 158329,
+      "sha256": "21471255972bf2055cdd6660d06c721c9b56c6eb777d10a63a0de645bdcd34c8"
+    },
+    {
+      "path": "ci333-authoring-results.json",
+      "bytes": 6199,
+      "sha256": "0420335cb8c67c870a7bbe99724db8d4b3eadeada215a33b27e5bc8bce0d5600"
+    },
+    {
+      "path": "ci333-native-compose.log.gz",
+      "bytes": 17850,
+      "sha256": "924111fecdee263eb507e9f7c15e276be793567f936605904c63fb4a0005dcc4",
+      "original_bytes": 84490,
+      "original_sha256": "c6314660e7904a9afc7f6d4a0c6b8ccd945a96546d45d45efb66cb2bdf9e0ad9"
+    },
+    {
+      "path": "ci333-node-regression-507.log.gz",
+      "bytes": 16924,
+      "sha256": "67ee8899bd83d6c2629dd2c255d9464d80a48c25a4a6549f72c2acc603b725de",
+      "original_bytes": 51563,
+      "original_sha256": "c37ba6a22e4ef45cb0fec443fde0db1cb7f159905bf040ec186abaa50d512ac0"
+    }
+  ]
+}

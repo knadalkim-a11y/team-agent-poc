@@ -1,0 +1,940 @@
+TAP version 13
+# Subtest: C66 content removes the needed-summary surface while preserving stored review decisions
+not ok 1 - C66 content removes the needed-summary surface while preserving stored review decisions
+  ---
+  duration_ms: 20.02853
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:119:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input was expected to not match the regular expression /정해야 할 것|data-author-action="summary_open"|ew-content-needs/. Input:
+    
+    '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span><details class="ew-procedure-menu"><summary aria-label="절차 메뉴"><img src="/_ees13/v4/cb8e2.svg" alt=""></summary><div><button type="button" data-author-action="edit_workflow" class="ew-author-link">절차 정보·분류 수정</button><button type="button" data-author-action="copy" class="ew-author-link">다른 이름으로 저장</button></div></details></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="true">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="false">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><section class="ew-work-content"><div class="ew-content-purpose"><p>목적을 입력해 주세요.</p><button type="button" data-author-action="summary_edit" data-id="business" class="ew-author-link">수정</button></div><button type="button" data-author-action="summary_open" class="ew-content-needs"><img src="/_ees13/v4/676c3.svg" alt=""><span><strong>정해야 할 것 1</strong><small>판정 · 보내기</small></span><img src="/_ees13/v4/f0554.svg" alt=""></button><div class="ew-content-heading"><h3>단계와 작업</h3><small>1개 단계</small><button type="button" data-author-action="help" data-id="stages_and_jobs" class="ew-help-trigger" aria-label="단계와 작업 도움말" aria-haspopup="dialog"><img src="/_ees13/v4/41b38.svg" alt=""></button></div><div class="ew-stage-list"><section class="ew-content-stage" data-stage-id="t"><button type="button" data-author-action="stage_toggle" data-id="t" class="ew-stage-toggle" aria-expanded="false" aria-controls="ew-stage-body-t"><span class="ew-author-stage-number">1</span><span class="ew-stage-name">단계</span><small class="ew-stage-count">1개 작업</small><img src="/_ees13/v4/f0554.svg" alt=""></button></section></div><button type="button" data-author-action="add_stage" class="ew-author-link"><img src="/_ees13/v4/9ce50.svg" alt="">단계 추가</button></section></div><footer><small data-author-status>초안 r1 · 저장됨</small><button type="button" data-author-action="validate" data-mutation >게시 전 확인</button><button type="button" data-author-action="save" data-mutation class="ew-primary">초안 저장</button><button type="button" data-author-action="publish" data-mutation>게시</button></footer></section>'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span><details class="ew-procedure-menu"><summary aria-label="절차 메뉴"><img src="/_ees13/v4/cb8e2.svg" alt=""></summary><div><button type="button" data-author-action="edit_workflow" class="ew-author-link">절차 정보·분류 수정</button><button type="button" data-author-action="copy" class="ew-author-link">다른 이름으로 저장</button></div></details></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="true">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="false">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><section class="ew-work-content"><div class="ew-content-purpose"><p>목적을 입력해 주세요.</p><button type="button" data-author-action="summary_edit" data-id="business" class="ew-author-link">수정</button></div><button type="button" data-author-action="summary_open" class="ew-content-needs"><img src="/_ees13/v4/676c3.svg" alt=""><span><strong>정해야 할 것 1</strong><small>판정 · 보내기</small></span><img src="/_ees13/v4/f0554.svg" alt=""></button><div class="ew-content-heading"><h3>단계와 작업</h3><small>1개 단계</small><button type="button" data-author-action="help" data-id="stages_and_jobs" class="ew-help-trigger" aria-label="단계와 작업 도움말" aria-haspopup="dialog"><img src="/_ees13/v4/41b38.svg" alt=""></button></div><div class="ew-stage-list"><section class="ew-content-stage" data-stage-id="t"><button type="button" data-author-action="stage_toggle" data-id="t" class="ew-stage-toggle" aria-expanded="false" aria-controls="ew-stage-body-t"><span class="ew-author-stage-number">1</span><span class="ew-stage-name">단계</span><small class="ew-stage-count">1개 작업</small><img src="/_ees13/v4/f0554.svg" alt=""></button></section></div><button type="button" data-author-action="add_stage" class="ew-author-link"><img src="/_ees13/v4/9ce50.svg" alt="">단계 추가</button></section></div><footer><small data-author-status>초안 r1 · 저장됨</small><button type="button" data-author-action="validate" data-mutation >게시 전 확인</button><button type="button" data-author-action="save" data-mutation class="ew-primary">초안 저장</button><button type="button" data-author-action="publish" data-mutation>게시</button></footer></section>'
+  operator: 'doesNotMatch'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:121:9)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1382:25)
+    Test.start (node:internal/test_runner/test:1242:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+  ...
+# Subtest: C66 expanded stages keep edit visible and disclose move and delete only through their menu
+not ok 2 - C66 expanded stages keep edit visible and disclose move and delete only through their menu
+  ---
+  duration_ms: 23.746735
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:125:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(actionButton(h,'stage_menu','t1'))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:128:102)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 stage menu Escape closes only an open menu and restores its trigger
+not ok 3 - C66 stage menu Escape closes only an open menu and restores its trigger
+  ---
+  duration_ms: 10.808597
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:134:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(actionButton(h,'stage_menu','t0'))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:137:9)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 outside clicks close stage and job menus while preserving the clicked focus and draft
+not ok 4 - C66 outside clicks close stage and job menus while preserving the clicked focus and draft
+  ---
+  duration_ms: 8.826214
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:142:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of undefined (reading 'getAttribute')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:144:169)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 factory viewing requires factories and scope or stored overrides: undecided / 0 / false
+not ok 5 - C66 factory viewing requires factories and scope or stored overrides: undecided / 0 / false
+  ---
+  duration_ms: 6.053738
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:149:108'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:152:60)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1382:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+    Test.postRun (node:internal/test_runner/test:1522:19)
+    Test.run (node:internal/test_runner/test:1447:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 factory viewing requires factories and scope or stored overrides: undecided / 0 / true
+not ok 6 - C66 factory viewing requires factories and scope or stored overrides: undecided / 0 / true
+  ---
+  duration_ms: 4.264509
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:149:108'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:152:60)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1382:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+    Test.postRun (node:internal/test_runner/test:1522:19)
+    Test.run (node:internal/test_runner/test:1447:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 factory viewing requires factories and scope or stored overrides: undecided / 1 / false
+not ok 7 - C66 factory viewing requires factories and scope or stored overrides: undecided / 1 / false
+  ---
+  duration_ms: 4.455935
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:149:108'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:152:60)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1382:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+    Test.postRun (node:internal/test_runner/test:1522:19)
+    Test.run (node:internal/test_runner/test:1447:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 factory viewing requires factories and scope or stored overrides: undecided / 1 / true
+ok 8 - C66 factory viewing requires factories and scope or stored overrides: undecided / 1 / true
+  ---
+  duration_ms: 4.531616
+  type: 'test'
+  ...
+# Subtest: C66 factory viewing requires factories and scope or stored overrides: system / 0 / false
+not ok 9 - C66 factory viewing requires factories and scope or stored overrides: system / 0 / false
+  ---
+  duration_ms: 6.116631
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:149:108'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:152:60)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1382:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+    Test.postRun (node:internal/test_runner/test:1522:19)
+    Test.run (node:internal/test_runner/test:1447:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 factory viewing requires factories and scope or stored overrides: system / 0 / true
+not ok 10 - C66 factory viewing requires factories and scope or stored overrides: system / 0 / true
+  ---
+  duration_ms: 3.332318
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:149:108'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:152:60)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1382:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+    Test.postRun (node:internal/test_runner/test:1522:19)
+    Test.run (node:internal/test_runner/test:1447:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 factory viewing requires factories and scope or stored overrides: system / 1 / false
+not ok 11 - C66 factory viewing requires factories and scope or stored overrides: system / 1 / false
+  ---
+  duration_ms: 3.073668
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:149:108'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:152:60)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1382:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+    Test.postRun (node:internal/test_runner/test:1522:19)
+    Test.run (node:internal/test_runner/test:1447:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 factory viewing requires factories and scope or stored overrides: system / 1 / true
+ok 12 - C66 factory viewing requires factories and scope or stored overrides: system / 1 / true
+  ---
+  duration_ms: 4.040559
+  type: 'test'
+  ...
+# Subtest: C66 factory viewing requires factories and scope or stored overrides: factory / 0 / false
+not ok 13 - C66 factory viewing requires factories and scope or stored overrides: factory / 0 / false
+  ---
+  duration_ms: 3.983846
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:149:108'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:152:60)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1382:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+    Test.postRun (node:internal/test_runner/test:1522:19)
+    Test.run (node:internal/test_runner/test:1447:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 factory viewing requires factories and scope or stored overrides: factory / 0 / true
+not ok 14 - C66 factory viewing requires factories and scope or stored overrides: factory / 0 / true
+  ---
+  duration_ms: 3.745886
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:149:108'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:152:60)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1382:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+    Test.postRun (node:internal/test_runner/test:1522:19)
+    Test.run (node:internal/test_runner/test:1447:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 factory viewing requires factories and scope or stored overrides: factory / 1 / false
+ok 15 - C66 factory viewing requires factories and scope or stored overrides: factory / 1 / false
+  ---
+  duration_ms: 3.692768
+  type: 'test'
+  ...
+# Subtest: C66 factory viewing requires factories and scope or stored overrides: factory / 1 / true
+ok 16 - C66 factory viewing requires factories and scope or stored overrides: factory / 1 / true
+  ---
+  duration_ms: 5.032127
+  type: 'test'
+  ...
+# Subtest: C66 factory conditions alone do not expose the factory view and hidden selection resets to base
+not ok 17 - C66 factory conditions alone do not expose the factory view and hidden selection resets to base
+  ---
+  duration_ms: 3.927063
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:155:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input was expected to not match the regular expression /class="ew-author-factories"/. Input:
+    
+    '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span><details class="ew-procedure-menu"><summary aria-label="절차 메뉴"><img src="/_ees13/v4/cb8e2.svg" alt=""></summary><div><button type="button" data-author-action="edit_workflow" class="ew-author-link">절차 정보·분류 수정</button><button type="button" data-author-action="copy" class="ew-author-link">다른 이름으로 저장</button></div></details></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="true">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="false">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><section class="ew-work-content"><div class="ew-content-purpose"><p>목적을 입력해 주세요.</p><button type="button" data-author-action="summary_edit" data-id="business" class="ew-author-link">수정</button></div><button type="button" data-author-action="summary_open" class="ew-content-needs"><img src="/_ees13/v4/676c3.svg" alt=""><span><strong>정해야 할 것 2</strong><small>실행할 때 정할 값 · 판정 · 보내기</small></span><img src="/_ees13/v4/f0554.svg" alt=""></button><div class="ew-content-heading"><h3>단계와 작업</h3><small>1개 단계</small><button type="button" data-author-action="help" data-id="stages_and_jobs" class="ew-help-trigger" aria-label="단계와 작업 도움말" aria-haspopup="dialog"><img src="/_ees13/v4/41b38.svg" alt=""></button></div><div class="ew-stage-list"><section class="ew-content-stage" data-stage-id="t"><button type="button" data-author-action="stage_toggle" data-id="t" class="ew-stage-toggle" aria-expanded="false" aria-controls="ew-stage-body-t"><span class="ew-author-stage-number">1</span><span class="ew-stage-name">단계</span><small class="ew-stage-count">1개 작업</small><img src="/_ees13/v4/f0554.svg" alt=""></button></section></div><button type="button" data-author-action="add_stage" class="ew-author-link"><img src="/_ees13/v4/9ce50.svg" alt="">단계 추가</button></section></div><footer><small data-author-status>초안 r1 · 저장됨</small><button type="button" data-author-action="validate" data-mutation >게시 전 확인</button><button type="button" data-author-action="save" data-mutation class="ew-primary">초안 저장</button><button type="button" data-author-action="publish" data-mutation>게시</button></footer></section>'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span><details class="ew-procedure-menu"><summary aria-label="절차 메뉴"><img src="/_ees13/v4/cb8e2.svg" alt=""></summary><div><button type="button" data-author-action="edit_workflow" class="ew-author-link">절차 정보·분류 수정</button><button type="button" data-author-action="copy" class="ew-author-link">다른 이름으로 저장</button></div></details></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="true">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="false">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><section class="ew-work-content"><div class="ew-content-purpose"><p>목적을 입력해 주세요.</p><button type="button" data-author-action="summary_edit" data-id="business" class="ew-author-link">수정</button></div><button type="button" data-author-action="summary_open" class="ew-content-needs"><img src="/_ees13/v4/676c3.svg" alt=""><span><strong>정해야 할 것 2</strong><small>실행할 때 정할 값 · 판정 · 보내기</small></span><img src="/_ees13/v4/f0554.svg" alt=""></button><div class="ew-content-heading"><h3>단계와 작업</h3><small>1개 단계</small><button type="button" data-author-action="help" data-id="stages_and_jobs" class="ew-help-trigger" aria-label="단계와 작업 도움말" aria-haspopup="dialog"><img src="/_ees13/v4/41b38.svg" alt=""></button></div><div class="ew-stage-list"><section class="ew-content-stage" data-stage-id="t"><button type="button" data-author-action="stage_toggle" data-id="t" class="ew-stage-toggle" aria-expanded="false" aria-controls="ew-stage-body-t"><span class="ew-author-stage-number">1</span><span class="ew-stage-name">단계</span><small class="ew-stage-count">1개 작업</small><img src="/_ees13/v4/f0554.svg" alt=""></button></section></div><button type="button" data-author-action="add_stage" class="ew-author-link"><img src="/_ees13/v4/9ce50.svg" alt="">단계 추가</button></section></div><footer><small data-author-status>초안 r1 · 저장됨</small><button type="button" data-author-action="validate" data-mutation >게시 전 확인</button><button type="button" data-author-action="save" data-mutation class="ew-primary">초안 저장</button><button type="button" data-author-action="publish" data-mutation>게시</button></footer></section>'
+  operator: 'doesNotMatch'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:157:9)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1382:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+    Test.postRun (node:internal/test_runner/test:1522:19)
+    Test.run (node:internal/test_runner/test:1447:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 losing factory visibility removes hidden selection without changing saved factory values
+not ok 18 - C66 losing factory visibility removes hidden selection without changing saved factory values
+  ---
+  duration_ms: 18.428648
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:164:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input was expected to not match the regular expression /class="ew-author-factories"/. Input:
+    
+    '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><p role="status" class="ew-author-note">저장 전 초안에 적용했습니다. 다른 항목을 작성한 뒤 초안 저장을 눌러 주세요.</p><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span><details class="ew-procedure-menu"><summary aria-label="절차 메뉴"><img src="/_ees13/v4/cb8e2.svg" alt=""></summary><div><button type="button" data-author-action="edit_workflow" class="ew-author-link">절차 정보·분류 수정</button><button type="button" data-author-action="copy" class="ew-author-link">다른 이름으로 저장</button></div></details></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="false">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="true">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><section class="ew-work-content"><div class="ew-content-purpose"><p>목적을 입력해 주세요.</p><button type="button" data-author-action="summary_edit" data-id="business" class="ew-author-link">수정</button></div><button type="button" data-author-action="summary_open" class="ew-content-needs"><img src="/_ees13/v4/676c3.svg" alt=""><span><strong>정해야 할 것 1</strong><small>판정 · 보내기</small></span><img src="/_ees13/v4/f0554.svg" alt=""></button><p class="ew-author-note">공장에 적용되는 절차 · 기본 절차와 공장별 값을 함께 사용합니다.</p><div class="ew-content-heading"><h3>단계와 작업</h3><small>1개 단계</small><button type="button" data-author-action="help" data-id="stages_and_jobs" class="ew-help-trigger" aria-label="단계와 작업 도움말" aria-haspopup="dialog"><img src="/_ees13/v4/41b38.svg" alt=""></button></div><div class="ew-stage-list"><section class="ew-content-stage" data-stage-id="t"><button type="button" data-author-action="stage_toggle" data-id="t" class="ew-stage-toggle" aria-expanded="false" aria-controls="ew-stage-body-t"><span class="ew-author-stage-number">1</span><span class="ew-stage-name">단계</span><small class="ew-stage-count">1개 작업</small><img src="/_ees13/v4/f0554.svg" alt=""></button></section></div><button type="button" data-author-action="add_stage" class="ew-author-link"><img src="/_ees13/v4/9ce50.svg" alt="">단계 추가</button><button type="button" data-author-action="factory_settings" class="ew-author-link">공장별 값 편집</button></section></div><footer><small data-author-status>변경 있음 · 저장 안 됨</small><button type="button" data-author-action="validate" data-mutation disabled>게시 전 확인</button><button type="button" data-author-action="save" data-mutation class="ew-primary">초안 저장</button></footer></section>'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><p role="status" class="ew-author-note">저장 전 초안에 적용했습니다. 다른 항목을 작성한 뒤 초안 저장을 눌러 주세요.</p><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span><details class="ew-procedure-menu"><summary aria-label="절차 메뉴"><img src="/_ees13/v4/cb8e2.svg" alt=""></summary><div><button type="button" data-author-action="edit_workflow" class="ew-author-link">절차 정보·분류 수정</button><button type="button" data-author-action="copy" class="ew-author-link">다른 이름으로 저장</button></div></details></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="false">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="true">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><section class="ew-work-content"><div class="ew-content-purpose"><p>목적을 입력해 주세요.</p><button type="button" data-author-action="summary_edit" data-id="business" class="ew-author-link">수정</button></div><button type="button" data-author-action="summary_open" class="ew-content-needs"><img src="/_ees13/v4/676c3.svg" alt=""><span><strong>정해야 할 것 1</strong><small>판정 · 보내기</small></span><img src="/_ees13/v4/f0554.svg" alt=""></button><p class="ew-author-note">공장에 적용되는 절차 · 기본 절차와 공장별 값을 함께 사용합니다.</p><div class="ew-content-heading"><h3>단계와 작업</h3><small>1개 단계</small><button type="button" data-author-action="help" data-id="stages_and_jobs" class="ew-help-trigger" aria-label="단계와 작업 도움말" aria-haspopup="dialog"><img src="/_ees13/v4/41b38.svg" alt=""></button></div><div class="ew-stage-list"><section class="ew-content-stage" data-stage-id="t"><button type="button" data-author-action="stage_toggle" data-id="t" class="ew-stage-toggle" aria-expanded="false" aria-controls="ew-stage-body-t"><span class="ew-author-stage-number">1</span><span class="ew-stage-name">단계</span><small class="ew-stage-count">1개 작업</small><img src="/_ees13/v4/f0554.svg" alt=""></button></section></div><button type="button" data-author-action="add_stage" class="ew-author-link"><img src="/_ees13/v4/9ce50.svg" alt="">단계 추가</button><button type="button" data-author-action="factory_settings" class="ew-author-link">공장별 값 편집</button></section></div><footer><small data-author-status>변경 있음 · 저장 안 됨</small><button type="button" data-author-action="validate" data-mutation disabled>게시 전 확인</button><button type="button" data-author-action="save" data-mutation class="ew-primary">초안 저장</button></footer></section>'
+  operator: 'doesNotMatch'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:166:147)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 human detail uses the compact breadcrumb and three real mode radios
+not ok 19 - C66 human detail uses the compact breadcrumb and three real mode radios
+  ---
+  duration_ms: 5.456531
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:922:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /ew-job-detail/. Input:
+    
+    '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span><details class="ew-procedure-menu"><summary aria-label="절차 메뉴"><img src="/_ees13/v4/cb8e2.svg" alt=""></summary><div><button type="button" data-author-action="edit_workflow" class="ew-author-link">절차 정보·분류 수정</button><button type="button" data-author-action="copy" class="ew-author-link">다른 이름으로 저장</button></div></details></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="true">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="false">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><button type="button" data-author-action="node" data-id="" class="ew-author-back"><img src="/_ees13/v4/eb94a.svg" alt="">단계와 작업</button><h2>확인 작업</h2><form id="ew-author-node"><div class="ew-author-fields"><label>작업 이름<input name="name" value="확인 작업" required maxlength="160"></label><label>설명<textarea name="description" ></textarea></label><label>수행 안내<textarea name="instructions" >원래 안내</textarea></label><label>작업 담당자 · Native 사용자/그룹<select name="assignee" ><option value="" selected>담당자 미지정</option></select></label><label>수행 방식<select name="mode" ><option value="human" selected>사람 확인</option><option value="tool" >도구 실행</option><option value="ai" >AI 초안</option></select></label><label>결과 형태<select name="result_block" ><option value="values" >사람이 정하는 값</option><option value="schedule" >예약 안내</option><option value="checklist" >확인 항목</option><option value="list_confirm" >목록 확정</option><option value="item_verdict" >항목별 판정</option><option value="ai_review" >AI 초안 검토</option><option value="human_confirm" selected>사람 확인</option><option value="change_request" >변경 요청</option></select></label><label>사용하는 도구<select name="tool_contract_id" ><option value="" selected>도구 없음</option></select></label><label class="ew-author-inline"><input type="checkbox" name="human_required" checked>실행 후 사람이 확인해야 완료</label><details class="ew-job-advanced"><summary>기한 · 예약 실행</summary><div class="ew-author-fields"><label>기한 설명<input name="deadline_notes" value="" ></label><label>기한 계산의 날짜 입력<select name="deadline_input" ><option value="" selected>계산 안 함</option></select></label><label>기준 날짜에서 일수<input name="deadline_offset" value="" type="number" min="-3660" max="3660"></label><label>기한 계산 시간대<input name="deadline_timezone" value="" placeholder="예: Asia/Seoul"></label><label>날짜 기준<select name="deadline_calendar" ><option value="calendar" selected>달력 날짜</option><option value="business" >영업일 · 공휴일 달력 필요</option></select></label><label>예약 실행 시점<select name="trigger_kind" ><option value="" selected>선행 조건 충족 후</option><option value="offset" >회차 시작에서 지정 시간 후</option><option value="at" >지정한 시각</option></select></label><label>회차 시작 후 · 초<input name="trigger_offset" value="" type="number" min="0" max="31622400"></label><label>예약 시각 · 시간대 포함<input name="trigger_at" value="" placeholder="ISO 날짜·시각과 시간대"></label></div></details></div><details class="ew-job-advanced"><summary>사람이 정하는 값</summary><div class="ew-advanced-content"><table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody><tr><td colspan="5">선언한 값이 없습니다.</td></tr></tbody></table><button type="button" data-author-action="input_add" class="ew-author-link"><img src="/_ees13/v4/7d31f.svg" alt="">값 추가</button></div></details><details class="ew-job-advanced"><summary>결과와 완료</summary><div class="ew-advanced-content"><label>완료 기준 설명<textarea name="completion_rule" ></textarea></label><h4>선행 작업</h4><p class="ew-author-muted">다른 작업이 없습니다.</p></div></details><details class="ew-job-advanced"><summary>적용 조건</summary><div class="ew-advanced-content"><p class="ew-author-muted">속성이 없으면 확인 필요 상태로 남습니다.</p><div class="ew-author-fields"><label>조건 종류<select name="condition_kind" ><option value="" selected>모든 공장</option><option value="attribute" >공장 속성</option><option value="factory" >특정 공장</option></select></label><label>공장 속성 ID<input name="condition_field" value="" ></label><label>비교<select name="condition_op" ><option value="eq" selected>같음</option><option value="ne" >다름</option><option value="in" >목록에 포함</option><option value="not_in" >목록에 없음</option><option value="gt" >초과</option><option value="gte" >이상</option><option value="lt" >미만</option><option value="lte" >이하</option></select></label><label>비교 값<input name="condition_value" value="" ></label><label>값 형식<select name="condition_type" ><option value="text" selected>문자</option><option value="number" >숫자</option><option value="boolean" >예 / 아니오</option><option value="list" >목록 · JSON 배열</option></select></label></div></div></details><details class="ew-job-advanced"><summary>스킬 · 지침 연결</summary><div class="ew-advanced-content"><p class="ew-author-muted">현재 Native 권한으로 사용할 수 있는 스킬을 연결합니다. 스킬이 없어도 사람 작업을 작성할 수 있습니다.</p></div></details><div class="ew-author-inline"><button type="button" data-author-action="move_up" >위로</button><button type="button" data-author-action="move_down" >아래로</button><button type="button" data-author-action="delete_node" >삭제</button></div></form></div><footer><small data-author-status>초안 r1 · 저장됨</small><button type="button" data-author-action="validate" data-mutation >게시 전 확인</button><button type="button" data-author-action="save" data-mutation class="ew-primary">초안 저장</button><button type="button" data-author-action="publish" data-mutation>게시</button></footer></section>'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span><details class="ew-procedure-menu"><summary aria-label="절차 메뉴"><img src="/_ees13/v4/cb8e2.svg" alt=""></summary><div><button type="button" data-author-action="edit_workflow" class="ew-author-link">절차 정보·분류 수정</button><button type="button" data-author-action="copy" class="ew-author-link">다른 이름으로 저장</button></div></details></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="true">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="false">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><button type="button" data-author-action="node" data-id="" class="ew-author-back"><img src="/_ees13/v4/eb94a.svg" alt="">단계와 작업</button><h2>확인 작업</h2><form id="ew-author-node"><div class="ew-author-fields"><label>작업 이름<input name="name" value="확인 작업" required maxlength="160"></label><label>설명<textarea name="description" ></textarea></label><label>수행 안내<textarea name="instructions" >원래 안내</textarea></label><label>작업 담당자 · Native 사용자/그룹<select name="assignee" ><option value="" selected>담당자 미지정</option></select></label><label>수행 방식<select name="mode" ><option value="human" selected>사람 확인</option><option value="tool" >도구 실행</option><option value="ai" >AI 초안</option></select></label><label>결과 형태<select name="result_block" ><option value="values" >사람이 정하는 값</option><option value="schedule" >예약 안내</option><option value="checklist" >확인 항목</option><option value="list_confirm" >목록 확정</option><option value="item_verdict" >항목별 판정</option><option value="ai_review" >AI 초안 검토</option><option value="human_confirm" selected>사람 확인</option><option value="change_request" >변경 요청</option></select></label><label>사용하는 도구<select name="tool_contract_id" ><option value="" selected>도구 없음</option></select></label><label class="ew-author-inline"><input type="checkbox" name="human_required" checked>실행 후 사람이 확인해야 완료</label><details class="ew-job-advanced"><summary>기한 · 예약 실행</summary><div class="ew-author-fields"><label>기한 설명<input name="deadline_notes" value="" ></label><label>기한 계산의 날짜 입력<select name="deadline_input" ><option value="" selected>계산 안 함</option></select></label><label>기준 날짜에서 일수<input name="deadline_offset" value="" type="number" min="-3660" max="3660"></label><label>기한 계산 시간대<input name="deadline_timezone" value="" placeholder="예: Asia/Seoul"></label><label>날짜 기준<select name="deadline_calendar" ><option value="calendar" selected>달력 날짜</option><option value="business" >영업일 · 공휴일 달력 필요</option></select></label><label>예약 실행 시점<select name="trigger_kind" ><option value="" selected>선행 조건 충족 후</option><option value="offset" >회차 시작에서 지정 시간 후</option><option value="at" >지정한 시각</option></select></label><label>회차 시작 후 · 초<input name="trigger_offset" value="" type="number" min="0" max="31622400"></label><label>예약 시각 · 시간대 포함<input name="trigger_at" value="" placeholder="ISO 날짜·시각과 시간대"></label></div></details></div><details class="ew-job-advanced"><summary>사람이 정하는 값</summary><div class="ew-advanced-content"><table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody><tr><td colspan="5">선언한 값이 없습니다.</td></tr></tbody></table><button type="button" data-author-action="input_add" class="ew-author-link"><img src="/_ees13/v4/7d31f.svg" alt="">값 추가</button></div></details><details class="ew-job-advanced"><summary>결과와 완료</summary><div class="ew-advanced-content"><label>완료 기준 설명<textarea name="completion_rule" ></textarea></label><h4>선행 작업</h4><p class="ew-author-muted">다른 작업이 없습니다.</p></div></details><details class="ew-job-advanced"><summary>적용 조건</summary><div class="ew-advanced-content"><p class="ew-author-muted">속성이 없으면 확인 필요 상태로 남습니다.</p><div class="ew-author-fields"><label>조건 종류<select name="condition_kind" ><option value="" selected>모든 공장</option><option value="attribute" >공장 속성</option><option value="factory" >특정 공장</option></select></label><label>공장 속성 ID<input name="condition_field" value="" ></label><label>비교<select name="condition_op" ><option value="eq" selected>같음</option><option value="ne" >다름</option><option value="in" >목록에 포함</option><option value="not_in" >목록에 없음</option><option value="gt" >초과</option><option value="gte" >이상</option><option value="lt" >미만</option><option value="lte" >이하</option></select></label><label>비교 값<input name="condition_value" value="" ></label><label>값 형식<select name="condition_type" ><option value="text" selected>문자</option><option value="number" >숫자</option><option value="boolean" >예 / 아니오</option><option value="list" >목록 · JSON 배열</option></select></label></div></div></details><details class="ew-job-advanced"><summary>스킬 · 지침 연결</summary><div class="ew-advanced-content"><p class="ew-author-muted">현재 Native 권한으로 사용할 수 있는 스킬을 연결합니다. 스킬이 없어도 사람 작업을 작성할 수 있습니다.</p></div></details><div class="ew-author-inline"><button type="button" data-author-action="move_up" >위로</button><button type="button" data-author-action="move_down" >아래로</button><button type="button" data-author-action="delete_node" >삭제</button></div></form></div><footer><small data-author-status>초안 r1 · 저장됨</small><button type="button" data-author-action="validate" data-mutation >게시 전 확인</button><button type="button" data-author-action="save" data-mutation class="ew-primary">초안 저장</button><button type="button" data-author-action="publish" data-mutation>게시</button></footer></section>'
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:923:42)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 human detail preserves an older result kind outside the four ordinary choices: change_request
+ok 20 - C66 human detail preserves an older result kind outside the four ordinary choices: change_request
+  ---
+  duration_ms: 11.794747
+  type: 'test'
+  ...
+# Subtest: C66 human detail preserves an older result kind outside the four ordinary choices: schedule
+ok 21 - C66 human detail preserves an older result kind outside the four ordinary choices: schedule
+  ---
+  duration_ms: 13.101889
+  type: 'test'
+  ...
+# Subtest: C66 human detail preserves an older result kind outside the four ordinary choices: list_confirm
+ok 22 - C66 human detail preserves an older result kind outside the four ordinary choices: list_confirm
+  ---
+  duration_ms: 9.95321
+  type: 'test'
+  ...
+# Subtest: C66 tool selection before connection never fabricates arguments results or completion settings
+ok 23 - C66 tool selection before connection never fabricates arguments results or completion settings
+  ---
+  duration_ms: 8.06844
+  type: 'test'
+  ...
+# Subtest: C66 AI mode retains its existing completion dependency and source controls
+not ok 24 - C66 AI mode retains its existing completion dependency and source controls
+  ---
+  duration_ms: 6.543828
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:940:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of undefined (reading 'value')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:942:59)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 D5 mode switch requires confirmation and matches Tool None cleanup: human
+not ok 25 - C66 D5 mode switch requires confirmation and matches Tool None cleanup: human
+  ---
+  duration_ms: 19.996724
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:945:34'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of undefined (reading 'length')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:948:96)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 D5 mode switch requires confirmation and matches Tool None cleanup: ai
+not ok 26 - C66 D5 mode switch requires confirmation and matches Tool None cleanup: ai
+  ---
+  duration_ms: 17.698896
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:945:34'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of undefined (reading 'length')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:948:96)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 D5 cancellation and confirmation preserve manually customized generated bindings
+ok 27 - C66 D5 cancellation and confirmation preserve manually customized generated bindings
+  ---
+  duration_ms: 19.332797
+  type: 'test'
+  ...
+# Subtest: C66 connected shared tool describes its known output and opens exactly one argument row
+not ok 28 - C66 connected shared tool describes its known output and opens exactly one argument row
+  ---
+  duration_ms: 11.921328
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:955:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /문서 목록 · 페이지 번호, 제목, 주소 · 한 번에 한 쪽/. Input:
+    
+    '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span><details class="ew-procedure-menu"><summary aria-label="절차 메뉴"><img src="/_ees13/v4/cb8e2.svg" alt=""></summary><div><button type="button" data-author-action="edit_workflow" class="ew-author-link">절차 정보·분류 수정</button><button type="button" data-author-action="copy" class="ew-author-link">다른 이름으로 저장</button></div></details></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="true">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="false">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><button type="button" data-author-action="node" data-id="" class="ew-author-back"><img src="/_ees13/v4/eb94a.svg" alt="">단계와 작업</button><h2>확인 작업</h2><form id="ew-author-node"><div class="ew-author-fields"><label>작업 이름<input name="name" value="확인 작업" required maxlength="160"></label><label>설명<textarea name="description" ></textarea></label><label>수행 안내<textarea name="instructions" >원래 안내</textarea></label><label>작업 담당자 · Native 사용자/그룹<select name="assignee" ><option value="" selected>담당자 미지정</option></select></label><label>수행 방식<select name="mode" ><option value="human" >사람 확인</option><option value="tool" selected>도구 실행</option><option value="ai" >AI 초안</option></select></label><label>결과 형태<select name="result_block" ><option value="values" >사람이 정하는 값</option><option value="schedule" >예약 안내</option><option value="checklist" >확인 항목</option><option value="list_confirm" selected>목록 확정</option><option value="item_verdict" >항목별 판정</option><option value="ai_review" >AI 초안 검토</option><option value="human_confirm" >사람 확인</option><option value="change_request" >변경 요청</option></select></label><label class="ew-shared-picker-label">쓰는 도구</label><details class="ew-shared-picker"><summary>Confluence 페이지 찾기</summary><div class="ew-shared-picker-options"><input id="ew-shared-picker-search" aria-label="도구 이름이나 하는 일로 찾기" placeholder="도구 이름이나 하는 일로 찾기" value=""><button type="button" data-author-action="pick_job_tool" data-id="">도구 없음</button><h4>Confluence</h4><button type="button" data-author-action="pick_job_tool" data-id="managed-search_pages" data-shared="true"><strong>Confluence 페이지 찾기 <small class="ew-author-tag">조회</small></strong><small></small><span>v1</span></button><button type="button" data-author-action="pick_job_tool" data-id="managed-get_page" data-shared="true"><strong>Confluence 페이지 읽기 <small class="ew-author-tag">조회</small></strong><small></small><span>v1</span></button><p class="ew-author-muted">필요한 도구가 없으면 관리자에게 요청하세요.</p></div></details><label class="ew-author-inline"><input type="checkbox" name="human_required" checked>실행 후 사람이 확인해야 완료</label><details class="ew-job-advanced"><summary>기한 · 예약 실행</summary><div class="ew-author-fields"><label>기한 설명<input name="deadline_notes" value="" ></label><label>기한 계산의 날짜 입력<select name="deadline_input" ><option value="" selected>계산 안 함</option></select></label><label>기준 날짜에서 일수<input name="deadline_offset" value="" type="number" min="-3660" max="3660"></label><label>기한 계산 시간대<input name="deadline_timezone" value="" placeholder="예: Asia/Seoul"></label><label>날짜 기준<select name="deadline_calendar" ><option value="calendar" selected>달력 날짜</option><option value="business" >영업일 · 공휴일 달력 필요</option></select></label><label>예약 실행 시점<select name="trigger_kind" ><option value="" selected>선행 조건 충족 후</option><option value="offset" >회차 시작에서 지정 시간 후</option><option value="at" >지정한 시각</option></select></label><label>회차 시작 후 · 초<input name="trigger_offset" value="" type="number" min="0" max="31622400"></label><label>예약 시각 · 시간대 포함<input name="trigger_at" value="" placeholder="ISO 날짜·시각과 시간대"></label></div></details></div><details class="ew-job-advanced"><summary>사람이 정하는 값</summary><div class="ew-advanced-content"><table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody><tr><td><button type="button" data-author-action="input_edit" data-id="query">찾을 말</button></td><td>텍스트</td><td>미연결</td><td>이번 진행 건</td><td><button type="button" data-author-action="input_delete" data-id="query" aria-label="찾을 말 삭제">삭제</button></td></tr><tr><td><button type="button" data-author-action="input_edit" data-id="space_key">공간</button></td><td>텍스트</td><td>미연결</td><td>이번 진행 건</td><td><button type="button" data-author-action="input_delete" data-id="space_key" aria-label="공간 삭제">삭제</button></td></tr><tr><td><button type="button" data-author-action="input_edit" data-id="limit">개수</button></td><td>숫자 · 단위</td><td>미연결</td><td>이번 진행 건</td><td><button type="button" data-author-action="input_delete" data-id="limit" aria-label="개수 삭제">삭제</button></td></tr></tbody></table><button type="button" data-author-action="input_add" class="ew-author-link"><img src="/_ees13/v4/7d31f.svg" alt="">값 추가</button></div></details><details class="ew-job-advanced"><summary>결과와 완료</summary><div class="ew-advanced-content"><label>완료 기준 설명<textarea name="completion_rule" ></textarea></label><h4>선행 작업</h4><p class="ew-author-muted">다른 작업이 없습니다.</p></div></details><fieldset><legend>읽기 실패 시 재조회</legend><div class="ew-author-fields"><label>추가 재조회 횟수 · 0이면 사용 안 함<input name="read_retry_count" value="0" type="number" min="0" max="3"></label><label>전체 조회·재조회 제한 · 초<input name="read_retry_deadline" value="" type="number" min="1" max="300"></label></div><p class="ew-author-note">허용된 읽기 기능의 명확한 실패만 첫 조회부터 지정한 시간과 추가 횟수 안에서 재조회합니다. 부분 결과·결과 불명·변경 요청은 자동 재실행하지 않으며 매번 현재 권한을 확인합니다. 각 시도와 기존 결과는 별도로 보존합니다.</p></fieldset><details class="ew-job-advanced"><summary>적용 조건</summary><div class="ew-advanced-content"><p class="ew-author-muted">속성이 없으면 확인 필요 상태로 남습니다.</p><div class="ew-author-fields"><label>조건 종류<select name="condition_kind" ><option value="" selected>모든 공장</option><option value="attribute" >공장 속성</option><option value="factory" >특정 공장</option></select></label><label>공장 속성 ID<input name="condition_field" value="" ></label><label>비교<select name="condition_op" ><option value="eq" selected>같음</option><option value="ne" >다름</option><option value="in" >목록에 포함</option><option value="not_in" >목록에 없음</option><option value="gt" >초과</option><option value="gte" >이상</option><option value="lt" >미만</option><option value="lte" >이하</option></select></label><label>비교 값<input name="condition_value" value="" ></label><label>값 형식<select name="condition_type" ><option value="text" selected>문자</option><option value="number" >숫자</option><option value="boolean" >예 / 아니오</option><option value="list" >목록 · JSON 배열</option></select></label></div></div></details><details class="ew-job-advanced"><summary>스킬 · 지침 연결</summary><div class="ew-advanced-content"><p class="ew-author-muted">현재 Native 권한으로 사용할 수 있는 스킬을 연결합니다. 스킬이 없어도 사람 작업을 작성할 수 있습니다.</p></div></details><div class="ew-author-inline"><button type="button" data-author-action="move_up" >위로</button><button type="button" data-author-action="move_down" >아래로</button><button type="button" data-author-action="delete_node" >삭제</button></div></form></div><footer><small data-author-status>변경 있음 · 저장 안 됨</small><button type="button" data-author-action="validate" data-mutation disabled>게시 전 확인</button><button type="button" data-author-action="save" data-mutation class="ew-primary">초안 저장</button></footer></section>'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span><details class="ew-procedure-menu"><summary aria-label="절차 메뉴"><img src="/_ees13/v4/cb8e2.svg" alt=""></summary><div><button type="button" data-author-action="edit_workflow" class="ew-author-link">절차 정보·분류 수정</button><button type="button" data-author-action="copy" class="ew-author-link">다른 이름으로 저장</button></div></details></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="true">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="false">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><button type="button" data-author-action="node" data-id="" class="ew-author-back"><img src="/_ees13/v4/eb94a.svg" alt="">단계와 작업</button><h2>확인 작업</h2><form id="ew-author-node"><div class="ew-author-fields"><label>작업 이름<input name="name" value="확인 작업" required maxlength="160"></label><label>설명<textarea name="description" ></textarea></label><label>수행 안내<textarea name="instructions" >원래 안내</textarea></label><label>작업 담당자 · Native 사용자/그룹<select name="assignee" ><option value="" selected>담당자 미지정</option></select></label><label>수행 방식<select name="mode" ><option value="human" >사람 확인</option><option value="tool" selected>도구 실행</option><option value="ai" >AI 초안</option></select></label><label>결과 형태<select name="result_block" ><option value="values" >사람이 정하는 값</option><option value="schedule" >예약 안내</option><option value="checklist" >확인 항목</option><option value="list_confirm" selected>목록 확정</option><option value="item_verdict" >항목별 판정</option><option value="ai_review" >AI 초안 검토</option><option value="human_confirm" >사람 확인</option><option value="change_request" >변경 요청</option></select></label><label class="ew-shared-picker-label">쓰는 도구</label><details class="ew-shared-picker"><summary>Confluence 페이지 찾기</summary><div class="ew-shared-picker-options"><input id="ew-shared-picker-search" aria-label="도구 이름이나 하는 일로 찾기" placeholder="도구 이름이나 하는 일로 찾기" value=""><button type="button" data-author-action="pick_job_tool" data-id="">도구 없음</button><h4>Confluence</h4><button type="button" data-author-action="pick_job_tool" data-id="managed-search_pages" data-shared="true"><strong>Confluence 페이지 찾기 <small class="ew-author-tag">조회</small></strong><small></small><span>v1</span></button><button type="button" data-author-action="pick_job_tool" data-id="managed-get_page" data-shared="true"><strong>Confluence 페이지 읽기 <small class="ew-author-tag">조회</small></strong><small></small><span>v1</span></button><p class="ew-author-muted">필요한 도구가 없으면 관리자에게 요청하세요.</p></div></details><label class="ew-author-inline"><input type="checkbox" name="human_required" checked>실행 후 사람이 확인해야 완료</label><details class="ew-job-advanced"><summary>기한 · 예약 실행</summary><div class="ew-author-fields"><label>기한 설명<input name="deadline_notes" value="" ></label><label>기한 계산의 날짜 입력<select name="deadline_input" ><option value="" selected>계산 안 함</option></select></label><label>기준 날짜에서 일수<input name="deadline_offset" value="" type="number" min="-3660" max="3660"></label><label>기한 계산 시간대<input name="deadline_timezone" value="" placeholder="예: Asia/Seoul"></label><label>날짜 기준<select name="deadline_calendar" ><option value="calendar" selected>달력 날짜</option><option value="business" >영업일 · 공휴일 달력 필요</option></select></label><label>예약 실행 시점<select name="trigger_kind" ><option value="" selected>선행 조건 충족 후</option><option value="offset" >회차 시작에서 지정 시간 후</option><option value="at" >지정한 시각</option></select></label><label>회차 시작 후 · 초<input name="trigger_offset" value="" type="number" min="0" max="31622400"></label><label>예약 시각 · 시간대 포함<input name="trigger_at" value="" placeholder="ISO 날짜·시각과 시간대"></label></div></details></div><details class="ew-job-advanced"><summary>사람이 정하는 값</summary><div class="ew-advanced-content"><table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody><tr><td><button type="button" data-author-action="input_edit" data-id="query">찾을 말</button></td><td>텍스트</td><td>미연결</td><td>이번 진행 건</td><td><button type="button" data-author-action="input_delete" data-id="query" aria-label="찾을 말 삭제">삭제</button></td></tr><tr><td><button type="button" data-author-action="input_edit" data-id="space_key">공간</button></td><td>텍스트</td><td>미연결</td><td>이번 진행 건</td><td><button type="button" data-author-action="input_delete" data-id="space_key" aria-label="공간 삭제">삭제</button></td></tr><tr><td><button type="button" data-author-action="input_edit" data-id="limit">개수</button></td><td>숫자 · 단위</td><td>미연결</td><td>이번 진행 건</td><td><button type="button" data-author-action="input_delete" data-id="limit" aria-label="개수 삭제">삭제</button></td></tr></tbody></table><button type="button" data-author-action="input_add" class="ew-author-link"><img src="/_ees13/v4/7d31f.svg" alt="">값 추가</button></div></details><details class="ew-job-advanced"><summary>결과와 완료</summary><div class="ew-advanced-content"><label>완료 기준 설명<textarea name="completion_rule" ></textarea></label><h4>선행 작업</h4><p class="ew-author-muted">다른 작업이 없습니다.</p></div></details><fieldset><legend>읽기 실패 시 재조회</legend><div class="ew-author-fields"><label>추가 재조회 횟수 · 0이면 사용 안 함<input name="read_retry_count" value="0" type="number" min="0" max="3"></label><label>전체 조회·재조회 제한 · 초<input name="read_retry_deadline" value="" type="number" min="1" max="300"></label></div><p class="ew-author-note">허용된 읽기 기능의 명확한 실패만 첫 조회부터 지정한 시간과 추가 횟수 안에서 재조회합니다. 부분 결과·결과 불명·변경 요청은 자동 재실행하지 않으며 매번 현재 권한을 확인합니다. 각 시도와 기존 결과는 별도로 보존합니다.</p></fieldset><details class="ew-job-advanced"><summary>적용 조건</summary><div class="ew-advanced-content"><p class="ew-author-muted">속성이 없으면 확인 필요 상태로 남습니다.</p><div class="ew-author-fields"><label>조건 종류<select name="condition_kind" ><option value="" selected>모든 공장</option><option value="attribute" >공장 속성</option><option value="factory" >특정 공장</option></select></label><label>공장 속성 ID<input name="condition_field" value="" ></label><label>비교<select name="condition_op" ><option value="eq" selected>같음</option><option value="ne" >다름</option><option value="in" >목록에 포함</option><option value="not_in" >목록에 없음</option><option value="gt" >초과</option><option value="gte" >이상</option><option value="lt" >미만</option><option value="lte" >이하</option></select></label><label>비교 값<input name="condition_value" value="" ></label><label>값 형식<select name="condition_type" ><option value="text" selected>문자</option><option value="number" >숫자</option><option value="boolean" >예 / 아니오</option><option value="list" >목록 · JSON 배열</option></select></label></div></div></details><details class="ew-job-advanced"><summary>스킬 · 지침 연결</summary><div class="ew-advanced-content"><p class="ew-author-muted">현재 Native 권한으로 사용할 수 있는 스킬을 연결합니다. 스킬이 없어도 사람 작업을 작성할 수 있습니다.</p></div></details><div class="ew-author-inline"><button type="button" data-author-action="move_up" >위로</button><button type="button" data-author-action="move_down" >아래로</button><button type="button" data-author-action="delete_node" >삭제</button></div></form></div><footer><small data-author-status>변경 있음 · 저장 안 됨</small><button type="button" data-author-action="validate" data-mutation disabled>게시 전 확인</button><button type="button" data-author-action="save" data-mutation class="ew-primary">초안 저장</button></footer></section>'
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:956:52)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 argument input scope roundtrips through the existing declaration and preserves factory scope
+not ok 29 - C66 argument input scope roundtrips through the existing declaration and preserves factory scope
+  ---
+  duration_ms: 13.244123
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:962:1'
+  failureType: 'testCodeFailure'
+  error: 'field argument_scope'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:114:144)
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:963:98)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 constant values roundtrip with exact JSON types and range checking stays at publish validation
+not ok 30 - C66 constant values roundtrip with exact JSON types and range checking stays at publish validation
+  ---
+  duration_ms: 10.223818
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:969:1'
+  failureType: 'testCodeFailure'
+  error: 'field argument_constant'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:114:144)
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:970:341)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 an invalid numeric constant is rejected without replacing its previous value
+not ok 31 - C66 an invalid numeric constant is rejected without replacing its previous value
+  ---
+  duration_ms: 8.480996
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:974:1'
+  failureType: 'testCodeFailure'
+  error: 'field argument_source'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:114:144)
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:975:98)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 changing the selected tool clears only its abandoned argument buffer
+not ok 32 - C66 changing the selected tool clears only its abandoned argument buffer
+  ---
+  duration_ms: 11.899661
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:980:1'
+  failureType: 'testCodeFailure'
+  error: 'field argument_source'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:114:144)
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:981:98)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 shared result source remains disabled with a reason and cannot replace existing input bindings
+not ok 33 - C66 shared result source remains disabled with a reason and cannot replace existing input bindings
+  ---
+  duration_ms: 7.814747
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:985:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(field)
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:986:180)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 legacy confirmed-list result binding roundtrips without losing opaque result metadata
+not ok 34 - C66 legacy confirmed-list result binding roundtrips without losing opaque result metadata
+  ---
+  duration_ms: 7.629685
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:989:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of undefined (reading 'value')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:990:599)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 completion and additional disclosures are view-only until a displayed field changes
+not ok 35 - C66 completion and additional disclosures are view-only until a displayed field changes
+  ---
+  duration_ms: 7.718777
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:996:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of undefined (reading 'getAttribute')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:997:107)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 read-only job detail exposes saved values without allowing edits: human
+not ok 36 - C66 read-only job detail exposes saved values without allowing edits: human
+  ---
+  duration_ms: 6.159414
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:1002:41'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /ew-job-detail/. Input:
+    
+    '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><p class="ew-author-warning">이 범위를 수정할 담당 권한이 없습니다. 작성 중인 내용은 이 로그인 세션에 보존됩니다.</p><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="true">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="false">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><button type="button" data-author-action="node" data-id="" class="ew-author-back"><img src="/_ees13/v4/eb94a.svg" alt="">단계와 작업</button><h2>확인 작업</h2><form id="ew-author-node"><div class="ew-author-fields"><label>작업 이름<input name="name" value="확인 작업" required maxlength="160"></label><label>설명<textarea name="description" ></textarea></label><label>수행 안내<textarea name="instructions" >보존할 수행 안내</textarea></label><label>작업 담당자 · Native 사용자/그룹<select name="assignee" ><option value="" selected>담당자 미지정</option></select></label><label>수행 방식<select name="mode" ><option value="human" selected>사람 확인</option><option value="tool" >도구 실행</option><option value="ai" >AI 초안</option></select></label><label>결과 형태<select name="result_block" ><option value="values" >사람이 정하는 값</option><option value="schedule" >예약 안내</option><option value="checklist" >확인 항목</option><option value="list_confirm" >목록 확정</option><option value="item_verdict" >항목별 판정</option><option value="ai_review" >AI 초안 검토</option><option value="human_confirm" selected>사람 확인</option><option value="change_request" >변경 요청</option></select></label><label>사용하는 도구<select name="tool_contract_id" ><option value="" selected>도구 없음</option></select></label><label class="ew-author-inline"><input type="checkbox" name="human_required" checked>실행 후 사람이 확인해야 완료</label><details class="ew-job-advanced"><summary>기한 · 예약 실행</summary><div class="ew-author-fields"><label>기한 설명<input name="deadline_notes" value="" ></label><label>기한 계산의 날짜 입력<select name="deadline_input" ><option value="" selected>계산 안 함</option></select></label><label>기준 날짜에서 일수<input name="deadline_offset" value="" type="number" min="-3660" max="3660"></label><label>기한 계산 시간대<input name="deadline_timezone" value="" placeholder="예: Asia/Seoul"></label><label>날짜 기준<select name="deadline_calendar" ><option value="calendar" selected>달력 날짜</option><option value="business" >영업일 · 공휴일 달력 필요</option></select></label><label>예약 실행 시점<select name="trigger_kind" ><option value="" selected>선행 조건 충족 후</option><option value="offset" >회차 시작에서 지정 시간 후</option><option value="at" >지정한 시각</option></select></label><label>회차 시작 후 · 초<input name="trigger_offset" value="" type="number" min="0" max="31622400"></label><label>예약 시각 · 시간대 포함<input name="trigger_at" value="" placeholder="ISO 날짜·시각과 시간대"></label></div></details></div><details class="ew-job-advanced"><summary>사람이 정하는 값</summary><div class="ew-advanced-content"><table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody><tr><td colspan="5">선언한 값이 없습니다.</td></tr></tbody></table></div></details><details class="ew-job-advanced"><summary>결과와 완료</summary><div class="ew-advanced-content"><label>완료 기준 설명<textarea name="completion_rule" ></textarea></label><h4>선행 작업</h4><p class="ew-author-muted">다른 작업이 없습니다.</p></div></details><details class="ew-job-advanced"><summary>적용 조건</summary><div class="ew-advanced-content"><p class="ew-author-muted">속성이 없으면 확인 필요 상태로 남습니다.</p><div class="ew-author-fields"><label>조건 종류<select name="condition_kind" ><option value="" selected>모든 공장</option><option value="attribute" >공장 속성</option><option value="factory" >특정 공장</option></select></label><label>공장 속성 ID<input name="condition_field" value="" ></label><label>비교<select name="condition_op" ><option value="eq" selected>같음</option><option value="ne" >다름</option><option value="in" >목록에 포함</option><option value="not_in" >목록에 없음</option><option value="gt" >초과</option><option value="gte" >이상</option><option value="lt" >미만</option><option value="lte" >이하</option></select></label><label>비교 값<input name="condition_value" value="" ></label><label>값 형식<select name="condition_type" ><option value="text" selected>문자</option><option value="number" >숫자</option><option value="boolean" >예 / 아니오</option><option value="list" >목록 · JSON 배열</option></select></label></div></div></details><details class="ew-job-advanced"><summary>스킬 · 지침 연결</summary><div class="ew-advanced-content"><p class="ew-author-muted">현재 Native 권한으로 사용할 수 있는 스킬을 연결합니다. 스킬이 없어도 사람 작업을 작성할 수 있습니다.</p></div></details><div class="ew-author-inline"></div></form></div><footer><small data-author-status>초안 r1 · 저장됨</small></footer></section>'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><p class="ew-author-warning">이 범위를 수정할 담당 권한이 없습니다. 작성 중인 내용은 이 로그인 세션에 보존됩니다.</p><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="true">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="false">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><button type="button" data-author-action="node" data-id="" class="ew-author-back"><img src="/_ees13/v4/eb94a.svg" alt="">단계와 작업</button><h2>확인 작업</h2><form id="ew-author-node"><div class="ew-author-fields"><label>작업 이름<input name="name" value="확인 작업" required maxlength="160"></label><label>설명<textarea name="description" ></textarea></label><label>수행 안내<textarea name="instructions" >보존할 수행 안내</textarea></label><label>작업 담당자 · Native 사용자/그룹<select name="assignee" ><option value="" selected>담당자 미지정</option></select></label><label>수행 방식<select name="mode" ><option value="human" selected>사람 확인</option><option value="tool" >도구 실행</option><option value="ai" >AI 초안</option></select></label><label>결과 형태<select name="result_block" ><option value="values" >사람이 정하는 값</option><option value="schedule" >예약 안내</option><option value="checklist" >확인 항목</option><option value="list_confirm" >목록 확정</option><option value="item_verdict" >항목별 판정</option><option value="ai_review" >AI 초안 검토</option><option value="human_confirm" selected>사람 확인</option><option value="change_request" >변경 요청</option></select></label><label>사용하는 도구<select name="tool_contract_id" ><option value="" selected>도구 없음</option></select></label><label class="ew-author-inline"><input type="checkbox" name="human_required" checked>실행 후 사람이 확인해야 완료</label><details class="ew-job-advanced"><summary>기한 · 예약 실행</summary><div class="ew-author-fields"><label>기한 설명<input name="deadline_notes" value="" ></label><label>기한 계산의 날짜 입력<select name="deadline_input" ><option value="" selected>계산 안 함</option></select></label><label>기준 날짜에서 일수<input name="deadline_offset" value="" type="number" min="-3660" max="3660"></label><label>기한 계산 시간대<input name="deadline_timezone" value="" placeholder="예: Asia/Seoul"></label><label>날짜 기준<select name="deadline_calendar" ><option value="calendar" selected>달력 날짜</option><option value="business" >영업일 · 공휴일 달력 필요</option></select></label><label>예약 실행 시점<select name="trigger_kind" ><option value="" selected>선행 조건 충족 후</option><option value="offset" >회차 시작에서 지정 시간 후</option><option value="at" >지정한 시각</option></select></label><label>회차 시작 후 · 초<input name="trigger_offset" value="" type="number" min="0" max="31622400"></label><label>예약 시각 · 시간대 포함<input name="trigger_at" value="" placeholder="ISO 날짜·시각과 시간대"></label></div></details></div><details class="ew-job-advanced"><summary>사람이 정하는 값</summary><div class="ew-advanced-content"><table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody><tr><td colspan="5">선언한 값이 없습니다.</td></tr></tbody></table></div></details><details class="ew-job-advanced"><summary>결과와 완료</summary><div class="ew-advanced-content"><label>완료 기준 설명<textarea name="completion_rule" ></textarea></label><h4>선행 작업</h4><p class="ew-author-muted">다른 작업이 없습니다.</p></div></details><details class="ew-job-advanced"><summary>적용 조건</summary><div class="ew-advanced-content"><p class="ew-author-muted">속성이 없으면 확인 필요 상태로 남습니다.</p><div class="ew-author-fields"><label>조건 종류<select name="condition_kind" ><option value="" selected>모든 공장</option><option value="attribute" >공장 속성</option><option value="factory" >특정 공장</option></select></label><label>공장 속성 ID<input name="condition_field" value="" ></label><label>비교<select name="condition_op" ><option value="eq" selected>같음</option><option value="ne" >다름</option><option value="in" >목록에 포함</option><option value="not_in" >목록에 없음</option><option value="gt" >초과</option><option value="gte" >이상</option><option value="lt" >미만</option><option value="lte" >이하</option></select></label><label>비교 값<input name="condition_value" value="" ></label><label>값 형식<select name="condition_type" ><option value="text" selected>문자</option><option value="number" >숫자</option><option value="boolean" >예 / 아니오</option><option value="list" >목록 · JSON 배열</option></select></label></div></div></details><details class="ew-job-advanced"><summary>스킬 · 지침 연결</summary><div class="ew-advanced-content"><p class="ew-author-muted">현재 Native 권한으로 사용할 수 있는 스킬을 연결합니다. 스킬이 없어도 사람 작업을 작성할 수 있습니다.</p></div></details><div class="ew-author-inline"></div></form></div><footer><small data-author-status>초안 r1 · 저장됨</small></footer></section>'
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:1004:9)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 read-only job detail exposes saved values without allowing edits: tool
+not ok 37 - C66 read-only job detail exposes saved values without allowing edits: tool
+  ---
+  duration_ms: 6.331987
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:1002:41'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /ew-job-detail/. Input:
+    
+    '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><p class="ew-author-warning">이 범위를 수정할 담당 권한이 없습니다. 작성 중인 내용은 이 로그인 세션에 보존됩니다.</p><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="true">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="false">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><button type="button" data-author-action="node" data-id="" class="ew-author-back"><img src="/_ees13/v4/eb94a.svg" alt="">단계와 작업</button><h2>확인 작업</h2><form id="ew-author-node"><div class="ew-author-fields"><label>작업 이름<input name="name" value="확인 작업" required maxlength="160"></label><label>설명<textarea name="description" ></textarea></label><label>수행 안내<textarea name="instructions" >보존할 수행 안내</textarea></label><label>작업 담당자 · Native 사용자/그룹<select name="assignee" ><option value="" selected>담당자 미지정</option></select></label><label>수행 방식<select name="mode" ><option value="human" >사람 확인</option><option value="tool" selected>도구 실행</option><option value="ai" >AI 초안</option></select></label><label>결과 형태<select name="result_block" ><option value="values" >사람이 정하는 값</option><option value="schedule" >예약 안내</option><option value="checklist" >확인 항목</option><option value="list_confirm" >목록 확정</option><option value="item_verdict" >항목별 판정</option><option value="ai_review" >AI 초안 검토</option><option value="human_confirm" selected>사람 확인</option><option value="change_request" >변경 요청</option></select></label><label class="ew-shared-picker-label">쓰는 도구</label><details class="ew-shared-picker"><summary>기존 확인 도구</summary><div class="ew-shared-picker-options"><input id="ew-shared-picker-search" aria-label="도구 이름이나 하는 일로 찾기" placeholder="도구 이름이나 하는 일로 찾기" value=""><h4>이전 방식 도구</h4><p>쓸 수 있는 공용 도구가 없습니다.</p><p class="ew-author-muted">필요한 도구가 없으면 관리자에게 요청하세요.</p></div></details><label class="ew-author-inline"><input type="checkbox" name="human_required" checked>실행 후 사람이 확인해야 완료</label><details class="ew-job-advanced"><summary>기한 · 예약 실행</summary><div class="ew-author-fields"><label>기한 설명<input name="deadline_notes" value="" ></label><label>기한 계산의 날짜 입력<select name="deadline_input" ><option value="" selected>계산 안 함</option></select></label><label>기준 날짜에서 일수<input name="deadline_offset" value="" type="number" min="-3660" max="3660"></label><label>기한 계산 시간대<input name="deadline_timezone" value="" placeholder="예: Asia/Seoul"></label><label>날짜 기준<select name="deadline_calendar" ><option value="calendar" selected>달력 날짜</option><option value="business" >영업일 · 공휴일 달력 필요</option></select></label><label>예약 실행 시점<select name="trigger_kind" ><option value="" selected>선행 조건 충족 후</option><option value="offset" >회차 시작에서 지정 시간 후</option><option value="at" >지정한 시각</option></select></label><label>회차 시작 후 · 초<input name="trigger_offset" value="" type="number" min="0" max="31622400"></label><label>예약 시각 · 시간대 포함<input name="trigger_at" value="" placeholder="ISO 날짜·시각과 시간대"></label></div></details></div><details class="ew-job-advanced"><summary>사람이 정하는 값</summary><div class="ew-advanced-content"><table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody><tr><td colspan="5">선언한 값이 없습니다.</td></tr></tbody></table></div></details><details class="ew-job-advanced"><summary>결과와 완료</summary><div class="ew-advanced-content"><label>완료 기준 설명<textarea name="completion_rule" ></textarea></label><h4>선행 작업</h4><p class="ew-author-muted">다른 작업이 없습니다.</p></div></details><details class="ew-job-advanced"><summary>확정 목록에서 도구 인자 연결</summary><div class="ew-advanced-content"><p class="ew-author-muted">완전 조회 후 사람이 확정한 현재 목록의 ID만 전달합니다. 목록을 다시 조회·수정하면 후속 근거를 재확인합니다.</p><label>목록을 받을 Native 인자<input name="result_argument" value="" ></label><label>확정한 목록 작업<select name="result_job_id" ><option value="" selected>연결 안 함</option></select></label></div></details><fieldset><legend>읽기 실패 시 재조회</legend><div class="ew-author-fields"><label>추가 재조회 횟수 · 0이면 사용 안 함<input name="read_retry_count" value="0" type="number" min="0" max="3"></label><label>전체 조회·재조회 제한 · 초<input name="read_retry_deadline" value="" type="number" min="1" max="300"></label></div><p class="ew-author-note">허용된 읽기 기능의 명확한 실패만 첫 조회부터 지정한 시간과 추가 횟수 안에서 재조회합니다. 부분 결과·결과 불명·변경 요청은 자동 재실행하지 않으며 매번 현재 권한을 확인합니다. 각 시도와 기존 결과는 별도로 보존합니다.</p></fieldset><details class="ew-job-advanced"><summary>적용 조건</summary><div class="ew-advanced-content"><p class="ew-author-muted">속성이 없으면 확인 필요 상태로 남습니다.</p><div class="ew-author-fields"><label>조건 종류<select name="condition_kind" ><option value="" selected>모든 공장</option><option value="attribute" >공장 속성</option><option value="factory" >특정 공장</option></select></label><label>공장 속성 ID<input name="condition_field" value="" ></label><label>비교<select name="condition_op" ><option value="eq" selected>같음</option><option value="ne" >다름</option><option value="in" >목록에 포함</option><option value="not_in" >목록에 없음</option><option value="gt" >초과</option><option value="gte" >이상</option><option value="lt" >미만</option><option value="lte" >이하</option></select></label><label>비교 값<input name="condition_value" value="" ></label><label>값 형식<select name="condition_type" ><option value="text" selected>문자</option><option value="number" >숫자</option><option value="boolean" >예 / 아니오</option><option value="list" >목록 · JSON 배열</option></select></label></div></div></details><details class="ew-job-advanced"><summary>스킬 · 지침 연결</summary><div class="ew-advanced-content"><p class="ew-author-muted">현재 Native 권한으로 사용할 수 있는 스킬을 연결합니다. 스킬이 없어도 사람 작업을 작성할 수 있습니다.</p></div></details><div class="ew-author-inline"></div></form></div><footer><small data-author-status>초안 r1 · 저장됨</small></footer></section>'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><p class="ew-author-warning">이 범위를 수정할 담당 권한이 없습니다. 작성 중인 내용은 이 로그인 세션에 보존됩니다.</p><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="true">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="false">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><button type="button" data-author-action="node" data-id="" class="ew-author-back"><img src="/_ees13/v4/eb94a.svg" alt="">단계와 작업</button><h2>확인 작업</h2><form id="ew-author-node"><div class="ew-author-fields"><label>작업 이름<input name="name" value="확인 작업" required maxlength="160"></label><label>설명<textarea name="description" ></textarea></label><label>수행 안내<textarea name="instructions" >보존할 수행 안내</textarea></label><label>작업 담당자 · Native 사용자/그룹<select name="assignee" ><option value="" selected>담당자 미지정</option></select></label><label>수행 방식<select name="mode" ><option value="human" >사람 확인</option><option value="tool" selected>도구 실행</option><option value="ai" >AI 초안</option></select></label><label>결과 형태<select name="result_block" ><option value="values" >사람이 정하는 값</option><option value="schedule" >예약 안내</option><option value="checklist" >확인 항목</option><option value="list_confirm" >목록 확정</option><option value="item_verdict" >항목별 판정</option><option value="ai_review" >AI 초안 검토</option><option value="human_confirm" selected>사람 확인</option><option value="change_request" >변경 요청</option></select></label><label class="ew-shared-picker-label">쓰는 도구</label><details class="ew-shared-picker"><summary>기존 확인 도구</summary><div class="ew-shared-picker-options"><input id="ew-shared-picker-search" aria-label="도구 이름이나 하는 일로 찾기" placeholder="도구 이름이나 하는 일로 찾기" value=""><h4>이전 방식 도구</h4><p>쓸 수 있는 공용 도구가 없습니다.</p><p class="ew-author-muted">필요한 도구가 없으면 관리자에게 요청하세요.</p></div></details><label class="ew-author-inline"><input type="checkbox" name="human_required" checked>실행 후 사람이 확인해야 완료</label><details class="ew-job-advanced"><summary>기한 · 예약 실행</summary><div class="ew-author-fields"><label>기한 설명<input name="deadline_notes" value="" ></label><label>기한 계산의 날짜 입력<select name="deadline_input" ><option value="" selected>계산 안 함</option></select></label><label>기준 날짜에서 일수<input name="deadline_offset" value="" type="number" min="-3660" max="3660"></label><label>기한 계산 시간대<input name="deadline_timezone" value="" placeholder="예: Asia/Seoul"></label><label>날짜 기준<select name="deadline_calendar" ><option value="calendar" selected>달력 날짜</option><option value="business" >영업일 · 공휴일 달력 필요</option></select></label><label>예약 실행 시점<select name="trigger_kind" ><option value="" selected>선행 조건 충족 후</option><option value="offset" >회차 시작에서 지정 시간 후</option><option value="at" >지정한 시각</option></select></label><label>회차 시작 후 · 초<input name="trigger_offset" value="" type="number" min="0" max="31622400"></label><label>예약 시각 · 시간대 포함<input name="trigger_at" value="" placeholder="ISO 날짜·시각과 시간대"></label></div></details></div><details class="ew-job-advanced"><summary>사람이 정하는 값</summary><div class="ew-advanced-content"><table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody><tr><td colspan="5">선언한 값이 없습니다.</td></tr></tbody></table></div></details><details class="ew-job-advanced"><summary>결과와 완료</summary><div class="ew-advanced-content"><label>완료 기준 설명<textarea name="completion_rule" ></textarea></label><h4>선행 작업</h4><p class="ew-author-muted">다른 작업이 없습니다.</p></div></details><details class="ew-job-advanced"><summary>확정 목록에서 도구 인자 연결</summary><div class="ew-advanced-content"><p class="ew-author-muted">완전 조회 후 사람이 확정한 현재 목록의 ID만 전달합니다. 목록을 다시 조회·수정하면 후속 근거를 재확인합니다.</p><label>목록을 받을 Native 인자<input name="result_argument" value="" ></label><label>확정한 목록 작업<select name="result_job_id" ><option value="" selected>연결 안 함</option></select></label></div></details><fieldset><legend>읽기 실패 시 재조회</legend><div class="ew-author-fields"><label>추가 재조회 횟수 · 0이면 사용 안 함<input name="read_retry_count" value="0" type="number" min="0" max="3"></label><label>전체 조회·재조회 제한 · 초<input name="read_retry_deadline" value="" type="number" min="1" max="300"></label></div><p class="ew-author-note">허용된 읽기 기능의 명확한 실패만 첫 조회부터 지정한 시간과 추가 횟수 안에서 재조회합니다. 부분 결과·결과 불명·변경 요청은 자동 재실행하지 않으며 매번 현재 권한을 확인합니다. 각 시도와 기존 결과는 별도로 보존합니다.</p></fieldset><details class="ew-job-advanced"><summary>적용 조건</summary><div class="ew-advanced-content"><p class="ew-author-muted">속성이 없으면 확인 필요 상태로 남습니다.</p><div class="ew-author-fields"><label>조건 종류<select name="condition_kind" ><option value="" selected>모든 공장</option><option value="attribute" >공장 속성</option><option value="factory" >특정 공장</option></select></label><label>공장 속성 ID<input name="condition_field" value="" ></label><label>비교<select name="condition_op" ><option value="eq" selected>같음</option><option value="ne" >다름</option><option value="in" >목록에 포함</option><option value="not_in" >목록에 없음</option><option value="gt" >초과</option><option value="gte" >이상</option><option value="lt" >미만</option><option value="lte" >이하</option></select></label><label>비교 값<input name="condition_value" value="" ></label><label>값 형식<select name="condition_type" ><option value="text" selected>문자</option><option value="number" >숫자</option><option value="boolean" >예 / 아니오</option><option value="list" >목록 · JSON 배열</option></select></label></div></div></details><details class="ew-job-advanced"><summary>스킬 · 지침 연결</summary><div class="ew-advanced-content"><p class="ew-author-muted">현재 Native 권한으로 사용할 수 있는 스킬을 연결합니다. 스킬이 없어도 사람 작업을 작성할 수 있습니다.</p></div></details><div class="ew-author-inline"></div></form></div><footer><small data-author-status>초안 r1 · 저장됨</small></footer></section>'
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:1004:9)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 read-only job detail exposes saved values without allowing edits: ai
+not ok 38 - C66 read-only job detail exposes saved values without allowing edits: ai
+  ---
+  duration_ms: 5.505993
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:1002:41'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /ew-job-detail/. Input:
+    
+    '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><p class="ew-author-warning">이 범위를 수정할 담당 권한이 없습니다. 작성 중인 내용은 이 로그인 세션에 보존됩니다.</p><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="true">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="false">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><button type="button" data-author-action="node" data-id="" class="ew-author-back"><img src="/_ees13/v4/eb94a.svg" alt="">단계와 작업</button><h2>확인 작업</h2><form id="ew-author-node"><div class="ew-author-fields"><label>작업 이름<input name="name" value="확인 작업" required maxlength="160"></label><label>설명<textarea name="description" ></textarea></label><label>수행 안내<textarea name="instructions" >보존할 수행 안내</textarea></label><label>작업 담당자 · Native 사용자/그룹<select name="assignee" ><option value="" selected>담당자 미지정</option></select></label><label>수행 방식<select name="mode" ><option value="human" >사람 확인</option><option value="tool" >도구 실행</option><option value="ai" selected>AI 초안</option></select></label><label>결과 형태<select name="result_block" ><option value="values" >사람이 정하는 값</option><option value="schedule" >예약 안내</option><option value="checklist" >확인 항목</option><option value="list_confirm" >목록 확정</option><option value="item_verdict" >항목별 판정</option><option value="ai_review" >AI 초안 검토</option><option value="human_confirm" selected>사람 확인</option><option value="change_request" >변경 요청</option></select></label><label>사용하는 도구<select name="tool_contract_id" ><option value="" selected>도구 없음</option></select></label><label class="ew-author-inline"><input type="checkbox" name="human_required" checked>실행 후 사람이 확인해야 완료</label><details class="ew-job-advanced"><summary>기한 · 예약 실행</summary><div class="ew-author-fields"><label>기한 설명<input name="deadline_notes" value="" ></label><label>기한 계산의 날짜 입력<select name="deadline_input" ><option value="" selected>계산 안 함</option></select></label><label>기준 날짜에서 일수<input name="deadline_offset" value="" type="number" min="-3660" max="3660"></label><label>기한 계산 시간대<input name="deadline_timezone" value="" placeholder="예: Asia/Seoul"></label><label>날짜 기준<select name="deadline_calendar" ><option value="calendar" selected>달력 날짜</option><option value="business" >영업일 · 공휴일 달력 필요</option></select></label><label>예약 실행 시점<select name="trigger_kind" ><option value="" selected>선행 조건 충족 후</option><option value="offset" >회차 시작에서 지정 시간 후</option><option value="at" >지정한 시각</option></select></label><label>회차 시작 후 · 초<input name="trigger_offset" value="" type="number" min="0" max="31622400"></label><label>예약 시각 · 시간대 포함<input name="trigger_at" value="" placeholder="ISO 날짜·시각과 시간대"></label></div></details></div><details class="ew-job-advanced"><summary>사람이 정하는 값</summary><div class="ew-advanced-content"><table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody><tr><td colspan="5">선언한 값이 없습니다.</td></tr></tbody></table></div></details><details class="ew-job-advanced"><summary>결과와 완료</summary><div class="ew-advanced-content"><label>완료 기준 설명<textarea name="completion_rule" ></textarea></label><h4>선행 작업</h4><p class="ew-author-muted">다른 작업이 없습니다.</p></div></details><details class="ew-job-advanced"><summary>적용 조건</summary><div class="ew-advanced-content"><p class="ew-author-muted">속성이 없으면 확인 필요 상태로 남습니다.</p><div class="ew-author-fields"><label>조건 종류<select name="condition_kind" ><option value="" selected>모든 공장</option><option value="attribute" >공장 속성</option><option value="factory" >특정 공장</option></select></label><label>공장 속성 ID<input name="condition_field" value="" ></label><label>비교<select name="condition_op" ><option value="eq" selected>같음</option><option value="ne" >다름</option><option value="in" >목록에 포함</option><option value="not_in" >목록에 없음</option><option value="gt" >초과</option><option value="gte" >이상</option><option value="lt" >미만</option><option value="lte" >이하</option></select></label><label>비교 값<input name="condition_value" value="" ></label><label>값 형식<select name="condition_type" ><option value="text" selected>문자</option><option value="number" >숫자</option><option value="boolean" >예 / 아니오</option><option value="list" >목록 · JSON 배열</option></select></label></div></div></details><details class="ew-job-advanced"><summary>스킬 · 지침 연결</summary><div class="ew-advanced-content"><p class="ew-author-muted">현재 Native 권한으로 사용할 수 있는 스킬을 연결합니다. 스킬이 없어도 사람 작업을 작성할 수 있습니다.</p></div></details><div class="ew-author-inline"></div></form></div><footer><small data-author-status>초안 r1 · 저장됨</small></footer></section>'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: '<section class="ew-author " id="ees-work-designer" data-ees-work data-author-tab="content"><header><strong>업무 절차</strong><small>EMS</small><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button"><img src="/_ees13/v4/7bb4a.svg" alt=""></button></header><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true"></span><div class="ew-author-scroll"><p class="ew-author-warning">이 범위를 수정할 담당 권한이 없습니다. 작성 중인 내용은 이 로그인 세션에 보존됩니다.</p><button type="button" data-author-action="list" class="ew-author-back"><img src="/_ees13/v4/9acc8.svg" alt="">업무 절차 목록</button><div class="ew-author-definition-head"><div class="ew-author-heading"><h2>절차 w</h2><span class="ew-author-tag" data-state="draft" title="아직 게시하지 않은 편집본">초안</span></div><p class="ew-author-muted">EMS · 게시본 없음</p></div><nav class="ew-author-factories" aria-label="공장별 차이"><span>보기</span><button type="button" data-author-action="factory" data-id="" aria-selected="true">기본 절차</button><button type="button" data-author-action="factory" data-id="f" aria-selected="false">공장</button></nav><nav class="ew-author-tabs" aria-label="절차 편집"><button type="button" data-author-action="tab" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-author-action="tab" data-tab="schedule" aria-selected="false">실행 방식</button><button type="button" data-author-action="tab" data-tab="rules" aria-selected="false">판정 규칙</button><button type="button" data-author-action="tab" data-tab="history" aria-selected="false">게시 기록</button></nav><button type="button" data-author-action="node" data-id="" class="ew-author-back"><img src="/_ees13/v4/eb94a.svg" alt="">단계와 작업</button><h2>확인 작업</h2><form id="ew-author-node"><div class="ew-author-fields"><label>작업 이름<input name="name" value="확인 작업" required maxlength="160"></label><label>설명<textarea name="description" ></textarea></label><label>수행 안내<textarea name="instructions" >보존할 수행 안내</textarea></label><label>작업 담당자 · Native 사용자/그룹<select name="assignee" ><option value="" selected>담당자 미지정</option></select></label><label>수행 방식<select name="mode" ><option value="human" >사람 확인</option><option value="tool" >도구 실행</option><option value="ai" selected>AI 초안</option></select></label><label>결과 형태<select name="result_block" ><option value="values" >사람이 정하는 값</option><option value="schedule" >예약 안내</option><option value="checklist" >확인 항목</option><option value="list_confirm" >목록 확정</option><option value="item_verdict" >항목별 판정</option><option value="ai_review" >AI 초안 검토</option><option value="human_confirm" selected>사람 확인</option><option value="change_request" >변경 요청</option></select></label><label>사용하는 도구<select name="tool_contract_id" ><option value="" selected>도구 없음</option></select></label><label class="ew-author-inline"><input type="checkbox" name="human_required" checked>실행 후 사람이 확인해야 완료</label><details class="ew-job-advanced"><summary>기한 · 예약 실행</summary><div class="ew-author-fields"><label>기한 설명<input name="deadline_notes" value="" ></label><label>기한 계산의 날짜 입력<select name="deadline_input" ><option value="" selected>계산 안 함</option></select></label><label>기준 날짜에서 일수<input name="deadline_offset" value="" type="number" min="-3660" max="3660"></label><label>기한 계산 시간대<input name="deadline_timezone" value="" placeholder="예: Asia/Seoul"></label><label>날짜 기준<select name="deadline_calendar" ><option value="calendar" selected>달력 날짜</option><option value="business" >영업일 · 공휴일 달력 필요</option></select></label><label>예약 실행 시점<select name="trigger_kind" ><option value="" selected>선행 조건 충족 후</option><option value="offset" >회차 시작에서 지정 시간 후</option><option value="at" >지정한 시각</option></select></label><label>회차 시작 후 · 초<input name="trigger_offset" value="" type="number" min="0" max="31622400"></label><label>예약 시각 · 시간대 포함<input name="trigger_at" value="" placeholder="ISO 날짜·시각과 시간대"></label></div></details></div><details class="ew-job-advanced"><summary>사람이 정하는 값</summary><div class="ew-advanced-content"><table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody><tr><td colspan="5">선언한 값이 없습니다.</td></tr></tbody></table></div></details><details class="ew-job-advanced"><summary>결과와 완료</summary><div class="ew-advanced-content"><label>완료 기준 설명<textarea name="completion_rule" ></textarea></label><h4>선행 작업</h4><p class="ew-author-muted">다른 작업이 없습니다.</p></div></details><details class="ew-job-advanced"><summary>적용 조건</summary><div class="ew-advanced-content"><p class="ew-author-muted">속성이 없으면 확인 필요 상태로 남습니다.</p><div class="ew-author-fields"><label>조건 종류<select name="condition_kind" ><option value="" selected>모든 공장</option><option value="attribute" >공장 속성</option><option value="factory" >특정 공장</option></select></label><label>공장 속성 ID<input name="condition_field" value="" ></label><label>비교<select name="condition_op" ><option value="eq" selected>같음</option><option value="ne" >다름</option><option value="in" >목록에 포함</option><option value="not_in" >목록에 없음</option><option value="gt" >초과</option><option value="gte" >이상</option><option value="lt" >미만</option><option value="lte" >이하</option></select></label><label>비교 값<input name="condition_value" value="" ></label><label>값 형식<select name="condition_type" ><option value="text" selected>문자</option><option value="number" >숫자</option><option value="boolean" >예 / 아니오</option><option value="list" >목록 · JSON 배열</option></select></label></div></div></details><details class="ew-job-advanced"><summary>스킬 · 지침 연결</summary><div class="ew-advanced-content"><p class="ew-author-muted">현재 Native 권한으로 사용할 수 있는 스킬을 연결합니다. 스킬이 없어도 사람 작업을 작성할 수 있습니다.</p></div></details><div class="ew-author-inline"></div></form></div><footer><small data-author-status>초안 r1 · 저장됨</small></footer></section>'
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:1004:9)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 inspection and an unrelated edit preserve every stored tool input and binding value
+not ok 39 - C66 inspection and an unrelated edit preserve every stored tool input and binding value
+  ---
+  duration_ms: 18.719487
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:1009:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    ... Skipped lines
+    
+      {
+        category: 'ops',
+        id: 'w',
+        mode: 'on_demand',
+        name: '절차 w',
+        nodes: {
+          j: {
+    +       approval_count: 0,
+            argument_bindings: {
+              flag: {
+                constant: false
+              },
+              list: {
+    ...
+            },
+    +       deadline_notes: '',
+            deps: [],
+    +       description: '',
+            extension: {
+              private: 'keep'
+            },
+            human_confirmation: false,
+            id: 'j',
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    id: 'w'
+    name: '절차 w'
+    system_id: 'EMS'
+    category: 'ops'
+    mode: 'on_demand'
+    nodes:
+      p:
+        id: 'p'
+        type: 'p'
+        parent: ~
+        children:
+          0: 't'
+        deps:
+        name: '절차'
+      t:
+        id: 't'
+        type: 't'
+        parent: 'p'
+        children:
+          0: 'j'
+        deps:
+        name: '단계'
+      j:
+        id: 'j'
+        type: 'j'
+        parent: 't'
+        children:
+        deps:
+        name: '확인 작업'
+        instructions: '안내만 바꿨습니다'
+        mode: 'tool'
+        inputs:
+          0:
+            id: 'private-input'
+            name: '기존 입력'
+            type: 'text'
+            scope: 'factory'
+            options_query:
+              extension: 'keep'
+            opaque:
+              keep: true
+        result_block: 'human_confirm'
+        human_confirmation: false
+        tool_contract_id: 'legacy'
+        tool_contract_revision: 2
+        tool_reference:
+          tool_id: 'private-tool'
+          function: 'read'
+          content_hash: 'older-preserved'
+        argument_bindings:
+          text:
+            constant: ''
+          zero:
+            constant: 0
+          flag:
+            constant: false
+          list:
+            constant:
+              0: 'x'
+              1: 0
+              2: false
+          object:
+            constant:
+              nested:
+                0: 'x'
+              nullable: ~
+          nullable:
+            constant: ~
+          prompt:
+            input: 'private-input'
+        condition:
+          all:
+            0:
+              field: 'factory_id'
+              op: 'eq'
+              value: 'f'
+        completion:
+          rule: '기존 기준'
+          opaque: 'keep'
+        read_retry:
+          count: 2
+          deadline_seconds: 45
+        skills:
+          0: 'opaque-skill'
+        extension:
+          private: 'keep'
+  actual:
+    id: 'w'
+    name: '절차 w'
+    system_id: 'EMS'
+    category: 'ops'
+    mode: 'on_demand'
+    nodes:
+      p:
+        id: 'p'
+        type: 'p'
+        parent: ~
+        children:
+          0: 't'
+        deps:
+        name: '절차'
+      t:
+        id: 't'
+        type: 't'
+        parent: 'p'
+        children:
+          0: 'j'
+        deps:
+        name: '단계'
+      j:
+        id: 'j'
+        type: 'j'
+        parent: 't'
+        children:
+        deps:
+        name: '확인 작업'
+        instructions: '안내만 바꿨습니다'
+        mode: 'tool'
+        inputs:
+          0:
+            id: 'private-input'
+            name: '기존 입력'
+            type: 'text'
+            scope: 'factory'
+            options_query:
+              extension: 'keep'
+            opaque:
+              keep: true
+        result_block: 'human_confirm'
+        human_confirmation: false
+        tool_contract_id: 'legacy'
+        tool_contract_revision: 2
+        tool_reference:
+          tool_id: 'private-tool'
+          function: 'read'
+          content_hash: 'older-preserved'
+        argument_bindings:
+          text:
+            constant: ''
+          zero:
+            constant: 0
+          flag:
+            constant: false
+          list:
+            constant:
+              0: 'x'
+              1: 0
+              2: false
+          object:
+            constant:
+              nested:
+                0: 'x'
+              nullable: ~
+          nullable:
+            constant: ~
+          prompt:
+            input: 'private-input'
+        condition:
+          all:
+            0:
+              field: 'factory_id'
+              op: 'eq'
+              value: 'f'
+        completion:
+          rule: '기존 기준'
+          opaque: 'keep'
+        read_retry:
+          count: 2
+          deadline_seconds: 45
+        skills:
+          0: 'opaque-skill'
+        extension:
+          private: 'keep'
+        description: ''
+        deadline_notes: ''
+        approval_count: 0
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:1013:283)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 editing constants saves strings numbers booleans arrays and objects as their declared JSON types
+not ok 40 - C66 editing constants saves strings numbers booleans arrays and objects as their declared JSON types
+  ---
+  duration_ms: 6.627271
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:1015:1'
+  failureType: 'testCodeFailure'
+  error: 'field argument_constant'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  operator: '=='
+  stack: |-
+    h.field (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:114:144)
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:1017:364)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+# Subtest: C66 D5 confirmation cannot change a different workflow after navigation
+not ok 41 - C66 D5 confirmation cannot change a different workflow after navigation
+  ---
+  duration_ms: 11.494596
+  type: 'test'
+  location: '/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:1021:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    'w' !== 'q'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'q'
+  actual: 'w'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/workspace/scratch/690395b7dc56/c66/tests/test_ees_work_authoring_ui.cjs:1022:181)
+    async Test.run (node:internal/test_runner/test:1389:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+  ...
+1..41
+# tests 41
+# suites 0
+# pass 9
+# fail 32
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 492.361102

@@ -1,5 +1,27 @@
 # 현재 작업 상태
 
+## 2026-10-26 · PR #103에 #102 병합 main 통합
+
+- **완료한 선행 조건:** 사용자 승인으로 [#102](https://github.com/knadalkim-a11y/team-agent-poc/pull/102)를 **2026-10-26 10:15:03 KST**, main `4d27de76fe4bbc4aad70ec009bb7d478d0bbe29f`에 merge commit으로 병합했다. 최종 head41c0a4b의 [CI40252075901/#341](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40252075901)는39성공/PR 출하1정상 생략, Native81/81·작성27/27·Windows Node probe와2454자 PowerShell 파싱을 통과했다. 첫 실패와 원인 미확정은 보존했다.
+- **현재 통합:** [#103](https://github.com/knadalkim-a11y/team-agent-poc/pull/103)의 검증된0b885d3에 위 최신 main을 merge commit **`5634ca9cc9e953f5a91226e45e8985e32b863909`**으로 통합했다. 두 부모는0b885d3·4d27de7이며 rebase·force-push는 하지 않았다. STATUS 상단1곳의 충돌은 양쪽 기록을 모두 남기고 이 현재 상태를 앞에 두어 해결했다. CHANGELOG·가이드·evals·증거와 CI의 읽기 전용 PowerShell 파싱은 함께 보존한다. C66 제품/시험 소스는0b885d3 그대로이며 API·저장 형식·시험 단언·시간 제한은 바꾸지 않는다.
+- **통합 head 전체 CI:** `5634ca9cc9e953f5a91226e45e8985e32b863909`의 [CI40253641052/#343](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40253641052)는 **첫 시도 성공·39작업 성공/PR 출하1정상 생략**이다. Native **83/83·작성29/29**, Complete Native·execution5/5, Ubuntu/Windows 최종 검사와 기존10초 launcher probe·2454자 PowerShell 파싱을 통과했다. 실제 Native 구성 PNG235장·Complete Native45장의 유효성을 확인했다. [병합 main CI40253294470/#342](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40253294470)도 **첫 시도40/40 성공**이며 Native81/81·작성27/27과 프로그램 ZIP 생성을 확인했다. PR 본문에도 동일한 head·번호·결과를 기록했다.
+- **검증 구분:** 통합 전 #103의 [CI40242894489/#340](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40242894489)는39성공/1정상 생략·Native83/83·작성29/29다. 위 #343은 통합 head를 직접 검증한 결과이며 이전 성공으로 대신하지 않았다. [통합 기록](../evals/v4-ui-20260930.md#work-content-job-detail-c66-20261022). 이번 후속 변경은 이 STATUS의 결과 명시뿐이다. 선택 사항인 CSS 토큰 치환은 이미 끝난 통합 push에 추가하지 않아 제품·시험·기존 화면을 그대로 유지한다. 기록 보완 head의 최신 전체 CI는 [같은 PR 본문/Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/103/checks)에서 별도로 확인한다.
+- **사내 적용:** **미실행**이다. 기존2a4b82a의 유효/실행 중 사용자 보고를 유지한다.1c1efff 블록은 당시 검토 기록이며 새 적용 때 목표·성공 CI 프로그램 ZIP·바이트/SHA256·설치 원본을 함께 확정한다. 보호 조건·PowerShell 실행문은 바꾸지 않는다.
+- **다음 하나:** 통합 및 전체 CI 검증을 완료한 #103을 사용자가 검토·병합한다. #103은 Draft가 해제된 상태이며 에이전트는 #103 자체를 병합하지 않는다. main 직접 push·사내 실행·Figma/서버 API/사용자 자산 변경은 하지 않는다.
+
+> 아래 #103 보완·#102 승인 및10-22 적용 준비 절은 통합 전의 기록이다. ‘#102 미병합’, ‘main1c1efff’, 당시 ‘다음 하나’는 위 현재 상태로 대체하며 최초 검증·실패 내용은 보존한다.
+
+## 2026-10-26 · PR #103 C66 검토 보완 완료
+
+- **현재 범위:** #101 병합 main `1c1efff8abe19da3e6e8921859b52858fc6cacfb`의 별도 `feat/work-content-job-detail-c66-20261022`, [PR #103](https://github.com/knadalkim-a11y/team-agent-poc/pull/103)에서 추가 설정 요약·도구 선택 줄의 검토 보완을 완료했다. [계약](mockups/ees-work/TASK.md#work-content-job-detail-c66-20261022) · [최초 실패·검증](../evals/v4-ui-20260930.md#work-content-job-detail-c66-20261022). 아래 #101 재검토 문구는 당시 기록이다.
+- **이번 결과:** 제품·시험 head `62c9515d3e861f98445071bc29328ae1abd33c97`의 [CI40241391858/#339](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40241391858)는 **39작업 성공/PR 배포 준비1정상 생략**, Native **83/83·작성29/29**다. 관련 Node519 PASS·작성/일정 Python30 PASS이며 기존 저장·D5·상수·키보드 보호를 유지했다. 실제 작업 상세26장 중 지정한6상태×두 폭과 완료 조건 하단14장을 Figma에 직접 대조했고 전체26관찰의 가로 넘침은0이다. [원본 결과·캡처·해시](../evals/artifacts/work-content-job-detail-c66-20261022/review-20261026-ci339-evidence.json). 기록을 포함한 최종 head의 전체 CI 번호와 결과는 [같은 PR 본문/Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/103/checks)를 원본으로 연결한다.
+- **보완 내용:** 사람이 확인·AI 초안의 숨은 수행 안내/다시 읽기를 추가 설정 요약에서 제외했다. 작업 상세만 이름→조회/도구 확인 필요→알려진 버전→오른쪽 chevron으로 표시하고 미연결 이름·버전은 원본 회색을 쓴다. 기존 목록·선택·포커스·저장 동작은 유지한다. 새12개 중 최초10FAIL·수정 후12PASS, 새 Native 포커스 색 기대 오류와 실제 화면/토큰 대조 과정은 평가에 보존했다.
+- **별도 적용 문서:** [PR #102](https://github.com/knadalkim-a11y/team-agent-poc/pull/102)는 아직 미병합이며 섞지 않았다. 적용 전 출력에서 확인된 기존 프로그램은 `2a4b82a5f482…`, valid/running=true이고 `1c1efff` 적용 성공은 아직 보고되지 않았다. 이번 C66 사내 실행·적용은 **미실행**이다.
+- **앞선 제품 검증:** 제품 head `537cda97799dabcaa62e07324ce481f32587b170`의 [CI39759230676/#334](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39759230676)는 39작업 성공/PR 배포 준비1생략이다. Native 구성83/83·작성29/29, 관련 Node507 PASS이며 D5 취소/정리·상수 왕복/게시 검사·기존 자료·공장 초기화·메뉴/포커스를 통과했다. 480/1366 실제 단계32장·작업 상세26장과 Figma 대조, 하단 단추 가시성·넘침0을 [증거 색인](../evals/artifacts/work-content-job-detail-c66-20261022/ci334-evidence.json)에 보존했다. 최초 실패와 #330~333의 미도달 범위·수정 이유는 평가에 그대로 남겼다.
+- **이전 기록 보존:** 기존 기록 head78bc879의 CI #335도39성공/1정상 생략이었다. #334/#335와 이번 #339를 구분하며, 앞선 실패·취소·미도달 범위를 성공 뒤에도 보존한다.
+- **남은 경계:** 서버 오류에 구조화 인자 ID가 없어 게시 오류의 개별 입력 줄 연결은 후속이다. 기존 전체 오류 안내를 유지하며 문구 파싱/API·저장·검증기 변경은 없다. 실제 사내 도구/모델 연결·사용자 사용성 확인은 이번 합성 Native 검증에 포함하지 않는다.
+- **다음 하나:** 사용자가 **#102를 먼저 병합 → #103에 최신 main 통합(양쪽 기록 보존) → 통합 head CI 확인** 후 #103을 검토·병합한다. #103은 Draft가 해제된 상태이며 현재 main은1c1efff다. main 직접 push·PR 병합·사내 적용·Figma/API/저장 형식 변경은 하지 않았다.
+
 ## 2026-10-26 · PR #102 병합 승인·검증
 
 - **현재 범위:** 사용자가 #102 병합을 명시 승인했다. [문서 PR #102](https://github.com/knadalkim-a11y/team-agent-poc/pull/102)의 기존 head5f047c8·main1c1efff에서 최종 검증한다. 제품·서버 API·시험 단언·시간 제한은 변경하지 않는다. #103 병합·사내 실행/적용 승인은 포함하지 않는다.

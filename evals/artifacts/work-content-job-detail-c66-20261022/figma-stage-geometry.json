@@ -1,0 +1,208 @@
+{
+  "retrievedAtUTC": "2026-10-22T08:21:21.290Z",
+  "stateExamples": [
+    {
+      "id": "1524:1759",
+      "ancestors": [
+        {
+          "id": "1524:1759",
+          "type": "TEXT",
+          "name": "번호",
+          "width": 32,
+          "height": 16
+        },
+        {
+          "id": "1524:1758",
+          "type": "FRAME",
+          "name": "Head",
+          "width": 408,
+          "height": 22
+        },
+        {
+          "id": "1524:1757",
+          "type": "FRAME",
+          "name": "예시 3 · 단계 삭제 확인 (기존 확인 창 재사용)",
+          "width": 440,
+          "height": 526
+        }
+      ]
+    },
+    {
+      "id": "1524:1869",
+      "ancestors": [
+        {
+          "id": "1524:1869",
+          "type": "TEXT",
+          "name": "번호",
+          "width": 32,
+          "height": 16
+        },
+        {
+          "id": "1524:1868",
+          "type": "FRAME",
+          "name": "Head",
+          "width": 408,
+          "height": 22
+        },
+        {
+          "id": "1524:1867",
+          "type": "FRAME",
+          "name": "예시 8 · 단계 순서 변경 (‘위로’ 누른 뒤)",
+          "width": 440,
+          "height": 423
+        }
+      ]
+    },
+    {
+      "id": "1546:117",
+      "ancestors": [
+        {
+          "id": "1546:117",
+          "type": "TEXT",
+          "name": "번호",
+          "width": 39,
+          "height": 16
+        },
+        {
+          "id": "1546:116",
+          "type": "FRAME",
+          "name": "Head",
+          "width": 408,
+          "height": 22
+        },
+        {
+          "id": "1546:115",
+          "type": "FRAME",
+          "name": "예시 16 · 단계 메뉴 (⋯)",
+          "width": 440,
+          "height": 407
+        }
+      ]
+    }
+  ],
+  "stageComponent": [
+    {
+      "id": "1462:4860",
+      "name": "상태=닫힘",
+      "width": 440,
+      "height": 52,
+      "layoutMode": "HORIZONTAL",
+      "paddingLeft": 14,
+      "paddingRight": 12,
+      "itemSpacing": 10,
+      "children": [
+        {
+          "id": "1462:4861",
+          "name": "Number",
+          "type": "FRAME",
+          "x": 14,
+          "y": 15.5,
+          "width": 22,
+          "height": 22
+        },
+        {
+          "id": "1462:4863",
+          "name": "단계 이름",
+          "type": "TEXT",
+          "x": 46,
+          "y": 15.5,
+          "width": 305,
+          "height": 22
+        },
+        {
+          "id": "1462:4864",
+          "name": "Tag / 정할 것 1",
+          "type": "INSTANCE",
+          "x": 370,
+          "y": 17.5,
+          "width": 58,
+          "height": 18
+        },
+        {
+          "id": "1462:4866",
+          "name": "작업 수",
+          "type": "TEXT",
+          "x": 361,
+          "y": 17.5,
+          "width": 43,
+          "height": 18
+        },
+        {
+          "id": "1462:4867",
+          "name": "Icon/chevron-right",
+          "type": "INSTANCE",
+          "x": 414,
+          "y": 19.5,
+          "width": 14,
+          "height": 14
+        }
+      ]
+    },
+    {
+      "id": "1462:4869",
+      "name": "상태=열림",
+      "width": 440,
+      "height": 52,
+      "layoutMode": "HORIZONTAL",
+      "paddingLeft": 14,
+      "paddingRight": 12,
+      "itemSpacing": 10,
+      "children": [
+        {
+          "id": "1462:4870",
+          "name": "Number",
+          "type": "FRAME",
+          "x": 14,
+          "y": 15.5,
+          "width": 22,
+          "height": 22
+        },
+        {
+          "id": "1462:4872",
+          "name": "단계 이름",
+          "type": "TEXT",
+          "x": 46,
+          "y": 15.5,
+          "width": 265,
+          "height": 22
+        },
+        {
+          "id": "1462:4873",
+          "name": "Tag / 정할 것 1",
+          "type": "INSTANCE",
+          "x": 370,
+          "y": 17.5,
+          "width": 58,
+          "height": 18
+        },
+        {
+          "id": "1462:4875",
+          "name": "작업 수",
+          "type": "TEXT",
+          "x": 321,
+          "y": 17.5,
+          "width": 43,
+          "height": 18
+        },
+        {
+          "id": "1543:175",
+          "name": "IconButton / 단계 메뉴",
+          "type": "FRAME",
+          "x": 374,
+          "y": 11.5,
+          "width": 30,
+          "height": 30
+        },
+        {
+          "id": "1462:4876",
+          "name": "Icon/chevron-down",
+          "type": "INSTANCE",
+          "x": 414,
+          "y": 19.5,
+          "width": 14,
+          "height": 14
+        }
+      ]
+    }
+  ]
+}

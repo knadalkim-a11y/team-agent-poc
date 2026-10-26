@@ -1,0 +1,248 @@
+[
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "human",
+    "focus": {},
+    "sections": [
+      {
+        "id": "advanced",
+        "expanded": "false",
+        "disabled": false,
+        "summary": "직접 만든 입력 1개"
+      }
+    ],
+    "arguments": [],
+    "argumentGeometry": [],
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리",
+      "AI 초안"
+    ],
+    "unconnectedColors": null,
+    "toolStateOrder": null,
+    "pickerSummary": null,
+    "sectionMargins": [],
+    "cardGaps": [
+      {
+        "before": "ew-job-card ew-job-main",
+        "after": "ew-job-card ew-job-sections",
+        "gap": 12
+      }
+    ],
+    "toggleBorders": [
+      {
+        "action": "job_section",
+        "id": "advanced",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [],
+    "label": "c66-b3-human-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "focus": {
+      "name": "mode"
+    },
+    "sections": [
+      {
+        "id": "completion",
+        "expanded": "false",
+        "disabled": true,
+        "summary": "도구를 고른 뒤 정합니다"
+      },
+      {
+        "id": "advanced",
+        "expanded": "false",
+        "disabled": false,
+        "summary": "수행 안내 · 직접 만든 입력 1개"
+      }
+    ],
+    "arguments": [],
+    "argumentGeometry": [],
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리",
+      "AI 초안"
+    ],
+    "unconnectedColors": {
+      "notice": "rgb(150, 89, 12)",
+      "pickerBorder": "rgb(150, 89, 12)",
+      "pickerBorderWidth": 1
+    },
+    "toolStateOrder": null,
+    "pickerSummary": {
+      "classPresent": true,
+      "display": "flex",
+      "listStyleType": "none",
+      "rect": {
+        "left": 825,
+        "right": 1328,
+        "top": 453,
+        "bottom": 491,
+        "width": 503,
+        "height": 38
+      },
+      "controlRect": {
+        "left": 824,
+        "right": 1329,
+        "top": 452,
+        "bottom": 492,
+        "width": 505,
+        "height": 40
+      },
+      "name": "도구 고르기",
+      "nameRect": {
+        "left": 837,
+        "right": 905.078125,
+        "top": 461,
+        "bottom": 483,
+        "width": 68.078125,
+        "height": 22
+      },
+      "version": null,
+      "versionRect": null,
+      "versionColor": null,
+      "arrow": {
+        "left": 1302,
+        "right": 1316,
+        "top": 465,
+        "bottom": 479,
+        "width": 14,
+        "height": 14
+      },
+      "badges": [],
+      "connected": false,
+      "unavailable": false
+    },
+    "sectionMargins": [
+      {
+        "className": "ew-job-section",
+        "marginTop": 0
+      }
+    ],
+    "cardGaps": [
+      {
+        "before": "ew-job-card ew-job-main",
+        "after": "ew-job-card ew-job-sections",
+        "gap": 12
+      }
+    ],
+    "toggleBorders": [
+      {
+        "action": "job_section",
+        "id": "completion",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "action": "job_section",
+        "id": "advanced",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [],
+    "label": "c66-b3-tool-unconnected-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "ai",
+    "focus": {
+      "name": "mode"
+    },
+    "sections": [
+      {
+        "id": "advanced",
+        "expanded": "false",
+        "disabled": false,
+        "summary": "직접 만든 입력 1개"
+      }
+    ],
+    "arguments": [],
+    "argumentGeometry": [],
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리",
+      "AI 초안"
+    ],
+    "unconnectedColors": null,
+    "toolStateOrder": null,
+    "pickerSummary": null,
+    "sectionMargins": [],
+    "cardGaps": [
+      {
+        "before": "ew-job-card ew-job-main",
+        "after": "ew-job-card ew-job-sections",
+        "gap": 12
+      }
+    ],
+    "toggleBorders": [
+      {
+        "action": "job_section",
+        "id": "advanced",
+        "widths": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "radii": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "invalid": [],
+    "label": "c66-b3-ai-1366"
+  }
+]

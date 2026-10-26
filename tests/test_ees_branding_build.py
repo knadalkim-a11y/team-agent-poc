@@ -746,7 +746,7 @@ class BrandingBuildTests(unittest.TestCase):
                  '6d84b', 'a28e3', 'b22ad', 'b456d', 'f1e53',
                  'f4cb1', '3dae2', 'e9ac2', '30679', '2b3d1',
                  '1a06f', '2fe77', '2eb05', 'b355c', '66c71', '45242',
-                 '83565', '54b2e', '4d978', '4308e')
+                 '83565', '54b2e', '4d978', '4308e', 'f17e6')
         self.build('figma-icons')
         with ZipFile(self.root / 'figma-icons' / builder.WHEEL_FILENAME) as archive:
             for name in added:
@@ -1208,7 +1208,7 @@ class OfficialWheelTests(unittest.TestCase):
                 for filename, references in {
                     "chat-theme.css": (),
                     "ees-work-launcher.css": (
-                        "v4/83565.svg", "v4/54b2e.svg", "v4/4d978.svg", "v4/4308e.svg", "v4/f0554.svg",
+                        "v4/83565.svg", "v4/54b2e.svg", "v4/4d978.svg", "v4/4308e.svg", "v4/f0554.svg", "v4/f17e6.svg",
                     ),
                 }.items():
                     icons = {relative: (builder.UI_DIR / relative).read_bytes() for relative in references}

@@ -1,0 +1,406 @@
+{
+  "scope": "built Native UI; synthetic session and data",
+  "path": "/c/existing-chat",
+  "ready": "complete",
+  "fonts": "loaded",
+  "nativeMount": {
+    "chatPane": true,
+    "sidebarSearch": true,
+    "sidebarToggle": false
+  },
+  "sourceShell": {
+    "root": {
+      "x": 0,
+      "y": 0,
+      "bottom": 768,
+      "width": 1366,
+      "height": 768,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "relative",
+      "flex": "0 1 auto",
+      "font": "16px / 24px -apple-system, BlinkMacSystemFont, Inter, Vazirmatn, ui-sans-serif, system-ui, \"Segoe UI\", Roboto, Ubuntu, Cantarell, \"Noto Sans\", sans-serif, \"Helvetica Neue\", Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "maskImage": "none",
+      "background": "rgb(255, 255, 255)"
+    },
+    "sidebar": {
+      "x": 0,
+      "y": 0,
+      "bottom": 768,
+      "width": 56,
+      "height": 768,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "relative",
+      "flex": "0 0 auto",
+      "font": "14px / 21px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+      "maskImage": "none",
+      "background": "rgb(250, 250, 250)"
+    },
+    "panelSlot": {
+      "x": 787,
+      "y": 0,
+      "bottom": 768,
+      "width": 579,
+      "height": 768,
+      "display": "flex",
+      "visibility": "visible",
+      "position": "relative",
+      "flex": "0 0 480px",
+      "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+      "maskImage": "none",
+      "background": "rgb(243, 243, 245)"
+    },
+    "persistentChat": true,
+    "startupGate": null
+  },
+  "viewport": [
+    1366,
+    768
+  ],
+  "active": {
+    "tag": "BODY",
+    "id": ""
+  },
+  "panel": {
+    "text": "업무 절차\nEMS\n업무 절차 목록\nC66 공장 보기 보존\n초안\n\nEMS · 게시 v1\n\n보기\n기본 절차\nC66 합성 공장\n업무 내용\n실행 방식\n판정 규칙\n게시 기록\n\n목적을 입력해 주세요.\n\n수정\n단계와 작업\n1개 단계\n1\n검증 단계\n1개 작업\n단계 추가\n기본 업무 설정\n초안 r4 · 저장됨\n게시 전 확인\n초안 저장",
+    "html": "<aside id=\"ees-work-panel\" data-ees-motion-kind=\"panel-content\" tabindex=\"-1\" data-ees-work=\"\" data-ees-source-slot=\"\" aria-label=\"업무 패널\" data-ees-mode=\"author\" aria-busy=\"false\"><div id=\"ees-work-authoring-panel\" class=\"ew-scroll\"><section class=\"ew-author \" id=\"ees-work-designer\" data-ees-work=\"\" data-author-tab=\"content\"><header><strong>업무 절차</strong><small>EMS</small><button type=\"button\" data-action=\"close_panel\" aria-label=\"업무 패널 닫기\" class=\"ew-icon-button\"><img class=\"ew-icon\" src=\"/_ees14/v4/7bb4a.svg\" alt=\"\" aria-hidden=\"true\"></button></header><span class=\"ew-visually-hidden\" data-author-live=\"\" aria-live=\"polite\" aria-atomic=\"true\"></span><div class=\"ew-author-scroll\"><button type=\"button\" data-author-action=\"list\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees14/v4/9acc8.svg\" alt=\"\" aria-hidden=\"true\">업무 절차 목록</button><div class=\"ew-author-definition-head\"><div class=\"ew-author-heading\"><h2>C66 공장 보기 보존</h2><span class=\"ew-author-tag\" data-state=\"draft\" title=\"아직 게시하지 않은 편집본\">초안</span><details class=\"ew-procedure-menu\"><summary aria-label=\"절차 메뉴\"><img class=\"ew-icon\" src=\"/_ees14/v4/cb8e2.svg\" alt=\"\" aria-hidden=\"true\"></summary><div><button type=\"button\" data-author-action=\"edit_workflow\" class=\"ew-author-link\">절차 정보·분류 수정</button><button type=\"button\" data-author-action=\"copy\" class=\"ew-author-link\">다른 이름으로 저장</button></div></details></div><p class=\"ew-author-muted\">EMS · 게시 v1</p></div><nav class=\"ew-author-factories\" aria-label=\"공장별 차이\"><span>보기</span><button type=\"button\" data-author-action=\"factory\" data-id=\"\" aria-selected=\"true\">기본 절차</button><button type=\"button\" data-author-action=\"factory\" data-id=\"c66-factory\" aria-selected=\"false\">C66 합성 공장</button></nav><nav class=\"ew-author-tabs\" aria-label=\"절차 편집\"><button type=\"button\" data-author-action=\"tab\" data-tab=\"content\" aria-selected=\"true\">업무 내용</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"schedule\" aria-selected=\"false\">실행 방식</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"rules\" aria-selected=\"false\">판정 규칙</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"history\" aria-selected=\"false\">게시 기록</button></nav><section class=\"ew-work-content\"><div class=\"ew-content-purpose\"><p>목적을 입력해 주세요.</p><button type=\"button\" data-author-action=\"summary_edit\" data-id=\"business\" class=\"ew-author-link\">수정</button></div><div class=\"ew-content-heading\"><h3>단계와 작업</h3><small>1개 단계</small><button type=\"button\" data-author-action=\"help\" data-id=\"stages_and_jobs\" class=\"ew-help-trigger\" aria-label=\"단계와 작업 도움말\" aria-haspopup=\"dialog\"><img class=\"ew-icon\" src=\"/_ees14/v4/41b38.svg\" alt=\"\" aria-hidden=\"true\"></button></div><div class=\"ew-stage-list\"><section class=\"ew-content-stage\" data-stage-id=\"stage\"><div class=\"ew-stage-head\"><button type=\"button\" data-author-action=\"stage_toggle\" data-id=\"stage\" class=\"ew-stage-toggle\" aria-expanded=\"false\" aria-controls=\"ew-stage-body-stage\"><span class=\"ew-author-stage-number\">1</span><span class=\"ew-stage-name\">검증 단계</span><small class=\"ew-stage-count\">1개 작업</small><img class=\"ew-icon\" src=\"/_ees14/v4/f0554.svg\" alt=\"\" aria-hidden=\"true\"></button></div></section></div><button type=\"button\" data-author-action=\"add_stage\" class=\"ew-author-link\"><img class=\"ew-icon\" src=\"/_ees14/v4/9ce50.svg\" alt=\"\" aria-hidden=\"true\">단계 추가</button><button type=\"button\" data-author-action=\"factory_settings\" class=\"ew-author-link\">기본 업무 설정</button></section></div><footer><small data-author-status=\"\">초안 r4 · 저장됨</small><button type=\"button\" data-author-action=\"validate\" data-mutation=\"\">게시 전 확인</button><button type=\"button\" data-author-action=\"save\" data-mutation=\"\" class=\"ew-primary\">초안 저장</button></footer></section></div></aside>"
+  },
+  "authoring": {
+    "text": "업무 절차\nEMS\n업무 절차 목록\nC66 공장 보기 보존\n초안\n\nEMS · 게시 v1\n\n보기\n기본 절차\nC66 합성 공장\n업무 내용\n실행 방식\n판정 규칙\n게시 기록\n\n목적을 입력해 주세요.\n\n수정\n단계와 작업\n1개 단계\n1\n검증 단계\n1개 작업\n단계 추가\n기본 업무 설정\n초안 r4 · 저장됨\n게시 전 확인\n초안 저장",
+    "html": "<section class=\"ew-author \" id=\"ees-work-designer\" data-ees-work=\"\" data-author-tab=\"content\"><header><strong>업무 절차</strong><small>EMS</small><button type=\"button\" data-action=\"close_panel\" aria-label=\"업무 패널 닫기\" class=\"ew-icon-button\"><img class=\"ew-icon\" src=\"/_ees14/v4/7bb4a.svg\" alt=\"\" aria-hidden=\"true\"></button></header><span class=\"ew-visually-hidden\" data-author-live=\"\" aria-live=\"polite\" aria-atomic=\"true\"></span><div class=\"ew-author-scroll\"><button type=\"button\" data-author-action=\"list\" class=\"ew-author-back\"><img class=\"ew-icon\" src=\"/_ees14/v4/9acc8.svg\" alt=\"\" aria-hidden=\"true\">업무 절차 목록</button><div class=\"ew-author-definition-head\"><div class=\"ew-author-heading\"><h2>C66 공장 보기 보존</h2><span class=\"ew-author-tag\" data-state=\"draft\" title=\"아직 게시하지 않은 편집본\">초안</span><details class=\"ew-procedure-menu\"><summary aria-label=\"절차 메뉴\"><img class=\"ew-icon\" src=\"/_ees14/v4/cb8e2.svg\" alt=\"\" aria-hidden=\"true\"></summary><div><button type=\"button\" data-author-action=\"edit_workflow\" class=\"ew-author-link\">절차 정보·분류 수정</button><button type=\"button\" data-author-action=\"copy\" class=\"ew-author-link\">다른 이름으로 저장</button></div></details></div><p class=\"ew-author-muted\">EMS · 게시 v1</p></div><nav class=\"ew-author-factories\" aria-label=\"공장별 차이\"><span>보기</span><button type=\"button\" data-author-action=\"factory\" data-id=\"\" aria-selected=\"true\">기본 절차</button><button type=\"button\" data-author-action=\"factory\" data-id=\"c66-factory\" aria-selected=\"false\">C66 합성 공장</button></nav><nav class=\"ew-author-tabs\" aria-label=\"절차 편집\"><button type=\"button\" data-author-action=\"tab\" data-tab=\"content\" aria-selected=\"true\">업무 내용</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"schedule\" aria-selected=\"false\">실행 방식</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"rules\" aria-selected=\"false\">판정 규칙</button><button type=\"button\" data-author-action=\"tab\" data-tab=\"history\" aria-selected=\"false\">게시 기록</button></nav><section class=\"ew-work-content\"><div class=\"ew-content-purpose\"><p>목적을 입력해 주세요.</p><button type=\"button\" data-author-action=\"summary_edit\" data-id=\"business\" class=\"ew-author-link\">수정</button></div><div class=\"ew-content-heading\"><h3>단계와 작업</h3><small>1개 단계</small><button type=\"button\" data-author-action=\"help\" data-id=\"stages_and_jobs\" class=\"ew-help-trigger\" aria-label=\"단계와 작업 도움말\" aria-haspopup=\"dialog\"><img class=\"ew-icon\" src=\"/_ees14/v4/41b38.svg\" alt=\"\" aria-hidden=\"true\"></button></div><div class=\"ew-stage-list\"><section class=\"ew-content-stage\" data-stage-id=\"stage\"><div class=\"ew-stage-head\"><button type=\"button\" data-author-action=\"stage_toggle\" data-id=\"stage\" class=\"ew-stage-toggle\" aria-expanded=\"false\" aria-controls=\"ew-stage-body-stage\"><span class=\"ew-author-stage-number\">1</span><span class=\"ew-stage-name\">검증 단계</span><small class=\"ew-stage-count\">1개 작업</small><img class=\"ew-icon\" src=\"/_ees14/v4/f0554.svg\" alt=\"\" aria-hidden=\"true\"></button></div></section></div><button type=\"button\" data-author-action=\"add_stage\" class=\"ew-author-link\"><img class=\"ew-icon\" src=\"/_ees14/v4/9ce50.svg\" alt=\"\" aria-hidden=\"true\">단계 추가</button><button type=\"button\" data-author-action=\"factory_settings\" class=\"ew-author-link\">기본 업무 설정</button></section></div><footer><small data-author-status=\"\">초안 r4 · 저장됨</small><button type=\"button\" data-author-action=\"validate\" data-mutation=\"\">게시 전 확인</button><button type=\"button\" data-author-action=\"save\" data-mutation=\"\" class=\"ew-primary\">초안 저장</button></footer></section>"
+  },
+  "nativeTheme": {
+    "modalSurface": null,
+    "selectedSettingsTab": null,
+    "valves": null,
+    "valveInput": null
+  },
+  "nativeMenu": {
+    "draftReady": true,
+    "settingsTabs": null,
+    "returnBar": null,
+    "workspace": null,
+    "workspaceNav": null,
+    "workspaceTabs": [],
+    "search": null,
+    "items": [
+      {
+        "text": "업무 절차4",
+        "button": {
+          "x": 8,
+          "y": 192,
+          "bottom": 228,
+          "width": 39,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "500 14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgb(238, 243, 249)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 202,
+              "bottom": 218,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "500 14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "업무 절차",
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "bottom": 0,
+              "width": 0,
+              "height": 0,
+              "display": "none",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "500 14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SMALL",
+            "text": "4",
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "bottom": 0,
+              "width": 0,
+              "height": 0,
+              "display": "none",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 1 auto",
+              "font": "12px / 18px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      },
+      {
+        "text": "도구10",
+        "button": {
+          "x": 8,
+          "y": 229,
+          "bottom": 265,
+          "width": 39,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 239,
+              "bottom": 255,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "도구",
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "bottom": 0,
+              "width": 0,
+              "height": 0,
+              "display": "none",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SMALL",
+            "text": "10",
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "bottom": 0,
+              "width": 0,
+              "height": 0,
+              "display": "none",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 1 auto",
+              "font": "12px / 18px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      },
+      {
+        "text": "공장·접근 범위",
+        "button": {
+          "x": 8,
+          "y": 265,
+          "bottom": 301,
+          "width": 39,
+          "height": 36,
+          "display": "flex",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "children": [
+          {
+            "tag": "IMG",
+            "text": "",
+            "layout": {
+              "x": 16,
+              "y": 275,
+              "bottom": 291,
+              "width": 16,
+              "height": 16,
+              "display": "block",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "0 0 16px",
+              "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          },
+          {
+            "tag": "SPAN",
+            "text": "공장·접근 범위",
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "bottom": 0,
+              "width": 0,
+              "height": 0,
+              "display": "none",
+              "visibility": "visible",
+              "position": "static",
+              "flex": "1 1 0%",
+              "font": "14px / 22px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "maskImage": "none",
+              "background": "rgba(0, 0, 0, 0)"
+            }
+          }
+        ]
+      }
+    ],
+    "captions": [
+      {
+        "text": "업무 만들기",
+        "layout": {
+          "x": 0,
+          "y": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0,
+          "display": "none",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "500 12px / 16px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "text": "관리자만",
+        "layout": {
+          "x": 0,
+          "y": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0,
+          "display": "none",
+          "visibility": "visible",
+          "position": "static",
+          "flex": "0 1 auto",
+          "font": "500 12px / 16px \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "maskImage": "none",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      }
+    ]
+  },
+  "layout": {
+    "panel": {
+      "x": 787,
+      "y": 0,
+      "width": 579,
+      "height": 768,
+      "clientWidth": 579,
+      "scrollWidth": 579,
+      "clientHeight": 768,
+      "scrollHeight": 768,
+      "scrollTop": 0,
+      "overflowY": "visible",
+      "background": "rgb(243, 243, 245)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "0px",
+      "borderRadius": "0px",
+      "minHeight": "0px"
+    },
+    "scroll": {
+      "x": 787,
+      "y": 48,
+      "width": 579,
+      "height": 661,
+      "clientWidth": 579,
+      "scrollWidth": 579,
+      "clientHeight": 661,
+      "scrollHeight": 661,
+      "scrollTop": 0,
+      "overflowY": "auto",
+      "background": "rgba(0, 0, 0, 0)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "0px",
+      "borderRadius": "0px",
+      "minHeight": "0px"
+    },
+    "radio": null,
+    "selected": null,
+    "unselected": null,
+    "name": null,
+    "footer": {
+      "x": 787,
+      "y": 709,
+      "width": 579,
+      "height": 59,
+      "clientWidth": 579,
+      "scrollWidth": 579,
+      "clientHeight": 58,
+      "scrollHeight": 58,
+      "scrollTop": 0,
+      "overflowY": "visible",
+      "background": "rgb(255, 255, 255)",
+      "outline": "rgb(31, 32, 35) none 3px",
+      "focusVisible": false,
+      "borderWidth": "1px 0px 0px",
+      "borderRadius": "0px",
+      "minHeight": "auto"
+    },
+    "back": null,
+    "questionGroup": null,
+    "firstQuestion": null,
+    "cardGaps": []
+  },
+  "nativeDraft": {
+    "prompt": "",
+    "files": [],
+    "selectedToolIds": [],
+    "selectedSkillIds": [],
+    "selectedFilterIds": [],
+    "imageGenerationEnabled": false,
+    "webSearchEnabled": false,
+    "codeInterpreterEnabled": false
+  },
+  "nativeInput": {
+    "text": "\n",
+    "html": "<div contenteditable=\"true\" translate=\"no\" class=\"tiptap ProseMirror\" tabindex=\"0\" id=\"chat-input\" aria-label=\"업무를 물어보거나, 필요한 작업을 요청하세요\"><p data-placeholder=\"업무를 물어보거나, 필요한 작업을 요청하세요\" class=\"is-empty is-editor-empty\"><br class=\"ProseMirror-trailingBreak\"></p></div>"
+  },
+  "native_search": null
+}

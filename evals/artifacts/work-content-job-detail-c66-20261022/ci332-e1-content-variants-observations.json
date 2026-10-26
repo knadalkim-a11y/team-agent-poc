@@ -1,0 +1,6118 @@
+[
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [],
+    "jobs": [],
+    "focus": {},
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-a-stage-count-0-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [],
+    "focus": {},
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-a-stage-count-1-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [],
+    "focus": {},
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-a-stage-count-3-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [],
+    "focus": {},
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-a-stage-count-6-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 130,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "true",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-5-0",
+        "returned": "false",
+        "width": 477,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "stage_menu",
+      "id": "stage-5",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "c66-stage-last-menu-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 477,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 477,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "stage_menu",
+      "id": "stage-0",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-b-expanded-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 477,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 477,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "stage_menu",
+      "id": "stage-0",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "c66-example16-stage-menu-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 477,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 477,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "name": "name"
+    },
+    "inline": true,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-c1-stage-edit-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 318,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 477,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 477,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "name": "name"
+    },
+    "inline": true,
+    "invalid": false,
+    "inlineAlert": {
+      "text": "편집 중인 항목을 먼저 적용하거나 취소해 주세요.",
+      "rect": {
+        "left": 866,
+        "right": 1321,
+        "top": 48,
+        "bottom": 66
+      },
+      "withinScroll": true,
+      "withinPanel": true,
+      "withinViewport": true,
+      "visible": true,
+      "hitTest": true,
+      "focusInsideEditor": true
+    },
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example7-dirty-guard-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 43,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 477,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 477,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "job_menu",
+      "id": "job-0-0",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example4-job-menu-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 477,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 477,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "stage_menu",
+      "id": "stage-0",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "reorder": {
+      "before": {
+        "x": 1269,
+        "y": 406,
+        "top": 311,
+        "scroll": 0,
+        "step": 53,
+        "hitTest": true
+      },
+      "after": {
+        "top": 364,
+        "scroll": 0,
+        "focus": true,
+        "menu": false,
+        "live": "2번째로 옮겼습니다",
+        "livePosition": "absolute",
+        "liveWidth": 1,
+        "liveHeight": 1
+      }
+    },
+    "label": "e1-example8-stage-moved-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 96,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "true",
+        "width": 477,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgb(238, 243, 249)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 477,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "node",
+      "id": "job-0-0",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-d-job-return-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 117,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 477,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 477,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [
+      {
+        "id": "ees-work-dialog",
+        "opacity": "1"
+      }
+    ],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example3-stage-delete-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 175,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 477,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 477,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "name": "name"
+    },
+    "inline": true,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-c2-stage-add-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 266,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 477,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 477,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "name": "name"
+    },
+    "inline": true,
+    "invalid": true,
+    "inlineAlert": {
+      "text": "단계 이름을 입력해 주세요.",
+      "rect": {
+        "left": 819,
+        "right": 1334,
+        "top": 613,
+        "bottom": 631
+      },
+      "withinScroll": true,
+      "withinPanel": true,
+      "withinViewport": true,
+      "visible": true,
+      "hitTest": true,
+      "focusInsideEditor": true
+    },
+    "surfaces": [],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example6-empty-name-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 179,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-afa4811b-6c9d-4510-9774-aa291b74cbc3",
+        "expanded": "true",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [],
+    "focus": {
+      "action": "add_job",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example2-empty-stage-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 179,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-afa4811b-6c9d-4510-9774-aa291b74cbc3",
+        "expanded": "true",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [],
+    "focus": {
+      "name": "name"
+    },
+    "inline": true,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example5-job-add-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-afa4811b-6c9d-4510-9774-aa291b74cbc3",
+        "expanded": "true",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [],
+    "focus": {},
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [
+      {
+        "id": "ees-work-help",
+        "opacity": "1"
+      }
+    ],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example10-stage-help-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-afa4811b-6c9d-4510-9774-aa291b74cbc3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 477,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 477,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "stage_toggle",
+      "id": "stage-0",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": true,
+    "footer": "업무 도우미 수정 제안 · 5곳 · 반영하거나 버린 뒤 저장합니다\n버리기\n반영",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example12-proposal-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 375,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-afa4811b-6c9d-4510-9774-aa291b74cbc3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 477,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 477,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "stage_toggle",
+      "id": "stage-0",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": true,
+    "footer": "업무 도우미 수정 제안 · 5곳 · 반영하거나 버린 뒤 저장합니다\n버리기\n반영",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example12-changed-row-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "scrollTop": 140,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 537,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-afa4811b-6c9d-4510-9774-aa291b74cbc3",
+        "expanded": "false",
+        "width": 537,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 477,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 477,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "stage_toggle",
+      "id": "stage-0",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example9-read-only-1366"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [],
+    "jobs": [],
+    "focus": {},
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-a-stage-count-0-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [],
+    "focus": {},
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-a-stage-count-1-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [],
+    "focus": {},
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-a-stage-count-3-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [],
+    "focus": {},
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-a-stage-count-6-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 152,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "true",
+        "width": 381,
+        "height": 90,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-5-0",
+        "returned": "false",
+        "width": 321,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "stage_menu",
+      "id": "stage-5",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "c66-stage-last-menu-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 321,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 321,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "stage_menu",
+      "id": "stage-0",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-b-expanded-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 321,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 321,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "stage_menu",
+      "id": "stage-0",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "c66-example16-stage-menu-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 321,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 321,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "name": "name"
+    },
+    "inline": true,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-c1-stage-edit-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 318,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 321,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 321,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "name": "name"
+    },
+    "inline": true,
+    "invalid": false,
+    "inlineAlert": {
+      "text": "편집 중인 항목을 먼저 적용하거나 취소해 주세요.",
+      "rect": {
+        "left": 136,
+        "right": 435,
+        "top": 48,
+        "bottom": 66
+      },
+      "withinScroll": true,
+      "withinPanel": true,
+      "withinViewport": true,
+      "visible": true,
+      "hitTest": true,
+      "focusInsideEditor": true
+    },
+    "surfaces": [],
+    "proposal": false,
+    "footer": "초안 r2 · 저장됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example7-dirty-guard-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 43,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 321,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 321,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "job_menu",
+      "id": "job-0-0",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example4-job-menu-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 321,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 321,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "stage_menu",
+      "id": "stage-0",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "reorder": {
+      "before": {
+        "x": 383,
+        "y": 406,
+        "top": 311,
+        "scroll": 0,
+        "step": 53,
+        "hitTest": true
+      },
+      "after": {
+        "top": 364,
+        "scroll": 0,
+        "focus": true,
+        "menu": false,
+        "live": "2번째로 옮겼습니다",
+        "livePosition": "absolute",
+        "liveWidth": 1,
+        "liveHeight": 1
+      }
+    },
+    "label": "e1-example8-stage-moved-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 96,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "true",
+        "width": 321,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgb(238, 243, 249)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 321,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "node",
+      "id": "job-0-0",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-d-job-return-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 117,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 321,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 321,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [
+      {
+        "id": "ees-work-dialog",
+        "opacity": "1"
+      }
+    ],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example3-stage-delete-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 175,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 321,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 321,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "name": "name"
+    },
+    "inline": true,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-c2-stage-add-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 266,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 321,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 321,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "name": "name"
+    },
+    "inline": true,
+    "invalid": true,
+    "inlineAlert": {
+      "text": "단계 이름을 입력해 주세요.",
+      "rect": {
+        "left": 89,
+        "right": 448,
+        "top": 613,
+        "bottom": 631
+      },
+      "withinScroll": true,
+      "withinPanel": true,
+      "withinViewport": true,
+      "visible": true,
+      "hitTest": true,
+      "focusInsideEditor": true
+    },
+    "surfaces": [],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example6-empty-name-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 179,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-6551f34d-1877-4b4b-9ec2-14de211444d1",
+        "expanded": "true",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [],
+    "focus": {
+      "action": "add_job",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example2-empty-stage-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 179,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-6551f34d-1877-4b4b-9ec2-14de211444d1",
+        "expanded": "true",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [],
+    "focus": {
+      "name": "name"
+    },
+    "inline": true,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example5-job-add-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-6551f34d-1877-4b4b-9ec2-14de211444d1",
+        "expanded": "true",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [],
+    "focus": {},
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [
+      {
+        "id": "ees-work-help",
+        "opacity": "1"
+      }
+    ],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example10-stage-help-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 0,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-6551f34d-1877-4b4b-9ec2-14de211444d1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 321,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 321,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "stage_toggle",
+      "id": "stage-0",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": true,
+    "footer": "업무 도우미 수정 제안 · 5곳 · 반영하거나 버린 뒤 저장합니다\n버리기\n반영",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example12-proposal-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 432,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-6551f34d-1877-4b4b-9ec2-14de211444d1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 321,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 321,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "stage_toggle",
+      "id": "stage-0",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": true,
+    "footer": "업무 도우미 수정 제안 · 5곳 · 반영하거나 버린 뒤 저장합니다\n버리기\n반영",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/a953c.svg",
+        "natural": 16,
+        "rendered": 16
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/9ce50.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example12-changed-row-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "scrollTop": 160,
+    "overflow": 0,
+    "stages": [
+      {
+        "id": "stage-1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-0",
+        "expanded": "true",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-2",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-3",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-4",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-5",
+        "expanded": "false",
+        "width": 381,
+        "height": 68,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "stage-6551f34d-1877-4b4b-9ec2-14de211444d1",
+        "expanded": "false",
+        "width": 381,
+        "height": 52,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "job-0-0",
+        "returned": "false",
+        "width": 321,
+        "height": 44,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "id": "job-0-1",
+        "returned": "false",
+        "width": 321,
+        "height": 45,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "focus": {
+      "action": "stage_toggle",
+      "id": "stage-0",
+      "name": ""
+    },
+    "inline": false,
+    "invalid": false,
+    "inlineAlert": null,
+    "surfaces": [],
+    "proposal": false,
+    "footer": "변경 있음 · 저장 안 됨",
+    "icons": [
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/41b38.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/e1049.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      },
+      {
+        "src": "http://127.0.0.1:40961/_ees14/v4/f0554.svg",
+        "natural": 14,
+        "rendered": 14
+      }
+    ],
+    "label": "e1-example9-read-only-480"
+  }
+]

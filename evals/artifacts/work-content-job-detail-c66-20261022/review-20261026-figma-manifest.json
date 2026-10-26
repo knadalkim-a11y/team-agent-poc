@@ -1,0 +1,150 @@
+{
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "page": {
+    "id": "1285:1829",
+    "name": "워크-1 · 업무 절차 · 초안"
+  },
+  "pr": 103,
+  "readOnly": true,
+  "mutatedFigma": false,
+  "queriedAtUTC": "2026-10-25T22:14:25.873Z",
+  "queriedAtKST": "2026-10-26T07:14:25.873+09:00",
+  "sourceCommit": "78bc879e34b67929136f0ca64d1561972e91224e",
+  "nodes": [
+    {
+      "id": "1456:4557",
+      "name": "B3-1 · 작업 상세 · 기본 (도구 연결됨 · 모두 접힘)",
+      "type": "FRAME",
+      "propertyQueryAtUTC": "2026-10-25T22:14:25.873Z",
+      "naturalBounds": {
+        "width": 480,
+        "height": 958
+      },
+      "render": "review-20261026-figma-1456-4557.png"
+    },
+    {
+      "id": "1458:4880",
+      "name": "B3-6b · 작업 상세 · 연결한 도구를 지금 쓸 수 없음 (도구 확인 필요)",
+      "type": "FRAME",
+      "propertyQueryAtUTC": "2026-10-25T22:14:25.873Z",
+      "naturalBounds": {
+        "width": 480,
+        "height": 924
+      },
+      "render": "review-20261026-figma-1458-4880.png"
+    }
+  ],
+  "propertyEvidence": "review-20261026-figma-nodes.json",
+  "renderTimeNote": "Both screenshot queries preceded the property query in this session on 2026-10-26 KST; the exact screenshot-call start times were not recorded. The node property query timestamp above is exact.",
+  "renderNote": "Original Figma renders include canvas annotation bubbles outside the 480px frame; no cropping or image editing was performed.",
+  "scope": "B3-1 and B3-6b current tool selector summary only. Ordinary FRAME/TEXT nodes; no native SPEC_BLOCK content API was used.",
+  "findings": {
+    "summaryOrder": [
+      "tool name",
+      "status tag",
+      "v + version",
+      "flex space",
+      "right chevron"
+    ],
+    "defaultLeftTriangle": false,
+    "select": {
+      "height": 40,
+      "widthInSource": 404,
+      "padding": "8px 12px",
+      "gap": 8,
+      "radius": 6,
+      "border": "1px solid #D5D6DA",
+      "background": "#FFFFFF"
+    },
+    "name": {
+      "fontFamily": "Noto Sans KR",
+      "weight": 400,
+      "fontSize": 14,
+      "lineHeight": 22,
+      "color": "#1F2023",
+      "letterSpacingPercent": -0.3
+    },
+    "normalTag": {
+      "text": "조회",
+      "sourceSize": [
+        35,
+        18
+      ],
+      "padding": "1px 6px",
+      "radius": 4,
+      "fontWeight": 500,
+      "fontSize": 12,
+      "lineHeight": 16,
+      "color": "#3F4147",
+      "background": "#ECECEF"
+    },
+    "unavailableTag": {
+      "text": "도구 확인 필요",
+      "sourceSize": [
+        84,
+        18
+      ],
+      "padding": "1px 6px",
+      "radius": 4,
+      "fontWeight": 500,
+      "fontSize": 12,
+      "lineHeight": 16,
+      "color": "#96590C",
+      "background": "#FAF1E4"
+    },
+    "version": {
+      "sourceText": "v1",
+      "fontWeight": 400,
+      "fontSize": 12,
+      "lineHeight": 18,
+      "color": "#6F717A"
+    },
+    "chevron": {
+      "size": [
+        14,
+        14
+      ],
+      "vectorBounds": [
+        3.5,
+        5.25,
+        7,
+        3.5
+      ],
+      "pathIn14pxViewBox": "M3.5 5.25L7 8.75L10.5 5.25",
+      "strokeWidth": 0.9916666150093079,
+      "color": "#6F717A",
+      "linecap": "round",
+      "linejoin": "round",
+      "matchesExistingAsset": "figma-f17e6-select-chevron.svg"
+    }
+  },
+  "retrievalNotes": [
+    "The first broader read-only property return exceeded the Figma 48000-byte response limit (250216 bytes; debug UUID f8aa8864-8924-4a2d-a4a6-d55232e636b1). No canvas edits were attempted or committed.",
+    "The successful retry narrowed properties to selector summary nodes while retaining both frames' text nodes."
+  ],
+  "files": [
+    {
+      "path": "review-20261026-figma-1456-4557.png",
+      "bytes": 64842,
+      "sha256": "135b889d6a8a7e0e208b7487e8b9d1f48d5402be039c488a0edd2546b6db2d15",
+      "renderSize": [
+        558,
+        958
+      ]
+    },
+    {
+      "path": "review-20261026-figma-1458-4880.png",
+      "bytes": 63655,
+      "sha256": "0df364632b71ac572bcf89ee65122d2149e04ad789ac9d330fbc899c7ba72ce0",
+      "renderSize": [
+        520,
+        924
+      ]
+    },
+    {
+      "path": "review-20261026-figma-nodes.json",
+      "bytes": 40812,
+      "sha256": "060e34fafef38fe72ab8f2fd5994bdeb6a2f443917c44a4333c80f4d66a931d1"
+    }
+  ]
+}

@@ -277,7 +277,8 @@ def input_and_history_flow(g,key,chat_id):
     # the same visible editor controls a user uses; no seeded procedure/API write.
     g.click('[data-author-action=add_job]')
     g.type('#ew-stage-editor [name=name]','입력 제안과 과거 근거');g.click('[data-author-action=inline_apply]')
-    g.click('#ew-author-node .ew-job-advanced:has([data-author-action=input_add]) > summary')
+    # C66 moves job inputs into the explicit additional-settings disclosure.
+    g.click('#ew-author-node [data-author-action=job_section][data-id=advanced]')
     g.click('[data-author-action=input_add]');g.type('#ees-work-dialog [name=name]','자료 메모')
     g.click('#ees-work-dialog .ew-input-advanced > summary')
     g.type('#ees-work-dialog [name=id]','note');g.click('#ees-work-dialog [data-dialog-confirm]')

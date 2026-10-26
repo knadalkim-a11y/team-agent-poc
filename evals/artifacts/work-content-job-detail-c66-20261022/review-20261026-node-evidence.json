@@ -1,0 +1,78 @@
+{
+  "date_kst": "2026-10-26",
+  "baseline_commit": "78bc879e34b67929136f0ca64d1561972e91224e",
+  "baseline_designer_sha256": "8d78add69041295018de5506a8ca20c176eaea8e0944a0d41ad971c0c7f57391",
+  "new_cases": 12,
+  "before": {
+    "pass": 2,
+    "fail": 10
+  },
+  "after": {
+    "new_pass": 12,
+    "related_modules": 5,
+    "related_pass": 519,
+    "fail": 0
+  },
+  "previous_same_modules_pass": 507,
+  "user_review_554": "Different or unspecified module set; not treated as the same denominator. Existing assertions and timeouts unchanged.",
+  "local_native": {
+    "executed": 0,
+    "class_skips": 1,
+    "reason": "Chrome/fixed build not prepared; actual result is CI only"
+  },
+  "files": [
+    {
+      "path": "c66-followup-20261026-change-request-red.log.gz",
+      "bytes": 577,
+      "sha256": "edd9af3c1963e5a21bec771c22db72ac32f0787d6c007a01f69bd6361a62749b",
+      "original_bytes": 1035,
+      "original_sha256": "c1c84b363dcb56c7828965e4a6bf9c7c7d53b3af38f3729bbc8391dd6b7ec46a"
+    },
+    {
+      "path": "c66-followup-20261026-final-red.log.gz",
+      "bytes": 1218,
+      "sha256": "0f677dde646d77523e6ead7f464dcd5012815edfe45c808fc12bdc816440ffc2",
+      "original_bytes": 7790,
+      "original_sha256": "aba231a984e8f99cd7b2d875333fe0810e0acb9c26b9b28f89d40447879ce761"
+    },
+    {
+      "path": "c66-followup-20261026-green.log.gz",
+      "bytes": 490,
+      "sha256": "4ad3ad4779478b25f85a985fdc48198e7f78d24747905ddde037c1e4026a55ba",
+      "original_bytes": 1422,
+      "original_sha256": "0825ea76f9910a331ec0dc917d4c10098328414cccbf337167162bb5ad75b3e6"
+    },
+    {
+      "path": "c66-followup-20261026-picker-red.log.gz",
+      "bytes": 955,
+      "sha256": "9d333cb7f64a08fce4c75f0af29f0fcadf2c73ac17c0af98d60f7eddec982707",
+      "original_bytes": 3850,
+      "original_sha256": "d04cae5ee13bd65f1195097ec4a4ee648720d7607a0622689f746ee855bedc79"
+    },
+    {
+      "path": "c66-followup-20261026-regression.log.gz",
+      "bytes": 17131,
+      "sha256": "75b66c91094619b98c3b9586b160d0b6612b867bb4285c214999af5177f2c9d7",
+      "original_bytes": 52838,
+      "original_sha256": "8e3fdb2a998da1605087911954520b0bb3359bb50c4a68818a947e6fda815943"
+    },
+    {
+      "path": "c66-followup-20261026-summary-red.log.gz",
+      "bytes": 644,
+      "sha256": "ac0db60278f71e5f2e79c77c7200f327d9f0962a7560211f60608d51874ff3a2",
+      "original_bytes": 2019,
+      "original_sha256": "f262b28d8502643eb5f18449edf0d77adf2d27c0d7e60abe78ad436a77b3d83f"
+    },
+    {
+      "path": "c66-followup-20261026-python.log.gz",
+      "bytes": 342,
+      "sha256": "c26f6f746b2af04ec63b5156c14219a77c18db902b1d0c34ffe49c2b6786ede5",
+      "original_bytes": 876,
+      "original_sha256": "9516778b792de2c18fe0264756c1a255ce843489ccbc01fed37eb0e8221e4cee"
+    }
+  ],
+  "python_authoring_schedule": {
+    "passed": 30,
+    "encoding_warnings": "error"
+  }
+}

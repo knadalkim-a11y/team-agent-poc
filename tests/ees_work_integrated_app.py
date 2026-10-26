@@ -309,7 +309,8 @@ def integrated_flow(gate):
     g.click('[data-author-action="add_job"]')
     g.type('#ew-stage-editor input[name="name"]','사람의 근거 확인')
     g.click('[data-author-action=inline_apply]')
-    g.click('#ew-author-node .ew-job-advanced:has([data-author-action="input_add"]) > summary')
+    # C66 moves job inputs into the explicit additional-settings disclosure.
+    g.click('#ew-author-node [data-author-action=job_section][data-id=advanced]')
     g.click('[data-author-action="input_add"]')
     g.type('#ees-work-dialog input[name="name"]','확인할 자료')
     g.click('#ees-work-dialog .ew-input-advanced > summary')
