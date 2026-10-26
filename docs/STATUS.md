@@ -1,5 +1,14 @@
 # 현재 작업 상태
 
+## 2026-10-26 · #103 병합 완료·main924d919 사내 적용 준비
+
+- **병합·승인:** 사용자 “병합하고 해” 승인으로 #103을 **2026-10-26 17:45:45 KST**, main `924d919333b8804ece2cf5322e14adc681ad6457`에 merge commit으로 병합했다. 최신 PR head afc4697의 [CI40290888003/#344](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40290888003)는39성공/PR 출하1정상 생략이었다. rebase·force-push·main 직접 push는 하지 않았다.
+- **main 검증:** [CI40294530820/#345](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40294530820) **첫 시도40/40 성공**, Native83/83·작성29/29·Complete Native·execution5/5·Windows 검증을 확인했다. 프로그램 ZIP 실제 크기·SHA256·내/외 CRC·기존 manifest/wheel 검사를 통과했다. [적용 근거](../evals/v4-ui-20260930.md#main-924d919-apply-evidence-20261026).
+- **사내 적용:** 사용자 실행용 [2,500자 이내 한 블록](03-openwebui-native-agent.md#main-924d919-apply-prep-20261026)을 준비했다. 마지막 설치 보고2a4b82a의 정상/미완료·정확SHA와 목표ZIP·HEAD/origin/main 보호를 유지한다. 운영·Work/Confluence 도구·업무 백엔드/저장 형식은2a4b82a와 동일하며 도구 재등록/자료 이관은 하지 않는다. 실제 사내 PC 실행·적용은 아직 **미실행**이다.
+- **다음 하나:** 사용자가 블록을 실행하고 기존 `result/stage/running/commit`1~2줄을 전달한다. 실패면 반복하지 않고 보존된 단계/상태로 판단한다. 새 문서 PR을 먼저 병합해 main을 바꾸지 않으며, 실제 적용 성공이나 도구 설정 완료는 사용자 결과를 받은 범위에서만 기록한다.
+
+> 아래 #103 미병합·“병합은 사용자”와 과거 적용 대기는 이번 승인 전 기록이다. 현재 병합/적용 상태는 위 절을 따르며 모든 과거 기록을 보존한다.
+
 ## 2026-10-26 · PR #103에 #102 병합 main 통합
 
 - **완료한 선행 조건:** 사용자 승인으로 [#102](https://github.com/knadalkim-a11y/team-agent-poc/pull/102)를 **2026-10-26 10:15:03 KST**, main `4d27de76fe4bbc4aad70ec009bb7d478d0bbe29f`에 merge commit으로 병합했다. 최종 head41c0a4b의 [CI40252075901/#341](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40252075901)는39성공/PR 출하1정상 생략, Native81/81·작성27/27·Windows Node probe와2454자 PowerShell 파싱을 통과했다. 첫 실패와 원인 미확정은 보존했다.
