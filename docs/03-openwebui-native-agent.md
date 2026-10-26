@@ -1,6 +1,6 @@
 # 03. Open WebUI Native 통합 Assistant
 
-현재 제품 이름은 **EES Workflow**이며 [2026-10-02 통합 구현 기준](#integrated-work-install-20261002)을 유지한다. 최신 사용자 보고의 사내 설치 커밋 접두어는 main `2a4b82a5f482`(#96)와 일치한다. 최신 [main 1c1efff 적용 준비](#main-1c1efff-apply-prep-20261022)는 검토 뒤 사용자 시도에서 설치 기준 불일치로 사전 중단됐으며 **1c1efff 적용 미실행**이다. 아래 42cc756·#88/#89 및 날짜별 적용·시연·ApplyDemo 안내는 당시 기록으로 보존하며 현재 실행 목록으로 반복하지 않는다. 실제 도구/Native 관리와 기존 Apply/Restore 경로는 유지한다.
+현재 제품 이름은 **EES Workflow**이며 [2026-10-02 통합 구현 기준](#integrated-work-install-20261002)을 유지한다. 최신 사용자 보고의 사내 설치 커밋 접두어는 main `2a4b82a5f482`(#96)와 일치한다. [2026-10-22 main 1c1efff 적용 검토 기록](#main-1c1efff-apply-prep-20261022)는 검토 뒤 사용자 시도에서 설치 기준 불일치로 사전 중단됐으며 **1c1efff 적용 미실행**이다. 아래 42cc756·#88/#89 및 날짜별 적용·시연·ApplyDemo 안내는 당시 기록으로 보존하며 현재 실행 목록으로 반복하지 않는다. 실제 도구/Native 관리와 기존 Apply/Restore 경로는 유지한다.
 
 > 문서 역할: Native Assistant 기준선 구성·확장 원칙
 >
@@ -12,7 +12,7 @@
 
 | 할 일 | 안내 |
 |---|---|
-| main 1c1efff 적용 준비·Claude 대조 | [확정 ZIP·한 블록·설정·Restore 경계](#main-1c1efff-apply-prep-20261022) |
+| main 1c1efff 적용 검토 기록·Claude 대조 | [확정 ZIP·한 블록·설정·Restore 경계](#main-1c1efff-apply-prep-20261022) |
 | 2-1/A2·Work 도구 후속 통합 적용 이력 | [병합 뒤 브라우저 열기·ZIP 대기·검사·적용 한 블록](#source-phase2-route-cache-zip-20261014) |
 | 소스 화면·대화 도우미 2단계 통합 적용 이력 | [당시 main 브라우저 ZIP 안내](#source-phase2-local-zip-20261014) |
 | 소스 프런트엔드 1단계 적용 준비 | [CI ZIP 적용·대안·종료 복구](#source-frontend-apply-20261013) · [팀원 업무 안내](07-team-quickstart.md#first-work-20261012) |
@@ -23,7 +23,9 @@
 
 <a id="main-1c1efff-apply-prep-20261022"></a>
 
-## main 1c1efff 사내 적용 준비 · 2026-10-22
+## main 1c1efff 사내 적용 검토 기록 · 2026-10-22
+
+**2026-10-26 문서 병합 시점의 사용 범위:** 아래는 목표 `1c1efff`를 검토한 당시 기록이다. #102 병합 등으로 main이 더 진행되면 블록의 HEAD/origin/main 정확 일치 검사가 Stop 전에 중단한다. 현재 적용 명령으로 그대로 재사용하지 않으며, 다음 사내 적용 때 목표 main·성공한 CI의 프로그램 ZIP·정확한 바이트/SHA256·실제 설치 기준을 함께 다시 확정한다. SHA 검사를 없애거나 SHA/ZIP 한 곳만 임의로 바꾸지 않는다. 이번 문서 병합은 사내 실행·적용 승인이 아니며 실제 적용은 미실행이다.
 
 **2026-10-22 설치 기준 정정:** 사용자는 Claude 검토 뒤 실행했으나 `EES before commit=2a4b82a5f482… valid=true running=true`로 사전 중단됐다고 보고했다. 이는 #96 병합 main `2a4b82a5f482b6b1677b40cad171589c71bae13f`와 일치한다. 최초 준비는 `d4f18069db6ca6ac2804d5ed3007a840b71a72a9`를 전제로 했지만 실제 기준은 더 최신이다. 아래 블록의 예상 설치 SHA만 정정하며 목표는 `1c1efff8abe19da3e6e8921859b52858fc6cacfb` 그대로다. 남은 main 변경은 #100·#101이다. [main CI 39694472521 / #326](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/39694472521)는 첫 시도 40개 작업 모두 성공했고 native-compose 81 PASS(C44 27개 포함)다. 첫 시도는 Update·Stop·Apply 전이므로 **1c1efff 적용·기동 미실행**이며 Restore는 필요하지 않다. C64·C65는 사용자 설명에 따른 설계 정정이고 이번 제품 코드·Figma 변경은 없다.
 
@@ -38,7 +40,7 @@
 
 #95는 CI 시험 자료를 분할·캐시하고 최종 패키지 입력 이름을 바꿨다. 사용자 전달 구조(바깥 ZIP 안 프로그램 ZIP 하나)와 `Update → Upgrade`의 검사·정상 Stop·검증 백업·Apply·Start/health, 명시적인 `Stop → Restore → Start`는 d4f1806과 같다. `manage-ees.ps1`·`manage_ees.py`·`ees_upgrade.py`·`ees_update_download.py`·`build_demo_bundle.py`는 이 구간에 변경되지 않았다. 새 프로그램에는 공용 도구 모듈·작성 아이콘이 추가됐지만, 정확한 이전 `.14` 설치 파일 목록도 Apply/Restore 검증 대상으로 유지한다. 사내 Node/npm 빌드·전체 의존성 재설치·Init·ApplyDemo를 추가하지 않는다.
 
-검토 뒤 사용자가 적용을 승인한 때, 필요한 제안 반영·입력을 먼저 명시적으로 저장하고 팀원이 사용하지 않는 시간에 기존 운영 계정 PowerShell에서 아래 **한 블록**을 사용한다. 기존 경로가 다르면 `$er`(저장소)·`$ecfg`(등록 설정)·`$ed`(다운로드 폴더)만 맞춘다. 브라우저가 열리면 원래 ZIP 이름으로 새 다운로드를 마친다. 블록은 새 파일/같은 이름의 `(숫자)` 파일만 15분 기다리고 두 번 연속 파일 상태·정확한 크기·해시를 확인한다. 다른 설치 원본, 무효/미완료 설치, 검토 SHA와 다른 HEAD/origin/main이면 Stop 전에 중단한다. main이 더 진행됐어도 강제 reset하거나 최신 ZIP으로 임의 대체하지 않는다.
+아래 **한 블록**은 2026-10-22의 검토된 실행문 원본을 보존한 것이다. 당시에는 별도 적용 승인 뒤 필요한 제안·입력을 먼저 명시적으로 저장하고 팀원이 사용하지 않는 시간에 기존 운영 계정 PowerShell에서 사용하도록 안내했다. 기존 경로가 다르면 `$er`(저장소)·`$ecfg`(등록 설정)·`$ed`(다운로드 폴더)만 맞춘다. 브라우저가 열리면 원래 ZIP 이름으로 새 다운로드를 마친다. 블록은 새 파일/같은 이름의 `(숫자)` 파일만 15분 기다리고 두 번 연속 파일 상태·정확한 크기·해시를 확인한다. 다른 설치 원본, 무효/미완료 설치, 검토 SHA와 다른 HEAD/origin/main이면 Stop 전에 중단한다. main이 더 진행됐어도 강제 reset하거나 최신 ZIP으로 임의 대체하지 않는다.
 
 ```powershell
 # 실제 설치 기준 정정. 기존 운영 계정에서만 사용.

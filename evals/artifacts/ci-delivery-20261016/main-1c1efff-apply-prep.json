@@ -138,5 +138,43 @@
       "sha256": "942ce6bb20a53a306d7f4cf2cebe3deed80f02528880f3e2e2bbe7da2547e4e5",
       "crc_valid": true
     }
+  },
+  "merge_preparation_20261026": {
+    "head": "5f047c8dfe8d2f22ca56eb54313b91ac48c851e2",
+    "run_id": 39738417918,
+    "run_number": 329,
+    "job_id": 119691259285,
+    "job_counts": {
+      "success": 36,
+      "failure": 2,
+      "cancelled": 1,
+      "skipped": 1
+    },
+    "failed_test": "test_launcher_assembly_order_is_private_and_has_one_runtime_asset",
+    "evidence": "Node launcher probe timed out after10s; entry not observed; synthetic fixture208bytes SHA256c7bf9c7bf270383a3eaf5febc759fe32ba05afad6af9702a6f7679c46928797f. Actual product launcher not exercised. Cause undetermined.",
+    "other_results": {
+      "branding_pass": 33,
+      "branding_fail": 1,
+      "process_pass": 67,
+      "apply_block_powershell_characters": 2454
+    },
+    "log": {
+      "file": "pr102-ci329-windows.log.gz",
+      "source_bytes": 277803,
+      "source_sha256": "91a84604ced64a666d05bf943e59b3639c062c7734c9bdb7eb255bea27951cff",
+      "gzip_bytes": 44700,
+      "gzip_sha256": "f7af0f95f56fb9404e1b6ef9c1c3454869b8de8282bade1c29053725d32749e5"
+    },
+    "local_check": {
+      "python": "3.12.14",
+      "node": "v24.22.1",
+      "tests": "LauncherProbeDiagnosticsTests and launcher assembly test",
+      "passed": 2,
+      "seconds": 0.165,
+      "windows_result": false
+    },
+    "retry_boundary": "One full final-head CI on a new runner after documentation/evidence correction; no product/test/timeout change. Repeated same failure requires diagnosis, not automatic retries. Success is not a root-cause fix.",
+    "merge_permission": "User explicitly authorized PR102 merge on2026-10-26; PR103 merge and intranet execution remain unauthorized.",
+    "apply_block_boundary": "Preserve reviewed1c1efff block and exact SHA guard as historical evidence. After main advances, prepare a separately verified target, CI ZIP, bytes, SHA256 and installed baseline before intranet use."
   }
 }
