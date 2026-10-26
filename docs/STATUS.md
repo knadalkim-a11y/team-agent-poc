@@ -1,5 +1,13 @@
 # 현재 작업 상태
 
+## 2026-10-26 · 사내 적용 사전 중단·설치 기준 정정
+
+- **사용자 보고:** `EES before commit=1c1efff7abe… valid=true running=true`. 최초924d919 블록은 과거2a4b82a 보고를 예상해 Update·Stop·백업·Apply 전에 중단했다. Status는 읽기 전용이며 **924d919 적용은 미실행**, 보고 당시 기존 프로그램은 유효·실행 중이다.
+- **정정·보호:** Git의 #101 병합 원본은 `1c1efff8abe19da3e6e8921859b52858fc6cacfb`이다. 사용자 타이핑7/8 차이를 확정하지 않고 [정정 블록](03-openwebui-native-agent.md#main-924d919-apply-prep-20261026)이 전체 SHA를 정확히 검사한다. 이미 받은 동일 ZIP은 크기/해시 재검증 뒤 재사용하며, 없을 때만 기존 다운로드를 진행한다. 1c1efff8→924d919 운영·Work 백엔드·저장·도구 코드는 동일하다.
+- **다음 하나:** 정정 블록의 `result/stage/running/commit`1~2줄을 받는다. 다시 EES before면 출력의 commit 앞12자리만 확인하고 반복하지 않는다. Restore는 필요하지 않으며 문서 #104는 미병합으로 유지한다. [실패와 정정 근거](../evals/v4-ui-20260930.md#main-924d919-apply-evidence-20261026). 대상 main의 CI#345 성공과 문서 정정 head의 CI는 별개다.
+
+> 아래 최초 준비와2a4b82a 기준·미실행 표기는 정정 전 기록이다. 실패와 당시 판단을 보존한다.
+
 ## 2026-10-26 · #103 병합 완료·main924d919 사내 적용 준비
 
 - **병합·승인:** 사용자 “병합하고 해” 승인으로 #103을 **2026-10-26 17:45:45 KST**, main `924d919333b8804ece2cf5322e14adc681ad6457`에 merge commit으로 병합했다. 최신 PR head afc4697의 [CI40290888003/#344](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40290888003)는39성공/PR 출하1정상 생략이었다. rebase·force-push·main 직접 push는 하지 않았다.

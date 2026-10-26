@@ -94,5 +94,62 @@
     "CRLF_chars": 2454,
     "sha256_utf8": "cac891b89205c6e615335255157e678a07f446260dd4351b05b7df08d94e6be6",
     "executable_change": "Only target SHA, outer ZIP URL, bytes and SHA256 literals; all checks/control flow unchanged."
+  },
+  "baseline_correction_20261026": {
+    "reported": "EES before commit=1c1efff7abe... valid=true running=true",
+    "previous_expected": "2a4b82a5f482b6b1677b40cad171589c71bae13f",
+    "git_verified_expected": "1c1efff8abe19da3e6e8921859b52858fc6cacfb",
+    "reported_character_difference": "Typed 7 versus Git 8; full installed SHA remains unconfirmed. Exact full-SHA guard is retained.",
+    "stage": "read-only Status before Update/Stop/Backup/Apply/Start",
+    "target_application": "not executed; corrected block user result pending",
+    "comparison": [
+      {
+        "path": "scripts/manage-ees.ps1",
+        "identical": true,
+        "sha256": "94f59450a2980d728ebf007e89cdb0f1acfee77b509c4ee747b3366402b33e82"
+      },
+      {
+        "path": "scripts/manage_ees.py",
+        "identical": true,
+        "sha256": "53b4c197c5d5d147c19f45f2530aaa1fb371c646240abe1ebba90a87a894c9e7"
+      },
+      {
+        "path": "scripts/ees_upgrade.py",
+        "identical": true,
+        "sha256": "8d71a2560a1ef79af3eba3f9f41d338da27ab805bc32591438fa9504fb962fac"
+      },
+      {
+        "path": "scripts/ees_update_download.py",
+        "identical": true,
+        "sha256": "1badaa06186dce96fb3a5fdeaec6df9af490be91bd94be33c080154c9da75a97"
+      },
+      {
+        "path": "scripts/ees_deploy_release.py",
+        "identical": true,
+        "sha256": "76c21b4d52763bb6774fca0abf506eaf8e3748c27b7b43206aed0bb06fabbf98"
+      },
+      {
+        "path": "scripts/build_demo_bundle.py",
+        "identical": true,
+        "sha256": "fa286c3581b9f1c84ed924c173dd544dc238db496e247b5dbc12cdc201652f2f"
+      },
+      {
+        "path": "agent-pack/skills/ees-work-demo/scripts/workflow_tool.py",
+        "identical": true,
+        "sha256": "c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085"
+      },
+      {
+        "path": "agent-pack/skills/confluence-read/scripts/confluence_tool.py",
+        "identical": true,
+        "sha256": "1820a07b67b630f041c0d4fa7dbdc9ba84186866309942f35fa6a74e91f31dde"
+      }
+    ],
+    "delivery_block": {
+      "LF_chars": 2250,
+      "CRLF_chars": 2289,
+      "sha256_utf8": "e3f76343c54ead1b69469bf5b5240c8cc4726bdc2b0717a2de0e6ae7d1c9b2e1",
+      "changes": "Correct expected baseline; reuse existing target-name/size ZIP only after common SHA256 verification, otherwise retain existing fresh-download wait. All application guards/timeouts unchanged."
+    },
+    "windows_validation": "new head CI pending; previous CI346 does not verify revised block"
   }
 }
