@@ -13,8 +13,8 @@
     "complete_native_pass": true,
     "windows_pass": true
   },
-  "installed_user_report": "2a4b82a5f482b6b1677b40cad171589c71bae13f",
-  "intranet_execution": "not executed; user to run reviewed block",
+  "installed_user_report": "924d919333b8",
+  "intranet_execution": "User reported result=ok, stage=complete, running=true; target program application completed. UI/data/tool checks not yet reported.",
   "comparison": [
     {
       "path": "scripts/manage-ees.ps1",
@@ -151,5 +151,41 @@
       "changes": "Correct expected baseline; reuse existing target-name/size ZIP only after common SHA256 verification, otherwise retain existing fresh-download wait. All application guards/timeouts unchanged."
     },
     "windows_validation": "new head CI pending; previous CI346 does not verify revised block"
+  },
+  "initial_preparation_state": {
+    "installed_user_report": "2a4b82a5f482b6b1677b40cad171589c71bae13f",
+    "intranet_execution": "not executed; user to run reviewed block"
+  },
+  "application_report_20261026": {
+    "source": "user typed reply",
+    "result": "ok",
+    "stage": "complete",
+    "running": true,
+    "commit_prefix": "924d919333b8",
+    "expected_target_full_sha": "924d919333b8804ece2cf5322e14adc681ad6457",
+    "direct_intranet_inspection": false,
+    "ui_data_tool_checks": "not yet reported",
+    "repeat_application": false
+  },
+  "corrected_block_windows_validation": {
+    "source_head": "b5aed83ff893439c49f0ed06b56b0ac9fac3680c",
+    "run": 40316799429,
+    "number": 347,
+    "job": 121553282064,
+    "job_conclusion": "success",
+    "log_line": "2026-10-26T11:52:41.6771408Z Pilot block parsed: main-924d919-apply-prep-20261026 (2289 characters)"
+  },
+  "corrected_block_ci": {
+    "head": "b5aed83ff893439c49f0ed06b56b0ac9fac3680c",
+    "run": 40316799429,
+    "number": 347,
+    "conclusion": "success",
+    "jobs_success": 39,
+    "normal_pr_shipping_skip": 1,
+    "native_compose_pass": 83,
+    "authoring_pass": 29,
+    "native_compose_valid_pngs": 235,
+    "complete_native_valid_pngs": 45,
+    "execution_pass": 5
   }
 }

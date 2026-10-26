@@ -1,8 +1,8 @@
 # 03. Open WebUI Native 통합 Assistant
 
-**2026-10-26 현재 적용 안내:** [#103 병합 main924d919 한 블록](#main-924d919-apply-prep-20261026)을 준비했다. main CI·프로그램 ZIP 검증은 완료했다. 사용자 시도는 설치 기준 불일치로 Update·Stop·Apply 전에 중단됐으며, 아래 정정 블록의 적용 결과를 기다린다. 아래10-22 내용은 당시 기록이다.
+**2026-10-26 현재 적용 상태:** 사용자가 `result=ok / stage=complete / running=true / commit=924d919333b8`를 보고했다. **#103 병합 main924d919 프로그램 적용 완료·실행 중**으로 기록한다. [아래 적용 블록](#main-924d919-apply-prep-20261026)은 실행 이력이며 이 PC에서 반복하지 않는다. 로그인·기존 자료·새 화면·도구 설정은 아직 미확인이다.
 
-현재 제품 이름은 **EES Workflow**이며 [2026-10-02 통합 구현 기준](#integrated-work-install-20261002)을 유지한다. 최신 사용자는 `1c1efff7abe… valid=true running=true`를 직접 타이핑했다. Git의 #101 병합 원본은 `1c1efff8abe19da3e6e8921859b52858fc6cacfb`이므로 한 글자 차이를 확정하지 않고 블록에서 전체 SHA를 다시 대조한다. [2026-10-22 main 1c1efff 적용 검토 기록](#main-1c1efff-apply-prep-20261022)의2a4b82a 보고와 당시 미실행 표기는 이전 상태다. 아래 42cc756·#88/#89 및 날짜별 적용·시연·ApplyDemo 안내는 당시 기록으로 보존하며 현재 실행 목록으로 반복하지 않는다. 실제 도구/Native 관리와 기존 Apply/Restore 경로는 유지한다.
+현재 제품 이름은 **EES Workflow**이며 [2026-10-02 통합 구현 기준](#integrated-work-install-20261002)을 유지한다. 최신 사내 적용 보고는 `924d919333b8`이다. 앞선 `1c1efff7abe… valid=true running=true` 사전 중단과 [2026-10-22 main1c1efff 검토 기록](#main-1c1efff-apply-prep-20261022)은 당시 상태로 보존한다. 아래 42cc756·#88/#89 및 날짜별 적용·시연·ApplyDemo 안내는 당시 기록으로 보존하며 현재 실행 목록으로 반복하지 않는다. 실제 도구/Native 관리와 기존 Apply/Restore 경로는 유지한다.
 
 > 문서 역할: Native Assistant 기준선 구성·확장 원칙
 >
@@ -28,7 +28,7 @@
 
 ## main 924d919 사내 적용 · #103 병합본 · 2026-10-26
 
-사용자가 “사내적용까지 하자”, “병합하고 해”로 승인했다. #103의 검증된 `afc4697003ceb9e49e174e8acaed8c0e03da6f42`를 **2026-10-26 17:45:45 KST**, main **`924d919333b8804ece2cf5322e14adc681ad6457`**에 merge commit으로 병합했다. [병합 main CI 40294530820/#345](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40294530820)는 **첫 시도40/40 성공**이며 Native83/83·작성29/29·Complete Native·execution5/5·Windows 검증을 통과했다. 에이전트의 사내 PC 접근은 없다. 사용자가 최초 블록을 실행했으나 사전 설치 검사에서 중단했으므로 **924d919 적용은 미실행**이다.
+사용자가 “사내적용까지 하자”, “병합하고 해”로 승인했다. #103의 검증된 `afc4697003ceb9e49e174e8acaed8c0e03da6f42`를 **2026-10-26 17:45:45 KST**, main **`924d919333b8804ece2cf5322e14adc681ad6457`**에 merge commit으로 병합했다. [병합 main CI 40294530820/#345](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40294530820)는 **첫 시도40/40 성공**이며 Native83/83·작성29/29·Complete Native·execution5/5·Windows 검증을 통과했다. 에이전트의 사내 PC 접근은 없다. 사용자는 최초 사전 중단 뒤 정정 블록 실행 결과로 `result=ok / stage=complete / running=true / commit=924d919333b8`를 보고했다. 프로그램 적용은 완료됐고 화면·기존 자료·도구 설정 확인은 별도다.
 
 **설치 기준 정정:** 최초 블록은 과거 보고2a4b82a를 예상해 `EES before commit=1c1efff7abe… valid=true running=true`에서 중단됐다. Status는 읽기 전용이고 이 오류는 Update·Stop·백업·Apply 전에 발생하므로 이번 시도로 프로그램은 바뀌지 않았으며 Restore도 필요하지 않다. 원본 전체 SHA `1c1efff8abe19da3e6e8921859b52858fc6cacfb`와 사용자 타이핑의7/8 차이는 아직 미확인이다. 아래 블록은 원본 전체 값과 정확히 비교하며, 다르면 다시 Stop 전에 멈춘다. prefix 허용이나 검사 삭제로 통과시키지 않는다. 목표 ZIP은 동일한924d919이며 기존 다운로드를 크기·해시로 재검증해 재사용한다.
 
@@ -41,7 +41,7 @@
 
 실제 다운로드 바이트의 크기·SHA256·바깥/안쪽 ZIP CRC와 기존 `ees_deploy_release.py validate`의 manifest·포함 파일·wheel 검사를 통과했다. [검증 근거](../evals/v4-ui-20260930.md#main-924d919-apply-evidence-20261026). 프로그램 설치·실제 DB 접근 검사는 아니다.
 
-기존 운영 계정 PowerShell에서 필요한 제안·입력을 먼저 명시적으로 저장하고 팀원이 사용하지 않는 시간에 아래 한 블록을 실행한다. 경로가 다르면 `$er`(기존 저장소)·`$ecfg`(등록 설정)·`$ed`(다운로드 폴더)만 맞춘다. Downloads에 대상 전체 SHA 이름과 크기가 맞는 ZIP이 있으면 해시를 다시 검사해 재사용한다. 없을 때만 브라우저를 열고 원래 이름으로 새 다운로드를15분 기다린다. 새 파일 안정성·정확한 크기/해시·정상 설치·HEAD/origin/main 검사 뒤 기존 Upgrade로 진행한다. main이 달라졌으면 강제 reset·SHA 검사 삭제·다른 ZIP 대체 없이 중단한다. **이 안내 PR을 먼저 병합하면 목표 main이 바뀌므로, 지금 확정한924d919 블록을 그대로 쓰지 않는다.**
+**아래는 적용 당시 사용한 블록이다. 이미 성공한 이 PC에서는 반복하지 않는다.** 당시 실행 조건은 기존 운영 계정 PowerShell에서 필요한 제안·입력을 명시적으로 저장하고 팀원이 사용하지 않는 시간이었다. 경로가 다르면 `$er`(기존 저장소)·`$ecfg`(등록 설정)·`$ed`(다운로드 폴더)만 맞춘다. Downloads에 대상 전체 SHA 이름과 크기가 맞는 ZIP이 있으면 해시를 다시 검사해 재사용한다. 없을 때만 브라우저를 열고 원래 이름으로 새 다운로드를15분 기다린다. 새 파일 안정성·정확한 크기/해시·정상 설치·HEAD/origin/main 검사 뒤 기존 Upgrade로 진행한다. main이 달라졌으면 강제 reset·SHA 검사 삭제·다른 ZIP 대체 없이 중단한다. **적용 당시 이 문서 PR은 미병합으로 유지해 목표 main924d919를 고정했다. 이후 새 적용에는 당시 main·CI·ZIP·설치 버전을 다시 확정한다.**
 
 ```powershell
 # 저장 후 실행. 적용 뒤 로그인·기존 자료·단계⋯·작업 상세 확인.
@@ -95,7 +95,7 @@ if($LASTEXITCODE -ne 0 -or $ea -cne $ec){throw '검토 원본 불일치: 미적�
 
 **실패·Restore:** 실패하면 마지막 `result/stage/code/running/commit`만 전달하고 반복 실행하지 않는다. ZIP/설치/원본 사전 검사 실패는 Stop 전이다. Stop·백업 실패는 Apply에 도달하지 않으며, Start 실패 뒤에는 상태 확인이 필요하다. 자동 Restore하지 않는다. 필요한 경우 [기존 명시적 Restore](#ees-wrapper-restore)로 검증된 직전 프로그램을 복원한다. Git으로 대조한1c1efff8 원본과 이번 대상은 업무 백엔드·저장 형식이 동일하며 새 DB 형식 변환은 없다. Restore는 **프로그램만** 복원하고 DB·대화·첨부·PAT·도구/공용 설정은 되돌리지 않는다. 실제 PC 자료의 왕복 검증 완료를 뜻하지 않는다.
 
-회신은 기존 **1~2줄**이다: `result=… / stage=… / running=… / commit=…`(실패면 code 포함), 필요하면 `login=… / chat=… / work=… / work_tool=…`를 덧붙인다. 전체 로그·파일·사진·PAT는 요구하지 않는다. 성공 출력과 화면 확인을 받은 뒤 실제 적용 상태를 기록한다.
+회신은 기존 **1~2줄**이다: `result=… / stage=… / running=… / commit=…`(실패면 code 포함), 필요하면 `login=… / chat=… / work=… / work_tool=…`를 덧붙인다. 전체 로그·파일·사진·PAT는 요구하지 않는다. 이번에는 성공 출력을 받아 프로그램 적용 완료로 기록했다. 화면·자료·도구 확인은 사용자 후속 결과를 받은 범위에서만 추가한다.
 
 <a id="main-1c1efff-apply-prep-20261022"></a>
 
