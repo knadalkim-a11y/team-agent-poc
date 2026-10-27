@@ -11,8 +11,8 @@
       "sha256": "28baa295cbc95a08da40f021c60662255d1e0e4ae93ce9378bde8f4eb5ddca48"
     },
     "branding/ees/ui/ees-work-view.js": {
-      "bytes": 136427,
-      "sha256": "427e3bb9bf1fc829c925072527ba6e545a456adde69beeb9e8a6e89f9bed7942"
+      "bytes": 136678,
+      "sha256": "14ae3ff22a1c83ccc6a3e41428ea178b5214923a2e68e2bf669ca931280a980c"
     },
     "docs/mockups/ees-work/design-mock-src/06-task-groups.html": {
       "bytes": 75628,
@@ -25,7 +25,7 @@
   },
   "validation": {
     "runtime_node": {
-      "passed": 125,
+      "passed": 126,
       "failed": 0
     },
     "related_node_initial": 394,
@@ -54,6 +54,7 @@
     "Queued label and overly broad hidden regex assertions corrected.",
     "Native fixture expected transport failure used success-only helper; explicit failure assertion added.",
     "Mock builder Python lacked Brotli; existing .venv used.",
-    "Pre-CI Native navigation audit found singleton stage intercepting explicit run overview and closed-run history; explicit overview and closed-run entry restored, regression added, 125/125 passed."
+    "Pre-CI Native navigation audit found singleton stage intercepting explicit run overview and closed-run history; explicit overview and closed-run entry restored, regression added, 125/125 passed.",
+    "Direct visual review found full localized timestamps wrapping to three lines in the narrow log time column. Visible time now uses HH:mm with full date/time preserved in datetime/title/aria-label; renderer recapture and Node126/126 passed."
   ]
 }

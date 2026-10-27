@@ -856,3 +856,9 @@ test('explicit run overview and closed-run history remain reachable after enteri
  h.state.run.status='completed';assert.equal(html('workStageTarget(state,{mode:"work",tab:"overview"})',{state:h.state}),null);
  assert.equal(html('workStageTarget(state,{mode:"work",tab:"overview",stage_id:"t"}).id',{state:h.state}),'t');
 });
+
+test('stage log keeps its compact time column and retains the full timestamp accessibly',()=>{
+ const {state}=stageRuntimeFixture();state.run.attempts=[{id:'a1',job_id:'a',number:1,status:'succeeded',created_at:'2026-10-27T14:20:00Z'}];
+ const out=html('workStageHTML(state,{stage_tab:"log"},state.run.definition.nodes.t).body',{state});
+ assert.match(out,/<time datetime="2026-10-27T14:20:00Z" title="[^"]*2026[^\"]*" aria-label="[^"]+">\d{2}:\d{2}<\/time>/);
+});
