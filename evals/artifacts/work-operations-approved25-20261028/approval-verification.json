@@ -1,0 +1,131 @@
+{
+  "scope": "Revision25 design approval metadata only; no new revision.",
+  "sourceOnlyApprovalTextChanged": true,
+  "scriptsIdentical": true,
+  "cssExceptEmbeddedFontsIdentical": true,
+  "generatedNormalizedEqual": true,
+  "fonts": [
+    {
+      "family": "Inter",
+      "beforeBytes": 55320,
+      "afterBytes": 55320,
+      "beforeGlyphs": 334,
+      "afterGlyphs": 334,
+      "sameBytes": true,
+      "addedUnicode": [],
+      "removedUnicode": [],
+      "sharedAdvanceWidthsIdentical": true
+    },
+    {
+      "family": "Noto Sans KR Thin",
+      "beforeBytes": 84120,
+      "afterBytes": 84356,
+      "beforeGlyphs": 775,
+      "afterGlyphs": 776,
+      "sameBytes": false,
+      "addedUnicode": [
+        "디"
+      ],
+      "removedUnicode": [],
+      "sharedAdvanceWidthsIdentical": true
+    }
+  ],
+  "files": [
+    {
+      "path": "docs/mockups/ees-work/design-mock-src/06-task-groups.html",
+      "bytes": 76364,
+      "sha256": "d316d63986b2afe1edda567b862edd716b14a71c80f04b5d679a445e94171e0d"
+    },
+    {
+      "path": "docs/mockups/ees-work/design-mock-06-task-groups.html",
+      "bytes": 407663,
+      "sha256": "24b9fee62679f0317cb9f69852a0caeedd434124bbcbbfb32e11252acd253aa6"
+    }
+  ],
+  "diagnosticObservations": [
+    {
+      "step": "First font extraction",
+      "result": "Incorrect padding before comparison",
+      "cause": "Regex captured CSS suffix because font URL is unquoted. Changed matcher to base64 character class. No source/build change."
+    },
+    {
+      "step": "Second font extraction",
+      "result": "No module named brotli before comparison",
+      "cause": "Used primary python instead of existing repo .venv. Corrected interpreter; no installs or source/build change."
+    },
+    {
+      "step": "First browser comparison",
+      "result": "Stopped after initial before-panel capture",
+      "cause": "Chromium single-process closed after last page/context was explicitly closed; next browser.newPage failed. Same page reused on corrected attempt, matching prior successful revision25 harness.",
+      "evidence": "first-browser-attempt.json"
+    },
+    {
+      "step": "PNG byte-equality assertion",
+      "result": "Failed at1920",
+      "cause": "Decoded comparison found286 pixels differing by at most1/255 per channel; retained observed raster difference instead of claiming pixel identity.",
+      "evidence": "second-browser-attempt.json"
+    }
+  ],
+  "browser": {
+    "version": "133.0.6943.0",
+    "playwright": "1.62.1"
+  },
+  "render": [
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "panelPngByteIdentical": false,
+      "beforeSha256": "4894d2194d025295c768500171ac2fd8d9345f6d28104fdaf0cdcc17315486b0",
+      "afterSha256": "c515b6661a083fbe7f437dc40c184e016bc116722be2f2593579d04522f7fbc9"
+    }
+  ],
+  "errors": [],
+  "externalRequests": [],
+  "result": "pass with recorded raster-only difference",
+  "approvalText": "시안 25판 · 2026-10-28 · 단계와 작업 실행 · 디자인 확정",
+  "domGeometry": [
+    {
+      "width": 1920,
+      "height": 1080,
+      "identicalMarkupAndComputedGeometry": true,
+      "elementsCompared": 147,
+      "overflow": false
+    },
+    {
+      "width": 480,
+      "height": 1080,
+      "identicalMarkupAndComputedGeometry": true,
+      "elementsCompared": 147,
+      "overflow": false
+    }
+  ],
+  "correctedBrowserAttempt": "Markup/computed geometry identical at1920/480; approval label verified; no runtime behavior retest because script byte-identical",
+  "pixelComparison": [
+    {
+      "viewportWidth": 1920,
+      "imageSize": [
+        479,
+        1080
+      ],
+      "differentPixels": 286,
+      "totalPixels": 517320,
+      "maxChannelDifference": 1,
+      "sameDimensions": true
+    },
+    {
+      "viewportWidth": 480,
+      "imageSize": [
+        423,
+        1080
+      ],
+      "differentPixels": 189,
+      "totalPixels": 456840,
+      "maxChannelDifference": 1,
+      "sameDimensions": true
+    }
+  ],
+  "buildFirstAttempt": "pass; existing .venv and pinned wheel",
+  "diffCheck": "pass"
+}

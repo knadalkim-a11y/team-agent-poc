@@ -12,11 +12,9 @@ EES 팀의 문서 조회와 업무 처리를 대화·워크플로우 화면으�
 
 <a id="design-sources"></a>
 
-현재 업무 화면의 확정 디자인은 [20판 고정 원본·확정 범위](docs/mockups/ees-work/TASK.md#design-mock-approved20-20261027)와 [Figma 확정20판](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1658-7137)에서 시작합니다. 이전 시안과 실제 구현 상태, 미정 기능 계약은 해당 기록에서 구분합니다.
+현재 운영 화면의 확정 디자인은 [운영25판 고정 원본·확정 범위](docs/mockups/ees-work/TASK.md#work-operations-design)와 [Figma 운영25판](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1681-8037)에서 시작합니다. ‘배포 산출물 점검 → 1차 점검’의 현재 목업이 기준이며, 운영 전체의 기능 구현·사내 적용 완료를 뜻하지 않습니다. [20판](docs/mockups/ees-work/TASK.md#design-mock-approved20-20261027)은 이전 확정본으로 보존합니다.
 
-최신 추가 검토안은 [25판 · 판정 선택 메뉴 정리](docs/mockups/ees-work/TASK.md#design-mock-verdict-menu-20261028)입니다. 확정20판을 보존하며 사용자 확인 전에는 확정 기준을 대체하지 않습니다.
-
-다른 워크플로우에 이 화면을 적용할 때는 [단계 화면의 공통 설계 기준](docs/mockups/ees-work/TASK.md#workflow-stage-common-standard-20261028)을 함께 따릅니다. 배치와 상세 표시 방식은 공통으로 쓰고, 실행 가능 여부·최종 판정 주체·완료 기준은 실제 작업 정의와 연결합니다. 현재25판의 합성 예시를 공통 동작 정책으로 확대하지 않습니다.
+Figma는 제품 기능을 **업무 · 운영 / 셋업 / 장애대응**으로 나누고, [업무 공통 기준](docs/mockups/ees-work/TASK.md#workflow-stage-common-standard)은 한 원본에서 연결합니다. 셋업·장애대응은 기존 참고 설계이며 새 목업이 확정된 것은 아닙니다. 운영25판의 합성 예시를 모든 업무의 실행·판정 정책으로 확대하지 않습니다.
 
 ### 설계 문서의 역할과 찾는 순서
 

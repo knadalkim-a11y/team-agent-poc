@@ -1,0 +1,310 @@
+{
+  "task": "work-operations-approved25-20261028",
+  "status": "complete",
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "sessionId": "1ef48260-1a91-4b43-9f41-447c6b4770a1",
+  "dateKST": "2026-10-28",
+  "pages": {
+    "common": "1689:1061",
+    "operations": "1284:3106",
+    "setup": "1689:1062",
+    "incident": "1689:1063"
+  },
+  "headers": {
+    "common": "1690:9323",
+    "operations": "1284:3107",
+    "setup": "1690:9301",
+    "incident": "1690:9312"
+  },
+  "current": {
+    "board25": "1681:8037",
+    "note25": "1681:8038",
+    "approvalMemo": "1690:9340",
+    "default": "1681:8046",
+    "directRecord": "1681:8168",
+    "running": "1681:8299",
+    "menuOpen": "1682:8443",
+    "menu": "1682:8204",
+    "commonPrinciples": "1685:8248",
+    "commonLegacyNotice": "1690:9337",
+    "previous20Notice": "1690:9344",
+    "legacyOperationsNotice": "1690:9347",
+    "C103": "1691:946"
+  },
+  "approvedSource": {
+    "commit": "8959ffb67d2e09dd6b64a7561f998027f1e6298b",
+    "sourcePath": "docs/mockups/ees-work/design-mock-src/06-task-groups.html",
+    "sourceBytes": 76364,
+    "sourceSha256": "d316d63986b2afe1edda567b862edd716b14a71c80f04b5d679a445e94171e0d",
+    "htmlPath": "docs/mockups/ees-work/design-mock-06-task-groups.html",
+    "htmlBytes": 407663,
+    "htmlSha256": "24b9fee62679f0317cb9f69852a0caeedd434124bbcbbfb32e11252acd253aa6",
+    "preApprovalVisualCommit": "db0fb9b14371fb6b438606cd41373de59fa1ebbc"
+  },
+  "approval": {
+    "scope": "Current revision25 first-inspection mock as operations design baseline; future revisions remain possible",
+    "notIncluded": [
+      "product implementation",
+      "merge/deploy",
+      "approval of all legacy A/R screens",
+      "new features",
+      "new component library"
+    ],
+    "quote": "응 이렇게 정리해서 현재 목업까지 만든거 반영하자. '업무.운영' 이랑' '업무.공통'쪽에 반영이되겠네? '업무.운영'쪽 페이지는 지금 만든 목업을 기준으로 확정하면 될거같아. 수정이 더 있을순 있겠지만 말이야"
+  },
+  "moves": {
+    "board25": {
+      "id": "1681:8037",
+      "from": "897:761",
+      "to": "1284:3106",
+      "x": 0,
+      "y": 560,
+      "width": 2076,
+      "height": 1466
+    },
+    "commonCard": {
+      "id": "1685:8248",
+      "from": "897:761",
+      "to": "1689:1061",
+      "x": 0,
+      "y": 500,
+      "width": 1000,
+      "height": 616
+    },
+    "commonLegacy": {
+      "from": "1284:3106",
+      "to": "1689:1061",
+      "ids": [
+        "859:8586",
+        "875:536",
+        "879:641",
+        "888:8861",
+        "1128:12219"
+      ]
+    },
+    "setup": {
+      "from": "1284:3106",
+      "to": "1689:1062",
+      "frameIds": [
+        "960:1177",
+        "1576:701",
+        "1576:1021"
+      ],
+      "captionIds": [
+        "979:1390",
+        "1576:922",
+        "1576:1242"
+      ],
+      "status": "previous reference; not newly approved"
+    },
+    "incident": {
+      "from": "1284:3106",
+      "to": "1689:1063",
+      "frameIds": [
+        "881:659",
+        "1264:2968",
+        "885:764",
+        "888:758"
+      ],
+      "captionIds": [
+        "979:1384",
+        "1264:3231",
+        "979:1385",
+        "979:1386"
+      ],
+      "status": "previous reference; not newly approved"
+    },
+    "retainedOperationsLegacy": {
+      "frameIds": [
+        "940:795",
+        "832:8219",
+        "942:891",
+        "875:8674",
+        "943:968"
+      ],
+      "captionIds": [
+        "979:1387",
+        "979:1382",
+        "979:1388",
+        "979:1383",
+        "979:1389"
+      ],
+      "frameY": 5300,
+      "captionY": 5276
+    },
+    "previous20Assets": {
+      "ids": [
+        "1658:7137",
+        "1665:925",
+        "1665:926",
+        "1665:1535"
+      ],
+      "mainY": 2400,
+      "assetY": 3787,
+      "internalContentUnchanged": true,
+      "externalNoticeExplainsHistoricalCURRENT": true
+    }
+  },
+  "preservation": {
+    "method": "Per-call explicit source-page scope; intentional root parent/canvas-position changes excluded. Same before/after scope and sorted IDs. No whole-file equality claim.",
+    "panels25": {
+      "scope": "ID/name/type/local x/y/width/height/visible/text/fills/strokes; no panel edits",
+      "before": {
+        "1681:8046": "94eb3ad1",
+        "1681:8168": "4c2183e7",
+        "1681:8299": "122ccea",
+        "1682:8443": "a91b3694"
+      },
+      "after": {
+        "1681:8046": "94eb3ad1",
+        "1681:8168": "4c2183e7",
+        "1681:8299": "122ccea",
+        "1682:8443": "a91b3694"
+      },
+      "allEqual": true
+    },
+    "operationsLegacyAnd20": {
+      "scope": "ID/name/root dimensions and sorted descendant text; only root y repositioned, no style writes",
+      "equalHashPairs": {
+        "940:795": "d078ff53",
+        "979:1387": "159b56ae",
+        "832:8219": "5cc8b0e5",
+        "979:1382": "1ebfe46a",
+        "942:891": "669118ca",
+        "979:1388": "4e0fe550",
+        "875:8674": "c31fc938",
+        "979:1383": "e088ec43",
+        "943:968": "bd19661c",
+        "979:1389": "d0b9df71",
+        "1658:7137": "8aace595",
+        "1665:925": "b73a25c0",
+        "1665:926": "54daaa6a",
+        "1665:1535": "9ff33abd"
+      }
+    },
+    "commonLegacy": {
+      "scope": "Recursive IDs/text/styles/local geometry; root placement excluded",
+      "equalHashPairs": {
+        "859:8586": "8e80e445",
+        "875:536": "a6e1d189",
+        "879:641": "a0142105",
+        "888:8861": "ab6b5049",
+        "1128:12219": "1f2037ac"
+      }
+    },
+    "setupIncident": {
+      "scope": "Recursive IDs/name/type/size/local geometry/fills/strokes/text/font/lineheight; root parent and canvas x/y excluded",
+      "equalHashPairs": {
+        "960:1177": "3a72c1a2",
+        "979:1390": "1874a3bb",
+        "1576:701": "11e5387a",
+        "1576:922": "ba6dfbbb",
+        "1576:1021": "acad0ae9",
+        "1576:1242": "a24af7cf",
+        "881:659": "1e1ab524",
+        "979:1384": "b5b558bd",
+        "1264:2968": "e79734ee",
+        "1264:3231": "3aa55126",
+        "885:764": "57c4b228",
+        "979:1385": "5665a0d9",
+        "888:758": "e7bc1a2b",
+        "979:1386": "c5cf5876"
+      }
+    },
+    "commonPrinciples": "8 principle text/font/lineheight/width/height preserved; introduction distinguishes original C102 agreement from subsequent operations25 approval",
+    "fontsLoadedBeforeMoves": true
+  },
+  "navigation": {
+    "featureMap": "1288:2",
+    "rows": [
+      {
+        "row": "1691:931",
+        "label": "업무 · 공통",
+        "target": "1689:1061"
+      },
+      {
+        "row": "1288:42",
+        "label": "업무 · 운영",
+        "target": "1284:3106"
+      },
+      {
+        "row": "1691:936",
+        "label": "업무 · 셋업",
+        "target": "1689:1062"
+      },
+      {
+        "row": "1691:941",
+        "label": "업무 · 장애대응",
+        "target": "1689:1063"
+      }
+    ],
+    "mapDate": "2026-10-28",
+    "readmeNode": "1393:145",
+    "mainReadme": "https://github.com/knadalkim-a11y/team-agent-poc/blob/main/README.md",
+    "latestTask": "https://github.com/knadalkim-a11y/team-agent-poc/blob/fix/design-mock-review-20261027/docs/mockups/ees-work/TASK.md#work-operations-design",
+    "workshopCurrent": "1674:7336",
+    "workshopPrevious20": "1668:8206",
+    "previous20Link": {
+      "node": "1681:8042",
+      "label": "이전 확정20판 보기 →",
+      "target": "1658:7137",
+      "width": 121,
+      "height": 20
+    },
+    "commonLink": {
+      "node": "1685:8263",
+      "target": "1685:8248",
+      "targetPage": "1689:1061"
+    },
+    "mapNeighborShift": {
+      "node": "1564:2",
+      "beforeY": 2219,
+      "afterY": 2384,
+      "reason": "preserve 80px gap after feature-map height grew by165"
+    }
+  },
+  "render": {
+    "status": "PASS",
+    "checkedNodeIds": [
+      "1284:3107",
+      "1690:9340",
+      "1288:2",
+      "1691:946",
+      "1690:9323",
+      "1685:8248",
+      "1690:9337",
+      "1690:9301",
+      "1690:9312",
+      "960:1177",
+      "881:659"
+    ],
+    "operationsPanelEvidence": "Existing revision25 panel render plus strict unchanged subtree snapshots",
+    "scope": "Headers, approval/common/legacy annotations, feature map and representative preserved legacy screens checked for legibility, clipping and overlap"
+  },
+  "rootReview": {
+    "checkedFinalRenders": [
+      "1681:8038",
+      "1685:8248"
+    ],
+    "observed": "Final approval note includes current25 approval, fixed source commit/hash and previous20 link. Common card distinguishes C102 agreement from current25 approval; all eight principles remain legible without clipping.",
+    "screenCaptureMethod": "get_screenshot image blocks; native renders viewed directly, not edited",
+    "status": "PASS"
+  },
+  "observations": [
+    "Initial approval memo text height clipped; corrected auto-height and final render passed at1100x352.",
+    "Feature-map expansion overlapped following annotation; moved existing1564:2 down165px and final map render passed.",
+    "One read-only metadata call exceeded48000-byte result limit; retried with narrowed output, no edits were committed by that failed call.",
+    "Subagent exec_command/apply_patch returned No usable execution environment; local report/PNG creation unavailable. Root persisted this report. No environment-recovery attempts needed.",
+    "Root final screenshot tool results initially exceeded output size; reused stored results and emitted each image individually for inspection without rerender."
+  ],
+  "remainingDifferences": [
+    "Prior approximately1px panel boundary and Noto/shadow rasterization variance remain. Exact visual canonical is frozen approved HTML/PNG.",
+    "Historical20 internal CURRENT wording intentionally preserved, explicitly labeled as previous baseline by external notice."
+  ],
+  "ambiguousClassifications": [],
+  "classificationEvidence": "A8 actual body identifies 신규 공장 횡전개/셋업/셋업 범위 확인; A4 actual body identifies AP incident restart request/confirmation/tracking.",
+  "newFunctions": false,
+  "newComponents": 0,
+  "uiDuplicatesAdded": 0,
+  "repoEditsByFigmaAgent": false
+}
