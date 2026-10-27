@@ -1,5 +1,14 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="design-mock-stage-action-20261027"></a>
+
+## 2026-10-27 · 업무 목업 18판 · 상단 실행 강조·범위 구분
+
+- **요청·기준:** 사용자는1차 점검 옆 상단 버튼의 색이 너무 진하고 이름이 개별 작업의 지금 실행과 겹친다고 했다. 같은 [Draft PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `621195d9d4cd6b66519a36638ef7bb247a648e4c`의 [05목업](design-mock-05-execution.html)·[원본](design-mock-src/05-execution.html)을18판으로 정리한다.
+- **변경:** 상단 이름을 ‘이 단계 실행’으로 바꾸고 배경을 기존 옅은 선택색 `#eef3f9`, 아이콘/글자를 기존 파란색으로 낮춘다.116×32px·위치·13px 글자, hover/키보드 포커스·실행 중 비활성 표시는 유지한다. 개별 ‘지금 실행’/‘다시 실행’의 투명 배경,17판 글자/첨부 표시와 기존 실행 범위는 바꾸지 않는다. 보충 안내나 기능을 새로 만들지 않는다.
+- **검토·보존:** [18판 평가](../../../evals/v4-ui-20260930.md#design-mock-stage-action-20261027)에1920/480px 표시·문구 잘림·색·키보드/비활성 확인을 기록한다. 표시 함수 외 스크립트·확정10판04파일과 이전 판/실패를 보존한다. 제품 구현·병합·배포는 없고18판은 사용자 검토 전이다.
+- **Figma:** [18판 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1656-6931)·[메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1656-6932)·[C93](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1656-7265). 상단 버튼의 문구/배경만 바꾸고116×32px·좌표와 개별 실행6개의 투명 배경을 확인했다.3집중패널 렌더,17판/이전 이력 보존, 새 컴포넌트 없음. 전체 셸/다른 상태·기존 펼침 화살표 차이는 남는다.
+
 <a id="design-mock-type-execution-20261027"></a>
 
 ## 2026-10-27 · 업무 목업 17판 · 실행 표시·글자 크기·첨부 역할 정리
