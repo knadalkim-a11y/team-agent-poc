@@ -1,14 +1,15 @@
 # 현재 작업 상태
 
-## 2026-10-27 · 업무 목업 11판 · 실행 맥락·단계·작업 실행 검토
+## 2026-10-27 · 업무 목업 12판 · 실행 버튼 배치 검토
 
-- **현재 요청:** 상위 업무의 주기/수시 구분과 예약 여부, 단계 실행, 작업 실행/재실행을 목업에 보완한다. [이번 범위](mockups/ees-work/TASK.md#design-mock-execution-20261027). 같은 [Draft PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `d5d4fa682ab1ec795e2e29640f926991d7212742`에서 진행한다.
-- **검토 목업:** [11판 HTML](mockups/ees-work/design-mock-05-execution.html) · [원본](mockups/ees-work/design-mock-src/05-execution.html). 기본 수시·예약 없음과 주기·예약 예시를 구분한다. 미완료 서비스 작업의 단계 실행/개별 실행과 새 시도를 남기는 재실행을 로컬에서 시연한다.
-- **확정본 보존:** [10판 HTML](https://github.com/knadalkim-a11y/team-agent-poc/blob/7447bd24ff8bff3e5ce2459e03f567765851441b/docs/mockups/ees-work/design-mock-04-cr-verdict.html)과 편집 원본04파일은 그대로다. [사용자 확정 범위](mockups/ees-work/TASK.md#design-mock-approved-20261027)의 사람 기록·선택 사유/도구별 근거·한 작업/한 도구 펼침은 유지한다. 새11판은 미확정이다.
-- **검토·Figma:** 브라우저13/13 PASS·외부 요청/오류0, 최종6화면과 독립 검토를 [11판 평가](../evals/v4-ui-20260930.md#design-mock-execution-20261027)에 기록했다. [Figma 11판 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1640-6276)에는 기본/이전 실행 근거의 편집 가능한2패널과 메모·C86을 반영했다. 전체 셸·사람 기록·기록/기준 탭·주기 예약 상태는 동기화하지 않았다. HTML을 시각 기준으로 두고 이전 검증·실패·10판 확정 보드와C85는 보존한다.
-- **구현 경계:** 모든 실행·예약·시각은 합성 예시다. 실제 Job/result.items 연결·저장/최종 확정·서비스 판정 조합 정책은 미정이며 제품 UI·API·엔진을 수정하지 않는다. 기존 제품의 실행 기능 존재와 새 목업의 연결 완료를 혼동하지 않는다.
+- **현재 요청:**11판 버튼 위치·디자인 개선. [범위](mockups/ees-work/TASK.md#design-mock-button-layout-20261027). 같은 [Draft PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `6c0bb25bea06c5a30646e651a6e12fa7e6f1f2d7`에서 진행한다.
+- **최신 목업:** [12판 HTML](mockups/ees-work/design-mock-05-execution.html) · [편집 원본](mockups/ees-work/design-mock-src/05-execution.html). 단계 실행은 제목 오른쪽, 개별 실행/재실행은 작업 행 오른쪽에 배치하고 버튼 크기·강조를 통일한다. 동작과 시안 데이터는11판을 유지한다. 12판은 사용자 검토 전이다.
+- **확정본·이력:** 확정10판04원본/HTML은 그대로이며 [확정 범위](mockups/ees-work/TASK.md#design-mock-approved-20261027)를 보존한다. 11판은 기준 커밋과 [기존 검증/화면](../evals/v4-ui-20260930.md#design-mock-execution-20261027)에 남긴다.
+- **검토:** [12판 평가](../evals/v4-ui-20260930.md#design-mock-button-layout-20261027)에 버튼 클릭/키보드·로직 보존8/8 PASS,1920/480px 화면과 오류/외부 요청0을 기록했다. HTML이 시각 기준이며 전체 앱 셸 동기화 완료로 표현하지 않는다.
+- **Figma:** [12판 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1644-6357)에 기본/이전 실행 근거의 편집 가능2패널과 메모·C87을 반영하고 최종 렌더를 확인했다. 10판·11판은 보존하며 전체 셸·다른 상태와 펼침 화살표의 기존 차이는 남아 있다.
+- **구현 경계:** 실제 제품 UI·API·저장·엔진은 바꾸지 않는다. 모든 실행·도구·자료·예약은 합성 예시이며 Job/result.items 연결·사람 최종 저장/확정·실제 판정 조합 정책은 별도 구현/결정 범위다.
 - **사내 적용 원본:** [미병합 문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`에 따라 프로그램 적용 완료·실행 중으로 구분한다. 로그인·기존 자료·새 화면·도구 설정은 별도 미확인이다. #104의 상세 적용 기록은 이 브랜치에 복제하거나 덮어쓰지 않는다.
-- **다음 하나:** 11판의 실행 맥락과 버튼 배치·실행/재실행 흐름을 사용자와 검토한다. 제품 구현·병합·배포로 확대하지 않는다.
+- **다음 하나:**12판의 버튼 배치와 강조를 사용자와 검토한다. 제품 구현·병합·배포로 확대하지 않는다.
 
 > 아래 절은 이전 작업 당시 기록이다. #103 병합 대기·사내 적용 미실행 등의 당시 표현은 위 현재 상태와 구분하고, 과거 검증·실패 근거는 보존한다.
 

@@ -1,5 +1,15 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="design-mock-button-layout-20261027"></a>
+
+## 2026-10-27 · 업무 목업 12판 · 실행 버튼 배치 정돈
+
+- **요청·기준:** 사용자가11판의 버튼 위치와 디자인 개선을 요청했다. [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `6c0bb25bea06c5a30646e651a6e12fa7e6f1f2d7`의 [05목업](design-mock-05-execution.html)·[원본](design-mock-src/05-execution.html)을12판으로 갱신한다. 11판 원본은 해당 커밋과 기존 화면 증거에 보존하며 확정10판04파일은 바꾸지 않는다.
+- **시각 범위:** 단계 실행을 제목 오른쪽에 배치하고 개별 지금 실행/다시 실행의 위치·높이·아이콘·간격을 통일한다. 단계 실행만 강하게 강조하고 개별 실행은 옅은 배경으로 구분한다. 완료 판정과 근거는 보조 정보 영역에 두며 사람 판정 선택·기록과 도구별 근거 내용은 유지한다.
+- **동작 보존:** 실행 대상·중복 방지·타이머·시도 이력·판정·사람 메모·예약 예시를 바꾸지 않는다. 새 기능·메뉴·확정 단계나 실제 서비스 연결을 추가하지 않으며 제품 코드·API·저장·엔진은 변경하지 않는다.
+- **검토:** [12판 평가](../../../evals/v4-ui-20260930.md#design-mock-button-layout-20261027)에 실제 렌더와 이동한 버튼의 클릭/키보드·좁은 화면 확인을 연결한다. 사용자 확인 전 시안이며 병합·배포로 확대하지 않는다.
+- **Figma:** [12판 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1644-6357)의 [기본](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1644-6367)·[이전 실행 근거](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1644-6482)와 [메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1644-6358)·[C87](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1645-6461)에 반영했다. 편집 가능2패널의 최종 렌더를 확인했으며10판/11판 보드는 보존한다. 전체 셸·다른 상태와 기존 펼침 화살표 차이는 미동기화 범위로 남긴다.
+
 <a id="design-mock-execution-20261027"></a>
 
 ## 2026-10-27 · 업무 목업 11판 · 실행 맥락과 단계·작업 실행

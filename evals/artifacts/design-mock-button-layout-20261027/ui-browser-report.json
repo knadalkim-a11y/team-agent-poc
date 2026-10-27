@@ -1,0 +1,65 @@
+{
+  "checkedAt": "2026-10-27T04:25:57.643Z",
+  "baseline": "6c0bb25",
+  "source": "docs/mockups/ees-work/design-mock-src/05-execution.html",
+  "sourceSha256": "208a7dce0ccf02a0d6eb5e61140b8dfcf90fe5a44f6ee774177034b4eb31d693",
+  "sourceBytes": 78855,
+  "artifact": "docs/mockups/ees-work/design-mock-05-execution.html",
+  "artifactSha256": "e444a8ab183b745276b804acb84f07e58fd1e099e923dd0d040be94c3627652d",
+  "artifactBytes": 410632,
+  "checks": [
+    {
+      "name": "Execution/data/event logic unchanged outside3render functions and static icons; approved revision10 bytes retained",
+      "result": "pass"
+    },
+    {
+      "name": "Stage action is beside heading; service run/rerun share row-right placement and verdict/evidence retain readable hierarchy",
+      "result": "pass"
+    },
+    {
+      "name": "Clicking new inline SVG runs intended task exactly once and leaves a single disabled control during execution",
+      "result": "pass"
+    },
+    {
+      "name": "Keyboard stage action runs only pending services and retains button position/width while running",
+      "result": "pass"
+    },
+    {
+      "name": "Clicking moved rerun label preserves rejected verdict and previous input/output/criteria through second attempt",
+      "result": "pass"
+    },
+    {
+      "name": "Unchanged human keyboard selection, record and optional reason survive tab changes",
+      "result": "pass"
+    },
+    {
+      "name": "Moved run/rerun buttons support visible keyboard focus; default/history layouts fit1920px and480px without overflow",
+      "result": "pass"
+    },
+    {
+      "name": "Offline mock makes no external requests and has no browser errors",
+      "result": "pass"
+    }
+  ],
+  "screenshots": [
+    "mock-revision12-1920-default.png",
+    "mock-revision12-1920-running.png",
+    "mock-revision12-1920-history.png",
+    "mock-revision12-480-default.png",
+    "mock-revision12-480-history.png"
+  ],
+  "externalRequests": [],
+  "errors": [],
+  "logicComparison": {
+    "equal": true,
+    "excludedRenderFunctions": [
+      "headHTML",
+      "pickHTML",
+      "itemHTML"
+    ],
+    "excludedStaticAddition": "ACTION_ICON SVG strings",
+    "compared": "All remaining script bytes, including seed data, timers, execution, attempts, human selection, notes and event delegation"
+  },
+  "browser": "134.0.6998.35",
+  "result": "pass"
+}
