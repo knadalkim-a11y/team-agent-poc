@@ -1,0 +1,702 @@
+{
+  "createdAt": "2026-10-27T23:03:40.610Z",
+  "baselineCommit": "fbbee1bca726b06aa684cc2ab56ab2d6b09fbb66",
+  "approvedCommit": "8959ffb67d2e09dd6b64a7561f998027f1e6298b",
+  "source": {
+    "path": "docs/mockups/ees-work/design-mock-src/06-task-groups.html",
+    "sha256": "d316d63986b2afe1edda567b862edd716b14a71c80f04b5d679a445e94171e0d",
+    "bytes": 76364
+  },
+  "artifact": {
+    "path": "docs/mockups/ees-work/design-mock-06-task-groups.html",
+    "sha256": "24b9fee62679f0317cb9f69852a0caeedd434124bbcbbfb32e11252acd253aa6",
+    "bytes": 407663
+  },
+  "captureMethod": "Playwright file:// read-only screenshots; interactive paths use existing visible UI controls. Synthetic note text is entered into the existing optional textarea only. No API/network/storage/source changes.",
+  "states": [
+    {
+      "id": "01-full-shell-default",
+      "label": "전체 업무 셸 · 기본",
+      "interactivePath": [
+        "HTML을1920×1080에서 열기"
+      ],
+      "contentSource": [
+        "static .ees-source-shell",
+        "headHTML",
+        "itemHTML",
+        "listHTML"
+      ],
+      "notes": "",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "scrollTop": 0,
+      "png": "01-full-shell-default.png",
+      "geometry": "01-full-shell-default-geometry.json",
+      "visibleText": "E\nEES Workflow\n\n작업 위치\n\n공장\n전체 공장\n시스템\nEMS\n내 업무\n1\n실행 기록\n대화 기록\n\n업무\n\n운영\n배포 산출물 점검\n일일 시스템 점검\n셋업\n신규 공장 횡전개\n장애대응\n새 대화\n대화 검색\n김광재\n1차 점검 작업 현황\n···\n새 대화\n10.27 배포 회차의 1차 점검에서 실행할 작업과 판정 현황을 보여 줘\n업무 도우미\n\n서비스 작업 9개 중 7개는 판정이 끝났고, 2개는 실행이 필요한 예시입니다.\n\n단계 제목 옆 ‘이 단계 실행’은 아직 실행하지 않은 서비스 작업을 시작합니다. 끝난 작업은 건너뛰며, 필요한 작업만 ‘다시 실행’할 수도 있습니다.\n\n나머지 3건은 사람이 판정하는 작업입니다. 각 작업에서 판정을 선택하고, ‘판정 기록’에 필요한 사유를 적을 수 있습니다.\n\n업무를 물어보거나, 필요한 작업을 요청하세요\n음성 모드 사용\n10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n대기\n5\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n배치 주기 조정\n직접 판정\n판정 필요\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n7\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건\n시안\n저장·실행 안 됨\n⑥-1 단계와 작업 실행\n안내\n화면 바로 보기 · 25판",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "02-focused-default",
+      "label": "업무 패널 · 기본",
+      "interactivePath": [
+        "기본 상태에서480px 업무 패널만 캡처"
+      ],
+      "contentSource": [
+        "headHTML",
+        "itemHTML",
+        "listHTML"
+      ],
+      "notes": "",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 1440,
+        "y": 0,
+        "width": 480,
+        "height": 1080
+      },
+      "scrollTop": 0,
+      "png": "02-focused-default.png",
+      "geometry": "02-focused-default-geometry.json",
+      "visibleText": "10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n대기\n5\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n배치 주기 조정\n직접 판정\n판정 필요\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n7\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "03-direct-verdict-menu",
+      "label": "직접 판정 메뉴",
+      "interactivePath": [
+        "기본",
+        "배치 주기 조정 → 판정 선택"
+      ],
+      "contentSource": [
+        "pickHTML",
+        "menuHTML",
+        "placeMenu"
+      ],
+      "notes": "",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 1440,
+        "y": 0,
+        "width": 480,
+        "height": 1080
+      },
+      "scrollTop": 0,
+      "png": "03-direct-verdict-menu.png",
+      "geometry": "03-direct-verdict-menu-geometry.json",
+      "visibleText": "10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n대기\n5\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n배치 주기 조정\n직접 판정\n판정 필요\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n7\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건\n승인\n조건부 승인\n미승인",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "04-direct-record-note",
+      "label": "직접 판정 기록과 사유",
+      "interactivePath": [
+        "배치 주기 조정 → 조건부 승인",
+        "판정 기록 펼치기",
+        "사유(선택)에 합성 검토 문장 입력"
+      ],
+      "contentSource": [
+        "evidenceHTML human branch",
+        "itemHTML attachment",
+        "VERDICT"
+      ],
+      "notes": "Text entered through the existing textarea; not a saved/finalized judgment.",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 1440,
+        "y": 0,
+        "width": 480,
+        "height": 1080
+      },
+      "scrollTop": 185,
+      "png": "04-direct-record-note.png",
+      "geometry": "04-direct-record-note-geometry.json",
+      "visibleText": "10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 1/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n대기\n4\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n8\n배치 주기 조정\n직접 판정\n조건부 승인\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n\n조건부 승인 선택\n김광재 · 10.27 14:24\n\n사유 (선택)\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "05-service-tool-overview",
+      "label": "자동 판정 · 도구 목록",
+      "interactivePath": [
+        "기본",
+        "대시보드 필터 추가 → 판정 근거"
+      ],
+      "contentSource": [
+        "evidenceHTML service branch",
+        "toolHTML"
+      ],
+      "notes": "",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 1440,
+        "y": 0,
+        "width": 480,
+        "height": 1080
+      },
+      "scrollTop": 313,
+      "png": "05-service-tool-overview.png",
+      "geometry": "05-service-tool-overview-geometry.json",
+      "visibleText": "10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n대기\n5\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n배치 주기 조정\n직접 판정\n판정 필요\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n7\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n\n현재 실행 결과 · 1차\n10.27 14:20:05\n\n실행 도구 2개\n문서 목록 조회\n미충족\n실행 완료 · 10.27 14:20:03\n문서 접근 확인\n충족\n실행 완료 · 10.27 14:20:05\n\n작업 판정 · 미승인\n문서 목록 조회에서 테스트 결과가 없어 미승인입니다.\n\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "06-service-document-detail",
+      "label": "문서 목록 조회 · 기준 미충족",
+      "interactivePath": [
+        "자동 판정 도구 목록",
+        "문서 목록 조회 펼치기"
+      ],
+      "contentSource": [
+        "toolHTML",
+        "toolRuns documents fixture"
+      ],
+      "notes": "",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 1440,
+        "y": 0,
+        "width": 480,
+        "height": 1080
+      },
+      "scrollTop": 662,
+      "png": "06-service-document-detail.png",
+      "geometry": "06-service-document-detail-geometry.json",
+      "visibleText": "10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n대기\n5\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n배치 주기 조정\n직접 판정\n판정 필요\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n7\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n\n현재 실행 결과 · 1차\n10.27 14:20:05\n\n실행 도구 2개\n문서 목록 조회\n미충족\n실행 완료 · 10.27 14:20:03\n입력 Input\n대상 작업\n대시보드 필터 추가\n문서 종류\n설계서, 테스트 결과, 배포 계획서\n출력 Output\n설계서\n있음\n테스트 결과\n없음\n배포 계획서\n있음\n이번 작업의 판정 기준\n\n필수 문서 3종이 모두 있어야 합니다.\n\n예시 지침 · 필수 문서 확인\n판정 결과 · 미충족\n\n테스트 결과가 없어 기준을 충족하지 못했습니다.\n\n문서 접근 확인\n충족\n실행 완료 · 10.27 14:20:05\n\n작업 판정 · 미승인\n문서 목록 조회에서 테스트 결과가 없어 미승인입니다.\n\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "07-service-access-detail",
+      "label": "문서 접근 확인 · 기준 충족",
+      "interactivePath": [
+        "자동 판정 도구 목록",
+        "문서 접근 확인 펼치기"
+      ],
+      "contentSource": [
+        "toolHTML",
+        "toolRuns access fixture"
+      ],
+      "notes": "Only the selected tool stays open.",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 1440,
+        "y": 0,
+        "width": 480,
+        "height": 1080
+      },
+      "scrollTop": 614,
+      "png": "07-service-access-detail.png",
+      "geometry": "07-service-access-detail-geometry.json",
+      "visibleText": "10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n대기\n5\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n배치 주기 조정\n직접 판정\n판정 필요\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n7\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n\n현재 실행 결과 · 1차\n10.27 14:20:05\n\n실행 도구 2개\n문서 목록 조회\n미충족\n실행 완료 · 10.27 14:20:03\n문서 접근 확인\n충족\n실행 완료 · 10.27 14:20:05\n입력 Input\n조회된 문서\n설계서, 배포 계획서\n출력 Output\n읽기 가능\n2/2건\n확인한 문서\n설계서, 배포 계획서\n이번 작업의 판정 기준\n\n조회된 문서를 모두 읽을 수 있어야 합니다.\n\n예시 지침 · 문서 접근 확인\n판정 결과 · 충족\n\n조회된 문서 2건을 모두 읽을 수 있습니다.\n\n작업 판정 · 미승인\n문서 목록 조회에서 테스트 결과가 없어 미승인입니다.\n\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "08-service-rerun-running",
+      "label": "개별 재실행 중 · 이전 결과",
+      "interactivePath": [
+        "대시보드 필터 추가 → 다시 실행"
+      ],
+      "contentSource": [
+        "startRun",
+        "itemHTML running branch",
+        "evidenceHTML pending/previous branches"
+      ],
+      "notes": "Captured during the existing1100ms local timer; no timer duration/source changed.",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 1440,
+        "y": 0,
+        "width": 480,
+        "height": 1080
+      },
+      "scrollTop": 401,
+      "png": "08-service-rerun-running.png",
+      "geometry": "08-service-rerun-running-geometry.json",
+      "visibleText": "10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 6/9\n승인 6 · 미승인 0 · 실행 중 1\n\n작업\n기록\n기준\n대기\n5\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n배치 주기 조정\n직접 판정\n판정 필요\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n실행 중\n1\n대시보드 필터 추가\n실행 중\n자동 판정\n문서 목록 조회 중\n이전 판정 · 미승인\n판정 근거\n\n문서 목록 조회 중 · 이번 실행 결과는 아직 없습니다.\n\n이전 실행 결과 · 1차\n10.27 14:20:05\n\n실행 도구 2개\n문서 목록 조회\n미충족\n실행 완료 · 10.27 14:20:03\n문서 접근 확인\n충족\n실행 완료 · 10.27 14:20:05\n\n당시 작업 판정 · 미승인\n문서 목록 조회에서 테스트 결과가 없어 미승인입니다.\n\n판정 결과\n6\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "09-service-current-attempt",
+      "label": "현재 실행 결과 ·2차",
+      "interactivePath": [
+        "기존 재실행 완료 대기",
+        "문서 목록 조회 펼치기"
+      ],
+      "contentSource": [
+        "evidenceHTML attempt selector/current caption",
+        "toolHTML"
+      ],
+      "notes": "",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 1440,
+        "y": 0,
+        "width": 480,
+        "height": 1080
+      },
+      "scrollTop": 706,
+      "png": "09-service-current-attempt.png",
+      "geometry": "09-service-current-attempt-geometry.json",
+      "visibleText": "10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n대기\n5\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n배치 주기 조정\n직접 판정\n판정 필요\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n7\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n실행 내역\n2차 · 10.27 14:24:15 · 미승인\n1차 · 10.27 14:20:05 · 미승인\n\n현재 실행 결과 · 2차\n10.27 14:24:15\n\n실행 도구 2개\n문서 목록 조회\n미충족\n실행 완료 · 10.27 14:24:13\n입력 Input\n대상 작업\n대시보드 필터 추가\n문서 종류\n설계서, 테스트 결과, 배포 계획서\n출력 Output\n설계서\n있음\n테스트 결과\n없음\n배포 계획서\n있음\n이번 작업의 판정 기준\n\n필수 문서 3종이 모두 있어야 합니다.\n\n예시 지침 · 필수 문서 확인\n판정 결과 · 미충족\n\n테스트 결과가 없어 기준을 충족하지 못했습니다.\n\n문서 접근 확인\n충족\n실행 완료 · 10.27 14:24:15\n\n작업 판정 · 미승인\n문서 목록 조회에서 테스트 결과가 없어 미승인입니다.\n\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "10-service-prior-attempt",
+      "label": "이전 실행 결과 ·1차",
+      "interactivePath": [
+        "실행 내역 →1차 선택",
+        "문서 목록 조회 펼치기"
+      ],
+      "contentSource": [
+        "evidenceHTML attempt selector/prior caption",
+        "toolHTML"
+      ],
+      "notes": "",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 1440,
+        "y": 0,
+        "width": 480,
+        "height": 1080
+      },
+      "scrollTop": 706,
+      "png": "10-service-prior-attempt.png",
+      "geometry": "10-service-prior-attempt-geometry.json",
+      "visibleText": "10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n대기\n5\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n배치 주기 조정\n직접 판정\n판정 필요\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n7\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n실행 내역\n2차 · 10.27 14:24:15 · 미승인\n1차 · 10.27 14:20:05 · 미승인\n\n이전 실행 결과 · 1차\n10.27 14:20:05\n\n실행 도구 2개\n문서 목록 조회\n미충족\n실행 완료 · 10.27 14:20:03\n입력 Input\n대상 작업\n대시보드 필터 추가\n문서 종류\n설계서, 테스트 결과, 배포 계획서\n출력 Output\n설계서\n있음\n테스트 결과\n없음\n배포 계획서\n있음\n이번 작업의 판정 기준\n\n필수 문서 3종이 모두 있어야 합니다.\n\n예시 지침 · 필수 문서 확인\n판정 결과 · 미충족\n\n테스트 결과가 없어 기준을 충족하지 못했습니다.\n\n문서 접근 확인\n충족\n실행 완료 · 10.27 14:20:05\n\n당시 작업 판정 · 미승인\n문서 목록 조회에서 테스트 결과가 없어 미승인입니다.\n\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "11-log",
+      "label": "기록 탭",
+      "interactivePath": [
+        "재실행 이력이 있는 상태",
+        "기록 탭"
+      ],
+      "contentSource": [
+        "logHTML",
+        "S.log"
+      ],
+      "notes": "",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 1440,
+        "y": 0,
+        "width": 480,
+        "height": 1080
+      },
+      "scrollTop": 0,
+      "png": "11-log.png",
+      "geometry": "11-log-geometry.json",
+      "visibleText": "10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n14:24\n대시보드 필터 추가 · 2차 실행 완료 · 미승인\n실행 내역 보기\n14:24\n대시보드 필터 추가 · 2차 실행 시작\n14:20\n화면 응답 속도 개선 · 1차 실행 완료 · 승인\n실행 내역 보기\n14:20\n메일 발송 대상 추가 · 1차 실행 완료 · 승인\n실행 내역 보기\n14:20\n데이터 보관 기간 변경 · 1차 실행 완료 · 승인\n실행 내역 보기\n14:20\n설비 목록 정렬 수정 · 1차 실행 완료 · 승인\n실행 내역 보기\n14:20\n대시보드 필터 추가 · 1차 실행 완료 · 미승인\n실행 내역 보기\n14:20\n알람 기준값 조정 · 1차 실행 완료 · 승인\n실행 내역 보기\n14:20\n로그인 화면 문구 수정 · 1차 실행 완료 · 승인\n실행 내역 보기",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "12-rules",
+      "label": "기준 탭",
+      "interactivePath": [
+        "기준 탭"
+      ],
+      "contentSource": [
+        "rulesHTML",
+        "VERDICT descriptions"
+      ],
+      "notes": "",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 1440,
+        "y": 0,
+        "width": 480,
+        "height": 1080
+      },
+      "scrollTop": 0,
+      "png": "12-rules.png",
+      "geometry": "12-rules-geometry.json",
+      "visibleText": "10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n판정 단어\n승인\n설정된 승인 조건을 충족함\n조건부 승인\n추가 조건을 전제로 승인\n미승인\n설정된 승인 조건을 충족하지 못함\n확인할 문서\n\n설계서, 테스트 결과, 배포 계획서",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "13-periodic-header",
+      "label": "주기·예약 예시",
+      "interactivePath": [
+        "시안 확인 도구 → 화면 바로 보기",
+        "주기·예약 예시"
+      ],
+      "contentSource": [
+        "previewState periodic",
+        "headHTML schedule"
+      ],
+      "notes": "Review-only metadata fixture; no scheduler exists.",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 1440,
+        "y": 0,
+        "width": 480,
+        "height": 1080
+      },
+      "scrollTop": 0,
+      "png": "13-periodic-header.png",
+      "geometry": "13-periodic-header-geometry.json",
+      "visibleText": "10.27 배포 회차\n업무절차 · 주기 실행\n자동실행 예약 · 매주 화요일 09:00 KST\n다음 11.03(화) 09:00 · 예약 예시\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n대기\n5\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n배치 주기 조정\n직접 판정\n판정 필요\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n7\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "14-approved-group-expanded",
+      "label": "나머지 승인 작업 펼침",
+      "interactivePath": [
+        "기본",
+        "나머지 승인5건 펼치기"
+      ],
+      "contentSource": [
+        "listHTML expanded branch"
+      ],
+      "notes": "",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 1440,
+        "y": 0,
+        "width": 480,
+        "height": 1080
+      },
+      "scrollTop": 435,
+      "png": "14-approved-group-expanded.png",
+      "geometry": "14-approved-group-expanded-geometry.json",
+      "visibleText": "10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n대기\n5\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n배치 주기 조정\n직접 판정\n판정 필요\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n7\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건\n알람 기준값 조정\n다시 실행\n자동 판정\n승인\n판정 근거\n설비 목록 정렬 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n데이터 보관 기간 변경\n다시 실행\n자동 판정\n승인\n판정 근거\n메일 발송 대상 추가\n다시 실행\n자동 판정\n승인\n판정 근거\n화면 응답 속도 개선\n다시 실행\n자동 판정\n승인\n판정 근거",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "15-stage-running",
+      "label": "단계 실행 중",
+      "interactivePath": [
+        "기본",
+        "1차 점검 → 이 단계 실행"
+      ],
+      "contentSource": [
+        "startStage",
+        "headHTML",
+        "itemHTML running branch"
+      ],
+      "notes": "Captured during existing local timers; direct judgments remain pending.",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 1440,
+        "y": 0,
+        "width": 480,
+        "height": 1080
+      },
+      "scrollTop": 0,
+      "png": "15-stage-running.png",
+      "geometry": "15-stage-running-geometry.json",
+      "visibleText": "10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n실행 중\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1 · 실행 중 2\n\n작업\n기록\n기준\n대기\n3\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n배치 주기 조정\n직접 판정\n판정 필요\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n실행 중\n2\n이력 조회 기간 확대\n실행 중\n자동 판정\n문서 목록 조회 중\n오류 메시지 정리\n실행 중\n자동 판정\n문서 목록 조회 중\n판정 결과\n7\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "16-stage-finished",
+      "label": "단계 실행 완료",
+      "interactivePath": [
+        "이 단계 실행",
+        "실행 전2개 완료 대기"
+      ],
+      "contentSource": [
+        "headHTML completed count/disabled stage action",
+        "listHTML"
+      ],
+      "notes": "",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 1440,
+        "y": 0,
+        "width": 480,
+        "height": 1080
+      },
+      "scrollTop": 0,
+      "png": "16-stage-finished.png",
+      "geometry": "16-stage-finished-geometry.json",
+      "visibleText": "10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 9/9\n승인 8 · 미승인 1\n\n작업\n기록\n기준\n대기\n3\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n배치 주기 조정\n직접 판정\n판정 필요\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n9\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n오류 메시지 정리\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 7건",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "17-narrow-default",
+      "label": "480px · 기본",
+      "interactivePath": [
+        "HTML을480×900에서 열기"
+      ],
+      "contentSource": [
+        "layout responsive shell",
+        "headHTML",
+        "listHTML"
+      ],
+      "notes": "",
+      "viewport": {
+        "width": 480,
+        "height": 900
+      },
+      "captureBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 480,
+        "height": 900
+      },
+      "scrollTop": 0,
+      "png": "17-narrow-default.png",
+      "geometry": "17-narrow-default-geometry.json",
+      "visibleText": "1차 점검 작업 현황\n···\n새 대화\n10.27 배포 회차의 1차 점검에서 실행할 작업과 판정 현황을 보여 줘\n업무 도우미\n\n서비스 작업 9개 중 7개는 판정이 끝났고, 2개는 실행이 필요한 예시입니다.\n\n단계 제목 옆 ‘이 단계 실행’은 아직 실행하지 않은 서비스 작업을 시작합니다. 끝난 작업은 건너뛰며, 필요한 작업만 ‘다시 실행’할 수도 있습니다.\n\n나머지 3건은 사람이 판정하는 작업입니다. 각 작업에서 판정을 선택하고, ‘판정 기록’에 필요한 사유를 적을 수 있습니다.\n\n업무를 물어보거나, 필요한 작업을 요청하세요\n음성 모드 사용\n10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n대기\n5\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n배치 주기 조정\n직접 판정\n판정 필요\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n7\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건\n시안",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "18-narrow-direct-menu",
+      "label": "480px · 직접 판정 메뉴",
+      "interactivePath": [
+        "480px 기본",
+        "배치 주기 조정 → 판정 선택"
+      ],
+      "contentSource": [
+        "menuHTML",
+        "placeMenu"
+      ],
+      "notes": "",
+      "viewport": {
+        "width": 480,
+        "height": 900
+      },
+      "captureBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 480,
+        "height": 900
+      },
+      "scrollTop": 0,
+      "png": "18-narrow-direct-menu.png",
+      "geometry": "18-narrow-direct-menu-geometry.json",
+      "visibleText": "1차 점검 작업 현황\n···\n새 대화\n10.27 배포 회차의 1차 점검에서 실행할 작업과 판정 현황을 보여 줘\n업무 도우미\n\n서비스 작업 9개 중 7개는 판정이 끝났고, 2개는 실행이 필요한 예시입니다.\n\n단계 제목 옆 ‘이 단계 실행’은 아직 실행하지 않은 서비스 작업을 시작합니다. 끝난 작업은 건너뛰며, 필요한 작업만 ‘다시 실행’할 수도 있습니다.\n\n나머지 3건은 사람이 판정하는 작업입니다. 각 작업에서 판정을 선택하고, ‘판정 기록’에 필요한 사유를 적을 수 있습니다.\n\n업무를 물어보거나, 필요한 작업을 요청하세요\n음성 모드 사용\n10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n대기\n5\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n배치 주기 조정\n직접 판정\n판정 필요\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n7\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건\n승인\n조건부 승인\n미승인\n시안",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "19-narrow-tool-evidence",
+      "label": "480px · 도구 근거",
+      "interactivePath": [
+        "480px 기본",
+        "대시보드 필터 추가 → 판정 근거",
+        "문서 목록 조회 펼치기"
+      ],
+      "contentSource": [
+        "evidenceHTML",
+        "toolHTML"
+      ],
+      "notes": "",
+      "viewport": {
+        "width": 480,
+        "height": 900
+      },
+      "captureBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 480,
+        "height": 900
+      },
+      "scrollTop": 782,
+      "png": "19-narrow-tool-evidence.png",
+      "geometry": "19-narrow-tool-evidence-geometry.json",
+      "visibleText": "1차 점검 작업 현황\n···\n새 대화\n10.27 배포 회차의 1차 점검에서 실행할 작업과 판정 현황을 보여 줘\n업무 도우미\n\n서비스 작업 9개 중 7개는 판정이 끝났고, 2개는 실행이 필요한 예시입니다.\n\n단계 제목 옆 ‘이 단계 실행’은 아직 실행하지 않은 서비스 작업을 시작합니다. 끝난 작업은 건너뛰며, 필요한 작업만 ‘다시 실행’할 수도 있습니다.\n\n나머지 3건은 사람이 판정하는 작업입니다. 각 작업에서 판정을 선택하고, ‘판정 기록’에 필요한 사유를 적을 수 있습니다.\n\n업무를 물어보거나, 필요한 작업을 요청하세요\n음성 모드 사용\n10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n대기\n5\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n배치 주기 조정\n직접 판정\n판정 필요\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n7\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n\n현재 실행 결과 · 1차\n10.27 14:20:05\n\n실행 도구 2개\n문서 목록 조회\n미충족\n실행 완료 · 10.27 14:20:03\n입력 Input\n대상 작업\n대시보드 필터 추가\n문서 종류\n설계서, 테스트 결과, 배포 계획서\n출력 Output\n설계서\n있음\n테스트 결과\n없음\n배포 계획서\n있음\n이번 작업의 판정 기준\n\n필수 문서 3종이 모두 있어야 합니다.\n\n예시 지침 · 필수 문서 확인\n판정 결과 · 미충족\n\n테스트 결과가 없어 기준을 충족하지 못했습니다.\n\n문서 접근 확인\n충족\n실행 완료 · 10.27 14:20:05\n\n작업 판정 · 미승인\n문서 목록 조회에서 테스트 결과가 없어 미승인입니다.\n\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건\n시안",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "20-approved-design-notice",
+      "label": "시안 안내 · 디자인 확정",
+      "interactivePath": [
+        "시안 확인 도구 → 안내",
+        "안내 하단으로 스크롤"
+      ],
+      "contentSource": [
+        "static .mock-info"
+      ],
+      "notes": "Approval metadata visible in dialog footer; no new product feature.",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "scrollTop": 0,
+      "png": "20-approved-design-notice.png",
+      "geometry": "20-approved-design-notice-geometry.json",
+      "visibleText": "E\nEES Workflow\n\n작업 위치\n\n공장\n전체 공장\n시스템\nEMS\n내 업무\n1\n실행 기록\n대화 기록\n\n업무\n\n운영\n배포 산출물 점검\n일일 시스템 점검\n셋업\n신규 공장 횡전개\n장애대응\n새 대화\n대화 검색\n김광재\n1차 점검 작업 현황\n···\n새 대화\n10.27 배포 회차의 1차 점검에서 실행할 작업과 판정 현황을 보여 줘\n업무 도우미\n\n서비스 작업 9개 중 7개는 판정이 끝났고, 2개는 실행이 필요한 예시입니다.\n\n단계 제목 옆 ‘이 단계 실행’은 아직 실행하지 않은 서비스 작업을 시작합니다. 끝난 작업은 건너뛰며, 필요한 작업만 ‘다시 실행’할 수도 있습니다.\n\n나머지 3건은 사람이 판정하는 작업입니다. 각 작업에서 판정을 선택하고, ‘판정 기록’에 필요한 사유를 적을 수 있습니다.\n\n업무를 물어보거나, 필요한 작업을 요청하세요\n음성 모드 사용\n10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n대기\n5\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n배치 주기 조정\n직접 판정\n판정 필요\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n7\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건\n시안\n저장·실행 안 됨\n⑥-1 단계와 작업 실행\n안내\n화면 바로 보기 · 25판\n시안 안내 · 단계와 작업 실행\n이 화면\n\n‘배포 산출물 점검’ 절차의 10.27 배포 회차 → 1차 점검 단계입니다. 각 행을 하나의 작업으로 보는 설계 시안이며 작업 12개 중 직접 판정은 3개, 자동 판정은 9개입니다. 확정한 20판을 보존하고 판정 선택 메뉴의 폭과 여백을 줄이고 글자 크기와 그림자를 맞춘 별도 25판입니다. 개별 작업의 실행 버튼은 ‘실행’과 ‘다시 실행’으로 표시합니다. 서비스 7개는 판정 완료, 2개는 실행 필요 상태인 예시이며 실제 제품 실행 구조는 바꾸지 않았습니다.\n\n직접 판정과 자동 판정\n\n사람 작업은 ‘판정 기록’에서 누가 언제 무엇을 선택했는지 보고, 사유를 선택적으로 적습니다. 서비스 작업은 ‘판정 근거’에서 실행한 도구를 보고, 도구 하나를 펼쳐 입력·출력·이번 작업의 판정 기준·판정 결과를 확인합니다. 작업과 도구는 각각 하나씩 펼쳐집니다. 도구 실행 완료와 기준 충족 여부는 서로 다릅니다.\n\n실행 방식과 예약\n\n기본은 업무절차의 수시 실행 · 직접 시작이며 자동실행 예약이 없습니다. 확인용 ‘주기 · 예약 예시’는 매주 화요일 09:00 KST와 다음 11.03 화요일 예약을 보여주는 메타데이터 예시입니다. 예약 실행기나 설정 변경 기능은 없습니다.\n\n단계와 작업 실행\n\n단계 제목 옆 ‘이 단계 실행’은 실행 가능한 미실행 서비스 작업만 시작합니다. 완료·제외 작업은 건너뛰고 사람의 판정을 대신하지 않습니다. 개별 ‘다시 실행’은 새 실행 기록을 만들고 이전 입력·출력·결과를 보존합니다. 실행 중에는 이전 결과를 이번 실행 결과로 표시하지 않습니다. 이 시안의 실행은 짧은 화면 전환일 뿐 실제 도구를 호출하지 않습니다.\n\n해 볼 것\n실행이 필요한 작업을 하나 실행하거나 단계 제목 옆 ‘이 단계 실행’ 누르기\n완료된 작업을 다시 실행하고 이전 기록 보기\n직접 판정 작업의 ‘판정 필요’에서 값 고르기\n사람 작업의 ‘판정 기록’에서 사유 적기\n서비스 작업의 ‘판정 근거’에서 도구를 하나씩 펼치기\n판정 결과에서 나머지 승인 항목 펼치기\n‘기록’과 ‘기준’ 탭 보기\n의견 보내는 법\n\n왼쪽 아래 화면 번호와 함께 짧게 적어 주세요. 예) ⑥-1 고르기 목록 글자가 작다\n\n아직 정하지 않은 것\n\n사람이 고른 판정을 실제로 저장·최종 확정하는 방법은 아직 정하지 않았습니다. 이 시안에는 확정 버튼이 없고, 판정 선택과 사유 입력만 시험할 수 있습니다. 값을 고르면 판정 결과 묶음으로 이동하며, 저장되거나 판정 완료로 처리되지는 않습니다. 판정 선택·사유·실행 기록은 이 화면에서만 유지되며 초기화하거나 새로 열면 사라집니다.\n\n이 시안은\n\n실제 프로그램의 글꼴 파일과 화면 CSS(색, 크기, 탭·꼬리표·단추 부품)를 그대로 써서 만들었습니다. 왼쪽 메뉴 접기·펼치기와 창 크기에 따른 업무 패널 겹침은 제품 기준을 따릅니다. 도구 이름·입력·출력·지침·시각은 화면 검토를 위한 합성 예시이며 실제 도구 실행 기록이 아닙니다. 문서 존재와 접근 여부의 예시를 보여주며 내용 적정성은 판단하지 않습니다. 여러 도구 결과를 최종 판정으로 합치는 실제 규칙·저장은 아직 정하지 않았습니다. ‘배치 주기 조정’의 첨부는 판정 참고 자료의 표시 예시이며 실제 파일 내용이나 열기·업로드 기능과 연결되지 않습니다. 실제 저장·도구 실행·대화는 되지 않으며, 왼쪽 메뉴 이동과 가운데 대화는 모양만 같습니다. 사내 PC에서 파일이 열리는지도 확인해 주세요.\n\n판\n\n시안 25판 · 2026-10-28 · 단계와 작업 실행 · 디자인 확정\n\n처음부터 다시\n닫기",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    {
+      "id": "21-selected-verdict-menu",
+      "label": "선택 후 판정 메뉴 · 조건부 승인",
+      "interactivePath": [
+        "배치 주기 조정 → 판정 필요 → 조건부 승인",
+        "기존2초 강조 종료 대기",
+        "작업 영역 맨 위로 스크롤",
+        "조건부 승인 다시 열기"
+      ],
+      "contentSource": [
+        "pickHTML",
+        "menuHTML",
+        "placeMenu"
+      ],
+      "notes": "Revision25 compact menu, current checkmark, stable non-flashing row.",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captureBounds": {
+        "x": 1440,
+        "y": 0,
+        "width": 480,
+        "height": 1080
+      },
+      "scrollTop": 0,
+      "png": "21-selected-verdict-menu.png",
+      "geometry": "21-selected-verdict-menu-geometry.json",
+      "visibleText": "10.27 배포 회차\n업무절차 · 수시 · 직접 시작\n자동실행 예약 없음\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 1/3\n\n자동 판정 완료 7/9\n승인 6 · 미승인 1\n\n작업\n기록\n기준\n대기\n4\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n8\n배치 주기 조정\n직접 판정\n조건부 승인\n판정 기록\n판정 참고 자료\ntest_v2_final.xlsx\n대시보드 필터 추가\n다시 실행\n자동 판정\n미승인\n판정 근거\n로그인 화면 문구 수정\n다시 실행\n자동 판정\n승인\n판정 근거\n나머지 승인 5건\n승인\n조건부 승인\n미승인",
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    }
+  ],
+  "errors": [],
+  "externalRequests": [],
+  "exclusions": [
+    {
+      "state": "회차 화면 / 더 보기 메뉴 / 다른 업무 화면",
+      "reason": "Existing controls only show mock toasts; corresponding screens are not designed in this HTML."
+    },
+    {
+      "state": "자료 업로드 / 파일 열기 / 자료 관리",
+      "reason": "Attachment is a read-only reference label in this mock; no such interactive screen exists."
+    },
+    {
+      "state": "사람 판정 최종 저장/확정",
+      "reason": "No finalization/save control or designed persistence flow exists."
+    },
+    {
+      "state": "임의의 모든 작업×판정×실행 조합",
+      "reason": "Inventory captures each distinct rendered component/state once; no combinatorial duplicates."
+    }
+  ],
+  "browser": {
+    "version": "133.0.6943.0",
+    "playwright": "1.62.1",
+    "package": "@sparticuz/chromium@133.0.0"
+  },
+  "result": "pass",
+  "sourceUnchanged": true
+}

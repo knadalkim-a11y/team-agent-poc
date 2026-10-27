@@ -1,0 +1,16 @@
+{
+  "reusedHarness": "evals/artifacts/design-mock-figma-complete-20261027/capture-states.cjs",
+  "reusedHarnessSha256": "de94bdfd791822010517a220470f59959d6d219dab44466305c1100b2c3d3d02",
+  "reusedBrowser": "/tmp/mock-browser-runtime/bin/chromium",
+  "newDependencies": false,
+  "sourceEdits": false,
+  "adaptations": [
+    "Paths/hashes pinned to approved25",
+    "Existing installed Chromium133 and Playwright1.62.1",
+    "Wait for existing animations before geometry",
+    "Wait existing transient2s highlight before human-record capture",
+    "Add already-supported selected-menu state21"
+  ],
+  "priorFinding": "Approved25 Figma promotion preserved four focused panels; full shell and20state reference links were still approved20. See prior Figma reports.",
+  "observations": []
+}
