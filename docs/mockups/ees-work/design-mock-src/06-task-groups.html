@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
-<title>시안 · 단계와 작업 실행 · 22판 · EES Workflow</title>
+<title>시안 · 단계와 작업 실행 · 23판 · EES Workflow</title>
 <!--@mock:provenance-->
 <!--@mock:fonts-->
 <!--@mock:product-css-->
@@ -156,8 +156,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-src{display:inline-flex;width:14px;height:14px}
 #ees-work-panel .ew-vd-pick{display:flex;align-items:center;gap:6px;width:124px;min-height:30px;height:30px;padding:0 8px 0 10px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-default);font-size:13px;line-height:20px;font-weight:500;color:var(--ees-text-primary);text-align:left}
 #ees-work-panel .ew-vd-pick>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#ees-work-panel .ew-vd-pick:not([data-verdict]){border-color:var(--ees-status-attention);color:var(--ees-status-attention)}
 #ees-work-panel .ew-vd-pick[aria-expanded=true]{border-color:var(--ees-brand-solid);box-shadow:var(--ees-focus-ring)}
+#ees-work-panel .ew-vd-pick:not([data-verdict]){border-color:transparent;background:transparent;color:var(--ees-text-tertiary);box-shadow:none}
 #ees-work-panel :is(.ew-vd-pick,.ew-vd-group,.ew-vd-option,.ew-run-back,.ew-run-nav>.ew-icon-button):focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px}
 #ees-work-panel .ew-vd-dot{display:inline-block;flex:none;width:8px;height:8px;border-radius:50%;background:var(--ees-line-control)}
 #ees-work-panel .ew-vd-final{display:flex;align-items:center;gap:6px;height:30px;padding-left:11px;box-sizing:border-box;font-size:13px;line-height:20px;font-weight:500;color:var(--ees-text-primary)}
@@ -362,7 +362,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   <div><b>시안</b><span>저장·실행 안 됨</span></div>
   <div><strong id="mock-screen" role="status" aria-live="polite">⑥-1 단계와 작업 실행</strong><button type="button" data-mock-info>안내</button></div>
   <details class="mock-state-picker">
-    <summary>화면 바로 보기 · 22판</summary>
+    <summary>화면 바로 보기 · 23판</summary>
     <nav aria-label="작업별 판정 상태 선택">
       <button type="button" data-mock-state="initial" aria-current="true">⑥-1 단계와 작업 실행</button>
       <button type="button" data-mock-state="periodic">⑥-주기 · 예약 예시</button>
@@ -379,7 +379,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   <section>
     <h2 id="mock-info-title">시안 안내 · 단계와 작업 실행</h2>
     <h3>이 화면</h3>
-    <p>‘배포 산출물 점검’ 절차의 10.27 배포 회차 → 1차 점검 단계입니다. 각 행을 하나의 작업으로 보는 설계 시안이며 작업 12개 중 직접 판정은 3개, 자동 판정은 9개입니다. 확정한 20판을 보존하고 묶음 제목을 옅은 회색 바탕과 굵은 글씨로 구분한 별도 22판입니다. 개별 작업의 실행 버튼은 ‘실행’과 ‘다시 실행’으로 표시합니다. 서비스 7개는 판정 완료, 2개는 실행 필요 상태인 예시이며 실제 제품 실행 구조는 바꾸지 않았습니다.</p>
+    <p>‘배포 산출물 점검’ 절차의 10.27 배포 회차 → 1차 점검 단계입니다. 각 행을 하나의 작업으로 보는 설계 시안이며 작업 12개 중 직접 판정은 3개, 자동 판정은 9개입니다. 확정한 20판을 보존하고 ‘판정 필요’를 테두리와 배경 없는 회색 글씨로 정리한 별도 23판입니다. 개별 작업의 실행 버튼은 ‘실행’과 ‘다시 실행’으로 표시합니다. 서비스 7개는 판정 완료, 2개는 실행 필요 상태인 예시이며 실제 제품 실행 구조는 바꾸지 않았습니다.</p>
     <h3>직접 판정과 자동 판정</h3>
     <p>사람 작업은 ‘판정 기록’에서 누가 언제 무엇을 선택했는지 보고, 사유를 선택적으로 적습니다. 서비스 작업은 ‘판정 근거’에서 실행한 도구를 보고, 도구 하나를 펼쳐 입력·출력·이번 작업의 판정 기준·판정 결과를 확인합니다. 작업과 도구는 각각 하나씩 펼쳐집니다. 도구 실행 완료와 기준 충족 여부는 서로 다릅니다.</p>
     <h3>실행 방식과 예약</h3><p>기본은 업무절차의 수시 실행 · 직접 시작이며 자동실행 예약이 없습니다. 확인용 ‘주기 · 예약 예시’는 매주 화요일 09:00 KST와 다음 11.03 화요일 예약을 보여주는 메타데이터 예시입니다. 예약 실행기나 설정 변경 기능은 없습니다.</p><h3>단계와 작업 실행</h3><p>단계 제목 옆 ‘이 단계 실행’은 실행 가능한 미실행 서비스 작업만 시작합니다. 완료·제외 작업은 건너뛰고 사람의 판정을 대신하지 않습니다. 개별 ‘다시 실행’은 새 실행 기록을 만들고 이전 입력·출력·결과를 보존합니다. 실행 중에는 이전 결과를 이번 실행 결과로 표시하지 않습니다. 이 시안의 실행은 짧은 화면 전환일 뿐 실제 도구를 호출하지 않습니다.</p><h3>해 볼 것</h3>
@@ -391,7 +391,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     <h3>이 시안은</h3>
     <p>실제 프로그램의 글꼴 파일과 화면 CSS(색, 크기, 탭·꼬리표·단추 부품)를 그대로 써서 만들었습니다. 왼쪽 메뉴 접기·펼치기와 창 크기에 따른 업무 패널 겹침은 제품 기준을 따릅니다. 도구 이름·입력·출력·지침·시각은 화면 검토를 위한 합성 예시이며 실제 도구 실행 기록이 아닙니다. 문서 존재와 접근 여부의 예시를 보여주며 내용 적정성은 판단하지 않습니다. 여러 도구 결과를 최종 판정으로 합치는 실제 규칙·저장은 아직 정하지 않았습니다. ‘배치 주기 조정’의 첨부는 판정 참고 자료의 표시 예시이며 실제 파일 내용이나 열기·업로드 기능과 연결되지 않습니다. 실제 저장·도구 실행·대화는 되지 않으며, 왼쪽 메뉴 이동과 가운데 대화는 모양만 같습니다. 사내 PC에서 파일이 열리는지도 확인해 주세요.</p>
     <h3>판</h3>
-    <p>시안 22판 · 2026-10-27 · 단계와 작업 실행 · 검토안</p>
+    <p>시안 23판 · 2026-10-27 · 단계와 작업 실행 · 검토안</p>
     <footer><button type="button" data-mock-reset>처음부터 다시</button><button type="button" data-mock-close>닫기</button></footer>
   </section>
 </div>

@@ -1,10 +1,20 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="design-mock-pending-control-20261027"></a>
+
+## 2026-10-27 · 업무 목업 23판 · 판정 필요 표시 정리
+
+- **요청·원본:** ‘판정 필요’ 상자의 이질감을 지적한 뒤, 테두리·배경을 빼고 회색 글씨와 기존 작은 아래 화살표를 유지하는 제안에 사용자가 “정리하고 보여줘”라고 요청했다. 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `33a1ee7ed1f69aa18a2832e81d55fd5a5d96cbb5`의22판에서 [23판 HTML](design-mock-06-task-groups.html)·[편집 원본](design-mock-src/06-task-groups.html)을 갱신한다.
+- **표시 범위:** 아직 선택하지 않은 직접 판정 버튼만 보이는 테두리·배경·열림 그림자를 없애고 보조색 `#5c5e65`를 사용한다. 클릭 영역124×30px·위치·13px/20px/500 글씨·기존 아래 화살표는 유지한다. 키보드 포커스 표시와 승인/조건부 승인/미승인을 선택한 뒤의 기존 모양·동작은 보존한다. 새 선택지·안내·저장 기능을 추가하지 않는다.
+- **경계:** 전체 JavaScript와 작업/상태/실행/기록/근거 동작은 그대로다.22판은 고정 commit과 이전 증거로 남기고 확정20판05·10판04는 수정하지 않는다.23판은 추가 검토안이며 제품 구현·새 확정·병합·배포 요청으로 확대하지 않는다. [집중 확인](../../../evals/v4-ui-20260930.md#design-mock-pending-control-20261027).
+
+- **Figma:** [23판 검토 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1678-7545)·[C99](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1679-7754)의 기본/직접 기록/실행 중3패널에서 선택 전7개 표시만 수정하고 최종 렌더를 확인했다.22판과 확정20판은 보존한다.
+
 <a id="design-mock-group-headings-20261027"></a>
 
 ## 2026-10-27 · 업무 목업 22판 · 묶음 제목과 실행 문구
 
-- **요청·기준:** “묶음끼리 구분이 잘 안가긴해”라는 피드백 뒤 사용자가 “수정하고 다시 목업 보여줘”라고 요청했다. [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `ca9d1c99c0d21f266d63c50bb143c74871cc050f`의21판을 기준으로 [22판 HTML](design-mock-06-task-groups.html)·[편집 원본](design-mock-src/06-task-groups.html)을 갱신한다. 새 기능이나 확정 요청으로 확대하지 않는다.
+- **요청·기준:** “묶음끼리 구분이 잘 안가긴해”라는 피드백 뒤 사용자가 “수정하고 다시 목업 보여줘”라고 요청했다. [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `ca9d1c99c0d21f266d63c50bb143c74871cc050f`의21판을 기준으로 [22판 HTML](https://github.com/knadalkim-a11y/team-agent-poc/blob/33a1ee7ed1f69aa18a2832e81d55fd5a5d96cbb5/docs/mockups/ees-work/design-mock-06-task-groups.html)·[편집 원본](https://github.com/knadalkim-a11y/team-agent-poc/blob/33a1ee7ed1f69aa18a2832e81d55fd5a5d96cbb5/docs/mockups/ees-work/design-mock-src/06-task-groups.html)을 갱신한다. 새 기능이나 확정 요청으로 확대하지 않는다.
 - **표시만 조정:** 대기/실행 중/판정 결과의 제목 줄에 옅은 회색 `#f3f3f5`, 모서리6px, 굵기700을 적용한다. 제목은13px/20px, 회색 줄36px와 위 간격12px로 기존48px 점유를 유지한다. 개수는 기존500 굵기와 보조색이다. 개별 ‘지금 실행’만 ‘실행’으로 줄이며 ‘다시 실행’·‘실행 중’·‘이 단계 실행’의 문구/위치/스타일은 유지한다.
 - **보존·검토:** 작업 행의 기본 배경과 여섯 상태, 세 묶음 분류, 판정/실행/기록/이전 근거/접기 동작은 바꾸지 않는다. 확정20판05·10판04는 그대로이며21판은 고정 commit과 이전 증거로 보존한다. [22판 집중 확인](../../../evals/v4-ui-20260930.md#design-mock-group-headings-20261027)에서 제목 구분·문구·1920/480px 렌더를 대조한다. 제품 구현·병합·배포는 이번 범위 밖이다.
 - **Figma:** [22판 검토 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1675-7336)와 [C98](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1677-7545)에 기본/직접 기록/실행 중을 반영하고 렌더를 대조했다.21판 보드와20판 확정 기준의 전후 snapshot 동일을 확인했다.
