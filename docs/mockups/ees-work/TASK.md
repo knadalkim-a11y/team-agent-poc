@@ -1,10 +1,20 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="design-mock-verdict-menu-20261028"></a>
+
+## 2026-10-28 · 업무 목업 25판 · 판정 선택 메뉴 정리
+
+- **요청·기준:** 클릭해서 열리는 승인/조건부 승인/미승인 선택 메뉴도 폭·여백·그림자를 줄이고 목록과 글자 크기를 맞추는 제안에 사용자가 “응 하고 보여줘”라고 요청했다. 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `272a7e1b583704f539b1697fff78b54ca0ea7c95`의24판에서 [25판 HTML](design-mock-06-task-groups.html)·[편집 원본](design-mock-src/06-task-groups.html)을 갱신한다.
+- **표시 범위:** 메뉴 폭248→180px, 바깥 여백6→4px, 각 항목 여백8/10→6/8px와 간격10→8px, 글자14→13px/줄높이20px로 조정한다. 흰 배경·1px 테두리·8px 둥근 모서리는 유지하고 그림자를 옅게 한다. 기존 결과색 점과 현재 선택의 체크 표시, 세 선택지·키보드 선택·닫기·화면 안 자동 위치 동작은 그대로다. 목록의 선택값 표시는24판을 유지한다.
+- **경계:** 전체 JavaScript는24판과 같고, 메뉴 위치는 기존 실제 너비/높이 계산을 재사용한다. 메뉴가 열린 확인 화면을 추가하되 제품 기능이나 선택지는 추가하지 않는다.24판 고정 원본과 확정20판05·10판04, 과거 증거를 보존하며25판은 검토안이다. [집중 확인](../../../evals/v4-ui-20260930.md#design-mock-verdict-menu-20261028)·[Figma25판](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1681-8037).
+
+- **Figma:** [C101](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1682-8674)에 반영하고 기존3패널에 메뉴 열린 패널1682:8443을 추가했다. 실제 열린 PNG와 좌표를 대조했으며24판/확정20판에는 쓰기 작업을 하지 않았다. 보존 확인 범위와20판 교차 페이지 조회 해시의 한계는 평가에 기록한다.
+
 <a id="design-mock-verdict-control-20261027"></a>
 
 ## 2026-10-27 · 업무 목업 24판 · 직접 판정 표시 통일
 
-- **요청·기준:** 선택 후 승인/조건부 승인 상자가 남는 이유를 확인한 사용자가, 모든 직접 판정을 테두리·배경 없이 통일하는 제안에 “더 자연스럽게 개선해줘”라고 요청했다. 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `413f6143544e5cbf620e6f6d8a96f2fa01c5a129`에서 [24판 HTML](design-mock-06-task-groups.html)·[편집 원본](design-mock-src/06-task-groups.html)을 갱신한다.
+- **요청·기준:** 선택 후 승인/조건부 승인 상자가 남는 이유를 확인한 사용자가, 모든 직접 판정을 테두리·배경 없이 통일하는 제안에 “더 자연스럽게 개선해줘”라고 요청했다. 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `413f6143544e5cbf620e6f6d8a96f2fa01c5a129`에서 [24판 HTML](https://github.com/knadalkim-a11y/team-agent-poc/blob/272a7e1b583704f539b1697fff78b54ca0ea7c95/docs/mockups/ees-work/design-mock-06-task-groups.html)·[편집 원본](https://github.com/knadalkim-a11y/team-agent-poc/blob/272a7e1b583704f539b1697fff78b54ca0ea7c95/docs/mockups/ees-work/design-mock-src/06-task-groups.html)을 갱신한다.
 - **표시 범위:** 직접 판정의 미선택/승인/조건부 승인/미승인 버튼 모두 보이는 테두리·배경·열림 그림자를 없앤다. 선택 후에는 기존 결과색 점·본문색 글씨·작은 아래 화살표를 사용하며, 미선택의 ‘판정 필요’는 회색이다.124×30px·위치·패딩·13px/20px/500·14px 화살표는 같고 키보드 포커스 outline은 유지한다. 기존 선택 메뉴·값·기록·실행·근거 동작은 바꾸지 않는다.
 - **경계·원본:** 전체 JavaScript는23판과 같고23판은 고정 commit/증거로 보존한다. 확정20판05·10판04를 바꾸지 않으며24판은 추가 검토안이다. 새 기능·제품 구현·확정·병합·배포로 확대하지 않는다. [집중 확인](../../../evals/v4-ui-20260930.md#design-mock-verdict-control-20261027)·[Figma24판](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1680-7754).
 

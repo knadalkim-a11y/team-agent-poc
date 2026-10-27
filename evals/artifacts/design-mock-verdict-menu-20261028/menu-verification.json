@@ -1,0 +1,828 @@
+{
+  "checkedAt": "2026-10-27T21:58:20.191Z",
+  "baseline": "272a7e1b583704f539b1697fff78b54ca0ea7c95",
+  "source": {
+    "path": "docs/mockups/ees-work/design-mock-src/06-task-groups.html",
+    "bytes": 76357,
+    "sha256": "c9e39a9a7893cc130b2febcdf94993d86d9a4e077ebe69e2822de20e13fd42a2"
+  },
+  "artifact": {
+    "path": "docs/mockups/ees-work/design-mock-06-task-groups.html",
+    "bytes": 407340,
+    "sha256": "6a2b854b0e10cebb0a1609d959ac70d534302389a779212575729712f8c49533"
+  },
+  "scope": "Focused revision25 compact verdict menu; no source edits, no broad state/runtime regression.",
+  "setupObservations": [
+    {
+      "step": "Installed runtime Playwright1.62.1 Chromium1234 CLI download",
+      "outcome": "failed before browser launch",
+      "evidence": "Official cdn.playwright.dev/builds/cft/151.0.7922.34/linux64/chrome-headless-shell-linux64.zip returned HTTP200, text/html,195bytes Site Unavailable; CLI extraction End of central directory record signature not found."
+    },
+    {
+      "step": "Previously used Chromium1161 archive HEAD",
+      "outcome": "unavailable",
+      "evidence": "Official cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1161/chromium-headless-shell-linux.zip returned HTTP200,text/html,195bytes."
+    },
+    {
+      "step": "Standard npm alternative",
+      "outcome": "restored",
+      "evidence": "@sparticuz/chromium134.0.0 not published(E404); queried published list and installed pinned133.0.0 in scratch only. Default package extractor hit EINVAL chown /tmp/libEGL.so under container ownership; decompressed unchanged packaged files with Node Brotli and tar --no-same-owner to scratch, then launched actual Chromium."
+    }
+  ],
+  "checks": [
+    "1920/480 selected conditional menu is180×110 with32px options,13/20/500 labels,one current checkmark,no label/popup clipping or overflow;124×30 control unchanged.",
+    "Keyboard Escape returns focus; Enter opens selected item; ArrowDown+Enter chooses미승인; outside click closes the existing menu.",
+    "All three existing selections remain selectable and reopen with exactly the corresponding checkmark; approved row uses existing automatically expanded group.",
+    "Entire JavaScript and frozen04/05 files identical to revision24 baseline; source/HTML unchanged by QA; page errors and external requests zero."
+  ],
+  "states": [
+    {
+      "target": {
+        "id": "CR-2207",
+        "name": "배치 주기 조정",
+        "verdict": "cond"
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "frame": {
+        "x": 1440,
+        "y": 0,
+        "width": 480,
+        "height": 1080,
+        "right": 1920,
+        "bottom": 1080
+      },
+      "panel": {
+        "x": 1441,
+        "y": 0,
+        "width": 479,
+        "height": 1080,
+        "right": 1920,
+        "bottom": 1080
+      },
+      "body": {
+        "x": 1441,
+        "y": 331,
+        "width": 479,
+        "height": 749,
+        "right": 1920,
+        "bottom": 1080
+      },
+      "scrollArea": {
+        "x": 1441,
+        "y": 48,
+        "width": 479,
+        "height": 1032,
+        "right": 1920,
+        "bottom": 1080
+      },
+      "scrollTop": 0,
+      "control": {
+        "x": 1541,
+        "y": 775,
+        "width": 124,
+        "height": 30,
+        "right": 1665,
+        "bottom": 805,
+        "style": {
+          "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "500",
+          "lineHeight": "20px",
+          "padding": "0px 8px 0px 10px",
+          "gap": "6px",
+          "color": "rgb(31, 32, 35)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderRadius": "6px",
+          "boxShadow": "none",
+          "transform": "none"
+        }
+      },
+      "taskRow": {
+        "x": 1449,
+        "y": 739,
+        "width": 463,
+        "height": 103,
+        "right": 1912,
+        "bottom": 842
+      },
+      "menu": {
+        "x": 1541,
+        "y": 811,
+        "width": 180,
+        "height": 110,
+        "right": 1721,
+        "bottom": 921,
+        "style": {
+          "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "lineHeight": "22px",
+          "padding": "4px",
+          "gap": "2px",
+          "color": "rgb(31, 32, 35)",
+          "backgroundColor": "rgb(255, 255, 255)",
+          "borderColor": "rgb(230, 230, 233)",
+          "borderWidth": "1px",
+          "borderRadius": "8px",
+          "boxShadow": "rgba(17, 24, 39, 0.05) 0px 4px 12px 0px, rgba(17, 24, 39, 0.03) 0px 1px 2px 0px",
+          "transform": "none"
+        },
+        "relativeToPanel": {
+          "x": 101,
+          "y": 811
+        },
+        "options": [
+          {
+            "value": "ok",
+            "label": "승인",
+            "checked": "false",
+            "x": 1546,
+            "y": 816,
+            "width": 170,
+            "height": 32,
+            "right": 1716,
+            "bottom": 848,
+            "style": {
+              "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "fontSize": "14px",
+              "fontWeight": "400",
+              "lineHeight": "22px",
+              "padding": "6px 8px",
+              "gap": "8px",
+              "color": "rgb(31, 32, 35)",
+              "backgroundColor": "rgba(0, 0, 0, 0)",
+              "borderColor": "rgb(31, 32, 35)",
+              "borderWidth": "0px",
+              "borderRadius": "6px",
+              "boxShadow": "none",
+              "transform": "none"
+            },
+            "labelBounds": {
+              "x": 1570,
+              "y": 822,
+              "width": 138,
+              "height": 20,
+              "right": 1708,
+              "bottom": 842
+            },
+            "labelStyle": {
+              "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "fontSize": "13px",
+              "fontWeight": "500",
+              "lineHeight": "20px",
+              "padding": "0px",
+              "gap": "normal",
+              "color": "rgb(31, 32, 35)",
+              "backgroundColor": "rgba(0, 0, 0, 0)",
+              "borderColor": "rgb(31, 32, 35)",
+              "borderWidth": "0px",
+              "borderRadius": "0px",
+              "boxShadow": "none",
+              "transform": "none"
+            },
+            "dot": {
+              "x": 1554,
+              "y": 828,
+              "width": 8,
+              "height": 8,
+              "right": 1562,
+              "bottom": 836,
+              "style": {
+                "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+                "fontSize": "14px",
+                "fontWeight": "400",
+                "lineHeight": "22px",
+                "padding": "0px",
+                "gap": "normal",
+                "color": "rgb(31, 32, 35)",
+                "backgroundColor": "rgb(42, 116, 76)",
+                "borderColor": "rgb(31, 32, 35)",
+                "borderWidth": "0px",
+                "borderRadius": "50%",
+                "boxShadow": "none",
+                "transform": "none"
+              }
+            },
+            "check": null,
+            "overflow": 0
+          },
+          {
+            "value": "cond",
+            "label": "조건부 승인",
+            "checked": "true",
+            "x": 1546,
+            "y": 850,
+            "width": 170,
+            "height": 32,
+            "right": 1716,
+            "bottom": 882,
+            "style": {
+              "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "fontSize": "14px",
+              "fontWeight": "400",
+              "lineHeight": "22px",
+              "padding": "6px 8px",
+              "gap": "8px",
+              "color": "rgb(31, 32, 35)",
+              "backgroundColor": "rgb(243, 243, 245)",
+              "borderColor": "rgb(31, 32, 35)",
+              "borderWidth": "0px",
+              "borderRadius": "6px",
+              "boxShadow": "none",
+              "transform": "none"
+            },
+            "labelBounds": {
+              "x": 1570,
+              "y": 856,
+              "width": 114,
+              "height": 20,
+              "right": 1684,
+              "bottom": 876
+            },
+            "labelStyle": {
+              "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "fontSize": "13px",
+              "fontWeight": "500",
+              "lineHeight": "20px",
+              "padding": "0px",
+              "gap": "normal",
+              "color": "rgb(31, 32, 35)",
+              "backgroundColor": "rgba(0, 0, 0, 0)",
+              "borderColor": "rgb(31, 32, 35)",
+              "borderWidth": "0px",
+              "borderRadius": "0px",
+              "boxShadow": "none",
+              "transform": "none"
+            },
+            "dot": {
+              "x": 1554,
+              "y": 862,
+              "width": 8,
+              "height": 8,
+              "right": 1562,
+              "bottom": 870,
+              "style": {
+                "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+                "fontSize": "14px",
+                "fontWeight": "400",
+                "lineHeight": "22px",
+                "padding": "0px",
+                "gap": "normal",
+                "color": "rgb(31, 32, 35)",
+                "backgroundColor": "rgb(150, 89, 12)",
+                "borderColor": "rgb(31, 32, 35)",
+                "borderWidth": "0px",
+                "borderRadius": "50%",
+                "boxShadow": "none",
+                "transform": "none"
+              }
+            },
+            "check": {
+              "x": 1692,
+              "y": 858,
+              "width": 16,
+              "height": 16,
+              "right": 1708,
+              "bottom": 874,
+              "source": "branding/ees/ui/v4/9d8d5.svg"
+            },
+            "overflow": 0
+          },
+          {
+            "value": "bad",
+            "label": "미승인",
+            "checked": "false",
+            "x": 1546,
+            "y": 884,
+            "width": 170,
+            "height": 32,
+            "right": 1716,
+            "bottom": 916,
+            "style": {
+              "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "fontSize": "14px",
+              "fontWeight": "400",
+              "lineHeight": "22px",
+              "padding": "6px 8px",
+              "gap": "8px",
+              "color": "rgb(31, 32, 35)",
+              "backgroundColor": "rgba(0, 0, 0, 0)",
+              "borderColor": "rgb(31, 32, 35)",
+              "borderWidth": "0px",
+              "borderRadius": "6px",
+              "boxShadow": "none",
+              "transform": "none"
+            },
+            "labelBounds": {
+              "x": 1570,
+              "y": 890,
+              "width": 138,
+              "height": 20,
+              "right": 1708,
+              "bottom": 910
+            },
+            "labelStyle": {
+              "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "fontSize": "13px",
+              "fontWeight": "500",
+              "lineHeight": "20px",
+              "padding": "0px",
+              "gap": "normal",
+              "color": "rgb(31, 32, 35)",
+              "backgroundColor": "rgba(0, 0, 0, 0)",
+              "borderColor": "rgb(31, 32, 35)",
+              "borderWidth": "0px",
+              "borderRadius": "0px",
+              "boxShadow": "none",
+              "transform": "none"
+            },
+            "dot": {
+              "x": 1554,
+              "y": 896,
+              "width": 8,
+              "height": 8,
+              "right": 1562,
+              "bottom": 904,
+              "style": {
+                "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+                "fontSize": "14px",
+                "fontWeight": "400",
+                "lineHeight": "22px",
+                "padding": "0px",
+                "gap": "normal",
+                "color": "rgb(31, 32, 35)",
+                "backgroundColor": "rgb(191, 58, 43)",
+                "borderColor": "rgb(31, 32, 35)",
+                "borderWidth": "0px",
+                "borderRadius": "50%",
+                "boxShadow": "none",
+                "transform": "none"
+              }
+            },
+            "check": null,
+            "overflow": 0
+          }
+        ]
+      },
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      },
+      "groups": [
+        {
+          "name": "waiting",
+          "count": "4",
+          "x": 1449,
+          "y": 347,
+          "width": 463,
+          "height": 344,
+          "right": 1912,
+          "bottom": 691
+        },
+        {
+          "name": "result",
+          "count": "8",
+          "x": 1449,
+          "y": 703,
+          "width": 463,
+          "height": 353,
+          "right": 1912,
+          "bottom": 1056
+        }
+      ],
+      "flash": false,
+      "png": "mock-revision25-menu-open.png",
+      "interactivePath": [
+        "Open revision25 HTML",
+        "배치 주기 조정 → 판정 필요 → 조건부 승인",
+        "Wait existing2s selection flash",
+        "Scroll existing work area to top",
+        "배치 주기 조정 → 조건부 승인 to reopen menu"
+      ]
+    },
+    {
+      "target": {
+        "id": "CR-2207",
+        "name": "배치 주기 조정",
+        "verdict": "cond"
+      },
+      "viewport": {
+        "width": 480,
+        "height": 900
+      },
+      "frame": {
+        "x": 56,
+        "y": 0,
+        "width": 424,
+        "height": 900,
+        "right": 480,
+        "bottom": 900
+      },
+      "panel": {
+        "x": 57,
+        "y": 0,
+        "width": 423,
+        "height": 900,
+        "right": 480,
+        "bottom": 900
+      },
+      "body": {
+        "x": 57,
+        "y": 331,
+        "width": 423,
+        "height": 749,
+        "right": 480,
+        "bottom": 1080
+      },
+      "scrollArea": {
+        "x": 57,
+        "y": 48,
+        "width": 423,
+        "height": 852,
+        "right": 480,
+        "bottom": 900
+      },
+      "scrollTop": 0,
+      "control": {
+        "x": 157,
+        "y": 775,
+        "width": 124,
+        "height": 30,
+        "right": 281,
+        "bottom": 805,
+        "style": {
+          "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "fontSize": "13px",
+          "fontWeight": "500",
+          "lineHeight": "20px",
+          "padding": "0px 8px 0px 10px",
+          "gap": "6px",
+          "color": "rgb(31, 32, 35)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderRadius": "6px",
+          "boxShadow": "none",
+          "transform": "none"
+        }
+      },
+      "taskRow": {
+        "x": 65,
+        "y": 739,
+        "width": 407,
+        "height": 103,
+        "right": 472,
+        "bottom": 842
+      },
+      "menu": {
+        "x": 157,
+        "y": 659,
+        "width": 180,
+        "height": 110,
+        "right": 337,
+        "bottom": 769,
+        "style": {
+          "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "lineHeight": "22px",
+          "padding": "4px",
+          "gap": "2px",
+          "color": "rgb(31, 32, 35)",
+          "backgroundColor": "rgb(255, 255, 255)",
+          "borderColor": "rgb(230, 230, 233)",
+          "borderWidth": "1px",
+          "borderRadius": "8px",
+          "boxShadow": "rgba(17, 24, 39, 0.05) 0px 4px 12px 0px, rgba(17, 24, 39, 0.03) 0px 1px 2px 0px",
+          "transform": "none"
+        },
+        "relativeToPanel": {
+          "x": 101,
+          "y": 659
+        },
+        "options": [
+          {
+            "value": "ok",
+            "label": "승인",
+            "checked": "false",
+            "x": 162,
+            "y": 664,
+            "width": 170,
+            "height": 32,
+            "right": 332,
+            "bottom": 696,
+            "style": {
+              "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "fontSize": "14px",
+              "fontWeight": "400",
+              "lineHeight": "22px",
+              "padding": "6px 8px",
+              "gap": "8px",
+              "color": "rgb(31, 32, 35)",
+              "backgroundColor": "rgba(0, 0, 0, 0)",
+              "borderColor": "rgb(31, 32, 35)",
+              "borderWidth": "0px",
+              "borderRadius": "6px",
+              "boxShadow": "none",
+              "transform": "none"
+            },
+            "labelBounds": {
+              "x": 186,
+              "y": 670,
+              "width": 138,
+              "height": 20,
+              "right": 324,
+              "bottom": 690
+            },
+            "labelStyle": {
+              "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "fontSize": "13px",
+              "fontWeight": "500",
+              "lineHeight": "20px",
+              "padding": "0px",
+              "gap": "normal",
+              "color": "rgb(31, 32, 35)",
+              "backgroundColor": "rgba(0, 0, 0, 0)",
+              "borderColor": "rgb(31, 32, 35)",
+              "borderWidth": "0px",
+              "borderRadius": "0px",
+              "boxShadow": "none",
+              "transform": "none"
+            },
+            "dot": {
+              "x": 170,
+              "y": 676,
+              "width": 8,
+              "height": 8,
+              "right": 178,
+              "bottom": 684,
+              "style": {
+                "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+                "fontSize": "14px",
+                "fontWeight": "400",
+                "lineHeight": "22px",
+                "padding": "0px",
+                "gap": "normal",
+                "color": "rgb(31, 32, 35)",
+                "backgroundColor": "rgb(42, 116, 76)",
+                "borderColor": "rgb(31, 32, 35)",
+                "borderWidth": "0px",
+                "borderRadius": "50%",
+                "boxShadow": "none",
+                "transform": "none"
+              }
+            },
+            "check": null,
+            "overflow": 0
+          },
+          {
+            "value": "cond",
+            "label": "조건부 승인",
+            "checked": "true",
+            "x": 162,
+            "y": 698,
+            "width": 170,
+            "height": 32,
+            "right": 332,
+            "bottom": 730,
+            "style": {
+              "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "fontSize": "14px",
+              "fontWeight": "400",
+              "lineHeight": "22px",
+              "padding": "6px 8px",
+              "gap": "8px",
+              "color": "rgb(31, 32, 35)",
+              "backgroundColor": "rgb(243, 243, 245)",
+              "borderColor": "rgb(31, 32, 35)",
+              "borderWidth": "0px",
+              "borderRadius": "6px",
+              "boxShadow": "none",
+              "transform": "none"
+            },
+            "labelBounds": {
+              "x": 186,
+              "y": 704,
+              "width": 114,
+              "height": 20,
+              "right": 300,
+              "bottom": 724
+            },
+            "labelStyle": {
+              "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "fontSize": "13px",
+              "fontWeight": "500",
+              "lineHeight": "20px",
+              "padding": "0px",
+              "gap": "normal",
+              "color": "rgb(31, 32, 35)",
+              "backgroundColor": "rgba(0, 0, 0, 0)",
+              "borderColor": "rgb(31, 32, 35)",
+              "borderWidth": "0px",
+              "borderRadius": "0px",
+              "boxShadow": "none",
+              "transform": "none"
+            },
+            "dot": {
+              "x": 170,
+              "y": 710,
+              "width": 8,
+              "height": 8,
+              "right": 178,
+              "bottom": 718,
+              "style": {
+                "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+                "fontSize": "14px",
+                "fontWeight": "400",
+                "lineHeight": "22px",
+                "padding": "0px",
+                "gap": "normal",
+                "color": "rgb(31, 32, 35)",
+                "backgroundColor": "rgb(150, 89, 12)",
+                "borderColor": "rgb(31, 32, 35)",
+                "borderWidth": "0px",
+                "borderRadius": "50%",
+                "boxShadow": "none",
+                "transform": "none"
+              }
+            },
+            "check": {
+              "x": 308,
+              "y": 706,
+              "width": 16,
+              "height": 16,
+              "right": 324,
+              "bottom": 722,
+              "source": "branding/ees/ui/v4/9d8d5.svg"
+            },
+            "overflow": 0
+          },
+          {
+            "value": "bad",
+            "label": "미승인",
+            "checked": "false",
+            "x": 162,
+            "y": 732,
+            "width": 170,
+            "height": 32,
+            "right": 332,
+            "bottom": 764,
+            "style": {
+              "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "fontSize": "14px",
+              "fontWeight": "400",
+              "lineHeight": "22px",
+              "padding": "6px 8px",
+              "gap": "8px",
+              "color": "rgb(31, 32, 35)",
+              "backgroundColor": "rgba(0, 0, 0, 0)",
+              "borderColor": "rgb(31, 32, 35)",
+              "borderWidth": "0px",
+              "borderRadius": "6px",
+              "boxShadow": "none",
+              "transform": "none"
+            },
+            "labelBounds": {
+              "x": 186,
+              "y": 738,
+              "width": 138,
+              "height": 20,
+              "right": 324,
+              "bottom": 758
+            },
+            "labelStyle": {
+              "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+              "fontSize": "13px",
+              "fontWeight": "500",
+              "lineHeight": "20px",
+              "padding": "0px",
+              "gap": "normal",
+              "color": "rgb(31, 32, 35)",
+              "backgroundColor": "rgba(0, 0, 0, 0)",
+              "borderColor": "rgb(31, 32, 35)",
+              "borderWidth": "0px",
+              "borderRadius": "0px",
+              "boxShadow": "none",
+              "transform": "none"
+            },
+            "dot": {
+              "x": 170,
+              "y": 744,
+              "width": 8,
+              "height": 8,
+              "right": 178,
+              "bottom": 752,
+              "style": {
+                "fontFamily": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+                "fontSize": "14px",
+                "fontWeight": "400",
+                "lineHeight": "22px",
+                "padding": "0px",
+                "gap": "normal",
+                "color": "rgb(31, 32, 35)",
+                "backgroundColor": "rgb(191, 58, 43)",
+                "borderColor": "rgb(31, 32, 35)",
+                "borderWidth": "0px",
+                "borderRadius": "50%",
+                "boxShadow": "none",
+                "transform": "none"
+              }
+            },
+            "check": null,
+            "overflow": 0
+          }
+        ]
+      },
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      },
+      "groups": [
+        {
+          "name": "waiting",
+          "count": "4",
+          "x": 65,
+          "y": 347,
+          "width": 407,
+          "height": 344,
+          "right": 472,
+          "bottom": 691
+        },
+        {
+          "name": "result",
+          "count": "8",
+          "x": 65,
+          "y": 703,
+          "width": 407,
+          "height": 353,
+          "right": 472,
+          "bottom": 1056
+        }
+      ],
+      "flash": false,
+      "png": "mock-revision25-480-menu-open.png",
+      "interactivePath": [
+        "Open revision25 HTML",
+        "배치 주기 조정 → 판정 필요 → 조건부 승인",
+        "Wait existing2s selection flash",
+        "Scroll existing work area to top",
+        "배치 주기 조정 → 조건부 승인 to reopen menu"
+      ]
+    }
+  ],
+  "errors": [],
+  "externalRequests": [],
+  "browser": {
+    "version": "133.0.6943.0",
+    "playwright": "1.62.1",
+    "package": "@sparticuz/chromium@133.0.0"
+  },
+  "scriptsIdenticalToRevision24": true,
+  "frozenFiles": [
+    {
+      "path": "docs/mockups/ees-work/design-mock-src/04-cr-verdict.html",
+      "sha256": "544d5bbb92322bb7c21b080c860da2f81a00ea0d80239e2637a527ba00d2590d",
+      "unchanged": true
+    },
+    {
+      "path": "docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+      "sha256": "e3b562b05c79a5921813da0e8babcab5f6f4ac987196cca29a9f349503a3a8fe",
+      "unchanged": true
+    },
+    {
+      "path": "docs/mockups/ees-work/design-mock-src/05-execution.html",
+      "sha256": "d64abe44731b7481329cc8a9ff9f0ddf75c9e307fed2a0cd4d1da97e95bb3cc8",
+      "unchanged": true
+    },
+    {
+      "path": "docs/mockups/ees-work/design-mock-05-execution.html",
+      "sha256": "e99013764c1cacac347d02d9b7425f04efbf92cbd55153e7b752dd00bdc884ea",
+      "unchanged": true
+    }
+  ],
+  "result": "pass",
+  "firstBrowserQA": "pass",
+  "artifacts": [
+    "mock-revision25-menu-open.png",
+    "mock-revision25-480-menu-open.png",
+    "menu-open-geometry.json",
+    "menu-verification.json",
+    "mock-revision25-menu-closeup.png"
+  ],
+  "closeup": {
+    "png": "mock-revision25-menu-closeup.png",
+    "clip": {
+      "x": 1440,
+      "y": 679,
+      "width": 480,
+      "height": 266
+    },
+    "method": "Direct real-browser screenshot clip around result heading,selected CR-2207 row,and open menu with24px margin clamped to existing panel; no image editing or layout changes."
+  },
+  "visualInspection": "Wide and480 screenshots directly inspected; selected conditional checkmark and all labels clear. Narrow menu uses existing above-anchor positioning to stay inside viewport."
+}
