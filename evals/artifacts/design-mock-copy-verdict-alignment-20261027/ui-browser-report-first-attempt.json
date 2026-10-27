@@ -1,0 +1,95 @@
+{
+  "checkedAt": "2026-10-27T05:03:26.424Z",
+  "baseline": "b20846752827fd279fb35d3f946bb9f357bd02d1",
+  "source": "docs/mockups/ees-work/design-mock-src/05-execution.html",
+  "sourceSha256": "537b581230cc971f8e38c9ff6b8ac5bd09c5135bc90fa1a90fbae9bf8985c841",
+  "sourceBytes": 75796,
+  "artifact": "docs/mockups/ees-work/design-mock-05-execution.html",
+  "artifactSha256": "99fe93f1700ac73672795c9e80a7887736805c89259c2caa7a235828bacebe47",
+  "artifactBytes": 405805,
+  "checks": [
+    {
+      "name": "Non-render script unchanged except removed fallback copy and horizontal menu anchoring; approved revision10 source/HTML hashes retained",
+      "result": "pass"
+    },
+    {
+      "name": "Requested duplicate copy removed from header, log, rules and evidence while verdict terms, documents and real status remain",
+      "result": "pass"
+    },
+    {
+      "name": "Human and service approval/rejection share dot/text X, 30px result row and name-to-result spacing; only humans have dropdown controls",
+      "result": "pass"
+    }
+  ],
+  "screenshots": [
+    "mock-revision14-first-attempt-focus.png"
+  ],
+  "externalRequests": [],
+  "errors": [],
+  "logicComparison": {
+    "equal": true,
+    "excludedRenderFunctions": [
+      "headHTML",
+      "evidenceHTML",
+      "itemHTML",
+      "logHTML",
+      "rulesHTML",
+      "menuHTML"
+    ],
+    "excludedPresentationChanges": [
+      "reasonHTML empty-reason fallback text removal",
+      "placeMenu horizontal anchor position"
+    ],
+    "compared": "All remaining script bytes, including seed data, timers, execution, attempts, human selection, notes and event delegation"
+  },
+  "browser": "134.0.6998.35",
+  "alignment": [
+    {
+      "human": "CR-2203",
+      "service": "CR-2204",
+      "humanGeometry": {
+        "dotX": 1472,
+        "textX": 1486,
+        "height": 30,
+        "gapAfterName": 4,
+        "font": "13px",
+        "textClipped": false
+      },
+      "serviceGeometry": {
+        "dotX": 1472,
+        "textX": 1486,
+        "height": 30,
+        "gapAfterName": 4,
+        "font": "13px",
+        "textClipped": false
+      }
+    },
+    {
+      "human": "CR-2207",
+      "service": "CR-2201",
+      "humanGeometry": {
+        "dotX": 1472,
+        "textX": 1486,
+        "height": 30,
+        "gapAfterName": 4,
+        "font": "13px",
+        "textClipped": false
+      },
+      "serviceGeometry": {
+        "dotX": 1472,
+        "textX": 1486,
+        "height": 30,
+        "gapAfterName": 4,
+        "font": "13px",
+        "textClipped": false
+      }
+    }
+  ],
+  "result": "fail",
+  "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\nfalse !== true\n\n    at /workspace/scratch/025fcfa7db3e/review-repo/evals/artifacts/design-mock-copy-verdict-alignment-20261027/browser-smoke.cjs:38:40",
+  "supersededScreenshots": [
+    "mock-revision14-1920-default.png",
+    "mock-revision14-1920-comparison.png"
+  ],
+  "evidenceNote": "Intermediate routine screenshots were replaced by final renders after the user requested duplicate status text removal. The first failing focus screenshot, original error, check results and source/HTML hashes remain preserved."
+}

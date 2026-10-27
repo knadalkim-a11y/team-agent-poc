@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
-<title>시안 · 단계와 작업 실행 · 13판 · EES Workflow</title>
+<title>시안 · 단계와 작업 실행 · 14판 · EES Workflow</title>
 <!--@mock:provenance-->
 <!--@mock:fonts-->
 <!--@mock:product-css-->
@@ -157,7 +157,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-line>[data-tone=attention]{color:var(--ees-status-attention)}
 #ees-work-panel .ew-vd-line>[data-tone=danger]{color:var(--ees-status-danger)}
 #ees-work-panel .ew-vd-file{display:inline-flex;align-items:center;gap:4px;min-height:22px;margin-top:2px;padding:2px 8px 2px 6px;border:1px solid var(--ees-line-divider);border-radius:6px;background:var(--ees-surface-default);font-size:12px;line-height:16px;font-weight:400;color:var(--ees-brand-text)}
-#ees-work-panel .ew-vd-right{display:flex;align-items:center;gap:6px;flex:none}
+#ees-work-panel .ew-vd-right{display:flex;align-items:center;align-self:flex-start;gap:6px;flex:none}
 #ees-work-panel .ew-vd-src{display:inline-flex;width:14px;height:14px}
 #ees-work-panel .ew-vd-pick{display:flex;align-items:center;gap:6px;width:124px;min-height:30px;height:30px;padding:0 8px 0 10px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-default);font-size:13px;line-height:18px;font-weight:500;color:var(--ees-text-primary);text-align:left}
 #ees-work-panel .ew-vd-pick>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -165,7 +165,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-pick[aria-expanded=true]{border-color:var(--ees-brand-solid);box-shadow:var(--ees-focus-ring)}
 #ees-work-panel :is(.ew-vd-pick,.ew-vd-group,.ew-vd-option,.ew-vd-file,.ew-run-back,.ew-run-nav>.ew-icon-button):focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px}
 #ees-work-panel .ew-vd-dot{display:inline-block;flex:none;width:8px;height:8px;border-radius:50%;background:var(--ees-line-control)}
-#ees-work-panel .ew-vd-final{display:flex;align-items:center;gap:6px;width:124px;padding-left:10px;box-sizing:border-box;font-size:13px;line-height:18px;font-weight:500}
+#ees-work-panel .ew-vd-final{display:flex;align-items:center;gap:6px;height:30px;padding-left:11px;box-sizing:border-box;font-size:13px;line-height:18px;font-weight:500;color:var(--ees-text-primary)}
 #ees-work-panel .ew-vd-group{display:flex;align-items:center;gap:8px;width:100%;min-height:40px;padding:10px 12px;border:0;border-radius:6px;background:transparent;text-align:left;font-size:14px;line-height:20px;font-weight:400;color:var(--ees-text-strong)}
 #ees-work-panel .ew-vd-group-label{flex:1}
 #ees-work-panel .ew-vd-group>.ew-icon:first-child{transition:transform var(--ees-motion-fast)}
@@ -177,7 +177,6 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-option>.ew-vd-dot{margin-top:6px}
 #ees-work-panel .ew-vd-option>span{display:grid;gap:2px;flex:1}
 #ees-work-panel .ew-vd-option b{font-size:14px;line-height:20px;font-weight:500;color:var(--ees-text-primary)}
-#ees-work-panel .ew-vd-option small{font-size:12px;line-height:16px;color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-vd-option>.ew-icon{margin-top:2px}
 #ees-work-panel .ew-vd-log{display:grid;margin:0;padding:8px 20px 24px;list-style:none}
 #ees-work-panel .ew-vd-log>li{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--ees-line-divider);font-size:13px;line-height:18px;color:var(--ees-text-strong)}
@@ -187,7 +186,6 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-rules ul{display:grid;gap:8px;margin:0;padding:0;list-style:none}
 #ees-work-panel .ew-vd-rules li{display:flex;align-items:center;gap:8px}
 #ees-work-panel .ew-vd-rules li>b{width:84px;flex:none;font-weight:500;color:var(--ees-text-primary)}
-#ees-work-panel .ew-vd-draft{margin-bottom:4px;font-size:12px;line-height:16px;color:var(--ees-text-tertiary)}
 </style>
 <style data-new-screen="⑤ 작업별 판정 근거">
 /* Synthetic task-level decisions; reuses approved revision10 styling and product tokens. */
@@ -211,7 +209,6 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-evidence [data-pass=true]{color:var(--ees-status-success)}
 #ees-work-panel .ew-vd-evidence-caption{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px}
 #ees-work-panel .ew-vd-evidence-caption b{font-weight:500;color:var(--ees-text-primary)}
-#ees-work-panel .ew-vd-evidence-caption>span{color:var(--ees-text-tertiary);font-size:11px}
 #ees-work-panel .ew-vd-tool+.ew-vd-tool{margin-top:0;border-top:1px solid var(--ees-line-divider)}
 #ees-work-panel .ew-vd-tool-toggle{display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;border:0;background:transparent;text-align:left;border-radius:4px}
 #ees-work-panel .ew-vd-tool-toggle:hover{background:var(--ees-surface-hover)}
@@ -243,7 +240,6 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-note>span{font-weight:500;color:var(--ees-text-primary)}
 #ees-work-panel .ew-vd-note small{font-weight:400;color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-vd-note textarea{display:block;box-sizing:border-box;resize:vertical;width:100%;min-height:66px;padding:8px 10px;border:1px solid var(--ees-line-divider);border-radius:6px;background:var(--ees-surface-default);font:inherit;line-height:18px;color:var(--ees-text-primary)}
-#ees-work-panel .ew-vd-note textarea::placeholder{color:var(--ees-text-tertiary)}
 </style>
 <style data-new-screen="⑤ 단계와 작업 실행">
 #ees-work-panel .ew-execution-context{display:grid;gap:3px;margin:0 0 16px;padding-bottom:12px;border-bottom:1px solid var(--ees-line-divider);font-size:12px;line-height:18px}
@@ -254,14 +250,12 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-stage-heading>.ew-vd-title h2{white-space:nowrap}
 #ees-work-panel .ew-stage-run-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:none;box-sizing:border-box;width:116px;min-height:32px;height:32px;padding:0 10px;border:0;border-radius:6px;box-shadow:none;font-size:13px;line-height:18px;font-weight:500;white-space:nowrap}
 #ees-work-panel .ew-stage-run-button>svg,#ees-work-panel .ew-vd-run>svg{display:block;flex:none}
-#ees-work-panel .ew-stage-hint{margin-top:10px;font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-vd-run{display:inline-flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;width:106px;min-height:32px;height:32px;padding:0 10px;border:0;border-radius:6px;box-shadow:none;background:var(--ees-surface-selected);color:var(--ees-brand-text);font-size:13px;line-height:18px;font-weight:500;white-space:nowrap}
 #ees-work-panel .ew-vd-run:not(:disabled):hover{background:var(--ees-surface-hover)}
 #ees-work-panel .ew-vd-run:disabled{color:var(--ees-text-tertiary);background:var(--ees-surface-muted);cursor:default}
 #ees-work-panel :is(.ew-vd-run,[data-stage-run],.ew-attempt-select select):focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px;box-shadow:none}
-#ees-work-panel .ew-vd-service-summary{display:flex;align-items:center;flex-wrap:wrap;gap:3px 10px;font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-service-summary{display:grid;justify-items:start;gap:4px;font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-vd-service-summary [data-tone=danger]{color:var(--ees-status-danger)}
-#ees-work-panel .ew-vd-service-summary .ew-vd-final{width:auto;padding:0;font-size:12px;line-height:18px;color:var(--ees-text-primary)}
 #ees-work-panel .ew-attempt-select{display:grid;grid-template-columns:58px minmax(0,1fr);align-items:center;gap:8px;margin-bottom:12px}
 #ees-work-panel .ew-attempt-select select{min-width:0;max-width:100%;height:32px;padding:4px 6px;border:1px solid var(--ees-line-control);border-radius:5px;background:var(--ees-surface-default);font:inherit;color:var(--ees-text-primary)}
 #ees-work-panel .ew-attempt-caption{display:grid;gap:3px;margin:0 0 12px;font-size:12px}
@@ -327,7 +321,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
                   <div id="response-content-container"><div class="markdown-prose">
                     <p>서비스 작업 9개 중 7개는 판정이 끝났고, 2개는 아직 실행 전인 예시입니다.</p>
                     <p>‘단계 실행’은 아직 실행하지 않은 서비스 작업을 시작합니다. 끝난 작업은 건너뛰며, 필요한 작업만 ‘다시 실행’할 수도 있습니다.</p>
-                    <p>나머지 3건은 사람이 판정하는 작업입니다. 오른쪽에서 판정을 선택하고, ‘판정 기록’에 필요한 사유를 적을 수 있습니다.</p>
+                    <p>나머지 3건은 사람이 판정하는 작업입니다. 각 작업에서 판정을 선택하고, ‘판정 기록’에 필요한 사유를 적을 수 있습니다.</p>
                   </div></div>
                   <div class="mock-ai-actions" aria-hidden="true">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" stroke="#6F717A" stroke-width="1.3"/><path d="M10.5 3.5v-.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5" stroke="#6F717A" stroke-width="1.3"/></svg>
@@ -367,7 +361,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   <div><b>시안</b><span>저장·실행 안 됨</span></div>
   <div><strong id="mock-screen" role="status" aria-live="polite">⑤-1 단계와 작업 실행</strong><button type="button" data-mock-info>안내</button></div>
   <details class="mock-state-picker">
-    <summary>화면 바로 보기 · 13판</summary>
+    <summary>화면 바로 보기 · 14판</summary>
     <nav aria-label="작업별 판정 상태 선택">
       <button type="button" data-mock-state="initial" aria-current="true">⑤-1 단계와 작업 실행</button>
       <button type="button" data-mock-state="periodic">⑤-주기 · 예약 예시</button>
@@ -384,19 +378,19 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   <section>
     <h2 id="mock-info-title">시안 안내 · 단계와 작업 실행</h2>
     <h3>이 화면</h3>
-    <p>‘배포 산출물 점검’ 절차의 10.27 배포 회차 → 1차 점검 단계입니다. 각 행을 하나의 작업으로 보는 설계 시안이며 작업 12개 중 사람 판정은 3개, 서비스 판정은 9개입니다. 확정한 10판을 보존하고 버튼 배치를 유지하고 제목 주변의 두 표시를 정리한 별도 13판입니다. 서비스 7개는 판정 완료, 2개는 실행 전인 예시이며 실제 제품 실행 구조는 바꾸지 않았습니다.</p>
+    <p>‘배포 산출물 점검’ 절차의 10.27 배포 회차 → 1차 점검 단계입니다. 각 행을 하나의 작업으로 보는 설계 시안이며 작업 12개 중 사람 판정은 3개, 서비스 판정은 9개입니다. 확정한 10판을 보존하고 반복 안내와 판정 위치를 정리한 별도 14판입니다. 서비스 7개는 판정 완료, 2개는 실행 전인 예시이며 실제 제품 실행 구조는 바꾸지 않았습니다.</p>
     <h3>사람 판정과 서비스 판정</h3>
     <p>사람 작업은 ‘판정 기록’에서 누가 언제 무엇을 선택했는지 보고, 사유를 선택적으로 적습니다. 서비스 작업은 ‘판정 근거’에서 실행한 도구를 보고, 도구 하나를 펼쳐 입력·출력·이번 작업의 판정 기준·판정 결과를 확인합니다. 작업과 도구는 각각 하나씩 펼쳐집니다. 도구 실행 완료와 기준 충족 여부는 서로 다릅니다.</p>
     <h3>실행 방식과 예약</h3><p>기본은 업무절차의 수시 실행 · 직접 시작이며 자동실행 예약이 없습니다. 확인용 ‘주기 · 예약 예시’는 매주 화요일 09:00 KST와 다음 11.03 화요일 예약을 보여주는 메타데이터 예시입니다. 예약 실행기나 설정 변경 기능은 없습니다.</p><h3>단계와 작업 실행</h3><p>단계 실행은 실행 가능한 미실행 서비스 작업만 시작합니다. 완료·제외 작업은 건너뛰고 사람의 판정을 대신하지 않습니다. 개별 ‘다시 실행’은 새 실행 기록을 만들고 이전 입력·출력·결과를 보존합니다. 실행 중에는 이전 결과를 이번 실행 결과로 표시하지 않습니다. 이 시안의 실행은 짧은 화면 전환일 뿐 실제 도구를 호출하지 않습니다.</p><h3>해 볼 것</h3>
-    <ol><li>실행 전 작업을 하나 실행하거나 ‘단계 실행’하기</li><li>완료된 작업을 다시 실행하고 이전 기록 보기</li><li>사람 판정 작업의 ‘판정 선택’에서 값 고르기</li><li>사람 작업의 ‘판정 기록’에서 사유 적기</li><li>서비스 작업의 ‘판정 근거’에서 도구를 하나씩 펼치기</li><li>승인 묶음의 나머지 항목 펼치기</li><li>‘기록’과 ‘기준’ 탭 보기 (초안)</li></ol>
+    <ol><li>실행 전 작업을 하나 실행하거나 ‘단계 실행’하기</li><li>완료된 작업을 다시 실행하고 이전 기록 보기</li><li>사람 판정 작업의 ‘판정 선택’에서 값 고르기</li><li>사람 작업의 ‘판정 기록’에서 사유 적기</li><li>서비스 작업의 ‘판정 근거’에서 도구를 하나씩 펼치기</li><li>승인 묶음의 나머지 항목 펼치기</li><li>‘기록’과 ‘기준’ 탭 보기</li></ol>
     <h3>의견 보내는 법</h3>
     <p>왼쪽 아래 화면 번호와 함께 짧게 적어 주세요. 예) ⑤-1 고르기 목록 글자가 작다</p>
     <h3>아직 정하지 않은 것</h3>
-    <p>사람이 고른 판정을 실제로 저장·최종 확정하는 방법은 아직 정하지 않았습니다. 이 시안에는 확정 버튼이 없고, 판정 선택과 사유 입력만 시험할 수 있습니다. 값을 고르면 기존 시안처럼 해당 판정 묶음으로 이동하며, 저장되거나 판정 완료로 처리되지는 않습니다. 사유는 이 화면을 보는 동안만 유지되며 초기화하거나 새로 열면 사라집니다.</p>
+    <p>사람이 고른 판정을 실제로 저장·최종 확정하는 방법은 아직 정하지 않았습니다. 이 시안에는 확정 버튼이 없고, 판정 선택과 사유 입력만 시험할 수 있습니다. 값을 고르면 기존 시안처럼 해당 판정 묶음으로 이동하며, 저장되거나 판정 완료로 처리되지는 않습니다. 판정 선택·사유·실행 기록은 이 화면에서만 유지되며 초기화하거나 새로 열면 사라집니다.</p>
     <h3>이 시안은</h3>
     <p>실제 프로그램의 글꼴 파일과 화면 CSS(색, 크기, 탭·꼬리표·단추 부품)를 그대로 써서 만들었습니다. 왼쪽 메뉴 접기·펼치기와 창 크기에 따른 업무 패널 겹침은 제품 기준을 따릅니다. 도구 이름·입력·출력·지침·시각은 화면 검토를 위한 합성 예시이며 실제 도구 실행 기록이 아닙니다. 문서 존재와 접근 여부의 예시를 보여주며 내용 적정성은 판단하지 않습니다. 여러 도구 결과를 최종 판정으로 합치는 실제 규칙·저장은 아직 정하지 않았습니다. 실제 저장·도구 실행·대화는 되지 않으며, 왼쪽 메뉴 이동과 가운데 대화는 모양만 같습니다. 사내 PC에서 파일이 열리는지도 확인해 주세요.</p>
     <h3>판</h3>
-    <p>시안 13판 · 2026-10-27 · 단계와 작업 실행 · 미확정</p>
+    <p>시안 14판 · 2026-10-27 · 단계와 작업 실행 · 미확정</p>
     <footer><button type="button" data-mock-reset>처음부터 다시</button><button type="button" data-mock-close>닫기</button></footer>
   </section>
 </div>
@@ -539,8 +533,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     const finished = services.filter(item => item.attempts.length && !item.running), pending = executable().length, active = services.filter(item => item.running).length;
     const bar = [['ok', c.ok], ['cond', c.cond], ['bad', c.bad], ['none', c.none+c.pending+c.running]].filter(([, n]) => n).map(([v, n]) => `<i data-verdict="${v}" style="flex:${n} 1 0"></i>`).join('');
     const schedule = S.mode === 'periodic' ? '<b>업무절차 · 주기 실행</b><span>자동실행 예약 · 매주 화요일 09:00 KST</span><small>다음 11.03(화) 09:00 · 예약 예시</small>' : '<b>업무절차 · 수시 · 직접 시작</b><span>자동실행 예약 없음</span>';
-    const hint = active ? `서비스 작업 ${active}개 실행 중 · 사람 판정은 대기` : pending ? `미실행 서비스 ${pending}개만 시작 · 완료 작업은 건너뜀` : remaining ? `실행할 서비스 작업 없음 · 사람 판정 ${remaining}개 남음` : '실행할 서비스 작업이 없습니다.';
-    return `<div class="ew-vd-head"><div class="ew-execution-context" data-execution-context>${schedule}</div><div class="ew-stage-heading"><div class="ew-vd-title"><h2>1차 점검</h2></div><button type="button" class="ew-primary ew-stage-run-button" data-stage-run${!pending || active ? ' disabled' : ''}>${ACTION_ICON.play}<span>${S.stageIds.length && active ? '단계 실행 중' : '단계 실행'}</span></button></div><p class="ew-vd-sub"><span>작업 12개</span></p><div class="ew-vd-progress"><div class="ew-vd-bar" role="img" aria-label="현재 선택과 서비스 결과: 승인 ${c.ok}건, 조건부 승인 ${c.cond}건, 미승인 ${c.bad}건, 사람 선택 전 ${remaining}건, 실행 전 ${pending}건, 실행 중 ${active}건">${bar}</div><p class="ew-vd-statusline" data-person><b>사람 판정</b><span>선택 ${people.length - remaining}/${people.length}</span></p><p class="ew-vd-statusline" data-service><b>서비스 판정 완료 ${finished.length}/9</b><span>승인 ${finished.filter(item=>item.verdict==='ok').length} · 미승인 ${finished.filter(item=>item.verdict==='bad').length}${active ? ` · 실행 중 ${active}` : ''}</span></p></div><p class="ew-stage-hint" data-stage-hint>${hint}</p></div>`;
+    return `<div class="ew-vd-head"><div class="ew-execution-context" data-execution-context>${schedule}</div><div class="ew-stage-heading"><div class="ew-vd-title"><h2>1차 점검</h2></div><button type="button" class="ew-primary ew-stage-run-button" data-stage-run${!pending || active ? ' disabled' : ''}>${ACTION_ICON.play}<span>${S.stageIds.length && active ? '단계 실행 중' : '단계 실행'}</span></button></div><p class="ew-vd-sub"><span>작업 12개</span></p><div class="ew-vd-progress"><div class="ew-vd-bar" role="img" aria-label="현재 선택과 서비스 결과: 승인 ${c.ok}건, 조건부 승인 ${c.cond}건, 미승인 ${c.bad}건, 사람 선택 전 ${remaining}건, 실행 전 ${pending}건, 실행 중 ${active}건">${bar}</div><p class="ew-vd-statusline" data-person><b>사람 판정</b><span>선택 ${people.length - remaining}/${people.length}</span></p><p class="ew-vd-statusline" data-service><b>서비스 판정 완료 ${finished.length}/9</b><span>승인 ${finished.filter(item=>item.verdict==='ok').length} · 미승인 ${finished.filter(item=>item.verdict==='bad').length}${active ? ` · 실행 중 ${active}` : ''}</span></p></div></div>`;
   }
   function tabsHTML() {
     return `<nav class="ew-tabs" aria-label="작업 화면">${[['work', '작업'], ['log', '기록'], ['rules', '기준']].map(([key, label]) => `<button type="button" data-vd-tab="${key}" aria-pressed="${S.tab === key}">${label}</button>`).join('')}</nav>`;
@@ -548,7 +541,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   function reasonHTML(item) {
     if (item.id === S.picked) return '<span>방금 선택</span>';
     if (!item.verdict) return item.reason ? `<span data-tone="attention">${esc(item.reason)}</span>` : '';
-    if (item.verdict === 'bad') return item.reason ? `<span data-tone="danger">${esc(item.reason)}</span>` : '<span>직접 정함</span>';
+    if (item.verdict === 'bad') return item.reason ? `<span data-tone="danger">${esc(item.reason)}</span>` : '';
     return '';
   }
   function pickHTML(item) {
@@ -589,25 +582,25 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
       if (!attempt) return `<div class="ew-vd-evidence" id="evidence-${item.id}">${pending || '<p>아직 실행하지 않았습니다.</p>'}</div>`;
       const old = item.running || index < item.attempts.length-1, missingTest = attempt.verdict === 'bad';
       const selector = item.attempts.length > 1 ? `<label class="ew-attempt-select"><span>실행 내역</span><select data-vd-attempt="${item.id}" aria-label="${esc(item.name)} 실행 내역">${item.attempts.map((entry,i) => `<option value="${i}"${i===index?' selected':''}>${entry.number}차 · ${entry.finishedAt} · ${VERDICT[entry.verdict][0]}</option>`).reverse().join('')}</select></label>` : '';
-      return `<div class="ew-vd-evidence ew-vd-service-evidence" id="evidence-${item.id}">${pending}${selector}<p class="ew-attempt-caption" data-attempt-number="${attempt.number}"><b>${old ? '이전 실행 결과' : '현재 실행 결과'} · ${attempt.number}차</b><span>${attempt.finishedAt}</span></p><div class="ew-vd-evidence-caption"><b>실행 도구 ${attempt.tools.length}개</b><span>예시 실행 내역</span></div>${attempt.tools.map(run => toolHTML(item, run)).join('')}<p class="ew-vd-task-result"><b>${old ? '당시 작업 판정' : '작업 판정'} · ${VERDICT[attempt.verdict][0]}</b><span>${missingTest ? '문서 목록 조회에서 테스트 결과가 없어 미승인입니다.' : '필수 문서가 모두 있고 읽을 수 있어 승인입니다.'}</span></p></div>`;
+      return `<div class="ew-vd-evidence ew-vd-service-evidence" id="evidence-${item.id}">${pending}${selector}<p class="ew-attempt-caption" data-attempt-number="${attempt.number}"><b>${old ? '이전 실행 결과' : '현재 실행 결과'} · ${attempt.number}차</b><span>${attempt.finishedAt}</span></p><div class="ew-vd-evidence-caption"><b>실행 도구 ${attempt.tools.length}개</b></div>${attempt.tools.map(run => toolHTML(item, run)).join('')}<p class="ew-vd-task-result"><b>${old ? '당시 작업 판정' : '작업 판정'} · ${VERDICT[attempt.verdict][0]}</b><span>${missingTest ? '문서 목록 조회에서 테스트 결과가 없어 미승인입니다.' : '필수 문서가 모두 있고 읽을 수 있어 승인입니다.'}</span></p></div>`;
     }
     const selections = item.history.slice().reverse().map(entry => `<p data-human-selection><b>${VERDICT[entry.verdict][0]} 선택</b><span>${ACTOR} · ${entry.date} ${entry.time}</span></p>`).join('');
-    return `<div class="ew-vd-evidence ew-vd-human-record" id="evidence-${item.id}"><div class="ew-vd-selection-record">${selections || '<p>아직 판정을 선택하지 않았습니다.</p>'}</div><label class="ew-vd-note"><span>사유 <small>(선택)</small></span><textarea data-vd-note="${item.id}" rows="2" aria-label="${esc(item.name)} 판정 사유 (선택)" placeholder="필요한 경우 판정 이유를 적어 주세요">${esc(item.note)}</textarea></label></div>`;
+    return `<div class="ew-vd-evidence ew-vd-human-record" id="evidence-${item.id}"><div class="ew-vd-selection-record">${selections || '<p>아직 판정을 선택하지 않았습니다.</p>'}</div><label class="ew-vd-note"><span>사유 <small>(선택)</small></span><textarea data-vd-note="${item.id}" rows="2" aria-label="${esc(item.name)} 판정 사유 (선택)">${esc(item.note)}</textarea></label></div>`;
   }
   function statusLabel(item) {
-    if (item.handler === 'service') return item.running ? item.phase : item.attempts.length ? '자동 판정 완료' : '실행 전';
-    return item.verdict ? `선택: ${VERDICT[item.verdict][0]}` : '판정 선택 전';
+    if (item.handler === 'service') return item.running ? item.phase : item.attempts.length ? '' : '실행 전';
+    return '';
   }
   function itemHTML(item) {
     const service = item.handler === 'service';
     const tone = service ? '' : !item.verdict ? 'attention' : item.id === S.flash ? 'picked' : '';
     const file = item.file ? `<button type="button" class="ew-vd-file" data-mock-toast="시안: 파일은 열리지 않습니다">${icon(ICON.clip, 13)}${esc(item.file)}</button>` : '';
     const reason = item.running ? (item.verdict ? `<span>이전 판정 · ${VERDICT[item.verdict][0]}</span>` : '') : reasonHTML(item);
-    const verdict = service && item.verdict && !item.running ? `<span class="ew-vd-final"><i class="ew-vd-dot" data-verdict="${item.verdict}"></i>${VERDICT[item.verdict][0]}</span>` : '';
-    const summary = service ? (verdict || reason ? `<div class="ew-vd-service-summary">${verdict}${reason}</div>` : '') : (reason ? `<span class="ew-vd-line">${reason}</span>` : '');
-    const row = `<div class="ew-vd-item"><div class="ew-vd-text"><span class="ew-vd-name">${esc(item.name)}</span>${summary}${file}</div><div class="ew-vd-right">${pickHTML(item)}</div></div>`;
+    const verdict = service && item.verdict && !item.running ? `<span class="ew-vd-final"><i class="ew-vd-dot" data-verdict="${item.verdict}"></i><span>${VERDICT[item.verdict][0]}</span></span>` : '';
+    const summary = service ? (verdict || reason ? `<div class="ew-vd-service-summary">${verdict}${reason}</div>` : '') : `${pickHTML(item)}${reason ? `<span class="ew-vd-line">${reason}</span>` : ''}`;
+    const row = `<div class="ew-vd-item"><div class="ew-vd-text"><span class="ew-vd-name">${esc(item.name)}</span>${summary}${file}</div>${service ? `<div class="ew-vd-right">${pickHTML(item)}</div>` : ''}</div>`;
     const opened = S.evidence === item.id, evidenceLabel = service ? '판정 근거' : '판정 기록';
-    return `<section class="ew-vd-entry" data-vd-item="${item.id}" data-handler="${item.handler}"${service ? ` data-decision-state="${item.running ? 'running' : item.attempts.length ? 'complete' : 'pending'}"` : ''}${tone ? ` data-tone="${tone}"` : ''}>${row}<div class="ew-vd-origin"><span><b data-decision-actor>${service ? '서비스 판정' : '사람 판정'}</b><span data-decision-status>${statusLabel(item)}</span></span>${!service || item.attempts.length ? `<button type="button" class="ew-vd-evidence-toggle" data-vd-evidence="${item.id}" aria-expanded="${opened}"${opened ? ` aria-controls="evidence-${item.id}"` : ''} aria-label="${esc(item.name)} ${evidenceLabel} ${opened ? '접기' : '펼치기'}">${evidenceLabel}${icon(ICON.down, 13)}</button>` : ''}</div>${opened ? evidenceHTML(item) : ''}</section>`;
+    return `<section class="ew-vd-entry" data-vd-item="${item.id}" data-handler="${item.handler}"${service ? ` data-decision-state="${item.running ? 'running' : item.attempts.length ? 'complete' : 'pending'}"` : ''}${tone ? ` data-tone="${tone}"` : ''}>${row}<div class="ew-vd-origin"><span><b data-decision-actor>${service ? '서비스 판정' : '사람 판정'}</b>${statusLabel(item) ? `<span data-decision-status>${statusLabel(item)}</span>` : ''}</span>${!service || item.attempts.length ? `<button type="button" class="ew-vd-evidence-toggle" data-vd-evidence="${item.id}" aria-expanded="${opened}"${opened ? ` aria-controls="evidence-${item.id}"` : ''} aria-label="${esc(item.name)} ${evidenceLabel} ${opened ? '접기' : '펼치기'}">${evidenceLabel}${icon(ICON.down, 13)}</button>` : ''}</div>${opened ? evidenceHTML(item) : ''}</section>`;
   }
   function listHTML() {
     let html = '';
@@ -625,14 +618,14 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     return `<div class="ew-vd-body">${html}</div>`;
   }
   function logHTML() {
-    return `<p class="ew-vd-draft" style="padding:16px 20px 0">예시 실행 기록 · 새로 열면 초기화됩니다</p><ol class="ew-vd-log">${S.log.slice().reverse().map(([time, text, reference]) => `<li><time>${time}</time><span>${esc(text)}${reference ? `<button type="button" class="ew-vd-evidence-toggle" data-vd-attempt-open="${reference.id}:${reference.index}">실행 내역 보기</button>` : ''}</span></li>`).join('')}</ol>`;
+    return `<ol class="ew-vd-log">${S.log.slice().reverse().map(([time, text, reference]) => `<li><time>${time}</time><span>${esc(text)}${reference ? `<button type="button" class="ew-vd-evidence-toggle" data-vd-attempt-open="${reference.id}:${reference.index}">실행 내역 보기</button>` : ''}</span></li>`).join('')}</ol>`;
   }
   function rulesHTML() {
     const words = Object.entries(VERDICT).map(([key, [label, desc]]) => `<li><i class="ew-vd-dot" data-verdict="${key}"></i><b>${label}</b><span>${desc}</span></li>`).join('');
-    return `<div class="ew-vd-rules"><p class="ew-vd-draft">초안: 이 탭은 아직 Figma에 그리지 않았습니다</p><section><h3>판정 단어</h3><ul>${words}</ul></section><section><h3>확인할 문서</h3><p>설계서, 테스트 결과, 배포 계획서</p></section><section><h3>사람 판정</h3><p>누가 언제 어떤 판정을 선택했는지 기록하고, 사유는 필요할 때 적습니다. 이 시안의 선택과 사유는 실제 저장·확정되지 않습니다.</p></section><section><h3>서비스 판정</h3><p>도구별 입력·출력·판정 기준·결과를 확인합니다. 도구 실행 완료와 기준 충족은 다르며, 서비스의 작업 판정은 읽기 전용입니다.</p></section><section><h3>단계 실행</h3><p>실행 가능한 미실행 서비스 작업만 시작합니다. 완료·제외 작업은 건너뛰며 사람 판정은 대기합니다. 다시 실행은 개별 작업에서 시작하고 이전 실행 기록은 보존합니다.</p></section><section><h3>예시 범위</h3><p>각 행을 독립 작업으로 보는 설계 시안입니다. 도구와 지침은 합성 예시이며 실제 연결·실행 기록이 아닙니다. 여러 도구 결과를 합치는 실제 정책은 아직 정하지 않았습니다.</p></section></div>`;
+    return `<div class="ew-vd-rules"><section><h3>판정 단어</h3><ul>${words}</ul></section><section><h3>확인할 문서</h3><p>설계서, 테스트 결과, 배포 계획서</p></section></div>`;
   }
   function menuHTML(item) {
-    return `<div class="ew-vd-menu" role="menu" aria-label="${esc(item.name)} 판정 고르기">${Object.entries(VERDICT).map(([key, [label, desc]]) => `<button type="button" role="menuitemradio" class="ew-vd-option" data-vd-choose="${key}" aria-checked="${item.verdict === key}" tabindex="-1"><i class="ew-vd-dot" data-verdict="${key}"></i><span><b>${label}</b><small>${desc}</small></span>${item.verdict === key ? icon(ICON.check) : ''}</button>`).join('')}</div>`;
+    return `<div class="ew-vd-menu" role="menu" aria-label="${esc(item.name)} 판정 고르기">${Object.entries(VERDICT).map(([key, [label]]) => `<button type="button" role="menuitemradio" class="ew-vd-option" data-vd-choose="${key}" aria-checked="${item.verdict === key}" tabindex="-1"><i class="ew-vd-dot" data-verdict="${key}"></i><span><b>${label}</b></span>${item.verdict === key ? icon(ICON.check) : ''}</button>`).join('')}</div>`;
   }
 
   function render(focus) {
@@ -660,7 +653,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     let top = anchor.bottom - box.top + 6;
     if (anchor.bottom + 6 + menu.offsetHeight > box.bottom - 8) top = anchor.top - box.top - 6 - menu.offsetHeight;
     menu.style.top = `${Math.max(8, top)}px`;
-    menu.style.left = `${Math.max(8, anchor.right - box.left - menu.offsetWidth)}px`;
+    menu.style.left = `${Math.min(box.width - menu.offsetWidth - 8, Math.max(8, anchor.left - box.left))}px`;
   }
   function openMenu(id) {
     if (!humanItems().some(item => item.id === id)) return;
