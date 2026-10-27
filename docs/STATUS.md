@@ -1,13 +1,13 @@
 # 현재 작업 상태
 
-## 2026-10-27 · 목업 우선 개발 기준 보완 · CR별 판정 2판
+## 2026-10-27 · 업무 목업 3판 · 사람 판정과 자동 완료
 
-- **현재 작업:** `main 924d919333b8804ece2cf5322e14adc681ad6457` 위 설계 브랜치 `ccr-5c97dda0-jb5rxv`의 `0a5ea4df28bbbd484edb8a441002e229ce38fb12`를 검토한 뒤, `fix/design-mock-review-20261027`에서 지침·목업 생성 도구·목업만 보완한다. Claude 원본 브랜치와 제품 UI·서버 API·저장·실행 코드는 보존한다. [개발 순서](../AGENTS.md#design-mock-first) · [이번 범위](mockups/ees-work/TASK.md#design-mock-review-20261027).
-- **최신 목업:** [④ CR별 판정 v3.1 · 2판 HTML](mockups/ees-work/design-mock-04-cr-verdict.html), [편집 원본](mockups/ees-work/design-mock-src/04-cr-verdict.html). Figma [C74](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1615-2)·[v3.1 시안](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1613-6115)을 기준으로 하며, 이번 [C76](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1620-6119)·[2판 검토 메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1620-6114)를 추가했다. **디자인 검토 중·사용자 확정 전·사내 열기/피드백 미확인**이며, 제품 구현 착수나 사내 기능 배포 완료가 아니다. 실제 생성 커밋·검증 근거는 이번 PR과 [평가 기록](../evals/v4-ui-20260930.md#design-mock-review-20261027)에서 확인한다.
-- **이번 보완:** 확정 목업의 SHA·상태·창 크기를 고정하고 수용 근거 없는 시각적 차이를 미완료로 남기도록 했다. 목업은 제품과 같은 56/256px 메뉴 접힘·겹침 계산, 여섯 상태 바로보기, 실제 WOFF2 글꼴을 사용한다. 판정 화면의 새 CSS는 1판 그대로이며 검토 도구는 제품 영역 밖에 둔다.
-- **검증:** 생성기5 PASS, 로컬 Chromium134에서21 PASS(6상태·8폭·키보드·폰트·외부 요청/오류0), 문서/diff 및 기존 suite audit(1332→1569 ID·오류0)을 통과했다. [상태별 화면과 최초 실패·보완 근거](../evals/v4-ui-20260930.md#design-mock-review-20261027). 이 결과는 목업 검증이며 실제 제품의 일치·기능 검증이나 사내 확인 완료가 아니다.
+- **현재 작업:** [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)의 2판 head `89d81d5b58f02e2f9c219df10aa3ab159a1d5d29`에서 같은 PR을 갱신한다. 사용자는 사람 최종 판정 화면에 긍정 의견을 주고 서비스가 자동 완료하는 작업도 목업에 추가하도록 요청했다. 제품 UI·서버 API·저장·실행 코드는 보존한다. [개발 순서](../AGENTS.md#design-mock-first) · [이번 범위](mockups/ees-work/TASK.md#design-mock-auto-20261027).
+- **최신 목업:** [업무 목업 3판 HTML](mockups/ees-work/design-mock-04-cr-verdict.html), [편집 원본](mockups/ees-work/design-mock-src/04-cr-verdict.html). 기존 CR별 판정을 유지하고 일일 시스템 점검의 자동 완료 예시를 추가한다. Figma [C77](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1623-6119)·[3판 검토 메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1623-6114)에 요청과 범위를 기록했다. **디자인 검토 중·3판 전체 확정 전·사내 열기 미확인**이며, 사람 화면에 대한 긍정 의견을 전체 확정이나 제품 구현 승인으로 확대하지 않는다.
+- **이번 보완:** 목업 전용 도구에서 사람 판정과 자동 완료를 전환한다. 자동 예시는 점검 중·자동 완료·조건 미충족과 측정값·통과 기준·확인 시각을 보여 준다. 모든 조건 통과만 자동 완료이며 미충족은 미완료다. 합성 데이터의 임계치 예시는 제품에 범용 자동 판정기가 구현됐다는 뜻이 아니다. 이전 2판 지침·생성기·반응형 보완과 과거 증거는 유지한다.
+- **검증:** 3판 생성 검사5 PASS, Chromium134 브라우저33/33 PASS, 외부 요청·console/page error0. 기존 사람 메뉴/확정 준비/확정됨 3화면의 픽셀 완전 일치와 문서/diff를 확인했다. [파일 해시·캡처·첫 실패와 보완 근거](../evals/v4-ui-20260930.md#design-mock-auto-20261027), [2판 당시 검사](../evals/v4-ui-20260930.md#design-mock-review-20261027)를 보존한다. 목업 검증을 실제 제품의 기능 검증이나 사내 확인 완료로 해석하지 않는다.
 - **사내 적용 원본:** [미병합 문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`에 따라 프로그램 적용 완료·실행 중으로 구분한다. 로그인·기존 자료·새 화면·도구 설정은 별도 미확인이다. #104의 상세 적용 기록은 이 브랜치에 복제하거나 덮어쓰지 않는다.
-- **다음 하나:** 2판 목업에서 판정 선택·확정 전후를 검토해 디자인 피드백을 받는다. 고른 항목을 즉시 판정 묶음으로 옮길지, 확정 전 확인창을 둘지는 **미확정**이다. 목업 확정 후 Figma·기능 계약과 구현 범위를 맞춘다.
+- **다음 하나:** 3판의 자동 완료와 조건 미충족 화면을 검토해 디자인 피드백을 받는다. 기존 사람 판정의 즉시 묶음 이동·확정 전 확인창에 대한 개별 결정은 별도로 받지 않았으며 기존 시안을 유지한다. 목업 확정 후 Figma·기능 계약과 구현 범위를 맞춘다.
 
 > 아래 절은 이전 작업 당시 기록이다. #103 병합 대기·사내 적용 미실행 등의 당시 표현은 위 현재 상태와 구분하고, 과거 검증·실패 근거는 보존한다.
 

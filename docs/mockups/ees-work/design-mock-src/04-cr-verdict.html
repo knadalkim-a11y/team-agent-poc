@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
-<title>시안 ④ CR별 판정 v3.1 · 2판 · EES Workflow</title>
+<title>시안 · 사람 판정과 자동 완료 · 3판 · EES Workflow</title>
 <!--@mock:provenance-->
 <!--@mock:fonts-->
 <!--@mock:product-css-->
@@ -87,10 +87,14 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 .mock-chip strong{flex:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mock-chip button{border:0;border-radius:6px;padding:2px 9px;background:#ffffff26;color:#fff;font:500 12px/18px var(--ees-font-sans);cursor:pointer}
 .mock-chip button:hover{background:#ffffff40}
+.mock-chip .mock-mode{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:5px 0 2px}
+.mock-mode button{min-height:28px}
+.mock-mode button[aria-pressed=true]{background:#ffd58a;color:#1f2023}
 .mock-chip button:focus-visible,.mock-state-picker summary:focus-visible{outline:2px solid #ffd58a;outline-offset:2px}
 .mock-state-picker{margin-top:4px;border-top:1px solid #ffffff26;padding-top:5px}
 .mock-state-picker summary{cursor:pointer;font-weight:500}
 .mock-state-picker nav{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px}
+.mock-state-picker nav[hidden]{display:none}
 .mock-state-picker button{min-height:30px;text-align:left;padding:5px 7px}
 .mock-state-picker button[aria-current=true]{background:#ffd58a;color:#1f2023}
 .mock-state-picker p{margin:6px 0 0;color:#ffffffb8;font-size:11px;line-height:16px}
@@ -194,6 +198,32 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-rules li>b{width:84px;flex:none;font-weight:500;color:var(--ees-text-primary)}
 #ees-work-panel .ew-vd-draft{margin-bottom:4px;font-size:12px;line-height:16px;color:var(--ees-text-tertiary)}
 </style>
+<style data-new-screen="자동 · 시스템 상태 점검">
+/* Separate synthetic example. Does not change the human CR-verdict styles. */
+#ees-work-panel .ew-auto-summary{margin-top:8px;font-size:13px;line-height:20px;color:var(--ees-text-secondary)}
+#ees-work-panel .ew-auto-summary[data-state=success]{color:var(--ees-status-success)}
+#ees-work-panel .ew-auto-summary[data-state=blocked]{color:var(--ees-status-attention)}
+#ees-work-panel .ew-auto-list{padding:4px 8px 24px}
+#ees-work-panel .ew-auto-item{padding:16px 12px;border-bottom:1px solid var(--ees-line-divider)}
+#ees-work-panel .ew-auto-item[data-status=blocked]{margin-top:6px;border:0;border-radius:8px;background:var(--ees-status-attention-bg)}
+#ees-work-panel .ew-auto-item-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+#ees-work-panel .ew-auto-item-head h3{flex:1;min-width:0;font-size:14px;line-height:20px;font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-auto-status-label{display:inline-flex;align-items:center;gap:6px;flex:none;font-size:13px;line-height:18px;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-auto-status-label[data-status=passed]{color:var(--ees-status-success)}
+#ees-work-panel .ew-auto-status-label[data-status=blocked]{color:var(--ees-status-attention)}
+#ees-work-panel .ew-auto-status-label[data-status=checking]{color:var(--ees-brand-text)}
+#ees-work-panel .ew-auto-status-label>i{width:6px;height:6px;border-radius:50%;background:currentColor}
+#ees-work-panel .ew-auto-values{display:grid;grid-template-columns:44px minmax(0,1fr);gap:4px 10px;margin:0;font-size:13px;line-height:18px}
+#ees-work-panel .ew-auto-values dt{color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-auto-values dd{margin:0;color:var(--ees-text-primary);overflow-wrap:anywhere}
+#ees-work-panel .ew-auto-values dd[data-measured]{font-weight:500}
+#ees-work-panel .ew-auto-next{margin:12px 12px 0;font-size:13px;line-height:20px;color:var(--ees-status-attention)}
+#ees-work-panel .ew-auto-footer>p>b{display:block;margin:0 0 4px}
+#ees-work-panel .ew-auto-rule-list{display:grid;gap:12px;margin:10px 0 0}
+#ees-work-panel .ew-auto-rule-list div{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#ees-work-panel .ew-auto-rule-list dt{color:var(--ees-text-secondary)}
+#ees-work-panel .ew-auto-rule-list dd{margin:0;font-weight:500}
+</style>
 </head>
 <body>
 <div class="ees-source-shell" data-ees-source-shell data-ees-route="chat">
@@ -290,9 +320,13 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   <button type="button" class="mock-mobile-control" data-mock-controls-toggle aria-expanded="false" aria-label="시안 확인 도구 열기">시안</button>
   <div><b>시안</b><span>저장·실행 안 됨</span></div>
   <div><strong id="mock-screen" role="status" aria-live="polite">④-1 고르는 중</strong><button type="button" data-mock-info>안내</button></div>
+  <div class="mock-mode" role="group" aria-label="시안 종류">
+    <button type="button" data-mock-mode="human" aria-pressed="true">사람 판정</button>
+    <button type="button" data-mock-mode="auto" aria-pressed="false">자동 완료</button>
+  </div>
   <details class="mock-state-picker">
-    <summary>화면 바로 보기 · 2판</summary>
-    <nav aria-label="시안 상태 선택">
+    <summary>화면 바로 보기 · 3판</summary>
+    <nav aria-label="사람 판정 상태 선택" data-mock-human-states>
       <button type="button" data-mock-state="initial" aria-current="true">④-1 고르는 중</button>
       <button type="button" data-mock-state="menu">④-1a 판정 고르기</button>
       <button type="button" data-mock-state="ready">④-2 확정 준비</button>
@@ -300,15 +334,24 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
       <button type="button" data-mock-state="log">④-기록 · 초안</button>
       <button type="button" data-mock-state="rules">④-기준 · 초안</button>
     </nav>
+    <nav aria-label="자동 완료 상태 선택" data-mock-auto-states hidden>
+      <button type="button" data-auto-state="checking">자동-1 점검 중</button>
+      <button type="button" data-auto-state="success">자동-2 자동 완료</button>
+      <button type="button" data-auto-state="blocked">자동-3 조건 미충족</button>
+      <button type="button" data-auto-state="log">자동-기록 · 초안</button>
+      <button type="button" data-auto-state="rules">자동-기준 · 초안</button>
+    </nav>
     <p>선택하면 예시 상태로 다시 시작합니다.<br>실제 제품에는 없는 확인용 도구입니다.</p>
   </details>
 </div>
 
 <div class="mock-info" role="dialog" aria-modal="true" aria-labelledby="mock-info-title" hidden>
   <section>
-    <h2 id="mock-info-title">시안 안내 · ④ CR별 판정 v3.1</h2>
+    <h2 id="mock-info-title">시안 안내 · 사람 판정과 자동 완료</h2>
     <h3>이 화면</h3>
     <p>‘배포 산출물 점검’ 절차의 10.13 배포 회차 → 1차 점검 단계 → 두 번째 작업 ‘CR별 판정’입니다. CR(변경 요청) 12건마다 배포해도 되는지 사람이 정하고 확정합니다. AI는 가운데 대화에서 11건을 미리 채웠고(파란 말풍선), 1건은 사람이 직접 판단해야 합니다.</p>
+    <h3>자동 완료 보기</h3>
+    <p>‘자동 완료’를 고르면 별개의 ‘일일 시스템 점검 → 시스템 상태 점검’ 예시를 봅니다. 서비스가 점검 결과를 정해진 조건과 비교해 모두 통과할 때만 완료하는 화면입니다. 조건에 맞지 않으면 미완료로 남고 다음 행동을 안내합니다. 사람 판정으로 돌아오면 앞서 고른 CR 판정이 그대로 남습니다.</p>
     <h3>해 볼 것</h3>
     <ol><li>CR-2207의 ‘판정 선택’을 눌러 고르기</li><li>다른 판정도 바꿔 보기 (사람이 고르면 말풍선이 사라짐)</li><li>‘9건 모두 승인’ 펼치기</li><li>‘판정 확정’ 누르기</li><li>‘기록’과 ‘기준’ 탭 보기 (초안)</li></ol>
     <h3>의견 보내는 법</h3>
@@ -318,7 +361,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     <h3>이 시안은</h3>
     <p>실제 프로그램의 글꼴 파일과 화면 CSS(색, 크기, 탭·꼬리표·단추 부품)를 그대로 써서 만들었습니다. 왼쪽 메뉴 접기·펼치기와 창 크기에 따른 업무 패널 겹침은 제품 기준을 따릅니다. 저장·실행·대화는 되지 않으며, 왼쪽 메뉴 이동과 가운데 대화는 모양만 같습니다. 사내 PC에서 파일이 열리는지도 확인해 주세요.</p>
     <h3>판</h3>
-    <p>v3.1 시안 2판 · 2026-10-27 · Figma 1613:6115 · 미확정</p>
+    <p>시안 3판 · 2026-10-27 · 사람 판정 v3.1 + 자동 완료 예시 · 미확정</p>
     <footer><button type="button" data-mock-reset>처음부터 다시</button><button type="button" data-mock-close>닫기</button></footer>
   </section>
 </div>
@@ -338,12 +381,25 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     ['CR-2207', '배치 주기 조정', null, '테스트 파일이 최종본인지 확인 필요', 'test_v2_final.xlsx'], ['CR-2208', '메일 발송 대상 추가', 'ok'],
     ['CR-2209', '화면 응답 속도 개선', 'ok'], ['CR-2210', '권한 그룹 정리', 'bad', '설계서와 테스트 없음'], ['CR-2211', '이력 조회 기간 확대', 'ok'], ['CR-2212', '오류 메시지 정리', 'ok']
   ];
+  const AUTO_CHECKS = [
+    {id: 'response', name: '서비스 응답 시간', value: '184 ms', condition: '500 ms 이하', time: '09:00:01'},
+    {id: 'database', name: '데이터베이스 연결', value: '연결 성공', condition: '연결 성공', time: '09:00:02'},
+    {id: 'disk', name: '디스크 사용률', value: '67%', condition: '80% 이하', time: '09:00:03'},
+    {id: 'backup', name: '최근 백업', value: '4시간 전', condition: '24시간 이내', time: '09:00:04'}
+  ];
   const panel = document.getElementById('ees-work-panel');
   const region = document.querySelector('.ees-panel-region');
   const sidebar = document.querySelector('.mock-sidebar');
   let compactBreakpoint = window.innerWidth < 1440;
   let compact = compactBreakpoint;
   let S, flashTimer, toastTimer;
+  let mode = 'human', A = {status: 'checking', tab: 'work'}, humanScroll = 0, autoScroll = 0;
+  const humanContext = {
+    title: document.querySelector('.mock-chat-title').textContent,
+    request: document.querySelector('.chat-user .whitespace-pre-wrap').textContent,
+    response: document.querySelector('#response-content-container .markdown-prose').innerHTML
+  };
+  const workflowContext = [...sidebar.querySelectorAll('[data-action=workflow]')].map(button => [button, button.getAttribute('aria-current')]);
 
   const esc = value => String(value).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
   const icon = (src, size) => `<img class="ew-icon" src="${src}" alt="" aria-hidden="true"${size ? ` width="${size}" height="${size}"` : ''}>`;
@@ -377,6 +433,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   // Review-only fixture navigation. It deliberately does not call product
   // actions, change the CR design or decide the outstanding UX questions.
   function previewState(key) {
+    if (mode !== 'human') return;
     const width = S.width;
     reset();
     S.width = width;
@@ -410,6 +467,101 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     button.setAttribute('aria-expanded', String(expanded));
     button.setAttribute('aria-label', expanded ? '시안 확인 도구 접기' : '시안 확인 도구 열기');
     button.textContent = expanded ? '시안 도구 접기' : '시안';
+  }
+
+  function changeMode(next) {
+    if (next === mode) return;
+    const scroll = panel.querySelector('.ew-scroll');
+    if (mode === 'human') humanScroll = scroll?.scrollTop || 0;
+    else autoScroll = scroll?.scrollTop || 0;
+    mode = next;
+    document.querySelector('.mock-state-picker').open = false;
+    setMockControlsExpanded(false);
+    setOpen(true);
+    render();
+    panel.querySelector('.ew-scroll').scrollTop = mode === 'human' ? humanScroll : autoScroll;
+  }
+
+  function previewAutoState(key) {
+    if (mode !== 'auto') return;
+    if (key === 'log' || key === 'rules') A.tab = key;
+    else { A.status = key; A.tab = 'work'; }
+    document.querySelector('.mock-state-picker').open = false;
+    setMockControlsExpanded(false);
+    setOpen(true);
+    render();
+    panel.querySelector('.ew-scroll').scrollTop = 0;
+  }
+
+  function autoItems() {
+    return AUTO_CHECKS.map((item, index) => {
+      const pending = A.status === 'checking' && index >= 2;
+      const blocked = A.status === 'blocked' && item.id === 'disk';
+      return {...item, status: pending ? (index === 2 ? 'checking' : 'waiting') : blocked ? 'blocked' : 'passed',
+        value: pending ? '—' : blocked ? '92%' : item.value, time: pending ? '—' : item.time};
+    });
+  }
+
+  function autoScreenId() {
+    if (A.tab === 'log') return '자동-기록 (초안)';
+    if (A.tab === 'rules') return '자동-기준 (초안)';
+    return {checking: '자동-1 점검 중', success: '자동-2 자동 완료', blocked: '자동-3 조건 미충족'}[A.status];
+  }
+
+  function syncContext() {
+    const auto = mode === 'auto';
+    document.querySelector('.mock-chat-title').textContent = auto ? '일일 시스템 점검' : humanContext.title;
+    document.querySelector('.chat-user .whitespace-pre-wrap').textContent = auto ? '오늘 일일 시스템 점검 상태 보여 줘' : humanContext.request;
+    const response = {checking: '서비스가 4개 항목을 점검하고 있습니다. 정해진 조건을 모두 충족하면 자동으로 완료됩니다.',
+      success: '4개 항목이 모두 기준을 충족해 서비스가 09:00:04에 점검을 완료했습니다. 측정값과 완료 조건은 오른쪽에서 확인할 수 있습니다.',
+      blocked: '디스크 사용률이 92%로, 기준인 80%를 넘었습니다. 점검은 아직 완료되지 않았습니다. 디스크 공간을 확보한 뒤 다시 점검해 주세요.'};
+    document.querySelector('#response-content-container .markdown-prose').innerHTML = auto ? `<p>${response[A.status]}</p><p>이 작업은 서비스의 점검 결과로 완료 여부가 정해집니다.</p>` : humanContext.response;
+    workflowContext.forEach(([button, current]) => {
+      const selected = auto && button.textContent.trim() === '일일 시스템 점검';
+      if (selected) button.setAttribute('aria-current', 'page');
+      else if (!auto && current) button.setAttribute('aria-current', current);
+      else button.removeAttribute('aria-current');
+    });
+    document.querySelectorAll('button[data-mock-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mockMode === mode)));
+    document.querySelector('[data-mock-human-states]').hidden = auto;
+    document.querySelector('[data-mock-auto-states]').hidden = !auto;
+  }
+
+  function autoHeaderHTML() {
+    return `<header class="ew-panel-header ew-run-nav"><button type="button" class="ew-run-back" data-mock-toast="시안: 일일 시스템 점검의 회차 화면은 아직 없습니다">${icon(ICON.back)}<span>10.27 정기 점검 회차</span></button><span></span><button type="button" class="ew-icon-button" aria-label="더 보기" data-mock-toast="시안: 메뉴 항목은 아직 정하지 않았습니다">${icon(ICON.more)}</button><button type="button" class="ew-icon-button" aria-label="업무 패널 닫기" data-panel-close>${icon(ICON.panel)}</button></header>`;
+  }
+
+  function autoHeadHTML() {
+    const items = autoItems(), passed = items.filter(item => item.status === 'passed').length;
+    const state = {checking: ['점검 중', 'neutral'], success: ['자동 완료', 'success'], blocked: ['조건 미충족', 'attention']}[A.status];
+    const summary = {checking: '4개 중 2개 확인 · 나머지 항목을 점검하고 있습니다', success: '서비스가 09:00:04에 완료 처리했습니다', blocked: '디스크 사용률이 기준을 넘어 완료되지 않았습니다'}[A.status];
+    const bar = items.map(item => `<i data-verdict="${item.status === 'passed' ? 'ok' : item.status === 'blocked' ? 'cond' : 'none'}" style="flex:1 1 0"></i>`).join('');
+    return `<div class="ew-vd-head"><div class="ew-vd-title"><h2>시스템 상태 점검</h2><span class="ew-tag" data-tone="${state[1]}">${state[0]}</span></div><p class="ew-vd-sub"><span>정기 점검 단계</span><span>작업 1/1</span><span>서비스 자동 처리</span></p><div class="ew-vd-progress"><div class="ew-vd-bar" role="img" aria-label="4개 조건 중 ${passed}개 통과">${bar}</div><p class="ew-auto-summary" data-state="${A.status}">${summary}</p></div></div>`;
+  }
+
+  function autoTabsHTML() {
+    return `<nav class="ew-tabs" aria-label="자동 작업 화면">${[['work', '작업'], ['log', '기록'], ['rules', '기준']].map(([key, label]) => `<button type="button" data-auto-tab="${key}" aria-pressed="${A.tab === key}">${label}</button>`).join('')}</nav>`;
+  }
+
+  function autoListHTML() {
+    const labels = {passed: '통과', blocked: '조건 미충족', checking: '확인 중', waiting: '대기'};
+    return `<div class="ew-auto-list">${autoItems().map(item => `<section class="ew-auto-item" data-auto-check="${item.id}" data-status="${item.status}"><div class="ew-auto-item-head"><h3>${item.name}</h3><span class="ew-auto-status-label" data-status="${item.status}"><i aria-hidden="true"></i>${labels[item.status]}</span></div><dl class="ew-auto-values"><dt>측정값</dt><dd data-measured>${item.value}</dd><dt>조건</dt><dd>${item.condition}</dd><dt>확인</dt><dd>${item.time}</dd></dl></section>`).join('')}${A.status === 'blocked' ? '<p class="ew-auto-next">디스크 공간을 확보한 뒤 다시 점검하세요.</p>' : ''}</div>`;
+  }
+
+  function autoLogHTML() {
+    const rows = [['09:00:00', '서비스가 시스템 상태 점검을 시작함'], ...autoItems().filter(item => item.time !== '—').map(item => [item.time, `${item.name} · ${item.value} · ${item.status === 'blocked' ? '조건 미충족' : '통과'}`])];
+    if (A.status !== 'checking') rows.push(['09:00:04', A.status === 'success' ? '4개 조건 충족 · 서비스가 자동 완료 처리함' : '디스크 조건 미충족 · 미완료로 남김']);
+    return `<ol class="ew-vd-log">${rows.slice().reverse().map(([time, text]) => `<li><time>${time}</time><span>${text}</span></li>`).join('')}</ol>`;
+  }
+
+  function autoRulesHTML() {
+    return `<div class="ew-vd-rules"><section><h3>완료 방식</h3><p>서비스가 네 가지 조건을 모두 확인하고, 모두 통과하면 이 작업을 자동으로 완료합니다.</p></section><section><h3>통과 조건</h3><dl class="ew-auto-rule-list">${AUTO_CHECKS.map(item => `<div><dt>${item.name}</dt><dd>${item.condition}</dd></div>`).join('')}</dl></section><section><h3>완료하지 않는 경우</h3><p>조건에 맞지 않거나 측정값을 확인하지 못하면 완료하지 않습니다. 원인을 해결한 뒤 다시 점검합니다.</p></section></div>`;
+  }
+
+  function autoFooterHTML() {
+    if (A.status === 'success') return '<p><b>4개 조건 모두 충족</b>추가 확인 없이 완료되었습니다</p><button type="button" class="ew-primary" data-auto-tab="log">기록 보기</button>';
+    if (A.status === 'blocked') return '<p><b>미완료 · 디스크 사용률 확인 필요</b>공간을 확보한 뒤 다시 점검하세요</p>';
+    return '<p>조건을 모두 충족하면 자동으로 완료됩니다</p>';
   }
 
   function headerHTML() {
@@ -478,13 +630,24 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 
   function render(focus) {
     const scroll = panel.querySelector('.ew-scroll'), top = scroll ? scroll.scrollTop : 0;
-    const body = S.tab === 'work' ? listHTML() : S.tab === 'log' ? logHTML() : rulesHTML();
-    panel.innerHTML = headerHTML() + `<div class="ew-scroll ew-vd">${headHTML()}${tabsHTML()}${body}</div><footer class="ew-vd-footer">${footerHTML()}</footer>`;
+    if (mode === 'auto') {
+      const body = A.tab === 'work' ? autoListHTML() : A.tab === 'log' ? autoLogHTML() : autoRulesHTML();
+      panel.innerHTML = autoHeaderHTML() + `<div class="ew-scroll ew-vd">${autoHeadHTML()}${autoTabsHTML()}${body}</div><footer class="ew-vd-footer ew-auto-footer">${autoFooterHTML()}</footer>`;
+    } else {
+      const body = S.tab === 'work' ? listHTML() : S.tab === 'log' ? logHTML() : rulesHTML();
+      panel.innerHTML = headerHTML() + `<div class="ew-scroll ew-vd">${headHTML()}${tabsHTML()}${body}</div><footer class="ew-vd-footer">${footerHTML()}</footer>`;
+    }
+    panel.dataset.mockMode = mode;
     panel.querySelector('.ew-scroll').scrollTop = top;
-    if (S.menu) placeMenu();
-    document.getElementById('mock-screen').textContent = screenId();
+    if (mode === 'human' && S.menu) placeMenu();
+    syncContext();
+    document.getElementById('mock-screen').textContent = mode === 'auto' ? autoScreenId() : screenId();
     document.querySelectorAll('[data-mock-state]').forEach(button => {
       if (button.dataset.mockState === stateKey()) button.setAttribute('aria-current', 'true');
+      else button.removeAttribute('aria-current');
+    });
+    document.querySelectorAll('[data-auto-state]').forEach(button => {
+      if (button.dataset.autoState === (A.tab === 'work' ? A.status : A.tab)) button.setAttribute('aria-current', 'true');
       else button.removeAttribute('aria-current');
     });
     if (focus) panel.querySelector(focus)?.focus({preventScroll: true});
@@ -569,7 +732,10 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
       return setMockControlsExpanded(target.getAttribute('aria-expanded') !== 'true');
     }
     if (target.matches('[data-sidebar-toggle]')) { compact = !compact; return layout(); }
+    if (target.matches('[data-mock-mode]')) return changeMode(target.dataset.mockMode);
     if (target.matches('[data-mock-state]')) return previewState(target.dataset.mockState);
+    if (target.matches('[data-auto-state]')) return previewAutoState(target.dataset.autoState);
+    if (target.matches('[data-auto-tab]')) { A.tab = target.dataset.autoTab; return render(`[data-auto-tab="${A.tab}"]`); }
     if (target.matches('[data-vd-pick]')) return S.menu === target.dataset.vdPick ? closeMenu(true) : openMenu(target.dataset.vdPick);
     if (target.matches('[data-vd-choose]')) return choose(S.menu, target.dataset.vdChoose);
     if (target.matches('[data-vd-group]')) { S.expanded = !S.expanded; return render('[data-vd-group]'); }
@@ -579,7 +745,13 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     if (target.matches('[data-panel-open]')) return setOpen(true);
     if (target.matches('[data-mock-info]')) { document.querySelector('.mock-info').hidden = false; return document.querySelector('[data-mock-close]').focus(); }
     if (target.matches('[data-mock-close]')) { document.querySelector('.mock-info').hidden = true; return document.querySelector('[data-mock-info]').focus(); }
-    if (target.matches('[data-mock-reset]')) { document.querySelector('.mock-info').hidden = true; reset(); setOpen(true); layout(); render(); return toast('처음 상태로 돌렸습니다'); }
+    if (target.matches('[data-mock-reset]')) {
+      document.querySelector('.mock-info').hidden = true;
+      if (mode === 'human') reset(); else A = {status: 'checking', tab: 'work'};
+      setOpen(true); layout(); render();
+      panel.querySelector('.ew-scroll').scrollTop = 0;
+      return toast('지금 시안을 처음 상태로 돌렸습니다');
+    }
     if (target.dataset.mockToast) toast(target.dataset.mockToast);
   });
   document.addEventListener('keydown', event => {
@@ -614,6 +786,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   });
   window.addEventListener('resize', layout);
   reset();
+  if (window.location.hash === '#auto-complete') { mode = 'auto'; A.status = 'success'; }
   layout();
   render();
 })();
