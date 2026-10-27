@@ -749,9 +749,9 @@ test('finished run separates confirmed partial count and keeps a partial stage b
  const h=sharedRuntimeFixture(),runState=h.snapshot.state.run;
  runState.status='completed';runState.definition.nodes={p:{id:'p',type:'p'},t:{id:'t',type:'t',parent:'p',name:'문서 확인'},j:{id:'j',type:'j',parent:'t',name:'문서 찾기',mode:'tool'},next:{id:'next',type:'j',parent:'t',name:'후속 확인',mode:'human'},skip:{id:'skip',type:'j',parent:'t',name:'적용 제외'}};
  runState.jobs={j:{status:'partial',partial_confirmed:true},next:{status:'completed'},skip:{status:'excluded'}};runState.progress={completed:1,total:2,confirmed_partial:1,remaining:0};
- let out=h.overview();assert.match(out,/완료 1 · 부분 결과 확정 1 · 남은 작업 0/);assert.match(out,/<h3>문서 확인<\/h3><span class="ew-status" data-status="partial">/);assert.match(out,/data-status="partial"[^>]*>[\s\S]*문서 찾기/);
+ let out=h.overview();assert.match(out,/완료 1 · 부분 결과 확정 1 · 남은 작업 0/);assert.match(out,/<h3><button type="button" data-action="stage_open" data-node-id="t" class="ew-text">문서 확인<\/button><\/h3><span class="ew-status" data-status="partial">/);assert.match(out,/data-status="partial"[^>]*>[\s\S]*문서 찾기/);
  delete runState.progress.confirmed_partial;delete runState.progress.excluded;delete runState.progress.remaining;out=h.overview();assert.match(out,/남은 작업 0/);
- runState.status='open';runState.jobs.j.partial_confirmed=false;out=h.overview();assert.match(out,/남은 작업 1/);assert.doesNotMatch(out,/부분 결과 확정 1/);assert.match(out,/<h3>문서 확인<\/h3><span class="ew-status" data-status="in_progress">/);
+ runState.status='open';runState.jobs.j.partial_confirmed=false;out=h.overview();assert.match(out,/남은 작업 1/);assert.doesNotMatch(out,/부분 결과 확정 1/);assert.match(out,/<h3><button type="button" data-action="stage_open" data-node-id="t" class="ew-text">문서 확인<\/button><\/h3><span class="ew-status" data-status="in_progress">/);
 });
 
 
@@ -759,4 +759,92 @@ test('run editors can accept a shared version even when another person has claim
  const h=sharedRuntimeFixture();h.snapshot.state.run.jobs.j={can_execute:false,permission_reason:'task_claimed',claim_actor:'another-user'};
  assert.match(h.panel(),/data-action="shared_accept_version"/);assert.doesNotMatch(h.panel(),/data-action="execute"/);
  h.snapshot.state.operations.shared_tool_access.j.can_accept_version=false;assert.doesNotMatch(h.panel(),/data-action="shared_accept_version"/);
+});
+
+function stageRuntimeFixture(){
+ const judgments=[{id:'yes',label:'승인',status:'completed'},{id:'conditional',label:'조건부 승인',status:'completed'},{id:'no',label:'미승인',status:'failed'}];
+ const nodes={p:{id:'p',type:'p'},t:{id:'t',type:'t',parent:'p',name:'1차 점검'},h:{id:'h',type:'j',parent:'t',name:'직접 확인',mode:'human',result_block:'human_confirm',judgments},a:{id:'a',type:'j',parent:'t',name:'실제 도구',mode:'tool',human_confirmation:false,result_block:'values'},other:{id:'other',type:'j',parent:'p',name:'다른 단계 작업',mode:'human'}};
+ const state={ok:true,capabilities:{actor_id:'actor'},workflow:{id:'w',name:'배포 산출물 점검'},run:{id:'r',workflow_id:'w',status:'open',revision:8,name:'10.27 배포 회차',definition:{name:'배포 산출물 점검',nodes},jobs:{h:{status:'ready',can_decide:true,can_execute:true},a:{status:'ready',can_execute:true}},attempts:[]},operations:{},ui_state:{revision:0,state:{}}};
+ const h=controller();h.api.setState(state);h.api.setSelection({mode:'work',workflow_id:'w',run_id:'r',job_id:'',tab:'overview',stage_id:'t'});
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true});
+ return {...h,state,mutations:()=>h.calls.filter(call=>['human_confirm','decide','execute_job'].includes(call.body?.action))};
+}
+
+test('common stage header shows workflow and optional context without imposing recurrence metadata',()=>{
+ const {state}=stageRuntimeFixture(),stage=state.run.definition.nodes.t;
+ let rendered=html('workStageHTML(state,{stage_tab:"work"},stage)',{state,stage});
+ assert.match(rendered.header,/배포 산출물 점검/);assert.match(rendered.header+rendered.body,/10.27 배포 회차/);assert.match(rendered.body,/1차 점검/);
+ assert.doesNotMatch(rendered.header+rendered.body,/업무절차|직접 시작|자동실행 예약 없음|수시/);
+ delete state.run.name;rendered=html('workStageHTML(state,{},stage)',{state,stage});assert.doesNotMatch(rendered.header+rendered.body,/회차|ew-stage-context/);
+ state.run.name='접근 권한 신청 A';rendered=html('workStageHTML(state,{},stage)',{state,stage});assert.match(rendered.header+rendered.body,/접근 권한 신청 A/);assert.doesNotMatch(rendered.header+rendered.body,/회차/);
+});
+
+test('stage rows use Jobs, preserve configured judgment meaning and distinguish failed execution',()=>{
+ const {state}=stageRuntimeFixture();state.run.jobs.a={status:'failed',result:{items:[{id:'CR-1',name:'도구의 내부 항목'}]}};
+ const rows=html('workStageRows(state,state.run.definition.nodes.t)',{state});assert.equal(rows.length,2);assert.equal(rows.find(row=>row.node.id==='a').label,'실행 실패');assert.equal(rows.find(row=>row.node.id==='a').decision,null);
+ state.run.jobs.h={status:'completed',decisions:{job:{id:10,verdict:'completed',note:'검토 근거\n선택한 판정: 조건부 승인 (conditional)',actor_id:'actor'}}};
+ const decision=html('workStageDecision(state.run.definition.nodes.h,state.run.jobs.h,state.run.definition)',{state});assert.equal(decision.label,'조건부 승인');assert.equal(decision.judgment_id,'conditional');assert.equal(decision.note,'검토 근거');
+ const previous={snapshot:{job:{judgments:[{id:'old',label:'이전 정의',status:'completed'}]}}};
+ state.run.jobs.h.decisions.job.note='\n선택한 판정: 이전 정의 (old)';assert.equal(html('workStageDecision(state.run.definition.nodes.h,state.run.jobs.h,state.run.definition,previous)',{state,previous}).label,'이전 정의');
+});
+
+test('stage actions mutate the exact row Job using existing execution and judgment contracts',async()=>{
+ let h=stageRuntimeFixture();await h.api.handleClick({dataset:{action:'stage_execute',jobId:'a'}});
+ assert.equal(h.mutations().length,1);assert.equal(h.mutations()[0].body.action,'execute_job');assert.equal(h.mutations()[0].body.job_id,'a');assert.equal(h.mutations()[0].body.expected_revision,8);
+ h=stageRuntimeFixture();await h.api.handleClick({dataset:{action:'stage_decide',jobId:'h',judgmentId:'conditional',verdict:'completed'}});
+ assert.equal(h.mutations().length,1);assert.equal(h.mutations()[0].body.action,'human_confirm');assert.equal(h.mutations()[0].body.judgment_id,'conditional');assert.equal(h.mutations()[0].body.verdict,'completed');
+});
+
+test('stage view-only actions never execute tools or change judgments',async()=>{
+ const h=stageRuntimeFixture();
+ for(const dataset of [{action:'stage_evidence',jobId:'a'},{action:'stage_tool',jobId:'a',toolKey:'current'},{action:'stage_tab',tab:'log'},{action:'stage_approved'},{action:'stage_back'}])await h.api.handleClick({dataset});
+ assert.equal(h.mutations().length,0);assert.equal(h.api.snapshot().selection.stage_overview,true);
+});
+
+test('forged, stale-policy, automatic, readonly and dirty-input stage actions do not mutate',async()=>{
+ for(const kind of ['foreign','automatic','mismatched','readonly','closed','denied','dirty']){
+  const h=stageRuntimeFixture();let dataset={action:'stage_decide',jobId:'h',judgmentId:'yes',verdict:'completed'};
+  if(kind==='foreign')dataset.jobId='other';if(kind==='automatic')dataset.jobId='a';if(kind==='mismatched')dataset.verdict='failed';if(kind==='readonly')h.state.run.can_write=false;if(kind==='closed')h.state.run.status='completed';if(kind==='denied')h.state.run.jobs.h.can_decide=false;if(kind==='dirty')h.view.readInputs=()=>({dirty:true});
+  await h.api.handleClick({dataset});assert.equal(h.mutations().length,0,kind);
+ }
+});
+
+test('legacy human choices retain the existing verdict API and never invent a conditional policy',async()=>{
+ const h=stageRuntimeFixture();delete h.state.run.definition.nodes.h.judgments;
+ await h.api.handleClick({dataset:{action:'stage_decide',jobId:'h',verdict:'completed'}});
+ assert.equal(h.mutations().length,1);assert.equal(h.mutations()[0].body.verdict,'completed');assert.equal(h.mutations()[0].body.judgment_id,undefined);
+});
+
+test('execution history keeps the picker available for running and access-masked attempts',()=>{
+ const {state}=stageRuntimeFixture();state.run.jobs.a={status:'running',attempt_id:'a2'};
+ state.run.attempts=[{id:'a1',job_id:'a',number:1,status:'succeeded',evidence_access:'requires_current_source_access',snapshot:{arguments:{private:'hidden'}},result:{summary:'hidden-output'}},{id:'a2',job_id:'a',number:2,status:'running'}];
+ for(const id of ['a1','a2']){const out=html('workStageHTML(state,{stage_evidence:"a",stage_attempts:{a:id}},state.run.definition.nodes.t).body',{state,id});assert.match(out,/data-stage-attempt/);assert.doesNotMatch(out,/hidden-output|>hidden</);}
+});
+
+test('prior tool evidence never combines a newer job judgment with the selected attempt',()=>{
+ const {state}=stageRuntimeFixture();state.run.definition.nodes.a.judgments=state.run.definition.nodes.h.judgments;
+ state.run.attempts=[{id:'a1',job_id:'a',number:1,status:'succeeded',result:{summary:'first'}},{id:'a2',job_id:'a',number:2,status:'succeeded',result:{summary:'second'}}];
+ const old={item_id:'job',attempt_id:'a1',verdict:'failed',note:'\n선택한 판정: 미승인 (no)'},current={item_id:'job',attempt_id:'a2',verdict:'completed',note:'\n선택한 판정: 승인 (yes)'};
+ state.run.jobs.a={status:'completed',attempt_id:'a2',decisions:{job:current},decision_history:[old,current]};
+ const out=html('workStageHTML(state,{stage_evidence:"a",stage_attempts:{a:"a1"}},state.run.definition.nodes.t).body',{state});
+ assert.match(out,/당시 작업 판정 · 미승인/);assert.doesNotMatch(out,/작업 판정 · 승인/);
+});
+
+test('stage log does not promote result item decisions to whole Job judgments',()=>{
+ const {state}=stageRuntimeFixture();state.run.jobs.a.decision_history=[{item_id:'inner-item',verdict:'failed',actor_id:'item-actor',note:'inner item result'}];
+ const out=html('workStageHTML(state,{stage_tab:"log"},state.run.definition.nodes.t).body',{state});assert.doesNotMatch(out,/item-actor|inner item result/);
+});
+
+test('queued stage execution is visible and prevents a second stage start',()=>{
+ const {state}=stageRuntimeFixture();state.operations.scope_runs=[{id:'scope1',run_id:'r',node_id:'t',status:'queued'}];
+ const out=html('workStageHTML(state,{},state.run.definition.nodes.t).body',{state});
+ assert.match(out,/data-action="execute_scope"[^>]* disabled/);assert.match(out,/실행 대기/);
+});
+
+test('history link selects only an attempt belonging to its actual row and opens that evidence',async()=>{
+ const h=stageRuntimeFixture();h.state.run.attempts=[{id:'a1',job_id:'a',number:1,status:'succeeded'},{id:'h1',job_id:'h',number:1,status:'succeeded'}];
+ await h.api.handleClick({dataset:{action:'stage_tab',tab:'log'}});await h.api.handleClick({dataset:{action:'stage_evidence',jobId:'a',attemptId:'h1'}});
+ assert.equal(h.api.snapshot().selection.stage_tab,'log');
+ await h.api.handleClick({dataset:{action:'stage_evidence',jobId:'a',attemptId:'a1'}});
+ const selection=h.api.snapshot().selection;assert.equal(selection.stage_tab,'work');assert.equal(selection.stage_evidence,'a');assert.equal(selection.stage_attempts.a,'a1');assert.equal(h.mutations().length,0);
 });

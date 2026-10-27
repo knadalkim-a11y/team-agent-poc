@@ -26,7 +26,7 @@
   // The last successful workspace remains visible during route validation.
   // References and queued actions still wait for the current route and Chat.
   const chatPrepared=()=>readyRoute===route&&(!route||route===location.pathname+location.search+'#chat')&&(!nativeTicket||nativeTicket.phase==='leaving');
-  function render(){bindHosts();const value=snapshot();view.render(value);if(available()&&!value.target_loading&&!evidenceUnavailable&&!(scopeLoading&&error)&&state&&selection.mode==='author'&&selection.tab!=='workspace_admin'&&workCanCreate(capabilities()))designer.render({state:{...state,capabilities:capabilities()},scope_loading:scopeLoading,selection:{...clone(selection),chat_id:chatId()},host:view.authoringHost()});}
+  function render(){bindHosts();const value=snapshot();view.render(value);positionStageMenu();if(available()&&!value.target_loading&&!evidenceUnavailable&&!(scopeLoading&&error)&&state&&selection.mode==='author'&&selection.tab!=='workspace_admin'&&workCanCreate(capabilities()))designer.render({state:{...state,capabilities:capabilities()},scope_loading:scopeLoading,selection:{...clone(selection),chat_id:chatId()},host:view.authoringHost()});}
   function setBusy(value){busy=value;view.setBusy(value);designer.setBusy?.(value);if(value){clearTimeout(refreshTimer);refreshTimer=setTimeout(refresh,250);}}
   const adminNativePage=()=>Boolean(screen().admin);
   const nativePage=()=>Boolean(screen().native);
@@ -309,6 +309,7 @@
   function commitSelection(patch){
     if(pendingNativeAction?.applied)pendingNativeAction=null;clearTimeout(reviewTimer);
     const previous={...selection},before=context(),next={...selection,chat_reference:null,...patch};
+    if(['system_id','factory_id','workflow_id','run_id'].some(key=>previous[key]!==next[key]))Object.assign(next,{stage_id:'',stage_overview:false,stage_tab:'work',stage_evidence:'',stage_tool:'',stage_attempts:{},stage_approved_expanded:false,stage_verdict_job:''});
     const sameInputTarget=token()===identity&&previous.run_id&&previous.job_id&&
       ['mode','system_id','factory_id','workflow_id','run_id','job_id'].every(key=>previous[key]===next[key])&&
       Object.keys(patch).every(key=>key==='tab'||JSON.stringify(patch[key])===JSON.stringify(previous[key]));
@@ -495,8 +496,75 @@
     const body=kind==='factory'?{action:'save_factory',factory_id:values.factory_id,system_id:values.system_id,name:values.name,attributes:JSON.parse(values.attributes)}:{action:'save_access',access_id:values.access_id,system_id:values.system_id,factory_id:values.factory_id,principal_kind:values.principal_kind,principal_id:values.principal_kind==='group'?values.group_id:values.principal_id,roles:values.roles,active:values.active};
     await mutate({...body,expected_revision:record?.revision || 0});
   }
+  function stageJob(id){
+    const run=state?.run,definition=run?.definition,node=definition?.nodes?.[id],stage=workStageTarget(state,selection);
+    if(!run||selection.mode!=='work'||!stage||node?.type!=='j'||!workUI.lineage(id,definition).some(parent=>parent.id===stage.id))return null;
+    return {run,node,saved:run.jobs?.[id] || {},definition};
+  }
+  function positionStageMenu(){
+    if(!selection.stage_verdict_job)return;
+    const menu=source()?.hosts?.()?.panel?.querySelector?.('#ees-stage-verdict-menu');if(!menu?.getBoundingClientRect)return;
+    const panel=menu.parentElement,trigger=[...(panel?.querySelectorAll('[data-action="stage_verdict"]') || [])].find(item=>item.dataset.jobId===selection.stage_verdict_job);
+    if(!trigger?.getBoundingClientRect)return;
+    const bounds=panel.getBoundingClientRect(),anchor=trigger.getBoundingClientRect(),rect=menu.getBoundingClientRect();
+    const top=anchor.bottom+6+rect.height<=bounds.bottom-8?anchor.bottom+6:anchor.top-6-rect.height;
+    menu.style.left=Math.max(8,Math.min(anchor.left-bounds.left,bounds.width-rect.width-8))+'px';
+    menu.style.top=Math.max(8,top-bounds.top)+'px';
+  }
+  function closeStageMenu(restoreFocus=false){
+    const id=selection.stage_verdict_job;if(!id)return;selection.stage_verdict_job='';render();
+    if(restoreFocus)[...(source()?.hosts?.()?.panel?.querySelectorAll?.('[data-action="stage_verdict"]') || [])].find(item=>item.dataset.jobId===id)?.focus?.({preventScroll:true});
+  }
+  function stageMenuEvent(event){
+    if(!selection.stage_verdict_job)return false;
+    const target=event.target,inMenu=target.closest?.('#ees-stage-verdict-menu');
+    if(event.type==='click'&&!inMenu&&!target.closest?.('[data-action="stage_verdict"]')){closeStageMenu();return false;}
+    if(event.type!=='keydown'||!inMenu&&!target.closest?.('[data-action="stage_verdict"]'))return false;
+    if(event.key==='Escape'||event.key==='Tab'){closeStageMenu(true);if(event.key==='Escape'){event.preventDefault();event.stopPropagation();}return event.key==='Escape';}
+    if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){
+      const options=[...(source()?.hosts?.()?.panel?.querySelectorAll?.('#ees-stage-verdict-menu [role="menuitemradio"]') || [])];if(!options.length)return false;
+      const at=options.indexOf(target),next=event.key==='Home'?0:event.key==='End'?options.length-1:(at+(event.key==='ArrowDown'?1:-1)+options.length)%options.length;
+      options[next].focus();event.preventDefault();event.stopPropagation();return true;
+    }
+    return false;
+  }
+  async function stageAction(action,target){
+    const data=target.dataset;
+    if(action==='stage_open'){
+      if(state?.run?.definition?.nodes?.[data.nodeId]?.type!=='t')return;
+      return select({stage_id:data.nodeId,stage_overview:false,stage_tab:'work',stage_evidence:'',stage_tool:'',stage_verdict_job:'',job_id:'',tab:'overview'},{fetch:false});
+    }
+    if(action==='stage_back')return select({stage_id:'',stage_overview:true,stage_verdict_job:'',job_id:'',tab:'overview'},{fetch:false});
+    if(!workStageTarget(state,selection))return;
+    if(action==='stage_tab'){if(!['work','log','rules'].includes(data.tab))return;selection.stage_tab=data.tab;selection.stage_verdict_job='';render();remember();return;}
+    if(action==='stage_approved'){selection.stage_approved_expanded=!selection.stage_approved_expanded;render();remember();return;}
+    const current=stageJob(data.jobId);if(!current)return;
+    const {run,node,saved,definition}=current;
+    if(action==='stage_evidence'){if(data.attemptId){if(!(run.attempts || []).some(attempt=>attempt.id===data.attemptId&&attempt.job_id===node.id))return;selection.stage_attempts={...(selection.stage_attempts || {}),[node.id]:data.attemptId};selection.stage_tab='work';selection.stage_evidence=node.id;}else selection.stage_evidence=selection.stage_evidence===node.id?'':node.id;selection.stage_tool='';selection.stage_verdict_job='';render();return;}
+    if(action==='stage_tool'){selection.stage_evidence=node.id;selection.stage_tool=selection.stage_tool===data.toolKey?'':data.toolKey;render();return;}
+    if(action==='stage_execute'){
+      if(busy||!workStageCanExecute(node,saved,run,state)||!inputsSaved(true))return;
+      setBusy(true);try{const model=executionModel();await operationsCommand({action:'execute_job',run_id:run.id,job_id:node.id,expected_revision:run.revision,...(model?{model_id:model}:{})});await refresh();}finally{setBusy(false);}return;
+    }
+    if(!workStageCanDecide(node,saved,run))return;
+    if(action==='stage_verdict'){
+      selection.stage_verdict_job=selection.stage_verdict_job===node.id?'':node.id;render();
+      if(selection.stage_verdict_job)source()?.hosts?.()?.panel?.querySelector?.('#ees-work-content')?.addEventListener?.('scroll',()=>closeStageMenu(),{once:true});
+      const menu=source()?.hosts?.()?.panel?.querySelector?.('#ees-stage-verdict-menu');(menu?.querySelector?.('[aria-checked="true"]') || menu?.querySelector?.('[role="menuitemradio"]'))?.focus?.({preventScroll:true});return;
+    }
+    if(action==='stage_decide'){
+      if(busy||!inputsSaved(true))return;
+      const judgment=workStageJudgments(node,definition).find(item=>String(item.id)===(data.judgmentId || data.verdict)&&String(item.status)===data.verdict);
+      if(!judgment)return;
+      const existing=workStageDecision(node,saved,definition);if(existing?.judgment_id===judgment.id)return closeStageMenu(true);
+      selection.stage_verdict_job='';selection.stage_approved_expanded=true;
+      await mutate({action:(node.mode || 'human')==='human'?'human_confirm':'decide',run_id:run.id,job_id:node.id,item_id:'job',expected_revision:run.revision,result_revision:saved.result_revision,verdict:judgment.status,...(!judgment.legacy?{judgment_id:judgment.id}:{})});
+      [...(source()?.hosts?.()?.panel?.querySelectorAll?.('[data-action="stage_verdict"]') || [])].find(item=>item.dataset.jobId===node.id)?.focus?.({preventScroll:true});return;
+    }
+  }
   async function handleClick(target){
     const action=target.dataset.action;if(!action)return;
+    if(action.startsWith('stage_'))return stageAction(action,target);
     if(action==='panel_width'){const width=Number(target.dataset.width);if(Number.isFinite(width)){selection.panel_width=Math.max(400,Math.min(720,Math.round(width)));if(!restored)initialSelectionPatch={...initialSelectionPatch,panel_width:selection.panel_width};remember(selection.panel_width);render();}return;}
     if(action==='category'){const value=target.dataset.category;if(!Object.hasOwn(workUI.categories,value))return;const collapsed=new Set(selection.collapsed || []);if(target.dataset.open==='true')collapsed.delete(value);else collapsed.add(value);selection.collapsed=[...collapsed];remember();return;}
     if(action==='procedure_question'){
@@ -583,7 +651,7 @@
     catch(failure){error=failure.message;render();}
   }
   function handleEvent(event){
-    if(workUI.menuEvent(event))return;
+    if(stageMenuEvent(event)||workUI.menuEvent(event))return;
     const author=designer.handleEvent?.(event);if(author?.handled){if(author.preventDefault){event.preventDefault();if(event.type==='keydown'&&event.key==='Escape')event.stopPropagation();}return;}
     const target=event.target;if(event.type==='submit'&&target.closest?.('[data-ees-work]')){event.preventDefault();return;}if(event.type==='keydown'&&event.repeat&&target.closest?.('[data-mutation]')){event.preventDefault();event.stopImmediatePropagation();return;}if(!target?.closest?.('[data-ees-work]'))return;
     if(event.type==='click'){const buttonTarget=target.closest('button[data-action]');if(!buttonTarget||buttonTarget.disabled)return;event.preventDefault();if(nativePage()&&buttonTarget.closest('#ees-work-entry')&&!['native_open','refresh'].includes(buttonTarget.dataset.action)){returnFromNative(buttonTarget);return;}Promise.resolve(handleClick(buttonTarget)).catch(failure=>{error=failure.message;render();});}
@@ -604,6 +672,7 @@
       }
       optionTimer=setTimeout(()=>loadOptions(),300);
     }
+    if(event.type==='change'&&target.matches?.('[data-stage-attempt]')){const current=stageJob(target.dataset.jobId);if(!current||!(current.run.attempts || []).some(attempt=>attempt.id===target.value&&attempt.job_id===current.node.id))return;selection.stage_attempts={...(selection.stage_attempts || {}),[current.node.id]:target.value};selection.stage_tool='';render();return;}
     if(event.type==='change'&&target.id==='ees-start-factory'){select({factory_id:target.value,start_factory_id:target.value});return;}
     if(event.type==='change'&&target.matches?.('[data-item-verdict]')){const saved=state?.run?.jobs?.[selection.job_id];if(!saved||saved.can_decide===false||saved.decisions?.[target.dataset.itemId])return;const key=selection.run_id+'/'+selection.job_id+'/'+saved.attempt_id;selection.verdict_drafts ||= {};selection.verdict_drafts[key] ||= {};const option=target.selectedOptions?.[0];selection.verdict_drafts[key][target.dataset.itemId]={verdict:option?.dataset.verdict || target.value,...(option?.dataset.judgmentId?{judgment_id:option.dataset.judgmentId}:{})};remember();render();return;}
     if(event.type==='change'&&target.matches?.('[data-list-include]')){view.refreshResults();return;}

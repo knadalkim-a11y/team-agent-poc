@@ -1,5 +1,17 @@
 # 현재 작업 상태
 
+## 2026-10-28 · 운영 단계26판 제품 구현·사내 배포 검증 진행
+
+- **현재 목표:** 기존 제품을 확정 목업과 시각적으로 맞춰 사내에서 확인한다. 사용자가 추가로 지정한 상단 표준화까지 반영한 [26판 HTML](mockups/ees-work/design-mock-06-task-groups.html)·[구현 범위](mockups/ees-work/TASK.md#operations-stage26-product-20261028)를 기준으로 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)를 이어간다. HTML 파일 제공만으로 사내 제품 배포를 완료한 것으로 보지 않는다.
+- **Figma 기준:** [26판 전체 화면](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1705-1020) · [집중4상태](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1705-1328) · [기록/기준](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1705-1851)과 공통 상단 적용 안내를 연결한다.25/20판의 당시 원본과 검증은 보존한다.
+- **공통 상단:** 워크플로우 이름과 필요한 실제 구분 정보만 표시한다. 모든 업무에 ‘회차’를 강제하지 않으며 주기·예약 두 줄은 단계 화면에서 제거한다. 단계 제목·작업 수·실행 버튼·목록 배치는 유지한다.
+- **제품 연결:** 실제 Job을 한 행으로 표시하고 기존 판정·실행 명령과 실제 도구/지침/입출력 기록을 연결한다. 실행 성공/실패를 승인/미승인으로 바꾸지 않는다. 다중 도구의 종합 판정·사유 자동 저장·첨부 연동은 새 기능으로 추가하지 않는다.
+- **확인된 범위:** 초기 관련 Node394개·Python100개, 후속 집중 runtime Node124개, 임시 SQLite의12 Job/판정 재선택/지침/단계 실행 확인을 통과했다. 새 Native2시험은 로컬 제품 빌드가 없어0개 실행·1개 SKIP다. 제품 renderer와 목업의9개 부품 치수·스타일을 비교했지만 합성 화면 검사이며 실제 Native 제품 시각 비교를 대신하지 않는다. 최초 오류·환경 제한과 이후 정확한 검증 head/CI는 [평가 기록](../evals/v4-ui-20260930.md#operations-stage26-product-20261028)에서 구분한다.
+- **사내 설치 상태:** 기존 [문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`를 유지한다. 새 프로그램 적용·로그인·자료·이번 화면의 사내 확인은 아직 완료되지 않았다. #104의 기록을 복제하거나 덮어쓰지 않는다.
+- **다음 하나:** 실제 제품 Native 화면 대조와 최신 통합 head 전체 CI를 마친 뒤 새 CI 프로그램 ZIP의 원본·해시를 고정해 기존 사내 적용 절차로 확인한다. 워크스페이스의 운영 워크플로우 작성 목업은 이 배포 검증 다음 순서다.
+
+> 아래는25판 설계·보완 당시 기록이다. 당시 ‘제품 변경 없음’과 다음 작업 안내는 위의 새 구현·배포 요청으로 대체하며, 승인·실패·이전 검증 근거는 보존한다.
+
 ## 2026-10-28 · 운영 목업25판 확정·Figma 전체 화면 보완
 
 - **사용자 확정:** 현재 운영의 ‘배포 산출물 점검 → 1차 점검’ 목업25판 디자인·모의 동작을 기준으로 확정했다. 이후 수정 가능성을 유지하며 [확정 범위와 원본](mockups/ees-work/TASK.md#work-operations-design)을 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)에 반영한다.

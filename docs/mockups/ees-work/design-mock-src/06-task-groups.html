@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
-<title>시안 · 단계와 작업 실행 · 25판 · EES Workflow</title>
+<title>시안 · 단계와 작업 실행 · 26판 · EES Workflow</title>
 <!--@mock:provenance-->
 <!--@mock:fonts-->
 <!--@mock:product-css-->
@@ -125,7 +125,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-run-nav>span{flex:1}
 #ees-work-panel .ew-run-back{display:inline-flex;align-items:center;gap:6px;min-width:0;min-height:32px;padding:4px 8px;border:0;border-radius:6px;background:transparent;font-size:14px;line-height:20px;font-weight:500;color:var(--ees-text-strong)}
 #ees-work-panel .ew-run-back>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#ees-work-panel .ew-run-nav>.ew-icon-button{display:inline-flex;align-items:center;justify-content:center;width:32px;min-height:32px;padding:0;border-radius:6px}
+#ees-work-panel .ew-run-nav>.ew-icon-button{display:inline-flex;flex:none;align-items:center;justify-content:center;width:32px;min-height:32px;padding:0;border-radius:6px}
 #ees-work-panel .ew-run-nav>:is(.ew-run-back,.ew-icon-button):hover{background:var(--ees-surface-panel-hover)}
 #ees-work-panel .ew-vd-head{padding:20px 20px 0}
 #ees-work-panel .ew-vd-title{display:flex;align-items:center;gap:8px}
@@ -242,9 +242,6 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-note textarea{display:block;box-sizing:border-box;resize:vertical;width:100%;min-height:66px;padding:8px 10px;border:1px solid var(--ees-line-divider);border-radius:6px;background:var(--ees-surface-default);font:inherit;line-height:18px;color:var(--ees-text-primary)}
 </style>
 <style data-new-screen="⑥ 단계와 작업 실행">
-#ees-work-panel .ew-execution-context{display:grid;gap:3px;margin:0 0 16px;padding-bottom:12px;border-bottom:1px solid var(--ees-line-divider);font-size:12px;line-height:18px}
-#ees-work-panel .ew-execution-context b{font-weight:500;color:var(--ees-text-primary)}
-#ees-work-panel .ew-execution-context span,#ees-work-panel .ew-execution-context small{font-size:12px;color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-stage-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
 #ees-work-panel .ew-stage-heading>.ew-vd-title{flex:1;min-width:0;flex-wrap:wrap;gap:4px 8px}
 #ees-work-panel .ew-stage-heading>.ew-vd-title h2{white-space:nowrap;font-size:20px;line-height:28px;font-weight:700}
@@ -361,10 +358,9 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   <div><b>시안</b><span>저장·실행 안 됨</span></div>
   <div><strong id="mock-screen" role="status" aria-live="polite">⑥-1 단계와 작업 실행</strong><button type="button" data-mock-info>안내</button></div>
   <details class="mock-state-picker">
-    <summary>화면 바로 보기 · 25판</summary>
+    <summary>화면 바로 보기 · 26판</summary>
     <nav aria-label="작업별 판정 상태 선택">
       <button type="button" data-mock-state="initial" aria-current="true">⑥-1 단계와 작업 실행</button>
-      <button type="button" data-mock-state="periodic">⑥-주기 · 예약 예시</button>
       <button type="button" data-mock-state="menu">⑥-1a 직접 판정 고르기</button>
       <button type="button" data-mock-state="evidence">⑥-1b 판정 근거</button>
       <button type="button" data-mock-state="log">⑥-기록 · 초안</button>
@@ -378,10 +374,10 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   <section>
     <h2 id="mock-info-title">시안 안내 · 단계와 작업 실행</h2>
     <h3>이 화면</h3>
-    <p>‘배포 산출물 점검’ 절차의 10.27 배포 회차 → 1차 점검 단계입니다. 각 행을 하나의 작업으로 보는 설계 시안이며 작업 12개 중 직접 판정은 3개, 자동 판정은 9개입니다. 확정한 20판을 보존하고 판정 선택 메뉴의 폭과 여백을 줄이고 글자 크기와 그림자를 맞춘 별도 25판입니다. 개별 작업의 실행 버튼은 ‘실행’과 ‘다시 실행’으로 표시합니다. 서비스 7개는 판정 완료, 2개는 실행 필요 상태인 예시이며 실제 제품 실행 구조는 바꾸지 않았습니다.</p>
+    <p>‘배포 산출물 점검’ 절차의 10.27 배포 회차 → 1차 점검 단계입니다. 각 행을 하나의 작업으로 보는 설계 시안이며 작업 12개 중 직접 판정은 3개, 자동 판정은 9개입니다. 25판의 작업 목록과 판정 동작을 유지하면서 단계 상단에 업무 이름과 필요한 경우의 구분 이름만 표시한 26판입니다. 개별 작업의 실행 버튼은 ‘실행’과 ‘다시 실행’으로 표시합니다. 서비스 7개는 판정 완료, 2개는 실행 필요 상태인 예시이며 실제 제품 실행 구조는 바꾸지 않았습니다.</p>
     <h3>직접 판정과 자동 판정</h3>
     <p>사람 작업은 ‘판정 기록’에서 누가 언제 무엇을 선택했는지 보고, 사유를 선택적으로 적습니다. 서비스 작업은 ‘판정 근거’에서 실행한 도구를 보고, 도구 하나를 펼쳐 입력·출력·이번 작업의 판정 기준·판정 결과를 확인합니다. 작업과 도구는 각각 하나씩 펼쳐집니다. 도구 실행 완료와 기준 충족 여부는 서로 다릅니다.</p>
-    <h3>실행 방식과 예약</h3><p>기본은 업무절차의 수시 실행 · 직접 시작이며 자동실행 예약이 없습니다. 확인용 ‘주기 · 예약 예시’는 매주 화요일 09:00 KST와 다음 11.03 화요일 예약을 보여주는 메타데이터 예시입니다. 예약 실행기나 설정 변경 기능은 없습니다.</p><h3>단계와 작업 실행</h3><p>단계 제목 옆 ‘이 단계 실행’은 실행 가능한 미실행 서비스 작업만 시작합니다. 완료·제외 작업은 건너뛰고 사람의 판정을 대신하지 않습니다. 개별 ‘다시 실행’은 새 실행 기록을 만들고 이전 입력·출력·결과를 보존합니다. 실행 중에는 이전 결과를 이번 실행 결과로 표시하지 않습니다. 이 시안의 실행은 짧은 화면 전환일 뿐 실제 도구를 호출하지 않습니다.</p><h3>해 볼 것</h3>
+    <h3>화면의 위치</h3><p>맨 위에는 업무 이름을 표시하고, 구분할 대상이 있으면 그 이름을 함께 표시합니다. 이 예시의 ‘10.27 배포 회차’는 배포 대상을 구분하는 이름이며 모든 업무에 회차가 필요한 것은 아닙니다.</p><h3>단계와 작업 실행</h3><p>단계 제목 옆 ‘이 단계 실행’은 실행 가능한 미실행 서비스 작업만 시작합니다. 완료·제외 작업은 건너뛰고 사람의 판정을 대신하지 않습니다. 개별 ‘다시 실행’은 새 실행 기록을 만들고 이전 입력·출력·결과를 보존합니다. 실행 중에는 이전 결과를 이번 실행 결과로 표시하지 않습니다. 이 시안의 실행은 짧은 화면 전환일 뿐 실제 도구를 호출하지 않습니다.</p><h3>해 볼 것</h3>
     <ol><li>실행이 필요한 작업을 하나 실행하거나 단계 제목 옆 ‘이 단계 실행’ 누르기</li><li>완료된 작업을 다시 실행하고 이전 기록 보기</li><li>직접 판정 작업의 ‘판정 필요’에서 값 고르기</li><li>사람 작업의 ‘판정 기록’에서 사유 적기</li><li>서비스 작업의 ‘판정 근거’에서 도구를 하나씩 펼치기</li><li>판정 결과에서 나머지 승인 항목 펼치기</li><li>‘기록’과 ‘기준’ 탭 보기</li></ol>
     <h3>의견 보내는 법</h3>
     <p>왼쪽 아래 화면 번호와 함께 짧게 적어 주세요. 예) ⑥-1 고르기 목록 글자가 작다</p>
@@ -390,7 +386,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     <h3>이 시안은</h3>
     <p>실제 프로그램의 글꼴 파일과 화면 CSS(색, 크기, 탭·꼬리표·단추 부품)를 그대로 써서 만들었습니다. 왼쪽 메뉴 접기·펼치기와 창 크기에 따른 업무 패널 겹침은 제품 기준을 따릅니다. 도구 이름·입력·출력·지침·시각은 화면 검토를 위한 합성 예시이며 실제 도구 실행 기록이 아닙니다. 문서 존재와 접근 여부의 예시를 보여주며 내용 적정성은 판단하지 않습니다. 여러 도구 결과를 최종 판정으로 합치는 실제 규칙·저장은 아직 정하지 않았습니다. ‘배치 주기 조정’의 첨부는 판정 참고 자료의 표시 예시이며 실제 파일 내용이나 열기·업로드 기능과 연결되지 않습니다. 실제 저장·도구 실행·대화는 되지 않으며, 왼쪽 메뉴 이동과 가운데 대화는 모양만 같습니다. 사내 PC에서 파일이 열리는지도 확인해 주세요.</p>
     <h3>판</h3>
-    <p>시안 25판 · 2026-10-28 · 단계와 작업 실행 · 디자인 확정</p>
+    <p>시안 26판 · 2026-10-28 · 단계와 작업 실행 · 공통 단계 상단 반영</p>
     <footer><button type="button" data-mock-reset>처음부터 다시</button><button type="button" data-mock-close>닫기</button></footer>
   </section>
 </div>
@@ -399,6 +395,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 (() => {
   'use strict';
   const ACTOR = '김광재';
+  const SCREEN = Object.freeze({workflowName: '배포 산출물 점검', contextLabel: '10.27 배포 회차'});
   const ICON = {down: 'v4/f17e6.svg', right: 'v4/69549.svg', check: 'v4/9d8d5.svg', clip: 'v4/ea639.svg', back: 'v4/eb94a.svg', more: 'v4/a953c.svg', panel: 'v4/7bb4a.svg'};
   // Small inline run glyph; retry reuses the existing mock chat refresh path.
   const ACTION_ICON = {play: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.5 2.75L11 7L4.5 11.25V2.75Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg>', retry: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.5V5h-2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'};
@@ -436,7 +433,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     S = {
       items: SEED.map(([id, name, verdict, reason, file]) => ({id, name, verdict, reason: reason || '', file: file || '', handler: HUMAN_IDS.has(id) ? 'human' : 'service', history: [], note: '', attempts: [], running: false, excluded: false})),
       picked: null, flash: null, expanded: false, evidence: null, tool: null, tab: 'work', menu: null,
-      mode: 'adhoc', runSerial: 0, stageIds: [], lastRun: null, attemptView: {}, log: [], width: 480, open: true
+      runSerial: 0, stageIds: [], lastRun: null, attemptView: {}, log: [], width: 480, open: true
     };
     S.items.filter(item => item.handler === 'service' && item.verdict).forEach(item => {
       item.attempts.push(makeAttempt(item, 1, 14*3600+20*60));
@@ -482,7 +479,6 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   function humanRemaining() { return humanItems().filter(item => !item.verdict).length; }
   function stateKey() {
     if (S.tab !== 'work') return S.tab;
-    if (S.mode === 'periodic') return 'periodic';
     if (S.menu) return 'menu';
     if (S.evidence) return 'evidence';
     return 'initial';
@@ -502,7 +498,6 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     const width = S.width;
     reset();
     S.width = width;
-    if (key === 'periodic') S.mode = 'periodic';
     if (key === 'log' || key === 'rules') S.tab = key;
     if (key === 'menu') S.menu = 'CR-2207';
     if (key === 'evidence') S.evidence = 'CR-2204';
@@ -525,15 +520,15 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     button.textContent = expanded ? '시안 도구 접기' : '시안';
   }
 
-  function headerHTML() {
-    return `<header class="ew-panel-header ew-run-nav"><button type="button" class="ew-run-back" data-mock-toast="시안: 회차 화면은 이번 시안에 없습니다">${icon(ICON.back)}<span>10.27 배포 회차</span></button><span></span><button type="button" class="ew-icon-button" aria-label="더 보기" data-mock-toast="시안: 메뉴 항목은 아직 정하지 않았습니다">${icon(ICON.more)}</button><button type="button" class="ew-icon-button" aria-label="업무 패널 닫기" data-panel-close>${icon(ICON.panel)}</button></header>`;
+  function headerHTML({workflowName, contextLabel = ''} = SCREEN) {
+    const path = contextLabel ? `${workflowName} / ${contextLabel}` : workflowName;
+    return `<header class="ew-panel-header ew-run-nav"><button type="button" class="ew-run-back" data-mock-toast="시안: 상위 업무 화면은 이번 시안에 없습니다" title="${esc(path)}">${icon(ICON.back)}<span>${esc(path)}</span></button><span></span><button type="button" class="ew-icon-button" aria-label="더 보기" data-mock-toast="시안: 메뉴 항목은 아직 정하지 않았습니다">${icon(ICON.more)}</button><button type="button" class="ew-icon-button" aria-label="업무 패널 닫기" data-panel-close>${icon(ICON.panel)}</button></header>`;
   }
   function headHTML() {
     const c = counts(), people = humanItems(), remaining = humanRemaining(), services = S.items.filter(item => item.handler === 'service');
     const finished = services.filter(item => item.attempts.length && !item.running), pending = executable().length, active = services.filter(item => item.running).length;
     const bar = [['ok', c.ok], ['cond', c.cond], ['bad', c.bad], ['none', c.none+c.pending+c.running]].filter(([, n]) => n).map(([v, n]) => `<i data-verdict="${v}" style="flex:${n} 1 0"></i>`).join('');
-    const schedule = S.mode === 'periodic' ? '<b>업무절차 · 주기 실행</b><span>자동실행 예약 · 매주 화요일 09:00 KST</span><small>다음 11.03(화) 09:00 · 예약 예시</small>' : '<b>업무절차 · 수시 · 직접 시작</b><span>자동실행 예약 없음</span>';
-    return `<div class="ew-vd-head"><div class="ew-execution-context" data-execution-context>${schedule}</div><div class="ew-stage-heading"><div class="ew-vd-title"><h2>1차 점검</h2></div><button type="button" class="ew-primary ew-stage-run-button" data-stage-run aria-label="${S.stageIds.length && active ? '1차 점검 실행 중' : '1차 점검 단계 실행'}"${!pending || active ? ' disabled' : ''}>${ACTION_ICON.play}<span>${S.stageIds.length && active ? '실행 중' : '이 단계 실행'}</span></button></div><p class="ew-vd-sub"><span>작업 12개</span></p><div class="ew-vd-progress"><div class="ew-vd-bar" role="img" aria-label="현재 선택과 서비스 결과: 승인 ${c.ok}건, 조건부 승인 ${c.cond}건, 미승인 ${c.bad}건, 판정 필요 ${remaining}건, 실행 필요 ${pending}건, 실행 중 ${active}건">${bar}</div><p class="ew-vd-statusline" data-person><b>직접 판정</b><span>선택 ${people.length - remaining}/${people.length}</span></p><p class="ew-vd-statusline" data-service><b>자동 판정 완료 ${finished.length}/9</b><span>승인 ${finished.filter(item=>item.verdict==='ok').length} · 미승인 ${finished.filter(item=>item.verdict==='bad').length}${active ? ` · 실행 중 ${active}` : ''}</span></p></div></div>`;
+    return `<div class="ew-vd-head"><div class="ew-stage-heading"><div class="ew-vd-title"><h2>1차 점검</h2></div><button type="button" class="ew-primary ew-stage-run-button" data-stage-run aria-label="${S.stageIds.length && active ? '1차 점검 실행 중' : '1차 점검 단계 실행'}"${!pending || active ? ' disabled' : ''}>${ACTION_ICON.play}<span>${S.stageIds.length && active ? '실행 중' : '이 단계 실행'}</span></button></div><p class="ew-vd-sub"><span>작업 12개</span></p><div class="ew-vd-progress"><div class="ew-vd-bar" role="img" aria-label="현재 선택과 서비스 결과: 승인 ${c.ok}건, 조건부 승인 ${c.cond}건, 미승인 ${c.bad}건, 판정 필요 ${remaining}건, 실행 필요 ${pending}건, 실행 중 ${active}건">${bar}</div><p class="ew-vd-statusline" data-person><b>직접 판정</b><span>선택 ${people.length - remaining}/${people.length}</span></p><p class="ew-vd-statusline" data-service><b>자동 판정 완료 ${finished.length}/9</b><span>승인 ${finished.filter(item=>item.verdict==='ok').length} · 미승인 ${finished.filter(item=>item.verdict==='bad').length}${active ? ` · 실행 중 ${active}` : ''}</span></p></div></div>`;
   }
   function tabsHTML() {
     return `<nav class="ew-tabs" aria-label="작업 화면">${[['work', '작업'], ['log', '기록'], ['rules', '기준']].map(([key, label]) => `<button type="button" data-vd-tab="${key}" aria-pressed="${S.tab === key}">${label}</button>`).join('')}</nav>`;
