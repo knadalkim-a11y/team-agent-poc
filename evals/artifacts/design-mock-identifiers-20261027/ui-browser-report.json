@@ -1,0 +1,47 @@
+{
+  "checkedAt": "2026-10-27T02:24:26.548Z",
+  "source": "docs/mockups/ees-work/design-mock-src/04-cr-verdict.html",
+  "sourceSha256": "6fbe80529176dfb1fb1483bd7de91372e54cfa82d004da9c726756866aa34ec2",
+  "artifact": "docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+  "artifactSha256": "b89d1c3baf5f74e3d65b1c5a1b55d1e9249ed2788b7c5e63e9da95472ba24355",
+  "artifactBytes": 388866,
+  "checks": [
+    {
+      "name": "Visible and accessible identifiers are removed; empty subtitles are omitted and titles remain non-interactive",
+      "result": "pass"
+    },
+    {
+      "name": "All twelve internal item IDs and three-human/nine-service handlers remain intact",
+      "result": "pass"
+    },
+    {
+      "name": "Named evidence controls open the intended human/service rows while internal aria-controls IDs remain stable",
+      "result": "pass"
+    },
+    {
+      "name": "Name-based accessible controls and existing ID matching select only the intended human row; service results are unchanged",
+      "result": "pass"
+    },
+    {
+      "name": "Records use task names; rules/help/chat remain identifier-free and reset preserves the original selection state",
+      "result": "pass"
+    },
+    {
+      "name": "Default and expanded evidence fit 1920px/480px without horizontal overflow",
+      "result": "pass"
+    },
+    {
+      "name": "Offline smoke has no external requests or browser errors",
+      "result": "pass"
+    }
+  ],
+  "screenshots": [
+    "mock-revision9-1920-panel.png",
+    "mock-revision9-1920-batch-evidence.png",
+    "mock-revision9-480-full.png"
+  ],
+  "externalRequests": [],
+  "errors": [],
+  "browser": "134.0.6998.35",
+  "result": "pass"
+}

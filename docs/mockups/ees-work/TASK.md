@@ -1,5 +1,14 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="design-mock-identifiers-20261027"></a>
+
+## 2026-10-27 · 업무 목업 9판 · 예시 번호 표시 제거
+
+- **요청:** 사용자는 실제 관리 중인 CR이 아닌 번호는 삭제하고 현재 목업에 각 항목의 상세 페이지가 있는지 확인해 달라고 했다. [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `05611ebb58b595ebb2aeda3b9586871a29cc6487`에서 같은 [목업](design-mock-04-cr-verdict.html)을 갱신한다.
+- **변경·보존:** 목록의 CR 번호를 제거하고 기록·접근성 이름은 항목 이름으로 표시한다. 제목·안내의 CR 약어도 일반 표현으로 정리한다. 내부 항목 ID는 선택·근거 연결에 사용하므로 유지하며 사람3건 선택·서비스9건 읽기 전용과 기존 근거·예시는 바꾸지 않는다.
+- **상세 화면:** 현재 목업에는 각 항목의 이름을 눌러 들어가는 별도 상세 페이지가 없다. 판정 선택·목록 안의 근거 펼침·기록/기준 탭만 있으며 이번 요청으로 상세 페이지나 새 동작을 추가하지 않는다. 실제 제품의 작성 화면에 있는 작업 설정 상세와 이 목업의 개별 항목 상세를 혼동하지 않는다.
+- **기록:** [9판 평가](../../../evals/v4-ui-20260930.md#design-mock-identifiers-20261027) · Figma [9판 메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1633-6115)·[C83](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1633-2). Figma는 메모·기록만 반영하며 전체 화면 동기화·전체 목업 확정·실제 제품 구현은 미완료다.
+
 <a id="design-mock-copy-20261027"></a>
 
 ## 2026-10-27 · 업무 목업 8판 · 임의 최종본 확인 안내 제거
