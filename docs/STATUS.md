@@ -1,14 +1,16 @@
 # 현재 작업 상태
 
-## 2026-10-28 · 업무 목업 25판 · 판정 선택 메뉴 검토
+## 2026-10-28 · 단계 화면 공통 설계 기준 반영
 
-- **현재 요청:** 클릭해서 열리는 판정 선택 메뉴의 폭·여백·글자 크기·그림자를 가볍게 정리한다. [범위](mockups/ees-work/TASK.md#design-mock-verdict-menu-20261028). 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)를 갱신한다.
-- **최신 검토안:** [25판 HTML](mockups/ees-work/design-mock-06-task-groups.html)·[원본](mockups/ees-work/design-mock-src/06-task-groups.html). 메뉴 폭180px·글자13px와 작은 여백을 적용하고 흰 배경·기존 선택지/체크 표시·위치 계산·키보드 동작은 유지한다. [확인 기록](../evals/v4-ui-20260930.md#design-mock-verdict-menu-20261028).
-- **Figma·확인:** [25판 검토 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1681-8037)·[C101](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1682-8674)에 기존3패널과 열린 메뉴를 반영했다. 환경 복구 후 메뉴 크기·체크·키보드·1920/480px 집중 확인4개는 첫 실행PASS다. 브라우저 준비 실패와 Figma 보존 조회의 한계, 기존1px/글꼴 차이는 평가에 기록했다.
+- **사용자 합의:** 다른 워크플로우에도 공통 배치·버튼·상세 표시 방식을 쓰고 실행 조건·판정 방식·완료 기준은 실제 작업 정의를 따른다. [공통 설계 관리 원본](mockups/ees-work/TASK.md#workflow-stage-common-standard-20261028)을 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)에 반영한다.
+- **핵심 구분:** 도구 실행 가능 여부와 최종 판정 주체는 별개다. 실행 상태·판정 결과·업무 완료를 구분한다. 회차·승인 접기·문서 점검 내용은 현재 예시를 모든 업무의 필수 정책으로 확대하지 않는다.
+- **최신 화면:** [25판 HTML](mockups/ees-work/design-mock-06-task-groups.html)·[원본](mockups/ees-work/design-mock-src/06-task-groups.html)은 그대로다. 새 목업 판이나 기능을 추가하지 않았다. 기존 메뉴 검증·환경 복구·Figma 보존 확인의 한계는 [25판 평가](../evals/v4-ui-20260930.md#design-mock-verdict-menu-20261028)에 보존한다.
+- **검증:** [이번 검토와 보존 확인](../evals/v4-ui-20260930.md#workflow-stage-common-standard-20261028). 공통 설계 합의와 현재 화면 최종 확정·실제 제품 구현을 구분한다.
+- **Figma:** [공통 기준 안내](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1685-8248)·[C102](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1685-8264)를 기존25판에서 연결했다. 현재 화면 패널은 유지하고 설계 원칙과 미정 항목을 구분한다.
 - **확정 기준 보존:** [확정20판 계약](mockups/ees-work/TASK.md#design-mock-approved20-20261027)의 commit `0cd79100d65cb831575d4087666272f05a259fad`와05원본/HTML, [Figma 확정20판](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1658-7137)을 그대로 둔다.25판은 별도 검토안이며 자동으로 확정된 것이 아니다.10판·이전 실패/관측도 보존한다.
 - **남은 계약:** 실제 Job/result.items 연결, 직접 판정 저장/최종 확정·권한, 도구 결과 조합·재실행 영향, 실제 도구/스킬 이력과 자료 연결/업로드는 후속 결정/구현 범위다. 첨부는 합성 예시다. 제품 UI·API·저장·엔진·병합·배포는 변경하지 않는다.
 - **사내 적용 원본:** [미병합 문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`에 따라 프로그램 적용 완료·실행 중으로 구분한다. 로그인·기존 자료·새 화면·도구 설정은 별도 미확인이다. #104의 상세 적용 기록은 이 브랜치에 복제하거나 덮어쓰지 않는다.
-- **다음 하나:** 사용자가25판의 열린 판정 선택 메뉴를 검토한다.
+- **다음 하나:** 후속 목업 적용 전에 한 행과 실제 작업의 연결 및 사람 판정 저장·확정 시점을 구체화한다. 이번 문서 반영을 해당 미정 기능의 구현 승인으로 해석하지 않는다.
 
 > 아래 절은 이전 작업 당시 기록이다. #103 병합 대기·사내 적용 미실행 등의 당시 표현은 위 현재 상태와 구분하고, 과거 검증·실패 근거는 보존한다.
 
