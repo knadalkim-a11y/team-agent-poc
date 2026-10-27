@@ -1,5 +1,16 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="design-mock-approved-20261027"></a>
+
+## 2026-10-27 · 업무 목업 10판 · 화면 구성 확정
+
+- **사용자 확정 근거:** “응 지금 방식 괜찮은거같다. 이대로 이 목업은 일단 확정해놓자.” 2026-10-27 KST 대화에서 아래 10판을 현재 화면의 기준으로 확정했다. 전체 프로젝트·다른 화면이나 미정 정책의 확정으로 확대하지 않는다.
+- **고정 원본:** Git commit `7447bd24ff8bff3e5ce2459e03f567765851441b`의 [확정 HTML](https://github.com/knadalkim-a11y/team-agent-poc/blob/7447bd24ff8bff3e5ce2459e03f567765851441b/docs/mockups/ees-work/design-mock-04-cr-verdict.html)과 [편집 원본](https://github.com/knadalkim-a11y/team-agent-poc/blob/7447bd24ff8bff3e5ce2459e03f567765851441b/docs/mockups/ees-work/design-mock-src/04-cr-verdict.html). HTML396,066bytes SHA-256 `e3b562b05c79a5921813da0e8babcab5f6f4ac987196cca29a9f349503a3a8fe`, 원본65,552bytes SHA-256 `544d5bbb92322bb7c21b080c860da2f81a00ea0d80239e2637a527ba00d2590d`. 파일 내용은 바꾸지 않는다. 파일 안 제작 당시 ‘미확정’ 표기와 아래 이전 검토 기록은 이 사용자 확정 기록으로 상태를 갱신한다.
+- **확정 범위:** 단계의 목록에서 각 행을 독립 작업으로 표시한다. 사람은 판정 기록(사람·시각·선택값)과 선택 사유, 서비스는 도구별 입력·출력·이번 작업의 판정 기준·결과를 표시한다. 기본은 접힘이며 작업1개·도구1개씩 펼친다. 서비스 결과는 읽기 전용이다. 별도 상세 페이지·AI 추천·노출 CR 번호·일괄 확정은 없다.
+- **시각 대조 기준:** 화면④-1 기본 목록,④-1b 사람 기록/서비스 도구 요약,④-1c 도구 상세와 사람 선택 메뉴를 기준으로 삼는다. 기존 [10판 증거](../../../evals/v4-ui-20260930.md#design-mock-tool-evidence-20261027)의1920×1080/480×900, 기본 업무 패널 폭480px(가용 폭에 따른 좁은 화면 배치), 넓은 화면 왼쪽 메뉴 펼침/좁은 화면 접힘, 기본 미선택/도구 펼침/사유 입력 상태를 재사용한다. 근거 안 Input·Output·기준·결과와 접힘 상태를 포함해 비교하며 합성 데이터 수치·명칭을 실제 업무 정책으로 고정하지 않는다.
+- **구현 시 별도 정할 사항:** 실제 Job과 결과행의 단위 연결, 실제 실행별 입력/출력/도구·스킬 지침 이력, 사람 판정·사유의 저장/최종 확정 시점과 권한, 여러 도구 결과를 작업 판정에 반영하는 정책은 후속 기능 계약이 필요하다. 이번 확정은 이를 임의로 구현하는 권한이 아니다. 원본과 달리 구현할 사항은 별도 사용자 결정으로 남긴다.
+- **Figma·반영 상태:** [10판 집중 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1635-6114)와 고정 HTML을 연결했다. [확정 메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1638-6276)·[C85](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1638-6284)에 같은 사용자 원문·기준을 기록하고2026-10-27 KST에 읽기와 텍스트 렌더를 확인했다. 사람 기록/전체 셸·펼침 화살표의 Figma 차이는 남아 있으며 HTML을 시각 기준으로 둔다. 사내 열기·사용 검증, 전체 Figma 정합, 제품 구현·병합·배포는 완료로 처리하지 않는다.
+
 <a id="design-mock-tool-evidence-20261027"></a>
 
 ## 2026-10-27 · 업무 목업 10판 · 사람 기록과 도구별 판정 근거
