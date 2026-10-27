@@ -1,14 +1,14 @@
 # 현재 작업 상태
 
-## 2026-10-27 · 업무 목업 23판 · 판정 필요 표시 검토
+## 2026-10-27 · 업무 목업 24판 · 직접 판정 표시 통일 검토
 
-- **현재 요청:** ‘판정 필요’의 보이는 테두리와 배경을 제거하고 회색 글씨·기존 화살표로 정리한다. [범위](mockups/ees-work/TASK.md#design-mock-pending-control-20261027). 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)를 갱신한다.
-- **최신 검토안:** [23판 HTML](mockups/ees-work/design-mock-06-task-groups.html)·[원본](mockups/ees-work/design-mock-src/06-task-groups.html). 선택 전 버튼의 모양만 변경하며 크기·위치·키보드 포커스와 선택 후 표시·동작은 유지한다. [확인 기록](../evals/v4-ui-20260930.md#design-mock-pending-control-20261027).
-- **Figma·확인:** [23판 검토 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1678-7545)·[C99](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1679-7754)에3패널을 반영했다. 판정 전 닫힘/열림·키보드 포커스·선택 후 표시·1920/480px를 확인했고22판/20판을 보존했다. 측정 조건을 다르게 읽은 첫 관측2건과 정정 결과, 기존 Figma1px·글꼴 차이는 평가에 기록했다.
-- **확정 기준 보존:** [확정20판 계약](mockups/ees-work/TASK.md#design-mock-approved20-20261027)의 commit `0cd79100d65cb831575d4087666272f05a259fad`와05원본/HTML, [Figma 확정20판](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1658-7137)을 그대로 둔다.23판은 별도 검토안이며 자동으로 확정된 것이 아니다.10판·이전 실패/관측도 보존한다.
+- **현재 요청:** 직접 판정의 승인/조건부 승인/미승인도 선택 전과 같은 형태로 정리한다. [범위](mockups/ees-work/TASK.md#design-mock-verdict-control-20261027). 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)를 갱신한다.
+- **최신 검토안:** [24판 HTML](mockups/ees-work/design-mock-06-task-groups.html)·[원본](mockups/ees-work/design-mock-src/06-task-groups.html). 모든 직접 판정 버튼의 테두리·배경을 없애고 결과색 점·문구·화살표를 유지한다. 크기·위치·키보드 포커스와 기존 선택/실행/기록 동작은 그대로다. [확인 기록](../evals/v4-ui-20260930.md#design-mock-verdict-control-20261027).
+- **Figma·확인:** [24판 검토 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1680-7754)·[C100](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1680-8349)에3패널을 반영했다. 세 선택값의 닫힘/열림·키보드 포커스·1920/480px 집중 확인은 최초PASS다.23판/20판을 보존했고 기존 Figma1px·글꼴 차이는 평가에 기록했다.
+- **확정 기준 보존:** [확정20판 계약](mockups/ees-work/TASK.md#design-mock-approved20-20261027)의 commit `0cd79100d65cb831575d4087666272f05a259fad`와05원본/HTML, [Figma 확정20판](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1658-7137)을 그대로 둔다.24판은 별도 검토안이며 자동으로 확정된 것이 아니다.10판·이전 실패/관측도 보존한다.
 - **남은 계약:** 실제 Job/result.items 연결, 직접 판정 저장/최종 확정·권한, 도구 결과 조합·재실행 영향, 실제 도구/스킬 이력과 자료 연결/업로드는 후속 결정/구현 범위다. 첨부는 합성 예시다. 제품 UI·API·저장·엔진·병합·배포는 변경하지 않는다.
 - **사내 적용 원본:** [미병합 문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`에 따라 프로그램 적용 완료·실행 중으로 구분한다. 로그인·기존 자료·새 화면·도구 설정은 별도 미확인이다. #104의 상세 적용 기록은 이 브랜치에 복제하거나 덮어쓰지 않는다.
-- **다음 하나:** 사용자가23판의 판정 필요 표시를 검토한다.
+- **다음 하나:** 사용자가24판의 선택 전후 판정 표시를 검토한다.
 
 > 아래 절은 이전 작업 당시 기록이다. #103 병합 대기·사내 적용 미실행 등의 당시 표현은 위 현재 상태와 구분하고, 과거 검증·실패 근거는 보존한다.
 

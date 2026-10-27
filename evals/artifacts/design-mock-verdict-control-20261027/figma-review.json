@@ -1,0 +1,152 @@
+{
+  "revision": 24,
+  "status": "review_only_not_approved",
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "pageId": "897:761",
+  "nodes": {
+    "board": "1680:7754",
+    "memo": "1680:7755",
+    "default": "1680:7763",
+    "directRecord": "1680:7885",
+    "running": "1680:8016",
+    "C100": "1680:8349",
+    "latestWorkshop": "1674:7336",
+    "latestFeatureMap": "1288:45"
+  },
+  "boardUrl": "https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1680-7754",
+  "changelogUrl": "https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1680-8349",
+  "source": {
+    "path": "docs/mockups/ees-work/design-mock-src/06-task-groups.html",
+    "bytes": 76356,
+    "sha256": "2e115fd06d038c369700bbc0b97bbcb70012fe0e9a614cb49118c30722a93efd"
+  },
+  "html": {
+    "path": "docs/mockups/ees-work/design-mock-06-task-groups.html",
+    "bytes": 406723,
+    "sha256": "f5cba8328ea66a8fcf8d8ef594a2aaf464471ec8dfbb7f54e0472ba74b180265"
+  },
+  "branch": "fix/design-mock-review-20261027",
+  "PR": 105,
+  "change": {
+    "scope": "Unify all direct-verdict selections to borderless presentation; existing 3 native panels contain 2 selected conditional controls",
+    "selectedControlsChanged": 2,
+    "pendingControlsUnchanged": 7,
+    "fill": "none",
+    "border": "unbound SOLID opacity 0, original border geometry retained",
+    "shadow": "none",
+    "selectedText": "#1f2023",
+    "pendingText": "#5c5e65",
+    "dot": {
+      "size": 8,
+      "color": "#96590c",
+      "x": 11,
+      "y": 11
+    },
+    "arrow": {
+      "size": 14,
+      "color": "#6f717a",
+      "x": 101,
+      "y": 8,
+      "source": "Original SVG size/path preserved; two selected Figma arrows aligned from inherited legacy #6b7280 to actual source #6f717a"
+    },
+    "width": 124,
+    "height": 30,
+    "font": {
+      "family": "Noto Sans KR",
+      "size": 13,
+      "lineHeight": 20,
+      "weight": 500
+    },
+    "selectedTextOffset": {
+      "x": 25,
+      "y": 5
+    },
+    "pendingTextOffset": {
+      "x": 11,
+      "y": 5
+    },
+    "geometryUnchanged": true,
+    "behavior": "unchanged",
+    "htmlKeyboardFocus": "2px focus-visible outline retained; no extra Figma state",
+    "htmlSelectedValuesCoveredByCSS": [
+      "승인",
+      "조건부 승인",
+      "미승인"
+    ],
+    "figmaSelectedExample": "조건부 승인 in existing direct-record and running panels; no extra examples added"
+  },
+  "panels": [
+    {
+      "id": "1680:7763",
+      "w": 480,
+      "h": 1080,
+      "bodyH": 749,
+      "scrollTop": 0
+    },
+    {
+      "id": "1680:7885",
+      "w": 480,
+      "h": 1080,
+      "bodyH": 780,
+      "scrollTop": 31
+    },
+    {
+      "id": "1680:8016",
+      "w": 480,
+      "h": 1250,
+      "bodyH": 797,
+      "scrollTop": 0
+    }
+  ],
+  "renderCheck": {
+    "status": "PASS",
+    "method": "One final board screenshot covers all 3 panels; C100 screenshot legible; compared actual mock-revision24-six-states.png",
+    "nativeEditable": true,
+    "descendantCount": 573,
+    "nodeTypeCounts": {
+      "FRAME": 251,
+      "TEXT": 157,
+      "INSTANCE": 56,
+      "VECTOR": 64,
+      "RECTANGLE": 33,
+      "ELLIPSE": 11,
+      "GROUP": 1
+    },
+    "fonts": [
+      "Noto Sans KR"
+    ],
+    "imageFillCount": 0,
+    "selectedBoxesRemoved": true,
+    "controlSizeAndChildCoordinatesPreserved": true
+  },
+  "snapshots": {
+    "method": "FNV32 of ID/name/parent/size/text tree",
+    "revision23": {
+      "node": "1678:7545",
+      "before": "aa834e98",
+      "after": "aa834e98",
+      "unchanged": true
+    },
+    "approved20": {
+      "node": "1658:7137",
+      "before": "3cca26ad",
+      "after": "3cca26ad",
+      "unchanged": true
+    }
+  },
+  "remainingDifferences": [
+    "Existing approximately 1px internal boundary/width difference and native Noto font rasterization remain; exact visual canonical is HTML/PNG at recorded hashes.",
+    "Direct record panel retains intentional scrollTop31 and corresponding clipped context line."
+  ],
+  "boundaries": {
+    "newFunctions": false,
+    "newStates": false,
+    "newExamples": false,
+    "fullShellWork": false,
+    "imageUpload": false,
+    "repoEdits": false,
+    "previous23Unchanged": true,
+    "approved20Unchanged": true
+  },
+  "commitIdentification": "Source, HTML and report share the containing Git commit; SHA-256 values identify reviewed bytes."
+}
