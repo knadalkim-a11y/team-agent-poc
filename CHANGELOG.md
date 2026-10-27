@@ -2,6 +2,7 @@
 
 ## 2026-10-27
 
+- 목업15판에서 판정 주체와 결과, 기존 기록/근거 버튼을 한 줄로 합쳐 작업 행의 높이를 줄인다. 사람 선택/서비스 읽기 전용과 기존 실행·근거 동작은 유지한다. [범위](docs/mockups/ees-work/TASK.md#design-mock-compact-verdict-20261027).
 - 목업14판에서 중복·어려운 안내를 제거하고 사람/서비스 판정을 작업명 아래 같은 위치에 표시한다. 사람의 선택 가능 여부와 서비스 결과의 읽기 전용 성격, 실행 버튼·도구 근거·기존 동작은 유지한다. [범위](docs/mockups/ees-work/TASK.md#design-mock-copy-verdict-alignment-20261027).
 - 사용자 요청으로 목업13판 제목 옆 ‘사람 판정 3건’과 작업 수 옆 시계·‘오늘 18:00까지’를 제거한다. 12판 버튼 배치·실행/판정 동작과 확정10판은 유지한다. [범위](docs/mockups/ees-work/TASK.md#design-mock-heading-cleanup-20261027).
 - 목업12판의 단계 실행을 제목 오른쪽으로 옮기고 개별 실행/재실행의 위치·크기·강조를 통일한다. 실행·판정·이력 동작과 확정10판은 유지한다. [시각 개선 범위](docs/mockups/ees-work/TASK.md#design-mock-button-layout-20261027).

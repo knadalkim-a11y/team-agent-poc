@@ -1,5 +1,15 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="design-mock-compact-verdict-20261027"></a>
+
+## 2026-10-27 · 업무 목업 15판 · 판정 주체와 결과 한 줄 배치
+
+- **요청·기준:** 사용자는 ‘서비스 판정/사람 판정’과 ‘승인/미승인’이 서로 다른 줄에 있어 정보량에 비해 행이 높다고 지적했다. 같은 [Draft PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `89a8ac70349e859168c7cb526e273281f0f7c3d4`의 [05목업](design-mock-05-execution.html)·[원본](design-mock-src/05-execution.html)을15판으로 정리한다.
+- **배치:** 작업명 아래 한 줄에 판정 주체→결과를 같은 순서로 배치하고 기존 판정 기록/근거 버튼을 오른쪽에 둔다. 사람만 판정 선택 상자와 화살표를 유지하며 서비스 결과는 읽기 전용이다. 실행/재실행은 작업명 오른쪽을 유지한다. 별도 주체/근거 하단 줄을 없애고 실제로 있는 첨부·사유만 필요한 공간을 쓴다.
+- **검토 경계:** 1920/480px에서 실제 행 높이 감소·판정 정렬·메뉴/근거 접근과 글자/버튼 크기를 확인한다. [15판 평가](../../../evals/v4-ui-20260930.md#design-mock-compact-verdict-20261027)에 근거를 남긴다. 표시 배치만 바꾸며 기존 데이터·선택·실행·이력·사유와 확정10판04파일을 보존한다. 새 기능·상태·안내나 제품 UI·API·저장·엔진 변경, 병합·배포는 추가하지 않는다.15판은 사용자 검토 전이다.
+
+- **Figma:** [15판 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1650-6618) · [기본](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1650-6628) · [이전 근거](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1650-6753) · [두 판정 비교](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1650-6824) · [메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1650-6619) · [C90](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1651-6834). 편집 가능3패널을 반영하고 실제 렌더를 확인했다. 사람75px/첨부103px/서비스87px와 점 X111·텍스트 X125가 HTML과 일치한다. 15판 전용 컴포넌트1651:6717(구성 영역1651:6716)을 사용하며 원래 컴포넌트와10–14판을 보존한다. 전체 셸/다른 상태·기존 펼침 화살표 차이는 미동기화 범위로 남기고 HTML을 시각 기준으로 둔다.
+
 <a id="design-mock-copy-verdict-alignment-20261027"></a>
 
 ## 2026-10-27 · 업무 목업 14판 · 안내 정리와 판정 위치 통일

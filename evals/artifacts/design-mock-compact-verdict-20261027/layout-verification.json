@@ -1,0 +1,356 @@
+{
+  "checkedAt": "2026-10-27T05:22:45.817Z",
+  "baseline": "89a8ac70349e859168c7cb526e273281f0f7c3d4",
+  "source": {
+    "path": "docs/mockups/ees-work/design-mock-src/05-execution.html",
+    "bytes": 75783,
+    "sha256": "b03477e2044c20383a1a29bf2a615d332da41ca7ae05c4ab570c666f70177035"
+  },
+  "artifact": {
+    "path": "docs/mockups/ees-work/design-mock-05-execution.html",
+    "bytes": 405832,
+    "sha256": "cb2c9907b9710c3cd1fec5af347615dd4e81eacdb4a6c9982e3225d4503ff843"
+  },
+  "scope": "Layout-only ad-hoc Playwright inspection; no new test framework and no broad execution-suite repeat.",
+  "scriptComparison": "All script bytes identical except itemHTML markup function; approved04 source/generated hashes retained.",
+  "fixture": "Comparison: CR-2203 bad, then CR-2207 ok so CR-2203 has no temporary picked reason. No manual note added.",
+  "screenshots": [
+    "mock-revision15-1920-default.png",
+    "mock-revision15-verdict-comparison.png",
+    "mock-revision15-1920-history.png",
+    "mock-revision15-480-default.png",
+    "mock-revision15-480-menu.png"
+  ],
+  "measurements": {
+    "480": {
+      "beforeInitial": [
+        {
+          "id": "CR-2211",
+          "height": 79,
+          "name": "이력 조회 기간 확대"
+        },
+        {
+          "id": "CR-2212",
+          "height": 79,
+          "name": "오류 메시지 정리"
+        },
+        {
+          "id": "CR-2203",
+          "height": 109,
+          "name": "보고서 출력 양식 변경"
+        },
+        {
+          "id": "CR-2207",
+          "height": 137,
+          "name": "배치 주기 조정"
+        },
+        {
+          "id": "CR-2210",
+          "height": 109,
+          "name": "권한 그룹 정리"
+        },
+        {
+          "id": "CR-2204",
+          "height": 131,
+          "name": "대시보드 필터 추가"
+        },
+        {
+          "id": "CR-2201",
+          "height": 109,
+          "name": "로그인 화면 문구 수정"
+        }
+      ],
+      "afterInitial": [
+        {
+          "id": "CR-2211",
+          "height": 75,
+          "name": "이력 조회 기간 확대"
+        },
+        {
+          "id": "CR-2212",
+          "height": 75,
+          "name": "오류 메시지 정리"
+        },
+        {
+          "id": "CR-2203",
+          "height": 75,
+          "name": "보고서 출력 양식 변경"
+        },
+        {
+          "id": "CR-2207",
+          "height": 103,
+          "name": "배치 주기 조정"
+        },
+        {
+          "id": "CR-2210",
+          "height": 75,
+          "name": "권한 그룹 정리"
+        },
+        {
+          "id": "CR-2204",
+          "height": 87,
+          "name": "대시보드 필터 추가"
+        },
+        {
+          "id": "CR-2201",
+          "height": 87,
+          "name": "로그인 화면 문구 수정"
+        }
+      ],
+      "initialReductions": [
+        {
+          "id": "CR-2211",
+          "before": 79,
+          "after": 75,
+          "saved": 4
+        },
+        {
+          "id": "CR-2212",
+          "before": 79,
+          "after": 75,
+          "saved": 4
+        },
+        {
+          "id": "CR-2203",
+          "before": 109,
+          "after": 75,
+          "saved": 34
+        },
+        {
+          "id": "CR-2207",
+          "before": 137,
+          "after": 103,
+          "saved": 34
+        },
+        {
+          "id": "CR-2210",
+          "before": 109,
+          "after": 75,
+          "saved": 34
+        },
+        {
+          "id": "CR-2204",
+          "before": 131,
+          "after": 87,
+          "saved": 44
+        },
+        {
+          "id": "CR-2201",
+          "before": 109,
+          "after": 87,
+          "saved": 22
+        }
+      ],
+      "comparison": [
+        {
+          "id": "CR-2203",
+          "before": 109,
+          "after": 75,
+          "saved": 34
+        },
+        {
+          "id": "CR-2204",
+          "before": 131,
+          "after": 87,
+          "saved": 44
+        }
+      ],
+      "alignment": [
+        {
+          "id": "CR-2203",
+          "height": 75,
+          "actorX": 77,
+          "resultX": 157,
+          "dotX": 168,
+          "textX": 182,
+          "actorCenterY": 250,
+          "resultCenterY": 250,
+          "evidenceCenterY": 250,
+          "topHeight": 20
+        },
+        {
+          "id": "CR-2204",
+          "height": 87,
+          "actorX": 77,
+          "resultX": 157,
+          "dotX": 168,
+          "textX": 182,
+          "actorCenterY": 337,
+          "resultCenterY": 337,
+          "evidenceCenterY": 337,
+          "topHeight": 32
+        }
+      ]
+    },
+    "1920": {
+      "beforeInitial": [
+        {
+          "id": "CR-2211",
+          "height": 79,
+          "name": "이력 조회 기간 확대"
+        },
+        {
+          "id": "CR-2212",
+          "height": 79,
+          "name": "오류 메시지 정리"
+        },
+        {
+          "id": "CR-2203",
+          "height": 109,
+          "name": "보고서 출력 양식 변경"
+        },
+        {
+          "id": "CR-2207",
+          "height": 137,
+          "name": "배치 주기 조정"
+        },
+        {
+          "id": "CR-2210",
+          "height": 109,
+          "name": "권한 그룹 정리"
+        },
+        {
+          "id": "CR-2204",
+          "height": 131,
+          "name": "대시보드 필터 추가"
+        },
+        {
+          "id": "CR-2201",
+          "height": 109,
+          "name": "로그인 화면 문구 수정"
+        }
+      ],
+      "afterInitial": [
+        {
+          "id": "CR-2211",
+          "height": 75,
+          "name": "이력 조회 기간 확대"
+        },
+        {
+          "id": "CR-2212",
+          "height": 75,
+          "name": "오류 메시지 정리"
+        },
+        {
+          "id": "CR-2203",
+          "height": 75,
+          "name": "보고서 출력 양식 변경"
+        },
+        {
+          "id": "CR-2207",
+          "height": 103,
+          "name": "배치 주기 조정"
+        },
+        {
+          "id": "CR-2210",
+          "height": 75,
+          "name": "권한 그룹 정리"
+        },
+        {
+          "id": "CR-2204",
+          "height": 87,
+          "name": "대시보드 필터 추가"
+        },
+        {
+          "id": "CR-2201",
+          "height": 87,
+          "name": "로그인 화면 문구 수정"
+        }
+      ],
+      "initialReductions": [
+        {
+          "id": "CR-2211",
+          "before": 79,
+          "after": 75,
+          "saved": 4
+        },
+        {
+          "id": "CR-2212",
+          "before": 79,
+          "after": 75,
+          "saved": 4
+        },
+        {
+          "id": "CR-2203",
+          "before": 109,
+          "after": 75,
+          "saved": 34
+        },
+        {
+          "id": "CR-2207",
+          "before": 137,
+          "after": 103,
+          "saved": 34
+        },
+        {
+          "id": "CR-2210",
+          "before": 109,
+          "after": 75,
+          "saved": 34
+        },
+        {
+          "id": "CR-2204",
+          "before": 131,
+          "after": 87,
+          "saved": 44
+        },
+        {
+          "id": "CR-2201",
+          "before": 109,
+          "after": 87,
+          "saved": 22
+        }
+      ],
+      "comparison": [
+        {
+          "id": "CR-2203",
+          "before": 109,
+          "after": 75,
+          "saved": 34
+        },
+        {
+          "id": "CR-2204",
+          "before": 131,
+          "after": 87,
+          "saved": 44
+        }
+      ],
+      "alignment": [
+        {
+          "id": "CR-2203",
+          "height": 75,
+          "actorX": 1461,
+          "resultX": 1541,
+          "dotX": 1552,
+          "textX": 1566,
+          "actorCenterY": 430,
+          "resultCenterY": 430,
+          "evidenceCenterY": 430,
+          "topHeight": 20
+        },
+        {
+          "id": "CR-2204",
+          "height": 87,
+          "actorX": 1461,
+          "resultX": 1541,
+          "dotX": 1552,
+          "textX": 1566,
+          "actorCenterY": 517,
+          "resultCenterY": 517,
+          "evidenceCenterY": 517,
+          "topHeight": 32
+        }
+      ]
+    }
+  },
+  "errors": [],
+  "externalRequests": [],
+  "browser": "134.0.6998.35",
+  "result": "pass",
+  "checks": [
+    "itemHTML/CSS-only layout change; other script and approved04 bytes retained",
+    "All visible initial row heights decrease at1920/480; actor/result/evidence share one line and human/service dot/text X match",
+    "480px keyboard menu opens/selects/closes, full conditional label fits, service result remains read-only",
+    "Moved evidence opens old tool input/output; no horizontal overflow, browser errors or external requests"
+  ]
+}
