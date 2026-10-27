@@ -1,0 +1,35 @@
+{
+  "source": "docs/mockups/ees-work/design-mock-src/04-cr-verdict.html",
+  "sourceSha256": "630723a6c6fda8e35174c55dada4ac911d3f0832e3609f2299811ed0010d51e5",
+  "artifact": "docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+  "artifactSha256": "2603d664814b5e1cc72ff2b5e5019fe3387db244d8a8e47502d364ec7fc9d7f7",
+  "artifactBytes": 391678,
+  "checkedAt": "2026-10-27T01:54:36.407Z",
+  "checks": [
+    {
+      "name": "Embedded product fonts load",
+      "result": "pass",
+      "details": [
+        {
+          "family": "EES Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "EES Noto Sans KR",
+          "status": "loaded"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    "mock-revision6-failure.png"
+  ],
+  "requests": [
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html"
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "browser": "134.0.6998.35",
+  "result": "fail",
+  "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ '결정 필요\\n3'\n- '결정 필요3'\n        ^\n\n    at /workspace/scratch/025fcfa7db3e/review-repo/evals/artifacts/design-mock-clarity-20261027/browser-check.cjs:74:12"
+}
