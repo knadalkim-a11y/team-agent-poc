@@ -1,5 +1,15 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="design-mock-evidence-position-20261027"></a>
+
+## 2026-10-27 · 업무 목업 20판 · 판정 근거와 재실행 분리
+
+- **요청·기준:** 사용자가 근거 버튼 이동과 목록의 ‘테스트 없음’ 제거를 요청했다. 같은 [Draft PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `a8d39c617971975b1abba929e793872461c6301c`의 [05목업](design-mock-05-execution.html)·[원본](design-mock-src/05-execution.html)을 갱신한다.
+- **변경:** 판정 근거를 자동 판정 결과 바로 뒤로 옮기고 판정 기록도 직접 판정 선택 바로 뒤로 맞춘다. 다시 실행은 작업명 오른쪽에 유지하여 근거와 떨어뜨린다. 완료된 자동 판정 행의 짧은 사유 표시만 없애며 도구별 입력/출력/기준/결과와 상세 미승인 사유는 보존한다. 기존 행 높이·글자·버튼 크기·실행 이력/선택 동작은 유지한다.
+- **첨부 논의:** 사용자가 ‘판정 참고 자료’의 출처와 작업/도구에서 필요한 자료의 관계를 물었다. 현재 파일명은 업로드나 실제 도구 입력에 연결되지 않은 합성 예시다. [읽기 전용 조사](../../../evals/v4-ui-20260930.md#design-mock-evidence-position-20261027)에 현재 코드 지원 범위와 설계 제안을 구분한다. 새 업로드·자료 설정·입력 연결 기능은 이번 변경에 추가하지 않는다.
+- **확인·보존:** [20판 평가](../../../evals/v4-ui-20260930.md#design-mock-evidence-position-20261027)에1920/480px 위치·클릭/키보드와 상세 근거 보존을 확인했다. 확정10판04파일·이전 증거를 보존하며 제품 구현·병합·배포로 확대하지 않는다.
+- **Figma:** [20판 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1658-7137)·[메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1658-7138)·[C95](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1660-2).3집중패널과20판 전용 직접 판정 컴포넌트1659:7241을 반영하고 렌더를 확인했다.19판/이전 컴포넌트는 보존한다. 전체 셸/다른 상태·기존 펼침 화살표 차이는 남으며 HTML을 시각 기준으로 둔다.
+
 <a id="design-mock-decision-terms-20261027"></a>
 
 ## 2026-10-27 · 업무 목업 19판 · 직접 판정·자동 판정

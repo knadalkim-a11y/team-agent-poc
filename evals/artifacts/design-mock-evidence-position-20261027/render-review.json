@@ -1,0 +1,190 @@
+{
+  "checkedAt": "2026-10-27T06:26:53.790Z",
+  "baseline": "a8d39c617971975b1abba929e793872461c6301c",
+  "scope": "Move record/evidence next to verdict and hide completed-service inline reason only; no upload/input-flow changes.",
+  "files": [
+    {
+      "path": "docs/mockups/ees-work/design-mock-src/05-execution.html",
+      "bytes": 76512,
+      "sha256": "89ae31f5f1c9147e2b1f44ec6fd4a78a39183f4f711991246c3c817846befb72"
+    },
+    {
+      "path": "docs/mockups/ees-work/design-mock-05-execution.html",
+      "bytes": 407309,
+      "sha256": "26603affded67f81f417c10482f05eb7537a4f5e9d35c54568acd32e34fea136"
+    }
+  ],
+  "checks": [
+    "All script outside itemHTML, underlying reason/tool data and approved04 bytes unchanged",
+    "1920/480 evidence immediately follows result with positive horizontal separation from rerun; same77/87/103 row heights and control sizes",
+    "Clicking moved proof opens original first attempt without rerun; missing-test detail/input/output/criterion remain",
+    "Moved direct record supports keyboard focus/Enter and reason field; selection and small layout remain"
+  ],
+  "geometry": {
+    "480": {
+      "human": {
+        "height": 77,
+        "actor": {
+          "x": 20,
+          "y": 626,
+          "width": 72,
+          "height": 20
+        },
+        "result": {
+          "x": 100,
+          "y": 621,
+          "width": 124,
+          "height": 30
+        },
+        "run": null,
+        "proof": {
+          "x": 232,
+          "y": 623,
+          "width": 79,
+          "height": 26
+        },
+        "proofInsideDecision": true
+      },
+      "service": {
+        "height": 87,
+        "actor": {
+          "x": 20,
+          "y": 941,
+          "width": 72,
+          "height": 20
+        },
+        "result": {
+          "x": 100,
+          "y": 936,
+          "width": 60.875,
+          "height": 30
+        },
+        "run": {
+          "x": 297,
+          "y": 900,
+          "width": 106,
+          "height": 32
+        },
+        "proof": {
+          "x": 168.875,
+          "y": 938,
+          "width": 79,
+          "height": 26
+        },
+        "proofInsideDecision": true
+      },
+      "attached": {
+        "height": 103,
+        "actor": {
+          "x": 20,
+          "y": 703,
+          "width": 72,
+          "height": 20
+        },
+        "result": {
+          "x": 100,
+          "y": 698,
+          "width": 124,
+          "height": 30
+        },
+        "run": null,
+        "proof": {
+          "x": 232,
+          "y": 700,
+          "width": 79,
+          "height": 26
+        },
+        "proofInsideDecision": true
+      },
+      "horizontalGap": 49.125
+    },
+    "1920": {
+      "human": {
+        "height": 77,
+        "actor": {
+          "x": 20,
+          "y": 626,
+          "width": 72,
+          "height": 20
+        },
+        "result": {
+          "x": 100,
+          "y": 621,
+          "width": 124,
+          "height": 30
+        },
+        "run": null,
+        "proof": {
+          "x": 232,
+          "y": 623,
+          "width": 79,
+          "height": 26
+        },
+        "proofInsideDecision": true
+      },
+      "service": {
+        "height": 87,
+        "actor": {
+          "x": 20,
+          "y": 941,
+          "width": 72,
+          "height": 20
+        },
+        "result": {
+          "x": 100,
+          "y": 936,
+          "width": 60.875,
+          "height": 30
+        },
+        "run": {
+          "x": 353,
+          "y": 900,
+          "width": 106,
+          "height": 32
+        },
+        "proof": {
+          "x": 168.875,
+          "y": 938,
+          "width": 79,
+          "height": 26
+        },
+        "proofInsideDecision": true
+      },
+      "attached": {
+        "height": 103,
+        "actor": {
+          "x": 20,
+          "y": 703,
+          "width": 72,
+          "height": 20
+        },
+        "result": {
+          "x": 100,
+          "y": 698,
+          "width": 124,
+          "height": 30
+        },
+        "run": null,
+        "proof": {
+          "x": 232,
+          "y": 700,
+          "width": 79,
+          "height": 26
+        },
+        "proofInsideDecision": true
+      },
+      "horizontalGap": 105.125
+    }
+  },
+  "errors": [],
+  "externalRequests": [],
+  "screenshots": [
+    "mock-revision20-1920-default.png",
+    "mock-revision20-evidence.png",
+    "mock-revision20-comparison.png",
+    "mock-revision20-480-default.png",
+    "mock-revision20-480-comparison.png"
+  ],
+  "browser": "134.0.6998.35",
+  "result": "pass"
+}

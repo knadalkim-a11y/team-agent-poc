@@ -1,14 +1,14 @@
 # 현재 작업 상태
 
-## 2026-10-27 · 업무 목업 19판 · 직접 판정·자동 판정
+## 2026-10-27 · 업무 목업 20판 · 판정 근거와 재실행 분리
 
-- **현재 요청:** 수용된 직접 판정/자동 판정으로 용어를 바꾼다. [범위](mockups/ees-work/TASK.md#design-mock-decision-terms-20261027). 같은 [Draft PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `f07d649c8d9c9807cd196c63e94ff498e581e792`에서 진행한다.
-- **최신 목업:** [19판 HTML](mockups/ees-work/design-mock-05-execution.html)·[원본](mockups/ees-work/design-mock-src/05-execution.html). 용어만 변경하며18판의 색/실행·글자·첨부·판정 배치를 유지한다. 근거·재실행 오클릭 방안은 결과 옆 근거 배치를 추천하는 단계이고19판에는 적용하지 않는다.
-- **확인·보존:** [19판 평가](../evals/v4-ui-20260930.md#design-mock-decision-terms-20261027)에1920/480px 표시 첫 확인PASS를 기록했다. 모든 CSS·용어 외 스크립트·확정10판04파일·이전 검증/실패를 보존한다. 용어 수용을 전체 디자인 확정으로 확대하지 않는다.
-- **Figma:** [19판 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1657-7034)·[메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1657-7035)·[C94](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1657-7368).3집중패널의 용어12곳과 제어19개의 위치/크기 보존을 확인했다. 기존 보드/컴포넌트와 전체 셸/다른 상태·기존 화살표 차이는 유지한다.
+- **현재 요청:** 판정 근거 위치 이동과 목록의 ‘테스트 없음’ 제거를 반영한다. [범위](mockups/ees-work/TASK.md#design-mock-evidence-position-20261027). 같은 [Draft PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `a8d39c617971975b1abba929e793872461c6301c`에서 진행한다.
+- **최신 목업:** [20판 HTML](mockups/ees-work/design-mock-05-execution.html)·[원본](mockups/ees-work/design-mock-src/05-execution.html). 기록/근거를 결과 바로 뒤로 옮기고 재실행은 작업명 오른쪽에 유지한다. 완료 자동 판정의 짧은 목록 사유만 제거하며 상세 도구 근거·첨부·기존 실행/선택은 보존한다.
+- **확인·보존:** [20판 평가](../evals/v4-ui-20260930.md#design-mock-evidence-position-20261027)에1920/480px 위치와 클릭/키보드, 상세 내용 보존4개 첫 확인PASS를 기록했다. 표시 함수 외 스크립트·원래 데이터·확정10판04파일·이전 검증/실패를 보존한다. 이번 수정을 전체 디자인 확정으로 확대하지 않는다.
+- **Figma:** [20판 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1658-7137)·[메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1658-7138)·[C95](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1660-2).3집중패널을 렌더 대조했다. 기존 보드/컴포넌트와 전체 셸/다른 상태·기존 화살표 차이는 유지한다.
 - **구현 경계:** 제품 UI·API·저장·엔진은 변경하지 않는다. 실제 상태·시각·도구별 입력/출력/판정 기준/결과와 이전 실행 정보는 보존한다. 실행·자료·예약은 합성 예시이며 Job/result.items 연결·최종 저장/확정·판정 조합 정책은 별도 결정/구현 범위다.
 - **사내 적용 원본:** [미병합 문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`에 따라 프로그램 적용 완료·실행 중으로 구분한다. 로그인·기존 자료·새 화면·도구 설정은 별도 미확인이다. #104의 상세 적용 기록은 이 브랜치에 복제하거나 덮어쓰지 않는다.
-- **다음 하나:**판정 근거와 재실행을 떨어뜨리는 배치안을 사용자와 검토한다. 제품 구현·병합·배포로 확대하지 않는다.
+- **다음 하나:** 실제 작업 하나를 기준으로 필요한 자료의 역할·출처와 도구 입력/출력 연결을 논의한다. 현재 첨부는 합성 파일명이며 실제 업로드/도구 연결이 아니다. 코드 지원 범위와 제안은20판 평가에 구분했으며 새 업로드/자료 설정 기능은 추가하지 않았다.
 
 > 아래 절은 이전 작업 당시 기록이다. #103 병합 대기·사내 적용 미실행 등의 당시 표현은 위 현재 상태와 구분하고, 과거 검증·실패 근거는 보존한다.
 
