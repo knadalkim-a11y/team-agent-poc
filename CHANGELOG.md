@@ -2,6 +2,7 @@
 
 ## 2026-10-27
 
+- 목업16판에서 ‘방금 선택’ 안내와 완료된 작업의 ‘다시 실행’ 배경을 제거한다. 기존 클릭 영역·키보드 포커스·실행 동작과15판 배치를 유지한다. [범위](docs/mockups/ees-work/TASK.md#design-mock-rerun-text-20261027).
 - 목업15판에서 판정 주체와 결과, 기존 기록/근거 버튼을 한 줄로 합쳐 작업 행의 높이를 줄인다. 사람 선택/서비스 읽기 전용과 기존 실행·근거 동작은 유지한다. [범위](docs/mockups/ees-work/TASK.md#design-mock-compact-verdict-20261027).
 - 목업14판에서 중복·어려운 안내를 제거하고 사람/서비스 판정을 작업명 아래 같은 위치에 표시한다. 사람의 선택 가능 여부와 서비스 결과의 읽기 전용 성격, 실행 버튼·도구 근거·기존 동작은 유지한다. [범위](docs/mockups/ees-work/TASK.md#design-mock-copy-verdict-alignment-20261027).
 - 사용자 요청으로 목업13판 제목 옆 ‘사람 판정 3건’과 작업 수 옆 시계·‘오늘 18:00까지’를 제거한다. 12판 버튼 배치·실행/판정 동작과 확정10판은 유지한다. [범위](docs/mockups/ees-work/TASK.md#design-mock-heading-cleanup-20261027).

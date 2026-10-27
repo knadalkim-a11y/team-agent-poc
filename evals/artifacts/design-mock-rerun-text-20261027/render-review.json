@@ -1,0 +1,73 @@
+{
+  "checkedAt": "2026-10-27T05:28:24.636Z",
+  "baseline": "a5665771720b8213b9a922bd4bf51e22cb45e055",
+  "scope": "Copy and completed rerun appearance only; ad-hoc browser inspection without a new test file or broad suite repeat.",
+  "files": [
+    {
+      "path": "docs/mockups/ees-work/design-mock-src/05-execution.html",
+      "bytes": 75881,
+      "sha256": "45e7a0daec8e85939178931224b99ca88fb3446201767ecd3f6fbe0e65b1666c"
+    },
+    {
+      "path": "docs/mockups/ees-work/design-mock-05-execution.html",
+      "bytes": 405670,
+      "sha256": "caec657ad798abfe61dc3c710b59d18a28651543fb37eca0434075b260fad357"
+    }
+  ],
+  "checks": [
+    "All other script bytes and approved04 hashes unchanged",
+    "Selected human verdict remains visible without the removed phrase",
+    "Rerun normal/hover has no box;106x32 hit area, keyboard focus and execution remain; first-run/running styles retained",
+    "480px selected display has no overflow; human verdict history remains available"
+  ],
+  "screenshots": [
+    "mock-revision16-verdict-comparison.png",
+    "mock-revision16-480-selection.png"
+  ],
+  "styles": {
+    "rerun": {
+      "width": 106,
+      "height": 32,
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px",
+      "shadow": "none",
+      "outline": "0px",
+      "focusVisible": false,
+      "text": "다시 실행"
+    },
+    "hover": {
+      "width": 106,
+      "height": 32,
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px",
+      "shadow": "none",
+      "outline": "0px",
+      "focusVisible": false,
+      "text": "다시 실행"
+    },
+    "firstRun": {
+      "width": 106,
+      "height": 32,
+      "background": "rgb(238, 243, 249)",
+      "border": "0px",
+      "shadow": "none",
+      "outline": "0px",
+      "focusVisible": false,
+      "text": "지금 실행"
+    },
+    "keyboard": {
+      "width": 106,
+      "height": 32,
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px",
+      "shadow": "none",
+      "outline": "2px",
+      "focusVisible": true,
+      "text": "다시 실행"
+    }
+  },
+  "errors": [],
+  "externalRequests": [],
+  "browser": "134.0.6998.35",
+  "result": "pass"
+}

@@ -1,5 +1,14 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="design-mock-rerun-text-20261027"></a>
+
+## 2026-10-27 · 업무 목업 16판 · 선택 안내·재실행 박스 제거
+
+- **요청·기준:** 사용자가 ‘방금 선택’을 없애고 ‘다시 실행’ 버튼의 테두리도 없어도 된다고 했다. 같은 [Draft PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `a5665771720b8213b9a922bd4bf51e22cb45e055`의 [05목업](design-mock-05-execution.html)·[원본](design-mock-src/05-execution.html)을16판으로 정리한다.
+- **변경:** 사람 판정 직후의 ‘방금 선택’ 출력만 제거한다. ‘다시 실행’은 원래 border/shadow가0이므로 박스로 보이게 하던 옅은 배경을 기본/hover에서 투명하게 바꾼다. 파란 아이콘·텍스트와106×32px 클릭 영역, 키보드 포커스 표시는 유지한다. ‘지금 실행’·‘실행 중’·‘단계 실행’은 유지한다.
+- **보존·검토:**15판의 한 줄 배치, 사람 선택/기록·서비스 읽기 전용/근거·실행 동작과 확정10판04파일을 보존한다. [16판 확인](../../../evals/v4-ui-20260930.md#design-mock-rerun-text-20261027). 새 기능·상태·제품 구현·병합·배포는 추가하지 않으며16판은 사용자 검토 전이다.
+- **Figma:** [16판 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1652-6723)·[메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1652-6724)·[C91](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1652-7056). 기존3집중패널에는 ‘방금 선택’ 표시가 없었고, 완료 재실행4개의 배경만 제거했다.106×32px·좌표·파란 아이콘/텍스트와 지금 실행/단계 실행 유지 및 최종3렌더를 확인했다.15판/이전 이력은 보존하며 전체 셸/다른 상태·기존 펼침 화살표 차이는 남는다.
+
 <a id="design-mock-compact-verdict-20261027"></a>
 
 ## 2026-10-27 · 업무 목업 15판 · 판정 주체와 결과 한 줄 배치
