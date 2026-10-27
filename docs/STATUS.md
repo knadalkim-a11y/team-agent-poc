@@ -1,13 +1,13 @@
 # 현재 작업 상태
 
-## 2026-10-27 · 업무 목업 4판 · 개별 항목의 사람·자동 판정
+## 2026-10-27 · 업무 목업 5판 · 공통 판정 근거와 판정 상태
 
-- **현재 작업:** [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)의 3판 head `d65c52fdeacfac26263f9a3957d98492ba14a23e`에서 같은 PR을 갱신한다. 사용자는 자동 판정의 단위를 ‘배치 주기 조정’ 같은 개별 CR 항목으로 정정하고 그 형태로 다시 보여 달라고 요청했다. 제품 UI·서버 API·저장·실행 코드는 보존한다. [개발 순서](../AGENTS.md#design-mock-first) · [이번 범위](mockups/ees-work/TASK.md#design-mock-items-20261027).
-- **최신 목업:** [업무 목업 4판 HTML](mockups/ees-work/design-mock-04-cr-verdict.html), [편집 원본](mockups/ees-work/design-mock-src/04-cr-verdict.html). 별도 시스템 점검 예시를 같은 CR 목록 안의 사람·자동 판정으로 교체한다. Figma [C78](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1624-6119)·[4판 검토 메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1624-6114)에 단위 정정과 범위를 기록했다. **디자인 검토 중·4판 전체 확정 전·사내 열기 미확인**이다.
-- **이번 보완:** 합성 CR12건 중 사람3건과 자동9건을 한 목록에 표시한다. CR2207은 사람이 선택·확정하고, CR2204는 자동 판정 완료·미승인이며 자동 승인 행도 기본 화면에 보인다. 자동 행은 읽기 전용 결과와 조건·관측·시각을 제공한다. 승인 여부와 판정 완료 여부를 분리하고, 사람3건 확정은 서비스9건의 결과·근거·시각·주체를 바꾸지 않는다. 현재 제품의 CR 전체 사람 확인 계약은 그대로이며 항목별 자동 판정은 목업 확정 후 구현할 목표다.
-- **검증:** 4판 생성 검사5 PASS, Chromium134 실제 브라우저23/23 PASS, 외부 요청·console/page error0. 사람3건만 확정·기록되고 서비스9건의 결과·근거가 유지되는 것과480/1200/1920px·키보드·문서/diff를 확인했다. [파일 해시·화면·검토 보완](../evals/v4-ui-20260930.md#design-mock-items-20261027), [3판 당시 검사·실패](../evals/v4-ui-20260930.md#design-mock-auto-20261027), [2판 기록](../evals/v4-ui-20260930.md#design-mock-review-20261027)을 보존한다. 목업 검증을 실제 제품의 기능 검증이나 사내 확인 완료로 해석하지 않는다.
+- **현재 작업:** [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)의 4판 head `1cb5b7621dc36aea9c27c03e1c08502b1b6231e5`에서 같은 PR을 갱신한다. 사용자는 근거 버튼의 유무와 ‘대화에서 채움’의 의미가 직관적이지 않다며 공통 근거와 판정 상태 표시 수정을 승인했다. 제품 UI·서버 API·저장·실행 코드는 보존한다. [이번 범위](mockups/ees-work/TASK.md#design-mock-evidence-20261027).
+- **최신 목업:** [업무 목업 5판 HTML](mockups/ees-work/design-mock-04-cr-verdict.html), [편집 원본](mockups/ees-work/design-mock-src/04-cr-verdict.html). 모든 항목의 같은 위치에 ‘판정 근거’를 제공하고 AI 제안·직접 선택·자동 판정·사람 확정을 구분한다. Figma [C79](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1626-6119)·[5판 메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1626-6114)에 기록했다. **디자인 검토 중·5판 전체 확정 전·사내 열기 미확인**이다.
+- **이번 보완:** ‘직접 판정 필요’, ‘AI 제안 · 확인 필요’, ‘직접 선택 · 확정 전’, ‘자동 판정 완료’, ‘김광재가 확정’을 상태에 맞게 표시한다. 근거에서는 확인 자료·미확인 사항·원래 AI 제안·현재 선택/확정을 구분하며 사람이 값을 바꾸거나 확정해도 원자료를 검증 완료로 바꾸지 않는다. 같은 목록의 사람3건/서비스9건과 사람 한정 확정·자동 읽기 전용은 유지한다. 현재 제품의 항목별 판정 계약은 목업 확정 후 구현할 대상이다.
+- **검증:** 5판 생성 검사5 PASS, Chromium134 브라우저23/23 PASS, 외부 요청·console/page error0. 공통12근거·각 상태·원제안/미확인 자료 보존·사람3건 확정/자동9건 불변·1920/1200/480px·문서/diff를 확인했다. [파일 해시·화면·최초 시각 관측과 보완](../evals/v4-ui-20260930.md#design-mock-evidence-20261027), [4판 당시 검사](../evals/v4-ui-20260930.md#design-mock-items-20261027)와 이전 판 증거를 보존한다. 목업 검증을 실제 제품의 기능 검증이나 사내 확인 완료로 해석하지 않는다.
 - **사내 적용 원본:** [미병합 문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`에 따라 프로그램 적용 완료·실행 중으로 구분한다. 로그인·기존 자료·새 화면·도구 설정은 별도 미확인이다. #104의 상세 적용 기록은 이 브랜치에 복제하거나 덮어쓰지 않는다.
-- **다음 하나:** 같은 목록의 항목별 사람/자동 판정과 근거·확정 범위가 의도한 단위에 맞는지 4판을 검토한다. 기존 사람 선택·확정 방식은 재사용하며, 목업 확정 후 Figma·기능 계약과 구현 범위를 맞춘다.
+- **다음 하나:** 5판에서 각 항목의 판정 근거·누가 판정했는지·확인이 남았는지를 직관적으로 이해할 수 있는지 검토한다. 목업 확정 후 Figma·기능 계약과 구현 범위를 맞춘다.
 
 > 아래 절은 이전 작업 당시 기록이다. #103 병합 대기·사내 적용 미실행 등의 당시 표현은 위 현재 상태와 구분하고, 과거 검증·실패 근거는 보존한다.
 

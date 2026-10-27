@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
-<title>시안 · CR 항목별 사람·자동 판정 · 4판 · EES Workflow</title>
+<title>시안 · CR 항목별 사람·자동 판정 · 5판 · EES Workflow</title>
 <!--@mock:provenance-->
 <!--@mock:fonts-->
 <!--@mock:product-css-->
@@ -195,15 +195,17 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-rules li>b{width:84px;flex:none;font-weight:500;color:var(--ees-text-primary)}
 #ees-work-panel .ew-vd-draft{margin-bottom:4px;font-size:12px;line-height:16px;color:var(--ees-text-tertiary)}
 </style>
-<style data-new-screen="④ CR 항목별 자동 판정">
+<style data-new-screen="④ CR 항목별 판정 근거">
 /* Synthetic item-level decisions; reuses the CR verdict language and product tokens. */
 #ees-work-panel .ew-vd-statusline{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:8px;font-size:13px;line-height:18px;color:var(--ees-text-secondary)}
 #ees-work-panel .ew-vd-statusline>b{font-weight:500;color:var(--ees-text-primary)}
 #ees-work-panel .ew-vd-statusline[data-person]>b{color:var(--ees-status-attention)}
 #ees-work-panel .ew-vd-statusline[data-person=confirmed]>b{color:var(--ees-status-success)}
-#ees-work-panel .ew-vd-auto{border-bottom:1px solid var(--ees-surface-muted)}
-#ees-work-panel .ew-vd-auto>.ew-vd-item{padding-bottom:8px}
-#ees-work-panel .ew-vd-origin{display:flex;align-items:center;gap:8px;margin:0 12px 10px;font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-entry{margin:0;border-bottom:1px solid var(--ees-surface-muted);border-radius:8px}
+#ees-work-panel .ew-vd-entry[data-tone=attention]{background:var(--ees-status-attention-bg)}
+#ees-work-panel .ew-vd-entry[data-tone=picked]{background:var(--ees-surface-selected)}
+#ees-work-panel .ew-vd-entry>.ew-vd-item{padding-bottom:6px}
+#ees-work-panel .ew-vd-origin{display:flex;align-items:center;gap:8px;margin:0 12px 8px;font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-vd-origin>span{flex:1;min-width:0}
 #ees-work-panel .ew-vd-evidence-toggle{display:inline-flex;align-items:center;gap:4px;min-height:26px;padding:2px 5px;border:0;border-radius:4px;background:transparent;color:var(--ees-brand-text);font-size:12px;line-height:18px;font-weight:500;white-space:nowrap}
 #ees-work-panel .ew-vd-evidence-toggle:hover{background:var(--ees-surface-hover)}
@@ -216,7 +218,13 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-evidence td{padding:4px 0;border-top:1px solid var(--ees-line-divider)}
 #ees-work-panel .ew-vd-evidence [data-missing]{color:var(--ees-status-danger);font-weight:500}
 #ees-work-panel .ew-vd-evidence>small{display:block;margin-top:8px;font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
-#ees-work-panel .ew-vd-person-note{font-size:12px;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-origin>[data-source=chat]{color:var(--ees-brand-text)}
+#ees-work-panel .ew-vd-evidence-observations{display:grid;grid-template-columns:64px minmax(0,1fr);gap:8px;margin:0}
+#ees-work-panel .ew-vd-evidence-observations dt{color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-evidence-observations dd{margin:0;overflow-wrap:anywhere;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-evidence-history{margin-top:12px;padding-top:10px;border-top:1px solid var(--ees-line-divider)}
+#ees-work-panel .ew-vd-evidence-history>b{display:block;margin-bottom:6px;font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-evidence-history p+p{margin-top:6px}
 </style>
 </head>
 <body>
@@ -275,7 +283,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
                   <div id="response-content-container"><div class="markdown-prose">
                     <p>12건 중 서비스 자동 판정 대상 9건은 판정이 끝났습니다. 승인 8건, 미승인 1건입니다.</p>
                     <p>‘대시보드 필터 추가’는 테스트 결과가 없어 미승인입니다. 자동 판정은 완료됐으며, 근거를 오른쪽에서 확인할 수 있습니다.</p>
-                    <p>사람 판정 대상 3건 중 2건은 대화에서 초안을 채웠습니다. ‘배치 주기 조정’은 테스트 파일(test_v2_final.xlsx)의 최종본 여부를 확인한 뒤 직접 판정해 주세요. 사람이 확정하는 것은 이 3건입니다.</p>
+                    <p>사람 판정 대상 3건 중 2건은 AI가 판정을 제안했습니다. 아직 확정되지 않아 사람의 확인이 필요합니다. ‘배치 주기 조정’은 테스트 파일(test_v2_final.xlsx)의 최종본 여부를 확인한 뒤 직접 판정해 주세요. 사람이 확정하는 것은 이 3건입니다.</p>
                   </div></div>
                   <div class="mock-ai-actions" aria-hidden="true">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" stroke="#6F717A" stroke-width="1.3"/><path d="M10.5 3.5v-.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5" stroke="#6F717A" stroke-width="1.3"/></svg>
@@ -315,11 +323,11 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   <div><b>시안</b><span>저장·실행 안 됨</span></div>
   <div><strong id="mock-screen" role="status" aria-live="polite">④-1 항목별 판정</strong><button type="button" data-mock-info>안내</button></div>
   <details class="mock-state-picker">
-    <summary>화면 바로 보기 · 4판</summary>
+    <summary>화면 바로 보기 · 5판</summary>
     <nav aria-label="항목별 판정 상태 선택">
       <button type="button" data-mock-state="initial" aria-current="true">④-1 항목별 판정</button>
       <button type="button" data-mock-state="menu">④-1a 사람 판정 고르기</button>
-      <button type="button" data-mock-state="evidence">④-1b 자동 판정 근거</button>
+      <button type="button" data-mock-state="evidence">④-1b 판정 근거</button>
       <button type="button" data-mock-state="ready">④-2 사람 확정 준비</button>
       <button type="button" data-mock-state="confirmed">④-3 사람 확정됨</button>
       <button type="button" data-mock-state="log">④-기록 · 초안</button>
@@ -333,11 +341,11 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   <section>
     <h2 id="mock-info-title">시안 안내 · CR 항목별 사람·자동 판정</h2>
     <h3>이 화면</h3>
-    <p>‘배포 산출물 점검’ 절차의 10.13 배포 회차 → 1차 점검 단계 → 두 번째 작업 ‘CR별 판정’입니다. CR(변경 요청) 12건을 한 목록에서 봅니다. 사람 판정 대상은 3건이고, 서비스 자동 판정 대상은 9건입니다. 사람 대상 2건은 대화에서 초안을 채웠고(파란 말풍선), 1건은 사람이 직접 판단해야 합니다.</p>
+    <p>‘배포 산출물 점검’ 절차의 10.13 배포 회차 → 1차 점검 단계 → 두 번째 작업 ‘CR별 판정’입니다. CR(변경 요청) 12건을 한 목록에서 봅니다. 사람 판정 대상은 3건이고, 서비스 자동 판정 대상은 9건입니다. 사람 대상 2건은 ‘AI 제안 · 확인 필요’, 1건은 ‘직접 판정 필요’로 표시합니다. AI 제안은 사람이 확인하고 확정하기 전까지 최종 판정이 아닙니다.</p>
     <h3>자동 판정과 사람 확정</h3>
-    <p>‘대시보드 필터 추가’는 테스트 결과가 없어 자동 판정 결과가 미승인입니다. ‘판정 완료’는 판정이 끝났다는 뜻이며 승인과 다릅니다. 자동 행의 근거를 펼쳐 조건·관측·시각을 확인하세요. ‘사람 3건 확정’은 사람 대상만 확정하며 자동 9건의 결과를 바꾸지 않습니다.</p>
+    <p>‘대시보드 필터 추가’는 테스트 결과가 없어 자동 판정 결과가 미승인입니다. ‘판정 완료’는 판정이 끝났다는 뜻이며 승인과 다릅니다. 모든 항목의 같은 위치에 있는 ‘판정 근거’를 펼쳐 확인하세요. 자동 항목은 조건·관측·시각을, 사람 항목은 확인된 자료와 아직 모르는 점, 제안·선택·확정 기록을 보여 줍니다. ‘사람 3건 확정’은 사람 대상만 확정하며 자동 9건의 결과를 바꾸지 않습니다.</p>
     <h3>해 볼 것</h3>
-    <ol><li>CR-2207의 ‘판정 선택’을 눌러 고르기</li><li>다른 판정도 바꿔 보기 (사람이 고르면 말풍선이 사라짐)</li><li>승인 묶음의 나머지 항목 펼치기</li><li>‘사람 3건 확정’ 누르기</li><li>‘기록’과 ‘기준’ 탭 보기 (초안)</li></ol>
+    <ol><li>CR-2207의 ‘판정 선택’을 눌러 고르기</li><li>다른 판정도 바꿔 보기 (‘직접 선택 · 확정 전’으로 표시됨)</li><li>각 항목의 ‘판정 근거’ 펼치기</li><li>승인 묶음의 나머지 항목 펼치기</li><li>‘사람 3건 확정’ 누르기</li><li>‘기록’과 ‘기준’ 탭 보기 (초안)</li></ol>
     <h3>의견 보내는 법</h3>
     <p>왼쪽 아래 화면 번호와 함께 짧게 적어 주세요. 예) ④-1 고르기 목록 글자가 작다</p>
     <h3>아직 정하지 않은 것</h3>
@@ -345,7 +353,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     <h3>이 시안은</h3>
     <p>실제 프로그램의 글꼴 파일과 화면 CSS(색, 크기, 탭·꼬리표·단추 부품)를 그대로 써서 만들었습니다. 왼쪽 메뉴 접기·펼치기와 창 크기에 따른 업무 패널 겹침은 제품 기준을 따릅니다. 항목별 자동 판정은 합성 예시이며 실제 제품의 규칙·저장은 목업 검토 후 정합니다. 이 예시의 자동 판정은 문서가 있는지만 확인하며 문서 내용의 적정성을 판단하지 않습니다. 저장·실행·대화는 되지 않으며, 왼쪽 메뉴 이동과 가운데 대화는 모양만 같습니다. 사내 PC에서 파일이 열리는지도 확인해 주세요.</p>
     <h3>판</h3>
-    <p>시안 4판 · 2026-10-27 · CR 항목별 사람·자동 판정 · 미확정</p>
+    <p>시안 5판 · 2026-10-27 · CR 항목별 사람·자동 판정 · 미확정</p>
     <footer><button type="button" data-mock-reset>처음부터 다시</button><button type="button" data-mock-close>닫기</button></footer>
   </section>
 </div>
@@ -354,7 +362,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 (() => {
   'use strict';
   const ACTOR = '김광재';
-  const ICON = {chat: 'v4/1c98e.svg', down: 'v4/f17e6.svg', right: 'v4/69549.svg', check: 'v4/9d8d5.svg', clip: 'v4/ea639.svg', back: 'v4/eb94a.svg', more: 'v4/a953c.svg', panel: 'v4/7bb4a.svg'};
+  const ICON = {down: 'v4/f17e6.svg', right: 'v4/69549.svg', check: 'v4/9d8d5.svg', clip: 'v4/ea639.svg', back: 'v4/eb94a.svg', more: 'v4/a953c.svg', panel: 'v4/7bb4a.svg'};
   // New icon variant: v4/63982 (clock) in the attention color.
   const CLOCK = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M6.5 11.375C9.19239 11.375 11.375 9.19239 11.375 6.5C11.375 3.80761 9.19239 1.625 6.5 1.625C3.80761 1.625 1.625 3.80761 1.625 6.5C1.625 9.19239 3.80761 11.375 6.5 11.375Z" stroke="#96590C" stroke-width="1.41667" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 3.7915V6.49984L8.125 7.58317" stroke="#96590C" stroke-width="1.41667" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const VERDICT = {ok: ['승인', '설정된 승인 조건을 충족함'], cond: ['조건부 승인', '최종본 제출을 조건으로 통과'], bad: ['미승인', '설정된 승인 조건을 충족하지 못함']};
@@ -375,15 +383,16 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 
   const esc = value => String(value).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
   const icon = (src, size) => `<img class="ew-icon" src="${src}" alt="" aria-hidden="true"${size ? ` width="${size}" height="${size}"` : ''}>`;
-  const stamp = () => { const d = new Date(), two = n => String(n).padStart(2, '0'); return {date: `${d.getMonth() + 1}.${two(d.getDate())}`, time: `${two(d.getHours())}:${two(d.getMinutes())}`}; };
+  // Synthetic review times keep proposal → selection → confirmation in order.
+  const stamp = (kind = 'selection') => ({date: '10.27', time: kind === 'confirmation' ? '14:25' : '14:24'});
   const objectParticle = id => '13678'.includes(id.slice(-1)) || id.slice(-1) === '0' ? '을' : '를';
 
   function reset() {
     clearTimeout(flashTimer);
     S = {
-      items: SEED.map(([id, name, verdict, reason, file]) => ({id, name, verdict, reason: reason || '', file: file || '', handler: HUMAN_IDS.has(id) ? 'human' : 'service', source: HUMAN_IDS.has(id) ? (verdict ? 'chat' : null) : 'service'})),
+      items: SEED.map(([id, name, verdict, reason, file]) => ({id, name, verdict, reason: reason || '', file: file || '', handler: HUMAN_IDS.has(id) ? 'human' : 'service', source: HUMAN_IDS.has(id) ? (verdict ? 'chat' : null) : 'service', history: []})),
       picked: null, flash: null, expanded: false, evidence: null, confirmed: null, tab: 'work', menu: null,
-      log: [['13:05', '‘CR별 필수 문서 확인’ 작업 완료 (12건)'], ['14:20', '서비스가 자동 대상 9건의 판정을 완료함 (승인 8건, 미승인 1건)'], ['14:20', 'CR-2204 자동 판정 완료 · 미승인 · 테스트 결과 없음'], ['14:21', '사람 대상 3건 중 2건을 대화에서 초안으로 채움']],
+      log: [['13:05', '‘CR별 필수 문서 확인’ 작업 완료 (12건)'], ['14:20', '서비스가 자동 대상 9건의 판정을 완료함 (승인 8건, 미승인 1건)'], ['14:20', 'CR-2204 자동 판정 완료 · 미승인 · 테스트 결과 없음'], ['14:21', 'AI가 사람 대상 CR-2203에 승인, CR-2210에 미승인을 제안함 · 사람 확인 필요']],
       width: 480, open: true
     };
   }
@@ -402,7 +411,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     if (S.tab === 'rules') return '④-기준 (초안)';
     if (S.confirmed) return '④-3 사람 판정 확정됨';
     if (S.menu) return '④-1a 사람 판정 고르기';
-    if (S.evidence) return '④-1b 자동 판정 근거';
+    if (S.evidence) return '④-1b 판정 근거';
     return humanRemaining() ? '④-1 항목별 판정' : '④-2 사람 판정 확정 준비';
   }
 
@@ -415,6 +424,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     if (key === 'ready' || key === 'confirmed') {
       const item = S.items.find(entry => entry.id === 'CR-2207');
       item.verdict = 'cond'; item.source = 'human';
+      item.history.push({date: '10.27', time: '14:24', verdict: 'cond'});
       S.picked = item.id;
       S.log.push(['14:24', `${ACTOR}가 CR-2207을 조건부 승인으로 정함`]);
     }
@@ -472,19 +482,37 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     return `<button type="button" class="ew-vd-pick" data-vd-pick="${item.id}"${item.verdict ? ` data-verdict="${item.verdict}"` : ''} aria-haspopup="menu" aria-expanded="${S.menu === item.id}" aria-label="${item.id} 판정 ${item.verdict ? VERDICT[item.verdict][0] : '선택'}">${label}${icon(ICON.down)}</button>`;
   }
   function evidenceHTML(item) {
-    const missingTest = item.id === 'CR-2204';
-    const rows = [['설계서', '있음', false], ['테스트 결과', missingTest ? '없음' : '있음', missingTest], ['배포 계획서', '있음', false]];
-    return `<div class="ew-vd-evidence" id="evidence-${item.id}"><p>이 항목의 승인 조건: 필수 문서 3종이 모두 있어야 합니다.</p><table aria-label="${item.id} 자동 판정 근거"><thead><tr><th scope="col">항목</th><th scope="col">조건</th><th scope="col">관측</th></tr></thead><tbody>${rows.map(([name, observed, missing]) => `<tr><td>${name}</td><td>있음</td><td${missing ? ' data-missing' : ''}>${observed}</td></tr>`).join('')}</tbody></table><small>판정 시각 · 10.27 14:20<br>${missingTest ? '테스트 결과 없음 → 미승인. 판정은 완료되었습니다.' : '필수 문서 모두 있음 → 승인. 판정은 완료되었습니다.'}</small></div>`;
+    if (item.handler === 'service') {
+      const missingTest = item.id === 'CR-2204';
+      const rows = [['설계서', '있음', false], ['테스트 결과', missingTest ? '없음' : '있음', missingTest], ['배포 계획서', '있음', false]];
+      return `<div class="ew-vd-evidence" id="evidence-${item.id}"><p>이 항목의 승인 조건: 필수 문서 3종이 모두 있어야 합니다.</p><table aria-label="${item.id} 자동 판정 조건과 관측"><thead><tr><th scope="col">항목</th><th scope="col">조건</th><th scope="col">관측</th></tr></thead><tbody>${rows.map(([name, observed, missing]) => `<tr><td>${name}</td><td>있음</td><td${missing ? ' data-missing' : ''}>${observed}</td></tr>`).join('')}</tbody></table><small>판정 주체 · 서비스<br>판정 시각 · 10.27 14:20<br>${missingTest ? '테스트 결과 없음 → 미승인. 판정은 완료되었습니다.' : '필수 문서 모두 있음 → 승인. 판정은 완료되었습니다.'}</small></div>`;
+    }
+    // Observations and the original AI proposal come from the immutable fixture,
+    // never from the person's current selection or confirmation state.
+    const observations = {
+      'CR-2207': ['첨부 test_v2_final.xlsx는 있습니다. 최종본 여부는 확인되지 않았습니다.', '테스트 파일이 최종본인지 확인해야 합니다.'],
+      'CR-2210': ['설계서와 테스트 결과가 없습니다.', '누락 문서의 보완 여부를 확인해야 합니다. 배포 계획서의 상태는 이 근거에 기록되지 않았습니다.'],
+      'CR-2203': ['AI 제안의 구체적인 근거가 확인되지 않았습니다.', '승인 조건을 충족하는지 자료를 직접 확인해야 합니다.']
+    }[item.id];
+    const originalProposal = SEED.find(([id]) => id === item.id)[2];
+    const proposal = originalProposal ? `<p data-original-proposal>10.27 14:21 · AI 제안: ${VERDICT[originalProposal][0]}<br>사람 확인이 필요한 제안으로 등록됨</p>` : '';
+    const selections = item.history.map(entry => `<p data-human-selection>${entry.date} ${entry.time} · ${ACTOR}가 ${VERDICT[entry.verdict][0]} 선택 · 확정 전</p>`).join('');
+    const confirmation = S.confirmed ? `<p data-human-confirmation>${S.confirmed.date} ${S.confirmed.time} · ${ACTOR}가 확정 · ${VERDICT[item.verdict][0]}</p>` : '';
+    return `<div class="ew-vd-evidence" id="evidence-${item.id}"><dl class="ew-vd-evidence-observations"><dt>현재 근거</dt><dd data-observation>${observations[0]}</dd><dt>추가 확인</dt><dd>${observations[1]}</dd></dl><small>근거 확인 시각 · 미기록</small><div class="ew-vd-evidence-history"><b>판정 기록</b>${proposal}${selections}${confirmation}${!proposal && !selections && !confirmation ? '<p>아직 판정을 선택하지 않았습니다.</p>' : ''}</div></div>`;
+  }
+  function statusLabel(item) {
+    if (item.handler === 'service') return '자동 판정 완료';
+    if (S.confirmed) return `${ACTOR}가 확정`;
+    if (!item.verdict) return '직접 판정 필요';
+    return item.source === 'chat' ? 'AI 제안 · 확인 필요' : '직접 선택 · 확정 전';
   }
   function itemHTML(item) {
     const service = item.handler === 'service';
     const tone = S.confirmed || service ? '' : !item.verdict ? 'attention' : item.id === S.flash ? 'picked' : '';
-    const source = !S.confirmed && item.source === 'chat' ? `<span class="ew-vd-src" title="대화에서 채움">${icon(ICON.chat)}</span>` : '<span class="ew-vd-src"></span>';
     const file = item.file ? `<button type="button" class="ew-vd-file" data-mock-toast="시안: 파일은 열리지 않습니다">${icon(ICON.clip, 13)}${esc(item.file)}</button>` : '';
-    const row = `<div class="ew-vd-item"${service ? '' : ` data-vd-item="${item.id}" data-handler="human"`}${tone ? ` data-tone="${tone}"` : ''}><div class="ew-vd-text"><span class="ew-vd-name">${esc(item.name)}</span><span class="ew-vd-line"><span class="ew-vd-id">${item.id}</span>${reasonHTML(item)}</span>${service ? '' : `<span class="ew-vd-person-note">${S.confirmed ? '사람 판정 확정됨' : '사람 판정'}</span>`}${file}</div><div class="ew-vd-right">${source}${pickHTML(item)}</div></div>`;
-    if (!service) return row;
+    const row = `<div class="ew-vd-item"><div class="ew-vd-text"><span class="ew-vd-name">${esc(item.name)}</span><span class="ew-vd-line"><span class="ew-vd-id">${item.id}</span>${reasonHTML(item)}</span>${file}</div><div class="ew-vd-right">${pickHTML(item)}</div></div>`;
     const opened = S.evidence === item.id;
-    return `<section class="ew-vd-auto" data-vd-item="${item.id}" data-handler="service" data-decision-state="complete">${row}<div class="ew-vd-origin"><span>서비스 자동 판정 · 판정 완료</span><button type="button" class="ew-vd-evidence-toggle" data-vd-evidence="${item.id}" aria-expanded="${opened}"${opened ? ` aria-controls="evidence-${item.id}"` : ''} aria-label="${item.id} 자동 판정 근거 ${opened ? '접기' : '보기'}">근거 ${opened ? '접기' : '보기'}${icon(ICON.down, 13)}</button></div>${opened ? evidenceHTML(item) : ''}</section>`;
+    return `<section class="ew-vd-entry" data-vd-item="${item.id}" data-handler="${item.handler}"${service ? ' data-decision-state="complete"' : ''}${tone ? ` data-tone="${tone}"` : ''}>${row}<div class="ew-vd-origin"><span data-source="${!S.confirmed ? item.source || 'none' : service ? 'service' : 'human'}">${statusLabel(item)}</span><button type="button" class="ew-vd-evidence-toggle" data-vd-evidence="${item.id}" aria-expanded="${opened}"${opened ? ` aria-controls="evidence-${item.id}"` : ''} aria-label="${item.id} 판정 근거 ${opened ? '접기' : '펼치기'}">판정 근거${icon(ICON.down, 13)}</button></div>${opened ? evidenceHTML(item) : ''}</section>`;
   }
   function listHTML() {
     let html = '';
@@ -497,7 +525,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
       const rest = items.filter(item => item !== visibleAuto);
       if (visibleAuto) html += itemHTML(visibleAuto);
       const chat = rest.filter(item => item.source === 'chat').length;
-      const chatLabel = !S.confirmed && chat ? `<span class="ew-vd-chat">${icon(ICON.chat)}대화에서 채움${chat < items.length ? ' ' + chat : ''}</span>` : '';
+      const chatLabel = !S.confirmed && chat ? `<span class="ew-vd-chat">AI 제안 · 확인 필요 ${chat}</span>` : '';
       html += `<button type="button" class="ew-vd-group" data-vd-group aria-expanded="${S.expanded}">${icon(ICON.right)}<i class="ew-vd-dot" data-verdict="ok"></i><span class="ew-vd-group-label">나머지 승인 ${rest.length}건</span>${chatLabel}</button>`;
       if (S.expanded) html += rest.map(itemHTML).join('');
     }
@@ -508,7 +536,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   }
   function rulesHTML() {
     const words = Object.entries(VERDICT).map(([key, [label, desc]]) => `<li><i class="ew-vd-dot" data-verdict="${key}"></i><b>${label}</b><span>${desc}</span></li>`).join('');
-    return `<div class="ew-vd-rules"><p class="ew-vd-draft">초안: 이 탭은 아직 Figma에 그리지 않았습니다</p><section><h3>판정 단어</h3><ul>${words}</ul></section><section><h3>확인할 문서</h3><p>설계서, 테스트 결과, 배포 계획서</p></section><section><h3>사람 판정과 자동 판정</h3><p>사람 대상 3건은 사람이 선택하고 확정합니다. 대화에서 채운 값도 사람의 확인이 필요합니다. 자동 대상 9건은 서비스가 필수 문서의 존재 여부로 판정합니다. 필수 문서가 하나라도 없으면 미승인으로 판정하며, 이는 판정이 끝난 상태입니다. 자동 결과는 여기서 수정하거나 사람 확정에 포함하지 않습니다.</p></section><section><h3>판정 뒤에는</h3><p>확정된 사람 판정과 자동 판정 결과는 이 화면에서 수정하지 않습니다. 결과와 판정 주체는 기록에서 확인할 수 있습니다.</p></section></div>`;
+    return `<div class="ew-vd-rules"><p class="ew-vd-draft">초안: 이 탭은 아직 Figma에 그리지 않았습니다</p><section><h3>판정 단어</h3><ul>${words}</ul></section><section><h3>확인할 문서</h3><p>설계서, 테스트 결과, 배포 계획서</p></section><section><h3>사람 판정과 자동 판정</h3><p>사람 대상 3건은 사람이 선택하고 확정합니다. ‘AI 제안 · 확인 필요’는 AI가 제시한 값이며 아직 확정되지 않았다는 뜻입니다. 사람이 고르면 ‘직접 선택 · 확정 전’으로 표시합니다. 모든 항목의 ‘판정 근거’에서 확인된 자료와 확인되지 않은 점, 판정 기록을 볼 수 있습니다. 선택하거나 확정해도 원래 근거가 검증된 것으로 바뀌지는 않습니다. 자동 대상 9건은 서비스가 필수 문서의 존재 여부로 판정합니다. 필수 문서가 하나라도 없으면 미승인으로 판정하며, 이는 판정이 끝난 상태입니다. 자동 결과는 여기서 수정하거나 사람 확정에 포함하지 않습니다.</p></section><section><h3>판정 뒤에는</h3><p>확정된 사람 판정과 자동 판정 결과는 이 화면에서 수정하지 않습니다. 결과와 판정 주체는 기록에서 확인할 수 있습니다.</p></section></div>`;
   }
   function footerHTML() {
     const remaining = humanRemaining();
@@ -558,9 +586,12 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     render(returnFocus ? `[data-vd-pick="${id}"]` : null);
   }
   function choose(id, verdict) {
-    const item = S.items.find(entry => entry.id === id), time = stamp().time;
+    const item = S.items.find(entry => entry.id === id), moment = stamp(), time = moment.time;
     if (!item || item.handler !== 'human' || S.confirmed) return;
-    if (item.verdict !== verdict || item.source === 'chat') S.log.push([time, `${ACTOR}가 ${id}${objectParticle(id)} ${VERDICT[verdict][0]}으로 정함`]);
+    if (item.verdict !== verdict || item.source === 'chat') {
+      S.log.push([time, `${ACTOR}가 ${id}${objectParticle(id)} ${VERDICT[verdict][0]}으로 정함`]);
+      item.history.push({...moment, verdict});
+    }
     item.verdict = verdict; item.source = 'human';
     S.picked = id; S.flash = id; S.menu = null;
     if (verdict === 'ok') S.expanded = true;
@@ -571,7 +602,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   }
   function confirmVerdicts() {
     if (humanRemaining() || S.confirmed) return;
-    S.confirmed = stamp(); S.menu = null; S.picked = null; S.flash = null;
+    S.confirmed = stamp('confirmation'); S.menu = null; S.picked = null; S.flash = null;
     S.log.push([S.confirmed.time, `${ACTOR}가 사람 대상 3건의 판정을 확정함 (CR-2203, CR-2207, CR-2210)`]);
     render('.ew-vd-footer .ew-primary');
   }
