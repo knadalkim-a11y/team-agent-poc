@@ -1,13 +1,17 @@
 """Design mockup builder: product CSS/icon inlining and offline-page guards.
 
-Font subsetting needs fontTools and the pinned wheel fonts, which the fixed
-test environment does not install; it is replaced by a stub here so the
-inlining, marker and network guards run with the standard library only.
+The offline-page guards and committed font-format check run with the standard
+library. An optional synthetic-font round trip verifies real WOFF2 encoding
+when fontTools and Brotli are available, without downloading a product font.
 """
 
+import base64
 import hashlib
 import importlib.util
+import io
 from pathlib import Path
+import re
+import struct
 import tempfile
 import unittest
 from unittest import mock
@@ -72,6 +76,58 @@ class DesignMockBuildTests(unittest.TestCase):
                 Path(tmp, name).write_bytes(b"not the pinned font")
             with self.assertRaises(SystemExit):
                 builder.load_fonts(fonts_dir=tmp)
+
+    def test_committed_mock_fonts_have_the_declared_woff2_format(self):
+        pages = sorted((ROOT / "docs/mockups/ees-work").glob("design-mock-*.html"))
+        self.assertTrue(pages, "the checked-in design mock must be covered")
+        for page in pages:
+            fonts = re.findall(r"data:font/woff2;base64,([A-Za-z0-9+/=]+)", page.read_text(encoding="utf-8"))
+            self.assertEqual(len(fonts), len(builder.FONT_FAMILIES), page.name)
+            for index, encoded in enumerate(fonts):
+                with self.subTest(page=page.name, font=index):
+                    data = base64.b64decode(encoded, validate=True)
+                    self.assertGreaterEqual(len(data), 48)
+                    self.assertEqual(data[:4], b"wOF2", "CSS says WOFF2 but the bytes use a different format")
+                    self.assertEqual(struct.unpack_from(">I", data, 8)[0], len(data))
+
+    def test_real_subset_keeps_requested_glyph_metrics_in_woff2(self):
+        try:
+            from fontTools.fontBuilder import FontBuilder
+            from fontTools.pens.ttGlyphPen import TTGlyphPen
+            from fontTools.ttLib import TTFont, woff2
+        except ImportError:
+            self.skipTest("real font-format round trip requires fontTools")
+        if not woff2.haveBrotli:
+            self.skipTest("real font-format round trip requires Brotli")
+        font = FontBuilder(1000, isTTF=True)
+        font.setupGlyphOrder([".notdef", "A", "B"])
+        font.setupCharacterMap({ord("A"): "A", ord("B"): "B"})
+        glyphs = {}
+        for name in [".notdef", "A", "B"]:
+            pen = TTGlyphPen(None)
+            pen.moveTo((0, 0)); pen.lineTo((300, 0)); pen.lineTo((150, 700)); pen.closePath()
+            glyphs[name] = pen.glyph()
+        font.setupGlyf(glyphs)
+        font.setupHorizontalMetrics({name: (600, 0) for name in glyphs})
+        font.setupHorizontalHeader(ascent=800, descent=-200)
+        font.setupNameTable({"familyName": "Mock format test", "styleName": "Regular"})
+        font.setupOS2(sTypoAscender=800, sTypoDescender=-200, usWinAscent=800, usWinDescent=200)
+        font.setupPost()
+        font.setupMaxp()
+        original = io.BytesIO()
+        font.save(original)
+
+        encoded, glyph_count = builder.subset_font(original.getvalue(), "A")
+        self.assertEqual(encoded[:4], b"wOF2")
+        decoded = TTFont(io.BytesIO(encoded))
+        self.assertEqual(decoded.flavor, "woff2")
+        self.assertIn(ord("A"), decoded.getBestCmap())
+        self.assertNotIn(ord("B"), decoded.getBestCmap())
+        self.assertEqual(decoded["hmtx"][decoded.getBestCmap()[ord("A")]], (600, 0))
+        self.assertEqual(decoded["maxp"].numGlyphs, glyph_count)
+        with mock.patch.object(woff2, "haveBrotli", False), mock.patch.object(woff2, "log"):
+            with self.assertRaisesRegex(SystemExit, "WOFF2 encoding requires brotli"):
+                builder.subset_font(original.getvalue(), "A")
 
 
 if __name__ == "__main__":

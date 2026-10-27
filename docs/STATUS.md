@@ -1,5 +1,16 @@
 # 현재 작업 상태
 
+## 2026-10-27 · 목업 우선 개발 기준 보완 · CR별 판정 2판
+
+- **현재 작업:** `main 924d919333b8804ece2cf5322e14adc681ad6457` 위 설계 브랜치 `ccr-5c97dda0-jb5rxv`의 `0a5ea4df28bbbd484edb8a441002e229ce38fb12`를 검토한 뒤, `fix/design-mock-review-20261027`에서 지침·목업 생성 도구·목업만 보완한다. Claude 원본 브랜치와 제품 UI·서버 API·저장·실행 코드는 보존한다. [개발 순서](../AGENTS.md#design-mock-first) · [이번 범위](mockups/ees-work/TASK.md#design-mock-review-20261027).
+- **최신 목업:** [④ CR별 판정 v3.1 · 2판 HTML](mockups/ees-work/design-mock-04-cr-verdict.html), [편집 원본](mockups/ees-work/design-mock-src/04-cr-verdict.html). Figma [C74](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1615-2)·[v3.1 시안](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1613-6115)을 기준으로 하며, 이번 [C76](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1620-6119)·[2판 검토 메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1620-6114)를 추가했다. **디자인 검토 중·사용자 확정 전·사내 열기/피드백 미확인**이며, 제품 구현 착수나 사내 기능 배포 완료가 아니다. 실제 생성 커밋·검증 근거는 이번 PR과 [평가 기록](../evals/v4-ui-20260930.md#design-mock-review-20261027)에서 확인한다.
+- **이번 보완:** 확정 목업의 SHA·상태·창 크기를 고정하고 수용 근거 없는 시각적 차이를 미완료로 남기도록 했다. 목업은 제품과 같은 56/256px 메뉴 접힘·겹침 계산, 여섯 상태 바로보기, 실제 WOFF2 글꼴을 사용한다. 판정 화면의 새 CSS는 1판 그대로이며 검토 도구는 제품 영역 밖에 둔다.
+- **검증:** 생성기5 PASS, 로컬 Chromium134에서21 PASS(6상태·8폭·키보드·폰트·외부 요청/오류0), 문서/diff 및 기존 suite audit(1332→1569 ID·오류0)을 통과했다. [상태별 화면과 최초 실패·보완 근거](../evals/v4-ui-20260930.md#design-mock-review-20261027). 이 결과는 목업 검증이며 실제 제품의 일치·기능 검증이나 사내 확인 완료가 아니다.
+- **사내 적용 원본:** [미병합 문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`에 따라 프로그램 적용 완료·실행 중으로 구분한다. 로그인·기존 자료·새 화면·도구 설정은 별도 미확인이다. #104의 상세 적용 기록은 이 브랜치에 복제하거나 덮어쓰지 않는다.
+- **다음 하나:** 2판 목업에서 판정 선택·확정 전후를 검토해 디자인 피드백을 받는다. 고른 항목을 즉시 판정 묶음으로 옮길지, 확정 전 확인창을 둘지는 **미확정**이다. 목업 확정 후 Figma·기능 계약과 구현 범위를 맞춘다.
+
+> 아래 절은 이전 작업 당시 기록이다. #103 병합 대기·사내 적용 미실행 등의 당시 표현은 위 현재 상태와 구분하고, 과거 검증·실패 근거는 보존한다.
+
 ## 2026-10-26 · PR #103에 #102 병합 main 통합
 
 - **완료한 선행 조건:** 사용자 승인으로 [#102](https://github.com/knadalkim-a11y/team-agent-poc/pull/102)를 **2026-10-26 10:15:03 KST**, main `4d27de76fe4bbc4aad70ec009bb7d478d0bbe29f`에 merge commit으로 병합했다. 최종 head41c0a4b의 [CI40252075901/#341](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40252075901)는39성공/PR 출하1정상 생략, Native81/81·작성27/27·Windows Node probe와2454자 PowerShell 파싱을 통과했다. 첫 실패와 원인 미확정은 보존했다.

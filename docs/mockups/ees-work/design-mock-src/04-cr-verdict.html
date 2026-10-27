@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
-<title>시안 ④ CR별 판정 v3.1 · EES Workflow</title>
+<title>시안 ④ CR별 판정 v3.1 · 2판 · EES Workflow</title>
 <!--@mock:provenance-->
 <!--@mock:fonts-->
 <!--@mock:product-css-->
@@ -17,7 +17,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 .ees-center{display:flex;flex:1;flex-direction:column;min-width:0;min-height:0;position:relative}
 .ees-main,.ees-chat-region{flex:1;width:100%;height:100%;min-height:0;min-width:0;overflow:hidden}
 .ees-chat-region{display:flex;flex-direction:column}
-.ees-panel-region{position:relative;flex:none;height:100%;min-height:0;border-left:1px solid #e6e6e9;background:#fff}
+.ees-panel-region{position:relative;flex:none;box-sizing:border-box;height:100%;min-height:0;border-left:1px solid #e6e6e9;background:#fff}
 .ees-panel-region[hidden]{display:none}
 .ees-panel-region[data-overlay='true']{position:absolute;right:0;top:0;z-index:35;box-shadow:-8px 0 24px #0001;max-width:calc(100% - 56px)}
 .ees-panel-region #ees-work-panel{width:100%;height:100%;max-height:100%;position:relative;inset:auto;border:0}
@@ -37,6 +37,16 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 .mock-user{flex:none;display:flex;align-items:center;gap:12px;height:50px;padding:0 14px;border-top:1px solid var(--ees-line-divider);font:400 14px/22px var(--ees-font-sans)}
 .mock-avatar{display:inline-flex;align-items:center;justify-content:center;flex:none;width:22px;height:22px;border-radius:50%;background:#e6e6e9}
 .mock-avatar[data-size='28']{width:28px;height:28px}
+/* Match EesShell / eesCompact: 56px below 1440px, 256px otherwise.
+   Manual toggles persist until the viewport crosses that breakpoint. */
+.mock-sidebar[data-compact=true]{flex-basis:56px;width:56px;overflow:hidden}
+.mock-sidebar[data-compact=true] :is(.mock-logo,.mock-brand b,.mock-native-links span,.mock-user-name),.mock-sidebar[data-compact=true] #ees-work-entry :is(.ew-nav-caption,.ew-nav-links span,.ew-nav-links small,.ew-scope span,.ew-scope small,.ew-scope .ew-icon:last-child,.ew-workflows details>button,.ew-workflows summary>span){display:none}
+.mock-sidebar[data-compact=true] .mock-brand{padding:0;justify-content:center}
+.mock-sidebar[data-compact=true] #ees-work-entry .ew-workflows summary{justify-content:center}
+.mock-sidebar[data-compact=true] #ees-work-entry .ew-workflows summary::after{display:none}
+.mock-sidebar[data-compact=true] #ees-work-entry .ew-scope button{justify-content:center;padding:8px}
+.mock-sidebar[data-compact=true] .mock-user{justify-content:center;padding:0}
+.mock-icon-button:focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px}
 
 #chat-container{display:flex;flex-direction:column;height:100%;min-height:0}
 #chat-container>nav{flex:none;height:48px;box-sizing:border-box;display:flex;align-items:center}
@@ -77,7 +87,20 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 .mock-chip strong{flex:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mock-chip button{border:0;border-radius:6px;padding:2px 9px;background:#ffffff26;color:#fff;font:500 12px/18px var(--ees-font-sans);cursor:pointer}
 .mock-chip button:hover{background:#ffffff40}
-.mock-chip button:focus-visible,.mock-info button:focus-visible{outline:2px solid #ffd58a;outline-offset:2px}
+.mock-chip button:focus-visible,.mock-state-picker summary:focus-visible{outline:2px solid #ffd58a;outline-offset:2px}
+.mock-state-picker{margin-top:4px;border-top:1px solid #ffffff26;padding-top:5px}
+.mock-state-picker summary{cursor:pointer;font-weight:500}
+.mock-state-picker nav{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px}
+.mock-state-picker button{min-height:30px;text-align:left;padding:5px 7px}
+.mock-state-picker button[aria-current=true]{background:#ffd58a;color:#1f2023}
+.mock-state-picker p{margin:6px 0 0;color:#ffffffb8;font-size:11px;line-height:16px}
+.mock-chip>.mock-mobile-control{display:none}
+@media(max-width:640px){
+  .mock-chip{left:6px}
+  .mock-chip>.mock-mobile-control{display:block;min-height:32px;padding:4px 2px;font-weight:600;white-space:nowrap}
+  .mock-chip[data-expanded=false]{width:44px;padding:4px;border-radius:8px}
+  .mock-chip[data-expanded=false]>:not(.mock-mobile-control){display:none}
+}
 .mock-toast{position:fixed;left:50%;bottom:24px;z-index:1001;transform:translateX(-50%);max-width:min(520px,calc(100% - 32px));padding:10px 16px;border-radius:8px;background:#1f2023;color:#fff;font:400 13px/18px var(--ees-font-sans);box-shadow:0 6px 20px #0003}
 .mock-info{position:fixed;inset:0;z-index:1002;display:flex;align-items:flex-start;justify-content:center;padding-top:56px;background:#1f202366}
 .mock-info[hidden]{display:none}
@@ -89,6 +112,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 .mock-info footer{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
 .mock-info footer button{min-height:34px;padding:5px 14px;border:1px solid #d5d6da;border-radius:6px;background:#fff;font:500 14px/22px var(--ees-font-sans);cursor:pointer}
 .mock-info footer button:last-child{border-color:#1f2023;background:#1f2023;color:#fff}
+.mock-info button:focus-visible{outline:2px solid #2f5f98;outline-offset:2px}
 </style>
 <style data-new-screen="④ CR별 판정 v3.1">
 /* ④ CR별 판정 v3.1 (Figma 1613:6115). New screen rules written against the
@@ -173,8 +197,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 </head>
 <body>
 <div class="ees-source-shell" data-ees-source-shell data-ees-route="chat">
-  <nav class="mock-sidebar" aria-label="왼쪽 메뉴">
-    <div class="mock-brand"><span class="mock-logo" aria-hidden="true">E</span><b>EES Workflow</b><button type="button" class="mock-icon-button" aria-label="메뉴 접기" data-mock-toast="시안: 메뉴 접기는 실제 프로그램과 같고 이 시안에서는 생략합니다"><img class="ew-icon" src="v4/cda5f.svg" alt="" aria-hidden="true"></button></div>
+  <nav class="mock-sidebar" aria-label="왼쪽 메뉴" data-compact="false">
+    <div class="mock-brand"><span class="mock-logo" aria-hidden="true">E</span><b>EES Workflow</b><button type="button" class="mock-icon-button" aria-label="메뉴 접기" aria-expanded="true" data-sidebar-toggle><img class="ew-icon" src="v4/cda5f.svg" alt="" aria-hidden="true"></button></div>
     <div class="mock-sidebar-scroll">
       <section id="ees-work-entry" data-ees-work aria-label="업무 메뉴">
         <p class="ew-nav-caption">작업 위치</p>
@@ -183,9 +207,9 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
           <div class="ew-scope-field"><button type="button" data-scope-trigger="system" aria-label="시스템 고르기" aria-haspopup="listbox" aria-expanded="false" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><img class="ew-icon" src="v4/31608.svg" alt="" aria-hidden="true"><small>시스템</small><span>EMS</span><img class="ew-icon" src="v4/f17e6.svg" alt="" aria-hidden="true"></button></div>
         </div>
         <nav class="ew-nav-links">
-          <button type="button" data-action="my_work" aria-current="page" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><img class="ew-icon" src="v4/4df0d.svg" alt="" aria-hidden="true"><span>내 업무</span><small>1</small></button>
-          <button type="button" data-action="records" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><img class="ew-icon" src="v4/c325d.svg" alt="" aria-hidden="true"><span>실행 기록</span></button>
-          <button type="button" data-action="chats" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><img class="ew-icon" src="v4/093d6.svg" alt="" aria-hidden="true"><span>대화 기록</span></button>
+          <button type="button" data-action="my_work" aria-current="page" aria-label="내 업무" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><img class="ew-icon" src="v4/4df0d.svg" alt="" aria-hidden="true"><span>내 업무</span><small>1</small></button>
+          <button type="button" data-action="records" aria-label="실행 기록" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><img class="ew-icon" src="v4/c325d.svg" alt="" aria-hidden="true"><span>실행 기록</span></button>
+          <button type="button" data-action="chats" aria-label="대화 기록" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><img class="ew-icon" src="v4/093d6.svg" alt="" aria-hidden="true"><span>대화 기록</span></button>
         </nav>
         <p class="ew-nav-caption">업무</p>
         <nav class="ew-workflows">
@@ -195,11 +219,11 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
         </nav>
       </section>
       <div class="mock-native-links">
-        <button type="button" data-mock-toast="시안: 대화는 동작하지 않습니다"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M11.3 2.7a1.5 1.5 0 0 1 2.1 2.1L5.7 12.5l-2.9.7.7-2.9 7.8-7.6Z" stroke="#6F717A" stroke-width="1.4" stroke-linejoin="round"/></svg>새 대화</button>
-        <button type="button" data-mock-toast="시안: 대화는 동작하지 않습니다"><img class="ew-icon" src="v4/b8bc6.svg" alt="" aria-hidden="true" width="16" height="16">대화 검색</button>
+        <button type="button" aria-label="새 대화" data-mock-toast="시안: 대화는 동작하지 않습니다"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M11.3 2.7a1.5 1.5 0 0 1 2.1 2.1L5.7 12.5l-2.9.7.7-2.9 7.8-7.6Z" stroke="#6F717A" stroke-width="1.4" stroke-linejoin="round"/></svg><span>새 대화</span></button>
+        <button type="button" aria-label="대화 검색" data-mock-toast="시안: 대화는 동작하지 않습니다"><img class="ew-icon" src="v4/b8bc6.svg" alt="" aria-hidden="true" width="16" height="16"><span>대화 검색</span></button>
       </div>
     </div>
-    <div class="mock-user"><span class="mock-avatar"><img class="ew-icon" src="v4/afcd5.svg" alt="" aria-hidden="true" width="13" height="13"></span>김광재</div>
+    <div class="mock-user" aria-label="김광재"><span class="mock-avatar"><img class="ew-icon" src="v4/afcd5.svg" alt="" aria-hidden="true" width="13" height="13"></span><span class="mock-user-name">김광재</span></div>
   </nav>
 
   <section class="ees-center" aria-label="대화">
@@ -262,9 +286,22 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   </section>
 </div>
 
-<div class="mock-chip" role="status" aria-live="polite">
+<div class="mock-chip" data-mock-controls data-expanded="false" aria-label="시안 확인 도구">
+  <button type="button" class="mock-mobile-control" data-mock-controls-toggle aria-expanded="false" aria-label="시안 확인 도구 열기">시안</button>
   <div><b>시안</b><span>저장·실행 안 됨</span></div>
-  <div><strong id="mock-screen">④-1 고르는 중</strong><button type="button" data-mock-info>안내</button></div>
+  <div><strong id="mock-screen" role="status" aria-live="polite">④-1 고르는 중</strong><button type="button" data-mock-info>안내</button></div>
+  <details class="mock-state-picker">
+    <summary>화면 바로 보기 · 2판</summary>
+    <nav aria-label="시안 상태 선택">
+      <button type="button" data-mock-state="initial" aria-current="true">④-1 고르는 중</button>
+      <button type="button" data-mock-state="menu">④-1a 판정 고르기</button>
+      <button type="button" data-mock-state="ready">④-2 확정 준비</button>
+      <button type="button" data-mock-state="confirmed">④-3 확정됨</button>
+      <button type="button" data-mock-state="log">④-기록 · 초안</button>
+      <button type="button" data-mock-state="rules">④-기준 · 초안</button>
+    </nav>
+    <p>선택하면 예시 상태로 다시 시작합니다.<br>실제 제품에는 없는 확인용 도구입니다.</p>
+  </details>
 </div>
 
 <div class="mock-info" role="dialog" aria-modal="true" aria-labelledby="mock-info-title" hidden>
@@ -276,10 +313,12 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     <ol><li>CR-2207의 ‘판정 선택’을 눌러 고르기</li><li>다른 판정도 바꿔 보기 (사람이 고르면 말풍선이 사라짐)</li><li>‘9건 모두 승인’ 펼치기</li><li>‘판정 확정’ 누르기</li><li>‘기록’과 ‘기준’ 탭 보기 (초안)</li></ol>
     <h3>의견 보내는 법</h3>
     <p>왼쪽 아래 화면 번호와 함께 짧게 적어 주세요. 예) ④-1 고르기 목록 글자가 작다</p>
+    <h3>아직 정하지 않은 것</h3>
+    <p>고른 항목을 바로 판정 묶음으로 옮길지 확정할 때까지 제자리에 둘지, ‘판정 확정’ 전에 확인 창이 필요한지 의견을 주세요. 지금은 1판처럼 바로 옮기고 확인 창 없이 보여 주며, 확정된 제품 동작은 아닙니다.</p>
     <h3>이 시안은</h3>
-    <p>실제 프로그램의 글꼴 파일과 화면 CSS(색, 크기, 탭·꼬리표·단추 부품)를 그대로 써서 만들었습니다. 저장·실행·대화는 되지 않으며, 왼쪽 메뉴와 가운데 대화는 모양만 같습니다.</p>
+    <p>실제 프로그램의 글꼴 파일과 화면 CSS(색, 크기, 탭·꼬리표·단추 부품)를 그대로 써서 만들었습니다. 왼쪽 메뉴 접기·펼치기와 창 크기에 따른 업무 패널 겹침은 제품 기준을 따릅니다. 저장·실행·대화는 되지 않으며, 왼쪽 메뉴 이동과 가운데 대화는 모양만 같습니다. 사내 PC에서 파일이 열리는지도 확인해 주세요.</p>
     <h3>판</h3>
-    <p>v3.1 시안 1판 · 2026-10-26 · Figma 1613:6115</p>
+    <p>v3.1 시안 2판 · 2026-10-27 · Figma 1613:6115 · 미확정</p>
     <footer><button type="button" data-mock-reset>처음부터 다시</button><button type="button" data-mock-close>닫기</button></footer>
   </section>
 </div>
@@ -301,6 +340,9 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   ];
   const panel = document.getElementById('ees-work-panel');
   const region = document.querySelector('.ees-panel-region');
+  const sidebar = document.querySelector('.mock-sidebar');
+  let compactBreakpoint = window.innerWidth < 1440;
+  let compact = compactBreakpoint;
   let S, flashTimer, toastTimer;
 
   const esc = value => String(value).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
@@ -309,6 +351,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   const objectParticle = id => '13678'.includes(id.slice(-1)) || id.slice(-1) === '0' ? '을' : '를';
 
   function reset() {
+    clearTimeout(flashTimer);
     S = {
       items: SEED.map(([id, name, verdict, reason, file]) => ({id, name, verdict, reason: reason || '', file: file || '', source: verdict ? 'chat' : null})),
       picked: null, flash: null, expanded: false, confirmed: null, tab: 'work', menu: null,
@@ -317,12 +360,56 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     };
   }
   function counts() { const c = {none: 0, ok: 0, cond: 0, bad: 0}; S.items.forEach(item => c[item.verdict || 'none']++); return c; }
+  function stateKey() {
+    if (S.tab !== 'work') return S.tab;
+    if (S.confirmed) return 'confirmed';
+    if (S.menu) return 'menu';
+    return counts().none ? 'initial' : 'ready';
+  }
   function screenId() {
     if (S.tab === 'log') return '④-기록 (초안)';
     if (S.tab === 'rules') return '④-기준 (초안)';
     if (S.confirmed) return '④-3 확정됨';
     if (S.menu) return '④-1a 판정 고르기';
     return counts().none ? '④-1 고르는 중' : '④-2 확정 준비';
+  }
+
+  // Review-only fixture navigation. It deliberately does not call product
+  // actions, change the CR design or decide the outstanding UX questions.
+  function previewState(key) {
+    const width = S.width;
+    reset();
+    S.width = width;
+    if (key === 'ready' || key === 'confirmed') {
+      const item = S.items.find(entry => entry.id === 'CR-2207');
+      item.verdict = 'cond'; item.source = 'human';
+      S.picked = item.id;
+      S.log.push(['14:24', `${ACTOR}가 CR-2207을 조건부 승인으로 정함`]);
+    }
+    if (key === 'confirmed') {
+      S.confirmed = {date: '10.27', time: '14:25'};
+      S.picked = null;
+      S.log.push(['14:25', `${ACTOR}가 12건 판정을 확정함`]);
+    }
+    if (key === 'log' || key === 'rules') S.tab = key;
+    if (key === 'menu') S.menu = 'CR-2207';
+    document.querySelector('.mock-state-picker').open = false;
+    setMockControlsExpanded(false);
+    document.querySelector('.mock-info').hidden = true;
+    document.querySelector('.mock-toast')?.remove();
+    const scroll = panel.querySelector('.ew-scroll');
+    if (scroll) scroll.scrollTop = 0;
+    setOpen(true);
+    layout();
+    render(key === 'menu' ? '.ew-vd-option' : null);
+  }
+
+  function setMockControlsExpanded(expanded) {
+    document.querySelector('[data-mock-controls]').dataset.expanded = String(expanded);
+    const button = document.querySelector('[data-mock-controls-toggle]');
+    button.setAttribute('aria-expanded', String(expanded));
+    button.setAttribute('aria-label', expanded ? '시안 확인 도구 접기' : '시안 확인 도구 열기');
+    button.textContent = expanded ? '시안 도구 접기' : '시안';
   }
 
   function headerHTML() {
@@ -396,6 +483,10 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     panel.querySelector('.ew-scroll').scrollTop = top;
     if (S.menu) placeMenu();
     document.getElementById('mock-screen').textContent = screenId();
+    document.querySelectorAll('[data-mock-state]').forEach(button => {
+      if (button.dataset.mockState === stateKey()) button.setAttribute('aria-current', 'true');
+      else button.removeAttribute('aria-current');
+    });
     if (focus) panel.querySelector(focus)?.focus({preventScroll: true});
   }
   function placeMenu() {
@@ -453,7 +544,17 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     if (open) panel.focus(); else document.getElementById('ees-work-panel-toggle').focus();
   }
   function layout() {
-    region.dataset.overlay = String(window.innerWidth - 256 - 480 < 560);
+    const nextBreakpoint = window.innerWidth < 1440;
+    if (nextBreakpoint !== compactBreakpoint) {
+      compactBreakpoint = nextBreakpoint;
+      compact = nextBreakpoint;
+    }
+    sidebar.dataset.compact = String(compact);
+    const toggle = sidebar.querySelector('[data-sidebar-toggle]');
+    toggle.setAttribute('aria-expanded', String(!compact));
+    toggle.setAttribute('aria-label', compact ? '메뉴 펼치기' : '메뉴 접기');
+    // EesShell uses the base work-panel width (480), including while resizing.
+    region.dataset.overlay = String(window.innerWidth - (compact ? 56 : 256) - 480 < 560);
     region.style.width = `${S.width}px`;
     region.querySelector('.ees-panel-resize').setAttribute('aria-valuenow', S.width);
     if (S.menu) render();
@@ -464,6 +565,11 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     const target = event.target.closest('button, [data-mock-toast], [data-vd-pick], [data-vd-choose]');
     if (S.menu && !event.target.closest('.ew-vd-menu, [data-vd-pick]')) closeMenu(false);
     if (!target) return;
+    if (target.matches('[data-mock-controls-toggle]')) {
+      return setMockControlsExpanded(target.getAttribute('aria-expanded') !== 'true');
+    }
+    if (target.matches('[data-sidebar-toggle]')) { compact = !compact; return layout(); }
+    if (target.matches('[data-mock-state]')) return previewState(target.dataset.mockState);
     if (target.matches('[data-vd-pick]')) return S.menu === target.dataset.vdPick ? closeMenu(true) : openMenu(target.dataset.vdPick);
     if (target.matches('[data-vd-choose]')) return choose(S.menu, target.dataset.vdChoose);
     if (target.matches('[data-vd-group]')) { S.expanded = !S.expanded; return render('[data-vd-group]'); }
@@ -479,6 +585,10 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   document.addEventListener('keydown', event => {
     const info = document.querySelector('.mock-info');
     if (!info.hidden && event.key === 'Escape') { info.hidden = true; return document.querySelector('[data-mock-info]').focus(); }
+    if (event.key === 'Escape' && !S.menu && S.open && region.dataset.overlay === 'true' && region.contains(event.target)) {
+      event.preventDefault();
+      return setOpen(false);
+    }
     if (event.target.matches?.('#chat-input') && (event.key === 'Enter' || event.key.length === 1)) { event.preventDefault(); return toast('시안: 대화는 동작하지 않습니다'); }
     if (event.target.matches?.('[data-vd-pick]') && ['ArrowDown', 'ArrowUp'].includes(event.key)) { event.preventDefault(); return openMenu(event.target.dataset.vdPick); }
     if (!S.menu || !event.target.closest?.('.ew-vd-menu')) return;
@@ -489,6 +599,9 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   });
   const handle = region.querySelector('.ees-panel-resize');
   handle.addEventListener('pointerdown', event => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    handle.focus({preventScroll: true});
     const startX = event.clientX, startWidth = S.width;
     handle.setPointerCapture(event.pointerId);
     const move = e => { S.width = clampWidth(startWidth + startX - e.clientX); layout(); };

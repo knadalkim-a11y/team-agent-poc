@@ -79,7 +79,6 @@ def subset_font(data, text):
     except ImportError as error:
         raise SystemExit("fontTools and brotli are required: pip install fonttools brotli") from error
     options = subset.Options()
-    options.flavor = "woff2"
     options.layout_features = ["*"]
     options.name_IDs = ["*"]
     options.name_languages = ["*"]
@@ -89,9 +88,18 @@ def subset_font(data, text):
     subsetter = subset.Subsetter(options=options)
     subsetter.populate(unicodes={ord(char) for char in text})
     subsetter.subset(font)
+    # The serializer reads TTFont.flavor; subset.Options.flavor is only a CLI
+    # option and does not change the bytes produced by font.save().
+    font.flavor = "woff2"
     output = io.BytesIO()
-    font.save(output)
-    return output.getvalue(), font["maxp"].numGlyphs
+    try:
+        font.save(output)
+    except ImportError as error:
+        raise SystemExit("WOFF2 encoding requires brotli: pip install fonttools brotli") from error
+    data = output.getvalue()
+    if not data.startswith(b"wOF2"):
+        raise SystemExit("font subsetting did not produce a WOFF2 file")
+    return data, font["maxp"].numGlyphs
 
 
 def icon_data_uri(name):
