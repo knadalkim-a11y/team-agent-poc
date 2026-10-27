@@ -1,0 +1,50 @@
+{
+  "checkedAt": "2026-10-27T04:44:40.668Z",
+  "baseline": "1176c76d976abda242b17cda1adcf9dbff994ac0",
+  "source": {
+    "path": "docs/mockups/ees-work/design-mock-src/05-execution.html",
+    "bytes": 78059,
+    "sha256": "3de10ec0a7e43bd2f8fd4f9894659a544ee5f62834b941c3aa3a56989deb8e8a"
+  },
+  "artifact": {
+    "path": "docs/mockups/ees-work/design-mock-05-execution.html",
+    "bytes": 409356,
+    "sha256": "b550c9ce0b78db0162b4709085b21747ebb01004250a618dd29ec88e64134558"
+  },
+  "logicUnchangedOutsideHeaderAndUnusedClock": true,
+  "views": [
+    {
+      "width": 1920,
+      "labelsRemoved": true,
+      "countAndStatusesPreserved": true,
+      "overflow": 0,
+      "pageOverflow": 0,
+      "stageButton": {
+        "x": 343,
+        "y": 136,
+        "width": 116,
+        "height": 32
+      },
+      "screenshot": "mock-revision13-1920-default.png"
+    },
+    {
+      "width": 480,
+      "labelsRemoved": true,
+      "countAndStatusesPreserved": true,
+      "overflow": 0,
+      "pageOverflow": 0,
+      "stageButton": {
+        "x": 287,
+        "y": 136,
+        "width": 116,
+        "height": 32
+      },
+      "screenshot": "mock-revision13-480-default.png"
+    }
+  ],
+  "errors": [],
+  "externalRequests": [],
+  "browser": "134.0.6998.35",
+  "approvedRevision10Preserved": true,
+  "result": "pass"
+}

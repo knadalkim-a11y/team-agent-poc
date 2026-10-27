@@ -1,5 +1,13 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="design-mock-heading-cleanup-20261027"></a>
+
+## 2026-10-27 · 업무 목업 13판 · 제목 주변 표시 정리
+
+- **요청:** 사용자는12판 버튼 배치에 긍정 피드백을 주고 제목 옆 ‘사람 판정 3건’ 배지와 작업 수 옆 시계·‘오늘 18:00까지’를 제거하도록 요청했다. [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `1176c76d976abda242b17cda1adcf9dbff994ac0`의 [05목업](design-mock-05-execution.html)·[원본](design-mock-src/05-execution.html)을13판으로 갱신한다. 긍정 피드백을 전체 목업/기능 구현 승인으로 확대하지 않는다.
+- **범위:** 두 표시와 더 이상 쓰지 않는 시계 SVG·기한 CSS만 제거한다. 작업 수·하단 사람/서비스 판정 현황·실행 버튼·나머지 배치/동작은 그대로다. 확정10판04파일과 이전 판의 커밋/검증을 보존한다. 제품 UI·API·저장·엔진은 바꾸지 않는다.
+- **반영:** [13판 평가](../../../evals/v4-ui-20260930.md#design-mock-heading-cleanup-20261027) · Figma [13판 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1646-6438)·[메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1646-6439)·[C88](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1646-6733). 기본/이전 실행 근거2패널을 보존 복제하고 기본 헤더의 두 표시만 제거했다. 기존 전체 셸·다른 상태·펼침 화살표의 미동기화 범위는 그대로다.
+
 <a id="design-mock-button-layout-20261027"></a>
 
 ## 2026-10-27 · 업무 목업 12판 · 실행 버튼 배치 정돈
