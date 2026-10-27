@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
-<title>시안 · CR 항목별 사람·자동 판정 · 7판 · EES Workflow</title>
+<title>시안 · CR 항목별 사람·자동 판정 · 8판 · EES Workflow</title>
 <!--@mock:provenance-->
 <!--@mock:fonts-->
 <!--@mock:product-css-->
@@ -278,7 +278,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
                   <div id="response-content-container"><div class="markdown-prose">
                     <p>12건 중 서비스 자동 판정 대상 9건은 판정이 끝났습니다. 승인 8건, 미승인 1건입니다.</p>
                     <p>‘대시보드 필터 추가’는 테스트 결과가 없어 미승인입니다. 자동 판정은 완료됐으며, 근거를 오른쪽에서 확인할 수 있습니다.</p>
-                    <p>나머지 3건은 사람이 판정하는 작업입니다. 자료를 확인한 뒤 오른쪽에서 판정을 선택할 수 있습니다. ‘배치 주기 조정’은 테스트 파일(test_v2_final.xlsx)의 최종본 여부를 확인해야 합니다.</p>
+                    <p>나머지 3건은 사람이 판정하는 작업입니다. 자료를 확인한 뒤 오른쪽에서 판정을 선택할 수 있습니다.</p>
                   </div></div>
                   <div class="mock-ai-actions" aria-hidden="true">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" stroke="#6F717A" stroke-width="1.3"/><path d="M10.5 3.5v-.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5" stroke="#6F717A" stroke-width="1.3"/></svg>
@@ -318,7 +318,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   <div><b>시안</b><span>저장·실행 안 됨</span></div>
   <div><strong id="mock-screen" role="status" aria-live="polite">④-1 항목별 판정</strong><button type="button" data-mock-info>안내</button></div>
   <details class="mock-state-picker">
-    <summary>화면 바로 보기 · 7판</summary>
+    <summary>화면 바로 보기 · 8판</summary>
     <nav aria-label="항목별 판정 상태 선택">
       <button type="button" data-mock-state="initial" aria-current="true">④-1 항목별 판정</button>
       <button type="button" data-mock-state="menu">④-1a 사람 판정 고르기</button>
@@ -346,7 +346,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     <h3>이 시안은</h3>
     <p>실제 프로그램의 글꼴 파일과 화면 CSS(색, 크기, 탭·꼬리표·단추 부품)를 그대로 써서 만들었습니다. 왼쪽 메뉴 접기·펼치기와 창 크기에 따른 업무 패널 겹침은 제품 기준을 따릅니다. 항목별 자동 판정은 합성 예시이며 실제 제품의 규칙·저장은 목업 검토 후 정합니다. 이 예시의 자동 판정은 문서가 있는지만 확인하며 문서 내용의 적정성을 판단하지 않습니다. 저장·실행·대화는 되지 않으며, 왼쪽 메뉴 이동과 가운데 대화는 모양만 같습니다. 사내 PC에서 파일이 열리는지도 확인해 주세요.</p>
     <h3>판</h3>
-    <p>시안 7판 · 2026-10-27 · CR 항목별 사람·자동 판정 · 미확정</p>
+    <p>시안 8판 · 2026-10-27 · CR 항목별 사람·자동 판정 · 미확정</p>
     <footer><button type="button" data-mock-reset>처음부터 다시</button><button type="button" data-mock-close>닫기</button></footer>
   </section>
 </div>
@@ -358,12 +358,12 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   const ICON = {down: 'v4/f17e6.svg', right: 'v4/69549.svg', check: 'v4/9d8d5.svg', clip: 'v4/ea639.svg', back: 'v4/eb94a.svg', more: 'v4/a953c.svg', panel: 'v4/7bb4a.svg'};
   // New icon variant: v4/63982 (clock) in the attention color.
   const CLOCK = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M6.5 11.375C9.19239 11.375 11.375 9.19239 11.375 6.5C11.375 3.80761 9.19239 1.625 6.5 1.625C3.80761 1.625 1.625 3.80761 1.625 6.5C1.625 9.19239 3.80761 11.375 6.5 11.375Z" stroke="#96590C" stroke-width="1.41667" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 3.7915V6.49984L8.125 7.58317" stroke="#96590C" stroke-width="1.41667" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  const VERDICT = {ok: ['승인', '설정된 승인 조건을 충족함'], cond: ['조건부 승인', '최종본 제출을 조건으로 통과'], bad: ['미승인', '설정된 승인 조건을 충족하지 못함']};
+  const VERDICT = {ok: ['승인', '설정된 승인 조건을 충족함'], cond: ['조건부 승인', '추가 조건을 전제로 승인'], bad: ['미승인', '설정된 승인 조건을 충족하지 못함']};
   const GROUPS = [['none', '결정 필요'], ['cond', '조건부 승인'], ['bad', '미승인'], ['ok', '승인']];
   const SEED = [
     ['CR-2201', '로그인 화면 문구 수정', 'ok'], ['CR-2202', '알람 기준값 조정', 'ok'], ['CR-2203', '보고서 출력 양식 변경', null],
     ['CR-2204', '대시보드 필터 추가', 'bad', '테스트 없음'], ['CR-2205', '설비 목록 정렬 수정', 'ok'], ['CR-2206', '데이터 보관 기간 변경', 'ok'],
-    ['CR-2207', '배치 주기 조정', null, '테스트 파일이 최종본인지 확인 필요', 'test_v2_final.xlsx'], ['CR-2208', '메일 발송 대상 추가', 'ok'],
+    ['CR-2207', '배치 주기 조정', null, '', 'test_v2_final.xlsx'], ['CR-2208', '메일 발송 대상 추가', 'ok'],
     ['CR-2209', '화면 응답 속도 개선', 'ok'], ['CR-2210', '권한 그룹 정리', null, '설계서와 테스트 없음'], ['CR-2211', '이력 조회 기간 확대', 'ok'], ['CR-2212', '오류 메시지 정리', 'ok']
   ];
   const HUMAN_IDS = new Set(['CR-2203', 'CR-2207', 'CR-2210']);
@@ -449,7 +449,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     if (item.id === S.picked) return '<span>방금 선택</span>';
     if (!item.verdict) return `<span data-tone="attention">${esc(item.reason)}</span>`;
     if (item.verdict === 'bad') return item.reason ? `<span data-tone="danger">${esc(item.reason)}</span>` : '<span>직접 정함</span>';
-    return item.verdict === 'cond' ? '<span>최종본 제출 조건</span>' : '';
+    return '';
   }
   function pickHTML(item) {
     if (item.handler === 'service') return `<span class="ew-vd-final"><i class="ew-vd-dot" data-verdict="${item.verdict}"></i>${VERDICT[item.verdict][0]}</span>`;
@@ -464,12 +464,12 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     }
     // Observations remain independent of the person's current selection.
     const observations = {
-      'CR-2207': ['첨부 test_v2_final.xlsx는 있습니다. 최종본 여부는 확인되지 않았습니다.', '테스트 파일이 최종본인지 확인해야 합니다.'],
+      'CR-2207': ['첨부 test_v2_final.xlsx는 있습니다.', ''],
       'CR-2210': ['설계서와 테스트 결과가 없습니다.', '누락 문서의 보완 여부를 확인해야 합니다. 배포 계획서의 상태는 이 근거에 기록되지 않았습니다.'],
       'CR-2203': ['판정에 필요한 자료가 기록되지 않았습니다.', '승인 조건을 충족하는지 자료를 직접 확인해야 합니다.']
     }[item.id];
     const selections = item.history.map(entry => `<p data-human-selection>${entry.date} ${entry.time} · ${ACTOR}가 ${VERDICT[entry.verdict][0]} 선택</p>`).join('');
-    return `<div class="ew-vd-evidence" id="evidence-${item.id}"><dl class="ew-vd-evidence-observations"><dt>현재 근거</dt><dd data-observation>${observations[0]}</dd><dt>추가 확인</dt><dd>${observations[1]}</dd></dl><small>근거 확인 시각 · 미기록</small><div class="ew-vd-evidence-history"><b>사람 선택 기록</b>${selections}${!selections ? '<p>아직 판정을 선택하지 않았습니다.</p>' : ''}</div></div>`;
+    return `<div class="ew-vd-evidence" id="evidence-${item.id}"><dl class="ew-vd-evidence-observations"><dt>현재 근거</dt><dd data-observation>${observations[0]}</dd>${observations[1] ? `<dt>추가 확인</dt><dd>${observations[1]}</dd>` : ''}</dl><small>근거 확인 시각 · 미기록</small><div class="ew-vd-evidence-history"><b>사람 선택 기록</b>${selections}${!selections ? '<p>아직 판정을 선택하지 않았습니다.</p>' : ''}</div></div>`;
   }
   function statusLabel(item) {
     if (item.handler === 'service') return '자동 판정 완료';

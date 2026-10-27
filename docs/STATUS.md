@@ -1,13 +1,13 @@
 # 현재 작업 상태
 
-## 2026-10-27 · 업무 목업 7판 · AI 추천 제거
+## 2026-10-27 · 업무 목업 8판 · 혼동을 주는 최종본 안내 제거
 
-- **현재 작업:** [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)의 6판 head `cb03ab60be8641c74d348ec7b24987241cf55c81`에서 요청 밖 기능인 AI 추천을 제거한다. [이번 범위](mockups/ees-work/TASK.md#design-mock-no-recommendation-20261027).
-- **최신 목업:** [업무 목업 7판 HTML](mockups/ees-work/design-mock-04-cr-verdict.html) · [편집 원본](mockups/ees-work/design-mock-src/04-cr-verdict.html). 사람3건은 직접 선택하고 서비스9건은 기존 로직의 결과를 보여 준다. 추천 문구·예시·합성 값·렌더 처리를 제거하고 공통 판정 근거·미확인 자료·사람 선택 기록은 유지한다. 확정·저장 등 대체 기능은 추가하지 않는다.
-- **기록·경계:** Figma [7판 메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1629-6115)·[C81](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1629-2). 제품 UI·API·저장·엔진은 보존한다. **디자인 검토 중·7판 전체 확정 전·사내 열기 미확인**이다. 최종 확정 방식은 미정이며 임의로 구현하지 않는다.
-- **검증:** 생성 검사5 PASS/0 SKIP, Chromium134 브라우저22/22 PASS, 외부 요청·console/page error0. 추천 잔여 제거·사람 선택·서비스9건 불변·공통 근거·1920/1200/480px를 확인했다. 결과와 해시는 [7판 평가](../evals/v4-ui-20260930.md#design-mock-no-recommendation-20261027)에 기록한다. [6판 당시 검사](../evals/v4-ui-20260930.md#design-mock-clarity-20261027)와 이전 증거는 당시 이력으로 보존한다.
+- **현재 작업:** [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)의 7판 head `d1895c47ac24c1daaec1fe81c1508bf32b710dc0`에서 ‘배치 주기 조정’의 임의 최종본 확인 안내와 연결된 설명을 제거한다. [이번 범위](mockups/ees-work/TASK.md#design-mock-copy-20261027).
+- **최신 목업:** [업무 목업 8판 HTML](mockups/ees-work/design-mock-04-cr-verdict.html) · [편집 원본](mockups/ees-work/design-mock-src/04-cr-verdict.html). 사람 판정의 선택지·서비스 읽기 전용 결과·공통 판정 근거를 유지하며 새 조건·기능은 추가하지 않는다. 첨부 파일은 실제 업로드/열기와 연결되지 않은 기존 합성 예시다.
+- **Figma·경계:** [8판 메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1631-6114)·[C82](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1631-6119)에 기록했다. **Figma는 검토 메모·기록만 반영됐고 기존 전체 판정 화면은 최신 HTML과 아직 다르다.** 제품 UI·API·저장·엔진은 보존한다. 디자인 검토 중·전체 확정 전·사내 열기 미확인이다.
+- **검토:** 범위 한정 브라우저 검사7/7 PASS, 외부 요청·console/page error0. 안내 제거·기존 판정 동작·1920/480px 확인 결과는 [8판 평가](../evals/v4-ui-20260930.md#design-mock-copy-20261027)에 기록한다. [7판 검사](../evals/v4-ui-20260930.md#design-mock-no-recommendation-20261027)와 이전 증거는 보존한다.
 - **사내 적용 원본:** [미병합 문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`에 따라 프로그램 적용 완료·실행 중으로 구분한다. 로그인·기존 자료·새 화면·도구 설정은 별도 미확인이다. #104의 상세 적용 기록은 이 브랜치에 복제하거나 덮어쓰지 않는다.
-- **다음 하나:** 사람 판정과 서비스 판정만 남긴 7판을 검토한다. 미정 동작을 후속 구현 권한으로 해석하지 않는다.
+- **다음 하나:** 임의 확인 안내를 제거한 8판을 검토한다. 미정 동작을 후속 구현 권한으로 해석하지 않는다.
 
 > 아래 절은 이전 작업 당시 기록이다. #103 병합 대기·사내 적용 미실행 등의 당시 표현은 위 현재 상태와 구분하고, 과거 검증·실패 근거는 보존한다.
 

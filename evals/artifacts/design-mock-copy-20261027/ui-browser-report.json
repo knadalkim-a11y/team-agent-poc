@@ -1,0 +1,47 @@
+{
+  "checkedAt": "2026-10-27T02:12:59.826Z",
+  "source": "docs/mockups/ees-work/design-mock-src/04-cr-verdict.html",
+  "sourceSha256": "261903d25a52b8da7af0b57cf477919528e2b6f71cf853930dc1b9f17fb916fc",
+  "artifact": "docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+  "artifactSha256": "6f9d6f0e774f6ed89340c5d8d29c6117b859ca534e82b1154026a957db1dbb7e",
+  "artifactBytes": 388978,
+  "checks": [
+    {
+      "name": "Removed final-version instructions are absent from source and generated artifact",
+      "result": "pass"
+    },
+    {
+      "name": "Attachment example and three human selectors remain; nine service rows stay read-only",
+      "result": "pass"
+    },
+    {
+      "name": "Batch evidence keeps only the attachment fact; unrelated missing-document guidance is unchanged",
+      "result": "pass"
+    },
+    {
+      "name": "Existing three verdict options and keyboard selection remain; no final-version rule or confirmation action appears",
+      "result": "pass"
+    },
+    {
+      "name": "Removed copy does not reappear in records, rules, chat or mock help",
+      "result": "pass"
+    },
+    {
+      "name": "Default and evidence views fit 1920px and 480px without horizontal overflow",
+      "result": "pass"
+    },
+    {
+      "name": "Offline smoke has no external requests or browser errors",
+      "result": "pass"
+    }
+  ],
+  "screenshots": [
+    "mock-revision8-1920-panel.png",
+    "mock-revision8-1920-batch-evidence.png",
+    "mock-revision8-480-full.png"
+  ],
+  "externalRequests": [],
+  "errors": [],
+  "browser": "134.0.6998.35",
+  "result": "pass"
+}

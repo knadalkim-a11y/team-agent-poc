@@ -1,5 +1,13 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="design-mock-copy-20261027"></a>
+
+## 2026-10-27 · 업무 목업 8판 · 임의 최종본 확인 안내 제거
+
+- **피드백:** ‘테스트 파일이 최종본인지 확인 필요’는 사용자가 정한 기준이나 실제 검사 결과가 아닌 합성 설명이며 혼동을 준다. [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `d1895c47ac24c1daaec1fe81c1508bf32b710dc0`에서 같은 [목업](design-mock-04-cr-verdict.html)의 목록·대화·근거와 조건부 승인 설명에 남은 최종본 확인/제출 문구를 제거한다.
+- **범위:** 사람/서비스 판정, 승인·조건부 승인·미승인 선택지와 공통 근거 버튼은 유지하며 새 조건·안내·기능을 추가하지 않는다. 기존 첨부 파일은 열기/업로드와 연결되지 않은 합성 예시다. 다른 항목의 예시와 실제 제품은 변경하지 않는다.
+- **기록:** [8판 검토](../../../evals/v4-ui-20260930.md#design-mock-copy-20261027) · Figma [8판 메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1631-6114)·[C82](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1631-6119). Figma 반영은 메모·변경 기록이며 기존 전체 화면과 최신 HTML의 동기화는 미실시다. 전체 목업 확정·사내 확인도 미완료다.
+
 <a id="design-mock-no-recommendation-20261027"></a>
 
 ## 2026-10-27 · 업무 목업 7판 · AI 추천 제거
