@@ -1,5 +1,14 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="design-mock-decision-terms-20261027"></a>
+
+## 2026-10-27 · 업무 목업 19판 · 직접 판정·자동 판정
+
+- **승인 범위:** 사용자가 ‘직접 판정 / 자동 판정’ 제안을 수용했다. 같은 [Draft PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `f07d649c8d9c9807cd196c63e94ff498e581e792`의 [05목업](design-mock-05-execution.html)·[원본](design-mock-src/05-execution.html)에서 기존 사람 판정/서비스 판정의 화면 용어만 바꾼다. 자동 판정은 실행을 예약/자동 시작한다는 뜻이 아니다. 판정 방식·실행 동작·배치는 유지한다.
+- **배치 논의:** 사용자는 판정 근거를 누르려다 가까운 다시 실행을 누를 우려가 있어 방안을 물었다. 판정 근거를 결과 옆으로 옮기고 재실행을 작업명 오른쪽에 두는 안을 추천한다. 이 질문을 위치 변경 승인으로 해석하지 않으며19판에는 적용하지 않는다. 새 메뉴·확인창·실행 기능도 추가하지 않는다.
+- **검토·보존:** [19판 확인](../../../evals/v4-ui-20260930.md#design-mock-decision-terms-20261027).1920/480px 용어 표시와 기존 위치/크기를 확인한다. CSS·용어 외 스크립트·확정10판04파일과 이전 이력을 보존하며 실제 제품·병합·배포는 변경하지 않는다.
+- **Figma:** [19판 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1657-7034)·[메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1657-7035)·[C94](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1657-7368). 화면 주체/현황12곳을 바꾸고3집중패널을 렌더 확인했다. 제어19개의 좌표/크기와 버튼/근거 배치를 유지한다. 새 컴포넌트 없이18판/이전 이력을 보존하며 전체 셸/다른 상태·기존 화살표 차이는 남는다.
+
 <a id="design-mock-stage-action-20261027"></a>
 
 ## 2026-10-27 · 업무 목업 18판 · 상단 실행 강조·범위 구분
