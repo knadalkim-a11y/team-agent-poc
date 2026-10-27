@@ -1,0 +1,183 @@
+{
+  "checkedAt": "2026-10-27T05:36:58.265Z",
+  "baseline": "3f0a919319ac247954878b6ffe94bb8c95725c74",
+  "scope": "Typography, execution labels/appearance and attachment role only; targeted ad-hoc browser inspection.",
+  "files": [
+    {
+      "path": "docs/mockups/ees-work/design-mock-src/05-execution.html",
+      "bytes": 76211,
+      "sha256": "de9cbf2bf4190d8eba2b92bfd9d9ece5943715fb88cfe3278feec678684c4ddc"
+    },
+    {
+      "path": "docs/mockups/ees-work/design-mock-05-execution.html",
+      "bytes": 406548,
+      "sha256": "c3af698a12fcb063d7f9e27b89468196b9c217d0a8415df5db9a5b873a8f74ba"
+    }
+  ],
+  "checks": [
+    "Only CSS/static content and headHTML/pickHTML/itemHTML changed; remaining script and approved04 bytes retained",
+    "1920/480: text-only first run/rerun match, top label/accessibility and primary emphasis retained;15px task/13px decision and static labelled attachment fit",
+    "480 keyboard menu/conditional label and attachment remain accessible without overflow",
+    "Renamed top control still starts only two unstarted services; aggregate9/9 and expanded9rows verified; all human decisions untouched",
+    "13px evidence body/12px secondary text and original tool input/output/criteria fit; final title700 matches Figma"
+  ],
+  "screenshots": [
+    "mock-revision17-1920-default.png",
+    "mock-revision17-attachment.png",
+    "mock-revision17-480-default.png",
+    "mock-revision17-480-menu.png",
+    "mock-revision17-evidence.png",
+    "mock-revision17-overview.png"
+  ],
+  "geometry": {
+    "480": {
+      "stage": {
+        "x": 344,
+        "y": 136,
+        "width": 116,
+        "height": 32,
+        "font": "13px",
+        "lineHeight": "20px",
+        "background": "rgb(47, 95, 152)",
+        "border": "0px",
+        "text": "지금 실행"
+      },
+      "first": {
+        "x": 354,
+        "y": 393,
+        "width": 106,
+        "height": 32,
+        "font": "13px",
+        "lineHeight": "20px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "지금 실행"
+      },
+      "repeat": {
+        "x": 354,
+        "y": 900,
+        "width": 106,
+        "height": 32,
+        "font": "13px",
+        "lineHeight": "20px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "다시 실행"
+      },
+      "taskName": {
+        "x": 77,
+        "y": 672,
+        "width": 383,
+        "height": 22,
+        "font": "15px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "배치 주기 조정"
+      },
+      "actor": {
+        "x": 77,
+        "y": 703,
+        "width": 72,
+        "height": 20,
+        "font": "13px",
+        "lineHeight": "20px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "사람 판정"
+      },
+      "attachment": {
+        "x": 77,
+        "y": 734,
+        "width": 383,
+        "height": 20,
+        "font": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "판정 참고 자료test_v2_final.xlsx"
+      },
+      "humanHeight": 77,
+      "attachedHumanHeight": 103,
+      "serviceHeight": 87
+    },
+    "1920": {
+      "stage": {
+        "x": 1784,
+        "y": 136,
+        "width": 116,
+        "height": 32,
+        "font": "13px",
+        "lineHeight": "20px",
+        "background": "rgb(47, 95, 152)",
+        "border": "0px",
+        "text": "지금 실행"
+      },
+      "first": {
+        "x": 1794,
+        "y": 393,
+        "width": 106,
+        "height": 32,
+        "font": "13px",
+        "lineHeight": "20px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "지금 실행"
+      },
+      "repeat": {
+        "x": 1794,
+        "y": 900,
+        "width": 106,
+        "height": 32,
+        "font": "13px",
+        "lineHeight": "20px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "다시 실행"
+      },
+      "taskName": {
+        "x": 1461,
+        "y": 672,
+        "width": 439,
+        "height": 22,
+        "font": "15px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "배치 주기 조정"
+      },
+      "actor": {
+        "x": 1461,
+        "y": 703,
+        "width": 72,
+        "height": 20,
+        "font": "13px",
+        "lineHeight": "20px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "사람 판정"
+      },
+      "attachment": {
+        "x": 1461,
+        "y": 734,
+        "width": 439,
+        "height": 20,
+        "font": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "판정 참고 자료test_v2_final.xlsx"
+      },
+      "humanHeight": 77,
+      "attachedHumanHeight": 103,
+      "serviceHeight": 87
+    }
+  },
+  "errors": [],
+  "externalRequests": [],
+  "browser": "134.0.6998.35",
+  "result": "pass",
+  "previousAttempt": "render-review-first-attempt.json",
+  "correction": "Initial stage assertion counted only visible DOM rows (2) while completed approval group was collapsed; final inspection expands that group before expecting9. No runtime/source behavior change. Figma supports title Bold, so title600 was adjusted to original700 and final default/menu captures replaced initial captures. Existing first-failure PNG retained.",
+  "visualReview": "Final default1920/480, attachment and evidence inspected directly. Menu initially captured during fade; final menu recaptured with animations disabled. Screenshot refresh only, no source change."
+}

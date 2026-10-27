@@ -1,14 +1,14 @@
 # 현재 작업 상태
 
-## 2026-10-27 · 업무 목업 16판 · 선택 안내·재실행 박스 제거
+## 2026-10-27 · 업무 목업 17판 · 실행 표시·글자 크기·첨부 역할
 
-- **현재 요청:** ‘방금 선택’ 문구를 없애고 ‘다시 실행’을 박스 없이 표시한다. [범위](mockups/ees-work/TASK.md#design-mock-rerun-text-20261027). 같은 [Draft PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `a5665771720b8213b9a922bd4bf51e22cb45e055`에서 진행한다.
-- **최신 목업:** [16판 HTML](mockups/ees-work/design-mock-05-execution.html)·[편집 원본](mockups/ees-work/design-mock-src/05-execution.html). 선택 직후 문구와 완료 재실행의 옅은 배경만 제거했다.106×32px 클릭 영역·키보드 포커스·첫 실행/실행 중/단계 실행과15판의 한 줄 판정 배치를 유지한다.
-- **확인·보존:** [16판 평가](../evals/v4-ui-20260930.md#design-mock-rerun-text-20261027)에 실제 선택/키보드 재실행·480px 배치 PASS와 오류/외부요청0을 기록했다. 표시 함수 외 스크립트와 확정10판04파일·이전 검증/실패는 보존한다.16판은 사용자 확인 전이다.
-- **Figma:** [16판 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1652-6723)·[메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1652-6724)·[C91](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1652-7056)에3집중패널의 재실행 배경 제거와 최종 렌더를 기록했다. 해당상태에는 ‘방금 선택’ 문구가 없었음을 구분했다.15판/이전 이력과 전체 셸/다른 상태·기존 화살표 차이의 경계를 유지한다.
+- **현재 요청:** 개별 지금 실행을 재실행과 맞추고 글자 크기·상단 실행 이름·불분명한 첨부 표시를 정리한다. [범위](mockups/ees-work/TASK.md#design-mock-type-execution-20261027). 같은 [Draft PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `3f0a919319ac247954878b6ffe94bb8c95725c74`에서 진행한다.
+- **최신 목업:** [17판 HTML](mockups/ees-work/design-mock-05-execution.html)·[원본](mockups/ees-work/design-mock-src/05-execution.html). 개별 두 실행은 투명 배경, 상단은 ‘지금 실행’으로 표시한다. 작업명15px·판정/근거13px·보조12px로 정리한다. 예시 첨부는 ‘판정 참고 자료’로 역할을 붙인 일반 텍스트이며 실제 파일 열기/업로드는 없다.
+- **검토·보존:** [17판 평가](../evals/v4-ui-20260930.md#design-mock-type-execution-20261027)에1920/480px·메뉴·근거·기존 상단 실행 범위 최종PASS와 최초 검사 준비 오류/정정을 기록했다. 표시 함수 외 스크립트·확정10판04파일·이전 검증/실패는 보존하며17판은 사용자 확인 전이다.
+- **Figma:** [17판 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1653-6825)·[메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1653-6826)·[C92](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1655-7044).3집중패널의 글자/실행/첨부를 반영하고 첨부 잘림 수정 후 최종 렌더를 HTML과 비교했다. 이전 보드/컴포넌트와 전체 셸/다른 상태·기존 화살표 차이의 경계를 유지한다.
 - **구현 경계:** 제품 UI·API·저장·엔진은 변경하지 않는다. 실제 상태·시각·도구별 입력/출력/판정 기준/결과와 이전 실행 정보는 보존한다. 실행·자료·예약은 합성 예시이며 Job/result.items 연결·최종 저장/확정·판정 조합 정책은 별도 결정/구현 범위다.
 - **사내 적용 원본:** [미병합 문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`에 따라 프로그램 적용 완료·실행 중으로 구분한다. 로그인·기존 자료·새 화면·도구 설정은 별도 미확인이다. #104의 상세 적용 기록은 이 브랜치에 복제하거나 덮어쓰지 않는다.
-- **다음 하나:**16판의 간결한 선택/재실행 표시를 사용자와 검토한다. 제품 구현·병합·배포로 확대하지 않는다.
+- **다음 하나:**17판의 실행 표시·글자 크기와 첨부 역할 표현을 사용자와 검토한다. 제품 구현·병합·배포로 확대하지 않는다.
 
 > 아래 절은 이전 작업 당시 기록이다. #103 병합 대기·사내 적용 미실행 등의 당시 표현은 위 현재 상태와 구분하고, 과거 검증·실패 근거는 보존한다.
 

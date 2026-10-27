@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
-<title>시안 · 단계와 작업 실행 · 16판 · EES Workflow</title>
+<title>시안 · 단계와 작업 실행 · 17판 · EES Workflow</title>
 <!--@mock:provenance-->
 <!--@mock:fonts-->
 <!--@mock:product-css-->
@@ -129,7 +129,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-run-nav>:is(.ew-run-back,.ew-icon-button):hover{background:var(--ees-surface-panel-hover)}
 #ees-work-panel .ew-vd-head{padding:20px 20px 0}
 #ees-work-panel .ew-vd-title{display:flex;align-items:center;gap:8px}
-#ees-work-panel .ew-vd-sub{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-top:8px;font-size:13px;line-height:18px;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-sub{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-top:8px;font-size:13px;line-height:20px;color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-vd-progress{margin-top:20px}
 #ees-work-panel .ew-vd-bar{display:flex;gap:2px;height:6px}
 #ees-work-panel .ew-vd-bar>i{display:block;min-width:4px;border-radius:3px;background:var(--ees-line-control);transition:flex-grow var(--ees-motion-open) var(--ees-motion-open-easing)}
@@ -141,7 +141,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-meta[data-done]>span:first-child{color:var(--ees-text-strong);font-weight:500}
 #ees-work-panel .ew-vd .ew-tabs{margin:20px 0 0;padding:0 20px}
 #ees-work-panel .ew-vd-body{padding:4px 8px 24px}
-#ees-work-panel .ew-vd-label{display:flex;align-items:center;gap:6px;padding:20px 12px 8px;font-size:13px;line-height:18px;font-weight:500;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-label{display:flex;align-items:center;gap:6px;padding:20px 12px 8px;font-size:13px;line-height:20px;font-weight:500;color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-vd-label>b{font-weight:500}
 #ees-work-panel .ew-vd-label[data-verdict=none]>b,#ees-work-panel .ew-vd-label[data-verdict=cond]>b{color:var(--ees-status-attention)}
 #ees-work-panel .ew-vd-label[data-verdict=bad]>b{color:var(--ees-status-danger)}
@@ -151,19 +151,19 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-item[data-tone]::before,#ees-work-panel .ew-vd-item[data-tone]+.ew-vd-item::before{display:none}
 #ees-work-panel .ew-vd-item[data-tone=attention]{background:var(--ees-status-attention-bg)}
 #ees-work-panel .ew-vd-item[data-tone=picked]{background:var(--ees-surface-selected)}
-#ees-work-panel .ew-vd-name{font-size:14px;line-height:20px;font-weight:500;color:var(--ees-text-primary);overflow-wrap:anywhere}
+#ees-work-panel .ew-vd-name{font-size:15px;line-height:22px;font-weight:500;color:var(--ees-text-primary);overflow-wrap:anywhere}
 #ees-work-panel .ew-vd-line{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;font-size:13px;line-height:18px;color:var(--ees-text-secondary)}
 #ees-work-panel .ew-vd-line>[data-tone=attention]{color:var(--ees-status-attention)}
 #ees-work-panel .ew-vd-line>[data-tone=danger]{color:var(--ees-status-danger)}
-#ees-work-panel .ew-vd-file{display:inline-flex;align-items:center;gap:4px;min-height:22px;margin-top:2px;padding:2px 8px 2px 6px;border:1px solid var(--ees-line-divider);border-radius:6px;background:var(--ees-surface-default);font-size:12px;line-height:16px;font-weight:400;color:var(--ees-brand-text)}
+#ees-work-panel .ew-vd-file{display:inline-flex;align-items:center;gap:4px;min-width:0;font-size:13px;line-height:20px;color:var(--ees-text-primary);overflow-wrap:anywhere}
 #ees-work-panel .ew-vd-src{display:inline-flex;width:14px;height:14px}
-#ees-work-panel .ew-vd-pick{display:flex;align-items:center;gap:6px;width:124px;min-height:30px;height:30px;padding:0 8px 0 10px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-default);font-size:13px;line-height:18px;font-weight:500;color:var(--ees-text-primary);text-align:left}
+#ees-work-panel .ew-vd-pick{display:flex;align-items:center;gap:6px;width:124px;min-height:30px;height:30px;padding:0 8px 0 10px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-default);font-size:13px;line-height:20px;font-weight:500;color:var(--ees-text-primary);text-align:left}
 #ees-work-panel .ew-vd-pick>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #ees-work-panel .ew-vd-pick:not([data-verdict]){border-color:var(--ees-status-attention);color:var(--ees-status-attention)}
 #ees-work-panel .ew-vd-pick[aria-expanded=true]{border-color:var(--ees-brand-solid);box-shadow:var(--ees-focus-ring)}
-#ees-work-panel :is(.ew-vd-pick,.ew-vd-group,.ew-vd-option,.ew-vd-file,.ew-run-back,.ew-run-nav>.ew-icon-button):focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px}
+#ees-work-panel :is(.ew-vd-pick,.ew-vd-group,.ew-vd-option,.ew-run-back,.ew-run-nav>.ew-icon-button):focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px}
 #ees-work-panel .ew-vd-dot{display:inline-block;flex:none;width:8px;height:8px;border-radius:50%;background:var(--ees-line-control)}
-#ees-work-panel .ew-vd-final{display:flex;align-items:center;gap:6px;height:30px;padding-left:11px;box-sizing:border-box;font-size:13px;line-height:18px;font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-final{display:flex;align-items:center;gap:6px;height:30px;padding-left:11px;box-sizing:border-box;font-size:13px;line-height:20px;font-weight:500;color:var(--ees-text-primary)}
 #ees-work-panel .ew-vd-group{display:flex;align-items:center;gap:8px;width:100%;min-height:40px;padding:10px 12px;border:0;border-radius:6px;background:transparent;text-align:left;font-size:14px;line-height:20px;font-weight:400;color:var(--ees-text-strong)}
 #ees-work-panel .ew-vd-group-label{flex:1}
 #ees-work-panel .ew-vd-group>.ew-icon:first-child{transition:transform var(--ees-motion-fast)}
@@ -177,17 +177,17 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-option b{font-size:14px;line-height:20px;font-weight:500;color:var(--ees-text-primary)}
 #ees-work-panel .ew-vd-option>.ew-icon{margin-top:2px}
 #ees-work-panel .ew-vd-log{display:grid;margin:0;padding:8px 20px 24px;list-style:none}
-#ees-work-panel .ew-vd-log>li{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--ees-line-divider);font-size:13px;line-height:18px;color:var(--ees-text-strong)}
+#ees-work-panel .ew-vd-log>li{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--ees-line-divider);font-size:13px;line-height:20px;color:var(--ees-text-strong)}
 #ees-work-panel .ew-vd-log time{color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-vd-rules{display:grid;gap:20px;padding:20px 20px 24px;font-size:13px;line-height:20px;color:var(--ees-text-strong)}
-#ees-work-panel .ew-vd-rules h3{margin-bottom:8px;font-size:13px;line-height:18px;font-weight:500;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-rules h3{margin-bottom:8px;font-size:13px;line-height:20px;font-weight:500;color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-vd-rules ul{display:grid;gap:8px;margin:0;padding:0;list-style:none}
 #ees-work-panel .ew-vd-rules li{display:flex;align-items:center;gap:8px}
 #ees-work-panel .ew-vd-rules li>b{width:84px;flex:none;font-weight:500;color:var(--ees-text-primary)}
 </style>
 <style data-new-screen="⑤ 작업별 판정 근거">
 /* Synthetic task-level decisions; reuses approved revision10 styling and product tokens. */
-#ees-work-panel .ew-vd-statusline{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:8px;font-size:13px;line-height:18px;color:var(--ees-text-secondary)}
+#ees-work-panel .ew-vd-statusline{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:8px;font-size:13px;line-height:20px;color:var(--ees-text-secondary)}
 #ees-work-panel .ew-vd-statusline>b{font-weight:500;color:var(--ees-text-primary)}
 #ees-work-panel .ew-vd-statusline[data-person]>b{color:var(--ees-status-attention)}
 #ees-work-panel .ew-vd-entry{margin:0;border-bottom:1px solid var(--ees-surface-muted);border-radius:8px}
@@ -196,18 +196,19 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-item-top{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
 #ees-work-panel .ew-vd-item-top>.ew-vd-name{flex:1;min-width:0}
 #ees-work-panel .ew-vd-item-top>.ew-vd-run{flex:none}
-#ees-work-panel .ew-vd-item-meta{display:grid;grid-template-columns:72px minmax(0,1fr) auto;align-items:center;gap:8px;font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-item-meta{display:grid;grid-template-columns:72px minmax(0,1fr) auto;align-items:center;gap:8px;font-size:13px;line-height:20px;color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-vd-item-meta>[data-decision-actor]{font-weight:500;color:var(--ees-text-primary);white-space:nowrap}
 #ees-work-panel .ew-vd-decision{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;min-width:0}
 #ees-work-panel .ew-vd-decision>:is(.ew-vd-pick,.ew-vd-final){flex:none}
 #ees-work-panel .ew-vd-decision>[data-tone=danger]{color:var(--ees-status-danger)}
 #ees-work-panel .ew-vd-decision>[data-tone=attention]{color:var(--ees-status-attention)}
-#ees-work-panel .ew-vd-item>.ew-vd-file{justify-self:start}
-#ees-work-panel .ew-vd-evidence-toggle{display:inline-flex;align-items:center;gap:4px;min-height:26px;padding:2px 5px;border:0;border-radius:4px;background:transparent;color:var(--ees-brand-text);font-size:12px;line-height:18px;font-weight:500;white-space:nowrap}
+#ees-work-panel .ew-vd-attachment{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;min-width:0;margin-top:2px}
+#ees-work-panel .ew-vd-attachment>span:first-child{font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-evidence-toggle{display:inline-flex;align-items:center;gap:4px;min-height:26px;padding:2px 5px;border:0;border-radius:4px;background:transparent;color:var(--ees-brand-text);font-size:13px;line-height:20px;font-weight:500;white-space:nowrap}
 #ees-work-panel .ew-vd-evidence-toggle:hover{background:var(--ees-surface-hover)}
 #ees-work-panel .ew-vd-evidence-toggle:focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px}
 #ees-work-panel .ew-vd-evidence-toggle[aria-expanded=true] .ew-icon{transform:rotate(180deg)}
-#ees-work-panel .ew-vd-evidence{margin:0 12px 12px;padding:12px;border:1px solid var(--ees-line-divider);border-radius:6px;background:var(--ees-surface-default);font-size:12px;line-height:18px;color:var(--ees-text-secondary)}
+#ees-work-panel .ew-vd-evidence{margin:0 12px 12px;padding:12px;border:1px solid var(--ees-line-divider);border-radius:6px;background:var(--ees-surface-default);font-size:13px;line-height:20px;color:var(--ees-text-secondary)}
 #ees-work-panel .ew-vd-evidence>p{margin-bottom:8px;color:var(--ees-text-primary)}
 #ees-work-panel .ew-vd-evidence [data-missing],#ees-work-panel .ew-vd-evidence [data-pass=false]{color:var(--ees-status-danger)}
 #ees-work-panel .ew-vd-evidence [data-pass=true]{color:var(--ees-status-success)}
@@ -220,22 +221,22 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-tool-toggle[aria-expanded=true]>.ew-icon{transform:rotate(180deg)}
 #ees-work-panel .ew-vd-tool-heading{display:grid;gap:4px;flex:1;min-width:0}
 #ees-work-panel .ew-vd-tool-heading>span{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px}
-#ees-work-panel .ew-vd-tool-heading b{font-size:13px;font-weight:500;color:var(--ees-text-primary)}
-#ees-work-panel .ew-vd-tool-heading strong{font-size:12px;font-weight:500}
-#ees-work-panel .ew-vd-tool-heading small{font-size:11px;line-height:16px;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-tool-heading b{font-size:14px;font-weight:500;color:var(--ees-text-primary);line-height:20px}
+#ees-work-panel .ew-vd-tool-heading strong{font-size:13px;font-weight:500;line-height:20px}
+#ees-work-panel .ew-vd-tool-heading small{font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-vd-tool-detail{display:grid;gap:14px;padding:4px 0 14px}
 #ees-work-panel .ew-vd-tool-detail>section{margin:0}
-#ees-work-panel .ew-vd-tool-detail h4{margin:0 0 6px;font-size:12px;line-height:18px;font-weight:500;color:var(--ees-text-primary)}
-#ees-work-panel .ew-vd-tool-detail h4>span:not([data-pass]){margin-left:4px;font-size:11px;font-weight:400;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-tool-detail h4{margin:0 0 6px;font-size:13px;line-height:20px;font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-tool-detail h4>span:not([data-pass]){margin-left:4px;font-size:12px;font-weight:400;color:var(--ees-text-tertiary);line-height:18px}
 #ees-work-panel .ew-vd-tool-detail p{margin:0;overflow-wrap:anywhere}
-#ees-work-panel .ew-vd-tool-detail small{display:block;margin-top:4px;font-size:11px;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-tool-detail small{display:block;margin-top:4px;font-size:12px;color:var(--ees-text-tertiary);line-height:18px}
 #ees-work-panel .ew-vd-tool-values{display:grid;grid-template-columns:84px minmax(0,1fr);gap:4px 10px;margin:0}
 #ees-work-panel .ew-vd-tool-values dt{color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-vd-tool-values dd{margin:0;overflow-wrap:anywhere;color:var(--ees-text-primary)}
 #ees-work-panel .ew-vd-tool-result{padding-top:10px;border-top:1px solid var(--ees-line-divider)}
 #ees-work-panel .ew-vd-task-result{display:grid;gap:4px;margin:0;padding-top:12px;border-top:1px solid var(--ees-line-divider)}
 #ees-work-panel .ew-vd-task-result b{font-weight:500;color:var(--ees-text-primary)}
-#ees-work-panel .ew-vd-task-result span{font-size:12px;color:var(--ees-text-secondary)}
+#ees-work-panel .ew-vd-task-result span{font-size:13px;color:var(--ees-text-secondary);line-height:20px}
 #ees-work-panel .ew-vd-selection-record{display:grid;gap:8px}
 #ees-work-panel .ew-vd-selection-record p{display:grid;gap:3px;margin:0}
 #ees-work-panel .ew-vd-selection-record b{font-weight:500;color:var(--ees-text-primary)}
@@ -251,20 +252,19 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-execution-context span,#ees-work-panel .ew-execution-context small{font-size:12px;color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-stage-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
 #ees-work-panel .ew-stage-heading>.ew-vd-title{flex:1;min-width:0;flex-wrap:wrap;gap:4px 8px}
-#ees-work-panel .ew-stage-heading>.ew-vd-title h2{white-space:nowrap}
-#ees-work-panel .ew-stage-run-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:none;box-sizing:border-box;width:116px;min-height:32px;height:32px;padding:0 10px;border:0;border-radius:6px;box-shadow:none;font-size:13px;line-height:18px;font-weight:500;white-space:nowrap}
+#ees-work-panel .ew-stage-heading>.ew-vd-title h2{white-space:nowrap;font-size:20px;line-height:28px;font-weight:700}
+#ees-work-panel .ew-stage-run-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:none;box-sizing:border-box;width:116px;min-height:32px;height:32px;padding:0 10px;border:0;border-radius:6px;box-shadow:none;font-size:13px;line-height:20px;font-weight:500;white-space:nowrap}
 #ees-work-panel .ew-stage-run-button>svg,#ees-work-panel .ew-vd-run>svg{display:block;flex:none}
-#ees-work-panel .ew-vd-run{display:inline-flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;width:106px;min-height:32px;height:32px;padding:0 10px;border:0;border-radius:6px;box-shadow:none;background:var(--ees-surface-selected);color:var(--ees-brand-text);font-size:13px;line-height:18px;font-weight:500;white-space:nowrap}
-#ees-work-panel .ew-vd-run:not(:disabled):hover{background:var(--ees-surface-hover)}
-#ees-work-panel .ew-vd-run[data-rerun],#ees-work-panel .ew-vd-run[data-rerun]:hover{background:transparent}
+#ees-work-panel .ew-vd-run{display:inline-flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;width:106px;min-height:32px;height:32px;padding:0 10px;border:0;border-radius:6px;box-shadow:none;background:transparent;color:var(--ees-brand-text);font-size:13px;line-height:20px;font-weight:500;white-space:nowrap}
+#ees-work-panel .ew-vd-run:not(:disabled):hover{background:transparent}
 #ees-work-panel .ew-vd-run:disabled{color:var(--ees-text-tertiary);background:var(--ees-surface-muted);cursor:default}
 #ees-work-panel :is(.ew-vd-run,[data-stage-run],.ew-attempt-select select):focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px;box-shadow:none}
 #ees-work-panel .ew-attempt-select{display:grid;grid-template-columns:58px minmax(0,1fr);align-items:center;gap:8px;margin-bottom:12px}
 #ees-work-panel .ew-attempt-select select{min-width:0;max-width:100%;height:32px;padding:4px 6px;border:1px solid var(--ees-line-control);border-radius:5px;background:var(--ees-surface-default);font:inherit;color:var(--ees-text-primary)}
-#ees-work-panel .ew-attempt-caption{display:grid;gap:3px;margin:0 0 12px;font-size:12px}
+#ees-work-panel .ew-attempt-caption{display:grid;gap:3px;margin:0 0 12px;font-size:13px;line-height:20px}
 #ees-work-panel .ew-attempt-caption b{font-weight:500}
 #ees-work-panel .ew-attempt-caption span{color:var(--ees-text-tertiary)}
-#ees-work-panel .ew-execution-pending{padding:8px 10px;border-radius:4px;background:var(--ees-status-attention-bg);color:var(--ees-status-attention);font-size:12px}
+#ees-work-panel .ew-execution-pending{padding:8px 10px;border-radius:4px;background:var(--ees-status-attention-bg);color:var(--ees-status-attention);font-size:13px;line-height:20px}
 #ees-work-panel .ew-vd-log>li>span>.ew-vd-evidence-toggle{display:block;padding-left:0;margin-top:4px}
 </style>
 </head>
@@ -323,7 +323,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
                   <div class="mock-ai-name">업무 도우미</div>
                   <div id="response-content-container"><div class="markdown-prose">
                     <p>서비스 작업 9개 중 7개는 판정이 끝났고, 2개는 아직 실행 전인 예시입니다.</p>
-                    <p>‘단계 실행’은 아직 실행하지 않은 서비스 작업을 시작합니다. 끝난 작업은 건너뛰며, 필요한 작업만 ‘다시 실행’할 수도 있습니다.</p>
+                    <p>단계 제목 옆 ‘지금 실행’은 아직 실행하지 않은 서비스 작업을 시작합니다. 끝난 작업은 건너뛰며, 필요한 작업만 ‘다시 실행’할 수도 있습니다.</p>
                     <p>나머지 3건은 사람이 판정하는 작업입니다. 각 작업에서 판정을 선택하고, ‘판정 기록’에 필요한 사유를 적을 수 있습니다.</p>
                   </div></div>
                   <div class="mock-ai-actions" aria-hidden="true">
@@ -364,7 +364,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   <div><b>시안</b><span>저장·실행 안 됨</span></div>
   <div><strong id="mock-screen" role="status" aria-live="polite">⑤-1 단계와 작업 실행</strong><button type="button" data-mock-info>안내</button></div>
   <details class="mock-state-picker">
-    <summary>화면 바로 보기 · 16판</summary>
+    <summary>화면 바로 보기 · 17판</summary>
     <nav aria-label="작업별 판정 상태 선택">
       <button type="button" data-mock-state="initial" aria-current="true">⑤-1 단계와 작업 실행</button>
       <button type="button" data-mock-state="periodic">⑤-주기 · 예약 예시</button>
@@ -381,19 +381,19 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   <section>
     <h2 id="mock-info-title">시안 안내 · 단계와 작업 실행</h2>
     <h3>이 화면</h3>
-    <p>‘배포 산출물 점검’ 절차의 10.27 배포 회차 → 1차 점검 단계입니다. 각 행을 하나의 작업으로 보는 설계 시안이며 작업 12개 중 사람 판정은 3개, 서비스 판정은 9개입니다. 확정한 10판을 보존하고 선택 직후 안내와 다시 실행의 박스 표시를 정리한 별도 16판입니다. 서비스 7개는 판정 완료, 2개는 실행 전인 예시이며 실제 제품 실행 구조는 바꾸지 않았습니다.</p>
+    <p>‘배포 산출물 점검’ 절차의 10.27 배포 회차 → 1차 점검 단계입니다. 각 행을 하나의 작업으로 보는 설계 시안이며 작업 12개 중 사람 판정은 3개, 서비스 판정은 9개입니다. 확정한 10판을 보존하고 실행 표시·글자 크기·첨부 자료의 역할을 정리한 별도 17판입니다. 서비스 7개는 판정 완료, 2개는 실행 전인 예시이며 실제 제품 실행 구조는 바꾸지 않았습니다.</p>
     <h3>사람 판정과 서비스 판정</h3>
     <p>사람 작업은 ‘판정 기록’에서 누가 언제 무엇을 선택했는지 보고, 사유를 선택적으로 적습니다. 서비스 작업은 ‘판정 근거’에서 실행한 도구를 보고, 도구 하나를 펼쳐 입력·출력·이번 작업의 판정 기준·판정 결과를 확인합니다. 작업과 도구는 각각 하나씩 펼쳐집니다. 도구 실행 완료와 기준 충족 여부는 서로 다릅니다.</p>
-    <h3>실행 방식과 예약</h3><p>기본은 업무절차의 수시 실행 · 직접 시작이며 자동실행 예약이 없습니다. 확인용 ‘주기 · 예약 예시’는 매주 화요일 09:00 KST와 다음 11.03 화요일 예약을 보여주는 메타데이터 예시입니다. 예약 실행기나 설정 변경 기능은 없습니다.</p><h3>단계와 작업 실행</h3><p>단계 실행은 실행 가능한 미실행 서비스 작업만 시작합니다. 완료·제외 작업은 건너뛰고 사람의 판정을 대신하지 않습니다. 개별 ‘다시 실행’은 새 실행 기록을 만들고 이전 입력·출력·결과를 보존합니다. 실행 중에는 이전 결과를 이번 실행 결과로 표시하지 않습니다. 이 시안의 실행은 짧은 화면 전환일 뿐 실제 도구를 호출하지 않습니다.</p><h3>해 볼 것</h3>
-    <ol><li>실행 전 작업을 하나 실행하거나 ‘단계 실행’하기</li><li>완료된 작업을 다시 실행하고 이전 기록 보기</li><li>사람 판정 작업의 ‘판정 선택’에서 값 고르기</li><li>사람 작업의 ‘판정 기록’에서 사유 적기</li><li>서비스 작업의 ‘판정 근거’에서 도구를 하나씩 펼치기</li><li>승인 묶음의 나머지 항목 펼치기</li><li>‘기록’과 ‘기준’ 탭 보기</li></ol>
+    <h3>실행 방식과 예약</h3><p>기본은 업무절차의 수시 실행 · 직접 시작이며 자동실행 예약이 없습니다. 확인용 ‘주기 · 예약 예시’는 매주 화요일 09:00 KST와 다음 11.03 화요일 예약을 보여주는 메타데이터 예시입니다. 예약 실행기나 설정 변경 기능은 없습니다.</p><h3>단계와 작업 실행</h3><p>단계 제목 옆 ‘지금 실행’은 실행 가능한 미실행 서비스 작업만 시작합니다. 완료·제외 작업은 건너뛰고 사람의 판정을 대신하지 않습니다. 개별 ‘다시 실행’은 새 실행 기록을 만들고 이전 입력·출력·결과를 보존합니다. 실행 중에는 이전 결과를 이번 실행 결과로 표시하지 않습니다. 이 시안의 실행은 짧은 화면 전환일 뿐 실제 도구를 호출하지 않습니다.</p><h3>해 볼 것</h3>
+    <ol><li>실행 전 작업을 하나 실행하거나 단계 제목 옆 ‘지금 실행’ 누르기</li><li>완료된 작업을 다시 실행하고 이전 기록 보기</li><li>사람 판정 작업의 ‘판정 선택’에서 값 고르기</li><li>사람 작업의 ‘판정 기록’에서 사유 적기</li><li>서비스 작업의 ‘판정 근거’에서 도구를 하나씩 펼치기</li><li>승인 묶음의 나머지 항목 펼치기</li><li>‘기록’과 ‘기준’ 탭 보기</li></ol>
     <h3>의견 보내는 법</h3>
     <p>왼쪽 아래 화면 번호와 함께 짧게 적어 주세요. 예) ⑤-1 고르기 목록 글자가 작다</p>
     <h3>아직 정하지 않은 것</h3>
     <p>사람이 고른 판정을 실제로 저장·최종 확정하는 방법은 아직 정하지 않았습니다. 이 시안에는 확정 버튼이 없고, 판정 선택과 사유 입력만 시험할 수 있습니다. 값을 고르면 기존 시안처럼 해당 판정 묶음으로 이동하며, 저장되거나 판정 완료로 처리되지는 않습니다. 판정 선택·사유·실행 기록은 이 화면에서만 유지되며 초기화하거나 새로 열면 사라집니다.</p>
     <h3>이 시안은</h3>
-    <p>실제 프로그램의 글꼴 파일과 화면 CSS(색, 크기, 탭·꼬리표·단추 부품)를 그대로 써서 만들었습니다. 왼쪽 메뉴 접기·펼치기와 창 크기에 따른 업무 패널 겹침은 제품 기준을 따릅니다. 도구 이름·입력·출력·지침·시각은 화면 검토를 위한 합성 예시이며 실제 도구 실행 기록이 아닙니다. 문서 존재와 접근 여부의 예시를 보여주며 내용 적정성은 판단하지 않습니다. 여러 도구 결과를 최종 판정으로 합치는 실제 규칙·저장은 아직 정하지 않았습니다. 실제 저장·도구 실행·대화는 되지 않으며, 왼쪽 메뉴 이동과 가운데 대화는 모양만 같습니다. 사내 PC에서 파일이 열리는지도 확인해 주세요.</p>
+    <p>실제 프로그램의 글꼴 파일과 화면 CSS(색, 크기, 탭·꼬리표·단추 부품)를 그대로 써서 만들었습니다. 왼쪽 메뉴 접기·펼치기와 창 크기에 따른 업무 패널 겹침은 제품 기준을 따릅니다. 도구 이름·입력·출력·지침·시각은 화면 검토를 위한 합성 예시이며 실제 도구 실행 기록이 아닙니다. 문서 존재와 접근 여부의 예시를 보여주며 내용 적정성은 판단하지 않습니다. 여러 도구 결과를 최종 판정으로 합치는 실제 규칙·저장은 아직 정하지 않았습니다. ‘배치 주기 조정’의 첨부는 판정 참고 자료의 표시 예시이며 실제 파일 내용이나 열기·업로드 기능과 연결되지 않습니다. 실제 저장·도구 실행·대화는 되지 않으며, 왼쪽 메뉴 이동과 가운데 대화는 모양만 같습니다. 사내 PC에서 파일이 열리는지도 확인해 주세요.</p>
     <h3>판</h3>
-    <p>시안 16판 · 2026-10-27 · 단계와 작업 실행 · 미확정</p>
+    <p>시안 17판 · 2026-10-27 · 단계와 작업 실행 · 미확정</p>
     <footer><button type="button" data-mock-reset>처음부터 다시</button><button type="button" data-mock-close>닫기</button></footer>
   </section>
 </div>
@@ -536,7 +536,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     const finished = services.filter(item => item.attempts.length && !item.running), pending = executable().length, active = services.filter(item => item.running).length;
     const bar = [['ok', c.ok], ['cond', c.cond], ['bad', c.bad], ['none', c.none+c.pending+c.running]].filter(([, n]) => n).map(([v, n]) => `<i data-verdict="${v}" style="flex:${n} 1 0"></i>`).join('');
     const schedule = S.mode === 'periodic' ? '<b>업무절차 · 주기 실행</b><span>자동실행 예약 · 매주 화요일 09:00 KST</span><small>다음 11.03(화) 09:00 · 예약 예시</small>' : '<b>업무절차 · 수시 · 직접 시작</b><span>자동실행 예약 없음</span>';
-    return `<div class="ew-vd-head"><div class="ew-execution-context" data-execution-context>${schedule}</div><div class="ew-stage-heading"><div class="ew-vd-title"><h2>1차 점검</h2></div><button type="button" class="ew-primary ew-stage-run-button" data-stage-run${!pending || active ? ' disabled' : ''}>${ACTION_ICON.play}<span>${S.stageIds.length && active ? '단계 실행 중' : '단계 실행'}</span></button></div><p class="ew-vd-sub"><span>작업 12개</span></p><div class="ew-vd-progress"><div class="ew-vd-bar" role="img" aria-label="현재 선택과 서비스 결과: 승인 ${c.ok}건, 조건부 승인 ${c.cond}건, 미승인 ${c.bad}건, 사람 선택 전 ${remaining}건, 실행 전 ${pending}건, 실행 중 ${active}건">${bar}</div><p class="ew-vd-statusline" data-person><b>사람 판정</b><span>선택 ${people.length - remaining}/${people.length}</span></p><p class="ew-vd-statusline" data-service><b>서비스 판정 완료 ${finished.length}/9</b><span>승인 ${finished.filter(item=>item.verdict==='ok').length} · 미승인 ${finished.filter(item=>item.verdict==='bad').length}${active ? ` · 실행 중 ${active}` : ''}</span></p></div></div>`;
+    return `<div class="ew-vd-head"><div class="ew-execution-context" data-execution-context>${schedule}</div><div class="ew-stage-heading"><div class="ew-vd-title"><h2>1차 점검</h2></div><button type="button" class="ew-primary ew-stage-run-button" data-stage-run aria-label="${S.stageIds.length && active ? '1차 점검 실행 중' : '1차 점검 지금 실행'}"${!pending || active ? ' disabled' : ''}>${ACTION_ICON.play}<span>${S.stageIds.length && active ? '실행 중' : '지금 실행'}</span></button></div><p class="ew-vd-sub"><span>작업 12개</span></p><div class="ew-vd-progress"><div class="ew-vd-bar" role="img" aria-label="현재 선택과 서비스 결과: 승인 ${c.ok}건, 조건부 승인 ${c.cond}건, 미승인 ${c.bad}건, 사람 선택 전 ${remaining}건, 실행 전 ${pending}건, 실행 중 ${active}건">${bar}</div><p class="ew-vd-statusline" data-person><b>사람 판정</b><span>선택 ${people.length - remaining}/${people.length}</span></p><p class="ew-vd-statusline" data-service><b>서비스 판정 완료 ${finished.length}/9</b><span>승인 ${finished.filter(item=>item.verdict==='ok').length} · 미승인 ${finished.filter(item=>item.verdict==='bad').length}${active ? ` · 실행 중 ${active}` : ''}</span></p></div></div>`;
   }
   function tabsHTML() {
     return `<nav class="ew-tabs" aria-label="작업 화면">${[['work', '작업'], ['log', '기록'], ['rules', '기준']].map(([key, label]) => `<button type="button" data-vd-tab="${key}" aria-pressed="${S.tab === key}">${label}</button>`).join('')}</nav>`;
@@ -549,7 +549,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   function pickHTML(item) {
     if (item.handler === 'service') {
       const label = item.running ? '실행 중' : item.attempts.length ? '다시 실행' : '지금 실행';
-      return `<button type="button" class="ew-vd-run" data-vd-run="${item.id}"${item.attempts.length && !item.running ? ' data-rerun' : ''} aria-label="${esc(item.name)} ${label}"${item.running ? ' disabled' : ''}>${item.attempts.length ? ACTION_ICON.retry : ACTION_ICON.play}<span>${label}</span></button>`;
+      return `<button type="button" class="ew-vd-run" data-vd-run="${item.id}" aria-label="${esc(item.name)} ${label}"${item.running ? ' disabled' : ''}>${item.attempts.length ? ACTION_ICON.retry : ACTION_ICON.play}<span>${label}</span></button>`;
     }
     const label = item.verdict ? `<i class="ew-vd-dot" data-verdict="${item.verdict}"></i><span>${VERDICT[item.verdict][0]}</span>` : '<span>판정 선택</span>';
     return `<button type="button" class="ew-vd-pick" data-vd-pick="${item.id}"${item.verdict ? ` data-verdict="${item.verdict}"` : ''} aria-haspopup="menu" aria-expanded="${S.menu === item.id}" aria-label="${esc(item.name)} 판정 ${item.verdict ? VERDICT[item.verdict][0] : '선택'}">${label}${icon(ICON.down)}</button>`;
@@ -596,7 +596,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   function itemHTML(item) {
     const service = item.handler === 'service';
     const tone = service ? '' : !item.verdict ? 'attention' : item.id === S.flash ? 'picked' : '';
-    const file = item.file ? `<button type="button" class="ew-vd-file" data-mock-toast="시안: 파일은 열리지 않습니다">${icon(ICON.clip, 13)}${esc(item.file)}</button>` : '';
+    const file = item.file ? `<div class="ew-vd-attachment"><span>판정 참고 자료</span><span class="ew-vd-file">${icon(ICON.clip, 13)}<span>${esc(item.file)}</span></span></div>` : '';
     const reason = item.running ? (item.verdict ? `<span>이전 판정 · ${VERDICT[item.verdict][0]}</span>` : '') : reasonHTML(item);
     const verdict = service && item.verdict && !item.running ? `<span class="ew-vd-final"><i class="ew-vd-dot" data-verdict="${item.verdict}"></i><span>${VERDICT[item.verdict][0]}</span></span>` : '';
     const opened = S.evidence === item.id, evidenceLabel = service ? '판정 근거' : '판정 기록';
