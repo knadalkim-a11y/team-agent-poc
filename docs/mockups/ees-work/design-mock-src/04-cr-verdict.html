@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
-<title>시안 · 사람 판정과 자동 완료 · 3판 · EES Workflow</title>
+<title>시안 · CR 항목별 사람·자동 판정 · 4판 · EES Workflow</title>
 <!--@mock:provenance-->
 <!--@mock:fonts-->
 <!--@mock:product-css-->
@@ -87,9 +87,6 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 .mock-chip strong{flex:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mock-chip button{border:0;border-radius:6px;padding:2px 9px;background:#ffffff26;color:#fff;font:500 12px/18px var(--ees-font-sans);cursor:pointer}
 .mock-chip button:hover{background:#ffffff40}
-.mock-chip .mock-mode{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:5px 0 2px}
-.mock-mode button{min-height:28px}
-.mock-mode button[aria-pressed=true]{background:#ffd58a;color:#1f2023}
 .mock-chip button:focus-visible,.mock-state-picker summary:focus-visible{outline:2px solid #ffd58a;outline-offset:2px}
 .mock-state-picker{margin-top:4px;border-top:1px solid #ffffff26;padding-top:5px}
 .mock-state-picker summary{cursor:pointer;font-weight:500}
@@ -198,31 +195,28 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-rules li>b{width:84px;flex:none;font-weight:500;color:var(--ees-text-primary)}
 #ees-work-panel .ew-vd-draft{margin-bottom:4px;font-size:12px;line-height:16px;color:var(--ees-text-tertiary)}
 </style>
-<style data-new-screen="자동 · 시스템 상태 점검">
-/* Separate synthetic example. Does not change the human CR-verdict styles. */
-#ees-work-panel .ew-auto-summary{margin-top:8px;font-size:13px;line-height:20px;color:var(--ees-text-secondary)}
-#ees-work-panel .ew-auto-summary[data-state=success]{color:var(--ees-status-success)}
-#ees-work-panel .ew-auto-summary[data-state=blocked]{color:var(--ees-status-attention)}
-#ees-work-panel .ew-auto-list{padding:4px 8px 24px}
-#ees-work-panel .ew-auto-item{padding:16px 12px;border-bottom:1px solid var(--ees-line-divider)}
-#ees-work-panel .ew-auto-item[data-status=blocked]{margin-top:6px;border:0;border-radius:8px;background:var(--ees-status-attention-bg)}
-#ees-work-panel .ew-auto-item-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-#ees-work-panel .ew-auto-item-head h3{flex:1;min-width:0;font-size:14px;line-height:20px;font-weight:500;color:var(--ees-text-primary)}
-#ees-work-panel .ew-auto-status-label{display:inline-flex;align-items:center;gap:6px;flex:none;font-size:13px;line-height:18px;color:var(--ees-text-tertiary)}
-#ees-work-panel .ew-auto-status-label[data-status=passed]{color:var(--ees-status-success)}
-#ees-work-panel .ew-auto-status-label[data-status=blocked]{color:var(--ees-status-attention)}
-#ees-work-panel .ew-auto-status-label[data-status=checking]{color:var(--ees-brand-text)}
-#ees-work-panel .ew-auto-status-label>i{width:6px;height:6px;border-radius:50%;background:currentColor}
-#ees-work-panel .ew-auto-values{display:grid;grid-template-columns:44px minmax(0,1fr);gap:4px 10px;margin:0;font-size:13px;line-height:18px}
-#ees-work-panel .ew-auto-values dt{color:var(--ees-text-tertiary)}
-#ees-work-panel .ew-auto-values dd{margin:0;color:var(--ees-text-primary);overflow-wrap:anywhere}
-#ees-work-panel .ew-auto-values dd[data-measured]{font-weight:500}
-#ees-work-panel .ew-auto-next{margin:12px 12px 0;font-size:13px;line-height:20px;color:var(--ees-status-attention)}
-#ees-work-panel .ew-auto-footer>p>b{display:block;margin:0 0 4px}
-#ees-work-panel .ew-auto-rule-list{display:grid;gap:12px;margin:10px 0 0}
-#ees-work-panel .ew-auto-rule-list div{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-#ees-work-panel .ew-auto-rule-list dt{color:var(--ees-text-secondary)}
-#ees-work-panel .ew-auto-rule-list dd{margin:0;font-weight:500}
+<style data-new-screen="④ CR 항목별 자동 판정">
+/* Synthetic item-level decisions; reuses the CR verdict language and product tokens. */
+#ees-work-panel .ew-vd-statusline{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:8px;font-size:13px;line-height:18px;color:var(--ees-text-secondary)}
+#ees-work-panel .ew-vd-statusline>b{font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-statusline[data-person]>b{color:var(--ees-status-attention)}
+#ees-work-panel .ew-vd-statusline[data-person=confirmed]>b{color:var(--ees-status-success)}
+#ees-work-panel .ew-vd-auto{border-bottom:1px solid var(--ees-surface-muted)}
+#ees-work-panel .ew-vd-auto>.ew-vd-item{padding-bottom:8px}
+#ees-work-panel .ew-vd-origin{display:flex;align-items:center;gap:8px;margin:0 12px 10px;font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-origin>span{flex:1;min-width:0}
+#ees-work-panel .ew-vd-evidence-toggle{display:inline-flex;align-items:center;gap:4px;min-height:26px;padding:2px 5px;border:0;border-radius:4px;background:transparent;color:var(--ees-brand-text);font-size:12px;line-height:18px;font-weight:500;white-space:nowrap}
+#ees-work-panel .ew-vd-evidence-toggle:hover{background:var(--ees-surface-hover)}
+#ees-work-panel .ew-vd-evidence-toggle:focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px}
+#ees-work-panel .ew-vd-evidence-toggle[aria-expanded=true] .ew-icon{transform:rotate(180deg)}
+#ees-work-panel .ew-vd-evidence{margin:0 12px 12px;padding:12px;border:1px solid var(--ees-line-divider);border-radius:6px;background:var(--ees-surface-default);font-size:12px;line-height:18px;color:var(--ees-text-secondary)}
+#ees-work-panel .ew-vd-evidence>p{margin-bottom:8px;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-evidence table{width:100%;border-collapse:collapse;text-align:left}
+#ees-work-panel .ew-vd-evidence th{padding:0 0 6px;font-weight:400;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-evidence td{padding:4px 0;border-top:1px solid var(--ees-line-divider)}
+#ees-work-panel .ew-vd-evidence [data-missing]{color:var(--ees-status-danger);font-weight:500}
+#ees-work-panel .ew-vd-evidence>small{display:block;margin-top:8px;font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-person-note{font-size:12px;color:var(--ees-text-tertiary)}
 </style>
 </head>
 <body>
@@ -279,9 +273,9 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
                 <div class="mock-ai-body">
                   <div class="mock-ai-name">업무 도우미</div>
                   <div id="response-content-container"><div class="markdown-prose">
-                    <p>‘CR별 필수 문서 확인’ 결과로 12건 중 11건을 오른쪽 판정 표에 채웠습니다.</p>
-                    <ul><li>승인 9건: 설계서, 테스트 결과, 배포 계획서가 모두 있습니다.</li><li>미승인 2건: CR-2204는 테스트 결과가 없고, CR-2210은 설계서와 테스트 결과가 없습니다.</li></ul>
-                    <p>CR-2207은 테스트 파일(test_v2_final.xlsx)이 최종본인지 확인할 수 없어 비워 두었습니다. 직접 판정해 주세요.</p>
+                    <p>12건 중 서비스 자동 판정 대상 9건은 판정이 끝났습니다. 승인 8건, 미승인 1건입니다.</p>
+                    <p>‘대시보드 필터 추가’는 테스트 결과가 없어 미승인입니다. 자동 판정은 완료됐으며, 근거를 오른쪽에서 확인할 수 있습니다.</p>
+                    <p>사람 판정 대상 3건 중 2건은 대화에서 초안을 채웠습니다. ‘배치 주기 조정’은 테스트 파일(test_v2_final.xlsx)의 최종본 여부를 확인한 뒤 직접 판정해 주세요. 사람이 확정하는 것은 이 3건입니다.</p>
                   </div></div>
                   <div class="mock-ai-actions" aria-hidden="true">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" stroke="#6F717A" stroke-width="1.3"/><path d="M10.5 3.5v-.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5" stroke="#6F717A" stroke-width="1.3"/></svg>
@@ -319,27 +313,17 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 <div class="mock-chip" data-mock-controls data-expanded="false" aria-label="시안 확인 도구">
   <button type="button" class="mock-mobile-control" data-mock-controls-toggle aria-expanded="false" aria-label="시안 확인 도구 열기">시안</button>
   <div><b>시안</b><span>저장·실행 안 됨</span></div>
-  <div><strong id="mock-screen" role="status" aria-live="polite">④-1 고르는 중</strong><button type="button" data-mock-info>안내</button></div>
-  <div class="mock-mode" role="group" aria-label="시안 종류">
-    <button type="button" data-mock-mode="human" aria-pressed="true">사람 판정</button>
-    <button type="button" data-mock-mode="auto" aria-pressed="false">자동 완료</button>
-  </div>
+  <div><strong id="mock-screen" role="status" aria-live="polite">④-1 항목별 판정</strong><button type="button" data-mock-info>안내</button></div>
   <details class="mock-state-picker">
-    <summary>화면 바로 보기 · 3판</summary>
-    <nav aria-label="사람 판정 상태 선택" data-mock-human-states>
-      <button type="button" data-mock-state="initial" aria-current="true">④-1 고르는 중</button>
-      <button type="button" data-mock-state="menu">④-1a 판정 고르기</button>
-      <button type="button" data-mock-state="ready">④-2 확정 준비</button>
-      <button type="button" data-mock-state="confirmed">④-3 확정됨</button>
+    <summary>화면 바로 보기 · 4판</summary>
+    <nav aria-label="항목별 판정 상태 선택">
+      <button type="button" data-mock-state="initial" aria-current="true">④-1 항목별 판정</button>
+      <button type="button" data-mock-state="menu">④-1a 사람 판정 고르기</button>
+      <button type="button" data-mock-state="evidence">④-1b 자동 판정 근거</button>
+      <button type="button" data-mock-state="ready">④-2 사람 확정 준비</button>
+      <button type="button" data-mock-state="confirmed">④-3 사람 확정됨</button>
       <button type="button" data-mock-state="log">④-기록 · 초안</button>
       <button type="button" data-mock-state="rules">④-기준 · 초안</button>
-    </nav>
-    <nav aria-label="자동 완료 상태 선택" data-mock-auto-states hidden>
-      <button type="button" data-auto-state="checking">자동-1 점검 중</button>
-      <button type="button" data-auto-state="success">자동-2 자동 완료</button>
-      <button type="button" data-auto-state="blocked">자동-3 조건 미충족</button>
-      <button type="button" data-auto-state="log">자동-기록 · 초안</button>
-      <button type="button" data-auto-state="rules">자동-기준 · 초안</button>
     </nav>
     <p>선택하면 예시 상태로 다시 시작합니다.<br>실제 제품에는 없는 확인용 도구입니다.</p>
   </details>
@@ -347,21 +331,21 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 
 <div class="mock-info" role="dialog" aria-modal="true" aria-labelledby="mock-info-title" hidden>
   <section>
-    <h2 id="mock-info-title">시안 안내 · 사람 판정과 자동 완료</h2>
+    <h2 id="mock-info-title">시안 안내 · CR 항목별 사람·자동 판정</h2>
     <h3>이 화면</h3>
-    <p>‘배포 산출물 점검’ 절차의 10.13 배포 회차 → 1차 점검 단계 → 두 번째 작업 ‘CR별 판정’입니다. CR(변경 요청) 12건마다 배포해도 되는지 사람이 정하고 확정합니다. AI는 가운데 대화에서 11건을 미리 채웠고(파란 말풍선), 1건은 사람이 직접 판단해야 합니다.</p>
-    <h3>자동 완료 보기</h3>
-    <p>‘자동 완료’를 고르면 별개의 ‘일일 시스템 점검 → 시스템 상태 점검’ 예시를 봅니다. 서비스가 점검 결과를 정해진 조건과 비교해 모두 통과할 때만 완료하는 화면입니다. 조건에 맞지 않으면 미완료로 남고 다음 행동을 안내합니다. 사람 판정으로 돌아오면 앞서 고른 CR 판정이 그대로 남습니다.</p>
+    <p>‘배포 산출물 점검’ 절차의 10.13 배포 회차 → 1차 점검 단계 → 두 번째 작업 ‘CR별 판정’입니다. CR(변경 요청) 12건을 한 목록에서 봅니다. 사람 판정 대상은 3건이고, 서비스 자동 판정 대상은 9건입니다. 사람 대상 2건은 대화에서 초안을 채웠고(파란 말풍선), 1건은 사람이 직접 판단해야 합니다.</p>
+    <h3>자동 판정과 사람 확정</h3>
+    <p>‘대시보드 필터 추가’는 테스트 결과가 없어 자동 판정 결과가 미승인입니다. ‘판정 완료’는 판정이 끝났다는 뜻이며 승인과 다릅니다. 자동 행의 근거를 펼쳐 조건·관측·시각을 확인하세요. ‘사람 3건 확정’은 사람 대상만 확정하며 자동 9건의 결과를 바꾸지 않습니다.</p>
     <h3>해 볼 것</h3>
-    <ol><li>CR-2207의 ‘판정 선택’을 눌러 고르기</li><li>다른 판정도 바꿔 보기 (사람이 고르면 말풍선이 사라짐)</li><li>‘9건 모두 승인’ 펼치기</li><li>‘판정 확정’ 누르기</li><li>‘기록’과 ‘기준’ 탭 보기 (초안)</li></ol>
+    <ol><li>CR-2207의 ‘판정 선택’을 눌러 고르기</li><li>다른 판정도 바꿔 보기 (사람이 고르면 말풍선이 사라짐)</li><li>승인 묶음의 나머지 항목 펼치기</li><li>‘사람 3건 확정’ 누르기</li><li>‘기록’과 ‘기준’ 탭 보기 (초안)</li></ol>
     <h3>의견 보내는 법</h3>
     <p>왼쪽 아래 화면 번호와 함께 짧게 적어 주세요. 예) ④-1 고르기 목록 글자가 작다</p>
     <h3>아직 정하지 않은 것</h3>
     <p>고른 항목을 바로 판정 묶음으로 옮길지 확정할 때까지 제자리에 둘지, ‘판정 확정’ 전에 확인 창이 필요한지 의견을 주세요. 지금은 1판처럼 바로 옮기고 확인 창 없이 보여 주며, 확정된 제품 동작은 아닙니다.</p>
     <h3>이 시안은</h3>
-    <p>실제 프로그램의 글꼴 파일과 화면 CSS(색, 크기, 탭·꼬리표·단추 부품)를 그대로 써서 만들었습니다. 왼쪽 메뉴 접기·펼치기와 창 크기에 따른 업무 패널 겹침은 제품 기준을 따릅니다. 저장·실행·대화는 되지 않으며, 왼쪽 메뉴 이동과 가운데 대화는 모양만 같습니다. 사내 PC에서 파일이 열리는지도 확인해 주세요.</p>
+    <p>실제 프로그램의 글꼴 파일과 화면 CSS(색, 크기, 탭·꼬리표·단추 부품)를 그대로 써서 만들었습니다. 왼쪽 메뉴 접기·펼치기와 창 크기에 따른 업무 패널 겹침은 제품 기준을 따릅니다. 항목별 자동 판정은 합성 예시이며 실제 제품의 규칙·저장은 목업 검토 후 정합니다. 이 예시의 자동 판정은 문서가 있는지만 확인하며 문서 내용의 적정성을 판단하지 않습니다. 저장·실행·대화는 되지 않으며, 왼쪽 메뉴 이동과 가운데 대화는 모양만 같습니다. 사내 PC에서 파일이 열리는지도 확인해 주세요.</p>
     <h3>판</h3>
-    <p>시안 3판 · 2026-10-27 · 사람 판정 v3.1 + 자동 완료 예시 · 미확정</p>
+    <p>시안 4판 · 2026-10-27 · CR 항목별 사람·자동 판정 · 미확정</p>
     <footer><button type="button" data-mock-reset>처음부터 다시</button><button type="button" data-mock-close>닫기</button></footer>
   </section>
 </div>
@@ -373,7 +357,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   const ICON = {chat: 'v4/1c98e.svg', down: 'v4/f17e6.svg', right: 'v4/69549.svg', check: 'v4/9d8d5.svg', clip: 'v4/ea639.svg', back: 'v4/eb94a.svg', more: 'v4/a953c.svg', panel: 'v4/7bb4a.svg'};
   // New icon variant: v4/63982 (clock) in the attention color.
   const CLOCK = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M6.5 11.375C9.19239 11.375 11.375 9.19239 11.375 6.5C11.375 3.80761 9.19239 1.625 6.5 1.625C3.80761 1.625 1.625 3.80761 1.625 6.5C1.625 9.19239 3.80761 11.375 6.5 11.375Z" stroke="#96590C" stroke-width="1.41667" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 3.7915V6.49984L8.125 7.58317" stroke="#96590C" stroke-width="1.41667" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  const VERDICT = {ok: ['승인', '필수 문서가 모두 맞음'], cond: ['조건부 승인', '최종본 제출을 조건으로 통과'], bad: ['미승인', '필수 문서가 없거나 맞지 않음']};
+  const VERDICT = {ok: ['승인', '설정된 승인 조건을 충족함'], cond: ['조건부 승인', '최종본 제출을 조건으로 통과'], bad: ['미승인', '설정된 승인 조건을 충족하지 못함']};
   const GROUPS = [['none', '결정 필요'], ['cond', '조건부 승인'], ['bad', '미승인'], ['ok', '승인']];
   const SEED = [
     ['CR-2201', '로그인 화면 문구 수정', 'ok'], ['CR-2202', '알람 기준값 조정', 'ok'], ['CR-2203', '보고서 출력 양식 변경', 'ok'],
@@ -381,25 +365,13 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     ['CR-2207', '배치 주기 조정', null, '테스트 파일이 최종본인지 확인 필요', 'test_v2_final.xlsx'], ['CR-2208', '메일 발송 대상 추가', 'ok'],
     ['CR-2209', '화면 응답 속도 개선', 'ok'], ['CR-2210', '권한 그룹 정리', 'bad', '설계서와 테스트 없음'], ['CR-2211', '이력 조회 기간 확대', 'ok'], ['CR-2212', '오류 메시지 정리', 'ok']
   ];
-  const AUTO_CHECKS = [
-    {id: 'response', name: '서비스 응답 시간', value: '184 ms', condition: '500 ms 이하', time: '09:00:01'},
-    {id: 'database', name: '데이터베이스 연결', value: '연결 성공', condition: '연결 성공', time: '09:00:02'},
-    {id: 'disk', name: '디스크 사용률', value: '67%', condition: '80% 이하', time: '09:00:03'},
-    {id: 'backup', name: '최근 백업', value: '4시간 전', condition: '24시간 이내', time: '09:00:04'}
-  ];
+  const HUMAN_IDS = new Set(['CR-2203', 'CR-2207', 'CR-2210']);
   const panel = document.getElementById('ees-work-panel');
   const region = document.querySelector('.ees-panel-region');
   const sidebar = document.querySelector('.mock-sidebar');
   let compactBreakpoint = window.innerWidth < 1440;
   let compact = compactBreakpoint;
   let S, flashTimer, toastTimer;
-  let mode = 'human', A = {status: 'checking', tab: 'work'}, humanScroll = 0, autoScroll = 0;
-  const humanContext = {
-    title: document.querySelector('.mock-chat-title').textContent,
-    request: document.querySelector('.chat-user .whitespace-pre-wrap').textContent,
-    response: document.querySelector('#response-content-container .markdown-prose').innerHTML
-  };
-  const workflowContext = [...sidebar.querySelectorAll('[data-action=workflow]')].map(button => [button, button.getAttribute('aria-current')]);
 
   const esc = value => String(value).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
   const icon = (src, size) => `<img class="ew-icon" src="${src}" alt="" aria-hidden="true"${size ? ` width="${size}" height="${size}"` : ''}>`;
@@ -409,31 +381,34 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   function reset() {
     clearTimeout(flashTimer);
     S = {
-      items: SEED.map(([id, name, verdict, reason, file]) => ({id, name, verdict, reason: reason || '', file: file || '', source: verdict ? 'chat' : null})),
-      picked: null, flash: null, expanded: false, confirmed: null, tab: 'work', menu: null,
-      log: [['13:05', '‘CR별 필수 문서 확인’ 작업 완료 (12건)'], ['14:20', '대화에서 11건 채움 (승인 9건, 미승인 2건)']],
+      items: SEED.map(([id, name, verdict, reason, file]) => ({id, name, verdict, reason: reason || '', file: file || '', handler: HUMAN_IDS.has(id) ? 'human' : 'service', source: HUMAN_IDS.has(id) ? (verdict ? 'chat' : null) : 'service'})),
+      picked: null, flash: null, expanded: false, evidence: null, confirmed: null, tab: 'work', menu: null,
+      log: [['13:05', '‘CR별 필수 문서 확인’ 작업 완료 (12건)'], ['14:20', '서비스가 자동 대상 9건의 판정을 완료함 (승인 8건, 미승인 1건)'], ['14:20', 'CR-2204 자동 판정 완료 · 미승인 · 테스트 결과 없음'], ['14:21', '사람 대상 3건 중 2건을 대화에서 초안으로 채움']],
       width: 480, open: true
     };
   }
   function counts() { const c = {none: 0, ok: 0, cond: 0, bad: 0}; S.items.forEach(item => c[item.verdict || 'none']++); return c; }
+  function humanItems() { return S.items.filter(item => item.handler === 'human'); }
+  function humanRemaining() { return humanItems().filter(item => !item.verdict).length; }
   function stateKey() {
     if (S.tab !== 'work') return S.tab;
     if (S.confirmed) return 'confirmed';
     if (S.menu) return 'menu';
-    return counts().none ? 'initial' : 'ready';
+    if (S.evidence) return 'evidence';
+    return humanRemaining() ? 'initial' : 'ready';
   }
   function screenId() {
     if (S.tab === 'log') return '④-기록 (초안)';
     if (S.tab === 'rules') return '④-기준 (초안)';
-    if (S.confirmed) return '④-3 확정됨';
-    if (S.menu) return '④-1a 판정 고르기';
-    return counts().none ? '④-1 고르는 중' : '④-2 확정 준비';
+    if (S.confirmed) return '④-3 사람 판정 확정됨';
+    if (S.menu) return '④-1a 사람 판정 고르기';
+    if (S.evidence) return '④-1b 자동 판정 근거';
+    return humanRemaining() ? '④-1 항목별 판정' : '④-2 사람 판정 확정 준비';
   }
 
   // Review-only fixture navigation. It deliberately does not call product
-  // actions, change the CR design or decide the outstanding UX questions.
+  // actions or decide the outstanding regrouping / confirmation-dialog questions.
   function previewState(key) {
-    if (mode !== 'human') return;
     const width = S.width;
     reset();
     S.width = width;
@@ -446,10 +421,11 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     if (key === 'confirmed') {
       S.confirmed = {date: '10.27', time: '14:25'};
       S.picked = null;
-      S.log.push(['14:25', `${ACTOR}가 12건 판정을 확정함`]);
+      S.log.push(['14:25', `${ACTOR}가 사람 대상 3건의 판정을 확정함 (CR-2203, CR-2207, CR-2210)`]);
     }
     if (key === 'log' || key === 'rules') S.tab = key;
     if (key === 'menu') S.menu = 'CR-2207';
+    if (key === 'evidence') S.evidence = 'CR-2204';
     document.querySelector('.mock-state-picker').open = false;
     setMockControlsExpanded(false);
     document.querySelector('.mock-info').hidden = true;
@@ -469,112 +445,16 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     button.textContent = expanded ? '시안 도구 접기' : '시안';
   }
 
-  function changeMode(next) {
-    if (next === mode) return;
-    const scroll = panel.querySelector('.ew-scroll');
-    if (mode === 'human') humanScroll = scroll?.scrollTop || 0;
-    else autoScroll = scroll?.scrollTop || 0;
-    mode = next;
-    document.querySelector('.mock-state-picker').open = false;
-    setMockControlsExpanded(false);
-    setOpen(true);
-    render();
-    panel.querySelector('.ew-scroll').scrollTop = mode === 'human' ? humanScroll : autoScroll;
-  }
-
-  function previewAutoState(key) {
-    if (mode !== 'auto') return;
-    if (key === 'log' || key === 'rules') A.tab = key;
-    else { A.status = key; A.tab = 'work'; }
-    document.querySelector('.mock-state-picker').open = false;
-    setMockControlsExpanded(false);
-    setOpen(true);
-    render();
-    panel.querySelector('.ew-scroll').scrollTop = 0;
-  }
-
-  function autoItems() {
-    return AUTO_CHECKS.map((item, index) => {
-      const pending = A.status === 'checking' && index >= 2;
-      const blocked = A.status === 'blocked' && item.id === 'disk';
-      return {...item, status: pending ? (index === 2 ? 'checking' : 'waiting') : blocked ? 'blocked' : 'passed',
-        value: pending ? '—' : blocked ? '92%' : item.value, time: pending ? '—' : item.time};
-    });
-  }
-
-  function autoScreenId() {
-    if (A.tab === 'log') return '자동-기록 (초안)';
-    if (A.tab === 'rules') return '자동-기준 (초안)';
-    return {checking: '자동-1 점검 중', success: '자동-2 자동 완료', blocked: '자동-3 조건 미충족'}[A.status];
-  }
-
-  function syncContext() {
-    const auto = mode === 'auto';
-    document.querySelector('.mock-chat-title').textContent = auto ? '일일 시스템 점검' : humanContext.title;
-    document.querySelector('.chat-user .whitespace-pre-wrap').textContent = auto ? '오늘 일일 시스템 점검 상태 보여 줘' : humanContext.request;
-    const response = {checking: '서비스가 4개 항목을 점검하고 있습니다. 정해진 조건을 모두 충족하면 자동으로 완료됩니다.',
-      success: '4개 항목이 모두 기준을 충족해 서비스가 09:00:04에 점검을 완료했습니다. 측정값과 완료 조건은 오른쪽에서 확인할 수 있습니다.',
-      blocked: '디스크 사용률이 92%로, 기준인 80%를 넘었습니다. 점검은 아직 완료되지 않았습니다. 디스크 공간을 확보한 뒤 다시 점검해 주세요.'};
-    document.querySelector('#response-content-container .markdown-prose').innerHTML = auto ? `<p>${response[A.status]}</p><p>이 작업은 서비스의 점검 결과로 완료 여부가 정해집니다.</p>` : humanContext.response;
-    workflowContext.forEach(([button, current]) => {
-      const selected = auto && button.textContent.trim() === '일일 시스템 점검';
-      if (selected) button.setAttribute('aria-current', 'page');
-      else if (!auto && current) button.setAttribute('aria-current', current);
-      else button.removeAttribute('aria-current');
-    });
-    document.querySelectorAll('button[data-mock-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mockMode === mode)));
-    document.querySelector('[data-mock-human-states]').hidden = auto;
-    document.querySelector('[data-mock-auto-states]').hidden = !auto;
-  }
-
-  function autoHeaderHTML() {
-    return `<header class="ew-panel-header ew-run-nav"><button type="button" class="ew-run-back" data-mock-toast="시안: 일일 시스템 점검의 회차 화면은 아직 없습니다">${icon(ICON.back)}<span>10.27 정기 점검 회차</span></button><span></span><button type="button" class="ew-icon-button" aria-label="더 보기" data-mock-toast="시안: 메뉴 항목은 아직 정하지 않았습니다">${icon(ICON.more)}</button><button type="button" class="ew-icon-button" aria-label="업무 패널 닫기" data-panel-close>${icon(ICON.panel)}</button></header>`;
-  }
-
-  function autoHeadHTML() {
-    const items = autoItems(), passed = items.filter(item => item.status === 'passed').length;
-    const state = {checking: ['점검 중', 'neutral'], success: ['자동 완료', 'success'], blocked: ['조건 미충족', 'attention']}[A.status];
-    const summary = {checking: '4개 중 2개 확인 · 나머지 항목을 점검하고 있습니다', success: '서비스가 09:00:04에 완료 처리했습니다', blocked: '디스크 사용률이 기준을 넘어 완료되지 않았습니다'}[A.status];
-    const bar = items.map(item => `<i data-verdict="${item.status === 'passed' ? 'ok' : item.status === 'blocked' ? 'cond' : 'none'}" style="flex:1 1 0"></i>`).join('');
-    return `<div class="ew-vd-head"><div class="ew-vd-title"><h2>시스템 상태 점검</h2><span class="ew-tag" data-tone="${state[1]}">${state[0]}</span></div><p class="ew-vd-sub"><span>정기 점검 단계</span><span>작업 1/1</span><span>서비스 자동 처리</span></p><div class="ew-vd-progress"><div class="ew-vd-bar" role="img" aria-label="4개 조건 중 ${passed}개 통과">${bar}</div><p class="ew-auto-summary" data-state="${A.status}">${summary}</p></div></div>`;
-  }
-
-  function autoTabsHTML() {
-    return `<nav class="ew-tabs" aria-label="자동 작업 화면">${[['work', '작업'], ['log', '기록'], ['rules', '기준']].map(([key, label]) => `<button type="button" data-auto-tab="${key}" aria-pressed="${A.tab === key}">${label}</button>`).join('')}</nav>`;
-  }
-
-  function autoListHTML() {
-    const labels = {passed: '통과', blocked: '조건 미충족', checking: '확인 중', waiting: '대기'};
-    return `<div class="ew-auto-list">${autoItems().map(item => `<section class="ew-auto-item" data-auto-check="${item.id}" data-status="${item.status}"><div class="ew-auto-item-head"><h3>${item.name}</h3><span class="ew-auto-status-label" data-status="${item.status}"><i aria-hidden="true"></i>${labels[item.status]}</span></div><dl class="ew-auto-values"><dt>측정값</dt><dd data-measured>${item.value}</dd><dt>조건</dt><dd>${item.condition}</dd><dt>확인</dt><dd>${item.time}</dd></dl></section>`).join('')}${A.status === 'blocked' ? '<p class="ew-auto-next">디스크 공간을 확보한 뒤 다시 점검하세요.</p>' : ''}</div>`;
-  }
-
-  function autoLogHTML() {
-    const rows = [['09:00:00', '서비스가 시스템 상태 점검을 시작함'], ...autoItems().filter(item => item.time !== '—').map(item => [item.time, `${item.name} · ${item.value} · ${item.status === 'blocked' ? '조건 미충족' : '통과'}`])];
-    if (A.status !== 'checking') rows.push(['09:00:04', A.status === 'success' ? '4개 조건 충족 · 서비스가 자동 완료 처리함' : '디스크 조건 미충족 · 미완료로 남김']);
-    return `<ol class="ew-vd-log">${rows.slice().reverse().map(([time, text]) => `<li><time>${time}</time><span>${text}</span></li>`).join('')}</ol>`;
-  }
-
-  function autoRulesHTML() {
-    return `<div class="ew-vd-rules"><section><h3>완료 방식</h3><p>서비스가 네 가지 조건을 모두 확인하고, 모두 통과하면 이 작업을 자동으로 완료합니다.</p></section><section><h3>통과 조건</h3><dl class="ew-auto-rule-list">${AUTO_CHECKS.map(item => `<div><dt>${item.name}</dt><dd>${item.condition}</dd></div>`).join('')}</dl></section><section><h3>완료하지 않는 경우</h3><p>조건에 맞지 않거나 측정값을 확인하지 못하면 완료하지 않습니다. 원인을 해결한 뒤 다시 점검합니다.</p></section></div>`;
-  }
-
-  function autoFooterHTML() {
-    if (A.status === 'success') return '<p><b>4개 조건 모두 충족</b>추가 확인 없이 완료되었습니다</p><button type="button" class="ew-primary" data-auto-tab="log">기록 보기</button>';
-    if (A.status === 'blocked') return '<p><b>미완료 · 디스크 사용률 확인 필요</b>공간을 확보한 뒤 다시 점검하세요</p>';
-    return '<p>조건을 모두 충족하면 자동으로 완료됩니다</p>';
-  }
-
   function headerHTML() {
     return `<header class="ew-panel-header ew-run-nav"><button type="button" class="ew-run-back" data-mock-toast="시안: 회차 화면은 이번 시안에 없습니다">${icon(ICON.back)}<span>10.13 배포 회차</span></button><span></span><button type="button" class="ew-icon-button" aria-label="더 보기" data-mock-toast="시안: 메뉴 항목은 아직 정하지 않았습니다">${icon(ICON.more)}</button><button type="button" class="ew-icon-button" aria-label="업무 패널 닫기" data-panel-close>${icon(ICON.panel)}</button></header>`;
   }
   function headHTML() {
-    const c = counts(), total = S.items.length, chat = S.items.filter(item => item.source === 'chat').length;
-    const tag = S.confirmed ? '<span class="ew-tag" data-tone="success">완료</span>' : '<span class="ew-tag" data-tone="attention">판정 필요</span>';
+    const c = counts(), people = humanItems(), remaining = humanRemaining();
+    const tag = S.confirmed ? '<span class="ew-tag" data-tone="success">사람 판정 확정됨</span>' : '<span class="ew-tag" data-tone="attention">사람 확인 필요</span>';
     const due = S.confirmed ? '' : `<span class="ew-vd-due">${CLOCK}오늘 18:00까지</span>`;
     const bar = [['ok', c.ok], ['cond', c.cond], ['bad', c.bad], ['none', c.none]].filter(([, n]) => n).map(([v, n]) => `<i data-verdict="${v}" style="flex:${n} 1 0"></i>`).join('');
-    const meta = S.confirmed ? `${ACTOR}가 ${S.confirmed.date} ${S.confirmed.time}에 확정` : c.none ? `${total}건 중 ${total - c.none}건 정함` : `${total}건 모두 정함`;
-    const chatMeta = !S.confirmed && chat ? `<span class="ew-vd-chat">${icon(ICON.chat)}대화에서 채움 ${chat}</span>` : '';
-    return `<div class="ew-vd-head"><div class="ew-vd-title"><h2>CR별 판정</h2>${tag}</div><p class="ew-vd-sub"><span>1차 점검 단계</span><span>작업 2/3</span>${due}</p><div class="ew-vd-progress"><div class="ew-vd-bar" role="img" aria-label="승인 ${c.ok}건, 조건부 승인 ${c.cond}건, 미승인 ${c.bad}건, 남은 판정 ${c.none}건">${bar}</div><p class="ew-vd-meta"${!c.none || S.confirmed ? ' data-done' : ''}><span>${meta}</span>${chatMeta}</p></div></div>`;
+    const human = S.confirmed ? `<b>사람 ${people.length}건 확정</b><span>${ACTOR} · ${S.confirmed.date} ${S.confirmed.time}</span>` : `<b>사람 미확정 ${people.length}건</b><span>판정 선택 ${people.length - remaining}/${people.length}</span>`;
+    return `<div class="ew-vd-head"><div class="ew-vd-title"><h2>CR별 판정</h2>${tag}</div><p class="ew-vd-sub"><span>1차 점검 단계</span><span>작업 2/3</span>${due}</p><div class="ew-vd-progress"><div class="ew-vd-bar" role="img" aria-label="승인 ${c.ok}건, 조건부 승인 ${c.cond}건, 미승인 ${c.bad}건, 남은 사람 판정 ${remaining}건">${bar}</div><p class="ew-vd-statusline" data-person="${S.confirmed ? 'confirmed' : 'pending'}">${human}</p><p class="ew-vd-statusline" data-service><b>자동 판정 완료 9/9</b><span>승인 8 · 미승인 1</span></p></div></div>`;
   }
   function tabsHTML() {
     return `<nav class="ew-tabs" aria-label="작업 화면">${[['work', '작업'], ['log', '기록'], ['rules', '기준']].map(([key, label]) => `<button type="button" data-vd-tab="${key}" aria-pressed="${S.tab === key}">${label}</button>`).join('')}</nav>`;
@@ -587,15 +467,24 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     return item.verdict === 'cond' ? '<span>최종본 제출 조건</span>' : '';
   }
   function pickHTML(item) {
-    if (S.confirmed) return `<span class="ew-vd-final"><i class="ew-vd-dot" data-verdict="${item.verdict}"></i>${VERDICT[item.verdict][0]}</span>`;
+    if (S.confirmed || item.handler === 'service') return `<span class="ew-vd-final"><i class="ew-vd-dot" data-verdict="${item.verdict}"></i>${VERDICT[item.verdict][0]}</span>`;
     const label = item.verdict ? `<i class="ew-vd-dot" data-verdict="${item.verdict}"></i><span>${VERDICT[item.verdict][0]}</span>` : '<span>판정 선택</span>';
     return `<button type="button" class="ew-vd-pick" data-vd-pick="${item.id}"${item.verdict ? ` data-verdict="${item.verdict}"` : ''} aria-haspopup="menu" aria-expanded="${S.menu === item.id}" aria-label="${item.id} 판정 ${item.verdict ? VERDICT[item.verdict][0] : '선택'}">${label}${icon(ICON.down)}</button>`;
   }
+  function evidenceHTML(item) {
+    const missingTest = item.id === 'CR-2204';
+    const rows = [['설계서', '있음', false], ['테스트 결과', missingTest ? '없음' : '있음', missingTest], ['배포 계획서', '있음', false]];
+    return `<div class="ew-vd-evidence" id="evidence-${item.id}"><p>이 항목의 승인 조건: 필수 문서 3종이 모두 있어야 합니다.</p><table aria-label="${item.id} 자동 판정 근거"><thead><tr><th scope="col">항목</th><th scope="col">조건</th><th scope="col">관측</th></tr></thead><tbody>${rows.map(([name, observed, missing]) => `<tr><td>${name}</td><td>있음</td><td${missing ? ' data-missing' : ''}>${observed}</td></tr>`).join('')}</tbody></table><small>판정 시각 · 10.27 14:20<br>${missingTest ? '테스트 결과 없음 → 미승인. 판정은 완료되었습니다.' : '필수 문서 모두 있음 → 승인. 판정은 완료되었습니다.'}</small></div>`;
+  }
   function itemHTML(item) {
-    const tone = S.confirmed ? '' : !item.verdict ? 'attention' : item.id === S.flash ? 'picked' : '';
+    const service = item.handler === 'service';
+    const tone = S.confirmed || service ? '' : !item.verdict ? 'attention' : item.id === S.flash ? 'picked' : '';
     const source = !S.confirmed && item.source === 'chat' ? `<span class="ew-vd-src" title="대화에서 채움">${icon(ICON.chat)}</span>` : '<span class="ew-vd-src"></span>';
     const file = item.file ? `<button type="button" class="ew-vd-file" data-mock-toast="시안: 파일은 열리지 않습니다">${icon(ICON.clip, 13)}${esc(item.file)}</button>` : '';
-    return `<div class="ew-vd-item" data-vd-item="${item.id}"${tone ? ` data-tone="${tone}"` : ''}><div class="ew-vd-text"><span class="ew-vd-name">${esc(item.name)}</span><span class="ew-vd-line"><span class="ew-vd-id">${item.id}</span>${reasonHTML(item)}</span>${file}</div><div class="ew-vd-right">${source}${pickHTML(item)}</div></div>`;
+    const row = `<div class="ew-vd-item"${service ? '' : ` data-vd-item="${item.id}" data-handler="human"`}${tone ? ` data-tone="${tone}"` : ''}><div class="ew-vd-text"><span class="ew-vd-name">${esc(item.name)}</span><span class="ew-vd-line"><span class="ew-vd-id">${item.id}</span>${reasonHTML(item)}</span>${service ? '' : `<span class="ew-vd-person-note">${S.confirmed ? '사람 판정 확정됨' : '사람 판정'}</span>`}${file}</div><div class="ew-vd-right">${source}${pickHTML(item)}</div></div>`;
+    if (!service) return row;
+    const opened = S.evidence === item.id;
+    return `<section class="ew-vd-auto" data-vd-item="${item.id}" data-handler="service" data-decision-state="complete">${row}<div class="ew-vd-origin"><span>서비스 자동 판정 · 판정 완료</span><button type="button" class="ew-vd-evidence-toggle" data-vd-evidence="${item.id}" aria-expanded="${opened}"${opened ? ` aria-controls="evidence-${item.id}"` : ''} aria-label="${item.id} 자동 판정 근거 ${opened ? '접기' : '보기'}">근거 ${opened ? '접기' : '보기'}${icon(ICON.down, 13)}</button></div>${opened ? evidenceHTML(item) : ''}</section>`;
   }
   function listHTML() {
     let html = '';
@@ -604,10 +493,13 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
       if (!items.length) continue;
       html += `<h3 class="ew-vd-label" data-verdict="${verdict}">${label}<b>${items.length}</b></h3>`;
       if (verdict !== 'ok') { html += items.map(itemHTML).join(''); continue; }
-      const chat = items.filter(item => item.source === 'chat').length;
+      const visibleAuto = items.find(item => item.handler === 'service');
+      const rest = items.filter(item => item !== visibleAuto);
+      if (visibleAuto) html += itemHTML(visibleAuto);
+      const chat = rest.filter(item => item.source === 'chat').length;
       const chatLabel = !S.confirmed && chat ? `<span class="ew-vd-chat">${icon(ICON.chat)}대화에서 채움${chat < items.length ? ' ' + chat : ''}</span>` : '';
-      html += `<button type="button" class="ew-vd-group" data-vd-group aria-expanded="${S.expanded}">${icon(ICON.right)}<i class="ew-vd-dot" data-verdict="ok"></i><span class="ew-vd-group-label">${items.length}건 모두 승인</span>${chatLabel}</button>`;
-      if (S.expanded) html += items.map(itemHTML).join('');
+      html += `<button type="button" class="ew-vd-group" data-vd-group aria-expanded="${S.expanded}">${icon(ICON.right)}<i class="ew-vd-dot" data-verdict="ok"></i><span class="ew-vd-group-label">나머지 승인 ${rest.length}건</span>${chatLabel}</button>`;
+      if (S.expanded) html += rest.map(itemHTML).join('');
     }
     return `<div class="ew-vd-body">${html}</div>`;
   }
@@ -616,13 +508,13 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   }
   function rulesHTML() {
     const words = Object.entries(VERDICT).map(([key, [label, desc]]) => `<li><i class="ew-vd-dot" data-verdict="${key}"></i><b>${label}</b><span>${desc}</span></li>`).join('');
-    return `<div class="ew-vd-rules"><p class="ew-vd-draft">초안: 이 탭은 아직 Figma에 그리지 않았습니다</p><section><h3>판정 단어</h3><ul>${words}</ul></section><section><h3>확인할 문서</h3><p>설계서, 테스트 결과, 배포 계획서</p></section><section><h3>판정 뒤에는</h3><p>미승인 CR은 ‘보완·재점검’ 단계에서, 조건부 승인 CR은 ‘조건부 승인 후속’ 단계에서 다시 확인합니다. 확정한 판정은 바꿀 수 없고, 바꾸려면 이 작업을 다시 실행해 새 근거로 판정합니다.</p></section></div>`;
+    return `<div class="ew-vd-rules"><p class="ew-vd-draft">초안: 이 탭은 아직 Figma에 그리지 않았습니다</p><section><h3>판정 단어</h3><ul>${words}</ul></section><section><h3>확인할 문서</h3><p>설계서, 테스트 결과, 배포 계획서</p></section><section><h3>사람 판정과 자동 판정</h3><p>사람 대상 3건은 사람이 선택하고 확정합니다. 대화에서 채운 값도 사람의 확인이 필요합니다. 자동 대상 9건은 서비스가 필수 문서의 존재 여부로 판정합니다. 필수 문서가 하나라도 없으면 미승인으로 판정하며, 이는 판정이 끝난 상태입니다. 자동 결과는 여기서 수정하거나 사람 확정에 포함하지 않습니다.</p></section><section><h3>판정 뒤에는</h3><p>확정된 사람 판정과 자동 판정 결과는 이 화면에서 수정하지 않습니다. 결과와 판정 주체는 기록에서 확인할 수 있습니다.</p></section></div>`;
   }
   function footerHTML() {
-    const c = counts();
-    if (S.confirmed) return '<p>다음 할 일<b>점검 결과 송부</b></p><button type="button" class="ew-primary" data-mock-toast="시안: 다음 작업 화면은 다음 시안에서 봅니다">열기</button>';
-    if (c.none) return `<p>${c.none}건 더 정하면 확정할 수 있습니다</p><button type="button" class="ew-primary" disabled>판정 확정</button>`;
-    return '<p>확정하면 점검 결과 송부로 넘어갑니다</p><button type="button" class="ew-primary" data-vd-confirm>판정 확정</button>';
+    const remaining = humanRemaining();
+    if (S.confirmed) return '<p>사람 3건 확정됨<br>자동 9건의 결과는 유지됩니다</p><button type="button" class="ew-primary" data-vd-tab="log">기록 보기</button>';
+    if (remaining) return `<p>사람 ${remaining}건을 더 정해 주세요<br>자동 9건은 판정 완료</p><button type="button" class="ew-primary" disabled>사람 3건 확정</button>`;
+    return '<p>사람 대상 3건만 확정합니다<br>자동 9건은 판정 완료</p><button type="button" class="ew-primary" data-vd-confirm>사람 3건 확정</button>';
   }
   function menuHTML(item) {
     return `<div class="ew-vd-menu" role="menu" aria-label="${item.id} 판정 고르기">${Object.entries(VERDICT).map(([key, [label, desc]]) => `<button type="button" role="menuitemradio" class="ew-vd-option" data-vd-choose="${key}" aria-checked="${item.verdict === key}" tabindex="-1"><i class="ew-vd-dot" data-verdict="${key}"></i><span><b>${label}</b><small>${desc}</small></span>${item.verdict === key ? icon(ICON.check) : ''}</button>`).join('')}</div>`;
@@ -630,24 +522,13 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 
   function render(focus) {
     const scroll = panel.querySelector('.ew-scroll'), top = scroll ? scroll.scrollTop : 0;
-    if (mode === 'auto') {
-      const body = A.tab === 'work' ? autoListHTML() : A.tab === 'log' ? autoLogHTML() : autoRulesHTML();
-      panel.innerHTML = autoHeaderHTML() + `<div class="ew-scroll ew-vd">${autoHeadHTML()}${autoTabsHTML()}${body}</div><footer class="ew-vd-footer ew-auto-footer">${autoFooterHTML()}</footer>`;
-    } else {
-      const body = S.tab === 'work' ? listHTML() : S.tab === 'log' ? logHTML() : rulesHTML();
-      panel.innerHTML = headerHTML() + `<div class="ew-scroll ew-vd">${headHTML()}${tabsHTML()}${body}</div><footer class="ew-vd-footer">${footerHTML()}</footer>`;
-    }
-    panel.dataset.mockMode = mode;
+    const body = S.tab === 'work' ? listHTML() : S.tab === 'log' ? logHTML() : rulesHTML();
+    panel.innerHTML = headerHTML() + `<div class="ew-scroll ew-vd">${headHTML()}${tabsHTML()}${body}</div><footer class="ew-vd-footer">${footerHTML()}</footer>`;
     panel.querySelector('.ew-scroll').scrollTop = top;
-    if (mode === 'human' && S.menu) placeMenu();
-    syncContext();
-    document.getElementById('mock-screen').textContent = mode === 'auto' ? autoScreenId() : screenId();
-    document.querySelectorAll('[data-mock-state]').forEach(button => {
+    if (S.menu) placeMenu();
+    document.getElementById('mock-screen').textContent = screenId();
+    document.querySelectorAll('button[data-mock-state]').forEach(button => {
       if (button.dataset.mockState === stateKey()) button.setAttribute('aria-current', 'true');
-      else button.removeAttribute('aria-current');
-    });
-    document.querySelectorAll('[data-auto-state]').forEach(button => {
-      if (button.dataset.autoState === (A.tab === 'work' ? A.status : A.tab)) button.setAttribute('aria-current', 'true');
       else button.removeAttribute('aria-current');
     });
     if (focus) panel.querySelector(focus)?.focus({preventScroll: true});
@@ -664,6 +545,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     menu.style.left = `${Math.max(8, anchor.right - box.left - menu.offsetWidth)}px`;
   }
   function openMenu(id) {
+    if (S.confirmed || !humanItems().some(item => item.id === id)) return;
     S.menu = id;
     render();
     const options = [...panel.querySelectorAll('.ew-vd-option')];
@@ -677,6 +559,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   }
   function choose(id, verdict) {
     const item = S.items.find(entry => entry.id === id), time = stamp().time;
+    if (!item || item.handler !== 'human' || S.confirmed) return;
     if (item.verdict !== verdict || item.source === 'chat') S.log.push([time, `${ACTOR}가 ${id}${objectParticle(id)} ${VERDICT[verdict][0]}으로 정함`]);
     item.verdict = verdict; item.source = 'human';
     S.picked = id; S.flash = id; S.menu = null;
@@ -687,8 +570,9 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     flashTimer = setTimeout(() => { S.flash = null; panel.querySelector(`[data-vd-item="${id}"][data-tone=picked]`)?.removeAttribute('data-tone'); }, 2000);
   }
   function confirmVerdicts() {
+    if (humanRemaining() || S.confirmed) return;
     S.confirmed = stamp(); S.menu = null; S.picked = null; S.flash = null;
-    S.log.push([S.confirmed.time, `${ACTOR}가 12건 판정을 확정함`]);
+    S.log.push([S.confirmed.time, `${ACTOR}가 사람 대상 3건의 판정을 확정함 (CR-2203, CR-2207, CR-2210)`]);
     render('.ew-vd-footer .ew-primary');
   }
   function toast(text) {
@@ -732,12 +616,10 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
       return setMockControlsExpanded(target.getAttribute('aria-expanded') !== 'true');
     }
     if (target.matches('[data-sidebar-toggle]')) { compact = !compact; return layout(); }
-    if (target.matches('[data-mock-mode]')) return changeMode(target.dataset.mockMode);
     if (target.matches('[data-mock-state]')) return previewState(target.dataset.mockState);
-    if (target.matches('[data-auto-state]')) return previewAutoState(target.dataset.autoState);
-    if (target.matches('[data-auto-tab]')) { A.tab = target.dataset.autoTab; return render(`[data-auto-tab="${A.tab}"]`); }
     if (target.matches('[data-vd-pick]')) return S.menu === target.dataset.vdPick ? closeMenu(true) : openMenu(target.dataset.vdPick);
     if (target.matches('[data-vd-choose]')) return choose(S.menu, target.dataset.vdChoose);
+    if (target.matches('[data-vd-evidence]')) { S.evidence = S.evidence === target.dataset.vdEvidence ? null : target.dataset.vdEvidence; return render(`[data-vd-evidence="${target.dataset.vdEvidence}"]`); }
     if (target.matches('[data-vd-group]')) { S.expanded = !S.expanded; return render('[data-vd-group]'); }
     if (target.matches('[data-vd-tab]')) { S.tab = target.dataset.vdTab; S.menu = null; return render(`[data-vd-tab="${S.tab}"]`); }
     if (target.matches('[data-vd-confirm]')) return confirmVerdicts();
@@ -747,7 +629,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     if (target.matches('[data-mock-close]')) { document.querySelector('.mock-info').hidden = true; return document.querySelector('[data-mock-info]').focus(); }
     if (target.matches('[data-mock-reset]')) {
       document.querySelector('.mock-info').hidden = true;
-      if (mode === 'human') reset(); else A = {status: 'checking', tab: 'work'};
+      reset();
       setOpen(true); layout(); render();
       panel.querySelector('.ew-scroll').scrollTop = 0;
       return toast('지금 시안을 처음 상태로 돌렸습니다');
@@ -786,7 +668,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   });
   window.addEventListener('resize', layout);
   reset();
-  if (window.location.hash === '#auto-complete') { mode = 'auto'; A.status = 'success'; }
+  if (window.location.hash === '#auto-evidence') S.evidence = 'CR-2204';
   layout();
   render();
 })();
