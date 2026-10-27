@@ -7,12 +7,12 @@
       "sha256": "a8070f3282e7a2d50dbd14af3bc8f013fd6413d81bbe9ea7eaedcdbe0bff2883"
     },
     "branding/ees/ui/ees-work-launcher.js": {
-      "bytes": 98787,
-      "sha256": "96c392ab8651d1fd6af910db087a45fbb24d6b9e87d903564a463a1c2492a92f"
+      "bytes": 98852,
+      "sha256": "28baa295cbc95a08da40f021c60662255d1e0e4ae93ce9378bde8f4eb5ddca48"
     },
     "branding/ees/ui/ees-work-view.js": {
-      "bytes": 136399,
-      "sha256": "d9c40dc78951c2e4730f6fe2a39fa0d40409e6a3b1eeed3ff1031fee549900d8"
+      "bytes": 136427,
+      "sha256": "427e3bb9bf1fc829c925072527ba6e545a456adde69beeb9e8a6e89f9bed7942"
     },
     "docs/mockups/ees-work/design-mock-src/06-task-groups.html": {
       "bytes": 75628,
@@ -25,7 +25,7 @@
   },
   "validation": {
     "runtime_node": {
-      "passed": 124,
+      "passed": 125,
       "failed": 0
     },
     "related_node_initial": 394,
@@ -53,6 +53,7 @@
     "Optional context assertion moved to new common header.",
     "Queued label and overly broad hidden regex assertions corrected.",
     "Native fixture expected transport failure used success-only helper; explicit failure assertion added.",
-    "Mock builder Python lacked Brotli; existing .venv used."
+    "Mock builder Python lacked Brotli; existing .venv used.",
+    "Pre-CI Native navigation audit found singleton stage intercepting explicit run overview and closed-run history; explicit overview and closed-run entry restored, regression added, 125/125 passed."
   ]
 }

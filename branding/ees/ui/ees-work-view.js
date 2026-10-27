@@ -566,7 +566,7 @@ function workWorkspaceMenuHTML(state,selection,error=''){
 function workStageTarget(data,selection={}){
   if(!data?.run||selection.mode==='author'||selection.job_id||['historical_reference','workspace_admin','my_work','records'].includes(selection.tab))return null;
   const stages=Object.values(data.run.definition?.nodes || {}).filter(node=>node.type==='t');
-  return stages.find(node=>node.id===selection.stage_id) || (!selection.stage_overview&&stages.length===1?stages[0]:null);
+  return stages.find(node=>node.id===selection.stage_id) || (!selection.stage_overview&&!workUI.finished(data.run)&&stages.length===1?stages[0]:null);
 }
 function workStageJudgments(node={},definition={}){
   const configured=Array.isArray(node.judgments)?node.judgments:definition.judgments;

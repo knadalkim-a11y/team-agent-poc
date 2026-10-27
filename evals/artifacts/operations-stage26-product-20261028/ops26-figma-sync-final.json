@@ -9,10 +9,13 @@
   "source": {
     "previousApprovedCommit": "8959ffb67d2e09dd6b64a7561f998027f1e6298b",
     "sourceSHA256": "9e56dd9f34fdb3784d0f0860b69463b3e5faa1a1a1fafd553f3e03c5da1bae31",
-    "htmlSHA256": "6d0071ac7143f89a89e21d93f767bd34a8d913300307f1156c0626bafa0c0d57",
-    "fixed26Commit": null,
+    "htmlSHA256": "f421dc83ef89abe55cb5af133b48e19b03e04da98e64d483b168e1994f931708",
+    "fixed26Commit": "b92a3036869c4e5f83a1125987641a32f207c886",
     "sourceReport": "/tmp/ops26-common-stage/render-review.json",
-    "canonicalScreenshot": "/tmp/ops26-common-stage/01-full-default.png"
+    "canonicalScreenshot": "/tmp/ops26-common-stage/01-full-default.png",
+    "initialRenderedHTMLSHA256": "6d0071ac7143f89a89e21d93f767bd34a8d913300307f1156c0626bafa0c0d57",
+    "htmlBytes": 423053,
+    "fixedHTMLURL": "https://github.com/knadalkim-a11y/team-agent-poc/blob/b92a3036869c4e5f83a1125987641a32f207c886/docs/mockups/ees-work/design-mock-06-task-groups.html"
   },
   "nodes": {
     "full": "1705:1020",
@@ -279,7 +282,8 @@
     "observations": [
       "Full26 screenshot compared to canonical full default: obsolete block gone, workflow path visible, primary layout matches.",
       "Four focused states and two tabs show identical new header; no clipped path or overlap.",
-      "Annotation and C105 readable. Existing eight common principles text remains unchanged."
+      "Annotation and C105 readable. Existing eight common principles text remains unchanged.",
+      "Existing screenshots observe initial6d build; root verified currentf421 rebuild preserves source/UI. Metadata text-only provenance update structurally checked without UI re-render."
     ]
   },
   "boundaries": [
@@ -1689,7 +1693,10 @@
     "1705:1851",
     "1706:1395",
     "1288:45",
-    "1674:7336"
+    "1674:7336",
+    "1706:1396",
+    "1705:1332",
+    "1706:1397"
   ],
   "removedNewCloneNodes": [
     "1705:1205",
@@ -1963,5 +1970,49 @@
       "Clarified supplemental note wording so existing agreed principles are maintained, not relegated to historical status."
     ],
     "scope": "Canvas annotations and deep links only; no operation screen/source/Git modifications; no new feature."
+  },
+  "provenanceUpdate": {
+    "updatedAtKST": "2026-10-28",
+    "fixed26Commit": "b92a3036869c4e5f83a1125987641a32f207c886",
+    "currentHTMLSHA256": "f421dc83ef89abe55cb5af133b48e19b03e04da98e64d483b168e1994f931708",
+    "currentHTMLBytes": 423053,
+    "firstRenderedHTMLSHA256": "6d0071ac7143f89a89e21d93f767bd34a8d913300307f1156c0626bafa0c0d57",
+    "reason": "Product CSS added disabled style for unresolved more-menu icon; rebuilt artifact hash changed. Source and UI content unchanged per root verification; original UI screenshots retained.",
+    "mutatedNodeIds": [
+      "1706:1396",
+      "1705:1332",
+      "1706:1397"
+    ],
+    "structuralVerification": [
+      {
+        "id": "1706:1396",
+        "width": 1052,
+        "height": 180,
+        "currentHashPresent": true,
+        "commitPresent": true,
+        "link": null
+      },
+      {
+        "id": "1705:1332",
+        "width": 1512,
+        "height": 20,
+        "currentHashPresent": true,
+        "commitPresent": true,
+        "link": {
+          "type": "URL",
+          "value": "https://github.com/knadalkim-a11y/team-agent-poc/blob/b92a3036869c4e5f83a1125987641a32f207c886/docs/mockups/ees-work/design-mock-06-task-groups.html"
+        }
+      },
+      {
+        "id": "1706:1397",
+        "width": 1280,
+        "height": 299,
+        "currentHashPresent": true,
+        "commitPresent": true,
+        "link": null
+      }
+    ],
+    "uiBodyMutated": false,
+    "uiRerenderRequired": false
   }
 }

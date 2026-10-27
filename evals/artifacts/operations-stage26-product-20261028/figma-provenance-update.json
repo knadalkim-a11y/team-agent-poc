@@ -1,0 +1,44 @@
+{
+  "updatedAtKST": "2026-10-28",
+  "fixed26Commit": "b92a3036869c4e5f83a1125987641a32f207c886",
+  "currentHTMLSHA256": "f421dc83ef89abe55cb5af133b48e19b03e04da98e64d483b168e1994f931708",
+  "currentHTMLBytes": 423053,
+  "firstRenderedHTMLSHA256": "6d0071ac7143f89a89e21d93f767bd34a8d913300307f1156c0626bafa0c0d57",
+  "reason": "Product CSS added disabled style for unresolved more-menu icon; rebuilt artifact hash changed. Source and UI content unchanged per root verification; original UI screenshots retained.",
+  "mutatedNodeIds": [
+    "1706:1396",
+    "1705:1332",
+    "1706:1397"
+  ],
+  "structuralVerification": [
+    {
+      "id": "1706:1396",
+      "width": 1052,
+      "height": 180,
+      "currentHashPresent": true,
+      "commitPresent": true,
+      "link": null
+    },
+    {
+      "id": "1705:1332",
+      "width": 1512,
+      "height": 20,
+      "currentHashPresent": true,
+      "commitPresent": true,
+      "link": {
+        "type": "URL",
+        "value": "https://github.com/knadalkim-a11y/team-agent-poc/blob/b92a3036869c4e5f83a1125987641a32f207c886/docs/mockups/ees-work/design-mock-06-task-groups.html"
+      }
+    },
+    {
+      "id": "1706:1397",
+      "width": 1280,
+      "height": 299,
+      "currentHashPresent": true,
+      "commitPresent": true,
+      "link": null
+    }
+  ],
+  "uiBodyMutated": false,
+  "uiRerenderRequired": false
+}

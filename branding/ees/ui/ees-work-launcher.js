@@ -604,9 +604,9 @@
       await select({workflow_id:target.dataset.workflowId,run_id:target.dataset.runId,job_id:target.dataset.jobId,mode:'work',tab:'current',panel_open:true});
       const job=state?.run?.jobs?.[target.dataset.jobId];if(job&&!job.claim_actor&&state.run.sharing?.group_ids?.length&&await confirmDialog({title:'이 작업을 맡을까요?',html:'<p>목록을 여는 것만으로 담당자가 지정되지는 않습니다.</p>',confirmLabel:'담당하기'}))await mutate({action:'claim_task',run_id:selection.run_id,job_id:selection.job_id});return;
     }
-    if(action==='open_run')return select({workflow_id:target.dataset.workflowId,run_id:target.dataset.runId,job_id:'',mode:'work',tab:'overview',panel_open:true});
+    if(action==='open_run')return select({workflow_id:target.dataset.workflowId,run_id:target.dataset.runId,job_id:'',stage_id:'',stage_overview:false,mode:'work',tab:'overview',panel_open:true});
     if(action==='job')return select({job_id:target.dataset.jobId,tab:'current'});
-    if(action==='overview')return select({job_id:'',tab:'overview'},{fetch:false});
+    if(action==='overview')return select({job_id:'',stage_id:'',stage_overview:true,tab:'overview'},{fetch:false});
     if(action==='tab')return select({tab:target.dataset.tab},{fetch:false});
     if(action==='close_panel'||action==='open_panel')return setPanelOpen(action==='open_panel');
     if(action==='refresh')return refresh();

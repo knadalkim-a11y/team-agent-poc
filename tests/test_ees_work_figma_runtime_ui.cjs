@@ -848,3 +848,11 @@ test('history link selects only an attempt belonging to its actual row and opens
  await h.api.handleClick({dataset:{action:'stage_evidence',jobId:'a',attemptId:'a1'}});
  const selection=h.api.snapshot().selection;assert.equal(selection.stage_tab,'work');assert.equal(selection.stage_evidence,'a');assert.equal(selection.stage_attempts.a,'a1');assert.equal(h.mutations().length,0);
 });
+
+test('explicit run overview and closed-run history remain reachable after entering a singleton stage',async()=>{
+ const h=stageRuntimeFixture();await h.api.handleClick({dataset:{action:'overview'}});
+ const selection=h.api.snapshot().selection;assert.equal(selection.stage_overview,true);assert.equal(selection.stage_id,'');
+ assert.equal(html('workStageTarget(state,selection)',{state:h.state,selection}),null);
+ h.state.run.status='completed';assert.equal(html('workStageTarget(state,{mode:"work",tab:"overview"})',{state:h.state}),null);
+ assert.equal(html('workStageTarget(state,{mode:"work",tab:"overview",stage_id:"t"}).id',{state:h.state}),'t');
+});
