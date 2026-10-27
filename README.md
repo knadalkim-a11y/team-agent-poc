@@ -12,6 +12,8 @@ EES 팀의 문서 조회와 업무 처리를 대화·워크플로우 화면으�
 
 <a id="design-sources"></a>
 
+현재 업무 화면의 확정 디자인은 [20판 고정 원본·확정 범위](docs/mockups/ees-work/TASK.md#design-mock-approved20-20261027)와 [Figma 확정20판](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1658-7137)에서 시작합니다. 이전 시안과 실제 구현 상태, 미정 기능 계약은 해당 기록에서 구분합니다.
+
 ### 설계 문서의 역할과 찾는 순서
 
 | 필요한 답 | 관리 원본 | 읽고 고치는 범위 |

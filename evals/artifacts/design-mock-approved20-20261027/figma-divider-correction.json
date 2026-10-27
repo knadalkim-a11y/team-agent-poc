@@ -1,0 +1,183 @@
+{
+  "applied": true,
+  "scope": "current approved board and full native shell only",
+  "source": "05-execution .ew-vd-entry border-bottom:1px solid var(--ees-surface-muted); border-radius8px",
+  "change": "13 collapsed service rows now use native frame bottom border;1 expanded service summary extra divider hidden;77/87px heights retained",
+  "readback": {
+    "createdNodeIds": [],
+    "mutatedNodeIds": [
+      "1658:7193",
+      "1658:7207",
+      "1658:7230",
+      "1658:7253",
+      "1658:7348",
+      "1665:1589",
+      "1665:1603",
+      "1665:1626",
+      "1665:1648",
+      "1665:2030",
+      "1665:2044",
+      "1665:2067",
+      "1665:2089"
+    ],
+    "rows": [
+      {
+        "id": "1658:7193",
+        "w": 464,
+        "h": 77,
+        "x": 8,
+        "y": 52,
+        "bottomBorder": 1
+      },
+      {
+        "id": "1658:7207",
+        "w": 464,
+        "h": 77,
+        "x": 8,
+        "y": 129,
+        "bottomBorder": 1
+      },
+      {
+        "id": "1658:7230",
+        "w": 464,
+        "h": 87,
+        "x": 8,
+        "y": 559,
+        "bottomBorder": 1
+      },
+      {
+        "id": "1658:7253",
+        "w": 464,
+        "h": 87,
+        "x": 8,
+        "y": 694,
+        "bottomBorder": 1
+      },
+      {
+        "id": "1658:7275",
+        "w": 464,
+        "h": 87,
+        "x": 8,
+        "y": 8,
+        "bottomBorder": 0
+      },
+      {
+        "id": "1658:7348",
+        "w": 464,
+        "h": 87,
+        "x": 8,
+        "y": 78,
+        "bottomBorder": 1
+      },
+      {
+        "id": "1665:1589",
+        "w": 464,
+        "h": 77,
+        "x": 8,
+        "y": 52,
+        "bottomBorder": 1
+      },
+      {
+        "id": "1665:1603",
+        "w": 464,
+        "h": 77,
+        "x": 8,
+        "y": 129,
+        "bottomBorder": 1
+      },
+      {
+        "id": "1665:1626",
+        "w": 464,
+        "h": 87,
+        "x": 8,
+        "y": 559,
+        "bottomBorder": 1
+      },
+      {
+        "id": "1665:1648",
+        "w": 464,
+        "h": 87,
+        "x": 8,
+        "y": 694,
+        "bottomBorder": 1
+      },
+      {
+        "id": "1665:2030",
+        "w": 464,
+        "h": 77,
+        "x": 8,
+        "y": 52,
+        "bottomBorder": 1
+      },
+      {
+        "id": "1665:2044",
+        "w": 464,
+        "h": 77,
+        "x": 8,
+        "y": 129,
+        "bottomBorder": 1
+      },
+      {
+        "id": "1665:2067",
+        "w": 464,
+        "h": 87,
+        "x": 8,
+        "y": 559,
+        "bottomBorder": 1
+      },
+      {
+        "id": "1665:2089",
+        "w": 464,
+        "h": 87,
+        "x": 8,
+        "y": 694,
+        "bottomBorder": 1
+      }
+    ],
+    "heightsMatch": true
+  },
+  "allAffected": [
+    "1658:7193",
+    "1658:7206",
+    "1658:7207",
+    "1658:7220",
+    "1658:7230",
+    "1658:7249",
+    "1658:7253",
+    "1658:7271",
+    "1658:7275",
+    "1658:7294",
+    "1658:7348",
+    "1658:7367",
+    "1665:1589",
+    "1665:1602",
+    "1665:1603",
+    "1665:1616",
+    "1665:1626",
+    "1665:1644",
+    "1665:1648",
+    "1665:1666",
+    "1665:2030",
+    "1665:2043",
+    "1665:2044",
+    "1665:2057",
+    "1665:2067",
+    "1665:2085",
+    "1665:2089",
+    "1665:2107",
+    "1668:1065"
+  ],
+  "C96": {
+    "createdNodeIds": [],
+    "mutatedNodeIds": [
+      "1668:1069"
+    ],
+    "C96": "1668:1069",
+    "dividerMismatchResolved": true
+  },
+  "visualCheck": {
+    "fullShell": "PASS after final correction",
+    "approvedBoard": "PASS after final correction"
+  },
+  "remaining": "1px panel edge and canvas font width/rendering differences; external PNG links instead of embedded image assets"
+}
