@@ -1,13 +1,13 @@
 # 현재 작업 상태
 
-## 2026-10-27 · 업무 목업 6판 · 판정 주체와 AI 추천 분리
+## 2026-10-27 · 업무 목업 7판 · AI 추천 제거
 
-- **현재 작업:** [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)의 5판 head `0a462e62a5a2d4111f1eeee553403a3e84dc8eec`에서 같은 PR을 갱신한다. 사용자는 판정 주체/AI 추천의 혼동을 정리하고 요청하지 않은 기능을 임의로 추가하지 말라고 했다. [이번 범위](mockups/ees-work/TASK.md#design-mock-clarity-20261027).
-- **최신 목업:** [업무 목업 6판 HTML](mockups/ees-work/design-mock-04-cr-verdict.html) · [편집 원본](mockups/ees-work/design-mock-src/04-cr-verdict.html). 각 행의 사람/서비스 판정 주체와 AI 추천을 분리하고, 사람3건은 미선택으로 시작한다. ‘사람 3건 확정’ 버튼·처리·완료 시연을 제거했다. 개별 확정이나 선택 즉시 저장/완료 기능은 추가하지 않으며 최종 확정 방법은 미정이다.
-- **보존·기록:** 공통 판정 근거, 원래 추천/관측, 서비스9건 결과와 제품 UI·API·저장·엔진은 보존한다. Figma [6판 메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1628-6114)·[C80](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1628-6119)에 같은 범위를 기록했다. **디자인 검토 중·6판 전체 확정 전·사내 열기 미확인**이다.
-- **검증:** 생성 검사5 PASS/0 SKIP, Chromium134 브라우저21/21 PASS, 외부 요청·console/page error0. 초기 선택0/3·추천 분리·확정 동작 없음·자동9건 불변·1920/1200/480px를 확인했다. 최초 검사 단언 보완과 파일 해시는 [6판 평가](../evals/v4-ui-20260930.md#design-mock-clarity-20261027)에 기록한다. [5판 당시 검사](../evals/v4-ui-20260930.md#design-mock-evidence-20261027)와 이전 증거는 보존한다. 목업 검사 통과를 사용자 수용이나 실제 제품 기능 검증으로 해석하지 않는다.
+- **현재 작업:** [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)의 6판 head `cb03ab60be8641c74d348ec7b24987241cf55c81`에서 요청 밖 기능인 AI 추천을 제거한다. [이번 범위](mockups/ees-work/TASK.md#design-mock-no-recommendation-20261027).
+- **최신 목업:** [업무 목업 7판 HTML](mockups/ees-work/design-mock-04-cr-verdict.html) · [편집 원본](mockups/ees-work/design-mock-src/04-cr-verdict.html). 사람3건은 직접 선택하고 서비스9건은 기존 로직의 결과를 보여 준다. 추천 문구·예시·합성 값·렌더 처리를 제거하고 공통 판정 근거·미확인 자료·사람 선택 기록은 유지한다. 확정·저장 등 대체 기능은 추가하지 않는다.
+- **기록·경계:** Figma [7판 메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1629-6115)·[C81](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1629-2). 제품 UI·API·저장·엔진은 보존한다. **디자인 검토 중·7판 전체 확정 전·사내 열기 미확인**이다. 최종 확정 방식은 미정이며 임의로 구현하지 않는다.
+- **검증:** 생성 검사5 PASS/0 SKIP, Chromium134 브라우저22/22 PASS, 외부 요청·console/page error0. 추천 잔여 제거·사람 선택·서비스9건 불변·공통 근거·1920/1200/480px를 확인했다. 결과와 해시는 [7판 평가](../evals/v4-ui-20260930.md#design-mock-no-recommendation-20261027)에 기록한다. [6판 당시 검사](../evals/v4-ui-20260930.md#design-mock-clarity-20261027)와 이전 증거는 당시 이력으로 보존한다.
 - **사내 적용 원본:** [미병합 문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`에 따라 프로그램 적용 완료·실행 중으로 구분한다. 로그인·기존 자료·새 화면·도구 설정은 별도 미확인이다. #104의 상세 적용 기록은 이 브랜치에 복제하거나 덮어쓰지 않는다.
-- **다음 하나:** 6판에서 사람 판정과 AI 추천의 차이가 직관적으로 보이는지 검토한다. 미정 동작을 후속 구현 권한으로 해석하지 않는다.
+- **다음 하나:** 사람 판정과 서비스 판정만 남긴 7판을 검토한다. 미정 동작을 후속 구현 권한으로 해석하지 않는다.
 
 > 아래 절은 이전 작업 당시 기록이다. #103 병합 대기·사내 적용 미실행 등의 당시 표현은 위 현재 상태와 구분하고, 과거 검증·실패 근거는 보존한다.
 

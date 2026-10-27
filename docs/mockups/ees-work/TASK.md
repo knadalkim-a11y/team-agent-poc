@@ -1,5 +1,14 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="design-mock-no-recommendation-20261027"></a>
+
+## 2026-10-27 · 업무 목업 7판 · AI 추천 제거
+
+- **사용자 요청:** ‘AI 추천’은 요청한 기능이 아니므로 정리한다. 대화를 통한 값 입력을 자율적인 판정 추천으로 해석한 것은 에이전트의 범위 확대였으며 6판의 추천 유지 결정을 철회한다. [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `cb03ab60be8641c74d348ec7b24987241cf55c81`에서 같은 [목업](design-mock-04-cr-verdict.html)을 7판으로 갱신한다. 아래 6판의 AI 추천 설명은 당시 이력이다.
+- **제거:** 행·상단·대화 예시·기록·기준·시안 안내의 추천 설명, 추천용 합성 판정값·CSS·렌더 처리를 제거한다. 사람3건의 원본 합성 판정값도 비운다. CR2203은 ‘판정에 필요한 자료가 기록되지 않았습니다’로 표시하고 새 근거를 만들지 않는다.
+- **유지:** 사람3건은 미선택에서 직접 판정을 고르고, 서비스9건은 기존 읽기 전용 결과와 조건·관측·시각을 보여 준다. 공통12근거·미확인 사항·사람 선택 기록을 유지한다. 개별/일괄 확정, 선택 즉시 저장/완료 등 대체 기능은 추가하지 않으며 최종 확정 방식은 미정이다. 실제 제품 UI·API·저장·엔진은 변경하지 않는다.
+- **기록:** [7판 평가](../../../evals/v4-ui-20260930.md#design-mock-no-recommendation-20261027) · Figma [7판 메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1629-6115)·[C81](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1629-2). 전체 목업 확정·사내 확인은 미완료이며 이전 판과 증거는 보존한다.
+
 <a id="design-mock-clarity-20261027"></a>
 
 ## 2026-10-27 · 업무 목업 6판 · 판정 주체와 AI 추천 분리
