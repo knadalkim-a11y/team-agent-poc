@@ -1,0 +1,373 @@
+{
+  "viewport": {
+    "width": 480,
+    "height": 1080
+  },
+  "panel": {
+    "x": 57,
+    "y": 0,
+    "width": 423,
+    "height": 1080
+  },
+  "overflow": 0,
+  "header": {
+    "x": 57,
+    "y": 0,
+    "width": 423,
+    "height": 48,
+    "fontSize": "14px",
+    "lineHeight": "20px",
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "0px 0px 1px"
+  },
+  "title": {
+    "x": 77,
+    "y": -271,
+    "width": 71.015625,
+    "height": 28,
+    "fontSize": "20px",
+    "lineHeight": "28px",
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "0px"
+  },
+  "rows": [
+    {
+      "job": "job-10",
+      "x": 65,
+      "y": -26,
+      "width": 407,
+      "height": 77
+    },
+    {
+      "job": "job-11",
+      "x": 65,
+      "y": 51,
+      "width": 407,
+      "height": 77
+    },
+    {
+      "job": "job-6",
+      "x": 65,
+      "y": 128,
+      "width": 407,
+      "height": 77
+    },
+    {
+      "job": "job-9",
+      "x": 65,
+      "y": 205,
+      "width": 407,
+      "height": 77
+    },
+    {
+      "job": "job-3",
+      "x": 65,
+      "y": 330,
+      "width": 407,
+      "height": 87
+    },
+    {
+      "job": "job-0",
+      "x": 65,
+      "y": 417,
+      "width": 407,
+      "height": 87
+    },
+    {
+      "job": "job-1",
+      "x": 65,
+      "y": 544,
+      "width": 407,
+      "height": 87
+    },
+    {
+      "job": "job-2",
+      "x": 65,
+      "y": 631,
+      "width": 407,
+      "height": 77
+    },
+    {
+      "job": "job-4",
+      "x": 65,
+      "y": 708,
+      "width": 407,
+      "height": 87
+    },
+    {
+      "job": "job-5",
+      "x": 65,
+      "y": 795,
+      "width": 407,
+      "height": 87
+    },
+    {
+      "job": "job-7",
+      "x": 65,
+      "y": 882,
+      "width": 407,
+      "height": 87
+    },
+    {
+      "job": "job-8",
+      "x": 65,
+      "y": 969,
+      "width": 407,
+      "height": 87
+    }
+  ],
+  "menu": {
+    "x": 157,
+    "y": 703,
+    "width": 180,
+    "height": 110,
+    "fontSize": "14px",
+    "lineHeight": "22px",
+    "background": "rgb(255, 255, 255)",
+    "border": "1px"
+  },
+  "controls": [
+    {
+      "text": "실행",
+      "x": 354,
+      "y": -16,
+      "width": 106,
+      "height": 32,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "실행",
+      "x": 354,
+      "y": 61,
+      "width": 106,
+      "height": 32,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "판정 필요",
+      "x": 157,
+      "y": 164,
+      "width": 124,
+      "height": 30,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "1px"
+    },
+    {
+      "text": "판정 기록",
+      "x": 289,
+      "y": 166,
+      "width": 79.796875,
+      "height": 26,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "판정 필요",
+      "x": 157,
+      "y": 241,
+      "width": 124,
+      "height": 30,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "1px"
+    },
+    {
+      "text": "판정 기록",
+      "x": 289,
+      "y": 243,
+      "width": 79.796875,
+      "height": 26,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "다시 실행",
+      "x": 354,
+      "y": 340,
+      "width": 106,
+      "height": 32,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "판정 근거",
+      "x": 241.796875,
+      "y": 378,
+      "width": 79.796875,
+      "height": 26,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "다시 실행",
+      "x": 354,
+      "y": 427,
+      "width": 106,
+      "height": 32,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "판정 근거",
+      "x": 241.796875,
+      "y": 465,
+      "width": 79.796875,
+      "height": 26,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "다시 실행",
+      "x": 354,
+      "y": 554,
+      "width": 106,
+      "height": 32,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "판정 근거",
+      "x": 241.796875,
+      "y": 592,
+      "width": 79.796875,
+      "height": 26,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "승인",
+      "x": 157,
+      "y": 667,
+      "width": 124,
+      "height": 30,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "1px"
+    },
+    {
+      "text": "판정 기록",
+      "x": 289,
+      "y": 669,
+      "width": 79.796875,
+      "height": 26,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "다시 실행",
+      "x": 354,
+      "y": 718,
+      "width": 106,
+      "height": 32,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "판정 근거",
+      "x": 241.796875,
+      "y": 756,
+      "width": 79.796875,
+      "height": 26,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "다시 실행",
+      "x": 354,
+      "y": 805,
+      "width": 106,
+      "height": 32,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "판정 근거",
+      "x": 241.796875,
+      "y": 843,
+      "width": 79.796875,
+      "height": 26,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "다시 실행",
+      "x": 354,
+      "y": 892,
+      "width": 106,
+      "height": 32,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "판정 근거",
+      "x": 241.796875,
+      "y": 930,
+      "width": 79.796875,
+      "height": 26,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "다시 실행",
+      "x": 354,
+      "y": 979,
+      "width": 106,
+      "height": 32,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "판정 근거",
+      "x": 241.796875,
+      "y": 1017,
+      "width": 79.796875,
+      "height": 26,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    }
+  ]
+}

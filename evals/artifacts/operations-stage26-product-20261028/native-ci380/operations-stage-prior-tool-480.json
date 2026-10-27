@@ -1,0 +1,190 @@
+{
+  "viewport": {
+    "width": 480,
+    "height": 1080
+  },
+  "panel": {
+    "x": 57,
+    "y": 0,
+    "width": 423,
+    "height": 1080
+  },
+  "overflow": 0,
+  "header": {
+    "x": 57,
+    "y": 0,
+    "width": 423,
+    "height": 48,
+    "fontSize": "14px",
+    "lineHeight": "20px",
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "0px 0px 1px"
+  },
+  "title": {
+    "x": 77,
+    "y": 26,
+    "width": 71.015625,
+    "height": 28,
+    "fontSize": "20px",
+    "lineHeight": "28px",
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "0px"
+  },
+  "rows": [
+    {
+      "job": "job-10",
+      "x": 65,
+      "y": 271,
+      "width": 407,
+      "height": 77
+    },
+    {
+      "job": "job-11",
+      "x": 65,
+      "y": 348,
+      "width": 407,
+      "height": 77
+    },
+    {
+      "job": "job-2",
+      "x": 65,
+      "y": 425,
+      "width": 407,
+      "height": 77
+    },
+    {
+      "job": "job-6",
+      "x": 65,
+      "y": 502,
+      "width": 407,
+      "height": 77
+    },
+    {
+      "job": "job-9",
+      "x": 65,
+      "y": 579,
+      "width": 407,
+      "height": 77
+    },
+    {
+      "job": "job-3",
+      "x": 65,
+      "y": 704,
+      "width": 407,
+      "height": 939
+    }
+  ],
+  "menu": null,
+  "controls": [
+    {
+      "text": "실행",
+      "x": 354,
+      "y": 281,
+      "width": 106,
+      "height": 32,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "실행",
+      "x": 354,
+      "y": 358,
+      "width": 106,
+      "height": 32,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "판정 필요",
+      "x": 157,
+      "y": 461,
+      "width": 124,
+      "height": 30,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "1px"
+    },
+    {
+      "text": "판정 기록",
+      "x": 289,
+      "y": 463,
+      "width": 79.796875,
+      "height": 26,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "판정 필요",
+      "x": 157,
+      "y": 538,
+      "width": 124,
+      "height": 30,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "1px"
+    },
+    {
+      "text": "판정 기록",
+      "x": 289,
+      "y": 540,
+      "width": 79.796875,
+      "height": 26,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "판정 필요",
+      "x": 157,
+      "y": 615,
+      "width": 124,
+      "height": 30,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "1px"
+    },
+    {
+      "text": "판정 기록",
+      "x": 289,
+      "y": 617,
+      "width": 79.796875,
+      "height": 26,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "다시 실행",
+      "x": 354,
+      "y": 714,
+      "width": 106,
+      "height": 32,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    },
+    {
+      "text": "판정 근거",
+      "x": 241.796875,
+      "y": 752,
+      "width": 79.796875,
+      "height": 26,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "0px"
+    }
+  ]
+}

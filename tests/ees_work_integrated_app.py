@@ -753,7 +753,12 @@ def figma_delta_flow(g):
     g.click('[data-action="start_run"][data-start-inline]')
     g.wait('!!document.querySelector(\'[data-action="job"][data-job-id="qa-list"]\')')
     run_id=g.api('/api/ees-work/workspace?workflow_id='+workflow_id)['runs'][0]['id']
-    g.wait_work_ready(workflow_id=workflow_id,run_id=run_id)
+    # A single-stage run opens its stage first. Inspect that entry separately,
+    # then physically return to the full overview for the existing A5 checks.
+    g.wait_work_ready(workflow_id=workflow_id,run_id=run_id,selector='[data-action="stage_back"]')
+    g.capture('figma-stage-single-entry')
+    g.click('[data-action="stage_back"]')
+    g.wait_work_ready(workflow_id=workflow_id,run_id=run_id,selector='.ew-phase-job[data-job-id="qa-list"]')
     assets('figma-a5-cycle',{'a28e3.svg':13,'b22ad.svg':13,'69549.svg':14});g.capture('figma-a5-cycle-overview')
     g.click('[data-action="job"][data-job-id="qa-list"]');g.wait_work_ready(run_id=run_id,selector='[data-action="execute"]')
     g.provider.fail_next=True;http_start=len(jira_http);g.click('[data-action="execute"]')
