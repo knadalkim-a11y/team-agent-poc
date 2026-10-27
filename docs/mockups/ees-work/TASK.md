@@ -17,12 +17,23 @@
 | [업무 · 장애대응](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1689-1063) | 장애 상황 확인·조회·대응·결과 확인에 해당하는 기존 참고 설계 | 기존 참고 설계 분류. 새 목업 확정 아님 |
 
 - **Figma 반영:** [현재25판 원본](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1681-8037)·[공통 기준 원본](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1685-8248)의 ID를 유지해 위 페이지로 옮겼고, 기능 지도·작업실 진입 링크와 [C103 변경 기록](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1691-946)을 갱신했다. 기존20판과 이전 참고 설계는 별도로 보존한다.
+- **반영 범위 정정:** 이후 사용자의 운영 페이지 확인에서 최신 화면 누락이 드러났다. 위25판 보드는 기본·직접 기록·실행 중·메뉴의 집중 패널4개만 담았으며, 전체 화면과 상세 상태 자료는20판에 머물렀다. 페이지 이동·확정 표시 확인을 최신 목업 전체 반영 완료로 설명한 것은 부정확했다. [전체 화면·상세 보완](#operations25-figma-sync-20261028)을 별도로 기록한다.
 
 - **고정 원본:** commit `8959ffb67d2e09dd6b64a7561f998027f1e6298b`의 [운영 확정25판 HTML](https://github.com/knadalkim-a11y/team-agent-poc/blob/8959ffb67d2e09dd6b64a7561f998027f1e6298b/docs/mockups/ees-work/design-mock-06-task-groups.html)·[편집 원본](https://github.com/knadalkim-a11y/team-agent-poc/blob/8959ffb67d2e09dd6b64a7561f998027f1e6298b/docs/mockups/ees-work/design-mock-src/06-task-groups.html). 원본76,364bytes SHA-256 `d316d63986b2afe1edda567b862edd716b14a71c80f04b5d679a445e94171e0d`, HTML407,663bytes SHA-256 `24b9fee62679f0317cb9f69852a0caeedd434124bbcbbfb32e11252acd253aa6`. 확정 직전 commit `db0fb9b14371fb6b438606cd41373de59fa1ebbc`의 안내 ‘검토안’을 ‘디자인 확정’으로 바꾸고 같은 생성기로 글꼴을 재구성했다. 새 판이나 화면 구성·기능 변경이 아니다.
 - **이전 기준 보존:** [20판](#design-mock-approved20-20261027)은 이전 확정본으로 보존한다. 같은 ‘1차 점검’ 화면 범위의 현재 기준은 이번25판이다. 확정10판04·20판05 파일과 고정 커밋·승인 근거·검증 기록을 삭제하거나 소급 수정하지 않는다.
 - **공통 기준과 남은 차이:** [업무 공통 원칙](#workflow-stage-common-standard)은 함께 적용할 방향이다. 실행 여부와 최종 판정 주체 분리, 상단의 업무/단계 맥락, 자료 역할 구분은 현재25판에 모두 반영된 것이 아니며 후속 목업 검토 항목으로 남긴다. 기존 R3의 AI 제안·하단 일괄 확정 등 이전 설명을 현재25판의 필수 기능으로 다시 적용하지 않는다.
 - **미정 기능 계약:** 독립 작업 행과 실제 Job의 연결, 사람 판정 저장/최종 확정 시점과 권한, 도구 결과의 종합 판정, 재실행의 후속 영향, 실제 도구/스킬 이력과 자료 출처·입력·업로드 연결은 미정이다. 화면에 영향을 주는 동작은 목업에 먼저 반영하며, 이번 분류/확정만으로 임의 구현하지 않는다.
 - **관리·개발 순서:** Figma의 업무별 페이지와 공통 기준에서 화면을 찾고, HTML을 시각·상호작용 비교 원본으로 사용한다. README는 이 고정 진입점, STATUS는 현재 작업/다음 하나, 평가 기록은 실제 확인 증거를 관리한다. [목업 확정·사내 확인 후 기능 구현](../../../AGENTS.md#design-mock-first) 순서를 유지하며 기존 시각 확정을 실제 사내 제품 동작 검증으로 바꾸지 않는다. [이번 검증](../../../evals/v4-ui-20260930.md#work-operations-approved25-20261028).
+
+<a id="operations25-figma-sync-20261028"></a>
+
+## 2026-10-28 · 운영25판 Figma 전체 화면·상세 누락 보완
+
+- **요청·기준:** 사용자가 ‘업무 · 운영’에 가장 최근 목업이 제대로 반영되지 않은 것 같다고 보고했다. PR #105 head `fbbee1bca726b06aa684cc2ab56ab2d6b09fbb66`, 승인25판 고정 원본 `8959ffb67d2e09dd6b64a7561f998027f1e6298b`를 기준으로 Figma 표현 누락을 바로잡는다. 새 디자인 판이나 기능 결정이 아니다.
+- **확인된 누락:** 현행25 보드1681:8037에는4개 집중 패널만 있었고, 유일한 전체1920×1080 화면1665:925 및20상태 자료1665:926은 이전20판이었다. 현재25가 이전 자료 뒤의 레이어 순서에 있었고 이전20의 노드 이름에도 CURRENT가 남아 있었다. 최신 전체 화면·도구별 근거·실행 내역·기록·기준을 실제25판에서 확인할 수 있도록 보완한다.
+- **보완 원칙:** 확정25 HTML의 기존 화면과 실제 목업 조작으로 도달하는 상태만 사용한다. 이전20 원본·승인 기록은 보존하고 최신 영역과 이전 참고 영역을 구분한다. 제품 기능·HTML/CSS/JavaScript·공통 원칙 미적용 사항·미정 계약은 변경하지 않는다. [누락 관측과 보완 검증](../../../evals/v4-ui-20260930.md#operations25-figma-sync-20261028).
+- **진입점:** [최신25판 전체 화면1700:933](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1700-933)·[도구 근거와 현재/이전 실행1700:931](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1700-931)·[기록·기준1700:930](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1700-930)을 새 네이티브 화면으로 보완했다. 기존4상태 보드1681:8037은 유지하며, 페이지 헤더·기능지도·작업실·공통 원본 링크에서 최신 화면을 찾도록 연결했다. [C104 정정·보완 기록](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1700-10252).
+- **표현 범위:** 새 전체1·근거5·탭2와 기존25 네 패널은 편집형 정적 화면이다.21개 원본 캡처 중 내용 범위가 대응하는10개, 같은 구성/다른 시나리오4개, 원본참조만7개를 [대응표](../../../evals/artifacts/operations25-figma-sync-20261028/figma-sync-final.json)로 구분한다. 실제 실행·선택·펼침 상호작용과 정확한 모든 상태의 시각 기준은 고정 HTML이며 Figma 프로토타입 동작을 새로 구현한 것은 아니다.
 
 <a id="workflow-stage-common-standard"></a>
 <a id="workflow-stage-common-standard-20261028"></a>

@@ -1,16 +1,16 @@
 # 현재 작업 상태
 
-## 2026-10-28 · 업무 페이지 분류와 운영 목업25판 확정
+## 2026-10-28 · 운영 목업25판 확정·Figma 전체 화면 보완
 
 - **사용자 확정:** 현재 운영의 ‘배포 산출물 점검 → 1차 점검’ 목업25판 디자인·모의 동작을 기준으로 확정했다. 이후 수정 가능성을 유지하며 [확정 범위와 원본](mockups/ees-work/TASK.md#work-operations-design)을 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)에 반영한다.
 - **페이지 구분:** [업무 · 운영](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1284-3106) / [업무 · 공통](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1689-1061) / [업무 · 셋업](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1689-1062) / [업무 · 장애대응](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1689-1063). 셋업/장애대응은 기존 참고 설계 분류이며 새 목업 확정이 아니다.
-- **현재 화면:** [25판 HTML](mockups/ees-work/design-mock-06-task-groups.html)·[원본](mockups/ees-work/design-mock-src/06-task-groups.html). 승인 표기만 갱신하고 화면 구성·동작은 유지한다. Figma25판과 공통 기준은 기존 노드 ID를 유지해 해당 페이지에서 연결한다. [이번 확인](../evals/v4-ui-20260930.md#work-operations-approved25-20261028).
+- **현재 화면:** [25판 HTML](mockups/ees-work/design-mock-06-task-groups.html)·[원본](mockups/ees-work/design-mock-src/06-task-groups.html)·[Figma25판 전체 화면](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1700-933). 확정25판 원본과 동작은 그대로이며, 이번 보완은 Figma 표현 범위에 한정한다.
 - **공통 기준과 미적용 사항:** [업무 공통 원칙](mockups/ees-work/TASK.md#workflow-stage-common-standard)은 합의된 방향이다. 실행 여부와 판정 주체 분리·상단 맥락·자료 역할 구분은 현재25판에 모두 적용되지 않았으며 후속 목업 검토로 남는다.
 - **이전 기준:** [확정20판](mockups/ees-work/TASK.md#design-mock-approved20-20261027)은 이전 확정본으로 보존한다. 같은 화면의 현재 기준은25판이다. 기존 [25판 메뉴 검증](../evals/v4-ui-20260930.md#design-mock-verdict-menu-20261028)·[공통 원칙 검토](../evals/v4-ui-20260930.md#workflow-stage-common-standard-20261028)와 최초 실패/관측은 유지한다.
 - **남은 계약:** 실제 Job/result.items 연결, 직접 판정 저장/최종 확정·권한, 도구 결과 조합·재실행 영향, 실제 도구/스킬 이력과 자료 연결/업로드는 후속 결정/구현 범위다. 첨부는 합성 예시다. 제품 UI·API·저장·엔진·병합·배포는 변경하지 않는다.
-- **반영 확인:** Figma 기능 지도·작업실 링크와 [C103](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1691-946)을 갱신했다.25판4패널과 이전 원본의 확인 범위별 보존·안내 렌더를 점검했고, HTML은 승인 문구 외 본문/동작/스타일을 유지했다. 미세한 PNG 색 차이와 최초 관측은 [검증 기록](../evals/v4-ui-20260930.md#work-operations-approved25-20261028)에 남긴다.
+- **누락 정정:** 앞선 C103 반영은25판4패널 이동과 안내 확인에 한정됐고, 전체 화면·상세 자료는20판에 머물렀다. 사용자 지적 후 최신25 HTML에서21상태를 다시 캡처하고 현재 전체 화면과 도구 근거·실행 내역·기록/기준의 Figma 표현을 보완했다. 최신 화면을 앞에 배치하고 이전20은 PREVIOUS20으로 구분했다. 이전 완료 주장·실제 누락·최종 대응 범위는 [이번 검증](../evals/v4-ui-20260930.md#operations25-figma-sync-20261028)에 기록하며, [이전 확인](../evals/v4-ui-20260930.md#work-operations-approved25-20261028)을 삭제하지 않는다.
 - **사내 적용 원본:** [미병합 문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`에 따라 프로그램 적용 완료·실행 중으로 구분한다. 로그인·기존 자료·새 화면·도구 설정은 별도 미확인이다. #104의 상세 적용 기록은 이 브랜치에 복제하거나 덮어쓰지 않는다.
-- **다음 하나:** 확정25판을 기준으로 다음 화면 수정 범위를 정한다. 미정 기능 계약은 구현 인계 전에 정하고, 화면에 영향을 주는 부분은 목업에 먼저 반영한다.
+- **다음 하나:** 이번 운영25판 Figma 보완 뒤, 사용자가 지정한 워크스페이스의 운영 워크플로우 작성 화면을 목업부터 다룬다. 기존 워크-1 설계와 운영25판의 단계·작업·도구·입력·판정 기준을 연결하고 미정 기능 계약은 임의 구현하지 않는다.
 
 > 아래 절은 이전 작업 당시 기록이다. #103 병합 대기·사내 적용 미실행 등의 당시 표현은 위 현재 상태와 구분하고, 과거 검증·실패 근거는 보존한다.
 
