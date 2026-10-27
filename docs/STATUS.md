@@ -1,15 +1,14 @@
 # 현재 작업 상태
 
-## 2026-10-27 · 업무 목업 10판 · 현재 화면 구성 확정
+## 2026-10-27 · 업무 목업 11판 · 실행 맥락·단계·작업 실행 검토
 
-- **사용자 확정:** “응 지금 방식 괜찮은거같다. 이대로 이 목업은 일단 확정해놓자.” [확정 범위·고정 기준](mockups/ees-work/TASK.md#design-mock-approved-20261027)에 기록했다. 현재 작업 목록/사람 기록/도구별 근거 화면의 확정이며 전체 프로젝트·미정 기능 정책의 확정은 아니다.
-- **확정 목업:** [10판 HTML](https://github.com/knadalkim-a11y/team-agent-poc/blob/7447bd24ff8bff3e5ce2459e03f567765851441b/docs/mockups/ees-work/design-mock-04-cr-verdict.html) · [편집 원본](https://github.com/knadalkim-a11y/team-agent-poc/blob/7447bd24ff8bff3e5ce2459e03f567765851441b/docs/mockups/ees-work/design-mock-src/04-cr-verdict.html). commit `7447bd24ff8bff3e5ce2459e03f567765851441b`와 원본 해시를 고정했다. 파일 내용은 변경하지 않았다.
-- **화면 기준:** 각 행은 독립 작업이다. 사람은 판정 기록·선택 사유, 서비스는 읽기 전용 도구별 입력·출력·기준·결과로 구분하며 한 작업/한 도구만 펼친다. 새 상세 페이지나 확정 단계를 추가하지 않는다.
-- **검토:** 기존 브라우저11/11 PASS·독립 화면 검토·1920/480px 가로 넘침0·외부 요청/오류0을 보존한다. 이번은 문서/설계 상태 기록만 변경하며 [확정 평가](../evals/v4-ui-20260930.md#design-mock-approved-20261027)에 연결한다.
-- **Figma·미정:** [10판 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1635-6114)에 확정 상태를 기록한다. 사람 기록/전체 셸·화살표 차이의 정합은 미완료이며 HTML이 시각 기준이다. 실제 작업 단위 연결·저장/최종 확정·판정 조합 정책은 미정이다. 사내 열기·제품 구현도 미완료다.
-- **GitHub:** 같은 [Draft PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)에 확정 기록을 반영한다. 제품 구현·main 병합·사내 적용 권한으로 확대하지 않는다.
+- **현재 요청:** 상위 업무의 주기/수시 구분과 예약 여부, 단계 실행, 작업 실행/재실행을 목업에 보완한다. [이번 범위](mockups/ees-work/TASK.md#design-mock-execution-20261027). 같은 [Draft PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `d5d4fa682ab1ec795e2e29640f926991d7212742`에서 진행한다.
+- **검토 목업:** [11판 HTML](mockups/ees-work/design-mock-05-execution.html) · [원본](mockups/ees-work/design-mock-src/05-execution.html). 기본 수시·예약 없음과 주기·예약 예시를 구분한다. 미완료 서비스 작업의 단계 실행/개별 실행과 새 시도를 남기는 재실행을 로컬에서 시연한다.
+- **확정본 보존:** [10판 HTML](https://github.com/knadalkim-a11y/team-agent-poc/blob/7447bd24ff8bff3e5ce2459e03f567765851441b/docs/mockups/ees-work/design-mock-04-cr-verdict.html)과 편집 원본04파일은 그대로다. [사용자 확정 범위](mockups/ees-work/TASK.md#design-mock-approved-20261027)의 사람 기록·선택 사유/도구별 근거·한 작업/한 도구 펼침은 유지한다. 새11판은 미확정이다.
+- **검토·Figma:** 브라우저13/13 PASS·외부 요청/오류0, 최종6화면과 독립 검토를 [11판 평가](../evals/v4-ui-20260930.md#design-mock-execution-20261027)에 기록했다. [Figma 11판 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1640-6276)에는 기본/이전 실행 근거의 편집 가능한2패널과 메모·C86을 반영했다. 전체 셸·사람 기록·기록/기준 탭·주기 예약 상태는 동기화하지 않았다. HTML을 시각 기준으로 두고 이전 검증·실패·10판 확정 보드와C85는 보존한다.
+- **구현 경계:** 모든 실행·예약·시각은 합성 예시다. 실제 Job/result.items 연결·저장/최종 확정·서비스 판정 조합 정책은 미정이며 제품 UI·API·엔진을 수정하지 않는다. 기존 제품의 실행 기능 존재와 새 목업의 연결 완료를 혼동하지 않는다.
 - **사내 적용 원본:** [미병합 문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`에 따라 프로그램 적용 완료·실행 중으로 구분한다. 로그인·기존 자료·새 화면·도구 설정은 별도 미확인이다. #104의 상세 적용 기록은 이 브랜치에 복제하거나 덮어쓰지 않는다.
-- **다음 하나:** 이번 확정본을 기준으로 보존하고 다음 사용자 요청을 받는다.
+- **다음 하나:** 11판의 실행 맥락과 버튼 배치·실행/재실행 흐름을 사용자와 검토한다. 제품 구현·병합·배포로 확대하지 않는다.
 
 > 아래 절은 이전 작업 당시 기록이다. #103 병합 대기·사내 적용 미실행 등의 당시 표현은 위 현재 상태와 구분하고, 과거 검증·실패 근거는 보존한다.
 

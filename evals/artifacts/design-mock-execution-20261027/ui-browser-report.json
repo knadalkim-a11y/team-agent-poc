@@ -1,0 +1,75 @@
+{
+  "checkedAt": "2026-10-27T04:02:34.280Z",
+  "source": "docs/mockups/ees-work/design-mock-src/05-execution.html",
+  "sourceSha256": "8a8f5dd0e09ecbed7ba168ee8ff613541017bd001c4dbded24e5a7f21de6b39f",
+  "sourceBytes": 77286,
+  "artifact": "docs/mockups/ees-work/design-mock-05-execution.html",
+  "artifactSha256": "ac18fe3fcae5d8c0d5827330b6bb255a23189c8b1caa906ba01d6056e8f44877",
+  "artifactBytes": 409063,
+  "checks": [
+    {
+      "name": "Approved revision10 source and generated HTML remain byte-identical",
+      "result": "pass"
+    },
+    {
+      "name": "Default shows inherited ad hoc type separately from no schedule,7finished/2unstarted services and human decision controls only",
+      "result": "pass"
+    },
+    {
+      "name": "Individual first execution progresses without fake prior evidence, blocks duplicate starts and creates exactly one completed attempt",
+      "result": "pass"
+    },
+    {
+      "name": "Stage asynchronous phase/completion preserves human reason, caret and focus without making human decisions",
+      "result": "pass"
+    },
+    {
+      "name": "Stage runs only2unstarted services, skips7finished, prevents duplicate starts and ends9/9 while humans still wait",
+      "result": "pass"
+    },
+    {
+      "name": "Rerun creates new time and immutable second attempt, preserves rejected verdict and exact old input/output/criteria; running labels old results as historical",
+      "result": "pass"
+    },
+    {
+      "name": "Existing records tab links each historical attempt to matching evidence without a new detail page",
+      "result": "pass"
+    },
+    {
+      "name": "Human keyboard verdict menu keeps focused option through asynchronous service completion",
+      "result": "pass"
+    },
+    {
+      "name": "Unrelated completion does not hide the currently open approved task evidence",
+      "result": "pass"
+    },
+    {
+      "name": "Reset cancels pending timers and blocks stale result/history insertion",
+      "result": "pass"
+    },
+    {
+      "name": "Periodic review preset is metadata only with consistent Tuesday09KST next date and no automatic run",
+      "result": "pass"
+    },
+    {
+      "name": "1920 and480px execution/history/reason layouts remain within viewport width; identifiers and removed features stay absent",
+      "result": "pass"
+    },
+    {
+      "name": "Offline simulation makes no network requests and has no browser errors",
+      "result": "pass"
+    }
+  ],
+  "screenshots": [
+    "mock-revision11-1920-default.png",
+    "mock-revision11-1920-stage-active.png",
+    "mock-revision11-1920-stage-finished.png",
+    "mock-revision11-1920-rerun-history.png",
+    "mock-revision11-1920-periodic-example.png",
+    "mock-revision11-480-default.png"
+  ],
+  "externalRequests": [],
+  "errors": [],
+  "browser": "134.0.6998.35",
+  "result": "pass"
+}
