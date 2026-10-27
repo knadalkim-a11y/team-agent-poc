@@ -14,7 +14,7 @@ EES 팀의 문서 조회와 업무 처리를 대화·워크플로우 화면으�
 
 현재 업무 화면의 확정 디자인은 [20판 고정 원본·확정 범위](docs/mockups/ees-work/TASK.md#design-mock-approved20-20261027)와 [Figma 확정20판](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1658-7137)에서 시작합니다. 이전 시안과 실제 구현 상태, 미정 기능 계약은 해당 기록에서 구분합니다.
 
-최신 추가 검토안은 [21판 · 대기/실행 중/판정 결과 묶음](docs/mockups/ees-work/TASK.md#design-mock-three-groups-20261027)입니다. 확정20판을 보존하며 사용자 확인 전에는 확정 기준을 대체하지 않습니다.
+최신 추가 검토안은 [22판 · 묶음 제목 구분과 실행 문구](docs/mockups/ees-work/TASK.md#design-mock-group-headings-20261027)입니다. 확정20판을 보존하며 사용자 확인 전에는 확정 기준을 대체하지 않습니다.
 
 ### 설계 문서의 역할과 찾는 순서
 

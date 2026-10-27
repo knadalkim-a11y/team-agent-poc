@@ -1,14 +1,14 @@
 # 현재 작업 상태
 
-## 2026-10-27 · 업무 목업 21판 · 상태 묶음 검토
+## 2026-10-27 · 업무 목업 22판 · 묶음 제목과 실행 문구 검토
 
-- **현재 요청:** 여섯 상태를 대기/실행 중/판정 결과의 세 묶음으로 보여 달라는 요청을 반영한다. [범위](mockups/ees-work/TASK.md#design-mock-three-groups-20261027). 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)를 갱신한다.
-- **최신 검토안:** [21판 HTML](mockups/ees-work/design-mock-06-task-groups.html)·[원본](mockups/ees-work/design-mock-src/06-task-groups.html). 실행 필요/판정 필요를 대기로 묶고, 실행 중과 판정 결과는 해당 작업이 있을 때 표시한다. 직접 판정 대기의 주황 기본 배경을 제거하며 기존 선택/실행/근거 동작은 유지한다. [확인 기록](../evals/v4-ui-20260930.md#design-mock-three-groups-20261027).
-- **Figma·검토:** [21판 검토 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1671-7139)·[C97](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1674-7337)에 기본/직접 기록/실행 중3패널을 반영했다. 기능6개 확인PASS 뒤 시각 대조에서 발견한 그룹 간 추가24px를 교정했고, 최종1920/480px·중립 배경·그룹 이동을 확인했다. 첫 관측과 수정 결과는 평가에 보존한다.20판은 변경하지 않았다.
-- **확정 기준 보존:** [확정20판 계약](mockups/ees-work/TASK.md#design-mock-approved20-20261027)의 commit `0cd79100d65cb831575d4087666272f05a259fad`와05원본/HTML, [Figma 확정20판](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1658-7137)을 그대로 둔다.21판은 별도 검토안이며 자동으로 확정된 것이 아니다.10판·이전 실패/관측도 보존한다.
+- **현재 요청:** 묶음 제목을 옅은 회색 바탕과 굵은 글씨로 구분하고 ‘지금 실행’을 ‘실행’으로 줄인다. [범위](mockups/ees-work/TASK.md#design-mock-group-headings-20261027). 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)를 갱신한다.
+- **최신 검토안:** [22판 HTML](mockups/ees-work/design-mock-06-task-groups.html)·[원본](mockups/ees-work/design-mock-src/06-task-groups.html). 대기/실행 중/판정 결과의 제목만 구분하며 ‘다시 실행’과 기존 위치·크기·동작을 유지한다. [집중 확인 기록](../evals/v4-ui-20260930.md#design-mock-group-headings-20261027).
+- **Figma·확인:** [22판 검토 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1675-7336)·[C98](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1677-7545)에 기본/직접 기록/실행 중3패널을 반영했다. 제목48px·버튼106×32·1920/480px 표시와 실행 문구를 확인했고21판/20판 Figma는 보존했다. 기존 네이티브 패널1px·글꼴 렌더 차이는 평가에 남긴다.
+- **확정 기준 보존:** [확정20판 계약](mockups/ees-work/TASK.md#design-mock-approved20-20261027)의 commit `0cd79100d65cb831575d4087666272f05a259fad`와05원본/HTML, [Figma 확정20판](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1658-7137)을 그대로 둔다.22판은 별도 검토안이며 자동으로 확정된 것이 아니다.10판·이전 실패/관측도 보존한다.
 - **남은 계약:** 실제 Job/result.items 연결, 직접 판정 저장/최종 확정·권한, 도구 결과 조합·재실행 영향, 실제 도구/스킬 이력과 자료 연결/업로드는 후속 결정/구현 범위다. 첨부는 합성 예시다. 제품 UI·API·저장·엔진·병합·배포는 변경하지 않는다.
 - **사내 적용 원본:** [미병합 문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`에 따라 프로그램 적용 완료·실행 중으로 구분한다. 로그인·기존 자료·새 화면·도구 설정은 별도 미확인이다. #104의 상세 적용 기록은 이 브랜치에 복제하거나 덮어쓰지 않는다.
-- **다음 하나:** 사용자가21판의 세 묶음과 개별 상태 표시를 검토한다.
+- **다음 하나:** 사용자가22판의 묶음 구분과 실행 버튼 문구를 검토한다.
 
 > 아래 절은 이전 작업 당시 기록이다. #103 병합 대기·사내 적용 미실행 등의 당시 표현은 위 현재 상태와 구분하고, 과거 검증·실패 근거는 보존한다.
 

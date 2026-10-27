@@ -1,10 +1,19 @@
 # EES Work 기존 WebUI 통합 작업 지시
 
+<a id="design-mock-group-headings-20261027"></a>
+
+## 2026-10-27 · 업무 목업 22판 · 묶음 제목과 실행 문구
+
+- **요청·기준:** “묶음끼리 구분이 잘 안가긴해”라는 피드백 뒤 사용자가 “수정하고 다시 목업 보여줘”라고 요청했다. [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `ca9d1c99c0d21f266d63c50bb143c74871cc050f`의21판을 기준으로 [22판 HTML](design-mock-06-task-groups.html)·[편집 원본](design-mock-src/06-task-groups.html)을 갱신한다. 새 기능이나 확정 요청으로 확대하지 않는다.
+- **표시만 조정:** 대기/실행 중/판정 결과의 제목 줄에 옅은 회색 `#f3f3f5`, 모서리6px, 굵기700을 적용한다. 제목은13px/20px, 회색 줄36px와 위 간격12px로 기존48px 점유를 유지한다. 개수는 기존500 굵기와 보조색이다. 개별 ‘지금 실행’만 ‘실행’으로 줄이며 ‘다시 실행’·‘실행 중’·‘이 단계 실행’의 문구/위치/스타일은 유지한다.
+- **보존·검토:** 작업 행의 기본 배경과 여섯 상태, 세 묶음 분류, 판정/실행/기록/이전 근거/접기 동작은 바꾸지 않는다. 확정20판05·10판04는 그대로이며21판은 고정 commit과 이전 증거로 보존한다. [22판 집중 확인](../../../evals/v4-ui-20260930.md#design-mock-group-headings-20261027)에서 제목 구분·문구·1920/480px 렌더를 대조한다. 제품 구현·병합·배포는 이번 범위 밖이다.
+- **Figma:** [22판 검토 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1675-7336)와 [C98](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1677-7545)에 기본/직접 기록/실행 중을 반영하고 렌더를 대조했다.21판 보드와20판 확정 기준의 전후 snapshot 동일을 확인했다.
+
 <a id="design-mock-three-groups-20261027"></a>
 
 ## 2026-10-27 · 업무 목업 21판 · 세 묶음으로 상태 정리
 
-- **요청·기준:** 사용자는 여섯 상태를 대기/실행 중/판정 결과의 세 묶음으로 보여주는 제안에 “응 그럼 그렇게 해서 보여줘”라고 했다. 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `718e5af1e3e552c7a35d9fe467910c0f2b07238f`에서 새 [21판 HTML](design-mock-06-task-groups.html)·[원본](design-mock-src/06-task-groups.html)을 만든다. 확정20판05파일과 확정10판04파일은 바꾸지 않으며21판은 검토안이다.
+- **요청·기준:** 사용자는 여섯 상태를 대기/실행 중/판정 결과의 세 묶음으로 보여주는 제안에 “응 그럼 그렇게 해서 보여줘”라고 했다. 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105) head `718e5af1e3e552c7a35d9fe467910c0f2b07238f`에서 새 [21판 HTML](https://github.com/knadalkim-a11y/team-agent-poc/blob/a168fe2edac8250d118a39f3f3ad1e03e43f8889/docs/mockups/ees-work/design-mock-06-task-groups.html)·[원본](https://github.com/knadalkim-a11y/team-agent-poc/blob/a168fe2edac8250d118a39f3f3ad1e03e43f8889/docs/mockups/ees-work/design-mock-src/06-task-groups.html)을 만든다. 확정20판05파일과 확정10판04파일은 바꾸지 않으며21판은 검토안이다.
 - **목록:** 여섯 상태 키와 동작을 유지하고 대기(실행 필요/판정 필요), 실행 중, 판정 결과(조건부 승인/미승인/승인) 순서로 표시한다. 빈 묶음은 숨기고 묶음 개수는 접힌 승인 항목도 포함한다. 결과 안의 기존 조건부 승인→미승인→승인 순서와 ‘나머지 승인’ 접기를 유지하며 별도 상태 소제목은 만들지 않는다.
 - **개별 표시:** 기존 실행 전은 ‘실행 필요’, 직접 판정 미선택 상자는 ‘판정 필요’로 맞춘다. 대기 작업의 주황 기본 배경을 없애고 다른 행과 같은 기본 배경을 쓴다. 기존2초 선택 직후 강조·판정 색·버튼 크기/위치·근거 펼침·실행/선택/이력 동작은 유지한다. 새 필터·정렬·확정·안내·첨부 기능은 추가하지 않는다.
 - **검토·경계:** [21판 평가](../../../evals/v4-ui-20260930.md#design-mock-three-groups-20261027)에 기본5/7, 단계 실행 중3/2/7·완료3/9, 직접 선택/재실행의 묶음 이동과 기존 근거 보존,1920/480px 확인을 기록한다. 현재 화면 변경 요청을 제품 구현·새 확정·병합·배포로 확대하지 않는다. 자료 연결 등 미정 계약은 확정20판 기록 그대로다.
