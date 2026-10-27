@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
-<title>시안 · 항목별 사람·자동 판정 · 9판 · EES Workflow</title>
+<title>시안 · 작업별 사람·서비스 판정 · 10판 · EES Workflow</title>
 <!--@mock:provenance-->
 <!--@mock:fonts-->
 <!--@mock:product-css-->
@@ -208,17 +208,43 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-vd-evidence-toggle[aria-expanded=true] .ew-icon{transform:rotate(180deg)}
 #ees-work-panel .ew-vd-evidence{margin:0 12px 12px;padding:12px;border:1px solid var(--ees-line-divider);border-radius:6px;background:var(--ees-surface-default);font-size:12px;line-height:18px;color:var(--ees-text-secondary)}
 #ees-work-panel .ew-vd-evidence>p{margin-bottom:8px;color:var(--ees-text-primary)}
-#ees-work-panel .ew-vd-evidence table{width:100%;border-collapse:collapse;text-align:left}
-#ees-work-panel .ew-vd-evidence th{padding:0 0 6px;font-weight:400;color:var(--ees-text-tertiary)}
-#ees-work-panel .ew-vd-evidence td{padding:4px 0;border-top:1px solid var(--ees-line-divider)}
-#ees-work-panel .ew-vd-evidence [data-missing]{color:var(--ees-status-danger);font-weight:500}
-#ees-work-panel .ew-vd-evidence>small{display:block;margin-top:8px;font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
-#ees-work-panel .ew-vd-evidence-observations{display:grid;grid-template-columns:64px minmax(0,1fr);gap:8px;margin:0}
-#ees-work-panel .ew-vd-evidence-observations dt{color:var(--ees-text-tertiary)}
-#ees-work-panel .ew-vd-evidence-observations dd{margin:0;overflow-wrap:anywhere;color:var(--ees-text-primary)}
-#ees-work-panel .ew-vd-evidence-history{margin-top:12px;padding-top:10px;border-top:1px solid var(--ees-line-divider)}
-#ees-work-panel .ew-vd-evidence-history>b{display:block;margin-bottom:6px;font-weight:500;color:var(--ees-text-primary)}
-#ees-work-panel .ew-vd-evidence-history p+p{margin-top:6px}
+#ees-work-panel .ew-vd-evidence [data-missing],#ees-work-panel .ew-vd-evidence [data-pass=false]{color:var(--ees-status-danger)}
+#ees-work-panel .ew-vd-evidence [data-pass=true]{color:var(--ees-status-success)}
+#ees-work-panel .ew-vd-evidence-caption{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px}
+#ees-work-panel .ew-vd-evidence-caption b{font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-evidence-caption>span{color:var(--ees-text-tertiary);font-size:11px}
+#ees-work-panel .ew-vd-tool+.ew-vd-tool{margin-top:0;border-top:1px solid var(--ees-line-divider)}
+#ees-work-panel .ew-vd-tool-toggle{display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;border:0;background:transparent;text-align:left;border-radius:4px}
+#ees-work-panel .ew-vd-tool-toggle:hover{background:var(--ees-surface-hover)}
+#ees-work-panel .ew-vd-tool-toggle:focus-visible,#ees-work-panel .ew-vd-note textarea:focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px}
+#ees-work-panel .ew-vd-tool-toggle[aria-expanded=true]>.ew-icon{transform:rotate(180deg)}
+#ees-work-panel .ew-vd-tool-heading{display:grid;gap:4px;flex:1;min-width:0}
+#ees-work-panel .ew-vd-tool-heading>span{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px}
+#ees-work-panel .ew-vd-tool-heading b{font-size:13px;font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-tool-heading strong{font-size:12px;font-weight:500}
+#ees-work-panel .ew-vd-tool-heading small{font-size:11px;line-height:16px;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-tool-detail{display:grid;gap:14px;padding:4px 0 14px}
+#ees-work-panel .ew-vd-tool-detail>section{margin:0}
+#ees-work-panel .ew-vd-tool-detail h4{margin:0 0 6px;font-size:12px;line-height:18px;font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-tool-detail h4>span:not([data-pass]){margin-left:4px;font-size:11px;font-weight:400;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-tool-detail p{margin:0;overflow-wrap:anywhere}
+#ees-work-panel .ew-vd-tool-detail small{display:block;margin-top:4px;font-size:11px;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-tool-values{display:grid;grid-template-columns:84px minmax(0,1fr);gap:4px 10px;margin:0}
+#ees-work-panel .ew-vd-tool-values dt{color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-tool-values dd{margin:0;overflow-wrap:anywhere;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-tool-result{padding-top:10px;border-top:1px solid var(--ees-line-divider)}
+#ees-work-panel .ew-vd-task-result{display:grid;gap:4px;margin:0;padding-top:12px;border-top:1px solid var(--ees-line-divider)}
+#ees-work-panel .ew-vd-task-result b{font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-task-result span{font-size:12px;color:var(--ees-text-secondary)}
+#ees-work-panel .ew-vd-selection-record{display:grid;gap:8px}
+#ees-work-panel .ew-vd-selection-record p{display:grid;gap:3px;margin:0}
+#ees-work-panel .ew-vd-selection-record b{font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-selection-record span{color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-note{display:grid;gap:6px;margin-top:12px}
+#ees-work-panel .ew-vd-note>span{font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-note small{font-weight:400;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-note textarea{display:block;box-sizing:border-box;resize:vertical;width:100%;min-height:66px;padding:8px 10px;border:1px solid var(--ees-line-divider);border-radius:6px;background:var(--ees-surface-default);font:inherit;line-height:18px;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-note textarea::placeholder{color:var(--ees-text-tertiary)}
 </style>
 </head>
 <body>
@@ -258,7 +284,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
         <div id="chat-container">
           <nav>
             <div>
-              <span class="mock-chat-title">항목별 판정 초안</span><span class="mock-chat-more" aria-hidden="true">···</span>
+              <span class="mock-chat-title">1차 점검 작업 현황</span><span class="mock-chat-more" aria-hidden="true">···</span>
               <div class="mock-chat-actions">
                 <button type="button" id="ees-work-panel-toggle" aria-expanded="true" hidden data-panel-open><img class="ew-icon" src="v4/7bb4a.svg" alt="" aria-hidden="true">업무 패널</button>
                 <button type="button" data-mock-toast="시안: 대화는 동작하지 않습니다">새 대화</button>
@@ -269,15 +295,15 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
           </nav>
           <div id="messages-container">
             <div class="mock-thread">
-              <div class="message-listitem chat-user"><div class="justify-end"><div class="rounded-3xl bg-gray-50"><div class="whitespace-pre-wrap">10.13 배포 회차 판정 대상 12건, 문서 확인 결과와 판정 참고할 내용을 보여 줘</div></div></div></div>
+              <div class="message-listitem chat-user"><div class="justify-end"><div class="rounded-3xl bg-gray-50"><div class="whitespace-pre-wrap">10.13 배포 회차의 1차 점검 작업 12개, 판정과 도구별 실행 내역을 보여 줘</div></div></div></div>
               <div class="message-listitem chat-assistant">
                 <span class="mock-avatar" data-size="28"><img class="ew-icon" src="v4/afcd5.svg" alt="" aria-hidden="true" width="16" height="16"></span>
                 <div class="mock-ai-body">
                   <div class="mock-ai-name">업무 도우미</div>
                   <div id="response-content-container"><div class="markdown-prose">
                     <p>12건 중 서비스 자동 판정 대상 9건은 판정이 끝났습니다. 승인 8건, 미승인 1건입니다.</p>
-                    <p>‘대시보드 필터 추가’는 테스트 결과가 없어 미승인입니다. 자동 판정은 완료됐으며, 근거를 오른쪽에서 확인할 수 있습니다.</p>
-                    <p>나머지 3건은 사람이 판정하는 작업입니다. 자료를 확인한 뒤 오른쪽에서 판정을 선택할 수 있습니다.</p>
+                    <p>‘대시보드 필터 추가’는 테스트 결과가 없어 미승인입니다. 자동 판정은 완료됐으며, 오른쪽 ‘판정 근거’에서 도구별 입력·출력과 적용 기준을 확인할 수 있습니다.</p>
+                    <p>나머지 3건은 사람이 판정하는 작업입니다. 오른쪽에서 판정을 선택하고, ‘판정 기록’에 필요한 사유를 적을 수 있습니다.</p>
                   </div></div>
                   <div class="mock-ai-actions" aria-hidden="true">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" stroke="#6F717A" stroke-width="1.3"/><path d="M10.5 3.5v-.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5" stroke="#6F717A" stroke-width="1.3"/></svg>
@@ -315,11 +341,11 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 <div class="mock-chip" data-mock-controls data-expanded="false" aria-label="시안 확인 도구">
   <button type="button" class="mock-mobile-control" data-mock-controls-toggle aria-expanded="false" aria-label="시안 확인 도구 열기">시안</button>
   <div><b>시안</b><span>저장·실행 안 됨</span></div>
-  <div><strong id="mock-screen" role="status" aria-live="polite">④-1 항목별 판정</strong><button type="button" data-mock-info>안내</button></div>
+  <div><strong id="mock-screen" role="status" aria-live="polite">④-1 작업별 판정</strong><button type="button" data-mock-info>안내</button></div>
   <details class="mock-state-picker">
-    <summary>화면 바로 보기 · 9판</summary>
-    <nav aria-label="항목별 판정 상태 선택">
-      <button type="button" data-mock-state="initial" aria-current="true">④-1 항목별 판정</button>
+    <summary>화면 바로 보기 · 10판</summary>
+    <nav aria-label="작업별 판정 상태 선택">
+      <button type="button" data-mock-state="initial" aria-current="true">④-1 작업별 판정</button>
       <button type="button" data-mock-state="menu">④-1a 사람 판정 고르기</button>
       <button type="button" data-mock-state="evidence">④-1b 판정 근거</button>
       <button type="button" data-mock-state="log">④-기록 · 초안</button>
@@ -331,21 +357,21 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 
 <div class="mock-info" role="dialog" aria-modal="true" aria-labelledby="mock-info-title" hidden>
   <section>
-    <h2 id="mock-info-title">시안 안내 · 항목별 사람·자동 판정</h2>
+    <h2 id="mock-info-title">시안 안내 · 작업별 사람·서비스 판정</h2>
     <h3>이 화면</h3>
-    <p>‘배포 산출물 점검’ 절차의 10.13 배포 회차 → 1차 점검 단계 → 두 번째 작업 ‘항목별 판정’입니다. 판정 대상 12건을 한 목록에서 봅니다. 사람 판정 대상은 3건이고, 서비스 자동 판정 대상은 9건입니다. 각 행의 ‘사람 판정’ 또는 ‘서비스 판정’이 판정 주체입니다. 사람 대상 3건은 모두 ‘판정 선택 전’에서 시작합니다.</p>
+    <p>‘배포 산출물 점검’ 절차의 10.13 배포 회차 → 1차 점검 단계입니다. 각 행을 하나의 작업으로 보는 설계 시안이며 작업 12개 중 사람 판정은 3개, 서비스 판정은 9개입니다. 실제 제품의 한 작업 안 판정 항목 구조와는 구분하며, 제품의 실행 구조는 아직 바꾸지 않았습니다.</p>
     <h3>사람 판정과 서비스 판정</h3>
-    <p>‘대시보드 필터 추가’는 테스트 결과가 없어 자동 판정 결과가 미승인입니다. ‘판정 완료’는 판정이 끝났다는 뜻이며 승인과 다릅니다. 모든 항목의 같은 위치에 있는 ‘판정 근거’를 펼쳐 확인하세요. 서비스 항목은 조건·관측·시각을, 사람 항목은 확인된 자료와 아직 모르는 점, 사람이 선택한 값을 보여 줍니다.</p>
+    <p>사람 작업은 ‘판정 기록’에서 누가 언제 무엇을 선택했는지 보고, 사유를 선택적으로 적습니다. 서비스 작업은 ‘판정 근거’에서 실행한 도구를 보고, 도구 하나를 펼쳐 입력·출력·이번 작업의 판정 기준·판정 결과를 확인합니다. 작업과 도구는 각각 하나씩 펼쳐집니다. 도구 실행 완료와 기준 충족 여부는 서로 다릅니다.</p>
     <h3>해 볼 것</h3>
-    <ol><li>각 작업의 ‘사람 판정’과 ‘서비스 판정’ 구분해서 보기</li><li>사람 판정 작업의 ‘판정 선택’에서 값 고르기</li><li>각 항목의 ‘판정 근거’ 펼치기</li><li>승인 묶음의 나머지 항목 펼치기</li><li>‘기록’과 ‘기준’ 탭 보기 (초안)</li></ol>
+    <ol><li>각 작업의 ‘사람 판정’과 ‘서비스 판정’ 구분해서 보기</li><li>사람 판정 작업의 ‘판정 선택’에서 값 고르기</li><li>사람 작업의 ‘판정 기록’에서 사유 적기</li><li>서비스 작업의 ‘판정 근거’에서 도구를 하나씩 펼치기</li><li>승인 묶음의 나머지 항목 펼치기</li><li>‘기록’과 ‘기준’ 탭 보기 (초안)</li></ol>
     <h3>의견 보내는 법</h3>
     <p>왼쪽 아래 화면 번호와 함께 짧게 적어 주세요. 예) ④-1 고르기 목록 글자가 작다</p>
     <h3>아직 정하지 않은 것</h3>
-    <p>사람이 고른 판정을 실제로 저장·최종 확정하는 방법은 아직 정하지 않았습니다. 이 시안에는 확정 버튼이 없고, 값을 고르는 화면만 보여 줍니다. 값을 고르면 기존 시안처럼 해당 판정 묶음으로 이동하며, 저장되거나 판정 완료로 처리되지는 않습니다.</p>
+    <p>사람이 고른 판정을 실제로 저장·최종 확정하는 방법은 아직 정하지 않았습니다. 이 시안에는 확정 버튼이 없고, 판정 선택과 사유 입력만 시험할 수 있습니다. 값을 고르면 기존 시안처럼 해당 판정 묶음으로 이동하며, 저장되거나 판정 완료로 처리되지는 않습니다. 사유는 이 화면을 보는 동안만 유지되며 초기화하거나 새로 열면 사라집니다.</p>
     <h3>이 시안은</h3>
-    <p>실제 프로그램의 글꼴 파일과 화면 CSS(색, 크기, 탭·꼬리표·단추 부품)를 그대로 써서 만들었습니다. 왼쪽 메뉴 접기·펼치기와 창 크기에 따른 업무 패널 겹침은 제품 기준을 따릅니다. 항목별 자동 판정은 합성 예시이며 실제 제품의 규칙·저장은 목업 검토 후 정합니다. 이 예시의 자동 판정은 문서가 있는지만 확인하며 문서 내용의 적정성을 판단하지 않습니다. 저장·실행·대화는 되지 않으며, 왼쪽 메뉴 이동과 가운데 대화는 모양만 같습니다. 사내 PC에서 파일이 열리는지도 확인해 주세요.</p>
+    <p>실제 프로그램의 글꼴 파일과 화면 CSS(색, 크기, 탭·꼬리표·단추 부품)를 그대로 써서 만들었습니다. 왼쪽 메뉴 접기·펼치기와 창 크기에 따른 업무 패널 겹침은 제품 기준을 따릅니다. 도구 이름·입력·출력·지침·시각은 화면 검토를 위한 합성 예시이며 실제 도구 실행 기록이 아닙니다. 문서 존재와 접근 여부의 예시를 보여주며 내용 적정성은 판단하지 않습니다. 여러 도구 결과를 최종 판정으로 합치는 실제 규칙·저장은 아직 정하지 않았습니다. 저장·실행·대화는 되지 않으며, 왼쪽 메뉴 이동과 가운데 대화는 모양만 같습니다. 사내 PC에서 파일이 열리는지도 확인해 주세요.</p>
     <h3>판</h3>
-    <p>시안 9판 · 2026-10-27 · 항목별 사람·자동 판정 · 미확정</p>
+    <p>시안 10판 · 2026-10-27 · 작업별 사람·서비스 판정 · 미확정</p>
     <footer><button type="button" data-mock-reset>처음부터 다시</button><button type="button" data-mock-close>닫기</button></footer>
   </section>
 </div>
@@ -363,7 +389,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     ['CR-2201', '로그인 화면 문구 수정', 'ok'], ['CR-2202', '알람 기준값 조정', 'ok'], ['CR-2203', '보고서 출력 양식 변경', null],
     ['CR-2204', '대시보드 필터 추가', 'bad', '테스트 없음'], ['CR-2205', '설비 목록 정렬 수정', 'ok'], ['CR-2206', '데이터 보관 기간 변경', 'ok'],
     ['CR-2207', '배치 주기 조정', null, '', 'test_v2_final.xlsx'], ['CR-2208', '메일 발송 대상 추가', 'ok'],
-    ['CR-2209', '화면 응답 속도 개선', 'ok'], ['CR-2210', '권한 그룹 정리', null, '설계서와 테스트 없음'], ['CR-2211', '이력 조회 기간 확대', 'ok'], ['CR-2212', '오류 메시지 정리', 'ok']
+    ['CR-2209', '화면 응답 속도 개선', 'ok'], ['CR-2210', '권한 그룹 정리', null], ['CR-2211', '이력 조회 기간 확대', 'ok'], ['CR-2212', '오류 메시지 정리', 'ok']
   ];
   const HUMAN_IDS = new Set(['CR-2203', 'CR-2207', 'CR-2210']);
   const panel = document.getElementById('ees-work-panel');
@@ -381,9 +407,9 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   function reset() {
     clearTimeout(flashTimer);
     S = {
-      items: SEED.map(([id, name, verdict, reason, file]) => ({id, name, verdict, reason: reason || '', file: file || '', handler: HUMAN_IDS.has(id) ? 'human' : 'service', history: []})),
-      picked: null, flash: null, expanded: false, evidence: null, tab: 'work', menu: null,
-      log: [['13:05', '‘항목별 필수 문서 확인’ 작업 완료 (12건)'], ['14:20', '서비스가 자동 대상 9건의 판정을 완료함 (승인 8건, 미승인 1건)'], ['14:20', '대시보드 필터 추가 · 자동 판정 완료 · 미승인 · 테스트 결과 없음']],
+      items: SEED.map(([id, name, verdict, reason, file]) => ({id, name, verdict, reason: reason || '', file: file || '', handler: HUMAN_IDS.has(id) ? 'human' : 'service', history: [], note: ''})),
+      picked: null, flash: null, expanded: false, evidence: null, tool: null, tab: 'work', menu: null,
+      log: [['14:20', '서비스가 자동 대상 9건의 판정을 완료함 (승인 8건, 미승인 1건)'], ['14:20', '대시보드 필터 추가 · 자동 판정 완료 · 미승인 · 테스트 결과 없음']],
       width: 480, open: true
     };
   }
@@ -400,8 +426,9 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     if (S.tab === 'log') return '④-기록 (초안)';
     if (S.tab === 'rules') return '④-기준 (초안)';
     if (S.menu) return '④-1a 사람 판정 고르기';
-    if (S.evidence) return '④-1b 판정 근거';
-    return '④-1 항목별 판정';
+    if (S.tool) return '④-1c 도구별 판정 근거';
+    if (S.evidence) return HUMAN_IDS.has(S.evidence) ? '④-1b 사람 판정 기록' : '④-1b 서비스 판정 근거';
+    return '④-1 작업별 판정';
   }
 
   // Review-only fixture navigation. It deliberately does not call product
@@ -412,7 +439,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     S.width = width;
     if (key === 'log' || key === 'rules') S.tab = key;
     if (key === 'menu') S.menu = 'CR-2207';
-    if (key === 'evidence') S.evidence = 'CR-2210';
+    if (key === 'evidence') S.evidence = 'CR-2204';
     document.querySelector('.mock-state-picker').open = false;
     setMockControlsExpanded(false);
     document.querySelector('.mock-info').hidden = true;
@@ -438,7 +465,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   function headHTML() {
     const c = counts(), people = humanItems(), remaining = humanRemaining();
     const bar = [['ok', c.ok], ['cond', c.cond], ['bad', c.bad], ['none', c.none]].filter(([, n]) => n).map(([v, n]) => `<i data-verdict="${v}" style="flex:${n} 1 0"></i>`).join('');
-    return `<div class="ew-vd-head"><div class="ew-vd-title"><h2>항목별 판정</h2><span class="ew-tag" data-tone="attention">사람 판정 3건</span></div><p class="ew-vd-sub"><span>1차 점검 단계</span><span>작업 2/3</span><span class="ew-vd-due">${CLOCK}오늘 18:00까지</span></p><div class="ew-vd-progress"><div class="ew-vd-bar" role="img" aria-label="현재 선택과 서비스 결과: 승인 ${c.ok}건, 조건부 승인 ${c.cond}건, 미승인 ${c.bad}건, 사람 선택 전 ${remaining}건">${bar}</div><p class="ew-vd-statusline" data-person><b>사람 판정</b><span>선택 ${people.length - remaining}/${people.length}</span></p><p class="ew-vd-statusline" data-service><b>서비스 판정 완료 9/9</b><span>승인 8 · 미승인 1</span></p></div></div>`;
+    return `<div class="ew-vd-head"><div class="ew-vd-title"><h2>1차 점검</h2><span class="ew-tag" data-tone="attention">사람 판정 3건</span></div><p class="ew-vd-sub"><span>작업 12개</span><span class="ew-vd-due">${CLOCK}오늘 18:00까지</span></p><div class="ew-vd-progress"><div class="ew-vd-bar" role="img" aria-label="현재 선택과 서비스 결과: 승인 ${c.ok}건, 조건부 승인 ${c.cond}건, 미승인 ${c.bad}건, 사람 선택 전 ${remaining}건">${bar}</div><p class="ew-vd-statusline" data-person><b>사람 판정</b><span>선택 ${people.length - remaining}/${people.length}</span></p><p class="ew-vd-statusline" data-service><b>서비스 판정 완료 9/9</b><span>승인 8 · 미승인 1</span></p></div></div>`;
   }
   function tabsHTML() {
     return `<nav class="ew-tabs" aria-label="작업 화면">${[['work', '작업'], ['log', '기록'], ['rules', '기준']].map(([key, label]) => `<button type="button" data-vd-tab="${key}" aria-pressed="${S.tab === key}">${label}</button>`).join('')}</nav>`;
@@ -454,20 +481,36 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     const label = item.verdict ? `<i class="ew-vd-dot" data-verdict="${item.verdict}"></i><span>${VERDICT[item.verdict][0]}</span>` : '<span>판정 선택</span>';
     return `<button type="button" class="ew-vd-pick" data-vd-pick="${item.id}"${item.verdict ? ` data-verdict="${item.verdict}"` : ''} aria-haspopup="menu" aria-expanded="${S.menu === item.id}" aria-label="${esc(item.name)} 판정 ${item.verdict ? VERDICT[item.verdict][0] : '선택'}">${label}${icon(ICON.down)}</button>`;
   }
+  // All tool runs below are synthetic design fixtures, not connected execution records.
+  function toolRuns(item) {
+    const missingTest = item.id === 'CR-2204';
+    const documents = missingTest ? '설계서, 배포 계획서' : '설계서, 테스트 결과, 배포 계획서';
+    const count = missingTest ? 2 : 3;
+    return [
+      {key: 'documents', name: '문서 목록 조회', time: '10.27 14:20:03', pass: !missingTest,
+        input: [['대상 작업', item.name], ['문서 종류', '설계서, 테스트 결과, 배포 계획서']],
+        output: [['설계서', '있음'], ['테스트 결과', missingTest ? '없음' : '있음'], ['배포 계획서', '있음']],
+        criterion: '필수 문서 3종이 모두 있어야 합니다.', guideline: '예시 지침 · 필수 문서 확인',
+        result: missingTest ? '테스트 결과가 없어 기준을 충족하지 못했습니다.' : '필수 문서 3종이 모두 있습니다.'},
+      {key: 'access', name: '문서 접근 확인', time: '10.27 14:20:05', pass: true,
+        input: [['조회된 문서', documents]], output: [['읽기 가능', count + '/' + count + '건'], ['확인한 문서', documents]],
+        criterion: '조회된 문서를 모두 읽을 수 있어야 합니다.', guideline: '예시 지침 · 문서 접근 확인',
+        result: '조회된 문서 ' + count + '건을 모두 읽을 수 있습니다.'}
+    ];
+  }
+  function toolHTML(item, run) {
+    const key = item.id + ':' + run.key, opened = S.tool === key;
+    const facts = pairs => `<dl class="ew-vd-tool-values">${pairs.map(([label,value]) => `<dt>${esc(label)}</dt><dd${value === '없음' ? ' data-missing' : ''}>${esc(value)}</dd>`).join('')}</dl>`;
+    const detail = `<div class="ew-vd-tool-detail" id="tool-${key}"><section><h4>입력 <span>Input</span></h4>${facts(run.input)}</section><section><h4>출력 <span>Output</span></h4>${facts(run.output)}</section><section><h4>이번 작업의 판정 기준</h4><p>${esc(run.criterion)}</p><small>${esc(run.guideline)}</small></section><section class="ew-vd-tool-result"><h4>판정 결과 · <span data-pass="${run.pass}">${run.pass ? '충족' : '미충족'}</span></h4><p>${esc(run.result)}</p></section></div>`;
+    return `<section class="ew-vd-tool"><button type="button" class="ew-vd-tool-toggle" data-vd-tool="${key}" aria-expanded="${opened}"${opened ? ` aria-controls="tool-${key}"` : ''} aria-label="${esc(item.name)} · ${esc(run.name)} · 기준 ${run.pass ? '충족' : '미충족'} · 실행 완료 · ${run.time} · ${opened ? '접기' : '펼치기'}"><span class="ew-vd-tool-heading"><span><b>${esc(run.name)}</b><strong data-pass="${run.pass}">${run.pass ? '충족' : '미충족'}</strong></span><small>실행 완료 · ${run.time}</small></span>${icon(ICON.down, 14)}</button>${opened ? detail : ''}</section>`;
+  }
   function evidenceHTML(item) {
     if (item.handler === 'service') {
       const missingTest = item.id === 'CR-2204';
-      const rows = [['설계서', '있음', false], ['테스트 결과', missingTest ? '없음' : '있음', missingTest], ['배포 계획서', '있음', false]];
-      return `<div class="ew-vd-evidence" id="evidence-${item.id}"><p>이 항목의 승인 조건: 필수 문서 3종이 모두 있어야 합니다.</p><table aria-label="${esc(item.name)} 자동 판정 조건과 관측"><thead><tr><th scope="col">항목</th><th scope="col">조건</th><th scope="col">관측</th></tr></thead><tbody>${rows.map(([name, observed, missing]) => `<tr><td>${name}</td><td>있음</td><td${missing ? ' data-missing' : ''}>${observed}</td></tr>`).join('')}</tbody></table><small>판정 주체 · 서비스<br>판정 시각 · 10.27 14:20<br>${missingTest ? '테스트 결과 없음 → 미승인. 판정은 완료되었습니다.' : '필수 문서 모두 있음 → 승인. 판정은 완료되었습니다.'}</small></div>`;
+      return `<div class="ew-vd-evidence ew-vd-service-evidence" id="evidence-${item.id}"><div class="ew-vd-evidence-caption"><b>실행 도구 2개</b><span>예시 실행 내역</span></div>${toolRuns(item).map(run => toolHTML(item, run)).join('')}<p class="ew-vd-task-result"><b>작업 판정 · ${VERDICT[item.verdict][0]}</b><span>${missingTest ? '문서 목록 조회에서 테스트 결과가 없어 미승인입니다.' : '필수 문서가 모두 있고 읽을 수 있어 승인입니다.'}</span></p></div>`;
     }
-    // Observations remain independent of the person's current selection.
-    const observations = {
-      'CR-2207': ['첨부 test_v2_final.xlsx는 있습니다.', ''],
-      'CR-2210': ['설계서와 테스트 결과가 없습니다.', '누락 문서의 보완 여부를 확인해야 합니다. 배포 계획서의 상태는 이 근거에 기록되지 않았습니다.'],
-      'CR-2203': ['판정에 필요한 자료가 기록되지 않았습니다.', '승인 조건을 충족하는지 자료를 직접 확인해야 합니다.']
-    }[item.id];
-    const selections = item.history.map(entry => `<p data-human-selection>${entry.date} ${entry.time} · ${ACTOR}가 ${VERDICT[entry.verdict][0]} 선택</p>`).join('');
-    return `<div class="ew-vd-evidence" id="evidence-${item.id}"><dl class="ew-vd-evidence-observations"><dt>현재 근거</dt><dd data-observation>${observations[0]}</dd>${observations[1] ? `<dt>추가 확인</dt><dd>${observations[1]}</dd>` : ''}</dl><small>근거 확인 시각 · 미기록</small><div class="ew-vd-evidence-history"><b>사람 선택 기록</b>${selections}${!selections ? '<p>아직 판정을 선택하지 않았습니다.</p>' : ''}</div></div>`;
+    const selections = item.history.slice().reverse().map(entry => `<p data-human-selection><b>${VERDICT[entry.verdict][0]} 선택</b><span>${ACTOR} · ${entry.date} ${entry.time}</span></p>`).join('');
+    return `<div class="ew-vd-evidence ew-vd-human-record" id="evidence-${item.id}"><div class="ew-vd-selection-record">${selections || '<p>아직 판정을 선택하지 않았습니다.</p>'}</div><label class="ew-vd-note"><span>사유 <small>(선택)</small></span><textarea data-vd-note="${item.id}" rows="2" aria-label="${esc(item.name)} 판정 사유 (선택)" placeholder="필요한 경우 판정 이유를 적어 주세요">${esc(item.note)}</textarea></label></div>`;
   }
   function statusLabel(item) {
     if (item.handler === 'service') return '자동 판정 완료';
@@ -479,8 +522,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     const file = item.file ? `<button type="button" class="ew-vd-file" data-mock-toast="시안: 파일은 열리지 않습니다">${icon(ICON.clip, 13)}${esc(item.file)}</button>` : '';
     const reason = reasonHTML(item);
     const row = `<div class="ew-vd-item"><div class="ew-vd-text"><span class="ew-vd-name">${esc(item.name)}</span>${reason ? `<span class="ew-vd-line">${reason}</span>` : ''}${file}</div><div class="ew-vd-right">${pickHTML(item)}</div></div>`;
-    const opened = S.evidence === item.id;
-    return `<section class="ew-vd-entry" data-vd-item="${item.id}" data-handler="${item.handler}"${service ? ' data-decision-state="complete"' : ''}${tone ? ` data-tone="${tone}"` : ''}>${row}<div class="ew-vd-origin"><span><b data-decision-actor>${service ? '서비스 판정' : '사람 판정'}</b><span data-decision-status>${statusLabel(item)}</span></span><button type="button" class="ew-vd-evidence-toggle" data-vd-evidence="${item.id}" aria-expanded="${opened}"${opened ? ` aria-controls="evidence-${item.id}"` : ''} aria-label="${esc(item.name)} 판정 근거 ${opened ? '접기' : '펼치기'}">판정 근거${icon(ICON.down, 13)}</button></div>${opened ? evidenceHTML(item) : ''}</section>`;
+    const opened = S.evidence === item.id, evidenceLabel = service ? '판정 근거' : '판정 기록';
+    return `<section class="ew-vd-entry" data-vd-item="${item.id}" data-handler="${item.handler}"${service ? ' data-decision-state="complete"' : ''}${tone ? ` data-tone="${tone}"` : ''}>${row}<div class="ew-vd-origin"><span><b data-decision-actor>${service ? '서비스 판정' : '사람 판정'}</b><span data-decision-status>${statusLabel(item)}</span></span><button type="button" class="ew-vd-evidence-toggle" data-vd-evidence="${item.id}" aria-expanded="${opened}"${opened ? ` aria-controls="evidence-${item.id}"` : ''} aria-label="${esc(item.name)} ${evidenceLabel} ${opened ? '접기' : '펼치기'}">${evidenceLabel}${icon(ICON.down, 13)}</button></div>${opened ? evidenceHTML(item) : ''}</section>`;
   }
   function listHTML() {
     let html = '';
@@ -502,7 +545,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   }
   function rulesHTML() {
     const words = Object.entries(VERDICT).map(([key, [label, desc]]) => `<li><i class="ew-vd-dot" data-verdict="${key}"></i><b>${label}</b><span>${desc}</span></li>`).join('');
-    return `<div class="ew-vd-rules"><p class="ew-vd-draft">초안: 이 탭은 아직 Figma에 그리지 않았습니다</p><section><h3>판정 단어</h3><ul>${words}</ul></section><section><h3>확인할 문서</h3><p>설계서, 테스트 결과, 배포 계획서</p></section><section><h3>사람 판정</h3><p>사람이 승인·조건부 승인·미승인을 선택합니다. 선택해도 미확인 자료가 검증된 것으로 바뀌지는 않습니다.</p></section><section><h3>서비스 판정</h3><p>서비스가 필수 문서의 존재 여부로 판정합니다. 필수 문서가 하나라도 없으면 미승인이며, 판정은 끝난 상태입니다. 서비스 결과는 이 화면에서 수정하지 않습니다.</p></section><section><h3>판정 근거</h3><p>모든 항목에서 확인된 자료와 확인되지 않은 점, 판정 기록을 볼 수 있습니다.</p></section></div>`;
+    return `<div class="ew-vd-rules"><p class="ew-vd-draft">초안: 이 탭은 아직 Figma에 그리지 않았습니다</p><section><h3>판정 단어</h3><ul>${words}</ul></section><section><h3>확인할 문서</h3><p>설계서, 테스트 결과, 배포 계획서</p></section><section><h3>사람 판정</h3><p>누가 언제 어떤 판정을 선택했는지 기록하고, 사유는 필요할 때 적습니다. 이 시안의 선택과 사유는 실제 저장·확정되지 않습니다.</p></section><section><h3>서비스 판정</h3><p>도구별 입력·출력·판정 기준·결과를 확인합니다. 도구 실행 완료와 기준 충족은 다르며, 서비스의 작업 판정은 읽기 전용입니다.</p></section><section><h3>예시 범위</h3><p>각 행을 독립 작업으로 보는 설계 시안입니다. 도구와 지침은 합성 예시이며 실제 연결·실행 기록이 아닙니다. 여러 도구 결과를 합치는 실제 정책은 아직 정하지 않았습니다.</p></section></div>`;
   }
   function menuHTML(item) {
     return `<div class="ew-vd-menu" role="menu" aria-label="${esc(item.name)} 판정 고르기">${Object.entries(VERDICT).map(([key, [label, desc]]) => `<button type="button" role="menuitemradio" class="ew-vd-option" data-vd-choose="${key}" aria-checked="${item.verdict === key}" tabindex="-1"><i class="ew-vd-dot" data-verdict="${key}"></i><span><b>${label}</b><small>${desc}</small></span>${item.verdict === key ? icon(ICON.check) : ''}</button>`).join('')}</div>`;
@@ -603,7 +646,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     if (target.matches('[data-mock-state]')) return previewState(target.dataset.mockState);
     if (target.matches('[data-vd-pick]')) return S.menu === target.dataset.vdPick ? closeMenu(true) : openMenu(target.dataset.vdPick);
     if (target.matches('[data-vd-choose]')) return choose(S.menu, target.dataset.vdChoose);
-    if (target.matches('[data-vd-evidence]')) { S.evidence = S.evidence === target.dataset.vdEvidence ? null : target.dataset.vdEvidence; return render(`[data-vd-evidence="${target.dataset.vdEvidence}"]`); }
+    if (target.matches('[data-vd-evidence]')) { S.evidence = S.evidence === target.dataset.vdEvidence ? null : target.dataset.vdEvidence; S.tool = null; return render(`[data-vd-evidence="${target.dataset.vdEvidence}"]`); }
+    if (target.matches('[data-vd-tool]')) { S.tool = S.tool === target.dataset.vdTool ? null : target.dataset.vdTool; return render(`[data-vd-tool="${target.dataset.vdTool}"]`); }
     if (target.matches('[data-vd-group]')) { S.expanded = !S.expanded; return render('[data-vd-group]'); }
     if (target.matches('[data-vd-tab]')) { S.tab = target.dataset.vdTab; S.menu = null; return render(`[data-vd-tab="${S.tab}"]`); }
     if (target.matches('[data-panel-close]')) return setOpen(false);
@@ -618,6 +662,11 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
       return toast('지금 시안을 처음 상태로 돌렸습니다');
     }
     if (target.dataset.mockToast) toast(target.dataset.mockToast);
+  });
+  document.addEventListener('input', event => {
+    if (!event.target.matches('[data-vd-note]')) return;
+    const item = S.items.find(entry => entry.id === event.target.dataset.vdNote);
+    if (item?.handler === 'human') item.note = event.target.value;
   });
   document.addEventListener('keydown', event => {
     const info = document.querySelector('.mock-info');

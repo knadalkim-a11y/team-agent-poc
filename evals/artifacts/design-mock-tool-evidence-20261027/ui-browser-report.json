@@ -1,0 +1,97 @@
+{
+  "checkedAt": "2026-10-27T02:42:56.877Z",
+  "source": "docs/mockups/ees-work/design-mock-src/04-cr-verdict.html",
+  "sourceSha256": "544d5bbb92322bb7c21b080c860da2f81a00ea0d80239e2637a527ba00d2590d",
+  "sourceBytes": 65552,
+  "artifact": "docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+  "artifactSha256": "e3b562b05c79a5921813da0e8babcab5f6f4ac987196cca29a9f349503a3a8fe",
+  "artifactBytes": 396066,
+  "checks": [
+    {
+      "name": "Default is a stage task list with all task/tool details collapsed; hidden identifiers and removed features stay absent",
+      "result": "pass"
+    },
+    {
+      "name": "All12 tasks retain3human/9readonly service distinction",
+      "result": "pass"
+    },
+    {
+      "name": "Service overview shows two synthetic tool runs; execution completion is separate from criterion satisfaction",
+      "result": "pass"
+    },
+    {
+      "name": "Keyboard opens one tool with actual fixture input/output, applicable criterion, example guideline and criterion result",
+      "result": "pass"
+    },
+    {
+      "name": "Opening a second tool closes first; passing access check does not overwrite the missing-document task rejection",
+      "result": "pass"
+    },
+    {
+      "name": "Opening another task closes previous task and starts with tool details collapsed; approved fixture has matching result",
+      "result": "pass"
+    },
+    {
+      "name": "Human record replaces synthetic evidence; optional note survives task collapse and tab changes",
+      "result": "pass"
+    },
+    {
+      "name": "Human selection records person/time/verdict, retains reason, and never mutates service verdicts or claims finalized completion",
+      "result": "pass"
+    },
+    {
+      "name": "Reset clears local selection and optional notes; help discloses synthetic tools and unimplemented persistence",
+      "result": "pass"
+    },
+    {
+      "name": "Default/service overview/tool detail/human note fit1920px and480px without horizontal overflow",
+      "result": "pass"
+    },
+    {
+      "name": "Offline mock has no external requests or browser errors",
+      "result": "pass"
+    }
+  ],
+  "screenshots": [
+    "mock-revision10-1920-default.png",
+    "mock-revision10-1920-service-overview.png",
+    "mock-revision10-1920-tool-detail.png",
+    "mock-revision10-1920-tool-card.png",
+    "mock-revision10-1920-human-record.png",
+    "mock-revision10-480-tool-detail.png"
+  ],
+  "density": [
+    {
+      "state": "default",
+      "viewportHeight": 1032,
+      "contentHeight": 1032,
+      "openTasks": 0,
+      "openTools": 0
+    },
+    {
+      "state": "service-overview",
+      "viewportHeight": 1032,
+      "contentHeight": 1104,
+      "openTasks": 1,
+      "openTools": 0
+    },
+    {
+      "state": "tool-detail",
+      "viewportHeight": 1032,
+      "contentHeight": 1431,
+      "openTasks": 1,
+      "openTools": 1
+    },
+    {
+      "state": "480-tool-detail",
+      "viewportHeight": 852,
+      "contentHeight": 1431,
+      "openTasks": 1,
+      "openTools": 1
+    }
+  ],
+  "externalRequests": [],
+  "errors": [],
+  "browser": "134.0.6998.35",
+  "result": "pass"
+}

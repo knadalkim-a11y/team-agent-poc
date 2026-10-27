@@ -1,13 +1,14 @@
 # 현재 작업 상태
 
-## 2026-10-27 · 업무 목업 9판 · 예시 번호 표시 제거
+## 2026-10-27 · 업무 목업 10판 · 사람 기록과 도구별 근거
 
-- **현재 작업:** [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)의 8판 head `05611ebb58b595ebb2aeda3b9586871a29cc6487`에서 예시 CR 번호 표시를 제거한다. [이번 범위](mockups/ees-work/TASK.md#design-mock-identifiers-20261027).
-- **최신 목업:** [업무 목업 9판 HTML](mockups/ees-work/design-mock-04-cr-verdict.html) · [편집 원본](mockups/ees-work/design-mock-src/04-cr-verdict.html). 목록·기록·접근성 이름에 항목 이름을 사용하고 내부 식별값은 보존한다. 사람 판정/서비스 읽기 전용·근거 연결은 그대로다. **현재 목업에는 개별 항목의 별도 상세 페이지가 없으며 이번에 추가하지 않았다.**
-- **Figma·경계:** [9판 메모](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1633-6115)·[C83](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1633-2)에 기록했다. **Figma는 메모·기록만 반영됐고 전체 판정 화면은 최신 HTML과 아직 다르다.** 제품 UI·API·저장·엔진은 보존한다. 전체 목업 확정 전·사내 열기 미확인이다.
-- **검토:** 범위 한정 브라우저 검사7/7 PASS, 외부 요청·console/page error0. 번호 표시 제거·내부 ID 보존·기존 판정/근거 동작·1920/480px 확인 결과는 [9판 평가](../evals/v4-ui-20260930.md#design-mock-identifiers-20261027)에 기록한다. [8판 검사](../evals/v4-ui-20260930.md#design-mock-copy-20261027)와 이전 증거는 보존한다.
+- **현재 작업:** [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)의 9판 head `008228500696b722447529e21e0070257366c2de`에서 도구별 입력·출력·기준·결과를 펼쳐 보는 목업을 만든다. [이번 범위](mockups/ees-work/TASK.md#design-mock-tool-evidence-20261027).
+- **최신 목업:** [업무 목업 10판 HTML](mockups/ees-work/design-mock-04-cr-verdict.html) · [편집 원본](mockups/ees-work/design-mock-src/04-cr-verdict.html). 사람은 판정 기록·선택 사유, 서비스는 읽기 전용 도구별 근거로 구분한다. 한 작업/한 도구만 펼치며 별도 상세 페이지는 추가하지 않는다.
+- **작업 단위·경계:** 각 행을 독립 작업으로 보는 사용자 요구를 단계의 작업 목록으로 표현한다. 현재 제품의 한 Job 안 결과행 구조는 변경하지 않았다. 도구·지침·실행 내역은 합성 예시이고 사유도 메모리 안에서만 시연한다. 최종 저장/확정·자동 판정 조합 정책은 미정이다.
+- **검토:** 범위 한정 브라우저11/11 PASS, 독립 화면 검토,1920/480px 가로 넘침0, 외부 요청/오류0. 기본 목록의 밀도는 유지하고 도구1개 상세를 펼치면 세로 스크롤이 늘어난다. [10판 평가](../evals/v4-ui-20260930.md#design-mock-tool-evidence-20261027)에 기록했다. 이전 판의 검사·증거는 보존한다.
+- **Figma:** [10판 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1635-6114)에 기본 목록·도구 요약·도구 상세의 편집 가능 패널과 메모를 추가했다. 사람 기록 상태·전체 앱 셸 동기화는 미완료이며 펼침 화살표의 작은 차이는 [평가](../evals/v4-ui-20260930.md#design-mock-tool-evidence-20261027)에 기록했다. 전체 목업 확정·사내 열기·제품 구현은 미완료다.
 - **사내 적용 원본:** [미병합 문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`에 따라 프로그램 적용 완료·실행 중으로 구분한다. 로그인·기존 자료·새 화면·도구 설정은 별도 미확인이다. #104의 상세 적용 기록은 이 브랜치에 복제하거나 덮어쓰지 않는다.
-- **다음 하나:** 번호 표시를 제거한 9판을 검토한다. 미정 동작을 후속 구현 권한으로 해석하지 않는다.
+- **다음 하나:** 10판에서 도구별 근거를 펼쳤을 때 정보량과 읽는 흐름을 검토한다. 미정 동작을 후속 구현 권한으로 해석하지 않는다.
 
 > 아래 절은 이전 작업 당시 기록이다. #103 병합 대기·사내 적용 미실행 등의 당시 표현은 위 현재 상태와 구분하고, 과거 검증·실패 근거는 보존한다.
 
