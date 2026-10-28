@@ -450,7 +450,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('#ew-author-node [name=instructions]')")
         self.assertEqual(self.read('#ew-author-node [name=instructions]', 'value'), '')
         self.fill('#ew-author-node [name=instructions]', '작업을 시작하기 전에 개발 준비 사항을 확인합니다.')
-        self.click('#ew-author-node .ew-job-advanced > summary')
+        # This is the stage's retained input-definition editor, not the retired
+        # extra-settings section of a job. Job guidance is edited directly below.
+        self.click('#ew-author-node details:has([data-author-action=input_add]) > summary')
         self.click('#ew-author-node [data-author-action=input_add]')
         self.fill('#ees-work-dialog [name=name]', '개발 준비 메모')
         self.fill('#ees-work-dialog [name=description]', '이번 진행 건의 개발 준비 사항입니다.')
@@ -468,8 +470,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(saved['nodes'][stage_id]['inputs'][0]['scope'], 'run')
         self.assertNotIn('value', saved['nodes'][stage_id]['inputs'][0])
         self.click('[data-author-action=list]')
-        self.wait("document.querySelector('.ew-author-list')?.textContent.includes('미게시 · 이어서 작성하기')")
-        self.assertIn('미게시 · 이어서 작성하기', self.text('.ew-author-list'))
+        draft_badge = '.ew-author-list [data-author-action=open][data-id="' + identifier + '"] .ew-author-tag'
+        self.wait('document.querySelector(' + json.dumps(draft_badge) + ')?.textContent === "초안"')
+        self.assertEqual(self.text(draft_badge), '초안')
+        self.assertIsNone(self.state(workflow_id=identifier)['workflow']['published_version'])
         self.click('[data-author-action=open][data-id="' + identifier + '"]')
         self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
         self.click('[data-author-action=tab][data-tab=content]')
@@ -1108,15 +1112,15 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             })()""")
             self.assertEqual(metrics['overlay'], 'true' if width == 480 else 'false')
             # Overlay retains the existing 56 px navigation rail even when the
-            # authoring panel's preferred 580 px width cannot fit the frame.
+            # authoring panel's fixed 480 px width cannot fit the frame.
             available_panel_width = metrics['availableWidth'] - (56 if metrics['overlay'] == 'true' else 0)
-            metrics['expectedPanelWidth'] = min(580, available_panel_width)
+            metrics['expectedPanelWidth'] = min(480, available_panel_width)
             metrics['panelFrameLeftGap'] = metrics['panel']['x'] - metrics['frame']['x']
             self.assertEqual(metrics['panel']['width'], metrics['expectedPanelWidth'])
             self.assertEqual(metrics['panel']['x'] + metrics['panel']['width'], width)
             if metrics['overlay'] == 'true':
                 self.assertEqual(metrics['sidebar']['width'], 56)
-                self.assertEqual(metrics['panelFrameLeftGap'], max(56, metrics['availableWidth'] - 580))
+                self.assertEqual(metrics['panelFrameLeftGap'], max(56, metrics['availableWidth'] - 480))
             self.assertEqual(metrics['header']['height'], 48)
             self.assertEqual(metrics['extraHeader'], 0)
             # HTML 12 uses the sidebar scope and has no duplicate factory tabs.

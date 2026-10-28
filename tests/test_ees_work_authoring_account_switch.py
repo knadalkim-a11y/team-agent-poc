@@ -54,7 +54,7 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
             for(const type of types)document.addEventListener(type,listener,{capture:true,passive:true});
             window.__eesAccountStageProbe={snapshot:()=>({generation,events,
                 initial_control_connected:!!initial?.isConnected,
-                node_editor_present:!!document.querySelector('#ew-author-node [name=instructions]')}),
+                node_editor_present:!!document.querySelector('#ew-author-node [name=job_guidance]')}),
                 stop:()=>{observer.disconnect();for(const type of types)document.removeEventListener(type,listener,true);}};
             return true;
         })()""")
@@ -124,7 +124,7 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         try:
             self.click('[data-author-action=stage_toggle][data-id=stage]')
             self.click('[data-author-action=node][data-id=job]')
-            self.wait("document.querySelector('#ew-author-node [name=instructions]')")
+            self.wait("document.querySelector('#ew-author-node [name=job_guidance]')")
         finally:
             self.collect_stage_click_diagnostics()
         self.assert_user_workspace_zero()
@@ -143,8 +143,9 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width===720")
         self.eventually(lambda: self.browser_api('GET','/api/ees-work/workspace')['data'].get('ui_state',{}).get('state',{}).get('selection',{}).get('panel_width')==720)
         self.open_workflow(workflow_a)
-        self.assertEqual(self.browser.evaluate("document.querySelector('.ees-panel-region').getBoundingClientRect().width"),580)
-        self.fill('#ew-author-node [name=instructions]',a_text)
+        self.assertEqual(self.browser.evaluate("document.querySelector('.ees-panel-region').getBoundingClientRect().width"),480)
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-ees-panel-resize]')"))
+        self.fill('#ew-author-node [name=job_guidance]',a_text)
         a_proposed = deepcopy(workflow_a['draft'])
         a_proposed['description'] = a_answer
         a_proposed['nodes']['job']['instructions'] = a_text
@@ -167,8 +168,9 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width===400")
         self.eventually(lambda: self.browser_api('GET','/api/ees-work/workspace')['data'].get('ui_state',{}).get('state',{}).get('selection',{}).get('panel_width')==400)
         self.open_workflow(workflow_b)
-        self.assertEqual(self.browser.evaluate("document.querySelector('.ees-panel-region').getBoundingClientRect().width"),580)
-        self.fill('#ew-author-node [name=instructions]',b_text);new_session=self.browser.session
+        self.assertEqual(self.browser.evaluate("document.querySelector('.ees-panel-region').getBoundingClientRect().width"),480)
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-ees-panel-resize]')"))
+        self.fill('#ew-author-node [name=job_guidance]',b_text);new_session=self.browser.session
         self.assertEqual(self.browser_api('GET','/api/v1/auths/')['data']['id'],account_b['id'])
         settings=self.browser_api('GET','/api/v1/users/user/settings')['data']
         self.assertEqual(settings['ui']['params']['system'],'NU05 private Native setting B')
@@ -180,7 +182,7 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.assertTrue(read['finished'].wait(5))
         late_on_b = self.deliver_native_chat_proposal(a_delivery)
         self.assertEqual(late_on_b, {'ok': False, 'code': 'context_changed'})
-        self.assertEqual(self.read('#ew-author-node [name=instructions]','value'),b_text)
+        self.assertEqual(self.read('#ew-author-node [name=job_guidance]','value'),b_text)
         for secret in (a_text,a_question,a_answer,'NU05 A private chat title'):
             self.assertNotIn(secret,self.authoring_content()+self.text('body'))
         self.screenshot('sa26-b-after-late-a-responses')
@@ -207,7 +209,7 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.assertIn(b_text,context)
         self.assertEqual(b_model_request['user_message']['meta']['ees_work_reference']['workflow_id'], workflow_b['id'])
         for secret in (a_text,a_question,a_answer):self.assertNotIn(secret,context)
-        self.assertEqual(self.read('#ew-author-node [name=instructions]','value'),b_text)
+        self.assertEqual(self.read('#ew-author-node [name=job_guidance]','value'),b_text)
         # After all original late-response/privacy assertions, reloading the
         # former A tab must restore the latest stored B preference.
         self.activate_tab(old_session);self.navigate('/')

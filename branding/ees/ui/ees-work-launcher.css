@@ -1101,7 +1101,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-stage-list{background:transparent;border:0;border-top:1px solid var(--ew-line);border-radius:0;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-content-stage{border:0;border-bottom:1px solid var(--ew-line);}
 #ees-work-designer:not([data-author-tab=tools]) .ew-content-stage+.ew-content-stage{border-top:0;}
-#ees-work-designer:not([data-author-tab=tools]) .ew-stage-head>.ew-stage-toggle{gap:12px;min-height:0;padding:17px 2px;border-radius:0;font-size:13px;line-height:20.8px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-stage-head>.ew-stage-toggle{gap:12px;min-height:59.6px;padding:17px 2px;border-radius:0;font-size:13px;line-height:20.8px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-stage-toggle>.ew-author-stage-number{display:block;width:16px;height:auto;border:0;border-radius:0;background:transparent;font-size:12px;line-height:19.2px;font-weight:400;color:#8a8e97;text-align:left;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-stage-count{font-size:12px;line-height:19.2px;color:var(--ew-muted);}
 #ees-work-designer:not([data-author-tab=tools]) .ew-stage-head:has(.ew-stage-menu-button) .ew-stage-count{margin-right:0;}
@@ -1135,6 +1135,10 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-card{border:0;border-radius:0;background:transparent;overflow:visible;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-card+.ew-job-card{border-top:1px solid var(--ew-line);margin-top:24px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-main{gap:18px;padding:0;}
+/* Match the mock's inline-textarea baseline without changing its 84px control. */
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-main>label:has(>textarea){padding-bottom:6px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-main>label:has(>select[name=result_block])+.ew-author-muted{margin-top:-12px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-main select[name=result_block]{height:41px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-detail label:not(.ew-author-inline):not(.ew-job-source-choice){gap:7px;font-size:12px;line-height:18px;color:var(--ees-text-primary);}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-detail textarea{min-height:84px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-detail fieldset>legend{margin-bottom:7px;font-size:12px;font-weight:500;line-height:18px;color:var(--ees-text-primary);}
@@ -1229,6 +1233,8 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-author-history summary{padding:0;color:var(--ees-text-primary);font-size:13px;font-weight:500;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-author-history>.ew-author-empty{margin:0;padding:18px 0;text-align:left;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-author-history>.ew-author-muted{margin-top:10px;font-size:11px;line-height:1.7;}
+/* Settings use the approved 1.7 line box; job details keep their 20.8px controls. */
+#ees-work-designer:not([data-author-tab=tools]) :is(.ew-schedule-card,.ew-author-rule-card,.ew-author-rule-policy) :is(button,label,input:not([type=checkbox]):not([type=radio]),select,textarea){line-height:1.7;}
 /* Persistent author actions are outside the scrolling form. */
 #ees-work-designer:not([data-author-tab=tools])>footer{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 20px 14px;background:var(--ees-surface-sidebar);border-color:var(--ew-line);}
 #ees-work-designer:not([data-author-tab=tools])>footer:empty{display:none;}

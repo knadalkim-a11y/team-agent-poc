@@ -64,5 +64,8 @@
     "source_shell": 26,
     "frontend_build": "5582 files, pinned source2a960a59/Node22.16.0/npm10.9.2",
     "native_local": "not run; managed preview and CI used instead"
-  }
+  },
+  "verified_wheel_sha256": "f6339501b18969c0f01f7e7fe933573c36983d3676e3cd9a632c264203f460db",
+  "verified_css_sha256": "e427159955461544c0793566802ab7b91d6199d974d458681c62e75888326019",
+  "pr": "https://github.com/knadalkim-a11y/team-agent-poc/pull/108"
 }
