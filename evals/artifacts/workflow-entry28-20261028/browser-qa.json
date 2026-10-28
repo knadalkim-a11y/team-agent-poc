@@ -1,0 +1,584 @@
+{
+  "scope": "Revision28 left factory/system scope and direct-start changed boundaries only. No product/API or deployment verification; revision27 artifacts remain unchanged.",
+  "started": "2026-10-28T03:29:57.307Z",
+  "source": {
+    "editable_sha256": "81b0b8721cc8f39c6fefb77cb835b396b43179fac3466ecb0baf59dd3cf785f5",
+    "html_sha256": "4bd30e896fcc1846ff2ff573a834328fa0c702c8f968f14f22b01cf96ee4587f"
+  },
+  "checks": [
+    {
+      "name": "28-1920 left A/EMS selected",
+      "status": "passed"
+    },
+    {
+      "name": "28-1920-overview-a no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "28-1920 direct start keeps scope",
+      "status": "passed",
+      "observed": {
+        "rows": 12,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "context": "배포 산출물 점검 / 공장 A · EMS",
+        "running": 0,
+        "form": false
+      }
+    },
+    {
+      "name": "28-1920 keyboard stage focus",
+      "status": "passed",
+      "observed": {
+        "tag": "BUTTON",
+        "back": true,
+        "open": false,
+        "start": false
+      }
+    },
+    {
+      "name": "28-1920-stage-a-unstarted no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "28-1920 duplicate start disabled and back focus",
+      "status": "passed",
+      "observed": {
+        "tag": "BUTTON",
+        "back": false,
+        "open": true,
+        "start": false
+      }
+    },
+    {
+      "name": "28-1920-overview-active-a no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "28-1920 selecting B does not create",
+      "status": "passed"
+    },
+    {
+      "name": "28-1920 B separately starts",
+      "status": "passed",
+      "observed": {
+        "rows": 12,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "context": "배포 산출물 점검 / 공장 B · EMS",
+        "running": 0,
+        "form": false
+      }
+    },
+    {
+      "name": "28-1920 distinct run IDs",
+      "status": "passed",
+      "observed": {
+        "aid": "mock-work-1",
+        "bid": "mock-work-2"
+      }
+    },
+    {
+      "name": "28-1920 both immutable scopes retained",
+      "status": "passed",
+      "observed": [
+        "공장 A · EMS현재 단계 · 1차 점검 · 처리 0/12열기",
+        "공장 B · EMS현재 단계 · 1차 점검 · 처리 0/12열기"
+      ]
+    },
+    {
+      "name": "28-1920 opening A preserves scope",
+      "status": "passed",
+      "observed": {
+        "rows": 12,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "context": "배포 산출물 점검 / 공장 A · EMS",
+        "running": 0,
+        "form": false
+      }
+    },
+    {
+      "name": "28-1920 missing factory opens existing left menu",
+      "status": "passed"
+    },
+    {
+      "name": "28-1920 selecting existing A blocks new start and focuses open",
+      "status": "passed",
+      "observed": {
+        "tag": "BUTTON",
+        "back": false,
+        "open": true,
+        "start": false
+      }
+    },
+    {
+      "name": "28-1920 no right duplicate form",
+      "status": "passed"
+    },
+    {
+      "name": "28-1920 selection alone creates nothing",
+      "status": "passed"
+    },
+    {
+      "name": "28-1920-left-factory-open no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "28-1920-left-factory-open left menu visible",
+      "status": "passed",
+      "observed": {
+        "x": 9,
+        "y": 129,
+        "width": 237,
+        "height": 164
+      }
+    },
+    {
+      "name": "28-1920 Escape keeps context and returns start",
+      "status": "passed",
+      "observed": {
+        "tag": "BUTTON",
+        "back": false,
+        "open": false,
+        "start": true
+      }
+    },
+    {
+      "name": "28-1920 keyboard A selection only",
+      "status": "passed"
+    },
+    {
+      "name": "28-1920 selected A starts afterwards",
+      "status": "passed",
+      "observed": {
+        "rows": 12,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "context": "배포 산출물 점검 / 공장 A · EMS",
+        "running": 0,
+        "form": false
+      }
+    },
+    {
+      "name": "28-1920 system scene initially whole EMS",
+      "status": "passed"
+    },
+    {
+      "name": "28-1920 system uses left EMS list",
+      "status": "passed"
+    },
+    {
+      "name": "28-1920 system selection alone no run",
+      "status": "passed"
+    },
+    {
+      "name": "28-1920 system scope preserved",
+      "status": "passed",
+      "observed": {
+        "rows": 12,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "context": "배포 산출물 점검 / EMS 전체",
+        "running": 0,
+        "form": false
+      }
+    },
+    {
+      "name": "28-1920-system-stage no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "28-1920 double click guard retains pending",
+      "status": "passed",
+      "observed": {
+        "rows": 12,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "context": "배포 산출물 점검 / 공장 A · EMS",
+        "running": 0,
+        "form": false
+      }
+    },
+    {
+      "name": "28-1920 intentional stage execution stays enabled",
+      "status": "passed"
+    },
+    {
+      "name": "28-1920 separate multistage overview",
+      "status": "passed",
+      "observed": [
+        "대상 확정작업 1개",
+        "1차 점검작업 3개",
+        "보완·재점검작업 2개",
+        "조건부 승인 후속작업 3개"
+      ]
+    },
+    {
+      "name": "28-1920-multi-overview no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "28-480 left A/EMS selected",
+      "status": "passed"
+    },
+    {
+      "name": "28-480-overview-a no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "28-480 direct start keeps scope",
+      "status": "passed",
+      "observed": {
+        "rows": 12,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "context": "배포 산출물 점검 / 공장 A · EMS",
+        "running": 0,
+        "form": false
+      }
+    },
+    {
+      "name": "28-480 keyboard stage focus",
+      "status": "passed",
+      "observed": {
+        "tag": "BUTTON",
+        "back": true,
+        "open": false,
+        "start": false
+      }
+    },
+    {
+      "name": "28-480-stage-a-unstarted no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "28-480 duplicate start disabled and back focus",
+      "status": "passed",
+      "observed": {
+        "tag": "BUTTON",
+        "back": false,
+        "open": true,
+        "start": false
+      }
+    },
+    {
+      "name": "28-480-overview-active-a no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "28-480 selecting B does not create",
+      "status": "passed"
+    },
+    {
+      "name": "28-480 B separately starts",
+      "status": "passed",
+      "observed": {
+        "rows": 12,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "context": "배포 산출물 점검 / 공장 B · EMS",
+        "running": 0,
+        "form": false
+      }
+    },
+    {
+      "name": "28-480 distinct run IDs",
+      "status": "passed",
+      "observed": {
+        "aid": "mock-work-1",
+        "bid": "mock-work-2"
+      }
+    },
+    {
+      "name": "28-480 both immutable scopes retained",
+      "status": "passed",
+      "observed": [
+        "공장 A · EMS현재 단계 · 1차 점검 · 처리 0/12열기",
+        "공장 B · EMS현재 단계 · 1차 점검 · 처리 0/12열기"
+      ]
+    },
+    {
+      "name": "28-480 opening A preserves scope",
+      "status": "passed",
+      "observed": {
+        "rows": 12,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "context": "배포 산출물 점검 / 공장 A · EMS",
+        "running": 0,
+        "form": false
+      }
+    },
+    {
+      "name": "28-480 missing factory opens existing left menu",
+      "status": "passed"
+    },
+    {
+      "name": "28-480 selecting existing A blocks new start and focuses open",
+      "status": "passed",
+      "observed": {
+        "tag": "BUTTON",
+        "back": false,
+        "open": true,
+        "start": false
+      }
+    },
+    {
+      "name": "28-480 no right duplicate form",
+      "status": "passed"
+    },
+    {
+      "name": "28-480 selection alone creates nothing",
+      "status": "passed"
+    },
+    {
+      "name": "28-480-left-factory-open no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "28-480-left-factory-open left menu visible",
+      "status": "passed",
+      "observed": {
+        "x": 9,
+        "y": 129,
+        "width": 237,
+        "height": 164
+      }
+    },
+    {
+      "name": "28-480 Escape keeps context and returns start",
+      "status": "passed",
+      "observed": {
+        "tag": "BUTTON",
+        "back": false,
+        "open": false,
+        "start": true
+      }
+    },
+    {
+      "name": "28-480 keyboard A selection only",
+      "status": "passed"
+    },
+    {
+      "name": "28-480 selected A starts afterwards",
+      "status": "passed",
+      "observed": {
+        "rows": 12,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "context": "배포 산출물 점검 / 공장 A · EMS",
+        "running": 0,
+        "form": false
+      }
+    },
+    {
+      "name": "28-480 system scene initially whole EMS",
+      "status": "passed"
+    },
+    {
+      "name": "28-480 system uses left EMS list",
+      "status": "passed"
+    },
+    {
+      "name": "28-480 system selection alone no run",
+      "status": "passed"
+    },
+    {
+      "name": "28-480 system scope preserved",
+      "status": "passed",
+      "observed": {
+        "rows": 12,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "context": "배포 산출물 점검 / EMS 전체",
+        "running": 0,
+        "form": false
+      }
+    },
+    {
+      "name": "28-480-system-stage no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "28-480 double click guard retains pending",
+      "status": "passed",
+      "observed": {
+        "rows": 12,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "context": "배포 산출물 점검 / 공장 A · EMS",
+        "running": 0,
+        "form": false
+      }
+    },
+    {
+      "name": "28-480 intentional stage execution stays enabled",
+      "status": "passed"
+    },
+    {
+      "name": "28-480 separate multistage overview",
+      "status": "passed",
+      "observed": [
+        "대상 확정작업 1개",
+        "1차 점검작업 3개",
+        "보완·재점검작업 2개",
+        "조건부 승인 후속작업 3개"
+      ]
+    },
+    {
+      "name": "28-480-multi-overview no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "No external/API requests",
+      "status": "passed",
+      "observed": []
+    },
+    {
+      "name": "No console/page errors",
+      "status": "passed",
+      "observed": []
+    },
+    {
+      "name": "Source stable throughout run",
+      "status": "passed"
+    }
+  ],
+  "captures": [
+    {
+      "label": "28-1920-overview-a",
+      "png": "28-1920-overview-a.png",
+      "geometry": "28-1920-overview-a-geometry.json",
+      "sha256": "f0aa1fcba38b1555bed084e55164d03612e1ef9e435076f1fa60d5d9489d8f69"
+    },
+    {
+      "label": "28-1920-stage-a-unstarted",
+      "png": "28-1920-stage-a-unstarted.png",
+      "geometry": "28-1920-stage-a-unstarted-geometry.json",
+      "sha256": "d951d45ae62c98970c13e60b4d7aaa3993969bb37baf15745aa243524fa88bdf"
+    },
+    {
+      "label": "28-1920-overview-active-a",
+      "png": "28-1920-overview-active-a.png",
+      "geometry": "28-1920-overview-active-a-geometry.json",
+      "sha256": "ce41b420b6fde5d42b72a8c972d16c9b54be6fece35c6a2e42209487f863c8b0"
+    },
+    {
+      "label": "28-1920-left-factory-open",
+      "png": "28-1920-left-factory-open.png",
+      "geometry": "28-1920-left-factory-open-geometry.json",
+      "sha256": "79d590409e1760e1bcba135695aa5ecd1253176747daa03ab183db93ff5e8a79"
+    },
+    {
+      "label": "28-1920-system-stage",
+      "png": "28-1920-system-stage.png",
+      "geometry": "28-1920-system-stage-geometry.json",
+      "sha256": "672956095ee43d4fddce3ae124a5de364cb907d38d80b5c7befe05b9102923e2"
+    },
+    {
+      "label": "28-1920-multi-overview",
+      "png": "28-1920-multi-overview.png",
+      "geometry": "28-1920-multi-overview-geometry.json",
+      "sha256": "b3d61a66dea75038393507f4a443a9ae0a00ad6ab21571ac650c7ee8992916c9"
+    },
+    {
+      "label": "28-480-overview-a",
+      "png": "28-480-overview-a.png",
+      "geometry": "28-480-overview-a-geometry.json",
+      "sha256": "6c61a7dec02d1b51ba2372c901278eabd343ebc3b600b01383c29bf853bb32fb"
+    },
+    {
+      "label": "28-480-stage-a-unstarted",
+      "png": "28-480-stage-a-unstarted.png",
+      "geometry": "28-480-stage-a-unstarted-geometry.json",
+      "sha256": "d765af3592dd8f9b8e34fd54158a33d79eb39b14d5898e35affb339aae9cbb3f"
+    },
+    {
+      "label": "28-480-overview-active-a",
+      "png": "28-480-overview-active-a.png",
+      "geometry": "28-480-overview-active-a-geometry.json",
+      "sha256": "6949c0b016835838aea863f24060f721fd7c4dd3198e567689da9e20f59ee768"
+    },
+    {
+      "label": "28-480-left-factory-open",
+      "png": "28-480-left-factory-open.png",
+      "geometry": "28-480-left-factory-open-geometry.json",
+      "sha256": "a74331aa9b06a512cb883e150e062e9a5f07151980431add599647de0c65bce9"
+    },
+    {
+      "label": "28-480-system-stage",
+      "png": "28-480-system-stage.png",
+      "geometry": "28-480-system-stage-geometry.json",
+      "sha256": "f7bc3b64fa95f5ea98c7a7d3eb6c1af746c763d5a267a909d9a8b738917a5dff"
+    },
+    {
+      "label": "28-480-multi-overview",
+      "png": "28-480-multi-overview.png",
+      "geometry": "28-480-multi-overview-geometry.json",
+      "sha256": "a2f7b7bf1cc2107c82555b7e6d0999120a6bc216a91d3db56e1703441e6d2842"
+    }
+  ],
+  "requests": [],
+  "errors": [],
+  "first_observation": "first-back-focus-observation.json",
+  "browser": "133.0.6943.0",
+  "status": "passed",
+  "finished": "2026-10-28T03:30:00.103Z",
+  "summary": {
+    "passed": 63,
+    "failed": 0,
+    "captures": 12
+  },
+  "visual_review": {
+    "directly_inspected": [
+      "28-1920-overview-a.png",
+      "28-1920-left-factory-open.png",
+      "28-480-left-factory-open.png",
+      "28-480-stage-a-unstarted.png"
+    ],
+    "observations": "Existing left scope drives direct start; no right factory form is present. Left list and keyboard focus are visible at both widths. On 480px the expanded left sidebar overlays part of the right panel while selecting, then restores on close. Captured pages and panels have zero horizontal overflow."
+  },
+  "first_observation_resolution": {
+    "evidence": "first-back-focus-observation.json",
+    "initial_html_sha256": "9736e309be41e6f2ecdfdd03e8495dfebe6c0ef1de00395fda2ededf7c639070",
+    "result": "Builder added shared enabled-start/open-run/panel focus fallback. Both keyboard stage-back and duplicate scope selection return to existing open-run action in the final two-width QA."
+  },
+  "harness_sha256": "395f3290abc5f811eb05b2baaea328f79e22ffb1b5117ab13e0ba700692adc40"
+}

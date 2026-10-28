@@ -1,5 +1,15 @@
 # 현재 작업 상태
 
+## 2026-10-28 · 왼쪽 공장·시스템 선택 재사용 목업28
+
+- **현재 요청:** 사용자가27판의 별도 공장 선택이 왼쪽 선택과 중복이라고 지적하고 목업 수정을 요청했다. [28판 계약](mockups/ees-work/TASK.md#workflow-entry28-20261028)에 따라 오른쪽 시작 폼을 제거하고 왼쪽 작업 위치로 시작한다. 공장 필수·미선택일 때만 왼쪽 목록으로 연결한다.
+- **원본/반영 범위:** 기존 [07 HTML](mockups/ees-work/design-mock-07-workflow-entry.html)·[편집 원본](mockups/ees-work/design-mock-src/07-workflow-entry.html), Figma `업무.운영`/`업무.공통`과 [기존 PR #107](https://github.com/knadalkim-a11y/team-agent-poc/pull/107)을 갱신한다. 위치를 바꿔도 이전 진행 건의 대상은 유지한다. 이전27판 증빙은 보존한다.
+- **실제 적용 상태:** 사내 프로그램의 마지막 사용자 보고는 `result=ok / stage=complete / running=true / commit=42f5ae502b57`이다. 새28판은 목업이며 제품 코드·서버·저장·실행·사내 재배포를 바꾸지 않는다. PR #106의 별도 Figma 관리 변경은 미병합 상태 그대로다.
+- **확인한 범위:** [고정 목업5cd9f94](https://github.com/knadalkim-a11y/team-agent-poc/blob/5cd9f945def1b8911bec864cc8aca054c10b9afe/docs/mockups/ees-work/design-mock-07-workflow-entry.html)에서1920/480 폭·12장면·변경 경계63/63 PASS다. 중복 시작 때문에 비활성 버튼으로 초점이 사라지던 첫 관측을 보완했고, 외부/API 요청·브라우저 오류·가로 넘침은0이다. [검증과 경계](../evals/v4-ui-20260930.md#workflow-entry28-20261028).
+- **다음 하나:** 수정 목업에서 왼쪽 선택→업무 시작→단계 진입을 확인하고 피드백을 받는다.
+
+> 아래27판은 중복 공장 선택을 제거하기 전의 설계·검증 기록이다.
+
 ## 2026-10-28 · 진행0개 워크플로우 진입 목업27 설계
 
 - **현재 요청:** 사용자는42f5ae5 적용·기동 성공 뒤 진행 중인 업무가 없어 새 단계 화면까지 들어가지 못한다고 보고했고, 빠진 첫 진입 흐름을 설계하라고 요청했다. [이번 계약](mockups/ees-work/TASK.md#workflow-entry27-20261028)에 따라 개요·조건부 시작 입력·단계 진입·기존 진행 업무 열기를 목업으로 연결한다.
