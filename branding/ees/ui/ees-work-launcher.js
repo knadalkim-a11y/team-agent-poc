@@ -322,7 +322,7 @@
     else{pendingInputProposal=null;inputProposalApplied=null;}
     error='';commandError='';clearTimeout(refreshTimer);remember();
   }
-  async function select(patch,{fetch=true,validate=null}={}){workUI.closeHelp({restoreFocus:false});designer.closeStart?.();procedureStart=null;view.capture();const before=context();while(state?.run?.definition?.nodes?.[selection.job_id]?.result_block==='ai_review'&&view.readReview?.().dirty){if(!await saveReviewDraft()||before!==context())return null;view.capture();}if(validate&&!validate())return null;commitSelection(patch);render();if(fetch)return refresh();refreshTimer=setTimeout(refresh,2500);loadOptions();return state;}
+  async function select(patch,{fetch=true,validate=null,preserveAuthorStart=false}={}){workUI.closeHelp({restoreFocus:false});if(!preserveAuthorStart){designer.closeStart?.();procedureStart=null;}view.capture();const before=context();while(state?.run?.definition?.nodes?.[selection.job_id]?.result_block==='ai_review'&&view.readReview?.().dirty){if(!await saveReviewDraft()||before!==context())return null;view.capture();}if(validate&&!validate())return null;commitSelection(patch);render();if(fetch)return refresh();refreshTimer=setTimeout(refresh,2500);loadOptions();return state;}
   async function mutate(body,{refreshAfter=true,accept=null}={}){if(busy)return null;const at=context();setBusy(true);try{const result=await command(body);if(result&&accept)accept(result);if(result&&refreshAfter&&!await refresh())return null;return at===context()?result:null;}catch(failure){if(at===context()){commandError=failure.message;render();}return null;}finally{setBusy(false);}}
   async function models(){
     const auth=token(),headers={Accept:'application/json',Authorization:'Bearer '+auth};
@@ -592,10 +592,13 @@
       const catalog=nativePage()?nativeScope:state;
       const item=(factory?catalog?.factories:catalog?.systems)?.find(value=>(typeof value==='string'?value:value.id)===id);
       const option=(factory?catalog?.scope_options?.factories:catalog?.scope_options?.systems)?.find(value=>value.id===id);
-      if(typeof id!=='string'||factory&&(nativePage()||selection.mode==='author')||!(factory&&id==='')&&(!item||item.allowed===false||option?.allowed===false))return;
+      if(typeof id!=='string'||factory&&(nativePage()||selection.mode==='author'&&['tools','workspace_admin'].includes(selection.tab))||!(factory&&id==='')&&(!item||item.allowed===false||option?.allowed===false))return;
       if(id===selection[factory?'factory_id':'system_id'])return;
       designer.readDraft?.();
       const author=nativePage()||selection.mode==='author';
+      // Factory is the author's view context, not the definition's owner or
+      // execution scope. Keep the open draft and unfinished creation form.
+      if(factory&&author)return select({factory_id:id},{preserveAuthorStart:true});
       return select({[factory?'factory_id':'system_id']:id,...(!factory?{factory_id:''}:{}),...(author?{mode:'author'}:{}),workflow_id:'',run_id:'',job_id:'',tab:author?'overview':'my_work'});
     }
     if(action==='workflow'){const id=target.dataset.workflowId,workflow=(state?.workflows || []).find(item=>item.id===id),adhoc=(workflow?.execution_mode || workflow?.mode || 'on_demand')==='on_demand';const runs=(state?.runs || []).filter(run=>run.workflow_id===id&&!workUI.finished(run));return select({workflow_id:id,run_id:!adhoc&&runs.length===1?runs[0].id:'',job_id:'',tab:'overview',panel_open:true});}

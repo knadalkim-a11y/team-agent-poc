@@ -244,17 +244,20 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.fill('#chat-input', '범위를 골라도 유지할 개인 대화 초안')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         evidence = {}
-        # Each of the three A2 states gets open, Esc/focus, Enter/Space open,
+        # Work and authoring scopes get open, Esc/focus, Enter/Space open,
         # outside click and selection through real browser input events.
         for variant, kind, target, expected in (
                 ('work-factory', 'factory', 'scope-factory-1', '합성 공장 01'),
                 ('work-system', 'system', 'APC', 'APC'),
-                ('workspace-system', 'system', 'EMS', 'EMS')):
-            if variant == 'workspace-system':
+                ('workspace-system', 'system', 'EMS', 'EMS'),
+                ('workspace-factory', 'factory', 'scope-factory-1', '합성 공장 01')):
+            if variant.startswith('workspace-'):
                 self.click('[data-action=mode][data-mode=author]')
                 self.wait("document.querySelector('#ees-work-designer')")
-                self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-site-trigger')"))
-                self.assertIn('관리 시스템', self.text('#ees-work-entry'))
+                self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-work-site-trigger')"))
+                self.assertIn('작업 위치', self.text('#ees-work-entry'))
+                self.assertAlmostEqual(self.read('.ees-panel-region', 'getBoundingClientRect().width'), 480, delta=1)
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-ees-panel-resize]')"))
             trigger, geometry = self.scope_open(kind)
             evidence[variant] = geometry
             self.screenshot('source-scope-' + variant)

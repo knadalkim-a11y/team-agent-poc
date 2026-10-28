@@ -1331,10 +1331,10 @@ index 0000000..a509ea5
 +/>
 diff --git a/src/lib/components/ees/EesNavigation.svelte b/src/lib/components/ees/EesNavigation.svelte
 new file mode 100644
-index 0000000..be842d3
+index 0000000..bd38db6
 --- /dev/null
 +++ b/src/lib/components/ees/EesNavigation.svelte
-@@ -0,0 +1,253 @@
+@@ -0,0 +1,254 @@
 +<script lang="ts">
 +	import { getContext } from 'svelte';
 +	import { page } from '$app/stores';
@@ -1378,6 +1378,7 @@ index 0000000..be842d3
 +	$: s = $eesSnapshot.selection || {};
 +	$: cap = $eesSnapshot.native_capabilities ?? data.capabilities ?? {};
 +	$: author = $eesSnapshot.native_shell || s.mode === 'author';
++	$: scopeHasFactory = !$eesSnapshot.native_shell && (!author || !['tools', 'workspace_admin'].includes(s.tab));
 +	$: create = cap.is_admin === true || cap.can_author === true || cap.can_manage === true;
 +	$: canWorkspace =
 +		create ||
@@ -1400,7 +1401,7 @@ index 0000000..be842d3
 +	$: t = (key, fallback) => $i18n.t(key, { defaultValue: fallback });
 +</script>
 +
-+<section id="ees-work-entry" data-ees-work aria-label={t('EES.Nav.Navigation', 'Work navigation')}>
++<section id="ees-work-entry" data-ees-work data-work-mode={author ? 'author' : 'work'} aria-label={t('EES.Nav.Navigation', 'Work navigation')}>
 +	{#if $eesSnapshot.state === null && $eesSnapshot.native_capabilities == null}
 +		{#if !$eesSnapshot.error}<p class="ew-empty" role="status">
 +				{t('EES.Loading', 'Loading…')}
@@ -1424,13 +1425,13 @@ index 0000000..be842d3
 +			</nav>{/if}
 +		<p class="ew-nav-caption">
 +			{t(
-+				author ? 'EES.Nav.ManagedSystem' : 'EES.Nav.WorkLocation',
-+				author ? 'Managed system' : 'Work location'
++				scopeHasFactory ? 'EES.Nav.WorkLocation' : 'EES.Nav.ManagedSystem',
++				scopeHasFactory ? 'Work location' : 'Managed system'
 +			)}
 +		</p>
 +		<div class="ew-scope">
-+			{#if !author}<EesScopeSelect kind="factory" label={t('EES.Factory', 'Factory')} value={s.factory_id || ''} options={factories} bind:opened={openedScope} boundary={scopeBoundary} selectionContext={JSON.stringify([scopeSelectionContext, s.system_id, factories])} exitBoundary={scopeBoundary} />{/if}
-+			<EesScopeSelect kind="system" compact={author} label={t('EES.System', 'System')} value={s.system_id || ''} options={systems} bind:opened={openedScope} boundary={scopeBoundary} selectionContext={scopeSelectionContext} exitBoundary={scopeSystemExitBoundary} />
++			{#if scopeHasFactory}<EesScopeSelect kind="factory" label={t('EES.Factory', 'Factory')} value={s.factory_id || ''} options={factories} bind:opened={openedScope} boundary={scopeBoundary} selectionContext={JSON.stringify([scopeSelectionContext, s.system_id, factories])} exitBoundary={scopeBoundary} />{/if}
++			<EesScopeSelect kind="system" compact={!scopeHasFactory} label={t('EES.System', 'System')} value={s.system_id || ''} options={systems} bind:opened={openedScope} boundary={scopeBoundary} selectionContext={scopeSelectionContext} exitBoundary={scopeSystemExitBoundary} />
 +		</div>
 +		{#if author}
 +			<section class="ew-nav-group">
@@ -1831,10 +1832,10 @@ index 0000000..6d5288b
 +</style>
 diff --git a/src/lib/components/ees/EesShell.svelte b/src/lib/components/ees/EesShell.svelte
 new file mode 100644
-index 0000000..75b667c
+index 0000000..5e7c8a1
 --- /dev/null
 +++ b/src/lib/components/ees/EesShell.svelte
-@@ -0,0 +1,476 @@
+@@ -0,0 +1,479 @@
 +<script lang="ts">
 +	import { getContext, onMount, tick } from 'svelte';
 +	import { get } from 'svelte/store';
@@ -1890,10 +1891,11 @@ index 0000000..75b667c
 +	}
 +	$: s = $eesSnapshot.selection || {};
 +	$: procedurePanel = s.mode === 'author' && !['tools', 'workspace_admin'].includes(s.tab);
-+	$: panelWidth = transientWidth ?? (procedurePanel || $eesSnapshot.procedure_start ? 580 : clamp(s.panel_width));
++	$: fixedPanel = procedurePanel || Boolean($eesSnapshot.procedure_start);
++	$: panelWidth = fixedPanel ? 480 : (transientWidth ?? clamp(s.panel_width));
 +	$: panelOpen = !nativeRoute && s.panel_open !== false;
 +	$: panelOverlay =
-+		width - ($eesCompact ? 56 : 256) - (procedurePanel || $eesSnapshot.procedure_start ? 580 : 480) < 560;
++		width - ($eesCompact ? 56 : 256) - 480 < 560;
 +	$: if (mounted && panelRegion) syncPanelMotion(panelOpen, panelOverlay, nativeRoute);
 +	function syncPanelMotion(open: boolean, overlay: boolean, native: boolean) {
 +		const motion = window.__eesMotionV1;
@@ -1997,6 +1999,7 @@ index 0000000..75b667c
 +		eesSync();
 +	}
 +	function setWidth(next, persist = false) {
++		if (fixedPanel) return;
 +		transientWidth = clamp(next);
 +		if (persist) {
 +			eesAction({ action: 'panel_width', width: transientWidth });
@@ -2004,7 +2007,7 @@ index 0000000..75b667c
 +		}
 +	}
 +	function resizeStart(e) {
-+		if (e.button !== 0) return;
++		if (fixedPanel || e.button !== 0) return;
 +		e.preventDefault();
 +		// The prevented pointer event needs explicit focus for keyboard resizing.
 +		e.currentTarget.focus({ preventScroll: true });
@@ -2181,10 +2184,10 @@ index 0000000..75b667c
 +		inert={!panelOpen}
 +		aria-label={t('EES.Panel', 'Work panel')}
 +	>
++		{#if !fixedPanel}
 +		<div
 +			class="ees-panel-resize"
 +			data-ees-panel-resize
-+			hidden={procedurePanel || Boolean($eesSnapshot.procedure_start)}
 +			role="separator"
 +			tabindex="0"
 +			aria-label={t('EES.PanelWidth', 'Work panel width')}
@@ -2212,6 +2215,7 @@ index 0000000..75b667c
 +				}
 +			}}
 +		></div>
++		{/if}
 +		<aside
 +			id="ees-work-panel"
 +			data-ees-motion-kind="panel-content"

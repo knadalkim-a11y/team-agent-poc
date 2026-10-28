@@ -1,5 +1,15 @@
 # 현재 작업 상태
 
+## 2026-10-29 · 워크.워크플로 12판 제품 UI 구현 중
+
+- **현재 작업:** 사용자 요청에 따라 [작성 목업12판](mockups/ees-work/design-mock-08-workspace-authoring.html)을 실제 제품 화면에 반영한다. [이번 범위·보존·완료 기준](mockups/ees-work/TASK.md#workspace-authoring12-ui-20261029). 기능 완성은 ‘워크.도구’ 설계 이후이며 이번에는 새 도구 제작·서버 저장·실행 엔진을 추가하지 않는다.
+- **출발점:** main `42f5ae502b57be68aefa5d141f09259c8f6e9ee9`의 별도 `feat/workspace-authoring12-ui-20261029`. 12판은 HTML/Figma에만 있었고 제품 작성기는 C66 화면이었다. 아래 운영26판 기록은 다른 화면의 당시 상태다.
+- **검증 상태:** 구현·관련 보존 검사·실제 화면 대조 진행 중. [근거](../evals/v4-ui-20260930.md#workspace-authoring12-ui-20261029). 아직 시각 일치·전체 CI·사내 적용 완료로 간주하지 않는다.
+- **사내 적용:** 이번 변경은 미실행이다. 기존 main `42f5ae5` 적용·기동 성공 사용자 보고는 [PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 원래 기록을 유지한다.
+- **다음 하나:** 실제 제품 화면을 12판에 대조하고 필요한 보존 검사와 CI를 확인해 검토용 PR로 정리한다.
+
+> 아래 절은 운영26판과 이전 구현 당시 기록이다. 작성12판의 현재 상태와 구분한다.
+
 ## 2026-10-28 · 운영 단계26판 제품 구현·사내 배포 검증 진행
 
 - **현재 목표:** 기존 제품을 확정 목업과 시각적으로 맞춰 사내에서 확인한다. 사용자가 추가로 지정한 상단 표준화까지 반영한 [26판 HTML](mockups/ees-work/design-mock-06-task-groups.html)·[구현 범위](mockups/ees-work/TASK.md#operations-stage26-product-20261028)를 기준으로 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)를 이어간다. HTML 파일 제공만으로 사내 제품 배포를 완료한 것으로 보지 않는다.

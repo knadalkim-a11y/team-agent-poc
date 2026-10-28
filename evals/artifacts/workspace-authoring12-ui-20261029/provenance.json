@@ -1,0 +1,68 @@
+{
+  "base_commit": "42f5ae502b57be68aefa5d141f09259c8f6e9ee9",
+  "recorded_at": "2026-10-28T23:33:36.363929+00:00",
+  "reference_library_version": 12,
+  "initial_build_inputs": {
+    "branding/ees/ui/ees-work-designer.js": "a23a7c6f79e073d243f4dc55e79ecf418f01a734e1717bb99dd144928168778f",
+    "branding/ees/ui/ees-work-launcher.css": "1f71ce82fdebb373943039eb147249bf612336e470b52def64bbe57cdeec46d1",
+    "branding/ees/ui/ees-work-launcher.js": "89c148d7b21ff754bbf93d74b0d9c9c1a8ec362971b37003f4ac873e73a2426c",
+    "frontend/patches/0001-ees-native-hooks.patch": "c6e261daa7c0040926356dd9efaf430c05fa4f57c5fc02f812e2f31163dd571f",
+    "frontend/open-webui-source.json": "a2a33e24309897b3eee79b8b6588cf9485cd31a520234f91f2bcaab486e27ada",
+    "docs/mockups/ees-work/design-mock-08-workspace-authoring.html": "d2aec2a3cf61f09ceb3915c778ef77b5a07b559b9fb57f545eb16cb11973079e"
+  },
+  "figma_session": "43d6f4d6-370e-4edc-8676-42ea2331c3df",
+  "figma_nodes": [
+    "1804:2673",
+    "1804:2950",
+    "1846:3011",
+    "1922:3018",
+    "1869:3157"
+  ],
+  "boundaries": [
+    "HTML12 is the visual source; Figma has small geometry differences",
+    "No production data or external APIs used",
+    "No backend/schema changes"
+  ],
+  "first_candidate": {
+    "frontend_build": "pinned source build passed, 5582 files",
+    "wheel_sha256": "a4a2e8bdb84dfb3e4247643ed66e73c3308534dd8fc4ab0b38a2f8187a388f96",
+    "packaging_first_failure": "Output inventory rejected one extra rsync temporary file; every expected file hash matched. Extra file quarantined; unchanged expected output then verified.",
+    "browser_viewport": [
+      1363,
+      936
+    ],
+    "observed_issues": [
+      "Authoring panel was 580px, reference default480px",
+      "Tabs and job details were4.047px too low; fields used500 instead of400 weight",
+      "Stage edit link on same line instead of separate line",
+      "List, empty start input/rules/history layouts retained old spacing/backgrounds",
+      "New workflow creation was modal instead of inline",
+      "Selected tab focus restored to first tab; tool dialog did not restore entry focus"
+    ]
+  },
+  "first_regressions": [
+    "Save remained disabled after ordinary input edits",
+    "Untouched popup bindings lost extension keys and converted untyped number/object to string",
+    "Optional numeric argument with default could not be cleared"
+  ],
+  "intermediate_checks": {
+    "node": "250 passed at JS9ad309e",
+    "python": "8 passed",
+    "native_tests": "not yet run locally"
+  },
+  "second_candidate_inputs": {
+    "branding/ees/ui/ees-work-designer.js": "ce4f8d4f3bc4be4a8b00b0b9034de477b0a4e516474a55c0f527a11c6d8e708c",
+    "branding/ees/ui/ees-work-launcher.css": "7dfb8d6580f93d6f64e3baeac7da8300c6d2e5fd21261aab19ed65404d8d7cb6",
+    "branding/ees/ui/ees-work-launcher.js": "89c148d7b21ff754bbf93d74b0d9c9c1a8ec362971b37003f4ac873e73a2426c",
+    "frontend/patches/0001-ees-native-hooks.patch": "4d6dbc76cc44d25b0ea9e4604105e74bf92f11c5d414848512baf65de935e615",
+    "frontend/open-webui-source.json": "c12f51d062838da2c1c661738185906bc370edaf30dee9df86c1fcadb604312f",
+    "docs/mockups/ees-work/design-mock-08-workspace-authoring.html": "d2aec2a3cf61f09ceb3915c778ef77b5a07b559b9fb57f545eb16cb11973079e"
+  },
+  "second_candidate_checks": {
+    "node_authoring": 256,
+    "python_authoring": 8,
+    "source_shell": 26,
+    "frontend_build": "5582 files, pinned source2a960a59/Node22.16.0/npm10.9.2",
+    "native_local": "not run; managed preview and CI used instead"
+  }
+}

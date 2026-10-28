@@ -16,6 +16,8 @@ EES 팀의 문서 조회와 업무 처리를 대화·워크플로우 화면으�
 
 Figma는 제품 기능을 **업무 · 운영 / 셋업 / 장애대응**으로 나누고, [업무 공통 기준](docs/mockups/ees-work/TASK.md#workflow-stage-common-standard)은 한 원본에서 연결합니다. 셋업·장애대응은 기존 참고 설계이며 새 목업이 확정된 것은 아닙니다. 운영 목업의 합성 예시를 모든 업무의 실행·판정 정책으로 확대하지 않습니다.
 
+작성 화면은 [워크.워크플로12판 제품 UI 범위](docs/mockups/ees-work/TASK.md#workspace-authoring12-ui-20261029)와 [고정 HTML 목업](docs/mockups/ees-work/design-mock-08-workspace-authoring.html)에서 시작합니다. 2026-10-29 사용자는 화면을 목업과 동일하게 먼저 구현하고, 기능 완성은 도구 만들기 설계 이후로 구분했습니다. 구현·시각 대조·사내 적용 상태는 [STATUS](docs/STATUS.md)에서 각각 확인합니다.
+
 ### 설계 문서의 역할과 찾는 순서
 
 | 필요한 답 | 관리 원본 | 읽고 고치는 범위 |
