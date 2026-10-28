@@ -1,0 +1,41 @@
+[
+  {
+    "state": "menu",
+    "sizeBefore": [
+      480,
+      1080
+    ],
+    "sizeAfter": [
+      480,
+      1080
+    ],
+    "identical": true,
+    "changedBounds": null
+  },
+  {
+    "state": "ready",
+    "sizeBefore": [
+      480,
+      1080
+    ],
+    "sizeAfter": [
+      480,
+      1080
+    ],
+    "identical": true,
+    "changedBounds": null
+  },
+  {
+    "state": "confirmed",
+    "sizeBefore": [
+      480,
+      1080
+    ],
+    "sizeAfter": [
+      480,
+      1080
+    ],
+    "identical": true,
+    "changedBounds": null
+  }
+]

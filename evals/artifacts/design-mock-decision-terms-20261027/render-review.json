@@ -1,0 +1,75 @@
+{
+  "checkedAt": "2026-10-27T06:18:16.028Z",
+  "baseline": "f07d649c8d9c9807cd196c63e94ff498e581e792",
+  "scope": "Approved decision terminology only; evidence/run relocation is a recommendation and was not applied.",
+  "files": [
+    {
+      "path": "docs/mockups/ees-work/design-mock-src/05-execution.html",
+      "bytes": 76483,
+      "sha256": "9826d83200236f6ed593e09b2797c397e2235e1d12f91f92a61f0c77c42f6c5a"
+    },
+    {
+      "path": "docs/mockups/ees-work/design-mock-05-execution.html",
+      "bytes": 406820,
+      "sha256": "99cc0fcc8770d98f9e862d5774b9c1b594f8c33ab471adf39a3150d50f76b0ae"
+    }
+  ],
+  "errors": [],
+  "externalRequests": [],
+  "screenshots": [
+    "mock-revision19-1920-default.png",
+    "mock-revision19-decision-terms.png",
+    "mock-revision19-480-default.png"
+  ],
+  "measurements": {
+    "480": {
+      "actor": {
+        "x": 77,
+        "y": 941,
+        "width": 72,
+        "height": 20
+      },
+      "run": {
+        "x": 354,
+        "y": 900,
+        "width": 106,
+        "height": 32
+      },
+      "evidence": {
+        "x": 381,
+        "y": 938,
+        "width": 79,
+        "height": 26
+      },
+      "actorFits": true
+    },
+    "1920": {
+      "actor": {
+        "x": 1461,
+        "y": 941,
+        "width": 72,
+        "height": 20
+      },
+      "run": {
+        "x": 1794,
+        "y": 900,
+        "width": 106,
+        "height": 32
+      },
+      "evidence": {
+        "x": 1821,
+        "y": 938,
+        "width": 79,
+        "height": 26
+      },
+      "actorFits": true
+    }
+  },
+  "browser": "134.0.6998.35",
+  "result": "pass",
+  "checks": [
+    "Only labels changed; all CSS and normalized script bytes identical; approved04 hashes retained",
+    "1920/480 new decision labels fit; no overflow/errors/external requests",
+    "Run/evidence controls remain at original positions; relocation not applied"
+  ]
+}

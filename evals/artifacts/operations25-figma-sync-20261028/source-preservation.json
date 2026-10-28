@@ -1,0 +1,41 @@
+{
+  "baselineLocal": "36d0f17a8c5f172193d785797a323bc34316bfe0",
+  "files": [
+    {
+      "path": "docs/mockups/ees-work/design-mock-src/04-cr-verdict.html",
+      "bytes": 65552,
+      "sha256": "544d5bbb92322bb7c21b080c860da2f81a00ea0d80239e2637a527ba00d2590d",
+      "unchanged": true
+    },
+    {
+      "path": "docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+      "bytes": 396066,
+      "sha256": "e3b562b05c79a5921813da0e8babcab5f6f4ac987196cca29a9f349503a3a8fe",
+      "unchanged": true
+    },
+    {
+      "path": "docs/mockups/ees-work/design-mock-src/05-execution.html",
+      "bytes": 76519,
+      "sha256": "d64abe44731b7481329cc8a9ff9f0ddf75c9e307fed2a0cd4d1da97e95bb3cc8",
+      "unchanged": true
+    },
+    {
+      "path": "docs/mockups/ees-work/design-mock-05-execution.html",
+      "bytes": 407188,
+      "sha256": "e99013764c1cacac347d02d9b7425f04efbf92cbd55153e7b752dd00bdc884ea",
+      "unchanged": true
+    },
+    {
+      "path": "docs/mockups/ees-work/design-mock-src/06-task-groups.html",
+      "bytes": 76364,
+      "sha256": "d316d63986b2afe1edda567b862edd716b14a71c80f04b5d679a445e94171e0d",
+      "unchanged": true
+    },
+    {
+      "path": "docs/mockups/ees-work/design-mock-06-task-groups.html",
+      "bytes": 407663,
+      "sha256": "24b9fee62679f0317cb9f69852a0caeedd434124bbcbbfb32e11252acd253aa6",
+      "unchanged": true
+    }
+  ]
+}

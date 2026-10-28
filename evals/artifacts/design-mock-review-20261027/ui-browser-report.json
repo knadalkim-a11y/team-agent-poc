@@ -1,0 +1,281 @@
+{
+  "source": "docs/mockups/ees-work/design-mock-src/04-cr-verdict.html",
+  "sourceSha256": "7adae4f9cb859a59e0be8ec6b66f12c7c56d8249366b263c2b08f6f7acd1d416",
+  "artifactSha256": "c8fc3502cc7dee23b6689d096234c9aed59177af53915a75e63f2c0b2345d7d0",
+  "artifact": "docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+  "checkedAt": "2026-10-27T00:26:04.172Z",
+  "checks": [
+    {
+      "name": "Embedded product fonts loaded",
+      "result": "pass",
+      "details": [
+        {
+          "family": "EES Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "EES Noto Sans KR",
+          "status": "loaded"
+        }
+      ]
+    },
+    {
+      "name": "Review state: initial",
+      "result": "pass",
+      "details": {
+        "label": "④-1 고르는 중"
+      }
+    },
+    {
+      "name": "Review state: menu",
+      "result": "pass",
+      "details": {
+        "label": "④-1a 판정 고르기"
+      }
+    },
+    {
+      "name": "Review state: ready",
+      "result": "pass",
+      "details": {
+        "label": "④-2 확정 준비"
+      }
+    },
+    {
+      "name": "Review state: confirmed",
+      "result": "pass",
+      "details": {
+        "label": "④-3 확정됨"
+      }
+    },
+    {
+      "name": "Review state: log",
+      "result": "pass",
+      "details": {
+        "label": "④-기록 (초안)"
+      }
+    },
+    {
+      "name": "Review state: rules",
+      "result": "pass",
+      "details": {
+        "label": "④-기준 (초안)"
+      }
+    },
+    {
+      "name": "Keyboard verdict choice updates state and restores focus",
+      "result": "pass",
+      "details": {
+        "chosen": "cond",
+        "state": "ready"
+      }
+    },
+    {
+      "name": "Menu Escape restores trigger; confirmation reaches completed state",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Default responsive shell at 1920",
+      "result": "pass",
+      "details": {
+        "width": 1920,
+        "sidebar": 256,
+        "compact": "false",
+        "overlay": "false",
+        "panel": {
+          "x": 1440,
+          "width": 480
+        },
+        "toggle": "true",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1440",
+      "result": "pass",
+      "details": {
+        "width": 1440,
+        "sidebar": 256,
+        "compact": "false",
+        "overlay": "false",
+        "panel": {
+          "x": 960,
+          "width": 480
+        },
+        "toggle": "true",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1439",
+      "result": "pass",
+      "details": {
+        "width": 1439,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "false",
+        "panel": {
+          "x": 959,
+          "width": 480
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1366",
+      "result": "pass",
+      "details": {
+        "width": 1366,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "false",
+        "panel": {
+          "x": 886,
+          "width": 480
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1200",
+      "result": "pass",
+      "details": {
+        "width": 1200,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "false",
+        "panel": {
+          "x": 720,
+          "width": 480
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1096",
+      "result": "pass",
+      "details": {
+        "width": 1096,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "false",
+        "panel": {
+          "x": 616,
+          "width": 480
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1095",
+      "result": "pass",
+      "details": {
+        "width": 1095,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "true",
+        "panel": {
+          "x": 615,
+          "width": 480
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 480",
+      "result": "pass",
+      "details": {
+        "width": 480,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "true",
+        "panel": {
+          "x": 56,
+          "width": 424
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Narrow review controls keep footer clear and can select a state",
+      "result": "pass",
+      "details": {
+        "controls": {
+          "x": 6,
+          "y": 852,
+          "width": 44,
+          "height": 40
+        },
+        "panel": {
+          "x": 56,
+          "y": 0,
+          "width": 424,
+          "height": 900
+        }
+      }
+    },
+    {
+      "name": "Manual sidebar state persists within breakpoint, defaults reset on crossing",
+      "result": "pass",
+      "details": {
+        "width": 1200,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "false",
+        "panel": {
+          "x": 720,
+          "width": 480
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Overlay Escape closes panel and toggle restores it",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Offline load and interactions",
+      "result": "pass",
+      "details": {
+        "externalRequests": 0,
+        "consoleErrors": 0,
+        "pageErrors": 0
+      }
+    }
+  ],
+  "screenshots": [
+    "mock-revision2-1920-full.png",
+    "mock-revision2-1920-menu.png",
+    "mock-revision2-1920-ready.png",
+    "mock-revision2-1920-confirmed.png",
+    "mock-revision2-1200-full.png",
+    "mock-revision2-1095-full.png",
+    "mock-revision2-480-full.png",
+    "mock-revision2-480-ready.png"
+  ],
+  "requests": [
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html"
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "browser": "134.0.6998.35",
+  "result": "pass"
+}

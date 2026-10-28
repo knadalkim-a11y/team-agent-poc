@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>시안 · 단계와 작업 실행 · 26판 · EES Workflow</title>
+<!--@mock:provenance-->
+<!--@mock:fonts-->
+<!--@mock:product-css-->
+<style data-mock-frame>
+/* Mock frame only. The EES shell rules are copied from EesShell.svelte in
+   frontend/patches; the Open WebUI sidebar footer and chat column are native
+   parts reproduced from CI screenshots (1920x1080, 1366x768). */
+html,body{margin:0;height:100%;overflow:hidden;background:#fff}
+.ees-source-shell{display:flex;position:relative;width:100%;height:100dvh;min-height:0;overflow:hidden;background:#fff;color:#1f2023}
+.ees-center{display:flex;flex:1;flex-direction:column;min-width:0;min-height:0;position:relative}
+.ees-main,.ees-chat-region{flex:1;width:100%;height:100%;min-height:0;min-width:0;overflow:hidden}
+.ees-chat-region{display:flex;flex-direction:column}
+.ees-panel-region{position:relative;flex:none;box-sizing:border-box;height:100%;min-height:0;border-left:1px solid #e6e6e9;background:#fff}
+.ees-panel-region[hidden]{display:none}
+.ees-panel-region[data-overlay='true']{position:absolute;right:0;top:0;z-index:35;box-shadow:-8px 0 24px #0001;max-width:calc(100% - 56px)}
+.ees-panel-region #ees-work-panel{width:100%;height:100%;max-height:100%;position:relative;inset:auto;border:0}
+.ees-panel-resize{position:absolute;left:-4px;top:0;bottom:0;width:8px;z-index:2;cursor:col-resize;touch-action:none}
+.ees-panel-resize:focus-visible{outline:2px solid #2f5f98;outline-offset:-3px}
+
+.mock-sidebar{flex:0 0 256px;width:256px;height:100%;display:flex;flex-direction:column;box-sizing:border-box;background:var(--ees-surface-sidebar);border-right:1px solid var(--ees-line-divider);font-family:var(--ees-font-sans);color:var(--ees-text-primary)}
+.mock-brand{flex:none;display:flex;align-items:center;gap:8px;height:48px;padding:0 14px 0 16px}
+.mock-brand b{flex:1;font-size:15px;line-height:22px;font-weight:700;letter-spacing:-.2px}
+.mock-logo{width:22px;height:22px;border-radius:6px;background:var(--ees-brand-solid);color:#fff;font:700 12px/22px var(--ees-font-sans);text-align:center}
+.mock-icon-button{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;padding:0;border:0;border-radius:6px;background:transparent;cursor:pointer}
+.mock-icon-button:hover{background:var(--ees-surface-hover)}
+.mock-sidebar-scroll{flex:1;min-height:0;overflow:auto}
+.mock-native-links{display:grid;gap:2px;padding:14px 8px 8px}
+.mock-native-links button{display:flex;align-items:center;gap:10px;padding:7px 8px;border:0;border-radius:6px;background:transparent;text-align:left;font:400 14px/22px var(--ees-font-sans);color:var(--ees-text-primary);cursor:pointer}
+.mock-native-links button:hover{background:var(--ees-surface-hover)}
+.mock-user{flex:none;display:flex;align-items:center;gap:12px;height:50px;padding:0 14px;border-top:1px solid var(--ees-line-divider);font:400 14px/22px var(--ees-font-sans)}
+.mock-avatar{display:inline-flex;align-items:center;justify-content:center;flex:none;width:22px;height:22px;border-radius:50%;background:#e6e6e9}
+.mock-avatar[data-size='28']{width:28px;height:28px}
+/* Match EesShell / eesCompact: 56px below 1440px, 256px otherwise.
+   Manual toggles persist until the viewport crosses that breakpoint. */
+.mock-sidebar[data-compact=true]{flex-basis:56px;width:56px;overflow:hidden}
+.mock-sidebar[data-compact=true] :is(.mock-logo,.mock-brand b,.mock-native-links span,.mock-user-name),.mock-sidebar[data-compact=true] #ees-work-entry :is(.ew-nav-caption,.ew-nav-links span,.ew-nav-links small,.ew-scope span,.ew-scope small,.ew-scope .ew-icon:last-child,.ew-workflows details>button,.ew-workflows summary>span){display:none}
+.mock-sidebar[data-compact=true] .mock-brand{padding:0;justify-content:center}
+.mock-sidebar[data-compact=true] #ees-work-entry .ew-workflows summary{justify-content:center}
+.mock-sidebar[data-compact=true] #ees-work-entry .ew-workflows summary::after{display:none}
+.mock-sidebar[data-compact=true] #ees-work-entry .ew-scope button{justify-content:center;padding:8px}
+.mock-sidebar[data-compact=true] .mock-user{justify-content:center;padding:0}
+.mock-icon-button:focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px}
+
+#chat-container{display:flex;flex-direction:column;height:100%;min-height:0}
+#chat-container>nav{flex:none;height:48px;box-sizing:border-box;display:flex;align-items:center}
+#chat-container>nav>div:first-child{display:flex;align-items:center;gap:8px;width:100%;min-width:0}
+.mock-chat-title{font-size:14px;line-height:20px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mock-chat-more{color:var(--ees-muted);letter-spacing:1px}
+.mock-chat-actions{display:flex;align-items:center;gap:6px;margin-left:auto}
+.mock-chat-actions>button{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 8px;border:0;border-radius:6px;background:transparent;font:500 13px/18px var(--ees-font);color:var(--ees-ink);cursor:pointer}
+.mock-chat-actions>button:hover{background:var(--ees-surface-hover)}
+#messages-container{flex:1;min-height:0;overflow:auto}
+.mock-thread{width:min(816px,100%);margin:0 auto;padding:80px 0 24px;box-sizing:border-box}
+.message-listitem{box-sizing:border-box}
+.chat-user .justify-end{display:flex;justify-content:flex-end}
+.chat-user .rounded-3xl.bg-gray-50{max-width:min(560px,90%)}
+.chat-assistant{display:flex;gap:12px;padding-top:30px}
+.mock-ai-body{flex:1;min-width:0}
+.mock-ai-name{font-size:15px;line-height:22px;font-weight:500;color:var(--ees-ink);margin-bottom:2px}
+.mock-ai-body .markdown-prose{font-size:14px;line-height:1.95;color:var(--ees-ink)}
+.mock-ai-body .markdown-prose p{margin:0 0 .6em}
+.mock-ai-body .markdown-prose ul{margin:0 0 .6em;padding-left:1.3em}
+.mock-ai-actions{display:flex;gap:12px;margin-top:6px}
+.mock-ai-actions svg{display:block}
+.mock-composer{flex:none;width:min(760px,calc(100% - 32px));margin:0 auto 16px}
+#message-input-container{border:1px solid var(--ees-line);border-radius:8px;background:var(--ees-paper)}
+#chat-input-container{padding:.625rem .375rem .25rem}
+#chat-input{min-height:22px;padding:4px 11px 0;font-size:14px;line-height:22px;color:var(--ees-muted);cursor:text}
+.mock-composer-row{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 12px}
+.mock-composer-row>svg:nth-child(2){margin-left:auto}
+.mock-voice{font-size:12px;line-height:18px;color:var(--ees-muted)}
+.mock-send{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#e6e6e9}
+#ees-work-panel-toggle{display:inline-flex}
+#ees-work-panel-toggle[hidden]{display:none}
+
+/* Mock-only controls: dark, outside the product language on purpose. */
+.mock-chip{position:fixed;left:10px;bottom:8px;z-index:1000;display:grid;gap:2px;width:236px;box-sizing:border-box;padding:7px 8px 7px 12px;border-radius:10px;background:#1f2023eb;color:#fff;font:400 12px/17px var(--ees-font-sans);box-shadow:0 4px 16px #0003}
+.mock-chip>div{display:flex;align-items:center;gap:6px}
+.mock-chip b{color:#ffd58a;font-weight:700}
+.mock-chip strong{flex:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mock-chip button{border:0;border-radius:6px;padding:2px 9px;background:#ffffff26;color:#fff;font:500 12px/18px var(--ees-font-sans);cursor:pointer}
+.mock-chip button:hover{background:#ffffff40}
+.mock-chip button:focus-visible,.mock-state-picker summary:focus-visible{outline:2px solid #ffd58a;outline-offset:2px}
+.mock-state-picker{margin-top:4px;border-top:1px solid #ffffff26;padding-top:5px}
+.mock-state-picker summary{cursor:pointer;font-weight:500}
+.mock-state-picker nav{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px}
+.mock-state-picker nav[hidden]{display:none}
+.mock-state-picker button{min-height:30px;text-align:left;padding:5px 7px}
+.mock-state-picker button[aria-current=true]{background:#ffd58a;color:#1f2023}
+.mock-state-picker p{margin:6px 0 0;color:#ffffffb8;font-size:11px;line-height:16px}
+.mock-chip>.mock-mobile-control{display:none}
+@media(max-width:640px){
+  .mock-chip{left:6px}
+  .mock-chip>.mock-mobile-control{display:block;min-height:32px;padding:4px 2px;font-weight:600;white-space:nowrap}
+  .mock-chip[data-expanded=false]{width:44px;padding:4px;border-radius:8px}
+  .mock-chip[data-expanded=false]>:not(.mock-mobile-control){display:none}
+}
+.mock-toast{position:fixed;left:50%;bottom:24px;z-index:1001;transform:translateX(-50%);max-width:min(520px,calc(100% - 32px));padding:10px 16px;border-radius:8px;background:#1f2023;color:#fff;font:400 13px/18px var(--ees-font-sans);box-shadow:0 6px 20px #0003}
+.mock-info{position:fixed;inset:0;z-index:1002;display:flex;align-items:flex-start;justify-content:center;padding-top:56px;background:#1f202366}
+.mock-info[hidden]{display:none}
+.mock-info>section{width:min(560px,calc(100% - 32px));max-height:calc(100% - 88px);overflow:auto;box-sizing:border-box;padding:22px 26px;border-radius:12px;background:#fff;color:#1f2023;font:400 14px/22px var(--ees-font-sans);box-shadow:0 12px 40px #0004}
+.mock-info h2{margin:0 0 12px;font-size:18px;line-height:26px}
+.mock-info h3{margin:16px 0 4px;font-size:13px;line-height:18px;color:#5c5e65}
+.mock-info p,.mock-info ol{margin:0}
+.mock-info ol{padding-left:1.3em}
+.mock-info footer{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+.mock-info footer button{min-height:34px;padding:5px 14px;border:1px solid #d5d6da;border-radius:6px;background:#fff;font:500 14px/22px var(--ees-font-sans);cursor:pointer}
+.mock-info footer button:last-child{border-color:#1f2023;background:#1f2023;color:#fff}
+.mock-info button:focus-visible{outline:2px solid #2f5f98;outline-offset:2px}
+</style>
+<style data-new-screen="⑥ 작업별 판정과 실행">
+/* Historical layout base: CR verdict v3.1 (Figma 1613:6115), not this revision's design reference. New screen rules written against the
+   product tokens and shared components; move them into ees-work-launcher.css
+   when the mock is confirmed. Reused as-is: .ew-panel-header, .ew-icon-button,
+   .ew-tag, .ew-tabs, .ew-primary and the [data-ees-work] base styles. */
+#ees-work-panel[data-ees-theme=v3]{background:var(--ees-surface-sidebar)}
+#ees-work-panel>.ew-panel-header.ew-run-nav{gap:2px;padding:0 10px 0 8px}
+#ees-work-panel .ew-run-nav>span{flex:1}
+#ees-work-panel .ew-run-back{display:inline-flex;align-items:center;gap:6px;min-width:0;min-height:32px;padding:4px 8px;border:0;border-radius:6px;background:transparent;font-size:14px;line-height:20px;font-weight:500;color:var(--ees-text-strong)}
+#ees-work-panel .ew-run-back>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ees-work-panel .ew-run-nav>.ew-icon-button{display:inline-flex;flex:none;align-items:center;justify-content:center;width:32px;min-height:32px;padding:0;border-radius:6px}
+#ees-work-panel .ew-run-nav>:is(.ew-run-back,.ew-icon-button):hover{background:var(--ees-surface-panel-hover)}
+#ees-work-panel .ew-vd-head{padding:20px 20px 0}
+#ees-work-panel .ew-vd-title{display:flex;align-items:center;gap:8px}
+#ees-work-panel .ew-vd-sub{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-top:8px;font-size:13px;line-height:20px;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-progress{margin-top:20px}
+#ees-work-panel .ew-vd-bar{display:flex;gap:2px;height:6px}
+#ees-work-panel .ew-vd-bar>i{display:block;min-width:4px;border-radius:3px;background:var(--ees-line-control);transition:flex-grow var(--ees-motion-open) var(--ees-motion-open-easing)}
+#ees-work-panel :is(.ew-vd-bar>i,.ew-vd-dot)[data-verdict=ok]{background:var(--ees-status-success)}
+#ees-work-panel :is(.ew-vd-bar>i,.ew-vd-dot)[data-verdict=cond]{background:var(--ees-status-attention)}
+#ees-work-panel :is(.ew-vd-bar>i,.ew-vd-dot)[data-verdict=bad]{background:var(--ees-status-danger)}
+#ees-work-panel .ew-vd-meta{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:13px;line-height:18px;color:var(--ees-text-secondary)}
+#ees-work-panel .ew-vd-meta>span:first-child{flex:1;min-width:0}
+#ees-work-panel .ew-vd-meta[data-done]>span:first-child{color:var(--ees-text-strong);font-weight:500}
+#ees-work-panel .ew-vd .ew-tabs{margin:20px 0 0;padding:0 20px}
+#ees-work-panel .ew-vd-body{padding:4px 8px 24px}
+#ees-work-panel .ew-vd-body>[data-task-group]{margin:0}
+#ees-work-panel .ew-vd-label{display:flex;align-items:center;gap:6px;margin:12px 0 0;padding:8px 12px;border-radius:6px;background:var(--ees-surface-hover);font-size:13px;line-height:20px;font-weight:700;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-label>b{font-weight:500;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-item{position:relative;display:grid;gap:4px;padding:10px 12px;border-radius:8px;transition:background-color var(--ees-motion-close) var(--ees-motion-close-easing)}
+#ees-work-panel .ew-vd-item+.ew-vd-item::before{content:"";position:absolute;top:0;left:12px;right:12px;height:1px;background:var(--ees-surface-muted)}
+#ees-work-panel .ew-vd-item[data-tone]::before,#ees-work-panel .ew-vd-item[data-tone]+.ew-vd-item::before{display:none}
+#ees-work-panel .ew-vd-item[data-tone=picked]{background:var(--ees-surface-selected)}
+#ees-work-panel .ew-vd-name{font-size:15px;line-height:22px;font-weight:500;color:var(--ees-text-primary);overflow-wrap:anywhere}
+#ees-work-panel .ew-vd-line{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;font-size:13px;line-height:18px;color:var(--ees-text-secondary)}
+#ees-work-panel .ew-vd-line>[data-tone=attention]{color:var(--ees-status-attention)}
+#ees-work-panel .ew-vd-line>[data-tone=danger]{color:var(--ees-status-danger)}
+#ees-work-panel .ew-vd-file{display:inline-flex;align-items:center;gap:4px;min-width:0;font-size:13px;line-height:20px;color:var(--ees-text-primary);overflow-wrap:anywhere}
+#ees-work-panel .ew-vd-src{display:inline-flex;width:14px;height:14px}
+#ees-work-panel .ew-vd-pick{display:flex;align-items:center;gap:6px;width:124px;min-height:30px;height:30px;padding:0 8px 0 10px;border:1px solid transparent;border-radius:6px;background:transparent;box-shadow:none;font-size:13px;line-height:20px;font-weight:500;color:var(--ees-text-primary);text-align:left}
+#ees-work-panel .ew-vd-pick>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ees-work-panel .ew-vd-pick:not([data-verdict]){color:var(--ees-text-tertiary)}
+#ees-work-panel :is(.ew-vd-pick,.ew-vd-group,.ew-vd-option,.ew-run-back,.ew-run-nav>.ew-icon-button):focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px}
+#ees-work-panel .ew-vd-dot{display:inline-block;flex:none;width:8px;height:8px;border-radius:50%;background:var(--ees-line-control)}
+#ees-work-panel .ew-vd-final{display:flex;align-items:center;gap:6px;height:30px;padding-left:11px;box-sizing:border-box;font-size:13px;line-height:20px;font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-group{display:flex;align-items:center;gap:8px;width:100%;min-height:40px;padding:10px 12px;border:0;border-radius:6px;background:transparent;text-align:left;font-size:14px;line-height:20px;font-weight:400;color:var(--ees-text-strong)}
+#ees-work-panel .ew-vd-group-label{flex:1}
+#ees-work-panel .ew-vd-group>.ew-icon:first-child{transition:transform var(--ees-motion-fast)}
+#ees-work-panel .ew-vd-group[aria-expanded=true]>.ew-icon:first-child{transform:rotate(90deg)}
+#ees-work-panel .ew-vd-menu{position:absolute;z-index:30;display:grid;gap:2px;width:180px;box-sizing:border-box;padding:4px;border:1px solid var(--ees-line-divider);border-radius:8px;background:var(--ees-surface-default);box-shadow:0 4px 12px #1118270d,0 1px 2px #11182708;animation:ew-vd-open var(--ees-motion-open) var(--ees-motion-open-easing)}
+@keyframes ew-vd-open{from{opacity:0;transform:var(--ees-motion-offset,translateY(-4px))}to{opacity:1;transform:none}}
+#ees-work-panel .ew-vd-option{display:flex;align-items:flex-start;gap:8px;width:100%;min-height:0;padding:6px 8px;border:0;border-radius:6px;background:transparent;text-align:left;font-weight:400}
+#ees-work-panel .ew-vd-option:is(:hover,:focus){background:var(--ees-surface-hover);outline:none}
+#ees-work-panel .ew-vd-option>.ew-vd-dot{margin-top:6px}
+#ees-work-panel .ew-vd-option>span{display:grid;gap:2px;flex:1}
+#ees-work-panel .ew-vd-option b{font-size:13px;line-height:20px;font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-option>.ew-icon{margin-top:2px}
+#ees-work-panel .ew-vd-log{display:grid;margin:0;padding:8px 20px 24px;list-style:none}
+#ees-work-panel .ew-vd-log>li{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--ees-line-divider);font-size:13px;line-height:20px;color:var(--ees-text-strong)}
+#ees-work-panel .ew-vd-log time{color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-rules{display:grid;gap:20px;padding:20px 20px 24px;font-size:13px;line-height:20px;color:var(--ees-text-strong)}
+#ees-work-panel .ew-vd-rules h3{margin-bottom:8px;font-size:13px;line-height:20px;font-weight:500;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-rules ul{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+#ees-work-panel .ew-vd-rules li{display:flex;align-items:center;gap:8px}
+#ees-work-panel .ew-vd-rules li>b{width:84px;flex:none;font-weight:500;color:var(--ees-text-primary)}
+</style>
+<style data-new-screen="⑥ 작업별 판정 근거">
+/* Synthetic task-level decisions; reuses approved revision10 styling and product tokens. */
+#ees-work-panel .ew-vd-statusline{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:8px;font-size:13px;line-height:20px;color:var(--ees-text-secondary)}
+#ees-work-panel .ew-vd-statusline>b{font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-statusline[data-person]>b{color:var(--ees-status-attention)}
+#ees-work-panel .ew-vd-entry{margin:0;border-bottom:1px solid var(--ees-surface-muted);border-radius:8px}
+#ees-work-panel .ew-vd-entry[data-tone=picked]{background:var(--ees-surface-selected)}
+#ees-work-panel .ew-vd-item-top{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
+#ees-work-panel .ew-vd-item-top>.ew-vd-name{flex:1;min-width:0}
+#ees-work-panel .ew-vd-item-top>.ew-vd-run{flex:none}
+#ees-work-panel .ew-vd-item-meta{display:grid;grid-template-columns:72px minmax(0,1fr);align-items:center;gap:8px;font-size:13px;line-height:20px;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-item-meta>[data-decision-actor]{font-weight:500;color:var(--ees-text-primary);white-space:nowrap}
+#ees-work-panel .ew-vd-decision{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;min-width:0}
+#ees-work-panel .ew-vd-decision>:is(.ew-vd-pick,.ew-vd-final){flex:none}
+#ees-work-panel .ew-vd-decision>[data-tone=danger]{color:var(--ees-status-danger)}
+#ees-work-panel .ew-vd-decision>[data-tone=attention]{color:var(--ees-status-attention)}
+#ees-work-panel .ew-vd-attachment{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;min-width:0;margin-top:2px}
+#ees-work-panel .ew-vd-attachment>span:first-child{font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-evidence-toggle{display:inline-flex;align-items:center;gap:4px;min-height:26px;padding:2px 5px;border:0;border-radius:4px;background:transparent;color:var(--ees-brand-text);font-size:13px;line-height:20px;font-weight:500;white-space:nowrap}
+#ees-work-panel .ew-vd-evidence-toggle:hover{background:var(--ees-surface-hover)}
+#ees-work-panel .ew-vd-evidence-toggle:focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px}
+#ees-work-panel .ew-vd-evidence-toggle[aria-expanded=true] .ew-icon{transform:rotate(180deg)}
+#ees-work-panel .ew-vd-evidence{margin:0 12px 12px;padding:12px;border:1px solid var(--ees-line-divider);border-radius:6px;background:var(--ees-surface-default);font-size:13px;line-height:20px;color:var(--ees-text-secondary)}
+#ees-work-panel .ew-vd-evidence>p{margin-bottom:8px;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-evidence [data-missing],#ees-work-panel .ew-vd-evidence [data-pass=false]{color:var(--ees-status-danger)}
+#ees-work-panel .ew-vd-evidence [data-pass=true]{color:var(--ees-status-success)}
+#ees-work-panel .ew-vd-evidence-caption{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px}
+#ees-work-panel .ew-vd-evidence-caption b{font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-tool+.ew-vd-tool{margin-top:0;border-top:1px solid var(--ees-line-divider)}
+#ees-work-panel .ew-vd-tool-toggle{display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;border:0;background:transparent;text-align:left;border-radius:4px}
+#ees-work-panel .ew-vd-tool-toggle:hover{background:var(--ees-surface-hover)}
+#ees-work-panel .ew-vd-tool-toggle:focus-visible,#ees-work-panel .ew-vd-note textarea:focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px}
+#ees-work-panel .ew-vd-tool-toggle[aria-expanded=true]>.ew-icon{transform:rotate(180deg)}
+#ees-work-panel .ew-vd-tool-heading{display:grid;gap:4px;flex:1;min-width:0}
+#ees-work-panel .ew-vd-tool-heading>span{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px}
+#ees-work-panel .ew-vd-tool-heading b{font-size:14px;font-weight:500;color:var(--ees-text-primary);line-height:20px}
+#ees-work-panel .ew-vd-tool-heading strong{font-size:13px;font-weight:500;line-height:20px}
+#ees-work-panel .ew-vd-tool-heading small{font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-tool-detail{display:grid;gap:14px;padding:4px 0 14px}
+#ees-work-panel .ew-vd-tool-detail>section{margin:0}
+#ees-work-panel .ew-vd-tool-detail h4{margin:0 0 6px;font-size:13px;line-height:20px;font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-tool-detail h4>span:not([data-pass]){margin-left:4px;font-size:12px;font-weight:400;color:var(--ees-text-tertiary);line-height:18px}
+#ees-work-panel .ew-vd-tool-detail p{margin:0;overflow-wrap:anywhere}
+#ees-work-panel .ew-vd-tool-detail small{display:block;margin-top:4px;font-size:12px;color:var(--ees-text-tertiary);line-height:18px}
+#ees-work-panel .ew-vd-tool-values{display:grid;grid-template-columns:84px minmax(0,1fr);gap:4px 10px;margin:0}
+#ees-work-panel .ew-vd-tool-values dt{color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-tool-values dd{margin:0;overflow-wrap:anywhere;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-tool-result{padding-top:10px;border-top:1px solid var(--ees-line-divider)}
+#ees-work-panel .ew-vd-task-result{display:grid;gap:4px;margin:0;padding-top:12px;border-top:1px solid var(--ees-line-divider)}
+#ees-work-panel .ew-vd-task-result b{font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-task-result span{font-size:13px;color:var(--ees-text-secondary);line-height:20px}
+#ees-work-panel .ew-vd-selection-record{display:grid;gap:8px}
+#ees-work-panel .ew-vd-selection-record p{display:grid;gap:3px;margin:0}
+#ees-work-panel .ew-vd-selection-record b{font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-selection-record span{color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-note{display:grid;gap:6px;margin-top:12px}
+#ees-work-panel .ew-vd-note>span{font-weight:500;color:var(--ees-text-primary)}
+#ees-work-panel .ew-vd-note small{font-weight:400;color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-vd-note textarea{display:block;box-sizing:border-box;resize:vertical;width:100%;min-height:66px;padding:8px 10px;border:1px solid var(--ees-line-divider);border-radius:6px;background:var(--ees-surface-default);font:inherit;line-height:18px;color:var(--ees-text-primary)}
+</style>
+<style data-new-screen="⑥ 단계와 작업 실행">
+#ees-work-panel .ew-stage-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#ees-work-panel .ew-stage-heading>.ew-vd-title{flex:1;min-width:0;flex-wrap:wrap;gap:4px 8px}
+#ees-work-panel .ew-stage-heading>.ew-vd-title h2{white-space:nowrap;font-size:20px;line-height:28px;font-weight:700}
+#ees-work-panel .ew-stage-run-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:none;box-sizing:border-box;width:116px;min-height:32px;height:32px;padding:0 10px;border:0;border-radius:6px;box-shadow:none;font-size:13px;line-height:20px;font-weight:500;white-space:nowrap;background:var(--ees-surface-selected);color:var(--ees-brand-text)}
+#ees-work-panel .ew-stage-run-button:not(:disabled):hover{background:var(--ees-surface-hover)}
+#ees-work-panel .ew-stage-run-button:disabled{background:var(--ees-surface-muted);color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-stage-run-button>svg,#ees-work-panel .ew-vd-run>svg{display:block;flex:none}
+#ees-work-panel .ew-vd-run{display:inline-flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;width:106px;min-height:32px;height:32px;padding:0 10px;border:0;border-radius:6px;box-shadow:none;background:transparent;color:var(--ees-brand-text);font-size:13px;line-height:20px;font-weight:500;white-space:nowrap}
+#ees-work-panel .ew-vd-run:not(:disabled):hover{background:transparent}
+#ees-work-panel .ew-vd-run:disabled{color:var(--ees-text-tertiary);background:var(--ees-surface-muted);cursor:default}
+#ees-work-panel :is(.ew-vd-run,[data-stage-run],.ew-attempt-select select):focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px;box-shadow:none}
+#ees-work-panel .ew-attempt-select{display:grid;grid-template-columns:58px minmax(0,1fr);align-items:center;gap:8px;margin-bottom:12px}
+#ees-work-panel .ew-attempt-select select{min-width:0;max-width:100%;height:32px;padding:4px 6px;border:1px solid var(--ees-line-control);border-radius:5px;background:var(--ees-surface-default);font:inherit;color:var(--ees-text-primary)}
+#ees-work-panel .ew-attempt-caption{display:grid;gap:3px;margin:0 0 12px;font-size:13px;line-height:20px}
+#ees-work-panel .ew-attempt-caption b{font-weight:500}
+#ees-work-panel .ew-attempt-caption span{color:var(--ees-text-tertiary)}
+#ees-work-panel .ew-execution-pending{padding:8px 10px;border-radius:4px;background:var(--ees-status-attention-bg);color:var(--ees-status-attention);font-size:13px;line-height:20px}
+#ees-work-panel .ew-vd-log>li>span>.ew-vd-evidence-toggle{display:block;padding-left:0;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="ees-source-shell" data-ees-source-shell data-ees-route="chat">
+  <nav class="mock-sidebar" aria-label="왼쪽 메뉴" data-compact="false">
+    <div class="mock-brand"><span class="mock-logo" aria-hidden="true">E</span><b>EES Workflow</b><button type="button" class="mock-icon-button" aria-label="메뉴 접기" aria-expanded="true" data-sidebar-toggle><img class="ew-icon" src="v4/cda5f.svg" alt="" aria-hidden="true"></button></div>
+    <div class="mock-sidebar-scroll">
+      <section id="ees-work-entry" data-ees-work aria-label="업무 메뉴">
+        <p class="ew-nav-caption">작업 위치</p>
+        <div class="ew-scope">
+          <div class="ew-scope-field"><button type="button" data-scope-trigger="factory" aria-label="공장 고르기" aria-haspopup="listbox" aria-expanded="false" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><img class="ew-icon" src="v4/4d978.svg" alt="" aria-hidden="true"><small>공장</small><span>전체 공장</span><img class="ew-icon" src="v4/f17e6.svg" alt="" aria-hidden="true"></button></div>
+          <div class="ew-scope-field"><button type="button" data-scope-trigger="system" aria-label="시스템 고르기" aria-haspopup="listbox" aria-expanded="false" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><img class="ew-icon" src="v4/31608.svg" alt="" aria-hidden="true"><small>시스템</small><span>EMS</span><img class="ew-icon" src="v4/f17e6.svg" alt="" aria-hidden="true"></button></div>
+        </div>
+        <nav class="ew-nav-links">
+          <button type="button" data-action="my_work" aria-current="page" aria-label="내 업무" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><img class="ew-icon" src="v4/4df0d.svg" alt="" aria-hidden="true"><span>내 업무</span><small>1</small></button>
+          <button type="button" data-action="records" aria-label="실행 기록" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><img class="ew-icon" src="v4/c325d.svg" alt="" aria-hidden="true"><span>실행 기록</span></button>
+          <button type="button" data-action="chats" aria-label="대화 기록" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><img class="ew-icon" src="v4/093d6.svg" alt="" aria-hidden="true"><span>대화 기록</span></button>
+        </nav>
+        <p class="ew-nav-caption">업무</p>
+        <nav class="ew-workflows">
+          <details data-category="ops" open><summary aria-label="운영"><img class="ew-icon" src="v4/126c7.svg" alt="" aria-hidden="true"><span>운영</span></summary><button type="button" data-action="workflow" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><span>배포 산출물 점검</span></button><button type="button" data-action="workflow" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><span>일일 시스템 점검</span></button></details>
+          <details data-category="setup" open><summary aria-label="셋업"><img class="ew-icon" src="v4/f6bbc.svg" alt="" aria-hidden="true"><span>셋업</span></summary><button type="button" data-action="workflow" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><span>신규 공장 횡전개</span></button></details>
+          <details data-category="incident" open><summary aria-label="장애대응"><img class="ew-icon" src="v4/4fb09.svg" alt="" aria-hidden="true"><span>장애대응</span></summary></details>
+        </nav>
+      </section>
+      <div class="mock-native-links">
+        <button type="button" aria-label="새 대화" data-mock-toast="시안: 대화는 동작하지 않습니다"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M11.3 2.7a1.5 1.5 0 0 1 2.1 2.1L5.7 12.5l-2.9.7.7-2.9 7.8-7.6Z" stroke="#6F717A" stroke-width="1.4" stroke-linejoin="round"/></svg><span>새 대화</span></button>
+        <button type="button" aria-label="대화 검색" data-mock-toast="시안: 대화는 동작하지 않습니다"><img class="ew-icon" src="v4/b8bc6.svg" alt="" aria-hidden="true" width="16" height="16"><span>대화 검색</span></button>
+      </div>
+    </div>
+    <div class="mock-user" aria-label="김광재"><span class="mock-avatar"><img class="ew-icon" src="v4/afcd5.svg" alt="" aria-hidden="true" width="13" height="13"></span><span class="mock-user-name">김광재</span></div>
+  </nav>
+
+  <section class="ees-center" aria-label="대화">
+    <main id="main-content" class="ees-main">
+      <div class="ees-chat-region">
+        <div id="chat-container">
+          <nav>
+            <div>
+              <span class="mock-chat-title">1차 점검 작업 현황</span><span class="mock-chat-more" aria-hidden="true">···</span>
+              <div class="mock-chat-actions">
+                <button type="button" id="ees-work-panel-toggle" aria-expanded="true" hidden data-panel-open><img class="ew-icon" src="v4/7bb4a.svg" alt="" aria-hidden="true">업무 패널</button>
+                <button type="button" data-mock-toast="시안: 대화는 동작하지 않습니다">새 대화</button>
+                <button type="button" aria-label="대화 설정" data-mock-toast="시안: 대화는 동작하지 않습니다"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 4.5h7M12.5 4.5h1M2.5 11.5h1M6.5 11.5h7" stroke="#6F717A" stroke-width="1.4" stroke-linecap="round"/><circle cx="11" cy="4.5" r="1.5" stroke="#6F717A" stroke-width="1.4"/><circle cx="5" cy="11.5" r="1.5" stroke="#6F717A" stroke-width="1.4"/></svg></button>
+              </div>
+            </div>
+            <div id="navbar-bg-gradient-to-b" hidden></div>
+          </nav>
+          <div id="messages-container">
+            <div class="mock-thread">
+              <div class="message-listitem chat-user"><div class="justify-end"><div class="rounded-3xl bg-gray-50"><div class="whitespace-pre-wrap">10.27 배포 회차의 1차 점검에서 실행할 작업과 판정 현황을 보여 줘</div></div></div></div>
+              <div class="message-listitem chat-assistant">
+                <span class="mock-avatar" data-size="28"><img class="ew-icon" src="v4/afcd5.svg" alt="" aria-hidden="true" width="16" height="16"></span>
+                <div class="mock-ai-body">
+                  <div class="mock-ai-name">업무 도우미</div>
+                  <div id="response-content-container"><div class="markdown-prose">
+                    <p>서비스 작업 9개 중 7개는 판정이 끝났고, 2개는 실행이 필요한 예시입니다.</p>
+                    <p>단계 제목 옆 ‘이 단계 실행’은 아직 실행하지 않은 서비스 작업을 시작합니다. 끝난 작업은 건너뛰며, 필요한 작업만 ‘다시 실행’할 수도 있습니다.</p>
+                    <p>나머지 3건은 사람이 판정하는 작업입니다. 각 작업에서 판정을 선택하고, ‘판정 기록’에 필요한 사유를 적을 수 있습니다.</p>
+                  </div></div>
+                  <div class="mock-ai-actions" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" stroke="#6F717A" stroke-width="1.3"/><path d="M10.5 3.5v-.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5" stroke="#6F717A" stroke-width="1.3"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 6.5h2l3-2.5v8l-3-2.5h-2v-3Z" stroke="#6F717A" stroke-width="1.3" stroke-linejoin="round"/><path d="M10.5 6a2.8 2.8 0 0 1 0 4M12.3 4.3a5.2 5.2 0 0 1 0 7.4" stroke="#6F717A" stroke-width="1.3" stroke-linecap="round"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 7.2 7.3 2.5a1.6 1.6 0 0 1 1.6 1.9L8.6 6.5h3.5a1.3 1.3 0 0 1 1.3 1.6l-1 4.2a1.6 1.6 0 0 1-1.6 1.2H5V7.2ZM2.5 7.2H5v6.3H2.5z" stroke="#6F717A" stroke-width="1.3" stroke-linejoin="round"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11 8.8 8.7 13.5a1.6 1.6 0 0 1-1.6-1.9l.3-2.1H3.9a1.3 1.3 0 0 1-1.3-1.6l1-4.2a1.6 1.6 0 0 1 1.6-1.2H11v6.3ZM13.5 8.8H11V2.5h2.5z" stroke="#6F717A" stroke-width="1.3" stroke-linejoin="round"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.5V5h-2.5" stroke="#6F717A" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mock-composer">
+            <div id="message-input-container">
+              <div id="chat-input-container"><div id="chat-input" role="textbox" aria-label="업무를 물어보거나, 필요한 작업을 요청하세요" tabindex="0" data-mock-toast="시안: 대화는 동작하지 않습니다">업무를 물어보거나, 필요한 작업을 요청하세요</div></div>
+              <div class="mock-composer-row">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10M3 8h10" stroke="#5C5E65" stroke-width="1.4" stroke-linecap="round"/></svg>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="5.75" y="2" width="4.5" height="7.5" rx="2.25" stroke="#5C5E65" stroke-width="1.3"/><path d="M3.5 7.5a4.5 4.5 0 0 0 9 0M8 12v2" stroke="#5C5E65" stroke-width="1.3" stroke-linecap="round"/></svg>
+                <span class="mock-voice">음성 모드 사용</span>
+                <span class="mock-send" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 11.5v-9M3.5 6 7 2.5 10.5 6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <section class="ees-panel-region" aria-label="업무 패널" style="width:480px">
+    <div class="ees-panel-resize" role="separator" tabindex="0" aria-label="업무 패널 너비" aria-orientation="vertical" aria-valuemin="400" aria-valuemax="720" aria-valuenow="480"></div>
+    <aside id="ees-work-panel" tabindex="-1" data-ees-work data-ees-source-slot data-ees-theme="v3" aria-label="업무 패널"></aside>
+  </section>
+</div>
+
+<div class="mock-chip" data-mock-controls data-expanded="false" aria-label="시안 확인 도구">
+  <button type="button" class="mock-mobile-control" data-mock-controls-toggle aria-expanded="false" aria-label="시안 확인 도구 열기">시안</button>
+  <div><b>시안</b><span>저장·실행 안 됨</span></div>
+  <div><strong id="mock-screen" role="status" aria-live="polite">⑥-1 단계와 작업 실행</strong><button type="button" data-mock-info>안내</button></div>
+  <details class="mock-state-picker">
+    <summary>화면 바로 보기 · 26판</summary>
+    <nav aria-label="작업별 판정 상태 선택">
+      <button type="button" data-mock-state="initial" aria-current="true">⑥-1 단계와 작업 실행</button>
+      <button type="button" data-mock-state="menu">⑥-1a 직접 판정 고르기</button>
+      <button type="button" data-mock-state="evidence">⑥-1b 판정 근거</button>
+      <button type="button" data-mock-state="log">⑥-기록 · 초안</button>
+      <button type="button" data-mock-state="rules">⑥-기준 · 초안</button>
+    </nav>
+    <p>선택하면 예시 상태로 다시 시작합니다.<br>실제 제품에는 없는 확인용 도구입니다.</p>
+  </details>
+</div>
+
+<div class="mock-info" role="dialog" aria-modal="true" aria-labelledby="mock-info-title" hidden>
+  <section>
+    <h2 id="mock-info-title">시안 안내 · 단계와 작업 실행</h2>
+    <h3>이 화면</h3>
+    <p>‘배포 산출물 점검’ 절차의 10.27 배포 회차 → 1차 점검 단계입니다. 각 행을 하나의 작업으로 보는 설계 시안이며 작업 12개 중 직접 판정은 3개, 자동 판정은 9개입니다. 25판의 작업 목록과 판정 동작을 유지하면서 단계 상단에 업무 이름과 필요한 경우의 구분 이름만 표시한 26판입니다. 개별 작업의 실행 버튼은 ‘실행’과 ‘다시 실행’으로 표시합니다. 서비스 7개는 판정 완료, 2개는 실행 필요 상태인 예시이며 실제 제품 실행 구조는 바꾸지 않았습니다.</p>
+    <h3>직접 판정과 자동 판정</h3>
+    <p>사람 작업은 ‘판정 기록’에서 누가 언제 무엇을 선택했는지 보고, 사유를 선택적으로 적습니다. 서비스 작업은 ‘판정 근거’에서 실행한 도구를 보고, 도구 하나를 펼쳐 입력·출력·이번 작업의 판정 기준·판정 결과를 확인합니다. 작업과 도구는 각각 하나씩 펼쳐집니다. 도구 실행 완료와 기준 충족 여부는 서로 다릅니다.</p>
+    <h3>화면의 위치</h3><p>맨 위에는 업무 이름을 표시하고, 구분할 대상이 있으면 그 이름을 함께 표시합니다. 이 예시의 ‘10.27 배포 회차’는 배포 대상을 구분하는 이름이며 모든 업무에 회차가 필요한 것은 아닙니다.</p><h3>단계와 작업 실행</h3><p>단계 제목 옆 ‘이 단계 실행’은 실행 가능한 미실행 서비스 작업만 시작합니다. 완료·제외 작업은 건너뛰고 사람의 판정을 대신하지 않습니다. 개별 ‘다시 실행’은 새 실행 기록을 만들고 이전 입력·출력·결과를 보존합니다. 실행 중에는 이전 결과를 이번 실행 결과로 표시하지 않습니다. 이 시안의 실행은 짧은 화면 전환일 뿐 실제 도구를 호출하지 않습니다.</p><h3>해 볼 것</h3>
+    <ol><li>실행이 필요한 작업을 하나 실행하거나 단계 제목 옆 ‘이 단계 실행’ 누르기</li><li>완료된 작업을 다시 실행하고 이전 기록 보기</li><li>직접 판정 작업의 ‘판정 필요’에서 값 고르기</li><li>사람 작업의 ‘판정 기록’에서 사유 적기</li><li>서비스 작업의 ‘판정 근거’에서 도구를 하나씩 펼치기</li><li>판정 결과에서 나머지 승인 항목 펼치기</li><li>‘기록’과 ‘기준’ 탭 보기</li></ol>
+    <h3>의견 보내는 법</h3>
+    <p>왼쪽 아래 화면 번호와 함께 짧게 적어 주세요. 예) ⑥-1 고르기 목록 글자가 작다</p>
+    <h3>아직 정하지 않은 것</h3>
+    <p>사람이 고른 판정을 실제로 저장·최종 확정하는 방법은 아직 정하지 않았습니다. 이 시안에는 확정 버튼이 없고, 판정 선택과 사유 입력만 시험할 수 있습니다. 값을 고르면 판정 결과 묶음으로 이동하며, 저장되거나 판정 완료로 처리되지는 않습니다. 판정 선택·사유·실행 기록은 이 화면에서만 유지되며 초기화하거나 새로 열면 사라집니다.</p>
+    <h3>이 시안은</h3>
+    <p>실제 프로그램의 글꼴 파일과 화면 CSS(색, 크기, 탭·꼬리표·단추 부품)를 그대로 써서 만들었습니다. 왼쪽 메뉴 접기·펼치기와 창 크기에 따른 업무 패널 겹침은 제품 기준을 따릅니다. 도구 이름·입력·출력·지침·시각은 화면 검토를 위한 합성 예시이며 실제 도구 실행 기록이 아닙니다. 문서 존재와 접근 여부의 예시를 보여주며 내용 적정성은 판단하지 않습니다. 여러 도구 결과를 최종 판정으로 합치는 실제 규칙·저장은 아직 정하지 않았습니다. ‘배치 주기 조정’의 첨부는 판정 참고 자료의 표시 예시이며 실제 파일 내용이나 열기·업로드 기능과 연결되지 않습니다. 실제 저장·도구 실행·대화는 되지 않으며, 왼쪽 메뉴 이동과 가운데 대화는 모양만 같습니다. 사내 PC에서 파일이 열리는지도 확인해 주세요.</p>
+    <h3>판</h3>
+    <p>시안 26판 · 2026-10-28 · 단계와 작업 실행 · 공통 단계 상단 반영</p>
+    <footer><button type="button" data-mock-reset>처음부터 다시</button><button type="button" data-mock-close>닫기</button></footer>
+  </section>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const ACTOR = '김광재';
+  const SCREEN = Object.freeze({workflowName: '배포 산출물 점검', contextLabel: '10.27 배포 회차'});
+  const ICON = {down: 'v4/f17e6.svg', right: 'v4/69549.svg', check: 'v4/9d8d5.svg', clip: 'v4/ea639.svg', back: 'v4/eb94a.svg', more: 'v4/a953c.svg', panel: 'v4/7bb4a.svg'};
+  // Small inline run glyph; retry reuses the existing mock chat refresh path.
+  const ACTION_ICON = {play: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.5 2.75L11 7L4.5 11.25V2.75Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg>', retry: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.5V5h-2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'};
+  const VERDICT = {ok: ['승인', '설정된 승인 조건을 충족함'], cond: ['조건부 승인', '추가 조건을 전제로 승인'], bad: ['미승인', '설정된 승인 조건을 충족하지 못함']};
+  const GROUPS = [['waiting', '대기', ['pending', 'none']], ['running', '실행 중', ['running']], ['result', '판정 결과', ['cond', 'bad', 'ok']]];
+  const SEED = [
+    ['CR-2201', '로그인 화면 문구 수정', 'ok'], ['CR-2202', '알람 기준값 조정', 'ok'], ['CR-2203', '보고서 출력 양식 변경', null],
+    ['CR-2204', '대시보드 필터 추가', 'bad', '테스트 없음'], ['CR-2205', '설비 목록 정렬 수정', 'ok'], ['CR-2206', '데이터 보관 기간 변경', 'ok'],
+    ['CR-2207', '배치 주기 조정', null, '', 'test_v2_final.xlsx'], ['CR-2208', '메일 발송 대상 추가', 'ok'],
+    ['CR-2209', '화면 응답 속도 개선', 'ok'], ['CR-2210', '권한 그룹 정리', null], ['CR-2211', '이력 조회 기간 확대', null], ['CR-2212', '오류 메시지 정리', null]
+  ];
+  const HUMAN_IDS = new Set(['CR-2203', 'CR-2207', 'CR-2210']);
+  const panel = document.getElementById('ees-work-panel');
+  const region = document.querySelector('.ees-panel-region');
+  const sidebar = document.querySelector('.mock-sidebar');
+  let compactBreakpoint = window.innerWidth < 1440;
+  let compact = compactBreakpoint;
+  let S, flashTimer, toastTimer, epoch = 0;
+  const runTimers = new Set();
+
+  const esc = value => String(value).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+  const icon = (src, size) => `<img class="ew-icon" src="${src}" alt="" aria-hidden="true"${size ? ` width="${size}" height="${size}"` : ''}>`;
+  // Fixed synthetic time for mock selections.
+  const stamp = () => ({date: '10.27', time: '14:24'});
+
+  const timeText = seconds => '10.27 ' + [Math.floor(seconds/3600), Math.floor(seconds/60)%60, seconds%60].map(n => String(n).padStart(2, '0')).join(':');
+  const immutable = value => { if (value && typeof value === 'object' && !Object.isFrozen(value)) { Object.values(value).forEach(immutable); Object.freeze(value); } return value; };
+  function makeAttempt(item, number, seconds) {
+    const verdict = item.id === 'CR-2204' ? 'bad' : 'ok';
+    return immutable({number, startedAt: timeText(seconds), finishedAt: timeText(seconds+5), verdict, tools: toolRuns(item, seconds)});
+  }
+  function reset() {
+    clearTimeout(flashTimer); epoch++;
+    runTimers.forEach(clearTimeout); runTimers.clear();
+    S = {
+      items: SEED.map(([id, name, verdict, reason, file]) => ({id, name, verdict, reason: reason || '', file: file || '', handler: HUMAN_IDS.has(id) ? 'human' : 'service', history: [], note: '', attempts: [], running: false, excluded: false})),
+      picked: null, flash: null, expanded: false, evidence: null, tool: null, tab: 'work', menu: null,
+      runSerial: 0, stageIds: [], lastRun: null, attemptView: {}, log: [], width: 480, open: true
+    };
+    S.items.filter(item => item.handler === 'service' && item.verdict).forEach(item => {
+      item.attempts.push(makeAttempt(item, 1, 14*3600+20*60));
+      S.log.push(['14:20', `${item.name} · 1차 실행 완료 · ${VERDICT[item.verdict][0]}`, {id:item.id, index:0}]);
+    });
+  }
+  function groupFor(item) { return item.running ? 'running' : item.handler === 'service' && !item.attempts.length ? 'pending' : item.verdict || 'none'; }
+  function counts() { const c = {none: 0, pending:0, running:0, ok: 0, cond: 0, bad: 0}; S.items.forEach(item => c[groupFor(item)]++); return c; }
+  const executable = () => S.items.filter(item => item.handler === 'service' && !item.attempts.length && !item.running && !item.excluded);
+  const busy = () => S.items.some(item => item.running);
+  function afterRun(delay, action) {
+    const currentEpoch = epoch, timer = setTimeout(() => { runTimers.delete(timer); if (currentEpoch === epoch) action(); }, delay);
+    runTimers.add(timer);
+  }
+  function startRun(id, inStage = false) {
+    const item = S.items.find(entry => entry.id === id);
+    if (!item || item.handler !== 'service' || item.running || item.excluded) return;
+    const seconds = 14*3600+24*60+(++S.runSerial)*10;
+    item.running = true; item.phase = '문서 목록 조회 중'; item.startedAt = timeText(seconds);
+    S.attemptView[id] = item.attempts.length - 1;
+    S.log.push([item.startedAt.slice(6,11), `${item.name} · ${item.attempts.length+1}차 실행 시작`]);
+    S.menu = null; S.tool = null;
+    afterRun(450, () => { item.phase = '문서 접근 확인 중'; render(); });
+    afterRun(1100, () => {
+      const attempt = makeAttempt(item, item.attempts.length+1, seconds);
+      item.attempts.push(attempt); item.running = false; item.phase = ''; item.verdict = attempt.verdict;
+      S.attemptView[id] = item.attempts.length - 1; S.lastRun = id;
+      S.log.push([attempt.finishedAt.slice(6,11), `${item.name} · ${attempt.number}차 실행 완료 · ${VERDICT[attempt.verdict][0]}`, {id, index:item.attempts.length-1}]);
+      if (!busy()) S.stageIds = [];
+      render();
+    });
+    if (!inStage) render(`[data-vd-run="${id}"]`);
+  }
+  function startStage() {
+    if (busy()) return;
+    const ids = executable().map(item => item.id);
+    if (!ids.length) return;
+    S.stageIds = ids;
+    ids.forEach(id => startRun(id, true));
+    render('[data-stage-run]');
+  }
+  function humanItems() { return S.items.filter(item => item.handler === 'human'); }
+  function humanRemaining() { return humanItems().filter(item => !item.verdict).length; }
+  function stateKey() {
+    if (S.tab !== 'work') return S.tab;
+    if (S.menu) return 'menu';
+    if (S.evidence) return 'evidence';
+    return 'initial';
+  }
+  function screenId() {
+    if (S.tab === 'log') return '⑥-기록 (초안)';
+    if (S.tab === 'rules') return '⑥-기준 (초안)';
+    if (S.menu) return '⑥-1a 직접 판정 고르기';
+    if (S.tool) return '⑥-1c 도구별 판정 근거';
+    if (S.evidence) return HUMAN_IDS.has(S.evidence) ? '⑥-1b 직접 판정 기록' : '⑥-1b 자동 판정 근거';
+    return '⑥-1 단계와 작업 실행';
+  }
+
+  // Review-only fixture navigation. It deliberately does not call product
+  // actions or decide how selected human verdicts will be saved or finalized.
+  function previewState(key) {
+    const width = S.width;
+    reset();
+    S.width = width;
+    if (key === 'log' || key === 'rules') S.tab = key;
+    if (key === 'menu') S.menu = 'CR-2207';
+    if (key === 'evidence') S.evidence = 'CR-2204';
+    document.querySelector('.mock-state-picker').open = false;
+    setMockControlsExpanded(false);
+    document.querySelector('.mock-info').hidden = true;
+    document.querySelector('.mock-toast')?.remove();
+    const scroll = panel.querySelector('.ew-scroll');
+    if (scroll) scroll.scrollTop = 0;
+    setOpen(true);
+    layout();
+    render(key === 'menu' ? '.ew-vd-option' : null);
+  }
+
+  function setMockControlsExpanded(expanded) {
+    document.querySelector('[data-mock-controls]').dataset.expanded = String(expanded);
+    const button = document.querySelector('[data-mock-controls-toggle]');
+    button.setAttribute('aria-expanded', String(expanded));
+    button.setAttribute('aria-label', expanded ? '시안 확인 도구 접기' : '시안 확인 도구 열기');
+    button.textContent = expanded ? '시안 도구 접기' : '시안';
+  }
+
+  function headerHTML({workflowName, contextLabel = ''} = SCREEN) {
+    const path = contextLabel ? `${workflowName} / ${contextLabel}` : workflowName;
+    return `<header class="ew-panel-header ew-run-nav"><button type="button" class="ew-run-back" data-mock-toast="시안: 상위 업무 화면은 이번 시안에 없습니다" title="${esc(path)}">${icon(ICON.back)}<span>${esc(path)}</span></button><span></span><button type="button" class="ew-icon-button" aria-label="더 보기" data-mock-toast="시안: 메뉴 항목은 아직 정하지 않았습니다">${icon(ICON.more)}</button><button type="button" class="ew-icon-button" aria-label="업무 패널 닫기" data-panel-close>${icon(ICON.panel)}</button></header>`;
+  }
+  function headHTML() {
+    const c = counts(), people = humanItems(), remaining = humanRemaining(), services = S.items.filter(item => item.handler === 'service');
+    const finished = services.filter(item => item.attempts.length && !item.running), pending = executable().length, active = services.filter(item => item.running).length;
+    const bar = [['ok', c.ok], ['cond', c.cond], ['bad', c.bad], ['none', c.none+c.pending+c.running]].filter(([, n]) => n).map(([v, n]) => `<i data-verdict="${v}" style="flex:${n} 1 0"></i>`).join('');
+    return `<div class="ew-vd-head"><div class="ew-stage-heading"><div class="ew-vd-title"><h2>1차 점검</h2></div><button type="button" class="ew-primary ew-stage-run-button" data-stage-run aria-label="${S.stageIds.length && active ? '1차 점검 실행 중' : '1차 점검 단계 실행'}"${!pending || active ? ' disabled' : ''}>${ACTION_ICON.play}<span>${S.stageIds.length && active ? '실행 중' : '이 단계 실행'}</span></button></div><p class="ew-vd-sub"><span>작업 12개</span></p><div class="ew-vd-progress"><div class="ew-vd-bar" role="img" aria-label="현재 선택과 서비스 결과: 승인 ${c.ok}건, 조건부 승인 ${c.cond}건, 미승인 ${c.bad}건, 판정 필요 ${remaining}건, 실행 필요 ${pending}건, 실행 중 ${active}건">${bar}</div><p class="ew-vd-statusline" data-person><b>직접 판정</b><span>선택 ${people.length - remaining}/${people.length}</span></p><p class="ew-vd-statusline" data-service><b>자동 판정 완료 ${finished.length}/9</b><span>승인 ${finished.filter(item=>item.verdict==='ok').length} · 미승인 ${finished.filter(item=>item.verdict==='bad').length}${active ? ` · 실행 중 ${active}` : ''}</span></p></div></div>`;
+  }
+  function tabsHTML() {
+    return `<nav class="ew-tabs" aria-label="작업 화면">${[['work', '작업'], ['log', '기록'], ['rules', '기준']].map(([key, label]) => `<button type="button" data-vd-tab="${key}" aria-pressed="${S.tab === key}">${label}</button>`).join('')}</nav>`;
+  }
+  function reasonHTML(item) {
+    if (!item.verdict) return item.reason ? `<span data-tone="attention">${esc(item.reason)}</span>` : '';
+    if (item.verdict === 'bad') return item.reason ? `<span data-tone="danger">${esc(item.reason)}</span>` : '';
+    return '';
+  }
+  function pickHTML(item) {
+    if (item.handler === 'service') {
+      const label = item.running ? '실행 중' : item.attempts.length ? '다시 실행' : '실행';
+      return `<button type="button" class="ew-vd-run" data-vd-run="${item.id}" aria-label="${esc(item.name)} ${label}"${item.running ? ' disabled' : ''}>${item.attempts.length ? ACTION_ICON.retry : ACTION_ICON.play}<span>${label}</span></button>`;
+    }
+    const label = item.verdict ? `<i class="ew-vd-dot" data-verdict="${item.verdict}"></i><span>${VERDICT[item.verdict][0]}</span>` : '<span>판정 필요</span>';
+    return `<button type="button" class="ew-vd-pick" data-vd-pick="${item.id}"${item.verdict ? ` data-verdict="${item.verdict}"` : ''} aria-haspopup="menu" aria-expanded="${S.menu === item.id}" aria-label="${esc(item.name)} ${item.verdict ? '판정 ' + VERDICT[item.verdict][0] : '판정 필요'}">${label}${icon(ICON.down)}</button>`;
+  }
+  // All tool runs below are synthetic design fixtures, not connected execution records.
+  function toolRuns(item, seconds = 14*3600+20*60) {
+    const missingTest = item.id === 'CR-2204';
+    const documents = missingTest ? '설계서, 배포 계획서' : '설계서, 테스트 결과, 배포 계획서';
+    const count = missingTest ? 2 : 3;
+    return [
+      {key: 'documents', name: '문서 목록 조회', time: timeText(seconds+3), pass: !missingTest,
+        input: [['대상 작업', item.name], ['문서 종류', '설계서, 테스트 결과, 배포 계획서']],
+        output: [['설계서', '있음'], ['테스트 결과', missingTest ? '없음' : '있음'], ['배포 계획서', '있음']],
+        criterion: '필수 문서 3종이 모두 있어야 합니다.', guideline: '예시 지침 · 필수 문서 확인',
+        result: missingTest ? '테스트 결과가 없어 기준을 충족하지 못했습니다.' : '필수 문서 3종이 모두 있습니다.'},
+      {key: 'access', name: '문서 접근 확인', time: timeText(seconds+5), pass: true,
+        input: [['조회된 문서', documents]], output: [['읽기 가능', count + '/' + count + '건'], ['확인한 문서', documents]],
+        criterion: '조회된 문서를 모두 읽을 수 있어야 합니다.', guideline: '예시 지침 · 문서 접근 확인',
+        result: '조회된 문서 ' + count + '건을 모두 읽을 수 있습니다.'}
+    ];
+  }
+  function toolHTML(item, run) {
+    const key = item.id + ':' + run.key, opened = S.tool === key;
+    const facts = pairs => `<dl class="ew-vd-tool-values">${pairs.map(([label,value]) => `<dt>${esc(label)}</dt><dd${value === '없음' ? ' data-missing' : ''}>${esc(value)}</dd>`).join('')}</dl>`;
+    const detail = `<div class="ew-vd-tool-detail" id="tool-${key}"><section><h4>입력 <span>Input</span></h4>${facts(run.input)}</section><section><h4>출력 <span>Output</span></h4>${facts(run.output)}</section><section><h4>이번 작업의 판정 기준</h4><p>${esc(run.criterion)}</p><small>${esc(run.guideline)}</small></section><section class="ew-vd-tool-result"><h4>판정 결과 · <span data-pass="${run.pass}">${run.pass ? '충족' : '미충족'}</span></h4><p>${esc(run.result)}</p></section></div>`;
+    return `<section class="ew-vd-tool"><button type="button" class="ew-vd-tool-toggle" data-vd-tool="${key}" aria-expanded="${opened}"${opened ? ` aria-controls="tool-${key}"` : ''} aria-label="${esc(item.name)} · ${esc(run.name)} · 기준 ${run.pass ? '충족' : '미충족'} · 실행 완료 · ${run.time} · ${opened ? '접기' : '펼치기'}"><span class="ew-vd-tool-heading"><span><b>${esc(run.name)}</b><strong data-pass="${run.pass}">${run.pass ? '충족' : '미충족'}</strong></span><small>실행 완료 · ${run.time}</small></span>${icon(ICON.down, 14)}</button>${opened ? detail : ''}</section>`;
+  }
+  function evidenceHTML(item) {
+    if (item.handler === 'service') {
+      const index = S.attemptView[item.id] ?? item.attempts.length-1, attempt = item.attempts[index];
+      const pending = item.running ? `<p class="ew-execution-pending" role="status">${esc(item.phase)} · 이번 실행 결과는 아직 없습니다.</p>` : '';
+      if (!attempt) return `<div class="ew-vd-evidence" id="evidence-${item.id}">${pending || '<p>아직 실행하지 않았습니다.</p>'}</div>`;
+      const old = item.running || index < item.attempts.length-1, missingTest = attempt.verdict === 'bad';
+      const selector = item.attempts.length > 1 ? `<label class="ew-attempt-select"><span>실행 내역</span><select data-vd-attempt="${item.id}" aria-label="${esc(item.name)} 실행 내역">${item.attempts.map((entry,i) => `<option value="${i}"${i===index?' selected':''}>${entry.number}차 · ${entry.finishedAt} · ${VERDICT[entry.verdict][0]}</option>`).reverse().join('')}</select></label>` : '';
+      return `<div class="ew-vd-evidence ew-vd-service-evidence" id="evidence-${item.id}">${pending}${selector}<p class="ew-attempt-caption" data-attempt-number="${attempt.number}"><b>${old ? '이전 실행 결과' : '현재 실행 결과'} · ${attempt.number}차</b><span>${attempt.finishedAt}</span></p><div class="ew-vd-evidence-caption"><b>실행 도구 ${attempt.tools.length}개</b></div>${attempt.tools.map(run => toolHTML(item, run)).join('')}<p class="ew-vd-task-result"><b>${old ? '당시 작업 판정' : '작업 판정'} · ${VERDICT[attempt.verdict][0]}</b><span>${missingTest ? '문서 목록 조회에서 테스트 결과가 없어 미승인입니다.' : '필수 문서가 모두 있고 읽을 수 있어 승인입니다.'}</span></p></div>`;
+    }
+    const selections = item.history.slice().reverse().map(entry => `<p data-human-selection><b>${VERDICT[entry.verdict][0]} 선택</b><span>${ACTOR} · ${entry.date} ${entry.time}</span></p>`).join('');
+    return `<div class="ew-vd-evidence ew-vd-human-record" id="evidence-${item.id}"><div class="ew-vd-selection-record">${selections || '<p>아직 판정을 선택하지 않았습니다.</p>'}</div><label class="ew-vd-note"><span>사유 <small>(선택)</small></span><textarea data-vd-note="${item.id}" rows="2" aria-label="${esc(item.name)} 판정 사유 (선택)">${esc(item.note)}</textarea></label></div>`;
+  }
+  function statusLabel(item) {
+    if (item.handler === 'service') return item.running ? item.phase : item.attempts.length ? '' : '실행 필요';
+    return '';
+  }
+  function itemHTML(item) {
+    const service = item.handler === 'service';
+    const tone = !service && item.verdict && item.id === S.flash ? 'picked' : '';
+    const file = item.file ? `<div class="ew-vd-attachment"><span>판정 참고 자료</span><span class="ew-vd-file">${icon(ICON.clip, 13)}<span>${esc(item.file)}</span></span></div>` : '';
+    const reason = item.running ? (item.verdict ? `<span>이전 판정 · ${VERDICT[item.verdict][0]}</span>` : '') : service ? '' : reasonHTML(item);
+    const verdict = service && item.verdict && !item.running ? `<span class="ew-vd-final"><i class="ew-vd-dot" data-verdict="${item.verdict}"></i><span>${VERDICT[item.verdict][0]}</span></span>` : '';
+    const opened = S.evidence === item.id, evidenceLabel = service ? '판정 근거' : '판정 기록';
+    const decision = service ? `${verdict}${statusLabel(item) ? `<span data-decision-status>${statusLabel(item)}</span>` : ''}${reason}` : `${pickHTML(item)}${reason}`;
+    const evidence = !service || item.attempts.length ? `<button type="button" class="ew-vd-evidence-toggle" data-vd-evidence="${item.id}" aria-expanded="${opened}"${opened ? ` aria-controls="evidence-${item.id}"` : ''} aria-label="${esc(item.name)} ${evidenceLabel} ${opened ? '접기' : '펼치기'}">${evidenceLabel}${icon(ICON.down, 13)}</button>` : '';
+    const row = `<div class="ew-vd-item"><div class="ew-vd-item-top"><span class="ew-vd-name">${esc(item.name)}</span>${service ? pickHTML(item) : ''}</div><div class="ew-vd-item-meta"><b data-decision-actor>${service ? '자동 판정' : '직접 판정'}</b><div class="ew-vd-decision">${decision}${evidence}</div></div>${file}</div>`;
+    return `<section class="ew-vd-entry" data-vd-item="${item.id}" data-handler="${item.handler}"${service ? ` data-decision-state="${item.running ? 'running' : item.attempts.length ? 'complete' : 'pending'}"` : ''}${tone ? ` data-tone="${tone}"` : ''}>${row}${opened ? evidenceHTML(item) : ''}</section>`;
+  }
+  function listHTML() {
+    let html = '';
+    for (const [group, label, states] of GROUPS) {
+      const items = states.flatMap(state => S.items.filter(item => groupFor(item) === state));
+      if (!items.length) continue;
+      html += `<section data-task-group="${group}"><h3 class="ew-vd-label">${label}<b>${items.length}</b></h3>`;
+      const approved = group === 'result' ? items.filter(item => groupFor(item) === 'ok') : [];
+      html += items.filter(item => !approved.includes(item)).map(itemHTML).join('');
+      if (approved.length) {
+        const visibleAuto = approved.find(item => item.handler === 'service' && item.id === S.evidence) || approved.find(item => item.handler === 'service' && item.id === S.lastRun) || approved.find(item => item.handler === 'service');
+        const rest = approved.filter(item => item !== visibleAuto);
+        if (visibleAuto) html += itemHTML(visibleAuto);
+        if (rest.length) {
+          html += `<button type="button" class="ew-vd-group" data-vd-group aria-expanded="${S.expanded}">${icon(ICON.right)}<i class="ew-vd-dot" data-verdict="ok"></i><span class="ew-vd-group-label">나머지 승인 ${rest.length}건</span></button>`;
+          if (S.expanded) html += rest.map(itemHTML).join('');
+        }
+      }
+      html += '</section>';
+    }
+    return `<div class="ew-vd-body">${html}</div>`;
+  }
+  function logHTML() {
+    return `<ol class="ew-vd-log">${S.log.slice().reverse().map(([time, text, reference]) => `<li><time>${time}</time><span>${esc(text)}${reference ? `<button type="button" class="ew-vd-evidence-toggle" data-vd-attempt-open="${reference.id}:${reference.index}">실행 내역 보기</button>` : ''}</span></li>`).join('')}</ol>`;
+  }
+  function rulesHTML() {
+    const words = Object.entries(VERDICT).map(([key, [label, desc]]) => `<li><i class="ew-vd-dot" data-verdict="${key}"></i><b>${label}</b><span>${desc}</span></li>`).join('');
+    return `<div class="ew-vd-rules"><section><h3>판정 단어</h3><ul>${words}</ul></section><section><h3>확인할 문서</h3><p>설계서, 테스트 결과, 배포 계획서</p></section></div>`;
+  }
+  function menuHTML(item) {
+    return `<div class="ew-vd-menu" role="menu" aria-label="${esc(item.name)} 판정 고르기">${Object.entries(VERDICT).map(([key, [label]]) => `<button type="button" role="menuitemradio" class="ew-vd-option" data-vd-choose="${key}" aria-checked="${item.verdict === key}" tabindex="-1"><i class="ew-vd-dot" data-verdict="${key}"></i><span><b>${label}</b></span>${item.verdict === key ? icon(ICON.check) : ''}</button>`).join('')}</div>`;
+  }
+
+  function render(focus) {
+    const scroll = panel.querySelector('.ew-scroll'), top = scroll ? scroll.scrollTop : 0;
+    const activeChoice = document.activeElement?.dataset.vdChoose;
+    const activeNote = document.activeElement?.matches('[data-vd-note]') ? {id:document.activeElement.dataset.vdNote, start:document.activeElement.selectionStart, end:document.activeElement.selectionEnd} : null;
+    const body = S.tab === 'work' ? listHTML() : S.tab === 'log' ? logHTML() : rulesHTML();
+    panel.innerHTML = headerHTML() + `<div class="ew-scroll ew-vd">${headHTML()}${tabsHTML()}${body}</div>`;
+    panel.querySelector('.ew-scroll').scrollTop = top;
+    if (S.menu) placeMenu();
+    document.getElementById('mock-screen').textContent = screenId();
+    document.querySelectorAll('button[data-mock-state]').forEach(button => {
+      if (button.dataset.mockState === stateKey()) button.setAttribute('aria-current', 'true');
+      else button.removeAttribute('aria-current');
+    });
+    if (focus) panel.querySelector(focus)?.focus({preventScroll: true});
+    else if (activeChoice && S.menu) panel.querySelector(`[data-vd-choose="${activeChoice}"]`)?.focus({preventScroll:true});
+    else if (activeNote) { const note = panel.querySelector(`[data-vd-note="${activeNote.id}"]`); if (note) { note.focus({preventScroll:true}); note.setSelectionRange(activeNote.start,activeNote.end); } }
+  }
+  function placeMenu() {
+    const item = S.items.find(entry => entry.id === S.menu), pick = panel.querySelector(`[data-vd-pick="${S.menu}"]`);
+    if (!item || !pick) return;
+    panel.insertAdjacentHTML('beforeend', menuHTML(item));
+    const menu = panel.lastElementChild, box = panel.getBoundingClientRect(), anchor = pick.getBoundingClientRect();
+    let top = anchor.bottom - box.top + 6;
+    if (anchor.bottom + 6 + menu.offsetHeight > box.bottom - 8) top = anchor.top - box.top - 6 - menu.offsetHeight;
+    menu.style.top = `${Math.max(8, top)}px`;
+    menu.style.left = `${Math.min(box.width - menu.offsetWidth - 8, Math.max(8, anchor.left - box.left))}px`;
+  }
+  function openMenu(id) {
+    if (!humanItems().some(item => item.id === id)) return;
+    S.menu = id;
+    render();
+    const options = [...panel.querySelectorAll('.ew-vd-option')];
+    (options.find(option => option.getAttribute('aria-checked') === 'true') || options[0])?.focus();
+  }
+  function closeMenu(returnFocus) {
+    const id = S.menu;
+    if (!id) return;
+    S.menu = null;
+    render(returnFocus ? `[data-vd-pick="${id}"]` : null);
+  }
+  function choose(id, verdict) {
+    const item = S.items.find(entry => entry.id === id), moment = stamp(), time = moment.time;
+    if (!item || item.handler !== 'human') return;
+    if (item.verdict !== verdict) {
+      S.log.push([time, `${ACTOR} · ${item.name} · ${VERDICT[verdict][0]} 선택`]);
+      item.history.push({...moment, verdict});
+    }
+    item.verdict = verdict;
+    S.picked = id; S.flash = id; S.menu = null;
+    if (verdict === 'ok') S.expanded = true;
+    render(`[data-vd-pick="${id}"]`);
+    panel.querySelector(`[data-vd-item="${id}"]`)?.scrollIntoView({block: 'nearest'});
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(() => { S.flash = null; panel.querySelector(`[data-vd-item="${id}"][data-tone=picked]`)?.removeAttribute('data-tone'); }, 2000);
+  }
+  function toast(text) {
+    document.querySelector('.mock-toast')?.remove();
+    const node = document.createElement('div');
+    node.className = 'mock-toast'; node.setAttribute('role', 'status'); node.textContent = text;
+    document.body.append(node);
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => node.remove(), 2400);
+  }
+  function setOpen(open) {
+    S.open = open;
+    region.hidden = !open;
+    document.getElementById('ees-work-panel-toggle').hidden = open;
+    document.getElementById('ees-work-panel-toggle').setAttribute('aria-expanded', String(open));
+    if (open) panel.focus(); else document.getElementById('ees-work-panel-toggle').focus();
+  }
+  function layout() {
+    const nextBreakpoint = window.innerWidth < 1440;
+    if (nextBreakpoint !== compactBreakpoint) {
+      compactBreakpoint = nextBreakpoint;
+      compact = nextBreakpoint;
+    }
+    sidebar.dataset.compact = String(compact);
+    const toggle = sidebar.querySelector('[data-sidebar-toggle]');
+    toggle.setAttribute('aria-expanded', String(!compact));
+    toggle.setAttribute('aria-label', compact ? '메뉴 펼치기' : '메뉴 접기');
+    // EesShell uses the base work-panel width (480), including while resizing.
+    region.dataset.overlay = String(window.innerWidth - (compact ? 56 : 256) - 480 < 560);
+    region.style.width = `${S.width}px`;
+    region.querySelector('.ees-panel-resize').setAttribute('aria-valuenow', S.width);
+    if (S.menu) render();
+  }
+  const clampWidth = value => Math.max(400, Math.min(720, Math.round(value)));
+
+  document.addEventListener('click', event => {
+    const target = event.target.closest('button, [data-mock-toast], [data-vd-pick], [data-vd-choose]');
+    if (S.menu && !event.target.closest('.ew-vd-menu, [data-vd-pick]')) closeMenu(false);
+    if (!target) return;
+    if (target.matches('[data-mock-controls-toggle]')) {
+      return setMockControlsExpanded(target.getAttribute('aria-expanded') !== 'true');
+    }
+    if (target.matches('[data-sidebar-toggle]')) { compact = !compact; return layout(); }
+    if (target.matches('[data-mock-state]')) return previewState(target.dataset.mockState);
+    if (target.matches('[data-stage-run]')) return startStage();
+    if (target.matches('[data-vd-run]')) return startRun(target.dataset.vdRun);
+    if (target.matches('[data-vd-attempt-open]')) {
+      const [id, index] = target.dataset.vdAttemptOpen.split(':'); S.tab = 'work'; S.evidence = id; S.attemptView[id] = Number(index); S.tool = null; S.expanded = true;
+      render(`[data-vd-evidence="${id}"]`); panel.querySelector(`[data-vd-item="${id}"]`)?.scrollIntoView({block:'start'}); return;
+    }
+    if (target.matches('[data-vd-pick]')) return S.menu === target.dataset.vdPick ? closeMenu(true) : openMenu(target.dataset.vdPick);
+    if (target.matches('[data-vd-choose]')) return choose(S.menu, target.dataset.vdChoose);
+    if (target.matches('[data-vd-evidence]')) { S.evidence = S.evidence === target.dataset.vdEvidence ? null : target.dataset.vdEvidence; S.tool = null; return render(`[data-vd-evidence="${target.dataset.vdEvidence}"]`); }
+    if (target.matches('[data-vd-tool]')) { S.tool = S.tool === target.dataset.vdTool ? null : target.dataset.vdTool; return render(`[data-vd-tool="${target.dataset.vdTool}"]`); }
+    if (target.matches('[data-vd-group]')) { S.expanded = !S.expanded; return render('[data-vd-group]'); }
+    if (target.matches('[data-vd-tab]')) { S.tab = target.dataset.vdTab; S.menu = null; return render(`[data-vd-tab="${S.tab}"]`); }
+    if (target.matches('[data-panel-close]')) return setOpen(false);
+    if (target.matches('[data-panel-open]')) return setOpen(true);
+    if (target.matches('[data-mock-info]')) { document.querySelector('.mock-info').hidden = false; return document.querySelector('[data-mock-close]').focus(); }
+    if (target.matches('[data-mock-close]')) { document.querySelector('.mock-info').hidden = true; return document.querySelector('[data-mock-info]').focus(); }
+    if (target.matches('[data-mock-reset]')) {
+      document.querySelector('.mock-info').hidden = true;
+      reset();
+      setOpen(true); layout(); render();
+      panel.querySelector('.ew-scroll').scrollTop = 0;
+      return toast('지금 시안을 처음 상태로 돌렸습니다');
+    }
+    if (target.dataset.mockToast) toast(target.dataset.mockToast);
+  });
+  document.addEventListener('change', event => {
+    if (!event.target.matches('[data-vd-attempt]')) return;
+    const id = event.target.dataset.vdAttempt; S.attemptView[id] = Number(event.target.value); S.tool = null; render(`[data-vd-attempt="${id}"]`);
+  });
+  document.addEventListener('input', event => {
+    if (!event.target.matches('[data-vd-note]')) return;
+    const item = S.items.find(entry => entry.id === event.target.dataset.vdNote);
+    if (item?.handler === 'human') item.note = event.target.value;
+  });
+  document.addEventListener('keydown', event => {
+    const info = document.querySelector('.mock-info');
+    if (!info.hidden && event.key === 'Escape') { info.hidden = true; return document.querySelector('[data-mock-info]').focus(); }
+    if (event.key === 'Escape' && !S.menu && S.open && region.dataset.overlay === 'true' && region.contains(event.target)) {
+      event.preventDefault();
+      return setOpen(false);
+    }
+    if (event.target.matches?.('#chat-input') && (event.key === 'Enter' || event.key.length === 1)) { event.preventDefault(); return toast('시안: 대화는 동작하지 않습니다'); }
+    if (event.target.matches?.('[data-vd-pick]') && ['ArrowDown', 'ArrowUp'].includes(event.key)) { event.preventDefault(); return openMenu(event.target.dataset.vdPick); }
+    if (!S.menu || !event.target.closest?.('.ew-vd-menu')) return;
+    const options = [...panel.querySelectorAll('.ew-vd-option')], index = options.indexOf(document.activeElement);
+    const next = {ArrowDown: index + 1, ArrowUp: index - 1, Home: 0, End: options.length - 1}[event.key];
+    if (next !== undefined) { event.preventDefault(); options[(next + options.length) % options.length].focus(); }
+    else if (event.key === 'Escape' || event.key === 'Tab') { event.preventDefault(); closeMenu(true); }
+  });
+  const handle = region.querySelector('.ees-panel-resize');
+  handle.addEventListener('pointerdown', event => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    handle.focus({preventScroll: true});
+    const startX = event.clientX, startWidth = S.width;
+    handle.setPointerCapture(event.pointerId);
+    const move = e => { S.width = clampWidth(startWidth + startX - e.clientX); layout(); };
+    const up = () => { handle.removeEventListener('pointermove', move); handle.removeEventListener('pointerup', up); handle.removeEventListener('pointercancel', up); };
+    handle.addEventListener('pointermove', move); handle.addEventListener('pointerup', up); handle.addEventListener('pointercancel', up);
+  });
+  handle.addEventListener('keydown', event => {
+    const next = {ArrowLeft: S.width + 16, ArrowRight: S.width - 16, Home: 400, End: 720}[event.key];
+    if (next !== undefined) { event.preventDefault(); S.width = clampWidth(next); layout(); }
+  });
+  window.addEventListener('resize', layout);
+  reset();
+  if (window.location.hash === '#auto-evidence') S.evidence = 'CR-2204';
+  layout();
+  render();
+})();
+</script>
+<!--@mock:font-licenses-->
+</body>
+</html>

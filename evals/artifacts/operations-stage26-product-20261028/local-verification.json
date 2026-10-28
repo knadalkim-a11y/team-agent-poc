@@ -1,0 +1,60 @@
+{
+  "base": "5d1cd105bc9a1bd03b716e9faeb378da56e01760",
+  "main": "924d919333b8804ece2cf5322e14adc681ad6457",
+  "source_files": {
+    "branding/ees/ui/ees-work-launcher.css": {
+      "bytes": 113639,
+      "sha256": "a8070f3282e7a2d50dbd14af3bc8f013fd6413d81bbe9ea7eaedcdbe0bff2883"
+    },
+    "branding/ees/ui/ees-work-launcher.js": {
+      "bytes": 98852,
+      "sha256": "28baa295cbc95a08da40f021c60662255d1e0e4ae93ce9378bde8f4eb5ddca48"
+    },
+    "branding/ees/ui/ees-work-view.js": {
+      "bytes": 136678,
+      "sha256": "14ae3ff22a1c83ccc6a3e41428ea178b5214923a2e68e2bf669ca931280a980c"
+    },
+    "docs/mockups/ees-work/design-mock-src/06-task-groups.html": {
+      "bytes": 75628,
+      "sha256": "9e56dd9f34fdb3784d0f0860b69463b3e5faa1a1a1fafd553f3e03c5da1bae31"
+    },
+    "docs/mockups/ees-work/design-mock-06-task-groups.html": {
+      "bytes": 423053,
+      "sha256": "f421dc83ef89abe55cb5af133b48e19b03e04da98e64d483b168e1994f931708"
+    }
+  },
+  "validation": {
+    "runtime_node": {
+      "passed": 126,
+      "failed": 0
+    },
+    "related_node_initial": 394,
+    "workspace_contract_python": 100,
+    "native_local": {
+      "ran": 0,
+      "skipped": 1,
+      "reason": "current source frontend build unavailable"
+    },
+    "mock26_states": 4,
+    "renderer_states": 6,
+    "component_style_geometry_checks": 9
+  },
+  "scope": "Product UI and common stage header. Existing APIs and stored data preserved. Native/CI/in-house validation pending.",
+  "limits": [
+    "Automatic execution statuses do not invent business approval.",
+    "No synthetic attachments or two-tool aggregation in actual data.",
+    "Existing human notes are readable; no new note autosave.",
+    "Unassigned mock more action is visually retained as disabled.",
+    "Renderer capture is not Native integration."
+  ],
+  "initial_failures": [
+    "First Native DOM menu query ran without an open menu; guarded and scoped to owned panel.",
+    "Existing stage heading assertion needed navigation markup attribute order.",
+    "Optional context assertion moved to new common header.",
+    "Queued label and overly broad hidden regex assertions corrected.",
+    "Native fixture expected transport failure used success-only helper; explicit failure assertion added.",
+    "Mock builder Python lacked Brotli; existing .venv used.",
+    "Pre-CI Native navigation audit found singleton stage intercepting explicit run overview and closed-run history; explicit overview and closed-run entry restored, regression added, 125/125 passed.",
+    "Direct visual review found full localized timestamps wrapping to three lines in the narrow log time column. Visible time now uses HH:mm with full date/time preserved in datetime/title/aria-label; renderer recapture and Node126/126 passed."
+  ]
+}

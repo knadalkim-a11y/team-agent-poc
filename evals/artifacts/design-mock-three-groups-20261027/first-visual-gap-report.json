@@ -1,0 +1,138 @@
+{
+  "checkedAt": "2026-10-27T07:19:11.503Z",
+  "source": {
+    "path": "docs/mockups/ees-work/design-mock-src/06-task-groups.html",
+    "bytes": 76288,
+    "sha256": "a2c93c0a4d11096e2c3b0252979c30a6ec308ffe31018e50962d2f6252a055dd"
+  },
+  "artifact": {
+    "path": "docs/mockups/ees-work/design-mock-06-task-groups.html",
+    "bytes": 406631,
+    "sha256": "414bcdb231b2636c895ab2e16382851f92141589a4dcf1dff42da8ae509cce6a"
+  },
+  "scope": "Focused ad-hoc browser verification of three groups; no new test framework, no full prior regression replay.",
+  "checks": [
+    {
+      "name": "Initial waiting5/result7 include hidden approved5; new labels and neutral waiting rows render correctly",
+      "result": "pass"
+    },
+    {
+      "name": "Stage execution moves only two unfinished service jobs:3/2/7 during,3/9 after",
+      "result": "pass"
+    },
+    {
+      "name": "Conditional/rejected/approved direct selections move to result, note survives, empty waiting hides, fold includes8 hidden approvals and expansion has12 unique jobs; flash returns to neutral",
+      "result": "pass"
+    },
+    {
+      "name": "Rejected automatic retry moves result→running→result and retains first attempt input/output/criteria",
+      "result": "pass"
+    },
+    {
+      "name": "All six row states are shown through existing UI in three sections;1920/480 layouts have no horizontal overflow",
+      "result": "pass"
+    },
+    {
+      "name": "Source/HTML and approved04/05 bytes unchanged; no browser errors or external requests",
+      "result": "pass"
+    }
+  ],
+  "screenshots": [
+    "first-visual-gap-six-states.png"
+  ],
+  "geometry": [
+    "mock-revision21-default-geometry.json",
+    "mock-revision21-direct-geometry.json",
+    "mock-revision21-running-geometry.json"
+  ],
+  "observedGroups": {
+    "initial": {
+      "waiting": 5,
+      "result": 7
+    },
+    "stageRunning": {
+      "waiting": 3,
+      "running": 2,
+      "result": 7
+    },
+    "stageCompleted": {
+      "waiting": 3,
+      "result": 9
+    },
+    "allDecided": {
+      "result": 12
+    },
+    "sixStatesPreview": {
+      "waiting": 3,
+      "running": 1,
+      "result": 8
+    }
+  },
+  "errors": [],
+  "externalRequests": [],
+  "preserved": {
+    "docs/mockups/ees-work/design-mock-src/05-execution.html": "d64abe44731b7481329cc8a9ff9f0ddf75c9e307fed2a0cd4d1da97e95bb3cc8",
+    "docs/mockups/ees-work/design-mock-05-execution.html": "e99013764c1cacac347d02d9b7425f04efbf92cbd55153e7b752dd00bdc884ea",
+    "docs/mockups/ees-work/design-mock-src/04-cr-verdict.html": "544d5bbb92322bb7c21b080c860da2f81a00ea0d80239e2637a527ba00d2590d",
+    "docs/mockups/ees-work/design-mock-04-cr-verdict.html": "e3b562b05c79a5921813da0e8babcab5f6f4ac987196cca29a9f349503a3a8fe"
+  },
+  "scriptComparison": "Unchanged outside GROUPS and six presentation functions: screenId, headHTML, pickHTML, statusLabel, itemHTML, listHTML. Timers, attempts, seed data, selection, notes and events identical.",
+  "browser": "134.0.6998.35",
+  "result": "pass",
+  "finalCaptureStates": {
+    "direct": {
+      "scrollTop": 55,
+      "selectedTask": "CR-2207 · 배치 주기 조정 · 조건부 승인",
+      "selectedFlash": false,
+      "panel": {
+        "width": 480,
+        "height": 1080
+      },
+      "recordOpen": true,
+      "note": "테스트 결과 확인",
+      "groups": {
+        "waiting": 2,
+        "result": 10
+      }
+    },
+    "running": {
+      "scrollTop": 0,
+      "selectedTask": "CR-2207 · 배치 주기 조정 · 조건부 승인",
+      "selectedFlash": false,
+      "panel": {
+        "width": 480,
+        "height": 1250
+      },
+      "recordOpen": false,
+      "groups": {
+        "waiting": 3,
+        "running": 1,
+        "result": 8
+      },
+      "pendingService": "CR-2212",
+      "runningService": "CR-2211"
+    }
+  },
+  "captureTiming": "Direct/running/six-state images were recaptured after the existing2s picked flash expired to show the neutral resting background. No source, timer or fixture change.",
+  "visualObservation": {
+    "symptom": "Subsequent new task-group sections inherited an extra24px top margin. Behavior checks6/6 passed; this is a visual spacing observation, not a behavior failure.",
+    "cause": "#ees-work-panel section + section { margin-top:24px; } from existing product CSS",
+    "computed": {
+      "firstGroupMargin": "0px",
+      "subsequentGroupMargin": "24px 0px 0px",
+      "headingMargin": "0px",
+      "headingPadding": "20px 12px 8px"
+    },
+    "retainedImage": "first-visual-gap-six-states.png"
+  },
+  "supersededScreenshots": [
+    "mock-revision21-default.png",
+    "mock-revision21-full-shell.png",
+    "mock-revision21-direct.png",
+    "mock-revision21-results.png",
+    "mock-revision21-480-default.png",
+    "mock-revision21-running.png",
+    "mock-revision21-six-states.png"
+  ],
+  "geometryNote": "Initial geometry is replaced by final geometry after targeted new-wrapper margin correction."
+}

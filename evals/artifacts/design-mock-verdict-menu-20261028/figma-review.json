@@ -1,0 +1,204 @@
+{
+  "revision": 25,
+  "dateKST": "2026-10-28",
+  "status": "review_only_not_approved",
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "pageId": "897:761",
+  "nodes": {
+    "board": "1681:8037",
+    "memo": "1681:8038",
+    "default": "1681:8046",
+    "directRecord": "1681:8168",
+    "running": "1681:8299",
+    "menuOpen": "1682:8443",
+    "menu": "1682:8204",
+    "C101": "1682:8674",
+    "latestWorkshop": "1674:7336",
+    "latestFeatureMap": "1288:45"
+  },
+  "boardUrl": "https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1681-8037",
+  "changelogUrl": "https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1682-8674",
+  "source": {
+    "path": "docs/mockups/ees-work/design-mock-src/06-task-groups.html",
+    "bytes": 76357,
+    "sha256": "c9e39a9a7893cc130b2febcdf94993d86d9a4e077ebe69e2822de20e13fd42a2"
+  },
+  "html": {
+    "path": "docs/mockups/ees-work/design-mock-06-task-groups.html",
+    "bytes": 407340,
+    "sha256": "6a2b854b0e10cebb0a1609d959ac70d534302389a779212575729712f8c49533"
+  },
+  "branch": "fix/design-mock-review-20261027",
+  "PR": 105,
+  "menu": {
+    "width": 180,
+    "height": 110,
+    "padding": 4,
+    "gap": 2,
+    "radius": 8,
+    "border": {
+      "width": 1,
+      "color": "#e6e6e9"
+    },
+    "fill": "#ffffff",
+    "shadows": [
+      "0 4px 12px #1118270d",
+      "0 1px 2px #11182708"
+    ],
+    "nativePosition": {
+      "x": 100,
+      "y": 811
+    },
+    "htmlPosition": {
+      "x": 101,
+      "y": 811
+    },
+    "anchorGap": 6,
+    "options": {
+      "width": 170,
+      "height": 32,
+      "paddingVertical": 6,
+      "paddingHorizontal": 8,
+      "gap": 8,
+      "fontSize": 13,
+      "lineHeight": 20,
+      "fontWeight": 500,
+      "labels": [
+        "승인",
+        "조건부 승인",
+        "미승인"
+      ],
+      "relativeX": 5,
+      "relativeYs": [
+        5,
+        39,
+        73
+      ],
+      "labelWidths": [
+        138,
+        114,
+        138
+      ]
+    },
+    "selectedOption": {
+      "value": "cond",
+      "fill": "#f3f3f5",
+      "checkSize": 16,
+      "checkSource": "branding/ees/ui/v4/9d8d5.svg",
+      "outline": "none"
+    }
+  },
+  "openState": {
+    "task": "배치 주기 조정",
+    "verdict": "조건부 승인",
+    "waiting": 4,
+    "result": 8,
+    "running": 0,
+    "pendingAutomatic": 2,
+    "recordExpanded": false,
+    "scrollTop": 0,
+    "flash": false,
+    "width": 480,
+    "height": 1080,
+    "control": {
+      "x": 100,
+      "y": 775,
+      "width": 124,
+      "height": 30
+    }
+  },
+  "panelDimensions": {
+    "board": [
+      2076,
+      1466
+    ],
+    "default": [
+      480,
+      1080
+    ],
+    "directRecord": [
+      480,
+      1080
+    ],
+    "running": [
+      480,
+      1250
+    ],
+    "menuOpen": [
+      480,
+      1080
+    ]
+  },
+  "renderCheck": {
+    "status": "PASS",
+    "method": "One full-board composition screenshot plus readable C101 screenshot; compared actual menu-open PNG and geometry",
+    "referenceFiles": [
+      "evals/artifacts/design-mock-verdict-menu-20261028/mock-revision25-menu-open.png",
+      "evals/artifacts/design-mock-verdict-menu-20261028/menu-open-geometry.json"
+    ],
+    "nativeEditable": true,
+    "descendantCount": 777,
+    "nodeTypeCounts": {
+      "FRAME": 340,
+      "TEXT": 211,
+      "INSTANCE": 75,
+      "VECTOR": 87,
+      "RECTANGLE": 45,
+      "ELLIPSE": 18,
+      "GROUP": 1
+    },
+    "fonts": [
+      "Noto Sans KR"
+    ],
+    "imageFillCount": 0,
+    "menuAndRowsGeometryMatched": true,
+    "selectedCheckAndFocusRowMatched": true
+  },
+  "preservation": {
+    "revision24": {
+      "node": "1680:7754",
+      "hashBefore": "8c4fc0c7",
+      "hashAfter": "8c4fc0c7",
+      "snapshotMethod": "FNV32 of ID/name/parent/size/text tree",
+      "unchanged": true
+    },
+    "approved20": {
+      "node": "1658:7137",
+      "parent": "1284:3106",
+      "size": [
+        1560,
+        2562
+      ],
+      "name": "CURRENT · 업무 목업 20판 · 디자인 확정 · 2026-10-27 (C96)",
+      "noMutationIdsInApproved20": true,
+      "stableIdParentSize": true,
+      "approvalMetadataPreserved": true,
+      "textSnapshotEqualityClaimed": false,
+      "observedHashes": {
+        "initialCrossPage": "91334428",
+        "laterCrossPage": "3cca26ad",
+        "explicitPageRead": "ac8ec2fc"
+      },
+      "explicitPageTextCount": 181,
+      "methodLimitation": "Text enumeration hashes differed across reads; cause unproven. Possible page-loading/enumeration behavior is only an inference. These hashes were not used as proof of approved20 text equality."
+    }
+  },
+  "remainingDifferences": [
+    "Existing 1px panel boundary difference: Figma popup and anchor x100 vs HTML x101, with identical y775/y811 and sizes.",
+    "Native Noto font width/rasterization and shadow rasterization may differ slightly; exact visual canonical is HTML/PNG at recorded hashes.",
+    "Direct-record closed panel intentionally retains scrollTop31 with clipped context line."
+  ],
+  "boundaries": {
+    "existingThreeClosedStatesPreserved": true,
+    "addedState": "Existing menu-open interaction snapshot only",
+    "newFunctions": false,
+    "newOptions": false,
+    "newDialogs": false,
+    "JSChanges": false,
+    "fullShellWork": false,
+    "imageUpload": false,
+    "repoEdits": false,
+    "approvalExpanded": false
+  },
+  "commitIdentification": "Source, HTML and report share the containing Git commit; recorded SHA-256 values identify reviewed bytes."
+}

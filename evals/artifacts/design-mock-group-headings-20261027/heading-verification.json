@@ -1,0 +1,394 @@
+{
+  "checkedAt": "2026-10-27T07:38:03.951Z",
+  "baseline": "ca9d1c99c0d21f266d63c50bb143c74871cc050f",
+  "source": {
+    "path": "docs/mockups/ees-work/design-mock-src/06-task-groups.html",
+    "bytes": 76512,
+    "sha256": "f9e413c013c9a08da4e341551224199fdd385f0116c9686a7a9404589b1d9acc"
+  },
+  "artifact": {
+    "path": "docs/mockups/ees-work/design-mock-06-task-groups.html",
+    "bytes": 407671,
+    "sha256": "47de9d089d2b6e42769d173bf394b2b82ca40aee80de0424d770fb0edc505b6f"
+  },
+  "scope": "Focused revision22 copy and heading geometry/render inspection. Existing21 behavior suite not repeated.",
+  "checks": [
+    "Entire JavaScript unchanged except single 실행 label; approved04/05 hashes preserved",
+    "Heading36px plus12px top margin occupies actual48px; no inherited group margin; color/weight hierarchy rendered",
+    "Individual 실행/다시 실행/실행 중 buttons remain106×32 and stage label stays 이 단계 실행",
+    "1920/480 render without horizontal overflow, errors or external requests"
+  ],
+  "screenshots": [
+    "mock-revision22-default.png",
+    "mock-revision22-480-default.png",
+    "mock-revision22-running.png",
+    "mock-revision22-six-states.png",
+    "mock-revision22-direct.png"
+  ],
+  "geometry": [
+    "mock-revision22-default-geometry.json",
+    "mock-revision22-running-geometry.json",
+    "mock-revision22-direct-geometry.json"
+  ],
+  "states": {
+    "default": {
+      "headings": [
+        {
+          "group": "waiting",
+          "label": "대기5",
+          "headingHeight": 36,
+          "marginTop": "12px",
+          "padding": "8px 12px",
+          "computedFootprint": 48,
+          "actualBoundaryToFirstRow": 48,
+          "groupMargin": "0px",
+          "background": "rgb(243, 243, 245)",
+          "fontWeight": "700",
+          "color": "rgb(31, 32, 35)",
+          "countWeight": "500",
+          "countColor": "rgb(92, 94, 101)"
+        },
+        {
+          "group": "result",
+          "label": "판정 결과7",
+          "headingHeight": 36,
+          "marginTop": "12px",
+          "padding": "8px 12px",
+          "computedFootprint": 48,
+          "actualBoundaryToFirstRow": 48,
+          "groupMargin": "0px",
+          "background": "rgb(243, 243, 245)",
+          "fontWeight": "700",
+          "color": "rgb(31, 32, 35)",
+          "countWeight": "500",
+          "countColor": "rgb(92, 94, 101)"
+        }
+      ],
+      "buttons": [
+        {
+          "label": "실행",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "이력 조회 기간 확대 실행"
+        },
+        {
+          "label": "실행",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "오류 메시지 정리 실행"
+        },
+        {
+          "label": "다시 실행",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "대시보드 필터 추가 다시 실행"
+        },
+        {
+          "label": "다시 실행",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "로그인 화면 문구 수정 다시 실행"
+        }
+      ],
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      },
+      "scrollTop": 0,
+      "selectedFlash": false
+    },
+    "480-default": {
+      "headings": [
+        {
+          "group": "waiting",
+          "label": "대기5",
+          "headingHeight": 36,
+          "marginTop": "12px",
+          "padding": "8px 12px",
+          "computedFootprint": 48,
+          "actualBoundaryToFirstRow": 48,
+          "groupMargin": "0px",
+          "background": "rgb(243, 243, 245)",
+          "fontWeight": "700",
+          "color": "rgb(31, 32, 35)",
+          "countWeight": "500",
+          "countColor": "rgb(92, 94, 101)"
+        },
+        {
+          "group": "result",
+          "label": "판정 결과7",
+          "headingHeight": 36,
+          "marginTop": "12px",
+          "padding": "8px 12px",
+          "computedFootprint": 48,
+          "actualBoundaryToFirstRow": 48,
+          "groupMargin": "0px",
+          "background": "rgb(243, 243, 245)",
+          "fontWeight": "700",
+          "color": "rgb(31, 32, 35)",
+          "countWeight": "500",
+          "countColor": "rgb(92, 94, 101)"
+        }
+      ],
+      "buttons": [
+        {
+          "label": "실행",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "이력 조회 기간 확대 실행"
+        },
+        {
+          "label": "실행",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "오류 메시지 정리 실행"
+        },
+        {
+          "label": "다시 실행",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "대시보드 필터 추가 다시 실행"
+        },
+        {
+          "label": "다시 실행",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "로그인 화면 문구 수정 다시 실행"
+        }
+      ],
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    "running": {
+      "headings": [
+        {
+          "group": "waiting",
+          "label": "대기3",
+          "headingHeight": 36,
+          "marginTop": "12px",
+          "padding": "8px 12px",
+          "computedFootprint": 48,
+          "actualBoundaryToFirstRow": 48,
+          "groupMargin": "0px",
+          "background": "rgb(243, 243, 245)",
+          "fontWeight": "700",
+          "color": "rgb(31, 32, 35)",
+          "countWeight": "500",
+          "countColor": "rgb(92, 94, 101)"
+        },
+        {
+          "group": "running",
+          "label": "실행 중1",
+          "headingHeight": 36,
+          "marginTop": "12px",
+          "padding": "8px 12px",
+          "computedFootprint": 48,
+          "actualBoundaryToFirstRow": 48,
+          "groupMargin": "0px",
+          "background": "rgb(243, 243, 245)",
+          "fontWeight": "700",
+          "color": "rgb(31, 32, 35)",
+          "countWeight": "500",
+          "countColor": "rgb(92, 94, 101)"
+        },
+        {
+          "group": "result",
+          "label": "판정 결과8",
+          "headingHeight": 36,
+          "marginTop": "12px",
+          "padding": "8px 12px",
+          "computedFootprint": 48,
+          "actualBoundaryToFirstRow": 48,
+          "groupMargin": "0px",
+          "background": "rgb(243, 243, 245)",
+          "fontWeight": "700",
+          "color": "rgb(31, 32, 35)",
+          "countWeight": "500",
+          "countColor": "rgb(92, 94, 101)"
+        }
+      ],
+      "buttons": [
+        {
+          "label": "실행",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "오류 메시지 정리 실행"
+        },
+        {
+          "label": "실행 중",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "이력 조회 기간 확대 실행 중"
+        },
+        {
+          "label": "다시 실행",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "대시보드 필터 추가 다시 실행"
+        },
+        {
+          "label": "다시 실행",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "로그인 화면 문구 수정 다시 실행"
+        }
+      ],
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      },
+      "scrollTop": 0,
+      "selectedFlash": false,
+      "selectedTask": "배치 주기 조정 · 조건부 승인",
+      "recordOpen": false,
+      "groups": "대기3 / 실행중1 / 판정결과8"
+    },
+    "six-states": {
+      "headings": [
+        {
+          "group": "waiting",
+          "label": "대기3",
+          "headingHeight": 36,
+          "marginTop": "12px",
+          "padding": "8px 12px",
+          "computedFootprint": 48,
+          "actualBoundaryToFirstRow": 48,
+          "groupMargin": "0px",
+          "background": "rgb(243, 243, 245)",
+          "fontWeight": "700",
+          "color": "rgb(31, 32, 35)",
+          "countWeight": "500",
+          "countColor": "rgb(92, 94, 101)"
+        },
+        {
+          "group": "running",
+          "label": "실행 중1",
+          "headingHeight": 36,
+          "marginTop": "12px",
+          "padding": "8px 12px",
+          "computedFootprint": 48,
+          "actualBoundaryToFirstRow": 48,
+          "groupMargin": "0px",
+          "background": "rgb(243, 243, 245)",
+          "fontWeight": "700",
+          "color": "rgb(31, 32, 35)",
+          "countWeight": "500",
+          "countColor": "rgb(92, 94, 101)"
+        },
+        {
+          "group": "result",
+          "label": "판정 결과8",
+          "headingHeight": 36,
+          "marginTop": "12px",
+          "padding": "8px 12px",
+          "computedFootprint": 48,
+          "actualBoundaryToFirstRow": 48,
+          "groupMargin": "0px",
+          "background": "rgb(243, 243, 245)",
+          "fontWeight": "700",
+          "color": "rgb(31, 32, 35)",
+          "countWeight": "500",
+          "countColor": "rgb(92, 94, 101)"
+        }
+      ],
+      "buttons": [
+        {
+          "label": "실행",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "오류 메시지 정리 실행"
+        },
+        {
+          "label": "실행 중",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "이력 조회 기간 확대 실행 중"
+        },
+        {
+          "label": "다시 실행",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "대시보드 필터 추가 다시 실행"
+        },
+        {
+          "label": "다시 실행",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "로그인 화면 문구 수정 다시 실행"
+        }
+      ],
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    "direct": {
+      "headings": [
+        {
+          "group": "waiting",
+          "label": "대기2",
+          "headingHeight": 36,
+          "marginTop": "12px",
+          "padding": "8px 12px",
+          "computedFootprint": 48,
+          "actualBoundaryToFirstRow": 48,
+          "groupMargin": "0px",
+          "background": "rgb(243, 243, 245)",
+          "fontWeight": "700",
+          "color": "rgb(31, 32, 35)",
+          "countWeight": "500",
+          "countColor": "rgb(92, 94, 101)"
+        },
+        {
+          "group": "result",
+          "label": "판정 결과10",
+          "headingHeight": 36,
+          "marginTop": "12px",
+          "padding": "8px 12px",
+          "computedFootprint": 48,
+          "actualBoundaryToFirstRow": 48,
+          "groupMargin": "0px",
+          "background": "rgb(243, 243, 245)",
+          "fontWeight": "700",
+          "color": "rgb(31, 32, 35)",
+          "countWeight": "500",
+          "countColor": "rgb(92, 94, 101)"
+        }
+      ],
+      "buttons": [
+        {
+          "label": "다시 실행",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "대시보드 필터 추가 다시 실행"
+        },
+        {
+          "label": "다시 실행",
+          "width": 106,
+          "height": 32,
+          "ariaLabel": "오류 메시지 정리 다시 실행"
+        }
+      ],
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      },
+      "scrollTop": 31,
+      "selectedFlash": false,
+      "selectedTask": "배치 주기 조정 · 조건부 승인",
+      "recordOpen": true
+    }
+  },
+  "errors": [],
+  "externalRequests": [],
+  "scriptComparison": "Entire script identical to revision21 except the single string literal 지금 실행 → 실행 in pickHTML.",
+  "preserved": {
+    "docs/mockups/ees-work/design-mock-src/05-execution.html": "d64abe44731b7481329cc8a9ff9f0ddf75c9e307fed2a0cd4d1da97e95bb3cc8",
+    "docs/mockups/ees-work/design-mock-05-execution.html": "e99013764c1cacac347d02d9b7425f04efbf92cbd55153e7b752dd00bdc884ea",
+    "docs/mockups/ees-work/design-mock-src/04-cr-verdict.html": "544d5bbb92322bb7c21b080c860da2f81a00ea0d80239e2637a527ba00d2590d",
+    "docs/mockups/ees-work/design-mock-04-cr-verdict.html": "e3b562b05c79a5921813da0e8babcab5f6f4ac987196cca29a9f349503a3a8fe"
+  },
+  "result": "pass"
+}

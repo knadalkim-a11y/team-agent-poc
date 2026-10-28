@@ -1,0 +1,183 @@
+{
+  "checkedAt": "2026-10-27T07:21:26.027Z",
+  "initialBehaviorReport": "first-visual-gap-report.json",
+  "initialBehaviorResult": "6/6 PASS; not repeated after CSS-only new-wrapper margin correction",
+  "source": {
+    "path": "docs/mockups/ees-work/design-mock-src/06-task-groups.html",
+    "bytes": 76344,
+    "sha256": "cd50e78f40a936c1734ebc886cc989b76dfccc41f1c8deadaf038a78bf90ca39"
+  },
+  "artifact": {
+    "path": "docs/mockups/ees-work/design-mock-06-task-groups.html",
+    "bytes": 406687,
+    "sha256": "e7d8a7eb1c68d0d67e090a01d5a65493055a473cf8602f74eaffb1259024dce3"
+  },
+  "checks": [
+    "All group wrappers computed margin0 at every final captured state",
+    "1920/480 rendering has no horizontal overflow; direct/running captures wait for existing2s picked flash expiry",
+    "No browser errors/external requests; frozen final source/HTML hashes preserved"
+  ],
+  "screenshots": [
+    "mock-revision21-default.png",
+    "mock-revision21-full-shell.png",
+    "mock-revision21-480-default.png",
+    "mock-revision21-direct.png",
+    "mock-revision21-results.png",
+    "mock-revision21-running.png",
+    "mock-revision21-six-states.png"
+  ],
+  "geometry": [
+    "mock-revision21-default-geometry.json",
+    "mock-revision21-direct-geometry.json",
+    "mock-revision21-running-geometry.json"
+  ],
+  "states": {
+    "default": {
+      "groups": [
+        {
+          "group": "waiting",
+          "count": 5,
+          "margin": "0px"
+        },
+        {
+          "group": "result",
+          "count": 7,
+          "margin": "0px"
+        }
+      ],
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      },
+      "scrollTop": 0,
+      "selectedFlash": false
+    },
+    "full-shell": {
+      "groups": [
+        {
+          "group": "waiting",
+          "count": 5,
+          "margin": "0px"
+        },
+        {
+          "group": "result",
+          "count": 7,
+          "margin": "0px"
+        }
+      ],
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    "480-default": {
+      "groups": [
+        {
+          "group": "waiting",
+          "count": 5,
+          "margin": "0px"
+        },
+        {
+          "group": "result",
+          "count": 7,
+          "margin": "0px"
+        }
+      ],
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    "direct": {
+      "groups": [
+        {
+          "group": "waiting",
+          "count": 2,
+          "margin": "0px"
+        },
+        {
+          "group": "result",
+          "count": 10,
+          "margin": "0px"
+        }
+      ],
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      },
+      "scrollTop": 31,
+      "selectedFlash": false,
+      "selectedTask": "CR-2207 · 배치 주기 조정 · 조건부 승인",
+      "recordOpen": true,
+      "note": "테스트 결과 확인"
+    },
+    "results": {
+      "groups": [
+        {
+          "group": "result",
+          "count": 12,
+          "margin": "0px"
+        }
+      ],
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    },
+    "running": {
+      "groups": [
+        {
+          "group": "waiting",
+          "count": 3,
+          "margin": "0px"
+        },
+        {
+          "group": "running",
+          "count": 1,
+          "margin": "0px"
+        },
+        {
+          "group": "result",
+          "count": 8,
+          "margin": "0px"
+        }
+      ],
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      },
+      "scrollTop": 0,
+      "selectedFlash": false,
+      "selectedTask": "CR-2207 · 배치 주기 조정 · 조건부 승인",
+      "recordOpen": false,
+      "runningService": "CR-2211",
+      "pendingService": "CR-2212"
+    },
+    "six-states": {
+      "groups": [
+        {
+          "group": "waiting",
+          "count": 3,
+          "margin": "0px"
+        },
+        {
+          "group": "running",
+          "count": 1,
+          "margin": "0px"
+        },
+        {
+          "group": "result",
+          "count": 8,
+          "margin": "0px"
+        }
+      ],
+      "overflow": {
+        "document": 0,
+        "panel": 0
+      }
+    }
+  },
+  "errors": [],
+  "externalRequests": [],
+  "result": "pass"
+}

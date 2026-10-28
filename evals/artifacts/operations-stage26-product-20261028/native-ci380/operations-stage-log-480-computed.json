@@ -1,0 +1,82 @@
+[
+  {
+    "selector": ".ew-run-nav",
+    "width": 423,
+    "height": 48,
+    "fontSize": "14px",
+    "lineHeight": "20px",
+    "fontWeight": "400",
+    "padding": "0px 10px 0px 8px",
+    "background": "rgba(0, 0, 0, 0)",
+    "opacity": "1",
+    "outline": "rgb(31, 32, 35) none 0px",
+    "boxShadow": "none"
+  },
+  {
+    "selector": ".ew-vd-head",
+    "width": 423,
+    "height": 162,
+    "fontSize": "14px",
+    "lineHeight": "22px",
+    "fontWeight": "400",
+    "padding": "20px 20px 0px",
+    "background": "rgba(0, 0, 0, 0)",
+    "opacity": "1",
+    "outline": "rgb(31, 32, 35) none 0px",
+    "boxShadow": "none"
+  },
+  {
+    "selector": ".ew-stage-heading",
+    "width": 383,
+    "height": 32,
+    "fontSize": "14px",
+    "lineHeight": "22px",
+    "fontWeight": "400",
+    "padding": "0px",
+    "background": "rgba(0, 0, 0, 0)",
+    "opacity": "1",
+    "outline": "rgb(31, 32, 35) none 0px",
+    "boxShadow": "none"
+  },
+  {
+    "selector": ".ew-tabs",
+    "width": 423,
+    "height": 33,
+    "fontSize": "14px",
+    "lineHeight": "22px",
+    "fontWeight": "400",
+    "padding": "0px 20px",
+    "background": "rgba(0, 0, 0, 0)",
+    "opacity": "1",
+    "outline": "rgb(31, 32, 35) none 0px",
+    "boxShadow": "none"
+  },
+  {
+    "selector": ".ew-vd-label",
+    "missing": true
+  },
+  {
+    "selector": ".ew-vd-item",
+    "missing": true
+  },
+  {
+    "selector": ".ew-vd-name",
+    "missing": true
+  },
+  {
+    "selector": ".ew-vd-run",
+    "missing": true
+  },
+  {
+    "selector": ".ew-vd-pick",
+    "missing": true
+  },
+  {
+    "selector": ".ew-vd-menu",
+    "missing": true
+  },
+  {
+    "selector": ".ew-vd-option",
+    "missing": true
+  }
+]

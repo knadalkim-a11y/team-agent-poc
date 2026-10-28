@@ -1,5 +1,31 @@
 # 현재 작업 상태
 
+## 2026-10-28 · 운영 단계26판 제품 구현·사내 배포 검증 진행
+
+- **현재 목표:** 기존 제품을 확정 목업과 시각적으로 맞춰 사내에서 확인한다. 사용자가 추가로 지정한 상단 표준화까지 반영한 [26판 HTML](mockups/ees-work/design-mock-06-task-groups.html)·[구현 범위](mockups/ees-work/TASK.md#operations-stage26-product-20261028)를 기준으로 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)를 이어간다. HTML 파일 제공만으로 사내 제품 배포를 완료한 것으로 보지 않는다.
+- **Figma 기준:** [26판 전체 화면](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1705-1020) · [집중4상태](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1705-1328) · [기록/기준](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1705-1851)과 공통 상단 적용 안내를 연결한다.25/20판의 당시 원본과 검증은 보존한다.
+- **공통 상단:** 워크플로우 이름과 필요한 실제 구분 정보만 표시한다. 모든 업무에 ‘회차’를 강제하지 않으며 주기·예약 두 줄은 단계 화면에서 제거한다. 단계 제목·작업 수·실행 버튼·목록 배치는 유지한다.
+- **제품 연결:** 실제 Job을 한 행으로 표시하고 기존 판정·실행 명령과 실제 도구/지침/입출력 기록을 연결한다. 실행 성공/실패를 승인/미승인으로 바꾸지 않는다. 다중 도구의 종합 판정·사유 자동 저장·첨부 연동은 새 기능으로 추가하지 않는다.
+- **확인된 범위:** runtime Node126개·관련 Python100개와 실제 Native 신규2시험을 통과했다. CI380의 현재 frontend를 검증해 만든 wheel로12상태를 캡처했고,1920/480 폭에서 목업과11개 부품의 치수·폰트·배경·포커스 스타일이 같고 가로 넘침은0이다. CI380 전체 앱 검사는 새 단계 화면에서 기존 전체 개요 아이콘을 기대한 동선 때문에 실패했다. 기존 자산 검사를 유지하며 개요로 명시적으로 이동하도록 보완했고 새 최종 head 전체 CI가 필요하다. 초기0실행/1SKIP·첫 캡처/비교 관측과 최초 CI 실패는 [평가 기록](../evals/v4-ui-20260930.md#operations-stage26-product-20261028)에 보존한다.
+- **사내 설치 상태:** 기존 [문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`를 유지한다. 새 프로그램 적용·로그인·자료·이번 화면의 사내 확인은 아직 완료되지 않았다. #104의 기록을 복제하거나 덮어쓰지 않는다.
+- **다음 하나:** 실제 제품 Native 화면 대조와 최신 통합 head 전체 CI를 마친 뒤 새 CI 프로그램 ZIP의 원본·해시를 고정해 기존 사내 적용 절차로 확인한다. 워크스페이스의 운영 워크플로우 작성 목업은 이 배포 검증 다음 순서다.
+
+> 아래는25판 설계·보완 당시 기록이다. 당시 ‘제품 변경 없음’과 다음 작업 안내는 위의 새 구현·배포 요청으로 대체하며, 승인·실패·이전 검증 근거는 보존한다.
+
+## 2026-10-28 · 운영 목업25판 확정·Figma 전체 화면 보완
+
+- **사용자 확정:** 현재 운영의 ‘배포 산출물 점검 → 1차 점검’ 목업25판 디자인·모의 동작을 기준으로 확정했다. 이후 수정 가능성을 유지하며 [확정 범위와 원본](mockups/ees-work/TASK.md#work-operations-design)을 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)에 반영한다.
+- **페이지 구분:** [업무 · 운영](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1284-3106) / [업무 · 공통](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1689-1061) / [업무 · 셋업](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1689-1062) / [업무 · 장애대응](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1689-1063). 셋업/장애대응은 기존 참고 설계 분류이며 새 목업 확정이 아니다.
+- **현재 화면:** [25판 HTML](mockups/ees-work/design-mock-06-task-groups.html)·[원본](mockups/ees-work/design-mock-src/06-task-groups.html)·[Figma25판 전체 화면](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1700-933). 확정25판 원본과 동작은 그대로이며, 이번 보완은 Figma 표현 범위에 한정한다.
+- **공통 기준과 미적용 사항:** [업무 공통 원칙](mockups/ees-work/TASK.md#workflow-stage-common-standard)은 합의된 방향이다. 실행 여부와 판정 주체 분리·상단 맥락·자료 역할 구분은 현재25판에 모두 적용되지 않았으며 후속 목업 검토로 남는다.
+- **이전 기준:** [확정20판](mockups/ees-work/TASK.md#design-mock-approved20-20261027)은 이전 확정본으로 보존한다. 같은 화면의 현재 기준은25판이다. 기존 [25판 메뉴 검증](../evals/v4-ui-20260930.md#design-mock-verdict-menu-20261028)·[공통 원칙 검토](../evals/v4-ui-20260930.md#workflow-stage-common-standard-20261028)와 최초 실패/관측은 유지한다.
+- **남은 계약:** 실제 Job/result.items 연결, 직접 판정 저장/최종 확정·권한, 도구 결과 조합·재실행 영향, 실제 도구/스킬 이력과 자료 연결/업로드는 후속 결정/구현 범위다. 첨부는 합성 예시다. 제품 UI·API·저장·엔진·병합·배포는 변경하지 않는다.
+- **누락 정정:** 앞선 C103 반영은25판4패널 이동과 안내 확인에 한정됐고, 전체 화면·상세 자료는20판에 머물렀다. 사용자 지적 후 최신25 HTML에서21상태를 다시 캡처하고 현재 전체 화면과 도구 근거·실행 내역·기록/기준의 Figma 표현을 보완했다. 최신 화면을 앞에 배치하고 이전20은 PREVIOUS20으로 구분했다. 이전 완료 주장·실제 누락·최종 대응 범위는 [이번 검증](../evals/v4-ui-20260930.md#operations25-figma-sync-20261028)에 기록하며, [이전 확인](../evals/v4-ui-20260930.md#work-operations-approved25-20261028)을 삭제하지 않는다.
+- **사내 적용 원본:** [미병합 문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`에 따라 프로그램 적용 완료·실행 중으로 구분한다. 로그인·기존 자료·새 화면·도구 설정은 별도 미확인이다. #104의 상세 적용 기록은 이 브랜치에 복제하거나 덮어쓰지 않는다.
+- **다음 하나:** 이번 운영25판 Figma 보완 뒤, 사용자가 지정한 워크스페이스의 운영 워크플로우 작성 화면을 목업부터 다룬다. 기존 워크-1 설계와 운영25판의 단계·작업·도구·입력·판정 기준을 연결하고 미정 기능 계약은 임의 구현하지 않는다.
+
+> 아래 절은 이전 작업 당시 기록이다. #103 병합 대기·사내 적용 미실행 등의 당시 표현은 위 현재 상태와 구분하고, 과거 검증·실패 근거는 보존한다.
+
 ## 2026-10-26 · PR #103에 #102 병합 main 통합
 
 - **완료한 선행 조건:** 사용자 승인으로 [#102](https://github.com/knadalkim-a11y/team-agent-poc/pull/102)를 **2026-10-26 10:15:03 KST**, main `4d27de76fe4bbc4aad70ec009bb7d478d0bbe29f`에 merge commit으로 병합했다. 최종 head41c0a4b의 [CI40252075901/#341](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40252075901)는39성공/PR 출하1정상 생략, Native81/81·작성27/27·Windows Node probe와2454자 PowerShell 파싱을 통과했다. 첫 실패와 원인 미확정은 보존했다.

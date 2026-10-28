@@ -1,0 +1,36 @@
+{
+  "viewport": {
+    "width": 480,
+    "height": 1080
+  },
+  "panel": {
+    "x": 57,
+    "y": 0,
+    "width": 423,
+    "height": 1080
+  },
+  "overflow": 0,
+  "header": {
+    "x": 57,
+    "y": 0,
+    "width": 423,
+    "height": 48,
+    "fontSize": "14px",
+    "lineHeight": "20px",
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "0px 0px 1px"
+  },
+  "title": {
+    "x": 77,
+    "y": 70,
+    "width": 71.015625,
+    "height": 28,
+    "fontSize": "20px",
+    "lineHeight": "28px",
+    "background": "rgba(0, 0, 0, 0)",
+    "border": "0px"
+  },
+  "rows": [],
+  "menu": null,
+  "controls": []
+}

@@ -1,0 +1,275 @@
+{
+  "status": "PASS",
+  "readOnlySource": true,
+  "sourceSha256": "d316d63986b2afe1edda567b862edd716b14a71c80f04b5d679a445e94171e0d",
+  "htmlSha256": "24b9fee62679f0317cb9f69852a0caeedd434124bbcbbfb32e11252acd253aa6",
+  "sourceUnchanged": true,
+  "captureCount": 21,
+  "firstCaptureAttempt": "PASS",
+  "browser": {
+    "version": "133.0.6943.0",
+    "playwright": "1.62.1",
+    "package": "@sparticuz/chromium@133.0.0"
+  },
+  "errors": [],
+  "externalRequests": [],
+  "allHorizontalOverflowZero": true,
+  "directlyInspectedPngs": [
+    "01-full-shell-default.png",
+    "04-direct-record-note.png",
+    "06-service-document-detail.png",
+    "07-service-access-detail.png",
+    "08-service-rerun-running.png",
+    "10-service-prior-attempt.png",
+    "11-log.png",
+    "12-rules.png",
+    "15-stage-running.png",
+    "21-selected-verdict-menu.png"
+  ],
+  "observations": [
+    "Latest whole shell shows revision25 waiting/result groups and borderless direct decisions.",
+    "Document detail shows actual mock tool name, input, output, criterion, guideline, per-tool result and overall task judgment within one480x1080capture.",
+    "Access detail is a separately opened existing tool state; only one tool remains expanded.",
+    "Human optional note textarea retains its real focused appearance.",
+    "During service rerun, prior result is explicitly labeled; capture does not represent it as current.",
+    "Prior attempt uses actual selectOption on existing execution selector; source/runtime timers unchanged.",
+    "Group/header content can be scrolled behind fixed panel header; this is the actual HTML viewport state, not clipping introduced by Figma.",
+    "All20 prior distinct designed states were recaptured because original gallery pointed to20;21st capture adds selected-menu checkmark state."
+  ],
+  "sourceMutations": 0,
+  "repoEdits": 0,
+  "newDependencies": 0,
+  "newFeatures": 0,
+  "artifacts": [
+    {
+      "name": "01-full-shell-default-geometry.json",
+      "bytes": 201076,
+      "sha256": "44bb389087f5334079a6efb70669719c5f2df83515da048aa49c7e97ecc77ebf"
+    },
+    {
+      "name": "01-full-shell-default.png",
+      "bytes": 165742,
+      "sha256": "67a69b61f35f319da7338523344f1670ea7ee853895a851453c3c593536190e8"
+    },
+    {
+      "name": "02-focused-default-geometry.json",
+      "bytes": 100931,
+      "sha256": "816e1e9daa2f39e534de661334979ef6fe4bb88719eada63fca238d01eb939a2"
+    },
+    {
+      "name": "02-focused-default.png",
+      "bytes": 71485,
+      "sha256": "690cc9ea692c06ccc58a7fd4f2833d6d7b4fb9fd2594bf00627f60d8bf04f30a"
+    },
+    {
+      "name": "03-direct-verdict-menu-geometry.json",
+      "bytes": 109089,
+      "sha256": "53b7dbd79e8a774b8813ebeb636b638d02c08cdfeb1b649e37f8b695c8528299"
+    },
+    {
+      "name": "03-direct-verdict-menu.png",
+      "bytes": 72512,
+      "sha256": "9781418cc39a550633f90a38b2133b195d864c818fd1cc77c14d838b23fb19bc"
+    },
+    {
+      "name": "04-direct-record-note-geometry.json",
+      "bytes": 101307,
+      "sha256": "e66a91cdfb9ffe87aa8cd72532c758c4b58a23f257c7a56b68f490e58ec54ffd"
+    },
+    {
+      "name": "04-direct-record-note.png",
+      "bytes": 72329,
+      "sha256": "3a5ef300df3468dd69b19cc995b7679c68876b5c10e1d92a6625c1bad4d9fe70"
+    },
+    {
+      "name": "05-service-tool-overview-geometry.json",
+      "bytes": 102080,
+      "sha256": "007712d4352a45a60e08894aa24d8f825ac859e2011c32bca8e88717c5b78b06"
+    },
+    {
+      "name": "05-service-tool-overview.png",
+      "bytes": 77141,
+      "sha256": "6ec9b180b027c2f536c991ed1474136612648fc0d93d4ad4d20f924ea8288ce4"
+    },
+    {
+      "name": "06-service-document-detail-geometry.json",
+      "bytes": 90069,
+      "sha256": "22b9d9e213cb96e24603cf4add1d0140284fdafb1cb0d51bb9da4197be154944"
+    },
+    {
+      "name": "06-service-document-detail.png",
+      "bytes": 79177,
+      "sha256": "a8ef1fd2e0230be5a43d5102f25551d0b6af855f74869f648f548b8d3478a13a"
+    },
+    {
+      "name": "07-service-access-detail-geometry.json",
+      "bytes": 88815,
+      "sha256": "31ad8a7e36cadb1616b094df254806cd5e51a2d2b28fb48e28f2ca08f7487814"
+    },
+    {
+      "name": "07-service-access-detail.png",
+      "bytes": 81074,
+      "sha256": "1e6a1fcf882c2f7d8a0ef7e4f135728f5f79daada657a5ca4adb63421c4fbb61"
+    },
+    {
+      "name": "08-service-rerun-running-geometry.json",
+      "bytes": 100144,
+      "sha256": "57653fe0b3476cb209d884b8017c4439104f5378d33db9be848993723abb22a9"
+    },
+    {
+      "name": "08-service-rerun-running.png",
+      "bytes": 80699,
+      "sha256": "ca41756e3259cf29874bf611ddf7eae0c0e39d351c9bdb83767c189a34e2d6ce"
+    },
+    {
+      "name": "09-service-current-attempt-geometry.json",
+      "bytes": 82341,
+      "sha256": "e6f307b4e60979515c1d84193c3f429c12573bdf53ccdd93d5c787202ba3753a"
+    },
+    {
+      "name": "09-service-current-attempt.png",
+      "bytes": 81002,
+      "sha256": "7f1e9d07feaede81c17653b86653fea59b2dbed63d394f0f1a5165d81a3a71bf"
+    },
+    {
+      "name": "10-service-prior-attempt-geometry.json",
+      "bytes": 82349,
+      "sha256": "99bf1959e7d448650fe3df7701607f467eb3cd2df01357e1559ddf9b8af2d8f4"
+    },
+    {
+      "name": "10-service-prior-attempt.png",
+      "bytes": 81379,
+      "sha256": "473c65c06fba9921f77bc4dff0db45ad2ad9bc112596ba1714385f03f5b822f4"
+    },
+    {
+      "name": "11-log-geometry.json",
+      "bytes": 50779,
+      "sha256": "55e722b1b1dea9d44961097ae1f24a4e8057b9c3d43bf98457eedb0aa1149448"
+    },
+    {
+      "name": "11-log.png",
+      "bytes": 74553,
+      "sha256": "cb92f65c93431aeee064b5d980a5ccec27c0f1b530e2b1ebd2e7e9fda3096991"
+    },
+    {
+      "name": "12-rules-geometry.json",
+      "bytes": 39606,
+      "sha256": "6225ff8af308ac71f77fd9f598a55878e2bc5718b6752a6a93c00a2142c690f7"
+    },
+    {
+      "name": "12-rules.png",
+      "bytes": 40699,
+      "sha256": "cd6e82d2eb6a396f6e0c05789112b805ed8da935bc1586e1855486163b1ea093"
+    },
+    {
+      "name": "13-periodic-header-geometry.json",
+      "bytes": 101608,
+      "sha256": "e572ca1e40bc92fb2a1a6d7687bc820a66b21920be16930a57d865509c0bd375"
+    },
+    {
+      "name": "13-periodic-header.png",
+      "bytes": 74925,
+      "sha256": "4f582cda12102134ec18eb0b7b005dd778121935124a6a1839f2bb8e1e8868d6"
+    },
+    {
+      "name": "14-approved-group-expanded-geometry.json",
+      "bytes": 131309,
+      "sha256": "1f1f95ceb27fbe01c62a012fed88eedf91f5c820d17d5bccbf6b13a1cc368e63"
+    },
+    {
+      "name": "14-approved-group-expanded.png",
+      "bytes": 81243,
+      "sha256": "edf4bc46d92c09e5abbc269323dbec50e21b54c53550e35b134990a8878c7cdb"
+    },
+    {
+      "name": "15-stage-running-geometry.json",
+      "bytes": 102248,
+      "sha256": "ed24ad8f63f87105b98c52ea3fb914448818640238c17b6c2a1895369f2289d1"
+    },
+    {
+      "name": "15-stage-running.png",
+      "bytes": 74958,
+      "sha256": "58fec394a987c01e99d8336b5f9fa0735e40d7a6687d4d94188cd33bf6deb7c7"
+    },
+    {
+      "name": "16-stage-finished-geometry.json",
+      "bytes": 85156,
+      "sha256": "87efd52cb15648718a2a8a29bf92312d733ca6c1bed8a273f2bc8f491240b0af"
+    },
+    {
+      "name": "16-stage-finished.png",
+      "bytes": 60755,
+      "sha256": "e0fc84ab37f2fa94b9ed47a30184692cf30fe24d2d29e19137bfc100fbdd5528"
+    },
+    {
+      "name": "17-narrow-default-geometry.json",
+      "bytes": 163655,
+      "sha256": "663bc414956a67d34ee075fc8d4fa3e8adf7b1e0bfef2355a615ed0438875656"
+    },
+    {
+      "name": "17-narrow-default.png",
+      "bytes": 65861,
+      "sha256": "5e55034472ea57711992c97724767bbf85345e2f7dbf96d4e5b613c59930116e"
+    },
+    {
+      "name": "18-narrow-direct-menu-geometry.json",
+      "bytes": 171813,
+      "sha256": "14c5eaa7847d419a78b3eeb13a08677e24a7be0708add71da61111492d1488a6"
+    },
+    {
+      "name": "18-narrow-direct-menu.png",
+      "bytes": 66793,
+      "sha256": "49d3843fb8dc6214cea627bb2fe4f49ae15def2c67e301dc5e0148523bf1f1ce"
+    },
+    {
+      "name": "19-narrow-tool-evidence-geometry.json",
+      "bytes": 148238,
+      "sha256": "8fa023babb1b6181cc5c575a2c4b0e9050f17100829da0da4a093a649cc3aac1"
+    },
+    {
+      "name": "19-narrow-tool-evidence.png",
+      "bytes": 75560,
+      "sha256": "80f43097860f3160366b0ead21df3e4236802d14e9aeac1f05d33340bbba56cb"
+    },
+    {
+      "name": "20-approved-design-notice-geometry.json",
+      "bytes": 221255,
+      "sha256": "5041f1be48fc633958b8144a5313e64ea1f5341875a64e3656c2114614b45c2a"
+    },
+    {
+      "name": "20-approved-design-notice.png",
+      "bytes": 354307,
+      "sha256": "d07f94f8aef9c1648f7f18c0c97a108a258da84648f9de3bf45bca9a3dab95bb"
+    },
+    {
+      "name": "21-selected-verdict-menu-geometry.json",
+      "bytes": 111240,
+      "sha256": "8030dde42d3f45d42d484f8cd95ccc08d6391ffa0d9edb2af73eaae62ecb7965"
+    },
+    {
+      "name": "21-selected-verdict-menu.png",
+      "bytes": 72519,
+      "sha256": "ce55f906674e9e2e8001766ff68eab2a08917c27959464b52f0ca59d40aa2780"
+    },
+    {
+      "name": "capture-preparation.json",
+      "bytes": 786,
+      "sha256": "e6eb3cbe6911d7ff2a66615fd038a5192e71e81db3f7fd14a1922733ebbdfae2"
+    },
+    {
+      "name": "capture-states.cjs",
+      "bytes": 13737,
+      "sha256": "fd7d2a6cd6372de01ca303fc375e35d0450bdbcccf745d7114865d95fd59aeef"
+    },
+    {
+      "name": "exact-arrow-sources.json",
+      "bytes": 783,
+      "sha256": "ab1123c102195ef2c0588d0903208dd97da4246e5fca302eb75e5bd521254d03"
+    },
+    {
+      "name": "state-inventory.json",
+      "bytes": 48834,
+      "sha256": "2444feeee73a24f626eea8dcb8716198cf5981f5d9b3bec4fc42124f4e183179"
+    }
+  ]
+}

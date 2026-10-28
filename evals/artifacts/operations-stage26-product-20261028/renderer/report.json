@@ -1,0 +1,363 @@
+{
+  "method": "Actual product stage renderer and CSS in frozen mock26 context shell, synthetic JS data only. Not Native integration evidence.",
+  "states": [
+    {
+      "id": "01-default",
+      "geometry": {
+        "panel": {
+          "x": 1441,
+          "y": 0,
+          "width": 479,
+          "height": 1080,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "header": {
+          "x": 1441,
+          "y": 0,
+          "width": 479,
+          "height": 48,
+          "fontSize": "14px",
+          "lineHeight": "20px"
+        },
+        "head": {
+          "x": 1441,
+          "y": 48,
+          "width": 479,
+          "height": 162,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "title": {
+          "x": 1461,
+          "y": 70,
+          "width": 71.609375,
+          "height": 28,
+          "fontSize": "20px",
+          "lineHeight": "28px"
+        },
+        "tabs": {
+          "x": 1441,
+          "y": 230,
+          "width": 479,
+          "height": 33,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "group": {
+          "x": 1449,
+          "y": 279,
+          "width": 463,
+          "height": 36,
+          "fontSize": "13px",
+          "lineHeight": "20px"
+        },
+        "row": {
+          "x": 1449,
+          "y": 315,
+          "width": 463,
+          "height": 76,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "menu": null,
+        "overflow": 0
+      }
+    },
+    {
+      "id": "02-menu",
+      "geometry": {
+        "panel": {
+          "x": 1441,
+          "y": 0,
+          "width": 479,
+          "height": 1080,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "header": {
+          "x": 1441,
+          "y": 0,
+          "width": 479,
+          "height": 48,
+          "fontSize": "14px",
+          "lineHeight": "20px"
+        },
+        "head": {
+          "x": 1441,
+          "y": 48,
+          "width": 479,
+          "height": 162,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "title": {
+          "x": 1461,
+          "y": 70,
+          "width": 71.609375,
+          "height": 28,
+          "fontSize": "20px",
+          "lineHeight": "28px"
+        },
+        "tabs": {
+          "x": 1441,
+          "y": 230,
+          "width": 479,
+          "height": 33,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "group": {
+          "x": 1449,
+          "y": 279,
+          "width": 463,
+          "height": 36,
+          "fontSize": "13px",
+          "lineHeight": "20px"
+        },
+        "row": {
+          "x": 1449,
+          "y": 315,
+          "width": 463,
+          "height": 76,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "menu": {
+          "x": 1541,
+          "y": 615.9859008789062,
+          "width": 180,
+          "height": 110,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "overflow": 0
+      }
+    },
+    {
+      "id": "03-evidence",
+      "geometry": {
+        "panel": {
+          "x": 1441,
+          "y": 0,
+          "width": 479,
+          "height": 1080,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "header": {
+          "x": 1441,
+          "y": 0,
+          "width": 479,
+          "height": 48,
+          "fontSize": "14px",
+          "lineHeight": "20px"
+        },
+        "head": {
+          "x": 1441,
+          "y": 48,
+          "width": 479,
+          "height": 162,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "title": {
+          "x": 1461,
+          "y": 70,
+          "width": 71.609375,
+          "height": 28,
+          "fontSize": "20px",
+          "lineHeight": "28px"
+        },
+        "tabs": {
+          "x": 1441,
+          "y": 230,
+          "width": 479,
+          "height": 33,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "group": {
+          "x": 1449,
+          "y": 279,
+          "width": 463,
+          "height": 36,
+          "fontSize": "13px",
+          "lineHeight": "20px"
+        },
+        "row": {
+          "x": 1449,
+          "y": 315,
+          "width": 463,
+          "height": 76,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "menu": null,
+        "overflow": 0
+      }
+    },
+    {
+      "id": "04-log",
+      "geometry": {
+        "panel": {
+          "x": 1441,
+          "y": 0,
+          "width": 479,
+          "height": 1080,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "header": {
+          "x": 1441,
+          "y": 0,
+          "width": 479,
+          "height": 48,
+          "fontSize": "14px",
+          "lineHeight": "20px"
+        },
+        "head": {
+          "x": 1441,
+          "y": 48,
+          "width": 479,
+          "height": 162,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "title": {
+          "x": 1461,
+          "y": 70,
+          "width": 71.609375,
+          "height": 28,
+          "fontSize": "20px",
+          "lineHeight": "28px"
+        },
+        "tabs": {
+          "x": 1441,
+          "y": 230,
+          "width": 479,
+          "height": 33,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "group": null,
+        "row": null,
+        "menu": null,
+        "overflow": 0
+      }
+    },
+    {
+      "id": "05-rules",
+      "geometry": {
+        "panel": {
+          "x": 1441,
+          "y": 0,
+          "width": 479,
+          "height": 1080,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "header": {
+          "x": 1441,
+          "y": 0,
+          "width": 479,
+          "height": 48,
+          "fontSize": "14px",
+          "lineHeight": "20px"
+        },
+        "head": {
+          "x": 1441,
+          "y": 48,
+          "width": 479,
+          "height": 162,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "title": {
+          "x": 1461,
+          "y": 70,
+          "width": 71.609375,
+          "height": 28,
+          "fontSize": "20px",
+          "lineHeight": "28px"
+        },
+        "tabs": {
+          "x": 1441,
+          "y": 230,
+          "width": 479,
+          "height": 33,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "group": null,
+        "row": null,
+        "menu": null,
+        "overflow": 0
+      }
+    },
+    {
+      "id": "06-narrow",
+      "geometry": {
+        "panel": {
+          "x": 1,
+          "y": 0,
+          "width": 479,
+          "height": 900,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "header": {
+          "x": 1,
+          "y": 0,
+          "width": 479,
+          "height": 48,
+          "fontSize": "14px",
+          "lineHeight": "20px"
+        },
+        "head": {
+          "x": 1,
+          "y": 48,
+          "width": 479,
+          "height": 162,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "title": {
+          "x": 21,
+          "y": 70,
+          "width": 71.609375,
+          "height": 28,
+          "fontSize": "20px",
+          "lineHeight": "28px"
+        },
+        "tabs": {
+          "x": 1,
+          "y": 230,
+          "width": 479,
+          "height": 33,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "group": {
+          "x": 9,
+          "y": 279,
+          "width": 463,
+          "height": 36,
+          "fontSize": "13px",
+          "lineHeight": "20px"
+        },
+        "row": {
+          "x": 9,
+          "y": 315,
+          "width": 463,
+          "height": 76,
+          "fontSize": "14px",
+          "lineHeight": "22px"
+        },
+        "menu": null,
+        "overflow": 0
+      }
+    }
+  ],
+  "errors": []
+}
