@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
-<title>시안 · 업무 시작과 단계 진입 · 28판 · EES Workflow</title>
+<title>시안 · 워크플로우와 단계 탐색 · 29판 · EES Workflow</title>
 <!--@mock:provenance-->
 <!--@mock:fonts-->
 <!--@mock:product-css-->
@@ -261,26 +261,26 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-execution-pending{padding:8px 10px;border-radius:4px;background:var(--ees-status-attention-bg);color:var(--ees-status-attention);font-size:13px;line-height:20px}
 #ees-work-panel .ew-vd-log>li>span>.ew-vd-evidence-toggle{display:block;padding-left:0;margin-top:4px}
 </style>
-<style data-new-screen="⑦ 업무 시작과 단계 진입">
+<style data-new-screen="⑦ 워크플로우와 단계 탐색">
 #ees-work-panel .ew-entry{padding:20px;overflow-y:auto}
 #ees-work-panel .ew-entry-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:20px}
 #ees-work-panel .ew-entry-heading h2{min-width:0;font-size:20px;line-height:28px;font-weight:700;overflow-wrap:anywhere}
-#ees-work-panel .ew-entry-start{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:106px;min-height:34px;padding:6px 12px;border:0;border-radius:6px;white-space:nowrap;font-size:13px;line-height:20px;font-weight:500}
 #ees-work-panel .ew-entry-meta{display:grid;grid-template-columns:68px minmax(0,1fr);gap:6px 12px;margin:0;font-size:13px;line-height:20px}
 #ees-work-panel .ew-entry-meta dt{color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-entry-meta dd{margin:0;color:var(--ees-text-primary)}
 #ees-work-panel .ew-entry-section{margin-top:24px}
 #ees-work-panel .ew-entry-section h3{display:flex;gap:6px;margin:0 0 8px;font-size:14px;line-height:20px;font-weight:700;color:var(--ees-text-primary)}
 #ees-work-panel .ew-entry-section h3 span{font-weight:400;color:var(--ees-text-tertiary)}
-#ees-work-panel .ew-entry-empty,#ees-work-panel .ew-entry-reason{margin:8px 0 0;font-size:13px;line-height:20px;color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-entry-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:60px;padding:12px 0;border-bottom:1px solid var(--ees-line-divider)}
-#ees-work-panel .ew-entry-row>div{display:grid;gap:4px;min-width:0}
+#ees-work-panel .ew-entry-row>.ew-entry-stage-copy{display:grid;gap:4px;min-width:0}
 #ees-work-panel .ew-entry-row b{font-size:15px;line-height:22px;font-weight:500;color:var(--ees-text-primary)}
 #ees-work-panel .ew-entry-row small{font-size:13px;line-height:20px;color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-entry-link{display:inline-flex;align-items:center;gap:4px;min-height:32px;padding:6px 8px;border:0;border-radius:6px;background:transparent;color:var(--ees-brand-text);font-size:13px;line-height:20px;white-space:nowrap}
 #ees-work-panel .ew-entry-link:hover{background:var(--ees-surface-hover)}
 #ees-work-panel .ew-entry button:focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px}
-#ees-work-panel .ew-entry button:disabled{opacity:.45;cursor:not-allowed}
+#ees-work-panel .ew-entry-stage{width:100%;border:0;border-bottom:1px solid var(--ees-line-divider);border-radius:6px;background:transparent;text-align:left;cursor:pointer}
+#ees-work-panel .ew-entry-stage:hover{background:var(--ees-surface-hover)}
+@media(max-width:1439px){.mock-sidebar[data-compact=false]{position:relative;z-index:40}}
 /* The existing left scope list stays above the panel only while it is open. */
 .mock-sidebar[data-scope-open=true]{position:relative;z-index:50}
 </style>
@@ -303,7 +303,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
         </nav>
         <p class="ew-nav-caption">업무</p>
         <nav class="ew-workflows">
-          <details data-category="ops" open><summary aria-label="운영"><img class="ew-icon" src="v4/126c7.svg" alt="" aria-hidden="true"><span>운영</span></summary><button type="button" data-action="workflow" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><span>배포 산출물 점검</span></button><button type="button" data-action="workflow" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><span>일일 시스템 점검</span></button></details>
+          <details data-category="ops" open><summary aria-label="운영"><img class="ew-icon" src="v4/126c7.svg" alt="" aria-hidden="true"><span>운영</span></summary><button type="button" data-action="workflow" data-entry-workflow><span>배포 산출물 점검</span></button><button type="button" data-action="workflow" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><span>일일 시스템 점검</span></button></details>
           <details data-category="setup" open><summary aria-label="셋업"><img class="ew-icon" src="v4/f6bbc.svg" alt="" aria-hidden="true"><span>셋업</span></summary><button type="button" data-action="workflow" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><span>신규 공장 횡전개</span></button></details>
           <details data-category="incident" open><summary aria-label="장애대응"><img class="ew-icon" src="v4/4fb09.svg" alt="" aria-hidden="true"><span>장애대응</span></summary></details>
         </nav>
@@ -340,7 +340,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
                   <div class="mock-ai-name">업무 도우미</div>
                   <div id="response-content-container"><div class="markdown-prose">
                     <p>배포 산출물 점검 업무입니다.</p>
-                    <p>오른쪽에서 업무 단계를 확인하고 업무를 시작할 수 있습니다.</p>
+                    <p>오른쪽에서 단계를 선택하면 작업을 볼 수 있습니다.</p>
                   </div></div>
                   <div class="mock-ai-actions" aria-hidden="true">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" stroke="#6F717A" stroke-width="1.3"/><path d="M10.5 3.5v-.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h.5" stroke="#6F717A" stroke-width="1.3"/></svg>
@@ -380,15 +380,12 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   <div><b>시안</b><span>저장·실행 안 됨</span></div>
   <div><strong id="mock-screen" role="status" aria-live="polite">⑦-1 업무 개요</strong><button type="button" data-mock-info>안내</button></div>
   <details class="mock-state-picker">
-    <summary>화면 바로 보기 · 28판</summary>
-    <nav aria-label="업무 진입 예시 선택">
-      <button type="button" data-mock-state="default" aria-current="true">⑦-1 공장 A · 시작 전</button>
-      <button type="button" data-mock-state="factory">⑦-2 전체 공장 · 선택 필요</button>
+    <summary>화면 바로 보기 · 29판</summary>
+    <nav aria-label="워크플로우와 단계 예시 선택">
+      <button type="button" data-mock-state="default" aria-current="true">⑦-1 공장 A · 단계 조회</button>
+      <button type="button" data-mock-state="factory">⑦-2 전체 공장 · 단계 조회</button>
       <button type="button" data-mock-state="system">⑦-2a 시스템 범위 · EMS</button>
-      <button type="button" data-mock-state="existing">⑦-3 진행 중 있음</button>
-      <button type="button" data-mock-state="multi">⑦-4 여러 단계 · 시작 후 개요</button>
-      <button type="button" data-mock-state="unpublished">⑦-5 게시 전</button>
-      <button type="button" data-mock-state="forbidden">⑦-6 시작 권한 없음</button>
+      <button type="button" data-mock-state="existing">⑦-기존 · 기존 작업 상태</button>
     </nav>
     <p>선택하면 예시 상태로 다시 시작합니다.<br>실제 제품에는 없는 확인용 도구입니다.</p>
   </details>
@@ -396,16 +393,18 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 
 <div class="mock-info" role="dialog" aria-modal="true" aria-labelledby="mock-info-title" hidden>
   <section>
-    <h2 id="mock-info-title">시안 안내 · 업무 시작과 단계 진입</h2>
+    <h2 id="mock-info-title">시안 안내 · 워크플로우와 단계 탐색</h2>
     <h3>이 화면</h3>
-    <p>업무 개요에서 시작하고 단계로 들어가는 흐름을 확인하는 28판입니다. 공장과 시스템은 왼쪽 작업 위치에서 한 번 선택합니다. 기본은 공장 A와 EMS를 선택한 수시 업무입니다. ‘업무 시작’은 그 선택값으로 업무를 만들고, 단계가 하나이면 바로 엽니다. 공장이 필요한데 전체 공장을 선택했다면 왼쪽 공장 목록을 엽니다. 공장만 선택해서는 업무를 만들지 않으며 시작 버튼으로 돌아옵니다.</p>
-    <h3>예시 구분</h3>
-    <p>만들어진 업무의 공장·시스템은 시작할 때의 값으로 고정하며 왼쪽 선택을 바꿔도 이전 업무의 대상은 바뀌지 않습니다. 선택한 위치에 해당하는 합성 진행 업무만 표시합니다. 기본 ‘배포 산출물 점검’은 26판의 1차 점검과 합성 작업 12개를 재사용합니다. 실제 사내에 작성된 절차라는 뜻이 아닙니다. 새로 시작한 작업에는 실행 결과·판정·첨부를 미리 넣지 않습니다. 전체 공장·시스템 범위·기존 업무·여러 단계·게시 전·권한 없음은 바깥 시안 도구에서만 고르는 별도 예시입니다. 여러 단계는 실제 작성 예시의 4단계와 작업 수를 옮긴 시작 후 개요 미리보기이며 단계 상세는 이번 시안에 포함하지 않습니다. 이 예시의 주기 실행 정의와 실제 예약 설정은 별개입니다.</p>
-    <h3>단계 안에서</h3>
-    <p>직접 판정 선택·사유 입력과 자동 작업 실행·도구별 근거·이전 실행 내역은 기존 목업의 모의 동작입니다. 판정 선택은 실제 저장이나 최종 확정이 아니며, 자동 실행도 실제 도구를 호출하지 않습니다. 단계 왼쪽 위에서 업무 개요로 돌아갈 수 있습니다.</p>
+    <p>워크플로우에서 단계를 선택하면 기존 운영 화면의 작업 12개를 바로 볼 수 있습니다. 별도 ‘업무 시작’은 없으며, 화면을 열거나 돌아가고 탭·기록·판정 메뉴를 보는 것만으로 실행이나 판정이 생기지 않습니다.</p>
+    <h3>작업 위치와 행동</h3>
+    <p>공장과 시스템은 왼쪽 작업 위치를 사용합니다. 공장을 고르지 않아도 단계와 작업을 볼 수 있습니다. 공장이 필요한 실행·판정 선택을 누르면 왼쪽 공장 목록을 열며, 선택 후에는 해당 공장의 단계로 돌아옵니다. 선택만으로 실행하거나 판정을 적용하지 않습니다.</p>
+    <h3>이어지는 상태</h3>
+    <p>실행이나 판정값 선택을 명시적으로 했을 때만 위치별 합성 메모리 상태를 갱신합니다. 같은 위치의 기존 상태는 이어서 보며, 왼쪽 위치를 바꿔도 이전 상태의 대상은 바뀌지 않습니다. 판정 선택과 사유는 서버 저장·최종 확정이 아니며 실제 도구도 호출하지 않습니다. 새 진행 건을 만드는 실제 API·권한·필수 입력·저장 방식은 아직 정하지 않았습니다.</p>
+    <h3>예시 범위</h3>
+    <p>이번 시안은 ‘배포 산출물 점검 → 1차 점검’ 단일 단계와 기존 합성 작업 12개를 연결합니다. 실제 사내 정의를 조회한 화면이 아니며, 여러 단계의 상세·게시 전·시작 권한 제한은 이 시안의 행동 정책으로 확장하지 않습니다. 최초 실행 결과·판정·첨부는 비어 있습니다.</p>
     <h3>이 시안은</h3>
-    <p>실제 프로그램의 글꼴·색·부품을 재사용한 독립 HTML입니다. 데이터는 메모리에서만 유지되며 처음부터 다시 시작하거나 파일을 다시 열면 사라집니다. 실제 저장·도구 실행·대화·예약 실행은 되지 않습니다. 왼쪽 공장·시스템 선택만 이 시안의 업무 위치와 연결되며, 나머지 왼쪽 메뉴와 가운데 대화는 맥락을 보여주는 모양입니다.</p>
-    <h3>판</h3><p>시안 28판 · 2026-10-28 · 업무 시작과 단계 진입 · 검토안</p>
+    <p>실제 프로그램의 글꼴·색·부품을 재사용한 독립 HTML입니다. 데이터는 메모리에서만 유지되며 처음부터 다시 시작하거나 파일을 다시 열면 사라집니다. 실제 저장·도구 실행·대화·예약 실행은 되지 않습니다. 왼쪽 작업 위치만 이 시안에 연결되며 나머지 메뉴와 가운데 대화는 맥락을 보여주는 모양입니다.</p>
+    <h3>판</h3><p>시안 29판 · 2026-10-28 · 워크플로우와 단계 탐색 · 검토안</p>
     <footer><button type="button" data-mock-reset>처음부터 다시</button><button type="button" data-mock-close>닫기</button></footer>
   </section>
 </div>
@@ -453,56 +452,61 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
       picked:null, flash:null, expanded:false, evidence:null, tool:null, tab:'work', menu:null,
       runSerial:0, stageIds:[], lastRun:null, attemptView:{}, log:[], width:480, open:true};
   }
-  const MULTI_STAGES = [{"id": "delivery-target", "name": "대상 확정", "count": 1}, {"id": "delivery-first", "name": "1차 점검", "count": 3}, {"id": "delivery-recheck", "name": "보완·재점검", "count": 2}, {"id": "delivery-followup", "name": "조건부 승인 후속", "count": 3}];
-  function definitions() { return E.scene==='multi'?MULTI_STAGES:[{id:'review', name:'1차 점검', count:12}]; }
+  function definitions() { return [{id:'review', name:'1차 점검', count:12}]; }
   function reset(scene = 'default') {
     if(E?.scopeMenu) closeScope(false);
     clearTimeout(flashTimer); epoch++; runTimers.forEach(clearTimeout); runTimers.clear();
-    E = {scene, view:'overview', runs:[], selected:null, stage:0, location:{factory:['factory','system','multi'].includes(scene)?'':'factory-a',system:'EMS'}, serial:0, scopeMenu:null, scopeReturnStart:false};
+    E = {scene, view:'overview', runs:[], previews:{}, selected:null, stage:0, location:{factory:['factory','system'].includes(scene)?'':'factory-a',system:'EMS'}, serial:0, scopeMenu:null, scopeReturnTarget:''};
     S = freshState();
-    if (scene === 'existing' || scene === 'multi') createWork(false);
+    if(scene==='existing') makeMemoryContext(S);
     syncScope();
   }
-  const factoryScope = () => !['system','multi'].includes(E.scene);
-  const visibleWorks = () => E.runs.filter(run => run.scope.system===E.location.system && (!factoryScope() || !E.location.factory || run.scope.factory===E.location.factory));
-  const duplicateWork = () => factoryScope() && E.location.factory && E.runs.some(run=>run.scope.system===E.location.system&&run.scope.factory===E.location.factory);
-  const startReason = () => E.scene === 'unpublished' ? '게시된 버전이 없습니다.' : E.scene === 'forbidden' ? '이 업무를 시작할 권한이 없습니다.' : duplicateWork() ? '이미 진행 중인 공장입니다.' : '';
+  const factoryScope = () => E.scene!=='system';
+  const locationKey = () => E.location.system+'|'+(factoryScope()?E.location.factory:'');
+  const locationContexts = () => E.runs.filter(run=>run.scope.system===E.location.system&&run.scope.factory===(factoryScope()?E.location.factory:''));
+  const locationContext = () => { const rows=locationContexts(); return rows.length===1?rows[0]:null; };
   const currentWork = () => E.runs.find(run => run.id === E.selected);
   const currentStage = () => definitions()[E.stage];
   const factoryName = id => FACTORIES.find(factory=>factory.id===id)?.name || '전체 공장';
   const workTarget = run => run.scope.factory ? `${factoryName(run.scope.factory)} · ${run.scope.system}` : `${run.scope.system} 전체`;
   const selectedTarget = () => factoryScope() ? `${factoryName(E.location.factory)} · ${E.location.system}` : `${E.location.system} 전체`;
-  const processed = run => run.stages.reduce((n,state) => n + state.items.filter(item => item.handler === 'service' && item.attempts.length && !item.running).length, 0);
-  function createWork(enter = true) {
-    const factory=factoryScope()?E.location.factory:'';
-    if (startReason() || factoryScope()&&!factory) return;
+  const locationState = () => locationContext()?.stages[0] || E.previews[locationKey()] || null;
+  // Synthetic memory for explicit mock actions only; this is not an API/start_run policy.
+  function makeMemoryContext(state) {
+    const run={id:'mock-work-'+(++E.serial), scope:Object.freeze({factory:factoryScope()?E.location.factory:'',system:E.location.system}), stages:[state]};
+    E.runs.push(run); E.selected=run.id; delete E.previews[locationKey()]; return run;
+  }
+  function browseStage(index = 0, focus = '[data-entry-back]') {
+    if(index!==0) return;
     const width=S.width, open=S.open; S.flash=null; clearTimeout(flashTimer);
-    const run={id:'mock-work-'+(++E.serial), scope:Object.freeze({factory,system:E.location.system}), stages:definitions().map(() => E.scene==='multi'?freshState([]):freshState())};
-    E.runs.push(run); E.selected=run.id; E.stage=0; S=run.stages[0]; S.width=width; S.open=open;
-    E.view=enter && run.stages.length===1?'stage':'overview';
+    const run=locationContext(), key=locationKey();
+    if(!run&&!E.previews[key]) E.previews[key]=freshState();
+    S=run?run.stages[0]:E.previews[key]; S.width=width; S.open=open;
+    E.selected=run?.id || null; E.stage=0; E.view='stage'; S.menu=null;
+    render(focus); panel.querySelector('.ew-scroll').scrollTop=0;
   }
-  function enterWork(id, stage = 0) {
-    const run=visibleWorks().find(entry => entry.id===id); if(!run) return;
-    if(E.scene==='multi'){ E.selected=id; E.view='overview'; return render(); }
-    const width=S.width, open=S.open; S.flash=null; clearTimeout(flashTimer); E.selected=id; E.stage=stage; S=run.stages[stage]; S.width=width; S.open=open;
-    E.view='stage'; S.menu=null; render('[data-entry-back]'); panel.querySelector('.ew-scroll').scrollTop=0;
+  function ensureActionContext(returnTarget) {
+    if(E.view!=='stage') return false;
+    if(factoryScope()&&!E.location.factory){ S.menu=null; render(); openScope('factory',returnTarget); return false; }
+    const rows=locationContexts();
+    if(rows.length>1) return false; // No implicit choice between multiple real runs is defined here.
+    const run=rows[0] || makeMemoryContext(S); E.selected=run.id;
+    return true;
   }
-  function focusOverview() { (panel.querySelector('[data-work-start]:not(:disabled)')||panel.querySelector('[data-work-open]')||panel).focus({preventScroll:true}); }
+  function focusOverview() { (panel.querySelector('[data-entry-stage]')||panel).focus({preventScroll:true}); }
   function overview() { E.view='overview'; S.menu=null; render(); panel.querySelector('.ew-scroll').scrollTop=0; focusOverview(); }
-  function requestStart() {
-    if(E.view!=='overview'||startReason()||E.scene==='multi') return;
-    if(factoryScope()&&!E.location.factory) return openScope('factory',true);
-    createWork(); render('[data-entry-back]'); panel.querySelector('.ew-scroll').scrollTop=0;
-  }
   function entryHeaderHTML() {
     return `<header class="ew-panel-header ew-run-nav"><span class="ew-run-back">업무</span><span></span><button type="button" class="ew-icon-button" aria-label="업무 패널 닫기" data-panel-close>${icon(ICON.panel)}</button></header>`;
   }
+  function stageSummary(state) {
+    const facts=[];
+    if(state){ const c=counts(state); for(const [key,label] of [['running','실행 중'],['ok','승인'],['cond','조건부 승인'],['bad','미승인']]) if(c[key]) facts.push(`${label} ${c[key]}`); }
+    return '작업 12개'+(facts.length?' · '+facts.join(' · '):'');
+  }
   function overviewHTML() {
-    const defs=definitions(), reason=startReason(), visible=visibleWorks();
-    const runs=visible.map(run=>`<div class="ew-entry-row" data-work-row="${run.id}"><div><b>${esc(workTarget(run))}</b><small>현재 단계 · ${esc(defs[0].name)} · 처리 ${processed(run)}/${defs.reduce((n,stage)=>n+stage.count,0)}</small></div>${E.scene==='multi'?'':`<button type="button" class="ew-entry-link" data-work-open="${run.id}">열기${icon(ICON.right,14)}</button>`}</div>`).join('');
-    const stages=defs.map(stage=>`<div class="ew-entry-row"><div><b>${esc(stage.name)}</b><small>작업 ${stage.count}개</small></div></div>`).join('');
-    const needFactory=factoryScope()&&!E.location.factory;
-    return `<div class="ew-entry-heading"><h2>${esc(SCREEN.workflowName)}</h2>${E.scene==='multi'?'':`<button type="button" class="ew-primary ew-entry-start" data-work-start${reason?' disabled':''}>${ACTION_ICON.play}<span>업무 시작</span></button>`}</div><dl class="ew-entry-meta"><dt>주기</dt><dd>${E.scene==='multi'?'정기':'수시'} · 예약 없음</dd><dt>적용 대상</dt><dd>${esc(selectedTarget())}</dd></dl>${reason?`<p class="ew-entry-reason" data-start-reason>${esc(reason)}</p>`:needFactory?'<p class="ew-entry-reason" data-start-reason>왼쪽에서 공장을 선택해 주세요.</p>':''}<div class="ew-entry-section"><h3>진행 중인 업무 <span>${visible.length}</span></h3>${runs||'<p class="ew-entry-empty">진행 중인 업무가 없습니다.</p>'}</div><div class="ew-entry-section"><h3>업무 단계</h3>${stages}</div>`;
+    const state=locationState();
+    const stages=definitions().map((stage,index)=>`<button type="button" class="ew-entry-row ew-entry-stage" data-entry-stage="${index}" aria-label="${esc(stage.name)} · 작업 ${stage.count}개 열기"><span class="ew-entry-stage-copy"><b>${esc(stage.name)}</b><small data-stage-summary>${esc(stageSummary(state))}</small></span>${icon(ICON.right,14)}</button>`).join('');
+    return `<div class="ew-entry-heading"><h2>${esc(SCREEN.workflowName)}</h2></div><dl class="ew-entry-meta"><dt>주기</dt><dd>수시 · 예약 없음</dd><dt>적용 대상</dt><dd>${esc(selectedTarget())}</dd></dl><div class="ew-entry-section"><h3>업무 단계</h3>${stages}</div>`;
   }
   function syncScope() {
     sidebar.querySelector('[data-scope-value="factory"]').textContent=factoryName(E.location.factory);
@@ -510,10 +514,10 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     sidebar.querySelectorAll('[data-scope-trigger]').forEach(button=>button.setAttribute('aria-expanded',String(E.scopeMenu===button.dataset.scopeTrigger)));
     document.getElementById('mock-screen').textContent=screenId();
   }
-  function openScope(kind, returnStart = false) {
+  function openScope(kind, returnTarget = '') {
     if(!['factory','system'].includes(kind)) return;
     if(E.scopeMenu) closeScope(false);
-    E.scopeMenu=kind; E.scopeReturnStart=returnStart; E.scopeRestoreCompact=compact;
+    E.scopeMenu=kind; E.scopeReturnTarget=returnTarget; E.scopeRestoreCompact=compact;
     compact=false; sidebar.dataset.scopeOpen='true'; layout(); syncScope();
     const options=kind==='factory'?[{id:'',name:'전체 공장'},...FACTORIES]:[{id:'EMS',name:'EMS'}];
     const selected=E.location[kind], field=sidebar.querySelector(`[data-scope-trigger="${kind}"]`).closest('.ew-scope-field');
@@ -522,19 +526,19 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   }
   function closeScope(restoreFocus = true) {
     const kind=E.scopeMenu; if(!kind) return;
-    const returnStart=E.scopeReturnStart;
-    E.scopeMenu=null; E.scopeReturnStart=false; sidebar.querySelector('.ew-scope-dropdown')?.remove();
+    const returnTarget=E.scopeReturnTarget;
+    E.scopeMenu=null; E.scopeReturnTarget=''; sidebar.querySelector('.ew-scope-dropdown')?.remove();
     sidebar.dataset.scopeOpen='false'; compact=E.scopeRestoreCompact; layout(); syncScope();
-    if(restoreFocus){ if(returnStart) focusOverview(); else sidebar.querySelector(`[data-scope-trigger="${kind}"]`)?.focus({preventScroll:true}); }
+    if(restoreFocus){ const target=returnTarget?(panel.querySelector(returnTarget+':not(:disabled)')||panel.querySelector('[data-entry-back]')||panel):sidebar.querySelector(`[data-scope-trigger="${kind}"]`); target?.focus({preventScroll:true}); }
   }
   function selectScope(value) {
     const kind=E.scopeMenu;
     if(!kind || kind==='factory'&&!['',...FACTORIES.map(factory=>factory.id)].includes(value) || kind==='system'&&value!=='EMS') return;
-    if(E.location[kind]!==value){ E.location[kind]=value; E.view='overview'; E.selected=null; S.menu=null; render(); panel.querySelector('.ew-scroll').scrollTop=0; }
+    if(E.location[kind]!==value){ E.location[kind]=value; E.selected=null; S.menu=null; if(E.scopeReturnTarget) browseStage(0,null); else { E.view='overview'; render(); panel.querySelector('.ew-scroll').scrollTop=0; } }
     closeScope(true);
   }
   function groupFor(item) { return item.running ? 'running' : item.handler === 'service' && !item.attempts.length ? 'pending' : item.verdict || 'none'; }
-  function counts() { const c = {none: 0, pending:0, running:0, ok: 0, cond: 0, bad: 0}; S.items.forEach(item => c[groupFor(item)]++); return c; }
+  function counts(state = S) { const c = {none: 0, pending:0, running:0, ok: 0, cond: 0, bad: 0}; state.items.forEach(item => c[groupFor(item)]++); return c; }
   const executable = () => S.items.filter(item => item.handler === 'service' && !item.attempts.length && !item.running && !item.excluded);
   const busy = () => S.items.some(item => item.running);
   function afterRun(delay, action) {
@@ -589,7 +593,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   }
 
   function headerHTML() {
-    const run=currentWork(), path=SCREEN.workflowName+(run?' / '+workTarget(run):'');
+    const run=currentWork(), path=SCREEN.workflowName+' / '+(run?workTarget(run):selectedTarget());
     return `<header class="ew-panel-header ew-run-nav"><button type="button" class="ew-run-back" data-entry-back aria-label="업무 개요로 돌아가기" title="${esc(path)}">${icon(ICON.back)}<span>${esc(path)}</span></button><span></span><button type="button" class="ew-icon-button" aria-label="더 보기" data-mock-toast="시안: 메뉴 항목은 아직 정하지 않았습니다">${icon(ICON.more)}</button><button type="button" class="ew-icon-button" aria-label="업무 패널 닫기" data-panel-close>${icon(ICON.panel)}</button></header>`;
   }
   function headHTML() {
@@ -799,22 +803,25 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     if (target.matches('[data-scope-option]')) return selectScope(target.dataset.scopeOption);
     if (target.matches('[data-sidebar-toggle]')) { const next=!compact; if(E.scopeMenu) closeScope(false); compact=next; return layout(); }
     if (target.matches('[data-mock-state]')) return previewState(target.dataset.mockState);
-    if (target.matches('[data-work-start]')) return requestStart();
+    if (target.matches('[data-entry-workflow]')) {
+      if(compactBreakpoint&&region.dataset.overlay==='true'){ compact=true; layout(); }
+      return overview();
+    }
     if (target.matches('[data-entry-back]')) return overview();
-    if (target.matches('[data-work-open]')) return enterWork(target.dataset.workOpen);
-    if (target.matches('[data-entry-stage]')) return enterWork(E.selected, Number(target.dataset.entryStage));
+    if (target.matches('[data-entry-stage]')) return browseStage(Number(target.dataset.entryStage));
     if (target.matches('[data-stage-run]')) {
-      // A second click from the start CTA must not activate its replacement.
+      // A repeated navigation click must not execute the newly displayed stage.
       if (event.detail > 1) return;
+      if(!ensureActionContext('[data-stage-run]')) return;
       return startStage();
     }
-    if (target.matches('[data-vd-run]')) return startRun(target.dataset.vdRun);
+    if (target.matches('[data-vd-run]')) { if(!ensureActionContext(`[data-vd-run="${target.dataset.vdRun}"]`)) return; return startRun(target.dataset.vdRun); }
     if (target.matches('[data-vd-attempt-open]')) {
       const [id, index] = target.dataset.vdAttemptOpen.split(':'); S.tab = 'work'; S.evidence = id; S.attemptView[id] = Number(index); S.tool = null; S.expanded = true;
       render(`[data-vd-evidence="${id}"]`); panel.querySelector(`[data-vd-item="${id}"]`)?.scrollIntoView({block:'start'}); return;
     }
     if (target.matches('[data-vd-pick]')) return S.menu === target.dataset.vdPick ? closeMenu(true) : openMenu(target.dataset.vdPick);
-    if (target.matches('[data-vd-choose]')) return choose(S.menu, target.dataset.vdChoose);
+    if (target.matches('[data-vd-choose]')) { if(!ensureActionContext(`[data-vd-pick="${S.menu}"]`)) return; return choose(S.menu, target.dataset.vdChoose); }
     if (target.matches('[data-vd-evidence]')) { S.evidence = S.evidence === target.dataset.vdEvidence ? null : target.dataset.vdEvidence; S.tool = null; return render(`[data-vd-evidence="${target.dataset.vdEvidence}"]`); }
     if (target.matches('[data-vd-tool]')) { S.tool = S.tool === target.dataset.vdTool ? null : target.dataset.vdTool; return render(`[data-vd-tool="${target.dataset.vdTool}"]`); }
     if (target.matches('[data-vd-group]')) { S.expanded = !S.expanded; return render('[data-vd-group]'); }
@@ -882,7 +889,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   });
   window.addEventListener('resize', layout);
   const requestedScene = new URLSearchParams(window.location.search).get('scene');
-  reset(['factory','system','existing','multi','unpublished','forbidden'].includes(requestedScene)?requestedScene:'default');
+  reset(['factory','system','existing'].includes(requestedScene)?requestedScene:'default');
   layout();
   render();
 })();
