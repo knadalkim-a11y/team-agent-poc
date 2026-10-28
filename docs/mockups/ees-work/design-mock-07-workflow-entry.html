@@ -2136,7 +2136,11 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     if (target.matches('[data-entry-back],[data-entry-cancel]')) return overview();
     if (target.matches('[data-work-open]')) return enterWork(target.dataset.workOpen);
     if (target.matches('[data-entry-stage]')) return enterWork(E.selected, Number(target.dataset.entryStage));
-    if (target.matches('[data-stage-run]')) return startStage();
+    if (target.matches('[data-stage-run]')) {
+      // A second click from the start CTA must not activate its replacement.
+      if (event.detail > 1) return;
+      return startStage();
+    }
     if (target.matches('[data-vd-run]')) return startRun(target.dataset.vdRun);
     if (target.matches('[data-vd-attempt-open]')) {
       const [id, index] = target.dataset.vdAttemptOpen.split(':'); S.tab = 'work'; S.evidence = id; S.attemptView[id] = Number(index); S.tool = null; S.expanded = true;
