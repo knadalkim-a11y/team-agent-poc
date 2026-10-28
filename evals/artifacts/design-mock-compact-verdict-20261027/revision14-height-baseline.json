@@ -1,0 +1,104 @@
+{
+  "baseline": "89a8ac70349e859168c7cb526e273281f0f7c3d4",
+  "fixture": "Comparison: CR-2203 bad, then CR-2207 ok so CR-2203 has no temporary picked reason. No manual note added.",
+  "measurements": {
+    "480": {
+      "initial": [
+        {
+          "id": "CR-2211",
+          "height": 79,
+          "name": "이력 조회 기간 확대"
+        },
+        {
+          "id": "CR-2212",
+          "height": 79,
+          "name": "오류 메시지 정리"
+        },
+        {
+          "id": "CR-2203",
+          "height": 109,
+          "name": "보고서 출력 양식 변경"
+        },
+        {
+          "id": "CR-2207",
+          "height": 137,
+          "name": "배치 주기 조정"
+        },
+        {
+          "id": "CR-2210",
+          "height": 109,
+          "name": "권한 그룹 정리"
+        },
+        {
+          "id": "CR-2204",
+          "height": 131,
+          "name": "대시보드 필터 추가"
+        },
+        {
+          "id": "CR-2201",
+          "height": 109,
+          "name": "로그인 화면 문구 수정"
+        }
+      ],
+      "comparison": [
+        {
+          "id": "CR-2203",
+          "height": 109
+        },
+        {
+          "id": "CR-2204",
+          "height": 131
+        }
+      ]
+    },
+    "1920": {
+      "initial": [
+        {
+          "id": "CR-2211",
+          "height": 79,
+          "name": "이력 조회 기간 확대"
+        },
+        {
+          "id": "CR-2212",
+          "height": 79,
+          "name": "오류 메시지 정리"
+        },
+        {
+          "id": "CR-2203",
+          "height": 109,
+          "name": "보고서 출력 양식 변경"
+        },
+        {
+          "id": "CR-2207",
+          "height": 137,
+          "name": "배치 주기 조정"
+        },
+        {
+          "id": "CR-2210",
+          "height": 109,
+          "name": "권한 그룹 정리"
+        },
+        {
+          "id": "CR-2204",
+          "height": 131,
+          "name": "대시보드 필터 추가"
+        },
+        {
+          "id": "CR-2201",
+          "height": 109,
+          "name": "로그인 화면 문구 수정"
+        }
+      ],
+      "comparison": [
+        {
+          "id": "CR-2203",
+          "height": 109
+        },
+        {
+          "id": "CR-2204",
+          "height": 131
+        }
+      ]
+    }
+  }
+}

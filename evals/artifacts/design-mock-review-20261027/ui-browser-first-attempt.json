@@ -1,0 +1,231 @@
+{
+  "artifact": "docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+  "checkedAt": "2026-10-27T00:22:05.926Z",
+  "checks": [
+    {
+      "name": "Embedded product fonts loaded",
+      "result": "pass",
+      "details": [
+        {
+          "family": "EES Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "EES Noto Sans KR",
+          "status": "loaded"
+        }
+      ]
+    },
+    {
+      "name": "Review state: initial",
+      "result": "pass",
+      "details": {
+        "label": "④-1 고르는 중"
+      }
+    },
+    {
+      "name": "Review state: menu",
+      "result": "pass",
+      "details": {
+        "label": "④-1a 판정 고르기"
+      }
+    },
+    {
+      "name": "Review state: ready",
+      "result": "pass",
+      "details": {
+        "label": "④-2 확정 준비"
+      }
+    },
+    {
+      "name": "Review state: confirmed",
+      "result": "pass",
+      "details": {
+        "label": "④-3 확정됨"
+      }
+    },
+    {
+      "name": "Review state: log",
+      "result": "pass",
+      "details": {
+        "label": "④-기록 (초안)"
+      }
+    },
+    {
+      "name": "Review state: rules",
+      "result": "pass",
+      "details": {
+        "label": "④-기준 (초안)"
+      }
+    },
+    {
+      "name": "Keyboard verdict choice updates state and restores focus",
+      "result": "pass",
+      "details": {
+        "chosen": "cond",
+        "state": "ready"
+      }
+    },
+    {
+      "name": "Menu Escape restores trigger; confirmation reaches completed state",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Default responsive shell at 1920",
+      "result": "pass",
+      "details": {
+        "width": 1920,
+        "sidebar": 256,
+        "compact": "false",
+        "overlay": "false",
+        "panel": {
+          "x": 1439,
+          "width": 481
+        },
+        "toggle": "true",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1440",
+      "result": "pass",
+      "details": {
+        "width": 1440,
+        "sidebar": 256,
+        "compact": "false",
+        "overlay": "false",
+        "panel": {
+          "x": 959,
+          "width": 481
+        },
+        "toggle": "true",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1439",
+      "result": "pass",
+      "details": {
+        "width": 1439,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "false",
+        "panel": {
+          "x": 958,
+          "width": 481
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1366",
+      "result": "pass",
+      "details": {
+        "width": 1366,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "false",
+        "panel": {
+          "x": 885,
+          "width": 481
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1200",
+      "result": "pass",
+      "details": {
+        "width": 1200,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "false",
+        "panel": {
+          "x": 719,
+          "width": 481
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1096",
+      "result": "pass",
+      "details": {
+        "width": 1096,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "false",
+        "panel": {
+          "x": 615,
+          "width": 481
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1095",
+      "result": "pass",
+      "details": {
+        "width": 1095,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "true",
+        "panel": {
+          "x": 614,
+          "width": 481
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 480",
+      "result": "pass",
+      "details": {
+        "width": 480,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "true",
+        "panel": {
+          "x": 55,
+          "width": 425
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    }
+  ],
+  "screenshots": [
+    "mock-revision2-1920-full.png",
+    "mock-revision2-1920-menu.png",
+    "mock-revision2-1920-ready.png",
+    "mock-revision2-1920-confirmed.png",
+    "mock-revision2-1200-full.png",
+    "mock-revision2-1095-full.png",
+    "first-mock-revision2-480-full.png",
+    "first-mock-revision2-failure.png"
+  ],
+  "requests": [
+    "file:///workspace/scratch/025fcfa7db3e/review-repo/docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:///workspace/scratch/025fcfa7db3e/review-repo/docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:///workspace/scratch/025fcfa7db3e/review-repo/docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:///workspace/scratch/025fcfa7db3e/review-repo/docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:///workspace/scratch/025fcfa7db3e/review-repo/docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:///workspace/scratch/025fcfa7db3e/review-repo/docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:///workspace/scratch/025fcfa7db3e/review-repo/docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:///workspace/scratch/025fcfa7db3e/review-repo/docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:///workspace/scratch/025fcfa7db3e/review-repo/docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:///workspace/scratch/025fcfa7db3e/review-repo/docs/mockups/ees-work/design-mock-04-cr-verdict.html"
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "browser": "134.0.6998.35",
+  "result": "fail",
+  "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n'true' !== 'false'\n\n    at /workspace/scratch/025fcfa7db3e/verify-design-mock-ui.cjs:100:50",
+  "diagnosis": "Verification read immediately after setViewportSize before resize event settled; frame-settled follow-up observed expected compact=false/overlay=false at1500. First run screenshots also exposed compact sidebar workflow labels overridden by product CSS ID selectors and mock controls covering narrow footer; source fixes follow."
+}

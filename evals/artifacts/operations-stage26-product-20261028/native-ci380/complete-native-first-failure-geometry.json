@@ -1,0 +1,586 @@
+{
+  "before": [
+    {
+      "file": "40095.svg",
+      "src": "/_ees14/v4/40095.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/40095.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        19,
+        134,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "ead50.svg",
+      "src": "/_ees14/v4/ead50.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/ead50.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        14,
+        14
+      ],
+      "layout": [
+        14,
+        14
+      ],
+      "rect": [
+        222,
+        135,
+        14,
+        14
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "f34f3.svg",
+      "src": "/_ees14/v4/f34f3.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/f34f3.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        19,
+        173,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "ead50.svg",
+      "src": "/_ees14/v4/ead50.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/ead50.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        14,
+        14
+      ],
+      "layout": [
+        14,
+        14
+      ],
+      "rect": [
+        222,
+        174,
+        14,
+        14
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "4df0d.svg",
+      "src": "/_ees14/v4/4df0d.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/4df0d.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        16,
+        223,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "c325d.svg",
+      "src": "/_ees14/v4/c325d.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/c325d.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        16,
+        259,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "093d6.svg",
+      "src": "/_ees14/v4/093d6.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/093d6.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        16,
+        295,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "126c7.svg",
+      "src": "/_ees14/v4/126c7.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/126c7.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        28.1875,
+        376,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "f6bbc.svg",
+      "src": "/_ees14/v4/f6bbc.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/f6bbc.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        28.1875,
+        592,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "4fb09.svg",
+      "src": "/_ees14/v4/4fb09.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/4fb09.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        28.1875,
+        664,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "eb94a.svg",
+      "src": "/_ees14/v4/eb94a.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/eb94a.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        14,
+        14
+      ],
+      "layout": [
+        14,
+        14
+      ],
+      "rect": [
+        1457,
+        16.5,
+        14,
+        14
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "a953c.svg",
+      "src": "/_ees14/v4/a953c.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/a953c.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        1852,
+        15.5,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "7bb4a.svg",
+      "src": "/_ees14/v4/7bb4a.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/7bb4a.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        1886,
+        15.5,
+        16,
+        16
+      ],
+      "animation": "none"
+    }
+  ],
+  "expected": {
+    "a28e3.svg": 13,
+    "b22ad.svg": 13,
+    "69549.svg": 14
+  },
+  "scope": "Actual packaged Native product",
+  "status": "failed",
+  "error": "AssertionError: ('Figma asset slot absent', 'figma-a5-cycle', 'a28e3.svg')",
+  "assets": [
+    {
+      "file": "40095.svg",
+      "src": "/_ees14/v4/40095.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/40095.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        19,
+        134,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "ead50.svg",
+      "src": "/_ees14/v4/ead50.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/ead50.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        14,
+        14
+      ],
+      "layout": [
+        14,
+        14
+      ],
+      "rect": [
+        222,
+        135,
+        14,
+        14
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "f34f3.svg",
+      "src": "/_ees14/v4/f34f3.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/f34f3.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        19,
+        173,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "ead50.svg",
+      "src": "/_ees14/v4/ead50.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/ead50.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        14,
+        14
+      ],
+      "layout": [
+        14,
+        14
+      ],
+      "rect": [
+        222,
+        174,
+        14,
+        14
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "4df0d.svg",
+      "src": "/_ees14/v4/4df0d.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/4df0d.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        16,
+        223,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "c325d.svg",
+      "src": "/_ees14/v4/c325d.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/c325d.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        16,
+        259,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "093d6.svg",
+      "src": "/_ees14/v4/093d6.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/093d6.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        16,
+        295,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "126c7.svg",
+      "src": "/_ees14/v4/126c7.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/126c7.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        28.1875,
+        376,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "f6bbc.svg",
+      "src": "/_ees14/v4/f6bbc.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/f6bbc.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        28.1875,
+        592,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "4fb09.svg",
+      "src": "/_ees14/v4/4fb09.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/4fb09.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        28.1875,
+        664,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "eb94a.svg",
+      "src": "/_ees14/v4/eb94a.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/eb94a.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        14,
+        14
+      ],
+      "layout": [
+        14,
+        14
+      ],
+      "rect": [
+        1457,
+        16.5,
+        14,
+        14
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "a953c.svg",
+      "src": "/_ees14/v4/a953c.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/a953c.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        1852,
+        15.5,
+        16,
+        16
+      ],
+      "animation": "none"
+    },
+    {
+      "file": "7bb4a.svg",
+      "src": "/_ees14/v4/7bb4a.svg",
+      "currentSrc": "http://127.0.0.1:60333/_ees14/v4/7bb4a.svg",
+      "complete": true,
+      "loaded": true,
+      "natural": [
+        16,
+        16
+      ],
+      "layout": [
+        16,
+        16
+      ],
+      "rect": [
+        1886,
+        15.5,
+        16,
+        16
+      ],
+      "animation": "none"
+    }
+  ]
+}

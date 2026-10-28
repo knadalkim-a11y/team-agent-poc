@@ -1,0 +1,298 @@
+{
+  "source": "docs/mockups/ees-work/design-mock-src/04-cr-verdict.html",
+  "sourceSha256": "8c15dce0f39bde1e82fe0d3b691fcc9c5a290dca93760c3690b248375d7df08a",
+  "artifactSha256": "6db5c986d3a4fb69036b7d19841abaf930b9b84096b830ca95c9d5cb8f20ab8c",
+  "artifact": "docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+  "checkedAt": "2026-10-27T01:07:26.609Z",
+  "checks": [
+    {
+      "name": "Embedded product fonts loaded",
+      "result": "pass",
+      "details": [
+        {
+          "family": "EES Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "EES Noto Sans KR",
+          "status": "loaded"
+        }
+      ]
+    },
+    {
+      "name": "Review state: initial",
+      "result": "pass",
+      "details": {
+        "label": "④-1 고르는 중"
+      }
+    },
+    {
+      "name": "Review state: menu",
+      "result": "pass",
+      "details": {
+        "label": "④-1a 판정 고르기"
+      }
+    },
+    {
+      "name": "Review state: ready",
+      "result": "pass",
+      "details": {
+        "label": "④-2 확정 준비"
+      }
+    },
+    {
+      "name": "Review state: confirmed",
+      "result": "pass",
+      "details": {
+        "label": "④-3 확정됨"
+      }
+    },
+    {
+      "name": "Review state: log",
+      "result": "pass",
+      "details": {
+        "label": "④-기록 (초안)"
+      }
+    },
+    {
+      "name": "Review state: rules",
+      "result": "pass",
+      "details": {
+        "label": "④-기준 (초안)"
+      }
+    },
+    {
+      "name": "Keyboard verdict choice updates state and restores focus",
+      "result": "pass",
+      "details": {
+        "chosen": "cond",
+        "state": "ready"
+      }
+    },
+    {
+      "name": "Menu Escape restores trigger; confirmation reaches completed state",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Default responsive shell at 1920",
+      "result": "pass",
+      "details": {
+        "width": 1920,
+        "sidebar": 256,
+        "compact": "false",
+        "overlay": "false",
+        "panel": {
+          "x": 1440,
+          "width": 480
+        },
+        "toggle": "true",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1440",
+      "result": "pass",
+      "details": {
+        "width": 1440,
+        "sidebar": 256,
+        "compact": "false",
+        "overlay": "false",
+        "panel": {
+          "x": 960,
+          "width": 480
+        },
+        "toggle": "true",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1439",
+      "result": "pass",
+      "details": {
+        "width": 1439,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "false",
+        "panel": {
+          "x": 959,
+          "width": 480
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1366",
+      "result": "pass",
+      "details": {
+        "width": 1366,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "false",
+        "panel": {
+          "x": 886,
+          "width": 480
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1200",
+      "result": "pass",
+      "details": {
+        "width": 1200,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "false",
+        "panel": {
+          "x": 720,
+          "width": 480
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1096",
+      "result": "pass",
+      "details": {
+        "width": 1096,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "false",
+        "panel": {
+          "x": 616,
+          "width": 480
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 1095",
+      "result": "pass",
+      "details": {
+        "width": 1095,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "true",
+        "panel": {
+          "x": 615,
+          "width": 480
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Default responsive shell at 480",
+      "result": "pass",
+      "details": {
+        "width": 480,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "true",
+        "panel": {
+          "x": 56,
+          "width": 424
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Narrow review controls keep footer clear and can select a state",
+      "result": "pass",
+      "details": {
+        "controls": {
+          "x": 6,
+          "y": 852,
+          "width": 44,
+          "height": 40
+        },
+        "panel": {
+          "x": 56,
+          "y": 0,
+          "width": 424,
+          "height": 900
+        }
+      }
+    },
+    {
+      "name": "Manual sidebar state persists within breakpoint, defaults reset on crossing",
+      "result": "pass",
+      "details": {
+        "width": 1200,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "false",
+        "panel": {
+          "x": 720,
+          "width": 480
+        },
+        "toggle": "false",
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Overlay Escape closes panel and toggle restores it",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Automatic example has independent daily-check context and no human approval",
+      "result": "pass",
+      "details": {
+        "title": "일일 시스템 점검",
+        "request": "오늘 일일 시스템 점검 상태 보여 줘",
+        "response": "<p>서비스가 4개 항목을 점검하고 있습니다. 정해진 조건을 모두 충족하면 자동으로 완료됩니다.</p><p>이 작업은 서비스의 점검 결과로 완료 여부가 정해집니다.</p>",
+        "workflow": [
+          [
+            "배포 산출물 점검",
+            null
+          ],
+          [
+            "일일 시스템 점검",
+            "page"
+          ],
+          [
+            "신규 공장 횡전개",
+            null
+          ]
+        ]
+      }
+    }
+  ],
+  "screenshots": [
+    "mock-revision3-1920-full.png",
+    "mock-revision3-1920-menu.png",
+    "mock-revision3-1920-ready.png",
+    "mock-revision3-1920-confirmed.png",
+    "mock-revision3-1200-full.png",
+    "mock-revision3-1095-full.png",
+    "mock-revision3-480-full.png",
+    "mock-revision3-480-ready.png",
+    "mock-revision3-failure.png"
+  ],
+  "requests": [
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html"
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "browser": "134.0.6998.35",
+  "result": "fail",
+  "error": "locator.isVisible: Error: strict mode violation: locator('[data-mock-mode=\"auto\"]') resolved to 2 elements:\n    1) <aside tabindex=\"-1\" data-ees-work=\"\" aria-label=\"업무 패널\" id=\"ees-work-panel\" data-ees-theme=\"v3\" aria-pressed=\"true\" data-mock-mode=\"auto\" data-ees-source-slot=\"\">…</aside> aka getByRole('complementary', { name: '업무 패널' })\n    2) <button type=\"button\" aria-pressed=\"true\" data-mock-mode=\"auto\">자동 완료</button> aka getByRole('button', { name: '자동 완료' })\n\nCall log:\n\u001b[2m    - checking visibility of locator('[data-mock-mode=\"auto\"]')\u001b[22m\n\n    at openControls (/workspace/scratch/025fcfa7db3e/review-repo/evals/artifacts/design-mock-auto-20261027/browser-check.cjs:43:56)\n    at autoState (/workspace/scratch/025fcfa7db3e/review-repo/evals/artifacts/design-mock-auto-20261027/browser-check.cjs:50:11)\n    at /workspace/scratch/025fcfa7db3e/review-repo/evals/artifacts/design-mock-auto-20261027/browser-check.cjs:174:13"
+}

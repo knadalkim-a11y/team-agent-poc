@@ -1,0 +1,125 @@
+{
+  "revision": 23,
+  "status": "review_only_not_approved",
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "pageId": "897:761",
+  "nodes": {
+    "board": "1678:7545",
+    "memo": "1678:7546",
+    "default": "1678:7554",
+    "directRecord": "1678:7676",
+    "running": "1678:7807",
+    "C99": "1679:7754",
+    "latestWorkshop": "1674:7336",
+    "latestFeatureMap": "1288:45"
+  },
+  "boardUrl": "https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1678-7545",
+  "changelogUrl": "https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1679-7754",
+  "source": {
+    "path": "docs/mockups/ees-work/design-mock-src/06-task-groups.html",
+    "bytes": 76541,
+    "sha256": "81fc0f11d2b3250357603eeb814f04dc6185b957e667bbdefcba19b43fcb028a"
+  },
+  "html": {
+    "path": "docs/mockups/ees-work/design-mock-06-task-groups.html",
+    "bytes": 406732,
+    "sha256": "3cda103d3a8bee10a87f56c6d621f8ba17feec6e2d6bd2cff9af2e21eb506a21"
+  },
+  "branch": "fix/design-mock-review-20261027",
+  "PR": 105,
+  "change": {
+    "scope": "Only unselected direct-verdict 판정 필요 controls",
+    "count": 7,
+    "perPanel": {
+      "default": 3,
+      "directRecord": 2,
+      "running": 2
+    },
+    "fill": "none",
+    "border": "unbound SOLID opacity 0; original geometry retained",
+    "text": "#5c5e65",
+    "arrow": {
+      "size": 14,
+      "color": "#6f717a",
+      "source": "existing source SVG preserved"
+    },
+    "width": 124,
+    "height": 30,
+    "font": {
+      "family": "Noto Sans KR",
+      "size": 13,
+      "lineHeight": 20,
+      "weight": 500
+    },
+    "textOffset": {
+      "x": 11,
+      "y": 5
+    },
+    "selectedStyles": "unchanged",
+    "behavior": "unchanged",
+    "htmlKeyboardFocus": "2px focus-visible outline retained; no extra Figma focus state"
+  },
+  "panels": [
+    {
+      "id": "1678:7554",
+      "w": 480,
+      "h": 1080,
+      "bodyH": 749,
+      "scrollTop": 0
+    },
+    {
+      "id": "1678:7676",
+      "w": 480,
+      "h": 1080,
+      "bodyH": 780,
+      "scrollTop": 31
+    },
+    {
+      "id": "1678:7807",
+      "w": 480,
+      "h": 1250,
+      "bodyH": 797,
+      "scrollTop": 0
+    }
+  ],
+  "renderCheck": {
+    "status": "PASS",
+    "method": "Final board and C99 screenshots visually inspected; all 7 controls read back transparent with identical 124×30/text x11 geometry",
+    "nativeEditable": true,
+    "fonts": [
+      "Noto Sans KR"
+    ],
+    "imageFillCount": 0,
+    "memoLegible": true,
+    "selectedConditionalBoxPreserved": true
+  },
+  "snapshots": {
+    "method": "FNV32 of ID/name/parent/size/text tree",
+    "revision22": {
+      "node": "1675:7336",
+      "before": "98f5aa5a",
+      "after": "98f5aa5a",
+      "unchanged": true
+    },
+    "approved20": {
+      "node": "1658:7137",
+      "before": "3cca26ad",
+      "after": "3cca26ad",
+      "unchanged": true
+    }
+  },
+  "remainingDifferences": [
+    "Existing approximately 1px internal boundary/width difference and native Noto font rasterization remain; exact visual canonical is HTML/PNG at recorded hashes.",
+    "Direct record panel retains intentional scrollTop31 and corresponding clipped context line."
+  ],
+  "boundaries": {
+    "newFunctions": false,
+    "newStates": false,
+    "fullShellWork": false,
+    "imageUpload": false,
+    "repoEdits": false,
+    "oldApproved20Unchanged": true,
+    "old22Unchanged": true
+  },
+  "commitIdentification": "Source, HTML and report share the containing Git commit; recorded SHA-256 values identify reviewed bytes."
+}

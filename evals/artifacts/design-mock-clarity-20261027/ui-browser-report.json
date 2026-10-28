@@ -1,0 +1,246 @@
+{
+  "source": "docs/mockups/ees-work/design-mock-src/04-cr-verdict.html",
+  "sourceSha256": "630723a6c6fda8e35174c55dada4ac911d3f0832e3609f2299811ed0010d51e5",
+  "artifact": "docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+  "artifactSha256": "2603d664814b5e1cc72ff2b5e5019fe3387db244d8a8e47502d364ec7fc9d7f7",
+  "artifactBytes": 391678,
+  "checkedAt": "2026-10-27T01:54:44.240Z",
+  "checks": [
+    {
+      "name": "Embedded product fonts load",
+      "result": "pass",
+      "details": [
+        {
+          "family": "EES Inter",
+          "status": "loaded"
+        },
+        {
+          "family": "EES Noto Sans KR",
+          "status": "loaded"
+        }
+      ]
+    },
+    {
+      "name": "All three human choices start empty; two AI recommendations are separate and excluded from decision counts",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "All twelve rows retain common evidence controls at the same horizontal position",
+      "result": "pass",
+      "details": [
+        {
+          "id": "CR-2203",
+          "label": "판정 근거",
+          "parent": "ew-vd-origin",
+          "right": -12
+        },
+        {
+          "id": "CR-2207",
+          "label": "판정 근거",
+          "parent": "ew-vd-origin",
+          "right": -12
+        },
+        {
+          "id": "CR-2210",
+          "label": "판정 근거",
+          "parent": "ew-vd-origin",
+          "right": -12
+        },
+        {
+          "id": "CR-2204",
+          "label": "판정 근거",
+          "parent": "ew-vd-origin",
+          "right": -12
+        },
+        {
+          "id": "CR-2201",
+          "label": "판정 근거",
+          "parent": "ew-vd-origin",
+          "right": -12
+        },
+        {
+          "id": "CR-2202",
+          "label": "판정 근거",
+          "parent": "ew-vd-origin",
+          "right": -12
+        },
+        {
+          "id": "CR-2205",
+          "label": "판정 근거",
+          "parent": "ew-vd-origin",
+          "right": -12
+        },
+        {
+          "id": "CR-2206",
+          "label": "판정 근거",
+          "parent": "ew-vd-origin",
+          "right": -12
+        },
+        {
+          "id": "CR-2208",
+          "label": "판정 근거",
+          "parent": "ew-vd-origin",
+          "right": -12
+        },
+        {
+          "id": "CR-2209",
+          "label": "판정 근거",
+          "parent": "ew-vd-origin",
+          "right": -12
+        },
+        {
+          "id": "CR-2211",
+          "label": "판정 근거",
+          "parent": "ew-vd-origin",
+          "right": -12
+        },
+        {
+          "id": "CR-2212",
+          "label": "판정 근거",
+          "parent": "ew-vd-origin",
+          "right": -12
+        }
+      ]
+    },
+    {
+      "name": "Batch finalization control, handler, preview and claims are removed without replacement save or finalize actions",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Human evidence preserves missing/unverified facts and separately records the correct original recommendations",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Service approval and rejection remain completed, read-only and linked to unchanged conditions and observations",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Evidence Enter toggle keeps its name, expanded state and keyboard focus",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Human approval can differ from the rights-group AI rejection without rewriting recommendation, evidence or finalization state",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Opposite human selection preserves the original AI approval and unverified supporting evidence",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Keyboard menu works after footer removal; selecting all three does not create or imply a finalization action",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "All nine service rows remain byte-for-byte unchanged after human choices",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Log and rules distinguish reference recommendations from human selections without extra workflow claims",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Five retained review presets work; arbitrary ready and confirmed presets are absent",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Mock help leaves actual finalization undecided; reset clears selections while preserving recommendations",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Stable actor, state, reference and common evidence fit at 1920",
+      "result": "pass",
+      "details": {
+        "width": 1920,
+        "sidebar": 256,
+        "compact": "false",
+        "overlay": "false",
+        "panel": {
+          "x": 1440,
+          "width": 480
+        },
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Stable actor, state, reference and common evidence fit at 1200",
+      "result": "pass",
+      "details": {
+        "width": 1200,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "false",
+        "panel": {
+          "x": 720,
+          "width": 480
+        },
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Stable actor, state, reference and common evidence fit at 480",
+      "result": "pass",
+      "details": {
+        "width": 480,
+        "sidebar": 56,
+        "compact": "true",
+        "overlay": "true",
+        "panel": {
+          "x": 56,
+          "width": 424
+        },
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Narrow rights evidence and dropdown fit the panel without the removed footer",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Overlay keyboard close and reopen remain functional",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Existing service-evidence deep link remains valid",
+      "result": "pass",
+      "details": {}
+    },
+    {
+      "name": "Offline load and interactions have no external requests or console/page errors",
+      "result": "pass",
+      "details": {}
+    }
+  ],
+  "screenshots": [
+    "mock-revision6-1920-full.png",
+    "mock-revision6-1920-panel.png",
+    "mock-revision6-1920-rights-evidence.png",
+    "mock-revision6-1920-selected.png",
+    "mock-revision6-480-full.png",
+    "mock-revision6-480-rights-evidence.png"
+  ],
+  "requests": [
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html",
+    "file:docs/mockups/ees-work/design-mock-04-cr-verdict.html"
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "browser": "134.0.6998.35",
+  "result": "pass"
+}

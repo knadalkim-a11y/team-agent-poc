@@ -1,0 +1,177 @@
+{
+  "checkedAt": "2026-10-27T05:35:32.817Z",
+  "baseline": "3f0a919319ac247954878b6ffe94bb8c95725c74",
+  "scope": "Typography, execution labels/appearance and attachment role only; targeted ad-hoc browser inspection.",
+  "files": [
+    {
+      "path": "docs/mockups/ees-work/design-mock-src/05-execution.html",
+      "bytes": 76211,
+      "sha256": "bbfe6d2e0450785e43325d4aaa864666a021c4c101876c233ac38dc4cfa28943"
+    },
+    {
+      "path": "docs/mockups/ees-work/design-mock-05-execution.html",
+      "bytes": 406548,
+      "sha256": "4e65cfe32f67d6551037b218ea60bdbdb79522c97a2c6f411533892a1b2127b0"
+    }
+  ],
+  "checks": [
+    "Only CSS/static content and headHTML/pickHTML/itemHTML changed; remaining script and approved04 bytes retained",
+    "1920/480: text-only first run/rerun match, top label/accessibility and primary emphasis retained;15px task/13px decision and static labelled attachment fit",
+    "480 keyboard menu/conditional label and attachment remain accessible without overflow"
+  ],
+  "screenshots": [
+    "mock-revision17-1920-default.png",
+    "mock-revision17-attachment.png",
+    "mock-revision17-480-default.png",
+    "mock-revision17-480-menu.png"
+  ],
+  "geometry": {
+    "480": {
+      "stage": {
+        "x": 344,
+        "y": 136,
+        "width": 116,
+        "height": 32,
+        "font": "13px",
+        "lineHeight": "20px",
+        "background": "rgb(47, 95, 152)",
+        "border": "0px",
+        "text": "지금 실행"
+      },
+      "first": {
+        "x": 354,
+        "y": 393,
+        "width": 106,
+        "height": 32,
+        "font": "13px",
+        "lineHeight": "20px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "지금 실행"
+      },
+      "repeat": {
+        "x": 354,
+        "y": 900,
+        "width": 106,
+        "height": 32,
+        "font": "13px",
+        "lineHeight": "20px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "다시 실행"
+      },
+      "taskName": {
+        "x": 77,
+        "y": 672,
+        "width": 383,
+        "height": 22,
+        "font": "15px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "배치 주기 조정"
+      },
+      "actor": {
+        "x": 77,
+        "y": 703,
+        "width": 72,
+        "height": 20,
+        "font": "13px",
+        "lineHeight": "20px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "사람 판정"
+      },
+      "attachment": {
+        "x": 77,
+        "y": 734,
+        "width": 383,
+        "height": 20,
+        "font": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "판정 참고 자료test_v2_final.xlsx"
+      },
+      "humanHeight": 77,
+      "attachedHumanHeight": 103,
+      "serviceHeight": 87
+    },
+    "1920": {
+      "stage": {
+        "x": 1784,
+        "y": 136,
+        "width": 116,
+        "height": 32,
+        "font": "13px",
+        "lineHeight": "20px",
+        "background": "rgb(47, 95, 152)",
+        "border": "0px",
+        "text": "지금 실행"
+      },
+      "first": {
+        "x": 1794,
+        "y": 393,
+        "width": 106,
+        "height": 32,
+        "font": "13px",
+        "lineHeight": "20px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "지금 실행"
+      },
+      "repeat": {
+        "x": 1794,
+        "y": 900,
+        "width": 106,
+        "height": 32,
+        "font": "13px",
+        "lineHeight": "20px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "다시 실행"
+      },
+      "taskName": {
+        "x": 1461,
+        "y": 672,
+        "width": 439,
+        "height": 22,
+        "font": "15px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "배치 주기 조정"
+      },
+      "actor": {
+        "x": 1461,
+        "y": 703,
+        "width": 72,
+        "height": 20,
+        "font": "13px",
+        "lineHeight": "20px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "사람 판정"
+      },
+      "attachment": {
+        "x": 1461,
+        "y": 734,
+        "width": 439,
+        "height": 20,
+        "font": "14px",
+        "lineHeight": "22px",
+        "background": "rgba(0, 0, 0, 0)",
+        "border": "0px",
+        "text": "판정 참고 자료test_v2_final.xlsx"
+      },
+      "humanHeight": 77,
+      "attachedHumanHeight": 103,
+      "serviceHeight": 87
+    }
+  },
+  "errors": [],
+  "externalRequests": [],
+  "browser": "134.0.6998.35",
+  "result": "fail",
+  "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n2 !== 9\n\n    at [stdin]:14:347"
+}

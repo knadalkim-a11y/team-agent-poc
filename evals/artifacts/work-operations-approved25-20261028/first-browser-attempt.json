@@ -1,0 +1,66 @@
+{
+  "scope": "Revision25 design approval metadata only; no new revision.",
+  "sourceOnlyApprovalTextChanged": true,
+  "scriptsIdentical": true,
+  "cssExceptEmbeddedFontsIdentical": true,
+  "generatedNormalizedEqual": true,
+  "fonts": [
+    {
+      "family": "Inter",
+      "beforeBytes": 55320,
+      "afterBytes": 55320,
+      "beforeGlyphs": 334,
+      "afterGlyphs": 334,
+      "sameBytes": true,
+      "addedUnicode": [],
+      "removedUnicode": [],
+      "sharedAdvanceWidthsIdentical": true
+    },
+    {
+      "family": "Noto Sans KR Thin",
+      "beforeBytes": 84120,
+      "afterBytes": 84356,
+      "beforeGlyphs": 775,
+      "afterGlyphs": 776,
+      "sameBytes": false,
+      "addedUnicode": [
+        "디"
+      ],
+      "removedUnicode": [],
+      "sharedAdvanceWidthsIdentical": true
+    }
+  ],
+  "files": [
+    {
+      "path": "docs/mockups/ees-work/design-mock-src/06-task-groups.html",
+      "bytes": 76364,
+      "sha256": "d316d63986b2afe1edda567b862edd716b14a71c80f04b5d679a445e94171e0d"
+    },
+    {
+      "path": "docs/mockups/ees-work/design-mock-06-task-groups.html",
+      "bytes": 407663,
+      "sha256": "24b9fee62679f0317cb9f69852a0caeedd434124bbcbbfb32e11252acd253aa6"
+    }
+  ],
+  "diagnosticObservations": [
+    {
+      "step": "First font extraction",
+      "result": "Incorrect padding before comparison",
+      "cause": "Regex captured CSS suffix because font URL is unquoted. Changed matcher to base64 character class. No source/build change."
+    },
+    {
+      "step": "Second font extraction",
+      "result": "No module named brotli before comparison",
+      "cause": "Used primary python instead of existing repo .venv. Corrected interpreter; no installs or source/build change."
+    }
+  ],
+  "browser": {
+    "version": "133.0.6943.0",
+    "playwright": "1.62.1"
+  },
+  "render": [],
+  "errors": [],
+  "externalRequests": [],
+  "result": "fail",
+  "error": "browser.newPage: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /tmp/mock-browser-runtime/bin/chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --allow-pre-commit-input --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-sync --enable-automation --enable-blink-features=IdleDetection --export-tagged-pdf --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --disable-domain-reliability --disable-print-preview --disable-speech-api --disk-cache-size=33554432 --mute-audio --no-default-browser-check --no-pings --single-process --font-render-hinting=none --disable-features=Translate,BackForwardCache,AcceptCHFrame,MediaRouter,OptimizationHints,AudioServiceOutOfProcess,IsolateOrigins,site-per-process --enable-features=NetworkServiceInProcess2,SharedArrayBuffer --hide-scrollbars --ignore-gpu-blocklist --in-process-gpu --window-size=1920,1080 --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --allow-running-insecure-content --disable-setuid-sandbox --disable-site-isolation-trials --disable-web-security --no-sandbox --no-zygote --headless='shell' --user-data-dir=/tmp/playwright_chromiumdev_profile-ru5lNa --remote-debugging-pipe --no-startup-window\n<launched> pid=17\n[pid=17][err] [1028/064737.124425:ERROR:address_tracker_linux.cc(212)] Could not create NETLINK socket: Operation not permitted (1)\n[pid=17][err] [1028/064737.151642:WARNING:viz_main_impl.cc(85)] VizNullHypothesis is disabled (not a warning)\n    at [stdin]:3:235"
+}

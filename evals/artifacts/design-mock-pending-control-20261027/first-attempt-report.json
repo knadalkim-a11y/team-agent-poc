@@ -1,0 +1,94 @@
+{
+  "checkedAt": "2026-10-27T07:48:29.199Z",
+  "baseline": "33a1ee7ed1f69aa18a2832e81d55fd5a5d96cbb5",
+  "source": {
+    "path": "docs/mockups/ees-work/design-mock-src/06-task-groups.html",
+    "bytes": 76541,
+    "sha256": "81fc0f11d2b3250357603eeb814f04dc6185b957e667bbdefcba19b43fcb028a"
+  },
+  "artifact": {
+    "path": "docs/mockups/ees-work/design-mock-06-task-groups.html",
+    "bytes": 406732,
+    "sha256": "3cda103d3a8bee10a87f56c6d621f8ba17feec6e2d6bd2cff9af2e21eb506a21"
+  },
+  "scope": "Pending direct-verdict control style only. Existing broader behavior suites not repeated.",
+  "screenshots": [
+    "mock-revision23-default.png"
+  ],
+  "checks": [],
+  "styles": {
+    "previousSelected": {
+      "width": 124,
+      "height": 30,
+      "color": "rgb(31, 32, 35)",
+      "background": "rgb(255, 255, 255)",
+      "borderColor": "rgb(213, 214, 218)",
+      "borderWidth": "1px",
+      "boxShadow": "none",
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "fontWeight": "500",
+      "padding": "0px 8px 0px 10px",
+      "arrow": 14
+    },
+    "pendingClosed": {
+      "width": 124,
+      "height": 30,
+      "color": "rgb(92, 94, 101)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderColor": "rgba(0, 0, 0, 0)",
+      "borderWidth": "1px",
+      "boxShadow": "none",
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "fontWeight": "500",
+      "padding": "0px 8px 0px 10px",
+      "arrow": 14
+    },
+    "keyboardFocus": {
+      "focusVisible": true,
+      "outlineStyle": "solid",
+      "outlineWidth": "2px",
+      "outlineColor": "rgb(47, 95, 152)"
+    },
+    "pendingOpen": {
+      "width": 124,
+      "height": 30,
+      "color": "rgb(92, 94, 101)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderColor": "rgba(0, 0, 0, 0)",
+      "borderWidth": "1px",
+      "boxShadow": "none",
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "fontWeight": "500",
+      "padding": "0px 8px 0px 10px",
+      "arrow": 14
+    },
+    "selected": {
+      "width": 124,
+      "height": 30,
+      "color": "rgb(31, 32, 35)",
+      "background": "rgb(255, 255, 255)",
+      "borderColor": "rgb(213, 214, 218)",
+      "borderWidth": "1px",
+      "boxShadow": "rgba(47, 95, 152, 0.15) 0px 0px 0px 2px",
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "fontWeight": "500",
+      "padding": "0px 8px 0px 10px",
+      "arrow": 14
+    }
+  },
+  "errors": [],
+  "externalRequests": [],
+  "scriptComparison": "Entire script byte-identical to revision22.",
+  "preserved": {
+    "docs/mockups/ees-work/design-mock-src/05-execution.html": "d64abe44731b7481329cc8a9ff9f0ddf75c9e307fed2a0cd4d1da97e95bb3cc8",
+    "docs/mockups/ees-work/design-mock-05-execution.html": "e99013764c1cacac347d02d9b7425f04efbf92cbd55153e7b752dd00bdc884ea",
+    "docs/mockups/ees-work/design-mock-src/04-cr-verdict.html": "544d5bbb92322bb7c21b080c860da2f81a00ea0d80239e2637a527ba00d2590d",
+    "docs/mockups/ees-work/design-mock-04-cr-verdict.html": "e3b562b05c79a5921813da0e8babcab5f6f4ac987196cca29a9f349503a3a8fe"
+  },
+  "result": "fail",
+  "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n  {\n    arrow: 14,\n    background: 'rgb(255, 255, 255)',\n    borderColor: 'rgb(213, 214, 218)',\n    borderWidth: '1px',\n+   boxShadow: 'rgba(47, 95, 152, 0.15) 0px 0px 0px 2px',\n-   boxShadow: 'none',\n    color: 'rgb(31, 32, 35)',\n    fontSize: '13px',\n    fontWeight: '500',\n    height: 30,\n    lineHeight: '20px',\n\n    at [stdin]:5:1186"
+}

@@ -1,0 +1,236 @@
+{
+  "created_at": "2026-10-27T23:49:02.136376+00:00",
+  "source_head": "b5004a2b96330913c14355986b737d3f44028dea",
+  "source_tree": "b4449b43280bef254fc0157a5390ec80453e667e",
+  "ci_run": 40603340522,
+  "wheel_sha256": "69065403c74eb0ddcd22117744c3d98961ffd068799abc2efbb16ad486ab8fbb",
+  "native_tests": {
+    "first": {
+      "passed": 2,
+      "failed": 0,
+      "seconds": 6.411
+    },
+    "settled_capture": {
+      "passed": 2,
+      "failed": 0,
+      "seconds": 7.847
+    }
+  },
+  "states": [
+    {
+      "name": "operations-stage-default-1920",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "panel": {
+        "x": 1441,
+        "y": 0,
+        "width": 479,
+        "height": 1080
+      },
+      "overflow": 0,
+      "png_sha256": "3df4ccba7ddc975ebae4b764477f6bd0f20bc85ab9ebd7f0abb00a272a56d96b"
+    },
+    {
+      "name": "operations-stage-executed-1920",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "panel": {
+        "x": 1441,
+        "y": 0,
+        "width": 479,
+        "height": 1080
+      },
+      "overflow": 0,
+      "png_sha256": "652e38ed72842edeef0f8d9486947785c233c5902da729439c6b42afc158973f"
+    },
+    {
+      "name": "operations-stage-human-record-480",
+      "viewport": {
+        "width": 480,
+        "height": 1080
+      },
+      "panel": {
+        "x": 57,
+        "y": 0,
+        "width": 423,
+        "height": 1080
+      },
+      "overflow": 0,
+      "png_sha256": "9de78ca62438a38ffe0bc0e6d0f30f87acf1f1a3214836c9cbcae0a454631169"
+    },
+    {
+      "name": "operations-stage-log-480",
+      "viewport": {
+        "width": 480,
+        "height": 1080
+      },
+      "panel": {
+        "x": 57,
+        "y": 0,
+        "width": 423,
+        "height": 1080
+      },
+      "overflow": 0,
+      "png_sha256": "50ef9983c189ad51f23b3094e45ae831c0cf581c9826fe727a7ee30c2e2330ea"
+    },
+    {
+      "name": "operations-stage-menu-1920",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "panel": {
+        "x": 1441,
+        "y": 0,
+        "width": 479,
+        "height": 1080
+      },
+      "overflow": 0,
+      "png_sha256": "1f8ee95cac9c8cae20b553490d6747aa913bbf1e68dc923b2a1a041c60c133f3"
+    },
+    {
+      "name": "operations-stage-menu-480",
+      "viewport": {
+        "width": 480,
+        "height": 1080
+      },
+      "panel": {
+        "x": 57,
+        "y": 0,
+        "width": 423,
+        "height": 1080
+      },
+      "overflow": 0,
+      "png_sha256": "f394d6cf322228f0250f7e9c0aca572060b71ecf32a508acc0b2a5472d91dd5f"
+    },
+    {
+      "name": "operations-stage-prior-tool-1920",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "panel": {
+        "x": 1441,
+        "y": 0,
+        "width": 479,
+        "height": 1080
+      },
+      "overflow": 0,
+      "png_sha256": "a3d3f901d86c31a750aee066e2e90b1b6eb7b63819ed8f09cb96bd3dcd262c62"
+    },
+    {
+      "name": "operations-stage-prior-tool-480",
+      "viewport": {
+        "width": 480,
+        "height": 1080
+      },
+      "panel": {
+        "x": 57,
+        "y": 0,
+        "width": 423,
+        "height": 1080
+      },
+      "overflow": 0,
+      "png_sha256": "c4f9ad7bef02eb11f075ce64395ccd16be0bc617a8461d9f526c4c10b91767e0"
+    },
+    {
+      "name": "operations-stage-rules-480",
+      "viewport": {
+        "width": 480,
+        "height": 1080
+      },
+      "panel": {
+        "x": 57,
+        "y": 0,
+        "width": 423,
+        "height": 1080
+      },
+      "overflow": 0,
+      "png_sha256": "7e9060abe8c756d9c396061b04aa2a48fd3e027757fb198de615f3b1975fe8d8"
+    },
+    {
+      "name": "operations-stage-selected-menu-480",
+      "viewport": {
+        "width": 480,
+        "height": 1080
+      },
+      "panel": {
+        "x": 57,
+        "y": 0,
+        "width": 423,
+        "height": 1080
+      },
+      "overflow": 0,
+      "png_sha256": "d991493b57a4239fa36a391caab1b8f2662cfde143918c6f25b993e347a1a819"
+    },
+    {
+      "name": "operations-stage-tool-detail-1920",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "panel": {
+        "x": 1441,
+        "y": 0,
+        "width": 479,
+        "height": 1080
+      },
+      "overflow": 0,
+      "png_sha256": "1deaca9497209cf682ecf15eee4dbde1b9a8d8f412b64827876ee5f68eb8e46e"
+    },
+    {
+      "name": "operations-stage-tool-running-1920",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "panel": {
+        "x": 1441,
+        "y": 0,
+        "width": 479,
+        "height": 1080
+      },
+      "overflow": 0,
+      "png_sha256": "b326ea3027ec0ade5d153c6681cd849bd706841abd2994a44efa8c65806b687e"
+    }
+  ],
+  "comparison": {
+    "components": 11,
+    "widths": [
+      1920,
+      480
+    ],
+    "differences": [],
+    "same_interaction_sequence": "Open menu at 1920, Escape, resize to 480, reopen; CSS animation finished before screenshot."
+  },
+  "first_capture_observation": "Initial menu screenshot was taken during entry animation. Preserved original; separate QA harness waited for actual animation.finished without changing product or test assertions. Initial comparison used mismatched input modality at 480; matching Escape/resize/click sequence yielded no style differences.",
+  "first_ci_failure": {
+    "job": 122539530500,
+    "test": "Complete Native product",
+    "file": "tests/ees_work_integrated_app.py:757",
+    "error": "Figma asset slot absent: figma-a5-cycle / a28e3.svg",
+    "cause": "Single-stage start now opens the stage; legacy A5 overview asset assertion ran before navigating back to the workflow overview.",
+    "resolution": "Explicit physical stage_back navigation and wait for the original overview before unchanged icon assertions; final CI pending."
+  },
+  "boundaries": [
+    "Real pinned Native frontend and packaged current UI; workflow writes use real temporary SQLite service. Session/chat/tool responses are synthetic.",
+    "No actual in-house access or application has occurred.",
+    "Actual tool execution success/failure is not converted into business approval/rejection; synthetic attachments and multi-tool rules are not added.",
+    "Complete Native CI initially failed as documented; current full CI is not claimed successful."
+  ],
+  "focused_overview_navigation": {
+    "passed": 1,
+    "seconds": 1.815,
+    "unchanged_asset_assertions": [
+      "a28e3.svg:13px",
+      "b22ad.svg:13px",
+      "69549.svg:14px"
+    ],
+    "run_data_unchanged": true,
+    "scope": "Physical start_run and stage_back on the actual packaged Native frontend; real temporary SQLite with one stage and two tool/AI Jobs."
+  }
+}

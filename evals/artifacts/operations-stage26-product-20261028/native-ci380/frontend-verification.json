@@ -1,0 +1,14 @@
+{
+  "artifact_id": 12779661995,
+  "run_id": 40603340522,
+  "head_sha": "b5004a2b96330913c14355986b737d3f44028dea",
+  "artifact_sha256": "03a029c6395b5c6ea5cb68b40c783077f98563017a4c7f2e0e1de4709bc3055a",
+  "artifact_bytes": 258158499,
+  "extract_path": "/workspace/scratch/025fcfa7db3e/review-repo/dist/frontend-current26",
+  "archive_members": 5583,
+  "uncompressed_bytes": 257188275,
+  "validated_frontend_file_count": 5582,
+  "manifest_sha256": "c3a8fcb61d4e077b0559f43482743b6869d6cea31bf8e79702d053d0e36f3e79",
+  "source_input_count": 139,
+  "all_checks": "SHA256, byte size, CRC, unique safe paths, file types, exact checkout source inputs, pinned upstream config, output hashes, pyodide inventory PASS"
+}

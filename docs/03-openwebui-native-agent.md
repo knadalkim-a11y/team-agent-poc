@@ -1,6 +1,8 @@
 # 03. Open WebUI Native 통합 Assistant
 
-**2026-10-26 현재 적용 상태:** 사용자가 `result=ok / stage=complete / running=true / commit=924d919333b8`를 보고했다. **#103 병합 main924d919 프로그램 적용 완료·실행 중**으로 기록한다. [아래 적용 블록](#main-924d919-apply-prep-20261026)은 실행 이력이며 이 PC에서 반복하지 않는다. 로그인·기존 자료·새 화면·도구 설정은 아직 미확인이다.
+**2026-10-28 배포 준비:** 공통 단계 상세26판의 검증된 main42f5ae5 프로그램과 [한 번 적용할 블록](#main-42f5ae5-apply-prep-20261028)을 준비했다. 새 프로그램의 사내 적용은 아직 미실행이다.
+
+**마지막 사내 적용 보고(2026-10-26):** 사용자가 `result=ok / stage=complete / running=true / commit=924d919333b8`를 보고했다. **#103 병합 main924d919 프로그램 적용 완료·실행 중**으로 기록한다. [아래 적용 블록](#main-924d919-apply-prep-20261026)은 실행 이력이며 이 PC에서 반복하지 않는다. 로그인·기존 자료·새 화면·도구 설정은 아직 미확인이다.
 
 현재 제품 이름은 **EES Workflow**이며 [2026-10-02 통합 구현 기준](#integrated-work-install-20261002)을 유지한다. 최신 사내 적용 보고는 `924d919333b8`이다. 앞선 `1c1efff7abe… valid=true running=true` 사전 중단과 [2026-10-22 main1c1efff 검토 기록](#main-1c1efff-apply-prep-20261022)은 당시 상태로 보존한다. 아래 42cc756·#88/#89 및 날짜별 적용·시연·ApplyDemo 안내는 당시 기록으로 보존하며 현재 실행 목록으로 반복하지 않는다. 실제 도구/Native 관리와 기존 Apply/Restore 경로는 유지한다.
 
@@ -14,7 +16,8 @@
 
 | 할 일 | 안내 |
 |---|---|
-| #103 병합 main924d919 사내 적용 | [확정 ZIP·복사 실행 블록·설정·복구 경계](#main-924d919-apply-prep-20261026) |
+| 공통 단계 상세26판 · main42f5ae5 사내 적용 | [확정 ZIP·복사 실행 블록·화면 확인](#main-42f5ae5-apply-prep-20261028) |
+| #103 병합 main924d919 사내 적용 이력 | [확정 ZIP·복사 실행 블록·설정·복구 경계](#main-924d919-apply-prep-20261026) |
 | main 1c1efff 적용 검토 기록·Claude 대조 | [확정 ZIP·한 블록·설정·Restore 경계](#main-1c1efff-apply-prep-20261022) |
 | 2-1/A2·Work 도구 후속 통합 적용 이력 | [병합 뒤 브라우저 열기·ZIP 대기·검사·적용 한 블록](#source-phase2-route-cache-zip-20261014) |
 | 소스 화면·대화 도우미 2단계 통합 적용 이력 | [당시 main 브라우저 ZIP 안내](#source-phase2-local-zip-20261014) |
@@ -23,6 +26,75 @@
 | 프로그램·래퍼 업데이트 | [Upgrade](#ees-wrapper-upgrade) |
 | 수동 적용·복구 | [Apply/Restore](#ees-wrapper-apply)·[종료 복구](#ees-stop-recovery) |
 | 실패 기록·등록 위치 확인 | [실패 판단](#ees-update-failure-causes)·[사내 기록](#ees-local-state) |
+
+<a id="main-42f5ae5-apply-prep-20261028"></a>
+
+## main 42f5ae5 사내 적용 · 공통 단계 상세26판 · 2026-10-28
+
+확정 목업을 기존 제품에 구현한 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)를 main **`42f5ae502b57be68aefa5d141f09259c8f6e9ee9`**에 병합했다. [main CI382](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40606766540)는 첫 실행 **40/40 성공**이다. 실제 Native 화면에서 목업의 배치·글꼴·여백·색상·포커스를1920/480 폭으로 대조했다. 공통 상단에는 워크플로우 이름과 필요한 구분 정보만 표시하고, ‘회차’를 강제하거나 주기·예약을 단계에 표시하지 않는다. 제목 줄은 단계 이름과 **이 단계 실행**, 아래는 현황과 작업 목록이다. 실제 작업·판정·입출력을 연결하며 목업의12개 합성 작업을 사내 자료로 추가하지 않는다.
+
+**현재 사내 설치는 사용자 보고 `924d919333b8`이며 새 프로그램은 아직 적용 전이다.** 아래 블록은 이 설치에서42f5ae5로 한 번 적용할 때 사용한다. 사내 PC에 직접 접근할 수 없어 실제 적용·화면 확인은 사용자 결과로 구분한다. 이 문서 PR #104는 Draft·미병합으로 유지해 목표 main을 고정한다.
+
+| 대조 항목 | 확정 값 |
+|---|---|
+| 브라우저에서 받는 바깥 Actions ZIP | [ees-program-42f5ae502b57be68aefa5d141f09259c8f6e9ee9.zip](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40606766540/artifacts/12781047790) |
+| 바깥 ZIP 크기 / SHA256 | **155,277,967 bytes** / `c734d9a317655e035f97651814df16a9b5f6a11ebd1951b404a6d05fbd6f677a` |
+| 내부 프로그램 ZIP | `EES-demo-42f5ae502b57.zip`, 155,277,803 bytes / `80619b3b99a8b54fa6b2be5b60ad0324d3ec6584b116e7de65f7fde94422b1eb` |
+| 프로그램 원본 | clean manifest의 source_commit=`42f5ae502b57be68aefa5d141f09259c8f6e9ee9` |
+
+실제 다운로드한 바깥/안쪽 ZIP의 크기·SHA256·CRC와 기존 추출/배포 검증기로 manifest·포함 파일·wheel을 확인했다. [정확한 검증 근거](../evals/v4-ui-20260930.md#main-42f5ae5-apply-evidence-20261028). 이는 사내 설치·실제 DB 검사와 구분한다.
+
+기존 운영 계정 PowerShell에서 필요한 입력을 저장하고 팀원이 사용하지 않는 시간에 **아래 블록 하나**를 실행한다. 경로가 다르면 `$er`(기존 저장소)·`$ecfg`(등록 설정)·`$ed`(다운로드 폴더)만 맞춘다. 대상 ZIP이 Downloads에 있으면 크기·해시를 검사해 재사용하고, 없으면 브라우저를 열어 원래 이름으로 다운로드할 때까지15분 기다린다. 설치 SHA·ZIP·`HEAD`/`origin/main`이 다르면 Stop 전에 멈춘다. 검사를 제거하거나 다른 ZIP으로 바꾸지 않는다.
+
+```powershell
+# 저장 후 실행. 적용 뒤 새로고침하고 단계 화면·기존 자료 확인.
+# 기존 도구·개인 연결을 유지하며 도구를 재등록하지 않음.
+# Restore는 직전924d919 프로그램만. DB/PAT/도구 설정은 보존.
+& {
+$ErrorActionPreference='Stop'
+$ec='42f5ae502b57be68aefa5d141f09259c8f6e9ee9'
+$eh='c734d9a317655e035f97651814df16a9b5f6a11ebd1951b404a6d05fbd6f677a'
+$en=155277967
+$eu='https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40606766540/artifacts/12781047790'
+if($ec -cnotmatch '\A[0-9a-f]{40}\z' -or $eh -cnotmatch '\A[0-9a-f]{64}\z' -or $en -le 0 -or $eu -cnotmatch '\Ahttps://github\.com/knadalkim-a11y/team-agent-poc/actions/runs/[0-9]+/artifacts/[0-9]+\z'){throw '배포 값 오류'}
+$er=Join-Path $env:USERPROFILE 'team-agent-poc'
+$ecfg=Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+$ed=Join-Path $env:USERPROFILE 'Downloads'
+$em=Join-Path $er 'scripts\manage-ees.ps1'
+$et=[DateTime]::UtcNow; $ee=$et.AddMinutes(15)
+$ep='\Aees-program-'+$ec+'(?: \([0-9]+\))?\.zip\z'
+$ef=@(Get-ChildItem -LiteralPath $ed -File | Where-Object {$_.Name -cmatch $ep -and $_.Length -eq $en} | Sort-Object LastWriteTimeUtc -Descending)[0]
+$ez=if($ef){$ef.FullName}else{$null}
+$ev=''
+if(!$ez){
+Start-Process $eu
+while([DateTime]::UtcNow -lt $ee){
+$ef=@(Get-ChildItem -LiteralPath $ed -File | Where-Object {$_.Name -cmatch $ep -and $_.Length -eq $en -and $_.LastWriteTimeUtc -ge $et} | Sort-Object LastWriteTimeUtc -Descending)[0]
+$es=if($ef){"$($ef.FullName)|$($ef.LastWriteTimeUtc.Ticks)"}else{''}
+if($es -and $es -ceq $ev){$ez=$ef.FullName; break}
+$ev=$es; Start-Sleep -Seconds 2
+}
+}
+if(!$ez){throw 'ZIP 대기 만료: 미적용'}
+if((Get-FileHash -LiteralPath $ez -Algorithm SHA256).Hash -ine $eh){throw 'ZIP 해시 불일치: 미적용'}
+$eb=& $em -Action Status -Config $ecfg | ConvertFrom-Json
+if($eb.program_valid -ne $true -or $eb.program_incomplete -or $eb.current_commit -cne '924d919333b8804ece2cf5322e14adc681ad6457'){throw ('EES before commit={0} valid={1} running={2}' -f $eb.current_commit,$eb.program_valid,$eb.managed_process_running)}
+& $em -Action Update -Config $ecfg
+foreach($ex in @('HEAD','origin/main')){
+$ea=& git -C $er rev-parse $ex
+if($LASTEXITCODE -ne 0 -or $ea -cne $ec){throw '검토 원본 불일치: 미적용'}
+}
+& $em -Action Upgrade -Config $ecfg -Bundle $ez -Commit $ec -ArtifactSha256 $eh -HealthTimeout 120 -Summary
+}
+```
+
+기존 **Update → Upgrade(검사 → Stop → 정지 확인 → 백업 → Apply → Start/health)** 경로를 사용한다.924d919→42f5ae5에서 배포 스크립트·Work/Confluence 도구 원본·업무 Python 백엔드·저장 형식은 변경하지 않았다. 기존 계정·대화·첨부·개인 PAT·모델/도구 설정을 유지하며 도구 재등록·DB 이관·사내 Node/npm 빌드·전체 의존성 재설치·Init/ApplyDemo는 필요 없다.
+
+성공하면 브라우저를 새로고침하고 기존 대화/업무가 남았는지, 운영의 단계 화면에서 경로·제목·실행 버튼·현황·작업 목록이 목업과 같은 위치인지 확인한다. 판정 메뉴와 근거를 열어 읽는 정도로 확인하며 실제 작업 실행이나 판정 변경은 필수 검사가 아니다. 실행 성공/실패는 실제 실행 상태로 표시하고 이를 승인/미승인으로 바꾸지 않는다.
+
+실패하면 반복 적용하지 않고 마지막 `result/stage/code/running/commit`만 전달한다. 사전 검사 중단은 Apply 전이므로 Restore하지 않는다. 프로그램 복원이 필요할 때는 [기존 Restore](#ees-wrapper-restore)의 정상 적용 뒤 **Stop → Restore → Start**, 미완료 Apply/Restore의 **Restore → Start** 분기를 구분한다. 복원에도 적용 때의 같은 관리자 경로와 설정 파일을 사용하고 각 명령에 `-Config`를 명시한다. Restore는 직전924d919 **프로그램만** 복원하며 DB·대화·첨부·PAT·도구 설정을 되돌리지 않는다.
+
+회신은 **1~2줄**이면 된다: `result=… / stage=… / running=… / commit=…`(실패면 code 포함), 확인했다면 `화면=일치/차이 / 기존자료=정상/문제`. 전체 로그·파일·사진·PAT는 요구하지 않는다.
 
 <a id="main-924d919-apply-prep-20261026"></a>
 

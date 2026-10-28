@@ -1,0 +1,145 @@
+{
+  "task": "workflow-stage-common-standard-20261028",
+  "dateKST": "2026-10-28",
+  "status": "principles_agreed_no_screen_approval",
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "nodes": {
+    "standardCard": "1685:8248",
+    "C102": "1685:8264",
+    "existingReviewBoard25": "1681:8037",
+    "existingNote25": "1681:8038",
+    "newLinkRow": "1685:8262",
+    "standardLink": "1685:8263",
+    "existingApproved20Link": "1681:8042"
+  },
+  "urls": {
+    "standardCard": "https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1685-8248",
+    "C102": "https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1685-8264",
+    "review25": "https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1681-8037",
+    "canonicalGit": "https://github.com/knadalkim-a11y/team-agent-poc/blob/fix/design-mock-review-20261027/docs/mockups/ees-work/TASK.md#workflow-stage-common-standard-20261028"
+  },
+  "representation": "Ordinary canvas annotations using existing annotation style; no SPEC_BLOCK/spec API and no new spec system",
+  "agreement": {
+    "quote": "응 그렇게 하자",
+    "scope": "Common workflow/stage design principles only",
+    "notApproved": [
+      "Final approval of current revision25 screen",
+      "Product implementation",
+      "Merge or deployment",
+      "New recurrence selector UI",
+      "Upload or automatic attachment behavior"
+    ]
+  },
+  "principlesRecorded": [
+    "Consistent task/run/result placement; separate execution/evidence click areas; collapsed detail; human actor/time/optional reason; tool-wise input/output/task criteria/result; preserve prior attempts.",
+    "Execution and final verdict authority are independent, including tool query followed by human judgment; automatic execution does not imply automatic judgment.",
+    "Separate execution state, verdict and business completion; never convert execution error into rejection; nonapproval-task status names remain undecided.",
+    "Stage execution follows actual eligibility: required inputs, upstream results, permissions and tool availability. Rerun downstream impact remains undecided.",
+    "One representative approved row plus folded remainder is the inspection example policy, not a universal workflow rule.",
+    "Show materials according to input/reference/output roles and connect evidence to actual tools and skill instructions.",
+    "User-visible run/round is not mandatory; do not mix parent workflow schedule with stage information.",
+    "One row is an independent task; Job mapping, human verdict save/finalization/permissions, tool aggregate verdict, rerun downstream impact and material connections remain unresolved."
+  ],
+  "preservation": {
+    "revision25Panels": {
+      "method": "Explicit workshop page scope; FNV32 of sorted text IDs/text plus root ID,parent,x,y,width,height before/after, supplemented by write target ledger",
+      "results": [
+        {
+          "id": "1681:8046",
+          "before": "f036a0f3",
+          "after": "f036a0f3",
+          "size": [
+            480,
+            1080
+          ],
+          "position": [
+            0,
+            32
+          ]
+        },
+        {
+          "id": "1681:8168",
+          "before": "3cf2d0f1",
+          "after": "3cf2d0f1",
+          "size": [
+            480,
+            1080
+          ],
+          "position": [
+            0,
+            32
+          ]
+        },
+        {
+          "id": "1681:8299",
+          "before": "eb54d463",
+          "after": "eb54d463",
+          "size": [
+            480,
+            1250
+          ],
+          "position": [
+            0,
+            32
+          ]
+        },
+        {
+          "id": "1682:8443",
+          "before": "437c3ff8",
+          "after": "437c3ff8",
+          "size": [
+            480,
+            1080
+          ],
+          "position": [
+            0,
+            32
+          ]
+        }
+      ],
+      "unchanged": true
+    },
+    "board25SizeBeforeAfter": [
+      2076,
+      1466
+    ],
+    "note25SizeBeforeAfter": [
+      1512,
+      112
+    ],
+    "approved20AndRevision24": "No writes to either board or descendants; no cross-page full-text equality claim",
+    "existingNodeWrites": [
+      "1681:8038",
+      "1681:8042",
+      "898:31"
+    ],
+    "UIWrites": false,
+    "HTMLWrites": false,
+    "repoWrites": false
+  },
+  "layout": {
+    "card": {
+      "x": 2316,
+      "y": 80846,
+      "width": 1000,
+      "height": 616
+    },
+    "link": "Added beside existing approved20 link within original 20px note link row"
+  },
+  "renderCheck": {
+    "status": "PASS",
+    "screenshotsInspected": [
+      "standard card",
+      "revision25 annotation/link row",
+      "C102"
+    ],
+    "font": "Noto Sans KR",
+    "readable": true,
+    "clippingOrOverlapObserved": false,
+    "existingPanelRerenderNeeded": false
+  },
+  "limitations": [
+    "Git link targets the current PR branch and named TASK.md anchor; root owns final Git commit/push.",
+    "This is a documentation/annotation update; prior UI pixel-variance notes remain unchanged."
+  ]
+}

@@ -1,0 +1,231 @@
+{
+  "schema_version": 1,
+  "scope": "CI synthetic-data verification of the packaged Native product; not an in-house installation or live-data result.",
+  "ci": {
+    "number": 381,
+    "run_id": 40604943707,
+    "run_attempt": 1,
+    "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40604943707",
+    "pull_request": 105,
+    "head_sha": "018e7cc42b8d13e93d3e2789b4cf26f33ebe9e59",
+    "tested_checkout_sha": "0aa16ebc41978e3628a7fc5ff4af2ac99c679caa",
+    "tested_tree": "3e8213adf92e7171963b71804a32ac5d5a11e55c",
+    "jobs": {
+      "total": 40,
+      "success": 39,
+      "skipped": 1,
+      "failure": 0,
+      "cancelled": 0
+    },
+    "skipped_job": "Prepare delivery files (expected for a pull request)"
+  },
+  "main_merge": {
+    "sha": "42f5ae502b57be68aefa5d141f09259c8f6e9ee9",
+    "tree": "3e8213adf92e7171963b71804a32ac5d5a11e55c",
+    "matches_tested_tree": true,
+    "main_ci_number": 382,
+    "main_ci_run_id": 40606766540,
+    "main_ci_status_at_recording": "in_progress; program ZIP not yet verified"
+  },
+  "reported_dirty_flag_scope": {
+    "calculation": "bool(subprocess.check_output(['git','status','--porcelain'], text=True, encoding='utf-8').strip())",
+    "meaning": "Non-empty whole-checkout porcelain status at gate startup; both reports retain true. The changed/untracked paths are not listed in these reports, so no specific cause is inferred. This flag is separate from the tested Git tree and the wheel digest."
+  },
+  "artifacts": {
+    "native_compose": {
+      "id": 12780589326,
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40604943707/artifacts/12780589326",
+      "bytes": 22271058,
+      "sha256": "d4c58064be5177ab63a910be4426740ac2cefabfffaefe5ad603bc972315d6e4",
+      "zip_crc": "passed",
+      "modules": [
+        {
+          "module": "test_ees_helper_chat_native.py",
+          "tests_run": 10,
+          "counts": {
+            "passed": 10,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "status": "passed"
+        },
+        {
+          "module": "test_ees_motion_native.py",
+          "tests_run": 5,
+          "counts": {
+            "passed": 5,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "status": "passed"
+        },
+        {
+          "module": "test_ees_source_shell_native.py",
+          "tests_run": 9,
+          "counts": {
+            "passed": 9,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "status": "passed"
+        },
+        {
+          "module": "test_ees_work_c_phase1_native.py",
+          "tests_run": 5,
+          "counts": {
+            "passed": 5,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "status": "passed"
+        },
+        {
+          "module": "test_ees_work_c_phase2_native.py",
+          "tests_run": 6,
+          "counts": {
+            "passed": 6,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "status": "passed"
+        },
+        {
+          "module": "test_ees_work_figma_authoring_native.py",
+          "tests_run": 29,
+          "counts": {
+            "passed": 29,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "status": "passed"
+        },
+        {
+          "module": "test_ees_work_figma_layout_native.py",
+          "tests_run": 5,
+          "counts": {
+            "passed": 5,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "status": "passed"
+        },
+        {
+          "module": "test_ees_work_figma_runtime_native.py",
+          "tests_run": 16,
+          "counts": {
+            "passed": 16,
+            "failed": 0,
+            "error": 0,
+            "skipped": 0,
+            "expected-failure": 0,
+            "unexpected-success": 0
+          },
+          "status": "passed"
+        }
+      ],
+      "tests_run": 85,
+      "operations_stage_tests": [
+        {
+          "id": "test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_operations_stage_actual_jobs_header_and_judgment_menu_at_two_widths",
+          "status": "passed"
+        },
+        {
+          "id": "test_ees_work_figma_runtime_native.FigmaRuntimeNativeTests.test_operations_stage_actual_tool_evidence_retry_and_scope_execution",
+          "status": "passed"
+        }
+      ],
+      "pngs": 247,
+      "png_decode_verify": "passed",
+      "operations_stage_pngs": 12
+    },
+    "complete_native": {
+      "id": 12780951279,
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40604943707/artifacts/12780951279",
+      "bytes": 6512562,
+      "sha256": "7ab741efb12a3cc64fab93bdf0e8cf61281da275888aa5fcde9ddd7abf51b8f3",
+      "zip_crc": "passed",
+      "reports": [
+        {
+          "path_in_artifact": "ees-native-product/report.json",
+          "sha256": "8e4a722c18d84de8c09cacda160cef061a34dd895418ba5ad1c14ca069597835",
+          "status": "passed",
+          "steps": 20,
+          "reported_source_commit": "0aa16ebc41978e3628a7fc5ff4af2ac99c679caa",
+          "reported_source_dirty": true,
+          "wheel_sha256": "69065403c74eb0ddcd22117744c3d98961ffd068799abc2efbb16ad486ab8fbb",
+          "gate_sha256": "9888734cf6f2419675a24325329d7d924f0b87fbf0f6ff803495790376ac20fe"
+        },
+        {
+          "path_in_artifact": "ees-native-product/central-chat/report.json",
+          "sha256": "c872436064853c9737516fa6db7b7e2316a71eb7deba90e977e3c517bd5c7763",
+          "status": "passed",
+          "steps": 17,
+          "reported_source_commit": "0aa16ebc41978e3628a7fc5ff4af2ac99c679caa",
+          "reported_source_dirty": true,
+          "wheel_sha256": "69065403c74eb0ddcd22117744c3d98961ffd068799abc2efbb16ad486ab8fbb",
+          "gate_sha256": "9888734cf6f2419675a24325329d7d924f0b87fbf0f6ff803495790376ac20fe"
+        }
+      ]
+    }
+  },
+  "preserved_files": [
+    {
+      "path": "figma-stage-single-entry.png",
+      "bytes": 120490,
+      "sha256": "76c1d5f56490285ba2221dfe3e94d426df15024d99ff32fad1d85ec88b651406",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "path": "figma-a5-cycle-overview.png",
+      "bytes": 145852,
+      "sha256": "b1434c8a179ad6f5c72fc0bcde3583739bd7f36492be1e45dcfa59a6aca26b55",
+      "dimensions": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "path": "figma-a5-cycle-geometry.json",
+      "bytes": 13269,
+      "sha256": "85f94b56f8e1663a584139f8ed8b71887c17379b9c5a7db9995976a1a4631beb"
+    }
+  ],
+  "a5_assets": {
+    "status": "passed",
+    "expected": {
+      "a28e3.svg": 13,
+      "b22ad.svg": 13,
+      "69549.svg": 14
+    }
+  },
+  "boundaries": {
+    "ci380_first_failure_preserved": true,
+    "in_house_installed_commit": "924d919333b8804ece2cf5322e14adc681ad6457",
+    "new_program_applied": false,
+    "new_program_zip_values_recorded": false
+  }
+}

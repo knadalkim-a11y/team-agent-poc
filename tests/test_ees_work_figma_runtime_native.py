@@ -28,6 +28,195 @@ class SyntheticReviewModel:
 
 
 class FigmaRuntimeNativeTests(IntegratedNativeCase):
+    def operations_stage(self):
+        """Approved layout data authored only in this test's temporary database."""
+        async def assets(actor):
+            return {'available': True, 'skills': [{'id': 'synthetic-document-guide'}],
+                'skill_bodies': {'synthetic-document-guide': '합성 지침: 반환된 문서 목록과 접근 결과를 기록합니다.'},
+                'skill_versions': {'synthetic-document-guide': 1}}
+        self.server.workflow._assets = assets
+        created = self.command('create_workflow', name='배포 산출물 점검', system_id='EMS')
+        key, definition = created['workflow_id'], created['workflow']['draft']
+        root = next(iter(definition['nodes']))
+        definition['nodes'][root]['children'] = ['stage']
+        names = ['로그인 화면 문구 수정', '알람 기준값 조정', '보고서 출력 양식 변경', '대시보드 필터 추가',
+            '설비 목록 정렬 수정', '데이터 보관 기간 변경', '배치 주기 조정', '메일 발송 대상 추가',
+            '화면 응답 속도 개선', '권한 그룹 정리', '이력 조회 기간 확대', '오류 메시지 정리']
+        definition['nodes']['stage'] = {'id': 'stage', 'type': 't', 'name': '1차 점검', 'parent': root,
+            'children': ['job-' + str(index) for index in range(len(names))], 'deps': []}
+        judgments = [{'id': 'approved', 'label': '승인', 'status': 'completed'},
+            {'id': 'conditional', 'label': '조건부 승인', 'status': 'completed'},
+            {'id': 'rejected', 'label': '미승인', 'status': 'failed'}]
+        for index, name in enumerate(names):
+            human = index in (2, 6, 9)
+            job_id = 'job-' + str(index)
+            node = {'id': job_id, 'type': 'j', 'name': name, 'parent': 'stage', 'children': [], 'deps': [],
+                'mode': 'human' if human else 'tool', 'result_block': 'human_confirm' if human else 'values',
+                'human_confirmation': human, 'inputs': [], 'instructions': '반환된 자료를 확인한 실행 기록입니다.'}
+            if human:
+                # The conditional meaning is explicit in this synthetic definition,
+                # never a new product-wide approval/completion policy.
+                node['judgments'] = deepcopy(judgments)
+            else:
+                node.update(inputs=[{'id': 'query', 'name': '조회 조건', 'type': 'text', 'scope': 'run'}],
+                    argument_bindings={'query': {'input': 'query'}}, skills=['synthetic-document-guide'],
+                    tool_reference={'tool_id': 'synthetic-read', 'function': 'read', 'revision': 1,
+                        'content_hash': 'a' * 64, 'schema_hash': 'b' * 64})
+            definition['nodes'][job_id] = node
+        self.command('save_draft', workflow_id=key, expected_revision=1, definition=definition)
+        checked = self.command('validate_workflow', workflow_id=key, expected_revision=2)
+        self.assertEqual(checked['validation']['errors'], [], checked)
+        self.command('publish_workflow', workflow_id=key, expected_revision=2)
+        run = self.start(key, inputs={'query': '이번 배포 문서'})
+        for index in (0, 1, 3, 4, 5, 7, 8):
+            self.bridge.result = {'status': 'failed' if index == 3 else 'succeeded', 'completeness': 'complete',
+                'items': [{'id': 'internal-one', 'name': '작업 결과 내부 문서 1'},
+                    {'id': 'internal-two', 'name': '작업 결과 내부 문서 2'}],
+                'data': {'summary': '합성 원본 실행 ' + str(index)}}
+            result = asyncio.run(self.server.workflow.operations.command(self.server.user, {
+                'action': 'execute_job', 'run_id': run['id'], 'job_id': 'job-' + str(index),
+                'expected_revision': run['revision'], 'request_id': str(uuid4())}))
+            self.assertEqual(result['ok'], index != 3, result)
+            self.assertEqual(result['attempt']['status'], 'failed' if index == 3 else 'succeeded')
+            run = self.state(run_id=run['id'])['run']
+        return key, run
+
+    def stage_capture(self, label):
+        self.wait("!document.querySelector('[data-ees-motion=opening],[data-ees-motion=closing]')")
+        observed = self.browser.evaluate("""(() => {
+            const panel=document.querySelector('#ees-work-panel'), rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};};
+            const styled=e=>{const s=getComputedStyle(e);return {...rect(e),fontSize:s.fontSize,lineHeight:s.lineHeight,background:s.backgroundColor,border:s.borderWidth};};
+            return {viewport:{width:innerWidth,height:innerHeight},panel:rect(panel),overflow:panel.scrollWidth-panel.clientWidth,
+                header:styled(panel.querySelector('.ew-panel-header')),title:styled(panel.querySelector('h2')),
+                rows:[...panel.querySelectorAll('[data-stage-job]')].map(e=>({job:e.dataset.stageJob,...rect(e)})),
+                menu:panel.querySelector('#ees-stage-verdict-menu')?styled(panel.querySelector('#ees-stage-verdict-menu')):null,
+                controls:[...panel.querySelectorAll('.ew-vd-pick,.ew-vd-run,.ew-vd-evidence-toggle')].filter(e=>e.getClientRects().length).map(e=>({text:e.innerText,...styled(e)}))};
+        })()""")
+        self.assertLessEqual(observed['overflow'], 1, observed)
+        self.assertAlmostEqual(observed['header']['height'], 48, delta=1, msg=observed)
+        self.assertEqual(observed['title']['fontSize'], '20px', observed)
+        self.assertEqual(observed['title']['lineHeight'], '28px', observed)
+        if observed['menu']:
+            self.assertAlmostEqual(observed['menu']['width'], 180, delta=1, msg=observed)
+            self.assertAlmostEqual(observed['menu']['height'], 110, delta=1, msg=observed)
+            self.assertGreaterEqual(observed['menu']['x'], observed['panel']['x'] + 7, observed)
+            self.assertLessEqual(observed['menu']['x'] + observed['menu']['width'], observed['panel']['x'] + observed['panel']['width'] - 7, observed)
+        directory = self.screenshot(label)
+        (directory / (label + '.json')).write_text(json.dumps(observed, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+    def test_operations_stage_actual_jobs_header_and_judgment_menu_at_two_widths(self):
+        key, run = self.operations_stage()
+        self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+        self.open_run(key, run, job='')
+        self.wait("document.querySelector('#ees-work-panel.ew-vd h2')?.textContent === '1차 점검'")
+        self.assertEqual(self.text('.ew-run-back'), '배포 산출물 점검')
+        self.assertIn('작업 12개', self.text('.ew-vd-head'))
+        self.assertNotIn('회차', self.text('.ew-run-nav') + self.text('.ew-vd-head'))
+        self.assertNotIn('자동실행 예약 없음', self.text('.ew-vd-head'))
+        self.assertNotIn('업무절차 · 수시 · 직접 시작', self.text('.ew-vd-head'))
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-stage-job=internal-one],[data-stage-job=internal-two]')"))
+        self.assertEqual(self.read('[data-task-group=waiting] .ew-vd-label'), '대기5')
+        self.assertEqual(self.text('[data-stage-job=job-3] [data-decision-status]'), '실행 실패')
+        self.assertEqual(self.text('[data-stage-job=job-0] [data-decision-status]'), '실행 완료')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-stage-job=job-0] [data-action=stage_verdict]')"))
+        self.stage_capture('operations-stage-default-1920')
+        self.click('[data-action=stage_approved]')
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('[data-stage-job]')].map(e=>e.dataset.stageJob).sort()"), sorted(run['jobs']))
+        self.click('[data-action=stage_approved]')
+        for width in (1920, 480):
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+            self.wait('innerWidth === ' + str(width))
+            self.click('[data-action=stage_verdict][data-job-id=job-2]')
+            self.wait("document.querySelector('#ees-stage-verdict-menu [role=menuitemradio]')")
+            self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('#ees-stage-verdict-menu b')].map(e=>e.textContent)"), ['승인', '조건부 승인', '미승인'])
+            self.stage_capture('operations-stage-menu-' + str(width))
+            self.key('Escape', 27)
+            self.wait("!document.querySelector('#ees-stage-verdict-menu')")
+            self.assertEqual(self.browser.evaluate('document.activeElement.dataset.action'), 'stage_verdict')
+        self.click('[data-action=stage_verdict][data-job-id=job-2]')
+        self.click('[data-action=stage_decide][data-judgment-id=approved]')
+        self.wait("document.querySelector('[data-action=stage_verdict][data-job-id=job-2]')?.innerText.includes('승인')")
+        first = deepcopy(self.state(run_id=run['id'])['run'])
+        first_decision = first['jobs']['job-2']['decisions'][0]
+        self.assertEqual(first_decision['verdict'], 'completed')
+        self.assertTrue(first_decision['note'].endswith('선택한 판정: 승인 (approved)'))
+        self.click('[data-action=stage_verdict][data-job-id=job-2]')
+        self.assertEqual(self.read('[data-action=stage_decide][data-judgment-id=approved]', "getAttribute('aria-checked')"), 'true')
+        self.stage_capture('operations-stage-selected-menu-480')
+        self.key('ArrowDown', 40); self.key('Enter', 13)
+        self.wait("document.querySelector('[data-action=stage_verdict][data-job-id=job-2]')?.innerText.includes('조건부 승인')")
+        second = self.state(run_id=run['id'])['run']
+        self.assertEqual([d for d in second['jobs']['job-2']['decisions'] if d['id'] == first_decision['id']], [first_decision])
+        self.assertEqual(len([a for a in second['attempts'] if a['job_id'] == 'job-2']), 2)
+        self.assertEqual(len(second['jobs']['job-2']['decisions']), 2)
+        self.click('[data-action=stage_evidence][data-job-id=job-2]')
+        self.assertIn('조건부 승인', self.text('#stage-evidence-job-2'))
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('#stage-evidence-job-2 [data-human-selection] b')].map(e=>e.textContent)"), ['조건부 승인', '승인'])
+        self.stage_capture('operations-stage-human-record-480')
+        for tab in ('log', 'rules'):
+            self.click('[data-action=stage_tab][data-tab=' + tab + ']')
+            self.wait("document.querySelector('[data-action=stage_tab][data-tab=" + tab + "][aria-pressed=true]')")
+            self.stage_capture('operations-stage-' + tab + '-480')
+        self.assertIn('조건부 승인', self.text('.ew-vd-rules'))
+
+    def test_operations_stage_actual_tool_evidence_retry_and_scope_execution(self):
+        key, run = self.operations_stage()
+        self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+        self.open_run(key, run, job='')
+        self.wait("document.querySelector('#ees-work-panel.ew-vd')")
+        original = deepcopy(next(a for a in run['attempts'] if a['job_id'] == 'job-3'))
+        self.click('[data-action=stage_evidence][data-job-id=job-3]')
+        self.click('[data-action=stage_tool][data-job-id=job-3]')
+        detail = self.text('#stage-tool-job-3')
+        for expected in ('이번 배포 문서', '합성 원본 실행 3', '합성 지침: 반환된 문서 목록과 접근 결과를 기록합니다.', '실행 실패'):
+            self.assertIn(expected, detail)
+        self.assertNotIn('미승인', detail)
+        self.stage_capture('operations-stage-tool-detail-1920')
+        writes, calls = len(self.server.workspace_commands), len(self.bridge.calls)
+        self.bridge.result = {'status': 'succeeded', 'completeness': 'complete', 'data': {'summary': '합성 두 번째 실행 결과'}}
+        self.bridge.hold.clear(); self.bridge.started.clear()
+        self.click('[data-action=stage_execute][data-job-id=job-3]')
+        self.assertTrue(self.bridge.started.wait(5))
+        self.refresh()
+        self.wait("document.querySelector('[data-stage-job=job-3] [data-decision-status]')?.innerText === '실행 중'")
+        self.stage_capture('operations-stage-tool-running-1920')
+        self.bridge.hold.set()
+        self.wait("document.querySelector('[data-stage-job=job-3] [data-decision-status]')?.innerText === '실행 완료'")
+        business = [body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui']
+        self.assertEqual([(b['action'], b.get('job_id')) for b in business], [('execute_job', 'job-3')])
+        self.assertEqual([entry['context']['job_id'] for entry in self.bridge.calls[calls:]], ['job-3'])
+        after = self.state(run_id=run['id'])['run']
+        attempts = [a for a in after['attempts'] if a['job_id'] == 'job-3']
+        self.assertEqual(len(attempts), 2)
+        self.assertEqual(next(a for a in attempts if a['id'] == original['id']), original)
+        if not self.browser.evaluate("!!document.querySelector('#stage-evidence-job-3')"):
+            self.click('[data-action=stage_evidence][data-job-id=job-3]')
+        self.wait("document.querySelector('[data-stage-attempt][data-job-id=job-3]')")
+        self.choose('[data-stage-attempt][data-job-id=job-3]', original['id'])
+        self.wait("document.querySelector('#stage-evidence-job-3 .ew-attempt-caption')?.innerText.includes('이전 실행 결과')")
+        self.click('[data-action=stage_tool][data-job-id=job-3]')
+        self.assertIn('합성 원본 실행 3', self.text('#stage-tool-job-3'))
+        self.assertNotIn('합성 두 번째 실행 결과', self.text('#stage-tool-job-3'))
+        self.stage_capture('operations-stage-prior-tool-1920')
+        self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 480, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+        self.wait('innerWidth === 480')
+        self.stage_capture('operations-stage-prior-tool-480')
+        self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+        self.wait('innerWidth === 1920')
+        writes, calls = len(self.server.workspace_commands), len(self.bridge.calls)
+        self.click('[data-action=execute_scope][data-node-id=stage]')
+        self.wait("!document.querySelector('#ees-work-panel[aria-busy=true]')")
+        business = [body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui']
+        self.assertEqual([(b['action'], b.get('node_id')) for b in business], [('execute_scope', 'stage')])
+        for _ in range(3):
+            asyncio.run(self.server.workflow.operations.process_once())
+        self.assertEqual([entry['context']['job_id'] for entry in self.bridge.calls[calls:]], ['job-10', 'job-11'])
+        final = self.state(run_id=run['id'])['run']
+        self.assertEqual(len([a for a in final['attempts'] if a['job_id'] == 'job-0']), 1)
+        self.assertEqual(final['jobs']['job-2']['decisions'], [])
+        self.refresh()
+        self.stage_capture('operations-stage-executed-1920')
+
     def preview_inputs(self, run, values, job='job-0'):
         reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
         payload = {'proposal_kind': 'inputs', 'workflow_id': run['workflow_id'], 'run_id': run['id'], 'job_id': job,

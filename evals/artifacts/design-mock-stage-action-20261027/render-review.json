@@ -1,0 +1,98 @@
+{
+  "checkedAt": "2026-10-27T06:12:22.674Z",
+  "baseline": "621195d9d4cd6b66519a36638ef7bb247a648e4c",
+  "scope": "Top action wording/color only; focused ad-hoc render check, no new tests or broad runtime repeat.",
+  "files": [
+    {
+      "path": "docs/mockups/ees-work/design-mock-src/05-execution.html",
+      "bytes": 76500,
+      "sha256": "ea42ce067349b55b2c0a9b11beebc9181012c6bb0da6e0b0b4f4527996a49fb4"
+    },
+    {
+      "path": "docs/mockups/ees-work/design-mock-05-execution.html",
+      "bytes": 407089,
+      "sha256": "9f5a631b3c84fc565c0b7e70cf2079a63ccc3fcae32cbbc81e353cc0dbd92395"
+    }
+  ],
+  "measurements": {
+    "480": {
+      "label": "이 단계 실행",
+      "aria": "1차 점검 단계 실행",
+      "background": "rgb(238, 243, 249)",
+      "color": "rgb(47, 95, 152)",
+      "width": 116,
+      "height": 32,
+      "font": "13px",
+      "lineHeight": "20px",
+      "focusVisible": false,
+      "outline": "0px",
+      "textFits": true
+    },
+    "1920": {
+      "label": "이 단계 실행",
+      "aria": "1차 점검 단계 실행",
+      "background": "rgb(238, 243, 249)",
+      "color": "rgb(47, 95, 152)",
+      "width": 116,
+      "height": 32,
+      "font": "13px",
+      "lineHeight": "20px",
+      "focusVisible": false,
+      "outline": "0px",
+      "textFits": true
+    },
+    "hover": {
+      "label": "이 단계 실행",
+      "aria": "1차 점검 단계 실행",
+      "background": "rgb(238, 243, 249)",
+      "color": "rgb(47, 95, 152)",
+      "width": 116,
+      "height": 32,
+      "font": "13px",
+      "lineHeight": "20px",
+      "focusVisible": false,
+      "outline": "0px",
+      "textFits": true
+    },
+    "keyboard": {
+      "label": "이 단계 실행",
+      "aria": "1차 점검 단계 실행",
+      "background": "rgb(243, 243, 245)",
+      "color": "rgb(47, 95, 152)",
+      "width": 116,
+      "height": 32,
+      "font": "13px",
+      "lineHeight": "20px",
+      "focusVisible": true,
+      "outline": "2px",
+      "textFits": true
+    },
+    "disabled": {
+      "label": "실행 중",
+      "aria": "1차 점검 실행 중",
+      "background": "rgb(236, 236, 239)",
+      "color": "rgb(92, 94, 101)",
+      "width": 116,
+      "height": 32,
+      "font": "13px",
+      "lineHeight": "20px",
+      "focusVisible": false,
+      "outline": "0px",
+      "textFits": true
+    }
+  },
+  "errors": [],
+  "externalRequests": [],
+  "screenshots": [
+    "mock-revision18-1920-default.png",
+    "mock-revision18-stage-action.png",
+    "mock-revision18-480-default.png"
+  ],
+  "browser": "134.0.6998.35",
+  "result": "pass",
+  "checks": [
+    "Only headHTML/CSS/static label references changed; all other script/approved04 bytes retained",
+    "1920/480 pale stage action and distinct labels fit at unchanged116x32/13px; individual styles intact",
+    "Hover/keyboard focus and running disabled label preserved; no overflow/errors/external requests"
+  ]
+}

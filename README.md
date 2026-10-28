@@ -12,12 +12,16 @@ EES 팀의 문서 조회와 업무 처리를 대화·워크플로우 화면으�
 
 <a id="design-sources"></a>
 
+현재 운영 화면은 [공통 단계 상세26판·제품 적용 범위](docs/mockups/ees-work/TASK.md#work-operations-design)와 [Figma26판 전체 화면](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1705-1020)에서 시작합니다. 워크플로우 이름과 필요한 업무 구분 정보를 위에 두고, 단계 제목·실행·진행·작업 목록의 위치를 고정합니다. 현재는 실제 제품 UI 구현·검증 중이며, 사내 적용 완료는 [STATUS](docs/STATUS.md)에서 구분합니다. [25판 확정](docs/mockups/ees-work/TASK.md#work-operations-approved25-20261028)·[Figma 보완](docs/mockups/ees-work/TASK.md#operations25-figma-sync-20261028)·[20판](docs/mockups/ees-work/TASK.md#design-mock-approved20-20261027)은 이전 기록으로 보존합니다.
+
+Figma는 제품 기능을 **업무 · 운영 / 셋업 / 장애대응**으로 나누고, [업무 공통 기준](docs/mockups/ees-work/TASK.md#workflow-stage-common-standard)은 한 원본에서 연결합니다. 셋업·장애대응은 기존 참고 설계이며 새 목업이 확정된 것은 아닙니다. 운영 목업의 합성 예시를 모든 업무의 실행·판정 정책으로 확대하지 않습니다.
+
 ### 설계 문서의 역할과 찾는 순서
 
 | 필요한 답 | 관리 원본 | 읽고 고치는 범위 |
 |---|---|---|
 | 무엇을 만들고 각 부분은 어떻게 연결되는가 | 이 README의 목표·실행 구조·코드 책임 표 | 기능 간 책임이나 데이터·권한 경계가 바뀔 때 갱신 |
-| 어떤 화면과 문구를 보여 주는가 | [Figma 기능 지도](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1288-2) → 해당 화면·명세 카드, 공통 부품은 [C1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=948-1078)·상태는 [S1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=944-1036)·움직임 기준은 [C3](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1443-137)·반응형 기준은 [Q1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=979-1252) | 배치·표시 문구·화면 이동·상태 표현. 작업실 시안과 보관 화면은 채택된 설계와 구분 |
+| 어떤 화면과 문구를 보여 주는가 | [Figma 기능 지도](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1288-2) → 해당 화면·명세 카드, 공통 부품은 [C1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=948-1078)·상태는 [S1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=944-1036)·움직임 기준은 [C3](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1443-137)·반응형 기준은 [Q1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=979-1252) | 배치·표시 문구·화면 이동·상태 표현. 작업실 시안과 보관 화면은 채택된 설계와 구분. 사내 확인용 디자인 목업은 [화면이 바뀌는 기능의 개발 순서](AGENTS.md#design-mock-first)를 따름 |
 | 어떤 조건에서 저장·실행·완료되는가 | 대상 브랜치의 기능 명세가 있으면 그 명세, 없으면 [TASK의 해당 기능 계약](docs/mockups/ees-work/TASK.md) | 입력·권한·상태 변화·저장/반영·완료 조건. 화면 카드에는 규칙 ID와 기능별 표시 차이만 연결 |
 | 어디까지 구현·검증·사내 적용됐는가 | [STATUS](docs/STATUS.md)와 거기서 연결한 PR·Checks·[평가 기록](evals/v4-ui-20260930.md) | 설계 확정·코드 구현·CI 검증·사내 확인을 구분 |
 | 개발 AI는 어떻게 작업하는가 | [AGENTS.md](AGENTS.md), Claude Code 진입은 [CLAUDE.md](CLAUDE.md) | 같은 지침 원본을 사용하며 기능별 상세 문서는 필요할 때 읽음 |
@@ -130,8 +134,10 @@ flowchart TD
 | 사용자 화면 | 역할 | 바꿀 때 함께 확인할 것 |
 |---|---|---|
 | 왼쪽 탐색 | 업무/워크스페이스 전환, 작업 위치와 대상 선택 | 선택 권한·범위, 이동 뒤 목적지, 미저장 내용 |
-| 가운데 대화 | 설명·질문·근거·도우미 제안 | 개인 대화·첨부 보존, 현재 참고와 메시지 당시 참고, 제안 반영 여부 |
-| 오른쪽 업무 패널 | 구조화된 입력·결과·저장·게시·실행·확정 | 저장 전/후, 실행 권한, 회차와 게시 버전, 완료 기준 |
+| 가운데 대화 | 설명·질문·근거. AI가 사용자의 요청으로 업무 기능과 상호작용(상태 읽기·칸 채우기·다음 할 일 안내) | 개인 대화·첨부 보존, 현재 참고와 메시지 당시 참고, AI가 채운 값의 반영 여부 |
+| 오른쪽 업무 패널 | 구조화된 입력·결과·저장·게시·실행·확정. AI에게 초안을 맡기는 요청 기능은 두지 않고 AI가 채운 값은 구분해 표시 | 저장 전/후, 실행 권한, 회차와 게시 버전, 완료 기준 |
+
+**AI의 역할(2026-10-26 사용자 결정):** 이 제품에는 업무 패널에서 ‘AI에게 초안을 맡기는 기능’이 따로 없습니다. AI는 두 가지로 쓰입니다. 하나는 가운데 대화에서 사용자의 요청을 받아 제품 기능과 상호작용하는 것으로, 업무 상태를 읽고 업무 패널의 입력·판정·보고 칸을 사람 확인 전 값으로 채우며 다음 할 일을 안내합니다. 다른 하나는 절차 안의 AI(LLM)로 처리하는 작업으로, 회차와 예약 실행이 다른 작업처럼 실행합니다. 어느 쪽이든 AI가 채운 값은 구분해 보이고, 사람 확인이 필요한 결과의 확정과 저장·게시는 사람이 합니다. 현재 구현된 대화 도구는 조회·입력 제안·화면 안내입니다. 수행 방법 ‘AI 초안’과 결과 형태 ‘AI 초안 검토’는 두 번째 방식의 현재 이름이며, 실행 방식은 유지하고 이름과 화면만 [화면이 바뀌는 기능의 개발 순서](AGENTS.md#design-mock-first)로 바꿉니다.
 
 일부 자산 관리는 Native 화면을 사용합니다. EES 화면 틀과 Native 관리 화면의 전환 범위는 [메뉴 안내](docs/03-openwebui-native-agent.md#menu-integration-20261006)가 원본입니다. Figma의 목표 화면과 현재 구현의 예외를 구분합니다.
 
@@ -192,6 +198,7 @@ AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs
 | 시스템/P별 절차 편집·미저장 초안·권한 상태·Native 셸 복원 | [ees-work-designer.js](branding/ees/ui/ees-work-designer.js) |
 | 고정 소스 프런트엔드 빌드·검증 | [build_ees_frontend.py](scripts/build_ees_frontend.py) |
 | 소스 조립·wheel 파일 목록·해시 | [build_ees_webui.py](scripts/build_ees_webui.py) |
+| 사내 확인용 디자인 목업(제품 CSS·아이콘·글꼴로 만든 단일 HTML) | [build_design_mock.py](scripts/build_design_mock.py), 원본 `docs/mockups/ees-work/design-mock-src/`, [개발 순서](AGENTS.md#design-mock-first) |
 
 factory는 배포 JS 내부에만 존재하고 기존 runtime UI/Tool 연결을 유지합니다. ees.11의 P별 작성 프로토콜·추가 메타데이터와 기존 전체 초안 호환은 [별도 계약](docs/mockups/ees-work/TASK.md#system-authoring-20260924)을 따릅니다. 화면 분리와 이전 프로그램 복원 검증의 실제 범위는 [R2/R3 기록](evals/scenarios.md#work-ui-refactor-20260915)을 따릅니다.
 
