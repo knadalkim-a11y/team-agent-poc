@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
-<title>시안 · 업무 시작과 단계 진입 · 27판 · EES Workflow</title>
+<title>시안 · 업무 시작과 단계 진입 · 28판 · EES Workflow</title>
 <!--@mock:provenance-->
 <!--@mock:fonts-->
 <!--@mock:product-css-->
@@ -279,13 +279,10 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
 #ees-work-panel .ew-entry-row small{font-size:13px;line-height:20px;color:var(--ees-text-tertiary)}
 #ees-work-panel .ew-entry-link{display:inline-flex;align-items:center;gap:4px;min-height:32px;padding:6px 8px;border:0;border-radius:6px;background:transparent;color:var(--ees-brand-text);font-size:13px;line-height:20px;white-space:nowrap}
 #ees-work-panel .ew-entry-link:hover{background:var(--ees-surface-hover)}
-#ees-work-panel .ew-entry-form{margin-top:24px}
-#ees-work-panel .ew-entry-field{display:grid;gap:8px;font-size:14px;line-height:20px;font-weight:500}
-#ees-work-panel .ew-entry-field select{width:100%;height:36px;padding:6px 10px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-default);color:var(--ees-text-primary);font:400 14px/20px var(--ees-font-sans)}
-#ees-work-panel .ew-entry-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:24px}
-#ees-work-panel .ew-entry-actions .ew-entry-cancel{min-height:34px;padding:6px 14px;border:1px solid var(--ees-line-control);border-radius:6px;background:transparent;font-size:13px;line-height:20px}
-#ees-work-panel .ew-entry :is(button,select):focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px}
+#ees-work-panel .ew-entry button:focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px}
 #ees-work-panel .ew-entry button:disabled{opacity:.45;cursor:not-allowed}
+/* The existing left scope list stays above the panel only while it is open. */
+.mock-sidebar[data-scope-open=true]{position:relative;z-index:50}
 </style>
 </head>
 <body>
@@ -296,8 +293,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
       <section id="ees-work-entry" data-ees-work aria-label="업무 메뉴">
         <p class="ew-nav-caption">작업 위치</p>
         <div class="ew-scope">
-          <div class="ew-scope-field"><button type="button" data-scope-trigger="factory" aria-label="공장 고르기" aria-haspopup="listbox" aria-expanded="false" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><img class="ew-icon" src="v4/4d978.svg" alt="" aria-hidden="true"><small>공장</small><span>전체 공장</span><img class="ew-icon" src="v4/f17e6.svg" alt="" aria-hidden="true"></button></div>
-          <div class="ew-scope-field"><button type="button" data-scope-trigger="system" aria-label="시스템 고르기" aria-haspopup="listbox" aria-expanded="false" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><img class="ew-icon" src="v4/31608.svg" alt="" aria-hidden="true"><small>시스템</small><span>EMS</span><img class="ew-icon" src="v4/f17e6.svg" alt="" aria-hidden="true"></button></div>
+          <div class="ew-scope-field"><button type="button" data-scope-trigger="factory" aria-label="공장 고르기" aria-haspopup="listbox" aria-expanded="false"><img class="ew-icon" src="v4/4d978.svg" alt="" aria-hidden="true"><small>공장</small><span data-scope-value="factory">공장 A</span><img class="ew-icon" src="v4/f17e6.svg" alt="" aria-hidden="true"></button></div>
+          <div class="ew-scope-field"><button type="button" data-scope-trigger="system" aria-label="시스템 고르기" aria-haspopup="listbox" aria-expanded="false"><img class="ew-icon" src="v4/31608.svg" alt="" aria-hidden="true"><small>시스템</small><span data-scope-value="system">EMS</span><img class="ew-icon" src="v4/f17e6.svg" alt="" aria-hidden="true"></button></div>
         </div>
         <nav class="ew-nav-links">
           <button type="button" data-action="my_work" aria-current="page" aria-label="내 업무" data-mock-toast="시안: 왼쪽 메뉴는 모양만 보여 줍니다"><img class="ew-icon" src="v4/4df0d.svg" alt="" aria-hidden="true"><span>내 업무</span><small>1</small></button>
@@ -383,10 +380,11 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   <div><b>시안</b><span>저장·실행 안 됨</span></div>
   <div><strong id="mock-screen" role="status" aria-live="polite">⑦-1 업무 개요</strong><button type="button" data-mock-info>안내</button></div>
   <details class="mock-state-picker">
-    <summary>화면 바로 보기 · 27판</summary>
+    <summary>화면 바로 보기 · 28판</summary>
     <nav aria-label="업무 진입 예시 선택">
-      <button type="button" data-mock-state="default" aria-current="true">⑦-1 기본 · 시작 전</button>
-      <button type="button" data-mock-state="factory">⑦-2 공장 선택 필요</button>
+      <button type="button" data-mock-state="default" aria-current="true">⑦-1 공장 A · 시작 전</button>
+      <button type="button" data-mock-state="factory">⑦-2 전체 공장 · 선택 필요</button>
+      <button type="button" data-mock-state="system">⑦-2a 시스템 범위 · EMS</button>
       <button type="button" data-mock-state="existing">⑦-3 진행 중 있음</button>
       <button type="button" data-mock-state="multi">⑦-4 여러 단계 · 시작 후 개요</button>
       <button type="button" data-mock-state="unpublished">⑦-5 게시 전</button>
@@ -400,14 +398,14 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   <section>
     <h2 id="mock-info-title">시안 안내 · 업무 시작과 단계 진입</h2>
     <h3>이 화면</h3>
-    <p>업무 개요에서 시작하고 단계로 들어가는 흐름을 확인하는 27판입니다. 기본은 시스템 전체에 적용되는 수시 업무이며 시작 입력이 없습니다. ‘업무 시작’을 누르면 이 화면 안에 진행 중인 업무가 만들어지고, 단계가 하나이면 바로 엽니다.</p>
+    <p>업무 개요에서 시작하고 단계로 들어가는 흐름을 확인하는 28판입니다. 공장과 시스템은 왼쪽 작업 위치에서 한 번 선택합니다. 기본은 공장 A와 EMS를 선택한 수시 업무입니다. ‘업무 시작’은 그 선택값으로 업무를 만들고, 단계가 하나이면 바로 엽니다. 공장이 필요한데 전체 공장을 선택했다면 왼쪽 공장 목록을 엽니다. 공장만 선택해서는 업무를 만들지 않으며 시작 버튼으로 돌아옵니다.</p>
     <h3>예시 구분</h3>
-    <p>기본 ‘배포 산출물 점검’은 26판의 1차 점검과 합성 작업 12개를 재사용합니다. 실제 사내에 작성된 절차라는 뜻이 아닙니다. 새로 시작한 작업에는 실행 결과·판정·첨부를 미리 넣지 않습니다. 공장 선택·기존 업무·여러 단계·게시 전·권한 없음은 바깥 시안 도구에서만 고르는 별도 예시입니다. 여러 단계는 실제 작성 예시의 4단계와 작업 수를 옮긴 시작 후 개요 미리보기이며 단계 상세는 이번 시안에 포함하지 않습니다. 이 예시의 주기 실행 정의와 실제 예약 설정은 별개입니다.</p>
+    <p>만들어진 업무의 공장·시스템은 시작할 때의 값으로 고정하며 왼쪽 선택을 바꿔도 이전 업무의 대상은 바뀌지 않습니다. 선택한 위치에 해당하는 합성 진행 업무만 표시합니다. 기본 ‘배포 산출물 점검’은 26판의 1차 점검과 합성 작업 12개를 재사용합니다. 실제 사내에 작성된 절차라는 뜻이 아닙니다. 새로 시작한 작업에는 실행 결과·판정·첨부를 미리 넣지 않습니다. 전체 공장·시스템 범위·기존 업무·여러 단계·게시 전·권한 없음은 바깥 시안 도구에서만 고르는 별도 예시입니다. 여러 단계는 실제 작성 예시의 4단계와 작업 수를 옮긴 시작 후 개요 미리보기이며 단계 상세는 이번 시안에 포함하지 않습니다. 이 예시의 주기 실행 정의와 실제 예약 설정은 별개입니다.</p>
     <h3>단계 안에서</h3>
     <p>직접 판정 선택·사유 입력과 자동 작업 실행·도구별 근거·이전 실행 내역은 기존 목업의 모의 동작입니다. 판정 선택은 실제 저장이나 최종 확정이 아니며, 자동 실행도 실제 도구를 호출하지 않습니다. 단계 왼쪽 위에서 업무 개요로 돌아갈 수 있습니다.</p>
     <h3>이 시안은</h3>
-    <p>실제 프로그램의 글꼴·색·부품을 재사용한 독립 HTML입니다. 데이터는 메모리에서만 유지되며 처음부터 다시 시작하거나 파일을 다시 열면 사라집니다. 실제 저장·도구 실행·대화·예약 실행은 되지 않습니다. 왼쪽 메뉴와 가운데 대화는 맥락을 보여주는 모양입니다.</p>
-    <h3>판</h3><p>시안 27판 · 2026-10-28 · 업무 시작과 단계 진입 · 검토안</p>
+    <p>실제 프로그램의 글꼴·색·부품을 재사용한 독립 HTML입니다. 데이터는 메모리에서만 유지되며 처음부터 다시 시작하거나 파일을 다시 열면 사라집니다. 실제 저장·도구 실행·대화·예약 실행은 되지 않습니다. 왼쪽 공장·시스템 선택만 이 시안의 업무 위치와 연결되며, 나머지 왼쪽 메뉴와 가운데 대화는 맥락을 보여주는 모양입니다.</p>
+    <h3>판</h3><p>시안 28판 · 2026-10-28 · 업무 시작과 단계 진입 · 검토안</p>
     <footer><button type="button" data-mock-reset>처음부터 다시</button><button type="button" data-mock-close>닫기</button></footer>
   </section>
 </div>
@@ -458,50 +456,82 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   const MULTI_STAGES = [{"id": "delivery-target", "name": "대상 확정", "count": 1}, {"id": "delivery-first", "name": "1차 점검", "count": 3}, {"id": "delivery-recheck", "name": "보완·재점검", "count": 2}, {"id": "delivery-followup", "name": "조건부 승인 후속", "count": 3}];
   function definitions() { return E.scene==='multi'?MULTI_STAGES:[{id:'review', name:'1차 점검', count:12}]; }
   function reset(scene = 'default') {
+    if(E?.scopeMenu) closeScope(false);
     clearTimeout(flashTimer); epoch++; runTimers.forEach(clearTimeout); runTimers.clear();
-    E = {scene, view:'overview', runs:[], selected:null, stage:0, factory:'', serial:0};
+    E = {scene, view:'overview', runs:[], selected:null, stage:0, location:{factory:['factory','system','multi'].includes(scene)?'':'factory-a',system:'EMS'}, serial:0, scopeMenu:null, scopeReturnStart:false};
     S = freshState();
-    if (scene === 'existing') createWork('factory-a', false);
-    if (scene === 'multi') createWork('', false);
+    if (scene === 'existing' || scene === 'multi') createWork(false);
+    syncScope();
   }
-  const factoryScope = () => ['factory','existing'].includes(E.scene);
-  const startReason = () => E.scene === 'unpublished' ? '게시된 버전이 없습니다.' : E.scene === 'forbidden' ? '이 업무를 시작할 권한이 없습니다.' : '';
+  const factoryScope = () => !['system','multi'].includes(E.scene);
+  const visibleWorks = () => E.runs.filter(run => run.scope.system===E.location.system && (!factoryScope() || !E.location.factory || run.scope.factory===E.location.factory));
+  const duplicateWork = () => factoryScope() && E.location.factory && E.runs.some(run=>run.scope.system===E.location.system&&run.scope.factory===E.location.factory);
+  const startReason = () => E.scene === 'unpublished' ? '게시된 버전이 없습니다.' : E.scene === 'forbidden' ? '이 업무를 시작할 권한이 없습니다.' : duplicateWork() ? '이미 진행 중인 공장입니다.' : '';
   const currentWork = () => E.runs.find(run => run.id === E.selected);
   const currentStage = () => definitions()[E.stage];
-  const workTarget = run => run?.factory ? FACTORIES.find(factory => factory.id === run.factory)?.name || '' : '시스템 전체';
+  const factoryName = id => FACTORIES.find(factory=>factory.id===id)?.name || '전체 공장';
+  const workTarget = run => run.scope.factory ? `${factoryName(run.scope.factory)} · ${run.scope.system}` : `${run.scope.system} 전체`;
+  const selectedTarget = () => factoryScope() ? `${factoryName(E.location.factory)} · ${E.location.system}` : `${E.location.system} 전체`;
   const processed = run => run.stages.reduce((n,state) => n + state.items.filter(item => item.handler === 'service' && item.attempts.length && !item.running).length, 0);
-  function createWork(factory = '', enter = true) {
-    if (startReason() || (factory && E.runs.some(run => run.factory === factory))) return;
+  function createWork(enter = true) {
+    const factory=factoryScope()?E.location.factory:'';
+    if (startReason() || factoryScope()&&!factory) return;
     const width=S.width, open=S.open; S.flash=null; clearTimeout(flashTimer);
-    const run={id:'mock-work-'+(++E.serial), factory, stages:definitions().map(() => E.scene==='multi'?freshState([]):freshState())};
+    const run={id:'mock-work-'+(++E.serial), scope:Object.freeze({factory,system:E.location.system}), stages:definitions().map(() => E.scene==='multi'?freshState([]):freshState())};
     E.runs.push(run); E.selected=run.id; E.stage=0; S=run.stages[0]; S.width=width; S.open=open;
-    E.view=enter && run.stages.length===1?'stage':'overview'; E.factory='';
+    E.view=enter && run.stages.length===1?'stage':'overview';
   }
   function enterWork(id, stage = 0) {
-    const run=E.runs.find(entry => entry.id===id); if(!run) return;
+    const run=visibleWorks().find(entry => entry.id===id); if(!run) return;
     if(E.scene==='multi'){ E.selected=id; E.view='overview'; return render(); }
     const width=S.width, open=S.open; S.flash=null; clearTimeout(flashTimer); E.selected=id; E.stage=stage; S=run.stages[stage]; S.width=width; S.open=open;
     E.view='stage'; S.menu=null; render('[data-entry-back]'); panel.querySelector('.ew-scroll').scrollTop=0;
   }
-  function overview() { E.view='overview'; S.menu=null; render('[data-work-start]'); panel.querySelector('.ew-scroll').scrollTop=0; }
+  function focusOverview() { (panel.querySelector('[data-work-start]:not(:disabled)')||panel.querySelector('[data-work-open]')||panel).focus({preventScroll:true}); }
+  function overview() { E.view='overview'; S.menu=null; render(); panel.querySelector('.ew-scroll').scrollTop=0; focusOverview(); }
   function requestStart() {
     if(E.view!=='overview'||startReason()||E.scene==='multi') return;
-    if(factoryScope()){ E.factory=''; E.view='start'; render('[data-start-factory]'); }
-    else { createWork(); render('[data-entry-back]'); }
-    panel.querySelector('.ew-scroll').scrollTop=0;
+    if(factoryScope()&&!E.location.factory) return openScope('factory',true);
+    createWork(); render('[data-entry-back]'); panel.querySelector('.ew-scroll').scrollTop=0;
   }
   function entryHeaderHTML() {
-    return `<header class="ew-panel-header ew-run-nav">${E.view==='start'?`<button type="button" class="ew-run-back" data-entry-back aria-label="업무 개요로 돌아가기">${icon(ICON.back)}<span>업무 시작</span></button>`:'<span class="ew-run-back">업무</span>'}<span></span><button type="button" class="ew-icon-button" aria-label="업무 패널 닫기" data-panel-close>${icon(ICON.panel)}</button></header>`;
+    return `<header class="ew-panel-header ew-run-nav"><span class="ew-run-back">업무</span><span></span><button type="button" class="ew-icon-button" aria-label="업무 패널 닫기" data-panel-close>${icon(ICON.panel)}</button></header>`;
   }
   function overviewHTML() {
-    const defs=definitions(), reason=startReason();
-    const runs=E.runs.map(run=>`<div class="ew-entry-row" data-work-row="${run.id}"><div><b>${esc(workTarget(run))}</b><small>현재 단계 · ${esc(defs[0].name)} · 처리 ${processed(run)}/${defs.reduce((n,stage)=>n+stage.count,0)}</small></div>${E.scene==='multi'?'':`<button type="button" class="ew-entry-link" data-work-open="${run.id}">열기${icon(ICON.right,14)}</button>`}</div>`).join('');
-    const stages=defs.map((stage,i)=>`<div class="ew-entry-row"><div><b>${esc(stage.name)}</b><small>작업 ${stage.count}개</small></div></div>`).join('');
-    return `<div class="ew-entry-heading"><h2>${esc(SCREEN.workflowName)}</h2>${E.scene==='multi'?'':`<button type="button" class="ew-primary ew-entry-start" data-work-start${reason?' disabled':''}>${ACTION_ICON.play}<span>업무 시작</span></button>`}</div><dl class="ew-entry-meta"><dt>주기</dt><dd>${E.scene==='multi'?'정기':'수시'} · 예약 없음</dd><dt>적용 대상</dt><dd>${factoryScope()?'공장별':'시스템 전체'}</dd></dl>${reason?`<p class="ew-entry-reason" data-start-reason>${esc(reason)}</p>`:''}<div class="ew-entry-section"><h3>진행 중인 업무 <span>${E.runs.length}</span></h3>${runs||'<p class="ew-entry-empty">진행 중인 업무가 없습니다.</p>'}</div><div class="ew-entry-section"><h3>업무 단계</h3>${stages}</div>`;
+    const defs=definitions(), reason=startReason(), visible=visibleWorks();
+    const runs=visible.map(run=>`<div class="ew-entry-row" data-work-row="${run.id}"><div><b>${esc(workTarget(run))}</b><small>현재 단계 · ${esc(defs[0].name)} · 처리 ${processed(run)}/${defs.reduce((n,stage)=>n+stage.count,0)}</small></div>${E.scene==='multi'?'':`<button type="button" class="ew-entry-link" data-work-open="${run.id}">열기${icon(ICON.right,14)}</button>`}</div>`).join('');
+    const stages=defs.map(stage=>`<div class="ew-entry-row"><div><b>${esc(stage.name)}</b><small>작업 ${stage.count}개</small></div></div>`).join('');
+    const needFactory=factoryScope()&&!E.location.factory;
+    return `<div class="ew-entry-heading"><h2>${esc(SCREEN.workflowName)}</h2>${E.scene==='multi'?'':`<button type="button" class="ew-primary ew-entry-start" data-work-start${reason?' disabled':''}>${ACTION_ICON.play}<span>업무 시작</span></button>`}</div><dl class="ew-entry-meta"><dt>주기</dt><dd>${E.scene==='multi'?'정기':'수시'} · 예약 없음</dd><dt>적용 대상</dt><dd>${esc(selectedTarget())}</dd></dl>${reason?`<p class="ew-entry-reason" data-start-reason>${esc(reason)}</p>`:needFactory?'<p class="ew-entry-reason" data-start-reason>왼쪽에서 공장을 선택해 주세요.</p>':''}<div class="ew-entry-section"><h3>진행 중인 업무 <span>${visible.length}</span></h3>${runs||'<p class="ew-entry-empty">진행 중인 업무가 없습니다.</p>'}</div><div class="ew-entry-section"><h3>업무 단계</h3>${stages}</div>`;
   }
-  function startHTML() {
-    const used=new Set(E.runs.map(run=>run.factory));
-    return `<div class="ew-entry-heading"><h2>${esc(SCREEN.workflowName)}</h2></div><form class="ew-entry-form" data-entry-form><label class="ew-entry-field"><span>공장 <small>(필수)</small></span><select data-start-factory aria-label="공장 (필수)" required><option value="">공장 선택</option>${FACTORIES.map(factory=>`<option value="${factory.id}"${used.has(factory.id)?' disabled':''}${E.factory===factory.id?' selected':''}>${esc(factory.name)}${used.has(factory.id)?' · 이미 진행 중':''}</option>`).join('')}</select></label>${used.size?'<p class="ew-entry-reason">진행 중인 공장은 새로 시작할 수 없습니다.</p>':''}<div class="ew-entry-actions"><button type="button" class="ew-entry-cancel" data-entry-cancel>취소</button><button type="submit" class="ew-primary ew-entry-start" data-entry-submit${!E.factory?' disabled':''}>업무 시작</button></div></form>`;
+  function syncScope() {
+    sidebar.querySelector('[data-scope-value="factory"]').textContent=factoryName(E.location.factory);
+    sidebar.querySelector('[data-scope-value="system"]').textContent=E.location.system;
+    sidebar.querySelectorAll('[data-scope-trigger]').forEach(button=>button.setAttribute('aria-expanded',String(E.scopeMenu===button.dataset.scopeTrigger)));
+    document.getElementById('mock-screen').textContent=screenId();
+  }
+  function openScope(kind, returnStart = false) {
+    if(!['factory','system'].includes(kind)) return;
+    if(E.scopeMenu) closeScope(false);
+    E.scopeMenu=kind; E.scopeReturnStart=returnStart; E.scopeRestoreCompact=compact;
+    compact=false; sidebar.dataset.scopeOpen='true'; layout(); syncScope();
+    const options=kind==='factory'?[{id:'',name:'전체 공장'},...FACTORIES]:[{id:'EMS',name:'EMS'}];
+    const selected=E.location[kind], field=sidebar.querySelector(`[data-scope-trigger="${kind}"]`).closest('.ew-scope-field');
+    field.insertAdjacentHTML('beforeend',`<div class="ew-scope-dropdown"><div data-scope-list role="listbox" aria-label="${kind==='factory'?'공장':'시스템'} 선택">${options.map(option=>`<button type="button" role="option" tabindex="-1" data-scope-option="${esc(option.id)}" aria-selected="${option.id===selected}"><span>${esc(option.name)}</span>${option.id===selected?icon(ICON.check,14):''}</button>`).join('')}</div></div>`);
+    sidebar.querySelector('[data-scope-option][aria-selected=true]')?.focus();
+  }
+  function closeScope(restoreFocus = true) {
+    const kind=E.scopeMenu; if(!kind) return;
+    const returnStart=E.scopeReturnStart;
+    E.scopeMenu=null; E.scopeReturnStart=false; sidebar.querySelector('.ew-scope-dropdown')?.remove();
+    sidebar.dataset.scopeOpen='false'; compact=E.scopeRestoreCompact; layout(); syncScope();
+    if(restoreFocus){ if(returnStart) focusOverview(); else sidebar.querySelector(`[data-scope-trigger="${kind}"]`)?.focus({preventScroll:true}); }
+  }
+  function selectScope(value) {
+    const kind=E.scopeMenu;
+    if(!kind || kind==='factory'&&!['',...FACTORIES.map(factory=>factory.id)].includes(value) || kind==='system'&&value!=='EMS') return;
+    if(E.location[kind]!==value){ E.location[kind]=value; E.view='overview'; E.selected=null; S.menu=null; render(); panel.querySelector('.ew-scroll').scrollTop=0; }
+    closeScope(true);
   }
   function groupFor(item) { return item.running ? 'running' : item.handler === 'service' && !item.attempts.length ? 'pending' : item.verdict || 'none'; }
   function counts() { const c = {none: 0, pending:0, running:0, ok: 0, cond: 0, bad: 0}; S.items.forEach(item => c[groupFor(item)]++); return c; }
@@ -542,7 +572,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   function humanItems() { return S.items.filter(item => item.handler === 'human'); }
   function humanRemaining() { return humanItems().filter(item => !item.verdict).length; }
   function stateKey() { return E.scene; }
-  function screenId() { return E.view==='overview'?'⑦-1 업무 개요':E.view==='start'?'⑦-2 업무 시작 입력':'⑦-3 단계와 작업 실행'; }
+  function screenId() { return E.scopeMenu?'⑦-2 왼쪽 작업 위치 선택':E.view==='overview'?'⑦-1 업무 개요':'⑦-3 단계와 작업 실행'; }
   function previewState(key) {
     const width=S.width; reset(key); S.width=width;
     document.querySelector('.mock-state-picker').open=false; setMockControlsExpanded(false);
@@ -559,7 +589,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   }
 
   function headerHTML() {
-    const run=currentWork(), path=SCREEN.workflowName+(run?.factory?' / '+workTarget(run):'');
+    const run=currentWork(), path=SCREEN.workflowName+(run?' / '+workTarget(run):'');
     return `<header class="ew-panel-header ew-run-nav"><button type="button" class="ew-run-back" data-entry-back aria-label="업무 개요로 돌아가기" title="${esc(path)}">${icon(ICON.back)}<span>${esc(path)}</span></button><span></span><button type="button" class="ew-icon-button" aria-label="더 보기" data-mock-toast="시안: 메뉴 항목은 아직 정하지 않았습니다">${icon(ICON.more)}</button><button type="button" class="ew-icon-button" aria-label="업무 패널 닫기" data-panel-close>${icon(ICON.panel)}</button></header>`;
   }
   function headHTML() {
@@ -672,9 +702,10 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     const activeChoice = document.activeElement?.dataset.vdChoose;
     const activeNote = document.activeElement?.matches('[data-vd-note]') ? {id:document.activeElement.dataset.vdNote, start:document.activeElement.selectionStart, end:document.activeElement.selectionEnd} : null;
     const body = S.tab === 'work' ? listHTML() : S.tab === 'log' ? logHTML() : rulesHTML();
-    panel.innerHTML = E.view==='stage' ? headerHTML() + `<div class="ew-scroll ew-vd">${headHTML()}${tabsHTML()}${body}</div>` : entryHeaderHTML() + `<div class="ew-scroll ew-entry" data-entry-view="${E.view}">${E.view==='start'?startHTML():overviewHTML()}</div>`;
+    panel.innerHTML = E.view==='stage' ? headerHTML() + `<div class="ew-scroll ew-vd">${headHTML()}${tabsHTML()}${body}</div>` : entryHeaderHTML() + `<div class="ew-scroll ew-entry" data-entry-view="${E.view}">${overviewHTML()}</div>`;
     panel.querySelector('.ew-scroll').scrollTop = top;
     if (S.menu) placeMenu();
+    syncScope();
     document.getElementById('mock-screen').textContent = screenId();
     document.querySelectorAll('button[data-mock-state]').forEach(button => {
       if (button.dataset.mockState === stateKey()) button.setAttribute('aria-current', 'true');
@@ -741,7 +772,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     const nextBreakpoint = window.innerWidth < 1440;
     if (nextBreakpoint !== compactBreakpoint) {
       compactBreakpoint = nextBreakpoint;
-      compact = nextBreakpoint;
+      if(E?.scopeMenu){ E.scopeRestoreCompact=nextBreakpoint; compact=false; }
+      else compact = nextBreakpoint;
     }
     sidebar.dataset.compact = String(compact);
     const toggle = sidebar.querySelector('[data-sidebar-toggle]');
@@ -758,14 +790,17 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   document.addEventListener('click', event => {
     const target = event.target.closest('button, [data-mock-toast], [data-vd-pick], [data-vd-choose]');
     if (S.menu && !event.target.closest('.ew-vd-menu, [data-vd-pick]')) closeMenu(false);
+    if (E.scopeMenu && !event.target.closest('.ew-scope-field, [data-sidebar-toggle]')) closeScope(false);
     if (!target) return;
     if (target.matches('[data-mock-controls-toggle]')) {
       return setMockControlsExpanded(target.getAttribute('aria-expanded') !== 'true');
     }
-    if (target.matches('[data-sidebar-toggle]')) { compact = !compact; return layout(); }
+    if (target.matches('[data-scope-trigger]')) return E.scopeMenu===target.dataset.scopeTrigger?closeScope(true):openScope(target.dataset.scopeTrigger);
+    if (target.matches('[data-scope-option]')) return selectScope(target.dataset.scopeOption);
+    if (target.matches('[data-sidebar-toggle]')) { const next=!compact; if(E.scopeMenu) closeScope(false); compact=next; return layout(); }
     if (target.matches('[data-mock-state]')) return previewState(target.dataset.mockState);
     if (target.matches('[data-work-start]')) return requestStart();
-    if (target.matches('[data-entry-back],[data-entry-cancel]')) return overview();
+    if (target.matches('[data-entry-back]')) return overview();
     if (target.matches('[data-work-open]')) return enterWork(target.dataset.workOpen);
     if (target.matches('[data-entry-stage]')) return enterWork(E.selected, Number(target.dataset.entryStage));
     if (target.matches('[data-stage-run]')) {
@@ -797,13 +832,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     }
     if (target.dataset.mockToast) toast(target.dataset.mockToast);
   });
-  document.addEventListener('submit', event => {
-    if(!event.target.matches('[data-entry-form]')) return; event.preventDefault();
-    if(E.view!=='start'||!FACTORIES.some(factory=>factory.id===E.factory)||E.runs.some(run=>run.factory===E.factory)) return;
-    createWork(E.factory); render('[data-entry-back]'); panel.querySelector('.ew-scroll').scrollTop=0;
-  });
   document.addEventListener('change', event => {
-    if(event.target.matches('[data-start-factory]')){ E.factory=event.target.value; const submit=panel.querySelector('[data-entry-submit]'); submit.disabled=!E.factory; return; }
     if (!event.target.matches('[data-vd-attempt]')) return;
     const id = event.target.dataset.vdAttempt; S.attemptView[id] = Number(event.target.value); S.tool = null; render(`[data-vd-attempt="${id}"]`);
   });
@@ -813,6 +842,15 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
     if (item?.handler === 'human') item.note = event.target.value;
   });
   document.addEventListener('keydown', event => {
+    if(E.scopeMenu){
+      if(event.key==='Escape'||event.key==='Tab'){ event.preventDefault(); return closeScope(true); }
+      if(event.target.closest?.('[data-scope-list]')){
+        const options=[...sidebar.querySelectorAll('[data-scope-option]')], index=options.indexOf(document.activeElement);
+        const next={ArrowDown:index+1,ArrowUp:index-1,Home:0,End:options.length-1}[event.key];
+        if(next!==undefined){ event.preventDefault(); options[(next+options.length)%options.length].focus(); return; }
+      }
+    }
+    if(event.target.matches?.('[data-scope-trigger]')&&['ArrowDown','ArrowUp'].includes(event.key)){ event.preventDefault(); return openScope(event.target.dataset.scopeTrigger); }
     const info = document.querySelector('.mock-info');
     if (!info.hidden && event.key === 'Escape') { info.hidden = true; return document.querySelector('[data-mock-info]').focus(); }
     if (event.key === 'Escape' && !S.menu && S.open && region.dataset.overlay === 'true' && region.contains(event.target)) {
@@ -844,7 +882,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff}
   });
   window.addEventListener('resize', layout);
   const requestedScene = new URLSearchParams(window.location.search).get('scene');
-  reset(['factory','existing','multi','unpublished','forbidden'].includes(requestedScene)?requestedScene:'default');
+  reset(['factory','system','existing','multi','unpublished','forbidden'].includes(requestedScene)?requestedScene:'default');
   layout();
   render();
 })();
