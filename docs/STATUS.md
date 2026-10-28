@@ -1,5 +1,15 @@
 # 현재 작업 상태
 
+## 2026-10-28 · 워크플로우에서 단계·작업으로 바로 이동하는 목업29
+
+- **현재 요청:** 사용자가 워크플로우→단계→작업 계층으로 탐색하고 기존 `업무.운영` 목업과 자연스럽게 이어지도록 요청했다. [29판 계약](mockups/ees-work/TASK.md#workflow-entry29-20261028)에 따라 업무 시작 진입 조건과 별도 진행 건 블록을 제거하고 개요의 단계행을 기존 작업 화면에 연결한다.
+- **원본/범위:** 기존 [07 HTML](mockups/ees-work/design-mock-07-workflow-entry.html)·[편집 원본](mockups/ees-work/design-mock-src/07-workflow-entry.html), Figma 운영/공통과 [PR #107](https://github.com/knadalkim-a11y/team-agent-poc/pull/107)을 갱신한다. 조회만으로 결과를 만들지 않으며 기존 실행·판정은 합성 상태로 이어진다. 실제 서버 진행 건 생성·권한·저장 정책은 이번에 확정하지 않는다.
+- **실제 적용:** 사내 마지막 보고는 `result=ok / stage=complete / running=true / commit=42f5ae502b57`이다. 새29판은 목업이며 제품 코드·API·저장·실행·사내 재배포는 변경하지 않는다. PR #106의 별도 Figma 관리 변경은 그대로다.
+- **확인한 범위:** [고정29판5a7c3b0](https://github.com/knadalkim-a11y/team-agent-poc/blob/5a7c3b02e55b5b5dbe2af6e6812f6d85fe1533cf/docs/mockups/ees-work/design-mock-07-workflow-entry.html)의1920/480 폭·10장면·변경 경계81/81 PASS다. 좁은 화면에서 왼쪽 워크플로우 버튼이 오른쪽 패널에 가리던 결함을 고쳤고 실제 포인터 경로로 확인했다. 최초 실패·검증 경계는 [평가 기록](../evals/v4-ui-20260930.md#workflow-entry29-20261028)에 남겼다.
+- **다음 하나:** 개요에서 ‘1차 점검’을 클릭해 기존 단계·작업 화면으로 이어지는 수정 목업을 검토한다.
+
+> 아래28판은 업무 시작을 거쳐 단계로 들어가던 이전 설계·검증 기록이다.
+
 ## 2026-10-28 · 왼쪽 공장·시스템 선택 재사용 목업28
 
 - **현재 요청:** 사용자가27판의 별도 공장 선택이 왼쪽 선택과 중복이라고 지적하고 목업 수정을 요청했다. [28판 계약](mockups/ees-work/TASK.md#workflow-entry28-20261028)에 따라 오른쪽 시작 폼을 제거하고 왼쪽 작업 위치로 시작한다. 공장 필수·미선택일 때만 왼쪽 목록으로 연결한다.

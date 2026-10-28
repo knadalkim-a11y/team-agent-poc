@@ -1,0 +1,66 @@
+{
+  "status": "sealed-after-final-writes",
+  "date": "2026-10-28",
+  "files": [
+    {
+      "file": "C111-direct-stage-transparent.png",
+      "bytes": 111681,
+      "sha256": "5a8ede5b0e65f5e4829a84452620b2aa87711494a3553067b569d630c464ce94"
+    },
+    {
+      "file": "C111-direct-stage.png",
+      "bytes": 93716,
+      "sha256": "5daad0a0e3b5d769e56f40bdaa9e4e587e496ba6707075f1e7113fd4eab0035f"
+    },
+    {
+      "file": "C111-fixed-source.png",
+      "bytes": 7437,
+      "sha256": "f890978ed435bee88c23f978cff7d5d5d19da6dea92495ff54224c1275c4776d"
+    },
+    {
+      "file": "before-readonly.json",
+      "bytes": 22862,
+      "sha256": "564d16e45fba7cd9ec529be1ee04f27ac2a58af4bfd37e4a7b9afbfaa161c191"
+    },
+    {
+      "file": "common-admin-report.json",
+      "bytes": 11008,
+      "sha256": "1fdf68adafe52beac3cefefe790c36773704a22c8632e9b2688ce8195102906f"
+    },
+    {
+      "file": "common-direct-stage-note.png",
+      "bytes": 28943,
+      "sha256": "31969da4aeb0e2fdf4ded2011942942d9c6488705128b66ab33abfa01a30957d"
+    },
+    {
+      "file": "entry-states.png",
+      "bytes": 203219,
+      "sha256": "10e011f480fbb0a1f55c57cc068984f7a60786579257e836cc3a8c86f230d2bf"
+    },
+    {
+      "file": "figma-sync-final.json",
+      "bytes": 12726,
+      "sha256": "86f605ac4eee5fec8d12bc8ec6c6fbd7e657cb644794f4a22b4ee007fdb5b165"
+    },
+    {
+      "file": "mutations-and-validation.json",
+      "bytes": 27939,
+      "sha256": "8c7eabd3067d24cab300bbfaf7306490d755971308d6aec7df6ba84fe75cb822"
+    },
+    {
+      "file": "operations-header.png",
+      "bytes": 61886,
+      "sha256": "e692ad40e1c7aaf7a98f30ba90f012bd8eedc2f0b865981e9f90f1557d8de2cf"
+    },
+    {
+      "file": "overview-full.png",
+      "bytes": 70912,
+      "sha256": "d83a306911fdca1bcfdc003fad2b639f996123d63edbc30197d21cd8036133a6"
+    },
+    {
+      "file": "stage-approved-write.json",
+      "bytes": 8982,
+      "sha256": "6403b558a68cca5b282cf4909ded9738f5a62bec514cc93f1b081c2c055da1f2"
+    }
+  ]
+}
