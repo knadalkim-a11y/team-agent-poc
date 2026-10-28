@@ -1,0 +1,658 @@
+{
+  "task": "workflow-entry27 common/admin",
+  "date": "2026-10-28",
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "sessionId": "1df14170-3fc8-4a01-a6d8-71ce03e554ed",
+  "status": "complete",
+  "policy": {
+    "nodes": [
+      "898:15",
+      "898:22",
+      "898:26"
+    ],
+    "backupRequiredBeforeMutation": true,
+    "latestChangeBefore": "1755:9",
+    "reservedChange": "C109"
+  },
+  "backup": {
+    "backupPageId": "1762:419",
+    "headerCopyId": "1762:421",
+    "labelId": "1762:420",
+    "createdNodeIds": [
+      "1762:419",
+      "1762:420",
+      "1762:421",
+      "1762:422",
+      "1762:423",
+      "1762:424",
+      "1762:425",
+      "1762:426",
+      "1762:427",
+      "1762:428",
+      "1762:429",
+      "1762:430",
+      "1762:431",
+      "1762:432",
+      "1762:433",
+      "1762:434",
+      "1762:435",
+      "1762:436",
+      "1762:437",
+      "1762:438",
+      "1762:439"
+    ],
+    "mutatedNodeIds": [],
+    "commonBefore": {
+      "id": "1690:9323",
+      "parent": "1689:1061",
+      "name": "Header · 업무 · 공통 · 현재 기준과 원본 연결",
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 260,
+      "texts": [
+        {
+          "id": "1690:9324",
+          "text": "업무 · 공통",
+          "hyperlink": null
+        },
+        {
+          "id": "1690:9325",
+          "text": "공통 원칙 합의 · 운영 화면은 ‘업무 · 운영’ 페이지의 최신판을 따르며, 같은 UI를 이 페이지에 복제하지 않습니다.",
+          "hyperlink": null
+        },
+        {
+          "id": "1690:9326",
+          "text": "단계 상단에는 워크플로우 이름과 필요한 업무 맥락을 표시합니다(공통 원칙7, 2026-10-28 적용). 이전 판은 ‘91 · 보관’에 보존하며, 미정 계약의 결정·제품 구현·병합·배포 승인으로 확대하지 않습니다.",
+          "hyperlink": null
+        },
+        {
+          "id": "1690:9327",
+          "text": "운영 화면 원본: 전체 화면 / 목록·직접 기록·실행·메뉴 / 도구별 근거·이전 실행 / 기록 / 기준 — 모두 ‘업무 · 운영’의 최신판 프레임입니다.",
+          "hyperlink": null
+        },
+        {
+          "id": "1690:9329",
+          "text": "기본 작업 목록 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1339"
+          }
+        },
+        {
+          "id": "1690:9330",
+          "text": "직접 판정 기록 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1461"
+          }
+        },
+        {
+          "id": "1690:9331",
+          "text": "실행 상태 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1592"
+          }
+        },
+        {
+          "id": "1690:9332",
+          "text": "판정 메뉴 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1718"
+          }
+        },
+        {
+          "id": "1690:9334",
+          "text": "업무 · 운영 →",
+          "hyperlink": {
+            "type": "URL",
+            "value": "https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1284-3106"
+          }
+        },
+        {
+          "id": "1690:9335",
+          "text": "공통 기준 관리 원본 →",
+          "hyperlink": {
+            "type": "URL",
+            "value": "https://github.com/knadalkim-a11y/team-agent-poc/blob/main/docs/mockups/ees-work/TASK.md#workflow-stage-common-standard"
+          }
+        },
+        {
+          "id": "1690:9336",
+          "text": "운영 기준 관리 원본 →",
+          "hyperlink": {
+            "type": "URL",
+            "value": "https://github.com/knadalkim-a11y/team-agent-poc/blob/main/docs/mockups/ees-work/TASK.md#work-operations-design"
+          }
+        },
+        {
+          "id": "1700:10254",
+          "text": "전체 업무 화면 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1020"
+          }
+        },
+        {
+          "id": "1700:10255",
+          "text": "도구별 근거·이전 실행 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1700:931"
+          }
+        },
+        {
+          "id": "1700:10256",
+          "text": "기록 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1854"
+          }
+        },
+        {
+          "id": "1700:10257",
+          "text": "기준 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1966"
+          }
+        }
+      ]
+    },
+    "originalParentAfter": "1689:1061"
+  },
+  "common": {
+    "noteId": "1763:495",
+    "linkId": "1763:498",
+    "createdNodeIds": [
+      "1763:495",
+      "1763:496",
+      "1763:497",
+      "1763:498"
+    ],
+    "mutatedNodeIds": [],
+    "geometry": {
+      "x": 0,
+      "y": 320,
+      "w": 1920,
+      "h": 136
+    },
+    "texts": [
+      {
+        "id": "1763:496",
+        "text": "진입 흐름 · 업무 개요에서 시작하고 단계로 이동",
+        "w": 1872,
+        "h": 28,
+        "font": {
+          "family": "Noto Sans KR",
+          "style": "Medium",
+          "variationSettings": {
+            "wght": 500
+          }
+        },
+        "link": null
+      },
+      {
+        "id": "1763:497",
+        "text": "업무 이름은 항상 표시하고 날짜·회차·대상 등 맥락은 해당 업무에 필요한 경우에만 표시합니다. 시작 입력은 업무 정의에 따라 필요한 경우에만 보여 줍니다.\n시작 후 미종료 단일 단계는 자동으로 열고, 여러 단계는 개요에서 선택합니다. 이 안내는 진입 화면에 한정하며 미정 계약이나 제품 구현·배포 승인으로 확대하지 않습니다.",
+        "w": 1872,
+        "h": 40,
+        "font": {
+          "family": "Noto Sans KR",
+          "style": "Medium",
+          "variationSettings": {
+            "wght": 500
+          }
+        },
+        "link": null
+      },
+      {
+        "id": "1763:498",
+        "text": "업무 개요 · 시작 전 화면 →",
+        "w": 1872,
+        "h": 20,
+        "font": {
+          "family": "Noto Sans KR",
+          "style": "Medium",
+          "variationSettings": {
+            "wght": 500
+          }
+        },
+        "link": {
+          "type": "NODE",
+          "value": "1762:456"
+        }
+      }
+    ],
+    "existingHeaderUnchanged": {
+      "id": "1690:9323",
+      "w": 1920,
+      "h": 260,
+      "parent": "1689:1061"
+    },
+    "overlap": false
+  },
+  "render": {
+    "nodeId": "1763:495",
+    "status": "PASS",
+    "checks": [
+      "native text readable",
+      "no clipped text or overlap",
+      "existing Noto Sans KR Medium reused",
+      "source link 1762:456"
+    ],
+    "path": "common-entry-note.png",
+    "management": {
+      "nodeId": "1768:457",
+      "path": "C109-entry-flow.png",
+      "status": "PASS",
+      "checks": [
+        "all C109 text readable",
+        "no clipped lines",
+        "scope and source commit visible"
+      ],
+      "note": "Captured before provenance-only interim/final footer replacements; body styling and 1280×276 bounds unchanged. Final immutable source text/link structurally verified."
+    }
+  },
+  "existingCommonHeaderPreserved": true,
+  "operationsMutationByThisAgent": false,
+  "sourceOrRepositoryCodeModified": false,
+  "createdNodeIds": [
+    "1762:419",
+    "1762:420",
+    "1762:421",
+    "1762:422",
+    "1762:423",
+    "1762:424",
+    "1762:425",
+    "1762:426",
+    "1762:427",
+    "1762:428",
+    "1762:429",
+    "1762:430",
+    "1762:431",
+    "1762:432",
+    "1762:433",
+    "1762:434",
+    "1762:435",
+    "1762:436",
+    "1762:437",
+    "1762:438",
+    "1762:439",
+    "1763:495",
+    "1763:496",
+    "1763:497",
+    "1763:498",
+    "1768:457",
+    "1768:458"
+  ],
+  "mutatedExistingNodeIds": [
+    "898:31",
+    "1768:457",
+    "1768:458"
+  ],
+  "errors": [
+    {
+      "scope": "local artifact save",
+      "error": "Argument list too long for embedded PNG; recovered using temporary base64 file."
+    },
+    {
+      "scope": "local artifact save",
+      "error": "apply_patch rejected delete+add same file; recovered using scoped file overwrite."
+    }
+  ],
+  "management": {
+    "changeId": "1768:457",
+    "sourceLinkId": "1768:458",
+    "createdNodeIds": [
+      "1768:457",
+      "1768:458"
+    ],
+    "mutatedNodeIds": [
+      "898:31"
+    ],
+    "text": "C109 · 2026-10-28 KST · 업무 개요와 시작·단계 진입 흐름 (백업 B047)\n사용자 요청에 따라 진행 중인 건이 없는 첫 화면에서 시작하고 단계로 이동하는 흐름을 목업에 추가했습니다. 새 기능이나 제품 실행 연동을 추가한 것은 아닙니다.\n① 업무 · 운영에 업무 개요 전체 화면(1762:456)과 진입 상태 보드(1762:758)를 추가했습니다. 공장 시작 입력·시작 직후 미실행 단계·진행 중인 건이 있는 개요·다단계 개요를 편집 가능한 노드로 보여 줍니다. 기본 개요를 합쳐 5장면이며, HTML의 모의 동작을 Figma에서는 상태와 링크로 표현합니다.\n② 기존 단계 화면 본문과 ID(1705:1020·1705:1328·1700:931·1705:1851)는 유지했습니다. 기능 페이지에는 화면별 최신본을 두고 판 번호는 페이지 헤더에서 관리합니다. 기존 노드 삭제·이동은 하지 않았습니다.\n③ 업무 · 공통에는 짧은 진입 원칙과 실제 업무 개요 원본 링크(1763:495)를 추가했습니다. 업무 이름 필수·맥락 조건부·정의에 따라 필요한 시작 입력·단일 단계 자동 진입과 여러 단계 선택을 구분하며, UI를 공통 페이지에 복제하지 않습니다.\n④ 기본 사례는 1단계·12작업의 합성 사례입니다. 별도의 4단계·9작업 개요는 저장소 예시 정의를 검토하는 정적 화면이며 기본 12작업 상세와 연결하지 않습니다. 사내 실제 게시 정의를 확인했다는 뜻이 아닙니다. 저장·판정·자료 연결 등 미정 계약, 제품 구현·병합·배포 승인으로 확대하지 않습니다.\n⑤ 복구 기준점: B047(1762:419), 운영 헤더 사본1762:440·공통 헤더 사본1762:421. 새 화면은 원본 HTML과 대조하고 글꼴·편집 가능한 구조·이미지 채움 유무를 확인했습니다. 캔버스와 브라우저의 글꼴 렌더 차이는 픽셀 완전 일치로 주장하지 않습니다.\n고정 원본: design-mock-07-workflow-entry.html · 90186e8248d36d2fe1c9f9028adb6acdf47ddb2e",
+    "sourceURL": "https://github.com/knadalkim-a11y/team-agent-poc/blob/90186e8248d36d2fe1c9f9028adb6acdf47ddb2e/docs/mockups/ees-work/design-mock-07-workflow-entry.html",
+    "geometry": {
+      "x": 0,
+      "y": 17483,
+      "w": 1280,
+      "h": 276
+    },
+    "sourceLinkGeometry": {
+      "x": 0,
+      "y": 17769,
+      "w": 1280,
+      "h": 23
+    },
+    "font": {
+      "family": "Noto Sans KR",
+      "style": "Regular",
+      "variationSettings": {
+        "wght": 400
+      }
+    }
+  },
+  "preservation": {
+    "samePageScopedRead": true,
+    "commonHeaderExactObjectEqual": true,
+    "originalHeaderBefore": {
+      "id": "1690:9323",
+      "parent": "1689:1061",
+      "name": "Header · 업무 · 공통 · 현재 기준과 원본 연결",
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 260,
+      "texts": [
+        {
+          "id": "1690:9324",
+          "text": "업무 · 공통",
+          "hyperlink": null
+        },
+        {
+          "id": "1690:9325",
+          "text": "공통 원칙 합의 · 운영 화면은 ‘업무 · 운영’ 페이지의 최신판을 따르며, 같은 UI를 이 페이지에 복제하지 않습니다.",
+          "hyperlink": null
+        },
+        {
+          "id": "1690:9326",
+          "text": "단계 상단에는 워크플로우 이름과 필요한 업무 맥락을 표시합니다(공통 원칙7, 2026-10-28 적용). 이전 판은 ‘91 · 보관’에 보존하며, 미정 계약의 결정·제품 구현·병합·배포 승인으로 확대하지 않습니다.",
+          "hyperlink": null
+        },
+        {
+          "id": "1690:9327",
+          "text": "운영 화면 원본: 전체 화면 / 목록·직접 기록·실행·메뉴 / 도구별 근거·이전 실행 / 기록 / 기준 — 모두 ‘업무 · 운영’의 최신판 프레임입니다.",
+          "hyperlink": null
+        },
+        {
+          "id": "1690:9329",
+          "text": "기본 작업 목록 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1339"
+          }
+        },
+        {
+          "id": "1690:9330",
+          "text": "직접 판정 기록 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1461"
+          }
+        },
+        {
+          "id": "1690:9331",
+          "text": "실행 상태 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1592"
+          }
+        },
+        {
+          "id": "1690:9332",
+          "text": "판정 메뉴 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1718"
+          }
+        },
+        {
+          "id": "1690:9334",
+          "text": "업무 · 운영 →",
+          "hyperlink": {
+            "type": "URL",
+            "value": "https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1284-3106"
+          }
+        },
+        {
+          "id": "1690:9335",
+          "text": "공통 기준 관리 원본 →",
+          "hyperlink": {
+            "type": "URL",
+            "value": "https://github.com/knadalkim-a11y/team-agent-poc/blob/main/docs/mockups/ees-work/TASK.md#workflow-stage-common-standard"
+          }
+        },
+        {
+          "id": "1690:9336",
+          "text": "운영 기준 관리 원본 →",
+          "hyperlink": {
+            "type": "URL",
+            "value": "https://github.com/knadalkim-a11y/team-agent-poc/blob/main/docs/mockups/ees-work/TASK.md#work-operations-design"
+          }
+        },
+        {
+          "id": "1700:10254",
+          "text": "전체 업무 화면 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1020"
+          }
+        },
+        {
+          "id": "1700:10255",
+          "text": "도구별 근거·이전 실행 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1700:931"
+          }
+        },
+        {
+          "id": "1700:10256",
+          "text": "기록 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1854"
+          }
+        },
+        {
+          "id": "1700:10257",
+          "text": "기준 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1966"
+          }
+        }
+      ]
+    },
+    "originalHeaderAfter": {
+      "id": "1690:9323",
+      "parent": "1689:1061",
+      "name": "Header · 업무 · 공통 · 현재 기준과 원본 연결",
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 260,
+      "texts": [
+        {
+          "id": "1690:9324",
+          "text": "업무 · 공통",
+          "hyperlink": null
+        },
+        {
+          "id": "1690:9325",
+          "text": "공통 원칙 합의 · 운영 화면은 ‘업무 · 운영’ 페이지의 최신판을 따르며, 같은 UI를 이 페이지에 복제하지 않습니다.",
+          "hyperlink": null
+        },
+        {
+          "id": "1690:9326",
+          "text": "단계 상단에는 워크플로우 이름과 필요한 업무 맥락을 표시합니다(공통 원칙7, 2026-10-28 적용). 이전 판은 ‘91 · 보관’에 보존하며, 미정 계약의 결정·제품 구현·병합·배포 승인으로 확대하지 않습니다.",
+          "hyperlink": null
+        },
+        {
+          "id": "1690:9327",
+          "text": "운영 화면 원본: 전체 화면 / 목록·직접 기록·실행·메뉴 / 도구별 근거·이전 실행 / 기록 / 기준 — 모두 ‘업무 · 운영’의 최신판 프레임입니다.",
+          "hyperlink": null
+        },
+        {
+          "id": "1690:9329",
+          "text": "기본 작업 목록 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1339"
+          }
+        },
+        {
+          "id": "1690:9330",
+          "text": "직접 판정 기록 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1461"
+          }
+        },
+        {
+          "id": "1690:9331",
+          "text": "실행 상태 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1592"
+          }
+        },
+        {
+          "id": "1690:9332",
+          "text": "판정 메뉴 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1718"
+          }
+        },
+        {
+          "id": "1690:9334",
+          "text": "업무 · 운영 →",
+          "hyperlink": {
+            "type": "URL",
+            "value": "https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1284-3106"
+          }
+        },
+        {
+          "id": "1690:9335",
+          "text": "공통 기준 관리 원본 →",
+          "hyperlink": {
+            "type": "URL",
+            "value": "https://github.com/knadalkim-a11y/team-agent-poc/blob/main/docs/mockups/ees-work/TASK.md#workflow-stage-common-standard"
+          }
+        },
+        {
+          "id": "1690:9336",
+          "text": "운영 기준 관리 원본 →",
+          "hyperlink": {
+            "type": "URL",
+            "value": "https://github.com/knadalkim-a11y/team-agent-poc/blob/main/docs/mockups/ees-work/TASK.md#work-operations-design"
+          }
+        },
+        {
+          "id": "1700:10254",
+          "text": "전체 업무 화면 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1020"
+          }
+        },
+        {
+          "id": "1700:10255",
+          "text": "도구별 근거·이전 실행 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1700:931"
+          }
+        },
+        {
+          "id": "1700:10256",
+          "text": "기록 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1854"
+          }
+        },
+        {
+          "id": "1700:10257",
+          "text": "기준 →",
+          "hyperlink": {
+            "type": "NODE",
+            "value": "1705:1966"
+          }
+        }
+      ]
+    },
+    "commonPrincipleAndLegacyNodesMutated": false
+  },
+  "automaticLayoutReflowAncestors": [
+    "898:31",
+    "898:2"
+  ],
+  "sourceCommit": "90186e8248d36d2fe1c9f9028adb6acdf47ddb2e",
+  "sourceConfirmation": "Parent supplied final immutable commit; verified source-link and footer readback.",
+  "provenanceChanges": [
+    {
+      "mutatedNodeIds": [
+        "1768:457",
+        "1768:458"
+      ],
+      "sourceFinal": false,
+      "textTail": "중간 관측 원본: design-mock-07-workflow-entry.html · 8fd372ddb8d778919fe880c00e5f1d36648772c7 (시작 더블클릭 보호 수정 전, 최종 원본 아님)",
+      "sourceLink": "중간 관측 원본 보기 · 최종 수정 전 →"
+    },
+    {
+      "mutatedNodeIds": [
+        "1768:457",
+        "1768:458"
+      ],
+      "sourceFinal": true,
+      "changeText": "C109 · 2026-10-28 KST · 업무 개요와 시작·단계 진입 흐름 (백업 B047)\n사용자 요청에 따라 진행 중인 건이 없는 첫 화면에서 시작하고 단계로 이동하는 흐름을 목업에 추가했습니다. 새 기능이나 제품 실행 연동을 추가한 것은 아닙니다.\n① 업무 · 운영에 업무 개요 전체 화면(1762:456)과 진입 상태 보드(1762:758)를 추가했습니다. 공장 시작 입력·시작 직후 미실행 단계·진행 중인 건이 있는 개요·다단계 개요를 편집 가능한 노드로 보여 줍니다. 기본 개요를 합쳐 5장면이며, HTML의 모의 동작을 Figma에서는 상태와 링크로 표현합니다.\n② 기존 단계 화면 본문과 ID(1705:1020·1705:1328·1700:931·1705:1851)는 유지했습니다. 기능 페이지에는 화면별 최신본을 두고 판 번호는 페이지 헤더에서 관리합니다. 기존 노드 삭제·이동은 하지 않았습니다.\n③ 업무 · 공통에는 짧은 진입 원칙과 실제 업무 개요 원본 링크(1763:495)를 추가했습니다. 업무 이름 필수·맥락 조건부·정의에 따라 필요한 시작 입력·단일 단계 자동 진입과 여러 단계 선택을 구분하며, UI를 공통 페이지에 복제하지 않습니다.\n④ 기본 사례는 1단계·12작업의 합성 사례입니다. 별도의 4단계·9작업 개요는 저장소 예시 정의를 검토하는 정적 화면이며 기본 12작업 상세와 연결하지 않습니다. 사내 실제 게시 정의를 확인했다는 뜻이 아닙니다. 저장·판정·자료 연결 등 미정 계약, 제품 구현·병합·배포 승인으로 확대하지 않습니다.\n⑤ 복구 기준점: B047(1762:419), 운영 헤더 사본1762:440·공통 헤더 사본1762:421. 새 화면은 원본 HTML과 대조하고 글꼴·편집 가능한 구조·이미지 채움 유무를 확인했습니다. 캔버스와 브라우저의 글꼴 렌더 차이는 픽셀 완전 일치로 주장하지 않습니다.\n고정 원본: design-mock-07-workflow-entry.html · 90186e8248d36d2fe1c9f9028adb6acdf47ddb2e",
+      "sourceLink": {
+        "type": "URL",
+        "value": "https://github.com/knadalkim-a11y/team-agent-poc/blob/90186e8248d36d2fe1c9f9028adb6acdf47ddb2e/docs/mockups/ees-work/design-mock-07-workflow-entry.html"
+      },
+      "text": "진입 목업 고정 원본 보기 →",
+      "geometry": [
+        {
+          "id": "1768:457",
+          "w": 1280,
+          "h": 276
+        },
+        {
+          "id": "1768:458",
+          "w": 1280,
+          "h": 23
+        }
+      ],
+      "oldCommitPresent": false
+    }
+  ],
+  "canonical": {
+    "htmlBytes": 425287,
+    "htmlSHA256": "286e076858ca90329acf82fe6e195dc9c537140d2e7ec3dc92985dcfac73bd7b",
+    "sourceSHA256": "071260d4c762922877a4b1c858679a95122aa040a14bce79e3b06eae96a54f0d"
+  },
+  "parentReportedQA": {
+    "behavior": "141/141",
+    "doubleClickGuards": "3/3",
+    "capturesPixelChanged": 0,
+    "unchangedCaptureCount": 24,
+    "stageBoardPreservation": [
+      {
+        "id": "1705:1020",
+        "nodes": 370,
+        "fnvBeforeAfter": "3eba7581"
+      },
+      {
+        "id": "1705:1328",
+        "nodes": 772,
+        "fnvBeforeAfter": "5e8abf46"
+      },
+      {
+        "id": "1700:931",
+        "nodes": 423,
+        "fnvBeforeAfter": "15f410c1"
+      },
+      {
+        "id": "1705:1851",
+        "nodes": 184,
+        "fnvBeforeAfter": "1c8635ab"
+      }
+    ],
+    "source": "Parent agent verification, not repeated by this helper"
+  }
+}

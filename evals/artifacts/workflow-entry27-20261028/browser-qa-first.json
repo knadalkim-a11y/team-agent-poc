@@ -1,0 +1,250 @@
+{
+  "scope": "Standalone revision27 design mock; synthetic in-memory data, not product integration or deployment.",
+  "started": "2026-10-28T02:44:42.844Z",
+  "source": {
+    "html_sha256": "06db8539b9cace40f1a778497212d5a7596a2937637a0fde5e6d0f8b1a2f47d2",
+    "editable_sha256": "d7eb224907bca28955c033b3a720a3d970c3c0717bb84654364d0c1af8ec3158"
+  },
+  "setup_observations": [
+    {
+      "kind": "environment",
+      "observation": "The supplied /tmp Playwright module path was absent; existing primary-runtime Playwright was used without installing dependencies."
+    },
+    {
+      "kind": "initial_keyboard_observation",
+      "observation": "Before the builder focus correction, Enter on 업무 시작 rendered 12 fresh jobs but focus became body; next Tab reached stage back. Builder added explicit stage-back focus for start/submit/open; original observation retained here."
+    }
+  ],
+  "checks": [
+    {
+      "name": "27-1920 initial empty",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 no forced date/run fields",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920-overview-empty horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1920-overview-empty preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 twelve fresh jobs",
+      "status": "passed",
+      "detail": {
+        "rows": 12,
+        "auto": 9,
+        "human": 3,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "files": 0,
+        "ids": [
+          "로그인 화면 문구 수정\n실행\n자동 판정\n실행 필요",
+          "알람 기준값 조정\n실행\n자동 판정\n실행 필요",
+          "대시보드 필터 추가\n실행\n자동 판정\n실행 필요",
+          "설비 목록 정렬 수정\n실행\n자동 판정\n실행 필요",
+          "데이터 보관 기간 변경\n실행\n자동 판정\n실행 필요",
+          "메일 발송 대상 추가\n실행\n자동 판정\n실행 필요",
+          "화면 응답 속도 개선\n실행\n자동 판정\n실행 필요",
+          "이력 조회 기간 확대\n실행\n자동 판정\n실행 필요",
+          "오류 메시지 정리\n실행\n자동 판정\n실행 필요",
+          "보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록",
+          "배치 주기 조정\n직접 판정\n판정 필요\n판정 기록",
+          "권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록"
+        ],
+        "metadata": false
+      }
+    },
+    {
+      "name": "27-1920 context and IDs",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 keyboard start focus",
+      "status": "passed",
+      "detail": {
+        "tag": "BUTTON",
+        "action": "entry_back"
+      }
+    },
+    {
+      "name": "27-1920-stage-unstarted horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1920-stage-unstarted preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 human menu keyboard focus",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 menu Escape returns focus",
+      "status": "passed",
+      "detail": {
+        "tag": "BUTTON",
+        "action": "human_pick"
+      }
+    },
+    {
+      "name": "27-1920 back one run",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 overview focus",
+      "status": "passed",
+      "detail": {
+        "tag": "BUTTON",
+        "action": "work_start"
+      }
+    },
+    {
+      "name": "27-1920-overview-active horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1920-overview-active preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 reopened twelve fresh jobs",
+      "status": "passed",
+      "detail": {
+        "rows": 12,
+        "auto": 9,
+        "human": 3,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "files": 0,
+        "ids": [
+          "로그인 화면 문구 수정\n실행\n자동 판정\n실행 필요",
+          "알람 기준값 조정\n실행\n자동 판정\n실행 필요",
+          "대시보드 필터 추가\n실행\n자동 판정\n실행 필요",
+          "설비 목록 정렬 수정\n실행\n자동 판정\n실행 필요",
+          "데이터 보관 기간 변경\n실행\n자동 판정\n실행 필요",
+          "메일 발송 대상 추가\n실행\n자동 판정\n실행 필요",
+          "화면 응답 속도 개선\n실행\n자동 판정\n실행 필요",
+          "이력 조회 기간 확대\n실행\n자동 판정\n실행 필요",
+          "오류 메시지 정리\n실행\n자동 판정\n실행 필요",
+          "보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록",
+          "배치 주기 조정\n직접 판정\n판정 필요\n판정 기록",
+          "권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록"
+        ],
+        "metadata": false
+      }
+    },
+    {
+      "name": "27-1920 reopened context and IDs",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 open run focus",
+      "status": "passed",
+      "detail": {
+        "tag": "BUTTON",
+        "action": "entry_back"
+      }
+    },
+    {
+      "name": "27-1920 factory field focus",
+      "status": "passed",
+      "detail": {
+        "tag": "SELECT",
+        "action": "factory"
+      }
+    },
+    {
+      "name": "27-1920 required factory blocks start",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920-factory-input horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1920-factory-input preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 form Tab cancel",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 cancel creates nothing",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 factory selected",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 keyboard submit ready",
+      "status": "failed"
+    }
+  ],
+  "captures": [
+    {
+      "label": "27-1920-overview-empty",
+      "png": "27-1920-overview-empty.png",
+      "geometry": "27-1920-overview-empty-geometry.json",
+      "sha256": "4298e495516d305b43e920e072bad37ead6f60e91424eb4584946a603426bd8d"
+    },
+    {
+      "label": "27-1920-stage-unstarted",
+      "png": "27-1920-stage-unstarted.png",
+      "geometry": "27-1920-stage-unstarted-geometry.json",
+      "sha256": "d7b353b58c921a2159c4bd40ef42da97df5240a5f5f86a45c5a4b2ec39013473"
+    },
+    {
+      "label": "27-1920-overview-active",
+      "png": "27-1920-overview-active.png",
+      "geometry": "27-1920-overview-active-geometry.json",
+      "sha256": "de6cb7e668045cfe6b9a18962fc3b838364a76a87135d7da6521376c99985cb2"
+    },
+    {
+      "label": "27-1920-factory-input",
+      "png": "27-1920-factory-input.png",
+      "geometry": "27-1920-factory-input-geometry.json",
+      "sha256": "36c2ae8420fcdd00f2ce82e2be51c3e35fd491da714b3cd70e83b60e5d74d871"
+    }
+  ],
+  "requests": [],
+  "errors": [],
+  "browser": "133.0.6943.0",
+  "status": "failed",
+  "failure": {
+    "step": "27-1920-factory-input",
+    "error": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-vd-item]').first() to be visible\u001b[22m\n\n    at /workspace/scratch/025fcfa7db3e/operations-entry27/evals/artifacts/workflow-entry27-20261028/browser-qa.cjs:50:528"
+  },
+  "finished": "2026-10-28T02:45:13.905Z",
+  "summary": {
+    "passed": 25,
+    "failed": 1,
+    "captures": 4
+  },
+  "first_failure_diagnosis": {
+    "scope": "QA harness keyboard assumption, not a mock state failure",
+    "observation": "ArrowDown on the focused select already chose factory-a. Enter opened the native select popup; the first Tab dismissed it, so the second Tab reached cancel instead of submit. Pressing Enter then cancelled and no stage should have appeared.",
+    "correction": "Choose via ArrowDown, then Tab to cancel and Tab to submit; retain physical keyboard entry and unchanged mock source.",
+    "first_harness_sha256": "b0ebb906302c9db761e036a2bde3087555764e51cb4e66663fbee2de4a7a1d98"
+  }
+}

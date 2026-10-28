@@ -1,5 +1,16 @@
 # 현재 작업 상태
 
+## 2026-10-28 · 진행0개 워크플로우 진입 목업27 설계
+
+- **현재 요청:** 사용자는42f5ae5 적용·기동 성공 뒤 진행 중인 업무가 없어 새 단계 화면까지 들어가지 못한다고 보고했고, 빠진 첫 진입 흐름을 설계하라고 요청했다. [이번 계약](mockups/ees-work/TASK.md#workflow-entry27-20261028)에 따라 개요·조건부 시작 입력·단계 진입·기존 진행 업무 열기를 목업으로 연결한다.
+- **최신 목업/구현 기준:** 새 설계는27판 [HTML](mockups/ees-work/design-mock-07-workflow-entry.html)·[편집 원본](mockups/ees-work/design-mock-src/07-workflow-entry.html)이다. 기존 단계26판의 디자인과 동작을 재사용하며 제품 코드·API·저장·실행은 변경하지 않는다. Figma 화면별 최신판 관리와 작업실 정리 [PR #106](https://github.com/knadalkim-a11y/team-agent-poc/pull/106)은 별도 미병합 변경으로 존중한다.
+- **Figma 진입점:** `업무.운영` [시작 전 전체](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1762-456) · [시작과 단계 진입 상태](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1762-758), `업무.공통` [진입 표준](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1763-495). 기존26판과 새27판의 실제 적용 경계를 유지한다.
+- **실제 적용 상태:** 사용자 보고 `result=ok / stage=complete / running=true / commit=42f5ae502b57`이다. 사내 적용·최초 화면 관측은 [PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)에 기록했다. 새27판 제품 구현·배포, 실제 단계 표시·자료 보존은 확인하지 않았다. 적용 스크립트를 다시 실행하지 않는다.
+- **확인한 범위:** 합성 목업을3개 화면 크기·24장면에서 검증해141/141 PASS, 가로 넘침·외부/API 요청·브라우저 오류0이다. 시작 더블클릭이 다음 단계 실행으로 전달되는 실제 결함을 보완하고 집중3/3 PASS했다. 초기 포커스·검사 가정 오류·수정 전 결과도 [평가 기록](../evals/v4-ui-20260930.md#workflow-entry27-20261028)에 보존했다. 실제 제품 적용이나 사내 사용자 확인 완료로 보지 않는다.
+- **다음 하나:** 새 진입 목업의0개 상태에서 시작·단계까지 직접 눌러 보고 사용자 피드백을 받는다. 새 기능을 임의로 추가하거나 다음 워크스페이스 작성 목업으로 넘어가지 않는다.
+
+> 아래는 이전 제품 구현·검증과 설계 당시 기록이다. 당시 대기/미확인 표현을 위 최신 상태와 구분한다.
+
 ## 2026-10-28 · 운영 단계26판 제품 구현·사내 배포 검증 진행
 
 - **현재 목표:** 기존 제품을 확정 목업과 시각적으로 맞춰 사내에서 확인한다. 사용자가 추가로 지정한 상단 표준화까지 반영한 [26판 HTML](mockups/ees-work/design-mock-06-task-groups.html)·[구현 범위](mockups/ees-work/TASK.md#operations-stage26-product-20261028)를 기준으로 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)를 이어간다. HTML 파일 제공만으로 사내 제품 배포를 완료한 것으로 보지 않는다.

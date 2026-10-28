@@ -1,0 +1,58 @@
+/* Local mock interaction QA only. No product/API or test-suite changes. */
+const fs=require('fs'), path=require('path'), crypto=require('crypto'), {pathToFileURL}=require('url');
+const runtime=process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES || '/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules';
+const {chromium}=require(path.join(runtime,'playwright'));
+const root=path.resolve(__dirname,'../../..'), out=__dirname;
+const file=path.join(root,'docs/mockups/ees-work/design-mock-07-workflow-entry.html');
+const source=path.join(root,'docs/mockups/ees-work/design-mock-src/07-workflow-entry.html');
+const hash=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+const report={scope:'Standalone revision27 design mock; synthetic in-memory data, not product integration or deployment.',started:new Date().toISOString(),source:{html_sha256:hash(file),editable_sha256:hash(source)},setup_observations:[{kind:'environment',observation:'The supplied /tmp Playwright module path was absent; existing primary-runtime Playwright was used without installing dependencies.'},{kind:'initial_keyboard_observation',observation:'Before the builder focus correction, Enter on 업무 시작 rendered 12 fresh jobs but focus became body; next Tab reached stage back. Builder added explicit stage-back focus for start/submit/open; original observation retained here.'}],checks:[],captures:[],requests:[],errors:[]};
+let page,browser,current='setup';
+function check(name,condition,detail){report.checks.push({name,status:condition?'passed':'failed',detail});if(!condition)console.error('CHECK FAILED',name,detail);}
+async function active(){return page.evaluate(()=>({tag:document.activeElement.tagName,action:document.activeElement.getAttribute('data-entry-back')!==null?'entry_back':document.activeElement.getAttribute('data-work-start')!==null?'work_start':document.activeElement.getAttribute('data-start-factory')!==null?'factory':document.activeElement.getAttribute('data-vd-pick')!==null?'human_pick':'other'}));}
+async function settle(){await page.evaluate(()=>document.fonts.ready);await page.waitForFunction(()=>[...document.images].every(i=>i.complete&&i.naturalWidth>0));}
+async function go(scene='default'){await page.goto(pathToFileURL(file).href+'?scene='+scene);await settle();}
+async function capture(label){
+ await settle();current=label;
+ const geometry=await page.evaluate(()=>{
+  const panel=document.querySelector('#ees-work-panel'),rect=e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height};};
+  const style=e=>{const s=getComputedStyle(e);return{...rect(e),fontFamily:s.fontFamily,fontSize:s.fontSize,fontWeight:s.fontWeight,lineHeight:s.lineHeight,color:s.color,background:s.backgroundColor,border:s.border,borderRadius:s.borderRadius,padding:s.padding,gap:s.gap};};
+  const selectors=['.ew-panel-header','.ew-entry-heading','.ew-entry-heading h2','.ew-entry-meta','.ew-entry-meta dt','.ew-entry-meta dd','.ew-entry-section','.ew-entry-section h3','.ew-entry-row','.ew-entry-row b','.ew-entry-row small','.ew-entry-empty','.ew-entry-field','.ew-entry-field select','.ew-entry-actions','.ew-entry-reason','.ew-stage-heading','.ew-vd-head','.ew-vd-sub','.ew-vd-progress','.ew-tabs','.ew-vd-label','.ew-vd-item'];
+  const parts=selectors.flatMap(selector=>[...panel.querySelectorAll(selector)].map((e,index)=>({selector,index,text:e.innerText,...style(e)})));
+  const shellSelectors=['.mock-chat-title','.mock-thread','.chat-user','.chat-assistant','.mock-ai-body p','.mock-ai-actions','.mock-chip'];const shellParts=shellSelectors.flatMap(selector=>[...document.querySelectorAll(selector)].map((e,index)=>({selector,index,text:e.innerText,...style(e)})));
+  const controls=[...panel.querySelectorAll('button,select,input')].filter(e=>e.getClientRects().length).map(e=>({tag:e.tagName,text:e.innerText,value:e.value,disabled:e.disabled,ariaLabel:e.getAttribute('aria-label'),...style(e)}));
+  return{viewport:{width:innerWidth,height:innerHeight},panel:style(panel),pageOverflow:document.documentElement.scrollWidth-innerWidth,panelOverflow:panel.scrollWidth-panel.clientWidth,scroll:style(panel.querySelector('.ew-scroll')),parts,controls,shellParts,mockControlsOutsidePanel:!panel.contains(document.querySelector('[data-mock-controls]')),activeElement:{tag:document.activeElement.tagName,text:document.activeElement.innerText?.slice(0,80)}};
+ });
+ check(label+' horizontal overflow',geometry.pageOverflow<=1&&geometry.panelOverflow<=1,{page:geometry.pageOverflow,panel:geometry.panelOverflow});
+ check(label+' preview controls outside product',geometry.mockControlsOutsidePanel);
+ const png=label+'.png',json=label+'-geometry.json';await page.screenshot({path:path.join(out,png),fullPage:false});fs.writeFileSync(path.join(out,json),JSON.stringify(geometry,null,2)+'\n');report.captures.push({label,png,geometry:json,sha256:hash(path.join(out,png))});
+}
+async function fresh(label){
+ const value=await page.evaluate(()=>({rows:document.querySelectorAll('[data-vd-item]').length,auto:document.querySelectorAll('[data-vd-run]').length,human:document.querySelectorAll('[data-vd-pick]').length,head:document.querySelector('.ew-vd-head')?.innerText,files:document.querySelectorAll('.ew-vd-file').length,ids:[...document.querySelectorAll('[data-vd-item]')].map(e=>e.innerText),metadata:!!document.querySelector('.ew-entry-meta')}));
+ check(label+' twelve fresh jobs',value.rows===12&&value.auto===9&&value.human===3&&value.head.includes('0/3')&&value.head.includes('0/9')&&value.files===0,value);
+ check(label+' context and IDs',!value.metadata&&!value.ids.some(x=>/CR-\d|test_v2_final/.test(x)));
+}
+(async()=>{
+ browser=await chromium.launch({executablePath:process.env.EES_MOCK_CHROMIUM_PATH||'/tmp/mock-browser-runtime/bin/chromium',headless:true,args:['--no-sandbox']});
+ report.browser=browser.version();page=await browser.newPage();page.on('request',r=>{if(!r.url().startsWith('data:')&&!r.url().startsWith('file:'))report.requests.push({url:r.url(),type:r.resourceType()});});page.on('pageerror',e=>report.errors.push(String(e)));page.on('console',m=>{if(m.type()==='error')report.errors.push(m.text());});
+ for(const [width,height] of [[1920,1080],[1366,768],[480,900]]){
+  await page.setViewportSize({width,height});const pre='27-'+width;
+  current=pre+' default';await go();
+  check(pre+' initial empty',await page.locator('[data-work-row]').count()===0&&await page.locator('[data-work-start]').isEnabled());
+  check(pre+' no forced date/run fields',await page.locator('#ees-work-panel input[type=date],#ees-work-panel input[type=datetime-local]').count()===0);
+  await capture(pre+'-overview-empty');
+  await page.locator('[data-work-start]').press('Enter');await page.locator('[data-vd-item]').first().waitFor();await fresh(pre);check(pre+' keyboard start focus',(await active()).action==='entry_back',await active());await capture(pre+'-stage-unstarted');
+  await page.locator('[data-vd-pick]').first().press('ArrowDown');check(pre+' human menu keyboard focus',await page.evaluate(()=>document.activeElement.getAttribute('role')==='menuitemradio'));
+  await page.keyboard.press('Escape');check(pre+' menu Escape returns focus',(await active()).action==='human_pick',await active());
+  await page.locator('[data-entry-back]').press('Enter');check(pre+' back one run',await page.locator('[data-work-row]').count()===1);check(pre+' overview focus',(await active()).action==='work_start',await active());await capture(pre+'-overview-active');
+  await page.locator('[data-work-open]').press('Enter');await fresh(pre+' reopened');check(pre+' open run focus',(await active()).action==='entry_back',await active());
+  current=pre+' factory';await go('factory');await page.locator('[data-work-start]').press('Enter');check(pre+' factory field focus',(await active()).action==='factory',await active());check(pre+' required factory blocks start',await page.locator('[data-entry-submit]').isDisabled());await capture(pre+'-factory-input');
+  await page.keyboard.press('Tab');check(pre+' form Tab cancel',await page.evaluate(()=>document.activeElement.matches('[data-entry-cancel]')));await page.keyboard.press('Enter');check(pre+' cancel creates nothing',await page.locator('[data-work-row]').count()===0&&(await active()).action==='work_start');
+  await page.locator('[data-work-start]').press('Enter');await page.keyboard.press('ArrowDown');check(pre+' factory selected',await page.locator('[data-start-factory]').inputValue()==='factory-a');await page.keyboard.press('Tab');await page.keyboard.press('Tab');check(pre+' keyboard submit ready',await page.evaluate(()=>document.activeElement.matches('[data-entry-submit]')&&!document.activeElement.disabled));await page.keyboard.press('Enter');await page.locator('[data-vd-item]').first().waitFor();await fresh(pre+' factory');check(pre+' selected factory context',(await page.locator('.ew-run-back').innerText()).includes('공장 A')&&(await active()).action==='entry_back');await capture(pre+'-factory-stage');
+  current=pre+' existing';await go('existing');check(pre+' existing one run',await page.locator('[data-work-row]').count()===1);await page.locator('[data-work-start]').click();check(pre+' duplicate factory disabled',await page.locator('[data-start-factory] option[value=factory-a]').evaluate(e=>e.disabled)&&await page.locator('[data-entry-submit]').isDisabled());await page.keyboard.press('ArrowDown');check(pre+' keyboard skips active factory',await page.locator('[data-start-factory]').inputValue()==='factory-b');await page.locator('[data-entry-submit]').click();await fresh(pre+' second factory');await page.locator('[data-entry-back]').click();check(pre+' second factory distinct',await page.locator('[data-work-row]').count()===2&&(await page.locator('[data-work-row]').allTextContents()).every(x=>x.includes('0/12')));
+  for(const scene of ['unpublished','forbidden']){await go(scene);check(pre+' '+scene+' disabled',await page.locator('[data-work-start]').isDisabled()&&await page.locator('[data-work-row]').count()===0&&!!(await page.locator('[data-start-reason]').innerText()));await capture(pre+'-'+scene);}
+  await go('multi');const multi=await page.locator('.ew-entry-section').last().locator('.ew-entry-row').allTextContents();check(pre+' multi separate 4 stages/9 jobs',multi.length===4&&multi.every((t,i)=>t.includes('작업 '+[1,3,2,3][i]+'개'))&&(await page.locator('[data-work-row]').innerText()).includes('0/9')&&await page.locator('[data-vd-item],[data-entry-stage],[data-work-open],[data-work-start]').count()===0,multi);await capture(pre+'-multi-overview');
+ }
+ check('No external or API requests',report.requests.length===0,report.requests);check('No browser errors',report.errors.length===0,report.errors);check('Source unchanged during QA',hash(file)===report.source.html_sha256&&hash(source)===report.source.editable_sha256);
+ report.status=report.checks.some(x=>x.status==='failed')?'failed':'passed';
+})().catch(async error=>{report.status='failed';report.failure={step:current,error:error.stack};if(page)try{await page.screenshot({path:path.join(out,'first-failure.png')});}catch{}}).finally(async()=>{if(browser)await browser.close();report.finished=new Date().toISOString();report.summary={passed:report.checks.filter(x=>x.status==='passed').length,failed:report.checks.filter(x=>x.status==='failed').length,captures:report.captures.length};fs.writeFileSync(path.join(out,'browser-qa.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({status:report.status,...report.summary,failure:report.failure}));process.exitCode=report.status==='passed'?0:1;});
