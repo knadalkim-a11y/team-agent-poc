@@ -12,7 +12,7 @@ EES 팀의 문서 조회와 업무 처리를 대화·워크플로우 화면으�
 
 <a id="design-sources"></a>
 
-현재 운영 화면은 [운영 디자인 기준·제품 적용 범위](docs/mockups/ees-work/TASK.md#work-operations-design)와 [Figma 업무·운영 전체 화면](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1705-1020)에서 시작합니다. Figma 기능 페이지에는 화면마다 최신판만 두며 판 번호는 각 페이지 헤더에 있습니다. 워크플로우 이름과 필요한 업무 구분 정보를 위에 두고, 단계 제목·실행·진행·작업 목록의 위치를 고정합니다. 현재는 실제 제품 UI 구현·검증 중이며, 사내 적용 완료는 [STATUS](docs/STATUS.md)에서 구분합니다. [25판 확정](docs/mockups/ees-work/TASK.md#work-operations-approved25-20261028)·[Figma 보완](docs/mockups/ees-work/TASK.md#operations25-figma-sync-20261028)·[20판](docs/mockups/ees-work/TASK.md#design-mock-approved20-20261027)은 이전 기록으로 보존하고, Figma의 이전 판 화면은 ‘91 · 보관’ 페이지에 있습니다.
+현재 운영 화면은 [운영 디자인 기준·제품 적용 범위](docs/mockups/ees-work/TASK.md#work-operations-design)와 [Figma 업무·운영 전체 화면](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1705-1020)에서 시작합니다. Figma 기능 페이지에는 화면마다 최신판만 두며, 판 번호를 쓰는 페이지는 헤더 한 곳에만 적습니다. 워크플로우 이름과 필요한 업무 구분 정보를 위에 두고, 단계 제목·실행·진행·작업 목록의 위치를 고정합니다. 현재는 실제 제품 UI 구현·검증 중이며, 사내 적용 완료는 [STATUS](docs/STATUS.md)에서 구분합니다. [25판 확정](docs/mockups/ees-work/TASK.md#work-operations-approved25-20261028)·[Figma 보완](docs/mockups/ees-work/TASK.md#operations25-figma-sync-20261028)·[20판](docs/mockups/ees-work/TASK.md#design-mock-approved20-20261027)은 이전 기록으로 보존하고, Figma의 이전 판 화면은 ‘91 · 보관’ 페이지에 있습니다.
 
 Figma는 제품 기능을 **업무 · 운영 / 셋업 / 장애대응**으로 나누고, [업무 공통 기준](docs/mockups/ees-work/TASK.md#workflow-stage-common-standard)은 한 원본에서 연결합니다. 셋업·장애대응은 기존 참고 설계이며 아직 새 목업이 없습니다. 운영 목업의 합성 예시를 모든 업무의 실행·판정 정책으로 확대하지 않습니다.
 
