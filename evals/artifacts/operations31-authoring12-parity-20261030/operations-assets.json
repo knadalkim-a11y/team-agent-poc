@@ -1,0 +1,108 @@
+{
+  "dateKST": "2026-10-30",
+  "sourceMockCommit": "6ac4c1062a6c83d2d1429d0120cc5179d5dc508d",
+  "sourceMock": "docs/mockups/ees-work/design-mock-src/07-workflow-entry.html",
+  "sourceIconMappingLine": 419,
+  "sourceActionIconsLine": 421,
+  "assets": [
+    {
+      "figmaNode": "1781:1254",
+      "name": "chevron-right",
+      "localAsset": "branding/ees/ui/v4/69549.svg",
+      "bytes": 229,
+      "sha256": "ec6a1bf9d4a7b42a6132dc1cb46894ea9ce459404e7a09f3bba0692cfe611f02",
+      "rootMetadata": {
+        "width": "14",
+        "height": "14",
+        "viewBox": "0 0 14 14",
+        "fill": "none"
+      },
+      "mockSourceReferencesSameAsset": true,
+      "renderSlot": "overview stage",
+      "figmaSlotPx": 14,
+      "notes": ""
+    },
+    {
+      "figmaNode": "1764:831",
+      "name": "arrow-left",
+      "localAsset": "branding/ees/ui/v4/eb94a.svg",
+      "bytes": 363,
+      "sha256": "157914196f301f18bad29e31c105488879e937d597a672c71110ba7e2d04c10b",
+      "rootMetadata": {
+        "width": "14",
+        "height": "14",
+        "viewBox": "0 0 14 14",
+        "fill": "none"
+      },
+      "mockSourceReferencesSameAsset": true,
+      "renderSlot": "stage header back",
+      "figmaSlotPx": 14,
+      "notes": ""
+    },
+    {
+      "figmaNode": "1764:835",
+      "name": "more",
+      "localAsset": "branding/ees/ui/v4/a953c.svg",
+      "bytes": 994,
+      "sha256": "2179f5640dcc4d0281e94ba5f230ade86fab7866ef20ab335a2aa86c1a1864e7",
+      "rootMetadata": {
+        "width": "16",
+        "height": "16",
+        "viewBox": "0 0 16 16",
+        "fill": "none"
+      },
+      "mockSourceReferencesSameAsset": true,
+      "renderSlot": "stage header more",
+      "figmaSlotPx": 16,
+      "notes": ""
+    },
+    {
+      "figmaNode": "1764:837",
+      "name": "panel-right",
+      "localAsset": "branding/ees/ui/v4/7bb4a.svg",
+      "bytes": 568,
+      "sha256": "a5f08771fd6364324d8240540d6f832b0901c4e98bc73fef4e94c79f3f415a0f",
+      "rootMetadata": {
+        "width": "16",
+        "height": "16",
+        "viewBox": "0 0 16 16",
+        "fill": "none"
+      },
+      "mockSourceReferencesSameAsset": true,
+      "renderSlot": "stage header close",
+      "figmaSlotPx": 16,
+      "notes": ""
+    },
+    {
+      "figmaNode": "1764:657",
+      "name": "panel-right",
+      "localAsset": "branding/ees/ui/v4/7bb4a.svg",
+      "bytes": 568,
+      "sha256": "a5f08771fd6364324d8240540d6f832b0901c4e98bc73fef4e94c79f3f415a0f",
+      "rootMetadata": {
+        "width": "16",
+        "height": "16",
+        "viewBox": "0 0 16 16",
+        "fill": "none"
+      },
+      "mockSourceReferencesSameAsset": true,
+      "renderSlot": "overview close",
+      "figmaSlotPx": 14,
+      "notes": "Figma overview close slot is14px; original mock source uses the16px root asset without a size override. Product overview wrapper currently targets14px. Exact Figma source asset byte equality remains unverified."
+    }
+  ],
+  "actionIcons": [
+    {
+      "name": "play",
+      "sourceMockAndProductIdentical": true,
+      "sha256": "e91d5af4d279717362188e430f752bc5959be677d9f8fb70122faa9e4759440e"
+    },
+    {
+      "name": "retry",
+      "sourceMockAndProductIdentical": true,
+      "sha256": "43c4eedd1f9fe712100f36b33e9e8102d401fc5433062b029587019b7016b638"
+    }
+  ],
+  "figmaOriginalAssetByteEquality": "unverified: Figma temporary asset download returned195-byte HTML interception, not SVG. Existing code reuses exact original mock source assets; PNG screenshots and Figma metadata captured separately.",
+  "nativeRenderedGeometry": "pending independent Native capture"
+}

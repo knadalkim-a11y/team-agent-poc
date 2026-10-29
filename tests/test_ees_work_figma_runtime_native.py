@@ -28,7 +28,16 @@ class SyntheticReviewModel:
 
 
 class FigmaRuntimeNativeTests(IntegratedNativeCase):
-    def operations_stage(self):
+    def open_stage_from_overview(self):
+        self.click('[data-action=stage_open][data-node-id=stage]')
+        self.wait("document.querySelector('#ees-work-panel.ew-vd h2')")
+
+    def open_run_details_from_overview(self):
+        self.open_stage_from_overview()
+        self.click('[data-action=stage_details]')
+        self.wait("document.querySelector('.ew-phase-overview')")
+
+    def operations_stage(self, *, start=True):
         """Approved layout data authored only in this test's temporary database."""
         async def assets(actor):
             return {'available': True, 'skills': [{'id': 'synthetic-document-guide'}],
@@ -67,6 +76,8 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         checked = self.command('validate_workflow', workflow_id=key, expected_revision=2)
         self.assertEqual(checked['validation']['errors'], [], checked)
         self.command('publish_workflow', workflow_id=key, expected_revision=2)
+        if not start:
+            return key, None
         run = self.start(key, inputs={'query': '이번 배포 문서'})
         for index in (0, 1, 3, 4, 5, 7, 8):
             self.bridge.result = {'status': 'failed' if index == 3 else 'succeeded', 'completeness': 'complete',
@@ -109,7 +120,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
         self.open_run(key, run, job='')
         self.wait("document.querySelector('#ees-work-panel.ew-vd h2')?.textContent === '1차 점검'")
-        self.assertEqual(self.text('.ew-run-back'), '배포 산출물 점검')
+        self.assertEqual(self.text('.ew-run-back'), '배포 산출물 점검 / 전체 공장 · EMS')
         self.assertIn('작업 12개', self.text('.ew-vd-head'))
         self.assertNotIn('회차', self.text('.ew-run-nav') + self.text('.ew-vd-head'))
         self.assertNotIn('자동실행 예약 없음', self.text('.ew-vd-head'))
@@ -151,13 +162,114 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.assertEqual(len(second['jobs']['job-2']['decisions']), 2)
         self.click('[data-action=stage_evidence][data-job-id=job-2]')
         self.assertIn('조건부 승인', self.text('#stage-evidence-job-2'))
-        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('#stage-evidence-job-2 [data-human-selection] b')].map(e=>e.textContent)"), ['조건부 승인', '승인'])
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('#stage-evidence-job-2 [data-human-selection] b')].map(e=>e.textContent)"), ['조건부 승인 선택', '승인 선택'])
         self.stage_capture('operations-stage-human-record-480')
         for tab in ('log', 'rules'):
             self.click('[data-action=stage_tab][data-tab=' + tab + ']')
             self.wait("document.querySelector('[data-action=stage_tab][data-tab=" + tab + "][aria-pressed=true]')")
             self.stage_capture('operations-stage-' + tab + '-480')
         self.assertIn('조건부 승인', self.text('.ew-vd-rules'))
+
+    def test_operations31_preexecution_navigation_creates_no_run_or_attempt(self):
+        self.command('save_factory', factory_id='figma-factory-a', system_id='EMS', name='공장 A', attributes={})
+        key, _ = self.operations_stage(start=False)
+        published = deepcopy(self.state(workflow_id=key)['workflow'])
+        self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+        self.refresh()
+        control = '[data-action=workflow][data-workflow-id="' + key + '"]'
+        self.wait('document.querySelector(' + json.dumps(control) + ')')
+        self.click(control)
+        self.wait("document.querySelector('.ew-operation-overview')")
+        writes = len(self.server.workspace_commands)
+        for width in (1920, 480):
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+            self.wait('innerWidth===' + str(width))
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-start')"))
+            self.assertIn('배포 산출물 점검', self.text('.ew-operation-overview'))
+            self.assertIn('작업 12개', self.text('.ew-operation-overview'))
+            self.screenshot('operations31-overview-before-' + str(width))
+            self.click('[data-action=stage_open][data-node-id=stage]')
+            self.wait("document.querySelector('#ees-work-panel.ew-vd h2')?.textContent==='1차 점검'")
+            self.assertEqual(self.browser.evaluate("document.querySelectorAll('[data-stage-job]').length"), 12)
+            self.assertFalse(self.browser.evaluate("!!window.__eesNativeWorkV1.captureReference()?.run_id"))
+            self.stage_capture('operations31-stage-before-' + str(width))
+            for tab in ('log', 'rules', 'work'):
+                self.click('[data-action=stage_tab][data-tab=' + tab + ']')
+                self.wait("document.querySelector('[data-action=stage_tab][data-tab=" + tab + "][aria-pressed=true]')")
+            self.click('[data-action=stage_evidence][data-job-id=job-2]')
+            self.assertTrue(self.read('#stage-evidence-job-2 [data-stage-note]', 'readOnly'))
+            self.click('[data-action=stage_back]')
+            self.wait("document.querySelector('.ew-operation-overview')")
+        self.click('[data-action=stage_open][data-node-id=stage]')
+        self.wait("document.querySelector('#ees-work-panel.ew-vd')")
+        self.click('[data-action=stage_start][data-node-id=stage]')
+        self.wait("document.querySelector('#ees-work-start')")
+        self.screenshot('operations31-explicit-start-form-480')
+        self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+        self.wait('innerWidth===1920')
+        self.open_sidebar()
+        self.click('#ees-work-site-trigger')
+        self.click('[data-action=choose_factory][data-factory-id=figma-factory-a]')
+        self.wait("document.querySelector('#ees-work-site-trigger')?.textContent.includes('공장 A')")
+        self.click(control)
+        self.wait("document.querySelector('.ew-operation-overview')?.textContent.includes('공장 A · EMS')")
+        self.screenshot('operations31-overview-factory-a-1920')
+        self.click('[data-action=stage_open][data-node-id=stage]')
+        self.wait("document.querySelector('.ew-run-back')?.textContent.includes('공장 A · EMS')")
+        self.stage_capture('operations31-stage-factory-a-1920')
+        self.assert_only_selection_remembered(writes)
+        self.assertEqual(self.state(workflow_id=key)['workflow'], published)
+        with self.server.workflow._db() as db:
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM work_runs WHERE workflow_id=?', (key,)).fetchone()[0], 0)
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM work_attempts').fetchone()[0], 0)
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM work_decisions').fetchone()[0], 0)
+        self.assertEqual(self.bridge.calls, [])
+        self.assertEqual(self.server.completions, [])
+
+    def test_operations31_reason_draft_is_private_and_saved_with_explicit_verdict(self):
+        key, run = self.operations_stage()
+        self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+        self.open_run(key, run, job='')
+        self.wait("document.querySelector('#ees-work-panel.ew-vd')")
+        self.click('[data-action=stage_evidence][data-job-id=job-2]')
+        note = '적용 대상 확인을 마친 뒤 배포합니다.\n기존 자료와 이전 판정을 보존합니다.'
+        writes = len(self.server.workspace_commands)
+        original = deepcopy(self.state(run_id=run['id'])['run'])
+        self.fill('#stage-evidence-job-2 [data-stage-note]', note)
+        self.browser.evaluate('new Promise(resolve=>setTimeout(resolve,500))')
+        self.assertEqual(self.state(run_id=run['id'])['run'], original)
+        self.assert_only_selection_remembered(writes)
+        self.assertNotIn(note, json.dumps(self.server.workspace_commands[writes:], ensure_ascii=False))
+        self.stage_capture('operations31-reason-draft-1920')
+        self.click('[data-action=stage_verdict][data-job-id=job-2]')
+        self.click('[data-action=stage_decide][data-judgment-id=conditional]')
+        self.wait("document.querySelector('[data-action=stage_verdict][data-job-id=job-2]')?.innerText.includes('조건부 승인')")
+        saved = deepcopy(self.state(run_id=run['id'])['run'])
+        first = saved['jobs']['job-2']['decisions'][0]
+        self.assertEqual(first['note'], note + '\n선택한 판정: 조건부 승인 (conditional)')
+        business = [body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui']
+        self.assertEqual([body['action'] for body in business], ['human_confirm'])
+        self.assertEqual(business[0]['note'], note)
+        self.assertEqual(business[0]['judgment_id'], 'conditional')
+        self.refresh()
+        self.wait("document.querySelector('[data-action=stage_verdict][data-job-id=job-2]')?.innerText.includes('조건부 승인')")
+        if not self.browser.evaluate("!!document.querySelector('#stage-evidence-job-2')"):
+            self.click('[data-action=stage_evidence][data-job-id=job-2]')
+        self.assertEqual(self.read('#stage-evidence-job-2 [data-stage-note]', 'value'), note)
+        self.assertTrue(self.read('#stage-evidence-job-2 [data-stage-note]', 'readOnly'))
+        self.assertAlmostEqual(self.read('#stage-evidence-job-2 [data-stage-note]', 'getBoundingClientRect().height'), 66, delta=.5)
+        for width in (1920, 480):
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+            self.wait('innerWidth===' + str(width))
+            self.click('#stage-evidence-job-2 [data-stage-note]')
+            self.stage_capture('operations31-reason-saved-' + str(width))
+        self.click('[data-action=stage_verdict][data-job-id=job-2]')
+        self.click('[data-action=stage_decide][data-judgment-id=approved]')
+        self.wait("document.querySelector('[data-action=stage_verdict][data-job-id=job-2]')?.textContent.trim()==='승인' && !document.querySelector('#ees-stage-verdict-menu')")
+        final = self.state(run_id=run['id'])['run']
+        self.assertEqual([item for item in final['jobs']['job-2']['decisions'] if item['id'] == first['id']], [first])
+        self.assertEqual(len(final['jobs']['job-2']['decisions']), 2)
+        self.assertEqual(len([item for item in final['attempts'] if item['job_id'] == 'job-2']), 2)
 
     def test_operations_stage_actual_tool_evidence_retry_and_scope_execution(self):
         key, run = self.operations_stage()
@@ -331,9 +443,9 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
                 self.preview_inputs(run, {'note': '다른 작업으로 가기 전 제안'})
                 if applied:
                     self.click('[data-action=apply_input_proposal]')
-                self.click('[data-action=overview]'); self.click('[data-action=job][data-job-id=job-1]')
+                self.click('[data-action=overview]'); self.open_stage_from_overview(); self.click('[data-action=job][data-job-id=job-1]')
                 self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-input-proposal-bar,.ew-input-proposal-applied,.ew-input-proposal-source')"))
-                self.click('[data-action=overview]'); self.click('[data-action=job][data-job-id=job-0]')
+                self.click('[data-action=overview]'); self.open_stage_from_overview(); self.click('[data-action=job][data-job-id=job-0]')
                 self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-input-proposal-bar,.ew-input-proposal-applied,.ew-input-proposal-source')"))
             self.assertEqual(self.state(run_id=run['id'])['run'], before)
 
@@ -585,7 +697,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
                 confirmed = self.state(run_id=run['id'])['run']
                 self.assertEqual(confirmed['jobs']['job-0']['status'], 'partial')
                 self.assertTrue(confirmed['jobs']['job-0']['partial_confirmed'])
-                self.click('[data-action=overview]'); self.click('[data-action=job][data-job-id=job-1]')
+                self.click('[data-action=overview]'); self.open_stage_from_overview(); self.click('[data-action=job][data-job-id=job-1]')
                 self.assertIn('부분 결과에서 시작함', self.text('#ees-work-panel'))
                 self.click('[data-action=confirm]'); self.click('[data-dialog-confirm]')
                 self.wait("document.querySelector('#ees-work-panel .ew-work-heading .ew-status')?.dataset.status === 'completed'")
@@ -594,7 +706,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
                 self.assertIn('부분 결과에서 시작함', self.text('.ew-history'))
                 if shared:
                     self.screenshot('shared-runtime-partial-next-history')
-                self.click('[data-action=overview]'); self.click('[data-action=close_run]')
+                self.click('[data-action=overview]'); self.open_run_details_from_overview(); self.click('[data-action=close_run]')
                 self.click('[data-dialog-confirm]')
                 self.wait("document.querySelector('#ees-work-panel')?.innerText.includes('읽기 전용')")
                 closed = self.state(run_id=run['id'])['run']
@@ -832,6 +944,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         run = self.execute(self.start(key)); original = deepcopy(run['attempts'][0])
         self.open_run(key, run)
         self.click('[data-action=overview]')
+        self.open_run_details_from_overview()
         self.assertEqual(self.browser.evaluate("document.querySelectorAll('.ew-phase-overview').length"), 1)
         self.wait("[...document.querySelectorAll('.ew-job-actor img')].every(image => image.complete && image.naturalWidth > 0)")
         self.screenshot('figma-a5-cycle-overview')
@@ -930,7 +1043,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.assertEqual(saved['attempts'][0]['result'], original)
         self.assertTrue(saved['attempts'][0]['review_history'][-1]['decision_id'])
         self.assertTrue(self.read('[data-action="send_review_draft"]', 'disabled'))
-        self.click('[data-action=overview]'); self.click('[data-action=close_run]')
+        self.click('[data-action=overview]'); self.open_run_details_from_overview(); self.click('[data-action=close_run]')
         self.click('[data-dialog-confirm]')
         self.wait("document.querySelector('.ew-error')?.innerText.includes('필수 작업')")
         self.assertEqual(self.state(run_id=run['id'])['run']['status'], 'open')
@@ -947,9 +1060,11 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.command('save_settings', workflow_id=key, expected_revision=1, values={'setting': '현재 값'})
         self.refresh(); self.click('[data-action="records"]')
         self.click('[data-action="open_run"][data-run-id="' + run['id'] + '"]')
+        self.open_run_details_from_overview()
         self.click('[data-action="workflow_records"]')
         self.assertTrue(self.browser.evaluate("!!document.querySelector('.ew-record-filter')"))
         self.click('[data-action="open_run"][data-run-id="' + run['id'] + '"]')
+        self.open_run_details_from_overview()
         self.click('.ew-history summary')
         self.assertIn('당시 값', self.text('.ew-history-values'))
         self.assertIn('지금과 다름', self.text('.ew-history-values'))

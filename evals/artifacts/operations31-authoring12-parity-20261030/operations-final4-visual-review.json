@@ -1,0 +1,37 @@
+{
+  "dateKST": "2026-10-30",
+  "runtime": "parity-build/runtime3 / normal source4 build",
+  "status": "Two in-scope styling discrepancies sent for source5 correction; no product/test edits by reviewer.",
+  "checked": [
+    "operations31-overview-factory-a-1920-panel.png",
+    "operations31-stage-factory-a-1920-panel.png",
+    "operations31-reason-reference-1920-panel.png"
+  ],
+  "matched": [
+    "Overview content dimensions439px; title y68/28, metadata y116/46, stageheading y186, stage row y214/71. Figma root is479px versus actual Native480px including1px left divider; relative x differs1px.",
+    "Pre-run group36px and job row76px match layout; workflow summary and stage/row placement visually inspected. Actual final-state wording remains execution rather than fabricated approval.",
+    "Reason reference target and actual: selection history x34/y883/w413/h43; textarea x34/y964/w413/h66; focus outer x32/y962/w417/h70. Single approved group and result count2 restored."
+  ],
+  "discrepancies": [
+    {
+      "id": "overview-divider",
+      "figma": "Row radius6 clips an absolute439×1px inner line at y284; end of straight line is clipped.",
+      "actual": "CSS border-bottom1 follows the rounded corner and extends into corner curve.",
+      "cause": "Border geometry is not equivalent to clipped child line.",
+      "requestedFix": "Keep row439×71/radius6; use absolute ::after line at bottom0 and clip overflow, padding12px0 13px."
+    },
+    {
+      "id": "tertiary-color",
+      "figma": "#6f717a (rgb111,113,122) on overview metadata, count and record actor text; same token on authoring detail hints/assignee.",
+      "actual": "#5c5e65 (rgb92,94,101).",
+      "cause": "Historical #ees-work-panel tertiary→secondary override wins by inheritance.",
+      "requestedFix": "Restore tertiary only #ees-work-panel.ew-vd and #ees-work-designer:not([data-author-tab=tools]) .ew-job-detail. Preserve latest list.",
+      "priorIncident": "evals/v4-ui-20260930.md #338 actual-browser color comparison also traced same inheritance bug; earlier local tool-name/version correction missed these new surfaces."
+    }
+  ],
+  "dynamicDifferences": [
+    "Actual tool failure label/badge represents execution failure, not Figma sample rejection. No fake rejection record added.",
+    "Actual actor/time and workflow saved state reflect fixture API records."
+  ],
+  "next": "Source5 normal rebuild and scoped repeat verification."
+}

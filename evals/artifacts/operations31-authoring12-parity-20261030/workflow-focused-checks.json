@@ -1,0 +1,54 @@
+{
+  "dateKST": "2026-10-30",
+  "base": "6ac4c1062a6c83d2d1429d0120cc5179d5dc508d",
+  "checks": [
+    {
+      "command": "EES_AUTHORING_TEST_SOURCE=<captured-base-source> node --test --test-name-pattern=\"A12 an unconnected tool displays|A12 tool review notice\" tests/test_ees_work_authoring_ui.cjs",
+      "result": "EXPECTED_FAIL",
+      "passed": 0,
+      "failed": 2,
+      "purpose": "Prove disabled choices and warning order changes are regressions caught by new checks."
+    },
+    {
+      "command": "node --test tests/test_ees_work_authoring_ui.cjs",
+      "result": "PASS",
+      "passed": 265,
+      "failed": 0
+    },
+    {
+      "command": ".venv/bin/python -m unittest tests.test_ees_work_figma_authoring -v",
+      "result": "PASS",
+      "passed": 8
+    },
+    {
+      "command": ".venv/bin/python -m unittest tests.test_ees_work_designer tests.test_ees_work_figma_contracts -v",
+      "result": "ERROR",
+      "passed": 1,
+      "errors": 1,
+      "reason": "Invocation missed PYTHONPATH=tests for contracts sibling import test_ees_work_workspace; unrelated to product."
+    },
+    {
+      "command": "PYTHONPATH=tests .venv/bin/python -m unittest test_ees_work_figma_contracts -v",
+      "result": "PASS",
+      "passed": 24
+    },
+    {
+      "command": "node --check branding/ees/ui/ees-work-designer.js; git diff --check",
+      "result": "PASS"
+    },
+    {
+      "command": "node --test --test-name-pattern=\"A12 an unconnected tool displays|A12 tool review notice\" tests/test_ees_work_authoring_ui.cjs",
+      "result": "PASS",
+      "passed": 2,
+      "note": "Final targeted test includes both saved human_confirmation true and false. No product mutation."
+    }
+  ],
+  "runtime": "Native geometry/state checks are collected separately by parity_verification after pinned frontend build.",
+  "preservation": [
+    "No existing workflow list changes.",
+    "Unconnected controls disabled; capture guard prevents writing a new result mode.",
+    "Hidden completion data remains on draft and unchanged when saving a name edit.",
+    "Warning keeps actual service reason and existing administrator action access.",
+    "Assignee remains a native select with unchanged focus and keyboard behavior; the authoring-only background chevron is removed to match Figma12."
+  ]
+}

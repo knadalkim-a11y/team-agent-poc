@@ -1,5 +1,13 @@
 # 현재 작업 상태
 
+## 2026-10-30 · 운영31·업무절차12 구현·로컬 검증 완료
+
+- **사용자 요청·현재:** #104·#107·#108은 main `6ac4c1062a6c83d2d1429d0120cc5179d5dc508d`에 병합됐다. 두 페이지를 다시 비교한 뒤 받은 구현 요청에 따라 `feat/operations31-authoring12-parity-20261030`에서 [범위·완료 조건](mockups/ees-work/TASK.md#operations31-authoring12-parity-20261030)의 제품 보정과 로컬 검증을 마쳤다. 새 변경은 아직 main에 병합되지 않았다.
+- **수정 대상:** 운영31의 개요와 실행 전 단계 조회·판정 사유/근거 배치, 작성12의 도구 미연결/확인 필요 상태를 기존 기능에 연결한다. 비교 HTML8의 B1은 이전 참고 화면이라는 사용자 정정을 반영하며 현재 코드의 목록은 유지한다.
+- **검증:** Node404개와 source5 실제 Native6개·시각 단언을 통과했다. 바로 전 source4의 영향 경로는21개 첫 통과와 탐색 보완 후1개 재검증 통과이며, Complete Native22단계도 통과했다. source5는 그 뒤 CSS1파일만 보완했으며 두 빌드의 검증 범위를 [최종 원본·해시·실측](../evals/artifacts/operations31-authoring12-parity-20261030/runtime/final-result.json)에서 구분한다. 실제 도구 설정 수·실패 상태·판정자와 시각을 보존하므로 전체 이미지 픽셀 동일성을 주장하지 않는다.
+- **다음 하나:** [이 브랜치의 검토 PR](https://github.com/knadalkim-a11y/team-agent-poc/pulls?q=is%3Apr+head%3Afeat%2Foperations31-authoring12-parity-20261030)의 최종 CI와 병합 전 검토를 확인한다. 로컬 성공을 새 PR head CI나 사내 적용 성공으로 대신하지 않는다.
+- **사내 적용:** 이번 구현은 새 사내 배포를 포함하지 않는다. 마지막 사용자 보고 적용 원본 `42f5ae502b57`과 당시 기록을 유지한다.
+
 ## 2026-10-30 · PR 통합과 두 Figma 페이지의 제품 UI 재검증
 
 - **사용자 요청·현재:** 열린 PR을 병합한 뒤 Figma ‘업무 · 운영’과 ‘워크 · 업무 절차’가 현재 제품에 시각적으로 반영됐는지 다시 확인한다. [PR #108](https://github.com/knadalkim-a11y/team-agent-poc/pull/108)은 검증된 head `a5af7706708687a61acb6ec2fd0c65c6d34db026`에서 main `b8f6e16f551fb197ef41d799a962420e5dcf10f2`로 병합했다.

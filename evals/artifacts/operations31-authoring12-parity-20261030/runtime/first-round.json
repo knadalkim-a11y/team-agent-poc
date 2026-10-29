@@ -1,0 +1,60 @@
+{
+  "base_commit": "6ac4c1062a6c83d2d1429d0120cc5179d5dc508d",
+  "working_tree_modified": true,
+  "source_build": "frontend3",
+  "frontend_manifest_sha256": "28abf0940a9d6e7a4685ae5c6bb1a13af94d7a3d7b01771c7ef1c106d45063da",
+  "ui_source_hashes": {
+    "branding/ees/ui/ees-work-designer.js": "ba210b224e27df461c4660a7ee1ef9af58731ac23a5318c43dd2b2b33d798698",
+    "branding/ees/ui/ees-work-launcher.css": "d1a560e2e4b86d1cc48bfb05bf21ff5d77722857b5fc65b95304e935db9f8858",
+    "branding/ees/ui/ees-work-launcher.js": "25c9e066b6f1e191d8b73fbb6bb248310899a14f633de536bd9ed6718c2c8586",
+    "branding/ees/ui/ees-work-view.js": "5d5ceb4969094520832f87b0bad02e08776bd74ff946ea2afef5feabb47df0c0"
+  },
+  "wheel_sha256": "05321880ec66b17cfa9097f5da1ebe8fa162fe384613dd2994ce91135397856f",
+  "first_core": {
+    "tests": 5,
+    "success": false,
+    "failures": [
+      [
+        "test_operations31_reason_draft_is_private_and_saved_with_explicit_verdict (__main__.Parity.test_operations31_reason_draft_is_private_and_saved_with_explicit_verdict)",
+        "Traceback (most recent call last):\n  File \"/workspace/scratch/b1afafbe4fcd/repo/tests/test_ees_work_figma_runtime_native.py\", line 219, in test_operations31_reason_draft_is_private_and_saved_with_explicit_verdict\n    self.open_run(key, run, job='')\n  File \"/workspace/scratch/b1afafbe4fcd/repo/tests/ees_work_integrated_fixture.py\", line 185, in open_run\n    self.wait('document.querySelector(' + json.dumps(run_control) + ') || (window.__eesNativeWorkV1.captureReference()?.run_id === ' + json.dumps(run['id']) + ' && document.querySelector(\"#ees-work-panel [data-action=job]\"))')\n  File \"/workspace/scratch/b1afafbe4fcd/repo/tests/ees_work_integrated_fixture.py\", line 213, in wait\n    self.fail('Timed out: ' + expression + '\\n' + self.text('body') + '\\nUnknown routes:' + repr(self.server.unknown))\nAssertionError: Timed out: document.querySelector(\"#ees-work-panel .ew-active-runs [data-action=\\\"open_run\\\"][data-run-id=\\\"2f4dee22-b3ac-4896-b79f-be63de737a12\\\"]\") || (window.__eesNativeWorkV1.captureReference()?.run_id === \"2f4dee22-b3ac-4896-b79f-be63de737a12\" && document.querySelector(\"#ees-work-panel [data-action=job]\"))\nSkip to main content\nE\nEES Workflow\n업무\n워크스페이스\n\n작업 위치\n\n공장\n전체 공장\n시스템\nEMS\n내 업무\n4\n실행 기록\n대화 기록\n\n업무\n\n운영\n배포 산출물 점검\n셋업\n장애대응\n새 대화\n대화 검색\nFixture Administrator\n배포 산출물 점검\n새 대화\n채팅 대화\n\n기존 질문\n\nFixture AI\n\n기존 대화 기록\n\n\n\n\n음성 모드 사용\n업무\n배포 산출물 점검\n주기\n수시 · 예약 없음\n적용 대상\n전체 공장 · EMS\n업무 단계\n1차 점검\n작업 12개\nUnknown routes:[]\n"
+      ],
+      [
+        "test_operations_stage_actual_jobs_header_and_judgment_menu_at_two_widths (__main__.Parity.test_operations_stage_actual_jobs_header_and_judgment_menu_at_two_widths)",
+        "Traceback (most recent call last):\n  File \"/workspace/scratch/b1afafbe4fcd/repo/tests/test_ees_work_figma_runtime_native.py\", line 121, in test_operations_stage_actual_jobs_header_and_judgment_menu_at_two_widths\n    self.open_run(key, run, job='')\n  File \"/workspace/scratch/b1afafbe4fcd/repo/tests/ees_work_integrated_fixture.py\", line 185, in open_run\n    self.wait('document.querySelector(' + json.dumps(run_control) + ') || (window.__eesNativeWorkV1.captureReference()?.run_id === ' + json.dumps(run['id']) + ' && document.querySelector(\"#ees-work-panel [data-action=job]\"))')\n  File \"/workspace/scratch/b1afafbe4fcd/repo/tests/ees_work_integrated_fixture.py\", line 213, in wait\n    self.fail('Timed out: ' + expression + '\\n' + self.text('body') + '\\nUnknown routes:' + repr(self.server.unknown))\nAssertionError: Timed out: document.querySelector(\"#ees-work-panel .ew-active-runs [data-action=\\\"open_run\\\"][data-run-id=\\\"717fa4d4-be0d-4eb7-9a90-6e09689a1d4e\\\"]\") || (window.__eesNativeWorkV1.captureReference()?.run_id === \"717fa4d4-be0d-4eb7-9a90-6e09689a1d4e\" && document.querySelector(\"#ees-work-panel [data-action=job]\"))\nSkip to main content\nE\nEES Workflow\n업무\n워크스페이스\n\n작업 위치\n\n공장\n전체 공장\n시스템\nEMS\n내 업무\n4\n실행 기록\n대화 기록\n\n업무\n\n운영\n배포 산출물 점검\n셋업\n장애대응\n새 대화\n대화 검색\nFixture Administrator\n배포 산출물 점검\n새 대화\n채팅 대화\n\n기존 질문\n\nFixture AI\n\n기존 대화 기록\n\n\n\n\n음성 모드 사용\n업무\n배포 산출물 점검\n주기\n수시 · 예약 없음\n적용 대상\n전체 공장 · EMS\n업무 단계\n1차 점검\n작업 12개\nUnknown routes:[]\n"
+      ],
+      [
+        "test_operations_stage_actual_tool_evidence_retry_and_scope_execution (__main__.Parity.test_operations_stage_actual_tool_evidence_retry_and_scope_execution)",
+        "Traceback (most recent call last):\n  File \"/workspace/scratch/b1afafbe4fcd/repo/tests/test_ees_work_figma_runtime_native.py\", line 264, in test_operations_stage_actual_tool_evidence_retry_and_scope_execution\n    self.open_run(key, run, job='')\n  File \"/workspace/scratch/b1afafbe4fcd/repo/tests/ees_work_integrated_fixture.py\", line 185, in open_run\n    self.wait('document.querySelector(' + json.dumps(run_control) + ') || (window.__eesNativeWorkV1.captureReference()?.run_id === ' + json.dumps(run['id']) + ' && document.querySelector(\"#ees-work-panel [data-action=job]\"))')\n  File \"/workspace/scratch/b1afafbe4fcd/repo/tests/ees_work_integrated_fixture.py\", line 213, in wait\n    self.fail('Timed out: ' + expression + '\\n' + self.text('body') + '\\nUnknown routes:' + repr(self.server.unknown))\nAssertionError: Timed out: document.querySelector(\"#ees-work-panel .ew-active-runs [data-action=\\\"open_run\\\"][data-run-id=\\\"c2f35649-a8e4-498b-bf14-96e36e6c46aa\\\"]\") || (window.__eesNativeWorkV1.captureReference()?.run_id === \"c2f35649-a8e4-498b-bf14-96e36e6c46aa\" && document.querySelector(\"#ees-work-panel [data-action=job]\"))\nSkip to main content\nE\nEES Workflow\n업무\n워크스페이스\n\n작업 위치\n\n공장\n전체 공장\n시스템\nEMS\n내 업무\n4\n실행 기록\n대화 기록\n\n업무\n\n운영\n배포 산출물 점검\n셋업\n장애대응\n새 대화\n대화 검색\nFixture Administrator\n배포 산출물 점검\n새 대화\n채팅 대화\n\n기존 질문\n\nFixture AI\n\n기존 대화 기록\n\n\n\n\n음성 모드 사용\n업무\n배포 산출물 점검\n주기\n수시 · 예약 없음\n적용 대상\n전체 공장 · EMS\n업무 단계\n1차 점검\n작업 12개\nUnknown routes:[]\n"
+      ]
+    ],
+    "cause": "Shared fixture open_run awaited the old direct active-runs view; new operation overview rendered correctly. Updated physical navigation through stage/details, retained business assertions.",
+    "log_sha256": "cf4fa225486c9b9d635d0d66905eb5a13abe6af77996bc600a924c67055abf8c"
+  },
+  "corrected_core": {
+    "tests": 5,
+    "success": true,
+    "log_sha256": "b6f2b9a58b9c3717a12130746c27a3ffb7513e557837f05bb8baecadb3719d86",
+    "seconds": 29.904
+  },
+  "affected_native": {
+    "tests": 22,
+    "success": true,
+    "seconds": 62.16,
+    "log_sha256": "36da08d3c30fc42aef62cfa65bfcc2eba969963d8e941636ecd7f67bc77181f0"
+  },
+  "complete_native": {
+    "status": "passed",
+    "steps": 22,
+    "screenshots": 35,
+    "report_sha256": "ca576e23b297ad4d6eccedf765ff87aba99e9633546a6ca41b62d5c745e06972",
+    "log_sha256": "0ebd6825d9c11f1b9496ef078fc7d5d2bba76e5d9960c935f39093e0b63f19ab"
+  },
+  "reference_state_capture": {
+    "tests": 1,
+    "success": true,
+    "scope": "Real service commands: factory A, one failed automatic execution, one approved human decision with saved note. Native physical controls and wheel scroll only.",
+    "source": "reference-state1",
+    "visual_finding": "Actual source3 single human approval omitted the reference expanded 나머지 승인 1건 group header. Functional capture passed, visual parity did not. Final4 corrects grouping and runner asserts the real collapse/expand controls."
+  },
+  "pending_product_changes": "Overview row height 72 to71; no-run menu aria correction; accurate unsaved/readonly note title; group a single human approval under 나머지 승인1건. This is first-round verification, not final source4 evidence."
+}

@@ -782,7 +782,7 @@ test('shared search failure without result scope uses the known function and nev
  const legacy=html('workResultHTML({result_block:"list_confirm"},saved)',{saved:h.snapshot.state.run.jobs.j});assert.match(legacy,/조회 결과를 확인하지 못했습니다/);assert.doesNotMatch(legacy,/Confluence에서/);
 });
 test('finished run separates confirmed partial count and keeps a partial stage badge with zero remaining work',()=>{
- const h=sharedRuntimeFixture(),runState=h.snapshot.state.run;
+ const h=sharedRuntimeFixture(),runState=h.snapshot.state.run;h.snapshot.selection.tab='run_details';
  runState.status='completed';runState.definition.nodes={p:{id:'p',type:'p'},t:{id:'t',type:'t',parent:'p',name:'문서 확인'},j:{id:'j',type:'j',parent:'t',name:'문서 찾기',mode:'tool'},next:{id:'next',type:'j',parent:'t',name:'후속 확인',mode:'human'},skip:{id:'skip',type:'j',parent:'t',name:'적용 제외'}};
  runState.jobs={j:{status:'partial',partial_confirmed:true},next:{status:'completed'},skip:{status:'excluded'}};runState.progress={completed:1,total:2,confirmed_partial:1,remaining:0};
  let out=h.overview();assert.match(out,/완료 1 · 부분 결과 확정 1 · 남은 작업 0/);assert.match(out,/<h3><button type="button" data-action="stage_open" data-node-id="t" class="ew-text">문서 확인<\/button><\/h3><span class="ew-status" data-status="partial">/);assert.match(out,/data-status="partial"[^>]*>[\s\S]*문서 찾기/);
@@ -806,13 +806,13 @@ function stageRuntimeFixture(){
  return {...h,state,mutations:()=>h.calls.filter(call=>['human_confirm','decide','execute_job'].includes(call.body?.action))};
 }
 
-test('common stage header shows workflow and optional context without imposing recurrence metadata',()=>{
+test('operations31 stage header shows workflow and actual target without recurrence metadata',()=>{
  const {state}=stageRuntimeFixture(),stage=state.run.definition.nodes.t;
  let rendered=html('workStageHTML(state,{stage_tab:"work"},stage)',{state,stage});
- assert.match(rendered.header,/배포 산출물 점검/);assert.match(rendered.header+rendered.body,/10.27 배포 회차/);assert.match(rendered.body,/1차 점검/);
+ assert.match(rendered.header,/배포 산출물 점검/);assert.match(rendered.header,/전체 공장/);assert.doesNotMatch(rendered.header,/10.27 배포 회차/);assert.match(rendered.body,/1차 점검/);
  assert.doesNotMatch(rendered.header+rendered.body,/업무절차|직접 시작|자동실행 예약 없음|수시/);
  delete state.run.name;rendered=html('workStageHTML(state,{},stage)',{state,stage});assert.doesNotMatch(rendered.header+rendered.body,/회차|ew-stage-context/);
- state.run.name='접근 권한 신청 A';rendered=html('workStageHTML(state,{},stage)',{state,stage});assert.match(rendered.header+rendered.body,/접근 권한 신청 A/);assert.doesNotMatch(rendered.header+rendered.body,/회차/);
+ state.run.name='접근 권한 신청 A';rendered=html('workStageHTML(state,{},stage)',{state,stage});assert.doesNotMatch(rendered.header,/접근 권한 신청 A/);assert.doesNotMatch(rendered.header+rendered.body,/회차/);
 });
 
 test('stage rows use Jobs, preserve configured judgment meaning and distinguish failed execution',()=>{
@@ -897,4 +897,89 @@ test('stage log keeps its compact time column and retains the full timestamp acc
  const {state}=stageRuntimeFixture();state.run.attempts=[{id:'a1',job_id:'a',number:1,status:'succeeded',created_at:'2026-10-27T14:20:00Z'}];
  const out=html('workStageHTML(state,{stage_tab:"log"},state.run.definition.nodes.t).body',{state});
  assert.match(out,/<time datetime="2026-10-27T14:20:00Z" title="[^"]*2026[^\"]*" aria-label="[^"]+">\d{2}:\d{2}<\/time>/);
+});
+
+function stagePreviewFixture(){
+ const h=stageRuntimeFixture();h.state.workflow.published_version=3;h.state.workflow.system_id='EMS';h.state.workflow.published=h.state.run.definition;h.state.workflow.draft={nodes:{secret:{id:'secret',type:'t',name:'비공개 초안'}}};delete h.state.run;
+ h.api.setSelection({run_id:'',stage_id:'',stage_overview:false});return h;
+}
+test('operations31 preview reads only published stages without a run or factory',async()=>{
+ const h=stagePreviewFixture();
+ assert.equal(html('workStageTarget(state,selection)',{state:h.state,selection:h.api.snapshot().selection}),null);
+ const overview=html('workOperationOverviewHTML(state,{})',{state:h.state});assert.match(overview,/업무 단계/);assert.match(overview,/작업 2개/);assert.match(overview,/전체 공장 · EMS/);assert.doesNotMatch(overview,/비공개 초안|진행 건 시작|ew-adhoc-start/);
+ await h.api.handleClick({dataset:{action:'stage_open',nodeId:'secret'}});assert.equal(h.api.snapshot().selection.stage_id,'');
+ await h.api.handleClick({dataset:{action:'stage_open',nodeId:'t'}});assert.equal(h.api.snapshot().selection.stage_id,'t');
+ for(const action of ['stage_evidence','stage_tab','stage_decide','stage_execute'])await h.api.handleClick({dataset:{action,jobId:'h',tab:'rules',verdict:'completed',judgmentId:'yes'}});
+ await h.api.handleClick({dataset:{action:'execute_scope',nodeId:'t'}});
+ assert.equal(h.calls.filter(call=>call.body&&call.body.action!=='save_ui').length,0);
+ const body=html('workStageHTML(state,selection,workPublishedDefinition(state).nodes.t).body',{state:h.state,selection:h.api.snapshot().selection});assert.match(body,/판정 단어/);
+});
+test('preview execution enters the existing explicit start form without creating or executing a run',async()=>{
+ const h=stagePreviewFixture();await h.api.handleClick({dataset:{action:'stage_open',nodeId:'t'}});
+ const body=html('workStageHTML(state,selection,workPublishedDefinition(state).nodes.t).body',{state:h.state,selection:h.api.snapshot().selection});assert.match(body,/data-action="stage_start"/);assert.doesNotMatch(body,/data-action="execute_scope"|data-action="stage_decide"/);assert.ok([...body.matchAll(/<button[^>]*data-action="stage_start"[^>]*>/g)].every(match=>!match[0].includes('aria-haspopup')&&!match[0].includes('aria-controls')));const emptyRecord=html('workStageHTML(state,{stage_id:"t",stage_evidence:"h"},workPublishedDefinition(state).nodes.t).body',{state:h.state});assert.match(emptyRecord,/title="읽기 전용 판정 사유"/);assert.doesNotMatch(emptyRecord,/title="저장된 판정 사유"/);
+ await h.api.handleClick({dataset:{action:'stage_start',jobId:'other'}});assert.equal(h.api.snapshot().selection.tab,'overview');
+ await h.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});assert.equal(h.api.snapshot().selection.tab,'start');assert.equal(h.calls.filter(call=>call.body&&call.body.action!=='save_ui').length,0);
+ await h.api.handleClick({dataset:{action:'stage_return'}});assert.equal(h.api.snapshot().selection.stage_id,'t');assert.equal(h.api.snapshot().selection.tab,'overview');
+});
+test('unpublished workflows never expose author drafts to operations preview',()=>{
+ const h=stagePreviewFixture();delete h.state.workflow.published;delete h.state.workflow.published_version;
+ assert.deepEqual(JSON.parse(JSON.stringify(html('workPublishedDefinition(state)',{state:h.state}))),{});
+ assert.equal(html('workStageTarget(state,{stage_id:"secret"})',{state:h.state}),null);
+});
+test('operations overview uses canonical mode and published name ahead of author draft metadata',()=>{
+ const h=stagePreviewFixture();h.state.workflow.name='미게시 이름';h.state.workflow.mode='on_demand';
+ for(const [mode,label] of [['periodic','주기'],['emergency','비상'],['on_demand','수시']]){
+  h.state.workflow.published.mode=mode;const out=html('workOperationOverviewHTML(state,{})',{state:h.state});assert.match(out,new RegExp(label+' · 예약 없음'));assert.match(out,/<h2>배포 산출물 점검<\/h2>/);assert.doesNotMatch(out,/미게시 이름/);
+  const stage=html('workStageHTML(state,{},workPublishedDefinition(state).nodes.t)',{state:h.state});assert.match(stage.header,/배포 산출물 점검/);assert.doesNotMatch(stage.header,/미게시 이름/);
+ }
+});
+test('both existing start flows return to their selected stage without automatically executing it',async()=>{
+ for(const mode of ['on_demand','periodic','emergency']){
+  const h=stagePreviewFixture(),definition=h.state.workflow.published;definition.mode=mode;definition.nodes.t2={id:'t2',parent:'p',type:'t',name:'후속 단계'};
+  h.api.setSelection({system_id:'EMS',factory_id:'factory',stage_id:'t2'});await h.api.handleClick({dataset:{action:'stage_start',nodeId:'t2'}});
+  const form={querySelectorAll:()=>[],addEventListener:()=>{}};h.context.document.querySelector=selector=>selector==='#ees-start-factory'?{value:'factory'}:selector==='#ees-work-start'||selector==='#ees-work-dialog'?form:null;h.setDialog(()=>Promise.resolve(true));
+  h.setReply(call=>{if(call.body?.action==='start_run'){h.state.run={id:'new-run',workflow_id:'w',factory_id:'factory',definition,status:'open',jobs:{},attempts:[],revision:1};return {ok:true,run:h.state.run};}return call.url.includes('workspace?')?h.state:{ok:true};});
+  await h.api.handleClick({dataset:{action:'start_run',...(mode==='on_demand'?{startInline:''}:{})}});
+  assert.equal(h.api.snapshot().selection.run_id,'new-run',mode);assert.equal(h.api.snapshot().selection.stage_id,'t2',mode);assert.equal(h.api.snapshot().selection.start_stage_id,'',mode);assert.equal(h.calls.filter(call=>call.body?.action==='start_run').length,1);assert.equal(h.calls.filter(call=>['execute_scope','execute_job'].includes(call.body?.action)).length,0);
+ }
+});
+function typeStageNote(h,value,readonly=false){const target={dataset:{jobId:'h'},value,readOnly:readonly,closest:selector=>selector==='[data-ees-work]'?{}:null,matches:selector=>selector==='[data-stage-note]'};h.api.handleEvent({type:'input',target});}
+test('stage reason is an unsaved local draft and persists only with its explicit judgment',async()=>{
+ const h=stageRuntimeFixture(),pendingTimers=h.timers.size;typeStageNote(h,'배치 변경 확인');assert.equal(h.calls.length,0);assert.equal(h.timers.size,pendingTimers);assert.equal(h.api.snapshot().selection.stage_notes,undefined);
+ await h.api.handleClick({dataset:{action:'stage_decide',jobId:'h',judgmentId:'conditional',verdict:'completed'}});
+ assert.equal(h.mutations()[0].body.note,'배치 변경 확인');
+ await h.api.handleClick({dataset:{action:'stage_decide',jobId:'h',judgmentId:'yes',verdict:'completed'}});assert.equal(h.mutations()[1].body.note,undefined);
+});
+test('failed judgment retains its reason while changed attempts and accounts cannot reuse that draft',async()=>{
+ const h=stageRuntimeFixture();typeStageNote(h,'실패 뒤 보존');let fail=true;
+ h.setReply(call=>call.body?.action==='human_confirm'&&fail?{ok:false,error:{message:'revision conflict'}}:call.url.includes('workspace?')?h.state:{ok:true});
+ await h.api.handleClick({dataset:{action:'stage_decide',jobId:'h',judgmentId:'yes',verdict:'completed'}});fail=false;
+ await h.api.handleClick({dataset:{action:'stage_decide',jobId:'h',judgmentId:'yes',verdict:'completed'}});assert.equal(h.mutations()[1].body.note,'실패 뒤 보존');
+ typeStageNote(h,'이전 근거 초안');h.state.run.jobs.h.attempt_id='new-attempt';h.state.run.jobs.h.result_revision=2;
+ await h.api.handleClick({dataset:{action:'stage_decide',jobId:'h',judgmentId:'yes',verdict:'completed'}});assert.equal(h.mutations()[2].body.note,undefined);
+ typeStageNote(h,'이전 계정 초안');h.api.reset();h.api.setState(h.state);h.api.setSelection({mode:'work',workflow_id:'w',run_id:'r',job_id:'',tab:'overview',stage_id:'t'});
+ await h.api.handleClick({dataset:{action:'stage_decide',jobId:'h',judgmentId:'yes',verdict:'completed'}});assert.equal(h.mutations()[3].body.note,undefined);
+});
+test('saved human reasons render read-only and retain previous judgments as history',()=>{
+ const {state}=stageRuntimeFixture();state.run.jobs.h={status:'completed',decisions:{job:{item_id:'job',verdict:'completed',note:'기존 사유\n선택한 판정: 승인 (yes)',actor_id:'actor'}}};
+ const body=html('workStageHTML(state,{stage_evidence:"h"},state.run.definition.nodes.t).body',{state});assert.match(body,/승인 선택/);assert.match(body,/<textarea[^>]*data-stage-note[^>]* readonly aria-readonly="true"[^>]*>기존 사유<\/textarea>/);assert.doesNotMatch(body,/선택한 판정: 승인/);
+});
+test('reason input reserves the existing judgment marker and rejects oversize text without truncating or saving it',async()=>{
+ const h=stageRuntimeFixture(),definition=h.state.run.definition,node=definition.nodes.h,marker='\n선택한 판정: 조건부 승인 (conditional)',limit=4000-Array.from(marker).length;
+ const body=html('workStageHTML(state,{stage_evidence:"h"},state.run.definition.nodes.t).body',{state:h.state});assert.match(body,new RegExp('maxlength="'+limit+'"'));
+ typeStageNote(h,'가'.repeat(limit+1));await h.api.handleClick({dataset:{action:'stage_decide',jobId:'h',judgmentId:'conditional',verdict:'completed'}});
+ assert.equal(h.mutations().length,0);assert.match(h.api.snapshot().error,/아직 저장하지 않았습니다/);
+ typeStageNote(h,'가'.repeat(limit));await h.api.handleClick({dataset:{action:'stage_decide',jobId:'h',judgmentId:'conditional',verdict:'completed'}});assert.equal(h.mutations()[0].body.note,'가'.repeat(limit));
+});
+test('one approved human remains in the expandable group after a failed automatic result',async()=>{
+ const h=stageRuntimeFixture();h.state.run.jobs.a={status:'failed'};h.state.run.jobs.h={status:'completed',decisions:{job:{item_id:'job',verdict:'completed',note:'확인 근거\n선택한 판정: 승인 (yes)',actor_id:'actor'}}};
+ const render=selection=>html('workStageHTML(state,selection,state.run.definition.nodes.t).body',{state:h.state,selection});
+ let out=render(h.api.snapshot().selection);assert.match(out,/나머지 승인 1건/);assert.match(out,/data-action="stage_approved" aria-expanded="false"/);assert.doesNotMatch(out,/data-stage-job="h"/);assert.match(out,/실행 실패/);
+ await h.api.handleClick({dataset:{action:'stage_evidence',jobId:'h'}});out=render(h.api.snapshot().selection);assert.match(out,/data-action="stage_approved" aria-expanded="true"/);assert.ok(out.indexOf('data-action="stage_approved"')<out.indexOf('data-stage-job="h"'));assert.match(out,/stage-evidence-h/);
+ await h.api.handleClick({dataset:{action:'stage_approved'}});out=render(h.api.snapshot().selection);assert.equal(h.api.snapshot().selection.stage_evidence,'');assert.match(out,/data-action="stage_approved" aria-expanded="false"/);assert.doesNotMatch(out,/data-stage-job="h"/);
+ await h.api.handleClick({dataset:{action:'stage_approved'}});out=render(h.api.snapshot().selection);assert.match(out,/data-action="stage_approved" aria-expanded="true"/);assert.match(out,/data-stage-job="h"/);assert.equal(h.mutations().length,0);
+});
+test('only an automatic positive is exposed ahead of grouped humans without relabelling execution as approval',()=>{
+ const {state}=stageRuntimeFixture();state.run.jobs.a={status:'completed'};state.run.jobs.h={status:'completed',decisions:{job:{item_id:'job',verdict:'completed',note:'\n선택한 판정: 승인 (yes)',actor_id:'actor'}}};
+ const out=html('workStageHTML(state,{stage_evidence:"h"},state.run.definition.nodes.t).body',{state});assert.ok(out.indexOf('data-stage-job="a"')<out.indexOf('data-action="stage_approved"'));assert.ok(out.indexOf('data-action="stage_approved"')<out.indexOf('data-stage-job="h"'));assert.match(out,/나머지 승인 1건/);assert.match(out,/실행 완료/);
 });

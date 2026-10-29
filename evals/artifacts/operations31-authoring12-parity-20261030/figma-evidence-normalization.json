@@ -1,0 +1,124 @@
+{
+  "reason": "Do not publish short-lived Figma asset URLs. PNG bytes extracted unchanged from original tool image blocks.",
+  "files": [
+    {
+      "context": "figma-1700-2103.json",
+      "images": [
+        {
+          "type": "image",
+          "mimeType": "image/png",
+          "local_path": "figma-1700-2103-render-1.png",
+          "sha256": "214eb96371f5d5e5e43b9ac2d8895bba71262238be1634ee49118d807f0eac68",
+          "bytes": 23121
+        }
+      ],
+      "temporary_asset_urls": "omitted; original response retained only in temporary working evidence"
+    },
+    {
+      "context": "figma-1705-1461.json",
+      "images": [
+        {
+          "type": "image",
+          "mimeType": "image/png",
+          "local_path": "figma-1705-1461-render-1.png",
+          "sha256": "43acab283279be162eb67181abce74510f779046c5095d9d361df3c18cf65e59",
+          "bytes": 58558
+        }
+      ],
+      "temporary_asset_urls": "omitted; original response retained only in temporary working evidence"
+    },
+    {
+      "context": "figma-1762-629.json",
+      "images": [
+        {
+          "type": "image",
+          "mimeType": "image/png",
+          "local_path": "figma-1762-629-render-1.png",
+          "sha256": "99595159de90492b7e6f8aaeb8e97e821b68380f762870d4b84511be61b22d92",
+          "bytes": 12983
+        }
+      ],
+      "temporary_asset_urls": "omitted; original response retained only in temporary working evidence"
+    },
+    {
+      "context": "figma-1764-828.json",
+      "images": [
+        {
+          "type": "image",
+          "mimeType": "image/png",
+          "local_path": "figma-1764-828-render-1.png",
+          "sha256": "06d28c5ba8a1817ffc11707fc6194212600d15860e21acb6e1bb1f9a20e81efe",
+          "bytes": 60309
+        }
+      ],
+      "temporary_asset_urls": "omitted; original response retained only in temporary working evidence"
+    },
+    {
+      "context": "figma-1783-687.json",
+      "images": [
+        {
+          "type": "image",
+          "mimeType": "image/png",
+          "local_path": "figma-1783-687-render-1.png",
+          "sha256": "d2c2447576d478b0fda86fc6c50efd50dfdb35c2141cccea87adbf4007b4d3f3",
+          "bytes": 13814
+        }
+      ],
+      "temporary_asset_urls": "omitted; original response retained only in temporary working evidence"
+    },
+    {
+      "context": "figma-operation-icons.json",
+      "images": [
+        {
+          "type": "image",
+          "mimeType": "image/png",
+          "local_path": "figma-operation-icons-render-1.png",
+          "sha256": "c3822e83ecfd9f580cdbf6fc7a7d1e1ef028c716d3d4a6fd15cae1cacdf7c659",
+          "bytes": 253
+        },
+        {
+          "type": "image",
+          "mimeType": "image/png",
+          "local_path": "figma-operation-icons-render-2.png",
+          "sha256": "e7ad77ebe5822f98eee0ecd0223f0765672d3b0c48d5acf32adf4dedd7d9d138",
+          "bytes": 287
+        },
+        {
+          "type": "image",
+          "mimeType": "image/png",
+          "local_path": "figma-operation-icons-render-3.png",
+          "sha256": "fe2be508853dc5325e12af4524dd988bca4b6fc3858adfd5484f88e8286f3563",
+          "bytes": 270
+        },
+        {
+          "type": "image",
+          "mimeType": "image/png",
+          "local_path": "figma-operation-icons-render-4.png",
+          "sha256": "3db66a885f5c8949a0d5f095b5d7139346feee046b304f170217506a550ef4fb",
+          "bytes": 198
+        },
+        {
+          "type": "image",
+          "mimeType": "image/png",
+          "local_path": "figma-operation-icons-render-5.png",
+          "sha256": "f0a47db0417118a9aff4c595d79404f5b4efb1a14ec86bced83212adbd8ba4cf",
+          "bytes": 335
+        },
+        {
+          "type": "image",
+          "mimeType": "image/png",
+          "local_path": "figma-operation-icons-render-6.png",
+          "sha256": "3095862494ef893cf875457e03f2c25e9e3699b5f6d011055e9fa71a1956d9df",
+          "bytes": 317
+        }
+      ],
+      "temporary_asset_urls": "omitted; original response retained only in temporary working evidence"
+    }
+  ],
+  "additional_text_asset_urls_redacted": [
+    "figma-1762-629.txt",
+    "figma-1783-687.txt",
+    "figma-1705-1461.txt",
+    "figma-1764-828.txt"
+  ]
+}

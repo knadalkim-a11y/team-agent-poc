@@ -206,8 +206,12 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.click('.ew-job-method [name=mode][value=human]')
             self.key('ArrowRight', 39)
             self.wait("document.querySelector('.ew-job-method [value=tool]')?.checked")
-            self.assertIn('도구 연결 전', self.text('.ew-job-main'))
-            self.assertFalse(self.browser.evaluate("!!document.querySelector('[name=result_confirmation],.ew-job-tool-output')"))
+            self.assertIn('도구를 연결하면 결과 확인 방식을 정할 수 있습니다.', self.text('.ew-job-main'))
+            self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('[name=result_confirmation]')].map(e=>({value:e.value,checked:e.checked,disabled:e.disabled}))"), [
+                {'value': 'manual', 'checked': True, 'disabled': True},
+                {'value': 'automatic', 'checked': False, 'disabled': True},
+            ])
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('[name=completion_rule],.ew-job-tool-output')"))
             capture('c66-b3-tool-unconnected-' + str(width))
             self.open_job_tool_setup('shared:managed-search_pages')
             self.job_tool_value('query', '취소할 검색어')
@@ -215,7 +219,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.key('Escape', 27)
             self.wait("!document.querySelector('#ees-work-dialog') && document.activeElement?.matches('[data-author-action=job_tool_setup]')")
             self.assertEqual(self.state(workflow_id=key)['workflow'], before)
-            self.assertIn('도구 연결 전', self.text('.ew-job-main'))
+            self.assertIn('도구를 연결하면 결과 확인 방식을 정할 수 있습니다.', self.text('.ew-job-main'))
             # Native keyboard activation opens the actual modal; its focus and
             # Escape return contract replace the retired details picker.
             for key_name, key_code in (('Enter', 13), (' ', 32)):
@@ -287,6 +291,11 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             unavailable = '도구 확인 필요 · 관리자에게 입력·결과와 연결 설정 확인을 요청하세요.'
             self.wait("document.querySelector('.ew-job-tool-state')?.textContent.includes(" + json.dumps(unavailable) + ")")
             self.assertIn(unavailable, self.text('.ew-job-tool-state'))
+            self.assertEqual(self.text('.ew-job-tool-state strong'), '지금은 이 작업을 실행할 수 없습니다')
+            notice_geometry = self.browser.evaluate("""(()=>{const name=document.querySelector('.ew-job-tool-name'),notice=document.querySelector('.ew-job-tool-state'),values=document.querySelector('.ew-job-values'),icon=notice.querySelector('img'),r=icon.getBoundingClientRect();return {ordered:name.getBoundingClientRect().bottom<=notice.getBoundingClientRect().top&&notice.getBoundingClientRect().bottom<values.getBoundingClientRect().top,icon:{src:icon.getAttribute('src'),width:r.width,height:r.height,loaded:icon.complete&&icon.naturalWidth>0}}})()""")
+            self.assertTrue(notice_geometry['ordered'], notice_geometry)
+            self.assertTrue(notice_geometry['icon']['src'].endswith('/676c3.svg'), notice_geometry)
+            self.assertEqual({key: notice_geometry['icon'][key] for key in ('width', 'height', 'loaded')}, {'width': 16, 'height': 16, 'loaded': True})
             self.assertTrue(self.read('.ew-job-tool-state [data-author-action=shared_open]', 'checkVisibility()'))
             self.assertIn('설치 가이드', self.text('.ew-job-main'))
             capture('c66-b3-tool-review-required-' + str(width))

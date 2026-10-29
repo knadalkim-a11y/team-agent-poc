@@ -1,0 +1,191 @@
+{
+  "label": "operations31-overview-factory-a-1920",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "panel": {
+    "x": 1440,
+    "y": 0,
+    "width": 480,
+    "height": 1080
+  },
+  "bodyOverflow": 0,
+  "panelOverflow": 0,
+  "text": "업무\n배포 산출물 점검\n주기\n수시 · 예약 없음\n적용 대상\n공장 A · EMS\n업무 단계\n1차 점검\n작업 12개",
+  "stageDivider": {
+    "borderBottomWidth": "0px",
+    "borderRadius": "6px",
+    "overflow": "hidden",
+    "afterHeight": "1px",
+    "afterBottom": "0px",
+    "afterColor": "rgb(230, 230, 233)",
+    "afterContent": "\"\""
+  },
+  "geometry": {
+    ".ew-panel-header": {
+      "x": 1,
+      "y": 0,
+      "width": 479,
+      "height": 48,
+      "fontSize": "14px",
+      "lineHeight": "20px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "업무"
+    },
+    ".ew-operation-overview": {
+      "x": 1,
+      "y": 48,
+      "width": 479,
+      "height": 257,
+      "fontSize": "14px",
+      "lineHeight": "22px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "배포 산출물 점검\n주기\n수시 · 예약 없음\n적용 대상\n공장 A · EMS\n업무 단계\n1차 점검\n작업 12개"
+    },
+    ".ew-operation-overview h2": {
+      "x": 21,
+      "y": 68,
+      "width": 439,
+      "height": 28,
+      "fontSize": "20px",
+      "lineHeight": "28px",
+      "fontWeight": "700",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "배포 산출물 점검"
+    },
+    ".ew-operation-context": {
+      "x": 21,
+      "y": 116,
+      "width": 439,
+      "height": 46,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "주기\n수시 · 예약 없음\n적용 대상\n공장 A · EMS"
+    },
+    ".ew-operation-context dt": {
+      "x": 21,
+      "y": 116,
+      "width": 68,
+      "height": 20,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "fontWeight": "400",
+      "color": "rgb(111, 113, 122)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "주기"
+    },
+    ".ew-operation-context dd": {
+      "x": 101,
+      "y": 116,
+      "width": 359,
+      "height": 20,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "수시 · 예약 없음"
+    },
+    ".ew-operation-stages": {
+      "x": 21,
+      "y": 186,
+      "width": 439,
+      "height": 99,
+      "fontSize": "14px",
+      "lineHeight": "22px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "업무 단계\n1차 점검\n작업 12개"
+    },
+    ".ew-operation-stage": {
+      "x": 21,
+      "y": 214,
+      "width": 439,
+      "height": 71,
+      "fontSize": "14px",
+      "lineHeight": "22px",
+      "fontWeight": "500",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "6px",
+      "text": ""
+    },
+    ".ew-vd-head": null,
+    ".ew-tabs": null,
+    ".ew-vd-label": null,
+    ".ew-vd-item": null,
+    ".ew-vd-note textarea": null,
+    ".ew-vd-note small": null,
+    ".ew-vd-selection-record": null,
+    ".ew-author>header": null,
+    ".ew-author-definition-head": null,
+    ".ew-author-tabs": null,
+    ".ew-job-detail-header": null,
+    "#ew-author-node [name=name]": null,
+    ".ew-job-method": null,
+    "#ew-author-node [name=job_guidance]": null,
+    "#ew-author-node [name=result_block]": null,
+    "#ew-author-node [name=completion_rule]": null,
+    "#ew-author-node [name=assignee]": null,
+    ".ew-author>footer": null,
+    ".ew-job-tool-state": null,
+    ".ew-job-tool-state img": null,
+    ".ew-job-result-confirmation": null,
+    ".ew-job-tool-summary": null
+  },
+  "images": [
+    {
+      "src": "/_ees14/v4/7bb4a.svg",
+      "naturalWidth": 16,
+      "naturalHeight": 16,
+      "box": {
+        "x": 447,
+        "y": 16.5,
+        "width": 14,
+        "height": 14,
+        "fontSize": "12px",
+        "lineHeight": "20px",
+        "fontWeight": "400",
+        "color": "rgb(31, 32, 35)",
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "text": ""
+      }
+    },
+    {
+      "src": "/_ees14/v4/69549.svg",
+      "naturalWidth": 14,
+      "naturalHeight": 14,
+      "box": {
+        "x": 446,
+        "y": 242,
+        "width": 14,
+        "height": 14,
+        "fontSize": "14px",
+        "lineHeight": "22px",
+        "fontWeight": "500",
+        "color": "rgb(31, 32, 35)",
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "text": ""
+      }
+    }
+  ]
+}

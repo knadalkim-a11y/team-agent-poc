@@ -1,0 +1,40 @@
+{
+  "tests": [
+    "test_operations31_saved_reason_reference_state",
+    "test_operations31_preexecution_navigation_creates_no_run_or_attempt",
+    "test_operations31_reason_draft_is_private_and_saved_with_explicit_verdict",
+    "test_operations_stage_actual_jobs_header_and_judgment_menu_at_two_widths",
+    "test_operations_stage_actual_tool_evidence_retry_and_scope_execution",
+    "test_c66_job_methods_arguments_d5_and_read_only_at_480_and_1366"
+  ],
+  "testsRun": 6,
+  "success": true,
+  "failures": [],
+  "errors": [],
+  "base_commit": "6ac4c1062a6c83d2d1429d0120cc5179d5dc508d",
+  "working_tree_modified": true,
+  "source_hashes": {
+    "branding/ees/ui/ees-work-launcher.js": "2ceb2fbbf58025e7bfdcca23bb7e21395080090c2261ffbe91c75392b1e48c11",
+    "branding/ees/ui/ees-work-view.js": "51c6aa5b9ba56341f8d2c05187afc33879c2302bdd8d7400ab12d5e14ea9d682",
+    "branding/ees/ui/ees-work-designer.js": "ba210b224e27df461c4660a7ee1ef9af58731ac23a5318c43dd2b2b33d798698",
+    "branding/ees/ui/ees-work-launcher.css": "3ce5b34702e5795981dd17d8cec4fb7fd16739548c6e9379d47c27bf8ce699ee",
+    "tests/test_ees_work_figma_runtime_native.py": "5752462eaf004be5dfac45f0ca300eb7e2dc244e54e1928f0050c010bb7e3b34",
+    "tests/test_ees_work_figma_authoring_native.py": "27935a395ecc800eacfa93b16e0e835df83f0892e6a2534944aa94926581e58b",
+    "tests/ees_work_integrated_fixture.py": "3143b47d526bc1e89f495964ca01e9bd1923eb98968dec09036e597bc6f60e8c",
+    "evals/artifacts/operations31-authoring12-parity-20261030/runtime/capture-parity.py": "f376b7000b88fa7194d241863b6728bac17f75a2734e6f9a467db1bda87c3ff7"
+  },
+  "source_unchanged_during_run": true,
+  "built_ui_hashes": {
+    "branding/ees/ui/ees-work-launcher.js": "2ceb2fbbf58025e7bfdcca23bb7e21395080090c2261ffbe91c75392b1e48c11",
+    "branding/ees/ui/ees-work-view.js": "51c6aa5b9ba56341f8d2c05187afc33879c2302bdd8d7400ab12d5e14ea9d682",
+    "branding/ees/ui/ees-work-designer.js": "ba210b224e27df461c4660a7ee1ef9af58731ac23a5318c43dd2b2b33d798698",
+    "branding/ees/ui/ees-work-launcher.css": "3ce5b34702e5795981dd17d8cec4fb7fd16739548c6e9379d47c27bf8ce699ee"
+  },
+  "wheel": {
+    "filename": "open_webui-0.11.3+ees.14-py3-none-any.whl",
+    "sha256": "cfe23f087d229097fca3168918b2a55f83ea4e2468b281039d08f65b458c5bf6",
+    "size": 152172048
+  },
+  "branding_manifest_sha256": "6cc829864c7990e81357f550e277fa13da686b2f4b79543d382b5825ce6bd284",
+  "scope": "Actual built Native frontend and production workflow service/SQLite; synthetic authentication, tool metadata and external transports. No product DOM substitutions."
+}

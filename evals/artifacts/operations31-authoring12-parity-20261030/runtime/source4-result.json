@@ -1,0 +1,45 @@
+{
+  "base_commit": "6ac4c1062a6c83d2d1429d0120cc5179d5dc508d",
+  "working_tree_modified": true,
+  "wheel": {
+    "filename": "open_webui-0.11.3+ees.14-py3-none-any.whl",
+    "sha256": "cfe23f087d229097fca3168918b2a55f83ea4e2468b281039d08f65b458c5bf6",
+    "size": 152172048
+  },
+  "source_hashes": {
+    "branding/ees/ui/ees-work-launcher.js": "2ceb2fbbf58025e7bfdcca23bb7e21395080090c2261ffbe91c75392b1e48c11",
+    "branding/ees/ui/ees-work-view.js": "51c6aa5b9ba56341f8d2c05187afc33879c2302bdd8d7400ab12d5e14ea9d682",
+    "branding/ees/ui/ees-work-designer.js": "ba210b224e27df461c4660a7ee1ef9af58731ac23a5318c43dd2b2b33d798698",
+    "branding/ees/ui/ees-work-launcher.css": "3ce5b34702e5795981dd17d8cec4fb7fd16739548c6e9379d47c27bf8ce699ee"
+  },
+  "core": {
+    "tests": 6,
+    "success": true,
+    "seconds": 33.987
+  },
+  "complete_native": {
+    "status": "passed",
+    "steps": 22,
+    "screenshots": 35,
+    "gate_report_source_commit_means": "Base commit only; raw gate source_dirty=true. Exact tested UI hashes are above."
+  },
+  "affected_native": {
+    "tests": 22,
+    "first_passes": 21,
+    "first_failures": 1,
+    "failure": "closed_run expected a completed human row immediately after stage_open; source4 correctly groups completed humans. Existing readonly/retained completion assertions were not reached.",
+    "correction": "One physical stage_approved click before selecting job; existing assertions unchanged.",
+    "corrected_targeted_rerun": {
+      "tests": 1,
+      "success": true,
+      "seconds": 1.946
+    }
+  },
+  "visual_review": {
+    "remaining": [
+      "Overview rounded border arc differs from Figma clipped rectangular divider.",
+      "Global tertiary override yields secondary color in stage/author detail."
+    ],
+    "next": "Source5 CSS-only correction with core6 and explicit line/color assertions. No source5 Complete run claimed; source4 behavior evidence retained with unchanged JS hashes."
+  }
+}

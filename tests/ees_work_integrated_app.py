@@ -187,6 +187,22 @@ if(performance.now()>end)return resolve(null);requestAnimationFrame(check)}check
             self.browser.call('Input.dispatchKeyEvent',{'type':kind,'key':'a','code':'KeyA','windowsVirtualKeyCode':65,'modifiers':2})
         self.browser.call('Input.insertText',{'text':value})
 
+    def open_operation_stage(self):
+        """Follow the published overview's first stage through physical input."""
+        self.wait_work_ready(selector='.ew-operation-overview [data-action="stage_open"]')
+        self.click('.ew-operation-overview [data-action="stage_open"]')
+        self.wait_work_ready(selector='[data-action="stage_details"]')
+
+    def open_operation_start(self):
+        self.open_operation_stage()
+        self.click('.ew-stage-run-button[data-action="stage_start"]')
+        self.wait_work_ready(selector='#ees-work-start')
+
+    def open_operation_details(self):
+        self.open_operation_stage()
+        self.click('[data-action="stage_details"]')
+        self.wait_work_ready(selector='.ew-phase-overview')
+
     def select(self, selector, value):
         """Select an enabled Native option with keyboard input."""
         index=self.browser.evaluate('[...document.querySelector('+json.dumps(selector)+').options].filter(o=>!o.disabled).findIndex(o=>o.value==='+json.dumps(value)+')')
@@ -379,6 +395,7 @@ def integrated_flow(gate):
     g.record('physical validate and publish with legacy job-input fixture',workflow_id=identifier,version=1)
     g.click('[data-action="mode"][data-mode="work"]')
     g.click('[data-action="workflow"][data-workflow-id="'+identifier+'"]')
+    g.open_operation_start()
     g.wait('!!document.querySelector(".ew-adhoc-start")')
     g.type('#ees-work-start [name="evidence_note"]','개발용 시작 근거')
     g.capture('figma-a8-first-start')
@@ -805,14 +822,16 @@ def figma_delta_flow(g):
     assert not g.api('/api/ees-work/operations?system_id=EMS')['schedules']
     g.record('Figma B2-1 physical schedule preview and draft save',draft_revision=saved['revision'],published_version=1,reservation_created=False)
     g.click('[data-action="mode"][data-mode="work"]');g.click('[data-action="workflow"][data-workflow-id="'+workflow_id+'"]')
+    g.open_operation_start()
     g.click('[data-action="start_run"][data-start-inline]')
     g.wait('!!document.querySelector(\'[data-action="job"][data-job-id="qa-list"]\')')
     run_id=g.api('/api/ees-work/workspace?workflow_id='+workflow_id)['runs'][0]['id']
     # A single-stage run opens its stage first. Inspect that entry separately,
-    # then physically return to the full overview for the existing A5 checks.
+    # then physically open run details for the existing A5 checks.
     g.wait_work_ready(workflow_id=workflow_id,run_id=run_id,selector='[data-action="stage_back"]')
     g.capture('figma-stage-single-entry')
     g.click('[data-action="stage_back"]')
+    g.open_operation_details()
     g.wait_work_ready(workflow_id=workflow_id,run_id=run_id,selector='.ew-phase-job[data-job-id="qa-list"]')
     assets('figma-a5-cycle',{'a28e3.svg':13,'b22ad.svg':13,'69549.svg':14});g.capture('figma-a5-cycle-overview')
     g.click('[data-action="job"][data-job-id="qa-list"]');g.wait_work_ready(run_id=run_id,selector='[data-action="execute"]')
@@ -851,7 +870,7 @@ def figma_delta_flow(g):
     g.wait_work_ready(run_id=run_id);g.capture('figma-a6-list-confirmed')
     g.record('Figma A6 physical Native tool call list selection and atomic confirmation',attempts=3,original_result_preserved=True,confirmed_items=2)
 
-    g.click('[data-action="overview"]');g.click('[data-action="job"][data-job-id="qa-report"]')
+    g.click('[data-action="overview"]');g.open_operation_stage();g.click('[data-action="job"][data-job-id="qa-report"]')
     select_execution_model();g.click('[data-action="execute"]')
     g.wait('document.querySelector("#ees-review-text")?.value.includes("합성 AI 검토 원문")',20000)
     original_report=next(item for item in run_state()['attempts'] if item['job_id']=='qa-report')['result']
@@ -882,15 +901,16 @@ def figma_delta_flow(g):
     g.record('Figma A7 physical AI review autosave and explicit confirmation',completion_kind='review',actual_delivery=False,
         original_result_preserved=True,autosave_confirmed=False,send_control_present=False,confirmed_text=text)
 
-    g.click('[data-action="overview"]');g.click('[data-action="close_run"]');g.click('#ees-work-dialog [data-dialog-confirm]')
+    g.click('[data-action="overview"]');g.open_operation_details();g.click('[data-action="close_run"]');g.click('#ees-work-dialog [data-dialog-confirm]')
     closed=settle_server(lambda value:value['status']=='completed','Run closure missing')
     command('save_settings',1,workflow_id=workflow_id,values={'project':'AFTER-SYNTHETIC'})
     history_chat_id=next(item['chat_id'] for item in g.report['steps'] if item['name']=='Native physical send and storage reload')
     previous_chat=g.api('/api/v1/chats/'+history_chat_id)['chat'];expected_messages=len(previous_chat['history']['messages'])+2
     g.navigate('/c/'+history_chat_id);g.wait_work_ready();g.click('[data-action="records"]')
-    g.click('[data-action="open_run"][data-run-id="'+run_id+'"]');g.click('[data-action="workflow_records"]')
+    g.click('[data-action="open_run"][data-run-id="'+run_id+'"]');g.open_operation_details();g.click('[data-action="workflow_records"]')
     g.wait_work_ready();assets('figma-s2-filter',{'6d84b.svg':11});g.capture('figma-s2-filtered-records')
     g.click('[data-action="open_run"][data-run-id="'+run_id+'"]')
+    g.open_operation_details()
     historical_selector='.ew-history[data-key="history-'+original['id']+'"]'
     g.wait_work_ready(run_id=run_id,selector=historical_selector+' summary');g.click(historical_selector+' summary')
     historical_values=json.dumps(historical_selector+'[open] .ew-history-values')
@@ -978,6 +998,7 @@ def figma_delta_flow(g):
     assert g.api('/api/ees-work/workspace?workflow_id='+delivery_id)['workflow']['published_version']==1
     g.record('Figma B2-3 delivery recommendation permits physical publish',recommendations=len(advisory['warnings']),external_delivery=False)
     g.click('[data-action="mode"][data-mode="work"]');g.click('[data-action="workflow"][data-workflow-id="'+delivery_id+'"]')
+    g.open_operation_start()
     g.select('#ees-start-factory',factory_id)
     g.capture('figma-a8-factory-ready')
     g.click('[data-action="start_run"][data-start-inline]')
@@ -994,15 +1015,16 @@ def figma_delta_flow(g):
     assert delivery_attempt['result']['sent'] is False and delivery_attempt['review_history'][-1]['decision_id']
     assert g.browser.evaluate('document.querySelector(\'[data-action="send_review_draft"]\')?.disabled')
     g.capture('figma-a7-delivery-reviewed-still-blocked')
-    g.click('[data-action="overview"]');g.click('[data-action="close_run"]');g.click('#ees-work-dialog [data-dialog-confirm]')
+    g.click('[data-action="overview"]');g.open_operation_details();g.click('[data-action="close_run"]');g.click('#ees-work-dialog [data-dialog-confirm]')
     g.wait('document.querySelector("#ees-work-panel")?.innerText.includes("필수 작업의 판정")')
     assert g.api('/api/ees-work/workspace?run_id='+delivery_run_id)['run']==blocked
     g.record('Figma A7 delivery purpose review cannot close or claim sent',completion_kind='delivery',human_review_saved=True,
         business_status='blocked',reason='delivery_unconfigured',actual_delivery=False)
     assert blocked['factory_id']==factory_id
     g.click('[data-action="workflow"][data-workflow-id="'+delivery_id+'"]')
-    # Navigation first paints the cached pre-start overview. Its empty active
-    # list already exists before workspace/operations refresh completes. Wait
+    g.open_operation_start()
+    # The explicit start form can use the cached pre-start workspace before
+    # workspace/operations refresh completes. Wait
     # for this known server run to reach the UI, then independently verify the
     # factory option and start action are disabled; never manufacture either.
     g.wait('document.querySelector(\'.ew-active-runs [data-run-id="'+delivery_run_id+'"]\')?.getClientRects().length>0')

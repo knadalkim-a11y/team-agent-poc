@@ -1,0 +1,189 @@
+{
+  "dateKST": "2026-10-30",
+  "runtime": "runtime/ unprefixed originals; source5 normal pinned frontend build",
+  "sourceHashes": {
+    "branding/ees/ui/ees-work-launcher.js": "2ceb2fbbf58025e7bfdcca23bb7e21395080090c2261ffbe91c75392b1e48c11",
+    "branding/ees/ui/ees-work-view.js": "51c6aa5b9ba56341f8d2c05187afc33879c2302bdd8d7400ab12d5e14ea9d682",
+    "branding/ees/ui/ees-work-designer.js": "ba210b224e27df461c4660a7ee1ef9af58731ac23a5318c43dd2b2b33d798698",
+    "branding/ees/ui/ees-work-launcher.css": "b40873cdf3b878d02190bf3bc1692de196669115a51abd761534e8cfa347d041"
+  },
+  "status": "Final5 independent visual review complete. Previously identified divider and tertiary-color discrepancies are corrected. No further fixed-layout styling discrepancy observed in these three inspected states. This is not whole-image identity.",
+  "originalPairsInspected": 3,
+  "productChangedByReviewer": false,
+  "history": "operations-final4-visual-review.json",
+  "comparisonBoundary": {
+    "figmaOverviewPrerunWidth": 479,
+    "nativePanelWidth": 480,
+    "nativeLeftBoundaryWidth": 1,
+    "nativeInnerArea": {
+      "x": 1,
+      "width": 479
+    },
+    "normalization": "Subtract the separately existing native left border (1px) from raw content x for overview/prerun comparison. Native x21 maps to Figma x20, same439px content width. No PNG was cropped, resized or altered. Reason reference already480px; compare its raw measurements."
+  },
+  "overview": {
+    "title": {
+      "x": 21,
+      "y": 68,
+      "width": 439,
+      "height": 28,
+      "fontSize": "20px",
+      "lineHeight": "28px",
+      "fontWeight": "700",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "배포 산출물 점검"
+    },
+    "metadata": {
+      "x": 21,
+      "y": 116,
+      "width": 439,
+      "height": 46,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "주기\n수시 · 예약 없음\n적용 대상\n공장 A · EMS"
+    },
+    "labelColor": "rgb(111, 113, 122)",
+    "stageRow": {
+      "x": 21,
+      "y": 214,
+      "width": 439,
+      "height": 71,
+      "fontSize": "14px",
+      "lineHeight": "22px",
+      "fontWeight": "500",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "6px",
+      "text": ""
+    },
+    "divider": {
+      "borderBottomWidth": "0px",
+      "borderRadius": "6px",
+      "overflow": "hidden",
+      "afterHeight": "1px",
+      "afterBottom": "0px",
+      "afterColor": "rgb(230, 230, 233)",
+      "afterContent": "\"\""
+    },
+    "result": "439×71 row matches, absolute1px divider is clipped by radius6 as Figma. Scoped tertiary text matches #6f717a."
+  },
+  "prerun": {
+    "head": {
+      "x": 1,
+      "y": 48,
+      "width": 479,
+      "height": 162,
+      "fontSize": "14px",
+      "lineHeight": "22px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 실행 완료 0/9"
+    },
+    "tabs": {
+      "x": 1,
+      "y": 230,
+      "width": 479,
+      "height": 33,
+      "fontSize": "14px",
+      "lineHeight": "22px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "작업\n기록\n기준"
+    },
+    "group": {
+      "x": 9,
+      "y": 279,
+      "width": 463,
+      "height": 36,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "fontWeight": "700",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgb(243, 243, 245)",
+      "borderRadius": "6px",
+      "text": "대기\n12"
+    },
+    "job": {
+      "x": 9,
+      "y": 315,
+      "width": 463,
+      "height": 76,
+      "fontSize": "14px",
+      "lineHeight": "22px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "8px",
+      "text": "로그인 화면 문구 수정\n실행\n자동 판정\n실행 필요"
+    },
+    "result": "Group36px and job76px, header/summary/tabs positions preserved after native border normalization."
+  },
+  "reason": {
+    "selection": {
+      "x": 34,
+      "y": 883,
+      "width": 413,
+      "height": 43,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "fontWeight": "400",
+      "color": "rgb(92, 94, 101)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "승인 선택\nFixture Administrator · 2026. 10. 29. 19:00"
+    },
+    "textarea": {
+      "x": 34,
+      "y": 964,
+      "width": 413,
+      "height": 66,
+      "fontSize": "13px",
+      "lineHeight": "18px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgb(255, 255, 255)",
+      "borderRadius": "6px",
+      "text": "배치 주기 변경 내용을 확인했습니다."
+    },
+    "optionalLabel": {
+      "x": 61.875,
+      "y": 939,
+      "width": 29.84375,
+      "height": 17,
+      "fontSize": "12px",
+      "lineHeight": "18px",
+      "fontWeight": "400",
+      "color": "rgb(111, 113, 122)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "(선택)"
+    },
+    "result": "Selection(34,883,413,43) and textarea(34,964,413,66) match exact Figma raw geometry. Single approved group and count2 visible. Focus outline visually aligned."
+  },
+  "dynamicDifferences": [
+    "Pre-run actual automatic summary is 자동 실행 완료0/9; Figma example 자동 판정 완료0/9 with approval counts. Runtime execution is not a fabricated approval record.",
+    "Reason actual tool badge is 실행 실패 versus Figma 미승인, reflecting actual execution failure. Actual actor/time are fixture data.",
+    "Authoring unavailable notice/schema differences and downstream57.796875px offset are documented in workflow-visual-check.json; not claimed identical."
+  ],
+  "verificationScope": {
+    "source5CoreNative": {
+      "tests": 6,
+      "success": true,
+      "seconds": 33.453,
+      "result": "core-result.json",
+      "log": "core.log"
+    },
+    "source4BroaderFunctional": "Source4 affected22/Complete22 recorded separately; source5 scoped CSS only, not falsely labeled rerun."
+  },
+  "freeze": true
+}

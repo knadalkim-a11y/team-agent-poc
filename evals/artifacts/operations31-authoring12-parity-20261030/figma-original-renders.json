@@ -1,0 +1,43 @@
+{
+  "date_kst": "2026-10-30",
+  "file_key": "XK2wTos6sEuxSHhIj7cqg6",
+  "session_id": "b06a5016-3736-46fb-aed7-7743d8ffa95d",
+  "method": "Read-only node.screenshot({scale:1}); original returned PNG bytes, no image edits or resizing.",
+  "images": [
+    {
+      "node_id": "1762:629",
+      "path": "operations-overview-figma.png",
+      "width": 479,
+      "height": 1080,
+      "sha256": "e082729be0e919faa284c2ea6e27fd436ccbdef3e4823bbe824974912bd70455"
+    },
+    {
+      "node_id": "1764:828",
+      "path": "operations-prerun-figma.png",
+      "width": 479,
+      "height": 1080,
+      "sha256": "ce7a7780f6a87eff125e443f533743f997dd440b7df93c3351141de7f566bea5"
+    },
+    {
+      "node_id": "1705:1461",
+      "path": "operations-reason-figma.png",
+      "width": 480,
+      "height": 1080,
+      "sha256": "60afdb90f63b2b7228db1996098dcc3d6e034991339dfe24dcf0f593c69bed8f"
+    },
+    {
+      "node_id": "1846:3456",
+      "path": "workflow-unconnected-figma-original.png",
+      "width": 480,
+      "height": 918,
+      "sha256": "91c4778e2dcbe9a738b6b6ea8312cd70875256feab45f43577f6e07e75d210db"
+    },
+    {
+      "node_id": "1846:3548",
+      "path": "workflow-unavailable-figma-original.png",
+      "width": 480,
+      "height": 1186,
+      "sha256": "eaed5f5f3b76d002d6687aa29e7b3a8a818af79da610ed408ca5d2b5101575f7"
+    }
+  ]
+}

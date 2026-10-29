@@ -1,0 +1,24 @@
+--- source4/ees-work-launcher.css
++++ source5/ees-work-launcher.css
+@@ -884,5 +884,5 @@
+  * opt in only on the focused task panel with #ees-work-panel.ew-vd. */
+ #ees-work-panel.ew-vd #ees-work-content.ew-vd-padding-reset{padding:0;}
+-#ees-work-panel.ew-vd{background:var(--ees-surface-sidebar)}
++#ees-work-panel.ew-vd{--ees-text-tertiary:#6f717a;background:var(--ees-surface-sidebar)}
+ #ees-work-panel.ew-vd>.ew-panel-header.ew-run-nav{gap:2px;padding:0 10px 0 8px}
+ #ees-work-panel.ew-vd .ew-run-nav>span{flex:1}
+@@ -1040,5 +1040,6 @@
+ #ees-work-panel.ew-vd .ew-operation-stages{margin:0;}
+ #ees-work-panel.ew-vd .ew-operation-stages>h3{height:28px;margin:0;font-size:14px;font-weight:700;line-height:20px;color:var(--ees-text-primary);}
+-#ees-work-panel.ew-vd .ew-operation-stage{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;min-height:71px;padding:12px 0;border:0;border-bottom:1px solid var(--ees-line-divider);border-radius:6px;background:transparent;text-align:left;}
++#ees-work-panel.ew-vd .ew-operation-stage{position:relative;display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;min-height:71px;padding:12px 0 13px;overflow:hidden;border:0;border-radius:6px;background:transparent;text-align:left;}
++#ees-work-panel.ew-vd .ew-operation-stage::after{position:absolute;bottom:0;left:0;width:100%;height:1px;background:var(--ees-line-divider);content:"";}
+ #ees-work-panel.ew-vd .ew-operation-stage>span{display:grid;flex:1;min-width:0;gap:4px;}
+ #ees-work-panel.ew-vd .ew-operation-stage strong{font-size:15px;font-weight:500;line-height:22px;color:var(--ees-text-primary);}
+@@ -1153,5 +1154,5 @@
+ #ees-work-designer:not([data-author-tab=tools]) .ew-summary-actions>button{font-size:12px;min-height:0;padding:6px 11px;}
+ /* Job detail: same plane as stages, with intentional borders only on controls. */
+-#ees-work-designer:not([data-author-tab=tools]) .ew-job-detail{gap:0;margin-top:24px;}
++#ees-work-designer:not([data-author-tab=tools]) .ew-job-detail{--ees-text-tertiary:#6f717a;gap:0;margin-top:24px;}
+ #ees-work-designer:not([data-author-tab=tools]) .ew-job-detail-header{gap:6px;min-height:30px;margin-bottom:24px;font-size:12px;line-height:18px;color:var(--ees-text-tertiary);}
+ #ees-work-designer:not([data-author-tab=tools]) .ew-job-field-label{display:inline;font-size:12px;line-height:18px;font-weight:500;}
