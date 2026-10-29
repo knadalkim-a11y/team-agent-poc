@@ -22,6 +22,18 @@ from test_ees_helper_chat_native import install_helper_status_fixture
 
 
 class FigmaAuthoringNativeTests(IntegratedNativeCase):
+    def open_initialized_author_list(self):
+        # First author entry creates the default procedures and reorders the
+        # list. Finish that preparation before adding/selecting fixture rows.
+        self.click('[data-action=mode][data-mode=author]')
+        prepared = self.refresh()
+        self.assertTrue(prepared and prepared['initial_procedures_ready'], prepared)
+        self.wait("document.querySelector('.ew-author-list,[data-author-action=list]')")
+        if self.browser.evaluate("!!document.querySelector('[data-author-action=list]')"):
+            self.click('[data-author-action=list]')
+        self.wait("JSON.stringify([...document.querySelectorAll('.ew-author-list [data-author-action=open]')].map(button=>button.dataset.id)) === JSON.stringify(" +
+                  json.dumps([workflow['id'] for workflow in prepared['workflows']]) + ")")
+
     def open_schedule_tools(self):
         if not self.read('.ew-procedure-menu', 'open'):
             self.click('.ew-procedure-menu > summary')
@@ -143,6 +155,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.navigate('/c/existing-chat')
             self.wait("document.querySelector('#ees-work-entry')")
             self.open_sidebar()
+            self.open_initialized_author_list()
             key = self.author(name='12판 작업 상세 ' + str(width), jobs=1)
             initial = self.state(workflow_id=key)['workflow']
             original = deepcopy(initial['draft'])
@@ -151,10 +164,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             original['nodes']['job-0'].update(inputs=[manual], description='별도로 작성한 설명',
                 deadline_notes='기존 기한 메모', completion={'rule': '필요한 자료가 맞는지 확인합니다.'})
             self.command('save_draft', workflow_id=key, expected_revision=initial['revision'], definition=original)
-            self.refresh(); self.click('[data-action=mode][data-mode=author]')
-            if self.browser.evaluate("!!document.querySelector('[data-author-action=list]')"):
-                self.click('[data-author-action=list]')
+            self.refresh()
             self.click('[data-author-action=open][data-id="' + key + '"]')
+            self.wait("window.__eesNativeWorkV1.captureReference().workflow_id === " + json.dumps(key))
+            self.assertEqual(self.text('.ew-author-definition-head h2'), '12판 작업 상세 ' + str(width))
             self.open_author_job_ui('job-0')
             self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
             self.wait('innerWidth===' + str(width))
@@ -328,6 +341,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.server.completions, [])
 
     def test_c66_factory_view_resets_in_job_detail_and_preserves_saved_values(self):
+        self.open_initialized_author_list()
         self.command('save_factory', factory_id='c66-factory', system_id='EMS', name='C66 합성 공장', attributes={})
         key = self.author(name='C66 공장 보기 보존', jobs=1)
         initial = self.state(workflow_id=key)['workflow']
@@ -337,10 +351,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.command('save_draft', workflow_id=key, expected_revision=initial['revision'], definition=original)
         self.command('save_settings', workflow_id=key, factory_id='c66-factory', values={'site-note': '이미 저장된 공장 값'})
         saved = deepcopy(self.state(workflow_id=key)['workflow'])
-        self.refresh(); self.click('[data-action=mode][data-mode=author]')
-        if self.browser.evaluate("!!document.querySelector('[data-author-action=list]')"):
-            self.click('[data-author-action=list]')
+        self.refresh()
         self.click('[data-author-action=open][data-id="' + key + '"]')
+        self.wait("window.__eesNativeWorkV1.captureReference().workflow_id === " + json.dumps(key))
+        self.assertEqual(self.text('.ew-author-definition-head h2'), 'C66 공장 보기 보존')
         self.wait("document.querySelector('[data-author-action=factory_settings]')")
         writes = len(self.server.workspace_commands)
         # Retain the historical C66 test ID. HTML 12 chooses the factory in the

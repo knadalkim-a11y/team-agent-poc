@@ -207,5 +207,42 @@
       "actionlint": "not installed; not run"
     },
     "final_ci": "PR108 current head checks required; no production source changes after fd0124e"
+  },
+  "ci398_observation": {
+    "run_id": 40796379294,
+    "head": "b7f1dd532bbc08d70ea873a33fc226a8c719b7ad",
+    "conclusion": "failure",
+    "jobs": {
+      "success": 36,
+      "failure": 2,
+      "cancelled": 1,
+      "skipped": 1
+    },
+    "independent_failure": "C66 job-method test tried to open its stage while the visible workflow was the default daily check, not the intended fixture workflow.",
+    "passed": [
+      "Windows platform/font",
+      "Windows contracts",
+      "factory480",
+      "copy focus",
+      "Complete Native product"
+    ],
+    "current_wheel_job": 123195815134,
+    "current_wheel_sha256": "e8fcc0556c5c9d43b2e639274b26639cdf188bcd7e14c1423d21335e75c77234",
+    "matches_actual_ui_qa": true,
+    "confirmed_setup_condition": "API fixture create/save/validate/publish leaves initial_procedures_ready false and one row; first author initialize adds three default workflows ahead of it, moving it from first to fourth.",
+    "unconfirmed_mechanism": "No mouse-event target trace was captured. A pre-initialization physical row coordinate becoming a different row is an inference, not a proven product response overwrite.",
+    "test_fix": "Exactly two C66 cases now enter author mode and await actual refresh ready flag plus rendered IDs in server order before adding fixture data. A single target click must produce the expected workflow ID and exact title.",
+    "unchanged": [
+      "Product JS fd0124e, CSS and Svelte patch",
+      "Physical clicks and individual timeouts",
+      "Existing saved-data, permission and480/1366 assertions",
+      "Other mode-entry tests already refreshed after the mode action"
+    ],
+    "local_checks": {
+      "python_ast": "passed",
+      "diff": "passed",
+      "initialization_service_regressions": 5,
+      "browser": "final CI required"
+    }
   }
 }
