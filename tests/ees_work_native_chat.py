@@ -303,7 +303,10 @@ def input_and_history_flow(g,key,chat_id):
     g.record('isolated existing job-input definition fixture',workflow_id=key,
              job_id=declared_job['id'],field=note_field,draft_revision=seeded['revision'],
              boundary='Actual authenticated save_draft; no input values, publication or execution seeded')
+    # Job detail returns to stages before the workflow-list navigation appears.
     # Reopen visibly so the browser reads the fixture revision before publishing.
+    g.click('[data-author-action=node][data-id=""]')
+    g.wait('document.querySelector(".ew-work-content")')
     g.click('[data-author-action=list]')
     g.click('[data-author-action=open][data-id="'+key+'"]')
     g.wait('document.querySelector("[data-author-status]")?.textContent.includes('
