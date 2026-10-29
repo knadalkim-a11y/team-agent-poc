@@ -81,13 +81,30 @@ class DesignMockBuildTests(unittest.TestCase):
         pages = sorted((ROOT / "docs/mockups/ees-work").glob("design-mock-*.html"))
         self.assertTrue(pages, "the checked-in design mock must be covered")
         for page in pages:
-            fonts = re.findall(r"data:font/woff2;base64,([A-Za-z0-9+/=]+)", page.read_text(encoding="utf-8"))
-            self.assertEqual(len(fonts), len(builder.FONT_FAMILIES), page.name)
-            for index, encoded in enumerate(fonts):
+            content = page.read_bytes()
+            expected_formats = ["woff2"] * len(builder.FONT_FAMILIES)
+            if page.name == "design-mock-08-workspace-authoring.html":
+                # This approved HTML12 was imported byte-for-byte, not generated
+                # by this builder: Inter is WOFF2 and Noto Sans KR is WOFF.
+                # Pin that exception without weakening the generated pages'
+                # two-WOFF2 contract or rewriting the accepted visual reference.
+                self.assertEqual(hashlib.sha256(content).hexdigest(),
+                                 "d2aec2a3cf61f09ceb3915c778ef77b5a07b559b9fb57f545eb16cb11973079e")
+                expected_formats = ["woff2", "woff"]
+            faces = re.findall(r"@font-face\s*\{[^}]*\}", content.decode("utf-8"))
+            self.assertEqual(len(faces), len(builder.FONT_FAMILIES), page.name)
+            for index, (face, family, expected) in enumerate(zip(faces, builder.FONT_FAMILIES.values(), expected_formats)):
                 with self.subTest(page=page.name, font=index):
+                    self.assertIn(f'font-family:"{family}"', face)
+                    self.assertIn(f'format("{expected}")', face)
+                    fonts = re.findall(r"data:font/(woff2?);base64,([A-Za-z0-9+/=]+)", face)
+                    self.assertEqual(len(fonts), 1)
+                    declared, encoded = fonts[0]
+                    self.assertEqual(declared, expected)
                     data = base64.b64decode(encoded, validate=True)
-                    self.assertGreaterEqual(len(data), 48)
-                    self.assertEqual(data[:4], b"wOF2", "CSS says WOFF2 but the bytes use a different format")
+                    self.assertGreaterEqual(len(data), 48 if expected == "woff2" else 44)
+                    self.assertEqual(data[:4], {"woff2": b"wOF2", "woff": b"wOFF"}[expected],
+                                     "CSS font format and embedded bytes differ")
                     self.assertEqual(struct.unpack_from(">I", data, 8)[0], len(data))
 
     def test_real_subset_keeps_requested_glyph_metrics_in_woff2(self):

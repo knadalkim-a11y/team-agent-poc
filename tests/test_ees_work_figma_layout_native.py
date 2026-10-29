@@ -151,8 +151,10 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
             'panel': '#ees-work-panel', 'author': '#ees-work-designer',
             'card': '.ew-author-list', 'input': '#ew-author-search',
             'chat': '#chat-container #chat-pane'}.items()}
-        self.assertEqual(observed, {'panel': 'rgb(243, 243, 245)', 'author': 'rgb(243, 243, 245)',
-            'card': 'rgb(255, 255, 255)', 'input': 'rgb(255, 255, 255)', 'chat': 'rgb(255, 255, 255)'})
+        # Approved HTML12 uses a #fafafa authoring canvas and flat list rows.
+        # The outer host, inputs, chat, hover and keyboard contracts stay intact.
+        self.assertEqual(observed, {'panel': 'rgb(243, 243, 245)', 'author': 'rgb(250, 250, 250)',
+            'card': 'rgba(0, 0, 0, 0)', 'input': 'rgb(255, 255, 255)', 'chat': 'rgb(255, 255, 255)'})
         hover('.ew-author-list>button', 'rgb(243, 243, 245)')
         observed['cardHover'] = background('.ew-author-list>button')
         self.assertEqual(observed['cardHover'], 'rgb(243, 243, 245)')

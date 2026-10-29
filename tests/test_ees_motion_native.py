@@ -367,6 +367,12 @@ class MotionNativeTests(IntegratedNativeCase):
         self.key('Escape', 27)
         self.wait("!document.querySelector('#ees-work-dialog')")
         self.assertFalse(self.read('.ees-panel-region', 'hidden'), 'Dialog Escape also closed its underlying panel')
+        # Choosing Copy closes the menu; its visible summary owns focus return.
+        self.wait("document.activeElement?.matches('.ew-procedure-menu > summary')")
+        self.activate()
+        self.wait("document.querySelector('.ew-procedure-menu')?.open")
+        self.key('Tab', 9)
+        self.key('Tab', 9)
         self.wait("document.activeElement?.matches('[data-author-action=copy]')")
         self.activate()
         self.wait("document.querySelector('#ees-work-dialog [name=name]')")

@@ -263,6 +263,15 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 self.assertIn('작업 위치', self.text('#ees-work-entry'))
                 self.assertAlmostEqual(self.read('.ees-panel-region', 'getBoundingClientRect().width'), 480, delta=1)
                 self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-ees-panel-resize]')"))
+            if variant == 'workspace-factory':
+                # The preceding keyboard loop can end on another enabled
+                # system. This search fixture has eight factories in EMS, so
+                # restore that scope through the real UI before checking it.
+                system_trigger, _ = self.scope_open('system')
+                self.click('[data-action=choose_system][data-system-id=EMS]')
+                self.scope_closed(system_trigger)
+                self.wait("document.querySelector('#ees-work-system-trigger')?.textContent.includes('EMS')")
+                self.assertIsNotNone(self.refresh())
             trigger, geometry = self.scope_open(kind)
             evidence[variant] = geometry
             self.screenshot('source-scope-' + variant)
@@ -430,7 +439,8 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 self.assertIn('저장된 진행 건이 없습니다.', self.text('#ees-work-panel'))
             elif unknown:
                 self.wait("document.querySelectorAll('[data-author-action=open]').length === 3")
-                self.assertIn('업무 절차 3개', self.text('#ees-work-designer'))
+                self.assertEqual(self.text('#ees-work-designer .ew-author-heading h2'), '워크플로우')
+                self.assertEqual(self.text('#ees-work-designer .ew-author-heading small'), '3개')
                 self.assertEqual(self.text('#ees-work-entry [data-action=procedures] small'), '3')
             labels.append(label)
             (unknown_labels if unknown else cached_labels).append(label)
@@ -766,7 +776,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         panels = {
             'tools': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '도구 · 공용'",
-            'procedures': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '업무 절차'",
+            'procedures': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '워크스페이스 · 워크플로우'",
             'workspace_admin': "document.querySelector('#ees-work-panel .ew-work-heading h2')?.textContent === '공장·접근 범위'",
             'my_work': "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '내 업무'",
         }

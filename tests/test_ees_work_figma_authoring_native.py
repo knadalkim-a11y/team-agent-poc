@@ -368,7 +368,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertLessEqual(self.browser.evaluate("document.querySelector('.ew-author-scroll').scrollWidth-document.querySelector('.ew-author-scroll').clientWidth"), 1)
             self.click('[data-author-action=node][data-id=""]')
             self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-author-factories')"))
-            self.assertIn('C66 합성 공장', self.text('#ees-work-site-trigger'))
+            # Compact HTML12 navigation hides the label while retaining the
+            # selected factory in its DOM; the settings values above also
+            # verify that this context still addresses the same factory.
+            self.assertIn('C66 합성 공장', self.read('#ees-work-site-trigger', 'textContent'))
             self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=node][data-id=job-0]')"))
             self.screenshot('c66-stage-factory-context-preserved-' + str(width))
         self.open_sidebar()
@@ -952,8 +955,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.click('[data-author-action=help][data-id=stages_and_jobs]')
             self.wait("document.querySelector('#ees-work-help')")
             self.assertIn('단계는 작업을 묶는 이름입니다. 개수·이름·순서는 업무에 맞게 정합니다.', self.text('#ees-work-help'))
-            self.assertIn('단계 순서는 화면에 보이는 순서입니다.', self.text('#ees-work-help'))
-            self.assertIn('먼저 끝나야 하는 작업은 작업 상세의 ‘앞 작업’에서 정합니다.', self.text('#ees-work-help'))
+            self.assertIn('단계와 작업은 적힌 순서대로 진행합니다.', self.text('#ees-work-help'))
+            self.assertIn('기존에 정한 적용 조건과 작업 연결은 유지됩니다.', self.text('#ees-work-help'))
             capture('e1-example10-stage-help-' + str(width))
             self.key('Escape', 27)
             self.click('[data-author-action=stage_toggle][data-id=stage-0]')

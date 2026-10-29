@@ -831,7 +831,11 @@ function createWorkDesigner({callbacks}) {
     else if(action==='start_input_delete'){const root=nodes(editor).find(node=>node.type==='p'),field=root?.inputs?.find(input=>input.id===target.dataset.id);if(field&&await confirmDialog({title:'시작 입력을 삭제할까요?',html:`<p>${esc(field.name || field.id)} 입력 선언을 초안에서 삭제합니다. 기존 진행 건과 기록은 유지하며 남은 참조는 게시 전 확인에서 검사합니다.</p>`,confirmLabel:'입력 삭제'})){root.inputs=root.inputs.filter(input=>input.id!==field.id);dirty=true;stash();paint();}}
     else if(action==='compare')await compare();else if(action==='create')await create();else if(action==='procedure_create')await createProcedure();else if(action==='edit_workflow')await editWorkflow();else if(action==='save')await command(actions.save,{definition:clone(editor)});else if(action==='validate'){if(dirty){error='초안을 저장한 뒤 게시 전 확인을 해 주세요.';paint();return;}await command(actions.validate);}
     else if(action==='publish'){if(dirty||!validRevision())return;const accepted=await confirmDialog({title:'새 버전으로 게시할까요?',html:`<p>${esc(editor.name || record.name)} · 저장 초안 r${revision}</p><p>이 버전은 보존되며 새 진행 건부터 사용합니다. 기존 진행 건은 바뀌지 않습니다.</p>`,confirmLabel:'새 버전 게시'});if(accepted)await command(actions.publish);}
-    else if(action==='copy'){const value=await formDialog('다른 이름으로 저장',textInput('name','절차 이름',(editor.name || record.name)+' 복사','required maxlength="160"')+`<p class="ew-author-note">저장 위치 · ${esc(selection.system_id)}<br>저장된 초안의 정의만 복사합니다. 미저장 변경·게시 기록·진행 건·자동 실행 예약·업무 설정 값은 복사하지 않습니다.</p>`,'저장');if(value?.name)await command(actions.copy,{name:value.name});}
+    else if(action==='copy'){
+      const boundary={epoch,key:key()},restoreCopyFocus=()=>{if(boundary.epoch===epoch&&boundary.key===key())host?.querySelector?.('.ew-procedure-menu > summary')?.focus?.({preventScroll:true});};
+      // The copy action closes its menu, so return to its visible trigger.
+      const value=await formDialog('다른 이름으로 저장',textInput('name','절차 이름',(editor.name || record.name)+' 복사','required maxlength="160"')+`<p class="ew-author-note">저장 위치 · ${esc(selection.system_id)}<br>저장된 초안의 정의만 복사합니다. 미저장 변경·게시 기록·진행 건·자동 실행 예약·업무 설정 값은 복사하지 않습니다.</p>`,'저장',null,restoreCopyFocus);if(value?.name)await command(actions.copy,{name:value.name});
+    }
     else if(action==='stage_edit')openInline('stage',target.dataset.id);
     else if(action==='add_stage'||action==='add_job')openInline(action,'',target.dataset.parent || '');
     else if(action==='delete_node'){

@@ -106,5 +106,38 @@
     ],
     "prior_visual_evidence": "actual-reference-comparison.json retains original measured wheel; input followup changes no markup or CSS",
     "final_ci": "PR108 current head checks required"
+  },
+  "ci396_observation": {
+    "run_id": 40791595361,
+    "head": "9540dd974d4c95142435bdd772026adde3dbc091",
+    "result": {
+      "success": 34,
+      "failure": 5,
+      "skipped": 1
+    },
+    "independent_failures": [
+      "native-compose:9 browser tests",
+      "platform Ubuntu: imported HTML12 mixed font encoding expectation",
+      "platform Windows: same font expectation"
+    ],
+    "dependent_failures": "2 aggregate gates; no independent defect",
+    "actual_defect": "Copy dialog tried to restore focus to its hidden menu item; now uses the visible workflow menu trigger under the same epoch/context",
+    "test_updates": [
+      "New authoring titles/help/colors and collapsed factory label",
+      "Frame monitor retains old modes and recognizes new authoring/empty states",
+      "Factory search fixture explicitly returns to EMS after the preceding keyboard traversal selected APC",
+      "Imported frozen HTML12 pins SHA and actual Inter WOFF2 plus Noto WOFF; generated mock font contract retained"
+    ],
+    "complete_native": "passed; authoring1920x1080/480panel screenshot reviewed",
+    "compose_visual_review": "human480 and tool-picker480 screenshots reviewed, separate from the failed suite conclusion",
+    "final_js_sha256": "fd0124e19d8e8092797c4c3d725ad91140320fa1280be2e2e8b8784dd0e63cf2",
+    "followup_checks": {
+      "authoring_node": 262,
+      "runtime_node": 128,
+      "mock_font": "4passed/1optionalBrotliSkip",
+      "python_ast": "passed",
+      "docs": "passed"
+    },
+    "final_actual_build": "Final CI source artifact will be validated and packaged without modifying compiled bytes; PR current head checks are authoritative"
   }
 }
