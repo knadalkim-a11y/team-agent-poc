@@ -1,0 +1,199 @@
+{
+  "base_commit": "ed77695d425cc1ab0ccfd92a3ad8f38e239d66cb",
+  "working_tree_modified": true,
+  "tested_source": "source6 working tree linked to exact source/manifest/wheel hashes below",
+  "source_hashes": {
+    "branding/ees/ui/ees-work-launcher.js": "2ceb2fbbf58025e7bfdcca23bb7e21395080090c2261ffbe91c75392b1e48c11",
+    "branding/ees/ui/ees-work-view.js": "51c6aa5b9ba56341f8d2c05187afc33879c2302bdd8d7400ab12d5e14ea9d682",
+    "branding/ees/ui/ees-work-designer.js": "ba210b224e27df461c4660a7ee1ef9af58731ac23a5318c43dd2b2b33d798698",
+    "branding/ees/ui/ees-work-launcher.css": "b0bf0c6f130ec37ca2af85c2a6e764dd7e4d72b38a83b5745d601ab63e005f64"
+  },
+  "source_unchanged_during_focus_run": true,
+  "wheel": {
+    "filename": "open_webui-0.11.3+ees.14-py3-none-any.whl",
+    "sha256": "268786f8a97a5b0512d30f057f87d2314d7b06af7ae0531007a73856bc19ff5f",
+    "size": 152172102
+  },
+  "upstream_commit": "2a960a59fe1dbbd35282f0556b3666d81102e781",
+  "normal_source_build": "passed",
+  "strict_source_provenance": "passed after quarantining one unlisted partial-copy temporary file; original5582 listed files unchanged",
+  "first_packaging_attempt": "first-package-attempt.json",
+  "frontend_manifest_sha256": "8b47e7cc5e047c415d7b2090552dca976732346880edc6d04fb7cbc42103671d",
+  "branding_manifest_sha256": "527beb16794c8c51d9ef5a8f0ad3d7ad7262bf1e5f7baf0302b5231f45e0a9f6",
+  "source5_to_source6_changed_frontend_inputs": [
+    "branding/ees/ui/ees-work-launcher.css"
+  ],
+  "source5_original_screenshots_unchanged": true,
+  "focused_native": {
+    "tests": 2,
+    "success": true,
+    "seconds": 9.02,
+    "result": "result.json",
+    "log": "focused-native.log",
+    "first_attempt": "first-focus-attempt.json"
+  },
+  "focus_checks": {
+    "observations": 12,
+    "viewports": [
+      1920,
+      480
+    ],
+    "states": [
+      "idle",
+      "pointer",
+      "keyboard"
+    ],
+    "editable_and_readonly": true,
+    "idle": "Normal1px rgb(213,214,218) border; outlineStyle none and boxShadow none",
+    "focused": "2px rgb(92,94,101) neutral inset outline with offset-2px; boxShadow none",
+    "size_invariant": "Height66; width413 at viewport1920 and357 at viewport480 with the existing56px Native rail. Same sizes as source5.",
+    "clipboard_copy_verified": 4,
+    "readonly_input_blocked": 2,
+    "other_tool_toggle_blue_focus": {
+      "focusVisible": true,
+      "width": "2px",
+      "color": "rgb(47, 95, 152)",
+      "offset": "2px",
+      "boxShadow": "rgba(47, 95, 152, 0.15) 0px 0px 0px 2px"
+    },
+    "observations_file": "focus-observations.json"
+  },
+  "behavior_checks": [
+    "Typing a draft causes no business write and no note leak to save_ui.",
+    "Explicit verdict atomically saves note; reload preserves readonly saved text.",
+    "A later verdict preserves the earlier decision and attempt.",
+    "Readonly note remains selectable/copyable and rejects text insertion.",
+    "Single approval group collapse/reopen preserves saved record."
+  ],
+  "central_chat_native": {
+    "status": "passed",
+    "steps": 18,
+    "report": "central-chat-source6/report.json",
+    "report_sha256": "7e44b70b43d435e5857026b11e53b6f4f379a53a4cf5ada9582e398a1281756e",
+    "script": "tests/ees_work_native_chat.py",
+    "script_sha256": "1b2c0ccc73bde8202852a8b13a84243be1c0888621026c60e710dddfeb2b510d",
+    "scope": "Separate actual source6 central-chat/helper gate run by contract_review; not a repeat of Complete22."
+  },
+  "broader_complete22_rerun": false,
+  "screenshots": [
+    {
+      "file": "operations31-reason-reference-1920-panel.png",
+      "sha256": "2a371da023b2a7288c98f51aa29ff3a75821de0c51d947668b28fd6484ec38c8",
+      "width": 480,
+      "height": 1080,
+      "geometry_file": "operations31-reason-reference-1920-panel.json",
+      "geometry_sha256": "010d8e9a3b79465e705c8ac20a9dec3589b5e27e2f928567d0c18185c037a5be"
+    },
+    {
+      "file": "reason-draft-editable-1920-idle-textarea.png",
+      "sha256": "9a1d2630102baa995ab875139d7046ee34be44b379279c5658087e2139e34d42",
+      "width": 413,
+      "height": 66
+    },
+    {
+      "file": "reason-draft-editable-1920-keyboard-panel.png",
+      "sha256": "c33e769f25792d02a25481d3c69670967a90c7436e06a2b9845afc1975e3fa99",
+      "width": 480,
+      "height": 1080,
+      "geometry_file": "reason-draft-editable-1920-keyboard-panel.json",
+      "geometry_sha256": "1d27a05cedd2f8dbcd8411793009a84b3938caeb204ebf1215460a5c4cb78ec2"
+    },
+    {
+      "file": "reason-draft-editable-1920-keyboard-textarea.png",
+      "sha256": "dad37f20bf8113a9550a22acc604916bbede53a6bb2089bead7a541c160698e1",
+      "width": 413,
+      "height": 66
+    },
+    {
+      "file": "reason-draft-editable-1920-pointer-textarea.png",
+      "sha256": "dad37f20bf8113a9550a22acc604916bbede53a6bb2089bead7a541c160698e1",
+      "width": 413,
+      "height": 66
+    },
+    {
+      "file": "reason-draft-editable-480-idle-textarea.png",
+      "sha256": "e13245b7f5cf94b4e2c5513900a48e472220cc44dd4d6b79f35612dd887c2b42",
+      "width": 357,
+      "height": 66
+    },
+    {
+      "file": "reason-draft-editable-480-keyboard-panel.png",
+      "sha256": "d57a18c728afeaf6899881bebd6be6465290ba99fb3cb389d4f8a20290d33f28",
+      "width": 424,
+      "height": 1080,
+      "geometry_file": "reason-draft-editable-480-keyboard-panel.json",
+      "geometry_sha256": "3ce9a1a679332dc8e59b705298eb20180352bf4441b92f064e769a384b70196e"
+    },
+    {
+      "file": "reason-draft-editable-480-keyboard-textarea.png",
+      "sha256": "c9077ec5198c04c1df963095c9353ae5bad12b54771362e34ed21a2ec9a81c83",
+      "width": 357,
+      "height": 66
+    },
+    {
+      "file": "reason-draft-editable-480-pointer-textarea.png",
+      "sha256": "c9077ec5198c04c1df963095c9353ae5bad12b54771362e34ed21a2ec9a81c83",
+      "width": 357,
+      "height": 66
+    },
+    {
+      "file": "reason-reference-readonly-1920-idle-panel.png",
+      "sha256": "e65f876af92b30413d83410151a1a5ba8c9a71b58da1a95847f64ef9597cda6b",
+      "width": 480,
+      "height": 1080,
+      "geometry_file": "reason-reference-readonly-1920-idle-panel.json",
+      "geometry_sha256": "24b0b5b8bf326fed596a33c0cfeb09ae7cc49f49d0cf7385ab8a97af990a434f"
+    },
+    {
+      "file": "reason-reference-readonly-1920-idle-textarea.png",
+      "sha256": "2ff281d7793f957c6cd9e53ff29631bfd7418bde6c5d81d7286e751b309b47fc",
+      "width": 413,
+      "height": 66
+    },
+    {
+      "file": "reason-reference-readonly-1920-keyboard-textarea.png",
+      "sha256": "f683cd9de8ea1a9fb194390e6a4e2d93495513d62731fca2e877f1a2e49b2ece",
+      "width": 413,
+      "height": 66
+    },
+    {
+      "file": "reason-reference-readonly-1920-pointer-textarea.png",
+      "sha256": "f683cd9de8ea1a9fb194390e6a4e2d93495513d62731fca2e877f1a2e49b2ece",
+      "width": 413,
+      "height": 66
+    },
+    {
+      "file": "reason-saved-readonly-480-idle-textarea.png",
+      "sha256": "e13245b7f5cf94b4e2c5513900a48e472220cc44dd4d6b79f35612dd887c2b42",
+      "width": 357,
+      "height": 66
+    },
+    {
+      "file": "reason-saved-readonly-480-keyboard-panel.png",
+      "sha256": "1b77164a0c1703ba944f440d00044f6a390a73b8d79f79af616295cabce875d0",
+      "width": 424,
+      "height": 1080,
+      "geometry_file": "reason-saved-readonly-480-keyboard-panel.json",
+      "geometry_sha256": "eee185d7849c943a181d5ecbe41140e3c436104b27f5031901a336141b144b84"
+    },
+    {
+      "file": "reason-saved-readonly-480-keyboard-textarea.png",
+      "sha256": "b9ff7097593f6ba261e6ee5de4a6316a308408a5bc45371876b9d8b2afcfde49",
+      "width": 357,
+      "height": 66
+    },
+    {
+      "file": "reason-saved-readonly-480-pointer-textarea.png",
+      "sha256": "b9ff7097593f6ba261e6ee5de4a6316a308408a5bc45371876b9d8b2afcfde49",
+      "width": 357,
+      "height": 66
+    }
+  ],
+  "comparison_panel": "operations31-reason-reference-1920-panel.png",
+  "scope": "Real pinned Native frontend, real workflow service/temporary SQLite, physical mouse/Tab/Ctrl+A/C and actual clipboard read. Synthetic auth/tool fixtures. No product DOM substitution; all PNGs unmodified direct CDP captures.",
+  "build_logs_sha256": {
+    "source": "d89af8b91f2b87eb1392669f6f6b47a821854b2a49043cae4aaeb1eb65e03d7d",
+    "first_wheel": "5989ba19a301bc6f70602f2ae300ca8d1319feda021d9ae9756897ac4c678c69",
+    "retry_wheel": "7288e57cd330362da01c95e2f116b9eeefdc09f9a9fb745b9c0b1bd6c91f3791"
+  }
+}

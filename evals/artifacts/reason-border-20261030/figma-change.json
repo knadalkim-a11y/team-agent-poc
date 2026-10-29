@@ -1,0 +1,116 @@
+{
+  "createdNodeIds": [],
+  "mutatedNodeIds": [
+    "1794:905",
+    "1284:3114",
+    "1823:5407",
+    "1823:5408"
+  ],
+  "before": {
+    "id": "1794:905",
+    "x": 11,
+    "y": 92,
+    "width": 417,
+    "height": 70,
+    "cornerRadius": 8,
+    "strokeAlign": "OUTSIDE",
+    "strokes": [
+      {
+        "type": "SOLID",
+        "visible": true,
+        "opacity": 1,
+        "blendMode": "NORMAL",
+        "color": {
+          "r": 0.18431372940540314,
+          "g": 0.37254902720451355,
+          "b": 0.5960784554481506
+        },
+        "boundVariables": {
+          "color": {
+            "type": "VARIABLE_ALIAS",
+            "id": "VariableID:746:170"
+          }
+        }
+      }
+    ]
+  },
+  "after": {
+    "id": "1794:905",
+    "x": 13,
+    "y": 94,
+    "width": 413,
+    "height": 66,
+    "strokeAlign": "INSIDE",
+    "strokeWeight": 2,
+    "strokes": [
+      {
+        "type": "SOLID",
+        "visible": true,
+        "opacity": 1,
+        "blendMode": "NORMAL",
+        "color": {
+          "r": 0.3607843220233917,
+          "g": 0.3686274588108063,
+          "b": 0.3960784375667572
+        },
+        "boundVariables": {
+          "color": {
+            "type": "VARIABLE_ALIAS",
+            "id": "VariableID:746:162"
+          }
+        }
+      }
+    ],
+    "cornerRadius": 6
+  },
+  "textChanges": [
+    {
+      "id": "1284:3114",
+      "before": "최신판   운영 31판 · 2026-10-28 · 공통 사이드바 복원 · HTML31 미리보기 → · 오른쪽 흐름의 30판 원본 3624a12 →",
+      "after": "최신판   운영 32판 · 2026-10-30 · 판정 사유의 파란 바깥 테두리 제거 · PR #109 →"
+    },
+    {
+      "id": "1823:5407",
+      "before": "이번 변경 / 유지   왼쪽 모드 전환 복원. 기존 공장 선택·메뉴·대화·오른쪽 12작업 흐름·기록·판정·실행 보호를 유지합니다. 작성자 김광재 예시이므로 전환을 표시합니다.",
+      "after": "이번 변경 / 유지   사유 선택 표시는 회색 안쪽선으로 변경. 사유·판정 기록과 공통 사이드바·대화·실행 흐름은 유지합니다."
+    },
+    {
+      "id": "1823:5408",
+      "before": "검수 범위   운영 HTML31과 작성 HTML4에서 업무 / 워크스페이스 전환과 공장 / 시스템 선택을 확인합니다. Git 고정 HTML30은 오른쪽 운영 흐름의 당시 이력이며 공통 사이드바의 기준은 R7·A2입니다.",
+      "after": "검수 범위   사유 입력의 기본·마우스·키보드 선택과 저장·읽기 전용 동작. 나머지 화면은 운영31·작성12 검증 이력을 유지합니다."
+    }
+  ],
+  "retainedInput": {
+    "id": "1794:903",
+    "width": 413,
+    "height": 66,
+    "strokes": [
+      {
+        "type": "SOLID",
+        "visible": true,
+        "opacity": 1,
+        "blendMode": "NORMAL",
+        "color": {
+          "r": 0.8352941274642944,
+          "g": 0.8392156958580017,
+          "b": 0.8549019694328308
+        },
+        "boundVariables": {
+          "color": {
+            "type": "VARIABLE_ALIAS",
+            "id": "VariableID:746:159"
+          }
+        }
+      }
+    ]
+  },
+  "fonts": [
+    {
+      "family": "Noto Sans KR",
+      "style": "Bold",
+      "variationSettings": {
+        "wght": 700
+      }
+    }
+  ]
+}

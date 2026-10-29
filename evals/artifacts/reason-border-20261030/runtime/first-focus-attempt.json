@@ -1,0 +1,42 @@
+{
+  "base_commit": "ed77695d425cc1ab0ccfd92a3ad8f38e239d66cb",
+  "working_tree_modified": true,
+  "source_hashes": {
+    "branding/ees/ui/ees-work-launcher.js": "2ceb2fbbf58025e7bfdcca23bb7e21395080090c2261ffbe91c75392b1e48c11",
+    "branding/ees/ui/ees-work-view.js": "51c6aa5b9ba56341f8d2c05187afc33879c2302bdd8d7400ab12d5e14ea9d682",
+    "branding/ees/ui/ees-work-designer.js": "ba210b224e27df461c4660a7ee1ef9af58731ac23a5318c43dd2b2b33d798698",
+    "branding/ees/ui/ees-work-launcher.css": "b0bf0c6f130ec37ca2af85c2a6e764dd7e4d72b38a83b5745d601ab63e005f64",
+    "tests/test_ees_work_figma_runtime_native.py": "5752462eaf004be5dfac45f0ca300eb7e2dc244e54e1928f0050c010bb7e3b34",
+    "tests/ees_work_integrated_fixture.py": "3143b47d526bc1e89f495964ca01e9bd1923eb98968dec09036e597bc6f60e8c",
+    "evals/artifacts/operations31-authoring12-parity-20261030/runtime/capture-parity.py": "a4d813ee4791141d64d691dd8641330a0370b15deacb955a62f3a832106a6edb",
+    "evals/artifacts/reason-border-20261030/runtime/capture-reason.py": "dc4400b734956bb126df66fea280546321f4b7effa3db6b16c0a12a7b927b695"
+  },
+  "built_ui_hashes": {
+    "branding/ees/ui/ees-work-launcher.js": "2ceb2fbbf58025e7bfdcca23bb7e21395080090c2261ffbe91c75392b1e48c11",
+    "branding/ees/ui/ees-work-view.js": "51c6aa5b9ba56341f8d2c05187afc33879c2302bdd8d7400ab12d5e14ea9d682",
+    "branding/ees/ui/ees-work-designer.js": "ba210b224e27df461c4660a7ee1ef9af58731ac23a5318c43dd2b2b33d798698",
+    "branding/ees/ui/ees-work-launcher.css": "b0bf0c6f130ec37ca2af85c2a6e764dd7e4d72b38a83b5745d601ab63e005f64"
+  },
+  "source_unchanged_during_run": true,
+  "wheel": {
+    "filename": "open_webui-0.11.3+ees.14-py3-none-any.whl",
+    "sha256": "268786f8a97a5b0512d30f057f87d2314d7b06af7ae0531007a73856bc19ff5f",
+    "size": 152172102
+  },
+  "branding_manifest_sha256": "527beb16794c8c51d9ef5a8f0ad3d7ad7262bf1e5f7baf0302b5231f45e0a9f6",
+  "tests": [
+    "test_operations31_saved_reason_reference_state",
+    "test_operations31_reason_draft_is_private_and_saved_with_explicit_verdict"
+  ],
+  "testsRun": 2,
+  "success": false,
+  "failures": [
+    [
+      "test_operations31_reason_draft_is_private_and_saved_with_explicit_verdict (__main__.ReasonBorder.test_operations31_reason_draft_is_private_and_saved_with_explicit_verdict)",
+      "Traceback (most recent call last):\n  File \"/workspace/scratch/b1afafbe4fcd/repo/tests/test_ees_work_figma_runtime_native.py\", line 243, in test_operations31_reason_draft_is_private_and_saved_with_explicit_verdict\n    self.stage_capture('operations31-reason-draft-1920')\n  File \"/workspace/scratch/b1afafbe4fcd/repo/evals/artifacts/reason-border-20261030/runtime/capture-reason.py\", line 89, in stage_capture\n    self.reason_focus_states('#stage-evidence-job-2 [data-stage-note]','reason-draft-editable-480')\n  File \"/workspace/scratch/b1afafbe4fcd/repo/evals/artifacts/reason-border-20261030/runtime/capture-reason.py\", line 65, in reason_focus_states\n    self.assertEqual([idle['rect']['width'],pointer['rect']['width'],keyboard['rect']['width']],[413,413,413])\nAssertionError: Lists differ: [357, 357, 357] != [413, 413, 413]\n\nFirst differing element 0:\n357\n413\n\n- [357, 357, 357]\n+ [413, 413, 413]\n"
+    ]
+  ],
+  "errors": [],
+  "scope": "Actual Native production UI and SQLite; physical pointer/Tab/clipboard input, real draft and explicit verdict contract. No product DOM substitution. Prior source5 evidence remains untouched.",
+  "failure_classification": "New focus-runner width assumption only: viewport480 retains existing56px Native rail, panel424 and field357. Source5 prior screenshot geometry also357. Gray focus styling passed; correction keeps expected413 at1920 and357 at480, invariant across idle/click/Tab."
+}

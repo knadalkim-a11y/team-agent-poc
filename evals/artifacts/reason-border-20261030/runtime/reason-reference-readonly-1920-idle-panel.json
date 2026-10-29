@@ -1,0 +1,345 @@
+{
+  "label": "reason-reference-readonly-1920-idle",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "panel": {
+    "x": 1440,
+    "y": 0,
+    "width": 480,
+    "height": 1080
+  },
+  "bodyOverflow": 0,
+  "panelOverflow": 0,
+  "text": "배포 산출물 점검 / 공장 A · EMS\n1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 1/3\n\n자동 실행 완료 0/9\n실행 실패 1\n\n작업\n기록\n기준\n대기\n10\n로그인 화면 문구 수정\n실행\n자동 판정\n실행 필요\n알람 기준값 조정\n실행\n자동 판정\n실행 필요\n설비 목록 정렬 수정\n실행\n자동 판정\n실행 필요\n데이터 보관 기간 변경\n실행\n자동 판정\n실행 필요\n메일 발송 대상 추가\n실행\n자동 판정\n실행 필요\n화면 응답 속도 개선\n실행\n자동 판정\n실행 필요\n이력 조회 기간 확대\n실행\n자동 판정\n실행 필요\n오류 메시지 정리\n실행\n자동 판정\n실행 필요\n보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록\n권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록\n판정 결과\n2\n대시보드 필터 추가\n다시 실행\n자동 판정\n실행 실패\n판정 근거\n나머지 승인 1건\n배치 주기 조정\n직접 판정\n승인\n판정 기록\n\n승인 선택\nFixture Administrator · 2026. 10. 29. 19:23\n\n사유 (선택)",
+  "stageDivider": null,
+  "geometry": {
+    ".ew-panel-header": {
+      "x": 1,
+      "y": 0,
+      "width": 479,
+      "height": 48,
+      "fontSize": "14px",
+      "lineHeight": "20px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "배포 산출물 점검 / 공장 A · EMS"
+    },
+    ".ew-operation-overview": null,
+    ".ew-operation-overview h2": null,
+    ".ew-operation-context": null,
+    ".ew-operation-context dt": null,
+    ".ew-operation-context dd": null,
+    ".ew-operation-stages": null,
+    ".ew-operation-stage": null,
+    ".ew-vd-head": {
+      "x": 1,
+      "y": -418,
+      "width": 479,
+      "height": 162,
+      "fontSize": "14px",
+      "lineHeight": "22px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 1/3\n\n자동 실행 완료 0/9\n실행 실패 1"
+    },
+    ".ew-tabs": {
+      "x": 1,
+      "y": -236,
+      "width": 479,
+      "height": 33,
+      "fontSize": "14px",
+      "lineHeight": "22px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "작업\n기록\n기준"
+    },
+    ".ew-vd-label": {
+      "x": 9,
+      "y": -187,
+      "width": 463,
+      "height": 36,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "fontWeight": "700",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgb(243, 243, 245)",
+      "borderRadius": "6px",
+      "text": "대기\n10"
+    },
+    ".ew-vd-item": {
+      "x": 9,
+      "y": -151,
+      "width": 463,
+      "height": 76,
+      "fontSize": "14px",
+      "lineHeight": "22px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "8px",
+      "text": "로그인 화면 문구 수정\n실행\n자동 판정\n실행 필요"
+    },
+    ".ew-vd-note textarea": {
+      "x": 34,
+      "y": 964,
+      "width": 413,
+      "height": 66,
+      "fontSize": "13px",
+      "lineHeight": "18px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgb(255, 255, 255)",
+      "borderRadius": "6px",
+      "text": "배치 주기 변경 내용을 확인했습니다."
+    },
+    ".ew-vd-note small": {
+      "x": 61.875,
+      "y": 939,
+      "width": 29.84375,
+      "height": 17,
+      "fontSize": "12px",
+      "lineHeight": "18px",
+      "fontWeight": "400",
+      "color": "rgb(111, 113, 122)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "(선택)"
+    },
+    ".ew-vd-selection-record": {
+      "x": 34,
+      "y": 883,
+      "width": 413,
+      "height": 43,
+      "fontSize": "13px",
+      "lineHeight": "20px",
+      "fontWeight": "400",
+      "color": "rgb(92, 94, 101)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "승인 선택\nFixture Administrator · 2026. 10. 29. 19:23"
+    },
+    ".ew-author>header": null,
+    ".ew-author-definition-head": null,
+    ".ew-author-tabs": null,
+    ".ew-job-detail-header": null,
+    "#ew-author-node [name=name]": null,
+    ".ew-job-method": null,
+    "#ew-author-node [name=job_guidance]": null,
+    "#ew-author-node [name=result_block]": null,
+    "#ew-author-node [name=completion_rule]": null,
+    "#ew-author-node [name=assignee]": null,
+    ".ew-author>footer": null,
+    ".ew-job-tool-state": null,
+    ".ew-job-tool-state img": null,
+    ".ew-job-result-confirmation": null,
+    ".ew-job-tool-summary": null
+  },
+  "images": [
+    {
+      "src": "/_ees14/v4/eb94a.svg",
+      "naturalWidth": 14,
+      "naturalHeight": 14,
+      "box": {
+        "x": 17,
+        "y": 16.5,
+        "width": 14,
+        "height": 14,
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "fontWeight": "500",
+        "color": "rgb(63, 65, 71)",
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "text": ""
+      }
+    },
+    {
+      "src": "/_ees14/v4/a953c.svg",
+      "naturalWidth": 16,
+      "naturalHeight": 16,
+      "box": {
+        "x": 412,
+        "y": 15.5,
+        "width": 16,
+        "height": 16,
+        "fontSize": "12px",
+        "lineHeight": "20px",
+        "fontWeight": "400",
+        "color": "rgb(31, 32, 35)",
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "text": ""
+      }
+    },
+    {
+      "src": "/_ees14/v4/7bb4a.svg",
+      "naturalWidth": 16,
+      "naturalHeight": 16,
+      "box": {
+        "x": 446,
+        "y": 15.5,
+        "width": 16,
+        "height": 16,
+        "fontSize": "12px",
+        "lineHeight": "20px",
+        "fontWeight": "400",
+        "color": "rgb(31, 32, 35)",
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "text": ""
+      }
+    },
+    {
+      "src": "/_ees14/v4/f17e6.svg",
+      "naturalWidth": 14,
+      "naturalHeight": 14,
+      "box": {
+        "x": 202,
+        "y": 509,
+        "width": 14,
+        "height": 14,
+        "fontSize": "13px",
+        "lineHeight": "20px",
+        "fontWeight": "500",
+        "color": "rgb(111, 113, 122)",
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "text": ""
+      }
+    },
+    {
+      "src": "/_ees14/v4/f17e6.svg",
+      "naturalWidth": 14,
+      "naturalHeight": 14,
+      "box": {
+        "x": 293.796875,
+        "y": 509,
+        "width": 14,
+        "height": 14,
+        "fontSize": "13px",
+        "lineHeight": "20px",
+        "fontWeight": "500",
+        "color": "rgb(47, 95, 152)",
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "text": ""
+      }
+    },
+    {
+      "src": "/_ees14/v4/f17e6.svg",
+      "naturalWidth": 14,
+      "naturalHeight": 14,
+      "box": {
+        "x": 202,
+        "y": 586,
+        "width": 14,
+        "height": 14,
+        "fontSize": "13px",
+        "lineHeight": "20px",
+        "fontWeight": "500",
+        "color": "rgb(111, 113, 122)",
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "text": ""
+      }
+    },
+    {
+      "src": "/_ees14/v4/f17e6.svg",
+      "naturalWidth": 14,
+      "naturalHeight": 14,
+      "box": {
+        "x": 293.796875,
+        "y": 586,
+        "width": 14,
+        "height": 14,
+        "fontSize": "13px",
+        "lineHeight": "20px",
+        "fontWeight": "500",
+        "color": "rgb(47, 95, 152)",
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "text": ""
+      }
+    },
+    {
+      "src": "/_ees14/v4/f17e6.svg",
+      "naturalWidth": 14,
+      "naturalHeight": 14,
+      "box": {
+        "x": 246.59375,
+        "y": 721,
+        "width": 14,
+        "height": 14,
+        "fontSize": "13px",
+        "lineHeight": "20px",
+        "fontWeight": "500",
+        "color": "rgb(47, 95, 152)",
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "text": ""
+      }
+    },
+    {
+      "src": "/_ees14/v4/69549.svg",
+      "naturalWidth": 14,
+      "naturalHeight": 14,
+      "box": {
+        "x": 21,
+        "y": 767,
+        "width": 14,
+        "height": 14,
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "fontWeight": "400",
+        "color": "rgb(63, 65, 71)",
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "text": ""
+      }
+    },
+    {
+      "src": "/_ees14/v4/f17e6.svg",
+      "naturalWidth": 14,
+      "naturalHeight": 14,
+      "box": {
+        "x": 202,
+        "y": 838,
+        "width": 14,
+        "height": 14,
+        "fontSize": "13px",
+        "lineHeight": "20px",
+        "fontWeight": "500",
+        "color": "rgb(31, 32, 35)",
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "text": ""
+      }
+    },
+    {
+      "src": "/_ees14/v4/f17e6.svg",
+      "naturalWidth": 14,
+      "naturalHeight": 14,
+      "box": {
+        "x": 293.796875,
+        "y": 838,
+        "width": 14,
+        "height": 14,
+        "fontSize": "13px",
+        "lineHeight": "20px",
+        "fontWeight": "500",
+        "color": "rgb(47, 95, 152)",
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "text": ""
+      }
+    }
+  ]
+}

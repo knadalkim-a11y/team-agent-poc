@@ -317,6 +317,7 @@ def input_and_history_flow(g,key,chat_id):
     g.wait('document.querySelector(".ew-author-history")?.textContent.includes("게시 v1")')
     assert g.api('/api/ees-work/workspace?workflow_id='+key)['workflow']['published_version']==1
     g.click('[data-action=mode][data-mode=work]');g.click('[data-action=workflow][data-workflow-id="'+key+'"]')
+    g.open_operation_start()
     g.click('[data-action=start_run][data-start-inline]')
     g.wait('document.querySelector("[data-action=job]")')
     run=g.api('/api/ees-work/workspace?workflow_id='+key)['runs'][0];run_id=run['id']

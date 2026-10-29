@@ -1,0 +1,346 @@
+[
+  {
+    "active": false,
+    "focusVisible": false,
+    "readOnly": true,
+    "value": "배치 주기 변경 내용을 확인했습니다.",
+    "selectionStart": 20,
+    "selectionEnd": 20,
+    "outlineStyle": "none",
+    "outlineWidth": "3px",
+    "outlineColor": "rgb(31, 32, 35)",
+    "outlineOffset": "0px",
+    "boxShadow": "none",
+    "borderWidth": "1px",
+    "borderColor": "rgb(213, 214, 218)",
+    "borderRadius": "6px",
+    "rect": {
+      "x": 1474,
+      "y": 964,
+      "width": 413,
+      "height": 66
+    },
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "label": "reason-reference-readonly-1920",
+    "state": "idle"
+  },
+  {
+    "active": true,
+    "focusVisible": true,
+    "readOnly": true,
+    "value": "배치 주기 변경 내용을 확인했습니다.",
+    "selectionStart": 20,
+    "selectionEnd": 20,
+    "outlineStyle": "solid",
+    "outlineWidth": "2px",
+    "outlineColor": "rgb(92, 94, 101)",
+    "outlineOffset": "-2px",
+    "boxShadow": "none",
+    "borderWidth": "1px",
+    "borderColor": "rgb(213, 214, 218)",
+    "borderRadius": "6px",
+    "rect": {
+      "x": 1474,
+      "y": 964,
+      "width": 413,
+      "height": 66
+    },
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "label": "reason-reference-readonly-1920",
+    "state": "pointer"
+  },
+  {
+    "active": true,
+    "focusVisible": true,
+    "readOnly": true,
+    "value": "배치 주기 변경 내용을 확인했습니다.",
+    "selectionStart": 20,
+    "selectionEnd": 20,
+    "outlineStyle": "solid",
+    "outlineWidth": "2px",
+    "outlineColor": "rgb(92, 94, 101)",
+    "outlineOffset": "-2px",
+    "boxShadow": "none",
+    "borderWidth": "1px",
+    "borderColor": "rgb(213, 214, 218)",
+    "borderRadius": "6px",
+    "rect": {
+      "x": 1474,
+      "y": 964,
+      "width": 413,
+      "height": 66
+    },
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "label": "reason-reference-readonly-1920",
+    "state": "keyboard",
+    "copy_verified": true,
+    "readonly_input_blocked": true
+  },
+  {
+    "active": false,
+    "focusVisible": false,
+    "readOnly": false,
+    "value": "적용 대상 확인을 마친 뒤 배포합니다.\n기존 자료와 이전 판정을 보존합니다.",
+    "selectionStart": 42,
+    "selectionEnd": 42,
+    "outlineStyle": "none",
+    "outlineWidth": "3px",
+    "outlineColor": "rgb(31, 32, 35)",
+    "outlineOffset": "0px",
+    "boxShadow": "none",
+    "borderWidth": "1px",
+    "borderColor": "rgb(213, 214, 218)",
+    "borderRadius": "6px",
+    "rect": {
+      "x": 1474,
+      "y": 612,
+      "width": 413,
+      "height": 66
+    },
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "label": "reason-draft-editable-1920",
+    "state": "idle"
+  },
+  {
+    "active": true,
+    "focusVisible": true,
+    "readOnly": false,
+    "value": "적용 대상 확인을 마친 뒤 배포합니다.\n기존 자료와 이전 판정을 보존합니다.",
+    "selectionStart": 41,
+    "selectionEnd": 41,
+    "outlineStyle": "solid",
+    "outlineWidth": "2px",
+    "outlineColor": "rgb(92, 94, 101)",
+    "outlineOffset": "-2px",
+    "boxShadow": "none",
+    "borderWidth": "1px",
+    "borderColor": "rgb(213, 214, 218)",
+    "borderRadius": "6px",
+    "rect": {
+      "x": 1474,
+      "y": 548,
+      "width": 413,
+      "height": 66
+    },
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "label": "reason-draft-editable-1920",
+    "state": "pointer"
+  },
+  {
+    "active": true,
+    "focusVisible": true,
+    "readOnly": false,
+    "value": "적용 대상 확인을 마친 뒤 배포합니다.\n기존 자료와 이전 판정을 보존합니다.",
+    "selectionStart": 41,
+    "selectionEnd": 41,
+    "outlineStyle": "solid",
+    "outlineWidth": "2px",
+    "outlineColor": "rgb(92, 94, 101)",
+    "outlineOffset": "-2px",
+    "boxShadow": "none",
+    "borderWidth": "1px",
+    "borderColor": "rgb(213, 214, 218)",
+    "borderRadius": "6px",
+    "rect": {
+      "x": 1474,
+      "y": 548,
+      "width": 413,
+      "height": 66
+    },
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "label": "reason-draft-editable-1920",
+    "state": "keyboard",
+    "copy_verified": true,
+    "readonly_input_blocked": false
+  },
+  {
+    "active": false,
+    "focusVisible": false,
+    "readOnly": false,
+    "value": "적용 대상 확인을 마친 뒤 배포합니다.\n기존 자료와 이전 판정을 보존합니다.",
+    "selectionStart": 0,
+    "selectionEnd": 42,
+    "outlineStyle": "none",
+    "outlineWidth": "3px",
+    "outlineColor": "rgb(31, 32, 35)",
+    "outlineOffset": "0px",
+    "boxShadow": "none",
+    "borderWidth": "1px",
+    "borderColor": "rgb(213, 214, 218)",
+    "borderRadius": "6px",
+    "rect": {
+      "x": 90,
+      "y": 612,
+      "width": 357,
+      "height": 66
+    },
+    "viewport": {
+      "width": 480,
+      "height": 1080
+    },
+    "label": "reason-draft-editable-480",
+    "state": "idle"
+  },
+  {
+    "active": true,
+    "focusVisible": true,
+    "readOnly": false,
+    "value": "적용 대상 확인을 마친 뒤 배포합니다.\n기존 자료와 이전 판정을 보존합니다.",
+    "selectionStart": 39,
+    "selectionEnd": 39,
+    "outlineStyle": "solid",
+    "outlineWidth": "2px",
+    "outlineColor": "rgb(92, 94, 101)",
+    "outlineOffset": "-2px",
+    "boxShadow": "none",
+    "borderWidth": "1px",
+    "borderColor": "rgb(213, 214, 218)",
+    "borderRadius": "6px",
+    "rect": {
+      "x": 90,
+      "y": 548,
+      "width": 357,
+      "height": 66
+    },
+    "viewport": {
+      "width": 480,
+      "height": 1080
+    },
+    "label": "reason-draft-editable-480",
+    "state": "pointer"
+  },
+  {
+    "active": true,
+    "focusVisible": true,
+    "readOnly": false,
+    "value": "적용 대상 확인을 마친 뒤 배포합니다.\n기존 자료와 이전 판정을 보존합니다.",
+    "selectionStart": 39,
+    "selectionEnd": 39,
+    "outlineStyle": "solid",
+    "outlineWidth": "2px",
+    "outlineColor": "rgb(92, 94, 101)",
+    "outlineOffset": "-2px",
+    "boxShadow": "none",
+    "borderWidth": "1px",
+    "borderColor": "rgb(213, 214, 218)",
+    "borderRadius": "6px",
+    "rect": {
+      "x": 90,
+      "y": 548,
+      "width": 357,
+      "height": 66
+    },
+    "viewport": {
+      "width": 480,
+      "height": 1080
+    },
+    "label": "reason-draft-editable-480",
+    "state": "keyboard",
+    "copy_verified": true,
+    "readonly_input_blocked": false
+  },
+  {
+    "active": false,
+    "focusVisible": false,
+    "readOnly": true,
+    "value": "적용 대상 확인을 마친 뒤 배포합니다.\n기존 자료와 이전 판정을 보존합니다.",
+    "selectionStart": 39,
+    "selectionEnd": 39,
+    "outlineStyle": "none",
+    "outlineWidth": "3px",
+    "outlineColor": "rgb(31, 32, 35)",
+    "outlineOffset": "0px",
+    "boxShadow": "none",
+    "borderWidth": "1px",
+    "borderColor": "rgb(213, 214, 218)",
+    "borderRadius": "6px",
+    "rect": {
+      "x": 90,
+      "y": 623,
+      "width": 357,
+      "height": 66
+    },
+    "viewport": {
+      "width": 480,
+      "height": 1080
+    },
+    "label": "reason-saved-readonly-480",
+    "state": "idle"
+  },
+  {
+    "active": true,
+    "focusVisible": true,
+    "readOnly": true,
+    "value": "적용 대상 확인을 마친 뒤 배포합니다.\n기존 자료와 이전 판정을 보존합니다.",
+    "selectionStart": 39,
+    "selectionEnd": 39,
+    "outlineStyle": "solid",
+    "outlineWidth": "2px",
+    "outlineColor": "rgb(92, 94, 101)",
+    "outlineOffset": "-2px",
+    "boxShadow": "none",
+    "borderWidth": "1px",
+    "borderColor": "rgb(213, 214, 218)",
+    "borderRadius": "6px",
+    "rect": {
+      "x": 90,
+      "y": 531,
+      "width": 357,
+      "height": 66
+    },
+    "viewport": {
+      "width": 480,
+      "height": 1080
+    },
+    "label": "reason-saved-readonly-480",
+    "state": "pointer"
+  },
+  {
+    "active": true,
+    "focusVisible": true,
+    "readOnly": true,
+    "value": "적용 대상 확인을 마친 뒤 배포합니다.\n기존 자료와 이전 판정을 보존합니다.",
+    "selectionStart": 39,
+    "selectionEnd": 39,
+    "outlineStyle": "solid",
+    "outlineWidth": "2px",
+    "outlineColor": "rgb(92, 94, 101)",
+    "outlineOffset": "-2px",
+    "boxShadow": "none",
+    "borderWidth": "1px",
+    "borderColor": "rgb(213, 214, 218)",
+    "borderRadius": "6px",
+    "rect": {
+      "x": 90,
+      "y": 531,
+      "width": 357,
+      "height": 66
+    },
+    "viewport": {
+      "width": 480,
+      "height": 1080
+    },
+    "label": "reason-saved-readonly-480",
+    "state": "keyboard",
+    "copy_verified": true,
+    "readonly_input_blocked": true
+  }
+]

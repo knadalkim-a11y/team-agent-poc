@@ -1,0 +1,328 @@
+{
+  "captured_at_utc": "2026-10-29T23:21:52.571Z",
+  "repository": "knadalkim-a11y/team-agent-poc",
+  "pull_request": 109,
+  "head_commit": "ed77695d425cc1ab0ccfd92a3ad8f38e239d66cb",
+  "run": {
+    "id": 40970728929,
+    "name": "EES delivery",
+    "status": "completed",
+    "conclusion": "failure",
+    "run_number": 406,
+    "jobs_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/runs/40970728929/jobs",
+    "logs_url": "https://api.github.com/repos/knadalkim-a11y/team-agent-poc/actions/runs/40970728929/logs",
+    "workflow_id": 352666731,
+    "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40970728929"
+  },
+  "retrieval": "GitHub connector fetch_commit_workflow_runs, fetch_workflow_run_jobs, fetch_workflow_job_logs; first observed completed failure, no rerun performed",
+  "jobs": [
+    {
+      "id": 123786505218,
+      "name": "Pinned Native source baseline and EES frontend build",
+      "conclusion": "success"
+    },
+    {
+      "id": 123786505464,
+      "name": "Source audit (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123786505519,
+      "name": "Source audit (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123786505574,
+      "name": "Verify the fixed official wheel",
+      "conclusion": "success"
+    },
+    {
+      "id": 123786613437,
+      "name": "Verify cached historical fixture (previous-v4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123786613486,
+      "name": "Verify cached historical fixture (previous)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123786613489,
+      "name": "Verify cached historical fixture (previous12)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123786613514,
+      "name": "Verify cached historical fixture (previous13)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123786613543,
+      "name": "Verify cached historical fixture (legacy)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123788736807,
+      "name": "Prepare current program fixtures",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789017904,
+      "name": "Complete Native product (ubuntu-24.04)",
+      "conclusion": "failure"
+    },
+    {
+      "id": 123789017998,
+      "name": "native-execution (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018034,
+      "name": "native-compose (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018041,
+      "name": "native-work (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018060,
+      "name": "native-account (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018301,
+      "name": "restore-ees11 (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018311,
+      "name": "program-install (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018327,
+      "name": "native-grounding (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018341,
+      "name": "contracts (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018353,
+      "name": "program-wheel (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018354,
+      "name": "services (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018355,
+      "name": "restore-ees11 (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018360,
+      "name": "program-wheel (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018390,
+      "name": "contracts (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018393,
+      "name": "restore-ees12 (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018403,
+      "name": "program-install (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018406,
+      "name": "native-contracts (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018438,
+      "name": "restore-ees13 (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018457,
+      "name": "restore-ees12 (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123789018458,
+      "name": "platform (windows-2022)",
+      "conclusion": "success"
+    }
+  ],
+  "failed_jobs": [
+    {
+      "id": 123789017904,
+      "name": "Complete Native product (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "failure",
+      "run_id": 40970728929,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Restore the already verified fixed product dependency inventory",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Verify the downloaded official wheel before testing",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Restore the exact upstream text-attachment dependency missing from the older inventory",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Start the actual CLI and verify browser writes, reload and restart",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Verify central Native chat and isolated helper with actual registered tools",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 10
+        },
+        {
+          "name": "Record the successfully tested integration tree",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11
+        },
+        {
+          "name": "Select the review head only for candidate packaging",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12
+        },
+        {
+          "name": "Prepare the exact tested head as a review candidate",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13
+        },
+        {
+          "name": "Keep the hashed review candidate for this exact head",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14
+        },
+        {
+          "name": "Verify actual full-product evidence files",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Keep actual full-product results and screen evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Post Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 31
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 32
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33
+        }
+      ],
+      "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40970728929/job/123789017904"
+    }
+  ],
+  "exact_log_excerpt": [
+    "2026-10-29T23:14:55.8194947Z {\"name\": \"physical central proposal then separate apply and save\", \"draft_revision\": 3, \"published\": false, \"runs\": 0, \"chat_id\": \"1864b8dc-e0ff-43dd-98df-a6ac4b449a0f\", \"native_tool_history_saved\": true, \"model_boundary\": \"Loopback synthetic tool-call selection only; actual Native registered tool execution\"}",
+    "2026-10-29T23:14:56.2011451Z {\"name\": \"isolated existing job-input definition fixture\", \"workflow_id\": \"073d6ae6-13a8-4ffa-a397-04b1d14f7242\", \"job_id\": \"job-2ea62e2c-d393-4b67-9978-9ac7e3fcddce\", \"field\": {\"id\": \"note\", \"name\": \"자료 메모\", \"type\": \"text\", \"scope\": \"run\", \"required\": false}, \"draft_revision\": 5, \"boundary\": \"Actual authenticated save_draft; no input values, publication or execution seeded\"}",
+    "2026-10-29T23:15:07.1195649Z Traceback (most recent call last):",
+    "2026-10-29T23:15:07.1207766Z   File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_native_chat.py\", line 604, in <module>",
+    "2026-10-29T23:15:07.1208781Z     if __name__=='__main__':main()",
+    "2026-10-29T23:15:07.1209213Z                             ^^^^^^",
+    "2026-10-29T23:15:07.1210398Z   File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_native_chat.py\", line 574, in main",
+    "2026-10-29T23:15:07.1211435Z     g.setup();central_flow(g);assert not g.provider.errors,g.provider.errors",
+    "2026-10-29T23:15:07.1220582Z               ^^^^^^^^^^^^^^^",
+    "2026-10-29T23:15:07.1222024Z   File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_native_chat.py\", line 270, in central_flow",
+    "2026-10-29T23:15:07.1222743Z     input_and_history_flow(g,key,chat_id)",
+    "2026-10-29T23:15:07.1223548Z   File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_native_chat.py\", line 320, in input_and_history_flow",
+    "2026-10-29T23:15:07.1224322Z     g.click('[data-action=start_run][data-start-inline]')",
+    "2026-10-29T23:15:07.1225104Z   File \"/home/runner/work/team-agent-poc/team-agent-poc/tests/ees_work_integrated_app.py\", line 177, in click",
+    "2026-10-29T23:15:07.1225939Z     point=self.browser.evaluate(expression); assert point, 'Not clickable: '+selector",
+    "2026-10-29T23:15:07.1226491Z                                                     ^^^^^",
+    "2026-10-29T23:15:07.1226998Z AssertionError: Not clickable: [data-action=start_run][data-start-inline]",
+    "2026-10-29T23:15:07.1700927Z ##[error]Process completed with exit code 1."
+  ],
+  "diagnosis": {
+    "classification": "Related test navigation regression; no infrastructure failure indicated by this stack",
+    "failed_step": "Verify central Native chat and isolated helper with actual registered tools",
+    "failing_test_location": "tests/ees_work_native_chat.py:320 input_and_history_flow",
+    "assertion": "AssertionError: Not clickable: [data-action=start_run][data-start-inline]",
+    "cause": "The test opens the workflow overview then immediately clicks the old inline-start button. Operations31 now requires the visible stage_open -> stage_start route before that form appears.",
+    "minimal_fix": "Call the existing ProductGate.open_operation_start() immediately before the current start_run click; preserve subsequent run/input/history/privacy assertions.",
+    "focused_validation": "Run tests/ees_work_native_chat.py once against the new verified source6 wheel. The script has no individual-test filter. Do not repeat unrelated suites.",
+    "evidence_boundary": "Complete Native product step9 (actual CLI/browser/reload/restart) succeeded; its distinct central-chat/helper step10 failed. All other 29 jobs succeeded. Local Complete gate success did not establish central-chat/helper gate success.",
+    "modifications_by_reviewer": "Evidence file only; product and test files unchanged."
+  }
+}

@@ -18,6 +18,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
+| 운영 사유의 파란 바깥 포커스 제거·CI406 | [Figma32·안쪽 회색 초점·source6 집중 검사·central-chat 탐색 수정](v4-ui-20260930.md#reason-border-20261030) |
 | 운영31·업무절차12 시각 일치 후속 | [게시 정의 조회·사유 저장 경계·도구 상태 표현·B1 제외·실제 제품 검증](v4-ui-20260930.md#operations31-authoring12-parity-20261030) |
 | C66 업무 내용·작업 상세 1단계 | [요약 제거·공장 조건·단계 메뉴·D5/입력 출처·기존 자료 보존·480/1366 대조](v4-ui-20260930.md#work-content-job-detail-c66-20261022) |
 | #88/#89 사내 적용 뒤 Native 복귀 때 이전 선택·작성기 재표시 | [main controller 최초 실패·목적지 첫 render·aria-current/오른쪽 칸 프레임과 보존 경계](v4-ui-20260930.md#native-return-selection-evidence-20261015) |
