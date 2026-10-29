@@ -182,12 +182,23 @@ class IntegratedNativeCase(unittest.TestCase):
         self.wait('document.querySelector(' + json.dumps(control) + ')')
         self.click(control)
         run_control = '#ees-work-panel .ew-active-runs [data-action="open_run"][data-run-id="' + run['id'] + '"]'
+        self.wait("document.querySelector('.ew-operation-overview') || " +
+            'document.querySelector(' + json.dumps(run_control) + ') || ' +
+            '(window.__eesNativeWorkV1.captureReference()?.run_id === ' + json.dumps(run['id']) +
+            ' && document.querySelector("#ees-work-panel [data-action=job]"))')
+        if self.browser.evaluate("!!document.querySelector('.ew-operation-overview')"):
+            self.click('.ew-operation-stage[data-action=stage_open]')
+            self.wait("document.querySelector('#ees-work-panel .ew-run-nav [data-action=stage_details]')")
+            if self.browser.evaluate('window.__eesNativeWorkV1.captureReference()?.run_id !== ' + json.dumps(run['id'])):
+                self.click('[data-action=stage_details]')
         self.wait('document.querySelector(' + json.dumps(run_control) + ') || (window.__eesNativeWorkV1.captureReference()?.run_id === ' + json.dumps(run['id']) + ' && document.querySelector("#ees-work-panel [data-action=job]"))')
         if self.browser.evaluate('!!document.querySelector(' + json.dumps(run_control) + ')'):
             self.click(run_control)
             self.wait('window.__eesNativeWorkV1.captureReference()?.run_id === ' + json.dumps(run['id']))
         if job:
             selector = '#ees-work-panel [data-action="job"][data-job-id="' + job + '"]'
+            if not self.browser.evaluate('!!document.querySelector(' + json.dumps(selector) + ')'):
+                self.click('[data-action=stage_details]')
             self.wait('document.querySelector(' + json.dumps(selector) + ')')
             self.click(selector)
             self.wait("document.querySelector('#ees-work-panel h2')?.textContent === " + json.dumps(run['definition']['nodes'][job]['name']))

@@ -961,8 +961,11 @@ class SourceShellNativeTests(IntegratedNativeCase):
         labels.append('work-open')
         frame_monitor.guard_loading(self)
         self.step('right-overview', '#ees-work-panel [data-action=overview]',
-                  "document.querySelector('#ees-work-panel [data-action=job]')")
+                  "document.querySelector('#ees-work-panel .ew-operation-overview [data-action=stage_open]')")
         labels.append('right-overview')
+        self.step('right-stage', '#ees-work-panel .ew-operation-overview [data-action=stage_open]',
+                  "document.querySelector('#ees-work-panel [data-action=job]')")
+        labels.append('right-stage')
         self.step('right-other-task', '#ees-work-panel [data-action=job][data-job-id=job-1]',
                   "document.querySelector('#ees-work-panel h2')?.textContent === '합성 작업 1'")
         labels.append('right-other-task')

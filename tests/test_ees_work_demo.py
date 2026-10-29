@@ -99,9 +99,9 @@ class EESWorkNativeBrowserTests(IntegratedNativeCase):
     def test_navigation_preserves_local_input_and_does_not_change_business_revision(self):
         key = self.author(fields=[{'id': 'note', 'type': 'text', 'scope': 'run'}]); run = self.start(key)
         self.open_run(key, run); self.fill('[data-work-input][name="note"]', '아직 저장하지 않음')
-        self.click('[data-action="overview"]'); self.click('[data-action="job"][data-job-id="job-1"]')
+        self.click('[data-action="overview"]'); self.click('[data-action=stage_open][data-node-id=stage]'); self.click('[data-action="job"][data-job-id="job-1"]')
         self.assertNotEqual(self.read('[data-work-input][name="note"]', 'value'), '아직 저장하지 않음')
-        self.click('[data-action="overview"]'); self.click('[data-action="job"][data-job-id="job-0"]')
+        self.click('[data-action="overview"]'); self.click('[data-action=stage_open][data-node-id=stage]'); self.click('[data-action="job"][data-job-id="job-0"]')
         self.assertEqual(self.read('[data-work-input][name="note"]', 'value'), '아직 저장하지 않음')
         current = self.state(run_id=run['id'])['run']; self.assertEqual(current['revision'], run['revision']); self.assertEqual(current['inputs'], {})
 

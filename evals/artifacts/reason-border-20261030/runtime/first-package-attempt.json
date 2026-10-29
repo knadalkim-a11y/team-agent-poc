@@ -1,0 +1,11 @@
+{
+  "result": "First wheel packaging strict provenance rejected one extra temporary-named file; all5582 manifest files matched.",
+  "extra_name": "_ees14/immutable/workers/assets/.ort-wasm-simd-threaded.jsep-B0T3yYHD.wasm.C1fFHr",
+  "extra_size": 17825792,
+  "extra_sha256": "d03b58e9d081663d0c9c123af786b93590f5c3c0359e5c334c09163fb54accaa",
+  "matches_original_prefix": true,
+  "original_size": 21596019,
+  "original_sha256": "c46655e8a94afc45338d4cb2b840475f88e5012d524509916e505079c00bfa39",
+  "action": "Moved only unlisted partial-copy temporary file to scratch quarantine; no manifest or listed output bytes changed. Strict validation is rerun normally.",
+  "origin": "Unknown; temporary-name pattern and payload are a partial copy of the listed WASM. No product failure inferred."
+}

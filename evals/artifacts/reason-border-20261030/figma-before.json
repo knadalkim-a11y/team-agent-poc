@@ -1,0 +1,464 @@
+{
+  "sessionId": "5e74f5e6-d46d-48db-b41e-5beacaaac372",
+  "before": {
+    "nodes": [
+      {
+        "id": "1794:903",
+        "name": "선택 사유 입력 예시",
+        "type": "FRAME",
+        "parent": {
+          "id": "1794:899",
+          "name": "사유 (선택)",
+          "children": [
+            {
+              "id": "1794:900",
+              "name": "사유 라벨",
+              "type": "FRAME"
+            },
+            {
+              "id": "1794:903",
+              "name": "선택 사유 입력 예시",
+              "type": "FRAME"
+            }
+          ]
+        },
+        "width": 413,
+        "height": 66,
+        "visible": true,
+        "strokes": [
+          {
+            "type": "SOLID",
+            "visible": true,
+            "opacity": 1,
+            "blendMode": "NORMAL",
+            "color": {
+              "r": 0.8352941274642944,
+              "g": 0.8392156958580017,
+              "b": 0.8549019694328308
+            },
+            "boundVariables": {
+              "color": {
+                "type": "VARIABLE_ALIAS",
+                "id": "VariableID:746:159"
+              }
+            }
+          }
+        ],
+        "strokeWeight": 1,
+        "effects": [],
+        "bindings": {
+          "fills": [
+            {
+              "type": "VARIABLE_ALIAS",
+              "id": "VariableID:746:153"
+            }
+          ],
+          "strokes": [
+            {
+              "type": "VARIABLE_ALIAS",
+              "id": "VariableID:746:159"
+            }
+          ]
+        },
+        "characters": null,
+        "texts": [
+          {
+            "id": "1794:904",
+            "text": "배치 주기 변경 내용을 확인했습니다."
+          }
+        ]
+      },
+      {
+        "id": "1794:905",
+        "name": "키보드 포커스",
+        "type": "RECTANGLE",
+        "parent": {
+          "id": "1794:895",
+          "name": "판정 기록",
+          "children": [
+            {
+              "id": "1794:896",
+              "name": "선택 이력",
+              "type": "FRAME"
+            },
+            {
+              "id": "1794:899",
+              "name": "사유 (선택)",
+              "type": "FRAME"
+            },
+            {
+              "id": "1794:905",
+              "name": "키보드 포커스",
+              "type": "RECTANGLE"
+            }
+          ]
+        },
+        "width": 417,
+        "height": 70,
+        "visible": true,
+        "strokes": [
+          {
+            "type": "SOLID",
+            "visible": true,
+            "opacity": 1,
+            "blendMode": "NORMAL",
+            "color": {
+              "r": 0.18431372940540314,
+              "g": 0.37254902720451355,
+              "b": 0.5960784554481506
+            },
+            "boundVariables": {
+              "color": {
+                "type": "VARIABLE_ALIAS",
+                "id": "VariableID:746:170"
+              }
+            }
+          }
+        ],
+        "strokeWeight": 2,
+        "effects": [],
+        "bindings": {
+          "strokes": [
+            {
+              "type": "VARIABLE_ALIAS",
+              "id": "VariableID:746:170"
+            }
+          ]
+        },
+        "characters": null,
+        "texts": []
+      },
+      {
+        "id": "1284:3107",
+        "name": "Header · 업무 · 운영",
+        "type": "FRAME",
+        "parent": {
+          "id": "1284:3106",
+          "name": "업무 · 운영",
+          "children": [
+            {
+              "id": "1284:3107",
+              "name": "Header · 업무 · 운영",
+              "type": "FRAME"
+            },
+            {
+              "id": "1705:1328",
+              "name": "운영 · 직접 판정과 기록",
+              "type": "FRAME"
+            },
+            {
+              "id": "1700:931",
+              "name": "운영 · 자동 판정 · 동일 작업 E2E30",
+              "type": "FRAME"
+            },
+            {
+              "id": "1705:1851",
+              "name": "운영 · 기록·기준",
+              "type": "FRAME"
+            },
+            {
+              "id": "1762:456",
+              "name": "운영 · 업무 개요",
+              "type": "FRAME"
+            },
+            {
+              "id": "1762:758",
+              "name": "운영 · 단계와 작업 조회",
+              "type": "FRAME"
+            },
+            {
+              "id": "1762:760",
+              "name": "운영 · 보조 · 공장 미선택",
+              "type": "FRAME"
+            },
+            {
+              "id": "1762:763",
+              "name": "운영 · 개요 판정 현황",
+              "type": "FRAME"
+            },
+            {
+              "id": "1793:408",
+              "name": "대표 흐름 · 개요",
+              "type": "FRAME"
+            },
+            {
+              "id": "1793:411",
+              "name": "대표 흐름 · 개요 결과",
+              "type": "FRAME"
+            },
+            {
+              "id": "1793:414",
+              "name": "보조 흐름 · 대상 선택",
+              "type": "FRAME"
+            }
+          ]
+        },
+        "width": 2076,
+        "height": 524,
+        "visible": true,
+        "strokes": [
+          {
+            "type": "SOLID",
+            "visible": true,
+            "opacity": 1,
+            "blendMode": "NORMAL",
+            "color": {
+              "r": 0.9019607901573181,
+              "g": 0.9019607901573181,
+              "b": 0.9137254953384399
+            },
+            "boundVariables": {
+              "color": {
+                "type": "VARIABLE_ALIAS",
+                "id": "VariableID:746:158"
+              }
+            }
+          }
+        ],
+        "strokeWeight": 1,
+        "effects": [],
+        "bindings": {
+          "fills": [
+            {
+              "type": "VARIABLE_ALIAS",
+              "id": "VariableID:746:153"
+            }
+          ],
+          "strokes": [
+            {
+              "type": "VARIABLE_ALIAS",
+              "id": "VariableID:746:158"
+            }
+          ]
+        },
+        "characters": null,
+        "texts": [
+          {
+            "id": "1284:3108",
+            "text": "업무 · 운영"
+          },
+          {
+            "id": "1284:3112",
+            "text": "메뉴 위치   업무 › 운영 › 워크플로우 · 공통 원칙은 ‘업무 · 공통’"
+          },
+          {
+            "id": "1284:3113",
+            "text": "보는 사람   팀원 · 절차 작성자 · 관리자"
+          },
+          {
+            "id": "1284:3114",
+            "text": "최신판   운영 31판 · 2026-10-28 · 공통 사이드바 복원 · HTML31 미리보기 → · 오른쪽 흐름의 30판 원본 3624a12 →"
+          },
+          {
+            "id": "1284:3115",
+            "text": "구현·계약   어느 판을 구현할지와 저장·판정·자료 연결 계약은 GitHub TASK·STATUS를 따릅니다. Figma는 화면 표현의 원본입니다."
+          },
+          {
+            "id": "1284:3116",
+            "text": "범위   단일 단계의 판정 현황까지 연결했습니다. 여러 단계의 최신 연결과 업무 전체 완료·종료는 이번 대표 흐름 범위 밖입니다."
+          },
+          {
+            "id": "1284:3117",
+            "text": "대표 예시   공장 A · EMS / 1차 점검12작업 · 개요 → 단계 조회 → 자동 실행·근거 → 직접 판정 → 기록·기준 → 개요 현황. 화면의 예시 순서이며 업무의 필수 선후 조건을 새로 정하지 않습니다."
+          },
+          {
+            "id": "1284:3110",
+            "text": "기능 지도 열기 (00 · 설계 관리 · 먼저 읽기) →"
+          },
+          {
+            "id": "1284:3111",
+            "text": "판 기록   바뀐 점은 관리 페이지의 변경 기록(C번호), 판별 정확한 모습은 Git의 목업 고정 커밋, 이전 화면은 91 · 보관 페이지에 있습니다."
+          },
+          {
+            "id": "1668:1068",
+            "text": "01 업무 개요 →"
+          },
+          {
+            "id": "1768:456",
+            "text": "02 단계·작업 조회 →"
+          },
+          {
+            "id": "1700:2254",
+            "text": "03–08 자동 실행·근거 →"
+          },
+          {
+            "id": "1700:2253",
+            "text": "09–10 직접 판정·기록 →"
+          },
+          {
+            "id": "1700:2255",
+            "text": "11 기록 →"
+          },
+          {
+            "id": "1700:2256",
+            "text": "12 기준 →"
+          },
+          {
+            "id": "1794:281",
+            "text": "13 개요 현황 →"
+          },
+          {
+            "id": "1823:5406",
+            "text": "공통 원본   R7 모드·권한 → · A2 공장·시스템 → · 공통 검수 기준 →. 오른쪽 흐름 HTML을 공통 화면 틀의 대체 기준으로 쓰지 않습니다."
+          },
+          {
+            "id": "1823:5407",
+            "text": "이번 변경 / 유지   왼쪽 모드 전환 복원. 기존 공장 선택·메뉴·대화·오른쪽 12작업 흐름·기록·판정·실행 보호를 유지합니다. 작성자 김광재 예시이므로 전환을 표시합니다."
+          },
+          {
+            "id": "1823:5408",
+            "text": "검수 범위   운영 HTML31과 작성 HTML4에서 업무 / 워크스페이스 전환과 공장 / 시스템 선택을 확인합니다. Git 고정 HTML30은 오른쪽 운영 흐름의 당시 이력이며 공통 사이드바의 기준은 R7·A2입니다."
+          }
+        ]
+      }
+    ],
+    "pages": [
+      {
+        "id": "897:760",
+        "name": "00 · 설계 관리 · 먼저 읽기"
+      },
+      {
+        "id": "1284:3046",
+        "name": "공통 · 화면 틀·이동"
+      },
+      {
+        "id": "1284:3058",
+        "name": "공통 · 대화·업무 도우미"
+      },
+      {
+        "id": "1284:3070",
+        "name": "공통 · 상태·부품"
+      },
+      {
+        "id": "1284:3082",
+        "name": "업무 · 내 업무"
+      },
+      {
+        "id": "1689:1061",
+        "name": "업무 · 공통"
+      },
+      {
+        "id": "1284:3106",
+        "name": "업무 · 운영"
+      },
+      {
+        "id": "1689:1062",
+        "name": "업무 · 셋업"
+      },
+      {
+        "id": "1689:1063",
+        "name": "업무 · 장애대응"
+      },
+      {
+        "id": "1284:3118",
+        "name": "업무 · 실행 기록"
+      },
+      {
+        "id": "1285:1829",
+        "name": "워크 · 업무 절차"
+      },
+      {
+        "id": "1285:1841",
+        "name": "워크 · 도구"
+      },
+      {
+        "id": "1283:3107",
+        "name": "워크 · 스킬·지침"
+      },
+      {
+        "id": "1285:1853",
+        "name": "워크 · AI 도우미"
+      },
+      {
+        "id": "1285:1865",
+        "name": "워크 · 참고 문서"
+      },
+      {
+        "id": "897:761",
+        "name": "70 · 작업실 · 실험·검토"
+      },
+      {
+        "id": "1722:1395",
+        "name": "91 · 보관 · 기능 페이지 이전 판과 옛 설계"
+      },
+      {
+        "id": "1753:7977",
+        "name": "92 · 보관 · 작업실 지난 시안과 검토"
+      },
+      {
+        "id": "1762:419",
+        "name": "99 · 백업 · B047 · 2026-10-28 · 업무 개요 시작 흐름 수정 전"
+      },
+      {
+        "id": "1773:494",
+        "name": "99 · 백업 · B048 · 2026-10-28 · 왼쪽 대상 선택 연결 전"
+      },
+      {
+        "id": "1781:40",
+        "name": "99 · 백업 · B049 · 2026-10-28 · 단계·작업 바로 조회 추가 전"
+      },
+      {
+        "id": "1791:1713",
+        "name": "99 · 백업 · B050 · 2026-10-28 · 운영 사례 흐름 정리 전"
+      },
+      {
+        "id": "1804:2535",
+        "name": "99 · 백업 · B051 · 2026-10-28 · 운영 작성 사례 추가 전"
+      },
+      {
+        "id": "1815:2727",
+        "name": "99 · 백업 · B053 · 2026-10-28 · AI 초안 선택지 정리 전"
+      },
+      {
+        "id": "1820:3865",
+        "name": "99 · 백업 · B054 · 2026-10-28 · 공통 원본 검수 전"
+      },
+      {
+        "id": "1831:270",
+        "name": "99 · 백업 · B055 · 2026-10-28 · HTML 사이드바 복구 전"
+      },
+      {
+        "id": "1851:2",
+        "name": "99 · 백업 · B057 · 2026-10-28 · 작업 상세 B3 복구 전"
+      },
+      {
+        "id": "1854:3157",
+        "name": "99 · 백업 · B058 · 2026-10-28 · 워크.워크플로 패밀리룩 수정 전"
+      },
+      {
+        "id": "1865:2",
+        "name": "99 · 백업 · B059 · 2026-10-28 · 워크.워크플로 도구 선택 연동 수정 전"
+      },
+      {
+        "id": "1874:2",
+        "name": "99 · 백업 · B060 · 2026-10-28 · 워크.워크플로 검색 조건 표현 수정 전"
+      },
+      {
+        "id": "1880:3197",
+        "name": "99 · 백업 · B061 · 2026-10-28 · 워크.워크플로 도구 설정 구조 변경 전"
+      },
+      {
+        "id": "1888:620",
+        "name": "99 · 백업 · B062 · 2026-10-29 · 도구 연결 버튼 9.1판 변경 전"
+      },
+      {
+        "id": "1899:2",
+        "name": "99 · 백업 · B064 · 2026-10-29 · 업무절차 작성 마감 변경 전"
+      },
+      {
+        "id": "1912:3059",
+        "name": "99 · 백업 · B065 · 2026-10-29 · 작업 상세 추가 설정 정리 전"
+      },
+      {
+        "id": "1920:3015",
+        "name": "99 · 백업 · B066 · 2026-10-29 · 결과 확인 직접 노출 전"
+      }
+    ]
+  },
+  "reason_context": [
+    "export default function Component() {\n  return (\n    <div className=\"bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex flex-col gap-[12px] items-start overflow-clip p-[12px] relative rounded-[6px] size-full\" data-node-id=\"1794:895\" data-name=\"판정 기록\">\n      <div className=\"[word-break:break-word] content-stretch flex flex-col gap-[3px] items-start leading-[20px] overflow-clip relative shrink-0 text-[13px] w-[413px]\" data-node-id=\"1794:896\" data-name=\"선택 이력\">\n        <p className=\"font-['Noto_Sans_KR:Medium'] font-medium relative shrink-0 text-[color:var(--ees-text-primary,#1f2023)] w-[414px]\" data-node-id=\"1794:897\">\n          승인 선택\n        </p>\n        <p className=\"font-['Noto_Sans_KR:Regular'] font-normal relative shrink-0 text-[color:var(--ees-text-tertiary,#6f717a)] w-[414px]\" data-node-id=\"1794:898\">\n          김광재 · 10.27 14:24\n        </p>\n      </div>\n      <div className=\"content-stretch flex flex-col gap-[6px] items-start overflow-clip relative shrink-0 w-[413px]\" data-node-id=\"1794:899\" data-name=\"사유 (선택)\">\n        <div className=\"[word-break:break-word] content-stretch flex gap-[4px] items-center overflow-clip relative shrink-0 w-[413px] whitespace-nowrap\" data-node-id=\"1794:900\" data-name=\"사유 라벨\">\n          <p className=\"font-['Noto_Sans_KR:Medium'] font-medium leading-[20px] relative shrink-0 text-[13px] text-[color:var(--ees-text-primary,#1f2023)]\" data-node-id=\"1794:901\">\n            사유\n          </p>\n          <p className=\"font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[12px] text-[color:var(--ees-text-tertiary,#6f717a)]\" data-node-id=\"1794:902\">\n            (선택)\n          </p>\n        </div>\n        <div className=\"bg-[var(--ees-surface-default,white)] border border-[var(--ees-line-control,#d5d6da)] border-solid content-stretch flex flex-col h-[66px] items-start overflow-clip p-[9px] relative rounded-[6px] shrink-0 w-[413px]\" data-node-id=\"1794:903\" data-name=\"선택 사유 입력 예시\">\n          <p className=\"[word-break:break-word] font-['Noto_Sans_KR:Regular'] font-normal leading-[18px] relative shrink-0 text-[13px] text-[color:var(--ees-text-primary,#1f2023)] w-[396px]\" data-node-id=\"1794:904\">\n            배치 주기 변경 내용을 확인했습니다.\n          </p>\n        </div>\n      </div>\n      <div className=\"absolute border-2 border-[var(--ees-brand-text,#2f5f98)] border-solid h-[70px] left-[10px] rounded-[8px] top-[91px] w-[417px]\" data-node-id=\"1794:905\" data-name=\"키보드 포커스\" />\n    </div>\n  );\n}",
+    "SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.\n1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens\n2. Convert React syntax to the target framework/library\n3. Transform all Tailwind classes to the target styling system while preserving exact visual design\n4. Follow the project's existing patterns and conventions\nDO NOT install any Tailwind as a dependency unless the user instructs you to do so.\n",
+    "Node ids have been added to the code as data attributes, e.g. `data-node-id=\"1:2\"`.",
+    "The generated code contains image and SVG URL constants, e.g. const image = `${assetPathPrefix}/<asset file name>`, where assetPathPrefix is declared once at the top of the code and every asset URL interpolates it. These URLs are temporary download sources and expire after 7 days. Download each asset into the project with curl -L, then replace its URL in the generated code with a reference to the downloaded asset. Never use the temporary URLs as runtime image sources."
+  ]
+}

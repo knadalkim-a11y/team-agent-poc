@@ -1,0 +1,2019 @@
+{
+  "time": "2026-10-29T23:23:48.402278+00:00",
+  "scope": "Complete packaged Native app gate for the integrated work contract.\n\nOne temporary DATA_DIR and a loopback synthetic model are used. Native auth,\nchat/file storage, workflow APIs, worker and frontend are the built product.\nNo company credentials, DB or service is read. Physical CDP input drives UI;\nread-only DOM evaluation inspects readiness and results. Failure evidence is\ncaptured before browser shutdown. This is distinct from the Native fixtures.\nThis gate was reconstructed after workspace loss from the committed base and\nobserved failures. It is not claimed byte-identical to the lost c144 gate.\n",
+  "source_commit": "ed77695d425cc1ab0ccfd92a3ad8f38e239d66cb",
+  "source_dirty": true,
+  "wheel": "open_webui-0.11.3+ees.14-py3-none-any.whl",
+  "wheel_sha256": "268786f8a97a5b0512d30f057f87d2314d7b06af7ae0531007a73856bc19ff5f",
+  "gate_sha256": "5e6d07e3348193a0c2d926888efad640b4f67e60f21cd3072db5ba4bc0d0914f",
+  "execution": {
+    "python": "3.11.16",
+    "argv": [
+      "tests/ees_work_native_chat.py",
+      "--wheel",
+      "/workspace/scratch/b1afafbe4fcd/parity-build/branding6/open_webui-0.11.3+ees.14-py3-none-any.whl",
+      "--chrome",
+      "/workspace/scratch/b1afafbe4fcd/browser-tools/chromium",
+      "--output",
+      "/workspace/scratch/b1afafbe4fcd/repo/evals/artifacts/reason-border-20261030/runtime/central-chat-source6"
+    ],
+    "chrome": "/workspace/scratch/b1afafbe4fcd/browser-tools/chromium",
+    "reconstructed_after_workspace_loss": true,
+    "prior_lost_gate_byte_identity_claimed": false
+  },
+  "steps": [
+    {
+      "name": "empty Native installation",
+      "workflows": 0,
+      "runs": 0
+    },
+    {
+      "name": "Native model availability",
+      "models": [
+        {
+          "id": "c3-synthetic-model",
+          "direct": null,
+          "owned_by": "openai"
+        },
+        {
+          "id": "arena-model",
+          "direct": null,
+          "owned_by": "arena"
+        }
+      ]
+    },
+    {
+      "name": "actual built Native render",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "name": "explicit packaged read-only Work tool registration",
+      "id": "ees_workflow",
+      "source_sha256": "c3405128830c77f6d7e5bd1d9bf0f5493e94c43fae3f4db7dfbee81f4e797085",
+      "private_native_grant": true,
+      "model_presets_created": false
+    },
+    {
+      "name": "actual Native authenticated socket join sent",
+      "credential_payload_recorded": false
+    },
+    {
+      "name": "physical central chat executes actual registered authorized read",
+      "workflow_id": "9d06f947-7a1a-45fd-8733-639d2d77ba12",
+      "revision": 2,
+      "stored_work_unchanged": true
+    },
+    {
+      "name": "physical central proposal then separate apply and save",
+      "draft_revision": 3,
+      "published": false,
+      "runs": 0,
+      "chat_id": "fcbcd5fb-481f-4503-aeed-bb803acd7b48",
+      "native_tool_history_saved": true,
+      "model_boundary": "Loopback synthetic tool-call selection only; actual Native registered tool execution"
+    },
+    {
+      "name": "isolated existing job-input definition fixture",
+      "workflow_id": "9d06f947-7a1a-45fd-8733-639d2d77ba12",
+      "job_id": "job-7f2b8f0e-28e3-4e83-a93f-4c4d4c7278d3",
+      "field": {
+        "id": "note",
+        "name": "자료 메모",
+        "type": "text",
+        "scope": "run",
+        "required": false
+      },
+      "draft_revision": 5,
+      "boundary": "Actual authenticated save_draft; no input values, publication or execution seeded"
+    },
+    {
+      "name": "physical central input suggestion preview apply then separate save",
+      "run_id": "84eb7764-29cb-47f2-a711-53875b59dc94",
+      "proposal_count": 1,
+      "attempts": 0,
+      "native_tool_history_saved": true
+    },
+    {
+      "name": "physical immutable historical message reference after second attempt",
+      "message_id": "17d9b47a-cfea-457a-b7bb-9440af0531ff",
+      "attempt_id": "16d224f9-d4c1-4124-9c32-731626783be4",
+      "latest_attempts": 2,
+      "readonly": true
+    },
+    {
+      "name": "physical helper question directly sends through actual Native model and read-only tool",
+      "chat_id": "fcbcd5fb-481f-4503-aeed-bb803acd7b48",
+      "message_id": "94383b5a-55d0-43b2-a666-73c1b7bdc44c",
+      "question": "정보 읽기 도구와 작업 부탁 도구는 뭐가 달라?",
+      "reference": {
+        "kind": "help",
+        "system_id": "EMS",
+        "context_id": "[18,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"\",\"\",\"\"]",
+        "screen": "새 도구 시작"
+      },
+      "selected_model": "c3-synthetic-model",
+      "advertised_tools": [
+        "ees_workflow_view"
+      ],
+      "actual_tool_results": 1,
+      "composer_preserved": true,
+      "workflow_argument_cannot_read_work": true
+    },
+    {
+      "name": "helper reference remains immutable after navigation and actual persisted-chat reload",
+      "message_id": "94383b5a-55d0-43b2-a666-73c1b7bdc44c",
+      "reference": {
+        "kind": "help",
+        "system_id": "EMS",
+        "context_id": "[18,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"\",\"\",\"\"]",
+        "screen": "새 도구 시작"
+      },
+      "work_unchanged": true
+    },
+    {
+      "name": "actual helper call boundary strips selected tools filters skills files terminal and features",
+      "message_id": "63d05046-7fa4-4354-8d7a-8ebf0f396a95",
+      "actual_helper_results": 2,
+      "advertised_tools": [
+        "ees_workflow_view"
+      ],
+      "unrelated_asset_resolution": false,
+      "stored_message_files": 0,
+      "existing_chat_models_preserved": [
+        "c3-synthetic-model",
+        "c3-synthetic-model"
+      ],
+      "existing_chat_file_metadata_preserved": true
+    },
+    {
+      "name": "actual new helper chat preserves multiple composer models with one assistant answer",
+      "chat_id": "206de4b7-42e1-4c58-926f-abb6e1bb94d6",
+      "stored_chat_models": [
+        "c3-synthetic-model",
+        "c3-synthetic-model"
+      ],
+      "stored_messages": 2,
+      "assistant_messages": 1,
+      "actual_helper_results": 3
+    },
+    {
+      "name": "helper unavailable before Native persistence and external model: missing selected model",
+      "status": 400,
+      "readiness_code": "work_help_model_unsupported",
+      "messages_before": 0,
+      "messages_after": 0,
+      "provider_calls": 0,
+      "new_chat_created": false,
+      "synthetic_member": true
+    },
+    {
+      "name": "helper unavailable before Native persistence and external model: revoked selected model",
+      "status": 400,
+      "readiness_code": "work_help_model_unavailable",
+      "messages_before": 0,
+      "messages_after": 0,
+      "provider_calls": 0,
+      "new_chat_created": false,
+      "synthetic_member": true
+    },
+    {
+      "name": "helper unavailable before Native persistence and external model: revoked helper tool",
+      "status": 409,
+      "readiness_code": "work_chat_access_denied",
+      "messages_before": 0,
+      "messages_after": 0,
+      "provider_calls": 0,
+      "new_chat_created": false,
+      "synthetic_member": true
+    },
+    {
+      "name": "helper unavailable before Native persistence and external model: missing helper tool",
+      "status": 409,
+      "readiness_code": "work_chat_tool_unconfigured",
+      "messages_before": 0,
+      "messages_after": 0,
+      "provider_calls": 0,
+      "new_chat_created": false,
+      "synthetic_member": true
+    }
+  ],
+  "status": "passed",
+  "api_failures": [],
+  "native_messages": [
+    {
+      "id": "6fff7a92-0547-4401-acb2-ced77c28bcb5",
+      "role": "user",
+      "content": "중앙 대화 준비",
+      "done": null,
+      "meta": {
+        "ees_work_reference": {
+          "kind": "workspace",
+          "workflow_id": "9d06f947-7a1a-45fd-8733-639d2d77ba12",
+          "run_id": "",
+          "job_id": "",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": null,
+          "workflow_revision": 2,
+          "revision": 2,
+          "created_at": "2026-10-29T23:23:58.926+00:00",
+          "context_id": "[4,true,\"/\",\"\",\"EMS\",\"\",\"9d06f947-7a1a-45fd-8733-639d2d77ba12\",\"\",\"\"]"
+        }
+      }
+    },
+    {
+      "id": "297f18be-3301-494d-bfbc-b96eb9cfc1f3",
+      "role": "assistant",
+      "content": "중앙 대화의 합성 연결 준비 완료",
+      "done": true,
+      "meta": null
+    },
+    {
+      "id": "1d845d3b-94cb-4b4d-aca5-4808f4edf251",
+      "role": "user",
+      "content": "중앙 도구로 현재 절차를 조회해 줘",
+      "done": null,
+      "meta": {
+        "ees_work_reference": {
+          "kind": "workspace",
+          "workflow_id": "9d06f947-7a1a-45fd-8733-639d2d77ba12",
+          "run_id": "",
+          "job_id": "",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": null,
+          "workflow_revision": 2,
+          "revision": 2,
+          "created_at": "2026-10-29T23:23:58.926+00:00",
+          "context_id": "[6,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"9d06f947-7a1a-45fd-8733-639d2d77ba12\",\"\",\"\"]"
+        }
+      }
+    },
+    {
+      "id": "913507f4-dd2a-4007-af61-c6d4bdf93cac",
+      "role": "assistant",
+      "content": "중앙 도구 조회 완료",
+      "done": true,
+      "meta": null
+    },
+    {
+      "id": "cd13e3f0-f1a5-415b-a187-eba8784b7afc",
+      "role": "user",
+      "content": "설명을 보완한 초안을 제안해 줘. 저장하지 말고 검토하게 해 줘",
+      "done": null,
+      "meta": {
+        "ees_work_reference": {
+          "kind": "workspace",
+          "workflow_id": "9d06f947-7a1a-45fd-8733-639d2d77ba12",
+          "run_id": "",
+          "job_id": "",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": null,
+          "workflow_revision": 2,
+          "revision": 2,
+          "created_at": "2026-10-29T23:23:58.926+00:00",
+          "context_id": "[6,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"9d06f947-7a1a-45fd-8733-639d2d77ba12\",\"\",\"\"]"
+        }
+      }
+    },
+    {
+      "id": "9e97c74a-7da5-49b1-a37b-2037843c8d04",
+      "role": "assistant",
+      "content": "중앙 제안은 검토 전이며 저장하지 않았습니다",
+      "done": true,
+      "meta": null
+    },
+    {
+      "id": "5e1f0254-a406-4380-869f-e5484c010dd5",
+      "role": "user",
+      "content": "개발용 자료 메모를 제안해 줘. 저장하지 마.",
+      "done": null,
+      "meta": {
+        "ees_work_reference": {
+          "kind": "workspace",
+          "workflow_id": "9d06f947-7a1a-45fd-8733-639d2d77ba12",
+          "run_id": "84eb7764-29cb-47f2-a711-53875b59dc94",
+          "job_id": "job-7f2b8f0e-28e3-4e83-a93f-4c4d4c7278d3",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 6,
+          "attempt_id": null,
+          "result_revision": null,
+          "revision": 1,
+          "created_at": "2026-10-29T23:24:02.438+00:00",
+          "context_id": "[15,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"9d06f947-7a1a-45fd-8733-639d2d77ba12\",\"84eb7764-29cb-47f2-a711-53875b59dc94\",\"job-7f2b8f0e-28e3-4e83-a93f-4c4d4c7278d3\"]"
+        }
+      }
+    },
+    {
+      "id": "a9648c1d-99eb-4831-bf98-fd5162f97e4a",
+      "role": "assistant",
+      "content": "중앙 입력 제안은 검토 전이며 저장하지 않았습니다",
+      "done": true,
+      "meta": null
+    },
+    {
+      "id": "17d9b47a-cfea-457a-b7bb-9440af0531ff",
+      "role": "user",
+      "content": "첫 번째 완료 근거를 대화에 남겨 줘",
+      "done": null,
+      "meta": {
+        "ees_work_reference": {
+          "kind": "workspace",
+          "workflow_id": "9d06f947-7a1a-45fd-8733-639d2d77ba12",
+          "run_id": "84eb7764-29cb-47f2-a711-53875b59dc94",
+          "job_id": "job-7f2b8f0e-28e3-4e83-a93f-4c4d4c7278d3",
+          "system_id": "EMS",
+          "factory_id": "",
+          "version": 1,
+          "workflow_revision": 6,
+          "attempt_id": "16d224f9-d4c1-4124-9c32-731626783be4",
+          "result_revision": 1,
+          "revision": 5,
+          "created_at": "2026-10-29T23:24:04.007+00:00",
+          "context_id": "[15,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"9d06f947-7a1a-45fd-8733-639d2d77ba12\",\"84eb7764-29cb-47f2-a711-53875b59dc94\",\"job-7f2b8f0e-28e3-4e83-a93f-4c4d4c7278d3\"]"
+        }
+      }
+    },
+    {
+      "id": "53c0183b-9928-4d88-9c48-635c24ff46b4",
+      "role": "assistant",
+      "content": "첫 번째 완료 근거를 참조한 대화 응답",
+      "done": true,
+      "meta": null
+    },
+    {
+      "id": "94383b5a-55d0-43b2-a666-73c1b7bdc44c",
+      "role": "user",
+      "content": "정보 읽기 도구와 작업 부탁 도구는 뭐가 달라?",
+      "done": null,
+      "meta": {
+        "ees_work_help": 1,
+        "ees_work_reference": {
+          "kind": "help",
+          "system_id": "EMS",
+          "context_id": "[18,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"\",\"\",\"\"]",
+          "screen": "새 도구 시작"
+        }
+      }
+    },
+    {
+      "id": "ec0ecb2e-b557-4af8-b9d9-a8ae4e4fe85b",
+      "role": "assistant",
+      "content": "업무 도우미가 실제 등록된 읽기 도구로 안내했습니다.",
+      "done": true,
+      "meta": null
+    },
+    {
+      "id": "63d05046-7fa4-4354-8d7a-8ebf0f396a95",
+      "role": "user",
+      "content": "선택된 기능과 자료 없이 도움말만 알려 주세요",
+      "done": null,
+      "meta": {
+        "ees_work_help": 1,
+        "ees_work_reference": {
+          "kind": "help",
+          "system_id": "EMS",
+          "context_id": "[18,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"\",\"\",\"\"]",
+          "screen": "새 도구 시작"
+        }
+      }
+    },
+    {
+      "id": "f3d944cb-e955-4efe-b4db-5a6305129106",
+      "role": "assistant",
+      "content": "업무 도우미가 실제 등록된 읽기 도구로 안내했습니다.",
+      "done": true,
+      "meta": null
+    }
+  ],
+  "model_boundary": {
+    "calls": [
+      {
+        "mode": "read",
+        "function": "ees_workflow_view",
+        "arguments": {
+          "workflow_id": "9d06f947-7a1a-45fd-8733-639d2d77ba12"
+        }
+      },
+      {
+        "mode": "propose",
+        "function": "ees_workflow_propose",
+        "arguments": {
+          "workflow_id": "9d06f947-7a1a-45fd-8733-639d2d77ba12",
+          "base_revision": 2,
+          "definition": {
+            "id": "9d06f947-7a1a-45fd-8733-639d2d77ba12",
+            "name": "중앙 대화 제안 검증",
+            "system_id": "EMS",
+            "category": "ops",
+            "mode": "on_demand",
+            "nodes": {
+              "p-019fa58c1031": {
+                "id": "p-019fa58c1031",
+                "name": "중앙 대화 제안 검증",
+                "type": "p",
+                "parent": null,
+                "children": [
+                  "stage-b82252db-e2d9-4df9-ba9b-2dfc533ca4f5"
+                ],
+                "deps": []
+              },
+              "stage-b82252db-e2d9-4df9-ba9b-2dfc533ca4f5": {
+                "id": "stage-b82252db-e2d9-4df9-ba9b-2dfc533ca4f5",
+                "type": "t",
+                "parent": "p-019fa58c1031",
+                "name": "대화 제안 검토 단계",
+                "description": "중앙 대화 제안 · 사람 반영 전",
+                "instructions": "",
+                "children": [],
+                "mode": "human",
+                "inputs": [],
+                "result_block": "human_confirm",
+                "deps": [],
+                "human_confirmation": true,
+                "completion": {
+                  "rule": ""
+                }
+              }
+            },
+            "description": "중앙 대화에서 제안한 미저장 설명"
+          },
+          "context_id": "[6,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"9d06f947-7a1a-45fd-8733-639d2d77ba12\",\"\",\"\"]"
+        }
+      },
+      {
+        "mode": "inputs",
+        "function": "ees_workflow_propose",
+        "arguments": {
+          "workflow_id": "9d06f947-7a1a-45fd-8733-639d2d77ba12",
+          "base_revision": 1,
+          "context_id": "[15,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"9d06f947-7a1a-45fd-8733-639d2d77ba12\",\"84eb7764-29cb-47f2-a711-53875b59dc94\",\"job-7f2b8f0e-28e3-4e83-a93f-4c4d4c7278d3\"]",
+          "proposal_kind": "inputs",
+          "run_id": "84eb7764-29cb-47f2-a711-53875b59dc94",
+          "job_id": "job-7f2b8f0e-28e3-4e83-a93f-4c4d4c7278d3",
+          "inputs": {
+            "note": "AI가 제안한 첫 입력"
+          }
+        }
+      },
+      {
+        "mode": "help",
+        "function": "ees_workflow_view",
+        "arguments": {
+          "workflow_id": "9d06f947-7a1a-45fd-8733-639d2d77ba12"
+        }
+      },
+      {
+        "mode": "help",
+        "function": "ees_workflow_view",
+        "arguments": {
+          "workflow_id": "9d06f947-7a1a-45fd-8733-639d2d77ba12"
+        }
+      },
+      {
+        "mode": "help",
+        "function": "ees_workflow_view",
+        "arguments": {
+          "workflow_id": "9d06f947-7a1a-45fd-8733-639d2d77ba12"
+        }
+      }
+    ],
+    "models": [
+      {
+        "mode": "plain",
+        "advertised_tool_names": [
+          "ees_workflow_display",
+          "ees_workflow_propose",
+          "ees_workflow_view",
+          "get_current_timestamp",
+          "calculate_timestamp",
+          "ask_user",
+          "list_knowledge_bases",
+          "search_knowledge_bases",
+          "query_knowledge_bases",
+          "grep_knowledge_files",
+          "search_knowledge_files",
+          "query_knowledge_files",
+          "view_knowledge_file",
+          "search_chats",
+          "view_chat",
+          "search_memories",
+          "list_memory_paths",
+          "read_memory_path",
+          "list_memories",
+          "update_memory",
+          "add_memory",
+          "replace_memory_content",
+          "delete_memory",
+          "search_notes",
+          "view_note",
+          "write_note",
+          "replace_note_content",
+          "create_tasks",
+          "update_task",
+          "create_automation",
+          "update_automation",
+          "list_automations",
+          "toggle_automation",
+          "delete_automation",
+          "search_calendar_events",
+          "create_calendar_event",
+          "update_calendar_event",
+          "delete_calendar_event"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user"
+        ]
+      },
+      {
+        "mode": "read",
+        "advertised_tool_names": [
+          "ees_workflow_display",
+          "ees_workflow_propose",
+          "ees_workflow_view",
+          "get_current_timestamp",
+          "calculate_timestamp",
+          "ask_user",
+          "list_knowledge_bases",
+          "search_knowledge_bases",
+          "query_knowledge_bases",
+          "grep_knowledge_files",
+          "search_knowledge_files",
+          "query_knowledge_files",
+          "view_knowledge_file",
+          "search_chats",
+          "view_chat",
+          "search_memories",
+          "list_memory_paths",
+          "read_memory_path",
+          "list_memories",
+          "update_memory",
+          "add_memory",
+          "replace_memory_content",
+          "delete_memory",
+          "search_notes",
+          "view_note",
+          "write_note",
+          "replace_note_content",
+          "create_tasks",
+          "update_task",
+          "create_automation",
+          "update_automation",
+          "list_automations",
+          "toggle_automation",
+          "delete_automation",
+          "search_calendar_events",
+          "create_calendar_event",
+          "update_calendar_event",
+          "delete_calendar_event"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user",
+          "assistant",
+          "user"
+        ]
+      },
+      {
+        "mode": "read",
+        "advertised_tool_names": [
+          "ees_workflow_display",
+          "ees_workflow_propose",
+          "ees_workflow_view",
+          "get_current_timestamp",
+          "calculate_timestamp",
+          "ask_user",
+          "list_knowledge_bases",
+          "search_knowledge_bases",
+          "query_knowledge_bases",
+          "grep_knowledge_files",
+          "search_knowledge_files",
+          "query_knowledge_files",
+          "view_knowledge_file",
+          "search_chats",
+          "view_chat",
+          "search_memories",
+          "list_memory_paths",
+          "read_memory_path",
+          "list_memories",
+          "update_memory",
+          "add_memory",
+          "replace_memory_content",
+          "delete_memory",
+          "search_notes",
+          "view_note",
+          "write_note",
+          "replace_note_content",
+          "create_tasks",
+          "update_task",
+          "create_automation",
+          "update_automation",
+          "list_automations",
+          "toggle_automation",
+          "delete_automation",
+          "search_calendar_events",
+          "create_calendar_event",
+          "update_calendar_event",
+          "delete_calendar_event"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "tool"
+        ]
+      },
+      {
+        "mode": "propose",
+        "advertised_tool_names": [
+          "ees_workflow_display",
+          "ees_workflow_propose",
+          "ees_workflow_view",
+          "get_current_timestamp",
+          "calculate_timestamp",
+          "ask_user",
+          "list_knowledge_bases",
+          "search_knowledge_bases",
+          "query_knowledge_bases",
+          "grep_knowledge_files",
+          "search_knowledge_files",
+          "query_knowledge_files",
+          "view_knowledge_file",
+          "search_chats",
+          "view_chat",
+          "search_memories",
+          "list_memory_paths",
+          "read_memory_path",
+          "list_memories",
+          "update_memory",
+          "add_memory",
+          "replace_memory_content",
+          "delete_memory",
+          "search_notes",
+          "view_note",
+          "write_note",
+          "replace_note_content",
+          "create_tasks",
+          "update_task",
+          "create_automation",
+          "update_automation",
+          "list_automations",
+          "toggle_automation",
+          "delete_automation",
+          "search_calendar_events",
+          "create_calendar_event",
+          "update_calendar_event",
+          "delete_calendar_event"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user"
+        ]
+      },
+      {
+        "mode": "propose",
+        "advertised_tool_names": [
+          "ees_workflow_display",
+          "ees_workflow_propose",
+          "ees_workflow_view",
+          "get_current_timestamp",
+          "calculate_timestamp",
+          "ask_user",
+          "list_knowledge_bases",
+          "search_knowledge_bases",
+          "query_knowledge_bases",
+          "grep_knowledge_files",
+          "search_knowledge_files",
+          "query_knowledge_files",
+          "view_knowledge_file",
+          "search_chats",
+          "view_chat",
+          "search_memories",
+          "list_memory_paths",
+          "read_memory_path",
+          "list_memories",
+          "update_memory",
+          "add_memory",
+          "replace_memory_content",
+          "delete_memory",
+          "search_notes",
+          "view_note",
+          "write_note",
+          "replace_note_content",
+          "create_tasks",
+          "update_task",
+          "create_automation",
+          "update_automation",
+          "list_automations",
+          "toggle_automation",
+          "delete_automation",
+          "search_calendar_events",
+          "create_calendar_event",
+          "update_calendar_event",
+          "delete_calendar_event"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "tool"
+        ]
+      },
+      {
+        "mode": "inputs",
+        "advertised_tool_names": [
+          "ees_workflow_display",
+          "ees_workflow_propose",
+          "ees_workflow_view",
+          "get_current_timestamp",
+          "calculate_timestamp",
+          "ask_user",
+          "list_knowledge_bases",
+          "search_knowledge_bases",
+          "query_knowledge_bases",
+          "grep_knowledge_files",
+          "search_knowledge_files",
+          "query_knowledge_files",
+          "view_knowledge_file",
+          "search_chats",
+          "view_chat",
+          "search_memories",
+          "list_memory_paths",
+          "read_memory_path",
+          "list_memories",
+          "update_memory",
+          "add_memory",
+          "replace_memory_content",
+          "delete_memory",
+          "search_notes",
+          "view_note",
+          "write_note",
+          "replace_note_content",
+          "create_tasks",
+          "update_task",
+          "create_automation",
+          "update_automation",
+          "list_automations",
+          "toggle_automation",
+          "delete_automation",
+          "search_calendar_events",
+          "create_calendar_event",
+          "update_calendar_event",
+          "delete_calendar_event"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user"
+        ]
+      },
+      {
+        "mode": "inputs",
+        "advertised_tool_names": [
+          "ees_workflow_display",
+          "ees_workflow_propose",
+          "ees_workflow_view",
+          "get_current_timestamp",
+          "calculate_timestamp",
+          "ask_user",
+          "list_knowledge_bases",
+          "search_knowledge_bases",
+          "query_knowledge_bases",
+          "grep_knowledge_files",
+          "search_knowledge_files",
+          "query_knowledge_files",
+          "view_knowledge_file",
+          "search_chats",
+          "view_chat",
+          "search_memories",
+          "list_memory_paths",
+          "read_memory_path",
+          "list_memories",
+          "update_memory",
+          "add_memory",
+          "replace_memory_content",
+          "delete_memory",
+          "search_notes",
+          "view_note",
+          "write_note",
+          "replace_note_content",
+          "create_tasks",
+          "update_task",
+          "create_automation",
+          "update_automation",
+          "list_automations",
+          "toggle_automation",
+          "delete_automation",
+          "search_calendar_events",
+          "create_calendar_event",
+          "update_calendar_event",
+          "delete_calendar_event"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "tool"
+        ]
+      },
+      {
+        "mode": "plain",
+        "advertised_tool_names": [
+          "ees_workflow_display",
+          "ees_workflow_propose",
+          "ees_workflow_view",
+          "get_current_timestamp",
+          "calculate_timestamp",
+          "ask_user",
+          "list_knowledge_bases",
+          "search_knowledge_bases",
+          "query_knowledge_bases",
+          "grep_knowledge_files",
+          "search_knowledge_files",
+          "query_knowledge_files",
+          "view_knowledge_file",
+          "search_chats",
+          "view_chat",
+          "search_memories",
+          "list_memory_paths",
+          "read_memory_path",
+          "list_memories",
+          "update_memory",
+          "add_memory",
+          "replace_memory_content",
+          "delete_memory",
+          "search_notes",
+          "view_note",
+          "write_note",
+          "replace_note_content",
+          "create_tasks",
+          "update_task",
+          "create_automation",
+          "update_automation",
+          "list_automations",
+          "toggle_automation",
+          "delete_automation",
+          "search_calendar_events",
+          "create_calendar_event",
+          "update_calendar_event",
+          "delete_calendar_event"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user"
+        ]
+      },
+      {
+        "mode": "help",
+        "advertised_tool_names": [
+          "ees_workflow_view"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "user"
+        ]
+      },
+      {
+        "mode": "help",
+        "advertised_tool_names": [
+          "ees_workflow_view"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "tool"
+        ]
+      },
+      {
+        "mode": "help",
+        "advertised_tool_names": [
+          "ees_workflow_view"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user"
+        ]
+      },
+      {
+        "mode": "help",
+        "advertised_tool_names": [
+          "ees_workflow_view"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "user",
+          "assistant",
+          "tool",
+          "assistant",
+          "user",
+          "assistant",
+          "tool"
+        ]
+      },
+      {
+        "mode": "help",
+        "advertised_tool_names": [
+          "ees_workflow_view"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user"
+        ]
+      },
+      {
+        "mode": "help",
+        "advertised_tool_names": [
+          "ees_workflow_view"
+        ],
+        "stream": true,
+        "roles": [
+          "system",
+          "user",
+          "assistant",
+          "tool"
+        ]
+      }
+    ],
+    "tool_results": [
+      {
+        "role": "tool",
+        "tool_call_id": "call_f85892e678d849b7ba75175275daeeca",
+        "content": "{\n  \"ok\": true,\n  \"workflows\": [\n    {\n      \"id\": \"9d06f947-7a1a-45fd-8733-639d2d77ba12\",\n      \"system_id\": \"EMS\",\n      \"revision\": 2,\n      \"published_version\": null,\n      \"created_by\": \"d7aadf59-f088-4a25-a252-dbbad84ab292\",\n      \"updated_at\": \"2026-10-29T23:23:58.926+00:00\",\n      \"draft\": {\n        \"id\": \"9d06f947-7a1a-45fd-8733-639d2d77ba12\",\n        \"name\": \"중앙 대화 제안 검증\",\n        \"system_id\": \"EMS\",\n        \"category\": \"ops\",\n        \"mode\": \"on_demand\",\n        \"nodes\": {\n          \"p-019fa58c1031\": {\n            \"id\": \"p-019fa58c1031\",\n            \"name\": \"중앙 대화 제안 검증\",\n            \"type\": \"p\",\n            \"parent\": null,\n            \"children\": [\n              \"stage-b82252db-e2d9-4df9-ba9b-2dfc533ca4f5\"\n            ],\n            \"deps\": []\n          },\n          \"stage-b82252db-e2d9-4df9-ba9b-2dfc533ca4f5\": {\n            \"id\": \"stage-b82252db-e2d9-4df9-ba9b-2dfc533ca4f5\",\n            \"type\": \"t\",\n            \"parent\": \"p-019fa58c1031\",\n            \"name\": \"대화 제안 검토 단계\",\n            \"description\": \"저장된 기준 안내\",\n            \"instructions\": \"\",\n            \"children\": [],\n            \"mode\": \"human\",\n            \"inputs\": [],\n            \"result_block\": \"human_confirm\",\n            \"deps\": [],\n            \"human_confirmation\": true,\n            \"completion\": {\n              \"rule\": \"\"\n            }\n          }\n        }\n      },\n      \"can_manage\": true,\n      \"validation\": null,\n      \"versions\": [],\n      \"published\": null,\n      \"name\": \"중앙 대화 제안 검증\",\n      \"mode\": \"on_demand\",\n      \"execution_scope\": null,\n      \"category\": \"ops\",\n      \"settings\": []\n    },\n    {\n      \"id\": \"520ad300-33e0-4dac-99fa-987b078c825a\",\n      \"system_id\": \"EMS\",\n      \"revision\": 1,\n      \"published_version\": null,\n      \"created_by\": \"d7aadf59-f088-4a25-a252-dbbad84ab292\",\n      \"updated_at\": \"2026-10-29T23:23:58.227+00:00\",\n      \"draft\": {\n        \"category\": \"setup\",\n        \"mode\": \"on_demand\",\n        \"execution_scope\": \"factory\",\n        \"nodes\": {\n          \"p-d145c32263b8\": {\n            \"id\": \"p-d145c32263b8\",\n            \"type\": \"p\",\n            \"name\": \"신규 공장 횡전개\",\n            \"parent\": null,\n            \"children\": [\n              \"t-358557ee429d\",\n              \"t-f0ef7de651c4\",\n              \"t-758ab91e1146\",\n              \"t-4d8996fac9d0\"\n            ],\n            \"deps\": []\n          },\n          \"t-358557ee429d\": {\n            \"id\": \"t-358557ee429d\",\n            \"type\": \"t\",\n            \"name\": \"사전준비\",\n            \"parent\": \"p-d145c32263b8\",\n            \"children\": [\n              \"j-e2d095334ab3\"\n            ],\n            \"deps\": []\n          },\n          \"j-e2d095334ab3\": {\n            \"id\": \"j-e2d095334ab3\",\n            \"name\": \"셋업 범위 확인\",\n            \"mode\": \"human\",\n            \"result_block\": \"human_confirm\",\n            \"instructions\": \"담당자가 실제 확인한 내용을 기록합니다. 확인 기준은 사용할 절차에 맞게 정해 주세요.\",\n            \"type\": \"j\",\n            \"parent\": \"t-358557ee429d\",\n            \"children\": [],\n            \"deps\": [],\n            \"human_confirmation\": true,\n            \"inputs\": []\n          },\n          \"t-f0ef7de651c4\": {\n            \"id\": \"t-f0ef7de651c4\",\n            \"type\": \"t\",\n            \"name\": \"AP·DB 인프라 준비\",\n            \"parent\": \"p-d145c32263b8\",\n            \"children\": [\n              \"j-92e8a9f045c6\"\n            ],\n            \"deps\": [\n              \"t-358557ee429d\"\n            ]\n          },\n          \"j-92e8a9f045c6\": {\n            \"id\": \"j-92e8a9f045c6\",\n            \"name\": \"인프라 준비 확인\",\n            \"mode\": \"tool\",\n            \"result_block\": \"values\",\n            \"instructions\": \"예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.\",\n            \"type\": \"j\",\n            \"parent\": \"t-f0ef7de651c4\",\n            \"children\": [],\n            \"deps\": [],\n            \"human_confirmation\": true,\n            \"inputs\": [],\n            \"argument_bindings\": {}\n          },\n          \"t-758ab91e1146\": {\n            \"id\": \"t-758ab91e1146\",\n            \"type\": \"t\",\n            \"name\": \"시스템 설치\",\n            \"parent\": \"p-d145c32263b8\",\n            \"children\": [\n              \"j-e655ecb0d56c\",\n              \"j-e93451a54904\",\n              \"j-d39be38b3dbe\"\n            ],\n            \"deps\": [\n              \"t-f0ef7de651c4\"\n            ]\n          },\n          \"j-e655ecb0d56c\": {\n            \"id\": \"j-e655ecb0d56c\",\n            \"name\": \"설치·설정 확인\",\n            \"mode\": \"human\",\n            \"result_block\": \"human_confirm\",\n            \"instructions\": \"담당자가 실제 확인한 내용을 기록합니다. 확인 기준은 사용할 절차에 맞게 정해 주세요.\",\n            \"type\": \"j\",\n            \"parent\": \"t-758ab91e1146\",\n            \"children\": [],\n            \"deps\": [],\n            \"human_confirmation\": true,\n            \"inputs\": []\n          },\n          \"j-e93451a54904\": {\n            \"id\": \"j-e93451a54904\",\n            \"name\": \"DB 연결 확인\",\n            \"mode\": \"tool\",\n            \"result_block\": \"values\",\n            \"instructions\": \"예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.\",\n            \"type\": \"j\",\n            \"parent\": \"t-758ab91e1146\",\n            \"children\": [],\n            \"deps\": [\n              \"j-e655ecb0d56c\"\n            ],\n            \"human_confirmation\": true,\n            \"inputs\": [],\n            \"argument_bindings\": {}\n          },\n          \"j-d39be38b3dbe\": {\n            \"id\": \"j-d39be38b3dbe\",\n            \"name\": \"AP 연결 확인\",\n            \"mode\": \"tool\",\n            \"result_block\": \"values\",\n            \"instructions\": \"예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.\",\n            \"type\": \"j\",\n            \"parent\": \"t-758ab91e1146\",\n            \"children\": [],\n            \"deps\": [\n              \"j-e93451a54904\"\n            ],\n            \"human_confirmation\": true,\n            \"inputs\": [],\n            \"argument_bindings\": {}\n          },\n          \"t-4d8996fac9d0\": {\n            \"id\": \"t-4d8996fac9d0\",\n            \"type\": \"t\",\n            \"name\": \"시스템 간 인터페이스 확인\",\n            \"parent\": \"p-d145c32263b8\",\n            \"children\": [\n              \"j-3d2fd38f85eb\"\n            ],\n            \"deps\": [\n              \"t-758ab91e1146\"\n            ]\n          },\n          \"j-3d2fd38f85eb\": {\n            \"id\": \"j-3d2fd38f85eb\",\n            \"name\": \"인터페이스 검증\",\n            \"mode\": \"tool\",\n            \"result_block\": \"values\",\n            \"instructions\": \"예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.\",\n            \"type\": \"j\",\n            \"parent\": \"t-4d8996fac9d0\",\n            \"children\": [],\n            \"deps\": [],\n            \"human_confirmation\": true,\n            \"inputs\": [],\n            \"argument_bindings\": {}\n          }\n        },\n        \"id\": \"520ad300-33e0-4dac-99fa-987b078c825a\",\n        \"name\": \"신규 공장 횡전개\",\n        \"system_id\": \"EMS\"\n      },\n      \"can_manage\": true,\n      \"validation\": null,\n      \"versions\": [],\n      \"published\": null,\n      \"name\": \"신규 공장 횡전개\",\n      \"mode\": \"on_demand\",\n      \"execution_scope\": \"factory\",\n      \"category\": \"setup\",\n      \"settings\": []\n    },\n    {\n      \"id\": \"eed231cd-b9a1-481c-8212-813e1faf4a40\",\n      \"system_id\": \"EMS\",\n      \"revision\": 1,\n      \"published_version\": null,\n      \"created_by\": \"d7aadf59-f088-4a25-a252-dbbad84ab292\",\n      \"updated_at\": \"2026-10-29T23:23:58.227+00:00\",\n      \"draft\": {\n        \"category\": \"ops\",\n        \"mode\": \"periodic\",\n        \"nodes\": {\n          \"p-e0229473fbbd\": {\n            \"id\": \"p-e0229473fbbd\",\n            \"type\": \"p\",\n            \"name\": \"일일 시스템 점검\",\n            \"parent\": null,\n            \"children\": [\n              \"t-d12861332767\"\n            ],\n            \"deps\": []\n          },\n          \"t-d12861332767\": {\n            \"id\": \"t-d12861332767\",\n            \"type\": \"t\",\n            \"name\": \"일일 점검\",\n            \"parent\": \"p-e0229473fbbd\",\n            \"children\": [\n              \"j-f36919edad5b\"\n            ],\n            \"deps\": []\n          },\n          \"j-f36919edad5b\": {\n            \"id\": \"j-f36919edad5b\",\n            \"name\": \"시스템 상태 확인\",\n            \"mode\": \"tool\",\n            \"result_block\": \"values\",\n            \"instructions\": \"예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.\",\n            \"type\": \"j\",\n            \"parent\": \"t-d12861332767\",\n            \"children\": [],\n            \"deps\": [],\n            \"human_confirmation\": true,\n            \"inputs\": [],\n            \"argument_bindings\": {}\n          }\n        },\n        \"id\": \"eed231cd-b9a1-481c-8212-813e1faf4a40\",\n        \"name\": \"일일 시스템 점검\",\n        \"system_id\": \"EMS\"\n      },\n      \"can_manage\": true,\n      \"validation\": null,\n      \"versions\": [],\n      \"published\": null,\n      \"name\": \"일일 시스템 점검\",\n      \"mode\": \"periodic\",\n      \"execution_scope\": null,\n      \"category\": \"ops\",\n      \"settings\": []\n    },\n    {\n      \"id\": \"05cec4f7-e620-4341-925c-6a641ac15c7d\",\n      \"system_id\": \"EMS\",\n      \"revision\": 1,\n      \"published_version\": null,\n      \"created_by\": \"d7aadf59-f088-4a25-a252-dbbad84ab292\",\n      \"updated_at\": \"2026-10-29T23:23:58.226+00:00\",\n      \"draft\": {\n        \"category\": \"ops\",\n        \"mode\": \"periodic\",\n        \"nodes\": {\n          \"p-5d209483f977\": {\n            \"id\": \"p-5d209483f977\",\n            \"type\": \"p\",\n            \"name\": \"배포 산출물 점검\",\n            \"parent\": null,\n            \"children\": [\n              \"t-690ef84507cb\",\n              \"t-22c902a22843\",\n              \"t-a64c3150f059\",\n              \"t-4a6701de213b\"\n            ],\n            \"deps\": []\n          },\n          \"t-690ef84507cb\": {\n            \"id\": \"t-690ef84507cb\",\n            \"type\": \"t\",\n            \"name\": \"대상 확정\",\n            \"parent\": \"p-5d209483f977\",\n            \"children\": [\n              \"j-1d2c5feedc53\"\n            ],\n            \"deps\": []\n          },\n          \"j-1d2c5feedc53\": {\n            \"id\": \"j-1d2c5feedc53\",\n            \"name\": \"배포 대상 CR 목록 만들기\",\n            \"mode\": \"tool\",\n            \"result_block\": \"list_confirm\",\n            \"instructions\": \"예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.\",\n            \"type\": \"j\",\n            \"parent\": \"t-690ef84507cb\",\n            \"children\": [],\n            \"deps\": [],\n            \"human_confirmation\": true,\n            \"inputs\": [],\n            \"argument_bindings\": {}\n          },\n          \"t-22c902a22843\": {\n            \"id\": \"t-22c902a22843\",\n            \"type\": \"t\",\n            \"name\": \"1차 점검\",\n            \"parent\": \"p-5d209483f977\",\n            \"children\": [\n              \"j-38093508f9b4\",\n              \"j-dde229af8dbe\",\n              \"j-abbaa3131989\"\n            ],\n            \"deps\": [\n              \"t-690ef84507cb\"\n            ]\n          },\n          \"j-38093508f9b4\": {\n            \"id\": \"j-38093508f9b4\",\n            \"name\": \"CR별 필수 문서 확인\",\n            \"mode\": \"tool\",\n            \"result_block\": \"values\",\n            \"instructions\": \"예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.\",\n            \"type\": \"j\",\n            \"parent\": \"t-22c902a22843\",\n            \"children\": [],\n            \"deps\": [],\n            \"human_confirmation\": true,\n            \"inputs\": [],\n            \"argument_bindings\": {}\n          },\n          \"j-dde229af8dbe\": {\n            \"id\": \"j-dde229af8dbe\",\n            \"name\": \"CR별 판정\",\n            \"mode\": \"ai\",\n            \"result_block\": \"item_verdict\",\n            \"instructions\": \"조회 근거를 바탕으로 초안을 만들고 사람이 확인합니다. 사용할 모델과 판정 기준을 절차에 맞게 정해 주세요.\",\n            \"type\": \"j\",\n            \"parent\": \"t-22c902a22843\",\n            \"children\": [],\n            \"deps\": [\n              \"j-38093508f9b4\"\n            ],\n            \"human_confirmation\": true,\n            \"inputs\": []\n          },\n          \"j-abbaa3131989\": {\n            \"id\": \"j-abbaa3131989\",\n            \"name\": \"점검 결과 송부\",\n            \"mode\": \"ai\",\n            \"result_block\": \"ai_review\",\n            \"instructions\": \"조회 근거를 바탕으로 초안을 만들고 사람이 확인합니다. 사용할 모델과 판정 기준을 절차에 맞게 정해 주세요.\",\n            \"type\": \"j\",\n            \"parent\": \"t-22c902a22843\",\n            \"children\": [],\n            \"deps\": [\n              \"j-dde229af8dbe\"\n            ],\n            \"human_confirmation\": true,\n            \"inputs\": [],\n            \"completion\": {\n              \"kind\": \"delivery\"\n            }\n          },\n          \"t-a64c3150f059\": {\n            \"id\": \"t-a64c3150f059\",\n            \"type\": \"t\",\n            \"name\": \"보완·재점검\",\n            \"parent\": \"p-5d209483f977\",\n            \"children\": [\n              \"j-8cd00ffb50e4\",\n              \"j-1d102c834b3b\"\n            ],\n            \"deps\": [\n              \"t-22c902a22843\"\n            ]\n          },\n          \"j-8cd00ffb50e4\": {\n            \"id\": \"j-8cd00ffb50e4\",\n            \"name\": \"미승인 CR 추가 제출 확인\",\n            \"mode\": \"tool\",\n            \"result_block\": \"values\",\n            \"instructions\": \"예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.\",\n            \"type\": \"j\",\n            \"parent\": \"t-a64c3150f059\",\n            \"children\": [],\n            \"deps\": [],\n            \"human_confirmation\": true,\n            \"inputs\": [],\n            \"argument_bindings\": {}\n          },\n          \"j-1d102c834b3b\": {\n            \"id\": \"j-1d102c834b3b\",\n            \"name\": \"재판정·배포 포함 확정\",\n            \"mode\": \"human\",\n            \"result_block\": \"item_verdict\",\n            \"instructions\": \"담당자가 실제 확인한 내용을 기록합니다. 확인 기준은 사용할 절차에 맞게 정해 주세요.\",\n            \"type\": \"j\",\n            \"parent\": \"t-a64c3150f059\",\n            \"children\": [],\n            \"deps\": [\n              \"j-8cd00ffb50e4\"\n            ],\n            \"human_confirmation\": true,\n            \"inputs\": []\n          },\n          \"t-4a6701de213b\": {\n            \"id\": \"t-4a6701de213b\",\n            \"type\": \"t\",\n            \"name\": \"조건부 승인 후속\",\n            \"parent\": \"p-5d209483f977\",\n            \"children\": [\n              \"j-63f5728e840d\",\n              \"j-144ce1b35aac\",\n              \"j-c9b5e00eb546\"\n            ],\n            \"deps\": [\n              \"t-a64c3150f059\"\n            ]\n          },\n          \"j-63f5728e840d\": {\n            \"id\": \"j-63f5728e840d\",\n            \"name\": \"조건부 승인 CR 최종 제출 확인\",\n            \"mode\": \"tool\",\n            \"result_block\": \"values\",\n            \"instructions\": \"예시 작업입니다. 사용할 도구를 연결하고 필요한 입력과 결과를 절차에 맞게 정해 주세요.\",\n            \"type\": \"j\",\n            \"parent\": \"t-4a6701de213b\",\n            \"children\": [],\n            \"deps\": [],\n            \"human_confirmation\": true,\n            \"inputs\": [],\n            \"argument_bindings\": {}\n          },\n          \"j-144ce1b35aac\": {\n            \"id\": \"j-144ce1b35aac\",\n            \"name\": \"최종 판정\",\n            \"mode\": \"human\",\n            \"result_block\": \"item_verdict\",\n            \"instructions\": \"담당자가 실제 확인한 내용을 기록합니다. 확인 기준은 사용할 절차에 맞게 정해 주세요.\",\n            \"type\": \"j\",\n            \"parent\": \"t-4a6701de213b\",\n            \"children\": [],\n            \"deps\": [\n              \"j-63f5728e840d\"\n            ],\n            \"human_confirmation\": true,\n            \"inputs\": []\n          },\n          \"j-c9b5e00eb546\": {\n            \"id\": \"j-c9b5e00eb546\",\n            \"name\": \"최종 결과 송부\",\n            \"mode\": \"ai\",\n            \"result_block\": \"ai_review\",\n            \"instructions\": \"조회 근거를 바탕으로 초안을 만들고 사람이 확인합니다. 사용할 모델과 판정 기준을 절차에 맞게 정해 주세요.\",\n            \"type\": \"j\",\n            \"parent\": \"t-4a6701de213b\",\n            \"children\": [],\n            \"deps\": [\n              \"j-144ce1b35aac\"\n            ],\n            \"human_confirmation\": true,\n            \"inputs\": [],\n            \"completion\": {\n              \"kind\": \"delivery\"\n            }\n          }\n        },\n        \"id\": \"05cec4f7-e620-4341-925c-6a641ac15c7d\",\n        \"name\": \"배포 산출물 점검\",\n        \"system_id\": \"EMS\"\n      },\n      \"can_manage\": true,\n      \"validation\": null,\n      \"versions\": [],\n      \"published\": null,\n      \"name\": \"배포 산출물 점검\",\n      \"mode\": \"periodic\",\n      \"execution_scope\": null,\n      \"category\": \"ops\",\n      \"settings\": []\n    }\n  ],\n  \"workflow\": {\n    \"id\": \"9d06f947-7a1a-45fd-8733-639d2d77ba12\",\n    \"system_id\": \"EMS\",\n    \"revision\": 2,\n    \"published_version\": null,\n    \"created_by\": \"d7aadf59-f088-4a25-a252-dbbad84ab292\",\n    \"updated_at\": \"2026-10-29T23:23:58.926+00:00\",\n    \"draft\": {\n      \"id\": \"9d06f947-7a1a-45fd-8733-639d2d77ba12\",\n      \"name\": \"중앙 대화 제안 검증\",\n      \"system_id\": \"EMS\",\n      \"category\": \"ops\",\n      \"mode\": \"on_demand\",\n      \"nodes\": {\n        \"p-019fa58c1031\": {\n          \"id\": \"p-019fa58c1031\",\n          \"name\": \"중앙 대화 제안 검증\",\n          \"type\": \"p\",\n          \"parent\": null,\n          \"children\": [\n            \"stage-b82252db-e2d9-4df9-ba9b-2dfc533ca4f5\"\n          ],\n          \"deps\": []\n        },\n        \"stage-b82252db-e2d9-4df9-ba9b-2dfc533ca4f5\": {\n          \"id\": \"stage-b82252db-e2d9-4df9-ba9b-2dfc533ca4f5\",\n          \"type\": \"t\",\n          \"parent\": \"p-019fa58c1031\",\n          \"name\": \"대화 제안 검토 단계\",\n          \"description\": \"저장된 기준 안내\",\n          \"instructions\": \"\",\n          \"children\": [],\n          \"mode\": \"human\",\n          \"inputs\": [],\n          \"result_block\": \"human_confirm\",\n          \"deps\": [],\n          \"human_confirmation\": true,\n          \"completion\": {\n            \"rule\": \"\"\n          }\n        }\n      }\n    },\n    \"can_manage\": true,\n    \"validation\": null,\n    \"versions\": [],\n    \"published\": null,\n    \"name\": \"중앙 대화 제안 검증\",\n    \"mode\": \"on_demand\",\n    \"execution_scope\": null,\n    \"category\": \"ops\",\n    \"settings\": []\n  },\n  \"run\": null,\n  \"runs\": [],\n  \"my_work\": [],\n  \"capabilities\": {\n    \"actor_id\": \"d7aadf59-f088-4a25-a252-dbbad84ab292\",\n    \"is_admin\": true,\n    \"native_access\": {\n      \"models\": true,\n      \"knowledge\": true,\n      \"prompts\": true,\n      \"skills\": true,\n      \"tools\": true,\n      \"admin\": true\n    },\n    \"native_access_available\": true,\n    \"managed_systems\": [\n      \"EMS\",\n      \"APC\",\n      \"FDC\",\n      \"EGIS\",\n      \"EPT\",\n      \"COMMON\"\n    ],\n    \"can_author\": true\n  },\n  \"work_context\": {\n    \"workflow_id\": \"9d06f947-7a1a-45fd-8733-639d2d77ba12\",\n    \"run_id\": \"\",\n    \"job_id\": \"\",\n    \"revision\": 2,\n    \"context_id\": \"[6,true,\\\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\\\",\\\"\\\",\\\"EMS\\\",\\\"\\\",\\\"9d06f947-7a1a-45fd-8733-639d2d77ba12\\\",\\\"\\\",\\\"\\\"]\"\n  },\n  \"help\": {\n    \"source\": \"EES Workflow 도움말\",\n    \"version\": 1,\n    \"answer_guidance\": {\n      \"grounding\": \"용어 id·이름·별칭으로 관련 항목을 찾아 summary와 example에 근거해 설명합니다. 답에 해당 항목의 evidence 문구를 표시합니다.\",\n      \"unknown\": \"원본에서 확인할 수 없는 내용은 ‘도움말에 없는 내용’이라고 밝히고, 필요한 확인 사항을 안내합니다. 정책·연결 상태·실행 결과를 추측하여 단정하지 않습니다.\",\n      \"context\": \"화면 이름·초안 이름·종류는 사용자가 보고 있는 문맥일 뿐, 저장·확인·게시·실행 여부의 근거가 아닙니다. 예시는 실제 연결이나 실행을 뜻하지 않습니다.\"\n    },\n    \"terms\": [\n      {\n        \"id\": \"read_tool\",\n        \"name\": \"정보 읽기\",\n        \"aliases\": [\n          \"조회 도구\"\n        ],\n        \"summary\": \"운영 시스템을 바꾸지 않고 읽기만 합니다.\",\n        \"example\": \"Jira CR 상태 보기, 서비스 응답 시간 보기. 예시 기능이 실제로 연결되어 있는지는 연결된 기능 목록에서 확인합니다.\",\n        \"related\": [\n          \"request_tool\",\n          \"direct_tool\",\n          \"connected_function\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘정보 읽기’\"\n      },\n      {\n        \"id\": \"request_tool\",\n        \"name\": \"EES에 작업 부탁\",\n        \"aliases\": [\n          \"요청 도구\"\n        ],\n        \"summary\": \"상태를 바꾸는 일을 EES에 부탁합니다. 실제 실행은 EES가 합니다.\",\n        \"example\": \"서비스 재시작을 요청하는 도구입니다. 요청 접수와 실제 작업 완료는 따로 확인합니다.\",\n        \"related\": [\n          \"read_tool\",\n          \"direct_tool\",\n          \"output_schema\",\n          \"reviewer\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘EES에 작업 부탁’\"\n      },\n      {\n        \"id\": \"direct_tool\",\n        \"name\": \"직접 실행 · 예외\",\n        \"aliases\": [\n          \"직접 실행\"\n        ],\n        \"summary\": \"연결할 EES 기능이 없을 때 담당자가 검토하는 예외입니다.\",\n        \"example\": \"예외로 필요한 이유와 담당자, 실행 뒤 상태·효과를 확인할 방법을 함께 정합니다. 화면에 보인다고 실행 권한이 생기지는 않습니다.\",\n        \"related\": [\n          \"request_tool\",\n          \"guide_url\",\n          \"reviewer\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘직접 실행 · 예외’\"\n      },\n      {\n        \"id\": \"connected_function\",\n        \"name\": \"연결된 기능\",\n        \"aliases\": [\n          \"Native 기능\",\n          \"EES 기능\"\n        ],\n        \"summary\": \"관리자가 등록한 기능 중 현재 계정으로 사용할 수 있는 기능입니다.\",\n        \"example\": \"Jira에 등록된 CR 조회 기능을 골라 도구를 만듭니다. 기능을 바꾸면 필요한 입력값도 다시 확인합니다.\",\n        \"related\": [\n          \"read_tool\",\n          \"request_tool\",\n          \"connection_request\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘연결된 기능’\"\n      },\n      {\n        \"id\": \"tool_purpose\",\n        \"name\": \"무엇을 왜 조회하나요\",\n        \"aliases\": [\n          \"설명\"\n        ],\n        \"summary\": \"언제 무엇을 읽어야 하는지 적는 설명입니다. AI가 이 설명을 보고 언제 쓸지 판단합니다.\",\n        \"example\": \"배포 전에 CR 승인 상태를 확인합니다.\",\n        \"related\": [\n          \"read_tool\",\n          \"connected_function\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘무엇을 왜 조회하나요’\"\n      },\n      {\n        \"id\": \"output_schema\",\n        \"name\": \"결과 형식\",\n        \"aliases\": [\n          \"출력 계약\",\n          \"JSON Schema\"\n        ],\n        \"summary\": \"도구가 돌려주는 결과의 항목과 자료 형식을 정합니다. 연결된 기능에서 자동으로 얻는 값은 아닙니다.\",\n        \"example\": \"서비스 상태를 어떤 이름과 형식으로 받을지 개발자나 시스템 담당자와 정합니다. 정보 읽기에서는 선택이고, 작업 부탁과 직접 실행 예외에서는 확인 요청 전에 필요합니다.\",\n        \"related\": [\n          \"request_tool\",\n          \"direct_tool\",\n          \"reviewer\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘결과 형식’\"\n      },\n      {\n        \"id\": \"guide_url\",\n        \"name\": \"가이드 문서\",\n        \"aliases\": [\n          \"참고 문서\"\n        ],\n        \"summary\": \"도구를 사용할 때 확인할 안내 문서의 링크입니다. 정보 읽기는 선택이고, 작업 부탁과 직접 실행 예외는 필수입니다.\",\n        \"example\": \"서비스 재시작이 실패했을 때 따를 가이드의 링크를 적습니다. 링크를 모르면 담당자에게 물어보세요.\",\n        \"related\": [\n          \"request_tool\",\n          \"direct_tool\",\n          \"reviewer\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘가이드 문서’\"\n      },\n      {\n        \"id\": \"reviewer\",\n        \"name\": \"확인할 사람\",\n        \"aliases\": [\n          \"확인하는 사람\",\n          \"담당자\"\n        ],\n        \"summary\": \"도구의 연결과 설명을 확인하는 담당자입니다. 정보 읽기는 해당 시스템 담당자가, 작업 부탁과 직접 실행 예외는 지정한 담당자가 확인합니다.\",\n        \"example\": \"확인 요청을 보내면 담당자가 도구 목록에서 확인합니다. 정보 읽기는 작성자도 시스템 담당자라면 확인할 수 있고, 확인한 사람의 기록이 남습니다.\",\n        \"related\": [\n          \"tool_states\",\n          \"guide_url\",\n          \"output_schema\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘확인할 사람’\"\n      },\n      {\n        \"id\": \"tool_states\",\n        \"name\": \"초안 · 확인 요청 · 확인 완료 · 반려\",\n        \"aliases\": [\n          \"도구 상태\",\n          \"담당자 확인 대기\"\n        ],\n        \"summary\": \"초안은 작성 중, 확인 요청은 담당자 확인 대기, 확인 완료는 검토 통과, 반려는 보완이 필요한 상태입니다.\",\n        \"example\": \"초안을 저장한 다음 확인을 요청합니다. 반려된 내용은 고쳐서 다시 요청합니다. 확인된 도구만 업무 절차에 사용할 수 있습니다.\",\n        \"related\": [\n          \"reviewer\",\n          \"publish\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘초안 · 확인 요청 · 확인 완료 · 반려’\"\n      },\n      {\n        \"id\": \"category\",\n        \"name\": \"분류\",\n        \"aliases\": [\n          \"셋업\",\n          \"운영\",\n          \"장애대응\"\n        ],\n        \"summary\": \"절차가 어떤 업무인지 셋업·운영·장애대응으로 구분합니다.\",\n        \"example\": \"신규 시스템 설치는 셋업, 일일 점검은 운영으로 분류할 수 있습니다.\",\n        \"related\": [\n          \"run_mode\",\n          \"execution_scope\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘분류’\"\n      },\n      {\n        \"id\": \"run_mode\",\n        \"name\": \"실행 방식\",\n        \"aliases\": [\n          \"주기\",\n          \"수시\",\n          \"비상\"\n        ],\n        \"summary\": \"절차를 주기적으로 할지, 필요할 때 할지, 비상 상황에 할지 구분합니다.\",\n        \"example\": \"일일 점검은 주기, 필요할 때 하는 점검은 수시로 정할 수 있습니다. 주기를 고르는 것만으로 일정 규칙이 켜지지는 않습니다.\",\n        \"related\": [\n          \"category\",\n          \"execution_scope\",\n          \"publish\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘실행 방식’\"\n      },\n      {\n        \"id\": \"execution_scope\",\n        \"name\": \"수행 범위\",\n        \"aliases\": [\n          \"공장별\",\n          \"시스템 공통\"\n        ],\n        \"summary\": \"공장마다 따로 진행하는 절차인지, 시스템 전체에서 공통으로 진행하는 절차인지 정합니다.\",\n        \"example\": \"공장마다 설치 상태를 확인하면 공장별, 시스템 전체 배포를 확인하면 시스템 공통을 선택할 수 있습니다.\",\n        \"related\": [\n          \"category\",\n          \"run_mode\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘수행 범위’\"\n      },\n      {\n        \"id\": \"publish\",\n        \"name\": \"게시\",\n        \"aliases\": [\n          \"절차 게시\"\n        ],\n        \"summary\": \"검사를 통과한 절차 초안을 업무에 사용할 수 있는 버전으로 만듭니다.\",\n        \"example\": \"초안을 저장하고 게시 전 확인을 거쳐 게시합니다. 저장만으로 게시되지 않고, 게시만으로 작업을 실행하지 않습니다.\",\n        \"related\": [\n          \"tool_states\",\n          \"run_mode\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘게시’\"\n      },\n      {\n        \"id\": \"connection_request\",\n        \"name\": \"연결 요청 방법\",\n        \"aliases\": [\n          \"기능 연결 전\",\n          \"필요한 기능이 없어요\"\n        ],\n        \"summary\": \"관리자에게 Open WebUI 관리자 화면에서 필요한 도구를 등록해 달라고 요청하세요.\",\n        \"example\": \"어떤 시스템에서 무엇을 읽거나 요청하려는지 알려 주세요. 등록 뒤 현재 계정에 사용 권한이 있으면 연결된 기능 목록에 나타납니다. 이 화면에서 요청을 자동으로 보내지는 않습니다.\",\n        \"related\": [\n          \"connected_function\",\n          \"read_tool\",\n          \"request_tool\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘연결 요청 방법’\"\n      }\n    ]\n  },\n  \"shared_tools\": []\n}"
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "call_7abbd2752b624e9fb44f86480f5eb8c2",
+        "content": "{\n  \"ok\": true,\n  \"proposal\": {\n    \"ok\": true,\n    \"preview\": true,\n    \"saved\": false\n  },\n  \"saved\": false,\n  \"published\": false,\n  \"message\": \"사용자가 편집 화면에서 제안을 검토하고 반영·저장해야 합니다.\"\n}"
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "call_6c1e7058c0f94b8e80e7c0883d841ff2",
+        "content": "{\n  \"ok\": true,\n  \"proposal\": {\n    \"ok\": true,\n    \"preview\": true,\n    \"saved\": false,\n    \"executed\": false\n  },\n  \"proposal_kind\": \"inputs\",\n  \"saved\": false,\n  \"published\": false,\n  \"executed\": false,\n  \"message\": \"입력 제안을 검토하고 개인 입력 초안에 반영한 뒤 별도로 저장해 주세요.\"\n}"
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "call_0c871cb6d7274ef5bd748e3846e5e235",
+        "content": "{\n  \"ok\": true,\n  \"help\": {\n    \"source\": \"EES Workflow 도움말\",\n    \"version\": 1,\n    \"answer_guidance\": {\n      \"grounding\": \"용어 id·이름·별칭으로 관련 항목을 찾아 summary와 example에 근거해 설명합니다. 답에 해당 항목의 evidence 문구를 표시합니다.\",\n      \"unknown\": \"원본에서 확인할 수 없는 내용은 ‘도움말에 없는 내용’이라고 밝히고, 필요한 확인 사항을 안내합니다. 정책·연결 상태·실행 결과를 추측하여 단정하지 않습니다.\",\n      \"context\": \"화면 이름·초안 이름·종류는 사용자가 보고 있는 문맥일 뿐, 저장·확인·게시·실행 여부의 근거가 아닙니다. 예시는 실제 연결이나 실행을 뜻하지 않습니다.\"\n    },\n    \"terms\": [\n      {\n        \"id\": \"read_tool\",\n        \"name\": \"정보 읽기\",\n        \"aliases\": [\n          \"조회 도구\"\n        ],\n        \"summary\": \"운영 시스템을 바꾸지 않고 읽기만 합니다.\",\n        \"example\": \"Jira CR 상태 보기, 서비스 응답 시간 보기. 예시 기능이 실제로 연결되어 있는지는 연결된 기능 목록에서 확인합니다.\",\n        \"related\": [\n          \"request_tool\",\n          \"direct_tool\",\n          \"connected_function\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘정보 읽기’\"\n      },\n      {\n        \"id\": \"request_tool\",\n        \"name\": \"EES에 작업 부탁\",\n        \"aliases\": [\n          \"요청 도구\"\n        ],\n        \"summary\": \"상태를 바꾸는 일을 EES에 부탁합니다. 실제 실행은 EES가 합니다.\",\n        \"example\": \"서비스 재시작을 요청하는 도구입니다. 요청 접수와 실제 작업 완료는 따로 확인합니다.\",\n        \"related\": [\n          \"read_tool\",\n          \"direct_tool\",\n          \"output_schema\",\n          \"reviewer\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘EES에 작업 부탁’\"\n      },\n      {\n        \"id\": \"direct_tool\",\n        \"name\": \"직접 실행 · 예외\",\n        \"aliases\": [\n          \"직접 실행\"\n        ],\n        \"summary\": \"연결할 EES 기능이 없을 때 담당자가 검토하는 예외입니다.\",\n        \"example\": \"예외로 필요한 이유와 담당자, 실행 뒤 상태·효과를 확인할 방법을 함께 정합니다. 화면에 보인다고 실행 권한이 생기지는 않습니다.\",\n        \"related\": [\n          \"request_tool\",\n          \"guide_url\",\n          \"reviewer\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘직접 실행 · 예외’\"\n      },\n      {\n        \"id\": \"connected_function\",\n        \"name\": \"연결된 기능\",\n        \"aliases\": [\n          \"Native 기능\",\n          \"EES 기능\"\n        ],\n        \"summary\": \"관리자가 등록한 기능 중 현재 계정으로 사용할 수 있는 기능입니다.\",\n        \"example\": \"Jira에 등록된 CR 조회 기능을 골라 도구를 만듭니다. 기능을 바꾸면 필요한 입력값도 다시 확인합니다.\",\n        \"related\": [\n          \"read_tool\",\n          \"request_tool\",\n          \"connection_request\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘연결된 기능’\"\n      },\n      {\n        \"id\": \"tool_purpose\",\n        \"name\": \"무엇을 왜 조회하나요\",\n        \"aliases\": [\n          \"설명\"\n        ],\n        \"summary\": \"언제 무엇을 읽어야 하는지 적는 설명입니다. AI가 이 설명을 보고 언제 쓸지 판단합니다.\",\n        \"example\": \"배포 전에 CR 승인 상태를 확인합니다.\",\n        \"related\": [\n          \"read_tool\",\n          \"connected_function\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘무엇을 왜 조회하나요’\"\n      },\n      {\n        \"id\": \"output_schema\",\n        \"name\": \"결과 형식\",\n        \"aliases\": [\n          \"출력 계약\",\n          \"JSON Schema\"\n        ],\n        \"summary\": \"도구가 돌려주는 결과의 항목과 자료 형식을 정합니다. 연결된 기능에서 자동으로 얻는 값은 아닙니다.\",\n        \"example\": \"서비스 상태를 어떤 이름과 형식으로 받을지 개발자나 시스템 담당자와 정합니다. 정보 읽기에서는 선택이고, 작업 부탁과 직접 실행 예외에서는 확인 요청 전에 필요합니다.\",\n        \"related\": [\n          \"request_tool\",\n          \"direct_tool\",\n          \"reviewer\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘결과 형식’\"\n      },\n      {\n        \"id\": \"guide_url\",\n        \"name\": \"가이드 문서\",\n        \"aliases\": [\n          \"참고 문서\"\n        ],\n        \"summary\": \"도구를 사용할 때 확인할 안내 문서의 링크입니다. 정보 읽기는 선택이고, 작업 부탁과 직접 실행 예외는 필수입니다.\",\n        \"example\": \"서비스 재시작이 실패했을 때 따를 가이드의 링크를 적습니다. 링크를 모르면 담당자에게 물어보세요.\",\n        \"related\": [\n          \"request_tool\",\n          \"direct_tool\",\n          \"reviewer\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘가이드 문서’\"\n      },\n      {\n        \"id\": \"reviewer\",\n        \"name\": \"확인할 사람\",\n        \"aliases\": [\n          \"확인하는 사람\",\n          \"담당자\"\n        ],\n        \"summary\": \"도구의 연결과 설명을 확인하는 담당자입니다. 정보 읽기는 해당 시스템 담당자가, 작업 부탁과 직접 실행 예외는 지정한 담당자가 확인합니다.\",\n        \"example\": \"확인 요청을 보내면 담당자가 도구 목록에서 확인합니다. 정보 읽기는 작성자도 시스템 담당자라면 확인할 수 있고, 확인한 사람의 기록이 남습니다.\",\n        \"related\": [\n          \"tool_states\",\n          \"guide_url\",\n          \"output_schema\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘확인할 사람’\"\n      },\n      {\n        \"id\": \"tool_states\",\n        \"name\": \"초안 · 확인 요청 · 확인 완료 · 반려\",\n        \"aliases\": [\n          \"도구 상태\",\n          \"담당자 확인 대기\"\n        ],\n        \"summary\": \"초안은 작성 중, 확인 요청은 담당자 확인 대기, 확인 완료는 검토 통과, 반려는 보완이 필요한 상태입니다.\",\n        \"example\": \"초안을 저장한 다음 확인을 요청합니다. 반려된 내용은 고쳐서 다시 요청합니다. 확인된 도구만 업무 절차에 사용할 수 있습니다.\",\n        \"related\": [\n          \"reviewer\",\n          \"publish\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘초안 · 확인 요청 · 확인 완료 · 반려’\"\n      },\n      {\n        \"id\": \"category\",\n        \"name\": \"분류\",\n        \"aliases\": [\n          \"셋업\",\n          \"운영\",\n          \"장애대응\"\n        ],\n        \"summary\": \"절차가 어떤 업무인지 셋업·운영·장애대응으로 구분합니다.\",\n        \"example\": \"신규 시스템 설치는 셋업, 일일 점검은 운영으로 분류할 수 있습니다.\",\n        \"related\": [\n          \"run_mode\",\n          \"execution_scope\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘분류’\"\n      },\n      {\n        \"id\": \"run_mode\",\n        \"name\": \"실행 방식\",\n        \"aliases\": [\n          \"주기\",\n          \"수시\",\n          \"비상\"\n        ],\n        \"summary\": \"절차를 주기적으로 할지, 필요할 때 할지, 비상 상황에 할지 구분합니다.\",\n        \"example\": \"일일 점검은 주기, 필요할 때 하는 점검은 수시로 정할 수 있습니다. 주기를 고르는 것만으로 일정 규칙이 켜지지는 않습니다.\",\n        \"related\": [\n          \"category\",\n          \"execution_scope\",\n          \"publish\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘실행 방식’\"\n      },\n      {\n        \"id\": \"execution_scope\",\n        \"name\": \"수행 범위\",\n        \"aliases\": [\n          \"공장별\",\n          \"시스템 공통\"\n        ],\n        \"summary\": \"공장마다 따로 진행하는 절차인지, 시스템 전체에서 공통으로 진행하는 절차인지 정합니다.\",\n        \"example\": \"공장마다 설치 상태를 확인하면 공장별, 시스템 전체 배포를 확인하면 시스템 공통을 선택할 수 있습니다.\",\n        \"related\": [\n          \"category\",\n          \"run_mode\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘수행 범위’\"\n      },\n      {\n        \"id\": \"publish\",\n        \"name\": \"게시\",\n        \"aliases\": [\n          \"절차 게시\"\n        ],\n        \"summary\": \"검사를 통과한 절차 초안을 업무에 사용할 수 있는 버전으로 만듭니다.\",\n        \"example\": \"초안을 저장하고 게시 전 확인을 거쳐 게시합니다. 저장만으로 게시되지 않고, 게시만으로 작업을 실행하지 않습니다.\",\n        \"related\": [\n          \"tool_states\",\n          \"run_mode\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘게시’\"\n      },\n      {\n        \"id\": \"connection_request\",\n        \"name\": \"연결 요청 방법\",\n        \"aliases\": [\n          \"기능 연결 전\",\n          \"필요한 기능이 없어요\"\n        ],\n        \"summary\": \"관리자에게 Open WebUI 관리자 화면에서 필요한 도구를 등록해 달라고 요청하세요.\",\n        \"example\": \"어떤 시스템에서 무엇을 읽거나 요청하려는지 알려 주세요. 등록 뒤 현재 계정에 사용 권한이 있으면 연결된 기능 목록에 나타납니다. 이 화면에서 요청을 자동으로 보내지는 않습니다.\",\n        \"related\": [\n          \"connected_function\",\n          \"read_tool\",\n          \"request_tool\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘연결 요청 방법’\"\n      }\n    ]\n  },\n  \"shared_tools\": [],\n  \"help_context\": {\n    \"kind\": \"help\",\n    \"system_id\": \"EMS\",\n    \"context_id\": \"[18,true,\\\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\\\",\\\"\\\",\\\"EMS\\\",\\\"\\\",\\\"\\\",\\\"\\\",\\\"\\\"]\",\n    \"screen\": \"새 도구 시작\"\n  }\n}"
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "call_208cda63a4df45d2b5f1e6be767fa58d",
+        "content": "{\n  \"ok\": true,\n  \"help\": {\n    \"source\": \"EES Workflow 도움말\",\n    \"version\": 1,\n    \"answer_guidance\": {\n      \"grounding\": \"용어 id·이름·별칭으로 관련 항목을 찾아 summary와 example에 근거해 설명합니다. 답에 해당 항목의 evidence 문구를 표시합니다.\",\n      \"unknown\": \"원본에서 확인할 수 없는 내용은 ‘도움말에 없는 내용’이라고 밝히고, 필요한 확인 사항을 안내합니다. 정책·연결 상태·실행 결과를 추측하여 단정하지 않습니다.\",\n      \"context\": \"화면 이름·초안 이름·종류는 사용자가 보고 있는 문맥일 뿐, 저장·확인·게시·실행 여부의 근거가 아닙니다. 예시는 실제 연결이나 실행을 뜻하지 않습니다.\"\n    },\n    \"terms\": [\n      {\n        \"id\": \"read_tool\",\n        \"name\": \"정보 읽기\",\n        \"aliases\": [\n          \"조회 도구\"\n        ],\n        \"summary\": \"운영 시스템을 바꾸지 않고 읽기만 합니다.\",\n        \"example\": \"Jira CR 상태 보기, 서비스 응답 시간 보기. 예시 기능이 실제로 연결되어 있는지는 연결된 기능 목록에서 확인합니다.\",\n        \"related\": [\n          \"request_tool\",\n          \"direct_tool\",\n          \"connected_function\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘정보 읽기’\"\n      },\n      {\n        \"id\": \"request_tool\",\n        \"name\": \"EES에 작업 부탁\",\n        \"aliases\": [\n          \"요청 도구\"\n        ],\n        \"summary\": \"상태를 바꾸는 일을 EES에 부탁합니다. 실제 실행은 EES가 합니다.\",\n        \"example\": \"서비스 재시작을 요청하는 도구입니다. 요청 접수와 실제 작업 완료는 따로 확인합니다.\",\n        \"related\": [\n          \"read_tool\",\n          \"direct_tool\",\n          \"output_schema\",\n          \"reviewer\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘EES에 작업 부탁’\"\n      },\n      {\n        \"id\": \"direct_tool\",\n        \"name\": \"직접 실행 · 예외\",\n        \"aliases\": [\n          \"직접 실행\"\n        ],\n        \"summary\": \"연결할 EES 기능이 없을 때 담당자가 검토하는 예외입니다.\",\n        \"example\": \"예외로 필요한 이유와 담당자, 실행 뒤 상태·효과를 확인할 방법을 함께 정합니다. 화면에 보인다고 실행 권한이 생기지는 않습니다.\",\n        \"related\": [\n          \"request_tool\",\n          \"guide_url\",\n          \"reviewer\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘직접 실행 · 예외’\"\n      },\n      {\n        \"id\": \"connected_function\",\n        \"name\": \"연결된 기능\",\n        \"aliases\": [\n          \"Native 기능\",\n          \"EES 기능\"\n        ],\n        \"summary\": \"관리자가 등록한 기능 중 현재 계정으로 사용할 수 있는 기능입니다.\",\n        \"example\": \"Jira에 등록된 CR 조회 기능을 골라 도구를 만듭니다. 기능을 바꾸면 필요한 입력값도 다시 확인합니다.\",\n        \"related\": [\n          \"read_tool\",\n          \"request_tool\",\n          \"connection_request\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘연결된 기능’\"\n      },\n      {\n        \"id\": \"tool_purpose\",\n        \"name\": \"무엇을 왜 조회하나요\",\n        \"aliases\": [\n          \"설명\"\n        ],\n        \"summary\": \"언제 무엇을 읽어야 하는지 적는 설명입니다. AI가 이 설명을 보고 언제 쓸지 판단합니다.\",\n        \"example\": \"배포 전에 CR 승인 상태를 확인합니다.\",\n        \"related\": [\n          \"read_tool\",\n          \"connected_function\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘무엇을 왜 조회하나요’\"\n      },\n      {\n        \"id\": \"output_schema\",\n        \"name\": \"결과 형식\",\n        \"aliases\": [\n          \"출력 계약\",\n          \"JSON Schema\"\n        ],\n        \"summary\": \"도구가 돌려주는 결과의 항목과 자료 형식을 정합니다. 연결된 기능에서 자동으로 얻는 값은 아닙니다.\",\n        \"example\": \"서비스 상태를 어떤 이름과 형식으로 받을지 개발자나 시스템 담당자와 정합니다. 정보 읽기에서는 선택이고, 작업 부탁과 직접 실행 예외에서는 확인 요청 전에 필요합니다.\",\n        \"related\": [\n          \"request_tool\",\n          \"direct_tool\",\n          \"reviewer\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘결과 형식’\"\n      },\n      {\n        \"id\": \"guide_url\",\n        \"name\": \"가이드 문서\",\n        \"aliases\": [\n          \"참고 문서\"\n        ],\n        \"summary\": \"도구를 사용할 때 확인할 안내 문서의 링크입니다. 정보 읽기는 선택이고, 작업 부탁과 직접 실행 예외는 필수입니다.\",\n        \"example\": \"서비스 재시작이 실패했을 때 따를 가이드의 링크를 적습니다. 링크를 모르면 담당자에게 물어보세요.\",\n        \"related\": [\n          \"request_tool\",\n          \"direct_tool\",\n          \"reviewer\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘가이드 문서’\"\n      },\n      {\n        \"id\": \"reviewer\",\n        \"name\": \"확인할 사람\",\n        \"aliases\": [\n          \"확인하는 사람\",\n          \"담당자\"\n        ],\n        \"summary\": \"도구의 연결과 설명을 확인하는 담당자입니다. 정보 읽기는 해당 시스템 담당자가, 작업 부탁과 직접 실행 예외는 지정한 담당자가 확인합니다.\",\n        \"example\": \"확인 요청을 보내면 담당자가 도구 목록에서 확인합니다. 정보 읽기는 작성자도 시스템 담당자라면 확인할 수 있고, 확인한 사람의 기록이 남습니다.\",\n        \"related\": [\n          \"tool_states\",\n          \"guide_url\",\n          \"output_schema\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘확인할 사람’\"\n      },\n      {\n        \"id\": \"tool_states\",\n        \"name\": \"초안 · 확인 요청 · 확인 완료 · 반려\",\n        \"aliases\": [\n          \"도구 상태\",\n          \"담당자 확인 대기\"\n        ],\n        \"summary\": \"초안은 작성 중, 확인 요청은 담당자 확인 대기, 확인 완료는 검토 통과, 반려는 보완이 필요한 상태입니다.\",\n        \"example\": \"초안을 저장한 다음 확인을 요청합니다. 반려된 내용은 고쳐서 다시 요청합니다. 확인된 도구만 업무 절차에 사용할 수 있습니다.\",\n        \"related\": [\n          \"reviewer\",\n          \"publish\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘초안 · 확인 요청 · 확인 완료 · 반려’\"\n      },\n      {\n        \"id\": \"category\",\n        \"name\": \"분류\",\n        \"aliases\": [\n          \"셋업\",\n          \"운영\",\n          \"장애대응\"\n        ],\n        \"summary\": \"절차가 어떤 업무인지 셋업·운영·장애대응으로 구분합니다.\",\n        \"example\": \"신규 시스템 설치는 셋업, 일일 점검은 운영으로 분류할 수 있습니다.\",\n        \"related\": [\n          \"run_mode\",\n          \"execution_scope\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘분류’\"\n      },\n      {\n        \"id\": \"run_mode\",\n        \"name\": \"실행 방식\",\n        \"aliases\": [\n          \"주기\",\n          \"수시\",\n          \"비상\"\n        ],\n        \"summary\": \"절차를 주기적으로 할지, 필요할 때 할지, 비상 상황에 할지 구분합니다.\",\n        \"example\": \"일일 점검은 주기, 필요할 때 하는 점검은 수시로 정할 수 있습니다. 주기를 고르는 것만으로 일정 규칙이 켜지지는 않습니다.\",\n        \"related\": [\n          \"category\",\n          \"execution_scope\",\n          \"publish\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘실행 방식’\"\n      },\n      {\n        \"id\": \"execution_scope\",\n        \"name\": \"수행 범위\",\n        \"aliases\": [\n          \"공장별\",\n          \"시스템 공통\"\n        ],\n        \"summary\": \"공장마다 따로 진행하는 절차인지, 시스템 전체에서 공통으로 진행하는 절차인지 정합니다.\",\n        \"example\": \"공장마다 설치 상태를 확인하면 공장별, 시스템 전체 배포를 확인하면 시스템 공통을 선택할 수 있습니다.\",\n        \"related\": [\n          \"category\",\n          \"run_mode\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘수행 범위’\"\n      },\n      {\n        \"id\": \"publish\",\n        \"name\": \"게시\",\n        \"aliases\": [\n          \"절차 게시\"\n        ],\n        \"summary\": \"검사를 통과한 절차 초안을 업무에 사용할 수 있는 버전으로 만듭니다.\",\n        \"example\": \"초안을 저장하고 게시 전 확인을 거쳐 게시합니다. 저장만으로 게시되지 않고, 게시만으로 작업을 실행하지 않습니다.\",\n        \"related\": [\n          \"tool_states\",\n          \"run_mode\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘게시’\"\n      },\n      {\n        \"id\": \"connection_request\",\n        \"name\": \"연결 요청 방법\",\n        \"aliases\": [\n          \"기능 연결 전\",\n          \"필요한 기능이 없어요\"\n        ],\n        \"summary\": \"관리자에게 Open WebUI 관리자 화면에서 필요한 도구를 등록해 달라고 요청하세요.\",\n        \"example\": \"어떤 시스템에서 무엇을 읽거나 요청하려는지 알려 주세요. 등록 뒤 현재 계정에 사용 권한이 있으면 연결된 기능 목록에 나타납니다. 이 화면에서 요청을 자동으로 보내지는 않습니다.\",\n        \"related\": [\n          \"connected_function\",\n          \"read_tool\",\n          \"request_tool\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘연결 요청 방법’\"\n      }\n    ]\n  },\n  \"shared_tools\": [],\n  \"help_context\": {\n    \"kind\": \"help\",\n    \"system_id\": \"EMS\",\n    \"context_id\": \"[18,true,\\\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\\\",\\\"\\\",\\\"EMS\\\",\\\"\\\",\\\"\\\",\\\"\\\",\\\"\\\"]\",\n    \"screen\": \"새 도구 시작\"\n  }\n}"
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "call_1c18c578b92d456e9e9f6dee5ef16987",
+        "content": "{\n  \"ok\": true,\n  \"help\": {\n    \"source\": \"EES Workflow 도움말\",\n    \"version\": 1,\n    \"answer_guidance\": {\n      \"grounding\": \"용어 id·이름·별칭으로 관련 항목을 찾아 summary와 example에 근거해 설명합니다. 답에 해당 항목의 evidence 문구를 표시합니다.\",\n      \"unknown\": \"원본에서 확인할 수 없는 내용은 ‘도움말에 없는 내용’이라고 밝히고, 필요한 확인 사항을 안내합니다. 정책·연결 상태·실행 결과를 추측하여 단정하지 않습니다.\",\n      \"context\": \"화면 이름·초안 이름·종류는 사용자가 보고 있는 문맥일 뿐, 저장·확인·게시·실행 여부의 근거가 아닙니다. 예시는 실제 연결이나 실행을 뜻하지 않습니다.\"\n    },\n    \"terms\": [\n      {\n        \"id\": \"read_tool\",\n        \"name\": \"정보 읽기\",\n        \"aliases\": [\n          \"조회 도구\"\n        ],\n        \"summary\": \"운영 시스템을 바꾸지 않고 읽기만 합니다.\",\n        \"example\": \"Jira CR 상태 보기, 서비스 응답 시간 보기. 예시 기능이 실제로 연결되어 있는지는 연결된 기능 목록에서 확인합니다.\",\n        \"related\": [\n          \"request_tool\",\n          \"direct_tool\",\n          \"connected_function\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘정보 읽기’\"\n      },\n      {\n        \"id\": \"request_tool\",\n        \"name\": \"EES에 작업 부탁\",\n        \"aliases\": [\n          \"요청 도구\"\n        ],\n        \"summary\": \"상태를 바꾸는 일을 EES에 부탁합니다. 실제 실행은 EES가 합니다.\",\n        \"example\": \"서비스 재시작을 요청하는 도구입니다. 요청 접수와 실제 작업 완료는 따로 확인합니다.\",\n        \"related\": [\n          \"read_tool\",\n          \"direct_tool\",\n          \"output_schema\",\n          \"reviewer\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘EES에 작업 부탁’\"\n      },\n      {\n        \"id\": \"direct_tool\",\n        \"name\": \"직접 실행 · 예외\",\n        \"aliases\": [\n          \"직접 실행\"\n        ],\n        \"summary\": \"연결할 EES 기능이 없을 때 담당자가 검토하는 예외입니다.\",\n        \"example\": \"예외로 필요한 이유와 담당자, 실행 뒤 상태·효과를 확인할 방법을 함께 정합니다. 화면에 보인다고 실행 권한이 생기지는 않습니다.\",\n        \"related\": [\n          \"request_tool\",\n          \"guide_url\",\n          \"reviewer\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘직접 실행 · 예외’\"\n      },\n      {\n        \"id\": \"connected_function\",\n        \"name\": \"연결된 기능\",\n        \"aliases\": [\n          \"Native 기능\",\n          \"EES 기능\"\n        ],\n        \"summary\": \"관리자가 등록한 기능 중 현재 계정으로 사용할 수 있는 기능입니다.\",\n        \"example\": \"Jira에 등록된 CR 조회 기능을 골라 도구를 만듭니다. 기능을 바꾸면 필요한 입력값도 다시 확인합니다.\",\n        \"related\": [\n          \"read_tool\",\n          \"request_tool\",\n          \"connection_request\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘연결된 기능’\"\n      },\n      {\n        \"id\": \"tool_purpose\",\n        \"name\": \"무엇을 왜 조회하나요\",\n        \"aliases\": [\n          \"설명\"\n        ],\n        \"summary\": \"언제 무엇을 읽어야 하는지 적는 설명입니다. AI가 이 설명을 보고 언제 쓸지 판단합니다.\",\n        \"example\": \"배포 전에 CR 승인 상태를 확인합니다.\",\n        \"related\": [\n          \"read_tool\",\n          \"connected_function\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘무엇을 왜 조회하나요’\"\n      },\n      {\n        \"id\": \"output_schema\",\n        \"name\": \"결과 형식\",\n        \"aliases\": [\n          \"출력 계약\",\n          \"JSON Schema\"\n        ],\n        \"summary\": \"도구가 돌려주는 결과의 항목과 자료 형식을 정합니다. 연결된 기능에서 자동으로 얻는 값은 아닙니다.\",\n        \"example\": \"서비스 상태를 어떤 이름과 형식으로 받을지 개발자나 시스템 담당자와 정합니다. 정보 읽기에서는 선택이고, 작업 부탁과 직접 실행 예외에서는 확인 요청 전에 필요합니다.\",\n        \"related\": [\n          \"request_tool\",\n          \"direct_tool\",\n          \"reviewer\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘결과 형식’\"\n      },\n      {\n        \"id\": \"guide_url\",\n        \"name\": \"가이드 문서\",\n        \"aliases\": [\n          \"참고 문서\"\n        ],\n        \"summary\": \"도구를 사용할 때 확인할 안내 문서의 링크입니다. 정보 읽기는 선택이고, 작업 부탁과 직접 실행 예외는 필수입니다.\",\n        \"example\": \"서비스 재시작이 실패했을 때 따를 가이드의 링크를 적습니다. 링크를 모르면 담당자에게 물어보세요.\",\n        \"related\": [\n          \"request_tool\",\n          \"direct_tool\",\n          \"reviewer\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘가이드 문서’\"\n      },\n      {\n        \"id\": \"reviewer\",\n        \"name\": \"확인할 사람\",\n        \"aliases\": [\n          \"확인하는 사람\",\n          \"담당자\"\n        ],\n        \"summary\": \"도구의 연결과 설명을 확인하는 담당자입니다. 정보 읽기는 해당 시스템 담당자가, 작업 부탁과 직접 실행 예외는 지정한 담당자가 확인합니다.\",\n        \"example\": \"확인 요청을 보내면 담당자가 도구 목록에서 확인합니다. 정보 읽기는 작성자도 시스템 담당자라면 확인할 수 있고, 확인한 사람의 기록이 남습니다.\",\n        \"related\": [\n          \"tool_states\",\n          \"guide_url\",\n          \"output_schema\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘확인할 사람’\"\n      },\n      {\n        \"id\": \"tool_states\",\n        \"name\": \"초안 · 확인 요청 · 확인 완료 · 반려\",\n        \"aliases\": [\n          \"도구 상태\",\n          \"담당자 확인 대기\"\n        ],\n        \"summary\": \"초안은 작성 중, 확인 요청은 담당자 확인 대기, 확인 완료는 검토 통과, 반려는 보완이 필요한 상태입니다.\",\n        \"example\": \"초안을 저장한 다음 확인을 요청합니다. 반려된 내용은 고쳐서 다시 요청합니다. 확인된 도구만 업무 절차에 사용할 수 있습니다.\",\n        \"related\": [\n          \"reviewer\",\n          \"publish\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘초안 · 확인 요청 · 확인 완료 · 반려’\"\n      },\n      {\n        \"id\": \"category\",\n        \"name\": \"분류\",\n        \"aliases\": [\n          \"셋업\",\n          \"운영\",\n          \"장애대응\"\n        ],\n        \"summary\": \"절차가 어떤 업무인지 셋업·운영·장애대응으로 구분합니다.\",\n        \"example\": \"신규 시스템 설치는 셋업, 일일 점검은 운영으로 분류할 수 있습니다.\",\n        \"related\": [\n          \"run_mode\",\n          \"execution_scope\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘분류’\"\n      },\n      {\n        \"id\": \"run_mode\",\n        \"name\": \"실행 방식\",\n        \"aliases\": [\n          \"주기\",\n          \"수시\",\n          \"비상\"\n        ],\n        \"summary\": \"절차를 주기적으로 할지, 필요할 때 할지, 비상 상황에 할지 구분합니다.\",\n        \"example\": \"일일 점검은 주기, 필요할 때 하는 점검은 수시로 정할 수 있습니다. 주기를 고르는 것만으로 일정 규칙이 켜지지는 않습니다.\",\n        \"related\": [\n          \"category\",\n          \"execution_scope\",\n          \"publish\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘실행 방식’\"\n      },\n      {\n        \"id\": \"execution_scope\",\n        \"name\": \"수행 범위\",\n        \"aliases\": [\n          \"공장별\",\n          \"시스템 공통\"\n        ],\n        \"summary\": \"공장마다 따로 진행하는 절차인지, 시스템 전체에서 공통으로 진행하는 절차인지 정합니다.\",\n        \"example\": \"공장마다 설치 상태를 확인하면 공장별, 시스템 전체 배포를 확인하면 시스템 공통을 선택할 수 있습니다.\",\n        \"related\": [\n          \"category\",\n          \"run_mode\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘수행 범위’\"\n      },\n      {\n        \"id\": \"publish\",\n        \"name\": \"게시\",\n        \"aliases\": [\n          \"절차 게시\"\n        ],\n        \"summary\": \"검사를 통과한 절차 초안을 업무에 사용할 수 있는 버전으로 만듭니다.\",\n        \"example\": \"초안을 저장하고 게시 전 확인을 거쳐 게시합니다. 저장만으로 게시되지 않고, 게시만으로 작업을 실행하지 않습니다.\",\n        \"related\": [\n          \"tool_states\",\n          \"run_mode\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘게시’\"\n      },\n      {\n        \"id\": \"connection_request\",\n        \"name\": \"연결 요청 방법\",\n        \"aliases\": [\n          \"기능 연결 전\",\n          \"필요한 기능이 없어요\"\n        ],\n        \"summary\": \"관리자에게 Open WebUI 관리자 화면에서 필요한 도구를 등록해 달라고 요청하세요.\",\n        \"example\": \"어떤 시스템에서 무엇을 읽거나 요청하려는지 알려 주세요. 등록 뒤 현재 계정에 사용 권한이 있으면 연결된 기능 목록에 나타납니다. 이 화면에서 요청을 자동으로 보내지는 않습니다.\",\n        \"related\": [\n          \"connected_function\",\n          \"read_tool\",\n          \"request_tool\"\n        ],\n        \"evidence\": \"근거 · EES Workflow 도움말 ‘연결 요청 방법’\"\n      }\n    ]\n  },\n  \"shared_tools\": [],\n  \"help_context\": {\n    \"kind\": \"help\",\n    \"system_id\": \"EMS\",\n    \"context_id\": \"[18,true,\\\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\\\",\\\"\\\",\\\"EMS\\\",\\\"\\\",\\\"\\\",\\\"\\\",\\\"\\\"]\",\n    \"screen\": \"새 도구 시작\"\n  }\n}"
+      }
+    ],
+    "input_proposals": [
+      {
+        "workflow_id": "9d06f947-7a1a-45fd-8733-639d2d77ba12",
+        "base_revision": 1,
+        "context_id": "[15,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"9d06f947-7a1a-45fd-8733-639d2d77ba12\",\"84eb7764-29cb-47f2-a711-53875b59dc94\",\"job-7f2b8f0e-28e3-4e83-a93f-4c4d4c7278d3\"]",
+        "proposal_kind": "inputs",
+        "run_id": "84eb7764-29cb-47f2-a711-53875b59dc94",
+        "job_id": "job-7f2b8f0e-28e3-4e83-a93f-4c4d4c7278d3",
+        "inputs": {
+          "note": "AI가 제안한 첫 입력"
+        }
+      }
+    ],
+    "helper_payloads": [
+      {
+        "question": "정보 읽기 도구와 작업 부탁 도구는 뭐가 달라?",
+        "reference": {
+          "context_id": "[18,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"\",\"\",\"\"]",
+          "screen": "새 도구 시작",
+          "system_id": "EMS"
+        },
+        "advertised_tool_names": [
+          "ees_workflow_view"
+        ],
+        "model": "c3-synthetic-model"
+      },
+      {
+        "question": "정보 읽기 도구와 작업 부탁 도구는 뭐가 달라?",
+        "reference": {
+          "context_id": "[18,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"\",\"\",\"\"]",
+          "screen": "새 도구 시작",
+          "system_id": "EMS"
+        },
+        "advertised_tool_names": [
+          "ees_workflow_view"
+        ],
+        "model": "c3-synthetic-model"
+      },
+      {
+        "question": "선택된 기능과 자료 없이 도움말만 알려 주세요",
+        "reference": {
+          "context_id": "[18,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"\",\"\",\"\"]",
+          "screen": "새 도구 시작",
+          "system_id": "EMS"
+        },
+        "advertised_tool_names": [
+          "ees_workflow_view"
+        ],
+        "model": "c3-synthetic-model"
+      },
+      {
+        "question": "선택된 기능과 자료 없이 도움말만 알려 주세요",
+        "reference": {
+          "context_id": "[18,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"\",\"\",\"\"]",
+          "screen": "새 도구 시작",
+          "system_id": "EMS"
+        },
+        "advertised_tool_names": [
+          "ees_workflow_view"
+        ],
+        "model": "c3-synthetic-model"
+      },
+      {
+        "question": "새 대화에서도 업무 도우미가 하나의 안내만 답해 주세요",
+        "reference": {
+          "context_id": "[18,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"\",\"\",\"\"]",
+          "screen": "새 도구 시작",
+          "system_id": "EMS"
+        },
+        "advertised_tool_names": [
+          "ees_workflow_view"
+        ],
+        "model": "c3-synthetic-model"
+      },
+      {
+        "question": "새 대화에서도 업무 도우미가 하나의 안내만 답해 주세요",
+        "reference": {
+          "context_id": "[18,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"\",\"\",\"\"]",
+          "screen": "새 도구 시작",
+          "system_id": "EMS"
+        },
+        "advertised_tool_names": [
+          "ees_workflow_view"
+        ],
+        "model": "c3-synthetic-model"
+      }
+    ],
+    "helper_results": [
+      {
+        "ok": true,
+        "help": {
+          "source": "EES Workflow 도움말",
+          "version": 1,
+          "answer_guidance": {
+            "grounding": "용어 id·이름·별칭으로 관련 항목을 찾아 summary와 example에 근거해 설명합니다. 답에 해당 항목의 evidence 문구를 표시합니다.",
+            "unknown": "원본에서 확인할 수 없는 내용은 ‘도움말에 없는 내용’이라고 밝히고, 필요한 확인 사항을 안내합니다. 정책·연결 상태·실행 결과를 추측하여 단정하지 않습니다.",
+            "context": "화면 이름·초안 이름·종류는 사용자가 보고 있는 문맥일 뿐, 저장·확인·게시·실행 여부의 근거가 아닙니다. 예시는 실제 연결이나 실행을 뜻하지 않습니다."
+          },
+          "terms": [
+            {
+              "id": "read_tool",
+              "name": "정보 읽기",
+              "aliases": [
+                "조회 도구"
+              ],
+              "summary": "운영 시스템을 바꾸지 않고 읽기만 합니다.",
+              "example": "Jira CR 상태 보기, 서비스 응답 시간 보기. 예시 기능이 실제로 연결되어 있는지는 연결된 기능 목록에서 확인합니다.",
+              "related": [
+                "request_tool",
+                "direct_tool",
+                "connected_function"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘정보 읽기’"
+            },
+            {
+              "id": "request_tool",
+              "name": "EES에 작업 부탁",
+              "aliases": [
+                "요청 도구"
+              ],
+              "summary": "상태를 바꾸는 일을 EES에 부탁합니다. 실제 실행은 EES가 합니다.",
+              "example": "서비스 재시작을 요청하는 도구입니다. 요청 접수와 실제 작업 완료는 따로 확인합니다.",
+              "related": [
+                "read_tool",
+                "direct_tool",
+                "output_schema",
+                "reviewer"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘EES에 작업 부탁’"
+            },
+            {
+              "id": "direct_tool",
+              "name": "직접 실행 · 예외",
+              "aliases": [
+                "직접 실행"
+              ],
+              "summary": "연결할 EES 기능이 없을 때 담당자가 검토하는 예외입니다.",
+              "example": "예외로 필요한 이유와 담당자, 실행 뒤 상태·효과를 확인할 방법을 함께 정합니다. 화면에 보인다고 실행 권한이 생기지는 않습니다.",
+              "related": [
+                "request_tool",
+                "guide_url",
+                "reviewer"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘직접 실행 · 예외’"
+            },
+            {
+              "id": "connected_function",
+              "name": "연결된 기능",
+              "aliases": [
+                "Native 기능",
+                "EES 기능"
+              ],
+              "summary": "관리자가 등록한 기능 중 현재 계정으로 사용할 수 있는 기능입니다.",
+              "example": "Jira에 등록된 CR 조회 기능을 골라 도구를 만듭니다. 기능을 바꾸면 필요한 입력값도 다시 확인합니다.",
+              "related": [
+                "read_tool",
+                "request_tool",
+                "connection_request"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘연결된 기능’"
+            },
+            {
+              "id": "tool_purpose",
+              "name": "무엇을 왜 조회하나요",
+              "aliases": [
+                "설명"
+              ],
+              "summary": "언제 무엇을 읽어야 하는지 적는 설명입니다. AI가 이 설명을 보고 언제 쓸지 판단합니다.",
+              "example": "배포 전에 CR 승인 상태를 확인합니다.",
+              "related": [
+                "read_tool",
+                "connected_function"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘무엇을 왜 조회하나요’"
+            },
+            {
+              "id": "output_schema",
+              "name": "결과 형식",
+              "aliases": [
+                "출력 계약",
+                "JSON Schema"
+              ],
+              "summary": "도구가 돌려주는 결과의 항목과 자료 형식을 정합니다. 연결된 기능에서 자동으로 얻는 값은 아닙니다.",
+              "example": "서비스 상태를 어떤 이름과 형식으로 받을지 개발자나 시스템 담당자와 정합니다. 정보 읽기에서는 선택이고, 작업 부탁과 직접 실행 예외에서는 확인 요청 전에 필요합니다.",
+              "related": [
+                "request_tool",
+                "direct_tool",
+                "reviewer"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘결과 형식’"
+            },
+            {
+              "id": "guide_url",
+              "name": "가이드 문서",
+              "aliases": [
+                "참고 문서"
+              ],
+              "summary": "도구를 사용할 때 확인할 안내 문서의 링크입니다. 정보 읽기는 선택이고, 작업 부탁과 직접 실행 예외는 필수입니다.",
+              "example": "서비스 재시작이 실패했을 때 따를 가이드의 링크를 적습니다. 링크를 모르면 담당자에게 물어보세요.",
+              "related": [
+                "request_tool",
+                "direct_tool",
+                "reviewer"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘가이드 문서’"
+            },
+            {
+              "id": "reviewer",
+              "name": "확인할 사람",
+              "aliases": [
+                "확인하는 사람",
+                "담당자"
+              ],
+              "summary": "도구의 연결과 설명을 확인하는 담당자입니다. 정보 읽기는 해당 시스템 담당자가, 작업 부탁과 직접 실행 예외는 지정한 담당자가 확인합니다.",
+              "example": "확인 요청을 보내면 담당자가 도구 목록에서 확인합니다. 정보 읽기는 작성자도 시스템 담당자라면 확인할 수 있고, 확인한 사람의 기록이 남습니다.",
+              "related": [
+                "tool_states",
+                "guide_url",
+                "output_schema"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘확인할 사람’"
+            },
+            {
+              "id": "tool_states",
+              "name": "초안 · 확인 요청 · 확인 완료 · 반려",
+              "aliases": [
+                "도구 상태",
+                "담당자 확인 대기"
+              ],
+              "summary": "초안은 작성 중, 확인 요청은 담당자 확인 대기, 확인 완료는 검토 통과, 반려는 보완이 필요한 상태입니다.",
+              "example": "초안을 저장한 다음 확인을 요청합니다. 반려된 내용은 고쳐서 다시 요청합니다. 확인된 도구만 업무 절차에 사용할 수 있습니다.",
+              "related": [
+                "reviewer",
+                "publish"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘초안 · 확인 요청 · 확인 완료 · 반려’"
+            },
+            {
+              "id": "category",
+              "name": "분류",
+              "aliases": [
+                "셋업",
+                "운영",
+                "장애대응"
+              ],
+              "summary": "절차가 어떤 업무인지 셋업·운영·장애대응으로 구분합니다.",
+              "example": "신규 시스템 설치는 셋업, 일일 점검은 운영으로 분류할 수 있습니다.",
+              "related": [
+                "run_mode",
+                "execution_scope"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘분류’"
+            },
+            {
+              "id": "run_mode",
+              "name": "실행 방식",
+              "aliases": [
+                "주기",
+                "수시",
+                "비상"
+              ],
+              "summary": "절차를 주기적으로 할지, 필요할 때 할지, 비상 상황에 할지 구분합니다.",
+              "example": "일일 점검은 주기, 필요할 때 하는 점검은 수시로 정할 수 있습니다. 주기를 고르는 것만으로 일정 규칙이 켜지지는 않습니다.",
+              "related": [
+                "category",
+                "execution_scope",
+                "publish"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘실행 방식’"
+            },
+            {
+              "id": "execution_scope",
+              "name": "수행 범위",
+              "aliases": [
+                "공장별",
+                "시스템 공통"
+              ],
+              "summary": "공장마다 따로 진행하는 절차인지, 시스템 전체에서 공통으로 진행하는 절차인지 정합니다.",
+              "example": "공장마다 설치 상태를 확인하면 공장별, 시스템 전체 배포를 확인하면 시스템 공통을 선택할 수 있습니다.",
+              "related": [
+                "category",
+                "run_mode"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘수행 범위’"
+            },
+            {
+              "id": "publish",
+              "name": "게시",
+              "aliases": [
+                "절차 게시"
+              ],
+              "summary": "검사를 통과한 절차 초안을 업무에 사용할 수 있는 버전으로 만듭니다.",
+              "example": "초안을 저장하고 게시 전 확인을 거쳐 게시합니다. 저장만으로 게시되지 않고, 게시만으로 작업을 실행하지 않습니다.",
+              "related": [
+                "tool_states",
+                "run_mode"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘게시’"
+            },
+            {
+              "id": "connection_request",
+              "name": "연결 요청 방법",
+              "aliases": [
+                "기능 연결 전",
+                "필요한 기능이 없어요"
+              ],
+              "summary": "관리자에게 Open WebUI 관리자 화면에서 필요한 도구를 등록해 달라고 요청하세요.",
+              "example": "어떤 시스템에서 무엇을 읽거나 요청하려는지 알려 주세요. 등록 뒤 현재 계정에 사용 권한이 있으면 연결된 기능 목록에 나타납니다. 이 화면에서 요청을 자동으로 보내지는 않습니다.",
+              "related": [
+                "connected_function",
+                "read_tool",
+                "request_tool"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘연결 요청 방법’"
+            }
+          ]
+        },
+        "shared_tools": [],
+        "help_context": {
+          "kind": "help",
+          "system_id": "EMS",
+          "context_id": "[18,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"\",\"\",\"\"]",
+          "screen": "새 도구 시작"
+        }
+      },
+      {
+        "ok": true,
+        "help": {
+          "source": "EES Workflow 도움말",
+          "version": 1,
+          "answer_guidance": {
+            "grounding": "용어 id·이름·별칭으로 관련 항목을 찾아 summary와 example에 근거해 설명합니다. 답에 해당 항목의 evidence 문구를 표시합니다.",
+            "unknown": "원본에서 확인할 수 없는 내용은 ‘도움말에 없는 내용’이라고 밝히고, 필요한 확인 사항을 안내합니다. 정책·연결 상태·실행 결과를 추측하여 단정하지 않습니다.",
+            "context": "화면 이름·초안 이름·종류는 사용자가 보고 있는 문맥일 뿐, 저장·확인·게시·실행 여부의 근거가 아닙니다. 예시는 실제 연결이나 실행을 뜻하지 않습니다."
+          },
+          "terms": [
+            {
+              "id": "read_tool",
+              "name": "정보 읽기",
+              "aliases": [
+                "조회 도구"
+              ],
+              "summary": "운영 시스템을 바꾸지 않고 읽기만 합니다.",
+              "example": "Jira CR 상태 보기, 서비스 응답 시간 보기. 예시 기능이 실제로 연결되어 있는지는 연결된 기능 목록에서 확인합니다.",
+              "related": [
+                "request_tool",
+                "direct_tool",
+                "connected_function"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘정보 읽기’"
+            },
+            {
+              "id": "request_tool",
+              "name": "EES에 작업 부탁",
+              "aliases": [
+                "요청 도구"
+              ],
+              "summary": "상태를 바꾸는 일을 EES에 부탁합니다. 실제 실행은 EES가 합니다.",
+              "example": "서비스 재시작을 요청하는 도구입니다. 요청 접수와 실제 작업 완료는 따로 확인합니다.",
+              "related": [
+                "read_tool",
+                "direct_tool",
+                "output_schema",
+                "reviewer"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘EES에 작업 부탁’"
+            },
+            {
+              "id": "direct_tool",
+              "name": "직접 실행 · 예외",
+              "aliases": [
+                "직접 실행"
+              ],
+              "summary": "연결할 EES 기능이 없을 때 담당자가 검토하는 예외입니다.",
+              "example": "예외로 필요한 이유와 담당자, 실행 뒤 상태·효과를 확인할 방법을 함께 정합니다. 화면에 보인다고 실행 권한이 생기지는 않습니다.",
+              "related": [
+                "request_tool",
+                "guide_url",
+                "reviewer"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘직접 실행 · 예외’"
+            },
+            {
+              "id": "connected_function",
+              "name": "연결된 기능",
+              "aliases": [
+                "Native 기능",
+                "EES 기능"
+              ],
+              "summary": "관리자가 등록한 기능 중 현재 계정으로 사용할 수 있는 기능입니다.",
+              "example": "Jira에 등록된 CR 조회 기능을 골라 도구를 만듭니다. 기능을 바꾸면 필요한 입력값도 다시 확인합니다.",
+              "related": [
+                "read_tool",
+                "request_tool",
+                "connection_request"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘연결된 기능’"
+            },
+            {
+              "id": "tool_purpose",
+              "name": "무엇을 왜 조회하나요",
+              "aliases": [
+                "설명"
+              ],
+              "summary": "언제 무엇을 읽어야 하는지 적는 설명입니다. AI가 이 설명을 보고 언제 쓸지 판단합니다.",
+              "example": "배포 전에 CR 승인 상태를 확인합니다.",
+              "related": [
+                "read_tool",
+                "connected_function"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘무엇을 왜 조회하나요’"
+            },
+            {
+              "id": "output_schema",
+              "name": "결과 형식",
+              "aliases": [
+                "출력 계약",
+                "JSON Schema"
+              ],
+              "summary": "도구가 돌려주는 결과의 항목과 자료 형식을 정합니다. 연결된 기능에서 자동으로 얻는 값은 아닙니다.",
+              "example": "서비스 상태를 어떤 이름과 형식으로 받을지 개발자나 시스템 담당자와 정합니다. 정보 읽기에서는 선택이고, 작업 부탁과 직접 실행 예외에서는 확인 요청 전에 필요합니다.",
+              "related": [
+                "request_tool",
+                "direct_tool",
+                "reviewer"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘결과 형식’"
+            },
+            {
+              "id": "guide_url",
+              "name": "가이드 문서",
+              "aliases": [
+                "참고 문서"
+              ],
+              "summary": "도구를 사용할 때 확인할 안내 문서의 링크입니다. 정보 읽기는 선택이고, 작업 부탁과 직접 실행 예외는 필수입니다.",
+              "example": "서비스 재시작이 실패했을 때 따를 가이드의 링크를 적습니다. 링크를 모르면 담당자에게 물어보세요.",
+              "related": [
+                "request_tool",
+                "direct_tool",
+                "reviewer"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘가이드 문서’"
+            },
+            {
+              "id": "reviewer",
+              "name": "확인할 사람",
+              "aliases": [
+                "확인하는 사람",
+                "담당자"
+              ],
+              "summary": "도구의 연결과 설명을 확인하는 담당자입니다. 정보 읽기는 해당 시스템 담당자가, 작업 부탁과 직접 실행 예외는 지정한 담당자가 확인합니다.",
+              "example": "확인 요청을 보내면 담당자가 도구 목록에서 확인합니다. 정보 읽기는 작성자도 시스템 담당자라면 확인할 수 있고, 확인한 사람의 기록이 남습니다.",
+              "related": [
+                "tool_states",
+                "guide_url",
+                "output_schema"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘확인할 사람’"
+            },
+            {
+              "id": "tool_states",
+              "name": "초안 · 확인 요청 · 확인 완료 · 반려",
+              "aliases": [
+                "도구 상태",
+                "담당자 확인 대기"
+              ],
+              "summary": "초안은 작성 중, 확인 요청은 담당자 확인 대기, 확인 완료는 검토 통과, 반려는 보완이 필요한 상태입니다.",
+              "example": "초안을 저장한 다음 확인을 요청합니다. 반려된 내용은 고쳐서 다시 요청합니다. 확인된 도구만 업무 절차에 사용할 수 있습니다.",
+              "related": [
+                "reviewer",
+                "publish"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘초안 · 확인 요청 · 확인 완료 · 반려’"
+            },
+            {
+              "id": "category",
+              "name": "분류",
+              "aliases": [
+                "셋업",
+                "운영",
+                "장애대응"
+              ],
+              "summary": "절차가 어떤 업무인지 셋업·운영·장애대응으로 구분합니다.",
+              "example": "신규 시스템 설치는 셋업, 일일 점검은 운영으로 분류할 수 있습니다.",
+              "related": [
+                "run_mode",
+                "execution_scope"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘분류’"
+            },
+            {
+              "id": "run_mode",
+              "name": "실행 방식",
+              "aliases": [
+                "주기",
+                "수시",
+                "비상"
+              ],
+              "summary": "절차를 주기적으로 할지, 필요할 때 할지, 비상 상황에 할지 구분합니다.",
+              "example": "일일 점검은 주기, 필요할 때 하는 점검은 수시로 정할 수 있습니다. 주기를 고르는 것만으로 일정 규칙이 켜지지는 않습니다.",
+              "related": [
+                "category",
+                "execution_scope",
+                "publish"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘실행 방식’"
+            },
+            {
+              "id": "execution_scope",
+              "name": "수행 범위",
+              "aliases": [
+                "공장별",
+                "시스템 공통"
+              ],
+              "summary": "공장마다 따로 진행하는 절차인지, 시스템 전체에서 공통으로 진행하는 절차인지 정합니다.",
+              "example": "공장마다 설치 상태를 확인하면 공장별, 시스템 전체 배포를 확인하면 시스템 공통을 선택할 수 있습니다.",
+              "related": [
+                "category",
+                "run_mode"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘수행 범위’"
+            },
+            {
+              "id": "publish",
+              "name": "게시",
+              "aliases": [
+                "절차 게시"
+              ],
+              "summary": "검사를 통과한 절차 초안을 업무에 사용할 수 있는 버전으로 만듭니다.",
+              "example": "초안을 저장하고 게시 전 확인을 거쳐 게시합니다. 저장만으로 게시되지 않고, 게시만으로 작업을 실행하지 않습니다.",
+              "related": [
+                "tool_states",
+                "run_mode"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘게시’"
+            },
+            {
+              "id": "connection_request",
+              "name": "연결 요청 방법",
+              "aliases": [
+                "기능 연결 전",
+                "필요한 기능이 없어요"
+              ],
+              "summary": "관리자에게 Open WebUI 관리자 화면에서 필요한 도구를 등록해 달라고 요청하세요.",
+              "example": "어떤 시스템에서 무엇을 읽거나 요청하려는지 알려 주세요. 등록 뒤 현재 계정에 사용 권한이 있으면 연결된 기능 목록에 나타납니다. 이 화면에서 요청을 자동으로 보내지는 않습니다.",
+              "related": [
+                "connected_function",
+                "read_tool",
+                "request_tool"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘연결 요청 방법’"
+            }
+          ]
+        },
+        "shared_tools": [],
+        "help_context": {
+          "kind": "help",
+          "system_id": "EMS",
+          "context_id": "[18,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"\",\"\",\"\"]",
+          "screen": "새 도구 시작"
+        }
+      },
+      {
+        "ok": true,
+        "help": {
+          "source": "EES Workflow 도움말",
+          "version": 1,
+          "answer_guidance": {
+            "grounding": "용어 id·이름·별칭으로 관련 항목을 찾아 summary와 example에 근거해 설명합니다. 답에 해당 항목의 evidence 문구를 표시합니다.",
+            "unknown": "원본에서 확인할 수 없는 내용은 ‘도움말에 없는 내용’이라고 밝히고, 필요한 확인 사항을 안내합니다. 정책·연결 상태·실행 결과를 추측하여 단정하지 않습니다.",
+            "context": "화면 이름·초안 이름·종류는 사용자가 보고 있는 문맥일 뿐, 저장·확인·게시·실행 여부의 근거가 아닙니다. 예시는 실제 연결이나 실행을 뜻하지 않습니다."
+          },
+          "terms": [
+            {
+              "id": "read_tool",
+              "name": "정보 읽기",
+              "aliases": [
+                "조회 도구"
+              ],
+              "summary": "운영 시스템을 바꾸지 않고 읽기만 합니다.",
+              "example": "Jira CR 상태 보기, 서비스 응답 시간 보기. 예시 기능이 실제로 연결되어 있는지는 연결된 기능 목록에서 확인합니다.",
+              "related": [
+                "request_tool",
+                "direct_tool",
+                "connected_function"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘정보 읽기’"
+            },
+            {
+              "id": "request_tool",
+              "name": "EES에 작업 부탁",
+              "aliases": [
+                "요청 도구"
+              ],
+              "summary": "상태를 바꾸는 일을 EES에 부탁합니다. 실제 실행은 EES가 합니다.",
+              "example": "서비스 재시작을 요청하는 도구입니다. 요청 접수와 실제 작업 완료는 따로 확인합니다.",
+              "related": [
+                "read_tool",
+                "direct_tool",
+                "output_schema",
+                "reviewer"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘EES에 작업 부탁’"
+            },
+            {
+              "id": "direct_tool",
+              "name": "직접 실행 · 예외",
+              "aliases": [
+                "직접 실행"
+              ],
+              "summary": "연결할 EES 기능이 없을 때 담당자가 검토하는 예외입니다.",
+              "example": "예외로 필요한 이유와 담당자, 실행 뒤 상태·효과를 확인할 방법을 함께 정합니다. 화면에 보인다고 실행 권한이 생기지는 않습니다.",
+              "related": [
+                "request_tool",
+                "guide_url",
+                "reviewer"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘직접 실행 · 예외’"
+            },
+            {
+              "id": "connected_function",
+              "name": "연결된 기능",
+              "aliases": [
+                "Native 기능",
+                "EES 기능"
+              ],
+              "summary": "관리자가 등록한 기능 중 현재 계정으로 사용할 수 있는 기능입니다.",
+              "example": "Jira에 등록된 CR 조회 기능을 골라 도구를 만듭니다. 기능을 바꾸면 필요한 입력값도 다시 확인합니다.",
+              "related": [
+                "read_tool",
+                "request_tool",
+                "connection_request"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘연결된 기능’"
+            },
+            {
+              "id": "tool_purpose",
+              "name": "무엇을 왜 조회하나요",
+              "aliases": [
+                "설명"
+              ],
+              "summary": "언제 무엇을 읽어야 하는지 적는 설명입니다. AI가 이 설명을 보고 언제 쓸지 판단합니다.",
+              "example": "배포 전에 CR 승인 상태를 확인합니다.",
+              "related": [
+                "read_tool",
+                "connected_function"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘무엇을 왜 조회하나요’"
+            },
+            {
+              "id": "output_schema",
+              "name": "결과 형식",
+              "aliases": [
+                "출력 계약",
+                "JSON Schema"
+              ],
+              "summary": "도구가 돌려주는 결과의 항목과 자료 형식을 정합니다. 연결된 기능에서 자동으로 얻는 값은 아닙니다.",
+              "example": "서비스 상태를 어떤 이름과 형식으로 받을지 개발자나 시스템 담당자와 정합니다. 정보 읽기에서는 선택이고, 작업 부탁과 직접 실행 예외에서는 확인 요청 전에 필요합니다.",
+              "related": [
+                "request_tool",
+                "direct_tool",
+                "reviewer"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘결과 형식’"
+            },
+            {
+              "id": "guide_url",
+              "name": "가이드 문서",
+              "aliases": [
+                "참고 문서"
+              ],
+              "summary": "도구를 사용할 때 확인할 안내 문서의 링크입니다. 정보 읽기는 선택이고, 작업 부탁과 직접 실행 예외는 필수입니다.",
+              "example": "서비스 재시작이 실패했을 때 따를 가이드의 링크를 적습니다. 링크를 모르면 담당자에게 물어보세요.",
+              "related": [
+                "request_tool",
+                "direct_tool",
+                "reviewer"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘가이드 문서’"
+            },
+            {
+              "id": "reviewer",
+              "name": "확인할 사람",
+              "aliases": [
+                "확인하는 사람",
+                "담당자"
+              ],
+              "summary": "도구의 연결과 설명을 확인하는 담당자입니다. 정보 읽기는 해당 시스템 담당자가, 작업 부탁과 직접 실행 예외는 지정한 담당자가 확인합니다.",
+              "example": "확인 요청을 보내면 담당자가 도구 목록에서 확인합니다. 정보 읽기는 작성자도 시스템 담당자라면 확인할 수 있고, 확인한 사람의 기록이 남습니다.",
+              "related": [
+                "tool_states",
+                "guide_url",
+                "output_schema"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘확인할 사람’"
+            },
+            {
+              "id": "tool_states",
+              "name": "초안 · 확인 요청 · 확인 완료 · 반려",
+              "aliases": [
+                "도구 상태",
+                "담당자 확인 대기"
+              ],
+              "summary": "초안은 작성 중, 확인 요청은 담당자 확인 대기, 확인 완료는 검토 통과, 반려는 보완이 필요한 상태입니다.",
+              "example": "초안을 저장한 다음 확인을 요청합니다. 반려된 내용은 고쳐서 다시 요청합니다. 확인된 도구만 업무 절차에 사용할 수 있습니다.",
+              "related": [
+                "reviewer",
+                "publish"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘초안 · 확인 요청 · 확인 완료 · 반려’"
+            },
+            {
+              "id": "category",
+              "name": "분류",
+              "aliases": [
+                "셋업",
+                "운영",
+                "장애대응"
+              ],
+              "summary": "절차가 어떤 업무인지 셋업·운영·장애대응으로 구분합니다.",
+              "example": "신규 시스템 설치는 셋업, 일일 점검은 운영으로 분류할 수 있습니다.",
+              "related": [
+                "run_mode",
+                "execution_scope"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘분류’"
+            },
+            {
+              "id": "run_mode",
+              "name": "실행 방식",
+              "aliases": [
+                "주기",
+                "수시",
+                "비상"
+              ],
+              "summary": "절차를 주기적으로 할지, 필요할 때 할지, 비상 상황에 할지 구분합니다.",
+              "example": "일일 점검은 주기, 필요할 때 하는 점검은 수시로 정할 수 있습니다. 주기를 고르는 것만으로 일정 규칙이 켜지지는 않습니다.",
+              "related": [
+                "category",
+                "execution_scope",
+                "publish"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘실행 방식’"
+            },
+            {
+              "id": "execution_scope",
+              "name": "수행 범위",
+              "aliases": [
+                "공장별",
+                "시스템 공통"
+              ],
+              "summary": "공장마다 따로 진행하는 절차인지, 시스템 전체에서 공통으로 진행하는 절차인지 정합니다.",
+              "example": "공장마다 설치 상태를 확인하면 공장별, 시스템 전체 배포를 확인하면 시스템 공통을 선택할 수 있습니다.",
+              "related": [
+                "category",
+                "run_mode"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘수행 범위’"
+            },
+            {
+              "id": "publish",
+              "name": "게시",
+              "aliases": [
+                "절차 게시"
+              ],
+              "summary": "검사를 통과한 절차 초안을 업무에 사용할 수 있는 버전으로 만듭니다.",
+              "example": "초안을 저장하고 게시 전 확인을 거쳐 게시합니다. 저장만으로 게시되지 않고, 게시만으로 작업을 실행하지 않습니다.",
+              "related": [
+                "tool_states",
+                "run_mode"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘게시’"
+            },
+            {
+              "id": "connection_request",
+              "name": "연결 요청 방법",
+              "aliases": [
+                "기능 연결 전",
+                "필요한 기능이 없어요"
+              ],
+              "summary": "관리자에게 Open WebUI 관리자 화면에서 필요한 도구를 등록해 달라고 요청하세요.",
+              "example": "어떤 시스템에서 무엇을 읽거나 요청하려는지 알려 주세요. 등록 뒤 현재 계정에 사용 권한이 있으면 연결된 기능 목록에 나타납니다. 이 화면에서 요청을 자동으로 보내지는 않습니다.",
+              "related": [
+                "connected_function",
+                "read_tool",
+                "request_tool"
+              ],
+              "evidence": "근거 · EES Workflow 도움말 ‘연결 요청 방법’"
+            }
+          ]
+        },
+        "shared_tools": [],
+        "help_context": {
+          "kind": "help",
+          "system_id": "EMS",
+          "context_id": "[18,true,\"/c/fcbcd5fb-481f-4503-aeed-bb803acd7b48\",\"\",\"EMS\",\"\",\"\",\"\",\"\"]",
+          "screen": "새 도구 시작"
+        }
+      }
+    ],
+    "errors": []
+  },
+  "browser_cleanup_diagnostics": {
+    "stage": "ready",
+    "elapsed_ms": 11062.88359499922,
+    "pid": 48,
+    "exit_code": 0,
+    "browser_version": {
+      "protocolVersion": "1.3",
+      "product": "HeadlessChrome/153.0.8010.0",
+      "revision": "@86cee6df69e0463a839c0cc8435c9d4c259434d3",
+      "jsVersion": "15.3.76"
+    },
+    "target_id": "DDB29B621DE441A919FDC8302DE88E43",
+    "session_attached": false,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 418,
+      "method": "Browser.close",
+      "session_attached": false,
+      "timeout_seconds": 5,
+      "elapsed_ms": 0.3178870001647738,
+      "completed": true
+    },
+    "recent_responses": [
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "id": 417,
+        "sessionId": "FBF75BB6AC9F9E5B43A13CE8043C40BC"
+      },
+      {
+        "id": 418
+      }
+    ],
+    "stderr_tail": "[1029/192356.932957:ERROR:../net/base/address_tracker_linux.cc:224] Could not create NETLINK socket: Operation not permitted (1)\n[1029/192356.934304:ERROR:../content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 65: No such file or directory (2)\n[1029/192356.942883:WARNING:../sandbox/policy/linux/sandbox_linux.cc:405] InitializeSandbox() called with multiple threads in process gpu-process.\n[1029/192356.955390:ERROR:../content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 94: No such file or directory (2)\n",
+    "first_failure": null,
+    "browser_startup": {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 146.96815099978267,
+      "product": "HeadlessChrome/153.0.8010.0"
+    },
+    "bootstrap_observation": null
+  }
+}

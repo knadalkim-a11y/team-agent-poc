@@ -1,0 +1,48 @@
+{
+  "date_kst": "2026-10-30",
+  "baseline": "6ac4c1062a6c83d2d1429d0120cc5179d5dc508d",
+  "source_commit": "2a960a59fe1dbbd35282f0556b3666d81102e781",
+  "node": "v22.16.0",
+  "npm": "10.9.2",
+  "official_wheel_sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547",
+  "first_attempts": [
+    {
+      "attempt": 1,
+      "result": "Python .venv has no pip; downloaded official wheel with runtime Python pip instead; expected SHA matched."
+    },
+    {
+      "attempt": 2,
+      "result": "npm ci without CI env tried optional ONNX CUDA binary; DNS error. No source build ran."
+    },
+    {
+      "attempt": 3,
+      "result": "npm ci with ONNX skip but missing CYPRESS_INSTALL_BINARY=0 failed Cypress unzip. No source build ran."
+    }
+  ],
+  "correction": "Use exact existing ees-delivery.yml frontend install environment: ONNXRUNTIME_NODE_INSTALL_CUDA=skip CYPRESS_INSTALL_BINARY=0 npm ci --force --no-audit --no-fund. No dependency/source changes.",
+  "dependency_result": {
+    "installed_packages": 1128,
+    "clean_source_gate": "pass",
+    "final_install": "exact ees-delivery.yml settings, success"
+  },
+  "frontend_attempts": [
+    {
+      "attempt": 1,
+      "result": "intentionally interrupted by parent at exit130 while independent review fixed canonical workflow.mode rendering; no frontend published; patched source and log retained."
+    },
+    {
+      "attempt": 2,
+      "result": "intentionally interrupted by parent at exit130 while review fixed note length reservation for stored judgment suffix; no frontend published; original source/log preserved."
+    }
+  ],
+  "product_environment": {
+    "python": "3.11.16",
+    "inventory": "evals/assets/restructure-step0b-20261001/venv-final-inventory.json",
+    "inventory_sha256": "5d99cd1d5baa634ed3aa27c7ca4803472e06be114b6e75a40d0e65eb55f71eba",
+    "verified_exact_packages": 199,
+    "extra": {
+      "ftfy": "6.3.1",
+      "wcwidth": "0.2.13"
+    }
+  }
+}

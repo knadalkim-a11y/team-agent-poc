@@ -1,0 +1,57 @@
+{
+  "sessionId": "5e74f5e6-d46d-48db-b41e-5beacaaac372",
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "date": "2026-10-30",
+  "check": "figma-check.json (errors 0, pre-existing warnings 1) completed before this append",
+  "createdNodeIds": [
+    "1959:2"
+  ],
+  "mutatedNodeIds": [
+    "898:31"
+  ],
+  "log": [
+    {
+      "id": "898:32",
+      "text": "변경 기록",
+      "characters": 5
+    },
+    {
+      "id": "898:35",
+      "text": "기록 형식(2026-10-29부터): ‘C번호 · 날짜 · 바꾼 것 · PR #번호(없으면 PR 없음) · 백업 B번호(없으면 백업 없음)’를 한 줄로 씁니다. 자세한 내용과 확인 결과는 GitHub 기록에 둡니다. 이 칸에는 최근 20줄(기준은 scripts/figma_check.js)만 두고, 넘치면 오래된 줄을 91 · 보관 ‘지난 변경 기록 · 목록’ 끝으로 옮깁니다. 기록하기 전에 GitHub 저장소의 scripts/figma_check.js 점검을 실행합니다.",
+      "characters": 265
+    },
+    {
+      "id": "1932:8",
+      "text": "지난 기록 137개(관리 v1.0 · B001 · C01~C129와 미반영 제안 메모, 2026-10-01~10-29)는 91 · 보관 ‘지난 변경 기록 · 목록’에 그대로 있습니다 →",
+      "characters": 103
+    },
+    {
+      "id": "1932:9",
+      "text": "C130 · 2026-10-29 · 고정 점검 도입, 변경 기록을 한 줄로 바꾸고 지난 기록 137개를 91로 옮김 · PR #106 · 백업 없음",
+      "characters": 82
+    },
+    {
+      "id": "1940:2",
+      "text": "C131 · 2026-10-29 · PR #106 병합에 따라 백업 B044·B045·B046·B052·B056·B063을 지우고 백업 링크 3곳을 백업 규칙으로 바꿈 · PR #106 · 백업 없음",
+      "characters": 111
+    },
+    {
+      "id": "1959:2",
+      "text": "C132 · 2026-10-30 · 운영 사유 박스의 파란 바깥 포커스를 회색 안쪽선으로 변경 · PR #109 · 백업 없음",
+      "characters": 70
+    }
+  ],
+  "bounds": {
+    "width": 1280,
+    "height": 23
+  },
+  "fonts": [
+    {
+      "family": "Noto Sans KR",
+      "style": "Regular",
+      "variationSettings": {
+        "wght": 400
+      }
+    }
+  ]
+}

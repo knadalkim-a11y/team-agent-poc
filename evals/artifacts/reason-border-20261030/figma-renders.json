@@ -1,0 +1,21 @@
+{
+  "session_id": "5e74f5e6-d46d-48db-b41e-5beacaaac372",
+  "date_kst": "2026-10-30",
+  "method": "get_screenshot original PNG bytes; URL download returned195-byte site unavailable HTML, inline fallback used. No image edits.",
+  "images": [
+    {
+      "path": "reason-figma.png",
+      "node_id": "1705:1461",
+      "width": 480,
+      "height": 1080,
+      "sha256": "9b9f123c4e5bac48c9c9613456fbe949ff255b4bbb88f844650ccc171e1daaf0"
+    },
+    {
+      "path": "header-figma.png",
+      "node_id": "1284:3107",
+      "width": 2076,
+      "height": 524,
+      "sha256": "dc23654b6b7db8edb4a59fdf4e972a0267634e5eff38cb44c6618321bbc58b76"
+    }
+  ]
+}

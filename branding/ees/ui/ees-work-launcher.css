@@ -883,7 +883,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
  * execution controls. Match the current 06-task-groups source new-screen rules;
  * opt in only on the focused task panel with #ees-work-panel.ew-vd. */
 #ees-work-panel.ew-vd #ees-work-content.ew-vd-padding-reset{padding:0;}
-#ees-work-panel.ew-vd{background:var(--ees-surface-sidebar)}
+#ees-work-panel.ew-vd{--ees-text-tertiary:#6f717a;background:var(--ees-surface-sidebar)}
 #ees-work-panel.ew-vd>.ew-panel-header.ew-run-nav{gap:2px;padding:0 10px 0 8px}
 #ees-work-panel.ew-vd .ew-run-nav>span{flex:1}
 #ees-work-panel.ew-vd .ew-run-back{display:inline-flex;align-items:center;gap:6px;min-width:0;min-height:32px;padding:4px 8px;border:0;border-radius:6px;background:transparent;font-size:14px;line-height:20px;font-weight:500;color:var(--ees-text-strong)}
@@ -974,7 +974,8 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-panel.ew-vd .ew-vd-tool+.ew-vd-tool{margin-top:0;border-top:1px solid var(--ees-line-divider)}
 #ees-work-panel.ew-vd .ew-vd-tool-toggle{display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;border:0;background:transparent;text-align:left;border-radius:4px}
 #ees-work-panel.ew-vd .ew-vd-tool-toggle:hover{background:var(--ees-surface-hover)}
-#ees-work-panel.ew-vd .ew-vd-tool-toggle:focus-visible,#ees-work-panel.ew-vd .ew-vd-note textarea:focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px}
+#ees-work-panel.ew-vd .ew-vd-tool-toggle:focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px}
+#ees-work-panel.ew-vd .ew-vd-note textarea:focus-visible{outline:2px solid var(--ees-text-secondary);outline-offset:-2px;box-shadow:none}
 #ees-work-panel.ew-vd .ew-vd-tool-toggle[aria-expanded=true]>.ew-icon{transform:rotate(180deg)}
 #ees-work-panel.ew-vd .ew-vd-tool-heading{display:grid;gap:4px;flex:1;min-width:0}
 #ees-work-panel.ew-vd .ew-vd-tool-heading>span{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px}
@@ -1002,7 +1003,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-panel.ew-vd .ew-vd-note{display:grid;gap:6px;margin-top:12px}
 #ees-work-panel.ew-vd .ew-vd-note>span{font-weight:500;color:var(--ees-text-primary)}
 #ees-work-panel.ew-vd .ew-vd-note small{font-weight:400;color:var(--ees-text-tertiary)}
-#ees-work-panel.ew-vd .ew-vd-note textarea{display:block;box-sizing:border-box;resize:vertical;width:100%;min-height:66px;padding:8px 10px;border:1px solid var(--ees-line-divider);border-radius:6px;background:var(--ees-surface-default);font:inherit;line-height:18px;color:var(--ees-text-primary)}
+#ees-work-panel.ew-vd .ew-vd-note textarea{display:block;box-sizing:border-box;resize:vertical;width:100%;min-height:66px;padding:9px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-default);font:inherit;line-height:18px;color:var(--ees-text-primary)}
 
 #ees-work-panel.ew-vd .ew-stage-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
 #ees-work-panel.ew-vd .ew-stage-heading>.ew-vd-title{flex:1;min-width:0;flex-wrap:wrap;gap:4px 8px}
@@ -1025,6 +1026,29 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 
 /* The approved mock has no actions assigned to its more button yet. */
 #ees-work-panel.ew-vd .ew-run-nav>.ew-icon-button:disabled{opacity:1;cursor:default;}
+
+/* Operations 31: the published procedure is readable before a run exists. */
+#ees-work-panel.ew-vd>.ew-operation-nav{gap:2px;padding:0 10px 0 8px;}
+#ees-work-panel.ew-vd>.ew-operation-nav>strong{display:flex;align-items:center;box-sizing:border-box;width:100px;height:32px;padding:0 8px;font-size:14px;font-weight:500;line-height:20px;color:var(--ees-text-strong);}
+#ees-work-panel.ew-vd>.ew-operation-nav>span{flex:1;}
+#ees-work-panel.ew-vd>.ew-operation-nav>.ew-icon-button{display:flex;align-items:center;justify-content:center;flex:none;width:32px;min-height:32px;padding:0;border:0;background:transparent;}
+#ees-work-panel.ew-vd>.ew-operation-nav>.ew-icon-button>.ew-icon{width:14px;height:14px;}
+#ees-work-panel.ew-vd .ew-operation-overview{padding:20px;}
+#ees-work-panel.ew-vd .ew-operation-overview>h2{margin:0;font-size:20px;font-weight:700;line-height:28px;color:var(--ees-text-primary);}
+#ees-work-panel.ew-vd .ew-operation-context{display:grid;grid-template-columns:68px minmax(0,1fr);gap:6px 12px;margin:20px 0 24px;font-size:13px;font-weight:400;line-height:20px;}
+#ees-work-panel.ew-vd .ew-operation-context>dt{color:var(--ees-text-tertiary);}
+#ees-work-panel.ew-vd .ew-operation-context>dd{margin:0;overflow-wrap:anywhere;color:var(--ees-text-primary);}
+#ees-work-panel.ew-vd .ew-operation-stages{margin:0;}
+#ees-work-panel.ew-vd .ew-operation-stages>h3{height:28px;margin:0;font-size:14px;font-weight:700;line-height:20px;color:var(--ees-text-primary);}
+#ees-work-panel.ew-vd .ew-operation-stage{position:relative;display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;min-height:71px;padding:12px 0 13px;overflow:hidden;border:0;border-radius:6px;background:transparent;text-align:left;}
+#ees-work-panel.ew-vd .ew-operation-stage::after{position:absolute;bottom:0;left:0;width:100%;height:1px;background:var(--ees-line-divider);content:"";}
+#ees-work-panel.ew-vd .ew-operation-stage>span{display:grid;flex:1;min-width:0;gap:4px;}
+#ees-work-panel.ew-vd .ew-operation-stage strong{font-size:15px;font-weight:500;line-height:22px;color:var(--ees-text-primary);}
+#ees-work-panel.ew-vd .ew-operation-stage small{font-size:13px;font-weight:400;line-height:20px;color:var(--ees-text-tertiary);}
+#ees-work-panel.ew-vd .ew-operation-stage>.ew-icon{width:14px;height:14px;}
+#ees-work-panel.ew-vd .ew-operation-stage:focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:2px;}
+#ees-work-panel.ew-vd .ew-vd-prior-selections{margin-top:12px;}
+#ees-work-panel.ew-vd .ew-vd-prior-selections>.ew-vd-selection-record{margin-top:12px;}
 
 /* Workspace authoring · Figma authoring 12, explicitly selected after the HTML comparison.
    Native owns the outer left divider; complete the remaining frame edges here. */
@@ -1130,7 +1154,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-summary-actions{gap:8px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-summary-actions>button{font-size:12px;min-height:0;padding:6px 11px;}
 /* Job detail: same plane as stages, with intentional borders only on controls. */
-#ees-work-designer:not([data-author-tab=tools]) .ew-job-detail{gap:0;margin-top:24px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-detail{--ees-text-tertiary:#6f717a;gap:0;margin-top:24px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-detail-header{gap:6px;min-height:30px;margin-bottom:24px;font-size:12px;line-height:18px;color:var(--ees-text-tertiary);}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-field-label{display:inline;font-size:12px;line-height:18px;font-weight:500;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-field-required{margin-left:5px;font-size:11px;line-height:18px;font-weight:400;color:#8b8e98;}
@@ -1146,6 +1170,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-detail textarea{height:64px;min-height:64px;line-height:20.8px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-detail textarea.ew-job-completion-rule{height:39px;min-height:39px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-main>label:has(>select[name=assignee]){margin-top:6px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-main select[name=assignee]{padding-right:12px;background-image:none;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-main select[name=assignee]:has(option[value=""]:checked){color:var(--ees-text-tertiary);}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-detail fieldset>legend{margin-bottom:6px;font-size:12px;font-weight:500;line-height:18px;color:var(--ees-text-secondary);}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-method>div{grid-template-columns:repeat(2,minmax(0,1fr));gap:2px;padding:3px;}
@@ -1154,14 +1179,18 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-result-confirmation input[value=manual]+span{font-weight:400;box-shadow:none;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-result-confirmation input[value=automatic]+span{font-weight:500;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-result-confirmation input:disabled+span{opacity:.45;cursor:default;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-result-confirmation[data-connected=false] input[value=manual]:disabled+span{opacity:1;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-summary{display:grid;gap:6px;min-width:0;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-summary>label{display:block;font-size:12px;line-height:18px;font-weight:500;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-name{display:flex;align-items:center;gap:8px;min-height:24px;font-size:13px;line-height:21px;overflow-wrap:anywhere;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-name>small{font-size:12px;color:var(--ew-muted);}
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-name>small[data-state=review_required]{background:var(--ees-status-attention-bg);color:var(--ees-status-attention);}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-summary>[data-author-action=pick_job_tool]{justify-self:start;min-height:36px;padding:7px 13px;font-size:13px;line-height:20px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-summary>.ew-job-connect{justify-self:start;min-height:36px;padding:7px 13px;border:1px solid #d8dde5;border-radius:6px;background:var(--ees-surface-default);font-size:13px;line-height:20px;color:var(--ees-text-primary);}
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-summary>.ew-procedure-unconnected{color:var(--ees-status-attention);font-size:12px;line-height:18px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-summary>.ew-procedure-unconnected+.ew-author-muted{color:var(--ees-text-tertiary);font-size:12px;line-height:18px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-values{min-width:0;margin:0;}
-#ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-name+.ew-job-values{margin-top:18px;}
+#ees-work-designer:not([data-author-tab=tools]) :is(.ew-job-tool-name,.ew-job-tool-state)+.ew-job-values{margin-top:18px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-values dl{display:grid;gap:0;margin:0;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-values dl>div{display:grid;grid-template-columns:100px minmax(0,1fr);gap:16px;padding:8px 0;font-size:13px;line-height:21px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-values dt{align-self:center;font-size:12px;line-height:18px;font-weight:500;color:var(--ew-muted);}
@@ -1170,7 +1199,14 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-main[data-job-mode=tool]>.ew-job-result-confirmation,
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-main[data-job-mode=tool]>label:has(>textarea[name=completion_rule]),
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-main[data-job-mode=tool]>label:has(>textarea[name=job_guidance]){margin-top:6px;}
-#ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-state{font-size:12px;line-height:18px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-state{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;font-size:12px;line-height:18px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-state>.ew-icon{margin-top:2px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-state>div{display:grid;gap:4px;min-width:0;flex:1;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-state strong{font-size:13px;font-weight:500;line-height:20.8px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-state p{margin:0;color:var(--ees-text-secondary);}
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-admin{display:flex;align-items:center;gap:6px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-admin>.ew-author-link{min-height:0;padding:0;font-weight:500;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-tool-admin>small{font-size:12px;line-height:18px;color:var(--ees-text-tertiary);}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-section:last-child{border-bottom:1px solid var(--ew-line);}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-section-toggle{min-height:44px;padding:17px 2px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-section-toggle>strong{font-size:13px;line-height:20.8px;}

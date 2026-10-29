@@ -28,6 +28,8 @@ class CPhaseOneNativeTests(IntegratedNativeCase):
             run=self.command('human_confirm',run_id=run['id'],job_id=job,expected_revision=run['revision'])['run']
         run=self.command('close_run',run_id=run['id'],expected_revision=run['revision'])['run']
         self.refresh();self.click('[data-action="records"]');self.click('[data-action="open_run"][data-run-id="'+run['id']+'"]')
+        self.click('[data-action=stage_open][data-node-id=stage]')
+        self.click('[data-action=stage_approved]')
         self.wait("document.querySelector('[data-action=job][data-job-id=job-0]')")
         self.click('[data-action="job"][data-job-id="job-0"]')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-action=confirm],[data-action=execute],[data-action=save_inputs]')"))
@@ -41,7 +43,7 @@ class CPhaseOneNativeTests(IntegratedNativeCase):
         self.fill('[data-work-input][name="value-19"]','마지막 값')
         self.assertEqual(self.read('[data-work-input][name="value-19"]','value'),'마지막 값')
         self.assertTrue(self.browser.evaluate("document.querySelector('#ees-work-content').scrollHeight > document.querySelector('#ees-work-content').clientHeight"))
-        self.click('[data-action="overview"]');self.click('[data-action="job"][data-job-id="job-0"]')
+        self.click('[data-action="overview"]');self.click('[data-action=stage_open][data-node-id=stage]');self.click('[data-action="job"][data-job-id="job-0"]')
         self.assertEqual(self.read('[data-work-input][name="value-19"]','value'),'마지막 값')
         self.assertEqual(self.state(run_id=run['id'])['run']['inputs'],{})
         self.screenshot('integrated-long-korean-form')

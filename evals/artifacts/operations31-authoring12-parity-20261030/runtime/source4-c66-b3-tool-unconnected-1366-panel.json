@@ -1,0 +1,253 @@
+{
+  "label": "c66-b3-tool-unconnected-1366",
+  "viewport": {
+    "width": 1920,
+    "height": 918
+  },
+  "panel": {
+    "x": 1440,
+    "y": 0,
+    "width": 480,
+    "height": 918
+  },
+  "bodyOverflow": 0,
+  "panelOverflow": 0,
+  "text": "워크플로우\nEMS\n12판 작업 상세 1366\n초안\n\nEMS · 운영\n\n업무 내용\n실행 방식\n판정 규칙\n게시 기록\n단계와 작업\n/ 검증 단계\n작업 이름\n수행 방법\n사람이 확인\n도구로 처리\n연결된 도구\n＋ 도구 연결\n\n할 일을 고르고 질문에 답한 뒤 도구를 연결합니다.\n\n필요한 도구가 없으면 관리자에게 요청하세요.\n\n결과 확인\n담당자가 확인\n자동으로 완료\n\n도구를 연결하면 결과 확인 방식을 정할 수 있습니다.\n\n담당자 · 선택\n담당자 미지정\nFixture Administrator\n합성 조회 팀\n작업 안내 · 선택\n변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장",
+  "geometry": {
+    ".ew-panel-header": null,
+    ".ew-operation-overview": null,
+    ".ew-operation-overview h2": null,
+    ".ew-operation-context": null,
+    ".ew-operation-context dt": null,
+    ".ew-operation-context dd": null,
+    ".ew-operation-stages": null,
+    ".ew-operation-stage": null,
+    ".ew-vd-head": null,
+    ".ew-tabs": null,
+    ".ew-vd-label": null,
+    ".ew-vd-item": null,
+    ".ew-vd-note textarea": null,
+    ".ew-vd-selection-record": null,
+    ".ew-author>header": {
+      "x": 1,
+      "y": 1,
+      "width": 478,
+      "height": 48,
+      "fontSize": "12px",
+      "lineHeight": "18px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "워크플로우\nEMS"
+    },
+    ".ew-author-definition-head": {
+      "x": 21,
+      "y": 69,
+      "width": 438,
+      "height": 52,
+      "fontSize": "13px",
+      "lineHeight": "20.8px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "12판 작업 상세 1366\n초안\n\nEMS · 운영"
+    },
+    ".ew-author-tabs": {
+      "x": 21,
+      "y": 145,
+      "width": 438,
+      "height": 35,
+      "fontSize": "13px",
+      "lineHeight": "20.8px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "업무 내용\n실행 방식\n판정 규칙\n게시 기록"
+    },
+    ".ew-job-detail-header": {
+      "x": 21,
+      "y": 204,
+      "width": 438,
+      "height": 30,
+      "fontSize": "12px",
+      "lineHeight": "18px",
+      "fontWeight": "400",
+      "color": "rgb(92, 94, 101)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "단계와 작업\n/ 검증 단계"
+    },
+    "#ew-author-node [name=name]": {
+      "x": 21,
+      "y": 282,
+      "width": 438,
+      "height": 39,
+      "fontSize": "13px",
+      "lineHeight": "21px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgb(255, 255, 255)",
+      "borderRadius": "6px",
+      "text": "합성 작업 0"
+    },
+    ".ew-job-method": {
+      "x": 21,
+      "y": 339,
+      "width": 438,
+      "height": 59,
+      "fontSize": "13px",
+      "lineHeight": "20.8px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "수행 방법\n사람이 확인\n도구로 처리"
+    },
+    "#ew-author-node [name=job_guidance]": {
+      "x": 21,
+      "y": 766,
+      "width": 438,
+      "height": 64,
+      "fontSize": "13px",
+      "lineHeight": "21px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgb(255, 255, 255)",
+      "borderRadius": "6px",
+      "text": "합성 자료로 저장·판정 경계를 검증합니다.\n\n별도로 작성한 설명"
+    },
+    "#ew-author-node [name=result_block]": null,
+    "#ew-author-node [name=completion_rule]": null,
+    "#ew-author-node [name=assignee]": {
+      "x": 21,
+      "y": 679,
+      "width": 438,
+      "height": 39,
+      "fontSize": "13px",
+      "lineHeight": "21px",
+      "fontWeight": "400",
+      "color": "rgb(92, 94, 101)",
+      "background": "rgb(255, 255, 255)",
+      "borderRadius": "6px",
+      "text": ""
+    },
+    ".ew-author>footer": {
+      "x": 1,
+      "y": 858,
+      "width": 478,
+      "height": 59,
+      "fontSize": "13px",
+      "lineHeight": "20.8px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgb(250, 250, 250)",
+      "borderRadius": "0px",
+      "text": "변경 있음 · 저장 안 됨\n게시 전 확인\n초안 저장"
+    },
+    ".ew-job-tool-state": null,
+    ".ew-job-tool-state img": null,
+    ".ew-job-result-confirmation": {
+      "x": 21,
+      "y": 548,
+      "width": 438,
+      "height": 83,
+      "fontSize": "13px",
+      "lineHeight": "20.8px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "결과 확인\n담당자가 확인\n자동으로 완료\n\n도구를 연결하면 결과 확인 방식을 정할 수 있습니다."
+    },
+    ".ew-job-tool-summary": {
+      "x": 21,
+      "y": 416,
+      "width": 438,
+      "height": 108,
+      "fontSize": "13px",
+      "lineHeight": "20.8px",
+      "fontWeight": "400",
+      "color": "rgb(31, 32, 35)",
+      "background": "rgba(0, 0, 0, 0)",
+      "borderRadius": "0px",
+      "text": "연결된 도구\n＋ 도구 연결\n\n할 일을 고르고 질문에 답한 뒤 도구를 연결합니다.\n\n필요한 도구가 없으면 관리자에게 요청하세요."
+    }
+  },
+  "images": [
+    {
+      "src": "/_ees14/v4/7bb4a.svg",
+      "naturalWidth": 16,
+      "naturalHeight": 16,
+      "box": {
+        "x": 436,
+        "y": 16.5,
+        "width": 16,
+        "height": 16,
+        "fontSize": "12px",
+        "lineHeight": "18px",
+        "fontWeight": "400",
+        "color": "rgb(31, 32, 35)",
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "text": ""
+      }
+    },
+    {
+      "src": "/_ees14/v4/cb8e2.svg",
+      "naturalWidth": 16,
+      "naturalHeight": 16,
+      "box": {
+        "x": 436,
+        "y": 76,
+        "width": 16,
+        "height": 16,
+        "fontSize": "12px",
+        "lineHeight": "20.8px",
+        "fontWeight": "400",
+        "color": "rgb(47, 95, 152)",
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "text": ""
+      }
+    },
+    {
+      "src": "/_ees14/v4/9acc8.svg",
+      "naturalWidth": 14,
+      "naturalHeight": 14,
+      "box": {
+        "x": 21,
+        "y": 212,
+        "width": 14,
+        "height": 14,
+        "fontSize": "12px",
+        "lineHeight": "18px",
+        "fontWeight": "400",
+        "color": "rgb(92, 94, 101)",
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "text": ""
+      }
+    },
+    {
+      "src": "/_ees14/v4/cb8e2.svg",
+      "naturalWidth": 16,
+      "naturalHeight": 16,
+      "box": {
+        "x": 436,
+        "y": 211,
+        "width": 16,
+        "height": 16,
+        "fontSize": "12px",
+        "lineHeight": "18px",
+        "fontWeight": "400",
+        "color": "rgb(92, 94, 101)",
+        "background": "rgba(0, 0, 0, 0)",
+        "borderRadius": "0px",
+        "text": ""
+      }
+    }
+  ]
+}

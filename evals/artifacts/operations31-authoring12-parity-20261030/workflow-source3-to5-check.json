@@ -1,0 +1,7 @@
+{
+  "source3To5DesignerUnchanged": true,
+  "authoringCssEqualApartFromScopedTertiary": true,
+  "comparisonNote": "Compared source3 wheel stylesheet authoring block with final5 source block, normalized only build-generated asset cache query hashes for source comparison. No original artifacts edited.",
+  "changedRule": "#ees-work-designer:not([data-author-tab=tools]) .ew-job-detail{--ees-text-tertiary:#6f717a;}",
+  "currentDesignerSha256": "ba210b224e27df461c4660a7ee1ef9af58731ac23a5318c43dd2b2b33d798698"
+}

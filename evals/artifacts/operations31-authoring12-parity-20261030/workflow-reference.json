@@ -1,0 +1,39 @@
+{
+  "dateKST": "2026-10-30",
+  "session": "b06a5016-3736-46fb-aed7-7743d8ffa95d",
+  "file": "XK2wTos6sEuxSHhIj7cqg6",
+  "screenshots": [
+    {
+      "node": "1846:3456",
+      "file": "workflow-unconnected-figma.png",
+      "size": [
+        480,
+        918
+      ],
+      "sha256": "63be8a9552e2c2c032a5cfeb4965d22c79fab3e2c1a1eefac37d6518e7d3ea06",
+      "source": "get_design_context included screenshot; may be capped at1024px"
+    },
+    {
+      "node": "1846:3548",
+      "file": "workflow-unavailable-figma.png",
+      "size": [
+        415,
+        1024
+      ],
+      "sha256": "dafadadc242254a3457d8f20116431258a5de8280a2c78def883b5d8344c8939",
+      "source": "get_design_context included screenshot; may be capped at1024px"
+    }
+  ],
+  "asset": {
+    "id": "676c3.svg",
+    "local": "branding/ees/ui/v4/676c3.svg",
+    "bytes": 541,
+    "dimensions": [
+      16,
+      16
+    ],
+    "color": "#96590C",
+    "sha256": "e201643f986a4d0d4f495db87ad9386b0f70a70f6d5e97a87bd7c23e03fe43d9",
+    "reuse": "Existing matching asset ID used by context; download returned interception HTML and was not installed."
+  }
+}

@@ -1,0 +1,265 @@
+{
+  "base_commit": "6ac4c1062a6c83d2d1429d0120cc5179d5dc508d",
+  "working_tree_modified": true,
+  "tested_source": "source5 built working tree; exact hashes below, not the unmodified base commit",
+  "source_hashes": {
+    "branding/ees/ui/ees-work-launcher.js": "2ceb2fbbf58025e7bfdcca23bb7e21395080090c2261ffbe91c75392b1e48c11",
+    "branding/ees/ui/ees-work-view.js": "51c6aa5b9ba56341f8d2c05187afc33879c2302bdd8d7400ab12d5e14ea9d682",
+    "branding/ees/ui/ees-work-designer.js": "ba210b224e27df461c4660a7ee1ef9af58731ac23a5318c43dd2b2b33d798698",
+    "branding/ees/ui/ees-work-launcher.css": "b40873cdf3b878d02190bf3bc1692de196669115a51abd761534e8cfa347d041"
+  },
+  "source_unchanged_during_core_run": true,
+  "source5": {
+    "upstream_commit": "2a960a59fe1dbbd35282f0556b3666d81102e781",
+    "node": "v22.16.0",
+    "npm": "10.9.2",
+    "official_wheel_sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547",
+    "normal_source_build": "passed",
+    "strict_source_provenance": "passed",
+    "frontend_manifest_sha256": "bf8f8c00059cf0be12705bb1b9391e061100ac71dd9dae353ae8ddacbb6156b4",
+    "branding_manifest_sha256": "e8ee936fa1d208183e054f3bc517e1453f08c1ed306d573c0f4e084ee7091a37",
+    "wheel": {
+      "filename": "open_webui-0.11.3+ees.14-py3-none-any.whl",
+      "sha256": "ad0d360b6ae9465d59f37bf83ccf6ad5058ece55250221320c735d17c5b468e8",
+      "size": 152172097
+    },
+    "source_input_count": 139,
+    "output_file_count": 5582,
+    "core_native": {
+      "tests": 6,
+      "success": true,
+      "seconds": 33.453,
+      "result": "core-result.json",
+      "log": "core.log"
+    },
+    "complete_native_run": false,
+    "broader_22_run": false,
+    "visual_assertions": {
+      "all_passed": true,
+      "actual_panel_captures": 39,
+      "retained_original_panels": 12,
+      "stage_row_height": 71,
+      "stage_divider": "0px border + clipped absolute bottom1px rectangle, radius6px, background rgb(230,230,233)",
+      "operation_context_and_reason_optional_and_author_breadcrumb_color": "rgb(111, 113, 122)",
+      "body_overflow_max": 0,
+      "panel_overflow_max": 0,
+      "all_images_loaded": true
+    }
+  },
+  "source4_functional_regression": {
+    "result": "source4-result.json",
+    "wheel_sha256": "cfe23f087d229097fca3168918b2a55f83ea4e2468b281039d08f65b458c5bf6",
+    "affected_native": {
+      "total": 22,
+      "first_passes": 21,
+      "navigation_only_failure": 1,
+      "corrected_targeted_rerun_passes": 1,
+      "business_assertions_retained": true
+    },
+    "complete_native": {
+      "status": "passed",
+      "steps": 22,
+      "screenshots": 35,
+      "report": "source4-complete-native-report.json"
+    },
+    "applicability": "Source5 changes only scoped color and divider CSS; all other138 source inputs, including every product JS input, match source4. Broad/Complete gates were not repeated or represented as source5 runs."
+  },
+  "source4_to_source5_changed_inputs": [
+    "branding/ees/ui/ees-work-launcher.css"
+  ],
+  "bounded_css_diff": "source4-to-source5.css.diff",
+  "screenshots": [
+    {
+      "file": "operations31-overview-factory-a-1920-panel.png",
+      "sha256": "f2c19f1eb279c9094dfcb55dd15acd57b41a307573d92dfeede776f5523f6c4a",
+      "width": 480,
+      "height": 1080,
+      "geometry_file": "operations31-overview-factory-a-1920-panel.json",
+      "geometry_sha256": "6beefec3188e1a5cb584e319bf19a59f600b96ae0b8cd3e811aae749f2270de9",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "body_overflow": 0,
+      "panel_overflow": 0
+    },
+    {
+      "file": "operations31-stage-factory-a-1920-panel.png",
+      "sha256": "3de506547ed408626a7adbd2f9784fd3bf5e60601798416ecdf9c04e3637f249",
+      "width": 480,
+      "height": 1080,
+      "geometry_file": "operations31-stage-factory-a-1920-panel.json",
+      "geometry_sha256": "2b2da642a7bf4aa9ccef01b1525103a5563c844d6752dadc82b877ca13d010d8",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "body_overflow": 0,
+      "panel_overflow": 0
+    },
+    {
+      "file": "operations31-reason-reference-1920-panel.png",
+      "sha256": "d28799a81493c86bcdfbfe353e0f553096f4a779c225205c1e8b751653fa2a23",
+      "width": 480,
+      "height": 1080,
+      "geometry_file": "operations31-reason-reference-1920-panel.json",
+      "geometry_sha256": "97d79415b017da5bf238317c846d38fedd004a66b407c9a1cbea4f99849d58ab",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "body_overflow": 0,
+      "panel_overflow": 0
+    },
+    {
+      "file": "operations31-overview-before-480-panel.png",
+      "sha256": "5d8cddf484ce5c911be918b5d34caeb3bb4bcac50a7b02350d885086341ac4ed",
+      "width": 424,
+      "height": 1080,
+      "geometry_file": "operations31-overview-before-480-panel.json",
+      "geometry_sha256": "e718cdcab2a616cee552453d2cbcada5a76bdfd824d22540f6163e7ca64812cb",
+      "viewport": {
+        "width": 480,
+        "height": 1080
+      },
+      "body_overflow": 0,
+      "panel_overflow": 0
+    },
+    {
+      "file": "operations31-stage-before-480-panel.png",
+      "sha256": "2f496adbfd3676222c4036dba2c10146e0b06a9864f251603f535c5b0cad8fab",
+      "width": 424,
+      "height": 1080,
+      "geometry_file": "operations31-stage-before-480-panel.json",
+      "geometry_sha256": "f943de75f174ac0435b6639d642731d0c5599281f2ca7c69b4dcddef91b98867",
+      "viewport": {
+        "width": 480,
+        "height": 1080
+      },
+      "body_overflow": 0,
+      "panel_overflow": 0
+    },
+    {
+      "file": "operations31-reason-saved-480-panel.png",
+      "sha256": "956481d2d98b8042245ac909d3d21483236456042e18db729fd7f5ef918fe90f",
+      "width": 424,
+      "height": 1080,
+      "geometry_file": "operations31-reason-saved-480-panel.json",
+      "geometry_sha256": "f9428933ee619e40ce7c48265c47dafd20178820236c5e5a04e8fd0e18944d98",
+      "viewport": {
+        "width": 480,
+        "height": 1080
+      },
+      "body_overflow": 0,
+      "panel_overflow": 0
+    },
+    {
+      "file": "operations31-reason-draft-1920-panel.png",
+      "sha256": "6bde131c799c21465677f4ecbd216dc0cda51f889348d197abe029e1f84db9f2",
+      "width": 480,
+      "height": 1080,
+      "geometry_file": "operations31-reason-draft-1920-panel.json",
+      "geometry_sha256": "d5f9f099b2a8d2331d285df81eb4e5eb551e1027efc6fd5f3c0f257566fad176",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "body_overflow": 0,
+      "panel_overflow": 0
+    },
+    {
+      "file": "c66-b3-tool-unconnected-1366-panel.png",
+      "sha256": "3d26131b79a615221862cfc76f5987536fd047fbb442912e60bb7f8d11273ec5",
+      "width": 480,
+      "height": 918,
+      "geometry_file": "c66-b3-tool-unconnected-1366-panel.json",
+      "geometry_sha256": "82ebd1268a1672d532146c8f322ca8b88f08ca2906bd89fe0bf6e0fe4336bf73",
+      "viewport": {
+        "width": 1920,
+        "height": 918
+      },
+      "body_overflow": 0,
+      "panel_overflow": 0
+    },
+    {
+      "file": "c66-b3-tool-review-required-1366-panel.png",
+      "sha256": "5020d831147d2fd9b361cbcf80149dd97738fd7edd754cb57d897eca5a37be64",
+      "width": 480,
+      "height": 1186,
+      "geometry_file": "c66-b3-tool-review-required-1366-panel.json",
+      "geometry_sha256": "17f56b9d47c293ac8cac510d2c0ace9fb418ec4f8bb025f26cad68d75b81bc06",
+      "viewport": {
+        "width": 1920,
+        "height": 1186
+      },
+      "body_overflow": 0,
+      "panel_overflow": 0
+    },
+    {
+      "file": "c66-b3-tool-unconnected-480-panel.png",
+      "sha256": "528408f478e66b60eac574407ad1f8817a066ae89794255c6291edbec3e005d7",
+      "width": 424,
+      "height": 768,
+      "geometry_file": "c66-b3-tool-unconnected-480-panel.json",
+      "geometry_sha256": "f791e27d22e218eb0eeeff03116342c24b35dd8fd45a7f4f2384bdd3e4f1b540",
+      "viewport": {
+        "width": 480,
+        "height": 768
+      },
+      "body_overflow": 0,
+      "panel_overflow": 0
+    },
+    {
+      "file": "c66-b3-tool-review-required-480-panel.png",
+      "sha256": "cc619f5c2567f6d153dfadcdc5aba91f151b2f3fbefff3cfcc226e8a883b5109",
+      "width": 424,
+      "height": 768,
+      "geometry_file": "c66-b3-tool-review-required-480-panel.json",
+      "geometry_sha256": "e6d214c9e150bc9850566841a5548395d199607486754884b4dbee6ef7672aae",
+      "viewport": {
+        "width": 480,
+        "height": 768
+      },
+      "body_overflow": 0,
+      "panel_overflow": 0
+    },
+    {
+      "file": "c66-b3-human-1366-panel.png",
+      "sha256": "ced3a9d67032922088c312c6d22ce07044eece44cf46b4e088fff386026dc3c6",
+      "width": 480,
+      "height": 865,
+      "geometry_file": "c66-b3-human-1366-panel.json",
+      "geometry_sha256": "fe91e9155243caf64f74f1fd670061daf14f5eee81ea72af572f9237429f44f7",
+      "viewport": {
+        "width": 1920,
+        "height": 865
+      },
+      "body_overflow": 0,
+      "panel_overflow": 0
+    }
+  ],
+  "scope": "Real pinned built frontend, Native controls, production workflow service and temporary SQLite. Synthetic auth, tool metadata and external transport. No product DOM substitution; PNGs are unaltered CDP panel captures.",
+  "verified_contracts": [
+    "Published workflow/stage reads and tab navigation create0 runs, attempts and decisions.",
+    "Reason draft input causes0 business writes and is absent from save_ui.",
+    "Explicit human verdict stores the note atomically; reload retains readonly note; later verdict preserves prior decision and attempt.",
+    "Single human approval is inside expandable group; actual collapse/reopen retains saved record.",
+    "Unconnected authoring has disabled result-confirmation choices without completion textarea.",
+    "Unavailable authoring preserves actual schema/values and shows warning title/icon above them.",
+    "Narrow480 controls, menus, notes and panel scrolling remain usable without horizontal overflow."
+  ],
+  "comparison_limits": [
+    "Dynamic user/time, actual tool schema and actual unavailability reason are preserved. Automatic execution failure remains 실행 실패 rather than invented human 미승인.",
+    "Figma overview/prerun originals479px exclude the separate panel boundary; Native480px captures include it.",
+    "Old B1 list is historical only; current list remains the user-approved latest implementation."
+  ],
+  "first_failures": [
+    "first-round.json",
+    "source4-result.json",
+    "source4-affected.log"
+  ],
+  "build_log_sha256": {
+    "frontend5": "ec7176e1502df22fdb44afcf303707c267dc03dd6ae42b809c680a780072ee3f",
+    "wheel5": "662511fd9128ac84b4316751ae2382cdfa397bac905a71fa995967c82e2ccf64"
+  }
+}
