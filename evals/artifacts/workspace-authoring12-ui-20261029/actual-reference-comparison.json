@@ -1,0 +1,150 @@
+{
+  "viewport": [
+    1363,
+    936
+  ],
+  "panel_width": 480,
+  "reference_sha256": "d2aec2a3cf61f09ceb3915c778ef77b5a07b559b9fb57f545eb16cb11973079e",
+  "verified_wheel_sha256": "f6339501b18969c0f01f7e7fe933573c36983d3676e3cd9a632c264203f460db",
+  "css_sha256": "e427159955461544c0793566802ab7b91d6199d974d458681c62e75888326019",
+  "actual_reference_rows": [
+    {
+      "part": "expanded stage",
+      "actual": [
+        442.578125,
+        59.59375,
+        429
+      ],
+      "reference": [
+        442.515625,
+        59.59375,
+        429
+      ],
+      "units": "top,height,width px"
+    },
+    {
+      "part": "job name",
+      "actual": [
+        309.609375,
+        40.796875
+      ],
+      "reference": [
+        309.5625,
+        40.796875
+      ]
+    },
+    {
+      "part": "human guidance",
+      "actual": [
+        476.40625,
+        84
+      ],
+      "reference": [
+        476.359375,
+        84
+      ]
+    },
+    {
+      "part": "human method select",
+      "actual": [
+        609.40625,
+        41
+      ],
+      "reference": [
+        609.15625,
+        41
+      ]
+    },
+    {
+      "part": "completion rule",
+      "actual": [
+        717.40625,
+        84
+      ],
+      "reference": [
+        717.15625,
+        84
+      ]
+    },
+    {
+      "part": "assignee",
+      "actual": [
+        850.40625,
+        40.796875
+      ],
+      "reference": [
+        849.953125,
+        40.796875
+      ]
+    },
+    {
+      "part": "execution mode button",
+      "actual": [
+        270.609375,
+        40.390625
+      ],
+      "reference": [
+        270.5625,
+        40.390625
+      ]
+    },
+    {
+      "part": "add start input",
+      "actual": [
+        521.078125,
+        48.390625
+      ],
+      "reference": [
+        521.03125,
+        48.390625
+      ]
+    },
+    {
+      "part": "schedule final hint",
+      "actual": [
+        579.46875,
+        18.6875
+      ],
+      "reference": [
+        579.421875,
+        18.6875
+      ]
+    }
+  ],
+  "unchanged_second_candidate_modal": {
+    "actual": [
+      760,
+      543
+    ],
+    "reference": [
+      760,
+      542.984375
+    ],
+    "padding": [
+      24,
+      28
+    ],
+    "columns": [
+      190,
+      24
+    ],
+    "question_input_top": 369.296875,
+    "question_input_height": 40.796875,
+    "detail": "Third candidate changes are scoped outside the workflow tool dialog."
+  },
+  "behavior_verified": [
+    "Selected tab retains keyboard focus",
+    "Tool popup cancel returns focus to Settings change",
+    "Tool selection remains buffered on cancel",
+    "New workflow purpose enters a dirty private draft",
+    "Explicit save produces revision2; purpose survives actual UI reload",
+    "Private fixture health: zero external tool calls, errors and unknown routes"
+  ],
+  "limits": [
+    "Authentication/chat/tool transport are synthetic; workflow commands and SQLite persistence are actual code.",
+    "This is scoped component geometry and visual review, not a full screenshot pixel-equality assertion.",
+    "Real catalog labels, assignee selector and factory execution scope differ from invented mock data.",
+    "Local managed browser had1363x936 viewport;1920/narrow Native checks are CI evidence, not local pixel comparisons.",
+    "Browser screenshots were visually inspected but shared-file delivery was unavailable; no screenshot file is linked as evidence."
+  ]
+}

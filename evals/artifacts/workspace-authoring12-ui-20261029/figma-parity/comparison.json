@@ -1,0 +1,306 @@
+{
+  "date": "2026-10-29",
+  "figma": {
+    "file": "XK2wTos6sEuxSHhIj7cqg6",
+    "node": "1804:2950",
+    "panel": [
+      480,
+      865
+    ]
+  },
+  "scope": "Actual source-built Native UI with synthetic authentication, tool metadata and example data; real workflow API and SQLite. No DOM replacement or edited screenshots.",
+  "baseline_commit": "c4b21685dac37a5278c52d5e118c389441fba127",
+  "frontend_manifest_sha256": "89626e0ed91b6e11346d10285defc5ee83baef9b527f816c848e25b2a2c0056f",
+  "wheel_sha256": "7c11b7e67e58666a44f45961d03fe3d187b2f40bea58c924fe77364e0258c7cf",
+  "measurements": [
+    {
+      "element": "panel",
+      "figma": {
+        "width": 480,
+        "height": 865
+      },
+      "native": {
+        "width": 480,
+        "height": 865
+      },
+      "delta_px": {
+        "width": 0,
+        "height": 0
+      }
+    },
+    {
+      "element": "header",
+      "figma": {
+        "x": 1,
+        "y": 1,
+        "width": 478,
+        "height": 48
+      },
+      "native": {
+        "x": 1,
+        "y": 1,
+        "width": 478,
+        "height": 48
+      },
+      "delta_px": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    {
+      "element": "title",
+      "figma": {
+        "x": 21,
+        "y": 69,
+        "width": 438,
+        "height": 52
+      },
+      "native": {
+        "x": 21,
+        "y": 69,
+        "width": 438,
+        "height": 52
+      },
+      "delta_px": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    {
+      "element": "tabs",
+      "figma": {
+        "x": 21,
+        "y": 145,
+        "width": 438,
+        "height": 35
+      },
+      "native": {
+        "x": 21,
+        "y": 145,
+        "width": 438,
+        "height": 35
+      },
+      "delta_px": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    {
+      "element": "breadcrumb",
+      "figma": {
+        "x": 21,
+        "y": 204,
+        "width": 438,
+        "height": 30
+      },
+      "native": {
+        "x": 21,
+        "y": 204,
+        "width": 438,
+        "height": 30
+      },
+      "delta_px": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    {
+      "element": "name",
+      "figma": {
+        "x": 21,
+        "y": 282,
+        "width": 438,
+        "height": 39
+      },
+      "native": {
+        "x": 21,
+        "y": 282,
+        "width": 438,
+        "height": 39
+      },
+      "delta_px": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    {
+      "element": "method",
+      "figma": {
+        "x": 21,
+        "y": 339,
+        "width": 438,
+        "height": 59
+      },
+      "native": {
+        "x": 21,
+        "y": 339,
+        "width": 438,
+        "height": 59
+      },
+      "delta_px": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    {
+      "element": "guidance",
+      "figma": {
+        "x": 21,
+        "y": 440,
+        "width": 438,
+        "height": 64
+      },
+      "native": {
+        "x": 21,
+        "y": 440,
+        "width": 438,
+        "height": 64
+      },
+      "delta_px": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    {
+      "element": "result",
+      "figma": {
+        "x": 21,
+        "y": 546,
+        "width": 438,
+        "height": 39
+      },
+      "native": {
+        "x": 21,
+        "y": 546,
+        "width": 438,
+        "height": 39
+      },
+      "delta_px": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    {
+      "element": "completion",
+      "figma": {
+        "x": 21,
+        "y": 651,
+        "width": 438,
+        "height": 39
+      },
+      "native": {
+        "x": 21,
+        "y": 651,
+        "width": 438,
+        "height": 39
+      },
+      "delta_px": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    {
+      "element": "assignee",
+      "figma": {
+        "x": 21,
+        "y": 738,
+        "width": 438,
+        "height": 39
+      },
+      "native": {
+        "x": 21,
+        "y": 738,
+        "width": 438,
+        "height": 39
+      },
+      "delta_px": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    {
+      "element": "footer",
+      "figma": {
+        "x": 1,
+        "y": 805,
+        "width": 478,
+        "height": 59
+      },
+      "native": {
+        "x": 1,
+        "y": 805,
+        "width": 478,
+        "height": 59
+      },
+      "delta_px": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      }
+    }
+  ],
+  "max_geometry_delta_px": 0,
+  "footer_buttons": [
+    {
+      "text": "게시 전 확인",
+      "x": 285.453125,
+      "y": 818,
+      "width": 90.734375,
+      "height": 34,
+      "font": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+      "size": "12px",
+      "weight": "500",
+      "paddingLeft": "14px",
+      "paddingRight": "14px"
+    },
+    {
+      "text": "초안 저장",
+      "x": 384.1875,
+      "y": 818,
+      "width": 74.8125,
+      "height": 34,
+      "font": "\"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+      "size": "12px",
+      "weight": "500",
+      "paddingLeft": "14px",
+      "paddingRight": "14px"
+    }
+  ],
+  "checks": {
+    "authoring_node": 264,
+    "authoring_python": 8,
+    "runtime_node": 128,
+    "frontend_contracts": 32,
+    "native_focused": 2,
+    "same_example_and_four_tabs": 1
+  },
+  "preserved_runtime_differences": [
+    "Workflow scope describes the stored execution scope; Figma uses the example factory name.",
+    "The values result block retains its actual value-entry guidance; judgment words belong to checklist/item_verdict.",
+    "Assignee remains an actual select. Tool questions come from the actual schema rather than example-only choices.",
+    "History retains persisted-history semantics. Longer real guidance wraps naturally; clipped Figma sample text is not reproduced.",
+    "This is a measured component comparison, not a claim that every image pixel or viewport is identical."
+  ],
+  "onsite": "Not deployed; no merge performed."
+}

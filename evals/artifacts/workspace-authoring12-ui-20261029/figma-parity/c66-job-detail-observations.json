@@ -1,0 +1,948 @@
+[
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "human",
+    "renderedMethod": "human",
+    "workflowListBack": false,
+    "guidance": {
+      "x": 907,
+      "y": 440,
+      "width": 438,
+      "height": 64
+    },
+    "completion": {
+      "x": 907,
+      "y": 651,
+      "width": 438,
+      "height": 39
+    },
+    "methodBounds": {
+      "x": 907,
+      "y": 363,
+      "width": 438,
+      "height": 35
+    },
+    "nameBounds": {
+      "x": 907,
+      "y": 282,
+      "width": 438,
+      "height": 39
+    },
+    "focus": {},
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리"
+    ],
+    "resultChoices": [],
+    "retiredControls": 0,
+    "cards": [
+      {
+        "border": "0px",
+        "radius": "0px"
+      }
+    ],
+    "mainPadding": "0px",
+    "inputFont": "13px",
+    "dialogOverflow": 0,
+    "label": "c66-b3-human-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "renderedMethod": "tool",
+    "workflowListBack": false,
+    "guidance": {
+      "x": 907,
+      "y": 795,
+      "width": 438,
+      "height": 64
+    },
+    "completion": {
+      "x": 907,
+      "y": 596,
+      "width": 438,
+      "height": 64
+    },
+    "methodBounds": {
+      "x": 907,
+      "y": 363,
+      "width": 438,
+      "height": 35
+    },
+    "nameBounds": {
+      "x": 907,
+      "y": 282,
+      "width": 438,
+      "height": 39
+    },
+    "focus": {
+      "name": "mode"
+    },
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리"
+    ],
+    "resultChoices": [],
+    "retiredControls": 0,
+    "cards": [
+      {
+        "border": "0px",
+        "radius": "0px"
+      }
+    ],
+    "mainPadding": "0px",
+    "inputFont": "13px",
+    "dialogOverflow": 0,
+    "label": "c66-b3-tool-unconnected-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "renderedMethod": "tool",
+    "workflowListBack": false,
+    "guidance": {
+      "x": 907,
+      "y": 715,
+      "width": 438,
+      "height": 64
+    },
+    "completion": {
+      "x": 907,
+      "y": 516,
+      "width": 438,
+      "height": 64
+    },
+    "methodBounds": {
+      "x": 907,
+      "y": 283,
+      "width": 438,
+      "height": 35
+    },
+    "nameBounds": {
+      "x": 907,
+      "y": 202,
+      "width": 438,
+      "height": 39
+    },
+    "focus": {
+      "name": ""
+    },
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리"
+    ],
+    "resultChoices": [],
+    "retiredControls": 0,
+    "cards": [
+      {
+        "border": "0px",
+        "radius": "0px"
+      }
+    ],
+    "mainPadding": "0px",
+    "inputFont": "13px",
+    "dialogOverflow": 0,
+    "label": "c66-b3-tool-picker-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "renderedMethod": "tool",
+    "workflowListBack": false,
+    "guidance": {
+      "x": 907,
+      "y": 919,
+      "width": 438,
+      "height": 64
+    },
+    "completion": {
+      "x": 907,
+      "y": 720,
+      "width": 438,
+      "height": 64
+    },
+    "methodBounds": {
+      "x": 907,
+      "y": 283,
+      "width": 438,
+      "height": 35
+    },
+    "nameBounds": {
+      "x": 907,
+      "y": 202,
+      "width": 438,
+      "height": 39
+    },
+    "focus": {
+      "action": "job_tool_setup",
+      "name": ""
+    },
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리"
+    ],
+    "resultChoices": [
+      {
+        "value": "manual",
+        "checked": true,
+        "disabled": false
+      },
+      {
+        "value": "automatic",
+        "checked": false,
+        "disabled": true
+      }
+    ],
+    "retiredControls": 0,
+    "cards": [
+      {
+        "border": "0px",
+        "radius": "0px"
+      }
+    ],
+    "mainPadding": "0px",
+    "inputFont": "13px",
+    "dialogOverflow": 0,
+    "label": "c66-b3-tool-connected-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "renderedMethod": "tool",
+    "workflowListBack": false,
+    "guidance": {
+      "x": 907,
+      "y": 833,
+      "width": 438,
+      "height": 64
+    },
+    "completion": {
+      "x": 907,
+      "y": 634,
+      "width": 438,
+      "height": 64
+    },
+    "methodBounds": {
+      "x": 907,
+      "y": 113,
+      "width": 438,
+      "height": 35
+    },
+    "nameBounds": {
+      "x": 907,
+      "y": 32,
+      "width": 438,
+      "height": 39
+    },
+    "focus": {},
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리"
+    ],
+    "resultChoices": [
+      {
+        "value": "manual",
+        "checked": true,
+        "disabled": false
+      },
+      {
+        "value": "automatic",
+        "checked": false,
+        "disabled": true
+      }
+    ],
+    "retiredControls": 0,
+    "cards": [
+      {
+        "border": "0px",
+        "radius": "0px"
+      }
+    ],
+    "mainPadding": "0px",
+    "inputFont": "13px",
+    "dialogOverflow": 0,
+    "label": "c66-b3-tool-review-required-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "renderedMethod": "tool",
+    "workflowListBack": false,
+    "guidance": {
+      "x": 907,
+      "y": 839,
+      "width": 438,
+      "height": 64
+    },
+    "completion": {
+      "x": 907,
+      "y": 640,
+      "width": 438,
+      "height": 64
+    },
+    "methodBounds": {
+      "x": 907,
+      "y": 199,
+      "width": 438,
+      "height": 35
+    },
+    "nameBounds": {
+      "x": 907,
+      "y": 118,
+      "width": 438,
+      "height": 39
+    },
+    "focus": {},
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리"
+    ],
+    "resultChoices": [
+      {
+        "value": "manual",
+        "checked": true,
+        "disabled": true
+      },
+      {
+        "value": "automatic",
+        "checked": false,
+        "disabled": true
+      }
+    ],
+    "retiredControls": 0,
+    "cards": [
+      {
+        "border": "0px",
+        "radius": "0px"
+      }
+    ],
+    "mainPadding": "0px",
+    "inputFont": "13px",
+    "dialogOverflow": 0,
+    "label": "c66-b3-read-only-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "human",
+    "renderedMethod": "tool",
+    "workflowListBack": false,
+    "guidance": {
+      "x": 907,
+      "y": 999,
+      "width": 438,
+      "height": 64
+    },
+    "completion": {
+      "x": 907,
+      "y": 800,
+      "width": 438,
+      "height": 64
+    },
+    "methodBounds": {
+      "x": 907,
+      "y": 363,
+      "width": 438,
+      "height": 35
+    },
+    "nameBounds": {
+      "x": 907,
+      "y": 282,
+      "width": 438,
+      "height": 39
+    },
+    "focus": {},
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리"
+    ],
+    "resultChoices": [
+      {
+        "value": "manual",
+        "checked": true,
+        "disabled": false
+      },
+      {
+        "value": "automatic",
+        "checked": false,
+        "disabled": true
+      }
+    ],
+    "retiredControls": 0,
+    "cards": [
+      {
+        "border": "0px",
+        "radius": "0px"
+      }
+    ],
+    "mainPadding": "0px",
+    "inputFont": "13px",
+    "dialogOverflow": 0,
+    "label": "c66-b3-method-change-confirm-1366"
+  },
+  {
+    "viewport": [
+      1366,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "renderedMethod": "tool",
+    "workflowListBack": false,
+    "guidance": {
+      "x": 907,
+      "y": 616,
+      "width": 438,
+      "height": 64
+    },
+    "completion": null,
+    "methodBounds": {
+      "x": 907,
+      "y": 166,
+      "width": 438,
+      "height": 35
+    },
+    "nameBounds": {
+      "x": 907,
+      "y": 85,
+      "width": 438,
+      "height": 39
+    },
+    "focus": {},
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리"
+    ],
+    "resultChoices": [
+      {
+        "value": "manual",
+        "checked": false,
+        "disabled": false
+      },
+      {
+        "value": "automatic",
+        "checked": true,
+        "disabled": false
+      }
+    ],
+    "retiredControls": 0,
+    "cards": [
+      {
+        "border": "0px",
+        "radius": "0px"
+      }
+    ],
+    "mainPadding": "0px",
+    "inputFont": "13px",
+    "dialogOverflow": 0,
+    "label": "c66-b3-read-automatic-1366"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "overflow": 0,
+    "method": "human",
+    "renderedMethod": "human",
+    "workflowListBack": false,
+    "guidance": {
+      "x": 75,
+      "y": 440,
+      "width": 386,
+      "height": 64
+    },
+    "completion": {
+      "x": 75,
+      "y": 651,
+      "width": 386,
+      "height": 39
+    },
+    "methodBounds": {
+      "x": 75,
+      "y": 363,
+      "width": 386,
+      "height": 35
+    },
+    "nameBounds": {
+      "x": 75,
+      "y": 282,
+      "width": 386,
+      "height": 39
+    },
+    "focus": {},
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리"
+    ],
+    "resultChoices": [],
+    "retiredControls": 0,
+    "cards": [
+      {
+        "border": "0px",
+        "radius": "0px"
+      }
+    ],
+    "mainPadding": "0px",
+    "inputFont": "13px",
+    "dialogOverflow": 0,
+    "label": "c66-b3-human-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "renderedMethod": "tool",
+    "workflowListBack": false,
+    "guidance": {
+      "x": 75,
+      "y": 795,
+      "width": 386,
+      "height": 64
+    },
+    "completion": {
+      "x": 75,
+      "y": 596,
+      "width": 386,
+      "height": 64
+    },
+    "methodBounds": {
+      "x": 75,
+      "y": 363,
+      "width": 386,
+      "height": 35
+    },
+    "nameBounds": {
+      "x": 75,
+      "y": 282,
+      "width": 386,
+      "height": 39
+    },
+    "focus": {
+      "name": "mode"
+    },
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리"
+    ],
+    "resultChoices": [],
+    "retiredControls": 0,
+    "cards": [
+      {
+        "border": "0px",
+        "radius": "0px"
+      }
+    ],
+    "mainPadding": "0px",
+    "inputFont": "13px",
+    "dialogOverflow": 0,
+    "label": "c66-b3-tool-unconnected-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "renderedMethod": "tool",
+    "workflowListBack": false,
+    "guidance": {
+      "x": 75,
+      "y": 715,
+      "width": 386,
+      "height": 64
+    },
+    "completion": {
+      "x": 75,
+      "y": 516,
+      "width": 386,
+      "height": 64
+    },
+    "methodBounds": {
+      "x": 75,
+      "y": 283,
+      "width": 386,
+      "height": 35
+    },
+    "nameBounds": {
+      "x": 75,
+      "y": 202,
+      "width": 386,
+      "height": 39
+    },
+    "focus": {
+      "name": ""
+    },
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리"
+    ],
+    "resultChoices": [],
+    "retiredControls": 0,
+    "cards": [
+      {
+        "border": "0px",
+        "radius": "0px"
+      }
+    ],
+    "mainPadding": "0px",
+    "inputFont": "13px",
+    "dialogOverflow": 0,
+    "label": "c66-b3-tool-picker-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "renderedMethod": "tool",
+    "workflowListBack": false,
+    "guidance": {
+      "x": 75,
+      "y": 919,
+      "width": 386,
+      "height": 64
+    },
+    "completion": {
+      "x": 75,
+      "y": 720,
+      "width": 386,
+      "height": 64
+    },
+    "methodBounds": {
+      "x": 75,
+      "y": 283,
+      "width": 386,
+      "height": 35
+    },
+    "nameBounds": {
+      "x": 75,
+      "y": 202,
+      "width": 386,
+      "height": 39
+    },
+    "focus": {
+      "action": "job_tool_setup",
+      "name": ""
+    },
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리"
+    ],
+    "resultChoices": [
+      {
+        "value": "manual",
+        "checked": true,
+        "disabled": false
+      },
+      {
+        "value": "automatic",
+        "checked": false,
+        "disabled": true
+      }
+    ],
+    "retiredControls": 0,
+    "cards": [
+      {
+        "border": "0px",
+        "radius": "0px"
+      }
+    ],
+    "mainPadding": "0px",
+    "inputFont": "13px",
+    "dialogOverflow": 0,
+    "label": "c66-b3-tool-connected-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "renderedMethod": "tool",
+    "workflowListBack": false,
+    "guidance": {
+      "x": 75,
+      "y": 833,
+      "width": 386,
+      "height": 64
+    },
+    "completion": {
+      "x": 75,
+      "y": 634,
+      "width": 386,
+      "height": 64
+    },
+    "methodBounds": {
+      "x": 75,
+      "y": 113,
+      "width": 386,
+      "height": 35
+    },
+    "nameBounds": {
+      "x": 75,
+      "y": 32,
+      "width": 386,
+      "height": 39
+    },
+    "focus": {},
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리"
+    ],
+    "resultChoices": [
+      {
+        "value": "manual",
+        "checked": true,
+        "disabled": false
+      },
+      {
+        "value": "automatic",
+        "checked": false,
+        "disabled": true
+      }
+    ],
+    "retiredControls": 0,
+    "cards": [
+      {
+        "border": "0px",
+        "radius": "0px"
+      }
+    ],
+    "mainPadding": "0px",
+    "inputFont": "13px",
+    "dialogOverflow": 0,
+    "label": "c66-b3-tool-review-required-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "renderedMethod": "tool",
+    "workflowListBack": false,
+    "guidance": {
+      "x": 75,
+      "y": 839,
+      "width": 386,
+      "height": 64
+    },
+    "completion": {
+      "x": 75,
+      "y": 640,
+      "width": 386,
+      "height": 64
+    },
+    "methodBounds": {
+      "x": 75,
+      "y": 199,
+      "width": 386,
+      "height": 35
+    },
+    "nameBounds": {
+      "x": 75,
+      "y": 118,
+      "width": 386,
+      "height": 39
+    },
+    "focus": {},
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리"
+    ],
+    "resultChoices": [
+      {
+        "value": "manual",
+        "checked": true,
+        "disabled": true
+      },
+      {
+        "value": "automatic",
+        "checked": false,
+        "disabled": true
+      }
+    ],
+    "retiredControls": 0,
+    "cards": [
+      {
+        "border": "0px",
+        "radius": "0px"
+      }
+    ],
+    "mainPadding": "0px",
+    "inputFont": "13px",
+    "dialogOverflow": 0,
+    "label": "c66-b3-read-only-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "overflow": 0,
+    "method": "human",
+    "renderedMethod": "tool",
+    "workflowListBack": false,
+    "guidance": {
+      "x": 75,
+      "y": 999,
+      "width": 386,
+      "height": 64
+    },
+    "completion": {
+      "x": 75,
+      "y": 800,
+      "width": 386,
+      "height": 64
+    },
+    "methodBounds": {
+      "x": 75,
+      "y": 363,
+      "width": 386,
+      "height": 35
+    },
+    "nameBounds": {
+      "x": 75,
+      "y": 282,
+      "width": 386,
+      "height": 39
+    },
+    "focus": {},
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리"
+    ],
+    "resultChoices": [
+      {
+        "value": "manual",
+        "checked": true,
+        "disabled": false
+      },
+      {
+        "value": "automatic",
+        "checked": false,
+        "disabled": true
+      }
+    ],
+    "retiredControls": 0,
+    "cards": [
+      {
+        "border": "0px",
+        "radius": "0px"
+      }
+    ],
+    "mainPadding": "0px",
+    "inputFont": "13px",
+    "dialogOverflow": 0,
+    "label": "c66-b3-method-change-confirm-480"
+  },
+  {
+    "viewport": [
+      480,
+      768
+    ],
+    "overflow": 0,
+    "method": "tool",
+    "renderedMethod": "tool",
+    "workflowListBack": false,
+    "guidance": {
+      "x": 75,
+      "y": 616,
+      "width": 386,
+      "height": 64
+    },
+    "completion": null,
+    "methodBounds": {
+      "x": 75,
+      "y": 166,
+      "width": 386,
+      "height": 35
+    },
+    "nameBounds": {
+      "x": 75,
+      "y": 85,
+      "width": 386,
+      "height": 39
+    },
+    "focus": {},
+    "factoryTabs": 0,
+    "methodLabels": [
+      "사람이 확인",
+      "도구로 처리"
+    ],
+    "resultChoices": [
+      {
+        "value": "manual",
+        "checked": false,
+        "disabled": false
+      },
+      {
+        "value": "automatic",
+        "checked": true,
+        "disabled": false
+      }
+    ],
+    "retiredControls": 0,
+    "cards": [
+      {
+        "border": "0px",
+        "radius": "0px"
+      }
+    ],
+    "mainPadding": "0px",
+    "inputFont": "13px",
+    "dialogOverflow": 0,
+    "label": "c66-b3-read-automatic-480"
+  }
+]

@@ -1,0 +1,248 @@
+{
+  "base_commit": "42f5ae502b57be68aefa5d141f09259c8f6e9ee9",
+  "recorded_at": "2026-10-28T23:33:36.363929+00:00",
+  "reference_library_version": 12,
+  "initial_build_inputs": {
+    "branding/ees/ui/ees-work-designer.js": "a23a7c6f79e073d243f4dc55e79ecf418f01a734e1717bb99dd144928168778f",
+    "branding/ees/ui/ees-work-launcher.css": "1f71ce82fdebb373943039eb147249bf612336e470b52def64bbe57cdeec46d1",
+    "branding/ees/ui/ees-work-launcher.js": "89c148d7b21ff754bbf93d74b0d9c9c1a8ec362971b37003f4ac873e73a2426c",
+    "frontend/patches/0001-ees-native-hooks.patch": "c6e261daa7c0040926356dd9efaf430c05fa4f57c5fc02f812e2f31163dd571f",
+    "frontend/open-webui-source.json": "a2a33e24309897b3eee79b8b6588cf9485cd31a520234f91f2bcaab486e27ada",
+    "docs/mockups/ees-work/design-mock-08-workspace-authoring.html": "d2aec2a3cf61f09ceb3915c778ef77b5a07b559b9fb57f545eb16cb11973079e"
+  },
+  "figma_session": "43d6f4d6-370e-4edc-8676-42ea2331c3df",
+  "figma_nodes": [
+    "1804:2673",
+    "1804:2950",
+    "1846:3011",
+    "1922:3018",
+    "1869:3157"
+  ],
+  "boundaries": [
+    "HTML12 is the visual source; Figma has small geometry differences",
+    "No production data or external APIs used",
+    "No backend/schema changes"
+  ],
+  "first_candidate": {
+    "frontend_build": "pinned source build passed, 5582 files",
+    "wheel_sha256": "a4a2e8bdb84dfb3e4247643ed66e73c3308534dd8fc4ab0b38a2f8187a388f96",
+    "packaging_first_failure": "Output inventory rejected one extra rsync temporary file; every expected file hash matched. Extra file quarantined; unchanged expected output then verified.",
+    "browser_viewport": [
+      1363,
+      936
+    ],
+    "observed_issues": [
+      "Authoring panel was 580px, reference default480px",
+      "Tabs and job details were4.047px too low; fields used500 instead of400 weight",
+      "Stage edit link on same line instead of separate line",
+      "List, empty start input/rules/history layouts retained old spacing/backgrounds",
+      "New workflow creation was modal instead of inline",
+      "Selected tab focus restored to first tab; tool dialog did not restore entry focus"
+    ]
+  },
+  "first_regressions": [
+    "Save remained disabled after ordinary input edits",
+    "Untouched popup bindings lost extension keys and converted untyped number/object to string",
+    "Optional numeric argument with default could not be cleared"
+  ],
+  "intermediate_checks": {
+    "node": "250 passed at JS9ad309e",
+    "python": "8 passed",
+    "native_tests": "not yet run locally"
+  },
+  "second_candidate_inputs": {
+    "branding/ees/ui/ees-work-designer.js": "ce4f8d4f3bc4be4a8b00b0b9034de477b0a4e516474a55c0f527a11c6d8e708c",
+    "branding/ees/ui/ees-work-launcher.css": "7dfb8d6580f93d6f64e3baeac7da8300c6d2e5fd21261aab19ed65404d8d7cb6",
+    "branding/ees/ui/ees-work-launcher.js": "89c148d7b21ff754bbf93d74b0d9c9c1a8ec362971b37003f4ac873e73a2426c",
+    "frontend/patches/0001-ees-native-hooks.patch": "4d6dbc76cc44d25b0ea9e4604105e74bf92f11c5d414848512baf65de935e615",
+    "frontend/open-webui-source.json": "c12f51d062838da2c1c661738185906bc370edaf30dee9df86c1fcadb604312f",
+    "docs/mockups/ees-work/design-mock-08-workspace-authoring.html": "d2aec2a3cf61f09ceb3915c778ef77b5a07b559b9fb57f545eb16cb11973079e"
+  },
+  "second_candidate_checks": {
+    "node_authoring": 256,
+    "python_authoring": 8,
+    "source_shell": 26,
+    "frontend_build": "5582 files, pinned source2a960a59/Node22.16.0/npm10.9.2",
+    "native_local": "not run; managed preview and CI used instead"
+  },
+  "verified_wheel_sha256": "f6339501b18969c0f01f7e7fe933573c36983d3676e3cd9a632c264203f460db",
+  "verified_css_sha256": "e427159955461544c0793566802ab7b91d6199d974d458681c62e75888326019",
+  "pr": "https://github.com/knadalkim-a11y/team-agent-poc/pull/108",
+  "first_ci_observation": {
+    "run": 40789981308,
+    "head": "baff0ce229ef299cce13e01c2e323a637cb30ed4",
+    "failed_jobs": [
+      "Complete Native product: obsolete create modal selector",
+      "native-account: old guidance selector and published badge location"
+    ],
+    "handling": "Retain state/persistence/permission assertions; update actual UI paths. Superseded workflow may be cancelled after branch update."
+  },
+  "native_test_followup": {
+    "updated_modules": [
+      "tests/ees_work_integrated_app.py",
+      "tests/ees_work_native_chat.py",
+      "tests/test_ees_motion_native.py",
+      "tests/test_ees_source_shell_native.py",
+      "tests/test_ees_work_authoring_native.py"
+    ],
+    "ast": "passed",
+    "browser": "CI required",
+    "legacy_job_input_fixture": "Actual authenticated save_draft prepares a definition only; proposed values, approval, save, execution and immutable history remain UI-driven",
+    "no_browser_service_check": "create/save/validate/publish/start/save_inputs passed, validation errors0"
+  },
+  "generated_input_followup": {
+    "product_js_sha256": "d0a6f66a6a6aa68cb3f693e8bab94db572f63d2bcbdea30c791e90340d770a8b",
+    "wheel_sha256": "cc026713bc15976ed677e2ec609fda12500261f8c5c9b5dfc574a7a94214d4e0",
+    "source_build": "Fresh pinned upstream worktree;5582 files verified; same Node22.16.0/npm10.9.2; unchanged CSS and Svelte patch",
+    "node_authoring": 262,
+    "python_authoring": 8,
+    "regression_evidence": "generated-input-regression.json",
+    "actual_ui_verification": [
+      "Changed a human synthetic job to tool mode and newly connected managed-get_page with constant123",
+      "Explicit draft save and reload preserved revision3, constant123 and unchecked runtime question",
+      "Toggling runtime on then off and applying retained the saved state without a new dirty change",
+      "Dialog760x543; settings-entry focus restored",
+      "Health: external tool calls0, errors0, unknown requests0"
+    ],
+    "prior_visual_evidence": "actual-reference-comparison.json retains original measured wheel; input followup changes no markup or CSS",
+    "final_ci": "PR108 current head checks required"
+  },
+  "ci396_observation": {
+    "run_id": 40791595361,
+    "head": "9540dd974d4c95142435bdd772026adde3dbc091",
+    "result": {
+      "success": 34,
+      "failure": 5,
+      "skipped": 1
+    },
+    "independent_failures": [
+      "native-compose:9 browser tests",
+      "platform Ubuntu: imported HTML12 mixed font encoding expectation",
+      "platform Windows: same font expectation"
+    ],
+    "dependent_failures": "2 aggregate gates; no independent defect",
+    "actual_defect": "Copy dialog tried to restore focus to its hidden menu item; now uses the visible workflow menu trigger under the same epoch/context",
+    "test_updates": [
+      "New authoring titles/help/colors and collapsed factory label",
+      "Frame monitor retains old modes and recognizes new authoring/empty states",
+      "Factory search fixture explicitly returns to EMS after the preceding keyboard traversal selected APC",
+      "Imported frozen HTML12 pins SHA and actual Inter WOFF2 plus Noto WOFF; generated mock font contract retained"
+    ],
+    "complete_native": "passed; authoring1920x1080/480panel screenshot reviewed",
+    "compose_visual_review": "human480 and tool-picker480 screenshots reviewed, separate from the failed suite conclusion",
+    "final_js_sha256": "fd0124e19d8e8092797c4c3d725ad91140320fa1280be2e2e8b8784dd0e63cf2",
+    "followup_checks": {
+      "authoring_node": 262,
+      "runtime_node": 128,
+      "mock_font": "4passed/1optionalBrotliSkip",
+      "python_ast": "passed",
+      "docs": "passed"
+    },
+    "final_actual_build": "CI397 source artifact was validated against unchanged product inputs and packaged; see ci397_actual_product"
+  },
+  "ci397_actual_product": {
+    "head": "4b69f55496d084e1028e9b508a759d0b15e9295e",
+    "frontend_artifact_id": 12863231943,
+    "frontend_zip_sha256": "9139c2062d806cf54eff242be73cba6192902c9b55a170bbc04250c35b2a663c",
+    "wheel_sha256": "e8fcc0556c5c9d43b2e639274b26639cdf188bcd7e14c1423d21335e75c77234",
+    "source_js_sha256": "fd0124e19d8e8092797c4c3d725ad91140320fa1280be2e2e8b8784dd0e63cf2",
+    "verified": [
+      "5582 frontend files and source inputs validated by existing wheel builder; no compiled byte edits",
+      "Actual Copy Escape returns focus to visible menu summary",
+      "Return/Tab/Tab/Return reopens Copy with name input focus",
+      "Cancel leaves no dialog, restores menu focus and retains r2 saved state",
+      "Final authoring screenshot reviewed; external calls/errors/unknown requests0"
+    ]
+  },
+  "ci397_observation": {
+    "run_id": 40793958869,
+    "head": "4b69f55496d084e1028e9b508a759d0b15e9295e",
+    "conclusion": "cancelled",
+    "jobs": {
+      "success": 34,
+      "failure": 2,
+      "cancelled": 3,
+      "skipped": 1
+    },
+    "font_failure": "Windows CRLF checkout changes whole-file SHA; LF normalization matches the immutable Git source. Fonts and HTML content are unchanged.",
+    "font_report_correction": "Cleanup step was incorrectly reported as success before final job conclusion; corrected to failure.",
+    "compose_failure": "One factory test attempted to expand and hit-test navigation behind a 480px authoring overlay. Use the real close/select/reopen path and retain narrow viewport and state assertions.",
+    "compose_timeout": {
+      "normal_run": 40788781825,
+      "normal_prepare_s": 34,
+      "normal_test_s": 505,
+      "current_prepare_s": 129,
+      "current_test_s_at_cancel": 485,
+      "failed_wait_s": 9,
+      "last_runtime_normal_s": 48.9,
+      "last_runtime_current_s_at_cancel": 22.4
+    },
+    "windows_contracts_timeout": {
+      "normal_run": 40788781825,
+      "normal_prepare_s": 90,
+      "normal_test_s": 372,
+      "current_prepare_s": 194,
+      "current_test_s_at_cancel": 407,
+      "assertion_failures_observed": 0
+    },
+    "passed_modules": [
+      "Complete Native product",
+      "native-account",
+      "native-work",
+      "native-execution",
+      "motion5",
+      "source-shell9",
+      "Figma layout5"
+    ],
+    "changes": [
+      "Compare frozen HTML Git-canonical LF bytes; LF and CRLF accepted but changed text rejected",
+      "Keep 480px and close authoring panel, choose factory, reopen; verify same workflow and saved data",
+      "Only native-compose and Windows contracts job budgets increase10to15minutes; individual waits/assertions/matrices unchanged"
+    ],
+    "local_checks": {
+      "mock_fonts": "5passed/1optionalBrotliSkip",
+      "delivery_suite": 11,
+      "python_ast": "passed",
+      "yaml_structure": "only two timeout expressions changed",
+      "actionlint": "not installed; not run"
+    },
+    "final_ci": "PR108 current head checks required; no production source changes after fd0124e"
+  },
+  "ci398_observation": {
+    "run_id": 40796379294,
+    "head": "b7f1dd532bbc08d70ea873a33fc226a8c719b7ad",
+    "conclusion": "failure",
+    "jobs": {
+      "success": 36,
+      "failure": 2,
+      "cancelled": 1,
+      "skipped": 1
+    },
+    "independent_failure": "C66 job-method test tried to open its stage while the visible workflow was the default daily check, not the intended fixture workflow.",
+    "passed": [
+      "Windows platform/font",
+      "Windows contracts",
+      "factory480",
+      "copy focus",
+      "Complete Native product"
+    ],
+    "current_wheel_job": 123195815134,
+    "current_wheel_sha256": "e8fcc0556c5c9d43b2e639274b26639cdf188bcd7e14c1423d21335e75c77234",
+    "matches_actual_ui_qa": true,
+    "confirmed_setup_condition": "API fixture create/save/validate/publish leaves initial_procedures_ready false and one row; first author initialize adds three default workflows ahead of it, moving it from first to fourth.",
+    "unconfirmed_mechanism": "No mouse-event target trace was captured. A pre-initialization physical row coordinate becoming a different row is an inference, not a proven product response overwrite.",
+    "test_fix": "Exactly two C66 cases now enter author mode and await actual refresh ready flag plus rendered IDs in server order before adding fixture data. A single target click must produce the expected workflow ID and exact title.",
+    "unchanged": [
+      "Product JS fd0124e, CSS and Svelte patch",
+      "Physical clicks and individual timeouts",
+      "Existing saved-data, permission and480/1366 assertions",
+      "Other mode-entry tests already refreshed after the mode action"
+    ],
+    "local_checks": {
+      "python_ast": "passed",
+      "diff": "passed",
+      "initialization_service_regressions": 5,
+      "browser": "final CI required"
+    }
+  }
+}

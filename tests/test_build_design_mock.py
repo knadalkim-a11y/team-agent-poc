@@ -77,18 +77,56 @@ class DesignMockBuildTests(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 builder.load_fonts(fonts_dir=tmp)
 
-    def test_committed_mock_fonts_have_the_declared_woff2_format(self):
-        pages = sorted((ROOT / "docs/mockups/ees-work").glob("design-mock-*.html"))
+    def assert_committed_mock_fonts(self, pages):
+        pages = sorted(pages)
         self.assertTrue(pages, "the checked-in design mock must be covered")
         for page in pages:
-            fonts = re.findall(r"data:font/woff2;base64,([A-Za-z0-9+/=]+)", page.read_text(encoding="utf-8"))
-            self.assertEqual(len(fonts), len(builder.FONT_FAMILIES), page.name)
-            for index, encoded in enumerate(fonts):
+            content = page.read_bytes()
+            expected_formats = ["woff2"] * len(builder.FONT_FAMILIES)
+            if page.name == "design-mock-08-workspace-authoring.html":
+                # This approved HTML12 was imported byte-for-byte, not generated
+                # by this builder: Inter is WOFF2 and Noto Sans KR is WOFF.
+                # Pin that exception without weakening the generated pages'
+                # two-WOFF2 contract or rewriting the accepted visual reference.
+                # Git may check this text file out as CRLF on Windows. Compare
+                # its canonical LF content; do not normalize any other bytes.
+                self.assertEqual(hashlib.sha256(content.replace(b"\r\n", b"\n")).hexdigest(),
+                                 "d2aec2a3cf61f09ceb3915c778ef77b5a07b559b9fb57f545eb16cb11973079e")
+                expected_formats = ["woff2", "woff"]
+            faces = re.findall(r"@font-face\s*\{[^}]*\}", content.decode("utf-8"))
+            self.assertEqual(len(faces), len(builder.FONT_FAMILIES), page.name)
+            for index, (face, family, expected) in enumerate(zip(faces, builder.FONT_FAMILIES.values(), expected_formats)):
                 with self.subTest(page=page.name, font=index):
+                    self.assertIn(f'font-family:"{family}"', face)
+                    self.assertIn(f'format("{expected}")', face)
+                    fonts = re.findall(r"data:font/(woff2?);base64,([A-Za-z0-9+/=]+)", face)
+                    self.assertEqual(len(fonts), 1)
+                    declared, encoded = fonts[0]
+                    self.assertEqual(declared, expected)
                     data = base64.b64decode(encoded, validate=True)
-                    self.assertGreaterEqual(len(data), 48)
-                    self.assertEqual(data[:4], b"wOF2", "CSS says WOFF2 but the bytes use a different format")
+                    self.assertGreaterEqual(len(data), 48 if expected == "woff2" else 44)
+                    self.assertEqual(data[:4], {"woff2": b"wOF2", "woff": b"wOFF"}[expected],
+                                     "CSS font format and embedded bytes differ")
                     self.assertEqual(struct.unpack_from(">I", data, 8)[0], len(data))
+
+    def test_committed_mock_fonts_have_the_declared_woff2_format(self):
+        self.assert_committed_mock_fonts((ROOT / "docs/mockups/ees-work").glob("design-mock-*.html"))
+
+    def test_frozen_mock_accepts_checkout_line_endings_but_rejects_content_changes(self):
+        name = "design-mock-08-workspace-authoring.html"
+        canonical = (ROOT / "docs/mockups/ees-work" / name).read_bytes().replace(b"\r\n", b"\n")
+        with tempfile.TemporaryDirectory() as tmp:
+            page = Path(tmp, name)
+            for content in (canonical, canonical.replace(b"\n", b"\r\n")):
+                page.write_bytes(content)
+                self.assert_committed_mock_fonts([page])
+            # A visible content change must still invalidate the frozen source,
+            # even when checkout line endings have also changed.
+            changed = canonical.replace(b"<title>", b"<title>changed ", 1)
+            self.assertNotEqual(changed, canonical)
+            page.write_bytes(changed.replace(b"\n", b"\r\n"))
+            with self.assertRaises(AssertionError):
+                self.assert_committed_mock_fonts([page])
 
     def test_real_subset_keeps_requested_glyph_metrics_in_woff2(self):
         try:

@@ -117,6 +117,42 @@ test('Native scope preserves separate permission metadata and rejects disabled o
  assert.equal(h.calls.length,before);assert.equal(h.context.location.pathname,'/workspace/skills');assert.equal(h.api.snapshot().selection.system_id,'EMS');
  assert.deepEqual(h.navigation,['/workspace/skills']);
 });
+test('authoring factory scope preserves the open definition and unfinished creation without writing work',async()=>{
+ const h=nativeNavigationHarness(),draft={definition:{name:'미저장 작성',execution_scope:'system',nodes:{j:{name:'보존할 작업'}}},dirty:true};
+ h.state.factories=[{id:'factory-a',name:'공장 A',system_id:'EMS'},{id:'factory-denied',name:'권한 없는 공장',system_id:'EMS'}];
+ h.state.scope_options={systems:[{id:'EMS',allowed:true}],factories:[{id:'factory-a',allowed:true},{id:'factory-denied',allowed:false}]};
+ h.state.workflows=[{id:'w',system_id:'EMS',name:'기존 절차'}];
+ h.state.workflow={id:'w',revision:1,draft:draft.definition};
+ let captured=0,closed=0;h.designer.readDraft=()=>{captured++;return draft;};h.designer.closeStart=()=>closed++;
+ const composer=JSON.parse(JSON.stringify(h.readDraft())),definition=JSON.stringify(draft);
+ await h.api.sourceAction({action:'choose_factory',factoryId:'factory-denied'});
+ await h.api.sourceAction({action:'choose_factory',factoryId:'unknown'});
+ assert.equal(h.calls.length,0);assert.equal(captured,0);
+ await h.api.sourceAction({action:'choose_factory',factoryId:'factory-a'});
+ const selected=h.api.snapshot().selection;
+ assert.equal(selected.mode,'author');assert.equal(selected.system_id,'EMS');assert.equal(selected.factory_id,'factory-a');
+ assert.equal(selected.workflow_id,'w');assert.equal(selected.job_id,'j');assert.equal(selected.tab,'overview');
+ assert.ok(captured>0);assert.equal(closed,0,'Changing view scope must not close the unfinished new-procedure form');
+ assert.equal(JSON.stringify(draft),definition);assert.deepEqual(h.readDraft(),composer);
+ assert.ok(h.calls.some(call=>call.url.includes('factory_id=factory-a')));
+ assert.equal(h.calls.filter(call=>call.body&&call.body.action!=='save_ui').length,0);
+ const count=h.calls.length,reads=captured;
+ await h.api.sourceAction({action:'choose_factory',factoryId:'factory-a'});
+ assert.equal(h.calls.length,count);assert.equal(captured,reads,'Choosing the same factory is a no-op');
+ await h.api.sourceAction({action:'choose_factory',factoryId:''});
+ assert.equal(h.api.snapshot().selection.factory_id,'');assert.equal(h.api.snapshot().selection.workflow_id,'w');
+ assert.equal(JSON.stringify(draft),definition);assert.equal(closed,0);
+});
+test('factory scope remains unavailable in tools, administration and Native management',async()=>{
+ for(const tab of ['tools','workspace_admin']){
+  const h=nativeNavigationHarness();h.state.factories=[{id:'factory-a',system_id:'EMS'}];h.api.setSelection({mode:'author',tab,system_id:'EMS',factory_id:''});
+  await h.api.sourceAction({action:'choose_factory',factoryId:'factory-a'});
+  assert.equal(h.api.snapshot().selection.factory_id,'');assert.equal(h.calls.length,0);
+ }
+ const h=nativeNavigationHarness();h.state.factories=[{id:'factory-a',system_id:'EMS'}];await h.open();const before=h.calls.length;
+ await h.api.handleClick({dataset:{action:'choose_factory',factoryId:'factory-a'}});
+ assert.equal(h.api.snapshot().selection.factory_id,'');assert.equal(h.calls.length,before);assert.equal(h.context.location.pathname,'/workspace/skills');
+});
 test('all six allowed Native destinations use direct static routes without a sidebar link',async()=>{
  for(const id of ['skills','models','knowledge','prompts','tools','admin']){const h=nativeNavigationHarness();await h.open(id);assert.deepEqual(h.navigation,[id==='admin'?'/admin/settings':'/workspace/'+id]);assert.equal(h.renders.at(-1)?.native_shell,true);assert.equal(h.renders.at(-1)?.native_id,id);assert.equal(h.calls.filter(call=>call.body).length,0);}
 });

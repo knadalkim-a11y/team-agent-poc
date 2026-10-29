@@ -30,7 +30,7 @@ assert.deepEqual(h.draft().definition,original);assert.equal(h.draft().dirty,fal
 assert.match(h.markup,/시작할 때 받는 값/);assert.doesNotMatch(h.markup,/2026-09-15|2주마다|대상 확정/);
 h.click('run_mode',{id:'periodic'});await flush();
 assert.equal(h.draft().definition.schedule,undefined);
-assert.match(h.markup,/규칙을 게시하고 실행을 위임한 예약에서만/);assert.doesNotMatch(h.markup,/이후 회차는 직전 회차가 완료되면 열리며/);
+h.click('schedule_tools');await flush();assert.match(h.markup,/초안 저장·게시만으로 실행 권한을 위임하지 않습니다/);assert.doesNotMatch(h.markup,/이후 회차는 직전 회차가 완료되면 열리며/);
 h.field('frequency','weekly','change');h.field('interval','2');
 h.field('weekday','1','change');h.field('anchor','2026-10-06T09:00');
 h.field('timezone','Asia/Seoul');h.field('name_template','{date} 회차');
@@ -43,7 +43,7 @@ assert.equal(h.writes.length,0);h.click('save');await flush();
 assert.equal(h.writes[0].action,'save_draft');assert.equal(h.writes[0].expected_revision,1);
 assert.deepEqual(h.writes[0].definition.schedule,schedule);assert.equal(h.draft().dirty,false);
 h.click('run_mode',{id:'emergency'});await flush();
-assert.match(h.markup,/발생 시각·현상/);assert.doesNotMatch(h.markup,/name="anchor"/);
+assert.match(h.markup,/장애를 인지한 사람이 필요한 값을 입력하고 바로 시작/);assert.doesNotMatch(h.markup,/name="anchor"/);
 assert.deepEqual(h.draft().definition.schedule,schedule);
 h.click('run_mode',{id:'periodic'});await flush();
 assert.deepEqual(h.draft().definition.schedule,schedule);
@@ -55,7 +55,7 @@ await h.open('q');await h.open('w');assert.equal(h.draft().definition.schedule.f
     def test_preview_is_read_only_and_late_results_cannot_replace_edited_or_other_account_state(self):
         self.run_contract(r"""
 (async()=>{
-const h=harness(),record=h.workflows.get('w');record.draft.mode='periodic';record.draft.schedule={timezone:'Asia/Seoul',anchor:'2026-10-06T09:00',frequency:'weekly',interval:2};h.render();h.click('tab',{tab:'schedule'});await flush();
+const h=harness(),record=h.workflows.get('w');record.draft.mode='periodic';record.draft.schedule={timezone:'Asia/Seoul',anchor:'2026-10-06T09:00',frequency:'weekly',interval:2};h.render();h.click('tab',{tab:'schedule'});h.click('schedule_tools');await flush();
 const waiting=deferred(),queries=[];h.callbacks.operationsCommand=async body=>{queries.push(copy(body));return waiting.promise;};
 h.click('schedule_preview');await flush();assert.equal(queries[0].action,'schedule_preview');assert.equal(queries[0].workflow_id,'w');
 assert.deepEqual(queries[0].definition,h.draft().definition);assert.equal(h.writes.length,0);assert.equal(h.draft().dirty,false);
@@ -94,7 +94,7 @@ h.click('start_input_add');await flush();
 assert.equal(h.draft().definition.nodes.p.inputs[0].id,'incident_at');assert.equal(h.draft().definition.nodes.p.inputs[0].scope,'run');assert.equal(h.draft().definition.nodes.j.inputs.length,0);assert.equal(h.writes.length,0);
 h.dialogs.push(null);h.click('start_input_delete',{id:'incident_at'});await flush();assert.equal(h.draft().definition.nodes.p.inputs.length,1);
 h.click('save');await flush();const record=h.workflows.get('w');
-record.draft.mode='periodic';record.draft.schedule={timezone:'Asia/Seoul',anchor:'2026-10-06T09:00',frequency:'weekly',interval:2,weekday:1,name_template:'{date} 회차',stage_deadlines:{t:{offset_days:-8}},opening:'after_previous_closed',closing:'after_last_stage',non_working_days:'notify_no_shift'};record.published=copy(record.draft);record.published_version=2;h.render();
+record.draft.mode='periodic';record.draft.schedule={timezone:'Asia/Seoul',anchor:'2026-10-06T09:00',frequency:'weekly',interval:2,weekday:1,name_template:'{date} 회차',stage_deadlines:{t:{offset_days:-8}},opening:'after_previous_closed',closing:'after_last_stage',non_working_days:'notify_no_shift'};record.published=copy(record.draft);record.published_version=2;h.render();h.click('schedule_tools');await flush();
 h.dialogs.push({grace_seconds:'300',delegated:false});h.click('schedule_create');await flush();
 assert.equal(h.operations[0].action,'schedule_save');assert.equal(h.operations[0].schedule.lifecycle_enabled,false);assert.equal(h.operations[0].schedule.delegated,false);assert.equal(h.operations[0].schedule.version,2);assert.equal(h.operations[0].schedule.identity_user_id,'a');assert.deepEqual(h.operations[0].schedule.rule,record.published.schedule);assert.equal(h.operations[0].expected_revision,0);
 h.dialogs.push({grace_seconds:'300',delegated:true});h.click('schedule_create');await flush();assert.equal(h.operations[1].schedule.lifecycle_enabled,true);assert.equal(h.operations[1].schedule.delegated,true);assert.deepEqual(h.operations[1].schedule.rule,record.published.schedule);
@@ -105,16 +105,18 @@ record.draft.schedule={timezone:'Asia/Seoul',anchor:'2026-10-06T09:00',frequency
     def test_read_retry_is_explicit_bounded_draft_policy_without_default_registration(self):
         self.run_contract(r"""
 (async()=>{
-const h=harness();h.state.tools=[{id:'retry-read',name:'확인된 조회',state:'approved',revision:1,kind:'read',reference:{tool_id:'read',function:'read'},input_schema:{properties:{}}}];await h.node();assert.doesNotMatch(h.markup,/name="read_retry_count"/);
-// C66 exposes a legacy result selector after choosing its tool, inside Completion.
-h.field('mode','tool','change');await flush();h.field('tool_contract_id','retry-read','change');h.click('job_section',{id:'completion'});h.click('job_section',{id:'advanced'});await flush();assert.equal(h.draft().definition.nodes.j.read_retry,undefined);
-h.field('instructions','도구 설명만 수정');assert.equal(h.draft().definition.nodes.j.read_retry,undefined);
-h.field('read_retry_count','2');assert.deepEqual(h.draft().definition.nodes.j.read_retry,{count:2,deadline_seconds:null});
-h.field('read_retry_deadline','45');h.click('save');await flush();assert.deepEqual(h.writes[0].definition.nodes.j.read_retry,{count:2,deadline_seconds:45});
-h.field('instructions','별도 안내 수정');assert.deepEqual(h.draft().definition.nodes.j.read_retry,{count:2,deadline_seconds:45});
-h.field('read_retry_count','0');assert.equal(h.draft().definition.nodes.j.read_retry,undefined);
-h.field('read_retry_count','2');h.field('read_retry_deadline','30');h.field('result_block','change_request','change');assert.doesNotMatch(h.markup,/name="read_retry_count"/);assert.deepEqual(h.draft().definition.nodes.j.read_retry,{count:2,deadline_seconds:30});
-assert.equal(h.operations.length,0);assert.match(source,/min="0" max="3"/);assert.match(source,/min="1" max="300"/);
+const h=harness();await h.node();assert.doesNotMatch(h.markup,/name="read_retry_count"/);
+h.field('job_guidance','도구 연결 전 안내만 수정');assert.equal(h.draft().definition.nodes.j.read_retry,undefined);
+h.click('save');await flush();assert.equal(h.writes[0].definition.nodes.j.read_retry,undefined);
+// The approved A12 editor hides legacy retry controls; reading or editing guidance
+// must neither create a retry policy nor erase an explicitly stored policy.
+const record=h.workflows.get('w');record.draft.nodes.j.mode='tool';record.draft.nodes.j.read_retry={count:2,deadline_seconds:45};h.render();await h.node();
+assert.doesNotMatch(h.markup,/name="read_retry_count"|name="read_retry_deadline"/);
+assert.deepEqual(h.draft().definition.nodes.j.read_retry,{count:2,deadline_seconds:45});
+h.field('job_guidance','별도 안내 수정');h.click('save');await flush();
+assert.deepEqual(h.writes[1].definition.nodes.j.read_retry,{count:2,deadline_seconds:45});
+await h.open('q');await h.open('w');assert.deepEqual(h.draft().definition.nodes.j.read_retry,{count:2,deadline_seconds:45});
+assert.equal(h.operations.length,0);
 })().catch(e=>{console.error(e);process.exitCode=1;});
 """)
 
@@ -122,7 +124,7 @@ assert.equal(h.operations.length,0);assert.match(source,/min="0" max="3"/);asser
         self.run_contract(r"""
 (async()=>{
 const h=harness();h.workflows.get('w').draft.nodes.j.mode='ai';h.workflows.get('w').draft.nodes.j.result_block='ai_review';h.render();await h.node();
-assert.equal(h.draft().definition.nodes.j.completion?.kind,undefined);h.field('instructions','검토 안내만 변경');assert.equal(h.draft().definition.nodes.j.completion?.kind,undefined);
+assert.equal(h.draft().definition.nodes.j.completion?.kind,undefined);h.field('job_guidance','검토 안내만 변경');assert.equal(h.draft().definition.nodes.j.completion?.kind,undefined);
 h.field('completion_kind','delivery','change');assert.equal(h.draft().definition.nodes.j.completion.kind,'delivery');assert.equal(h.writes.length,0);
 h.click('save');await flush();assert.equal(h.writes[0].expected_revision,1);assert.equal(h.writes[0].definition.nodes.j.completion.kind,'delivery');assert.equal(h.draft().revision,2);
 h.field('completion_rule','송부 결과 근거 확인');assert.equal(h.draft().definition.nodes.j.completion.kind,'delivery');
@@ -138,8 +140,8 @@ h.state.workflow.can_manage=true;h.render();h.field('completion_kind','review','
 const h=harness(),record=h.workflows.get('w'),published=copy(record.draft);
 record.published_version=1;record.published=copy(published);record.definition=copy(published);
 record.draft.nodes.j.mode='tool';record.draft.nodes.j.instructions='게시 이후의 저장 초안';
-h.render();await h.node();assert.equal(h.draft().definition.nodes.j.mode,'tool');assert.match(h.markup,/name="read_retry_count"/);
-h.field('instructions','현재 편집 중인 초안');h.render();assert.equal(h.draft().definition.nodes.j.instructions,'현재 편집 중인 초안');
+h.render();await h.node();assert.equal(h.draft().definition.nodes.j.mode,'tool');assert.doesNotMatch(h.markup,/name="read_retry_count"/);
+h.field('job_guidance','현재 편집 중인 초안');h.render();assert.equal(h.draft().definition.nodes.j.instructions,'현재 편집 중인 초안');
 h.click('save');await flush();assert.equal(h.writes[0].definition.nodes.j.mode,'tool');assert.equal(h.writes[0].definition.nodes.j.instructions,'현재 편집 중인 초안');
 assert.equal(record.published.nodes.j.mode,'human');assert.equal(record.definition.nodes.j.instructions,'원래 안내');
 h.render();assert.equal(h.draft().definition.nodes.j.mode,'tool');assert.equal(h.draft().dirty,false);
@@ -150,10 +152,10 @@ const wrapped=copy(record.draft);wrapped.name='중첩 초안';record.draft={defi
     def test_workflow_selection_ignores_previous_response_and_preserves_private_dirty_drafts(self):
         self.run_contract(r"""
 (async()=>{
-const h=harness();await h.node();h.field('instructions','W 미저장 글');
+const h=harness();await h.node();h.field('job_guidance','W 미저장 글');
 // Launcher select changes the selection before its new HTTP read resolves.
 h.selection.workflow_id='q';h.render();assert.equal(h.draft().definition.id,'q');assert.equal(h.draft().definition.nodes.j.instructions,'원래 안내');
-await h.node();h.field('instructions','Q 미저장 글');h.selection.workflow_id='w';h.state.workflow=h.workflows.get('q');h.render();assert.equal(h.draft().definition.id,'w');assert.equal(h.draft().definition.nodes.j.instructions,'W 미저장 글');
+await h.node();h.field('job_guidance','Q 미저장 글');h.selection.workflow_id='w';h.state.workflow=h.workflows.get('q');h.render();assert.equal(h.draft().definition.id,'w');assert.equal(h.draft().definition.nodes.j.instructions,'W 미저장 글');
 h.selection.workflow_id='q';h.state.workflow=h.workflows.get('w');h.render();assert.equal(h.draft().definition.id,'q');assert.equal(h.draft().definition.nodes.j.instructions,'Q 미저장 글');assert.equal(h.writes.length,0);
 const pending=deferred();h.callbacks.read=()=>pending.promise;h.selection.workflow_id='not-in-list';h.render();assert.equal(h.draft().definition,null);assert.match(h.markup,/절차를 읽고 있습니다/);assert.doesNotMatch(h.markup,/Q 미저장 글|W 미저장 글/);
 pending.resolve({workflow:{id:'not-in-list',revision:1,can_manage:true,draft:definition('not-in-list')}});await flush();assert.equal(h.draft().definition.id,'not-in-list');assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);

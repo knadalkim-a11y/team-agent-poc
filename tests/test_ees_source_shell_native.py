@@ -77,23 +77,28 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.fill('#chat-input', '새 절차를 보며 작성한 질문')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.click('[data-author-action=create]')
-        self.wait("document.querySelector('#ees-work-dialog [name=name]')")
+        self.wait("document.querySelector('#ew-procedure-create [name=name]')")
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start')"))
-        # C3 scales the dialog during entry; measure its settled design width.
-        self.wait("!document.querySelector('#ees-work-dialog[data-ees-motion=opening]')")
-        self.assertAlmostEqual(self.read('#ees-work-dialog', 'getBoundingClientRect().width'), 484, delta=1)
-        self.fill('#ees-work-dialog [name=name]', '닫았다 열어도 남을 새 절차 이름')
+        # Creation now lives in the 480px workflow panel and keeps the Native
+        # conversation available; there is no name dialog or resize separator.
+        self.assertAlmostEqual(self.read('.ees-panel-region', 'getBoundingClientRect().width'), 480, delta=1)
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog,[data-ees-panel-resize]')"))
+        self.fill('#ew-procedure-create [name=name]', '닫았다 열어도 남을 새 절차 이름')
+        self.fill('#ew-procedure-create [name=description]', '취소해도 작성 중인 이름과 함께 보존할 목적')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[name=procedure_template]')"))
         self.key('Escape', 27)
-        self.wait("!document.querySelector('#ees-work-dialog')")
+        self.wait("!document.querySelector('#ew-procedure-create')")
+        self.wait("document.activeElement?.matches('[data-author-action=create]')")
         reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
         self.r11_panel_roundtrip('Enter')
         self.assertEqual(self.browser.evaluate('window.__eesNativeWorkV1.captureReference()'), reference)
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
         self.assertEqual(self.state()['workflows'], initial_workflows)
         self.click('[data-author-action=create]')
-        self.assertEqual(self.read('#ees-work-dialog [name=name]', 'value'), '닫았다 열어도 남을 새 절차 이름')
-        self.click('#ees-work-dialog [data-dialog-cancel]')
+        self.assertEqual(self.read('#ew-procedure-create [name=name]', 'value'), '닫았다 열어도 남을 새 절차 이름')
+        self.assertEqual(self.read('#ew-procedure-create [name=description]', 'value'), '취소해도 작성 중인 이름과 함께 보존할 목적')
+        self.click('[data-author-action=procedure_cancel]')
+        self.wait("!document.querySelector('#ew-procedure-create')")
         self.click('#ees-work-context [aria-label=Controls]')
         self.wait("document.querySelector('#controls-container')?.getBoundingClientRect().height > 0")
         self.click('#ees-work-context [aria-label=Controls]')
@@ -107,7 +112,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.wait("!new URLSearchParams(location.search).has('temporary-chat')")
         self.assertEqual(self.server.completions, [])
         self.assertEqual(self.state()['workflows'], initial_workflows)
-        self.screenshot('source-r11-name-dialog-toolbar-preserved')
+        self.screenshot('source-r11-inline-creation-toolbar-preserved')
 
     def scope_catalog_fixture(self, *, denied=False):
         """Real saved factories and grants; never replace workspace responses.
@@ -244,17 +249,29 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.fill('#chat-input', '범위를 골라도 유지할 개인 대화 초안')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         evidence = {}
-        # Each of the three A2 states gets open, Esc/focus, Enter/Space open,
+        # Work and authoring scopes get open, Esc/focus, Enter/Space open,
         # outside click and selection through real browser input events.
         for variant, kind, target, expected in (
                 ('work-factory', 'factory', 'scope-factory-1', '합성 공장 01'),
                 ('work-system', 'system', 'APC', 'APC'),
-                ('workspace-system', 'system', 'EMS', 'EMS')):
-            if variant == 'workspace-system':
+                ('workspace-system', 'system', 'EMS', 'EMS'),
+                ('workspace-factory', 'factory', 'scope-factory-1', '합성 공장 01')):
+            if variant.startswith('workspace-'):
                 self.click('[data-action=mode][data-mode=author]')
                 self.wait("document.querySelector('#ees-work-designer')")
-                self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-site-trigger')"))
-                self.assertIn('관리 시스템', self.text('#ees-work-entry'))
+                self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-work-site-trigger')"))
+                self.assertIn('작업 위치', self.text('#ees-work-entry'))
+                self.assertAlmostEqual(self.read('.ees-panel-region', 'getBoundingClientRect().width'), 480, delta=1)
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-ees-panel-resize]')"))
+            if variant == 'workspace-factory':
+                # The preceding keyboard loop can end on another enabled
+                # system. This search fixture has eight factories in EMS, so
+                # restore that scope through the real UI before checking it.
+                system_trigger, _ = self.scope_open('system')
+                self.click('[data-action=choose_system][data-system-id=EMS]')
+                self.scope_closed(system_trigger)
+                self.wait("document.querySelector('#ees-work-system-trigger')?.textContent.includes('EMS')")
+                self.assertIsNotNone(self.refresh())
             trigger, geometry = self.scope_open(kind)
             evidence[variant] = geometry
             self.screenshot('source-scope-' + variant)
@@ -422,7 +439,8 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 self.assertIn('저장된 진행 건이 없습니다.', self.text('#ees-work-panel'))
             elif unknown:
                 self.wait("document.querySelectorAll('[data-author-action=open]').length === 3")
-                self.assertIn('업무 절차 3개', self.text('#ees-work-designer'))
+                self.assertEqual(self.text('#ees-work-designer .ew-author-heading h2'), '워크플로우')
+                self.assertEqual(self.text('#ees-work-designer .ew-author-heading small'), '3개')
                 self.assertEqual(self.text('#ees-work-entry [data-action=procedures] small'), '3')
             labels.append(label)
             (unknown_labels if unknown else cached_labels).append(label)
@@ -758,7 +776,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         panels = {
             'tools': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '도구 · 공용'",
-            'procedures': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '업무 절차'",
+            'procedures': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '워크플로우'",
             'workspace_admin': "document.querySelector('#ees-work-panel .ew-work-heading h2')?.textContent === '공장·접근 범위'",
             'my_work': "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '내 업무'",
         }

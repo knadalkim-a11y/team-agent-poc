@@ -1,5 +1,17 @@
 # 현재 작업 상태
 
+## 2026-10-29 · 워크.워크플로 Figma 12판 보정 · PR #108
+
+- **현재 작업:** 실제 Figma와 PR 화면의 차이를 보여준 뒤 받은 “동일하게 변경 진행해줘” 요청에 따라, 같은 [PR #108](https://github.com/knadalkim-a11y/team-agent-poc/pull/108)에서 현재 Figma12판에 맞춰 제품 UI를 보정하고 로컬 검증을 마쳤다. 이번 보정의 시각 기준은 [Figma 워크·업무 절차](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1285-1830)이며 [범위·보존·완료 기준](mockups/ees-work/TASK.md#workspace-authoring12-ui-20261029)을 따른다. 기존 HTML12판과 이전 검증 근거는 그대로 보존한다.
+- **출발점:** PR #108 head `c4b21685dac37a5278c52d5e118c389441fba127`, 같은 작업 브랜치 `feat/workspace-authoring12-ui-20261029`. main `96467cfc7298521eee3812e38237ebb719cd544e`는 이 head에 이미 통합됐으며 작성12판은 아직 main에 병합되지 않았다.
+- **검증 상태:** 출발 head의 [CI400](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40799420294)과 이전 HTML 대조는 이번 Figma 보정의 통과 근거로 재사용하지 않는다. 이번 authoring Node264·Python8, runtime Node128, source frontend32 검사와 최종 소스 빌드 strict 검증을 통과했다. 최종 실제 Native 집중2시험과 같은 예시·네 탭 표본1시험도 통과했으며, 사람 상세12개 측정 영역의 위치·치수 차이는0px, 하단 버튼은0.5px 이내다. 네 탭의 가로 넘침은0이고 독립 육안 검수5개 화면에 겹침·잘림이 없었다. [실측·보존한 차이](../evals/artifacts/workspace-authoring12-ui-20261029/figma-parity/comparison.json)와 [검증 이력](../evals/v4-ui-20260930.md#workspace-authoring12-ui-20261029)을 남겼다. 전체 이미지 픽셀 일치를 뜻하지 않으며, 이번 head 전체 CI 결과는 [PR #108 검사](https://github.com/knadalkim-a11y/team-agent-poc/pull/108/checks)와 PR 본문에서 확인한다.
+- **전체 CI 후속:** [CI401 Complete Native](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40859406117/job/123400889349)는 공용 central-chat helper가 작업 상세에서 없어진 목록 이동 행을 클릭해 실패했다. 공용 helper에도 ‘단계와 작업 → 목록’ 동선을 적용하고 기존 권한·저장 단언을 유지했으며, Native C44 저장·재개1시험과 helper 구문 검사를 통과했다. 제품 코드는 그대로다. 전체 central-chat 재검증과 새 head 전체 CI는 별도로 확인하며 첫 실패와 로컬 환경의 시작 실패를 평가 기록에 보존한다.
+- **기능·자료 경계:** 기능 완성은 ‘워크.도구’ 설계 이후이며 새 도구 제작·backend·실행 엔진은 추가하지 않는다. 완료 조건의 기본 표시를39px로 맞추면서 textarea와 여러 줄 저장값을 유지하고, workflows 자료·숨긴 설정·기존 저장/게시 동작을 보존한다.
+- **사내 적용:** 이번 변경은 미실행이다. 기존 main `42f5ae5` 적용·기동 성공 사용자 보고는 [PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 원래 기록을 유지한다.
+- **다음 하나:** 공용 시험 동선 수정의 전체 central-chat 재검증·새 head 전체 CI와 PR #108 검토를 확인한다. 병합은 사용자 별도 요청에 따르며 사내 적용은 미실행이다.
+
+> 아래 절은 운영26판과 이전 구현 당시 기록이다. 작성12판의 현재 상태와 구분한다.
+
 ## 2026-10-28 · 운영 단계26판 제품 구현·사내 배포 검증 진행
 
 - **현재 목표:** 기존 제품을 확정 목업과 시각적으로 맞춰 사내에서 확인한다. 사용자가 추가로 지정한 상단 표준화까지 반영한 [26판 HTML](mockups/ees-work/design-mock-06-task-groups.html)·[구현 범위](mockups/ees-work/TASK.md#operations-stage26-product-20261028)를 기준으로 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)를 이어간다. HTML 파일 제공만으로 사내 제품 배포를 완료한 것으로 보지 않는다.
