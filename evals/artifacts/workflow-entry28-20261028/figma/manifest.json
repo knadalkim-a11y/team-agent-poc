@@ -1,0 +1,51 @@
+{
+  "status": "sealed-after-final-writes",
+  "date": "2026-10-28",
+  "files": [
+    {
+      "file": "C110-target-selection.png",
+      "bytes": 101365,
+      "sha256": "c3f5df07dfb304a99530e5dc5b8eee3ea192126a6e4841ac174d67a49a810651"
+    },
+    {
+      "file": "before-readonly.json",
+      "bytes": 5697,
+      "sha256": "cf23420e13bd47719f888868a944dbb990027ec1f4c4dae611129b1dd58eebda"
+    },
+    {
+      "file": "common-admin-report.json",
+      "bytes": 10008,
+      "sha256": "7535800a4a1d38d3f7d8542555406c2ba625e33c1c1c7aab8b8aa298338acd44"
+    },
+    {
+      "file": "common-entry-target-note.png",
+      "bytes": 27238,
+      "sha256": "e13a32d215ee56ca631daf85d1b18b9e65147836823c8fcc42635ad9728e3d68"
+    },
+    {
+      "file": "entry-states.png",
+      "bytes": 174460,
+      "sha256": "f2b348b96f6468d0a788278e01e4df04a3006837a431f07e63ebe77e0eaefdc4"
+    },
+    {
+      "file": "figma-sync-final.json",
+      "bytes": 8169,
+      "sha256": "65bb44abf87471b1aaae18c2910612bce5a085b8920f836d154b6b7bfc70a85d"
+    },
+    {
+      "file": "mutations-and-validation.json",
+      "bytes": 19826,
+      "sha256": "edd0739f1c0409b023642ade395265f0613e461b6d23428930745d0e0461e623"
+    },
+    {
+      "file": "operations-header.png",
+      "bytes": 63021,
+      "sha256": "0c056defb0c73d6ce35ef6cfa21123d7b208202d24a48462f945e7833982d281"
+    },
+    {
+      "file": "overview-full.png",
+      "bytes": 76204,
+      "sha256": "ffa26834013f79fb896dee40bab7813bd04ba3dd16300bc5355314ad65e04685"
+    }
+  ]
+}

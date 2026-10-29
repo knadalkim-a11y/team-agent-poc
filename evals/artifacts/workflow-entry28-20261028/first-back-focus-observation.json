@@ -1,0 +1,15 @@
+{
+  "source_sha256": "a68ca04fa9bd8c5e95fc0da9a8953afc06bd97d9c1b05a5684744bfdf3f4c17c",
+  "html_sha256": "9736e309be41e6f2ecdfdd03e8495dfebe6c0ef1de00395fda2ededf7c639070",
+  "steps": [
+    "keyboard Enter on 업무 시작",
+    "keyboard Enter on 단계 뒤로"
+  ],
+  "observed": {
+    "active": "BODY",
+    "activeHTML": "<body>\n<div class=\"ees-source-shell\" data-ees-source-shell=\"\" data-ees-route=\"chat\">\n  <nav class=\"mock-sidebar\" aria-label=\"왼쪽 메뉴\" data-compact=\"false\">\n    <d",
+    "startDisabled": true,
+    "runCount": 1,
+    "openVisible": true
+  }
+}

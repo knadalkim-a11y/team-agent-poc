@@ -1,0 +1,1232 @@
+{
+  "scope": "Standalone revision27 design mock; synthetic in-memory data, not product integration or deployment.",
+  "started": "2026-10-28T02:54:11.320Z",
+  "source": {
+    "html_sha256": "286e076858ca90329acf82fe6e195dc9c537140d2e7ec3dc92985dcfac73bd7b",
+    "editable_sha256": "071260d4c762922877a4b1c858679a95122aa040a14bce79e3b06eae96a54f0d"
+  },
+  "setup_observations": [
+    {
+      "kind": "environment",
+      "observation": "The supplied /tmp Playwright module path was absent; existing primary-runtime Playwright was used without installing dependencies."
+    },
+    {
+      "kind": "initial_keyboard_observation",
+      "observation": "Before the builder focus correction, Enter on 업무 시작 rendered 12 fresh jobs but focus became body; next Tab reached stage back. Builder added explicit stage-back focus for start/submit/open; original observation retained here."
+    }
+  ],
+  "checks": [
+    {
+      "name": "27-1920 initial empty",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 no forced date/run fields",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920-overview-empty horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1920-overview-empty preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 twelve fresh jobs",
+      "status": "passed",
+      "detail": {
+        "rows": 12,
+        "auto": 9,
+        "human": 3,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "files": 0,
+        "ids": [
+          "로그인 화면 문구 수정\n실행\n자동 판정\n실행 필요",
+          "알람 기준값 조정\n실행\n자동 판정\n실행 필요",
+          "대시보드 필터 추가\n실행\n자동 판정\n실행 필요",
+          "설비 목록 정렬 수정\n실행\n자동 판정\n실행 필요",
+          "데이터 보관 기간 변경\n실행\n자동 판정\n실행 필요",
+          "메일 발송 대상 추가\n실행\n자동 판정\n실행 필요",
+          "화면 응답 속도 개선\n실행\n자동 판정\n실행 필요",
+          "이력 조회 기간 확대\n실행\n자동 판정\n실행 필요",
+          "오류 메시지 정리\n실행\n자동 판정\n실행 필요",
+          "보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록",
+          "배치 주기 조정\n직접 판정\n판정 필요\n판정 기록",
+          "권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록"
+        ],
+        "metadata": false
+      }
+    },
+    {
+      "name": "27-1920 context and IDs",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 keyboard start focus",
+      "status": "passed",
+      "detail": {
+        "tag": "BUTTON",
+        "action": "entry_back"
+      }
+    },
+    {
+      "name": "27-1920-stage-unstarted horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1920-stage-unstarted preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 human menu keyboard focus",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 menu Escape returns focus",
+      "status": "passed",
+      "detail": {
+        "tag": "BUTTON",
+        "action": "human_pick"
+      }
+    },
+    {
+      "name": "27-1920 back one run",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 overview focus",
+      "status": "passed",
+      "detail": {
+        "tag": "BUTTON",
+        "action": "work_start"
+      }
+    },
+    {
+      "name": "27-1920-overview-active horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1920-overview-active preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 reopened twelve fresh jobs",
+      "status": "passed",
+      "detail": {
+        "rows": 12,
+        "auto": 9,
+        "human": 3,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "files": 0,
+        "ids": [
+          "로그인 화면 문구 수정\n실행\n자동 판정\n실행 필요",
+          "알람 기준값 조정\n실행\n자동 판정\n실행 필요",
+          "대시보드 필터 추가\n실행\n자동 판정\n실행 필요",
+          "설비 목록 정렬 수정\n실행\n자동 판정\n실행 필요",
+          "데이터 보관 기간 변경\n실행\n자동 판정\n실행 필요",
+          "메일 발송 대상 추가\n실행\n자동 판정\n실행 필요",
+          "화면 응답 속도 개선\n실행\n자동 판정\n실행 필요",
+          "이력 조회 기간 확대\n실행\n자동 판정\n실행 필요",
+          "오류 메시지 정리\n실행\n자동 판정\n실행 필요",
+          "보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록",
+          "배치 주기 조정\n직접 판정\n판정 필요\n판정 기록",
+          "권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록"
+        ],
+        "metadata": false
+      }
+    },
+    {
+      "name": "27-1920 reopened context and IDs",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 open run focus",
+      "status": "passed",
+      "detail": {
+        "tag": "BUTTON",
+        "action": "entry_back"
+      }
+    },
+    {
+      "name": "27-1920 factory field focus",
+      "status": "passed",
+      "detail": {
+        "tag": "SELECT",
+        "action": "factory"
+      }
+    },
+    {
+      "name": "27-1920 required factory blocks start",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920-factory-input horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1920-factory-input preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 form Tab cancel",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 cancel creates nothing",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 factory selected",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 keyboard submit ready",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 factory twelve fresh jobs",
+      "status": "passed",
+      "detail": {
+        "rows": 12,
+        "auto": 9,
+        "human": 3,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "files": 0,
+        "ids": [
+          "로그인 화면 문구 수정\n실행\n자동 판정\n실행 필요",
+          "알람 기준값 조정\n실행\n자동 판정\n실행 필요",
+          "대시보드 필터 추가\n실행\n자동 판정\n실행 필요",
+          "설비 목록 정렬 수정\n실행\n자동 판정\n실행 필요",
+          "데이터 보관 기간 변경\n실행\n자동 판정\n실행 필요",
+          "메일 발송 대상 추가\n실행\n자동 판정\n실행 필요",
+          "화면 응답 속도 개선\n실행\n자동 판정\n실행 필요",
+          "이력 조회 기간 확대\n실행\n자동 판정\n실행 필요",
+          "오류 메시지 정리\n실행\n자동 판정\n실행 필요",
+          "보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록",
+          "배치 주기 조정\n직접 판정\n판정 필요\n판정 기록",
+          "권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록"
+        ],
+        "metadata": false
+      }
+    },
+    {
+      "name": "27-1920 factory context and IDs",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 selected factory context",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920-factory-stage horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1920-factory-stage preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 existing one run",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 duplicate factory disabled",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 keyboard skips active factory",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 second factory twelve fresh jobs",
+      "status": "passed",
+      "detail": {
+        "rows": 12,
+        "auto": 9,
+        "human": 3,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "files": 0,
+        "ids": [
+          "로그인 화면 문구 수정\n실행\n자동 판정\n실행 필요",
+          "알람 기준값 조정\n실행\n자동 판정\n실행 필요",
+          "대시보드 필터 추가\n실행\n자동 판정\n실행 필요",
+          "설비 목록 정렬 수정\n실행\n자동 판정\n실행 필요",
+          "데이터 보관 기간 변경\n실행\n자동 판정\n실행 필요",
+          "메일 발송 대상 추가\n실행\n자동 판정\n실행 필요",
+          "화면 응답 속도 개선\n실행\n자동 판정\n실행 필요",
+          "이력 조회 기간 확대\n실행\n자동 판정\n실행 필요",
+          "오류 메시지 정리\n실행\n자동 판정\n실행 필요",
+          "보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록",
+          "배치 주기 조정\n직접 판정\n판정 필요\n판정 기록",
+          "권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록"
+        ],
+        "metadata": false
+      }
+    },
+    {
+      "name": "27-1920 second factory context and IDs",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 second factory distinct",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 unpublished disabled",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920-unpublished horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1920-unpublished preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 forbidden disabled",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920-forbidden horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1920-forbidden preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1920 multi separate 4 stages/9 jobs",
+      "status": "passed",
+      "detail": [
+        "대상 확정작업 1개",
+        "1차 점검작업 3개",
+        "보완·재점검작업 2개",
+        "조건부 승인 후속작업 3개"
+      ]
+    },
+    {
+      "name": "27-1920-multi-overview horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1920-multi-overview preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 initial empty",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 no forced date/run fields",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366-overview-empty horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1366-overview-empty preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 twelve fresh jobs",
+      "status": "passed",
+      "detail": {
+        "rows": 12,
+        "auto": 9,
+        "human": 3,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "files": 0,
+        "ids": [
+          "로그인 화면 문구 수정\n실행\n자동 판정\n실행 필요",
+          "알람 기준값 조정\n실행\n자동 판정\n실행 필요",
+          "대시보드 필터 추가\n실행\n자동 판정\n실행 필요",
+          "설비 목록 정렬 수정\n실행\n자동 판정\n실행 필요",
+          "데이터 보관 기간 변경\n실행\n자동 판정\n실행 필요",
+          "메일 발송 대상 추가\n실행\n자동 판정\n실행 필요",
+          "화면 응답 속도 개선\n실행\n자동 판정\n실행 필요",
+          "이력 조회 기간 확대\n실행\n자동 판정\n실행 필요",
+          "오류 메시지 정리\n실행\n자동 판정\n실행 필요",
+          "보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록",
+          "배치 주기 조정\n직접 판정\n판정 필요\n판정 기록",
+          "권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록"
+        ],
+        "metadata": false
+      }
+    },
+    {
+      "name": "27-1366 context and IDs",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 keyboard start focus",
+      "status": "passed",
+      "detail": {
+        "tag": "BUTTON",
+        "action": "entry_back"
+      }
+    },
+    {
+      "name": "27-1366-stage-unstarted horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1366-stage-unstarted preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 human menu keyboard focus",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 menu Escape returns focus",
+      "status": "passed",
+      "detail": {
+        "tag": "BUTTON",
+        "action": "human_pick"
+      }
+    },
+    {
+      "name": "27-1366 back one run",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 overview focus",
+      "status": "passed",
+      "detail": {
+        "tag": "BUTTON",
+        "action": "work_start"
+      }
+    },
+    {
+      "name": "27-1366-overview-active horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1366-overview-active preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 reopened twelve fresh jobs",
+      "status": "passed",
+      "detail": {
+        "rows": 12,
+        "auto": 9,
+        "human": 3,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "files": 0,
+        "ids": [
+          "로그인 화면 문구 수정\n실행\n자동 판정\n실행 필요",
+          "알람 기준값 조정\n실행\n자동 판정\n실행 필요",
+          "대시보드 필터 추가\n실행\n자동 판정\n실행 필요",
+          "설비 목록 정렬 수정\n실행\n자동 판정\n실행 필요",
+          "데이터 보관 기간 변경\n실행\n자동 판정\n실행 필요",
+          "메일 발송 대상 추가\n실행\n자동 판정\n실행 필요",
+          "화면 응답 속도 개선\n실행\n자동 판정\n실행 필요",
+          "이력 조회 기간 확대\n실행\n자동 판정\n실행 필요",
+          "오류 메시지 정리\n실행\n자동 판정\n실행 필요",
+          "보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록",
+          "배치 주기 조정\n직접 판정\n판정 필요\n판정 기록",
+          "권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록"
+        ],
+        "metadata": false
+      }
+    },
+    {
+      "name": "27-1366 reopened context and IDs",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 open run focus",
+      "status": "passed",
+      "detail": {
+        "tag": "BUTTON",
+        "action": "entry_back"
+      }
+    },
+    {
+      "name": "27-1366 factory field focus",
+      "status": "passed",
+      "detail": {
+        "tag": "SELECT",
+        "action": "factory"
+      }
+    },
+    {
+      "name": "27-1366 required factory blocks start",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366-factory-input horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1366-factory-input preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 form Tab cancel",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 cancel creates nothing",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 factory selected",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 keyboard submit ready",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 factory twelve fresh jobs",
+      "status": "passed",
+      "detail": {
+        "rows": 12,
+        "auto": 9,
+        "human": 3,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "files": 0,
+        "ids": [
+          "로그인 화면 문구 수정\n실행\n자동 판정\n실행 필요",
+          "알람 기준값 조정\n실행\n자동 판정\n실행 필요",
+          "대시보드 필터 추가\n실행\n자동 판정\n실행 필요",
+          "설비 목록 정렬 수정\n실행\n자동 판정\n실행 필요",
+          "데이터 보관 기간 변경\n실행\n자동 판정\n실행 필요",
+          "메일 발송 대상 추가\n실행\n자동 판정\n실행 필요",
+          "화면 응답 속도 개선\n실행\n자동 판정\n실행 필요",
+          "이력 조회 기간 확대\n실행\n자동 판정\n실행 필요",
+          "오류 메시지 정리\n실행\n자동 판정\n실행 필요",
+          "보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록",
+          "배치 주기 조정\n직접 판정\n판정 필요\n판정 기록",
+          "권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록"
+        ],
+        "metadata": false
+      }
+    },
+    {
+      "name": "27-1366 factory context and IDs",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 selected factory context",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366-factory-stage horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1366-factory-stage preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 existing one run",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 duplicate factory disabled",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 keyboard skips active factory",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 second factory twelve fresh jobs",
+      "status": "passed",
+      "detail": {
+        "rows": 12,
+        "auto": 9,
+        "human": 3,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "files": 0,
+        "ids": [
+          "로그인 화면 문구 수정\n실행\n자동 판정\n실행 필요",
+          "알람 기준값 조정\n실행\n자동 판정\n실행 필요",
+          "대시보드 필터 추가\n실행\n자동 판정\n실행 필요",
+          "설비 목록 정렬 수정\n실행\n자동 판정\n실행 필요",
+          "데이터 보관 기간 변경\n실행\n자동 판정\n실행 필요",
+          "메일 발송 대상 추가\n실행\n자동 판정\n실행 필요",
+          "화면 응답 속도 개선\n실행\n자동 판정\n실행 필요",
+          "이력 조회 기간 확대\n실행\n자동 판정\n실행 필요",
+          "오류 메시지 정리\n실행\n자동 판정\n실행 필요",
+          "보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록",
+          "배치 주기 조정\n직접 판정\n판정 필요\n판정 기록",
+          "권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록"
+        ],
+        "metadata": false
+      }
+    },
+    {
+      "name": "27-1366 second factory context and IDs",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 second factory distinct",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 unpublished disabled",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366-unpublished horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1366-unpublished preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 forbidden disabled",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366-forbidden horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1366-forbidden preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-1366 multi separate 4 stages/9 jobs",
+      "status": "passed",
+      "detail": [
+        "대상 확정작업 1개",
+        "1차 점검작업 3개",
+        "보완·재점검작업 2개",
+        "조건부 승인 후속작업 3개"
+      ]
+    },
+    {
+      "name": "27-1366-multi-overview horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-1366-multi-overview preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 initial empty",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 no forced date/run fields",
+      "status": "passed"
+    },
+    {
+      "name": "27-480-overview-empty horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-480-overview-empty preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 twelve fresh jobs",
+      "status": "passed",
+      "detail": {
+        "rows": 12,
+        "auto": 9,
+        "human": 3,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "files": 0,
+        "ids": [
+          "로그인 화면 문구 수정\n실행\n자동 판정\n실행 필요",
+          "알람 기준값 조정\n실행\n자동 판정\n실행 필요",
+          "대시보드 필터 추가\n실행\n자동 판정\n실행 필요",
+          "설비 목록 정렬 수정\n실행\n자동 판정\n실행 필요",
+          "데이터 보관 기간 변경\n실행\n자동 판정\n실행 필요",
+          "메일 발송 대상 추가\n실행\n자동 판정\n실행 필요",
+          "화면 응답 속도 개선\n실행\n자동 판정\n실행 필요",
+          "이력 조회 기간 확대\n실행\n자동 판정\n실행 필요",
+          "오류 메시지 정리\n실행\n자동 판정\n실행 필요",
+          "보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록",
+          "배치 주기 조정\n직접 판정\n판정 필요\n판정 기록",
+          "권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록"
+        ],
+        "metadata": false
+      }
+    },
+    {
+      "name": "27-480 context and IDs",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 keyboard start focus",
+      "status": "passed",
+      "detail": {
+        "tag": "BUTTON",
+        "action": "entry_back"
+      }
+    },
+    {
+      "name": "27-480-stage-unstarted horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-480-stage-unstarted preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 human menu keyboard focus",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 menu Escape returns focus",
+      "status": "passed",
+      "detail": {
+        "tag": "BUTTON",
+        "action": "human_pick"
+      }
+    },
+    {
+      "name": "27-480 back one run",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 overview focus",
+      "status": "passed",
+      "detail": {
+        "tag": "BUTTON",
+        "action": "work_start"
+      }
+    },
+    {
+      "name": "27-480-overview-active horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-480-overview-active preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 reopened twelve fresh jobs",
+      "status": "passed",
+      "detail": {
+        "rows": 12,
+        "auto": 9,
+        "human": 3,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "files": 0,
+        "ids": [
+          "로그인 화면 문구 수정\n실행\n자동 판정\n실행 필요",
+          "알람 기준값 조정\n실행\n자동 판정\n실행 필요",
+          "대시보드 필터 추가\n실행\n자동 판정\n실행 필요",
+          "설비 목록 정렬 수정\n실행\n자동 판정\n실행 필요",
+          "데이터 보관 기간 변경\n실행\n자동 판정\n실행 필요",
+          "메일 발송 대상 추가\n실행\n자동 판정\n실행 필요",
+          "화면 응답 속도 개선\n실행\n자동 판정\n실행 필요",
+          "이력 조회 기간 확대\n실행\n자동 판정\n실행 필요",
+          "오류 메시지 정리\n실행\n자동 판정\n실행 필요",
+          "보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록",
+          "배치 주기 조정\n직접 판정\n판정 필요\n판정 기록",
+          "권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록"
+        ],
+        "metadata": false
+      }
+    },
+    {
+      "name": "27-480 reopened context and IDs",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 open run focus",
+      "status": "passed",
+      "detail": {
+        "tag": "BUTTON",
+        "action": "entry_back"
+      }
+    },
+    {
+      "name": "27-480 factory field focus",
+      "status": "passed",
+      "detail": {
+        "tag": "SELECT",
+        "action": "factory"
+      }
+    },
+    {
+      "name": "27-480 required factory blocks start",
+      "status": "passed"
+    },
+    {
+      "name": "27-480-factory-input horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-480-factory-input preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 form Tab cancel",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 cancel creates nothing",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 factory selected",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 keyboard submit ready",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 factory twelve fresh jobs",
+      "status": "passed",
+      "detail": {
+        "rows": 12,
+        "auto": 9,
+        "human": 3,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "files": 0,
+        "ids": [
+          "로그인 화면 문구 수정\n실행\n자동 판정\n실행 필요",
+          "알람 기준값 조정\n실행\n자동 판정\n실행 필요",
+          "대시보드 필터 추가\n실행\n자동 판정\n실행 필요",
+          "설비 목록 정렬 수정\n실행\n자동 판정\n실행 필요",
+          "데이터 보관 기간 변경\n실행\n자동 판정\n실행 필요",
+          "메일 발송 대상 추가\n실행\n자동 판정\n실행 필요",
+          "화면 응답 속도 개선\n실행\n자동 판정\n실행 필요",
+          "이력 조회 기간 확대\n실행\n자동 판정\n실행 필요",
+          "오류 메시지 정리\n실행\n자동 판정\n실행 필요",
+          "보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록",
+          "배치 주기 조정\n직접 판정\n판정 필요\n판정 기록",
+          "권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록"
+        ],
+        "metadata": false
+      }
+    },
+    {
+      "name": "27-480 factory context and IDs",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 selected factory context",
+      "status": "passed"
+    },
+    {
+      "name": "27-480-factory-stage horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-480-factory-stage preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 existing one run",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 duplicate factory disabled",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 keyboard skips active factory",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 second factory twelve fresh jobs",
+      "status": "passed",
+      "detail": {
+        "rows": 12,
+        "auto": 9,
+        "human": 3,
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "files": 0,
+        "ids": [
+          "로그인 화면 문구 수정\n실행\n자동 판정\n실행 필요",
+          "알람 기준값 조정\n실행\n자동 판정\n실행 필요",
+          "대시보드 필터 추가\n실행\n자동 판정\n실행 필요",
+          "설비 목록 정렬 수정\n실행\n자동 판정\n실행 필요",
+          "데이터 보관 기간 변경\n실행\n자동 판정\n실행 필요",
+          "메일 발송 대상 추가\n실행\n자동 판정\n실행 필요",
+          "화면 응답 속도 개선\n실행\n자동 판정\n실행 필요",
+          "이력 조회 기간 확대\n실행\n자동 판정\n실행 필요",
+          "오류 메시지 정리\n실행\n자동 판정\n실행 필요",
+          "보고서 출력 양식 변경\n직접 판정\n판정 필요\n판정 기록",
+          "배치 주기 조정\n직접 판정\n판정 필요\n판정 기록",
+          "권한 그룹 정리\n직접 판정\n판정 필요\n판정 기록"
+        ],
+        "metadata": false
+      }
+    },
+    {
+      "name": "27-480 second factory context and IDs",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 second factory distinct",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 unpublished disabled",
+      "status": "passed"
+    },
+    {
+      "name": "27-480-unpublished horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-480-unpublished preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 forbidden disabled",
+      "status": "passed"
+    },
+    {
+      "name": "27-480-forbidden horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-480-forbidden preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "27-480 multi separate 4 stages/9 jobs",
+      "status": "passed",
+      "detail": [
+        "대상 확정작업 1개",
+        "1차 점검작업 3개",
+        "보완·재점검작업 2개",
+        "조건부 승인 후속작업 3개"
+      ]
+    },
+    {
+      "name": "27-480-multi-overview horizontal overflow",
+      "status": "passed",
+      "detail": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "27-480-multi-overview preview controls outside product",
+      "status": "passed"
+    },
+    {
+      "name": "No external or API requests",
+      "status": "passed",
+      "detail": []
+    },
+    {
+      "name": "No browser errors",
+      "status": "passed",
+      "detail": []
+    },
+    {
+      "name": "Source unchanged during QA",
+      "status": "passed"
+    }
+  ],
+  "captures": [
+    {
+      "label": "27-1920-overview-empty",
+      "png": "27-1920-overview-empty.png",
+      "geometry": "27-1920-overview-empty-geometry.json",
+      "sha256": "4298e495516d305b43e920e072bad37ead6f60e91424eb4584946a603426bd8d"
+    },
+    {
+      "label": "27-1920-stage-unstarted",
+      "png": "27-1920-stage-unstarted.png",
+      "geometry": "27-1920-stage-unstarted-geometry.json",
+      "sha256": "d7b353b58c921a2159c4bd40ef42da97df5240a5f5f86a45c5a4b2ec39013473"
+    },
+    {
+      "label": "27-1920-overview-active",
+      "png": "27-1920-overview-active.png",
+      "geometry": "27-1920-overview-active-geometry.json",
+      "sha256": "de6cb7e668045cfe6b9a18962fc3b838364a76a87135d7da6521376c99985cb2"
+    },
+    {
+      "label": "27-1920-factory-input",
+      "png": "27-1920-factory-input.png",
+      "geometry": "27-1920-factory-input-geometry.json",
+      "sha256": "36c2ae8420fcdd00f2ce82e2be51c3e35fd491da714b3cd70e83b60e5d74d871"
+    },
+    {
+      "label": "27-1920-factory-stage",
+      "png": "27-1920-factory-stage.png",
+      "geometry": "27-1920-factory-stage-geometry.json",
+      "sha256": "7031955377ee57f3d087df907c97de7ff8765efae6cf4fb399e61fd591a24278"
+    },
+    {
+      "label": "27-1920-unpublished",
+      "png": "27-1920-unpublished.png",
+      "geometry": "27-1920-unpublished-geometry.json",
+      "sha256": "a3dc3cba732e46dc7f123b46973a2dec59211c222ab90535946bd88f2d5be1c4"
+    },
+    {
+      "label": "27-1920-forbidden",
+      "png": "27-1920-forbidden.png",
+      "geometry": "27-1920-forbidden-geometry.json",
+      "sha256": "1496e9e44f4d7f049de3ebce12ba9a3829c54857f0b35b27f04965ee1ed004aa"
+    },
+    {
+      "label": "27-1920-multi-overview",
+      "png": "27-1920-multi-overview.png",
+      "geometry": "27-1920-multi-overview-geometry.json",
+      "sha256": "7b25c7f27224ee39fb87e961c37be86739cdd665dea21d85d1691bce1382447a"
+    },
+    {
+      "label": "27-1366-overview-empty",
+      "png": "27-1366-overview-empty.png",
+      "geometry": "27-1366-overview-empty-geometry.json",
+      "sha256": "680f861cd9f4f17dc5abf258fca0a8f153f9f9b7f644a2497b1d5ba6ca37de10"
+    },
+    {
+      "label": "27-1366-stage-unstarted",
+      "png": "27-1366-stage-unstarted.png",
+      "geometry": "27-1366-stage-unstarted-geometry.json",
+      "sha256": "73674bc578730e6e37607ac7be179e59fd59fbf6db64466ccf51367f86ec137f"
+    },
+    {
+      "label": "27-1366-overview-active",
+      "png": "27-1366-overview-active.png",
+      "geometry": "27-1366-overview-active-geometry.json",
+      "sha256": "f9fcbdb0457242dc54b63c46ab5dc7d827ecb7a1d45919d3004a7aed4f87e721"
+    },
+    {
+      "label": "27-1366-factory-input",
+      "png": "27-1366-factory-input.png",
+      "geometry": "27-1366-factory-input-geometry.json",
+      "sha256": "dc94bb38e05f28d6a02888b22e8b18c1f409be1d5f813701bf470a9a8fb4a502"
+    },
+    {
+      "label": "27-1366-factory-stage",
+      "png": "27-1366-factory-stage.png",
+      "geometry": "27-1366-factory-stage-geometry.json",
+      "sha256": "13744fcb27fe4d739a48d9864e3ea4b522eee1f0e45ea823c2e5c8811f9a237f"
+    },
+    {
+      "label": "27-1366-unpublished",
+      "png": "27-1366-unpublished.png",
+      "geometry": "27-1366-unpublished-geometry.json",
+      "sha256": "b462a146268fc88c28cf4046cdc2a846e1e19d3ee6a6dcb524b3510cedade1c4"
+    },
+    {
+      "label": "27-1366-forbidden",
+      "png": "27-1366-forbidden.png",
+      "geometry": "27-1366-forbidden-geometry.json",
+      "sha256": "267e51f1137c86439ef2a2069730cf4e7c4244d8d747beec07735ca2d95c668c"
+    },
+    {
+      "label": "27-1366-multi-overview",
+      "png": "27-1366-multi-overview.png",
+      "geometry": "27-1366-multi-overview-geometry.json",
+      "sha256": "943827d3de61c7facd65b593ddc2bcb01dd40a0cfbd17fbc1c8811ce3892e525"
+    },
+    {
+      "label": "27-480-overview-empty",
+      "png": "27-480-overview-empty.png",
+      "geometry": "27-480-overview-empty-geometry.json",
+      "sha256": "c769b26bd758cd54e247bcd34f9044093abdb9325e0268303a99bb8f4cea72ee"
+    },
+    {
+      "label": "27-480-stage-unstarted",
+      "png": "27-480-stage-unstarted.png",
+      "geometry": "27-480-stage-unstarted-geometry.json",
+      "sha256": "61076d12d3268a8860351a7c7858b0d40a6ba3bd1a01b0542e35bf08ec18df57"
+    },
+    {
+      "label": "27-480-overview-active",
+      "png": "27-480-overview-active.png",
+      "geometry": "27-480-overview-active-geometry.json",
+      "sha256": "70d6028b5bb371ddbfc780cdb3f40aef51ed9f4e05b7e501e9a09be0c1383267"
+    },
+    {
+      "label": "27-480-factory-input",
+      "png": "27-480-factory-input.png",
+      "geometry": "27-480-factory-input-geometry.json",
+      "sha256": "c85ae6ca4db53839a2dab1ac2803ba86b5d79be2f02de3f9ab1f838eb43038d5"
+    },
+    {
+      "label": "27-480-factory-stage",
+      "png": "27-480-factory-stage.png",
+      "geometry": "27-480-factory-stage-geometry.json",
+      "sha256": "abb6cc0b99d19b20c68f161c2882643b4b2a4afc61e254b88228c446e7c80597"
+    },
+    {
+      "label": "27-480-unpublished",
+      "png": "27-480-unpublished.png",
+      "geometry": "27-480-unpublished-geometry.json",
+      "sha256": "97184ea2814d6aa4209bd37254384adbbfe9c788a82e8eda87459963e3183620"
+    },
+    {
+      "label": "27-480-forbidden",
+      "png": "27-480-forbidden.png",
+      "geometry": "27-480-forbidden-geometry.json",
+      "sha256": "e48210d22d5065fa299de30fb08d7cd4f2d3e5967c895d5b8a915b176173bb40"
+    },
+    {
+      "label": "27-480-multi-overview",
+      "png": "27-480-multi-overview.png",
+      "geometry": "27-480-multi-overview-geometry.json",
+      "sha256": "acb9fd79ad5960efc38407bb7a3021ac06c2ae75fdf03393a32e6d1aeb1ece04"
+    }
+  ],
+  "requests": [],
+  "errors": [],
+  "browser": "133.0.6943.0",
+  "status": "passed",
+  "finished": "2026-10-28T02:54:15.331Z",
+  "summary": {
+    "passed": 141,
+    "failed": 0,
+    "captures": 24
+  },
+  "prior_attempt_reports": [
+    "browser-qa-first.json",
+    "browser-qa-second.json",
+    "before-double-click-fix/browser-qa.json",
+    "double-click-transition.json",
+    "double-click-transition-fixed-first.json"
+  ],
+  "followup": {
+    "double_click_regression": "double-click-transition-fixed.json",
+    "targeted_checks": 3,
+    "targeted_passed": 3,
+    "initial_double_click_failure": "double-click-transition.json",
+    "initial_failure_screenshot": "double-click-transition.png",
+    "same_pngs_as_before_fix": [
+      "27-1920-overview-empty.png",
+      "27-1920-stage-unstarted.png",
+      "27-1920-overview-active.png",
+      "27-1920-factory-input.png",
+      "27-1920-factory-stage.png",
+      "27-1920-unpublished.png",
+      "27-1920-forbidden.png",
+      "27-1920-multi-overview.png",
+      "27-1366-overview-empty.png",
+      "27-1366-stage-unstarted.png",
+      "27-1366-overview-active.png",
+      "27-1366-factory-input.png",
+      "27-1366-factory-stage.png",
+      "27-1366-unpublished.png",
+      "27-1366-forbidden.png",
+      "27-1366-multi-overview.png",
+      "27-480-overview-empty.png",
+      "27-480-stage-unstarted.png",
+      "27-480-overview-active.png",
+      "27-480-factory-input.png",
+      "27-480-factory-stage.png",
+      "27-480-unpublished.png",
+      "27-480-forbidden.png",
+      "27-480-multi-overview.png"
+    ],
+    "changed_pngs_as_before_fix": []
+  },
+  "visual_review": {
+    "directly_inspected": [
+      "27-1920-overview-empty.png",
+      "27-1366-stage-unstarted.png",
+      "27-480-factory-input.png",
+      "27-480-multi-overview.png"
+    ],
+    "observations": "Workflow heading/start action, compact overview groups, visible keyboard focus, factory input and four-stage example are legible; horizontal overflow is zero in all 24 captured states. Remaining captures have geometry checks and are supplied for review, not individually claimed as visually inspected.",
+    "followup": "The interaction-only guard changed no markup or styles. Final screenshot hashes compared with prior captures; fixed double-click screenshot additionally inspected."
+  },
+  "harness_sha256": "b902bbe5d2c5ecab9f8a4867d4b4df2ec7831cfa48e9c8e55518538ab5a8e75a"
+}

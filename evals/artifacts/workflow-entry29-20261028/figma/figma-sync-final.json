@@ -1,0 +1,413 @@
+{
+  "schema": "figma-workflow-entry29-sync-v1",
+  "date": "2026-10-28",
+  "status": "complete-scoped-native-review",
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "sessionId": "1df14170-3fc8-4a01-a6d8-71ce03e554ed",
+  "source": {
+    "commit": "5a7c3b02e55b5b5dbe2af6e6812f6d85fe1533cf",
+    "sourceSha256": "d85d6e6bf6529232e0dbac89f6b374ed5c2b31b222ba4a35a1036aaf1a0e0a59",
+    "htmlSha256": "8a83206a19ca87c022a0eab9d40f7d96f95c6db4f490798fc38f5eda74c49542",
+    "htmlBytes": 427671,
+    "htmlPath": "docs/mockups/ees-work/design-mock-07-workflow-entry.html",
+    "url": "https://github.com/knadalkim-a11y/team-agent-poc/blob/5a7c3b02e55b5b5dbe2af6e6812f6d85fe1533cf/docs/mockups/ees-work/design-mock-07-workflow-entry.html",
+    "qa": "Parent/QA agent reported81/81 PASS and10 captures. Final1920 layout unchanged from reviewed candidate;480 sidebar hit-test corrected in HTML."
+  },
+  "change": "Workflow overview opens stage/jobs directly. Removed start CTA, separate run listing and static multi-stage example. Browsing alone does not create execution/verdict results. Factory/system context remains left-side selection; a context-requiring action opens that selection and does not automatically replay the action.",
+  "nodes": {
+    "operationsPage": "1284:3106",
+    "operationsHeader": "1284:3107",
+    "overviewFull": "1762:456",
+    "statesBoard": "1762:758",
+    "leftSelectionComparison": "1762:760",
+    "leftSelectionStagePanel": "1783:453",
+    "factoryMenu": "1776:453",
+    "initialStage": "1762:761",
+    "directApprovedStage": "1762:762",
+    "directApprovedPanel": "1785:514",
+    "returnedOverview": "1762:763",
+    "returnedOverviewPanel": "1783:687",
+    "commonNote": "1763:495",
+    "changeRecord": "1781:1256",
+    "fixedSourceLink": "1781:1257",
+    "backupPage": "1781:40",
+    "backupOperationsHeader": "1781:497",
+    "backupOverviewFull": "1781:514",
+    "backupStatesBoard": "1781:737",
+    "backupCommonNote": "1781:42"
+  },
+  "coverage": [
+    {
+      "state": "overview",
+      "nodeId": "1762:456",
+      "type": "native-full-shell",
+      "size": [
+        1920,
+        1080
+      ],
+      "description": "Workflow overview with period/selected target and single clickable stage row; no start CTA or separate run list."
+    },
+    {
+      "state": "left-factory-open",
+      "nodeId": "1762:760",
+      "type": "native-comparison-crop",
+      "size": [
+        768,
+        1080
+      ],
+      "description": "Left scope popup after explicit action from all-factory stage; right side stays unstarted stage. Center chat omitted intentionally and canvas note discloses this."
+    },
+    {
+      "state": "stage-browse",
+      "nodeId": "1762:761",
+      "type": "native-panel",
+      "size": [
+        480,
+        1080
+      ],
+      "description": "Existing stage visual with12 unstarted jobs. Workflow breadcrumb returns to overview. Browsing creates no verdict result."
+    },
+    {
+      "state": "stage-human-approved",
+      "nodeId": "1762:762",
+      "type": "native-panel-scrolled",
+      "size": [
+        480,
+        1080
+      ],
+      "description": "Only 배치 주기 조정 directly approved;11waiting/1result. Static editable snapshot of source scroll247px, native focus outline and expanded approval fold."
+    },
+    {
+      "state": "overview-human-approved",
+      "nodeId": "1762:763",
+      "type": "native-panel",
+      "size": [
+        480,
+        1080
+      ],
+      "description": "Stage summary 작업12개 · 승인1; verdict facts, not business-completion rate. Stage title/summary link to approved-stage snapshot."
+    }
+  ],
+  "native": {
+    "totalNodes": 1073,
+    "counts": [
+      {
+        "id": "1762:456",
+        "name": "운영 · 업무 개요",
+        "w": 1920,
+        "h": 1080,
+        "count": 215,
+        "types": {
+          "FRAME": 111,
+          "TEXT": 44,
+          "VECTOR": 52,
+          "RECTANGLE": 7,
+          "INSTANCE": 1
+        },
+        "imageNodes": [],
+        "fontMismatches": [],
+        "obsoleteTexts": []
+      },
+      {
+        "id": "1762:758",
+        "name": "운영 · 단계 조회와 판정 현황",
+        "w": 2364,
+        "h": 1232,
+        "count": 858,
+        "types": {
+          "FRAME": 438,
+          "TEXT": 222,
+          "VECTOR": 107,
+          "RECTANGLE": 47,
+          "INSTANCE": 41,
+          "GROUP": 1,
+          "ELLIPSE": 2
+        },
+        "imageNodes": [],
+        "fontMismatches": [],
+        "obsoleteTexts": []
+      }
+    ],
+    "imageFilledNodes": 0,
+    "fontMismatchCount": 0,
+    "productFont": "Noto Sans KR",
+    "oldStartAndRunBlocks": 0
+  },
+  "links": [
+    {
+      "id": "1764:688",
+      "text": "1차 점검",
+      "link": {
+        "type": "NODE",
+        "value": "1762:761"
+      }
+    },
+    {
+      "id": "1764:689",
+      "text": "작업 12개",
+      "link": {
+        "type": "NODE",
+        "value": "1762:761"
+      }
+    },
+    {
+      "id": "1764:832",
+      "text": "배포 산출물 점검 / 공장 A · EMS",
+      "link": {
+        "type": "NODE",
+        "value": "1762:456"
+      }
+    },
+    {
+      "id": "1783:457",
+      "text": "배포 산출물 점검 / 전체 공장 · EMS",
+      "link": {
+        "type": "NODE",
+        "value": "1762:456"
+      }
+    },
+    {
+      "id": "1783:712",
+      "text": "1차 점검",
+      "link": {
+        "type": "NODE",
+        "value": "1762:762"
+      }
+    },
+    {
+      "id": "1783:713",
+      "text": "작업 12개 · 승인 1",
+      "link": {
+        "type": "NODE",
+        "value": "1762:762"
+      }
+    },
+    {
+      "id": "1668:1068",
+      "text": "업무 개요와 단계 탐색 열기 →",
+      "link": {
+        "type": "NODE",
+        "value": "1762:456"
+      }
+    },
+    {
+      "id": "1768:456",
+      "text": "단계 조회·판정 현황 →",
+      "link": {
+        "type": "NODE",
+        "value": "1762:758"
+      }
+    },
+    {
+      "id": "1785:518",
+      "text": "배포 산출물 점검 / 공장 A · EMS",
+      "link": {
+        "type": "NODE",
+        "value": "1762:763"
+      }
+    }
+  ],
+  "preservation": {
+    "outerIDsUnchanged": [
+      "1762:456",
+      "1762:758",
+      "1762:760",
+      "1762:761",
+      "1762:762",
+      "1762:763"
+    ],
+    "previous26Writes": 0,
+    "stage26": [
+      {
+        "id": "1705:1020",
+        "before": {
+          "id": "1705:1020",
+          "count": 370,
+          "hash": "3eba7581",
+          "parent": "1284:3106",
+          "x": 0,
+          "y": 560,
+          "w": 1920,
+          "h": 1080
+        },
+        "after": {
+          "id": "1705:1020",
+          "count": 370,
+          "hash": "3eba7581",
+          "parent": "1284:3106",
+          "x": 0,
+          "y": 560,
+          "w": 1920,
+          "h": 1080
+        },
+        "pass": true
+      },
+      {
+        "id": "1705:1328",
+        "before": {
+          "id": "1705:1328",
+          "count": 772,
+          "hash": "5e8abf46",
+          "parent": "1284:3106",
+          "x": 0,
+          "y": 1800,
+          "w": 2076,
+          "h": 1466
+        },
+        "after": {
+          "id": "1705:1328",
+          "count": 772,
+          "hash": "5e8abf46",
+          "parent": "1284:3106",
+          "x": 0,
+          "y": 1800,
+          "w": 2076,
+          "h": 1466
+        },
+        "pass": true
+      },
+      {
+        "id": "1700:931",
+        "before": {
+          "id": "1700:931",
+          "count": 423,
+          "hash": "15f410c1",
+          "parent": "1284:3106",
+          "x": 2500,
+          "y": 1800,
+          "w": 1560,
+          "h": 1850
+        },
+        "after": {
+          "id": "1700:931",
+          "count": 423,
+          "hash": "15f410c1",
+          "parent": "1284:3106",
+          "x": 2500,
+          "y": 1800,
+          "w": 1560,
+          "h": 1850
+        },
+        "pass": true
+      },
+      {
+        "id": "1705:1851",
+        "before": {
+          "id": "1705:1851",
+          "count": 184,
+          "hash": "1c8635ab",
+          "parent": "1284:3106",
+          "x": 4200,
+          "y": 1800,
+          "w": 1020,
+          "h": 1164
+        },
+        "after": {
+          "id": "1705:1851",
+          "count": 184,
+          "hash": "1c8635ab",
+          "parent": "1284:3106",
+          "x": 4200,
+          "y": 1800,
+          "w": 1020,
+          "h": 1164
+        },
+        "pass": true
+      }
+    ],
+    "method": "Same-page scoped ordered node serialization of id,parent,type,name,x,y,w,h,visible,text,fills hashed via FNV1a. Not a full-file cryptographic equality claim.",
+    "backups": "Existing28 header/full/stateboard and common note copied before in-place changes to B049. Clone descendant enumeration can vary until instance descendants are loaded; backup IDs and native clone operation are recorded."
+  },
+  "render": {
+    "overview": {
+      "path": "overview-full.png",
+      "nodeId": "1762:456",
+      "status": "PASS",
+      "checks": [
+        "start gate absent",
+        "stage row with source chevron",
+        "neutral current chat content",
+        "no text clipping",
+        "Noto Sans KR"
+      ]
+    },
+    "states": {
+      "path": "entry-states.png",
+      "nodeId": "1762:758",
+      "status": "PASS",
+      "checks": [
+        "comparison right isstage, notoverview",
+        "initial stage all12pending",
+        "human approval1 source scroll247",
+        "returned summary exact",
+        "no new static multi example"
+      ]
+    },
+    "header": {
+      "path": "operations-header.png",
+      "nodeId": "1284:3107",
+      "status": "PASS",
+      "checks": [
+        "latest29/C111",
+        "fixedsource5a7c3b0",
+        "entry/state links"
+      ]
+    },
+    "common": {
+      "path": "common-direct-stage-note.png",
+      "status": "PASS",
+      "verifiedBy": "common helper"
+    },
+    "changeRecord": {
+      "path": "C111-direct-stage.png",
+      "status": "PASS-body",
+      "finalSourcePath": "C111-fixed-source.png",
+      "note": "Final source updated after body capture; actual fixed-source text node separately rendered and link read back. Do not use pending-source capture as final source evidence."
+    }
+  },
+  "knownDifferences": [
+    "Native Noto Sans KR rasterization and glyph widths vary slightly from the browser subset font; no pixel-perfect fidelity claim.",
+    "The comparison crop intentionally omits the center chat and the source workshop overlay; other four scenes preserve their represented source area.",
+    "Figma uses existing native text NODE/URL links. The source HTML stage row is an entire clickable button; no unsupported prototype/runtime recreation was attempted.",
+    "Source temporary hover/focus on a tab is omitted in the left-selection comparison. The approved human control's focus outline is included.",
+    "Some text containers retain safe native widths: returned summary110px vs browser101px; all-factory backbutton244px vs browser245px. Row positions and content are preserved, and no clipping was observed.",
+    "The selected-stage snapshot represents scroll247px statically with editable content under a clipped viewport."
+  ],
+  "unresolved": [
+    "Actual server run creation policy",
+    "Persistence/finalize/authorization and final business-completion contracts",
+    "Tool verdict aggregation and connected data contracts"
+  ],
+  "scope": "29 is a review iteration, not approval of all product/workflow functionality. No product code, merge, deployment or new API policy authorized or changed by this Figma work.",
+  "observations": [
+    {
+      "action": "initial read-only baseline",
+      "error": "Return value exceeded48000-byte tool limit",
+      "canvasWrites": false,
+      "resolved": "returned compact scoped baseline instead"
+    },
+    {
+      "action": "skill .d.ts resource",
+      "error": "failed to read skill resource",
+      "canvasWrites": false,
+      "resolved": "used documented index and existing supported native hyperlinks; no new API experiment"
+    },
+    {
+      "action": "common/source render",
+      "observation": "get_screenshot immediately after some text writes returned prior text. Fresh use_figma read+node.screenshot showed current text.",
+      "cause": "Cache/propagation delay is an inference, not proven.",
+      "detailFile": "common-admin-report.json"
+    },
+    {
+      "action": "source left popup",
+      "observation": "Initial QA capture showed overview; final QA capture replaced it with agreed stage+left-menu scene. Native final scene checked against that final capture."
+    }
+  ],
+  "evidence": {
+    "before": "before-readonly.json",
+    "allMainMutations": "mutations-and-validation.json",
+    "stageHelper": "stage-approved-write.json",
+    "commonHelper": "common-admin-report.json"
+  },
+  "finalFilesStable": true
+}

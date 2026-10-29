@@ -1,0 +1,478 @@
+{
+  "scope": "Standalone revision29 mock only. Navigation uses in-memory preview state; only explicit mock actions connect memory state. This does not decide actual API automatic run creation, publication, execution permissions or completion policy.",
+  "started": "2026-10-28T03:54:47.198Z",
+  "source": {
+    "editable_sha256": "7206a909e88d647a05cc20e8406b0c1b120fe6ced28a0b613d4b151bcd311d8b",
+    "html_sha256": "3ca02c977cdaa2216b5586e7661a5115f8a1b2d215f9eb612d58f3cc752da671"
+  },
+  "checks": [
+    {
+      "name": "29-1920 overview centered on browseable stage",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920 undefined scene controls excluded",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920 initial summary",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920-overview no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "29-1920 browse has no result",
+      "status": "passed",
+      "observed": {
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "rows": 12,
+        "running": 0,
+        "results": 0,
+        "scopeList": false
+      }
+    },
+    {
+      "name": "29-1920 enter focus",
+      "status": "passed",
+      "observed": {
+        "tag": "BUTTON",
+        "back": true,
+        "stage": false
+      }
+    },
+    {
+      "name": "29-1920-stage-browse no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "29-1920 reading log remains empty",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920 rules are readable",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920 opening decision menu is read-only",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920 menu Escape restores trigger",
+      "status": "passed",
+      "observed": {
+        "tag": "BUTTON",
+        "back": false,
+        "stage": false,
+        "pick": "CR-2207"
+      }
+    },
+    {
+      "name": "29-1920 tabs and menu do not mutate",
+      "status": "passed",
+      "observed": {
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "rows": 12,
+        "running": 0,
+        "results": 0,
+        "scopeList": false
+      }
+    },
+    {
+      "name": "29-1920 back preserves no results",
+      "status": "passed",
+      "observed": {
+        "tag": "BUTTON",
+        "back": false,
+        "stage": true
+      }
+    },
+    {
+      "name": "29-1920 double-click stage is still viewing",
+      "status": "passed",
+      "observed": {
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "rows": 12,
+        "running": 0,
+        "results": 0,
+        "scopeList": false
+      }
+    },
+    {
+      "name": "29-1920 explicit human choice creates only selected result",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920-stage-human-approved no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "29-1920 overview counts direct choice",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920-overview-human-approved no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "29-1920 reentry preserves choice",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920 left workflow returns to same overview",
+      "status": "passed",
+      "observed": {
+        "tag": "BUTTON",
+        "back": false,
+        "stage": true
+      }
+    },
+    {
+      "name": "29-1920 B summary independent",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920 B tasks independent",
+      "status": "passed",
+      "observed": {
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "rows": 12,
+        "running": 0,
+        "results": 0,
+        "scopeList": false
+      }
+    },
+    {
+      "name": "29-1920 returning A restores summary",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920 returning A preserves original human choice",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920-left-factory-open no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "29-1920-left-factory-open left menu visible",
+      "status": "passed",
+      "observed": {
+        "x": 9,
+        "y": 129,
+        "width": 237,
+        "height": 164
+      }
+    },
+    {
+      "name": "29-1920 no-location browsing permitted",
+      "status": "passed",
+      "observed": {
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "rows": 12,
+        "running": 0,
+        "results": 0,
+        "scopeList": false
+      }
+    },
+    {
+      "name": "29-1920 no location prompt on browse",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920 no location prompt on opening menu",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920 explicit choice requests existing left list",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920 selecting location does not apply pending choice",
+      "status": "passed",
+      "observed": {
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "rows": 12,
+        "running": 0,
+        "results": 0,
+        "scopeList": false
+      }
+    },
+    {
+      "name": "29-1920 choice request restores trigger",
+      "status": "passed",
+      "observed": {
+        "tag": "BUTTON",
+        "back": false,
+        "stage": false,
+        "pick": "CR-2207"
+      }
+    },
+    {
+      "name": "29-1920 blocked choice leaves log empty",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920 explicit execution requests location",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920 selecting location does not execute",
+      "status": "passed",
+      "observed": {
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "rows": 12,
+        "running": 0,
+        "results": 0,
+        "scopeList": false
+      }
+    },
+    {
+      "name": "29-1920 execution request restores run control",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920 subsequent explicit execution starts once",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920 explicit mock execution alone produces one result",
+      "status": "passed"
+    },
+    {
+      "name": "29-1920 execution result survives navigation",
+      "status": "passed"
+    },
+    {
+      "name": "29-480 overview centered on browseable stage",
+      "status": "passed"
+    },
+    {
+      "name": "29-480 undefined scene controls excluded",
+      "status": "passed"
+    },
+    {
+      "name": "29-480 initial summary",
+      "status": "passed"
+    },
+    {
+      "name": "29-480-overview no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "29-480 browse has no result",
+      "status": "passed",
+      "observed": {
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "rows": 12,
+        "running": 0,
+        "results": 0,
+        "scopeList": false
+      }
+    },
+    {
+      "name": "29-480 enter focus",
+      "status": "passed",
+      "observed": {
+        "tag": "BUTTON",
+        "back": true,
+        "stage": false
+      }
+    },
+    {
+      "name": "29-480-stage-browse no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "29-480 reading log remains empty",
+      "status": "passed"
+    },
+    {
+      "name": "29-480 rules are readable",
+      "status": "passed"
+    },
+    {
+      "name": "29-480 opening decision menu is read-only",
+      "status": "passed"
+    },
+    {
+      "name": "29-480 menu Escape restores trigger",
+      "status": "passed",
+      "observed": {
+        "tag": "BUTTON",
+        "back": false,
+        "stage": false,
+        "pick": "CR-2207"
+      }
+    },
+    {
+      "name": "29-480 tabs and menu do not mutate",
+      "status": "passed",
+      "observed": {
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "rows": 12,
+        "running": 0,
+        "results": 0,
+        "scopeList": false
+      }
+    },
+    {
+      "name": "29-480 back preserves no results",
+      "status": "passed",
+      "observed": {
+        "tag": "BUTTON",
+        "back": false,
+        "stage": true
+      }
+    },
+    {
+      "name": "29-480 double-click stage is still viewing",
+      "status": "passed",
+      "observed": {
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "rows": 12,
+        "running": 0,
+        "results": 0,
+        "scopeList": false
+      }
+    },
+    {
+      "name": "29-480 explicit human choice creates only selected result",
+      "status": "passed"
+    },
+    {
+      "name": "29-480-stage-human-approved no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "29-480 overview counts direct choice",
+      "status": "passed"
+    },
+    {
+      "name": "29-480-overview-human-approved no overflow",
+      "status": "passed",
+      "observed": {
+        "page": 0,
+        "panel": 0
+      }
+    },
+    {
+      "name": "29-480 reentry preserves choice",
+      "status": "passed"
+    }
+  ],
+  "captures": [
+    {
+      "label": "29-1920-overview",
+      "png": "29-1920-overview.png",
+      "geometry": "29-1920-overview-geometry.json",
+      "sha256": "a159561b2ae2b0883edd5c145dcc8995005b4a695c5b7edf4d7ffc4bab4812cf"
+    },
+    {
+      "label": "29-1920-stage-browse",
+      "png": "29-1920-stage-browse.png",
+      "geometry": "29-1920-stage-browse-geometry.json",
+      "sha256": "6ac8dab9f79bf883479a6dfec8ee285916c79666289c6572c0fe4d2d1b1a48eb"
+    },
+    {
+      "label": "29-1920-stage-human-approved",
+      "png": "29-1920-stage-human-approved.png",
+      "geometry": "29-1920-stage-human-approved-geometry.json",
+      "sha256": "84af1df119a0316b75f9c306b8aefac83cc54cdf433bfa73c3608e73daab1f38"
+    },
+    {
+      "label": "29-1920-overview-human-approved",
+      "png": "29-1920-overview-human-approved.png",
+      "geometry": "29-1920-overview-human-approved-geometry.json",
+      "sha256": "788b3d87cdd313088f50f5d34af62ea60c83c4484bdea14485f3a6ff66965409"
+    },
+    {
+      "label": "29-1920-left-factory-open",
+      "png": "29-1920-left-factory-open.png",
+      "geometry": "29-1920-left-factory-open-geometry.json",
+      "sha256": "ed3c1c2de10a6400b8741d6d1da3e7cf53f5bf08c16b2da483eff473079508a2"
+    },
+    {
+      "label": "29-480-overview",
+      "png": "29-480-overview.png",
+      "geometry": "29-480-overview-geometry.json",
+      "sha256": "7dd88a2f2a29c015d1ebbc3bf0a472b7213fb2d3e69b52abe6e2b652583b1a98"
+    },
+    {
+      "label": "29-480-stage-browse",
+      "png": "29-480-stage-browse.png",
+      "geometry": "29-480-stage-browse-geometry.json",
+      "sha256": "d765af3592dd8f9b8e34fd54158a33d79eb39b14d5898e35affb339aae9cbb3f"
+    },
+    {
+      "label": "29-480-stage-human-approved",
+      "png": "29-480-stage-human-approved.png",
+      "geometry": "29-480-stage-human-approved-geometry.json",
+      "sha256": "24ceadfd20820360935d803241b301ab8b40cf2e60ffcdefe19c926e64eb81ba"
+    },
+    {
+      "label": "29-480-overview-human-approved",
+      "png": "29-480-overview-human-approved.png",
+      "geometry": "29-480-overview-human-approved-geometry.json",
+      "sha256": "064a5b6b4b189570670af88c2b58448dbc36bc20d490fd2af054be5a072d6962"
+    }
+  ],
+  "requests": [],
+  "errors": [],
+  "representative_decision": {
+    "job": "CR-2207",
+    "name": "배치 주기 조정",
+    "choice": "승인"
+  },
+  "browser": "133.0.6943.0",
+  "status": "failed",
+  "failure": {
+    "step": "29-480-overview-human-approved",
+    "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-entry-workflow]')\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"button\" data-action=\"workflow\" data-entry-workflow=\"\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <b data-decision-actor=\"\">자동 판정</b> from <section aria-label=\"업무 패널\" data-overlay=\"true\" class=\"ees-panel-region\">…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <b data-decision-actor=\"\">자동 판정</b> from <section aria-label=\"업무 패널\" data-overlay=\"true\" class=\"ees-panel-region\">…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    58 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <b data-decision-actor=\"\">자동 판정</b> from <section aria-label=\"업무 패널\" data-overlay=\"true\" class=\"ees-panel-region\">…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n    at leftWorkflow (/workspace/scratch/025fcfa7db3e/operations-entry27/evals/artifacts/workflow-entry29-20261028/browser-qa.cjs:14:187)\n    at async /workspace/scratch/025fcfa7db3e/operations-entry27/evals/artifacts/workflow-entry29-20261028/browser-qa.cjs:28:339"
+  },
+  "finished": "2026-10-28T03:55:24.493Z",
+  "summary": {
+    "passed": 58,
+    "failed": 0,
+    "captures": 9
+  },
+  "failure_diagnosis": {
+    "kind": "Actual mock responsive hit-test regression",
+    "observation": "At width480, manually expanding the left sidebar leaves its workflow button beneath the right overlay panel; pointer events are intercepted. No force click was used.",
+    "scope": "Newly functional left workflow overview navigation",
+    "source_change_owner": "builder"
+  }
+}

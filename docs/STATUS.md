@@ -1,5 +1,14 @@
 # 현재 작업 상태
 
+## 2026-10-30 · PR 통합과 두 Figma 페이지의 제품 UI 재검증
+
+- **사용자 요청·현재:** 열린 PR을 병합한 뒤 Figma ‘업무 · 운영’과 ‘워크 · 업무 절차’가 현재 제품에 시각적으로 반영됐는지 다시 확인한다. [PR #108](https://github.com/knadalkim-a11y/team-agent-poc/pull/108)은 검증된 head `a5af7706708687a61acb6ec2fd0c65c6d34db026`에서 main `b8f6e16f551fb197ef41d799a962420e5dcf10f2`로 병합했다.
+- **통합 범위:** 같은 [PR #107](https://github.com/knadalkim-a11y/team-agent-poc/pull/107)에 최신 main과 [PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사내 적용 기록을 merge로 통합한다. 양쪽 목업·구현·실패·적용 이력을 보존하고 새로운 제품 변경은 추가하지 않는다. 운영29판은 목업이며 병합만으로 제품 구현이 되지 않는다.
+- **검증·다음 하나:** 통합 최종 head의 전체 CI와 실제 제품/Figma 대조를 진행한 뒤 병합을 마친다. 최종 CI·병합·시각 비교 결과는 [PR #107 본문과 검사](https://github.com/knadalkim-a11y/team-agent-poc/pull/107/checks)에서 확인한다. 이전 head 성공과 과거 일부 영역의 치수 일치를 두 페이지 전체 일치로 확대하지 않는다.
+- **사내 적용:** 이번 통합의 사내 배포는 수행하지 않는다. 마지막 사용자 보고 `42f5ae502b57`의 적용·기동 성공과 사내 화면·자료 보존 미확인은 아래 원래 기록을 유지한다.
+
+> 아래는 각 작업 당시 기록이다. Draft·미병합·다음 작업 문구는 위의 새 병합·재검증 요청 이전 상태로 구분하며 검증·실패 근거를 보존한다.
+
 ## 2026-10-29 · 워크.워크플로 Figma 12판 보정 · PR #108
 
 - **현재 작업:** 실제 Figma와 PR 화면의 차이를 보여준 뒤 받은 “동일하게 변경 진행해줘” 요청에 따라, 같은 [PR #108](https://github.com/knadalkim-a11y/team-agent-poc/pull/108)에서 현재 Figma12판에 맞춰 제품 UI를 보정하고 로컬 검증을 마쳤다. 이번 보정의 시각 기준은 [Figma 워크·업무 절차](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1285-1830)이며 [범위·보존·완료 기준](mockups/ees-work/TASK.md#workspace-authoring12-ui-20261029)을 따른다. 기존 HTML12판과 이전 검증 근거는 그대로 보존한다.
@@ -12,15 +21,48 @@
 
 > 아래 절은 운영26판과 이전 구현 당시 기록이다. 작성12판의 현재 상태와 구분한다.
 
-## 2026-10-28 · 운영 단계26판 제품 구현·사내 배포 검증 진행
+## 2026-10-28 · 워크플로우에서 단계·작업으로 바로 이동하는 목업29
 
-- **현재 목표:** 기존 제품을 확정 목업과 시각적으로 맞춰 사내에서 확인한다. 사용자가 추가로 지정한 상단 표준화까지 반영한 [26판 HTML](mockups/ees-work/design-mock-06-task-groups.html)·[구현 범위](mockups/ees-work/TASK.md#operations-stage26-product-20261028)를 기준으로 같은 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)를 이어간다. HTML 파일 제공만으로 사내 제품 배포를 완료한 것으로 보지 않는다.
+- **현재 요청:** 사용자가 워크플로우→단계→작업 계층으로 탐색하고 기존 `업무.운영` 목업과 자연스럽게 이어지도록 요청했다. [29판 계약](mockups/ees-work/TASK.md#workflow-entry29-20261028)에 따라 업무 시작 진입 조건과 별도 진행 건 블록을 제거하고 개요의 단계행을 기존 작업 화면에 연결한다.
+- **원본/범위:** 기존 [07 HTML](mockups/ees-work/design-mock-07-workflow-entry.html)·[편집 원본](mockups/ees-work/design-mock-src/07-workflow-entry.html), Figma 운영/공통과 [PR #107](https://github.com/knadalkim-a11y/team-agent-poc/pull/107)을 갱신한다. 조회만으로 결과를 만들지 않으며 기존 실행·판정은 합성 상태로 이어진다. 실제 서버 진행 건 생성·권한·저장 정책은 이번에 확정하지 않는다.
+- **실제 적용:** 사내 마지막 보고는 `result=ok / stage=complete / running=true / commit=42f5ae502b57`이다. 새29판은 목업이며 제품 코드·API·저장·실행·사내 재배포는 변경하지 않는다. PR #106의 별도 Figma 관리 변경은 그대로다.
+- **확인한 범위:** [고정29판5a7c3b0](https://github.com/knadalkim-a11y/team-agent-poc/blob/5a7c3b02e55b5b5dbe2af6e6812f6d85fe1533cf/docs/mockups/ees-work/design-mock-07-workflow-entry.html)의1920/480 폭·10장면·변경 경계81/81 PASS다. 좁은 화면에서 왼쪽 워크플로우 버튼이 오른쪽 패널에 가리던 결함을 고쳤고 실제 포인터 경로로 확인했다. 최초 실패·검증 경계는 [평가 기록](../evals/v4-ui-20260930.md#workflow-entry29-20261028)에 남겼다.
+- **다음 하나:** 개요에서 ‘1차 점검’을 클릭해 기존 단계·작업 화면으로 이어지는 수정 목업을 검토한다.
+
+> 아래28판은 업무 시작을 거쳐 단계로 들어가던 이전 설계·검증 기록이다.
+
+## 2026-10-28 · 왼쪽 공장·시스템 선택 재사용 목업28
+
+- **현재 요청:** 사용자가27판의 별도 공장 선택이 왼쪽 선택과 중복이라고 지적하고 목업 수정을 요청했다. [28판 계약](mockups/ees-work/TASK.md#workflow-entry28-20261028)에 따라 오른쪽 시작 폼을 제거하고 왼쪽 작업 위치로 시작한다. 공장 필수·미선택일 때만 왼쪽 목록으로 연결한다.
+- **원본/반영 범위:** 기존 [07 HTML](mockups/ees-work/design-mock-07-workflow-entry.html)·[편집 원본](mockups/ees-work/design-mock-src/07-workflow-entry.html), Figma `업무.운영`/`업무.공통`과 [기존 PR #107](https://github.com/knadalkim-a11y/team-agent-poc/pull/107)을 갱신한다. 위치를 바꿔도 이전 진행 건의 대상은 유지한다. 이전27판 증빙은 보존한다.
+- **실제 적용 상태:** 사내 프로그램의 마지막 사용자 보고는 `result=ok / stage=complete / running=true / commit=42f5ae502b57`이다. 새28판은 목업이며 제품 코드·서버·저장·실행·사내 재배포를 바꾸지 않는다. PR #106의 별도 Figma 관리 변경은 미병합 상태 그대로다.
+- **확인한 범위:** [고정 목업5cd9f94](https://github.com/knadalkim-a11y/team-agent-poc/blob/5cd9f945def1b8911bec864cc8aca054c10b9afe/docs/mockups/ees-work/design-mock-07-workflow-entry.html)에서1920/480 폭·12장면·변경 경계63/63 PASS다. 중복 시작 때문에 비활성 버튼으로 초점이 사라지던 첫 관측을 보완했고, 외부/API 요청·브라우저 오류·가로 넘침은0이다. [검증과 경계](../evals/v4-ui-20260930.md#workflow-entry28-20261028).
+- **다음 하나:** 수정 목업에서 왼쪽 선택→업무 시작→단계 진입을 확인하고 피드백을 받는다.
+
+> 아래27판은 중복 공장 선택을 제거하기 전의 설계·검증 기록이다.
+
+## 2026-10-28 · 진행0개 워크플로우 진입 목업27 설계
+
+- **현재 요청:** 사용자는42f5ae5 적용·기동 성공 뒤 진행 중인 업무가 없어 새 단계 화면까지 들어가지 못한다고 보고했고, 빠진 첫 진입 흐름을 설계하라고 요청했다. [이번 계약](mockups/ees-work/TASK.md#workflow-entry27-20261028)에 따라 개요·조건부 시작 입력·단계 진입·기존 진행 업무 열기를 목업으로 연결한다.
+- **최신 목업/구현 기준:** 새 설계는27판 [HTML](mockups/ees-work/design-mock-07-workflow-entry.html)·[편집 원본](mockups/ees-work/design-mock-src/07-workflow-entry.html)이다. 기존 단계26판의 디자인과 동작을 재사용하며 제품 코드·API·저장·실행은 변경하지 않는다. Figma 화면별 최신판 관리와 작업실 정리 [PR #106](https://github.com/knadalkim-a11y/team-agent-poc/pull/106)은 별도 미병합 변경으로 존중한다.
+- **Figma 진입점:** `업무.운영` [시작 전 전체](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1762-456) · [시작과 단계 진입 상태](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1762-758), `업무.공통` [진입 표준](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1763-495). 기존26판과 새27판의 실제 적용 경계를 유지한다.
+- **실제 적용 상태:** 사용자 보고 `result=ok / stage=complete / running=true / commit=42f5ae502b57`이다. 사내 적용·최초 화면 관측은 [PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)에 기록했다. 새27판 제품 구현·배포, 실제 단계 표시·자료 보존은 확인하지 않았다. 적용 스크립트를 다시 실행하지 않는다.
+- **확인한 범위:** 합성 목업을3개 화면 크기·24장면에서 검증해141/141 PASS, 가로 넘침·외부/API 요청·브라우저 오류0이다. 시작 더블클릭이 다음 단계 실행으로 전달되는 실제 결함을 보완하고 집중3/3 PASS했다. 초기 포커스·검사 가정 오류·수정 전 결과도 [평가 기록](../evals/v4-ui-20260930.md#workflow-entry27-20261028)에 보존했다. 실제 제품 적용이나 사내 사용자 확인 완료로 보지 않는다.
+- **다음 하나:** 새 진입 목업의0개 상태에서 시작·단계까지 직접 눌러 보고 사용자 피드백을 받는다. 새 기능을 임의로 추가하거나 다음 워크스페이스 작성 목업으로 넘어가지 않는다.
+
+> 아래는 이전 제품 구현·검증과 설계 당시 기록이다. 당시 대기/미확인 표현을 위 최신 상태와 구분한다.
+
+## 2026-10-28 · 공통 단계26판 사내 적용 성공 보고·화면 진입 확인 중
+
+- **현재 목표:** 기존 제품을 확정 목업과 시각적으로 맞춰 사내에서 확인한다. 사용자 지정 상단 표준화를 포함한 [26판 HTML](mockups/ees-work/design-mock-06-task-groups.html)·[구현 범위](mockups/ees-work/TASK.md#operations-stage26-product-20261028)를 [PR #105](https://github.com/knadalkim-a11y/team-agent-poc/pull/105)로 구현했고 main `42f5ae502b57be68aefa5d141f09259c8f6e9ee9`에 병합했다. HTML 제공·main 병합만으로 사내 제품 배포를 완료한 것으로 보지 않는다.
 - **Figma 기준:** [26판 전체 화면](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1705-1020) · [집중4상태](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1705-1328) · [기록/기준](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1705-1851)과 공통 상단 적용 안내를 연결한다.25/20판의 당시 원본과 검증은 보존한다.
 - **공통 상단:** 워크플로우 이름과 필요한 실제 구분 정보만 표시한다. 모든 업무에 ‘회차’를 강제하지 않으며 주기·예약 두 줄은 단계 화면에서 제거한다. 단계 제목·작업 수·실행 버튼·목록 배치는 유지한다.
 - **제품 연결:** 실제 Job을 한 행으로 표시하고 기존 판정·실행 명령과 실제 도구/지침/입출력 기록을 연결한다. 실행 성공/실패를 승인/미승인으로 바꾸지 않는다. 다중 도구의 종합 판정·사유 자동 저장·첨부 연동은 새 기능으로 추가하지 않는다.
-- **확인된 범위:** runtime Node126개·관련 Python100개와 실제 Native 신규2시험을 통과했다. CI380의 현재 frontend를 검증해 만든 wheel로12상태를 캡처했고,1920/480 폭에서 목업과11개 부품의 치수·폰트·배경·포커스 스타일이 같고 가로 넘침은0이다. CI380 전체 앱 검사는 새 단계 화면에서 기존 전체 개요 아이콘을 기대한 동선 때문에 실패했다. 기존 자산 검사를 유지하며 개요로 명시적으로 이동하도록 보완했고 새 최종 head 전체 CI가 필요하다. 초기0실행/1SKIP·첫 캡처/비교 관측과 최초 CI 실패는 [평가 기록](../evals/v4-ui-20260930.md#operations-stage26-product-20261028)에 보존한다.
-- **사내 설치 상태:** 기존 [문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 사용자 보고 `result=ok / stage=complete / running=true / commit=924d919333b8`를 유지한다. 새 프로그램 적용·로그인·자료·이번 화면의 사내 확인은 아직 완료되지 않았다. #104의 기록을 복제하거나 덮어쓰지 않는다.
-- **다음 하나:** 실제 제품 Native 화면 대조와 최신 통합 head 전체 CI를 마친 뒤 새 CI 프로그램 ZIP의 원본·해시를 고정해 기존 사내 적용 절차로 확인한다. 워크스페이스의 운영 워크플로우 작성 목업은 이 배포 검증 다음 순서다.
+- **확인된 범위:** 최종 PR head `018e7cc42b8d13e93d3e2789b4cf26f33ebe9e59`의 [CI381](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40604943707)은 첫 실행40개 작업 중39성공·PR 출하1정상 생략이며 실패/취소0이다. Native8모듈85/85(신규2시험 포함)·PNG247장 디코더 검사, Complete Native20단계·중앙 대화17단계가 통과했다. 새 단계 자동 진입과 명시적 전체 개요의 기존 A5 자산 검사도 각각 통과했다. main과 검증한 PR/합성 merge의 tree `3e8213adf92e7171963b71804a32ac5d5a11e55c`가 같다. 앞선1920/480 폭의 목업11개 부품 대조·12상태 넘침0과 초기SKIP·CI380 최초 실패는 [평가 기록](../evals/v4-ui-20260930.md#operations-stage26-product-20261028)에 보존한다.
+- **사내 설치 상태:** 사용자가 `result=ok / stage=complete / running=true / commit=42f5ae502b57`를 보고했다. 프로그램 적용·기동 성공 보고로 기록하며 이전924d919 보고와 적용 준비·실패 이력은 보존한다. 사내 PC·화면을 직접 확인한 결과가 아니며 이번 단계 화면의 실제 표시·기존 자료 보존은 아직 미확인이다. [문서 PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104).
+- **현재 화면 관측:** 사용자는 `배포 산출물 점검` 선택 뒤 `새로 시작`·`대상 공장 시스템 전체`가 보인다고 했다. 코드상 진행 건을 선택하지 않은 수시 업무의 시작 화면이며 이번 변경은 그 뒤의 단계 화면이다. 시작 화면은924d919와42f5ae5에서 동일하다. 배포·캐시 오류로 확정하지 않으며 시작 화면 미변경과 진입 안내 누락을 구분한다. [읽기 전용 진입 안내](03-openwebui-native-agent.md#operations-stage26-readonly-entry-20261028)·[관측과 코드 근거](../evals/v4-ui-20260930.md#main-42f5ae5-intranet-report-20261028).
+- **배포물 검증:** 같은 main의 [CI382](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40606766540)는 첫 실행40/40 성공했다. 새 프로그램 artifact12781047790의 실제 다운로드 크기155,277,967bytes·SHA256·내외 ZIP CRC·clean exact source_commit·32개 포함 파일·wheel/프런트엔드 원본을 기존 엄격 검증기로 확인했다. wheel SHA256은 실제 Native 시각 검증본과 같다. [메타·검증·블록 대조](../evals/artifacts/ci-delivery-20261016/main-42f5ae5-apply-prep.json).
+- **다음 하나:** 기존 진행 건을 읽기 전용으로 열어 실제 단계 화면과 기존 자료를 확인한다. 이미 성공한 [적용 블록](03-openwebui-native-agent.md#main-42f5ae5-apply-prep-20261028)은 다시 실행하지 않는다. 확인만을 위해 새 진행 건·작업 실행·판정 변경을 만들지 않으며, 기존 진행 건이 없으면 그 사실만 남긴다. 문서 PR #104는 Draft·미병합으로 유지하고 워크스페이스의 운영 워크플로우 작성 목업은 이 확인 다음 순서다.
 
 > 아래는25판 설계·보완 당시 기록이다. 당시 ‘제품 변경 없음’과 다음 작업 안내는 위의 새 구현·배포 요청으로 대체하며, 승인·실패·이전 검증 근거는 보존한다.
 
@@ -37,6 +79,31 @@
 - **다음 하나:** 이번 운영25판 Figma 보완 뒤, 사용자가 지정한 워크스페이스의 운영 워크플로우 작성 화면을 목업부터 다룬다. 기존 워크-1 설계와 운영25판의 단계·작업·도구·입력·판정 기준을 연결하고 미정 기능 계약은 임의 구현하지 않는다.
 
 > 아래 절은 이전 작업 당시 기록이다. #103 병합 대기·사내 적용 미실행 등의 당시 표현은 위 현재 상태와 구분하고, 과거 검증·실패 근거는 보존한다.
+
+## 2026-10-26 · main924d919 사내 적용 완료 (사용자 보고)
+
+- **현재 적용:** 사용자 회신 `result=ok / stage=complete / running=true / commit=924d919333b8`를 받았다. 확정 대상은 `924d919333b8804ece2cf5322e14adc681ad6457`이며 프로그램 적용 완료·실행 중으로 기록한다. 에이전트가 사내 PC나 화면에 직접 접근해 확인한 결과는 아니다. 적용 명령을 반복하지 않는다.
+- **검증·보존:** 적용 대상 main의 CI#34540/40 성공과 ZIP 검증을 유지한다. 정정 블록 b5aed83의 [CI#347](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40316799429)는 첫 시도39성공/PR 출하1정상 생략이며 Native83/83·작성29/29·Windows2289자 PowerShell 구문 검사도 통과했다. 초기 설치 기준 불일치·임시 ZIP 이름 실패는 [평가 기록](../evals/v4-ui-20260930.md#main-924d919-apply-evidence-20261026)에 보존한다.
+- **다음 하나:** 브라우저에서 로그인·기존 대화/업무/입력·단계⋯/작업 상세·Work 도구 상태를 확인하고 결과만 짧게 받는다. 화면·자료 보존·Confluence 관리자 설정/개인 연결은 아직 미확인이다. 문서 #104는 미병합이며 이번 갱신은 상태 기록뿐이다.
+
+> 아래 사전 중단·미실행·결과 대기 문구는 이번 성공 보고 전 기록이다.
+
+## 2026-10-26 · 사내 적용 사전 중단·설치 기준 정정
+
+- **사용자 보고:** `EES before commit=1c1efff7abe… valid=true running=true`. 최초924d919 블록은 과거2a4b82a 보고를 예상해 Update·Stop·백업·Apply 전에 중단했다. Status는 읽기 전용이며 **924d919 적용은 미실행**, 보고 당시 기존 프로그램은 유효·실행 중이다.
+- **정정·보호:** Git의 #101 병합 원본은 `1c1efff8abe19da3e6e8921859b52858fc6cacfb`이다. 사용자 타이핑7/8 차이를 확정하지 않고 [정정 블록](03-openwebui-native-agent.md#main-924d919-apply-prep-20261026)이 전체 SHA를 정확히 검사한다. 이미 받은 동일 ZIP은 크기/해시 재검증 뒤 재사용하며, 없을 때만 기존 다운로드를 진행한다. 1c1efff8→924d919 운영·Work 백엔드·저장·도구 코드는 동일하다.
+- **다음 하나:** 정정 블록의 `result/stage/running/commit`1~2줄을 받는다. 다시 EES before면 출력의 commit 앞12자리만 확인하고 반복하지 않는다. Restore는 필요하지 않으며 문서 #104는 미병합으로 유지한다. [실패와 정정 근거](../evals/v4-ui-20260930.md#main-924d919-apply-evidence-20261026). 대상 main의 CI#345 성공과 문서 정정 head의 CI는 별개다.
+
+> 아래 최초 준비와2a4b82a 기준·미실행 표기는 정정 전 기록이다. 실패와 당시 판단을 보존한다.
+
+## 2026-10-26 · #103 병합 완료·main924d919 사내 적용 준비
+
+- **병합·승인:** 사용자 “병합하고 해” 승인으로 #103을 **2026-10-26 17:45:45 KST**, main `924d919333b8804ece2cf5322e14adc681ad6457`에 merge commit으로 병합했다. 최신 PR head afc4697의 [CI40290888003/#344](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40290888003)는39성공/PR 출하1정상 생략이었다. rebase·force-push·main 직접 push는 하지 않았다.
+- **main 검증:** [CI40294530820/#345](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40294530820) **첫 시도40/40 성공**, Native83/83·작성29/29·Complete Native·execution5/5·Windows 검증을 확인했다. 프로그램 ZIP 실제 크기·SHA256·내/외 CRC·기존 manifest/wheel 검사를 통과했다. [적용 근거](../evals/v4-ui-20260930.md#main-924d919-apply-evidence-20261026).
+- **사내 적용:** 사용자 실행용 [2,500자 이내 한 블록](03-openwebui-native-agent.md#main-924d919-apply-prep-20261026)을 준비했다. 마지막 설치 보고2a4b82a의 정상/미완료·정확SHA와 목표ZIP·HEAD/origin/main 보호를 유지한다. 운영·Work/Confluence 도구·업무 백엔드/저장 형식은2a4b82a와 동일하며 도구 재등록/자료 이관은 하지 않는다. 실제 사내 PC 실행·적용은 아직 **미실행**이다.
+- **다음 하나:** 사용자가 블록을 실행하고 기존 `result/stage/running/commit`1~2줄을 전달한다. 실패면 반복하지 않고 보존된 단계/상태로 판단한다. 새 문서 PR을 먼저 병합해 main을 바꾸지 않으며, 실제 적용 성공이나 도구 설정 완료는 사용자 결과를 받은 범위에서만 기록한다.
+
+> 아래 #103 미병합·“병합은 사용자”와 과거 적용 대기는 이번 승인 전 기록이다. 현재 병합/적용 상태는 위 절을 따르며 모든 과거 기록을 보존한다.
 
 ## 2026-10-26 · PR #103에 #102 병합 main 통합
 

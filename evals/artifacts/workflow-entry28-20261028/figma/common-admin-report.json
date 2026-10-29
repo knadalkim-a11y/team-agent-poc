@@ -1,0 +1,199 @@
+{
+  "task": "workflow-entry28 common/admin",
+  "date": "2026-10-28",
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "sessionId": "1df14170-3fc8-4a01-a6d8-71ce03e554ed",
+  "status": "complete",
+  "policy": {
+    "rules": [
+      "898:6",
+      "898:15",
+      "898:16",
+      "898:22",
+      "898:26"
+    ],
+    "lastChangeBefore": "1768:457",
+    "nextChange": "C110",
+    "stableOuterFrameRequired": true,
+    "separateRevisionBoardProhibited": true
+  },
+  "backup": {
+    "backupPageId": "1773:494",
+    "titleId": "1773:495",
+    "copyId": "1773:496",
+    "createdNodeIds": [
+      "1773:494",
+      "1773:495",
+      "1773:496",
+      "1773:497",
+      "1773:498",
+      "1773:499"
+    ],
+    "mutatedExistingNodeIds": [],
+    "before": {
+      "id": "1763:495",
+      "parent": "1689:1061",
+      "name": "진입 흐름 · 개요에서 단계로",
+      "x": 0,
+      "y": 320,
+      "w": 1920,
+      "h": 136,
+      "texts": [
+        {
+          "id": "1763:496",
+          "text": "진입 흐름 · 업무 개요에서 시작하고 단계로 이동",
+          "link": null
+        },
+        {
+          "id": "1763:497",
+          "text": "업무 이름은 항상 표시하고 날짜·회차·대상 등 맥락은 해당 업무에 필요한 경우에만 표시합니다. 시작 입력은 업무 정의에 따라 필요한 경우에만 보여 줍니다.\n시작 후 미종료 단일 단계는 자동으로 열고, 여러 단계는 개요에서 선택합니다. 이 안내는 진입 화면에 한정하며 미정 계약이나 제품 구현·배포 승인으로 확대하지 않습니다.",
+          "link": null
+        },
+        {
+          "id": "1763:498",
+          "text": "업무 개요 · 시작 전 화면 →",
+          "link": {
+            "type": "NODE",
+            "value": "1762:456"
+          }
+        }
+      ]
+    },
+    "originalPreserved": true,
+    "copyBounds": {
+      "x": 5000,
+      "y": 120,
+      "w": 1920,
+      "h": 136
+    }
+  },
+  "common": {
+    "mutatedNodeIds": [
+      "1763:497"
+    ],
+    "createdNodeIds": [],
+    "before": "업무 이름은 항상 표시하고 날짜·회차·대상 등 맥락은 해당 업무에 필요한 경우에만 표시합니다. 시작 입력은 업무 정의에 따라 필요한 경우에만 보여 줍니다.\n시작 후 미종료 단일 단계는 자동으로 열고, 여러 단계는 개요에서 선택합니다. 이 안내는 진입 화면에 한정하며 미정 계약이나 제품 구현·배포 승인으로 확대하지 않습니다.",
+    "after": "업무 이름은 항상 표시하고 날짜·회차 등 맥락은 필요한 경우에만 붙입니다. 공장·시스템은 왼쪽 선택값을 사용하며, 시작 화면에서 같은 대상을 다시 입력받지 않습니다.\n대상이 없으면 왼쪽 선택 목록에서 고릅니다. 시작 후 미종료 단일 단계는 자동으로 열고, 여러 단계는 개요에서 선택합니다. 별도 입력 정의·미정 계약·제품 구현·배포 승인으로 확대하지 않습니다.",
+    "note": {
+      "id": "1763:495",
+      "parent": "1689:1061",
+      "x": 0,
+      "y": 320,
+      "w": 1920,
+      "h": 136
+    },
+    "body": {
+      "w": 1872,
+      "h": 40,
+      "font": {
+        "family": "Noto Sans KR",
+        "style": "Medium",
+        "variationSettings": {
+          "wght": 500
+        }
+      }
+    },
+    "sourceLink": {
+      "type": "NODE",
+      "value": "1762:456"
+    },
+    "overlap": false
+  },
+  "render": {
+    "nodeId": "1763:495",
+    "status": "PASS",
+    "path": "common-entry-target-note.png",
+    "checks": [
+      "Noto Sans KR preserved",
+      "1920×136 bounds unchanged",
+      "two body lines fully readable",
+      "no overlap",
+      "source link preserved"
+    ]
+  },
+  "createdNodeIds": [
+    "1773:494",
+    "1773:495",
+    "1773:496",
+    "1773:497",
+    "1773:498",
+    "1773:499",
+    "1776:465",
+    "1776:466"
+  ],
+  "mutatedExistingNodeIds": [
+    "1763:497",
+    "898:31"
+  ],
+  "preservation": {
+    "commonHeaderAndPrinciplesUntouched": true,
+    "previous27SealedArtifactsUntouched": true
+  },
+  "errors": [],
+  "management": {
+    "changeId": "1776:465",
+    "sourceLinkId": "1776:466",
+    "createdNodeIds": [
+      "1776:465",
+      "1776:466"
+    ],
+    "mutatedExistingNodeIds": [
+      "898:31"
+    ],
+    "text": "C110 · 2026-10-28 KST · 왼쪽 대상 선택을 시작 흐름에 연결 (백업 B048)\n공장·시스템은 이미 왼쪽에서 선택하므로 시작 화면에서 중복으로 입력하지 않도록 목업을 정리했습니다. 기존 제품의 대상 선택·시작 계약을 표현하며 제품 코드나 새 실행 기능을 추가하지 않습니다.\n① 업무 개요 전체 화면1762:456, 진입 상태 보드1762:758, 기존 공장 입력 장면의 바깥 프레임1762:760을 유지했습니다. 별도 새 판 보드를 만들지 않고 같은 프레임 안에서 갱신합니다. 기본은 왼쪽 ‘공장 A · EMS’ 선택값이 오른쪽 개요에 이어지는 장면입니다.\n② 중복 공장 선택 폼은 없앴습니다. 기존 입력 장면1762:760은 대상 미선택 상태에서 왼쪽 선택 목록이 열린 모습으로 재사용합니다. 768px 캔버스 비교 구성은 왼쪽 256px + 간격 32px + 오른쪽 480px이며 중간 대화 영역을 생략한 표현입니다.\n③ 왼쪽에서 대상을 선택하는 동작만으로 진행 건을 시작하지 않습니다. ‘업무 시작’을 눌러 시작하며 시작된 진행 건의 대상은 고정됩니다. 시작 후 단일 단계 자동 진입·여러 단계 개요 선택, 뒤로 돌아와 진행 건 열기 흐름은 유지합니다.\n④ 공통 진입 안내1763:495의 본문1763:497만 같은 원칙으로 수정했습니다. 원본 링크1763:498, 공통 헤더와 원칙 본문은 유지했습니다. 기본 1단계·12작업 합성 사례와 별도 4단계·9작업 정적 개요의 구분을 유지하며, 다단계 상세 화면은 이번 범위에 포함하지 않습니다.\n⑤ 수정 전 복구 기준점은 B048(1773:494)입니다. 공통 안내 사본1773:496, 운영 헤더1773:500, 전체 화면1773:517 및 진입 상태 보드 사본을 보관합니다. HTML 동작 검증 63/63과 12개 캡처를 기준으로 대조하며, Figma 렌더·보존 확인은 동반 보고서에 기록합니다.\n고정 원본: design-mock-07-workflow-entry.html · 5cd9f945def1b8911bec864cc8aca054c10b9afe",
+    "sourceURL": "https://github.com/knadalkim-a11y/team-agent-poc/blob/5cd9f945def1b8911bec864cc8aca054c10b9afe/docs/mockups/ees-work/design-mock-07-workflow-entry.html",
+    "geometry": {
+      "x": 0,
+      "y": 17802,
+      "w": 1280,
+      "h": 299
+    },
+    "sourceLinkGeometry": {
+      "x": 0,
+      "y": 18111,
+      "w": 1280,
+      "h": 23
+    },
+    "font": {
+      "family": "Noto Sans KR",
+      "style": "Regular",
+      "variationSettings": {
+        "wght": 400
+      }
+    }
+  },
+  "canonical": {
+    "commit": "5cd9f945def1b8911bec864cc8aca054c10b9afe",
+    "htmlSHA256": "4bd30e896fcc1846ff2ff573a834328fa0c702c8f968f14f22b01cf96ee4587f",
+    "sourceSHA256": "81b0b8721cc8f39c6fefb77cb835b396b43179fac3466ecb0baf59dd3cf785f5",
+    "sourceOfMetadata": "Parent-provided final source verification"
+  },
+  "parentReportedQA": {
+    "behavior": "63/63",
+    "captures": 12
+  },
+  "managementRender": {
+    "nodeId": "1776:465",
+    "path": "C110-target-selection.png",
+    "status": "PASS",
+    "checks": [
+      "scope readable",
+      "stable frame IDs and backup recorded",
+      "final fixed commit visible",
+      "no clipped lines"
+    ],
+    "note": "Provenance/number spacing clarified after render; same 1280×299 text bounds and font, structurally checked."
+  },
+  "automaticReflowAncestors": [
+    "898:31",
+    "898:2"
+  ],
+  "readabilityUpdate": {
+    "mutatedNodeIds": [
+      "1776:465"
+    ],
+    "text": "C110 · 2026-10-28 KST · 왼쪽 대상 선택을 시작 흐름에 연결 (백업 B048)\n공장·시스템은 이미 왼쪽에서 선택하므로 시작 화면에서 중복으로 입력하지 않도록 목업을 정리했습니다. 기존 제품의 대상 선택·시작 계약을 표현하며 제품 코드나 새 실행 기능을 추가하지 않습니다.\n① 업무 개요 전체 화면1762:456, 진입 상태 보드1762:758, 기존 공장 입력 장면의 바깥 프레임1762:760을 유지했습니다. 별도 새 판 보드를 만들지 않고 같은 프레임 안에서 갱신합니다. 기본은 왼쪽 ‘공장 A · EMS’ 선택값이 오른쪽 개요에 이어지는 장면입니다.\n② 중복 공장 선택 폼은 없앴습니다. 기존 입력 장면1762:760은 대상 미선택 상태에서 왼쪽 선택 목록이 열린 모습으로 재사용합니다. 768px 캔버스 비교 구성은 왼쪽 256px + 간격 32px + 오른쪽 480px이며 중간 대화 영역을 생략한 표현입니다.\n③ 왼쪽에서 대상을 선택하는 동작만으로 진행 건을 시작하지 않습니다. ‘업무 시작’을 눌러 시작하며 시작된 진행 건의 대상은 고정됩니다. 시작 후 단일 단계 자동 진입·여러 단계 개요 선택, 뒤로 돌아와 진행 건 열기 흐름은 유지합니다.\n④ 공통 진입 안내1763:495의 본문1763:497만 같은 원칙으로 수정했습니다. 원본 링크1763:498, 공통 헤더와 원칙 본문은 유지했습니다. 기본 1단계·12작업 합성 사례와 별도 4단계·9작업 정적 개요의 구분을 유지하며, 다단계 상세 화면은 이번 범위에 포함하지 않습니다.\n⑤ 수정 전 복구 기준점은 B048(1773:494)입니다. 공통 안내 사본1773:496, 운영 헤더1773:500, 전체 화면1773:517 및 진입 상태 보드 사본을 보관합니다. HTML 동작 검증 63/63과 12개 캡처를 기준으로 대조하며, Figma 렌더·보존 확인은 동반 보고서에 기록합니다.\n고정 원본: design-mock-07-workflow-entry.html · 5cd9f945def1b8911bec864cc8aca054c10b9afe",
+    "w": 1280,
+    "h": 299
+  }
+}

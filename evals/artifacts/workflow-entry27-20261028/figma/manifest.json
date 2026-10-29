@@ -1,0 +1,61 @@
+{
+  "status": "sealed-after-final-writes",
+  "date": "2026-10-28",
+  "files": [
+    {
+      "file": "C109-entry-flow.png",
+      "bytes": 101281,
+      "sha256": "d9a2afe193a89466551c86a7476ef143ec77580732df1eee4dac1fb6e4942866"
+    },
+    {
+      "file": "common-admin-report.json",
+      "bytes": 22845,
+      "sha256": "abb583dcb6ece79ec672b974e16d8e7d0a3d7a5198229047d63b36443d4ec3a6"
+    },
+    {
+      "file": "common-entry-note.png",
+      "bytes": 25584,
+      "sha256": "4c8de2e20b4a56af80bc4256cb4168d97344202870324c8ef121b4175826272a"
+    },
+    {
+      "file": "entry-states.png",
+      "bytes": 134750,
+      "sha256": "1b8c1c4b8d17d8093c0093b32b1a602eeac2a3bb0ae3f3729a2f39e7c1aae145"
+    },
+    {
+      "file": "figma-sync-final.json",
+      "bytes": 9545,
+      "sha256": "a3d41409d077b6a56a2036dd8440c148768de9fe2cc17a4c4c58ede0d84130ac"
+    },
+    {
+      "file": "final-source-pointer.json",
+      "bytes": 951,
+      "sha256": "8613764cd5b4fa5301275af58d33aa84c3af14a3afa65b845c4ab72b69672d9b"
+    },
+    {
+      "file": "initial-stage-report.json",
+      "bytes": 12581,
+      "sha256": "19e73859f9ee6f628fdb9b2733010819dad2d11a43ad0626bb1e48714d745833"
+    },
+    {
+      "file": "initial-stage.png",
+      "bytes": 62046,
+      "sha256": "f8d4b6d9fb39678684bf88ae538b95e68de4ad35a2571610eff18040bcb52cc6"
+    },
+    {
+      "file": "mutations-and-validation.json",
+      "bytes": 18603,
+      "sha256": "ed24f32e0d8ea3c06d7cc8a7eec52e4ddf39cc517550c779239f3bbcfe47b67e"
+    },
+    {
+      "file": "operations-header.png",
+      "bytes": 45000,
+      "sha256": "3e1f5a7945a97471e2d9ff54ce0b3e8a2ed9b0cefb9bae3fe5049e4b7393c1a6"
+    },
+    {
+      "file": "overview-full.png",
+      "bytes": 76103,
+      "sha256": "713cbfa40f4e585e1a53aeea0fae0ecd1f9642795db6daf3868b7c45391f5f8d"
+    }
+  ]
+}

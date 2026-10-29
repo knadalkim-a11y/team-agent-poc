@@ -1,0 +1,255 @@
+{
+  "schema": "figma-workflow-entry28-sync-v1",
+  "date": "2026-10-28",
+  "status": "complete-scoped-native-review",
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "sessionId": "1df14170-3fc8-4a01-a6d8-71ce03e554ed",
+  "source": {
+    "commit": "5cd9f945def1b8911bec864cc8aca054c10b9afe",
+    "sourceSha256": "81b0b8721cc8f39c6fefb77cb835b396b43179fac3466ecb0baf59dd3cf785f5",
+    "htmlSha256": "4bd30e896fcc1846ff2ff573a834328fa0c702c8f968f14f22b01cf96ee4587f",
+    "htmlPath": "docs/mockups/ees-work/design-mock-07-workflow-entry.html",
+    "url": "https://github.com/knadalkim-a11y/team-agent-poc/blob/5cd9f945def1b8911bec864cc8aca054c10b9afe/docs/mockups/ees-work/design-mock-07-workflow-entry.html",
+    "qa": "Source QA 63/63 PASS;12 captures; no product code changed by Figma agent."
+  },
+  "change": "Duplicate factory start form removed. Existing overview and state-board IDs updated in place. Start target follows factory/system selected in left sidebar.",
+  "nodes": {
+    "operationsPage": "1284:3106",
+    "operationsHeader": "1284:3107",
+    "overviewFull": "1762:456",
+    "statesBoard": "1762:758",
+    "leftSelectionComparison": "1762:760",
+    "leftSidebar": "1774:456",
+    "factoryMenu": "1776:453",
+    "unselectedOverview": "1774:569",
+    "initialStage": "1762:761",
+    "activeOverview": "1762:762",
+    "multiOverview": "1762:763",
+    "commonNote": "1763:495",
+    "commonUpdatedBody": "1763:497",
+    "changeRecord": "1776:465",
+    "fixedSourceLink": "1776:466",
+    "backupPage": "1773:494"
+  },
+  "coverage": [
+    {
+      "state": "overview-a",
+      "nodeId": "1762:456",
+      "type": "native-full-shell",
+      "size": [
+        1920,
+        1080
+      ],
+      "description": "Factory A / EMS selected in sidebar; overview target Factory A · EMS;0 active."
+    },
+    {
+      "state": "left-factory-open",
+      "nodeId": "1762:760",
+      "type": "native-comparison-crop",
+      "size": [
+        768,
+        1080
+      ],
+      "description": "Existing slot repurposed. Left256px +32px comparison gap +right480px. Center chat deliberately omitted and canvas note discloses this. Menu239×166 at8,128 with3options. No duplicate right-side form."
+    },
+    {
+      "state": "stage-a-unstarted",
+      "nodeId": "1762:761",
+      "type": "native-panel",
+      "size": [
+        480,
+        1080
+      ],
+      "description": "Stage path includes Factory A · EMS;12 unstarted tasks; row layout unchanged."
+    },
+    {
+      "state": "overview-active-a",
+      "nodeId": "1762:762",
+      "type": "native-panel",
+      "size": [
+        480,
+        1080
+      ],
+      "description": "Factory A · EMS active; duplicate start disabled and existing reason shown; open link retained."
+    },
+    {
+      "state": "multi-overview",
+      "nodeId": "1762:763",
+      "type": "native-panel",
+      "size": [
+        480,
+        1080
+      ],
+      "description": "Separate EMS-wide4-stage9-task overview; no new stage detail."
+    }
+  ],
+  "native": {
+    "totalNodes": 731,
+    "counts": [
+      {
+        "id": "1762:456",
+        "name": "운영 · 업무 개요",
+        "w": 1920,
+        "h": 1080,
+        "total": 223,
+        "types": {
+          "FRAME": 115,
+          "TEXT": 48,
+          "VECTOR": 52,
+          "RECTANGLE": 7,
+          "INSTANCE": 1
+        },
+        "imageNodes": [],
+        "fontMismatches": []
+      },
+      {
+        "id": "1762:758",
+        "name": "운영 · 대상 선택과 단계 진입",
+        "w": 2364,
+        "h": 1232,
+        "total": 508,
+        "types": {
+          "FRAME": 257,
+          "TEXT": 137,
+          "VECTOR": 66,
+          "RECTANGLE": 31,
+          "INSTANCE": 17
+        },
+        "imageNodes": [],
+        "fontMismatches": []
+      }
+    ],
+    "imageFilledNodes": 0,
+    "fontMismatchCount": 0,
+    "productFont": "Noto Sans KR",
+    "oldFactoryFormControls": []
+  },
+  "preservation": {
+    "outerIDsUnchanged": [
+      "1762:456",
+      "1762:758",
+      "1762:760"
+    ],
+    "previous26Writes": 0,
+    "stage26": [
+      {
+        "id": "1705:1020",
+        "before": {
+          "id": "1705:1020",
+          "count": 370,
+          "fnv1a": "3eba7581"
+        },
+        "after": {
+          "id": "1705:1020",
+          "count": 370,
+          "fnv1a": "3eba7581"
+        },
+        "pass": true
+      },
+      {
+        "id": "1705:1328",
+        "before": {
+          "id": "1705:1328",
+          "count": 772,
+          "fnv1a": "5e8abf46"
+        },
+        "after": {
+          "id": "1705:1328",
+          "count": 772,
+          "fnv1a": "5e8abf46"
+        },
+        "pass": true
+      },
+      {
+        "id": "1700:931",
+        "before": {
+          "id": "1700:931",
+          "count": 423,
+          "fnv1a": "15f410c1"
+        },
+        "after": {
+          "id": "1700:931",
+          "count": 423,
+          "fnv1a": "15f410c1"
+        },
+        "pass": true
+      },
+      {
+        "id": "1705:1851",
+        "before": {
+          "id": "1705:1851",
+          "count": 184,
+          "fnv1a": "1c8635ab"
+        },
+        "after": {
+          "id": "1705:1851",
+          "count": 184,
+          "fnv1a": "1c8635ab"
+        },
+        "pass": true
+      }
+    ],
+    "method": "Same-page before/after ordered scoped structural entries hashed with FNV-1a. Counts and hashes equal; not a full-file cryptographic equality claim.",
+    "backupPage": "1773:494",
+    "backups": [
+      {
+        "source": "1284:3107",
+        "id": "1773:500",
+        "w": 2076,
+        "h": 422
+      },
+      {
+        "source": "1762:456",
+        "id": "1773:517",
+        "w": 1920,
+        "h": 1080
+      },
+      {
+        "source": "1762:758",
+        "id": "1773:740",
+        "w": 2076,
+        "h": 1232
+      }
+    ],
+    "commonBackup": "1773:496",
+    "revision27Evidence": "Prior workflow-entry27-20261028/figma folder left untouched."
+  },
+  "visualReview": {
+    "pass": true,
+    "files": [
+      "overview-full.png",
+      "entry-states.png",
+      "operations-header.png",
+      "common-entry-target-note.png",
+      "C110-target-selection.png"
+    ],
+    "observations": [
+      "Rendered full overview shows sidebar factory A matching targetFactory A · EMS.",
+      "Open left factory list and unselected right overview are visible together; no right factory-input/cancel form.",
+      "New-stage path includes selected target and all tasks remain unstarted.",
+      "Active-target start is visibly disabled with existing duplicate reason; multi state uses EMS-wide target.",
+      "Colors, menu placement, font family and no text clipping were checked against final HTML captures.",
+      "C110 and page header link fixed5cd9f945 HTML; common target-selection rule updated."
+    ]
+  },
+  "remainingDifferences": [
+    "Native Noto Sans KR vs browser subset font metrics retain small glyph-width/half-pixel differences; no pixel-perfect identity claim.",
+    "Left-selection comparison intentionally omits the chat region and outside mock-control overlay; it is labeled as a comparison crop, not a complete viewport.",
+    "Native static stage uses normal back-button focus; source transition capture can show temporary focus-visible outline.",
+    "Figma presents native editable states and links, not the HTML memory-based runtime or actual workflow execution."
+  ],
+  "boundaries": [
+    "Latest28 is a review mock, not broader design approval or implementation/merge/deploy authorization.",
+    "No new version board, component library, product execution feature, attachment upload, or tool connection added.",
+    "Selecting a factory alone does not start work; source start uses selected context and preserves target after start.",
+    "Workflow-required inputs other than factory/system are outside this duplicate-target-input correction.",
+    "Existing26 task/evidence/history/rules boards remain untouched."
+  ],
+  "errorsAndRecovery": [],
+  "evidenceFiles": [
+    "before-readonly.json",
+    "mutations-and-validation.json",
+    "common-admin-report.json"
+  ],
+  "writeBoundary": "This agent team wrote Figma and evidence files under workflow-entry28-20261028/figma only; no source, product, docs, commits, pushes."
+}

@@ -1,0 +1,47 @@
+{
+  "scope": "Focused physical click/keyboard regression for mock navigation only; initial failure retained separately.",
+  "html_sha256": "286e076858ca90329acf82fe6e195dc9c537140d2e7ec3dc92985dcfac73bd7b",
+  "source_sha256": "071260d4c762922877a4b1c858679a95122aa040a14bce79e3b06eae96a54f0d",
+  "checks": [
+    {
+      "name": "50ms double click only starts workflow",
+      "status": "passed",
+      "observed": {
+        "rows": 12,
+        "running": 0,
+        "automatic": 9,
+        "human": 3,
+        "stageButton": "이 단계 실행",
+        "head": "1차 점검\n이 단계 실행\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0",
+        "focusedBack": false
+      }
+    },
+    {
+      "name": "Later intentional single stage click still executes",
+      "status": "passed",
+      "observed": {
+        "rows": 12,
+        "running": 9,
+        "automatic": 9,
+        "human": 3,
+        "stageButton": "실행 중",
+        "head": "1차 점검\n실행 중\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0 · 실행 중 9",
+        "focusedBack": false
+      }
+    },
+    {
+      "name": "Intentional keyboard stage execution still works",
+      "status": "passed",
+      "observed": {
+        "rows": 12,
+        "running": 9,
+        "automatic": 9,
+        "human": 3,
+        "stageButton": "실행 중",
+        "head": "1차 점검\n실행 중\n\n작업 12개\n\n직접 판정\n선택 0/3\n\n자동 판정 완료 0/9\n승인 0 · 미승인 0 · 실행 중 9",
+        "focusedBack": false
+      }
+    }
+  ],
+  "status": "passed"
+}
