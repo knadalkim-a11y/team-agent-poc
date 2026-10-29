@@ -410,8 +410,9 @@ def integrated_flow(gate):
     assert len(complete['attempts'])==1
     g.capture('a1-human-complete')
     g.record('run input save cancel confirmation and actual completion',run_id=run_id,attempts=1,version=complete['version'])
-    # Native text entry/send is physical; saving or completion HTTP calls are
-    # never injected by the test. Model HTTP content alone is synthetic.
+    # Native text entry/send is physical; runtime input saving and completion
+    # HTTP calls are not injected. The earlier save_draft fixture only prepared
+    # a legacy job-local field definition; model HTTP content is synthetic.
     question='개발용 합성 대화 저장 확인'
     g.type('#chat-input',question)
     g.click('#send-message-button')

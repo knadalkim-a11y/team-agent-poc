@@ -1,0 +1,155 @@
+{
+  "reviewed_commit": "9540dd974d4c95142435bdd772026adde3dbc091",
+  "baseline_source_sha256": "ce4f8d4f3bc4be4a8b00b0b9034de477b0a4e516474a55c0f527a11c6d8e708c",
+  "fixed_source_sha256": "d0a6f66a6a6aa68cb3f693e8bab94db572f63d2bcbdea30c791e90340d770a8b",
+  "scope": "Only this setup dialog newly generated input definitions that final bindings do not use are removed; pre-existing manual, legacy and same-tool inputs remain intact.",
+  "reproduction": {
+    "action": "New shared get_page connection, page_id=123, runtime question unchecked, explicit apply",
+    "before": {
+      "source": "9540dd974d4c95142435bdd772026adde3dbc091",
+      "checkbox_checked": false,
+      "job": {
+        "id": "j",
+        "type": "j",
+        "parent": "t",
+        "children": [],
+        "deps": [],
+        "name": "확인 작업",
+        "instructions": "원래 안내",
+        "mode": "tool",
+        "inputs": [
+          {
+            "id": "page_id",
+            "name": "페이지 번호",
+            "type": "text",
+            "required": true,
+            "scope": "run",
+            "source": {
+              "shared_tool_id": "managed-get_page"
+            }
+          }
+        ],
+        "result_block": "human_confirm",
+        "human_confirmation": true,
+        "argument_bindings": {
+          "page_id": {
+            "constant": "123"
+          }
+        },
+        "shared_tool_generated": {
+          "shared_tool_id": "managed-get_page",
+          "argument_bindings": {
+            "page_id": {
+              "input": "page_id"
+            }
+          },
+          "previous_result_block": "human_confirm",
+          "result_block": "human_confirm"
+        },
+        "shared_tool_id": "managed-get_page"
+      }
+    },
+    "after": {
+      "source_sha": "d0a6f66a6a6aa68cb3f693e8bab94db572f63d2bcbdea30c791e90340d770a8b",
+      "job": {
+        "id": "j",
+        "type": "j",
+        "parent": "t",
+        "children": [],
+        "deps": [],
+        "name": "확인 작업",
+        "instructions": "원래 안내",
+        "mode": "tool",
+        "inputs": [],
+        "result_block": "human_confirm",
+        "human_confirmation": true,
+        "argument_bindings": {
+          "page_id": {
+            "constant": "123"
+          }
+        },
+        "shared_tool_generated": {
+          "shared_tool_id": "managed-get_page",
+          "argument_bindings": {
+            "page_id": {
+              "input": "page_id"
+            }
+          },
+          "previous_result_block": "human_confirm",
+          "result_block": "human_confirm"
+        },
+        "shared_tool_id": "managed-get_page"
+      }
+    }
+  },
+  "first_observation": {
+    "test_count": 4,
+    "pass": 2,
+    "fail": 2,
+    "failing_cases": [
+      "new shared constants left generated runtime questions",
+      "asking for query also left unused space_key and limit questions"
+    ]
+  },
+  "baseline_regression": {
+    "command": "EES_AUTHORING_TEST_SOURCE=/tmp/authoring-9540dd9-designer.js node --test --test-reporter=tap --test-name-pattern=\"A12 generated prompts\" tests/test_ees_work_authoring_ui.cjs",
+    "tests": 6,
+    "pass": 3,
+    "fail": 3,
+    "results": [
+      "not ok 1 - A12 generated prompts: new shared constants do not create unused required runtime questions",
+      "not ok 2 - A12 generated prompts: asking at runtime retains only the explicitly used generated question",
+      "ok 3 - A12 generated prompts: pre-existing same-name and opaque legacy inputs survive a new constant connection",
+      "ok 4 - A12 generated prompts: same-tool edits and cancellation never clean up existing input definitions",
+      "not ok 5 - A12 generated prompts: a temporary runtime choice returns to a constant without dirtying the original",
+      "ok 6 - A12 generated prompts: legacy execution bindings keep a newly generated input that they still reference"
+    ]
+  },
+  "final_regression": {
+    "command": "node --test --test-reporter=tap tests/test_ees_work_authoring_ui.cjs",
+    "tests": 262,
+    "pass": 262,
+    "fail": 0,
+    "new_focused_tests": 6,
+    "python_command": "python -m unittest discover -s tests -p test_ees_work_figma_authoring.py -v",
+    "python_tests": 8,
+    "python_pass": 8,
+    "python_fail": 0,
+    "git_diff_check": "PASS"
+  },
+  "workflow_service": {
+    "boundary": "real WorkflowService save/validate/publish/start and pre-attempt validation; synthetic registry+Native bridge, no tool invocation",
+    "cases": [
+      {
+        "label": "before",
+        "validation_errors": [],
+        "start_ok": true,
+        "run_inputs": {},
+        "missing_inputs": [
+          "page_id: 필수값을 입력해 주세요."
+        ],
+        "pre_attempt": "input_required",
+        "message": "page_id: 필수값을 입력해 주세요.",
+        "attempts_inside_boundary": 0,
+        "attempts_after_rollback": 0
+      },
+      {
+        "label": "fixed",
+        "validation_errors": [],
+        "start_ok": true,
+        "run_inputs": {},
+        "missing_inputs": [],
+        "pre_attempt": "accepted",
+        "snapshot_inputs": {},
+        "attempts_inside_boundary": 1,
+        "attempts_after_rollback": 0
+      }
+    ],
+    "native_invocations": 0
+  },
+  "limits": [
+    "Synthetic DOM tests do not claim browser rendering.",
+    "WorkflowService verification uses a synthetic approved shared-tool registry and Native bridge. Save/validate/publish/start/pre-attempt validation use production code. No actual tool invocation occurs; successful pre-attempt creation is rolled back.",
+    "Existing input definitions are intentionally preserved; this is not a migration of old stored inputs."
+  ]
+}

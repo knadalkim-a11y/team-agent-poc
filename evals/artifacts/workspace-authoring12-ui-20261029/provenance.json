@@ -89,5 +89,22 @@
     "browser": "CI required",
     "legacy_job_input_fixture": "Actual authenticated save_draft prepares a definition only; proposed values, approval, save, execution and immutable history remain UI-driven",
     "no_browser_service_check": "create/save/validate/publish/start/save_inputs passed, validation errors0"
+  },
+  "generated_input_followup": {
+    "product_js_sha256": "d0a6f66a6a6aa68cb3f693e8bab94db572f63d2bcbdea30c791e90340d770a8b",
+    "wheel_sha256": "cc026713bc15976ed677e2ec609fda12500261f8c5c9b5dfc574a7a94214d4e0",
+    "source_build": "Fresh pinned upstream worktree;5582 files verified; same Node22.16.0/npm10.9.2; unchanged CSS and Svelte patch",
+    "node_authoring": 262,
+    "python_authoring": 8,
+    "regression_evidence": "generated-input-regression.json",
+    "actual_ui_verification": [
+      "Changed a human synthetic job to tool mode and newly connected managed-get_page with constant123",
+      "Explicit draft save and reload preserved revision3, constant123 and unchecked runtime question",
+      "Toggling runtime on then off and applying retained the saved state without a new dirty change",
+      "Dialog760x543; settings-entry focus restored",
+      "Health: external tool calls0, errors0, unknown requests0"
+    ],
+    "prior_visual_evidence": "actual-reference-comparison.json retains original measured wheel; input followup changes no markup or CSS",
+    "final_ci": "PR108 current head checks required"
   }
 }

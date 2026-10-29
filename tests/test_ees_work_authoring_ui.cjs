@@ -1114,3 +1114,33 @@ test('A12 followup opening another workflow protects the unfinished creation buf
  const h=harness();await h.node();h.field('job_guidance','기존 미저장 안내');const before=h.draft().definition;await beginCreation(h,'새 워크플로우','새 목적');h.click('open',{id:'q'});await flush();assert.equal(h.selection.workflow_id,'');assert.ok(h.forms['ew-procedure-create']);assert.match(h.markup,/추가하거나 취소한 뒤/);assert.equal(h.fields.find(field=>field.id==='ew-procedure-description').value,'새 목적');assert.equal(h.writes.length,0);
  h.click('procedure_cancel');await flush();h.click('open',{id:'w'});await flush();assert.deepEqual(h.draft().definition,before);assert.equal(h.draft().dirty,true);assert.equal(h.writes.length,0);
 });
+
+test('A12 generated prompts: new shared constants do not create unused required runtime questions',async()=>{
+ for(const [id,argument,value] of [['managed-get_page','page_id','123'],['managed-search_pages','query','설치 가이드']]){
+  const h=harness();sharedReviewFixture(h);h.render();await h.node();await a12Connect(h,id,{runtime:false,values:{[argument]:value}});
+  const node=h.draft().definition.nodes.j;assert.deepEqual(node.argument_bindings[argument],{constant:value});assert.deepEqual(node.inputs,[],'constant-only new connection cannot leave generated run questions');
+  const before=h.draft();await a12Open(h);assert.equal(h.modal.querySelector('[data-job-tool-runtime="'+argument+'"]').checked,false);await h.modalClose('apply');assert.deepEqual(h.draft(),before);assert.equal(h.operations.length,0);
+ }
+});
+test('A12 generated prompts: asking at runtime retains only the explicitly used generated question',async()=>{
+ const h=harness();sharedReviewFixture(h);h.render();await h.node();h.field('mode','tool','change');await flush();await a12Open(h,'shared:managed-search_pages');
+ h.modalField('data-job-tool-runtime','query',true,'change');await h.modalClose('apply');const node=h.draft().definition.nodes.j;
+ assert.deepEqual(node.argument_bindings.query,{input:'query'});assert.deepEqual(node.inputs.map(field=>field.id),['query']);assert.equal(node.inputs[0].required,true);assert.equal(node.inputs[0].scope,'run');assert.equal(h.writes.length,0);
+});
+test('A12 generated prompts: pre-existing same-name and opaque legacy inputs survive a new constant connection',async()=>{
+ const h=harness();sharedReviewFixture(h);const value=definition(),inputs=[{id:'page_id',name:'직접 만든 입력',type:'text',scope:'workflow',required:true,extension:{keep:true}},{id:'legacy-note',name:'기존 입력',type:'text',scope:'run',source:{opaque:'keep'}}];value.nodes.j.inputs=copy(inputs);installDefinition(h,value);await h.node();
+ await a12Connect(h,'managed-get_page',{runtime:false,values:{page_id:'123'}});const node=h.draft().definition.nodes.j;assert.deepEqual(node.inputs,inputs);assert.deepEqual(node.argument_bindings.page_id,{constant:'123'});h.click('save');await flush();assert.deepEqual(h.writes[0].definition.nodes.j.inputs,inputs);
+});
+test('A12 generated prompts: same-tool edits and cancellation never clean up existing input definitions',async()=>{
+ const h=harness(),{read}=sharedReviewFixture(h),value=definition();Object.assign(value.nodes.j,{mode:'tool',shared_tool_id:read.id,inputs:[{id:'page_id',name:'기존 도구 입력',type:'text',required:true,scope:'run',source:{shared_tool_id:read.id},extension:'keep'}],argument_bindings:{page_id:{constant:'123'}},human_confirmation:false});installDefinition(h,value);await h.node();
+ await a12Open(h);h.modalField('data-job-tool-value','page_id','456');await h.modalClose('cancel');assert.deepEqual(h.draft().definition,value);
+ await a12Open(h);h.modalField('data-job-tool-value','page_id','456');await h.modalClose('apply');const expected=copy(value);expected.nodes.j.argument_bindings.page_id.constant='456';assert.deepEqual(h.draft().definition,expected);assert.equal(h.writes.length,0);
+});
+test('A12 generated prompts: a temporary runtime choice returns to a constant without dirtying the original',async()=>{
+ const h=harness(),{read}=sharedReviewFixture(h),value=definition();Object.assign(value.nodes.j,{mode:'tool',shared_tool_id:read.id,inputs:[],argument_bindings:{page_id:{constant:'123'}},human_confirmation:false});installDefinition(h,value);await h.node();const before=h.draft();
+ await a12Open(h);h.modalField('data-job-tool-runtime','page_id',true,'change');h.modalField('data-job-tool-runtime','page_id',false,'change');await h.modalClose('apply');assert.deepEqual(h.draft(),before);assert.equal(h.writes.length,0);
+});
+test('A12 generated prompts: legacy execution bindings keep a newly generated input that they still reference',async()=>{
+ const h=harness();sharedReviewFixture(h);const value=definition();value.nodes.j.argument_bindings={};value.nodes.j.execution={argument_bindings:{legacy_argument:{input:'page_id',extension:'keep'}}};installDefinition(h,value);await h.node();await a12Connect(h,'managed-get_page',{runtime:false,values:{page_id:'123'}});
+ const node=h.draft().definition.nodes.j;assert.deepEqual(node.execution,value.nodes.j.execution);assert.deepEqual(node.inputs.map(input=>input.id),['page_id']);assert.deepEqual(node.argument_bindings.page_id,{constant:'123'});
+});
