@@ -771,7 +771,9 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.click('[data-author-action="save"]');self.wait("document.querySelector('[data-author-status]')?.textContent.includes('초안 r2 · 저장됨')")
         self.click('[data-author-action="validate"]');self.wait("document.querySelector('[data-author-action=publish]')")
         self.click('[data-author-action="publish"]');self.click('[data-dialog-confirm]')
-        self.wait("document.querySelector('#ees-work-designer')?.innerText.includes('게시 v1')")
+        self.wait("!document.querySelector('#ees-work-dialog') && document.querySelector('#ees-work-designer [role=status]')?.textContent.includes('새 게시 버전을 만들었습니다')")
+        self.click('[data-author-action=tab][data-tab=history]')
+        self.wait("[...document.querySelectorAll('.ew-author-history strong')].some(node=>node.textContent.trim()==='게시 v1')")
         published=self.browser_api('GET','/api/ees-work/workspace?workflow_id='+key)['data']['workflow']
         self.assertEqual(published['published_version'],1);self.assert_user_workspace_zero()
         self.assertEqual(self.fixture.run(self.fixture.groups.Groups.get_group_by_id(group['id'])).permissions,{})

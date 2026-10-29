@@ -202,7 +202,7 @@ class NativeToolProvider:
 
 
 def central_flow(g):
-    """All workflow writes and model sends below come from visible controls."""
+    """Visible authoring and model sends; the later input test declares its fixture."""
     actor=g.api('/api/v1/auths/')['id']
     status=g.api('/api/v1/ees/assets/work-tool/status')
     source=(g.program/'open_webui/ees_workflow_tool.py').read_bytes()
@@ -217,7 +217,8 @@ def central_flow(g):
     assert g.api('/api/ees-work/workspace')['workflows']==[]
     g.record('explicit packaged read-only Work tool registration',id='ees_workflow',source_sha256=status['source_sha256'],private_native_grant=True,model_presets_created=False)
     g.click('[data-action="mode"][data-mode="author"]');g.click('[data-author-action="create"]')
-    g.type('#ees-work-dialog [name=name]','중앙 대화 제안 검증');g.click('#ees-work-dialog [data-dialog-confirm]')
+    g.type('#ew-procedure-create #ew-procedure-name','중앙 대화 제안 검증')
+    g.click('#ew-procedure-create [data-author-action=procedure_create]')
     g.wait('document.querySelector("[data-author-action=add_stage]")')
     g.click('[data-author-action=add_stage]');g.type('#ew-stage-editor [name=name]','대화 제안 검토 단계')
     g.click('[data-author-action=inline_apply]')
@@ -273,18 +274,45 @@ def central_flow(g):
 def input_and_history_flow(g,key,chat_id):
     """Real input suggestion plus immutable message-reference lookup."""
     g.provider.mode='plain'
-    # Extend the same authored draft with an actual declared human task, using
-    # the same visible editor controls a user uses; no seeded procedure/API write.
+    # Create the human task through the current visible authoring controls.
     g.click('[data-author-action=add_job]')
     g.type('#ew-stage-editor [name=name]','입력 제안과 과거 근거');g.click('[data-author-action=inline_apply]')
-    # C66 moves job inputs into the explicit additional-settings disclosure.
-    g.click('#ew-author-node [data-author-action=job_section][data-id=advanced]')
-    g.click('[data-author-action=input_add]');g.type('#ees-work-dialog [name=name]','자료 메모')
-    g.click('#ees-work-dialog .ew-input-advanced > summary')
-    g.type('#ees-work-dialog [name=id]','note');g.click('#ees-work-dialog [data-dialog-confirm]')
-    g.click('[data-author-action=save]');g.wait('!document.querySelector("[data-author-action=validate]")?.disabled')
+    g.click('[data-author-action=save]')
+    g.wait('document.querySelector("[data-author-status]")?.textContent.includes("저장됨")')
+    # HTML 12 no longer exposes the old job-input definition editor. Prepare
+    # one existing job-local input through the real authenticated save API.
+    # Stage/root inputs are not substitutes: _work_snapshot filters job.inputs.
+    # This fixture declares a field only; all proposals, values, publication,
+    # attempts and immutable-history checks below still use actual product UI.
+    authored=g.api('/api/ees-work/workspace?workflow_id='+key)['workflow']
+    definition=deepcopy(authored['draft'])
+    declared_job=next(node for node in definition['nodes'].values()
+                      if node['type']=='j' and node['name']=='입력 제안과 과거 근거')
+    assert not declared_job.get('inputs'),declared_job
+    note_field={'id':'note','name':'자료 메모','type':'text','scope':'run','required':False}
+    declared_job['inputs']=[note_field]
+    seeded=g.api('/api/ees-work/workspace/command',{
+        'action':'save_draft','system_id':authored['system_id'],'workflow_id':key,
+        'expected_revision':authored['revision'],'request_id':str(uuid4()),'definition':definition})
+    assert seeded['revision']==authored['revision']+1,seeded
+    prepared=g.api('/api/ees-work/workspace?workflow_id='+key)['workflow']
+    assert prepared['draft']==definition and prepared['published_version'] is None,prepared
+    assert all(not any(field['id']=='note' for field in node.get('inputs',[]))
+               for node in definition['nodes'].values() if node['id']!=declared_job['id'])
+    assert g.api('/api/ees-work/workspace?workflow_id='+key)['runs']==[]
+    g.record('isolated existing job-input definition fixture',workflow_id=key,
+             job_id=declared_job['id'],field=note_field,draft_revision=seeded['revision'],
+             boundary='Actual authenticated save_draft; no input values, publication or execution seeded')
+    # Reopen visibly so the browser reads the fixture revision before publishing.
+    g.click('[data-author-action=list]')
+    g.click('[data-author-action=open][data-id="'+key+'"]')
+    g.wait('document.querySelector("[data-author-status]")?.textContent.includes('
+           +json.dumps('초안 r'+str(seeded['revision'])+' · 저장됨')+')')
     g.click('[data-author-action=validate]');g.click('[data-author-action=publish]');g.click('#ees-work-dialog [data-dialog-confirm]')
-    g.wait('document.querySelector("#ees-work-designer")?.innerText.includes("게시 v1")')
+    g.wait('!document.querySelector("#ees-work-dialog") && document.querySelector("#ees-work-designer [role=status]")?.textContent.includes("새 게시 버전을 만들었습니다")')
+    g.click('[data-author-action=tab][data-tab=history]')
+    g.wait('document.querySelector(".ew-author-history")?.textContent.includes("게시 v1")')
+    assert g.api('/api/ees-work/workspace?workflow_id='+key)['workflow']['published_version']==1
     g.click('[data-action=mode][data-mode=work]');g.click('[data-action=workflow][data-workflow-id="'+key+'"]')
     g.click('[data-action=start_run][data-start-inline]')
     g.wait('document.querySelector("[data-action=job]")')
@@ -292,6 +320,8 @@ def input_and_history_flow(g,key,chat_id):
     assert run['workflow_id']==key and run['version']==1 and run['status']=='open' and not run['attempts'],run
     g.wait_work_ready(workflow_id=key,run_id=run_id)
     job=next(node for node in run['definition']['nodes'].values() if node['type']=='j')
+    assert job['id']==declared_job['id'] and job['inputs']==[note_field],job
+    assert run['inputs']=={},run
     g.click('[data-action=job][data-job-id="'+job['id']+'"]')
     before=g.api('/api/ees-work/workspace?run_id='+run_id)['run']
     assert not g.browser.evaluate('!!document.querySelector("[data-action=propose_inputs],#ees-input-proposal-prompt,#ees-input-proposal-model")')

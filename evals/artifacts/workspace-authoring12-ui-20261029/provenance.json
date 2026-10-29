@@ -67,5 +67,27 @@
   },
   "verified_wheel_sha256": "f6339501b18969c0f01f7e7fe933573c36983d3676e3cd9a632c264203f460db",
   "verified_css_sha256": "e427159955461544c0793566802ab7b91d6199d974d458681c62e75888326019",
-  "pr": "https://github.com/knadalkim-a11y/team-agent-poc/pull/108"
+  "pr": "https://github.com/knadalkim-a11y/team-agent-poc/pull/108",
+  "first_ci_observation": {
+    "run": 40789981308,
+    "head": "baff0ce229ef299cce13e01c2e323a637cb30ed4",
+    "failed_jobs": [
+      "Complete Native product: obsolete create modal selector",
+      "native-account: old guidance selector and published badge location"
+    ],
+    "handling": "Retain state/persistence/permission assertions; update actual UI paths. Superseded workflow may be cancelled after branch update."
+  },
+  "native_test_followup": {
+    "updated_modules": [
+      "tests/ees_work_integrated_app.py",
+      "tests/ees_work_native_chat.py",
+      "tests/test_ees_motion_native.py",
+      "tests/test_ees_source_shell_native.py",
+      "tests/test_ees_work_authoring_native.py"
+    ],
+    "ast": "passed",
+    "browser": "CI required",
+    "legacy_job_input_fixture": "Actual authenticated save_draft prepares a definition only; proposed values, approval, save, execution and immutable history remain UI-driven",
+    "no_browser_service_check": "create/save/validate/publish/start/save_inputs passed, validation errors0"
+  }
 }

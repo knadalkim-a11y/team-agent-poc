@@ -296,11 +296,17 @@ font:getComputedStyle(e).fontFamily,display:getComputedStyle(e).display,overflow
 
 def integrated_flow(gate):
     g=gate
-    # All business writes in this flow are actual visible user controls.
+    # Authoring and runtime actions use actual visible controls. One explicit
+    # legacy job-input fixture below preserves the existing runtime-input gate.
+    authoring_chat_draft='업무 절차를 작성하는 동안 보존할 대화 초안'
+    purpose='합성 배포 자료와 변경 내용을 사람이 확인합니다.'
+    g.type('#chat-input',authoring_chat_draft)
     g.click('[data-action="mode"][data-mode="author"]')
     g.click('[data-author-action="create"]')
-    g.type('#ees-work-dialog [name=name]','합성 배포 자료 확인')
-    g.click('#ees-work-dialog [data-dialog-confirm]')
+    g.wait('!!document.querySelector("#ew-procedure-create")')
+    g.type('#ew-procedure-create [name=name]','합성 배포 자료 확인')
+    g.type('#ew-procedure-create [name=description]',purpose)
+    g.click('[data-author-action="procedure_create"]')
     g.wait('!!document.querySelector("[data-author-action=tab][data-tab=content]")')
     g.wait('!!document.querySelector(\'[data-author-action="add_stage"]\')')
     g.click('[data-author-action="add_stage"]')
@@ -309,20 +315,45 @@ def integrated_flow(gate):
     g.click('[data-author-action="add_job"]')
     g.type('#ew-stage-editor input[name="name"]','사람의 근거 확인')
     g.click('[data-author-action=inline_apply]')
-    # C66 moves job inputs into the explicit additional-settings disclosure.
-    g.click('#ew-author-node [data-author-action=job_section][data-id=advanced]')
-    g.click('[data-author-action="input_add"]')
+    # Authoring12 defines run inputs in execution method; job detail retains
+    # guidance and confirmation only. Preserve this real start-input authoring
+    # check before preparing the legacy job-input regression fixture below.
+    g.click('[data-author-action="tab"][data-tab="schedule"]')
+    g.click('[data-author-action="start_input_add"]')
     g.type('#ees-work-dialog input[name="name"]','확인할 자료')
     g.click('#ees-work-dialog .ew-input-advanced > summary')
     g.type('#ees-work-dialog input[name="id"]','evidence_note')
     g.click('#ees-work-dialog input[name="required"]')
     g.click('#ees-work-dialog [data-dialog-confirm]')
     g.click('[data-author-action="save"]')
-    g.wait('!document.querySelector(\'[data-author-action="validate"]\')?.disabled')
+    g.wait('document.querySelector("[data-author-status]")?.textContent.includes("저장됨")')
     g.capture('b3-saved-authoring')
     state=g.api('/api/ees-work/workspace')
     workflow=next(item for item in state['workflows'] if item['name']=='합성 배포 자료 확인')
     identifier=workflow['id']
+    authored=g.api('/api/ees-work/workspace?workflow_id='+identifier)['workflow']
+    assert authored['draft']['description']==purpose
+    root=next(node for node in authored['draft']['nodes'].values() if node['type']=='p')
+    evidence=next(field for field in root['inputs'] if field['id']=='evidence_note')
+    assert evidence['name']=='확인할 자료' and evidence['scope']=='run' and evidence['required']
+    assert not authored['published_version']
+    assert g.browser.evaluate('document.querySelector("#chat-input").innerText.trim()')==authoring_chat_draft
+    g.record('physical authoring create and draft save',workflow_id=identifier,
+        revision=authored['revision'],purpose_saved=True,start_input='evidence_note',chat_draft_preserved=True)
+    # Runtime job forms intentionally list job.inputs, not root start inputs.
+    # Existing job-local input definitions remain supported even though their
+    # authoring control was retired. Copy this exact field through the real API
+    # only as an isolated compatibility fixture; do not claim a UI edit for it.
+    runtime_definition=json.loads(json.dumps(authored['draft']))
+    legacy_job=next(node for node in runtime_definition['nodes'].values() if node['type']=='j')
+    legacy_job['inputs']=[dict(evidence)]
+    prepared=g.api('/api/ees-work/workspace/command',{'action':'save_draft','workflow_id':identifier,
+        'expected_revision':authored['revision'],'request_id':str(uuid4()),'definition':runtime_definition})
+    g.record('explicit legacy job-input API fixture',workflow_id=identifier,job_id=legacy_job['id'],
+        field_id='evidence_note',revision=prepared['revision'],ui_creation_claimed=False)
+    g.click('[data-author-action="list"]')
+    g.click('[data-author-action="open"][data-id="'+identifier+'"]')
+    g.wait('document.querySelector("[data-author-status]")?.textContent.includes('+json.dumps('초안 r'+str(prepared['revision'])+' · 저장됨')+')')
     g.click('[data-author-action="validate"]')
     g.wait('!!document.querySelector(\'[data-author-action="publish"]\')')
     g.wait('!!document.querySelector(".ew-author-validation")')
@@ -337,11 +368,15 @@ def integrated_flow(gate):
     assert g.browser.evaluate("(()=>{const r=document.querySelector('#ees-work-dialog').getBoundingClientRect();return Math.abs(r.x+r.width/2-innerWidth/2)<2&&Math.abs(r.y+r.height/2-innerHeight/2)<2})()"), 'confirmation dialog must be centered'
     g.capture('publish-confirmation-body-focus')
     g.click('#ees-work-dialog [data-dialog-confirm]')
-    g.wait('document.querySelector("#ees-work-designer")?.innerText.includes("게시 v1")')
+    g.wait('!document.querySelector("#ees-work-dialog")')
+    g.click('[data-author-action="tab"][data-tab="history"]')
+    g.wait('document.querySelector(".ew-author-history")?.innerText.includes("게시 v1")')
     published=g.api('/api/ees-work/workspace?workflow_id='+identifier)['workflow']
     assert published['published_version']==1
+    assert published['published']['description']==purpose
+    assert g.browser.evaluate('document.querySelector("#chat-input").innerText.trim()')==authoring_chat_draft
     g.capture('b2-published')
-    g.record('physical authoring save validate publish',workflow_id=identifier,version=1)
+    g.record('physical validate and publish with legacy job-input fixture',workflow_id=identifier,version=1)
     g.click('[data-action="mode"][data-mode="work"]')
     g.click('[data-action="workflow"][data-workflow-id="'+identifier+'"]')
     g.wait('!!document.querySelector(".ew-adhoc-start")')
@@ -705,7 +740,8 @@ def figma_delta_flow(g):
         'parent':rule_root,'children':['rule-checklist'],'deps':[]}
     rule_definition['nodes']['rule-checklist']={'id':'rule-checklist','type':'j','name':'사람이 확정하는 확인 항목',
         'parent':'rule-stage','children':[],'deps':[],'mode':'human','result_block':'checklist',
-        'inputs':[],'instructions':'합성 확인 항목의 근거를 사람이 확인합니다.'}
+        'inputs':[],'instructions':'합성 확인 항목의 근거를 사람이 확인합니다.',
+        'suggestion_rules':{'description':'기존 합성 제안 지침','provisional':True,'rules':[]}}
     command('save_draft',1,workflow_id=rule_id,definition=rule_definition)
     g.navigate('/');g.wait_work_ready()
     g.click('[data-action="mode"][data-mode="author"]');g.click('[data-action="procedures"]')
@@ -713,13 +749,25 @@ def figma_delta_flow(g):
     g.wait('!!document.querySelector("[data-author-action=tab][data-tab=content]")')
     g.click('.ew-author-tabs [data-author-action="tab"][data-tab="rules"]')
     g.wait('document.querySelector(\'select[name="rule_job_id"]\')?.value==="rule-checklist"')
-    assert g.browser.evaluate('document.querySelectorAll(".ew-author-rule-card tbody tr").length>0')
+    assert g.browser.evaluate('document.querySelectorAll(".ew-judgment-definition").length>0')
+    judgment_label='합성 근거 확인'
+    judgment_consequence='근거를 확인한 뒤 담당자가 완료를 결정합니다.'
+    g.type('.ew-judgment-definition [data-definition-field="label"]',judgment_label)
+    g.select('.ew-judgment-definition [data-definition-field="status"]','completed')
+    g.type('.ew-judgment-definition [data-definition-field="consequence"]',judgment_consequence)
+    # Existing suggestion guidance remains editable in its explicit disclosure;
+    # the ordinary authoring surface now edits judgment words and meanings.
+    g.click('.ew-author-legacy-rules > summary')
     guidance='합성 근거만 제안에 사용하며 사람의 판정을 대신하지 않습니다.'
     g.type('#ew-author-rules [name="suggestion_description"]',guidance)
     g.click('[data-author-action="save"]')
-    g.wait('!document.querySelector(\'[data-author-action="validate"]\')?.disabled')
+    g.wait('document.querySelector("[data-author-status]")?.textContent.includes("저장됨")')
     saved_rules=g.api('/api/ees-work/workspace?workflow_id='+rule_id)['workflow']
-    assert saved_rules['draft']['nodes']['rule-checklist']['suggestion_rules']['description']==guidance
+    rule_job=saved_rules['draft']['nodes']['rule-checklist']
+    assert rule_job['suggestion_rules']['description']==guidance
+    assert rule_job['judgments'][0]['label']==judgment_label
+    assert rule_job['judgments'][0]['status']=='completed'
+    assert rule_job['judgments'][0]['consequence']==judgment_consequence
     assert not saved_rules['published_version']
     assert not any(run['workflow_id']==rule_id for run in g.api('/api/ees-work/workspace?workflow_id='+rule_id)['runs'])
     g.capture('figma-b22-saved-job-rules')
@@ -737,10 +785,16 @@ def figma_delta_flow(g):
     g.select('#ew-author-schedule [name="opening"]','on_schedule')
     g.type('#ew-author-schedule [name="interval"]','2')
     g.type('#ew-author-schedule [name="name_template"]','{date} 실제 검수 회차')
+    g.click('.ew-procedure-menu > summary')
+    g.click('[data-author-action="schedule_tools"]')
+    g.wait('document.querySelector(".ew-author-schedules")?.open')
     g.click('[data-author-action="schedule_preview"]')
     g.wait('document.querySelector(".ew-schedule-preview")?.innerText.includes("그다음")')
-    assets('figma-b21-schedule',{'ead50.svg':14,'1fc4e.svg':14});g.capture('figma-b21-schedule-preview')
-    g.click('[data-author-action="save"]');g.wait('!document.querySelector(\'[data-author-action="save"]\')?.disabled')
+    # Authoring12 uses the native select chevron in schedule rows; the source
+    # icon is deliberately hidden there. The preview keeps its shipped icon.
+    assert g.browser.evaluate('document.querySelector(\'#ew-author-schedule [name="opening"]\').getClientRects().length>0')
+    assets('figma-b21-schedule',{'1fc4e.svg':14});g.capture('figma-b21-schedule-preview')
+    g.click('[data-author-action="save"]');g.wait('document.querySelector("[data-author-status]")?.textContent.includes("저장됨")')
     saved=g.api('/api/ees-work/workspace?workflow_id='+workflow_id)['workflow']
     assert saved['draft']['mode']=='periodic' and saved['draft']['schedule']['interval']==2
     assert saved['draft']['schedule']['name_template']=='{date} 실제 검수 회차'
@@ -917,7 +971,9 @@ def figma_delta_flow(g):
     assert g.browser.evaluate('!document.querySelector(\'[data-author-action="publish"]\').disabled')
     g.capture('figma-b23-delivery-advisory-publish-enabled')
     g.click('[data-author-action="publish"]');g.click('#ees-work-dialog [data-dialog-confirm]')
-    g.wait('document.querySelector("#ees-work-designer")?.innerText.includes("게시 v1")')
+    g.wait('!document.querySelector("#ees-work-dialog")')
+    g.click('[data-author-action="tab"][data-tab="history"]')
+    g.wait('document.querySelector(".ew-author-history")?.innerText.includes("게시 v1")')
     assert g.api('/api/ees-work/workspace?workflow_id='+delivery_id)['workflow']['published_version']==1
     g.record('Figma B2-3 delivery recommendation permits physical publish',recommendations=len(advisory['warnings']),external_delivery=False)
     g.click('[data-action="mode"][data-mode="work"]');g.click('[data-action="workflow"][data-workflow-id="'+delivery_id+'"]')

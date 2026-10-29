@@ -334,34 +334,65 @@ class MotionNativeTests(IntegratedNativeCase):
                         'Overlay animation changed the conversation layout')
 
     def test_c3_dialog_and_help_close_preserve_draft_and_release_modal_blocker(self):
+        name = '모달 움직임 검증 절차'
+        identifier = self.command('create_workflow', name=name, system_id='EMS')['workflow_id']
+        stored = self.state(workflow_id=identifier)['workflow']
+        self.refresh()
         self.fill('#chat-input', '확인 창과 도움말 왕복 후 보존할 문장')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.click('[data-action=mode][data-mode=author]')
+        self.click('[data-author-action=open][data-id="' + identifier + '"]')
+        self.wait("document.querySelector('.ew-procedure-menu > summary')")
+
+        def open_copy_dialog():
+            # The workflow menu is revealed by trusted hover/focus in HTML 12.
+            if not self.read('.ew-procedure-menu', 'open'):
+                point = self.browser.evaluate("(()=>{const r=document.querySelector('.ew-procedure-menu > summary').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()")
+                self.browser.call('Input.dispatchMouseEvent', {'type': 'mouseMoved', **point})
+                self.click('.ew-procedure-menu > summary')
+            self.click('[data-author-action=copy]')
+            self.wait("document.querySelector('#ees-work-dialog')?.open")
+
         self.observe('dialog-help')
-        # Check the modal blocker in attached mode, then use a nested panel.
+        # New workflows are inline. The existing copy dialog still exercises
+        # the actual modal blocker in attached mode and inside an overlay panel.
         self.viewport(1920, 1080)
-        self.click('[data-author-action=create]')
-        self.wait("document.querySelector('#ees-work-dialog')?.open")
+        open_copy_dialog()
         self.key('Escape', 27)
         self.click_now('#chat-input')
         self.wait("!document.querySelector('#ees-work-dialog')")
         self.assertTrue(self.browser.evaluate("document.activeElement === document.querySelector('#chat-input')"))
         self.viewport(1000, 768)
-        self.click('[data-author-action=create]')
-        self.wait("document.querySelector('#ees-work-dialog')?.open")
+        open_copy_dialog()
         self.key('Escape', 27)
         self.wait("!document.querySelector('#ees-work-dialog')")
         self.assertFalse(self.read('.ees-panel-region', 'hidden'), 'Dialog Escape also closed its underlying panel')
-        self.wait("document.activeElement?.matches('[data-author-action=create]')")
+        self.wait("document.activeElement?.matches('[data-author-action=copy]')")
         self.activate()
         self.wait("document.querySelector('#ees-work-dialog [name=name]')")
-        self.fill('#ees-work-dialog [name=name]', '다시 열어도 남는 이름')
+        copy_name = self.read('#ees-work-dialog [name=name]', 'value')
+        self.fill('#ees-work-dialog [name=name]', '취소할 복사 이름')
         self.click('[data-dialog-cancel]')
         self.wait("!document.querySelector('#ees-work-dialog')")
-        self.click('[data-author-action=create]')
-        self.assertEqual(self.read('#ees-work-dialog [name=name]', 'value'), '다시 열어도 남는 이름')
+        open_copy_dialog()
+        self.assertEqual(self.read('#ees-work-dialog [name=name]', 'value'), copy_name)
         self.key('Escape', 27)
         self.wait("!document.querySelector('#ees-work-dialog')")
+        self.assertEqual(self.state(workflow_id=identifier)['workflow'], stored)
+        # Keep the original creation-buffer assertion on its current inline UI.
+        self.click('[data-author-action=list]')
+        self.click('[data-author-action=create]')
+        self.wait("document.querySelector('#ew-procedure-create #ew-procedure-name')")
+        self.fill('#ew-procedure-name', '다시 열어도 남는 이름')
+        self.click('[data-author-action=procedure_cancel]')
+        self.wait("!document.querySelector('#ew-procedure-create')")
+        self.wait("document.activeElement?.matches('[data-author-action=create]')")
+        self.activate()
+        self.wait("document.querySelector('#ew-procedure-create #ew-procedure-name')")
+        self.assertEqual(self.read('#ew-procedure-name', 'value'), '다시 열어도 남는 이름')
+        self.key('Escape', 27)
+        self.wait("!document.querySelector('#ew-procedure-create')")
+        self.assertFalse(self.read('.ees-panel-region', 'hidden'), 'Inline Escape also closed its underlying panel')
         self.click('[data-action=tools]')
         self.click('[data-author-action=tool_create]')
         self.click('[data-author-action=tool_example][data-id=jira-query]')
