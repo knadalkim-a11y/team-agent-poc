@@ -12,9 +12,9 @@ EES 팀의 문서 조회와 업무 처리를 대화·워크플로우 화면으�
 
 <a id="design-sources"></a>
 
-현재 운영 화면은 [공통 단계 상세26판·제품 적용 범위](docs/mockups/ees-work/TASK.md#work-operations-design)와 [Figma26판 전체 화면](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1705-1020)에서 시작합니다. 워크플로우 이름과 필요한 업무 구분 정보를 위에 두고, 단계 제목·실행·진행·작업 목록의 위치를 고정합니다. 현재는 실제 제품 UI 구현·검증 중이며, 사내 적용 완료는 [STATUS](docs/STATUS.md)에서 구분합니다. [25판 확정](docs/mockups/ees-work/TASK.md#work-operations-approved25-20261028)·[Figma 보완](docs/mockups/ees-work/TASK.md#operations25-figma-sync-20261028)·[20판](docs/mockups/ees-work/TASK.md#design-mock-approved20-20261027)은 이전 기록으로 보존합니다.
+현재 운영 화면은 [운영 디자인 기준·제품 적용 범위](docs/mockups/ees-work/TASK.md#work-operations-design)와 [Figma 업무·운영 페이지 헤더](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1284-3107)에서 시작합니다. Figma 기능 페이지에는 화면마다 최신판만 두며, 판 번호를 쓰는 페이지는 헤더 한 곳에만 적습니다. 워크플로우 이름과 필요한 업무 구분 정보를 위에 두고, 단계 제목·실행·진행·작업 목록의 위치를 고정합니다. 현재는 실제 제품 UI 구현·검증 중이며, 사내 적용 완료는 [STATUS](docs/STATUS.md)에서 구분합니다. [25판 확정](docs/mockups/ees-work/TASK.md#work-operations-approved25-20261028)·[Figma 보완](docs/mockups/ees-work/TASK.md#operations25-figma-sync-20261028)·[20판](docs/mockups/ees-work/TASK.md#design-mock-approved20-20261027)은 이전 기록으로 보존하고, Figma의 이전 판 화면은 ‘91 · 보관’ 페이지에 있습니다.
 
-Figma는 제품 기능을 **업무 · 운영 / 셋업 / 장애대응**으로 나누고, [업무 공통 기준](docs/mockups/ees-work/TASK.md#workflow-stage-common-standard)은 한 원본에서 연결합니다. 셋업·장애대응은 기존 참고 설계이며 새 목업이 확정된 것은 아닙니다. 운영 목업의 합성 예시를 모든 업무의 실행·판정 정책으로 확대하지 않습니다.
+Figma는 제품 기능을 **업무 · 운영 / 셋업 / 장애대응**으로 나누고, [업무 공통 기준](docs/mockups/ees-work/TASK.md#workflow-stage-common-standard)은 한 원본에서 연결합니다. 셋업·장애대응은 기존 참고 설계이며 아직 새 목업이 없습니다. 운영 목업의 합성 예시를 모든 업무의 실행·판정 정책으로 확대하지 않습니다.
 
 작성 화면은 [워크.워크플로12판 제품 UI 범위](docs/mockups/ees-work/TASK.md#workspace-authoring12-ui-20261029)와 [고정 HTML 목업](docs/mockups/ees-work/design-mock-08-workspace-authoring.html)에서 시작합니다. 2026-10-29 사용자는 화면을 목업과 동일하게 먼저 구현하고, 기능 완성은 도구 만들기 설계 이후로 구분했습니다. 구현·시각 대조·사내 적용 상태는 [STATUS](docs/STATUS.md)에서 각각 확인합니다.
 
@@ -23,9 +23,9 @@ Figma는 제품 기능을 **업무 · 운영 / 셋업 / 장애대응**으로 나
 | 필요한 답 | 관리 원본 | 읽고 고치는 범위 |
 |---|---|---|
 | 무엇을 만들고 각 부분은 어떻게 연결되는가 | 이 README의 목표·실행 구조·코드 책임 표 | 기능 간 책임이나 데이터·권한 경계가 바뀔 때 갱신 |
-| 어떤 화면과 문구를 보여 주는가 | [Figma 기능 지도](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1288-2) → 해당 화면·명세 카드, 공통 부품은 [C1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=948-1078)·상태는 [S1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=944-1036)·움직임 기준은 [C3](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1443-137)·반응형 기준은 [Q1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=979-1252) | 배치·표시 문구·화면 이동·상태 표현. 작업실 시안과 보관 화면은 채택된 설계와 구분. 사내 확인용 디자인 목업은 [화면이 바뀌는 기능의 개발 순서](AGENTS.md#design-mock-first)를 따름 |
+| 어떤 화면과 문구를 보여 주는가 | [Figma 기능 지도](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1288-2) → 해당 화면·명세 카드, 공통 부품은 [C1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=948-1078)·상태는 [S1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=944-1036)·움직임 기준은 [C3](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1443-137)·반응형 기준은 [Q1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=979-1252) | 배치·표시 문구·화면 이동·상태 표현. 기능 페이지는 화면마다 최신판만 두고 판 번호는 페이지 헤더에 적음. 작업실 시안과 보관 화면은 채택된 설계와 구분. 사내 확인용 디자인 목업은 [화면이 바뀌는 기능의 개발 순서](AGENTS.md#design-mock-first)를 따름 |
 | 어떤 조건에서 저장·실행·완료되는가 | 대상 브랜치의 기능 명세가 있으면 그 명세, 없으면 [TASK의 해당 기능 계약](docs/mockups/ees-work/TASK.md) | 입력·권한·상태 변화·저장/반영·완료 조건. 화면 카드에는 규칙 ID와 기능별 표시 차이만 연결 |
-| 어디까지 구현·검증·사내 적용됐는가 | [STATUS](docs/STATUS.md)와 거기서 연결한 PR·Checks·[평가 기록](evals/v4-ui-20260930.md) | 설계 확정·코드 구현·CI 검증·사내 확인을 구분 |
+| 어디까지 구현·검증·사내 적용됐는가 | [STATUS](docs/STATUS.md)와 거기서 연결한 PR·Checks·[평가 기록](evals/v4-ui-20260930.md) | 구현할 판 지정·코드 구현·CI 검증·사내 확인을 구분 |
 | 개발 AI는 어떻게 작업하는가 | [AGENTS.md](AGENTS.md), Claude Code 진입은 [CLAUDE.md](CLAUDE.md) | 같은 지침 원본을 사용하며 기능별 상세 문서는 필요할 때 읽음 |
 
 **공용 도구를 찾는 예:** [공용 도구 기능 명세](docs/specs/shared-tools.md)에서 시작해 [B10-1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1369-732)·[B10-2](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1368-724)·[B10-5](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1372-741) 카드와 명세에 연결된 코드·시험 순서로 읽습니다. 이전 설계·결정 과정은 [TASK의 기능 계약](docs/mockups/ees-work/TASK.md#shared-tools-phase1-20261015)과 [PR #96](https://github.com/knadalkim-a11y/team-agent-poc/pull/96)에 보존하며, 구현·최종 검증·실제 적용 상태는 [STATUS](docs/STATUS.md)에서 구분합니다.
@@ -201,6 +201,7 @@ AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs
 | 고정 소스 프런트엔드 빌드·검증 | [build_ees_frontend.py](scripts/build_ees_frontend.py) |
 | 소스 조립·wheel 파일 목록·해시 | [build_ees_webui.py](scripts/build_ees_webui.py) |
 | 사내 확인용 디자인 목업(제품 CSS·아이콘·글꼴로 만든 단일 HTML) | [build_design_mock.py](scripts/build_design_mock.py), 원본 `docs/mockups/ees-work/design-mock-src/`, [개발 순서](AGENTS.md#design-mock-first) |
+| Figma 설계 파일 고정 점검(읽기 전용, Figma 도구 use_figma로 실행) | [figma_check.js](scripts/figma_check.js), 시험 [test_figma_check.cjs](tests/test_figma_check.cjs), [규칙](AGENTS.md#design-mock-first) |
 
 factory는 배포 JS 내부에만 존재하고 기존 runtime UI/Tool 연결을 유지합니다. ees.11의 P별 작성 프로토콜·추가 메타데이터와 기존 전체 초안 호환은 [별도 계약](docs/mockups/ees-work/TASK.md#system-authoring-20260924)을 따릅니다. 화면 분리와 이전 프로그램 복원 검증의 실제 범위는 [R2/R3 기록](evals/scenarios.md#work-ui-refactor-20260915)을 따릅니다.
 
