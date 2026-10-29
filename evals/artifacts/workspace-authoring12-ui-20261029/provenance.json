@@ -138,6 +138,74 @@
       "python_ast": "passed",
       "docs": "passed"
     },
-    "final_actual_build": "Final CI source artifact will be validated and packaged without modifying compiled bytes; PR current head checks are authoritative"
+    "final_actual_build": "CI397 source artifact was validated against unchanged product inputs and packaged; see ci397_actual_product"
+  },
+  "ci397_actual_product": {
+    "head": "4b69f55496d084e1028e9b508a759d0b15e9295e",
+    "frontend_artifact_id": 12863231943,
+    "frontend_zip_sha256": "9139c2062d806cf54eff242be73cba6192902c9b55a170bbc04250c35b2a663c",
+    "wheel_sha256": "e8fcc0556c5c9d43b2e639274b26639cdf188bcd7e14c1423d21335e75c77234",
+    "source_js_sha256": "fd0124e19d8e8092797c4c3d725ad91140320fa1280be2e2e8b8784dd0e63cf2",
+    "verified": [
+      "5582 frontend files and source inputs validated by existing wheel builder; no compiled byte edits",
+      "Actual Copy Escape returns focus to visible menu summary",
+      "Return/Tab/Tab/Return reopens Copy with name input focus",
+      "Cancel leaves no dialog, restores menu focus and retains r2 saved state",
+      "Final authoring screenshot reviewed; external calls/errors/unknown requests0"
+    ]
+  },
+  "ci397_observation": {
+    "run_id": 40793958869,
+    "head": "4b69f55496d084e1028e9b508a759d0b15e9295e",
+    "conclusion": "cancelled",
+    "jobs": {
+      "success": 34,
+      "failure": 2,
+      "cancelled": 3,
+      "skipped": 1
+    },
+    "font_failure": "Windows CRLF checkout changes whole-file SHA; LF normalization matches the immutable Git source. Fonts and HTML content are unchanged.",
+    "font_report_correction": "Cleanup step was incorrectly reported as success before final job conclusion; corrected to failure.",
+    "compose_failure": "One factory test attempted to expand and hit-test navigation behind a 480px authoring overlay. Use the real close/select/reopen path and retain narrow viewport and state assertions.",
+    "compose_timeout": {
+      "normal_run": 40788781825,
+      "normal_prepare_s": 34,
+      "normal_test_s": 505,
+      "current_prepare_s": 129,
+      "current_test_s_at_cancel": 485,
+      "failed_wait_s": 9,
+      "last_runtime_normal_s": 48.9,
+      "last_runtime_current_s_at_cancel": 22.4
+    },
+    "windows_contracts_timeout": {
+      "normal_run": 40788781825,
+      "normal_prepare_s": 90,
+      "normal_test_s": 372,
+      "current_prepare_s": 194,
+      "current_test_s_at_cancel": 407,
+      "assertion_failures_observed": 0
+    },
+    "passed_modules": [
+      "Complete Native product",
+      "native-account",
+      "native-work",
+      "native-execution",
+      "motion5",
+      "source-shell9",
+      "Figma layout5"
+    ],
+    "changes": [
+      "Compare frozen HTML Git-canonical LF bytes; LF and CRLF accepted but changed text rejected",
+      "Keep 480px and close authoring panel, choose factory, reopen; verify same workflow and saved data",
+      "Only native-compose and Windows contracts job budgets increase10to15minutes; individual waits/assertions/matrices unchanged"
+    ],
+    "local_checks": {
+      "mock_fonts": "5passed/1optionalBrotliSkip",
+      "delivery_suite": 11,
+      "python_ast": "passed",
+      "yaml_structure": "only two timeout expressions changed",
+      "actionlint": "not installed; not run"
+    },
+    "final_ci": "PR108 current head checks required; no production source changes after fd0124e"
   }
 }

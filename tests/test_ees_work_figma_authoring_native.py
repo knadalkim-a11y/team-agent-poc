@@ -374,12 +374,23 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertIn('C66 합성 공장', self.read('#ees-work-site-trigger', 'textContent'))
             self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=node][data-id=job-0]')"))
             self.screenshot('c66-stage-factory-context-preserved-' + str(width))
+        # Keep the final 480px viewport. Its work panel overlays the expanded
+        # navigation, so use the real close/select/reopen route before changing
+        # factory rather than trying to click a sidebar hidden behind the panel.
+        self.click('.ew-author>header [data-action=close_panel]')
+        self.wait("document.querySelector('.ees-panel-region')?.hidden")
         self.open_sidebar()
         self.click('#ees-work-site-trigger')
         self.click('[data-action=choose_factory][data-factory-id=""]')
         self.wait("document.querySelector('#ees-work-site-trigger')?.innerText.includes('전체 공장') && document.querySelector('[data-author-action=factory_settings]')")
         if self.read('#sidebar', 'getBoundingClientRect().width') > 200:
             self.click('[data-ees-sidebar-toggle]')
+        self.click('#ees-work-panel-open')
+        self.wait("!document.querySelector('.ees-panel-region')?.hidden && document.querySelector('[data-author-action=factory_settings]')")
+        self.wait("window.__eesNativeWorkV1.captureReference().workflow_id === " + json.dumps(key) +
+                  " && window.__eesNativeWorkV1.captureReference().factory_id === ''")
+        self.assertEqual(self.text('.ew-author-definition-head h2'), 'C66 공장 보기 보존')
+        self.assertEqual(self.state(workflow_id=key)['workflow'], saved)
         self.click('[data-author-action=factory_settings]')
         self.wait("document.querySelector('#ees-work-dialog[open] [name=\"value:site-note\"]')")
         self.assertEqual(self.read('#ees-work-dialog [name="value:site-note"]', 'value'), '')

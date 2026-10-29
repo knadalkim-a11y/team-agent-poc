@@ -395,7 +395,7 @@ jobs:
           - suite: restore-ees13
             fixtures: upstream previous13
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    timeout-minutes: ${{ matrix.os == 'windows-2022' && matrix.suite == 'contracts' && 15 || 10 }}
     env:
       EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
       EES_TEST_BRANDING_DIR: dist/branding
@@ -567,7 +567,7 @@ jobs:
       matrix:
         suite: [native-account, native-work, native-compose, native-execution]
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: ${{ matrix.suite == 'native-compose' && 15 || 10 }}
     env:
       EES_TEST_CHROME: google-chrome
       EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
