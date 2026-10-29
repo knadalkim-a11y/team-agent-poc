@@ -1,13 +1,13 @@
 # 현재 작업 상태
 
-## 2026-10-29 · 워크.워크플로 12판 제품 UI · PR #108
+## 2026-10-29 · 워크.워크플로 Figma 12판 보정 · PR #108
 
-- **현재 작업:** 사용자 요청에 따라 [작성 목업12판](mockups/ees-work/design-mock-08-workspace-authoring.html)을 실제 제품 화면에 반영한 [PR #108](https://github.com/knadalkim-a11y/team-agent-poc/pull/108)을 준비했다. [이번 범위·보존·완료 기준](mockups/ees-work/TASK.md#workspace-authoring12-ui-20261029). 기능 완성은 ‘워크.도구’ 설계 이후이며 이번에는 새 도구 제작·서버 저장·실행 엔진을 추가하지 않는다.
-- **출발점:** main `42f5ae502b57be68aefa5d141f09259c8f6e9ee9`의 별도 `feat/workspace-authoring12-ui-20261029`. 12판은 HTML/Figma에만 있었고 제품 작성기는 C66 화면이었다. 아래 운영26판 기록은 다른 화면의 당시 상태다.
-- **main 통합:** 작업 중 병합된 PR #106의 main `96467cfc7298521eee3812e38237ebb719cd544e`를 같은 작업 브랜치에 통합한다. 변경 이력·공용 도구 명세의 충돌 2곳은 양쪽 기록과 새 Figma 명칭 규칙을 보존해 해결했다. 제품 코드·지정12판 HTML은 그대로이며 새 통합 head 전체 CI를 확인한다.
-- **검증 상태:** 관련 Node262·Python8·source shell26 검사를 통과했다. 실제 Native build와 고정 목업을 같은1363×936/480px 패널에서 비교했고 측정한 주요 요소의 높이와 위치 차이는0.5px 이내다. 마감 검토에서 발견한 신규 도구의 고정값/실행 입력 불일치는 기존 입력을 보존하며 수정했다. [근거](../evals/v4-ui-20260930.md#workspace-authoring12-ui-20261029). 전체 CI는 PR #108의 현재 head checks를 기준으로 확인한다. 목업 가상 데이터와 실제 권한/실행 범위의 표시 차이, 사내 적용 상태는 별개다.
+- **현재 작업:** 실제 Figma와 PR 화면의 차이를 보여준 뒤 받은 “동일하게 변경 진행해줘” 요청에 따라, 같은 [PR #108](https://github.com/knadalkim-a11y/team-agent-poc/pull/108)에서 현재 Figma12판에 맞춰 제품 UI를 보정하고 로컬 검증을 마쳤다. 이번 보정의 시각 기준은 [Figma 워크·업무 절차](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1285-1830)이며 [범위·보존·완료 기준](mockups/ees-work/TASK.md#workspace-authoring12-ui-20261029)을 따른다. 기존 HTML12판과 이전 검증 근거는 그대로 보존한다.
+- **출발점:** PR #108 head `c4b21685dac37a5278c52d5e118c389441fba127`, 같은 작업 브랜치 `feat/workspace-authoring12-ui-20261029`. main `96467cfc7298521eee3812e38237ebb719cd544e`는 이 head에 이미 통합됐으며 작성12판은 아직 main에 병합되지 않았다.
+- **검증 상태:** 출발 head의 [CI400](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40799420294)과 이전 HTML 대조는 이번 Figma 보정의 통과 근거로 재사용하지 않는다. 이번 authoring Node264·Python8, runtime Node128, source frontend32 검사와 최종 소스 빌드 strict 검증을 통과했다. 최종 실제 Native 집중2시험과 같은 예시·네 탭 표본1시험도 통과했으며, 사람 상세12개 측정 영역의 위치·치수 차이는0px, 하단 버튼은0.5px 이내다. 네 탭의 가로 넘침은0이고 독립 육안 검수5개 화면에 겹침·잘림이 없었다. [실측·보존한 차이](../evals/artifacts/workspace-authoring12-ui-20261029/figma-parity/comparison.json)와 [검증 이력](../evals/v4-ui-20260930.md#workspace-authoring12-ui-20261029)을 남겼다. 전체 이미지 픽셀 일치를 뜻하지 않으며, 이번 head 전체 CI 결과는 [PR #108 검사](https://github.com/knadalkim-a11y/team-agent-poc/pull/108/checks)와 PR 본문에서 확인한다.
+- **기능·자료 경계:** 기능 완성은 ‘워크.도구’ 설계 이후이며 새 도구 제작·backend·실행 엔진은 추가하지 않는다. 완료 조건의 기본 표시를39px로 맞추면서 textarea와 여러 줄 저장값을 유지하고, workflows 자료·숨긴 설정·기존 저장/게시 동작을 보존한다.
 - **사내 적용:** 이번 변경은 미실행이다. 기존 main `42f5ae5` 적용·기동 성공 사용자 보고는 [PR #104](https://github.com/knadalkim-a11y/team-agent-poc/pull/104)의 원래 기록을 유지한다.
-- **다음 하나:** PR #108의 현재 head 검사·검토를 마치고, 후속 설계는 ‘워크.도구’로 진행한다.
+- **다음 하나:** 이번 head 전체 CI와 PR #108 검토를 확인한다. 병합은 사용자 별도 요청에 따르며 사내 적용은 미실행이다.
 
 > 아래 절은 운영26판과 이전 구현 당시 기록이다. 작성12판의 현재 상태와 구분한다.
 

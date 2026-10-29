@@ -90,7 +90,7 @@ FRAME_MONITOR = r"""(() => {
       if (!visible(header)) continue;
       const title = header.firstChild?.textContent.trim();
       if (title === '도구' || title === '도구 · 공용') panels.push('tools');
-      if (title === '업무 절차' || title === '워크스페이스 · 워크플로우') panels.push('procedures');
+      if (title === '업무 절차' || title === '워크플로우') panels.push('procedures');
     }
     for (const header of document.querySelectorAll('#ees-work-panel .ew-work-heading h2'))
       if (visible(header) && header.textContent.trim() === '공장·접근 범위') panels.push('workspace_admin');

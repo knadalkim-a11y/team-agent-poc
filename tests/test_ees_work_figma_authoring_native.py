@@ -125,8 +125,13 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.wait("[...document.querySelectorAll('#ees-work-designer,#ees-work-dialog')].every(surface=>surface.getAnimations({subtree:true}).every(animation=>!animation.pending&&animation.playState!=='running'))")
             observed = self.browser.evaluate("""(() => {
                 const scroll=document.querySelector('.ew-author-scroll'), active=document.activeElement;
+                const bounds=selector=>{const element=document.querySelector(selector);if(!element)return null;const r=element.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};};
                 return {viewport:[innerWidth,innerHeight],overflow:scroll.scrollWidth-scroll.clientWidth,
                     method:document.querySelector('.ew-job-method [name=mode]:checked')?.value,
+                    renderedMethod:document.querySelector('.ew-job-main')?.dataset.jobMode,
+                    workflowListBack:!!document.querySelector('.ew-author-scroll > [data-author-action=list]'),
+                    guidance:bounds('#ew-author-node [name=job_guidance]'),completion:bounds('#ew-author-node [name=completion_rule]'),
+                    methodBounds:bounds('.ew-job-method>div'),nameBounds:bounds('#ew-author-node [name=name]'),
                     focus:{action:active?.dataset.authorAction,id:active?.dataset.id,name:active?.name},
                     factoryTabs:document.querySelectorAll('.ew-author-factories').length,
                     methodLabels:[...document.querySelectorAll('.ew-job-method [name=mode]')].map(e=>e.parentElement.querySelector('span').textContent),
@@ -145,6 +150,14 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertTrue(all(card == {'border': '0px', 'radius': '0px'} for card in observed['cards']), observed)
             self.assertEqual(observed['mainPadding'], '0px', observed)
             self.assertEqual(observed['inputFont'], '13px', observed)
+            self.assertFalse(observed['workflowListBack'], observed)
+            self.assertAlmostEqual(observed['nameBounds']['height'], 39, delta=.5, msg=observed)
+            self.assertAlmostEqual(observed['methodBounds']['height'], 35, delta=.5, msg=observed)
+            # A pending method-change confirmation keeps the old body while
+            # the browser radio already reflects the user's proposed choice.
+            if observed['renderedMethod'] == 'human':
+                self.assertAlmostEqual(observed['guidance']['height'], 64, delta=.5, msg=observed)
+                self.assertAlmostEqual(observed['completion']['height'], 39, delta=.5, msg=observed)
             observed['label'] = label; observations.append(observed)
             directory = self.screenshot(label)
             (directory / 'c66-job-detail-observations.json').write_text(json.dumps(observations, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
@@ -162,12 +175,21 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             original['authoring_review'] = {'inputs': True, 'rules': False}
             manual = {'id': 'manual-note', 'name': '직접 만든 메모', 'type': 'text', 'scope': 'run', 'required': False}
             original['nodes']['job-0'].update(inputs=[manual], description='별도로 작성한 설명',
-                deadline_notes='기존 기한 메모', completion={'rule': '필요한 자료가 맞는지 확인합니다.'})
+                deadline_notes='기존 기한 메모', completion={'rule': '필요한 자료가 맞는지 확인합니다.\n\n둘째 줄: 확인 근거를 보존합니다.', 'extension': {'keep': '원문 기준'}})
             self.command('save_draft', workflow_id=key, expected_revision=initial['revision'], definition=original)
             self.refresh()
             self.click('[data-author-action=open][data-id="' + key + '"]')
             self.wait("window.__eesNativeWorkV1.captureReference().workflow_id === " + json.dumps(key))
             self.assertEqual(self.text('.ew-author-definition-head h2'), '12판 작업 상세 ' + str(width))
+            # Figma's stage header is 52px with a 22px circular ordinal. This
+            # check runs before opening the detail, against real rendered CSS.
+            stage_geometry = self.browser.evaluate("""(() => {
+                const head=document.querySelector('.ew-stage-head'),number=head.querySelector('.ew-author-stage-number'),r=number.getBoundingClientRect(),s=getComputedStyle(number);
+                const radius=parseFloat(s.borderTopLeftRadius)*(s.borderTopLeftRadius.endsWith('%')?r.width/100:1);
+                return {height:head.getBoundingClientRect().height,number:{width:r.width,height:r.height,border:s.borderTopWidth,radius}};
+            })()""")
+            self.assertAlmostEqual(stage_geometry['height'], 52, delta=.5, msg=stage_geometry)
+            self.assertEqual(stage_geometry['number'], {'width': 22, 'height': 22, 'border': '1px', 'radius': 11})
             self.open_author_job_ui('job-0')
             self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
             self.wait('innerWidth===' + str(width))
@@ -177,6 +199,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertFalse(self.browser.evaluate("!!document.querySelector('[name=result_confirmation]')"))
             merged = original['nodes']['job-0']['instructions'] + '\n\n별도로 작성한 설명'
             self.assertEqual(self.read('#ew-author-node [name=job_guidance]', 'value'), merged)
+            self.assertEqual(self.read('#ew-author-node [name=completion_rule]', 'value'), original['nodes']['job-0']['completion']['rule'])
             capture('c66-b3-human-' + str(width))
             # Viewing the merged guidance does not rewrite either stored source.
             self.assertEqual(self.state(workflow_id=key)['workflow']['draft'], original)
@@ -227,6 +250,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertEqual(stored['nodes']['job-0']['description'], original['nodes']['job-0']['description'])
             self.assertEqual(stored['nodes']['job-0']['instructions'], original['nodes']['job-0']['instructions'])
             self.assertEqual(stored['nodes']['job-0']['deadline_notes'], original['nodes']['job-0']['deadline_notes'])
+            self.assertEqual(stored['nodes']['job-0']['completion'], original['nodes']['job-0']['completion'])
             self.assertEqual(stored['authoring_review'], original['authoring_review'])
             self.click('[data-author-action=validate]')
             self.wait("document.querySelector('.ew-author-validation')")
@@ -316,6 +340,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertEqual(job['instructions'], '두 원문을 확인하고 편집한 안내')
             self.assertFalse(job.get('description'))
             self.assertEqual(job['deadline_notes'], original['nodes']['job-0']['deadline_notes'])
+            self.assertEqual(job['completion'], original['nodes']['job-0']['completion'])
             self.assertEqual(cleaned['authoring_review'], original['authoring_review'])
             self.assertEqual(self.state(workflow_id=key)['workflow']['published_version'], 1)
             # A read tool permits automatic completion, and changing that UI
@@ -497,6 +522,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(saved['nodes'][stage_id]['inputs'][0]['name'], '개발 준비 메모')
         self.assertEqual(saved['nodes'][stage_id]['inputs'][0]['scope'], 'run')
         self.assertNotIn('value', saved['nodes'][stage_id]['inputs'][0])
+        self.click('[data-author-action=node][data-id=""]')
+        self.wait("document.querySelector('.ew-work-content')")
         self.click('[data-author-action=list]')
         draft_badge = '.ew-author-list [data-author-action=open][data-id="' + identifier + '"] .ew-author-tag'
         self.wait('document.querySelector(' + json.dumps(draft_badge) + ')?.textContent === "초안"')
@@ -1122,16 +1149,21 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
             self.wait('innerWidth === ' + str(width))
             metrics = self.browser.evaluate("""(() => {
-              const bounds = selector => {const box=document.querySelector(selector).getBoundingClientRect();return {x:box.x,y:box.y,width:box.width,height:box.height};};
-              const style = selector => {const value=getComputedStyle(document.querySelector(selector));return {font:value.fontFamily,size:value.fontSize,line:value.lineHeight,background:value.backgroundColor,paddingTop:value.paddingTop,paddingBottom:value.paddingBottom};};
+              const rect = element => {const box=element.getBoundingClientRect();return {x:box.x,y:box.y,width:box.width,height:box.height};};
+              const bounds = selector => rect(document.querySelector(selector));
+              const style = selector => {const value=getComputedStyle(document.querySelector(selector));return {font:value.fontFamily,size:value.fontSize,weight:value.fontWeight,line:value.lineHeight,background:value.backgroundColor,paddingTop:value.paddingTop,paddingBottom:value.paddingBottom,paddingLeft:value.paddingLeft,paddingRight:value.paddingRight,border:value.borderTopWidth};};
               return {panel:bounds('.ees-panel-region'),frame:bounds('[data-ees-source-shell]'),sidebar:bounds('#sidebar'),
                 overlay:document.querySelector('.ees-panel-region').getAttribute('data-overlay'),header:bounds('.ew-author>header'),
                 card:bounds('.ew-work-content'),purpose:bounds('.ew-content-purpose'),steps:bounds('.ew-content-heading'),list:bounds('.ew-stage-list'),footer:bounds('.ew-author>footer'),
+                titleRow:bounds('.ew-author-definition-head>.ew-author-heading'),title:bounds('.ew-author-definition-head h2'),badgeBounds:bounds('.ew-author-heading>.ew-author-tag'),
+                menu:bounds('.ew-procedure-menu'),menuOpacity:getComputedStyle(document.querySelector('.ew-procedure-menu')).opacity,
+                footerItems:[...document.querySelector('.ew-author>footer').children].map(rect),
                 retiredSummary:!!document.querySelector('.ew-content-needs,[data-author-action=summary_open]'),
+                redundantOverview:!!document.querySelector('.ew-content-overview h3,.ew-content-meta,.ew-work-order-note'),
                 availableWidth:document.querySelector('.ees-panel-region').parentElement.getBoundingClientRect().width,
-                badge:style('.ew-author-heading>.ew-author-tag'),detail:style('.ew-content-purpose'),
+                badge:style('.ew-author-heading>.ew-author-tag'),detail:style('.ew-content-purpose>p'),
                 tabs:style('.ew-author-tabs>button'),heading:style('.ew-author h2'),
-                footerStyle:style('.ew-author>footer'),footerButton:style('.ew-author>footer>button'),
+                footerStyle:style('.ew-author>footer'),footerButton:style('.ew-author>footer>button'),primaryButton:style('.ew-author>footer>.ew-primary'),
                 extraHeader:document.querySelectorAll('#ees-work-panel>.ew-panel-header').length,
                 factoryTabs:document.querySelectorAll('.ew-author-factories').length,
                 factoryLabel:document.querySelector('.ew-author-factories')?.getAttribute('aria-label')??null,
@@ -1151,32 +1183,51 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 self.assertEqual(metrics['panelFrameLeftGap'], max(56, metrics['availableWidth'] - 480))
             self.assertEqual(metrics['header']['height'], 48)
             self.assertEqual(metrics['extraHeader'], 0)
-            # HTML 12 uses the sidebar scope and has no duplicate factory tabs.
+            # The sidebar scope has no duplicate factory tabs in the panel.
             self.assertEqual(metrics['factoryTabs'], 0)
             self.assertIsNone(metrics['factoryLabel'])
             self.assertEqual(metrics['factoryViews'], [])
-            self.assertEqual(self.text('.ew-author>header>strong'), '워크스페이스 · 워크플로우')
+            self.assertEqual(self.text('.ew-author>header>strong'), '워크플로우')
             self.assertAlmostEqual(metrics['card']['x'] - metrics['panel']['x'], 19 if width == 480 else 21, delta=1)
+            if metrics['panel']['width'] == 480:
+                self.assertAlmostEqual(metrics['card']['width'], 438, delta=1)
             # The flat overview precedes stages, with no retired summary card.
             self.assertFalse(metrics['retiredSummary'])
-            self.assertEqual(self.text('.ew-content-overview h3'), '업무 개요')
-            self.assertEqual(self.text('.ew-content-heading>small'), '단계 0개 · 작업 0개')
+            self.assertFalse(metrics['redundantOverview'])
+            self.assertEqual(self.text('.ew-content-heading>small'), '0개 단계')
+            self.assertTrue(self.browser.evaluate("!!document.querySelector('.ew-content-purpose [data-author-action=summary_edit]')"))
             self.assertLess(metrics['purpose']['y'], metrics['steps']['y'])
             self.assertLess(metrics['steps']['y'], metrics['list']['y'])
             self.assertEqual(self.browser.evaluate("document.querySelectorAll('[data-author-action=stage_toggle]').length"), 0)
             self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim())"), ['업무 내용', '실행 방식', '판정 규칙', '게시 기록'])
-            # HTML 12 keeps saved status on its own line above the actions.
+            # The reviewed Figma keeps status and content-sized actions on one
+            # row, including the 424px panel inside the 480px viewport.
             self.assertEqual(metrics['footerStyle']['paddingTop'], '12px')
-            self.assertEqual(metrics['footerStyle']['paddingBottom'], '14px')
+            self.assertEqual(metrics['footerStyle']['paddingBottom'], '12px')
             self.assertEqual(metrics['footerButton']['size'], '12px')
-            self.assertAlmostEqual(metrics['footer']['height'], 91.8, delta=1)
+            self.assertEqual(metrics['footerButton']['weight'], '500')
+            self.assertEqual(metrics['footerButton']['paddingLeft'], '14px')
+            self.assertEqual(metrics['footerButton']['paddingRight'], '14px')
+            self.assertEqual(metrics['primaryButton']['border'], '0px')
+            self.assertAlmostEqual(metrics['footer']['height'], 59, delta=.5)
+            self.assertEqual(len(metrics['footerItems']), 3)
+            for index, item in enumerate(metrics['footerItems']):
+                self.assertAlmostEqual(item['y'] + item['height']/2, metrics['footer']['y'] + 30, delta=.5)
+                if index:
+                    self.assertAlmostEqual(item['height'], 34, delta=.5)
+                    self.assertLess(item['width'], metrics['footer']['width']/3)
+            self.assertAlmostEqual(metrics['titleRow']['height'], 30, delta=.5)
+            self.assertAlmostEqual(metrics['badgeBounds']['height'], 20, delta=.5)
+            self.assertAlmostEqual(metrics['badgeBounds']['x'] - metrics['title']['x'] - metrics['title']['width'], 8, delta=.5)
+            self.assertEqual(metrics['menuOpacity'], '1')
+            self.assertAlmostEqual(metrics['menu']['x'] + metrics['menu']['width'], metrics['titleRow']['x'] + metrics['titleRow']['width'], delta=.5)
             self.assertEqual(metrics['heading']['size'], '20px')
             self.assertTrue(metrics['heading']['font'].startswith('"EES Noto Sans KR"'))
             self.assertEqual(metrics['detail']['size'], '13px')
-            self.assertEqual(metrics['detail']['line'], '23.4px')
+            self.assertEqual(metrics['detail']['line'], '20.8px')
             self.assertEqual(metrics['tabs']['size'], '12px')
-            self.assertEqual(metrics['badge']['size'], '11px')
-            self.assertEqual(metrics['badge']['background'], 'rgb(241, 238, 231)')
+            self.assertEqual(metrics['badge']['size'], '12px')
+            self.assertEqual(metrics['badge']['background'], 'rgb(250, 241, 228)')
             self.assertLessEqual(metrics['overflow'], 1)
             self.assertEqual(self.text('.ew-author-heading>.ew-author-tag'), '초안')
             self.assertIn('초안 r1 · 저장됨', self.text('[data-author-status]'))
@@ -2387,7 +2438,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         before = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.click('[data-action="mode"][data-mode="author"]')
         self.wait("document.querySelectorAll('[data-author-action=open]').length === 3")
-        self.assertEqual(self.text('.ew-author>header>strong'), '워크스페이스 · 워크플로우')
+        self.assertEqual(self.text('.ew-author>header>strong'), '워크플로우')
         self.assertEqual(self.text('.ew-author-heading h2'), '워크플로우')
         self.assertEqual(self.text('.ew-author-heading small'), '3개')
         self.assertNotIn('기본 제공 절차', self.text('#ees-work-designer'))

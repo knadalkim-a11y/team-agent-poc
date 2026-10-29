@@ -87,7 +87,7 @@ function harness({cryptoProvider=crypto,proposalChangesObserver=null}={}){const 
   return [...h.buttons,...h.fields].filter(node=>matches(node,selector));
  },set innerHTML(html){
   const ownedFocus=host.contains(h.document?.activeElement);for(const node of [...h.fields,...h.buttons])node.isConnected=false;if(ownedFocus)h.document.activeElement=null;
-  h.markup=html;const parents=ancestorMap(html);h.status={textContent:decode(html.match(/data-author-status[^>]*>([^<]*)/)?.[1] || '')};
+  h.markup=html;const parents=ancestorMap(html);h.status={textContent:decode(html.match(/data-author-status[^>]*>([^<]*)/)?.[1] || ''),dataset:{}};const statusDirty=html.match(/data-author-status[^>]*data-dirty="([^"]*)"/)?.[1];if(statusDirty!==undefined)h.status.dataset.dirty=statusDirty;
   const footer=html.match(/<footer(?:\s[^>]*)?>([\s\S]*?)<\/footer>/)?.[1];h.footerNodes=footerNodes(footer || '');h.footer=footer===undefined?null:{};
   if(h.footer)Object.defineProperty(h.footer,'innerHTML',{get:()=>footer,set:value=>{h.footerReplacements=(h.footerReplacements || 0)+1;h.footerNodes=footerNodes(value);h.buttons=h.buttons.map(button=>['procedure_create','procedure_cancel','tool_save','tool_review','tool_approve','tool_reject'].includes(button.dataset.authorAction)?{...button}:button);}});
   h.summaries=[...html.matchAll(/<summary\b([^>]*)>/g)].map(m=>decorate({tagName:'SUMMARY',parentElement:parents.get(m.index)},controlAttributes(m[1])));
@@ -271,7 +271,7 @@ test('late Native proposal after reset cannot expose the previous account previe
 
 test('a confirmation opened for one workflow cannot publish after context changes',async()=>{const h=harness();h.dialogs.push({});h.dialogHook=()=>h.open('q');h.click('publish');await flush();assert.equal(h.writes.length,0);assert.equal(h.draft().definition.id,'q');});
 test('conflict comparison can discard only by explicit choice and load exact new revision',async()=>{const h=harness();await h.node();h.field('job_guidance','내 변경');h.workflows.get('w').revision=3;h.workflows.get('w').draft.nodes.j.instructions='서버 변경';h.dialogs.push({choice:'keep'});h.click('compare');await flush();assert.equal(h.draft().definition.nodes.j.instructions,'내 변경');assert.equal(h.draft().revision,1);h.dialogs.push({choice:'discard'});h.click('compare');await flush();assert.equal(h.draft().definition.nodes.j.instructions,'서버 변경');assert.equal(h.draft().revision,3);assert.equal(h.draft().dirty,false);});
-test('tool navigation returns to workflow editor without retaining tool-only surface',async()=>{const h=harness();h.selection.tab='tools';h.render();assert.match(h.markup,/>도구 · 공용</);h.selection.tab='overview';h.render();assert.match(h.markup,/워크스페이스 · 워크플로우/);assert.match(h.markup,/워크플로우 정보·분류 수정/);});
+test('tool navigation returns to workflow editor without retaining tool-only surface',async()=>{const h=harness();h.selection.tab='tools';h.render();assert.match(h.markup,/>도구 · 공용</);h.selection.tab='overview';h.render();assert.match(h.markup,/<header><strong>워크플로우<\/strong>/);assert.match(h.markup,/워크플로우 정보·분류 수정/);});
 test('hidden job trigger remains a stored offset after direct guidance editing',async()=>{const h=harness();h.workflows.get('w').draft.nodes.j.trigger={offset_seconds:3600};h.render();await h.node();assert.equal(h.fields.some(f=>f.name==='trigger_kind'),false);h.field('job_guidance','안내만 수정');h.click('save');await flush();assert.deepEqual(h.writes[0].definition.nodes.j.trigger,{offset_seconds:3600});assert.doesNotMatch(source,/setInterval|setTimeout/);});
 
 test('published periodic schedule explicitly pins user, version, jobs, timezone and delegation',async()=>{const h=harness(),record=h.workflows.get('w');record.published_version=2;record.draft.mode='periodic';record.draft.schedule={timezone:'Asia/Seoul',anchor:'2026-10-05T09:00',frequency:'weekly',interval:1};record.draft.nodes.j.mode='tool';record.published=copy(record.draft);h.render();h.click('schedule_tools');h.dialogs.push({timezone:'Asia/Seoul',anchor:'2026-10-05T09:00',frequency:'weekly',interval:'1',grace_seconds:'300',delegated:true,'job:j':true});h.click('schedule_create');await flush();assert.equal(h.operations[0].action,'schedule_save');assert.equal(h.operations[0].expected_revision,0);assert.equal(h.operations[0].schedule.identity_user_id,'a');assert.equal(h.operations[0].schedule.version,2);assert.equal(h.operations[0].schedule.delegated,true);assert.deepEqual(h.operations[0].schedule.job_ids,['j']);assert.equal(h.operations[0].schedule.catch_up,'miss');assert.equal(h.writes.length,0);});
@@ -693,7 +693,7 @@ test('content renders 0 1 3 and 6 stages initially collapsed with exactly one ex
   assert.equal(h.buttons.filter(button=>button.dataset.authorAction==='stage_toggle').length,count);
   assert.equal(h.buttons.filter(button=>button.getAttribute('aria-expanded')==='true').length,0);
   assert.equal(h.buttons.filter(button=>button.dataset.authorAction==='node'&&button.dataset.id).length,0);
-  assert.match(h.markup,new RegExp('단계 '+count+'개'));
+  assert.match(h.markup,new RegExp('<small>'+count+'개 단계</small>'));
   if(!count){assert.match(h.markup,/아직 단계가 없습니다. 먼저 단계를 추가하세요./);continue;}
   h.click('stage_toggle',{id:'t0'});await flush();assert.equal(stageButton(h,'t0').getAttribute('aria-expanded'),'true');
   if(count>1){h.click('stage_toggle',{id:'t1'});await flush();assert.equal(stageButton(h,'t0').getAttribute('aria-expanded'),'false');assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');}
@@ -976,6 +976,23 @@ for(const [mode,resultBlock] of [['human','human_confirm'],['ai','human_confirm'
 for(const [instructions,description,shown] of [['안내','설명','안내\n\n설명'],['같은 글','같은 글','같은 글'],['','설명','설명']])test('A12 merged guidance preserves originals until an actual edit: '+JSON.stringify([instructions,description]),async()=>{
  const h=harness(),value=definition();Object.assign(value.nodes.j,{instructions,description});installDefinition(h,value);await h.node();assert.equal(h.fields.find(f=>f.name==='job_guidance').value,shown);h.field('job_guidance',shown);h.render();assert.deepEqual(h.draft().definition,value);assert.equal(h.draft().dirty,false);
  h.field('job_guidance','수정한 전체 안내');h.click('save');await flush();assert.equal(h.writes[0].definition.nodes.j.instructions,'수정한 전체 안내');assert.equal(h.writes[0].definition.nodes.j.description,'');await h.open('q');await h.open('w');await h.node();assert.equal(h.fields.find(f=>f.name==='job_guidance').value,'수정한 전체 안내');
+});
+test('Figma A12 job navigation returns to stages without a duplicate workflow-list row',async()=>{
+ const h=harness();assert.ok(actionButton(h,'list'));
+ await h.node();assert.equal(Boolean(actionButton(h,'list')),false);assert.ok(actionButton(h,'node',''));
+ for(const tab of ['schedule','rules','history']){h.click('tab',{tab});await flush();assert.ok(actionButton(h,'list'),tab);}
+ h.click('tab',{tab:'content'});await flush();await h.node();assert.equal(Boolean(actionButton(h,'list')),false);
+ h.click('node',{id:''});await flush();assert.ok(actionButton(h,'list'));assert.equal(h.writes.length,0);
+});
+test('Figma A12 compact completion preserves multiline text and metadata through unrelated save and reload',async()=>{
+ const h=harness(),value=definition(),rule='첫째 줄: 승인 기준을 확인합니다.\n\n둘째 줄: 근거를 남깁니다.  ';
+ value.nodes.j.completion={rule,kind:'review',extension:{keep:'원문 메타데이터'}};installDefinition(h,value);await h.node();
+ assert.equal(h.fields.find(field=>field.name==='completion_rule').value,rule);
+ h.field('completion_rule',rule);h.render();assert.equal(h.draft().dirty,false);assert.deepEqual(h.draft().definition,value);assert.equal(h.status.dataset.dirty,'false');
+ h.field('job_guidance','안내만 수정');assert.equal(h.status.dataset.dirty,'true');h.click('save');await flush();assert.equal(h.status.dataset.dirty,'false');assert.deepEqual(h.writes.at(-1).definition.nodes.j.completion,value.nodes.j.completion);
+ await h.open('q');await h.open('w');await h.node();assert.equal(h.fields.find(field=>field.name==='completion_rule').value,rule);
+ const changed=rule+'\n셋째 줄: 담당자가 판정합니다.';h.field('completion_rule',changed);h.click('save');await flush();
+ assert.deepEqual(h.writes.at(-1).definition.nodes.j.completion,{...value.nodes.j.completion,rule:changed});
 });
 test('A12 connected tool shows its name without a read badge or version pinning',async()=>{
  const h=harness(),{search}=sharedReviewFixture(h),value=definition();search.version=7;Object.assign(value.nodes.j,{mode:'tool',shared_tool_id:search.id,inputs:[{id:'query',name:'검색어',type:'text',scope:'factory'}],argument_bindings:{query:{input:'query'}}});installDefinition(h,value);await h.node();
