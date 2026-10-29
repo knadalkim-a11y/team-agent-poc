@@ -160,16 +160,15 @@ class IntegratedNativeCase(unittest.TestCase):
         self.wait("document.querySelector('#ew-stage-editor [name=name]')")
         self.fill('#ew-stage-editor [name=name]', name)
         self.click('[data-author-action=inline_apply]')
-        self.wait("document.querySelector('#ew-author-node [name=instructions]')")
+        self.wait("document.querySelector('#ew-author-node [name=job_guidance]')")
 
     def open_author_job_ui(self, job_id, stage_id='stage'):
         selector = '[data-author-action=node][data-id="' + job_id + '"]'
         if not self.browser.evaluate('!!document.querySelector(' + json.dumps(selector) + ')'):
             self.click('[data-author-action=stage_toggle][data-id="' + stage_id + '"]')
         self.click(selector)
-        # C66 tool instructions live in the collapsed additional-settings
-        # section. The always-visible name and method identify a ready detail;
-        # callers explicitly open additional settings before editing them.
+        # The always-visible name and method identify a ready job detail.
+        # Job guidance is now direct; hidden legacy settings remain preserved.
         self.wait("document.querySelector('.ew-job-detail #ew-author-node [name=name]') && document.querySelector('.ew-job-method [name=mode]:checked')")
 
     def start(self, key, **values):

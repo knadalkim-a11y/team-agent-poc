@@ -94,7 +94,8 @@ CASE_PARTITIONS = {
 NODE_SCRIPTS = {
     "services": ["test_wo_demo_state.cjs", "test_ees_cooperation_panel.cjs", "test_ees_execution_ui.cjs",
                  "test_ees_work_authoring_ui.cjs", "test_ees_v4_layout.cjs", "test_ees_v4_drafts.cjs",
-                 "test_ees_work_figma_runtime_ui.cjs", "test_ees_motion.cjs", "test_ees_motion_svelte.cjs"],
+                 "test_ees_work_figma_runtime_ui.cjs", "test_ees_motion.cjs", "test_ees_motion_svelte.cjs",
+                 "test_figma_check.cjs"],
 }
 
 

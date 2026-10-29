@@ -69,12 +69,14 @@ FRAME_MONITOR = r"""(() => {
     const copy = /^(등록된 업무 절차가 없습니다[.]?|지금 처리할 내 업무가 없습니다[.]?|저장된 진행 건이 없습니다[.]?|조회할 이전 기록이 없습니다[.]?|No procedures are registered[.]?)$/;
     const nodes = [...document.querySelectorAll('#ees-work-entry *, #ees-work-panel *')];
     const empty = nodes.filter(node => visible(node) &&
-      (copy.test(node.textContent.trim()) || /^아직 업무 절차가 없습니다[.]?/.test(node.textContent.trim()) ||
+      (copy.test(node.textContent.trim()) || /^아직 (업무 절차|워크플로우)가 없습니다[.]?/.test(node.textContent.trim()) ||
        /의 업무 절차\s*0개$/.test(node.textContent.trim())) &&
       ![...node.children].some(child => visible(child) && child.textContent.trim() === node.textContent.trim()))
       .map(node => node.textContent.trim());
     for (const node of document.querySelectorAll('#ees-work-entry [data-action=procedures] small'))
       if (visible(node) && node.textContent.trim() === '0') empty.push('업무 절차 배지 0');
+    for (const node of document.querySelectorAll('#ees-work-designer .ew-author-heading small'))
+      if (visible(node) && node.textContent.trim() === '0개') empty.push('워크플로우 목록 0개');
     return empty;
   };
   const navigationCurrent = () => [...document.querySelectorAll('#ees-work-entry [aria-current]')]
@@ -88,7 +90,7 @@ FRAME_MONITOR = r"""(() => {
       if (!visible(header)) continue;
       const title = header.firstChild?.textContent.trim();
       if (title === '도구' || title === '도구 · 공용') panels.push('tools');
-      if (title === '업무 절차') panels.push('procedures');
+      if (title === '업무 절차' || title === '워크플로우') panels.push('procedures');
     }
     for (const header of document.querySelectorAll('#ees-work-panel .ew-work-heading h2'))
       if (visible(header) && header.textContent.trim() === '공장·접근 범위') panels.push('workspace_admin');

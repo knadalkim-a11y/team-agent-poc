@@ -47,6 +47,42 @@ function panelHarness() {
   const key = bind(between(shell, 'function panelKeydown(', '\n\tfunction clearPrivateDrafts').replace('event: KeyboardEvent', 'event').replaceAll('(event.target as Element)', 'event.target'), env, 'panelKeydown');
   return { env, m, trigger, focus, key, set(open, overlay = true, native = false) { env.panelOpen = open; env.panelOverlay = overlay; env.nativeRoute = native; sync(open, overlay, native); } };
 }
+function panelLayout(values = {}) {
+  const shell = component('EesShell'), env = {
+    s: { mode: 'work', tab: 'my_work', panel_width: 640 }, $eesSnapshot: {},
+    transientWidth: null, width: 1350, $eesCompact: false,
+    procedurePanel: false, fixedPanel: false, panelWidth: 0, panelOverlay: false,
+    clamp: value => Math.max(400, Math.min(720, Math.round(Number(value) || 480))), ...values
+  };
+  const statements = ['procedurePanel', 'fixedPanel', 'panelWidth', 'panelOverlay'].map(name => {
+    const statement = shell.match(new RegExp('\\$:\\s*' + name + '\\s*=[\\s\\S]*?;'));
+    assert.ok(statement, name); return statement[0].replace(/^\$:\s*/, '');
+  }).join('\n');
+  Function('env', `with(env) { ${statements} }`)(env);
+  return env;
+}
+test('procedure authoring uses 480px while work and Native management retain saved resize widths', () => {
+  for (const tab of ['overview', 'content', 'execution', 'decision', 'history']) {
+    const layout = panelLayout({ s: { mode: 'author', tab, panel_width: 680 }, transientWidth: 700 });
+    assert.equal(layout.panelWidth, 480); assert.equal(layout.fixedPanel, true);
+    assert.equal(layout.panelOverlay, false, '480px authoring leaves enough conversation room at 1350px');
+  }
+  const creation = panelLayout({ $eesSnapshot: { procedure_start: { draftName: '새 절차' } }, transientWidth: 700 });
+  assert.equal(creation.panelWidth, 480); assert.equal(creation.fixedPanel, true);
+  assert.equal(panelLayout().panelWidth, 640);
+  for (const tab of ['tools', 'workspace_admin']) {
+    assert.equal(panelLayout({ s: { mode: 'author', tab, panel_width: 680 } }).panelWidth, 680);
+    assert.equal(panelLayout({ s: { mode: 'author', tab, panel_width: 680 }, transientWidth: 600 }).panelWidth, 600);
+  }
+});
+test('retired resize gestures cannot persist a width while the authoring panel is fixed', () => {
+  const env = panelLayout({ s: { mode: 'author', tab: 'overview' } }), actions = [];
+  env.eesAction = action => actions.push(action);
+  const setWidth = bind(between(component('EesShell'), 'function setWidth(', '\n\tfunction resizeStart'), env, 'setWidth');
+  setWidth(700, true); assert.equal(env.transientWidth, null); assert.deepEqual(actions, []);
+  env.fixedPanel = false; setWidth(700, true);
+  assert.deepEqual(actions, [{ action: 'panel_width', width: 700 }]);
+});
 test('scope close before its opening tick never opens a stale menu and restores focus after completion', async () => {
   const h = scopeHarness(); h.set(true); h.set(false); await flush();
   assert.equal(h.m.opened.length, 0); assert.equal(h.env.shown, true); assert.equal(h.env.trigger.focused, 0);

@@ -23,10 +23,10 @@
     "src/lib/components/chat/Placeholder.svelte": "dc5512dc7648112edd011e27797c07cf5d8d52474be5490a1ae2bef434327036",
     "src/lib/components/ees/EesHelperNotice.svelte": "22ceccc7ad93c5d820f73269baaa9b19f12c5c99054b76ecc8c89f7757f8bba0",
     "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
-    "src/lib/components/ees/EesNavigation.svelte": "0fa6fc4a7cd399ea117fd602039962f1d0ce31ab412a845dc26009c4e561148b",
+    "src/lib/components/ees/EesNavigation.svelte": "47ca460b71b7cfcca6948000c55c6e9bdfc472328b14866c044fe2df6a1f3b79",
     "src/lib/components/ees/EesProcedureIntro.svelte": "8e9e92baa499c6acf66f73643ce17e8b047a6d932844cc3158a252d23718a9a5",
     "src/lib/components/ees/EesScopeSelect.svelte": "b488d5e53c337fc6e3d0de1c1cae06fc753217d54e36ebcc9fc6fc0ca60603fa",
-    "src/lib/components/ees/EesShell.svelte": "0d1d54578c4fcf7bb5a29ac039766b49149fc31716ca6727d09cf0ebcf2e7b4e",
+    "src/lib/components/ees/EesShell.svelte": "eab9153eff27d1f2d3f0034bc3087e75aa6bda82fdf2913c37a8f405046d33f1",
     "src/lib/components/ees/icons/5bc95.svg": "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7",
     "src/lib/components/ees/state.ts": "560ef1a21f46fc2a1beabf3012a74933002af586c507ac42bb144f40fe305a43",
     "src/lib/components/layout/Sidebar.svelte": "9d08f54fdaa101ef2cf06c159e5defe421b366c695f26a15c4045bf3ba556096",
@@ -44,7 +44,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "302d959f3e6306fe323029bbb484149bf5801a4457f2265b39bcec5147369595"
+      "sha256": "4d6dbc76cc44d25b0ea9e4604105e74bf92f11c5d414848512baf65de935e615"
     }
   ],
   "pyodide_files": {

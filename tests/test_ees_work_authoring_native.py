@@ -575,8 +575,8 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.enter_authoring()
         self.wait("document.querySelector('[data-author-action=create]') && !document.querySelector('[data-author-action=create]').disabled")
         self.click('[data-author-action="create"]')
-        self.wait("document.querySelector('#ees-work-dialog [name=name]')")
-        self.fill('#ees-work-dialog [name=name]',name);self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.wait("document.querySelector('#ew-procedure-create #ew-procedure-name')")
+        self.fill('#ew-procedure-name',name);self.click('[data-author-action=procedure_create]')
         self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
         self.wait("document.querySelector('[data-author-action=add_stage]')")
         state=self.browser_api("GET","/api/ees-work/workspace")["data"]
@@ -594,7 +594,7 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.wait("document.querySelector('#ew-stage-editor [name=name]')")
         self.fill('#ew-stage-editor [name=name]', name)
         self.click('[data-author-action=inline_apply]')
-        self.wait("document.querySelector('#ew-author-node [name=instructions]')")
+        self.wait("document.querySelector('#ew-author-node [name=job_guidance]')")
 
     def send_native_chat_question(self, question):
         before = len(self.server.completions)
@@ -671,7 +671,7 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('[data-author-status]')?.textContent.includes('초안 r2 · 저장됨')")
         before = self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['workflow']
-        self.fill('#ew-author-node [name=instructions]', '직접 편집한 미저장 값')
+        self.fill('#ew-author-node [name=job_guidance]', '직접 편집한 미저장 값')
         proposed = deepcopy(before['draft'])
         proposed['description'] = '반영 전 합성 제안'
         job = next(node for node in proposed['nodes'].values() if node['type'] == 'j')
@@ -680,11 +680,11 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         accepted = self.deliver_native_chat_proposal(code)
         self.assertTrue(accepted['ok'], accepted)
         self.wait("document.querySelector('footer [data-author-action=ai_apply]')")
-        self.assertEqual(self.read('#ew-author-node [name=instructions]', 'value'), '직접 편집한 미저장 값')
+        self.assertEqual(self.read('#ew-author-node [name=job_guidance]', 'value'), '직접 편집한 미저장 값')
         self.assertEqual(self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['workflow'], before)
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[name=ai_prompt],[data-author-action=ai_propose],[data-author-action=ai_cancel]')"))
         self.click('footer [data-author-action=ai_apply]')
-        self.assertEqual(self.read('#ew-author-node [name=instructions]', 'value'), '반영 전 합성 제안')
+        self.assertEqual(self.read('#ew-author-node [name=job_guidance]', 'value'), '반영 전 합성 제안')
         self.assertEqual(self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['workflow'], before)
         discarded = deepcopy(proposed)
         discarded['description'] = '버릴 추가 제안'
@@ -692,7 +692,7 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.assertTrue(self.deliver_native_chat_proposal(self.prepare_native_chat_proposal(discarded))['ok'])
         self.click('footer [data-author-action=ai_discard]')
         self.wait("!document.querySelector('[data-author-action=ai_apply]')")
-        self.assertEqual(self.read('#ew-author-node [name=instructions]', 'value'), '반영 전 합성 제안')
+        self.assertEqual(self.read('#ew-author-node [name=job_guidance]', 'value'), '반영 전 합성 제안')
         self.assertEqual(self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['workflow'], before)
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('#ees-work-designer')?.innerText.includes('초안 r3')")
@@ -771,7 +771,9 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.click('[data-author-action="save"]');self.wait("document.querySelector('[data-author-status]')?.textContent.includes('초안 r2 · 저장됨')")
         self.click('[data-author-action="validate"]');self.wait("document.querySelector('[data-author-action=publish]')")
         self.click('[data-author-action="publish"]');self.click('[data-dialog-confirm]')
-        self.wait("document.querySelector('#ees-work-designer')?.innerText.includes('게시 v1')")
+        self.wait("!document.querySelector('#ees-work-dialog') && document.querySelector('#ees-work-designer [role=status]')?.textContent.includes('새 게시 버전을 만들었습니다')")
+        self.click('[data-author-action=tab][data-tab=history]')
+        self.wait("[...document.querySelectorAll('.ew-author-history strong')].some(node=>node.textContent.trim()==='게시 v1')")
         published=self.browser_api('GET','/api/ees-work/workspace?workflow_id='+key)['data']['workflow']
         self.assertEqual(published['published_version'],1);self.assert_user_workspace_zero()
         self.assertEqual(self.fixture.run(self.fixture.groups.Groups.get_group_by_id(group['id'])).permissions,{})
