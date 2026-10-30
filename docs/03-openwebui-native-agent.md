@@ -1,5 +1,7 @@
 # 03. Open WebUI Native 통합 Assistant
 
+**최신 배포 준비(2026-10-30):** [PR #109](https://github.com/knadalkim-a11y/team-agent-poc/pull/109)를 main `6b1c256ef44691ffec53cdcd7b65db329e11c4e1`에 병합했다. 아래 [운영32·작성12 적용 블록](#main-6b1c256-apply-prep-20261030)은 마지막 사내 성공 보고42f5ae5에서의 프로그램 갱신용이다. 새 사내 적용·기동·자료 확인은 아직 미실행이며 이전 성공 보고와 구분한다.
+
 **최신 사내 적용 보고(2026-10-28):** 사용자가 `result=ok / stage=complete / running=true / commit=42f5ae502b57`를 보고했다. 공통 단계 상세26판 프로그램의 적용·기동 성공 보고로 기록하며 [당시 적용 블록](#main-42f5ae5-apply-prep-20261028)은 다시 실행하지 않는다. 사내 단계 화면·기존 자료는 아직 미확인이므로 [기존 진행 건의 읽기 전용 진입](#operations-stage26-readonly-entry-20261028)으로 확인한다.
 
 **이전 사내 적용 보고(2026-10-26):** 사용자가 `result=ok / stage=complete / running=true / commit=924d919333b8`를 보고했다. 당시 **#103 병합 main924d919 프로그램 적용 완료·실행 중**으로 기록했다. [아래 적용 블록](#main-924d919-apply-prep-20261026)은 실행 이력이며 이 PC에서 반복하지 않는다. 당시 로그인·기존 자료·새 화면·도구 설정은 미확인이었다.
@@ -16,7 +18,8 @@
 
 | 할 일 | 안내 |
 |---|---|
-| 공통 단계 상세26판 · main42f5ae5 사내 적용 | [확정 ZIP·복사 실행 블록·화면 확인](#main-42f5ae5-apply-prep-20261028) |
+| 운영32·작성12 · main6b1c256 사내 적용 | [검증 ZIP·복사 실행·프로그램 복구](#main-6b1c256-apply-prep-20261030) |
+| 공통 단계 상세26판 · main42f5ae5 사내 적용 이력 | [확정 ZIP·복사 실행 블록·화면 확인](#main-42f5ae5-apply-prep-20261028) |
 | #103 병합 main924d919 사내 적용 이력 | [확정 ZIP·복사 실행 블록·설정·복구 경계](#main-924d919-apply-prep-20261026) |
 | main 1c1efff 적용 검토 기록·Claude 대조 | [확정 ZIP·한 블록·설정·Restore 경계](#main-1c1efff-apply-prep-20261022) |
 | 2-1/A2·Work 도구 후속 통합 적용 이력 | [병합 뒤 브라우저 열기·ZIP 대기·검사·적용 한 블록](#source-phase2-route-cache-zip-20261014) |
@@ -26,6 +29,89 @@
 | 프로그램·래퍼 업데이트 | [Upgrade](#ees-wrapper-upgrade) |
 | 수동 적용·복구 | [Apply/Restore](#ees-wrapper-apply)·[종료 복구](#ees-stop-recovery) |
 | 실패 기록·등록 위치 확인 | [실패 판단](#ees-update-failure-causes)·[사내 기록](#ees-local-state) |
+
+<a id="main-6b1c256-apply-prep-20261030"></a>
+
+## main 6b1c256 사내 적용 · 운영32·업무 절차12 · 2026-10-30
+
+사용자 요청으로 [PR #109](https://github.com/knadalkim-a11y/team-agent-poc/pull/109)를 main **`6b1c256ef44691ffec53cdcd7b65db329e11c4e1`**에 병합했다. PR CI407은39성공/출하1정상생략이며 검증 head와 main의 tree는 같다. [main CI408](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40975832132)은 첫 실행 **40/40 성공**이다. 실제 다운로드한 새 프로그램 ZIP의 크기·SHA256·CRC·원본 커밋·전체 포함 파일·wheel·프런트엔드 strict 검증을 마쳤다. [정확한 검증 근거](../evals/v4-ui-20260930.md#main-6b1c256-apply-evidence-20261030).
+
+이번 버전은 운영의 간결한 개요→단계 조회, 판정 사유 저장·읽기 전용 표시와 회색 안쪽 초점, 작성12의 작업 상세·도구 연결/확인 필요 표현을 반영한다. 현재 검색 목록은 유지하며 이전 B1으로 되돌리지 않는다. 최신 Figma 기준으로 대조한 범위와 실제 자료에 따른 차이는 [평가 기록](../evals/v4-ui-20260930.md#reason-border-20261030)을 따른다.
+
+| 대조 항목 | 확정 값 |
+|---|---|
+| 바깥 Actions ZIP | [ees-program-6b1c256ef44691ffec53cdcd7b65db329e11c4e1.zip](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40975832132/artifacts/12943147290) |
+| 바깥 ZIP 크기 / SHA256 | **155,314,608 bytes** / `d7fc1b946aeaa69b3be24f346fb91facbe0b399ab0e9b36c8d1f66f7efc6c0de` |
+| 내부 프로그램 ZIP | `EES-demo-6b1c256ef446.zip`, 155,314,444 bytes / `fc2d952448a840d3dcab23e482891c34024024d490b0e56ba046ccb02a50984b` |
+| 프로그램 원본 | clean manifest의 source_commit=`6b1c256ef44691ffec53cdcd7b65db329e11c4e1` |
+
+기존 운영 계정 PowerShell에서 작성 중인 입력을 저장하고 팀원이 사용하지 않는 시간에 아래 적용 블록을 실행한다. 경로가 다르면 `$er`(기존 저장소)·`$ecfg`(등록 설정)·`$ed`(다운로드 폴더)만 맞춘다. ZIP이 없으면 브라우저를 열고 Downloads에 원래 이름으로 받을 때까지15분 기다린다. 기존 ZIP이 있으면 같은 크기·해시로 다시 검사해 사용한다.
+
+```powershell
+# 저장 후 실행. 적용 뒤 새로고침하고 개요·단계·업무절차·기존 자료 확인.
+# 기존 도구·개인 연결을 유지하며 도구를 재등록하지 않음.
+# Restore는 직전42f5ae5 프로그램만. DB/PAT/도구 설정은 보존.
+& {
+$ErrorActionPreference='Stop'
+$ec='6b1c256ef44691ffec53cdcd7b65db329e11c4e1'
+$eh='d7fc1b946aeaa69b3be24f346fb91facbe0b399ab0e9b36c8d1f66f7efc6c0de'
+$en=155314608
+$eu='https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40975832132/artifacts/12943147290'
+if($ec -cnotmatch '\A[0-9a-f]{40}\z' -or $eh -cnotmatch '\A[0-9a-f]{64}\z' -or $en -le 0 -or $eu -cnotmatch '\Ahttps://github\.com/knadalkim-a11y/team-agent-poc/actions/runs/[0-9]+/artifacts/[0-9]+\z'){throw '배포 값 오류'}
+$er=Join-Path $env:USERPROFILE 'team-agent-poc'
+$ecfg=Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+$ed=Join-Path $env:USERPROFILE 'Downloads'
+$em=Join-Path $er 'scripts\manage-ees.ps1'
+$et=[DateTime]::UtcNow; $ee=$et.AddMinutes(15)
+$ep='\Aees-program-'+$ec+'(?: \([0-9]+\))?\.zip\z'
+$ef=@(Get-ChildItem -LiteralPath $ed -File | Where-Object {$_.Name -cmatch $ep -and $_.Length -eq $en} | Sort-Object LastWriteTimeUtc -Descending)[0]
+$ez=if($ef){$ef.FullName}else{$null}
+$ev=''
+if(!$ez){
+Start-Process $eu
+while([DateTime]::UtcNow -lt $ee){
+$ef=@(Get-ChildItem -LiteralPath $ed -File | Where-Object {$_.Name -cmatch $ep -and $_.Length -eq $en -and $_.LastWriteTimeUtc -ge $et} | Sort-Object LastWriteTimeUtc -Descending)[0]
+$es=if($ef){"$($ef.FullName)|$($ef.LastWriteTimeUtc.Ticks)"}else{''}
+if($es -and $es -ceq $ev){$ez=$ef.FullName; break}
+$ev=$es; Start-Sleep -Seconds 2
+}
+}
+if(!$ez){throw 'ZIP 대기 만료: 미적용'}
+if((Get-FileHash -LiteralPath $ez -Algorithm SHA256).Hash -ine $eh){throw 'ZIP 해시 불일치: 미적용'}
+$eb=& $em -Action Status -Config $ecfg | ConvertFrom-Json
+if($eb.program_valid -ne $true -or $eb.program_incomplete -or $eb.current_commit -cne '42f5ae502b57be68aefa5d141f09259c8f6e9ee9'){throw ('EES before commit={0} valid={1} running={2}' -f $eb.current_commit,$eb.program_valid,$eb.managed_process_running)}
+& $em -Action Update -Config $ecfg
+foreach($ex in @('HEAD','origin/main')){
+$ea=& git -C $er rev-parse $ex
+if($LASTEXITCODE -ne 0 -or $ea -cne $ec){throw '검토 원본 불일치: 미적용'}
+}
+& $em -Action Upgrade -Config $ecfg -Bundle $ez -Commit $ec -ArtifactSha256 $eh -HealthTimeout 120 -Summary
+}
+```
+
+설치 전 exact42f5ae5·정상 프로그램·미완료 없음, ZIP 크기/해시, Update 후 HEAD/origin/main 일치를 확인한 뒤 기존 Upgrade가 검사→Stop→정지 확인→백업→Apply→Start/health를 수행한다. 값이 다르면 Stop 전에 멈추며 임의 reset·검사 삭제·다른 ZIP 대체를 하지 않는다. 기존 Python·DATA_DIR·키·계정·대화·첨부·PAT·모델/도구 설정을 유지한다. 이 구간의 관리/배포 스크립트·업무 Python·Work/Confluence 도구 원본은 같으며 도구 재등록·Init·ApplyDemo·의존성 전체 설치·사내 Node/npm 빌드는 필요 없다.
+
+적용 뒤 브라우저를 새로고침하고 **업무 → 운영**에서 기존 워크플로우의 개요→단계로 읽기 전용 이동한다. **워크 → 업무 절차**에서 기존 작성 내용을 확인하되 저장/게시/실행/판정은 검수만을 위해 누르지 않는다. 기존 대화·업무와 사유 기록이 남아 있는지도 확인한다. 실제 도구 만들기 기능 완성은 별도 후속 작업이다.
+
+프로그램 적용 후 문제가 있어 **직전42f5 프로그램으로 되돌릴 때만** 다음 블록을 쓴다. DB·대화·첨부·PAT·설정은 복원 대상이 아니다.
+
+```powershell
+# 새 프로그램 적용 후 직전 프로그램으로 되돌릴 때만 실행.
+# 프로그램만 복원하며 DB·대화·첨부·PAT는 되돌리지 않음.
+& {
+$ErrorActionPreference='Stop'
+$er=Join-Path $env:USERPROFILE 'team-agent-poc'
+$ecfg=Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'
+$em=Join-Path $er 'scripts\manage-ees.ps1'
+& $em -Action Stop -Config $ecfg -Summary
+& $em -Action Restore -Config $ecfg -Summary
+& $em -Action Start -Config $ecfg -HealthTimeout 120 -Summary
+}
+```
+
+사전 검사에서 중단했으면 프로그램은 바뀌지 않아 Restore하지 않는다. Apply/Restore 자체가 중단돼 미완료 기록이 남았다면 위 정상 원복 대신 [미완료 작업의 Restore→Start 분기](#ees-wrapper-restore)를 따른다. 이 분기에서도 같은 관리자 경로·설정 파일을 사용하고 각 명령에 `-Config $ecfg`를 명시한다. health timeout만으로 Start·Upgrade·Restore를 반복하지 않는다. 실패하면 마지막 `result/stage/code/running/commit`만 전달하고 상세 로그는 사내에 보존한다.
+
+회신은1~2줄이면 된다: `result=… / stage=… / running=… / commit=…`(실패면 code 포함), 확인했다면 `화면=일치/차이 / 기존자료=정상/문제`. 에이전트의 ZIP 검증·병합 완료를 사내 적용 완료로 대신하지 않는다.
 
 <a id="main-42f5ae5-apply-prep-20261028"></a>
 
@@ -278,7 +364,7 @@ Confluence 페이지 조회를 사용할 때는 관리자가 **워크스페이�
   $eesCommit='MERGED_MAIN_SHA'
   $eesHash='OUTER_ZIP_SHA256'
   $eesBytes=0
-  $eesUrl='FINAL_ACTIONS_ARTIFACT_URL'
+  $eesUrl='https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40975832132/artifacts/12943147290'
   if($eesCommit -cnotmatch '\A[0-9a-f]{40}\z' -or $eesHash -cnotmatch '\A[0-9a-f]{64}\z' -or $eesBytes -le 0 -or $eesUrl -cnotmatch '\Ahttps://github\.com/knadalkim-a11y/team-agent-poc/actions/runs/[0-9]+/artifacts/[0-9]+\z'){throw '병합 후 확정한 배포 값이 필요합니다.'}
   $eesRepo=Join-Path $env:USERPROFILE 'team-agent-poc'
   $eesCfg=Join-Path $env:LOCALAPPDATA 'EES-Agent-POC\deployment\config.json'

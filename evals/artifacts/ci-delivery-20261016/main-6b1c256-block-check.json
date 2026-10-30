@@ -1,0 +1,47 @@
+{
+  "checked_at_utc": "2026-10-30T00:11:35.666735+00:00",
+  "result": "passed",
+  "target_commit": "6b1c256ef44691ffec53cdcd7b65db329e11c4e1",
+  "expected_installed_commit": "42f5ae502b57be68aefa5d141f09259c8f6e9ee9",
+  "outer_zip": {
+    "bytes": 155314608,
+    "sha256": "d7fc1b946aeaa69b3be24f346fb91facbe0b399ab0e9b36c8d1f66f7efc6c0de",
+    "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40975832132/artifacts/12943147290"
+  },
+  "checks": {
+    "fixed_literal_formats_and_expected_values": true,
+    "docs_and_scratch_blocks_identical": true,
+    "apply_control_flow_identical_to_42f5_block_except_comments_and_pins": true,
+    "apply_control_flow_normalized_sha256": "ebee7d82a46d50cb7b68b808885b30b9d71b8e66c1f28121ba10b6f1b3e5e94c",
+    "every_manager_action_uses_same_config": true,
+    "apply_actions": [
+      "Status",
+      "Update",
+      "Upgrade"
+    ],
+    "restore_actions": [
+      "Stop",
+      "Restore",
+      "Start"
+    ],
+    "incomplete_restore_same_config_instruction": true,
+    "no_placeholders": true
+  },
+  "blocks": {
+    "apply": {
+      "characters_lf_including_trailing_newline": 2233,
+      "characters_crlf_including_trailing_newline": 2272,
+      "sha256_lf": "b0484f6cedf7f2c1c3a3bc9a60e9c4ec4d65f511b8101325839effd3224c862e"
+    },
+    "restore": {
+      "characters_lf_including_trailing_newline": 420,
+      "characters_crlf_including_trailing_newline": 431,
+      "sha256_lf": "2b8a21f7f5839009193ef6a7e45485fea5f8598161e26d2d7bdbb4b3fc7c5265"
+    }
+  },
+  "validation_boundary": {
+    "powershell_ast_executed": false,
+    "pwsh_on_path": null,
+    "basis": "Read-only code/contract review, constant-format checks and byte-equal control flow to the previous 42f5 Apply block; no actual PowerShell or on-premise deployment execution. ZIP download/manifest verification is separate; fixed values here are matched to the supplied verified artifact metadata."
+  }
+}
