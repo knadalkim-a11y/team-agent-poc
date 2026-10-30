@@ -1,5 +1,20 @@
 # 현재 작업 상태
 
+## 2026-10-30 · PR #110 병합 요청 · 새 터미널 실행 정책 중단
+
+- **현재:** 사용자가 배포 문서 [PR #110](https://github.com/knadalkim-a11y/team-agent-poc/pull/110)의 병합도 요청했다. 문서·실패 기록을 보완하고 최종 CI 확인 후 병합한다. 제품 코드는 바꾸지 않는다.
+- **현장 보고:** 재부팅 뒤 새 PowerShell 창에서 첫 `Status`가 `UnauthorizedAccess`로 차단됐다. 이번 시도의 Update·Upgrade·Stop·프로그램 교체는 미실행이며 Restore는 불필요하다. 현재 실행 정책 값·재시도·새 프로그램 적용 성공은 아직 미확인이고, 마지막 성공 보고는42f5ae5다. [원인 판단과 재발 방지](../evals/v4-ui-20260930.md#powershell-preflight-20261030).
+- **병합 전 CI 보완:** 최종 문서 head9b2df31의 CI410에서 Windows 재시도 시험이 실제1초 경과에 의존해 실패했다. 제어한 시계로 대기 전·만료 경계·재시도 횟수를 검사하도록 시험만 고치며 제품의 재시도 정책·호출 예산은 유지한다. [첫 실패와 검증](../evals/v4-ui-20260930.md#ci410-windows-retry-clock-20261030)을 보존하고 수정 head의 전체 CI를 확인한 뒤 병합한다.
+- **다음 하나:** PR #110 병합 뒤 정확한 새 main에서 프로그램 포함 CI/ZIP을 검증하고 새 고정 적용 블록을 같은 PR 본문에 제공한다. 기존6b1c256 블록은 병합 전 이력으로 보존하며 재실행하지 않는다. [새 터미널 준비](03-openwebui-native-agent.md#ees-new-powershell-window)를 현재 배포 안내에 연결했다.
+
+> 아래는 앞선 배포 준비·구현 당시 기록이다. Draft 유지·다음 작업 문구와 CI 성공은 각 당시 상태이며, 이번 병합이나 사내 적용 성공을 뜻하지 않는다.
+
+## 2026-10-30 · PR #109 병합 · 운영32/작성12 사내 적용 준비
+
+- **병합:** 사용자의 “병합하고, 사내배포 스크립트까지 복붙가능하게 제공해줘” 요청에 따라 [PR #109](https://github.com/knadalkim-a11y/team-agent-poc/pull/109)를08:50 KST에 main `6b1c256ef44691ffec53cdcd7b65db329e11c4e1`으로 병합했다. 최종 head `3c5ba1d`의 [CI407](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124)은39성공/PR 출하1정상생략이며 미해결 리뷰0이었다. 병합 main과 검증 head의 tree `63bec1690b08c9eb3c6a39196ba95f89fee4d19c`는 같다.
+- **배포 준비:** [main CI408](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40975832132)은 첫 실행40/40 성공했다. 새 프로그램 ZIP의 실제 바이트·clean 원본·32포함 파일·wheel RECORD·프런트엔드139입력/5,582출력을 strict 검증하고 [복사 실행·복구 블록](03-openwebui-native-agent.md#main-6b1c256-apply-prep-20261030)을 준비했다. 마지막 사내 보고 `42f5ae502b57be68aefa5d141f09259c8f6e9ee9`에서 기존 Update→Upgrade/명시적 Restore를 사용한다. 기존 관리 스크립트·업무 Python·Work/Confluence 도구 원본은 이 구간에서 바뀌지 않았으며 자료 이관·재등록·의존성 설치는 추가하지 않는다.
+- **다음 하나·현장:** 검증된 main ZIP과 복사 실행 블록으로 적용한 결과1줄·읽기 전용 화면/기존 자료 확인1줄을 받는다. 배포 기록 문서는 별도 Draft로 두어 적용 대상 main6b1c256을 유지한다. 이 준비를 사내 적용 성공으로 표시하지 않는다. 아래 Draft·미병합 문구는 작업 당시 이력이다.
+
 ## 2026-10-30 · 사유의 파란 바깥선 제거 · PR #109 후속
 
 - **현재:** 사용자 요청에 따라 같은 [PR #109](https://github.com/knadalkim-a11y/team-agent-poc/pull/109)에서 사유의 파란 바깥선을 제거하고 키보드 초점을 회색 안쪽선으로 바꿨다. Figma 운영32와 비교 HTML에도 반영했다. 작성12·현재 검색 목록·B1 제외 결정은 유지한다. [범위](mockups/ees-work/TASK.md#reason-border-20261030).

@@ -675,16 +675,27 @@ class ExecutionTests(unittest.IsolatedAsyncioTestCase):
             limits.update(max_retries=1, max_tool_calls=2)
             db.execute("UPDATE catalog SET published=?", (workflow._dump(catalog),))
         self.bridge.results["jira_dashboard"] = {**envelope(status="failed"), "error": {"code": "rate_limited"}}
-        run = await self.start(await self.plan("new-operations-jira-j"))
-        await self.runtime.process_once()
-        run = await self.state(run)
-        self.assertEqual(run["reason"], "retry_wait")
-        self.assertFalse(await self.runtime.process_once())
-        await asyncio.sleep(1.02)
-        run = await self.drain(run)
-        self.assertEqual(run["status"], "failed")
-        self.assertEqual(len(run["calls"]), 2)
-        self.assertEqual([row["status"] for row in run["calls"]], ["failed", "failed"])
+        # Advance the persisted retry deadline explicitly; runner/SQLite latency
+        # must not turn the before-deadline assertion into an eligible retry.
+        with patch.object(execution.time, "time", return_value=time.time()) as clock:
+            run = await self.start(await self.plan("new-operations-jira-j"))
+            await self.runtime.process_once()
+            run = await self.state(run)
+            self.assertEqual(run["reason"], "retry_wait")
+            retry_at = run["not_before"]
+            self.assertEqual(retry_at, clock.return_value + 1)
+            clock.return_value = retry_at - 0.01
+            self.assertFalse(await self.runtime.process_once())
+            self.assertEqual(len(self.bridge.calls), 1)
+            clock.return_value = retry_at
+            self.assertTrue(await self.runtime.process_once())
+            run = await self.drain(run)
+            self.assertEqual(run["status"], "failed")
+            self.assertEqual(len(run["calls"]), 2)
+            self.assertEqual([row["status"] for row in run["calls"]], ["failed", "failed"])
+            clock.return_value = retry_at + 2.4
+            self.assertFalse(await self.runtime.process_once())
+            self.assertEqual(len(self.bridge.calls), 2)
 
     async def test_plan_hash_expiry_and_skill_change_fail_before_dispatch(self):
         plan = await self.plan()

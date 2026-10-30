@@ -1,0 +1,336 @@
+{
+  "recorded_date": "2026-10-30",
+  "timezone": "Asia/Seoul",
+  "run": {
+    "id": 40988818725,
+    "run_number": 410,
+    "run_attempt": 1,
+    "head_sha": "9b2df315e3a1e6e91e06196b3f161e9a19ebd90a",
+    "event": "pull_request",
+    "status": "completed",
+    "conclusion": "failure",
+    "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40988818725",
+    "run_started_at": "2026-10-30T01:57:03Z",
+    "updated_at": "2026-10-30T02:12:45Z"
+  },
+  "jobs": [
+    {
+      "id": 123846014367,
+      "name": "Pinned Native source baseline and EES frontend build",
+      "conclusion": "success"
+    },
+    {
+      "id": 123846014604,
+      "name": "Source audit (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123846014643,
+      "name": "Source audit (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123846014646,
+      "name": "Verify the fixed official wheel",
+      "conclusion": "success"
+    },
+    {
+      "id": 123846108923,
+      "name": "Verify cached historical fixture (previous-v4)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123846108969,
+      "name": "Verify cached historical fixture (previous13)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123846108981,
+      "name": "Verify cached historical fixture (previous)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123846109020,
+      "name": "Verify cached historical fixture (legacy)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123846109160,
+      "name": "Verify cached historical fixture (previous12)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847778627,
+      "name": "Prepare current program fixtures",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847991916,
+      "name": "Complete Native product (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847991969,
+      "name": "native-work (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847991980,
+      "name": "native-compose (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847991995,
+      "name": "native-account (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992024,
+      "name": "native-execution (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992283,
+      "name": "contracts (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992297,
+      "name": "restore-ees12 (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992298,
+      "name": "services (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992302,
+      "name": "native-grounding (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992346,
+      "name": "platform (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992347,
+      "name": "program-install (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992349,
+      "name": "program-wheel (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992364,
+      "name": "program-wheel (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992368,
+      "name": "restore-ees12 (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992369,
+      "name": "contracts (windows-2022)",
+      "conclusion": "failure"
+    },
+    {
+      "id": 123847992389,
+      "name": "platform (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992392,
+      "name": "program-install (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992397,
+      "name": "native-contracts (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992400,
+      "name": "restore-ees13 (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992401,
+      "name": "services (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992422,
+      "name": "restore-ees13 (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992424,
+      "name": "restore-ees10 (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992435,
+      "name": "native-contracts (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992468,
+      "name": "restore-ees11 (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992472,
+      "name": "restore-ees10 (ubuntu-24.04)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992491,
+      "name": "native-grounding (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123847992724,
+      "name": "restore-ees11 (windows-2022)",
+      "conclusion": "success"
+    },
+    {
+      "id": 123850935638,
+      "name": "Delivery checks (windows-2022)",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 123850935644,
+      "name": "Delivery checks (ubuntu-24.04)",
+      "conclusion": "failure"
+    },
+    {
+      "id": 123850976551,
+      "name": "Prepare delivery files",
+      "conclusion": "skipped"
+    }
+  ],
+  "failed_step": [
+    {
+      "name": "Run the complete assigned module set",
+      "status": "completed",
+      "conclusion": "failure",
+      "number": 15,
+      "started_at": "2026-10-30T02:04:24Z",
+      "completed_at": "2026-10-30T02:10:23Z"
+    }
+  ],
+  "source_diff_at_first_failure": {
+    "files": 8,
+    "scope": "docs/evals/CHANGELOG only",
+    "product_changes": 0,
+    "test_changes": 0
+  },
+  "first_failure_log": {
+    "origin": "GitHub job log123847992369",
+    "saved_format": "full UTF-8 log with LF newlines",
+    "bytes": 202673,
+    "sha256": "80b6aa6a9b7a9b0d6b02b5e9a889deabfd85640f6bfe50b52ef8ea234610d4cf",
+    "test_timing_excerpt": [
+      "2026-10-30T02:09:56.5342742Z test_only_classified_rate_limit_retries_once_within_declared_budget (test_ees_workflow_execution.ExecutionTests.test_only_classified_rate_limit_retries_once_within_declared_budget) ... Executing <Task finished name='Task-157' coro=<ExecutionTests.asyncSetUp() done, defined at D:\\a\\team-agent-poc\\team-agent-poc\\tests\\test_ees_workflow_execution.py:104> result=None created at C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\runners.py:100> took 0.625 seconds",
+      "2026-10-30T02:09:58.4890704Z Executing <Task pending name='Task-158' coro=<ExecutionTests.test_only_classified_rate_limit_retries_once_within_declared_budget() running at D:\\a\\team-agent-poc\\team-agent-poc\\tests\\test_ees_workflow_execution.py:679> wait_for=<Future pending cb=[Task.task_wakeup()] created at C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\base_events.py:428> cb=[_run_until_complete_cb() at C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\base_events.py:181] created at C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\runners.py:100> took 1.953 seconds",
+      "2026-10-30T02:09:59.5713864Z Executing <Task pending name='Task-158' coro=<ExecutionTests.test_only_classified_rate_limit_retries_once_within_declared_budget() running at D:\\a\\team-agent-poc\\team-agent-poc\\tests\\test_ees_workflow_execution.py:679> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()] created at C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\tasks.py:709> cb=[_run_until_complete_cb() at C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\base_events.py:181] created at C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\runners.py:100> took 1.078 seconds",
+      "2026-10-30T02:10:02.0124183Z Executing <Task pending name='Task-158' coro=<ExecutionTests.test_only_classified_rate_limit_retries_once_within_declared_budget() running at D:\\a\\team-agent-poc\\team-agent-poc\\tests\\test_ees_workflow_execution.py:682> wait_for=<Future pending cb=[Task.task_wakeup()] created at C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\base_events.py:428> cb=[_run_until_complete_cb() at C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\base_events.py:181] created at C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\runners.py:100> took 2.437 seconds",
+      "2026-10-30T02:10:02.3907701Z Executing <Task pending name='Task-158' coro=<ExecutionTests.test_only_classified_rate_limit_retries_once_within_declared_budget() running at D:\\a\\team-agent-poc\\team-agent-poc\\tests\\test_ees_workflow_execution.py:682> wait_for=<_GatheringFuture pending cb=[Task.task_wakeup()] created at C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\tasks.py:709> cb=[_run_until_complete_cb() at C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\base_events.py:181] created at C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\runners.py:100> took 0.375 seconds",
+      "2026-10-30T02:10:02.3931507Z FAIL"
+    ],
+    "traceback_excerpt": [
+      "2026-10-30T02:10:22.1280596Z FAIL: test_only_classified_rate_limit_retries_once_within_declared_budget (test_ees_workflow_execution.ExecutionTests.test_only_classified_rate_limit_retries_once_within_declared_budget)",
+      "2026-10-30T02:10:22.1282315Z ----------------------------------------------------------------------",
+      "2026-10-30T02:10:22.1283073Z Traceback (most recent call last):",
+      "2026-10-30T02:10:22.1293838Z   File \"C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\unittest\\async_case.py\", line 90, in _callTestMethod",
+      "2026-10-30T02:10:22.1294908Z     if self._callMaybeAsync(method) is not None:",
+      "2026-10-30T02:10:22.1295470Z        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+      "2026-10-30T02:10:22.1297115Z   File \"C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\unittest\\async_case.py\", line 112, in _callMaybeAsync",
+      "2026-10-30T02:10:22.1298052Z     return self._asyncioRunner.run(",
+      "2026-10-30T02:10:22.1298550Z            ^^^^^^^^^^^^^^^^^^^^^^^^",
+      "2026-10-30T02:10:22.1299341Z   File \"C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\runners.py\", line 118, in run",
+      "2026-10-30T02:10:22.1300148Z     return self._loop.run_until_complete(task)",
+      "2026-10-30T02:10:22.1300630Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+      "2026-10-30T02:10:22.1301517Z   File \"C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\asyncio\\base_events.py\", line 654, in run_until_complete",
+      "2026-10-30T02:10:22.1302405Z     return future.result()",
+      "2026-10-30T02:10:22.1302886Z            ^^^^^^^^^^^^^^^",
+      "2026-10-30T02:10:22.1304001Z   File \"D:\\a\\team-agent-poc\\team-agent-poc\\tests\\test_ees_workflow_execution.py\", line 682, in test_only_classified_rate_limit_retries_once_within_declared_budget",
+      "2026-10-30T02:10:22.1305188Z     self.assertFalse(await self.runtime.process_once())",
+      "2026-10-30T02:10:22.1305788Z AssertionError: True is not false",
+      "2026-10-30T02:10:22.1306076Z ",
+      "2026-10-30T02:10:22.1306359Z ----------------------------------------------------------------------",
+      "2026-10-30T02:10:22.1324527Z Ran 37 tests in 35.070s",
+      "2026-10-30T02:10:22.1324782Z ",
+      "2026-10-30T02:10:22.1324951Z FAILED (failures=1)",
+      "2026-10-30T02:10:22.8322389Z test_chat_completion_cannot_forward_configured_output_token_override (test_ees_workflow_model_native.NativePayloadTests.test_chat_completion_cannot_forward_configured_output_token_override) ... ok"
+    ]
+  },
+  "diagnosis": {
+    "observed": "Expected immediate second process_once to return False, but it returned True.",
+    "test_assumption": "The next DB/state check completes within the real one-second retry delay.",
+    "runtime_contract": "Persist not_before=time.time()+1; only claim queued runs with not_before<=time.time().",
+    "scope": "Timing-sensitive test; separate from in-house PowerShell execution policy preflight error."
+  },
+  "correction": {
+    "file": "tests/test_ees_workflow_execution.py",
+    "scope": "Only this test wallclock is controlled; no product policy, delay, call budget or asyncio monotonic changes.",
+    "required_assertions": [
+      "not dispatched before deadline",
+      "one retry at deadline",
+      "two failed calls exhaust budget"
+    ]
+  },
+  "local_validation": {
+    "python": "3.11.16",
+    "module": "test_ees_workflow_execution",
+    "command": "PYTHONPATH=tests .venv/bin/python -X warn_default_encoding -W error::EncodingWarning -m unittest test_ees_workflow_execution -v",
+    "total": 37,
+    "passed": 35,
+    "skipped": 2,
+    "failures": 0,
+    "duration_seconds": 4.05,
+    "skipped_tests": {
+      "test_protocol_writer_guard_rejects_actual_previous_program": "pinned previous main source fixture unavailable",
+      "test_real_native_approval_disable_endpoints_return_success_after_commit": "pinned Native wheel unavailable"
+    },
+    "reproduction": {
+      "scope": "Pre-fix test sequence with controlled 2.4-second wallclock advance",
+      "expected_result": "AssertionError: True is not false",
+      "observed_result": "AssertionError: True is not false",
+      "duration_seconds": 0.035,
+      "script": "\"\"\"Reproduce the old retry assertion after a controlled 2.4-second clock advance.\"\"\"\nimport ast\nfrom pathlib import Path\nimport subprocess\nimport sys\nimport textwrap\nimport time\nimport unittest\nfrom unittest.mock import patch\n\nroot = Path('/workspace/scratch/b1afafbe4fcd/repo')\nsys.path.insert(0, str(root / 'tests'))\nimport test_ees_workflow_execution as original\n\nname = 'test_only_classified_rate_limit_retries_once_within_declared_budget'\nsource = subprocess.run(\n    ['git', 'show', '9b2df315e3a1e6e91e06196b3f161e9a19ebd90a:tests/test_ees_workflow_execution.py'],\n    cwd=root, check=True, capture_output=True, text=True, encoding='utf-8').stdout\nmethod = next(node for node in ast.walk(ast.parse(source))\n              if isinstance(node, ast.AsyncFunctionDef) and node.name == name)\nbody = textwrap.dedent('\\n'.join(source.splitlines()[method.lineno - 1:method.end_lineno]))\nneedle = '    self.assertFalse(await self.runtime.process_once())'\nassert body.count(needle) == 1\nbody = body.replace(needle, '    execution.time.time.return_value += 2.4\\n' + needle)\nnamespace = dict(vars(original))\nexec(compile(body, '<old-test-with-controlled-delay>', 'exec'), namespace)\nold_with_delay = namespace[name]\n\nasync def reproduce(self):\n    with patch.object(original.execution.time, 'time', return_value=time.time()):\n        await old_with_delay(self)\n\ncase = type('PriorClockAssumption', (original.ExecutionTests,), {name: reproduce})\nresult = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite([case(name)]))\nexpected = len(result.failures) == 1 and not result.errors and 'True is not false' in result.failures[0][1]\nprint('EXPECTED_PRIOR_ASSERTION_FAILURE=' + str(expected))\nraise SystemExit(0 if expected else 1)\n"
+    },
+    "log_hashes": {
+      "execution-module-clock-fix.log": {
+        "bytes": 7217,
+        "sha256": "098c6f3bc2f9332da9ff008cf2163f3ecf8cc468b46a02d5aa55258b59ab49c8"
+      },
+      "ci410-clock-assumption-reproduction.log": {
+        "bytes": 1834,
+        "sha256": "ac7d3b1103c28e6521bd263305a5a531921adfea62ce07b8a921902ea7c19764"
+      },
+      "reproduce-ci410-clock-assumption.py": {
+        "bytes": 1728,
+        "sha256": "2e5019963f12a4fc44e30a6d8c8362c5d63b71aec0c6ada07f1e274d3f9d068d"
+      }
+    },
+    "boundary_assertions": [
+      "not_before == current wallclock+1",
+      "no dispatch at not_before-0.01 and exactly1bridgecall",
+      "dispatch at not_before",
+      "original terminal failed state and2failedcalls retained",
+      "no dispatch at not_before+2.4 and exactly2bridgecalls"
+    ],
+    "limitations": [
+      "Local Linux module test does not substitute for final Windows CI.",
+      "Two unchanged fixture-dependent tests skipped locally; full CI has assigned fixtures."
+    ]
+  },
+  "ci_after_correction": "Fresh head required; first attempt preserved, no same-head retry."
+}

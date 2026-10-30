@@ -1,0 +1,304 @@
+{
+  "date_kst": "2026-10-30",
+  "pr": 109,
+  "head": "3c5ba1d074a0dee57d0737ae305242acca90b06f",
+  "main": "6b1c256ef44691ffec53cdcd7b65db329e11c4e1",
+  "merged_at_kst": "2026-10-30T08:50:34+09:00",
+  "tree": "63bec1690b08c9eb3c6a39196ba95f89fee4d19c",
+  "tree_equal": true,
+  "run": {
+    "id": 40973385124,
+    "number": 407,
+    "status": "completed",
+    "conclusion": "success",
+    "head_sha": "3c5ba1d074a0dee57d0737ae305242acca90b06f",
+    "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124",
+    "run_attempt": 1
+  },
+  "jobs": [
+    {
+      "id": 123795391756,
+      "name": "Verify the fixed official wheel",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123795391756"
+    },
+    {
+      "id": 123795391972,
+      "name": "Source audit (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123795391972"
+    },
+    {
+      "id": 123795392010,
+      "name": "Source audit (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123795392010"
+    },
+    {
+      "id": 123795392033,
+      "name": "Pinned Native source baseline and EES frontend build",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123795392033"
+    },
+    {
+      "id": 123795577048,
+      "name": "Verify cached historical fixture (previous)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123795577048"
+    },
+    {
+      "id": 123795577060,
+      "name": "Verify cached historical fixture (previous13)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123795577060"
+    },
+    {
+      "id": 123795577118,
+      "name": "Verify cached historical fixture (previous-v4)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123795577118"
+    },
+    {
+      "id": 123795577128,
+      "name": "Verify cached historical fixture (legacy)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123795577128"
+    },
+    {
+      "id": 123795577142,
+      "name": "Verify cached historical fixture (previous12)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123795577142"
+    },
+    {
+      "id": 123796957837,
+      "name": "Prepare current program fixtures",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123796957837"
+    },
+    {
+      "id": 123797232782,
+      "name": "native-compose (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797232782"
+    },
+    {
+      "id": 123797232785,
+      "name": "Complete Native product (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797232785"
+    },
+    {
+      "id": 123797232835,
+      "name": "native-account (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797232835"
+    },
+    {
+      "id": 123797232842,
+      "name": "native-work (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797232842"
+    },
+    {
+      "id": 123797232857,
+      "name": "native-execution (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797232857"
+    },
+    {
+      "id": 123797233001,
+      "name": "services (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233001"
+    },
+    {
+      "id": 123797233013,
+      "name": "program-install (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233013"
+    },
+    {
+      "id": 123797233014,
+      "name": "platform (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233014"
+    },
+    {
+      "id": 123797233057,
+      "name": "restore-ees13 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233057"
+    },
+    {
+      "id": 123797233060,
+      "name": "restore-ees13 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233060"
+    },
+    {
+      "id": 123797233066,
+      "name": "native-grounding (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233066"
+    },
+    {
+      "id": 123797233070,
+      "name": "contracts (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233070"
+    },
+    {
+      "id": 123797233073,
+      "name": "contracts (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233073"
+    },
+    {
+      "id": 123797233091,
+      "name": "native-contracts (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233091"
+    },
+    {
+      "id": 123797233095,
+      "name": "program-wheel (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233095"
+    },
+    {
+      "id": 123797233096,
+      "name": "restore-ees12 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233096"
+    },
+    {
+      "id": 123797233101,
+      "name": "services (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233101"
+    },
+    {
+      "id": 123797233107,
+      "name": "restore-ees11 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233107"
+    },
+    {
+      "id": 123797233120,
+      "name": "native-contracts (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233120"
+    },
+    {
+      "id": 123797233133,
+      "name": "program-install (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233133"
+    },
+    {
+      "id": 123797233135,
+      "name": "restore-ees10 (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233135"
+    },
+    {
+      "id": 123797233143,
+      "name": "program-wheel (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233143"
+    },
+    {
+      "id": 123797233190,
+      "name": "restore-ees12 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233190"
+    },
+    {
+      "id": 123797233195,
+      "name": "platform (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233195"
+    },
+    {
+      "id": 123797233237,
+      "name": "native-grounding (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233237"
+    },
+    {
+      "id": 123797233245,
+      "name": "restore-ees11 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233245"
+    },
+    {
+      "id": 123797233252,
+      "name": "restore-ees10 (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123797233252"
+    },
+    {
+      "id": 123800626757,
+      "name": "Delivery checks (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123800626757"
+    },
+    {
+      "id": 123800626875,
+      "name": "Delivery checks (windows-2022)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123800626875"
+    },
+    {
+      "id": 123800669084,
+      "name": "Prepare delivery files",
+      "status": "completed",
+      "conclusion": "skipped",
+      "html_url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124/job/123800669084"
+    }
+  ],
+  "reviews": 0,
+  "unresolved_threads": 0,
+  "issue_comments": 0,
+  "first_failure_preserved": "../operations31-authoring12-parity-20261030/ci406-first-failure.json"
+}
