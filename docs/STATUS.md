@@ -6,7 +6,8 @@
 - **확인:** 같은6b1c CI 프로그램의 새 브라우저에서 게시된 절차는 새 개요·단계, 미게시 수시/주기 절차는 옛 시작 화면을 표시하는 분기를 재현했다. 앞선 대표 검수가 게시 절차만 사용해 미게시 진입을 놓쳤다. 명시적 단계 실행도 같은 옛 전체 화면으로 이동하던 경로를 함께 제거했다. [원인·수정 전 증거](../evals/v4-ui-20260930.md#operations-entry-legacy-removal-20261030).
 - **원본 구분:** [PR #110](https://github.com/knadalkim-a11y/team-agent-poc/pull/110)은11:34:34 KST에 main `4c33f6de195553f3b90ead096de56c2420bfceea`로 병합됐고 [CI413](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40992650525)은40/40 성공했다. 새 ZIP 검증·복사 명령도 PR에 반영했으나6b1c와 제품 코드는 같으므로 이번 운영 결함의 수정본이 아니다. 현재 사내 적용 기준은 새 사용자 보고6b1c이며, 같은 문제를 확인하려고 재배포하지 않는다.
 - **로컬 검증:** runtime Node142/142·작성기265/265·시험 ID 감사 오류0, 정상 source8 빌드/strict 검사, 실제 Native 집중5개·480px 추가1개·관련3개, Complete Native22단계·central-chat18단계를 통과했다. 원본 회귀2실패/보존2통과, 첫 빌드의 heap 부족, helper/합성 fixture/중복 공장 probe 실패와 central-chat 첫 불완전 결과도 [같은 사건 기록](../evals/v4-ui-20260930.md#operations-entry-legacy-removal-20261030)에 보존했다.
-- **다음 하나:** 수정 PR의 최종 head 전체 CI와 검토를 확인한다. 로컬 성공을 새 head CI나 사내 수정 확인으로 대신하지 않으며 이번 수정의 병합·사내 적용은 수행하지 않았다.
+- **첫 PR CI:** [PR #111](https://github.com/knadalkim-a11y/team-agent-poc/pull/111) head `de207f22`의 [CI414](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41003208602)는 최종34성공/4실패/1취소/PR 출하1생략으로 끝났다. 실제 실패는 services 양쪽 플랫폼의 옛 Node 기대2건과 native-account1건이며, 집계 단계도 이 실패를 반영했다. 시험2파일의 fixture/새 개요 기대를 보완해 Node157개·Python wrapper3개를 통과했다. 제품 원본은 source8 그대로다. native-account의 로컬 해당1시험은 통과했지만 CI의 Chrome156의 실패 원인은 미확정으로 남겼다. [최초 실패와 후속 범위](../evals/v4-ui-20260930.md#operations-entry-legacy-removal-20261030).
+- **다음 하나:** 같은 PR의 보완 head 전체 CI와 검토를 확인한다. 첫 CI 실패를 보존하고 로컬 성공을 새 head CI나 사내 수정 확인으로 대신하지 않으며 이번 수정의 병합·사내 적용은 수행하지 않았다.
 
 > 아래는 앞선 병합 준비·배포 시도 당시 기록이다. 마지막 적용42f5·새 적용 미확인 문구는 위6b1c 사용자 보고 이전 상태이며, 최초 실패 근거로 보존한다.
 

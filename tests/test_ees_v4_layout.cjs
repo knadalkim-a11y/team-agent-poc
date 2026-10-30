@@ -62,7 +62,25 @@ test('help footer sends question and visible context separately and follows Nati
 test('workspace refresh retains active input identity and text selection without taking Native focus',()=>{const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})');view.render(snapshot());const host=h.ids.get('ees-work-panel'),field=h.element('input-original');field.id='ew-run-evidence';field.setAttribute('name','evidence');field.selectionStart=2;field.selectionEnd=5;field.selectionDirection='forward';host.mockControls=[field];field.focus();let replacement;host.replaceControls=()=>{replacement=h.element('ew-run-evidence');replacement.setAttribute('name','evidence');replacement.setSelectionRange=(start,end,direction)=>{replacement.range=[start,end,direction];};return [replacement];};view.render(snapshot());assert.equal(h.document.activeElement,replacement);assert.deepEqual(replacement.range,[2,5,'forward']);h.pane.focus();view.render(snapshot());assert.equal(h.document.activeElement,h.pane);});
 
 
-test('published procedure overview opens before a run exists without dereferencing run state',()=>{const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})'),value=snapshot({workflow_id:'w',tab:'overview'});value.state.workflow={id:'w',name:'게시한 절차',published_version:1,published:{nodes:{p:{id:'p',type:'p',children:['j']},j:{id:'j',type:'j',parent:'p',mode:'tool',name:'조회'}}}};view.render(value);assert.match(h.ids.get('ees-work-panel').innerHTML,/data-action="start_run"/);assert.doesNotMatch(h.ids.get('ees-work-panel').innerHTML,/data-action="execute_scope"/);});
+test('published procedure overview opens before a run exists without dereferencing run state',()=>{
+ for(const withStage of [false,true]){
+  const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})'),value=snapshot({workflow_id:'w',tab:'overview'});
+  const nodes={p:{id:'p',type:'p',children:[withStage?'t':'j']},j:{id:'j',type:'j',parent:withStage?'t':'p',mode:'tool',name:'조회'}};
+  if(withStage)nodes.t={id:'t',type:'t',parent:'p',name:'검토',children:['j']};
+  value.state.workflow={id:'w',name:'게시한 절차',published_version:1,published:{nodes}};
+  view.render(value);const overview=h.panel.innerHTML;
+  assert.match(overview,/class="ew-operation-overview"/);assert.match(overview,/<h2>게시한 절차<\/h2>/);
+  assert.doesNotMatch(overview,/data-action="(?:start_run|stage_start|execute_scope)"|ew-active-runs|ew-adhoc-start/);
+  if(withStage){
+   assert.match(overview,/data-action="stage_open" data-node-id="t"/);
+   value.selection.stage_id='t';view.render(value);
+   assert.match(h.panel.innerHTML,/class="ew-vd-head"/);assert.match(h.panel.innerHTML,/data-action="stage_start" data-node-id="t"/);
+   assert.doesNotMatch(h.panel.innerHTML,/data-action="(?:start_run|execute_scope)"|ew-active-runs|ew-adhoc-start/);
+  }else{
+   assert.match(overview,/게시된 단계가 없습니다/);assert.doesNotMatch(overview,/data-action="stage_open"/);
+  }
+ }
+});
 
 
 test('authoring capability and selection are published for the source navigation',()=>{const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})'),value=snapshot({mode:'author'});value.state.capabilities={actor_id:'a',managed_systems:['EMS'],can_author:true,native_access_available:true,native_access:{skills:true}};value.state.workflows=[{id:'w',name:'저장된 편집',system_id:'EMS',category:'ops',updated_at:'2026-10-02'}];view.render(value);const published=h.published.at(-1);assert.deepEqual(published.state.capabilities,value.state.capabilities);assert.deepEqual(published.state.workflows,value.state.workflows);assert.equal(published.selection.mode,'author');assert.equal(h.ids.get('ees-work-panel').dataset.eesMode,'author');});

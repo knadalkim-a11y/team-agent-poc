@@ -96,7 +96,28 @@ test('unmatched Native creation finish cannot bless an arbitrary old chat contex
 
 
 test('start-run mutation uses workflow revision rather than absent run revision',async()=>{const h=controller();h.api.setState({workflow:{revision:7}});await h.api.command({action:'start_run',workflow_id:'w',version:1});assert.equal(h.calls[0].body.expected_revision,7);});
-test('start dialog retains its captured workflow revision across a concurrent refresh',async()=>{const h=controller(),pending=deferred();h.context.document.querySelector=()=>({addEventListener(){}});h.api.setState({workflow:{id:'w',revision:6,published_version:1,versions:[{version:1}]}});h.api.setSelection({workflow_id:'w'});h.setDialog(()=>pending.promise);const waiting=h.api.handleClick({dataset:{action:'start_run'}});h.api.setState({workflow:{id:'w',revision:7,published_version:2,versions:[{version:2}]}});pending.resolve(true);await waiting;assert.equal(h.calls.find(call=>call.body?.action==='start_run').body.expected_revision,6);assert.equal(h.calls.find(call=>call.body?.action==='start_run').body.version,1);});
+test('start dialog retains its captured workflow revision across a concurrent refresh',async()=>{
+ for(const mode of ['on_demand','periodic']){
+  const h=controller(),pending=deferred(),dialogs=[],form={querySelectorAll:()=>[]};
+  const published={mode,execution_scope:'system',nodes:{p:{id:'p',type:'p',children:['t']},t:{id:'t',type:'t',parent:'p',name:'검토',children:[]}}};
+  const element={addEventListener(){},querySelector:selector=>selector==='#ees-work-start'?form:selector==='#ees-start-version'?{value:'1'}:null,querySelectorAll:()=>[]};
+  h.context.document.querySelector=selector=>selector==='#ees-work-dialog'?element:null;
+  h.api.setState({workflow:{id:'w',revision:6,published_version:1,published,versions:[{version:1,definition:published}]}});
+  h.api.setSelection({mode:'work',workflow_id:'w',stage_id:'t',tab:'overview'});
+  h.setDialog(options=>{dialogs.push(options);return pending.promise;});
+  const waiting=h.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});
+  assert.equal(dialogs.length,1);assert.equal(dialogs[0].confirmLabel,'진행 건 시작');
+  assert.match(dialogs[0].html,mode==='on_demand'?/id="ees-work-start"/:/id="ees-start-version"/);
+  assert.equal(h.calls.length,0,'Opening the start dialog must not create or execute a run');
+  h.api.setState({workflow:{id:'w',revision:7,published_version:2,published,versions:[{version:2,definition:published}]}});
+  h.setReply(()=>({ok:false,httpError:true,status:409,error:{message:'revision conflict'}}));
+  pending.resolve(true);await waiting;
+  const commands=h.calls.filter(call=>call.body?.action==='start_run');
+  assert.equal(commands.length,1);assert.equal(commands[0].body.expected_revision,6);assert.equal(commands[0].body.version,1);
+  assert.match(h.api.snapshot().error,/revision conflict/);assert.equal(h.api.snapshot().state.workflow.revision,7);
+  assert.equal(h.calls.some(call=>['execute_job','execute_scope'].includes(call.body?.action)),false);
+ }
+});
 test('successful read polling preserves command rejection until successful command or explicit context change',async()=>{const h=controller();h.api.setState({workflow:{revision:3}});h.setReply(call=>call.options.method==='POST'?{ok:false,httpError:true,status:409,error:{message:'revision conflict'}}:{ok:true,systems:[],workflows:[],runs:[],ui_state:{revision:0,state:{}}});await assert.rejects(h.api.command({action:'start_run'}));await h.api.refresh();assert.match(h.api.snapshot().error,/revision conflict/);h.setReply(()=>({ok:true}));await h.api.command({action:'save_inputs'});assert.equal(h.api.snapshot().error,'');});
 
 
