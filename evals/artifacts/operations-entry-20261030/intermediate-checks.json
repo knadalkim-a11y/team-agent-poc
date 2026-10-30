@@ -1,0 +1,139 @@
+{
+  "date": "2026-10-30",
+  "base_commit": "4c33f6de195553f3b90ead096de56c2420bfceea",
+  "working_tree_modified": true,
+  "classification": "Historical intermediate local evidence. Pending fields describe that observation; final local results are in final-result.json, which does not claim PR CI or intranet acceptance.",
+  "node_original": {
+    "result": "expected_failure",
+    "tests": 1,
+    "passed": 0,
+    "failed": 1,
+    "duration_ms": 92.500307,
+    "test": "unpublished operation entry and saved start tabs keep the new empty overview for every mode",
+    "assertion": "on_demand/overview",
+    "log": {
+      "filename": "node-fix-baseline.tap",
+      "bytes": 1972,
+      "sha256": "64f72c12662be71d58515a175aab9e53f365d6ffab65b0006c2fc5ac030e9523"
+    }
+  },
+  "node_current": {
+    "result": "passed",
+    "tests": 142,
+    "passed": 142,
+    "failed": 0,
+    "skipped": 0,
+    "duration_ms": 580.318322,
+    "log": {
+      "filename": "node-fix-current.tap",
+      "bytes": 14821,
+      "sha256": "ec00c6163dc56cca27d3e6358903eb5048787969e674b39224fddf3caece5400"
+    }
+  },
+  "authoring_observed": {
+    "result": "incomplete_log_not_used_as_final_proof",
+    "success_lines": 255,
+    "failure_lines": 0,
+    "note": "The first retained log has255successlines but no finalsummary. Parent confirmed no Nodeprocess remains. Only authoring was repeated with explicit TAP reporter to establish a complete result.",
+    "log": {
+      "filename": "authoring-regression.tap",
+      "bytes": 25831,
+      "sha256": "31f409537ee6b5876be5d8dd59c7a3f61bfb7d778d8f76c56e0a727a93b5b681"
+    }
+  },
+  "native_initial_setup": {
+    "result": "setup_rejected",
+    "tests": 4,
+    "errors": 4,
+    "duration_seconds": 0.189,
+    "error": "Native UI wheel launcher differs from the current assembled sources.",
+    "cause": "The edited current product source was imported alongside the original CI wheel. Integrity guard rejected the mismatch before running product assertions.",
+    "log": {
+      "filename": "before.log",
+      "bytes": 4409,
+      "sha256": "b90042079c99d620f6cc01f28ba575a11e1c86c11859fa06b0093c9d6dc7da35"
+    }
+  },
+  "native_original": {
+    "result": "original_defect_expected_failures_with_preservation_controls_passed",
+    "source_commit": "6b1c256ef44691ffec53cdcd7b65db329e11c4e1",
+    "program_wheel_sha256": "70e1574b0e754c496b790f09347d9f91f74265ad7274762aad06f98339b2490d",
+    "tests": 4,
+    "passed": 2,
+    "failed": 2,
+    "duration_seconds": 25.617,
+    "failed_tests": [
+      "test_unpublished_operations_use_empty_overview_without_start_or_draft_execution",
+      "test_operations31_preexecution_navigation_creates_no_run_or_attempt"
+    ],
+    "passed_tests": [
+      "test_operations_keep_published_definition_when_a_new_draft_differs",
+      "test_operations_existing_run_keeps_its_version_after_a_new_publication"
+    ],
+    "failed_expectations": [
+      "new empty overview with unpublished notice",
+      "run input form in the existing open dialog instead of old full panel"
+    ],
+    "source_alignment": "Imported fixtures/product source from clean exact6b1c worktree, while retaining new regression assertions. Integrity guard remained enabled.",
+    "log": {
+      "filename": "before-exact-source.log",
+      "bytes": 4953,
+      "sha256": "f80cc81853d80e2f4b3f3891aee1d5f09d22ce6b3f00e96fe85d88b006433afd"
+    }
+  },
+  "frontend7_initial_build": {
+    "result": "failed_before_deliverable",
+    "error": "FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory",
+    "signal": "SIGABRT 6",
+    "node_heap_observed_mb": 2044.5,
+    "elapsed_gc_ms": 50836,
+    "log": {
+      "filename": "build-frontend7.log",
+      "bytes": 184378,
+      "sha256": "f44d2f437ff5dfa89e95ca13439661e660a05e934b9d1bcf9fa8cbfb0e7ddcdc"
+    },
+    "followup": "Fresh same-pinned upstream build8 with the existing CI 6144MiB Node heap setting. Source/lock/validation guards unchanged; completion pending."
+  },
+  "independent_review": {
+    "result": "reported_pass",
+    "source": "Independent agent report relayed by parent",
+    "checks": [
+      "cancelled input preservation",
+      "account/auth change guard",
+      "selection/context change guard"
+    ],
+    "count": 3,
+    "limit": "Focused controller probes, not actual browser or final CI acceptance."
+  },
+  "pending": [
+    "proper frontend build8 and strict wheel validation",
+    "modified-source Native regressions",
+    "new PR head CI",
+    "new version intranet verification"
+  ],
+  "authoring_final": {
+    "result": "passed",
+    "tests": 265,
+    "passed": 265,
+    "failed": 0,
+    "skipped": 0,
+    "duration_ms": 2733.724919,
+    "log": {
+      "filename": "authoring-final.tap",
+      "bytes": 63673,
+      "sha256": "243ca8f82b29a7433730921b916e502443630c921018765e2a89e2291ac922a6"
+    }
+  },
+  "suite_id_audit": {
+    "baseline": "b41e23917273e1d2d0ead1ddadfea75b2dda1e32",
+    "old_ids": 1332,
+    "current_ids": 1578,
+    "errors": [],
+    "log": {
+      "filename": "coverage.json",
+      "bytes": 337029,
+      "sha256": "1d4e079e05a81695c7e9564a061229a5ebc955a1a9f1051ab3437b2d98ecbd27"
+    }
+  },
+  "superseded_by": "final-result.json"
+}

@@ -1,0 +1,80 @@
+{
+  "observed_at": "2026-10-30",
+  "source_commit": "6b1c256ef44691ffec53cdcd7b65db329e11c4e1",
+  "ci_run": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40975832132",
+  "program_wheel_sha256": "70e1574b0e754c496b790f09347d9f91f74265ad7274762aad06f98339b2490d",
+  "environment": {
+    "browser": "HeadlessChrome/153.0.8010.0",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "actual_panel_width": 479,
+    "service": "actual product WorkflowService with temporary SQLite; synthetic authentication/model/tool fixtures",
+    "company_data_accessed": false,
+    "product_source_or_dom_modified": false
+  },
+  "user_report": {
+    "installed_commit_prefix": "6b1c256ef446",
+    "authoring_ui": "updated according to user",
+    "operations_ui": "old layout with 게시 v없음 confirmed by user",
+    "instruction": "저 화면 자체가 아에 안나와야 되는걸로 난 알고있어",
+    "full_apply_output_received": false
+  },
+  "confirmed": {
+    "published_overview": "new overview",
+    "published_stage": "new stage and jobs",
+    "unpublished_on_demand": "legacy 진행 중 / 새로 시작 / 대상 공장 screen",
+    "unpublished_periodic": "legacy 진행 건 시작 screen",
+    "work_runs_created": 0,
+    "external_tool_calls": 0
+  },
+  "initial_probe": {
+    "result": "failure",
+    "duration_seconds": 11.632,
+    "cause": "Probe incorrectly expected the unpublished periodic workflow name in panel h2; actual legacy h2 is 진행 건 시작. Product mismatch was already visible in output.",
+    "assertion": "Timed out: document.querySelector('#ees-work-panel h2')?.textContent.includes('미게시 배포')",
+    "unknown_routes": [],
+    "log_sha256": "24cf5a938b3616dc2ecd6996977381a043dc0985e00bc6715819c489fca0d0e8"
+  },
+  "corrected_probe": {
+    "result": "diagnostic probe passed; product defect reproduced, not fixed",
+    "tests": 1,
+    "scenes": 4,
+    "duration_seconds": 2.319,
+    "change": "Waited for the existing legacy paragraph 게시한 절차 버전으로 새 진행 건을 시작합니다. instead of workflow name in h2. No product changes.",
+    "log_sha256": "8c77214ee89bf43db25542e457ccd9fc21f362be8fdd5716c431c1636a3461a6"
+  },
+  "coverage_gap": "Previous operations31/32 Native rendering fixtures published the representative workflow before opening it. Unpublished entries visible to managers were not compared.",
+  "files": {
+    "observations.json": {
+      "bytes": 4389,
+      "sha256": "aac97eab9890c5b348b9f425f467046243d9701e7ff92bd7d7565803fcbee5c1"
+    },
+    "route-matrix.json": {
+      "bytes": 4298,
+      "sha256": "30390f4e0159f1ba233084dc11b16249716ffe2d07dfdbda06e56a58bfccf848"
+    },
+    "capture_unpublished.py": {
+      "bytes": 3900,
+      "sha256": "6320871f3c857428960f8c8688f08a16b141520bd41daa7f5642a49f162be992"
+    },
+    "published-new-overview.png": {
+      "bytes": 16515,
+      "sha256": "b709c40a0fbcb88b33ca97b664e13d600a8d56dffa789355e56c61fe6b2e0729"
+    },
+    "published-new-stage.png": {
+      "bytes": 30374,
+      "sha256": "6e0ac61caaa106eb84134c739af60dabe4f3ae699b148dee210994ac517f97ee"
+    },
+    "unpublished-on-demand-old-start.png": {
+      "bytes": 35404,
+      "sha256": "4ad7159456430aab7f1a72a78837da3c0f649b4bf40014012ed565bdad6dd511"
+    },
+    "unpublished-periodic-old-overview.png": {
+      "bytes": 17909,
+      "sha256": "f0823e431eb5fc40a29720fa7702e445d5948e6ce9914bd956661baefb3602f1"
+    }
+  },
+  "remaining": "New source build, regression tests, new PR CI and intranet fixed-version verification are pending."
+}
