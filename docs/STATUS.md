@@ -1,5 +1,13 @@
 # 현재 작업 상태
 
+## 2026-10-30 · PR #110 병합 요청 · 새 터미널 실행 정책 중단
+
+- **현재:** 사용자가 배포 문서 [PR #110](https://github.com/knadalkim-a11y/team-agent-poc/pull/110)의 병합도 요청했다. 문서·실패 기록을 보완하고 최종 CI 확인 후 병합한다. 제품 코드는 바꾸지 않는다.
+- **현장 보고:** 재부팅 뒤 새 PowerShell 창에서 첫 `Status`가 `UnauthorizedAccess`로 차단됐다. 이번 시도의 Update·Upgrade·Stop·프로그램 교체는 미실행이며 Restore는 불필요하다. 현재 실행 정책 값·재시도·새 프로그램 적용 성공은 아직 미확인이고, 마지막 성공 보고는42f5ae5다. [원인 판단과 재발 방지](../evals/v4-ui-20260930.md#powershell-preflight-20261030).
+- **다음 하나:** PR #110 병합 뒤 정확한 새 main에서 프로그램 포함 CI/ZIP을 검증하고 새 고정 적용 블록을 같은 PR 본문에 제공한다. 기존6b1c256 블록은 병합 전 이력으로 보존하며 재실행하지 않는다. [새 터미널 준비](03-openwebui-native-agent.md#ees-new-powershell-window)를 현재 배포 안내에 연결했다.
+
+> 아래는 앞선 배포 준비·구현 당시 기록이다. Draft 유지·다음 작업 문구와 CI 성공은 각 당시 상태이며, 이번 병합이나 사내 적용 성공을 뜻하지 않는다.
+
 ## 2026-10-30 · PR #109 병합 · 운영32/작성12 사내 적용 준비
 
 - **병합:** 사용자의 “병합하고, 사내배포 스크립트까지 복붙가능하게 제공해줘” 요청에 따라 [PR #109](https://github.com/knadalkim-a11y/team-agent-poc/pull/109)를08:50 KST에 main `6b1c256ef44691ffec53cdcd7b65db329e11c4e1`으로 병합했다. 최종 head `3c5ba1d`의 [CI407](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40973385124)은39성공/PR 출하1정상생략이며 미해결 리뷰0이었다. 병합 main과 검증 head의 tree `63bec1690b08c9eb3c6a39196ba95f89fee4d19c`는 같다.

@@ -1,6 +1,6 @@
 # 03. Open WebUI Native 통합 Assistant
 
-**최신 배포 준비(2026-10-30):** [PR #109](https://github.com/knadalkim-a11y/team-agent-poc/pull/109)를 main `6b1c256ef44691ffec53cdcd7b65db329e11c4e1`에 병합했다. 아래 [운영32·작성12 적용 블록](#main-6b1c256-apply-prep-20261030)은 마지막 사내 성공 보고42f5ae5에서의 프로그램 갱신용이다. 새 사내 적용·기동·자료 확인은 아직 미실행이며 이전 성공 보고와 구분한다.
+**최신 배포 준비(2026-10-30):** [PR #109](https://github.com/knadalkim-a11y/team-agent-poc/pull/109)의 운영32·작성12 프로그램은 main6b1c256에 병합됐다. 사용자는 새 PowerShell 창에서 첫 `Status` 호출이 `UnauthorizedAccess`로 차단됐다고 보고했다. 이번 시도의 Update·Upgrade·Stop·프로그램 교체는 미실행이며, 재시도 성공은 아직 확인되지 않았다. 후속 [PR #110](https://github.com/knadalkim-a11y/team-agent-poc/pull/110) 병합 요청에 따라 아래6b1c256 블록 재실행은 보류한다. 병합 뒤 달라지는 main의 CI·프로그램 ZIP을 검증하고 **새 고정 적용 블록을 같은 PR 본문에 제공**한다. [새 터미널 준비](#ees-new-powershell-window)를 먼저 확인한다.
 
 **최신 사내 적용 보고(2026-10-28):** 사용자가 `result=ok / stage=complete / running=true / commit=42f5ae502b57`를 보고했다. 공통 단계 상세26판 프로그램의 적용·기동 성공 보고로 기록하며 [당시 적용 블록](#main-42f5ae5-apply-prep-20261028)은 다시 실행하지 않는다. 사내 단계 화면·기존 자료는 아직 미확인이므로 [기존 진행 건의 읽기 전용 진입](#operations-stage26-readonly-entry-20261028)으로 확인한다.
 
@@ -18,7 +18,7 @@
 
 | 할 일 | 안내 |
 |---|---|
-| 운영32·작성12 · main6b1c256 사내 적용 | [검증 ZIP·복사 실행·프로그램 복구](#main-6b1c256-apply-prep-20261030) |
+| 운영32·작성12 · PR #110 병합 후 사내 적용 | [새 터미널 준비](#ees-new-powershell-window) · [병합 뒤 검증 ZIP·적용 블록](https://github.com/knadalkim-a11y/team-agent-poc/pull/110) · [6b1c256 준비 이력](#main-6b1c256-apply-prep-20261030) |
 | 공통 단계 상세26판 · main42f5ae5 사내 적용 이력 | [확정 ZIP·복사 실행 블록·화면 확인](#main-42f5ae5-apply-prep-20261028) |
 | #103 병합 main924d919 사내 적용 이력 | [확정 ZIP·복사 실행 블록·설정·복구 경계](#main-924d919-apply-prep-20261026) |
 | main 1c1efff 적용 검토 기록·Claude 대조 | [확정 ZIP·한 블록·설정·Restore 경계](#main-1c1efff-apply-prep-20261022) |
@@ -30,9 +30,29 @@
 | 수동 적용·복구 | [Apply/Restore](#ees-wrapper-apply)·[종료 복구](#ees-stop-recovery) |
 | 실패 기록·등록 위치 확인 | [실패 판단](#ees-update-failure-causes)·[사내 기록](#ees-local-state) |
 
+<a id="ees-new-powershell-window"></a>
+
+## 새 PowerShell 창에서 배포 재개
+
+재부팅하거나 창을 새로 열면 이전 `Process` 실행 정책은 유지되지 않는다. 기존 운영 계정의 **실제로 배포할 창**에서 다음 두 조회로 확인한다.
+
+```powershell
+Get-ExecutionPolicy -List
+Get-ExecutionPolicy
+```
+
+다섯 범위가 모두 `Undefined`이고 유효 정책이 `Restricted`일 때만 같은 창에 아래 설정을 적용한다. `RemoteSigned`가 확인되면 검증된 최신 적용 블록을 그 창에서 실행한다. 별도 정책 값이나 설정 오류가 있으면 정책을 임의로 바꾸지 말고 해당 Scope와 값만 확인한다. 관리자 권한의 새 창·영구 정책 변경·Bypass는 필요하지 않다. [Microsoft 실행 정책 안내](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies).
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned -Force
+Get-ExecutionPolicy
+```
+
+2026-10-30 보고는 `manage-ees.ps1`의 첫 `Status` 로딩 오류이므로 이번 시도로 프로그램을 중지하거나 바꾸지 않았고 Restore도 하지 않는다. 현재 정책의 실제 값과 재시도 결과는 아직 미확인이다. 배포 블록의 JSON 변환 명령은 `ConvertFrom-Json`이며, 전달된 오류 설명의 `ConvertForm-Json` 표기가 실제 입력에도 있다면 바로잡는다.
+
 <a id="main-6b1c256-apply-prep-20261030"></a>
 
-## main 6b1c256 사내 적용 · 운영32·업무 절차12 · 2026-10-30
+## main 6b1c256 사내 적용 준비 이력 · 운영32·업무 절차12 · 2026-10-30
 
 사용자 요청으로 [PR #109](https://github.com/knadalkim-a11y/team-agent-poc/pull/109)를 main **`6b1c256ef44691ffec53cdcd7b65db329e11c4e1`**에 병합했다. PR CI407은39성공/출하1정상생략이며 검증 head와 main의 tree는 같다. [main CI408](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/40975832132)은 첫 실행 **40/40 성공**이다. 실제 다운로드한 새 프로그램 ZIP의 크기·SHA256·CRC·원본 커밋·전체 포함 파일·wheel·프런트엔드 strict 검증을 마쳤다. [정확한 검증 근거](../evals/v4-ui-20260930.md#main-6b1c256-apply-evidence-20261030).
 
@@ -45,7 +65,9 @@
 | 내부 프로그램 ZIP | `EES-demo-6b1c256ef446.zip`, 155,314,444 bytes / `fc2d952448a840d3dcab23e482891c34024024d490b0e56ba046ccb02a50984b` |
 | 프로그램 원본 | clean manifest의 source_commit=`6b1c256ef44691ffec53cdcd7b65db329e11c4e1` |
 
-기존 운영 계정 PowerShell에서 작성 중인 입력을 저장하고 팀원이 사용하지 않는 시간에 아래 적용 블록을 실행한다. 경로가 다르면 `$er`(기존 저장소)·`$ecfg`(등록 설정)·`$ed`(다운로드 폴더)만 맞춘다. ZIP이 없으면 브라우저를 열고 Downloads에 원래 이름으로 받을 때까지15분 기다린다. 기존 ZIP이 있으면 같은 크기·해시로 다시 검사해 사용한다.
+**아래는 PR #110 병합 전 전달한 블록의 원본 기록이며, 병합 뒤에는 실행하지 않는다.** 문서 병합도 main SHA를 바꾸므로 이 블록은 Update 뒤 원본 불일치로 중단된다. `$ec`만 바꾸거나 검사 조건을 제거해서 기존 ZIP을 적용하지 않는다. 병합 뒤 `include_branding=true`로 생성한 정확한 새 main의 프로그램 ZIP과 CI를 검증하고, 고정 SHA·ZIP 링크·크기·해시·새 적용 블록을 [같은 PR #110 본문](https://github.com/knadalkim-a11y/team-agent-poc/pull/110)에 기록한다. 문서만 바뀐 push의 Agent Pack 전용 ZIP은 프로그램 배포에 쓰지 않는다.
+
+당시 실행 조건은 기존 운영 계정 PowerShell에서 작성 중인 입력을 저장하고 팀원이 사용하지 않는 시간이었으며, 경로가 다르면 `$er`(기존 저장소)·`$ecfg`(등록 설정)·`$ed`(다운로드 폴더)만 맞추도록 했다. ZIP이 없으면 브라우저를 열고 Downloads에 원래 이름으로 받을 때까지15분 기다리며, 기존 ZIP은 같은 크기·해시로 검사해 사용하도록 했다.
 
 ```powershell
 # 저장 후 실행. 적용 뒤 새로고침하고 개요·단계·업무절차·기존 자료 확인.
