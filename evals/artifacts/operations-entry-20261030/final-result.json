@@ -1,0 +1,261 @@
+{
+  "date": "2026-10-30",
+  "base_commit": "4c33f6de195553f3b90ead096de56c2420bfceea",
+  "working_tree_modified": true,
+  "result": "passed",
+  "scope": "Local built-product validation of unpublished operations entry and explicit start dialog. Not PR CI or in-house deployment.",
+  "build": {
+    "upstream_commit": "2a960a59fe1dbbd35282f0556b3666d81102e781",
+    "node": "v22.16.0",
+    "npm": "10.9.2",
+    "node_options": "--max-old-space-size=6144",
+    "source_inputs": 139,
+    "output_files": 5582,
+    "all_source_hashes_match_current_tree": true,
+    "source_hashes": {
+      "branding/ees/ui/ees-work-view.js": "6c4485e5012bd67ac33edd1f17d4b39e5c2cc93657f790df81c06ed9ea958371",
+      "branding/ees/ui/ees-work-launcher.js": "f4aed06c804796103771b473a157b51c82b60ffb88ac1ff7a427eb96bac535fc",
+      "branding/ees/ui/ees-work-designer.js": "ba210b224e27df461c4660a7ee1ef9af58731ac23a5318c43dd2b2b33d798698",
+      "branding/ees/ui/ees-work-launcher.css": "b0bf0c6f130ec37ca2af85c2a6e764dd7e4d72b38a83b5745d601ab63e005f64"
+    },
+    "frontend_manifest": {
+      "filename": "manifest.json",
+      "bytes": 612103,
+      "sha256": "bc45c2cd3e1d1104ea87b36b337dfca494c47c062968c11be1766caaed8034c9"
+    },
+    "branding_manifest": {
+      "filename": "manifest.json",
+      "bytes": 942640,
+      "sha256": "e5588ab396219e884a344137b8b57c9d7adae65b274460ee237f4863e21bb123"
+    },
+    "wheel": {
+      "filename": "open_webui-0.11.3+ees.14-py3-none-any.whl",
+      "bytes": 152171617,
+      "sha256": "bbc988d28e3742f87801583d0303a4a032b274a8a42633aff11a3e2176b4f78e"
+    },
+    "official_wheel": {
+      "filename": "open_webui-0.11.3-py3-none-any.whl",
+      "bytes": 146072797,
+      "sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547"
+    },
+    "frontend_log": {
+      "filename": "build-frontend8.log",
+      "bytes": 339900,
+      "sha256": "82d55135d8c8670a91dab2448638202090a183269ca558861052a9798452a961"
+    },
+    "wheel_log": {
+      "filename": "build-wheel8.log",
+      "bytes": 181,
+      "sha256": "95ab924c76220fdedb1053f01d0299056c73135bbe8b16b01247aa36a87da8dc"
+    },
+    "compiled_asset_patching": false
+  },
+  "native": {
+    "python": "3.11.16",
+    "chrome": "HeadlessChrome/153.0.8010.0",
+    "focused": {
+      "tests": 5,
+      "duration_seconds": 11.7,
+      "passed": 5,
+      "failed": 0,
+      "errors": 0,
+      "log": {
+        "filename": "after.log",
+        "bytes": 1761,
+        "sha256": "6be2987d5ad0d21313eb852c54a1cd1ae935318a239e04a28c09484ece2ed30a"
+      }
+    },
+    "steady_narrow_dialog": {
+      "tests": 1,
+      "duration_seconds": 3.64,
+      "passed": 1,
+      "failed": 0,
+      "errors": 0,
+      "log": {
+        "filename": "steady-480.log",
+        "bytes": 421,
+        "sha256": "1b0043e3289d34d27d17dd1a9bcf265efee7b12ebccf248bfda6fae567539dcc"
+      }
+    },
+    "related_operations": {
+      "tests": 3,
+      "duration_seconds": 8.593,
+      "passed": 3,
+      "failed": 0,
+      "errors": 0,
+      "log": {
+        "filename": "existing-runtime-fixture-complete.log",
+        "bytes": 1097,
+        "sha256": "bbc8de07de37b467cc0bfb59d5a1b95a06f7208e2c47d13572f7fd6f9052810a"
+      }
+    },
+    "unique_tests_passed": 8,
+    "note": "The preexecution test was repeated only after adding animation-settled capture, viewport bounds and cancel-focus checks; product bytes did not change.",
+    "checks": [
+      "Unpublished staged on-demand, periodic template and root-only drafts use the empty new overview at1920/480; no draft rows or execution controls.",
+      "Navigation leaves workflow definitions unchanged, creates no runs/attempts/decisions and makes no external calls.",
+      "Published definitions remain preferred over differently edited drafts; old runs retain their published-version snapshots.",
+      "Explicit stage start opens a dialog while the stage remains behind it; no legacy start page or right-side factory picker.",
+      "Normal and reduced-motion cancel make no business writes; confirming exact input and Native group creates one run and executes no jobs.",
+      "Steady480 dialog remains inside viewport without horizontal overflow; cancel returns focus to the stage start button.",
+      "Existing actual job judgments, human reason/history and tool evidence/retry/scope execution assertions pass."
+    ]
+  },
+  "complete_native": {
+    "result": "passed",
+    "steps": 22,
+    "report": "after/complete-native-report.json",
+    "report_file": {
+      "filename": "complete-native-report.json",
+      "bytes": 13249,
+      "sha256": "4bb9529194ba090392dfe91328900c5d496d5758f82d48b72cb86c593ad2b89b"
+    },
+    "log": {
+      "filename": "complete-recheck.log",
+      "bytes": 5636,
+      "sha256": "01b4fda7c8b0d9bffba2d9ecc61f4dc364a0989892ea3b89a034eb20bb2fadca"
+    }
+  },
+  "central_chat": {
+    "result": "passed",
+    "steps": 18,
+    "finalizer_present": true,
+    "report": "after/central-chat-report.json",
+    "report_file": {
+      "filename": "central-chat-report.json",
+      "bytes": 140594,
+      "sha256": "6c37fc465bc6764c60bf98be111889305fdaec13e36140b18f10cb44b5fb0916"
+    },
+    "log": {
+      "filename": "central-chat-recheck.log",
+      "bytes": 4896,
+      "sha256": "e175dafa78d4e8093da1a00d8ffa4b95ea24360fa8dee1316cb5f25ebf00d69d"
+    }
+  },
+  "preserved_first_attempts": [
+    {
+      "stage": "Native baseline setup",
+      "result": "rejected before browser/assertions",
+      "checks": {
+        "tests": 4,
+        "duration_seconds": 0.189,
+        "passed": 0,
+        "failed": 0,
+        "errors": 4,
+        "log": {
+          "filename": "before.log",
+          "bytes": 4409,
+          "sha256": "b90042079c99d620f6cc01f28ba575a11e1c86c11859fa06b0093c9d6dc7da35"
+        }
+      },
+      "reason": "Concurrent current-source edits did not match the old6b1c wheel. Source-wheel guard correctly rejected setup; retry used the clean6b1c worktree fixtures with the new assertions. Guard unchanged."
+    },
+    {
+      "stage": "Exact6b1c baseline",
+      "result": "expected failures",
+      "checks": {
+        "tests": 4,
+        "duration_seconds": 25.617,
+        "passed": 2,
+        "failed": 2,
+        "errors": 0,
+        "log": {
+          "filename": "before-exact-source.log",
+          "bytes": 4953,
+          "sha256": "f80cc81853d80e2f4b3f3891aee1d5f09d22ce6b3f00e96fe85d88b006433afd"
+        }
+      },
+      "reason": "Unpublished new overview and modal start were absent; published-priority and pinned-run assertions already passed."
+    },
+    {
+      "stage": "Frontend7",
+      "result": "build setup failed; no new artifact",
+      "log": {
+        "filename": "build-frontend7.log",
+        "bytes": 184378,
+        "sha256": "f44d2f437ff5dfa89e95ca13439661e660a05e934b9d1bcf9fa8cbfb0e7ddcdc"
+      },
+      "reason": "Default Node approximately2GiB heap exhausted during Vite. One fresh source build used the existing CI/dev_ees6GiB heap setting and passed without changing product source."
+    },
+    {
+      "stage": "Related Native initial",
+      "result": "obsolete helper path",
+      "checks": {
+        "tests": 3,
+        "duration_seconds": 33.701,
+        "passed": 0,
+        "failed": 3,
+        "errors": 0,
+        "log": {
+          "filename": "existing-runtime.log",
+          "bytes": 10053,
+          "sha256": "c80a4b7067d3d15c3413c6e72eeb8098c5c142f6e924e2fa96ab2152a39daf26"
+        }
+      },
+      "reason": "Shared open_run still navigated through the removed active-run start page. Helper now physically opens the exact run through execution records; original test assertions retained."
+    },
+    {
+      "stage": "Related Native second",
+      "result": "synthetic fixture schema incomplete",
+      "checks": {
+        "tests": 3,
+        "duration_seconds": 8.989,
+        "passed": 0,
+        "failed": 3,
+        "errors": 0,
+        "log": {
+          "filename": "existing-runtime-recheck.log",
+          "bytes": 3397,
+          "sha256": "c5e7c0be69ddce436a4b42bbc5354149a14ff156c5a59e769421cf2cd0a39a4c"
+        }
+      },
+      "reason": "All body assertions completed but teardown reported KeyError(tools). Record-list navigation read a synthetic assets result lacking the tools key, which every production provider supplies. Fixture now explicitly returns tools:[]; no product change or assertion removal."
+    },
+    {
+      "stage": "Complete Native initial",
+      "result": "failed",
+      "steps_completed": 21,
+      "failure": {
+        "type": "AssertionError",
+        "message": "Readiness failed: document.querySelector(\"#ees-work-dialog\")?.innerText.includes(\"이미 진행 중\")"
+      },
+      "report": {
+        "filename": "report.json",
+        "bytes": 16126,
+        "sha256": "d16ab0f650b229b8b7dba84b9c12e6f037d9a420475e82167f2f8a5017375ed5"
+      },
+      "log": {
+        "filename": "complete.log",
+        "bytes": 6327,
+        "sha256": "4a346135ad78d2910bc24538ba44353d1e675715c9cd236b4592461f09869ce1"
+      },
+      "reason": "Duplicate-start assertion opened a one-time dialog before the refreshed active-run state was ready. Probe now awaits the public refresh and asserts selected workflow/factory/run context and the existing active run before opening; backend duplicate protection assertions remain."
+    },
+    {
+      "stage": "Central chat initial",
+      "result": "incomplete, not counted as success",
+      "exit_code": 0,
+      "report_status": "running",
+      "steps_retained": 16,
+      "report": {
+        "filename": "report.json",
+        "bytes": 6863,
+        "sha256": "cf9f25832590ecd0cf7613b3dbd4bed82a9e93773ef588f6b8fe608722db9d99"
+      },
+      "log": {
+        "filename": "central-chat.log",
+        "bytes": 4344,
+        "sha256": "73ec0d6347f78912bc0c51f479114f37f563d49fc22a8f425aaa81c16ba42bce"
+      },
+      "reason": "Process ended with no final report/finalizer after16steps; cause unconfirmed. One separate sequential rerun with identical wheel passed18steps and wrote finalizer evidence. Retry success is not a root-cause fix."
+    }
+  ],
+  "renders": "after/renders.json",
+  "boundaries": {
+    "product_dom_replaced": false,
+    "real_company_data_used": false,
+    "intranet_executed": false,
+    "new_full_pixel_identity_claimed": false,
+    "actual_auth_and_storage": "Complete Native gate uses packaged product, temporary DATA_DIR and loopback synthetic providers; narrow Native cases use temporary SQLite and explicit synthetic session fixture."
+  }
+}

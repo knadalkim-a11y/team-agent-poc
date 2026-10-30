@@ -193,10 +193,14 @@ if(performance.now()>end)return resolve(null);requestAnimationFrame(check)}check
         self.click('.ew-operation-overview [data-action="stage_open"]')
         self.wait_work_ready(selector='[data-action="stage_details"]')
 
-    def open_operation_start(self):
+    def open_operation_start(self, *, expect_form=True):
         self.open_operation_stage()
         self.click('.ew-stage-run-button[data-action="stage_start"]')
-        self.wait_work_ready(selector='#ees-work-start')
+        self.wait_work_ready(selector='#ees-work-dialog[open]')
+        assert self.browser.evaluate("!!document.querySelector('.ew-vd-head')"), 'Execution preparation must keep the stage behind its dialog'
+        assert not self.browser.evaluate("!!document.querySelector('.ew-adhoc-start,.ew-active-runs,#ees-start-factory')"), 'The removed start screen and duplicate factory picker must remain absent'
+        if expect_form:
+            self.wait_work_ready(selector='#ees-work-dialog #ees-work-start')
 
     def open_operation_details(self):
         self.open_operation_stage()
@@ -396,10 +400,9 @@ def integrated_flow(gate):
     g.click('[data-action="mode"][data-mode="work"]')
     g.click('[data-action="workflow"][data-workflow-id="'+identifier+'"]')
     g.open_operation_start()
-    g.wait('!!document.querySelector(".ew-adhoc-start")')
     g.type('#ees-work-start [name="evidence_note"]','개발용 시작 근거')
     g.capture('figma-a8-first-start')
-    g.click('[data-action="start_run"][data-start-inline]')
+    g.click('#ees-work-dialog [data-dialog-confirm]')
     g.wait('!!document.querySelector(\'[data-action="job"]\')')
     state=g.api('/api/ees-work/workspace?workflow_id='+identifier)
     run=state['runs'][0];run_id=run['id']
@@ -823,7 +826,7 @@ def figma_delta_flow(g):
     g.record('Figma B2-1 physical schedule preview and draft save',draft_revision=saved['revision'],published_version=1,reservation_created=False)
     g.click('[data-action="mode"][data-mode="work"]');g.click('[data-action="workflow"][data-workflow-id="'+workflow_id+'"]')
     g.open_operation_start()
-    g.click('[data-action="start_run"][data-start-inline]')
+    g.click('#ees-work-dialog [data-dialog-confirm]')
     g.wait('!!document.querySelector(\'[data-action="job"][data-job-id="qa-list"]\')')
     run_id=g.api('/api/ees-work/workspace?workflow_id='+workflow_id)['runs'][0]['id']
     # A single-stage run opens its stage first. Inspect that entry separately,
@@ -997,11 +1000,14 @@ def figma_delta_flow(g):
     g.wait('document.querySelector(".ew-author-history")?.innerText.includes("게시 v1")')
     assert g.api('/api/ees-work/workspace?workflow_id='+delivery_id)['workflow']['published_version']==1
     g.record('Figma B2-3 delivery recommendation permits physical publish',recommendations=len(advisory['warnings']),external_delivery=False)
-    g.click('[data-action="mode"][data-mode="work"]');g.click('[data-action="workflow"][data-workflow-id="'+delivery_id+'"]')
+    g.click('[data-action="mode"][data-mode="work"]')
+    g.click('#ees-work-site-trigger')
+    g.click('[data-action="choose_factory"][data-factory-id="'+factory_id+'"]')
+    g.wait('document.querySelector("#ees-work-site-trigger")?.innerText.includes("합성 C12 검수 공장")')
+    g.click('[data-action="workflow"][data-workflow-id="'+delivery_id+'"]')
     g.open_operation_start()
-    g.select('#ees-start-factory',factory_id)
     g.capture('figma-a8-factory-ready')
-    g.click('[data-action="start_run"][data-start-inline]')
+    g.click('#ees-work-dialog [data-dialog-confirm]')
     g.click('[data-action="job"][data-job-id="delivery-report"]');select_execution_model();g.click('[data-action="execute"]')
     g.wait('document.querySelector("#ees-review-text")?.value.includes("합성 AI 검토 원문")',20000)
     delivery_run_id=g.api('/api/ees-work/workspace?workflow_id='+delivery_id)['runs'][0]['id']
@@ -1022,19 +1028,30 @@ def figma_delta_flow(g):
         business_status='blocked',reason='delivery_unconfigured',actual_delivery=False)
     assert blocked['factory_id']==factory_id
     g.click('[data-action="workflow"][data-workflow-id="'+delivery_id+'"]')
-    g.open_operation_start()
-    # The explicit start form can use the cached pre-start workspace before
-    # workspace/operations refresh completes. Wait
-    # for this known server run to reach the UI, then independently verify the
-    # factory option and start action are disabled; never manufacture either.
-    g.wait('document.querySelector(\'.ew-active-runs [data-run-id="'+delivery_run_id+'"]\')?.getClientRects().length>0')
-    assert g.browser.evaluate('document.querySelector(\'#ees-start-factory option[value="'+factory_id+'"]\')?.disabled')
-    assert g.browser.evaluate('document.querySelector(\'.ew-active-runs [data-run-id="'+delivery_run_id+'"]\')?.getClientRects().length>0')
-    assert g.browser.evaluate('document.querySelector(\'[data-action="start_run"][data-start-inline]\')?.disabled')
+    g.wait_work_ready(workflow_id=delivery_id,run_id='')
+    # Returning from a run can first show the cached pre-start overview. The
+    # dialog takes one snapshot when opened; complete its read-only public
+    # refresh before checking duplicate protection, as the former screen's
+    # active-run row was also awaited before checking its disabled control.
+    refreshed=g.browser.evaluate('window.__eesNativeWorkV1.refresh().then(state=>({workflow_id:state?.workflow?.id,active_runs:state?.workflow_active_runs,reference:window.__eesNativeWorkV1.captureReference()}))')
+    assert refreshed['workflow_id']==delivery_id,refreshed
+    assert any(item['id']==delivery_run_id and item['factory_id']==factory_id for item in refreshed['active_runs']),refreshed
+    assert all(refreshed['reference'].get(key)==value for key,value in {'workflow_id':delivery_id,'factory_id':factory_id,'run_id':''}.items()),refreshed
+    g.open_operation_start(expect_form=False)
+    g.wait('document.querySelector("#ees-work-dialog")?.innerText.includes("이미 진행 중")')
+    assert not g.browser.evaluate('!!document.querySelector("#ees-work-dialog [data-dialog-confirm],#ees-work-start")')
     assert g.api('/api/ees-work/workspace?run_id='+delivery_run_id)['run']==blocked
     g.capture('figma-a8-active-factory-duplicate-disabled')
+    g.click('#ees-work-dialog [data-dialog-cancel]')
+    g.wait('!document.querySelector("#ees-work-dialog")')
+    g.click('[data-action="records"]')
+    g.wait_work_ready(selector='[data-action="open_run"][data-run-id="'+delivery_run_id+'"]')
+    g.click('[data-action="open_run"][data-run-id="'+delivery_run_id+'"]')
+    g.wait_work_ready(workflow_id=delivery_id,run_id=delivery_run_id,selector='[data-action="stage_back"]')
+    assert g.api('/api/ees-work/workspace?run_id='+delivery_run_id)['run']==blocked
+    assert len([item for item in g.api('/api/ees-work/workspace?workflow_id='+delivery_id)['runs'] if item['factory_id']==factory_id])==1
     g.record('Figma A8 active factory remains visible and duplicate start is disabled',factory_id=factory_id,
-        existing_run_unchanged=True,duplicate_created=False)
+        existing_run_unchanged=True,duplicate_created=False,existing_run_reopened_from_records=True)
 
 
 def main():

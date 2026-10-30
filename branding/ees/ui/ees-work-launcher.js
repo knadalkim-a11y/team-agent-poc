@@ -528,6 +528,36 @@
     }
     return false;
   }
+  async function startRun(target){
+    const workflow=state?.workflow,definition=workPublishedDefinition(state);
+    if(busy||state?.run||!workflow?.id||!workflow.published_version||!definition.nodes)return;
+    const at=context(),auth=token(),owner=actor();
+    const requestedStage=target.dataset.startStageId || selection.start_stage_id,returnStage=definition.nodes[requestedStage]?.type==='t'?requestedStage:'';
+    const adhoc=(definition.mode || definition.execution_mode || workflow.mode || workflow.execution_mode || 'on_demand')==='on_demand';
+    const factory=adhoc&&definition.execution_scope==='system'?'':selection.factory_id || '';
+    if(adhoc&&definition.execution_scope==='factory'&&!factory)return dialog({title:'공장을 선택해 주세요',readOnlyDetail:true,html:'<p>왼쪽 작업 위치에서 공장을 선택한 뒤 다시 실행해 주세요.</p>'});
+    const active=(state.workflow_active_runs || state.runs || []).filter(run=>run.workflow_id===workflow.id&&!workUI.finished(run));
+    if(adhoc&&factory&&active.some(run=>run.factory_id===factory))return dialog({title:'이미 진행 중인 공장입니다',readOnlyDetail:true,html:'<p>실행 기록에서 기존 진행 건을 열어 이어서 처리해 주세요.</p>'});
+    let version=workflow.published_version,groups=[],link=false,inputs={};
+    const html=adhoc?workRunStartFieldsHTML(state,selection,definition):`<label>게시 버전<select id="ees-start-version">${(workflow.versions || []).map(item=>`<option value="${item.version}"${item.version===version?' selected':''}>v${item.version} · ${esc(item.published_at || '')}</option>`).join('')}</select></label><fieldset><legend>함께 처리할 Native 그룹</legend><p class="ew-muted">선택하지 않으면 개인 진행 건입니다. 개인 대화 내용은 공유하지 않습니다.</p>${(state.native_groups || []).map(group=>`<label><input type="checkbox" data-start-group value="${esc(group.id)}">${esc(group.name || group.id)}</label>`).join('') || '<p>현재 참여 중인 그룹이 없습니다.</p>'}</fieldset>${chatId()?'<label><input type="checkbox" id="ees-start-chat-link">현재 개인 대화를 이 진행 건에 연결</label>':''}`;
+    const pending=dialog({title:'실행 준비',note:'선택한 게시 버전과 이번 진행 건을 따로 보존합니다.',html,confirmLabel:'진행 건 시작'}),element=$('#ees-work-dialog');
+    const read=()=>{
+      if(at!==context()||auth!==token()||owner!==actor())return;
+      if(adhoc){const form=element.querySelector('#ees-work-start');if(!form)return;inputs=workReadInputs(form);groups=[...form.querySelectorAll('[data-start-group]:checked')].map(field=>field.value);}
+      else {version=Number(element.querySelector('#ees-start-version')?.value || workflow.published_version);groups=[...element.querySelectorAll('[data-start-group]:checked')].map(field=>field.value);link=Boolean(element.querySelector('#ees-start-chat-link')?.checked);}
+    };
+    read();element.addEventListener('input',read);element.addEventListener('change',read);
+    // Capture before the dialog removes itself, including reduced-motion closes.
+    element.addEventListener('click',event=>{if(event.target.closest?.('[data-dialog-confirm]'))read();},true);
+    if(!await pending||at!==context()||auth!==token()||owner!==actor())return;
+    const result=await mutate({action:'start_run',expected_revision:workflow.revision,workflow_id:workflow.id,factory_id:factory,version,inputs,sharing:{group_ids:groups}},{refreshAfter:false});
+    if(!result||at!==context())return;
+    const id=result.run?.id || result.run_id || result.id;
+    if(adhoc)delete selection.start_inputs?.[workflow.id];
+    await select({factory_id:factory,run_id:id,start_stage_id:'',tab:'overview'});
+    if(returnStage&&state?.run?.id===id&&state.run.definition?.nodes?.[returnStage]?.type==='t')await select({stage_id:returnStage,stage_overview:false,tab:'overview'},{fetch:false});
+    if(link&&state?.run?.id===id)await mutate({action:'link_chat',run_id:id,chat_id:chatId()});
+  }
   async function stageAction(action,target){
     const data=target.dataset;
     if(action==='stage_open'){
@@ -540,7 +570,8 @@
     if(action==='stage_start'||action==='stage_details'){
       const stage=workStageTarget(state,selection);
       if(action==='stage_start'&&(state.run||data.jobId&&!stageJob(data.jobId)||data.nodeId&&data.nodeId!==stage.id))return;
-      return select({start_stage_id:stage.id,job_id:'',stage_verdict_job:'',tab:state.run?'run_details':'start'},{fetch:false});
+      if(!state.run)return startRun({dataset:{startStageId:stage.id}});
+      return select({start_stage_id:stage.id,job_id:'',stage_verdict_job:'',tab:'run_details'},{fetch:false});
     }
     if(action==='stage_tab'){if(!['work','log','rules'].includes(data.tab))return;selection.stage_tab=data.tab;selection.stage_verdict_job='';render();remember();return;}
     if(action==='stage_approved'){const group=workStagePositiveGroup(workStageRows(state,workStageTarget(state,selection)),selection);selection.stage_approved_expanded=!group.expanded;if(group.expanded&&group.rest.some(row=>row.node.id===selection.stage_evidence)){selection.stage_evidence='';selection.stage_tool='';}selection.stage_verdict_job='';render();remember();return;}
@@ -627,14 +658,7 @@
     if(action==='save_inputs')return saveInputs();
     if(action==='native_open')return openNative(target.dataset.nativeId);
     if(action==='new_chat'){return source()?.newChat?.();}
-    if(action==='start_run'){
-      const at=context(),workflow=state?.workflow,returnStage=selection.start_stage_id;let version=workflow?.published_version,groups=[],link=false;
-      if(target.dataset.startInline!==undefined){const form=$('#ees-work-start');if(!form||[...form.querySelectorAll('input,select,textarea')].some(field=>!field.reportValidity()))return;const def=workPublishedDefinition(state),factory=def.execution_scope==='system'?'':($('#ees-start-factory')?.value || ''),inputs=workReadInputs(form);const result=await mutate({action:'start_run',expected_revision:workflow.revision,workflow_id:workflow.id,factory_id:factory,version,inputs,sharing:{group_ids:[...form.querySelectorAll('[data-start-group]:checked')].map(field=>field.value)}},{refreshAfter:false});if(result&&at===context()){const id=result.run?.id || result.run_id || result.id;delete selection.start_inputs?.[workflow.id];await select({factory_id:factory,run_id:id,tab:'overview'});if(returnStage&&state?.run?.id===id&&state.run.definition?.nodes?.[returnStage]?.type==='t')await select({stage_id:returnStage,stage_overview:false,tab:'overview'},{fetch:false});}return;}
-      const pending=dialog({title:'진행 건 시작',note:'선택한 게시 버전과 이번 진행 건을 따로 보존합니다.',html:`<label>게시 버전<select id="ees-start-version">${(workflow?.versions || []).map(item=>`<option value="${item.version}"${item.version===version?' selected':''}>v${item.version} · ${esc(item.published_at || '')}</option>`).join('')}</select></label><fieldset><legend>함께 처리할 Native 그룹</legend><p class="ew-muted">선택하지 않으면 개인 진행 건입니다. 개인 대화 내용은 공유하지 않습니다.</p>${(state.native_groups || []).map(group=>`<label><input type="checkbox" data-start-group value="${esc(group.id)}">${esc(group.name || group.id)}</label>`).join('') || '<p>현재 참여 중인 그룹이 없습니다.</p>'}</fieldset>${chatId()?'<label><input type="checkbox" id="ees-start-chat-link">현재 개인 대화를 이 진행 건에 연결</label>':''}`,confirmLabel:'진행 건 시작'});
-      $('#ees-work-dialog').addEventListener('change',()=>{version=Number($('#ees-start-version').value);groups=[...document.querySelectorAll('[data-start-group]:checked')].map(field=>field.value);link=Boolean($('#ees-start-chat-link')?.checked);});
-      if(!await pending||at!==context())return;
-      const result=await mutate({action:'start_run',expected_revision:workflow.revision,workflow_id:selection.workflow_id,factory_id:selection.factory_id,version,inputs:{},sharing:{group_ids:groups}},{refreshAfter:false});if(result){const id=result.run?.id || result.run_id || result.id;await select({run_id:id,tab:'overview'});if(returnStage&&state?.run?.id===id&&state.run.definition?.nodes?.[returnStage]?.type==='t')await select({stage_id:returnStage,stage_overview:false,tab:'overview'},{fetch:false});if(link)await mutate({action:'link_chat',run_id:id,chat_id:chatId()});}return;
-    }
+    if(action==='start_run')return startRun(target);
     if(action==='execute_scope'){if(busy||!state?.run||!inputsSaved(true))return;setBusy(true);try{const model=executionModel();await operationsCommand({action:'execute_scope',run_id:selection.run_id,node_id:target.dataset.nodeId,expected_revision:state.run.revision,...(model?{model_id:model}:{})});await refresh();}finally{setBusy(false);}return;}
     if(action==='shared_accept_version'){if(busy)return;const item=state.operations?.shared_tools?.find(item=>item.id===target.dataset.sharedId);if(!item)return;if(!await confirmDialog({title:'이 회차에서 v'+item.version+'으로 계속할까요?',html:'<p>이 회차에서 같은 도구를 쓰는 다음 실행부터 새 버전을 사용합니다. 이미 남긴 실행 기록은 그대로 유지됩니다.</p>',confirmLabel:'새 버전으로 계속'}))return;await operationsCommand({action:'shared_tool_accept_version',run_id:selection.run_id,shared_tool_id:item.id,version:item.version,expected_revision:state.run.revision});await refresh();return;}
     if(action==='execute'){if(busy||!inputsSaved())return;setBusy(true);try{const model=executionModel();await operationsCommand({action:'execute_job',run_id:selection.run_id,job_id:selection.job_id,expected_revision:state.run.revision,...(model?{model_id:model}:{})});await refresh();}finally{setBusy(false);}return;}
@@ -686,7 +710,6 @@
       optionTimer=setTimeout(()=>loadOptions(),300);
     }
     if(event.type==='change'&&target.matches?.('[data-stage-attempt]')){const current=stageJob(target.dataset.jobId);if(!current||!(current.run.attempts || []).some(attempt=>attempt.id===target.value&&attempt.job_id===current.node.id))return;selection.stage_attempts={...(selection.stage_attempts || {}),[current.node.id]:target.value};selection.stage_tool='';render();return;}
-    if(event.type==='change'&&target.id==='ees-start-factory'){select({factory_id:target.value,start_factory_id:target.value});return;}
     if(event.type==='change'&&target.matches?.('[data-item-verdict]')){const saved=state?.run?.jobs?.[selection.job_id];if(!saved||saved.can_decide===false||saved.decisions?.[target.dataset.itemId])return;const key=selection.run_id+'/'+selection.job_id+'/'+saved.attempt_id;selection.verdict_drafts ||= {};selection.verdict_drafts[key] ||= {};const option=target.selectedOptions?.[0];selection.verdict_drafts[key][target.dataset.itemId]={verdict:option?.dataset.verdict || target.value,...(option?.dataset.judgmentId?{judgment_id:option.dataset.judgmentId}:{})};remember();render();return;}
     if(event.type==='change'&&target.matches?.('[data-list-include]')){view.refreshResults();return;}
     if(event.type==='change'&&(target.matches?.('[data-item-verdict]')||target.matches?.('[data-item-confirm]'))){const verdict=target.matches('[data-item-confirm]')?(target.checked?'completed':'unknown'):target.value;if(verdict)mutate({action:'decide',run_id:selection.run_id,job_id:selection.job_id,item_id:target.dataset.itemId,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,verdict});}

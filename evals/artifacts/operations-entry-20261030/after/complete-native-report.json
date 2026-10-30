@@ -1,0 +1,434 @@
+{
+  "time": "2026-10-30T04:22:03.974083+00:00",
+  "scope": "Complete packaged Native app gate for the integrated work contract.\n\nOne temporary DATA_DIR and a loopback synthetic model are used. Native auth,\nchat/file storage, workflow APIs, worker and frontend are the built product.\nNo company credentials, DB or service is read. Physical CDP input drives UI;\nread-only DOM evaluation inspects readiness and results. Failure evidence is\ncaptured before browser shutdown. This is distinct from the Native fixtures.\nThis gate was reconstructed after workspace loss from the committed base and\nobserved failures. It is not claimed byte-identical to the lost c144 gate.\n",
+  "source_commit": "4c33f6de195553f3b90ead096de56c2420bfceea",
+  "source_dirty": true,
+  "wheel": "open_webui-0.11.3+ees.14-py3-none-any.whl",
+  "wheel_sha256": "bbc988d28e3742f87801583d0303a4a032b274a8a42633aff11a3e2176b4f78e",
+  "gate_sha256": "94e515059e5ea307dcd28d5a74d41192548bdfd8f8308761b79f69f78951ac43",
+  "execution": {
+    "python": "3.11.16",
+    "argv": [
+      "tests/ees_work_integrated_app.py",
+      "--wheel",
+      "/workspace/scratch/b1afafbe4fcd/parity-build/branding8/open_webui-0.11.3+ees.14-py3-none-any.whl",
+      "--chrome",
+      "/workspace/scratch/b1afafbe4fcd/browser-tools/chromium",
+      "--output",
+      "/workspace/scratch/b1afafbe4fcd/operations-fix-native-20261030/complete-recheck"
+    ],
+    "chrome": "/workspace/scratch/b1afafbe4fcd/browser-tools/chromium",
+    "reconstructed_after_workspace_loss": true,
+    "prior_lost_gate_byte_identity_claimed": false
+  },
+  "steps": [
+    {
+      "name": "empty Native installation",
+      "workflows": 0,
+      "runs": 0
+    },
+    {
+      "name": "Native model availability",
+      "models": [
+        {
+          "id": "c3-synthetic-model",
+          "direct": null,
+          "owned_by": "openai"
+        },
+        {
+          "id": "arena-model",
+          "direct": null,
+          "owned_by": "arena"
+        }
+      ]
+    },
+    {
+      "name": "actual built Native render",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "name": "physical authoring create and draft save",
+      "workflow_id": "78437dcc-ef8e-44fc-9dfd-ea600d848e00",
+      "revision": 2,
+      "purpose_saved": true,
+      "start_input": "evidence_note",
+      "chat_draft_preserved": true
+    },
+    {
+      "name": "explicit legacy job-input API fixture",
+      "workflow_id": "78437dcc-ef8e-44fc-9dfd-ea600d848e00",
+      "job_id": "job-258bab72-9f52-4a43-a6f5-eaf6978dd562",
+      "field_id": "evidence_note",
+      "revision": 3,
+      "ui_creation_claimed": false
+    },
+    {
+      "name": "physical validate and publish with legacy job-input fixture",
+      "workflow_id": "78437dcc-ef8e-44fc-9dfd-ea600d848e00",
+      "version": 1
+    },
+    {
+      "name": "Q1 actual Native layout at 1366x768",
+      "action_bar_visible": true,
+      "message_width_checked": false,
+      "geometry": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "document_width": 1366,
+        "sidebar": {
+          "x": 0,
+          "y": 0,
+          "width": 56,
+          "height": 768,
+          "bottom": 768,
+          "right": 56
+        },
+        "panel": {
+          "x": 886,
+          "y": 0,
+          "width": 480,
+          "height": 768,
+          "bottom": 768,
+          "right": 1366
+        },
+        "chat": {
+          "x": 56,
+          "y": 0,
+          "width": 830,
+          "height": 768,
+          "bottom": 768,
+          "right": 886
+        },
+        "action": {
+          "x": 887,
+          "y": 709,
+          "width": 479,
+          "height": 59,
+          "bottom": 768,
+          "right": 1366
+        },
+        "messages": []
+      }
+    },
+    {
+      "name": "run input save cancel confirmation and actual completion",
+      "run_id": "8b17e08c-5e91-45e0-bf75-bb381e97b034",
+      "attempts": 1,
+      "version": 1
+    },
+    {
+      "name": "Native physical send and storage reload",
+      "saved_messages": 2,
+      "chat_id": "b7202980-6cf6-4a98-bac2-8cc6dbb47f47",
+      "model_boundary": "loopback synthetic HTTP only"
+    },
+    {
+      "name": "Native attachment chooser upload process send reload",
+      "file_id": "d095cccd-1d8d-47c5-9e4f-178ddcde19ab",
+      "chat_id": "b7202980-6cf6-4a98-bac2-8cc6dbb47f47",
+      "model_boundary": "Only model response and embedding vectors are loopback synthesis"
+    },
+    {
+      "name": "Q1 actual Native layout at 1366x768",
+      "action_bar_visible": false,
+      "message_width_checked": true,
+      "geometry": {
+        "viewport": [
+          1366,
+          768
+        ],
+        "document_width": 1366,
+        "sidebar": {
+          "x": 0,
+          "y": 0,
+          "width": 56,
+          "height": 768,
+          "bottom": 768,
+          "right": 56
+        },
+        "panel": {
+          "x": 886,
+          "y": 0,
+          "width": 480,
+          "height": 768,
+          "bottom": 768,
+          "right": 1366
+        },
+        "chat": {
+          "x": 56,
+          "y": 0,
+          "width": 830,
+          "height": 768,
+          "bottom": 768,
+          "right": 886
+        },
+        "action": {
+          "x": 887,
+          "y": 709,
+          "width": 479,
+          "height": 59,
+          "bottom": 768,
+          "right": 1366
+        },
+        "messages": [
+          {
+            "x": 91,
+            "y": 128,
+            "width": 760,
+            "height": 108.75,
+            "bottom": 236.75,
+            "right": 851
+          },
+          {
+            "x": 91,
+            "y": 264.75,
+            "width": 760,
+            "height": 75.25,
+            "bottom": 340,
+            "right": 851
+          },
+          {
+            "x": 91,
+            "y": 368,
+            "width": 760,
+            "height": 116.75,
+            "bottom": 484.75,
+            "right": 851
+          },
+          {
+            "x": 91,
+            "y": 512.75,
+            "width": 760,
+            "height": 141.75,
+            "bottom": 654.5,
+            "right": 851
+          }
+        ]
+      }
+    },
+    {
+      "name": "Native and work restart persistence",
+      "chat_preserved": true,
+      "attempts_preserved": true
+    },
+    {
+      "name": "latest Figma isolated API fixtures",
+      "workflow_id": "826632de-05b3-4856-a1d3-cfce2824654d",
+      "native_tool_source_sha256": "d6bb9bee2a7919b994008393d48188cd43d1a26404b013f21bc6d56f3e95085c",
+      "business_completion": false,
+      "external_boundary": "Loopback synthetic Jira and model HTTP only"
+    },
+    {
+      "name": "Figma B2-2 physical job rule edit and draft save",
+      "workflow_id": "d34f8ddc-71da-4592-912a-0d36ff9f97a4",
+      "result_block": "checklist",
+      "published": false,
+      "business_completion": false
+    },
+    {
+      "name": "Figma B2-1 physical schedule preview and draft save",
+      "draft_revision": 4,
+      "published_version": 1,
+      "reservation_created": false
+    },
+    {
+      "name": "Figma S1 actual HTTP failure and bounded read retry",
+      "attempt_statuses": [
+        "failed",
+        "succeeded"
+      ],
+      "external_http_requests": [
+        {
+          "path": "/rest/api/2/myself",
+          "status": 503
+        },
+        {
+          "path": "/rest/api/2/myself",
+          "status": 200
+        },
+        {
+          "path": "/rest/api/2/project",
+          "status": 200
+        },
+        {
+          "path": "/rest/api/2/project/EESEMS/statuses",
+          "status": 200
+        },
+        {
+          "path": "/rest/api/2/field",
+          "status": 200
+        },
+        {
+          "path": "/rest/api/2/search",
+          "status": 200
+        }
+      ],
+      "native_tool_attempts": 2,
+      "business_completed": false,
+      "failed_result_preserved": true
+    },
+    {
+      "name": "Figma A6 physical Native tool call list selection and atomic confirmation",
+      "attempts": 3,
+      "original_result_preserved": true,
+      "confirmed_items": 2
+    },
+    {
+      "name": "Figma A7 physical AI review autosave and explicit confirmation",
+      "completion_kind": "review",
+      "actual_delivery": false,
+      "original_result_preserved": true,
+      "autosave_confirmed": false,
+      "send_control_present": false,
+      "confirmed_text": "사람이 보완한 실제 제품 검토 본문. 합성 자료이며 송부하지 않았습니다."
+    },
+    {
+      "name": "Figma S2 physical readonly history and reference with restart persistence",
+      "original_shared_value_preserved": true,
+      "current_value_not_substituted": true,
+      "attempts": 4,
+      "actual_native_historical_tool_calls": 1,
+      "stored_chat_messages": 6,
+      "narrow_work_ready": true,
+      "physical_scroll_verified": true
+    },
+    {
+      "name": "Figma B2-3 delivery recommendation permits physical publish",
+      "recommendations": 1,
+      "external_delivery": false
+    },
+    {
+      "name": "Figma A7 delivery purpose review cannot close or claim sent",
+      "completion_kind": "delivery",
+      "human_review_saved": true,
+      "business_status": "blocked",
+      "reason": "delivery_unconfigured",
+      "actual_delivery": false
+    },
+    {
+      "name": "Figma A8 active factory remains visible and duplicate start is disabled",
+      "factory_id": "synthetic-c12-factory",
+      "existing_run_unchanged": true,
+      "duplicate_created": false,
+      "existing_run_reopened_from_records": true
+    }
+  ],
+  "status": "passed",
+  "browser_cleanup_diagnostics": {
+    "stage": "ready",
+    "elapsed_ms": 45189.09116500072,
+    "pid": 49,
+    "exit_code": 0,
+    "browser_version": {
+      "protocolVersion": "1.3",
+      "product": "HeadlessChrome/153.0.8010.0",
+      "revision": "@86cee6df69e0463a839c0cc8435c9d4c259434d3",
+      "jsVersion": "15.3.76"
+    },
+    "target_id": "54D21E4F9BE508F795BCC1118632149D",
+    "session_attached": false,
+    "buffer_bytes": 0,
+    "last_command": {
+      "id": 1177,
+      "method": "Browser.close",
+      "session_attached": false,
+      "timeout_seconds": 5,
+      "elapsed_ms": 0.34340900310780853,
+      "completed": true
+    },
+    "recent_responses": [
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "id": 1173,
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "id": 1174,
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "id": 1175,
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "id": 1176,
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "method": "Network.responseReceivedExtraInfo",
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "method": "Network.responseReceived",
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "method": "Network.dataReceived",
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "method": "Network.loadingFinished",
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "method": "Network.requestWillBeSent",
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "method": "Network.requestWillBeSentExtraInfo",
+        "sessionId": "9D4C2A68728E61B884183B9D0F212DB6"
+      },
+      {
+        "id": 1177
+      }
+    ],
+    "stderr_tail": "[1030/002211.733470:ERROR:../net/base/address_tracker_linux.cc:224] Could not create NETLINK socket: Operation not permitted (1)\n[1030/002211.735917:ERROR:../content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 66: No such file or directory (2)\n[1030/002211.748468:WARNING:../sandbox/policy/linux/sandbox_linux.cc:405] InitializeSandbox() called with multiple threads in process gpu-process.\n[1030/002211.767375:ERROR:../content/browser/zygote_host/zygote_host_impl_linux.cc:300] Failed to adjust OOM score of renderer with pid 104: No such file or directory (2)\n",
+    "first_failure": null,
+    "browser_startup": {
+      "budget_seconds": 30,
+      "ready_elapsed_ms": 226.33492900058627,
+      "product": "HeadlessChrome/153.0.8010.0"
+    },
+    "bootstrap_observation": null
+  }
+}

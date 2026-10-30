@@ -579,10 +579,9 @@ test('request proposal cannot apply a field hidden by a later schema refresh',()
  assert.throws(()=>h.api.applyInputProposal(),/다른 입력 제안/);assert.equal(applied,0);assert.equal(runState.inputs.wait,60);assert.equal(h.calls.length,0);
  tools[0].input_schema.properties.timeout=timeout;h.api.applyInputProposal();assert.equal(applied,1);assert.equal(h.calls.length,0);
 });
-test('ad-hoc start lists active factories and disables only those with active work',()=>{
- const data={workflow:{id:'w',name:'Setup',published_version:2},factories:[{id:'a',name:'Alpha',system_id:'EMS'},{id:'b',name:'Beta',system_id:'EMS'}],workflow_active_runs:[{id:'existing',workflow_id:'w',factory_id:'a',status:'open',progress:{}}]},selection={system_id:'EMS',factory_id:'b'},definition={execution_scope:'factory',nodes:{}};
- const out=html('workAdhocStartHTML(data,selection,definition)',{data,selection,definition});assert.match(out,/data-run-id="existing"/);assert.match(out,/<option value="a" disabled>Alpha · 이미 진행 중/);assert.match(out,/<option value="b" selected>Beta/);assert.match(out,/data-action="start_run" data-start-inline/);assert.doesNotMatch(out,/김도윤|미국 공장|완료 0\/0/);
- data.workflow_active_runs[0].progress={completed:0,total:1};assert.match(html('workAdhocStartHTML(data,selection,definition)',{data,selection,definition}),/완료 0\/1/);
+test('execution preparation keeps declared inputs and groups while using only the left selected target',()=>{
+ const data={workflow:{id:'w',name:'Setup',published_version:2},factories:[{id:'b',name:'Beta',system_id:'EMS'}],native_groups:[{id:'g',name:'운영 담당'}]},selection={system_id:'EMS',factory_id:'b',start_inputs:{w:{note:'보존할 <값>'}},start_groups:{w:['g']}},definition={execution_scope:'factory',nodes:{p:{inputs:[{id:'note',name:'입력 근거',type:'text',scope:'run',required:true}]}}};
+ const out=html('workRunStartFieldsHTML(data,selection,definition)',{data,selection,definition});assert.match(out,/적용 대상 · Beta · EMS/);assert.match(out,/id="ees-work-start"/);assert.match(out,/보존할 &lt;값&gt;/);assert.match(out,/data-start-group value="g" checked/);assert.match(out,/required/);assert.doesNotMatch(out,/새로 시작|진행 중|ees-start-factory|ew-adhoc-start|data-action="start_run"/);
 });
 test('item verdict options stay pending and AI suggestions cannot enable final confirmation',()=>{
  const job={result_block:'item_verdict',judgments:[{id:'approved',label:'승인',status:'completed'},{id:'unknown',label:'판단 불가',status:'unknown'}]},saved={result:{items:[{id:'one',ai_suggestion:'completed'},{id:'two'}]}};
@@ -914,17 +913,32 @@ test('operations31 preview reads only published stages without a run or factory'
  assert.equal(h.calls.filter(call=>call.body&&call.body.action!=='save_ui').length,0);
  const body=html('workStageHTML(state,selection,workPublishedDefinition(state).nodes.t).body',{state:h.state,selection:h.api.snapshot().selection});assert.match(body,/판정 단어/);
 });
-test('preview execution enters the existing explicit start form without creating or executing a run',async()=>{
- const h=stagePreviewFixture();await h.api.handleClick({dataset:{action:'stage_open',nodeId:'t'}});
+function stageStartDialog(h){
+ const pending=deferred(),options=[],listeners=new Map(),fields=[{name:'note',value:'입력한 근거',dataset:{inputType:'text'}}],groups=[{value:'ops-group'}];
+ const form={querySelectorAll:selector=>selector==='[data-work-input]'?fields:selector==='[data-start-group]:checked'?groups:[]};
+ const element={querySelector:selector=>selector==='#ees-work-start'?form:selector==='#ees-start-version'?{value:'3'}:null,querySelectorAll:selector=>selector==='[data-start-group]:checked'?groups:[],addEventListener:(kind,fn)=>listeners.set(kind,fn)};
+ h.context.document.querySelector=selector=>selector==='#ees-work-dialog'?element:null;h.setDialog(value=>{options.push(value);return pending.promise;});
+ return {pending,options,fields,groups,confirm(){listeners.get('click')?.({target:{closest:selector=>selector==='[data-dialog-confirm]'?{}:null}});pending.resolve(true);}};
+}
+test('preview execution opens preparation over the same stage and cancel creates no run',async()=>{
+ const h=stagePreviewFixture(),dialog=stageStartDialog(h);await h.api.handleClick({dataset:{action:'stage_open',nodeId:'t'}});
  const body=html('workStageHTML(state,selection,workPublishedDefinition(state).nodes.t).body',{state:h.state,selection:h.api.snapshot().selection});assert.match(body,/data-action="stage_start"/);assert.doesNotMatch(body,/data-action="execute_scope"|data-action="stage_decide"/);assert.ok([...body.matchAll(/<button[^>]*data-action="stage_start"[^>]*>/g)].every(match=>!match[0].includes('aria-haspopup')&&!match[0].includes('aria-controls')));const emptyRecord=html('workStageHTML(state,{stage_id:"t",stage_evidence:"h"},workPublishedDefinition(state).nodes.t).body',{state:h.state});assert.match(emptyRecord,/title="읽기 전용 판정 사유"/);assert.doesNotMatch(emptyRecord,/title="저장된 판정 사유"/);
- await h.api.handleClick({dataset:{action:'stage_start',jobId:'other'}});assert.equal(h.api.snapshot().selection.tab,'overview');
- await h.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});assert.equal(h.api.snapshot().selection.tab,'start');assert.equal(h.calls.filter(call=>call.body&&call.body.action!=='save_ui').length,0);
- await h.api.handleClick({dataset:{action:'stage_return'}});assert.equal(h.api.snapshot().selection.stage_id,'t');assert.equal(h.api.snapshot().selection.tab,'overview');
+ await h.api.handleClick({dataset:{action:'stage_start',jobId:'other'}});assert.equal(dialog.options.length,0);
+ const action=h.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});assert.equal(dialog.options[0].title,'실행 준비');assert.equal(h.api.snapshot().selection.tab,'overview');assert.equal(h.api.snapshot().selection.stage_id,'t');dialog.pending.resolve(false);await action;
+ assert.equal(h.calls.filter(call=>call.body&&call.body.action!=='save_ui').length,0);assert.equal(h.api.snapshot().selection.stage_id,'t');
 });
 test('unpublished workflows never expose author drafts to operations preview',()=>{
  const h=stagePreviewFixture();delete h.state.workflow.published;delete h.state.workflow.published_version;
  assert.deepEqual(JSON.parse(JSON.stringify(html('workPublishedDefinition(state)',{state:h.state}))),{});
  assert.equal(html('workStageTarget(state,{stage_id:"secret"})',{state:h.state}),null);
+});
+test('unpublished operation entry and saved start tabs keep the new empty overview for every mode',()=>{
+ for(const mode of ['on_demand','periodic','emergency'])for(const tab of ['overview','start','run_details']){
+  const h=sharedRuntimeFixture();delete h.snapshot.state.run;
+  h.snapshot.state.workflow={id:'w',name:'미게시 절차',mode,system_id:'EMS',can_manage:true,draft:{nodes:{secret:{id:'secret',type:'t',name:'초안 전용 단계'}}}};
+  h.snapshot.selection={mode:'work',workflow_id:'w',job_id:'',stage_id:'secret',tab};
+  const out=h.overview();assert.match(out,/ew-operation-overview/,mode+'/'+tab);assert.match(out,/게시되지 않은 업무 절차/);assert.doesNotMatch(out,/초안 전용 단계|새로 시작|진행 건 시작|ew-adhoc-start|data-action="(?:start_run|stage_start|stage_open|execute_scope)"/);
+ }
 });
 test('operations overview uses canonical mode and published name ahead of author draft metadata',()=>{
  const h=stagePreviewFixture();h.state.workflow.name='미게시 이름';h.state.workflow.mode='on_demand';
@@ -933,14 +947,25 @@ test('operations overview uses canonical mode and published name ahead of author
   const stage=html('workStageHTML(state,{},workPublishedDefinition(state).nodes.t)',{state:h.state});assert.match(stage.header,/배포 산출물 점검/);assert.doesNotMatch(stage.header,/미게시 이름/);
  }
 });
-test('both existing start flows return to their selected stage without automatically executing it',async()=>{
+test('all explicit start dialogs return to their selected stage without automatically executing it',async()=>{
  for(const mode of ['on_demand','periodic','emergency']){
-  const h=stagePreviewFixture(),definition=h.state.workflow.published;definition.mode=mode;definition.nodes.t2={id:'t2',parent:'p',type:'t',name:'후속 단계'};
-  h.api.setSelection({system_id:'EMS',factory_id:'factory',stage_id:'t2'});await h.api.handleClick({dataset:{action:'stage_start',nodeId:'t2'}});
-  const form={querySelectorAll:()=>[],addEventListener:()=>{}};h.context.document.querySelector=selector=>selector==='#ees-start-factory'?{value:'factory'}:selector==='#ees-work-start'||selector==='#ees-work-dialog'?form:null;h.setDialog(()=>Promise.resolve(true));
+  const h=stagePreviewFixture(),definition=h.state.workflow.published,dialog=stageStartDialog(h);definition.mode=mode;definition.execution_scope='factory';definition.nodes.t2={id:'t2',parent:'p',type:'t',name:'후속 단계'};
+  h.api.setSelection({system_id:'EMS',factory_id:'factory',stage_id:'t2'});
   h.setReply(call=>{if(call.body?.action==='start_run'){h.state.run={id:'new-run',workflow_id:'w',factory_id:'factory',definition,status:'open',jobs:{},attempts:[],revision:1};return {ok:true,run:h.state.run};}return call.url.includes('workspace?')?h.state:{ok:true};});
-  await h.api.handleClick({dataset:{action:'start_run',...(mode==='on_demand'?{startInline:''}:{})}});
-  assert.equal(h.api.snapshot().selection.run_id,'new-run',mode);assert.equal(h.api.snapshot().selection.stage_id,'t2',mode);assert.equal(h.api.snapshot().selection.start_stage_id,'',mode);assert.equal(h.calls.filter(call=>call.body?.action==='start_run').length,1);assert.equal(h.calls.filter(call=>['execute_scope','execute_job'].includes(call.body?.action)).length,0);
+  const action=h.api.handleClick({dataset:{action:'stage_start',nodeId:'t2'}});dialog.fields[0].value='확정 직전 입력';dialog.confirm();await action;
+  const starts=h.calls.filter(call=>call.body?.action==='start_run');assert.equal(starts.length,1);assert.equal(starts[0].body.factory_id,'factory');assert.equal(starts[0].body.version,3);assert.deepEqual(starts[0].body.sharing.group_ids,['ops-group']);assert.deepEqual(starts[0].body.inputs,mode==='on_demand'?{note:'확정 직전 입력'}:{});
+  assert.equal(h.api.snapshot().selection.run_id,'new-run',mode);assert.equal(h.api.snapshot().selection.stage_id,'t2',mode);assert.equal(h.api.snapshot().selection.start_stage_id,'',mode);assert.equal(h.calls.filter(call=>['execute_scope','execute_job'].includes(call.body?.action)).length,0);
+ }
+});
+test('unpublished and changed-account preparation never creates a run',async()=>{
+ const unpublished=stagePreviewFixture(),blocked=stageStartDialog(unpublished);delete unpublished.state.workflow.published_version;delete unpublished.state.workflow.published;
+ await unpublished.api.handleClick({dataset:{action:'start_run'}});assert.equal(blocked.options.length,0);assert.equal(unpublished.calls.length,0);
+ const h=stagePreviewFixture(),dialog=stageStartDialog(h);h.api.setSelection({stage_id:'t'});const action=h.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});h.setAuth('different-account');dialog.confirm();await action;assert.equal(h.calls.filter(call=>call.body?.action==='start_run').length,0);
+});
+test('missing left factory and an active run show a notice without a second picker or start action',async()=>{
+ for(const duplicate of [false,true]){
+  const h=stagePreviewFixture(),dialog=stageStartDialog(h);h.state.workflow.published.execution_scope='factory';h.state.workflow.published.mode='on_demand';h.api.setSelection({stage_id:'t',factory_id:duplicate?'factory':''});if(duplicate)h.state.workflow_active_runs=[{id:'kept',workflow_id:h.state.workflow.id,factory_id:'factory',status:'open'}];
+  const action=h.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});assert.equal(dialog.options[0].readOnlyDetail,true);assert.doesNotMatch(dialog.options[0].html,/ees-work-start|ees-start-factory/);dialog.pending.resolve(false);await action;assert.equal(h.calls.filter(call=>call.body?.action==='start_run').length,0);
  }
 });
 function typeStageNote(h,value,readonly=false){const target={dataset:{jobId:'h'},value,readOnly:readonly,closest:selector=>selector==='[data-ees-work]'?{}:null,matches:selector=>selector==='[data-stage-note]'};h.api.handleEvent({type:'input',target});}
