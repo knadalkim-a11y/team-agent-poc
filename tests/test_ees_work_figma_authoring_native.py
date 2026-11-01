@@ -137,8 +137,16 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.click('.ew-author-rule-policy>summary')
             self.click('.ew-author-rule-card>.ew-author-link')
             self.wait("document.querySelector('.ew-work-content')")
-            self.assertEqual(self.state(workflow_id=key)['workflow'], original)
-            self.assertEqual(len(self.server.workspace_commands), writes)
+            stored = self.state(workflow_id=key)['workflow']
+            commands = self.server.workspace_commands[writes:]
+            observations[-1].update(workflowUnchanged=stored == original,
+                                    workspaceActions=[body.get('action') for body in commands])
+            (directory / 'a12-rules-empty-geometry.json').write_text(
+                json.dumps(observations, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+            self.assertEqual(stored, original)
+            # Opening a workflow legitimately remembers its private selection
+            # through debounced save_ui; shared workflow/run writes are forbidden.
+            self.assertEqual([body for body in commands if body.get('action') != 'save_ui'], [])
 
     def test_c66_job_methods_arguments_d5_and_read_only_at_480_and_1366(self):
         """C66 uses real controls/SQLite; installed Confluence metadata is synthetic."""
