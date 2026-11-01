@@ -66,6 +66,64 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.click('#ees-work-dialog details:not([open]) > summary')
         self.fill(selector, value)
 
+    def test_authoring12_empty_rules_spacing_and_wrapped_guidance(self):
+        """Figma 1902:3197 text/divider positions, without overlapping hit areas."""
+        self.open_initialized_author_list()
+        key = self.author(name='판정 규칙 간격 검증', jobs=1)
+        self.refresh()
+        self.click('[data-author-action=open][data-id="' + key + '"]')
+        self.wait("window.__eesNativeWorkV1.captureReference().workflow_id === " + json.dumps(key))
+        original = deepcopy(self.state(workflow_id=key)['workflow'])
+        writes = len(self.server.workspace_commands)
+        for width in (1366, 480, 360):
+            self.browser.call('Emulation.setDeviceMetricsOverride', {
+                'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+            self.click('[data-author-action=tab][data-tab=rules]')
+            self.wait("document.querySelector('.ew-author-rule-card>.ew-author-empty')")
+            self.screenshot('a12-rules-empty-' + str(width))
+            geometry = self.browser.evaluate("""(() => {
+                const card=document.querySelector('.ew-author-rule-card'),
+                    title=card.querySelector('h3').getBoundingClientRect(),
+                    guidance=card.querySelector('.ew-author-empty p:last-child'),
+                    link=card.querySelector('.ew-author-empty+.ew-author-link'),
+                    policy=document.querySelector('.ew-author-rule-policy'),
+                    text=guidance.getBoundingClientRect(),button=link.getBoundingClientRect(),
+                    style=getComputedStyle(link),range=document.createRange(),
+                    scroll=document.querySelector('.ew-author-scroll');
+                range.selectNodeContents(guidance);
+                const lines=[...range.getClientRects()];
+                return {
+                    panelWidth:document.querySelector('#ees-work-panel').getBoundingClientRect().width,
+                    linkTextTop:button.top+parseFloat(style.borderTopWidth)+parseFloat(style.paddingTop)-title.top,
+                    policyTop:policy.getBoundingClientRect().top-title.top,
+                    linkHeight:button.height,guidanceHeight:text.height,
+                    overlap:text.bottom-button.top,
+                    clipped:lines.some(r=>r.bottom>text.bottom+1||r.right>text.right+1),
+                    overflow:scroll.scrollWidth-scroll.clientWidth,
+                    policyIcon:getComputedStyle(policy.querySelector('summary'),'::before').backgroundImage
+                };
+            })()""")
+            self.assertLessEqual(geometry['overlap'], .5, geometry)
+            self.assertFalse(geometry['clipped'], geometry)
+            self.assertLessEqual(geometry['overflow'], 1, geometry)
+            self.assertGreaterEqual(geometry['linkHeight'], 34, geometry)
+            self.assertGreaterEqual(geometry['guidanceHeight'], 36, geometry)
+            self.assertIn('/_ees14/v4/f0554.svg', geometry['policyIcon'])
+            if width == 1366:
+                self.assertAlmostEqual(geometry['panelWidth'], 480, delta=.5, msg=geometry)
+                # Figma: title y=0, link label y=159, divider y=211.
+                # Compare label position; the product's hit area follows the
+                # fully wrapped text instead of overlapping it by 3px.
+                self.assertAlmostEqual(geometry['linkTextTop'], 159, delta=1, msg=geometry)
+                self.assertAlmostEqual(geometry['policyTop'], 211, delta=1, msg=geometry)
+            self.click('.ew-author-rule-policy>summary')
+            self.wait("document.querySelector('.ew-author-rule-policy').open")
+            self.click('.ew-author-rule-policy>summary')
+            self.click('.ew-author-rule-card>.ew-author-link')
+            self.wait("document.querySelector('.ew-work-content')")
+            self.assertEqual(self.state(workflow_id=key)['workflow'], original)
+            self.assertEqual(len(self.server.workspace_commands), writes)
+
     def test_c66_job_methods_arguments_d5_and_read_only_at_480_and_1366(self):
         """C66 uses real controls/SQLite; installed Confluence metadata is synthetic."""
         # Verify the browser's own Enter activation independently of product
