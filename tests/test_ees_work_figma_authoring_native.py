@@ -66,6 +66,19 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.click('#ees-work-dialog details:not([open]) > summary')
         self.fill(selector, value)
 
+    def authoring_viewport(self, width, height, *, overlay):
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
+        self.wait('innerWidth === ' + str(width) + ' && innerHeight === ' + str(height))
+        # The browser viewport changes before Svelte's bound width/compact
+        # stores have rendered. Wait for the actual layout contract, not time.
+        self.wait("document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === " +
+                  json.dumps(str(width < 1440).lower()))
+        self.wait("document.querySelector('.ees-panel-region')?.dataset.overlay === " +
+                  json.dumps(str(overlay).lower()))
+        self.wait("Math.abs(document.querySelector('[data-ees-source-shell]').getBoundingClientRect().width - " +
+                  str(width) + ") < .01")
+
     def test_authoring12_empty_rules_spacing_and_wrapped_guidance(self):
         """Figma 1902:3197 text/divider positions, without overlapping hit areas."""
         self.open_initialized_author_list()
@@ -75,12 +88,12 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("window.__eesNativeWorkV1.captureReference().workflow_id === " + json.dumps(key))
         original = deepcopy(self.state(workflow_id=key)['workflow'])
         writes = len(self.server.workspace_commands)
+        observations = []
         for width in (1366, 480, 360):
-            self.browser.call('Emulation.setDeviceMetricsOverride', {
-                'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+            self.authoring_viewport(width, 768, overlay=width <= 480)
             self.click('[data-author-action=tab][data-tab=rules]')
             self.wait("document.querySelector('.ew-author-rule-card>.ew-author-empty')")
-            self.screenshot('a12-rules-empty-' + str(width))
+            directory = self.screenshot('a12-rules-empty-' + str(width))
             geometry = self.browser.evaluate("""(() => {
                 const card=document.querySelector('.ew-author-rule-card'),
                     title=card.querySelector('h3').getBoundingClientRect(),
@@ -93,7 +106,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 range.selectNodeContents(guidance);
                 const lines=[...range.getClientRects()];
                 return {
-                    panelWidth:document.querySelector('#ees-work-panel').getBoundingClientRect().width,
+                    panelWidth:document.querySelector('.ees-panel-region').getBoundingClientRect().width,
                     linkTextTop:button.top+parseFloat(style.borderTopWidth)+parseFloat(style.paddingTop)-title.top,
                     policyTop:policy.getBoundingClientRect().top-title.top,
                     linkHeight:button.height,guidanceHeight:text.height,
@@ -103,6 +116,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                     policyIcon:getComputedStyle(policy.querySelector('summary'),'::before').backgroundImage
                 };
             })()""")
+            observations.append({'width': width, **geometry})
+            (directory / 'a12-rules-empty-geometry.json').write_text(
+                json.dumps(observations, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
             self.assertLessEqual(geometry['overlap'], .5, geometry)
             self.assertFalse(geometry['clipped'], geometry)
             self.assertLessEqual(geometry['overflow'], 1, geometry)
@@ -1212,9 +1228,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action="open"][data-id="' + identifier + '"]')
         self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
         for width, height in ((1920, 1080), (1440, 1080), (1366, 768), (480, 768)):
-            self.browser.call('Emulation.setDeviceMetricsOverride', {
-                'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
-            self.wait('innerWidth === ' + str(width))
+            self.authoring_viewport(width, height, overlay=width == 480)
             metrics = self.browser.evaluate("""(() => {
               const rect = element => {const box=element.getBoundingClientRect();return {x:box.x,y:box.y,width:box.width,height:box.height};};
               const bounds = selector => rect(document.querySelector(selector));
