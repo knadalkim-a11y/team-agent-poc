@@ -45,6 +45,7 @@ function panelHarness() {
   const focusSource = between(shell, 'focusPanel: async', '\n\t\treferenceHost:').replace('(open: boolean)', '(open)');
   const focus = Function('env', `with(env) { return { ${focusSource} }.focusPanel; }`)(env);
   const key = bind(between(shell, 'function panelKeydown(', '\n\tfunction clearPrivateDrafts').replace('event: KeyboardEvent', 'event').replaceAll('(event.target as Element)', 'event.target'), env, 'panelKeydown');
+  sync(false, true, false);
   return { env, m, trigger, focus, key, set(open, overlay = true, native = false) { env.panelOpen = open; env.panelOverlay = overlay; env.nativeRoute = native; sync(open, overlay, native); } };
 }
 function panelLayout(values = {}) {
@@ -92,7 +93,8 @@ test('compact scope keeps readable width outside the rail and stays inside small
     h.action.destroy();
   }
   const expanded = scopePositionHarness({ compact: false });
-  assert.equal(expanded.action, undefined); assert.deepEqual(expanded.node.style, {});
+  assert.equal(expanded.node.style.position, 'fixed');
+  assert.equal(expanded.node.style.width, '240px'); expanded.action.destroy();
   assert.equal(expanded.documentListeners.size + expanded.windowListeners.size, 0);
 });
 test('compact scope allows list scroll but closes after anchor movement and removes listeners', () => {
@@ -137,9 +139,15 @@ test('opening a sibling retires closing scope content immediately without restor
   const h = scopeHarness(); h.set(true); await flush(); h.set(false); h.set(false, 'system');
   assert.equal(h.env.shown, false); assert.equal(h.m.pending.size, 0); assert.equal(h.env.trigger.focused, 0);
 });
-test('attached panel changes layout immediately and only fades content on open', async () => {
-  const h = panelHarness(); h.set(true, false); await flush(); assert.deepEqual(h.m.opened, [h.env.panel]);
-  h.set(false, false); assert.equal(h.env.panelClosing, false); assert.equal(h.m.pending.size, 0); await h.focus(false); assert.equal(h.trigger.focused, 1);
+test('initial panel geometry has no intro animation', async () => {
+  const h = panelHarness(); h.env.previousPanelOpen = null; h.set(true, false); await flush();
+  assert.deepEqual(h.m.opened, []); assert.equal(h.env.panelClosing, false);
+});
+test('docked panel slides the same surface and returns focus only after closing', async () => {
+  const h = panelHarness(); h.set(true, false); await flush(); assert.deepEqual(h.m.opened, [h.env.panelRegion]);
+  h.set(false, false); const focus = h.focus(false); await flush();
+  assert.equal(h.env.panelClosing, true); assert.equal(h.trigger.focused, 0);
+  h.m.api.finish(h.env.panelRegion); await focus; assert.equal(h.trigger.focused, 1);
 });
 test('overlay animates only the panel and returns focus after its completion', async () => {
   const h = panelHarness(); h.set(true); await flush();
@@ -154,9 +162,10 @@ test('overlay reopening cancels old cleanup and focus without leaving interactio
   const h = panelHarness(); h.set(true); await flush(); h.set(false); const focus = h.focus(false); h.set(true); await flush(); await focus;
   assert.equal(h.env.panelClosing, false); assert.equal(h.env.panelRegion.inert, false); assert.equal(h.trigger.focused, 0); assert.equal(h.m.pending.size, 0);
 });
-test('a responsive overlay-to-attached change cancels exit instead of reserving space until timeout', async () => {
-  const h = panelHarness(); h.set(true); await flush(); h.set(false); h.set(false, false);
-  assert.equal(h.env.panelClosing, false); assert.equal(h.m.pending.size, 0);
+test('crossing the overlay breakpoint preserves the same active exit', async () => {
+  const h = panelHarness(); h.set(true); await flush(); h.set(false); const exit = h.env.panelClose; h.set(false, false);
+  assert.equal(h.env.panelClosing, true); assert.equal(h.m.pending.size, 1); assert.equal(h.env.panelClose, exit);
+  h.m.api.finish(h.env.panelRegion); await exit; assert.equal(h.env.panelClosing, false);
 });
 test('overlay Escape preserves nested consumed keys and ignores attached/native/settings surfaces', () => {
   const h = panelHarness(), event = () => ({ key: 'Escape', target: h.env.panelRegion, defaultPrevented: false, stopPropagation() { this.stopped = true; }, preventDefault() { this.defaultPrevented = true; } });

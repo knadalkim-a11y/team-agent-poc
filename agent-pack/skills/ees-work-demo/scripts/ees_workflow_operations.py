@@ -1543,7 +1543,7 @@ class OperationsRuntime:
 
     async def state(self, user, system_id="", run_id=""):
         actor, caps, groups = await self._actor(user)
-        tools, schedules, slots, requests, scopes = [], [], [], [], []
+        tools, all_tools, schedules, slots, requests, scopes = [], [], [], [], [], []
         request_records = []
         reviewer_ids = {value(actor, "id")} if value(actor, "role") == "admin" else set()
         with self.service._db() as db:
@@ -1552,13 +1552,15 @@ class OperationsRuntime:
                     reviewer_ids.add(row["principal_id"])
             for row in db.execute("SELECT data FROM work_tool_contracts ORDER BY id"):
                 item = json.loads(row[0])
-                if system_id and item["system_id"] != system_id:
-                    continue
                 try:
                     self._scope(db, actor, groups, item["system_id"])
                 except WorkflowError:
                     continue
-                tools.append(item)
+                # Global tools navigation must not depend on the hidden work
+                # location. Procedure pickers retain their scoped contracts.
+                all_tools.append(item)
+                if not system_id or item["system_id"] == system_id:
+                    tools.append(item)
             for row in db.execute("SELECT data FROM work_schedules ORDER BY next_at,id"):
                 item = json.loads(row[0])
                 if system_id and item["system_id"] != system_id:
@@ -1630,7 +1632,7 @@ class OperationsRuntime:
             shared_tools, shared_notice = [], "공용 도구 목록을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요."
         from .ees_workflow_shared_tools import MESSAGES
         shared_tool_access = await self.service.shared_tools.run_access(actor, run_id) if run_id else {}
-        return {"shared_tools": shared_tools, "shared_tools_notice": shared_notice, "shared_tool_messages": deepcopy(MESSAGES), "shared_tool_access": shared_tool_access, "ok": True, "scope_runs": scopes, "tools": tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
+        return {"shared_tools": shared_tools, "shared_tools_notice": shared_notice, "shared_tool_messages": deepcopy(MESSAGES), "shared_tool_access": shared_tool_access, "ok": True, "scope_runs": scopes, "tools": tools, "all_tools": all_tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
 
     def start(self):
         self._closing = False

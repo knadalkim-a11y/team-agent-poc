@@ -60,7 +60,7 @@ class HelperChatNativeTests(IntegratedNativeCase):
     def open_guide(self):
         self.click('[data-action=mode][data-mode=author]')
         self.click('[data-action=tools]')
-        self.click('[data-author-action=tool_create]')
+        self.create_legacy_tool()
         self.wait('document.querySelector(' + json.dumps(QUESTION) + ')?.checkVisibility({visibilityProperty:true})')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start')"))
         self.assertEqual(self.browser.evaluate('document.querySelectorAll(' + json.dumps(QUESTION) + ').length'), 3)
@@ -205,6 +205,7 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.screenshot('helper-chat-question-and-personal-file')
         message_id = self.server.completions[0]['user_message']['id']
         self.click('[data-author-action=tool_start_back]')
+        self.click('[data-action=procedures]')
         self.click('#ees-work-system-trigger')
         self.click('[data-action=choose_system][data-system-id=APC]')
         self.wait("document.querySelector('#ees-work-system-trigger')?.textContent.includes('APC')")
@@ -348,7 +349,7 @@ class HelperChatNativeTests(IntegratedNativeCase):
         before = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.click('[data-action=mode][data-mode=author]')
         self.click('[data-action=tools]')
-        self.click('[data-author-action=tool_create]')
+        self.create_legacy_tool()
         self.click('[data-author-action=tool_example][data-id=jira-query]')
         self.click('[data-author-action=help][data-id=read_tool]')
         self.wait("document.querySelector('#ees-work-help [data-help-ask]')")

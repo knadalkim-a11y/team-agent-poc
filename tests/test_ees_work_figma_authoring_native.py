@@ -1717,6 +1717,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         workflow_id = created['workflow_id']
         self.refresh()
         self.click('[data-action=mode][data-mode=author]')
+        # Finish the mode's real service read before setting up the editor draft.
+        # This test exercises Native return, not an in-flight list replacement.
+        self.assertIsNotNone(self.refresh())
         self.wait('document.querySelector(' + json.dumps('[data-author-action=open][data-id="' + workflow_id + '"]') + ')')
         self.click('[data-author-action=open][data-id="' + workflow_id + '"]')
         self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
@@ -1735,7 +1738,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
 
         self.click('[data-action=tools]')
         self.wait("document.querySelector('[data-author-action=tool_create]')")
-        self.click('[data-author-action=tool_create]')
+        self.create_legacy_tool()
         self.click('[data-author-action=tool_example][data-id=jira-query]')
         self.fill('#ew-author-tool [name=name]', '미저장 개인 도구 이름')
         self.fill('#ew-author-tool [name=description]', '배포 전에 필요한 승인 상태를 확인')
@@ -2315,7 +2318,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         function = self.tool_connections()
         self.refresh()
         self.open_tools()
-        self.click('[data-author-action="tool_create"]')
+        self.create_legacy_tool()
         self.assertIn('예시에서 시작', self.text('#ees-work-designer'))
         self.assertIn('아직 연결된 기능이 없습니다', self.text('#ees-work-designer'))
         self.assertEqual(self.browser.evaluate("document.querySelectorAll('[data-author-action=tool_example]').length"), 4)
@@ -2341,7 +2344,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.connected_tools.append(function('jira', '합성 Jira', 'jira_search_crs', 'read'))
         self.refresh()
         self.click('[data-author-action="tool_list"]')
-        self.click('[data-author-action="tool_create"]')
+        self.create_legacy_tool()
         self.wait("document.querySelector('[data-author-action=tool_pick]')")
         self.assertEqual(self.read('[data-author-action="tool_example"][data-id="jira-query"] .ew-tool-connection', 'dataset.connected'), 'true')
         self.fill('#ew-tool-search', 'jira_search')
@@ -2397,7 +2400,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(saved['description'], '기존 값을 보존하는 설명 수정')
 
         self.click('[data-author-action="tool_list"]')
-        self.click('[data-author-action="tool_create"]')
+        self.create_legacy_tool()
         self.click('[data-author-action="tool_pick"][data-id="ops:restart_service"]')
         self.assertIn('하는 일: EES에 작업 부탁', self.text('#ees-work-designer'))
         self.assertEqual(self.read('[name=status_function]', 'value'), 'restart_status')
@@ -2447,7 +2450,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         before = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.refresh()
         self.open_tools()
-        self.click('[data-author-action="tool_create"]')
+        self.create_legacy_tool()
         self.click('[data-author-action="tool_example"][data-id="jira-query"]')
         self.click('#ew-author-tool [name=name]')
         for _ in range(12):
@@ -2511,7 +2514,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(advanced_focus, {'trigger': True, 'visible': True, 'open': True})
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-help')"))
         self.click('[data-author-action="tool_list"]')
-        self.click('[data-author-action="tool_create"]')
+        self.create_legacy_tool()
         self.click('[data-author-action="tool_question"][data-id="1"]')
         self.wait("document.querySelector('#messages-container')?.textContent.includes('Jira에서 CR 승인 상태를 확인하는 도구를 만들고 싶어') && !window.__eesSourceShellV1.helpState().busy")
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), before)

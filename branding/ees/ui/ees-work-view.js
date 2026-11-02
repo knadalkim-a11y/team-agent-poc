@@ -24,23 +24,23 @@ const workMotion = (() => {
     restoreInteraction(element);element?.removeAttribute?.('data-ees-motion');
   }
   function capture(element){
-    const style=styleOf(element);return {opacity:style?.opacity || '1',transform:style?.transform || 'none'};
+    const style=styleOf(element);return {opacity:style?.opacity || '1',transform:style?.transform || 'none',...(element?.getAttribute?.('data-ees-motion-kind')==='scope'?{'clip-path':style?.clipPath || 'inset(-24px round 6px)'}:{})};
   }
   function open(element,{from=null}={}){
     if(!element)return;
     const interrupted=from || (closing.has(element)?capture(element):null);
     cancel(element);
-    for(const [key,value] of Object.entries(interrupted || {opacity:'',transform:''})){
+    for(const [key,value] of Object.entries(interrupted || {opacity:'',transform:'','clip-path':''})){
       if(value)element.style?.setProperty?.('--ees-motion-from-'+key,value);
       else element.style?.removeProperty?.('--ees-motion-from-'+key);
     }
-    // Reset only the surface animation. No width or surrounding layout tween.
+    // Restart this surface from its current frame when an exit is interrupted.
     void element.offsetWidth;
     element.setAttribute('data-ees-motion','opening');
     const duration=settings(element).open;if(!duration){element.removeAttribute('data-ees-motion');return;}
     const media=window.matchMedia?.('(prefers-reduced-motion: reduce)');let timer=null;
     const complete=()=>{if(opening.get(element)!==stop)return;stop();if(element.getAttribute('data-ees-motion')==='opening')element.removeAttribute('data-ees-motion');};
-    const onEnd=event=>{if(event.target===element&&event.animationName==='ees-motion-open')complete();};
+    const onEnd=event=>{if(event.target===element&&event.animationName?.startsWith('ees-motion-open'))complete();};
     const onReduced=()=>{if(media?.matches)complete();};
     const stop=()=>{if(timer!==null)clearTimeout(timer);element.removeEventListener('animationend',onEnd);media?.removeEventListener?.('change',onReduced);opening.delete(element);};
     opening.set(element,stop);element.addEventListener('animationend',onEnd);media?.addEventListener?.('change',onReduced);timer=setTimeout(complete,duration+50);
@@ -685,7 +685,7 @@ function workStageHTML(data,selection,stage,options={}){
   const counts={ok:0,cond:0,bad:0,none:0};for(const row of rows)counts[row.group==='result'?row.tone:'none']++;
   const bar=Object.entries(counts).filter(([,n])=>n).map(([tone,n])=>`<i data-verdict="${tone}" style="flex:${n} 1 0"></i>`).join(''),workflowName=definition.name || data.workflow?.name || '업무',qualifier=run.cycle?.name || run.name || '';
   const context=' / '+workOperationTarget(data,selection);
-  const header=`<header class="ew-panel-header ew-run-nav"><button type="button" class="ew-run-back" data-action="stage_back">${icon('eb94a')}<span>${esc(workflowName+context)}</span></button><span></span><button type="button" class="ew-icon-button" aria-label="더 보기" data-action="stage_details">${icon('a953c')}</button><button type="button" class="ew-icon-button" aria-label="업무 패널 닫기" data-action="close_panel">${icon('7bb4a')}</button></header>`;
+  const header=`<header class="ew-panel-header ew-run-nav"><button type="button" class="ew-run-back" data-action="stage_back">${icon('eb94a')}<span>${esc(workflowName+context)}</span></button><span></span><button type="button" class="ew-icon-button" aria-label="더 보기" data-action="stage_details">${icon('a953c')}</button><button type="button" class="ew-icon-button" aria-label="업무 패널 닫기" data-action="close_panel">${icon('a9175')}</button></header>`;
   const head=`<div class="ew-vd-head"><div class="ew-stage-heading"><div class="ew-vd-title"><h2>${esc(stage.name)}</h2></div><button type="button" class="ew-primary ew-stage-run-button" data-action="${data.run?'execute_scope':'stage_start'}" data-node-id="${esc(stage.id)}"${data.run?' data-mutation':''} aria-label="${esc(stage.name)} 단계 실행"${(!data.run||executable)&&!active?'':' disabled data-own-disabled="true"'}>${workStageActionIcons.play}<span>${active?scopeLabel:'이 단계 실행'}</span></button></div><p class="ew-vd-sub"><span>작업 ${rows.length}개</span></p><div class="ew-vd-progress"><div class="ew-vd-bar" role="img" aria-label="작업 ${rows.length}개, 대기 ${rows.filter(row=>row.group==='waiting').length}개, 실행 중 ${rows.filter(row=>row.group==='running').length}개, 결과 ${results.length}개">${bar}</div><p class="ew-vd-statusline" data-person><b>직접 판정</b><span>선택 ${direct.filter(row=>row.decision).length}/${direct.length}</span></p><p class="ew-vd-statusline" data-service><b>자동 실행 완료 ${automatic.filter(row=>row.state==='completed').length}/${automatic.length}</b><span>${automatic.filter(row=>row.state==='failed').length?'실행 실패 '+automatic.filter(row=>row.state==='failed').length:automatic.some(row=>row.state==='running')?'실행 중 '+automatic.filter(row=>row.state==='running').length:''}</span></p></div></div>`;
   const tabs=`<nav class="ew-tabs" aria-label="작업 화면">${[['work','작업'],['log','기록'],['rules','기준']].map(([key,label])=>`<button type="button" data-action="stage_tab" data-tab="${key}" aria-pressed="${tab===key}">${label}</button>`).join('')}</nav>`;
   const modelControls=data.run&&rows.some(row=>row.node.mode==='ai')&&!workUI.finished(run)?(options.modelControls ?? workExecutionModelHTML(data.operations || {},selection.stage_model_id || '')):'',scopeNotice=scopes.filter(scope=>scope.reason).map(scope=>`<p class="ew-muted" role="status">${esc(workReasonText(scope.reason,data.operations?.shared_tool_messages))}</p>`).join(''),runtime=modelControls||scopeNotice?`<div class="ew-stage-runtime">${modelControls}${scopeNotice}</div>`:'';
@@ -776,7 +776,7 @@ function createWorkView({callbacks}){
     const stage=!snapshot.target_loading&&!snapshot.scope_loading&&!snapshot.evidence_unavailable&&snapshot.state?workStageTarget(data,s):null,stageScreen=stage?workStageHTML(data,s,stage,{modelControls:Object.values(data.run?.definition?.nodes || {}).some(node=>node.type==='j'&&node.mode==='ai'&&workUI.lineage(node.id,data.run.definition).some(parent=>parent.id===stage.id))?executionModels():''}):null;
     host.classList?.toggle('ew-vd',Boolean(stageScreen||overview));
     const title=s.mode==='author'?'워크스페이스':s.tab==='my_work'?'내 업무':s.tab==='records'?'실행 기록':'업무';
-    const top=stageScreen?.header || (overview?`<header class="ew-panel-header ew-operation-nav"><strong>업무</strong><span></span><button type="button" class="ew-icon-button" aria-label="업무 패널 닫기" data-action="close_panel">${icon('7bb4a')}</button></header>`:null) || `<header class="ew-panel-header"><strong>${title}</strong><span>${esc(snapshot.native_return_pending?'':s.mode==='author'?data.workflow?.name || '':definition().name || data.workflow?.name || '')}</span>${button('닫기','close_panel','aria-label="업무 패널 닫기" class="ew-icon-button"')}</header>`;
+    const top=stageScreen?.header || (overview?`<header class="ew-panel-header ew-operation-nav"><strong>업무</strong><span></span><button type="button" class="ew-icon-button" aria-label="업무 패널 닫기" data-action="close_panel">${icon('a9175')}</button></header>`:null) || `<header class="ew-panel-header"><strong>${title}</strong><span>${esc(snapshot.native_return_pending?'':s.mode==='author'?data.workflow?.name || '':definition().name || data.workflow?.name || '')}</span><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button">${icon('a9175')}</button></header>`;
     if(snapshot.evidence_unavailable){paint(top+`<div class="ew-scroll"><div class="ew-error" role="alert"><p>${esc(snapshot.error || '기록을 다시 조회해 주세요.')}</p>${button('다시 조회','refresh')}</div></div>`);setBusy(snapshot.busy);return;}
     if(!snapshot.target_loading&&!(snapshot.scope_loading&&snapshot.error)&&snapshot.state&&s.mode==='author'&&s.tab!=='workspace_admin'){if(!workCanCreate(data.capabilities)){paint(top+'<div class="ew-scroll"><p class="ew-empty">'+(workNativeTargets.some(target=>workNativeAllowed(data.capabilities,target.id))?'왼쪽 메뉴에서 사용할 화면을 여세요.':'현재 계정으로 EES Workflow에서 열 수 있는 항목이 없습니다.')+'</p></div>');return;}if(!$('#ees-work-authoring-panel',host))paint('<div id="ees-work-authoring-panel" class="ew-scroll"></div>');return;}
     let body='';currentDraftKey='';

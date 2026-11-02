@@ -185,6 +185,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         trigger = '#ees-work-' + ('site' if kind == 'factory' else 'system') + '-trigger'
         self.click(trigger)
         self.wait('document.querySelector("[data-scope-dropdown=' + kind + ']")')
+        self.wait('!document.querySelector("[data-scope-dropdown=' + kind + '][data-ees-motion]")')
         self.assertEqual(self.read(trigger, 'ariaExpanded'), 'true')
         self.assertEqual(self.read(trigger, 'ariaHasPopup'), 'listbox')
         self.assertEqual(self.browser.evaluate('document.querySelectorAll("[data-scope-dropdown]").length'), 1)
@@ -292,6 +293,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-factory-search')"))
                 self.assertGreater(geometry['list']['scrollHeight'], geometry['list']['clientHeight'])
                 self.assertIn(geometry['list']['overflow'], ('auto', 'scroll'))
+                self.wait("!document.querySelector('[data-scope-dropdown=factory][data-ees-motion]')")
                 page_scroll = self.browser.evaluate('window.scrollY')
                 point = self.browser.evaluate("(()=>{const r=document.querySelector('[data-scope-list=factory]').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()")
                 self.browser.call('Input.dispatchMouseEvent', {'type': 'mouseWheel', **point,
@@ -535,11 +537,11 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.assertIsNotNone(self.refresh())
         self.fill('#chat-input', '범위 변경 중에도 그대로인 문장')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
-        self.wait("document.querySelector('#ees-work-entry .ew-workflows details')")
-        group = '#ees-work-entry .ew-workflows details'
-        if self.read(group, 'open'):
-            self.click(group + ' > summary')
-        self.assertFalse(self.read(group, 'open'))
+        self.wait("document.querySelector('#ees-work-entry .ew-workflows .ew-category-toggle')")
+        group = '#ees-work-entry .ew-workflows .ew-category-toggle'
+        if self.read(group, 'ariaExpanded') == 'true':
+            self.click(group)
+        self.assertFalse(self.read(group, 'ariaExpanded') == 'true')
         self.delay_workspace_reads()
         frame_monitor.guard_loading(self)
         labels = []
@@ -559,7 +561,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
             labels.append(label)
             self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
             self.assertEqual(self.browser.evaluate('location.pathname'), '/c/existing-chat')
-        self.assertFalse(self.read(group, 'open'), 'Range selection reset the collapsed workflow group')
+        self.assertFalse(self.read(group, 'ariaExpanded') == 'true', 'Range selection reset the collapsed workflow group')
         # A new menu replaces the old one, and changing screens closes it.
         self.scope_open('system')
         self.scope_open('factory')

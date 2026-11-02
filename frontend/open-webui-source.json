@@ -23,13 +23,13 @@
     "src/lib/components/chat/Placeholder.svelte": "dc5512dc7648112edd011e27797c07cf5d8d52474be5490a1ae2bef434327036",
     "src/lib/components/ees/EesHelperNotice.svelte": "22ceccc7ad93c5d820f73269baaa9b19f12c5c99054b76ecc8c89f7757f8bba0",
     "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
-    "src/lib/components/ees/EesNavigation.svelte": "51927a8db645ed41c5eb6cd6b5c5fef5eb38be016f4decd4550ac5ed68b465b3",
+    "src/lib/components/ees/EesNavigation.svelte": "2ef3501454980633cd400b280f810f48803142f01dd616d57e8e7a50d6ebe4cc",
     "src/lib/components/ees/EesProcedureIntro.svelte": "8e9e92baa499c6acf66f73643ce17e8b047a6d932844cc3158a252d23718a9a5",
-    "src/lib/components/ees/EesScopeSelect.svelte": "20bfb8c0ff0504d9f650c4ba247c6ef52c23741d8a2a12758b070f4bee50fd82",
-    "src/lib/components/ees/EesShell.svelte": "eab9153eff27d1f2d3f0034bc3087e75aa6bda82fdf2913c37a8f405046d33f1",
+    "src/lib/components/ees/EesScopeSelect.svelte": "4906d92006b655ef5de8079ba0ea03a84ae9a584cd404585d530b4f35479afc4",
+    "src/lib/components/ees/EesShell.svelte": "f0a2dce78749fc449c29ad5ce263a2996ec65cf954c2e13e83a187210c094c57",
     "src/lib/components/ees/icons/5bc95.svg": "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7",
     "src/lib/components/ees/state.ts": "560ef1a21f46fc2a1beabf3012a74933002af586c507ac42bb144f40fe305a43",
-    "src/lib/components/layout/Sidebar.svelte": "e07559d0793490b779cb1748b50c986afaa1b7c853d6f6d673f2bee53c4278b3",
+    "src/lib/components/layout/Sidebar.svelte": "f58d025927bfc5adab883defbd03300412bfad0291727ffdee5fca314f8173b9",
     "src/lib/constants.ts": "0fd43314837a2d7775810c3f08fc82b8042c34a5b6e52f1a7e4513f303a07b5d",
     "src/lib/i18n/locales/ko-KR/translation.json": "802545c50d8d87dbc82afacc5bd9e92587576e023392f426d415409de3ad5438",
     "src/routes/(app)/+layout.svelte": "6e235011199f1eb11107a2d444e5db8c6fb89d13b6e93b9e5980523bf87226f6",
@@ -44,7 +44,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "56fdee99936ab41d5923ea3a9b3cc67536dd5824bc81c884f690f2b372cc7201"
+      "sha256": "764649fb2dcabf977c6ef6a77d8025f1ce5a9a2e919116cf4ce282c7acfc4f49"
     }
   ],
   "pyodide_files": {
