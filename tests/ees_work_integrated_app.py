@@ -337,11 +337,13 @@ def integrated_flow(gate):
     g.type('#ew-stage-editor input[name="name"]','사람의 근거 확인')
     g.click('[data-author-action=inline_apply]')
     # 2026-11-02 moves run start inputs from the removed execution-mode tab to
-    # the content tab; job detail retains guidance and confirmation only.
-    # Preserve this real start-input authoring check before preparing the
-    # legacy job-input regression fixture below.
+    # the content tab's stage-and-job view; job detail retains guidance and
+    # confirmation only. The new job opens its detail, so return through its
+    # back link as a person does. Preserve this real start-input authoring
+    # check before preparing the legacy job-input regression fixture below.
     assert not g.browser.evaluate('!!document.querySelector(\'[data-author-action="tab"][data-tab="schedule"]\')')
-    g.click('[data-author-action="start_input_add"]')
+    g.click('.ew-job-detail-header [data-author-action="node"].ew-author-back')
+    g.click('.ew-content-start-inputs [data-author-action="start_input_add"]')
     g.type('#ees-work-dialog input[name="name"]','확인할 자료')
     g.click('#ees-work-dialog .ew-input-advanced > summary')
     g.type('#ees-work-dialog input[name="id"]','evidence_note')

@@ -275,6 +275,18 @@ test('tool navigation returns to workflow editor without retaining tool-only sur
 test('hidden job trigger remains a stored offset after direct guidance editing',async()=>{const h=harness();h.workflows.get('w').draft.nodes.j.trigger={offset_seconds:3600};h.render();await h.node();assert.equal(h.fields.some(f=>f.name==='trigger_kind'),false);h.field('job_guidance','안내만 수정');h.click('save');await flush();assert.deepEqual(h.writes[0].definition.nodes.j.trigger,{offset_seconds:3600});assert.doesNotMatch(source,/setInterval|setTimeout/);});
 
 test('2026-11-02 authoring no longer creates reservations for a published periodic workflow',async()=>{const h=harness(),record=h.workflows.get('w');record.published_version=2;record.draft.mode='periodic';record.draft.schedule={timezone:'Asia/Seoul',anchor:'2026-10-05T09:00',frequency:'weekly',interval:1};record.draft.nodes.j.mode='tool';record.published=copy(record.draft);h.render();assert.doesNotMatch(h.markup,/일정 미리보기·서버 예약|게시 버전 예약 만들기|data-author-action="schedule_tools"/);h.click('schedule_tools');h.dialogs.push({timezone:'Asia/Seoul',anchor:'2026-10-05T09:00',frequency:'weekly',interval:'1',grace_seconds:'300',delegated:true,'job:j':true});h.click('schedule_create');await flush();assert.equal(h.operations.length,0);assert.equal(h.writes.length,0);assert.equal(h.dialogs.length,1);assert.deepEqual(h.draft().definition.schedule,record.published.schedule);});
+test('2026-11-02 start inputs sit in the stage-and-job view and a new job detail returns to them through its back link',async()=>{
+ // A newly added job opens its detail; start inputs are not part of job detail.
+ const h=harness();h.click('add_stage');await flush();await h.inline('자료 검토');
+ const stage=Object.values(h.draft().definition.nodes).find(node=>node.type==='t'&&node.name==='자료 검토');
+ assert.match(h.markup,/class="ew-schedule-section ew-content-start-inputs"[\s\S]*data-author-action="start_input_add"/);
+ h.click('add_job',{parent:stage.id});await flush();await h.inline('사람의 근거 확인');
+ assert.ok(h.forms['ew-author-node']);assert.doesNotMatch(h.markup,/data-author-action="start_input_add"/);
+ assert.match(h.markup,/<header class="ew-job-detail-header"><button type="button" data-author-action="node" data-id="" class="ew-author-back">/);
+ h.click('node',{id:''});await flush();
+ assert.equal(h.forms['ew-author-node'],undefined);assert.match(h.markup,/class="ew-schedule-section ew-content-start-inputs"[\s\S]*data-author-action="start_input_add"/);
+ assert.ok(Object.values(h.draft().definition.nodes).some(node=>node.type==='j'&&node.name==='사람의 근거 확인'));
+});
 
 test('hidden Native skills retain their saved IDs and do not acquire newly available skills',async()=>{const h=harness();h.workflows.get('w').draft.nodes.j.skills=['saved-skill'];h.callbacks.resources=async()=>({available:true,skills:[{id:'native-skill',name:'사용자 지침',revision:4}]});h.render();await flush();await h.node();assert.equal(h.fields.some(f=>f.name==='skills'),false);h.field('job_guidance','안내 변경');h.click('save');await flush();assert.deepEqual(h.writes[0].definition.nodes.j.skills,['saved-skill']);assert.equal(JSON.stringify(h.writes[0]).includes('skill body'),false);});
 
