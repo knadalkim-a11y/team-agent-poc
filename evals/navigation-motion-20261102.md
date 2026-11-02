@@ -53,6 +53,14 @@
 - **별도 Windows 시작 지연:** [platform job125221447017](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41427686210/job/125221447017)의 합성 launcher 조립1개가 `Node launcher probe timed out after 10s; stderr stages: entry not observed`로 실패했다(모듈33/34). 입력208bytes/SHA256 `c7bf9c7bf270383a3eaf5febc759fe32ba05afad6af9702a6f7679c46928797f`는 [CI418/419 기록](v4-ui-20260930.md#authoring12-rules-spacing-20261102)과 같다. 시험·조립기·10초 제한은 main부터 변경하지 않았다. Linux counterpart와 Windows 종료67/67은 통과했지만 Node 표식 전 초기화·모듈 로드·OS 중 직접 원인은 미확정이다.
 - **다음 검증과 상한:** Native 시험 보완이 필요하므로 실패 Windows job을 먼저 별도 재실행하지 않고 보완 head의 전체 CI1회에 새 runner 확인을 묶는다. 이는 실행기 일시 지연 가설을 확인하는 제한 재검이며 같은 Node 실패가 다시 나면 자동 추가 재시도를 하지 않는다. 성공도 근본원인 해결로 기록하지 않는다. CI 최종 결과는 같은 PR #114에 남기고 병합·사내 적용은 수행하지 않는다.
 
+### CI432 통과와 접힌 제품명 키보드 리뷰 보완
+
+- [CI432](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41430757672), head `88c8dd3`는39성공/PR 출하1정상생략으로 완료됐다. Chrome156 Native94/94(Helper10·motion6·source10·입력5·실행6·작성30·레이아웃5·운영22) 및 Linux·Windows 전체 집계가 통과했다. Windows launcher34/34·종료67/67도 통과해 이번 제한 재확인에서는 진입 지연이 재현되지 않았다. 과거 지연의 직접 원인은 미확정으로 유지한다.
+- **리뷰 발견:** 최종 PR 리뷰 확인에서 접힌 제품명 링크가 폭0이어도 Tab 순서에 남는 P2를 확인했다. 새 실제 키보드 회귀에서 접기 버튼→Shift+Tab이 보이지 않는 제품명 링크에 초점을 주는 실패를 수정 전 패키지에서 재현했다. 기존 애니메이션/가시성 검수는 제품명 링크의 Tab 순서를 포함하지 못했다.
+- **수정:** Sidebar 소스의 제품명 링크에 compact 상태의 `inert`만 연결했다. 폭 애니메이션은 그대로이며 펼치면 링크가 다시 키보드·접근성 탐색에 포함된다. 검토 가능한 소스 patch와 해당 SHA-256을 갱신했고 새 고정 checkout에서 정상 빌드/패키지했다. wheel SHA-256 `79def116f2ab5557985f9285495c593785b2dd0090031c19ecd24ec8924a4668`다.
+- **검증:** patched frontend32/32 및 새 제품의 키보드 회귀·접힌 범위 목록·전체 탐색 기하3/3이 통과했다. 물리 Tab/Shift+Tab/Enter로 숨은 링크 제외·토글 유지·펼친 링크 복구를 확인했고 가시 초점은199×22px/2px solid이며 실제 캡처를 열어 확인했다. 기존 대화 경로·초안·전역 도구·폭/높이 전환은 유지됐고 송신0건이다. 화면/실측은 `dist/navigation-motion-focus/`, 원본 로그는 `scope-qa/*focus*.log`에 보존했다.
+- **후속:** 같은 PR에 리뷰 보완을 게시하고 새 head의 전체 CI를 확인한다. CI432 성공을 뒤의 소스 변경까지 검증한 것으로 간주하지 않으며 최초 실패·Windows 지연 기록은 유지한다. 병합·사내 배포는 하지 않는다.
+
 <a id="navigation-motion-mock2-20261102"></a>
 
 ## 2026-11-02 · 요소별 움직임 · 탐색·패널 시안 2

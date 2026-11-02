@@ -392,6 +392,39 @@ class SourceShellNativeTests(IntegratedNativeCase):
         (directory / 'source-scope-three-dropdowns.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         (directory / 'source-scope-api-permissions.json').write_text(json.dumps(self.scope_api_evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
+    def test_compact_product_link_leaves_tab_order_and_restores_visible_focus(self):
+        self.fill('#chat-input', '키보드 탐색에서도 유지할 대화 초안')
+        draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        self.click('[data-ees-sidebar-toggle]')
+        self.wait("document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === 'true' && !document.querySelector('#sidebar').getAnimations().length")
+        self.key('Tab', 9, 8)  # Shift+Tab from the toggle used to reach a zero-width link.
+        self.assertFalse(self.browser.evaluate("document.activeElement?.matches('.ees-product>a')"))
+        self.assertTrue(self.read('.ees-product>a', 'inert'))
+        self.key('Tab', 9)
+        self.wait("document.activeElement?.matches('[data-ees-sidebar-toggle]')")
+        self.key('Enter', 13)
+        self.wait("document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === 'false' && !document.querySelector('#sidebar').getAnimations().length")
+        self.key('Tab', 9, 8)
+        self.wait("document.activeElement?.matches('.ees-product>a')")
+        focus = self.browser.evaluate("""(()=>{
+          const e=document.activeElement,r=e.getBoundingClientRect(),s=getComputedStyle(e);
+          return {inert:e.inert,width:r.width,height:r.height,x:r.x,y:r.y,
+            focusVisible:e.matches(':focus-visible'),outline:s.outlineStyle,
+            outlineWidth:s.outlineWidth,shadow:s.boxShadow};})()""")
+        self.assertFalse(focus['inert'])
+        self.assertTrue(focus['focusVisible'])
+        self.assertGreater(focus['width'], 0)
+        self.assertGreater(focus['height'], 0)
+        self.assertGreaterEqual(min(focus['x'], focus['y']), 0)
+        self.assertTrue((focus['outline'] != 'none' and focus['outlineWidth'] != '0px')
+                        or focus['shadow'] != 'none', focus)
+        self.assertEqual(self.browser.evaluate('location.pathname'), '/c/existing-chat')
+        self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+        self.assertEqual(self.server.completions, [])
+        directory = self.screenshot('source-product-link-visible-keyboard-focus')
+        (directory/'source-product-link-focus.json').write_text(
+            json.dumps(focus, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+
     def test_compact_scope_options_remain_readable_clickable_and_preserve_draft(self):
         self.scope_catalog_fixture(denied=True)
         self.fill('#chat-input', '접힌 탐색에서도 유지할 대화 초안')

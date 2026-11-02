@@ -2904,7 +2904,7 @@ index 007df31..d812226 100644
 -
 +<SearchModal bind:show={$showSearch} />
 +<aside id="sidebar" data-ees-source-sidebar data-compact={$eesCompact} bind:this={navElement} aria-label={$i18n.t('EES.Nav.Navigation',{defaultValue:'Work navigation'})}>
-+ <header class="ees-product"><a href="/" on:click|preventDefault={()=>window.__eesSourceShellV1?.newChat()} aria-label="EES Workflow"><span class="ees-product-icon">E</span><strong>EES Workflow</strong></a><button data-ees-sidebar-toggle aria-expanded={!$eesCompact} aria-label={$i18n.t($eesCompact?'EES.Sidebar.Expand':'EES.Sidebar.Collapse',{defaultValue:$eesCompact?'Expand sidebar':'Collapse sidebar'})} on:click={()=>eesCompact.set(!$eesCompact)}><Sidebar className="size-4"/></button></header>
++ <header class="ees-product"><a href="/" on:click|preventDefault={()=>window.__eesSourceShellV1?.newChat()} inert={$eesCompact} aria-label="EES Workflow"><span class="ees-product-icon">E</span><strong>EES Workflow</strong></a><button data-ees-sidebar-toggle aria-expanded={!$eesCompact} aria-label={$i18n.t($eesCompact?'EES.Sidebar.Expand':'EES.Sidebar.Collapse',{defaultValue:$eesCompact?'Expand sidebar':'Collapse sidebar'})} on:click={()=>eesCompact.set(!$eesCompact)}><Sidebar className="size-4"/></button></header>
 + <div class="ees-sidebar-scroll">
 + <EesNavigation />
 + <div class="ees-chat-controls"><button id="sidebar-new-chat-button" on:click={()=>window.__eesSourceShellV1?.newChat()}><EditPencilIcon className="size-4"/><span>{$i18n.t('EES.Nav.NewChat',{defaultValue:'New chat'})}</span></button><button id="sidebar-search-button" on:click={()=>showSearch.set(true)}><SearchIcon className="size-4"/><span>{$i18n.t('EES.Nav.Search',{defaultValue:'Search chats'})}</span></button></div>
