@@ -11,6 +11,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from ees_work_integrated_fixture import IntegratedNativeCase
+from ees_frontend_native_baseline import reload_page
 
 
 class SyntheticReviewModel:
@@ -241,6 +242,8 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.assertEqual(self.server.completions, [])
 
     def test_unpublished_operations_use_empty_overview_without_start_or_draft_execution(self):
+        # Keep the regression ID; operations now exclude drafts entirely. The
+        # empty overview remains only a defensive renderer fallback (Node test).
         created = self.command('create_workflow', name='미게시 수시 점검', system_id='EMS')
         key, draft = created['workflow_id'], created['workflow']['draft']
         root = next(iter(draft['nodes']))
@@ -254,33 +257,45 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         periodic = self.command('create_workflow', name='미게시 주기 점검', system_id='EMS',
             template_id='delivery_review')['workflow_id']
         blank = self.command('create_workflow', name='미게시 빈 절차', system_id='EMS')['workflow_id']
+        published = self.author(name='게시된 운영 점검')
+        self.command('initialize_procedures', system_id='EMS')
         workflows = {item: deepcopy(self.state(workflow_id=item)['workflow']) for item in (key, periodic, blank)}
+        saved_ui = self.state()['ui_state']
+        self.command('save_ui', expected_revision=saved_ui['revision'], state={'selection': {
+            'mode': 'work', 'system_id': 'EMS', 'workflow_id': key, 'run_id': '', 'job_id': '',
+            'tab': 'start', 'stage_id': 'private-stage', 'panel_open': True}})
         writes = len(self.server.workspace_commands)
-        for label, item in (('on-demand', key), ('periodic', periodic), ('root-only', blank)):
-            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080,
+        reload_page(self.browser)
+        self.wait("document.querySelector('#ees-work-panel .ew-my-work-empty')")
+        for width in (1920, 480):
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 1080,
                 'deviceScaleFactor': 1, 'mobile': False})
+            self.wait('innerWidth===' + str(width))
             self.open_sidebar()
-            self.refresh()
-            control = '[data-action=workflow][data-workflow-id="' + item + '"]'
+            self.wait('document.querySelector(\'[data-action=workflow][data-workflow-id="' + published + '"]\')')
+            visible = self.browser.evaluate("[...document.querySelectorAll('#sidebar [data-action=workflow]')].map(node=>node.dataset.workflowId)")
+            self.assertIn(published, visible)
+            for item in workflows:
+                self.assertNotIn(item, visible)
+            self.assertNotIn('게시되지', self.text('#ees-work-panel'))
+            self.assertFalse(self.browser.evaluate("!!window.__eesNativeWorkV1.captureReference()?.workflow_id"))
+            self.screenshot('operations-published-only-' + str(width))
+        self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080,
+            'deviceScaleFactor': 1, 'mobile': False})
+        self.wait('innerWidth===1920')
+        self.open_sidebar()
+        self.click('[data-action=mode][data-mode=author]')
+        self.wait("document.querySelector('#ees-work-designer')")
+        for label, item in (('on-demand', key), ('periodic', periodic), ('root-only', blank)):
+            control = '#sidebar [data-action=workflow][data-workflow-id="' + item + '"]'
             self.wait('document.querySelector(' + json.dumps(control) + ')')
             self.click(control)
-            self.wait("document.querySelector('.ew-operation-overview')?.textContent.includes('게시되지')")
-            for width in (1920, 480):
-                with self.subTest(mode=label, width=width):
-                    self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 1080,
-                        'deviceScaleFactor': 1, 'mobile': False})
-                    self.wait('innerWidth===' + str(width))
-                    panel = self.text('#ees-work-panel')
-                    self.assertIn(workflows[item]['name'], panel)
-                    self.assertIn('업무 단계', panel)
-                    self.assertIn('게시되지', panel)
-                    for legacy in ('새로 시작', '진행 건 시작', '게시 v없음', '미게시 단계 원문', '미게시 작업 원문'):
-                        self.assertNotIn(legacy, panel)
-                    self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-panel #ees-work-start,#ees-work-panel .ew-active-runs,#ees-work-panel .ew-adhoc-start,#ees-work-panel [data-action=stage_open],#ees-work-panel [data-action=stage_start],#ees-work-panel [data-action=start_run],#ees-work-panel [data-action=execute_scope],#ees-work-panel [data-action=stage_decide]')"))
-                    self.assertFalse(self.browser.evaluate("!!window.__eesNativeWorkV1.captureReference()?.run_id"))
-                    self.assertLessEqual(self.browser.evaluate("document.querySelector('#ees-work-panel').scrollWidth-document.querySelector('#ees-work-panel').clientWidth"), 1)
-                    self.screenshot('operations-unpublished-' + label + '-' + str(width))
+            self.wait("document.querySelector('#ees-work-designer')?.textContent.includes(" + json.dumps(workflows[item]['name']) + ") && document.querySelector('[data-author-action=add_stage]')")
+            self.screenshot('authoring-unpublished-kept-' + label)
             self.assertEqual(self.state(workflow_id=item)['workflow'], workflows[item])
+        self.click('[data-action=mode][data-mode=work]')
+        self.wait("document.querySelector('#ees-work-panel .ew-my-work-empty')")
+        self.wait("!window.__eesNativeWorkV1.captureReference()?.workflow_id")
         self.assert_only_selection_remembered(writes)
         with self.server.workflow._db() as db:
             for table in ('work_runs', 'work_attempts', 'work_decisions'):

@@ -222,11 +222,11 @@ test('Native capability refresh never replaces the retained selected workspace o
  assert.equal(h.calls.at(-1).url,'/api/ees-work/workspace?');
 });
 test('new target loads once while returning target uses only its own system and factory snapshot',async()=>{
- const h=controller(),reply=call=>call.url.startsWith('/api/ees-work/workspace?')?(()=>{const query=new URL(call.url,'http://native.test').searchParams,id=query.get('workflow_id'),system=query.get('system_id'),factory=query.get('factory_id');return {ok:true,capabilities:{actor_id:'a'},workflows:[{id,system_id:system}],runs:[],workflow:{id,system_id:system,private:factory},systems:['EMS','FDC']};})():{ok:true};
+ const h=controller(),reply=call=>call.url.startsWith('/api/ees-work/workspace?')?(()=>{const query=new URL(call.url,'http://native.test').searchParams,id=query.get('workflow_id'),system=query.get('system_id'),factory=query.get('factory_id');return {ok:true,capabilities:{actor_id:'a'},workflows:[{id,system_id:system,published_version:1}],runs:[],workflow:{id,system_id:system,published_version:1,private:factory},systems:['EMS','FDC']};})():{ok:true};
  h.setReply(reply);await h.api.select({system_id:'EMS',factory_id:'f1',workflow_id:'w1'});const first=h.api.snapshot().state;await h.api.select({workflow_id:'w2'});const pending=deferred();h.setReply(()=>pending.promise);
  const returning=h.api.select({workflow_id:'w1'});assert.equal(h.api.snapshot().state,first);assert.equal(h.api.snapshot().target_loading,false);assert.equal(h.renders.at(-1).state.workflow.private,'f1');
  const other=h.api.select({factory_id:'f2',workflow_id:'w1'});assert.equal(h.api.snapshot().state.workflow,null);assert.equal(h.api.snapshot().state.workflows.length,0);assert.equal(h.api.snapshot().target_loading,true);assert.equal(h.api.reference().kind,'none');
- pending.resolve({ok:true,capabilities:{actor_id:'a'},workflows:[],runs:[],workflow:{id:'w1',private:'f2'}});await Promise.all([returning,other]);assert.equal(h.api.snapshot().state.workflow.private,'f2');
+ pending.resolve({ok:true,capabilities:{actor_id:'a'},workflows:[],runs:[],workflow:{id:'w1',published_version:1,private:'f2'}});await Promise.all([returning,other]);assert.equal(h.api.snapshot().state.workflow.private,'f2');
 });
 test('first scope keeps its navigation catalog but marks lists unread until workspace and operations both arrive',async()=>{
  for(const destination of [{system_id:'APC',factory_id:''},{system_id:'EMS',factory_id:'unvisited'}]){
@@ -242,7 +242,7 @@ test('first scope keeps its navigation catalog but marks lists unread until work
  }
 });
 test('returning to a received scope reuses its lists even when its previous selected workflow differs',async()=>{
- const h=controller();h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},systems:['EMS','APC'],workflows:[{id:'kept',system_id:'EMS'}],runs:[],my_work:[{id:'task'}],workflow:{id:'kept'}}:{ok:true});
+ const h=controller();h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},systems:['EMS','APC'],workflows:[{id:'kept',system_id:'EMS',published_version:1}],runs:[],my_work:[{id:'task'}],workflow:{id:'kept',published_version:1}}:{ok:true});
  await h.api.select({system_id:'EMS',workflow_id:'kept'});
  const pending=deferred();h.setReply(()=>pending.promise);const away=h.api.select({system_id:'APC',workflow_id:''});const back=h.api.select({system_id:'EMS',workflow_id:''});
  const rendered=h.renders.at(-1);assert.equal(rendered.scope_loading,false);assert.equal(rendered.state.workflows[0]?.id,'kept');assert.equal(rendered.state.my_work[0]?.id,'task');assert.equal(rendered.state.workflow,null);

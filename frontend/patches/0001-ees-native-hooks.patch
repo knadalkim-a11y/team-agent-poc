@@ -1384,7 +1384,7 @@ index 0000000..bd38db6
 +		create ||
 +		cap.managed_systems?.length ||
 +		(cap.native_access_available && Object.values(cap.native_access || {}).some(Boolean));
-+	$: current = (data.workflows || []).filter((w) => !s.system_id || w.system_id === s.system_id);
++	$: current = (data.workflows || []).filter((w) => (!s.system_id || w.system_id === s.system_id) && (author || w.published_version != null));
 +	let openedScope = '';
 +	$: scope = $eesSnapshot.native_shell && $eesSnapshot.native_scope ? $eesSnapshot.native_scope : data;
 +	$: scopeRole = (item) => item.allowed === false ? '' : item.role || (item.roles?.includes('manager') || cap.is_admin || cap.managed_systems?.includes(item.system_id || item.id) ? 'owner' : 'participant');
