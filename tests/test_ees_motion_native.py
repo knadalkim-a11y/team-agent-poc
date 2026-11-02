@@ -4,6 +4,7 @@ Native account/chat responses and external transports are synthetic; the built
 frontend and temporary workflow service are real. Frame/style observations are
 retained alongside screenshots so still images cannot count as motion evidence.
 """
+import asyncio
 import json
 import os
 from pathlib import Path
@@ -36,6 +37,7 @@ class MotionNativeTests(IntegratedNativeCase):
         self.wait('innerWidth === ' + str(width) + ' && innerHeight === ' + str(height))
         self.wait("document.querySelector('.ees-panel-region')?.dataset.overlay === " +
                   json.dumps('true' if width < 1096 else 'false'))
+        self.wait("!document.querySelector('#sidebar').getAnimations().length && !document.querySelector('.ees-panel-space').getAnimations().length")
 
     def observe(self, label):
         self.browser.evaluate("""(()=>{
@@ -46,7 +48,7 @@ class MotionNativeTests(IntegratedNativeCase):
             action:element?.dataset?.action||element?.dataset?.authorAction||''});
           const snapshot=element=>{const s=getComputedStyle(element),r=element.getBoundingClientRect();
             return {kind:element.dataset.eesMotionKind,state:element.dataset.eesMotion||'',
-              id:element.id,opacity:Number(s.opacity),transform:s.transform,width:r.width,
+              id:element.id,opacity:Number(s.opacity),transform:s.transform,clipPath:s.clipPath,width:r.width,
               duration:s.animationDuration,easing:s.animationTimingFunction,name:s.animationName,
               transitionProperty:s.transitionProperty,inert:element.inert,hidden:element.hidden,
               ariaHidden:element.getAttribute('aria-hidden'),pointerEvents:s.pointerEvents,
@@ -58,7 +60,8 @@ class MotionNativeTests(IntegratedNativeCase):
               scopeCount:document.querySelectorAll('[data-scope-dropdown]').length,
               dialogCount:document.querySelectorAll('#ees-work-dialog').length,
               chatWidth:document.querySelector('.ees-chat-region')?.getBoundingClientRect().width,
-              panelWidth:document.querySelector('.ees-panel-region')?.getBoundingClientRect().width});
+              panelWidth:document.querySelector('.ees-panel-region')?.getBoundingClientRect().width,
+              reservedWidth:document.querySelector('.ees-panel-space')?.getBoundingClientRect().width});
             requestAnimationFrame(sample);};
           const animation=event=>{if(event.target.matches('[data-ees-motion-kind]'))
             evidence.events.push({t:performance.now(),type:event.type,...snapshot(event.target)});};
@@ -105,8 +108,15 @@ class MotionNativeTests(IntegratedNativeCase):
         self.assertTrue(any(row['duration'] == duration and row['easing'] == easing for row in rows), rows)
         frames = [node for frame in evidence['frames'] for node in frame['nodes']
                   if node['kind'] == kind and node['state'] == state]
-        self.assertTrue(any(0 < node['opacity'] < 1 for node in frames),
-                        'No rendered intermediate opacity for ' + kind + ' ' + state)
+        if kind in ('scope', 'panel-slide'):
+            self.assertTrue(frames)
+            self.assertTrue(all(node['opacity'] == 1 for node in frames), frames)
+            self.assertTrue(any(node['transform'] != 'none' for node in frames), frames)
+            if kind == 'scope':
+                self.assertTrue(all(node['clipPath'] != 'none' for node in frames), frames)
+        else:
+            self.assertTrue(any(0 < node['opacity'] < 1 for node in frames),
+                            'No rendered intermediate opacity for ' + kind + ' ' + state)
         if state == 'closing':
             self.assertTrue(all(row['inert'] and row['pointerEvents'] == 'none' for row in rows), rows)
 
@@ -120,15 +130,66 @@ class MotionNativeTests(IntegratedNativeCase):
 
     def click_now(self, selector):
         """Trusted input at the current visible point, during an opening tween."""
-        point = self.browser.evaluate('(()=>{const e=document.querySelector(' + json.dumps(selector) +
+        point = self.browser.evaluate('new Promise(resolve=>{const end=performance.now()+500;function sample(){const e=document.querySelector(' + json.dumps(selector) +
             '),r=e.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2;'
-            'return e.contains(document.elementFromPoint(x,y))?{x,y}:null;})()')
+            'if(e.contains(document.elementFromPoint(x,y)))return resolve({x,y});if(performance.now()>end)return resolve(null);requestAnimationFrame(sample);}sample();})')
         self.assertIsNotNone(point, 'Animated control is not hit-testable: ' + selector)
         for kind in ('mousePressed', 'mouseReleased'):
             self.browser.call('Input.dispatchMouseEvent', {'type': kind, **point, 'button': 'left',
                 'buttons': int(kind == 'mousePressed'), 'clickCount': 1})
 
-    def test_c3_attached_panel_fades_content_without_width_tween_and_preserves_work(self):
+    def test_navigation_v2_geometry_modes_categories_global_tools_and_draft(self):
+        self.viewport(1920, 1080)
+        self.assertTrue(self.read('#ees-work-panel [data-action=close_panel] img', 'src').endswith('/a9175.svg'))
+        self.author(name='움직임 검증 절차', jobs=1)
+        for system in ('EMS', 'FDC'):
+            asyncio.run(self.server.workflow.operations.command(self.server.user, {
+                'action': 'tool_save', 'expected_revision': 0, 'request_id': 'navigation-' + system,
+                'tool': {'system_id': system, 'kind': 'read', 'name': system + ' 전역 목록 검증'}}))
+        self.refresh()
+        self.wait("document.querySelector('#ees-category-ops button')")
+        self.fill('#chat-input', '전역 도구에서 돌아와도 남는 초안')
+        draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        location = self.text('.ew-scope')
+        self.browser.evaluate("""(()=>{window.__navFrames=[];window.__navSampling=true;
+          const sample=()=>{if(!window.__navSampling)return;const q=s=>document.querySelector(s),r=s=>q(s)?.getBoundingClientRect();
+            const pill=q('.ew-mode')&&getComputedStyle(q('.ew-mode'),'::before');
+            window.__navFrames.push({sidebar:r('#sidebar')?.width,category:r('#ees-category-ops')?.height,
+              scope:r('.ew-scope-wrap')?.height,pillLeft:parseFloat(pill?.left),pillTop:parseFloat(pill?.top),
+              labelWidth:r('.ew-mode button[data-mode=author] span:not(.ew-icon)')?.width,labelOpacity:getComputedStyle(q('.ew-mode button[data-mode=author] span:not(.ew-icon)')).opacity});requestAnimationFrame(sample);};sample();})()""")
+        self.click('[data-ees-sidebar-toggle]')
+        self.wait("document.querySelector('#sidebar').getBoundingClientRect().width === 56")
+        self.click('[data-category=ops] .ew-category-toggle')
+        self.wait("document.querySelector('#sidebar').getBoundingClientRect().width === 256 && document.querySelector('#ees-category-ops').getBoundingClientRect().height > 0")
+        self.click('[data-category=ops] .ew-category-toggle')
+        self.wait("document.querySelector('#ees-category-ops').getBoundingClientRect().height === 0")
+        self.click('[data-mode=author]')
+        self.wait("document.querySelector('#ees-work-entry [data-action=tools]')")
+        self.click('#ees-work-entry [data-action=tools]')
+        self.wait("document.querySelector('.ew-scope-wrap').getBoundingClientRect().height === 0")
+        self.assertTrue(self.read('.ew-scope-wrap', 'inert'))
+        self.assertIn('공용 도구', self.text('#ees-work-panel'))
+        self.assertIn('EMS 전역 목록 검증', self.text('#ees-work-panel'))
+        self.assertIn('FDC 전역 목록 검증', self.text('#ees-work-panel'))
+        self.assertTrue(self.read('#ees-work-panel [data-action=close_panel] img', 'src').endswith('/a9175.svg'))
+        self.click('[data-mode=work]')
+        self.wait("document.querySelector('.ew-scope-wrap').getBoundingClientRect().height > 50")
+        self.assertEqual(self.text('.ew-scope'), location)
+        self.assertEqual(self.read('[data-category=ops] .ew-category-toggle', 'ariaExpanded'), 'false')
+        self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+        frames = self.browser.evaluate('window.__navSampling=false;window.__navFrames')
+        self.wait("document.querySelector('#ees-work-entry').getAnimations({subtree:true}).every(animation=>animation.playState !== 'running')")
+        directory = self.screenshot('navigation-v2-1920')
+        (directory / 'navigation-v2-geometry.json').write_text(json.dumps(frames, indent=2) + '\n', encoding='utf-8')
+        self.assertTrue(any(56 < row['sidebar'] < 256 for row in frames))
+        self.assertTrue(any(0 < row['category'] < max(item.get('category') or 0 for item in frames) for row in frames if row.get('category')))
+        self.assertTrue(any(0 < row['scope'] < 50 for row in frames))
+        self.assertTrue(any(3 < row['pillLeft'] < 100 for row in frames))
+        self.assertTrue(all(row['labelOpacity'] == '1' for row in frames))
+        self.assertTrue(any(0 < row['labelWidth'] < max(item['labelWidth'] for item in frames) for row in frames))
+        self.assertEqual(self.server.completions, [])
+
+    def test_c3_docked_panel_slides_opaque_and_reserves_space_while_preserving_work(self):
         identifier = self.author(fields=[{'id': 'note', 'type': 'text', 'scope': 'run'}] +
             [{'id': 'field-' + str(index), 'type': 'text'} for index in range(20)], jobs=1)
         run = self.start(identifier)
@@ -149,11 +210,12 @@ class MotionNativeTests(IntegratedNativeCase):
             self.wait("!document.querySelector('.ees-panel-region').hidden")
             self.wait("!document.querySelector('[data-ees-motion=opening]')")
             evidence = self.finish_evidence('c3-attached-' + str(width) + 'x' + str(height))
-            self.assert_effect(evidence, 'panel-content', 'opening')
+            self.assert_effect(evidence, 'panel-slide', 'opening')
+            self.assert_effect(evidence, 'panel-slide', 'closing')
+            self.assertTrue(any(0 < row['reservedWidth'] < 480 for row in evidence['frames']))
             widths = {round(row['panelWidth'], 3) for row in evidence['frames']}
             self.assertTrue(widths <= {0, 480}, widths)
-            self.assertFalse([row for row in evidence['events'] if row['kind'] == 'panel-overlay'
-                              and row['state'] in ('opening', 'closing')])
+            self.assertTrue(all(node['opacity'] == 1 for row in evidence['frames'] for node in row['nodes'] if node['kind'] == 'panel-slide'))
             self.assertEqual(self.read('[data-work-input][name=note]', 'value'), '전환해도 보존할 미저장 입력')
             self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
             self.assertIn('기존 대화 기록', self.text('body'))
@@ -322,8 +384,8 @@ class MotionNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('.ees-panel-region').hidden")
         self.assertTrue(self.browser.evaluate("document.activeElement === document.querySelector('#chat-input')"))
         evidence = self.finish_evidence('c3-overlay-close-reopen')
-        self.assert_effect(evidence, 'panel-overlay', 'opening')
-        self.assert_effect(evidence, 'panel-overlay', 'closing')
+        self.assert_effect(evidence, 'panel-slide', 'opening')
+        self.assert_effect(evidence, 'panel-slide', 'closing')
         self.assertTrue(any(row['composer'] and row['overlayOpen']
                             and not row['opening'] and not row['closing'] for row in evidence['inputs']),
                         'The visible composer was not actually clicked while the overlay panel was open')
@@ -400,7 +462,7 @@ class MotionNativeTests(IntegratedNativeCase):
         self.wait("!document.querySelector('#ew-procedure-create')")
         self.assertFalse(self.read('.ees-panel-region', 'hidden'), 'Inline Escape also closed its underlying panel')
         self.click('[data-action=tools]')
-        self.click('[data-author-action=tool_create]')
+        self.create_legacy_tool()
         self.click('[data-author-action=tool_example][data-id=jira-query]')
         self.click('[data-author-action=help][data-id=read_tool]')
         self.wait("document.querySelector('#ees-work-help')")

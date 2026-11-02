@@ -222,6 +222,10 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.wait("document.activeElement?.matches('[data-action=stage_start][data-node-id=stage]')")
         self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
         self.wait('innerWidth===1920')
+        # Responsive expansion is asynchronous. Otherwise open_sidebar can
+        # toggle the already-expanding sidebar closed while its width > 200.
+        self.wait("document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === 'false'")
+        self.wait("!document.querySelector('#sidebar').getAnimations().length")
         self.open_sidebar()
         self.click('#ees-work-site-trigger')
         self.click('[data-action=choose_factory][data-factory-id=figma-factory-a]')

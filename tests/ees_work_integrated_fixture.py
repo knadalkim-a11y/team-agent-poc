@@ -258,6 +258,13 @@ class IntegratedNativeCase(unittest.TestCase):
         for _ in range(index): self.key('ArrowDown', 40)
         self.key('Enter', 13)
 
+    def create_legacy_tool(self, system='EMS'):
+        self.click('[data-author-action=tool_create]')
+        self.wait("document.querySelector('#ees-work-dialog [name=system_id]')")
+        self.choose('#ees-work-dialog [name=system_id]', system)
+        self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.wait("!document.querySelector('#ees-work-dialog')?.open && document.querySelector('[data-author-action=tool_example]') && !document.querySelector('#ew-tool-search')?.disabled")
+
     def screenshot(self, label, *, wait_for_fonts=True):
         directory = Path(os.environ.get('EES_TEST_SCREENSHOT_DIR', ROOT / 'dist/ees-work-screenshots'))
         directory.mkdir(parents=True, exist_ok=True)

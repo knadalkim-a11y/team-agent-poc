@@ -12,6 +12,9 @@ import ees_source_frame_monitor as frame_monitor
 
 
 class FigmaLayoutNativeTests(IntegratedNativeCase):
+    def wait_layout_motion(self):
+        self.wait("!document.querySelector('#sidebar').getAnimations().length && !document.querySelector('.ees-panel-space').getAnimations().length")
+
     def wait_saved_width(self, width):
         deadline=time.monotonic()+5
         saved_width=None
@@ -32,6 +35,7 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.wait('innerWidth === ' + str(width))
         self.wait("document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === " + json.dumps(str(width < 1440).lower()))
         self.wait("Math.abs(document.querySelector('[data-ees-source-shell]').getBoundingClientRect().width - "+str(width)+") < .01")
+        self.wait_layout_motion()
 
     def geometry(self):
         return self.browser.evaluate("""(()=>{
@@ -54,6 +58,7 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         expected={'Home':400,'End':720}.get(key)
         if expected is not None:
             self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width === "+str(expected))
+        self.wait_layout_motion()
 
     def test_q1_geometry_reading_width_footer_and_baseline_overlay(self):
         key=self.author(fields=[{'id':'field-'+str(i),'name':'확인 값 '+str(i),'type':'text'} for i in range(18)],jobs=1)
@@ -75,9 +80,11 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
             self.assertTrue(self.browser.evaluate("document.querySelector('#ees-work-content').scrollHeight > document.querySelector('#ees-work-content').clientHeight"))
             if width in (1920,1366):self.evidence('q1-'+str(width)+'x768')
         self.click('[data-ees-sidebar-toggle]')
+        self.wait_layout_motion()
         self.assertEqual(self.geometry()['sidebar']['width'],256)
         self.assertEqual(self.geometry()['overlay'],'true')
         self.click('[data-ees-sidebar-toggle]')
+        self.wait_layout_motion()
         # Widening by itself does not activate the unresolved overlay policy.
         self.resize_keyboard('End',35)
         geometry=self.geometry()

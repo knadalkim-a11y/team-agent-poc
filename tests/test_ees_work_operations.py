@@ -110,6 +110,30 @@ class RuntimeTests(unittest.IsolatedAsyncioTestCase):
         return (await self.runtime.command(self.users[who],self.body('request_approve',request['revision'],external_request_id=request['id'])))['request']
     async def intent(self,request):
         return await self.runtime.command(self.user,self.body('request_intent',request['revision'],external_request_id=request['id']))
+    async def test_global_tool_catalog_preserves_scoped_picker_and_current_access(self):
+        created = []
+        for system in ('EMS', 'FDC'):
+            response = await self.runtime.command(self.user, self.body('tool_save',
+                tool={'system_id': system, 'name': system + ' tool', 'kind': 'read'}))
+            created.append(response['tool'])
+        for system in ('EMS', 'FDC'):
+            state = await self.runtime.state(self.user, system_id=system)
+            self.assertEqual({tool['system_id'] for tool in state['tools']}, {system})
+            self.assertEqual({tool['id'] for tool in state['all_tools']}, {tool['id'] for tool in created})
+        self.users['bob']['role'] = 'user'
+        grant = await self.core('save_access', system_id='EMS', factory_id='*',
+            principal_kind='user', principal_id='bob', roles=['participant'])
+        state = await self.runtime.state(self.users['bob'], system_id='FDC')
+        self.assertEqual(state['tools'], [])
+        self.assertEqual([tool['system_id'] for tool in state['all_tools']], ['EMS'])
+        with self.assertRaises(workflow.WorkflowError):
+            await self.runtime.command(self.users['bob'], self.body('tool_save',
+                tool=created[1], revision=created[1]['revision']))
+        await self.core('save_access', grant['revision'], access_id=grant['access_id'],
+            system_id='EMS', factory_id='*', principal_kind='user', principal_id='bob',
+            roles=['participant'], active=False)
+        self.assertEqual((await self.runtime.state(self.users['bob']))['all_tools'], [])
+
     async def test_tool_draft_schema_review_and_current_reference(self):
         saved=await self.runtime.command(self.user,self.body('tool_save',tool={'system_id':'EMS','kind':'request','name':'미완성'}))
         self.assertEqual(saved['tool']['state'],'draft')

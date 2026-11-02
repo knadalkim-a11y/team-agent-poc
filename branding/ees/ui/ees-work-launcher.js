@@ -612,7 +612,7 @@
     const action=target.dataset.action;if(!action)return;
     if(action.startsWith('stage_'))return stageAction(action,target);
     if(action==='panel_width'){const width=Number(target.dataset.width);if(Number.isFinite(width)){selection.panel_width=Math.max(400,Math.min(720,Math.round(width)));if(!restored)initialSelectionPatch={...initialSelectionPatch,panel_width:selection.panel_width};remember(selection.panel_width);render();}return;}
-    if(action==='category'){const value=target.dataset.category;if(!Object.hasOwn(workUI.categories,value))return;const collapsed=new Set(selection.collapsed || []);if(target.dataset.open==='true')collapsed.delete(value);else collapsed.add(value);selection.collapsed=[...collapsed];remember();return;}
+    if(action==='category'){const value=target.dataset.category;if(!Object.hasOwn(workUI.categories,value))return;const collapsed=new Set(selection.collapsed || []);if(target.dataset.open==='true')collapsed.delete(value);else collapsed.add(value);selection.collapsed=[...collapsed];remember();render();return;}
     if(action==='procedure_question'){
       const current=designer.readStartContext?.(),index=Number(target.dataset.questionIndex),fallback=workUI.procedureQuestions[index];
       if(!current||!Number.isInteger(index)||!fallback||selection.mode!=='author')return;
