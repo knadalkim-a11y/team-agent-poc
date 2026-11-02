@@ -184,8 +184,13 @@ class DeployProcessTests(unittest.TestCase):
         manager.wait_healthy(identity, timeout=5)
         code = ('import importlib.util,json,sys; '
                 's=importlib.util.spec_from_file_location("m",sys.argv[1]); '
-                'm=importlib.util.module_from_spec(s);s.loader.exec_module(m); '
-                'm.stop_server(json.loads(sys.argv[2]),timeout=3)')
+                'm=importlib.util.module_from_spec(s);s.loader.exec_module(m)\n'
+                'try:\n'
+                ' m.stop_server(json.loads(sys.argv[2]),timeout=3)\n'
+                'except m.ProcessError as error:\n'
+                ' fields=("operation","reason","errno","winerror","elapsed_seconds","timeout_seconds","exit_code")\n'
+                ' print("EES synthetic child stop evidence: "+json.dumps({key:getattr(error,key) for key in fields},sort_keys=True),file=sys.stderr)\n'
+                ' raise\n')
         flags = {'creationflags': subprocess.CREATE_NO_WINDOW} if os.name == 'nt' else {}
         completed = subprocess.run([sys.executable, '-c', code, str(MODULE), json.dumps(identity)],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=8, **flags)

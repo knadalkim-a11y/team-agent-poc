@@ -319,8 +319,8 @@ def input_and_history_flow(g,key,chat_id):
     g.click('[data-action=mode][data-mode=work]');g.click('[data-action=workflow][data-workflow-id="'+key+'"]')
     g.open_operation_start()
     g.click('#ees-work-dialog [data-dialog-confirm]')
-    g.wait('document.querySelector("[data-action=job]")')
-    run=g.api('/api/ees-work/workspace?workflow_id='+key)['runs'][0];run_id=run['id']
+    run_id=g.wait_work_ready(workflow_id=key,require_run=True,selector='[data-action=job]')['reference']['run_id']
+    run=g.api('/api/ees-work/workspace?run_id='+run_id)['run']
     assert run['workflow_id']==key and run['version']==1 and run['status']=='open' and not run['attempts'],run
     g.wait_work_ready(workflow_id=key,run_id=run_id)
     job=next(node for node in run['definition']['nodes'].values() if node['type']=='j')

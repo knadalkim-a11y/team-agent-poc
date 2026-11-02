@@ -232,7 +232,7 @@ if(performance.now()>end)return resolve(null);requestAnimationFrame(check)}check
         frame=self.browser.call('Page.getFrameTree')['frameTree']['frame']
         assert frame['loaderId']==navigation['loaderId'],'Requested document loader has not committed'
 
-    def wait_work_ready(self, *, workflow_id=None, run_id=None, attempt_id=None, selector=None):
+    def wait_work_ready(self, *, workflow_id=None, run_id=None, attempt_id=None, selector=None, require_run=False):
         # Native chat and document/fonts can finish before Work state restoration.
         # Reading this public reference does not mutate UI or business state.
         expression='''(()=>{const p=document.querySelector('#ees-work-panel'),c=document.querySelector('#ees-work-content');
@@ -246,7 +246,8 @@ selector_visible:!SELECTOR||!!e?.getClientRects().length};})()'''.replace('SELEC
         while True:
             observed=self.browser.evaluate(expression)
             if (observed['loaded'] and not observed['busy'] and not observed['loading'] and not observed['error']
-                    and observed['selector_visible'] and all(observed['reference'].get(key)==value for key,value in expected.items())):
+                    and observed['selector_visible'] and (not require_run or observed['reference'].get('run_id'))
+                    and all(observed['reference'].get(key)==value for key,value in expected.items())):
                 return observed
             assert time.monotonic()<deadline,('Work panel did not settle',expected,observed)
             time.sleep(.05)
@@ -403,9 +404,9 @@ def integrated_flow(gate):
     g.type('#ees-work-start [name="evidence_note"]','개발용 시작 근거')
     g.capture('figma-a8-first-start')
     g.click('#ees-work-dialog [data-dialog-confirm]')
-    g.wait('!!document.querySelector(\'[data-action="job"]\')')
-    state=g.api('/api/ees-work/workspace?workflow_id='+identifier)
-    run=state['runs'][0];run_id=run['id']
+    run_id=g.wait_work_ready(workflow_id=identifier,require_run=True,selector='[data-action="job"]')['reference']['run_id']
+    run=g.api('/api/ees-work/workspace?run_id='+run_id)['run']
+    assert run['workflow_id']==identifier
     assert run['inputs']['evidence_note']=='개발용 시작 근거'
     job_id=next(key for key,node in run['definition']['nodes'].items() if node['type']=='j')
     g.click('[data-action="job"][data-job-id="'+job_id+'"]')
@@ -827,11 +828,10 @@ def figma_delta_flow(g):
     g.click('[data-action="mode"][data-mode="work"]');g.click('[data-action="workflow"][data-workflow-id="'+workflow_id+'"]')
     g.open_operation_start()
     g.click('#ees-work-dialog [data-dialog-confirm]')
-    g.wait('!!document.querySelector(\'[data-action="job"][data-job-id="qa-list"]\')')
-    run_id=g.api('/api/ees-work/workspace?workflow_id='+workflow_id)['runs'][0]['id']
     # A single-stage run opens its stage first. Inspect that entry separately,
     # then physically open run details for the existing A5 checks.
-    g.wait_work_ready(workflow_id=workflow_id,run_id=run_id,selector='[data-action="stage_back"]')
+    run_id=g.wait_work_ready(workflow_id=workflow_id,require_run=True,selector='[data-action="stage_back"]')['reference']['run_id']
+    assert g.api('/api/ees-work/workspace?run_id='+run_id)['run']['workflow_id']==workflow_id
     g.capture('figma-stage-single-entry')
     g.click('[data-action="stage_back"]')
     g.open_operation_details()
@@ -1008,13 +1008,14 @@ def figma_delta_flow(g):
     g.open_operation_start()
     g.capture('figma-a8-factory-ready')
     g.click('#ees-work-dialog [data-dialog-confirm]')
+    delivery_run_id=g.wait_work_ready(workflow_id=delivery_id,require_run=True,selector='[data-action="job"][data-job-id="delivery-report"]')['reference']['run_id']
     g.click('[data-action="job"][data-job-id="delivery-report"]');select_execution_model();g.click('[data-action="execute"]')
     g.wait('document.querySelector("#ees-review-text")?.value.includes("합성 AI 검토 원문")',20000)
-    delivery_run_id=g.api('/api/ees-work/workspace?workflow_id='+delivery_id)['runs'][0]['id']
     g.click('[data-action="confirm"]');g.click('#ees-work-dialog [data-dialog-confirm]')
     g.wait('document.querySelector("#ees-work-panel")?.innerText.includes("실제 송부와 결과 확인 전")')
     g.wait_work_ready(workflow_id=delivery_id,run_id=delivery_run_id,selector='#ees-review-text')
     blocked=g.api('/api/ees-work/workspace?run_id='+delivery_run_id)['run']
+    assert blocked['workflow_id']==delivery_id
     assert blocked['status']=='open' and blocked['jobs']['delivery-report']['status']=='blocked'
     assert blocked['jobs']['delivery-report']['reason']=='delivery_unconfigured'
     delivery_attempt=next(item for item in blocked['attempts'] if item['job_id']=='delivery-report')
