@@ -791,6 +791,21 @@ class ChromePipeBootstrapTests(unittest.TestCase):
         gate.browser.evaluate = lambda expression: unselected
         self.assertEqual(gate.wait_work_ready(), unselected)
 
+        # Published previews already contain job controls. After a physical
+        # start, require a real run for this workflow before reading its ID.
+        preview = {**ready, 'reference': {**reference, 'run_id': ''}}
+        foreign = {**ready, 'reference': {**reference, 'workflow_id': 'previous-workflow'}}
+        values = iter([preview, foreign, ready])
+        gate.browser.evaluate = lambda expression: next(values)
+        with patch.object(time, 'sleep'):
+            self.assertEqual(gate.wait_work_ready(workflow_id='workflow-one', require_run=True), ready)
+        clock = [0.0]
+        gate.browser.evaluate = lambda expression: preview
+        with patch.object(time, 'monotonic', side_effect=lambda: clock[0]), \
+                patch.object(time, 'sleep', side_effect=lambda seconds: clock.__setitem__(0, clock[0] + 13)), \
+                self.assertRaisesRegex(AssertionError, 'Work panel did not settle'):
+            gate.wait_work_ready(workflow_id='workflow-one', require_run=True)
+
     def test_historical_request_route_keeps_main_guards_and_only_accepts_exact_retrieval_template(self):
         from ees_work_integrated_app import historical_request_route, WORK_REFERENCE_PREFIX
         question = '이 당시 조회 시도의 프로젝트와 결과만 설명해 줘.'

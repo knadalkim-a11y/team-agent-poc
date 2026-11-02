@@ -947,6 +947,33 @@ test('operations overview uses canonical mode and published name ahead of author
   const stage=html('workStageHTML(state,{},workPublishedDefinition(state).nodes.t)',{state:h.state});assert.match(stage.header,/배포 산출물 점검/);assert.doesNotMatch(stage.header,/미게시 이름/);
  }
 });
+test('restored unpublished operations selections return to my work while author drafts and existing runs remain selected',async()=>{
+ for(const mode of ['on_demand','periodic','emergency'])for(const tab of ['overview','start','run_details'])for(const target of ['unpublished','author','published','run']){
+  const h=controller(),workflow={id:'w',system_id:'EMS',mode,published_version:target==='published'?1:null,draft:{name:'kept draft',nodes:{}}};
+  const saved={mode:target==='author'?'author':'work',system_id:'EMS',workflow_id:'w',run_id:target==='run'?'r':'',job_id:'',stage_id:'old-stage',tab,start_inputs:{w:{note:'kept input'}}};
+  const state={ok:true,capabilities:{actor_id:'a',can_author:true},systems:['EMS'],workflows:[workflow],runs:[],ui_state:{revision:1,state:{selection:saved}}};
+  h.api.setRestored(false);h.setReply(call=>call.url.includes('workspace?')?{...state,workflow:new URL(call.url,'http://native.test').searchParams.get('workflow_id')?workflow:null,...(target==='run'?{run:{id:'r',workflow_id:'w',definition:{name:'fixed version',nodes:{}},jobs:{}}}:{})}:{ok:true});
+  await h.api.refresh();const actual=h.api.snapshot();
+  assert.equal(actual.selection.workflow_id,target==='unpublished'?'':'w',mode+'/'+tab+'/'+target);
+  assert.equal(actual.selection.tab,target==='unpublished'?'my_work':tab);
+  assert.equal(actual.state.workflows[0].draft.name,'kept draft');assert.equal(actual.selection.start_inputs.w.note,'kept input');
+  if(target==='unpublished'){assert.equal(actual.state.workflow,null);assert.equal(actual.selection.stage_id,'');}
+  if(target==='run'){assert.equal(actual.selection.run_id,'r');assert.equal(actual.state.run.definition.name,'fixed version');}
+  assert.equal(h.calls.some(call=>call.body),false);
+ }
+});
+test('stale workflow actions are blocked in operations but drafts still open in authoring',async()=>{
+ for(const mode of ['work','author'])for(const published of [false,true]){
+  const h=controller(),workflow={id:'w',system_id:'EMS',published_version:published?1:null,draft:{name:'kept'}};
+  const state={ok:true,capabilities:{actor_id:'a',can_author:true},systems:['EMS'],workflows:[workflow],workflow,runs:[]};
+  h.api.setState(state);h.api.setSelection({mode,system_id:'EMS',workflow_id:'',run_id:'',tab:'my_work'});
+  h.setReply(call=>call.url.includes('workspace?')?state:{ok:true});
+  await h.api.handleClick({dataset:{action:'workflow',workflowId:'w'}});
+  assert.equal(h.api.snapshot().selection.workflow_id,mode==='author'||published?'w':'');
+  if(mode==='work'&&!published)assert.equal(h.calls.length,0);
+  assert.equal(h.calls.some(call=>call.body),false);
+ }
+});
 test('all explicit start dialogs return to their selected stage without automatically executing it',async()=>{
  for(const mode of ['on_demand','periodic','emergency']){
   const h=stagePreviewFixture(),definition=h.state.workflow.published,dialog=stageStartDialog(h);definition.mode=mode;definition.execution_scope='factory';definition.nodes.t2={id:'t2',parent:'p',type:'t',name:'후속 단계'};

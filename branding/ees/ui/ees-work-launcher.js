@@ -249,6 +249,11 @@
       if(previousActor&&result.capabilities?.actor_id&&previousActor!==result.capabilities.actor_id){reset();nativeCapabilities=result.capabilities;return refresh();}
       if(!restored){restored=true;uiRevision=Math.max(uiRevision,result.ui_state?.revision || 0);const saved=result.ui_state?.state?.selection,explicit=initialSelectionPatch;initialSelectionPatch=null;if(saved&&typeof saved==='object')selection={...selection,...saved,...explicit};if(!selection.system_id)selection.system_id=(result.systems?.[0]?.id || result.systems?.[0] || '');if(explicit)remember(explicit.panel_width ?? null);if(at!==context())return refresh();}
       if(nativePage()){nativeCapabilities=result.capabilities || {};nativeScope={systems:result.systems || [],factories:result.factories || [],scope_options:result.scope_options};error='';render();refreshTimer=setTimeout(refresh,30000);return state;}
+      // Drafts remain available to authors, but a saved operations selection
+      // must not reopen one. Existing runs keep their own published snapshot.
+      if((selection.mode!=='author'||!workCanWorkspace(result.capabilities))&&selection.workflow_id&&!selection.run_id&&result.workflow?.id===selection.workflow_id&&result.workflow.published_version==null){
+        return select({workflow_id:'',run_id:'',job_id:'',tab:['overview','start','run_details','current'].includes(selection.tab)?'my_work':selection.tab});
+      }
       if(selection.mode==='author'&&!['tools','workspace_admin'].includes(selection.tab)&&result.initial_procedures_ready===false&&(result.capabilities?.managed_systems || []).includes(selection.system_id)){
         await command({action:'initialize_procedures',system_id:selection.system_id,expected_revision:0});
         if(at!==context()||n!==serial||!screenAvailable())return null;
@@ -641,7 +646,7 @@
       if(factory&&author)return select({factory_id:id},{preserveAuthorStart:true});
       return select({[factory?'factory_id':'system_id']:id,...(!factory?{factory_id:''}:{}),...(author?{mode:'author'}:{}),workflow_id:'',run_id:'',job_id:'',tab:author?'overview':'my_work'});
     }
-    if(action==='workflow'){const id=target.dataset.workflowId,workflow=(state?.workflows || []).find(item=>item.id===id),adhoc=(workflow?.execution_mode || workflow?.mode || 'on_demand')==='on_demand';const runs=(state?.runs || []).filter(run=>run.workflow_id===id&&!workUI.finished(run));return select({workflow_id:id,run_id:!adhoc&&runs.length===1?runs[0].id:'',job_id:'',tab:'overview',panel_open:true});}
+    if(action==='workflow'){const id=target.dataset.workflowId,workflow=(state?.workflows || []).find(item=>item.id===id);if(selection.mode!=='author'&&workflow?.published_version==null)return;const adhoc=(workflow?.execution_mode || workflow?.mode || 'on_demand')==='on_demand';const runs=(state?.runs || []).filter(run=>run.workflow_id===id&&!workUI.finished(run));return select({workflow_id:id,run_id:!adhoc&&runs.length===1?runs[0].id:'',job_id:'',tab:'overview',panel_open:true});}
     if(action==='open_task'){
       if(target.dataset.scheduleId){const item=state.operations?.schedules?.find(value=>value.id===target.dataset.scheduleId);if(!item)return;if(await confirmDialog({title:'예약 실행 결과를 확인하셨나요?',html:'<p>실패·놓친 예약을 확인한 사실을 기록합니다. 실행 성공이나 재실행을 뜻하지 않습니다.</p>',confirmLabel:'확인 기록'})){await operationsCommand({action:'schedule_check',schedule_id:item.id,slot_id:target.dataset.taskId,expected_revision:item.revision});await refresh();}return;}
       await select({workflow_id:target.dataset.workflowId,run_id:target.dataset.runId,job_id:target.dataset.jobId,mode:'work',tab:'current',panel_open:true});
