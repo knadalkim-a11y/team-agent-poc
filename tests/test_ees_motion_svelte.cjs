@@ -61,6 +61,47 @@ function panelLayout(values = {}) {
   Function('env', `with(env) { ${statements} }`)(env);
   return env;
 }
+function scopePositionHarness({ compact = true, width = 480, height = 768, bottom = 172 } = {}) {
+  const documentListeners = new Map(), windowListeners = new Map(), closed = [];
+  const inside = {}, style = {}, node = {
+    style, closest: () => ({ getAttribute: () => String(compact) }),
+    contains: target => target === inside,
+    get offsetHeight() { return Math.min(360, parseFloat(style.maxHeight) || 360); }
+  };
+  const env = {
+    trigger: { getBoundingClientRect: () => ({ left: 8, bottom }) },
+    close: restore => closed.push(restore),
+    document: { addEventListener: (name, fn) => documentListeners.set(name, fn), removeEventListener: name => documentListeners.delete(name) },
+    window: { innerWidth: width, innerHeight: height,
+      addEventListener: (name, fn) => windowListeners.set(name, fn), removeEventListener: name => windowListeners.delete(name) }
+  };
+  const source = between(component('EesScopeSelect'), 'function positionScope(', '\n\tfunction outside(')
+    .replace('node: HTMLDivElement', 'node').replace('event: Event', 'event').replace('event.target as Node', 'event.target');
+  const action = bind(source, env, 'positionScope')(node);
+  return { node, inside, closed, documentListeners, windowListeners, action };
+}
+test('compact scope keeps readable width outside the rail and stays inside small viewports', () => {
+  for (const size of [{ width: 1920 }, { width: 480 }, { width: 360, height: 250, bottom: 210 }, { width: 220 }]) {
+    const width = size.width, height = size.height || 768, h = scopePositionHarness(size), s = h.node.style;
+    assert.equal(s.position, 'fixed');
+    assert.equal(parseFloat(s.width), Math.min(240, width - 16));
+    assert.ok(parseFloat(s.left) >= 8);
+    assert.ok(parseFloat(s.left) + parseFloat(s.width) <= width - 8);
+    assert.ok(parseFloat(s.top) >= 8);
+    assert.ok(parseFloat(s.top) + h.node.offsetHeight <= height - 8);
+    h.action.destroy();
+  }
+  const expanded = scopePositionHarness({ compact: false });
+  assert.equal(expanded.action, undefined); assert.deepEqual(expanded.node.style, {});
+  assert.equal(expanded.documentListeners.size + expanded.windowListeners.size, 0);
+});
+test('compact scope allows list scroll but closes after anchor movement and removes listeners', () => {
+  const h = scopePositionHarness();
+  h.documentListeners.get('scroll')({ target: h.inside }); assert.deepEqual(h.closed, []);
+  h.documentListeners.get('scroll')({ target: {} }); assert.deepEqual(h.closed, [false]);
+  h.windowListeners.get('resize')(); assert.deepEqual(h.closed, [false, false]);
+  h.action.destroy(); assert.equal(h.documentListeners.size + h.windowListeners.size, 0);
+});
 test('procedure authoring uses 480px while work and Native management retain saved resize widths', () => {
   for (const tab of ['overview', 'content', 'execution', 'decision', 'history']) {
     const layout = panelLayout({ s: { mode: 'author', tab, panel_width: 680 }, transientWidth: 700 });
