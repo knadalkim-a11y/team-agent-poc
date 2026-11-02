@@ -22,6 +22,7 @@ from uuid import uuid4
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from .ees_workflow_authoring import WorkflowError
+from .ees_workflow_definition import TOOL_CONNECTION_MESSAGE, tool_connection_required
 
 INTENT_TTL = 120
 LEASE_SECONDS = 30
@@ -990,6 +991,12 @@ class OperationsRuntime:
                 pending[0:0] = nodes[key].get("children", [])
         if not jobs or len(jobs) > 200:
             fail("scope_invalid")
+        # 2026-11-02: a stage or procedure with a published-but-unconnected
+        # tool job is not run at all, not even its other jobs.
+        statuses = {row[0]: row[1] for row in db.execute("SELECT job_id,status FROM work_jobs WHERE run_id=?", (run_id,))}
+        unconnected = [nodes[key].get("name") or key for key in jobs if statuses.get(key) not in {"completed", "excluded"} and tool_connection_required(nodes[key])]
+        if unconnected:
+            fail("tool_connection_required", "도구가 연결되지 않은 작업이 있어 실행할 수 없습니다: " + ", ".join(unconnected) + ". 워크스페이스에서 도구를 연결해 다시 게시하면 새로 시작하는 진행 건부터 실행할 수 있습니다.")
         for row in db.execute("SELECT data FROM work_scope_runs WHERE run_id=? AND status IN ('queued','running','waiting')", (run_id,)):
             existing = json.loads(row[0])
             if set(jobs).intersection(existing["job_ids"]):
@@ -1199,6 +1206,9 @@ class OperationsRuntime:
         with self.service._db() as db:
             run = self.service._work_run(db, actor, groups, identifier(body.get("run_id")), write=True)
             snapshot = self.service._work_snapshot(db, run, identifier(body.get("job_id")))
+            # A retry budget cannot be checked before a tool is connected.
+            if tool_connection_required(snapshot["job"]):
+                fail("tool_connection_required", TOOL_CONNECTION_MESSAGE)
             policy = validate_read_retry(snapshot["job"])
             existing = self._receipt(db, actor, body)
         if not policy["count"] or existing is not None:
@@ -1283,6 +1293,8 @@ class OperationsRuntime:
             run = self.service._work_run(db, actor, groups, identifier(body.get("run_id")), write=True)
             snapshot = self.service._work_snapshot(db, run, identifier(body.get("job_id")))
             job = snapshot["job"]
+            if tool_connection_required(job):
+                fail("tool_connection_required", TOOL_CONNECTION_MESSAGE)
             self._check_read_contract(db, job)
         shared_pin = None
         if job.get("shared_tool_id"):
@@ -1299,7 +1311,7 @@ class OperationsRuntime:
             reference.pop("contract_id", None)
         if kind == "tool":
             if not reference:
-                fail("native_tool_required")
+                fail("native_tool_required", "연결된 도구 정보를 찾지 못해 실행할 수 없습니다. 워크스페이스에서 이 작업의 도구 연결을 확인해 주세요.")
             await self.bridge.check(actor, reference)
             with self.service._db() as db:
                 arguments, argument_sources, argument_records = self._resolve_arguments(db, run, job, snapshot["inputs"])

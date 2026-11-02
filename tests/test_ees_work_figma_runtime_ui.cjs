@@ -798,7 +798,7 @@ test('run editors can accept a shared version even when another person has claim
 
 function stageRuntimeFixture(){
  const judgments=[{id:'yes',label:'승인',status:'completed'},{id:'conditional',label:'조건부 승인',status:'completed'},{id:'no',label:'미승인',status:'failed'}];
- const nodes={p:{id:'p',type:'p'},t:{id:'t',type:'t',parent:'p',name:'1차 점검'},h:{id:'h',type:'j',parent:'t',name:'직접 확인',mode:'human',result_block:'human_confirm',judgments},a:{id:'a',type:'j',parent:'t',name:'실제 도구',mode:'tool',human_confirmation:false,result_block:'values'},other:{id:'other',type:'j',parent:'p',name:'다른 단계 작업',mode:'human'}};
+ const nodes={p:{id:'p',type:'p'},t:{id:'t',type:'t',parent:'p',name:'1차 점검'},h:{id:'h',type:'j',parent:'t',name:'직접 확인',mode:'human',result_block:'human_confirm',judgments},a:{id:'a',type:'j',parent:'t',name:'실제 도구',mode:'tool',human_confirmation:false,result_block:'values',tool_reference:{tool_id:'native',function:'read',content_hash:'synthetic'}},other:{id:'other',type:'j',parent:'p',name:'다른 단계 작업',mode:'human'}};
  const state={ok:true,capabilities:{actor_id:'actor'},workflow:{id:'w',name:'배포 산출물 점검'},run:{id:'r',workflow_id:'w',status:'open',revision:8,name:'10.27 배포 회차',definition:{name:'배포 산출물 점검',nodes},jobs:{h:{status:'ready',can_decide:true,can_execute:true},a:{status:'ready',can_execute:true}},attempts:[]},operations:{},ui_state:{revision:0,state:{}}};
  const h=controller();h.api.setState(state);h.api.setSelection({mode:'work',workflow_id:'w',run_id:'r',job_id:'',tab:'overview',stage_id:'t'});
  h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true});
@@ -828,6 +828,33 @@ test('stage actions mutate the exact row Job using existing execution and judgme
  assert.equal(h.mutations().length,1);assert.equal(h.mutations()[0].body.action,'execute_job');assert.equal(h.mutations()[0].body.job_id,'a');assert.equal(h.mutations()[0].body.expected_revision,8);
  h=stageRuntimeFixture();await h.api.handleClick({dataset:{action:'stage_decide',jobId:'h',judgmentId:'conditional',verdict:'completed'}});
  assert.equal(h.mutations().length,1);assert.equal(h.mutations()[0].body.action,'human_confirm');assert.equal(h.mutations()[0].body.judgment_id,'conditional');assert.equal(h.mutations()[0].body.verdict,'completed');
+});
+
+test('2026-11-02 an unconnected tool job shows a reason and disables its run and the whole stage run',async()=>{
+ const connected=stageRuntimeFixture(),connectedStage=html('workStageHTML(state,{stage_tab:"work"},stage)',{state:connected.state,stage:connected.state.run.definition.nodes.t});
+ assert.doesNotMatch(connectedStage.body,/도구 연결 필요|data-tool-connection-required/);assert.match(connectedStage.body,/class="ew-primary ew-stage-run-button"[^>]*aria-label="1차 점검 단계 실행">/);
+ const h=stageRuntimeFixture(),nodes=h.state.run.definition.nodes;delete nodes.a.tool_reference;
+ h.state.run.jobs.a={status:'pending',can_execute:false,permission_reason:'tool_connection_required',tool_connection_required:true};h.api.setState(h.state);
+ const rendered=html('workStageHTML(state,{stage_tab:"work"},stage)',{state:h.state,stage:nodes.t});
+ assert.match(rendered.body,/<span data-tool-connection-required>도구 연결 필요 1개 · 워크스페이스에서 연결해 다시 게시해야 실행됩니다<\/span>/);
+ assert.match(rendered.body,/aria-label="1차 점검 단계 실행" disabled data-own-disabled="true" title="도구가 연결되지 않은 작업이 있어 이 단계를 실행할 수 없습니다"/);
+ assert.match(rendered.body,/aria-label="실제 도구 실행" data-mutation disabled data-own-disabled="true" title="도구가 연결되지 않아 실행할 수 없습니다"/);
+ assert.match(rendered.body,/도구 연결 필요/);
+ await h.api.handleClick({dataset:{action:'stage_execute',jobId:'a'}});assert.equal(h.mutations().length,0);
+ // A shared tool or a contract counts as connected; only a missing tool blocks.
+ for(const connection of [{shared_tool_id:'managed-read'},{tool_contract_id:'contract'},{execution:{reference:{tool_id:'native',function:'read'}}}])
+  assert.equal(html('workToolConnectionRequired(node)',{node:{mode:'tool',...connection}}),false);
+ assert.equal(html('workToolConnectionRequired(node)',{node:{mode:'tool',result_block:'change_request'}}),false);
+ assert.equal(html('workToolConnectionRequired(node)',{node:{mode:'human'}}),false);
+});
+
+test('2026-11-02 operations overview lists only reservations made earlier, without an execution-mode row',()=>{
+ const h=stagePreviewFixture();h.state.workflow.published.mode='periodic';
+ h.state.operations={schedules:[{id:'s1',workflow_id:h.state.workflow.id,enabled:true},{id:'s2',workflow_id:h.state.workflow.id,enabled:false},{id:'s3',workflow_id:'other',enabled:true}]};
+ const out=html('workOperationOverviewHTML(state,{})',{state:h.state});
+ assert.match(out,/<dt>자동 실행<\/dt><dd>이전에 맡긴 예약 1개<\/dd><dt>적용 대상<\/dt>/);assert.doesNotMatch(out,/<dt>주기<\/dt>|예약 없음/);
+ const cycle=html('workCycleBarHTML(run,definition)',{run:{mode:'emergency',name:'14:20 장애',created_at:'2026-11-02T00:00:00Z'},definition:{nodes:{}}});
+ assert.match(cycle,/<span>진행 건<\/span>/);assert.match(cycle,/다른 진행 건/);assert.doesNotMatch(cycle,/진행 중인 대응|다른 대응|이번 회차|지난 회차/);
 });
 
 test('stage view-only actions never execute tools or change judgments',async()=>{
@@ -940,10 +967,10 @@ test('unpublished operation entry and saved start tabs keep the new empty overvi
   const out=h.overview();assert.match(out,/ew-operation-overview/,mode+'/'+tab);assert.match(out,/게시되지 않은 업무 절차/);assert.doesNotMatch(out,/초안 전용 단계|새로 시작|진행 건 시작|ew-adhoc-start|data-action="(?:start_run|stage_start|stage_open|execute_scope)"/);
  }
 });
-test('operations overview uses canonical mode and published name ahead of author draft metadata',()=>{
+test('operations overview shows no execution mode and uses the published name ahead of author draft metadata',()=>{
  const h=stagePreviewFixture();h.state.workflow.name='미게시 이름';h.state.workflow.mode='on_demand';
- for(const [mode,label] of [['periodic','주기'],['emergency','비상'],['on_demand','수시']]){
-  h.state.workflow.published.mode=mode;const out=html('workOperationOverviewHTML(state,{})',{state:h.state});assert.match(out,new RegExp(label+' · 예약 없음'));assert.match(out,/<h2>배포 산출물 점검<\/h2>/);assert.doesNotMatch(out,/미게시 이름/);
+ for(const mode of ['periodic','emergency','on_demand',undefined]){
+  h.state.workflow.published.mode=mode;const out=html('workOperationOverviewHTML(state,{})',{state:h.state});assert.doesNotMatch(out,/<dt>주기<\/dt>|예약 없음|수시|비상|자동 실행/);assert.match(out,/<dt>적용 대상<\/dt>/);assert.match(out,/<h2>배포 산출물 점검<\/h2>/);assert.doesNotMatch(out,/미게시 이름/);
   const stage=html('workStageHTML(state,{},workPublishedDefinition(state).nodes.t)',{state:h.state});assert.match(stage.header,/배포 산출물 점검/);assert.doesNotMatch(stage.header,/미게시 이름/);
  }
 });
@@ -980,7 +1007,7 @@ test('all explicit start dialogs return to their selected stage without automati
   h.api.setSelection({system_id:'EMS',factory_id:'factory',stage_id:'t2'});
   h.setReply(call=>{if(call.body?.action==='start_run'){h.state.run={id:'new-run',workflow_id:'w',factory_id:'factory',definition,status:'open',jobs:{},attempts:[],revision:1};return {ok:true,run:h.state.run};}return call.url.includes('workspace?')?h.state:{ok:true};});
   const action=h.api.handleClick({dataset:{action:'stage_start',nodeId:'t2'}});dialog.fields[0].value='확정 직전 입력';dialog.confirm();await action;
-  const starts=h.calls.filter(call=>call.body?.action==='start_run');assert.equal(starts.length,1);assert.equal(starts[0].body.factory_id,'factory');assert.equal(starts[0].body.version,3);assert.deepEqual(starts[0].body.sharing.group_ids,['ops-group']);assert.deepEqual(starts[0].body.inputs,mode==='on_demand'?{note:'확정 직전 입력'}:{});
+  const starts=h.calls.filter(call=>call.body?.action==='start_run');assert.equal(starts.length,1);assert.equal(starts[0].body.factory_id,'factory');assert.equal(starts[0].body.version,3);assert.deepEqual(starts[0].body.sharing.group_ids,['ops-group']);assert.deepEqual(starts[0].body.inputs,{note:'확정 직전 입력'},'2026-11-02: every start uses the start-input form');
   assert.equal(h.api.snapshot().selection.run_id,'new-run',mode);assert.equal(h.api.snapshot().selection.stage_id,'t2',mode);assert.equal(h.api.snapshot().selection.start_stage_id,'',mode);assert.equal(h.calls.filter(call=>['execute_scope','execute_job'].includes(call.body?.action)).length,0);
  }
 });

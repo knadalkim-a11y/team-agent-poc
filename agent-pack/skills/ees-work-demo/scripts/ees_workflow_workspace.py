@@ -17,7 +17,7 @@ from uuid import uuid4
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from .ees_workflow_authoring import WorkflowError, _value, _resolve, _now, _hash, _fail
-from .ees_workflow_definition import SYSTEMS, CATEGORIES, IDENTIFIER, MAX_DOCUMENT_BYTES, _dump
+from .ees_workflow_definition import SYSTEMS, CATEGORIES, IDENTIFIER, MAX_DOCUMENT_BYTES, _dump, tool_connection_required, concurrent_runs_allowed
 from .ees_workflow_view import workflow_help
 
 INPUT_TYPES = ('text', 'number', 'datetime', 'single', 'multi', 'list', 'person', 'boolean')
@@ -38,8 +38,8 @@ def _procedure_example_summaries():
         definition = example['definition']; nodes = definition['nodes']
         root = next(node for node in nodes.values() if node['type'] == 'p')
         stages = [nodes[key] for key in root['children']]
-        summaries.append({key: example[key] for key in ('id', 'name', 'description', 'schedule_suggestion')} | {
-            'category': definition['category'], 'mode': definition['mode'],
+        summaries.append({key: example[key] for key in ('id', 'name', 'description')} | {
+            'category': definition['category'],
             'execution_scope': definition.get('execution_scope'),
             'stage_count': len(stages), 'job_count': sum(node['type'] == 'j' for node in nodes.values()),
             'stages': [{'name': stage['name'], 'job_count': len(stage['children'])} for stage in stages]})
@@ -165,12 +165,9 @@ def definition_check(definition, complete=True):
     nodes = definition.get('nodes')
     if not isinstance(nodes, dict) or len(nodes) > 250:
         return errors + ['P/T/J 구조를 확인해 주세요.'], warnings
-    if complete and definition.get('mode') == 'periodic' and definition.get('schedule'):
-        from .ees_workflow_operations import validate_schedule_definition
-        try:
-            validate_schedule_definition(definition['schedule'], nodes)
-        except WorkflowError as error:
-            errors.append(error.message)
+    # 2026-11-02: schedules are no longer authored with the procedure. A rule
+    # left in an earlier draft is kept as data but cannot be edited on screen,
+    # so it no longer blocks publication. Reservations validate their own rule.
     field_ids, jobs = {}, []
     for key, node in nodes.items():
         if not _id(key) or not isinstance(node, dict) or node.get('id') != key or node.get('type') not in ('p', 't', 'j'):
@@ -234,7 +231,8 @@ def definition_check(definition, complete=True):
             errors.append(f'{key}: AI 제안과 항목 판정은 사람 확인이 필요합니다.')
         if not isinstance(node.get('human_confirmation', True), bool):
             errors.append(f'{key}: 사람 확인 조건을 확인해 주세요.')
-        if complete and 'read_retry' in node:
+        # A retry budget is checked against its read tool once one is connected.
+        if complete and 'read_retry' in node and not tool_connection_required(node):
             from .ees_workflow_operations import validate_read_retry
             try:
                 validate_read_retry(node)
@@ -292,7 +290,11 @@ def definition_check(definition, complete=True):
                 errors.append(f'{key}: 공용 도구 ID와 이전 방식 도구를 함께 저장할 수 없습니다.')
         if node.get('mode') == 'tool' and complete and not node.get('shared_tool_id'):
             ref = node.get('tool_reference')
-            if not isinstance(ref, dict) or any(not isinstance(ref.get(f), str) or not ref[f] for f in ('tool_id', 'function')):
+            if tool_connection_required(node):
+                warnings.append(f'{key}: 도구가 연결되지 않았습니다. 게시는 되지만, 도구를 연결해 다시 게시하기 전까지 이 작업과 이 작업이 있는 단계는 실행할 수 없습니다.')
+            elif node.get('result_block') == 'change_request' and not ref:
+                errors.append(f'{key}: 운영 상태를 바꾸는 EES 요청 작업은 확인된 요청 도구를 연결해야 게시할 수 있습니다.')
+            elif not isinstance(ref, dict) or any(not isinstance(ref.get(f), str) or not ref[f] for f in ('tool_id', 'function')):
                 errors.append(f'{key}: 검증된 Native 도구 참조가 필요합니다.')
             elif not (ref.get('content_hash') or ref.get('code_hash')):
                 errors.append(f'{key}: Native 코드 지문이 필요합니다.')
@@ -909,6 +911,9 @@ class WorkspaceMixin:
                 job['can_execute'], job['permission_reason'] = False, 'assignee_required'
             if job['claim_actor'] and job['claim_actor'] != _value(actor, 'id'):
                 job['can_execute'], job['permission_reason'] = False, 'task_claimed'
+            job['tool_connection_required'] = tool_connection_required(node)
+            if job['tool_connection_required']:
+                job['can_execute'], job['permission_reason'] = False, 'tool_connection_required'
             job['can_decide'] = bool(job['can_execute'] and assigned and (not current or not current.get('evidence_access')))
             # Request preparation/approval/status lookup have distinct existing
             # server roles; an approver need not be the current job claimant.
@@ -992,7 +997,7 @@ class WorkspaceMixin:
                     continue
                 if not self._work_dependencies_ready(db, run['id'], definition, key):
                     continue
-                due = (job.get('deadline') or {}).get('at'); bucket = 'incident' if run['mode'] == 'emergency' else 'undated'
+                due = (job.get('deadline') or {}).get('at'); bucket = 'incident' if run['mode'] == 'emergency' or definition.get('category') == 'incident' else 'undated'
                 if due and bucket != 'incident':
                     try:
                         due_time = datetime.fromisoformat(due.replace('Z', '+00:00'))
@@ -1413,7 +1418,9 @@ class WorkspaceMixin:
                     except Exception:
                         publication_errors.append('선택지 Native 조회의 현재 권한과 지문을 확인하지 못했습니다.')
                 for node in definition.get('nodes', {}).values():
-                    if node.get('mode') != 'tool':
+                    # A job whose tool is not chosen yet has nothing to check;
+                    # definition_check reports it as a publishable warning.
+                    if node.get('mode') != 'tool' or tool_connection_required(node):
                         continue
                     if node.get('shared_tool_id'):
                         try:
@@ -1527,8 +1534,11 @@ class WorkspaceMixin:
                 for node in definition['nodes'].values():
                     if node['type'] == 'p': node['name'] = definition['name']
             else:
-                definition = {'id': key, 'name': body.get('name', '새 업무 절차'), 'system_id': system, 'category': body.get('category', 'ops'), 'mode': body.get('mode', 'on_demand'),
+                definition = {'id': key, 'name': body.get('name', '새 업무 절차'), 'system_id': system, 'category': body.get('category', 'ops'),
                               'nodes': {root: {'id': root, 'name': body.get('name', '새 업무 절차'), 'type': 'p', 'parent': None, 'children': [], 'deps': []}}}
+                # Execution modes are no longer authored; an explicit API value
+                # is still validated for earlier clients.
+                if body.get('mode') is not None: definition['mode'] = body['mode']
                 if body.get('execution_scope') is not None: definition['execution_scope'] = body['execution_scope']
             errors, _ = definition_check(definition, False)
             if errors: _fail('invalid_definition', '\n'.join(errors))
@@ -1604,7 +1614,7 @@ class WorkspaceMixin:
             self._work_authorize_scope(db, actor, groups, row['system_id'], factory_id, 'participant')
             factory = db.execute('SELECT * FROM work_factories WHERE id=? AND system_id=?', (factory_id, row['system_id'])).fetchone() if factory_id else None
             if factory_id and not factory: _fail('factory_not_found', '등록된 공장을 선택해 주세요.')
-            if definition.get('mode', 'on_demand') == 'on_demand' and factory_id and db.execute("SELECT 1 FROM work_runs WHERE workflow_id=? AND factory_id=? AND status NOT IN ('completed','cancelled') LIMIT 1", (row['id'], factory_id)).fetchone():
+            if not concurrent_runs_allowed(definition) and factory_id and db.execute("SELECT 1 FROM work_runs WHERE workflow_id=? AND factory_id=? AND status NOT IN ('completed','cancelled') LIMIT 1", (row['id'], factory_id)).fetchone():
                 _fail('factory_run_active', '이 공장에서 같은 업무가 진행 중입니다. 기존 진행 건을 확인해 주세요.')
             sharing = body.get('sharing', {'group_ids': []})
             if not isinstance(sharing, dict) or set(sharing) != {'group_ids'} or not isinstance(sharing['group_ids'], list) or any(group not in {item['id'] for item in native_groups} for group in sharing['group_ids']): _fail('invalid_sharing', '현재 Native 참여 그룹을 선택해 주세요.')
@@ -1630,8 +1640,8 @@ class WorkspaceMixin:
                 if node['type'] == 'j':
                     condition = conditions[job_id]; status = 'excluded' if condition is False else 'blocked' if condition is None else 'pending'
                     db.execute('INSERT INTO work_jobs VALUES(?,?,?,0,NULL,NULL,?)', (key, job_id, status, '공장 조건 미충족' if condition is False else '공장 속성 확인 필요' if condition is None else ''))
-            if mode == 'emergency' and hasattr(self, 'operations'):
-                self.operations.enqueue_scope(db, actor, groups, key, expected_revision=1, request_id='emergency-' + key, emergency=True)
+            # Starting never runs jobs (2026-11-02): earlier emergency versions
+            # also wait for an explicit stage or job run.
             run = self._work_run_view(db, actor, groups, self._work_run(db, actor, groups, key))
             return {'run_id': key, 'workflow_id': row['id'], 'revision': 1, 'run': run}
         if action in ('save_inputs', 'claim_task', 'human_confirm', 'decide', 'confirm_verdicts', 'close_run', 'cancel_run', 'link_chat', 'amend_items', 'release_task', 'confirm_list', 'save_review_draft'):

@@ -1654,7 +1654,7 @@ index 0000000..6d5288b
 +		],
 +		[
 +			'EES.Procedure.Question2',
-+			'Explain categories and execution modes (periodic, on-demand, emergency)'
++			'Explain the categories (setup, operations, incident response)'
 +		],
 +		['EES.Procedure.Question3', 'What should I decide first when starting an empty procedure?']
 +	];
@@ -3053,7 +3053,7 @@ index 8eba682..38ee86b 100644
 +	"EES.Procedure.Intro": "새 업무 절차는 비슷한 예시를 복사해 고치는 것이 가장 쉽습니다. 오른쪽에서 예시를 고르거나 빈 절차로 시작하세요. 만드는 방법이 궁금하면 아래 질문을 보내 보세요. 지금은 대화 내용으로 초안을 바로 만들지는 않습니다. 초안은 게시하기 전까지 업무 화면에 나타나지 않습니다.",
 +	"EES.NoAccessibleScreens": "EES Workflow에서 열 수 있는 항목이 없습니다",
 +	"EES.Procedure.Question1": "신규 공장 횡전개 예시를 복사해서 우리 공장에 맞게 고치고 싶어",
-+	"EES.Procedure.Question2": "분류와 실행 방식(주기 · 수시 · 비상)이 뭔지 알려줘",
++	"EES.Procedure.Question2": "분류(셋업 · 운영 · 장애대응)가 뭔지 알려줘",
 +	"EES.Procedure.Question3": "빈 절차로 시작하면 무엇부터 정하나요?",
 +	"EES.Native.Skills": "스킬",
 +	"EES.Native.Models": "모델",

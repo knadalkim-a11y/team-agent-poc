@@ -3,10 +3,8 @@
     "id": "delivery_review",
     "name": "배포 산출물 점검",
     "description": "대상 확정부터 문서 점검, 재점검과 최종 확인까지 구성한 예시입니다.",
-    "schedule_suggestion": "격주 화요일 · 제안",
     "definition": {
       "category": "ops",
-      "mode": "periodic",
       "nodes": {
         "delivery_review-root": {
           "id": "delivery_review-root",
@@ -216,10 +214,8 @@
     "id": "factory_rollout",
     "name": "신규 공장 횡전개",
     "description": "공장마다 범위를 정하고 인프라, 설치와 연결 상태를 확인하는 예시입니다.",
-    "schedule_suggestion": "",
     "definition": {
       "category": "setup",
-      "mode": "on_demand",
       "execution_scope": "factory",
       "nodes": {
         "factory_rollout-root": {
@@ -376,10 +372,8 @@
     "id": "daily_check",
     "name": "일일 시스템 점검",
     "description": "연결된 조회 기능으로 시스템 상태를 확인하는 간단한 예시입니다.",
-    "schedule_suggestion": "매일 · 제안",
     "definition": {
       "category": "ops",
-      "mode": "periodic",
       "nodes": {
         "daily_check-root": {
           "id": "daily_check-root",

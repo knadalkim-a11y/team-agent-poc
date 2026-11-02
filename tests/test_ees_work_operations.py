@@ -442,14 +442,73 @@ class RuntimeTests(unittest.IsolatedAsyncioTestCase):
         with self.service._db() as db:
             self.assertEqual(db.execute("SELECT count(*) FROM work_scope_runs WHERE status='blocked'").fetchone()[0],1)
 
-    async def test_emergency_start_enqueues_read_and_never_replays_on_restart(self):
+    async def test_saved_emergency_start_runs_nothing_until_explicit_stage_run_and_never_replays(self):
+        # 2026-11-02: execution modes are no longer authored and starting never
+        # runs jobs, including versions published earlier as emergency.
         run = await self.chain(emergency=True)
         with self.service._db() as db:
-            self.assertEqual(db.execute('SELECT count(*) FROM work_scope_runs').fetchone()[0],1)
+            self.assertEqual(db.execute('SELECT count(*) FROM work_scope_runs').fetchone()[0],0)
+            self.assertEqual(db.execute('SELECT mode FROM work_runs').fetchone()[0],'emergency')
+        await self.runtime.process_once(); await self.runtime.process_once()
+        self.assertEqual(self.bridge.calls,[])
+        await self.runtime.command(self.user,self.body('execute_scope',1,run_id=run['run_id'],node_id='t1'))
         await self.runtime.process_once(); await self.runtime.process_once()
         self.assertEqual(len(self.bridge.calls),1)
         restarted=ops.OperationsRuntime(self.service,bridge=self.bridge,clock=lambda:self.now)
         await restarted.process_once(); self.assertEqual(len(self.bridge.calls),1)
+
+    async def test_unconnected_tool_job_publishes_with_warning_but_job_and_stage_runs_are_refused(self):
+        # 2026-11-02 user decision: keep 'run with a tool' on a job whose tool is
+        # not chosen yet, allow publication, and refuse running the job or its stage.
+        wid = await self.make_workflow()
+        with self.service._db() as db:
+            row = db.execute('SELECT draft,revision FROM work_definitions WHERE id=?', (wid,)).fetchone()
+        definition, revision = json.loads(row[0]), row[1]
+        definition['nodes']['t1']['children'].append('j2')
+        definition['nodes']['j2'] = {'id':'j2','type':'j','name':'도구 고르기 전 작업','parent':'t1','children':[],'deps':[],
+                                     'mode':'tool','result_block':'human_confirm','human_confirmation':True,
+                                     'read_retry':{'count':1,'deadline_seconds':30}}
+        await self.core('save_draft', revision, workflow_id=wid, definition=definition)
+        checked = await self.core('validate_workflow', revision + 1, workflow_id=wid)
+        self.assertEqual(checked['validation']['errors'], [])
+        self.assertEqual([warning for warning in checked['validation']['warnings'] if warning.startswith('j2:')],
+                         ['j2: 도구가 연결되지 않았습니다. 게시는 되지만, 도구를 연결해 다시 게시하기 전까지 이 작업과 이 작업이 있는 단계는 실행할 수 없습니다.'])
+        published = await self.core('publish_workflow', revision + 1, workflow_id=wid)
+        run = await self.core('start_run', published['revision'], workflow_id=wid, inputs={'target':'synthetic-target'}, sharing={'group_ids':['team']})
+        jobs = run['run']['jobs']
+        self.assertEqual((jobs['j2']['can_execute'], jobs['j2']['permission_reason'], jobs['j2']['tool_connection_required']), (False, 'tool_connection_required', True))
+        self.assertEqual((jobs['j1']['can_execute'], jobs['j1']['tool_connection_required']), (True, False))
+        with self.assertRaises(workflow.WorkflowError) as error:
+            await self.runtime.command(self.user, self.body('execute_job', 1, run_id=run['run_id'], job_id='j2'))
+        self.assertEqual(error.exception.code, 'tool_connection_required')
+        for scope in ('t1', None):
+            with self.assertRaises(workflow.WorkflowError) as error:
+                await self.runtime.command(self.user, self.body('execute_scope', 1, run_id=run['run_id'], **({'node_id': scope} if scope else {})))
+            self.assertEqual(error.exception.code, 'tool_connection_required')
+            self.assertIn('도구 고르기 전 작업', error.exception.message)
+        await self.runtime.process_once()
+        with self.service._db() as db:
+            self.assertEqual(db.execute('SELECT count(*) FROM work_scope_runs').fetchone()[0], 0)
+            self.assertEqual(db.execute('SELECT count(*) FROM work_attempts').fetchone()[0], 0)
+            self.assertEqual(db.execute("SELECT status FROM work_jobs WHERE job_id='j2'").fetchone()[0], 'pending')
+        self.assertEqual(self.bridge.calls, [])
+        # Other connected jobs in the stage can still run one by one.
+        await self.runtime.command(self.user, self.body('execute_job', 1, run_id=run['run_id'], job_id='j1'))
+        self.assertEqual(len(self.bridge.calls), 1)
+
+    async def test_unconnected_ees_request_job_still_blocks_publication(self):
+        created = await self.core('create_workflow', system_id='EMS', name='요청 절차')
+        wid, definition = created['workflow_id'], created['workflow']['draft']
+        root = next(iter(definition['nodes']))
+        definition['nodes'][root]['children'] = ['t1']
+        definition['nodes']['t1'] = {'id':'t1','type':'t','name':'단계','parent':root,'children':['j1'],'deps':[]}
+        definition['nodes']['j1'] = {'id':'j1','type':'j','name':'재시작 요청','parent':'t1','children':[],'deps':[],
+                                     'mode':'tool','result_block':'change_request','effect_criterion':{'check':'registered-status'}}
+        await self.core('save_draft', 1, workflow_id=wid, definition=definition)
+        checked = await self.core('validate_workflow', 2, workflow_id=wid)
+        self.assertIn('j1: 운영 상태를 바꾸는 EES 요청 작업은 확인된 요청 도구를 연결해야 게시할 수 있습니다.', checked['validation']['errors'])
+        blocked = await self.service.workspace_command(self.user, self.body('publish_workflow', 2, workflow_id=wid))
+        self.assertEqual(blocked['error']['code'], 'validation_required')
 
     async def test_confirmed_list_binding_freezes_actual_ids_and_denies_unconfirmed(self):
         run = await self.chain(result_binding=True)

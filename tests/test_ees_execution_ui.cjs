@@ -107,7 +107,8 @@ test('start dialog retains its captured workflow revision across a concurrent re
   h.setDialog(options=>{dialogs.push(options);return pending.promise;});
   const waiting=h.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});
   assert.equal(dialogs.length,1);assert.equal(dialogs[0].confirmLabel,'진행 건 시작');
-  assert.match(dialogs[0].html,mode==='on_demand'?/id="ees-work-start"/:/id="ees-start-version"/);
+  // 2026-11-02: every start, including a version saved as periodic, uses the start-input form.
+  assert.match(dialogs[0].html,/id="ees-work-start"/);assert.doesNotMatch(dialogs[0].html,/id="ees-start-version"/);
   assert.equal(h.calls.length,0,'Opening the start dialog must not create or execute a run');
   h.api.setState({workflow:{id:'w',revision:7,published_version:2,published,versions:[{version:2,definition:published}]}});
   h.setReply(()=>({ok:false,httpError:true,status:409,error:{message:'revision conflict'}}));

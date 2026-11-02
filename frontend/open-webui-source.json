@@ -24,14 +24,14 @@
     "src/lib/components/ees/EesHelperNotice.svelte": "22ceccc7ad93c5d820f73269baaa9b19f12c5c99054b76ecc8c89f7757f8bba0",
     "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
     "src/lib/components/ees/EesNavigation.svelte": "51927a8db645ed41c5eb6cd6b5c5fef5eb38be016f4decd4550ac5ed68b465b3",
-    "src/lib/components/ees/EesProcedureIntro.svelte": "8e9e92baa499c6acf66f73643ce17e8b047a6d932844cc3158a252d23718a9a5",
+    "src/lib/components/ees/EesProcedureIntro.svelte": "40a2dfed9e4ce7dab16fe1956be96fb2c1aff3fa9c7dfa2e1b0853c9d3f6fd34",
     "src/lib/components/ees/EesScopeSelect.svelte": "b488d5e53c337fc6e3d0de1c1cae06fc753217d54e36ebcc9fc6fc0ca60603fa",
     "src/lib/components/ees/EesShell.svelte": "eab9153eff27d1f2d3f0034bc3087e75aa6bda82fdf2913c37a8f405046d33f1",
     "src/lib/components/ees/icons/5bc95.svg": "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7",
     "src/lib/components/ees/state.ts": "560ef1a21f46fc2a1beabf3012a74933002af586c507ac42bb144f40fe305a43",
     "src/lib/components/layout/Sidebar.svelte": "9d08f54fdaa101ef2cf06c159e5defe421b366c695f26a15c4045bf3ba556096",
     "src/lib/constants.ts": "0fd43314837a2d7775810c3f08fc82b8042c34a5b6e52f1a7e4513f303a07b5d",
-    "src/lib/i18n/locales/ko-KR/translation.json": "802545c50d8d87dbc82afacc5bd9e92587576e023392f426d415409de3ad5438",
+    "src/lib/i18n/locales/ko-KR/translation.json": "20be3efad509a34d4550130affd52ec19a41a24fe1151f227b3fb7be85e358a5",
     "src/routes/(app)/+layout.svelte": "6e235011199f1eb11107a2d444e5db8c6fb89d13b6e93b9e5980523bf87226f6",
     "src/routes/(app)/+page.svelte": "7cdd5f35c6d1064663d2bafd03263585ca270ce24d26788a656d465339e6cb03",
     "src/routes/(app)/c/[id]/+page.svelte": "2cf8b7796915e7711e467a4142d96ad1d4afc0366221236620719193d91d0ad2",
@@ -44,7 +44,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "4f750627869f41535a3dbaedfba542a14ba7a8063e0f94c9da89078d8dcf88f8"
+      "sha256": "9540fb36c5e1e2b714fe3853408a405419a573f7b6dc6e7d47b2e00d7797129b"
     }
   ],
   "pyodide_files": {
