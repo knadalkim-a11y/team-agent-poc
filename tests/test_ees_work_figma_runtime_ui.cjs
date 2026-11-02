@@ -848,6 +848,17 @@ test('2026-11-02 an unconnected tool job shows a reason and disables its run and
  assert.equal(html('workToolConnectionRequired(node)',{node:{mode:'human'}}),false);
 });
 
+test('2026-11-02 run details keep stage and procedure runs disabled across busy updates while a tool is unconnected',()=>{
+ // setBusy() re-enables every data-mutation control unless data-own-disabled="true" marks it.
+ const h=sharedRuntimeFixture(),runState=h.snapshot.state.run;h.snapshot.selection.tab='run_details';
+ runState.definition.nodes={p:{id:'p',type:'p',name:'절차'},t:{id:'t',type:'t',parent:'p',name:'문서 확인'},j:{id:'j',type:'j',parent:'t',name:'문서 찾기',mode:'tool',shared_tool_id:'shared',inputs:[],result_block:'list_confirm'},missing:{id:'missing',type:'j',parent:'t',name:'설정 조회',mode:'tool'}};
+ runState.jobs={j:{can_execute:true},missing:{status:'pending',can_execute:false,permission_reason:'tool_connection_required'}};
+ let out=h.overview();
+ for(const id of ['t','p'])assert.match(out,new RegExp(`data-action="execute_scope" data-node-id="${id}" data-mutation class="ew-secondary" disabled data-own-disabled="true" title="도구가 연결되지 않은 작업이 있어 실행할 수 없습니다"`),id);
+ runState.jobs.missing.status='excluded';out=h.overview();
+ assert.match(out,/data-action="execute_scope" data-node-id="t" data-mutation class="ew-secondary">/);assert.doesNotMatch(out,/data-action="execute_scope"[^>]*disabled/);
+});
+
 test('2026-11-02 operations overview lists only reservations made earlier, without an execution-mode row',()=>{
  const h=stagePreviewFixture();h.state.workflow.published.mode='periodic';
  h.state.operations={schedules:[{id:'s1',workflow_id:h.state.workflow.id,enabled:true},{id:'s2',workflow_id:h.state.workflow.id,enabled:false},{id:'s3',workflow_id:'other',enabled:true}]};
