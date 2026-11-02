@@ -45,6 +45,14 @@
 - [CI430](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41427385280)의 head `64a4b84`는 Linux 소스 감사와 고정 wheel 검증을 통과했지만 Windows 문서 검사에서 누적 v4 기록이1MiB를 넘어 실패했다. LF 1,046,321bytes는 한계 아래였으나 Windows CRLF 변환 후1,050,030bytes가 되어 한계1,048,576bytes를 넘었다. 테스트 ID 감사는 오류0이었다.
 - 이번 탐색의 시안1/2·접힌 메뉴 첫 수정 기록만 이 문서 아래로 내용 그대로 옮기고 기존 앵커를 각각 연결했다. 날짜·원본·첫 실패·검증 경계는 보존했으며 제품 코드·검사 크기 제한·줄바꿈 정책은 바꾸지 않았다. 새 head 게시로 이전 진행 중 작업은 workflow의 기존 PR 중복 취소 정책을 따른다. 최종 전체 CI는 같은 PR에서 다시 확인한다.
 
+### CI431 실제 브라우저·Windows 첫 통합과 보완
+
+- [CI431 첫 실행](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41427686210/attempts/1), head `d3fa248`:35성공/3실패/1취소/출하1정상생략이다. Linux·Windows 문서 감사, 실제 제품 기동/저장/재시작·계정/업무/실행·설치/복구는 통과했다. 실패는 Native 묶음3개, Windows platform1개이며 Linux 집계 실패·Windows 집계 취소가 뒤따랐다.
+- **Native91/94:** Chrome156.0.8078.47에서 motion6/6·source shell10/10·작성30/30은 통과했다. Helper10중1개는 전역 도구에서 숨긴 작업 위치를 클릭했고, Q1 크기5중1개는 사이드바 전환 중251.515625px를 최종56px와 비교했다. 운영22중1개는480→1920 반응형 펼침 중 기존 `open_sidebar` 준비 동작이 다시 접어 버린 뒤 숨은 절차를 클릭했다. 로컬 Chromium133에서 같은3실패를 재현하고 실제 scope inert/높이0·사이드바56/category inert를 기록했다.
+- **시험 보완:** 전역 도구에서 실제 업무절차 메뉴로 나온 뒤 범위를 바꾸고, 반응형 compact 상태와 실제 width/공간 transition 종료를 기다린 뒤 기존 최종 크기를 단언한다. DOM 강제 클릭·제품 상태 변경·대기 제한 완화는 없다. 첫 재검은2/3 통과했고 Q1에서 키보드 너비 변경 뒤 대화 공간이 아직 이동 중인744px를 최종504px와 비교한 경계가 이어서 드러났다. 같은 실제 transition 완료 대기를 키보드 helper에도 적용했다. Q1/물리 드래그2/2 후속 통과로 실패3개 및 관련 드래그까지4개 대상이 최종 통과했다. 제품 코드는 변경하지 않았다.
+- **별도 Windows 시작 지연:** [platform job125221447017](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41427686210/job/125221447017)의 합성 launcher 조립1개가 `Node launcher probe timed out after 10s; stderr stages: entry not observed`로 실패했다(모듈33/34). 입력208bytes/SHA256 `c7bf9c7bf270383a3eaf5febc759fe32ba05afad6af9702a6f7679c46928797f`는 [CI418/419 기록](v4-ui-20260930.md#authoring12-rules-spacing-20261102)과 같다. 시험·조립기·10초 제한은 main부터 변경하지 않았다. Linux counterpart와 Windows 종료67/67은 통과했지만 Node 표식 전 초기화·모듈 로드·OS 중 직접 원인은 미확정이다.
+- **다음 검증과 상한:** Native 시험 보완이 필요하므로 실패 Windows job을 먼저 별도 재실행하지 않고 보완 head의 전체 CI1회에 새 runner 확인을 묶는다. 이는 실행기 일시 지연 가설을 확인하는 제한 재검이며 같은 Node 실패가 다시 나면 자동 추가 재시도를 하지 않는다. 성공도 근본원인 해결로 기록하지 않는다. CI 최종 결과는 같은 PR #114에 남기고 병합·사내 적용은 수행하지 않는다.
+
 <a id="navigation-motion-mock2-20261102"></a>
 
 ## 2026-11-02 · 요소별 움직임 · 탐색·패널 시안 2
