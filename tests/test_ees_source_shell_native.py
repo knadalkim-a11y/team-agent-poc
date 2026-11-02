@@ -390,6 +390,64 @@ class SourceShellNativeTests(IntegratedNativeCase):
         (directory / 'source-scope-three-dropdowns.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         (directory / 'source-scope-api-permissions.json').write_text(json.dumps(self.scope_api_evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
+    def test_compact_scope_options_remain_readable_clickable_and_preserve_draft(self):
+        self.scope_catalog_fixture(denied=True)
+        self.fill('#chat-input', '접힌 탐색에서도 유지할 대화 초안')
+        draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        evidence = {}
+        for width in (1920, 480):
+            self.browser.call('Emulation.setDeviceMetricsOverride', {
+                'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+            self.wait('window.innerWidth === ' + str(width))
+            if self.read('[data-ees-source-sidebar]', 'getBoundingClientRect().width') > 100:
+                self.click('[data-ees-sidebar-toggle]')
+            self.wait("document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === 'true'")
+            for mode in ('work', 'author'):
+                self.click('[data-action=mode][data-mode=' + mode + ']')
+                self.wait("document.querySelector('#ees-work-entry')?.dataset.workMode === " + json.dumps(mode))
+                for kind, target in (('factory', 'scope-factory-1'), ('system', 'EMS')):
+                    trigger, geometry = self.scope_open(kind)
+                    self.wait("!document.querySelector('[data-scope-dropdown]')?.hasAttribute('data-ees-motion')")
+                    # textContent alone passed the old tests even when the
+                    # compact ancestor hid all labels and the selected check.
+                    visible = self.browser.evaluate('''(()=>{
+                      const popup=document.querySelector('[data-scope-dropdown]'), r=popup.getBoundingClientRect();
+                      const shown=e=>{const b=e.getBoundingClientRect(),s=getComputedStyle(e);
+                        return b.width>0&&b.height>0&&s.display!=='none'&&s.visibility==='visible'};
+                      const labels=[...popup.querySelectorAll('[role=option]>span')],
+                        check=popup.querySelector('[aria-selected=true]>img.ew-icon:last-child'),
+                        first=labels[0].getBoundingClientRect();
+                      return {width:r.width,right:r.right,bottom:r.bottom,labels:labels.every(shown),
+                        descriptions:labels.every(e=>shown(e.querySelector('small'))),check:!!check&&shown(check),
+                        hit:popup.contains(document.elementFromPoint(first.left+first.width/2,first.top+first.height/2)),
+                        rail:document.querySelector('[data-ees-source-sidebar]').getBoundingClientRect().width};})()''')
+                    self.assertAlmostEqual(visible['width'], 240, delta=1, msg=visible)
+                    self.assertAlmostEqual(visible['rail'], 56, delta=1, msg=visible)
+                    self.assertLessEqual(visible['right'], width - 7, visible)
+                    self.assertLessEqual(visible['bottom'], 761, visible)
+                    self.assertTrue(all(visible[key] for key in ('labels', 'descriptions', 'check', 'hit')), visible)
+                    evidence[f'{width}-{mode}-{kind}'] = visible
+                    self.screenshot(f'source-compact-scope-{width}-{mode}-{kind}')
+                    if kind == 'factory':
+                        self.scope_search('공장 01')
+                        self.wait("document.querySelectorAll('[data-scope-list=factory] [role=option]').length === 2")
+                    else:
+                        self.assertTrue(self.read('[data-system-id=FDC][role=option]', 'disabled'))
+                        self.assertIn('권한 없음', self.text('[data-system-id=FDC][role=option]'))
+                    self.click('[data-action=choose_' + kind + '][data-' + kind + '-id=' + target + ']')
+                    self.scope_closed(trigger)
+                    self.assertIsNotNone(self.refresh())
+                    self.assertIn('합성 공장 01' if kind == 'factory' else 'EMS', self.read(trigger, 'title'))
+                    self.scope_activate_key('Enter')
+                    self.wait('document.querySelector("[data-scope-dropdown=' + kind + ']")')
+                    self.key('Escape', 27)
+                    self.scope_closed(trigger)
+                    self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+        self.assertEqual(self.server.completions, [])
+        directory = self.screenshot('source-compact-scope-complete')
+        (directory / 'source-compact-scope.json').write_text(
+            json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
     def test_first_scope_lists_wait_for_response_before_empty_or_zero(self):
         """The received/not-received boundary comes from observed HTTP bodies."""
         self.enable_native_menus()

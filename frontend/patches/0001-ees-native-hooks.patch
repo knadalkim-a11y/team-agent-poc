@@ -2968,8 +2968,8 @@ index 007df31..55d13cc 100644
 -	}
 + #sidebar{position:relative;display:flex;flex-direction:column;flex:none;width:256px;height:100%;min-width:0;background:#fafafa;border-right:1px solid #e6e6e9;overflow:hidden;font-size:14px;color:#1f2023}
 + #sidebar[data-compact=true]{width:56px}.ees-product{height:48px;flex:none;display:flex;align-items:center;gap:8px;padding:0 12px 0 16px}.ees-product a{display:flex;align-items:center;gap:8px;flex:1;white-space:nowrap}.ees-product-icon{width:22px;height:22px;display:grid;place-items:center;background:#2f5f98;color:white;border-radius:6px;font-size:12px;font-weight:600}.ees-product strong{font-size:14px}.ees-product button{padding:4px}.ees-sidebar-scroll{flex:1;min-height:0;overflow:auto}.ees-profile{padding:8px;border-top:1px solid #e6e6e9}.ees-chat-controls{display:flex;flex-direction:column;padding:8px;gap:4px}.ees-chat-controls button{display:flex;gap:8px;align-items:center;text-align:left;min-height:34px;padding:6px 8px;border-radius:6px}.ees-chat-controls button:hover{background:#eef0f3}.ees-native-history[hidden]{display:none}.ees-native-history{padding:0 8px}
-+ #sidebar[data-compact=true] :global(.ew-mode span),#sidebar[data-compact=true] :global(.ew-nav-caption),#sidebar[data-compact=true] :global(.ew-nav-label),#sidebar[data-compact=true] :global(.ew-nav-links span),#sidebar[data-compact=true] :global(.ew-nav-links small),#sidebar[data-compact=true] :global(.ew-scope span),#sidebar[data-compact=true] :global(.ew-scope small),#sidebar[data-compact=true] :global(.ew-scope .ew-icon:last-child),#sidebar[data-compact=true] :global(.ew-workflows details>button),#sidebar[data-compact=true] :global(.ew-workflows summary>span),#sidebar[data-compact=true] :global(.ew-empty),#sidebar[data-compact=true] :global(.ew-nav-group-title),#sidebar[data-compact=true] :global(.ew-recent),#sidebar[data-compact=true] .ees-product strong,#sidebar[data-compact=true] .ees-product-icon,#sidebar[data-compact=true] .ees-chat-controls span{display:none}
-+ #sidebar[data-compact=true] .ees-product{padding:0;justify-content:center}#sidebar[data-compact=true] .ees-product a{display:none}#sidebar[data-compact=true] :global(.ew-mode){flex-direction:column}#sidebar[data-compact=true] :global(.ew-mode button){padding:8px}#sidebar[data-compact=true] :global(.ew-workflows summary){justify-content:center}#sidebar[data-compact=true] :global(.ew-workflows summary::after){display:none}#sidebar[data-compact=true] :global(.ew-scope button){justify-content:center;padding:8px}
++ #sidebar[data-compact=true] :global(.ew-mode span),#sidebar[data-compact=true] :global(.ew-nav-caption),#sidebar[data-compact=true] :global(.ew-nav-label),#sidebar[data-compact=true] :global(.ew-nav-links span),#sidebar[data-compact=true] :global(.ew-nav-links small),#sidebar[data-compact=true] :global(.ew-scope [data-scope-trigger]>span),#sidebar[data-compact=true] :global(.ew-scope [data-scope-trigger]>small),#sidebar[data-compact=true] :global(.ew-scope [data-scope-trigger]>.ew-icon:last-child),#sidebar[data-compact=true] :global(.ew-workflows details>button),#sidebar[data-compact=true] :global(.ew-workflows summary>span),#sidebar[data-compact=true] :global(.ew-empty),#sidebar[data-compact=true] :global(.ew-nav-group-title),#sidebar[data-compact=true] :global(.ew-recent),#sidebar[data-compact=true] .ees-product strong,#sidebar[data-compact=true] .ees-product-icon,#sidebar[data-compact=true] .ees-chat-controls span{display:none}
++ #sidebar[data-compact=true] .ees-product{padding:0;justify-content:center}#sidebar[data-compact=true] .ees-product a{display:none}#sidebar[data-compact=true] :global(.ew-mode){flex-direction:column}#sidebar[data-compact=true] :global(.ew-mode button){padding:8px}#sidebar[data-compact=true] :global(.ew-workflows summary){justify-content:center}#sidebar[data-compact=true] :global(.ew-workflows summary::after){display:none}#sidebar[data-compact=true] :global(.ew-scope [data-scope-trigger]){justify-content:center;padding:8px}
  </style>
 +
 +
@@ -3508,7 +3508,7 @@ diff --git a/src/lib/components/ees/EesScopeSelect.svelte b/src/lib/components/e
 new file mode 100644
 --- /dev/null
 +++ b/src/lib/components/ees/EesScopeSelect.svelte
-@@ -0,0 +1,169 @@
+@@ -0,0 +1,193 @@
 +<script lang="ts">
 +	import { getContext, onDestroy, tick } from 'svelte';
 +	import { eesAction } from './state';
@@ -3541,6 +3541,7 @@ new file mode 100644
 +	$: searchable = kind === 'factory' && options.filter((item) => item.id !== '').length >= 8;
 +	$: visible = options.filter((item) => item.id === '' || !query.trim() || String(item.name || item.id).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
 +	$: current = options.find((item) => item.id === value);
++	$: selectedName = current?.name || current?.id || (kind === 'factory' ? t('EES.AllFactories', 'All factories') : value || t('EES.Select', 'Select'));
 +	$: syncBoundary(boundary, selectionContext, value, exitBoundary);
 +	function syncBoundary(next: string, context: string, selected: string, exit: string) {
 +		if (next === previousBoundary) return;
@@ -3649,21 +3650,44 @@ new file mode 100644
 +			else if (item.bottom > bounds.bottom) list.scrollTop += item.bottom - bounds.bottom;
 +		}
 +	}
++	function positionScope(node: HTMLDivElement) {
++		if (node.closest('[data-ees-source-sidebar]')?.getAttribute('data-compact') !== 'true') return;
++		// A compact trigger is icon-sized; its options must escape the sidebar's
++		// scroll clipping and keep the same readable width as an expanded field.
++		const rect = trigger.getBoundingClientRect(), gap = 8;
++		const width = Math.min(240, window.innerWidth - gap * 2);
++		node.style.position = 'fixed';
++		node.style.right = 'auto';
++		node.style.width = `${width}px`;
++		node.style.maxHeight = `${Math.min(360, window.innerHeight - gap * 2)}px`;
++		node.style.left = `${Math.max(gap, Math.min(rect.left, window.innerWidth - width - gap))}px`;
++		node.style.top = `${Math.max(gap, Math.min(rect.bottom + 4, window.innerHeight - node.offsetHeight - gap))}px`;
++		// Keep list scrolling; retire a menu whose viewport/anchor has moved.
++		const onScroll = (event: Event) => { if (!node.contains(event.target as Node)) close(false); };
++		const onResize = () => close(false);
++		document.addEventListener('scroll', onScroll, true);
++		window.addEventListener('resize', onResize);
++		return { destroy() {
++			document.removeEventListener('scroll', onScroll, true);
++			window.removeEventListener('resize', onResize);
++		} };
++	}
 +	function outside(event: Event) { if (opened === kind && !root?.contains(event.target as Node)) close(false); }
 +</script>
 +
 +<svelte:document on:pointerdown={outside} on:focusin={outside} on:keydown={keydown} />
 +<div class="ew-scope-field" bind:this={root}>
 +	<button type="button" id={triggerId} data-scope-trigger={kind} bind:this={trigger}
-+		aria-label={t(kind === 'factory' ? 'EES.Nav.Factory' : 'EES.Nav.System', kind === 'factory' ? 'Choose factory' : 'Choose system')}
++		aria-label={`${t(kind === 'factory' ? 'EES.Nav.Factory' : 'EES.Nav.System', kind === 'factory' ? 'Choose factory' : 'Choose system')}: ${selectedName}`}
++		title={`${label}: ${selectedName}`}
 +		aria-haspopup="listbox" aria-expanded={opened === kind} aria-controls={opened === kind ? listId : undefined}
 +		on:click={() => toggle()} on:keydown={(event) => {
 +			if (opened !== kind && ['ArrowDown', 'ArrowUp'].includes(event.key)) { event.preventDefault(); toggle(event.key === 'ArrowUp' ? -1 : 1); }
 +		}}>
-+		<Icon name={icon} />{#if !compact}<small>{label}</small>{/if}<span>{current?.name || current?.id || (kind === 'factory' ? t('EES.AllFactories', 'All factories') : value || t('EES.Select', 'Select'))}</span>{#if compact && current}<small>{current.allowed === false ? t('EES.Scope.NoAccess', 'No access') : current.role === 'owner' ? t('EES.Scope.Owner', 'Owner') : t('EES.Scope.Participant', 'Participant')}</small>{/if}<Icon name="ead50" />
++		<Icon name={icon} />{#if !compact}<small>{label}</small>{/if}<span>{selectedName}</span>{#if compact && current}<small>{current.allowed === false ? t('EES.Scope.NoAccess', 'No access') : current.role === 'owner' ? t('EES.Scope.Owner', 'Owner') : t('EES.Scope.Participant', 'Participant')}</small>{/if}<Icon name="ead50" />
 +	</button>
 +	{#if shown}
-+		<div class="ew-scope-dropdown" data-scope-dropdown={kind} data-ees-motion-kind="scope" bind:this={dropdown} inert={opened !== kind} aria-hidden={opened !== kind}>
++		<div class="ew-scope-dropdown" data-scope-dropdown={kind} data-ees-motion-kind="scope" bind:this={dropdown} use:positionScope inert={opened !== kind} aria-hidden={opened !== kind}>
 +			{#if searchable}<label class="ew-scope-search"><Icon name="b8bc6" /><input type="search" id="ees-factory-search" bind:this={search} bind:value={query} placeholder={t('EES.Scope.SearchFactories', 'Search factories')} aria-label={t('EES.Scope.SearchFactories', 'Search factories')} aria-controls={listId} /></label>{/if}
 +			<div id={listId} data-scope-list={kind} role="listbox" aria-label={label} bind:this={list}>
 +				{#each visible as item (item.id)}
@@ -3678,3 +3702,4 @@ new file mode 100644
 +		</div>
 +	{/if}
 +</div>
+
