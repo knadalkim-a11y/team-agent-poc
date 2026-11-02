@@ -185,6 +185,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         trigger = '#ees-work-' + ('site' if kind == 'factory' else 'system') + '-trigger'
         self.click(trigger)
         self.wait('document.querySelector("[data-scope-dropdown=' + kind + ']")')
+        self.wait('!document.querySelector("[data-scope-dropdown=' + kind + '][data-ees-motion]")')
         self.assertEqual(self.read(trigger, 'ariaExpanded'), 'true')
         self.assertEqual(self.read(trigger, 'ariaHasPopup'), 'listbox')
         self.assertEqual(self.browser.evaluate('document.querySelectorAll("[data-scope-dropdown]").length'), 1)
@@ -292,6 +293,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-factory-search')"))
                 self.assertGreater(geometry['list']['scrollHeight'], geometry['list']['clientHeight'])
                 self.assertIn(geometry['list']['overflow'], ('auto', 'scroll'))
+                self.wait("!document.querySelector('[data-scope-dropdown=factory][data-ees-motion]')")
                 page_scroll = self.browser.evaluate('window.scrollY')
                 point = self.browser.evaluate("(()=>{const r=document.querySelector('[data-scope-list=factory]').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()")
                 self.browser.call('Input.dispatchMouseEvent', {'type': 'mouseWheel', **point,
@@ -390,6 +392,97 @@ class SourceShellNativeTests(IntegratedNativeCase):
         (directory / 'source-scope-three-dropdowns.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         (directory / 'source-scope-api-permissions.json').write_text(json.dumps(self.scope_api_evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
+    def test_compact_product_link_leaves_tab_order_and_restores_visible_focus(self):
+        self.fill('#chat-input', '키보드 탐색에서도 유지할 대화 초안')
+        draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        self.click('[data-ees-sidebar-toggle]')
+        self.wait("document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === 'true' && !document.querySelector('#sidebar').getAnimations().length")
+        self.key('Tab', 9, 8)  # Shift+Tab from the toggle used to reach a zero-width link.
+        self.assertFalse(self.browser.evaluate("document.activeElement?.matches('.ees-product>a')"))
+        self.assertTrue(self.read('.ees-product>a', 'inert'))
+        self.key('Tab', 9)
+        self.wait("document.activeElement?.matches('[data-ees-sidebar-toggle]')")
+        self.key('Enter', 13)
+        self.wait("document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === 'false' && !document.querySelector('#sidebar').getAnimations().length")
+        self.key('Tab', 9, 8)
+        self.wait("document.activeElement?.matches('.ees-product>a')")
+        focus = self.browser.evaluate("""(()=>{
+          const e=document.activeElement,r=e.getBoundingClientRect(),s=getComputedStyle(e);
+          return {inert:e.inert,width:r.width,height:r.height,x:r.x,y:r.y,
+            focusVisible:e.matches(':focus-visible'),outline:s.outlineStyle,
+            outlineWidth:s.outlineWidth,shadow:s.boxShadow};})()""")
+        self.assertFalse(focus['inert'])
+        self.assertTrue(focus['focusVisible'])
+        self.assertGreater(focus['width'], 0)
+        self.assertGreater(focus['height'], 0)
+        self.assertGreaterEqual(min(focus['x'], focus['y']), 0)
+        self.assertTrue((focus['outline'] != 'none' and focus['outlineWidth'] != '0px')
+                        or focus['shadow'] != 'none', focus)
+        self.assertEqual(self.browser.evaluate('location.pathname'), '/c/existing-chat')
+        self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+        self.assertEqual(self.server.completions, [])
+        directory = self.screenshot('source-product-link-visible-keyboard-focus')
+        (directory/'source-product-link-focus.json').write_text(
+            json.dumps(focus, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+
+    def test_compact_scope_options_remain_readable_clickable_and_preserve_draft(self):
+        self.scope_catalog_fixture(denied=True)
+        self.fill('#chat-input', '접힌 탐색에서도 유지할 대화 초안')
+        draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        evidence = {}
+        for width in (1920, 480):
+            self.browser.call('Emulation.setDeviceMetricsOverride', {
+                'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+            self.wait('window.innerWidth === ' + str(width))
+            if self.read('[data-ees-source-sidebar]', 'getBoundingClientRect().width') > 100:
+                self.click('[data-ees-sidebar-toggle]')
+            self.wait("document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === 'true'")
+            for mode in ('work', 'author'):
+                self.click('[data-action=mode][data-mode=' + mode + ']')
+                self.wait("document.querySelector('#ees-work-entry')?.dataset.workMode === " + json.dumps(mode))
+                for kind, target in (('factory', 'scope-factory-1'), ('system', 'EMS')):
+                    trigger, geometry = self.scope_open(kind)
+                    self.wait("!document.querySelector('[data-scope-dropdown]')?.hasAttribute('data-ees-motion')")
+                    # textContent alone passed the old tests even when the
+                    # compact ancestor hid all labels and the selected check.
+                    visible = self.browser.evaluate('''(()=>{
+                      const popup=document.querySelector('[data-scope-dropdown]'), r=popup.getBoundingClientRect();
+                      const shown=e=>{const b=e.getBoundingClientRect(),s=getComputedStyle(e);
+                        return b.width>0&&b.height>0&&s.display!=='none'&&s.visibility==='visible'};
+                      const labels=[...popup.querySelectorAll('[role=option]>span')],
+                        check=popup.querySelector('[aria-selected=true]>img.ew-icon:last-child'),
+                        first=labels[0].getBoundingClientRect();
+                      return {width:r.width,right:r.right,bottom:r.bottom,labels:labels.every(shown),
+                        descriptions:labels.every(e=>shown(e.querySelector('small'))),check:!!check&&shown(check),
+                        hit:popup.contains(document.elementFromPoint(first.left+first.width/2,first.top+first.height/2)),
+                        rail:document.querySelector('[data-ees-source-sidebar]').getBoundingClientRect().width};})()''')
+                    self.assertAlmostEqual(visible['width'], 240, delta=1, msg=visible)
+                    self.assertAlmostEqual(visible['rail'], 56, delta=1, msg=visible)
+                    self.assertLessEqual(visible['right'], width - 7, visible)
+                    self.assertLessEqual(visible['bottom'], 761, visible)
+                    self.assertTrue(all(visible[key] for key in ('labels', 'descriptions', 'check', 'hit')), visible)
+                    evidence[f'{width}-{mode}-{kind}'] = visible
+                    self.screenshot(f'source-compact-scope-{width}-{mode}-{kind}')
+                    if kind == 'factory':
+                        self.scope_search('공장 01')
+                        self.wait("document.querySelectorAll('[data-scope-list=factory] [role=option]').length === 2")
+                    else:
+                        self.assertTrue(self.read('[data-system-id=FDC][role=option]', 'disabled'))
+                        self.assertIn('권한 없음', self.text('[data-system-id=FDC][role=option]'))
+                    self.click('[data-action=choose_' + kind + '][data-' + kind + '-id=' + target + ']')
+                    self.scope_closed(trigger)
+                    self.assertIsNotNone(self.refresh())
+                    self.assertIn('합성 공장 01' if kind == 'factory' else 'EMS', self.read(trigger, 'title'))
+                    self.scope_activate_key('Enter')
+                    self.wait('document.querySelector("[data-scope-dropdown=' + kind + ']")')
+                    self.key('Escape', 27)
+                    self.scope_closed(trigger)
+                    self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
+        self.assertEqual(self.server.completions, [])
+        directory = self.screenshot('source-compact-scope-complete')
+        (directory / 'source-compact-scope.json').write_text(
+            json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
     def test_first_scope_lists_wait_for_response_before_empty_or_zero(self):
         """The received/not-received boundary comes from observed HTTP bodies."""
         self.enable_native_menus()
@@ -477,11 +570,11 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.assertIsNotNone(self.refresh())
         self.fill('#chat-input', '범위 변경 중에도 그대로인 문장')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
-        self.wait("document.querySelector('#ees-work-entry .ew-workflows details')")
-        group = '#ees-work-entry .ew-workflows details'
-        if self.read(group, 'open'):
-            self.click(group + ' > summary')
-        self.assertFalse(self.read(group, 'open'))
+        self.wait("document.querySelector('#ees-work-entry .ew-workflows .ew-category-toggle')")
+        group = '#ees-work-entry .ew-workflows .ew-category-toggle'
+        if self.read(group, 'ariaExpanded') == 'true':
+            self.click(group)
+        self.assertFalse(self.read(group, 'ariaExpanded') == 'true')
         self.delay_workspace_reads()
         frame_monitor.guard_loading(self)
         labels = []
@@ -501,7 +594,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
             labels.append(label)
             self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
             self.assertEqual(self.browser.evaluate('location.pathname'), '/c/existing-chat')
-        self.assertFalse(self.read(group, 'open'), 'Range selection reset the collapsed workflow group')
+        self.assertFalse(self.read(group, 'ariaExpanded') == 'true', 'Range selection reset the collapsed workflow group')
         # A new menu replaces the old one, and changing screens closes it.
         self.scope_open('system')
         self.scope_open('factory')

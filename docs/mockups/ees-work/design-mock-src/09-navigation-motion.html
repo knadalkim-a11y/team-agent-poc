@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>탐색·패널 동작 시안 2 · EES Workflow</title>
+<!--@mock:provenance-->
+<!--@mock:fonts-->
+<!--@mock:product-css-->
+<style data-mock-frame>
+html,body{margin:0;background:#fff}
+</style>
+<style data-new-screen="navigation-motion">
+#ees-navigation-motion-v2{--nm-paper:var(--ees-surface-default);--nm-sidebar:var(--ees-surface-sidebar);--nm-panel:var(--ees-surface-panel);--nm-hover:var(--ees-surface-hover);--nm-line:var(--ees-line-divider);--nm-ink:var(--ees-text-primary);--nm-muted:var(--ees-text-secondary);--nm-blue:var(--ees-brand-text);--nm-tint:var(--ees-surface-selected);--nm-open:var(--ees-motion-open);--nm-close:var(--ees-motion-close);--nm-ease:var(--ees-motion-open-easing);--nm-exit:var(--ees-motion-close-easing);--nm-panel-size:480px;color-scheme:light;font:400 14px/22px var(--ees-font-sans);letter-spacing:-.042px;color:var(--nm-ink);background:var(--nm-paper);width:100%;position:relative;isolation:isolate}
+#ees-navigation-motion-v2 *{box-sizing:border-box}
+#ees-navigation-motion-v2 [hidden]{display:none!important}
+#ees-navigation-motion-v2 :is(button,input,textarea){font:inherit;color:inherit}
+#ees-navigation-motion-v2 button{border:0;background:transparent;display:flex;align-items:center;gap:8px;text-align:left;border-radius:6px;min-height:36px;padding:7px 10px;transition:background var(--ees-motion-fast);cursor:pointer}
+#ees-navigation-motion-v2 button:hover{background:var(--nm-hover)}
+#ees-navigation-motion-v2 :is(button,input,textarea):focus-visible{outline:2px solid var(--nm-blue);outline-offset:-2px}
+#ees-navigation-motion-v2 img{display:block;flex:none;width:18px;height:18px}
+#ees-navigation-motion-v2 p,#ees-navigation-motion-v2 h1,#ees-navigation-motion-v2 h2,#ees-navigation-motion-v2 h3{margin:0}
+#ees-navigation-motion-v2 .nm-demo{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;padding:8px 14px;background:var(--nm-panel);border-bottom:1px solid var(--nm-line);font-size:12px;line-height:18px;min-height:36px}
+#ees-navigation-motion-v2 .nm-demo strong{font-weight:500;color:var(--nm-blue)}
+#ees-navigation-motion-v2 .nm-demo span{color:var(--nm-muted)}
+#ees-navigation-motion-v2 .nm-shell{display:flex;height:640px;min-height:0;position:relative;overflow:hidden}
+#ees-navigation-motion-v2 .nm-sidebar{width:256px;flex:none;display:flex;flex-direction:column;background:var(--nm-sidebar);border-right:1px solid var(--nm-line);transition:width var(--nm-open) var(--nm-ease);z-index:3;min-height:0}
+#ees-navigation-motion-v2[data-compact=true] .nm-sidebar{width:56px;transition-duration:var(--nm-close);transition-timing-function:var(--nm-exit)}
+#ees-navigation-motion-v2 .nm-brand{height:52px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;overflow:hidden}
+#ees-navigation-motion-v2 .nm-brand b{font-weight:700;white-space:nowrap;flex:1;font-size:15px}
+#ees-navigation-motion-v2 .nm-icon-button{padding:8px;justify-content:center;width:36px;flex:none}
+#ees-navigation-motion-v2 .nm-sidebar-scroll{padding:0 8px 12px;overflow:auto;overflow-x:hidden;flex:1;min-height:0}
+#ees-navigation-motion-v2 .nm-label{white-space:nowrap;overflow:hidden;transition:max-width var(--nm-open) var(--nm-ease);max-width:210px;min-width:0}
+#ees-navigation-motion-v2[data-compact=true] .nm-sidebar .nm-label{max-width:0;transition-duration:var(--nm-close);transition-timing-function:var(--nm-exit)}
+#ees-navigation-motion-v2[data-compact=true] .nm-brand{gap:0}
+#ees-navigation-motion-v2[data-compact=true] .nm-brand b{flex:0}
+#ees-navigation-motion-v2 .nm-modes{--nm-mode-height:32px;position:relative;height:calc(var(--nm-mode-height) + 6px);border-radius:7px;background:var(--ees-surface-muted);margin-bottom:10px;transition:height var(--nm-open) var(--nm-ease)}
+#ees-navigation-motion-v2 .nm-modes button{position:absolute;left:3px;top:3px;width:calc(50% - 4px);height:var(--nm-mode-height);min-height:var(--nm-mode-height);min-width:0;justify-content:center;font-size:12px;padding:5px 6px;gap:5px;overflow:hidden;background:transparent;transition:left var(--nm-open) var(--nm-ease),top var(--nm-open) var(--nm-ease),width var(--nm-open) var(--nm-ease),gap var(--nm-open) var(--nm-ease)}
+#ees-navigation-motion-v2 .nm-modes button[aria-pressed=true]{background:transparent;color:var(--nm-ink)}
+#ees-navigation-motion-v2 .nm-modes img{width:16px;height:16px}
+#ees-navigation-motion-v2[data-compact=true] .nm-modes{height:calc(var(--nm-mode-height) * 2 + 8px);transition-duration:var(--nm-close);transition-timing-function:var(--nm-exit)}
+#ees-navigation-motion-v2[data-compact=true] .nm-modes button{gap:0;left:3px;width:calc(100% - 6px);transition-duration:var(--nm-close);transition-timing-function:var(--nm-exit)}
+#ees-navigation-motion-v2 .nm-scope-wrap{display:grid;grid-template-rows:1fr;transition:grid-template-rows var(--nm-open) var(--nm-ease)}
+#ees-navigation-motion-v2[data-tools=true] .nm-scope-wrap{grid-template-rows:0fr;transition-duration:var(--nm-close);transition-timing-function:var(--nm-exit);pointer-events:none}
+#ees-navigation-motion-v2 .nm-scope-inner{min-height:0;overflow:hidden}
+#ees-navigation-motion-v2 .nm-caption{font-size:12px;color:var(--nm-muted);margin:8px 4px 6px;height:18px;transition:height var(--nm-open) var(--nm-ease),margin var(--nm-open) var(--nm-ease)}
+#ees-navigation-motion-v2[data-compact=true] .nm-caption{height:0;margin-top:0;margin-bottom:0;transition-duration:var(--nm-close);transition-timing-function:var(--nm-exit)}
+#ees-navigation-motion-v2 .nm-scope{padding-bottom:12px}
+#ees-navigation-motion-v2 .nm-scope button{width:100%;border:1px solid var(--ees-line-control);background:var(--nm-paper);font-size:12px;min-height:39px;gap:8px;flex-wrap:nowrap;padding:8px;overflow:hidden;transition:gap var(--nm-open) var(--nm-ease),background var(--ees-motion-fast)}
+#ees-navigation-motion-v2 .nm-scope button:first-child{border-radius:6px 6px 0 0}
+#ees-navigation-motion-v2 .nm-scope button:last-child{border-radius:0 0 6px 6px;margin-top:-1px}
+#ees-navigation-motion-v2 .nm-scope .nm-label{flex:1}
+#ees-navigation-motion-v2 .nm-chevron{margin-left:auto;transition:transform var(--nm-open) var(--nm-ease);width:14px;height:14px}
+#ees-navigation-motion-v2[data-compact=true] .nm-scope button{padding:8px;gap:0;justify-content:center}
+#ees-navigation-motion-v2[data-compact=true] .nm-scope .nm-chevron{display:none}
+#ees-navigation-motion-v2 .nm-views{display:grid}
+#ees-navigation-motion-v2 .nm-view{grid-area:1/1;min-width:0;visibility:visible}
+#ees-navigation-motion-v2 .nm-view[inert]{visibility:hidden;pointer-events:none}
+#ees-navigation-motion-v2 .nm-group{margin-bottom:5px}
+#ees-navigation-motion-v2 .nm-group-toggle{width:100%;font-size:12px;font-weight:500;min-height:38px}
+#ees-navigation-motion-v2 .nm-group-toggle .nm-label{flex:1}
+#ees-navigation-motion-v2 .nm-group-toggle[aria-expanded=false] .nm-chevron{transform:rotate(-90deg)}
+#ees-navigation-motion-v2 .nm-group-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows var(--nm-open) var(--nm-ease)}
+#ees-navigation-motion-v2 .nm-group-body[inert]{grid-template-rows:0fr;transition-duration:var(--nm-close);transition-timing-function:var(--nm-exit)}
+#ees-navigation-motion-v2 .nm-group-items{min-height:0;overflow:hidden}
+#ees-navigation-motion-v2 .nm-workflow{width:100%;font-size:12px;padding-left:36px;white-space:nowrap;min-height:34px}
+#ees-navigation-motion-v2 button[aria-current=true]{color:var(--nm-blue);background:var(--nm-tint)}
+#ees-navigation-motion-v2[data-compact=true] .nm-group-toggle{padding:8px;gap:0;justify-content:center}
+#ees-navigation-motion-v2[data-compact=true] .nm-group-toggle .nm-chevron{display:none}
+#ees-navigation-motion-v2[data-compact=true] .nm-group-body{grid-template-rows:0fr;pointer-events:none}
+#ees-navigation-motion-v2 .nm-workspace-link{width:100%;font-size:13px;white-space:nowrap;margin-bottom:4px}
+#ees-navigation-motion-v2[data-compact=true] .nm-workspace-link{padding:8px;gap:0;justify-content:center}
+#ees-navigation-motion-v2 .nm-user{border-top:1px solid var(--nm-line);height:48px;flex:none;display:flex;align-items:center;gap:10px;padding:0 16px;overflow:hidden;font-size:12px}
+#ees-navigation-motion-v2 .nm-avatar{width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:var(--ees-surface-muted);font-size:12px;flex:none}
+#ees-navigation-motion-v2 .nm-center{display:flex;flex-direction:column;min-width:0;flex:1;background:var(--nm-paper)}
+#ees-navigation-motion-v2 .nm-chat-header{min-height:52px;display:flex;align-items:center;gap:8px;padding:8px 18px;border-bottom:1px solid var(--nm-line)}
+#ees-navigation-motion-v2 .nm-chat-header strong{font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+#ees-navigation-motion-v2 .nm-panel-toggle{font-size:12px;white-space:nowrap;flex:none}
+#ees-navigation-motion-v2 .nm-conversation{flex:1;padding:48px 32px 24px;min-height:0;overflow:auto}
+#ees-navigation-motion-v2 .nm-thread{max-width:700px;margin:auto}
+#ees-navigation-motion-v2 .nm-user-message{margin-left:auto;width:fit-content;max-width:90%;padding:12px 16px;border-radius:16px;background:var(--nm-sidebar);line-height:24px}
+#ees-navigation-motion-v2 .nm-assistant{margin-top:32px;line-height:26px}
+#ees-navigation-motion-v2 .nm-assistant strong{font-weight:500;display:block;margin-bottom:8px}
+#ees-navigation-motion-v2 .nm-assistant p{margin-bottom:10px}
+#ees-navigation-motion-v2 .nm-composer{margin:0 auto 20px;width:calc(100% - 48px);max-width:760px;border:1px solid var(--ees-line-control);border-radius:9px;padding:10px 12px;background:var(--nm-paper)}
+#ees-navigation-motion-v2 .nm-composer textarea{display:block;width:100%;height:52px;resize:none;border:0;background:transparent;padding:2px;font-size:14px;line-height:24px}
+#ees-navigation-motion-v2 .nm-composer small{display:block;color:var(--nm-muted);font-size:11px;line-height:18px}
+#ees-navigation-motion-v2 .nm-panel-slot{width:0;flex:none;position:static;pointer-events:none;transition:width var(--nm-close) var(--nm-exit)}
+#ees-navigation-motion-v2[data-panel=true] .nm-panel-slot{transition-duration:var(--nm-open);transition-timing-function:var(--nm-ease)}
+#ees-navigation-motion-v2 .nm-panel{position:absolute;right:0;top:0;bottom:0;z-index:5;width:var(--nm-panel-size);background:var(--nm-panel);border-left:1px solid var(--nm-line);display:flex;flex-direction:column;transform:translateX(100%);visibility:hidden;pointer-events:none;transition:transform var(--nm-close) var(--nm-exit),visibility 0s var(--nm-close);will-change:transform}
+#ees-navigation-motion-v2[data-panel=true] .nm-panel{transform:translateX(0);visibility:visible;pointer-events:auto;transition:transform var(--nm-open) var(--nm-ease),visibility 0s}
+#ees-navigation-motion-v2[data-overlay=true] .nm-panel-slot{width:0}
+#ees-navigation-motion-v2[data-overlay=true][data-panel=true] .nm-panel-slot{width:0}
+#ees-navigation-motion-v2 .nm-panel-header{padding:8px 16px;min-height:52px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--nm-line)}
+#ees-navigation-motion-v2 .nm-panel-header strong{flex:1;font-weight:500;font-size:14px}
+#ees-navigation-motion-v2 .nm-panel-content{padding:22px 24px;overflow:auto;flex:1}
+#ees-navigation-motion-v2 .nm-eyebrow{font-size:12px;color:var(--nm-muted);margin-bottom:8px}
+#ees-navigation-motion-v2 h2{font-size:20px;line-height:28px;font-weight:700;letter-spacing:-.2px}
+#ees-navigation-motion-v2 .nm-description{font-size:13px;color:var(--nm-muted);line-height:22px;margin-top:10px}
+#ees-navigation-motion-v2 .nm-section-title{font-size:12px;font-weight:500;margin:24px 0 8px}
+#ees-navigation-motion-v2 .nm-step-list{background:var(--nm-paper);border:1px solid var(--nm-line);border-radius:8px;overflow:hidden}
+#ees-navigation-motion-v2 .nm-step{display:flex;gap:12px;padding:14px 16px;align-items:center;font-size:13px}
+#ees-navigation-motion-v2 .nm-step+.nm-step{border-top:1px solid var(--nm-line)}
+#ees-navigation-motion-v2 .nm-step b{font-weight:500;color:var(--nm-muted);font-size:12px}
+#ees-navigation-motion-v2 .nm-tool{width:100%;background:var(--nm-paper);border:1px solid var(--nm-line);padding:16px;margin-top:12px;align-items:flex-start;gap:12px}
+#ees-navigation-motion-v2 .nm-tool:hover{background:var(--nm-paper);border-color:var(--ees-line-control)}
+#ees-navigation-motion-v2 .nm-tool span{min-width:0}
+#ees-navigation-motion-v2 .nm-tool strong{display:block;font-weight:500;font-size:14px}
+#ees-navigation-motion-v2 .nm-tool small{font-size:12px;color:var(--nm-muted);display:block;margin-top:4px;line-height:20px}
+#ees-navigation-motion-v2 .nm-tool-detail{margin-top:16px;padding:14px 16px;background:var(--nm-paper);border:1px solid var(--nm-line);border-radius:8px;font-size:13px}
+#ees-navigation-motion-v2 .nm-tool-detail p{margin-top:8px;color:var(--nm-muted);line-height:22px}
+#ees-navigation-motion-v2 .nm-scope-menu{position:absolute;z-index:10;width:240px;padding:8px;border:1px solid var(--ees-line-control);border-radius:8px;background:var(--nm-paper);box-shadow:0 6px 22px #1f20231a;clip-path:inset(-24px -24px calc(100% + 24px) -24px round 8px);transform:translateY(-4px);pointer-events:none;transition:clip-path var(--nm-close) var(--nm-exit),transform var(--nm-close) var(--nm-exit)}
+#ees-navigation-motion-v2 .nm-scope-menu[data-open=true]{clip-path:inset(-24px -24px -24px -24px round 8px);transform:translateY(0);pointer-events:auto;transition-duration:var(--nm-open);transition-timing-function:var(--nm-ease)}
+#ees-navigation-motion-v2 .nm-menu-title{font-size:12px;color:var(--nm-muted);padding:2px 4px 8px}
+#ees-navigation-motion-v2 .nm-scope-menu input{width:100%;border:1px solid var(--ees-line-control);border-radius:5px;padding:7px 9px;background:var(--nm-paper);font-size:12px;margin-bottom:5px}
+#ees-navigation-motion-v2 .nm-options{max-height:210px;overflow:auto}
+#ees-navigation-motion-v2 .nm-option{width:100%;justify-content:flex-start;font-size:13px;padding:9px 6px;min-height:48px}
+#ees-navigation-motion-v2 .nm-option>span{flex:1;min-width:0;overflow-wrap:anywhere}
+#ees-navigation-motion-v2 .nm-option small{display:block;font-size:11px;line-height:18px;color:var(--nm-muted)}
+#ees-navigation-motion-v2 .nm-option:disabled{opacity:.55;cursor:not-allowed}
+#ees-navigation-motion-v2 .nm-empty{padding:14px 6px;color:var(--nm-muted);font-size:12px}
+#ees-navigation-motion-v2 .nm-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#ees-navigation-motion-v2 .nm-modes::before{content:"";position:absolute;top:3px;left:3px;width:calc(50% - 4px);height:var(--nm-mode-height);border-radius:5px;background:var(--nm-paper);box-shadow:0 1px 3px #1f202314;transition:left var(--nm-open) var(--nm-ease),top var(--nm-open) var(--nm-ease),width var(--nm-open) var(--nm-ease)}
+#ees-navigation-motion-v2 .nm-modes button[data-mode-button=workspace]{left:calc(50% + 1px)}
+#ees-navigation-motion-v2[data-mode=workspace] .nm-modes::before{left:calc(50% + 1px)}
+#ees-navigation-motion-v2[data-compact=true] .nm-modes::before{left:3px;width:calc(100% - 6px);transition-duration:var(--nm-close);transition-timing-function:var(--nm-exit)}
+#ees-navigation-motion-v2[data-compact=true] .nm-modes button[data-mode-button=workspace]{left:3px;top:calc(var(--nm-mode-height) + 5px)}
+#ees-navigation-motion-v2[data-compact=true][data-mode=workspace] .nm-modes::before{top:calc(var(--nm-mode-height) + 5px)}
+#ees-navigation-motion-v2 .nm-modes button:hover{background:transparent}
+#ees-navigation-motion-v2 [data-action=sidebar] img{transform:scaleX(-1)}
+#ees-navigation-motion-v2 .nm-scope button[aria-expanded=true]{border-color:var(--nm-blue);position:relative;z-index:1}
+#ees-navigation-motion-v2 .nm-scope button .nm-chevron{transition-duration:var(--nm-close);transition-timing-function:var(--nm-exit)}
+#ees-navigation-motion-v2 .nm-scope button[aria-expanded=true] .nm-chevron{transform:rotate(180deg);transition-duration:var(--nm-open);transition-timing-function:var(--nm-ease)}
+#ees-navigation-motion-v2 .nm-group-toggle[aria-expanded=false] .nm-chevron{transition-duration:var(--nm-close);transition-timing-function:var(--nm-exit)}
+#ees-navigation-motion-v2[data-panel=true][data-overlay=false] .nm-panel-slot{width:var(--nm-panel-size)}
+#ees-navigation-motion-v2[data-overlay=true] .nm-panel{box-shadow:-8px 0 24px #1f202314}
+#ees-navigation-motion-v2[data-ready=false] *,#ees-navigation-motion-v2[data-ready=false] *::before{transition:none!important}
+@media(max-width:600px){
+ #ees-navigation-motion-v2 .nm-sidebar{position:absolute;left:0;top:0;bottom:0;box-shadow:4px 0 16px #0001;z-index:6}
+ #ees-navigation-motion-v2[data-compact=true] .nm-sidebar{box-shadow:none}
+ #ees-navigation-motion-v2 .nm-center{margin-left:56px}
+ #ees-navigation-motion-v2 .nm-chat-header{padding:8px 10px}
+ #ees-navigation-motion-v2 .nm-panel-toggle span{display:none}
+ #ees-navigation-motion-v2 .nm-conversation{padding:32px 16px 16px}
+ #ees-navigation-motion-v2 .nm-composer{width:calc(100% - 24px)}
+ #ees-navigation-motion-v2 .nm-panel-content{padding:18px 16px}
+ #ees-navigation-motion-v2 .nm-panel-header{padding:8px 12px}
+ #ees-navigation-motion-v2 .nm-composer textarea{font-size:16px}
+}
+@media(pointer:coarse){#ees-navigation-motion-v2 button{min-height:44px}#ees-navigation-motion-v2 .nm-icon-button{width:44px}#ees-navigation-motion-v2 .nm-brand{padding:0 6px}#ees-navigation-motion-v2 .nm-sidebar-scroll{padding-left:6px;padding-right:6px}#ees-navigation-motion-v2 .nm-modes{--nm-mode-height:44px}#ees-navigation-motion-v2[data-compact=true] .nm-modes button[data-mode-button],#ees-navigation-motion-v2[data-compact=true] .nm-modes::before{left:0;width:100%}#ees-navigation-motion-v2 .nm-scope-menu input{font-size:16px}}
+@media(prefers-reduced-motion:reduce){#ees-navigation-motion-v2 *,#ees-navigation-motion-v2 *::before,#ees-navigation-motion-v2 *::after{animation-duration:0s!important;transition-duration:0s!important;transition-delay:0s!important}}
+</style>
+</head>
+<body>
+<div id="ees-navigation-motion-v2" data-ready="false" data-compact="false" data-mode="work" data-tools="false" data-panel="false" data-overlay="false">
+ <div class="nm-demo"><strong>탐색·패널 시안 2</strong><span>화면 <b data-screen-number>01</b> · 시안 · 저장·실행 안 됨</span></div>
+ <div class="nm-shell">
+  <aside class="nm-sidebar" aria-label="EES Workflow 탐색">
+   <div class="nm-brand"><b class="nm-label">EES Workflow</b><button class="nm-icon-button" data-action="sidebar" aria-label="사이드바 접기" aria-expanded="true" title="사이드바 접기"><img src="v4/a9175.svg" alt=""></button></div>
+   <div class="nm-sidebar-scroll">
+    <div class="nm-modes" role="group" aria-label="메뉴 전환">
+     <button data-mode-button="work" aria-pressed="true" aria-label="업무" title="업무"><img src="v4/4df0d.svg" alt=""><span class="nm-label">업무</span></button>
+     <button data-mode-button="workspace" aria-pressed="false" aria-label="워크스페이스" title="워크스페이스"><img src="v4/cece5.svg" alt=""><span class="nm-label">워크스페이스</span></button>
+    </div>
+    <div class="nm-scope-wrap"><div class="nm-scope-inner">
+     <div class="nm-caption nm-label">작업 위치</div>
+     <div class="nm-scope">
+      <button data-scope="factory" aria-haspopup="dialog" aria-expanded="false" aria-label="공장: 예시 1공장" title="공장: 예시 1공장"><img src="v4/40095.svg" alt=""><span class="nm-label" data-selection="factory">예시 1공장</span><img class="nm-chevron" src="v4/ead50.svg" alt=""></button>
+      <button data-scope="system" aria-haspopup="dialog" aria-expanded="false" aria-label="시스템: MES" title="시스템: MES"><img src="v4/f34f3.svg" alt=""><span class="nm-label" data-selection="system">MES</span><img class="nm-chevron" src="v4/ead50.svg" alt=""></button>
+     </div>
+    </div></div>
+    <div class="nm-views">
+     <nav class="nm-view" data-view="work" aria-label="업무 워크플로우">
+      <div class="nm-group" data-group="ops">
+       <button class="nm-group-toggle" aria-expanded="true" aria-controls="nm-ops" title="운영"><img src="v4/126c7.svg" alt=""><span class="nm-label">운영</span><img class="nm-chevron" src="v4/ead50.svg" alt=""></button>
+       <div class="nm-group-body" id="nm-ops"><div class="nm-group-items"><button class="nm-workflow" data-workflow="일일 시스템 점검" aria-current="true">일일 시스템 점검</button><button class="nm-workflow" data-workflow="주간 운영 보고">주간 운영 보고</button></div></div>
+      </div>
+      <div class="nm-group" data-group="setup">
+       <button class="nm-group-toggle" aria-expanded="true" aria-controls="nm-setup" title="셋업"><img src="v4/f6bbc.svg" alt=""><span class="nm-label">셋업</span><img class="nm-chevron" src="v4/ead50.svg" alt=""></button>
+       <div class="nm-group-body" id="nm-setup"><div class="nm-group-items"><button class="nm-workflow" data-workflow="신규 시스템 연결">신규 시스템 연결</button></div></div>
+      </div>
+      <div class="nm-group" data-group="incident">
+       <button class="nm-group-toggle" aria-expanded="true" aria-controls="nm-incident" title="장애대응"><img src="v4/4fb09.svg" alt=""><span class="nm-label">장애대응</span><img class="nm-chevron" src="v4/ead50.svg" alt=""></button>
+       <div class="nm-group-body" id="nm-incident"><div class="nm-group-items"><button class="nm-workflow" data-workflow="서비스 장애 대응">서비스 장애 대응</button></div></div>
+      </div>
+     </nav>
+     <nav class="nm-view" data-view="workspace" aria-label="워크스페이스" inert>
+      <div class="nm-caption nm-label">업무 만들기</div>
+      <button class="nm-workspace-link" data-tab="procedures" aria-current="true" title="업무 절차"><img src="v4/e8a37.svg" alt=""><span class="nm-label">업무 절차</span></button>
+      <button class="nm-workspace-link" data-tab="tools" title="도구"><img src="v4/d1220.svg" alt=""><span class="nm-label">도구</span></button>
+     </nav>
+    </div>
+   </div>
+   <div class="nm-user"><span class="nm-avatar">김</span><span class="nm-label">예시 사용자</span></div>
+  </aside>
+  <main class="nm-center">
+   <header class="nm-chat-header"><strong>업무 대화</strong><button class="nm-panel-toggle" data-action="panel" aria-label="업무 패널 열기" aria-expanded="false" title="업무 패널 열기"><img src="v4/a9175.svg" alt=""><span>업무 패널</span></button></header>
+   <div class="nm-conversation"><div class="nm-thread">
+    <div class="nm-user-message">오늘 시스템 점검을 준비할게요.</div>
+    <div class="nm-assistant"><strong>EES Workflow</strong><p>왼쪽에서 작업 위치와 업무를 선택한 뒤, 업무 패널에서 점검 순서를 확인할 수 있습니다.</p><p>필요한 문서 검색 도구는 워크스페이스의 도구에서 찾을 수 있습니다.</p></div>
+   </div></div>
+   <div class="nm-composer"><label class="nm-sr" for="nm-draft">작성 중인 메시지</label><textarea id="nm-draft" placeholder="메시지를 입력하세요">점검 결과를 정리할 때 확인할 항목은</textarea><small>시안에서는 메시지를 전송하지 않습니다.</small></div>
+  </main>
+  <div class="nm-panel-slot"><section class="nm-panel" aria-label="업무 패널" inert>
+   <header class="nm-panel-header"><strong data-panel-title>업무 패널</strong><button class="nm-icon-button" data-action="close-panel" aria-label="업무 패널 닫기" title="업무 패널 닫기"><img src="v4/a9175.svg" alt=""></button></header>
+   <div class="nm-panel-content" data-panel-content></div>
+  </section></div>
+ </div>
+ <div class="nm-scope-menu" role="dialog" aria-label="작업 위치 선택" hidden>
+  <div class="nm-menu-title" data-menu-title>공장 선택</div><label class="nm-sr" for="nm-scope-search">목록 검색</label><input id="nm-scope-search" type="search" placeholder="공장 검색" autocomplete="off"><div class="nm-options"></div>
+ </div>
+ <div class="nm-sr" aria-live="polite" data-announcement></div>
+</div>
+<!--@mock:font-licenses-->
+<script>
+(() => {
+ 'use strict';
+ const root = document.getElementById('ees-navigation-motion-v2');
+ const $ = s => root.querySelector(s), $$ = s => [...root.querySelectorAll(s)];
+ const state = {compact:root.clientWidth < 720, mode:'work', tab:'procedures', panel:false, workflow:'일일 시스템 점검', factory:'예시 1공장', system:'MES', menu:null, groups:{ops:true,setup:true,incident:true}};
+ const options = {factory:[['예시 1공장','담당'],['예시 2공장','참여'],['예시 3공장','권한 없음']],system:[['MES','생산 관리'],['EES','설비 관리'],['FDC','설비 데이터 수집']]};
+ const icons = {check:'v4/9d8d5.svg',tool:'v4/d1220.svg',factory:'v4/40095.svg',system:'v4/f34f3.svg'};
+ const announce = text => { $('[data-announcement]').textContent = text; };
+ const toolsActive = () => state.mode === 'workspace' && state.tab === 'tools';
+ function geometry() {
+  const width = root.clientWidth;
+  root.style.setProperty('--nm-panel-size', Math.min(480, width - 56) + 'px');
+  root.dataset.overlay = String(width - (state.compact ? 56 : 256) - 480 < 560);
+ }
+ let menuEpoch=0;
+ function closeMenu(restore = false) {
+  if (!state.menu) return;
+  const trigger = $(`[data-scope="${state.menu}"]`);
+  const menu=$('.nm-scope-menu'), epoch=++menuEpoch;
+  state.menu = null;menu.dataset.open='false';menu.inert=true;
+  Promise.allSettled(menu.getAnimations().map(animation=>animation.finished)).then(()=>{if(epoch===menuEpoch)menu.hidden=true;});
+  trigger.setAttribute('aria-expanded','false');
+  if (restore) trigger.focus();
+ }
+ function sync() {
+  root.dataset.compact=String(state.compact); root.dataset.mode=state.mode;
+  root.dataset.tools=String(toolsActive()); root.dataset.panel=String(state.panel);
+  $('[data-action="sidebar"]').setAttribute('aria-expanded',String(!state.compact));
+  for (const attr of ['aria-label','title']) $('[data-action="sidebar"]').setAttribute(attr,'사이드바 '+(state.compact?'펼치기':'접기'));
+  $$('.nm-modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.modeButton===state.mode)));
+  $$('.nm-view').forEach(v=>{v.inert=v.dataset.view!==state.mode;});
+  $('.nm-scope-wrap').inert=toolsActive();
+  $$('.nm-group').forEach(g=>{const open=state.groups[g.dataset.group];g.querySelector('button').setAttribute('aria-expanded',String(open));g.querySelector('.nm-group-body').inert=state.compact||!open;});
+  $$('[data-tab]').forEach(b=>b.setAttribute('aria-current',String(b.dataset.tab===state.tab)));
+  $('.nm-panel').inert=!state.panel;
+  const toggle=$('[data-action="panel"]');toggle.setAttribute('aria-expanded',String(state.panel));
+  for (const attr of ['aria-label','title']) toggle.setAttribute(attr,'업무 패널 '+(state.panel?'닫기':'열기'));
+  $('[data-screen-number]').textContent=toolsActive()?'03':state.mode==='workspace'?'02':'01';
+  geometry();
+ }
+ function panelContent() {
+  const content=$('[data-panel-content]');
+  $('[data-panel-title]').textContent=toolsActive()?'도구':state.mode==='workspace'?'업무 절차':'업무 패널';
+  if(toolsActive()) {
+   content.innerHTML=`<div class="nm-eyebrow">워크스페이스</div><h2>도구</h2><p class="nm-description">공장·시스템에 관계없이 업무에 연결해 쓰는 도구입니다.</p><button class="nm-tool" data-tool="search"><img src="${icons.tool}" alt=""><span><strong>Confluence 문서 검색</strong><small>키워드로 필요한 문서를 찾습니다.</small></span></button><button class="nm-tool" data-tool="read"><img src="${icons.tool}" alt=""><span><strong>Confluence 페이지 읽기</strong><small>선택한 문서의 내용을 확인합니다.</small></span></button><div class="nm-tool-detail" data-tool-detail hidden></div>`;
+  } else if(state.mode==='workspace') {
+   content.innerHTML='<div class="nm-eyebrow">워크스페이스</div><h2>업무 절차</h2><p class="nm-description">업무의 단계와 작업을 구성합니다.</p><div class="nm-section-title" data-procedure-location></div><div class="nm-step-list"><div class="nm-step">일일 시스템 점검</div><div class="nm-step">주간 운영 보고</div></div>';
+   $('[data-procedure-location]').textContent=state.factory+' · '+state.system;
+  } else {
+   content.innerHTML='<div class="nm-eyebrow" data-work-location></div><h2 data-work-title></h2><p class="nm-description">시스템 상태를 살펴보고 확인한 내용을 정리합니다.</p><div class="nm-section-title">단계</div><div class="nm-step-list"><div class="nm-step"><b>01</b><span>상태 확인</span></div><div class="nm-step"><b>02</b><span>점검 결과 정리</span></div><div class="nm-step"><b>03</b><span>보고서 검토</span></div></div>';
+   $('[data-work-title]').textContent=state.workflow;
+   $('[data-work-location]').textContent=state.factory+' · '+state.system;
+  }
+ }
+ function setPanel(open,restore=false) {state.panel=open;if(open&&root.clientWidth<600)state.compact=true;sync();if(restore)$('[data-action="panel"]').focus();}
+ function renderOptions() {
+  const list=$('.nm-options'); list.replaceChildren();
+  const query=$('#nm-scope-search').value.trim().toLowerCase();
+  const rows=options[state.menu].filter(([name])=>name.toLowerCase().includes(query));
+  for(const [name,role] of rows){
+   const button=document.createElement('button');button.type='button';button.className='nm-option';button.dataset.option=name;button.disabled=role==='권한 없음';
+   const img=document.createElement('img');img.src=icons[state.menu];img.alt='';button.append(img);
+   const text=document.createElement('span');text.append(document.createTextNode(name));
+   const small=document.createElement('small');small.textContent=role;text.append(small);button.append(text);
+   if(state[state.menu]===name){const check=document.createElement('img');check.src=icons.check;check.alt='선택됨';button.append(check);}
+   list.append(button);
+  }
+  if(!rows.length){const empty=document.createElement('p');empty.className='nm-empty';empty.textContent='검색 결과가 없습니다.';list.append(empty);}
+ }
+ function openMenu(kind) {
+  if(state.menu===kind){closeMenu(true);return;}
+  closeMenu();menuEpoch++;state.menu=kind;
+  const name=kind==='factory'?'공장':'시스템'; const menu=$('.nm-scope-menu');
+  $('[data-menu-title]').textContent=name+' 선택';menu.setAttribute('aria-label',name+' 선택');
+  $('#nm-scope-search').value='';$('#nm-scope-search').placeholder=name+' 검색';
+  renderOptions();menu.hidden=false;menu.inert=false;
+  const trigger=$(`[data-scope="${kind}"]`);trigger.setAttribute('aria-expanded','true');
+  const base=root.getBoundingClientRect(), rect=trigger.getBoundingClientRect(), width=Math.min(240,root.clientWidth-16);
+  menu.style.width=width+'px';
+  menu.style.left=Math.max(8,Math.min(rect.left-base.left,root.clientWidth-width-8))+'px';
+  menu.style.top=Math.max(8,Math.min(rect.bottom-base.top+5,root.clientHeight-menu.offsetHeight-8))+'px';
+  menu.getBoundingClientRect();menu.dataset.open='true';$('#nm-scope-search').focus();
+ }
+ root.addEventListener('click',event=>{
+  const b=event.target.closest('button');
+  if(state.menu&&!event.target.closest('.nm-scope-menu')&&!event.target.closest('[data-scope]'))closeMenu();
+  if(!b||!root.contains(b))return;
+  if(b.dataset.action==='sidebar'){state.compact=!state.compact;closeMenu();sync();}
+  else if(b.dataset.action==='panel')setPanel(!state.panel);
+  else if(b.dataset.action==='close-panel')setPanel(false,true);
+  else if(b.dataset.modeButton){state.mode=b.dataset.modeButton;closeMenu();sync();panelContent();announce(state.mode==='work'?'업무 메뉴':'워크스페이스 메뉴');}
+  else if(b.dataset.tab){state.tab=b.dataset.tab;closeMenu();setPanel(true);panelContent();}
+  else if(b.classList.contains('nm-group-toggle')){
+   const key=b.closest('[data-group]').dataset.group;
+   if(state.compact){state.compact=false;state.groups[key]=true;}else state.groups[key]=!state.groups[key];sync();
+  } else if(b.dataset.workflow){state.workflow=b.dataset.workflow;$$('[data-workflow]').forEach(x=>x.setAttribute('aria-current',String(x===b)));setPanel(true);panelContent();}
+  else if(b.dataset.scope)openMenu(b.dataset.scope);
+  else if(b.dataset.option){
+   const kind=state.menu;state[kind]=b.dataset.option;
+   $(`[data-selection="${kind}"]`).textContent=state[kind];
+   const label=(kind==='factory'?'공장: ':'시스템: ')+state[kind];
+   for(const attr of ['aria-label','title'])$(`[data-scope="${kind}"]`).setAttribute(attr,label);
+   closeMenu(true);panelContent();announce(label+' 선택');
+  } else if(b.dataset.tool){
+   const detail=$('[data-tool-detail]');detail.hidden=false;
+   detail.replaceChildren();const heading=document.createElement('strong');heading.textContent=b.querySelector('strong').textContent;
+   const text=document.createElement('p');text.textContent='사용할 문서와 검색 조건은 이 도구를 연결한 업무에서 정합니다.';detail.append(heading,text);
+  }
+ });
+ root.addEventListener('keydown',event=>{if(event.key==='Escape'){if(state.menu){closeMenu(true);event.preventDefault();}else if(state.panel){setPanel(false,true);event.preventDefault();}}});
+ $('#nm-scope-search').addEventListener('input',renderOptions);
+ $('.nm-sidebar-scroll').addEventListener('scroll',()=>closeMenu());
+ let lastWidth=root.clientWidth;
+ new ResizeObserver(()=>{if(root.clientWidth!==lastWidth){lastWidth=root.clientWidth;closeMenu();geometry();}}).observe(root);
+ sync();panelContent();
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{root.dataset.ready="true";}));
+})();
+</script>
+</body>
+</html>

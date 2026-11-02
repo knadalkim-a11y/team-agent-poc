@@ -18,6 +18,8 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
+| 탐색·패널 시안2 제품 전환/전역 도구 | [승인 기준·중간 프레임/초점/권한·첫 실패와 보완](navigation-motion-20261102.md#navigation-motion-product-20261102) |
+| 접힌 사이드바 범위 목록의 글자·선택 체크/너비 | [compact CSS 범위·고정 위치·실제 가시성/선택 회귀](v4-ui-20260930.md#compact-scope-dropdown-20261102) |
 | 미게시 절차가 운영 목록에 노출 | [게시 전용 운영 목록·작성 초안 보존·저장 선택/기존 회차 회귀](v4-ui-20260930.md#operations-published-only-20261102) |
 | 사내6b1c의 미게시 운영에서 옛 시작 화면 표시 | [수정 전 재현·옛 시작 경로 제거·새 소스 Native/입력·보존 검증](v4-ui-20260930.md#operations-entry-legacy-removal-20261030) |
 | #109 병합 main6b1c256 사내 적용 준비 | [PR407·main408·프로그램ZIP·직전42f5 설치 기준·적용/원복](v4-ui-20260930.md#main-6b1c256-apply-evidence-20261030) |
