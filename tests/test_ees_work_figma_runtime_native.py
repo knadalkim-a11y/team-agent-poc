@@ -40,7 +40,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
     def operations_stage(self, *, start=True):
         """Approved layout data authored only in this test's temporary database."""
         async def assets(actor):
-            return {'available': True, 'skills': [{'id': 'synthetic-document-guide'}],
+            return {'available': True, 'tools': [], 'skills': [{'id': 'synthetic-document-guide'}],
                 'skill_bodies': {'synthetic-document-guide': '합성 지침: 반환된 문서 목록과 접근 결과를 기록합니다.'},
                 'skill_versions': {'synthetic-document-guide': 1}}
         self.server.workflow._assets = assets
@@ -203,8 +203,22 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.click('[data-action=stage_open][data-node-id=stage]')
         self.wait("document.querySelector('#ees-work-panel.ew-vd')")
         self.click('[data-action=stage_start][data-node-id=stage]')
-        self.wait("document.querySelector('#ees-work-start')")
+        self.wait("document.querySelector('#ees-work-dialog[open] #ees-work-start')")
+        self.assertEqual(self.text('#ees-work-panel.ew-vd h2'), '1차 점검')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-panel #ees-work-start,#ees-start-factory')"))
+        self.assertNotIn('새로 시작', self.text('#ees-work-panel'))
+        self.wait("!document.querySelector('#ees-work-dialog[data-ees-motion=opening]') && [...document.querySelector('#ees-work-dialog').getAnimations({subtree:true})].every(animation=>animation.effect?.getTiming().iterations===Infinity||(!animation.pending&&animation.playState!=='running'))")
+        dialog = self.browser.evaluate("(()=>{const element=document.querySelector('#ees-work-dialog'),r=element.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:innerWidth,height:innerHeight,overflow:element.scrollWidth-element.clientWidth};})()")
+        self.assertGreaterEqual(dialog['left'], 0, dialog)
+        self.assertGreaterEqual(dialog['top'], 0, dialog)
+        self.assertLessEqual(dialog['right'], dialog['width'], dialog)
+        self.assertLessEqual(dialog['bottom'], dialog['height'], dialog)
+        self.assertLessEqual(dialog['overflow'], 1, dialog)
         self.screenshot('operations31-explicit-start-form-480')
+        self.click('#ees-work-dialog [data-dialog-cancel]')
+        self.wait("!document.querySelector('#ees-work-dialog[open]')")
+        self.assertEqual(self.text('#ees-work-panel.ew-vd h2'), '1차 점검')
+        self.wait("document.activeElement?.matches('[data-action=stage_start][data-node-id=stage]')")
         self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
         self.wait('innerWidth===1920')
         self.open_sidebar()
@@ -225,6 +239,173 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             self.assertEqual(db.execute('SELECT COUNT(*) FROM work_decisions').fetchone()[0], 0)
         self.assertEqual(self.bridge.calls, [])
         self.assertEqual(self.server.completions, [])
+
+    def test_unpublished_operations_use_empty_overview_without_start_or_draft_execution(self):
+        created = self.command('create_workflow', name='미게시 수시 점검', system_id='EMS')
+        key, draft = created['workflow_id'], created['workflow']['draft']
+        root = next(iter(draft['nodes']))
+        draft['nodes'][root]['children'] = ['private-stage']
+        draft['nodes']['private-stage'] = {'id': 'private-stage', 'type': 't', 'name': '미게시 단계 원문',
+            'parent': root, 'children': ['private-job'], 'deps': []}
+        draft['nodes']['private-job'] = {'id': 'private-job', 'type': 'j', 'name': '미게시 작업 원문',
+            'parent': 'private-stage', 'children': [], 'deps': [], 'mode': 'human',
+            'inputs': [], 'result_block': 'human_confirm', 'instructions': '초안은 실행하지 않습니다.'}
+        self.command('save_draft', workflow_id=key, expected_revision=1, definition=draft)
+        periodic = self.command('create_workflow', name='미게시 주기 점검', system_id='EMS',
+            template_id='delivery_review')['workflow_id']
+        blank = self.command('create_workflow', name='미게시 빈 절차', system_id='EMS')['workflow_id']
+        workflows = {item: deepcopy(self.state(workflow_id=item)['workflow']) for item in (key, periodic, blank)}
+        writes = len(self.server.workspace_commands)
+        for label, item in (('on-demand', key), ('periodic', periodic), ('root-only', blank)):
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080,
+                'deviceScaleFactor': 1, 'mobile': False})
+            self.open_sidebar()
+            self.refresh()
+            control = '[data-action=workflow][data-workflow-id="' + item + '"]'
+            self.wait('document.querySelector(' + json.dumps(control) + ')')
+            self.click(control)
+            self.wait("document.querySelector('.ew-operation-overview')?.textContent.includes('게시되지')")
+            for width in (1920, 480):
+                with self.subTest(mode=label, width=width):
+                    self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 1080,
+                        'deviceScaleFactor': 1, 'mobile': False})
+                    self.wait('innerWidth===' + str(width))
+                    panel = self.text('#ees-work-panel')
+                    self.assertIn(workflows[item]['name'], panel)
+                    self.assertIn('업무 단계', panel)
+                    self.assertIn('게시되지', panel)
+                    for legacy in ('새로 시작', '진행 건 시작', '게시 v없음', '미게시 단계 원문', '미게시 작업 원문'):
+                        self.assertNotIn(legacy, panel)
+                    self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-panel #ees-work-start,#ees-work-panel .ew-active-runs,#ees-work-panel .ew-adhoc-start,#ees-work-panel [data-action=stage_open],#ees-work-panel [data-action=stage_start],#ees-work-panel [data-action=start_run],#ees-work-panel [data-action=execute_scope],#ees-work-panel [data-action=stage_decide]')"))
+                    self.assertFalse(self.browser.evaluate("!!window.__eesNativeWorkV1.captureReference()?.run_id"))
+                    self.assertLessEqual(self.browser.evaluate("document.querySelector('#ees-work-panel').scrollWidth-document.querySelector('#ees-work-panel').clientWidth"), 1)
+                    self.screenshot('operations-unpublished-' + label + '-' + str(width))
+            self.assertEqual(self.state(workflow_id=item)['workflow'], workflows[item])
+        self.assert_only_selection_remembered(writes)
+        with self.server.workflow._db() as db:
+            for table in ('work_runs', 'work_attempts', 'work_decisions'):
+                self.assertEqual(db.execute('SELECT COUNT(*) FROM ' + table).fetchone()[0], 0)
+        self.assertEqual(self.bridge.calls, [])
+        self.assertEqual(self.server.completions, [])
+
+    def test_operations_keep_published_definition_when_a_new_draft_differs(self):
+        key = self.author(name='게시된 운영 절차')
+        workflow = self.state(workflow_id=key)['workflow']
+        draft = deepcopy(workflow['draft'])
+        draft['name'] = '아직 게시하지 않은 새 제목'
+        draft['nodes']['stage']['name'] = '아직 게시하지 않은 새 단계'
+        draft['nodes']['job-0']['name'] = '아직 게시하지 않은 새 작업'
+        self.command('save_draft', workflow_id=key, expected_revision=workflow['revision'], definition=draft)
+        saved = deepcopy(self.state(workflow_id=key)['workflow'])
+        writes = len(self.server.workspace_commands)
+        self.open_sidebar()
+        self.refresh()
+        control = '[data-action=workflow][data-workflow-id="' + key + '"]'
+        self.wait('document.querySelector(' + json.dumps(control) + ')')
+        self.click(control)
+        self.wait("document.querySelector('.ew-operation-overview')")
+        self.assertIn('게시된 운영 절차', self.text('.ew-operation-overview'))
+        self.assertIn('검증 단계', self.text('.ew-operation-overview'))
+        self.assertNotIn('아직 게시하지 않은', self.text('#ees-work-panel'))
+        self.open_stage_from_overview()
+        self.assertEqual(self.text('#ees-work-panel.ew-vd h2'), '검증 단계')
+        self.assertIn('합성 작업 0', self.text('#ees-work-panel'))
+        self.assertNotIn('아직 게시하지 않은', self.text('#ees-work-panel'))
+        self.screenshot('operations-published-before-draft')
+        self.assertEqual(self.state(workflow_id=key)['workflow'], saved)
+        self.assert_only_selection_remembered(writes)
+        with self.server.workflow._db() as db:
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM work_runs').fetchone()[0], 0)
+        self.assertEqual(self.bridge.calls, [])
+
+    def test_stage_start_dialog_preserves_inputs_and_groups_without_executing_jobs(self):
+        async def native_groups():
+            return [{'id': 'synthetic-review-team', 'name': '합성 점검팀'}]
+        self.server.workflow._native_groups = native_groups
+        for reduced in (False, True):
+            with self.subTest(reduced_motion=reduced):
+                self.browser.call('Emulation.setEmulatedMedia', {'features': [
+                    {'name': 'prefers-reduced-motion', 'value': 'reduce' if reduced else 'no-preference'}]})
+                key = self.author(name='실행 준비 검증 ' + str(reduced), jobs=1,
+                    fields=[{'id': 'query', 'name': '조회 조건', 'type': 'text', 'scope': 'run', 'required': True}])
+                self.open_sidebar()
+                self.refresh()
+                control = '[data-action=workflow][data-workflow-id="' + key + '"]'
+                self.wait('document.querySelector(' + json.dumps(control) + ')')
+                self.click(control)
+                self.wait("document.querySelector('.ew-operation-overview')")
+                self.open_stage_from_overview()
+                writes = len(self.server.workspace_commands)
+                self.click('[data-action=stage_start][data-node-id=stage]')
+                self.wait("document.querySelector('#ees-work-dialog[open] #ees-work-start')")
+                self.assertEqual(self.text('#ees-work-panel.ew-vd h2'), '검증 단계')
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-start-factory,#ees-work-panel #ees-work-start')"))
+                self.fill('#ees-work-dialog [data-work-input][name=query]', '취소한 입력')
+                self.click('#ees-work-dialog [data-dialog-cancel]')
+                self.wait("!document.querySelector('#ees-work-dialog[open]')")
+                self.assert_only_selection_remembered(writes)
+                self.assertFalse(self.browser.evaluate("!!window.__eesNativeWorkV1.captureReference()?.run_id"))
+                self.click('[data-action=stage_start][data-node-id=stage]')
+                self.wait("document.querySelector('#ees-work-dialog[open] #ees-work-start')")
+                value = '확정한 조회 조건 · ' + ('움직임 줄이기' if reduced else '기본 움직임')
+                self.fill('#ees-work-dialog [data-work-input][name=query]', value)
+                self.click('#ees-work-dialog #ees-work-start details summary')
+                self.click('#ees-work-dialog [data-start-group][value=synthetic-review-team]')
+                self.screenshot('operations-start-dialog-' + ('reduced' if reduced else 'normal'))
+                self.click('#ees-work-dialog [data-dialog-confirm]')
+                self.wait("!document.querySelector('#ees-work-dialog[open]') && window.__eesNativeWorkV1.captureReference()?.run_id")
+                self.wait("document.querySelector('#ees-work-panel.ew-vd h2')?.textContent==='검증 단계'")
+                commands = [body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui']
+                self.assertEqual([body['action'] for body in commands], ['start_run'], commands)
+                self.assertEqual(commands[0]['inputs'], {'query': value})
+                self.assertEqual(commands[0]['sharing'], {'group_ids': ['synthetic-review-team']})
+                run_id = self.browser.evaluate('window.__eesNativeWorkV1.captureReference().run_id')
+                run = self.state(run_id=run_id)['run']
+                self.assertEqual(run['inputs'], {'query': value})
+                self.assertEqual(run['sharing'], {'group_ids': ['synthetic-review-team']})
+                self.assertEqual(run['attempts'], [])
+                self.assertNotIn('새로 시작', self.text('#ees-work-panel'))
+                self.screenshot('operations-started-stage-' + ('reduced' if reduced else 'normal'))
+        with self.server.workflow._db() as db:
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM work_runs').fetchone()[0], 2)
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM work_attempts').fetchone()[0], 0)
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM work_decisions').fetchone()[0], 0)
+        self.assertEqual(self.bridge.calls, [])
+        self.assertEqual(self.server.completions, [])
+
+    def test_operations_existing_run_keeps_its_version_after_a_new_publication(self):
+        key = self.author(name='첫 게시 운영 절차')
+        run = self.start(key)
+        original = deepcopy(self.state(run_id=run['id'])['run'])
+        workflow = self.state(workflow_id=key)['workflow']
+        draft = deepcopy(workflow['draft'])
+        draft['name'] = '다음 게시 운영 절차'
+        draft['nodes']['stage']['name'] = '다음 게시 단계'
+        draft['nodes']['job-0']['name'] = '다음 게시 작업'
+        self.command('save_draft', workflow_id=key, expected_revision=workflow['revision'], definition=draft)
+        revision = self.state(workflow_id=key)['workflow']['revision']
+        checked = self.command('validate_workflow', workflow_id=key, expected_revision=revision)
+        self.assertEqual(checked['validation']['errors'], [], checked)
+        self.command('publish_workflow', workflow_id=key, expected_revision=revision)
+        saved = deepcopy(self.state(workflow_id=key)['workflow'])
+        self.assertEqual(saved['published_version'], 2)
+        writes = len(self.server.workspace_commands)
+        self.open_sidebar()
+        self.refresh()
+        self.click('[data-action=records]')
+        control = '[data-action=open_run][data-run-id="' + run['id'] + '"]'
+        self.wait('document.querySelector(' + json.dumps(control) + ')')
+        self.click(control)
+        self.wait("document.querySelector('#ees-work-panel.ew-vd h2')?.textContent==='검증 단계'")
+        self.assertIn('첫 게시 운영 절차', self.text('#ees-work-panel'))
+        self.assertIn('합성 작업 0', self.text('#ees-work-panel'))
+        self.assertNotIn('다음 게시', self.text('#ees-work-panel'))
+        self.assertEqual(self.browser.evaluate('window.__eesNativeWorkV1.captureReference().run_id'), run['id'])
+        self.screenshot('operations-run-pinned-before-publication')
+        self.assertEqual(self.state(run_id=run['id'])['run'], original)
+        self.assertEqual(self.state(workflow_id=key)['workflow'], saved)
+        self.assert_only_selection_remembered(writes)
+        self.assertEqual(self.bridge.calls, [])
 
     def test_operations31_reason_draft_is_private_and_saved_with_explicit_verdict(self):
         key, run = self.operations_stage()

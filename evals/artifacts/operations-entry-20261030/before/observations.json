@@ -1,0 +1,118 @@
+[
+  {
+    "text": "업무\n검증용 게시 절차\n주기\n수시 · 예약 없음\n적용 대상\n전체 공장 · EMS\n업무 단계\n검증 단계\n작업 2개",
+    "overview": true,
+    "stage": true,
+    "oldStart": false,
+    "stageRows": 1,
+    "jobRows": 0,
+    "rect": {
+      "x": 1441,
+      "y": 0,
+      "width": 479,
+      "height": 1080
+    },
+    "reference": {
+      "kind": "workspace",
+      "workflow_id": "9103f703-6e16-4f02-a6da-f80c9ee30d9e",
+      "run_id": "",
+      "job_id": "",
+      "system_id": "EMS",
+      "factory_id": "",
+      "version": 1,
+      "workflow_revision": 3,
+      "revision": 3,
+      "created_at": "2026-10-30T03:55:23.785+00:00",
+      "context_id": "[3,true,\"/c/existing-chat\",\"\",\"EMS\",\"\",\"9103f703-6e16-4f02-a6da-f80c9ee30d9e\",\"\",\"\"]"
+    },
+    "label": "published-new-overview",
+    "png_sha256": "b709c40a0fbcb88b33ca97b664e13d600a8d56dffa789355e56c61fe6b2e0729"
+  },
+  {
+    "text": "검증용 게시 절차 / 전체 공장 · EMS\n검증 단계\n이 단계 실행\n\n작업 2개\n\n직접 판정\n선택 0/2\n\n자동 실행 완료 0/0\n\n작업\n기록\n기준\n대기\n2\n합성 작업 0\n직접 판정\n판정 필요\n판정 기록\n합성 작업 1\n직접 판정\n판정 필요\n판정 기록",
+    "overview": false,
+    "stage": true,
+    "oldStart": false,
+    "stageRows": 0,
+    "jobRows": 2,
+    "rect": {
+      "x": 1441,
+      "y": 0,
+      "width": 479,
+      "height": 1080
+    },
+    "reference": {
+      "kind": "workspace",
+      "workflow_id": "9103f703-6e16-4f02-a6da-f80c9ee30d9e",
+      "run_id": "",
+      "job_id": "",
+      "system_id": "EMS",
+      "factory_id": "",
+      "version": 1,
+      "workflow_revision": 3,
+      "revision": 3,
+      "created_at": "2026-10-30T03:55:23.785+00:00",
+      "context_id": "[4,true,\"/c/existing-chat\",\"\",\"EMS\",\"\",\"9103f703-6e16-4f02-a6da-f80c9ee30d9e\",\"\",\"\"]"
+    },
+    "label": "published-new-stage",
+    "png_sha256": "6e0ac61caaa106eb84134c739af60dabe4f3ae699b148dee210994ac517f97ee"
+  },
+  {
+    "text": "업무\n검증용 미게시 수시 절차\n닫기\n검증용 미게시 수시 절차\n\n수시 · 게시 v없음 · 진행 중 0건\n\n진행 중 0\n\n진행 중인 건이 없습니다.\n\n새로 시작\n대상 공장\n시스템 전체\n진행 중인 공장은 새로 시작할 수 없습니다.\n적용되는 절차 · v없음\n\n시스템 전체 기준\n\n저장된 공장별 차이 없음\n\n시작하면 진행 건이 만들어지고 기록에 남습니다.\n\n게시된 버전이 없습니다.",
+    "overview": false,
+    "stage": false,
+    "oldStart": true,
+    "stageRows": 0,
+    "jobRows": 0,
+    "rect": {
+      "x": 1441,
+      "y": 0,
+      "width": 479,
+      "height": 1080
+    },
+    "reference": {
+      "kind": "workspace",
+      "workflow_id": "043a8043-915e-4db4-9fe1-46603780e4d6",
+      "run_id": "",
+      "job_id": "",
+      "system_id": "EMS",
+      "factory_id": "",
+      "version": null,
+      "workflow_revision": 2,
+      "revision": 2,
+      "created_at": "2026-10-30T03:55:23.790+00:00",
+      "context_id": "[5,true,\"/c/existing-chat\",\"\",\"EMS\",\"\",\"043a8043-915e-4db4-9fe1-46603780e4d6\",\"\",\"\"]"
+    },
+    "label": "unpublished-on-demand-old-start",
+    "png_sha256": "4ad7159456430aab7f1a72a78837da3c0f649b4bf40014012ed565bdad6dd511"
+  },
+  {
+    "text": "업무\n검증용 미게시 배포 점검\n닫기\n진행 건 시작\n\n게시한 절차 버전으로 새 진행 건을 시작합니다.\n\n게시된 버전이 없습니다. 워크스페이스에서 검사하고 게시해 주세요.",
+    "overview": false,
+    "stage": false,
+    "oldStart": false,
+    "stageRows": 0,
+    "jobRows": 0,
+    "rect": {
+      "x": 1441,
+      "y": 0,
+      "width": 479,
+      "height": 1080
+    },
+    "reference": {
+      "kind": "workspace",
+      "workflow_id": "15903c25-95ab-4be0-8940-6fa57d47c66b",
+      "run_id": "",
+      "job_id": "",
+      "system_id": "EMS",
+      "factory_id": "",
+      "version": null,
+      "workflow_revision": 1,
+      "revision": 1,
+      "created_at": "2026-10-30T03:55:23.792+00:00",
+      "context_id": "[6,true,\"/c/existing-chat\",\"\",\"EMS\",\"\",\"15903c25-95ab-4be0-8940-6fa57d47c66b\",\"\",\"\"]"
+    },
+    "label": "unpublished-periodic-old-overview",
+    "png_sha256": "f0823e431eb5fc40a29720fa7702e445d5948e6ce9914bd956661baefb3602f1"
+  }
+]

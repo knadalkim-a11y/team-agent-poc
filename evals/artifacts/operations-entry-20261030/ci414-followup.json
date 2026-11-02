@@ -1,0 +1,217 @@
+{
+  "date": "2026-10-30",
+  "pull_request": 111,
+  "head_commit": "de207f22a04941799a44a16b3e009b6242cf1b7d",
+  "ci_run": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41003208602",
+  "attempt": 1,
+  "observation_not_final": {
+    "confirmed_failed_jobs": 3,
+    "other_jobs": "not all completed at recording time",
+    "run_conclusion": "not yet final at this observation",
+    "rerun_performed": false
+  },
+  "services": {
+    "failed_jobs": [
+      {
+        "id": 123893948777,
+        "platform": "ubuntu-24.04",
+        "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41003208602/job/123893948777"
+      },
+      {
+        "id": 123893949009,
+        "platform": "windows-2022",
+        "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41003208602/job/123893949009"
+      }
+    ],
+    "step": "Run the complete assigned module set",
+    "unique_failures": 2,
+    "note": "The same Node failures repeat through Python controller/panel/v4 wrappers; they are not additional independent product failures.",
+    "cases": [
+      {
+        "file": "tests/test_ees_execution_ui.cjs",
+        "original_line": 99,
+        "test": "start dialog retains its captured workflow revision across a concurrent refresh",
+        "symptom": "TypeError: undefined.body",
+        "confirmed_cause": "Synthetic state had no published.nodes, so the new published-definition guard returned without a start command. The old test dereferenced the missing command.",
+        "fix": "Provide a real staged published definition and modal input contract; keep the concurrent revision conflict assertion."
+      },
+      {
+        "file": "tests/test_ees_v4_layout.cjs",
+        "original_line": 65,
+        "test": "published procedure overview opens before a run exists without dereferencing run state",
+        "symptom": "Expected removed inline data-action=start_run in new operation overview.",
+        "confirmed_cause": "Legacy overview expectation was not migrated to the new empty/staged overview and stage-start path.",
+        "fix": "Check new root-only empty overview and staged overview→stage_start while preserving pre-run safety."
+      }
+    ],
+    "first_local_reproduction_logs": [
+      {
+        "filename": "test_ees_execution_ui.log",
+        "bytes": 13649,
+        "sha256": "f44f24445ab9e7ff27b66d6b160384e88121a73d4fdb0849a85ca63c3ec1fafe"
+      },
+      {
+        "filename": "test_ees_v4_layout.log",
+        "bytes": 5241,
+        "sha256": "257c9f47f0cd9c4ca4ddf0c8d8198d8b9a75273e59df948541f4f334451f2036"
+      }
+    ],
+    "intermediate_fixture_failure": {
+      "log": {
+        "filename": "test_ees_execution_ui.log",
+        "bytes": 31480,
+        "sha256": "ace64f6fd39d90f4ec5cc84d020e5b57fa52d7c16983699f7ef8a88790edd817"
+      },
+      "passed": 130,
+      "failed": 1,
+      "duration_ms": 681.256237,
+      "symptom": "undefined.definition after generic ok response without a created run id",
+      "fix": "Use the intended server409 conflict reply, preserving the concurrent refresh test meaning."
+    },
+    "final_local_checks": {
+      "execution_node": {
+        "passed": 131,
+        "failed": 0,
+        "skipped": 0,
+        "duration_ms": 645.434393,
+        "log": {
+          "filename": "test_ees_execution_ui-final.log",
+          "bytes": 30930,
+          "sha256": "4fac7bbcff231e22d63a21adf94a7e9e673494f5a2444b84922f0d9ba307ed84"
+        }
+      },
+      "layout_node": {
+        "passed": 26,
+        "failed": 0,
+        "skipped": 0,
+        "duration_ms": 207.593069,
+        "log": {
+          "filename": "test_ees_v4_layout-final.log",
+          "bytes": 6632,
+          "sha256": "f1a818d59ebcd9b18d6bd114555b3221e3ac4ed76c9c918567877f03cf28f545"
+        }
+      },
+      "python_wrappers": {
+        "passed": 3,
+        "failed": 0,
+        "duration_seconds": 5.163,
+        "encoding_warning": "error",
+        "log": {
+          "filename": "python-wrappers-final.log",
+          "bytes": 582,
+          "sha256": "4d152f884d165ff1840f32bd4222526c6e1da8fb941023920674d7035802d9ab"
+        }
+      }
+    },
+    "preserved_contracts": [
+      "captured revision6 and publishedv1 in the request despite current revision7",
+      "server409 rejection preserves current revision7",
+      "zero commands before explicit confirmation",
+      "zero automatic execute commands"
+    ],
+    "modified_files": [
+      "tests/test_ees_execution_ui.cjs",
+      "tests/test_ees_v4_layout.cjs"
+    ],
+    "product_changes": false
+  },
+  "native_account": {
+    "job_id": 123893948636,
+    "url": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41003208602/job/123893948636",
+    "step": 8,
+    "test": "test_native_new_signup_and_approval_ui",
+    "browser": "Chrome/156.0.8078.47",
+    "startup_ready_ms": 290.74194899999384,
+    "suite_tests": 10,
+    "suite_passed": 9,
+    "suite_failed": 1,
+    "suite_duration_seconds": 38.919,
+    "symptom": "Control not visibly ready for a physical click:[data-author-action=procedure_create]",
+    "observed_sequence": "The #ew-procedure-name form-existence wait passed, then filling the field did not lead to a visible physical create-button click point within5s.",
+    "captured_state": "Failure PNG shows existing 신규 공장 횡전개 details, no create form, and page-wide Ctrl+A selection.",
+    "confirmed_cause": null,
+    "candidate_only": "New permissions/EMS selection/author entry/initialize_procedures response and form entry may overlap; no event timing evidence yet establishes a cause. The initialize path does not directly select a workflow, so it is not established as the cause.",
+    "first_log": {
+      "filename": "ci414-native-account-first-failure.log",
+      "bytes": 60999,
+      "sha256": "ad401837cd25cd8756f2604b1db52bc167446e71532350a2c855941ef7e72c74"
+    },
+    "failure_png": {
+      "filename": "test_native_new_signup_and_approval_ui-failure.png",
+      "bytes": 96057,
+      "sha256": "dbc4b064a39a27d9057bc0d3d5c0488a981164fe80d53946243d6b21977b87ad"
+    },
+    "failure_json": {
+      "filename": "test_native_new_signup_and_approval_ui-failure.json",
+      "bytes": 36346,
+      "sha256": "0c61d322af3bc1281040dd138bda6a3063dc0ad1fdc088f76c2160f362cf6060"
+    },
+    "local_setup0": {
+      "tests_run": 0,
+      "errors": 1,
+      "duration_seconds": 0.025,
+      "reason": "Incorrect branding7 path has no manifest; no product test began.",
+      "log": {
+        "filename": "ci414-native-account-local-setup0.log",
+        "bytes": 1380,
+        "sha256": "953c143579dc6870c55ba082cc591070e635b470a608c5adfa56a75d6677b8c7"
+      }
+    },
+    "local_observation": {
+      "tests_run": 1,
+      "passed": 1,
+      "failed": 0,
+      "duration_seconds": 9.88,
+      "browser": "HeadlessChrome/153.0.8010.0",
+      "wheel_sha256": "bbc988d28e3742f87801583d0303a4a032b274a8a42633aff11a3e2176b4f78e",
+      "log": {
+        "filename": "ci414-native-account-local.log",
+        "bytes": 850,
+        "sha256": "bdf7bcf186f393250d5e02fcbb047bcce3bf4fe10fceeb2917e0c3774f3c5a10"
+      }
+    },
+    "product_or_test_changes": false,
+    "remaining": "Observe the same test in the new-head full CI. If repeated, inspect actual click hit target/focus/mousedown/up and workspace/initialize response timing plus selection changes. A local pass is not a root-cause fix."
+  },
+  "source8_product_unchanged": {
+    "view_sha256": "6c4485e5012bd67ac33edd1f17d4b39e5c2cc93657f790df81c06ed9ea958371",
+    "launcher_sha256": "f4aed06c804796103771b473a157b51c82b60ffb88ac1ff7a427eb96bac535fc",
+    "rebuild_required": false
+  },
+  "boundaries": {
+    "new_head_ci": "pending",
+    "windows_local_revalidation": "not performed",
+    "intranet_fixed_version": "not deployed or verified",
+    "merge": "not performed"
+  },
+  "final_ci_result": {
+    "status": "completed",
+    "conclusion": "failure",
+    "jobs": 40,
+    "success": 34,
+    "failure": 4,
+    "cancelled": 1,
+    "skipped": 1,
+    "independent_failed_jobs": 3,
+    "aggregate_jobs": [
+      {
+        "id": 123896632783,
+        "platform": "ubuntu-24.04",
+        "conclusion": "failure"
+      },
+      {
+        "id": 123896632687,
+        "platform": "windows-2022",
+        "conclusion": "cancelled",
+        "failed_step": "Require every fixture, service, platform and Native result"
+      }
+    ],
+    "aggregate_log_results": {
+      "SERVICE_RESULT": "failure",
+      "NATIVE_RESULT": "failure",
+      "PRODUCT_RESULT": "success"
+    },
+    "normal_pr_skip": "Prepare delivery files",
+    "rerun_performed": false
+  }
+}

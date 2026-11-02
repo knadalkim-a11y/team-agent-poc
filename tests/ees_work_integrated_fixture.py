@@ -177,27 +177,20 @@ class IntegratedNativeCase(unittest.TestCase):
 
     def open_run(self, key, run, job='job-0'):
         self.open_sidebar()
-        self.browser.evaluate('window.__eesNativeWorkV1.refresh()')
-        control = '[data-action="workflow"][data-workflow-id="' + key + '"]'
-        self.wait('document.querySelector(' + json.dumps(control) + ')')
-        self.click(control)
-        run_control = '#ees-work-panel .ew-active-runs [data-action="open_run"][data-run-id="' + run['id'] + '"]'
-        self.wait("document.querySelector('.ew-operation-overview') || " +
-            'document.querySelector(' + json.dumps(run_control) + ') || ' +
-            '(window.__eesNativeWorkV1.captureReference()?.run_id === ' + json.dumps(run['id']) +
-            ' && document.querySelector("#ees-work-panel [data-action=job]"))')
-        if self.browser.evaluate("!!document.querySelector('.ew-operation-overview')"):
-            self.click('.ew-operation-stage[data-action=stage_open]')
-            self.wait("document.querySelector('#ees-work-panel .ew-run-nav [data-action=stage_details]')")
-            if self.browser.evaluate('window.__eesNativeWorkV1.captureReference()?.run_id !== ' + json.dumps(run['id'])):
-                self.click('[data-action=stage_details]')
-        self.wait('document.querySelector(' + json.dumps(run_control) + ') || (window.__eesNativeWorkV1.captureReference()?.run_id === ' + json.dumps(run['id']) + ' && document.querySelector("#ees-work-panel [data-action=job]"))')
-        if self.browser.evaluate('!!document.querySelector(' + json.dumps(run_control) + ')'):
-            self.click(run_control)
-            self.wait('window.__eesNativeWorkV1.captureReference()?.run_id === ' + json.dumps(run['id']))
+        # Existing runs are opened through the actual execution-record list.
+        # A new workflow overview no longer embeds the removed active/start UI.
+        self.click('[data-action="records"]')
+        run_control = '#ees-work-panel [data-action="open_run"][data-run-id="' + run['id'] + '"][data-workflow-id="' + key + '"]'
+        self.wait('document.querySelector(' + json.dumps(run_control) + ')')
+        self.click(run_control)
+        self.wait('window.__eesNativeWorkV1.captureReference()?.run_id === ' + json.dumps(run['id']) +
+            ' && document.querySelector("#ees-work-panel .ew-vd-head,#ees-work-panel .ew-operation-overview")')
         if job:
             selector = '#ees-work-panel [data-action="job"][data-job-id="' + job + '"]'
             if not self.browser.evaluate('!!document.querySelector(' + json.dumps(selector) + ')'):
+                if self.browser.evaluate("!!document.querySelector('.ew-operation-overview')"):
+                    self.click('.ew-operation-stage[data-action=stage_open]')
+                    self.wait("document.querySelector('#ees-work-panel .ew-run-nav [data-action=stage_details]')")
                 self.click('[data-action=stage_details]')
             self.wait('document.querySelector(' + json.dumps(selector) + ')')
             self.click(selector)

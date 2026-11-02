@@ -1,0 +1,28 @@
+[
+  {
+    "file": "operations-unpublished-on-demand-1920.png",
+    "bytes": 69126,
+    "sha256": "5903bf16ff5445b1818c8d5c04e1e97895687404672a9f72b4ec00426507fa45"
+  },
+  {
+    "file": "operations-unpublished-on-demand-480.png",
+    "bytes": 26095,
+    "sha256": "6a0d18135154d0d8fefb4d2399cbd1839870377f74bcde490d55df30f87053cc"
+  },
+  {
+    "file": "operations-start-dialog-normal.png",
+    "bytes": 96849,
+    "sha256": "448b1412641887761fe866a87645e6ca55ec2fee14a9d286fef3988d1f770d18"
+  },
+  {
+    "file": "operations-start-dialog-reduced.png",
+    "bytes": 99004,
+    "sha256": "d40511f07e8b1fd91ead628994fde55c26971ccf1bbb4a01a03821d3dcdc4fb6"
+  },
+  {
+    "file": "operations31-explicit-start-form-480.png",
+    "bytes": 72143,
+    "sha256": "b21fe10324b40692f28dfce137c4c3b93ba83479b9c8d84412ed46ff7a08c6b4",
+    "capture": "after opening animation settled; within viewport/no overflow; cancel focus returned"
+  }
+]

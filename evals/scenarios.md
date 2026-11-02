@@ -18,6 +18,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
+| 사내6b1c의 미게시 운영에서 옛 시작 화면 표시 | [수정 전 재현·옛 시작 경로 제거·새 소스 Native/입력·보존 검증](v4-ui-20260930.md#operations-entry-legacy-removal-20261030) |
 | #109 병합 main6b1c256 사내 적용 준비 | [PR407·main408·프로그램ZIP·직전42f5 설치 기준·적용/원복](v4-ui-20260930.md#main-6b1c256-apply-evidence-20261030) |
 | PR #110 Windows 재시도 시험 시간 경계 | [CI410 최초 실패·제어한 시계로 대기/재시도 검사](v4-ui-20260930.md#ci410-windows-retry-clock-20261030) |
 | 운영 사유의 파란 바깥 포커스 제거·CI406 | [Figma32·안쪽 회색 초점·source6 집중 검사·central-chat 탐색 수정](v4-ui-20260930.md#reason-border-20261030) |

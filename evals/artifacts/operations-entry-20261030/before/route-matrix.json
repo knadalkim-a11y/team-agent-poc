@@ -1,0 +1,99 @@
+{
+  "source_commit": "6b1c256ef44691ffec53cdcd7b65db329e11c4e1",
+  "checked_workspace_commit": "4c33f6de195553f3b90ead096de56c2420bfceea",
+  "product_paths_identical": true,
+  "method": "Node real createWorkView.runOverview exposed only in memory using existing ees_workspace_ui_fixture; existing real controller.handleClick for navigation; synthetic records, no product source changes",
+  "actual_intranet_access": false,
+  "matrix": [
+    {
+      "case": "initial delivery_review template draft only",
+      "draft_stage_count": 4,
+      "mode": "periodic",
+      "published": false,
+      "new_overview": false,
+      "old_start_form": false,
+      "visible": "진행 건 시작 / 게시된 버전이 없습니다. 워크스페이스에서 검사하고 게시해 주세요."
+    },
+    {
+      "case": "same staged draft on_demand",
+      "draft_stage_count": 4,
+      "mode": "on_demand",
+      "published": false,
+      "new_overview": false,
+      "old_start_form": true,
+      "visible": "수시 · 게시 v없음 · 진행 중 0건 / 새로 시작 / 대상 공장 시스템 전체 / 게시된 버전이 없습니다."
+    },
+    {
+      "case": "published delivery_review template",
+      "draft_stage_count": 4,
+      "mode": "periodic",
+      "published": true,
+      "new_overview": true,
+      "old_start_form": false,
+      "visible": "주기 / 적용 대상 / 업무 단계"
+    },
+    {
+      "case": "published staged on_demand",
+      "draft_stage_count": 4,
+      "mode": "on_demand",
+      "published": true,
+      "new_overview": true,
+      "old_start_form": false,
+      "visible": "주기 / 적용 대상 / 업무 단계"
+    },
+    {
+      "case": "published staged on_demand explicit tab:start",
+      "draft_stage_count": 4,
+      "mode": "on_demand",
+      "published": true,
+      "new_overview": false,
+      "old_start_form": true,
+      "visible": "수시 · 게시 v1 · 진행 중 0건 / 새로 시작 / 진행 건 시작"
+    },
+    {
+      "case": "staged published definition and staged run snapshot",
+      "run_stage_count": 4,
+      "published": true,
+      "new_overview": true,
+      "old_start_form": false
+    },
+    {
+      "case": "hypothetical no-stage publication with newer staged draft",
+      "warning": "renderer-only fallback; current backend rejects jobs directly under root, not evidence of a valid production record",
+      "new_overview": false,
+      "old_start_form": true
+    },
+    {
+      "case": "hypothetical no-stage historic run snapshot overrides newer staged publication",
+      "warning": "renderer-only fallback; current backend rejects jobs directly under root, not evidence of a valid production record",
+      "new_overview": false,
+      "old_run_layout": true
+    }
+  ],
+  "persisted_navigation": {
+    "previous_42f_has_start_or_run_details_assignment": false,
+    "tested_initial_tabs": [
+      "start",
+      "run_details",
+      "current",
+      "overview"
+    ],
+    "category_toggle": "leaves selected tab/target unchanged; only collapsed state",
+    "workflow_click": "sets tab overview, job_id empty, on_demand run_id empty; same workflow retains stage_id and therefore may land in new stage view",
+    "business_mutations_observed": 0
+  },
+  "references": {
+    "definition_choice": "branding/ees/ui/ees-work-view.js:566-582",
+    "overview_guard_and_fallback": "branding/ees/ui/ees-work-view.js:744-757",
+    "legacy_job_detail": "branding/ees/ui/ees-work-view.js:759-774,795",
+    "workflow_click": "branding/ees/ui/ees-work-launcher.js:613",
+    "explicit_start_details": "branding/ees/ui/ees-work-launcher.js:540-543",
+    "saved_selection_restore": "branding/ees/ui/ees-work-launcher.js:250",
+    "category_toggle": "branding/ees/ui/ees-work-launcher.js:578",
+    "api_published_shape": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py:950-960",
+    "manager_unpublished_list": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py:1254",
+    "draft_only_initialization": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py:1461-1477,1537",
+    "blank_create_root_only": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py:1530-1533",
+    "publication_parent_guard": "agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py:189-190"
+  }
+}
