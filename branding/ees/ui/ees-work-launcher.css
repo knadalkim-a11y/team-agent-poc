@@ -1260,6 +1260,12 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-author-rule-card>.ew-author-empty p+p{margin-top:12px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-author-rule-card>.ew-author-link{display:inline-block;min-height:34px;margin-top:12px;padding:6px;font-size:14px;line-height:22px;font-weight:500;text-align:left;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-author-rule-policy{margin:24px 0 0;padding:0;border-top:1px solid var(--ew-line);}
+/* Figma 1902:3197: keep the empty-state text and divider positions without
+ * copying the 21px text box that overflows when its guidance wraps to two lines.
+ * The 34px link target follows the full text; populated rule forms are unchanged. */
+#ees-work-designer:not([data-author-tab=tools]) .ew-author-rule-card:has(>.ew-author-empty)>h3{margin-bottom:11px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-author-rule-card>.ew-author-empty+.ew-author-link{display:block;width:fit-content;margin-top:0;padding:3px 6px 9px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-author-rule-card:has(>.ew-author-empty)+.ew-author-rule-policy{margin-top:21px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-author-rule-policy>summary{display:flex;align-items:center;justify-content:flex-start;gap:8px;min-height:49px;padding:12px 14px;list-style:none;color:var(--ees-text-primary);font-size:13px;line-height:22px;font-weight:500;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-author-rule-policy>summary::-webkit-details-marker{display:none;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-author-rule-policy>summary::before{content:'';flex:none;width:14px;height:14px;background:url('/_ees14/v4/f0554.svg') center/14px no-repeat;}

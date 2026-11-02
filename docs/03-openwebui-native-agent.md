@@ -1,12 +1,16 @@
 # 03. Open WebUI Native 통합 Assistant
 
-**최신 배포 준비(2026-10-30):** [PR #109](https://github.com/knadalkim-a11y/team-agent-poc/pull/109)의 운영32·작성12 프로그램은 main6b1c256에 병합됐다. 사용자는 새 PowerShell 창에서 첫 `Status` 호출이 `UnauthorizedAccess`로 차단됐다고 보고했다. 이번 시도의 Update·Upgrade·Stop·프로그램 교체는 미실행이며, 재시도 성공은 아직 확인되지 않았다. 후속 [PR #110](https://github.com/knadalkim-a11y/team-agent-poc/pull/110) 병합 요청에 따라 아래6b1c256 블록 재실행은 보류한다. 병합 뒤 달라지는 main의 CI·프로그램 ZIP을 검증하고 **새 고정 적용 블록을 같은 PR 본문에 제공**한다. [새 터미널 준비](#ees-new-powershell-window)를 먼저 확인한다.
+**최신 운영 수정 배포 준비(2026-11-02):** ‘새로 시작·대상 공장 선택’ 화면 제거는 [PR #111](https://github.com/knadalkim-a11y/team-agent-poc/pull/111)에서 최신 main90f9c1b와 통합한다. #112/90f9c1b는 작성 간격 수정만 포함하므로 운영 결함을 고친 배포본이 아니다. 사용자 해결 요청에 따라 통합 CI·병합 main CI·실제 프로그램 ZIP을 검증한 뒤 **정확한 새 SHA·ZIP 해시·적용/원복 블록을 같은 PR #111 본문에 제공**한다. 아래 날짜별 블록은 과거 실행 기록이며 다시 사용하지 않는다.
 
-**최신 사내 적용 보고(2026-10-28):** 사용자가 `result=ok / stage=complete / running=true / commit=42f5ae502b57`를 보고했다. 공통 단계 상세26판 프로그램의 적용·기동 성공 보고로 기록하며 [당시 적용 블록](#main-42f5ae5-apply-prep-20261028)은 다시 실행하지 않는다. 사내 단계 화면·기존 자료는 아직 미확인이므로 [기존 진행 건의 읽기 전용 진입](#operations-stage26-readonly-entry-20261028)으로 확인한다.
+**현재 사내 기준:** 마지막 명시적 설치 커밋 보고는6b1c256이며90f9c1b 적용 여부는 미확인이다. 새 적용 블록은 관리 스크립트·저장 계약이 같은 이 두 정확한 정상 설치본만 허용하고, 다른 커밋·무효/미완료는 적용 전에 중단한다. 기존 설정 파일·Python·DB·키·대화·첨부·PAT·도구를 유지한다. 새 창은 [실행 정책 준비](#ees-new-powershell-window)를 따르며 프로그램 원복은 실제 직전 설치본만 대상으로 한다. 사전 검사 중단이면 원복하지 않고, 미완료 Apply/Restore는 [기존 복구 분기](#ees-wrapper-restore)를 따른다.
+
+**이전 배포 준비(2026-10-30):** [PR #109](https://github.com/knadalkim-a11y/team-agent-poc/pull/109)의 운영32·작성12 프로그램은 main6b1c256에 병합됐다. 사용자는 새 PowerShell 창에서 첫 `Status` 호출이 `UnauthorizedAccess`로 차단됐다고 보고했다. 이번 시도의 Update·Upgrade·Stop·프로그램 교체는 미실행이며, 재시도 성공은 아직 확인되지 않았다. 후속 [PR #110](https://github.com/knadalkim-a11y/team-agent-poc/pull/110) 병합 요청에 따라 아래6b1c256 블록 재실행은 보류한다. 병합 뒤 달라지는 main의 CI·프로그램 ZIP을 검증하고 **새 고정 적용 블록을 같은 PR 본문에 제공**한다. [새 터미널 준비](#ees-new-powershell-window)를 먼저 확인한다.
+
+**이전 사내 적용 보고(2026-10-28):** 사용자가 `result=ok / stage=complete / running=true / commit=42f5ae502b57`를 보고했다. 공통 단계 상세26판 프로그램의 적용·기동 성공 보고로 기록하며 [당시 적용 블록](#main-42f5ae5-apply-prep-20261028)은 다시 실행하지 않는다. 사내 단계 화면·기존 자료는 아직 미확인이므로 [기존 진행 건의 읽기 전용 진입](#operations-stage26-readonly-entry-20261028)으로 확인한다.
 
 **이전 사내 적용 보고(2026-10-26):** 사용자가 `result=ok / stage=complete / running=true / commit=924d919333b8`를 보고했다. 당시 **#103 병합 main924d919 프로그램 적용 완료·실행 중**으로 기록했다. [아래 적용 블록](#main-924d919-apply-prep-20261026)은 실행 이력이며 이 PC에서 반복하지 않는다. 당시 로그인·기존 자료·새 화면·도구 설정은 미확인이었다.
 
-현재 제품 이름은 **EES Workflow**이며 [2026-10-02 통합 구현 기준](#integrated-work-install-20261002)을 유지한다. 최신 사내 적용 보고는 `42f5ae502b57`이다. 앞선 `1c1efff7abe… valid=true running=true` 사전 중단과 [2026-10-22 main1c1efff 검토 기록](#main-1c1efff-apply-prep-20261022)은 당시 상태로 보존한다. 아래 42cc756·#88/#89 및 날짜별 적용·시연·ApplyDemo 안내는 당시 기록으로 보존하며 현재 실행 목록으로 반복하지 않는다. 실제 도구/Native 관리와 기존 Apply/Restore 경로는 유지한다.
+현재 제품 이름은 **EES Workflow**이며 [2026-10-02 통합 구현 기준](#integrated-work-install-20261002)을 유지한다. 마지막 명시적 사내 설치 커밋 보고는 `6b1c256ef446`이며, 이후 배포본의 적용 여부는 위 현재 사내 기준에서 구분한다. 앞선 `1c1efff7abe… valid=true running=true` 사전 중단과 [2026-10-22 main1c1efff 검토 기록](#main-1c1efff-apply-prep-20261022)은 당시 상태로 보존한다. 아래 42cc756·#88/#89 및 날짜별 적용·시연·ApplyDemo 안내는 당시 기록으로 보존하며 현재 실행 목록으로 반복하지 않는다. 실제 도구/Native 관리와 기존 Apply/Restore 경로는 유지한다.
 
 > 문서 역할: Native Assistant 기준선 구성·확장 원칙
 >
@@ -18,7 +22,8 @@
 
 | 할 일 | 안내 |
 |---|---|
-| 운영32·작성12 · PR #110 병합 후 사내 적용 | [새 터미널 준비](#ees-new-powershell-window) · [병합 뒤 검증 ZIP·적용 블록](https://github.com/knadalkim-a11y/team-agent-poc/pull/110) · [6b1c256 준비 이력](#main-6b1c256-apply-prep-20261030) |
+| 운영 옛 시작 화면 제거 · PR #111 병합 후 사내 적용 | [새 터미널 준비](#ees-new-powershell-window) · [새 검증 ZIP·복사 블록](https://github.com/knadalkim-a11y/team-agent-poc/pull/111) |
+| 운영32·작성12 · PR #110 병합 후 사내 적용 이력 | [새 터미널 준비](#ees-new-powershell-window) · [병합 뒤 검증 ZIP·적용 블록](https://github.com/knadalkim-a11y/team-agent-poc/pull/110) · [6b1c256 준비 이력](#main-6b1c256-apply-prep-20261030) |
 | 공통 단계 상세26판 · main42f5ae5 사내 적용 이력 | [확정 ZIP·복사 실행 블록·화면 확인](#main-42f5ae5-apply-prep-20261028) |
 | #103 병합 main924d919 사내 적용 이력 | [확정 ZIP·복사 실행 블록·설정·복구 경계](#main-924d919-apply-prep-20261026) |
 | main 1c1efff 적용 검토 기록·Claude 대조 | [확정 ZIP·한 블록·설정·Restore 경계](#main-1c1efff-apply-prep-20261022) |
