@@ -573,6 +573,15 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
 
     def create_ui_procedure(self,name):
         self.enter_authoring()
+        # Match the initialized-list boundary used by the other authoring
+        # fixture before physical clicks can race the default rows' arrival.
+        prepared = self.browser.evaluate('window.__eesNativeWorkV1.refresh()')
+        self.assertTrue(prepared and prepared['initial_procedures_ready'], prepared)
+        self.wait("document.querySelector('.ew-author-list,[data-author-action=list]')")
+        if self.browser.evaluate("!!document.querySelector('[data-author-action=list]')"):
+            self.click('[data-author-action=list]')
+        self.wait("JSON.stringify([...document.querySelectorAll('.ew-author-list [data-author-action=open]')].map(button=>button.dataset.id)) === JSON.stringify(" +
+                  json.dumps([workflow['id'] for workflow in prepared['workflows']]) + ")")
         self.wait("document.querySelector('[data-author-action=create]') && !document.querySelector('[data-author-action=create]').disabled")
         self.click('[data-author-action="create"]')
         self.wait("document.querySelector('#ew-procedure-create #ew-procedure-name')")
