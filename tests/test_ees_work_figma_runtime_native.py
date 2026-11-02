@@ -271,6 +271,13 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 1080,
                 'deviceScaleFactor': 1, 'mobile': False})
             self.wait('innerWidth===' + str(width))
+            self.assertIn('지금 처리할 내 업무가 없습니다', self.text('#ees-work-panel'))
+            if width == 480:
+                # The work panel overlays navigation at this width. Follow the
+                # existing mobile close/select route before opening the menu.
+                self.wait("document.querySelector('.ees-panel-region')?.dataset.overlay==='true'")
+                self.click('#ees-work-panel [data-action=close_panel]')
+                self.wait("document.querySelector('.ees-panel-region')?.hidden")
             self.open_sidebar()
             self.wait('document.querySelector(\'[data-action=workflow][data-workflow-id="' + published + '"]\')')
             visible = self.browser.evaluate("[...document.querySelectorAll('#sidebar [data-action=workflow]')].map(node=>node.dataset.workflowId)")
