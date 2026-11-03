@@ -195,7 +195,10 @@ class FigmaWorkspaceContracts(unittest.IsolatedAsyncioTestCase):
         body = dict(action='save_review_draft', request_id=str(uuid4()), run_id=run['id'], job_id='j', expected_revision=run['revision'], attempt_id=attempt['id'], result_revision=1, review_revision=0, text='Private review text')
         saved = await self.service.workspace_command(self.users['a'], body)
         self.assertTrue(saved['ok'], saved)
+        self.memberships['b'] = []
         other = (await self.state(actor='b', run_id=run['id']))['run']
+        self.assertEqual(other['sharing'], {'group_ids': []})
+        self.assertEqual(other['attempts'][0]['evidence_access'], 'requires_current_source_access')
         self.assertNotIn('Private review text', json.dumps(other))
         self.assertIsNone(other['attempts'][0]['result'])
         self.bridge.allowed = False

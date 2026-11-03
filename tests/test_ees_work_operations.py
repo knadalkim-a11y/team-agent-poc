@@ -342,6 +342,8 @@ class RuntimeTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_receipt_read_rechecks_group_after_native_await(self):
         wid=await self.make_workflow();run=await self.start(wid)
+        self.users['bob']['role']='user'
+        await self.core('save_access', principal_kind='group', principal_id='team', system_id='EMS', factory_id='*', roles=['participant'])
         body=self.body('execute_job',1,run_id=run['run_id'],job_id='j1')
         await self.runtime.command(self.users['bob'],body)
         check=self.bridge.check
@@ -351,7 +353,7 @@ class RuntimeTests(unittest.IsolatedAsyncioTestCase):
             return result
         self.bridge.check=revoke_after_check
         with self.assertRaises(workflow.WorkflowError) as error:await self.runtime.command(self.users['bob'],body)
-        self.assertEqual(error.exception.code,'run_not_found')
+        self.assertEqual(error.exception.code,'scope_forbidden')
         self.assertEqual(len(self.bridge.calls),1)
 
     async def test_effect_probe_rechecks_access_after_status_read(self):

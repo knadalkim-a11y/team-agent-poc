@@ -84,8 +84,8 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         await self.core('save_access', system_id=system, factory_id='*', principal_kind='user', principal_id='reader', roles=['manager', 'participant'])
         return wid
 
-    async def start(self, wid, actor=None):
-        return await self.core('start_run', 3, actor=actor, workflow_id=wid, inputs={}, sharing={'group_ids':[self.group.id]})
+    async def start(self, wid, actor=None, factory_id=''):
+        return await self.core('start_run', 3, actor=actor, workflow_id=wid, factory_id=factory_id, inputs={}, sharing={'group_ids':[self.group.id]})
 
     def http(self, request, timeout=None):
         self.http_calls.append(request.get_header('Authorization'))
@@ -272,6 +272,7 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         await self.tools.command(self.admin, self.body('shared_tool_disable', item['revision'], shared_tool_id=self.key, reference=item['observed_reference']))
         started = await self.core('start_run', 5, actor=self.reader, workflow_id=wid, inputs={}, sharing={'group_ids':[self.group.id]})
         self.assertEqual(started['run']['jobs']['j1']['status'], 'excluded')
+        await self.core('close_run', 1, actor=self.reader, run_id=started['run_id'])
         with self.service._db() as db:
             self.assertEqual(db.execute('SELECT count(*) FROM work_shared_tool_pins WHERE run_id=?', (started['run_id'],)).fetchone()[0], 0)
         disabled = await self.item()
@@ -355,7 +356,9 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         revised = await self.review()
         self.assertEqual(revised['version'], 2)
         await self.assert_code('shared_tool_version_changed', self.execute(old_run))
-        new_run = await self.start(wid, self.reader)
+        # Compare two live pinned versions in distinct work units.
+        await self.core('save_factory', system_id='EMS', factory_id='new-version-factory', name='새 버전 공장')
+        new_run = await self.start(wid, self.reader, factory_id='new-version-factory')
         self.assertEqual((await self.execute(new_run))['attempt']['snapshot']['shared_tool']['version'], 2)
         await self.tools.accept_version(self.reader, self.body('shared_tool_accept_version', 1, run_id=old_run['run_id'], shared_tool_id=self.key, version=2))
         self.assertEqual((await self.execute(old_run, 2))['attempt']['snapshot']['shared_tool']['version'], 2)
@@ -364,7 +367,8 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_outside_group_run_view_exposes_only_permitted_group_and_assignee_names(self):
         await self.review()
-        run = await self.start(await self.workflow(), self.reader)
+        run = await self.start(await self.workflow(), self.admin)
+        self.assertEqual(run['run']['sharing'], {'group_ids': []})
         await self.core('claim_task', 1, actor=self.reader, run_id=run['run_id'], job_id='j1')
         await self.f.native_groups.Groups.remove_users_from_group(self.group.id, ['reader'])
         state = await self.service.operations.state(self.reader, run_id=run['run_id'])
@@ -467,6 +471,8 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         result = await self.execute(run)
         self.assertEqual(result['attempt']['result']['result_kind'], 'evidence')
         self.assertNotIn('items', result['attempt']['result'])
+        current = (await self.service.workspace_state(self.reader, run_id=run['run_id']))['run']
+        await self.core('cancel_run', current['revision'], actor=self.reader, run_id=run['run_id'], reason='다음 본문 크기 검사 전 진행 건 종료')
         self.page_body = '<p>' + '가' * 13000 + '</p>'
         truncated_run = await self.execute(await self.start(wid, self.reader))
         self.assertEqual(truncated_run['attempt']['result']['completeness'], 'truncated')

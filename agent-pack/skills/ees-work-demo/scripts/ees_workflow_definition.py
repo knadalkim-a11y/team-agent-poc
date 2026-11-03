@@ -30,11 +30,11 @@ def tool_connection_required(node):
 
 
 def concurrent_runs_allowed(definition):
-    """Only the same-factory duplicate start guard depends on this.
+    """Only the same factory/system unit duplicate start guard depends on this.
 
     Execution modes are no longer chosen while authoring. Versions saved as
     periodic/emergency keep their earlier parallel starts, and incident work may
-    handle several incidents for one factory at once.
+    handle several incidents for one work unit at once.
     """
     return definition.get("mode") in ("periodic", "emergency") or definition.get("category") == "incident"
 
