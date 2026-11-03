@@ -1020,22 +1020,16 @@ def figma_delta_flow(g):
         business_status='blocked',reason='delivery_unconfigured',actual_delivery=False)
     assert blocked['factory_id']==factory_id
     g.click('[data-action="workflow"][data-workflow-id="'+delivery_id+'"]')
-    g.wait_work_ready(workflow_id=delivery_id,run_id='')
-    # Returning from a run can first show the cached pre-start overview. The
-    # dialog takes one snapshot when opened; complete its read-only public
-    # refresh before checking duplicate protection, as the former screen's
-    # active-run row was also awaited before checking its disabled control.
-    refreshed=g.browser.evaluate('window.__eesNativeWorkV1.refresh().then(state=>({workflow_id:state?.workflow?.id,active_runs:state?.workflow_active_runs,reference:window.__eesNativeWorkV1.captureReference()}))')
-    assert refreshed['workflow_id']==delivery_id,refreshed
-    assert any(item['id']==delivery_run_id and item['factory_id']==factory_id for item in refreshed['active_runs']),refreshed
-    assert all(refreshed['reference'].get(key)==value for key,value in {'workflow_id':delivery_id,'factory_id':factory_id,'run_id':''}.items()),refreshed
-    g.open_operation_start(expect_form=False)
-    g.wait('document.querySelector("#ees-work-dialog")?.innerText.includes("이미 진행 중")')
-    assert not g.browser.evaluate('!!document.querySelector("#ees-work-dialog [data-dialog-confirm],#ees-work-start")')
+    # Opening ordinary work resumes the selected factory's active run. The
+    # single-stage product view is ready before checking that it offers no
+    # second start; entering work must preserve the reviewed blocked result.
+    resumed=g.wait_work_ready(workflow_id=delivery_id,run_id=delivery_run_id,selector='#ees-work-panel .ew-stage-run-button[data-action="execute_scope"]')
+    assert resumed['reference']['factory_id']==factory_id,resumed
+    g.wait('!document.querySelector("#ees-work-dialog")')
+    start_controls=g.browser.evaluate('[...document.querySelectorAll(\'#ees-work-panel #ees-work-start,#ees-work-panel [data-action="stage_start"],#ees-work-panel [data-action="start_run"]\')].map(e=>e.outerHTML)')
+    assert start_controls==[],start_controls
     assert g.api('/api/ees-work/workspace?run_id='+delivery_run_id)['run']==blocked
     g.capture('figma-a8-active-factory-duplicate-disabled')
-    g.click('#ees-work-dialog [data-dialog-cancel]')
-    g.wait('!document.querySelector("#ees-work-dialog")')
     g.click('[data-action="records"]')
     g.wait_work_ready(selector='[data-action="open_run"][data-run-id="'+delivery_run_id+'"]')
     g.click('[data-action="open_run"][data-run-id="'+delivery_run_id+'"]')
@@ -1043,7 +1037,7 @@ def figma_delta_flow(g):
     assert g.api('/api/ees-work/workspace?run_id='+delivery_run_id)['run']==blocked
     assert len([item for item in g.api('/api/ees-work/workspace?workflow_id='+delivery_id)['runs'] if item['factory_id']==factory_id])==1
     g.record('Figma A8 active factory remains visible and duplicate start is disabled',factory_id=factory_id,
-        existing_run_unchanged=True,duplicate_created=False,existing_run_reopened_from_records=True)
+        existing_run_unchanged=True,duplicate_created=False,existing_run_opened_from_workflow=True,existing_run_reopened_from_records=True)
 
 
 def main():

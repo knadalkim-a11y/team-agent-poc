@@ -554,9 +554,8 @@ class WorkspaceMixin:
     def _work_check_run(self, db, actor, groups, row, write=False, *, read=None):
         if not row:
             _fail('run_not_found', '접근할 수 있는 진행 건이 없습니다.')
-        sharing = json.loads(row['sharing'])
-        if row['owner'] != _value(actor, 'id') and not groups.intersection(sharing.get('group_ids', [])):
-            _fail('run_not_found', '접근할 수 있는 진행 건이 없습니다.')
+        # Runs belong to their factory/system, including records created before
+        # this policy. Keep owner/sharing as historical data, not an access ACL.
         self._work_authorize_scope(db, actor, groups, row['system_id'], row['factory_id'], 'participant' if write else 'viewer', read=read)
         if write and row['status'] in TERMINAL:
             _fail('run_closed', '종료된 진행 건은 기록으로 보존됩니다.')
@@ -1614,11 +1613,11 @@ class WorkspaceMixin:
             self._work_authorize_scope(db, actor, groups, row['system_id'], factory_id, 'participant')
             factory = db.execute('SELECT * FROM work_factories WHERE id=? AND system_id=?', (factory_id, row['system_id'])).fetchone() if factory_id else None
             if factory_id and not factory: _fail('factory_not_found', '등록된 공장을 선택해 주세요.')
-            if not concurrent_runs_allowed(definition) and factory_id and db.execute("SELECT 1 FROM work_runs WHERE workflow_id=? AND factory_id=? AND status NOT IN ('completed','cancelled') LIMIT 1", (row['id'], factory_id)).fetchone():
-                _fail('factory_run_active', '이 공장에서 같은 업무가 진행 중입니다. 기존 진행 건을 확인해 주세요.')
-            sharing = body.get('sharing', {'group_ids': []})
-            if not isinstance(sharing, dict) or set(sharing) != {'group_ids'} or not isinstance(sharing['group_ids'], list) or any(group not in {item['id'] for item in native_groups} for group in sharing['group_ids']): _fail('invalid_sharing', '현재 Native 참여 그룹을 선택해 주세요.')
-            if sharing['group_ids'] and not capabilities['is_admin'] and not set(sharing['group_ids']) <= groups: _fail('sharing_forbidden', '참여 중인 그룹만 연결할 수 있습니다.')
+            if not concurrent_runs_allowed(definition) and db.execute("SELECT 1 FROM work_runs WHERE workflow_id=? AND system_id=? AND factory_id=? AND status NOT IN ('completed','cancelled') LIMIT 1", (row['id'], row['system_id'], factory_id)).fetchone():
+                _fail('factory_run_active' if factory_id else 'system_run_active', ('이 공장' if factory_id else '이 시스템') + '에서 같은 업무가 진행 중입니다. 기존 진행 건을 확인해 주세요.')
+            # Earlier clients may still send sharing. New runs use scope access
+            # only, so do not validate, adopt, or persist that obsolete input.
+            sharing = {'group_ids': []}
             inputs = body.get('inputs', {}); fields = {field['id']: field for node in definition['nodes'].values() for field in node.get('inputs', []) if field.get('scope', 'run') == 'run'}
             if not isinstance(inputs, dict): _fail('invalid_inputs', '이번 입력 형식을 확인해 주세요.')
             errors = input_errors(list(fields.values()), inputs, False)

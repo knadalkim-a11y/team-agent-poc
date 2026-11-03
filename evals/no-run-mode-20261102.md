@@ -80,3 +80,10 @@
   - 게시 허용·실행 거부·EES 요청 차단·순서(재시도보다 먼저)를 회귀 시험으로 막았다.
   - 시험 출력 잘림으로 실패를 놓친 일은 이 기록에 남겼다. 지침에 일반 규칙으로 올리지 않은 것은 기존 ‘필요한 증거 확보’ 원칙으로 충분하다고 판단했기 때문이다.
   - frontend 고정 해시 누락은 기존 가이드 규칙과 frontend 시험(오류 11개)이 이미 막는 유형이다. 이번에 빠진 것은 시험 선택이다. 패치를 바꾸면 platform의 frontend 시험을 함께 돌린다는 점을 이 기록에 남기고, 새 지침은 만들지 않았다.
+
+
+### 2026-11-03 · 최종 CI440와 #115 병합
+
+- CI439의 30개 job 언급은 첫 조회 범위였다. 전체 40개 최종 집계는 36성공·2실패·1취소·PR 출하1정상생략이다. 실제 시험 실패 native-compose와 이를 반영한 Delivery checks 실패/취소를 구분한다.
+- 보완 head `0b1338840276248cc59d60e62878eebef8d7c0bc`의 [CI440](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41553995759)은 39성공·PR 출하1정상생략. Native 작성·브라우저·전체 제품, Windows 및 양쪽 Delivery checks가 모두 통과했다.
+- 사용자 “병합하고 진행해” 요청에 따라 [#115](https://github.com/knadalkim-a11y/team-agent-poc/pull/115)를 main `253cb3c6a16880aeb8be7113ecb7006a6f15585c`에 병합했다. 병합 뒤 Figma B067을 정리했다(C134에 기록). 사내 적용은 하지 않았다.

@@ -331,7 +331,7 @@ function workChecklistHTML(items,saved={},human=false){
 function workRunStartFieldsHTML(data,selection,definition){
   const {esc}=workUI,workflow=data.workflow || {},draft=selection.start_inputs?.[workflow.id] || {};
   const fields=[...new Map(Object.values(definition.nodes || {}).flatMap(node=>node.inputs || []).filter(field=>(field.scope || 'run')==='run').map(field=>[field.id,field])).values()];
-  return `<form id="ees-work-start"><p class="ew-muted">적용 대상 · ${esc(workOperationTarget(data,selection))}</p>${fields.map(field=>workInputHTML(field,draft[field.id],{prefix:'start',people:data.people || []})).join('')}${(data.native_groups || []).length?`<details><summary>함께 처리할 Native 그룹</summary><p class="ew-muted">선택하지 않으면 개인 진행 건입니다. 개인 대화는 공유하지 않습니다.</p>${data.native_groups.map(group=>`<label><input type="checkbox" data-start-group value="${esc(group.id)}"${selection.start_groups?.[workflow.id]?.includes(group.id)?' checked':''}>${esc(group.name || group.id)}</label>`).join('')}</details>`:''}</form>`;
+  return `<form id="ees-work-start"><p class="ew-muted">적용 대상 · ${esc(workOperationTarget(data,selection))}</p><p class="ew-muted">이 공장·시스템에 접근할 수 있는 사람과 진행 상태를 함께 봅니다. 개인 대화는 공유하지 않습니다.</p>${fields.map(field=>workInputHTML(field,draft[field.id],{prefix:'start',people:data.people || []})).join('')}</form>`;
 }
 
 function workValuesEqual(left,right){
@@ -566,6 +566,19 @@ function workPublishedDefinition(data={}){
   return workflow.versions?.find(item=>item.version===workflow.published_version)?.definition || {};
 }
 function workOperationDefinition(data={}){return data?.run?.definition || workPublishedDefinition(data);}
+function workParallelRuns(workflow={}){
+  const published=workPublishedDefinition({workflow}),definition=Object.keys(published).length?published:workflow;
+  return ['periodic','emergency'].includes(definition.mode || definition.execution_mode)||definition.category==='incident';
+}
+function workUnitActiveRuns(data={},selection={},workflow=data.workflow || {}){
+  const definition=workPublishedDefinition({workflow}),factory=definition.execution_scope==='system'?'':selection.factory_id || '',system=workflow.system_id || selection.system_id;
+  const rows=new Map([...(data.workflow_active_runs || []),...(data.runs || [])].map(run=>[run.id,run]));
+  return [...rows.values()].filter(run=>run.workflow_id===workflow.id&&!workUI.finished(run)&&(run.factory_id || '')===factory&&(!system||!run.system_id||run.system_id===system));
+}
+function workActiveRunsHTML(data,selection){
+  const {esc,button}=workUI;
+  return `<h2>진행 중인 건 선택</h2><p class="ew-muted">적용 대상 · ${esc(workOperationTarget(data,selection))}</p><p>이어서 처리할 진행 건을 선택해 주세요.</p><div class="ew-active-runs">${workRunRecordsHTML(workUnitActiveRuns(data,selection))}</div>${workParallelRuns(data.workflow)?button('새 진행 건 시작','start_run','data-mutation'):''}`;
+}
 function workOperationTarget(data={},selection={}){
   const definition=workOperationDefinition(data),factoryId=data.run?.factory_id ?? selection.factory_id,factory=(data.factories || []).find(item=>item.id===factoryId);
   const system=data.run?.system_id || data.workflow?.system_id || selection.system_id || '';
@@ -573,7 +586,7 @@ function workOperationTarget(data={},selection={}){
 }
 function workStageNoteKey(data,node){const saved=data.run?.jobs?.[node.id] || {};return [data.capabilities?.actor_id,data.run?.id,node.id,saved.attempt_id || saved.current_attempt || '',saved.result_revision || 0].join('/');}
 function workStageTarget(data,selection={}){
-  if(!data||selection.mode==='author'||selection.job_id||['historical_reference','workspace_admin','my_work','records','start','run_details'].includes(selection.tab))return null;
+  if(!data||selection.mode==='author'||selection.job_id||['historical_reference','workspace_admin','my_work','records','active_runs','start','run_details'].includes(selection.tab))return null;
   const stages=Object.values(workOperationDefinition(data).nodes || {}).filter(node=>node.type==='t');
   return stages.find(node=>node.id===selection.stage_id) || (data.run&&!selection.stage_overview&&!workUI.finished(data.run)&&stages.length===1?stages[0]:null);
 }
@@ -788,6 +801,7 @@ function createWorkView({callbacks}){
     else if(s.tab==='historical_reference')body=workHistoricalReferenceHTML(data.run,s.historical_reference,data.workflow,data.settings?.values);
     else if(s.tab==='workspace_admin')body=workAdminHTML(data);
     else if(s.tab==='my_work')body=workMyWorkHTML(data.my_work || [],data.operations);
+    else if(s.tab==='active_runs')body=workActiveRunsHTML(data,s);
     else if(s.tab==='records')body=workRunRecordsHTML(data.runs || [],s.records_workflow || '',data.workflow?.name)+(s.records_workflow?'':workLegacyHTML(data.legacy));
     else if(!s.workflow_id)body='<div class="ew-empty"><h3>업무 절차를 선택해 주세요</h3><p>왼쪽에서 업무를 찾거나 워크스페이스에서 새 절차를 작성할 수 있습니다.</p></div>';
     else if(stageScreen)body=stageScreen.body;

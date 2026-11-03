@@ -581,7 +581,7 @@ test('request proposal cannot apply a field hidden by a later schema refresh',()
 });
 test('execution preparation keeps declared inputs and groups while using only the left selected target',()=>{
  const data={workflow:{id:'w',name:'Setup',published_version:2},factories:[{id:'b',name:'Beta',system_id:'EMS'}],native_groups:[{id:'g',name:'운영 담당'}]},selection={system_id:'EMS',factory_id:'b',start_inputs:{w:{note:'보존할 <값>'}},start_groups:{w:['g']}},definition={execution_scope:'factory',nodes:{p:{inputs:[{id:'note',name:'입력 근거',type:'text',scope:'run',required:true}]}}};
- const out=html('workRunStartFieldsHTML(data,selection,definition)',{data,selection,definition});assert.match(out,/적용 대상 · Beta · EMS/);assert.match(out,/id="ees-work-start"/);assert.match(out,/보존할 &lt;값&gt;/);assert.match(out,/data-start-group value="g" checked/);assert.match(out,/required/);assert.doesNotMatch(out,/새로 시작|진행 중|ees-start-factory|ew-adhoc-start|data-action="start_run"/);
+ const out=html('workRunStartFieldsHTML(data,selection,definition)',{data,selection,definition});assert.match(out,/적용 대상 · Beta · EMS/);assert.match(out,/id="ees-work-start"/);assert.match(out,/보존할 &lt;값&gt;/);assert.doesNotMatch(out,/data-start-group|함께 처리할 Native 그룹|개인 진행 건/);assert.match(out,/진행 상태를 함께 봅니다/);assert.match(out,/required/);assert.doesNotMatch(out,/새로 시작|진행 중|ees-start-factory|ew-adhoc-start|data-action="start_run"/);
 });
 test('item verdict options stay pending and AI suggestions cannot enable final confirmation',()=>{
  const job={result_block:'item_verdict',judgments:[{id:'approved',label:'승인',status:'completed'},{id:'unknown',label:'판단 불가',status:'unknown'}]},saved={result:{items:[{id:'one',ai_suggestion:'completed'},{id:'two'}]}};
@@ -1018,7 +1018,7 @@ test('all explicit start dialogs return to their selected stage without automati
   h.api.setSelection({system_id:'EMS',factory_id:'factory',stage_id:'t2'});
   h.setReply(call=>{if(call.body?.action==='start_run'){h.state.run={id:'new-run',workflow_id:'w',factory_id:'factory',definition,status:'open',jobs:{},attempts:[],revision:1};return {ok:true,run:h.state.run};}return call.url.includes('workspace?')?h.state:{ok:true};});
   const action=h.api.handleClick({dataset:{action:'stage_start',nodeId:'t2'}});dialog.fields[0].value='확정 직전 입력';dialog.confirm();await action;
-  const starts=h.calls.filter(call=>call.body?.action==='start_run');assert.equal(starts.length,1);assert.equal(starts[0].body.factory_id,'factory');assert.equal(starts[0].body.version,3);assert.deepEqual(starts[0].body.sharing.group_ids,['ops-group']);assert.deepEqual(starts[0].body.inputs,{note:'확정 직전 입력'},'2026-11-02: every start uses the start-input form');
+  const starts=h.calls.filter(call=>call.body?.action==='start_run');assert.equal(starts.length,1);assert.equal(starts[0].body.factory_id,'factory');assert.equal(starts[0].body.version,3);assert.equal(Object.hasOwn(starts[0].body,'sharing'),false);assert.deepEqual(starts[0].body.inputs,{note:'확정 직전 입력'},'2026-11-02: every start uses the start-input form');
   assert.equal(h.api.snapshot().selection.run_id,'new-run',mode);assert.equal(h.api.snapshot().selection.stage_id,'t2',mode);assert.equal(h.api.snapshot().selection.start_stage_id,'',mode);assert.equal(h.calls.filter(call=>['execute_scope','execute_job'].includes(call.body?.action)).length,0);
  }
 });
@@ -1030,8 +1030,37 @@ test('unpublished and changed-account preparation never creates a run',async()=>
 test('missing left factory and an active run show a notice without a second picker or start action',async()=>{
  for(const duplicate of [false,true]){
   const h=stagePreviewFixture(),dialog=stageStartDialog(h);h.state.workflow.published.execution_scope='factory';h.state.workflow.published.mode='on_demand';h.api.setSelection({stage_id:'t',factory_id:duplicate?'factory':''});if(duplicate)h.state.workflow_active_runs=[{id:'kept',workflow_id:h.state.workflow.id,factory_id:'factory',status:'open'}];
-  const action=h.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});assert.equal(dialog.options[0].readOnlyDetail,true);assert.doesNotMatch(dialog.options[0].html,/ees-work-start|ees-start-factory/);dialog.pending.resolve(false);await action;assert.equal(h.calls.filter(call=>call.body?.action==='start_run').length,0);
+  const action=h.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});if(duplicate){await action;assert.equal(dialog.options.length,0);assert.equal(h.api.snapshot().selection.run_id,'kept');}else{assert.equal(dialog.options[0].readOnlyDetail,true);assert.doesNotMatch(dialog.options[0].html,/ees-work-start|ees-start-factory/);dialog.pending.resolve(false);await action;}assert.equal(h.calls.filter(call=>call.body?.action==='start_run').length,0);
  }
+});
+test('workflow entry resumes the selected unit for every category and uses published scope',async()=>{
+ for(const scope of ['factory','system'])for(const category of ['ops','incident']){
+  const h=stagePreviewFixture(),workflow=h.state.workflow;workflow.published.execution_scope=scope;workflow.published.category=category;
+  workflow.execution_scope=scope==='factory'?'system':'factory';workflow.draft.execution_scope=workflow.execution_scope;
+  h.state.workflows=[workflow];h.state.runs=[{id:'other-factory',workflow_id:'w',factory_id:'f2',status:'open'},{id:'closed',workflow_id:'w',factory_id:scope==='system'?'':'f1',status:'completed'},{id:'shared',workflow_id:'w',system_id:'EMS',factory_id:scope==='system'?'':'f1',owner:'another-user',status:'open'},{id:'other-workflow',workflow_id:'else',factory_id:'f1',status:'open'}];
+  h.api.setSelection({mode:'work',system_id:'EMS',factory_id:'f1',stage_id:'old-stage',job_id:'old-job'});
+  await h.api.handleClick({dataset:{action:'workflow',workflowId:'w'}});
+  const selection=h.api.snapshot().selection;assert.equal(selection.run_id,'shared',scope+'/'+category);assert.equal(selection.stage_id,'');assert.equal(selection.job_id,'');assert.equal(selection.tab,'overview');
+  assert.equal(h.calls.filter(call=>call.body&&call.body.action!=='save_ui').length,0);
+ }
+});
+test('legacy duplicate runs open a chooser and ordinary work cannot start another unit run',async()=>{
+ for(const scope of ['factory','system']){
+  const h=stagePreviewFixture(),workflow=h.state.workflow,dialog=stageStartDialog(h);workflow.published.execution_scope=scope;workflow.published.category='ops';delete workflow.published.mode;workflow.mode='emergency';workflow.category='incident';
+  h.state.workflows=[workflow];h.state.runs=['first','second'].map(id=>({id,workflow_id:'w',system_id:'EMS',factory_id:scope==='system'?'':'f1',status:'open',progress:{completed:2,total:3}}));
+  h.state.workflow_active_runs=[...h.state.runs,{id:'elsewhere',workflow_id:'w',system_id:'EMS',factory_id:'f2',status:'open'}];h.api.setSelection({mode:'work',system_id:'EMS',factory_id:'f1'});
+  await h.api.handleClick({dataset:{action:'workflow',workflowId:'w'}});const selection=h.api.snapshot().selection;assert.equal(selection.tab,'active_runs');assert.equal(selection.run_id,'');
+  const out=html('workActiveRunsHTML(state,selection)',{state:h.state,selection});assert.match(out,/data-run-id="first"/);assert.match(out,/data-run-id="second"/);assert.doesNotMatch(out,/elsewhere|data-action="start_run"/);assert.match(out,/완료 2\/3/);
+  await h.api.handleClick({dataset:{action:'start_run'}});assert.equal(dialog.options.length,0);assert.equal(h.api.snapshot().selection.tab,'active_runs');assert.equal(h.calls.filter(call=>call.body?.action==='start_run').length,0);
+  for(const mode of [null,'periodic','emergency']){workflow.published.category=mode?'ops':'incident';workflow.published.mode=mode;assert.match(html('workActiveRunsHTML(state,selection)',{state:h.state,selection}),/data-action="start_run"/);}
+ }
+});
+test('a system common start ignores the left factory and never sends remembered sharing',async()=>{
+ const h=stagePreviewFixture(),dialog=stageStartDialog(h);h.state.workflow.published.execution_scope='system';h.state.runs=[{id:'elsewhere',workflow_id:'w',factory_id:'f1',status:'open'}];
+ h.api.setSelection({system_id:'EMS',factory_id:'f1',start_groups:{w:['old-group']}});
+ h.setReply(call=>call.body?.action==='start_run'?{ok:true,run_id:'system-run'}:call.url.includes('workspace?')?h.state:{ok:true});
+ const action=h.api.handleClick({dataset:{action:'start_run'}});dialog.confirm();await action;
+ const start=h.calls.find(call=>call.body?.action==='start_run');assert.equal(start.body.factory_id,'');assert.equal(Object.hasOwn(start.body,'sharing'),false);assert.equal(h.api.snapshot().selection.start_groups,undefined);
 });
 function typeStageNote(h,value,readonly=false){const target={dataset:{jobId:'h'},value,readOnly:readonly,closest:selector=>selector==='[data-ees-work]'?{}:null,matches:selector=>selector==='[data-stage-note]'};h.api.handleEvent({type:'input',target});}
 test('stage reason is an unsaved local draft and persists only with its explicit judgment',async()=>{

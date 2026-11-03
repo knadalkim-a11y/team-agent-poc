@@ -598,15 +598,23 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(run['jobs']['j']['decisions']), 2)
 
     async def test_private_runs_chat_links_and_ui_state_are_isolated(self):
+        # The historical test ID stays: runs are shared, chats/UI are private.
         key, _, _ = await self.create()
         run = await self.start(key)
-        self.assertEqual((await self.state('b'))['runs'], [])
-        denied = await self.service.workspace_state(self.users['b'], run_id=run['id'])
-        self.assertEqual(denied['error']['code'], 'run_not_found')
+        self.assertEqual([item['id'] for item in (await self.state('b'))['runs']], [run['id']])
+        self.assertEqual((await self.state('b', run_id=run['id']))['run']['id'], run['id'])
+        denied = await self.service.workspace_state(self.users['c'], run_id=run['id'])
+        self.assertEqual(denied['error']['code'], 'scope_forbidden')
         bad_chat = await self.command('link_chat', actor='a', run_id=run['id'], chat_id='chat-b', expected_revision=1)
         self.assertEqual(bad_chat['error']['code'], 'chat_forbidden')
         good = await self.command('link_chat', actor='a', run_id=run['id'], chat_id='chat-a', expected_revision=1)
         self.assertTrue(good['ok'], good)
+        good = await self.command('link_chat', actor='b', run_id=run['id'], chat_id='chat-b', expected_revision=1)
+        self.assertTrue(good['ok'], good)
+        for actor, other in (('a', 'b'), ('b', 'a')):
+            visible = await self.state(actor, run_id=run['id'], workflow_id=key)
+            self.assertIn('chat-' + actor, json.dumps(visible))
+            self.assertNotIn('chat-' + other, json.dumps(visible))
         self.assertTrue((await self.command('save_ui', actor='a', state={'selection': {'run_id': run['id']}, 'scroll': 23}))['ok'])
         self.assertEqual((await self.state('b'))['ui_state']['state'], {})
 
@@ -715,6 +723,10 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         conflict = await self.command('claim_task', actor='b', run_id=run['id'], job_id='j', expected_revision=claimed['revision'])
         self.assertEqual(conflict['error']['code'], 'task_claimed')
         self.memberships['b'] = []
+        self.assertEqual([item['id'] for item in (await self.state('b'))['runs']], [run['id']])
+        # Losing Native membership alone does not revoke an explicit user grant.
+        with self.service._db(write=True) as db:
+            db.execute("UPDATE work_access SET active=0 WHERE principal_kind='user' AND principal_id='b'")
         self.assertEqual((await self.state('b'))['runs'], [])
 
     async def test_factory_unknown_is_blocked_not_excluded_and_conditions_safe(self):
@@ -1333,8 +1345,13 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         result = await self.service.workspace_export(self.users['a'], run['id'])
         self.assertTrue(result['ok']); self.assertNotIn('chat_links', result['run'])
         self.assertNotIn('private editor draft', json.dumps(result))
-        forbidden = await self.service.workspace_export(self.users['b'], run['id'])
-        self.assertEqual(forbidden['error']['code'], 'run_not_found')
+        shared = await self.service.workspace_export(self.users['b'], run['id'])
+        self.assertTrue(shared['ok'], shared)
+        self.assertNotIn('chat_links', shared['run'])
+        self.assertNotIn('chat-a', json.dumps(shared))
+        self.assertNotIn('private editor draft', json.dumps(shared))
+        forbidden = await self.service.workspace_export(self.users['c'], run['id'])
+        self.assertEqual(forbidden['error']['code'], 'scope_forbidden')
 
     async def test_explicit_claimant_release_preserves_evidence_and_allows_group_reclaim(self):
         key, _, _ = await self.create(); run = await self.start(key, sharing={'group_ids': ['g']})
@@ -1418,6 +1435,95 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
                 self.assertTrue(items)
                 self.assertEqual({item['bucket'] for item in items}, {bucket})
 
+    async def test_shared_factory_run_resumes_another_users_progress_with_viewer_readonly(self):
+        await self.command('save_factory', factory_id='f1', system_id='EMS', name='공장 A')
+        key, definition, revision = await self.create()
+        root = definition['nodes']['t']['parent']
+        definition['execution_scope'] = 'factory'
+        for number in (2, 3):
+            stage, job = f't{number}', f'j{number}'
+            definition['nodes'][root]['children'].append(stage)
+            definition['nodes'][stage] = {'id': stage, 'name': stage, 'type': 't', 'parent': root, 'children': [job], 'deps': ['t' if number == 2 else 't2']}
+            definition['nodes'][job] = {'id': job, 'name': job, 'type': 'j', 'parent': stage, 'children': [], 'mode': 'human', 'inputs': []}
+        await self.command('save_draft', workflow_id=key, definition=definition, expected_revision=revision)
+        await self.command('validate_workflow', workflow_id=key, expected_revision=revision+1)
+        published = await self.command('publish_workflow', workflow_id=key, expected_revision=revision+1)
+        run = await self.start(key, revision=published['revision'], factory_id='f1', sharing={'obsolete': 'ignored'})
+        self.assertEqual(run['sharing'], {'group_ids': []})
+        for job in ('j', 'j2'):
+            done = await self.command('human_confirm', actor='a', run_id=run['id'], job_id=job, expected_revision=run['revision'])
+            self.assertTrue(done['ok'], done); run = done['run']
+        await self.command('save_access', principal_kind='user', principal_id='c', system_id='EMS', factory_id='f1', roles=['viewer'])
+        visible = (await self.state('c', run_id=run['id']))['run']
+        self.assertEqual(visible['progress']['completed'], 2)
+        self.assertFalse(visible['can_write']); self.assertFalse(visible['jobs']['j3']['can_execute'])
+        self.assertEqual((await self.state('c'))['my_work'], [])
+        for action, values in (('human_confirm', {'job_id': 'j3'}), ('claim_task', {'job_id': 'j3'}), ('close_run', {}), ('cancel_run', {'reason': 'not allowed'})):
+            denied = await self.command(action, actor='c', run_id=run['id'], expected_revision=run['revision'], **values)
+            self.assertEqual(denied['error']['code'], 'scope_forbidden', action)
+        visible = await self.state('b', run_id=run['id'], workflow_id=key, factory_id='f1')
+        self.assertEqual(visible['run']['progress']['completed'], 2)
+        self.assertEqual([item['id'] for item in visible['workflow_active_runs']], [run['id']])
+        self.assertEqual([item['job_id'] for item in visible['my_work']], ['j3'])
+        done = await self.command('human_confirm', actor='b', run_id=run['id'], job_id='j3', expected_revision=run['revision'])
+        self.assertTrue(done['ok'], done)
+        closed = await self.command('close_run', actor='b', run_id=run['id'], expected_revision=done['revision'])
+        self.assertTrue(closed['ok'], closed)
+
+    async def test_system_start_is_atomic_legacy_duplicates_stay_and_sharing_is_ignored(self):
+        key, _, revision = await self.create()
+        outcomes = await asyncio.gather(*(self.command('start_run', actor=actor, workflow_id=key, expected_revision=revision, sharing='old client value') for actor in ('a', 'b')))
+        self.assertEqual(sum(item['ok'] for item in outcomes), 1)
+        self.assertEqual(next(item for item in outcomes if not item['ok'])['error']['code'], 'system_run_active')
+        run = next(item['run'] for item in outcomes if item['ok'])
+        # Pre-policy rows are visible without a migration; owner/sharing remain intact.
+        with self.service._db(write=True) as db:
+            db.execute('UPDATE work_runs SET sharing=? WHERE id=?', (json.dumps({'group_ids': ['departed-group']}), run['id']))
+            old = dict(db.execute('SELECT * FROM work_runs WHERE id=?', (run['id'],)).fetchone())
+            old['id'] = 'legacy-duplicate'; old['owner'] = 'departed-user'
+            db.execute('INSERT INTO work_runs (' + ','.join(old) + ') VALUES (' + ','.join('?' for _ in old) + ')', tuple(old.values()))
+        self.service = self.new_service(); self.memberships['b'] = []
+        visible = await self.state('b', workflow_id=key)
+        self.assertEqual({item['id'] for item in visible['workflow_active_runs']}, {run['id'], 'legacy-duplicate'})
+        self.assertEqual({item['id'] for item in visible['runs']}, {run['id'], 'legacy-duplicate'})
+        self.assertTrue(all(item['sharing'] == {'group_ids': ['departed-group']} for item in visible['runs']))
+        denied = await self.command('start_run', actor='b', workflow_id=key, expected_revision=revision)
+        self.assertEqual(denied['error']['code'], 'system_run_active')
+        denied = await self.command('cancel_run', actor='b', run_id=run['id'], expected_revision=1)
+        self.assertEqual(denied['error']['code'], 'reason_required')
+        cancelled = await self.command('cancel_run', actor='b', run_id=run['id'], expected_revision=1, reason='공동 업무 종료')
+        self.assertTrue(cancelled['ok'], cancelled)
+
+    async def test_system_incidents_and_legacy_periodic_emergency_keep_parallel_runs(self):
+        for mode, category in ((None, 'incident'), ('periodic', 'ops'), ('emergency', 'ops')):
+            with self.subTest(mode=mode, category=category):
+                key, definition, revision = await self.create()
+                definition.update(execution_scope='system', category=category)
+                if mode: definition['mode'] = mode
+                await self.command('save_draft', workflow_id=key, definition=definition, expected_revision=revision)
+                await self.command('validate_workflow', workflow_id=key, expected_revision=revision+1)
+                published = await self.command('publish_workflow', workflow_id=key, expected_revision=revision+1)
+                first = await self.start(key, revision=published['revision'], actor='a')
+                second = await self.start(key, revision=published['revision'], actor='b')
+                self.assertNotEqual(first['id'], second['id'])
+                self.assertEqual(len((await self.state('b', workflow_id=key))['workflow_active_runs']), 2)
+
+    async def test_other_participant_close_cancel_keep_running_and_external_request_guards(self):
+        key, _, _ = await self.create(); run = await self.start(key)
+        denied = await self.command('close_run', actor='b', run_id=run['id'], expected_revision=1)
+        self.assertEqual(denied['error']['code'], 'completion_required')
+        with self.service._db(write=True) as db:
+            db.execute("UPDATE work_jobs SET status='running' WHERE run_id=?", (run['id'],))
+        for action in ('close_run', 'cancel_run'):
+            denied = await self.command(action, actor='b', run_id=run['id'], expected_revision=1, reason='합성 종료')
+            self.assertEqual(denied['error']['code'], 'execution_running')
+        with self.service._db(write=True) as db:
+            db.execute("UPDATE work_jobs SET status='pending' WHERE run_id=?", (run['id'],))
+            db.execute('INSERT INTO work_external_requests VALUES(?,?,?,?,?,?,?)', ('pending-effect', run['id'], 'j', 'a', 1, 'unknown', '{}'))
+        for action in ('close_run', 'cancel_run'):
+            denied = await self.command(action, actor='b', run_id=run['id'], expected_revision=1, reason='합성 종료')
+            self.assertEqual(denied['error']['code'], 'external_request_unresolved')
+
     async def test_system_scope_is_visible_across_factory_selection_without_broadening_acl(self):
         await self.command('save_factory', factory_id='f1', system_id='EMS', name='f1')
         key, definition, revision = await self.create()
@@ -1427,6 +1533,8 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         published = await self.command('publish_workflow', workflow_id=key, expected_revision=revision+1)
         run = await self.start(key, revision=published['revision'], factory_id='f1', sharing={'group_ids': ['g']})
         self.assertEqual(run['factory_id'], '')
+        duplicate = await self.command('start_run', actor='b', workflow_id=key, factory_id='f1', expected_revision=published['revision'])
+        self.assertEqual(duplicate['error']['code'], 'system_run_active')
         visible = await self.state(workflow_id=key, run_id=run['id'], factory_id='f1')
         self.assertEqual(visible['run']['id'], run['id']); self.assertIn(run['id'], [item['id'] for item in visible['runs']])
         await self.command('save_access', principal_kind='user', principal_id='c', system_id='EMS', factory_id='f1', roles=['participant'])

@@ -375,8 +375,8 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
                 self.wait("document.querySelector('#ees-work-dialog[open] #ees-work-start')")
                 value = '확정한 조회 조건 · ' + ('움직임 줄이기' if reduced else '기본 움직임')
                 self.fill('#ees-work-dialog [data-work-input][name=query]', value)
-                self.click('#ees-work-dialog #ees-work-start details summary')
-                self.click('#ees-work-dialog [data-start-group][value=synthetic-review-team]')
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog [data-start-group]')"))
+                self.assertIn('진행 상태를 함께 봅니다', self.text('#ees-work-dialog'))
                 self.screenshot('operations-start-dialog-' + ('reduced' if reduced else 'normal'))
                 self.click('#ees-work-dialog [data-dialog-confirm]')
                 self.wait("!document.querySelector('#ees-work-dialog[open]') && window.__eesNativeWorkV1.captureReference()?.run_id")
@@ -384,11 +384,11 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
                 commands = [body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui']
                 self.assertEqual([body['action'] for body in commands], ['start_run'], commands)
                 self.assertEqual(commands[0]['inputs'], {'query': value})
-                self.assertEqual(commands[0]['sharing'], {'group_ids': ['synthetic-review-team']})
+                self.assertNotIn('sharing', commands[0])
                 run_id = self.browser.evaluate('window.__eesNativeWorkV1.captureReference().run_id')
                 run = self.state(run_id=run_id)['run']
                 self.assertEqual(run['inputs'], {'query': value})
-                self.assertEqual(run['sharing'], {'group_ids': ['synthetic-review-team']})
+                self.assertEqual(run['sharing'], {'group_ids': []})
                 self.assertEqual(run['attempts'], [])
                 self.assertNotIn('새로 시작', self.text('#ees-work-panel'))
                 self.screenshot('operations-started-stage-' + ('reduced' if reduced else 'normal'))
@@ -398,6 +398,50 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             self.assertEqual(db.execute('SELECT COUNT(*) FROM work_decisions').fetchone()[0], 0)
         self.assertEqual(self.bridge.calls, [])
         self.assertEqual(self.server.completions, [])
+
+    def test_workflow_entry_opens_another_users_two_completed_stages(self):
+        self.command('save_factory', factory_id='shared-factory', system_id='EMS', name='공장 A')
+        self.command('save_access', principal_kind='user', principal_id='other-user', system_id='EMS', factory_id='shared-factory', roles=['participant'])
+        key = self.author(name='배포', jobs=3)
+        workflow = self.state(workflow_id=key)['workflow']; definition = deepcopy(workflow['draft'])
+        definition['execution_scope'] = 'factory'; root = definition['nodes']['stage']['parent']
+        definition['nodes'][root]['children'] = ['stage', 'deploy', 'followup']
+        for stage, name, job, deps in (('stage', '준비', 'job-0', []), ('deploy', '배포', 'job-1', ['stage']), ('followup', '후속 점검', 'job-2', ['deploy'])):
+            definition['nodes'][stage] = dict(id=stage, name=name, type='t', parent=root, children=[job], deps=deps)
+            definition['nodes'][job]['parent'] = stage
+            definition['nodes'][job]['judgments'] = [{'id': 'done', 'label': '완료', 'status': 'completed'}]
+        revision = workflow['revision']
+        self.command('save_draft', workflow_id=key, definition=definition, expected_revision=revision)
+        self.command('validate_workflow', workflow_id=key, expected_revision=revision+1)
+        published = self.command('publish_workflow', workflow_id=key, expected_revision=revision+1)
+        run = self.command('start_run', user=self.users['other-user'], workflow_id=key, factory_id='shared-factory', expected_revision=published['revision'])['run']
+        for job in ('job-0', 'job-1'):
+            run = self.command('human_confirm', user=self.users['other-user'], run_id=run['id'], job_id=job, expected_revision=run['revision'])['run']
+        self.assertEqual(run['progress']['completed'], 2)
+        writes = len(self.server.workspace_commands)
+        self.refresh(); self.open_sidebar()
+        self.click('#ees-work-site-trigger')
+        self.click('[data-action=choose_factory][data-factory-id=shared-factory]')
+        self.wait("document.querySelector('#ees-work-site-trigger')?.textContent.includes('공장 A')")
+        control = '[data-action=workflow][data-workflow-id="' + key + '"]'
+        self.wait('document.querySelector(' + json.dumps(control) + ')')
+        self.click(control)
+        self.wait("document.querySelector('.ew-operation-overview')?.textContent.includes('후속 점검')")
+        self.assertEqual(self.browser.evaluate('window.__eesNativeWorkV1.captureReference().run_id'), run['id'])
+        self.assertIn('공장 A · EMS', self.text('.ew-operation-overview'))
+        for stage in ('stage', 'deploy'):
+            self.assertIn('완료 1', self.text('[data-action=stage_open][data-node-id=' + stage + ']'))
+        self.assert_only_selection_remembered(writes)
+        self.screenshot('operations34-shared-two-stages-complete')
+        self.click('[data-action=stage_open][data-node-id=followup]')
+        self.wait("document.querySelector('#ees-work-panel.ew-vd h2')?.textContent==='후속 점검'")
+        self.click('[data-action=stage_details]')
+        self.wait("document.querySelector('[data-action=job][data-job-id=job-2]')")
+        self.click('[data-action=job][data-job-id=job-2]')
+        self.wait("document.querySelector('[data-action=confirm]:not(:disabled)')")
+        self.click('[data-action=confirm]'); self.click('[data-dialog-confirm]')
+        self.wait("document.querySelector('#ees-work-panel .ew-work-heading .ew-status')?.dataset.status === 'completed'")
+        self.assertEqual(self.state(run_id=run['id'])['run']['progress']['completed'], 3)
 
     def test_operations_existing_run_keeps_its_version_after_a_new_publication(self):
         key = self.author(name='첫 게시 운영 절차')

@@ -284,6 +284,7 @@
     commandError='';return result;
   }
   function remember(panelWidth=null){
+    delete selection.start_groups;
     clearTimeout(uiTimer);const at=context(),auth=token(),saved=clone(selection);
     uiTimer=setTimeout(()=>{uiWrites=uiWrites.catch(()=>{}).then(async()=>{
       if(at!==context()||auth!==token()||!available())return;
@@ -292,7 +293,7 @@
         if(failure.code!=='revision_conflict'||panelWidth===null)throw failure;
         if(auth!==token()||at!==context()||!available())return;
         const current=await api('workspace?');if(auth!==token()||at!==context()||!available())return;
-        const stored=current.ui_state?.state || {},revision=current.ui_state?.revision || 0;uiRevision=Math.max(uiRevision,revision);
+        const stored=current.ui_state?.state || {},revision=current.ui_state?.revision || 0;uiRevision=Math.max(uiRevision,revision);delete stored.selection?.start_groups;
         // A concurrent tab's private drafts stay intact. Only the explicit
         // width preference is merged once, never a shared business command.
         result=await api('workspace/command',{action:'save_ui',expected_revision:revision,request_id:workUI.newId(),state:{...stored,selection:{...(stored.selection || {}),panel_width:panelWidth}}});
@@ -541,23 +542,23 @@
     // 2026-11-02: execution modes are no longer authored. Every start uses the same
     // start-input form; earlier periodic/emergency versions and incident work keep
     // parallel runs (same rule as concurrent_runs_allowed()).
-    const parallel=['periodic','emergency'].includes(definition.mode || definition.execution_mode || workflow.mode || workflow.execution_mode)||(definition.category || workflow.category)==='incident';
+    const parallel=workParallelRuns(workflow);
     const factory=definition.execution_scope==='system'?'':selection.factory_id || '';
     if(definition.execution_scope==='factory'&&!factory)return dialog({title:'공장을 선택해 주세요',readOnlyDetail:true,html:'<p>왼쪽 작업 위치에서 공장을 선택한 뒤 다시 실행해 주세요.</p>'});
-    const active=(state.workflow_active_runs || state.runs || []).filter(run=>run.workflow_id===workflow.id&&!workUI.finished(run));
-    if(!parallel&&factory&&active.some(run=>run.factory_id===factory))return dialog({title:'이미 진행 중인 공장입니다',readOnlyDetail:true,html:'<p>실행 기록에서 기존 진행 건을 열어 이어서 처리해 주세요.</p>'});
-    let version=workflow.published_version,groups=[],inputs={};
+    const active=workUnitActiveRuns(state,selection);
+    if(!parallel&&active.length)return select({run_id:active.length===1?active[0].id:'',job_id:'',stage_id:'',stage_overview:false,tab:active.length===1?'overview':'active_runs'});
+    let version=workflow.published_version,inputs={};
     const html=workRunStartFieldsHTML(state,selection,definition);
     const pending=dialog({title:'실행 준비',note:'선택한 게시 버전과 이번 진행 건을 따로 보존합니다.',html,confirmLabel:'진행 건 시작'}),element=$('#ees-work-dialog');
     const read=()=>{
       if(at!==context()||auth!==token()||owner!==actor())return;
-      const form=element.querySelector('#ees-work-start');if(!form)return;inputs=workReadInputs(form);groups=[...form.querySelectorAll('[data-start-group]:checked')].map(field=>field.value);
+      const form=element.querySelector('#ees-work-start');if(!form)return;inputs=workReadInputs(form);
     };
     read();element.addEventListener('input',read);element.addEventListener('change',read);
     // Capture before the dialog removes itself, including reduced-motion closes.
     element.addEventListener('click',event=>{if(event.target.closest?.('[data-dialog-confirm]'))read();},true);
     if(!await pending||at!==context()||auth!==token()||owner!==actor())return;
-    const result=await mutate({action:'start_run',expected_revision:workflow.revision,workflow_id:workflow.id,factory_id:factory,version,inputs,sharing:{group_ids:groups}},{refreshAfter:false});
+    const result=await mutate({action:'start_run',expected_revision:workflow.revision,workflow_id:workflow.id,factory_id:factory,version,inputs},{refreshAfter:false});
     if(!result||at!==context())return;
     const id=result.run?.id || result.run_id || result.id;
     delete selection.start_inputs?.[workflow.id];
@@ -647,11 +648,11 @@
       if(factory&&author)return select({factory_id:id},{preserveAuthorStart:true});
       return select({[factory?'factory_id':'system_id']:id,...(!factory?{factory_id:''}:{}),...(author?{mode:'author'}:{}),workflow_id:'',run_id:'',job_id:'',tab:author?'overview':'my_work'});
     }
-    if(action==='workflow'){const id=target.dataset.workflowId,workflow=(state?.workflows || []).find(item=>item.id===id);if(selection.mode!=='author'&&workflow?.published_version==null)return;const parallel=['periodic','emergency'].includes(workflow?.execution_mode || workflow?.mode)||workflow?.category==='incident';const runs=(state?.runs || []).filter(run=>run.workflow_id===id&&!workUI.finished(run));return select({workflow_id:id,run_id:parallel&&runs.length===1?runs[0].id:'',job_id:'',tab:'overview',panel_open:true});}
+    if(action==='workflow'){const id=target.dataset.workflowId,workflow=(state?.workflows || []).find(item=>item.id===id);if(selection.mode!=='author'&&workflow?.published_version==null)return;const runs=selection.mode==='author'?[]:workUnitActiveRuns(state,selection,workflow);return select({workflow_id:id,run_id:runs.length===1?runs[0].id:'',job_id:'',stage_id:'',stage_overview:false,tab:runs.length>1?'active_runs':'overview',panel_open:true});}
     if(action==='open_task'){
       if(target.dataset.scheduleId){const item=state.operations?.schedules?.find(value=>value.id===target.dataset.scheduleId);if(!item)return;if(await confirmDialog({title:'예약 실행 결과를 확인하셨나요?',html:'<p>실패·놓친 예약을 확인한 사실을 기록합니다. 실행 성공이나 재실행을 뜻하지 않습니다.</p>',confirmLabel:'확인 기록'})){await operationsCommand({action:'schedule_check',schedule_id:item.id,slot_id:target.dataset.taskId,expected_revision:item.revision});await refresh();}return;}
       await select({workflow_id:target.dataset.workflowId,run_id:target.dataset.runId,job_id:target.dataset.jobId,mode:'work',tab:'current',panel_open:true});
-      const job=state?.run?.jobs?.[target.dataset.jobId];if(job&&!job.claim_actor&&state.run.sharing?.group_ids?.length&&await confirmDialog({title:'이 작업을 맡을까요?',html:'<p>목록을 여는 것만으로 담당자가 지정되지는 않습니다.</p>',confirmLabel:'담당하기'}))await mutate({action:'claim_task',run_id:selection.run_id,job_id:selection.job_id});return;
+      const job=state?.run?.jobs?.[target.dataset.jobId];if(job?.can_execute&&!job.claim_actor&&await confirmDialog({title:'이 작업을 맡을까요?',html:'<p>목록을 여는 것만으로 담당자가 지정되지는 않습니다.</p>',confirmLabel:'담당하기'}))await mutate({action:'claim_task',run_id:selection.run_id,job_id:selection.job_id});return;
     }
     if(action==='open_run')return select({workflow_id:target.dataset.workflowId,run_id:target.dataset.runId,job_id:'',stage_id:'',stage_overview:false,mode:'work',tab:'overview',panel_open:true});
     if(action==='job')return select({job_id:target.dataset.jobId,tab:'current'});
@@ -699,7 +700,7 @@
     if(event.type==='click'){const buttonTarget=target.closest('button[data-action]');if(!buttonTarget||buttonTarget.disabled)return;event.preventDefault();if(nativePage()&&buttonTarget.closest('#ees-work-entry')&&!['native_open','refresh'].includes(buttonTarget.dataset.action)){returnFromNative(buttonTarget);return;}Promise.resolve(handleClick(buttonTarget)).catch(failure=>{error=failure.message;render();});}
     if(event.type==='input'){
       if(target.matches?.('[data-stage-note]')){const current=stageJob(target.dataset.jobId);if(current&&state.run&&!target.readOnly&&workStageCanDecide(current.node,current.saved,current.run)&&!current.saved.decisions?.job)stageNotes.set(workStageNoteKey(state,current.node),String(target.value));return;}
-      if(target.closest?.('#ees-work-start')){const form=target.closest('#ees-work-start');selection.start_inputs ||= {};selection.start_inputs[selection.workflow_id]=workReadInputs(form);selection.start_groups ||= {};selection.start_groups[selection.workflow_id]=[...form.querySelectorAll('[data-start-group]:checked')].map(field=>field.value);remember();return;}
+      if(target.closest?.('#ees-work-start')){const form=target.closest('#ees-work-start');selection.start_inputs ||= {};selection.start_inputs[selection.workflow_id]=workReadInputs(form);remember();return;}
       if(target.id==='ees-request-reason'){selection.request_reasons ||= {};selection.request_reasons[selection.run_id+'/'+selection.job_id]=target.value;remember();return;}
       if(target.id==='ees-review-text'){view.capture();scheduleReviewSave();}
     }
