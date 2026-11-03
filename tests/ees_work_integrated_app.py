@@ -1023,9 +1023,11 @@ def figma_delta_flow(g):
     # Opening ordinary work resumes the selected factory's active run. The
     # single-stage product view is ready before checking that it offers no
     # second start; entering work must preserve the reviewed blocked result.
-    resumed=g.wait_work_ready(workflow_id=delivery_id,run_id=delivery_run_id,selector='[data-action="stage_back"]')
+    resumed=g.wait_work_ready(workflow_id=delivery_id,run_id=delivery_run_id,selector='#ees-work-panel .ew-stage-run-button[data-action="execute_scope"]')
     assert resumed['reference']['factory_id']==factory_id,resumed
-    assert not g.browser.evaluate('!!document.querySelector(\'#ees-work-dialog,#ees-work-start,[data-action="stage_start"],[data-action="start_run"]\')')
+    g.wait('!document.querySelector("#ees-work-dialog")')
+    start_controls=g.browser.evaluate('[...document.querySelectorAll(\'#ees-work-panel #ees-work-start,#ees-work-panel [data-action="stage_start"],#ees-work-panel [data-action="start_run"]\')].map(e=>e.outerHTML)')
+    assert start_controls==[],start_controls
     assert g.api('/api/ees-work/workspace?run_id='+delivery_run_id)['run']==blocked
     g.capture('figma-a8-active-factory-duplicate-disabled')
     g.click('[data-action="records"]')
