@@ -417,8 +417,9 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         source = ROOT / 'agent-pack/skills/ees-work-demo/scripts/workflow_procedure_examples.json'
         original = source.read_bytes(); canonical = json.loads(original)
         used_ids, created_ids = set(), set()
-        for example, counts, category, mode, scope in zip(canonical, [(4, 9), (4, 6), (1, 1)],
-                ['ops', 'setup', 'ops'], ['periodic', 'on_demand', 'periodic'], [None, 'factory', None]):
+        # 2026-11-02: examples carry no execution mode or schedule suggestion.
+        for example, counts, category, scope in zip(canonical, [(4, 9), (4, 6), (1, 1)],
+                ['ops', 'setup', 'ops'], [None, 'factory', None]):
             for attempt in range(2):
                 name = example['name'] + ' 합성 초안 ' + str(attempt)
                 result = await self.command('create_workflow', actor='a', system_id='EMS',
@@ -431,7 +432,8 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
                 nodes = definition['nodes']; self.assertTrue(set(nodes).isdisjoint(used_ids)); used_ids.update(nodes)
                 self.assertTrue(set(nodes).isdisjoint(example['definition']['nodes']))
                 self.assertEqual((sum(n['type'] == 't' for n in nodes.values()), sum(n['type'] == 'j' for n in nodes.values())), counts)
-                self.assertEqual((definition['category'], definition['mode'], definition.get('execution_scope')), (category, mode, scope))
+                self.assertEqual((definition['category'], definition.get('execution_scope')), (category, scope))
+                self.assertNotIn('mode', definition)
                 self.assertEqual(definition['system_id'], 'EMS')
                 self.assertEqual(next(n['name'] for n in nodes.values() if n['type'] == 'p'), name)
                 self.assertNotIn('schedule', definition)
@@ -440,11 +442,13 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
                 self.assertTrue(tools)
                 self.assertTrue(all(not node.get('tool_reference') and not node.get('tool_contract_id') for node in nodes.values()))
                 self.assertTrue(all(not node.get('model_id') for node in nodes.values()))
+                # Unconnected tool jobs no longer block publication; the check
+                # warns per job and creating from an example still publishes nothing.
                 checked = await self.command('validate_workflow', actor='a', workflow_id=key, expected_revision=1)
                 self.assertTrue(checked['ok'], checked)
-                self.assertTrue(any('도구 참조' in error for error in checked['validation']['errors']))
-                blocked = await self.command('publish_workflow', actor='a', workflow_id=key, expected_revision=1)
-                self.assertEqual(blocked['error']['code'], 'validation_required')
+                self.assertEqual(checked['validation']['errors'], [])
+                unconnected = [warning for warning in checked['validation']['warnings'] if '도구가 연결되지 않았습니다' in warning]
+                self.assertEqual(sorted(warning.split(':')[0] for warning in unconnected), sorted(node['id'] for node in tools))
         self.assertEqual(snapshot(), before)
         self.assertEqual(source.read_bytes(), original)
         self.assertTrue(created_ids.isdisjoint({item['id'] for item in (await self.state('c'))['workflows']}))
@@ -470,7 +474,8 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         blank = await self.command('create_workflow', actor='a', system_id='EMS', name='이름만 정한 절차')
         self.assertTrue(blank['ok'], blank)
         definition = blank['workflow']['draft']
-        self.assertEqual((definition['category'], definition['mode']), ('ops', 'on_demand'))
+        self.assertEqual(definition['category'], 'ops')
+        self.assertNotIn('mode', definition)
         self.assertNotIn('execution_scope', definition)
         self.assertEqual(len(definition['nodes']), 1)
 
@@ -1386,6 +1391,32 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(cancelled['ok'])
         replacement = await self.start(key, revision=published['revision'], factory_id='f1')
         self.assertNotEqual(replacement['id'], first['id']); self.assertNotEqual(second['id'], replacement['id'])
+
+    async def test_duplicate_factory_start_follows_category_and_saved_modes_not_authoring(self):
+        # 2026-11-02: execution modes are not authored. A new procedure blocks a
+        # second active run for one factory; incident work and versions saved
+        # earlier as periodic/emergency keep parallel starts and incident leads my work.
+        await self.command('save_factory', factory_id='f1', system_id='EMS', name='f1')
+        for mode, category, parallel, bucket in ((None, 'ops', False, 'undated'), (None, 'incident', True, 'incident'),
+                                                 ('periodic', 'ops', True, 'undated'), ('emergency', 'ops', True, 'incident')):
+            with self.subTest(mode=mode, category=category):
+                key, definition, revision = await self.create()
+                self.assertNotIn('mode', definition)
+                definition.update(execution_scope='factory', category=category, **({'mode': mode} if mode else {}))
+                await self.command('save_draft', workflow_id=key, expected_revision=revision, definition=definition)
+                await self.command('validate_workflow', workflow_id=key, expected_revision=revision+1)
+                published = await self.command('publish_workflow', workflow_id=key, expected_revision=revision+1)
+                first = await self.command('start_run', actor='a', workflow_id=key, factory_id='f1', expected_revision=published['revision'])
+                self.assertTrue(first['ok'], first)
+                self.assertEqual(first['run']['mode'], mode or 'on_demand')
+                second = await self.command('start_run', actor='a', workflow_id=key, factory_id='f1', expected_revision=published['revision'])
+                if parallel:
+                    self.assertTrue(second['ok'], second)
+                else:
+                    self.assertEqual(second['error']['code'], 'factory_run_active')
+                items = [item for item in (await self.state('a'))['my_work'] if item['workflow_id'] == key]
+                self.assertTrue(items)
+                self.assertEqual({item['bucket'] for item in items}, {bucket})
 
     async def test_system_scope_is_visible_across_factory_selection_without_broadening_acl(self):
         await self.command('save_factory', factory_id='f1', system_id='EMS', name='f1')

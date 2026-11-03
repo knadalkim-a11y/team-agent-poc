@@ -93,7 +93,7 @@ h.workflows.get('w').draft=draft;h.render();await h.node('t1');
 h.dialogs.push({});h.click('delete_node',{id:'t1'});await flush();
 const result=h.draft();assert.equal(result.dirty,true);assert.equal(h.writes.length,0);
 assert.equal(result.definition.nodes.t1,undefined);assert.equal(result.definition.nodes.j1,undefined);
-assert.match(h.dialogHistory.at(-1).html,/이 단계의 기간 설정\(실행 방식\)도 함께 지웁니다/);
+assert.match(h.dialogHistory.at(-1).html,/이 단계의 기간 설정도 함께 지웁니다/);assert.doesNotMatch(h.dialogHistory.at(-1).html,/실행 방식/);
 process.stdout.write(JSON.stringify(result.definition));
 })().catch(error=>{console.error(error);process.exitCode=1;});
 """

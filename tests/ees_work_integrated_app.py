@@ -336,11 +336,14 @@ def integrated_flow(gate):
     g.click('[data-author-action="add_job"]')
     g.type('#ew-stage-editor input[name="name"]','사람의 근거 확인')
     g.click('[data-author-action=inline_apply]')
-    # Authoring12 defines run inputs in execution method; job detail retains
-    # guidance and confirmation only. Preserve this real start-input authoring
+    # 2026-11-02 moves run start inputs from the removed execution-mode tab to
+    # the content tab's stage-and-job view; job detail retains guidance and
+    # confirmation only. The new job opens its detail, so return through its
+    # back link as a person does. Preserve this real start-input authoring
     # check before preparing the legacy job-input regression fixture below.
-    g.click('[data-author-action="tab"][data-tab="schedule"]')
-    g.click('[data-author-action="start_input_add"]')
+    assert not g.browser.evaluate('!!document.querySelector(\'[data-author-action="tab"][data-tab="schedule"]\')')
+    g.click('.ew-job-detail-header [data-author-action="node"].ew-author-back')
+    g.click('.ew-content-start-inputs [data-author-action="start_input_add"]')
     g.type('#ees-work-dialog input[name="name"]','확인할 자료')
     g.click('#ees-work-dialog .ew-input-advanced > summary')
     g.type('#ees-work-dialog input[name="id"]','evidence_note')
@@ -802,29 +805,17 @@ def figma_delta_flow(g):
     g.click('[data-action="procedures"]')
     g.click('[data-author-action="open"][data-id="'+workflow_id+'"]')
     g.wait('!!document.querySelector("[data-author-action=tab][data-tab=content]")')
-    g.click('.ew-author-tabs [data-author-action="tab"][data-tab="schedule"]')
-    g.click('[data-author-action="run_mode"][data-id="periodic"]')
-    g.select('#ew-author-schedule [name="opening"]','on_schedule')
-    g.type('#ew-author-schedule [name="interval"]','2')
-    g.type('#ew-author-schedule [name="name_template"]','{date} 실제 검수 회차')
-    g.click('.ew-procedure-menu > summary')
-    g.click('[data-author-action="schedule_tools"]')
-    g.wait('document.querySelector(".ew-author-schedules")?.open')
-    g.click('[data-author-action="schedule_preview"]')
-    g.wait('document.querySelector(".ew-schedule-preview")?.innerText.includes("그다음")')
-    # Authoring12 uses the native select chevron in schedule rows; the source
-    # icon is deliberately hidden there. The preview keeps its shipped icon.
-    assert g.browser.evaluate('document.querySelector(\'#ew-author-schedule [name="opening"]\').getClientRects().length>0')
-    assets('figma-b21-schedule',{'1fc4e.svg':14});g.capture('figma-b21-schedule-preview')
-    g.click('[data-author-action="save"]');g.wait('document.querySelector("[data-author-status]")?.textContent.includes("저장됨")')
+    # 2026-11-02: no execution-mode tab or schedule authoring. A schedule saved
+    # earlier stays data in the draft and in the immutable publication.
+    assert g.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim()).join('|')")=='업무 내용|판정 규칙|게시 기록'
+    assert not g.browser.evaluate('!!document.querySelector("#ew-author-schedule,[data-author-action=run_mode],[data-author-action=schedule_tools],[data-author-action=schedule_preview]")')
+    assert '시작할 때 받는 값' in g.browser.evaluate('document.querySelector(".ew-content-start-inputs")?.innerText || ""')
+    g.capture('no-run-mode-content-tab')
     saved=g.api('/api/ees-work/workspace?workflow_id='+workflow_id)['workflow']
-    assert saved['draft']['mode']=='periodic' and saved['draft']['schedule']['interval']==2
-    assert saved['draft']['schedule']['name_template']=='{date} 실제 검수 회차'
-    assert saved['draft']['schedule']['opening']=='on_schedule'
+    assert saved['draft']['schedule']==saved['published']['schedule'] and saved['draft']['schedule']['opening']=='after_previous_closed'
     assert saved['published_version']==1 and saved['published']['mode']=='on_demand'
-    assert saved['published']['schedule']['opening']=='after_previous_closed','An old immutable publication must retain its snapshot'
     assert not g.api('/api/ees-work/operations?system_id=EMS')['schedules']
-    g.record('Figma B2-1 physical schedule preview and draft save',draft_revision=saved['revision'],published_version=1,reservation_created=False)
+    g.record('2026-11-02 authoring without an execution-mode tab keeps stored schedule data',draft_revision=saved['revision'],published_version=1,reservation_created=False)
     g.click('[data-action="mode"][data-mode="work"]');g.click('[data-action="workflow"][data-workflow-id="'+workflow_id+'"]')
     g.open_operation_start()
     g.click('#ees-work-dialog [data-dialog-confirm]')

@@ -34,12 +34,6 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("JSON.stringify([...document.querySelectorAll('.ew-author-list [data-author-action=open]')].map(button=>button.dataset.id)) === JSON.stringify(" +
                   json.dumps([workflow['id'] for workflow in prepared['workflows']]) + ")")
 
-    def open_schedule_tools(self):
-        if not self.read('.ew-procedure-menu', 'open'):
-            self.click('.ew-procedure-menu > summary')
-        self.click('[data-author-action=schedule_tools]')
-        self.wait("document.querySelector('.ew-author-schedules')?.open && document.querySelector('[data-author-action=schedule_preview]')")
-
     def wait_for_publication(self, version):
         # Version evidence lives in the publication tab in HTML 12, not in the
         # workflow title. Wait for the real command before opening that view.
@@ -78,6 +72,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                   json.dumps(str(overlay).lower()))
         self.wait("Math.abs(document.querySelector('[data-ees-source-shell]').getBoundingClientRect().width - " +
                   str(width) + ") < .01")
+        # Compact/overlay attributes update before the navigation transition
+        # finishes. Measure the rendered layout only after that motion settles.
+        self.wait("!document.querySelector('#sidebar').getAnimations().length && !document.querySelector('.ees-panel-space').getAnimations().length")
 
     def test_authoring12_empty_rules_spacing_and_wrapped_guidance(self):
         """Figma 1902:3197 text/divider positions, without overlapping hit areas."""
@@ -799,9 +796,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-action="mode"][data-mode="author"]')
         self.click('[data-author-action=open][data-id="' + identifier + '"]')
         self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
-        # C66 retires the summary shortcut; start inputs keep their existing
-        # execution-method editor and the same cancel/save contract.
-        self.click('[data-author-action=tab][data-tab=schedule]')
+        # 2026-11-02 removes the execution-mode tab; start inputs keep the same
+        # cancel/save contract in the content tab.
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-author-action=tab][data-tab=schedule]')"))
         self.click('[data-author-action=start_input_add]')
         self.fill('#ees-work-dialog [name=name]', '취소할 입력')
         self.key('Escape', 27)
@@ -1054,7 +1051,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.click('[data-author-action=delete_node][data-id=stage-0]')
             self.wait("document.querySelector('#ees-work-dialog[open]')")
             self.assertIn('2개 작업', self.text('#ees-work-dialog'))
-            self.assertIn('이 단계의 기간 설정(실행 방식)도 함께 지웁니다.', self.text('#ees-work-dialog'))
+            self.assertIn('이 단계의 기간 설정도 함께 지웁니다.', self.text('#ees-work-dialog'))
             self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-dialog-cancel]')"))
             capture('e1-example3-stage-delete-' + str(width))
             self.key('Escape', 27)
@@ -1288,7 +1285,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertLess(metrics['purpose']['y'], metrics['steps']['y'])
             self.assertLess(metrics['steps']['y'], metrics['list']['y'])
             self.assertEqual(self.browser.evaluate("document.querySelectorAll('[data-author-action=stage_toggle]').length"), 0)
-            self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim())"), ['업무 내용', '실행 방식', '판정 규칙', '게시 기록'])
+            self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim())"), ['업무 내용', '판정 규칙', '게시 기록'])
             # The reviewed Figma keeps status and content-sized actions on one
             # row, including the 424px panel inside the 480px viewport.
             self.assertEqual(metrics['footerStyle']['paddingTop'], '12px')
@@ -2566,8 +2563,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(saved['revision'], 1)
         self.assertIsNone(saved['published_version'])
         definition = saved['draft']
-        self.assertEqual((definition['category'], definition['mode'], definition['execution_scope']),
-                         ('setup', 'on_demand', 'factory'))
+        self.assertEqual((definition['category'], definition['execution_scope']),
+                         ('setup', 'factory'))
+        self.assertNotIn('mode', definition)
         nodes = definition['nodes']
         self.assertEqual(sum(node['type'] == 'p' for node in nodes.values()), 1)
         self.assertEqual(sum(node['type'] == 't' for node in nodes.values()), 4)
@@ -2601,12 +2599,12 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action="validate"]')
         self.wait("document.querySelector('.ew-author-validation')")
         validated = self.state(workflow_id=record['id'])['workflow']
-        self.assertTrue(validated['validation']['errors'])
-        self.assertRegex(' '.join(validated['validation']['errors']), r'도구|연결|Native')
-        self.assertTrue(self.read('[data-author-action=publish]', 'disabled'))
+        self.assertEqual(validated['validation']['errors'], [])
+        self.assertIn('도구가 연결되지 않았습니다', ' '.join(validated['validation']['warnings']))
+        self.assertFalse(self.read('[data-author-action=publish]', 'disabled'))
         self.assertIsNone(validated['published_version'])
         self.assertEqual(len(self.server.completions), 0)
-        self.screenshot('procedure-examples-created-publication-blocked')
+        self.screenshot('procedure-examples-created-publication-warning')
 
         self.click('[data-author-action="list"]')
         self.click('[data-author-action="create"]')
@@ -2652,7 +2650,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         saved = self.state(workflow_id=key)['workflow']
         self.assertEqual(saved['revision'], 2)
         self.assertEqual(saved['draft']['category'], 'ops')
-        self.assertEqual(saved['draft']['mode'], 'on_demand')
+        self.assertNotIn('mode', saved['draft'])
         self.assertFalse(saved['draft'].get('execution_scope'))
         self.assertIsNone(saved['published_version'])
         stage = next(node for node in saved['draft']['nodes'].values() if node['type'] == 't')
@@ -2678,162 +2676,72 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.state(workflow_id=key)['workflow']['draft'], saved['draft'])
         self.screenshot('http-id-native-create-save-reload')
 
-    def test_schedule_mouse_field_transition_keeps_focus_and_saves_both_values(self):
-        key = self.author(name='합성 일정 포커스 검증', jobs=1)
+    def test_saved_periodic_draft_has_no_mode_tab_and_keeps_schedule_while_start_inputs_change(self):
+        """2026-11-02: the execution-mode tab is removed; stored values remain data."""
+        key = self.author(name='합성 실행 방식 제거 검증', jobs=1)
         workflow = self.state(workflow_id=key)['workflow']
         definition = deepcopy(workflow['draft'])
-        definition.update(mode='periodic', schedule={
-            'timezone': 'Asia/Seoul', 'anchor': '2026-10-06T09:00',
-            'frequency': 'weekly', 'interval': 1, 'weekday': 1,
-            'name_template': '기존 {date} 회차',
-        })
-        self.command('save_draft', workflow_id=key,
-                     expected_revision=workflow['revision'], definition=definition)
+        schedule = {'timezone': 'Asia/Seoul', 'anchor': '2026-10-06T09:00', 'frequency': 'weekly',
+                    'interval': 1, 'weekday': 1, 'name_template': '기존 {date} 회차'}
+        definition.update(mode='periodic', schedule=deepcopy(schedule))
+        self.command('save_draft', workflow_id=key, expected_revision=workflow['revision'], definition=definition)
         self.refresh()
         self.click('[data-action="mode"][data-mode="author"]')
-        # First entry adds three initial procedures; wait for the final list
-        # before a physical row click, as in the schedule/delegation test.
         self.wait("document.querySelectorAll('.ew-author-list>[data-author-action=open]').length === 4")
         self.click('[data-author-action="open"][data-id="' + key + '"]')
         self.wait('window.__eesNativeWorkV1?.captureReference()?.workflow_id === ' + json.dumps(key))
         self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
-        self.click('.ew-author-tabs [data-author-action="tab"][data-tab="schedule"]')
-        self.wait("document.querySelector('#ew-author-schedule [name=run_mode]')?.value === 'periodic'")
-        self.open_schedule_tools()
-        self.click('[data-author-action="schedule_preview"]')
-        self.wait("document.querySelector('.ew-schedule-preview')?.textContent.includes('다음 회차 기존')")
-        self.click('#ew-author-schedule [name=interval]')
-        for kind in ('keyDown', 'keyUp'):
-            self.browser.call('Input.dispatchKeyEvent', {
-                'type': kind, 'key': 'a', 'code': 'KeyA',
-                'windowsVirtualKeyCode': 65, 'modifiers': 2,
-            })
-        self.browser.call('Input.insertText', {'text': '2'})
-        self.assertIn('일정이 바뀌었습니다', self.text('.ew-schedule-preview'))
-        self.assertNotIn('다음 회차 기존', self.text('.ew-schedule-preview'))
-        # Do not use fill()'s Tab commit: a real mouse transition must keep its
-        # target rather than replacing the entire form during blur/change.
-        self.click('#ew-author-schedule [name=name_template]')
-        self.assertEqual(self.browser.evaluate('document.activeElement?.name'), 'name_template')
-        for kind in ('keyDown', 'keyUp'):
-            self.browser.call('Input.dispatchKeyEvent', {
-                'type': kind, 'key': 'a', 'code': 'KeyA',
-                'windowsVirtualKeyCode': 65, 'modifiers': 2,
-            })
-        self.browser.call('Input.insertText', {'text': '마우스로 입력한 {date} 회차'})
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim())"),
+                         ['업무 내용', '판정 규칙', '게시 기록'])
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ew-author-schedule,[data-author-action=run_mode],[data-author-action=schedule_tools]')"))
+        self.assertIn('시작할 때 받는 값', self.text('.ew-content-start-inputs'))
+        self.assertLess(self.browser.evaluate("document.querySelector('.ew-content-start-inputs').getBoundingClientRect().y"),
+                        self.browser.evaluate("document.querySelector('.ew-content-heading').getBoundingClientRect().y"))
+        self.click('[data-author-action=start_input_add]')
+        self.fill('#ees-work-dialog [name=name]', '배포일')
+        self.click('#ees-work-dialog [data-dialog-confirm]')
         self.click('[data-author-action="save"]')
-        self.wait("!document.querySelector('[data-author-action=validate]')?.disabled")
-        saved = self.state(workflow_id=key)['workflow']
-        self.assertEqual(saved['draft']['schedule']['interval'], 2)
-        self.assertEqual(saved['draft']['schedule']['name_template'], '마우스로 입력한 {date} 회차')
-        self.screenshot('integrated-figma-b21-mouse-focus-saved')
+        self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
+        saved = self.state(workflow_id=key)['workflow']['draft']
+        self.assertEqual(saved['mode'], 'periodic')
+        self.assertEqual(saved['schedule'], schedule)
+        root = next(node for node in saved['nodes'].values() if node['type'] == 'p')
+        self.assertEqual([field['name'] for field in root.get('inputs', [])], ['배포일'])
+        self.assertFalse(any(body.get('action') in ('schedule_preview', 'schedule_save') for body in self.server.workspace_commands))
+        self.screenshot('no-run-mode-content-start-inputs')
 
-    def test_schedule_preview_save_publish_and_explicit_delegation_preserve_existing_cycle(self):
-        key = self.author(name='합성 일정 UI 검증', jobs=1)
+    def test_earlier_reservation_is_listed_in_history_and_can_be_stopped_but_not_created(self):
+        """Reservations made before 2026-11-02 keep running until stopped in the history tab."""
+        key = self.author(name='합성 이전 예약 검증', jobs=1)
         workflow = self.state(workflow_id=key)['workflow']
         definition = deepcopy(workflow['draft'])
-        definition['mode'] = 'periodic'
-        definition['schedule'] = {
-            'timezone': 'Asia/Seoul', 'anchor': '2026-10-06T09:00',
-            'frequency': 'weekly', 'interval': 1, 'weekday': 1,
-            'name_template': '기존 {date} 회차',
-            'stage_deadlines': {'stage': {'offset_days': -8, 'end_offset_days': -6}},
-            'opening': 'after_previous_closed', 'closing': 'after_last_stage',
-            'non_working_days': 'notify_no_shift',
-        }
-        saved = self.command('save_draft', workflow_id=key,
-                             expected_revision=workflow['revision'], definition=definition)
+        definition.update(mode='periodic', schedule={'timezone': 'Asia/Seoul', 'anchor': '2026-10-06T09:00', 'frequency': 'weekly', 'interval': 1, 'weekday': 1})
+        saved = self.command('save_draft', workflow_id=key, expected_revision=workflow['revision'], definition=definition)
         self.command('validate_workflow', workflow_id=key, expected_revision=saved['revision'])
-        self.command('publish_workflow', workflow_id=key, expected_revision=saved['revision'])
-        original = self.start(key, mode='periodic')
-        published_before = original['version']
-        revision_before = self.state(workflow_id=key)['workflow']['revision']
-
+        published = self.command('publish_workflow', workflow_id=key, expected_revision=saved['revision'])
+        reservation = asyncio.run(self.server.workflow.operations.command(self.server.user, {
+            'action': 'schedule_save', 'expected_revision': 0, 'request_id': str(uuid4()),
+            'schedule': {'workflow_id': key, 'version': published['version'], 'rule': definition['schedule'],
+                         'inputs': {}, 'job_ids': [], 'delegated': False}}))['schedule']
         self.refresh()
         self.click('[data-action="mode"][data-mode="author"]')
         self.wait("document.querySelectorAll('.ew-author-list>[data-author-action=open]').length === 4")
-        self.wait("document.querySelector('[data-author-action=open][data-id=\"" + key + "\"]')")
         self.click('[data-author-action="open"][data-id="' + key + '"]')
-        self.wait('window.__eesNativeWorkV1?.captureReference()?.workflow_id === ' + json.dumps(key))
-        self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
-        self.click('.ew-author-tabs [data-author-action="tab"][data-tab="schedule"]')
-        self.wait("document.querySelector('#ew-author-schedule [name=interval]')")
-        self.assertEqual(self.read('#ew-author-schedule [name=interval]', 'value'), '1')
-        self.fill('#ew-author-schedule [name=interval]', '2')
-        self.fill('#ew-author-schedule [name=name_template]', '화면에서 저장한 {date} 회차')
-        self.open_schedule_tools()
-        self.click('[data-author-action="schedule_preview"]')
-        self.wait("document.querySelector('.ew-schedule-preview')?.textContent.includes('다음 회차 화면에서 저장한')")
-        self.assertEqual(self.state(workflow_id=key)['workflow']['revision'], revision_before)
-        self.assertEqual(self.operations()['schedules'], [])
-        preview_requests = [body for body in self.server.workspace_commands
-                            if body.get('action') == 'schedule_preview']
-        self.assertEqual(preview_requests[-1]['definition']['schedule']['interval'], 2)
-        self.assertEqual(self.bridge.calls, [])
-        self.assertIn('공휴일 달력', self.text('.ew-schedule-preview'))
-        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-schedule-modes [aria-pressed=true]')].map(e=>e.textContent)"), ['주기'])
-        geometry = self.browser.evaluate("""(()=>{const e=document.querySelector('.ew-schedule-preview .ew-icon'),r=e.getBoundingClientRect();return {width:r.width,height:r.height,src:e.currentSrc,loaded:e.complete&&e.naturalWidth>0,font:getComputedStyle(document.querySelector('.ew-schedule-card')).fontFamily,overflow:document.querySelector('.ew-author-scroll').scrollHeight>document.querySelector('.ew-author-scroll').clientHeight};})()""")
-        self.assertTrue(geometry['loaded'], geometry)
-        self.assertAlmostEqual(geometry['width'], 14, delta=.1)
-        self.assertAlmostEqual(geometry['height'], 14, delta=.1)
-        self.assertIn('1fc4e.svg', geometry['src'])
-        directory = self.screenshot('integrated-figma-b21-live-preview')
-
-        self.click('[data-author-action="save"]')
-        self.wait("!document.querySelector('[data-author-action=validate]')?.disabled")
-        current = self.state(workflow_id=key)['workflow']
-        self.assertEqual(current['draft']['schedule']['interval'], 2)
-        self.assertEqual(current['draft']['schedule']['name_template'], '화면에서 저장한 {date} 회차')
-        self.assertGreater(current['revision'], revision_before)
-        self.click('[data-author-action="validate"]')
-        self.wait("document.querySelector('[data-author-action=publish]')")
-        self.click('[data-author-action="publish"]')
+        self.wait("document.querySelector('[data-author-action=tab][data-tab=history]')")
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-author-legacy-schedules')"))
+        self.click('[data-author-action=tab][data-tab=history]')
+        self.wait("document.querySelector('.ew-author-legacy-schedules')")
+        self.assertIn('이전에 맡긴 자동 실행', self.text('.ew-author-legacy-schedules'))
+        self.assertIn('게시 v' + str(published['version']), self.text('.ew-author-legacy-schedules'))
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-author-action=schedule_create],[data-author-action=schedule_tools]')"))
+        self.screenshot('no-run-mode-history-earlier-reservation')
+        self.click('[data-author-action=schedule_disable][data-id="' + reservation['id'] + '"]')
         self.click('#ees-work-dialog [data-dialog-confirm]')
-        self.wait_for_publication(published_before + 1)
-        published = self.state(workflow_id=key)['workflow']
-        prior = self.state(run_id=original['id'])['run']
-        self.assertEqual(prior['version'], published_before)
-        self.assertEqual(prior['definition']['schedule']['interval'], 1)
-        self.assertEqual(prior['definition']['schedule']['name_template'], '기존 {date} 회차')
-        self.click('[data-author-action="tab"][data-tab="schedule"]')
-        self.open_schedule_tools()
-        self.click('[data-author-action="schedule_create"]')
-        self.assertFalse(self.read('#ees-work-dialog [name=delegated]', 'checked'))
-        self.assertIn('게시 버전 그대로', self.text('#ees-work-dialog'))
-        self.click('#ees-work-dialog [data-dialog-confirm]')
-        self.wait("document.querySelector('.ew-author-schedules')?.textContent.includes('실행 위임 없음')")
-        undelegated = self.operations()['schedules']
-        self.assertEqual(len(undelegated), 1)
-        self.assertFalse(undelegated[0]['delegated'])
-        self.assertFalse(undelegated[0]['lifecycle_enabled'])
-        self.assertEqual(undelegated[0]['rule'], published['draft']['schedule'])
-
-        # A separate explicit confirmation enables lifecycle. No timer or
-        # fixture mutation provides user delegation.
-        if not self.read('.ew-author-schedules', 'open'):
-            self.click('.ew-author-schedules > summary')
-        self.click('[data-author-action="schedule_create"]')
-        self.click('#ees-work-dialog [name=delegated]')
-        self.click('#ees-work-dialog [data-dialog-confirm]')
-        self.wait("document.querySelector('.ew-author-schedules')?.textContent.includes('실행 위임됨')")
+        self.wait("!document.querySelector('.ew-author-legacy-schedules')")
         schedules = self.operations()['schedules']
-        self.assertEqual(len(schedules), 2)
-        active = next(item for item in schedules if item['delegated'])
-        self.assertTrue(active['lifecycle_enabled'])
-        self.assertEqual(active['version'], published_before + 1)
-        self.assertEqual(active['identity_user_id'], self.server.user['id'])
-        self.assertEqual(active['rule'], published['draft']['schedule'])
+        self.assertEqual([item['enabled'] for item in schedules if item['id'] == reservation['id']], [False])
+        self.assertEqual(len(schedules), 1)
         self.assertEqual(self.bridge.calls, [])
-        self.screenshot('integrated-figma-b21-published-reservation')
-        (directory / 'integrated-figma-b21-roundtrip.json').write_text(json.dumps({
-            'scope': 'built Native UI; synthetic Native session; real workspace and operations SQLite',
-            'geometry': geometry, 'preview_saved_definition': False,
-            'saved_interval': current['draft']['schedule']['interval'],
-            'preserved_existing_version': prior['version'], 'published_version': active['version'],
-            'undelegated_lifecycle_enabled': undelegated[0]['lifecycle_enabled'],
-            'explicit_lifecycle_enabled': active['lifecycle_enabled'],
-            'external_transport_calls': len(self.bridge.calls),
-        }, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
     def test_read_retry_policy_saved_in_ui_records_failed_and_successful_attempts_separately(self):
         # Retain this historical ID and server/attempt assertions. 12판 hides

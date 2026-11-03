@@ -12,6 +12,31 @@ SYSTEMS = ("EMS", "APC", "FDC", "EGIS", "EPT")
 INPUTS = ("db", "ap", "site", "interface")
 IDENTIFIER = re.compile(r"^[A-Za-z0-9_.:-]{1,160}$")
 MAX_DOCUMENT_BYTES = 750_000
+TOOL_CONNECTION_MESSAGE = "도구가 연결되지 않아 실행할 수 없습니다. 워크스페이스에서 도구를 연결해 다시 게시하면 새로 시작하는 진행 건부터 실행할 수 있습니다."
+
+
+def tool_connection_required(node):
+    """A tool job saved before its tool was chosen (2026-11-02 user decision).
+
+    The job stays a tool job, so publication only warns and the gap remains
+    visible. Running the job, or a stage/procedure that contains it, is refused.
+    State-changing EES requests are not covered: they still need a reviewed
+    request tool before publication.
+    """
+    if not isinstance(node, dict) or node.get("type", "j") != "j" or node.get("mode") != "tool" or node.get("result_block") == "change_request":
+        return False
+    execution = node.get("execution") if isinstance(node.get("execution"), dict) else {}
+    return not (node.get("shared_tool_id") or node.get("tool_contract_id") or node.get("tool_reference") or execution.get("reference"))
+
+
+def concurrent_runs_allowed(definition):
+    """Only the same-factory duplicate start guard depends on this.
+
+    Execution modes are no longer chosen while authoring. Versions saved as
+    periodic/emergency keep their earlier parallel starts, and incident work may
+    handle several incidents for one factory at once.
+    """
+    return definition.get("mode") in ("periodic", "emergency") or definition.get("category") == "incident"
 
 
 def _dump(value):
