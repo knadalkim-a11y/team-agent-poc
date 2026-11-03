@@ -409,6 +409,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         for stage, name, job, deps in (('stage', '준비', 'job-0', []), ('deploy', '배포', 'job-1', ['stage']), ('followup', '후속 점검', 'job-2', ['deploy'])):
             definition['nodes'][stage] = dict(id=stage, name=name, type='t', parent=root, children=[job], deps=deps)
             definition['nodes'][job]['parent'] = stage
+            definition['nodes'][job]['judgments'] = [{'id': 'done', 'label': '완료', 'status': 'completed'}]
         revision = workflow['revision']
         self.command('save_draft', workflow_id=key, definition=definition, expected_revision=revision)
         self.command('validate_workflow', workflow_id=key, expected_revision=revision+1)
@@ -416,6 +417,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         run = self.command('start_run', user=self.users['other-user'], workflow_id=key, factory_id='shared-factory', expected_revision=published['revision'])['run']
         for job in ('job-0', 'job-1'):
             run = self.command('human_confirm', user=self.users['other-user'], run_id=run['id'], job_id=job, expected_revision=run['revision'])['run']
+        self.assertEqual(run['progress']['completed'], 2)
         writes = len(self.server.workspace_commands)
         self.refresh(); self.open_sidebar()
         self.click('#ees-work-site-trigger')

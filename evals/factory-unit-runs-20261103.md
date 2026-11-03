@@ -45,6 +45,15 @@ Linux 격리 작업 사본, Python 3.11.17 `.venv`, Node 22.22.0. Python 의존�
 - 편집 가능한 자식57개(TEXT20/FRAME27/INSTANCE3/RECTANGLE4/VECTOR3), 전체 UI 이미지0, 글꼴 Noto Sans KR 확인. 시작 창 첫 캡처 후 제품 CSS의 700px 폭·24px 여백·10px 모서리·12px 안내 글로 맞춰 재캡처했고 잘림/겹침 없음. 기존 개요 부품의 배치·완료 표시를 유지한다. 제품의 실제 Native 캡처는 최종 CI로 별도 판정한다. Native 시험에 다른 사용자가 준비·배포를 완료한 공장 A 진행 건을 업무 메뉴에서 열어 같은 ID와 완료 2단계를 확인하고 후속 점검을 직접 확정하는 흐름을 추가했다.
 - `scripts/figma_check.js` 원문을 Figma에서 실행: 오류0. 기존 작성 페이지의 크기 경고는 이번 범위 밖이며 유지한다. 새 B068 기록 없음 경고는 점검 후 C134 한 줄 기록으로 연결했다. PR 생성 전 임시 `PR 없음` 표기를 실제 PR 번호로 바꾼다.
 
+## CI442의 실제 제품 흐름 보완
+
+- [PR #116](https://github.com/knadalkim-a11y/team-agent-poc/pull/116) head `2c03e50f4e00b8d4c2529bb54ae41eece4b61367`, [CI442](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41557304319)의 Complete Native product에서 기존 A8 흐름이 실패했다. 업무를 다시 누른 뒤 `run_id=''`와 중복 시작 안내 창을 기다렸지만, 실제 화면은 같은 공장·같은 진행 건을 바로 열었다. 권한/중복 제한의 제품 실패가 아니라 새 진입 계약이 반영되지 않은 통합 시험이었다.
+- 수정 전에 `node --test --test-name-pattern='workflow entry resumes|legacy duplicate runs|start preparation requires' tests/test_ees_work_figma_runtime_ui.cjs`로 해당 진입 상태 2/2를 확인했다. `figma_delta_flow`를 기존 진행 건·공장 일치와 단계 화면 준비, 새 시작 단추 없음, 검토 결과 불변, 기록에서 같은 건 다시 열기, 진행 건 1개 유지로 바꿨다. 기존 A8 기록 ID·검사 목적을 보존하며 제품 코드는 변경하지 않았다.
+- 수정 후 runtime UI 150/150, Python 구문 검사와 `git diff --check` 통과. 같은 통합 시험의 전체 흐름은 새 head의 CI에서 재검한다. 첫 실패를 남기며 이전 head 성공을 최종 검증으로 대신하지 않는다.
+- 같은 CI의 native-compose 96개 중 새 공동 진행 시험 1개가 실패했다. 미설정 판정의 기존 기본 표시인 `적합 1`을 새 fixture가 `완료 1`로 기대한 차이다. 화면에 이미 다른 사용자의 동일 진행 건·2개 판정이 나타났으며, 배포 예시의 각 작업에 `완료` 판정 말을 명시하고 원본 완료 수 2도 확인하도록 시험 자료를 보완했다. 제품의 기본 판정 말은 바꾸지 않는다.
+- Windows platform의 `test_launcher_assembly_order_is_private_and_has_one_runtime_asset`는 10초 안에 Node 진입 표식이 없어 실패했다(`entry not observed`, 합성 fixture208바이트). [CI431의 같은 관측](navigation-motion-20261102.md#ci431-실제-브라우저windows-첫-통합과-보완)과 비교했으며 제품 구문/검사 진입 전 지연이라는 증거만 있고 OS 세부 원인은 미확정이다. 시간 제한·제품 코드를 바꾸지 않고 위 시험 보완을 포함한 새 head의 새 Windows 실행기에서 1회 확인한다. 재발하면 같은 재실행을 반복하지 않고 추가 진단한다. CI442 전체는34성공·4실패(집계 포함)·1취소·PR 출하1생략이며 최초 증거를 보존한다.
+- Figma C134는 PR #116에 연결했다. 반복 단계 행은 로컬 구성요소 1개와 인스턴스 2개로 정리했고 최종 캡처·고정 점검 오류0을 확인했다. B068은 #116 병합 전까지 보존한다.
+
 ## 다음 단계와 미확인
 
 1단계 최종 PR CI·검토 후 병합 가능한 상태로 전달한다. 2단계 공용 토큰/공유 근거는 1단계 병합 뒤 최신 main에서 시작한다. 실제 시스템 토큰 발급·권한 범위, 사내 암호화 설정과 서비스 호출은 미확인이다.
