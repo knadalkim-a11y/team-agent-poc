@@ -72,6 +72,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                   json.dumps(str(overlay).lower()))
         self.wait("Math.abs(document.querySelector('[data-ees-source-shell]').getBoundingClientRect().width - " +
                   str(width) + ") < .01")
+        # Compact/overlay attributes update before the navigation transition
+        # finishes. Measure the rendered layout only after that motion settles.
+        self.wait("!document.querySelector('#sidebar').getAnimations().length && !document.querySelector('.ees-panel-space').getAnimations().length")
 
     def test_authoring12_empty_rules_spacing_and_wrapped_guidance(self):
         """Figma 1902:3197 text/divider positions, without overlapping hit areas."""
@@ -2560,8 +2563,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(saved['revision'], 1)
         self.assertIsNone(saved['published_version'])
         definition = saved['draft']
-        self.assertEqual((definition['category'], definition['mode'], definition['execution_scope']),
-                         ('setup', 'on_demand', 'factory'))
+        self.assertEqual((definition['category'], definition['execution_scope']),
+                         ('setup', 'factory'))
+        self.assertNotIn('mode', definition)
         nodes = definition['nodes']
         self.assertEqual(sum(node['type'] == 'p' for node in nodes.values()), 1)
         self.assertEqual(sum(node['type'] == 't' for node in nodes.values()), 4)
@@ -2595,12 +2599,12 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action="validate"]')
         self.wait("document.querySelector('.ew-author-validation')")
         validated = self.state(workflow_id=record['id'])['workflow']
-        self.assertTrue(validated['validation']['errors'])
-        self.assertRegex(' '.join(validated['validation']['errors']), r'도구|연결|Native')
-        self.assertTrue(self.read('[data-author-action=publish]', 'disabled'))
+        self.assertEqual(validated['validation']['errors'], [])
+        self.assertIn('도구가 연결되지 않았습니다', ' '.join(validated['validation']['warnings']))
+        self.assertFalse(self.read('[data-author-action=publish]', 'disabled'))
         self.assertIsNone(validated['published_version'])
         self.assertEqual(len(self.server.completions), 0)
-        self.screenshot('procedure-examples-created-publication-blocked')
+        self.screenshot('procedure-examples-created-publication-warning')
 
         self.click('[data-author-action="list"]')
         self.click('[data-author-action="create"]')
@@ -2646,7 +2650,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         saved = self.state(workflow_id=key)['workflow']
         self.assertEqual(saved['revision'], 2)
         self.assertEqual(saved['draft']['category'], 'ops')
-        self.assertEqual(saved['draft']['mode'], 'on_demand')
+        self.assertNotIn('mode', saved['draft'])
         self.assertFalse(saved['draft'].get('execution_scope'))
         self.assertIsNone(saved['published_version'])
         stage = next(node for node in saved['draft']['nodes'].values() if node['type'] == 't')
