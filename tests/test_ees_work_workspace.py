@@ -35,19 +35,21 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(reopened['workflow']['draft']['authoring_review'], definition['authoring_review'])
         checked = await self.command('validate_workflow', workflow_id=identifier, expected_revision=2)
         self.assertTrue(checked['validation']['errors'])
-        denied = await self.command('publish_workflow', workflow_id=identifier, expected_revision=2)
-        self.assertFalse(denied['ok'])
+        published = await self.command('publish_workflow', workflow_id=identifier, expected_revision=2)
+        self.assertTrue(published['ok'], published)
+        blocked = await self.command('start_run', workflow_id=identifier, expected_revision=3)
+        self.assertEqual(blocked['error']['code'], 'execution_not_ready')
         root = next(iter(definition['nodes']))
         definition['nodes'][root]['children'] = ['stage']
         definition['nodes']['stage'] = {'id': 'stage', 'type': 't', 'name': '준비', 'parent': root, 'children': ['job']}
         definition['nodes']['job'] = {'id': 'job', 'type': 'j', 'name': '설치 확인', 'parent': 'stage', 'children': [], 'mode': 'human', 'inputs': [], 'result_block': 'human_confirm'}
-        saved = await self.command('save_draft', workflow_id=identifier, definition=definition, expected_revision=2)
+        saved = await self.command('save_draft', workflow_id=identifier, definition=definition, expected_revision=3)
         self.assertTrue(saved['ok'], saved)
-        checked = await self.command('validate_workflow', workflow_id=identifier, expected_revision=3)
+        checked = await self.command('validate_workflow', workflow_id=identifier, expected_revision=4)
         self.assertEqual(checked['validation']['errors'], [])
-        published = await self.command('publish_workflow', workflow_id=identifier, expected_revision=3)
+        published = await self.command('publish_workflow', workflow_id=identifier, expected_revision=4)
         self.assertTrue(published['ok'], published)
-        started = await self.command('start_run', workflow_id=identifier, expected_revision=4)
+        started = await self.command('start_run', workflow_id=identifier, expected_revision=5)
         self.assertTrue(started['ok'], started)
         self.assertEqual(started['run']['definition']['authoring_review'], definition['authoring_review'])
 
@@ -100,6 +102,56 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         result = await self.service.workspace_state(self.users[actor], **query)
         self.assertTrue(result['ok'], result)
         return result
+
+    async def test_publication_visibility_is_manual_and_unfinished_procedures_are_listed(self):
+        await self.command('save_access', principal_kind='user', principal_id='c', system_id='EMS', factory_id='*', roles=['participant'])
+        for index in range(5):
+            created = await self.command('create_workflow', system_id='EMS', name=f'미완성 절차 {index}')
+            key = created['workflow_id']
+            self.assertEqual((await self.state('c'))['workflows'], [] if index == 0 else visible)
+            denied = await self.command('publish_workflow', actor='c', workflow_id=key, expected_revision=1)
+            self.assertFalse(denied['ok'])
+            published = await self.command('publish_workflow', workflow_id=key, expected_revision=1)
+            self.assertTrue(published['ok'], published)
+            visible = (await self.state('c'))['workflows']
+            self.assertEqual(len(visible), index + 1)
+            self.assertTrue(all(item['published_version'] == 1 for item in visible))
+
+    async def test_unpublish_keeps_active_runs_history_and_monotonic_versions(self):
+        key, definition, revision = await self.create()
+        run = await self.start(key, revision)
+        definition['name'] = '저장만 한 변경'
+        saved = await self.command('save_draft', workflow_id=key, definition=definition, expected_revision=revision)
+        before = (await self.state(workflow_id=key))['workflow']
+        self.assertEqual(before['published_version'], 1)
+        self.assertNotEqual(before['published']['name'], definition['name'])
+        body = dict(action='unpublish_workflow', workflow_id=key, expected_revision=saved['revision'], request_id=str(uuid4()))
+        hidden = await self.service.workspace_command(self.users['a'], body)
+        self.assertTrue(hidden['ok'], hidden)
+        self.assertEqual(await self.service.workspace_command(self.users['a'], body), hidden)
+        state = await self.state(workflow_id=key, run_id=run['id'])
+        self.assertIsNone(state['workflow']['published_version'])
+        self.assertEqual(state['workflow']['draft'], definition)
+        self.assertEqual(state['workflow']['versions'], before['versions'])
+        self.assertEqual(state['run']['definition'], run['definition'])
+        for extra in ({}, {'version': 1}):
+            blocked = await self.command('start_run', workflow_id=key, expected_revision=hidden['revision'], **extra)
+            self.assertEqual(blocked['error']['code'], 'publication_required')
+        self.assertTrue((await self.command('human_confirm', actor='a', run_id=run['id'], job_id='j', expected_revision=1))['ok'])
+        stale = await self.command('publish_workflow', workflow_id=key, expected_revision=revision)
+        self.assertEqual(stale['error']['code'], 'revision_conflict')
+        republished = await self.command('publish_workflow', workflow_id=key, expected_revision=hidden['revision'])
+        self.assertEqual(republished['version'], 2)
+        final = (await self.state(workflow_id=key))['workflow']
+        self.assertEqual([v['version'] for v in final['versions']], [2, 1])
+        self.assertEqual(final['published']['name'], definition['name'])
+        access = next(item for item in (await self.state('admin'))['access'] if item['principal_id'] == 'a')
+        revoked = await self.command('save_access', access_id=access['id'], principal_kind='user', principal_id='a', system_id='EMS', factory_id='*', roles=['participant'], expected_revision=access['revision'])
+        self.assertTrue(revoked['ok'], revoked)
+        replay = await self.service.workspace_command(self.users['a'], body)
+        self.assertFalse(replay['ok'])
+        denied = await self.command('unpublish_workflow', actor='a', workflow_id=key, expected_revision=republished['revision'])
+        self.assertFalse(denied['ok'])
 
     async def test_empty_initializer_restart_and_no_implicit_native_access(self):
         self.assertEqual((await self.state())['workflows'], [])
@@ -559,9 +611,9 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(bad['error']['code'], 'request_conflict')
         stale = await self.command('save_draft', workflow_id=result['workflow_id'], definition=body['definition'], expected_revision=1)
         self.assertEqual(stale['error']['code'], 'revision_conflict')
-        failed = await self.command('publish_workflow', workflow_id=result['workflow_id'], expected_revision=2)
-        self.assertEqual(failed['error']['code'], 'validation_required')
-        with self.service._db() as db: self.assertEqual(db.execute('SELECT COUNT(*) FROM work_versions').fetchone()[0], 0)
+        published = await self.command('publish_workflow', workflow_id=result['workflow_id'], expected_revision=2)
+        self.assertTrue(published['ok'], published)
+        with self.service._db() as db: self.assertEqual(db.execute('SELECT COUNT(*) FROM work_versions').fetchone()[0], 1)
 
     async def test_setting_precedence_false_zero_empty_and_attempt_snapshot(self):
         fields = [{'id': 'amount', 'type': 'number', 'scope': 'workflow', 'required': True}, {'id': 'enabled', 'type': 'boolean', 'scope': 'workflow'}, {'id': 'note', 'type': 'text', 'scope': 'run'}]
@@ -937,9 +989,6 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(checked['validation']['errors'], checked)
         assets['skill_versions']['native-skill'] = 2
         assets['skill_bodies']['native-skill'] = 'private instruction two'
-        stale = await self.command('publish_workflow', workflow_id=key, expected_revision=revision + 1)
-        self.assertEqual(stale['error']['code'], 'validation_required')
-        await self.command('validate_workflow', workflow_id=key, expected_revision=revision + 1)
         published = await self.command('publish_workflow', workflow_id=key, expected_revision=revision + 1)
         self.assertTrue(published['ok'], published)
         state = await self.state(workflow_id=key)

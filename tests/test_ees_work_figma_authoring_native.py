@@ -76,6 +76,35 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         # finishes. Measure the rendered layout only after that motion settles.
         self.wait("!document.querySelector('#sidebar').getAnimations().length && !document.querySelector('.ees-panel-space').getAnimations().length")
 
+    def test_manual_publication_of_incomplete_procedure_and_unpublish_from_editor(self):
+        self.open_initialized_author_list()
+        created = self.command('create_workflow', system_id='EMS', name='미완성 게시 검증')
+        key = created['workflow_id']
+        self.refresh()
+        self.click('[data-author-action=open][data-id="' + key + '"]')
+        self.wait("document.querySelector('.ew-author-heading>.ew-author-tag')?.textContent === '미게시'")
+        self.assertEqual(self.text('[data-author-action=save]'), '저장')
+        self.assertEqual(self.text('[data-author-status]'), '저장됨')
+        self.assertFalse(self.read('[data-author-action=publish]', 'disabled'))
+        self.click('[data-author-action=publish]')
+        self.click('[data-dialog-confirm]')
+        self.wait("document.querySelector('.ew-author-heading>.ew-author-tag')?.textContent === '게시'")
+        self.assertEqual(self.state(workflow_id=key)['workflow']['published_version'], 1)
+        self.screenshot('procedure-manual-publication-incomplete')
+        self.click('[data-action=mode][data-mode=work]')
+        self.wait('document.querySelector(' + json.dumps('[data-action=workflow][data-workflow-id="' + key + '"]') + ')')
+        self.click('[data-action=mode][data-mode=author]')
+        self.wait("document.querySelector('[data-author-action=unpublish]')")
+        self.click('[data-author-action=unpublish]')
+        self.click('[data-dialog-confirm]')
+        self.wait("document.querySelector('.ew-author-heading>.ew-author-tag')?.textContent === '미게시'")
+        hidden = self.state(workflow_id=key)['workflow']
+        self.assertIsNone(hidden['published_version'])
+        self.assertEqual(len(hidden['versions']), 1)
+        self.click('[data-action=mode][data-mode=work]')
+        self.wait('!document.querySelector(' + json.dumps('[data-action=workflow][data-workflow-id="' + key + '"]') + ')')
+        self.screenshot('procedure-manual-unpublication')
+
     def test_authoring12_empty_rules_spacing_and_wrapped_guidance(self):
         """Figma 1902:3197 text/divider positions, without overlapping hit areas."""
         self.open_initialized_author_list()
@@ -335,10 +364,11 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertEqual(stored['nodes']['job-0']['deadline_notes'], original['nodes']['job-0']['deadline_notes'])
             self.assertEqual(stored['nodes']['job-0']['completion'], original['nodes']['job-0']['completion'])
             self.assertEqual(stored['authoring_review'], original['authoring_review'])
+            self.click('.ew-procedure-menu>summary')
             self.click('[data-author-action=validate]')
             self.wait("document.querySelector('.ew-author-validation')")
             self.assertTrue(self.state(workflow_id=key)['workflow']['validation']['errors'])
-            self.assertTrue(self.read('[data-author-action=publish]', 'disabled'))
+            self.assertFalse(self.read('[data-author-action=publish]', 'disabled'))
             self.click('[data-author-action=tab][data-tab=content]')
             self.open_author_job_ui('job-0')
             self.open_job_tool_setup()
@@ -358,6 +388,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 self.wait("!document.querySelector('#ees-work-dialog')")
                 self.assertEqual(self.state(workflow_id=key)['workflow'], saved_tool)
                 self.assertEqual(self.text('[data-author-status]'), clean_status)
+            self.click('.ew-procedure-menu>summary')
             self.click('[data-author-action=validate]')
             self.wait("document.querySelector('[data-author-action=publish]')?.disabled===false")
             self.assertEqual(self.state(workflow_id=key)['workflow']['validation']['errors'], [])
@@ -577,6 +608,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
         self.assertEqual(self.state(workflow_id=identifier)['workflow']['draft']['category'], 'setup')
+        self.click('.ew-procedure-menu>summary')
         self.click('[data-author-action=validate]')
         self.wait("document.querySelector('.ew-author-validation')")
         self.assertTrue(self.state(workflow_id=identifier)['workflow']['validation']['errors'])
@@ -633,6 +665,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.screenshot('c44-inline-business-' + str(width))
             self.key('Escape', 27)
             self.wait("!document.querySelector('#ew-summary-editor')")
+        self.click('.ew-procedure-menu>summary')
         self.click('[data-author-action=validate]')
         self.wait("document.querySelector('.ew-author-validation')")
         checked = self.state(workflow_id=identifier)['workflow']
@@ -1315,8 +1348,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertEqual(metrics['badge']['size'], '12px')
             self.assertEqual(metrics['badge']['background'], 'rgb(250, 241, 228)')
             self.assertLessEqual(metrics['overflow'], 1)
-            self.assertEqual(self.text('.ew-author-heading>.ew-author-tag'), '초안')
-            self.assertIn('초안 r1 · 저장됨', self.text('[data-author-status]'))
+            self.assertEqual(self.text('.ew-author-heading>.ew-author-tag'), '미게시')
+            self.assertIn('저장됨', self.text('[data-author-status]'))
             directory = self.screenshot('procedure-visual-content-empty-' + str(width))
             (directory / ('procedure-visual-content-empty-' + str(width) + '-geometry.json')).write_text(
                 json.dumps(metrics, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
@@ -1489,6 +1522,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertNotIn('tool_contract_revision', stored)
         self.assertEqual(set(stored['argument_bindings']), {'query', 'space_key', 'limit'})
         self.assertEqual(stored['read_retry'], {'count': 1, 'deadline_seconds': 30})
+        self.click('.ew-procedure-menu>summary')
         self.click('[data-author-action=validate]')
         self.wait("document.querySelector('[data-author-action=publish]')?.disabled === false")
         self.assertEqual(self.state(workflow_id=wid)['workflow']['validation']['errors'], [])
@@ -2596,6 +2630,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=summary_edit][data-id=business]')"),
                         self.browser.evaluate('document.activeElement?.outerHTML'))
         self.assertEqual(self.state(workflow_id=record['id'])['workflow']['revision'], 1)
+        self.click('.ew-procedure-menu>summary')
         self.click('[data-author-action="validate"]')
         self.wait("document.querySelector('.ew-author-validation')")
         validated = self.state(workflow_id=record['id'])['workflow']
@@ -2770,15 +2805,16 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         observed = self.state(workflow_id=key)['workflow']['draft']['nodes']['job-0']
         self.assertEqual(observed['read_retry'], {'count': 2})
         self.assertEqual(observed['tool_reference'], before['tool_reference'])
+        self.click('.ew-procedure-menu>summary')
         self.click('[data-author-action="validate"]')
         self.wait("document.querySelector('.ew-author-validation-row')?.textContent.includes('조회 재시도는 검증된 읽기 작업에만')")
-        self.assertEqual(self.text('.ew-author-validation h2'), '게시 전 확인')
-        self.assertIn('게시를 막는 문제 1', self.text('.ew-author-validation summary'))
+        self.assertEqual(self.text('.ew-author-validation h2'), '내용 확인')
+        self.assertIn('실행 전 보완 1', self.text('.ew-author-validation summary'))
         incomplete = self.state(workflow_id=key)['workflow']
         self.assertEqual(len(incomplete['validation']['errors']), 1)
         self.assertIn('job-0: 조회 재시도는 검증된 읽기 작업에만 0~3회, 전체 1~300초',
                       incomplete['validation']['errors'][0])
-        self.assertTrue(self.read('[data-author-action="publish"]', 'disabled'))
+        self.assertFalse(self.read('[data-author-action="publish"]', 'disabled'))
         self.screenshot('integrated-figma-read-retry-publication-blocker')
         corrected = deepcopy(incomplete['draft'])
         corrected['nodes']['job-0']['read_retry']['deadline_seconds'] = 30
@@ -2793,6 +2829,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         saved = self.state(workflow_id=key)['workflow']
         self.assertEqual(saved['draft']['nodes']['job-0']['read_retry'], {'count': 2, 'deadline_seconds': 30})
         self.assertEqual(saved['draft']['nodes']['job-0']['tool_reference'], before['tool_reference'])
+        self.click('.ew-procedure-menu>summary')
         self.click('[data-author-action="validate"]')
         self.wait("document.querySelector('[data-author-action=publish]')?.disabled === false")
         self.assertEqual(self.state(workflow_id=key)['workflow']['validation']['errors'], [])

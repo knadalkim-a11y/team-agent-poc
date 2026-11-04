@@ -293,7 +293,7 @@ def definition_check(definition, complete=True):
             if tool_connection_required(node):
                 warnings.append(f'{key}: 도구가 연결되지 않았습니다. 게시는 되지만, 도구를 연결해 다시 게시하기 전까지 이 작업과 이 작업이 있는 단계는 실행할 수 없습니다.')
             elif node.get('result_block') == 'change_request' and not ref:
-                errors.append(f'{key}: 운영 상태를 바꾸는 EES 요청 작업은 확인된 요청 도구를 연결해야 게시할 수 있습니다.')
+                errors.append(f'{key}: 운영 상태를 바꾸는 EES 요청 작업은 확인된 요청 도구를 연결해야 실행할 수 있습니다.')
             elif not isinstance(ref, dict) or any(not isinstance(ref.get(f), str) or not ref[f] for f in ('tool_id', 'function')):
                 errors.append(f'{key}: 검증된 Native 도구 참조가 필요합니다.')
             elif not (ref.get('content_hash') or ref.get('code_hash')):
@@ -961,7 +961,7 @@ class WorkspaceMixin:
             value['can_manage'] = False
         versions = list(db.execute('SELECT * FROM work_versions WHERE workflow_id=? ORDER BY version DESC', (row['id'],)))
         value['versions'] = [{**{key: version[key] for key in ('version', 'hash', 'publisher', 'published_at')}, 'definition': json.loads(version['definition'])} for version in versions]
-        value['published'] = json.loads(versions[0]['definition']) if versions else None
+        value['published'] = next((json.loads(version['definition']) for version in versions if version['version'] == row['published_version']), None)
         value['name'] = (value.get('draft') or value['published'] or {}).get('name', '')
         value['mode'] = (value.get('draft') or value['published'] or {}).get('mode', 'on_demand')
         value['execution_scope'] = (value.get('draft') or value['published'] or {}).get('execution_scope')
@@ -1353,7 +1353,7 @@ class WorkspaceMixin:
             if response.get('run'):
                 response['run'] = self._work_run_view(db, actor, groups, run, evidence_access)
         if response.get('workflow_id'):
-            self._work_definition(db, actor, groups, response['workflow_id'], body.get('action') in {'create_workflow', 'copy_workflow', 'save_draft', 'validate_workflow', 'publish_workflow'})
+            self._work_definition(db, actor, groups, response['workflow_id'], body.get('action') in {'create_workflow', 'copy_workflow', 'save_draft', 'validate_workflow', 'publish_workflow', 'unpublish_workflow'})
             if body.get('action') == 'save_settings':
                 definition = self._work_definition(db, actor, groups, response['workflow_id'])
                 self._work_authorize_scope(db, actor, groups, definition['system_id'], body.get('factory_id', ''), 'manager')
@@ -1543,7 +1543,7 @@ class WorkspaceMixin:
             if errors: _fail('invalid_definition', '\n'.join(errors))
             db.execute('INSERT INTO work_definitions VALUES(?,?,?,1,NULL,NULL,?,?)', (key, system, _dump(definition), actor_id, now))
             return {'workflow_id': key, 'revision': 1, 'workflow': self._work_workflow_view(db, actor, groups, self._work_definition(db, actor, groups, key, True))}
-        if action in ('save_draft', 'validate_workflow', 'publish_workflow', 'save_settings'):
+        if action in ('save_draft', 'validate_workflow', 'publish_workflow', 'unpublish_workflow', 'save_settings'):
             row = self._work_definition(db, actor, groups, body.get('workflow_id'), action != 'save_settings')
             definition = json.loads(row['draft'])
             if action == 'save_settings':
@@ -1577,6 +1577,9 @@ class WorkspaceMixin:
                 if definition['id'] != row['id'] or definition['system_id'] != row['system_id']: _fail('immutable_identity', '절차 ID와 관리 시스템은 바꿀 수 없습니다.')
                 db.execute('UPDATE work_definitions SET draft=?,revision=revision+1,validation=NULL,updated_at=? WHERE id=?', (_dump(definition), now, row['id']))
                 return {'workflow_id': row['id'], 'revision': row['revision'] + 1}
+            if action == 'unpublish_workflow':
+                db.execute('UPDATE work_definitions SET published_version=NULL,revision=revision+1,validation=NULL,updated_at=? WHERE id=?', (now, row['id']))
+                return {'workflow_id': row['id'], 'revision': row['revision'] + 1, 'published_version': None}
             errors, warnings = definition_check(definition)
             declared = {field['id']: field for node in definition['nodes'].values() for field in node.get('inputs', [])}
             for setting in db.execute('SELECT factory_id,values_json FROM work_settings WHERE workflow_id=?', (row['id'],)):
@@ -1593,16 +1596,18 @@ class WorkspaceMixin:
             if action == 'validate_workflow':
                 db.execute('UPDATE work_definitions SET validation=? WHERE id=?', (_dump(validation), row['id']))
                 return {'workflow_id': row['id'], 'revision': row['revision'], 'validation': validation}
-            prior = json.loads(row['validation']) if row['validation'] else {}
-            if errors or prior.get('revision') != row['revision'] or prior.get('definition_hash') != _hash(definition) or prior.get('errors') or prior.get('resource_versions') != validation['resource_versions']:
-                _fail('validation_required', '\n'.join(errors) or '현재 초안을 먼저 검사해 주세요.')
-            version = (row['published_version'] or 0) + 1
+            # Publication controls visibility; readiness checks are advisory here.
+            # History survives unpublishing, so the next version must not use the
+            # nullable publication pointer as its counter.
+            version = db.execute('SELECT COALESCE(MAX(version),0)+1 FROM work_versions WHERE workflow_id=?', (row['id'],)).fetchone()[0]
             definition = {**definition, 'resource_versions': validation['resource_versions']}
             db.execute('INSERT INTO work_versions VALUES(?,?,?,?,?,?)', (row['id'], version, _dump(definition), _hash(definition), actor_id, now))
             db.execute('UPDATE work_definitions SET published_version=?,revision=revision+1,validation=NULL,updated_at=? WHERE id=?', (version, now, row['id']))
             return {'workflow_id': row['id'], 'revision': row['revision'] + 1, 'version': version}
         if action in ('start_run', 'run_start'):
             row = self._work_definition(db, actor, groups, body.get('workflow_id')); _revision(body, row['revision'])
+            if row['published_version'] is None:
+                _fail('publication_required', '미게시 업무절차입니다. 게시한 뒤 새 진행 건을 시작해 주세요.')
             version = body.get('version', row['published_version'])
             published = db.execute('SELECT * FROM work_versions WHERE workflow_id=? AND version=?', (row['id'], version)).fetchone()
             if not published: _fail('publication_required', '게시된 절차 버전을 선택해 주세요.')
@@ -1611,6 +1616,8 @@ class WorkspaceMixin:
             if definition.get('execution_scope') == 'factory' and not factory_id:
                 _fail('factory_required', '시작할 공장을 선택해 주세요.')
             self._work_authorize_scope(db, actor, groups, row['system_id'], factory_id, 'participant')
+            errors, _ = definition_check(definition)
+            if errors: _fail('execution_not_ready', '실행 전에 업무절차를 보완해 주세요.\n' + '\n'.join(errors))
             factory = db.execute('SELECT * FROM work_factories WHERE id=? AND system_id=?', (factory_id, row['system_id'])).fetchone() if factory_id else None
             if factory_id and not factory: _fail('factory_not_found', '등록된 공장을 선택해 주세요.')
             if not concurrent_runs_allowed(definition) and db.execute("SELECT 1 FROM work_runs WHERE workflow_id=? AND system_id=? AND factory_id=? AND status NOT IN ('completed','cancelled') LIMIT 1", (row['id'], row['system_id'], factory_id)).fetchone():

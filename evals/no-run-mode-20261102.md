@@ -87,3 +87,10 @@
 - CI439의 30개 job 언급은 첫 조회 범위였다. 전체 40개 최종 집계는 36성공·2실패·1취소·PR 출하1정상생략이다. 실제 시험 실패 native-compose와 이를 반영한 Delivery checks 실패/취소를 구분한다.
 - 보완 head `0b1338840276248cc59d60e62878eebef8d7c0bc`의 [CI440](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41553995759)은 39성공·PR 출하1정상생략. Native 작성·브라우저·전체 제품, Windows 및 양쪽 Delivery checks가 모두 통과했다.
 - 사용자 “병합하고 진행해” 요청에 따라 [#115](https://github.com/knadalkim-a11y/team-agent-poc/pull/115)를 main `253cb3c6a16880aeb8be7113ecb7006a6f15585c`에 병합했다. 병합 뒤 Figma B067을 정리했다(C134에 기록). 사내 적용은 하지 않았다.
+
+
+## 2026-11-05 후속 · 게시 상태를 완성도와 분리
+
+[사용자 계약](../docs/mockups/ees-work/TASK.md#procedure-publication-20261105)이 위 11-02의 게시 차단 조건을 대체한다. 불완전한 EES 요청도 목록 게시가 가능하며 실제 시작/실행은 준비 검사로 막는다. 기존 자동 실행 금지·Native 권한과 도구 지문·근거 검증은 그대로 유지한다.
+
+로컬 검증과 최종 통합 CI는 이 변경 PR에 기록한다. 업무절차 DB의 기존 행·진행 건·버전은 이동하거나 삭제하지 않는다. Figma 14판 상태/버튼을 갱신했으며, 화면 캡처의 게시 상태·저장·게시·미게시로 변경이 겹치지 않는지 확인했다. 사내 실제 적용·기존 5개 절차 게시 여부는 아직 확인하지 않았다.
