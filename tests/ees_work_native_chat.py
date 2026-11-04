@@ -224,7 +224,7 @@ def central_flow(g):
     g.click('[data-author-action=inline_apply]')
     g.click('[data-author-action=stage_edit]');g.type('#ew-stage-editor [name=description]','저장된 기준 안내')
     g.click('[data-author-action=inline_apply]')
-    g.click('[data-author-action=save]');g.wait('document.querySelector("#ees-work-designer")?.innerText.includes("초안 r2")')
+    g.click('[data-author-action=save]');g.wait('document.querySelector("[data-author-status]")?.dataset.authorRevision === "2"')
     workflow=next(item for item in g.api('/api/ees-work/workspace')['workflows'] if item['name']=='중앙 대화 제안 검증')
     key=workflow['id'];before=g.api('/api/ees-work/workspace?workflow_id='+key)['workflow']
     assert before['revision']==2 and before['published_version'] is None
@@ -258,7 +258,7 @@ def central_flow(g):
     g.wait('document.querySelector(".ew-stage-description p")?.textContent === "중앙 대화 제안 · 사람 반영 전"')
     assert g.api('/api/ees-work/workspace?workflow_id='+key)['workflow']==before
     g.capture('native-central-human-applied-unsaved')
-    g.click('[data-author-action=save]');g.wait('document.querySelector("#ees-work-designer")?.innerText.includes("초안 r3")')
+    g.click('[data-author-action=save]');g.wait('document.querySelector("[data-author-status]")?.dataset.authorRevision === "3"')
     after=g.api('/api/ees-work/workspace?workflow_id='+key)['workflow']
     assert after['revision']==3 and after['draft']==g.provider.proposed and after['published_version'] is None
     assert g.api('/api/ees-work/workspace')['runs']==[]
@@ -309,9 +309,9 @@ def input_and_history_flow(g,key,chat_id):
     g.wait('document.querySelector(".ew-work-content")')
     g.click('[data-author-action=list]')
     g.click('[data-author-action=open][data-id="'+key+'"]')
-    g.wait('document.querySelector("[data-author-status]")?.textContent.includes('
-           +json.dumps('초안 r'+str(seeded['revision'])+' · 저장됨')+')')
-    g.click('[data-author-action=validate]');g.click('[data-author-action=publish]');g.click('#ees-work-dialog [data-dialog-confirm]')
+    g.wait('document.querySelector("[data-author-status]")?.dataset.authorRevision === '
+           +json.dumps(str(seeded['revision'])))
+    g.click('.ew-procedure-menu>summary');g.click('[data-author-action=validate]');g.click('[data-author-action=publish]');g.click('#ees-work-dialog [data-dialog-confirm]')
     g.wait('!document.querySelector("#ees-work-dialog") && document.querySelector("#ees-work-designer [role=status]")?.textContent.includes("새 게시 버전을 만들었습니다")')
     g.click('[data-author-action=tab][data-tab=history]')
     g.wait('document.querySelector(".ew-author-history")?.textContent.includes("게시 v1")')

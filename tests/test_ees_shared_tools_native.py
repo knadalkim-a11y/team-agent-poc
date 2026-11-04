@@ -136,12 +136,14 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         await self.core('save_draft', 3, workflow_id=wid, definition=definition)
         validated = await self.core('validate_workflow', 4, workflow_id=wid)
         self.assertIn(notice, '\n'.join(validated['validation']['errors']))
-        rejected = await self.service.workspace_command(self.admin, self.body('publish_workflow', 4, workflow_id=wid))
+        await self.core('publish_workflow', 4, workflow_id=wid)
+        rejected = await self.service.workspace_command(self.reader, self.body('start_run', 5, workflow_id=wid))
         self.assertFalse(rejected['ok'], rejected)
-        self.assertEqual(rejected['error']['code'], 'validation_required')
+        self.assertEqual(rejected['error']['code'], 'execution_not_ready')
         self.assertIn(notice, rejected['error']['message'])
         with self.service._db() as db:
-            self.assertEqual(db.execute('SELECT count(*) FROM work_versions WHERE workflow_id=?', (wid,)).fetchone()[0], 1)
+            self.assertEqual(db.execute('SELECT count(*) FROM work_versions WHERE workflow_id=?', (wid,)).fetchone()[0], 2)
+            self.assertEqual(db.execute('SELECT count(*) FROM work_runs WHERE workflow_id=?', (wid,)).fetchone()[0], 0)
 
     async def test_publication_rejects_binding_keys_outside_shared_input_schema(self):
         await self.rejected_shared_binding('issue_keys', {'constant': ['CR-1']}, '공용 도구 입력에 없는 인자 연결')
@@ -174,8 +176,10 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
                 self.assertTrue(saved['ok'], saved)
                 validated = await self.core('validate_workflow', 4, workflow_id=wid)
                 self.assertTrue(validated['validation']['errors'], bindings)
-                rejected = await self.service.workspace_command(self.admin, self.body('publish_workflow', 4, workflow_id=wid))
+                await self.core('publish_workflow', 4, workflow_id=wid)
+                rejected = await self.service.workspace_command(self.reader, self.body('start_run', 5, workflow_id=wid))
                 self.assertFalse(rejected['ok'], rejected)
+                self.assertEqual(rejected['error']['code'], 'execution_not_ready')
 
     async def test_publication_accepts_compatible_manual_input_and_constant_bindings(self):
         await self.review()
@@ -296,7 +300,8 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         await self.core('save_draft', 3, workflow_id=wid, definition=definition)
         result = await self.core('validate_workflow', 4, workflow_id=wid)
         self.assertIn('목록 결과', '\n'.join(result['validation']['errors']))
-        rejected = await self.service.workspace_command(self.admin, self.body('publish_workflow', 4, workflow_id=wid))
+        await self.core('publish_workflow', 4, workflow_id=wid)
+        rejected = await self.service.workspace_command(self.reader, self.body('start_run', 5, workflow_id=wid))
         self.assertFalse(rejected['ok'], rejected)
 
     async def test_unavailable_reviewed_tool_can_be_disabled_and_access_revoked_only(self):

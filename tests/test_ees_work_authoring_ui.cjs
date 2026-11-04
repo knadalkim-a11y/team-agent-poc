@@ -1216,3 +1216,7 @@ test('late legacy tool details cannot overwrite a different tool owner context',
  test('saving a new stage includes its inline name without a separate apply',async()=>{
  const h=harness();h.click('add_stage');await flush();h.field('name','미완성 단계');h.click('save');await flush();assert.equal(h.writes.length,1);assert.ok(Object.values(h.writes[0].definition.nodes).some(n=>n.name==='미완성 단계'));assert.equal(h.draft().dirty,false);
  });
+
+test('unpublishing keeps unsaved typing and acknowledges its revision before the next save',async()=>{
+ const h=harness();h.workflows.get('w').published_version=1;h.render();await h.node();h.field('job_guidance','아직 저장하지 않은 안내');h.dialogs.push({});h.click('unpublish');await flush();assert.equal(h.draft().dirty,true);assert.equal(h.draft().revision,2);assert.equal(h.draft().definition.nodes.j.instructions,'아직 저장하지 않은 안내');assert.match(h.markup,/data-state="draft">미게시</);h.click('save');await flush();assert.equal(h.writes.at(-1).expected_revision,2);assert.equal(h.writes.at(-1).definition.nodes.j.instructions,'아직 저장하지 않은 안내');assert.equal(h.workflows.get('w').published_version,null);
+});
