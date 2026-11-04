@@ -215,7 +215,14 @@ class MotionNativeTests(IntegratedNativeCase):
             buttonGap:next.top-r.bottom,overflow:s.overflow};}))()"""
         heading_evidence = []
         for width, height, reduced in ((1920, 1080, False), (1366, 768, False), (1366, 768, True)):
+            previous_width = self.browser.evaluate('innerWidth')
             self.viewport(width, height)
+            # Crossing 1440px automatically compacts the source sidebar.
+            # Open it with the real toggle before measuring expanded headings.
+            if (previous_width < 1440) != (width < 1440):
+                self.wait("document.querySelector('#sidebar').dataset.compact === " +
+                          json.dumps('true' if width < 1440 else 'false'))
+            self.open_sidebar()
             self.browser.call('Emulation.setEmulatedMedia', {'features': [
                 {'name': 'prefers-reduced-motion', 'value': 'reduce' if reduced else 'no-preference'}]})
             for reopened in (False, True):
@@ -224,13 +231,15 @@ class MotionNativeTests(IntegratedNativeCase):
                     self.wait("document.querySelector('#sidebar').dataset.compact === 'false'")
                 self.wait("document.querySelector('#sidebar').getAnimations({subtree:true}).every(a=>a.playState !== 'running')")
                 rows = self.browser.evaluate(heading_metrics)
+                heading_evidence.append({'viewport': [width, height], 'reduced': reduced,
+                    'reopened': reopened, 'headings': rows})
+                (directory / 'workspace-heading-geometry.json').write_text(
+                    json.dumps(heading_evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
                 self.assertEqual([row['text'] for row in rows], ['업무 만들기', 'AI 설정', '관리자만'])
-                self.assertEqual([row['height'] for row in rows], [26, 36, 36])
+                self.assertEqual([row['height'] for row in rows], [26, 36, 36], heading_evidence[-1])
                 for row in rows:
                     self.assertGreaterEqual(row['available'], row['lineHeight'], row)
                     self.assertGreaterEqual(row['buttonGap'], 0, row)
-                heading_evidence.append({'viewport': [width, height], 'reduced': reduced,
-                    'reopened': reopened, 'headings': rows})
                 if not reopened:
                     self.click('[data-ees-sidebar-toggle]')
                     self.wait("document.querySelector('#sidebar').dataset.compact === 'true' && [...document.querySelectorAll('.ew-nav-group-title')].every(e=>e.getBoundingClientRect().height === 0)")
@@ -238,8 +247,6 @@ class MotionNativeTests(IntegratedNativeCase):
                                         for row in self.browser.evaluate(heading_metrics)))
             if width == 1366 and not reduced:
                 self.screenshot('workspace-heading-1366')
-        (directory / 'workspace-heading-geometry.json').write_text(
-            json.dumps(heading_evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         self.assertEqual(self.server.completions, [])
 
     def test_c3_docked_panel_slides_opaque_and_reserves_space_while_preserving_work(self):
