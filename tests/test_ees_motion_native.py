@@ -5,6 +5,7 @@ frontend and temporary workflow service are real. Frame/style observations are
 retained alongside screenshots so still images cannot count as motion evidence.
 """
 import asyncio
+import importlib
 import json
 import os
 from pathlib import Path
@@ -190,6 +191,19 @@ class MotionNativeTests(IntegratedNativeCase):
 
         # Check the line box, not just textContent: an 18px border box used to
         # clip these headings once their existing 10/20px padding was included.
+        # This workflow fixture has no Native account database; explicitly
+        # enable its synthetic Native menus, as in SourceShellNativeTests.
+        native = importlib.import_module(self.backend.__package__ + '.ees_workflow_native')
+
+        async def access(_actor):
+            return {'native_access': dict.fromkeys(
+                ('models', 'knowledge', 'prompts', 'skills', 'tools', 'admin'), True),
+                'native_access_available': True}
+
+        provider = patch.object(native, 'native_workspace_access', access)
+        provider.start()
+        self.addCleanup(provider.stop)
+        self.refresh()
         self.click('[data-mode=author]')
         self.wait("document.querySelectorAll('.ew-nav-group-title').length === 3")
         heading_metrics = """(()=>[...document.querySelectorAll('.ew-nav-group-title')].map(e=>{

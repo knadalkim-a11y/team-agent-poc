@@ -9,6 +9,7 @@
 - **수정:** 일반 설명의 18px와 그룹 제목의 26/36px를 분리한다. 접을 때 제목의 높이와 위아래 여백을 함께 0으로 전환하고 펼치면 원래 간격으로 돌아온다. 기존 속도·이징·동작 줄이기 설정을 재사용하며 새 화면·기능·설정은 추가하지 않는다. Figma·승인 목업·저장/게시·권한 동작은 변경하지 않는다.
 - **재발 검사:** 기존 `test_navigation_v2_geometry_modes_categories_global_tools_and_draft`에서 관리자 제목 3개의 실제 높이, 여백을 뺀 가용 높이와 행 높이, 다음 버튼과의 겹침을 확인한다. 1920×1080·1366×768과 동작 줄이기에서 접기 후 높이/여백 0·재펼침 복구를 검사하며 `workspace-heading-1366.png`와 `workspace-heading-geometry.json`을 CI 증거에 남긴다.
 - **로컬 검증:** 관련 Node motion/Svelte 39/39, branding 33통과·공식 wheel 필요 1생략, 수정한 Python 시험 구문·문서 점검(오류0/검토 후보0)·시험 ID 감사(기존1332/현재1591, 오류0)·`git diff --check` 통과. 최종 전체 CI는 이 수정 PR에서 확인한다. 최초 로컬 Chromium 기동은 `socket() failed: Operation not permitted`로 중단되어 실제 제품 브라우저 재현을 로컬 성공으로 기록하지 않는다. 사내 사용자 화면·배포는 미확인이다.
+- **첫 CI·보완:** head `10d01f4`의 [CI451 native-compose](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41931724663/job/126932846049)는 95통과·1실패였다. 새 제목 검사에서 세 제목을 기다렸지만 합성 workflow fixture에는 Native 계정 DB가 없어 `native_access`가 모두 false였고 ‘AI 설정’ 그룹 자체가 없었다. 실패 캡처에서 ‘업무 만들기·관리자만’의 정상 표시는 확인했지만 세 제목 검증 완료로 간주하지 않는다. 기존 `SourceShellNativeTests.enable_native_menus`와 같은 명시적 합성 접근 응답을 이 시험 안에만 설정하고 refresh 후 검사하도록 보완한다. 제품 권한·CSS는 추가 변경하지 않으며, 높이·간격·접기/재펼침 조건도 그대로 유지한다. 보완 head의 전체 CI와 3개 제목 실측·캡처를 확인한 뒤 병합한다.
 
 <a id="navigation-motion-product-20261102"></a>
 
