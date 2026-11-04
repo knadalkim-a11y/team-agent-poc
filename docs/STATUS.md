@@ -4,7 +4,7 @@
 
 - **현재:** 사용자 요청으로 PR #117(꺼진 ‘실행’ 단추 모양, 시스템 공용 계정 결정)을 최종 head `7425f21`의 [CI446](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41588611892) 39성공·PR 출하1생략과 Codex 리뷰 지적 없음을 확인한 뒤 main `93749cc10fc551748c018a06cc85318013d2970d`에 병합했다. 2단계 결정은 시스템마다 로그인 계정 하나를 담당자들이 함께 쓰고 그 계정의 도구 개인 설정에 시스템 토큰을 넣는 것이다. [결정과 감수할 점](mockups/ees-work/TASK.md#system-account-decision-20261103) · [2단계 기록](../evals/factory-unit-runs-20261103.md#system-account-check-20261103)
 - **변경(문서만):** 사용자 질문(“시스템 토큰이 뭔데”)과 요청에 따라 [사용 안내](07-team-quickstart.md#system-account-20261103)·ST-AUTH-5·AGENTS 5장에 시스템 토큰을 풀어 썼다. 그 시스템용으로 Jira·Confluence·GitHub에서 서비스마다 발급받은 토큰이고, 쓰는 서비스와 권한은 시스템마다 다를 수 있으며, 실행에는 실행한 계정의 토큰이 쓰인다.
-- **검증:** 문서 점검·diff 검사 통과. 문서만 바뀌어 EES delivery CI는 돌지 않는다(경로 조건).
+- **검증:** 문서 점검·diff 검사 통과. `docs/**`가 EES delivery CI의 경로 조건에 들어 있어 PR #118의 CI로 전체 검사를 확인한다.
 - **다음 하나:** 이 문서 PR의 검토·병합. 실제 시스템 계정과 서비스별 토큰의 발급·권한 범위, 사내 적용은 미확인이다.
 
 > 아래 1단계 상태는 당시 기록이다. ‘다음 하나’는 위를 따른다.
