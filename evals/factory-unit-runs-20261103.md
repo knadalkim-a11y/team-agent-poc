@@ -82,3 +82,13 @@ Linux 격리 작업 사본, Python 3.11.17 `.venv`, Node 22.22.0. Python 의존�
 - **재발 방지:** 단추 상태의 시험이 실행 중·다른 사람 담당·보기 권한만·켜짐을 함께 확인한다(`tests/test_ees_work_figma_runtime_ui.cjs`). 시안에서 실제 화면 위치를 고를 때 설계한 Figma 페이지에 있는 화면인지 먼저 확인해야 한다는 점(3판 ⑩-2를 설계 전 패널에서 고른 실수)은 TASK 4판 기록에 남겼다.
 - **PR CI와 병합(2026-11-03~04):** PR #117 최종 head `7425f21`의 [CI446](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41588611892)은 39성공·PR 출하1생략이다. 로컬에서 못 돌린 Complete Native product·native-compose·Windows 시험이 통과해 위 미확인의 Native 브라우저 확인을 닫는다. Codex 리뷰는 지적 없음. 사용자 요청으로 main `93749cc`에 병합 커밋으로 합쳐 시안 10의 판별 커밋이 main 기록에 남는다.
 - **시스템 토큰 설명(2026-11-04):** 사용자 질문 “시스템 토큰이 뭔데”와 요청 “각 시스템별로 토큰이 달라질수도 있을거같아”에 따라 사용 안내·ST-AUTH-5·AGENTS 5장·TASK에 풀어 썼다(서비스마다 하나, 시스템마다 다를 수 있음, 실행한 계정의 토큰 사용). 제품은 바꾸지 않았고 `scripts/check_docs.py`·`git diff --check`로 확인했다. 처음에는 workflow 경로 조건 목록의 앞부분만 보고 문서 변경에는 CI가 돌지 않는다고 STATUS·PR에 적었으나, 목록 뒤쪽에 `docs/**`·`README.md`가 있어 CI가 돌았다. 같은 PR에서 바로잡았으며, 경로 조건은 전체 목록과 대조한다.
+
+<a id="browser-startup-timeout-20261104"></a>
+
+### 병합 뒤 CI의 브라우저 준비 실패 (2026-11-04)
+
+- **증상:** main `93749cc`(#117 병합)의 [CI447](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41925504602) 1회차에서 `Complete Native product`가 Chrome 기동 10,038ms 뒤 `Readiness failed: !!document.querySelector("#ew-procedure-create")`로 실패했다. PR #118 head `2e26648`의 [CI449](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41927059414) 1회차에서는 `native-work`의 `test_empty_state_has_no_seed_run_or_fake_success`가 시험 본문 전 setUp의 `navigate('about:blank')`에서 `Chrome DevTools response timed out`로 멈췄다. 두 실행의 집계 단계는 이 결과를 따라 실패했다.
+- **환경:** ubuntu-24.04 러너 이미지 20261025.353.1, Chrome 156.0.8078.79, Python 3.11.18. 같은 시험이 통과한 CI446(2026-11-03)은 Chrome 156.0.8078.47, Python 3.11.17이었다.
+- **증거:** main `93749cc`와 PR head `7425f21`은 tree가 같고, CI446에서 같은 시험이 통과했다. CI449 1회차에서는 `Complete Native product`가 통과했다. 실패한 작업만 한 번씩 다시 실행해 CI447·CI449 2회차가 모두 성공했다. 코드·시험·시간 한도는 바꾸지 않았다.
+- **판단:** 브라우저 준비 단계의 일시적 지연으로 보이며 근본 원인은 확인하지 못했다. 재실행 성공을 원인 해결로 보지 않는다. `about:blank` 단계의 DevTools 시간 초과는 이전 기록 [2026-09-14](scenarios.md#specialists-editor-format-20260914)·[2026-09-11](scenarios.md#connector-demo-starters)·[2026-10-20](v4-ui-20260930.md#common-motion-c3-20261020)과 같은 유형의 재발이다. 이전에도 재실행으로 통과했고 시험은 바꾸지 않았다.
+- **남은 항목:** 다시 나오면 브라우저 시험 준비 단계(기동·첫 이동)를 한 번 다시 시도하게 하는 시험 보완을 사용자와 정한다.
