@@ -838,7 +838,7 @@ test('2026-11-02 an unconnected tool job shows a reason and disables its run and
  const rendered=html('workStageHTML(state,{stage_tab:"work"},stage)',{state:h.state,stage:nodes.t});
  assert.match(rendered.body,/<span data-tool-connection-required>도구 연결 필요 1개 · 워크스페이스에서 연결해 다시 게시해야 실행됩니다<\/span>/);
  assert.match(rendered.body,/aria-label="1차 점검 단계 실행" disabled data-own-disabled="true" title="도구가 연결되지 않은 작업이 있어 이 단계를 실행할 수 없습니다"/);
- assert.match(rendered.body,/aria-label="실제 도구 실행" data-mutation disabled data-own-disabled="true" title="도구가 연결되지 않아 실행할 수 없습니다"/);
+ assert.match(rendered.body,/aria-label="실제 도구 실행" data-mutation disabled data-own-disabled="true" data-run-blocked title="도구가 연결되지 않아 실행할 수 없습니다"/);
  assert.match(rendered.body,/도구 연결 필요/);
  await h.api.handleClick({dataset:{action:'stage_execute',jobId:'a'}});assert.equal(h.mutations().length,0);
  // A shared tool or a contract counts as connected; only a missing tool blocks.
@@ -846,6 +846,22 @@ test('2026-11-02 an unconnected tool job shows a reason and disables its run and
   assert.equal(html('workToolConnectionRequired(node)',{node:{mode:'tool',...connection}}),false);
  assert.equal(html('workToolConnectionRequired(node)',{node:{mode:'tool',result_block:'change_request'}}),false);
  assert.equal(html('workToolConnectionRequired(node)',{node:{mode:'human'}}),false);
+});
+
+test('2026-11-03 a run that cannot start keeps the text-button shape while running keeps the designed muted box',()=>{
+ // Figma 업무 · 운영 and the stage mocks draw only 실행 중 as the muted box; the user asked that a blocked 실행 match 다시 실행.
+ const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'../branding/ees/ui/ees-work-launcher.css'),'utf8');
+ assert.match(css,/#ees-work-panel\.ew-vd \.ew-vd-run:disabled\{color:var\(--ees-text-tertiary\);background:var\(--ees-surface-muted\);cursor:default\}/);
+ assert.match(css,/#ees-work-panel\.ew-vd \.ew-vd-run\[data-run-blocked\]:disabled\{background:transparent\}/);
+ const runButton=job=>{const h=stageRuntimeFixture(),nodes=h.state.run.definition.nodes;job(h.state.run);const body=html('workStageHTML(state,{stage_tab:"work"},stage)',{state:h.state,stage:nodes.t}).body;return body.match(/<button type="button" class="ew-vd-run"[^>]*data-job-id="a"[^>]*>/)?.[0] || '';};
+ const running=runButton(run=>{run.jobs.a={status:'running',can_execute:false};});
+ assert.match(running,/ disabled /);assert.doesNotMatch(running,/data-run-blocked/);
+ const claimed=runButton(run=>{run.jobs.a={status:'ready',can_execute:false,permission_reason:'task_claimed'};});
+ assert.match(claimed,/ disabled data-own-disabled="true" data-run-blocked>/);
+ const viewer=runButton(run=>{run.can_write=false;});
+ assert.match(viewer,/ disabled data-own-disabled="true" data-run-blocked>/);
+ const ready=runButton(()=>{});
+ assert.doesNotMatch(ready,/disabled|data-run-blocked/);
 });
 
 test('2026-11-02 run details keep stage and procedure runs disabled across busy updates while a tool is unconnected',()=>{
