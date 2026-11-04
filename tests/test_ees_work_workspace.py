@@ -635,6 +635,43 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         forbidden = await self.command('save_inputs', actor='a', run_id=run['id'], expected_revision=2, inputs={'pat': 'not-a-real-secret'})
         self.assertEqual(forbidden['error']['code'], 'secret_forbidden')
 
+    async def test_changed_setting_scope_allows_publication_but_blocks_new_run_until_cleared(self):
+        for scope in ('run', 'factory', 'deleted'):
+            with self.subTest(scope=scope):
+                key, definition, revision = await self.create(fields=[{'id': 'target', 'type': 'text', 'scope': 'workflow'}])
+                saved = await self.command('save_settings', workflow_id=key, values={'target': 'old shared target'})
+                self.assertTrue(saved['ok'], saved)
+                definition['nodes']['j']['inputs'] = [] if scope == 'deleted' else [{'id': 'target', 'type': 'text', 'scope': scope}]
+                saved = await self.command('save_draft', workflow_id=key, definition=definition, expected_revision=revision)
+                self.assertTrue(saved['ok'], saved)
+                published = await self.command('publish_workflow', workflow_id=key, expected_revision=saved['revision'])
+                self.assertTrue(published['ok'], published)
+                self.assertIn(key, {item['id'] for item in (await self.state())['workflows']})
+                blocked = await self.command('start_run', actor='a', workflow_id=key, expected_revision=published['revision'])
+                self.assertEqual(blocked.get('error', {}).get('code'), 'execution_not_ready', blocked)
+                self.assertIn('저장 범위', blocked['error']['message'])
+                with self.service._db() as db:
+                    self.assertEqual(db.execute('SELECT COUNT(*) FROM work_runs WHERE workflow_id=?', (key,)).fetchone()[0], 0)
+                cleared = await self.command('save_settings', workflow_id=key, values={}, expected_revision=1)
+                self.assertTrue(cleared['ok'], cleared)
+                run = await self.start(key, revision=published['revision'])
+                with self.service._db() as db:
+                    row = db.execute('SELECT * FROM work_runs WHERE id=?', (run['id'],)).fetchone()
+                    self.assertNotIn('target', self.service._work_snapshot(db, row, 'j')['inputs'])
+
+    async def test_incompatible_setting_in_another_factory_does_not_block_current_factory(self):
+        for factory in ('factory-1', 'factory-2'):
+            self.assertTrue((await self.command('save_factory', factory_id=factory, system_id='EMS', name=factory))['ok'])
+        key, definition, revision = await self.create(fields=[{'id': 'target', 'type': 'text', 'scope': 'workflow'}])
+        self.assertTrue((await self.command('save_settings', workflow_id=key, factory_id='factory-1', values={'target': 'old target'}))['ok'])
+        definition['nodes']['j']['inputs'][0]['scope'] = 'run'
+        saved = await self.command('save_draft', workflow_id=key, definition=definition, expected_revision=revision)
+        published = await self.command('publish_workflow', workflow_id=key, expected_revision=saved['revision'])
+        blocked = await self.command('start_run', actor='a', workflow_id=key, factory_id='factory-1', expected_revision=published['revision'])
+        self.assertEqual(blocked.get('error', {}).get('code'), 'execution_not_ready', blocked)
+        run = await self.start(key, revision=published['revision'], factory_id='factory-2')
+        self.assertEqual(run['factory_id'], 'factory-2')
+
     async def test_human_confirmation_retry_invalidates_only_dependents_and_history(self):
         key, _, _ = await self.create(dependent=True)
         run = await self.start(key)

@@ -382,6 +382,17 @@ def _options_query_valid(field):
     return isinstance(path, list) and len(path) <= 8 and all(_id(key) for key in path) and _id(query.get('value_field')) and _id(query.get('label_field'))
 
 
+def settings_errors(definition, settings):
+    declared = {field['id']: field for node in definition['nodes'].values() for field in node.get('inputs', [])}
+    errors = []
+    for setting in settings:
+        for key in json.loads(setting['values_json']):
+            field = declared.get(key)
+            if not field or field.get('scope', 'run') == 'run' or (field.get('scope') == 'factory' and not setting['factory_id']):
+                errors.append(f'{key}: 삭제되거나 저장 범위가 바뀐 업무 설정을 먼저 정리해 주세요.')
+    return errors
+
+
 def input_errors(fields, values, complete=True, options_snapshot=None):
     errors = []
     by_id = {field['id']: field for field in fields}
@@ -1581,12 +1592,7 @@ class WorkspaceMixin:
                 db.execute('UPDATE work_definitions SET published_version=NULL,revision=revision+1,validation=NULL,updated_at=? WHERE id=?', (now, row['id']))
                 return {'workflow_id': row['id'], 'revision': row['revision'] + 1, 'published_version': None}
             errors, warnings = definition_check(definition)
-            declared = {field['id']: field for node in definition['nodes'].values() for field in node.get('inputs', [])}
-            for setting in db.execute('SELECT factory_id,values_json FROM work_settings WHERE workflow_id=?', (row['id'],)):
-                for key in json.loads(setting['values_json']):
-                    field = declared.get(key)
-                    if not field or field.get('scope', 'run') == 'run' or (field.get('scope') == 'factory' and not setting['factory_id']):
-                        errors.append(f'{key}: 삭제되거나 저장 범위가 바뀐 업무 설정을 먼저 정리해 주세요.')
+            errors.extend(settings_errors(definition, db.execute('SELECT factory_id,values_json FROM work_settings WHERE workflow_id=?', (row['id'],))))
             errors.extend(publication_errors)
             if hasattr(self, 'operations') and hasattr(self.operations, 'validate_publication'):
                 errors.extend(self.operations.validate_publication(db, definition, actor, groups))
@@ -1617,6 +1623,7 @@ class WorkspaceMixin:
                 _fail('factory_required', '시작할 공장을 선택해 주세요.')
             self._work_authorize_scope(db, actor, groups, row['system_id'], factory_id, 'participant')
             errors, _ = definition_check(definition)
+            errors.extend(settings_errors(definition, db.execute('SELECT factory_id,values_json FROM work_settings WHERE workflow_id=? AND factory_id IN (?,?)', (row['id'], '', factory_id))))
             if errors: _fail('execution_not_ready', '실행 전에 업무절차를 보완해 주세요.\n' + '\n'.join(errors))
             factory = db.execute('SELECT * FROM work_factories WHERE id=? AND system_id=?', (factory_id, row['system_id'])).fetchone() if factory_id else None
             if factory_id and not factory: _fail('factory_not_found', '등록된 공장을 선택해 주세요.')
