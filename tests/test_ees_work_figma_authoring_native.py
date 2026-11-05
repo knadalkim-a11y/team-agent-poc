@@ -2039,7 +2039,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('.ew-procedure-menu>summary')
         self.click('[data-author-action=validate]')
         self.wait("document.querySelector('.ew-author-validation')")
-        self.assertTrue(self.state(workflow_id=key)['workflow']['validation']['errors'])
+        validation = self.state(workflow_id=key)['workflow']['validation']
+        self.assertEqual(validation['errors'], [])
+        self.assertEqual([warning for warning in validation['warnings'] if warning.startswith('job-0:')],
+                         ['job-0: 도구가 연결되지 않았습니다. 게시는 되지만, 도구를 연결해 다시 게시하기 전까지 이 작업과 이 작업이 있는 단계는 실행할 수 없습니다.'])
         self.assertFalse(self.read('[data-author-action=publish]', 'disabled'))
         self.screenshot('tools-phase3-t08a-incomplete-publication-1920')
         self.click('[data-author-action=publish]'); self.click('[data-dialog-confirm]')

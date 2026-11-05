@@ -98,7 +98,14 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
     def test_tools_phase3_shared_start_execution_whole_job_judgment_and_history(self):
         fixture, tool_id, active = self.phase3_authored_tool()
         key = self.phase3_workflow(fixture, tool_id, active)
-        self.server.user = self.users['other-user']
+        # Native session fields are required even when the service actor only
+        # needs id/role; keep this account's identity and participant grants.
+        member = deepcopy(self.server.user)
+        member.update(self.users['other-user'], email='other-user@example.invalid')
+        self.users[member['id']] = member
+        self.server.user = member
+        for chat in self.server.chats.values():
+            chat['user_id'] = member['id']
         self.navigate('/c/existing-chat')
         self.wait("document.querySelector('#ees-work-system-trigger')")
         self.open_sidebar(); self.refresh()

@@ -196,3 +196,14 @@ CI484 최종은 40 jobs 중 35성공·3실패·Windows 집계1취소·출하1정
 명세 밖 선택: 새 연결의 기본 사람 판정은 유지하되 기존 절차에서 명시적으로 정한 자동 판정·completion까지 강제 변경하지 않는다. 기존 execution.calls도 같은 authored 버전·권한 검사를 거치지만 새 여러 도구 연결 UI를 만들지는 않는다. 미완성 게시 허용은 유지하고 실제 실행 시 필요한 값을 검사한다. 최종 통합 결과와 PR은 후속 기록으로 관리한다.
 
 통합 head 로컬 검사: 전체 Node739/739(8.444초), 고정 공식 wheel과 `EES_REQUIRE_ASSET_NATIVE=1`, EncodingWarning 오류 모드에서 작성 도구 Native12/12(38.421초), builder34개 중33통과/실제 소스 frontend가 필요한1개생략(4.774초), pre-draft/P1/P2 Apply→Restore3/3(1.240초), 시험 ID1734개/기존1332개분류오류0, 문서35파일2930링크오류0. 새 P2 Restore 테스트의 처음 실패는 후보 ZIP을 바꾼 뒤에도 바꾸기 전 fixture 전체 tree와 비교한 시험 오류였다. 새 ZIP 저장 직후 기준을 잡고 Apply가 프로그램을 전혀 변경하지 않음을 다시 검증해 통과했다. 최종 사용자 입력 근거에는 원제출 arguments와 기본값 적용 effective_arguments를 함께 보존하고 권한 회수 시 둘 다 숨긴다. 수동 목록 수정으로 파생한 근거에도 같은 metadata를 보존한다.
+
+### 최초 전체 CI489와 시험 준비 보완
+
+[CI489](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/42005620218), [PR #125](https://github.com/knadalkim-a11y/team-agent-poc/pull/125), 원격 head `dece1b0` / 로컬 `0fce2b2`의 tree `75a8914a` 일치를 확인했다. 전체40 job은33성공·5실패(실제4묶음과최종gate)·1취소·출하1정상생략이었다. Windows/Linux 실행 계약·서비스·복원 등 성공을 보존한다.
+
+- 실제 Native 제품은 새 작성 도구 시험·사용v1·미시험r2 저장 뒤 새 공장 준비에서 `revision_conflict`로 중단됐다. 시험 helper의 새 객체 `expected_revision:0` 누락이었다. 명시 revision override를 보존하며 보완했다. 남은 준비 코드의 과거 `sharing` 그룹 요청/기대도 현재 공장·시스템 scope access only 계약에 맞췄다. 실제 service/SQLite에서 같은 helper를 사용해 factory/access/create/save/validate/publish/start와 일반 사용자의 동일 run 조회까지 확인했다. 실제 제품의 중앙 채팅 후속 검사는 이 실패 때문에 미실행이다.
+- Windows/Linux platform의 유일한 원인은 새 선택창이 재사용한 기존 `88f2f.svg`를 독립 CSS 캐시 검사 목록에서 누락한 것이다. 제품 builder는 올바른 해시 URL을 만들고 있었다. 고정 목록만 보완했고 CI489의 실제 frontend artifact(sha256 `5d203a0e81debc0bc5ff75aad7aab1128e58ee29d87476524d17981222c0b50b`)와 현재 UI·공식 wheel로 해당 시험1/1을29.396초에 통과했다. 과거 frontend로 먼저 시도한 검사는 provenance 불일치로 차단됐으며 성공으로 세지 않았다.
+- 실제 native-compose는110개 중108개 통과했다. 기존105개는 전부 통과, 신규5개 중3개 통과다. 작성 흐름은 미연결 작업을 errors로 기대했으나 기존 계약은 errors[]+작업별 경고·게시 허용이었다. 정확한 job-0 경고를 검사하도록 보완하고 기존 미연결 실제 실행 차단 회귀도 통과했다. 공동 시작 흐름은 서비스용 일반 사용자 객체에 Native 세션 permissions가 없어 Navbar에서 `undefined.chat`으로 실패했다. 기존 정식 세션 fixture를 복사하고 사용자 id/role=user 및 채팅 소유자를 맞췄다. 콘솔 오류 검사·제품 권한은 완화하지 않았다.
+- Native-compose ZIP sha256 `92cfb7075dccba307fbe8dc3a39e990db0fccdc50582889dd3dc676da38e4675`, manifest602파일의 크기·SHA와PNG326개를 확인했다. 신규6장의1920 화면 중 부분 판정·사용 중지 화면 원본을 직접 대조했다. 정상 T06A/T07/O15의3폭은 앞단 실패로 미생성이므로 시각 완료가 아니다. FullNative ZIP sha256 `90383006f607ca0f024810a51fe07cce854811fbe84d1f0e98b7ee2457ec9c84`의84개 파일·PNG36개도 일치했다.
+
+보완은 시험 코드 `65a8d56`, `f3b023f`, `7789a4e`이며 제품 코드 변경은 없다. 최초 실패는 이 기록에 보존하고 다음 head의 전체 CI와 실제 화면으로 최종 판정한다. 최종 head·CI·화면 증거와 병합 여부는 PR #125 본문/Checks를 최신 원본으로 삼는다. 사내 배포는 미실행이다.

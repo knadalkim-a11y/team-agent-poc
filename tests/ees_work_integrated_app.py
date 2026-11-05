@@ -456,7 +456,7 @@ def authored_workflow_flow(g):
     def command(action, *, workspace=False, headers=None, error=None, timeout=20, **fields):
         response=g.client.post('/api/ees-work/'+('workspace/command' if workspace else 'operations'),
             headers=headers or admin_headers,
-            json={'action':action,'request_id':uuid4().hex,**fields},timeout=timeout)
+            json={'action':action,'request_id':uuid4().hex,'expected_revision':0,**fields},timeout=timeout)
         assert all(value not in response.text for value in private_values), 'Authored work response exposed a credential'
         value=response.json()
         if error:
@@ -539,11 +539,11 @@ def authored_workflow_flow(g):
     assert stored['published']['nodes'][job_id]['shared_tool_id']==draft['id']
     assert all(key not in stored['published']['nodes'][job_id] for key in ('tool_reference','code','version','token'))
     started=command('start_run',workspace=True,workflow_id=workflow_id,expected_revision=published['revision'],
-        factory_id=factory_id,inputs=fixture['inputs'],sharing={'group_ids':[group['id']]})
+        factory_id=factory_id,inputs=fixture['inputs'])
     run_id=started['run']['id']
     shared_run=state(run_id)
     assert shared_run['factory_id']==factory_id and shared_run['workflow_id']==workflow_id
-    assert shared_run['sharing']=={'group_ids':[group['id']]}
+    assert shared_run['sharing']=={'group_ids':[]}
     assert shared_run['attempts']==[]
     command('execute_job',headers=member_headers,error='native_personal_connection_required',
         run_id=run_id,job_id=job_id,expected_revision=shared_run['revision'])

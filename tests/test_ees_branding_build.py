@@ -1206,14 +1206,15 @@ class OfficialWheelTests(unittest.TestCase):
                     self.assertEqual(copied, source.read(origin))
                     self.assertEqual(hashlib.sha256(copied).hexdigest(), expected)
                 # Independently reviewed CSS references, not the builder's icon
-                # list or prepared output. The C18 menu masks and E1 chevron use
-                # CSS URLs; font URLs and bytes outside icon values must survive.
+                # list or prepared output. The C18 menu masks, E1 chevron and
+                # T06A workflow selector use CSS URLs; font URLs and bytes
+                # outside icon values must survive.
                 # The independent fixed/mutated URL fixtures above still verify
                 # allowed rewriting, wrong/missing hashes and unrelated drift.
                 for filename, references in {
                     "chat-theme.css": (),
                     "ees-work-launcher.css": (
-                        "v4/83565.svg", "v4/54b2e.svg", "v4/4d978.svg", "v4/4308e.svg", "v4/f0554.svg", "v4/f17e6.svg",
+                        "v4/83565.svg", "v4/54b2e.svg", "v4/4d978.svg", "v4/4308e.svg", "v4/f0554.svg", "v4/f17e6.svg", "v4/88f2f.svg",
                     ),
                 }.items():
                     icons = {relative: (builder.UI_DIR / relative).read_bytes() for relative in references}
