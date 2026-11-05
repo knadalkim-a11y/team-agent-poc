@@ -19,6 +19,14 @@
 - **로컬 검증:** 고정 Open WebUI `2a960a5` 원본 해시와 패치 적용을 확인하고 변경된 Sidebar 1개의 결과 해시 및 패치 해시만 갱신했다. Sidebar Svelte 컴파일 오류/경고 0, Node motion/Svelte 39/39, Python 시험 구문, 문서 점검 오류/검토 후보 0, 시험 ID 감사 오류 0, diff 검사를 통과했다. frontend 32건 중 26건은 통과했고 6건은 이 소스 checkout에 TypeScript가 없어 실행 준비에서 실패했다(`Cannot find module .../node_modules/typescript`). 제품 실패로 단정하거나 제외해 성공으로 표시하지 않으며, 고정 의존성을 설치하는 PR CI에서 32건 전체와 실제 제품 브라우저를 확인한다.
 - **CI465·검사 조건 보완:** [PR #122](https://github.com/knadalkim-a11y/team-agent-poc/pull/122) 최초 head `ebb0c3e`의 [CI465](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41945760866)에서 고정 프런트엔드 빌드와 source 32/32를 통과했다. 후속 자체 검토에서 공통 `ChromePipe`가 `--hide-scrollbars`를 사용함을 발견했다. 이 조건의 통과만으로 실제 스크롤바 폭 검증을 완료 처리하지 않는다. 기본값은 유지하고 MotionNativeTests만 그 옵션을 끄며, 모든 측정에서 스크롤바 예약 폭이 0보다 큰지도 검사한다. 제품 CSS는 추가 변경하지 않고 보완 head의 전체 CI로 판정한다. 최종 head·CI와 실측은 이 PR 본문/Checks에 연결한다.
 
+<a id="initial-author-list-ready-20261105"></a>
+
+## 2026-11-05 · 실제 제품의 첫 작성 목록 준비
+
+- **최초 실패:** #122 통합 head `3831948`의 [CI473 전체 제품 검사](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41953277437/job/127004432217)는 본 제품 흐름을 통과한 뒤 중앙 대화 검사에서 새 절차 이름 입력을 위한 물리 클릭의 포커스 단언이 실패했다. Windows·Linux 소스 검사는 통과해 앞선 문서 크기 실패는 해결됐다. [실패 PNG·JSON·보고서](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41953277437/artifacts/13382123455)를 직접 확인했다.
+- **관찰·원인:** 직전 서버 목록은 비어 있었지만 실패 화면에는 초기 절차3개와 ‘배포 산출물 점검’ 상세가 열렸고 포커스는 BODY였다. JS 예외는 없었다. mode→create→type은 초기 등록·목록 재배치를 기다리지 않았으며, launcher의 첫 author refresh는 `initialize_procedures` 뒤 목록과 선택을 갱신한다. 클릭 직전 전환 순간은 미관측이므로 정확한 프레임을 추정하지 않는다. 이는 기존 CI419에 기록된 첫 작성 준비 누락과 같은 경로다.
+- **보완·검증:** 이미 Native 작성 검사에서 쓰던 `open_initialized_author_list`와 같은 준비 조건을 실제 제품 gate에 적용했다. 물리 모드 전환 뒤 공개 refresh의 초기 등록 완료, 서버/화면의 절차 ID 목록 일치, 패널 준비를 확인하고 새 양식을 클릭한다. 같은 초기 경로인 본 제품·중앙 대화 흐름 둘 다 사용하며 준비한 ID를 보고서에 남긴다. 물리 클릭·포커스·입력·저장·미게시/대화 제안 보존 단언, 제품 코드와 시간 제한은 유지한다. 변경된 Python 구문·문서29개/링크2,877개 오류0·시험 ID 감사1,597개 오류0·diff 검사를 통과했다. 보완 head 전체 CI·실제 제품 보고서로 최종 판정한다.
+
 <a id="shared-panel-style-20261105"></a>
 
 ## 2026-11-05 · 오른쪽 패널 배경·탭 공통화

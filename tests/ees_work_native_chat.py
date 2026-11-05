@@ -216,7 +216,7 @@ def central_flow(g):
     assert hashlib.sha256(registered['content'].encode()).hexdigest()==status['source_sha256']
     assert g.api('/api/ees-work/workspace')['workflows']==[]
     g.record('explicit packaged read-only Work tool registration',id='ees_workflow',source_sha256=status['source_sha256'],private_native_grant=True,model_presets_created=False)
-    g.click('[data-action="mode"][data-mode="author"]');g.click('[data-author-action="create"]')
+    g.open_initialized_author_list();g.click('[data-author-action="create"]')
     g.type('#ew-procedure-create #ew-procedure-name','중앙 대화 제안 검증')
     g.click('#ew-procedure-create [data-author-action=procedure_create]')
     g.wait('document.querySelector("[data-author-action=add_stage]")')

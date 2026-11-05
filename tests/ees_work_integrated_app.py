@@ -187,6 +187,21 @@ if(performance.now()>end)return resolve(null);requestAnimationFrame(check)}check
             self.browser.call('Input.dispatchKeyEvent',{'type':kind,'key':'a','code':'KeyA','windowsVirtualKeyCode':65,'modifiers':2})
         self.browser.call('Input.insertText',{'text':value})
 
+    def open_initialized_author_list(self):
+        # Match the Native authoring gate: first entry registers procedures and
+        # can replace the empty list. Settle that preparation before typing.
+        self.click('[data-action=mode][data-mode=author]')
+        prepared=self.browser.evaluate('window.__eesNativeWorkV1.refresh()')
+        assert prepared and prepared['initial_procedures_ready'],prepared
+        self.wait("document.querySelector('.ew-author-list,[data-author-action=list]')")
+        if self.browser.evaluate("!!document.querySelector('[data-author-action=list]')"):
+            self.click('[data-author-action=list]')
+        workflow_ids=[workflow['id'] for workflow in prepared['workflows']]
+        self.wait("JSON.stringify([...document.querySelectorAll('.ew-author-list [data-author-action=open]')].map(button=>button.dataset.id)) === JSON.stringify("+
+                  json.dumps(workflow_ids)+")")
+        self.wait("document.querySelector('#ees-work-panel')?.getAttribute('aria-busy') === 'false' && !!document.querySelector('[data-author-action=create]')")
+        self.record('initial author list ready before physical creation',workflow_ids=workflow_ids)
+
     def open_operation_stage(self):
         """Follow the published overview's first stage through physical input."""
         self.wait_work_ready(selector='.ew-operation-overview [data-action="stage_open"]')
@@ -322,7 +337,7 @@ def integrated_flow(gate):
     authoring_chat_draft='업무 절차를 작성하는 동안 보존할 대화 초안'
     purpose='합성 배포 자료와 변경 내용을 사람이 확인합니다.'
     g.type('#chat-input',authoring_chat_draft)
-    g.click('[data-action="mode"][data-mode="author"]')
+    g.open_initialized_author_list()
     g.click('[data-author-action="create"]')
     g.wait('!!document.querySelector("#ew-procedure-create")')
     g.type('#ew-procedure-create [name=name]','합성 배포 자료 확인')
