@@ -1334,7 +1334,7 @@ new file mode 100644
 index 0000000..8e92785
 --- /dev/null
 +++ b/src/lib/components/ees/EesNavigation.svelte
-@@ -0,0 +1,256 @@
+@@ -0,0 +1,254 @@
 +<script lang="ts">
 +	import { getContext } from 'svelte';
 +	import { page } from '$app/stores';
@@ -1365,7 +1365,6 @@ index 0000000..8e92785
 +		succeeded: ['c6340', 'EES.Automatic.Succeeded', 'Succeeded']
 +	};
 +	const normal = [
-+		['my_work', '4df0d', 'EES.Nav.MyWork', 'My work'],
 +		['records', 'c325d', 'EES.Nav.Records', 'Execution history'],
 +		['chats', '093d6', 'EES.Nav.Chats', 'Chat history']
 +	];
@@ -1544,8 +1543,7 @@ index 0000000..8e92785
 +							eesAction({ action });
 +						}}
 +						><Icon name={icon} /><span>{t(key, label)}</span
-+						>{#if action === 'my_work' && data.my_work?.length}<small>{data.my_work.length}</small
-+							>{/if}</button
++						></button
 +					>{/each}
 +			</nav>
 +			<p class="ew-nav-caption">{t('EES.Nav.Work', 'Work')}</p>
@@ -1959,7 +1957,7 @@ index 0000000..eb10012
 +			if (key.startsWith('chat-input')) sessionStorage.removeItem(key);
 +		eesSnapshot.set({
 +			state: null,
-+			selection: { mode: 'work', tab: 'my_work', panel_open: true, collapsed: [] }
++			selection: { mode: 'work', tab: 'overview', panel_open: true, collapsed: [] }
 +		});
 +	}
 +	function rememberOwner(id) {
@@ -2335,7 +2333,7 @@ index 0000000..2d6bef5
 +import { writable } from 'svelte/store';
 +export const eesSnapshot = writable<any>({
 +	state: null,
-+	selection: { mode: 'work', tab: 'my_work', panel_open: true, collapsed: [] },
++	selection: { mode: 'work', tab: 'overview', panel_open: true, collapsed: [] },
 +	busy: false,
 +	error: ''
 +});
@@ -2999,7 +2997,7 @@ diff --git a/src/lib/i18n/locales/ko-KR/translation.json b/src/lib/i18n/locales/
 index 8eba682..38ee86b 100644
 --- a/src/lib/i18n/locales/ko-KR/translation.json
 +++ b/src/lib/i18n/locales/ko-KR/translation.json
-@@ -3081,5 +3081,88 @@
+@@ -3081,5 +3081,87 @@
  	"Youtube Language": "Youtube 언어",
  	"Youtube Proxy URL": "Youtube 프록시 URL",
  	"Zoom in": "",
@@ -3036,7 +3034,6 @@ index 8eba682..38ee86b 100644
 +	"EES.Nav.AdminOnly": "관리자만",
 +	"EES.Nav.Access": "공장·접근 범위",
 +	"EES.Nav.Recent": "최근 편집",
-+	"EES.Nav.MyWork": "내 업무",
 +	"EES.Nav.Records": "실행 기록",
 +	"EES.Nav.Chats": "대화 기록",
 +	"EES.Category.Operations": "운영",

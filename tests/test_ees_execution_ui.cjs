@@ -18,8 +18,23 @@ test('request timeline preserves EES report and independent effect confirmation'
 });
 test('history uses immutable attempt inputs and result rather than current edited values',()=>{const out=html('workHistoryHTML(run)',{run:{version:1,inputs:{secret:'current-input'},attempts:[{id:'one',job_id:'j',number:1,status:'failed',inputs:{a:'historical'},result:{text:'old-result'}}]}});assert.match(out,/historical/);assert.match(out,/old-result/);assert.doesNotMatch(out,/current-input/);});
 test('missing history is explicitly unexecuted and never a success fixture',()=>{assert.match(html('workHistoryHTML({attempts:[]})'),/미수행을 성공으로 표시하지 않습니다/);});
-test('My Work uses actual tasks and incident-overdue-today-week-future-undated ordering',()=>{const items=['undated','week','overdue','today','future','incident'].map(bucket=>({id:bucket,bucket,name:bucket}));const out=html('workMyWorkHTML(items)',{items});const keys=['incident','overdue','today','week','future','undated'];for(let i=1;i<keys.length;i++)assert.ok(out.indexOf('data-task-id="'+keys[i-1]+'"')<out.indexOf('data-task-id="'+keys[i]+'"'));assert.equal((out.match(/data-action="open_task"/g)||[]).length,6);});
-test('empty My Work does not invent an actionable task or normal execution',()=>{const out=html('workMyWorkHTML([])');assert.match(out,/지금 처리할 내 업무가 없습니다/);assert.doesNotMatch(out,/data-task-id|정상 실행/);});
+test('retired saved My Work opens system work without selecting or mutating an old run',async()=>{
+ const h=controller();h.api.setRestored(false);
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},systems:['EMS'],workflows:[],runs:[],ui_state:{revision:7,state:{selection:{mode:'work',tab:'my_work',system_id:'EMS',factory_id:'factory-a',workflow_id:'old-work',run_id:'old-run',job_id:'old-job',stage_id:'old-stage',panel_width:620,collapsed:['setup']}}}}:{ok:true});
+ await h.api.refresh();const s=h.api.snapshot().selection;
+ assert.equal(s.tab,'overview');assert.equal(s.system_id,'EMS');assert.equal(s.factory_id,'factory-a');assert.equal(s.panel_width,620);assert.deepEqual(Array.from(s.collapsed),['setup']);
+ for(const key of ['workflow_id','run_id','job_id','stage_id'])assert.equal(s[key],'');
+ assert.equal(h.calls.filter(call=>call.body).length,0);
+ assert.ok(h.calls.filter(call=>call.url.startsWith('/api/ees-work/workspace?')).every(call=>!call.url.includes('old-run')));
+});
+test('an explicit history visit wins over a late retired selection restore',async()=>{
+ const h=controller(),pending=deferred();h.api.setRestored(false);let reads=0;
+ const response={ok:true,capabilities:{actor_id:'a'},systems:['EMS'],workflows:[],runs:[],ui_state:{revision:4,state:{selection:{mode:'work',tab:'my_work',system_id:'EMS',job_id:'old'}}}};
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?(++reads===1?pending.promise:response):{ok:true});
+ const first=h.api.refresh();await h.api.handleClick({dataset:{action:'records'}});pending.resolve(response);await first;
+ assert.equal(h.api.snapshot().selection.tab,'records');assert.equal(h.api.snapshot().selection.job_id,'');
+ assert.equal(h.calls.filter(call=>call.body&&call.body.action!=='save_ui').length,0);
+});
 test('late workspace reads are discarded after account change',async()=>{const h=controller(),pending=deferred();h.setReply(()=>pending.promise);const waiting=h.api.refresh();h.setAuth('other-token');pending.resolve({ok:true,private:'actor-a'});await waiting;assert.equal(h.renders.length,0);assert.equal(h.api.snapshot().state,null);});
 test('late workspace reads are discarded after selected job changes',async()=>{const h=controller(),pending=deferred();h.setReply(()=>pending.promise);const waiting=h.api.refresh();h.api.setSelection({job_id:'other'});pending.resolve({ok:true,private:'old-job'});await waiting;assert.equal(h.renders.length,0);});
 test('lookup failure clears stale private evidence and keeps an explicit read error',async()=>{const h=controller();h.api.setState({run:{private:'old'}});h.setReply(()=>({ok:false,error:{message:'access denied'},httpError:true,status:403}));await h.api.refresh();assert.equal(h.api.snapshot().state,null);assert.match(h.api.snapshot().error,/access denied/);});
@@ -34,7 +49,7 @@ test('AI reference never contains Native authorization tokens or confirmation in
 
 test('late confirmation is rejected after account or selected work context changes',async()=>{for(const change of ['account','job']){const h=controller(),pending=deferred();h.setDialog(()=>pending.promise);const waiting=h.api.confirmDialog({title:'확인'});if(change==='account')h.setAuth('other');else h.api.setSelection({job_id:'other'});pending.resolve(true);assert.equal(await waiting,false);assert.equal(h.calls.length,0);}});
 
-test('first workspace read refetches after default system selection before accepting operations',async()=>{const h=controller();h.api.setRestored(false);h.setReply(call=>call.url.startsWith('/api/ees-work/operations')?{ok:true,models:[]}:{ok:true,capabilities:{actor_id:'a'},systems:['EMS'],workflows:[],runs:[],my_work:[],ui_state:{revision:0,state:{}}});const state=await h.api.refresh();assert.ok(state);assert.equal(h.api.snapshot().selection.system_id,'EMS');assert.equal(h.calls.filter(call=>call.url.startsWith('/api/ees-work/workspace?')).length,2);assert.equal(h.renders.length,1);});
+test('first workspace read refetches after default system selection before accepting operations',async()=>{const h=controller();h.api.setRestored(false);h.setReply(call=>call.url.startsWith('/api/ees-work/operations')?{ok:true,models:[]}:{ok:true,capabilities:{actor_id:'a'},systems:['EMS'],workflows:[],runs:[],ui_state:{revision:0,state:{}}});const state=await h.api.refresh();assert.ok(state);assert.equal(h.api.snapshot().selection.system_id,'EMS');assert.equal(h.calls.filter(call=>call.url.startsWith('/api/ees-work/workspace?')).length,2);assert.equal(h.renders.length,1);});
 
 
 test('allowed model count survives a work selection change but not account change',async()=>{for(const kind of ['work','account']){const h=controller(),pending=deferred();h.setReply(()=>pending.promise);const waiting=h.api.models();if(kind==='work')h.api.setSelection({system_id:'EMS'});else h.setAuth('new-account');pending.resolve({data:[{id:'one'}]});const result=await waiting;assert.equal(result.length,kind==='work'?1:0);assert.equal(h.context.document.body.dataset.eesModelCount,kind==='work'?'1':undefined);}});
@@ -139,7 +154,7 @@ function workToolUpdateHarness(overrides={}){
  h.api.setState({capabilities:{is_admin:true,actor_id:'admin'},people:[],native_groups:[]});
  h.context.document.querySelector=()=>({addEventListener:(type,fn)=>{listeners[type]=fn;}});
  const status={state:'update_available',id:'ees_workflow',source_sha256:'program-hash',registered_source_sha256:'previous-hash',expected_token:'review-token',known_source:true,registered_source:{sha256:'previous-hash',date:'2026-10-02',format:'original'},program_source:{sha256:'program-hash',date:'2026-10-13'},...overrides};
- h.setReply(call=>call.url.endsWith('/status')?status:call.url.endsWith('/setup')||call.url.endsWith('/restore')?{ok:true,changed:true}:{ok:true,capabilities:{is_admin:true,actor_id:'admin'},systems:[],workflows:[],runs:[],my_work:[],ui_state:{revision:0,state:{}}});
+ h.setReply(call=>call.url.endsWith('/status')?status:call.url.endsWith('/setup')||call.url.endsWith('/restore')?{ok:true,changed:true}:{ok:true,capabilities:{is_admin:true,actor_id:'admin'},systems:[],workflows:[],runs:[],ui_state:{revision:0,state:{}}});
  h.setDialog(options=>{dialogs.push(options);return Promise.resolve(true);});
  return {...h,status,dialogs,listeners};
 }
@@ -232,30 +247,30 @@ test('new target loads once while returning target uses only its own system and 
 test('first scope keeps its navigation catalog but marks lists unread until workspace and operations both arrive',async()=>{
  for(const destination of [{system_id:'APC',factory_id:''},{system_id:'EMS',factory_id:'unvisited'}]){
   const h=controller(),workspace=deferred(),operations=deferred(),catalog={systems:['EMS','APC'],factories:[{id:'unvisited',system_id:'EMS'}]};
-  h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,...catalog,capabilities:{actor_id:'a'},workflows:[{id:'old',system_id:'EMS'}],runs:[],my_work:[]}:{ok:true});
+  h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,...catalog,capabilities:{actor_id:'a'},workflows:[{id:'old',system_id:'EMS'}],runs:[]}:{ok:true});
   await h.api.select({system_id:'EMS',factory_id:'',workflow_id:'old',collapsed:['setup']});
   h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?workspace.promise:operations.promise);
-  const changed=h.api.select({...destination,workflow_id:'',run_id:'',tab:'my_work'});
+  const changed=h.api.select({...destination,workflow_id:'',run_id:'',tab:'overview'});
   let rendered=h.renders.at(-1);assert.equal(rendered.scope_loading,true);assert.notEqual(rendered.state,null);assert.deepEqual(Array.from(rendered.state.systems),catalog.systems);assert.deepEqual(Array.from(rendered.selection.collapsed),['setup']);
-  workspace.resolve({ok:true,...catalog,capabilities:{actor_id:'a'},workflows:[],runs:[],my_work:[]});await new Promise(setImmediate);
+  workspace.resolve({ok:true,...catalog,capabilities:{actor_id:'a'},workflows:[],runs:[]});await new Promise(setImmediate);
   assert.equal(h.renders.at(-1).scope_loading,true,'workspace response alone cannot claim the combined lists are empty');
   operations.resolve({ok:true});await changed;assert.equal(h.renders.at(-1).scope_loading,false);assert.equal(h.api.snapshot().state.workflows.length,0);
  }
 });
 test('returning to a received scope reuses its lists even when its previous selected workflow differs',async()=>{
- const h=controller();h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},systems:['EMS','APC'],workflows:[{id:'kept',system_id:'EMS',published_version:1}],runs:[],my_work:[{id:'task'}],workflow:{id:'kept',published_version:1}}:{ok:true});
+ const h=controller();h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},systems:['EMS','APC'],workflows:[{id:'kept',system_id:'EMS',published_version:1}],runs:[{id:'run'}],workflow:{id:'kept',published_version:1}}:{ok:true});
  await h.api.select({system_id:'EMS',workflow_id:'kept'});
  const pending=deferred();h.setReply(()=>pending.promise);const away=h.api.select({system_id:'APC',workflow_id:''});const back=h.api.select({system_id:'EMS',workflow_id:''});
- const rendered=h.renders.at(-1);assert.equal(rendered.scope_loading,false);assert.equal(rendered.state.workflows[0]?.id,'kept');assert.equal(rendered.state.my_work[0]?.id,'task');assert.equal(rendered.state.workflow,null);
+ const rendered=h.renders.at(-1);assert.equal(rendered.scope_loading,false);assert.equal(rendered.state.workflows[0]?.id,'kept');assert.equal(rendered.state.runs[0]?.id,'run');assert.equal(rendered.state.workflow,null);
  pending.resolve({ok:true,capabilities:{actor_id:'a'},systems:['EMS','APC'],workflows:[],runs:[]});await Promise.all([away,back]);
 });
 test('unreceived scope panels never render empty My Work or history before their first response',()=>{
- for(const tab of ['my_work','records']){
+ for(const tab of ['overview','records']){
   const host={dataset:{},isConnected:true,querySelector:()=>null,querySelectorAll:()=>[],setAttribute(){},innerHTML:''};
   const context=renderer({document:{activeElement:null,querySelector:()=>null}});context.window.__eesSourceShellV1={hosts:()=>({panel:host}),publish(){}};
-  const view=run(context,'createWorkView({callbacks:{}})'),state={capabilities:{actor_id:'a'},workflows:[],runs:[],my_work:[]},selection={mode:'work',tab,system_id:'APC'};
-  view.render({state,selection,scope_loading:true});assert.match(host.innerHTML,/data-ees-scope-loading="panel"[^>]*>받는 중/);assert.doesNotMatch(host.innerHTML,/지금 처리할 내 업무가 없습니다|저장된 진행 건이 없습니다/);
-  run(context,'createWorkView({callbacks:{}})').render({state,selection,scope_loading:false});assert.match(host.innerHTML,tab==='my_work'?/지금 처리할 내 업무가 없습니다/:/저장된 진행 건이 없습니다/);
+  const view=run(context,'createWorkView({callbacks:{}})'),state={capabilities:{actor_id:'a'},workflows:[],runs:[]},selection={mode:'work',tab,system_id:'APC'};
+  view.render({state,selection,scope_loading:true});assert.match(host.innerHTML,/data-ees-scope-loading="panel"[^>]*>받는 중/);assert.doesNotMatch(host.innerHTML,/업무 절차를 선택해 주세요|저장된 진행 건이 없습니다/);
+  run(context,'createWorkView({callbacks:{}})').render({state,selection,scope_loading:false});assert.match(host.innerHTML,tab==='overview'?/업무 절차를 선택해 주세요/:/저장된 진행 건이 없습니다/);
  }
 });
 test('denied target removes cached private evidence and cannot restore it on a later visit',async()=>{
@@ -299,7 +314,7 @@ test('ordinary author background read outage keeps the live editor and its cache
 
 test('received scope fallback preserves common operations but removes prior run requests and scope runs',async()=>{
  const h=controller(),operations={ok:true,tools:[{id:'known-tool'}],schedules:[{id:'known-schedule',enabled:true,next_at:1792015200}],slots:[{id:'known-slot'}],automatic_statuses:[{workflow_id:'kept',status:'running'}],actionable:[],models:[{id:'known-model'}],requests:[{id:'private-request',inputs:{secret:'prior-run'}}],scope_runs:[{id:'private-execution',run_id:'old-run'}]};
- h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},systems:['EMS','APC'],workflows:[{id:'kept',system_id:'EMS'}],runs:[],my_work:[],workflow:{id:'kept'},run:{id:'old-run',jobs:{}}}:operations);
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},systems:['EMS','APC'],workflows:[{id:'kept',system_id:'EMS'}],runs:[],workflow:{id:'kept'},run:{id:'old-run',jobs:{}}}:operations);
  await h.api.select({system_id:'EMS',workflow_id:'kept',run_id:'old-run'});
  const pending=deferred();h.setReply(()=>pending.promise);const away=h.api.select({system_id:'APC',workflow_id:'',run_id:''});assert.equal(Object.keys(h.renders.at(-1).state.operations).length,0);
  const back=h.api.select({system_id:'EMS',workflow_id:'',run_id:''}),rendered=h.renders.at(-1);

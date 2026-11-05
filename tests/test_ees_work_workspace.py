@@ -805,7 +805,7 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
     async def test_group_task_claim_is_atomic_and_membership_revocation_blocks(self):
         key, _, _ = await self.create()
         run = await self.start(key, sharing={'group_ids': ['g']})
-        self.assertEqual(len((await self.state('b'))['my_work']), 1)
+        self.assertEqual([item['id'] for item in (await self.state('b'))['runs']], [run['id']])
         self.assertIsNone((await self.state('b', run_id=run['id']))['run']['jobs']['j']['claim_actor'])
         claimed = await self.command('claim_task', actor='a', run_id=run['id'], job_id='j', expected_revision=1)
         self.assertTrue(claimed['ok'], claimed)
@@ -1345,7 +1345,7 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(run['jobs']['j']['deadline']['at'], '2026-10-02T00:00:00+09:00')
         self.assertEqual(run['jobs']['j']['deadline']['days_remaining'], 0)
         state = await self.state(run_id=run['id'])
-        self.assertEqual(state['my_work'][0]['bucket'], 'today')
+        self.assertEqual(state['run']['jobs']['j']['deadline']['days_remaining'], 0)
         done = await self.command('human_confirm', actor='a', run_id=run['id'], job_id='j', expected_revision=1)
         snapshot = done['run']['attempts'][0]['snapshot']['deadline']
         self.assertEqual(snapshot['at'], '2026-10-02T00:00:00+09:00')
@@ -1498,10 +1498,10 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
     async def test_duplicate_factory_start_follows_category_and_saved_modes_not_authoring(self):
         # 2026-11-02: execution modes are not authored. A new procedure blocks a
         # second active run for one factory; incident work and versions saved
-        # earlier as periodic/emergency keep parallel starts and incident leads my work.
+        # earlier as periodic/emergency keep parallel starts.
         await self.command('save_factory', factory_id='f1', system_id='EMS', name='f1')
-        for mode, category, parallel, bucket in ((None, 'ops', False, 'undated'), (None, 'incident', True, 'incident'),
-                                                 ('periodic', 'ops', True, 'undated'), ('emergency', 'ops', True, 'incident')):
+        for mode, category, parallel in ((None, 'ops', False), (None, 'incident', True),
+                                         ('periodic', 'ops', True), ('emergency', 'ops', True)):
             with self.subTest(mode=mode, category=category):
                 key, definition, revision = await self.create()
                 self.assertNotIn('mode', definition)
@@ -1517,9 +1517,8 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
                     self.assertTrue(second['ok'], second)
                 else:
                     self.assertEqual(second['error']['code'], 'factory_run_active')
-                items = [item for item in (await self.state('a'))['my_work'] if item['workflow_id'] == key]
-                self.assertTrue(items)
-                self.assertEqual({item['bucket'] for item in items}, {bucket})
+                runs = [item for item in (await self.state('a'))['runs'] if item['workflow_id'] == key]
+                self.assertEqual(len(runs), 2 if parallel else 1)
 
     async def test_shared_factory_run_resumes_another_users_progress_with_viewer_readonly(self):
         await self.command('save_factory', factory_id='f1', system_id='EMS', name='공장 A')
@@ -1543,14 +1542,16 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         visible = (await self.state('c', run_id=run['id']))['run']
         self.assertEqual(visible['progress']['completed'], 2)
         self.assertFalse(visible['can_write']); self.assertFalse(visible['jobs']['j3']['can_execute'])
-        self.assertEqual((await self.state('c'))['my_work'], [])
+        self.assertNotIn('my_work', await self.state('c'))
         for action, values in (('human_confirm', {'job_id': 'j3'}), ('claim_task', {'job_id': 'j3'}), ('close_run', {}), ('cancel_run', {'reason': 'not allowed'})):
             denied = await self.command(action, actor='c', run_id=run['id'], expected_revision=run['revision'], **values)
             self.assertEqual(denied['error']['code'], 'scope_forbidden', action)
         visible = await self.state('b', run_id=run['id'], workflow_id=key, factory_id='f1')
         self.assertEqual(visible['run']['progress']['completed'], 2)
         self.assertEqual([item['id'] for item in visible['workflow_active_runs']], [run['id']])
-        self.assertEqual([item['job_id'] for item in visible['my_work']], ['j3'])
+        self.assertTrue(visible['run']['jobs']['j3']['can_execute'])
+        self.assertNotIn('my_work', visible)
+        self.assertNotIn('my_work_count', visible)
         done = await self.command('human_confirm', actor='b', run_id=run['id'], job_id='j3', expected_revision=run['revision'])
         self.assertTrue(done['ok'], done)
         closed = await self.command('close_run', actor='b', run_id=run['id'], expected_revision=done['revision'])

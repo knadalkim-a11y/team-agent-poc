@@ -15,7 +15,7 @@
   const workspaceCache=new Map(),stageNotes=new Map();
   const pendingInputMessage='업무 도우미 입력 제안을 먼저 반영하거나 버려 주세요.';
   let nativeTicket=null,nativeNavigationBusy=false,pendingNativeAction=null;
-  let selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};
+  let selection={mode:'work',tab:'overview',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};
   const receipts=new Map(),optionCache=new Map(),chatCreations=new Map(),chatAliases=new Map();let workEpoch=0;let referenceChat='',referenceTimer=null,referenceRead=0,messageReferences=new Map();let uiWrites=Promise.resolve(),optionTimer=null,pendingInputProposal=null,inputProposalApplied=null,reviewTimer=null,reviewSaving=null;
   const context=()=>JSON.stringify([epoch,token()===identity,location.pathname,location.search,selection.system_id,selection.factory_id,selection.workflow_id,selection.run_id,selection.job_id]);
   const view=createWorkView({callbacks:{panelWidth:width=>{if(!restored)initialSelectionPatch={...initialSelectionPatch,panel_width:width};selection.panel_width=width;remember(width);}}});
@@ -64,9 +64,9 @@
   function navigationPatch(dataset){
     const action=dataset.action;
     if(action==='workspace_admin')return capabilities()?.is_admin===true?{mode:'author',tab:'workspace_admin',workflow_id:'',run_id:'',job_id:''}:null;
-    if(action==='mode')return ['work','author'].includes(dataset.mode)&&(dataset.mode!=='author'||workCanWorkspace(capabilities()))?{mode:dataset.mode,tab:dataset.mode==='author'?'overview':'my_work'}:null;
+    if(action==='mode')return ['work','author'].includes(dataset.mode)&&(dataset.mode!=='author'||workCanWorkspace(capabilities()))?{mode:dataset.mode,tab:'overview',...(dataset.mode==='work'?{job_id:'',stage_id:'',stage_overview:false}:{})}:null;
     if(action==='procedures'||action==='tools')return workCanCreate(capabilities())?{mode:'author',tab:action==='tools'?'tools':'overview',workflow_id:'',run_id:'',job_id:''}:null;
-    if(action==='my_work'||action==='records')return {mode:'work',tab:action,panel_open:true,job_id:'',records_workflow:''};
+    if(action==='records')return {mode:'work',tab:action,panel_open:true,job_id:'',records_workflow:''};
     if(action==='chats')return {mode:'work',tab:'chats'};
     return null;
   }
@@ -182,7 +182,6 @@
   async function read(query={}){const at=context();const result=await api('workspace?'+new URLSearchParams(Object.entries(query).filter(([,value])=>value!==undefined&&value!==null)));if(at!==context())return null;return result;}
   function normalized(result){
     const next=clone(result),workflow=next.workflow;
-    const attention=next.operations?.actionable || [];next.my_work=[...(next.my_work || []),...attention.map(item=>({...item,bucket:'overdue',name:'예약 실행 확인',status:item.state,reason:item.reason}))];
     const rank={failed:0,missed:1,running:2,succeeded:3};for(const workflow of next.workflows || []){const candidates=(next.operations?.automatic_statuses || []).filter(item=>item.workflow_id===workflow.id&&(!selection.factory_id||item.factory_id===selection.factory_id)).sort((a,b)=>rank[a.status]-rank[b.status]);if(candidates.length)workflow.last_auto_status=candidates[0].status;}
     if(workflow){workflow.definition=workflow.published?.definition || workflow.published || workflow.definition || workflow.draft;workflow.name=workflow.name || workflow.draft?.name;}
     const settings=next.settings || workflow?.settings || [];
@@ -217,7 +216,7 @@
     // Operations' requests and scope_runs belong to one run; the other
     // received values describe this actor/system's tools, models and schedules.
     const operations=received?{...received.operations,requests:[],scope_runs:[]}:{};
-    if(state||received)state={...(received || state),workflow:null,run:null,settings:{values:{},revision:0},legacy:null,operations,...(!sameScope&&!received?{workflows:[],runs:[],my_work:[]}: {})};
+    if(state||received)state={...(received || state),workflow:null,run:null,settings:{values:{},revision:0},legacy:null,operations,...(!sameScope&&!received?{workflows:[],runs:[]}: {})};
     if(!sameScope)scopeLoading=!received;
     targetLoading=Boolean(selection.workflow_id||selection.run_id);
   }
@@ -247,19 +246,19 @@
       if(at!==context()||n!==serial||!screenAvailable())return null;
       const previousActor=state?.capabilities?.actor_id || nativeCapabilities?.actor_id;
       if(previousActor&&result.capabilities?.actor_id&&previousActor!==result.capabilities.actor_id){reset();nativeCapabilities=result.capabilities;return refresh();}
-      if(!restored){restored=true;uiRevision=Math.max(uiRevision,result.ui_state?.revision || 0);const saved=result.ui_state?.state?.selection,explicit=initialSelectionPatch;initialSelectionPatch=null;if(saved&&typeof saved==='object')selection={...selection,...saved,...explicit};if(!selection.system_id)selection.system_id=(result.systems?.[0]?.id || result.systems?.[0] || '');if(explicit)remember(explicit.panel_width ?? null);if(at!==context())return refresh();}
+      if(!restored){restored=true;uiRevision=Math.max(uiRevision,result.ui_state?.revision || 0);const saved=result.ui_state?.state?.selection,explicit=initialSelectionPatch;initialSelectionPatch=null;if(saved&&typeof saved==='object'){const retired=saved.tab==='my_work'?{tab:'overview',workflow_id:'',run_id:'',job_id:'',stage_id:'',stage_overview:false}:{};selection={...selection,...saved,...retired,...explicit};}if(!selection.system_id)selection.system_id=(result.systems?.[0]?.id || result.systems?.[0] || '');if(explicit)remember(explicit.panel_width ?? null);if(at!==context())return refresh();}
       if(nativePage()){nativeCapabilities=result.capabilities || {};nativeScope={systems:result.systems || [],factories:result.factories || [],scope_options:result.scope_options};error='';render();refreshTimer=setTimeout(refresh,30000);return state;}
       // Drafts remain available to authors, but a saved operations selection
       // must not reopen one. Existing runs keep their own published snapshot.
       if((selection.mode!=='author'||!workCanWorkspace(result.capabilities))&&selection.workflow_id&&!selection.run_id&&result.workflow?.id===selection.workflow_id&&result.workflow.published_version==null){
-        return select({workflow_id:'',run_id:'',job_id:'',tab:['overview','start','run_details','current'].includes(selection.tab)?'my_work':selection.tab});
+        return select({workflow_id:'',run_id:'',job_id:'',tab:['overview','start','run_details','current'].includes(selection.tab)?'overview':selection.tab});
       }
       if(selection.mode==='author'&&!['tools','workspace_admin'].includes(selection.tab)&&result.initial_procedures_ready===false&&(result.capabilities?.managed_systems || []).includes(selection.system_id)){
         await command({action:'initialize_procedures',system_id:selection.system_id,expected_revision:0});
         if(at!==context()||n!==serial||!screenAvailable())return null;
         return refresh();
       }
-      let operations={};try{operations=await api('operations?'+new URLSearchParams({system_id:selection.system_id,run_id:selection.run_id}));}catch(failure){if(accessFailure(failure))throw failure;operations={error:failure.message};}if(at!==context()||n!==serial)return null;uiRevision=Math.max(uiRevision,result.ui_state?.revision ?? uiRevision);let legacy;if(selection.tab==='records'){try{legacy=await api('legacy');}catch(failure){legacy={error:failure.message};}if(at!==context()||n!==serial)return null;}acceptWorkspace(normalized({...result,operations,legacy}));if(selection.mode==='author'&&!workCanWorkspace(state.capabilities)){selection={...selection,mode:'work',tab:'my_work'};}error='';readyRoute=route;syncNativeReturn();render();loadOptions();
+      let operations={};try{operations=await api('operations?'+new URLSearchParams({system_id:selection.system_id,run_id:selection.run_id}));}catch(failure){if(accessFailure(failure))throw failure;operations={error:failure.message};}if(at!==context()||n!==serial)return null;uiRevision=Math.max(uiRevision,result.ui_state?.revision ?? uiRevision);let legacy;if(selection.tab==='records'){try{legacy=await api('legacy');}catch(failure){legacy={error:failure.message};}if(at!==context()||n!==serial)return null;}acceptWorkspace(normalized({...result,operations,legacy}));if(selection.mode==='author'&&!workCanWorkspace(state.capabilities)){selection={...selection,mode:'work',tab:'overview'};}error='';readyRoute=route;syncNativeReturn();render();loadOptions();
       const active=Object.values(state.run?.jobs || {}).some(job=>job.status==='running')||(state.operations?.scope_runs || []).some(scope=>['queued','running'].includes(scope.status))||(state.operations?.requests || []).some(request=>['requested','accepted','running','reported_complete'].includes(request.state));refreshTimer=setTimeout(refresh,active||busy?2500:30000);
       return state;
     }catch(failure){if(at!==context()||n!==serial)return null;error=failure.message;if(!nativePage()&&pendingNativeAction?.applied){pendingNativeAction=null;invalidateWorkspace();}if(nativePage()){nativeCapabilities={};nativeScope=null;}if(accessFailure(failure)){invalidateWorkspace();nativeCapabilities={};nativeScope=null;}
@@ -632,7 +631,7 @@
     if(action==='export_json'||action==='export_text'||action==='export_result'){if(action==='export_result'&&!workUI.finished(state?.run)&&state?.run?.jobs?.[selection.job_id]?.can_decide!==false&&!await saveReviewDraft())return;return downloadRun(action==='export_json'?'json':'text',action==='export_result'?target.dataset.jobId:'');}
     if(action==='open_legacy')return openLegacy(target.dataset.caseId);
     if(action==='admin_work_tool')return setupWorkTool();
-    if(['workspace_admin','mode','procedures','tools','my_work','records','chats'].includes(action)){const patch=navigationPatch(target.dataset);if(patch)return select(patch,{fetch:action!=='chats'});return;}
+    if(['workspace_admin','mode','procedures','tools','records','chats'].includes(action)){const patch=navigationPatch(target.dataset);if(patch)return select(patch,{fetch:action!=='chats'});return;}
     if(action==='admin_factory'||action==='admin_access')return adminDialog(action==='admin_factory'?'factory':'access',target.dataset.id);
     if(action==='choose_factory'||action==='choose_system'){
       const factory=action==='choose_factory',id=factory?target.dataset.factoryId:target.dataset.systemId;
@@ -646,14 +645,9 @@
       // Factory is the author's view context, not the definition's owner or
       // execution scope. Keep the open draft and unfinished creation form.
       if(factory&&author)return select({factory_id:id},{preserveAuthorStart:true});
-      return select({[factory?'factory_id':'system_id']:id,...(!factory?{factory_id:''}:{}),...(author?{mode:'author'}:{}),workflow_id:'',run_id:'',job_id:'',tab:author?'overview':'my_work'});
+      return select({[factory?'factory_id':'system_id']:id,...(!factory?{factory_id:''}:{}),...(author?{mode:'author'}:{}),workflow_id:'',run_id:'',job_id:'',tab:author?'overview':'overview'});
     }
     if(action==='workflow'){const id=target.dataset.workflowId,workflow=(state?.workflows || []).find(item=>item.id===id);if(selection.mode!=='author'&&workflow?.published_version==null)return;const runs=selection.mode==='author'?[]:workUnitActiveRuns(state,selection,workflow);return select({workflow_id:id,run_id:runs.length===1?runs[0].id:'',job_id:'',stage_id:'',stage_overview:false,tab:runs.length>1?'active_runs':'overview',panel_open:true});}
-    if(action==='open_task'){
-      if(target.dataset.scheduleId){const item=state.operations?.schedules?.find(value=>value.id===target.dataset.scheduleId);if(!item)return;if(await confirmDialog({title:'예약 실행 결과를 확인하셨나요?',html:'<p>실패·놓친 예약을 확인한 사실을 기록합니다. 실행 성공이나 재실행을 뜻하지 않습니다.</p>',confirmLabel:'확인 기록'})){await operationsCommand({action:'schedule_check',schedule_id:item.id,slot_id:target.dataset.taskId,expected_revision:item.revision});await refresh();}return;}
-      await select({workflow_id:target.dataset.workflowId,run_id:target.dataset.runId,job_id:target.dataset.jobId,mode:'work',tab:'current',panel_open:true});
-      const job=state?.run?.jobs?.[target.dataset.jobId];if(job?.can_execute&&!job.claim_actor&&await confirmDialog({title:'이 작업을 맡을까요?',html:'<p>목록을 여는 것만으로 담당자가 지정되지는 않습니다.</p>',confirmLabel:'담당하기'}))await mutate({action:'claim_task',run_id:selection.run_id,job_id:selection.job_id});return;
-    }
     if(action==='open_run')return select({workflow_id:target.dataset.workflowId,run_id:target.dataset.runId,job_id:'',stage_id:'',stage_overview:false,mode:'work',tab:'overview',panel_open:true});
     if(action==='job')return select({job_id:target.dataset.jobId,tab:'current'});
     if(action==='overview')return select({job_id:'',stage_id:'',stage_overview:true,tab:'overview'},{fetch:false});
@@ -721,7 +715,7 @@
     if(event.type==='change'&&target.matches?.('[data-list-include]')){view.refreshResults();return;}
     if(event.type==='change'&&(target.matches?.('[data-item-verdict]')||target.matches?.('[data-item-confirm]'))){const verdict=target.matches('[data-item-confirm]')?(target.checked?'completed':'unknown'):target.value;if(verdict)mutate({action:'decide',run_id:selection.run_id,job_id:selection.job_id,item_id:target.dataset.itemId,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,verdict});}
   }
-  function reset(){stageNotes.clear();helpWriting=null;nativeCapabilities=null;nativeScope=null;workspaceCache.clear();stateKey='';targetLoading=false;scopeLoading=false;evidenceUnavailable=false;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;inputProposalApplied=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;source()?.modelCount?.(0);selection={mode:'work',tab:'my_work',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};}
+  function reset(){stageNotes.clear();helpWriting=null;nativeCapabilities=null;nativeScope=null;workspaceCache.clear();stateKey='';targetLoading=false;scopeLoading=false;evidenceUnavailable=false;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;inputProposalApplied=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;source()?.modelCount?.(0);selection={mode:'work',tab:'overview',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]};}
   function sync(){
     scheduled=false;bindHosts();syncHelpState();const auth=token();if(auth!==identity){reset();identity=auth;route='';}
     syncNativeReturn();

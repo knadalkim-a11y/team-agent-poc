@@ -5,11 +5,11 @@ const copy=value=>JSON.parse(JSON.stringify(value));
 const settle=()=>new Promise(setImmediate);
 const evidence=[];
 function record(value){evidence.push(value);if(process.env.EES_NATIVE_RETURN_EVIDENCE)fs.writeFileSync(process.env.EES_NATIVE_RETURN_EVIDENCE,JSON.stringify({runtime:process.version,source:process.env.EES_NATIVE_RETURN_SOURCE || 'working-tree',level:'controller render callbacks, not browser animation frames',cases:evidence},null,2)+'\n','utf8');}
-const targets={tools:{action:'tools',mode:'author',tab:'tools'},procedures:{action:'procedures',mode:'author',tab:'overview'},workspace_admin:{action:'workspace_admin',mode:'author',tab:'workspace_admin'},work:{action:'mode',mode:'work',tab:'my_work'}};
+const targets={tools:{action:'tools',mode:'author',tab:'tools'},procedures:{action:'procedures',mode:'author',tab:'overview'},workspace_admin:{action:'workspace_admin',mode:'author',tab:'workspace_admin'},work:{action:'mode',mode:'work',tab:'overview'}};
 function harness(origin){
  const h=controller(),frames=[],authorFrames=[],navigation=[];let phase='initial',time=0,chatReady=true,closed=0,resets=0;
  const capabilities={actor_id:'a',is_admin:true,can_author:true,native_access_available:true,native_access:{skills:true,models:true,admin:true}};
- const state={ok:true,capabilities,systems:['EMS'],workflows:[],runs:[],my_work:[],operations:{tools:[]},ui_state:{revision:0,state:{}}};
+ const state={ok:true,capabilities,systems:['EMS'],workflows:[],runs:[],operations:{tools:[]},ui_state:{revision:0,state:{}}};
  const draft={definition:{name:'kept unsaved author draft'},dirty:true},chat={prompt:'kept chat draft',files:[{id:'kept-file'}]};
  const queued=[],reads=[];
  h.api.setState(state);h.api.setSelection({mode:'author',tab:targets[origin].tab,system_id:'EMS',workflow_id:origin==='procedures'?'draft-workflow':'',run_id:'',job_id:'',panel_width:620});
@@ -85,7 +85,7 @@ test('Native return publishes no work reference until workspace operations and C
 
 test('account reset discards a pending Native destination and all prior private state',async()=>{
  const h=harness('tools');await h.open('skills');h.delayReplies();await h.api.sourceAction({action:'workspace_admin'});
- h.setAuth('account-b-token');h.api.sync();await settle();assert.equal(h.api.snapshot().state,null);assert.equal(h.api.snapshot().selection.mode,'work');assert.equal(h.api.snapshot().selection.tab,'my_work');
+ h.setAuth('account-b-token');h.api.sync();await settle();assert.equal(h.api.snapshot().state,null);assert.equal(h.api.snapshot().selection.mode,'work');assert.equal(h.api.snapshot().selection.tab,'overview');
 });
 
 test('a Native return permission denial discards cached author state and cannot execute the queued action',async()=>{
@@ -191,7 +191,7 @@ test('late rejected Native navigation cannot restore a previous account preview'
  h.context.window.__eesSourceShellV1.navigate=()=>navigation.promise;
  const returning=h.api.sourceAction({action:'procedures'});h.setAuth('account-b-token');h.api.reset();
  navigation.reject(new Error('old route failed'));await returning;await settle();
- assert.equal(h.api.snapshot().state,null);assert.equal(h.api.snapshot().selection.tab,'my_work');assert.equal(h.api.snapshot().error,'');
+ assert.equal(h.api.snapshot().state,null);assert.equal(h.api.snapshot().selection.tab,'overview');assert.equal(h.api.snapshot().error,'');
 });
 
 test('failed fresh Native access clears the preview without exposing cache and allows retry',async()=>{
