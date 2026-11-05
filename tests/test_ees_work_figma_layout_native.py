@@ -29,12 +29,17 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
             observed['capture_error']=str(error)
         self.fail('Private panel width did not persist: '+str(width)+'; '+json.dumps(observed))
 
-    def viewport(self, width, height=768):
+    def viewport(self, width, height=768, *, overlay=None):
         self.browser.call('Emulation.setDeviceMetricsOverride', {
             'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
         self.wait('innerWidth === ' + str(width))
         self.wait("document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === " + json.dumps(str(width < 1440).lower()))
         self.wait("Math.abs(document.querySelector('[data-ees-source-shell]').getBoundingClientRect().width - "+str(width)+") < .01")
+        # CSS can resize before Svelte handles the window resize event. When
+        # compact stays unchanged, neither it nor idle animations prove that
+        # the panel has crossed its separate overlay breakpoint.
+        if overlay is not None:
+            self.wait("document.querySelector('.ees-panel-region')?.dataset.overlay === " + json.dumps(str(overlay).lower()))
         self.wait_layout_motion()
 
     def geometry(self):
@@ -100,7 +105,7 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.evidence('q1-wide-panel-1280x768')
         self.resize_keyboard('Home',36)
         self.assertEqual(self.geometry()['panel']['width'],400)
-        self.viewport(1095)
+        self.viewport(1095, overlay=True)
         self.assertEqual(self.geometry()['overlay'],'true')
         self.assertEqual(self.geometry()['chat']['width'],1039)
         self.click('[data-action=close_panel]')
@@ -137,7 +142,7 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         (directory/'q1-contrast.json').write_text(json.dumps(ratios,indent=2)+'\n',encoding='utf-8')
 
     def test_c18_panel_cards_input_hover_and_keyboard_focus(self):
-        self.author(name='화면 색상 검증 절차', jobs=1)
+        workflow_id = self.author(name='화면 색상 검증 절차', jobs=1)
         self.browser.evaluate('window.__eesNativeWorkV1.refresh()')
         self.click('[data-action=mode][data-mode=author]')
         self.wait("document.querySelector('.ew-author-list>button')")
@@ -158,9 +163,9 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
             'panel': '#ees-work-panel', 'author': '#ees-work-designer',
             'card': '.ew-author-list', 'input': '#ew-author-search',
             'chat': '#chat-container #chat-pane'}.items()}
-        # Approved HTML12 uses a #fafafa authoring canvas and flat list rows.
-        # The outer host, inputs, chat, hover and keyboard contracts stay intact.
-        self.assertEqual(observed, {'panel': 'rgb(243, 243, 245)', 'author': 'rgb(250, 250, 250)',
+        # The 2026-11-05 shared-panel decision extends the authoring canvas
+        # to every right-panel host; white inputs/chat and hover stay distinct.
+        self.assertEqual(observed, {'panel': 'rgb(250, 250, 250)', 'author': 'rgb(250, 250, 250)',
             'card': 'rgba(0, 0, 0, 0)', 'input': 'rgb(255, 255, 255)', 'chat': 'rgb(255, 255, 255)'})
         hover('.ew-author-list>button', 'rgb(243, 243, 245)')
         observed['cardHover'] = background('.ew-author-list>button')
@@ -191,6 +196,108 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('#ees-work-panel')")
         self.assertFalse(self.geometry()['overflow'])
         self.screenshot('c18-panel-card-narrow')
+
+        # Exercise actual view changes, including the old task panel and tools,
+        # so a later per-screen override cannot silently split the shared style.
+        shared = {}
+
+        def capture_style(label, tabs=None):
+            self.browser.call('Input.dispatchMouseEvent', {'type': 'mouseMoved', 'x': 0, 'y': 0})
+            if tabs:
+                self.wait('getComputedStyle(document.querySelector(' + json.dumps(tabs) +
+                          ').querySelector("button")).backgroundColor === "rgba(0, 0, 0, 0)"')
+            result = self.browser.evaluate("""((selector)=>{
+              const panel=document.querySelector('#ees-work-panel'),author=panel.querySelector('#ees-work-designer');
+              const result={panel:getComputedStyle(panel).backgroundColor,author:author?getComputedStyle(author).backgroundColor:null};
+              const nav=selector?document.querySelector(selector):null;
+              if(nav){
+                const active=nav.querySelector('[aria-selected=true],[aria-pressed=true]'),inactive=nav.querySelector('[aria-selected=false],[aria-pressed=false]');
+                const read=element=>{const s=getComputedStyle(element);return {color:s.color,background:s.backgroundColor,font:s.fontSize,line:s.lineHeight,weight:s.fontWeight,height:element.getBoundingClientRect().height,paddingTop:s.paddingTop,paddingBottom:s.paddingBottom};};
+                const underline=getComputedStyle(active,'::after');
+                result.tabs={gap:getComputedStyle(nav).gap,active:read(active),inactive:read(inactive),underline:underline.backgroundColor,underlineHeight:underline.height};
+              }
+              return result;
+            })(""" + json.dumps(tabs) + ')')
+            self.assertEqual(result['panel'], 'rgb(250, 250, 250)', label)
+            if result['author'] is not None:
+                self.assertEqual(result['author'], result['panel'], label)
+                self.assertEqual(background('#ees-work-designer>footer'), result['panel'], label)
+            if tabs:
+                self.assertEqual(result['tabs'], {
+                    'gap': '20px',
+                    'active': {'color': 'rgb(31, 32, 35)', 'background': 'rgba(0, 0, 0, 0)',
+                               'font': '12px', 'line': '18px', 'weight': '500', 'height': 36,
+                               'paddingTop': '6px', 'paddingBottom': '10px'},
+                    'inactive': {'color': 'rgb(92, 94, 101)', 'background': 'rgba(0, 0, 0, 0)',
+                                 'font': '12px', 'line': '18px', 'weight': '400', 'height': 36,
+                                 'paddingTop': '6px', 'paddingBottom': '10px'},
+                    'underline': 'rgb(47, 95, 152)', 'underlineHeight': '2px'}, label)
+            self.assertFalse(self.geometry()['overflow'], label)
+            shared[label] = result
+
+        def capture_tab_focus(label, tabs):
+            # Enter keyboard modality with real Tab/Shift+Tab. The focus outline
+            # stays inside the tab so its scrolling parent cannot clip it.
+            self.browser.evaluate('document.querySelector(' + json.dumps(tabs) + ').querySelector("button").focus()')
+            self.key('Tab', 9)
+            self.key('Tab', 9, modifiers=8)
+            focus = self.browser.evaluate("""((selector)=>{
+              const e=document.activeElement,s=getComputedStyle(e);
+              return {tab:document.querySelector(selector).contains(e),visible:e.matches(':focus-visible'),style:s.outlineStyle,width:s.outlineWidth,offset:s.outlineOffset};
+            })(""" + json.dumps(tabs) + ')')
+            self.assertEqual(focus, {'tab': True, 'visible': True, 'style': 'solid',
+                                     'width': '2px', 'offset': '-2px'}, label)
+            shared[label]['keyboardFocus'] = focus
+
+        self.viewport(1366)
+        row = '[data-author-action=open][data-id="' + workflow_id + '"]'
+        self.wait('document.querySelector(' + json.dumps(row) + ')')
+        self.click(row)
+        self.wait("document.querySelector('.ew-author-tabs [aria-selected=true]')")
+        original = deepcopy(self.state(workflow_id=workflow_id)['workflow']['draft'])
+        capture_style('author-content', '.ew-author-tabs')
+        capture_tab_focus('author-content', '.ew-author-tabs')
+        self.screenshot('shared-panel-authoring-1366')
+        self.open_author_job_ui('job-0')
+        capture_style('author-job', '.ew-author-tabs')
+        for tab in ('rules', 'history'):
+            self.click('[data-author-action=tab][data-tab=' + tab + ']')
+            self.wait("document.querySelector('.ew-author-tabs [data-tab=" + tab + "]')?.getAttribute('aria-selected') === 'true'")
+            capture_style('author-' + tab, '.ew-author-tabs')
+        hover('.ew-author-tabs [aria-selected=false]', 'rgb(236, 236, 239)')
+        self.click('[data-action=tools]')
+        self.wait("document.querySelector('#ees-work-designer[data-author-tab=tools]')")
+        capture_style('tools')
+        run = self.start(workflow_id)
+        self.open_sidebar()
+        self.click('[data-action=mode][data-mode=work]')
+        self.wait("document.querySelector('[data-action=records]')")
+        self.open_run(workflow_id, run, job=None)
+        if not self.browser.evaluate("!!document.querySelector('.ew-operation-overview')"):
+            self.click('[data-action=stage_back]')
+        self.wait("document.querySelector('.ew-operation-overview')")
+        capture_style('work-overview')
+        self.click('.ew-operation-stage[data-action=stage_open]')
+        self.wait("document.querySelector('#ees-work-panel.ew-vd .ew-tabs')")
+        capture_style('work-stage', '.ew-tabs')
+        capture_tab_focus('work-stage', '.ew-tabs')
+        self.screenshot('shared-panel-stage-1366')
+        hover('.ew-tabs [aria-pressed=false]', 'rgb(236, 236, 239)')
+        self.open_run(workflow_id, run)
+        self.wait("document.querySelector('#ees-work-panel:not(.ew-vd) .ew-tabs')")
+        capture_style('work-task', '.ew-tabs')
+        # open_run explicitly expands the sidebar. Both 1366 and 480 are
+        # below the auto-collapse breakpoint, so resizing preserves that
+        # manual choice. Prepare the compact layout through its real control.
+        self.click('[data-ees-sidebar-toggle]')
+        self.wait("document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === 'true'")
+        self.viewport(480, overlay=True)
+        capture_style('work-task-narrow', '.ew-tabs')
+        capture_tab_focus('work-task-narrow', '.ew-tabs')
+        self.assertEqual(self.state(workflow_id=workflow_id)['workflow']['draft'], original)
+        directory = self.screenshot('shared-panel-task-480')
+        (directory / 'shared-panel-styles.json').write_text(
+            json.dumps(shared, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
     def test_source_startup_root_and_existing_chat_reveal_only_after_ees_layout(self):
         # Retain the original test ID but replace the retired four-second body

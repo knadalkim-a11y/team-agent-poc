@@ -1581,7 +1581,7 @@ index 0000000..8e92785
 +					</div></div></div>{/each}
 +				{#if $eesSnapshot.scope_loading}<p class="ew-empty" role="status" data-ees-scope-loading="navigation">{t($eesSnapshot.error ? 'EES.ListUnavailable' : 'EES.Receiving', $eesSnapshot.error ? 'Could not receive the list.' : 'Receiving')}</p>
 +				{:else if !current.length}<p class="ew-empty">
-+						{t('EES.NoProcedures', 'No procedures are registered.')}
++						{t('EES.NoProcedures', 'No published procedures.')}
 +					</p>{/if}
 +			</nav>
 +		{/if}
@@ -1689,7 +1689,7 @@ index 0000000..6d5288b
 +			<p>
 +				{t(
 +					'EES.Procedure.Intro',
-+					'Copy a similar example and adapt it, or start with an empty procedure. Ask a question below to learn how. The assistant explains the steps; it does not create drafts from this conversation yet. Drafts appear in work only after publication.'
++					'Copy a similar example and adapt it, or start with an empty procedure. Ask a question below to learn how. The assistant explains the steps; it does not create drafts from this conversation yet. Published procedures appear in work even when unfinished.'
 +				)}
 +			</p>
 +			{/if}
@@ -3042,7 +3042,7 @@ index 8eba682..38ee86b 100644
 +	"EES.Category.Operations": "운영",
 +	"EES.Category.Setup": "셋업",
 +	"EES.Category.Incident": "장애대응",
-+	"EES.NoProcedures": "등록된 업무 절차가 없습니다.",
++	"EES.NoProcedures": "게시된 업무 절차가 없습니다.",
 +	"EES.Retry": "다시 확인",
 +	"EES.Sidebar.Expand": "사이드바 펼치기",
 +	"EES.Sidebar.Collapse": "사이드바 접기",
@@ -3059,7 +3059,7 @@ index 8eba682..38ee86b 100644
 +	"EES.Composer.Placeholder": "업무를 물어보거나, 필요한 작업을 요청하세요",
 +	"EES.Procedure.Start": "새 절차 작성 안내",
 +	"EES.Helper": "업무 도우미",
-+	"EES.Procedure.Intro": "새 업무 절차는 비슷한 예시를 복사해 고치는 것이 가장 쉽습니다. 오른쪽에서 예시를 고르거나 빈 절차로 시작하세요. 만드는 방법이 궁금하면 아래 질문을 보내 보세요. 지금은 대화 내용으로 초안을 바로 만들지는 않습니다. 초안은 게시하기 전까지 업무 화면에 나타나지 않습니다.",
++	"EES.Procedure.Intro": "새 업무 절차는 비슷한 예시를 복사해 고치는 것이 가장 쉽습니다. 오른쪽에서 예시를 고르거나 빈 절차로 시작하세요. 만드는 방법이 궁금하면 아래 질문을 보내 보세요. 지금은 대화 내용으로 초안을 바로 만들지는 않습니다. 게시 상태로 설정하면 미완성이어도 업무 화면에 표시됩니다.",
 +	"EES.NoAccessibleScreens": "EES Workflow에서 열 수 있는 항목이 없습니다",
 +	"EES.Procedure.Question1": "신규 공장 횡전개 예시를 복사해서 우리 공장에 맞게 고치고 싶어",
 +	"EES.Procedure.Question2": "분류(셋업 · 운영 · 장애대응)가 뭔지 알려줘",

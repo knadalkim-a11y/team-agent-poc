@@ -354,8 +354,10 @@ class FigmaWorkspaceContracts(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(saved['ok'], saved)
         checked = await self.command('validate_workflow', workflow_id=key, expected_revision=saved['revision'])
         self.assertTrue(checked['validation']['errors'])
-        denied = await self.command('publish_workflow', workflow_id=key, expected_revision=saved['revision'])
-        self.assertFalse(denied['ok'])
+        published = await self.command('publish_workflow', workflow_id=key, expected_revision=saved['revision'])
+        self.assertTrue(published['ok'], published)
+        denied = await self.command('start_run', workflow_id=key, expected_revision=published['revision'])
+        self.assertEqual(denied['error']['code'], 'execution_not_ready')
 
     async def test_request_capabilities_follow_current_distinct_roles(self):
         run = await self.prepared(mode='human', block='human_confirm')

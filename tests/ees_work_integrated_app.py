@@ -377,8 +377,8 @@ def integrated_flow(gate):
         field_id='evidence_note',revision=prepared['revision'],ui_creation_claimed=False)
     g.click('[data-author-action="list"]')
     g.click('[data-author-action="open"][data-id="'+identifier+'"]')
-    g.wait('document.querySelector("[data-author-status]")?.textContent.includes('+json.dumps('초안 r'+str(prepared['revision'])+' · 저장됨')+')')
-    g.click('[data-author-action="validate"]')
+    g.wait('document.querySelector("[data-author-status]")?.dataset.authorRevision === '+json.dumps(str(prepared['revision'])))
+    g.click('.ew-procedure-menu>summary');g.click('[data-author-action="validate"]')
     g.wait('!!document.querySelector(\'[data-author-action="publish"]\')')
     g.wait('!!document.querySelector(".ew-author-validation")')
     checked=g.api('/api/ees-work/workspace?workflow_id='+identifier)['workflow']
@@ -976,7 +976,7 @@ def figma_delta_flow(g):
     g.browser.call('Emulation.setDeviceMetricsOverride',{'width':1920,'height':1080,'deviceScaleFactor':1,'mobile':False})
     g.navigate('/');g.wait_work_ready();g.click('[data-action="mode"][data-mode="author"]')
     g.click('[data-action="procedures"]');g.click('[data-author-action="open"][data-id="'+delivery_id+'"]')
-    g.click('[data-author-action="validate"]');g.wait('!!document.querySelector(".ew-author-validation")')
+    g.click('.ew-procedure-menu>summary');g.click('[data-author-action="validate"]');g.wait('!!document.querySelector(".ew-author-validation")')
     advisory=g.api('/api/ees-work/workspace?workflow_id='+delivery_id)['workflow']['validation']
     assert not advisory['errors'] and any('송부 방식' in str(item) for item in advisory['warnings']),advisory
     # The validation panel can render while its follow-up workspace read is

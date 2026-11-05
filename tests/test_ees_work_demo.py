@@ -11,7 +11,7 @@ class EESWorkNativeBrowserTests(IntegratedNativeCase):
     def test_empty_state_has_no_seed_run_or_fake_success(self):
         self.assertEqual(self.state()['workflows'], [])
         self.assertEqual(self.state()['runs'], [])
-        self.assertIn('등록된 업무 절차가 없습니다', self.text('#ees-work-entry'))
+        self.assertIn('게시된 업무 절차가 없습니다', self.text('#ees-work-entry'))
         self.assertIn('지금 처리할 내 업무가 없습니다', self.text('#ees-work-panel'))
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-action=execute],[data-action=confirm]')"))
         self.assertEqual([x for x in self.server.workspace_commands if x['action'] != 'save_ui'], [])

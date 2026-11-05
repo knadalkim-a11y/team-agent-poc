@@ -1688,7 +1688,7 @@ class OperationsRuntime:
         if tool["state"] != "approved" or tool["revision"] != job.get("tool_contract_revision") or reference != tool["reference"]:
             fail("tool_contract_changed")
 
-    def validate_publication(self, db, definition, actor, groups):
+    def validate_publication(self, db, definition, actor, groups, *, authoring=True, factory_id=""):
         errors = []
         for job in definition.get("nodes", {}).values():
             if job.get("type") != "j":
@@ -1733,7 +1733,9 @@ class OperationsRuntime:
                 continue
             try:
                 tool = self._tool(db, key)
-                self._scope(db, actor, groups, tool["system_id"], role="manager")
+                self._scope(db, actor, groups, tool["system_id"],
+                            factory="" if authoring else factory_id,
+                            role="manager" if authoring else "participant")
                 if tool["system_id"] != definition["system_id"] or tool["state"] != "approved":
                     fail("tool_review_required")
                 if type(job.get("tool_contract_revision")) is not int or job["tool_contract_revision"] != tool["revision"]:
