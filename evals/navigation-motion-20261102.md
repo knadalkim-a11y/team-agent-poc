@@ -4,6 +4,8 @@
 
 ## 2026-11-05 · 워크스페이스 메뉴 제목 잘림
 
+- **통합 후속 검증:** #120 최종 head `9d1df66`의 [CI468](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41948573115)에서 움직임6/6·native-compose97/97 및 전체 필수39개가 성공했다. 제목 접기의 실제 애니메이션 종료 후 padding0·재펼침 검사를 통과했다. #120 병합 main `c41634a`에 포함됐으며 #121 통합에서도 유지한다. 아래 최초 실패와 당시 관찰은 보존한다.
+
 - **병합 통합 CI466 후속(2026-11-05):** #120 head `707b249`의 [CI466](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41946435594) native-compose 97개 중 96개가 통과했다. 앞서 보완한 Q1을 포함한 layout5/5·작성31/31·실행23/23은 통과했고, 이 제목 검사의 첫1920px 접기에서 높이0 대기 뒤 padding0 즉시 단언이 실패했다. [최초 PNG·DOM·확장 치수](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41946435594/artifacts/13378893830)를 보존한다. 확장 높이26/36/36과 실제 글자16px는 정상이었으며 실패 캡처는 접힌 메뉴를 보여 준다. 실패 직전 padding 수치 자체는 기록되지 않아 추정값을 쓰지 않는다.
 - **누락 경로와 보완:** 기존 검사는 펼침/재펼침만 하위 애니메이션 종료를 기다렸고, 접기는 반올림되는 DOM 높이0만 기다렸다. CSS는 높이와 padding을 함께 전환하므로 높이0만으로 계산된 padding의 종료를 보장하지 않는다. 접기에도 같은 `getAnimations({subtree:true})` 종료 대기를 적용하고 실제 padding0 단언·폭/높이·일반/동작 줄이기·재펼침 조건을 유지한다. 재발 시 실제 padding 수치가 단언 로그에 남도록 측정 행도 전달한다. 제품 CSS·시간 제한·실제 클릭은 변경하지 않고, Python 구문·문서·diff 검사 및 새 통합 head 전체 CI로 판정한다.
 
