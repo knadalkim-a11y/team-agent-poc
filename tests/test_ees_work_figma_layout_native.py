@@ -29,12 +29,17 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
             observed['capture_error']=str(error)
         self.fail('Private panel width did not persist: '+str(width)+'; '+json.dumps(observed))
 
-    def viewport(self, width, height=768):
+    def viewport(self, width, height=768, *, overlay=None):
         self.browser.call('Emulation.setDeviceMetricsOverride', {
             'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
         self.wait('innerWidth === ' + str(width))
         self.wait("document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === " + json.dumps(str(width < 1440).lower()))
         self.wait("Math.abs(document.querySelector('[data-ees-source-shell]').getBoundingClientRect().width - "+str(width)+") < .01")
+        # CSS can resize before Svelte handles the window resize event. When
+        # compact stays unchanged, neither it nor idle animations prove that
+        # the panel has crossed its separate overlay breakpoint.
+        if overlay is not None:
+            self.wait("document.querySelector('.ees-panel-region')?.dataset.overlay === " + json.dumps(str(overlay).lower()))
         self.wait_layout_motion()
 
     def geometry(self):
@@ -100,7 +105,7 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.evidence('q1-wide-panel-1280x768')
         self.resize_keyboard('Home',36)
         self.assertEqual(self.geometry()['panel']['width'],400)
-        self.viewport(1095)
+        self.viewport(1095, overlay=True)
         self.assertEqual(self.geometry()['overlay'],'true')
         self.assertEqual(self.geometry()['chat']['width'],1039)
         self.click('[data-action=close_panel]')
