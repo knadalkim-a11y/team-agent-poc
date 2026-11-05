@@ -92,3 +92,11 @@ Linux 격리 작업 사본, Python 3.11.17 `.venv`, Node 22.22.0. Python 의존�
 - **증거:** main `93749cc`와 PR head `7425f21`은 tree가 같고, CI446에서 같은 시험이 통과했다. CI449 1회차에서는 `Complete Native product`가 통과했다. 실패한 작업만 한 번씩 다시 실행해 CI447·CI449 2회차가 모두 성공했다. 코드·시험·시간 한도는 바꾸지 않았다.
 - **판단:** 브라우저 준비 단계의 일시적 지연으로 보이며 근본 원인은 확인하지 못했다. 재실행 성공을 원인 해결로 보지 않는다. `about:blank` 단계의 DevTools 시간 초과는 이전 기록 [2026-09-14](scenarios.md#specialists-editor-format-20260914)·[2026-09-11](scenarios.md#connector-demo-starters)·[2026-10-20](v4-ui-20260930.md#common-motion-c3-20261020)과 같은 유형의 재발이다. 이전에도 재실행으로 통과했고 시험은 바꾸지 않았다.
 - **남은 항목:** 다시 나오면 브라우저 시험 준비 단계(기동·첫 이동)를 한 번 다시 시도하게 하는 시험 보완을 사용자와 정한다.
+
+<a id="pr118-merge-review-20261105"></a>
+
+### PR #118 병합 검토와 main 통합 (2026-11-05)
+
+- 사용자 “다 병합해줘”에 따라 #118 head `51f6cbc`와 #119 병합 main `eb6ede6`을 merge로 통합했다. STATUS·CHANGELOG 충돌은 두 변경의 기록을 모두 보존했으며 #119 제품 CSS·Native 시험을 유지한다. rebase·force-push·main 직접 push는 하지 않는다.
+- 설명 변경은 서비스마다·시스템마다 토큰이 다를 수 있고 실행 계정의 개인 설정을 사용한다는 기존 ST-AUTH-5와 일치한다. 기존 head CI450은 39성공·출하1정상생략이다.
+- Linux에서 통합 후 `python scripts/check_docs.py`와 `git diff --check`를 실행한다. 최종 통합 head의 전체 필수 CI와 병합 SHA는 [PR #118](https://github.com/knadalkim-a11y/team-agent-poc/pull/118)의 검증 기록을 따른다. 사내 적용·토큰 발급·실제 사용자 자료 변경은 수행하지 않는다.

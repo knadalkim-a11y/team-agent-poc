@@ -5,6 +5,7 @@ frontend and temporary workflow service are real. Frame/style observations are
 retained alongside screenshots so still images cannot count as motion evidence.
 """
 import asyncio
+import importlib
 import json
 import os
 from pathlib import Path
@@ -187,6 +188,65 @@ class MotionNativeTests(IntegratedNativeCase):
         self.assertTrue(any(3 < row['pillLeft'] < 100 for row in frames))
         self.assertTrue(all(row['labelOpacity'] == '1' for row in frames))
         self.assertTrue(any(0 < row['labelWidth'] < max(item['labelWidth'] for item in frames) for row in frames))
+
+        # Check the line box, not just textContent: an 18px border box used to
+        # clip these headings once their existing 10/20px padding was included.
+        # This workflow fixture has no Native account database; explicitly
+        # enable its synthetic Native menus, as in SourceShellNativeTests.
+        native = importlib.import_module(self.backend.__package__ + '.ees_workflow_native')
+
+        async def access(_actor):
+            return {'native_access': dict.fromkeys(
+                ('models', 'knowledge', 'prompts', 'skills', 'tools', 'admin'), True),
+                'native_access_available': True}
+
+        provider = patch.object(native, 'native_workspace_access', access)
+        provider.start()
+        self.addCleanup(provider.stop)
+        self.refresh()
+        self.click('[data-mode=author]')
+        self.wait("document.querySelectorAll('.ew-nav-group-title').length === 3")
+        heading_metrics = """(()=>[...document.querySelectorAll('.ew-nav-group-title')].map(e=>{
+          const s=getComputedStyle(e),r=e.getBoundingClientRect();
+          const next=e.nextElementSibling.querySelector('button').getBoundingClientRect();
+          return {text:e.textContent.trim(),height:r.height,lineHeight:parseFloat(s.lineHeight),
+            paddingTop:parseFloat(s.paddingTop),paddingBottom:parseFloat(s.paddingBottom),
+            available:e.clientHeight-parseFloat(s.paddingTop)-parseFloat(s.paddingBottom),
+            buttonGap:next.top-r.bottom,overflow:s.overflow};}))()"""
+        heading_evidence = []
+        for width, height, reduced in ((1920, 1080, False), (1366, 768, False), (1366, 768, True)):
+            previous_width = self.browser.evaluate('innerWidth')
+            self.viewport(width, height)
+            # Crossing 1440px automatically compacts the source sidebar.
+            # Open it with the real toggle before measuring expanded headings.
+            if (previous_width < 1440) != (width < 1440):
+                self.wait("document.querySelector('#sidebar').dataset.compact === " +
+                          json.dumps('true' if width < 1440 else 'false'))
+            self.open_sidebar()
+            self.browser.call('Emulation.setEmulatedMedia', {'features': [
+                {'name': 'prefers-reduced-motion', 'value': 'reduce' if reduced else 'no-preference'}]})
+            for reopened in (False, True):
+                if reopened:
+                    self.click('[data-ees-sidebar-toggle]')
+                    self.wait("document.querySelector('#sidebar').dataset.compact === 'false'")
+                self.wait("document.querySelector('#sidebar').getAnimations({subtree:true}).every(a=>a.playState !== 'running')")
+                rows = self.browser.evaluate(heading_metrics)
+                heading_evidence.append({'viewport': [width, height], 'reduced': reduced,
+                    'reopened': reopened, 'headings': rows})
+                (directory / 'workspace-heading-geometry.json').write_text(
+                    json.dumps(heading_evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+                self.assertEqual([row['text'] for row in rows], ['업무 만들기', 'AI 설정', '관리자만'])
+                self.assertEqual([row['height'] for row in rows], [26, 36, 36], heading_evidence[-1])
+                for row in rows:
+                    self.assertGreaterEqual(row['available'], row['lineHeight'], row)
+                    self.assertGreaterEqual(row['buttonGap'], 0, row)
+                if not reopened:
+                    self.click('[data-ees-sidebar-toggle]')
+                    self.wait("document.querySelector('#sidebar').dataset.compact === 'true' && [...document.querySelectorAll('.ew-nav-group-title')].every(e=>e.getBoundingClientRect().height === 0)")
+                    self.assertTrue(all(row['paddingTop'] == 0 and row['paddingBottom'] == 0
+                                        for row in self.browser.evaluate(heading_metrics)))
+            if width == 1366 and not reduced:
+                self.screenshot('workspace-heading-1366')
         self.assertEqual(self.server.completions, [])
 
     def test_c3_docked_panel_slides_opaque_and_reserves_space_while_preserving_work(self):
