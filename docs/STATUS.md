@@ -5,9 +5,9 @@
 - **요청·기준:** 사용자가 확인한 병렬 지시문을 서브에이전트로 실행하도록 요청했다. main `8258318fe9e6f4766417148beb3ecb26b53534ed`, 공통 계약 `1b81452`에서 서버 `72b2524`·화면 `bcd9cb5`를 독립 worktree로 구현하고 `codex/tools-p1-integration`에 merge했다(제품 통합 `2b70693`). [기능 계약](specs/shared-tools.md#tools-redesign-v2-phase1-20261105)·[작성 안내](03-openwebui-native-agent.md#tool-authoring-phase1-20261105).
 - **범위:** 새 도구·Python 정적 검사·기존 코드 가져오기·입력/결과 정의·수정본 저장/재조회. 시험·사용 설정은 2페이즈, 업무절차 연결·실행은 3페이즈다. 기존 사용본과 자료를 보존한다. Figma 원본은 변경하지 않는다.
 - **구현·검증:** 로컬 구현·통합·독립 리뷰 보완을 마쳤다. Node TAP 653/653와 별도 assertion 스크립트 2개, 관련 Python 329개 통과·실제 과거 wheel/현재 frontend 자료가 필요한 7개 건너뜀. 시험 ID 감사·문서·구문·diff 통과. [최초 실패·보완·검증 범위](../evals/tool-authoring-20261105.md).
-- **디자인·미확인:** Figma 2판 5화면의 [고정 PNG·해시](mockups/ees-work/tools-phase1-20261105/metadata.json)를 보존했다. 로컬 Chromium은 OS socket/ptrace 제한으로 제품 로드 전에 실패했다. 실제 브라우저 왕복·시각 대조와 최종 원격 CI가 남았으므로 배포 준비 완료로 판정하지 않는다. 사내 적용은 미실행이다.
-- **원격 게시:** 최초 push 거절 뒤 2026-11-05 사용자가 작업 브랜치 게시·Draft PR·CI를 명시 승인했다. 일반 Git push는 쓰기 인증 부재로 실패해 연결된 GitHub 계정으로 같은 파일 tree를 게시한다. 로컬 개발 커밋과 원격 게시 커밋을 구분하며 최종 CI·실제 화면 결과는 해당 PR 본문과 Checks에 갱신한다.
-- **다음 하나:** 원격 게시와 최종 CI를 마치고 실제 브라우저·시각 비교 결과를 보완한다. main 병합·사내 배포는 이번 범위에 포함하지 않는다.
+- **디자인·검증 경계:** Figma 2판 5화면의 [고정 PNG·해시](mockups/ees-work/tools-phase1-20261105/metadata.json)를 보존했다. 로컬 Chromium은 OS socket/ptrace 제한으로 제품 로드 전에 실패했다. 실제 브라우저 왕복·시각 대조와 최종 원격 CI의 판정은 [PR #123 본문과 Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/123)를 최신 원본으로 삼는다. 사내 적용은 미실행이다.
+- **원격 게시:** 최초 push 거절 뒤 2026-11-05 사용자가 작업 브랜치 게시·Draft PR·CI를 명시 승인했다. 일반 Git push는 쓰기 인증 부재로 실패해 연결된 GitHub 계정으로 게시했다. 최초 원격 `018aa96`과 로컬 `fd786b2`의 tree `9711e922` 일치를 확인했으며 [Draft PR #123](https://github.com/knadalkim-a11y/team-agent-poc/pull/123)을 만들었다. 로컬 개발 커밋과 원격 게시 커밋을 구분한다.
+- **다음 하나:** PR #123 최종 head의 검증 결과를 기준으로 병합 여부를 검토한다. main 병합·사내 배포는 이번 범위에 포함하지 않는다.
 
 > 아래는 변경 당시 기록이다.
 
