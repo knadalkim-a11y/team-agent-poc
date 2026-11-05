@@ -177,3 +177,22 @@ CI484 최종은 40 jobs 중 35성공·3실패·Windows 집계1취소·출하1정
 
 
 최신 main `c01bf09`를 포함한 로컬 `aa2404a`에서 Node작성/실행444개(6.604초), Native19개(72.068초), guard20개(1.145초), ID1692개·문서35개/링크2914개 오류0을 확인했다. 감사 명령의 필수 output 인자 및 파일/폴더 혼동으로 준비 명령2회가 실패했으며 실제 감사는 올바른 폴더로 완료됐다. 원격 게시 직전 병합 검토 세션이 같은 PR을 `54e8e2e`로 전진시켜 expected head 보호가 갱신을 막았다. 새 원격의 변경은 검토 문서뿐이며 제품 추가 수정은 없음을 대조하고 merge로 양쪽 기록과 개발 후속을 보존했다. 최종 head의 전체 CI/화면 결과는 PR 본문과 Checks에서 판정한다.
+
+
+<a id="phase3-evidence"></a>
+
+## 3페이즈 · 업무절차 연결·실행
+
+2026-11-05 KST. 사용자 요청에 따라 main `16cf557`에서 시작했다. 이전 2페이즈 CI487 head `fdf82c7`과 main의 tree `8ea725d9`가 같고 필수39개·브라우저105개가 성공했다. 실제 제품 worker2건/5.999초·자격 비노출, 최종 화면8장 및 증거589개 해시 검증을 완료한 상태다. 이전 실패 기록은 위에 보존한다.
+
+3페이즈 시작 시 열린 관련 PR은 없었다. 기존 AGENTS는 main과 bytes가 같음을 확인했고 현재기준·ST-P2 보존조건·shared catalog/회차/실행·Figma T06A~T09/O15 화면을 확인했다. [ST-P3 계약](../docs/specs/shared-tools.md#tools-redesign-v2-phase3-20261105)과 공통 fixture `tests/fixtures/tools_phase3_contract.json`을 `cc66c23`에 정의했다. Figma는 읽기만 하며 저장/게시·기존 진행·사람 판정의 구분을 유지한다.
+
+초기 조사에서 작성 도구의 Optional/float/bool/primitive list/typed enum이 기존 shared 질문 생성에서 자료형을 잃을 수 있음을 확인했다. 작성 도구에만 원래 property schema를 보존하고 실제 고정 사용본 schema로 검사하는 경계를 둔다. 기존 Native의 일반 사용자 UserValves 조회/저장 경로는 실제 고정 Native HTTP handlers·SQLite에서 성공했고 다른 사용자 PAT·inert identity는 보존됐다. 이는 실제 로그인/브라우저 검증과 구분한다. 제품·통합 검사는 구현 후 결과를 아래에 기록한다.
+
+구현 중 독립 검토에서 다음을 재현하고 보완했다. required를 비어 있지 않음으로 처리하는 화면 오류는 인자 존재와 값 검사를 나누고, 일반 목록은 한 줄에 한 항목 입력으로 제공한다. 첫 실행 질문의 기본값은 아직 사용자가 편집하지 않은 authored 필드에만 적용한다. Native 마지막 비동기 읽기 중 Work 사용 중지·버전 변경과 완료 뒤 heartbeat 정리 중 개인 PAT 변경은 최종 Native 재조회와 동기 Work 검사 직후 저장하도록 고쳤다. Native 역할·그룹 관측도 실행 메타데이터에 결합한다. timeout/권한 회수 뒤 불확실한 원문은 붙이지 않고 기존 기록을 보존하며 자동 재실행하지 않는다.
+
+로컬 중간 검사: 기존 서버 lifecycle/operations/workspace 159개 통과, Native 기존19개·최초 신규10개 통과. `node --test tests/test_*.cjs`는 첫 통합에서736/736 통과했다(후속 기본값 수정은 별도 검사 대상). durable execution은 신규3개 포함40개 중38통과·실제 wheel 환경2생략/6.319초였다. 최초 검사에서 과거 독립 service에 shared_tools가 없는데 managed 직접 호출까지 새 dispatcher를 검사한 오류를 발견해 shared_tool_id가 있는 경우로 한정하고 재검했다. 합성 브라우저 fixture를 실제 service/SQLite에 연결한5묶음 smoke는 공동 실행/whole-job 판정/재실행 이력/버전수락·중지/0건·partial/unknown·중복/권한회수를 통과했다. 이는 실제 source-built 브라우저·전체 Native 제품 실행을 대신하지 않으며 그 결과는 최종 CI에서 기록한다.
+
+명세 밖 선택: 새 연결의 기본 사람 판정은 유지하되 기존 절차에서 명시적으로 정한 자동 판정·completion까지 강제 변경하지 않는다. 기존 execution.calls도 같은 authored 버전·권한 검사를 거치지만 새 여러 도구 연결 UI를 만들지는 않는다. 미완성 게시 허용은 유지하고 실제 실행 시 필요한 값을 검사한다. 최종 통합 결과와 PR은 후속 기록으로 관리한다.
+
+통합 head 로컬 검사: 전체 Node739/739(8.444초), 고정 공식 wheel과 `EES_REQUIRE_ASSET_NATIVE=1`, EncodingWarning 오류 모드에서 작성 도구 Native12/12(38.421초), builder34개 중33통과/실제 소스 frontend가 필요한1개생략(4.774초), pre-draft/P1/P2 Apply→Restore3/3(1.240초), 시험 ID1734개/기존1332개분류오류0, 문서35파일2930링크오류0. 새 P2 Restore 테스트의 처음 실패는 후보 ZIP을 바꾼 뒤에도 바꾸기 전 fixture 전체 tree와 비교한 시험 오류였다. 새 ZIP 저장 직후 기준을 잡고 Apply가 프로그램을 전혀 변경하지 않음을 다시 검증해 통과했다. 최종 사용자 입력 근거에는 원제출 arguments와 기본값 적용 effective_arguments를 함께 보존하고 권한 회수 시 둘 다 숨긴다. 수동 목록 수정으로 파생한 근거에도 같은 metadata를 보존한다.

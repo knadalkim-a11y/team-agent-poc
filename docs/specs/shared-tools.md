@@ -300,3 +300,40 @@ Figma 2판 T02B `2052:207`, T05 `2016:277`, T05A `2018:160`, T05B `2052:236`, T0
 - backend: 수정본 lifecycle·연결/시험/사용 API·저장·서버 단위/Native 검사. 실행 worker/Native 설정 adapter는 같은 계약으로 하위 담당과 분리한다.
 - frontend: JS/CSS·정적 자산·Node 화면 검사·고정 Figma PNG/메타데이터.
 - validation: 실제 Native 브라우저 왕복·상태·화면 대조. review: 독립 권한/동시 변경/비밀·회귀 검토.
+
+
+<a id="tools-redesign-v2-phase3-20261105"></a>
+
+## 도구 재설계 2판 · 3페이즈 업무절차 연결·실행
+
+2026-11-05 사용자가 “3페이즈도 진행해줘”라고 요청했다. 기준 main `16cf557a742b6f90f455bdf9a48d2f6509a3922a`는 #123의 작성·시험·사용 설정과 #124의 내 업무 제거를 포함하며, 동일 tree의 CI487 필수39개·브라우저105개가 통과했다. 새 작업 브랜치에서 서버·화면·검증을 병렬 구현해 한 PR로 통합한다. 실제 사내 배포와 새 외부 변경 기능은 포함하지 않는다.
+
+### 동작과 기존 계약의 적용
+
+| ID | 계약 |
+|---|---|
+| ST-P3-1 | 도구의 ‘업무절차에서 사용’에서 편집할 수 있는 절차→단계→작업을 고른 뒤 그 작업의 도구 연결 창으로 이동한다. 대상 선택 자체는 저장이 아니다. 연결하기는 열린 편집본만 바꾸고 저장·게시는 별도다. 취소·Escape·권한 변경·늦은 응답으로 다른 작업이나 새 편집을 덮지 않는다. 미저장 절차를 다시 열 때 기존 편집본을 보존한다. |
+| ST-P3-2 | 사용 설정된 작성 도구를 기존 공용 도구 선택과 shared_tool_id 경로에 포함한다. 작업에는 도구 ID와 입력 연결만 저장하고 버전·코드·토큰을 직접 저장하지 않는다. 목록·연결·실행 준비·실제 호출은 같은 사용 상태·그룹·Native 권한을 판정한다. 미확인/중지/환경 불일치는 선택·실행을 막고, 이미 연결된 작업의 이름·입력과 과거 기록은 보존해 원인을 안내한다. 기존 기본 제공·이전 방식 도구 계약은 유지한다. |
+| ST-P3-3 | T08/T08A 및 최신 수동 게시 결정에 따라 미완성 저장·게시는 허용한다. ST-AUTH-6/ST-JOB-5의 과거 PAT 게시 차단을 작성 도구에 되살리지 않는다. 실제 실행 준비에서 필수 입력·현재 도구 상태·실행 계정 권한/자격을 검사한다. 게시 상태와 실행 가능한 상태를 구분한다. |
+| ST-P3-4 | 질문·선택지·기본값은 현재 사용본의 input_schema/input_ui를 사용한다. 실행할 때 입력/고정값의 기존 연결을 재사용한다. Optional·정수/실수·boolean·Literal·List[기본형/Literal]을 축소하지 않는다. 생략·null·빈문자·false·0·빈 배열을 구분한다. 생성된 입력에는 authored_schema(원래 property schema)와 기존 shared_tool_generated 출처를 둔다. 서버의 실제 검사 원본은 고정 사용본 schema이며 클라이언트 metadata를 신뢰해 검사를 생략하지 않는다. 직접 만든 입력·변경한 연결은 기존 정리 규칙대로 보존한다. |
+| ST-P3-5 | 회차 시작에 기존 work_shared_tool_pins로 현재 사용 버전과 비밀 없는 참조를 고정한다. 새 사용 버전은 다음 진행 건에서 사용한다. 기존 진행 건의 pin은 자동 변경하지 않고 ST-RUN-4처럼 다음 호출을 멈춰 명시적으로 새 버전을 수락하게 한다. 실행 중·멈추지 않은 자동 진행은 버전 수락할 수 없다. 기존 완료 내역·판정·입력·결과는 바꾸지 않는다. Figma의 ‘기존 진행 건 보존’은 기존 이 규칙을 유지하는 것으로 구현한다. |
+| ST-P3-6 | 실행할 때 저장된 불변 사용 버전에서만 코드·연결 주소·함수·입출력 정의를 읽고 P2 Native worker로 실행한다. 요청으로 코드/참조를 바꿀 수 없다. 실행한 현재 계정의 Native 개인 PAT만 사용하며 관리자·시험자 자격을 대행하지 않는다. 시험자 credential stamp를 다른 실행자와 비교하지 않는다. 관리 동작은 계속 관리자만 가능하다. 일반 사용자의 개인 PAT는 기존 Native UserValves 목록·설정 경로를 재사용하고 chat.valves 권한을 우회하지 않는다. |
+| ST-P3-7 | 실제 호출 직전과 비동기 완료 시 현재 계정·업무 범위·도구 그룹·Native ACL/개인 자격·환경을 재확인한다. 상태·버전·입력·계정이 바뀐 늦은 결과를 새 근거로 붙이지 않는다. 동일 request 중복은 한 번만 실행하고 timeout/응답 유실/unknown은 자동 재실행하지 않는다. 이미 끝난 결과는 기존 불변 attempt에 보존한다. 사용 중지는 다음 호출부터 막고 완료 기록은 유지한다. |
+| ST-P3-8 | O15B의 문서 목록은 사람 판정의 근거이며 행별 체크/목록 확정 화면이 아니다. 작성 도구 연결의 기본은 기존 human_confirm와 human_confirmation:true이고 사용자가 쓴 확인 기준은 보존한다. 기존 managed search_pages의 list_confirm 의미는 바꾸지 않는다. 이 기본 흐름은 조회 성공만으로 승인하지 않고 작업 전체를 승인·조건부 승인·미승인으로 명시 판정한다. 기존 judgments와 기본 상태 의미를 재사용하며 새 판정 상태를 만들지 않는다. 기존 절차에서 명시한 자동 판정·completion 계약까지 일괄 사람 판정으로 강제하지 않는다. |
+| ST-P3-9 | 실제 반환 목록·출력 역할/표시 항목·주소를 사용본 output_ui로 검사하고 표시한다. 예시 데이터로 대체하거나 외부 id를 필수/유일하다고 추정하지 않는다. 원문 id/결과는 덮지 않는다. 필요하면 저장 attempt의 행 순서 기반 내부 표시 키를 별도로 둔다. 목록0건과 부분/잘림을 구분한다. 형태가 유효한 부분 결과는 부분 상태로 사람이 판정할 수 있고 기존 ST-RUN-7의 확정 후 진행 조건을 적용한다. 0건도 사람이 확인하며 실패/unknown은 승인할 수 없다. P2 시험의 부분 결과 사용 설정 차단은 유지한다. |
+| ST-P3-10 | 화면에는 조회 건수·시간·현재 attempt의 도구 버전과 실제 입력·결과를 보이고 판정은 해당 attempt에 결합한다. 다시 실행은 새 attempt로 만들며 이전 판정/근거를 덮지 않는다. 공동 진행 상태·현재 실행자 권한으로 제한되는 근거·개인 대화의 기존 경계를 유지한다. 사용 중지나 현재 버전 변경만으로 과거 본인 근거를 숨기지는 않되 현재 업무 범위·그룹·Native 읽기 권한·개인 자격은 계속 확인한다. 접근 회수 후 개인 결과·코드·토큰을 목록/오류/로그/다른 계정에 노출하지 않는다. |
+| ST-P3-11 | T06 쓰는 곳은 접근 가능한 절차·단계·작업으로 이동하며 초안/게시본/실제 위임 예약을 구분해 집계한다. 자동 실행의 기존 계정·권한·회차·스케줄 저장소를 재사용하고 이번 범위를 별도 실행 엔진이나 여러 도구 이어 붙이기로 넓히지 않는다. 기존 execution.calls에 이미 연결된 authored 참조도 같은 권한·버전 판정을 거치게 한다. |
+| ST-P3-12 | 사용 버전/상태 원본은 P2 표이며 work_shared_tools에 복제하지 않는다. 동일 내용 재확인 때 version.snapshot.environment는 과거 값일 수 있으므로 현재 승인 환경은 work_tool_use_observations와 실제 환경을 비교한다. 실행 당시 환경은 attempt에 고정한다. 기존 자료·Native identity·개인 설정·프로그램 Restore를 보존하고 읽기 분류/worker를 보안 sandbox로 설명하지 않는다. |
+
+### 공통 인터페이스와 화면
+
+새 연결 mutation은 만들지 않는다. workspace_state의 편집 가능한 workflows와 저장/게시·start_run, operations.execute, 기존 사람 판정과 shared_tool_accept_version을 재사용한다. T06A 대상 목록은 기존 authoring 조회와 미저장 화면 캐시를 사용한다.
+
+shared_tools의 작성 도구 항목은 `source: authored`, `id: draft-…`, `version`, `state`, `can_use`, `unavailable_reason/unavailable_message`, `group_ids`, 사용본의 `input_schema/input_ui/output_ui`를 제공한다. pin은 기존 `{id,version,reference}`이며 reference에는 작성 도구 식별·불변 버전·지문만 둔다. 코드·PAT는 공개 응답에 포함하지 않는다. 실행 결과 표시 메타데이터와 raw 결과의 공개 범위는 기존 attempt 권한을 따른다. attempt.snapshot.shared_tool은 기존 id/version/reference에 source/name/input_schema/input_ui/output_ui를 그 당시 사용본에서 추가한다. result는 source:authored와 completeness/items/count/fields_checked를 보존한다. items의 내부 id는 row-1 등 저장된 순서를 쓰고 title/category/url과 원본 row를 분리한다. 각 행의 required:false로 작업 전체 사람 판정과 구분하며 원본 외부 id는 row.id에 보존한다. snapshot.arguments는 제출·생략 상태를 보존하고 snapshot.effective_arguments에는 서버가 고정 schema의 기본값을 적용한 실제 호출 인자를 저장한다. 화면은 실제 값을 우선 보여주며 제출하지 않은 값은 기본값임을 표시한다. 두 값 모두 기존 근거 접근 범위를 따른다.
+
+Figma `XK2wTos6sEuxSHhIj7cqg6` 도구 2판 T06 `2017:333`, T06A `2054:384`, T07 `2017:408`, T08 `2017:460`, T08A `2054:420`, T09 `2018:194`; 업무·운영의 O15A `2056:313`, O15B `2056:563`, O15C `2056:813`, 시작창 `2056:1158`, 실행 규칙 `2056:1172`를 2026-11-05 읽기 전용 조회했다. 기존 진행 건이 하나면 그 진행 건에서 실행하고 여러 건이면 선택한다. 미진행이면 기존 시작 입력 창을 사용한다. 고정 context·PNG와 실제1920/1366/360 화면을 대조한다. 시안의 인명·건수·문서는 합성 예시다.
+
+### 병렬 소유권과 완료 조건
+
+- root: 공통 계약/fixture·문서·패키징 목록·통합·PR/CI. backend: 공용 catalog/버전/실행·Native 계정/자격·Python 검사. frontend: JS/CSS·질문·결과/판정 화면·Node 검사·Figma 고정 자료. validation: 기존 브라우저 fixture와 작성/실행 종단·Full Native product 시험.
+- 정상 연결→저장→게시→공동 진행→실제 실행→사람 판정, 미저장 취소, typed 입력,0건/부분/실패/unknown, 버전/그룹/계정 변경·중복/늦은 응답·재실행 이력, 기존 managed/legacy 보존을 검사한다. 실제 Native worker·Windows/Linux·패키징/Restore·화면 대조를 포함한 최종 CI를 확인한다. 실제 사내 연결·데이터는 별도 확인 대상이다.

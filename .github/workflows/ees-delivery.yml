@@ -54,6 +54,7 @@ on:
       - 'tests/test_ees_tool_*.py'
       - 'tests/fixtures/tools_phase1_contract.json'
       - 'tests/fixtures/tools_phase2_contract.json'
+      - 'tests/fixtures/tools_phase3_contract.json'
       - 'tests/test_ees_work_figma*'
       - 'tests/test_ees_source_shell_native.py'
       - 'tests/test_ees_motion*'

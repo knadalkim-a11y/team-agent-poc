@@ -1,0 +1,108 @@
+{
+  "reference": "Figma tools redesign v2 and operation tool-to-human-decision flow",
+  "file_key": "XK2wTos6sEuxSHhIj7cqg6",
+  "retrieved_on": "2026-11-05",
+  "source": "Initial get_design_context screenshots; screenshots are fixed reference renders, not application assets.",
+  "implementation_scope": "Phase 3 workflow/job selection, tool questions and draft connection, separate save/publish, saved-version execution and human decision evidence. Existing run pins require explicit version acceptance under ST-RUN-4.",
+  "screens": [
+    {
+      "screen": "T06",
+      "title": "사용 상세",
+      "node_id": "2017:333",
+      "file": "T06.png",
+      "width": 475,
+      "height": 1024,
+      "sha256": "60fab1995deee0dd6bcd2255ca13f04e24fdffcb409fa02a24f815965b1a3e0d"
+    },
+    {
+      "screen": "T06A",
+      "title": "연결할 작업 선택",
+      "node_id": "2054:384",
+      "file": "T06A.png",
+      "width": 760,
+      "height": 596,
+      "sha256": "0632defb5f3723a09eae9c84d4d7ea140e7b632deb996aaea5cf0fb821411670"
+    },
+    {
+      "screen": "T07",
+      "title": "업무절차에서 도구 설정",
+      "node_id": "2017:408",
+      "file": "T07.png",
+      "width": 760,
+      "height": 582,
+      "sha256": "a46f84bdfdd90f891d4fe596d8a00424feb402182f1669291cd9d393f5b76d46"
+    },
+    {
+      "screen": "T08",
+      "title": "연결 후 작업",
+      "node_id": "2017:460",
+      "file": "T08.png",
+      "width": 474,
+      "height": 1024,
+      "sha256": "491d21e1f653c560ff116932a058e8b567fe84e7a2b32a539877716dfe7e476f"
+    },
+    {
+      "screen": "T08A",
+      "title": "저장 후 게시",
+      "node_id": "2054:420",
+      "file": "T08A.png",
+      "width": 474,
+      "height": 1024,
+      "sha256": "28302c9057e0024f8b175643bba3e5f4bab92e3c8d36821e49bf7013f7531441"
+    },
+    {
+      "screen": "T09",
+      "title": "예외 상태와 연결 규칙",
+      "node_id": "2018:194",
+      "file": "T09.png",
+      "width": 1024,
+      "height": 534,
+      "sha256": "f812c01af51801d7b0d69e29c06de1a66a98a8661e68c62d8cf2c3f81f1bc723"
+    },
+    {
+      "screen": "O15A",
+      "title": "게시된 작업 · 실행 전",
+      "node_id": "2056:313",
+      "file": "O15A.png",
+      "width": 433,
+      "height": 1024,
+      "sha256": "8d283d9148f5ee9ac8a9e500524196297c84c4a2e883e62aa20d4c508a5e333a"
+    },
+    {
+      "screen": "O15B",
+      "title": "문서 조회 후 · 사람 확인",
+      "node_id": "2056:563",
+      "file": "O15B.png",
+      "width": 433,
+      "height": 1024,
+      "sha256": "4503ba5a13c15c54fa8c8dec50465dfe901e64c5978eae686726968819a13b3f"
+    },
+    {
+      "screen": "O15C",
+      "title": "승인 후 · 판정 기록",
+      "node_id": "2056:813",
+      "file": "O15C.png",
+      "width": 433,
+      "height": 1024,
+      "sha256": "35e129877d0be3f93db37072c1952364d8ef47468d7ceeb154da5d4baa3e0b99"
+    },
+    {
+      "screen": "O15Start",
+      "title": "진행 건이 없을 때 · 실행 준비",
+      "node_id": "2056:1158",
+      "file": "O15Start.png",
+      "width": 700,
+      "height": 270,
+      "sha256": "deaf855cf2e3fa09a8ae6d10969b02c575f1af42cb498bf48ecb13f79ea67c6b"
+    },
+    {
+      "screen": "O15Rules",
+      "title": "실행 상태 규칙",
+      "node_id": "2056:1172",
+      "file": "O15Rules.png",
+      "width": 780,
+      "height": 132,
+      "sha256": "b4fa5616bd629e8e939e9dbabbc66d7af5010d2c9d0ade5560da98cfe05ec77d"
+    }
+  ]
+}

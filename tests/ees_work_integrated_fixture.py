@@ -7,7 +7,9 @@ Procedures are authored through the production command service, never seeded.
 import asyncio
 import base64
 from copy import deepcopy
+import hashlib
 import importlib
+import inspect
 import json
 import os
 from pathlib import Path
@@ -72,6 +74,8 @@ class SyntheticAuthoredNative:
         self.denied_users = set()
         self.environment = 'synthetic-native-0.11.3'
         self.run_calls = []
+        self.execution_calls = []
+        self.execution_actor_lookup = None
         self.save_calls = []
         self.group_calls = []
         self.started = threading.Event()
@@ -196,6 +200,81 @@ class SyntheticAuthoredNative:
         result['raw_result'] = await self.redact(user, native_id, result.get('raw_result'))
         return deepcopy(result)
 
+    def set_personal_token(self, user, native_id, token):
+        """Only synthetic Native personal settings; never a Work credential API."""
+        key = (native_id, self._value(user, 'id'))
+        self._tokens[key] = token
+        self._credential_revisions[key] = self._credential_revisions.get(key, 0) + 1
+
+    def _execution_check(self, user):
+        if self._value(user, 'role') not in ('admin', 'user'):
+            self._fail('native_access_denied')
+        if not self.allowed or self._value(user, 'id') in self.denied_users:
+            self._fail('native_access_denied')
+        failure = self.failures.get('inspect_execution')
+        if failure:
+            self._fail(failure)
+
+    async def inspect_execution(self, user, native_id):
+        self._execution_check(user)
+        actor, groups = user, []
+        if self.execution_actor_lookup:
+            actor, _, groups = await self.execution_actor_lookup(user)
+        self._execution_check(actor)
+        metadata = deepcopy(self._metadata(actor, native_id))
+        metadata['actor_stamp'] = hashlib.sha256(json.dumps([
+            self._value(actor, 'id'), self._value(actor, 'role'), sorted(groups)
+        ], sort_keys=True).encode('utf-8')).hexdigest()
+        return metadata
+
+    async def run_execution(self, user, snapshot, inputs, expected_metadata, context, dispatch_guard):
+        native_id = snapshot['native_id']
+        metadata = await self.inspect_execution(user, native_id)
+        if metadata != expected_metadata:
+            self._fail('tool_trial_snapshot_changed')
+        if not metadata['token_set']:
+            self._fail('native_personal_connection_required')
+        final_guard = await dispatch_guard()
+        if await self.inspect_execution(user, native_id) != expected_metadata:
+            self._fail('tool_trial_snapshot_changed')
+        def finish_guard(guard):
+            if not callable(guard):
+                self._fail('tool_trial_snapshot_changed')
+            checked = guard()
+            if inspect.isawaitable(checked):
+                if hasattr(checked, 'close'):
+                    checked.close()
+                self._fail('tool_trial_snapshot_changed')
+        finish_guard(final_guard)
+        self.execution_calls.append({'actor': self._value(user, 'id'),
+            'snapshot': deepcopy(snapshot), 'inputs': deepcopy(inputs),
+            'context': deepcopy(context), 'metadata': deepcopy(metadata)})
+        result = deepcopy(self.result)
+        self.started.set()
+        if not await asyncio.to_thread(self.hold.wait, self.hold_timeout):
+            result = {'status': 'unknown', 'raw_result': None,
+                      'duration_ms': int(self.hold_timeout * 1000), 'error_code': 'tool_trial_timeout'}
+        try:
+            final_guard = await dispatch_guard()
+            current = await self.inspect_execution(user, native_id)
+            finish_guard(final_guard)
+            if current != metadata:
+                self._fail('tool_trial_snapshot_changed')
+        except self.error_type as error:
+            return {'status': 'unknown', 'raw_result': None,
+                    'duration_ms': result.get('duration_ms', 0), 'error_code': error.code}
+        token = self._tokens.get((native_id, self._value(user, 'id')), '')
+        def clean(value):
+            if isinstance(value, str):
+                return value.replace(token, '[REDACTED]') if token else value
+            if isinstance(value, list):
+                return [clean(child) for child in value]
+            if isinstance(value, dict):
+                return {clean(key): clean(child) for key, child in value.items()}
+            return deepcopy(value)
+        result['raw_result'] = clean(result.get('raw_result'))
+        return result
+
 
 class IntegratedNativeCase(unittest.TestCase):
     @classmethod
@@ -277,6 +356,49 @@ class IntegratedNativeCase(unittest.TestCase):
         result = asyncio.run(self.server.workflow.workspace_state(self.server.user, **query))
         self.assertTrue(result['ok'], result)
         return result
+
+    def phase3_command(self, action, revision=0, *, user=None, **values):
+        result = asyncio.run(self.server.workflow.operations.command(user or self.server.user,
+            dict(action=action, expected_revision=revision, request_id=str(uuid4()), **values)))
+        self.assertTrue(result['ok'], result)
+        return result
+
+    def phase3_authored_tool(self, *, activate=True):
+        """Real draft/lifecycle commands; only Native settings/worker are synthetic."""
+        fixture = json.loads((ROOT / 'tests/fixtures/tools_phase3_contract.json').read_text(encoding='utf-8'))
+        self.phase3_admin = self.server.user
+        self.authored_native = SyntheticAuthoredNative(self.backend.WorkflowError,
+            result={'status': 'succeeded', 'raw_result': fixture['result'], 'duration_ms': 25})
+        self.server.workflow.tool_drafts.lifecycle.native = self.authored_native
+        self.authored_native.execution_actor_lookup = self.server.workflow._work_actor
+        self.addCleanup(self.authored_native.hold.set)
+        self.authored_members = {'group-ems': {self.server.user['id'], 'other-user'},
+                                'group-apc': {self.server.user['id']}}
+        groups = [{'id': 'group-ems', 'name': 'EMS 운영'}, {'id': 'group-apc', 'name': 'APC 운영'}]
+        self.server.workflow.group_lookup = lambda actor: [deepcopy(group) for group in groups
+            if (actor if isinstance(actor, str) else SyntheticAuthoredNative._value(actor, 'id')) in self.authored_members[group['id']]]
+        self.server.workflow.group_list_lookup = lambda: deepcopy(groups)
+        record = self.phase3_command('tool_draft_save', draft=fixture['draft'])['tool_draft']
+        key = record['id']
+        self.assertTrue(record['check']['valid'], record['check'])
+        record = self.phase3_command('tool_draft_connection_save', record['revision'],
+            tool_id=key, expected_connection_revision=0, **fixture['connection'])['tool_draft']
+        self.authored_native.set_personal_token(self.users['other-user'], record['connection']['native_id'],
+                                               'fixture-phase3-other-personal-token')
+        if activate:
+            record = self.phase3_activate(fixture, key)
+        return fixture, key, record
+
+    def phase3_activate(self, fixture, key):
+        record = self.phase3_command('tool_draft_get', user=self.phase3_admin, tool_id=key)['tool_draft']
+        self.phase3_command('tool_draft_trial_start', record['revision'], user=self.phase3_admin, tool_id=key,
+            expected_connection_revision=record['connection']['revision'], inputs=fixture['inputs'])
+        tested = self.phase3_command('tool_draft_get', user=self.phase3_admin, tool_id=key)['tool_draft']
+        self.assertTrue(tested['trial']['eligible_for_activation'], tested['trial'])
+        return self.phase3_command('tool_draft_use_set', tested['revision'], user=self.phase3_admin, tool_id=key,
+            expected_connection_revision=tested['connection']['revision'],
+            expected_use_revision=tested['use']['revision'], trial_id=tested['trial']['id'],
+            groups=fixture['groups'], evidence=fixture['evidence'])['tool_draft']
 
     def author(self, name='합성 절차', fields=None, jobs=2, mode='human', block='human_confirm'):
         created = self.command('create_workflow', name=name, system_id='EMS')

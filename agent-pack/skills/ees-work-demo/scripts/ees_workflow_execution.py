@@ -166,6 +166,16 @@ class ExecutionRuntime:
 
     async def _call_reference(self, user, call, run_id=None, *, evidence=False):
         if call.get("shared_tool_id"):
+            authored = self.service.shared_tools.authored
+            if evidence and authored.is_key(call["shared_tool_id"]):
+                with self.service._db() as db:
+                    row = db.execute("SELECT data FROM work_shared_tool_pins WHERE run_kind='execution' AND run_id=? AND tool_id=?",
+                                     (run_id, call["shared_tool_id"])).fetchone()
+                if not row:
+                    raise WorkflowError("shared_tool_plan_changed", "저장된 도구 버전을 확인해 주세요.")
+                pin = json.loads(row[0])
+                await authored.evidence_access(user, pin)
+                return pin["reference"]
             return (await self.service.shared_tools.resolve(user, call["shared_tool_id"], kind="execution", run_id=None if evidence else run_id))["reference"]
         await self.bridge.check(user, call["reference"])
         return call["reference"]
@@ -178,6 +188,7 @@ class ExecutionRuntime:
         if tool["reference"] != reference:
             raise WorkflowError("shared_tool_plan_changed", "공용 도구가 바뀌었습니다. 새 실행 계획을 확인해 주세요.")
         schema, bindings = tool["input_schema"], call["arguments"]
+        authored = self.service.shared_tools.authored.is_authored_reference(reference)
         properties = schema.get("properties", {})
         if set(bindings) - set(properties) or set(schema.get("required", [])) - set(bindings):
             raise WorkflowError("shared_tool_arguments_invalid", "공용 도구의 필수 입력과 인자 이름을 확인해 주세요.")
@@ -187,7 +198,8 @@ class ExecutionRuntime:
             if binding["source"] == "constant":
                 constants[name] = binding
             elif binding["source"] == "input":
-                kind = inputs.get(binding["key"], {}).get("type")
+                source = inputs.get(binding["key"], {})
+                kind = source.get("type")
                 transform = binding.get("transform", "identity")
                 if transform == "to_string" and kind in {"string", "integer"}:
                     kind = "string"
@@ -195,13 +207,38 @@ class ExecutionRuntime:
                     kind = "integer"
                 elif transform != "identity" and not (transform == "strip" and kind == "string"):
                     kind = None
-                if kind != properties[name].get("type"):
+                compatible = (self._authored_binding_schema(source if transform == "identity" else {"type": kind}, properties[name])
+                              if authored else kind == properties[name].get("type"))
+                if not compatible:
                     raise WorkflowError("shared_tool_arguments_invalid", "공용 도구에 연결할 입력과 자료형을 확인해 주세요.")
         values = resolve_arguments({"arguments": constants}, {}, {})
-        validate_arguments(tool["function"], {**schema, "required": []}, values)
+        if authored:
+            from .ees_workflow_tool_lifecycle import _inputs
+            _inputs({**schema, "required": []}, values)
+        else:
+            validate_arguments(tool["function"], {**schema, "required": []}, values)
         # Stored-result bindings retain their provenance checks; their resolved
         # values also pass Native's argument validation immediately before I/O.
         return {key: deepcopy(tool[key]) for key in ("id", "version", "reference")}
+
+    @staticmethod
+    def _authored_binding_schema(source, target):
+        """Check declared input types; resolved values still pass the pinned schema."""
+        from .ees_workflow_tool_draft_check import _matches
+        if "enum" in source:
+            return all(_matches(value, target) for value in source["enum"])
+        if "anyOf" in source:
+            return all(ExecutionRuntime._authored_binding_schema(branch, target) for branch in source["anyOf"])
+        if "anyOf" in target:
+            return any(ExecutionRuntime._authored_binding_schema(source, branch) for branch in target["anyOf"])
+        kind = source.get("type")
+        if kind is None or not (kind == target.get("type") or kind == "integer" and target.get("type") == "number"):
+            return False
+        if kind == "array":
+            return ExecutionRuntime._authored_binding_schema(source.get("items", {}), target.get("items", {}))
+        # An unrestricted input may target a choice field. The actual value is
+        # checked immediately before dispatch, as with stored-result bindings.
+        return True
 
     async def _ready(self, user, case, jobs):
         self.configure()
@@ -762,6 +799,8 @@ class ExecutionRuntime:
             self.configure()
             if job["kind"] != "ai":
                 reference = await self._call_reference(current, call, run["id"])
+            effective_arguments = (self.service.shared_tools.authored.validate_arguments(reference, arguments)
+                if call.get('shared_tool_id') and self.service.shared_tools.authored.is_authored_reference(reference) else None)
             context.update(run_id=run["id"], case_id=run["case_id"], job_id=job_id, call_id=call["id"], plan_hash=run["plan_hash"],
                            limits=node["execution"].get("limits", {}), untrusted_results=True)
             with self.service._db(write=True) as db:
@@ -790,6 +829,9 @@ class ExecutionRuntime:
                 if call.get("shared_tool_id"):
                     pinned = db.execute("SELECT data FROM work_shared_tool_pins WHERE run_kind='execution' AND run_id=? AND tool_id=?", (run["id"], call["shared_tool_id"])).fetchone()
                     record["shared_tool"] = json.loads(pinned[0])
+                    if self.service.shared_tools.authored.is_authored_reference(reference):
+                        record["shared_tool"] = self.service.shared_tools.authored.describe_pin(db, record["shared_tool"])
+                        record['effective_arguments'] = effective_arguments
                 context["attempt"] = attempt
                 db.execute("INSERT INTO execution_calls VALUES(?,?,?,?,?,?,?,?)", (record["id"], run["id"], job_id, call["id"], attempt, "running", self.worker_id, _dump(record)))
                 latest["jobs"][job_id]["status"] = "running"
@@ -802,7 +844,9 @@ class ExecutionRuntime:
             else:
                 if call.get("shared_tool_id"):
                     context.update(shared_tool_id=call["shared_tool_id"], shared_run_kind="execution")
-                operation = self.bridge.invoke(current, reference, arguments, context)
+                dispatcher = (self.service.shared_tools.authored if call.get("shared_tool_id") and self.service.shared_tools.authored.is_authored_reference(reference)
+                              else self.bridge)
+                operation = dispatcher.invoke(current, reference, arguments, context)
             task = asyncio.create_task(operation)
             self._pending.add(task)
             task.add_done_callback(self._pending.discard)
@@ -819,7 +863,14 @@ class ExecutionRuntime:
                 except Exception:
                     self._finish(record, node, None, "call_result_unavailable")
                 else:
-                    self._finish(record, node, result)
+                    seal = getattr(result, "seal", None)
+                    try:
+                        if callable(seal):
+                            await seal()
+                    except Exception:
+                        self._finish(record, node, None, "execution_result_unknown")
+                    else:
+                        self._finish(record, node, result)
             return True
         except (WorkflowError, ContractError) as error:
             with self.service._db() as db:
@@ -840,7 +891,7 @@ class ExecutionRuntime:
         case = self.service._case(db, run["owner"], run["case_id"])
         job = case["jobs"][job_id]
         calls = [json.loads(row["data"]) for row in db.execute("SELECT data FROM execution_calls WHERE run_id=? AND job_id=? ORDER BY rowid", (run["id"], job_id))]
-        checks = [{"id": call["call_id"], "name": call["reference"]["function"] if call.get("reference") else "근거 요약",
+        checks = [{"id": call["call_id"], "name": (call.get("shared_tool", {}).get("name") or call["reference"].get("function", "연결된 도구")) if call.get("reference") else "근거 요약",
                    "status": "passed" if call["status"] == "succeeded" else "blocked", "simulation": False,
                    "at": call.get("ended_at"), "detail": call.get("result", {}).get("completeness", call["status"]),
                    "call_id": call["id"], "run_id": run["id"]} for call in calls]
@@ -855,6 +906,12 @@ class ExecutionRuntime:
 
     def _finish(self, record, node, result, reason="", authorization=False):
         with self.service._db(write=True) as db:
+            final_check = getattr(result, "check_current", None)
+            if callable(final_check):
+                try:
+                    final_check(db)
+                except WorkflowError:
+                    result, reason, authorization = None, "execution_result_unknown", False
             row = db.execute("SELECT * FROM execution_calls WHERE id=?", (record["id"],)).fetchone()
             call = json.loads(row["data"])
             runrow, run = self._load_run(db, self._owner(db, record["run_id"]), record["run_id"])
@@ -870,7 +927,8 @@ class ExecutionRuntime:
             else:
                 call["result"] = result
                 call["status"] = ("failed" if result.get("status") in {"error", "failed"} else
-                                  "succeeded" if result.get("status") == "succeeded" else "unknown")
+                                  "succeeded" if result.get("status") == "succeeded" or
+                                  result.get("source") == "authored" and result.get("status") == "partial" else "unknown")
             db.execute("UPDATE execution_calls SET state=?,data=? WHERE id=?", (call["status"], _dump(call), call["id"]))
             if run["status"] not in {"running", "paused"}:
                 self._save(db, run, release=True)
@@ -910,6 +968,14 @@ class ExecutionRuntime:
             return
         try:
             result = task.result()
+            # A timed-out authored call cannot recheck asynchronous Native
+            # access from this callback. Keep its durable UNKNOWN receipt;
+            # never attach the late raw evidence without the final seal.
+            if callable(getattr(result, "seal", None)):
+                return
+            final_check = getattr(result, "check_current", None)
+            if callable(final_check):
+                final_check()
         except Exception:
             return
         try:
@@ -922,7 +988,7 @@ class ExecutionRuntime:
         except sqlite3.Error:
             pass
 
-    async def _can_read_evidence(self, user, case, jobs=None):
+    async def _can_read_evidence(self, user, case, jobs=None, run_id=None):
         try:
             self.configure()
             for job_id in case["definition"]["nodes"] if jobs is None else jobs:
@@ -932,7 +998,7 @@ class ExecutionRuntime:
                 await self._skills(user, case, job_id)
                 await self._source_access(user, case, node, evidence=True)
                 for call in node["execution"].get("calls", []):
-                    await self._call_reference(user, call, case.get("jobs", {}).get(job_id, {}).get("execution_run_id"), evidence=True)
+                    await self._call_reference(user, call, run_id or case.get("jobs", {}).get(job_id, {}).get("execution_run_id"), evidence=True)
             return True
         except (WorkflowError, ContractError):
             return False
@@ -940,11 +1006,11 @@ class ExecutionRuntime:
     async def redact_run(self, user, public):
         with self.service._db() as db:
             case = self.service._case(db, _value(user, "id"), public["case_id"])
-        if await self._can_read_evidence(user, case, public["jobs"]):
+        if await self._can_read_evidence(user, case, public["jobs"], public["id"]):
             return public
         public["evidence_available"] = False
         for call in public.get("calls", []):
-            for key in ("result", "late_result", "arguments"):
+            for key in ("result", "late_result", "arguments", "effective_arguments"):
                 call.pop(key, None)
             call["evidence_available"] = False
         for job in public["jobs"].values():
