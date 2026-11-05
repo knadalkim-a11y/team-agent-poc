@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 import sys
 import unittest
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 from zipfile import ZipFile
 
 from test_ees_workflow_native import WHEEL
@@ -42,10 +42,10 @@ class AuthoredNativeTests(unittest.IsolatedAsyncioTestCase):
             return (await db.execute(select(self.f.native_users.User.settings).where(self.f.native_users.User.id == actor))).scalar_one()
 
     def worker_package(self):
-        """Supply exact pinned loader/binder definitions to a child interpreter.
+        """Supply the actually patched loader/guard and pinned binder to a child.
 
         Native app/DB startup is deliberately absent in this process fixture.
-        Business code, process IO, loader and binding execute for real; no
+        Business code, process IO, installed loader guard and binding execute for real; no
         external service or installed whole-app claim is made by these tests.
         """
         root = self.f.directory / "worker-package"
@@ -53,13 +53,15 @@ class AuthoredNativeTests(unittest.IsolatedAsyncioTestCase):
         package.mkdir(parents=True)
         (root / "open_webui/__init__.py").write_text("", encoding="utf-8")
         (package / "__init__.py").write_text("", encoding="utf-8")
+        (root / "open_webui/ees_asset_guard.py").write_bytes(self.f.members["open_webui/ees_asset_guard.py"])
         with ZipFile(WHEEL) as wheel:
-            source = wheel.read("open_webui/utils/plugin.py").decode("utf-8")
+            source = self.f.members["open_webui/utils/plugin.py"].decode("utf-8")
             tree = ast.parse(source)
             selected = [node for node in tree.body if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
                         and node.name in {"extract_frontmatter", "load_tool_module_by_id"}]
-            loader = "from __future__ import annotations\nimport asyncio, types, sys, tempfile, os, re, logging\nENABLE_PLUGINS=True\nlog=logging.getLogger('trial')\ndef install_frontmatter_requirements(value):\n    assert not value\n"
-            (package / "plugin.py").write_text(loader + "\n".join(ast.get_source_segment(source, node) for node in selected), encoding="utf-8")
+            loader = "from __future__ import annotations\nimport asyncio, types, sys, tempfile, os, re, logging\nfrom open_webui.ees_asset_guard import guard_operation, guard_plugin_loader\nENABLE_PLUGINS=True\nlog=logging.getLogger('trial')\ndef install_frontmatter_requirements(value):\n    assert not value\n"
+            definitions = ["\n".join(source.splitlines()[min([node.lineno] + [item.lineno for item in node.decorator_list]) - 1:node.end_lineno]) for node in selected]
+            (package / "plugin.py").write_text(loader + "\n".join(definitions), encoding="utf-8")
             source = wheel.read("open_webui/utils/tools.py").decode("utf-8")
             node = next(node for node in ast.parse(source).body if isinstance(node, ast.AsyncFunctionDef) and node.name == "get_async_tool_function_and_apply_extra_params")
             binding = "from __future__ import annotations\nimport inspect\nfrom functools import partial, update_wrapper\nfrom typing import Callable, Awaitable, get_type_hints, get_args\n"
@@ -213,7 +215,8 @@ class Tools:
             self.assertEqual(result["error_code"], "native_requirements_unsupported")
             marker = self.f.directory / "once.txt"
             code = "from pathlib import Path\nimport time\nclass Tools:\n    def run(self):\n        p=Path(" + repr(str(marker)) + ")\n        p.write_text(p.read_text(encoding='utf-8')+'x' if p.exists() else 'x',encoding='utf-8')\n        time.sleep(30)\n"
-            with patch.object(self.module, "WORKER_TIMEOUT_SECONDS", 0.8):
+            # Include the real installed guard's FastAPI/Pydantic import time.
+            with patch.object(self.module, "WORKER_TIMEOUT_SECONDS", 3):
                 result = await self.adapter.run(self.actor, meta["native_id"], code, "run", "https://docs.invalid", {}, meta)
             self.assertEqual(result["status"], "unknown")
             self.assertEqual(result["error_code"], "tool_trial_timeout")
@@ -273,6 +276,24 @@ class Tools:
         self.assertNotIn("synthetic-personal-pat", json.dumps(result))
         self.assertNotIn("RuntimeError", json.dumps(result))
 
+    async def test_patched_native_loader_allows_exact_content_without_opening_writers_or_cache(self):
+        from fastapi import HTTPException
+        source = "class Tools:\n    def read(self): return {'documents': []}\n"
+        with patch.object(self.f.guard, "_guard", None), \
+                patch.object(self.f.tools.Tools, "get_tool_by_id", AsyncMock(side_effect=AssertionError("No Native asset read"))) as read:
+            instance, _ = await self.f.plugin.load_tool_module_by_id("standalone-synthetic", content=source)
+            self.assertEqual(instance.read(), {"documents": []})
+            read.assert_not_awaited()
+            for values in ({}, {"content": None}, {"content": b"source"}, {"content": 1}):
+                with self.assertRaises(HTTPException) as caught:
+                    await self.f.plugin.load_tool_module_by_id("stored-tool", **values)
+                self.assertEqual((caught.exception.status_code, caught.exception.detail), (503, "conditional_write_unavailable"))
+            with self.assertRaises(HTTPException):
+                await self.f.plugin.get_tool_module_from_cache(None, "stored-tool")
+            with self.assertRaises(HTTPException):
+                await self.f.tools.Tools.update_tool_by_id("stored-tool", {"content": source})
+            read.assert_not_awaited()
+
     async def test_real_workflow_connection_worker_and_use_activation_round_trip(self):
         root = Path(__file__).resolve().parents[1]
         fixture = json.loads((root / "tests/fixtures/tools_phase2_contract.json").read_text(encoding="utf-8"))
@@ -302,6 +323,62 @@ class Tools:
             stored = " ".join(row[0] for table in ("work_tool_trials", "work_tool_connections", "work_tool_authored_versions", "work_tool_connection_receipts")
                               for row in db.execute("SELECT data FROM " + table))
         self.assertNotIn(fixture["connection"]["token"], stored)
+
+    async def test_deployed_worker_bytes_invalidate_trial_activation_and_resume(self):
+        root = Path(__file__).resolve().parents[1]
+        fixture = json.loads((root / "tests/fixtures/tools_phase2_contract.json").read_text(encoding="utf-8"))
+        deployed = self.f.directory / "deployed-authored"
+        deployed.mkdir()
+        source = Path(self.module.__file__).parent
+        originals = {name: (Path(self.f.guard.__file__) if name == "ees_asset_guard.py" else source / name).read_bytes()
+                     for name in self.module.AUTHORED_ENVIRONMENT_FILES}
+        for name, content in originals.items():
+            (deployed / name).write_bytes(content)
+        group = await self.f.native_groups.Groups.insert_new_group("admin", self.f.native_groups.GroupForm(name="Deployment readers", description="Synthetic group"))
+        service = self.f.workflow.WorkflowService(self.f.directory / "deployment.sqlite3",
+            self.f.native_users.Users.get_user_by_id, lambda _: None,
+            group_lookup=self.f.native_groups.Groups.get_groups_by_member_id, group_list_lookup=lambda: [group])
+        async def command(action, request_id, **values):
+            return await service.operations.command(self.actor, {"action": action, "request_id": request_id, **values})
+        with patch.object(self.module, "__file__", str(deployed / Path(self.module.__file__).name)), \
+                patch.object(self.f.guard, "__file__", str(deployed / "ees_asset_guard.py")), \
+                patch.dict(os.environ, {"PYTHONPATH": self.worker_package()}):
+            native_environment = self.module.environment_fingerprint()
+            authored_environment = self.module.authored_environment_fingerprint()
+            for name, content in originals.items():
+                (deployed / name).write_bytes(content + b"\n# deployed module changed\n")
+                self.assertNotEqual(self.module.authored_environment_fingerprint(), authored_environment, name)
+                self.assertEqual(self.module.environment_fingerprint(), native_environment)
+                (deployed / name).write_bytes(content)
+            worker = deployed / "ees_workflow_tool_worker.py"
+            worker.unlink()
+            with self.assertRaises(self.module.WorkflowError) as caught:
+                self.module.authored_environment_fingerprint()
+            self.assertEqual(caught.exception.code, "tool_trial_environment_unavailable")
+            worker.write_bytes(originals[worker.name])
+            draft = (await command("tool_draft_save", "deployment-save", expected_revision=0, draft=fixture["draft"]))["tool_draft"]
+            fields = {"tool_id": draft["id"], "expected_revision": 1, "expected_connection_revision": 1}
+            await command("tool_draft_connection_save", "deployment-connect", **{**fields, "expected_connection_revision": 0}, **fixture["connection"])
+            trial = (await command("tool_draft_trial_start", "deployment-trial", **fields, inputs=fixture["inputs"]))["trial"]
+            self.assertTrue(trial["eligible_for_activation"], trial)
+            await command("tool_draft_use_set", "deployment-use", **fields, trial_id=trial["id"], expected_use_revision=0,
+                          groups=[group.id], evidence=fixture["evidence"])
+            await command("tool_draft_use_disable", "deployment-disable", tool_id=draft["id"], expected_use_revision=1)
+            worker.write_bytes(originals[worker.name] + b"\n# new deployed worker revision\n")
+            stale = (await command("tool_draft_trial_get", "deployment-get", tool_id=draft["id"], trial_id=trial["id"]))["trial"]
+            self.assertFalse(stale["eligible_for_activation"])
+            self.assertIn("tool_trial_credentials_changed", [item["code"] for item in stale["activation_reasons"]])
+            await self.assert_code("tool_trial_stale", command("tool_draft_use_set", "deployment-stale-use", **fields,
+                trial_id=trial["id"], expected_use_revision=2, groups=[group.id], evidence=fixture["evidence"]))
+            await self.assert_code("tool_use_snapshot_invalid", command("tool_draft_use_enable", "deployment-stale-enable",
+                tool_id=draft["id"], expected_use_revision=2))
+            fresh = (await command("tool_draft_trial_start", "deployment-fresh-trial", **fields, inputs=fixture["inputs"]))["trial"]
+            self.assertTrue(fresh["eligible_for_activation"], fresh)
+            confirmed = (await command("tool_draft_use_set", "deployment-confirm", **fields, trial_id=fresh["id"],
+                expected_use_revision=2, groups=[group.id], evidence=fixture["evidence"]))["use"]
+            self.assertEqual((confirmed["active_version"], confirmed["state"]), (1, "disabled"))
+            enabled = (await command("tool_draft_use_enable", "deployment-enable", tool_id=draft["id"], expected_use_revision=3))["use"]
+            self.assertEqual((enabled["active_version"], enabled["state"]), (1, "active"))
 
 
 if __name__ == "__main__":

@@ -270,12 +270,12 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             'tab': 'start', 'stage_id': 'private-stage', 'panel_open': True}})
         writes = len(self.server.workspace_commands)
         reload_page(self.browser)
-        self.wait("document.querySelector('#ees-work-panel .ew-my-work-empty')")
+        self.wait("document.querySelector('#ees-work-panel .ew-work-home')")
         for width in (1920, 480):
             self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 1080,
                 'deviceScaleFactor': 1, 'mobile': False})
             self.wait('innerWidth===' + str(width))
-            self.assertIn('지금 처리할 내 업무가 없습니다', self.text('#ees-work-panel'))
+            self.assertIn('업무 절차를 선택해 주세요', self.text('#ees-work-panel'))
             if width == 480:
                 # The work panel overlays navigation at this width. Follow the
                 # existing mobile close/select route before opening the menu.
@@ -305,7 +305,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             self.screenshot('authoring-unpublished-kept-' + label)
             self.assertEqual(self.state(workflow_id=item)['workflow'], workflows[item])
         self.click('[data-action=mode][data-mode=work]')
-        self.wait("document.querySelector('#ees-work-panel .ew-my-work-empty')")
+        self.wait("document.querySelector('#ees-work-panel .ew-work-home')")
         self.wait("!window.__eesNativeWorkV1.captureReference()?.workflow_id")
         self.assert_only_selection_remembered(writes)
         with self.server.workflow._db() as db:

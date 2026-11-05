@@ -50,7 +50,7 @@ function panelHarness() {
 }
 function panelLayout(values = {}) {
   const shell = component('EesShell'), env = {
-    s: { mode: 'work', tab: 'my_work', panel_width: 640 }, $eesSnapshot: {},
+    s: { mode: 'work', tab: 'overview', panel_width: 640 }, $eesSnapshot: {},
     transientWidth: null, width: 1350, $eesCompact: false,
     procedurePanel: false, fixedPanel: false, panelWidth: 0, panelOverlay: false,
     clamp: value => Math.max(400, Math.min(720, Math.round(Number(value) || 480))), ...values
@@ -301,7 +301,7 @@ test('external boundary retirement cannot reopen from a stale derived open value
   assert.equal(h.env.trigger.focused, 0);
 });
 
-function navigationScopeProps(kind, { system, factories, systems = [{ id: 'EMS', allowed: true }, { id: 'APC', allowed: true }], actor = 'actor', path = '/c/chat', tab = 'my_work' }) {
+function navigationScopeProps(kind, { system, factories, systems = [{ id: 'EMS', allowed: true }, { id: 'APC', allowed: true }], actor = 'actor', path = '/c/chat', tab = 'overview' }) {
   const source = component('EesNavigation');
   const env = { $page: { url: { pathname: path, search: '' } }, cap: { actor_id: actor }, $eesSnapshot: { native_id: '' },
     s: { mode: 'work', tab, system_id: system, factory_id: '', chat_id: 'chat' }, $eesCompact: false, author: false, systems, factories };

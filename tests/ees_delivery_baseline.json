@@ -5539,8 +5539,8 @@
         "request timeline preserves EES report and independent effect confirmation",
         "history uses immutable attempt inputs and result rather than current edited values",
         "missing history is explicitly unexecuted and never a success fixture",
-        "My Work uses actual tasks and incident-overdue-today-week-future-undated ordering",
-        "empty My Work does not invent an actionable task or normal execution",
+        "retired saved My Work opens system work without selecting or mutating an old run",
+        "an explicit history visit wins over a late retired selection restore",
         "late workspace reads are discarded after account change",
         "late workspace reads are discarded after selected job changes",
         "lookup failure clears stale private evidence and keeps an explicit read error",
@@ -5574,13 +5574,14 @@
         "eight typed inputs/eight common result blocks",
         "XSS/link safety, item human confirmation, evidence vs adequacy",
         "historical immutable attempts/redacted evidence/current attempt matching",
-        "MyWork counts and grouping",
+        "Retired My Work selection returns to scoped work without shared mutation; explicit navigation wins over delayed restoration",
         "late account/navigation response discard and lookup failure",
         "stable idempotent receipts, definitive rejection retirement",
         "Native allowed-model identities and secret-free proposalcontext"
       ]
     },
     "removed_design_behaviors": [
+      "2026-11-05 user decision retires personal My Work list/counts/grouping/empty state. Source menu absence and real work-home rendering replace that UI; workspace shared access/execution/history protections remain. TASK.md#remove-my-work-20261105",
       "Fixed right Assistant resizer replaced by responsive center Native chat/right work panel; Native sidebar preferences remain Native-owned.",
       "Raw JSON execution input editor replaced by eight declared typed inputs; no malformed JSON undo branch is retained.",
       "Legacy mock tool execution and demo P/T projection no longer render or execute; active shared J runtime/permission/duplicate guarantees move to core/operations tests."

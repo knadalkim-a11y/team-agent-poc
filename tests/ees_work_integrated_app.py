@@ -835,8 +835,12 @@ def figma_delta_flow(g):
     g.provider.server.RequestHandlerClass=ReportHandler
     g.browser.call('Emulation.setDeviceMetricsOverride',{'width':1920,'height':1080,'deviceScaleFactor':1,'mobile':False})
     g.browser.call('Emulation.setEmulatedMedia',{'features':[{'name':'prefers-reduced-motion','value':'no-preference'}]})
-    g.navigate('/');g.wait_work_ready();g.click('[data-action="my_work"]')
-    g.wait_work_ready(selector='.ew-my-work-empty');assets('figma-s1-empty',{'52271.svg':16});g.capture('figma-s1-empty')
+    g.navigate('/');g.wait_work_ready();g.click('[data-action="mode"][data-mode="work"]')
+    # Prior product gates can leave a selected shared procedure. Work mode
+    # now returns to that overview instead of forcing a personal empty list.
+    g.wait_work_ready()
+    assert not g.browser.evaluate("!!document.querySelector('[data-action=my_work],.ew-my-work-empty,.ew-todo')"), 'Retired personal queue is visible'
+    g.capture('system-work-return')
     tool='integrated_figma_jira'
     source=(Path(__file__).resolve().parents[1]/'agent-pack/skills/jira-read/scripts/jira_tool.py').read_text(encoding='utf-8')
     g.api('/api/v1/tools/create',{'id':tool,'name':'합성 Figma 검수 Jira','content':source,'meta':{'description':'Isolated loopback verification only'},'access_grants':[]})

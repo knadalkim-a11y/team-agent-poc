@@ -268,6 +268,8 @@ Figma [2판 헤더](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=
 
 연결 자격 변경 감지는 기존 Native 암호문 blob의 지문을 비공개 시험 메타데이터에만 보관해 수행한다. 토큰 원문이나 원문에서 만든 지문을 저장하지 않으며 이 암호문 지문도 API·영수증·감사에 내보내지 않는다. Native 개인 설정에서 직접 토큰을 바꾼 경우도 이전 시험이 무효가 된다. 계정 설정 갱신은 전체 settings를 비교하는 CAS로 다른 설정의 동시 변경을 보존한다.
 
+실행 환경에는 고정 Native 환경과 설치된 작성 실행·worker·lifecycle·정적 검사·asset guard 파일의 바이트 지문을 포함한다. 파일 변경/누락 때 이전 시험으로 사용 설정하거나 기존 환경 확인으로 사용을 재개하지 않는다. worker의 명시 문자열 코드 로딩은 Native DB 조회·정규화·쓰기와 구분하며 독립 프로세스에서 서버 guard가 없을 때만 허용한다. 기존 서버 guard가 있으면 동일한 보호를 유지하고 Native DB 쓰기·캐시 조회는 guard 없이 허용하지 않는다. [원인·검사 근거](../../evals/tool-authoring-20261105.md#pr123-merge-review-20261105).
+
 시험 입력은 64KiB, 저장할 반환값은 256KiB·목록 500개로 제한한다. worker 경계는 30초·입력 1MiB·출력 2MiB이며 한도 초과는 성공으로 축약하지 않는다. 반환 객체 최상위의 `status`/`completeness` 값이 `partial`, `truncated`, `page`, `incomplete`이거나 `partial=true`, `truncated=true`, `has_more=true`이면 부분 신호로 인식한다. `status`/`completeness`가 `unknown`이면 확인 불가로 기록하고 사용 설정을 막는다. `complete`는 수신한 응답의 형식을 검사했다는 뜻이며 외부 원본 전체 조회를 보장하지 않는다. 명시적 부분 신호나 worker 잘림은 사용 설정할 수 없다.
 
 ### 공통 API

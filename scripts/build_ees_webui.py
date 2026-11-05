@@ -244,9 +244,12 @@ def _guard_decorate(text, filename, class_name, functions):
             raise ValueError(f"Asset guard class differs: {filename}")
         nodes = classes[0].body
     lines = text.splitlines(keepends=True)
-    decorator = "guard_operation" if filename == "open_webui/utils/plugin.py" else "guard_table_method"
+    decorators = set()
     found = []
     for name in functions:
+        decorator = ("guard_plugin_loader" if filename == "open_webui/utils/plugin.py" and name == "load_tool_module_by_id" else
+                     "guard_operation" if filename == "open_webui/utils/plugin.py" else "guard_table_method")
+        decorators.add(decorator)
         matches = [node for node in nodes if isinstance(node, ast.AsyncFunctionDef) and node.name == name]
         if len(matches) != 1:
             raise ValueError(f"Asset guard method differs: {filename}:{name}")
@@ -257,7 +260,7 @@ def _guard_decorate(text, filename, class_name, functions):
         found.append((node.lineno - 1, " " * node.col_offset + "@" + decorator + option + "\n"))
     for at, line in sorted(found, reverse=True):
         lines.insert(at, line)
-    return _guard_import("".join(lines), "from open_webui.ees_asset_guard import " + decorator)
+    return _guard_import("".join(lines), "from open_webui.ees_asset_guard import " + ", ".join(sorted(decorators)))
 
 
 def _guard_tool_cache(text, filename):

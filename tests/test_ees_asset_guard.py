@@ -313,6 +313,41 @@ class TaskGuardTests(unittest.IsolatedAsyncioTestCase):
             await grant("model")
         guard_module._guard = self.guard
 
+    async def test_standalone_exact_content_loader_keeps_existing_and_writer_guards(self):
+        observations = []
+
+        @guard_module.guard_plugin_loader
+        async def load(tool_id, content=None):
+            observations.append((tool_id, content, self.guard.owned()))
+            return content
+
+        @guard_module.guard_table_method
+        async def write(*, db=None):
+            self.fail("Standalone writer must stay blocked")
+
+        @guard_module.guard_operation
+        async def cached():
+            self.fail("Standalone cache lookup must stay blocked")
+
+        with patch.object(guard_module, "_guard", None):
+            self.assertEqual(await load("trial", content="class Tools: pass"), "class Tools: pass")
+            self.assertEqual(await load("trial", ""), "")
+            for args in ({}, {"content": None}, {"content": 1}, {"content": b"source"}):
+                with self.assertRaises(guard_module.HTTPException) as caught:
+                    await load("stored", **args)
+                self.assertEqual(caught.exception.status_code, 503)
+            for operation in (write, cached):
+                with self.assertRaises(guard_module.HTTPException) as caught:
+                    await operation()
+                self.assertEqual(caught.exception.status_code, 503)
+        self.assertEqual(len(observations), 2)
+        self.assertTrue(all(not item[2] for item in observations))
+        self.assertEqual(await load("active", content="source"), "source")
+        self.assertTrue(observations[-1][2])
+        self.guard.closing = True
+        with self.assertRaises(guard_module.HTTPException):
+            await load("closing", content="source")
+
 
 class RouteTests(unittest.IsolatedAsyncioTestCase):
     async def test_dependencies_execute_and_close_inside_owner(self):

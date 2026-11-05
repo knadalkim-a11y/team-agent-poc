@@ -100,3 +100,32 @@ Linux 격리 작업 사본, Python 3.11.17 `.venv`, Node 22.22.0. Python 의존�
 - 사용자 “다 병합해줘”에 따라 #118 head `51f6cbc`와 #119 병합 main `eb6ede6`을 merge로 통합했다. STATUS·CHANGELOG 충돌은 두 변경의 기록을 모두 보존했으며 #119 제품 CSS·Native 시험을 유지한다. rebase·force-push·main 직접 push는 하지 않는다.
 - 설명 변경은 서비스마다·시스템마다 토큰이 다를 수 있고 실행 계정의 개인 설정을 사용한다는 기존 ST-AUTH-5와 일치한다. 기존 head CI450은 39성공·출하1정상생략이다.
 - Linux에서 통합 후 `python scripts/check_docs.py`와 `git diff --check`를 실행한다. 최종 통합 head의 전체 필수 CI와 병합 SHA는 [PR #118](https://github.com/knadalkim-a11y/team-agent-poc/pull/118)의 검증 기록을 따른다. 사내 적용·토큰 발급·실제 사용자 자료 변경은 수행하지 않는다.
+
+
+<a id="remove-my-work-20261105"></a>
+
+## 2026-11-05 · 개인별 내 업무 제거
+
+사용자는 공장·시스템 단위 관리에 맞춰 코드와 Figma에서 ‘내 업무’를 없애도록 요청했다. [최신 계약](../docs/mockups/ees-work/TASK.md#remove-my-work-20261105)이 이 문서의 과거 ‘내 업무 유지’ 결론을 대체한다. 기준 main `8258318`, 브랜치 `codex/remove-my-work`. [PR #124](https://github.com/knadalkim-a11y/team-agent-poc/pull/124)의 최종 head CI·실제 Native 판정은 PR 본문에서 관리한다.
+
+- 메뉴·배지·개인 작업 집계·개인 화면·열기/담당 이벤트·도구 결과 투영을 제거한다. 첫 진입은 기존 업무 개요/절차 선택 안내다. 새로운 목록이나 개인 소유 업무는 만들지 않는다.
+- 저장된 `tab=my_work`와 오래된 진행/작업 선택을 해제하고 공장·시스템·너비·접힘을 보존한다. 늦게 도착한 과거 저장값은 사용자가 방금 고른 실행 기록을 덮지 않는다. 화면만 열어 공동 업무 명령이 생기지 않는다.
+- 기존 참여자 A/B의 같은 진행 상태, 다른 공장과 viewer의 거부, 동시 변경·담당 충돌·종료/취소·개인 근거 보호 검사는 유지한다. 퇴역한 개인 목록 정렬/예약 요약 시험 3개는 제거하고 복원 회귀 2개를 추가했다. 실행·기록·예약의 기존 시험은 유지한다.
+- 실제 Native 브라우저 검사도 제거한 메뉴 대신 업무 모드 버튼으로 복귀한다. 메뉴 없는 개요의 선택 상태는 `aria-pressed`로 관측하며 개인 목록 DOM/응답이 없음을 검증한다. 옛 개인 빈 화면 아이콘 검사는 절차 선택 안내의 실제 렌더 검사로 대체했다.
+
+### Figma 증거
+
+운영 36판·업무절차 16판·C154. 메뉴 19개, 공통 도우미의 개인 메뉴 행과 개인 빈 상태 안내를 정리했다. 전용 페이지 `1284:3082`는 삭제하고 원본 A0 `919:7788`·R6 `922:785`·시간 씬 `979:1381`·빈 상태 `945:1095`를 기존 91 보관 `1722:1395`에 폐기 표시로 이동했다. 변경 이력은 20줄을 유지하며 C134를 기존 지난 이력으로 이동했다.
+
+[변경 전 구조](artifacts/remove-my-work-20261105/figma-before.json), [변경 결과·고정 점검](artifacts/remove-my-work-20261105/figma-after.json), [운영 메뉴](artifacts/remove-my-work-20261105/figma-sidebar-after.png), [워크.도구 단계 화면](artifacts/remove-my-work-20261105/figma-workshop-after.png). `scripts/figma_check.js`의 같은 제한·검사를 페이지당 한 번 전환하도록 나눠 실행했다. 16페이지 오류 0, 업무절차의 기존 크기 경고 1(10,489노드·60,725글자), 로그 20줄. 캡처에서 메뉴 제거 뒤 간격·겹침 없음과 전체 단계 흐름을 확인했다.
+
+### 로컬 검증·처음 실패
+
+- `node --test tests/*.cjs`: 675/675 통과. 기존 My Work 전용 3개를 제거하고 저장값 복원 2개를 추가한 총수다.
+- `python -m unittest discover -s tests -p test_ees_work_workspace.py`: 85/85 통과. `test_ees_workflow_tool.py`: 10/10 통과.
+- 고정 upstream `2a960a59fe1dbbd35282f0556b3666d81102e781`에 패치 적용·결과 SHA256 확인. `EES_TEST_FRONTEND_SOURCE_DIR=... test_ees_frontend_build.py`: 32/32 통과. 첫 실행은 로컬 TypeScript 미설치로 6실패였고 pinned lockfile의 TypeScript 5.9.3/Svelte 5.56.0 설치 후 해소했다. 테스트 조건을 낮추지 않았다.
+- `test_ees_asset_guard.py` 첫 실행은 새 도구 소스의 허용 해시 누락으로 줄끝/끝 공백 변형 인식 5실패였다. 검증된 Git 원문과 고정 Black 26.5.1 형태를 기존 생성기로 등록해 수정한다. 실제 도구 설치·토큰 변경은 수행하지 않는다.
+- 로컬 Node 24.22.1/Python 3.12.14 환경이며 CI의 고정 Node 22.16.0 전체 build·Native 제품 시험으로 최종 판단한다. 실제 사내 배포는 미실행이다.
+
+- 허용 해시 보완 후 `test_ees_asset_guard.py` 19/19 통과. Git 소스 이력 13개에 대한 원문/Black 26.5.1 총 26형태와 줄끝 인식 해시를 기존 생성기로 재현·대조했다. 부분 clone의 옛 blob을 추가 조회한 뒤 전체 이력 검사도 통과했다.
+- 첫 test-inventory audit는 제거한 개인 목록 시험 2개를 예전 UI 대체 매핑이 참조해 실패했다. 기능 폐기 사유와 복원 회귀 시험으로 매핑을 갱신한 뒤 기존 1,332/현재 1,597 Python ID·Node 보호 매핑 감사 오류 0. 문서 검사 29파일·2,885링크·오류 0, `git diff --check` 통과.

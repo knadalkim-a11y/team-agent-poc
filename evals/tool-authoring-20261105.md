@@ -1,5 +1,15 @@
 # 도구 작성·연결·시험·사용 설정 검증
 
+<a id="pr123-merge-review-20261105"></a>
+
+## 2026-11-05 · 전체 PR 병합 검토와 실제 설치 worker 보완
+
+- **범위/원본:** 사용자 전체 검토·병합 요청. #124 `7eca930`의 CI483 성공·실제 제품 검증 근거를 확인하고 Node 실행/Native 복귀166개·workspace85개·문서/diff를 재검해 main `c01bf098f1e11aa42bec6c8a1f8f0d6eef5121d1`로 병합했다. #123 원격 `cdfa7c5`에 해당 main을 merge하고 STATUS의 양쪽 기록을 보존했다. 원래 개발 사본의 수정 중 문서는 건드리지 않았다.
+- **최초 실패:** [CI484](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41990693577)의 Complete Native product 작업 `127124145454`는 실제 새 도구 시험에서 `unknown/tool_trial_worker_load_failed`로 실패했다. 합성 fixture의 제한 진단은 `ees_asset_guard._active_guard`의 `503 conditional_write_unavailable`을 확인했다. 앞선 CI480 실패와 단위 loader 통과는 그대로 보존한다.
+- **확인된 원인/조치:** 배포 빌더가 명시 `content`를 받는 Native loader에도 서버 guard를 적용했다. 짧은 수명의 시험 프로세스는 서버 guard가 없어 읽기/쓰기 없는 코드 로딩도 막혔다. 준비된 로컬 `f887c27`의 수정 7개 파일을 검토 사본에 적용했다. 고정 loader의 문자열 content 경로만 독립 호출을 허용하고, 기존 guard가 있거나 content가 없으면 기존 guard를 통과해야 한다. Native DB 쓰기와 캐시 로딩 차단은 유지한다.
+- **재발 방지:** worker 단위 fixture도 실제 배포 빌더의 loader 데코레이터를 포함한다. Native 버전이 같아도 설치된 작성 실행·검사·guard 파일 바이트 변경/누락이 이전 시험 및 사용 재개 확인을 무효화하도록 검사한다. 실제 설치 CLI의 연결→worker→결과→재조회 검사를 계속 최종 CI의 필수 조건으로 둔다.
+- **통합 검증:** Linux Python3.11.17의 작성·정적 검사·시험·Native80/80, guard20/20과 Node 작성·실행·Native 복귀478/478 통과. Python은 `EES_TEST_UPSTREAM_WHEEL`로 고정 공식0.11.3 wheel과 실제 배포 패치 fixture를 사용했고 `EES_REQUIRE_ASSET_NATIVE=1`로 생략을 허용하지 않았다. 패키징33통과·현재 frontend 자료 필요1생략, 시험 ID 감사1,690개 오류0, 문서/diff 검사 통과. 전체 필수 CI는 최종 head 기준으로 확인한다. 최종 커밋·CI·병합 결과는 [PR #123 본문과 Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/123)에 연결한다. 사내 연결/토큰/데이터·실제 적용은 미사용/미실행이다.
+
 <a id="phase1-evidence"></a>
 
 ## 기준과 실행 환경

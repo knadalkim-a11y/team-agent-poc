@@ -513,7 +513,8 @@ def assert_asset_guard_patches(test, built):
         for name in methods:
             node = next(node for node in nodes if isinstance(node, ast.AsyncFunctionDef) and node.name == name)
             decorators = [ast.unparse(value) for value in node.decorator_list]
-            wanted = ("guard_operation" if filename == "open_webui/utils/plugin.py" else
+            wanted = ("guard_plugin_loader" if filename == "open_webui/utils/plugin.py" and name == "load_tool_module_by_id" else
+                      "guard_operation" if filename == "open_webui/utils/plugin.py" else
                       "guard_table_method(asset_types_only=True)" if class_name == "AccessGrantsTable" else "guard_table_method")
             test.assertEqual(1, decorators.count(wanted), (filename, name))
     for filename in ("open_webui/routers/tools.py", "open_webui/routers/models.py"):

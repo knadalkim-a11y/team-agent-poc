@@ -22,6 +22,10 @@ from .ees_workflow_native import _safe, environment_fingerprint
 WORKER_TIMEOUT_SECONDS = 30
 MAX_WORKER_INPUT_BYTES = 1024 * 1024
 MAX_WORKER_RESULT_BYTES = 2 * 1024 * 1024
+AUTHORED_ENVIRONMENT_FILES = (
+    "ees_workflow_tool_native.py", "ees_workflow_tool_worker.py",
+    "ees_workflow_tool_lifecycle.py", "ees_workflow_tool_draft_check.py", "ees_asset_guard.py",
+)
 IDENTITY_CONTENT = '''from pydantic import BaseModel, Field
 class Tools:
     class Valves(BaseModel):
@@ -45,6 +49,21 @@ def _hash(value):
 
 def _fail(code, message="연결 설정의 현재 권한과 상태를 확인해 주세요."):
     raise WorkflowError(code, message)
+
+
+def authored_environment_fingerprint():
+    # A deployment may keep Native's version unchanged while changing authored
+    # execution or validation. Read deployed bytes on every observation so an
+    # existing trial never approves a changed worker, even in this process.
+    directory = Path(__file__).resolve().parent
+    try:
+        from open_webui import ees_asset_guard
+        modules = {name: hashlib.sha256((Path(ees_asset_guard.__file__) if name == "ees_asset_guard.py"
+                                        else directory / name).read_bytes()).hexdigest()
+                   for name in AUTHORED_ENVIRONMENT_FILES}
+    except (ImportError, OSError, AttributeError, TypeError):
+        _fail("tool_trial_environment_unavailable", "실행 환경을 확인할 수 없습니다. 설치 상태를 확인해 주세요.")
+    return _hash({"authored_version": 1, "native": environment_fingerprint(), "modules": modules})
 
 
 class AuthoredNative:
@@ -142,7 +161,7 @@ class AuthoredNative:
             identity = await self._identity(actor, registry, db)
             _, personal, stamp, _ = await self._credentials(actor, native_id, db)
         return actor, personal, {"native_id": native_id, "token_set": bool(personal.get("PAT")),
-                                 "credential_stamp": stamp, "identity_stamp": identity, "environment": environment_fingerprint(),
+                                 "credential_stamp": stamp, "identity_stamp": identity, "environment": authored_environment_fingerprint(),
                                  "groups": sorted(json.loads(registry["groups_json"]))}
 
     async def inspect(self, user, native_id):

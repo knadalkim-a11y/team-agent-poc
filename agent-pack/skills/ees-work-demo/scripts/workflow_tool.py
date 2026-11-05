@@ -92,7 +92,7 @@ class Tools:
         # Personal UI state, approvals/intents, credentials and private chat
         # bodies do not belong in model context. The service filters scope and
         # result evidence access before this narrower projection.
-        projection = {key: result[key] for key in ("ok", "workflows", "workflow", "run", "runs", "my_work", "capabilities") if key in result}
+        projection = {key: result[key] for key in ("ok", "workflows", "workflow", "run", "runs", "capabilities") if key in result}
         selected = result.get("run") if run_id else result.get("workflow")
         if (reference and selected and reference["workflow_id"] == workflow_id
                 and reference["run_id"] == run_id and reference["revision"] == selected.get("revision")):

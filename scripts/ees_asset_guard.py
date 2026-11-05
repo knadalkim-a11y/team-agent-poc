@@ -207,6 +207,28 @@ def guard_operation(function):
     return protected
 
 
+def guard_plugin_loader(function):
+    """Keep Native DB normalization guarded; permit standalone exact content.
+
+    In the pinned loader only content=None reads and rewrites a Native asset.
+    An explicit string executes that supplied source without Native DB access.
+    Child trials do not acquire the server's process lock or enable writers.
+    An existing guard, including a closing one, always keeps its protection.
+    """
+    signature = inspect.signature(function, eval_str=True)
+
+    @functools.wraps(function)
+    async def protected(*args, **kwargs):
+        bound = signature.bind(*args, **kwargs)
+        if _guard is None and isinstance(bound.arguments.get("content"), str):
+            return await function(*args, **kwargs)
+        return await _active_guard().run(lambda: function(*args, **kwargs))
+
+    protected.__ees_asset_guard__ = True
+    protected.__signature__ = signature
+    return protected
+
+
 def guard_table_method(function=None, *, asset_types_only=False):
     """Guard native writers and normalization reads, including direct callers.
 
@@ -807,7 +829,15 @@ WORK_TOOL_SOURCE_HISTORY = {'f4c1b758a49c8481bdd402c1073fb599a2131f91eba5d570dd2
  'b5ed6807fbc4f669d3a08bb52b1b7723dca77cfe6104530a254c28613da0f95b': {'date': '2026-10-13',
                                                                       'commit': '4fa89ced249f9e05f8bccb3665dee691053ea9cb',
                                                                       'format': 'black-26.5.1',
-                                                                      'normalized_sha256': 'b2b897133d3af46adfa517a46b64506c89609e04a0ddfe1e38619379e37e41af'}}
+                                                                      'normalized_sha256': 'b2b897133d3af46adfa517a46b64506c89609e04a0ddfe1e38619379e37e41af'},
+ '73fc2fca197bce4fbb3cabf847ac805469e6cd5b8c5359908316f1532c4337a3': {'date': '2026-11-05',
+                                                                      'commit': '805d826566710203808aaab76144bd88800b57ba',
+                                                                      'format': 'git',
+                                                                      'normalized_sha256': 'f06de6e93363ff10d94a28806d95013889685578ccdb7a05033a7f2c0688bf15'},
+ '1d4a6ff052f279d52b28083297c7cdeaebe97cbd031ccbb418d03a50182329de': {'date': '2026-11-05',
+                                                                      'commit': '805d826566710203808aaab76144bd88800b57ba',
+                                                                      'format': 'black-26.5.1',
+                                                                      'normalized_sha256': '504c0c5ac7ef28c2fa874636715ce30169b1c45b61d79c5a37e4771871977a9e'}}
 
 
 def work_tool_source():
