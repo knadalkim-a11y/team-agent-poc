@@ -1647,7 +1647,7 @@ class WorkspaceMixin:
             key = str(uuid4()); mode = definition.get('mode', 'on_demand')
             active_definition = {'nodes': {job_id: node for job_id, node in definition['nodes'].items() if node['type'] == 'j' and conditions[job_id] is not False}}
             if hasattr(self, 'operations') and hasattr(self.operations, 'validate_publication'):
-                errors = self.operations.validate_publication(db, {**definition, 'nodes': active_definition['nodes']}, actor, groups, authoring=False)
+                errors = self.operations.validate_publication(db, {**definition, 'nodes': active_definition['nodes']}, actor, groups, authoring=False, factory_id=factory_id)
                 if errors: _fail('execution_not_ready', '실행 전에 업무절차를 보완해 주세요.\n' + '\n'.join(errors))
             self.shared_tools.pin(db, actor, groups, 'work', key, active_definition)
             if body.get('mode', mode) != mode: _fail('invalid_mode', '게시된 실행 방식을 사용해 주세요.')
