@@ -247,6 +247,71 @@ class MotionNativeTests(IntegratedNativeCase):
                                         for row in self.browser.evaluate(heading_metrics)))
             if width == 1366 and not reduced:
                 self.screenshot('workspace-heading-1366')
+
+        # Reproduce the user's boundary: only Workspace needs a scrollbar.
+        # Derive the short viewport from the real menu heights so translations
+        # and legitimate menu changes cannot silently turn this into two
+        # overflowing (or two non-overflowing) states.
+        metrics = """(()=>{const q=s=>document.querySelector(s),scroll=q('.ees-sidebar-scroll');
+          const box=s=>{const r=q(s).getBoundingClientRect();return {x:r.x,width:r.width};};
+          const r=scroll.getBoundingClientRect(),sidebar=q('#sidebar').getBoundingClientRect();
+          const icons=[...document.querySelectorAll('.ew-mode .ew-icon,.ees-chat-controls button svg')].map(e=>{
+            const i=e.getBoundingClientRect(),b=e.closest('button').getBoundingClientRect();
+            return {width:i.width,left:i.left-b.left,right:b.right-i.right};});
+          return {sidebar:sidebar.width,client:scroll.clientWidth,gutter:scroll.offsetWidth-scroll.clientWidth,
+            overflow:scroll.scrollHeight>scroll.clientHeight,overflowX:scroll.scrollWidth>scroll.clientWidth,
+            overflowY:getComputedStyle(scroll).overflowY,mode:box('.ew-mode'),
+            work:box('[data-mode=work]'),author:box('[data-mode=author]'),scope:box('[data-scope-trigger]'),
+            contentHeight:q('.ees-chat-controls').getBoundingClientRect().bottom-r.top+scroll.scrollTop,
+            chromeHeight:sidebar.height-scroll.clientHeight,icons};})()"""
+        sidebar_evidence = []
+
+        def measure(mode, height, compact):
+            self.click('[data-mode=' + mode + ']')
+            self.wait("document.querySelector('#ees-work-entry').dataset.workMode === " + json.dumps(mode))
+            self.wait("document.querySelector('#sidebar').getAnimations({subtree:true}).every(a=>a.playState !== 'running')")
+            row = self.browser.evaluate(metrics)
+            sidebar_evidence.append({'mode': mode, 'height': height, 'compact': compact, **row})
+            (directory / 'sidebar-scrollbar-geometry.json').write_text(
+                json.dumps(sidebar_evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+            return row
+
+        self.viewport(1366, 1080)
+        self.open_sidebar()
+        natural_work = measure('work', 1080, False)
+        natural_author = measure('author', 1080, False)
+        self.assertGreater(natural_author['contentHeight'], natural_work['contentHeight'] + 20)
+        boundary_height = int((natural_work['contentHeight'] + natural_author['contentHeight']) / 2
+                              + natural_author['chromeHeight'])
+        sidebar_draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+        for height in (1080, boundary_height):
+            self.viewport(1366, height)
+            self.browser.call('Emulation.setEmulatedMedia', {'features': [
+                {'name': 'prefers-reduced-motion', 'value': 'reduce' if height == 1080 else 'no-preference'}]})
+            for compact in (False, True, False):
+                if self.read('#sidebar', 'dataset.compact') != str(compact).lower():
+                    self.click('[data-ees-sidebar-toggle]')
+                self.wait("document.querySelector('#sidebar').getBoundingClientRect().width === " +
+                          str(56 if compact else 256))
+                rows = [measure(mode, height, compact) for mode in ('work', 'author', 'work')]
+                for row in rows:
+                    self.assertEqual(row['sidebar'], 56 if compact else 256, row)
+                    self.assertEqual(row['overflowY'], 'auto', row)
+                    self.assertFalse(row['overflowX'], row)
+                    self.assertEqual(row['client'], rows[0]['client'], rows)
+                    for key in ('mode', 'work', 'author', 'scope'):
+                        self.assertEqual(row[key], rows[0][key], rows)
+                    self.assertTrue(row['icons'], row)
+                    for icon in row['icons']:
+                        self.assertGreaterEqual(icon['width'], 15.9, row)
+                        self.assertGreaterEqual(icon['left'], 0, row)
+                        self.assertGreaterEqual(icon['right'], 0, row)
+                if not compact and height == boundary_height:
+                    self.assertEqual([row['overflow'] for row in rows], [False, True, False], rows)
+                    self.screenshot('sidebar-scrollbar-work')
+                    measure('author', height, compact)
+                    self.screenshot('sidebar-scrollbar-workspace')
+        self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), sidebar_draft)
         self.assertEqual(self.server.completions, [])
 
     def test_c3_docked_panel_slides_opaque_and_reserves_space_while_preserving_work(self):

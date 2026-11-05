@@ -1,5 +1,16 @@
 # 탐색·패널 시안 2 제품 검증
 
+<a id="sidebar-stable-scrollbar-20261105"></a>
+
+## 2026-11-05 · 업무/워크스페이스 스크롤바 폭 고정
+
+- **요청·기준:** 사용자에게 스크롤바의 상시 표시와 자리 확보를 구분해 설명한 뒤, 내용이 넘칠 때만 표시하고 자리는 항상 확보하는 구현 요청을 받았다. 시작 main은 `818e31c57403ccc9e4893b464f412a4b2494a7bf`다. 미병합 #120(게시 상태)·#121(오른쪽 패널)은 별도 범위이며 이 브랜치로 옮기지 않는다. [결정](../docs/mockups/ees-work/TASK.md#sidebar-stable-scrollbar-20261105).
+- **원인:** Svelte Sidebar 바깥 폭은 256/56px로 고정되어 있지만 `.ees-sidebar-scroll`이 `overflow:auto`만 사용해 고전형 스크롤바 유무가 내부 폭을 바꾼다. 상단 모드 버튼도 내부 폭의 50%를 사용해 함께 변한다. 코드로 확인한 원인이며 사내 화면 직접 실측은 하지 않았다.
+- **수정:** 스크롤 컨테이너에 `scrollbar-gutter:stable`을 적용하고 `overflow:auto`는 유지한다. 접힌 모드 버튼은 좌우 4px, 대화 버튼은 숨은 글자와의 간격 0으로 정리해 예약된 스크롤 공간 안에서도 기존 16px 아이콘을 보존한다. 저장·권한·실행·메뉴 선택 로직은 변경하지 않는다.
+- **검증 설계:** 기존 `test_navigation_v2_geometry_modes_categories_global_tools_and_draft`를 확장한다. 실제 두 모드의 메뉴 높이 사이에서 창 높이를 정해 업무는 비넘침·워크스페이스는 넘침인 조건을 반드시 만든다. 1366px의 긴 창/경계 높이에서 펼침→접힘→재펼침과 업무→워크스페이스→업무를 왕복하며 실제 버튼 폭·가로 위치, 아이콘 크기/잘림, 가로 넘침 없음, `overflow:auto`, 대화 초안 보존을 확인한다. 매 측정은 `sidebar-scrollbar-geometry.json`, 경계 화면은 `sidebar-scrollbar-work.png`·`sidebar-scrollbar-workspace.png`에 보존한다.
+- **환경 경계:** 앞선 진단의 로컬 Chromium 기동은 환경 제한으로 실패했고, 로컬 HTML 브라우저 열기도 URL 정책으로 차단됐다. 같은 우회·반복 실행은 하지 않는다. 실제 제품 브라우저 검증은 PR CI에서 수행하며, 로컬 소스 검사와 구분해 기록한다. 사내 적용은 미실행이다.
+- **로컬 검증:** 고정 Open WebUI `2a960a5` 원본 해시와 패치 적용을 확인하고 변경된 Sidebar 1개의 결과 해시 및 패치 해시만 갱신했다. Sidebar Svelte 컴파일 오류/경고 0, Node motion/Svelte 39/39, Python 시험 구문, 문서 점검 오류/검토 후보 0, 시험 ID 감사 오류 0, diff 검사를 통과했다. frontend 32건 중 26건은 통과했고 6건은 이 소스 checkout에 TypeScript가 없어 실행 준비에서 실패했다(`Cannot find module .../node_modules/typescript`). 제품 실패로 단정하거나 제외해 성공으로 표시하지 않으며, 고정 의존성을 설치하는 PR CI에서 32건 전체와 실제 제품 브라우저를 확인한다.
+
 <a id="workspace-heading-clip-20261105"></a>
 
 ## 2026-11-05 · 워크스페이스 메뉴 제목 잘림
