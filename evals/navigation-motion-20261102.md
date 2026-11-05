@@ -1,8 +1,10 @@
-# 탐색·패널 시안 2 제품 검증
+# 탐색·패널 UI 검증
 
 <a id="sidebar-stable-scrollbar-20261105"></a>
 
 ## 2026-11-05 · 업무/워크스페이스 스크롤바 폭 고정
+
+- **CI472 Windows 문서 검사 실패·보완:** 통합 head `98e3006`의 [Source audit Windows](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41952865848/job/127000666708)에서 `evals/v4-ui-20260930.md`가 1MiB 한도를 넘었다. 당시 LF 원본은 1,045,608바이트·3,722줄이지만 Windows CRLF checkout은 1,049,330바이트로 1,048,576바이트 한도를 초과한다. Ubuntu 검사는 통과했으며 제품 실패와 구분한다. 이번 범위인 공통 패널·Q1 준비 기록을 이 기존 검증 문서에 원문 그대로 옮기고 원래 파일의 앵커·연결을 유지했다. 검사 한도와 제품·시험 코드는 변경하지 않는다. 로컬 tracked Markdown 전체를 CRLF로 바꾼 조건과 LF 원본 모두 문서29개·링크2,876개·오류0·검토 후보0 및 diff 검사를 통과했다. 이동 후 v4 문서는 LF 1,037,553바이트·CRLF 1,041,256바이트다. 보완 head의 전체 CI로 최종 판정한다. 최초 실패 로그는 보존한다.
 
 - **실제 main 통합:** #121의 CI470 전체 성공·실측·캡처 검수와 병합 후 최신 main `01a192d66e7ec4ecfa1b669ec284fb732529ef85`를 merge했다. 앞서 준비한 제품·검사 코드와 동일하며, #118·#119·#120·#121 기록을 보존한다. 통합 패치 SHA256은 `3c3476fe1ce7c1111530c18dc86732b45ee6d3db5c71503514bcdfbbf71abe24`이고, 최종 head 전체 CI 및 새 `workMode`가 담긴 22회 실측·캡처 판정은 [PR #122](https://github.com/knadalkim-a11y/team-agent-poc/pull/122) 본문/Checks에 연결한다.
 
@@ -16,6 +18,37 @@
 - **환경 경계:** 앞선 진단의 로컬 Chromium 기동은 환경 제한으로 실패했고, 로컬 HTML 브라우저 열기도 URL 정책으로 차단됐다. 같은 우회·반복 실행은 하지 않는다. 실제 제품 브라우저 검증은 PR CI에서 수행하며, 로컬 소스 검사와 구분해 기록한다. 사내 적용은 미실행이다.
 - **로컬 검증:** 고정 Open WebUI `2a960a5` 원본 해시와 패치 적용을 확인하고 변경된 Sidebar 1개의 결과 해시 및 패치 해시만 갱신했다. Sidebar Svelte 컴파일 오류/경고 0, Node motion/Svelte 39/39, Python 시험 구문, 문서 점검 오류/검토 후보 0, 시험 ID 감사 오류 0, diff 검사를 통과했다. frontend 32건 중 26건은 통과했고 6건은 이 소스 checkout에 TypeScript가 없어 실행 준비에서 실패했다(`Cannot find module .../node_modules/typescript`). 제품 실패로 단정하거나 제외해 성공으로 표시하지 않으며, 고정 의존성을 설치하는 PR CI에서 32건 전체와 실제 제품 브라우저를 확인한다.
 - **CI465·검사 조건 보완:** [PR #122](https://github.com/knadalkim-a11y/team-agent-poc/pull/122) 최초 head `ebb0c3e`의 [CI465](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41945760866)에서 고정 프런트엔드 빌드와 source 32/32를 통과했다. 후속 자체 검토에서 공통 `ChromePipe`가 `--hide-scrollbars`를 사용함을 발견했다. 이 조건의 통과만으로 실제 스크롤바 폭 검증을 완료 처리하지 않는다. 기본값은 유지하고 MotionNativeTests만 그 옵션을 끄며, 모든 측정에서 스크롤바 예약 폭이 0보다 큰지도 검사한다. 제품 CSS는 추가 변경하지 않고 보완 head의 전체 CI로 판정한다. 최종 head·CI와 실측은 이 PR 본문/Checks에 연결한다.
+
+<a id="shared-panel-style-20261105"></a>
+
+## 2026-11-05 · 오른쪽 패널 배경·탭 공통화
+
+- **최종 통합·직접 검수:** #120 병합 main `c41634a`를 포함한 head `dbb6d0543998cb01433701ea1e89c3debaea323c`의 [CI470](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41950730475)가 필수39성공·출하1정상생략, native-compose97/97로 끝났다. [브라우저 증거](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41950730475/artifacts/13381327290)의 `shared-panel-styles.json` 9개 화면 배경 `rgb(250,250,250)`, 7개 탭 화면 높이36px·글자12/18px·간격20px·밑줄2px, 3개 키보드 포커스의 안쪽2px를 직접 확인했다. 작성/단계1366px·작업480px PNG에서도 공통 배경·탭·잘리지 않는 가시 포커스를 확인했다. #121은 `01a192d66e7ec4ecfa1b669ec284fb732529ef85`에 병합됐으며 아래 최초 실패와 당시 관찰은 유지한다.
+
+- **기준·범위:** 마지막으로 전달받은 사내 배포 커밋 `cb612c9`와 작업 시작 main `93749cc`의 제품 CSS를 대조했다. 실제 사내 실행 중 커밋은 직접 조회하지 않았다. 사용자가 비교 시안을 보고 워크스페이스 기준의 배경·탭 공통화를 승인했다([결정](../docs/mockups/ees-work/TASK.md#shared-panel-style-20261105)). 열려 있던 게시 기능 #120·왼쪽 메뉴 #119와 별도 범위이며 그 작업 파일은 건드리지 않는다.
+- **원인:** 공통 패널 배경은 `#F3F3F5`인데 작성과 개요/단계 화면만 `#FAFAFA`로 덮어썼다. 업무 탭은 기본 글자가 본문색을 상속하고, 작성 탭은 별도 규칙에서 보조색·다른 높이/여백을 지정했다.
+- **수정:** `--ees-surface-panel`을 `#FAFAFA`로 맞추고 화면별 배경 재지정을 제거했다. `.ew-tabs`·`.ew-author-tabs`를 한 CSS 규칙으로 합쳐 기본/선택 글자·밑줄·크기·간격을 통일했다. 작성 하단도 같은 배경을 상속한다. 공통 탭의 가로 스크롤 영역에서 키보드 포커스가 잘리지 않도록 테두리를 안쪽에 표시한다. 상태 색상·카드·입력창·공장 선택기·업무 동작은 유지한다.
+- **재발 방지:** AGENTS의 공통 패널 규칙과 기존 `test_c18_panel_cards_input_hover_and_keyboard_focus`에 화면 전환 후 실제 computed style 비교를 추가했다. 작성 내용·작업 편집·규칙·기록·도구, 업무 개요·단계·작업 및 좁은 화면의 패널 배경/탭·hover·overflow와 원본 정의 보존을 확인하고, 기존 카드/입력/대화 배경·키보드 포커스 단언을 유지한다. Tab/Shift+Tab으로 작성·단계·좁은 작업 탭의 가시 포커스와 안쪽 테두리도 비교한다. 기록에서 단계로 바로 진입하는 경우에는 뒤로 가기로 업무 개요도 명시적으로 연다. 결과는 CI의 `shared-panel-styles.json`과 화면 캡처에 남긴다.
+- **로컬 검사:** Node `test_ees_work_figma_runtime_ui.cjs`·`test_ees_work_authoring_ui.cjs`·`test_ees_v4_layout.cjs` 446/446 통과. Python `tests.test_ees_branding_build`·`tests.test_ees_work_designer` 35개 실행, 34 통과·고정 upstream wheel이 필요한 1개 건너뜀. `scripts/check_docs.py` 오류0·검토 후보0, 변경 Native 시험의 `py_compile`, `git diff --check` 통과.
+- **1차 CI457 · `a11edca`:** [실행](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41935664837). 제품 빌드·전체 Native 제품·작성/실행/움직임·기존 레이아웃 검사는 통과했다. 새 색상 시험은 작성 내용·작업 편집·판정 규칙·게시 기록·도구의 배경/탭 단언을 통과한 뒤, 워크스페이스 모드에서 업무의 `records` 단추를 누르려 해 실패했다. 작성 화면 `shared-panel-authoring-1366.png`를 직접 열어 배경·선택/비선택 탭·간격·가독성을 확인했다. 업무 화면 공통화까지 통과한 것으로 간주하지 않는다.
+- **보완·현재 증거:** 시험에서 실제 메뉴로 업무 모드로 전환한 후 기록을 열도록 고쳤다. 업무 개요도 명시적으로 방문하고, 작성·단계·좁은 작업 화면에서 Tab/Shift+Tab의 가시 포커스를 확인한다. 가로 스크롤 탭의 포커스를 안쪽으로 표시하는 CSS 보완도 포함했다. 최종 head의 CI 결과·검토 요약은 [PR #121](https://github.com/knadalkim-a11y/team-agent-poc/pull/121)의 본문과 Checks가 현재 판정이다. 해당 실행의 `ees-work-browser-evidence-native-compose`에 `shared-panel-styles.json`과 작성·단계·좁은 작업 화면 캡처를 보존한다.
+- **환경·제한:** 로컬 브라우저 실행은 환경의 소켓 권한 제한으로 사용할 수 없어 Native 브라우저 검증은 CI에서 수행한다(1차 Chrome 156.0.8078.79). Figma C1(`948:1078`)은 읽기만 했으며, 실제 사내 배포·운영 데이터 검사는 하지 않았다.
+
+- **CI459 추가 실패와 보완(2026-11-05):** head `9888c1e`의 [CI459](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41938022868) native-compose는 C18의 480px 전환에서 `data-compact=true` 대기 실패다. 앞선 `open_run`이 메뉴를 수동으로 펼쳤고 1366→480은 둘 다 1440px 아래여서 제품은 그 선택을 유지한다. 추가한 시험의 준비 오류이며 제품 동작은 바꾸지 않는다. 이 흐름에서 실제 메뉴 접기 단추를 누르고 compact를 확인한 뒤 480px 스타일·Tab 포커스·가로 넘침·저장본 보존 검사를 계속한다. 최초 실패와 검사 단언을 보존하고 통합 head의 전체 CI로 확인한다.
+
+- **세 PR 통합 준비 검수:** #118 설명·#119 제목·#120 게시 상태/공장 권한 보완과 #121 공통 스타일을 합친 로컬 후보에서 `node --test tests/*.cjs` 676/676, 문서 검사 오류0·검토 후보0, diff 검사 통과. STATUS·CHANGELOG는 모든 변경 기록을 보존했다. 각 PR은 선행 PR 병합 뒤의 최신 main을 부모로 포함한 최종 head의 전체 필수 CI 성공을 확인하여 순서대로 병합한다. 이 로컬 검사는 실제 Native·Windows 최종 CI를 대신하지 않는다.
+
+- **최신 main 통합(2026-11-05):** #118의 CI462·#120 최종 head `9d1df66`의 [CI468](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41948573115) 성공 뒤 병합 main `c41634a`를 포함했다. #120의 공장 권한 보완과 Q1/메뉴 접기 준비 보완을 보존한다. 480px 색상·포커스 검사도 실제 overlay 상태가 반영된 뒤 측정한다. 통합 후 Python 구문·문서·diff 검사를 확인하고 #121 최종 head 전체 CI의 스타일 실측·캡처·기존 자료 보존 결과로 판정한다.
+<a id="q1-viewport-settle-20261105"></a>
+
+## 2026-11-05 · Q1 창 크기 전환의 패널 준비 조건
+
+- **후속 검증:** #120 최종 head `9d1df66`의 [CI468](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41948573115)은 layout5/5와 native-compose97/97을 포함해 전체 필수39개가 성공했다. 최초 CI464 실패와 CI466의 별도 제목 접기 실패는 보존한다. #120은 `c41634a`로 병합했고 #121도 해당 준비 보완을 포함한다.
+
+- **최초 실패:** #120 통합 head `153af6f`의 [CI464](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41944193231), Ubuntu 24.04·Python 3.11·Chrome 156.0.8078.79에서 native-compose 97개 중 96개가 통과하고 Q1의 1095px `overlay=true` 즉시 단언 한 곳이 실패했다. 작성 31/31과 실행 23/23은 통과했다. [최초 PNG·DOM·결과](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41944193231/artifacts/13378816153)를 보존한다.
+- **관찰·준비 누락:** 마지막 대기는 sidebar/panel-space의 애니메이션 없음이고 실패 값은 `overlay=false`였다. 캡처와 DOM은 창1095px·접힌 메뉴56px에서 패널 전환 전 배치를 보여 준다. helper는 `innerWidth`와 CSS 셸 폭, 기존 compact 값만 기다렸다. 1280→1095는 compact가 계속 true여서 Svelte의 window resize 반영 전에도 모두 만족한다. 제품의 overlay 기준은 창 폭과 고정480px 기준이며 패널의 사용자 폭400px와 다르다.
+- **보완·판정:** Q1의 이 전환에 실제 `data-overlay=true` 준비 대기를 추가한다. 같은 viewport helper에 선택적인 기대 상태를 전달하므로 제품 속성을 직접 바꾸거나 기다리는 시간을 늘리지 않는다. 기존 overlay 단언·대화 폭1039px·닫기/재열기와 다른 치수 단언은 유지한다. Python 구문·문서·diff 검사 후 최종 head 전체 CI로 판정하며 이 준비 누락을 단순 재시도 성공으로 해결했다고 쓰지 않는다. #121의 좁은 화면 검사에도 같은 준비 조건을 사용한다.
+
 
 <a id="workspace-heading-clip-20261105"></a>
 
