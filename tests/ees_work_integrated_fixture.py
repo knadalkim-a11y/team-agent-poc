@@ -84,7 +84,8 @@ class IntegratedNativeCase(unittest.TestCase):
         self.addCleanup(lambda: [sys.modules.pop(key, None) for key in list(sys.modules) if key == name or key.startswith(name + '.')])
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
         self.addCleanup(self.server.shutdown)
-        self.browser = ChromePipe(self.chrome, str(Path(self.temporary.name) / 'chrome'))
+        self.browser = ChromePipe(self.chrome, str(Path(self.temporary.name) / 'chrome'),
+                                  hide_scrollbars=getattr(self, 'hide_scrollbars', True))
         self.addCleanup(self.close_browser)
         self.addCleanup(self.capture_failure)
         self.browser.navigate('about:blank')

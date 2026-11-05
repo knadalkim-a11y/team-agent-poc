@@ -10,6 +10,7 @@
 - **검증 설계:** 기존 `test_navigation_v2_geometry_modes_categories_global_tools_and_draft`를 확장한다. 실제 두 모드의 메뉴 높이 사이에서 창 높이를 정해 업무는 비넘침·워크스페이스는 넘침인 조건을 반드시 만든다. 1366px의 긴 창/경계 높이에서 펼침→접힘→재펼침과 업무→워크스페이스→업무를 왕복하며 실제 버튼 폭·가로 위치, 아이콘 크기/잘림, 가로 넘침 없음, `overflow:auto`, 대화 초안 보존을 확인한다. 매 측정은 `sidebar-scrollbar-geometry.json`, 경계 화면은 `sidebar-scrollbar-work.png`·`sidebar-scrollbar-workspace.png`에 보존한다.
 - **환경 경계:** 앞선 진단의 로컬 Chromium 기동은 환경 제한으로 실패했고, 로컬 HTML 브라우저 열기도 URL 정책으로 차단됐다. 같은 우회·반복 실행은 하지 않는다. 실제 제품 브라우저 검증은 PR CI에서 수행하며, 로컬 소스 검사와 구분해 기록한다. 사내 적용은 미실행이다.
 - **로컬 검증:** 고정 Open WebUI `2a960a5` 원본 해시와 패치 적용을 확인하고 변경된 Sidebar 1개의 결과 해시 및 패치 해시만 갱신했다. Sidebar Svelte 컴파일 오류/경고 0, Node motion/Svelte 39/39, Python 시험 구문, 문서 점검 오류/검토 후보 0, 시험 ID 감사 오류 0, diff 검사를 통과했다. frontend 32건 중 26건은 통과했고 6건은 이 소스 checkout에 TypeScript가 없어 실행 준비에서 실패했다(`Cannot find module .../node_modules/typescript`). 제품 실패로 단정하거나 제외해 성공으로 표시하지 않으며, 고정 의존성을 설치하는 PR CI에서 32건 전체와 실제 제품 브라우저를 확인한다.
+- **CI465·검사 조건 보완:** [PR #122](https://github.com/knadalkim-a11y/team-agent-poc/pull/122) 최초 head `ebb0c3e`의 [CI465](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41945760866)에서 고정 프런트엔드 빌드와 source 32/32를 통과했다. 후속 자체 검토에서 공통 `ChromePipe`가 `--hide-scrollbars`를 사용함을 발견했다. 이 조건의 통과만으로 실제 스크롤바 폭 검증을 완료 처리하지 않는다. 기본값은 유지하고 MotionNativeTests만 그 옵션을 끄며, 모든 측정에서 스크롤바 예약 폭이 0보다 큰지도 검사한다. 제품 CSS는 추가 변경하지 않고 보완 head의 전체 CI로 판정한다. 최종 head·CI와 실측은 이 PR 본문/Checks에 연결한다.
 
 <a id="workspace-heading-clip-20261105"></a>
 

@@ -72,7 +72,7 @@ class ChromePipe:
     dependency. Every response has a deadline; browser/profile cleanup is local.
     """
 
-    def __init__(self, chrome, profile, *, font_wheel=None):
+    def __init__(self, chrome, profile, *, font_wheel=None, hide_scrollbars=True):
         self.started_at = time.monotonic()
         self.stage, self.browser_version, self.target_id = "launch", None, None
         self.last_command, self.first_failure, self.response_summary = None, None, []
@@ -83,7 +83,9 @@ class ChromePipe:
         command = [chrome, "--headless=new", "--no-sandbox", "--disable-gpu",
                    "--disable-dev-shm-usage", "--disable-background-networking",
                    "--no-first-run", "--no-default-browser-check", "--disable-extensions",
-                   "--hide-scrollbars", "--remote-debugging-pipe", "--user-data-dir=" + profile]
+                   "--remote-debugging-pipe", "--user-data-dir=" + profile]
+        if hide_scrollbars:
+            command.append("--hide-scrollbars")
         # dup2 runs in a fresh helper process: do not alter the HTTP server's
         # descriptors or use preexec_fn in this multithreaded test process.
         launch = "import os,sys;os.dup2(int(sys.argv[1]),3);os.dup2(int(sys.argv[2]),4);os.execv(sys.argv[3],sys.argv[3:])"

@@ -18,6 +18,10 @@ from native_ui_fixture import NativeUIHandler
 
 
 class MotionNativeTests(IntegratedNativeCase):
+    # Exercise real scrollbar geometry; the shared screenshot fixture normally
+    # hides scrollbars, which would mask the mode-switch regression.
+    hide_scrollbars = False
+
     def capture_failure(self):
         super().capture_failure()
         if (not getattr(self, 'failure_evidence_captured', False)
@@ -297,6 +301,7 @@ class MotionNativeTests(IntegratedNativeCase):
                 for row in rows:
                     self.assertEqual(row['sidebar'], 56 if compact else 256, row)
                     self.assertEqual(row['overflowY'], 'auto', row)
+                    self.assertGreater(row['gutter'], 0, row)
                     self.assertFalse(row['overflowX'], row)
                     self.assertEqual(row['client'], rows[0]['client'], rows)
                     for key in ('mode', 'work', 'author', 'scope'):

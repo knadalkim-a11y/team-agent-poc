@@ -4,7 +4,8 @@
 
 - **현재:** main `818e31c`에서 사용자 요청대로 스크롤바는 필요할 때 표시하고 자리를 항상 확보한다. 펼침/접힘 폭은 유지하며 접힌 아이콘이 좁아지지 않도록 간격을 함께 정리했다. [계약](mockups/ees-work/TASK.md#sidebar-stable-scrollbar-20261105).
 - **검증:** 기존 Native 탐색 시험에 스크롤 유무가 다른 두 모드의 폭·위치·아이콘·초안 보존 측정을 추가했다. 고정 소스/패치 해시, Svelte 컴파일 오류/경고 0, Node 39/39, Python 구문·문서·시험 ID·diff 검사를 통과했다. frontend는 26통과·TypeScript 부재로 6준비 실패이며 최종 PR CI에서 전체와 실제 제품 화면을 확인한다. [기록](../evals/navigation-motion-20261102.md#sidebar-stable-scrollbar-20261105).
-- **다음 하나:** 이 수정의 관련 검사·PR CI를 완료해 검토 가능한 상태로 전달한다. 사내 적용은 미실행이다.
+- **CI 후속:** CI465의 고정 빌드와 source 32/32는 통과했다. 공통 브라우저의 스크롤바 숨김 옵션을 발견해 해당 Native 탐색/움직임 시험에서는 끄고 실제 예약 폭이 있는지도 검사하도록 보완했다. 제품 CSS 변경 없이 최종 head·CI 및 실측 결과는 [PR #122](https://github.com/knadalkim-a11y/team-agent-poc/pull/122)의 본문/Checks에서 판정한다.
+- **다음 하나:** [PR #122](https://github.com/knadalkim-a11y/team-agent-poc/pull/122)의 최종 검증 결과와 변경을 검토한다. 병합·사내 적용은 미실행이다.
 
 > 아래는 각 변경 당시의 기록이다.
 
