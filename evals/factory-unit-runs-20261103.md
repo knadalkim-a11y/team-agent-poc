@@ -106,7 +106,7 @@ Linux 격리 작업 사본, Python 3.11.17 `.venv`, Node 22.22.0. Python 의존�
 
 ## 2026-11-05 · 개인별 내 업무 제거
 
-사용자는 공장·시스템 단위 관리에 맞춰 코드와 Figma에서 ‘내 업무’를 없애도록 요청했다. [최신 계약](../docs/mockups/ees-work/TASK.md#remove-my-work-20261105)이 이 문서의 과거 ‘내 업무 유지’ 결론을 대체한다. 기준 main `8258318`, 브랜치 `codex/remove-my-work`.
+사용자는 공장·시스템 단위 관리에 맞춰 코드와 Figma에서 ‘내 업무’를 없애도록 요청했다. [최신 계약](../docs/mockups/ees-work/TASK.md#remove-my-work-20261105)이 이 문서의 과거 ‘내 업무 유지’ 결론을 대체한다. 기준 main `8258318`, 브랜치 `codex/remove-my-work`. [PR #124](https://github.com/knadalkim-a11y/team-agent-poc/pull/124)의 최종 head CI·실제 Native 판정은 PR 본문에서 관리한다.
 
 - 메뉴·배지·개인 작업 집계·개인 화면·열기/담당 이벤트·도구 결과 투영을 제거한다. 첫 진입은 기존 업무 개요/절차 선택 안내다. 새로운 목록이나 개인 소유 업무는 만들지 않는다.
 - 저장된 `tab=my_work`와 오래된 진행/작업 선택을 해제하고 공장·시스템·너비·접힘을 보존한다. 늦게 도착한 과거 저장값은 사용자가 방금 고른 실행 기록을 덮지 않는다. 화면만 열어 공동 업무 명령이 생기지 않는다.
