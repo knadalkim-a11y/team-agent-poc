@@ -320,6 +320,7 @@ font:getComputedStyle(e).fontFamily,display:getComputedStyle(e).display,overflow
         # in one gate so screenshots always correspond to the tested wheel.
         integrated_flow(self)
         figma_delta_flow(self)
+        authored_trial_smoke(self)
         self.report['status']='passed'; self.write_report()
 
     def close(self):
@@ -328,6 +329,108 @@ font:getComputedStyle(e).fontFamily,display:getComputedStyle(e).display,overflow
             self.report['browser_cleanup_diagnostics']=self.browser.final_diagnostics
             self.write_report()
         self.stop_server(); self.client.close(); self.provider.close(); self.tmp.cleanup()
+
+
+def authored_trial_diagnostic(g, fixture, native_id):
+    """Failure-only diagnostic for this known, network-free synthetic source.
+
+    Never runs against user code or credentials. The production trial remains
+    failed; this separate process only explains its installed import boundary.
+    """
+    payload={'native_id':native_id,'worker_id':'synthetic_diagnostic_'+uuid4().hex,
+        'code':fixture['draft']['code'],'function':fixture['draft']['function'],
+        'base_url':fixture['connection']['base_url'],'token':fixture['connection']['token'],
+        'inputs':fixture['inputs'],'actor':{'id':'synthetic-diagnostic','role':'admin',
+            'name':'Synthetic diagnostic','email':'synthetic-diagnostic@example.test'}}
+    script=r'''
+import asyncio, importlib.util, json, os, pathlib, sys, traceback
+protocol=os.dup(1)
+with open(os.devnull,'wb') as sink:
+    os.dup2(sink.fileno(),1); os.dup2(sink.fileno(),2)
+payload=json.loads(sys.stdin.buffer.read(1024*1024))
+secrets=[payload['token'],*os.environ.values()]
+def redact(value):
+    for secret in sorted(set(secrets),key=len,reverse=True):
+        if len(secret)>=6: value=value.replace(secret,'[redacted]')
+    return value
+result={'status':'diagnostic_failed'}
+try:
+    path=pathlib.Path(sys.argv[1]);sys.path.insert(0,str(path.parent))
+    spec=importlib.util.spec_from_file_location('synthetic_authored_worker',path)
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    outcome=asyncio.run(module.invoke(payload))
+    result={'status':'diagnostic_completed','worker_status':outcome.get('status'),
+        'error_code':outcome.get('error_code')}
+except BaseException as error:
+    cause=error.__cause__ or error
+    result={'status':'diagnostic_exception','stage':getattr(error,'code',None),
+        'exception_type':type(cause).__module__+'.'+type(cause).__name__,
+        'message':redact(str(cause))[:1500],
+        'frames':[{'file':pathlib.Path(frame.filename).name,'line':frame.lineno,'function':frame.name}
+            for frame in traceback.extract_tb(cause.__traceback__)[-8:]]}
+encoded=redact(json.dumps(result,ensure_ascii=False)).encode('utf-8')
+if len(encoded)>8192: encoded=b'{"status":"diagnostic_too_large"}'
+os.write(protocol,encoded);os.close(protocol)
+'''
+    with tempfile.TemporaryDirectory(prefix='authored-diagnostic-',dir=g.work) as temp:
+        env={**g.environment,'TMPDIR':temp,'TMP':temp,'TEMP':temp}
+        try:
+            process=subprocess.run([sys.executable,'-c',script,str(g.program/'open_webui/ees_workflow_tool_worker.py')],
+                input=json.dumps(payload).encode('utf-8'),stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,
+                cwd=g.work,env=env,timeout=35)
+            evidence=json.loads(process.stdout) if len(process.stdout)<=8192 else {'status':'diagnostic_too_large'}
+        except (subprocess.TimeoutExpired,ValueError):
+            evidence={'status':'diagnostic_unavailable'}
+    serialized=json.dumps(evidence,ensure_ascii=False)
+    # Defense in depth at the artifact boundary, including inherited env keys.
+    for secret in sorted(set([payload['token'],*env.values()]),key=len,reverse=True):
+        if len(secret)>=6: serialized=serialized.replace(secret,'[redacted]')
+    (g.out/'authored-worker-diagnostic.json').write_text(serialized+'\n',encoding='utf-8')
+    g.record('Synthetic authored worker failure diagnostic',diagnostic=json.loads(serialized),production_trial_succeeded=False)
+
+
+def authored_trial_smoke(g):
+    """Actual CLI/API, Native settings and full installed worker imports.
+
+    The shared source returns synthetic documents without network access.
+    Unlike the unit fixture, no Native loader/binder import is substituted.
+    """
+    fixture_path=Path(__file__).resolve().parent/'fixtures/tools_phase2_contract.json'
+    fixture=json.loads(fixture_path.read_text(encoding='utf-8'))
+    token=fixture['connection']['token']
+
+    def command(action, *, timeout=20, **fields):
+        response=g.client.post('/api/ees-work/operations', headers=g.headers,
+            json={'action':action,'request_id':uuid4().hex,**fields}, timeout=timeout)
+        assert token not in response.text, 'Authored response exposed the synthetic credential'
+        assert response.status_code==200, (action,response.status_code)
+        value=response.json()
+        assert value.get('ok') is True, (action,value.get('error',{}).get('code'))
+        return value
+
+    draft=command('tool_draft_save',expected_revision=0,draft=fixture['draft'])['tool_draft']
+    connected=command('tool_draft_connection_save',tool_id=draft['id'],
+        expected_revision=draft['revision'],expected_connection_revision=0,**fixture['connection'])['connection']
+    assert connected['configured'] and connected['token_set'] and connected['native_id']
+    # The worker's 30-second deadline includes full Native module imports.
+    # Let the API return that explicit outcome instead of timing out at 20s.
+    trial=command('tool_draft_trial_start',timeout=40,tool_id=draft['id'],
+        expected_revision=draft['revision'],expected_connection_revision=connected['revision'],
+        inputs=fixture['inputs'])['trial']
+    if trial['status']!='succeeded':
+        authored_trial_diagnostic(g,fixture,connected['native_id'])
+    assert trial['status']=='succeeded', ('Authored worker trial',trial['status'],trial['errors'])
+    assert trial['count']==2 and trial['completeness']=='complete'
+    assert trial['fields_checked'] and trial['eligible_for_activation']
+    assert trial['raw_result']==fixture['result']
+    loaded=command('tool_draft_trial_get',tool_id=draft['id'],trial_id=trial['id'])['trial']
+    assert loaded==trial, 'Authored trial did not round-trip through the real API'
+    g.log.flush()
+    assert token not in (g.work/'native-server.log').read_text(encoding='utf-8'), 'Authored server log exposed the synthetic credential'
+    g.record('Authored trial through actual Native CLI and isolated worker',
+        fixture_sha256=hashlib.sha256(fixture_path.read_bytes()).hexdigest(),
+        count=trial['count'],fields_checked=trial['fields_checked'],duration_ms=trial['duration_ms'],
+        full_native_imports=True,credential_exposed=False,fixture_external_io=False)
 
 
 def integrated_flow(gate):

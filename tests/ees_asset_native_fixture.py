@@ -111,6 +111,7 @@ class NativeAssetFixture:
                 "get_verified_user": self.auth.get_verified_user,
                 "guard_table_method": self.guard.guard_table_method,
                 "guard_operation": self.guard.guard_operation,
+                "guard_plugin_loader": self.guard.guard_plugin_loader,
                 "Models": self.models.Models, "Tools": self.tools.Tools,
                 "AccessGrants": self.acl.AccessGrants,
                 "Users": sys.modules["open_webui.models.users"].Users,
@@ -339,6 +340,7 @@ class NativeAssetFixture:
         # as in the installed wheel. This fixture otherwise compiles ZIP bytes.
         (self.directory / "ees_workflow_tool.py").write_bytes(self.members["open_webui/ees_workflow_tool.py"])
         self.guard.__file__ = str(self.directory / "ees_asset_guard.py")
+        Path(self.guard.__file__).write_text(self.members["open_webui/ees_asset_guard.py"].decode("utf-8"), encoding="utf-8")
         self.acl = self.load("open_webui.models.access_grants")
         self.tools = self.load("open_webui.models.tools")
         self.models = self.load("open_webui.models.models")

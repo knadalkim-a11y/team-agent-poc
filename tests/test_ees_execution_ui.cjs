@@ -547,3 +547,15 @@ test('proposal B drops attribution overwritten by a person and values restored t
  assert.deepEqual(Object.keys(h.renders.at(-1).state.input_proposal_applied.values),['other']);assert.equal(h.view.readInputs().inputs.first,'사람이 수정');
  previewValues(h,{other:'유지'});h.api.applyInputProposal();assert.equal(h.renders.at(-1).state.input_proposal_applied,null);assert.equal(h.view.readInputs().inputs.other,'유지');assert.equal(h.view.readInputs().dirty,true);assert.doesNotMatch(h.panel.host.innerHTML,/ew-input-proposal-source|ew-input-applied-bar/);assert.equal(h.calls.length,0);
 });
+
+test('connection token never enters receipt keys or browser storage after a lost response',async()=>{
+ const h=controller(),stored=[],body={action:'tool_draft_connection_save',tool_id:'draft',expected_revision:1,expected_connection_revision:0,base_url:'https://example.invalid',token:'synthetic-private-pat',request_id:'connection-attempt-1'};
+ h.context.localStorage.setItem=(...args)=>stored.push(args);h.context.sessionStorage={setItem:(...args)=>stored.push(args)};h.setReply(()=>{throw new Error('response lost');});
+ await assert.rejects(h.api.operationsCommand(body));const receipts=h.api.snapshot().receipts;assert.equal(receipts.length,1);assert.equal(receipts[0][0],'operations:tool_draft_connection_save:connection-attempt-1');assert.doesNotMatch(JSON.stringify(receipts),/synthetic-private-pat|example.invalid/);assert.deepEqual(stored,[]);
+ await assert.rejects(h.api.operationsCommand(body));assert.equal(h.calls[0].body.request_id,h.calls[1].body.request_id);assert.equal(h.calls[1].body.token,'synthetic-private-pat');
+ await assert.rejects(h.api.operationsCommand({...body,token:'synthetic-replacement',request_id:'connection-attempt-2'}));assert.equal(h.api.snapshot().receipts.length,2);assert.doesNotMatch(JSON.stringify(h.api.snapshot().receipts),/synthetic-private-pat|synthetic-replacement/);h.setReply(()=>({ok:true}));await h.api.operationsCommand(body);assert.equal(h.api.snapshot().receipts.length,1);
+});
+
+test('closing the panel and changing selection end private connection dialogs',async()=>{
+ const h=controller();let closes=0;h.designer.closePrivateDialogs=()=>{closes++;};h.api.setState({capabilities:{actor_id:'a'},run:{revision:1}});await h.api.select({mode:'author',tab:'tools'},{fetch:false});assert.equal(closes,1);await h.api.handleClick({dataset:{action:'close_panel'}});assert.equal(closes,2);
+});

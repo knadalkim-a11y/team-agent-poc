@@ -192,3 +192,111 @@ C66의 **추가 설정**은 담당 · 앞 작업 · 적용 조건 · 기한·예
 | ST-OPEN-7 | 명세 작성 당시 같은 상태 문구가 서버와 화면 두 곳에 달랐음. B10-2 · B10-5 카드의 문구를 서버의 공용 문구 원본으로 통합하고 화면도 같은 값을 사용 | 구현 · Native·UI 회귀 통과, 실제 제품 화면·최종 CI는 [검증 기록](../../evals/v4-ui-20260930.md#shared-tools-spec-20261016)과 #96 Checks 참조 |
 | ST-OPEN-8 | 공통 패널 폭: Figma 580px, 제품 기본 480px. ‘공통 · 화면 틀·이동’에서 정함 | ‘공통 · 화면 틀·이동’을 고칠 때 |
 | ST-OPEN-9 | Jira 6 · GitHub 2의 결과 형식. 정하기 전에는 확인할 수 없음(준비 중) | 해당 도구를 켜기 전 |
+
+<a id="tools-redesign-v2-phase1-20261105"></a>
+
+## 도구 재설계 2판 · 1페이즈 작성·저장 계약
+
+2026-11-05 사용자가 2판 기준의 1페이즈를 서브에이전트로 병렬 구현하도록 요청했다. main `8258318`에서 시작한다. 아래 ST-P1 규칙은 새 작성 경로에 적용한다. 위 1단계-1의 기본 제공 실행·권한·버전 규칙과 기존 자료는 보존한다. 새 작성에는 담당자를 요구하지 않으며 기존 ST-ADMIN-2/5의 사용 설정 변경은 2페이즈에서 다룬다.
+
+| ID | 계약 |
+|---|---|
+| ST-P1-1 | 관리자만 새 도구 목록/코드/정의를 조회·작성·가져오기·검사한다. 담당자 대신 작성/수정 계정·시각을 기록한다. 기존 그룹 사용 권한과 업무절차 담당자 처리는 변경하지 않는다. |
+| ST-P1-2 | 추가 저장 `work_tool_drafts`에 코드·입력/결과 UI 정의를 같은 revision으로 저장한다. 사용 버전 `active_version`과 수정본 revision은 별개다. 이 단계의 새 도구 active_version은 null이며 업무 선택·실행 대상이 아니다. 기존 Native 코드·설정·개인 PAT·관리 도구·진행 건·기록을 수정하지 않는다. |
+| ST-P1-3 | 작성 중 코드와 불완전한 입력/결과도 저장하여 다시 편집할 수 있다. 정적 검사 결과는 오류 목록으로 따로 표시한다. 코드 확인과 저장은 import/exec/eval/함수 실행·외부 요청을 하지 않는다. 검사 통과는 시험/사용 승인이 아니다. |
+| ST-P1-4 | 기존 도구에서 가져오기는 현재 읽기 권한이 있는 Native 원본 코드의 복사다. 서버가 현재 권한을 다시 검사한다. 설정과 PAT는 읽거나 복사하지 않는다. 원본에 하드코딩한 비밀은 안전하게 추출했다고 간주하지 않으며 입력 코드 자체를 로그에 쓰지 않는다. |
+| ST-P1-5 | 저장은 expected_revision으로 충돌을 거부하고 request_id로 재전송을 처리한다. 실패/충돌 때 입력은 유지한다. 사용 중 버전과 원본 참조는 수정본 저장으로 변경되지 않는다. 기존 사용 도구를 이 테이블로 이관하거나 활성화하는 작업은 포함하지 않는다. |
+| ST-P1-6 | 코드의 Tools 공개 함수에서 지원하는 기본형(str/int/float/bool), List/list, Literal, Optional을 정적으로 읽는다. Valves/UserValves와 __user__ 등 내부 인자는 업무 질문이 아니다. 지원하지 않는 동적 형식은 추정해 통과시키지 않고 진단한다. 선택지 실제 값은 코드가 원본이며 UI에서 질문·표시 이름을 정한다. 반환 경로는 표시 정의로 저장하고 실제 결과 검증은 2페이즈 시험에서 한다. |
+
+### 공통 API와 자료
+
+기존 `/api/ees-work/operations` GET/POST를 재사용한다. POST 신규 `tool_draft_` 작업은 기존 실행/기본 제공 확인과 분리한다. 오류는 기존 `{ok:false,error:{code,message}}`를 따른다.
+
+| action/조회 | 입력 | 성공 응답 |
+|---|---|---|
+| GET operations | 기존 조회 인자 | 기존 결과 + 관리자에게 `tool_drafts` 요약 배열, `tool_import_sources` 배열. 비관리자는 빈 배열. 코드/설정 없음 |
+| tool_draft_get | tool_id | `{ok:true,tool_draft:record}` |
+| tool_draft_check | draft | `{ok:true,check:{valid,errors,functions,input_schema}}`, 저장 안 함 |
+| tool_draft_save | tool_id(새 도구는 생략), draft, expected_revision(최초 0), request_id | `{ok:true,tool_draft:record}` |
+| tool_draft_import | source_tool_id, function, expected_revision:0, request_id | 원본을 복사한 새 record 응답 |
+
+record = `{id,revision,active_version:null,draft,check,created_by,updated_by,created_at,updated_at}`. 요약 = `{id,name,description,target,kind,revision,active_version,state:'draft',updated_at}`. 가져오기 후보 = `{id,name,functions:[string]}`.
+draft = `{name,description,target,kind:'read',code,function,input_ui,output_ui}`. input_ui는 인자명별 `{label,question,widget,option_labels,default}` 사전, widget은 text/number/boolean/select/multiselect. option_labels는 실제 값→표시 이름 사전. output_ui = `{kind:'list',path:'documents',fields:[{path,label,role,hidden}]}`, role은 title/category/url/id/text.
+check.errors = `[{code,message,field?,line?}]`, functions = `[{name,input_schema}]`, input_schema는 선택 함수의 JSON schema. AST로 확인할 수 없는 반환값의 실재/타입을 확인했다고 표시하지 않는다.
+핵심 오류는 `admin_required`, `tool_draft_not_found`, `tool_draft_conflict`, `tool_draft_invalid`, `tool_draft_source_unavailable`. 기존 HTTP 오류 전달 방식을 유지한다.
+
+작성 내용이 미완성인 경우와 JSON 구조가 잘못된 경우를 구분한다. `input_ui`/각 입력 항목/`option_labels`/`output_ui`는 객체, `fields`는 객체 배열이어야 한다. 이름·질문·위젯·경로·역할·선택지 표시 이름은 문자열, `hidden`은 boolean이며 알 수 없는 키는 거부한다. 누락된 표시 값은 빈 문자열, 위젯은 text, 역할은 text, hidden은 false, fields는 빈 배열로 채운다. 이 구조 안의 미완성 값은 저장하고 검사 오류로 표시한다. 기본값은 JSON 값으로 보존한다.
+
+저장 자료는 UTF-8 JSON 1MiB, 코드 저장은 262,144자까지다. 정적 검사는 코드 200,000자·함수 32개·함수당 인자 32개·선택지 64개·선택지 문자열 512자·식별자 128자, 누적 schema 48KiB·최종 검사 응답 128KiB 이내로 제한한다. 정적 정의 한도 초과는 `definition_limit`과 빈 schema로 진단하며 사용자 코드를 실행하지 않는다. 코드 저장 한도 안의 검사 불가 코드는 수정본으로 보존할 수 있다.
+
+대표 자료는 [공통 fixture](../../tests/fixtures/tools_phase1_contract.json). 실제 API를 호출하지 않는 합성 코드로 list_documents/doc_types, Literal 세 값, documents의 네 필드를 고정한다.
+
+### 화면 기준과 병렬 담당
+
+Figma [2판 헤더](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1285-1842), T01 `2017:76`, T02 `2016:2`, T02A `2033:202`, T03 `2016:84`, T04 `2016:186`을 2026-11-05 조회 기준으로 사용한다. 고정 렌더는 [조회 메타데이터](../mockups/ees-work/tools-phase1-20261105/metadata.json)와 같은 폴더의 T01/T02/T02A/T03/T04 PNG에 보존했다(UI 커밋 `bcd9cb5`). 새 패널도 기존 공통 패널 토큰과 탭을 재사용한다. 시안 표시·합성 메뉴 수·대화 예시는 비교 대상에서 제외하고 도구 기능 패널을 비교한다. 1920×1080/1366×768과 좁은 화면에서 입력·저장·다시 열기 및 넘침을 검사한다. 시험·사용 탭은 이 단계에서 비활성으로 표시하며 가짜 성공을 만들지 않는다. 기존 도구의 사용 관리 경로는 보존한다.
+
+코드 확인 없이 바로 저장해도 유일한 함수의 입력 정의를 표시하며, 저장 중 추가로 입력한 내용은 미저장 상태로 남긴다. 함수·인자·선택지를 바꿔 코드에서 사라진 표시 설정은 자동 삭제하지 않는다. 이전 설정과 정리할 항목을 보여주고 사용자가 확인하면 지운다. 충돌 시 내 변경을 보존한 채 최신 저장본을 비교하고, 명시적으로 내 변경을 버릴 때만 최신본을 편집기에 연다. 관리자 권한이 회수된 상태를 받으면 수정본·코드 캐시를 비우고 작성 화면을 닫는다.
+
+- A(root): 이 명세·TASK·STATUS·CHANGELOG·README·evals, fixture, 빌드/설치 목록과 통합 검사.
+- B: Python 서비스/Native/API와 Python 서비스 검사. 추가 모듈은 기존 scripts 안에 두고 A에 배포 포함 경로를 알린다.
+- C: branding/ees/ui JS·CSS와 JS 화면 검사, Figma 고정 비교 자료.
+- 검증 에이전트: 통합 브라우저 검사·독립 리뷰(담당은 root와 조정).
+
+소유 밖 파일 변경은 요청해 조율하며 root가 최종 문서·조립을 갱신한다. 하위 세션별 PR 대신 같은 계약에서 독립 worktree 커밋을 만들고 root가 한 PR로 통합한다. 사용자 요청의 서브에이전트 방식에 맞춘 운영 변경이며 main 병합·사내 배포는 포함하지 않는다.
+
+<a id="tools-redesign-v2-phase2-20261105"></a>
+
+## 도구 재설계 2판 · 2페이즈 연결·시험·사용 설정
+
+2026-11-05 사용자가 1페이즈 완료 뒤 2페이즈 진행을 요청했다. 기준은 PR #123의 `448f9aa`(CI479 성공)이며 같은 PR에서 이어서 통합한다. main 병합·사내 배포는 포함하지 않는다. 작성 도구의 연결 설정, 저장본 시험, 사용 버전·그룹·근거·사용 중지를 구현한다. 업무절차 선택·연결·실행은 3페이즈다. 기존 기본 제공·이전 방식 도구는 기존 계약을 유지한다.
+
+### 동작과 보존 경계
+
+| ID | 계약 |
+|---|---|
+| ST-P2-1 | 새 작성 경로의 연결·시험·사용 설정은 관리자만 한다. 담당자 필드는 추가하지 않고 확인 계정·시각을 기록한다. 현재 계정·관리 권한·Native 접근을 요청 때와 비동기 완료 때 다시 확인한다. 시험 입력·원본 결과는 실행 계정에게만 보이며 다른 관리자에게 자동 공개하지 않는다. |
+| ST-P2-2 | 초안 저장·목록·조회·정적 검사는 코드를 실행하지 않는다. 사용자가 저장된 수정본의 ‘시험 실행/다시 시험’을 선택할 때만 정확한 코드 snapshot을 실행한다. 관리자 작성 코드는 기존 Native 관리자 코드와 같은 서버 권한의 신뢰 범위다. AST 검사·조회 분류·worker를 보안 sandbox나 외부 변경 방지 보장으로 설명하지 않는다. frontmatter requirements 자동 설치는 허용하지 않는다. |
+| ST-P2-3 | 새 도구마다 원본과 다른 Native 설정용 identity를 명시 생성한다. 그 Native 행은 제품이 제공하는 고정 설정 코드와 빈 업무 함수 목록을 유지한다. 코드 내용을 추정해 기존 도구에 연결하거나 원본·설정·PAT를 복사/덮어쓰지 않는다. 개인 설정 조회가 초안 코드를 실행하지 않게 한다. 작성·사용 코드의 원본은 새 도구의 Work 수정본·불변 버전이며 Native loader에는 정확한 content를 명시 전달한다. 기존 자산 보호가 활성화된 프로세스는 같은 잠금을 유지하고, 보호가 없는 별도 시험 프로세스에서는 DB를 조회·정규화하지 않는 명시 문자열 content 로딩만 허용한다. 생략/None 로딩·캐시·Native 자산 writer는 보호 없이 사용할 수 없다. |
+| ST-P2-4 | T02B의 주소와 현재 로그인 계정의 토큰을 설정한다. 토큰은 해당 Native identity의 기존 UserValves.PAT 저장과 암호화를 재사용하며 별도 비밀 저장소·시스템 계정 매핑·타 계정 대행을 만들지 않는다. 암호화가 꺼졌거나 저장/복호화를 확인할 수 없으면 실패한다. 토큰 원문은 조회 응답·시험·사용 버전·영수증·감사·로그에 넣지 않는다. 비워서 저장하면 본인 기존 토큰을 유지하고, 입력하면 교체한다. 다른 사용자 설정의 동시 변경을 덮지 않는다. |
+| ST-P2-5 | 연결에는 revision과 비밀 아닌 주소를 기록한다. 주소는 http/https 기본 주소만 허용하며 userinfo·query·fragment를 받지 않는다. 시험은 저장된 draft revision·connection revision·Native identity·계정 자격 상태·실행 환경을 고정한다. 코드·입력/결과 정의·연결·계정 자격이 바뀌면 이전 시험으로 사용 설정할 수 없다. 작성 도구의 환경 stamp는 기존 Native 환경 식별과 실제 배포된 native/worker/lifecycle/static-check/자산 보호 5모듈의 bytes hash를 포함하며 파일 확인 실패는 거부한다. 기존 기본 제공 도구의 환경 계약은 바꾸지 않는다. 연결 수정은 기존 사용 버전의 주소·코드 snapshot을 바꾸지 않는다. |
+| ST-P2-6 | 시험은 별도 짧은 수명 worker에서 Native 호환 Tools/예약 인자 바인딩을 사용한다. 후보 설정은 BASE_URL 및 선언된 서비스별 BASE_URL, 현재 계정 PAT에 주입한다. 나머지 코드 설정의 기본값·허용 범위를 임의로 넓히거나 기존 설정을 복사하지 않는다. 제한 시간·입출력 크기를 제한하고 중단된 시험을 자동 재실행하지 않는다. worker 종료는 보안 격리를 뜻하지 않는다. 사용자 stdout/stderr·원문 traceback은 공개/저장하지 않는다. 시험에서 주입하는 예약 인자는 __user__, __id__, __request__, __metadata__이며 그 밖의 필수 예약 인자는 명시 오류로 거부한다. |
+| ST-P2-7 | 입력은 저장된 정적 schema에 따라 서버에서 검사한다. 실제 반환값에서 output_ui.path의 목록과 각 표시 필드·URL 형식을 확인한다. 잘못된 결과를 예시 데이터로 대체하지 않는다. 정상 0건은 실패와 구분해 사용 설정을 허용하되 개별 항목의 표시는 확인하지 못했음을 기록/표시한다. 부분·잘림·크기 초과·형식 오류는 사용 설정을 막는다. 시간 초과·응답 유실은 외부 영향이 없었다는 증거가 아니며 같은 요청을 다시 실행하지 않는다. |
+| ST-P2-8 | 시험 id는 request_id로 중복 실행을 막는다. 완료·실패·중단 기록을 보존하고 실패 후 시험 입력을 유지한다. 지연 응답이 이후 편집이나 다른 계정의 화면을 덮지 않는다. 연결 저장 영수증에는 토큰을 포함하거나 토큰에서 유도한 요청 지문을 저장하지 않는다. 같은 연결 저장 request_id는 최초 결과만 재사용하므로 새 토큰 교체에는 새 요청 번호를 쓴다. |
+| ST-P2-9 | 사용 설정에는 본인이 성공시킨 현재 snapshot의 trial_id, 현재 draft/connection/use revision, 기존 그룹 1개 이상, 확인 근거 8~2,000자가 필요하다. 근거에 비밀 형태를 받지 않는다. 최초 v1, 코드·입출력·비밀 아닌 연결 snapshot이 달라질 때만 새 불변 버전을 만든다. 동일 snapshot 재확인·그룹 변경은 버전을 올리지 않는다. 기존 사용 버전과 수정본 revision은 별개다. |
+| ST-P2-10 | 사용 권한 변경·사용 중지는 use revision으로 충돌을 막는다. 사용 중지는 저장·재시험·재확인으로 자동 해제하지 않는다. 이미 확인된 도구의 장애 중에도 사용 중지·그룹 축소를 허용하고 그룹 확대·사용 재개는 현재 사용 snapshot/Native 상태를 확인한다. 업무 실행에서의 그룹 적용은 3페이즈에서 연결하며, 2페이즈만으로 기존 작업의 선택·버전 고정·실행 의미를 바꾸지 않는다. |
+| ST-P2-11 | 새 저장은 부가 표/필드로 구성하고 기존 draft 자료를 읽는다. 여러 저장소를 건드리는 연결/권한 변경은 현재 상태를 비교해 적용하며 실패를 성공으로 처리하지 않는다. 기존 Native 설정용 행이 사용자가 바꾼 내용과 다르면 자동으로 재등록·덮어쓰지 않는다. 기존 기본 제공 도구·계정·대화·근거·프로그램 Restore 범위를 보존한다. |
+
+연결 자격 변경 감지는 기존 Native 암호문 blob의 지문을 비공개 시험 메타데이터에만 보관해 수행한다. 토큰 원문이나 원문에서 만든 지문을 저장하지 않으며 이 암호문 지문도 API·영수증·감사에 내보내지 않는다. Native 개인 설정에서 직접 토큰을 바꾼 경우도 이전 시험이 무효가 된다. 계정 설정 갱신은 전체 settings를 비교하는 CAS로 다른 설정의 동시 변경을 보존한다.
+
+실행 환경에는 고정 Native 환경과 설치된 작성 실행·worker·lifecycle·정적 검사·asset guard 파일의 바이트 지문을 포함한다. 파일 변경/누락 때 이전 시험으로 사용 설정하거나 기존 환경 확인으로 사용을 재개하지 않는다. worker의 명시 문자열 코드 로딩은 Native DB 조회·정규화·쓰기와 구분하며 독립 프로세스에서 서버 guard가 없을 때만 허용한다. 기존 서버 guard가 있으면 동일한 보호를 유지하고 Native DB 쓰기·캐시 조회는 guard 없이 허용하지 않는다. [원인·검사 근거](../../evals/tool-authoring-20261105.md#pr123-merge-review-20261105).
+
+시험 입력은 64KiB, 저장할 반환값은 256KiB·목록 500개로 제한한다. worker 경계는 30초·입력 1MiB·출력 2MiB이며 한도 초과는 성공으로 축약하지 않는다. 반환 객체 최상위의 `status`/`completeness` 값이 `partial`, `truncated`, `page`, `incomplete`이거나 `partial=true`, `truncated=true`, `has_more=true`이면 부분 신호로 인식한다. `status`/`completeness`가 `unknown`이면 확인 불가로 기록하고 사용 설정을 막는다. `complete`는 수신한 응답의 형식을 검사했다는 뜻이며 외부 원본 전체 조회를 보장하지 않는다. 명시적 부분 신호나 worker 잘림은 사용 설정할 수 없다.
+
+### 공통 API
+
+기존 operations POST를 사용한다. 모든 mutation은 request_id, 오류는 기존 `{ok:false,error:{code,message}}`다. 시험/사용 응답에 코드·토큰을 복제하지 않는다. 사용자 입력 필드와 원본 결과는 비밀 제거·크기 제한 후 본인 시험 조회에만 둔다.
+
+| action | 주요 입력 | 결과 |
+|---|---|---|
+| tool_draft_get | tool_id | 기존 record + phase:2, connection, trial(본인 최신), use |
+| tool_draft_connection_get | tool_id | connection `{revision,base_url,configured,token_set,native_id}`; 토큰 값 없음 |
+| tool_draft_connection_save | tool_id, expected_revision(초안), expected_connection_revision, base_url, token(선택) | connection + tool_draft; 빈 token은 유지 |
+| tool_draft_trial_start | tool_id, expected_revision, expected_connection_revision, inputs | trial; 저장본만 시험. 실행 중 재전송은 같은 id/상태 |
+| tool_draft_trial_get | tool_id, trial_id | 본인 trial과 현재 eligible_for_activation |
+| tool_draft_use_set | tool_id, trial_id, expected_revision, expected_connection_revision, expected_use_revision, groups, evidence | use + tool_draft |
+| tool_draft_use_access | tool_id, expected_use_revision, groups | use; 새 시험 없이 접근 그룹만 변경 |
+| tool_draft_use_disable | tool_id, expected_use_revision | use; 현재 버전·기록 보존 |
+| tool_draft_use_enable | tool_id, expected_use_revision | use; 명시 재개, 유효한 현재 사용 snapshot 확인 |
+
+`trial = {id,tool_id,draft_revision,connection_revision,status,started_at,finished_at,duration_ms,inputs,rows,raw_result,count,completeness,fields_checked,errors,warnings,eligible_for_activation,activation_reasons}`. status는 running/succeeded/failed/unknown, completeness는 complete/empty/partial/unknown이다. 완료된 시험의 당시 사실과 지금의 활성화 가능 여부를 구분한다.
+
+`use = {revision,active_version,state,groups,evidence,confirmed_by,confirmed_at,versions}`. state는 draft/active/disabled, versions는 `{version,confirmed_by,confirmed_at,evidence}`의 읽기 전용 이력이다. 담당자나 되돌리기 UI를 추가하지 않는다. 화면의 enabled/disabled는 서버 권위값과 현재 미저장 상태를 함께 반영한다. operations에는 `tool_draft_phase:2`를 반환해 기존 1페이즈 응답과 구분한다.
+
+### 화면·병렬 소유권과 확인
+
+Figma 2판 T02B `2052:207`, T05 `2016:277`, T05A `2018:160`, T05B `2052:236`, T05C `2052:358`, T05D `2052:481`, T05E `2054:261`, T06 `2017:333`, T09 `2018:194`를 2026-11-05 읽기 전용 조회했다. 연결 저장/취소는 기능 작성에서 열면 기능 작성으로, 시험에서 열면 시험으로 돌아간다. 실패 시 입력 유지, 수정본 시험과 현재 사용 버전 구분, 공통 패널/탭·포커스·1920/1366/360 배치를 확인한다. 0건·부분·네트워크/자격/형식 오류·동시 변경·중복 시험·사용 중지·권한 회수와 기존 사용자 자산 보존을 합성 데이터로 검증한다. 실제 사내 토큰이나 외부 서비스 호출은 사용하지 않는다.
+
+- root: 이 계약·공통 fixture·문서·배포 파일 목록·통합·PR/CI.
+- backend: 수정본 lifecycle·연결/시험/사용 API·저장·서버 단위/Native 검사. 실행 worker/Native 설정 adapter는 같은 계약으로 하위 담당과 분리한다.
+- frontend: JS/CSS·정적 자산·Node 화면 검사·고정 Figma PNG/메타데이터.
+- validation: 실제 Native 브라우저 왕복·상태·화면 대조. review: 독립 권한/동시 변경/비밀·회귀 검토.

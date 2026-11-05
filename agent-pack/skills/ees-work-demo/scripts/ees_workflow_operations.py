@@ -368,6 +368,8 @@ class OperationsRuntime:
             fail("command_invalid")
         actor, caps, groups = await self._actor(user)
         action = body.get("action")
+        if str(action).startswith("tool_draft_"):
+            return await self.service.tool_drafts.command(actor, body)
         if action == "shared_tool_accept_version":
             return await self.service.shared_tools.accept_version(actor, body)
         if str(action).startswith("shared_tool_"):
@@ -1644,7 +1646,11 @@ class OperationsRuntime:
             shared_tools, shared_notice = [], "공용 도구 목록을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요."
         from .ees_workflow_shared_tools import MESSAGES
         shared_tool_access = await self.service.shared_tools.run_access(actor, run_id) if run_id else {}
-        return {"shared_tools": shared_tools, "shared_tools_notice": shared_notice, "shared_tool_messages": deepcopy(MESSAGES), "shared_tool_access": shared_tool_access, "ok": True, "scope_runs": scopes, "tools": tools, "all_tools": all_tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
+        tool_drafts = await self.service.tool_drafts.summaries(actor)
+        tool_import_sources = await self.service.tool_drafts.sources(actor)
+        if value(await self.service._user(actor), "role") != "admin":
+            tool_drafts, tool_import_sources = [], []
+        return {"tool_draft_phase": 2, "tool_drafts": tool_drafts, "tool_import_sources": tool_import_sources, "shared_tools": shared_tools, "shared_tools_notice": shared_notice, "shared_tool_messages": deepcopy(MESSAGES), "shared_tool_access": shared_tool_access, "ok": True, "scope_runs": scopes, "tools": tools, "all_tools": all_tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
 
     def start(self):
         self._closing = False

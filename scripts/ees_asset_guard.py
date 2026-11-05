@@ -207,6 +207,28 @@ def guard_operation(function):
     return protected
 
 
+def guard_plugin_loader(function):
+    """Keep Native DB normalization guarded; permit standalone exact content.
+
+    In the pinned loader only content=None reads and rewrites a Native asset.
+    An explicit string executes that supplied source without Native DB access.
+    Child trials do not acquire the server's process lock or enable writers.
+    An existing guard, including a closing one, always keeps its protection.
+    """
+    signature = inspect.signature(function, eval_str=True)
+
+    @functools.wraps(function)
+    async def protected(*args, **kwargs):
+        bound = signature.bind(*args, **kwargs)
+        if _guard is None and isinstance(bound.arguments.get("content"), str):
+            return await function(*args, **kwargs)
+        return await _active_guard().run(lambda: function(*args, **kwargs))
+
+    protected.__ees_asset_guard__ = True
+    protected.__signature__ = signature
+    return protected
+
+
 def guard_table_method(function=None, *, asset_types_only=False):
     """Guard native writers and normalization reads, including direct callers.
 

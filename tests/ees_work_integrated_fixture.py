@@ -49,6 +49,154 @@ class SyntheticReadBridge:
         return deepcopy(self.result)
 
 
+class SyntheticAuthoredNative:
+    """Synthetic Native settings and worker boundary for real lifecycle tests.
+
+    HTTP, SQLite trial records, eligibility and versions remain production code.
+    This adapter never executes authored source, starts a worker, encrypts real
+    credentials or calls an external service. Native/worker tests cover those
+    boundaries separately. Only metadata and redacted copies leave the adapter.
+    Set failures[method] to an error code (or exception) to reject an operation;
+    hold/started and run_calls expose deterministic in-flight request evidence.
+    """
+    def __init__(self, error_type=RuntimeError, *, result=None):
+        self.error_type = error_type
+        self.identities = {}
+        self._tokens = {}
+        self._credential_revisions = {}
+        self.failures = {}
+        self.inspect_error = None
+        self.save_error = None
+        self.groups_error = None
+        self.allowed = True
+        self.denied_users = set()
+        self.environment = 'synthetic-native-0.11.3'
+        self.run_calls = []
+        self.save_calls = []
+        self.group_calls = []
+        self.started = threading.Event()
+        self.hold = threading.Event(); self.hold.set()
+        self.hold_timeout = 30
+        if result is None:
+            fixture = json.loads((ROOT / 'tests/fixtures/tools_phase2_contract.json').read_text(encoding='utf-8'))
+            result = {'status': 'succeeded', 'raw_result': fixture['result'], 'duration_ms': 25}
+        self.result = deepcopy(result)
+
+    @property
+    def tokens(self):
+        """Private synthetic storage evidence; never included in API results."""
+        return deepcopy(self._tokens)
+
+    @staticmethod
+    def _value(user, key, default=''):
+        return user.get(key, default) if isinstance(user, dict) else getattr(user, key, default)
+
+    def _fail(self, code):
+        raise self.error_type(code, '합성 Native 연결을 확인해 주세요.')
+
+    def _check(self, method, user):
+        failure = self.failures.get(method)
+        if failure is None:
+            attribute = {'inspect': 'inspect_error', 'save_connection': 'save_error', 'set_groups': 'groups_error'}.get(method)
+            failure = getattr(self, attribute, None) if attribute else None
+        if isinstance(failure, BaseException):
+            raise failure
+        if failure:
+            self._fail(failure)
+        if self._value(user, 'role') != 'admin':
+            self._fail('admin_required')
+        if not self.allowed or self._value(user, 'id') in self.denied_users:
+            self._fail('native_access_denied')
+
+    def _metadata(self, user, native_id):
+        identity = self.identities.get(native_id)
+        if identity is None:
+            self._fail('tool_connection_identity_unavailable')
+        key = (native_id, self._value(user, 'id'))
+        return {'native_id': native_id, 'token_set': bool(self._tokens.get(key)),
+                'credential_stamp': 'synthetic-credential-' + key[1] + '-' + str(self._credential_revisions.get(key, 0)),
+                'identity_stamp': 'synthetic-identity-' + str(identity['revision']),
+                'environment': self.environment, 'groups': deepcopy(identity['groups'])}
+
+    async def inspect(self, user, native_id):
+        self._check('inspect', user)
+        return deepcopy(self._metadata(user, native_id))
+
+    async def save_connection(self, user, tool_id, native_id, token):
+        self._check('save_connection', user)
+        token = '' if token is None else token
+        if not isinstance(token, str) or len(token) > 16000 or any(ord(char) < 32 for char in token):
+            self._fail('tool_connection_token_invalid')
+        if native_id:
+            identity = self.identities.get(native_id)
+            if identity is None:
+                self._fail('tool_connection_identity_unavailable')
+            if identity['tool_id'] != tool_id:
+                self._fail('tool_connection_identity_changed')
+        else:
+            native_id = 'fixture-authored-' + tool_id
+            self.identities.setdefault(native_id, {'tool_id': tool_id, 'revision': 1, 'groups': []})
+        key = (native_id, self._value(user, 'id'))
+        if token:
+            self._tokens[key] = token
+            self._credential_revisions[key] = self._credential_revisions.get(key, 0) + 1
+        self.save_calls.append({'actor': key[1], 'tool_id': tool_id, 'native_id': native_id, 'token_supplied': bool(token)})
+        return deepcopy(self._metadata(user, native_id))
+
+    async def set_groups(self, user, native_id, groups, expected_stamp):
+        self._check('set_groups', user)
+        current = self._metadata(user, native_id)
+        if current['identity_stamp'] != expected_stamp:
+            self._fail('tool_connection_conflict')
+        if not isinstance(groups, list) or any(not isinstance(group, str) or not group for group in groups) or len(set(groups)) != len(groups):
+            self._fail('tool_draft_invalid')
+        identity = self.identities[native_id]
+        updated = sorted(groups)
+        if updated != identity['groups']:
+            identity['groups'] = updated
+            identity['revision'] += 1
+        self.group_calls.append({'actor': self._value(user, 'id'), 'native_id': native_id, 'groups': deepcopy(updated)})
+        return deepcopy(self._metadata(user, native_id))
+
+    async def redact(self, user, native_id, value):
+        self._check('redact', user)
+        self._metadata(user, native_id)
+        token = self._tokens.get((native_id, self._value(user, 'id')), '')
+
+        def clean(item):
+            if isinstance(item, str):
+                return item.replace(token, '[REDACTED]') if token else item
+            if isinstance(item, list):
+                return [clean(child) for child in item]
+            if isinstance(item, dict):
+                return {clean(key): clean(child) for key, child in item.items()}
+            return deepcopy(item)
+
+        return clean(value)
+
+    async def run(self, user, native_id, code, function, base_url, inputs, expected_metadata):
+        self._check('run', user)
+        metadata = await self.inspect(user, native_id)
+        if metadata != expected_metadata:
+            self._fail('tool_trial_snapshot_changed')
+        if not metadata['token_set']:
+            self._fail('native_personal_connection_required')
+        self.run_calls.append({'actor': self._value(user, 'id'), 'native_id': native_id,
+                               'code': code, 'function': function, 'base_url': base_url,
+                               'inputs': deepcopy(inputs), 'expected_metadata': deepcopy(expected_metadata)})
+        result = deepcopy(self.result)
+        self.started.set()
+        if not await asyncio.to_thread(self.hold.wait, self.hold_timeout):
+            result = {'status': 'unknown', 'raw_result': None, 'duration_ms': int(self.hold_timeout * 1000),
+                      'error_code': 'tool_trial_timeout'}
+        self._check('run', user)
+        if await self.inspect(user, native_id) != metadata:
+            return {'status': 'unknown', 'raw_result': None, 'duration_ms': result.get('duration_ms', 0),
+                    'error_code': 'tool_trial_snapshot_changed'}
+        result['raw_result'] = await self.redact(user, native_id, result.get('raw_result'))
+        return deepcopy(result)
+
+
 class IntegratedNativeCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -99,7 +247,9 @@ class IntegratedNativeCase(unittest.TestCase):
         self.wait("document.querySelector('#ees-work-panel') && document.querySelector('#ees-work-system-trigger')?.getBoundingClientRect().height > 0")
 
     def open_sidebar(self):
-        opened = "(()=>{const e=document.querySelector('#sidebar'),r=e?.getBoundingClientRect();return !!e&&(e.hasAttribute('data-ees-source-sidebar')||e.getAttribute('aria-hidden')==='false')&&!e.inert&&r.width>200&&r.x>=0&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+50));})()"
+        # A responsive collapse can still be wider than 200px mid-transition.
+        # Require the source sidebar's expanded target before trusting geometry.
+        opened = "(()=>{const e=document.querySelector('#sidebar'),r=e?.getBoundingClientRect();return !!e&&(e.hasAttribute('data-ees-source-sidebar')?e.dataset.compact==='false':e.getAttribute('aria-hidden')==='false')&&!e.inert&&r.width>200&&r.x>=0&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+50));})()"
         self.wait(opened + " || !!document.querySelector('[data-ees-sidebar-toggle],button[aria-label=\"사이드바 열기\"]')")
         if not self.browser.evaluate(opened):
             selector = '[data-ees-sidebar-toggle]' if self.browser.evaluate("!!document.querySelector('[data-ees-sidebar-toggle]')") else 'button[aria-label="사이드바 열기"]'
@@ -260,6 +410,9 @@ class IntegratedNativeCase(unittest.TestCase):
         self.key('Enter', 13)
 
     def create_legacy_tool(self, system='EMS'):
+        self.wait("document.querySelector('[data-author-action=tool_create]')")
+        if self.browser.evaluate("!!document.querySelector('.ew-draft-legacy:not([open])')"):
+            self.click('.ew-draft-legacy > summary')
         self.click('[data-author-action=tool_create]')
         self.wait("document.querySelector('#ees-work-dialog [name=system_id]')")
         self.choose('#ees-work-dialog [name=system_id]', system)

@@ -1,5 +1,36 @@
 # 현재 작업 상태
 
+## 2026-11-05 · PR #123·#124 검토와 병합
+
+- **요청·기준:** 사용자가 현재 열린 PR 전체의 검토·병합을 요청했다. #124는 최종 `7eca930`·CI483 성공과 공동 진행/권한/기록 보존을 확인해 main `c01bf098f1e11aa42bec6c8a1f8f0d6eef5121d1`로 병합했다. #123은 이 main을 merge로 통합하고 양쪽 상태·변경·검증 기록을 보존한다.
+- **보완:** #123 CI484의 실제 설치 시험은 `tool_trial_worker_load_failed`였다. 명시 코드 로딩까지 서버 guard가 요구되는 원인을 확인했고, 작업 사본에 준비된 `f887c27`의 수정 7개 파일을 별도 검토 사본에서 재사용한다. 명시 문자열 코드의 독립 로딩만 허용하며 Native DB 쓰기·캐시 조회·이미 활성화/종료 중인 guard는 보존한다. 실행/검사/guard 파일의 실제 바이트가 바뀌면 이전 시험과 사용 재개 확인도 무효화한다.
+- **병렬 개발 후속:** 같은 PR의 개발 작업과 병합 검토가 겹쳐 원격이 `54e8e2e`로 먼저 갱신됐다. 이를 merge로 받아 문서·검토 근거를 보존하고, 개발에서 검증한 360px 확인 근거 자동 높이와 Native 동시 설정 보존 수정까지 포함한다. main 통합본의 Node444/444·Native19/19·guard20/20·시험 ID1692개 오류0·문서 점검 통과. 최종 통합 CI는 이 추가 수정까지 포함한 head로 재판정한다.
+- **검증·다음:** [최초 실패·통합 검토](../evals/tool-authoring-20261105.md#pr123-merge-review-20261105)의 로컬 검사와 최종 통합 head의 전체 필수 CI를 확인한 뒤 #123을 병합한다. 최종 head·CI·병합 결과는 [PR #123 본문과 Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/123)를 판정 원본으로 삼는다. 사내 적용은 이번 요청에 포함하지 않는다.
+
+> 아래는 각 작업 당시의 기록이다.
+
+## 2026-11-05 · 도구 재설계 2판 · 연결·시험·사용 설정 2페이즈
+
+- **요청·기준:** 사용자가 2페이즈 진행을 요청했다. 1페이즈 최종 `448f9aa`·[CI479 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41976283599)을 기준으로 같은 [PR #123](https://github.com/knadalkim-a11y/team-agent-poc/pull/123)에서 서버·화면·Native 검증을 병렬 구현한다. [ST-P2 계약](specs/shared-tools.md#tools-redesign-v2-phase2-20261105)·[사용 안내](03-openwebui-native-agent.md#tool-authoring-phase2-20261105).
+- **범위:** 연결 주소·현재 계정 토큰, 저장본 시험, 현재 사용 버전·그룹·근거·이력, 중지/재개. 수정본 저장은 사용본을 바꾸지 않으며 업무절차 연결·실행은 3페이즈다. 기존 Native 도구·계정·개인 설정·프로그램 복원을 보존한다.
+- **검증·현재:** 서버·화면·브라우저 검사를 통합했고 관련 Python 278통과/실제 frontend 필요 1생략, 복원 3개, Node 작성·실행 443개, 독립 리뷰 원재현 6개를 통과했다. 전체 설치·실제 브라우저는 최종 head의 필수 CI에서 확인한다. 1페이즈 최종 실제 브라우저·시각 대조와 2페이즈 완료 기준을 [같은 검증 기록](../evals/tool-authoring-20261105.md#phase2-evidence)에 구분해 보존한다. 2페이즈의 최종 CI/화면은 해당 코드 head에서 확인한다.
+- **CI 후속:** [CI480](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41987460942)·[CI484](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41990693577)의 최초 실패를 검증 기록에 보존했다. CI484는 35성공·3실패·1취소·출하1정상 생략이다. 전체 설치 worker의 실제 보호 context 누락과 360px 근거 높이 갱신을 수정했고, 실제 Native 자산64개·최종 작성 도구 Native19개·Node 작성311개를 통과했다. Native 동시 권한 변경도 기존 보호 장치로 직렬화해 보존한다. 수정 head의 전체 CI·실제 화면은 재확인 대상이다.
+- **통합:** 작업 중 병합된 #124의 최신 main `c01bf09`(내 업무 제거)를 merge로 포함했다. 양쪽 코드와 기록을 보존했다.
+- **다음 하나:** PR #123 최종 head의 전체 CI·화면을 확인한다. main 병합·사내 적용은 미실행이다.
+
+> 아래는 변경 당시 기록이다.
+
+## 2026-11-05 · 도구 재설계 2판 · 작성·저장 1페이즈
+
+- **요청·기준:** 사용자가 확인한 병렬 지시문을 서브에이전트로 실행하도록 요청했다. main `8258318fe9e6f4766417148beb3ecb26b53534ed`, 공통 계약 `1b81452`에서 서버 `72b2524`·화면 `bcd9cb5`를 독립 worktree로 구현하고 `codex/tools-p1-integration`에 merge했다(제품 통합 `2b70693`). [기능 계약](specs/shared-tools.md#tools-redesign-v2-phase1-20261105)·[작성 안내](03-openwebui-native-agent.md#tool-authoring-phase1-20261105).
+- **범위:** 새 도구·Python 정적 검사·기존 코드 가져오기·입력/결과 정의·수정본 저장/재조회. 시험·사용 설정은 2페이즈, 업무절차 연결·실행은 3페이즈다. 기존 사용본과 자료를 보존한다. Figma 원본은 변경하지 않는다.
+- **구현·검증:** 로컬 구현·통합·독립 리뷰 보완을 마쳤다. Node TAP 653/653와 별도 assertion 스크립트 2개, 관련 Python 329개 통과·실제 과거 wheel/현재 frontend 자료가 필요한 7개 건너뜀. 시험 ID 감사·문서·구문·diff 통과. [최초 실패·보완·검증 범위](../evals/tool-authoring-20261105.md).
+- **디자인·검증 경계:** Figma 2판 5화면의 [고정 PNG·해시](mockups/ees-work/tools-phase1-20261105/metadata.json)를 보존했다. 로컬 Chromium은 OS socket/ptrace 제한으로 제품 로드 전에 실패했다. 실제 브라우저 왕복·시각 대조와 최종 원격 CI의 판정은 [PR #123 본문과 Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/123)를 최신 원본으로 삼는다. 사내 적용은 미실행이다.
+- **원격 게시:** 최초 push 거절 뒤 2026-11-05 사용자가 작업 브랜치 게시·Draft PR·CI를 명시 승인했다. 일반 Git push는 쓰기 인증 부재로 실패해 연결된 GitHub 계정으로 게시했다. 최초 원격 `018aa96`과 로컬 `fd786b2`의 tree `9711e922` 일치를 확인했으며 [Draft PR #123](https://github.com/knadalkim-a11y/team-agent-poc/pull/123)을 만들었다. 로컬 개발 커밋과 원격 게시 커밋을 구분한다.
+- **다음 하나:** PR #123 최종 head의 검증 결과를 기준으로 병합 여부를 검토한다. main 병합·사내 배포는 이번 범위에 포함하지 않는다.
+
+> 아래는 변경 당시 기록이다.
+
 ## 2026-11-05 · 내 업무 제거
 
 - **결정·범위:** 사용자 요청에 따라 개인별 ‘내 업무’를 코드와 Figma에서 제거한다. 기준 main `8258318fe9e6f4766417148beb3ecb26b53534ed`, 브랜치 `codex/remove-my-work`. 별도 도구 1/2단계 PR #123의 작업 사본은 수정하지 않았다.

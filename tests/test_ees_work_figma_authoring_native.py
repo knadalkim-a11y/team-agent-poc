@@ -16,7 +16,7 @@ from urllib.parse import parse_qs, urlsplit
 from unittest.mock import patch
 from uuid import UUID, uuid4
 
-from ees_work_integrated_fixture import IntegratedNativeCase
+from ees_work_integrated_fixture import IntegratedNativeCase, SyntheticAuthoredNative
 from native_ui_fixture import MODELS, NativeUIHandler
 from test_ees_helper_chat_native import install_helper_status_fixture
 
@@ -1408,8 +1408,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.refresh(); self.open_tools(shared_list=True)
         self.wait("document.querySelector('[data-author-action=shared_open][data-id=managed-search_pages]')")
         self.assertEqual(self.text('#ees-work-designer > header'), '도구 · 공용')
-        self.assertEqual(self.text('[data-author-action=shared_open][data-id=managed-search_pages] .ew-author-tag'), '확인 전')
-        unreviewed_list_colors = badge_colors('[data-author-action=shared_open][data-id=managed-search_pages] .ew-author-tag')
+        self.assertEqual(self.text('[data-author-action=shared_open][data-id=managed-search_pages] [data-state]'), '확인 전')
+        unreviewed_list_colors = badge_colors('[data-author-action=shared_open][data-id=managed-search_pages] [data-state]')
         assert_neutral_badge(unreviewed_list_colors)
         self.screenshot('shared-b10-1-before-review')
         self.click('[data-author-action=shared_open][data-id=managed-search_pages]')
@@ -1431,8 +1431,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('[data-author-action=shared_open]')")
         self.assertEqual(self.text('#ees-work-designer > header'), '도구 · 공용')
         self.assertNotIn('기능 연결', self.text('#ees-work-entry'))
-        self.assertIn('개인 PAT(기존 방식)', self.text('#ees-work-designer'))
-        self.assertIn('이전 방식 도구(관리 시스템별)', self.text('#ees-work-designer'))
+        self.assertIn('작성 중인 도구는 아직 업무절차에서 고를 수 없습니다.', self.text('#ees-work-designer'))
+        self.assertIn('이전 방식 도구 · 관리 시스템별', self.text('#ees-work-designer'))
         self.screenshot('shared-b10-1-list')
         self.click('[data-author-action="shared_open"][data-id="managed-search_pages"]')
         for label in ('하는 일','입력과 결과','쓰는 곳','지금 버전','버전 기록','프로그램 갱신으로만 바뀝니다'):
@@ -1540,10 +1540,577 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.server.user['role'] = 'user'
         self.server.workflow.group_lookup = lambda _: []
         self.refresh(); self.open_tools(shared_list=True)
-        self.wait("document.querySelector('#ees-work-designer')?.innerText.includes('공용 도구 0개')")
-        self.assertIn('쓸 수 있는 공용 도구가 없습니다. 필요한 도구는 관리자에게 요청하세요.', self.text('#ees-work-designer'))
+        self.wait("document.querySelector('.ew-draft-list .ew-author-empty')")
+        self.assertIn('등록된 도구가 없습니다.', self.text('.ew-draft-list'))
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-author-action=draft_new]')"))
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-draft-list [data-author-action=shared_open],.ew-draft-list [data-author-action=draft_open]')"))
+        self.assertEqual(self.operations()['tool_drafts'], [])
         self.screenshot('shared-b10-1-empty-list')
-        (directory/'shared-b10-comparison.json').write_text(json.dumps({'scope':'actual built product with synthetic Native session/metadata; real HTTP and SQLite','figma':{'B10-1':'1369:732','B10-2':'1368:724','B10-5':'1372:741'},'detail_cards':geometry,'review_layout':review_layout,'keyboard_focus':detail_focus,'badge_colors':{'unreviewed_list':unreviewed_list_colors,'unreviewed_detail':unreviewed_detail_colors,'review_required':review_colors},'picker_geometry':picker_geometry,'checked':['common panel heading','before-review tags in list and detail','neutral before-review badges distinct from review warning','empty visible list notice','target grouping','personal PAT label','legacy group','detail sections','admin Native link','no C45 menu','usable-only explicit-apply tool setup','tool questions in one dialog','retired read badge absent','saved shared ID without fixed reference','real query/space_key/limit schema','no redundant review button','per-field current/new comparison','Native Tools title','changed category notice','group and owner separate rows','shared list handoff controls absent','only query/space_key/limit binding keys','stored read retry preserved by visible UI edit and published'],'onsite':'unverified'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        (directory/'shared-b10-comparison.json').write_text(json.dumps({'scope':'actual built product with synthetic Native session/metadata; real HTTP and SQLite','figma':{'B10-1':'1369:732','B10-2':'1368:724','B10-5':'1372:741'},'detail_cards':geometry,'review_layout':review_layout,'keyboard_focus':detail_focus,'badge_colors':{'unreviewed_list':unreviewed_list_colors,'unreviewed_detail':unreviewed_detail_colors,'review_required':review_colors},'picker_geometry':picker_geometry,'checked':['common panel heading','before-review tags in list and detail','neutral before-review badges distinct from review warning','empty visible list notice','authored drafts excluded from procedure selection notice','legacy management entry','detail sections','admin Native link','no C45 menu','usable-only explicit-apply tool setup','tool questions in one dialog','retired read badge absent','saved shared ID without fixed reference','real query/space_key/limit schema','no redundant review button','per-field current/new comparison','Native Tools title','changed category notice','group and owner separate rows','shared list handoff controls absent','only query/space_key/limit binding keys','stored read retry preserved by visible UI edit and published'],'onsite':'unverified'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+    def test_tools_phase1_code_input_output_save_and_reload(self):
+        """Real HTTP/SQLite round trip; never execute the authored Python."""
+        def assert_primary_legible(selector):
+            self.wait("document.querySelector(" + json.dumps(selector) + ")?.disabled === false")
+            colors = self.browser.evaluate("(()=>{const s=getComputedStyle(document.querySelector(" + json.dumps(selector) + "));const rgba=value=>{const c=value.match(/[\\d.]+/g).map(Number);return [...c.slice(0,3),c.length>3?c[3]:1];};return {background:rgba(s.backgroundColor),foreground:rgba(s.color)};})()")
+            self.assertTrue(colors['background'] != colors['foreground'] and colors['background'][3] > 0, colors)
+
+        fixture = json.loads((Path(__file__).parent / 'fixtures/tools_phase1_contract.json').read_text(encoding='utf-8'))['draft']
+        self.authoring_viewport(1920, 1080, overlay=False)
+        self.open_tools(shared_list=True)
+        assert_primary_legible('[data-author-action=draft_new]')
+        self.click('[data-author-action=draft_new]')
+        for name in ('name', 'description', 'target'):
+            self.fill('[name=draft_' + name + ']', fixture[name])
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('#ees-work-designer [data-author-action=draft_tab]')].filter(e=>['trial','use'].includes(e.dataset.id)).map(e=>({name:e.textContent,disabled:e.disabled}))"), [{'name': '시험', 'disabled': False}, {'name': '사용·기록', 'disabled': False}])
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ew-tool-draft-form [name=owner],#ew-tool-draft-form [name=responsible_user_id]')"))
+        self.screenshot('tools-phase1-basic-1920')
+        self.click('[data-author-action=draft_code]')
+        self.fill('[name=draft_code]', fixture['code'])
+        self.click('[data-author-action=draft_check]')
+        self.wait("document.querySelector('[name=draft_function]')?.value === 'list_documents' && !document.querySelector('[data-author-action=draft_save_next]').disabled")
+        assert_primary_legible('[data-author-action=draft_save_next]')
+        # The first response checked an empty function selection. Auto-selecting
+        # its sole function changes the draft; that response is now stale.
+        self.assertEqual(self.text('.ew-draft-code .ew-draft-check > strong'), '변경 뒤 다시 확인해 주세요')
+        self.assertIn('코드를 실행하지 않는 정적 검사', self.text('.ew-draft-code'))
+        code_layouts = []
+        for width, height in ((1920, 1080), (1366, 768), (360, 768)):
+            self.authoring_viewport(width, height, overlay=width <= 480)
+            self.browser.evaluate("document.querySelector('.ew-draft-code').scrollTo({top:0,behavior:'instant'})")
+            geometry = self.browser.evaluate("(()=>{const e=document.querySelector('.ew-draft-code'),r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,overflow:e.scrollWidth-e.clientWidth};})()")
+            self.assertGreaterEqual(geometry['left'], -1, geometry)
+            self.assertGreaterEqual(geometry['top'], -1, geometry)
+            self.assertLessEqual(geometry['right'], width + 1, geometry)
+            self.assertLessEqual(geometry['bottom'], height + 1, geometry)
+            self.assertLessEqual(geometry['overflow'], 1, geometry)
+            self.assertEqual(self.read('[name=draft_code]', 'value'), fixture['code'])
+            directory = self.screenshot('tools-phase1-code-' + str(width))
+            # CI477 kept the dialog inside the viewport but let its flex body
+            # shrink under the footer. Check contents and real pointer targets
+            # after scrolling the unchanged dialog to its footer as a user can.
+            self.browser.evaluate("document.querySelector('.ew-draft-code-footer').scrollIntoView({block:'end',inline:'nearest',behavior:'instant'})")
+            footer_layout = self.browser.evaluate("""(()=>{
+                const dialog=document.querySelector('.ew-draft-code'),
+                    footer=dialog.querySelector('.ew-draft-code-footer'),
+                    rect=element=>{const r=element.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};},
+                    buttons=[...footer.querySelectorAll('button')].map(button=>{
+                        const r=button.getBoundingClientRect(),range=document.createRange();
+                        range.selectNodeContents(button);
+                        const lines=[...range.getClientRects()];
+                        return {action:button.dataset.authorAction,...rect(button),
+                            lines:new Set(lines.map(line=>Math.round(line.top))).size,
+                            textClipped:lines.some(line=>line.left<r.left-1||line.right>r.right+1||line.top<r.top-1||line.bottom>r.bottom+1),
+                            hitTest:button.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)),
+                            disabled:button.disabled};
+                    });
+                return {footer:rect(footer),columns:rect(dialog.querySelector('.ew-draft-code-columns')),
+                    main:rect(dialog.querySelector('.ew-draft-code-main')),note:rect(footer.querySelector('small')),
+                    buttons,scrollTop:dialog.scrollTop};
+            })()""")
+            code_layouts.append({'width': width, 'height': height, 'dialog': geometry, **footer_layout})
+            (directory / 'tools-phase1-code-geometry.json').write_text(
+                json.dumps(code_layouts, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+            self.assertGreaterEqual(footer_layout['footer']['top'] + 1,
+                                    max(footer_layout['columns']['bottom'], footer_layout['main']['bottom']), footer_layout)
+            self.assertEqual([button['action'] for button in footer_layout['buttons']], ['draft_code_close', 'draft_save_next'])
+            for button in footer_layout['buttons']:
+                self.assertGreaterEqual(button['lines'], 1, button)
+                self.assertLessEqual(button['lines'], 2, button)
+                self.assertFalse(button['textClipped'], button)
+                self.assertTrue(button['hitTest'], button)
+                self.assertFalse(button['disabled'], button)
+            if width <= 600:
+                self.assertLessEqual(footer_layout['note']['bottom'],
+                                     min(button['top'] for button in footer_layout['buttons']) + 1, footer_layout)
+            if footer_layout['scrollTop'] > 0:
+                self.screenshot('tools-phase1-code-footer-' + str(width))
+        self.authoring_viewport(1920, 1080, overlay=False)
+        self.click('[data-author-action=draft_save_next]')
+        self.wait("document.querySelector('[name=draft_input_0_question]') && document.querySelector('[data-draft-status]')?.textContent.includes('r1')")
+        identifier = self.operations()['tool_drafts'][0]['id']
+        first_saved = self.tool_command('tool_draft_get', tool_id=identifier)['tool_draft']
+        self.assertEqual(first_saved['draft']['function'], 'list_documents')
+        self.assertNotIn('function_selection', [error['code'] for error in first_saved['check']['errors']])
+        self.assertNotIn('작성한 공개 함수 중 사용할 함수를 선택', self.text('#ew-tool-draft-form .ew-draft-check'))
+        question = fixture['input_ui']['doc_types']
+        self.fill('[name=draft_input_0_label]', question['label'])
+        self.fill('[name=draft_input_0_question]', question['question'])
+        for index, label in enumerate(question['option_labels'].values()):
+            self.fill('[name=draft_input_0_option_' + str(index) + ']', label)
+        self.assertEqual(self.read('[name=draft_input_0_widget]', 'value'), 'multiselect')
+        self.browser.evaluate("document.querySelector('#ees-work-designer .ew-author-scroll').scrollTo({top:0,behavior:'instant'})")
+        self.screenshot('tools-phase1-input-1920')
+        self.click('[data-author-action=draft_part][data-id=outputs]')
+        self.click('.ew-draft-binding:has([name=draft_output_path]) > summary')
+        self.fill('[name=draft_output_path]', fixture['output_ui']['path'])
+        for index, field in enumerate(fixture['output_ui']['fields']):
+            self.click('[data-author-action=draft_output_add]')
+            prefix = '[name=draft_output_' + str(index) + '_'
+            for name in ('label', 'path'):
+                self.fill(prefix + name + ']', field[name])
+            self.choose(prefix + 'role]', field['role'])
+            if field['hidden']:
+                self.click(prefix + 'hidden]')
+        self.click('[data-author-action=draft_save]')
+        self.wait("document.querySelector('[data-draft-status]')?.textContent.includes('저장됨 · r2')")
+        saved = self.tool_command('tool_draft_get', tool_id=identifier)['tool_draft']
+        self.assertEqual(saved['draft'], fixture)
+        self.assertTrue(saved['check']['valid'], saved['check'])
+        self.assertIsNone(saved['active_version'])
+        self.assertEqual((saved['created_by'], saved['updated_by']), (self.server.user['id'], self.server.user['id']))
+        self.assertEqual(self.bridge.calls, [])
+        # A page reload discards the editor's in-memory cache. Reopen through
+        # the product list and compare values returned by the real API.
+        self.navigate('/c/existing-chat')
+        self.wait("document.querySelector('#chat-input.ProseMirror') && document.querySelector('#ees-work-entry')")
+        self.open_sidebar()
+        self.wait("document.querySelector('#ees-work-panel') && window.__eesNativeWorkV1?.refresh")
+        self.open_tools(shared_list=True)
+        self.screenshot('tools-phase1-list-1920')
+        self.click('[data-author-action=draft_open][data-id="' + identifier + '"]')
+        self.wait("document.querySelector('[name=draft_name]')?.value === " + json.dumps(fixture['name']))
+        self.click('[data-author-action=draft_tab][data-id=io]')
+        self.assertEqual(self.read('[name=draft_input_0_question]', 'value'), question['question'])
+        self.click('[data-author-action=draft_part][data-id=outputs]')
+        self.assertEqual(self.read('[name=draft_output_path]', 'value'), 'documents')
+        self.assertTrue(self.read('[name=draft_output_3_hidden]', 'checked'))
+        for width, height in ((1920, 1080), (1366, 768), (360, 768)):
+            self.authoring_viewport(width, height, overlay=width <= 480)
+            self.assertLessEqual(self.browser.evaluate("document.querySelector('#ees-work-designer').scrollWidth-document.querySelector('#ees-work-designer').clientWidth"), 1)
+            self.assertTrue(self.read('[data-author-action=draft_save]', 'checkVisibility()'))
+            self.screenshot('tools-phase1-output-' + str(width))
+        self.assertEqual(self.tool_command('tool_draft_get', tool_id=identifier)['tool_draft'], saved)
+        self.assertEqual(self.server.completions, [])
+
+    def test_tools_phase1_conflict_retains_editor_and_revoked_admin_hides_code(self):
+        fixture = json.loads((Path(__file__).parent / 'fixtures/tools_phase1_contract.json').read_text(encoding='utf-8'))['draft']
+        initial = self.tool_command('tool_draft_save', draft=fixture)['tool_draft']
+        self.refresh()
+        self.open_tools(shared_list=True)
+        self.click('[data-author-action=draft_open][data-id="' + initial['id'] + '"]')
+        self.wait("document.querySelector('[name=draft_name]')")
+        self.fill('[name=draft_name]', '이 화면에서 작성 중')
+        newer = deepcopy(fixture)
+        newer['name'] = '다른 창에서 먼저 저장'
+        saved = self.tool_command('tool_draft_save', revision=1, tool_id=initial['id'], draft=newer)['tool_draft']
+        self.click('[data-author-action=draft_save]')
+        self.wait("document.querySelector('#ees-work-designer [role=alert]')?.textContent.includes('입력은 유지')")
+        self.assertEqual(self.read('[name=draft_name]', 'value'), '이 화면에서 작성 중')
+        self.assertEqual(self.tool_command('tool_draft_get', tool_id=initial['id'])['tool_draft'], saved)
+        self.screenshot('tools-phase1-conflict-input-retained')
+        # The account directory is the fixture, while refreshed authorization
+        # and response filtering run through production code.
+        self.command('save_access', principal_kind='user', principal_id=self.server.user['id'],
+            system_id='EMS', factory_id='*', roles=['manager', 'participant'])
+        self.server.user['role'] = 'user'
+        self.refresh()
+        self.open_tools(shared_list=True)
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-author-action=draft_new],[data-author-action=draft_open],[name=draft_code]')"))
+        self.assertNotIn('이 화면에서 작성 중', self.text('#ees-work-designer'))
+        self.assertEqual(self.operations()['tool_drafts'], [])
+        self.assertEqual(self.bridge.calls, [])
+
+    def test_tools_phase1_import_copies_source_and_never_activates_it(self):
+        fixture = json.loads((Path(__file__).parent / 'fixtures/tools_phase1_contract.json').read_text(encoding='utf-8'))['draft']
+        source = {'name': '합성 기존 도구', 'code': fixture['code'], 'function': fixture['function']}
+        source_reads = []
+
+        async def candidates(actor):
+            return [{'id': 'synthetic-source', 'name': source['name'], 'functions': [source['function']]}]
+
+        async def read_source(actor, source_id, function):
+            self.assertEqual((source_id, function), ('synthetic-source', fixture['function']))
+            source_reads.append((actor['id'], source_id, function))
+            return deepcopy(source)
+
+        self.bridge.tool_import_sources = candidates
+        self.bridge.read_tool_import_source = read_source
+        self.refresh()
+        self.open_tools(shared_list=True)
+        self.click('[data-author-action=draft_new]')
+        self.click('[data-author-action=draft_import_picker]')
+        self.wait("document.querySelector('[data-author-action=draft_import][data-id=synthetic-source]')")
+        self.click('[data-author-action=draft_import][data-id=synthetic-source][data-function=list_documents]')
+        self.wait("document.querySelector('[name=draft_name]')?.value === '합성 기존 도구'")
+        self.assertEqual(len(source_reads), 1)
+        self.assertEqual(source['code'], fixture['code'])
+        identifier = self.operations()['tool_drafts'][0]['id']
+        saved = self.tool_command('tool_draft_get', tool_id=identifier)['tool_draft']
+        self.assertEqual(saved['draft']['code'], fixture['code'])
+        self.assertIsNone(saved['active_version'])
+        self.assertFalse(saved['check']['valid'])  # Result mapping is unfinished.
+        self.click('[data-author-action=draft_code]')
+        self.assertEqual(self.read('[name=draft_code]', 'value'), fixture['code'])
+        source['code'] = '# Original changed after copy'
+        self.assertEqual(self.tool_command('tool_draft_get', tool_id=identifier)['tool_draft']['draft']['code'], fixture['code'])
+        self.assertEqual(self.bridge.calls, [])
+        self.assertEqual(self.server.completions, [])
+
+    def test_tools_phase2_connection_returns_to_code_and_trial_at_each_viewport(self):
+        fixture, key = self.phase2_authored_tool()
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.phase2_trial_inputs(fixture['inputs']['doc_types'])
+        self.assertTrue(self.read('[data-author-action=draft_trial_start]', 'disabled'))
+        self.assertTrue(self.read('[data-author-action=draft_use_open]', 'disabled'))
+        self.screenshot('tools-phase2-t05b-before-connection-1920')
+        positions = []
+        for origin in ('code', 'trial'):
+            for width, height in ((1920, 1080), (1366, 768), (360, 768)):
+                self.authoring_viewport(width, height, overlay=width <= 480)
+                if origin == 'code':
+                    self.click('[data-author-action=draft_tab][data-id=basic]')
+                    self.click('[data-author-action=draft_code]')
+                else:
+                    self.click('[data-author-action=draft_tab][data-id=trial]')
+                container = '.ew-draft-code' if origin == 'code' else '#ees-work-designer .ew-author-scroll'
+                self.browser.evaluate("document.querySelector('[data-author-action=draft_connection]').scrollIntoView({block:'center',inline:'nearest',behavior:'instant'})")
+                before = self.read(container, 'scrollTop')
+                connection = self.tool_command('tool_draft_connection_get', tool_id=key)['connection']
+                self.click('[data-author-action=draft_connection]')
+                self.wait("document.querySelector('#ew-tool-connection-form')")
+                self.assertEqual(self.read('[name=draft_connection_token]', 'value'), '')
+                self.assertEqual(self.read('[name=draft_connection_token]', 'type'), 'password')
+                self.fill('[name=draft_connection_url]', fixture['connection']['base_url'])
+                self.fill('[name=draft_connection_token]', fixture['connection']['token'])
+                modal_geometry = self.phase2_modal_geometry(width, height)
+                self.screenshot('tools-phase2-t02b-' + origin + '-' + str(width))
+                self.click('[data-author-action=draft_modal_cancel]')
+                self.wait("!document.querySelector('#ew-tool-connection-form')")
+                self.assertEqual(self.tool_command('tool_draft_connection_get', tool_id=key)['connection'], connection)
+                self.assertAlmostEqual(self.read(container, 'scrollTop'), before, delta=1)
+                self.assertEqual(self.browser.evaluate('document.activeElement?.dataset.authorAction'), 'draft_connection')
+                self.click('[data-author-action=draft_connection]')
+                self.wait("document.querySelector('#ew-tool-connection-form')")
+                self.assertEqual(self.read('[name=draft_connection_token]', 'value'), '')
+                self.fill('[name=draft_connection_url]', fixture['connection']['base_url'])
+                if not connection['token_set']:
+                    self.fill('[name=draft_connection_token]', fixture['connection']['token'])
+                self.click('[data-author-action=draft_connection_save]')
+                self.wait("!document.querySelector('#ew-tool-connection-form') && !document.querySelector('[data-author-action=draft_connection]').disabled")
+                saved = self.tool_command('tool_draft_connection_get', tool_id=key)['connection']
+                self.assertTrue(saved['configured'] and saved['token_set'], saved)
+                self.assertNotIn(fixture['connection']['token'], json.dumps(saved))
+                self.assertAlmostEqual(self.read(container, 'scrollTop'), before, delta=1)
+                self.assertEqual(self.browser.evaluate('document.activeElement?.dataset.authorAction'), 'draft_connection')
+                positions.append({'origin': origin, 'width': width, 'before': before, 'after': self.read(container, 'scrollTop'), 'modal': modal_geometry})
+                if origin == 'code':
+                    self.assertEqual(self.read('[name=draft_code]', 'value'), fixture['draft']['code'])
+                    self.click('[data-author-action=draft_code_close]')
+                else:
+                    self.assertTrue(self.read('[name=draft_trial_0_option_0]', 'checked'))
+                    self.assertTrue(self.read('[name=draft_trial_0_option_1]', 'checked'))
+        self.authoring_viewport(1920, 1080, overlay=False)
+        self.assertFalse(self.read('[data-author-action=draft_trial_start]', 'disabled'))
+        directory = self.screenshot('tools-phase2-t05e-after-connection-1920')
+        (directory / 'tools-phase2-connection-return.json').write_text(json.dumps(positions, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        self.assertEqual(self.authored_native.run_calls, [])
+        self.assertIsNone(self.tool_command('tool_draft_get', tool_id=key)['tool_draft']['active_version'])
+
+    def test_tools_phase2_trial_activation_revision_groups_and_disable_roundtrip(self):
+        fixture, key = self.phase2_authored_tool(connected=True)
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.phase2_trial_inputs(fixture['inputs']['doc_types'])
+        tested = self.phase2_trial(key)
+        self.assertTrue(tested['trial']['eligible_for_activation'], tested['trial'])
+        self.assertEqual((tested['trial']['count'], tested['trial']['completeness']), (2, 'complete'))
+        self.assertEqual(tested['trial']['inputs'], fixture['inputs'])
+        self.assertEqual(tested['trial']['raw_result'], fixture['result'])
+        self.assertEqual(self.authored_native.run_calls[0]['code'], fixture['draft']['code'])
+        self.assertIsNone(tested['active_version'])
+        self.fill('[name=draft_trial_evidence]', fixture['evidence'])
+        self.phase2_viewport_evidence('tools-phase2-t05-success')
+        self.click('.ew-draft-trial-raw > summary')
+        self.assertIn('EMS 셋업 설계서', self.text('.ew-draft-trial-raw'))
+        self.assertNotIn(fixture['connection']['token'], self.text('.ew-draft-trial-raw'))
+        self.click('[data-author-action=draft_use_open]')
+        self.wait("document.querySelector('#ew-tool-use-form')")
+        self.click('[name="draft_use_group:group-ems"]')
+        self.fill('[name=draft_use_evidence]', fixture['evidence'])
+        self.phase2_viewport_evidence('tools-phase2-t05a-use-confirm', modal=True,
+                                      evidence=fixture['evidence'])
+        self.click('[data-author-action=draft_use_confirm]')
+        self.wait("document.querySelector('[data-active-version]')?.dataset.activeVersion === '1'")
+        first = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertEqual((first['active_version'], first['use']['state'], first['use']['groups']), (1, 'active', fixture['groups']))
+        self.assertEqual(len(first['use']['versions']), 1)
+        self.phase2_viewport_evidence('tools-phase2-t06-active')
+        self.click('[data-author-action=draft_tab][data-id=io]')
+        changed_question = fixture['draft']['input_ui']['doc_types']['question'] + ' (수정본)'
+        self.fill('[name=draft_input_0_question]', changed_question)
+        self.click('[data-author-action=draft_save]')
+        self.wait("document.querySelector('[data-draft-status]')?.textContent.includes('r2')")
+        edited = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertEqual(edited['active_version'], 1)
+        self.assertEqual(edited['use'], first['use'])
+        self.assertEqual(len(self.authored_native.run_calls), 1)
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.assertTrue(self.read('[data-author-action=draft_use_open]', 'disabled'))
+        self.assertIn('업무에서는 사용 버전 v1 유지', self.text('#ees-work-designer'))
+        self.screenshot('tools-phase2-t05d-saved-revision-keeps-active-1920')
+        retested = self.phase2_trial(key)
+        self.assertEqual(retested['trial']['draft_revision'], 2)
+        self.phase2_use(fixture)
+        promoted = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertEqual(promoted['active_version'], 2)
+        self.assertEqual([item['version'] for item in promoted['use']['versions']], [1, 2])
+        self.assertEqual(promoted['use']['versions'][0], first['use']['versions'][0])
+        self.click('[data-author-action=draft_use_access]')
+        self.wait("document.querySelector('#ew-tool-use-form')")
+        self.click('[name="draft_use_group:group-apc"]')
+        self.click('[data-author-action=draft_use_confirm]')
+        self.wait("!document.querySelector('#ew-tool-use-form')")
+        access = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertEqual(access['use']['groups'], ['group-apc', 'group-ems'])
+        self.assertEqual(access['use']['active_version'], 2)
+        self.assertEqual(access['use']['versions'], promoted['use']['versions'])
+        self.click('[data-author-action=draft_use_disable]')
+        self.click('[data-dialog-confirm]')
+        self.wait("document.querySelector('[data-use-state]')?.dataset.useState === 'disabled'")
+        disabled = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertEqual(disabled['use']['active_version'], 2)
+        self.assertEqual(disabled['use']['versions'], promoted['use']['versions'])
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.phase2_trial(key)
+        self.phase2_use(fixture, groups=['group-apc', 'group-ems'])
+        confirmed = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertEqual((confirmed['use']['state'], confirmed['active_version']), ('disabled', 2))
+        self.assertEqual(confirmed['use']['versions'], promoted['use']['versions'])
+        self.screenshot('tools-phase2-disabled-after-reconfirmation-1920')
+        self.assertEqual(self.server.completions, [])
+
+    def test_tools_phase2_failure_empty_partial_and_unknown_keep_trial_inputs(self):
+        fixture, key = self.phase2_authored_tool(connected=True)
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.phase2_trial_inputs(fixture['inputs']['doc_types'])
+        self.authored_native.result = {'status': 'failed', 'raw_result': None, 'duration_ms': 12,
+                                      'error_code': 'native_authentication_failed'}
+        failed = self.phase2_trial(key, status='failed')
+        self.assertFalse(failed['trial']['eligible_for_activation'])
+        self.assertTrue(self.read('[name=draft_trial_0_option_0]', 'checked'))
+        self.assertTrue(self.read('[name=draft_trial_0_option_1]', 'checked'))
+        self.assertTrue(self.read('[data-author-action=draft_use_open]', 'disabled'))
+        self.screenshot('tools-phase2-t05c-failure-inputs-retained-1920')
+        self.click('[data-author-action=draft_connection]')
+        self.wait("document.querySelector('#ew-tool-connection-form')")
+        invalid_url = fixture['connection']['base_url'] + '?token=not-a-base-url'
+        self.fill('[name=draft_connection_url]', invalid_url)
+        self.click('[data-author-action=draft_connection_save]')
+        self.wait("document.querySelector('.ew-draft-modal [role=alert]')")
+        self.assertEqual(self.read('[name=draft_connection_url]', 'value'), invalid_url)
+        self.click('[data-author-action=draft_modal_cancel]')
+        self.wait("!document.querySelector('#ew-tool-connection-form')")
+        self.assertTrue(self.read('[name=draft_trial_0_option_0]', 'checked'))
+        self.phase2_trial_inputs(fixture['empty_inputs']['doc_types'])
+        self.authored_native.result = {'status': 'succeeded', 'raw_result': {'documents': []}, 'duration_ms': 14}
+        empty = self.phase2_trial(key)
+        self.assertEqual((empty['trial']['count'], empty['trial']['completeness'], empty['trial']['fields_checked']), (0, 'empty', False))
+        self.assertTrue(empty['trial']['eligible_for_activation'])
+        self.assertIn('개별 항목의 표시', self.text('#ees-work-designer'))
+        self.assertFalse(self.read('[data-author-action=draft_use_open]', 'disabled'))
+        self.screenshot('tools-phase2-empty-not-a-failure-1920')
+        self.phase2_use(fixture)
+        self.assertEqual(self.tool_command('tool_draft_get', tool_id=key)['tool_draft']['active_version'], 1)
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.phase2_trial_inputs(fixture['inputs']['doc_types'])
+        self.authored_native.result = {'status': 'succeeded', 'raw_result': {**fixture['result'], 'completeness': 'partial'}, 'duration_ms': 16}
+        partial = self.phase2_trial(key, status='failed')
+        self.assertEqual(partial['trial']['completeness'], 'partial')
+        self.assertFalse(partial['trial']['eligible_for_activation'])
+        self.assertEqual(partial['active_version'], 1)
+        self.assertTrue(self.read('[data-author-action=draft_use_open]', 'disabled'))
+        self.assertIn('부분 결과', self.text('#ees-work-designer'))
+        self.screenshot('tools-phase2-partial-blocks-activation-1920')
+        self.authored_native.result = {'status': 'unknown', 'raw_result': None, 'duration_ms': 20, 'error_code': 'tool_trial_timeout'}
+        unknown = self.phase2_trial(key, status='unknown')
+        self.assertFalse(unknown['trial']['eligible_for_activation'])
+        self.assertEqual(unknown['trial']['inputs'], fixture['inputs'])
+        calls = len(self.authored_native.run_calls)
+        self.refresh()
+        self.assertEqual(len(self.authored_native.run_calls), calls)
+        self.assertIn('자동으로 다시 실행하지', self.text('#ees-work-designer'))
+        self.assertTrue(self.read('[name=draft_trial_0_option_0]', 'checked'))
+        self.assertTrue(self.read('[name=draft_trial_0_option_1]', 'checked'))
+        self.screenshot('tools-phase2-unknown-no-automatic-retry-1920')
+        self.assertEqual(self.server.completions, [])
+
+    def test_tools_phase2_duplicate_trial_and_old_trial_activation_are_blocked(self):
+        fixture, key = self.phase2_authored_tool(connected=True)
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.phase2_trial_inputs(fixture['inputs']['doc_types'])
+        self.authored_native.hold.clear()
+        self.click('[data-author-action=draft_trial_start]')
+        self.assertTrue(self.authored_native.started.wait(3), 'the actual HTTP trial did not reach the worker boundary')
+        self.wait("document.querySelector('[data-trial-status]')?.dataset.trialStatus === 'running'")
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-author-action=draft_trial_start]')"))
+        self.assertTrue(self.read('[data-author-action=draft_trial_refresh]', 'disabled'))
+        self.assertTrue(self.read('[data-author-action=draft_use_open]', 'disabled'))
+        request = deepcopy(next(body for body in reversed(self.server.workspace_commands) if body['action'] == 'tool_draft_trial_start'))
+        replay = asyncio.run(self.server.workflow.operations.command(self.server.user, request))
+        self.assertTrue(replay['ok'], replay)
+        self.assertEqual(replay['trial']['status'], 'running')
+        self.assertEqual(len(self.authored_native.run_calls), 1)
+        self.screenshot('tools-phase2-running-single-request-1920')
+        self.authored_native.hold.set()
+        self.wait("document.querySelector('[data-trial-status]')?.dataset.trialStatus === 'succeeded'")
+        completed = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertEqual(completed['trial']['id'], replay['trial']['id'])
+        completed_replay = asyncio.run(self.server.workflow.operations.command(self.server.user, request))
+        self.assertEqual(completed_replay['trial']['id'], completed['trial']['id'])
+        self.assertEqual(completed_replay['trial']['status'], 'succeeded')
+        self.assertEqual(len(self.authored_native.run_calls), 1)
+        other = {'id': 'other-tool-admin', 'role': 'admin', 'name': 'Other tool administrator'}
+        self.users[other['id']] = other
+        with self.assertRaises(self.backend.WorkflowError) as private:
+            asyncio.run(self.server.workflow.operations.command(other, {'action': 'tool_draft_trial_get',
+                'tool_id': key, 'trial_id': completed['trial']['id']}))
+        self.assertEqual(private.exception.code, 'tool_trial_not_found')
+        self.click('[data-author-action=draft_tab][data-id=basic]')
+        self.fill('[name=draft_description]', fixture['draft']['description'] + ' 수정본')
+        self.click('[data-author-action=draft_save]')
+        self.wait("document.querySelector('[data-draft-status]')?.textContent.includes('r2')")
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.assertTrue(self.read('[data-author-action=draft_use_open]', 'disabled'))
+        stale = self.tool_command('tool_draft_trial_get', tool_id=key, trial_id=completed['trial']['id'])['trial']
+        self.assertFalse(stale['eligible_for_activation'])
+        self.assertIn('tool_trial_draft_changed', [reason['code'] for reason in stale['activation_reasons']])
+        with self.assertRaises(self.backend.WorkflowError) as old_trial:
+            asyncio.run(self.server.workflow.operations.command(self.server.user, {
+                'action': 'tool_draft_use_set', 'request_id': str(uuid4()), 'tool_id': key,
+                'expected_revision': 2, 'expected_connection_revision': completed['connection']['revision'],
+                'expected_use_revision': 0, 'trial_id': completed['trial']['id'],
+                'groups': fixture['groups'], 'evidence': fixture['evidence']}))
+        self.assertEqual(old_trial.exception.code, 'tool_trial_stale')
+        self.assertIsNone(self.tool_command('tool_draft_get', tool_id=key)['tool_draft']['active_version'])
+        self.assertEqual(len(self.authored_native.run_calls), 1)
+
+    def test_tools_phase2_revoked_admin_discards_inflight_trial_response(self):
+        fixture, key = self.phase2_authored_tool(connected=True)
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.phase2_trial_inputs(fixture['inputs']['doc_types'])
+        self.authored_native.hold.clear()
+        self.click('[data-author-action=draft_trial_start]')
+        self.assertTrue(self.authored_native.started.wait(3))
+        self.command('save_access', principal_kind='user', principal_id=self.server.user['id'],
+            system_id='EMS', factory_id='*', roles=['manager', 'participant'])
+        self.server.user['role'] = 'user'
+        self.refresh()
+        self.authored_native.hold.set()
+        # Keep revocation in place until the real request has recorded its
+        # terminal result; restoring the actor earlier would race the worker.
+        deadline = time.monotonic() + 3
+        while time.monotonic() < deadline:
+            with self.server.workflow._db() as db:
+                trial = json.loads(db.execute('SELECT data FROM work_tool_trials WHERE tool_id=? ORDER BY rowid DESC LIMIT 1', (key,)).fetchone()[0])
+            if trial['status'] != 'running':
+                break
+            time.sleep(.02)
+        self.assertNotEqual(trial['status'], 'running')
+        self.wait("!document.querySelector('#ew-tool-trial-form,#ew-tool-connection-form,[data-author-action=draft_open]')")
+        self.open_tools(shared_list=True)
+        self.assertEqual(self.operations()['tool_drafts'], [])
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-author-action=draft_new],.ew-draft-code,.ew-draft-trial-raw')"))
+        self.assertNotIn('EMS 셋업 설계서', self.text('#ees-work-designer'))
+        self.assertEqual(len(self.authored_native.run_calls), 1)
+        self.screenshot('tools-phase2-revoked-inflight-result-hidden-1920')
+        self.server.user['role'] = 'admin'
+        stored = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertIsNone(stored['active_version'])
+        self.assertFalse(stored['trial']['eligible_for_activation'])
+        self.assertEqual(self.server.completions, [])
+
+    def phase2_authored_tool(self, *, connected=False):
+        """Real HTTP/service/SQLite; Native credentials and worker output are synthetic."""
+        fixture = json.loads((Path(__file__).parent / 'fixtures/tools_phase2_contract.json').read_text(encoding='utf-8'))
+        self.authored_native = SyntheticAuthoredNative(self.backend.WorkflowError)
+        self.server.workflow.tool_drafts.lifecycle.native = self.authored_native
+        self.addCleanup(self.authored_native.hold.set)
+        groups = [{'id': 'group-ems', 'name': 'EMS 운영'}, {'id': 'group-apc', 'name': 'APC 운영'}]
+        self.server.workflow.group_lookup = lambda _: deepcopy(groups)
+        self.server.workflow.group_list_lookup = lambda: deepcopy(groups)
+        record = self.tool_command('tool_draft_save', draft=fixture['draft'])['tool_draft']
+        self.assertEqual(record['phase'], 2)
+        self.assertTrue(record['check']['valid'], record['check'])
+        self.assertEqual(self.authored_native.run_calls, [])
+        if connected:
+            record = self.tool_command('tool_draft_connection_save', revision=record['revision'],
+                tool_id=record['id'], expected_connection_revision=0, **fixture['connection'])['tool_draft']
+        self.authoring_viewport(1920, 1080, overlay=False)
+        self.refresh(); self.open_tools(shared_list=True)
+        self.click('[data-author-action=draft_open][data-id="' + record['id'] + '"]')
+        self.wait("document.querySelector('[name=draft_name]')?.value === " + json.dumps(fixture['draft']['name']))
+        return fixture, record['id']
+
+    def phase2_trial_inputs(self, values):
+        for index, value in enumerate(('design_doc', 'test_result', 'deployment_plan')):
+            selector = '[name=draft_trial_0_option_' + str(index) + ']'
+            if self.read(selector, 'checked') != (value in values):
+                self.click(selector)
+
+    def phase2_trial(self, key, *, status='succeeded'):
+        before = len(self.authored_native.run_calls)
+        self.click('[data-author-action=draft_trial_start]')
+        self.wait("document.querySelector('[data-trial-status]')?.dataset.trialStatus === " + json.dumps(status) +
+                  " && !document.querySelector('[data-author-action=draft_trial_start]')?.disabled")
+        record = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertEqual(len(self.authored_native.run_calls), before + 1)
+        self.assertEqual(record['trial']['status'], status)
+        return record
+
+    def phase2_use(self, fixture, *, groups=None):
+        self.click('[data-author-action=draft_use_open]')
+        self.wait("document.querySelector('#ew-tool-use-form')")
+        selected = fixture['groups'] if groups is None else groups
+        for group in ('group-ems', 'group-apc'):
+            selector = '[name="draft_use_group:' + group + '"]'
+            if self.read(selector, 'checked') != (group in selected):
+                self.click(selector)
+        self.fill('[name=draft_use_evidence]', fixture['evidence'])
+        self.click('[data-author-action=draft_use_confirm]')
+        self.wait("!document.querySelector('#ew-tool-use-form') && document.querySelector('[data-use-state]')")
+
+    def phase2_modal_geometry(self, width, height):
+        self.browser.evaluate("document.querySelector('.ew-draft-modal-footer').scrollIntoView({block:'end',inline:'nearest',behavior:'instant'})")
+        geometry = self.browser.evaluate("""(()=>{const modal=document.querySelector('.ew-draft-modal'),r=modal.getBoundingClientRect(),footer=modal.querySelector('.ew-draft-modal-footer'),f=footer.getBoundingClientRect(),previous=footer.previousElementSibling.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,overflow:modal.scrollWidth-modal.clientWidth,footerGap:f.top-previous.bottom,controls:[...footer.querySelectorAll('button')].map(e=>{const box=e.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(e);const lines=[...range.getClientRects()];return {action:e.dataset.authorAction,hit:e.contains(document.elementFromPoint(box.left+box.width/2,box.top+box.height/2)),lines:new Set(lines.map(x=>Math.round(x.top))).size,clipped:lines.some(x=>x.left<box.left-1||x.right>box.right+1||x.top<box.top-1||x.bottom>box.bottom+1)};})};})()""")
+        self.assertGreaterEqual(geometry['left'], -1, geometry)
+        self.assertGreaterEqual(geometry['top'], -1, geometry)
+        self.assertLessEqual(geometry['right'], width + 1, geometry)
+        self.assertLessEqual(geometry['bottom'], height + 1, geometry)
+        self.assertLessEqual(geometry['overflow'], 1, geometry)
+        self.assertGreaterEqual(geometry['footerGap'], -1, geometry)
+        for control in geometry['controls']:
+            self.assertTrue(control['hit'], control)
+            self.assertGreaterEqual(control['lines'], 1, control)
+            self.assertLessEqual(control['lines'], 2, control)
+            self.assertFalse(control['clipped'], control)
+        return geometry
+
+    def phase2_viewport_evidence(self, name, *, modal=False, evidence=None):
+        observations = []
+        for width, height in ((1920, 1080), (1366, 768), (360, 768)):
+            self.authoring_viewport(width, height, overlay=width <= 480)
+            selector = '.ew-draft-modal' if modal else '#ees-work-designer'
+            geometry = self.browser.evaluate("(()=>{const e=document.querySelector(" + json.dumps(selector) + "),r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,overflow:e.scrollWidth-e.clientWidth};})()")
+            self.assertGreaterEqual(geometry['left'], -1, geometry)
+            self.assertGreaterEqual(geometry['top'], -1, geometry)
+            self.assertLessEqual(geometry['right'], width + 1, geometry)
+            self.assertLessEqual(geometry['bottom'], height + 1, geometry)
+            self.assertLessEqual(geometry['overflow'], 1, geometry)
+            if modal:
+                geometry = self.phase2_modal_geometry(width, height)
+            if evidence is not None:
+                # This short confirmation must wrap fully at narrow widths;
+                # retaining a value in a horizontally clipped input is insufficient.
+                visible_evidence = self.browser.evaluate("""(()=>{const e=document.querySelector('[name=draft_use_evidence]');return {value:e.value,width:e.clientWidth,scrollWidth:e.scrollWidth,height:e.clientHeight,scrollHeight:e.scrollHeight};})()""")
+                self.assertEqual(visible_evidence['value'], evidence)
+                self.assertGreater(visible_evidence['height'], 0, visible_evidence)
+                self.assertLessEqual(visible_evidence['scrollWidth'], visible_evidence['width'] + 1, visible_evidence)
+                self.assertLessEqual(visible_evidence['scrollHeight'], visible_evidence['height'] + 1, visible_evidence)
+                geometry['evidence'] = visible_evidence
+            observations.append({'width': width, 'height': height, **geometry})
+            directory = self.screenshot(name + '-' + str(width))
+            (directory / (name + '-geometry.json')).write_text(json.dumps(observations, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        self.authoring_viewport(1920, 1080, overlay=False)
 
     def operations(self):
         return asyncio.run(self.server.workflow.operations.state(self.server.user, system_id='EMS'))
@@ -1587,9 +2154,11 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-action="mode"][data-mode="author"]')
         self.click('[data-action="tools"]')
         if shared_list:
-            self.wait("document.querySelector('#ees-work-designer > header')?.textContent.trim() === '도구 · 공용' && document.querySelector('#ees-work-designer .ew-author-scroll > h2')?.textContent.startsWith('공용 도구')")
+            self.wait("document.querySelector('#ees-work-designer > header')?.textContent.trim() === '도구 · 공용' && document.querySelector('.ew-draft-list')")
         else:
             self.wait("document.querySelector('[data-author-action=tool_create]')")
+            if self.browser.evaluate("!!document.querySelector('.ew-draft-legacy:not([open])')"):
+                self.click('.ew-draft-legacy > summary')
 
     def native_menu_fixture(self, **grants):
         """UI capability fixture only; real Native ACL is tested separately."""

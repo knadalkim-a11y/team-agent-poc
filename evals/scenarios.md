@@ -10,6 +10,9 @@
 
 수락 기준은 Native의 실제 목적지 클릭부터 완료까지 **직전 Native 항목/목적지 외 aria-current0건·이전 오른쪽 칸 가시 프레임0건**이다. 출발 칸3개에서 다른 칸2개·업무 모드로 돌아오는9조합에 workspace·operations 각1초 지연을 적용하고, 같은 칸 작성 상태 및 계정·권한·경로 보호 회귀를 유지한다. [최초 실패·수정·실행별 결과](v4-ui-20260930.md#native-return-selection-evidence-20261015)를 한곳에 보존한다. 작은 별도 PR의 검증 범위이며 2-3·병합·사내 실행은 포함하지 않는다.
 
+도구 작성·저장 1페이즈의 P1-01~10과 환경 제한은 [전용 검증 기록](tool-authoring-20261105.md#phase1-evidence)에 기록합니다.
+연결·시험·사용 설정 2페이즈의 P2-01~10과 실제 판정은 [같은 검증 기록의 2페이즈 절](tool-authoring-20261105.md#phase2-evidence)을 따릅니다.
+
 <a id="evidence-index"></a>
 
 ## 기록 찾기

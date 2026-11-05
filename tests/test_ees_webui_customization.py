@@ -823,6 +823,46 @@ print("v4_database_" + phase + "=pass")
             self.apply()
         self.assertEqual(self.tree(), before)
 
+    def test_pre_draft_tools_ees14_restore_and_missing_incoming_module(self):
+        modules = ('open_webui/ees_workflow_tool_drafts.py',
+                   'open_webui/ees_workflow_tool_draft_check.py')
+        previous = self.install_legacy_program(version='0.11.3+ees.14', missing=modules)
+        before = self.tree()
+        custom.validate_program(self.program, previous)
+        self.assertTrue(self.apply()['changed'])
+        for module in modules:
+            self.assertTrue((self.program / module).is_file())
+        self.assertEqual(self.restore()['source_commit'], previous['source_commit'])
+        self.assertEqual(self.tree(), before)
+        for module in modules:
+            with self.subTest(missing=module):
+                self.write_bundle(make_wheel(missing=(module,)))
+                before = self.tree()
+                with self.assertRaisesRegex(custom.CustomizationError, 'complete app'):
+                    self.apply()
+                self.assertEqual(self.tree(), before)
+
+    def test_phase1_tools_ees14_restore_and_missing_phase2_modules(self):
+        modules = ('open_webui/ees_workflow_tool_lifecycle.py',
+                   'open_webui/ees_workflow_tool_native.py',
+                   'open_webui/ees_workflow_tool_worker.py')
+        previous = self.install_legacy_program(version='0.11.3+ees.14', missing=modules)
+        before = self.tree()
+        custom.validate_program(self.program, previous)
+        self.assertTrue(self.apply()['changed'])
+        for module in modules:
+            self.assertTrue((self.program / module).is_file())
+        self.assertEqual(self.restore()['source_commit'], previous['source_commit'])
+        custom.validate_program(self.program, previous)
+        self.assertEqual(self.tree(), before)
+        for module in modules:
+            with self.subTest(missing=module):
+                self.write_bundle(make_wheel(missing=(module,)))
+                before = self.tree()
+                with self.assertRaisesRegex(custom.CustomizationError, 'complete app'):
+                    self.apply()
+                self.assertEqual(self.tree(), before)
+
     def test_pre_easy_tools_ees13_apply_restore_preserves_its_verified_inventory(self):
         previous = self.install_legacy_program(version="0.11.3+ees.13", missing=AUTHORING_FILES + C18_ICON_FILES)
         custom.validate_program(self.program, previous)

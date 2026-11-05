@@ -173,7 +173,9 @@ class MotionNativeTests(IntegratedNativeCase):
         self.click('#ees-work-entry [data-action=tools]')
         self.wait("document.querySelector('.ew-scope-wrap').getBoundingClientRect().height === 0")
         self.assertTrue(self.read('.ew-scope-wrap', 'inert'))
-        self.assertIn('공용 도구', self.text('#ees-work-panel'))
+        self.assertEqual(self.text('#ees-work-designer > header'), '도구 · 공용')
+        if self.browser.evaluate("!!document.querySelector('.ew-draft-legacy:not([open])')"):
+            self.click('.ew-draft-legacy > summary')
         self.assertIn('EMS 전역 목록 검증', self.text('#ees-work-panel'))
         self.assertIn('FDC 전역 목록 검증', self.text('#ees-work-panel'))
         self.assertTrue(self.read('#ees-work-panel [data-action=close_panel] img', 'src').endswith('/a9175.svg'))

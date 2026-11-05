@@ -1,0 +1,54 @@
+{
+  "reference": "Figma tools redesign v2",
+  "file_key": "XK2wTos6sEuxSHhIj7cqg6",
+  "retrieved_on": "2026-11-05",
+  "source": "get_design_context with screenshot",
+  "implementation_scope": "Right tool authoring panel; surrounding shell examples and phase 2 controls are not implemented as functioning phase 1 features.",
+  "screens": [
+    {
+      "screen": "T01",
+      "title": "도구 목록",
+      "node_id": "2017:76",
+      "file": "T01.png",
+      "width": 1024,
+      "height": 596,
+      "sha256": "f3ebe82c835e399ee315567f91c1eae4f3176c3e8b597d0cd3ad9826805b5c50"
+    },
+    {
+      "screen": "T02",
+      "title": "기본 정보",
+      "node_id": "2016:2",
+      "file": "T02.png",
+      "width": 475,
+      "height": 1024,
+      "sha256": "293d3e403772af0ff1c590c32133162840007483f7b82eb3a61aefda756b4d74"
+    },
+    {
+      "screen": "T02A",
+      "title": "기능 작성",
+      "node_id": "2033:202",
+      "file": "T02A.png",
+      "width": 988,
+      "height": 1024,
+      "sha256": "4b2b5a4fddcac4b32a60a74b012888a6d17b098a7f190efd4f1d34c6f4fc8999"
+    },
+    {
+      "screen": "T03",
+      "title": "입력 질문",
+      "node_id": "2016:84",
+      "file": "T03.png",
+      "width": 475,
+      "height": 1024,
+      "sha256": "b7b09fdc64c130f3cd0de28e524aa57b90129b1e86a75e23a0ecfc19a3c1413d"
+    },
+    {
+      "screen": "T04",
+      "title": "결과",
+      "node_id": "2016:186",
+      "file": "T04.png",
+      "width": 475,
+      "height": 1024,
+      "sha256": "8b412127be319d49edf3f2a7f9dc213196cf5a7ecc350a2a09f66aa8b6565f79"
+    }
+  ]
+}
