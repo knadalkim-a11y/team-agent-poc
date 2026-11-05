@@ -168,6 +168,12 @@ class AuthoredNative:
         return (await self._read(user, native_id))[2]
 
     async def save_connection(self, user, tool_id, native_id, token):
+        from open_webui.ees_asset_guard import guard_operation
+        # Use Native's existing writer guard before the first registry/asset
+        # read and retain it through both commits and the final observation.
+        return await guard_operation(self._save_connection)(user, tool_id, native_id, token)
+
+    async def _save_connection(self, user, tool_id, native_id, token):
         from sqlalchemy import JSON, or_, select, update
         from sqlalchemy.exc import IntegrityError, OperationalError
         from open_webui.models.tools import Tool, get_async_db_context
@@ -233,6 +239,10 @@ class AuthoredNative:
         return await self.inspect(actor, registry["native_id"])
 
     async def set_groups(self, user, native_id, groups, expected_stamp):
+        from open_webui.ees_asset_guard import guard_operation
+        return await guard_operation(self._set_groups)(user, native_id, groups, expected_stamp)
+
+    async def _set_groups(self, user, native_id, groups, expected_stamp):
         from sqlalchemy import delete, select
         from open_webui.models.tools import get_async_db_context
         from open_webui.models.access_grants import AccessGrant

@@ -4,6 +4,7 @@
 
 - **요청·기준:** 사용자가 현재 열린 PR 전체의 검토·병합을 요청했다. #124는 최종 `7eca930`·CI483 성공과 공동 진행/권한/기록 보존을 확인해 main `c01bf098f1e11aa42bec6c8a1f8f0d6eef5121d1`로 병합했다. #123은 이 main을 merge로 통합하고 양쪽 상태·변경·검증 기록을 보존한다.
 - **보완:** #123 CI484의 실제 설치 시험은 `tool_trial_worker_load_failed`였다. 명시 코드 로딩까지 서버 guard가 요구되는 원인을 확인했고, 작업 사본에 준비된 `f887c27`의 수정 7개 파일을 별도 검토 사본에서 재사용한다. 명시 문자열 코드의 독립 로딩만 허용하며 Native DB 쓰기·캐시 조회·이미 활성화/종료 중인 guard는 보존한다. 실행/검사/guard 파일의 실제 바이트가 바뀌면 이전 시험과 사용 재개 확인도 무효화한다.
+- **병렬 개발 후속:** 같은 PR의 개발 작업과 병합 검토가 겹쳐 원격이 `54e8e2e`로 먼저 갱신됐다. 이를 merge로 받아 문서·검토 근거를 보존하고, 개발에서 검증한 360px 확인 근거 자동 높이와 Native 동시 설정 보존 수정까지 포함한다. main 통합본의 Node444/444·Native19/19·guard20/20·시험 ID1692개 오류0·문서 점검 통과. 최종 통합 CI는 이 추가 수정까지 포함한 head로 재판정한다.
 - **검증·다음:** [최초 실패·통합 검토](../evals/tool-authoring-20261105.md#pr123-merge-review-20261105)의 로컬 검사와 최종 통합 head의 전체 필수 CI를 확인한 뒤 #123을 병합한다. 최종 head·CI·병합 결과는 [PR #123 본문과 Checks](https://github.com/knadalkim-a11y/team-agent-poc/pull/123)를 판정 원본으로 삼는다. 사내 적용은 이번 요청에 포함하지 않는다.
 
 > 아래는 각 작업 당시의 기록이다.
@@ -13,8 +14,9 @@
 - **요청·기준:** 사용자가 2페이즈 진행을 요청했다. 1페이즈 최종 `448f9aa`·[CI479 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41976283599)을 기준으로 같은 [PR #123](https://github.com/knadalkim-a11y/team-agent-poc/pull/123)에서 서버·화면·Native 검증을 병렬 구현한다. [ST-P2 계약](specs/shared-tools.md#tools-redesign-v2-phase2-20261105)·[사용 안내](03-openwebui-native-agent.md#tool-authoring-phase2-20261105).
 - **범위:** 연결 주소·현재 계정 토큰, 저장본 시험, 현재 사용 버전·그룹·근거·이력, 중지/재개. 수정본 저장은 사용본을 바꾸지 않으며 업무절차 연결·실행은 3페이즈다. 기존 Native 도구·계정·개인 설정·프로그램 복원을 보존한다.
 - **검증·현재:** 서버·화면·브라우저 검사를 통합했고 관련 Python 278통과/실제 frontend 필요 1생략, 복원 3개, Node 작성·실행 443개, 독립 리뷰 원재현 6개를 통과했다. 전체 설치·실제 브라우저는 최종 head의 필수 CI에서 확인한다. 1페이즈 최종 실제 브라우저·시각 대조와 2페이즈 완료 기준을 [같은 검증 기록](../evals/tool-authoring-20261105.md#phase2-evidence)에 구분해 보존한다. 2페이즈의 최종 CI/화면은 해당 코드 head에서 확인한다.
-- **CI 후속:** [CI480](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41987460942)은 35성공·3실패·1취소·출하1정상 생략이다. 새 Native 검사는 Ubuntu/Windows 각각 14/14를 통과했으나 전체 설치 worker와 실제 브라우저에서 보완이 필요하다. 최초 결과를 위 검증 기록에 보존하며 수정 head의 CI·화면으로 재판정한다.
-- **다음 하나:** 확인된 실제 설치·브라우저 문제를 보완하고 PR #123 최종 head의 전체 CI·화면을 확인한다. main 병합·사내 적용은 미실행이다.
+- **CI 후속:** [CI480](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41987460942)·[CI484](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41990693577)의 최초 실패를 검증 기록에 보존했다. CI484는 35성공·3실패·1취소·출하1정상 생략이다. 전체 설치 worker의 실제 보호 context 누락과 360px 근거 높이 갱신을 수정했고, 실제 Native 자산64개·최종 작성 도구 Native19개·Node 작성311개를 통과했다. Native 동시 권한 변경도 기존 보호 장치로 직렬화해 보존한다. 수정 head의 전체 CI·실제 화면은 재확인 대상이다.
+- **통합:** 작업 중 병합된 #124의 최신 main `c01bf09`(내 업무 제거)를 merge로 포함했다. 양쪽 코드와 기록을 보존했다.
+- **다음 하나:** PR #123 최종 head의 전체 CI·화면을 확인한다. main 병합·사내 적용은 미실행이다.
 
 > 아래는 변경 당시 기록이다.
 

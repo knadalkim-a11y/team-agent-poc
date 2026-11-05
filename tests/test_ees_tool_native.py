@@ -1,5 +1,6 @@
 """Authored settings over real pinned Native persistence; isolated worker trials."""
 import ast
+import asyncio
 from copy import deepcopy
 import importlib
 import json
@@ -172,6 +173,65 @@ class AuthoredNativeTests(unittest.IsolatedAsyncioTestCase):
         await self.assert_code("tool_connection_conflict", self.adapter.set_groups(self.actor, meta["native_id"], [], meta["identity_stamp"]))
         tool = await self.f.tools.Tools.get_tool_by_id(meta["native_id"])
         self.assertEqual([(grant.principal_type, grant.principal_id, grant.permission) for grant in tool.access_grants], [("group", group.id, "read")])
+
+    async def test_connection_first_read_and_nested_save_use_the_existing_native_guard(self):
+        observed = []
+        original = self.adapter._admin
+        async def observe(user):
+            observed.append(self.f.guard._active_guard().owned())
+            return await original(user)
+        with patch.object(self.adapter, "_admin", side_effect=observe):
+            first = await self.save()
+            second = await self.f.guard._active_guard().run(lambda: self.save("synthetic-rotated-pat"))
+        self.assertTrue(observed)
+        self.assertTrue(all(observed), "The initial read and final inspect must stay in the Native guard's owning task")
+        self.assertEqual(first["native_id"], second["native_id"])
+        self.assertNotEqual(first["credential_stamp"], second["credential_stamp"])
+
+    async def test_native_acl_writer_waits_for_authored_save_and_its_committed_change_survives(self):
+        meta = await self.save()
+        settings = await self.raw_settings()
+        requested = await self.f.native_groups.Groups.insert_new_group("admin", self.f.native_groups.GroupForm(name="Authored access", description="Synthetic authored group"))
+        concurrent = await self.f.native_groups.Groups.insert_new_group("admin", self.f.native_groups.GroupForm(name="Native editor access", description="Synthetic concurrent group"))
+        entered, release, writer_started = asyncio.Event(), asyncio.Event(), asyncio.Event()
+        original = self.adapter._admin
+        calls = 0
+        async def pause_after_identity(user):
+            nonlocal calls
+            actor = await original(user)
+            calls += 1
+            if calls == 2:
+                entered.set()
+                await release.wait()
+            return actor
+        async def native_edit():
+            writer_started.set()
+            return await self.f.acl.AccessGrants.grant_access("tool", meta["native_id"], "group", concurrent.id, "read")
+        with patch.object(self.adapter, "_admin", side_effect=pause_after_identity):
+            authored = asyncio.create_task(self.adapter.set_groups(self.actor, meta["native_id"], [requested.id], meta["identity_stamp"]))
+            writer = None
+            try:
+                await asyncio.wait_for(entered.wait(), 3)
+                writer = asyncio.create_task(native_edit())
+                await asyncio.wait_for(writer_started.wait(), 3)
+                with self.assertRaises(asyncio.TimeoutError):
+                    await asyncio.wait_for(asyncio.shield(writer), 0.05)
+            finally:
+                release.set()
+                outcomes = await asyncio.wait_for(asyncio.gather(*[task for task in (authored, writer) if task], return_exceptions=True), 5)
+        self.assertFalse(any(isinstance(value, BaseException) for value in outcomes), outcomes)
+        self.assertEqual(outcomes[0]["groups"], [requested.id])
+        self.assertTrue(outcomes[1])
+        tool = await self.f.tools.Tools.get_tool_by_id(meta["native_id"])
+        grants = {(grant.principal_type, grant.principal_id, grant.permission) for grant in tool.access_grants}
+        expected = {("group", requested.id, "read"), ("group", concurrent.id, "read")}
+        self.assertEqual(grants, expected)
+        # Once the queued Native edit has committed, an authored save carrying
+        # the earlier identity must fail before deleting that user's change.
+        await self.assert_code("tool_connection_identity_changed", self.adapter.set_groups(self.actor, meta["native_id"], [], outcomes[0]["identity_stamp"]))
+        preserved = await self.f.tools.Tools.get_tool_by_id(meta["native_id"])
+        self.assertEqual({(grant.principal_type, grant.principal_id, grant.permission) for grant in preserved.access_grants}, expected)
+        self.assertEqual(await self.raw_settings(), settings)
 
     async def test_worker_uses_exact_source_native_binding_defaults_and_redacts_all_outputs(self):
         meta = await self.save()

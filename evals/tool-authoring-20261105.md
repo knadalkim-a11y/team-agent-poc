@@ -150,3 +150,30 @@ CI480 artifact는 26,876,710 bytes, SHA256 `807248628a8196afab7bcbe44e2c11aa0425
 
 
 실제 캡처 대조 후 `86c0a6c`는 공통 available 색상을 쓰는 사용 가능 배지, 평문 형태의 확인 근거 textarea 자동 높이(최대180px 뒤 스크롤), 안내 글자 크기·원본 결과 펼침의 회색 표현, 연결 전 버튼의 세로 배치를 보완했다. 공통 패널·탭 토큰과 가시 포커스는 유지한다. T05C의 예시 401 문구는 실제 HTTP 상태가 확인되지 않았으므로 추가하지 않았고, 실제 실패 안내·입력 보존·연결 설정/재시험·사용 차단을 확인했다. 수정 후 실제 근거 가독성과 상태 색상은 다음 CI 캡처로 재검한다.
+
+
+실행 환경 고정 추가 검토: 기존 Native 환경 stamp는 호스트/배포 식별·Native/Python·일부 의존성 버전만 포함해 같은 ees.14의 작성 도구 실행 코드가 바뀌어도 이전 시험을 유지할 수 있었다. `2571808`은 작성 도구만 native/worker/lifecycle/static-check 네 배포 파일의 bytes hash를 함께 확인한다. 읽기 실패는 거부하며 기본 제공 도구의 기존 환경 stamp는 유지한다. 실제 Native/SQLite 회귀에서 네 파일 각각 변경·파일 누락·이전 시험/활성화/재개 차단, 재시험 후 v1·중지 유지와 명시 재개를 확인했다(신규1개 5.833초, Native전체16개 67.172초 통과). 내용이 같은 재확인은 불변 버전을 고치지 않고 별도 확인 환경 기록을 갱신한다.
+
+
+### CI484 원인 확인과 실제 로더 보완
+
+[CI484](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41990693577), head `cdfa7c5bba7bccb8e3e05d023a78a0c161d5048a`에서 안전 진단으로 실제 원인을 확인했다. import는 성공했고 `tool_trial_worker_load_failed`의 원인은 배포된 `ees_asset_guard.protected`→`_active_guard`의 HTTP503 `conditional_write_unavailable`이었다. 별도 시험 프로세스에는 기존 서버 자산 보호 context가 없었다. 원문 비밀값을 노출하지 않는 합성 진단의 프레임으로 이 경계를 확정했다.
+
+수정 `ec60d96`은 보호를 가짜 초기화하거나 __wrapped__로 우회하지 않는다. 고정 공식 loader는 content=None일 때만 Native DB 조회·소스 정규화 쓰기를 하므로, 전용 decorator에서 active guard가 있으면 기존 잠금을 그대로 쓰고 guard가 없는 별도 프로세스는 명시 str content 경로만 허용한다. closing guard, content 생략/None/비문자열, 캐시, Native table writer는 계속 차단한다. builder의 실제 장식과 생산 guard 원본을 child fixture에도 포함해 이전 단위 fixture의 누락을 해소했다.
+
+환경 고정은 `710f4de`에서 자산 보호 파일까지 5개 bytes hash로 확장했다. Native17개 전체 59.141초, guard20개 1.356초, builder 장식·기존 Native DB정규화/호출자 잠금3개 4.474초 통과했다. 실제 전체 제품의 성공과 수정 UI는 다음 통합 head CI에서 판정하며 진단 성공을 기능 성공으로 대신하지 않는다.
+
+
+CI484 native-compose에서는 기존 motion 6/6이 통과해 앞선 준비 경계를 해소했다. 새 근거 가독성 단언이 360px에서 실패했다: T05A textarea width294px·clientHeight21px·scrollHeight42px로 2줄 중 한 줄만 보였다. 폭 변경은 paint/input을 발생시키지 않아 기존 자동 높이가 유지된 제품 결함이다. 작성39개 중38통과, 신규5개 중4통과이며 왕복 검사는 이 근거 단계에서 중단됐다. 기존 가독성 단언을 유지하고 실제 폭 변경에도 높이를 재계산하도록 보완한다.
+
+공통 자산 보호 변경의 총괄 재검은 guard20개와 branding33개 통과·현재 frontend 산출물 필요1생략이었다. 최초 asset-native 실행은 필수 환경 변수를 지정하지 않아64개 모두 건너뛰었으므로 성공으로 집계하지 않는다. 공식 wheel과 EES_REQUIRE_ASSET_NATIVE=1을 지정한 실제64개를 별도로 재검한다.
+
+
+CI484 최종은 40 jobs 중 35성공·3실패·Windows 집계1취소·출하1정상 생략이다. Native contracts는 Ubuntu15/15(26.680초)·Windows15/15(43.265초) 통과했다. artifact 26,614,799 bytes·SHA256 `2e6a6cd0a0b8c4dc1afed1385dd5fcbdc0a289c63b062dd1d8aa4764f0059bad`, 증거580개 size/SHA·PNG313개를 검증했다. 연결 복귀6건 scroll delta0, T02B6화면과 T05A1920/1366은 정상이며 T05A360 실패 후 T06 이후는 이번 실행에서 미도달이다.
+
+`6f5e473`은 열린 확인 근거 입력칸의 폭만 단일 ResizeObserver로 감지해 높이를 다시 계산한다. 높이 변경 자체는 재계산하지 않고 요소 교체·닫기·초기화 시 해제한다. 입력 없이 폭430→294px 변경·height42px·관찰 중복/늦은 callback/해제 회귀를 포함해 작성 Node311/311 통과했다. 실제3폭 가독성 단언은 그대로 유지한다.
+
+자산 보호 수정의 실제 공식 Native64개 전체는 157.718초에 통과했다. 추가 동시 변경 검토에서는 set_groups 첫 identity 조회 뒤 await 중 실제 Native AccessGrants.grant_access가 완료되면 authored 저장이 그 그룹을 지우는 lost update를 재현했다(2.954초). `f3ef6be`는 save_connection/set_groups 전체를 기존 guard_operation으로 보호해 첫 읽기부터 commit·최종 확인까지 같은 TaskGuard 안에 둔다. 새 잠금은 만들지 않는다. 실제 다른 task의 Native writer 대기→두 변경 보존→오래된 identity 거부, 개인 설정 보존·중첩 재진입2개(4.831초) 및 Native19개 전체(58.609초)를 통과했다.
+
+
+최신 main `c01bf09`를 포함한 로컬 `aa2404a`에서 Node작성/실행444개(6.604초), Native19개(72.068초), guard20개(1.145초), ID1692개·문서35개/링크2914개 오류0을 확인했다. 감사 명령의 필수 output 인자 및 파일/폴더 혼동으로 준비 명령2회가 실패했으며 실제 감사는 올바른 폴더로 완료됐다. 원격 게시 직전 병합 검토 세션이 같은 PR을 `54e8e2e`로 전진시켜 expected head 보호가 갱신을 막았다. 새 원격의 변경은 검토 문서뿐이며 제품 추가 수정은 없음을 대조하고 merge로 양쪽 기록과 개발 후속을 보존했다. 최종 head의 전체 CI/화면 결과는 PR 본문과 Checks에서 판정한다.
