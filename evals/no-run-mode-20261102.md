@@ -111,3 +111,5 @@ CI456 (`77ca5cd`)의 실제 전체 제품과 새 미완성 게시/360px 흐름�
 - **재현:** PR #120 `2578073`에서 특정 공장 `f1`에만 participant 권한이 있는 합성 사용자가 승인된 기존 방식 요청 도구를 포함한 게시 절차를 시작하면 `execution_not_ready / j1: scope_forbidden`이 발생했다. 같은 SQLite 시험 자료로 변경 전 제품 코드는 정상 시작했다. 기존 workspace 85·operations 54·작성 UI 272건은 통과했지만 공장 한정 권한과 기존 도구 계약을 함께 다루지 않았다.
 - **원인·수정:** 시작 경로의 `validate_publication(authoring=False)`가 선택 공장을 받지 않아 빈 공장 범위로 다시 권한을 검사했다. 실행 준비 검사에 선택한 `factory_id`를 전달하며 작성 검사는 기존 시스템 manager 범위를 유지한다.
 - **검증:** Linux/Python 3.12에서 `-X warn_default_encoding -W error::EncodingWarning`으로 operations 55/55·workspace 85/85 통과. 새 회귀 시험은 f1 participant 정상 시작, f2 viewer·공장 없는 시작 거부, participant 작성 검사 거부, 진행 건 한 개만 생성됨을 확인했다. 이전 실패·기존 범위 검사·실제 사용자 자료는 보존한다. 최종 통합 head의 Native·Windows 전체 검사는 [PR #120](https://github.com/knadalkim-a11y/team-agent-poc/pull/120)에서 판정한다.
+
+- **main 통합:** #118 최종 head `791ddb6`의 CI462 39성공·출하1정상생략과 병합 main `818e31c`을 확인하고 #120에 merge로 통합했다. #118·#119·#120의 STATUS·CHANGELOG·사용 안내·TASK 기록을 모두 보존하고 문서·diff 검사를 다시 통과했다. 최종 CI는 이 통합본에서 새로 실행한다.
