@@ -281,6 +281,11 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.open_run(workflow_id, run)
         self.wait("document.querySelector('#ees-work-panel:not(.ew-vd) .ew-tabs')")
         capture_style('work-task', '.ew-tabs')
+        # open_run explicitly expands the sidebar. Both 1366 and 480 are
+        # below the auto-collapse breakpoint, so resizing preserves that
+        # manual choice. Prepare the compact layout through its real control.
+        self.click('[data-ees-sidebar-toggle]')
+        self.wait("document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === 'true'")
         self.viewport(480)
         capture_style('work-task-narrow', '.ew-tabs')
         capture_tab_focus('work-task-narrow', '.ew-tabs')
