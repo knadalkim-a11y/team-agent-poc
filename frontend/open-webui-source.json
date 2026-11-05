@@ -29,7 +29,7 @@
     "src/lib/components/ees/EesShell.svelte": "f0a2dce78749fc449c29ad5ce263a2996ec65cf954c2e13e83a187210c094c57",
     "src/lib/components/ees/icons/5bc95.svg": "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7",
     "src/lib/components/ees/state.ts": "560ef1a21f46fc2a1beabf3012a74933002af586c507ac42bb144f40fe305a43",
-    "src/lib/components/layout/Sidebar.svelte": "55b43a4edb38ab49d83d160f6d548581a4562a1b611c1e89ba108e91352c342e",
+    "src/lib/components/layout/Sidebar.svelte": "caf981ff4fcf8ecaada468a327075fae86e8268dcbc2d5cf9b507d69628afac5",
     "src/lib/constants.ts": "0fd43314837a2d7775810c3f08fc82b8042c34a5b6e52f1a7e4513f303a07b5d",
     "src/lib/i18n/locales/ko-KR/translation.json": "78562a04e4a22236efd5efef429f1180071f536b00416af75ca7f3fb104410d3",
     "src/routes/(app)/+layout.svelte": "6e235011199f1eb11107a2d444e5db8c6fb89d13b6e93b9e5980523bf87226f6",
@@ -44,7 +44,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "dfcbead1512362359cd34ad38bf53c0dd8d649a8f1afc32d85777511374b6fc9"
+      "sha256": "3c3476fe1ce7c1111530c18dc86732b45ee6d3db5c71503514bcdfbbf71abe24"
     }
   ],
   "pyodide_files": {

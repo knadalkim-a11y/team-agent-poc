@@ -1396,6 +1396,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-entry .ew-category-items button{white-space:nowrap;overflow:hidden}
 [data-ees-source-sidebar][data-compact=true] #ees-work-entry .ew-mode{height:72px}
 [data-ees-source-sidebar][data-compact=true] #ees-work-entry .ew-mode>button,[data-ees-source-sidebar][data-compact=true] #ees-work-entry .ew-mode::before{left:3px;width:calc(100% - 6px);gap:0}
+[data-ees-source-sidebar][data-compact=true] #ees-work-entry .ew-mode>button{padding-inline:4px}
 [data-ees-source-sidebar][data-compact=true] #ees-work-entry .ew-mode>button[data-mode=author],[data-ees-source-sidebar][data-compact=true] #ees-work-entry[data-work-mode=author] .ew-mode::before{top:37px}
 [data-ees-source-sidebar][data-compact=true] #ees-work-entry :is(.ew-mode button,.ew-nav-links button,.ew-category-toggle,[data-scope-trigger])>span:not(.ew-icon),[data-ees-source-sidebar][data-compact=true] #ees-work-entry [data-scope-trigger]>small{max-width:0}
 [data-ees-source-sidebar][data-compact=true] #ees-work-entry :is(.ew-nav-caption,.ew-nav-group-title){height:0;margin-top:0;margin-bottom:0}

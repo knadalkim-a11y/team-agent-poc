@@ -2975,9 +2975,9 @@ index 007df31..d812226 100644
 + .ees-product button{flex:none;width:36px;height:36px;display:grid;place-items:center;padding:8px}
 + #sidebar[data-compact=true] .ees-product a{max-width:0;transition-duration:var(--ees-motion-close);transition-timing-function:var(--ees-motion-close-easing)}
 + #sidebar[data-compact=true] .ees-product{justify-content:center}
-+ .ees-sidebar-scroll{overflow-x:hidden}
++ .ees-sidebar-scroll{overflow-x:hidden;scrollbar-gutter:stable}
 + .ees-chat-controls span{white-space:nowrap;overflow:hidden;max-width:210px;transition:max-width var(--ees-motion-open) var(--ees-motion-open-easing)}
-+ #sidebar[data-compact=true] .ees-chat-controls span{max-width:0;transition-duration:var(--ees-motion-close);transition-timing-function:var(--ees-motion-close-easing)}
++ #sidebar[data-compact=true] .ees-chat-controls button{gap:0}#sidebar[data-compact=true] .ees-chat-controls span{max-width:0;transition-duration:var(--ees-motion-close);transition-timing-function:var(--ees-motion-close-easing)}
 + #sidebar[data-compact=true] :global(.ew-empty),#sidebar[data-compact=true] :global(.ew-recent){display:none}
  </style>
 +
