@@ -271,7 +271,7 @@
         if(state?.run?.id)for(const [key,value] of workspaceCache)if(value.run?.id===state.run.id)workspaceCache.delete(key);
       }targetLoading=false;render();return null;}
   }
-  function revisionFor(action){if(['save_draft','validate_workflow','publish_workflow','start_run','run_start'].includes(action))return state?.workflow?.revision || 0;if(action==='save_settings')return state?.settings?.revision || 0;if(action==='save_ui')return uiRevision;return state?.run?.revision || 0;}
+  function revisionFor(action){if(['save_draft','validate_workflow','publish_workflow','unpublish_workflow','start_run','run_start'].includes(action))return state?.workflow?.revision || 0;if(action==='save_settings')return state?.settings?.revision || 0;if(action==='save_ui')return uiRevision;return state?.run?.revision || 0;}
   async function command(body){return sendCommand('workspace/command',body);}
   async function sendCommand(path,body){
     if(!available())throw new Error('로그인을 확인해 주세요.');

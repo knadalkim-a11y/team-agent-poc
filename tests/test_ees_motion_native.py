@@ -243,8 +243,12 @@ class MotionNativeTests(IntegratedNativeCase):
                 if not reopened:
                     self.click('[data-ees-sidebar-toggle]')
                     self.wait("document.querySelector('#sidebar').dataset.compact === 'true' && [...document.querySelectorAll('.ew-nav-group-title')].every(e=>e.getBoundingClientRect().height === 0)")
+                    # Rounded zero height can precede the final computed
+                    # padding value. Use the same endpoint wait as expansion.
+                    self.wait("document.querySelector('#sidebar').getAnimations({subtree:true}).every(a=>a.playState !== 'running')")
+                    collapsed_rows = self.browser.evaluate(heading_metrics)
                     self.assertTrue(all(row['paddingTop'] == 0 and row['paddingBottom'] == 0
-                                        for row in self.browser.evaluate(heading_metrics)))
+                                        for row in collapsed_rows), collapsed_rows)
             if width == 1366 and not reduced:
                 self.screenshot('workspace-heading-1366')
         self.assertEqual(self.server.completions, [])

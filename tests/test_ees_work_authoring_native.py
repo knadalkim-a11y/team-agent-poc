@@ -678,7 +678,7 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.add_stage_ui('제안 검증 단계')
         self.add_job_ui('직접 편집할 작업')
         self.click('[data-author-action=save]')
-        self.wait("document.querySelector('[data-author-status]')?.textContent.includes('초안 r2 · 저장됨')")
+        self.wait("document.querySelector('[data-author-status]')?.dataset.authorRevision === '2'")
         before = self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['workflow']
         self.fill('#ew-author-node [name=job_guidance]', '직접 편집한 미저장 값')
         proposed = deepcopy(before['draft'])
@@ -704,7 +704,7 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.assertEqual(self.read('#ew-author-node [name=job_guidance]', 'value'), '반영 전 합성 제안')
         self.assertEqual(self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['workflow'], before)
         self.click('[data-author-action=save]')
-        self.wait("document.querySelector('#ees-work-designer')?.innerText.includes('초안 r3')")
+        self.wait("document.querySelector('[data-author-status]')?.dataset.authorRevision === '3'")
         after = self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['workflow']
         self.assertEqual(after['draft']['description'], '반영 전 합성 제안')
         self.assertIsNone(after['published_version'])
@@ -777,8 +777,8 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         key=self.create_ui_procedure('합성 담당자 작성 절차')
         self.add_stage_ui('현장 확인')
         self.add_job_ui('사람의 명시적 판정')
-        self.click('[data-author-action="save"]');self.wait("document.querySelector('[data-author-status]')?.textContent.includes('초안 r2 · 저장됨')")
-        self.click('[data-author-action="validate"]');self.wait("document.querySelector('[data-author-action=publish]')")
+        self.click('[data-author-action="save"]');self.wait("document.querySelector('[data-author-status]')?.dataset.authorRevision === '2'")
+        self.click('.ew-procedure-menu>summary');self.click('[data-author-action="validate"]');self.wait("document.querySelector('[data-author-action=publish]')")
         self.click('[data-author-action="publish"]');self.click('[data-dialog-confirm]')
         self.wait("!document.querySelector('#ees-work-dialog') && document.querySelector('#ees-work-designer [role=status]')?.textContent.includes('새 게시 버전을 만들었습니다')")
         self.click('[data-author-action=tab][data-tab=history]')
