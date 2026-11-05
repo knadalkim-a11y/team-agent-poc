@@ -110,6 +110,30 @@ class RuntimeTests(unittest.IsolatedAsyncioTestCase):
         return (await self.runtime.command(self.users[who],self.body('request_approve',request['revision'],external_request_id=request['id'])))['request']
     async def intent(self,request):
         return await self.runtime.command(self.user,self.body('request_intent',request['revision'],external_request_id=request['id']))
+    async def test_start_with_legacy_contract_preserves_factory_specific_authority(self):
+        contract = await self.make_contract()
+        wid = await self.make_workflow('human', contract=contract)
+        for factory in ('f1', 'f2'):
+            await self.core('save_factory', factory_id=factory, system_id='EMS', name=factory)
+        self.users['carol']['role'] = 'user'
+        for factory, role in (('f1', 'participant'), ('f2', 'viewer')):
+            await self.core('save_access', principal_kind='user', principal_id='carol',
+                            system_id='EMS', factory_id=factory, roles=[role])
+
+        started = await self.service.workspace_command(self.users['carol'], self.body(
+            'start_run', 3, workflow_id=wid, factory_id='f1', inputs={'target': 'synthetic-target'}))
+        self.assertTrue(started['ok'], started)
+        self.assertEqual(started['run']['factory_id'], 'f1')
+        for factory in ('f2', ''):
+            denied = await self.service.workspace_command(self.users['carol'], self.body(
+                'start_run', 3, workflow_id=wid, factory_id=factory, inputs={'target': 'synthetic-target'}))
+            self.assertEqual(denied['error']['code'], 'scope_forbidden', denied)
+        denied = await self.service.workspace_command(self.users['carol'], self.body(
+            'validate_workflow', 3, workflow_id=wid))
+        self.assertEqual(denied['error']['code'], 'scope_forbidden', denied)
+        with self.service._db() as db:
+            self.assertEqual(db.execute('SELECT count(*) FROM work_runs').fetchone()[0], 1)
+
     async def test_global_tool_catalog_preserves_scoped_picker_and_current_access(self):
         created = []
         for system in ('EMS', 'FDC'):
@@ -532,9 +556,11 @@ class RuntimeTests(unittest.IsolatedAsyncioTestCase):
                                      'mode':'tool','result_block':'change_request','effect_criterion':{'check':'registered-status'}}
         await self.core('save_draft', 1, workflow_id=wid, definition=definition)
         checked = await self.core('validate_workflow', 2, workflow_id=wid)
-        self.assertIn('j1: 운영 상태를 바꾸는 EES 요청 작업은 확인된 요청 도구를 연결해야 게시할 수 있습니다.', checked['validation']['errors'])
-        blocked = await self.service.workspace_command(self.user, self.body('publish_workflow', 2, workflow_id=wid))
-        self.assertEqual(blocked['error']['code'], 'validation_required')
+        self.assertIn('j1: 운영 상태를 바꾸는 EES 요청 작업은 확인된 요청 도구를 연결해야 실행할 수 있습니다.', checked['validation']['errors'])
+        await self.core('publish_workflow', 2, workflow_id=wid)
+        blocked = await self.service.workspace_command(self.user, self.body('start_run', 3, workflow_id=wid))
+        self.assertEqual(blocked['error']['code'], 'execution_not_ready')
+        self.assertEqual(self.bridge.calls, [])
 
     async def test_confirmed_list_binding_freezes_actual_ids_and_denies_unconfirmed(self):
         run = await self.chain(result_binding=True)

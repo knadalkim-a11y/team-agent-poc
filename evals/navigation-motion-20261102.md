@@ -1,5 +1,23 @@
 # 탐색·패널 시안 2 제품 검증
 
+<a id="workspace-heading-clip-20261105"></a>
+
+## 2026-11-05 · 워크스페이스 메뉴 제목 잘림
+
+- **통합 후속 검증:** #120 최종 head `9d1df66`의 [CI468](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41948573115)에서 움직임6/6·native-compose97/97 및 전체 필수39개가 성공했다. 제목 접기의 실제 애니메이션 종료 후 padding0·재펼침 검사를 통과했다. #120 병합 main `c41634a`에 포함됐으며 #121 통합에서도 유지한다. 아래 최초 실패와 당시 관찰은 보존한다.
+
+- **병합 통합 CI466 후속(2026-11-05):** #120 head `707b249`의 [CI466](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41946435594) native-compose 97개 중 96개가 통과했다. 앞서 보완한 Q1을 포함한 layout5/5·작성31/31·실행23/23은 통과했고, 이 제목 검사의 첫1920px 접기에서 높이0 대기 뒤 padding0 즉시 단언이 실패했다. [최초 PNG·DOM·확장 치수](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41946435594/artifacts/13378893830)를 보존한다. 확장 높이26/36/36과 실제 글자16px는 정상이었으며 실패 캡처는 접힌 메뉴를 보여 준다. 실패 직전 padding 수치 자체는 기록되지 않아 추정값을 쓰지 않는다.
+- **누락 경로와 보완:** 기존 검사는 펼침/재펼침만 하위 애니메이션 종료를 기다렸고, 접기는 반올림되는 DOM 높이0만 기다렸다. CSS는 높이와 padding을 함께 전환하므로 높이0만으로 계산된 padding의 종료를 보장하지 않는다. 접기에도 같은 `getAnimations({subtree:true})` 종료 대기를 적용하고 실제 padding0 단언·폭/높이·일반/동작 줄이기·재펼침 조건을 유지한다. 재발 시 실제 padding 수치가 단언 로그에 남도록 측정 행도 전달한다. 제품 CSS·시간 제한·실제 클릭은 변경하지 않고, Python 구문·문서·diff 검사 및 새 통합 head 전체 CI로 판정한다.
+
+- **요청·원본:** 사용자가 ‘업무 만들기·AI 설정·관리자만’이 반쯤 가려진다고 보고했고, 코드 비교 뒤 수정·병합을 요청했다. main `93749cc10fc551748c018a06cc85318013d2970d`에서 해당 제목 CSS와 기존 Native 탐색 시험만 수정한다. 다른 열린 PR #118은 시스템 계정 설명 변경이며 이번 수정과 분리한다.
+- **설계 비교:** 2026-11-05 KST에 Figma `835:324`와 `1068:6147`의 왼쪽 패널을 읽고 렌더를 확인했다. 제목은 16px 행에 위/아래 여백 4/6px 또는 14/6px를 더한 26/36/36px다. Figma 원본에서는 잘리지 않았으나 제품의 11-02 움직임 CSS는 세 제목 모두 `height:18px;overflow:hidden`으로 제한한다. `border-box`와 기존 여백이 결합해 글자가 잘리는 코드 원인을 확인했다. 앞선 정지 화면·폭·카테고리 검사에는 제목의 실제 가용 높이 검사가 없었다.
+- **수정:** 일반 설명의 18px와 그룹 제목의 26/36px를 분리한다. 접을 때 제목의 높이와 위아래 여백을 함께 0으로 전환하고 펼치면 원래 간격으로 돌아온다. 기존 속도·이징·동작 줄이기 설정을 재사용하며 새 화면·기능·설정은 추가하지 않는다. Figma·승인 목업·저장/게시·권한 동작은 변경하지 않는다.
+- **재발 검사:** 기존 `test_navigation_v2_geometry_modes_categories_global_tools_and_draft`에서 관리자 제목 3개의 실제 높이, 여백을 뺀 가용 높이와 행 높이, 다음 버튼과의 겹침을 확인한다. 1920×1080·1366×768과 동작 줄이기에서 접기 후 높이/여백 0·재펼침 복구를 검사하며 `workspace-heading-1366.png`와 `workspace-heading-geometry.json`을 CI 증거에 남긴다.
+- **로컬 검증:** 관련 Node motion/Svelte 39/39, branding 33통과·공식 wheel 필요 1생략, 수정한 Python 시험 구문·문서 점검(오류0/검토 후보0)·시험 ID 감사(기존1332/현재1591, 오류0)·`git diff --check` 통과. 최종 전체 CI는 이 수정 PR에서 확인한다. 최초 로컬 Chromium 기동은 `socket() failed: Operation not permitted`로 중단되어 실제 제품 브라우저 재현을 로컬 성공으로 기록하지 않는다. 사내 사용자 화면·배포는 미확인이다.
+- **첫 CI·보완:** head `10d01f4`의 [CI451 native-compose](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41931724663/job/126932846049)는 95통과·1실패였다. 새 제목 검사에서 세 제목을 기다렸지만 합성 workflow fixture에는 Native 계정 DB가 없어 `native_access`가 모두 false였고 ‘AI 설정’ 그룹 자체가 없었다. 실패 캡처에서 ‘업무 만들기·관리자만’의 정상 표시는 확인했지만 세 제목 검증 완료로 간주하지 않는다. 기존 `SourceShellNativeTests.enable_native_menus`와 같은 명시적 합성 접근 응답을 이 시험 안에만 설정하고 refresh 후 검사하도록 보완한다. 제품 권한·CSS는 추가 변경하지 않으며, 높이·간격·접기/재펼침 조건도 그대로 유지한다. 보완 head의 전체 CI와 3개 제목 실측·캡처를 확인한 뒤 병합한다.
+- **CI453 준비 실패·재검 경계:** head `288bd4e`의 [source-frontend job](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41934160143/job/126938318914)은 공식 wheel 비교의 첫 `about:blank` 진입에서 `Browser.getVersion` 응답 시간 초과로 중단됐다. 수정 프런트엔드 빌드나 제목 검사는 아직 시작하지 않았고 Chrome 지연의 직접 원인은 미확정이다. 같은 제품/준비 코드의 CI451 source-frontend 성공과 기존 [Chrome 준비 경계 기록](v4-ui-20260930.md#integrated-sixth-ci-20261002)을 참고하되 같은 원인으로 단정하지 않는다. 이 최초 실패를 기록하는 문서 변경만 반영한 새 head를 새 runner에서 1회 재검한다. 제품·fixture·시간 제한·assertion은 바꾸지 않으며, 같은 기동 실패가 반복되면 추가 자동 재시도 없이 준비 증거부터 조사한다. 최종 성공 조건은 새 head의 전체 필수 CI 및 3개 제목의 실측·캡처 통과다.
+- **CI454 화면 상태 보완:** head `d5889aa`의 source-frontend는 준비·원본 비교·수정 빌드 모두 통과했다(Chrome 지연의 원인 해결로 간주하지 않음). [native-compose job](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41934873539/job/126943490354)은 95통과·1실패였고, 새 검사는 1920px 제목 높이/여백/접기/재펼침을 통과한 뒤 1366px에서 `[0,0,0]`을 측정했다. 실패 PNG·DOM은 1366×768, 사이드바 폭56px, ‘사이드바 펼치기’ 버튼으로 접힌 상태를 확인했다. 소스의 기존 1440px 경계 자동 접힘을 시험 준비에서 빠뜨린 원인이다. 각 창 크기 변경 뒤 기존 `open_sidebar()`의 실제 클릭·가시 폭 확인으로 펼침을 준비하며, 제품의 자동 접힘은 변경하지 않는다. 첫 실패 위치를 잃지 않도록 각 측정의 창 크기·동작 줄이기·재펼침 상태와 실측을 파일에 즉시 보존한다. 높이·행 높이·버튼 간격·접힘0 기준은 그대로 유지하고 보완 head의 전체 CI로 재검한다.
+
 <a id="navigation-motion-product-20261102"></a>
 
 ## 2026-11-02 · 탐색·패널 시안 2 제품 반영

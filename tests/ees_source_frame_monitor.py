@@ -66,7 +66,7 @@ FRAME_MONITOR = r"""(() => {
     });
   };
   const scopeEmpty = () => {
-    const copy = /^(등록된 업무 절차가 없습니다[.]?|지금 처리할 내 업무가 없습니다[.]?|저장된 진행 건이 없습니다[.]?|조회할 이전 기록이 없습니다[.]?|No procedures are registered[.]?)$/;
+    const copy = /^((?:등록된|게시된) 업무 절차가 없습니다[.]?|지금 처리할 내 업무가 없습니다[.]?|저장된 진행 건이 없습니다[.]?|조회할 이전 기록이 없습니다[.]?|No (?:procedures are registered|published procedures)[.]?)$/;
     const nodes = [...document.querySelectorAll('#ees-work-entry *, #ees-work-panel *')];
     const empty = nodes.filter(node => visible(node) &&
       (copy.test(node.textContent.trim()) || /^아직 (업무 절차|워크플로우)가 없습니다[.]?/.test(node.textContent.trim()) ||
