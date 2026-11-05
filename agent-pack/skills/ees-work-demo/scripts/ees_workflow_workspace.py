@@ -986,43 +986,6 @@ class WorkspaceMixin:
             value['settings'].append({'factory_id': setting['factory_id'], 'values': json.loads(setting['values_json']), 'revision': setting['revision']})
         return value
 
-    def _work_my_work(self, db, actor, groups, runs):
-        items = []; now = datetime.now(timezone.utc); today = now.date()
-        for run in runs:
-            if run['status'] in TERMINAL:
-                continue
-            definition = run['definition']
-            for key, job in run['jobs'].items():
-                if not job.get('can_execute', True):
-                    continue
-                node = definition['nodes'][key]
-                if job['claim_actor'] and job['claim_actor'] != _value(actor, 'id'):
-                    continue
-                assigned = node.get('assignee')
-                if assigned and assigned.get('id') not in ({_value(actor, 'id')} if assigned.get('kind') == 'user' else groups):
-                    continue
-                actionable = bool(job.get('missing_inputs') and job['status'] == 'pending') or job['status'] in ('waiting_input', 'waiting_confirmation', 'review_required', 'failed', 'partial', 'unknown', 'blocked', 'missed') or (node.get('mode', 'human') == 'human' and job['status'] == 'pending')
-                if job.get('partial_confirmed'): actionable = False
-                if not actionable:
-                    continue
-                if not self._work_dependencies_ready(db, run['id'], definition, key):
-                    continue
-                due = (job.get('deadline') or {}).get('at'); bucket = 'incident' if run['mode'] == 'emergency' or definition.get('category') == 'incident' else 'undated'
-                if due and bucket != 'incident':
-                    try:
-                        due_time = datetime.fromisoformat(due.replace('Z', '+00:00'))
-                        local_today = datetime.fromtimestamp(self.operations.clock() if hasattr(self, 'operations') else now.timestamp(), due_time.tzinfo or timezone.utc).date()
-                        date = due_time.date()
-                        bucket = 'overdue' if date < local_today else 'today' if date == local_today else 'week' if date <= local_today + timedelta(days=6 - local_today.weekday()) else 'future'
-                    except (ValueError, AttributeError):
-                        bucket = 'undated'
-                items.append({'id': run['id'] + ':' + key, 'run_id': run['id'], 'workflow_id': run['workflow_id'],
-                              'job_id': key, 'name': node['name'], 'workflow_name': definition['name'], 'system_id': run['system_id'],
-                              'factory_id': run['factory_id'], 'status': job['status'], 'bucket': bucket, 'due_at': due,
-                              'order': list(definition['nodes']).index(key), 'claim_actor': job['claim_actor'], 'revision': run['revision']})
-        priority = {key: index for index, key in enumerate(('incident', 'overdue', 'today', 'week', 'future', 'undated'))}
-        return sorted(items, key=lambda item: (priority[item['bucket']], item['due_at'] or '9999', item['order'], item['id']))
-
     @staticmethod
     def _work_options_authority(db, actor, groups, system_id):
         grants = [dict(row) for row in db.execute('SELECT * FROM work_access WHERE system_id=? AND active=1 ORDER BY id', (system_id,)) if row['principal_id'] in ({_value(actor, 'id')} if row['principal_kind'] == 'user' else groups)]
@@ -1303,7 +1266,6 @@ class WorkspaceMixin:
                     if not factory or factory['system_id'] != selected_workflow['system_id']:
                         _fail('target_mismatch', '선택한 공장과 절차의 시스템이 다릅니다. 작업 위치를 다시 선택해 주세요.')
                 ui = db.execute('SELECT * FROM work_ui WHERE actor_id=?', (_value(actor, 'id'),)).fetchone()
-                my_work = self._work_my_work(db, actor, groups, runs)
                 capabilities['managed_systems'] = []
                 for system in systems:
                     try:
@@ -1320,7 +1282,7 @@ class WorkspaceMixin:
                         'initial_procedures_ready': bool(db.execute('SELECT 1 FROM work_initial_procedures WHERE system_id=?', (system_id,)).fetchone()) if system_id in systems else None,
                         'workflows': workflows, 'runs': runs, 'workflow': selected_workflow, 'run': selected_run,
                         'workflow_active_runs': workflow_active_runs,
-                        'my_work': my_work, 'my_work_count': len(my_work), 'access': access, 'people': people, 'native_groups': native_groups,
+                        'access': access, 'people': people, 'native_groups': native_groups,
                         'ui_state': {'revision': ui['revision'], 'state': json.loads(ui['state'])} if ui else {'revision': 0, 'state': {}},
                         'legacy_count': db.execute('SELECT COUNT(*) FROM cases WHERE owner=?', (_value(actor, 'id'),)).fetchone()[0]}
         except WorkflowError as error:

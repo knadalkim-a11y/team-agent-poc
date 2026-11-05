@@ -489,7 +489,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.author(name='처음 범위 응답 전 빈 상태 검증', jobs=1)
         frame_monitor.install(self)
         self.navigate('/c/existing-chat')
-        self.wait("document.querySelector('#ees-work-entry [data-action=my_work]') && window.__eesNativeDraftV1?.ready()")
+        self.wait("document.querySelector('#ees-work-entry [data-action=mode][data-mode=work]') && window.__eesNativeDraftV1?.ready()")
         self.open_sidebar()
         self.assertIsNotNone(self.refresh())
         self.fill('#chat-input', '첫 범위를 받는 동안에도 남는 문장')
@@ -498,8 +498,8 @@ class SourceShellNativeTests(IntegratedNativeCase):
         frame_monitor.guard_loading(self)
         labels, unknown_labels, cached_labels = [], [], []
         for label, system, screen, unknown in (
-                ('first-scope-my-work', 'APC', 'my_work', True),
-                ('cached-scope-my-work', 'EMS', 'my_work', False),
+                ('first-scope-work-home', 'APC', 'work_home', True),
+                ('cached-scope-work-home', 'EMS', 'work_home', False),
                 ('first-scope-records', 'FDC', 'records', True),
                 ('first-scope-procedures', 'EGIS', 'procedures', True),
                 ('cached-scope-procedures', 'EMS', 'procedures', False)):
@@ -526,8 +526,8 @@ class SourceShellNativeTests(IntegratedNativeCase):
             self.wait("!document.querySelector('[data-ees-scope-loading]')")
             self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
             self.assertEqual(self.browser.evaluate('location.pathname'), '/c/existing-chat')
-            if screen == 'my_work':
-                self.assertIn('지금 처리할 내 업무가 없습니다', self.text('#ees-work-panel'))
+            if screen == 'work_home':
+                self.assertIn('업무 절차를 선택해 주세요', self.text('#ees-work-panel'))
             elif screen == 'records':
                 self.assertIn('저장된 진행 건이 없습니다.', self.text('#ees-work-panel'))
             elif unknown:
@@ -565,7 +565,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.author(name='범위 변경 보존 절차', jobs=1)
         frame_monitor.install(self)
         self.navigate('/c/existing-chat')
-        self.wait("document.querySelector('#ees-work-entry [data-action=my_work]') && window.__eesNativeDraftV1?.ready()")
+        self.wait("document.querySelector('#ees-work-entry [data-action=mode][data-mode=work]') && window.__eesNativeDraftV1?.ready()")
         self.open_sidebar()
         self.assertIsNotNone(self.refresh())
         self.fill('#chat-input', '범위 변경 중에도 그대로인 문장')
@@ -766,22 +766,22 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.start(workflow_id)
         frame_monitor.install(self)
         self.navigate('/c/existing-chat')
-        self.wait("document.querySelector('#ees-work-entry [data-action=my_work]') && document.querySelector('#ees-work-content') && window.__eesNativeDraftV1?.ready()")
+        self.wait("document.querySelector('#ees-work-entry [data-action=mode][data-mode=work]') && document.querySelector('#ees-work-content') && window.__eesNativeDraftV1?.ready()")
         self.open_sidebar()
         # Warm each destination once. First acquisition may show a placeholder;
         # every subsequent route transition below must use retained work data.
         self.step('warm-procedures', '[data-action=mode][data-mode=author]',
                   "document.querySelector('#ees-work-designer [data-author-action=create]')")
-        self.step('warm-my-work', '[data-action=mode][data-mode=work]',
-                  "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '내 업무'")
+        self.step('warm-work-home', '[data-action=mode][data-mode=work]',
+                  "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '업무'")
         self.assertIsNotNone(self.refresh(), 'Initial workspace/operations refresh did not complete')
-        self.wait("document.querySelector('#ees-work-entry [data-action=my_work]') && document.querySelector('#ees-work-content .ew-todo, #ees-work-content .ew-my-work-empty')")
+        self.wait("document.querySelector('#ees-work-entry [data-action=mode][data-mode=work]') && document.querySelector('#ees-work-content .ew-work-home')")
         self.delay_workspace_reads()
         frame_monitor.guard_loading(self)
         labels = []
 
         for native in ('skills', 'tools', 'models'):
-            for destination in ('procedures', 'my-work'):
+            for destination in ('procedures', 'work-home'):
                 label = native + '-to-' + destination
                 enter = label + '-enter-workspace'
                 self.delayed_step(enter, '[data-action=mode][data-mode=author]',
@@ -797,8 +797,8 @@ class SourceShellNativeTests(IntegratedNativeCase):
                             else '[data-action=mode][data-mode=work]')
                 condition = ("document.querySelector('#ees-work-designer [data-author-action=create]')"
                              if destination == 'procedures' else
-                             "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '내 업무'")
-                different = destination == 'my-work' or native == 'tools'
+                             "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '업무'")
+                different = destination == 'work-home' or native == 'tools'
                 if different:
                     # B10-2 departs from tools, so its procedures return also differs.
                     # The 10-15 contract permits a local destination placeholder
@@ -806,7 +806,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
                     # already visible. Same-menu returns keep zero loading.
                     frame_monitor.begin_native_return(self, label,
                         selector='#ees-work-entry ' + selector, native=native,
-                        destination='my_work' if destination == 'my-work' else 'procedures',
+                        destination='work_home' if destination == 'work-home' else 'procedures',
                         previous='tools' if native == 'tools' else 'procedures')
                 self.delayed_step(label, '#ees-work-entry ' + selector,
                                   "location.pathname === '/c/existing-chat' && (" + condition + ')')
@@ -853,7 +853,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
             json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         self.assertTrue(self.server.navigation_reads)
         self.assertEqual([row['label'] for row in evidence['nativeReturns']],
-                         ['skills-to-my-work', 'tools-to-procedures', 'tools-to-my-work', 'models-to-my-work'])
+                         ['skills-to-work-home', 'tools-to-procedures', 'tools-to-work-home', 'models-to-work-home'])
         for row in self.server.navigation_reads:
             self.assertGreaterEqual(row['released'] - row['started'], .99)
         frame_monitor.assert_clean(self, evidence, labels=labels)
@@ -863,7 +863,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.enable_native_menus()
         frame_monitor.install(self)
         self.navigate('/c/existing-chat')
-        self.wait("document.querySelector('#ees-work-entry [data-action=my_work]') && window.__eesNativeDraftV1?.ready()")
+        self.wait("document.querySelector('#ees-work-entry [data-action=mode][data-mode=work]') && window.__eesNativeDraftV1?.ready()")
         self.open_sidebar()
         self.fill('#chat-input', '다른 칸으로 돌아와도 유지할 대화 초안')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
@@ -871,7 +871,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
             'tools': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '도구 · 공용'",
             'procedures': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '워크플로우'",
             'workspace_admin': "document.querySelector('#ees-work-panel .ew-work-heading h2')?.textContent === '공장·접근 범위'",
-            'my_work': "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '내 업무'",
+            'work_home': "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '업무'",
         }
         # Warm the three author panels once before timing the return boundary.
         # Existing same-menu preservation coverage below keeps dirty draft DOM,
@@ -888,7 +888,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         labels = []
 
         for origin in ('tools', 'procedures', 'workspace_admin'):
-            for destination in ('tools', 'procedures', 'workspace_admin', 'my_work'):
+            for destination in ('tools', 'procedures', 'workspace_admin', 'work_home'):
                 if destination == origin:
                     continue
                 label = 'return-' + origin + '-to-' + destination
@@ -900,14 +900,14 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 # Cover both Guidance and the AI settings route with the same
                 # return contract. The administrator dialog's close/same path
                 # remains in test_every_navigation_has_source_chrome... .
-                native = 'models' if destination == 'my_work' else 'skills'
+                native = 'models' if destination == 'work_home' else 'skills'
                 self.delayed_step(label + '-native',
                     '#ees-work-entry [data-action=native_open][data-native-id=' + native + ']',
                     'location.pathname === ' + json.dumps('/workspace/' + native) +
                     ' && document.querySelector("#workspace-container input") && ' +
                     'document.querySelector("#ees-work-entry [data-native-id=' + native + ']")?.getAttribute("aria-current") === "page"',
                     paths=('workspace',))
-                selector = ('#ees-work-entry [data-action=mode][data-mode=work]' if destination == 'my_work'
+                selector = ('#ees-work-entry [data-action=mode][data-mode=work]' if destination == 'work_home'
                             else '#ees-work-entry [data-action=' + destination + ']')
                 start = len(self.server.navigation_reads)
                 frame_monitor.begin_native_return(self, label, selector=selector, native=native,
@@ -951,7 +951,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         saved = self.state(workflow_id=workflow_id)['workflow']
         frame_monitor.install(self)
         self.navigate('/c/existing-chat')
-        self.wait("document.querySelector('#ees-work-entry [data-action=my_work]') && window.__eesNativeDraftV1?.ready()")
+        self.wait("document.querySelector('#ees-work-entry [data-action=mode][data-mode=work]') && window.__eesNativeDraftV1?.ready()")
         self.open_sidebar()
         self.fill('#chat-input', '새로 받는 동안 그대로 둘 개인 질문')
         composer = self.browser.evaluate('window.__eesNativeDraftV1.read()')
@@ -1015,8 +1015,8 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.delayed_step('preservation-native-return', '#ees-work-entry [data-action=procedures]',
                           "location.pathname === '/c/existing-chat' && document.querySelector('#ew-author-policies [name=completion_notes]')")
         returned = assert_preserved('Native return')
-        self.delayed_step('preservation-my-work', '[data-action=mode][data-mode=work]',
-                          "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '내 업무'")
+        self.delayed_step('preservation-work-home', '[data-action=mode][data-mode=work]',
+                          "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '업무'")
         self.delayed_step('preservation-author-return', '[data-action=mode][data-mode=author]',
                           "document.querySelector('#ew-author-policies [name=completion_notes]')")
         # Work mode deliberately mounts a different panel. Returning must
@@ -1026,7 +1026,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.assertEqual(self.server.completions, [])
         evidence = frame_monitor.collect(self, labels=('changed-background-refresh',
                                          'preservation-native-skills', 'preservation-native-return',
-                                         'preservation-my-work', 'preservation-author-return'))
+                                         'preservation-work-home', 'preservation-author-return'))
         evidence['preservation'] = {'before': before, 'refreshed': refreshed, 'returned': returned,
                                     'work_returned': work_returned,
                                     'updated_workflow_id': other['workflow_id'],

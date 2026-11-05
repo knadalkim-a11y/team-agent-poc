@@ -66,7 +66,7 @@ FRAME_MONITOR = r"""(() => {
     });
   };
   const scopeEmpty = () => {
-    const copy = /^((?:등록된|게시된) 업무 절차가 없습니다[.]?|지금 처리할 내 업무가 없습니다[.]?|저장된 진행 건이 없습니다[.]?|조회할 이전 기록이 없습니다[.]?|No (?:procedures are registered|published procedures)[.]?)$/;
+    const copy = /^((?:등록된|게시된) 업무 절차가 없습니다[.]?|업무 절차를 선택해 주세요[.]?|저장된 진행 건이 없습니다[.]?|조회할 이전 기록이 없습니다[.]?|No (?:procedures are registered|published procedures)[.]?)$/;
     const nodes = [...document.querySelectorAll('#ees-work-entry *, #ees-work-panel *')];
     const empty = nodes.filter(node => visible(node) &&
       (copy.test(node.textContent.trim()) || /^아직 (업무 절차|워크플로우)가 없습니다[.]?/.test(node.textContent.trim()) ||
@@ -79,11 +79,18 @@ FRAME_MONITOR = r"""(() => {
       if (visible(node) && node.textContent.trim() === '0개') empty.push('워크플로우 목록 0개');
     return empty;
   };
-  const navigationCurrent = () => [...document.querySelectorAll('#ees-work-entry [aria-current]')]
+  const navigationCurrent = () => {
+    const current = [...document.querySelectorAll('#ees-work-entry [aria-current]')]
     .filter(node => visible(node) && !['', 'false'].includes(node.getAttribute('aria-current')))
     .map(node => ({key: node.dataset.action === 'native_open'
       ? 'native_open:' + node.dataset.nativeId : node.dataset.action,
       ariaCurrent: node.getAttribute('aria-current'), text: node.textContent.trim()}));
+    // Work has no personal landing-menu item. Before choosing a procedure,
+    // its mode button is the actual selected navigation control.
+    const work = document.querySelector('#ees-work-entry [data-action=mode][data-mode=work][aria-pressed=true]');
+    if (!current.length && visible(work)) current.push({key: 'work_home', ariaPressed: 'true', text: work.textContent.trim()});
+    return current;
+  };
   const rightPanels = () => {
     const panels = [];
     for (const header of document.querySelectorAll('#ees-work-designer > header')) {
@@ -95,7 +102,7 @@ FRAME_MONITOR = r"""(() => {
     for (const header of document.querySelectorAll('#ees-work-panel .ew-work-heading h2'))
       if (visible(header) && header.textContent.trim() === '공장·접근 범위') panels.push('workspace_admin');
     for (const header of document.querySelectorAll('#ees-work-panel .ew-panel-header strong'))
-      if (visible(header) && header.textContent.trim() === '내 업무') panels.push('my_work');
+      if (visible(header) && header.textContent.trim() === '업무') panels.push('work_home');
     return panels;
   };
   // Arm before physical CDP input, but start the boundary at the real click.
@@ -148,7 +155,7 @@ FRAME_MONITOR = r"""(() => {
     // still a failure; other tests keep their original no-loading contract.
     const destinationLoading = !!returning && menuCurrent.length === 1 &&
       menuCurrent[0].key === returning.destination && menuMode.length === 1 &&
-      menuMode[0] === (returning.destination === 'my_work' ? 'work' : 'author') &&
+      menuMode[0] === (returning.destination === 'work_home' ? 'work' : 'author') &&
       !panels.includes(returning.previous) && targetLoading.length > 0 &&
       targetLoading.length === panelLoading.length &&
       panelLoading.every((text, index) => text === targetLoading[index]);
@@ -169,7 +176,7 @@ FRAME_MONITOR = r"""(() => {
         .filter(visible).map(node => ({region: node.dataset.eesScopeLoading, text: node.textContent.trim()})),
       scopeControls: visible(document.querySelector('#ees-work-system-trigger')) &&
         [...document.querySelectorAll('#ees-work-entry [data-action=mode]')].filter(visible).length === 2 &&
-        !![...document.querySelectorAll('#ees-work-entry [data-action=my_work], #ees-work-entry [data-action=procedures]')].find(visible),
+        !![...document.querySelectorAll('#ees-work-entry [data-action=mode][data-mode=work], #ees-work-entry [data-action=procedures]')].find(visible),
       content: visible(chat) || visible(workspace), adminDialog: visible(dialog),
       sourceText: source && !!shell.textContent.trim(),
       startupGate: document.documentElement?.dataset.eesStartup || null

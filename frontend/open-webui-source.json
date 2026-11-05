@@ -23,15 +23,15 @@
     "src/lib/components/chat/Placeholder.svelte": "dc5512dc7648112edd011e27797c07cf5d8d52474be5490a1ae2bef434327036",
     "src/lib/components/ees/EesHelperNotice.svelte": "22ceccc7ad93c5d820f73269baaa9b19f12c5c99054b76ecc8c89f7757f8bba0",
     "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
-    "src/lib/components/ees/EesNavigation.svelte": "2b5cc5bb21a05ec4ebebf9f703d3abc2591dcf986d1c05729780a264262fb76e",
+    "src/lib/components/ees/EesNavigation.svelte": "ac9a131ccdb9fd2930a13310e4d7a875e89aea55c65223261750d03dcb9a8028",
     "src/lib/components/ees/EesProcedureIntro.svelte": "a45c2231ab2f4463f48c39cb9172e820196a7001cd1df60ab549a5695df6d9a3",
     "src/lib/components/ees/EesScopeSelect.svelte": "4906d92006b655ef5de8079ba0ea03a84ae9a584cd404585d530b4f35479afc4",
-    "src/lib/components/ees/EesShell.svelte": "f0a2dce78749fc449c29ad5ce263a2996ec65cf954c2e13e83a187210c094c57",
+    "src/lib/components/ees/EesShell.svelte": "de3386987a70bc5c69a6f19c9af3f4babb0372a0b1e66341419406994b9363d2",
     "src/lib/components/ees/icons/5bc95.svg": "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7",
-    "src/lib/components/ees/state.ts": "560ef1a21f46fc2a1beabf3012a74933002af586c507ac42bb144f40fe305a43",
+    "src/lib/components/ees/state.ts": "96db1e239dde909e0ceb9866969e0a06b142b7cf863719af0e225cee3a43c9e0",
     "src/lib/components/layout/Sidebar.svelte": "caf981ff4fcf8ecaada468a327075fae86e8268dcbc2d5cf9b507d69628afac5",
     "src/lib/constants.ts": "0fd43314837a2d7775810c3f08fc82b8042c34a5b6e52f1a7e4513f303a07b5d",
-    "src/lib/i18n/locales/ko-KR/translation.json": "78562a04e4a22236efd5efef429f1180071f536b00416af75ca7f3fb104410d3",
+    "src/lib/i18n/locales/ko-KR/translation.json": "5b950adcd829c41ef865ea2538192bc86534a376fe9c83cbecf9205a7679335c",
     "src/routes/(app)/+layout.svelte": "6e235011199f1eb11107a2d444e5db8c6fb89d13b6e93b9e5980523bf87226f6",
     "src/routes/(app)/+page.svelte": "7cdd5f35c6d1064663d2bafd03263585ca270ce24d26788a656d465339e6cb03",
     "src/routes/(app)/c/[id]/+page.svelte": "2cf8b7796915e7711e467a4142d96ad1d4afc0366221236620719193d91d0ad2",
@@ -44,7 +44,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "3c3476fe1ce7c1111530c18dc86732b45ee6d3db5c71503514bcdfbbf71abe24"
+      "sha256": "c8b692a42439e5c51ed9c154b1396c822ad2a5e244c680948729502c06ca170c"
     }
   ],
   "pyodide_files": {

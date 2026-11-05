@@ -26,7 +26,7 @@ test('procedure entry initializes once through POST then renders ordinary workfl
 });
 
 test('initial registration is not attempted by readers, tools pages or ordinary work views',async()=>{
- for(const [mode,tab,managed] of [['author','overview',[]],['author','tools',['EMS']],['work','my_work',['EMS']]]){
+ for(const [mode,tab,managed] of [['author','overview',[]],['author','tools',['EMS']],['work','overview',['EMS']]]){
   const h=controller(),state={ok:true,capabilities:{actor_id:'a',can_author:!!managed.length,managed_systems:managed},systems:['EMS'],initial_procedures_ready:false,workflows:[],runs:[],ui_state:{revision:0,state:{}}};
   h.api.setState(state);h.api.setSelection({mode,tab,system_id:'EMS'});h.setReply(call=>call.url.includes('workspace?')?state:{ok:true});await h.api.refresh();
   assert.equal(h.calls.filter(call=>call.body?.action==='initialize_procedures').length,0);
@@ -229,7 +229,7 @@ test('same-section tools menu restores its exact authoring selection without clo
  const h=nativeNavigationHarness();h.api.setSelection({mode:'author',tab:'tools',workflow_id:'',job_id:'',run_id:''});const before=JSON.parse(JSON.stringify(h.api.snapshot().selection));let closed=0;h.designer.closeStart=()=>closed++;await h.open();await h.back('tools');assert.equal(h.navigation.at(-1),'/c/original?keep=1');assert.deepEqual(JSON.parse(JSON.stringify(h.api.snapshot().selection)),before);assert.equal(closed,0);
 });
 test('a different EES menu destination is applied only after returning to the original chat',async()=>{
- for(const [action,extra,mode,tab] of [['mode',{mode:'work'},'work','my_work'],['tools',{},'author','tools']]){const h=nativeNavigationHarness(),draft=JSON.parse(JSON.stringify(h.readDraft()));await h.open();await h.back(action,extra);assert.equal(h.navigation.at(-1),'/c/original?keep=1');assert.equal(h.api.snapshot().selection.mode,mode);assert.equal(h.api.snapshot().selection.tab,tab);assert.deepEqual(h.readDraft(),draft);assert.equal(h.restores.length,0);assert.equal(h.calls.filter(call=>call.body&&call.body.action!=='save_ui').length,0);}
+ for(const [action,extra,mode,tab] of [['mode',{mode:'work'},'work','overview'],['tools',{},'author','tools']]){const h=nativeNavigationHarness(),draft=JSON.parse(JSON.stringify(h.readDraft()));await h.open();await h.back(action,extra);assert.equal(h.navigation.at(-1),'/c/original?keep=1');assert.equal(h.api.snapshot().selection.mode,mode);assert.equal(h.api.snapshot().selection.tab,tab);assert.deepEqual(h.readDraft(),draft);assert.equal(h.restores.length,0);assert.equal(h.calls.filter(call=>call.body&&call.body.action!=='save_ui').length,0);}
 });
 test('Native return keeps the workspace visible but publishes a reference only after validation and Chat readiness',async()=>{
  for(const first of ['state','draft']){
@@ -413,10 +413,10 @@ test('review save cannot continue confirmation after its refresh loses the selec
 });
 test('an explicit early navigation survives initial saved-selection restoration and late startup reads',async()=>{
  const h=controller(),startup=deferred();h.api.setRestored(false);let reads=0;
- const saved={ok:true,systems:['EMS'],workflows:[],runs:[],my_work:[],ui_state:{revision:5,state:{selection:{mode:'work',tab:'current',workflow_id:'old-work',run_id:'old-run',job_id:'old-job',system_id:'EMS'}}}};
+ const saved={ok:true,systems:['EMS'],workflows:[],runs:[],ui_state:{revision:5,state:{selection:{mode:'work',tab:'current',workflow_id:'old-work',run_id:'old-run',job_id:'old-job',system_id:'EMS'}}}};
  h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?(++reads===1?startup.promise:saved):{ok:true});
- const first=h.api.refresh();await h.api.handleClick({dataset:{action:'my_work'}});startup.resolve(saved);await first;
- assert.equal(h.api.snapshot().selection.tab,'my_work');assert.equal(h.api.snapshot().selection.job_id,'');assert.equal(h.api.snapshot().selection.system_id,'EMS');
+ const first=h.api.refresh();await h.api.handleClick({dataset:{action:'mode',mode:'work'}});startup.resolve(saved);await first;
+ assert.equal(h.api.snapshot().selection.tab,'overview');assert.equal(h.api.snapshot().selection.job_id,'');assert.equal(h.api.snapshot().selection.system_id,'EMS');
 });
 test('early selection patches are cleared on account reset and do not replace another account restoration',async()=>{
  const h=controller();h.api.setRestored(false);await h.api.select({system_id:'CHOICE',tab:'records'},{fetch:false});
@@ -510,10 +510,6 @@ test('historical values compare only the stored shared input without replacing i
 test('records are scoped and put active runs first without inventing a date range',()=>{
  const runs=[{id:'old',workflow_id:'w',status:'completed',created_at:'2026-10-02',progress:{}},{id:'open',workflow_id:'w',status:'open',created_at:'2026-10-01',progress:{}},{id:'other',workflow_id:'x',status:'open',progress:{}}];
  const out=html('workRunRecordsHTML(runs,"w","Saved name")',{runs});assert.ok(out.indexOf('data-run-id="open"')<out.indexOf('data-run-id="old"'));assert.doesNotMatch(out,/data-run-id="other"|최근 3개월/);
-});
-test('empty work shows only the earliest real scheduled execution',()=>{
- const out=html('workMyWorkHTML([],operations)',{operations:{schedules:[{enabled:true,next_at:1791007200,name:'later'},{enabled:true,next_at:1791003600,name:'next'},{enabled:false,next_at:1791000000,name:'disabled'}]}});
- assert.match(out,/next/);assert.doesNotMatch(out,/later|disabled|추천/);assert.match(out,/63982.svg/);
 });
 test('asking about a historical record only changes private reference and never dispatches',async()=>{
  const h=controller();h.context.document.querySelector=()=>({focus(){}});h.api.setSelection({run_id:'r',workflow_id:'w'});h.api.setState({run:{id:'r',workflow_id:'w',version:1,attempts:[{id:'a',job_id:'j',number:2,created_at:'then'}]}});
@@ -1009,7 +1005,7 @@ test('restored unpublished operations selections return to my work while author 
   h.api.setRestored(false);h.setReply(call=>call.url.includes('workspace?')?{...state,workflow:new URL(call.url,'http://native.test').searchParams.get('workflow_id')?workflow:null,...(target==='run'?{run:{id:'r',workflow_id:'w',definition:{name:'fixed version',nodes:{}},jobs:{}}}:{})}:{ok:true});
   await h.api.refresh();const actual=h.api.snapshot();
   assert.equal(actual.selection.workflow_id,target==='unpublished'?'':'w',mode+'/'+tab+'/'+target);
-  assert.equal(actual.selection.tab,target==='unpublished'?'my_work':tab);
+  assert.equal(actual.selection.tab,target==='unpublished'?'overview':tab);
   assert.equal(actual.state.workflows[0].draft.name,'kept draft');assert.equal(actual.selection.start_inputs.w.note,'kept input');
   if(target==='unpublished'){assert.equal(actual.state.workflow,null);assert.equal(actual.selection.stage_id,'');}
   if(target==='run'){assert.equal(actual.selection.run_id,'r');assert.equal(actual.state.run.definition.name,'fixed version');}
@@ -1020,7 +1016,7 @@ test('stale workflow actions are blocked in operations but drafts still open in 
  for(const mode of ['work','author'])for(const published of [false,true]){
   const h=controller(),workflow={id:'w',system_id:'EMS',published_version:published?1:null,draft:{name:'kept'}};
   const state={ok:true,capabilities:{actor_id:'a',can_author:true},systems:['EMS'],workflows:[workflow],workflow,runs:[]};
-  h.api.setState(state);h.api.setSelection({mode,system_id:'EMS',workflow_id:'',run_id:'',tab:'my_work'});
+  h.api.setState(state);h.api.setSelection({mode,system_id:'EMS',workflow_id:'',run_id:'',tab:'overview'});
   h.setReply(call=>call.url.includes('workspace?')?state:{ok:true});
   await h.api.handleClick({dataset:{action:'workflow',workflowId:'w'}});
   assert.equal(h.api.snapshot().selection.workflow_id,mode==='author'||published?'w':'');

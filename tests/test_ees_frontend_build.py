@@ -311,7 +311,7 @@ class SourcePatchTests(unittest.TestCase):
         navbar = (root / "src/lib/components/chat/Navbar.svelte").read_text(encoding="utf-8")
         launcher = (Path(__file__).resolve().parents[1] / "branding/ees/ui/ees-work-launcher.js").read_text(encoding="utf-8")
         for name, source, markers in (
-            ('navigation', navigation, ('EES.Nav.Find', "['find',")),
+            ('navigation', navigation, ('EES.Nav.Find', "['find',", 'EES.Nav.MyWork', 'my_work', '내 업무')),
             ('toolbar', navbar, ('reference_label', 'EES.GeneralConversation', 'ees-reference-caption', 'class="ew-reference"')),
             ('launcher', launcher, ("action==='find'", "action==='find_workflow'", 'ees-workflow-search', 'ees-workflow-list')),
         ):

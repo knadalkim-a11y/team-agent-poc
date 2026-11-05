@@ -8,7 +8,7 @@ function renderer(extra={}){const context={document:{querySelector:()=>null},win
 function run(context,source){return vm.runInContext(source,context);}
 function deferred(){let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});return {promise,resolve,reject};}
 function controller(source=launcherSource){
- const calls=[],renders=[],timers=new Map();let auth='actor-a-token',counter=0,reply=()=>({ok:true,capabilities:{actor_id:'a'},systems:[],workflows:[],runs:[],my_work:[],ui_state:{revision:0,state:{}},operations:{}});
+ const calls=[],renders=[],timers=new Map();let auth='actor-a-token',counter=0,reply=()=>({ok:true,capabilities:{actor_id:'a'},systems:[],workflows:[],runs:[],ui_state:{revision:0,state:{}},operations:{}});
  const document={body:{dataset:{}},documentElement:{},querySelector:()=>({}),addEventListener(){},querySelectorAll:()=>[]};
  const window={addEventListener(){}};
  const view={render:value=>renders.push(value),sync(){},suspend(){},reset(){},setBusy(){},capture(){},readInputs:()=>({inputs:{}}),authoringHost:()=>null};

@@ -1,0 +1,3448 @@
+{
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "date": "2026-11-05",
+  "base": "8258318fe9e6f4766417148beb3ecb26b53534ed",
+  "before": [
+    {
+      "page": "897:760",
+      "pageId": "897:760",
+      "result": [
+        {
+          "id": "898:9",
+          "text": "공통(화면 틀·이동 · 대화·업무 도우미 · 상태·부품) · 업무(내 업무 · 공통 · 운영 · 셋업 · 장애대응 · 실행 기록) · 워크(업무 절차 · 도구 · 스킬·지침 · AI 도우미 · 참고 문서) → 왼쪽 메뉴 기준 기능 페이지. 화면마다 최신판 하나와 후속 보완 (왼쪽 기능 지도에서 찾기)",
+          "path": [
+            {
+              "id": "898:9",
+              "name": "바로가기 · 01 · 메인 설계 →  현재 합의된 설계와 후속 보완",
+              "type": "TEXT"
+            },
+            {
+              "id": "898:7",
+              "name": "페이지 역할",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "898:2",
+              "name": "관리 v1.0 · 메인·작업실·백업",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Bold",
+              "variationSettings": {
+                "wght": 700
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "898:8",
+              "name": "안내",
+              "type": "TEXT",
+              "x": 0,
+              "y": 0,
+              "w": 1280,
+              "h": 33
+            },
+            {
+              "id": "898:9",
+              "name": "바로가기 · 01 · 메인 설계 →  현재 합의된 설계와 후속 보완",
+              "type": "TEXT",
+              "x": 0,
+              "y": 43,
+              "w": 1280,
+              "h": 52
+            },
+            {
+              "id": "1515:2",
+              "name": "공통 자산 위치",
+              "type": "TEXT",
+              "x": 0,
+              "y": 105,
+              "w": 1280,
+              "h": 78
+            },
+            {
+              "id": "898:10",
+              "name": "바로가기 · 70 · 작업실 → 진행 중인 큰 구조 변경·대안 비교",
+              "type": "TEXT",
+              "x": 0,
+              "y": 193,
+              "w": 1280,
+              "h": 26
+            },
+            {
+              "id": "898:11",
+              "name": "바로가기 · 보관 · 백업",
+              "type": "TEXT",
+              "x": 0,
+              "y": 229,
+              "w": 1280,
+              "h": 52
+            },
+            {
+              "id": "898:12",
+              "name": "안내",
+              "type": "TEXT",
+              "x": 0,
+              "y": 291,
+              "w": 1280,
+              "h": 24
+            }
+          ]
+        },
+        {
+          "id": "1288:33",
+          "text": "업무 · 내 업무",
+          "path": [
+            {
+              "id": "1288:33",
+              "name": "업무 · 내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "1288:32",
+              "name": "업무 · 내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1288:2",
+              "name": "기능 지도 · 왼쪽 메뉴 기준",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Bold",
+              "variationSettings": {
+                "wght": 700
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1288:33",
+              "name": "업무 · 내 업무",
+              "type": "TEXT",
+              "x": 0,
+              "y": 8,
+              "w": 260,
+              "h": 26
+            },
+            {
+              "id": "1288:34",
+              "name": "바로가기 · 01 · 메인 설계 →  현재 합의된 설계와 후속 보완",
+              "type": "TEXT",
+              "x": 276,
+              "y": 8,
+              "w": 560,
+              "h": 26
+            },
+            {
+              "id": "1288:35",
+              "name": "바로가기 · 01 · 메인 설계 →  현재 합의된 설계와 후속 보완",
+              "type": "TEXT",
+              "x": 852,
+              "y": 8,
+              "w": 300,
+              "h": 26
+            },
+            {
+              "id": "1288:36",
+              "name": "바로가기 · 01 · 메인 설계 →  현재 합의된 설계와 후속 보완",
+              "type": "TEXT",
+              "x": 1168,
+              "y": 8,
+              "w": 512,
+              "h": 26
+            }
+          ]
+        },
+        {
+          "id": "1288:34",
+          "text": "업무 › 내 업무",
+          "path": [
+            {
+              "id": "1288:34",
+              "name": "바로가기 · 01 · 메인 설계 →  현재 합의된 설계와 후속 보완",
+              "type": "TEXT"
+            },
+            {
+              "id": "1288:32",
+              "name": "업무 · 내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1288:2",
+              "name": "기능 지도 · 왼쪽 메뉴 기준",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Bold",
+              "variationSettings": {
+                "wght": 700
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1288:33",
+              "name": "업무 · 내 업무",
+              "type": "TEXT",
+              "x": 0,
+              "y": 8,
+              "w": 260,
+              "h": 26
+            },
+            {
+              "id": "1288:34",
+              "name": "바로가기 · 01 · 메인 설계 →  현재 합의된 설계와 후속 보완",
+              "type": "TEXT",
+              "x": 276,
+              "y": 8,
+              "w": 560,
+              "h": 26
+            },
+            {
+              "id": "1288:35",
+              "name": "바로가기 · 01 · 메인 설계 →  현재 합의된 설계와 후속 보완",
+              "type": "TEXT",
+              "x": 852,
+              "y": 8,
+              "w": 300,
+              "h": 26
+            },
+            {
+              "id": "1288:36",
+              "name": "바로가기 · 01 · 메인 설계 →  현재 합의된 설계와 후속 보완",
+              "type": "TEXT",
+              "x": 1168,
+              "y": 8,
+              "w": 512,
+              "h": 26
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "1284:3046",
+      "pageId": "1284:3046",
+      "result": [
+        {
+          "id": "832:157",
+          "text": "EES에 재시작 등을 요청할 수 있는 방식(API · 배치) · 결과 송부 방식 · D-5 이후 미승인 CR 처리 · 내 업무 화면 · 도구 등록 화면",
+          "path": [
+            {
+              "id": "832:157",
+              "name": "EES에 재시작 등을 요청할 수 있는 방식(API · 배치) · 결과 송부 방식 · D-5 이후 미승인 CR 처리 · 내 업무 화면 · 도구 등록 화면",
+              "type": "TEXT"
+            },
+            {
+              "id": "832:155",
+              "name": "Frame",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "832:151",
+              "name": "Frame",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "832:132",
+              "name": "00 · 정리안 안내",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "832:156",
+              "name": "다음에 정할 것",
+              "type": "TEXT",
+              "x": 0,
+              "y": 0,
+              "w": 72,
+              "h": 16
+            },
+            {
+              "id": "832:157",
+              "name": "EES에 재시작 등을 요청할 수 있는 방식(API · 배치) · 결과 송부 방식 · D-5 이후 미승인 CR 처리 · 내 업무 화면 · 도구 등록 화면",
+              "type": "TEXT",
+              "x": 0,
+              "y": 20,
+              "w": 907,
+              "h": 22
+            }
+          ]
+        },
+        {
+          "id": "1068:6020",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "1068:6020",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "1068:6018",
+              "name": "Nav / 내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1068:6017",
+              "name": "Nav",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1068:5990",
+              "name": "Sidebar",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1068:5989",
+              "name": "Sidebar holder",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1068:5986",
+              "name": "Variant / 팀원 · 업무만 하는 사람",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1068:5985",
+              "name": "Variants",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1046:2124",
+              "name": "R7 · 규칙: EES Workflow 하나로 일하기 (권한별 메뉴와 화면)",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Medium",
+              "variationSettings": {
+                "wght": 500
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1068:6019",
+              "name": "Icon/list-checks",
+              "type": "INSTANCE",
+              "x": 8,
+              "y": 9,
+              "w": 16,
+              "h": 16
+            },
+            {
+              "id": "1068:6020",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 34,
+              "y": 6,
+              "w": 42,
+              "h": 22
+            },
+            {
+              "id": "1068:6021",
+              "name": "Flex",
+              "type": "FRAME",
+              "x": 86,
+              "y": 16.5,
+              "w": 125,
+              "h": 1
+            },
+            {
+              "id": "1068:6022",
+              "name": "4",
+              "type": "TEXT",
+              "x": 221,
+              "y": 8,
+              "w": 9,
+              "h": 18
+            }
+          ]
+        },
+        {
+          "id": "1296:154",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "1296:154",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "1296:152",
+              "name": "Nav / 내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1296:151",
+              "name": "Nav",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1296:124",
+              "name": "Sidebar",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1296:123",
+              "name": "Crop · 업무 · 공장 칸을 눌렀을 때",
+              "type": "FRAME",
+              "layout": "NONE"
+            },
+            {
+              "id": "1296:121",
+              "name": "업무 · 공장 칸을 눌렀을 때",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "832:8956",
+              "name": "Frame",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "832:8953",
+              "name": "A2 · 작업 위치 고르기 · 드롭다운 (열린 상태)",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1296:153",
+              "name": "Icon/list-checks",
+              "type": "INSTANCE",
+              "x": 8,
+              "y": 9,
+              "w": 16,
+              "h": 16
+            },
+            {
+              "id": "1296:154",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 34,
+              "y": 6,
+              "w": 42,
+              "h": 22
+            },
+            {
+              "id": "1296:155",
+              "name": "Flex",
+              "type": "FRAME",
+              "x": 86,
+              "y": 16.5,
+              "w": 126,
+              "h": 1
+            },
+            {
+              "id": "1296:156",
+              "name": "4",
+              "type": "TEXT",
+              "x": 222,
+              "y": 8,
+              "w": 9,
+              "h": 18
+            }
+          ]
+        },
+        {
+          "id": "1296:282",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "1296:282",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "1296:280",
+              "name": "Nav / 내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1296:279",
+              "name": "Nav",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1296:252",
+              "name": "Sidebar",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1296:251",
+              "name": "Crop · 업무 · 시스템 칸을 눌렀을 때",
+              "type": "FRAME",
+              "layout": "NONE"
+            },
+            {
+              "id": "1296:249",
+              "name": "업무 · 시스템 칸을 눌렀을 때",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "832:8956",
+              "name": "Frame",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "832:8953",
+              "name": "A2 · 작업 위치 고르기 · 드롭다운 (열린 상태)",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1296:281",
+              "name": "Icon/list-checks",
+              "type": "INSTANCE",
+              "x": 8,
+              "y": 9,
+              "w": 16,
+              "h": 16
+            },
+            {
+              "id": "1296:282",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 34,
+              "y": 6,
+              "w": 42,
+              "h": 22
+            },
+            {
+              "id": "1296:283",
+              "name": "Flex",
+              "type": "FRAME",
+              "x": 86,
+              "y": 16.5,
+              "w": 126,
+              "h": 1
+            },
+            {
+              "id": "1296:284",
+              "name": "4",
+              "type": "TEXT",
+              "x": 222,
+              "y": 8,
+              "w": 9,
+              "h": 18
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "1284:3058",
+      "pageId": "1284:3058",
+      "result": [
+        {
+          "id": "1300:221",
+          "text": "업무 › 내 업무 (A0)",
+          "path": [
+            {
+              "id": "1300:221",
+              "name": "업무 › 내 업무 (A0)",
+              "type": "TEXT"
+            },
+            {
+              "id": "1300:220",
+              "name": "업무 › 내 업무 (A0)",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1300:212",
+              "name": "화면별 참고와 질문",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1300:135",
+              "name": "R10 · 규칙: 대화 시작 · 화면별 참고 · 쓸 수 없을 때",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1300:221",
+              "name": "업무 › 내 업무 (A0)",
+              "type": "TEXT",
+              "x": 0,
+              "y": 8,
+              "w": 270,
+              "h": 16
+            },
+            {
+              "id": "1300:222",
+              "name": "내 업무 · 작업 위치",
+              "type": "TEXT",
+              "x": 286,
+              "y": 8,
+              "w": 230,
+              "h": 16
+            },
+            {
+              "id": "1300:223",
+              "name": "오늘 할 일 3 · 기한 지남 1",
+              "type": "TEXT",
+              "x": 532,
+              "y": 8,
+              "w": 300,
+              "h": 16
+            },
+            {
+              "id": "1300:224",
+              "name": "오늘 내가 할 일 정리해줘 / 기한이 가까운 일부터 알려줘 / 확인이 필요한 일만 보여줘",
+              "type": "TEXT",
+              "x": 848,
+              "y": 8,
+              "w": 640,
+              "h": 16
+            },
+            {
+              "id": "1300:225",
+              "name": "내 할 일 목록 · 새로 필요",
+              "type": "TEXT",
+              "x": 1504,
+              "y": 8,
+              "w": 304,
+              "h": 16
+            }
+          ]
+        },
+        {
+          "id": "1300:222",
+          "text": "내 업무 · 작업 위치",
+          "path": [
+            {
+              "id": "1300:222",
+              "name": "내 업무 · 작업 위치",
+              "type": "TEXT"
+            },
+            {
+              "id": "1300:220",
+              "name": "업무 › 내 업무 (A0)",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1300:212",
+              "name": "화면별 참고와 질문",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1300:135",
+              "name": "R10 · 규칙: 대화 시작 · 화면별 참고 · 쓸 수 없을 때",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1300:221",
+              "name": "업무 › 내 업무 (A0)",
+              "type": "TEXT",
+              "x": 0,
+              "y": 8,
+              "w": 270,
+              "h": 16
+            },
+            {
+              "id": "1300:222",
+              "name": "내 업무 · 작업 위치",
+              "type": "TEXT",
+              "x": 286,
+              "y": 8,
+              "w": 230,
+              "h": 16
+            },
+            {
+              "id": "1300:223",
+              "name": "오늘 할 일 3 · 기한 지남 1",
+              "type": "TEXT",
+              "x": 532,
+              "y": 8,
+              "w": 300,
+              "h": 16
+            },
+            {
+              "id": "1300:224",
+              "name": "오늘 내가 할 일 정리해줘 / 기한이 가까운 일부터 알려줘 / 확인이 필요한 일만 보여줘",
+              "type": "TEXT",
+              "x": 848,
+              "y": 8,
+              "w": 640,
+              "h": 16
+            },
+            {
+              "id": "1300:225",
+              "name": "내 할 일 목록 · 새로 필요",
+              "type": "TEXT",
+              "x": 1504,
+              "y": 8,
+              "w": 304,
+              "h": 16
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "1284:3070",
+      "pageId": "1284:3070",
+      "result": [
+        {
+          "id": "945:1077",
+          "text": "규칙 · 조회 도구(읽기)는 사람이 다시 실행할 수 있다. 자동 재조회는 절차에 정한 횟수(예: 1회)까지만. 실패한 동안 다음 단계는 시작하지 않고, 담당자의 내 업무에 ‘조회 실패 확인’이 생긴다.",
+          "path": [
+            {
+              "id": "945:1077",
+              "name": "규칙 · 조회 도구(읽기)는 사람이 다시 실행할 수 있다. 자동 재조회는 절차에 정한 횟수(예: 1회)까지만. 실패한 동안 다음 단계는 시작하지 않고, 담당자의 내 업무에 ‘조회 실패 확인’이 생긴다.",
+              "type": "TEXT"
+            },
+            {
+              "id": "945:1055",
+              "name": "State / 조회 실패 · 목록을 만들 수 없음",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "944:1040",
+              "name": "Cards",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "944:1036",
+              "name": "S1 · 상태 모음: 정상이 아닐 때의 블록",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "945:1056",
+              "name": "조회 실패 · 목록을 만들 수 없음",
+              "type": "TEXT",
+              "x": 0,
+              "y": 0,
+              "w": 181,
+              "h": 20
+            },
+            {
+              "id": "945:1057",
+              "name": "언제 · 예약된 조회 도구가 시간 초과·권한 오류로 결과를 받지 못했을 때 (예: 10.05 09:00 Jira 조회)",
+              "type": "TEXT",
+              "x": 0,
+              "y": 30,
+              "w": 480,
+              "h": 36
+            },
+            {
+              "id": "945:1058",
+              "name": "Panel block",
+              "type": "FRAME",
+              "x": 0,
+              "y": 76,
+              "w": 480,
+              "h": 202
+            },
+            {
+              "id": "945:1077",
+              "name": "규칙 · 조회 도구(읽기)는 사람이 다시 실행할 수 있다. 자동 재조회는 절차에 정한 횟수(예: 1회)까지만. 실패한 동안 다음 단계는 시작하지 않고, 담당자의 내 업무에 ‘조회 실패 확인’이 생긴다.",
+              "type": "TEXT",
+              "x": 0,
+              "y": 288,
+              "w": 480,
+              "h": 36
+            }
+          ]
+        },
+        {
+          "id": "945:1096",
+          "text": "내 업무 · 할 일 없음",
+          "path": [
+            {
+              "id": "945:1096",
+              "name": "내 업무 · 할 일 없음",
+              "type": "TEXT"
+            },
+            {
+              "id": "945:1095",
+              "name": "State / 내 업무 · 할 일 없음",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "944:1040",
+              "name": "Cards",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "944:1036",
+              "name": "S1 · 상태 모음: 정상이 아닐 때의 블록",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Bold",
+              "variationSettings": {
+                "wght": 700
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "945:1096",
+              "name": "내 업무 · 할 일 없음",
+              "type": "TEXT",
+              "x": 0,
+              "y": 0,
+              "w": 114,
+              "h": 20
+            },
+            {
+              "id": "945:1097",
+              "name": "언제 · 나에게 배정된 사람의 할 일이 하나도 없을 때",
+              "type": "TEXT",
+              "x": 0,
+              "y": 30,
+              "w": 480,
+              "h": 18
+            },
+            {
+              "id": "945:1098",
+              "name": "Panel block",
+              "type": "FRAME",
+              "x": 0,
+              "y": 58,
+              "w": 480,
+              "h": 202
+            },
+            {
+              "id": "945:1111",
+              "name": "규칙 · 빈 상태에는 다음 예정된 자동 실행 하나만 보여준다. 추천 업무나 안내 문구를 늘어놓지 않는다.",
+              "type": "TEXT",
+              "x": 0,
+              "y": 270,
+              "w": 480,
+              "h": 36
+            }
+          ]
+        },
+        {
+          "id": "945:1100",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "945:1100",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "945:1099",
+              "name": "Frame",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "945:1098",
+              "name": "Panel block",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "945:1095",
+              "name": "State / 내 업무 · 할 일 없음",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "944:1040",
+              "name": "Cards",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "944:1036",
+              "name": "S1 · 상태 모음: 정상이 아닐 때의 블록",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Bold",
+              "variationSettings": {
+                "wght": 700
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "945:1100",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 0,
+              "y": 0,
+              "w": 42,
+              "h": 20
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "1284:3082",
+      "pageId": "1284:3082",
+      "result": [
+        {
+          "id": "1284:3084",
+          "text": "업무 · 내 업무",
+          "path": [
+            {
+              "id": "1284:3084",
+              "name": "업무 · 내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "1284:3083",
+              "name": "Header · 업무 · 내 업무",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Bold",
+              "variationSettings": {
+                "wght": 700
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1284:3084",
+              "name": "업무 · 내 업무",
+              "type": "TEXT",
+              "x": 33,
+              "y": 25,
+              "w": 1856,
+              "h": 32
+            },
+            {
+              "id": "1284:3088",
+              "name": "메뉴 위치",
+              "type": "TEXT",
+              "x": 33,
+              "y": 69,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3089",
+              "name": "보는 사람",
+              "type": "TEXT",
+              "x": 33,
+              "y": 103,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3090",
+              "name": "할 수 있는 일",
+              "type": "TEXT",
+              "x": 33,
+              "y": 137,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3091",
+              "name": "현재 제품",
+              "type": "TEXT",
+              "x": 33,
+              "y": 171,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3092",
+              "name": "사내 확인 메모",
+              "type": "TEXT",
+              "x": 33,
+              "y": 205,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3093",
+              "name": "이 페이지 화면",
+              "type": "TEXT",
+              "x": 33,
+              "y": 239,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3086",
+              "name": "기능 지도 링크",
+              "type": "TEXT",
+              "x": 33,
+              "y": 273,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3087",
+              "name": "기록",
+              "type": "TEXT",
+              "x": 33,
+              "y": 307,
+              "w": 1856,
+              "h": 22
+            }
+          ]
+        },
+        {
+          "id": "1284:3088",
+          "text": "메뉴 위치   업무 › 내 업무",
+          "path": [
+            {
+              "id": "1284:3088",
+              "name": "메뉴 위치",
+              "type": "TEXT"
+            },
+            {
+              "id": "1284:3083",
+              "name": "Header · 업무 · 내 업무",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Bold",
+              "variationSettings": {
+                "wght": 700
+              }
+            },
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1284:3084",
+              "name": "업무 · 내 업무",
+              "type": "TEXT",
+              "x": 33,
+              "y": 25,
+              "w": 1856,
+              "h": 32
+            },
+            {
+              "id": "1284:3088",
+              "name": "메뉴 위치",
+              "type": "TEXT",
+              "x": 33,
+              "y": 69,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3089",
+              "name": "보는 사람",
+              "type": "TEXT",
+              "x": 33,
+              "y": 103,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3090",
+              "name": "할 수 있는 일",
+              "type": "TEXT",
+              "x": 33,
+              "y": 137,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3091",
+              "name": "현재 제품",
+              "type": "TEXT",
+              "x": 33,
+              "y": 171,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3092",
+              "name": "사내 확인 메모",
+              "type": "TEXT",
+              "x": 33,
+              "y": 205,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3093",
+              "name": "이 페이지 화면",
+              "type": "TEXT",
+              "x": 33,
+              "y": 239,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3086",
+              "name": "기능 지도 링크",
+              "type": "TEXT",
+              "x": 33,
+              "y": 273,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3087",
+              "name": "기록",
+              "type": "TEXT",
+              "x": 33,
+              "y": 307,
+              "w": 1856,
+              "h": 22
+            }
+          ]
+        },
+        {
+          "id": "1284:3093",
+          "text": "이 페이지 화면   A0 내 업무(모든 워크플로우의 할 일) · R6 규칙: 내 업무와 도구 등록 (도구 등록 부분은 ‘워크 · 도구’와 함께 봄)",
+          "path": [
+            {
+              "id": "1284:3093",
+              "name": "이 페이지 화면",
+              "type": "TEXT"
+            },
+            {
+              "id": "1284:3083",
+              "name": "Header · 업무 · 내 업무",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Bold",
+              "variationSettings": {
+                "wght": 700
+              }
+            },
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1284:3084",
+              "name": "업무 · 내 업무",
+              "type": "TEXT",
+              "x": 33,
+              "y": 25,
+              "w": 1856,
+              "h": 32
+            },
+            {
+              "id": "1284:3088",
+              "name": "메뉴 위치",
+              "type": "TEXT",
+              "x": 33,
+              "y": 69,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3089",
+              "name": "보는 사람",
+              "type": "TEXT",
+              "x": 33,
+              "y": 103,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3090",
+              "name": "할 수 있는 일",
+              "type": "TEXT",
+              "x": 33,
+              "y": 137,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3091",
+              "name": "현재 제품",
+              "type": "TEXT",
+              "x": 33,
+              "y": 171,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3092",
+              "name": "사내 확인 메모",
+              "type": "TEXT",
+              "x": 33,
+              "y": 205,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3093",
+              "name": "이 페이지 화면",
+              "type": "TEXT",
+              "x": 33,
+              "y": 239,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3086",
+              "name": "기능 지도 링크",
+              "type": "TEXT",
+              "x": 33,
+              "y": 273,
+              "w": 1856,
+              "h": 22
+            },
+            {
+              "id": "1284:3087",
+              "name": "기록",
+              "type": "TEXT",
+              "x": 33,
+              "y": 307,
+              "w": 1856,
+              "h": 22
+            }
+          ]
+        },
+        {
+          "id": "919:7819",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "919:7819",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "919:7817",
+              "name": "Nav / 내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "919:7816",
+              "name": "Nav",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "919:7789",
+              "name": "Sidebar",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "919:7788",
+              "name": "A0 · 업무 / 내 업무 (모든 워크플로우의 할 일)",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Medium",
+              "variationSettings": {
+                "wght": 500
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "919:7818",
+              "name": "Icon/list-checks",
+              "type": "INSTANCE",
+              "x": 8,
+              "y": 9,
+              "w": 16,
+              "h": 16
+            },
+            {
+              "id": "919:7819",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 34,
+              "y": 6,
+              "w": 42,
+              "h": 22
+            },
+            {
+              "id": "919:7820",
+              "name": "Flex",
+              "type": "FRAME",
+              "x": 86,
+              "y": 16.5,
+              "w": 126,
+              "h": 1
+            },
+            {
+              "id": "919:7821",
+              "name": "4",
+              "type": "TEXT",
+              "x": 222,
+              "y": 8,
+              "w": 9,
+              "h": 18
+            }
+          ]
+        },
+        {
+          "id": "919:7946",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "919:7946",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "919:7945",
+              "name": "Header",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "919:7944",
+              "name": "Work panel",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "919:7788",
+              "name": "A0 · 업무 / 내 업무 (모든 워크플로우의 할 일)",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Bold",
+              "variationSettings": {
+                "wght": 700
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "919:7946",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 20,
+              "y": 13.5,
+              "w": 42,
+              "h": 20
+            },
+            {
+              "id": "919:7947",
+              "name": "김광재 · 10.07 (수) 14:30",
+              "type": "TEXT",
+              "x": 68,
+              "y": 14.5,
+              "w": 130,
+              "h": 18
+            },
+            {
+              "id": "919:7948",
+              "name": "Flex",
+              "type": "FRAME",
+              "x": 204,
+              "y": 23,
+              "w": 193,
+              "h": 1
+            },
+            {
+              "id": "919:7949",
+              "name": "IconButton / search",
+              "type": "FRAME",
+              "x": 403,
+              "y": 8.5,
+              "w": 30,
+              "h": 30
+            },
+            {
+              "id": "919:7951",
+              "name": "IconButton / panel-right",
+              "type": "FRAME",
+              "x": 439,
+              "y": 8.5,
+              "w": 30,
+              "h": 30
+            }
+          ]
+        },
+        {
+          "id": "922:788",
+          "text": "내 업무는 사람이 할 일만, 급한 순서로",
+          "path": [
+            {
+              "id": "922:788",
+              "name": "내 업무는 사람이 할 일만, 급한 순서로",
+              "type": "TEXT"
+            },
+            {
+              "id": "922:786",
+              "name": "Frame",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "922:785",
+              "name": "R6 · 규칙: 내 업무와 도구 등록",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Bold",
+              "variationSettings": {
+                "wght": 700
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "922:787",
+              "name": "규칙",
+              "type": "TEXT",
+              "x": 0,
+              "y": 0,
+              "w": 23,
+              "h": 16
+            },
+            {
+              "id": "922:788",
+              "name": "내 업무는 사람이 할 일만, 급한 순서로",
+              "type": "TEXT",
+              "x": 0,
+              "y": 28,
+              "w": 306,
+              "h": 28
+            },
+            {
+              "id": "922:789",
+              "name": "모든 워크플로우에서 나에게 배정된 ‘사람이 해야 하는 일’을 한곳에 모읍니다. 사이드바 ‘내 업무’ 옆 숫자는 이 목록의 개수입니다.",
+              "type": "TEXT",
+              "x": 0,
+              "y": 68,
+              "w": 820,
+              "h": 22
+            },
+            {
+              "id": "922:790",
+              "name": "Frame",
+              "type": "FRAME",
+              "x": 0,
+              "y": 102,
+              "w": 820,
+              "h": 44
+            },
+            {
+              "id": "922:793",
+              "name": "Frame",
+              "type": "FRAME",
+              "x": 0,
+              "y": 158,
+              "w": 820,
+              "h": 44
+            },
+            {
+              "id": "922:796",
+              "name": "Frame",
+              "type": "FRAME",
+              "x": 0,
+              "y": 214,
+              "w": 820,
+              "h": 44
+            },
+            {
+              "id": "922:799",
+              "name": "Frame",
+              "type": "FRAME",
+              "x": 0,
+              "y": 270,
+              "w": 820,
+              "h": 22
+            },
+            {
+              "id": "922:802",
+              "name": "Frame",
+              "type": "FRAME",
+              "x": 0,
+              "y": 304,
+              "w": 820,
+              "h": 22
+            }
+          ]
+        },
+        {
+          "id": "922:789",
+          "text": "모든 워크플로우에서 나에게 배정된 ‘사람이 해야 하는 일’을 한곳에 모읍니다. 사이드바 ‘내 업무’ 옆 숫자는 이 목록의 개수입니다.",
+          "path": [
+            {
+              "id": "922:789",
+              "name": "모든 워크플로우에서 나에게 배정된 ‘사람이 해야 하는 일’을 한곳에 모읍니다. 사이드바 ‘내 업무’ 옆 숫자는 이 목록의 개수입니다.",
+              "type": "TEXT"
+            },
+            {
+              "id": "922:786",
+              "name": "Frame",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "922:785",
+              "name": "R6 · 규칙: 내 업무와 도구 등록",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "922:787",
+              "name": "규칙",
+              "type": "TEXT",
+              "x": 0,
+              "y": 0,
+              "w": 23,
+              "h": 16
+            },
+            {
+              "id": "922:788",
+              "name": "내 업무는 사람이 할 일만, 급한 순서로",
+              "type": "TEXT",
+              "x": 0,
+              "y": 28,
+              "w": 306,
+              "h": 28
+            },
+            {
+              "id": "922:789",
+              "name": "모든 워크플로우에서 나에게 배정된 ‘사람이 해야 하는 일’을 한곳에 모읍니다. 사이드바 ‘내 업무’ 옆 숫자는 이 목록의 개수입니다.",
+              "type": "TEXT",
+              "x": 0,
+              "y": 68,
+              "w": 820,
+              "h": 22
+            },
+            {
+              "id": "922:790",
+              "name": "Frame",
+              "type": "FRAME",
+              "x": 0,
+              "y": 102,
+              "w": 820,
+              "h": 44
+            },
+            {
+              "id": "922:793",
+              "name": "Frame",
+              "type": "FRAME",
+              "x": 0,
+              "y": 158,
+              "w": 820,
+              "h": 44
+            },
+            {
+              "id": "922:796",
+              "name": "Frame",
+              "type": "FRAME",
+              "x": 0,
+              "y": 214,
+              "w": 820,
+              "h": 44
+            },
+            {
+              "id": "922:799",
+              "name": "Frame",
+              "type": "FRAME",
+              "x": 0,
+              "y": 270,
+              "w": 820,
+              "h": 22
+            },
+            {
+              "id": "922:802",
+              "name": "Frame",
+              "type": "FRAME",
+              "x": 0,
+              "y": 304,
+              "w": 820,
+              "h": 22
+            }
+          ]
+        },
+        {
+          "id": "922:801",
+          "text": "줄을 누르면 업무 패널이 그 작업으로 바뀌고 ‘내 업무로 돌아가기’가 생긴다. 돌아오면 스크롤과 펼침 상태를 유지한다.",
+          "path": [
+            {
+              "id": "922:801",
+              "name": "줄을 누르면 업무 패널이 그 작업으로 바뀌고 ‘내 업무로 돌아가기’가 생긴다. 돌아오면 스크롤과 펼침 상태를 유지한다.",
+              "type": "TEXT"
+            },
+            {
+              "id": "922:799",
+              "name": "Frame",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "922:786",
+              "name": "Frame",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "922:785",
+              "name": "R6 · 규칙: 내 업무와 도구 등록",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "922:800",
+              "name": "4",
+              "type": "TEXT",
+              "x": 0,
+              "y": 0,
+              "w": 8,
+              "h": 18
+            },
+            {
+              "id": "922:801",
+              "name": "줄을 누르면 업무 패널이 그 작업으로 바뀌고 ‘내 업무로 돌아가기’가 생긴다. 돌아오면 스크롤과 펼침 상태를 유지한다.",
+              "type": "TEXT",
+              "x": 18,
+              "y": 0,
+              "w": 802,
+              "h": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "1284:3106",
+      "pageId": "1284:3106",
+      "result": [
+        {
+          "id": "1762:498",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "1762:498",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "1762:492",
+              "name": "내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1762:491",
+              "name": "주 메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1762:466",
+              "name": "사이드 메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1762:457",
+              "name": "HTML · 사이드바",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1762:456",
+              "name": "운영 · 업무 개요",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1762:493",
+              "name": "Icon · 25",
+              "type": "FRAME",
+              "x": 8,
+              "y": 10,
+              "w": 16,
+              "h": 16
+            },
+            {
+              "id": "1762:498",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 34,
+              "y": 7,
+              "w": 180,
+              "h": 22
+            },
+            {
+              "id": "1762:499",
+              "name": "1",
+              "type": "TEXT",
+              "x": 224,
+              "y": 9,
+              "w": 7,
+              "h": 18
+            }
+          ]
+        },
+        {
+          "id": "1774:497",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "1774:497",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "1774:491",
+              "name": "내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1774:490",
+              "name": "주 메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1774:465",
+              "name": "사이드 메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1774:456",
+              "name": "왼쪽 대상 선택 · 대화 영역 생략",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1762:760",
+              "name": "운영 · 보조 · 공장 미선택",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1774:492",
+              "name": "Icon · 25",
+              "type": "FRAME",
+              "x": 8,
+              "y": 10,
+              "w": 16,
+              "h": 16
+            },
+            {
+              "id": "1774:497",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 34,
+              "y": 7,
+              "w": 180,
+              "h": 22
+            },
+            {
+              "id": "1774:498",
+              "name": "1",
+              "type": "TEXT",
+              "x": 224,
+              "y": 9,
+              "w": 7,
+              "h": 18
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "1689:1062",
+      "pageId": "1689:1062",
+      "result": [
+        {
+          "id": "960:1208",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "960:1208",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "960:1206",
+              "name": "Nav / 내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "960:1205",
+              "name": "Nav",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "960:1178",
+              "name": "Sidebar",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "960:1177",
+              "name": "A8 · 업무 / 신규 공장 횡전개 · 진행 건 목록과 새로 시작 (작업 위치 전체 공장 · 시작할 공장을 고름)",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "960:1207",
+              "name": "Icon/list-checks",
+              "type": "INSTANCE",
+              "x": 8,
+              "y": 9,
+              "w": 16,
+              "h": 16
+            },
+            {
+              "id": "960:1208",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 34,
+              "y": 6,
+              "w": 42,
+              "h": 22
+            },
+            {
+              "id": "960:1209",
+              "name": "Flex",
+              "type": "FRAME",
+              "x": 86,
+              "y": 16.5,
+              "w": 126,
+              "h": 1
+            },
+            {
+              "id": "960:1210",
+              "name": "4",
+              "type": "TEXT",
+              "x": 222,
+              "y": 8,
+              "w": 9,
+              "h": 18
+            }
+          ]
+        },
+        {
+          "id": "1576:732",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "1576:732",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "1576:730",
+              "name": "Nav / 내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1576:729",
+              "name": "Nav",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1576:702",
+              "name": "Sidebar",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1576:701",
+              "name": "A8-1 · 업무 / 신규 공장 횡전개 · 작업 위치가 특정 공장 (대상 공장 고정 · 단계 펼침)",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1576:731",
+              "name": "Icon/list-checks",
+              "type": "INSTANCE",
+              "x": 8,
+              "y": 9,
+              "w": 16,
+              "h": 16
+            },
+            {
+              "id": "1576:732",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 34,
+              "y": 6,
+              "w": 42,
+              "h": 22
+            },
+            {
+              "id": "1576:733",
+              "name": "Flex",
+              "type": "FRAME",
+              "x": 86,
+              "y": 16.5,
+              "w": 126,
+              "h": 1
+            },
+            {
+              "id": "1576:734",
+              "name": "4",
+              "type": "TEXT",
+              "x": 222,
+              "y": 8,
+              "w": 9,
+              "h": 18
+            }
+          ]
+        },
+        {
+          "id": "1576:1052",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "1576:1052",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "1576:1050",
+              "name": "Nav / 내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1576:1049",
+              "name": "Nav",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1576:1022",
+              "name": "Sidebar",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1576:1021",
+              "name": "A8-2 · 업무 / 신규 공장 횡전개 · 작업 위치의 공장이 이미 진행 중 (진행 건 열기)",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1576:1051",
+              "name": "Icon/list-checks",
+              "type": "INSTANCE",
+              "x": 8,
+              "y": 9,
+              "w": 16,
+              "h": 16
+            },
+            {
+              "id": "1576:1052",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 34,
+              "y": 6,
+              "w": 42,
+              "h": 22
+            },
+            {
+              "id": "1576:1053",
+              "name": "Flex",
+              "type": "FRAME",
+              "x": 86,
+              "y": 16.5,
+              "w": 126,
+              "h": 1
+            },
+            {
+              "id": "1576:1054",
+              "name": "4",
+              "type": "TEXT",
+              "x": 222,
+              "y": 8,
+              "w": 9,
+              "h": 18
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "1689:1063",
+      "pageId": "1689:1063",
+      "result": [
+        {
+          "id": "881:690",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "881:690",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "881:688",
+              "name": "Nav / 내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "881:687",
+              "name": "Nav",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "881:660",
+              "name": "Sidebar",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "881:659",
+              "name": "A4 · 업무 / 장애 1차 대응 · 레거시에 서비스 재시작 요청",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "881:689",
+              "name": "Icon/list-checks",
+              "type": "INSTANCE",
+              "x": 8,
+              "y": 9,
+              "w": 16,
+              "h": 16
+            },
+            {
+              "id": "881:690",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 34,
+              "y": 6,
+              "w": 42,
+              "h": 22
+            },
+            {
+              "id": "881:691",
+              "name": "Flex",
+              "type": "FRAME",
+              "x": 86,
+              "y": 16.5,
+              "w": 126,
+              "h": 1
+            },
+            {
+              "id": "881:692",
+              "name": "4",
+              "type": "TEXT",
+              "x": 222,
+              "y": 8,
+              "w": 9,
+              "h": 18
+            }
+          ]
+        },
+        {
+          "id": "1264:2999",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "1264:2999",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "1264:2997",
+              "name": "Nav / 내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1264:2996",
+              "name": "Nav",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1264:2969",
+              "name": "Sidebar",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1264:2968",
+              "name": "A4a · 업무 / 장애 1차 대응 · 입력 제안 반영 후 (저장 전)",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1264:2998",
+              "name": "Icon/list-checks",
+              "type": "INSTANCE",
+              "x": 8,
+              "y": 9,
+              "w": 16,
+              "h": 16
+            },
+            {
+              "id": "1264:2999",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 34,
+              "y": 6,
+              "w": 42,
+              "h": 22
+            },
+            {
+              "id": "1264:3000",
+              "name": "Flex",
+              "type": "FRAME",
+              "x": 86,
+              "y": 16.5,
+              "w": 126,
+              "h": 1
+            },
+            {
+              "id": "1264:3001",
+              "name": "4",
+              "type": "TEXT",
+              "x": 222,
+              "y": 8,
+              "w": 9,
+              "h": 18
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "1285:1829",
+      "pageId": "1285:1829",
+      "result": [
+        {
+          "id": "1207:2565",
+          "text": "‘내 업무’에 할 일로 올라갑니다",
+          "path": [
+            {
+              "id": "1207:2565",
+              "name": "‘내 업무’에 할 일로 올라갑니다",
+              "type": "TEXT"
+            },
+            {
+              "id": "1207:2557",
+              "name": "Frame",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1207:2556",
+              "name": "Field · 목록은 누가 확정하나요?",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1204:5985",
+              "name": "Job editor",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1204:5977",
+              "name": "Date · D-8",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1204:5973",
+              "name": "Question",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1204:5972",
+              "name": "Builder body",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1204:5932",
+              "name": "Work panel",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1204:5836",
+              "name": "B1-5 · 워크스페이스 / 새 절차 · 질문 ② 날짜마다 할 일 (쓰는 중)",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1207:2558",
+              "name": "목록은 누가 확정하나요?",
+              "type": "TEXT",
+              "x": 0,
+              "y": 0,
+              "w": 142,
+              "h": 22
+            },
+            {
+              "id": "1207:2565",
+              "name": "‘내 업무’에 할 일로 올라갑니다",
+              "type": "TEXT",
+              "x": 148,
+              "y": 1,
+              "w": 163,
+              "h": 20
+            }
+          ]
+        },
+        {
+          "id": "1209:2577",
+          "text": "꼭 필요한 값 · 비어 있으면 실행 전에 ‘내 업무’에서 묻습니다",
+          "path": [
+            {
+              "id": "1209:2577",
+              "name": "꼭 필요한 값 · 비어 있으면 실행 전에 ‘내 업무’에서 묻습니다",
+              "type": "TEXT"
+            },
+            {
+              "id": "1209:2574",
+              "name": "Field · 꼭 필요한 값",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1204:6743",
+              "name": "Value editor",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1204:6738",
+              "name": "Values · CR별 필수 문서 확인",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1204:6709",
+              "name": "Question",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1204:6708",
+              "name": "Builder body",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1204:6668",
+              "name": "Work panel",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1204:6572",
+              "name": "B1-7 · 워크스페이스 / 새 절차 · 질문 ③ 실행할 때 고를 것",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Medium",
+              "variationSettings": {
+                "wght": 500
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1209:2575",
+              "name": "Checkbox",
+              "type": "FRAME",
+              "x": 0,
+              "y": 3,
+              "w": 16,
+              "h": 16
+            },
+            {
+              "id": "1209:2577",
+              "name": "꼭 필요한 값 · 비어 있으면 실행 전에 ‘내 업무’에서 묻습니다",
+              "type": "TEXT",
+              "x": 24,
+              "y": 0,
+              "w": 345,
+              "h": 22
+            }
+          ]
+        },
+        {
+          "id": "1204:6846",
+          "text": "처음 값을 비워 두면 첫 회차가 열릴 때 ‘내 업무’에서\n정하도록 알려 드립니다.",
+          "path": [
+            {
+              "id": "1204:6846",
+              "name": "처음 값을 비워 두면 첫 회차가 열릴 때 ‘내 업무’에서 정하도록 알려 드립니다.",
+              "type": "TEXT"
+            },
+            {
+              "id": "1204:6829",
+              "name": "Mini preview",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1204:6787",
+              "name": "Preview",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1204:6708",
+              "name": "Builder body",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1204:6668",
+              "name": "Work panel",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1204:6572",
+              "name": "B1-7 · 워크스페이스 / 새 절차 · 질문 ③ 실행할 때 고를 것",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1204:6830",
+              "name": "업무 화면에서는 이렇게 보입니다",
+              "type": "TEXT",
+              "x": 13,
+              "y": 13,
+              "w": 163,
+              "h": 18
+            },
+            {
+              "id": "1204:6831",
+              "name": "업무 설정 · 다음 회차에도 계속 사용",
+              "type": "TEXT",
+              "x": 13,
+              "y": 39,
+              "w": 178,
+              "h": 18
+            },
+            {
+              "id": "1204:6832",
+              "name": "Frame",
+              "type": "FRAME",
+              "x": 13,
+              "y": 65,
+              "w": 266,
+              "h": 20
+            },
+            {
+              "id": "1204:6835",
+              "name": "Frame",
+              "type": "FRAME",
+              "x": 13,
+              "y": 93,
+              "w": 266,
+              "h": 20
+            },
+            {
+              "id": "1204:6838",
+              "name": "Frame",
+              "type": "FRAME",
+              "x": 13,
+              "y": 121,
+              "w": 266,
+              "h": 20
+            },
+            {
+              "id": "1204:6841",
+              "name": "Divider",
+              "type": "FRAME",
+              "x": 13,
+              "y": 149,
+              "w": 294,
+              "h": 1
+            },
+            {
+              "id": "1204:6842",
+              "name": "이번 회차의 값 · 이번만 사용",
+              "type": "TEXT",
+              "x": 13,
+              "y": 158,
+              "w": 142,
+              "h": 18
+            },
+            {
+              "id": "1204:6843",
+              "name": "Frame",
+              "type": "FRAME",
+              "x": 13,
+              "y": 184,
+              "w": 189,
+              "h": 20
+            },
+            {
+              "id": "1204:6846",
+              "name": "처음 값을 비워 두면 첫 회차가 열릴 때 ‘내 업무’에서 정하도록 알려 드립니다.",
+              "type": "TEXT",
+              "x": 13,
+              "y": 212,
+              "w": 262,
+              "h": 36
+            }
+          ]
+        },
+        {
+          "id": "1204:7717",
+          "text": "사람이 할 일이 생기면 ‘내 업무’에 올라옵니다. 그 전에는 할 것이 없습니다.",
+          "path": [
+            {
+              "id": "1204:7717",
+              "name": "사람이 할 일이 생기면 ‘내 업무’에 올라옵니다. 그 전에는 할 것이 없습니다.",
+              "type": "TEXT"
+            },
+            {
+              "id": "1204:7715",
+              "name": "Notice",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1204:7676",
+              "name": "Question",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1204:7675",
+              "name": "Builder body",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "1204:7634",
+              "name": "Work panel",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "1204:7546",
+              "name": "B1-10 · 워크스페이스 / 새 절차 · 게시 완료",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "1204:7716",
+              "name": "Icon/circle-help",
+              "type": "INSTANCE",
+              "x": 12,
+              "y": 10,
+              "w": 16,
+              "h": 16
+            },
+            {
+              "id": "1204:7717",
+              "name": "사람이 할 일이 생기면 ‘내 업무’에 올라옵니다. 그 전에는 할 것이 없습니다.",
+              "type": "TEXT",
+              "x": 36,
+              "y": 10,
+              "w": 476,
+              "h": 20
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "897:761",
+      "pageId": "897:761",
+      "result": [
+        {
+          "id": "2075:49",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "2075:49",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "2075:43",
+              "name": "내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "2075:42",
+              "name": "주 메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2075:15",
+              "name": "사이드 메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2075:6",
+              "name": "HTML · 사이드바",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2075:5",
+              "name": "운영 화면 · 점검표형 패널",
+              "type": "FRAME",
+              "layout": "NONE"
+            },
+            {
+              "id": "2075:2",
+              "name": "점검표형 · 운영 화면 1920",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "2075:44",
+              "name": "Icon · 25",
+              "type": "FRAME",
+              "x": 8,
+              "y": 10,
+              "w": 16,
+              "h": 16
+            },
+            {
+              "id": "2075:49",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 34,
+              "y": 7,
+              "w": 180,
+              "h": 22
+            },
+            {
+              "id": "2075:50",
+              "name": "1",
+              "type": "TEXT",
+              "x": 224,
+              "y": 9,
+              "w": 7,
+              "h": 18
+            }
+          ]
+        },
+        {
+          "id": "2077:53",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "2077:53",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "2077:47",
+              "name": "내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "2077:46",
+              "name": "주 메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2077:19",
+              "name": "사이드 메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2077:10",
+              "name": "HTML · 사이드바",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2077:9",
+              "name": "운영 화면 · 목록형 패널",
+              "type": "FRAME",
+              "layout": "NONE"
+            },
+            {
+              "id": "2077:6",
+              "name": "목록형 · 운영 화면 1920",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "2077:48",
+              "name": "Icon · 25",
+              "type": "FRAME",
+              "x": 8,
+              "y": 10,
+              "w": 16,
+              "h": 16
+            },
+            {
+              "id": "2077:53",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 34,
+              "y": 7,
+              "w": 180,
+              "h": 22
+            },
+            {
+              "id": "2077:54",
+              "name": "1",
+              "type": "TEXT",
+              "x": 224,
+              "y": 9,
+              "w": 7,
+              "h": 18
+            }
+          ]
+        },
+        {
+          "id": "2079:57",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "2079:57",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "2079:51",
+              "name": "내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "2079:50",
+              "name": "주 메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2079:23",
+              "name": "사이드 메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2079:14",
+              "name": "HTML · 사이드바",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2079:13",
+              "name": "운영 화면 · 목록형 덜 촘촘하게",
+              "type": "FRAME",
+              "layout": "NONE"
+            },
+            {
+              "id": "2079:10",
+              "name": "목록형 · 덜 촘촘하게 · 운영 화면 1920",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "2079:52",
+              "name": "Icon · 25",
+              "type": "FRAME",
+              "x": 8,
+              "y": 10,
+              "w": 16,
+              "h": 16
+            },
+            {
+              "id": "2079:57",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 34,
+              "y": 7,
+              "w": 180,
+              "h": 22
+            },
+            {
+              "id": "2079:58",
+              "name": "1",
+              "type": "TEXT",
+              "x": 224,
+              "y": 9,
+              "w": 7,
+              "h": 18
+            }
+          ]
+        },
+        {
+          "id": "2081:80",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "2081:80",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "2081:74",
+              "name": "내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "2081:73",
+              "name": "주 메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2081:46",
+              "name": "사이드 메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2081:37",
+              "name": "HTML · 사이드바",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2081:36",
+              "name": "운영 화면 · 신호등 패널",
+              "type": "FRAME",
+              "layout": "NONE"
+            },
+            {
+              "id": "2081:14",
+              "name": "신호등 상태 언어 · 운영 화면 1920",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "Noto Sans KR",
+              "style": "Regular",
+              "variationSettings": {
+                "wght": 400
+              }
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "2081:75",
+              "name": "Icon · 25",
+              "type": "FRAME",
+              "x": 8,
+              "y": 10,
+              "w": 16,
+              "h": 16
+            },
+            {
+              "id": "2081:80",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 34,
+              "y": 7,
+              "w": 180,
+              "h": 22
+            },
+            {
+              "id": "2081:81",
+              "name": "1",
+              "type": "TEXT",
+              "x": 224,
+              "y": 9,
+              "w": 7,
+              "h": 18
+            }
+          ]
+        },
+        {
+          "id": "2088:75",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "2088:75",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "2088:74",
+              "name": "내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "2088:73",
+              "name": "메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2088:42",
+              "name": "왼쪽 메뉴 · 신호등",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2086:33",
+              "name": "운영 화면 · 신호등 화면 전체",
+              "type": "FRAME",
+              "layout": "NONE"
+            },
+            {
+              "id": "2086:30",
+              "name": "신호등 상태 언어 · 화면 전체",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "IBM Plex Sans KR",
+              "style": "Medium"
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "2088:75",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 8,
+              "y": 6,
+              "w": 202,
+              "h": 22
+            },
+            {
+              "id": "2088:76",
+              "name": "1",
+              "type": "TEXT",
+              "x": 216,
+              "y": 8,
+              "w": 8,
+              "h": 18
+            }
+          ]
+        },
+        {
+          "id": "2093:86",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "2093:86",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "2093:85",
+              "name": "내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "2093:84",
+              "name": "메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2093:53",
+              "name": "왼쪽 메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2093:52",
+              "name": "1 작업대 화면",
+              "type": "FRAME",
+              "layout": "NONE"
+            },
+            {
+              "id": "2093:49",
+              "name": "1 작업대",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2093:46",
+              "name": "과감한 세 안 · 화면 전체",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "IBM Plex Sans KR",
+              "style": "Medium"
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "2093:86",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 8,
+              "y": 6,
+              "w": 202,
+              "h": 22
+            },
+            {
+              "id": "2093:87",
+              "name": "1",
+              "type": "TEXT",
+              "x": 216,
+              "y": 8,
+              "w": 8,
+              "h": 18
+            }
+          ]
+        },
+        {
+          "id": "2094:94",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "2094:94",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "2094:93",
+              "name": "내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "2094:92",
+              "name": "메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2094:61",
+              "name": "왼쪽 메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2094:60",
+              "name": "2 조작반 화면",
+              "type": "FRAME",
+              "layout": "NONE"
+            },
+            {
+              "id": "2094:57",
+              "name": "2 조작반",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2093:46",
+              "name": "과감한 세 안 · 화면 전체",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "IBM Plex Sans KR",
+              "style": "Medium"
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "2094:94",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 8,
+              "y": 6,
+              "w": 202,
+              "h": 22
+            },
+            {
+              "id": "2094:95",
+              "name": "1",
+              "type": "TEXT",
+              "x": 216,
+              "y": 8,
+              "w": 8,
+              "h": 18
+            }
+          ]
+        },
+        {
+          "id": "2095:106",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "2095:106",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "2095:105",
+              "name": "내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "2095:104",
+              "name": "메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2095:73",
+              "name": "왼쪽 메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2095:72",
+              "name": "3 현황판 화면",
+              "type": "FRAME",
+              "layout": "NONE"
+            },
+            {
+              "id": "2095:69",
+              "name": "3 현황판",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2093:46",
+              "name": "과감한 세 안 · 화면 전체",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "IBM Plex Sans KR",
+              "style": "Medium"
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "2095:106",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 8,
+              "y": 6,
+              "w": 202,
+              "h": 22
+            },
+            {
+              "id": "2095:107",
+              "name": "1",
+              "type": "TEXT",
+              "x": 216,
+              "y": 8,
+              "w": 8,
+              "h": 18
+            }
+          ]
+        },
+        {
+          "id": "2105:109",
+          "text": "내 업무",
+          "path": [
+            {
+              "id": "2105:109",
+              "name": "내 업무",
+              "type": "TEXT"
+            },
+            {
+              "id": "2105:108",
+              "name": "내 업무",
+              "type": "FRAME",
+              "layout": "HORIZONTAL"
+            },
+            {
+              "id": "2105:107",
+              "name": "메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2105:76",
+              "name": "왼쪽 메뉴",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            },
+            {
+              "id": "2105:75",
+              "name": "나 · 화면",
+              "type": "FRAME",
+              "layout": "NONE"
+            },
+            {
+              "id": "2105:72",
+              "name": "나 · 큰 글자와 신호 줄 · 화면 전체",
+              "type": "FRAME",
+              "layout": "VERTICAL"
+            }
+          ],
+          "fonts": [
+            {
+              "family": "IBM Plex Sans KR",
+              "style": "Medium"
+            }
+          ],
+          "parentChildren": [
+            {
+              "id": "2105:109",
+              "name": "내 업무",
+              "type": "TEXT",
+              "x": 8,
+              "y": 6,
+              "w": 202,
+              "h": 22
+            },
+            {
+              "id": "2105:110",
+              "name": "1",
+              "type": "TEXT",
+              "x": 216,
+              "y": 8,
+              "w": 8,
+              "h": 18
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
