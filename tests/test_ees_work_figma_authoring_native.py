@@ -1827,7 +1827,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('#ew-tool-use-form')")
         self.click('[name="draft_use_group:group-ems"]')
         self.fill('[name=draft_use_evidence]', fixture['evidence'])
-        self.phase2_viewport_evidence('tools-phase2-t05a-use-confirm', modal=True)
+        self.phase2_viewport_evidence('tools-phase2-t05a-use-confirm', modal=True,
+                                      evidence=fixture['evidence'])
         self.click('[data-author-action=draft_use_confirm]')
         self.wait("document.querySelector('[data-active-version]')?.dataset.activeVersion === '1'")
         first = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
@@ -2084,7 +2085,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertFalse(control['clipped'], control)
         return geometry
 
-    def phase2_viewport_evidence(self, name, *, modal=False):
+    def phase2_viewport_evidence(self, name, *, modal=False, evidence=None):
         observations = []
         for width, height in ((1920, 1080), (1366, 768), (360, 768)):
             self.authoring_viewport(width, height, overlay=width <= 480)
@@ -2097,6 +2098,15 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertLessEqual(geometry['overflow'], 1, geometry)
             if modal:
                 geometry = self.phase2_modal_geometry(width, height)
+            if evidence is not None:
+                # This short confirmation must wrap fully at narrow widths;
+                # retaining a value in a horizontally clipped input is insufficient.
+                visible_evidence = self.browser.evaluate("""(()=>{const e=document.querySelector('[name=draft_use_evidence]');return {value:e.value,width:e.clientWidth,scrollWidth:e.scrollWidth,height:e.clientHeight,scrollHeight:e.scrollHeight};})()""")
+                self.assertEqual(visible_evidence['value'], evidence)
+                self.assertGreater(visible_evidence['height'], 0, visible_evidence)
+                self.assertLessEqual(visible_evidence['scrollWidth'], visible_evidence['width'] + 1, visible_evidence)
+                self.assertLessEqual(visible_evidence['scrollHeight'], visible_evidence['height'] + 1, visible_evidence)
+                geometry['evidence'] = visible_evidence
             observations.append({'width': width, 'height': height, **geometry})
             directory = self.screenshot(name + '-' + str(width))
             (directory / (name + '-geometry.json')).write_text(json.dumps(observations, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')

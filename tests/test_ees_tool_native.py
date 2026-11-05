@@ -58,11 +58,11 @@ class AuthoredNativeTests(unittest.IsolatedAsyncioTestCase):
             tree = ast.parse(source)
             selected = [node for node in tree.body if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
                         and node.name in {"extract_frontmatter", "load_tool_module_by_id"}]
-            loader = "import asyncio, types, sys, tempfile, os, re, logging\nENABLE_PLUGINS=True\nlog=logging.getLogger('trial')\ndef install_frontmatter_requirements(value):\n    assert not value\n"
+            loader = "from __future__ import annotations\nimport asyncio, types, sys, tempfile, os, re, logging\nENABLE_PLUGINS=True\nlog=logging.getLogger('trial')\ndef install_frontmatter_requirements(value):\n    assert not value\n"
             (package / "plugin.py").write_text(loader + "\n".join(ast.get_source_segment(source, node) for node in selected), encoding="utf-8")
             source = wheel.read("open_webui/utils/tools.py").decode("utf-8")
             node = next(node for node in ast.parse(source).body if isinstance(node, ast.AsyncFunctionDef) and node.name == "get_async_tool_function_and_apply_extra_params")
-            binding = "import inspect\nfrom functools import partial, update_wrapper\nfrom typing import Callable, Awaitable, get_type_hints, get_args\n"
+            binding = "from __future__ import annotations\nimport inspect\nfrom functools import partial, update_wrapper\nfrom typing import Callable, Awaitable, get_type_hints, get_args\n"
             (package / "tools.py").write_text(binding + ast.get_source_segment(source, node), encoding="utf-8")
         return str(root)
 
@@ -238,6 +238,7 @@ class Tools:
             exception = "class Tools:\n    def run(self, __user__: dict):\n        raise ValueError(__user__['valves'].PAT)\n"
             result = await self.adapter.run(self.actor, meta["native_id"], exception, "run", "https://docs.invalid", {}, meta)
             self.assertEqual(result["status"], "unknown")
+            self.assertEqual(result["error_code"], "tool_trial_worker_invoke_failed")
             self.assertNotIn("synthetic-personal-pat", json.dumps(result))
             original = self.adapter._admin
             calls = 0
@@ -259,6 +260,18 @@ class Tools:
                 result = await self.adapter.run(self.actor, meta["native_id"], code, "run", "https://docs.invalid", {}, meta)
                 self.assertEqual(result["status"], "failed", reserved)
                 self.assertEqual(result["error_code"], "tool_trial_reserved_unsupported", reserved)
+
+    async def test_worker_import_failure_reports_only_a_fixed_stage_without_exception_secrets(self):
+        meta = await self.save()
+        root = Path(self.worker_package())
+        (root / "open_webui/utils/plugin.py").write_text("raise RuntimeError('synthetic-personal-pat')\n", encoding="utf-8")
+        with patch.dict(os.environ, {"PYTHONPATH": str(root)}):
+            result = await self.adapter.run(self.actor, meta["native_id"], "class Tools:\n    def run(self): return []\n",
+                                            "run", "https://docs.invalid", {}, meta)
+        self.assertEqual((result["status"], result["error_code"]), ("unknown", "tool_trial_worker_import_failed"))
+        self.assertIsNone(result["raw_result"])
+        self.assertNotIn("synthetic-personal-pat", json.dumps(result))
+        self.assertNotIn("RuntimeError", json.dumps(result))
 
     async def test_real_workflow_connection_worker_and_use_activation_round_trip(self):
         root = Path(__file__).resolve().parents[1]

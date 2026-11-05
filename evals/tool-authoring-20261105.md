@@ -120,3 +120,23 @@
 - 전체 설치 Open WebUI의 import·계정·Native 설정·30초 worker를 그대로 쓰는 API smoke를 기존 실제 CLI CI에 추가했다. 합성 fixture로 2건·실제 저장/재조회·응답/로그 토큰 비노출을 검사한다. 로컬에서는 미실행이며 최종 Complete Native product 결과가 이 경계의 증거다.
 - 브라우저 새 5흐름은 실제 HTTP/service/SQLite와 합성 Native 경계로 검사한다. 연결 복귀, 시험 성공/실패/0건/부분/unknown, v1/v2·그룹·중지, 중복/이전 시험 차단, 권한 회수·지연 응답과 Figma 상태별/3폭 캡처를 포함한다. 로컬은 구문·합성 adapter/service smoke만 통과했으며 실제 브라우저는 CI 대상이다.
 - 시험 ID 감사는 기존 1,332·통합 1,685개에서 오류 0, 문서 35개·링크 2,906개 오류/검토 후보 0, diff 검사 통과했다. 최종 후속 head에서 ID 감사·필수 CI를 다시 판정한다.
+
+
+### CI480 최초 통합 결과
+
+[CI480](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41987460942), 원격 head `cc28c7b93ffe4efb4952811ebbe2feb9e89ed72c`·tree `966e9d8d40ead8c05943ce3e64c02027c30f31c0`는 로컬 `dc87350`과 동일한 제품이다. 최종 40 jobs 중 35성공·3실패·1취소·1정상 생략이었다. 실패는 Complete Native product, native-compose와 이를 집계한 Ubuntu Delivery checks이며 Windows 집계는 취소됐다. 첫 실패를 보존하고 수정 head로 재판정한다.
+
+- 새 `test_ees_tool_native.py`는 Ubuntu 14/14(22.802초), Windows 14/14(33.189초)로 실제 전체 실행 통과했다. 기존 Native 계정·암호화·CAS와 추출 loader/binder child 경계를 검증했다.
+- 전체 설치 제품은 기존 UI 두 흐름과 새 수정본·Native 연결 저장 뒤 실제 worker 시험에서 `unknown/tool_trial_worker_failed`로 실패했다. 약 6초이며 30초 제한 초과는 아니다. 원문 예외를 폐기하는 기존 보호 때문에 실패 단계는 미확정이었다. socket 이름 가림 가설은 실제 wheel 구조에서 반증했고, 공식 함수의 future annotations를 단위 fixture에 추가한 통합 1개도 통과해 원인이 아니었다.
+- 고정 단계 오류코드와 합성 fixture 전용 CI 실패 진단을 추가해 실제 설치 환경에서 원인을 구분한다. 생산 worker의 stdout/stderr·원문 예외 비공개는 유지하며 진단 성공으로 원래 시험 실패를 덮지 않는다. native-compose의 개별 실패·화면 관찰과 후속 결과는 아래에 추가한다.
+
+
+CI480 후속 분리: 새 2페이즈 브라우저 5개와 작성 모듈 39개는 모두 통과했다. native-compose 실패는 기존 `test_navigation_v2_geometry_modes_categories_global_tools_and_draft` 1개이며 개별 원인을 확인한다. 전체 worker 후속 `1dd211a`는 원인 해결이 아닌 안전한 단계 진단 변경이다. 이 변경의 Native 15개 전체는 실제 공식 wheel 지정으로 68.279초에 통과했고, 처음 wheel 경로 누락으로 15개를 건너뛴 실행과 구분한다. 합성 진단 메시지에 시험 PAT·WEBUI_SECRET_KEY를 함께 넣어 모두 제거되는 것을 확인했다. 고정 loader/binder fixture에는 원본의 future annotations도 보존한다.
+
+
+CI480 native-compose 최종은 105개 중 104통과·기존 motion 1실패였다. 1920→1366 전환에서 자동 접기 flag는 이미 true지만 축소 초반의 너비가 200px보다 커 공통 open_sidebar helper가 열린 상태로 오인했다. 그 뒤 애니메이션 완료를 기다려 접힌 제목 높이 [0,0,0]을 읽었다. 실패 PNG/DOM의 실제 56px·펼치기 단추와 일치했다. `ced97c5`는 source sidebar의 compact=false도 요구해 실제 토글을 거치게 하며 기존 치수·hit-test·단언·시간 제한을 유지한다. 새 브라우저 검증 성공을 대신하지 않는다.
+
+CI480 artifact는 26,876,710 bytes, SHA256 `807248628a8196afab7bcbe44e2c11aa0425a9cd59d16ab6880a86e3a20218a7`이고 ZIP CRC·내부 증거 589개 size/SHA256가 일치했다. PNG 316개 중 2페이즈 25개다. 연결 복귀 6건 scroll delta0, T02B/T05A의 1920/1366/360에서 footerGap20px·버튼 hit=true·한 줄·잘림 없음, T05/T06 가로 넘침0을 확인했다. 실제 화면 대조에서 T06 사용 가능 배지의 상태 색상 누락을 발견해 공통 상태 태그 매핑을 보완한다.
+
+
+실제 캡처 대조 후 `86c0a6c`는 공통 available 색상을 쓰는 사용 가능 배지, 평문 형태의 확인 근거 textarea 자동 높이(최대180px 뒤 스크롤), 안내 글자 크기·원본 결과 펼침의 회색 표현, 연결 전 버튼의 세로 배치를 보완했다. 공통 패널·탭 토큰과 가시 포커스는 유지한다. T05C의 예시 401 문구는 실제 HTTP 상태가 확인되지 않았으므로 추가하지 않았고, 실제 실패 안내·입력 보존·연결 설정/재시험·사용 차단을 확인했다. 수정 후 실제 근거 가독성과 상태 색상은 다음 CI 캡처로 재검한다.
