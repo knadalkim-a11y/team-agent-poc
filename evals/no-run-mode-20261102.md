@@ -113,3 +113,16 @@ CI456 (`77ca5cd`)의 실제 전체 제품과 새 미완성 게시/360px 흐름�
 - **검증:** Linux/Python 3.12에서 `-X warn_default_encoding -W error::EncodingWarning`으로 operations 55/55·workspace 85/85 통과. 새 회귀 시험은 f1 participant 정상 시작, f2 viewer·공장 없는 시작 거부, participant 작성 검사 거부, 진행 건 한 개만 생성됨을 확인했다. 이전 실패·기존 범위 검사·실제 사용자 자료는 보존한다. 최종 통합 head의 Native·Windows 전체 검사는 [PR #120](https://github.com/knadalkim-a11y/team-agent-poc/pull/120)에서 판정한다.
 
 - **main 통합:** #118 최종 head `791ddb6`의 CI462 39성공·출하1정상생략과 병합 main `818e31c`을 확인하고 #120에 merge로 통합했다. #118·#119·#120의 STATUS·CHANGELOG·사용 안내·TASK 기록을 모두 보존하고 문서·diff 검사를 다시 통과했다. 최종 CI는 이 통합본에서 새로 실행한다.
+
+
+<a id="publication-save-20261106"></a>
+
+## 2026-11-06 · 게시 상태 선택과 저장 통합
+
+- 기준: #125 병합 main `7a56cdbbcbf104a8a0847a446e951d262907a167`. 사용자 승인에 따라 업무절차17판의 상태 선택/저장을 구현한다. 도구의 수정본 저장/사용 설정 계약은 바꾸지 않는다.
+- UI: 상태만 바꿔도 미저장 표시·저장 활성화, 다른 절차 왕복·외부 refresh 보존, 원래 상태로 되돌리면 깨끗한 상태, 계정 전환 정리, 실패 후 재시도. 저장 전에는 서버 요청을 만들지 않는다.
+- 서버: 게시 상태 save_draft는 제출 내용으로 참조 검사 후 같은 트랜잭션에서 편집본·버전·포인터·revision·receipt를 저장한다. 중복 request는 한 번만 반영하고 재시도에도 권한을 다시 확인한다. 미게시 저장·재게시에도 과거 버전과 진행 건 snapshot은 유지한다.
+- 회귀: 기존 publish 버튼 기대6개가 실패해 상태 선택/단일 저장·서버 미변경/변경의 실제 계약으로 갱신했다. 검사 범위를 없애지 않고 게시 중 수정 반영·실패 선택 보존·state-only refresh를 추가했다. `node --test --test-reporter=tap tests/test_ees*.cjs`:733/733, workspace88/88, operations55/55 통과. SQLite version INSERT 실패 주입 뒤 내용·revision·포인터·버전·receipt 전체 rollback과 정상 재시도, stale revision과 접근 회수도 확인했다.
+- 빌드: main CI 산출물(검증된 공식 wheel·source frontend)을 재사용하려던 첫 빌드는 `Frontend inputs differ from this wrapper checkout; rebuild in CI.`로 중단했다. 변경된 UI 입력을 탐지한 정상 보호이며 manifest/컴파일 결과를 우회 수정하지 않는다. 최종 head의 CI 새 source 빌드와 실제 Native 검증으로 확인한다.
+- Figma: 업무절차 페이지1285:1829·루트1804:2546, 대표 패널1804:2551/1804:2673, 이전 B070 보존. 열 개 편집 화면에 상태 선택·단일 저장을 반영했다. 폰트/부품은 기존 것을 재사용한다. 라벨에 남은 상태 주황색을 공통 보조 글자 토큰으로 수정했다.
+- 실제 Native·최종 CI·고정 점검은 진행 중. 사내 화면·실데이터·사용자 사용성은 미확인, 병합·배포는 미실행이다.
