@@ -121,6 +121,7 @@
 :is(#ees-work-panel,#ees-work-designer) :is(.ew-tabs,.ew-author-tabs)>button:is([aria-pressed=true],[aria-selected=true]){color:var(--ees-text-primary);font-weight:500;}
 :is(#ees-work-panel,#ees-work-designer) :is(.ew-tabs,.ew-author-tabs)>button:is([aria-pressed=true],[aria-selected=true])::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--ees-brand-solid);}
 :is(#ees-work-panel,#ees-work-designer) :is(.ew-tabs,.ew-author-tabs)>button:disabled{background:transparent;color:var(--ees-text-tertiary);}
+:is(#ees-work-panel,#ees-work-designer) :is(.ew-tabs,.ew-author-tabs)>button:focus-visible{outline-offset:-2px;box-shadow:none;}
 #ees-work-panel section+section{margin-top:24px;}
 #ees-work-panel h3 small{font-size:11px;color:var(--ees-text-tertiary);font-weight:400;}
 #ees-work-inputs{margin:8px 0 20px;border:1px solid var(--ees-line-control);border-radius:6px;overflow:hidden;}

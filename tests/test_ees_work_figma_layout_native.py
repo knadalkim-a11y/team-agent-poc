@@ -230,6 +230,20 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
             self.assertFalse(self.geometry()['overflow'], label)
             shared[label] = result
 
+        def capture_tab_focus(label, tabs):
+            # Enter keyboard modality with real Tab/Shift+Tab. The focus outline
+            # stays inside the tab so its scrolling parent cannot clip it.
+            self.browser.evaluate('document.querySelector(' + json.dumps(tabs) + ').querySelector("button").focus()')
+            self.key('Tab', 9)
+            self.key('Tab', 9, modifiers=8)
+            focus = self.browser.evaluate("""((selector)=>{
+              const e=document.activeElement,s=getComputedStyle(e);
+              return {tab:document.querySelector(selector).contains(e),visible:e.matches(':focus-visible'),style:s.outlineStyle,width:s.outlineWidth,offset:s.outlineOffset};
+            })(""" + json.dumps(tabs) + ')')
+            self.assertEqual(focus, {'tab': True, 'visible': True, 'style': 'solid',
+                                     'width': '2px', 'offset': '-2px'}, label)
+            shared[label]['keyboardFocus'] = focus
+
         self.viewport(1366)
         row = '[data-author-action=open][data-id="' + workflow_id + '"]'
         self.wait('document.querySelector(' + json.dumps(row) + ')')
@@ -237,6 +251,7 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('.ew-author-tabs [aria-selected=true]')")
         original = deepcopy(self.state(workflow_id=workflow_id)['workflow']['draft'])
         capture_style('author-content', '.ew-author-tabs')
+        capture_tab_focus('author-content', '.ew-author-tabs')
         self.screenshot('shared-panel-authoring-1366')
         self.open_author_job_ui('job-0')
         capture_style('author-job', '.ew-author-tabs')
@@ -249,12 +264,18 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('#ees-work-designer[data-author-tab=tools]')")
         capture_style('tools')
         run = self.start(workflow_id)
+        self.open_sidebar()
+        self.click('[data-action=mode][data-mode=work]')
+        self.wait("document.querySelector('[data-action=records]')")
         self.open_run(workflow_id, run, job=None)
-        if self.browser.evaluate("!!document.querySelector('.ew-operation-overview')"):
-            capture_style('work-overview')
-            self.click('.ew-operation-stage[data-action=stage_open]')
+        if not self.browser.evaluate("!!document.querySelector('.ew-operation-overview')"):
+            self.click('[data-action=stage_back]')
+        self.wait("document.querySelector('.ew-operation-overview')")
+        capture_style('work-overview')
+        self.click('.ew-operation-stage[data-action=stage_open]')
         self.wait("document.querySelector('#ees-work-panel.ew-vd .ew-tabs')")
         capture_style('work-stage', '.ew-tabs')
+        capture_tab_focus('work-stage', '.ew-tabs')
         self.screenshot('shared-panel-stage-1366')
         hover('.ew-tabs [aria-pressed=false]', 'rgb(236, 236, 239)')
         self.open_run(workflow_id, run)
@@ -262,6 +283,7 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         capture_style('work-task', '.ew-tabs')
         self.viewport(480)
         capture_style('work-task-narrow', '.ew-tabs')
+        capture_tab_focus('work-task-narrow', '.ew-tabs')
         self.assertEqual(self.state(workflow_id=workflow_id)['workflow']['draft'], original)
         directory = self.screenshot('shared-panel-task-480')
         (directory / 'shared-panel-styles.json').write_text(
