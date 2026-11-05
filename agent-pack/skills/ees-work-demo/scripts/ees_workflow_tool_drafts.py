@@ -88,6 +88,8 @@ class ToolDrafts:
         self.service = service
         with service._db(write=True) as db:
             db.execute("CREATE TABLE IF NOT EXISTS work_tool_drafts(id TEXT PRIMARY KEY,revision INTEGER NOT NULL,data TEXT NOT NULL)")
+        from .ees_workflow_tool_lifecycle import ToolLifecycle
+        self.lifecycle = ToolLifecycle(self)
 
     async def _admin(self, user):
         actor = await self.service._user(user)
@@ -110,9 +112,10 @@ class ToolDrafts:
             return []
         with self.service._db() as db:
             records = [json.loads(row[0]) for row in db.execute("SELECT data FROM work_tool_drafts ORDER BY id")]
+            uses = {row[0]: json.loads(row[1]) for row in db.execute("SELECT tool_id,data FROM work_tool_uses")}
         return [{"id": item["id"], **{key: item["draft"][key] for key in ("name", "description", "target", "kind")},
                  "revision": item["revision"], "active_version": item["active_version"],
-                 "state": "draft", "updated_at": item["updated_at"]} for item in records]
+                 "state": uses.get(item["id"], {}).get("state", "draft"), "updated_at": item["updated_at"]} for item in records]
 
     async def sources(self, user):
         actor = await self.service._user(user)
@@ -128,16 +131,17 @@ class ToolDrafts:
         action = body.get("action")
         if action == "tool_draft_get":
             with self.service._db() as db:
-                return {"ok": True, "tool_draft": self._get(db, body.get("tool_id"))}
+                record = self._get(db, body.get("tool_id"))
+            return {"ok": True, "tool_draft": await self.lifecycle.decorate(actor, record)}
         if action == "tool_draft_check":
             return {"ok": True, "check": check_draft(normalize_draft(body.get("draft")))}
         if action not in {"tool_draft_save", "tool_draft_import"}:
-            _fail()
+            return await self.lifecycle.command(actor, body)
         runtime = self.service.operations
         with self.service._db() as db:
             receipt = runtime._receipt(db, actor, body)
-            if receipt is not None:
-                return receipt
+        if receipt is not None:
+            return {**receipt, "tool_draft": await self.lifecycle.decorate(actor, receipt["tool_draft"])}
         if action == "tool_draft_import":
             runtime.configure()
             bridge = runtime.bridge
@@ -178,4 +182,5 @@ class ToolDrafts:
                        (record["id"], record["revision"], data))
             # Audit metadata excludes source code, settings and actual secrets.
             runtime._event(db, record["id"], actor, action, {"revision": record["revision"], "valid": checked["valid"]})
-            return runtime._remember(db, actor, body, {"ok": True, "tool_draft": record})
+            result = runtime._remember(db, actor, body, {"ok": True, "tool_draft": record})
+        return {**result, "tool_draft": await self.lifecycle.decorate(actor, record)}

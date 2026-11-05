@@ -1,0 +1,87 @@
+{
+  "description": "Synthetic phase-two contract. No external requests; the token is a test-only value.",
+  "draft": {
+    "name": "문서 목록 조회",
+    "description": "필수 문서를 종류별로 찾아 목록으로 보여 줍니다.",
+    "target": "Confluence",
+    "kind": "read",
+    "code": "from typing import List, Literal\nfrom pydantic import BaseModel, Field\nDocType = Literal[\"design_doc\", \"test_result\", \"deployment_plan\"]\nclass Tools:\n    class Valves(BaseModel):\n        BASE_URL: str = \"\"\n    class UserValves(BaseModel):\n        PAT: str = Field(default=\"\", repr=False)\n    def __init__(self):\n        self.valves = self.Valves()\n    def list_documents(self, doc_types: List[DocType], __user__: dict) -> dict:\n        if not __user__[\"valves\"].PAT:\n            raise ValueError(\"fixture credential missing\")\n        base = self.valves.BASE_URL.rstrip(\"/\")\n        documents = [\n            {\"id\": \"101\", \"title\": \"EMS 셋업 설계서\", \"document_type\": \"design_doc\", \"url\": base + \"/pages/101\"},\n            {\"id\": \"102\", \"title\": \"EMS 통합 테스트 결과\", \"document_type\": \"test_result\", \"url\": base + \"/pages/102\"}\n        ]\n        return {\"documents\": [row for row in documents if row[\"document_type\"] in doc_types]}\n",
+    "function": "list_documents",
+    "input_ui": {
+      "doc_types": {
+        "label": "찾을 문서",
+        "question": "어떤 문서를 찾을까요?",
+        "widget": "multiselect",
+        "option_labels": {
+          "design_doc": "설계서",
+          "test_result": "테스트 결과",
+          "deployment_plan": "배포 계획서"
+        },
+        "default": []
+      }
+    },
+    "output_ui": {
+      "kind": "list",
+      "path": "documents",
+      "fields": [
+        {
+          "path": "title",
+          "label": "문서 제목",
+          "role": "title",
+          "hidden": false
+        },
+        {
+          "path": "document_type",
+          "label": "문서 종류",
+          "role": "category",
+          "hidden": false
+        },
+        {
+          "path": "url",
+          "label": "문서 주소",
+          "role": "url",
+          "hidden": false
+        },
+        {
+          "path": "id",
+          "label": "문서 번호",
+          "role": "id",
+          "hidden": true
+        }
+      ]
+    }
+  },
+  "connection": {
+    "base_url": "https://confluence.example.invalid",
+    "token": "fixture-phase2-personal-token"
+  },
+  "inputs": {
+    "doc_types": [
+      "design_doc",
+      "test_result"
+    ]
+  },
+  "empty_inputs": {
+    "doc_types": []
+  },
+  "groups": [
+    "group-ems"
+  ],
+  "evidence": "합성 문서 두 건의 입력과 표시 항목을 확인했습니다.",
+  "result": {
+    "documents": [
+      {
+        "id": "101",
+        "title": "EMS 셋업 설계서",
+        "document_type": "design_doc",
+        "url": "https://confluence.example.invalid/pages/101"
+      },
+      {
+        "id": "102",
+        "title": "EMS 통합 테스트 결과",
+        "document_type": "test_result",
+        "url": "https://confluence.example.invalid/pages/102"
+      }
+    ]
+  }
+}

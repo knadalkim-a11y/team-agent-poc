@@ -134,7 +134,9 @@ V4_ICON_FILES += AUTHORING_ICON_FILES
 UI_FILES.update({name: name for name in AUTHORING_ICON_FILES})
 WORK_FILES += tuple(TARGET_APP + name for name in AUTHORING_ICON_FILES)
 # Draft authoring is additive; older ees.14 inventories remain restorable.
-for _draft_module in ("ees_workflow_tool_drafts.py", "ees_workflow_tool_draft_check.py"):
+for _draft_module in ("ees_workflow_tool_drafts.py", "ees_workflow_tool_draft_check.py",
+                      "ees_workflow_tool_lifecycle.py", "ees_workflow_tool_native.py",
+                      "ees_workflow_tool_worker.py"):
     WORK_ASSETS["scripts/" + _draft_module] = "open_webui/" + _draft_module
     WORK_FILES += (WORK_ASSETS["scripts/" + _draft_module],)
 # Copy these already bundled upstream fonts byte-for-byte into the new cache

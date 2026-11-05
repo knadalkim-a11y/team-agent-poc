@@ -243,3 +243,58 @@ Figma [2판 헤더](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=
 - 검증 에이전트: 통합 브라우저 검사·독립 리뷰(담당은 root와 조정).
 
 소유 밖 파일 변경은 요청해 조율하며 root가 최종 문서·조립을 갱신한다. 하위 세션별 PR 대신 같은 계약에서 독립 worktree 커밋을 만들고 root가 한 PR로 통합한다. 사용자 요청의 서브에이전트 방식에 맞춘 운영 변경이며 main 병합·사내 배포는 포함하지 않는다.
+
+<a id="tools-redesign-v2-phase2-20261105"></a>
+
+## 도구 재설계 2판 · 2페이즈 연결·시험·사용 설정
+
+2026-11-05 사용자가 1페이즈 완료 뒤 2페이즈 진행을 요청했다. 기준은 PR #123의 `448f9aa`(CI479 성공)이며 같은 PR에서 이어서 통합한다. main 병합·사내 배포는 포함하지 않는다. 작성 도구의 연결 설정, 저장본 시험, 사용 버전·그룹·근거·사용 중지를 구현한다. 업무절차 선택·연결·실행은 3페이즈다. 기존 기본 제공·이전 방식 도구는 기존 계약을 유지한다.
+
+### 동작과 보존 경계
+
+| ID | 계약 |
+|---|---|
+| ST-P2-1 | 새 작성 경로의 연결·시험·사용 설정은 관리자만 한다. 담당자 필드는 추가하지 않고 확인 계정·시각을 기록한다. 현재 계정·관리 권한·Native 접근을 요청 때와 비동기 완료 때 다시 확인한다. 시험 입력·원본 결과는 실행 계정에게만 보이며 다른 관리자에게 자동 공개하지 않는다. |
+| ST-P2-2 | 초안 저장·목록·조회·정적 검사는 코드를 실행하지 않는다. 사용자가 저장된 수정본의 ‘시험 실행/다시 시험’을 선택할 때만 정확한 코드 snapshot을 실행한다. 관리자 작성 코드는 기존 Native 관리자 코드와 같은 서버 권한의 신뢰 범위다. AST 검사·조회 분류·worker를 보안 sandbox나 외부 변경 방지 보장으로 설명하지 않는다. frontmatter requirements 자동 설치는 허용하지 않는다. |
+| ST-P2-3 | 새 도구마다 원본과 다른 Native 설정용 identity를 명시 생성한다. 그 Native 행은 제품이 제공하는 고정 설정 코드와 빈 업무 함수 목록을 유지한다. 코드 내용을 추정해 기존 도구에 연결하거나 원본·설정·PAT를 복사/덮어쓰지 않는다. 개인 설정 조회가 초안 코드를 실행하지 않게 한다. 작성·사용 코드의 원본은 새 도구의 Work 수정본·불변 버전이며 Native loader에는 정확한 content를 명시 전달한다. |
+| ST-P2-4 | T02B의 주소와 현재 로그인 계정의 토큰을 설정한다. 토큰은 해당 Native identity의 기존 UserValves.PAT 저장과 암호화를 재사용하며 별도 비밀 저장소·시스템 계정 매핑·타 계정 대행을 만들지 않는다. 암호화가 꺼졌거나 저장/복호화를 확인할 수 없으면 실패한다. 토큰 원문은 조회 응답·시험·사용 버전·영수증·감사·로그에 넣지 않는다. 비워서 저장하면 본인 기존 토큰을 유지하고, 입력하면 교체한다. 다른 사용자 설정의 동시 변경을 덮지 않는다. |
+| ST-P2-5 | 연결에는 revision과 비밀 아닌 주소를 기록한다. 주소는 http/https 기본 주소만 허용하며 userinfo·query·fragment를 받지 않는다. 시험은 저장된 draft revision·connection revision·Native identity·계정 자격 상태·실행 환경을 고정한다. 코드·입력/결과 정의·연결·계정 자격이 바뀌면 이전 시험으로 사용 설정할 수 없다. 연결 수정은 기존 사용 버전의 주소·코드 snapshot을 바꾸지 않는다. |
+| ST-P2-6 | 시험은 별도 짧은 수명 worker에서 Native 호환 Tools/예약 인자 바인딩을 사용한다. 후보 설정은 BASE_URL 및 선언된 서비스별 BASE_URL, 현재 계정 PAT에 주입한다. 나머지 코드 설정의 기본값·허용 범위를 임의로 넓히거나 기존 설정을 복사하지 않는다. 제한 시간·입출력 크기를 제한하고 중단된 시험을 자동 재실행하지 않는다. worker 종료는 보안 격리를 뜻하지 않는다. 사용자 stdout/stderr·원문 traceback은 공개/저장하지 않는다. 시험에서 주입하는 예약 인자는 __user__, __id__, __request__, __metadata__이며 그 밖의 필수 예약 인자는 명시 오류로 거부한다. |
+| ST-P2-7 | 입력은 저장된 정적 schema에 따라 서버에서 검사한다. 실제 반환값에서 output_ui.path의 목록과 각 표시 필드·URL 형식을 확인한다. 잘못된 결과를 예시 데이터로 대체하지 않는다. 정상 0건은 실패와 구분해 사용 설정을 허용하되 개별 항목의 표시는 확인하지 못했음을 기록/표시한다. 부분·잘림·크기 초과·형식 오류는 사용 설정을 막는다. 시간 초과·응답 유실은 외부 영향이 없었다는 증거가 아니며 같은 요청을 다시 실행하지 않는다. |
+| ST-P2-8 | 시험 id는 request_id로 중복 실행을 막는다. 완료·실패·중단 기록을 보존하고 실패 후 시험 입력을 유지한다. 지연 응답이 이후 편집이나 다른 계정의 화면을 덮지 않는다. 연결 저장 영수증에는 토큰을 포함하거나 토큰에서 유도한 요청 지문을 저장하지 않는다. 같은 연결 저장 request_id는 최초 결과만 재사용하므로 새 토큰 교체에는 새 요청 번호를 쓴다. |
+| ST-P2-9 | 사용 설정에는 본인이 성공시킨 현재 snapshot의 trial_id, 현재 draft/connection/use revision, 기존 그룹 1개 이상, 확인 근거 8~2,000자가 필요하다. 근거에 비밀 형태를 받지 않는다. 최초 v1, 코드·입출력·비밀 아닌 연결 snapshot이 달라질 때만 새 불변 버전을 만든다. 동일 snapshot 재확인·그룹 변경은 버전을 올리지 않는다. 기존 사용 버전과 수정본 revision은 별개다. |
+| ST-P2-10 | 사용 권한 변경·사용 중지는 use revision으로 충돌을 막는다. 사용 중지는 저장·재시험·재확인으로 자동 해제하지 않는다. 이미 확인된 도구의 장애 중에도 사용 중지·그룹 축소를 허용하고 그룹 확대·사용 재개는 현재 사용 snapshot/Native 상태를 확인한다. 업무 실행에서의 그룹 적용은 3페이즈에서 연결하며, 2페이즈만으로 기존 작업의 선택·버전 고정·실행 의미를 바꾸지 않는다. |
+| ST-P2-11 | 새 저장은 부가 표/필드로 구성하고 기존 draft 자료를 읽는다. 여러 저장소를 건드리는 연결/권한 변경은 현재 상태를 비교해 적용하며 실패를 성공으로 처리하지 않는다. 기존 Native 설정용 행이 사용자가 바꾼 내용과 다르면 자동으로 재등록·덮어쓰지 않는다. 기존 기본 제공 도구·계정·대화·근거·프로그램 Restore 범위를 보존한다. |
+
+연결 자격 변경 감지는 기존 Native 암호문 blob의 지문을 비공개 시험 메타데이터에만 보관해 수행한다. 토큰 원문이나 원문에서 만든 지문을 저장하지 않으며 이 암호문 지문도 API·영수증·감사에 내보내지 않는다. Native 개인 설정에서 직접 토큰을 바꾼 경우도 이전 시험이 무효가 된다. 계정 설정 갱신은 전체 settings를 비교하는 CAS로 다른 설정의 동시 변경을 보존한다.
+
+시험 입력은 64KiB, 저장할 반환값은 256KiB·목록 500개로 제한한다. worker 경계는 30초·입력 1MiB·출력 2MiB이며 한도 초과는 성공으로 축약하지 않는다. 반환 객체 최상위의 `status`/`completeness` 값이 `partial`, `truncated`, `page`, `incomplete`이거나 `partial=true`, `truncated=true`, `has_more=true`이면 부분 신호로 인식한다. `status`/`completeness`가 `unknown`이면 확인 불가로 기록하고 사용 설정을 막는다. `complete`는 수신한 응답의 형식을 검사했다는 뜻이며 외부 원본 전체 조회를 보장하지 않는다. 명시적 부분 신호나 worker 잘림은 사용 설정할 수 없다.
+
+### 공통 API
+
+기존 operations POST를 사용한다. 모든 mutation은 request_id, 오류는 기존 `{ok:false,error:{code,message}}`다. 시험/사용 응답에 코드·토큰을 복제하지 않는다. 사용자 입력 필드와 원본 결과는 비밀 제거·크기 제한 후 본인 시험 조회에만 둔다.
+
+| action | 주요 입력 | 결과 |
+|---|---|---|
+| tool_draft_get | tool_id | 기존 record + phase:2, connection, trial(본인 최신), use |
+| tool_draft_connection_get | tool_id | connection `{revision,base_url,configured,token_set,native_id}`; 토큰 값 없음 |
+| tool_draft_connection_save | tool_id, expected_revision(초안), expected_connection_revision, base_url, token(선택) | connection + tool_draft; 빈 token은 유지 |
+| tool_draft_trial_start | tool_id, expected_revision, expected_connection_revision, inputs | trial; 저장본만 시험. 실행 중 재전송은 같은 id/상태 |
+| tool_draft_trial_get | tool_id, trial_id | 본인 trial과 현재 eligible_for_activation |
+| tool_draft_use_set | tool_id, trial_id, expected_revision, expected_connection_revision, expected_use_revision, groups, evidence | use + tool_draft |
+| tool_draft_use_access | tool_id, expected_use_revision, groups | use; 새 시험 없이 접근 그룹만 변경 |
+| tool_draft_use_disable | tool_id, expected_use_revision | use; 현재 버전·기록 보존 |
+| tool_draft_use_enable | tool_id, expected_use_revision | use; 명시 재개, 유효한 현재 사용 snapshot 확인 |
+
+`trial = {id,tool_id,draft_revision,connection_revision,status,started_at,finished_at,duration_ms,inputs,rows,raw_result,count,completeness,fields_checked,errors,warnings,eligible_for_activation,activation_reasons}`. status는 running/succeeded/failed/unknown, completeness는 complete/empty/partial/unknown이다. 완료된 시험의 당시 사실과 지금의 활성화 가능 여부를 구분한다.
+
+`use = {revision,active_version,state,groups,evidence,confirmed_by,confirmed_at,versions}`. state는 draft/active/disabled, versions는 `{version,confirmed_by,confirmed_at,evidence}`의 읽기 전용 이력이다. 담당자나 되돌리기 UI를 추가하지 않는다. 화면의 enabled/disabled는 서버 권위값과 현재 미저장 상태를 함께 반영한다. operations에는 `tool_draft_phase:2`를 반환해 기존 1페이즈 응답과 구분한다.
+
+### 화면·병렬 소유권과 확인
+
+Figma 2판 T02B `2052:207`, T05 `2016:277`, T05A `2018:160`, T05B `2052:236`, T05C `2052:358`, T05D `2052:481`, T05E `2054:261`, T06 `2017:333`, T09 `2018:194`를 2026-11-05 읽기 전용 조회했다. 연결 저장/취소는 기능 작성에서 열면 기능 작성으로, 시험에서 열면 시험으로 돌아간다. 실패 시 입력 유지, 수정본 시험과 현재 사용 버전 구분, 공통 패널/탭·포커스·1920/1366/360 배치를 확인한다. 0건·부분·네트워크/자격/형식 오류·동시 변경·중복 시험·사용 중지·권한 회수와 기존 사용자 자산 보존을 합성 데이터로 검증한다. 실제 사내 토큰이나 외부 서비스 호출은 사용하지 않는다.
+
+- root: 이 계약·공통 fixture·문서·배포 파일 목록·통합·PR/CI.
+- backend: 수정본 lifecycle·연결/시험/사용 API·저장·서버 단위/Native 검사. 실행 worker/Native 설정 adapter는 같은 계약으로 하위 담당과 분리한다.
+- frontend: JS/CSS·정적 자산·Node 화면 검사·고정 Figma PNG/메타데이터.
+- validation: 실제 Native 브라우저 왕복·상태·화면 대조. review: 독립 권한/동시 변경/비밀·회귀 검토.

@@ -276,7 +276,10 @@
   async function sendCommand(path,body){
     if(!available())throw new Error('로그인을 확인해 주세요.');
     const at=context(),auth=token(),payload={...body,expected_revision:body.expected_revision ?? revisionFor(body.action)};
-    const key=path+JSON.stringify(payload);if(!payload.request_id)payload.request_id=receipts.get(key) || workUI.newId();receipts.set(key,payload.request_id);
+    // The connection password must never become a receipt key (or a hash of it).
+    const privateConnection=path==='operations'&&payload.action==='tool_draft_connection_save';
+    if(privateConnection&&!payload.request_id)payload.request_id=workUI.newId();
+    const key=privateConnection?path+':'+payload.action+':'+payload.request_id:path+JSON.stringify(payload);if(!payload.request_id)payload.request_id=receipts.get(key) || workUI.newId();receipts.set(key,payload.request_id);
     let result;
     try{result=await api(path,payload);receipts.delete(key);}
     catch(failure){if(failure.status&&failure.status<500)receipts.delete(key);if(auth===token()&&at===context()){commandError=failure.message;render();}throw failure;}
@@ -304,7 +307,7 @@
   async function setPanelOpen(open){
     if((selection.panel_open!==false)===open)return state;
     // Visibility does not change the selected work, help context or chat epoch.
-    if(!open)workUI.closeHelp({restoreFocus:false});
+    if(!open){workUI.closeHelp({restoreFocus:false});designer.closePrivateDialogs?.();}
     view.capture();designer.readDraft?.();
     if(!restored)initialSelectionPatch={...initialSelectionPatch,panel_open:open};
     selection={...selection,panel_open:open};remember();render();
@@ -313,6 +316,7 @@
     return state;
   }
   function commitSelection(patch){
+    designer.closePrivateDialogs?.();
     if(pendingNativeAction?.applied)pendingNativeAction=null;clearTimeout(reviewTimer);
     const previous={...selection},before=context(),next={...selection,chat_reference:null,...patch};
     if(['system_id','factory_id','workflow_id','run_id'].some(key=>previous[key]!==next[key]))Object.assign(next,{start_stage_id:previous.workflow_id===next.workflow_id&&previous.system_id===next.system_id&&next.tab==='start'?previous.start_stage_id || '':'',stage_id:'',stage_overview:false,stage_tab:'work',stage_evidence:'',stage_tool:'',stage_attempts:{},stage_approved_expanded:false,stage_verdict_job:''});

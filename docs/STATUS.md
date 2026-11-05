@@ -1,5 +1,14 @@
 # 현재 작업 상태
 
+## 2026-11-05 · 도구 재설계 2판 · 연결·시험·사용 설정 2페이즈
+
+- **요청·기준:** 사용자가 2페이즈 진행을 요청했다. 1페이즈 최종 `448f9aa`·[CI479 성공](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/41976283599)을 기준으로 같은 [PR #123](https://github.com/knadalkim-a11y/team-agent-poc/pull/123)에서 서버·화면·Native 검증을 병렬 구현한다. [ST-P2 계약](specs/shared-tools.md#tools-redesign-v2-phase2-20261105)·[사용 안내](03-openwebui-native-agent.md#tool-authoring-phase2-20261105).
+- **범위:** 연결 주소·현재 계정 토큰, 저장본 시험, 현재 사용 버전·그룹·근거·이력, 중지/재개. 수정본 저장은 사용본을 바꾸지 않으며 업무절차 연결·실행은 3페이즈다. 기존 Native 도구·계정·개인 설정·프로그램 복원을 보존한다.
+- **검증·현재:** 서버·화면·브라우저 검사를 통합했고 관련 Python 278통과/실제 frontend 필요 1생략, 복원 3개, Node 작성·실행 443개, 독립 리뷰 원재현 6개를 통과했다. 전체 설치·실제 브라우저는 최종 head의 필수 CI에서 확인한다. 1페이즈 최종 실제 브라우저·시각 대조와 2페이즈 완료 기준을 [같은 검증 기록](../evals/tool-authoring-20261105.md#phase2-evidence)에 구분해 보존한다. 2페이즈의 최종 CI/화면은 해당 코드 head에서 확인한다.
+- **다음 하나:** 통합·독립 리뷰·최종 필수 CI와 화면 검증을 마쳐 PR을 갱신한다. main 병합·사내 적용은 미실행이다.
+
+> 아래는 변경 당시 기록이다.
+
 ## 2026-11-05 · 도구 재설계 2판 · 작성·저장 1페이즈
 
 - **요청·기준:** 사용자가 확인한 병렬 지시문을 서브에이전트로 실행하도록 요청했다. main `8258318fe9e6f4766417148beb3ecb26b53534ed`, 공통 계약 `1b81452`에서 서버 `72b2524`·화면 `bcd9cb5`를 독립 worktree로 구현하고 `codex/tools-p1-integration`에 merge했다(제품 통합 `2b70693`). [기능 계약](specs/shared-tools.md#tools-redesign-v2-phase1-20261105)·[작성 안내](03-openwebui-native-agent.md#tool-authoring-phase1-20261105).

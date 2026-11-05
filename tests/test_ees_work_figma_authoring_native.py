@@ -16,7 +16,7 @@ from urllib.parse import parse_qs, urlsplit
 from unittest.mock import patch
 from uuid import UUID, uuid4
 
-from ees_work_integrated_fixture import IntegratedNativeCase
+from ees_work_integrated_fixture import IntegratedNativeCase, SyntheticAuthoredNative
 from native_ui_fixture import MODELS, NativeUIHandler
 from test_ees_helper_chat_native import install_helper_status_fixture
 
@@ -1562,7 +1562,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action=draft_new]')
         for name in ('name', 'description', 'target'):
             self.fill('[name=draft_' + name + ']', fixture[name])
-        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('#ees-work-designer [role=tab]:disabled')].map(e=>e.textContent)"), ['시험', '사용·기록'])
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('#ees-work-designer [data-author-action=draft_tab]')].filter(e=>['trial','use'].includes(e.dataset.id)).map(e=>({name:e.textContent,disabled:e.disabled}))"), [{'name': '시험', 'disabled': False}, {'name': '사용·기록', 'disabled': False}])
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ew-tool-draft-form [name=owner],#ew-tool-draft-form [name=responsible_user_id]')"))
         self.screenshot('tools-phase1-basic-1920')
         self.click('[data-author-action=draft_code]')
@@ -1746,6 +1746,361 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.tool_command('tool_draft_get', tool_id=identifier)['tool_draft']['draft']['code'], fixture['code'])
         self.assertEqual(self.bridge.calls, [])
         self.assertEqual(self.server.completions, [])
+
+    def test_tools_phase2_connection_returns_to_code_and_trial_at_each_viewport(self):
+        fixture, key = self.phase2_authored_tool()
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.phase2_trial_inputs(fixture['inputs']['doc_types'])
+        self.assertTrue(self.read('[data-author-action=draft_trial_start]', 'disabled'))
+        self.assertTrue(self.read('[data-author-action=draft_use_open]', 'disabled'))
+        self.screenshot('tools-phase2-t05b-before-connection-1920')
+        positions = []
+        for origin in ('code', 'trial'):
+            for width, height in ((1920, 1080), (1366, 768), (360, 768)):
+                self.authoring_viewport(width, height, overlay=width <= 480)
+                if origin == 'code':
+                    self.click('[data-author-action=draft_tab][data-id=basic]')
+                    self.click('[data-author-action=draft_code]')
+                else:
+                    self.click('[data-author-action=draft_tab][data-id=trial]')
+                container = '.ew-draft-code' if origin == 'code' else '#ees-work-designer .ew-author-scroll'
+                self.browser.evaluate("document.querySelector('[data-author-action=draft_connection]').scrollIntoView({block:'center',inline:'nearest',behavior:'instant'})")
+                before = self.read(container, 'scrollTop')
+                connection = self.tool_command('tool_draft_connection_get', tool_id=key)['connection']
+                self.click('[data-author-action=draft_connection]')
+                self.wait("document.querySelector('#ew-tool-connection-form')")
+                self.assertEqual(self.read('[name=draft_connection_token]', 'value'), '')
+                self.assertEqual(self.read('[name=draft_connection_token]', 'type'), 'password')
+                self.fill('[name=draft_connection_url]', fixture['connection']['base_url'])
+                self.fill('[name=draft_connection_token]', fixture['connection']['token'])
+                modal_geometry = self.phase2_modal_geometry(width, height)
+                self.screenshot('tools-phase2-t02b-' + origin + '-' + str(width))
+                self.click('[data-author-action=draft_modal_cancel]')
+                self.wait("!document.querySelector('#ew-tool-connection-form')")
+                self.assertEqual(self.tool_command('tool_draft_connection_get', tool_id=key)['connection'], connection)
+                self.assertAlmostEqual(self.read(container, 'scrollTop'), before, delta=1)
+                self.assertEqual(self.browser.evaluate('document.activeElement?.dataset.authorAction'), 'draft_connection')
+                self.click('[data-author-action=draft_connection]')
+                self.wait("document.querySelector('#ew-tool-connection-form')")
+                self.assertEqual(self.read('[name=draft_connection_token]', 'value'), '')
+                self.fill('[name=draft_connection_url]', fixture['connection']['base_url'])
+                if not connection['token_set']:
+                    self.fill('[name=draft_connection_token]', fixture['connection']['token'])
+                self.click('[data-author-action=draft_connection_save]')
+                self.wait("!document.querySelector('#ew-tool-connection-form') && !document.querySelector('[data-author-action=draft_connection]').disabled")
+                saved = self.tool_command('tool_draft_connection_get', tool_id=key)['connection']
+                self.assertTrue(saved['configured'] and saved['token_set'], saved)
+                self.assertNotIn(fixture['connection']['token'], json.dumps(saved))
+                self.assertAlmostEqual(self.read(container, 'scrollTop'), before, delta=1)
+                self.assertEqual(self.browser.evaluate('document.activeElement?.dataset.authorAction'), 'draft_connection')
+                positions.append({'origin': origin, 'width': width, 'before': before, 'after': self.read(container, 'scrollTop'), 'modal': modal_geometry})
+                if origin == 'code':
+                    self.assertEqual(self.read('[name=draft_code]', 'value'), fixture['draft']['code'])
+                    self.click('[data-author-action=draft_code_close]')
+                else:
+                    self.assertTrue(self.read('[name=draft_trial_0_option_0]', 'checked'))
+                    self.assertTrue(self.read('[name=draft_trial_0_option_1]', 'checked'))
+        self.authoring_viewport(1920, 1080, overlay=False)
+        self.assertFalse(self.read('[data-author-action=draft_trial_start]', 'disabled'))
+        directory = self.screenshot('tools-phase2-t05e-after-connection-1920')
+        (directory / 'tools-phase2-connection-return.json').write_text(json.dumps(positions, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        self.assertEqual(self.authored_native.run_calls, [])
+        self.assertIsNone(self.tool_command('tool_draft_get', tool_id=key)['tool_draft']['active_version'])
+
+    def test_tools_phase2_trial_activation_revision_groups_and_disable_roundtrip(self):
+        fixture, key = self.phase2_authored_tool(connected=True)
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.phase2_trial_inputs(fixture['inputs']['doc_types'])
+        tested = self.phase2_trial(key)
+        self.assertTrue(tested['trial']['eligible_for_activation'], tested['trial'])
+        self.assertEqual((tested['trial']['count'], tested['trial']['completeness']), (2, 'complete'))
+        self.assertEqual(tested['trial']['inputs'], fixture['inputs'])
+        self.assertEqual(tested['trial']['raw_result'], fixture['result'])
+        self.assertEqual(self.authored_native.run_calls[0]['code'], fixture['draft']['code'])
+        self.assertIsNone(tested['active_version'])
+        self.fill('[name=draft_trial_evidence]', fixture['evidence'])
+        self.phase2_viewport_evidence('tools-phase2-t05-success')
+        self.click('.ew-draft-trial-raw > summary')
+        self.assertIn('EMS 셋업 설계서', self.text('.ew-draft-trial-raw'))
+        self.assertNotIn(fixture['connection']['token'], self.text('.ew-draft-trial-raw'))
+        self.click('[data-author-action=draft_use_open]')
+        self.wait("document.querySelector('#ew-tool-use-form')")
+        self.click('[name="draft_use_group:group-ems"]')
+        self.fill('[name=draft_use_evidence]', fixture['evidence'])
+        self.phase2_viewport_evidence('tools-phase2-t05a-use-confirm', modal=True)
+        self.click('[data-author-action=draft_use_confirm]')
+        self.wait("document.querySelector('[data-active-version]')?.dataset.activeVersion === '1'")
+        first = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertEqual((first['active_version'], first['use']['state'], first['use']['groups']), (1, 'active', fixture['groups']))
+        self.assertEqual(len(first['use']['versions']), 1)
+        self.phase2_viewport_evidence('tools-phase2-t06-active')
+        self.click('[data-author-action=draft_tab][data-id=io]')
+        changed_question = fixture['draft']['input_ui']['doc_types']['question'] + ' (수정본)'
+        self.fill('[name=draft_input_0_question]', changed_question)
+        self.click('[data-author-action=draft_save]')
+        self.wait("document.querySelector('[data-draft-status]')?.textContent.includes('r2')")
+        edited = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertEqual(edited['active_version'], 1)
+        self.assertEqual(edited['use'], first['use'])
+        self.assertEqual(len(self.authored_native.run_calls), 1)
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.assertTrue(self.read('[data-author-action=draft_use_open]', 'disabled'))
+        self.assertIn('업무에서는 사용 버전 v1 유지', self.text('#ees-work-designer'))
+        self.screenshot('tools-phase2-t05d-saved-revision-keeps-active-1920')
+        retested = self.phase2_trial(key)
+        self.assertEqual(retested['trial']['draft_revision'], 2)
+        self.phase2_use(fixture)
+        promoted = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertEqual(promoted['active_version'], 2)
+        self.assertEqual([item['version'] for item in promoted['use']['versions']], [1, 2])
+        self.assertEqual(promoted['use']['versions'][0], first['use']['versions'][0])
+        self.click('[data-author-action=draft_use_access]')
+        self.wait("document.querySelector('#ew-tool-use-form')")
+        self.click('[name="draft_use_group:group-apc"]')
+        self.click('[data-author-action=draft_use_confirm]')
+        self.wait("!document.querySelector('#ew-tool-use-form')")
+        access = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertEqual(access['use']['groups'], ['group-apc', 'group-ems'])
+        self.assertEqual(access['use']['active_version'], 2)
+        self.assertEqual(access['use']['versions'], promoted['use']['versions'])
+        self.click('[data-author-action=draft_use_disable]')
+        self.click('[data-dialog-confirm]')
+        self.wait("document.querySelector('[data-use-state]')?.dataset.useState === 'disabled'")
+        disabled = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertEqual(disabled['use']['active_version'], 2)
+        self.assertEqual(disabled['use']['versions'], promoted['use']['versions'])
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.phase2_trial(key)
+        self.phase2_use(fixture, groups=['group-apc', 'group-ems'])
+        confirmed = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertEqual((confirmed['use']['state'], confirmed['active_version']), ('disabled', 2))
+        self.assertEqual(confirmed['use']['versions'], promoted['use']['versions'])
+        self.screenshot('tools-phase2-disabled-after-reconfirmation-1920')
+        self.assertEqual(self.server.completions, [])
+
+    def test_tools_phase2_failure_empty_partial_and_unknown_keep_trial_inputs(self):
+        fixture, key = self.phase2_authored_tool(connected=True)
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.phase2_trial_inputs(fixture['inputs']['doc_types'])
+        self.authored_native.result = {'status': 'failed', 'raw_result': None, 'duration_ms': 12,
+                                      'error_code': 'native_authentication_failed'}
+        failed = self.phase2_trial(key, status='failed')
+        self.assertFalse(failed['trial']['eligible_for_activation'])
+        self.assertTrue(self.read('[name=draft_trial_0_option_0]', 'checked'))
+        self.assertTrue(self.read('[name=draft_trial_0_option_1]', 'checked'))
+        self.assertTrue(self.read('[data-author-action=draft_use_open]', 'disabled'))
+        self.screenshot('tools-phase2-t05c-failure-inputs-retained-1920')
+        self.click('[data-author-action=draft_connection]')
+        self.wait("document.querySelector('#ew-tool-connection-form')")
+        invalid_url = fixture['connection']['base_url'] + '?token=not-a-base-url'
+        self.fill('[name=draft_connection_url]', invalid_url)
+        self.click('[data-author-action=draft_connection_save]')
+        self.wait("document.querySelector('.ew-draft-modal [role=alert]')")
+        self.assertEqual(self.read('[name=draft_connection_url]', 'value'), invalid_url)
+        self.click('[data-author-action=draft_modal_cancel]')
+        self.wait("!document.querySelector('#ew-tool-connection-form')")
+        self.assertTrue(self.read('[name=draft_trial_0_option_0]', 'checked'))
+        self.phase2_trial_inputs(fixture['empty_inputs']['doc_types'])
+        self.authored_native.result = {'status': 'succeeded', 'raw_result': {'documents': []}, 'duration_ms': 14}
+        empty = self.phase2_trial(key)
+        self.assertEqual((empty['trial']['count'], empty['trial']['completeness'], empty['trial']['fields_checked']), (0, 'empty', False))
+        self.assertTrue(empty['trial']['eligible_for_activation'])
+        self.assertIn('개별 항목의 표시', self.text('#ees-work-designer'))
+        self.assertFalse(self.read('[data-author-action=draft_use_open]', 'disabled'))
+        self.screenshot('tools-phase2-empty-not-a-failure-1920')
+        self.phase2_use(fixture)
+        self.assertEqual(self.tool_command('tool_draft_get', tool_id=key)['tool_draft']['active_version'], 1)
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.phase2_trial_inputs(fixture['inputs']['doc_types'])
+        self.authored_native.result = {'status': 'succeeded', 'raw_result': {**fixture['result'], 'completeness': 'partial'}, 'duration_ms': 16}
+        partial = self.phase2_trial(key, status='failed')
+        self.assertEqual(partial['trial']['completeness'], 'partial')
+        self.assertFalse(partial['trial']['eligible_for_activation'])
+        self.assertEqual(partial['active_version'], 1)
+        self.assertTrue(self.read('[data-author-action=draft_use_open]', 'disabled'))
+        self.assertIn('부분 결과', self.text('#ees-work-designer'))
+        self.screenshot('tools-phase2-partial-blocks-activation-1920')
+        self.authored_native.result = {'status': 'unknown', 'raw_result': None, 'duration_ms': 20, 'error_code': 'tool_trial_timeout'}
+        unknown = self.phase2_trial(key, status='unknown')
+        self.assertFalse(unknown['trial']['eligible_for_activation'])
+        self.assertEqual(unknown['trial']['inputs'], fixture['inputs'])
+        calls = len(self.authored_native.run_calls)
+        self.refresh()
+        self.assertEqual(len(self.authored_native.run_calls), calls)
+        self.assertIn('자동으로 다시 실행하지', self.text('#ees-work-designer'))
+        self.assertTrue(self.read('[name=draft_trial_0_option_0]', 'checked'))
+        self.assertTrue(self.read('[name=draft_trial_0_option_1]', 'checked'))
+        self.screenshot('tools-phase2-unknown-no-automatic-retry-1920')
+        self.assertEqual(self.server.completions, [])
+
+    def test_tools_phase2_duplicate_trial_and_old_trial_activation_are_blocked(self):
+        fixture, key = self.phase2_authored_tool(connected=True)
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.phase2_trial_inputs(fixture['inputs']['doc_types'])
+        self.authored_native.hold.clear()
+        self.click('[data-author-action=draft_trial_start]')
+        self.assertTrue(self.authored_native.started.wait(3), 'the actual HTTP trial did not reach the worker boundary')
+        self.wait("document.querySelector('[data-trial-status]')?.dataset.trialStatus === 'running'")
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-author-action=draft_trial_start]')"))
+        self.assertTrue(self.read('[data-author-action=draft_trial_refresh]', 'disabled'))
+        self.assertTrue(self.read('[data-author-action=draft_use_open]', 'disabled'))
+        request = deepcopy(next(body for body in reversed(self.server.workspace_commands) if body['action'] == 'tool_draft_trial_start'))
+        replay = asyncio.run(self.server.workflow.operations.command(self.server.user, request))
+        self.assertTrue(replay['ok'], replay)
+        self.assertEqual(replay['trial']['status'], 'running')
+        self.assertEqual(len(self.authored_native.run_calls), 1)
+        self.screenshot('tools-phase2-running-single-request-1920')
+        self.authored_native.hold.set()
+        self.wait("document.querySelector('[data-trial-status]')?.dataset.trialStatus === 'succeeded'")
+        completed = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertEqual(completed['trial']['id'], replay['trial']['id'])
+        completed_replay = asyncio.run(self.server.workflow.operations.command(self.server.user, request))
+        self.assertEqual(completed_replay['trial']['id'], completed['trial']['id'])
+        self.assertEqual(completed_replay['trial']['status'], 'succeeded')
+        self.assertEqual(len(self.authored_native.run_calls), 1)
+        other = {'id': 'other-tool-admin', 'role': 'admin', 'name': 'Other tool administrator'}
+        self.users[other['id']] = other
+        with self.assertRaises(self.backend.WorkflowError) as private:
+            asyncio.run(self.server.workflow.operations.command(other, {'action': 'tool_draft_trial_get',
+                'tool_id': key, 'trial_id': completed['trial']['id']}))
+        self.assertEqual(private.exception.code, 'tool_trial_not_found')
+        self.click('[data-author-action=draft_tab][data-id=basic]')
+        self.fill('[name=draft_description]', fixture['draft']['description'] + ' 수정본')
+        self.click('[data-author-action=draft_save]')
+        self.wait("document.querySelector('[data-draft-status]')?.textContent.includes('r2')")
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.assertTrue(self.read('[data-author-action=draft_use_open]', 'disabled'))
+        stale = self.tool_command('tool_draft_trial_get', tool_id=key, trial_id=completed['trial']['id'])['trial']
+        self.assertFalse(stale['eligible_for_activation'])
+        self.assertIn('tool_trial_draft_changed', [reason['code'] for reason in stale['activation_reasons']])
+        with self.assertRaises(self.backend.WorkflowError) as old_trial:
+            asyncio.run(self.server.workflow.operations.command(self.server.user, {
+                'action': 'tool_draft_use_set', 'request_id': str(uuid4()), 'tool_id': key,
+                'expected_revision': 2, 'expected_connection_revision': completed['connection']['revision'],
+                'expected_use_revision': 0, 'trial_id': completed['trial']['id'],
+                'groups': fixture['groups'], 'evidence': fixture['evidence']}))
+        self.assertEqual(old_trial.exception.code, 'tool_trial_stale')
+        self.assertIsNone(self.tool_command('tool_draft_get', tool_id=key)['tool_draft']['active_version'])
+        self.assertEqual(len(self.authored_native.run_calls), 1)
+
+    def test_tools_phase2_revoked_admin_discards_inflight_trial_response(self):
+        fixture, key = self.phase2_authored_tool(connected=True)
+        self.click('[data-author-action=draft_tab][data-id=trial]')
+        self.phase2_trial_inputs(fixture['inputs']['doc_types'])
+        self.authored_native.hold.clear()
+        self.click('[data-author-action=draft_trial_start]')
+        self.assertTrue(self.authored_native.started.wait(3))
+        self.command('save_access', principal_kind='user', principal_id=self.server.user['id'],
+            system_id='EMS', factory_id='*', roles=['manager', 'participant'])
+        self.server.user['role'] = 'user'
+        self.refresh()
+        self.authored_native.hold.set()
+        # Keep revocation in place until the real request has recorded its
+        # terminal result; restoring the actor earlier would race the worker.
+        deadline = time.monotonic() + 3
+        while time.monotonic() < deadline:
+            with self.server.workflow._db() as db:
+                trial = json.loads(db.execute('SELECT data FROM work_tool_trials WHERE tool_id=? ORDER BY rowid DESC LIMIT 1', (key,)).fetchone()[0])
+            if trial['status'] != 'running':
+                break
+            time.sleep(.02)
+        self.assertNotEqual(trial['status'], 'running')
+        self.wait("!document.querySelector('#ew-tool-trial-form,#ew-tool-connection-form,[data-author-action=draft_open]')")
+        self.open_tools(shared_list=True)
+        self.assertEqual(self.operations()['tool_drafts'], [])
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-author-action=draft_new],.ew-draft-code,.ew-draft-trial-raw')"))
+        self.assertNotIn('EMS 셋업 설계서', self.text('#ees-work-designer'))
+        self.assertEqual(len(self.authored_native.run_calls), 1)
+        self.screenshot('tools-phase2-revoked-inflight-result-hidden-1920')
+        self.server.user['role'] = 'admin'
+        stored = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertIsNone(stored['active_version'])
+        self.assertFalse(stored['trial']['eligible_for_activation'])
+        self.assertEqual(self.server.completions, [])
+
+    def phase2_authored_tool(self, *, connected=False):
+        """Real HTTP/service/SQLite; Native credentials and worker output are synthetic."""
+        fixture = json.loads((Path(__file__).parent / 'fixtures/tools_phase2_contract.json').read_text(encoding='utf-8'))
+        self.authored_native = SyntheticAuthoredNative(self.backend.WorkflowError)
+        self.server.workflow.tool_drafts.lifecycle.native = self.authored_native
+        self.addCleanup(self.authored_native.hold.set)
+        groups = [{'id': 'group-ems', 'name': 'EMS 운영'}, {'id': 'group-apc', 'name': 'APC 운영'}]
+        self.server.workflow.group_lookup = lambda _: deepcopy(groups)
+        self.server.workflow.group_list_lookup = lambda: deepcopy(groups)
+        record = self.tool_command('tool_draft_save', draft=fixture['draft'])['tool_draft']
+        self.assertEqual(record['phase'], 2)
+        self.assertTrue(record['check']['valid'], record['check'])
+        self.assertEqual(self.authored_native.run_calls, [])
+        if connected:
+            record = self.tool_command('tool_draft_connection_save', revision=record['revision'],
+                tool_id=record['id'], expected_connection_revision=0, **fixture['connection'])['tool_draft']
+        self.authoring_viewport(1920, 1080, overlay=False)
+        self.refresh(); self.open_tools(shared_list=True)
+        self.click('[data-author-action=draft_open][data-id="' + record['id'] + '"]')
+        self.wait("document.querySelector('[name=draft_name]')?.value === " + json.dumps(fixture['draft']['name']))
+        return fixture, record['id']
+
+    def phase2_trial_inputs(self, values):
+        for index, value in enumerate(('design_doc', 'test_result', 'deployment_plan')):
+            selector = '[name=draft_trial_0_option_' + str(index) + ']'
+            if self.read(selector, 'checked') != (value in values):
+                self.click(selector)
+
+    def phase2_trial(self, key, *, status='succeeded'):
+        before = len(self.authored_native.run_calls)
+        self.click('[data-author-action=draft_trial_start]')
+        self.wait("document.querySelector('[data-trial-status]')?.dataset.trialStatus === " + json.dumps(status) +
+                  " && !document.querySelector('[data-author-action=draft_trial_start]')?.disabled")
+        record = self.tool_command('tool_draft_get', tool_id=key)['tool_draft']
+        self.assertEqual(len(self.authored_native.run_calls), before + 1)
+        self.assertEqual(record['trial']['status'], status)
+        return record
+
+    def phase2_use(self, fixture, *, groups=None):
+        self.click('[data-author-action=draft_use_open]')
+        self.wait("document.querySelector('#ew-tool-use-form')")
+        selected = fixture['groups'] if groups is None else groups
+        for group in ('group-ems', 'group-apc'):
+            selector = '[name="draft_use_group:' + group + '"]'
+            if self.read(selector, 'checked') != (group in selected):
+                self.click(selector)
+        self.fill('[name=draft_use_evidence]', fixture['evidence'])
+        self.click('[data-author-action=draft_use_confirm]')
+        self.wait("!document.querySelector('#ew-tool-use-form') && document.querySelector('[data-use-state]')")
+
+    def phase2_modal_geometry(self, width, height):
+        self.browser.evaluate("document.querySelector('.ew-draft-modal-footer').scrollIntoView({block:'end',inline:'nearest',behavior:'instant'})")
+        geometry = self.browser.evaluate("""(()=>{const modal=document.querySelector('.ew-draft-modal'),r=modal.getBoundingClientRect(),footer=modal.querySelector('.ew-draft-modal-footer'),f=footer.getBoundingClientRect(),previous=footer.previousElementSibling.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,overflow:modal.scrollWidth-modal.clientWidth,footerGap:f.top-previous.bottom,controls:[...footer.querySelectorAll('button')].map(e=>{const box=e.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(e);const lines=[...range.getClientRects()];return {action:e.dataset.authorAction,hit:e.contains(document.elementFromPoint(box.left+box.width/2,box.top+box.height/2)),lines:new Set(lines.map(x=>Math.round(x.top))).size,clipped:lines.some(x=>x.left<box.left-1||x.right>box.right+1||x.top<box.top-1||x.bottom>box.bottom+1)};})};})()""")
+        self.assertGreaterEqual(geometry['left'], -1, geometry)
+        self.assertGreaterEqual(geometry['top'], -1, geometry)
+        self.assertLessEqual(geometry['right'], width + 1, geometry)
+        self.assertLessEqual(geometry['bottom'], height + 1, geometry)
+        self.assertLessEqual(geometry['overflow'], 1, geometry)
+        self.assertGreaterEqual(geometry['footerGap'], -1, geometry)
+        for control in geometry['controls']:
+            self.assertTrue(control['hit'], control)
+            self.assertGreaterEqual(control['lines'], 1, control)
+            self.assertLessEqual(control['lines'], 2, control)
+            self.assertFalse(control['clipped'], control)
+        return geometry
+
+    def phase2_viewport_evidence(self, name, *, modal=False):
+        observations = []
+        for width, height in ((1920, 1080), (1366, 768), (360, 768)):
+            self.authoring_viewport(width, height, overlay=width <= 480)
+            selector = '.ew-draft-modal' if modal else '#ees-work-designer'
+            geometry = self.browser.evaluate("(()=>{const e=document.querySelector(" + json.dumps(selector) + "),r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,overflow:e.scrollWidth-e.clientWidth};})()")
+            self.assertGreaterEqual(geometry['left'], -1, geometry)
+            self.assertGreaterEqual(geometry['top'], -1, geometry)
+            self.assertLessEqual(geometry['right'], width + 1, geometry)
+            self.assertLessEqual(geometry['bottom'], height + 1, geometry)
+            self.assertLessEqual(geometry['overflow'], 1, geometry)
+            if modal:
+                geometry = self.phase2_modal_geometry(width, height)
+            observations.append({'width': width, 'height': height, **geometry})
+            directory = self.screenshot(name + '-' + str(width))
+            (directory / (name + '-geometry.json')).write_text(json.dumps(observations, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        self.authoring_viewport(1920, 1080, overlay=False)
 
     def operations(self):
         return asyncio.run(self.server.workflow.operations.state(self.server.user, system_id='EMS'))

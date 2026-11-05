@@ -1,0 +1,90 @@
+{
+  "reference": "Figma tools redesign v2",
+  "file_key": "XK2wTos6sEuxSHhIj7cqg6",
+  "retrieved_on": "2026-11-05",
+  "source": "get_design_context with screenshot",
+  "implementation_scope": "Connection settings, saved-draft trials, activation and usage history. Workflow connection and execution remain phase 3; no version rollback control is specified.",
+  "screens": [
+    {
+      "screen": "T02B",
+      "title": "연결 설정",
+      "node_id": "2052:207",
+      "file": "T02B.png",
+      "width": 480,
+      "height": 583,
+      "sha256": "625c1ad3527a745d0a1d5403a91e58479496afded1b1f1583fb3a2a9e7fdb47d"
+    },
+    {
+      "screen": "T05",
+      "title": "시험",
+      "node_id": "2016:277",
+      "file": "T05.png",
+      "width": 475,
+      "height": 1024,
+      "sha256": "5f8886d78f98ed7d0b8fbf49aead0901ab67a2b5130c85ae8546e434b898a5ec"
+    },
+    {
+      "screen": "T05A",
+      "title": "사용 설정",
+      "node_id": "2018:160",
+      "file": "T05A.png",
+      "width": 480,
+      "height": 558,
+      "sha256": "b2ac0cabe6cc394533ae5703101a0778164d0d6cb0e0af5f388f3943601ded43"
+    },
+    {
+      "screen": "T05B",
+      "title": "첫 시험 준비",
+      "node_id": "2052:236",
+      "file": "T05B.png",
+      "width": 475,
+      "height": 1024,
+      "sha256": "58fad4116155bd0ab88781e07bc9c3cc15ce25d304cf86e64c9df60c79a00d5c"
+    },
+    {
+      "screen": "T05C",
+      "title": "시험 실패와 복구",
+      "node_id": "2052:358",
+      "file": "T05C.png",
+      "width": 475,
+      "height": 1024,
+      "sha256": "b42131ecbf4a9caae981e5a422be38879b8277ddf6d21d8bc75106f65ecff181"
+    },
+    {
+      "screen": "T05D",
+      "title": "수정 후 재시험",
+      "node_id": "2052:481",
+      "file": "T05D.png",
+      "width": 475,
+      "height": 1024,
+      "sha256": "ed2f9978918ac6cd7331918e44b394f181b699068fa2193a564ed00f6dd075fa"
+    },
+    {
+      "screen": "T05E",
+      "title": "연결 후 첫 시험",
+      "node_id": "2054:261",
+      "file": "T05E.png",
+      "width": 475,
+      "height": 1024,
+      "sha256": "e542ecc9596a782b9fed686308fb26c34ecd75e21ddb8c6b1bf2a8826e1ac593"
+    },
+    {
+      "screen": "T06",
+      "title": "사용 상세",
+      "node_id": "2017:333",
+      "file": "T06.png",
+      "width": 475,
+      "height": 1024,
+      "sha256": "60fab1995deee0dd6bcd2255ca13f04e24fdffcb409fa02a24f815965b1a3e0d"
+    },
+    {
+      "screen": "T09",
+      "title": "예외 상태와 연결 규칙",
+      "node_id": "2018:194",
+      "file": "T09.png",
+      "width": 1024,
+      "height": 534,
+      "sha256": "f812c01af51801d7b0d69e29c06de1a66a98a8661e68c62d8cf2c3f81f1bc723"
+    }
+  ]
+}
