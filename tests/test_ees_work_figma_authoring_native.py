@@ -1550,21 +1550,31 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
 
     def test_tools_phase1_code_input_output_save_and_reload(self):
         """Real HTTP/SQLite round trip; never execute the authored Python."""
+        def assert_primary_legible(selector):
+            self.wait("document.querySelector(" + json.dumps(selector) + ")?.disabled === false")
+            colors = self.browser.evaluate("(()=>{const s=getComputedStyle(document.querySelector(" + json.dumps(selector) + "));const rgba=value=>{const c=value.match(/[\\d.]+/g).map(Number);return [...c.slice(0,3),c.length>3?c[3]:1];};return {background:rgba(s.backgroundColor),foreground:rgba(s.color)};})()")
+            self.assertTrue(colors['background'] != colors['foreground'] and colors['background'][3] > 0, colors)
+
         fixture = json.loads((Path(__file__).parent / 'fixtures/tools_phase1_contract.json').read_text(encoding='utf-8'))['draft']
         self.authoring_viewport(1920, 1080, overlay=False)
         self.open_tools(shared_list=True)
+        assert_primary_legible('[data-author-action=draft_new]')
         self.click('[data-author-action=draft_new]')
         for name in ('name', 'description', 'target'):
             self.fill('[name=draft_' + name + ']', fixture[name])
         self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('#ees-work-designer [role=tab]:disabled')].map(e=>e.textContent)"), ['시험', '사용·기록'])
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ew-tool-draft-form [name=owner],#ew-tool-draft-form [name=responsible_user_id]')"))
+        self.screenshot('tools-phase1-basic-1920')
         self.click('[data-author-action=draft_code]')
         self.fill('[name=draft_code]', fixture['code'])
         self.click('[data-author-action=draft_check]')
         self.wait("document.querySelector('[name=draft_function]')?.value === 'list_documents' && !document.querySelector('[data-author-action=draft_save_next]').disabled")
+        assert_primary_legible('[data-author-action=draft_save_next]')
         self.assertIn('코드를 실행하지 않는 정적 검사', self.text('.ew-draft-code'))
+        code_layouts = []
         for width, height in ((1920, 1080), (1366, 768), (360, 768)):
             self.authoring_viewport(width, height, overlay=width <= 480)
+            self.browser.evaluate("document.querySelector('.ew-draft-code').scrollTo({top:0,behavior:'instant'})")
             geometry = self.browser.evaluate("(()=>{const e=document.querySelector('.ew-draft-code'),r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,overflow:e.scrollWidth-e.clientWidth};})()")
             self.assertGreaterEqual(geometry['left'], -1, geometry)
             self.assertGreaterEqual(geometry['top'], -1, geometry)
@@ -1572,7 +1582,46 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertLessEqual(geometry['bottom'], height + 1, geometry)
             self.assertLessEqual(geometry['overflow'], 1, geometry)
             self.assertEqual(self.read('[name=draft_code]', 'value'), fixture['code'])
-            self.screenshot('tools-phase1-code-' + str(width))
+            directory = self.screenshot('tools-phase1-code-' + str(width))
+            # CI477 kept the dialog inside the viewport but let its flex body
+            # shrink under the footer. Check contents and real pointer targets
+            # after scrolling the unchanged dialog to its footer as a user can.
+            self.browser.evaluate("document.querySelector('.ew-draft-code-footer').scrollIntoView({block:'end',inline:'nearest',behavior:'instant'})")
+            footer_layout = self.browser.evaluate("""(()=>{
+                const dialog=document.querySelector('.ew-draft-code'),
+                    footer=dialog.querySelector('.ew-draft-code-footer'),
+                    rect=element=>{const r=element.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};},
+                    buttons=[...footer.querySelectorAll('button')].map(button=>{
+                        const r=button.getBoundingClientRect(),range=document.createRange();
+                        range.selectNodeContents(button);
+                        const lines=[...range.getClientRects()];
+                        return {action:button.dataset.authorAction,...rect(button),
+                            lines:new Set(lines.map(line=>Math.round(line.top))).size,
+                            textClipped:lines.some(line=>line.left<r.left-1||line.right>r.right+1||line.top<r.top-1||line.bottom>r.bottom+1),
+                            hitTest:button.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)),
+                            disabled:button.disabled};
+                    });
+                return {footer:rect(footer),columns:rect(dialog.querySelector('.ew-draft-code-columns')),
+                    main:rect(dialog.querySelector('.ew-draft-code-main')),note:rect(footer.querySelector('small')),
+                    buttons,scrollTop:dialog.scrollTop};
+            })()""")
+            code_layouts.append({'width': width, 'height': height, 'dialog': geometry, **footer_layout})
+            (directory / 'tools-phase1-code-geometry.json').write_text(
+                json.dumps(code_layouts, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+            self.assertGreaterEqual(footer_layout['footer']['top'] + 1,
+                                    max(footer_layout['columns']['bottom'], footer_layout['main']['bottom']), footer_layout)
+            self.assertEqual([button['action'] for button in footer_layout['buttons']], ['draft_code_close', 'draft_save_next'])
+            for button in footer_layout['buttons']:
+                self.assertGreaterEqual(button['lines'], 1, button)
+                self.assertLessEqual(button['lines'], 2, button)
+                self.assertFalse(button['textClipped'], button)
+                self.assertTrue(button['hitTest'], button)
+                self.assertFalse(button['disabled'], button)
+            if width <= 600:
+                self.assertLessEqual(footer_layout['note']['bottom'],
+                                     min(button['top'] for button in footer_layout['buttons']) + 1, footer_layout)
+            if footer_layout['scrollTop'] > 0:
+                self.screenshot('tools-phase1-code-footer-' + str(width))
         self.authoring_viewport(1920, 1080, overlay=False)
         self.click('[data-author-action=draft_save_next]')
         self.wait("document.querySelector('[name=draft_input_0_question]') && document.querySelector('[data-draft-status]')?.textContent.includes('r1')")
@@ -1583,6 +1632,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         for index, label in enumerate(question['option_labels'].values()):
             self.fill('[name=draft_input_0_option_' + str(index) + ']', label)
         self.assertEqual(self.read('[name=draft_input_0_widget]', 'value'), 'multiselect')
+        self.screenshot('tools-phase1-input-1920')
         self.click('[data-author-action=draft_part][data-id=outputs]')
         self.click('.ew-draft-binding:has([name=draft_output_path]) > summary')
         self.fill('[name=draft_output_path]', fixture['output_ui']['path'])
@@ -1609,6 +1659,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.open_sidebar()
         self.wait("document.querySelector('#ees-work-panel') && window.__eesNativeWorkV1?.refresh")
         self.open_tools(shared_list=True)
+        self.screenshot('tools-phase1-list-1920')
         self.click('[data-author-action=draft_open][data-id="' + identifier + '"]')
         self.wait("document.querySelector('[name=draft_name]')?.value === " + json.dumps(fixture['name']))
         self.click('[data-author-action=draft_tab][data-id=io]')

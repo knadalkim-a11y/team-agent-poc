@@ -397,7 +397,11 @@ def helper_chat_flow(g,key,chat_id):
     """Physical helper send, actual isolated tool dispatch, then live ACL denial."""
     before=g.api('/api/ees-work/workspace?workflow_id='+key)
     g.click('[data-action=mode][data-mode=author]')
-    g.click('[data-action=tools]');g.click('[data-author-action=tool_create]')
+    g.click('[data-action=tools]')
+    g.wait("document.querySelector('[data-author-action=tool_create]')")
+    if g.browser.evaluate("!!document.querySelector('.ew-draft-legacy:not([open])')"):
+        g.click('.ew-draft-legacy > summary')
+    g.click('[data-author-action=tool_create]')
     g.select('#ees-work-dialog [name=system_id]','EMS');g.click('#ees-work-dialog [data-dialog-confirm]')
     selector='[data-author-action=tool_question]'
     g.wait('document.querySelector('+json.dumps(selector)+') && !document.querySelector('+json.dumps(selector)+').disabled')

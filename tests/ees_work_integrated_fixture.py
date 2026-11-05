@@ -260,6 +260,9 @@ class IntegratedNativeCase(unittest.TestCase):
         self.key('Enter', 13)
 
     def create_legacy_tool(self, system='EMS'):
+        self.wait("document.querySelector('[data-author-action=tool_create]')")
+        if self.browser.evaluate("!!document.querySelector('.ew-draft-legacy:not([open])')"):
+            self.click('.ew-draft-legacy > summary')
         self.click('[data-author-action=tool_create]')
         self.wait("document.querySelector('#ees-work-dialog [name=system_id]')")
         self.choose('#ees-work-dialog [name=system_id]', system)
