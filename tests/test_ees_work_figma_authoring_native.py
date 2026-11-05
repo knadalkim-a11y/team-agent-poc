@@ -770,7 +770,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         writes = len(self.server.workspace_commands)
         self.click('#ew-stage-editor [name=description]')
         self.refresh()
-        self.wait("document.querySelector('[data-author-status]')?.textContent.includes(" + json.dumps('r' + str(changed['revision'])) + ")")
+        self.wait("document.querySelector('[data-author-status]')?.dataset.authorRevision === " + json.dumps(str(changed['revision'])))
         self.assertEqual(self.text('[data-stage-id="' + stage_id + '"] .ew-stage-name'), '다른 작성자의 최신 단계')
         # C61 replaces the obsolete click -> name-error expectation. The form
         # becomes unavailable immediately, while both drafts remain protected.
