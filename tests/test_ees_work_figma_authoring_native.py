@@ -1570,6 +1570,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action=draft_check]')
         self.wait("document.querySelector('[name=draft_function]')?.value === 'list_documents' && !document.querySelector('[data-author-action=draft_save_next]').disabled")
         assert_primary_legible('[data-author-action=draft_save_next]')
+        # The first response checked an empty function selection. Auto-selecting
+        # its sole function changes the draft; that response is now stale.
+        self.assertEqual(self.text('.ew-draft-code .ew-draft-check > strong'), '변경 뒤 다시 확인해 주세요')
         self.assertIn('코드를 실행하지 않는 정적 검사', self.text('.ew-draft-code'))
         code_layouts = []
         for width, height in ((1920, 1080), (1366, 768), (360, 768)):
@@ -1626,12 +1629,17 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action=draft_save_next]')
         self.wait("document.querySelector('[name=draft_input_0_question]') && document.querySelector('[data-draft-status]')?.textContent.includes('r1')")
         identifier = self.operations()['tool_drafts'][0]['id']
+        first_saved = self.tool_command('tool_draft_get', tool_id=identifier)['tool_draft']
+        self.assertEqual(first_saved['draft']['function'], 'list_documents')
+        self.assertNotIn('function_selection', [error['code'] for error in first_saved['check']['errors']])
+        self.assertNotIn('작성한 공개 함수 중 사용할 함수를 선택', self.text('#ew-tool-draft-form .ew-draft-check'))
         question = fixture['input_ui']['doc_types']
         self.fill('[name=draft_input_0_label]', question['label'])
         self.fill('[name=draft_input_0_question]', question['question'])
         for index, label in enumerate(question['option_labels'].values()):
             self.fill('[name=draft_input_0_option_' + str(index) + ']', label)
         self.assertEqual(self.read('[name=draft_input_0_widget]', 'value'), 'multiselect')
+        self.browser.evaluate("document.querySelector('#ees-work-designer .ew-author-scroll').scrollTo({top:0,behavior:'instant'})")
         self.screenshot('tools-phase1-input-1920')
         self.click('[data-author-action=draft_part][data-id=outputs]')
         self.click('.ew-draft-binding:has([name=draft_output_path]) > summary')

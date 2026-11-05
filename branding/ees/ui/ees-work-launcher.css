@@ -1413,7 +1413,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer[data-tool-draft=true] .ew-draft-list-head h2{font-size:20px;line-height:28px;}
 #ees-work-designer[data-tool-draft=true] .ew-draft-list-head h2 small{font-size:inherit;font-weight:700;color:inherit;}
 .ew-author .ew-draft-intro{margin:0 0 20px;color:var(--ees-text-secondary);font-size:12px;line-height:18px;}
-.ew-author .ew-draft-search{display:block;margin:0 0 16px;}
+.ew-author .ew-draft-search{display:grid;gap:6px;margin:0 0 16px;color:var(--ees-text-secondary);font-size:12px;line-height:18px;}
 .ew-author .ew-draft-search input{box-sizing:border-box;width:100%;height:46px;padding:11px 12px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-default);}
 .ew-author .ew-draft-filters{display:flex;gap:6px;margin-bottom:20px;}
 .ew-author .ew-draft-filters button{border-color:transparent;background:transparent;color:var(--ees-brand-text);padding:5px 12px;}
