@@ -566,7 +566,6 @@ def authored_workflow_flow(g):
     g.wait("document.querySelector('#ees-work-site-trigger')?.innerText.includes('합성 작성 도구 공장')")
     g.click('[data-action=workflow][data-workflow-id="'+workflow_id+'"]')
     g.wait_work_ready(workflow_id=workflow_id,run_id=run_id)
-    g.open_operation_stage()
     g.wait_work_ready(run_id=run_id,selector='[data-authored-stage][data-stage-job="'+job_id+'"]')
     g.capture('tools-phase3-full-native-member-before-execution')
     g.click('[data-action=stage_execute][data-job-id="'+job_id+'"]')

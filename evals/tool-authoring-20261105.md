@@ -209,3 +209,11 @@ CI484 최종은 40 jobs 중 35성공·3실패·Windows 집계1취소·출하1정
 보완은 시험 코드 `65a8d56`, `f3b023f`, `7789a4e`이며 제품 코드 변경은 없다. 최초 실패는 이 기록에 보존하고 다음 head의 전체 CI와 실제 화면으로 최종 판정한다. 최종 head·CI·화면 증거와 병합 여부는 PR #125 본문/Checks를 최신 원본으로 삼는다. 사내 배포는 미실행이다.
 
 CI489 원본 `tools-phase3-unknown-single-dispatch-1920.png`를 직접 검토하면서 현재 unknown/blocked 카드의 ‘결과 미확인’ 상태 문구가 두 번 붙는 표시 오류를 확인했다. `ea89d38`은 판정할 수 없는 현재 attempt의 비활성 판정 자리만 비우고 오른쪽 상태를 한 번 유지한다. 정상 판정 단추와 과거 실행 표시를 보존하며 관련3개 Node 검사를 통과했다. 이 작은 제품 표시 수정까지 최종 head에 포함하므로 진행 중인 CI490은 대체하고 새 head의 전체 결과로 판정한다.
+
+### CI491 브라우저·화면 완료와 전체 제품 시험 진입 보완
+
+[CI491](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/42009362584), 원격 head `20097bad` / 로컬 제품 tree `9ec9987e`는40 job 중36성공·2실패(전체 Native 제품과 최종gate)·1취소·출하1정상생략이다. Windows/Linux 플랫폼 검사와 Windows 실제IOCP accept/subprocess·독립진단·PowerShell검사가 모두 통과했다. 기존105개와 신규5개를 포함한 실제 native-compose 브라우저110/110, 작성40/40·실행27/27을 통과했다.
+
+Compose ZIP 29,145,582 bytes·SHA256 `2cf17162ad488073c0505ba97183505b1bf0200ac8a91ae7d89d2de2b53a4d62`, manifest625파일의 크기·SHA·목록과PNG343개를 확인했다. 신규PNG25개 중 T06A/T07/O15A/B/C의1920·1366·360 화면15장 및unknown1920 원본을 직접 대조했다. 입력 요소 가림·겹침·가로잘림이 없고 O15A/B/C의9개 폭 조합에서 panel/row 가로overflow0·행별체크0·결과3건을 확인했다. T07-360 아래 단추는 실제스크롤·좌표클릭으로 연결→저장→게시가 성공했다. O15B/C의화면높이밖내용은스크롤로도달하며 unknown의‘결과미확인’은한번만표시된다.
+
+전체 Native 제품 ZIP 4,728,780 bytes·SHA256 `32a39b17fb116e97ebc9d5fbec3df61bb2358d97b5898cf72b969bc15813baa2`, manifest84파일·PNG36개가 일치했다. 실패화면과 진단은 일반사용자가 올바른공장·공동run의‘1차점검’단계에이미진입해 v1·입력·지금실행을표시하며 콘솔오류[]·loaded=true·busy=false·error=false임을보였다. 단일단계실행의기존자동진입후시험이개요의stage_open을다시기다린오류였다. `9c70941`은 `authored_workflow_flow`의중복`open_operation_stage()`한줄만제거하며 바로뒤authored-stage/run_id준비확인·실제worker실행·전체작업판정·중앙채팅검사를그대로둔다. 이실패시점에는실제일반사용자worker가아직실행되지않았으므로다음전체CI에서최종판정한다.
