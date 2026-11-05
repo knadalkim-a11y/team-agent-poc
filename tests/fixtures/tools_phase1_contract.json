@@ -1,0 +1,53 @@
+{
+  "draft": {
+    "name": "문서 목록 조회",
+    "description": "필수 문서를 종류별로 찾아 목록으로 보여 줍니다.",
+    "target": "Confluence",
+    "kind": "read",
+    "code": "from typing import List, Literal\nDocType = Literal[\"design_doc\", \"test_result\", \"deployment_plan\"]\nclass Tools:\n    def list_documents(self, doc_types: List[DocType], __user__: dict) -> dict:\n        return {\"documents\": []}\n",
+    "function": "list_documents",
+    "input_ui": {
+      "doc_types": {
+        "label": "찾을 문서",
+        "question": "어떤 문서를 찾을까요?",
+        "widget": "multiselect",
+        "option_labels": {
+          "design_doc": "설계서",
+          "test_result": "테스트 결과",
+          "deployment_plan": "배포 계획서"
+        },
+        "default": []
+      }
+    },
+    "output_ui": {
+      "kind": "list",
+      "path": "documents",
+      "fields": [
+        {
+          "path": "title",
+          "label": "문서 제목",
+          "role": "title",
+          "hidden": false
+        },
+        {
+          "path": "document_type",
+          "label": "문서 종류",
+          "role": "category",
+          "hidden": false
+        },
+        {
+          "path": "url",
+          "label": "문서 주소",
+          "role": "url",
+          "hidden": false
+        },
+        {
+          "path": "id",
+          "label": "문서 번호",
+          "role": "id",
+          "hidden": true
+        }
+      ]
+    }
+  }
+}

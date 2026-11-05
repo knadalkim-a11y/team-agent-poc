@@ -192,3 +192,54 @@ C66의 **추가 설정**은 담당 · 앞 작업 · 적용 조건 · 기한·예
 | ST-OPEN-7 | 명세 작성 당시 같은 상태 문구가 서버와 화면 두 곳에 달랐음. B10-2 · B10-5 카드의 문구를 서버의 공용 문구 원본으로 통합하고 화면도 같은 값을 사용 | 구현 · Native·UI 회귀 통과, 실제 제품 화면·최종 CI는 [검증 기록](../../evals/v4-ui-20260930.md#shared-tools-spec-20261016)과 #96 Checks 참조 |
 | ST-OPEN-8 | 공통 패널 폭: Figma 580px, 제품 기본 480px. ‘공통 · 화면 틀·이동’에서 정함 | ‘공통 · 화면 틀·이동’을 고칠 때 |
 | ST-OPEN-9 | Jira 6 · GitHub 2의 결과 형식. 정하기 전에는 확인할 수 없음(준비 중) | 해당 도구를 켜기 전 |
+
+<a id="tools-redesign-v2-phase1-20261105"></a>
+
+## 도구 재설계 2판 · 1페이즈 작성·저장 계약
+
+2026-11-05 사용자가 2판 기준의 1페이즈를 서브에이전트로 병렬 구현하도록 요청했다. main `8258318`에서 시작한다. 아래 ST-P1 규칙은 새 작성 경로에 적용한다. 위 1단계-1의 기본 제공 실행·권한·버전 규칙과 기존 자료는 보존한다. 새 작성에는 담당자를 요구하지 않으며 기존 ST-ADMIN-2/5의 사용 설정 변경은 2페이즈에서 다룬다.
+
+| ID | 계약 |
+|---|---|
+| ST-P1-1 | 관리자만 새 도구 목록/코드/정의를 조회·작성·가져오기·검사한다. 담당자 대신 작성/수정 계정·시각을 기록한다. 기존 그룹 사용 권한과 업무절차 담당자 처리는 변경하지 않는다. |
+| ST-P1-2 | 추가 저장 `work_tool_drafts`에 코드·입력/결과 UI 정의를 같은 revision으로 저장한다. 사용 버전 `active_version`과 수정본 revision은 별개다. 이 단계의 새 도구 active_version은 null이며 업무 선택·실행 대상이 아니다. 기존 Native 코드·설정·개인 PAT·관리 도구·진행 건·기록을 수정하지 않는다. |
+| ST-P1-3 | 작성 중 코드와 불완전한 입력/결과도 저장하여 다시 편집할 수 있다. 정적 검사 결과는 오류 목록으로 따로 표시한다. 코드 확인과 저장은 import/exec/eval/함수 실행·외부 요청을 하지 않는다. 검사 통과는 시험/사용 승인이 아니다. |
+| ST-P1-4 | 기존 도구에서 가져오기는 현재 읽기 권한이 있는 Native 원본 코드의 복사다. 서버가 현재 권한을 다시 검사한다. 설정과 PAT는 읽거나 복사하지 않는다. 원본에 하드코딩한 비밀은 안전하게 추출했다고 간주하지 않으며 입력 코드 자체를 로그에 쓰지 않는다. |
+| ST-P1-5 | 저장은 expected_revision으로 충돌을 거부하고 request_id로 재전송을 처리한다. 실패/충돌 때 입력은 유지한다. 사용 중 버전과 원본 참조는 수정본 저장으로 변경되지 않는다. 기존 사용 도구를 이 테이블로 이관하거나 활성화하는 작업은 포함하지 않는다. |
+| ST-P1-6 | 코드의 Tools 공개 함수에서 지원하는 기본형(str/int/float/bool), List/list, Literal, Optional을 정적으로 읽는다. Valves/UserValves와 __user__ 등 내부 인자는 업무 질문이 아니다. 지원하지 않는 동적 형식은 추정해 통과시키지 않고 진단한다. 선택지 실제 값은 코드가 원본이며 UI에서 질문·표시 이름을 정한다. 반환 경로는 표시 정의로 저장하고 실제 결과 검증은 2페이즈 시험에서 한다. |
+
+### 공통 API와 자료
+
+기존 `/api/ees-work/operations` GET/POST를 재사용한다. POST 신규 `tool_draft_` 작업은 기존 실행/기본 제공 확인과 분리한다. 오류는 기존 `{ok:false,error:{code,message}}`를 따른다.
+
+| action/조회 | 입력 | 성공 응답 |
+|---|---|---|
+| GET operations | 기존 조회 인자 | 기존 결과 + 관리자에게 `tool_drafts` 요약 배열, `tool_import_sources` 배열. 비관리자는 빈 배열. 코드/설정 없음 |
+| tool_draft_get | tool_id | `{ok:true,tool_draft:record}` |
+| tool_draft_check | draft | `{ok:true,check:{valid,errors,functions,input_schema}}`, 저장 안 함 |
+| tool_draft_save | tool_id(새 도구는 생략), draft, expected_revision(최초 0), request_id | `{ok:true,tool_draft:record}` |
+| tool_draft_import | source_tool_id, function, expected_revision:0, request_id | 원본을 복사한 새 record 응답 |
+
+record = `{id,revision,active_version:null,draft,check,created_by,updated_by,created_at,updated_at}`. 요약 = `{id,name,description,target,kind,revision,active_version,state:'draft',updated_at}`. 가져오기 후보 = `{id,name,functions:[string]}`.
+draft = `{name,description,target,kind:'read',code,function,input_ui,output_ui}`. input_ui는 인자명별 `{label,question,widget,option_labels,default}` 사전, widget은 text/number/boolean/select/multiselect. option_labels는 실제 값→표시 이름 사전. output_ui = `{kind:'list',path:'documents',fields:[{path,label,role,hidden}]}`, role은 title/category/url/id/text.
+check.errors = `[{code,message,field?,line?}]`, functions = `[{name,input_schema}]`, input_schema는 선택 함수의 JSON schema. AST로 확인할 수 없는 반환값의 실재/타입을 확인했다고 표시하지 않는다.
+핵심 오류는 `admin_required`, `tool_draft_not_found`, `tool_draft_conflict`, `tool_draft_invalid`, `tool_draft_source_unavailable`. 기존 HTTP 오류 전달 방식을 유지한다.
+
+작성 내용이 미완성인 경우와 JSON 구조가 잘못된 경우를 구분한다. `input_ui`/각 입력 항목/`option_labels`/`output_ui`는 객체, `fields`는 객체 배열이어야 한다. 이름·질문·위젯·경로·역할·선택지 표시 이름은 문자열, `hidden`은 boolean이며 알 수 없는 키는 거부한다. 누락된 표시 값은 빈 문자열, 위젯은 text, 역할은 text, hidden은 false, fields는 빈 배열로 채운다. 이 구조 안의 미완성 값은 저장하고 검사 오류로 표시한다. 기본값은 JSON 값으로 보존한다.
+
+저장 자료는 UTF-8 JSON 1MiB, 코드 저장은 262,144자까지다. 정적 검사는 코드 200,000자·함수 32개·함수당 인자 32개·선택지 64개·선택지 문자열 512자·식별자 128자, 누적 schema 48KiB·최종 검사 응답 128KiB 이내로 제한한다. 정적 정의 한도 초과는 `definition_limit`과 빈 schema로 진단하며 사용자 코드를 실행하지 않는다. 코드 저장 한도 안의 검사 불가 코드는 수정본으로 보존할 수 있다.
+
+대표 자료는 [공통 fixture](../../tests/fixtures/tools_phase1_contract.json). 실제 API를 호출하지 않는 합성 코드로 list_documents/doc_types, Literal 세 값, documents의 네 필드를 고정한다.
+
+### 화면 기준과 병렬 담당
+
+Figma [2판 헤더](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1285-1842), T01 `2017:76`, T02 `2016:2`, T02A `2033:202`, T03 `2016:84`, T04 `2016:186`을 2026-11-05 조회 기준으로 사용한다. 고정 렌더는 [조회 메타데이터](../mockups/ees-work/tools-phase1-20261105/metadata.json)와 같은 폴더의 T01/T02/T02A/T03/T04 PNG에 보존했다(UI 커밋 `bcd9cb5`). 새 패널도 기존 공통 패널 토큰과 탭을 재사용한다. 시안 표시·합성 메뉴 수·대화 예시는 비교 대상에서 제외하고 도구 기능 패널을 비교한다. 1920×1080/1366×768과 좁은 화면에서 입력·저장·다시 열기 및 넘침을 검사한다. 시험·사용 탭은 이 단계에서 비활성으로 표시하며 가짜 성공을 만들지 않는다. 기존 도구의 사용 관리 경로는 보존한다.
+
+코드 확인 없이 바로 저장해도 유일한 함수의 입력 정의를 표시하며, 저장 중 추가로 입력한 내용은 미저장 상태로 남긴다. 함수·인자·선택지를 바꿔 코드에서 사라진 표시 설정은 자동 삭제하지 않는다. 이전 설정과 정리할 항목을 보여주고 사용자가 확인하면 지운다. 충돌 시 내 변경을 보존한 채 최신 저장본을 비교하고, 명시적으로 내 변경을 버릴 때만 최신본을 편집기에 연다. 관리자 권한이 회수된 상태를 받으면 수정본·코드 캐시를 비우고 작성 화면을 닫는다.
+
+- A(root): 이 명세·TASK·STATUS·CHANGELOG·README·evals, fixture, 빌드/설치 목록과 통합 검사.
+- B: Python 서비스/Native/API와 Python 서비스 검사. 추가 모듈은 기존 scripts 안에 두고 A에 배포 포함 경로를 알린다.
+- C: branding/ees/ui JS·CSS와 JS 화면 검사, Figma 고정 비교 자료.
+- 검증 에이전트: 통합 브라우저 검사·독립 리뷰(담당은 root와 조정).
+
+소유 밖 파일 변경은 요청해 조율하며 root가 최종 문서·조립을 갱신한다. 하위 세션별 PR 대신 같은 계약에서 독립 worktree 커밋을 만들고 root가 한 PR로 통합한다. 사용자 요청의 서브에이전트 방식에 맞춘 운영 변경이며 main 병합·사내 배포는 포함하지 않는다.

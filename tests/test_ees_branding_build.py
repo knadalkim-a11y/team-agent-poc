@@ -158,7 +158,8 @@ sys.modules["open_webui"] = package
 workflow = importlib.import_module("open_webui.ees_workflow")
 for name in ("ees_workflow", "ees_workflow_definition", "ees_workflow_view", "ees_workflow_authoring",
              "ees_workflow_execution", "ees_workflow_native", "ees_workflow_contract",
-             "ees_workflow_workspace", "ees_workflow_operations", "ees_workflow_shared_tools", "ees_workflow_model"):
+             "ees_workflow_workspace", "ees_workflow_operations", "ees_workflow_shared_tools", "ees_workflow_model",
+             "ees_workflow_tool_drafts", "ees_workflow_tool_draft_check"):
     module = importlib.import_module("open_webui." + name)
     assert Path(module.__file__).parent == root / "open_webui"
 seed = workflow._seed()
@@ -252,6 +253,7 @@ print("installed_workflow_contract=pass")
             for name in ("ees_workflow.py", "ees_workflow_definition.py", "ees_workflow_view.py", "ees_workflow_authoring.py",
                          "ees_workflow_execution.py", "ees_workflow_native.py", "ees_workflow_contract.py",
                          "ees_workflow_workspace.py", "ees_workflow_operations.py", "ees_workflow_shared_tools.py", "ees_workflow_model.py",
+                         "ees_workflow_tool_drafts.py", "ees_workflow_tool_draft_check.py",
                          "ees_workflow_tool.py", "workflow_policy.json", "workflow_help.json", "workflow_tool_examples.json",
                          "workflow_procedure_examples.json"):
                 target = root / "open_webui" / name
@@ -746,7 +748,7 @@ class BrandingBuildTests(unittest.TestCase):
                  '6d84b', 'a28e3', 'b22ad', 'b456d', 'f1e53',
                  'f4cb1', '3dae2', 'e9ac2', '30679', '2b3d1',
                  '1a06f', '2fe77', '2eb05', 'b355c', '66c71', '45242',
-                 '83565', '54b2e', '4d978', '4308e', 'f17e6')
+                 '83565', '54b2e', '4d978', '4308e', 'f17e6', 'e01ea')
         self.build('figma-icons')
         with ZipFile(self.root / 'figma-icons' / builder.WHEEL_FILENAME) as archive:
             for name in added:

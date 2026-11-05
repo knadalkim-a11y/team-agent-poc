@@ -537,6 +537,66 @@ class NativeBridge:
                     continue
         return result
 
+    async def tool_import_sources(self, user):
+        """Read-access-filtered authoring candidates; no source/settings loading."""
+        from open_webui.config import BYPASS_ADMIN_ACCESS_CONTROL
+        from open_webui.env import ENABLE_PLUGINS
+        from open_webui.models.tools import Tools
+        current = await self.service._user(user)
+        if _get(current, "role") != "admin":
+            _fail("admin_required")
+        if not ENABLE_PLUGINS:
+            return []
+        owner = None if BYPASS_ADMIN_ACCESS_CONTROL else _get(current, "id")
+        result = []
+        for tool in await Tools.get_tools(defer_content=True, user_id=owner, permission="read"):
+            functions = sorted({spec["name"] for spec in (_get(tool, "specs", []) or [])
+                                if isinstance(spec, dict) and isinstance(spec.get("name"), str)
+                                and re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,199}", spec["name"])})
+            if functions:
+                result.append({"id": _get(tool, "id"), "name": _get(tool, "name", "") or _get(tool, "id"),
+                               "functions": functions})
+        current = await self.service._user(current)
+        return result if _get(current, "role") == "admin" else []
+
+    async def read_tool_import_source(self, user, tool_id, function):
+        """Copy accessible source bytes only; never access valves or run a loader."""
+        current = await self.service._user(user)
+        if _get(current, "role") != "admin":
+            _fail("admin_required")
+        if (not isinstance(tool_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,200}", tool_id)
+                or not isinstance(function, str) or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,199}", function)):
+            _fail("tool_draft_source_unavailable")
+        from open_webui.config import BYPASS_ADMIN_ACCESS_CONTROL
+        from open_webui.env import ENABLE_PLUGINS
+        from open_webui.models.access_grants import AccessGrants
+        from open_webui.models.groups import Groups
+        from sqlalchemy import select
+        from open_webui.models.tools import Tool, get_async_db_context
+        if not ENABLE_PLUGINS:
+            _fail("native_plugins_disabled")
+        # Do not load the ORM entity: its valves column may contain settings.
+        # A column projection keeps this source-copy path independent of them.
+        async with get_async_db_context() as db:
+            tool = (await db.execute(select(Tool.id, Tool.user_id, Tool.name, Tool.content, Tool.specs)
+                                     .where(Tool.id == tool_id))).first()
+        if tool is None:
+            _fail("native_tool_unavailable")
+        groups = {_get(group, "id") for group in await Groups.get_groups_by_member_id(_get(current, "id"))}
+        if (not BYPASS_ADMIN_ACCESS_CONTROL and _get(tool, "user_id") != _get(current, "id")
+                and not await AccessGrants.has_access(user_id=_get(current, "id"), resource_type="tool", resource_id=tool_id,
+                                                     permission="read", user_group_ids=groups)):
+            _fail("native_access_denied")
+        # Recheck role after directory/ACL awaits; source is not a public result.
+        current = await self.service._user(current)
+        if _get(current, "role") != "admin":
+            _fail("admin_required")
+        specs = [spec for spec in (_get(tool, "specs", []) or [])
+                 if isinstance(spec, dict) and spec.get("name") == function]
+        if len(specs) != 1 or not isinstance(_get(tool, "content"), str):
+            _fail("native_function_missing")
+        return {"name": _get(tool, "name", "") or function, "code": _get(tool, "content"), "function": function}
+
     async def managed_tools(self):
         from sqlalchemy import select
         from open_webui.models.tools import Tool, get_async_db_context

@@ -128,11 +128,15 @@ WORK_ASSETS["scripts/ees_workflow_shared_tools.py"] = "open_webui/ees_workflow_s
 WORK_FILES += (WORK_ASSETS["scripts/ees_workflow_shared_tools.py"],)
 AUTHORING_ICON_FILES = tuple("v4/" + name for name in (
     "0a3bb.svg", "9acc8.svg", "cb8e2.svg", "7f185.svg", "f95ba.svg", "d73ca.svg",
-    "41b38.svg", "676c3.svg", "f0554.svg", "9ce50.svg", "f17e6.svg",
+    "41b38.svg", "676c3.svg", "f0554.svg", "9ce50.svg", "f17e6.svg", "e01ea.svg",
 ))
 V4_ICON_FILES += AUTHORING_ICON_FILES
 UI_FILES.update({name: name for name in AUTHORING_ICON_FILES})
 WORK_FILES += tuple(TARGET_APP + name for name in AUTHORING_ICON_FILES)
+# Draft authoring is additive; older ees.14 inventories remain restorable.
+for _draft_module in ("ees_workflow_tool_drafts.py", "ees_workflow_tool_draft_check.py"):
+    WORK_ASSETS["scripts/" + _draft_module] = "open_webui/" + _draft_module
+    WORK_FILES += (WORK_ASSETS["scripts/" + _draft_module],)
 # Copy these already bundled upstream fonts byte-for-byte into the new cache
 # namespace; no font download, transformation, or runtime dependency is needed.
 FONT_SOURCES = {

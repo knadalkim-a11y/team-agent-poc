@@ -119,6 +119,57 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(self.http_calls)
         self.assertEqual(set(self.http_calls), {'Bearer synthetic-reader-pat'})
 
+    async def test_authoring_import_reads_real_native_source_without_valves_or_loader(self):
+        native_tools = self.f.tools.Tools
+        candidates = await self.f.bridge.tool_import_sources(self.admin)
+        source = next(item for item in candidates if item['id'] == 'installed-with-unpredictable-id')
+        self.assertIn('search_pages', source['functions'])
+        self.assertEqual(set(source), {'id', 'name', 'functions'})
+        original = await native_tools.get_tool_by_id(source['id'])
+        from sqlalchemy import event
+        statements = []
+        def capture_sql(connection, cursor, statement, parameters, context, executemany):
+            statements.append(statement.lower())
+        event.listen(self.f.engine.sync_engine, 'before_cursor_execute', capture_sql)
+        try:
+            with patch.object(native_tools, 'get_tool_by_id', side_effect=AssertionError('full ORM entity must not be read')), \
+                    patch.object(native_tools, 'get_tool_valves_by_id', side_effect=AssertionError('settings must not be read')), \
+                    patch.object(native_tools, 'get_user_valves_by_id_and_user_id', side_effect=AssertionError('PAT must not be read')), \
+                    patch.object(self.f.plugin, 'load_tool_module_by_id', side_effect=AssertionError('draft source must not load')):
+                result = await self.service.operations.command(self.admin, self.body('tool_draft_import',
+                    source_tool_id=source['id'], function='search_pages'))
+        finally:
+            event.remove(self.f.engine.sync_engine, 'before_cursor_execute', capture_sql)
+        self.assertTrue(any('tool.content' in statement for statement in statements))
+        self.assertFalse(any('tool.valves' in statement for statement in statements))
+        saved = result['tool_draft']
+        self.assertEqual(saved['draft']['code'], original.content)
+        self.assertIsNone(saved['active_version'])
+        current = await native_tools.get_tool_by_id(source['id'])
+        self.assertEqual(current.content, original.content)
+        self.assertEqual(current.updated_at, original.updated_at)
+        self.assertEqual(self.http_calls, [])
+
+    async def test_authoring_import_native_access_and_active_reference_are_preserved(self):
+        item = await self.review()
+        second_admin = await self.f.native_users.Users.insert_new_user('draft-admin', 'Draft admin', 'draft-admin@example.invalid', role='admin')
+        with patch('open_webui.config.BYPASS_ADMIN_ACCESS_CONTROL', False):
+            await self.assert_code('tool_draft_source_unavailable', self.service.operations.command(second_admin,
+                self.body('tool_draft_import', source_tool_id=item['reference']['tool_id'], function='search_pages')))
+        with patch('open_webui.config.BYPASS_ADMIN_ACCESS_CONTROL', False), \
+                patch.object(self.f.native_groups.Groups, 'get_groups_by_member_id', return_value=[]):
+            # This source belongs to the administrator; ownership remains valid.
+            result = await self.service.operations.command(self.admin, self.body('tool_draft_import',
+                source_tool_id=item['reference']['tool_id'], function='search_pages'))
+        copied = result['tool_draft']
+        copied['draft']['code'] = 'class Tools:\n    def changed(self):\n        return {}\n'
+        await self.service.operations.command(self.admin, self.body('tool_draft_save', copied['revision'],
+            tool_id=copied['id'], draft=copied['draft']))
+        self.assertEqual((await self.item())['reference'], item['reference'])
+        self.assertEqual((await self.item())['version'], item['version'])
+        await self.assert_code('admin_required', self.service.operations.command(self.reader,
+            self.body('tool_draft_import', source_tool_id=item['reference']['tool_id'], function='search_pages')))
+
     async def rejected_shared_binding(self, argument, binding, notice, nested=False):
         await self.review()
         wid = await self.workflow()
