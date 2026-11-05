@@ -20,6 +20,7 @@ import re
 from pathlib import Path
 import secrets
 import socket
+import sqlite3
 import subprocess
 import sys
 import tempfile
@@ -307,8 +308,8 @@ font:getComputedStyle(e).fontFamily,display:getComputedStyle(e).display,overflow
         self.browser=ChromePipe(str(self.args.chrome.resolve()),str(self.work/'chrome'),font_wheel=self.args.wheel)
         self.browser.navigate('about:blank'); self.browser.call('Runtime.enable'); self.browser.call('Network.enable')
         self.browser.call('Emulation.setDeviceMetricsOverride',{'width':1920,'height':1080,'deviceScaleFactor':1,'mobile':False})
-        self.browser.call('Page.addScriptToEvaluateOnNewDocument',{'source':
-            'localStorage.setItem("token",'+json.dumps(session['token'])+');localStorage.setItem("locale","ko-KR");localStorage.setItem("version","0.11.3+ees.13");'})
+        self.session_script=self.browser.call('Page.addScriptToEvaluateOnNewDocument',{'source':
+            'localStorage.setItem("token",'+json.dumps(session['token'])+');localStorage.setItem("locale","ko-KR");localStorage.setItem("version","0.11.3+ees.13");'})['identifier']
         self.navigate('/'); self.wait('!!document.querySelector("#ees-work-entry")&&!!document.querySelector("#chat-input")')
         self.wait('!document.querySelector("#ees-work-panel")?.innerText.includes("불러오는 중")')
         self.capture('a0-empty')
@@ -321,6 +322,7 @@ font:getComputedStyle(e).fontFamily,display:getComputedStyle(e).display,overflow
         integrated_flow(self)
         figma_delta_flow(self)
         authored_trial_smoke(self)
+        authored_workflow_flow(self)
         self.report['status']='passed'; self.write_report()
 
     def close(self):
@@ -431,6 +433,186 @@ def authored_trial_smoke(g):
         fixture_sha256=hashlib.sha256(fixture_path.read_bytes()).hexdigest(),
         count=trial['count'],fields_checked=trial['fields_checked'],duration_ms=trial['duration_ms'],
         full_native_imports=True,credential_exposed=False,fixture_external_io=False)
+
+
+def authored_workflow_flow(g):
+    """Published authored snapshot, real member credentials and whole-job judgment.
+
+    All setup uses the installed HTTP APIs. Only the authored source's external
+    result is synthetic; Native authentication, encrypted settings, workflow
+    persistence and the isolated worker are the installed product. The member
+    browser uses an actual Native-issued session as ProductGate.setup does.
+    """
+    fixture_path=Path(__file__).resolve().parent/'fixtures/tools_phase3_contract.json'
+    fixture=json.loads(fixture_path.read_text(encoding='utf-8'))
+    admin_headers=dict(g.headers)
+    admin=g.api('/api/v1/auths/')
+    member=g.api('/api/v1/auths/add',{'name':'합성 공동 진행 담당자',
+        'email':'authored-'+uuid4().hex+'@example.test','password':secrets.token_urlsafe(32),'role':'user'})
+    member_headers={'Authorization':'Bearer '+member['token']}
+    member_pat='synthetic-authored-member-'+uuid4().hex
+    private_values=(fixture['connection']['token'],member_pat)
+
+    def command(action, *, workspace=False, headers=None, error=None, timeout=20, **fields):
+        response=g.client.post('/api/ees-work/'+('workspace/command' if workspace else 'operations'),
+            headers=headers or admin_headers,
+            json={'action':action,'request_id':uuid4().hex,'expected_revision':0,**fields},timeout=timeout)
+        assert all(value not in response.text for value in private_values), 'Authored work response exposed a credential'
+        value=response.json()
+        if error:
+            assert value.get('ok') is False and value.get('error',{}).get('code')==error, (action,response.status_code,value)
+        else:
+            assert response.status_code==200 and value.get('ok') is True, (action,response.status_code,value)
+        return value
+
+    def state(run_id, headers=member_headers):
+        value=g.api('/api/ees-work/workspace?run_id='+run_id,headers=headers)
+        assert all(secret not in json.dumps(value,ensure_ascii=False) for secret in private_values)
+        return value['run']
+
+    def sealed_settings(actor_id, native_id):
+        # Read the isolated real Native DB, never a reconstructed settings stub.
+        with sqlite3.connect(g.work/'data/webui.db') as db:
+            settings=json.loads(db.execute('SELECT settings FROM user WHERE id=?',(actor_id,)).fetchone()[0])
+        sealed=settings['tools']['valves'][native_id]
+        assert isinstance(sealed,str) and sealed
+        assert all(secret not in sealed for secret in private_values), 'Native personal settings were not encrypted'
+        return sealed
+
+    group=g.api('/api/v1/groups/create',{'name':'합성 작성 도구 공동 진행','description':'Isolated full-product verification',
+        'permissions':{'chat':{'valves':True}}})
+    g.api('/api/v1/groups/id/'+group['id']+'/users/add',{'user_ids':[admin['id'],member['id']]})
+    draft=command('tool_draft_save',expected_revision=0,draft=fixture['draft'])['tool_draft']
+    connected=command('tool_draft_connection_save',tool_id=draft['id'],expected_revision=draft['revision'],
+        expected_connection_revision=0,**fixture['connection'])['connection']
+    assert connected['configured'] and connected['token_set']
+    admin_sealed=sealed_settings(admin['id'],connected['native_id'])
+    trial=command('tool_draft_trial_start',timeout=40,tool_id=draft['id'],expected_revision=draft['revision'],
+        expected_connection_revision=connected['revision'],inputs=fixture['inputs'])['trial']
+    assert trial['status']=='succeeded' and trial['count']==3 and trial['eligible_for_activation'],trial
+    assert trial['raw_result']==fixture['result']
+    activated=command('tool_draft_use_set',tool_id=draft['id'],trial_id=trial['id'],expected_revision=draft['revision'],
+        expected_connection_revision=connected['revision'],expected_use_revision=0,groups=[group['id']],evidence=fixture['evidence'])
+    assert activated['use']['active_version']==1 and activated['use']['state']=='active'
+    catalog=g.api('/api/ees-work/operations',headers=admin_headers)['shared_tools']
+    shared=next(item for item in catalog if item['id']==draft['id'])
+    assert shared['source']=='authored' and shared['version']==1 and shared['can_use'],shared
+    assert shared['input_ui']==fixture['draft']['input_ui'] and shared['output_ui']==fixture['draft']['output_ui']
+
+    # A saved, untested r2 must never supply code to a v1 workflow execution.
+    changed=json.loads(json.dumps(fixture['draft']))
+    changed['code']=changed['code'].replace('EMS 셋업 설계서','UNRELEASED DRAFT MUST NOT EXECUTE')
+    edited=command('tool_draft_save',tool_id=draft['id'],expected_revision=draft['revision'],draft=changed)['tool_draft']
+    assert edited['revision']==2 and edited['active_version']==1
+    factory_id='authored-'+uuid4().hex[:12]
+    command('save_factory',workspace=True,factory_id=factory_id,system_id='EMS',name='합성 작성 도구 공장',attributes={})
+    command('save_access',workspace=True,principal_kind='group',principal_id=group['id'],system_id='EMS',
+        factory_id=factory_id,roles=['manager','participant'])
+    created=command('create_workflow',workspace=True,name=fixture['workflow']['name'],system_id='EMS')
+    workflow_id=created['workflow_id']; definition=created['workflow']['draft']; root=next(iter(definition['nodes']))
+    stage_id='authored-stage';job_id='authored-documents'
+    definition['execution_scope']='factory'
+    definition['nodes'][root]['children']=[stage_id]
+    definition['nodes'][stage_id]={'id':stage_id,'type':'t','name':fixture['workflow']['stage'],
+        'parent':root,'children':[job_id],'deps':[]}
+    schema=shared['input_schema']['properties']['doc_types']
+    bindings={'doc_types':{'input':'doc_types'}}
+    definition['nodes'][job_id]={'id':job_id,'type':'j','name':fixture['workflow']['job'],'parent':stage_id,
+        'children':[],'deps':[],'mode':'tool','shared_tool_id':draft['id'],'argument_bindings':bindings,
+        'inputs':[{'id':'doc_types','name':fixture['draft']['input_ui']['doc_types']['label'],
+            'question':fixture['draft']['input_ui']['doc_types']['question'],'type':'multi','scope':'run','required':True,
+            'options':[{'value':value,'label':label} for value,label in fixture['draft']['input_ui']['doc_types']['option_labels'].items()],
+            'default':[],'source':{'shared_tool_id':draft['id']},'authored_schema':schema}],
+        'shared_tool_generated':{'shared_tool_id':draft['id'],'argument_bindings':bindings,
+            'previous_result_block':'human_confirm','result_block':'human_confirm'},
+        'human_confirmation':fixture['workflow']['human_confirmation'],'result_block':fixture['workflow']['result_block'],
+        'completion':{'rule':fixture['workflow']['criteria']},
+        'judgments':[{'id':'approved','label':'승인','status':'completed'},
+            {'id':'conditional','label':'조건부 승인','status':'action_required'},
+            {'id':'rejected','label':'미승인','status':'failed'}]}
+    saved=command('save_draft',workspace=True,workflow_id=workflow_id,expected_revision=created['revision'],definition=definition)
+    checked=command('validate_workflow',workspace=True,workflow_id=workflow_id,expected_revision=saved['revision'])
+    assert checked['validation']['errors']==[],checked['validation']
+    published=command('publish_workflow',workspace=True,workflow_id=workflow_id,expected_revision=saved['revision'])
+    stored=g.api('/api/ees-work/workspace?workflow_id='+workflow_id,headers=admin_headers)['workflow']
+    assert stored['published_version']==1
+    assert stored['published']['nodes'][job_id]['shared_tool_id']==draft['id']
+    assert all(key not in stored['published']['nodes'][job_id] for key in ('tool_reference','code','version','token'))
+    started=command('start_run',workspace=True,workflow_id=workflow_id,expected_revision=published['revision'],
+        factory_id=factory_id,inputs=fixture['inputs'])
+    run_id=started['run']['id']
+    shared_run=state(run_id)
+    assert shared_run['factory_id']==factory_id and shared_run['workflow_id']==workflow_id
+    assert shared_run['sharing']=={'group_ids':[]}
+    assert shared_run['attempts']==[]
+    command('execute_job',headers=member_headers,error='native_personal_connection_required',
+        run_id=run_id,job_id=job_id,expected_revision=shared_run['revision'])
+    assert state(run_id)['attempts']==[], 'Missing member PAT must not use the administrator credential or dispatch'
+    # The ordinary current-user Native route retains chat.valves and ACL gates.
+    g.api('/api/v1/tools/id/'+connected['native_id']+'/valves/user/update',{'PAT':member_pat},headers=member_headers)
+    sealed_settings(member['id'],connected['native_id'])
+    assert sealed_settings(admin['id'],connected['native_id'])==admin_sealed
+
+    g.headers=member_headers
+    g.browser.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':g.session_script})
+    g.session_script=g.browser.call('Page.addScriptToEvaluateOnNewDocument',{'source':
+        'localStorage.setItem("token",'+json.dumps(member['token'])+');localStorage.setItem("locale","ko-KR");'})['identifier']
+    g.browser.call('Emulation.setDeviceMetricsOverride',{'width':1920,'height':1080,'deviceScaleFactor':1,'mobile':False})
+    g.navigate('/');g.wait_work_ready()
+    assert g.api('/api/v1/auths/')['id']==member['id']
+    g.click('#ees-work-system-trigger');g.click('[data-action=choose_system][data-system-id=EMS]')
+    g.wait_work_ready()
+    g.click('#ees-work-site-trigger');g.click('[data-action=choose_factory][data-factory-id="'+factory_id+'"]')
+    g.wait("document.querySelector('#ees-work-site-trigger')?.innerText.includes('합성 작성 도구 공장')")
+    g.click('[data-action=workflow][data-workflow-id="'+workflow_id+'"]')
+    g.wait_work_ready(workflow_id=workflow_id,run_id=run_id)
+    g.wait_work_ready(run_id=run_id,selector='[data-authored-stage][data-stage-job="'+job_id+'"]')
+    g.capture('tools-phase3-full-native-member-before-execution')
+    g.click('[data-action=stage_execute][data-job-id="'+job_id+'"]')
+    g.wait("document.querySelector('[data-authored-result][data-tool-version=\"1\"]') && document.querySelector('#ees-work-panel')?.getAttribute('aria-busy')==='false'")
+    executed=state(run_id);attempt=executed['attempts'][0]
+    assert len(executed['attempts'])==1 and attempt['status']=='succeeded',executed['attempts']
+    assert attempt['actor_id']==member['id'] and attempt['inputs']==fixture['inputs']
+    pin=attempt['snapshot']['shared_tool']; result=attempt['result']
+    assert pin['id']==draft['id'] and pin['source']=='authored' and pin['version']==1,pin
+    assert pin['name']==fixture['draft']['name'] and pin['input_schema']==shared['input_schema']
+    assert pin['input_ui']==fixture['draft']['input_ui'] and pin['output_ui']==fixture['draft']['output_ui']
+    assert result['source']=='authored' and result['completeness']=='complete'
+    assert [row['id'] for row in result['items']]==['row-1','row-2','row-3']
+    assert [row['row'] for row in result['items']]==fixture['result']['documents']
+    assert all(row['required'] is False for row in result['items'])
+    assert executed['jobs'][job_id]['status']=='waiting_confirmation' and executed['jobs'][job_id]['decisions']==[]
+    assert not g.browser.evaluate("!!document.querySelector('[data-authored-stage] [data-item-id],[data-action=confirm_list]')")
+    assert g.browser.evaluate("document.querySelectorAll('[data-authored-result] .ew-authored-document').length")==3
+    assert 'UNRELEASED DRAFT MUST NOT EXECUTE' not in json.dumps(executed,ensure_ascii=False)
+    other_view=state(run_id,admin_headers)
+    assert other_view['id']==run_id and other_view['jobs'][job_id]['status']=='waiting_confirmation'
+    assert other_view['attempts'][0]['result'] is None and other_view['attempts'][0]['inputs']=={}
+    g.capture('tools-phase3-full-native-member-result-awaits-judgment')
+    g.click('[data-authored-stage][data-stage-job="'+job_id+'"] .ew-authored-note > summary')
+    g.type('[data-authored-stage][data-stage-job="'+job_id+'"] [data-stage-note]',fixture['evidence'])
+    g.click('[data-action=stage_verdict][data-job-id="'+job_id+'"]')
+    assert g.browser.evaluate("[...document.querySelectorAll('#ees-stage-verdict-menu [data-action=stage_decide]')].map(e=>e.dataset.judgmentId)")==['approved','conditional','rejected']
+    g.click('#ees-stage-verdict-menu [data-action=stage_decide][data-judgment-id=approved]')
+    g.wait("!document.querySelector('#ees-stage-verdict-menu') && document.querySelector('[data-stage-job=\""+job_id+"\"] .ew-authored-approved')?.innerText==='승인'")
+    confirmed=state(run_id); decisions=confirmed['jobs'][job_id]['decisions']
+    assert confirmed['jobs'][job_id]['status']=='completed' and len(decisions)==1,confirmed['jobs'][job_id]
+    assert decisions[0]['item_id']=='job' and decisions[0]['attempt_id']==attempt['id']
+    assert decisions[0]['actor_id']==member['id'] and decisions[0]['verdict']=='completed'
+    assert decisions[0]['note']==fixture['evidence']+'\n선택한 판정: 승인 (approved)'
+    assert len(confirmed['attempts'])==1 and confirmed['attempts'][0]['result']==result
+    assert confirmed['attempts'][0]['snapshot']['shared_tool']==pin
+    assert state(run_id,admin_headers)['jobs'][job_id]['status']=='completed'
+    assert all(secret not in g.browser.evaluate('document.body.innerText') for secret in private_values)
+    g.capture('tools-phase3-full-native-whole-job-approved')
+    g.log.flush()
+    assert all(secret not in (g.work/'native-server.log').read_text(encoding='utf-8') for secret in private_values)
+    g.record('Authored v1 through real Native member worker and whole-job judgment',
+        fixture_sha256=hashlib.sha256(fixture_path.read_bytes()).hexdigest(),workflow_id=workflow_id,run_id=run_id,
+        factory_id=factory_id,tool_version=pin['version'],saved_draft_revision=edited['revision'],
+        actor_id=member['id'],count=len(result['items']),attempts=1,decision_items=['job'],
+        native_personal_encryption=True,administrator_pat_unchanged=True,missing_member_pat_blocked=True,
+        shared_progress=True,other_actor_evidence_hidden=True,full_native_imports=True,fixture_external_io=False)
 
 
 def integrated_flow(gate):

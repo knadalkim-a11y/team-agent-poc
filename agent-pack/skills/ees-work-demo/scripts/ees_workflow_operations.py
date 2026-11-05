@@ -1314,9 +1314,12 @@ class OperationsRuntime:
         if kind == "tool":
             if not reference:
                 fail("native_tool_required", "연결된 도구 정보를 찾지 못해 실행할 수 없습니다. 워크스페이스에서 이 작업의 도구 연결을 확인해 주세요.")
-            await self.bridge.check(actor, reference)
+            if not self.service.shared_tools.authored.is_authored_reference(reference):
+                await self.bridge.check(actor, reference)
             with self.service._db() as db:
                 arguments, argument_sources, argument_records = self._resolve_arguments(db, run, job, snapshot["inputs"])
+            effective_arguments = (self.service.shared_tools.authored.validate_arguments(reference, arguments)
+                if self.service.shared_tools.authored.is_authored_reference(reference) else None)
             for record in argument_records:
                 await self.service._work_check_evidence(actor, record)
         elif kind == "ai":
@@ -1377,6 +1380,15 @@ class OperationsRuntime:
                     fail("scope_claim_lost")
             receipt = self._receipt(db, actor, body)
             if receipt is not None:
+                if shared_pin and self.service.shared_tools.authored.is_authored_reference(shared_pin['reference']):
+                    # A client disconnect or revoked access can stop the final
+                    # response after the immutable attempt was persisted. Read
+                    # that outcome; never replay a stale "running" receipt.
+                    previous = db.execute('SELECT status,result FROM work_attempts WHERE id=? AND actor_id=?',
+                        (receipt.get('attempt', {}).get('id'), value(actor, 'id'))).fetchone()
+                    if previous and previous['status'] != 'running':
+                        receipt = {**receipt, 'ok': previous['status'] in {'succeeded', 'partial'},
+                            'attempt': {**receipt['attempt'], 'status': previous['status'], 'result': json.loads(previous['result'] or '{}')}}
                 return receipt
             self._check_read_contract(db, job)
             if kind == "tool":
@@ -1392,10 +1404,13 @@ class OperationsRuntime:
                 attempt["snapshot"]["read_retry"] = deepcopy(retry_context)
             attempt["snapshot"]["skills"] = skill_snapshots
             if shared_pin:
-                attempt["snapshot"]["shared_tool"] = deepcopy(shared_pin)
+                attempt["snapshot"]["shared_tool"] = (self.service.shared_tools.authored.describe_pin(db, shared_pin)
+                    if self.service.shared_tools.authored.is_authored_reference(shared_pin["reference"]) else deepcopy(shared_pin))
                 attempt["snapshot"]["tool_reference"] = deepcopy(shared_pin["reference"])
             if kind == "tool":
                 attempt["snapshot"]["arguments"] = arguments
+                if effective_arguments is not None:
+                    attempt['snapshot']['effective_arguments'] = effective_arguments
                 attempt["snapshot"]["argument_sources"] = argument_sources
                 attempt["snapshot"]["source_references"] = [ref for record in argument_records for ref in self.service._work_evidence_references(json.loads(record["snapshot"]))]
                 attempt["snapshot"]["evidence_attempt_ids"] = [record["id"] for record in argument_records]
@@ -1422,7 +1437,8 @@ class OperationsRuntime:
                     self._check_read_contract(db, job)
                 if shared_pin:
                     await self.service.shared_tools.resolve(actor, job["shared_tool_id"], kind="work", run_id=run["id"])
-                result = await self.bridge.invoke(actor, reference, arguments, {"run_id": run["id"], "job_id": job["id"], "call_id": attempt["id"], **({"shared_tool_id": job["shared_tool_id"], "shared_run_kind": "work"} if shared_pin else {})})
+                invoke = self.service.shared_tools.authored.invoke if self.service.shared_tools.authored.is_authored_reference(reference) else self.bridge.invoke
+                result = await invoke(actor, reference, arguments, {"run_id": run["id"], "job_id": job["id"], "call_id": attempt["id"], **({"shared_tool_id": job["shared_tool_id"], "shared_run_kind": "work"} if shared_pin else {})})
 
             elif job.get("result_block") in {"item_verdict", "ai_review"}:
                 proposal_kind = "verdicts" if job["result_block"] == "item_verdict" else "report"
@@ -1482,7 +1498,21 @@ class OperationsRuntime:
         finally:
             heartbeat.cancel()
             await asyncio.gather(heartbeat, return_exceptions=True)
+            # No await separates this Work CAS from persistence. Native already
+            # rechecked the execution account after the worker returned.
+            final_check = getattr(result, 'check_current', None)
+            if final_check:
+                try:
+                    await result.seal()
+                except WorkflowError as error:
+                    status, result = 'unknown', {'source': 'authored', 'status': 'unknown', 'completeness': 'unknown', 'items': [], 'count': 0, 'raw_result': None, 'error': {'code': error.code}}
             with self.service._db(write=True) as db:
+                final_check = getattr(result, 'check_current', None)
+                if final_check:
+                    try:
+                        final_check(db)
+                    except WorkflowError as error:
+                        status, result = 'unknown', {'source': 'authored', 'status': 'unknown', 'completeness': 'unknown', 'items': [], 'count': 0, 'raw_result': None, 'error': {'code': error.code}}
                 claim = db.execute("SELECT * FROM work_job_claims WHERE attempt_id=?", (attempt["id"],)).fetchone()
                 if claim["state"] == "running" and claim["worker"] == self.worker and claim["lease"] >= self.clock():
                     self.service._work_finish_attempt(db, attempt["id"], status, clean(result))
@@ -1535,6 +1565,11 @@ class OperationsRuntime:
             records.append(dict(row))
         if job.get("shared_tool_id"):
             schema = self.service.shared_tools.get(db, job["shared_tool_id"])["input_schema"]
+            if self.service.shared_tools.authored.is_key(job["shared_tool_id"]):
+                pinned = db.execute("SELECT data FROM work_shared_tool_pins WHERE run_kind='work' AND run_id=? AND tool_id=?", (run['id'], job['shared_tool_id'])).fetchone()
+                if not pinned:
+                    fail('shared_tool_review_required')
+                schema = self.service.shared_tools.authored.snapshot(db, json.loads(pinned[0])['reference'])['input_schema']
             normal = {name: binding for name, binding in normal.items() if not (isinstance(binding, dict) and set(binding) == {"input"} and binding["input"] not in inputs and name not in schema.get("required", []))}
         return self._arguments({"argument_bindings": normal}, inputs), sources, records
 
@@ -1650,7 +1685,7 @@ class OperationsRuntime:
         tool_import_sources = await self.service.tool_drafts.sources(actor)
         if value(await self.service._user(actor), "role") != "admin":
             tool_drafts, tool_import_sources = [], []
-        return {"tool_draft_phase": 2, "tool_drafts": tool_drafts, "tool_import_sources": tool_import_sources, "shared_tools": shared_tools, "shared_tools_notice": shared_notice, "shared_tool_messages": deepcopy(MESSAGES), "shared_tool_access": shared_tool_access, "ok": True, "scope_runs": scopes, "tools": tools, "all_tools": all_tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
+        return {"tool_draft_phase": 3, "tool_drafts": tool_drafts, "tool_import_sources": tool_import_sources, "shared_tools": shared_tools, "shared_tools_notice": shared_notice, "shared_tool_messages": deepcopy(MESSAGES), "shared_tool_access": shared_tool_access, "ok": True, "scope_runs": scopes, "tools": tools, "all_tools": all_tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
 
     def start(self):
         self._closing = False
@@ -1700,6 +1735,10 @@ class OperationsRuntime:
             if job.get("type") != "j":
                 continue
             if job.get("shared_tool_id"):
+                # Manual publication may retain an incomplete authored-tool
+                # setup. Readiness is checked against the pinned use at I/O.
+                if self.service.shared_tools.authored.is_key(job['shared_tool_id']):
+                    continue
                 try:
                     tool = self.service.shared_tools.get(db, job["shared_tool_id"])
                     self.service.shared_tools.authorize(tool, actor, groups)

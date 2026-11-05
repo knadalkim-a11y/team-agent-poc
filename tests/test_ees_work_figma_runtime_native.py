@@ -8,6 +8,7 @@ from copy import deepcopy
 import importlib
 import json
 from pathlib import Path
+import time
 from uuid import uuid4
 
 from ees_work_integrated_fixture import IntegratedNativeCase
@@ -29,6 +30,282 @@ class SyntheticReviewModel:
 
 
 class FigmaRuntimeNativeTests(IntegratedNativeCase):
+    def phase3_workflow(self, fixture, tool_id, record, *, factory='phase3-factory'):
+        self.command('save_factory', factory_id=factory, system_id='EMS', name='합성 공동 공장')
+        self.command('save_access', principal_kind='user', principal_id='other-user',
+                     system_id='EMS', factory_id='*', roles=['participant'])
+        key = self.author(name=fixture['workflow']['name'], jobs=2)
+        workflow = self.state(workflow_id=key)['workflow']
+        definition = deepcopy(workflow['draft'])
+        definition['execution_scope'] = 'factory'
+        definition['nodes']['stage']['name'] = fixture['workflow']['stage']
+        schema = deepcopy(record['check']['input_schema']['properties']['doc_types'])
+        ui = fixture['draft']['input_ui']['doc_types']
+        field = {'id': 'doc_types', 'name': ui['label'], 'question': ui['question'],
+            'type': 'multi', 'scope': 'run', 'required': True, 'default': [],
+            'authored_schema': schema, 'source': {'shared_tool_id': tool_id},
+            'options': [{'value': value, 'label': label} for value, label in ui['option_labels'].items()]}
+        job = definition['nodes']['job-0']
+        job.update(name=fixture['workflow']['job'], mode='tool', shared_tool_id=tool_id,
+            result_block='human_confirm', human_confirmation=True, inputs=[field],
+            argument_bindings={'doc_types': {'input': 'doc_types'}},
+            completion={'rule': fixture['workflow']['criteria']}, judgments=[
+                {'id': 'approved', 'label': '승인', 'status': 'completed'},
+                {'id': 'conditional', 'label': '조건부 승인', 'status': 'completed'},
+                {'id': 'rejected', 'label': '미승인', 'status': 'failed'}])
+        definition['nodes']['job-1']['deps'] = ['job-0']
+        self.command('save_draft', workflow_id=key, expected_revision=workflow['revision'], definition=definition)
+        checked = self.command('validate_workflow', workflow_id=key, expected_revision=workflow['revision'] + 1)
+        self.assertEqual(checked['validation']['errors'], [], checked)
+        self.command('publish_workflow', workflow_id=key, expected_revision=workflow['revision'] + 1)
+        return key
+
+    def phase3_stage(self, key, run):
+        self.open_run(key, run, job='')
+        if self.browser.evaluate("!!document.querySelector('.ew-operation-overview')"):
+            self.open_stage_from_overview()
+        self.wait("document.querySelector('[data-authored-stage][data-stage-job=job-0]')")
+
+    def phase3_capture(self, label):
+        observations = []
+        for width, height in ((1920, 1080), (1366, 768), (360, 768)):
+            self.browser.call('Emulation.setDeviceMetricsOverride', {
+                'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
+            self.wait('innerWidth === ' + str(width) + ' && innerHeight === ' + str(height))
+            self.wait("document.querySelector('.ees-panel-region')?.dataset.overlay === " + json.dumps(str(width <= 480).lower()))
+            self.wait("!document.querySelector('#sidebar').getAnimations().length && !document.querySelector('.ees-panel-space').getAnimations().length")
+            geometry = self.browser.evaluate("""(()=>{const e=document.querySelector('#ees-work-panel'),r=e.getBoundingClientRect(),row=e.querySelector('[data-authored-stage]');return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,overflow:e.scrollWidth-e.clientWidth,rowOverflow:row.scrollWidth-row.clientWidth,documents:row.querySelectorAll('.ew-authored-document').length,checkboxes:row.querySelectorAll('[data-list-include],[data-item-verdict],[data-action=confirm_list]').length};})()""")
+            self.assertGreaterEqual(geometry['left'], -1, geometry)
+            self.assertLessEqual(geometry['right'], width + 1, geometry)
+            self.assertLessEqual(geometry['overflow'], 1, geometry)
+            self.assertLessEqual(geometry['rowOverflow'], 1, geometry)
+            self.assertEqual(geometry['checkboxes'], 0, geometry)
+            observations.append({'width': width, 'height': height, **geometry})
+            directory = self.screenshot(label + '-' + str(width))
+            (directory / (label + '-geometry.json')).write_text(json.dumps(observations, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+        self.wait('innerWidth === 1920')
+
+    def phase3_failure_code(self, body, *, user=None):
+        try:
+            result = asyncio.run(self.server.workflow.operations.command(user or self.server.user, body))
+        except self.backend.WorkflowError as error:
+            return error.code
+        self.assertFalse(result['ok'], result)
+        return result['error']['code']
+
+    def test_tools_phase3_shared_start_execution_whole_job_judgment_and_history(self):
+        fixture, tool_id, active = self.phase3_authored_tool()
+        key = self.phase3_workflow(fixture, tool_id, active)
+        # Native session fields are required even when the service actor only
+        # needs id/role; keep this account's identity and participant grants.
+        member = deepcopy(self.server.user)
+        member.update(self.users['other-user'], email='other-user@example.invalid')
+        self.users[member['id']] = member
+        self.server.user = member
+        for chat in self.server.chats.values():
+            chat['user_id'] = member['id']
+        self.navigate('/c/existing-chat')
+        self.wait("document.querySelector('#ees-work-system-trigger')")
+        self.open_sidebar(); self.refresh()
+        self.click('#ees-work-site-trigger')
+        self.click('[data-action=choose_factory][data-factory-id=phase3-factory]')
+        self.wait("document.querySelector('[data-action=workflow][data-workflow-id=\"" + key + "\"]')")
+        self.click('[data-action=workflow][data-workflow-id="' + key + '"]')
+        self.wait("document.querySelector('.ew-operation-overview')")
+        self.open_stage_from_overview()
+        self.wait("document.querySelector('[data-authored-stage]')")
+        self.phase3_capture('tools-phase3-o15a-before-execution')
+        self.click('[data-action=stage_start][data-job-id=job-0]')
+        self.wait("document.querySelector('#ees-work-dialog #ees-work-start')")
+        self.assertIn('어떤 문서를 찾을까요?', self.text('#ees-work-dialog'))
+        select = '#ees-work-dialog [data-work-input][name=doc_types]'
+        self.click(select); self.key('Home', 36); self.key('ArrowDown', 40, 8)
+        self.assertEqual(self.browser.evaluate("[...document.querySelector(" + json.dumps(select) + ").selectedOptions].map(e=>JSON.parse(e.value))"), fixture['inputs']['doc_types'])
+        self.screenshot('tools-phase3-o15-start-inputs-1920')
+        self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.wait("!document.querySelector('#ees-work-dialog') && window.__eesNativeWorkV1.captureReference()?.run_id")
+        run_id = self.browser.evaluate('window.__eesNativeWorkV1.captureReference().run_id')
+        started = self.state(run_id=run_id)['run']
+        self.assertEqual(started['inputs'], fixture['inputs'])
+        self.assertEqual(started['attempts'], [])
+        self.assertEqual(self.authored_native.execution_calls, [])
+        self.click('[data-action=stage_execute][data-job-id=job-0]')
+        self.wait("document.querySelector('[data-authored-result]')?.textContent.includes('EMS 인터페이스 설계서')")
+        queried = self.state(run_id=run_id)['run']
+        first = deepcopy(queried['attempts'][0])
+        self.assertEqual(queried['jobs']['job-0']['status'], 'waiting_confirmation')
+        self.assertEqual(queried['jobs']['job-0']['decisions'], [])
+        self.assertEqual(first['snapshot']['shared_tool']['version'], 1)
+        self.assertEqual(first['snapshot']['shared_tool']['source'], 'authored')
+        self.assertEqual(first['result']['source'], 'authored')
+        self.assertEqual([item['id'] for item in first['result']['items']], ['row-1', 'row-2', 'row-3'])
+        self.assertEqual([item['row'] for item in first['result']['items']], fixture['result']['documents'])
+        self.assertEqual(self.authored_native.execution_calls[0]['actor'], 'other-user')
+        self.assertEqual(self.authored_native.execution_calls[0]['inputs'], fixture['inputs'])
+        self.assertNotIn('fixture-phase3-other-personal-token', json.dumps(queried))
+        self.phase3_capture('tools-phase3-o15b-human-judgment')
+        self.click('[data-action=stage_verdict][data-job-id=job-0]')
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('#ees-stage-verdict-menu b')].map(e=>e.textContent)"), ['승인', '조건부 승인', '미승인'])
+        self.click('[data-action=stage_decide][data-judgment-id=approved]')
+        self.wait("document.querySelector('[data-authored-stage] .ew-authored-approved')?.textContent.includes('승인')")
+        confirmed = self.state(run_id=run_id)['run']
+        self.assertEqual(confirmed['jobs']['job-0']['status'], 'completed')
+        self.assertEqual(next(item for item in confirmed['attempts'] if item['id'] == first['id']), first)
+        decision = deepcopy(confirmed['jobs']['job-0']['decisions'][0])
+        self.phase3_capture('tools-phase3-o15c-approved-evidence')
+        # A new explicit execution keeps the earlier attempt and its judgment.
+        replayed = self.phase3_command('execute_job', confirmed['revision'], run_id=run_id, job_id='job-0')
+        self.assertNotEqual(replayed['attempt']['id'], first['id'])
+        saved = self.state(run_id=run_id)['run']
+        self.assertEqual(next(item for item in saved['attempts'] if item['id'] == first['id']), first)
+        self.assertIn(decision, saved['jobs']['job-0']['decisions'])
+        self.assertEqual(len(self.authored_native.execution_calls), 2)
+        self.refresh()
+        self.wait("document.querySelector('[data-stage-attempt][data-job-id=job-0]')")
+        self.choose('[data-stage-attempt][data-job-id=job-0]', first['id'])
+        self.wait("document.querySelector('[data-authored-stage]')?.textContent.includes('이전 실행')")
+        self.assertIn('EMS 셋업 설계서', self.text('[data-authored-stage]'))
+        self.screenshot('tools-phase3-old-attempt-keeps-evidence-1920')
+        self.assertEqual(self.server.completions, [])
+
+    def test_tools_phase3_pin_upgrade_disable_and_completed_evidence_preserved(self):
+        fixture, tool_id, active = self.phase3_authored_tool()
+        key = self.phase3_workflow(fixture, tool_id, active)
+        run = self.start(key, factory_id='phase3-factory', inputs=fixture['inputs'])
+        first = self.phase3_command('execute_job', run['revision'], run_id=run['id'], job_id='job-0')['attempt']
+        current = self.state(run_id=run['id'])['run']
+        first = deepcopy(next(item for item in current['attempts'] if item['id'] == first['id']))
+        changed = deepcopy(fixture['draft'])
+        changed['input_ui']['doc_types']['question'] += ' (새 사용본)'
+        self.phase3_command('tool_draft_save', active['revision'], tool_id=tool_id, draft=changed)
+        self.assertEqual(self.phase3_command('tool_draft_get', tool_id=tool_id)['tool_draft']['active_version'], 1)
+        self.assertEqual(self.state(run_id=run['id'])['run']['shared_tools'][0]['version'], 1)
+        second = self.phase3_activate(fixture, tool_id)
+        self.assertEqual(second['active_version'], 2)
+        body = {'action': 'execute_job', 'request_id': str(uuid4()), 'expected_revision': current['revision'],
+                'run_id': run['id'], 'job_id': 'job-0'}
+        self.assertEqual(self.phase3_failure_code(body), 'shared_tool_version_changed')
+        self.assertEqual(len(self.authored_native.execution_calls), 1)
+        self.phase3_stage(key, current)
+        # The detailed job retains the existing explicit pin-acceptance control.
+        self.click('[data-action=job][data-job-id=job-0]')
+        self.wait("document.querySelector('[data-action=shared_accept_version]')")
+        self.assertIn('v2', self.text('[data-action=shared_accept_version]'))
+        self.screenshot('tools-phase3-old-pin-needs-acceptance-1920')
+        self.click('[data-action=shared_accept_version]'); self.click('[data-dialog-confirm]')
+        self.wait("document.querySelector('.ew-shared-runtime')?.textContent.includes('회차 v2')")
+        accepted = self.state(run_id=run['id'])['run']
+        self.assertEqual(accepted['shared_tools'][0]['version'], 2)
+        self.assertEqual(next(item for item in accepted['attempts'] if item['id'] == first['id']), first)
+        newer = self.phase3_command('execute_job', accepted['revision'], run_id=run['id'], job_id='job-0')['attempt']
+        self.assertEqual(newer['snapshot']['shared_tool']['version'], 2)
+        self.command('save_factory', factory_id='phase3-new-version', system_id='EMS', name='새 사용본 공장')
+        new_run = self.start(key, factory_id='phase3-new-version', inputs=fixture['inputs'])
+        self.assertEqual(new_run['shared_tools'][0]['version'], 2)
+        prior = deepcopy(self.state(run_id=run['id'])['run']['attempts'])
+        disabled = self.phase3_command('tool_draft_use_disable', tool_id=tool_id,
+            expected_use_revision=second['use']['revision'])['use']
+        self.assertEqual(disabled['state'], 'disabled')
+        now = self.state(run_id=run['id'])['run']
+        self.assertEqual(now['attempts'], prior)
+        blocked = {**body, 'request_id': str(uuid4()), 'expected_revision': now['revision']}
+        self.assertEqual(self.phase3_failure_code(blocked), 'shared_tool_disabled')
+        self.assertEqual(len(self.authored_native.execution_calls), 2)
+        self.assertEqual(self.state(run_id=run['id'])['run']['attempts'], prior)
+        self.refresh(); self.screenshot('tools-phase3-disabled-next-call-preserves-history-1920')
+
+    def test_tools_phase3_duplicate_and_unknown_do_not_redispatch(self):
+        fixture, tool_id, active = self.phase3_authored_tool()
+        key = self.phase3_workflow(fixture, tool_id, active)
+        run = self.start(key, factory_id='phase3-factory', inputs=fixture['inputs'])
+        self.phase3_stage(key, run)
+        self.authored_native.result = {'status': 'unknown', 'raw_result': None, 'duration_ms': 25,
+                                      'error_code': 'tool_trial_timeout'}
+        self.authored_native.hold.clear(); self.authored_native.started.clear()
+        self.click('[data-action=stage_execute][data-job-id=job-0]')
+        self.assertTrue(self.authored_native.started.wait(3))
+        request = deepcopy(next(body for body in reversed(self.server.workspace_commands) if body['action'] == 'execute_job'))
+        replay = asyncio.run(self.server.workflow.operations.command(self.server.user, request))
+        self.assertTrue(replay['ok'], replay)
+        self.assertEqual(len(self.authored_native.execution_calls), 1)
+        self.authored_native.hold.set()
+        self.wait("document.querySelector('[data-authored-stage]')?.textContent.includes('확인') && !document.querySelector('#ees-work-panel[aria-busy=true]')")
+        deadline = time.monotonic() + 3
+        while time.monotonic() < deadline:
+            saved = self.state(run_id=run['id'])['run']
+            if saved['attempts'] and saved['attempts'][0]['status'] != 'running':
+                break
+            time.sleep(.025)
+        self.assertEqual(saved['attempts'][0]['status'], 'unknown')
+        self.assertEqual(saved['inputs'], fixture['inputs'])
+        after = asyncio.run(self.server.workflow.operations.command(self.server.user, request))
+        self.assertEqual(after['attempt']['id'], saved['attempts'][0]['id'])
+        self.assertEqual(len(self.authored_native.execution_calls), 1)
+        self.refresh()
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-authored-stage] [data-action=stage_verdict]')"))
+        self.screenshot('tools-phase3-unknown-single-dispatch-1920')
+        self.assertEqual(self.server.completions, [])
+
+    def test_tools_phase3_empty_partial_and_revocation_keep_real_result_boundaries(self):
+        fixture, tool_id, active = self.phase3_authored_tool()
+        key = self.phase3_workflow(fixture, tool_id, active)
+        for label, raw, completeness in (
+                ('empty', {'documents': []}, 'empty'),
+                ('partial', {**fixture['result'], 'has_more': True}, 'partial')):
+            with self.subTest(result=label):
+                factory = 'phase3-' + label
+                self.command('save_factory', factory_id=factory, system_id='EMS', name=label)
+                run = self.start(key, factory_id=factory, inputs=fixture['inputs'])
+                self.authored_native.result = {'status': 'succeeded', 'raw_result': raw, 'duration_ms': 25}
+                result = self.phase3_command('execute_job', run['revision'], run_id=run['id'], job_id='job-0')
+                current = self.state(run_id=run['id'])['run']
+                original = deepcopy(next(item for item in current['attempts'] if item['id'] == result['attempt']['id']))
+                self.assertEqual(original['result']['completeness'], completeness)
+                self.phase3_stage(key, current)
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-authored-stage] [data-action=confirm_list]')"))
+                self.click('[data-action=stage_verdict][data-job-id=job-0]')
+                self.click('[data-action=stage_decide][data-judgment-id=conditional]')
+                self.wait("document.querySelector('[data-authored-stage] .ew-authored-approved')?.textContent.includes('조건부 승인')")
+                confirmed = self.state(run_id=run['id'])['run']
+                self.assertEqual(next(item for item in confirmed['attempts'] if item['id'] == original['id']), original)
+                if label == 'partial':
+                    self.assertEqual(confirmed['jobs']['job-0']['status'], 'partial')
+                    self.assertTrue(confirmed['jobs']['job-0']['partial_confirmed'])
+                else:
+                    self.assertEqual(confirmed['jobs']['job-0']['status'], 'completed')
+                self.screenshot('tools-phase3-' + label + '-whole-job-confirmed-1920')
+        # Current Native ACL is checked before dispatch and after asynchronous work.
+        run = self.start(key, factory_id='phase3-factory', inputs=fixture['inputs'])
+        self.authored_native.denied_users.add(self.server.user['id'])
+        body = {'action': 'execute_job', 'request_id': str(uuid4()), 'expected_revision': run['revision'],
+                'run_id': run['id'], 'job_id': 'job-0'}
+        calls = len(self.authored_native.execution_calls)
+        self.phase3_failure_code(body)
+        self.assertEqual(len(self.authored_native.execution_calls), calls)
+        self.authored_native.denied_users.clear()
+        self.authored_native.result = {'status': 'succeeded', 'raw_result': fixture['result'], 'duration_ms': 25}
+        self.phase3_stage(key, run)
+        self.authored_native.hold.clear(); self.authored_native.started.clear()
+        self.click('[data-action=stage_execute][data-job-id=job-0]')
+        self.assertTrue(self.authored_native.started.wait(3))
+        self.authored_native.denied_users.add(self.server.user['id'])
+        self.authored_native.hold.set()
+        deadline = time.monotonic() + 3
+        while time.monotonic() < deadline:
+            with self.server.workflow._db() as db:
+                row = db.execute('SELECT status FROM work_attempts WHERE run_id=? ORDER BY number DESC LIMIT 1', (run['id'],)).fetchone()
+            if row and row['status'] != 'running':
+                break
+            time.sleep(.025)
+        self.assertEqual(row['status'], 'unknown')
+        self.refresh()
+        self.wait("!document.querySelector('#ees-work-panel[aria-busy=true]')")
+        self.assertNotIn('EMS 셋업 설계서', self.text('[data-authored-stage]'))
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-authored-stage] [data-action=stage_verdict]')"))
+        self.screenshot('tools-phase3-revoked-late-result-hidden-1920')
+
     def open_stage_from_overview(self):
         self.click('[data-action=stage_open][data-node-id=stage]')
         self.wait("document.querySelector('#ees-work-panel.ew-vd h2')")

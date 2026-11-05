@@ -160,7 +160,7 @@ for name in ("ees_workflow", "ees_workflow_definition", "ees_workflow_view", "ee
              "ees_workflow_execution", "ees_workflow_native", "ees_workflow_contract",
              "ees_workflow_workspace", "ees_workflow_operations", "ees_workflow_shared_tools", "ees_workflow_model",
              "ees_workflow_tool_drafts", "ees_workflow_tool_draft_check",
-             "ees_workflow_tool_lifecycle", "ees_workflow_tool_native", "ees_workflow_tool_worker"):
+             "ees_workflow_tool_lifecycle", "ees_workflow_tool_native", "ees_workflow_tool_worker", "ees_workflow_tool_runtime"):
     module = importlib.import_module("open_webui." + name)
     assert Path(module.__file__).parent == root / "open_webui"
 seed = workflow._seed()
@@ -255,7 +255,7 @@ print("installed_workflow_contract=pass")
                          "ees_workflow_execution.py", "ees_workflow_native.py", "ees_workflow_contract.py",
                          "ees_workflow_workspace.py", "ees_workflow_operations.py", "ees_workflow_shared_tools.py", "ees_workflow_model.py",
                          "ees_workflow_tool_drafts.py", "ees_workflow_tool_draft_check.py",
-                         "ees_workflow_tool_lifecycle.py", "ees_workflow_tool_native.py", "ees_workflow_tool_worker.py",
+                         "ees_workflow_tool_lifecycle.py", "ees_workflow_tool_native.py", "ees_workflow_tool_worker.py", "ees_workflow_tool_runtime.py",
                          "ees_workflow_tool.py", "workflow_policy.json", "workflow_help.json", "workflow_tool_examples.json",
                          "workflow_procedure_examples.json"):
                 target = root / "open_webui" / name
@@ -1206,14 +1206,15 @@ class OfficialWheelTests(unittest.TestCase):
                     self.assertEqual(copied, source.read(origin))
                     self.assertEqual(hashlib.sha256(copied).hexdigest(), expected)
                 # Independently reviewed CSS references, not the builder's icon
-                # list or prepared output. The C18 menu masks and E1 chevron use
-                # CSS URLs; font URLs and bytes outside icon values must survive.
+                # list or prepared output. The C18 menu masks, E1 chevron and
+                # T06A workflow selector use CSS URLs; font URLs and bytes
+                # outside icon values must survive.
                 # The independent fixed/mutated URL fixtures above still verify
                 # allowed rewriting, wrong/missing hashes and unrelated drift.
                 for filename, references in {
                     "chat-theme.css": (),
                     "ees-work-launcher.css": (
-                        "v4/83565.svg", "v4/54b2e.svg", "v4/4d978.svg", "v4/4308e.svg", "v4/f0554.svg", "v4/f17e6.svg",
+                        "v4/83565.svg", "v4/54b2e.svg", "v4/4d978.svg", "v4/4308e.svg", "v4/f0554.svg", "v4/f17e6.svg", "v4/88f2f.svg",
                     ),
                 }.items():
                     icons = {relative: (builder.UI_DIR / relative).read_bytes() for relative in references}

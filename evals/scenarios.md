@@ -3519,3 +3519,8 @@ EES_TEST_STYLE_BASELINE_DIR=dist/validation-right-panel-20260922/before "$P" -X 
 ```
 
 최종 문서 검사는 strict `scripts/check_docs.py` 32files/1191links/0errors/0review이며 두 JS `node --check`와 `git diff --check`도 통과했다.
+
+
+### 작성 도구 업무절차 연결·실행 3페이즈
+
+[ST-P3 계약](../docs/specs/shared-tools.md#tools-redesign-v2-phase3-20261105)·[검증 증거](tool-authoring-20261105.md#phase3-evidence): 작성 사용본 선택·typed 입력·저장/게시 분리·공동 진행·실제 Native 호출·whole-job 사람 판정·회차 버전/권한/재실행 보존과 기존 managed/legacy 회귀를 검증한다. 현재 구현/검증 진행 중이며 최종 head/CI/실제 화면 판정은 STATUS에서 연결한다.

@@ -2019,6 +2019,107 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertFalse(stored['trial']['eligible_for_activation'])
         self.assertEqual(self.server.completions, [])
 
+    def test_tools_phase3_workflow_target_cancel_connect_save_and_publish(self):
+        fixture, tool_id, active = self.phase3_authored_tool()
+        key = self.author(name=fixture['workflow']['name'], jobs=1)
+        workflow = self.state(workflow_id=key)['workflow']
+        definition = deepcopy(workflow['draft'])
+        definition['nodes']['stage']['name'] = fixture['workflow']['stage']
+        job = definition['nodes']['job-0']
+        job.update(name=fixture['workflow']['job'], mode='tool', result_block='human_confirm',
+                   human_confirmation=True, completion={'rule': fixture['workflow']['criteria']})
+        self.command('save_draft', workflow_id=key, expected_revision=workflow['revision'], definition=definition)
+        self.open_initialized_author_list()
+        self.click('[data-author-action=open][data-id="' + key + '"]')
+        self.click('[data-author-action=tab][data-tab=content]')
+        self.open_author_job_ui('job-0')
+        self.fill('#ew-author-node [name=job_guidance]', '문서 종류별 증빙을 확인합니다.')
+        self.click('[data-author-action=save]')
+        self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
+        self.click('.ew-procedure-menu>summary')
+        self.click('[data-author-action=validate]')
+        self.wait("document.querySelector('.ew-author-validation')")
+        validation = self.state(workflow_id=key)['workflow']['validation']
+        self.assertEqual(validation['errors'], [])
+        self.assertEqual([warning for warning in validation['warnings'] if warning.startswith('job-0:')],
+                         ['job-0: 도구가 연결되지 않았습니다. 게시는 되지만, 도구를 연결해 다시 게시하기 전까지 이 작업과 이 작업이 있는 단계는 실행할 수 없습니다.'])
+        self.assertFalse(self.read('[data-author-action=publish]', 'disabled'))
+        self.screenshot('tools-phase3-t08a-incomplete-publication-1920')
+        self.click('[data-author-action=publish]'); self.click('[data-dialog-confirm]')
+        self.wait_for_publication(2)
+        before = deepcopy(self.state(workflow_id=key)['workflow'])
+        self.click('[data-author-action=tab][data-tab=content]')
+        self.open_author_job_ui('job-0')
+        unsaved_guidance = '문서 종류별 증빙을 확인합니다. (편집 중)'
+        self.fill('#ew-author-node [name=job_guidance]', unsaved_guidance)
+        self.open_tools(shared_list=True)
+        self.click('[data-author-action=draft_open][data-id="' + tool_id + '"]')
+        self.click('[data-author-action=draft_tab][data-id=use]')
+        for width, height in ((1920, 1080), (1366, 768), (360, 768)):
+            self.authoring_viewport(width, height, overlay=width <= 480)
+            self.click('[data-author-action=draft_workflow_connect]')
+            self.wait("document.querySelector('#ew-tool-workflow-target')")
+            self.choose('[data-tool-workflow]', key)
+            self.choose('[data-tool-stage]', 'stage')
+            self.choose('[data-tool-job]', 'job-0')
+            self.screenshot('tools-phase3-t06a-target-' + str(width))
+            self.key('Escape', 27)
+            self.wait("!document.querySelector('#ees-work-dialog')")
+            self.assertEqual(self.state(workflow_id=key)['workflow'], before)
+            self.assertEqual(self.authored_native.execution_calls, [])
+        self.authoring_viewport(1920, 1080, overlay=False)
+        self.click('[data-author-action=draft_workflow_connect]')
+        self.wait("document.querySelector('#ew-tool-workflow-target')")
+        self.choose('[data-tool-workflow]', key)
+        self.choose('[data-tool-stage]', 'stage')
+        self.choose('[data-tool-job]', 'job-0')
+        self.click('[data-dialog-confirm]')
+        self.wait("document.querySelector('#ew-workflow-tool-setup [data-job-tool-candidate]')")
+        self.assertEqual(self.state(workflow_id=key)['workflow'], before)
+        self.click('[data-job-tool-candidate="shared:' + tool_id + '"]')
+        self.assertIn('어떤 문서를 찾을까요?', self.text('#ew-workflow-tool-questions'))
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('[data-job-tool-value=doc_types][data-job-tool-option]')].map(e=>e.parentElement.textContent.trim())"),
+                         ['설계서', '테스트 결과', '배포 계획서'])
+        runtime = '[data-job-tool-runtime=doc_types]'
+        if not self.read(runtime, 'checked'):
+            self.click(runtime)
+        for width, height in ((1920, 1080), (1366, 768), (360, 768)):
+            self.authoring_viewport(width, height, overlay=width <= 480)
+            overflow = self.browser.evaluate("(()=>{const e=document.querySelector('#ees-work-dialog');return e.scrollWidth-e.clientWidth;})()")
+            self.assertLessEqual(overflow, 1)
+            self.screenshot('tools-phase3-t07-connect-' + str(width))
+        self.click('[data-dialog-confirm]')
+        self.wait("!document.querySelector('#ees-work-dialog')")
+        self.assertEqual(self.state(workflow_id=key)['workflow'], before)
+        self.assertEqual(self.read('#ew-author-node [name=completion_rule]', 'value'), fixture['workflow']['criteria'])
+        self.assertEqual(self.read('#ew-author-node [name=job_guidance]', 'value'), unsaved_guidance)
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[name=result_argument],[name=result_job_id]')"))
+        self.click('[data-author-action=save]')
+        self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
+        saved = self.state(workflow_id=key)['workflow']
+        stored = saved['draft']['nodes']['job-0']
+        self.assertEqual(stored['shared_tool_id'], tool_id)
+        self.assertEqual((stored['result_block'], stored['human_confirmation']), ('human_confirm', True))
+        self.assertEqual(stored['completion']['rule'], fixture['workflow']['criteria'])
+        self.assertEqual(stored['instructions'], unsaved_guidance)
+        self.assertNotIn('tool_reference', stored)
+        self.assertNotIn('tool_contract_revision', stored)
+        self.assertNotIn(fixture['connection']['token'], json.dumps(saved))
+        binding = stored['argument_bindings']['doc_types']['input']
+        generated = next(field for field in stored['inputs'] if field['id'] == binding)
+        self.assertEqual(generated['authored_schema'], active['check']['input_schema']['properties']['doc_types'])
+        self.assertEqual(generated['source'], {'shared_tool_id': tool_id})
+        self.assertEqual(stored['shared_tool_generated']['shared_tool_id'], tool_id)
+        self.authoring_viewport(1920, 1080, overlay=False)
+        self.screenshot('tools-phase3-t08-connected-saved-1920')
+        self.click('.ew-procedure-menu>summary'); self.click('[data-author-action=validate]')
+        self.wait("document.querySelector('.ew-author-validation')")
+        self.assertEqual(self.state(workflow_id=key)['workflow']['validation']['errors'], [])
+        self.click('[data-author-action=publish]'); self.click('[data-dialog-confirm]')
+        self.wait_for_publication(3)
+        self.assertEqual(self.authored_native.execution_calls, [])
+        self.assertEqual(self.server.completions, [])
+
     def phase2_authored_tool(self, *, connected=False):
         """Real HTTP/service/SQLite; Native credentials and worker output are synthetic."""
         fixture = json.loads((Path(__file__).parent / 'fixtures/tools_phase2_contract.json').read_text(encoding='utf-8'))

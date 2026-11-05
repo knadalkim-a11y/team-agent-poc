@@ -177,3 +177,43 @@ CI484 최종은 40 jobs 중 35성공·3실패·Windows 집계1취소·출하1정
 
 
 최신 main `c01bf09`를 포함한 로컬 `aa2404a`에서 Node작성/실행444개(6.604초), Native19개(72.068초), guard20개(1.145초), ID1692개·문서35개/링크2914개 오류0을 확인했다. 감사 명령의 필수 output 인자 및 파일/폴더 혼동으로 준비 명령2회가 실패했으며 실제 감사는 올바른 폴더로 완료됐다. 원격 게시 직전 병합 검토 세션이 같은 PR을 `54e8e2e`로 전진시켜 expected head 보호가 갱신을 막았다. 새 원격의 변경은 검토 문서뿐이며 제품 추가 수정은 없음을 대조하고 merge로 양쪽 기록과 개발 후속을 보존했다. 최종 head의 전체 CI/화면 결과는 PR 본문과 Checks에서 판정한다.
+
+
+<a id="phase3-evidence"></a>
+
+## 3페이즈 · 업무절차 연결·실행
+
+2026-11-05 KST. 사용자 요청에 따라 main `16cf557`에서 시작했다. 이전 2페이즈 CI487 head `fdf82c7`과 main의 tree `8ea725d9`가 같고 필수39개·브라우저105개가 성공했다. 실제 제품 worker2건/5.999초·자격 비노출, 최종 화면8장 및 증거589개 해시 검증을 완료한 상태다. 이전 실패 기록은 위에 보존한다.
+
+3페이즈 시작 시 열린 관련 PR은 없었다. 기존 AGENTS는 main과 bytes가 같음을 확인했고 현재기준·ST-P2 보존조건·shared catalog/회차/실행·Figma T06A~T09/O15 화면을 확인했다. [ST-P3 계약](../docs/specs/shared-tools.md#tools-redesign-v2-phase3-20261105)과 공통 fixture `tests/fixtures/tools_phase3_contract.json`을 `cc66c23`에 정의했다. Figma는 읽기만 하며 저장/게시·기존 진행·사람 판정의 구분을 유지한다.
+
+초기 조사에서 작성 도구의 Optional/float/bool/primitive list/typed enum이 기존 shared 질문 생성에서 자료형을 잃을 수 있음을 확인했다. 작성 도구에만 원래 property schema를 보존하고 실제 고정 사용본 schema로 검사하는 경계를 둔다. 기존 Native의 일반 사용자 UserValves 조회/저장 경로는 실제 고정 Native HTTP handlers·SQLite에서 성공했고 다른 사용자 PAT·inert identity는 보존됐다. 이는 실제 로그인/브라우저 검증과 구분한다. 제품·통합 검사는 구현 후 결과를 아래에 기록한다.
+
+구현 중 독립 검토에서 다음을 재현하고 보완했다. required를 비어 있지 않음으로 처리하는 화면 오류는 인자 존재와 값 검사를 나누고, 일반 목록은 한 줄에 한 항목 입력으로 제공한다. 첫 실행 질문의 기본값은 아직 사용자가 편집하지 않은 authored 필드에만 적용한다. Native 마지막 비동기 읽기 중 Work 사용 중지·버전 변경과 완료 뒤 heartbeat 정리 중 개인 PAT 변경은 최종 Native 재조회와 동기 Work 검사 직후 저장하도록 고쳤다. Native 역할·그룹 관측도 실행 메타데이터에 결합한다. timeout/권한 회수 뒤 불확실한 원문은 붙이지 않고 기존 기록을 보존하며 자동 재실행하지 않는다.
+
+로컬 중간 검사: 기존 서버 lifecycle/operations/workspace 159개 통과, Native 기존19개·최초 신규10개 통과. `node --test tests/test_*.cjs`는 첫 통합에서736/736 통과했다(후속 기본값 수정은 별도 검사 대상). durable execution은 신규3개 포함40개 중38통과·실제 wheel 환경2생략/6.319초였다. 최초 검사에서 과거 독립 service에 shared_tools가 없는데 managed 직접 호출까지 새 dispatcher를 검사한 오류를 발견해 shared_tool_id가 있는 경우로 한정하고 재검했다. 합성 브라우저 fixture를 실제 service/SQLite에 연결한5묶음 smoke는 공동 실행/whole-job 판정/재실행 이력/버전수락·중지/0건·partial/unknown·중복/권한회수를 통과했다. 이는 실제 source-built 브라우저·전체 Native 제품 실행을 대신하지 않으며 그 결과는 최종 CI에서 기록한다.
+
+명세 밖 선택: 새 연결의 기본 사람 판정은 유지하되 기존 절차에서 명시적으로 정한 자동 판정·completion까지 강제 변경하지 않는다. 기존 execution.calls도 같은 authored 버전·권한 검사를 거치지만 새 여러 도구 연결 UI를 만들지는 않는다. 미완성 게시 허용은 유지하고 실제 실행 시 필요한 값을 검사한다. 최종 통합 결과와 PR은 후속 기록으로 관리한다.
+
+통합 head 로컬 검사: 전체 Node739/739(8.444초), 고정 공식 wheel과 `EES_REQUIRE_ASSET_NATIVE=1`, EncodingWarning 오류 모드에서 작성 도구 Native12/12(38.421초), builder34개 중33통과/실제 소스 frontend가 필요한1개생략(4.774초), pre-draft/P1/P2 Apply→Restore3/3(1.240초), 시험 ID1734개/기존1332개분류오류0, 문서35파일2930링크오류0. 새 P2 Restore 테스트의 처음 실패는 후보 ZIP을 바꾼 뒤에도 바꾸기 전 fixture 전체 tree와 비교한 시험 오류였다. 새 ZIP 저장 직후 기준을 잡고 Apply가 프로그램을 전혀 변경하지 않음을 다시 검증해 통과했다. 최종 사용자 입력 근거에는 원제출 arguments와 기본값 적용 effective_arguments를 함께 보존하고 권한 회수 시 둘 다 숨긴다. 수동 목록 수정으로 파생한 근거에도 같은 metadata를 보존한다.
+
+### 최초 전체 CI489와 시험 준비 보완
+
+[CI489](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/42005620218), [PR #125](https://github.com/knadalkim-a11y/team-agent-poc/pull/125), 원격 head `dece1b0` / 로컬 `0fce2b2`의 tree `75a8914a` 일치를 확인했다. 전체40 job은33성공·5실패(실제4묶음과최종gate)·1취소·출하1정상생략이었다. Windows/Linux 실행 계약·서비스·복원 등 성공을 보존한다.
+
+- 실제 Native 제품은 새 작성 도구 시험·사용v1·미시험r2 저장 뒤 새 공장 준비에서 `revision_conflict`로 중단됐다. 시험 helper의 새 객체 `expected_revision:0` 누락이었다. 명시 revision override를 보존하며 보완했다. 남은 준비 코드의 과거 `sharing` 그룹 요청/기대도 현재 공장·시스템 scope access only 계약에 맞췄다. 실제 service/SQLite에서 같은 helper를 사용해 factory/access/create/save/validate/publish/start와 일반 사용자의 동일 run 조회까지 확인했다. 실제 제품의 중앙 채팅 후속 검사는 이 실패 때문에 미실행이다.
+- Windows/Linux platform의 유일한 원인은 새 선택창이 재사용한 기존 `88f2f.svg`를 독립 CSS 캐시 검사 목록에서 누락한 것이다. 제품 builder는 올바른 해시 URL을 만들고 있었다. 고정 목록만 보완했고 CI489의 실제 frontend artifact(sha256 `5d203a0e81debc0bc5ff75aad7aab1128e58ee29d87476524d17981222c0b50b`)와 현재 UI·공식 wheel로 해당 시험1/1을29.396초에 통과했다. 과거 frontend로 먼저 시도한 검사는 provenance 불일치로 차단됐으며 성공으로 세지 않았다.
+- 실제 native-compose는110개 중108개 통과했다. 기존105개는 전부 통과, 신규5개 중3개 통과다. 작성 흐름은 미연결 작업을 errors로 기대했으나 기존 계약은 errors[]+작업별 경고·게시 허용이었다. 정확한 job-0 경고를 검사하도록 보완하고 기존 미연결 실제 실행 차단 회귀도 통과했다. 공동 시작 흐름은 서비스용 일반 사용자 객체에 Native 세션 permissions가 없어 Navbar에서 `undefined.chat`으로 실패했다. 기존 정식 세션 fixture를 복사하고 사용자 id/role=user 및 채팅 소유자를 맞췄다. 콘솔 오류 검사·제품 권한은 완화하지 않았다.
+- Native-compose ZIP sha256 `92cfb7075dccba307fbe8dc3a39e990db0fccdc50582889dd3dc676da38e4675`, manifest602파일의 크기·SHA와PNG326개를 확인했다. 신규6장의1920 화면 중 부분 판정·사용 중지 화면 원본을 직접 대조했다. 정상 T06A/T07/O15의3폭은 앞단 실패로 미생성이므로 시각 완료가 아니다. FullNative ZIP sha256 `90383006f607ca0f024810a51fe07cce854811fbe84d1f0e98b7ee2457ec9c84`의84개 파일·PNG36개도 일치했다.
+
+보완은 시험 코드 `65a8d56`, `f3b023f`, `7789a4e`이며 제품 코드 변경은 없다. 최초 실패는 이 기록에 보존하고 다음 head의 전체 CI와 실제 화면으로 최종 판정한다. 최종 head·CI·화면 증거와 병합 여부는 PR #125 본문/Checks를 최신 원본으로 삼는다. 사내 배포는 미실행이다.
+
+CI489 원본 `tools-phase3-unknown-single-dispatch-1920.png`를 직접 검토하면서 현재 unknown/blocked 카드의 ‘결과 미확인’ 상태 문구가 두 번 붙는 표시 오류를 확인했다. `ea89d38`은 판정할 수 없는 현재 attempt의 비활성 판정 자리만 비우고 오른쪽 상태를 한 번 유지한다. 정상 판정 단추와 과거 실행 표시를 보존하며 관련3개 Node 검사를 통과했다. 이 작은 제품 표시 수정까지 최종 head에 포함하므로 진행 중인 CI490은 대체하고 새 head의 전체 결과로 판정한다.
+
+### CI491 브라우저·화면 완료와 전체 제품 시험 진입 보완
+
+[CI491](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/42009362584), 원격 head `20097bad` / 로컬 제품 tree `9ec9987e`는40 job 중36성공·2실패(전체 Native 제품과 최종gate)·1취소·출하1정상생략이다. Windows/Linux 플랫폼 검사와 Windows 실제IOCP accept/subprocess·독립진단·PowerShell검사가 모두 통과했다. 기존105개와 신규5개를 포함한 실제 native-compose 브라우저110/110, 작성40/40·실행27/27을 통과했다.
+
+Compose ZIP 29,145,582 bytes·SHA256 `2cf17162ad488073c0505ba97183505b1bf0200ac8a91ae7d89d2de2b53a4d62`, manifest625파일의 크기·SHA·목록과PNG343개를 확인했다. 신규PNG25개 중 T06A/T07/O15A/B/C의1920·1366·360 화면15장 및unknown1920 원본을 직접 대조했다. 입력 요소 가림·겹침·가로잘림이 없고 O15A/B/C의9개 폭 조합에서 panel/row 가로overflow0·행별체크0·결과3건을 확인했다. T07-360 아래 단추는 실제스크롤·좌표클릭으로 연결→저장→게시가 성공했다. O15B/C의화면높이밖내용은스크롤로도달하며 unknown의‘결과미확인’은한번만표시된다.
+
+전체 Native 제품 ZIP 4,728,780 bytes·SHA256 `32a39b17fb116e97ebc9d5fbec3df61bb2358d97b5898cf72b969bc15813baa2`, manifest84파일·PNG36개가 일치했다. 실패화면과 진단은 일반사용자가 올바른공장·공동run의‘1차점검’단계에이미진입해 v1·입력·지금실행을표시하며 콘솔오류[]·loaded=true·busy=false·error=false임을보였다. 단일단계실행의기존자동진입후시험이개요의stage_open을다시기다린오류였다. `9c70941`은 `authored_workflow_flow`의중복`open_operation_stage()`한줄만제거하며 바로뒤authored-stage/run_id준비확인·실제worker실행·전체작업판정·중앙채팅검사를그대로둔다. 이실패시점에는실제일반사용자worker가아직실행되지않았으므로다음전체CI에서최종판정한다.

@@ -144,6 +144,53 @@ class ExecutionTests(unittest.IsolatedAsyncioTestCase):
     async def control(self, run, action, **values):
         return await self.service.execution_action(USER, {"action": action, "run_id": run["id"], "expected_revision": run["revision"], "request_id": f"{action}-{run['id']}-{run['revision']}", **values})
 
+    async def test_authored_final_attachment_rechecks_after_async_completion(self):
+        authored = importlib.import_module(PACKAGE.__name__ + '.ees_workflow_tool_runtime')
+        def revoked(transaction=None):
+            raise workflow.WorkflowError('shared_tool_disabled', '도구 사용 중지')
+        async def seal():
+            await asyncio.sleep(0)
+        self.bridge.results['jira_dashboard'] = authored.AuthoredResult(envelope({'secret_evidence': 'discard-after-revocation'}), revoked, seal)
+        run = await self.start()
+        await self.runtime.process_once()
+        run = await self.state(run)
+        self.assertEqual(run['status'], 'unknown', run)
+        self.assertEqual(run['reason'], 'execution_result_unknown')
+        self.assertEqual(len(self.bridge.calls), 1)
+        with self.service._db() as db:
+            record = json.loads(db.execute('SELECT data FROM execution_calls').fetchone()[0])
+        self.assertEqual(record['status'], 'unknown')
+        self.assertNotIn('discard-after-revocation', json.dumps(record))
+        self.assertNotIn('result', record)
+        self.assertFalse(await self.runtime.process_once())
+
+    async def test_authored_final_native_access_failure_discards_received_result(self):
+        authored = importlib.import_module(PACKAGE.__name__ + '.ees_workflow_tool_runtime')
+        async def seal():
+            await asyncio.sleep(0)
+            raise workflow.WorkflowError('native_personal_connection_required', '개인 연결 변경')
+        self.bridge.results['jira_dashboard'] = authored.AuthoredResult(envelope({'secret_evidence': 'unsealed-result'}), lambda transaction=None: None, seal)
+        run = await self.start()
+        await self.runtime.process_once()
+        run = await self.state(run)
+        self.assertEqual(run['status'], 'unknown', run)
+        with self.service._db() as db:
+            record = json.loads(db.execute('SELECT data FROM execution_calls').fetchone()[0])
+        self.assertNotIn('unsealed-result', json.dumps(record))
+        self.assertNotIn('result', record)
+        self.assertEqual(len(self.bridge.calls), 1)
+
+    async def test_authored_binding_types_cover_nullable_typed_lists_and_numbers(self):
+        check = self.runtime._authored_binding_schema
+        nullable = {'anyOf': [{'type': 'string'}, {'type': 'null'}]}
+        self.assertTrue(check({'type': 'string'}, nullable))
+        self.assertTrue(check({'type': 'integer'}, {'type': 'number'}))
+        self.assertFalse(check({'type': 'boolean'}, {'type': 'integer'}))
+        typed_list = {'type': 'array', 'items': {'type': 'string', 'enum': ['design_doc', 'test_result']}}
+        self.assertTrue(check(typed_list, typed_list))
+        self.assertFalse(check({'type': 'array', 'items': {'type': 'integer'}}, typed_list))
+        self.assertFalse(check({'type': 'string', 'enum': ['wrong']}, typed_list['items']))
+
     async def test_v4_runtime_input_save_is_cas_persisted_and_dispatches_no_call(self):
         created = await self.service.handle_action(USER, {"action": "create", "payload": {
             "site_id": "us-a", "system": "EMS", "process_id": self.p}})

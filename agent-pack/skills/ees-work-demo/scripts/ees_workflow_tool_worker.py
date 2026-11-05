@@ -1,4 +1,4 @@
-"""One short-lived Native-compatible authoring trial, never a security sandbox.
+"""One short-lived Native-compatible authored call, never a security sandbox.
 
 The parent supplies exact saved content and one account's current credentials
 over stdin. User output and tracebacks are discarded; only a bounded result is
@@ -68,11 +68,18 @@ async def invoke(payload):
                for name, parameter in inspect.signature(function).parameters.items()):
             return {"status": "failed", "error_code": "tool_trial_reserved_unsupported", "raw_result": None}
     with _stage("bind"):
-        request = Request({"type": "http", "method": "POST", "path": "/api/ees-work/tool-trial",
+        execution = "execution_context" in payload
+        metadata = {"kind": "authored_tool_execution" if execution else "authored_tool_trial"}
+        if execution:
+            metadata.update({key: payload["execution_context"][key]
+                             for key in ("run_id", "job_id", "call_id", "case_id", "plan_hash")
+                             if key in payload["execution_context"]})
+        request = Request({"type": "http", "method": "POST",
+                           "path": "/api/ees-work/execution/worker" if execution else "/api/ees-work/tool-trial",
                            "headers": [], "query_string": b""})
         bound = await get_async_tool_function_and_apply_extra_params(function, {
             "__user__": actor, "__id__": payload["native_id"], "__request__": request,
-            "__metadata__": {"kind": "authored_tool_trial"},
+            "__metadata__": metadata,
         })
     with _stage("invoke"):
         raw = await bound(**payload["inputs"])

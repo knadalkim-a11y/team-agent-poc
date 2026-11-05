@@ -433,6 +433,37 @@ def input_errors(fields, values, complete=True, options_snapshot=None):
 
 
 class WorkspaceMixin:
+    def _work_input_errors(self, db, definition, fields, values, complete=True, options_snapshot=None, run_id=None):
+        """Validate authored bindings from server-owned schemas, never UI hints."""
+        from .ees_workflow_tool_draft_check import _matches
+        schemas = {}
+        for node in definition.get('nodes', {}).values():
+            key = node.get('shared_tool_id')
+            if not self.shared_tools.authored.is_key(key):
+                continue
+            try:
+                if run_id:
+                    pinned = db.execute("SELECT data FROM work_shared_tool_pins WHERE run_kind='work' AND run_id=? AND tool_id=?", (run_id, key)).fetchone()
+                    if not pinned: continue
+                    schema = self.shared_tools.authored.snapshot(db, json.loads(pinned[0])['reference'])['input_schema']
+                else:
+                    schema = self.shared_tools.get(db, key)['input_schema']
+            except WorkflowError:
+                continue
+            for name, binding in node.get('argument_bindings', {}).items():
+                field_id = binding if isinstance(binding, str) else binding.get('input') if isinstance(binding, dict) and set(binding) == {'input'} else None
+                if field_id and name in schema.get('properties', {}):
+                    schemas.setdefault(field_id, []).append((schema['properties'][name], name in schema.get('required', [])))
+        authored = {field['id'] for field in fields if field['id'] in schemas}
+        errors = input_errors([field for field in fields if field['id'] not in authored], {key: value for key, value in values.items() if key not in authored}, complete, options_snapshot)
+        for key in authored:
+            for shape, required in schemas[key]:
+                if key not in values:
+                    if complete and required: errors.append(f'{key}: 필수값을 입력해 주세요.')
+                elif not _matches(values[key], shape):
+                    errors.append(f'{key}: 저장된 도구 입력 형식과 선택지를 확인해 주세요.')
+        return errors
+
     def _init_workspace(self, db):
         # Called inside the service initialization transaction. A partial schema
         # cannot silently reset to an empty database.
@@ -629,6 +660,8 @@ class WorkspaceMixin:
         if job.get('shared_tool_id'):
             row = db.execute('SELECT data FROM work_shared_tool_pins WHERE run_kind=? AND run_id=? AND tool_id=?', ('work', run['id'], job['shared_tool_id'])).fetchone()
             pin = json.loads(row[0]) if row else None
+            if pin and self.shared_tools.authored.is_authored_reference(pin.get('reference')):
+                pin = self.shared_tools.authored.describe_pin(db, pin)
         return {'job': deepcopy(job), 'definition': deepcopy(definition), 'version': run['version'],
                 'definition_hash': saved['definition_hash'], 'factory': saved.get('factory'),
                 'condition_results': saved.get('condition_results', {}), 'inputs': values,
@@ -665,7 +698,7 @@ class WorkspaceMixin:
         prior = json.loads(attempt['snapshot']); node = prior['job']
         from .ees_workflow_native import FUNCTIONS
         reference = prior.get('tool_reference') or node.get('tool_reference') or node.get('execution', {}).get('reference') or {}
-        if node.get('mode') != 'tool' or node.get('result_block') == 'change_request' or reference.get('function') not in FUNCTIONS:
+        if node.get('mode') != 'tool' or node.get('result_block') == 'change_request' or (reference.get('function') not in FUNCTIONS and not self.shared_tools.authored.is_authored_reference(reference)):
             return False
         if (node.get('completion') or {}).get('kind') == 'delivery': return False
         current = self._work_snapshot(db, run, job['job_id'])
@@ -781,7 +814,7 @@ class WorkspaceMixin:
             context = record.get('context', {})
             if context.get('run_id') != run_id or context.get('job_id') != job_id or context.get('revision') != run['revision'] or context.get('input_hash') != _hash(snapshot['inputs']) or context.get('authorization_hash') != self._work_options_authority(db, actor, groups, run['system_id']):
                 _fail('options_context_changed', '입력이 바뀌었습니다. 선택지를 다시 확인해 주세요.')
-        errors = input_errors(job.get('inputs', []), snapshot['inputs'], options_snapshot=options_snapshot)
+        errors = self._work_input_errors(db, snapshot['definition'], job.get('inputs', []), snapshot['inputs'], options_snapshot=options_snapshot, run_id=run_id)
         if errors:
             _fail('input_required', '\n'.join(errors))
         number = db.execute('SELECT COALESCE(MAX(number),0)+1 FROM work_attempts WHERE run_id=? AND job_id=?', (run_id, job_id)).fetchone()[0]
@@ -851,7 +884,10 @@ class WorkspaceMixin:
         if snapshot.get('shared_tool'):
             # Reading saved evidence checks current access, not permission to
             # execute the historical pin. Upgrades never rewrite that evidence.
-            await self.shared_tools.resolve(actor, snapshot['shared_tool']['id'])
+            if self.shared_tools.authored.is_authored_reference(snapshot['shared_tool'].get('reference')):
+                await self.shared_tools.authored.evidence_access(actor, snapshot['shared_tool'])
+            else:
+                await self.shared_tools.resolve(actor, snapshot['shared_tool']['id'])
         refs = self._work_evidence_references(snapshot)
         if snapshot['job'].get('mode') == 'ai' and self._work_prerequisite_jobs(snapshot['definition'], snapshot['job']['id']) and not snapshot.get('evidence_attempt_ids'):
             _fail('evidence_access_required', '근거의 권한을 다시 조회해 주세요.')
@@ -859,6 +895,9 @@ class WorkspaceMixin:
         for ref in refs:
             if snapshot.get('shared_tool') and ref == snapshot['shared_tool']['reference']:
                 continue  # Current shared-tool ACL/source was checked above.
+            if self.shared_tools.authored.is_authored_reference(ref):
+                await self.shared_tools.authored.evidence_access(actor, {'id': ref['tool_id'], 'version': ref['version'], 'reference': ref})
+                continue
             if not bridge or not hasattr(bridge, 'check'):
                 _fail('evidence_access_required', '현재 Native 원본 접근권한을 확인해 주세요.')
             reference = deepcopy(ref); reference.pop('contract_id', None)
@@ -941,7 +980,7 @@ class WorkspaceMixin:
             job['effective_inputs'] = effective['inputs']
             job['deadline'] = effective.get('deadline')
             job['settings_sources'] = effective['settings_sources']
-            job['missing_inputs'] = input_errors(value['definition']['nodes'][job['job_id']].get('inputs', []), effective['inputs'], options_snapshot=(current or {}).get('snapshot', {}).get('options'))
+            job['missing_inputs'] = self._work_input_errors(db, value['definition'], value['definition']['nodes'][job['job_id']].get('inputs', []), effective['inputs'], options_snapshot=(current or {}).get('snapshot', {}).get('options'), run_id=row['id'])
             job['result_stale'] = bool(row['status'] not in TERMINAL and current and current['actor_id'] == _value(actor, 'id') and not current.get('evidence_access') and (current['inputs'] != effective['inputs'] or (current['snapshot'].get('deadline_source') or {}).get('value') != (effective.get('deadline_source') or {}).get('value') or not self._work_sources_current(db, row, current['snapshot'])))
             job['decisions'] = [dict(item) for item in db.execute('SELECT * FROM work_decisions WHERE run_id=? AND job_id=? ORDER BY created_at,id', (row['id'], job['job_id']))]
             job['partial_confirmed'] = self._work_partial_confirmed(db, row, job)
@@ -951,8 +990,14 @@ class WorkspaceMixin:
         for job in jobs.values():
             current_decisions = [item for item in job['decisions'] if item['attempt_id'] == job['current_attempt']]
             job['decision_summary'] = {'confirmed': len(current_decisions), 'all_approved': job['status'] == 'completed' and bool(current_decisions) and all(item['verdict'] == 'completed' for item in current_decisions)}
-        value['shared_tools'] = [{key: pin[key] for key in ('id', 'version')} for pin in
-            (json.loads(item[0]) for item in db.execute("SELECT data FROM work_shared_tool_pins WHERE run_kind='work' AND run_id=?", (row['id'],)))]
+        value['shared_tools'] = []
+        for item in db.execute("SELECT data FROM work_shared_tool_pins WHERE run_kind='work' AND run_id=?", (row['id'],)):
+            pin = json.loads(item[0])
+            if self.shared_tools.authored.is_authored_reference(pin.get('reference')):
+                description = self.shared_tools.authored.describe_pin(db, pin)
+                value['shared_tools'].append({key: description[key] for key in ('id', 'version', 'source', 'name', 'input_schema', 'input_ui', 'output_ui')})
+            else:
+                value['shared_tools'].append({key: pin[key] for key in ('id', 'version')})
         value['jobs'], value['attempts'] = jobs, attempts
         value['progress'] = {'completed': sum(item['status'] == 'completed' for item in jobs.values()),
                              'total': sum(item['status'] != 'excluded' for item in jobs.values()),
@@ -1026,7 +1071,7 @@ class WorkspaceMixin:
             _fail('invalid_inputs', '이 작업에 선언된 입력만 조회에 사용할 수 있습니다.')
         values.update(deepcopy(supplied))
         values = {key: value for key, value in values.items() if key in fields}
-        errors = input_errors(list(fields.values()), values, complete=False)
+        errors = self._work_input_errors(db, definition, list(fields.values()), values, complete=False, run_id=run_id or None)
         if errors: _fail('invalid_inputs', '\n'.join(errors))
         context = {'workflow_id': workflow_id, 'run_id': run_id, 'job_id': job_id, 'field_id': field_id,
                    'revision': revision, 'input_hash': _hash(values), 'system_id': definition['system_id'], 'factory_id': factory_id,
@@ -1395,6 +1440,8 @@ class WorkspaceMixin:
                     if node.get('mode') != 'tool' or tool_connection_required(node):
                         continue
                     if node.get('shared_tool_id'):
+                        if self.shared_tools.authored.is_key(node['shared_tool_id']):
+                            continue
                         try:
                             await self.shared_tools.resolve(actor, node['shared_tool_id'])
                         except WorkflowError as error:
@@ -1525,7 +1572,7 @@ class WorkspaceMixin:
                 saved = db.execute('SELECT * FROM work_settings WHERE workflow_id=? AND factory_id=?', (row['id'], factory)).fetchone(); revision = saved['revision'] if saved else 0; _revision(body, revision)
                 values = body.get('values', {}); fields = {field['id']: field for node in definition['nodes'].values() for field in node.get('inputs', []) if field.get('scope', 'run') == 'workflow' or (factory and field.get('scope') == 'factory')}
                 if not isinstance(values, dict): _fail('invalid_inputs', '업무 설정 형식을 확인해 주세요.')
-                errors = input_errors(list(fields.values()), values, False)
+                errors = self._work_input_errors(db, definition, list(fields.values()), values, False)
                 if errors: _fail('invalid_inputs', '\n'.join(errors))
                 active_runs = list(db.execute("SELECT * FROM work_runs WHERE workflow_id=? AND status NOT IN ('completed','cancelled')", (row['id'],)))
                 def evidence_values(run, job_id):
@@ -1596,7 +1643,7 @@ class WorkspaceMixin:
             sharing = {'group_ids': []}
             inputs = body.get('inputs', {}); fields = {field['id']: field for node in definition['nodes'].values() for field in node.get('inputs', []) if field.get('scope', 'run') == 'run'}
             if not isinstance(inputs, dict): _fail('invalid_inputs', '이번 입력 형식을 확인해 주세요.')
-            errors = input_errors(list(fields.values()), inputs, False)
+            errors = self._work_input_errors(db, definition, list(fields.values()), inputs, False)
             if errors: _fail('invalid_inputs', '\n'.join(errors))
             attributes = json.loads(factory['attributes']) if factory else {}; attributes['factory_id'] = factory_id
             conditions = {}
@@ -1631,7 +1678,7 @@ class WorkspaceMixin:
                 inputs = body.get('inputs', {}); definition = json.loads(row['snapshot'])['definition']
                 fields = {field['id']: field for node in definition['nodes'].values() for field in node.get('inputs', []) if field.get('scope', 'run') == 'run'}
                 if not isinstance(inputs, dict): _fail('invalid_inputs', '이번 입력 형식을 확인해 주세요.')
-                errors = input_errors(list(fields.values()), inputs, False)
+                errors = self._work_input_errors(db, definition, list(fields.values()), inputs, False, run_id=row['id'])
                 if errors: _fail('invalid_inputs', '\n'.join(errors))
                 before = json.loads(row['inputs']); changed = {key for key in set(before) | set(inputs) if key not in before or key not in inputs or before[key] != inputs[key]}
                 db.execute('UPDATE work_runs SET inputs=? WHERE id=?', (_dump(inputs), row['id']))
@@ -1765,7 +1812,7 @@ class WorkspaceMixin:
                     attempt = self._work_begin_attempt(db, actor, groups, row['id'], job_id, row['revision'], options_snapshot=options_snapshot)
                     # Manual list edits retain the source/model evidence that
                     # justified the original result, including future ACL checks.
-                    for field in ('source_references', 'evidence_attempt_ids', 'model', 'skills', 'argument_sources', 'arguments', 'shared_tool', 'tool_reference'):
+                    for field in ('source_references', 'evidence_attempt_ids', 'model', 'skills', 'argument_sources', 'arguments', 'effective_arguments', 'shared_tool', 'tool_reference'):
                         if field in prior_snapshot:
                             attempt['snapshot'][field] = deepcopy(prior_snapshot[field])
                     db.execute("UPDATE work_attempts SET snapshot=? WHERE id=? AND status='running'", (_dump(attempt['snapshot']), attempt['id']))

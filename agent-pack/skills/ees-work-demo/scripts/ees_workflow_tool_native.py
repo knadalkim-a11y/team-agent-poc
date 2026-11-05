@@ -1,4 +1,4 @@
-"""Native settings identities and bounded authoring-trial process dispatch.
+"""Native settings identities and bounded authored-tool process dispatch.
 
 Native remains the only personal-token store. The identity is permanently inert;
 draft and active business code are never registered as Native tool functions.
@@ -6,6 +6,7 @@ draft and active business code are never registered as Native tool functions.
 import asyncio
 from copy import deepcopy
 import hashlib
+import inspect
 import json
 import os
 from pathlib import Path
@@ -24,8 +25,10 @@ MAX_WORKER_INPUT_BYTES = 1024 * 1024
 MAX_WORKER_RESULT_BYTES = 2 * 1024 * 1024
 AUTHORED_ENVIRONMENT_FILES = (
     "ees_workflow_tool_native.py", "ees_workflow_tool_worker.py",
-    "ees_workflow_tool_lifecycle.py", "ees_workflow_tool_draft_check.py", "ees_asset_guard.py",
+    "ees_workflow_tool_lifecycle.py", "ees_workflow_tool_draft_check.py",
+    "ees_workflow_tool_runtime.py", "ees_asset_guard.py",
 )
+EXECUTION_CONTEXT_KEYS = ("run_id", "job_id", "call_id", "case_id", "plan_hash")
 IDENTITY_CONTENT = '''from pydantic import BaseModel, Field
 class Tools:
     class Valves(BaseModel):
@@ -49,6 +52,17 @@ def _hash(value):
 
 def _fail(code, message="연결 설정의 현재 권한과 상태를 확인해 주세요."):
     raise WorkflowError(code, message)
+
+
+def _finish_dispatch_guard(guard):
+    """The final Work read must not yield between Native observation and use."""
+    if not callable(guard):
+        _fail("tool_trial_snapshot_changed")
+    result = guard()
+    if inspect.isawaitable(result):
+        if inspect.iscoroutine(result):
+            result.close()
+        _fail("tool_trial_snapshot_changed")
 
 
 def authored_environment_fingerprint():
@@ -128,13 +142,32 @@ class AuthoredNative:
                 _fail("native_access_denied")
         return _hash({"id": row.id, "owner": row.user_id, "content": row.content, "meta": row.meta, "groups": actual})
 
-    async def _credentials(self, actor, native_id, db):
+    async def _credentials(self, actor, native_id, db, *, admin_only=True):
         from sqlalchemy import select
         from open_webui.models.users import User
         valves = self._encryption()
-        row = (await db.execute(select(User.id, User.role, User.settings).where(User.id == _value(actor, "id")))).first()
-        if row is None or row.role != "admin":
-            _fail("admin_required")
+        actor_stamp = None
+        if admin_only:
+            row = (await db.execute(select(User.id, User.role, User.settings).where(User.id == _value(actor, "id")))).first()
+        else:
+            from open_webui.models.groups import Group, GroupMember
+            # Observe role, membership and sealed credentials in one statement.
+            # In particular an administrator's Native ACL bypass must not hide
+            # loss of a Work group while the caller's final gate holds old data.
+            rows = (await db.execute(select(User.id, User.role, User.settings, Group.id.label("group_id"))
+                .outerjoin(GroupMember, GroupMember.user_id == User.id)
+                .outerjoin(Group, Group.id == GroupMember.group_id)
+                .where(User.id == _value(actor, "id")))).all()
+            row = rows[0] if rows else None
+            if row is not None:
+                actor_stamp = _hash({"id": row.id, "role": row.role,
+                                     "groups": sorted({value.group_id for value in rows if value.group_id is not None})})
+        if row is None or (row.role != "admin" if admin_only else row.role not in {"admin", "user"}):
+            _fail("admin_required" if admin_only else "unauthorized")
+        if not admin_only and row.role != _value(actor, "role"):
+            # The ACL check must not use a former administrator role after a
+            # concurrent role change. A new call can resolve the new role.
+            _fail("unauthorized")
         settings = row.settings
         if settings is None:
             settings = {}
@@ -148,24 +181,30 @@ class AuthoredNative:
             personal = valves.decrypt_valves(sealed)
             if not isinstance(personal, dict) or not isinstance(personal.get("PAT"), str):
                 _fail("tool_connection_credentials_unavailable")
-        return settings, personal, _hash({"native_id": native_id, "actor_id": row.id, "sealed": sealed}), row.settings
+        return settings, personal, _hash({"native_id": native_id, "actor_id": row.id, "sealed": sealed}), row.settings, actor_stamp
 
-    async def _read(self, user, native_id):
+    async def _read(self, user, native_id, *, admin_only=True):
         from open_webui.models.tools import get_async_db_context
-        actor = await self._admin(user)
+        current = self._admin if admin_only else self.service._user
+        actor = await current(user)
         registry = self._registry(native_id)
         async with get_async_db_context() as db:
             # Observe credentials after the final directory/role await. The
-            # same final User SELECT also checks the current administrator role.
-            actor = await self._admin(actor)
+            # same final User SELECT also checks the current required role.
+            actor = await current(actor)
             identity = await self._identity(actor, registry, db)
-            _, personal, stamp, _ = await self._credentials(actor, native_id, db)
+            _, personal, stamp, _, actor_stamp = await self._credentials(actor, native_id, db, admin_only=admin_only)
         return actor, personal, {"native_id": native_id, "token_set": bool(personal.get("PAT")),
                                  "credential_stamp": stamp, "identity_stamp": identity, "environment": authored_environment_fingerprint(),
-                                 "groups": sorted(json.loads(registry["groups_json"]))}
+                                 "groups": sorted(json.loads(registry["groups_json"])),
+                                 **({"actor_stamp": actor_stamp} if not admin_only else {})}
 
     async def inspect(self, user, native_id):
         return (await self._read(user, native_id))[2]
+
+    async def inspect_execution(self, user, native_id):
+        """Observe only the current execution account's Native connection."""
+        return (await self._read(user, native_id, admin_only=False))[2]
 
     async def save_connection(self, user, tool_id, native_id, token):
         from open_webui.ees_asset_guard import guard_operation
@@ -212,7 +251,7 @@ class AuthoredNative:
                 except (IntegrityError, OperationalError):
                     _fail("tool_connection_conflict")
             await self._identity(actor, registry, db)
-            settings, personal, _, original_settings = await self._credentials(actor, registry["native_id"], db)
+            settings, personal, _, original_settings, _ = await self._credentials(actor, registry["native_id"], db)
             if token:
                 new_personal = {**personal, "PAT": token}
                 sealed = valves.encrypt_valves(new_personal)
@@ -278,17 +317,44 @@ class AuthoredNative:
         return _safe(value, (personal.get("PAT", ""),))
 
     async def run(self, user, native_id, code, function, base_url, inputs, expected_metadata):
-        actor, personal, metadata = await self._read(user, native_id)
+        return await self._run(user, native_id, code, function, base_url, inputs, expected_metadata)
+
+    async def run_execution(self, user, snapshot, inputs, expected_metadata, context, dispatch_guard):
+        """Execute a server-resolved immutable version, never a client draft.
+
+        The caller owns current Work access/version checks. Its async guard
+        returns a synchronous final Work check for after Native reads finish.
+        Credentials are freshly read for this actor, never the trial author.
+        """
+        return await self._run(user, snapshot["native_id"], snapshot["draft"]["code"],
+            snapshot["draft"]["function"], snapshot["base_url"], inputs, expected_metadata,
+            admin_only=False, context={key: deepcopy(context[key]) for key in EXECUTION_CONTEXT_KEYS if key in context},
+            dispatch_guard=dispatch_guard)
+
+    async def _run(self, user, native_id, code, function, base_url, inputs, expected_metadata,
+                   *, admin_only=True, context=None, dispatch_guard=None):
+        actor, personal, metadata = await self._read(user, native_id, admin_only=admin_only)
         if metadata != expected_metadata:
             _fail("tool_trial_snapshot_changed")
         if not metadata["token_set"]:
             _fail("native_personal_connection_required")
-        payload = {"native_id": native_id, "worker_id": "authored_trial_" + uuid4().hex, "code": code, "function": function,
+        if not admin_only:
+            # The Work gate may await directory lookups. Re-read the Native
+            # credential/ACL after it and dispatch that exact observed account.
+            final_guard = await dispatch_guard()
+            actor, personal, latest = await self._read(actor, native_id, admin_only=False)
+            if latest != metadata:
+                _fail("tool_trial_snapshot_changed")
+        payload = {"native_id": native_id, "worker_id": ("authored_trial_" if admin_only else "authored_execution_") + uuid4().hex, "code": code, "function": function,
                    "base_url": base_url, "inputs": inputs, "token": personal["PAT"],
                    "actor": {key: _value(actor, key, "") for key in ("id", "name", "email", "role")}}
+        if not admin_only:
+            payload["execution_context"] = context
         packed = _json(payload).encode("utf-8")
         if len(packed) > MAX_WORKER_INPUT_BYTES:
             _fail("tool_trial_input_too_large")
+        if not admin_only:
+            _finish_dispatch_guard(final_guard)
         started = time.monotonic()
         process = None
         temporary = tempfile.TemporaryDirectory(prefix="ees-tool-trial-")
@@ -332,8 +398,17 @@ class AuthoredNative:
                     pass
                 await process.wait()
             temporary.cleanup()
-        await self._admin(actor)
-        latest = await self.inspect(actor, native_id)
+        if admin_only:
+            await self._admin(actor)
+            latest = await self.inspect(actor, native_id)
+        else:
+            try:
+                final_guard = await dispatch_guard()
+                latest = await self.inspect_execution(actor, native_id)
+                _finish_dispatch_guard(final_guard)
+            except WorkflowError as error:
+                return {"status": "unknown", "error_code": error.code, "raw_result": None,
+                        "duration_ms": int((time.monotonic() - started) * 1000)}
         if latest != metadata:
             return {"status": "unknown", "error_code": "tool_trial_snapshot_changed", "raw_result": None,
                     "duration_ms": int((time.monotonic() - started) * 1000)}

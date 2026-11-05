@@ -86,6 +86,8 @@ def compatible(before, after):
 class SharedTools:
     def __init__(self, service):
         self.service = service
+        from .ees_workflow_tool_runtime import AuthoredToolRuntime
+        self.authored = AuthoredToolRuntime(service)
         with service._db(write=True) as db:
             init_shared(db)
             init_native(db)
@@ -98,6 +100,8 @@ class SharedTools:
     def get(self, db, key):
         if not isinstance(key, str):
             fail('shared_tool_unavailable')
+        if self.authored.is_key(key):
+            return self.authored.get(db, key)
         row = db.execute('SELECT data FROM work_shared_tools WHERE id=?', (key,)).fetchone()
         if not row:
             fail('shared_tool_review_required')
@@ -212,6 +216,7 @@ class SharedTools:
             if not admin:
                 item.pop('reference', None)
             result.append(item)
+        result.extend(await self.authored.list(actor, usable_only=usable_only, summary=summary))
         return result
 
     async def command(self, user, body):
@@ -303,7 +308,7 @@ class SharedTools:
         keys.update(call['shared_tool_id'] for node in definition.get('nodes', {}).values() for call in (node.get('execution') or {}).get('calls', []) if call.get('shared_tool_id'))
         for key in keys:
             item = self.get(db, key)
-            if item['function'] not in PILOT_FUNCTIONS:
+            if item.get('source') != 'authored' and item['function'] not in PILOT_FUNCTIONS:
                 fail('shared_tool_preparing')
             self.authorize(item, actor, groups)
             if item['state'] != 'available':
@@ -314,6 +319,8 @@ class SharedTools:
             db.execute('INSERT INTO work_shared_tool_pins VALUES(?,?,?,?)', (kind, run_id, key, _json(pin)))
 
     async def resolve(self, user, key, *, kind=None, run_id=None):
+        if self.authored.is_key(key):
+            return await self.authored.resolve(user, key, kind=kind, run_id=run_id)
         actor, _, groups = await self.service._work_actor(user)
         with self.service._db() as db:
             item = self.get(db, key)
@@ -389,8 +396,10 @@ class SharedTools:
                 node = nodes[saved['job_id']]
                 if not node.get('shared_tool_id'):
                     continue
-                row = db.execute('SELECT data FROM work_shared_tools WHERE id=?', (node['shared_tool_id'],)).fetchone()
-                tool = json.loads(row[0]) if row else {}
+                try:
+                    tool = self.get(db, node['shared_tool_id'])
+                except WorkflowError:
+                    tool = {}
                 allowed = bool(set(tool.get('group_ids', [])).intersection(groups))
                 assignee = node.get('assignee') or {}
                 if saved['claim_actor']:

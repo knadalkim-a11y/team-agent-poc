@@ -28,7 +28,7 @@ Figma는 제품 기능을 **업무 · 운영 / 셋업 / 장애대응**으로 나
 | 어디까지 구현·검증·사내 적용됐는가 | [STATUS](docs/STATUS.md)와 거기서 연결한 PR·Checks·[평가 기록](evals/v4-ui-20260930.md) | 구현할 판 지정·코드 구현·CI 검증·사내 확인을 구분 |
 | 개발 AI는 어떻게 작업하는가 | [AGENTS.md](AGENTS.md), Claude Code 진입은 [CLAUDE.md](CLAUDE.md) | 같은 지침 원본을 사용하며 기능별 상세 문서는 필요할 때 읽음 |
 
-새 도구는 [작성·저장 ST-P1 계약](docs/specs/shared-tools.md#tools-redesign-v2-phase1-20261105) → [연결·시험·사용 설정 ST-P2 계약](docs/specs/shared-tools.md#tools-redesign-v2-phase2-20261105)과 [관리자 작성 안내](docs/03-openwebui-native-agent.md#tool-authoring-phase1-20261105)에서 시작합니다. 업무절차 연결·실행은 3페이즈이며 기존 실행 도구의 관리 계약은 유지합니다.
+새 도구는 [작성·저장 ST-P1 계약](docs/specs/shared-tools.md#tools-redesign-v2-phase1-20261105) → [연결·시험·사용 설정 ST-P2 계약](docs/specs/shared-tools.md#tools-redesign-v2-phase2-20261105)과 [관리자 작성 안내](docs/03-openwebui-native-agent.md#tool-authoring-phase1-20261105)에서 시작합니다. 이어서 [업무절차 연결·실행 ST-P3 계약](docs/specs/shared-tools.md#tools-redesign-v2-phase3-20261105)을 따릅니다. 기존 실행 도구의 관리 계약은 유지합니다.
 
 **공용 도구를 찾는 예:** [공용 도구 기능 명세](docs/specs/shared-tools.md)에서 시작해 [B10-1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1369-732)·[B10-2](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1368-724)·[B10-5](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1372-741) 카드와 명세에 연결된 코드·시험 순서로 읽습니다. 이전 설계·결정 과정은 [TASK의 기능 계약](docs/mockups/ees-work/TASK.md#shared-tools-phase1-20261015)과 [PR #96](https://github.com/knadalkim-a11y/team-agent-poc/pull/96)에 보존하며, 구현·최종 검증·실제 적용 상태는 [STATUS](docs/STATUS.md)에서 구분합니다.
 
