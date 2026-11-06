@@ -224,8 +224,8 @@ class MotionNativeTests(IntegratedNativeCase):
         self.addCleanup(provider.stop)
         self.refresh()
         self.click('[data-mode=author]')
-        self.wait("document.querySelectorAll('.ew-nav-group-title').length === 3")
-        heading_metrics = """(()=>[...document.querySelectorAll('.ew-nav-group-title')].map(e=>{
+        self.wait("document.querySelectorAll('.ew-assets-toggle').length === 1")
+        heading_metrics = """(()=>[...document.querySelectorAll('.ew-assets-toggle')].map(e=>{
           const s=getComputedStyle(e),r=e.getBoundingClientRect();
           const next=e.nextElementSibling.querySelector('button').getBoundingClientRect();
           return {text:e.textContent.trim(),height:r.height,lineHeight:parseFloat(s.lineHeight),
@@ -254,19 +254,19 @@ class MotionNativeTests(IntegratedNativeCase):
                     'reopened': reopened, 'headings': rows})
                 (directory / 'workspace-heading-geometry.json').write_text(
                     json.dumps(heading_evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-                self.assertEqual([row['text'] for row in rows], ['업무 만들기', 'AI 설정', '관리자만'])
-                self.assertEqual([row['height'] for row in rows], [26, 36, 36], heading_evidence[-1])
+                self.assertEqual([row['text'] for row in rows], ['도구·자료'])
+                self.assertEqual([row['height'] for row in rows], [36], heading_evidence[-1])
                 for row in rows:
                     self.assertGreaterEqual(row['available'], row['lineHeight'], row)
                     self.assertGreaterEqual(row['buttonGap'], 0, row)
                 if not reopened:
                     self.click('[data-ees-sidebar-toggle]')
-                    self.wait("document.querySelector('#sidebar').dataset.compact === 'true' && [...document.querySelectorAll('.ew-nav-group-title')].every(e=>e.getBoundingClientRect().height === 0)")
+                    self.wait("document.querySelector('#sidebar').dataset.compact === 'true' && document.querySelector('#ees-assets-items')?.inert")
                     # Rounded zero height can precede the final computed
                     # padding value. Use the same endpoint wait as expansion.
                     self.wait("document.querySelector('#sidebar').getAnimations({subtree:true}).every(a=>a.playState !== 'running')")
                     collapsed_rows = self.browser.evaluate(heading_metrics)
-                    self.assertTrue(all(row['paddingTop'] == 0 and row['paddingBottom'] == 0
+                    self.assertTrue(all(row['height'] == 36 and row['available'] >= row['lineHeight']
                                         for row in collapsed_rows), collapsed_rows)
             if width == 1366 and not reduced:
                 self.screenshot('workspace-heading-1366')
@@ -624,6 +624,7 @@ class MotionNativeTests(IntegratedNativeCase):
         self.key('Escape', 27)
         self.wait("!document.querySelector('#ew-procedure-create')")
         self.assertFalse(self.read('.ees-panel-region', 'hidden'), 'Inline Escape also closed its underlying panel')
+        self.open_workspace_assets()
         self.click('[data-action=tools]')
         self.create_legacy_tool()
         self.click('[data-author-action=tool_example][data-id=jira-query]')

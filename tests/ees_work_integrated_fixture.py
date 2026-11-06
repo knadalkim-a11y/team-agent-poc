@@ -511,6 +511,12 @@ class IntegratedNativeCase(unittest.TestCase):
             self.browser.call('Input.dispatchMouseEvent', {'type': kind, 'x': point['x'], 'y': point['y'],
                 'button': 'left', 'buttons': int(kind == 'mousePressed'), 'clickCount': 1})
 
+    def open_workspace_assets(self):
+        # The compact sidebar opens the assets group through its visible heading.
+        if self.read('.ew-assets-toggle', 'getAttribute("aria-expanded")') == 'false':
+            self.click('.ew-assets-toggle')
+        self.wait("document.querySelector('#ees-assets-items')?.inert === false")
+
     def key(self, key, code, modifiers=0):
         for kind in ('keyDown', 'keyUp'):
             event = {'type': kind, 'key': key, 'code': key,

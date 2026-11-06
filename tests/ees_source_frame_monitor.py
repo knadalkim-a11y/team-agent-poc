@@ -85,6 +85,10 @@ FRAME_MONITOR = r"""(() => {
     .map(node => ({key: node.dataset.action === 'native_open'
       ? 'native_open:' + node.dataset.nativeId : node.dataset.action,
       ariaCurrent: node.getAttribute('aria-current'), text: node.textContent.trim()}));
+    // AI settings moved from the workspace list to the persistent footer.
+    const settings = document.querySelector('.ees-settings-trigger[aria-current=page]');
+    if (visible(settings)) current.push({key: 'native_open:' + settings.dataset.eesSettingsCurrent,
+      ariaCurrent: 'page', text: settings.textContent.trim()});
     // Work has no personal landing-menu item. Before choosing a procedure,
     // its mode button is the actual selected navigation control.
     const work = document.querySelector('#ees-work-entry [data-action=mode][data-mode=work][aria-pressed=true]');

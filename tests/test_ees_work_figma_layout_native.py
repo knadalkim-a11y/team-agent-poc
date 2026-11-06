@@ -265,6 +265,7 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
             self.wait("document.querySelector('.ew-author-tabs [data-tab=" + tab + "]')?.getAttribute('aria-selected') === 'true'")
             capture_style('author-' + tab, '.ew-author-tabs')
         hover('.ew-author-tabs [aria-selected=false]', 'rgb(236, 236, 239)')
+        self.open_workspace_assets()
         self.click('[data-action=tools]')
         self.wait("document.querySelector('#ees-work-designer[data-author-tab=tools]')")
         capture_style('tools')

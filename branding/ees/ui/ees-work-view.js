@@ -603,10 +603,10 @@ function workRestorePanelPosition(host,position){
 
 // These are the pinned Native destinations, not URLs supplied by a page or user.
 const workNativeTargets=Object.freeze([
-  {id:'skills',label:'스킬·지침',name:'스킬',path:'/workspace/skills',icon:'f908d'},
-  {id:'models',label:'AI 도우미',name:'모델',path:'/workspace/models',icon:'cf77a'},
+  {id:'skills',label:'작업 지침',name:'스킬',path:'/workspace/skills',icon:'f908d'},
+  {id:'models',label:'AI 도우미 설정',name:'모델',path:'/workspace/models',icon:'cf77a'},
   {id:'knowledge',label:'참고 문서',name:'지식',path:'/workspace/knowledge',icon:'730b1'},
-  {id:'prompts',label:'빠른 문장',name:'프롬프트',path:'/workspace/prompts',icon:'093d6'},
+  {id:'prompts',label:'저장한 프롬프트',name:'프롬프트',path:'/workspace/prompts',icon:'093d6'},
   {id:'tools',label:'Open WebUI 도구',name:'도구',path:'/workspace/tools',icon:'cece5',admin:true},
   {id:'admin',label:'관리자 설정',name:'관리자',path:'/admin/settings',icon:'f34f3',admin:true}
 ].map(Object.freeze));
@@ -630,15 +630,15 @@ function workCanWorkspace(capabilities){
 function workWorkspaceMenuHTML(state,selection,error=''){
   const {esc,icon}=workUI,capabilities=state.capabilities || {},current=(state.workflows || []).filter(workflow=>!selection.system_id||workflow.system_id===selection.system_id);
   const item=(action,asset,label,{active=false,count,native,id}={})=>`<button type="button" class="ew-nav-button" data-action="${action}"${id?` data-native-id="${id}"`:''} aria-label="${label}" title="${label}"${active?' aria-current="page"':''}>${['models','tools','admin'].includes(id)?`<span class="ew-icon ew-native-icon" data-native-icon="${id}" aria-hidden="true"></span>`:icon(asset)}<span class="ew-nav-label">${label}</span>${native?`<small class="ew-nav-native-name">${native}</small>`:count===undefined?'':`<small>${count}</small>`}</button>`;
-  const native=target=>item('native_open',target.icon,target.label,{native:target.name,id:target.id,active:selection.native_id===target.id});
-  const group=(title,items)=>items?`<section class="ew-nav-group"><h3 class="ew-nav-group-title">${title}</h3><nav class="ew-nav-links">${items}</nav></section>`:'';
-  const create=workCanCreate(capabilities)?item('procedures','e8a37','업무 절차',{count:current.length,active:!selection.native_id&&selection.tab!=='tools'})+item('tools','d1220','도구',{count:state.operations?.error?undefined:workToolCatalog(state,selection).length,active:!selection.native_id&&selection.tab==='tools'}):'';
-  const skill=workNativeAllowed(capabilities,'skills')?native(workNativeTargets.find(item=>item.id==='skills')):'';
-  const ordinary=workNativeTargets.filter(target=>!target.admin&&target.id!=='skills'&&workNativeAllowed(capabilities,target.id)).map(native).join('');
-  const admin=workNativeAllowed(capabilities,'admin')?native(workNativeTargets.find(target=>target.id==='admin')):'';
-  const groups=group('업무 만들기',create+skill)+group('AI 설정',ordinary)+group('관리자만',admin);
+  const native=target=>item('native_open',target.icon,target.label,{id:target.id,active:selection.native_id===target.id});
+  const create=workCanCreate(capabilities)?`<nav class="ew-nav-links ew-procedure-link">${item('procedures','e8a37','업무 절차',{active:!selection.native_id&&selection.tab!=='tools'})}</nav>`:'';
+  const tools=workCanCreate(capabilities)?item('tools','d1220','도구',{active:!selection.native_id&&selection.tab==='tools'}):'';
+  const assets=tools+workNativeTargets.filter(target=>['skills','knowledge'].includes(target.id)&&workNativeAllowed(capabilities,target.id)).map(native).join('');
+  const collapsed=(selection.collapsed||[]).includes('assets');
+  const groups=create+(assets?`<section class="ew-nav-group ew-assets-group"><button type="button" class="ew-assets-toggle" data-action="category" data-category="assets" data-open="${collapsed}" aria-expanded="${!collapsed}" aria-controls="ees-assets-items"><span>도구·자료</span>${icon('ead50')}</button><div class="ew-category-body" id="ees-assets-items"${collapsed?' inert aria-hidden="true"':''}><nav class="ew-nav-links ew-category-items">${assets}</nav></div></section>`:'');
+  const settings=workNativeTargets.filter(target=>['models','admin'].includes(target.id)&&workNativeAllowed(capabilities,target.id)).map(native).join('');
   const recent=workCanCreate(capabilities)?current.filter(workflow=>workflow.updated_at).slice().sort((a,b)=>String(b.updated_at).localeCompare(String(a.updated_at))).slice(0,8):[];
-  return groups+(recent.length?`<p class="ew-nav-caption">최근 편집</p><nav class="ew-workflows ew-recent">${recent.map(workflow=>`<button type="button" data-action="workflow" data-workflow-id="${esc(workflow.id)}"${!selection.native_id&&workflow.id===selection.workflow_id?' aria-current="page"':''}>${icon({ops:'126c7',setup:'f6bbc',incident:'4fb09'}[workflow.category] || 'e8a37')}<span>${esc(workflow.name)}</span></button>`).join('')}</nav>`:'')+(!groups?'<p class="ew-empty">EES Workflow에서 열 수 있는 항목이 없습니다</p>':'')+(error?`<p class="ew-error" role="alert" data-native-navigation-error>${esc(error)}</p><button type="button" data-action="refresh">다시 확인</button>`:'');
+  return groups+(recent.length?`<p class="ew-nav-caption">최근 편집</p><nav class="ew-workflows ew-recent">${recent.map(workflow=>`<button type="button" data-action="workflow" data-workflow-id="${esc(workflow.id)}"${!selection.native_id&&workflow.id===selection.workflow_id?' aria-current="page"':''}>${icon({ops:'126c7',setup:'f6bbc',incident:'4fb09'}[workflow.category] || 'e8a37')}<span>${esc(workflow.name)}</span></button>`).join('')}</nav>`:'')+(settings?`<details class="ew-native-management"><summary>설정</summary>${settings}</details>`:'')+(!groups&&!settings?'<p class="ew-empty">EES Workflow에서 열 수 있는 항목이 없습니다</p>':'')+(error?`<p class="ew-error" role="alert" data-native-navigation-error>${esc(error)}</p><button type="button" data-action="refresh">다시 확인</button>`:'');
 }
 
 // Operations25 presents actual Jobs. Result items remain inside their Job;

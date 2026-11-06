@@ -1,0 +1,46 @@
+{
+  "date": "2026-11-06",
+  "file_key": "XK2wTos6sEuxSHhIj7cqg6",
+  "approved_request": "응 이방향으로 가자 맞춰서 수정계획 세우고 진행해줘",
+  "version": "메뉴 2판",
+  "snapshot_kind": "사용자 확인 목업 — 제품 캡처와 구분",
+  "figma_backup": "B071 / 2167:290",
+  "snapshots": [
+    {
+      "file": "EES_Workspace_Menu_Full.png",
+      "node_id": "2153:225",
+      "sha256": "e7d49e284be0d0d4332da730745a3f425bf1dce0ac3620a9ce102c53b46f8498"
+    },
+    {
+      "file": "EES_Workspace_Menu_Mockup.png",
+      "node_id": "2153:544",
+      "sha256": "c2b80b7fdd7548b9a7541e7b5d0e38783a8c45e3e9725ba713165a9780d76b4c"
+    }
+  ],
+  "figma_change": "C159 / 2178:2067",
+  "canonical_page": "1284:3058",
+  "rule_card": "2176:609",
+  "existing_frame_ids_preserved": true,
+  "canonical_renders": [
+    {
+      "file": "canonical-sidebar.png",
+      "node_id": "1068:6075",
+      "sha256": "8eb83dfefbd8cec22b29df2142683e6bfff417f8f2cbe65439e077afc1bae9d2",
+      "kind": "Figma 설계 캡처 — 실제 제품 아님"
+    },
+    {
+      "file": "canonical-tools.png",
+      "node_id": "2017:81",
+      "sha256": "0cfeb5582425498bd383e84570114fc759eb50703f3ad37ad491c711b311b396",
+      "kind": "Figma 설계 캡처 — 실제 제품 아님"
+    },
+    {
+      "file": "canonical-chat.png",
+      "node_id": "2153:225",
+      "sha256": "e7d49e284be0d0d4332da730745a3f425bf1dce0ac3620a9ce102c53b46f8498",
+      "kind": "Figma 설계 캡처 — 실제 제품 아님"
+    }
+  ],
+  "visual_review": "메뉴 들여쓰기·선택·공장/시스템 위치·하단 설정·입력창 프롬프트와 열린 팝오버를 직접 확인. 글자 겹침·빈 메뉴 자리 없음.",
+  "figma_check": "figma-check.json"
+}

@@ -534,7 +534,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 self.wait("document.querySelectorAll('[data-author-action=open]').length === 3")
                 self.assertEqual(self.text('#ees-work-designer .ew-author-heading h2'), '워크플로우')
                 self.assertEqual(self.text('#ees-work-designer .ew-author-heading small'), '3개')
-                self.assertEqual(self.text('#ees-work-entry [data-action=procedures] small'), '3')
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-entry [data-action=procedures] small')"))
             labels.append(label)
             (unknown_labels if unknown else cached_labels).append(label)
         evidence = frame_monitor.collect(self, labels=labels)
@@ -662,6 +662,158 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.addCleanup(provider.stop)
         self.refresh()
 
+    def test_workspace_assets_prompt_search_insert_save_and_settings(self):
+        """Real composer/Native editor; only prompt HTTP records are synthetic."""
+        self.enable_native_menus()
+        records = [
+            {'id': 'log', 'name': '장애 로그 분석', 'command': 'log', 'content': '오늘({{CURRENT_DATE}}) 로그를 원인·영향·조치·추가 확인으로 정리해줘.', 'is_active': True},
+            {'id': 'weekly', 'name': '주간 업무 보고', 'command': 'weekly', 'content': '이번 주 실적과 다음 주 계획을 정리해줘.', 'is_active': True},
+            {'id': 'meeting', 'name': '회의 내용 정리', 'command': 'meeting', 'content': '결정 사항과 후속 작업을 정리해줘.', 'is_active': True},
+            {'id': 'disabled', 'name': '사용 중지', 'command': 'disabled', 'content': '사용 중지 내용', 'is_active': False},
+        ]
+        original_get, original_post = NativeUIHandler.do_GET, NativeUIHandler.do_POST
+        saved, fail_load, rich_input = [], [False], [False]
+
+        def get_prompts(handler):
+            if handler.server is self.server and urlparse(handler.path).path == '/api/v1/users/user/settings' and rich_input[0]:
+                return handler.send_content({'ui': {'models': ['fixture-model'], 'showChangelog': False,
+                                                   'version': '0.11.3', 'autoFollowUps': False,
+                                                   'insertPromptAsRichText': True}})
+            if handler.server is self.server and urlparse(handler.path).path == '/api/v1/prompts/':
+                handler.server.requests.append(('GET', '/api/v1/prompts/'))
+                return handler.send_content({'detail': 'synthetic load failure'} if fail_load[0] else records,
+                                            status=503 if fail_load[0] else 200)
+            return original_get(handler)
+
+        def create_prompt(handler):
+            if handler.server is self.server and urlparse(handler.path).path == '/api/v1/prompts/create':
+                body = json.loads(handler.rfile.read(int(handler.headers.get('Content-Length', '0'))))
+                handler.server.requests.append(('POST', '/api/v1/prompts/create'))
+                saved.append(body)
+                result = dict(body, id='new-prompt', is_active=True)
+                records.append(result)
+                return handler.send_content(result)
+            return original_post(handler)
+
+        with patch.object(NativeUIHandler, 'do_GET', get_prompts), patch.object(NativeUIHandler, 'do_POST', create_prompt):
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+            self.open_sidebar()
+            self.click('[data-mode=author]')
+            menu = self.text('#ees-work-entry')
+            for label in ('업무 절차', '도구·자료', '작업 지침', '참고 문서'):
+                self.assertIn(label, menu)
+            for label in ('업무 만들기', 'AI 설정', '관리자만', '스킬·지침', '빠른 문장', '저장한 프롬프트', 'AI 도우미 설정'):
+                self.assertNotIn(label, menu)
+            self.click('.ew-assets-toggle')
+            self.wait("document.querySelector('#ees-assets-items').inert && document.querySelector('.ew-assets-toggle').getAttribute('aria-expanded') === 'false'")
+            self.wait("document.querySelector('#ees-assets-items').getBoundingClientRect().height === 0")
+            self.click('.ew-assets-toggle')
+            self.wait("!document.querySelector('#ees-assets-items').inert")
+            self.fill('#chat-input', '이 로그에서 오류 원인과 조치 방법을 정리해줘.')
+            original = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+            self.click('#ees-saved-prompts-button')
+            self.wait("document.querySelectorAll('[data-saved-prompt]').length === 3")
+            self.wait("document.activeElement?.matches('.ees-prompts-search')")
+            self.wait("getComputedStyle(document.querySelector('.ees-prompts-popover')).opacity === '1'")
+            self.wait("document.querySelector('.ees-prompts-popover').getBoundingClientRect().bottom <= document.querySelector('#message-input-container').getBoundingClientRect().top - 7")
+            self.screenshot('workspace-menu-prompts-1920')
+            self.fill('.ees-prompts-search', '주간')
+            self.wait("document.querySelectorAll('[data-saved-prompt]').length === 1")
+            self.key('ArrowDown', 40)
+            self.wait("document.activeElement?.getAttribute('data-saved-prompt') === 'weekly'")
+            self.key('Enter', 13)
+            self.wait("document.querySelector('#chat-input').textContent.includes('이번 주 실적')")
+            after = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+            self.assertIn(original['prompt'], after['prompt'])
+            self.assertEqual({k: v for k, v in after.items() if k not in ('prompt', 'richContent')},
+                             {k: v for k, v in original.items() if k not in ('prompt', 'richContent')})
+            self.assertEqual(self.server.completions, [])
+            self.click('#ees-saved-prompts-button')
+            self.wait("document.querySelector('[data-saved-prompt=log]')")
+            self.click('[data-saved-prompt=log]')
+            self.wait("document.querySelector('#chat-input').textContent.includes('로그를 원인') && !document.querySelector('#chat-input').textContent.includes('{{CURRENT_DATE}}')")
+            final_draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
+            self.click('#ees-saved-prompts-button')
+            self.click('[data-save-current-prompt]')
+            self.wait("document.querySelector('[role=dialog] form input[required]')")
+            self.assertEqual(saved, [])
+            self.fill('[role=dialog] form input[required]', 'Saved prompt')
+            self.screenshot('workspace-menu-native-prompt-save')
+            self.click('[role=dialog] form button[type=submit]')
+            self.wait("!document.querySelector('[role=dialog] form input[required]')")
+            self.assertEqual(len(saved), 1)
+            self.assertEqual(saved[0]['content'], final_draft['prompt'])
+            self.assertEqual(saved[0]['access_grants'], [])
+            self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), final_draft)
+            self.click('#ees-saved-prompts-button')
+            self.wait("document.querySelector('[data-saved-prompt=new-prompt]')")
+            self.key('Escape', 27)
+            self.wait("!document.querySelector('.ees-prompts-popover') && document.activeElement.id === 'ees-saved-prompts-button'")
+            fail_load[0] = True
+            self.click('#ees-saved-prompts-button')
+            self.wait("document.querySelector('.ees-prompts-popover [role=alert]')")
+            self.assertIn('불러오지 못했습니다', self.text('.ees-prompts-popover'))
+            fail_load[0] = False
+            self.click('.ees-prompts-popover [role=alert] button')
+            self.wait("document.querySelectorAll('[data-saved-prompt]').length === 4")
+            self.click('.ees-prompts-popover [data-native-id=prompts]')
+            self.wait("location.pathname === '/workspace/prompts' && document.querySelector('#workspace-container input')")
+            self.assertIn('저장한 프롬프트', self.text('[data-ees-source-workspace-heading]'))
+            self.click('#ees-work-entry [data-action=procedures]')
+            self.wait("window.__eesNativeDraftV1?.ready() && document.querySelector('#chat-input')?.textContent.includes('이번 주 실적')")
+            self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), final_draft)
+            self.click('.ees-settings-trigger')
+            self.wait("document.querySelector('.ees-settings-popover [data-native-id=models]')")
+            self.wait("getComputedStyle(document.querySelector('.ees-settings-popover')).opacity === '1'")
+            self.screenshot('workspace-menu-settings-1920')
+            self.click('.ees-settings-popover [data-native-id=models]')
+            self.wait("location.pathname === '/workspace/models' && document.querySelector('#workspace-container input')")
+            self.assertIn('AI 도우미 설정', self.text('[data-ees-source-workspace-heading]'))
+            self.click('#ees-work-entry [data-action=procedures]')
+            self.wait("window.__eesNativeDraftV1?.ready() && document.querySelector('#ees-saved-prompts-button')")
+            for width, height in ((1366, 768), (360, 800)):
+                self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
+                self.wait('innerWidth === ' + str(width))
+                if self.browser.evaluate("!!document.querySelector('#ees-work-panel [data-action=close_panel]')?.getClientRects().length"):
+                    self.click('#ees-work-panel [data-action=close_panel]')
+                self.click('#ees-saved-prompts-button')
+                self.wait("document.querySelectorAll('[data-saved-prompt]').length === 4")
+                self.wait("(()=>{const r=document.querySelector('.ees-prompts-popover').getBoundingClientRect();return r.x>=0&&r.right<=innerWidth&&r.y>=0&&r.bottom<=innerHeight;})()")
+                self.assertFalse(self.browser.evaluate('document.documentElement.scrollWidth > innerWidth'))
+                self.wait("getComputedStyle(document.querySelector('.ees-prompts-popover')).opacity === '1'")
+                self.wait("document.querySelector('.ees-prompts-popover').getBoundingClientRect().bottom <= document.querySelector('#message-input-container').getBoundingClientRect().top - 7")
+                self.screenshot('workspace-menu-prompts-' + str(width))
+                self.key('Escape', 27)
+            self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), final_draft)
+            self.assertEqual(self.server.completions, [])
+            # Native rich-prompt preference must preserve paragraph and mark boundaries.
+            rich_input[0] = True
+            records.append({'id': 'rich', 'name': '서식 있는 요청', 'command': 'rich',
+                            'content': '**결정 사항**\n\n후속 작업', 'is_active': True})
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+            previous_document = self.browser.evaluate('performance.timeOrigin')
+            self.navigate('/c/existing-chat')
+            self.wait('performance.timeOrigin !== ' + json.dumps(previous_document)
+                      + ' && window.__eesNativeDraftV1?.ready() && document.querySelector("#chat-input")')
+            self.fill('#chat-input', '작성 중인 내용')
+            self.click('#ees-saved-prompts-button')
+            self.wait("document.querySelector('[data-saved-prompt=rich]')")
+            self.click('[data-saved-prompt=rich]')
+            self.wait("document.querySelector('#chat-input strong')?.textContent === '결정 사항'")
+            self.assertEqual(self.browser.evaluate("[...document.querySelector('#chat-input').children].map(n=>n.textContent)"),
+                             ['작성 중인 내용', '', '결정 사항', '후속 작업'])
+            self.assertEqual(self.server.completions, [])
+            self.screenshot('workspace-menu-rich-insert-1920')
+            self.fill('#chat-input', '')
+            self.click('#ees-saved-prompts-button')
+            self.wait("document.querySelector('[data-saved-prompt=rich]')")
+            self.click('[data-saved-prompt=rich]')
+            self.wait("document.querySelector('#chat-input strong')?.textContent === '결정 사항'")
+            self.assertEqual(self.browser.evaluate("[...document.querySelector('#chat-input').children].map(n=>n.textContent)"),
+                             ['결정 사항', '후속 작업'])
+            self.assertEqual(self.server.completions, [])
+            self.screenshot('workspace-menu-rich-empty-insert-1920')
+
     def test_ai_assistant_work_tool_settings_stays_on_native_page(self):
         self.enable_native_menus()
         original = NativeUIHandler.do_GET
@@ -692,6 +844,14 @@ class SourceShellNativeTests(IntegratedNativeCase):
             self.assertEqual(self.browser.evaluate('location.pathname'), '/workspace/models')
 
     def native_link_selector(self, target, label, labels, *, return_from=None):
+        if target == 'models':
+            self.click('.ees-settings-trigger')
+        if target == 'prompts':
+            if self.browser.evaluate("location.pathname.startsWith('/workspace/')"):
+                self.step(label + '-return-to-composer', '#ees-work-entry [data-action=procedures]',
+                          "!!document.querySelector('#ees-saved-prompts-button') && window.__eesNativeDraftV1?.ready()")
+                labels.append(label + '-return-to-composer')
+            self.click('#ees-saved-prompts-button')
         if target != 'tools':
             return '[data-action=native_open][data-native-id=' + target + ']'
         # C45 keeps Native tools reachable through B10-2, with the same frame
@@ -929,11 +1089,15 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 # return contract. The administrator dialog's close/same path
                 # remains in test_every_navigation_has_source_chrome... .
                 native = 'models' if destination == 'work_home' else 'skills'
+                if native == 'models':
+                    self.click('.ees-settings-trigger')
+                selected = ('.ees-settings-trigger[aria-current=page]' if native == 'models'
+                            else '#ees-work-entry [data-native-id=skills][aria-current=page]')
                 self.delayed_step(label + '-native',
-                    '#ees-work-entry [data-action=native_open][data-native-id=' + native + ']',
+                    '[data-action=native_open][data-native-id=' + native + ']',
                     'location.pathname === ' + json.dumps('/workspace/' + native) +
                     ' && document.querySelector("#workspace-container input") && ' +
-                    'document.querySelector("#ees-work-entry [data-native-id=' + native + ']")?.getAttribute("aria-current") === "page"',
+                    'document.querySelector(' + json.dumps(selected) + ')',
                     paths=('workspace',))
                 selector = ('#ees-work-entry [data-action=mode][data-mode=work]' if destination == 'work_home'
                             else '#ees-work-entry [data-action=' + destination + ']')
@@ -1130,6 +1294,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.wait("window.__eesSourceFrameEvidence.samples.some(sample=>sample.label==='native-return' && sample.rightPanels.includes('procedures') && sample.menuCurrent.length===1 && sample.menuCurrent[0].key==='procedures')")
         frame_monitor.end_native_return(self)
         labels.append('native-return')
+        self.click('.ees-settings-trigger')
         self.step('admin-open', '[data-action=native_open][data-native-id=admin]',
                   "document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-admin-general][aria-selected=true]')")
         labels.append('admin-open')

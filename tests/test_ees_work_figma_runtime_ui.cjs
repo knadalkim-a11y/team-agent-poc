@@ -53,18 +53,19 @@ function nativeNavigationHarness(capabilities=nativeCapabilities({is_admin:true,
  return {...h,navigation,restores,state,setDraft:value=>{current=value;},readDraft:()=>current,setReady:value=>{ready=value;},async open(id='skills'){await h.api.handleClick({dataset:{action:'native_open',nativeId:id}});h.api.sync();await new Promise(setImmediate);},async back(action='procedures',extra={}){const target={dataset:{action,...extra},closest:selector=>['[data-ees-work]','#ees-work-entry','button[data-action]'].includes(selector)?target:null};h.api.handleEvent({type:'click',isTrusted:true,target,preventDefault(){},stopImmediatePropagation(){}});h.api.sync();await new Promise(setImmediate);}};
 }
 
-test('workspace menu uses server permissions for three groups and hides unavailable Native destinations',()=>{
+test('workspace assets and settings retain server permissions without duplicate prompt or Native labels',()=>{
  const admin=nativeCapabilities({is_admin:true,can_author:true,native_access:{models:true,knowledge:true,prompts:true,skills:true,tools:true,admin:true}});
  const rendered=html('workWorkspaceMenuHTML({capabilities}, {tab:"tools"})',{capabilities:admin});
- assert.equal((rendered.match(/class="ew-nav-group"/g)||[]).length,3);assert.doesNotMatch(rendered,/공장·접근 범위|workspace_admin|admin_factory|admin_access/);for(const label of ['업무 만들기','AI 설정','관리자만','스킬·지침','AI 도우미','참고 문서','빠른 문장','관리자 설정'])assert.ok(rendered.includes(label),label);
- assert.doesNotMatch(rendered,/기능 연결|data-native-id="tools"/);
- assert.match(rendered,/<small class="ew-nav-native-name">모델<\/small>/);assert.doesNotMatch(rendered,/native_workspace|native_skills|Native 모델|Open WebUI에서 열기|native_return/);
+ assert.equal((rendered.match(/class="ew-nav-group ew-assets-group"/g)||[]).length,1);
+ for(const label of ['업무 절차','도구·자료','작업 지침','AI 도우미 설정','참고 문서','관리자 설정'])assert.ok(rendered.includes(label),label);
+ assert.doesNotMatch(rendered,/공장·접근 범위|workspace_admin|admin_factory|admin_access|업무 만들기|AI 설정|관리자만|스킬·지침|빠른 문장|data-native-id="(?:tools|prompts)"|ew-nav-native-name/);
+ const assets=rendered.match(/<section class="ew-nav-group ew-assets-group">(.*?)<\/section>/)[1];
+ assert.match(assets,/data-action="tools"/);for(const id of ['skills','knowledge'])assert.ok(assets.includes('data-native-id="'+id+'"'));assert.doesNotMatch(assets,/data-native-id="(?:models|admin)"/);
  const nativeSelected=html('workWorkspaceMenuHTML({capabilities,workflows:[{id:"kept",name:"Previous draft",updated_at:"2026-10-11"}]}, {workflow_id:"kept",tab:"overview",native_id:"skills"})',{capabilities:admin});
  assert.equal((nativeSelected.match(/aria-current="page"/g)||[]).length,1);assert.match(nativeSelected,/data-native-id="skills"[^>]*aria-current="page"/);
- const groups=[...rendered.matchAll(/<section class="ew-nav-group"><h3 class="ew-nav-group-title">([^<]+)<\/h3><nav class="ew-nav-links">(.*?)<\/nav><\/section>/g)].map(match=>[match[1],match[2]]);
- assert.match(groups[0][1],/data-native-id="skills"/);assert.doesNotMatch(groups[0][1],/data-native-id="(?:models|knowledge|prompts)"/);for(const id of ['models','knowledge','prompts'])assert.ok(groups[1][1].includes('data-native-id="'+id+'"'));assert.doesNotMatch(groups[1][1],/data-native-id="skills"/);
+ const collapsed=html('workWorkspaceMenuHTML({capabilities}, {collapsed:["assets"]})',{capabilities:admin});assert.match(collapsed,/aria-expanded="false"/);assert.match(collapsed,/id="ees-assets-items" inert aria-hidden="true"/);
  const author=nativeCapabilities({can_author:true,managed_systems:['EMS'],native_access:{skills:true,tools:true}}),authorHTML=html('workWorkspaceMenuHTML({capabilities}, {})',{capabilities:author});
- assert.match(authorHTML,/업무 만들기/);assert.match(authorHTML,/data-native-id="skills"/);assert.doesNotMatch(authorHTML,/AI 설정/);assert.doesNotMatch(authorHTML,/관리자만|기능 연결|공장·접근 범위|data-native-id="models"/);
+ assert.match(authorHTML,/data-native-id="skills"/);assert.doesNotMatch(authorHTML,/data-native-id="(?:models|admin|knowledge)"/);
  for(const cap of [nativeCapabilities(),{...admin,native_access_available:false},{...admin,native_access_available:undefined},{...admin,native_access:{skills:'true'}}]){
   const output=html('workWorkspaceMenuHTML({capabilities}, {})',{capabilities:cap});assert.doesNotMatch(output,/data-action="native_open"/);
  }

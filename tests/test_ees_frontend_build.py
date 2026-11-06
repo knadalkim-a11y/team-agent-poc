@@ -935,3 +935,80 @@ const getSessionUser=async token=>{if(fail)throw Error('temporary offline');retu
 })().catch(e=>{console.error(e);process.exitCode=1;});
 '''
         self.assertEqual(self.run_node(probe), "source_session_owner=pass")
+
+
+@unittest.skipUnless(os.environ.get('EES_TEST_FRONTEND_SOURCE_DIR') and shutil.which('node'),
+                     'The actual patched source and its pinned editor dependencies are required.')
+class SavedPromptEditorTests(unittest.TestCase):
+    run_node = NativeDraftHookTests.run_node
+
+    def test_prompt_popover_keeps_current_input_visible(self):
+        root = Path(os.environ['EES_TEST_FRONTEND_SOURCE_DIR']).resolve()
+        source = (root / 'src/lib/components/common/Dropdown.svelte').read_text(encoding='utf-8')
+        functions = _between(source, 'function naturalContentHeight()', '\n\tfunction schedulePositionUpdate()')
+        functions = functions.replace('trigger: HTMLElement', 'trigger')
+        probe = r'''
+const assert=require('node:assert/strict');
+let window={innerWidth:1920,innerHeight:1080},side='top',align='start',sideOffset=8;
+let maxHeight='500px',resolvedMaxHeight=maxHeight,visualViewportAware=true,anchorSelector='#message-input-container';
+let button={left:512,right:648,top:1026,bottom:1054},composer={top:978,bottom:1064};
+const triggerEl={getBoundingClientRect:()=>button,closest:()=>({getBoundingClientRect:()=>composer})};
+const contentEl={style:{},scrollHeight:318,offsetHeight:318,offsetWidth:420};
+''' + functions + r'''
+positionContent();
+assert.equal(Number.parseFloat(contentEl.style.top)+318,composer.top-8);
+assert.equal(contentEl.style.left,'512px');
+window={innerWidth:360,innerHeight:800};composer={top:640,bottom:780};
+button={left:100,right:128,top:742,bottom:770};contentEl.offsetWidth=336;
+positionContent();
+assert.equal(Number.parseFloat(contentEl.style.top)+318,composer.top-8);
+assert.equal(contentEl.style.left,'16px');
+anchorSelector='';positionContent();
+assert.equal(Number.parseFloat(contentEl.style.top)+318,button.top-8);
+console.log('saved_prompt_popover_anchor=pass');
+'''
+        self.assertEqual(self.run_node(probe), 'saved_prompt_popover_anchor=pass')
+
+    def test_append_preserves_plain_and_rich_paragraphs_and_marks(self):
+        root = Path(os.environ['EES_TEST_FRONTEND_SOURCE_DIR']).resolve()
+        source = (root / 'src/lib/components/chat/MessageInput.svelte').read_text(encoding='utf-8')
+        self.assertIn('bind:editor={chatInputEditor}', source)
+        functions = _between(source, 'const insertSavedPrompt =', "\n\tlet command = '';").replace('text: string', 'text')
+        probe = 'const fromSource=require("node:module").createRequire(' + json.dumps(str(root / 'package.json')) + ');\n' + r'''
+const assert=require('node:assert/strict');
+const {Schema}=fromSource('@tiptap/pm/model');
+const {EditorState,TextSelection,Selection}=fromSource('@tiptap/pm/state');
+const schema=new Schema({nodes:{doc:{content:'block+'},paragraph:{content:'inline*',group:'block'},text:{group:'inline'}},marks:{strong:{}}});
+const paragraph=text=>schema.node('paragraph',null,text?[schema.text(text)]:[]);
+const parsed=schema.node('doc',null,[schema.node('paragraph',null,[schema.text('Saved',[schema.mark('strong')])]),paragraph('Next')]);
+let prompt='Keep',chatId='one',$_user={id:'one'},localStorage={token:'one'},$settings={insertPromptAsRichText:false};
+const tick=async()=>{},inputVariableHandler=async()=>{},textVariableHandler=async text=>text,focus=()=>{};
+const DOMPurify={sanitize:x=>x},marked={parse:x=>x},document={createElement:()=>({innerHTML:''})};
+const DOMParser={fromSchema:()=>({parse:()=>parsed})};
+function editor(text='Keep'){let state=EditorState.create({schema,doc:schema.node('doc',null,[paragraph(text)])});return {get state(){return state},isDestroyed:false,view:{dispatch(tr){state=state.apply(tr)}}};}
+let chatInputEditor=editor();
+''' + functions + r'''
+(async()=>{
+ await insertSavedPrompt('Saved');
+ assert.deepEqual(chatInputEditor.state.doc.content.content.map(n=>n.textContent),['Keep','','Saved']);
+ $settings.insertPromptAsRichText=true;chatInputEditor=editor();
+ await insertSavedPrompt('**Saved**\n\nNext');
+ const doc=chatInputEditor.state.doc;
+ assert.deepEqual(doc.content.content.map(n=>n.textContent),['Keep','','Saved','Next']);
+ assert.equal(doc.child(2).child(0).marks[0].type.name,'strong');
+ assert.equal(prompt,'Keep');
+ prompt='';chatInputEditor=editor('');
+ await insertSavedPrompt('**Saved**\n\nNext');
+ const emptyDoc=chatInputEditor.state.doc;
+ assert.deepEqual(emptyDoc.content.content.map(n=>n.textContent),['Saved','Next']);
+ assert.equal(emptyDoc.child(0).child(0).marks[0].type.name,'strong');
+ assert.equal(prompt,'');
+ $settings.insertPromptAsRichText=false;chatInputEditor=editor('');
+ await insertSavedPrompt('First\n\nSecond');
+ assert.deepEqual(chatInputEditor.state.doc.content.content.map(n=>n.textContent),['First','','Second']);
+ chatInputEditor=editor('');await insertSavedPrompt('Saved');
+ assert.deepEqual(chatInputEditor.state.doc.content.content.map(n=>n.textContent),['Saved']);
+ console.log('saved_prompt_editor_paragraphs=pass');
+})().catch(e=>{console.error(e);process.exitCode=1});
+'''
+        self.assertEqual(self.run_node(probe), 'saved_prompt_editor_paragraphs=pass')
