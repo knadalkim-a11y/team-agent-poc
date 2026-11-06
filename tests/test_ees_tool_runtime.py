@@ -202,7 +202,12 @@ class AuthoredRuntimeTests(unittest.IsolatedAsyncioTestCase):
         changed = deepcopy(FIXTURE['draft'])
         changed['code'] = 'invalid draft code'
         changed['input_ui'] = {}
+        changed['scope'] = {'system_id': 'FDC', 'factory_id': ''}
         await self.call('tool_draft_save', tool_id=self.key, expected_revision=1, draft=changed)
+        catalog = await self.service.shared_tools.list(self.users['member'])
+        tool = next(row for row in catalog if row['id'] == self.key)
+        self.assertEqual(tool['scope'], changed['scope'])
+        self.assertEqual(tool['version'], 1)
         result = await self.execute(run_id)
         self.assertEqual(result['attempt']['status'], 'succeeded')
         self.assertEqual(self.native.executions[0][2]['draft'], FIXTURE['draft'])

@@ -143,12 +143,13 @@ test('authoring factory scope preserves the open definition and unfinished creat
  assert.equal(h.api.snapshot().selection.factory_id,'');assert.equal(h.api.snapshot().selection.workflow_id,'w');
  assert.equal(JSON.stringify(draft),definition);assert.equal(closed,0);
 });
-test('factory scope remains unavailable in tools, administration and Native management',async()=>{
- for(const tab of ['tools','workspace_admin']){
+test('factory scope stays available in tools and unavailable in administration and Native management',async()=>{
+ for(const tab of ['workspace_admin']){
   const h=nativeNavigationHarness();h.state.factories=[{id:'factory-a',system_id:'EMS'}];h.api.setSelection({mode:'author',tab,system_id:'EMS',factory_id:''});
   await h.api.sourceAction({action:'choose_factory',factoryId:'factory-a'});
   assert.equal(h.api.snapshot().selection.factory_id,'');assert.equal(h.calls.length,0);
  }
+ const tools=nativeNavigationHarness();tools.state.factories=[{id:'factory-a',system_id:'EMS'}];tools.api.setSelection({mode:'author',tab:'tools',system_id:'EMS',factory_id:''});await tools.api.sourceAction({action:'choose_factory',factoryId:'factory-a'});assert.equal(tools.api.snapshot().selection.factory_id,'factory-a');assert.equal(tools.api.snapshot().selection.tab,'tools');assert.equal(tools.calls.filter(call=>call.body&&call.body.action!=='save_ui').length,0);
  const h=nativeNavigationHarness();h.state.factories=[{id:'factory-a',system_id:'EMS'}];await h.open();const before=h.calls.length;
  await h.api.handleClick({dataset:{action:'choose_factory',factoryId:'factory-a'}});
  assert.equal(h.api.snapshot().selection.factory_id,'');assert.equal(h.calls.length,before);assert.equal(h.context.location.pathname,'/workspace/skills');

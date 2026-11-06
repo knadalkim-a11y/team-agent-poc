@@ -1,0 +1,21 @@
+{
+  "file_key": "XK2wTos6sEuxSHhIj7cqg6",
+  "page_id": "1285:1841",
+  "version": "2.2",
+  "captured_on": "2026-11-06",
+  "screens": [
+    {
+      "file": "T01.png",
+      "node_id": "2017:76",
+      "sha256": "2e10e43abdfb01327cb8d93a3c62742109203bef8a558bcf38dc60c7684e1163",
+      "bytes": 90587
+    },
+    {
+      "file": "T02.png",
+      "node_id": "2016:2",
+      "sha256": "df586681f0971de6ce368de72dff2e3b6b427abefecfca2e0216aae128d04c2c",
+      "bytes": 49402
+    }
+  ],
+  "scope": "Work location retained; current scope plus common tools; basic scope fields. Screenshots are design references, not executed product evidence."
+}

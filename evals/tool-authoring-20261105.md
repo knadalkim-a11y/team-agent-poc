@@ -1,5 +1,17 @@
 # 도구 작성·연결·시험·사용 설정 검증
 
+<a id="tools-work-location-20261106"></a>
+
+## 2026-11-06 · 도구의 공장·시스템 분류
+
+- **기준·원인:** main `7a56cdbbcbf1`, `codex/tools-work-location`. 기존 명세와 `globalTools`가 도구 진입 시 작업 위치를 숨겼고 새 작성 도구에는 시스템/공장 분류가 없었다. 사용자 지시로 [ST-SCOPE](../docs/specs/shared-tools.md#tools-work-location-20261106)와 Figma 2.2판 T01/T02를 함께 바꿨다.
+- **보존·회귀:** 코드/토큰/그룹·사용 버전/회차 참조는 유지한다. 선택적 scope를 저장하고 기존 클라이언트가 생략하면 원래 분류를 보존한다. 분류 없는 자료는 공통, 이전 계약은 기존 system_id다. 관리자용 전체 공장 이름 선택지는 기본 정보에서 다른 시스템을 고를 때도 제공하며 비관리자에게는 반환하지 않는다.
+- **로컬 결과:** Node `node --test tests/test_ees_work_authoring_ui.cjs tests/test_ees_execution_ui.cjs` 472/472 통과. Python3.12 unittest discover의 `test_ees_tool_drafts.py` 14/14, `test_ees_tool_runtime.py` 21/21, `test_ees_tool_lifecycle.py` 19/19 통과. `test_ees_frontend_build.py` 32건 중19통과·고정 upstream 소스 필요13생략이다. 생략은 성공으로 집계하지 않는다.
+- **최초 실패·보완:** 새 공통 필터를 standalone UI harness에 주입하지 않은 오류와 기존 전역 목록/제목/가져오기 인자 기대를 수정했다. 기존 scope 없는 도구를 열기만 해도 빈 scope를 추가해 미저장으로 표시하던 제품 문제를 고쳤다. 공통 분류의 공장 select를 setBusy가 다시 켜던 문제는 기존 data-preserve 규칙을 사용해 고쳤다. 재검에서 오래된 초안·생애주기·분류 변경/저장·다른 시스템 공장 선택을 함께 통과했다.
+- **설계·화면:** Figma T01의 공장/시스템 표시와 목록 분류, T02의 두 분류 입력·연결 서비스 문구를 직접 렌더 확인했다. [고정 PNG·해시](../docs/mockups/ees-work/tools-work-location-20261106/metadata.json)를 보존한다. `chromium --headless --no-sandbox --disable-gpu --dump-dom about:blank`도 socket/ptrace Operation not permitted로 종료134였다. 실제 제품 로드·computed style·3폭 비교는 미실행이며 Figma PNG나 합성 DOM 통과로 대체하지 않는다. 기존 Native 탐색 검사에 표시 유지·EMS/FDC 왕복·목록 제외·메뉴 유지·채팅 초안 보존을 추가했다.
+- **확대 회귀·고정 점검:** Node services 10스크립트 묶음은 TAP 708건 중707통과·기존 도구 공장 선택 금지 기대1실패였다. 해당 기대를 도구 선택 허용/관리 화면·Native 금지로 바꾸고 해당 모듈150/150 재검을 통과했다. 기존 시험을 삭제하지 않았고 제품 접근 제한을 완화하지 않았다. operations55개 통과, 시험 ID1,736개 감사 오류0, 문서/diff 오류0이다. Figma 고정 점검을 API의 한 호출/한 페이지 규칙에 맞게17페이지로 나눠 실행해 오류0·기존 업무절차 크기 경고1을 확인했다.
+- **남은 확인:** 원격 최신 head의 필수 CI·실제 제품 화면 판정. 병합·사내 적용은 미실행이다.
+
 <a id="pr123-merge-review-20261105"></a>
 
 ## 2026-11-05 · 전체 PR 병합 검토와 실제 설치 worker 보완
