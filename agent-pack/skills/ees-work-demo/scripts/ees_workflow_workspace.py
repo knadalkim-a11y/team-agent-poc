@@ -1405,7 +1405,10 @@ class WorkspaceMixin:
             options_snapshot = await self._work_resolve_job_options(actor, body.get('run_id'), body.get('job_id')) if action in ('human_confirm', 'amend_items', 'confirm_list') else {}
             publication_errors = []
             publication_resources = {'skills': {}}
-            if action in ('validate_workflow', 'publish_workflow'):
+            save_publication = action == 'save_draft' and 'publication_state' in body
+            if save_publication and body['publication_state'] not in ('published', 'unpublished'):
+                _fail('invalid_publication_state', '게시 또는 미게시를 선택해 주세요.')
+            if action in ('validate_workflow', 'publish_workflow') or (save_publication and body['publication_state'] == 'published'):
                 with self._db() as db:
                     prepared = self._work_definition(db, actor, groups, body.get('workflow_id'), True)
                     receipt = db.execute('SELECT * FROM work_receipts WHERE actor_id=? AND request_id=?', (actor_id, request_id)).fetchone()
@@ -1416,7 +1419,12 @@ class WorkspaceMixin:
                         self._work_receipt_authorize(db, actor, groups, body, previous, evidence_access)
                         return previous
                     _revision(body, prepared['revision'])
-                    definition = json.loads(prepared['draft'])
+                    definition = body.get('definition') if save_publication else json.loads(prepared['draft'])
+                    if save_publication:
+                        errors, _ = definition_check(definition, False)
+                        if errors: _fail('invalid_definition', '\n'.join(errors))
+                        if definition['id'] != prepared['id'] or definition['system_id'] != prepared['system_id']:
+                            _fail('immutable_identity', '절차 ID와 관리 시스템은 바꿀 수 없습니다.')
                 if any(node.get('skills') for node in definition.get('nodes', {}).values()):
                     assets = await self._assets(actor)
                     allowed_skills = {entry.get('id') if isinstance(entry, dict) else entry for entry in assets.get('skills', [])}
@@ -1595,8 +1603,15 @@ class WorkspaceMixin:
                 definition = body.get('definition'); errors, _ = definition_check(definition, False)
                 if errors: _fail('invalid_definition', '\n'.join(errors))
                 if definition['id'] != row['id'] or definition['system_id'] != row['system_id']: _fail('immutable_identity', '절차 ID와 관리 시스템은 바꿀 수 없습니다.')
-                db.execute('UPDATE work_definitions SET draft=?,revision=revision+1,validation=NULL,updated_at=? WHERE id=?', (_dump(definition), now, row['id']))
-                return {'workflow_id': row['id'], 'revision': row['revision'] + 1}
+                if 'publication_state' not in body:
+                    # Keep the older draft-only API for existing clients.
+                    db.execute('UPDATE work_definitions SET draft=?,revision=revision+1,validation=NULL,updated_at=? WHERE id=?', (_dump(definition), now, row['id']))
+                    return {'workflow_id': row['id'], 'revision': row['revision'] + 1}
+                if body['publication_state'] == 'unpublished':
+                    db.execute('UPDATE work_definitions SET draft=?,published_version=NULL,revision=revision+1,validation=NULL,updated_at=? WHERE id=?', (_dump(definition), now, row['id']))
+                    return {'workflow_id': row['id'], 'revision': row['revision'] + 1, 'published_version': None}
+                # Save content and the new publication in the same transaction below.
+                db.execute('UPDATE work_definitions SET draft=? WHERE id=?', (_dump(definition), row['id']))
             if action == 'unpublish_workflow':
                 db.execute('UPDATE work_definitions SET published_version=NULL,revision=revision+1,validation=NULL,updated_at=? WHERE id=?', (now, row['id']))
                 return {'workflow_id': row['id'], 'revision': row['revision'] + 1, 'published_version': None}
@@ -1618,7 +1633,7 @@ class WorkspaceMixin:
             definition = {**definition, 'resource_versions': validation['resource_versions']}
             db.execute('INSERT INTO work_versions VALUES(?,?,?,?,?,?)', (row['id'], version, _dump(definition), _hash(definition), actor_id, now))
             db.execute('UPDATE work_definitions SET published_version=?,revision=revision+1,validation=NULL,updated_at=? WHERE id=?', (version, now, row['id']))
-            return {'workflow_id': row['id'], 'revision': row['revision'] + 1, 'version': version}
+            return {'workflow_id': row['id'], 'revision': row['revision'] + 1, 'version': version, 'published_version': version}
         if action in ('start_run', 'run_start'):
             row = self._work_definition(db, actor, groups, body.get('workflow_id')); _revision(body, row['revision'])
             if row['published_version'] is None:

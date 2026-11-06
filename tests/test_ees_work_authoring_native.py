@@ -778,9 +778,9 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.add_stage_ui('현장 확인')
         self.add_job_ui('사람의 명시적 판정')
         self.click('[data-author-action="save"]');self.wait("document.querySelector('[data-author-status]')?.dataset.authorRevision === '2'")
-        self.click('.ew-procedure-menu>summary');self.click('[data-author-action="validate"]');self.wait("document.querySelector('[data-author-action=publish]')")
-        self.click('[data-author-action="publish"]');self.click('[data-dialog-confirm]')
-        self.wait("!document.querySelector('#ees-work-dialog') && document.querySelector('#ees-work-designer [role=status]')?.textContent.includes('새 게시 버전을 만들었습니다')")
+        self.click('.ew-procedure-menu>summary');self.click('[data-author-action="validate"]');self.wait("document.querySelector('#ew-publication-state')")
+        self.choose('#ew-publication-state','published');self.click('[data-author-action=save]')
+        self.wait("!document.querySelector('#ees-work-dialog') && document.querySelector('#ees-work-designer [role=status]')?.textContent.includes('저장했습니다')")
         self.click('[data-author-action=tab][data-tab=history]')
         self.wait("[...document.querySelectorAll('.ew-author-history strong')].some(node=>node.textContent.trim()==='게시 v1')")
         published=self.browser_api('GET','/api/ees-work/workspace?workflow_id='+key)['data']['workflow']

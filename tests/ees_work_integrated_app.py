@@ -679,20 +679,19 @@ def integrated_flow(gate):
     g.click('[data-author-action="open"][data-id="'+identifier+'"]')
     g.wait('document.querySelector("[data-author-status]")?.dataset.authorRevision === '+json.dumps(str(prepared['revision'])))
     g.click('.ew-procedure-menu>summary');g.click('[data-author-action="validate"]')
-    g.wait('!!document.querySelector(\'[data-author-action="publish"]\')')
+    g.wait('!!document.querySelector(\'#ew-publication-state\')')
     g.wait('!!document.querySelector(".ew-author-validation")')
     checked=g.api('/api/ees-work/workspace?workflow_id='+identifier)['workflow']
     assert checked['validation']['revision']==checked['revision'] and not checked['validation']['errors']
-    g.wait('document.querySelector(\'[data-author-action="publish"]\')?.disabled===false')
-    assert g.browser.evaluate('!document.querySelector(\'[data-author-action="publish"]\').disabled')
+    g.wait('document.querySelector(\'#ew-publication-state\')?.disabled===false')
+    assert g.browser.evaluate('!document.querySelector(\'#ew-publication-state\').disabled')
     g.capture('figma-b23-publish-review')
-    g.click('[data-author-action="publish"]')
-    # C3 puts initial focus on the body when this confirmation has no inputs.
-    g.wait("document.activeElement?.id === 'ees-work-dialog-body'")
-    assert g.browser.evaluate("(()=>{const r=document.querySelector('#ees-work-dialog').getBoundingClientRect();return Math.abs(r.x+r.width/2-innerWidth/2)<2&&Math.abs(r.y+r.height/2-innerHeight/2)<2})()"), 'confirmation dialog must be centered'
-    g.capture('publish-confirmation-body-focus')
-    g.click('#ees-work-dialog [data-dialog-confirm]')
-    g.wait('!document.querySelector("#ees-work-dialog")')
+    g.select('#ew-publication-state','published')
+    assert g.api('/api/ees-work/workspace?workflow_id='+identifier)['workflow']['published_version'] is None
+    g.click('[data-author-action=save]')
+    g.wait('document.querySelector("[data-author-status]")?.dataset.dirty === "false"')
+    assert not g.browser.evaluate('!!document.querySelector("#ees-work-dialog")')
+    g.capture('publication-state-saved')
     g.click('[data-author-action="tab"][data-tab="history"]')
     g.wait('document.querySelector(".ew-author-history")?.innerText.includes("게시 v1")')
     published=g.api('/api/ees-work/workspace?workflow_id='+identifier)['workflow']
@@ -1286,10 +1285,10 @@ def figma_delta_flow(g):
     # The validation panel can render while its follow-up workspace read is
     # still pending. Require the physical publish action to be ready before
     # assessing advisory-only publication; never enable it from the fixture.
-    g.wait('document.querySelector(\'[data-author-action="publish"]\')?.disabled === false')
-    assert g.browser.evaluate('!document.querySelector(\'[data-author-action="publish"]\').disabled')
+    g.wait('document.querySelector(\'#ew-publication-state\')?.disabled === false')
+    assert g.browser.evaluate('!document.querySelector(\'#ew-publication-state\').disabled')
     g.capture('figma-b23-delivery-advisory-publish-enabled')
-    g.click('[data-author-action="publish"]');g.click('#ees-work-dialog [data-dialog-confirm]')
+    g.select('#ew-publication-state','published');g.click('[data-author-action=save]')
     g.wait('!document.querySelector("#ees-work-dialog")')
     g.click('[data-author-action="tab"][data-tab="history"]')
     g.wait('document.querySelector(".ew-author-history")?.innerText.includes("게시 v1")')
