@@ -1726,7 +1726,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action=draft_save]')
         self.wait("document.querySelector('[data-draft-status]')?.textContent.includes('저장됨 · r2')")
         saved = self.tool_command('tool_draft_get', tool_id=identifier)['tool_draft']
-        self.assertEqual(saved['draft'], fixture)
+        self.assertEqual(saved['draft'], {**fixture, 'scope': {'system_id': 'EMS', 'factory_id': ''}})
         self.assertTrue(saved['check']['valid'], saved['check'])
         self.assertIsNone(saved['active_version'])
         self.assertEqual((saved['created_by'], saved['updated_by']), (self.server.user['id'], self.server.user['id']))
@@ -1741,6 +1741,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.screenshot('tools-phase1-list-1920')
         self.click('[data-author-action=draft_open][data-id="' + identifier + '"]')
         self.wait("document.querySelector('[name=draft_name]')?.value === " + json.dumps(fixture['name']))
+        self.assertEqual(self.read('[name=draft_system]', 'value'), 'EMS')
+        self.assertEqual(self.read('[name=draft_factory]', 'value'), '')
         self.click('[data-author-action=draft_tab][data-id=io]')
         self.assertEqual(self.read('[name=draft_input_0_question]', 'value'), question['question'])
         self.click('[data-author-action=draft_part][data-id=outputs]')
