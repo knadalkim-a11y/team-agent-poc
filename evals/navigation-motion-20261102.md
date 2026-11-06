@@ -1,5 +1,16 @@
 # 탐색·패널 UI 검증
 
+<a id="scope-selector-metrics-20261106"></a>
+
+## 2026-11-06 · 작업 위치 선택칸 높이·라벨 공통화
+
+- **증상·기준:** 사용자 사내 적용 보고는 `7a56cdbbcbf104a8a0847a446e951d262907a167`. 강력 새로고침 뒤 제목 잘림/폭 문제 일부가 개선됐지만 공장·시스템 선택칸은 여전히 미세하게 다르다고 보고했다. 사내 브라우저를 직접 조회하지 않았으며 캐시를 모든 증상의 확정 원인으로 보지 않는다.
+- **확인된 원인:** 공통 버튼은 줄 높이22px를 상속하고 라벨은12px/18px인 반면, `data-work-mode=author` 전용 규칙은20px와11px/20px로 덮어썼다. 각 행40→38px, 전체79→75px가 된다. #122는 가로 폭/위치만 비교해 이 높이·글자 차이를 놓쳤다.
+- **기존 실제 증거:** [main CI493 브라우저 자료](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/42124297875/artifacts/13462280219), ZIP SHA256 `8e5843b8f733ca83d7736409dd49eda76821d849183f0585b05972b38adbef6a`의 `source-scope-three-dropdowns.json`에서 공장 아래 경계172/170px·시스템 아래 경계211/207px를 확인했다. `sidebar-scrollbar-work.png`·`sidebar-scrollbar-workspace.png`도 같은 차이를 보인다. 배포 ZIP과 wheel SHA는 PR #125의 CI493 배포 기록과 일치하며 실제 포함 CSS에도 전용 규칙이 있다.
+- **수정:** 기존 워크스페이스의 선택칸 줄 높이20px·라벨11px/20px를 공통 선택기에 적용하고 두 전용 중복 규칙을 제거했다. 기존 Native 탐색 검사의 `sidebar-scrollbar-geometry.json`에 두 선택칸 높이·라벨/값 좌표·글자 스타일을 추가하여 업무→워크스페이스→업무, 펼침→접힘→재펼침과 두 창 높이에서 동일성을 확인한다. 기존 폭·아이콘·초안 보존 단언은 유지한다.
+- **최초 로컬 제한:** 수정 전 배포 CSS를 로컬 Chromium으로 재측정하려 했으나 제품 로드 전 `socket() failed: Operation not permitted`로 실패했다. 브라우저 실행 우회나 같은 재시도 없이 기존 CI 실측과 원본으로 원인을 확인했다. 수정 후 실제 브라우저·Windows 검증은 새 PR의 최종 CI로 판정하며 사내 적용은 미실행이다.
+- **로컬 검증:** Node motion/Svelte/layout65/65 통과. Python branding34개 중33개 통과·공식 wheel/frontend 입력을 요구하는1개는 미실행이다. UTF-8 기본 인코딩 경고를 오류로 처리했다. 문서30파일/2936링크 오류0·검토 후보0, 시험 ID1734개 감사 오류0, Native 시험 구문·diff 검사 통과. 수정 후 실제 브라우저/Windows 및 최종 판정은 PR의 최종 head 전체 CI와 실측으로 연결한다. [사용자 결정](../docs/mockups/ees-work/TASK.md#scope-selector-metrics-20261106).
+
 <a id="sidebar-stable-scrollbar-20261105"></a>
 
 ## 2026-11-05 · 업무/워크스페이스 스크롤바 폭 고정
