@@ -53,6 +53,74 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(started['ok'], started)
         self.assertEqual(started['run']['definition']['authoring_review'], definition['authoring_review'])
 
+    async def test_save_publication_updates_new_runs_and_preserves_existing_snapshots(self):
+        key, definition, revision = await self.create()
+        definition['category'] = 'incident'
+        first = await self.command('save_draft', workflow_id=key, expected_revision=revision,
+                                   definition=definition, publication_state='published')
+        self.assertTrue(first['ok'], first)
+        old_run = await self.start(key, first['revision'])
+        definition['nodes']['j']['name'] = '바뀐 작업'
+        saved = await self.command('save_draft', workflow_id=key, expected_revision=first['revision'],
+                                   definition=definition, publication_state='published')
+        self.assertEqual(saved['revision'], first['revision'] + 1)
+        self.assertEqual(saved['published_version'], first['published_version'] + 1)
+        new_run = await self.start(key, saved['revision'])
+        self.assertEqual(new_run['definition']['nodes']['j']['name'], '바뀐 작업')
+        old = await self.service.workspace_state(self.users['a'], run_id=old_run['id'])
+        self.assertEqual(old['run']['definition']['nodes']['j']['name'], '작업')
+        hidden = await self.command('save_draft', workflow_id=key, expected_revision=saved['revision'],
+                                    definition=definition, publication_state='unpublished')
+        self.assertIsNone(hidden['published_version'])
+        blocked = await self.command('start_run', workflow_id=key, expected_revision=hidden['revision'])
+        self.assertEqual(blocked['error']['code'], 'publication_required')
+        state = await self.service.workspace_state(self.users['admin'], workflow_id=key)
+        self.assertEqual(len(state['workflow']['versions']), 3)
+        again = await self.command('save_draft', workflow_id=key, expected_revision=hidden['revision'],
+                                   definition=definition, publication_state='published')
+        self.assertEqual(again['published_version'], 4)
+
+    async def test_save_publication_incomplete_state_validation_and_retry_permissions(self):
+        created = await self.command('create_workflow', name='미완성', system_id='EMS')
+        body = dict(action='save_draft', workflow_id=created['workflow_id'], expected_revision=1,
+                    definition=created['workflow']['draft'], publication_state='published', request_id=str(uuid4()))
+        saved = await self.service.workspace_command(self.users['a'], body)
+        self.assertTrue(saved['ok'], saved)
+        self.assertEqual(await self.service.workspace_command(self.users['a'], body), saved)
+        state = await self.service.workspace_state(self.users['admin'], workflow_id=created['workflow_id'])
+        self.assertEqual(len(state['workflow']['versions']), 1)
+        invalid = await self.command('save_draft', workflow_id=created['workflow_id'], expected_revision=2,
+                                     definition=body['definition'], publication_state='other')
+        self.assertEqual(invalid['error']['code'], 'invalid_publication_state')
+        with self.service._db(write=True) as db:
+            db.execute("DELETE FROM work_access WHERE principal_id='a'")
+        denied = await self.service.workspace_command(self.users['a'], body)
+        self.assertFalse(denied['ok'], denied)
+
+    async def test_save_publication_rolls_back_content_state_and_receipt_on_storage_failure(self):
+        key, definition, revision = await self.create()
+        before = (await self.service.workspace_state(self.users['admin'], workflow_id=key))['workflow']
+        definition['name'] = '실패하면 저장되지 않음'
+        body = dict(action='save_draft', workflow_id=key, expected_revision=revision, definition=definition,
+                    publication_state='published', request_id=str(uuid4()))
+        with self.service._db(write=True) as db:
+            db.execute("CREATE TRIGGER reject_version BEFORE INSERT ON work_versions BEGIN SELECT RAISE(ABORT, 'synthetic disk error'); END")
+        failed = await self.service.workspace_command(self.users['admin'], body)
+        self.assertFalse(failed['ok'], failed)
+        after = (await self.service.workspace_state(self.users['admin'], workflow_id=key))['workflow']
+        for field in ('draft', 'revision', 'published_version', 'versions'):
+            self.assertEqual(after[field], before[field], field)
+        with self.service._db(write=True) as db:
+            self.assertIsNone(db.execute('SELECT 1 FROM work_receipts WHERE request_id=?', (body['request_id'],)).fetchone())
+            db.execute('DROP TRIGGER reject_version')
+        saved = await self.service.workspace_command(self.users['admin'], body)
+        self.assertTrue(saved['ok'], saved)
+        self.assertEqual(saved['revision'], revision + 1)
+        stale = await self.command('save_draft', workflow_id=key, expected_revision=revision,
+                                   definition=definition, publication_state='unpublished')
+        self.assertEqual(stale['error']['code'], 'revision_conflict')
+        self.assertEqual((await self.service.workspace_state(self.users['admin'], workflow_id=key))['workflow']['published_version'], saved['published_version'])
+
     async def asyncSetUp(self):
         self.temp = tempfile.TemporaryDirectory(); self.addCleanup(self.temp.cleanup)
         self.database = Path(self.temp.name) / 'work.sqlite3'
