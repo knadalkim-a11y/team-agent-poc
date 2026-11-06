@@ -1,0 +1,38 @@
+{
+  "html": "/workspace/scratch/b6a22133a55b/source-review/docs/mockups/ees-work/design-mock-14-work-centered.html",
+  "html_sha256": "ca6f008d47ecf056de64005923f692a6d4b2c107b84a86f28563ceeb89d12a4a",
+  "source": "/workspace/scratch/b6a22133a55b/source-review/docs/mockups/ees-work/design-mock-src/14-work-centered.html",
+  "source_sha256": "1eed5284db4163ff9112ff27508109daa5915f52e34e8207fd3dbeba4cce90bc",
+  "static_validation": "passed",
+  "browser_validation": "not_run",
+  "passing_html_screenshots": [],
+  "source_review_fixes": [
+    {
+      "finding": "Overlay layout showed an expansion button whose state was immediately cancelled.",
+      "resolution": "Expansion button is hidden for every data-overlay=true layout.",
+      "verification": "source inspected; browser not run"
+    },
+    {
+      "finding": "Opening overlay chat could leave keyboard focus in the inert work area.",
+      "resolution": "Opening overlay focuses chat composer and sets work/sidebar inert; dialog semantics added.",
+      "verification": "source inspected; browser not run"
+    },
+    {
+      "finding": "Returning to a remembered local tab reset the chat reference label to the default tab.",
+      "resolution": "switchScreen reapplies localTab from ui.tabs.",
+      "verification": "source inspected; browser not run"
+    }
+  ],
+  "test_harness_correction": "The first built-file static pass attempted to parse the embedded text/plain font license as JavaScript. The checker now parses executable script types only; first-checker-failure.json is preserved.",
+  "reports": {
+    "static": "/workspace/scratch/b6a22133a55b/source-review/evals/artifacts/work-centered-layout-20261106/final-static/validation-report.json",
+    "environment": "/workspace/scratch/b6a22133a55b/source-review/evals/artifacts/work-centered-layout-20261106/environment-report.json",
+    "script": "/workspace/scratch/b6a22133a55b/source-review/evals/artifacts/work-centered-layout-20261106/validate_mock.py"
+  },
+  "remaining_checks": [
+    "Actual 1920/1366/480 rendering",
+    "Button occlusion and horizontal overflow",
+    "Chat close/expand and keyboard focus",
+    "Draft preservation across mode/screen changes"
+  ]
+}

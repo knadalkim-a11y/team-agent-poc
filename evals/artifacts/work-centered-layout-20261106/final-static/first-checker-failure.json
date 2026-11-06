@@ -1,0 +1,26 @@
+{
+  "html": "/workspace/scratch/b6a22133a55b/source-review/docs/mockups/ees-work/design-mock-14-work-centered.html",
+  "static": {
+    "passed": false,
+    "duplicate_ids": [],
+    "external_resource_dependencies": [],
+    "missing_required_ids": [],
+    "script_parse": [
+      {
+        "index": 1,
+        "passed": true,
+        "error": ""
+      },
+      {
+        "index": 2,
+        "passed": false,
+        "error": "/workspace/scratch/b6a22133a55b/source-review/evals/artifacts/work-centered-layout-20261106/final-static/inline-2.js:2\nEES Work bundled font notices\n    ^^^^\n\nSyntaxError: Unexpected identifier 'Work'\n    at wrapSafe (node:internal/modules/cjs/loader:1861:18)\n    at checkSyntax (node:internal/main/check_syntax:88:3)\n\nNode.js v24.22.1"
+      }
+    ],
+    "limitations": "Parsing does not prove visual layout, accessibility, click behavior, or draft preservation."
+  },
+  "browser": {
+    "status": "not_run",
+    "screenshots": []
+  }
+}
