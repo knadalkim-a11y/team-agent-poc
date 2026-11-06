@@ -5539,7 +5539,7 @@
         "request timeline preserves EES report and independent effect confirmation",
         "history uses immutable attempt inputs and result rather than current edited values",
         "missing history is explicitly unexecuted and never a success fixture",
-        "retired saved My Work opens system work without selecting or mutating an old run",
+        "retired saved ${retiredTab} opens scope overview without selecting or mutating an old run",
         "an explicit history visit wins over a late retired selection restore",
         "late workspace reads are discarded after account change",
         "late workspace reads are discarded after selected job changes",

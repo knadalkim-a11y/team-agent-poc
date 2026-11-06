@@ -5,7 +5,7 @@ const copy=value=>JSON.parse(JSON.stringify(value));
 const settle=()=>new Promise(setImmediate);
 const evidence=[];
 function record(value){evidence.push(value);if(process.env.EES_NATIVE_RETURN_EVIDENCE)fs.writeFileSync(process.env.EES_NATIVE_RETURN_EVIDENCE,JSON.stringify({runtime:process.version,source:process.env.EES_NATIVE_RETURN_SOURCE || 'working-tree',level:'controller render callbacks, not browser animation frames',cases:evidence},null,2)+'\n','utf8');}
-const targets={tools:{action:'tools',mode:'author',tab:'tools'},procedures:{action:'procedures',mode:'author',tab:'overview'},workspace_admin:{action:'workspace_admin',mode:'author',tab:'workspace_admin'},work:{action:'mode',mode:'work',tab:'overview'}};
+const targets={tools:{action:'tools',mode:'author',tab:'tools'},procedures:{action:'procedures',mode:'author',tab:'overview'},work:{action:'mode',mode:'work',tab:'overview'}};
 function harness(origin){
  const h=controller(),frames=[],authorFrames=[],navigation=[];let phase='initial',time=0,chatReady=true,closed=0,resets=0;
  const capabilities={actor_id:'a',is_admin:true,can_author:true,native_access_available:true,native_access:{skills:true,models:true,admin:true}};
@@ -38,7 +38,7 @@ function harness(origin){
  };
 }
 
-for(const origin of ['tools','procedures','workspace_admin'])for(const native of ['skills','models'])for(const destination of Object.keys(targets).filter(value=>value!==origin)){
+for(const origin of ['tools','procedures'])for(const native of ['skills','models'])for(const destination of Object.keys(targets).filter(value=>value!==origin)){
  test(`Native return selects ${destination} before any response: ${origin} -> ${native}`,async()=>{
   const h=harness(origin);await h.open(native);h.delayReplies();h.phase('before-click');
   const first=h.frames.length,firstAuthor=h.authorFrames.length,target=targets[destination];
@@ -68,7 +68,7 @@ for(const origin of ['tools','procedures','workspace_admin'])for(const native of
 }
 
 test('same Native destination retains the exact private author draft and selection during both delayed reads',async()=>{
- for(const origin of ['tools','procedures','workspace_admin']){
+ for(const origin of ['tools','procedures']){
   const h=harness(origin);await h.open('skills');const before=copy(h.api.snapshot().selection),counts=h.counts();h.delayReplies();await h.click(origin);
   assert.deepEqual(copy(h.api.snapshot().selection),before);assert.equal(h.designer.readDraft(),h.draft);assert.deepEqual(h.counts(),counts);
   await h.advance(1000);assert.deepEqual(copy(h.api.snapshot().selection),before);await h.advance(2000);
@@ -84,7 +84,7 @@ test('Native return publishes no work reference until workspace operations and C
 });
 
 test('account reset discards a pending Native destination and all prior private state',async()=>{
- const h=harness('tools');await h.open('skills');h.delayReplies();await h.api.sourceAction({action:'workspace_admin'});
+ const h=harness('tools');await h.open('skills');h.delayReplies();await h.api.sourceAction({action:'procedures'});
  h.setAuth('account-b-token');h.api.sync();await settle();assert.equal(h.api.snapshot().state,null);assert.equal(h.api.snapshot().selection.mode,'work');assert.equal(h.api.snapshot().selection.tab,'overview');
 });
 

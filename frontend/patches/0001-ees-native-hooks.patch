@@ -1331,10 +1331,10 @@ index 0000000..a509ea5
 +/>
 diff --git a/src/lib/components/ees/EesNavigation.svelte b/src/lib/components/ees/EesNavigation.svelte
 new file mode 100644
-index 0000000..8e92785
+index 0000000..db77df1
 --- /dev/null
 +++ b/src/lib/components/ees/EesNavigation.svelte
-@@ -0,0 +1,254 @@
+@@ -0,0 +1,244 @@
 +<script lang="ts">
 +	import { getContext } from 'svelte';
 +	import { page } from '$app/stores';
@@ -1378,7 +1378,7 @@ index 0000000..8e92785
 +	$: cap = $eesSnapshot.native_capabilities ?? data.capabilities ?? {};
 +	$: author = $eesSnapshot.native_shell || s.mode === 'author';
 +	$: globalTools = !$eesSnapshot.native_shell && author && s.tab === 'tools';
-+	$: scopeHasFactory = !$eesSnapshot.native_shell && (!author || s.tab !== 'workspace_admin');
++	$: scopeHasFactory = !$eesSnapshot.native_shell;
 +	$: create = cap.is_admin === true || cap.can_author === true || cap.can_manage === true;
 +	$: canWorkspace =
 +		create ||
@@ -1446,7 +1446,7 @@ index 0000000..8e92785
 +								aria-current={!$eesSnapshot.native_id &&
 +								(action === 'tools'
 +									? s.tab === 'tools'
-+									: !['tools', 'workspace_admin'].includes(s.tab))
++									: s.tab !== 'tools')
 +									? 'page'
 +									: undefined}
 +								on:click={() => eesAction({ action })}
@@ -1484,21 +1484,11 @@ index 0000000..8e92785
 +								>{/if}{/each}
 +					</nav>
 +				</section>{/if}
-+			{#if cap.is_admin === true}<section class="ew-nav-group">
++			{#if nativeAllowed('admin')}<section class="ew-nav-group">
 +					<h3 class="ew-nav-group-title">{t('EES.Nav.AdminOnly', 'Administrators only')}</h3>
 +					<nav class="ew-nav-links">
-+						{#each [null, ...targets.filter(([id]) => id === 'admin')] as target}
-+							{#if target === null}<button
-+									class="ew-nav-button"
-+									data-action="workspace_admin"
-+									aria-current={!$eesSnapshot.native_id && s.tab === 'workspace_admin'
-+										? 'page'
-+										: undefined}
-+									on:click={() => eesAction({ action: 'workspace_admin' })}
-+									><Icon name="4d978" /><span>{t('EES.Nav.Access', 'Factories and access')}</span
-+									></button
-+								>
-+							{:else if nativeAllowed(target[0])}<button
++						{#each targets.filter(([id]) => id === 'admin') as target}
++							{#if nativeAllowed(target[0])}<button
 +									class="ew-nav-button"
 +									data-action="native_open"
 +									data-native-id={target[0]}
@@ -1832,7 +1822,7 @@ index 0000000..6d5288b
 +</style>
 diff --git a/src/lib/components/ees/EesShell.svelte b/src/lib/components/ees/EesShell.svelte
 new file mode 100644
-index 0000000..eb10012
+index 0000000..a4eef1d
 --- /dev/null
 +++ b/src/lib/components/ees/EesShell.svelte
 @@ -0,0 +1,477 @@
@@ -1889,7 +1879,7 @@ index 0000000..eb10012
 +		if (retainedChatId) lastChatPath = $page.url.pathname;
 +	}
 +	$: s = $eesSnapshot.selection || {};
-+	$: procedurePanel = s.mode === 'author' && !['tools', 'workspace_admin'].includes(s.tab);
++	$: procedurePanel = s.mode === 'author' && s.tab !== 'tools';
 +	$: fixedPanel = procedurePanel || Boolean($eesSnapshot.procedure_start);
 +	$: panelWidth = fixedPanel ? 480 : (transientWidth ?? clamp(s.panel_width));
 +	$: panelOpen = !nativeRoute && s.panel_open !== false;
@@ -2994,7 +2984,7 @@ index 172ed9a..8873d62 100644
  export const WEBUI_HOSTNAME = '';
  export const WEBUI_BASE_URL = '';
 diff --git a/src/lib/i18n/locales/ko-KR/translation.json b/src/lib/i18n/locales/ko-KR/translation.json
-index 8eba682..38ee86b 100644
+index 8eba682..429459c 100644
 --- a/src/lib/i18n/locales/ko-KR/translation.json
 +++ b/src/lib/i18n/locales/ko-KR/translation.json
 @@ -3081,5 +3081,87 @@
@@ -3025,6 +3015,7 @@ index 8eba682..38ee86b 100644
 +	"EES.Nav.Procedures": "업무 절차",
 +	"EES.Nav.Tools": "도구",
 +	"EES.Nav.Skills": "스킬·지침",
++	"EES.WorkToolSettings": "Work 도구 설정 확인",
 +	"EES.Nav.Models": "AI 도우미",
 +	"EES.Nav.Knowledge": "참고 문서",
 +	"EES.Nav.Prompts": "빠른 문장",
@@ -3032,7 +3023,6 @@ index 8eba682..38ee86b 100644
 +	"EES.Nav.Admin": "관리자 설정",
 +	"EES.Nav.AI": "AI 설정",
 +	"EES.Nav.AdminOnly": "관리자만",
-+	"EES.Nav.Access": "공장·접근 범위",
 +	"EES.Nav.Recent": "최근 편집",
 +	"EES.Nav.Records": "실행 기록",
 +	"EES.Nav.Chats": "대화 기록",
@@ -3709,3 +3699,32 @@ index 0000000..6e7a618
 +		</div>
 +	{/if}
 +</div>
+diff --git a/src/lib/components/workspace/Models.svelte b/src/lib/components/workspace/Models.svelte
+index 3b0513b..3f80d95 100644
+--- a/src/lib/components/workspace/Models.svelte
++++ b/src/lib/components/workspace/Models.svelte
+@@ -35,6 +35,7 @@
+ 	} from '$lib/apis/models';
+ 
+ 	import { getModels } from '$lib/apis';
++	import { eesAction, eesSnapshot } from '$lib/components/ees/state';
+ 	import { getGroups } from '$lib/apis/groups';
+ 	import { updateUserSettings } from '$lib/apis/users';
+ 
+@@ -511,6 +512,16 @@
+ 	/>
+ 
+ 	<div class="space-y-1">
++		{#if $user?.role === 'admin' && ($eesSnapshot.native_capabilities ?? $eesSnapshot.state?.capabilities)?.is_admin === true}
++			<div class="flex justify-end">
++				<button
++					type="button"
++					class="px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-850 transition"
++					data-ees-work-tool-settings
++					on:click={() => eesAction({ action: 'admin_work_tool' })}
++				>{$i18n.t('EES.WorkToolSettings', { defaultValue: 'Work tool settings' })}</button>
++			</div>
++		{/if}
+ 		<div class="flex h-8 flex-1 items-center w-full gap-2">
+ 			<div class="flex min-w-0 flex-1 items-center">
+ 				<div class=" self-center ml-1 mr-3">
