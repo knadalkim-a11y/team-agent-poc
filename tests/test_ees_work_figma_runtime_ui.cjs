@@ -56,7 +56,7 @@ function nativeNavigationHarness(capabilities=nativeCapabilities({is_admin:true,
 test('workspace menu uses server permissions for three groups and hides unavailable Native destinations',()=>{
  const admin=nativeCapabilities({is_admin:true,can_author:true,native_access:{models:true,knowledge:true,prompts:true,skills:true,tools:true,admin:true}});
  const rendered=html('workWorkspaceMenuHTML({capabilities}, {tab:"tools"})',{capabilities:admin});
- assert.equal((rendered.match(/class="ew-nav-group"/g)||[]).length,3);for(const label of ['업무 만들기','AI 설정','관리자만','스킬·지침','AI 도우미','참고 문서','빠른 문장','공장·접근 범위','관리자 설정'])assert.ok(rendered.includes(label),label);
+ assert.equal((rendered.match(/class="ew-nav-group"/g)||[]).length,3);assert.doesNotMatch(rendered,/공장·접근 범위|workspace_admin|admin_factory|admin_access/);for(const label of ['업무 만들기','AI 설정','관리자만','스킬·지침','AI 도우미','참고 문서','빠른 문장','관리자 설정'])assert.ok(rendered.includes(label),label);
  assert.doesNotMatch(rendered,/기능 연결|data-native-id="tools"/);
  assert.match(rendered,/<small class="ew-nav-native-name">모델<\/small>/);assert.doesNotMatch(rendered,/native_workspace|native_skills|Native 모델|Open WebUI에서 열기|native_return/);
  const nativeSelected=html('workWorkspaceMenuHTML({capabilities,workflows:[{id:"kept",name:"Previous draft",updated_at:"2026-10-11"}]}, {workflow_id:"kept",tab:"overview",native_id:"skills"})',{capabilities:admin});
@@ -143,8 +143,8 @@ test('authoring factory scope preserves the open definition and unfinished creat
  assert.equal(h.api.snapshot().selection.factory_id,'');assert.equal(h.api.snapshot().selection.workflow_id,'w');
  assert.equal(JSON.stringify(draft),definition);assert.equal(closed,0);
 });
-test('factory scope remains unavailable in tools, administration and Native management',async()=>{
- for(const tab of ['tools','workspace_admin']){
+test('factory scope remains unavailable in global tools and Native management',async()=>{
+ for(const tab of ['tools']){
   const h=nativeNavigationHarness();h.state.factories=[{id:'factory-a',system_id:'EMS'}];h.api.setSelection({mode:'author',tab,system_id:'EMS',factory_id:''});
   await h.api.sourceAction({action:'choose_factory',factoryId:'factory-a'});
   assert.equal(h.api.snapshot().selection.factory_id,'');assert.equal(h.calls.length,0);
