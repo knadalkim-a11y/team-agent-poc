@@ -713,6 +713,9 @@ class SourceShellNativeTests(IntegratedNativeCase):
             original = self.browser.evaluate('window.__eesNativeDraftV1.read()')
             self.click('#ees-saved-prompts-button')
             self.wait("document.querySelectorAll('[data-saved-prompt]').length === 3")
+            self.wait("document.activeElement?.matches('.ees-prompts-search')")
+            self.wait("getComputedStyle(document.querySelector('.ees-prompts-popover')).opacity === '1'")
+            self.wait("document.querySelector('.ees-prompts-popover').getBoundingClientRect().bottom <= document.querySelector('#message-input-container').getBoundingClientRect().top - 7")
             self.screenshot('workspace-menu-prompts-1920')
             self.fill('.ees-prompts-search', '주간')
             self.wait("document.querySelectorAll('[data-saved-prompt]').length === 1")
@@ -761,6 +764,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
             self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), final_draft)
             self.click('.ees-settings-trigger')
             self.wait("document.querySelector('.ees-settings-popover [data-native-id=models]')")
+            self.wait("getComputedStyle(document.querySelector('.ees-settings-popover')).opacity === '1'")
             self.screenshot('workspace-menu-settings-1920')
             self.click('.ees-settings-popover [data-native-id=models]')
             self.wait("location.pathname === '/workspace/models' && document.querySelector('#workspace-container input')")
@@ -776,6 +780,8 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 self.wait("document.querySelectorAll('[data-saved-prompt]').length === 4")
                 self.wait("(()=>{const r=document.querySelector('.ees-prompts-popover').getBoundingClientRect();return r.x>=0&&r.right<=innerWidth&&r.y>=0&&r.bottom<=innerHeight;})()")
                 self.assertFalse(self.browser.evaluate('document.documentElement.scrollWidth > innerWidth'))
+                self.wait("getComputedStyle(document.querySelector('.ees-prompts-popover')).opacity === '1'")
+                self.wait("document.querySelector('.ees-prompts-popover').getBoundingClientRect().bottom <= document.querySelector('#message-input-container').getBoundingClientRect().top - 7")
                 self.screenshot('workspace-menu-prompts-' + str(width))
                 self.key('Escape', 27)
             self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), final_draft)
@@ -785,7 +791,10 @@ class SourceShellNativeTests(IntegratedNativeCase):
             records.append({'id': 'rich', 'name': '서식 있는 요청', 'command': 'rich',
                             'content': '**결정 사항**\n\n후속 작업', 'is_active': True})
             self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
-            self.refresh()
+            previous_document = self.browser.evaluate('performance.timeOrigin')
+            self.navigate('/c/existing-chat')
+            self.wait('performance.timeOrigin !== ' + json.dumps(previous_document)
+                      + ' && window.__eesNativeDraftV1?.ready() && document.querySelector("#chat-input")')
             self.fill('#chat-input', '작성 중인 내용')
             self.click('#ees-saved-prompts-button')
             self.wait("document.querySelector('[data-saved-prompt=rich]')")
@@ -794,6 +803,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
             self.assertEqual(self.browser.evaluate("[...document.querySelector('#chat-input').children].map(n=>n.textContent)"),
                              ['작성 중인 내용', '', '결정 사항', '후속 작업'])
             self.assertEqual(self.server.completions, [])
+            self.screenshot('workspace-menu-rich-insert-1920')
 
     def test_ai_assistant_work_tool_settings_stays_on_native_page(self):
         self.enable_native_menus()

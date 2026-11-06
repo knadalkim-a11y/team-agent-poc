@@ -1394,6 +1394,60 @@ index c183993..e490262 100644
 -		</div>
  	{/if}
  </div>
+diff --git a/src/lib/components/common/Dropdown.svelte b/src/lib/components/common/Dropdown.svelte
+index 9234ec7..27056b0 100644
+--- a/src/lib/components/common/Dropdown.svelte
++++ b/src/lib/components/common/Dropdown.svelte
+@@ -26,6 +26,11 @@
+ 	/** Side offset in px */
+ 	export let sideOffset = 4;
+ 
++	/** Optional surrounding control to keep clear above/below the popup. */
++	export let anchorSelector = '';
++	/** Optional first control to focus when opening from the trigger. */
++	export let focusSelector = '';
++
+ 	/** Position against the visual viewport, e.g. when the mobile keyboard is open */
+ 	export let visualViewportAware = false;
+ 
+@@ -108,9 +113,17 @@
+ 		};
+ 	}
+ 
++	function anchorRect(trigger: HTMLElement) {
++		const rect = trigger.getBoundingClientRect();
++		const anchor = anchorSelector ? trigger.closest(anchorSelector) : null;
++		if (!anchor) return rect;
++		const bounds = anchor.getBoundingClientRect();
++		return { left: rect.left, right: rect.right, top: bounds.top, bottom: bounds.bottom };
++	}
++
+ 	function positionContentDefault() {
+ 		if (!triggerEl || !contentEl) return;
+-		const rect = triggerEl.getBoundingClientRect();
++		const rect = anchorRect(triggerEl);
+ 		resolvedMaxHeight = maxHeight;
+ 
+ 		contentEl.style.position = 'fixed';
+@@ -159,7 +172,7 @@
+ 
+ 	function positionContentVisualViewport() {
+ 		if (!triggerEl || !contentEl) return;
+-		const rect = triggerEl.getBoundingClientRect();
++		const rect = anchorRect(triggerEl);
+ 		const viewport = visualViewportRect();
+ 		const viewportRight = viewport.left + viewport.width;
+ 		const viewportBottom = viewport.top + viewport.height;
+@@ -241,7 +254,8 @@
+ 
+ 		if (shouldFocusContent) {
+ 			shouldFocusContent = false;
+-			contentEl?.focus();
++			const first = focusSelector ? contentEl?.querySelector<HTMLElement>(focusSelector) : null;
++			(first ?? contentEl)?.focus();
+ 		}
+ 	}
+ 
 diff --git a/src/lib/components/ees/EesHelperNotice.svelte b/src/lib/components/ees/EesHelperNotice.svelte
 new file mode 100644
 index 0000000..3ba519f
@@ -1881,10 +1935,10 @@ index 0000000..8d49db6
 +</style>
 diff --git a/src/lib/components/ees/EesSavedPrompts.svelte b/src/lib/components/ees/EesSavedPrompts.svelte
 new file mode 100644
-index 0000000..4022621
+index 0000000..093e8dd
 --- /dev/null
 +++ b/src/lib/components/ees/EesSavedPrompts.svelte
-@@ -0,0 +1,264 @@
+@@ -0,0 +1,271 @@
 +<script lang="ts">
 +	import { getContext, onDestroy, tick } from 'svelte';
 +	import { page } from '$app/stores';
@@ -1915,7 +1969,6 @@ index 0000000..4022621
 +	let alive = true;
 +	let previousBoundary = '';
 +	let trigger: HTMLButtonElement;
-+	let search: HTMLInputElement;
 +	$: cap = $eesSnapshot.native_capabilities ?? $eesSnapshot.state?.capabilities ?? {};
 +	$: canManage =
 +		cap.actor_id === $user?.id &&
@@ -1992,12 +2045,10 @@ index 0000000..4022621
 +			if (current(at) && request === sequence) loading = false;
 +		}
 +	}
-+	async function opened(open: boolean) {
++	function opened(open: boolean) {
 +		if (open) {
 +			query = '';
 +			void load();
-+			await tick();
-+			if (show) search?.focus();
 +		} else {
 +			sequence++;
 +			loading = false;
@@ -2035,6 +2086,15 @@ index 0000000..4022621
 +		if (current(at)) trigger?.focus();
 +	}
 +	function listKeys(event: KeyboardEvent) {
++		if (event.key === 'Escape') {
++			// Consume this popup's Escape before Native's global chat-focus shortcut.
++			event.preventDefault();
++			event.stopPropagation();
++			show = false;
++			opened(false);
++			trigger?.focus();
++			return;
++		}
 +		if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
 +		const buttons = Array.from(
 +			(event.currentTarget as HTMLElement).querySelectorAll<HTMLButtonElement>('[data-saved-prompt]')
@@ -2056,6 +2116,8 @@ index 0000000..4022621
 +	bind:show
 +	side="top"
 +	sideOffset={8}
++	anchorSelector="#message-input-container"
++	focusSelector=".ees-prompts-search"
 +	contentClass="ees-assets-popover ees-prompts-popover"
 +	onOpenChange={opened}
 +	visualViewportAware
@@ -2075,7 +2137,6 @@ index 0000000..4022621
 +	<div slot="content" on:keydown={listKeys} role="presentation">
 +		<h2>{t('EES.Nav.Prompts', 'Saved prompts')}</h2>
 +		<input
-+			bind:this={search}
 +			bind:value={query}
 +			type="search"
 +			class="ees-prompts-search"

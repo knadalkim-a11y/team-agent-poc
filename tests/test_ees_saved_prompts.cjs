@@ -62,3 +62,17 @@ test('appending multiline prompts never creates an empty text node',()=>{
  assert.deepEqual(convert(state,'\n\nSaved text'),[{paragraph:null},{paragraph:{text:'Saved text'}}]);
  assert.deepEqual(convert(state,'First\nSecond'),[{text:'First'},{paragraph:{text:'Second'}}]);
 });
+
+test('Escape closes the saved-prompt popup and restores its trigger before global shortcuts',()=>{
+ const h=harness();
+ const handler=block('function listKeys(', '\n</script>')
+  .replace('event: KeyboardEvent','event').replaceAll(' as HTMLElement','')
+  .replaceAll(' as HTMLButtonElement','').replaceAll('querySelectorAll<HTMLButtonElement>','querySelectorAll');
+ h.env.opened=h.api.opened;h.env.loading=true;
+ const key=Function('env',`with(env){${handler};return listKeys;}`)(h.env);
+ let prevented=false,stopped=false;
+ key({key:'Escape',preventDefault(){prevented=true},stopPropagation(){stopped=true}});
+ assert.equal(prevented,true);assert.equal(stopped,true);
+ assert.equal(h.env.show,false);assert.equal(h.env.loading,false);assert.equal(h.env.sequence,1);
+ assert.equal(h.env.focused,1);assert.deepEqual(h.writes,[]);assert.deepEqual(h.chosen,[]);
+});

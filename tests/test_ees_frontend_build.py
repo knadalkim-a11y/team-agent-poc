@@ -942,6 +942,33 @@ const getSessionUser=async token=>{if(fail)throw Error('temporary offline');retu
 class SavedPromptEditorTests(unittest.TestCase):
     run_node = NativeDraftHookTests.run_node
 
+    def test_prompt_popover_keeps_current_input_visible(self):
+        root = Path(os.environ['EES_TEST_FRONTEND_SOURCE_DIR']).resolve()
+        source = (root / 'src/lib/components/common/Dropdown.svelte').read_text(encoding='utf-8')
+        functions = _between(source, 'function naturalContentHeight()', '\n\tfunction schedulePositionUpdate()')
+        functions = functions.replace('trigger: HTMLElement', 'trigger')
+        probe = r'''
+const assert=require('node:assert/strict');
+let window={innerWidth:1920,innerHeight:1080},side='top',align='start',sideOffset=8;
+let maxHeight='500px',resolvedMaxHeight=maxHeight,visualViewportAware=true,anchorSelector='#message-input-container';
+let button={left:512,right:648,top:1026,bottom:1054},composer={top:978,bottom:1064};
+const triggerEl={getBoundingClientRect:()=>button,closest:()=>({getBoundingClientRect:()=>composer})};
+const contentEl={style:{},scrollHeight:318,offsetHeight:318,offsetWidth:420};
+''' + functions + r'''
+positionContent();
+assert.equal(Number.parseFloat(contentEl.style.top)+318,composer.top-8);
+assert.equal(contentEl.style.left,'512px');
+window={innerWidth:360,innerHeight:800};composer={top:640,bottom:780};
+button={left:100,right:128,top:742,bottom:770};contentEl.offsetWidth=336;
+positionContent();
+assert.equal(Number.parseFloat(contentEl.style.top)+318,composer.top-8);
+assert.equal(contentEl.style.left,'16px');
+anchorSelector='';positionContent();
+assert.equal(Number.parseFloat(contentEl.style.top)+318,button.top-8);
+console.log('saved_prompt_popover_anchor=pass');
+'''
+        self.assertEqual(self.run_node(probe), 'saved_prompt_popover_anchor=pass')
+
     def test_append_preserves_plain_and_rich_paragraphs_and_marks(self):
         root = Path(os.environ['EES_TEST_FRONTEND_SOURCE_DIR']).resolve()
         source = (root / 'src/lib/components/chat/MessageInput.svelte').read_text(encoding='utf-8')
