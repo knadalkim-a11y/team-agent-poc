@@ -3550,7 +3550,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         before = deepcopy(self.state(workflow_id=key)['workflow']['draft']['nodes']['job-0'])
         self.fill('#ew-author-node [name=name]', '기존 재조회 설정을 보존한 작업')
         self.click('[data-author-action="save"]')
-        self.wait("!document.querySelector('[data-author-action=validate]')?.disabled")
+        self.wait("document.querySelector('[data-author-action=validate]')?.disabled === false")
         observed = self.state(workflow_id=key)['workflow']['draft']['nodes']['job-0']
         self.assertEqual(observed['read_retry'], {'count': 2})
         self.assertEqual(observed['tool_reference'], before['tool_reference'])
@@ -3574,11 +3574,15 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.open_author_job_ui('job-0')
         self.fill('#ew-author-node [name=job_guidance]', '기존 정책에 따라 자료를 읽고 확인합니다.')
         self.click('[data-author-action="save"]')
-        self.wait("!document.querySelector('[data-author-action=validate]')?.disabled")
+        self.wait("document.querySelector('[data-author-action=validate]')?.disabled === false")
         saved = self.state(workflow_id=key)['workflow']
         self.assertEqual(saved['draft']['nodes']['job-0']['read_retry'], {'count': 2, 'deadline_seconds': 30})
         self.assertEqual(saved['draft']['nodes']['job-0']['tool_reference'], before['tool_reference'])
-        self.click('.ew-procedure-menu>summary')
+        # Returning to this job restores the menu's previous open state.
+        # Open only a closed menu; an unconditional summary click closes it.
+        if not self.read('.ew-procedure-menu', 'open'):
+            self.click('.ew-procedure-menu>summary')
+        self.wait("document.querySelector('.ew-procedure-menu')?.open === true")
         self.click('[data-author-action="validate"]')
         self.wait("document.querySelector('#ew-publication-state')?.disabled === false")
         self.assertEqual(self.state(workflow_id=key)['workflow']['validation']['errors'], [])

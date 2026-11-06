@@ -311,14 +311,6 @@
 .ew-stage>header button{font-size:12px;min-height:30px;padding:3px 8px;}
 .ew-scope-execution{display:grid;justify-items:start;gap:8px;margin-top:18px;}
 
-.ew-admin-list article{border:1px solid var(--ees-line-divider);border-radius:6px;padding:12px;margin:8px 0;display:grid;gap:6px;}
-.ew-admin-list article>button{justify-self:end;font-size:12px;}
-.ew-admin-list p{font-size:12px;overflow-wrap:anywhere;}
-.ew-admin-form{display:grid;gap:16px;}
-.ew-admin-form>label{display:grid;gap:6px;}
-.ew-admin-form fieldset>label,.ew-admin-form>label:has(input[type=checkbox]){display:flex;gap:8px;align-items:center;}
-.ew-admin-form fieldset{display:flex;gap:12px;flex-wrap:wrap;padding:12px;border:1px solid var(--ees-line-divider);}
-.ew-admin-form textarea{font-family:monospace;}
 .ew-scope-status{background:var(--ees-surface-sidebar);border:1px solid var(--ees-line-divider);border-radius:6px;padding:12px;margin:12px 0;}
 .ew-scope-status p{margin-top:8px!important;}
 
@@ -604,7 +596,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-panel :is(#ees-work-inputs,.ew-result-items,.ew-result-list,.ew-run-steps,
   .ew-author-list,.ew-author-stage,.ew-author table,.ew-procedure-choices,
   .ew-phase-overview,.ew-list-table,.ew-history-values,.ew-author-rule-card,
-  .ew-author-validation>details,.ew-adhoc-start,.ew-check-item,.ew-admin-list article,
+  .ew-author-validation>details,.ew-adhoc-start,.ew-check-item,
   .ew-admin-grants,.ew-amend-row){background:var(--ees-surface-default);}
 #ees-work-panel :is(.ew-query-summary,.ew-schedule-preview,.ew-start-preview,
   .ew-check-evidence,.ew-tool-questions,.ew-procedure-help,.ew-ai-proposal,

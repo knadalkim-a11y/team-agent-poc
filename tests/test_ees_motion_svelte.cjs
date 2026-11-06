@@ -113,7 +113,7 @@ test('procedure authoring uses 480px while work and Native management retain sav
   const creation = panelLayout({ $eesSnapshot: { procedure_start: { draftName: '새 절차' } }, transientWidth: 700 });
   assert.equal(creation.panelWidth, 480); assert.equal(creation.fixedPanel, true);
   assert.equal(panelLayout().panelWidth, 640);
-  for (const tab of ['tools', 'workspace_admin']) {
+  for (const tab of ['tools']) {
     assert.equal(panelLayout({ s: { mode: 'author', tab, panel_width: 680 } }).panelWidth, 680);
     assert.equal(panelLayout({ s: { mode: 'author', tab, panel_width: 680 }, transientWidth: 600 }).panelWidth, 600);
   }

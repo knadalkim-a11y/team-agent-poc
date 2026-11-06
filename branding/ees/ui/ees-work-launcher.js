@@ -26,7 +26,7 @@
   // The last successful workspace remains visible during route validation.
   // References and queued actions still wait for the current route and Chat.
   const chatPrepared=()=>readyRoute===route&&(!route||route===location.pathname+location.search+'#chat')&&(!nativeTicket||nativeTicket.phase==='leaving');
-  function render(){bindHosts();const value=snapshot();view.render(value);positionStageMenu();if(available()&&!value.target_loading&&!evidenceUnavailable&&!(scopeLoading&&error)&&state&&selection.mode==='author'&&selection.tab!=='workspace_admin'&&workCanCreate(capabilities()))designer.render({state:{...state,capabilities:capabilities()},scope_loading:scopeLoading,selection:{...clone(selection),chat_id:chatId()},host:view.authoringHost()});}
+  function render(){bindHosts();const value=snapshot();view.render(value);positionStageMenu();if(available()&&!value.target_loading&&!evidenceUnavailable&&!(scopeLoading&&error)&&state&&selection.mode==='author'&&workCanCreate(capabilities()))designer.render({state:{...state,capabilities:capabilities()},scope_loading:scopeLoading,selection:{...clone(selection),chat_id:chatId()},host:view.authoringHost()});}
   function setBusy(value){busy=value;view.setBusy(value);designer.setBusy?.(value);if(value){clearTimeout(refreshTimer);refreshTimer=setTimeout(refresh,250);}}
   const adminNativePage=()=>Boolean(screen().admin);
   const nativePage=()=>Boolean(screen().native);
@@ -63,7 +63,6 @@
   }
   function navigationPatch(dataset){
     const action=dataset.action;
-    if(action==='workspace_admin')return capabilities()?.is_admin===true?{mode:'author',tab:'workspace_admin',workflow_id:'',run_id:'',job_id:''}:null;
     if(action==='mode')return ['work','author'].includes(dataset.mode)&&(dataset.mode!=='author'||workCanWorkspace(capabilities()))?{mode:dataset.mode,tab:'overview',...(dataset.mode==='work'?{job_id:'',stage_id:'',stage_overview:false}:{})}:null;
     if(action==='procedures'||action==='tools')return workCanCreate(capabilities())?{mode:'author',tab:action==='tools'?'tools':'overview',workflow_id:'',run_id:'',job_id:''}:null;
     if(action==='records')return {mode:'work',tab:action,panel_open:true,job_id:'',records_workflow:''};
@@ -77,9 +76,8 @@
     // Keep the exact unsaved editor when it is the section the user left.
     const action=target.dataset.action;
     const same=ticket&&(action==='mode'&&target.dataset.mode===selection.mode||
-      action==='procedures'&&selection.mode==='author'&&!['tools','workspace_admin'].includes(selection.tab)||
-      action==='tools'&&selection.mode==='author'&&selection.tab==='tools'||
-      action==='workspace_admin'&&selection.tab==='workspace_admin');
+      action==='procedures'&&selection.mode==='author'&&selection.tab!=='tools'||
+      action==='tools'&&selection.mode==='author'&&selection.tab==='tools');
     pendingNativeAction={auth:token(),actor:actor(),path:ticket?.path || '/',dataset:{...target.dataset},patch:navigationPatch(target.dataset),same};
     // Prepare the hidden EES panel before Native reveals it. Keep run/job keys
     // until select's review-save guard finishes; only the destination is shown.
@@ -246,14 +244,14 @@
       if(at!==context()||n!==serial||!screenAvailable())return null;
       const previousActor=state?.capabilities?.actor_id || nativeCapabilities?.actor_id;
       if(previousActor&&result.capabilities?.actor_id&&previousActor!==result.capabilities.actor_id){reset();nativeCapabilities=result.capabilities;return refresh();}
-      if(!restored){restored=true;uiRevision=Math.max(uiRevision,result.ui_state?.revision || 0);const saved=result.ui_state?.state?.selection,explicit=initialSelectionPatch;initialSelectionPatch=null;if(saved&&typeof saved==='object'){const retired=saved.tab==='my_work'?{tab:'overview',workflow_id:'',run_id:'',job_id:'',stage_id:'',stage_overview:false}:{};selection={...selection,...saved,...retired,...explicit};}if(!selection.system_id)selection.system_id=(result.systems?.[0]?.id || result.systems?.[0] || '');if(explicit)remember(explicit.panel_width ?? null);if(at!==context())return refresh();}
+      if(!restored){restored=true;uiRevision=Math.max(uiRevision,result.ui_state?.revision || 0);const saved=result.ui_state?.state?.selection,explicit=initialSelectionPatch;initialSelectionPatch=null;if(saved&&typeof saved==='object'){const retired=['my_work','workspace_admin'].includes(saved.tab)?{tab:'overview',workflow_id:'',run_id:'',job_id:'',stage_id:'',stage_overview:false}:{};selection={...selection,...saved,...retired,...explicit};}if(!selection.system_id)selection.system_id=(result.systems?.[0]?.id || result.systems?.[0] || '');if(explicit)remember(explicit.panel_width ?? null);if(at!==context())return refresh();}
       if(nativePage()){nativeCapabilities=result.capabilities || {};nativeScope={systems:result.systems || [],factories:result.factories || [],scope_options:result.scope_options};error='';render();refreshTimer=setTimeout(refresh,30000);return state;}
       // Drafts remain available to authors, but a saved operations selection
       // must not reopen one. Existing runs keep their own published snapshot.
       if((selection.mode!=='author'||!workCanWorkspace(result.capabilities))&&selection.workflow_id&&!selection.run_id&&result.workflow?.id===selection.workflow_id&&result.workflow.published_version==null){
         return select({workflow_id:'',run_id:'',job_id:'',tab:['overview','start','run_details','current'].includes(selection.tab)?'overview':selection.tab});
       }
-      if(selection.mode==='author'&&!['tools','workspace_admin'].includes(selection.tab)&&result.initial_procedures_ready===false&&(result.capabilities?.managed_systems || []).includes(selection.system_id)){
+      if(selection.mode==='author'&&selection.tab!=='tools'&&result.initial_procedures_ready===false&&(result.capabilities?.managed_systems || []).includes(selection.system_id)){
         await command({action:'initialize_procedures',system_id:selection.system_id,expected_revision:0});
         if(at!==context()||n!==serial||!screenAvailable())return null;
         return refresh();
@@ -458,8 +456,10 @@
     return dialog({title:record.process_name || '이전 기록',note:legacy.notice || '사용 중지된 이전 버전의 기록입니다. 여기에서 다시 실행하지 않습니다.',readOnlyDetail:true,html:`${record.simulation?'<p class="ew-warning">시뮬레이션 기록 · 실제 업무 성공을 뜻하지 않습니다.</p>':''}<p>이전 게시 v${esc(record.version)} · ${esc(record.status)}</p><pre>${esc(JSON.stringify({inputs:record.inputs,jobs:record.jobs,progress:record.progress,created_at:record.created_at},null,2))}</pre>`});
   }
   async function setupWorkTool(){
-    if(!state?.capabilities?.is_admin)throw new Error('Native 관리자 권한이 필요합니다.');
+    if(!capabilities()?.is_admin)throw new Error('Native 관리자 권한이 필요합니다.');
     const at=context(),auth=token(),current=()=>at===context()&&auth===token();
+    const setupState=nativePage()?await api('workspace'):state;if(!current())return;
+    if(!setupState?.capabilities?.is_admin)throw new Error('Native 관리자 권한이 필요합니다.');
     const setupAPI=async(body,path=body?'setup':'status')=>{const response=await fetch('/api/v1/ees/assets/work-tool/'+path,{method:body?'POST':'GET',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json',Authorization:'Bearer '+auth,...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});const result=await response.json();if(!response.ok||result.ok===false)throw new Error(result.error?.message || result.detail?.message || (typeof result.detail==='string'?result.detail:result.reason) || 'Native Work 도구 설정을 확인하지 못했습니다.');return result;};
     const status=await setupAPI();if(!current())return;
     const description=`<p>Native 도구 ID · ${esc(status.id)}</p><p>등록 원본 SHA256</p><pre>${esc(status.registered_source_sha256 || '미등록')}</pre><p>지금 프로그램 원본 SHA256</p><pre>${esc(status.source_sha256)}</pre>`;
@@ -482,28 +482,13 @@
         confirmation='update_readonly_work_tool';body={};
       }
     }else if(status.state==='missing'){
-      let grants=[];const people=(state.people || []).filter(person=>person.value?.kind==='user'),groups=state.native_groups || [];
+      let grants=[];const people=(setupState.people || []).filter(person=>person.value?.kind==='user'),groups=setupState.native_groups || [];
       const pending=dialog({title:'Native 대화에 Work 도구를 등록할까요?',note:'조회·제안 기능만 등록합니다. 저장·게시·실행·확정 도구를 AI에 추가하지 않습니다.',html:description+`<p>허용 함수</p><pre>${esc(JSON.stringify(status.functions || [],null,2))}</pre><fieldset class="ew-admin-grants"><legend>읽기·제안 권한</legend><p>선택하지 않으면 등록 관리자 개인 범위입니다. 공개 권한은 만들지 않습니다.</p>${people.map(person=>`<label><input type="checkbox" data-work-grant data-kind="user" value="${esc(person.id)}">${esc(person.name)} · ${esc(person.id)}</label>`).join('')}${groups.map(group=>`<label><input type="checkbox" data-work-grant data-kind="group" value="${esc(group.id)}">${esc(group.name)} · ${esc(group.id)}</label>`).join('')}</fieldset>`,confirmLabel:'확인한 원본 등록'});
       $('#ees-work-dialog')?.addEventListener('change',()=>{grants=[...document.querySelectorAll('#ees-work-dialog [data-work-grant]:checked')].map(field=>({principal_type:field.dataset.kind,principal_id:field.value,permission:'read'}));});
       if(!await pending||!current())return;body={access_grants:grants};
     }else return dialog({title:'Work 도구 상태를 확인해 주세요',readOnlyDetail:true,html:description+`<p>${esc(status.reason || '지원되는 상태를 확인하지 못해 변경하지 않았습니다.')}</p>`});
     try{const result=await setupAPI({expected_token:status.expected_token,source_sha256:status.source_sha256,confirmation,...body},path);if(!current())return;commandError='';await refresh();if(!current())return;const message=path==='restore'?'비공개 백업의 코드 원본으로 되돌렸습니다.':confirmation==='update_readonly_work_tool'?'지금 프로그램 원본으로 바꿨습니다. 이전 코드 원본은 비공개 백업으로 보존했습니다.':result.changed?'확인한 제품 원본을 등록했습니다.':'기존 원본과 권한을 유지했습니다.';return dialog({title:'Native Work 도구 확인',readOnlyDetail:true,html:`<p>${esc(message)}</p>${confirmation==='register_readonly_work_tool'?'':'<p>이름·소유자·읽기 권한·설정을 유지했습니다.</p>'}<p>업무 도우미의 사용 가능 상태를 다시 확인해 주세요. 현재 대화의 도구 선택은 자동으로 바꾸지 않았습니다.</p>`});}
     catch(failure){if(current()){commandError=failure.message;render();}throw failure;}
-  }
-  async function adminDialog(kind,id=''){
-    if(!state?.capabilities?.is_admin)throw new Error('Native 관리자 권한이 필요합니다.');
-    const at=context(),record=(kind==='factory'?state.factories:state.access)?.find(item=>item.id===id),systems=(state.systems || []).map(item=>typeof item==='string'?item:item.id);
-    const sys=record?.system_id || selection.system_id || systems[0];
-    const option=(value,label,current)=>`<option value="${esc(value)}"${value===current?' selected':''}>${esc(label)}</option>`;
-    const systemSelect=`<label>시스템<select name="system_id"${kind==='factory'&&record?' disabled':''}>${systems.map(value=>option(value,value,sys)).join('')}</select></label>`;
-    let values=kind==='factory'?{factory_id:record?.id || '',system_id:sys,name:record?.name || '',attributes:JSON.stringify(record?.attributes || {},null,2)}:{access_id:record?.id || '',system_id:sys,factory_id:record?.factory_id || '*',principal_kind:record?.principal_kind || 'group',principal_id:record?.principal_kind==='user'?record.principal_id:'',group_id:record?.principal_kind==='group'?record.principal_id:state.native_groups?.[0]?.id || '',roles:record?.roles || [],active:record?Boolean(record.active):true};
-    const html=kind==='factory'?`<div class="ew-admin-form">${systemSelect}<label>공장 ID<input name="factory_id" value="${esc(values.factory_id)}"${record?' readonly':''} placeholder="비우면 새 ID 생성"></label><label>공장 이름<input name="name" value="${esc(values.name)}" required></label><label>공장 속성 · JSON 객체<textarea name="attributes" rows="6">${esc(values.attributes)}</textarea></label><small>기존 공장의 시스템과 ID는 바꾸지 않습니다. 업무 입력·비밀정보를 공장 속성에 넣지 마세요.</small></div>`:`<div class="ew-admin-form">${systemSelect}<label>공장 범위<select name="factory_id">${option('*','시스템 전체 범위',values.factory_id)}${(state.factories || []).map(item=>`<option data-system="${esc(item.system_id)}" value="${esc(item.id)}"${item.id===values.factory_id?' selected':''}${item.system_id!==sys?' disabled':''}>${esc(item.name)}</option>`).join('')}</select></label><label>Native 대상<select name="principal_kind">${option('group','그룹',values.principal_kind)}${option('user','사용자',values.principal_kind)}</select></label><label data-admin-group>Native 그룹<select name="group_id"${values.principal_kind!=='group'?' disabled':''}>${option('','선택 필요',values.group_id)}${(state.native_groups || []).map(group=>option(group.id,group.name+' · '+group.id,values.group_id)).join('')}</select></label><label data-admin-user>기존 Native 사용자 ID<input name="principal_id" value="${esc(values.principal_id)}" list="ees-admin-native-users"${values.principal_kind!=='user'?' disabled':''}><datalist id="ees-admin-native-users">${(state.people || []).filter(person=>person.value?.kind==='user').map(person=>`<option value="${esc(person.id)}">${esc(person.name)}</option>`).join('')}</datalist></label><small>이름으로 사용자를 만들거나 찾지 않습니다. 서버가 현재 승인된 Native ID인지 확인합니다.</small><fieldset><legend>역할</legend>${Object.entries({viewer:'조회',participant:'참여·실행',manager:'절차·설정 관리',requester:'EES 요청',reviewer:'요청 검토'}).map(([role,label])=>`<label><input type="checkbox" name="roles" value="${role}"${values.roles.includes(role)?' checked':''}>${label}</label>`).join('')}</fieldset><label><input type="checkbox" name="active"${values.active?' checked':''}>사용</label></div>`;
-    const pending=dialog({title:kind==='factory'?'공장 정보 저장':'업무 접근 범위 저장',html,confirmLabel:'변경 저장'}),element=$('#ees-work-dialog');
-    const collect=()=>{for(const field of element.querySelectorAll('[name]')){if(field.name==='roles')continue;values[field.name]=field.type==='checkbox'?field.checked:field.value;}if(kind==='access'){values.roles=[...element.querySelectorAll('[name="roles"]:checked')].map(field=>field.value);const user=element.querySelector('[name="principal_id"]'),group=element.querySelector('[name="group_id"]');user.disabled=values.principal_kind!=='user';group.disabled=values.principal_kind!=='group';user.required=values.principal_kind==='user';group.required=values.principal_kind==='group';const factory=element.querySelector('[name="factory_id"]');for(const option of factory.options)option.disabled=Boolean(option.dataset.system&&option.dataset.system!==values.system_id);if(factory.selectedOptions[0]?.disabled){factory.value='*';values.factory_id='*';}}else{const attributes=element.querySelector('[name="attributes"]');try{const parsed=JSON.parse(attributes.value);attributes.setCustomValidity(parsed&&typeof parsed==='object'&&!Array.isArray(parsed)?'':'JSON 객체를 입력해 주세요.');}catch(_){attributes.setCustomValidity('유효한 JSON 객체를 입력해 주세요.');}}};
-    element.addEventListener('input',collect);element.addEventListener('change',collect);collect();
-    if(!await pending||at!==context())return;
-    const body=kind==='factory'?{action:'save_factory',factory_id:values.factory_id,system_id:values.system_id,name:values.name,attributes:JSON.parse(values.attributes)}:{action:'save_access',access_id:values.access_id,system_id:values.system_id,factory_id:values.factory_id,principal_kind:values.principal_kind,principal_id:values.principal_kind==='group'?values.group_id:values.principal_id,roles:values.roles,active:values.active};
-    await mutate({...body,expected_revision:record?.revision || 0});
   }
   function stageJob(id){
     const run=state?.run,definition=workOperationDefinition(state),node=definition?.nodes?.[id],stage=workStageTarget(state,selection);
@@ -635,14 +620,13 @@
     if(action==='export_json'||action==='export_text'||action==='export_result'){if(action==='export_result'&&!workUI.finished(state?.run)&&state?.run?.jobs?.[selection.job_id]?.can_decide!==false&&!await saveReviewDraft())return;return downloadRun(action==='export_json'?'json':'text',action==='export_result'?target.dataset.jobId:'');}
     if(action==='open_legacy')return openLegacy(target.dataset.caseId);
     if(action==='admin_work_tool')return setupWorkTool();
-    if(['workspace_admin','mode','procedures','tools','records','chats'].includes(action)){const patch=navigationPatch(target.dataset);if(patch)return select(patch,{fetch:action!=='chats'});return;}
-    if(action==='admin_factory'||action==='admin_access')return adminDialog(action==='admin_factory'?'factory':'access',target.dataset.id);
+    if(['mode','procedures','tools','records','chats'].includes(action)){const patch=navigationPatch(target.dataset);if(patch)return select(patch,{fetch:action!=='chats'});return;}
     if(action==='choose_factory'||action==='choose_system'){
       const factory=action==='choose_factory',id=factory?target.dataset.factoryId:target.dataset.systemId;
       const catalog=nativePage()?nativeScope:state;
       const item=(factory?catalog?.factories:catalog?.systems)?.find(value=>(typeof value==='string'?value:value.id)===id);
       const option=(factory?catalog?.scope_options?.factories:catalog?.scope_options?.systems)?.find(value=>value.id===id);
-      if(typeof id!=='string'||factory&&(nativePage()||selection.mode==='author'&&selection.tab==='workspace_admin')||!(factory&&id==='')&&(!item||item.allowed===false||option?.allowed===false))return;
+      if(typeof id!=='string'||factory&&nativePage()||!(factory&&id==='')&&(!item||item.allowed===false||option?.allowed===false))return;
       if(id===selection[factory?'factory_id':'system_id'])return;
       designer.readDraft?.();
       const author=nativePage()||selection.mode==='author';
@@ -688,8 +672,8 @@
     if(action==='close_run'||action==='cancel_run'){const at=context(),run=state.run;let reason='';const pending=dialog({title:action==='close_run'?'이 진행 건을 종료할까요?':'이 진행 건을 취소할까요?',html:'<p>종료 후에는 이 진행 건의 당시 버전과 기록을 읽기 전용으로 보존합니다.</p>'+(action==='cancel_run'?'<label>취소 이유<input id="ees-cancel-reason" required></label>':''),confirmLabel:action==='close_run'?'진행 건 종료':'진행 건 취소'});$('#ees-cancel-reason')?.addEventListener('input',event=>{reason=event.target.value;});if(await pending&&at===context())return mutate({action,run_id:run.id,expected_revision:run.revision,...(reason?{reason}:{})});}
   }
   async function sourceAction(dataset){
-    if(!dataset||typeof dataset!=='object')return;
-    try{if(nativePage()&&!['native_open','refresh','category','choose_system'].includes(dataset.action)){return await returnFromNative({dataset});}return await handleClick({dataset});}
+    if(!dataset||typeof dataset!=='object'||['workspace_admin','admin_factory','admin_access'].includes(dataset.action))return;
+    try{if(nativePage()&&!['native_open','refresh','category','choose_system','admin_work_tool'].includes(dataset.action)){return await returnFromNative({dataset});}return await handleClick({dataset});}
     catch(failure){error=failure.message;render();}
   }
   function handleEvent(event){

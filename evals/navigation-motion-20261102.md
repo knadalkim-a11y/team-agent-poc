@@ -6,8 +6,13 @@
 
 - **요청·범위:** 사용자가 완료된 PR의 검토·병합을 요청했다. #126 게시 상태 저장, #127 선택칸 크기 통일, #129 공장·접근 범위 메뉴 제거가 대상이다. #128은 CI498 실패·미해결 리뷰1건으로 제외한다.
 - **#126:** 최종 `92e6aa1`, 기준 main `7a56cdb`, CI496 39성공·PR 출하1정상생략, 미해결 스레드0을 확인했다. 원자적 내용/게시 저장·이전 API·고정 진행 건·실패 rollback·권한 재검·미저장 상태 보존을 검토했고 workspace88/88·작성 UI324/324를 추가 통과했다. main `552d049a857fb002e36cae7718a6d25f88b55236`에 병합했다.
-- **#127 통합:** 위 실제 main을 `defdcd2`에 merge했다. CHANGELOG·STATUS의 같은 위치 추가 충돌은 두 기록 모두 보존했다. CSS 선택칸 공통화와 #126 게시 상태 선택 스타일은 서로 다른 규칙이며 자동 통합됐다. 기존 CI497의 실제38px/라벨11px·22회 실측 성공은 원래 근거로 유지하고 최종 통합 head의 전체 CI로 재판정한다. 사내 적용·실측은 이번에 수행하지 않았다.
+- **#127 통합:** 위 실제 main을 `defdcd2`에 merge했다. CHANGELOG·STATUS의 같은 위치 추가 충돌은 두 기록 모두 보존했다. CSS 선택칸 공통화와 #126 게시 상태 선택 스타일은 서로 다른 규칙이며 자동 통합됐다. 기존 CI497의 실측 근거는 보존한다. 통합 원격 head `e48d540`의 [CI503](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/42160223205) 39성공·출하1정상생략과 미해결 리뷰0을 확인한 뒤 main `14de941363bde50a948a6428c1a30f9ff028de27`에 병합했다. CI503 artifact13476478862의 CRC·SHA256 `a573b2245b82670556fc2944541ab496f6fa005b0a6dcced93157d8ef2af6bb4`를 확인했다. 실제 업무/워크스페이스 PNG를 직접 대조했고 22회 실측은 각38px·전체75px·라벨11px/줄높이20px·가로 넘침0이다. 사내 적용·실측은 이번에 수행하지 않았다.
 - **통합 로컬 검사:** Node motion/Svelte39/39·문서30파일/2949링크 오류0·diff 검사 통과. 실제 Native/Windows와 전체 결과는 통합 PR CI에서 확인한다.
+- **#129 통합 검토:** 메뉴 제거와 게시 상태 저장·선택칸 크기는 다른 제품 영역이며 자동 통합됐다. CHANGELOG·STATUS·TASK·본 검증 기록의 같은 위치 추가 충돌은 각 계약·최초 실패·검증 근거를 모두 보존했다. Native 복귀·작성 UI·실행 UI·motion Svelte·실행 화면 Node677/677이 통과했다. 최종 후보는 #127 병합 후 실제 최신 main `14de941`을 추가 통합했으며 제품 트리는 바뀌지 않았다. 최종 원격 head의 전체 필수 CI·병합 결과는 PR #129 본문/Checks에서 판정한다.
+- **#129 통합 CI505 최초 실패·보완:** head `79a2716`의 [CI505](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/42162339389) 실제 작성 검사40건 중1건이 두 번째 내용 확인 클릭 전 `Control not visibly ready`로 실패했다. artifact13478271841의 실패 PNG·DOM(메뉴 닫힘, 버튼 활성, 저장 완료)과 ZIP SHA256 `97b8a28d8917dc5fd656e71050057f3c8edffaa60f23c098535077abf935c68a`를 보존했다. 제품은 작업 상세로 돌아올 때 메뉴 열림을 보존하지만 검사는 summary를 무조건 다시 눌렀다. 기존 합성 DOM harness에서 검증 화면은 닫힘, 작업 재진입/저장 뒤 열림, 무조건 클릭 뒤 닫힘을 재현했다. 최초 진단 시 작업 재진입을 생략해 필드 조회가 중단됐으며 실제 검사와 같은 재진입을 넣어 위 경로를 확인했다. 해당 기존 검사만 실제 열림 상태를 읽고 닫혔을 때 물리 클릭하도록 바꾸며, 버튼 존재/활성 대기도 명시했다. 제품 코드·클릭 시간 한도·시험 ID·정책 저장/실패·성공 시도/사람 확정 경계 단언은 유지한다. 로컬 브라우저 실행 제한은 그대로여서 최종 원격 head 전체 CI로 재판정한다.
+- **#129 CI508 Chrome 준비 실패·재검 경계:** 수정 head `0f92935`의 [CI508 native-account](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/42164604580/job/127719717268)는 계정 전환 시험 setUp의 `about:blank`·`Browser.getVersion` 응답 시간 초과로 중단됐다. 제품 `/auth` 이동 전이며 실패 JSON의 요청 목록은 비어 있다. 같은 job의 뒤이은 계정 API/브라우저10건은 통과했다. artifact13478034970의 CRC·SHA256 `d76a7581c61b982bcdfeb30843b24615ecedd3269d44b4a14e4971a2f0535a1b`를 확인했고 최초 로그·실패 JSON을 보존한다. CI453 기록과 같은 준비 단계 증상이지만 Chrome 지연의 직접 원인은 미확정이다. 제품·fixture·시간 제한·단언은 유지하고 이 기록만 반영한 새 head를 새 runner에서1회 전체 재검한다. 같은 준비 실패가 반복되면 추가 자동 재시도 없이 기동 증거부터 조사하며, 재검 성공을 근본원인 해결로 보지 않는다. 최종 head와 결과는 PR #129 본문/Checks에서 연결한다.
+- **Figma 병합 정리:** #126 병합 후 C156과 연결된 B070 페이지 `2130:2847`을 삭제했다. 삭제 후 고정 점검은 비백업17페이지 오류0·기존 업무절차 크기 경고1이다. 각 페이지는 별도 MCP 호출로 로드하고 점검의 페이지 전환문만 생략했다. 미병합 메뉴 재분류 B071과 다른 보관 자료는 유지했다.
+- **게시 경로:** #127 통합본의 일반 Git push는 HTTPS 쓰기 인증 부재로 실패했다. 연결된 GitHub API로 blob·tree를 대조하고 예상 기존 head 조건을 걸어 같은 PR 브랜치만 갱신했다. 로컬·원격 commit SHA가 달라도 tree 일치와 최종 원격 head CI를 확인한다.
 
 <a id="scope-selector-metrics-20261106"></a>
 
@@ -19,6 +24,20 @@
 - **수정:** 기존 워크스페이스의 선택칸 줄 높이20px·라벨11px/20px를 공통 선택기에 적용하고 두 전용 중복 규칙을 제거했다. 기존 Native 탐색 검사의 `sidebar-scrollbar-geometry.json`에 두 선택칸 높이·라벨/값 좌표·글자 스타일을 추가하여 업무→워크스페이스→업무, 펼침→접힘→재펼침과 두 창 높이에서 동일성을 확인한다. 기존 폭·아이콘·초안 보존 단언은 유지한다.
 - **최초 로컬 제한:** 수정 전 배포 CSS를 로컬 Chromium으로 재측정하려 했으나 제품 로드 전 `socket() failed: Operation not permitted`로 실패했다. 브라우저 실행 우회나 같은 재시도 없이 기존 CI 실측과 원본으로 원인을 확인했다. 수정 후 실제 브라우저·Windows 검증은 새 PR의 최종 CI로 판정하며 사내 적용은 미실행이다.
 - **로컬 검증:** Node motion/Svelte/layout65/65 통과. Python branding34개 중33개 통과·공식 wheel/frontend 입력을 요구하는1개는 미실행이다. UTF-8 기본 인코딩 경고를 오류로 처리했다. 문서30파일/2936링크 오류0·검토 후보0, 시험 ID1734개 감사 오류0, Native 시험 구문·diff 검사 통과. 수정 후 실제 브라우저/Windows 및 최종 판정은 PR의 최종 head 전체 CI와 실측으로 연결한다. [사용자 결정](../docs/mockups/ees-work/TASK.md#scope-selector-metrics-20261106).
+
+<a id="remove-factory-access-20261106"></a>
+
+## 2026-11-06 · 공장·접근 범위 메뉴 제거
+
+- **기준·결정:** main `7a56cdbbcbf104a8a0847a446e951d262907a167`, `codex/remove-factory-access-menu`. 사용자 [삭제 계약](../docs/mockups/ees-work/TASK.md#remove-factory-access-20261106)에 따라 독립 화면을 제거한다. 기존 공장/시스템 선택·데이터·권한 검사와 Native 관리자 설정은 보존한다. Work 도구 연결 설정은 AI 도우미 화면의 관리자 버튼으로 옮겼다.
+- **확인 범위:** Svelte와 JS 메뉴 양쪽의 항목·전용 렌더러·등록/수정 폼·이벤트·전용 CSS, 저장된 선택 복원, Native 화면 복귀의 첫 프레임·초안 보존을 대조했다. Native 모델 화면의 설정은 현재 권한/사용자/그룹을 다시 읽고 같은 화면의 overlay를 사용한다. 폐기된 액션은 읽기/쓰기/이동을 만들지 않으며 기존 서버 설정 API와 DB는 변경하지 않는다.
+- **Figma:** 공통 메뉴·기능 지도 행2개 삭제, 연결 안내 변경, AI 도우미에 기존 버튼 부품을 복제해 설정 버튼1개 추가. 화면 ID·고정 검사 결과는 [metadata.json](../docs/mockups/ees-work/remove-factory-access-20261106/metadata.json), [메뉴](../docs/mockups/ees-work/remove-factory-access-20261106/menu.png), [도우미 설정](../docs/mockups/ees-work/remove-factory-access-20261106/assistant-settings.png). 두 PNG를 직접 대조해 메뉴 빈자리·설정 버튼 겹침이 없음을 확인했다. 보관·백업은 유지한다.
+- **고정 점검:** `scripts/figma_check.js`의 검사 조건은 그대로 쓰고 MCP의 한 호출 한 페이지 규칙에 맞춰 17개 비백업 페이지를 각각 연 뒤 페이지 전환문만 제외해 실행했다. 오류0·기존 업무절차 크기 경고1. 다른 작업의 C157 추가를 발견해 충돌하는 기록을 쓰지 않고 재검사 후 C158을 기록했다. 00은 최근20줄, 오래된 C137/C138은91 보관으로 이동했다.
+- **로컬 자동 검사:** Node v24.22.1 `node --test tests/*.cjs` 734/734. Python3.12.14 `python -m unittest tests.test_ees_work_workspace tests.test_ees_work_operations -v` 140/140. `EES_TEST_FRONTEND_SOURCE_DIR=/tmp/ees-remove-access-source python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_frontend_build -v` 32/32. 고정 upstream `2a960a59fe1dbbd35282f0556b3666d81102e781`에 패치를 적용했고, 원본·결과 파일 SHA256과 패치 SHA256을 갱신했다. CI의 고정 Node/Python 환경 판정과 구분한다.
+- **처음 실패·보완:** 첫 Python 실행에서 잘못 적은 두 모듈명과 소스 검사에 필요한 TypeScript 부재로 로딩2건·소스6건이 실패했다. 실제 모듈명으로 실행하고 upstream lock의 TypeScript5.9.3 tarball 무결성을 확인해 준비한 뒤 위 검사 모두 통과했다. 시험 ID 감사는 확대된 복원 시험의 이름 변경1건을 감지했고, 기존 보호 대응표를 같은 시험으로 갱신한 뒤 ID1735개·오류0을 확인했다. 보호 단언은 유지·확대했다.
+- **후속 검토:** 삭제된 관리 화면을 뺀 실제 Native 복귀 조합은 9개에서 4개로 줄어드는 것이 맞다. 남아 있던 고정 건수9와 설명을 4로 맞추고, 새 AI 도우미 설정 진입·상태 대화상자의 성공 캡처를 추가했다. 각 복귀의 지연·이전 화면 미노출·초안 보존 단언은 유지한다.
+- **CI500 첫 실패·보완:** 최종 후보 `fa4396e`의 실제 Native 대화 검사111건 중2건에서 `work_home` 관찰이 없다는 실패가 났다. 전용 관리 화면 감지문을 지우면서 바깥 `for` 한 줄을 남겨 업무 헤더 감지가 빈 관리 헤더 목록에 종속된 검사 코드 오류였다. 관리 헤더0개·업무 헤더1개 조건으로 원재현(결과 빈 목록)을 확인하고 남은 반복문을 제거한 뒤 `work_home` 감지를 확인했다. 제품 코드는 변경하지 않았다. 새 AI 도우미 설정의 실제 페이지 진입·상태 조회·닫기는 통과했다. [CI500](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/42147452291) 최초 실패와 artifact를 보존하며 수정 head의 전체 CI로 다시 판정한다.
+- **실제 제품 경계:** 실제 Native AI 도우미 페이지 → 설정 상태 조회 → 닫기의 브라우저 회귀를 추가했다. 그 시험은 실제 소스 빌드/브라우저를 사용하고 도구 상태 응답은 명시 합성 fixture다. 로컬 Chromium smoke는 제품을 열기 전 OS socket/ptrace 제한으로 시작하지 못했다. 기존 frontend도 이전 소스이므로 이번 실제 화면의 성공 증거로 재사용하지 않는다. [PR #129](https://github.com/knadalkim-a11y/team-agent-poc/pull/129)의 소스 빌드·Native 브라우저·전체 필수 CI 결과를 확인하며, 사내 사용자 확인·병합·배포는 미실행이다.
 
 <a id="sidebar-stable-scrollbar-20261105"></a>
 

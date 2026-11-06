@@ -6,6 +6,11 @@
 
 - 도구 화면에서도 공장·시스템 선택을 유지하고 선택 범위와 공통 도구를 표시한다. 새 도구의 초기 분류·기본 정보 편집·저장과 범위별 미저장 내용 보존을 추가했다. 기존 권한·실행 버전·분류 없는 자료는 유지한다. [계약](docs/specs/shared-tools.md#tools-work-location-20261106)·[검증](evals/tool-authoring-20261105.md#tools-work-location-20261106).
 
+## 2026-11-06 · 공장·접근 범위 메뉴 제거
+
+- 별도 관리 메뉴·화면·폼을 제거하고 저장된 옛 메뉴 선택은 같은 공장/시스템의 개요로 복원한다. 공장 카탈로그·공동 진행·권한 데이터와 검사는 보존한다.
+- Work 도구 설정 확인을 AI 도우미 화면의 관리자 전용 버튼으로 옮겼다. Figma 메뉴·기능 지도·연결 안내를 함께 갱신했다. [계약](docs/mockups/ees-work/TASK.md#remove-factory-access-20261106)·[검증](evals/navigation-motion-20261102.md#remove-factory-access-20261106).
+
 ## 2026-11-06
 
 - 업무/워크스페이스의 공장·시스템 선택칸을 높이38px·라벨11px로 공통화해 전환 시 두 줄 높이가4px 달라지던 문제를 수정했다. 기존 Native 탐색 검사에 선택칸 높이와 라벨/값의 위치·스타일 비교를 추가했다. [원인·검증](evals/navigation-motion-20261102.md#scope-selector-metrics-20261106).

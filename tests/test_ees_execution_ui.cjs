@@ -98,9 +98,9 @@ test('request timeline preserves EES report and independent effect confirmation'
 });
 test('history uses immutable attempt inputs and result rather than current edited values',()=>{const out=html('workHistoryHTML(run)',{run:{version:1,inputs:{secret:'current-input'},attempts:[{id:'one',job_id:'j',number:1,status:'failed',inputs:{a:'historical'},result:{text:'old-result'}}]}});assert.match(out,/historical/);assert.match(out,/old-result/);assert.doesNotMatch(out,/current-input/);});
 test('missing history is explicitly unexecuted and never a success fixture',()=>{assert.match(html('workHistoryHTML({attempts:[]})'),/미수행을 성공으로 표시하지 않습니다/);});
-test('retired saved My Work opens system work without selecting or mutating an old run',async()=>{
+for(const retiredTab of ['my_work','workspace_admin'])test(`retired saved ${retiredTab} opens scope overview without selecting or mutating an old run`,async()=>{
  const h=controller();h.api.setRestored(false);
- h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},systems:['EMS'],workflows:[],runs:[],ui_state:{revision:7,state:{selection:{mode:'work',tab:'my_work',system_id:'EMS',factory_id:'factory-a',workflow_id:'old-work',run_id:'old-run',job_id:'old-job',stage_id:'old-stage',panel_width:620,collapsed:['setup']}}}}:{ok:true});
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},systems:['EMS'],workflows:[],runs:[],ui_state:{revision:7,state:{selection:{mode:retiredTab==='workspace_admin'?'author':'work',tab:retiredTab,system_id:'EMS',factory_id:'factory-a',workflow_id:'old-work',run_id:'old-run',job_id:'old-job',stage_id:'old-stage',panel_width:620,collapsed:['setup']}}}}:{ok:true});
  await h.api.refresh();const s=h.api.snapshot().selection;
  assert.equal(s.tab,'overview');assert.equal(s.system_id,'EMS');assert.equal(s.factory_id,'factory-a');assert.equal(s.panel_width,620);assert.deepEqual(Array.from(s.collapsed),['setup']);
  for(const key of ['workflow_id','run_id','job_id','stage_id'])assert.equal(s[key],'');
@@ -174,8 +174,12 @@ test('held Enter or Space cannot repeat a mutation while its ordinary first clic
 test('scope execution uses the selected P or T and refuses unsaved run drafts',async()=>{const h=controller();h.api.setState({run:{revision:4}});h.api.setSelection({run_id:'r'});h.view.hasPendingInputs=()=>true;await h.api.handleClick({dataset:{action:'execute_scope',nodeId:'t1'}});assert.equal(h.calls.length,0);h.view.hasPendingInputs=()=>false;await h.api.handleClick({dataset:{action:'execute_scope',nodeId:'t1'}});assert.equal(h.calls[0].url,'/api/ees-work/operations');assert.equal(h.calls[0].body.node_id,'t1');assert.equal(h.calls[0].body.expected_revision,4);});
 
 
-test('admin management renders existing Native identities and is absent for ordinary participants',()=>{const data={capabilities:{is_admin:true},factories:[{id:'f',name:'실제 등록',system_id:'EMS',revision:1}],access:[{id:'a',system_id:'EMS',factory_id:'f',principal_kind:'group',principal_id:'native-id',roles:['manager'],active:1}],people:[{name:'현재 그룹',value:{kind:'group',id:'native-id'}}]};const out=html('workAdminHTML(data)',{data});assert.match(out,/현재 그룹/);assert.match(out,/native-id/);assert.match(out,/data-action="admin_factory"/);assert.match(out,/data-action="admin_access"/);assert.doesNotMatch(html('workAdminHTML({capabilities:{is_admin:false}})'),/data-action=/);});
-test('admin dialog refuses nonadmin identity before any write or new dialog',async()=>{const h=controller();h.api.setState({capabilities:{is_admin:false}});await assert.rejects(h.api.adminDialog('access'),/관리자/);assert.equal(h.calls.length,0);});
+test('retired factory access actions do not navigate, open forms or write data',async()=>{
+ const h=controller();h.api.setState({capabilities:{is_admin:true}});const before=JSON.stringify(h.api.snapshot().selection);
+ for(const action of ['workspace_admin','admin_factory','admin_access']){await h.api.handleClick({dataset:{action}});await h.api.sourceAction({action});}
+ assert.equal(JSON.stringify(h.api.snapshot().selection),before);assert.equal(h.calls.length,0);
+});
+test('Work tool settings refuses nonadmin identity before any request or dialog',async()=>{const h=controller();h.api.setState({capabilities:{is_admin:false}});await assert.rejects(h.api.setupWorkTool(),/관리자/);assert.equal(h.calls.length,0);});
 test('text export formats only fetched run history and retains redacted-source notice',()=>{const out=html('workExportText(document)',{document:{exported_at:'now',ui_state:{secret:'never-export'},run:{id:'r',version:1,status:'open',attempts:[{job_id:'j',number:1,status:'failed',inputs:{v:'historic'},result:null,evidence_access:'requires_current_source_access'}],jobs:{j:{decisions:[{item_id:'job',result_revision:1,verdict:'unknown',actor_id:'a'}]}}}}});assert.match(out,/historic/);assert.match(out,/원본 접근 권한 확인 필요/);assert.match(out,/unknown/);assert.doesNotMatch(out,/never-export/);});
 test('legacy records have readonly navigation and escaped values with no execution controls',()=>{const out=html('workLegacyHTML(legacy)',{legacy:{read_only:true,records:[{id:'old',process_name:'<script>name</script>',simulation:true,status:'failed'}]}});assert.match(out,/사용 중지/);assert.match(out,/시뮬레이션/);assert.match(out,/open_legacy/);assert.doesNotMatch(out,/<script|data-action="execute|data-action="confirm/);});
 test('authenticated source navigation preserves private drafts and resets only for account change',async()=>{const h=controller();let reset=0,suspend=0;h.view.reset=()=>reset++;h.view.suspend=()=>suspend++;h.api.sync();await new Promise(resolve=>setImmediate(resolve));const before=suspend,selection=JSON.parse(JSON.stringify(h.api.snapshot().selection));h.context.location.pathname='/workspace/skills';h.context.document.querySelector=()=>null;h.api.sync();assert.equal(suspend-before,0);assert.equal(reset,0);assert.deepEqual(JSON.parse(JSON.stringify(h.api.snapshot().selection)),selection);h.setAuth('other-account');h.api.sync();assert.equal(reset,1);});
@@ -662,4 +666,25 @@ test('tools keep the selected screen while changing factory and system',async()=
  h.setReply((url)=>url.includes('/workspace')?state:{ok:true});
  await h.api.handleClick({dataset:{action:'choose_factory',factoryId:'f1'}});assert.equal(h.api.snapshot().selection.tab,'tools');assert.equal(h.api.snapshot().selection.factory_id,'f1');
  await h.api.handleClick({dataset:{action:'choose_system',systemId:'FDC'}});assert.equal(h.api.snapshot().selection.tab,'tools');assert.equal(h.api.snapshot().selection.system_id,'FDC');assert.equal(h.api.snapshot().selection.factory_id,'');
+});
+
+// The settings entry now lives on Native's AI assistants page.
+test('Native AI assistants opens Work settings in place with freshly read grant choices',async()=>{
+ const h=workToolUpdateHarness({state:'missing'});h.context.location.pathname='/workspace/models';
+ const fresh={ok:true,capabilities:{is_admin:true,actor_id:'admin'},people:[{id:'current-user',name:'현재 사용자',value:{kind:'user'}}],native_groups:[{id:'current-group',name:'현재 그룹'}]};
+ h.setReply(call=>call.url==='/api/ees-work/workspace'?fresh:call.url.endsWith('/status')?h.status:{ok:true});
+ h.setDialog(options=>{h.dialogs.push(options);return Promise.resolve(false);});
+ await h.api.sourceAction({action:'admin_work_tool'});
+ assert.equal(h.context.location.pathname,'/workspace/models');assert.equal(h.calls.length,2);
+ assert.match(h.dialogs[0].html,/current-user/);assert.match(h.dialogs[0].html,/current-group/);
+ assert.equal(h.calls.some(call=>call.options.method==='POST'),false);
+});
+test('Native Work settings cannot reuse revoked administration or a stale account read',async()=>{
+ for(const stale of [false,true]){
+  const h=workToolUpdateHarness(),read=deferred();h.context.location.pathname='/workspace/models';h.setReply(()=>read.promise);
+  const task=h.api.setupWorkTool();if(stale)h.setAuth('other-account');
+  read.resolve({ok:true,capabilities:{is_admin:stale,actor_id:'admin'}});
+  if(stale)await task;else await assert.rejects(task,/관리자/);
+  assert.equal(h.calls.length,1);assert.equal(h.dialogs.length,0);
+ }
 });

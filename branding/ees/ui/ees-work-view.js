@@ -551,12 +551,6 @@ function workMessageReferenceHTML(reference,messageId){
   return `<button type="button" data-action="open_reference" data-message-id="${esc(messageId)}">${icon('522b5')}<span>${esc(label)}<small>기준 시각 · ${esc(workUI.time(reference.created_at || reference.basis_at) || '기록 없음')}</small></span></button>`;
 }
 
-function workAdminHTML(data){
-  const {esc,button}=workUI;if(!data.capabilities?.is_admin)return '<p class="ew-warning">Native 관리자 권한이 필요합니다.</p>';
-  const roles={viewer:'조회',participant:'참여·실행',manager:'절차·설정 관리',requester:'EES 요청',reviewer:'요청 검토'};
-  return `<header class="ew-work-heading"><h2>공장·접근 범위</h2><p>기존 Native 사용자와 그룹에 업무 범위를 연결합니다. 개인 PAT는 여기에서 관리하지 않습니다.</p></header><section><h3>Native 대화의 Work 연결</h3><p class="ew-muted">현재 제품의 읽기·제안 전용 도구를 확인하고, 선택한 Native 사용자·그룹에만 연결합니다.</p>${button('Work 도구 설정 확인','admin_work_tool','class="ew-secondary"')}</section><section><h3>공장 정보</h3>${button('공장 등록','admin_factory','class="ew-secondary"')}<div class="ew-admin-list">${(data.factories || []).map(item=>`<article><strong>${esc(item.name)}</strong><small>${esc(item.system_id)} · ${esc(item.id)} · r${esc(item.revision)}</small>${button('수정','admin_factory',`data-id="${esc(item.id)}"`)}</article>`).join('') || '<p class="ew-empty">등록된 공장이 없습니다.</p>'}</div></section><section><h3>업무 접근 범위</h3>${button('접근 범위 등록','admin_access','class="ew-secondary"')}<div class="ew-admin-list">${(data.access || []).map(item=>{const person=(data.people || []).find(person=>person.value?.id===item.principal_id&&person.value?.kind===item.principal_kind);return `<article><strong>${esc(person?.label || person?.name || item.principal_id)}</strong><small>${esc(item.principal_kind)} · ${esc(item.principal_id)}</small><p>${esc(item.system_id)} · ${esc(item.factory_id==='*'?'시스템 전체 범위':item.factory_id)} · ${esc(item.roles.map(role=>roles[role] || role).join(', '))} · ${item.active?'사용':'중지'}</p>${button('수정','admin_access',`data-id="${esc(item.id)}"`)}</article>`;}).join('') || '<p class="ew-empty">등록된 업무 접근 범위가 없습니다.</p>'}</div></section>`;
-}
-
 // Reconcile only the source-supplied EES content slot. Retained controls keep
 // focus, selection and browser state; no Native-owned DOM is read or changed.
 function workPatchContent(host,html){
@@ -635,13 +629,13 @@ function workCanWorkspace(capabilities){
 }
 function workWorkspaceMenuHTML(state,selection,error=''){
   const {esc,icon}=workUI,capabilities=state.capabilities || {},current=(state.workflows || []).filter(workflow=>!selection.system_id||workflow.system_id===selection.system_id);
-  const item=(action,asset,label,{active=false,count,native,id}={})=>`<button type="button" class="ew-nav-button" data-action="${action}"${id?` data-native-id="${id}"`:''} aria-label="${label}" title="${label}"${active?' aria-current="page"':''}>${['models','tools','admin'].includes(id)||action==='workspace_admin'?`<span class="ew-icon ew-native-icon" data-native-icon="${action==='workspace_admin'?'factory':id}" aria-hidden="true"></span>`:icon(asset)}<span class="ew-nav-label">${label}</span>${native?`<small class="ew-nav-native-name">${native}</small>`:count===undefined?'':`<small>${count}</small>`}</button>`;
+  const item=(action,asset,label,{active=false,count,native,id}={})=>`<button type="button" class="ew-nav-button" data-action="${action}"${id?` data-native-id="${id}"`:''} aria-label="${label}" title="${label}"${active?' aria-current="page"':''}>${['models','tools','admin'].includes(id)?`<span class="ew-icon ew-native-icon" data-native-icon="${id}" aria-hidden="true"></span>`:icon(asset)}<span class="ew-nav-label">${label}</span>${native?`<small class="ew-nav-native-name">${native}</small>`:count===undefined?'':`<small>${count}</small>`}</button>`;
   const native=target=>item('native_open',target.icon,target.label,{native:target.name,id:target.id,active:selection.native_id===target.id});
   const group=(title,items)=>items?`<section class="ew-nav-group"><h3 class="ew-nav-group-title">${title}</h3><nav class="ew-nav-links">${items}</nav></section>`:'';
-  const create=workCanCreate(capabilities)?item('procedures','e8a37','업무 절차',{count:current.length,active:!selection.native_id&&!['tools','workspace_admin'].includes(selection.tab)})+item('tools','d1220','도구',{count:state.operations?.error?undefined:workToolCatalog(state,selection).length,active:!selection.native_id&&selection.tab==='tools'}):'';
+  const create=workCanCreate(capabilities)?item('procedures','e8a37','업무 절차',{count:current.length,active:!selection.native_id&&selection.tab!=='tools'})+item('tools','d1220','도구',{count:state.operations?.error?undefined:workToolCatalog(state,selection).length,active:!selection.native_id&&selection.tab==='tools'}):'';
   const skill=workNativeAllowed(capabilities,'skills')?native(workNativeTargets.find(item=>item.id==='skills')):'';
   const ordinary=workNativeTargets.filter(target=>!target.admin&&target.id!=='skills'&&workNativeAllowed(capabilities,target.id)).map(native).join('');
-  const admin=capabilities.is_admin===true?[item('workspace_admin','f34f3','공장·접근 범위',{active:!selection.native_id&&selection.tab==='workspace_admin'}),workNativeAllowed(capabilities,'admin')?native(workNativeTargets.find(target=>target.id==='admin')):''].join(''):'';
+  const admin=workNativeAllowed(capabilities,'admin')?native(workNativeTargets.find(target=>target.id==='admin')):'';
   const groups=group('업무 만들기',create+skill)+group('AI 설정',ordinary)+group('관리자만',admin);
   const recent=workCanCreate(capabilities)?current.filter(workflow=>workflow.updated_at).slice().sort((a,b)=>String(b.updated_at).localeCompare(String(a.updated_at))).slice(0,8):[];
   return groups+(recent.length?`<p class="ew-nav-caption">최근 편집</p><nav class="ew-workflows ew-recent">${recent.map(workflow=>`<button type="button" data-action="workflow" data-workflow-id="${esc(workflow.id)}"${!selection.native_id&&workflow.id===selection.workflow_id?' aria-current="page"':''}>${icon({ops:'126c7',setup:'f6bbc',incident:'4fb09'}[workflow.category] || 'e8a37')}<span>${esc(workflow.name)}</span></button>`).join('')}</nav>`:'')+(!groups?'<p class="ew-empty">EES Workflow에서 열 수 있는 항목이 없습니다</p>':'')+(error?`<p class="ew-error" role="alert" data-native-navigation-error>${esc(error)}</p><button type="button" data-action="refresh">다시 확인</button>`:'');
@@ -676,7 +670,7 @@ function workOperationTarget(data={},selection={}){
 }
 function workStageNoteKey(data,node){const saved=data.run?.jobs?.[node.id] || {};return [data.capabilities?.actor_id,data.run?.id,node.id,saved.attempt_id || saved.current_attempt || '',saved.result_revision || 0].join('/');}
 function workStageTarget(data,selection={}){
-  if(!data||selection.mode==='author'||selection.job_id||['historical_reference','workspace_admin','records','active_runs','start','run_details'].includes(selection.tab))return null;
+  if(!data||selection.mode==='author'||selection.job_id||['historical_reference','records','active_runs','start','run_details'].includes(selection.tab))return null;
   const stages=Object.values(workOperationDefinition(data).nodes || {}).filter(node=>node.type==='t');
   return stages.find(node=>node.id===selection.stage_id) || (data.run&&!selection.stage_overview&&!workUI.finished(data.run)&&stages.length===1?stages[0]:null);
 }
@@ -916,13 +910,12 @@ function createWorkView({callbacks}){
     const title=s.mode==='author'?'워크스페이스':s.tab==='records'?'실행 기록':'업무';
     const top=stageScreen?.header || (overview?`<header class="ew-panel-header ew-operation-nav"><strong>업무</strong><span></span><button type="button" class="ew-icon-button" aria-label="업무 패널 닫기" data-action="close_panel">${icon('a9175')}</button></header>`:null) || `<header class="ew-panel-header"><strong>${title}</strong><span>${esc(snapshot.native_return_pending?'':s.mode==='author'?data.workflow?.name || '':definition().name || data.workflow?.name || '')}</span><button type="button" data-action="close_panel" aria-label="업무 패널 닫기" class="ew-icon-button">${icon('a9175')}</button></header>`;
     if(snapshot.evidence_unavailable){paint(top+`<div class="ew-scroll"><div class="ew-error" role="alert"><p>${esc(snapshot.error || '기록을 다시 조회해 주세요.')}</p>${button('다시 조회','refresh')}</div></div>`);setBusy(snapshot.busy);return;}
-    if(!snapshot.target_loading&&!(snapshot.scope_loading&&snapshot.error)&&snapshot.state&&s.mode==='author'&&s.tab!=='workspace_admin'){if(!workCanCreate(data.capabilities)){paint(top+'<div class="ew-scroll"><p class="ew-empty">'+(workNativeTargets.some(target=>workNativeAllowed(data.capabilities,target.id))?'왼쪽 메뉴에서 사용할 화면을 여세요.':'현재 계정으로 EES Workflow에서 열 수 있는 항목이 없습니다.')+'</p></div>');return;}if(!$('#ees-work-authoring-panel',host))paint('<div id="ees-work-authoring-panel" class="ew-scroll"></div>');return;}
+    if(!snapshot.target_loading&&!(snapshot.scope_loading&&snapshot.error)&&snapshot.state&&s.mode==='author'){if(!workCanCreate(data.capabilities)){paint(top+'<div class="ew-scroll"><p class="ew-empty">'+(workNativeTargets.some(target=>workNativeAllowed(data.capabilities,target.id))?'왼쪽 메뉴에서 사용할 화면을 여세요.':'현재 계정으로 EES Workflow에서 열 수 있는 항목이 없습니다.')+'</p></div>');return;}if(!$('#ees-work-authoring-panel',host))paint('<div id="ees-work-authoring-panel" class="ew-scroll"></div>');return;}
     let body='';currentDraftKey='';
     if(snapshot.error&&!snapshot.state)body=`<div class="ew-error" role="alert"><p>${esc(snapshot.error)}</p>${button('다시 조회','refresh')}</div>`;
     else if(snapshot.scope_loading&&snapshot.state)body='<p role="status" class="ew-empty" data-ees-scope-loading="panel">'+(snapshot.error?'목록을 받지 못했습니다.':'받는 중')+'</p>';
     else if(!snapshot.state||snapshot.target_loading)body='<p role="status" class="ew-empty" data-ees-target-loading>업무 정보를 불러오는 중입니다.</p>';
     else if(s.tab==='historical_reference')body=workHistoricalReferenceHTML(data.run,s.historical_reference,data.workflow,data.settings?.values);
-    else if(s.tab==='workspace_admin')body=workAdminHTML(data);
     else if(s.tab==='active_runs')body=workActiveRunsHTML(data,s);
     else if(s.tab==='records')body=workRunRecordsHTML(data.runs || [],s.records_workflow || '',data.workflow?.name)+(s.records_workflow?'':workLegacyHTML(data.legacy));
     else if(!s.workflow_id)body='<div class="ew-empty ew-work-home"><h3>업무 절차를 선택해 주세요</h3><p>공장·시스템을 선택한 뒤 왼쪽 업무 목록에서 절차를 여세요.</p></div>';

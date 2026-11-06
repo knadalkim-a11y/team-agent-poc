@@ -662,6 +662,35 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.addCleanup(provider.stop)
         self.refresh()
 
+    def test_ai_assistant_work_tool_settings_stays_on_native_page(self):
+        self.enable_native_menus()
+        original = NativeUIHandler.do_GET
+        status_reads = []
+
+        def tool_status(handler):
+            if urlparse(handler.path).path == '/api/v1/ees/assets/work-tool/status':
+                status_reads.append(handler.path)
+                return handler.send_content({'state': 'ready', 'id': 'ees_workflow',
+                                             'source_sha256': 'synthetic-current-source',
+                                             'registered_source_sha256': 'synthetic-current-source'})
+            return original(handler)
+
+        with patch.object(NativeUIHandler, 'do_GET', tool_status):
+            self.navigate('/workspace/models')
+            self.wait("document.querySelector('[data-ees-work-tool-settings]')")
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-action=workspace_admin]')"))
+            self.screenshot('source-shell-ai-assistant-work-settings-entry')
+            self.click('[data-ees-work-tool-settings]')
+            self.wait("document.querySelector('#ees-work-dialog[open]')")
+            self.assertIn('Work 대화 도구가 연결되어 있습니다', self.text('#ees-work-dialog'))
+            self.assertEqual(self.browser.evaluate('location.pathname'), '/workspace/models')
+            self.assertEqual(len(status_reads), 1)
+            self.screenshot('source-shell-ai-assistant-work-settings-dialog')
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog [data-dialog-confirm]')"))
+            self.click('#ees-work-dialog [data-dialog-close]')
+            self.wait("!document.querySelector('#ees-work-dialog')")
+            self.assertEqual(self.browser.evaluate('location.pathname'), '/workspace/models')
+
     def native_link_selector(self, target, label, labels, *, return_from=None):
         if target != 'tools':
             return '[data-action=native_open][data-native-id=' + target + ']'
@@ -870,16 +899,15 @@ class SourceShellNativeTests(IntegratedNativeCase):
         panels = {
             'tools': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '도구'",
             'procedures': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '워크플로우'",
-            'workspace_admin': "document.querySelector('#ees-work-panel .ew-work-heading h2')?.textContent === '공장·접근 범위'",
             'work_home': "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '업무'",
         }
-        # Warm the three author panels once before timing the return boundary.
+        # Warm both author panels once before timing the return boundary.
         # Existing same-menu preservation coverage below keeps dirty draft DOM,
         # fields, expansion and scroll; this test targets different destinations.
         self.click('[data-action=mode][data-mode=author]')
         self.wait(panels['procedures'])
         self.assertIsNotNone(self.refresh())
-        for origin in ('tools', 'workspace_admin', 'procedures'):
+        for origin in ('tools', 'procedures'):
             self.click('#ees-work-entry [data-action=' + origin + ']')
             self.wait(panels[origin])
             self.assertIsNotNone(self.refresh())
@@ -887,8 +915,8 @@ class SourceShellNativeTests(IntegratedNativeCase):
         frame_monitor.guard_loading(self)
         labels = []
 
-        for origin in ('tools', 'procedures', 'workspace_admin'):
-            for destination in ('tools', 'procedures', 'workspace_admin', 'work_home'):
+        for origin in ('tools', 'procedures'):
+            for destination in ('tools', 'procedures', 'work_home'):
                 if destination == origin:
                     continue
                 label = 'return-' + origin + '-to-' + destination
@@ -921,9 +949,9 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
 
         evidence = frame_monitor.collect(self, labels=labels)
-        evidence['scope'] = ('Real packaged frontend and physical CDP clicks: tools/procedures/factories-access '
-                             'each through Native guidance to both other author panels and through Native '
-                             'models to work mode (nine returns). Both real workspace and operations responses '
+        evidence['scope'] = ('Real packaged frontend and physical CDP clicks: tools/procedures '
+                             'each through Native guidance to the other author panel and through Native '
+                             'models to work mode (four returns). Both real workspace and operations responses '
                              'are delayed 1000ms; aria-current and visible right-panel identity are observed '
                              'from the trusted destination click through response completion.')
         evidence['reads'] = self.server.navigation_reads
@@ -939,7 +967,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         directory = self.screenshot('source-shell-native-return-selection-final')
         (directory / 'source-shell-native-return-selection-frames.json').write_text(
             json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-        self.assertEqual(len(evidence['nativeReturns']), 9)
+        self.assertEqual(len(evidence['nativeReturns']), 4)
         for row in self.server.navigation_reads:
             self.assertGreaterEqual(row['released'] - row['started'], .99)
         frame_monitor.assert_clean(self, evidence, labels=labels)
@@ -1085,9 +1113,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.step('work-tools', '#ees-work-entry [data-action=tools]',
                   "document.querySelector('[data-author-action=tool_create]')")
         labels.append('work-tools')
-        self.step('work-access', '#ees-work-entry [data-action=workspace_admin]',
-                  "document.querySelector('#ees-work-panel h2')?.textContent === '공장·접근 범위'")
-        labels.append('work-access')
+        self.assertFalse(self.browser.evaluate("Boolean(document.querySelector('[data-action=workspace_admin], [data-action=admin_factory], [data-action=admin_access]'))"))
         self.step('work-procedures', '#ees-work-entry [data-action=procedures]',
                   "document.querySelector('#ees-work-designer')")
         labels.append('work-procedures')
