@@ -1695,4 +1695,4 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 /* Procedure visibility is an editable field committed by the single Save action. */
 #ees-work-designer .ew-author-definition-head>.ew-author-heading{flex-wrap:wrap;}
 #ees-work-designer .ew-publication-field{display:flex;align-items:center;gap:6px;margin:0;flex:none;white-space:nowrap;font-size:12px;font-weight:400;color:var(--ees-text-secondary);}
-#ees-work-designer .ew-publication-field>select{width:82px;min-height:32px;height:32px;margin:0;padding:4px 8px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-panel);color:var(--ees-text-primary);font-size:12px;}
+#ees-work-designer .ew-publication-field>select{appearance:auto;width:82px;min-height:32px;height:32px;margin:0;padding:4px 8px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-default);color:var(--ees-text-primary);font-size:12px;}

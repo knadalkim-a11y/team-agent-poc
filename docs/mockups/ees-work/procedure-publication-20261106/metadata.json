@@ -1,0 +1,37 @@
+{
+  "file_key": "XK2wTos6sEuxSHhIj7cqg6",
+  "captured_at": "2026-11-06",
+  "procedure_version": 17,
+  "tool_flow_version": "2.1",
+  "change_record": "C156",
+  "backup": "B070",
+  "base_commit": "7a56cdbbcbf104a8a0847a446e951d262907a167",
+  "scope": "Publication status select and Save control; existing body content and execution contracts retained.",
+  "frames": [
+    {
+      "file": "figma-collapsed.png",
+      "node_id": "1804:2551",
+      "sha256": "255663d6ed17778f24fc9bc82ef41e326aca691949fc511cd226a5e6fe0e5d30"
+    },
+    {
+      "file": "figma-expanded.png",
+      "node_id": "1804:2673",
+      "sha256": "842bc05d9f30524ef8e81edd397382ef87dafd7cf2eed2f6b261f7e352bac093"
+    },
+    {
+      "file": "figma-tool-linked.png",
+      "node_id": "2017:460",
+      "sha256": "84225214e86b6eb4397b7a47b23a00a524e6791f0a6d97c6e3ba7f112a89ee30"
+    },
+    {
+      "file": "figma-tool-saved.png",
+      "node_id": "2054:420",
+      "sha256": "6d3a01f1913174959969ac6d99db6ee14c9336b20fe37614bdd41f5472b65a6f"
+    }
+  ],
+  "implementation_source_files": {
+    "branding/ees/ui/ees-work-designer.js": "f4d9c46c76b13d36fb2a619b40e8b59f4112e4666662e028c5f80eeebf356ec2",
+    "branding/ees/ui/ees-work-launcher.css": "730089370cc73b1acf095acdad1bf5a49e3f2af5ec6dfadd45907c3926afd601",
+    "agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py": "a75ab5f91d7a69b504e0097f0f22d1eec4ff2dbce19eab95bf2cbbefa489a343"
+  }
+}

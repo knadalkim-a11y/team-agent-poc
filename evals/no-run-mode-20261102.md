@@ -126,3 +126,10 @@ CI456 (`77ca5cd`)의 실제 전체 제품과 새 미완성 게시/360px 흐름�
 - 빌드: main CI 산출물(검증된 공식 wheel·source frontend)을 재사용하려던 첫 빌드는 `Frontend inputs differ from this wrapper checkout; rebuild in CI.`로 중단했다. 변경된 UI 입력을 탐지한 정상 보호이며 manifest/컴파일 결과를 우회 수정하지 않는다. 최종 head의 CI 새 source 빌드와 실제 Native 검증으로 확인한다.
 - Figma: 업무절차 페이지1285:1829·루트1804:2546, 대표 패널1804:2551/1804:2673, 이전 B070 보존. 열 개 편집 화면에 상태 선택·단일 저장을 반영했다. 폰트/부품은 기존 것을 재사용한다. 라벨에 남은 상태 주황색을 공통 보조 글자 토큰으로 수정했다.
 - 실제 Native·최종 CI·고정 점검은 진행 중. 사내 화면·실데이터·사용자 사용성은 미확인, 병합·배포는 미실행이다.
+
+- 로컬 브라우저 첫 시도: CI494의 frontend ZIP `f6c6189d19929276b594fcb33e1f9ad624d6e1a8bce5415bfda84f5c88bd253e`를 검증해 공식 builder로 현재 wheel `c0e35f3f49bbccecd813d4a6a5d3161430125d4a8754d11b411759e4fef47a2f`를 조립했다. Chromium은 제품을 읽기 전 `process_singleton_posix.cc:297 socket() failed: Operation not permitted`로 종료했고 ptrace도 차단됐다. 두 대상 검사는 환경 준비 실패이며 제품 실패/성공으로 판정하지 않는다. 이 제한을 우회하지 않고 CI의 실제 브라우저를 사용한다.
+- Figma 최종: 업무절차17판과 도구2.1판의 T08/T08A를 동기화하고 C156/PR126/B070을 기록했다. 고정 점검을 페이지당 한 호출로 나누되 기준·링크/이력 검사를 유지했다. 비백업17페이지 오류0, 기존 업무절차 크기 경고1(10,487요소·60,543자)은 관련 없는 대규모 정리 없이 보존한다. 기록 후 관리 페이지 재검사 오류0·경고0. [고정 PNG4개·해시](../docs/mockups/ees-work/procedure-publication-20261106/metadata.json)와 [점검 결과](../docs/mockups/ees-work/procedure-publication-20261106/figma-check.json)를 보존하고 실제 렌더를 직접 확인했다.
+- 시험 ID 감사: `python tests/ees_delivery_suite.py --audit --output dist/procedure-test-id-audit`는1737개 오류0. 실제 브라우저 회귀는 상태 선택만으로 쓰기 없음·게시 중 내용 저장·미게시 저장 전후의 서버 포인터와 이력 보존을 추가 확인한다.
+
+- 최초 CI494([실행](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/42133313139), head `6ac9433`, 통합 시험 commit `85fb305`): 실제 로그인·작성·저장·재시작·채팅·일반 사용자 실행을 포함한 Complete Native product는 성공했다. services의 `test_normalized_published_definition_never_replaces_the_authoring_draft`는 예전 “게시 중 저장 후에도 게시본은 human” 기대가 남아 실패했다. 제출 편집본이 게시본에 반영되는 기대와 저장 전 불변 단언을 함께 적용하고, normalized definition이 편집본을 덮지 않는 원래 단언은 유지했다. 해당 파일8/8 재검사 통과.
+- CI494 실제1920 화면의 상태 선택란은 기존 Native appearance 초기화 때문에 화살표가 없었다. 선택 가능한 상태값임을 드러내도록 해당 select에만 `appearance:auto`를 지정하고 Figma의 입력 배경과 같은 공통 흰색 토큰을 사용했다. 최종 새 빌드 화면에서 다시 확인한다. 게시 상태·저장 동작/크기는 바꾸지 않는다.
