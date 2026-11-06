@@ -2510,6 +2510,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('#ew-procedure-create [data-author-action=procedure_cancel]')
         initial_workflows = self.state()['workflows']
         reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
+        self.click('.ees-settings-trigger')
         self.click('[data-action=native_open][data-native-id=admin]')
         self.wait("document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-admin-general][aria-selected=true]') && document.querySelector('[role=dialog][aria-modal=true] input[type=text][placeholder*=\"localhost:3000\"]')")
         self.assertEqual(self.browser.evaluate('location.pathname + location.search'), '/c/existing-chat')
@@ -2531,6 +2532,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.browser.evaluate('window.__eesNativeWorkV1.captureReference()'), reference)
         self.screenshot('menu-c18-native-admin-returned')
 
+        self.click('.ees-settings-trigger')
         self.click('[data-action=native_open][data-native-id=admin]')
         self.wait("document.querySelector('[role=dialog] input[type=text][placeholder*=\"localhost:3000\"]')?.value === 'https://fixture.invalid'")
         self.assertFalse(any(method != 'GET' and path in {
@@ -2549,6 +2551,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
     def test_native_admin_dialog_contains_keyboard_focus(self):
         self.native_menu_fixture()
         self.click('[data-action=mode][data-mode=author]')
+        self.click('.ees-settings-trigger')
         self.click('[data-action=native_open][data-native-id=admin]')
         self.wait("document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-admin-general][aria-selected=true]') && document.querySelector('[role=dialog][aria-modal=true] input[type=text][placeholder*=\"localhost:3000\"]') && document.querySelector('#ees-work-entry [data-action=procedures]')")
         observe = """(()=>{
@@ -3002,10 +3005,13 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         def menu_ids():
             return self.browser.evaluate("[...document.querySelectorAll('#ees-work-entry [data-action=native_open]')].map(e=>e.dataset.nativeId)")
 
-        self.assertEqual(menu_ids(), ['skills', 'models', 'knowledge', 'prompts', 'admin'])
+        self.assertEqual(menu_ids(), ['skills', 'knowledge'])
+        self.click('.ees-settings-trigger')
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ees-settings-popover [data-native-id]')].map(e=>e.dataset.nativeId)"), ['models', 'admin'])
+        self.key('Escape', 27)
         self.assertNotIn('기능 연결', self.text('#ees-work-entry'))
-        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-nav-group-title')].map(e=>e.textContent)"),
-                         ['업무 만들기', 'AI 설정', '관리자만'])
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-assets-toggle')].map(e=>e.textContent.trim())"),
+                         ['도구·자료'])
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-action=native_skills],[data-action=native_workspace]')"))
         self.screenshot('menu-c18-admin-menu')
 
@@ -3015,7 +3021,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.menu_grants = {key: key in ('skills', 'prompts') for key in self.menu_grants}
         self.refresh()
         self.wait("!document.querySelector('[data-action=native_open][data-native-id=admin]')")
-        self.assertEqual(menu_ids(), ['skills', 'prompts'])
+        self.assertEqual(menu_ids(), ['skills'])
+        self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-saved-prompts-button')"))
         self.assertTrue(self.browser.evaluate("!!document.querySelector('[data-action=tools]')"))
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-action=workspace_admin]')"))
         self.screenshot('menu-c18-author-menu')

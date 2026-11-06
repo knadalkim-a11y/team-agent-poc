@@ -143,7 +143,7 @@ index d552ba8..384bf93 100644
  </svelte:head>
  
 diff --git a/src/lib/components/chat/Chat.svelte b/src/lib/components/chat/Chat.svelte
-index 875aee0..69c73bb 100644
+index 875aee0..00d8c07 100644
 --- a/src/lib/components/chat/Chat.svelte
 +++ b/src/lib/components/chat/Chat.svelte
 @@ -109,6 +109,10 @@
@@ -884,7 +884,7 @@ index 875aee0..69c73bb 100644
  								<div class="pb-6 z-10">
  									<div class="text-xs text-gray-400 dark:text-gray-500 text-center">
  										{$i18n.t('Read only')}
-@@ -4422,6 +4616,11 @@
+@@ -4422,7 +4616,12 @@
  									id={embedded ? messageInputDropzoneId : undefined}
  									class=" pb-2 {dragged ? 'z-0' : 'z-10'}"
  								>
@@ -896,6 +896,7 @@ index 875aee0..69c73bb 100644
 +										placeholder={!embedded && $eesSnapshot.selection?.mode === 'author' && !$models.length ? '업무 도우미 연결 전' : undefined}
  										bind:this={messageInput}
  										{history}
+ 										{taskIds}
 @@ -4574,7 +4773,7 @@
  								</div>
  							</div>
@@ -906,10 +907,53 @@ index 875aee0..69c73bb 100644
  									{history}
  									bind:selectedModels
 diff --git a/src/lib/components/chat/MessageInput.svelte b/src/lib/components/chat/MessageInput.svelte
-index a2df614..ff81873 100644
+index a2df614..09dd4f3 100644
 --- a/src/lib/components/chat/MessageInput.svelte
 +++ b/src/lib/components/chat/MessageInput.svelte
-@@ -2034,7 +2034,7 @@
+@@ -1,5 +1,6 @@
+ <script lang="ts">
+ 	import DOMPurify from 'dompurify';
++	import EesSavedPrompts from '../ees/EesSavedPrompts.svelte';
+ 	import { toast } from 'svelte-sonner';
+ 
+ 	import { marked } from 'marked';
+@@ -611,8 +612,20 @@
+ 		}
+ 	};
+ 
+-	const replaceSlashRangeWithPrompt = async (editor, range, text: string) => {
++	const insertSavedPrompt = async (text: string) => {
++		const editor = chatInputElement?.editor;
++		if (!editor || !$_user?.id) return;
++		const owner = $_user.id, token = localStorage.token, chat = chatId, doc = editor.state.doc;
++		const current = () => chatInputElement?.editor === editor && !editor.isDestroyed && $_user?.id === owner && localStorage.token === token && chatId === chat && editor.state.doc === doc;
++		const end = doc.content.size - 1;
++		// Append without replacing the user's draft or attachments. Native variable
++		// handling is shared with slash prompts; this path never submits a message.
++		await replaceSlashRangeWithPrompt(editor, { from: end, to: end }, (prompt.trim() ? '\n\n' : '') + text, current);
++	};
++
++	const replaceSlashRangeWithPrompt = async (editor, range, text: string, current = () => true) => {
+ 		text = await textVariableHandler(text);
++		if (!current()) return;
+ 
+ 		const { state, view } = editor;
+ 		let tr = state.tr;
+@@ -645,10 +658,10 @@
+ 		} else if (text.includes('\n')) {
+ 			const nodes = text
+ 				.split('\n')
+-				.map((line, index) =>
++				.flatMap((line, index) =>
+ 					index === 0
+-						? state.schema.text(line ? line : [])
+-						: state.schema.nodes.paragraph.create({}, line ? state.schema.text(line) : undefined)
++						? (line ? [state.schema.text(line)] : [])
++						: [state.schema.nodes.paragraph.create({}, line ? state.schema.text(line) : undefined)]
+ 				);
+ 			tr = tr.replaceWith(range.from, range.to, nodes);
+ 			const newPos = nodes.reduce((pos, node) => pos + node.nodeSize, range.from);
+@@ -2034,7 +2047,7 @@
  															navigator.maxTouchPoints > 0 ||
  															navigator.msMaxTouchPoints > 0
  														)}
@@ -918,7 +962,16 @@ index a2df614..ff81873 100644
  													largeTextAsFile={($settings?.largeTextAsFile ?? false) && !shiftKey}
  													autocomplete={$config?.features?.enable_autocomplete_generation &&
  														($settings?.promptAutocomplete ?? false)}
-@@ -2520,6 +2520,7 @@
+@@ -2302,6 +2315,8 @@
+ 											</IntegrationsMenu>
+ 										{/if}
+ 
++										{#if !embedded}<EesSavedPrompts {prompt} {chatId} onChoose={insertSavedPrompt} />{/if}
++
+ 										{#if selectedModelIds.length === 1 && $models.find((m) => m.id === selectedModelIds[0])?.has_user_valves}
+ 											<div class="ml-1 flex gap-1.5 shrink-0">
+ 												<Tooltip content={$i18n.t('Valves')} placement="top">
+@@ -2520,6 +2535,7 @@
  								</div>
  
  								<div class="self-end flex space-x-1 mr-1 min-w-0 gap-[0.03125rem]">
@@ -926,7 +979,7 @@ index a2df614..ff81873 100644
  									<div class="flex min-w-0 max-w-[10rem] items-center sm:max-w-[13rem]">
  										<ModelSelector
  											bind:this={modelSelector}
-@@ -2530,6 +2531,7 @@
+@@ -2530,6 +2546,7 @@
  											triggerClassName="items-center gap-1.5 rounded-lg pl-2 pr-1.5 py-1 text-[0.8125rem] font-normal text-gray-600 transition-colors duration-100 hover:bg-gray-50/40 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800/40 dark:hover:text-gray-200"
  										/>
  									</div>
@@ -934,7 +987,7 @@ index a2df614..ff81873 100644
  
  									{#if hasChatVariables}
  										<Tooltip content={$i18n.t('Chat Variables')} placement="top">
-@@ -2616,6 +2618,15 @@
+@@ -2616,6 +2633,15 @@
  										{/if}
  
  										{#if !embedded && prompt === '' && files.length === 0 && ($_user?.role === 'admin' || ($_user?.permissions?.chat?.call ?? true))}
@@ -950,7 +1003,7 @@ index a2df614..ff81873 100644
  											<div class=" flex items-center">
  												<!-- {$i18n.t('Call')} -->
  												<Tooltip content={$i18n.t('Voice mode')}>
-@@ -2678,7 +2689,9 @@
+@@ -2678,7 +2704,9 @@
  													</button>
  												</Tooltip>
  											</div>
@@ -961,7 +1014,7 @@ index a2df614..ff81873 100644
  											<div class=" flex items-center">
  												<Tooltip
  													content={uploadPending
-@@ -2712,7 +2725,6 @@
+@@ -2712,7 +2740,6 @@
  													</button>
  												</Tooltip>
  											</div>
@@ -1137,7 +1190,7 @@ index b6a045e..7fd3b5c 100644
 + .ees-context-actions button:hover {background:#eef0f3;}
 +</style>
 diff --git a/src/lib/components/chat/Placeholder.svelte b/src/lib/components/chat/Placeholder.svelte
-index c183993..94a5ac5 100644
+index c183993..e490262 100644
 --- a/src/lib/components/chat/Placeholder.svelte
 +++ b/src/lib/components/chat/Placeholder.svelte
 @@ -39,6 +39,7 @@
@@ -1312,6 +1365,50 @@ index c183993..94a5ac5 100644
 -		</div>
  	{/if}
  </div>
+diff --git a/src/lib/components/ees/EesHelperNotice.svelte b/src/lib/components/ees/EesHelperNotice.svelte
+new file mode 100644
+index 0000000..3ba519f
+--- /dev/null
++++ b/src/lib/components/ees/EesHelperNotice.svelte
+@@ -0,0 +1,38 @@
++<script lang="ts">
++	import { eesHelperState } from './state';
++</script>
++
++{#if $eesHelperState.notice}
++	<div data-ees-helper-notice role="status" aria-live="polite" aria-atomic="true">
++		<svg data-ees-helper-notice-icon width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6b7280" stroke-width="1.4167" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
++			<path d="m7 1.75 1.11 3.37a1.17 1.17 0 0 0 .77.77L12.25 7l-3.37 1.11a1.17 1.17 0 0 0-.77.77L7 12.25l-1.11-3.37a1.17 1.17 0 0 0-.77-.77L1.75 7l3.37-1.11a1.17 1.17 0 0 0 .77-.77L7 1.75Z" />
++			<path d="M2.92 1.75v2.34M1.75 2.92h2.34M11.67 9.92v2.33M10.5 11.08h2.33" />
++		</svg>
++		<span data-ees-helper-notice-text>{$eesHelperState.notice}</span>
++	</div>
++{/if}
++
++<style>
++	div {
++		display: flex;
++		align-items: center;
++		gap: 8px;
++		width: fit-content;
++		max-width: 100%;
++		align-self: flex-start;
++		box-sizing: border-box;
++		padding: 8px 12px;
++		border: 0;
++		border-radius: 8px;
++		background: #fafafa;
++		box-shadow: none;
++		color: #5c5e65;
++		font-family: 'Noto Sans KR', sans-serif;
++		font-size: 13px;
++		font-weight: 400;
++		line-height: 16px;
++		text-align: left;
++	}
++	svg { flex: none; }
++	span { min-width: 0; overflow-wrap: anywhere; }
++</style>
 diff --git a/src/lib/components/ees/EesIcon.svelte b/src/lib/components/ees/EesIcon.svelte
 new file mode 100644
 index 0000000..a509ea5
@@ -1331,10 +1428,10 @@ index 0000000..a509ea5
 +/>
 diff --git a/src/lib/components/ees/EesNavigation.svelte b/src/lib/components/ees/EesNavigation.svelte
 new file mode 100644
-index 0000000..db77df1
+index 0000000..4a965a8
 --- /dev/null
 +++ b/src/lib/components/ees/EesNavigation.svelte
-@@ -0,0 +1,244 @@
+@@ -0,0 +1,220 @@
 +<script lang="ts">
 +	import { getContext } from 'svelte';
 +	import { page } from '$app/stores';
@@ -1343,21 +1440,9 @@ index 0000000..db77df1
 +	import Icon from './EesIcon.svelte';
 +	const i18n: any = getContext('i18n');
 +	const targets = [
-+		['skills', 'f908d', 'EES.Nav.Skills', 'Guidance'],
-+		['models', '83565', 'EES.Nav.Models', 'AI assistants'],
-+		['knowledge', '730b1', 'EES.Nav.Knowledge', 'Reference documents'],
-+		['prompts', '093d6', 'EES.Nav.Prompts', 'Quick phrases'],
-+		// Native tools are opened from the shared tool detail, not a second menu.
-+		['admin', '4308e', 'EES.Nav.Admin', 'Administrator settings']
++		['skills', 'f908d', 'EES.Nav.Skills', 'Work instructions'],
++		['knowledge', '730b1', 'EES.Nav.Knowledge', 'Reference documents']
 +	];
-+	const nativeNames = {
-+		skills: ['EES.Native.Skills', 'Skills'],
-+		models: ['EES.Native.Models', 'Models'],
-+		knowledge: ['EES.Native.Knowledge', 'Knowledge'],
-+		prompts: ['EES.Native.Prompts', 'Prompts'],
-+		tools: ['EES.Native.Tools', 'Tools'],
-+		admin: ['EES.Native.Admin', 'Admin']
-+	};
 +	const automatic = {
 +		failed: ['7495b', 'EES.Automatic.Failed', 'Failed'],
 +		missed: ['ce467', 'EES.Automatic.Missed', 'Missed'],
@@ -1437,72 +1522,60 @@ index 0000000..db77df1
 +		</div>
 +		</div></div>
 +		{#if author}
-+			<section class="ew-nav-group">
-+				<h3 class="ew-nav-group-title">{t('EES.Nav.CreateWork', 'Create work')}</h3>
-+				<nav class="ew-nav-links">
-+					{#if create}{#each [['procedures', 'e8a37', 'EES.Nav.Procedures', 'Procedures'], ['tools', 'd1220', 'EES.Nav.Tools', 'Tools']] as [action, icon, key, label]}<button
-+								class="ew-nav-button"
-+								data-action={action}
-+								aria-current={!$eesSnapshot.native_id &&
-+								(action === 'tools'
-+									? s.tab === 'tools'
-+									: s.tab !== 'tools')
-+									? 'page'
-+									: undefined}
-+								on:click={() => eesAction({ action })}
-+								><Icon name={icon} /><span>{t(key, label)}</span
-+								>{#if !$eesSnapshot.scope_loading && (action === 'procedures' || !data.operations?.error)}<small
-+										>{action === 'procedures'
-+											? current.length
-+											: (data.operations?.all_tools ?? data.operations?.tools ?? []).length + (data.operations?.shared_tools || []).length}</small
-+									>{/if}</button
-+							>{/each}{/if}
-+					{#if nativeAllowed('skills')}<button
-+							class="ew-nav-button"
-+							data-action="native_open"
-+							data-native-id="skills"
-+							aria-current={$eesSnapshot.native_id === 'skills' ? 'page' : undefined}
-+							on:click={() => eesAction({ action: 'native_open', nativeId: 'skills' })}
-+							><Icon name="f908d" /><span>{t('EES.Nav.Skills', 'Guidance')}</span><small
-+								class="ew-nav-native-name">{t(...nativeNames.skills)}</small
-+							></button
-+						>{/if}
-+				</nav>
-+			</section>
-+			{#if targets.slice(1, 4).some((item) => nativeAllowed(item[0]))}<section class="ew-nav-group">
-+					<h3 class="ew-nav-group-title">{t('EES.Nav.AI', 'AI settings')}</h3>
-+					<nav class="ew-nav-links">
-+						{#each targets.slice(1, 4) as [id, icon, key, label]}{#if nativeAllowed(id)}<button
++			{#if create}<nav class="ew-nav-links ew-procedure-link">
++					<button
++						class="ew-nav-button"
++						data-action="procedures"
++						aria-label={t('EES.Nav.Procedures', 'Procedures')}
++						aria-current={!$eesSnapshot.native_id && s.tab !== 'tools' ? 'page' : undefined}
++						on:click={() => eesAction({ action: 'procedures' })}
++					>
++						<Icon name="e8a37" /><span>{t('EES.Nav.Procedures', 'Procedures')}</span>
++					</button>
++				</nav>{/if}
++			{#if create || targets.some(([id]) => nativeAllowed(id))}<section
++					class="ew-nav-group ew-assets-group"
++				>
++					<button
++						class="ew-assets-toggle"
++						aria-expanded={!$eesCompact && !s.collapsed?.includes('assets')}
++						aria-controls="ees-assets-items"
++						aria-label={t('EES.Nav.Assets', 'Tools and resources')}
++						title={t('EES.Nav.Assets', 'Tools and resources')}
++						on:click={() => {
++							const open = $eesCompact || s.collapsed?.includes('assets');
++							if ($eesCompact) eesCompact.set(false);
++							eesAction({ action: 'category', category: 'assets', open: String(Boolean(open)) });
++						}}
++						><span>{t('EES.Nav.Assets', 'Tools and resources')}</span><Icon name="ead50" /></button
++					>
++					<div
++						class="ew-category-body"
++						id="ees-assets-items"
++						inert={$eesCompact || s.collapsed?.includes('assets')}
++						aria-hidden={$eesCompact || Boolean(s.collapsed?.includes('assets'))}
++					>
++						<nav class="ew-nav-links ew-category-items">
++							{#if create}<button
 +									class="ew-nav-button"
-+									data-action="native_open"
-+									data-native-id={id}
-+									aria-current={$eesSnapshot.native_id === id ? 'page' : undefined}
-+									on:click={() => eesAction({ action: 'native_open', nativeId: id })}
-+									><Icon name={icon} /><span>{t(key, label)}</span><small class="ew-nav-native-name"
-+										>{t(...nativeNames[id])}</small
-+									></button
-+								>{/if}{/each}
-+					</nav>
-+				</section>{/if}
-+			{#if nativeAllowed('admin')}<section class="ew-nav-group">
-+					<h3 class="ew-nav-group-title">{t('EES.Nav.AdminOnly', 'Administrators only')}</h3>
-+					<nav class="ew-nav-links">
-+						{#each targets.filter(([id]) => id === 'admin') as target}
-+							{#if nativeAllowed(target[0])}<button
-+									class="ew-nav-button"
-+									data-action="native_open"
-+									data-native-id={target[0]}
-+									aria-current={$eesSnapshot.native_id === target[0] ? 'page' : undefined}
-+									on:click={() => eesAction({ action: 'native_open', nativeId: target[0] })}
-+									><Icon name={target[1]} /><span>{t(target[2], target[3])}</span><small
-+										class="ew-nav-native-name">{t(...nativeNames[target[0]])}</small
-+									></button
++									data-action="tools"
++									aria-current={!$eesSnapshot.native_id && s.tab === 'tools' ? 'page' : undefined}
++									on:click={() => eesAction({ action: 'tools' })}
++									><Icon name="d1220" /><span>{t('EES.Nav.Tools', 'Tools')}</span></button
 +								>{/if}
-+						{/each}
-+					</nav>
++							{#each targets as [id, icon, key, label]}{#if nativeAllowed(id)}<button
++										class="ew-nav-button"
++										data-action="native_open"
++										data-native-id={id}
++										aria-current={$eesSnapshot.native_id === id ? 'page' : undefined}
++										on:click={() => eesAction({ action: 'native_open', nativeId: id })}
++										><Icon name={icon} /><span>{t(key, label)}</span></button
++									>{/if}{/each}
++						</nav>
++					</div>
 +				</section>{/if}
-+			{#if !create && !targets.some((item) => nativeAllowed(item[0]))}<p class="ew-empty">
-+					{t('EES.NoAccessibleScreens', 'No screens are available in EES Workflow.')}
++			{#if !create && !targets.some(([id]) => nativeAllowed(id))}<p class="ew-empty">
++					{t('EES.NoWorkspaceAssets', 'No tools or resources are available for this account.')}
 +				</p>{/if}
 +			{#if create && $eesSnapshot.scope_loading}<p class="ew-empty" role="status" data-ees-scope-loading="navigation">{t($eesSnapshot.error ? 'EES.ListUnavailable' : 'EES.Receiving', $eesSnapshot.error ? 'Could not receive the list.' : 'Receiving')}</p>{/if}
 +			{#if create && !$eesSnapshot.scope_loading && current.length}<p class="ew-nav-caption">
@@ -1579,52 +1652,9 @@ index 0000000..db77df1
 +			>{t('EES.Retry', 'Check again')}</button
 +		>{/if}
 +</section>
-diff --git a/src/lib/components/ees/EesHelperNotice.svelte b/src/lib/components/ees/EesHelperNotice.svelte
-new file mode 100644
---- /dev/null
-+++ b/src/lib/components/ees/EesHelperNotice.svelte
-@@ -0,0 +1,38 @@
-+<script lang="ts">
-+	import { eesHelperState } from './state';
-+</script>
-+
-+{#if $eesHelperState.notice}
-+	<div data-ees-helper-notice role="status" aria-live="polite" aria-atomic="true">
-+		<svg data-ees-helper-notice-icon width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6b7280" stroke-width="1.4167" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-+			<path d="m7 1.75 1.11 3.37a1.17 1.17 0 0 0 .77.77L12.25 7l-3.37 1.11a1.17 1.17 0 0 0-.77.77L7 12.25l-1.11-3.37a1.17 1.17 0 0 0-.77-.77L1.75 7l3.37-1.11a1.17 1.17 0 0 0 .77-.77L7 1.75Z" />
-+			<path d="M2.92 1.75v2.34M1.75 2.92h2.34M11.67 9.92v2.33M10.5 11.08h2.33" />
-+		</svg>
-+		<span data-ees-helper-notice-text>{$eesHelperState.notice}</span>
-+	</div>
-+{/if}
-+
-+<style>
-+	div {
-+		display: flex;
-+		align-items: center;
-+		gap: 8px;
-+		width: fit-content;
-+		max-width: 100%;
-+		align-self: flex-start;
-+		box-sizing: border-box;
-+		padding: 8px 12px;
-+		border: 0;
-+		border-radius: 8px;
-+		background: #fafafa;
-+		box-shadow: none;
-+		color: #5c5e65;
-+		font-family: 'Noto Sans KR', sans-serif;
-+		font-size: 13px;
-+		font-weight: 400;
-+		line-height: 16px;
-+		text-align: left;
-+	}
-+	svg { flex: none; }
-+	span { min-width: 0; overflow-wrap: anywhere; }
-+</style>
 diff --git a/src/lib/components/ees/EesProcedureIntro.svelte b/src/lib/components/ees/EesProcedureIntro.svelte
 new file mode 100644
-index 0000000..6d5288b
+index 0000000..8d49db6
 --- /dev/null
 +++ b/src/lib/components/ees/EesProcedureIntro.svelte
 @@ -0,0 +1,192 @@
@@ -1820,6 +1850,574 @@ index 0000000..6d5288b
 +		line-height: 18px;
 +	}
 +</style>
+diff --git a/src/lib/components/ees/EesSavedPrompts.svelte b/src/lib/components/ees/EesSavedPrompts.svelte
+new file mode 100644
+index 0000000..4022621
+--- /dev/null
++++ b/src/lib/components/ees/EesSavedPrompts.svelte
+@@ -0,0 +1,264 @@
++<script lang="ts">
++	import { getContext, onDestroy, tick } from 'svelte';
++	import { page } from '$app/stores';
++	import { user } from '$lib/stores';
++	import { createNewPrompt, getPrompts } from '$lib/apis/prompts';
++	import { toast } from 'svelte-sonner';
++	import Dropdown from '../common/Dropdown.svelte';
++	import Modal from '../common/Modal.svelte';
++	import PromptEditor from '../workspace/Prompts/PromptEditor.svelte';
++	import Icon from './EesIcon.svelte';
++	import PlusAlt from '../icons/PlusAlt.svelte';
++	import { eesAction, eesSnapshot, eesSessionReady } from './state';
++
++	export let prompt = '';
++	export let chatId = '';
++	export let onChoose: (text: string) => Promise<void>;
++	const i18n: any = getContext('i18n');
++	let show = false;
++	let loading = false;
++	let error = false;
++	let query = '';
++	let items: any[] = [];
++	let listSession: any = null;
++	let showCreate = false;
++	let draft: any = null;
++	let createSession: any = null;
++	let sequence = 0;
++	let alive = true;
++	let previousBoundary = '';
++	let trigger: HTMLButtonElement;
++	let search: HTMLInputElement;
++	$: cap = $eesSnapshot.native_capabilities ?? $eesSnapshot.state?.capabilities ?? {};
++	$: canManage =
++		cap.actor_id === $user?.id &&
++		cap.native_access_available === true &&
++		cap.native_access?.prompts === true;
++	$: boundary = JSON.stringify([
++		$user?.id,
++		$eesSessionReady,
++		chatId,
++		$page.url.pathname,
++		$page.url.search
++	]);
++	$: if (boundary !== previousBoundary) {
++		previousBoundary = boundary;
++		reset();
++	}
++	$: if (!canManage) {
++		showCreate = false;
++		draft = null;
++		createSession = null;
++	}
++	$: filtered = items.filter((item) =>
++		`${item.name || ''} ${item.command || ''} ${item.content || ''}`
++			.toLocaleLowerCase()
++			.includes(query.trim().toLocaleLowerCase())
++	);
++	$: t = (key, fallback) => $i18n.t(key, { defaultValue: fallback });
++	function session() {
++		return { boundary, actor: $user?.id, token: localStorage.token };
++	}
++	function current(at) {
++		return (
++			alive &&
++			$eesSessionReady &&
++			at?.actor &&
++			at.actor === $user?.id &&
++			at.boundary === boundary &&
++			at.token === localStorage.token
++		);
++	}
++	function reset() {
++		sequence++;
++		show = false;
++		showCreate = false;
++		loading = false;
++		error = false;
++		query = '';
++		items = [];
++		listSession = null;
++		draft = null;
++		createSession = null;
++	}
++	onDestroy(() => {
++		alive = false;
++		sequence++;
++	});
++	async function load() {
++		const at = session(),
++			request = ++sequence;
++		items = [];
++		loading = true;
++		error = false;
++		try {
++			const result = await getPrompts(at.token);
++			if (!current(at) || request !== sequence) return;
++			if (!Array.isArray(result)) throw new Error('prompts_unavailable');
++			items = result.filter(
++				(item) => item && typeof item.content === 'string' && item.is_active !== false
++			);
++			listSession = at;
++		} catch (_) {
++			if (current(at) && request === sequence) error = true;
++		} finally {
++			if (current(at) && request === sequence) loading = false;
++		}
++	}
++	async function opened(open: boolean) {
++		if (open) {
++			query = '';
++			void load();
++			await tick();
++			if (show) search?.focus();
++		} else {
++			sequence++;
++			loading = false;
++		}
++	}
++	async function choose(item) {
++		if (!current(listSession) || !items.includes(item)) return;
++		show = false;
++		await onChoose(item.content);
++	}
++	async function saveInput() {
++		if (!canManage || !prompt.trim() || !$eesSessionReady) return;
++		createSession = session();
++		const at = createSession;
++		draft = { name: '', command: '', content: prompt, tags: [], access_grants: [] };
++		show = false;
++		await tick();
++		if (current(at) && canManage && draft) showCreate = true;
++	}
++	async function save(value) {
++		const at = createSession;
++		if (!canManage || !current(at)) return;
++		// Reuse Native creation and its validation/permissions; never update an existing prompt.
++		const result = await createNewPrompt(at.token, value).catch((failure) => {
++			if (current(at)) throw failure;
++		});
++		if (!current(at)) return;
++		if (!result?.id)
++			throw new Error(t('EES.Prompts.SaveFailed', 'Could not save. Your text is still here.'));
++		showCreate = false;
++		draft = null;
++		createSession = null;
++		toast.success($i18n.t('Prompt created successfully'));
++		await tick();
++		if (current(at)) trigger?.focus();
++	}
++	function listKeys(event: KeyboardEvent) {
++		if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
++		const buttons = Array.from(
++			(event.currentTarget as HTMLElement).querySelectorAll<HTMLButtonElement>('[data-saved-prompt]')
++		);
++		if (!buttons.length) return;
++		const at = buttons.indexOf(document.activeElement as HTMLButtonElement);
++		const next =
++			at < 0
++				? event.key === 'ArrowDown'
++					? 0
++					: buttons.length - 1
++				: (at + (event.key === 'ArrowDown' ? 1 : -1) + buttons.length) % buttons.length;
++		event.preventDefault();
++		buttons[next].focus();
++	}
++</script>
++
++<Dropdown
++	bind:show
++	side="top"
++	sideOffset={8}
++	contentClass="ees-assets-popover ees-prompts-popover"
++	onOpenChange={opened}
++	visualViewportAware
++>
++	<button
++		bind:this={trigger}
++		type="button"
++		id="ees-saved-prompts-button"
++		class="ees-prompts-trigger"
++		aria-expanded={show}
++		aria-haspopup="menu"
++		aria-label={t('EES.Nav.Prompts', 'Saved prompts')}
++		title={t('EES.Nav.Prompts', 'Saved prompts')}
++	>
++		<Icon name="093d6" /><span>{t('EES.Nav.Prompts', 'Saved prompts')}</span><Icon name="ead50" />
++	</button>
++	<div slot="content" on:keydown={listKeys} role="presentation">
++		<h2>{t('EES.Nav.Prompts', 'Saved prompts')}</h2>
++		<input
++			bind:this={search}
++			bind:value={query}
++			type="search"
++			class="ees-prompts-search"
++			aria-label={t('EES.Prompts.Search', 'Search prompts')}
++			placeholder={t('EES.Prompts.Search', 'Search prompts')}
++		/>
++		<div class="ees-prompts-list">
++			{#if loading}<p role="status">{t('EES.Loading', 'Loading…')}</p>
++			{:else if error}<p role="alert">
++					{t('EES.Prompts.LoadFailed', 'Could not load prompts.')}
++					<button type="button" on:click={load}>{t('EES.Retry', 'Check again')}</button>
++				</p>
++			{:else if !filtered.length}<p role="status">
++					{t(
++						query.trim() ? 'EES.Prompts.NoMatches' : 'EES.Prompts.Empty',
++						query.trim() ? 'No matching prompts.' : 'No saved prompts yet.'
++					)}
++				</p>
++			{:else}{#each filtered as item}
++					<button
++						type="button"
++						role="menuitem"
++						data-saved-prompt={item.id || item.command}
++						class="ees-asset-row"
++						on:click={() => choose(item)}
++					>
++						<Icon name="093d6" /><span
++							><strong>{item.name || item.command}</strong><small
++								>{item.content.replace(/\s+/g, ' ')}</small
++							></span
++						>
++					</button>
++				{/each}{/if}
++		</div>
++		{#if canManage}<footer>
++				<button
++					type="button"
++					data-save-current-prompt
++					disabled={!prompt.trim()}
++					on:click={saveInput}
++					><PlusAlt className="ew-icon" />{t('EES.Prompts.SaveInput', 'Save current input')}</button
++				>
++				<button
++					type="button"
++					data-action="native_open"
++					data-native-id="prompts"
++					on:click={() => {
++						show = false;
++						eesAction({ action: 'native_open', nativeId: 'prompts' });
++					}}>{t('EES.Prompts.Manage', 'Manage prompts')}</button
++				>
++			</footer>{/if}
++	</div>
++</Dropdown>
++
++<Modal
++	bind:show={showCreate}
++	size="full"
++	className="!w-[calc(100vw-2rem)] sm:!w-[calc(100vw-3rem)] lg:!w-[calc(100vw-4rem)] !max-w-[80rem] h-[min(54rem,calc(100dvh-4rem))] max-h-[calc(100dvh-4rem)] flex flex-col bg-white dark:bg-gray-900 rounded-4xl"
++>
++	{#if draft && canManage}<PromptEditor
++			modal
++			prompt={draft}
++			onSubmit={save}
++			onCancel={async () => {
++				showCreate = false;
++				draft = null;
++				createSession = null;
++				await tick();
++				trigger?.focus();
++			}}
++		/>{/if}
++</Modal>
+diff --git a/src/lib/components/ees/EesScopeSelect.svelte b/src/lib/components/ees/EesScopeSelect.svelte
+new file mode 100644
+index 0000000..6e7a618
+--- /dev/null
++++ b/src/lib/components/ees/EesScopeSelect.svelte
+@@ -0,0 +1,193 @@
++<script lang="ts">
++	import { getContext, onDestroy, tick } from 'svelte';
++	import { eesAction } from './state';
++	import Icon from './EesIcon.svelte';
++	const i18n: any = getContext('i18n');
++	export let kind: 'factory' | 'system';
++	export let label = '';
++	export let compact = false;
++	export let value = '';
++	export let options: any[] = [];
++	export let opened = '';
++	export let boundary = '';
++	export let selectionContext = '';
++	export let exitBoundary = '';
++	let root: HTMLDivElement;
++	let trigger: HTMLButtonElement;
++	let list: HTMLDivElement;
++	let dropdown: HTMLDivElement;
++	let shown = false, scopeVersion = 0;
++	let restoreOnClose = true;
++	let pendingSelection: { value: string; context: string } | null = null;
++	let selectionExitBoundary: string | null = null;
++	let search: HTMLInputElement;
++	let query = '';
++	let previousBoundary = '';
++	$: t = (key, fallback) => $i18n.t(key, { defaultValue: fallback });
++	$: icon = kind === 'factory' ? '40095' : 'f34f3';
++	$: triggerId = kind === 'factory' ? 'ees-work-site-trigger' : 'ees-work-system-trigger';
++	$: listId = `ees-scope-${kind}-list`;
++	$: searchable = kind === 'factory' && options.filter((item) => item.id !== '').length >= 8;
++	$: visible = options.filter((item) => item.id === '' || !query.trim() || String(item.name || item.id).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
++	$: current = options.find((item) => item.id === value);
++	$: selectedName = current?.name || current?.id || (kind === 'factory' ? t('EES.AllFactories', 'All factories') : value || t('EES.Select', 'Select'));
++	$: syncBoundary(boundary, selectionContext, value, exitBoundary);
++	function syncBoundary(next: string, context: string, selected: string, exit: string) {
++		if (next === previousBoundary) return;
++		previousBoundary = next;
++		const ownSelection = pendingSelection?.value === selected && pendingSelection?.context === context;
++		// A system choice also replaces the sibling factory catalog, from cache
++		// or its response. Its inert exit may continue only while its own catalog,
++		// selected destination and all account/navigation fields remain unchanged.
++		const ownExit = shown && !opened && (ownSelection || selectionExitBoundary === exit);
++		selectionExitBoundary = ownExit ? exit : null;
++		pendingSelection = null;
++		if (opened === kind) close(false);
++		if (shown && !ownExit) retireScope();
++	}
++	function retireScope() {
++		pendingSelection = null;
++		selectionExitBoundary = null;
++		scopeVersion++;
++		window.__eesMotionV1?.finish(dropdown, { restoreFocus: false });
++		window.__eesMotionV1?.cancel(dropdown);
++		shown = false;
++		query = '';
++	}
++	$: syncScope(opened === kind, opened);
++	function syncScope(wantsOpen: boolean, activeKind: string) {
++		const version = ++scopeVersion;
++		if (wantsOpen) {
++			const retained = shown && dropdown;
++			shown = true;
++			pendingSelection = null;
++			selectionExitBoundary = null;
++			const enter = () => {
++				if (version !== scopeVersion || opened !== kind || !dropdown) return;
++				window.__eesMotionV1?.open(dropdown);
++				dropdown.inert = false;
++				dropdown.removeAttribute('aria-hidden');
++			};
++			// Retire the closing state before Svelte restores interaction bindings.
++			if (retained) enter(); else tick().then(enter);
++			return;
++		}
++		if (!shown) return;
++		const restore = restoreOnClose;
++		restoreOnClose = true;
++		const cleanup = () => {
++			if (version !== scopeVersion) return;
++			shown = false;
++			query = '';
++			pendingSelection = null;
++			selectionExitBoundary = null;
++		};
++		const motion = window.__eesMotionV1;
++		// Only one scope menu exists, including when a sibling opens during closing.
++		if (activeKind) {
++			motion?.finish(dropdown, { restoreFocus: false });
++			cleanup();
++		} else if (motion && dropdown) {
++			motion.close(dropdown, { cleanup, restoreFocus: () => {
++				if (restore && version === scopeVersion && !opened) trigger?.focus({ preventScroll: true });
++			} });
++		} else {
++			cleanup();
++			if (restore) trigger?.focus({ preventScroll: true });
++		}
++	}
++	onDestroy(() => { scopeVersion++; if (typeof window !== 'undefined') window.__eesMotionV1?.cancel(dropdown); });
++	function close(restore = true) {
++		if (opened !== kind) return;
++		restoreOnClose = restore;
++		opened = '';
++	}
++	function allowedOptions() {
++		return Array.from(list?.querySelectorAll<HTMLButtonElement>('button[role="option"]:not(:disabled)') || []);
++	}
++	async function toggle(direction = 0) {
++		if (opened === kind && !direction) { close(); return; }
++		query = '';
++		opened = kind;
++		await tick();
++		if (opened !== kind) return;
++		if (searchable && !direction) { search?.focus({ preventScroll: true }); return; }
++		const buttons = allowedOptions();
++		const selected = buttons.find((item) => item.getAttribute('aria-selected') === 'true');
++		(direction < 0 ? buttons.at(-1) : selected || buttons[0])?.focus({ preventScroll: true });
++	}
++	function choose(item) {
++		if (item.allowed === false) return;
++		pendingSelection = item.id === value ? null : { value: item.id, context: selectionContext };
++		close();
++		eesAction(kind === 'factory' ? { action: 'choose_factory', factoryId: item.id } : { action: 'choose_system', systemId: item.id });
++	}
++	function keydown(event: KeyboardEvent) {
++		if (opened !== kind || !root?.contains(event.target as Node)) return;
++		if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); return; }
++		if (event.key === 'Tab') { close(false); return; }
++		if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
++		if (event.target === search && ['Home', 'End'].includes(event.key)) return;
++		event.preventDefault();
++		const buttons = allowedOptions();
++		const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
++		const next = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1 : event.key === 'ArrowDown' ? (index + 1) % buttons.length : (index <= 0 ? buttons.length : index) - 1;
++		buttons[next]?.focus({ preventScroll: true });
++		const item = buttons[next]?.getBoundingClientRect(), bounds = list?.getBoundingClientRect();
++		if (item && bounds) {
++			if (item.top < bounds.top) list.scrollTop -= bounds.top - item.top;
++			else if (item.bottom > bounds.bottom) list.scrollTop += item.bottom - bounds.bottom;
++		}
++	}
++	function positionScope(node: HTMLDivElement) {
++		const rail = node.closest('[data-ees-source-sidebar]')?.getAttribute('data-compact') === 'true';
++		// Keep the popup outside both sidebar scroll and the collapsing scope area.
++		// Compact triggers retain a readable 240px menu.
++		const rect = trigger.getBoundingClientRect(), gap = 8;
++		const width = Math.min(rail ? 240 : trigger.getBoundingClientRect().width || 240, window.innerWidth - gap * 2);
++		node.style.position = 'fixed';
++		node.style.right = 'auto';
++		node.style.width = `${width}px`;
++		node.style.maxHeight = `${Math.min(360, window.innerHeight - gap * 2)}px`;
++		node.style.left = `${Math.max(gap, Math.min(rect.left, window.innerWidth - width - gap))}px`;
++		node.style.top = `${Math.max(gap, Math.min(rect.bottom + 4, window.innerHeight - node.offsetHeight - gap))}px`;
++		// Keep list scrolling; retire a menu whose viewport/anchor has moved.
++		const onScroll = (event: Event) => { if (!node.contains(event.target as Node)) close(false); };
++		const onResize = () => close(false);
++		document.addEventListener('scroll', onScroll, true);
++		window.addEventListener('resize', onResize);
++		return { destroy() {
++			document.removeEventListener('scroll', onScroll, true);
++			window.removeEventListener('resize', onResize);
++		} };
++	}
++	function outside(event: Event) { if (opened === kind && !root?.contains(event.target as Node)) close(false); }
++</script>
++
++<svelte:document on:pointerdown={outside} on:focusin={outside} on:keydown={keydown} />
++<div class="ew-scope-field" bind:this={root}>
++	<button type="button" id={triggerId} data-scope-trigger={kind} bind:this={trigger}
++		aria-label={`${t(kind === 'factory' ? 'EES.Nav.Factory' : 'EES.Nav.System', kind === 'factory' ? 'Choose factory' : 'Choose system')}: ${selectedName}`}
++		title={`${label}: ${selectedName}`}
++		aria-haspopup="listbox" aria-expanded={opened === kind} aria-controls={opened === kind ? listId : undefined}
++		on:click={() => toggle()} on:keydown={(event) => {
++			if (opened !== kind && ['ArrowDown', 'ArrowUp'].includes(event.key)) { event.preventDefault(); toggle(event.key === 'ArrowUp' ? -1 : 1); }
++		}}>
++		<Icon name={icon} />{#if !compact}<small>{label}</small>{/if}<span>{selectedName}</span>{#if compact && current}<small>{current.allowed === false ? t('EES.Scope.NoAccess', 'No access') : current.role === 'owner' ? t('EES.Scope.Owner', 'Owner') : t('EES.Scope.Participant', 'Participant')}</small>{/if}<Icon name="ead50" />
++	</button>
++	{#if shown}
++		<div class="ew-scope-dropdown" data-scope-dropdown={kind} data-ees-motion-kind="scope" bind:this={dropdown} use:positionScope inert={opened !== kind} aria-hidden={opened !== kind}>
++			{#if searchable}<label class="ew-scope-search"><Icon name="b8bc6" /><input type="search" id="ees-factory-search" bind:this={search} bind:value={query} placeholder={t('EES.Scope.SearchFactories', 'Search factories')} aria-label={t('EES.Scope.SearchFactories', 'Search factories')} aria-controls={listId} /></label>{/if}
++			<div id={listId} data-scope-list={kind} role="listbox" aria-label={label} bind:this={list}>
++				{#each visible as item (item.id)}
++					<button type="button" role="option" tabindex="-1" data-action={kind === 'factory' ? 'choose_factory' : 'choose_system'} data-factory-id={kind === 'factory' ? item.id : undefined} data-system-id={kind === 'system' ? item.id : undefined}
++						aria-selected={value === item.id} aria-disabled={item.allowed === false} disabled={item.allowed === false} on:click={() => choose(item)}>
++						<Icon name={icon} /><span>{item.name || item.id}<small>{item.allowed === false ? t('EES.Scope.NoAccess', 'No access') : item.id === '' ? t('EES.Scope.AllFactoriesNote', 'View work across factories') : item.role === 'owner' ? t('EES.Scope.Owner', 'Owner') : t('EES.Scope.Participant', 'Participant')}</small></span>
++						{#if value === item.id}<Icon name="9d8d5" />{/if}
++					</button>
++				{/each}
++				{#if !visible.length || (query.trim() && !visible.some((item) => item.id !== ''))}<p class="ew-scope-no-results" role="status">{t('EES.Scope.NoResults', 'No matching items.')}</p>{/if}
++			</div>
++		</div>
++	{/if}
++</div>
+diff --git a/src/lib/components/ees/EesSettingsMenu.svelte b/src/lib/components/ees/EesSettingsMenu.svelte
+new file mode 100644
+index 0000000..81413ac
+--- /dev/null
++++ b/src/lib/components/ees/EesSettingsMenu.svelte
+@@ -0,0 +1,93 @@
++<script lang="ts">
++	import { getContext } from 'svelte';
++	import { page } from '$app/stores';
++	import Dropdown from '../common/Dropdown.svelte';
++	import Icon from './EesIcon.svelte';
++	import { eesAction, eesSnapshot, eesCompact } from './state';
++	const i18n: any = getContext('i18n');
++	let show = false;
++	let previousBoundary = '';
++	const targets = [
++		[
++			'models',
++			'83565',
++			'EES.Nav.Models',
++			'AI assistant settings',
++			'EES.Settings.ModelsHint',
++			'Models, instructions and tools'
++		],
++		[
++			'admin',
++			'4308e',
++			'EES.Nav.Admin',
++			'Administrator settings',
++			'EES.Settings.AdminHint',
++			'Accounts and services'
++		]
++	];
++	$: cap = $eesSnapshot.native_capabilities ?? $eesSnapshot.state?.capabilities ?? {};
++	$: allowed = targets.filter(
++		([id]) =>
++			cap.native_access_available === true &&
++			cap.native_access?.[id] === true &&
++			(id !== 'admin' || cap.is_admin === true)
++	);
++	$: boundary = JSON.stringify([
++		$page.url.pathname,
++		$page.url.search,
++		cap.actor_id,
++		allowed.map(([id]) => id),
++		$eesCompact
++	]);
++	$: if (boundary !== previousBoundary) {
++		previousBoundary = boundary;
++		show = false;
++	}
++	$: t = (key, fallback) => $i18n.t(key, { defaultValue: fallback });
++</script>
++
++{#if allowed.length}
++	<div class="ees-settings-entry" data-ees-settings>
++		<Dropdown
++			bind:show
++			side="top"
++			align="start"
++			sideOffset={8}
++			contentClass="ees-assets-popover ees-settings-popover"
++			visualViewportAware
++		>
++			<button
++				type="button"
++				class="ees-settings-trigger"
++				aria-label={t('EES.Settings', 'Settings')}
++				aria-expanded={show}
++				aria-current={['models', 'admin'].includes($eesSnapshot.native_id) ? 'page' : undefined}
++				aria-haspopup="menu"
++				title={t('EES.Settings', 'Settings')}
++			>
++				<Icon name="4308e" /><span>{t('EES.Settings', 'Settings')}</span>
++			</button>
++			<div slot="content">
++				<h2>{t('EES.Settings', 'Settings')}</h2>
++				{#each allowed as [id, icon, key, label, hintKey, hint]}
++					<button
++						type="button"
++						role="menuitem"
++						class="ees-asset-row"
++						data-action="native_open"
++						data-native-id={id}
++						aria-current={$eesSnapshot.native_id === id ? 'page' : undefined}
++						on:click={() => {
++							show = false;
++							eesAction({ action: 'native_open', nativeId: id });
++						}}
++					>
++						<Icon name={icon} /><span
++							><strong>{t(key, label)}</strong><small>{t(hintKey, hint)}</small></span
++						>
++					</button>
++				{/each}
++			</div>
++		</Dropdown>
++	</div>
++{/if}
 diff --git a/src/lib/components/ees/EesShell.svelte b/src/lib/components/ees/EesShell.svelte
 new file mode 100644
 index 0000000..a4eef1d
@@ -2316,7 +2914,7 @@ index 0000000..59f7e8d
 +</svg>
 diff --git a/src/lib/components/ees/state.ts b/src/lib/components/ees/state.ts
 new file mode 100644
-index 0000000..2d6bef5
+index 0000000..19d053d
 --- /dev/null
 +++ b/src/lib/components/ees/state.ts
 @@ -0,0 +1,31 @@
@@ -2352,19 +2950,20 @@ index 0000000..2d6bef5
 +	};
 +}
 diff --git a/src/lib/components/layout/Sidebar.svelte b/src/lib/components/layout/Sidebar.svelte
-index 007df31..d812226 100644
+index 007df31..1bdd8ca 100644
 --- a/src/lib/components/layout/Sidebar.svelte
 +++ b/src/lib/components/layout/Sidebar.svelte
-@@ -92,6 +92,8 @@
+@@ -92,6 +92,9 @@
  	import CheckIcon from '../icons/Check.svelte';
  	import MoreHorizontalIcon from './Sidebar/icons/MoreHorizontal.svelte';
  	import MobileSwipePanel from '../common/MobileSwipePanel.svelte';
 +	import EesNavigation from '$lib/components/ees/EesNavigation.svelte';
++	import EesSettingsMenu from '$lib/components/ees/EesSettingsMenu.svelte';
 +	import {eesSnapshot,eesCompact} from '$lib/components/ees/state';
  
  	const BREAKPOINT = 768;
  	const DEFAULT_PINNED_ITEMS = ['notes', 'workspace'];
-@@ -652,52 +654,7 @@
+@@ -652,52 +655,7 @@
  	});
  
  	onMount(async () => {
@@ -2418,7 +3017,7 @@ index 007df31..d812226 100644
  
  		window.addEventListener('keydown', onKeyDown);
  		window.addEventListener('keyup', onKeyUp);
-@@ -891,474 +848,13 @@
+@@ -891,474 +849,13 @@
  	on:pointercancel={resizeEndHandler}
  />
  
@@ -2900,7 +3499,7 @@ index 007df31..d812226 100644
  					{#if $config?.features?.enable_folders && ($user?.role === 'admin' || ($user?.permissions?.features?.folders ?? true))}
  						<SidebarSection
  							id="sidebar-folders"
-@@ -1698,15 +1194,8 @@
+@@ -1698,15 +1195,9 @@
  							</div>
  						</div>
  					</SidebarSection>
@@ -2914,11 +3513,12 @@ index 007df31..d812226 100644
 -						{#if $user !== undefined && $user !== null}
 -							<UserMenu
 + </div></div>
++ <EesSettingsMenu />
 + <footer class="ees-profile"><UserMenu
  								role={$user?.role}
  								profile={$config?.features?.enable_user_status ?? true}
  								className="w-[calc(var(--sidebar-width)-1rem)]"
-@@ -1738,34 +1227,22 @@
+@@ -1738,34 +1229,22 @@
  									</div>
  									<div class=" self-center font-normal truncate">{$user?.name}</div>
  								</button>
@@ -2970,6 +3570,35 @@ index 007df31..d812226 100644
  </style>
 +
 +
+diff --git a/src/lib/components/workspace/Models.svelte b/src/lib/components/workspace/Models.svelte
+index 3b0513b..3f80d95 100644
+--- a/src/lib/components/workspace/Models.svelte
++++ b/src/lib/components/workspace/Models.svelte
+@@ -35,6 +35,7 @@
+ 	} from '$lib/apis/models';
+ 
+ 	import { getModels } from '$lib/apis';
++	import { eesAction, eesSnapshot } from '$lib/components/ees/state';
+ 	import { getGroups } from '$lib/apis/groups';
+ 	import { updateUserSettings } from '$lib/apis/users';
+ 
+@@ -511,6 +512,16 @@
+ 	/>
+ 
+ 	<div class="space-y-1">
++		{#if $user?.role === 'admin' && ($eesSnapshot.native_capabilities ?? $eesSnapshot.state?.capabilities)?.is_admin === true}
++			<div class="flex justify-end">
++				<button
++					type="button"
++					class="px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-850 transition"
++					data-ees-work-tool-settings
++					on:click={() => eesAction({ action: 'admin_work_tool' })}
++				>{$i18n.t('EES.WorkToolSettings', { defaultValue: 'Work tool settings' })}</button>
++			</div>
++		{/if}
+ 		<div class="flex h-8 flex-1 items-center w-full gap-2">
+ 			<div class="flex min-w-0 flex-1 items-center">
+ 				<div class=" self-center ml-1 mr-3">
 diff --git a/src/lib/constants.ts b/src/lib/constants.ts
 index 172ed9a..8873d62 100644
 --- a/src/lib/constants.ts
@@ -2984,10 +3613,10 @@ index 172ed9a..8873d62 100644
  export const WEBUI_HOSTNAME = '';
  export const WEBUI_BASE_URL = '';
 diff --git a/src/lib/i18n/locales/ko-KR/translation.json b/src/lib/i18n/locales/ko-KR/translation.json
-index 8eba682..429459c 100644
+index 8eba682..c85018b 100644
 --- a/src/lib/i18n/locales/ko-KR/translation.json
 +++ b/src/lib/i18n/locales/ko-KR/translation.json
-@@ -3081,5 +3081,87 @@
+@@ -3081,5 +3081,99 @@
  	"Youtube Language": "Youtube 언어",
  	"Youtube Proxy URL": "Youtube 프록시 URL",
  	"Zoom in": "",
@@ -3014,11 +3643,11 @@ index 8eba682..429459c 100644
 +	"EES.Nav.CreateWork": "업무 만들기",
 +	"EES.Nav.Procedures": "업무 절차",
 +	"EES.Nav.Tools": "도구",
-+	"EES.Nav.Skills": "스킬·지침",
++	"EES.Nav.Skills": "작업 지침",
 +	"EES.WorkToolSettings": "Work 도구 설정 확인",
-+	"EES.Nav.Models": "AI 도우미",
++	"EES.Nav.Models": "AI 도우미 설정",
 +	"EES.Nav.Knowledge": "참고 문서",
-+	"EES.Nav.Prompts": "빠른 문장",
++	"EES.Nav.Prompts": "저장한 프롬프트",
 +	"EES.Nav.Connections": "Open WebUI 도구",
 +	"EES.Nav.Admin": "관리자 설정",
 +	"EES.Nav.AI": "AI 설정",
@@ -3074,7 +3703,19 @@ index 8eba682..429459c 100644
 +	"EES.Helper.ContextChanged": "대화나 화면이 바뀌었습니다. 질문을 다시 눌러 주세요.",
 +	"EES.Session.Checking": "현재 로그인 상태를 확인하고 있습니다…",
 +	"EES.Session.Failed": "로그인 정보를 확인하지 못했습니다. 다시 확인해 주세요.",
-+	"EES.Session.Retry": "다시 확인"
++	"EES.Session.Retry": "다시 확인",
++	"EES.Nav.Assets": "도구·자료",
++	"EES.Settings": "설정",
++	"EES.Settings.ModelsHint": "모델 · 기본 지침 · 사용 도구",
++	"EES.Settings.AdminHint": "계정과 서비스 설정",
++	"EES.NoWorkspaceAssets": "사용할 수 있는 도구·자료가 없습니다.",
++	"EES.Prompts.Search": "프롬프트 검색",
++	"EES.Prompts.SaveInput": "현재 입력 저장",
++	"EES.Prompts.Manage": "프롬프트 관리",
++	"EES.Prompts.Empty": "저장한 프롬프트가 없습니다.",
++	"EES.Prompts.NoMatches": "검색 결과가 없습니다.",
++	"EES.Prompts.LoadFailed": "프롬프트를 불러오지 못했습니다.",
++	"EES.Prompts.SaveFailed": "저장하지 못했습니다. 입력한 내용은 유지됩니다."
  }
 diff --git a/src/routes/(app)/+layout.svelte b/src/routes/(app)/+layout.svelte
 index 633a9f7..943bf69 100644
@@ -3157,7 +3798,7 @@ diff --git a/src/routes/(app)/c/[id]/+page.svelte b/src/routes/(app)/c/[id]/+pag
 index 53a2b61..3f77d9a 100644
 --- a/src/routes/(app)/c/[id]/+page.svelte
 +++ b/src/routes/(app)/c/[id]/+page.svelte
-@@ -1,7 +1,1 @@
+@@ -1,7 +1 @@
 -<script lang="ts">
 -	import { page } from '$app/stores';
 -
@@ -3499,232 +4140,3 @@ index 5052e5d..405a897 100644
  		APP_BUILD_HASH: JSON.stringify(process.env.APP_BUILD_HASH || 'dev-build')
  	},
  	build: {
-
-diff --git a/src/lib/components/ees/EesScopeSelect.svelte b/src/lib/components/ees/EesScopeSelect.svelte
-new file mode 100644
-index 0000000..6e7a618
---- /dev/null
-+++ b/src/lib/components/ees/EesScopeSelect.svelte
-@@ -0,0 +1,193 @@
-+<script lang="ts">
-+	import { getContext, onDestroy, tick } from 'svelte';
-+	import { eesAction } from './state';
-+	import Icon from './EesIcon.svelte';
-+	const i18n: any = getContext('i18n');
-+	export let kind: 'factory' | 'system';
-+	export let label = '';
-+	export let compact = false;
-+	export let value = '';
-+	export let options: any[] = [];
-+	export let opened = '';
-+	export let boundary = '';
-+	export let selectionContext = '';
-+	export let exitBoundary = '';
-+	let root: HTMLDivElement;
-+	let trigger: HTMLButtonElement;
-+	let list: HTMLDivElement;
-+	let dropdown: HTMLDivElement;
-+	let shown = false, scopeVersion = 0;
-+	let restoreOnClose = true;
-+	let pendingSelection: { value: string; context: string } | null = null;
-+	let selectionExitBoundary: string | null = null;
-+	let search: HTMLInputElement;
-+	let query = '';
-+	let previousBoundary = '';
-+	$: t = (key, fallback) => $i18n.t(key, { defaultValue: fallback });
-+	$: icon = kind === 'factory' ? '40095' : 'f34f3';
-+	$: triggerId = kind === 'factory' ? 'ees-work-site-trigger' : 'ees-work-system-trigger';
-+	$: listId = `ees-scope-${kind}-list`;
-+	$: searchable = kind === 'factory' && options.filter((item) => item.id !== '').length >= 8;
-+	$: visible = options.filter((item) => item.id === '' || !query.trim() || String(item.name || item.id).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
-+	$: current = options.find((item) => item.id === value);
-+	$: selectedName = current?.name || current?.id || (kind === 'factory' ? t('EES.AllFactories', 'All factories') : value || t('EES.Select', 'Select'));
-+	$: syncBoundary(boundary, selectionContext, value, exitBoundary);
-+	function syncBoundary(next: string, context: string, selected: string, exit: string) {
-+		if (next === previousBoundary) return;
-+		previousBoundary = next;
-+		const ownSelection = pendingSelection?.value === selected && pendingSelection?.context === context;
-+		// A system choice also replaces the sibling factory catalog, from cache
-+		// or its response. Its inert exit may continue only while its own catalog,
-+		// selected destination and all account/navigation fields remain unchanged.
-+		const ownExit = shown && !opened && (ownSelection || selectionExitBoundary === exit);
-+		selectionExitBoundary = ownExit ? exit : null;
-+		pendingSelection = null;
-+		if (opened === kind) close(false);
-+		if (shown && !ownExit) retireScope();
-+	}
-+	function retireScope() {
-+		pendingSelection = null;
-+		selectionExitBoundary = null;
-+		scopeVersion++;
-+		window.__eesMotionV1?.finish(dropdown, { restoreFocus: false });
-+		window.__eesMotionV1?.cancel(dropdown);
-+		shown = false;
-+		query = '';
-+	}
-+	$: syncScope(opened === kind, opened);
-+	function syncScope(wantsOpen: boolean, activeKind: string) {
-+		const version = ++scopeVersion;
-+		if (wantsOpen) {
-+			const retained = shown && dropdown;
-+			shown = true;
-+			pendingSelection = null;
-+			selectionExitBoundary = null;
-+			const enter = () => {
-+				if (version !== scopeVersion || opened !== kind || !dropdown) return;
-+				window.__eesMotionV1?.open(dropdown);
-+				dropdown.inert = false;
-+				dropdown.removeAttribute('aria-hidden');
-+			};
-+			// Retire the closing state before Svelte restores interaction bindings.
-+			if (retained) enter(); else tick().then(enter);
-+			return;
-+		}
-+		if (!shown) return;
-+		const restore = restoreOnClose;
-+		restoreOnClose = true;
-+		const cleanup = () => {
-+			if (version !== scopeVersion) return;
-+			shown = false;
-+			query = '';
-+			pendingSelection = null;
-+			selectionExitBoundary = null;
-+		};
-+		const motion = window.__eesMotionV1;
-+		// Only one scope menu exists, including when a sibling opens during closing.
-+		if (activeKind) {
-+			motion?.finish(dropdown, { restoreFocus: false });
-+			cleanup();
-+		} else if (motion && dropdown) {
-+			motion.close(dropdown, { cleanup, restoreFocus: () => {
-+				if (restore && version === scopeVersion && !opened) trigger?.focus({ preventScroll: true });
-+			} });
-+		} else {
-+			cleanup();
-+			if (restore) trigger?.focus({ preventScroll: true });
-+		}
-+	}
-+	onDestroy(() => { scopeVersion++; if (typeof window !== 'undefined') window.__eesMotionV1?.cancel(dropdown); });
-+	function close(restore = true) {
-+		if (opened !== kind) return;
-+		restoreOnClose = restore;
-+		opened = '';
-+	}
-+	function allowedOptions() {
-+		return Array.from(list?.querySelectorAll<HTMLButtonElement>('button[role="option"]:not(:disabled)') || []);
-+	}
-+	async function toggle(direction = 0) {
-+		if (opened === kind && !direction) { close(); return; }
-+		query = '';
-+		opened = kind;
-+		await tick();
-+		if (opened !== kind) return;
-+		if (searchable && !direction) { search?.focus({ preventScroll: true }); return; }
-+		const buttons = allowedOptions();
-+		const selected = buttons.find((item) => item.getAttribute('aria-selected') === 'true');
-+		(direction < 0 ? buttons.at(-1) : selected || buttons[0])?.focus({ preventScroll: true });
-+	}
-+	function choose(item) {
-+		if (item.allowed === false) return;
-+		pendingSelection = item.id === value ? null : { value: item.id, context: selectionContext };
-+		close();
-+		eesAction(kind === 'factory' ? { action: 'choose_factory', factoryId: item.id } : { action: 'choose_system', systemId: item.id });
-+	}
-+	function keydown(event: KeyboardEvent) {
-+		if (opened !== kind || !root?.contains(event.target as Node)) return;
-+		if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); return; }
-+		if (event.key === 'Tab') { close(false); return; }
-+		if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
-+		if (event.target === search && ['Home', 'End'].includes(event.key)) return;
-+		event.preventDefault();
-+		const buttons = allowedOptions();
-+		const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
-+		const next = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1 : event.key === 'ArrowDown' ? (index + 1) % buttons.length : (index <= 0 ? buttons.length : index) - 1;
-+		buttons[next]?.focus({ preventScroll: true });
-+		const item = buttons[next]?.getBoundingClientRect(), bounds = list?.getBoundingClientRect();
-+		if (item && bounds) {
-+			if (item.top < bounds.top) list.scrollTop -= bounds.top - item.top;
-+			else if (item.bottom > bounds.bottom) list.scrollTop += item.bottom - bounds.bottom;
-+		}
-+	}
-+	function positionScope(node: HTMLDivElement) {
-+		const rail = node.closest('[data-ees-source-sidebar]')?.getAttribute('data-compact') === 'true';
-+		// Keep the popup outside both sidebar scroll and the collapsing scope area.
-+		// Compact triggers retain a readable 240px menu.
-+		const rect = trigger.getBoundingClientRect(), gap = 8;
-+		const width = Math.min(rail ? 240 : trigger.getBoundingClientRect().width || 240, window.innerWidth - gap * 2);
-+		node.style.position = 'fixed';
-+		node.style.right = 'auto';
-+		node.style.width = `${width}px`;
-+		node.style.maxHeight = `${Math.min(360, window.innerHeight - gap * 2)}px`;
-+		node.style.left = `${Math.max(gap, Math.min(rect.left, window.innerWidth - width - gap))}px`;
-+		node.style.top = `${Math.max(gap, Math.min(rect.bottom + 4, window.innerHeight - node.offsetHeight - gap))}px`;
-+		// Keep list scrolling; retire a menu whose viewport/anchor has moved.
-+		const onScroll = (event: Event) => { if (!node.contains(event.target as Node)) close(false); };
-+		const onResize = () => close(false);
-+		document.addEventListener('scroll', onScroll, true);
-+		window.addEventListener('resize', onResize);
-+		return { destroy() {
-+			document.removeEventListener('scroll', onScroll, true);
-+			window.removeEventListener('resize', onResize);
-+		} };
-+	}
-+	function outside(event: Event) { if (opened === kind && !root?.contains(event.target as Node)) close(false); }
-+</script>
-+
-+<svelte:document on:pointerdown={outside} on:focusin={outside} on:keydown={keydown} />
-+<div class="ew-scope-field" bind:this={root}>
-+	<button type="button" id={triggerId} data-scope-trigger={kind} bind:this={trigger}
-+		aria-label={`${t(kind === 'factory' ? 'EES.Nav.Factory' : 'EES.Nav.System', kind === 'factory' ? 'Choose factory' : 'Choose system')}: ${selectedName}`}
-+		title={`${label}: ${selectedName}`}
-+		aria-haspopup="listbox" aria-expanded={opened === kind} aria-controls={opened === kind ? listId : undefined}
-+		on:click={() => toggle()} on:keydown={(event) => {
-+			if (opened !== kind && ['ArrowDown', 'ArrowUp'].includes(event.key)) { event.preventDefault(); toggle(event.key === 'ArrowUp' ? -1 : 1); }
-+		}}>
-+		<Icon name={icon} />{#if !compact}<small>{label}</small>{/if}<span>{selectedName}</span>{#if compact && current}<small>{current.allowed === false ? t('EES.Scope.NoAccess', 'No access') : current.role === 'owner' ? t('EES.Scope.Owner', 'Owner') : t('EES.Scope.Participant', 'Participant')}</small>{/if}<Icon name="ead50" />
-+	</button>
-+	{#if shown}
-+		<div class="ew-scope-dropdown" data-scope-dropdown={kind} data-ees-motion-kind="scope" bind:this={dropdown} use:positionScope inert={opened !== kind} aria-hidden={opened !== kind}>
-+			{#if searchable}<label class="ew-scope-search"><Icon name="b8bc6" /><input type="search" id="ees-factory-search" bind:this={search} bind:value={query} placeholder={t('EES.Scope.SearchFactories', 'Search factories')} aria-label={t('EES.Scope.SearchFactories', 'Search factories')} aria-controls={listId} /></label>{/if}
-+			<div id={listId} data-scope-list={kind} role="listbox" aria-label={label} bind:this={list}>
-+				{#each visible as item (item.id)}
-+					<button type="button" role="option" tabindex="-1" data-action={kind === 'factory' ? 'choose_factory' : 'choose_system'} data-factory-id={kind === 'factory' ? item.id : undefined} data-system-id={kind === 'system' ? item.id : undefined}
-+						aria-selected={value === item.id} aria-disabled={item.allowed === false} disabled={item.allowed === false} on:click={() => choose(item)}>
-+						<Icon name={icon} /><span>{item.name || item.id}<small>{item.allowed === false ? t('EES.Scope.NoAccess', 'No access') : item.id === '' ? t('EES.Scope.AllFactoriesNote', 'View work across factories') : item.role === 'owner' ? t('EES.Scope.Owner', 'Owner') : t('EES.Scope.Participant', 'Participant')}</small></span>
-+						{#if value === item.id}<Icon name="9d8d5" />{/if}
-+					</button>
-+				{/each}
-+				{#if !visible.length || (query.trim() && !visible.some((item) => item.id !== ''))}<p class="ew-scope-no-results" role="status">{t('EES.Scope.NoResults', 'No matching items.')}</p>{/if}
-+			</div>
-+		</div>
-+	{/if}
-+</div>
-diff --git a/src/lib/components/workspace/Models.svelte b/src/lib/components/workspace/Models.svelte
-index 3b0513b..3f80d95 100644
---- a/src/lib/components/workspace/Models.svelte
-+++ b/src/lib/components/workspace/Models.svelte
-@@ -35,6 +35,7 @@
- 	} from '$lib/apis/models';
- 
- 	import { getModels } from '$lib/apis';
-+	import { eesAction, eesSnapshot } from '$lib/components/ees/state';
- 	import { getGroups } from '$lib/apis/groups';
- 	import { updateUserSettings } from '$lib/apis/users';
- 
-@@ -511,6 +512,16 @@
- 	/>
- 
- 	<div class="space-y-1">
-+		{#if $user?.role === 'admin' && ($eesSnapshot.native_capabilities ?? $eesSnapshot.state?.capabilities)?.is_admin === true}
-+			<div class="flex justify-end">
-+				<button
-+					type="button"
-+					class="px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-850 transition"
-+					data-ees-work-tool-settings
-+					on:click={() => eesAction({ action: 'admin_work_tool' })}
-+				>{$i18n.t('EES.WorkToolSettings', { defaultValue: 'Work tool settings' })}</button>
-+			</div>
-+		{/if}
- 		<div class="flex h-8 flex-1 items-center w-full gap-2">
- 			<div class="flex min-w-0 flex-1 items-center">
- 				<div class=" self-center ml-1 mr-3">

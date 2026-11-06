@@ -18,6 +18,8 @@ Figma는 제품 기능을 **업무 · 운영 / 셋업 / 장애대응**으로 나
 
 작성 화면은 [워크.워크플로12판 제품 UI 범위](docs/mockups/ees-work/TASK.md#workspace-authoring12-ui-20261029), [후속 시각 일치 범위](docs/mockups/ees-work/TASK.md#operations31-authoring12-parity-20261030)와 [Figma 워크·업무 절차 페이지 헤더](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1285-1830)에서 시작합니다. 현재 Figma12판을 시각 기준으로 삼고, 페이지에 남아 있는 이전 B1 목록은 2026-10-30 사용자 정정에 따라 원복 대상에서 제외해 현재 제품 목록을 유지합니다. [기존 HTML12판](docs/mockups/ees-work/design-mock-08-workspace-authoring.html)은 변경 없이 이전 비교 근거로 보존하며, 기능 완성은 도구 만들기 설계 이후로 구분합니다. 구현·시각 대조·사내 적용 상태는 [STATUS](docs/STATUS.md)에서 각각 확인합니다.
 
+워크스페이스 메뉴와 대화의 저장한 프롬프트는 [메뉴 2판 계약](docs/mockups/ees-work/TASK.md#workspace-assets-prompts-20261106)과 [Figma C19](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=2153-225)을 따른다. 기존 Native 스킬·지식·모델·프롬프트 자산을 위치와 명칭으로 구분하며 저장 형식은 유지한다.
+
 ### 설계 문서의 역할과 찾는 순서
 
 | 필요한 답 | 관리 원본 | 읽고 고치는 범위 |
