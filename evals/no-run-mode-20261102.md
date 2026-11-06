@@ -133,3 +133,5 @@ CI456 (`77ca5cd`)의 실제 전체 제품과 새 미완성 게시/360px 흐름�
 
 - 최초 CI494([실행](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/42133313139), head `6ac9433`, 통합 시험 commit `85fb305`): 실제 로그인·작성·저장·재시작·채팅·일반 사용자 실행을 포함한 Complete Native product는 성공했다. services의 `test_normalized_published_definition_never_replaces_the_authoring_draft`는 예전 “게시 중 저장 후에도 게시본은 human” 기대가 남아 실패했다. 제출 편집본이 게시본에 반영되는 기대와 저장 전 불변 단언을 함께 적용하고, normalized definition이 편집본을 덮지 않는 원래 단언은 유지했다. 해당 파일8/8 재검사 통과.
 - CI494 실제1920 화면의 상태 선택란은 기존 Native appearance 초기화 때문에 화살표가 없었다. 선택 가능한 상태값임을 드러내도록 해당 select에만 `appearance:auto`를 지정하고 Figma의 입력 배경과 같은 공통 흰색 토큰을 사용했다. 최종 새 빌드 화면에서 다시 확인한다. 게시 상태·저장 동작/크기는 바꾸지 않는다.
+
+- CI494 작성 Native40개 중39개가 통과했고 `test_procedure_visual_geometry_matches_figma_and_preserves_native_draft`는 선택란 글자가12px가 아닌13px로 계산돼 실패했다. 기존 일반 입력 규칙의 `:is(input:not(...),select,textarea)`가 선택란 규칙보다 우선해 padding/font를 덮었다. 새 상태 선택란의 ID에 한정한 규칙으로 우선순위를 맞추고12px 단언을 유지한다. 상태 선택·미완성 게시/미게시·도구 연결 흐름은 통과했다. 새 head로 넘어가며 남은 CI494 compose와 최종 집계가 취소됐으며, 이 실행을 전체 성공으로 간주하지 않는다.

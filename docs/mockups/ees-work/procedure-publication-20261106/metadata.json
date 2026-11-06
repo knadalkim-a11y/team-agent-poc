@@ -31,7 +31,7 @@
   ],
   "implementation_source_files": {
     "branding/ees/ui/ees-work-designer.js": "f4d9c46c76b13d36fb2a619b40e8b59f4112e4666662e028c5f80eeebf356ec2",
-    "branding/ees/ui/ees-work-launcher.css": "730089370cc73b1acf095acdad1bf5a49e3f2af5ec6dfadd45907c3926afd601",
+    "branding/ees/ui/ees-work-launcher.css": "cba3f37a73d03f039c60a28b4a48be6767dd56ca3ed6368c7f1ddba3e61bc7a8",
     "agent-pack/skills/ees-work-demo/scripts/ees_workflow_workspace.py": "a75ab5f91d7a69b504e0097f0f22d1eec4ff2dbce19eab95bf2cbbefa489a343"
   }
 }
