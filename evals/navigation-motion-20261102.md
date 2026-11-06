@@ -10,7 +10,8 @@
 - **고정 점검:** `scripts/figma_check.js`의 검사 조건은 그대로 쓰고 MCP의 한 호출 한 페이지 규칙에 맞춰 17개 비백업 페이지를 각각 연 뒤 페이지 전환문만 제외해 실행했다. 오류0·기존 업무절차 크기 경고1. 다른 작업의 C157 추가를 발견해 충돌하는 기록을 쓰지 않고 재검사 후 C158을 기록했다. 00은 최근20줄, 오래된 C137/C138은91 보관으로 이동했다.
 - **로컬 자동 검사:** Node v24.22.1 `node --test tests/*.cjs` 734/734. Python3.12.14 `python -m unittest tests.test_ees_work_workspace tests.test_ees_work_operations -v` 140/140. `EES_TEST_FRONTEND_SOURCE_DIR=/tmp/ees-remove-access-source python -X warn_default_encoding -W error::EncodingWarning -m unittest tests.test_ees_frontend_build -v` 32/32. 고정 upstream `2a960a59fe1dbbd35282f0556b3666d81102e781`에 패치를 적용했고, 원본·결과 파일 SHA256과 패치 SHA256을 갱신했다. CI의 고정 Node/Python 환경 판정과 구분한다.
 - **처음 실패·보완:** 첫 Python 실행에서 잘못 적은 두 모듈명과 소스 검사에 필요한 TypeScript 부재로 로딩2건·소스6건이 실패했다. 실제 모듈명으로 실행하고 upstream lock의 TypeScript5.9.3 tarball 무결성을 확인해 준비한 뒤 위 검사 모두 통과했다. 시험 ID 감사는 확대된 복원 시험의 이름 변경1건을 감지했고, 기존 보호 대응표를 같은 시험으로 갱신한 뒤 ID1735개·오류0을 확인했다. 보호 단언은 유지·확대했다.
-- **실제 제품 경계:** 실제 Native AI 도우미 페이지 → 설정 상태 조회 → 닫기의 브라우저 회귀를 추가했다. 그 시험은 실제 소스 빌드/브라우저를 사용하고 도구 상태 응답은 명시 합성 fixture다. 로컬의 기존 frontend는 이전 소스이므로 이번 실제 화면의 성공 증거로 재사용하지 않는다. 새 PR의 소스 빌드·Native 브라우저·전체 필수 CI 결과를 확인하며, 사내 사용자 확인·병합·배포는 미실행이다.
+- **후속 검토:** 삭제된 관리 화면을 뺀 실제 Native 복귀 조합은 9개에서 4개로 줄어드는 것이 맞다. 남아 있던 고정 건수9와 설명을 4로 맞추고, 새 AI 도우미 설정 진입·상태 대화상자의 성공 캡처를 추가했다. 각 복귀의 지연·이전 화면 미노출·초안 보존 단언은 유지한다.
+- **실제 제품 경계:** 실제 Native AI 도우미 페이지 → 설정 상태 조회 → 닫기의 브라우저 회귀를 추가했다. 그 시험은 실제 소스 빌드/브라우저를 사용하고 도구 상태 응답은 명시 합성 fixture다. 로컬 Chromium smoke는 제품을 열기 전 OS socket/ptrace 제한으로 시작하지 못했다. 기존 frontend도 이전 소스이므로 이번 실제 화면의 성공 증거로 재사용하지 않는다. [PR #129](https://github.com/knadalkim-a11y/team-agent-poc/pull/129)의 소스 빌드·Native 브라우저·전체 필수 CI 결과를 확인하며, 사내 사용자 확인·병합·배포는 미실행이다.
 
 <a id="sidebar-stable-scrollbar-20261105"></a>
 

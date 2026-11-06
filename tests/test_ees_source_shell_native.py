@@ -679,11 +679,13 @@ class SourceShellNativeTests(IntegratedNativeCase):
             self.navigate('/workspace/models')
             self.wait("document.querySelector('[data-ees-work-tool-settings]')")
             self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-action=workspace_admin]')"))
+            self.screenshot('source-shell-ai-assistant-work-settings-entry')
             self.click('[data-ees-work-tool-settings]')
             self.wait("document.querySelector('#ees-work-dialog[open]')")
             self.assertIn('Work 대화 도구가 연결되어 있습니다', self.text('#ees-work-dialog'))
             self.assertEqual(self.browser.evaluate('location.pathname'), '/workspace/models')
             self.assertEqual(len(status_reads), 1)
+            self.screenshot('source-shell-ai-assistant-work-settings-dialog')
             self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog [data-dialog-confirm]')"))
             self.click('#ees-work-dialog [data-dialog-close]')
             self.wait("!document.querySelector('#ees-work-dialog')")
@@ -947,9 +949,9 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
 
         evidence = frame_monitor.collect(self, labels=labels)
-        evidence['scope'] = ('Real packaged frontend and physical CDP clicks: tools/procedures/factories-access '
-                             'each through Native guidance to both other author panels and through Native '
-                             'models to work mode (nine returns). Both real workspace and operations responses '
+        evidence['scope'] = ('Real packaged frontend and physical CDP clicks: tools/procedures '
+                             'each through Native guidance to the other author panel and through Native '
+                             'models to work mode (four returns). Both real workspace and operations responses '
                              'are delayed 1000ms; aria-current and visible right-panel identity are observed '
                              'from the trusted destination click through response completion.')
         evidence['reads'] = self.server.navigation_reads
@@ -965,7 +967,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         directory = self.screenshot('source-shell-native-return-selection-final')
         (directory / 'source-shell-native-return-selection-frames.json').write_text(
             json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-        self.assertEqual(len(evidence['nativeReturns']), 9)
+        self.assertEqual(len(evidence['nativeReturns']), 4)
         for row in self.server.navigation_reads:
             self.assertGreaterEqual(row['released'] - row['started'], .99)
         frame_monitor.assert_clean(self, evidence, labels=labels)
