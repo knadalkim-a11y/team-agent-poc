@@ -935,3 +935,42 @@ const getSessionUser=async token=>{if(fail)throw Error('temporary offline');retu
 })().catch(e=>{console.error(e);process.exitCode=1;});
 '''
         self.assertEqual(self.run_node(probe), "source_session_owner=pass")
+
+
+@unittest.skipUnless(os.environ.get('EES_TEST_FRONTEND_SOURCE_DIR') and shutil.which('node'),
+                     'The actual patched source and its pinned editor dependencies are required.')
+class SavedPromptEditorTests(unittest.TestCase):
+    run_node = NativeDraftHookTests.run_node
+
+    def test_append_preserves_plain_and_rich_paragraphs_and_marks(self):
+        root = Path(os.environ['EES_TEST_FRONTEND_SOURCE_DIR']).resolve()
+        source = (root / 'src/lib/components/chat/MessageInput.svelte').read_text(encoding='utf-8')
+        self.assertIn('bind:editor={chatInputEditor}', source)
+        functions = _between(source, 'const insertSavedPrompt =', "\n\tlet command = '';").replace('text: string', 'text')
+        probe = 'const fromSource=require("node:module").createRequire(' + json.dumps(str(root / 'package.json')) + ');\n' + r'''
+const assert=require('node:assert/strict');
+const {Schema}=fromSource('@tiptap/pm/model');
+const {EditorState,TextSelection,Selection}=fromSource('@tiptap/pm/state');
+const schema=new Schema({nodes:{doc:{content:'block+'},paragraph:{content:'inline*',group:'block'},text:{group:'inline'}},marks:{strong:{}}});
+const paragraph=text=>schema.node('paragraph',null,text?[schema.text(text)]:[]);
+const parsed=schema.node('doc',null,[schema.node('paragraph',null,[schema.text('Saved',[schema.mark('strong')])]),paragraph('Next')]);
+let prompt='Keep',chatId='one',$_user={id:'one'},localStorage={token:'one'},$settings={insertPromptAsRichText:false};
+const tick=async()=>{},inputVariableHandler=async()=>{},textVariableHandler=async text=>text,focus=()=>{};
+const DOMPurify={sanitize:x=>x},marked={parse:x=>x},document={createElement:()=>({innerHTML:''})};
+const DOMParser={fromSchema:()=>({parse:()=>parsed})};
+function editor(){let state=EditorState.create({schema,doc:schema.node('doc',null,[paragraph('Keep')])});return {get state(){return state},isDestroyed:false,view:{dispatch(tr){state=state.apply(tr)}}};}
+let chatInputEditor=editor();
+''' + functions + r'''
+(async()=>{
+ await insertSavedPrompt('Saved');
+ assert.deepEqual(chatInputEditor.state.doc.content.content.map(n=>n.textContent),['Keep','','Saved']);
+ $settings.insertPromptAsRichText=true;chatInputEditor=editor();
+ await insertSavedPrompt('**Saved**\n\nNext');
+ const doc=chatInputEditor.state.doc;
+ assert.deepEqual(doc.content.content.map(n=>n.textContent),['Keep','','Saved','Next']);
+ assert.equal(doc.child(2).child(0).marks[0].type.name,'strong');
+ assert.equal(prompt,'Keep');
+ console.log('saved_prompt_editor_paragraphs=pass');
+})().catch(e=>{console.error(e);process.exitCode=1});
+'''
+        self.assertEqual(self.run_node(probe), 'saved_prompt_editor_paragraphs=pass')

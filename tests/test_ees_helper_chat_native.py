@@ -59,6 +59,7 @@ class HelperChatNativeTests(IntegratedNativeCase):
 
     def open_guide(self):
         self.click('[data-action=mode][data-mode=author]')
+        self.open_workspace_assets()
         self.click('[data-action=tools]')
         self.create_legacy_tool()
         self.wait('document.querySelector(' + json.dumps(QUESTION) + ')?.checkVisibility({visibilityProperty:true})')

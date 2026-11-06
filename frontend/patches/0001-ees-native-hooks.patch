@@ -907,7 +907,7 @@ index 875aee0..00d8c07 100644
  									{history}
  									bind:selectedModels
 diff --git a/src/lib/components/chat/MessageInput.svelte b/src/lib/components/chat/MessageInput.svelte
-index a2df614..09dd4f3 100644
+index a2df614..36d5b8e 100644
 --- a/src/lib/components/chat/MessageInput.svelte
 +++ b/src/lib/components/chat/MessageInput.svelte
 @@ -1,5 +1,6 @@
@@ -923,23 +923,36 @@ index a2df614..09dd4f3 100644
  
 -	const replaceSlashRangeWithPrompt = async (editor, range, text: string) => {
 +	const insertSavedPrompt = async (text: string) => {
-+		const editor = chatInputElement?.editor;
++		const editor = chatInputEditor;
 +		if (!editor || !$_user?.id) return;
 +		const owner = $_user.id, token = localStorage.token, chat = chatId, doc = editor.state.doc;
-+		const current = () => chatInputElement?.editor === editor && !editor.isDestroyed && $_user?.id === owner && localStorage.token === token && chatId === chat && editor.state.doc === doc;
++		const current = () => chatInputEditor === editor && !editor.isDestroyed && $_user?.id === owner && localStorage.token === token && chatId === chat && editor.state.doc === doc;
 +		const end = doc.content.size - 1;
 +		// Append without replacing the user's draft or attachments. Native variable
 +		// handling is shared with slash prompts; this path never submits a message.
-+		await replaceSlashRangeWithPrompt(editor, { from: end, to: end }, (prompt.trim() ? '\n\n' : '') + text, current);
++		await replaceSlashRangeWithPrompt(editor, { from: end, to: end }, (prompt.trim() ? '\n\n' : '') + text, current, Boolean(prompt.trim()));
 +	};
 +
-+	const replaceSlashRangeWithPrompt = async (editor, range, text: string, current = () => true) => {
++	const replaceSlashRangeWithPrompt = async (editor, range, text: string, current = () => true, appendParagraphs = false) => {
  		text = await textVariableHandler(text);
 +		if (!current()) return;
  
  		const { state, view } = editor;
  		let tr = state.tr;
-@@ -645,10 +658,10 @@
+@@ -630,9 +643,11 @@
+ 			tempDiv.innerHTML = htmlContent;
+ 			const fragment = DOMParser.fromSchema(state.schema).parse(tempDiv);
+ 			const nodesToInsert = [];
++			// Keep a saved prompt separate from the existing rich-text draft.
++			if (appendParagraphs) nodesToInsert.push(state.schema.nodes.paragraph.create());
+ 
+ 			fragment.content.forEach((node) => {
+-				if (node.type.name === 'paragraph') {
++				if (node.type.name === 'paragraph' && !appendParagraphs) {
+ 					nodesToInsert.push(...node.content.content);
+ 				} else {
+ 					nodesToInsert.push(node);
+@@ -645,10 +660,10 @@
  		} else if (text.includes('\n')) {
  			const nodes = text
  				.split('\n')
@@ -953,7 +966,23 @@ index a2df614..09dd4f3 100644
  				);
  			tr = tr.replaceWith(range.from, range.to, nodes);
  			const newPos = nodes.reduce((pos, node) => pos + node.nodeSize, range.from);
-@@ -2034,7 +2047,7 @@
+@@ -708,6 +723,7 @@
+ 
+ 	let chatInputContainerElement;
+ 	let chatInputElement;
++	let chatInputEditor;
+ 	let modelSelector;
+ 
+ 	let filesInputElement;
+@@ -2014,6 +2030,7 @@
+ 											{#key $settings?.showFormattingToolbar ?? false}
+ 												<RichTextInput
+ 													bind:this={chatInputElement}
++													bind:editor={chatInputEditor}
+ 													id="chat-input"
+ 													editable={!showInputModal}
+ 													onChange={(content) => {
+@@ -2034,7 +2051,7 @@
  															navigator.maxTouchPoints > 0 ||
  															navigator.msMaxTouchPoints > 0
  														)}
@@ -962,7 +991,7 @@ index a2df614..09dd4f3 100644
  													largeTextAsFile={($settings?.largeTextAsFile ?? false) && !shiftKey}
  													autocomplete={$config?.features?.enable_autocomplete_generation &&
  														($settings?.promptAutocomplete ?? false)}
-@@ -2302,6 +2315,8 @@
+@@ -2302,6 +2319,8 @@
  											</IntegrationsMenu>
  										{/if}
  
@@ -971,7 +1000,7 @@ index a2df614..09dd4f3 100644
  										{#if selectedModelIds.length === 1 && $models.find((m) => m.id === selectedModelIds[0])?.has_user_valves}
  											<div class="ml-1 flex gap-1.5 shrink-0">
  												<Tooltip content={$i18n.t('Valves')} placement="top">
-@@ -2520,6 +2535,7 @@
+@@ -2520,6 +2539,7 @@
  								</div>
  
  								<div class="self-end flex space-x-1 mr-1 min-w-0 gap-[0.03125rem]">
@@ -979,7 +1008,7 @@ index a2df614..09dd4f3 100644
  									<div class="flex min-w-0 max-w-[10rem] items-center sm:max-w-[13rem]">
  										<ModelSelector
  											bind:this={modelSelector}
-@@ -2530,6 +2546,7 @@
+@@ -2530,6 +2550,7 @@
  											triggerClassName="items-center gap-1.5 rounded-lg pl-2 pr-1.5 py-1 text-[0.8125rem] font-normal text-gray-600 transition-colors duration-100 hover:bg-gray-50/40 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800/40 dark:hover:text-gray-200"
  										/>
  									</div>
@@ -987,7 +1016,7 @@ index a2df614..09dd4f3 100644
  
  									{#if hasChatVariables}
  										<Tooltip content={$i18n.t('Chat Variables')} placement="top">
-@@ -2616,6 +2633,15 @@
+@@ -2616,6 +2637,15 @@
  										{/if}
  
  										{#if !embedded && prompt === '' && files.length === 0 && ($_user?.role === 'admin' || ($_user?.permissions?.chat?.call ?? true))}
@@ -1003,7 +1032,7 @@ index a2df614..09dd4f3 100644
  											<div class=" flex items-center">
  												<!-- {$i18n.t('Call')} -->
  												<Tooltip content={$i18n.t('Voice mode')}>
-@@ -2678,7 +2704,9 @@
+@@ -2678,7 +2708,9 @@
  													</button>
  												</Tooltip>
  											</div>
@@ -1014,7 +1043,7 @@ index a2df614..09dd4f3 100644
  											<div class=" flex items-center">
  												<Tooltip
  													content={uploadPending
-@@ -2712,7 +2740,6 @@
+@@ -2712,7 +2744,6 @@
  													</button>
  												</Tooltip>
  											</div>
@@ -2321,10 +2350,10 @@ index 0000000..6e7a618
 +</div>
 diff --git a/src/lib/components/ees/EesSettingsMenu.svelte b/src/lib/components/ees/EesSettingsMenu.svelte
 new file mode 100644
-index 0000000..81413ac
+index 0000000..fc64846
 --- /dev/null
 +++ b/src/lib/components/ees/EesSettingsMenu.svelte
-@@ -0,0 +1,93 @@
+@@ -0,0 +1,94 @@
 +<script lang="ts">
 +	import { getContext } from 'svelte';
 +	import { page } from '$app/stores';
@@ -2386,6 +2415,7 @@ index 0000000..81413ac
 +			<button
 +				type="button"
 +				class="ees-settings-trigger"
++				data-ees-settings-current={$eesSnapshot.native_id}
 +				aria-label={t('EES.Settings', 'Settings')}
 +				aria-expanded={show}
 +				aria-current={['models', 'admin'].includes($eesSnapshot.native_id) ? 'page' : undefined}

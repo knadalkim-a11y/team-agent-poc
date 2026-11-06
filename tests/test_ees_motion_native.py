@@ -611,6 +611,7 @@ class MotionNativeTests(IntegratedNativeCase):
         self.key('Escape', 27)
         self.wait("!document.querySelector('#ew-procedure-create')")
         self.assertFalse(self.read('.ees-panel-region', 'hidden'), 'Inline Escape also closed its underlying panel')
+        self.open_workspace_assets()
         self.click('[data-action=tools]')
         self.create_legacy_tool()
         self.click('[data-author-action=tool_example][data-id=jira-query]')

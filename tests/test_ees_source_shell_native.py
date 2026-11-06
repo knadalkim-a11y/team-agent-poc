@@ -534,7 +534,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 self.wait("document.querySelectorAll('[data-author-action=open]').length === 3")
                 self.assertEqual(self.text('#ees-work-designer .ew-author-heading h2'), '워크플로우')
                 self.assertEqual(self.text('#ees-work-designer .ew-author-heading small'), '3개')
-                self.assertEqual(self.text('#ees-work-entry [data-action=procedures] small'), '3')
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-entry [data-action=procedures] small')"))
             labels.append(label)
             (unknown_labels if unknown else cached_labels).append(label)
         evidence = frame_monitor.collect(self, labels=labels)
@@ -672,9 +672,13 @@ class SourceShellNativeTests(IntegratedNativeCase):
             {'id': 'disabled', 'name': '사용 중지', 'command': 'disabled', 'content': '사용 중지 내용', 'is_active': False},
         ]
         original_get, original_post = NativeUIHandler.do_GET, NativeUIHandler.do_POST
-        saved, fail_load = [], [False]
+        saved, fail_load, rich_input = [], [False], [False]
 
         def get_prompts(handler):
+            if handler.server is self.server and urlparse(handler.path).path == '/api/v1/users/user/settings' and rich_input[0]:
+                return handler.send_content({'ui': {'models': ['fixture-model'], 'showChangelog': False,
+                                                   'version': '0.11.3', 'autoFollowUps': False,
+                                                   'insertPromptAsRichText': True}})
             if handler.server is self.server and urlparse(handler.path).path == '/api/v1/prompts/':
                 handler.server.requests.append(('GET', '/api/v1/prompts/'))
                 return handler.send_content({'detail': 'synthetic load failure'} if fail_load[0] else records,
@@ -702,6 +706,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 self.assertNotIn(label, menu)
             self.click('.ew-assets-toggle')
             self.wait("document.querySelector('#ees-assets-items').inert && document.querySelector('.ew-assets-toggle').getAttribute('aria-expanded') === 'false'")
+            self.wait("document.querySelector('#ees-assets-items').getBoundingClientRect().height === 0")
             self.click('.ew-assets-toggle')
             self.wait("!document.querySelector('#ees-assets-items').inert")
             self.fill('#chat-input', '이 로그에서 오류 원인과 조치 방법을 정리해줘.')
@@ -775,6 +780,20 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 self.key('Escape', 27)
             self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), final_draft)
             self.assertEqual(self.server.completions, [])
+            # Native rich-prompt preference must preserve paragraph and mark boundaries.
+            rich_input[0] = True
+            records.append({'id': 'rich', 'name': '서식 있는 요청', 'command': 'rich',
+                            'content': '**결정 사항**\n\n후속 작업', 'is_active': True})
+            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+            self.refresh()
+            self.fill('#chat-input', '작성 중인 내용')
+            self.click('#ees-saved-prompts-button')
+            self.wait("document.querySelector('[data-saved-prompt=rich]')")
+            self.click('[data-saved-prompt=rich]')
+            self.wait("document.querySelector('#chat-input strong')?.textContent === '결정 사항'")
+            self.assertEqual(self.browser.evaluate("[...document.querySelector('#chat-input').children].map(n=>n.textContent)"),
+                             ['작성 중인 내용', '', '결정 사항', '후속 작업'])
+            self.assertEqual(self.server.completions, [])
 
     def test_ai_assistant_work_tool_settings_stays_on_native_page(self):
         self.enable_native_menus()
@@ -809,7 +828,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         if target == 'models':
             self.click('.ees-settings-trigger')
         if target == 'prompts':
-            if not self.browser.evaluate("!!document.querySelector('#ees-saved-prompts-button')"):
+            if self.browser.evaluate("location.pathname.startsWith('/workspace/')"):
                 self.step(label + '-return-to-composer', '#ees-work-entry [data-action=procedures]',
                           "!!document.querySelector('#ees-saved-prompts-button') && window.__eesNativeDraftV1?.ready()")
                 labels.append(label + '-return-to-composer')
@@ -1051,11 +1070,15 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 # return contract. The administrator dialog's close/same path
                 # remains in test_every_navigation_has_source_chrome... .
                 native = 'models' if destination == 'work_home' else 'skills'
+                if native == 'models':
+                    self.click('.ees-settings-trigger')
+                selected = ('.ees-settings-trigger[aria-current=page]' if native == 'models'
+                            else '#ees-work-entry [data-native-id=skills][aria-current=page]')
                 self.delayed_step(label + '-native',
-                    '#ees-work-entry [data-action=native_open][data-native-id=' + native + ']',
+                    '[data-action=native_open][data-native-id=' + native + ']',
                     'location.pathname === ' + json.dumps('/workspace/' + native) +
                     ' && document.querySelector("#workspace-container input") && ' +
-                    'document.querySelector("#ees-work-entry [data-native-id=' + native + ']")?.getAttribute("aria-current") === "page"',
+                    'document.querySelector(' + json.dumps(selected) + ')',
                     paths=('workspace',))
                 selector = ('#ees-work-entry [data-action=mode][data-mode=work]' if destination == 'work_home'
                             else '#ees-work-entry [data-action=' + destination + ']')

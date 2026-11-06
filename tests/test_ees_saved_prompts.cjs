@@ -49,7 +49,7 @@ test('save dialog and pending save cannot open or announce success after the ses
 });
 test('saved prompt insertion appends to the existing draft and refuses a changed editor context',async()=>{
  const src=source('src/lib/components/chat/MessageInput.svelte');const start=src.indexOf('const insertSavedPrompt ='),end=src.indexOf('const replaceSlashRangeWithPrompt =',start);assert.ok(start>=0&&end>start);
- const inserted=[],doc={content:{size:17}},editor={state:{doc},isDestroyed:false};const env={chatInputElement:{editor},$_user:{id:'one'},localStorage:{token:'one'},chatId:'chat-one',prompt:'Keep my text',replaceSlashRangeWithPrompt:async(...args)=>inserted.push(args)};
+ const inserted=[],doc={content:{size:17}},editor={state:{doc},isDestroyed:false};const env={chatInputEditor:editor,$_user:{id:'one'},localStorage:{token:'one'},chatId:'chat-one',prompt:'Keep my text',replaceSlashRangeWithPrompt:async(...args)=>inserted.push(args)};
  const insert=Function('env',`with(env){${src.slice(start,end).replace('text: string','text')}return insertSavedPrompt;}`)(env);await insert('Saved text');assert.equal(inserted.length,1);assert.deepEqual(inserted[0][1],{from:16,to:16});assert.equal(inserted[0][2],'\n\nSaved text');const current=inserted[0][3];assert.equal(current(),true);editor.state.doc={};assert.equal(current(),false);editor.state.doc=doc;env.chatId='chat-two';assert.equal(current(),false);assert.equal(env.prompt,'Keep my text');
 });
 
