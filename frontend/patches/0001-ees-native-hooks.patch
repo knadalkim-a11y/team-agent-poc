@@ -1377,7 +1377,7 @@ index 0000000..db77df1
 +	$: s = $eesSnapshot.selection || {};
 +	$: cap = $eesSnapshot.native_capabilities ?? data.capabilities ?? {};
 +	$: author = $eesSnapshot.native_shell || s.mode === 'author';
-+	$: globalTools = !$eesSnapshot.native_shell && author && s.tab === 'tools';
++	// Work location remains visible when browsing tools.
 +	$: scopeHasFactory = !$eesSnapshot.native_shell;
 +	$: create = cap.is_admin === true || cap.can_author === true || cap.can_manage === true;
 +	$: canWorkspace =
@@ -1423,7 +1423,7 @@ index 0000000..db77df1
 +					><Icon name="cece5" /><span>{t('EES.Nav.Workspace', 'Workspace')}</span></button
 +				>
 +			</nav>{/if}
-+		<div class="ew-scope-wrap" data-collapsed={globalTools} inert={globalTools} aria-hidden={globalTools}>
++		<div class="ew-scope-wrap" data-collapsed={false}>
 +		<div class="ew-scope-inner">
 +		<p class="ew-nav-caption">
 +			{t(
@@ -1454,7 +1454,7 @@ index 0000000..db77df1
 +								>{#if !$eesSnapshot.scope_loading && (action === 'procedures' || !data.operations?.error)}<small
 +										>{action === 'procedures'
 +											? current.length
-+											: (data.operations?.all_tools ?? data.operations?.tools ?? []).length + (data.operations?.shared_tools || []).length}</small
++											: $eesSnapshot.tool_count ?? 0}</small
 +									>{/if}</button
 +							>{/each}{/if}
 +					{#if nativeAllowed('skills')}<button

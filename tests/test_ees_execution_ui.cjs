@@ -660,6 +660,14 @@ test('authored unknown and blocked cards show their unavailable verdict status o
  for(const status of ['unknown','blocked']){const {data,attempt}=authoredExecutionData();attempt.status=status;attempt.result={source:'authored',status,completeness:'unknown',items:[],count:0};Object.assign(data.run.jobs.j,{status,result:attempt.result,can_decide:false});const out=html('workStageHTML(data,{},data.run.definition.nodes.t).body',{data}),section=out.match(/<section class="ew-authored-verdict">([\s\S]*?)<\/section>/)?.[1];assert.ok(section);assert.match(section,/<h4>사람이 확인<\/h4><span>[^<]+<\/span>/);assert.equal((section.match(/<span\b/g)||[]).length,1,status);assert.doesNotMatch(section,/ew-authored-awaiting|data-action="stage_verdict"/);}
 });
 
+test('tools keep the selected screen while changing factory and system',async()=>{
+ const h=controller(),state={capabilities:{actor_id:'a',is_admin:true},systems:['EMS','FDC'],factories:[{id:'f1',system_id:'EMS',name:'천안'}],operations:{tool_drafts:[],shared_tools:[],tools:[]},workflows:[]};
+ h.api.setState(state);h.api.setSelection({mode:'author',tab:'tools',system_id:'EMS',factory_id:''});
+ h.setReply((url)=>url.includes('/workspace')?state:{ok:true});
+ await h.api.handleClick({dataset:{action:'choose_factory',factoryId:'f1'}});assert.equal(h.api.snapshot().selection.tab,'tools');assert.equal(h.api.snapshot().selection.factory_id,'f1');
+ await h.api.handleClick({dataset:{action:'choose_system',systemId:'FDC'}});assert.equal(h.api.snapshot().selection.tab,'tools');assert.equal(h.api.snapshot().selection.system_id,'FDC');assert.equal(h.api.snapshot().selection.factory_id,'');
+});
+
 // The settings entry now lives on Native's AI assistants page.
 test('Native AI assistants opens Work settings in place with freshly read grant choices',async()=>{
  const h=workToolUpdateHarness({state:'missing'});h.context.location.pathname='/workspace/models';

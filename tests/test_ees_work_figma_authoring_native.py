@@ -1432,7 +1432,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         items = asyncio.run(self.server.workflow.shared_tools.discover(self.server.user))
         self.refresh(); self.open_tools(shared_list=True)
         self.wait("document.querySelector('[data-author-action=shared_open][data-id=managed-search_pages]')")
-        self.assertEqual(self.text('#ees-work-designer > header'), '도구 · 공용')
+        self.assertEqual(self.text('#ees-work-designer > header'), '도구')
         self.assertEqual(self.text('[data-author-action=shared_open][data-id=managed-search_pages] [data-state]'), '확인 전')
         unreviewed_list_colors = badge_colors('[data-author-action=shared_open][data-id=managed-search_pages] [data-state]')
         assert_neutral_badge(unreviewed_list_colors)
@@ -1454,7 +1454,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.refresh()
         self.open_tools(shared_list=True)
         self.wait("document.querySelector('[data-author-action=shared_open]')")
-        self.assertEqual(self.text('#ees-work-designer > header'), '도구 · 공용')
+        self.assertEqual(self.text('#ees-work-designer > header'), '도구')
         self.assertNotIn('기능 연결', self.text('#ees-work-entry'))
         self.assertIn('작성 중인 도구는 아직 업무절차에서 고를 수 없습니다.', self.text('#ees-work-designer'))
         self.assertIn('이전 방식 도구 · 관리 시스템별', self.text('#ees-work-designer'))
@@ -1573,6 +1573,52 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.screenshot('shared-b10-1-empty-list')
         (directory/'shared-b10-comparison.json').write_text(json.dumps({'scope':'actual built product with synthetic Native session/metadata; real HTTP and SQLite','figma':{'B10-1':'1369:732','B10-2':'1368:724','B10-5':'1372:741'},'detail_cards':geometry,'review_layout':review_layout,'keyboard_focus':detail_focus,'badge_colors':{'unreviewed_list':unreviewed_list_colors,'unreviewed_detail':unreviewed_detail_colors,'review_required':review_colors},'picker_geometry':picker_geometry,'checked':['common panel heading','before-review tags in list and detail','neutral before-review badges distinct from review warning','empty visible list notice','authored drafts excluded from procedure selection notice','legacy management entry','detail sections','admin Native link','no C45 menu','usable-only explicit-apply tool setup','tool questions in one dialog','retired read badge absent','saved shared ID without fixed reference','real query/space_key/limit schema','no redundant review button','per-field current/new comparison','Native Tools title','changed category notice','group and owner separate rows','shared list handoff controls absent','only query/space_key/limit binding keys','stored read retry preserved by visible UI edit and published'],'onsite':'unverified'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
+    def test_tool_scope_drafts_survive_location_changes_from_procedures(self):
+        self.authoring_viewport(1920, 1080, overlay=False)
+        self.open_tools(shared_list=True)
+        self.wait("document.querySelector('.ew-scope-wrap').getBoundingClientRect().height > 50")
+        self.screenshot('tools-scope-list-1920')
+        self.click('[data-author-action=draft_new]')
+        self.fill('[name=draft_name]', 'EMS 저장 전 도구')
+        self.assertEqual(self.read('[name=draft_system]', 'value'), 'EMS')
+
+        def switch_from_procedures(system):
+            self.click('#ees-work-entry [data-action=procedures]')
+            self.click('#ees-work-system-trigger')
+            self.click('[data-action=choose_system][data-system-id=' + system + ']')
+            self.wait("document.querySelector('#ees-work-system-trigger')?.textContent.includes(" + json.dumps(system) + ")")
+            self.open_tools(shared_list=True)
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('#ew-tool-draft-form')"))
+            self.click('[data-author-action=draft_new]')
+            self.assertEqual(self.read('[name=draft_system]', 'value'), system)
+
+        switch_from_procedures('FDC')
+        self.fill('[name=draft_name]', 'FDC 저장 전 도구')
+        switch_from_procedures('EMS')
+        self.assertEqual(self.read('[name=draft_name]', 'value'), 'EMS 저장 전 도구')
+        switch_from_procedures('FDC')
+        self.assertEqual(self.read('[name=draft_name]', 'value'), 'FDC 저장 전 도구')
+        for width, height in ((1920, 1080), (1366, 768), (360, 768)):
+            self.authoring_viewport(width, height, overlay=width <= 480)
+            geometry = self.browser.evaluate("""(()=>{
+              const form=document.querySelector('#ew-tool-draft-form');
+              return {overflow:form.scrollWidth-form.clientWidth, fields:
+                [...form.querySelectorAll('.ew-draft-scope select')].map(e=>{
+                  const r=e.getBoundingClientRect(),s=getComputedStyle(e);
+                  return {left:r.left,right:r.right,width:r.width,height:r.height,font:s.fontFamily};})};})()""")
+            self.assertLessEqual(geometry['overflow'], 1, geometry)
+            self.assertEqual(len(geometry['fields']), 2, geometry)
+            for field in geometry['fields']:
+                self.assertGreater(field['width'], 40, geometry)
+                self.assertGreaterEqual(field['left'], -1, geometry)
+                self.assertLessEqual(field['right'], width + 1, geometry)
+            directory = self.screenshot('tools-scope-basic-' + str(width))
+            (directory / ('tools-scope-basic-' + str(width) + '.json')).write_text(
+                json.dumps(geometry, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        requests = [event['params']['request'] for event in self.browser.events
+                    if event.get('method') == 'Network.requestWillBeSent']
+        self.assertFalse(any('"tool_draft_' in request.get('postData', '') for request in requests))
+
     def test_tools_phase1_code_input_output_save_and_reload(self):
         """Real HTTP/SQLite round trip; never execute the authored Python."""
         def assert_primary_legible(selector):
@@ -1680,7 +1726,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action=draft_save]')
         self.wait("document.querySelector('[data-draft-status]')?.textContent.includes('저장됨 · r2')")
         saved = self.tool_command('tool_draft_get', tool_id=identifier)['tool_draft']
-        self.assertEqual(saved['draft'], fixture)
+        self.assertEqual(saved['draft'], {**fixture, 'scope': {'system_id': 'EMS', 'factory_id': ''}})
         self.assertTrue(saved['check']['valid'], saved['check'])
         self.assertIsNone(saved['active_version'])
         self.assertEqual((saved['created_by'], saved['updated_by']), (self.server.user['id'], self.server.user['id']))
@@ -1695,6 +1741,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.screenshot('tools-phase1-list-1920')
         self.click('[data-author-action=draft_open][data-id="' + identifier + '"]')
         self.wait("document.querySelector('[name=draft_name]')?.value === " + json.dumps(fixture['name']))
+        self.assertEqual(self.read('[name=draft_system]', 'value'), 'EMS')
+        self.assertEqual(self.read('[name=draft_factory]', 'value'), '')
         self.click('[data-author-action=draft_tab][data-id=io]')
         self.assertEqual(self.read('[name=draft_input_0_question]', 'value'), question['question'])
         self.click('[data-author-action=draft_part][data-id=outputs]')
@@ -2280,7 +2328,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-action="mode"][data-mode="author"]')
         self.click('[data-action="tools"]')
         if shared_list:
-            self.wait("document.querySelector('#ees-work-designer > header')?.textContent.trim() === '도구 · 공용' && document.querySelector('.ew-draft-list')")
+            self.wait("document.querySelector('#ees-work-designer > header')?.textContent.trim() === '도구' && document.querySelector('.ew-draft-list')")
         else:
             self.wait("document.querySelector('[data-author-action=tool_create]')")
             if self.browser.evaluate("!!document.querySelector('.ew-draft-legacy:not([open])')"):

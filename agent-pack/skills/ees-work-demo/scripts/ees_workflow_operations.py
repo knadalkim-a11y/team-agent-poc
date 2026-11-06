@@ -1605,8 +1605,8 @@ class OperationsRuntime:
                     self._scope(db, actor, groups, item["system_id"])
                 except WorkflowError:
                     continue
-                # Global tools navigation must not depend on the hidden work
-                # location. Procedure pickers retain their scoped contracts.
+                # Keep authorized contracts available for scope switching;
+                # catalog filtering and procedure pickers use their own scope.
                 all_tools.append(item)
                 if not system_id or item["system_id"] == system_id:
                     tools.append(item)
@@ -1683,9 +1683,13 @@ class OperationsRuntime:
         shared_tool_access = await self.service.shared_tools.run_access(actor, run_id) if run_id else {}
         tool_drafts = await self.service.tool_drafts.summaries(actor)
         tool_import_sources = await self.service.tool_drafts.sources(actor)
+        tool_scope_factories = []
         if value(await self.service._user(actor), "role") != "admin":
             tool_drafts, tool_import_sources = [], []
-        return {"tool_draft_phase": 3, "tool_drafts": tool_drafts, "tool_import_sources": tool_import_sources, "shared_tools": shared_tools, "shared_tools_notice": shared_notice, "shared_tool_messages": deepcopy(MESSAGES), "shared_tool_access": shared_tool_access, "ok": True, "scope_runs": scopes, "tools": tools, "all_tools": all_tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
+        else:
+            with self.service._db() as db:
+                tool_scope_factories = [dict(row) for row in db.execute("SELECT id,name,system_id FROM work_factories ORDER BY name,id")]
+        return {"tool_draft_phase": 3, "tool_scope_factories": tool_scope_factories, "tool_drafts": tool_drafts, "tool_import_sources": tool_import_sources, "shared_tools": shared_tools, "shared_tools_notice": shared_notice, "shared_tool_messages": deepcopy(MESSAGES), "shared_tool_access": shared_tool_access, "ok": True, "scope_runs": scopes, "tools": tools, "all_tools": all_tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
 
     def start(self):
         self._closing = False
