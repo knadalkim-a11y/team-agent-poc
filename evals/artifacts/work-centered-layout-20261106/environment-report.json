@@ -1,0 +1,27 @@
+{
+  "status": "browser_validation_blocked",
+  "python_playwright_available": true,
+  "chromium_path": "/usr/bin/chromium",
+  "attempts": [
+    {
+      "method": "Playwright Chromium headless",
+      "result": "failed_before_page_created",
+      "reason": "Chromium process_singleton_posix.cc: socket() failed: Operation not permitted (1)"
+    },
+    {
+      "method": "exec_command formal require_escalated mode",
+      "result": "rejected_by_execution_policy",
+      "reason": "Granular approval configuration sets sandbox_approval=false; escalated permissions cannot be requested."
+    },
+    {
+      "method": "Cloud Browser shared local HTML file",
+      "result": "rejected_by_browser_url_policy",
+      "reason": "Only http: and https: protocols are allowed; file: protocol was rejected. The policy explicitly prohibits indirect or alternate-surface circumvention."
+    }
+  ],
+  "browser_click_tests": "not_run",
+  "visual_layout_validation": "not_run",
+  "screenshots": [],
+  "available_validation": ["HTML parsing", "duplicate element ID scan", "external resource scan", "inline JavaScript syntax check", "reproducible Playwright test script"],
+  "claim_limit": "Static checks must not be presented as browser rendering, click behavior, draft preservation, accessibility or visual verification."
+}
