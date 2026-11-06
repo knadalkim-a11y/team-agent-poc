@@ -985,7 +985,7 @@ let prompt='Keep',chatId='one',$_user={id:'one'},localStorage={token:'one'},$set
 const tick=async()=>{},inputVariableHandler=async()=>{},textVariableHandler=async text=>text,focus=()=>{};
 const DOMPurify={sanitize:x=>x},marked={parse:x=>x},document={createElement:()=>({innerHTML:''})};
 const DOMParser={fromSchema:()=>({parse:()=>parsed})};
-function editor(){let state=EditorState.create({schema,doc:schema.node('doc',null,[paragraph('Keep')])});return {get state(){return state},isDestroyed:false,view:{dispatch(tr){state=state.apply(tr)}}};}
+function editor(text='Keep'){let state=EditorState.create({schema,doc:schema.node('doc',null,[paragraph(text)])});return {get state(){return state},isDestroyed:false,view:{dispatch(tr){state=state.apply(tr)}}};}
 let chatInputEditor=editor();
 ''' + functions + r'''
 (async()=>{
@@ -997,6 +997,17 @@ let chatInputEditor=editor();
  assert.deepEqual(doc.content.content.map(n=>n.textContent),['Keep','','Saved','Next']);
  assert.equal(doc.child(2).child(0).marks[0].type.name,'strong');
  assert.equal(prompt,'Keep');
+ prompt='';chatInputEditor=editor('');
+ await insertSavedPrompt('**Saved**\n\nNext');
+ const emptyDoc=chatInputEditor.state.doc;
+ assert.deepEqual(emptyDoc.content.content.map(n=>n.textContent),['Saved','Next']);
+ assert.equal(emptyDoc.child(0).child(0).marks[0].type.name,'strong');
+ assert.equal(prompt,'');
+ $settings.insertPromptAsRichText=false;chatInputEditor=editor('');
+ await insertSavedPrompt('First\n\nSecond');
+ assert.deepEqual(chatInputEditor.state.doc.content.content.map(n=>n.textContent),['First','','Second']);
+ chatInputEditor=editor('');await insertSavedPrompt('Saved');
+ assert.deepEqual(chatInputEditor.state.doc.content.content.map(n=>n.textContent),['Saved']);
  console.log('saved_prompt_editor_paragraphs=pass');
 })().catch(e=>{console.error(e);process.exitCode=1});
 '''

@@ -614,6 +614,15 @@ function workNativeAllowed(capabilities,id){
   const target=workNativeTargets.find(item=>item.id===id);
   return Boolean(target&&capabilities?.native_access_available===true&&capabilities.native_access?.[id]===true&&(!target.admin||capabilities.is_admin===true));
 }
+// Catalog classification is independent of permission and execution checks.
+function workToolMatchesScope(item,selection={}){
+  const scope=item.scope || {system_id:item.system_id || '',factory_id:''};
+  return (!selection.system_id||!scope.system_id||scope.system_id===selection.system_id)&&(!selection.factory_id||!scope.factory_id||scope.factory_id===selection.factory_id);
+}
+function workToolCatalog(state={},selection={}){
+  const ops=state.operations || {},drafts=state.capabilities?.is_admin?ops.tool_drafts || []:[];
+  return [...drafts.map(item=>({...item,authored:true})),...(ops.shared_tools || []).filter(item=>!drafts.some(draft=>draft.id===item.id)),...(ops.all_tools ?? ops.tools ?? []).map(item=>({...item,legacy:true}))].filter(item=>workToolMatchesScope(item,selection));
+}
 function workCanCreate(capabilities){return capabilities?.is_admin===true||capabilities?.can_author===true||capabilities?.can_manage===true;}
 function workCanWorkspace(capabilities){
   return workCanCreate(capabilities)||Boolean(capabilities?.managed_systems?.length)||Boolean(capabilities?.native_access_available===true&&['models','knowledge','prompts','skills','tools'].some(id=>capabilities.native_access?.[id]===true));
@@ -858,6 +867,7 @@ function createWorkView({callbacks}){
   function publish(){
     const node=job();
     window.__eesSourceShellV1?.publish?.({...snapshot,
+      tool_count:workToolCatalog(state(),selection()).length,
       context_title:snapshot.native_return_pending?'대화':snapshot.procedure_start?'새 업무 절차 만들기':node?.name || workStageTarget(state(),selection())?.name || state().workflow?.name || '대화'});
   }
   function runOverview(){

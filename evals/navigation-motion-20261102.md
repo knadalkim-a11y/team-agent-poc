@@ -1,5 +1,16 @@
 # 탐색·패널 UI 검증
 
+<a id="pr128-pr130-merge-preparation-20261106"></a>
+
+## 2026-11-06 · PR #128·#130 병합 준비
+
+- **요청·확인:** 열린 PR 검토와 병합 준비. main `f70b3b8`, #128 `6b4579d`/CI514, #130 `d8cecd1`/CI512를 조회했다. 두 실행의40개 작업을 모두 확인해 각39성공·출하1조건부생략을 확인했다. #128 리뷰는 해결됐고 #130 빈 입력창의 서식 문단 리뷰는 미해결이었다. 기존 성공은 새 통합본의 성공으로 간주하지 않는다.
+- **통합:** `git merge-tree --write-tree`로 두 head의 CHANGELOG·STATUS·TASK·work-view·소스 패치·해시 설정6개 충돌을 확인했다. #130에 #128을 merge하며 양쪽 계약/기록과 도구 분류·초안 보존을 유지했다. 화면은 사용자 확인 메뉴2판의 그룹·설정과 개수 배지 없는 구성을 유지하고, 범위별 목록 계산과 작업 위치 표시를 보존했다. 고정 Open WebUI `2a960a59fe1dbbd35282f0556b3666d81102e781`에 실제 패치를 적용한 소스로 패치와 파일 해시를 재생성했다.
+- **리뷰 원재현:** 실제 고정 ProseMirror 모델과 제품 함수를 사용하는 기존 `SavedPromptEditorTests.test_append_preserves_plain_and_rich_paragraphs_and_marks`에 빈 입력 조건을 추가했다. 수정 전 `['SavedNext']`가 나와 `['Saved','Next']` 기대에 실패했다. 이전 검사는 기존 입력 `Keep`이 있는 경우만 검사해 빈 입력의 문단 손실을 놓쳤다.
+- **수정·후속:** 문단 보존과 기존 입력 앞 구분 문단을 별도 조건으로 분리했다. 첫 보완은 빈 편집기 자리 문단을 남겨 `['','Saved','Next']`로 실패했다. 완전히 빈 문서의 자리 문단만 교체하도록 보완하고 선택 위치를 문서 범위로 제한했다. 기존 입력·첨부·권한·전송 경로는 유지한다. 실제 편집기에서 기존/빈 입력의 서식 문단·굵은 글씨, 빈 입력의 일반 단일/여러 문단을 검사했고 Native 실제 브라우저에도 빈 입력 서식 삽입과 자동 전송 없음·캡처를 추가했다. 일반 슬래시 호출은 기존 기본 인자를 사용한다.
+- **로컬 결과:** `node --test` 작성·실행·운영·저장한 프롬프트637/637, 모션·Svelte·Native 복귀64/64. `EES_TEST_FRONTEND_SOURCE_DIR`를 위 고정 패치 소스로 지정한 frontend34/34. 도구 작성14/14와 `PYTHONPATH=tests python -m unittest test_ees_tool_runtime test_ees_tool_lifecycle -q`40/40. 처음 runtime 호출은 tests 검색 경로 누락으로 모듈 import가 실패했고 올바른 기존 경로로 재실행했다. 시험 ID1744 감사 오류0, 문서·diff 검사 통과.
+- **다음 검증·경계:** 최종 통합 head의 Windows/Linux 전체 CI, Native112개와 작성41개, 메뉴2판·도구 위치·빈 입력 서식 캡처를 확인한다. 원격 head/CI 최종 판정은 [PR #130](https://github.com/knadalkim-a11y/team-agent-poc/pull/130)에 연결한다. 실제 병합 순서는 #128 → #130이며 이번 요청에서는 main 병합·사내 적용을 실행하지 않는다.
+
 <a id="workspace-assets-prompts-20261106"></a>
 
 ## 2026-11-06 · 메뉴 2판·저장한 프롬프트

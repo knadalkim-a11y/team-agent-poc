@@ -212,6 +212,9 @@ class AuthoredToolRuntime:
                 if _get(actor, "role") != "admin" and not set(item["group_ids"]).intersection(groups):
                     continue
                 item["uses"] = self._uses(db, actor, groups, key) if not summary else []
+                # Classification is a catalog filter, not an execution grant or
+                # part of the immutable version pinned by an existing run.
+                item["scope"] = deepcopy(self.service.tool_drafts._get(db, key)["draft"].get("scope", {}))
             if reason:
                 item["state"] = "disabled" if reason == "shared_tool_disabled" else "review_required" if reason == "shared_tool_review_required" else "unavailable"
             from .ees_workflow_shared_tools import message_for

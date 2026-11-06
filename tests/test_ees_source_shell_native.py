@@ -804,6 +804,15 @@ class SourceShellNativeTests(IntegratedNativeCase):
                              ['작성 중인 내용', '', '결정 사항', '후속 작업'])
             self.assertEqual(self.server.completions, [])
             self.screenshot('workspace-menu-rich-insert-1920')
+            self.fill('#chat-input', '')
+            self.click('#ees-saved-prompts-button')
+            self.wait("document.querySelector('[data-saved-prompt=rich]')")
+            self.click('[data-saved-prompt=rich]')
+            self.wait("document.querySelector('#chat-input strong')?.textContent === '결정 사항'")
+            self.assertEqual(self.browser.evaluate("[...document.querySelector('#chat-input').children].map(n=>n.textContent)"),
+                             ['결정 사항', '후속 작업'])
+            self.assertEqual(self.server.completions, [])
+            self.screenshot('workspace-menu-rich-empty-insert-1920')
 
     def test_ai_assistant_work_tool_settings_stays_on_native_page(self):
         self.enable_native_menus()
@@ -1048,7 +1057,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.fill('#chat-input', '다른 칸으로 돌아와도 유지할 대화 초안')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         panels = {
-            'tools': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '도구 · 공용'",
+            'tools': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '도구'",
             'procedures': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '워크플로우'",
             'work_home': "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '업무'",
         }

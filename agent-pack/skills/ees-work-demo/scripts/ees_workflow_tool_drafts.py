@@ -24,9 +24,17 @@ def normalize_draft(value):
     """Bound the storage envelope, retaining unfinished definitions for editing."""
     defaults = dict(name="", description="", target="", kind="read", code="", function="",
                     input_ui={}, output_ui={"kind": "list", "path": "", "fields": []})
-    if not isinstance(value, dict) or set(value) - set(defaults):
+    if not isinstance(value, dict) or set(value) - (set(defaults) | {"scope"}):
         _fail()
     draft = {**defaults, **value}
+    if "scope" in draft:
+        scope = draft["scope"]
+        if (not isinstance(scope, dict) or set(scope) - {"system_id", "factory_id"}
+                or any(not isinstance(v, str) or len(v) > 200 or "\x00" in v for v in scope.values())):
+            _fail(message="도구의 공장·시스템 분류를 확인해 주세요.")
+        draft["scope"] = {"system_id": "", "factory_id": "", **scope}
+        if draft["scope"]["factory_id"] and not draft["scope"]["system_id"]:
+            _fail(message="공장을 분류하려면 시스템도 선택해 주세요.")
     for key, limit in (("name", 160), ("description", 2000), ("target", 160),
                        ("code", 262144), ("function", 200)):
         if not isinstance(draft[key], str) or len(draft[key]) > limit or "\x00" in draft[key]:
@@ -114,6 +122,7 @@ class ToolDrafts:
             records = [json.loads(row[0]) for row in db.execute("SELECT data FROM work_tool_drafts ORDER BY id")]
             uses = {row[0]: json.loads(row[1]) for row in db.execute("SELECT tool_id,data FROM work_tool_uses")}
         return [{"id": item["id"], **{key: item["draft"][key] for key in ("name", "description", "target", "kind")},
+                 "scope": deepcopy(item["draft"].get("scope", {})),
                  "revision": item["revision"], "active_version": item["active_version"],
                  "state": uses.get(item["id"], {}).get("state", "draft"), "updated_at": item["updated_at"]} for item in records]
 
@@ -151,7 +160,8 @@ class ToolDrafts:
                 source = await bridge.read_tool_import_source(actor, body.get("source_tool_id"), body.get("function"))
             except WorkflowError:
                 _fail("tool_draft_source_unavailable", "가져올 도구의 현재 권한과 기능을 확인해 주세요.")
-            draft = normalize_draft({"name": source["name"], "code": source["code"], "function": source["function"]})
+            draft = normalize_draft({"name": source["name"], "code": source["code"], "function": source["function"],
+                                     **({"scope": body["scope"]} if "scope" in body else {})})
             parsed = check_draft(draft)
             draft["input_ui"] = default_inputs(parsed["input_schema"])
             key = None
@@ -168,6 +178,16 @@ class ToolDrafts:
             if receipt is not None:
                 return receipt
             old = self._get(db, key) if key is not None else None
+            # Older clients do not send classification. Preserve it on update.
+            if "scope" not in draft and old and "scope" in old["draft"]:
+                draft["scope"] = deepcopy(old["draft"]["scope"])
+            scope = draft.get("scope", {})
+            if scope.get("system_id"):
+                self.service._work_authorize_scope(db, actor, [], scope["system_id"], role="manager")
+            if scope.get("factory_id"):
+                factory = db.execute("SELECT system_id FROM work_factories WHERE id=?", (scope["factory_id"],)).fetchone()
+                if not factory or factory["system_id"] != scope["system_id"]:
+                    _fail(message="선택한 시스템의 공장으로 분류해 주세요.")
             revision = old["revision"] if old else 0
             if type(body.get("expected_revision")) is not int or body["expected_revision"] != revision:
                 _fail("tool_draft_conflict", "다른 변경이 저장되었습니다. 입력은 유지하고 최신 저장본을 확인해 주세요.")

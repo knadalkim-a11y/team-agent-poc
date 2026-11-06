@@ -907,7 +907,7 @@ index 875aee0..00d8c07 100644
  									{history}
  									bind:selectedModels
 diff --git a/src/lib/components/chat/MessageInput.svelte b/src/lib/components/chat/MessageInput.svelte
-index a2df614..36d5b8e 100644
+index a2df614..6754484 100644
 --- a/src/lib/components/chat/MessageInput.svelte
 +++ b/src/lib/components/chat/MessageInput.svelte
 @@ -1,5 +1,6 @@
@@ -917,7 +917,7 @@ index a2df614..36d5b8e 100644
  	import { toast } from 'svelte-sonner';
  
  	import { marked } from 'marked';
-@@ -611,8 +612,20 @@
+@@ -611,8 +612,22 @@
  		}
  	};
  
@@ -928,31 +928,38 @@ index a2df614..36d5b8e 100644
 +		const owner = $_user.id, token = localStorage.token, chat = chatId, doc = editor.state.doc;
 +		const current = () => chatInputEditor === editor && !editor.isDestroyed && $_user?.id === owner && localStorage.token === token && chatId === chat && editor.state.doc === doc;
 +		const end = doc.content.size - 1;
++		const empty = doc.childCount === 1 && doc.firstChild.isTextblock && doc.firstChild.content.size === 0;
++		const range = empty ? { from: 0, to: doc.content.size } : { from: end, to: end };
 +		// Append without replacing the user's draft or attachments. Native variable
 +		// handling is shared with slash prompts; this path never submits a message.
-+		await replaceSlashRangeWithPrompt(editor, { from: end, to: end }, (prompt.trim() ? '\n\n' : '') + text, current, Boolean(prompt.trim()));
++		await replaceSlashRangeWithPrompt(editor, range, (prompt.trim() ? '\n\n' : '') + text, current, Boolean(prompt.trim()), true);
 +	};
 +
-+	const replaceSlashRangeWithPrompt = async (editor, range, text: string, current = () => true, appendParagraphs = false) => {
++	const replaceSlashRangeWithPrompt = async (editor, range, text: string, current = () => true, appendParagraphs = false, preserveParagraphs = false) => {
  		text = await textVariableHandler(text);
 +		if (!current()) return;
  
  		const { state, view } = editor;
  		let tr = state.tr;
-@@ -630,9 +643,11 @@
+@@ -630,9 +645,11 @@
  			tempDiv.innerHTML = htmlContent;
  			const fragment = DOMParser.fromSchema(state.schema).parse(tempDiv);
  			const nodesToInsert = [];
-+			// Keep a saved prompt separate from the existing rich-text draft.
++			// A separator depends on the existing draft; saved paragraph boundaries do not.
 +			if (appendParagraphs) nodesToInsert.push(state.schema.nodes.paragraph.create());
  
  			fragment.content.forEach((node) => {
 -				if (node.type.name === 'paragraph') {
-+				if (node.type.name === 'paragraph' && !appendParagraphs) {
++				if (node.type.name === 'paragraph' && !preserveParagraphs) {
  					nodesToInsert.push(...node.content.content);
  				} else {
  					nodesToInsert.push(node);
-@@ -645,10 +660,10 @@
+@@ -641,14 +658,14 @@
+ 
+ 			tr = tr.replaceWith(range.from, range.to, nodesToInsert);
+ 			const newPos = range.from + nodesToInsert.reduce((sum, node) => sum + node.nodeSize, 0);
+-			tr = tr.setSelection(Selection.near(tr.doc.resolve(newPos)));
++			tr = tr.setSelection(Selection.near(tr.doc.resolve(Math.min(newPos, tr.doc.content.size))));
  		} else if (text.includes('\n')) {
  			const nodes = text
  				.split('\n')
@@ -966,7 +973,7 @@ index a2df614..36d5b8e 100644
  				);
  			tr = tr.replaceWith(range.from, range.to, nodes);
  			const newPos = nodes.reduce((pos, node) => pos + node.nodeSize, range.from);
-@@ -708,6 +723,7 @@
+@@ -708,6 +725,7 @@
  
  	let chatInputContainerElement;
  	let chatInputElement;
@@ -974,7 +981,7 @@ index a2df614..36d5b8e 100644
  	let modelSelector;
  
  	let filesInputElement;
-@@ -2014,6 +2030,7 @@
+@@ -2014,6 +2032,7 @@
  											{#key $settings?.showFormattingToolbar ?? false}
  												<RichTextInput
  													bind:this={chatInputElement}
@@ -982,7 +989,7 @@ index a2df614..36d5b8e 100644
  													id="chat-input"
  													editable={!showInputModal}
  													onChange={(content) => {
-@@ -2034,7 +2051,7 @@
+@@ -2034,7 +2053,7 @@
  															navigator.maxTouchPoints > 0 ||
  															navigator.msMaxTouchPoints > 0
  														)}
@@ -991,7 +998,7 @@ index a2df614..36d5b8e 100644
  													largeTextAsFile={($settings?.largeTextAsFile ?? false) && !shiftKey}
  													autocomplete={$config?.features?.enable_autocomplete_generation &&
  														($settings?.promptAutocomplete ?? false)}
-@@ -2302,6 +2319,8 @@
+@@ -2302,6 +2321,8 @@
  											</IntegrationsMenu>
  										{/if}
  
@@ -1000,7 +1007,7 @@ index a2df614..36d5b8e 100644
  										{#if selectedModelIds.length === 1 && $models.find((m) => m.id === selectedModelIds[0])?.has_user_valves}
  											<div class="ml-1 flex gap-1.5 shrink-0">
  												<Tooltip content={$i18n.t('Valves')} placement="top">
-@@ -2520,6 +2539,7 @@
+@@ -2520,6 +2541,7 @@
  								</div>
  
  								<div class="self-end flex space-x-1 mr-1 min-w-0 gap-[0.03125rem]">
@@ -1008,7 +1015,7 @@ index a2df614..36d5b8e 100644
  									<div class="flex min-w-0 max-w-[10rem] items-center sm:max-w-[13rem]">
  										<ModelSelector
  											bind:this={modelSelector}
-@@ -2530,6 +2550,7 @@
+@@ -2530,6 +2552,7 @@
  											triggerClassName="items-center gap-1.5 rounded-lg pl-2 pr-1.5 py-1 text-[0.8125rem] font-normal text-gray-600 transition-colors duration-100 hover:bg-gray-50/40 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800/40 dark:hover:text-gray-200"
  										/>
  									</div>
@@ -1016,7 +1023,7 @@ index a2df614..36d5b8e 100644
  
  									{#if hasChatVariables}
  										<Tooltip content={$i18n.t('Chat Variables')} placement="top">
-@@ -2616,6 +2637,15 @@
+@@ -2616,6 +2639,15 @@
  										{/if}
  
  										{#if !embedded && prompt === '' && files.length === 0 && ($_user?.role === 'admin' || ($_user?.permissions?.chat?.call ?? true))}
@@ -1032,7 +1039,7 @@ index a2df614..36d5b8e 100644
  											<div class=" flex items-center">
  												<!-- {$i18n.t('Call')} -->
  												<Tooltip content={$i18n.t('Voice mode')}>
-@@ -2678,7 +2708,9 @@
+@@ -2678,7 +2710,9 @@
  													</button>
  												</Tooltip>
  											</div>
@@ -1043,7 +1050,7 @@ index a2df614..36d5b8e 100644
  											<div class=" flex items-center">
  												<Tooltip
  													content={uploadPending
-@@ -2712,7 +2744,6 @@
+@@ -2712,7 +2746,6 @@
  													</button>
  												</Tooltip>
  											</div>
@@ -1511,7 +1518,7 @@ index 0000000..a509ea5
 +/>
 diff --git a/src/lib/components/ees/EesNavigation.svelte b/src/lib/components/ees/EesNavigation.svelte
 new file mode 100644
-index 0000000..4a965a8
+index 0000000..3d2dff2
 --- /dev/null
 +++ b/src/lib/components/ees/EesNavigation.svelte
 @@ -0,0 +1,220 @@
@@ -1545,7 +1552,7 @@ index 0000000..4a965a8
 +	$: s = $eesSnapshot.selection || {};
 +	$: cap = $eesSnapshot.native_capabilities ?? data.capabilities ?? {};
 +	$: author = $eesSnapshot.native_shell || s.mode === 'author';
-+	$: globalTools = !$eesSnapshot.native_shell && author && s.tab === 'tools';
++	// Work location remains visible when browsing tools.
 +	$: scopeHasFactory = !$eesSnapshot.native_shell;
 +	$: create = cap.is_admin === true || cap.can_author === true || cap.can_manage === true;
 +	$: canWorkspace =
@@ -1591,7 +1598,7 @@ index 0000000..4a965a8
 +					><Icon name="cece5" /><span>{t('EES.Nav.Workspace', 'Workspace')}</span></button
 +				>
 +			</nav>{/if}
-+		<div class="ew-scope-wrap" data-collapsed={globalTools} inert={globalTools} aria-hidden={globalTools}>
++		<div class="ew-scope-wrap" data-collapsed={false}>
 +		<div class="ew-scope-inner">
 +		<p class="ew-nav-caption">
 +			{t(

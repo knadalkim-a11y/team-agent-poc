@@ -130,10 +130,36 @@ class ToolDraftTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(second["check"]["valid"])
         self.assertEqual(second["draft"]["code"], draft["code"])
 
+    async def test_scope_roundtrip_import_and_legacy_update_preserve_classification(self):
+        created = await self.service.workspace_command(self.users["admin"], self.body(
+            "save_factory", factory_id="factory-one", system_id="EMS", name="합성 공장", attributes={}))
+        self.assertTrue(created["ok"], created)
+        admin_state = await self.service.operations.state(self.users["admin"], system_id="FDC")
+        self.assertEqual(admin_state["tool_scope_factories"], [{"id": "factory-one", "name": "합성 공장", "system_id": "EMS"}])
+        self.assertEqual((await self.service.operations.state(self.users["reader"]))["tool_scope_factories"], [])
+        scope = {"system_id": "EMS", "factory_id": "factory-one"}
+        saved = (await self.call("tool_draft_save", draft={**FIXTURE, "scope": scope}))["tool_draft"]
+        self.assertEqual(saved["draft"]["scope"], scope)
+        self.assertEqual((await self.service.tool_drafts.summaries(self.users["admin"]))[0]["scope"], scope)
+        updated = (await self.call("tool_draft_save", 1, tool_id=saved["id"], draft=FIXTURE))["tool_draft"]
+        self.assertEqual(updated["draft"]["scope"], scope)
+        imported = (await self.call("tool_draft_import", source_tool_id="existing", function="list_documents", scope=scope))["tool_draft"]
+        self.assertEqual(imported["draft"]["scope"], scope)
+        common = (await self.call("tool_draft_save", 2, tool_id=saved["id"], draft={**FIXTURE, "scope": {}}))["tool_draft"]
+        self.assertEqual(common["draft"]["scope"], {"system_id": "", "factory_id": ""})
+        self.assertEqual(await self.service.tool_drafts.summaries(self.users["reader"]), [])
+
+    async def test_scope_rejects_unknown_system_factory_and_invalid_shape(self):
+        for scope in [None, [], {"extra": "x"}, {"system_id": 1}, {"factory_id": "orphan"},
+                      {"system_id": "EMS", "factory_id": "missing"}]:
+            with self.subTest(scope=scope):
+                await self.assert_code("tool_draft_invalid", self.call("tool_draft_save", draft={**FIXTURE, "scope": scope}))
+        await self.assert_code("scope_forbidden", self.call("tool_draft_save", draft={**FIXTURE, "scope": {"system_id": "unknown"}}))
+
     async def test_summary_and_audit_exclude_code_and_definitions(self):
         saved = (await self.call("tool_draft_save", draft=FIXTURE))["tool_draft"]
         summary = (await self.service.tool_drafts.summaries(self.users["admin"]))[0]
-        self.assertEqual(set(summary), {"id", "name", "description", "target", "kind", "revision", "active_version", "state", "updated_at"})
+        self.assertEqual(set(summary), {"id", "name", "description", "target", "kind", "revision", "active_version", "state", "updated_at", "scope"})
         with self.service._db() as db:
             audit = json.loads(db.execute("SELECT data FROM work_operation_events WHERE target=?", (saved["id"],)).fetchone()[0])
         self.assertEqual(set(audit), {"revision", "valid"})

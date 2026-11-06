@@ -436,9 +436,9 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.click(QUESTION)
         self.assertTrue(self.helper_status['started'].wait(timeout=2))
         self.assertEqual(self.helper_status['requests'][0]['system_id'], 'EMS')
-        # Global tools deliberately hide work location. Leave that screen
-        # through the visible procedure menu before changing its work scope.
-        self.assertTrue(self.read('.ew-scope-wrap', 'inert'))
+        # Work location stays visible in tools. Leave through the procedure
+        # menu here to retain this test's no-work-reference boundary.
+        self.assertFalse(self.read('.ew-scope-wrap', 'inert'))
         self.click('[data-action=procedures]')
         self.click('#ees-work-system-trigger')
         self.click('[data-action=choose_system][data-system-id=APC]')

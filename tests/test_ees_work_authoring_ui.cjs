@@ -142,7 +142,7 @@ function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObser
  }
  const workUI={showHelp:options=>{(h.helpCalls ||= []).push(options);},newId:run(renderer({crypto:cryptoProvider}),'workUI.newId'),esc:value=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'),icon:id=>'<img src="/_ees13/v4/'+id+'.svg" alt="">',$:selector=>selector==='#ees-work-dialog'?dialog:null,dialog:options=>{h.dialogHistory ||= [];h.dialogHistory.push(options);if(options.html?.includes('ew-workflow-tool-setup')||options.html?.includes('ew-tool-workflow-target'))return toolDialog(options);const answer=h.dialogs.shift();assert.notEqual(answer,undefined,'dialog answer is explicit');const listeners={};dialog={addEventListener:(event,cb)=>{(listeners[event] ||= []).push(cb);},querySelectorAll:()=>Object.entries(answer || {}).map(([name,value])=>({name,value,type:typeof value==='boolean'?'checkbox':'text',checked:!!value}))};return Promise.resolve().then(async()=>{await h.dialogHook?.();for(const listener of listeners.click || [])listener({target:{closest:selector=>selector==='[data-dialog-confirm]'?true:null},preventDefault:noop,stopPropagation:noop});return answer!==null;});}};
  const FormData=class{constructor(form){this.data=form.controls.filter(c=>c.name&&!c.disabled&&(!['checkbox','radio'].includes(c.type)||c.checked)).map(c=>[c.name,c.value || (c.type==='checkbox'?'on':'')]);}has(key){return this.data.some(([name])=>name===key);}get(key){return this.data.find(([name])=>name===key)?.[1]??null;}getAll(key){return this.data.filter(([name])=>name===key).map(([,v])=>v);}entries(){return this.data.values();}};
- const context={workUI,URL,ResizeObserver:resizeObserver,crypto:cryptoProvider,AbortController,FormData,document:{activeElement:null},console,proposalChangesObserver};vm.createContext(context);const observedSource=proposalChangesObserver?source.replace('function proposalChanges(before,after) {','function proposalChanges(before,after) { proposalChangesObserver();'):source;vm.runInContext(observedSource,context);context.callbacks=callbacks;h.designer=vm.runInContext('createWorkDesigner({callbacks})',context);h.helpers=vm.runInContext('workAuthoring',context);h.host=host;h.callbacks=callbacks;h.document=context.document;
+ const context={workToolCatalog:run(renderer(),'workToolCatalog'),workToolMatchesScope:run(renderer(),'workToolMatchesScope'),workUI,URL,ResizeObserver:resizeObserver,crypto:cryptoProvider,AbortController,FormData,document:{activeElement:null},console,proposalChangesObserver};vm.createContext(context);const observedSource=proposalChangesObserver?source.replace('function proposalChanges(before,after) {','function proposalChanges(before,after) { proposalChangesObserver();'):source;vm.runInContext(observedSource,context);context.callbacks=callbacks;h.designer=vm.runInContext('createWorkDesigner({callbacks})',context);h.helpers=vm.runInContext('workAuthoring',context);h.host=host;h.callbacks=callbacks;h.document=context.document;
  h.render=()=>h.designer.render({state:h.state,selection:h.selection,host});h.render();
  h.click=(action,data={})=>{const button=h.buttons.find(node=>node.dataset.authorAction===action&&Object.entries(data).every(([key,value])=>node.dataset[key]===value));button?.focus();const control={dataset:{authorAction:action,...data}};h.designer.handleEvent({type:'click',target:button || {closest:selector=>selector==='#ees-work-designer'?host:selector==='[data-author-action]'?control:null}});};
  // The outer work host captures overlay clicks before workUI.dialog settles its promise.
@@ -273,7 +273,7 @@ test('late Native proposal after reset cannot expose the previous account previe
 test('unsaved publication state stays with its workflow across navigation',async()=>{const h=harness();h.field('publication_state','published','change');await h.open('q');assert.equal(h.draft().publication_state,'unpublished');assert.equal(h.draft().dirty,false);await h.open('w');assert.equal(h.draft().publication_state,'published');assert.equal(h.draft().dirty,true);assert.equal(h.writes.length,0);h.field('publication_state','unpublished','change');assert.equal(h.draft().dirty,false);assert.equal(actionButton(h,'save').disabled,true);});
 
 test('conflict comparison can discard only by explicit choice and load exact new revision',async()=>{const h=harness();await h.node();h.field('job_guidance','내 변경');h.workflows.get('w').revision=3;h.workflows.get('w').draft.nodes.j.instructions='서버 변경';h.dialogs.push({choice:'keep'});h.click('compare');await flush();assert.equal(h.draft().definition.nodes.j.instructions,'내 변경');assert.equal(h.draft().revision,1);h.dialogs.push({choice:'discard'});h.click('compare');await flush();assert.equal(h.draft().definition.nodes.j.instructions,'서버 변경');assert.equal(h.draft().revision,3);assert.equal(h.draft().dirty,false);});
-test('tool navigation returns to workflow editor without retaining tool-only surface',async()=>{const h=harness();h.selection.tab='tools';h.render();assert.match(h.markup,/>도구 · 공용</);h.selection.tab='overview';h.render();assert.match(h.markup,/<header><strong>워크플로우<\/strong>/);assert.match(h.markup,/워크플로우 정보·분류 수정/);});
+test('tool navigation returns to workflow editor without retaining tool-only surface',async()=>{const h=harness();h.selection.tab='tools';h.render();assert.match(h.markup,/>도구</);h.selection.tab='overview';h.render();assert.match(h.markup,/<header><strong>워크플로우<\/strong>/);assert.match(h.markup,/워크플로우 정보·분류 수정/);});
 test('hidden job trigger remains a stored offset after direct guidance editing',async()=>{const h=harness();h.workflows.get('w').draft.nodes.j.trigger={offset_seconds:3600};h.render();await h.node();assert.equal(h.fields.some(f=>f.name==='trigger_kind'),false);h.field('job_guidance','안내만 수정');h.click('save');await flush();assert.deepEqual(h.writes[0].definition.nodes.j.trigger,{offset_seconds:3600});assert.doesNotMatch(source,/setInterval|setTimeout/);});
 
 test('2026-11-02 authoring no longer creates reservations for a published periodic workflow',async()=>{const h=harness(),record=h.workflows.get('w');record.published_version=2;record.draft.mode='periodic';record.draft.schedule={timezone:'Asia/Seoul',anchor:'2026-10-05T09:00',frequency:'weekly',interval:1};record.draft.nodes.j.mode='tool';record.published=copy(record.draft);h.render();assert.doesNotMatch(h.markup,/일정 미리보기·서버 예약|게시 버전 예약 만들기|data-author-action="schedule_tools"/);h.click('schedule_tools');h.dialogs.push({timezone:'Asia/Seoul',anchor:'2026-10-05T09:00',frequency:'weekly',interval:'1',grace_seconds:'300',delegated:true,'job:j':true});h.click('schedule_create');await flush();assert.equal(h.operations.length,0);assert.equal(h.writes.length,0);assert.equal(h.dialogs.length,1);assert.deepEqual(h.draft().definition.schedule,record.published.schedule);});
@@ -626,7 +626,7 @@ test('shared discovery failure is explicit while legacy tools remain usable',asy
 
 test('B10 common heading empty list and unreviewed labels follow the specification cards',async()=>{
  const h=harness();const {search}=sharedReviewFixture(h);h.state.capabilities.is_admin=true;h.selection.tab='tools';search.version=0;search.state='review_required';h.render();
- const header=h.markup.match(/<header>([\s\S]*?)<\/header>/)?.[1];assert.ok(header);assert.match(header,/<strong>도구 · 공용<\/strong>/);assert.doesNotMatch(header,/<small\b/);assert.match(header,/data-action="close_panel"/);assert.match(h.markup,/data-author-tab="tools"/);assert.match(h.markup,/data-state="unreviewed">확인 전<\/span>/);assert.doesNotMatch(h.markup,/data-state="review_required">도구 확인 필요/);
+ const header=h.markup.match(/<header>([\s\S]*?)<\/header>/)?.[1];assert.ok(header);assert.match(header,/<strong>도구<\/strong>/);assert.doesNotMatch(header,/<small\b/);assert.match(header,/data-action="close_panel"/);assert.match(h.markup,/data-author-tab="tools"/);assert.match(h.markup,/data-state="unreviewed">확인 전<\/span>/);assert.doesNotMatch(h.markup,/data-state="review_required">도구 확인 필요/);
  h.click('shared_open',{id:search.id});await flush();assert.match(h.markup,/지금 버전 확인 전/);assert.match(h.markup,/data-state="unreviewed">확인 전<\/span>/);
  h.click('shared_list');await flush();h.state.operations.shared_tools=[];h.render();assert.match(h.markup,/공용 도구 0개/);assert.match(h.markup,/쓸 수 있는 공용 도구가 없습니다. 필요한 도구는 관리자에게 요청하세요./);
 });
@@ -1188,16 +1188,16 @@ test('A12 generated prompts: legacy execution bindings keep a newly generated in
 });
 
 
-test('global tools lists every accessible system and edits the selected tool owner without changing work location',async()=>{
+test('tool list follows the selected system and edits its own contract',async()=>{
  const h=harness();h.selection.tab='tools';h.selection.workflow_id='';h.state.workflow=null;h.state.capabilities.managed_systems=['EMS','FDC'];
  const tools=[{id:'ems',name:'EMS 도구',system_id:'EMS',kind:'read',revision:1,state:'draft'},{id:'fdc',name:'FDC 도구',system_id:'FDC',kind:'read',revision:2,state:'draft'}];
- h.state.operations={tools:[tools[0]],all_tools:tools};h.render();assert.match(h.markup,/EMS 도구/);assert.match(h.markup,/FDC 도구/);
+ h.state.operations={tools:[tools[0]],all_tools:tools};h.render();assert.match(h.markup,/EMS 도구/);assert.doesNotMatch(h.markup,/FDC 도구/);h.selection.system_id='FDC';h.render();assert.match(h.markup,/FDC 도구/);assert.doesNotMatch(h.markup,/EMS 도구/);
  h.click('tool_open',{id:'fdc'});await flush();assert.deepEqual(h.operationReads,[{system_id:'FDC'}]);
  h.field('description','FDC 담당자가 편집');h.click('tool_save');await flush();
- assert.equal(h.operations[0].system_id,'FDC');assert.equal(h.operations[0].tool.system_id,'FDC');assert.equal(h.selection.system_id,'EMS');
+ assert.equal(h.operations[0].system_id,'FDC');assert.equal(h.operations[0].tool.system_id,'FDC');assert.equal(h.selection.system_id,'FDC');
 });
 test('global tools preserves read-only access and never borrows another system manager permission',async()=>{
- const h=harness();h.selection.tab='tools';h.state.operations={all_tools:[{id:'fdc',name:'참여 도구',system_id:'FDC',kind:'read',revision:2,state:'draft'}]};h.render();
+ const h=harness();h.selection.tab='tools';h.selection.system_id='FDC';h.state.operations={all_tools:[{id:'fdc',name:'참여 도구',system_id:'FDC',kind:'read',revision:2,state:'draft'}]};h.render();
  h.click('tool_open',{id:'fdc'});await flush();assert.equal(h.fields.find(field=>field.name==='name').disabled,true);
  h.click('tool_save');await flush();assert.equal(h.operations.length,0);
 });
@@ -1205,7 +1205,7 @@ test('late legacy tool details cannot overwrite a different tool owner context',
  const h=harness(),pending=deferred();h.selection.tab='tools';h.state.capabilities.managed_systems=['EMS','FDC'];
  h.state.operations={all_tools:[{id:'ems',name:'EMS 도구',system_id:'EMS',kind:'request',revision:1,state:'draft'},{id:'fdc',name:'FDC 도구',system_id:'FDC',kind:'request',revision:1,state:'draft'}]};
  h.operationReadOverride=query=>query.system_id==='EMS'?pending.promise:Promise.resolve({reviewers:[{id:'fdc-owner',name:'FDC 담당'}]});h.render();
- h.click('tool_open',{id:'ems'});await flush();h.click('tool_list');h.click('tool_open',{id:'fdc'});await flush();
+ h.click('tool_open',{id:'ems'});await flush();h.click('tool_list');h.selection.system_id='FDC';h.render();h.click('tool_open',{id:'fdc'});await flush();
  pending.resolve({reviewers:[{id:'ems-owner',name:'EMS 담당'}],can_author_direct:true});await flush();
  assert.match(h.markup,/FDC 담당/);assert.doesNotMatch(h.markup,/EMS 담당|직접 실행 · 예외로 작성/);
 });
@@ -1249,7 +1249,7 @@ test('phase 1 static check failure is shown and does not fake execution or preve
  const h=phase1Harness();await phase1New(h);h.check={valid:false,errors:[{code:'syntax_error',message:'괄호를 확인해 주세요.',line:2}],functions:[],input_schema:{type:'object',properties:{}}};h.click('draft_code');await flush();h.field('draft_code','class Tools:\n  def broken(');h.click('draft_check');await flush();assert.match(h.markup,/2행 · 괄호를 확인해 주세요/);assert.match(h.markup,/실제 동작은 아직 시험하지 않았습니다/);assert.equal(h.records.size,0);h.click('draft_save_next');await flush();assert.equal(h.operations.at(-1).draft.code,'class Tools:\n  def broken(');assert.equal(h.records.size,1);
 });
 test('phase 1 import copies a permitted source to a new draft and keeps unsaved authoring recoverable',async()=>{
- const h=phase1Harness();await phase1New(h);h.click('draft_import_picker');await flush();assert.match(h.markup,/원본의 설정·개인 토큰은 가져오지 않습니다/);h.click('draft_import',{id:'native',function:'list_documents'});await flush();assert.deepEqual(Object.keys(h.operations.at(-1)).sort(),['action','expected_revision','function','request_id','source_tool_id']);assert.equal(h.operations.at(-1).expected_revision,0);assert.match(h.markup,/원본은 바뀌지 않았습니다/);h.click('draft_list');await flush();h.click('draft_new');await flush();assert.equal(h.fields.find(field=>field.name==='draft_name').value,'새 문서 도구');
+ const h=phase1Harness();await phase1New(h);h.click('draft_import_picker');await flush();assert.match(h.markup,/원본의 설정·개인 토큰은 가져오지 않습니다/);h.click('draft_import',{id:'native',function:'list_documents'});await flush();assert.deepEqual(Object.keys(h.operations.at(-1)).sort(),['action','expected_revision','function','request_id','scope','source_tool_id']);assert.equal(h.operations.at(-1).expected_revision,0);assert.match(h.markup,/원본은 바뀌지 않았습니다/);h.click('draft_list');await flush();h.click('draft_new');await flush();assert.equal(h.fields.find(field=>field.name==='draft_name').value,'새 문서 도구');
 });
 test('phase 1 drafts are searchable but never join the workflow picker and future tabs remain disabled',async()=>{
  const h=phase1Harness();await phase1Code(h);h.click('draft_save_next');await flush();for(const title of ['시험','사용·기록'])assert.match(h.markup,new RegExp('<button[^>]+role="tab"[^>]+disabled[^>]*>'+title));h.click('draft_list');await flush();h.field('ew-draft-search','없는 이름');assert.match(h.markup,/찾는 도구가 없습니다/);h.field('ew-draft-search','문서');assert.match(h.markup,/새 문서 도구/);assert.match(h.markup,/업무절차에서 고를 수 없습니다/);assert.deepEqual(h.state.tools,[]);assert.deepEqual(h.state.operations.shared_tools,[]);
@@ -1437,4 +1437,47 @@ test('phase 3 tool management deduplicates active catalog projections and distin
 test('phase 3 authored admin entry opens the draft manager while non-admin sees only the confirmed presentation',async()=>{
  const h=phase3Harness();await phase3Job(h);h.callbacks.openTools=async()=>{h.selection.tab='tools';h.selection.workflow_id='';h.render();};h.click('shared_open',{id:'phase2'});await flush();assert.equal(h.selection.tab,'tools');assert.ok(h.forms['ew-tool-draft-form']);assert.doesNotMatch(h.markup,/프로그램 갱신으로만|그룹·담당 변경/);
  h.state.capabilities.is_admin=false;h.state.operations.tool_drafts=[];h.render();h.click('shared_open',{id:'phase2'});await flush();assert.match(h.markup,/사용 버전 v1/);assert.match(h.markup,/찾을 문서/);assert.doesNotMatch(h.markup,/프로그램 갱신으로만|그룹·담당 변경|개인 PAT\(기존 방식\)|data-author-action="shared_(?:disable|enable|access|review)"/);assert.equal(h.operations.filter(item=>item.action==='tool_draft_get').length,1);
+});
+
+test('tool catalog combines selected factory and system with common tools and deduplicates active drafts',()=>{
+ const h=phase1Harness();h.selection.system_id='EMS';h.selection.factory_id='f1';
+ const rows=[{id:'common',name:'공통 문서',scope:{}},{id:'system',name:'EMS 공통',scope:{system_id:'EMS'}},{id:'first',name:'천안 도구',scope:{system_id:'EMS',factory_id:'f1'}},{id:'second',name:'울산 도구',scope:{system_id:'EMS',factory_id:'f2'}},{id:'other',name:'FDC 도구',scope:{system_id:'FDC'}}];
+ h.state.operations.tool_drafts=rows.map(item=>({...item,revision:1,state:'draft'}));h.state.operations.shared_tools=[{...rows[0],source:'authored'}];h.render();
+ assert.match(h.markup,/도구 <small>3개/);assert.match(h.markup,/공통 문서/);assert.match(h.markup,/EMS 공통/);assert.match(h.markup,/천안 도구/);assert.doesNotMatch(h.markup,/울산 도구|FDC 도구/);
+ h.selection.factory_id='';h.render();assert.match(h.markup,/도구 <small>4개/);assert.match(h.markup,/울산 도구/);
+ h.selection.system_id='FDC';h.render();assert.match(h.markup,/도구 <small>2개/);assert.match(h.markup,/공통 문서|FDC 도구/);assert.doesNotMatch(h.markup,/EMS 공통|천안 도구|울산 도구/);
+});
+test('new tool inherits work location and scope changes preserve separate unfinished forms',async()=>{
+ const h=phase1Harness();h.state.systems=['EMS','FDC'];h.state.factories=[{id:'f1',name:'천안',system_id:'EMS'}];h.selection.factory_id='f1';h.render();await phase1New(h);
+ assert.equal(h.fields.find(item=>item.name==='draft_system').value,'EMS');assert.equal(h.fields.find(item=>item.name==='draft_factory').value,'f1');
+ h.selection.system_id='FDC';h.selection.factory_id='';h.render();assert.match(h.markup,/class="ew-draft-list"/);await phase1New(h);h.field('draft_name','FDC 작성 중');
+ h.selection.system_id='EMS';h.selection.factory_id='f1';h.render();h.click('draft_new');await flush();assert.equal(h.fields.find(item=>item.name==='draft_name').value,'새 문서 도구');h.click('draft_save');await flush();assert.deepEqual(h.operations.at(-1).draft.scope,{system_id:'EMS',factory_id:'f1'});
+ h.state.operations.tool_scope_factories=[...h.state.factories,{id:'fdc-factory',name:'FDC 공장',system_id:'FDC'}];h.field('draft_system','FDC','change');assert.match(h.markup,/<option value="fdc-factory"/);h.field('draft_factory','fdc-factory','change');h.click('draft_save');await flush();assert.deepEqual(h.operations.at(-1).draft.scope,{system_id:'FDC',factory_id:'fdc-factory'});
+ h.field('draft_system','','change');assert.equal(h.fields.find(item=>item.name==='draft_factory').disabled,true);h.click('draft_save');await flush();assert.deepEqual(h.operations.at(-1).draft.scope,{system_id:'',factory_id:''});
+});
+
+test('tool drafts stay with their original work location when it changes from Procedures',async()=>{
+ for(const destination of [{system_id:'FDC',factory_id:''},{system_id:'EMS',factory_id:'f2'}]){
+  const h=phase1Harness(),origin={system_id:'EMS',factory_id:'f1'};
+  h.state.systems=['EMS','FDC'];h.state.factories=[{id:'f1',name:'천안',system_id:'EMS'},{id:'f2',name:'울산',system_id:'EMS'}];
+  Object.assign(h.selection,origin);h.render();await phase1New(h);h.field('draft_name','첫 위치의 미저장 도구');
+  Object.assign(h.selection,destination);h.render();await phase1New(h);h.field('draft_name','두 번째 위치의 미저장 도구');
+  h.selection.tab='procedures';h.render();Object.assign(h.selection,origin);h.render();
+  h.selection.tab='tools';h.render();assert.ok(!h.forms['ew-tool-draft-form']);assert.match(h.markup,/class="ew-draft-list"/);
+  h.click('draft_new');await flush();assert.equal(h.fields.find(item=>item.name==='draft_name').value,'첫 위치의 미저장 도구');
+  assert.equal(h.fields.find(item=>item.name==='draft_system').value,origin.system_id);assert.equal(h.fields.find(item=>item.name==='draft_factory').value,origin.factory_id);
+  h.selection.tab='procedures';h.render();Object.assign(h.selection,destination);h.render();h.selection.tab='tools';h.render();
+  h.click('draft_new');await flush();assert.equal(h.fields.find(item=>item.name==='draft_name').value,'두 번째 위치의 미저장 도구');
+  assert.equal(h.fields.find(item=>item.name==='draft_system').value,destination.system_id);assert.equal(h.fields.find(item=>item.name==='draft_factory').value,destination.factory_id);
+  assert.equal(h.operations.length,0);assert.equal(h.writes.length,0);
+ }
+});
+
+test('saved tool edits survive indirect scope navigation without following the new location',async()=>{
+ const h=phase1Harness();await phase1New(h);h.click('draft_save');await flush();h.field('draft_name','저장 전 수정한 도구');
+ const calls=h.operations.length;h.selection.tab='procedures';h.render();h.selection.system_id='FDC';h.render();h.selection.tab='tools';h.render();
+ assert.ok(!h.forms['ew-tool-draft-form']);assert.equal(h.operations.length,calls);
+ h.selection.system_id='EMS';h.render();h.click('draft_open',{id:'draft-1'});await flush();
+ assert.equal(h.fields.find(item=>item.name==='draft_name').value,'저장 전 수정한 도구');assert.equal(h.operations.length,calls);
+ assert.equal(h.records.get('draft-1').draft.name,'새 문서 도구');assert.equal(h.records.get('draft-1').revision,1);
 });

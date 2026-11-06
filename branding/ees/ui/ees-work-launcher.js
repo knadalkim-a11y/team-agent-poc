@@ -626,10 +626,11 @@
       const catalog=nativePage()?nativeScope:state;
       const item=(factory?catalog?.factories:catalog?.systems)?.find(value=>(typeof value==='string'?value:value.id)===id);
       const option=(factory?catalog?.scope_options?.factories:catalog?.scope_options?.systems)?.find(value=>value.id===id);
-      if(typeof id!=='string'||factory&&(nativePage()||selection.mode==='author'&&selection.tab==='tools')||!(factory&&id==='')&&(!item||item.allowed===false||option?.allowed===false))return;
+      if(typeof id!=='string'||factory&&nativePage()||!(factory&&id==='')&&(!item||item.allowed===false||option?.allowed===false))return;
       if(id===selection[factory?'factory_id':'system_id'])return;
       designer.readDraft?.();
       const author=nativePage()||selection.mode==='author';
+      if(author&&selection.tab==='tools')return select({[factory?'factory_id':'system_id']:id,...(!factory?{factory_id:''}:{}),mode:'author',tab:'tools',workflow_id:'',run_id:'',job_id:''});
       // Factory is the author's view context, not the definition's owner or
       // execution scope. Keep the open draft and unfinished creation form.
       if(factory&&author)return select({factory_id:id},{preserveAuthorStart:true});
