@@ -281,10 +281,17 @@ class MotionNativeTests(IntegratedNativeCase):
           const icons=[...document.querySelectorAll('.ew-mode .ew-icon,.ees-chat-controls button svg')].map(e=>{
             const i=e.getBoundingClientRect(),b=e.closest('button').getBoundingClientRect();
             return {width:i.width,left:i.left-b.left,right:b.right-i.right};});
+          const scopeFields=[...document.querySelectorAll('#ees-work-entry [data-scope-trigger]')].map(e=>{
+            const b=e.getBoundingClientRect(),s=getComputedStyle(e);
+            const child=selector=>{const node=e.querySelector(selector),r=node.getBoundingClientRect(),s=getComputedStyle(node);
+              return {x:r.x-b.x,y:r.y-b.y,width:r.width,height:r.height,fontSize:s.fontSize,lineHeight:s.lineHeight};};
+            return {kind:e.dataset.scopeTrigger,width:b.width,height:b.height,lineHeight:s.lineHeight,
+              label:child('small'),value:child('span:not(.ew-icon)')};});
           return {sidebar:sidebar.width,client:scroll.clientWidth,gutter:scroll.offsetWidth-scroll.clientWidth,
             overflow:scroll.scrollHeight>scroll.clientHeight,overflowX:scroll.scrollWidth>scroll.clientWidth,
             overflowY:getComputedStyle(scroll).overflowY,mode:box('.ew-mode'),
             work:box('[data-mode=work]'),author:box('[data-mode=author]'),scope:box('[data-scope-trigger]'),
+            scopeHeight:q('.ew-scope').getBoundingClientRect().height,scopeFields,
             contentHeight:q('.ees-chat-controls').getBoundingClientRect().bottom-r.top+scroll.scrollTop,
             chromeHeight:sidebar.height-scroll.clientHeight,icons};})()"""
         sidebar_evidence = []
@@ -323,8 +330,15 @@ class MotionNativeTests(IntegratedNativeCase):
                     self.assertGreater(row['gutter'], 0, row)
                     self.assertFalse(row['overflowX'], row)
                     self.assertEqual(row['client'], rows[0]['client'], rows)
-                    for key in ('mode', 'work', 'author', 'scope'):
+                    for key in ('mode', 'work', 'author', 'scope', 'scopeHeight', 'scopeFields'):
                         self.assertEqual(row[key], rows[0][key], rows)
+                    self.assertEqual(row['scopeHeight'], 75, row)
+                    self.assertEqual([field['kind'] for field in row['scopeFields']], ['factory', 'system'], row)
+                    for field in row['scopeFields']:
+                        self.assertEqual(field['height'], 38, field)
+                        self.assertEqual(field['lineHeight'], '20px', field)
+                        self.assertEqual(field['label']['fontSize'], '11px', field)
+                        self.assertEqual(field['label']['lineHeight'], '20px', field)
                     self.assertTrue(row['icons'], row)
                     for icon in row['icons']:
                         self.assertGreaterEqual(icon['width'], 15.9, row)

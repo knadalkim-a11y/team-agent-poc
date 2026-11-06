@@ -12,7 +12,7 @@
 | ST-SCOPE-2 | 새 작성/가져오기 도구의 초기 분류는 현재 작업 위치다. 기본 정보의 시스템 분류·공장 분류에서 바꾸고 저장한다. 시스템 변경 시 공장 선택은 초기화한다. 연결 서비스(Confluence 등)는 공장·시스템과 별도다. | 구현 |
 | ST-SCOPE-3 | 작성 도구는 선택 필드 `draft.scope = {system_id, factory_id}`에 분류를 저장한다. 공통은 두 값이 빈 문자열, 시스템 공통은 공장만 빈 문자열이다. 공장만 지정하거나 존재하지 않는 시스템/공장 또는 다른 시스템의 공장은 거부한다. 기존 분류 없는 도구·기본 제공 도구는 공통이며 임의 이관하지 않는다. 이전 방식 계약은 기존 `system_id`로 분류한다. | 구현 |
 | ST-SCOPE-4 | 분류는 목록 탐색 기준이다. 기존 관리/사용 그룹·Native 권한·실행 계정·사용 버전·진행 중 회차의 고정 참조를 바꾸지 않는다. 관리자만 분류를 수정하며 비관리자 목록에도 최근 저장된 분류를 투영한다. | 구현 |
-| ST-SCOPE-5 | 작성 도구는 위치 변경 시 도구 목록으로 돌아가며 미저장 편집은 같은 로그인 세션의 캐시에 보존한다. 새 도구 캐시는 작업 위치별로 구분한다. 범위 전환은 저장·시험·실행을 일으키지 않는다. | 구현 |
+| ST-SCOPE-5 | 작성 도구는 위치 변경 시 도구 목록으로 돌아가며 미저장 편집은 같은 로그인 세션의 캐시에 보존한다. 새 도구 캐시는 작업 위치별로 구분한다. 다른 메뉴에서 위치를 바꾸는 경우에도 기존 위치에 편집 내용을 보관하고 활성 편집본을 분리하여 새 위치에 덮어쓰지 않는다. 범위 전환은 저장·시험·실행을 일으키지 않는다. | 구현 |
 | ST-SCOPE-6 | 분류를 보내지 않는 이전 클라이언트의 수정은 기존 분류를 보존한다. 구버전 프로그램은 분류를 이해하지 못해 전역으로 표시할 수 있으므로 같은 분류 동작을 보장하지 않는다. DB 스키마 이관·기존 코드/설정/버전 재작성은 하지 않는다. | 구현 |
 
 화면: [워크 · 도구 2.2판 T01/T02](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=2017-76). [검증 범위·남은 확인](../../evals/tool-authoring-20261105.md#tools-work-location-20261106).
@@ -328,7 +328,7 @@ Figma 2판 T02B `2052:207`, T05 `2016:277`, T05A `2018:160`, T05B `2052:236`, T0
 
 | ID | 계약 |
 |---|---|
-| ST-P3-1 | 도구의 ‘업무절차에서 사용’에서 편집할 수 있는 절차→단계→작업을 고른 뒤 그 작업의 도구 연결 창으로 이동한다. 대상 선택 자체는 저장이 아니다. 연결하기는 열린 편집본만 바꾸고 저장·게시는 별도다. 취소·Escape·권한 변경·늦은 응답으로 다른 작업이나 새 편집을 덮지 않는다. 미저장 절차를 다시 열 때 기존 편집본을 보존한다. |
+| ST-P3-1 | 도구의 ‘업무절차에서 사용’에서 편집할 수 있는 절차→단계→작업을 고른 뒤 그 작업의 도구 연결 창으로 이동한다. 대상 선택 자체는 저장이 아니다. 연결하기는 열린 편집본만 바꾼다. 이후 절차의 게시 상태를 고르고 저장하면 내용·상태가 함께 반영된다([현재 저장 계약](../mockups/ees-work/TASK.md#procedure-publication-save-20261106)). 취소·Escape·권한 변경·늦은 응답으로 다른 작업이나 새 편집을 덮지 않는다. 미저장 절차를 다시 열 때 기존 편집본을 보존한다. |
 | ST-P3-2 | 사용 설정된 작성 도구를 기존 공용 도구 선택과 shared_tool_id 경로에 포함한다. 작업에는 도구 ID와 입력 연결만 저장하고 버전·코드·토큰을 직접 저장하지 않는다. 목록·연결·실행 준비·실제 호출은 같은 사용 상태·그룹·Native 권한을 판정한다. 미확인/중지/환경 불일치는 선택·실행을 막고, 이미 연결된 작업의 이름·입력과 과거 기록은 보존해 원인을 안내한다. 기존 기본 제공·이전 방식 도구 계약은 유지한다. |
 | ST-P3-3 | T08/T08A 및 최신 수동 게시 결정에 따라 미완성 저장·게시는 허용한다. ST-AUTH-6/ST-JOB-5의 과거 PAT 게시 차단을 작성 도구에 되살리지 않는다. 실제 실행 준비에서 필수 입력·현재 도구 상태·실행 계정 권한/자격을 검사한다. 게시 상태와 실행 가능한 상태를 구분한다. |
 | ST-P3-4 | 질문·선택지·기본값은 현재 사용본의 input_schema/input_ui를 사용한다. 실행할 때 입력/고정값의 기존 연결을 재사용한다. Optional·정수/실수·boolean·Literal·List[기본형/Literal]을 축소하지 않는다. 생략·null·빈문자·false·0·빈 배열을 구분한다. 생성된 입력에는 authored_schema(원래 property schema)와 기존 shared_tool_generated 출처를 둔다. 서버의 실제 검사 원본은 고정 사용본 schema이며 클라이언트 metadata를 신뢰해 검사를 생략하지 않는다. 직접 만든 입력·변경한 연결은 기존 정리 규칙대로 보존한다. |
@@ -343,13 +343,13 @@ Figma 2판 T02B `2052:207`, T05 `2016:277`, T05A `2018:160`, T05B `2052:236`, T0
 
 ### 공통 인터페이스와 화면
 
-새 연결 mutation은 만들지 않는다. workspace_state의 편집 가능한 workflows와 저장/게시·start_run, operations.execute, 기존 사람 판정과 shared_tool_accept_version을 재사용한다. T06A 대상 목록은 기존 authoring 조회와 미저장 화면 캐시를 사용한다.
+새 연결 mutation은 만들지 않는다. workspace_state의 편집 가능한 workflows와 save_draft(선택한 publication_state 포함)·start_run, operations.execute, 기존 사람 판정과 shared_tool_accept_version을 재사용한다. T06A 대상 목록은 기존 authoring 조회와 미저장 화면 캐시를 사용한다.
 
 shared_tools의 작성 도구 항목은 `source: authored`, `id: draft-…`, `version`, `state`, `can_use`, `unavailable_reason/unavailable_message`, `group_ids`, 사용본의 `input_schema/input_ui/output_ui`를 제공한다. pin은 기존 `{id,version,reference}`이며 reference에는 작성 도구 식별·불변 버전·지문만 둔다. 코드·PAT는 공개 응답에 포함하지 않는다. 실행 결과 표시 메타데이터와 raw 결과의 공개 범위는 기존 attempt 권한을 따른다. attempt.snapshot.shared_tool은 기존 id/version/reference에 source/name/input_schema/input_ui/output_ui를 그 당시 사용본에서 추가한다. result는 source:authored와 completeness/items/count/fields_checked를 보존한다. items의 내부 id는 row-1 등 저장된 순서를 쓰고 title/category/url과 원본 row를 분리한다. 각 행의 required:false로 작업 전체 사람 판정과 구분하며 원본 외부 id는 row.id에 보존한다. snapshot.arguments는 제출·생략 상태를 보존하고 snapshot.effective_arguments에는 서버가 고정 schema의 기본값을 적용한 실제 호출 인자를 저장한다. 화면은 실제 값을 우선 보여주며 제출하지 않은 값은 기본값임을 표시한다. 두 값 모두 기존 근거 접근 범위를 따른다.
 
-Figma `XK2wTos6sEuxSHhIj7cqg6` 도구 2판 T06 `2017:333`, T06A `2054:384`, T07 `2017:408`, T08 `2017:460`, T08A `2054:420`, T09 `2018:194`; 업무·운영의 O15A `2056:313`, O15B `2056:563`, O15C `2056:813`, 시작창 `2056:1158`, 실행 규칙 `2056:1172`를 2026-11-05 읽기 전용 조회했다. 기존 진행 건이 하나면 그 진행 건에서 실행하고 여러 건이면 선택한다. 미진행이면 기존 시작 입력 창을 사용한다. 고정 context·PNG와 실제1920/1366/360 화면을 대조한다. 시안의 인명·건수·문서는 합성 예시다.
+Figma `XK2wTos6sEuxSHhIj7cqg6` 도구 2판 T06 `2017:333`, T06A `2054:384`, T07 `2017:408`, T08 `2017:460`, T08A `2054:420`, T09 `2018:194`; 업무·운영의 O15A `2056:313`, O15B `2056:563`, O15C `2056:813`, 시작창 `2056:1158`, 실행 규칙 `2056:1172`를 2026-11-05 읽기 전용 조회했다. 기존 진행 건이 하나면 그 진행 건에서 실행하고 여러 건이면 선택한다. 미진행이면 기존 시작 입력 창을 사용한다. 고정 context·PNG와 실제1920/1366/360 화면을 대조한다. 시안의 인명·건수·문서는 합성 예시다. 2026-11-06 업무절차17판에 맞춘 도구2.1판은 T08/T08A의 게시 상태 선택·단일 저장과 안내만 바꾼다. [고정 대조 자료](../mockups/ees-work/procedure-publication-20261106/metadata.json).
 
 ### 병렬 소유권과 완료 조건
 
 - root: 공통 계약/fixture·문서·패키징 목록·통합·PR/CI. backend: 공용 catalog/버전/실행·Native 계정/자격·Python 검사. frontend: JS/CSS·질문·결과/판정 화면·Node 검사·Figma 고정 자료. validation: 기존 브라우저 fixture와 작성/실행 종단·Full Native product 시험.
-- 정상 연결→저장→게시→공동 진행→실제 실행→사람 판정, 미저장 취소, typed 입력,0건/부분/실패/unknown, 버전/그룹/계정 변경·중복/늦은 응답·재실행 이력, 기존 managed/legacy 보존을 검사한다. 실제 Native worker·Windows/Linux·패키징/Restore·화면 대조를 포함한 최종 CI를 확인한다. 실제 사내 연결·데이터는 별도 확인 대상이다.
+- 정상 연결→게시 상태 선택·저장→공동 진행→실제 실행→사람 판정, 미저장 취소, typed 입력,0건/부분/실패/unknown, 버전/그룹/계정 변경·중복/늦은 응답·재실행 이력, 기존 managed/legacy 보존을 검사한다. 실제 Native worker·Windows/Linux·패키징/Restore·화면 대조를 포함한 최종 CI를 확인한다. 실제 사내 연결·데이터는 별도 확인 대상이다.

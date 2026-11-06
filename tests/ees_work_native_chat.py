@@ -311,8 +311,8 @@ def input_and_history_flow(g,key,chat_id):
     g.click('[data-author-action=open][data-id="'+key+'"]')
     g.wait('document.querySelector("[data-author-status]")?.dataset.authorRevision === '
            +json.dumps(str(seeded['revision'])))
-    g.click('.ew-procedure-menu>summary');g.click('[data-author-action=validate]');g.click('[data-author-action=publish]');g.click('#ees-work-dialog [data-dialog-confirm]')
-    g.wait('!document.querySelector("#ees-work-dialog") && document.querySelector("#ees-work-designer [role=status]")?.textContent.includes("새 게시 버전을 만들었습니다")')
+    g.click('.ew-procedure-menu>summary');g.click('[data-author-action=validate]');g.select('#ew-publication-state','published');g.click('[data-author-action=save]')
+    g.wait('!document.querySelector("#ees-work-dialog") && document.querySelector("#ees-work-designer [role=status]")?.textContent.includes("저장했습니다")')
     g.click('[data-author-action=tab][data-tab=history]')
     g.wait('document.querySelector(".ew-author-history")?.textContent.includes("게시 v1")')
     assert g.api('/api/ees-work/workspace?workflow_id='+key)['workflow']['published_version']==1

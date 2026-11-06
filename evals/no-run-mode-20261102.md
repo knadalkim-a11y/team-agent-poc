@@ -113,3 +113,25 @@ CI456 (`77ca5cd`)의 실제 전체 제품과 새 미완성 게시/360px 흐름�
 - **검증:** Linux/Python 3.12에서 `-X warn_default_encoding -W error::EncodingWarning`으로 operations 55/55·workspace 85/85 통과. 새 회귀 시험은 f1 participant 정상 시작, f2 viewer·공장 없는 시작 거부, participant 작성 검사 거부, 진행 건 한 개만 생성됨을 확인했다. 이전 실패·기존 범위 검사·실제 사용자 자료는 보존한다. 최종 통합 head의 Native·Windows 전체 검사는 [PR #120](https://github.com/knadalkim-a11y/team-agent-poc/pull/120)에서 판정한다.
 
 - **main 통합:** #118 최종 head `791ddb6`의 CI462 39성공·출하1정상생략과 병합 main `818e31c`을 확인하고 #120에 merge로 통합했다. #118·#119·#120의 STATUS·CHANGELOG·사용 안내·TASK 기록을 모두 보존하고 문서·diff 검사를 다시 통과했다. 최종 CI는 이 통합본에서 새로 실행한다.
+
+
+<a id="publication-save-20261106"></a>
+
+## 2026-11-06 · 게시 상태 선택과 저장 통합
+
+- 기준: #125 병합 main `7a56cdbbcbf104a8a0847a446e951d262907a167`. 사용자 승인에 따라 업무절차17판의 상태 선택/저장을 구현한다. 도구의 수정본 저장/사용 설정 계약은 바꾸지 않는다.
+- UI: 상태만 바꿔도 미저장 표시·저장 활성화, 다른 절차 왕복·외부 refresh 보존, 원래 상태로 되돌리면 깨끗한 상태, 계정 전환 정리, 실패 후 재시도. 저장 전에는 서버 요청을 만들지 않는다.
+- 서버: 게시 상태 save_draft는 제출 내용으로 참조 검사 후 같은 트랜잭션에서 편집본·버전·포인터·revision·receipt를 저장한다. 중복 request는 한 번만 반영하고 재시도에도 권한을 다시 확인한다. 미게시 저장·재게시에도 과거 버전과 진행 건 snapshot은 유지한다.
+- 회귀: 기존 publish 버튼 기대6개가 실패해 상태 선택/단일 저장·서버 미변경/변경의 실제 계약으로 갱신했다. 검사 범위를 없애지 않고 게시 중 수정 반영·실패 선택 보존·state-only refresh를 추가했다. `node --test --test-reporter=tap tests/test_ees*.cjs`:733/733, workspace88/88, operations55/55 통과. SQLite version INSERT 실패 주입 뒤 내용·revision·포인터·버전·receipt 전체 rollback과 정상 재시도, stale revision과 접근 회수도 확인했다.
+- 빌드: main CI 산출물(검증된 공식 wheel·source frontend)을 재사용하려던 첫 빌드는 `Frontend inputs differ from this wrapper checkout; rebuild in CI.`로 중단했다. 변경된 UI 입력을 탐지한 정상 보호이며 manifest/컴파일 결과를 우회 수정하지 않는다. 최종 head의 CI 새 source 빌드와 실제 Native 검증으로 확인한다.
+- Figma: 업무절차 페이지1285:1829·루트1804:2546, 대표 패널1804:2551/1804:2673, 이전 B070 보존. 열 개 편집 화면에 상태 선택·단일 저장을 반영했다. 폰트/부품은 기존 것을 재사용한다. 라벨에 남은 상태 주황색을 공통 보조 글자 토큰으로 수정했다.
+- 실제 Native·최종 CI·고정 점검은 진행 중. 사내 화면·실데이터·사용자 사용성은 미확인, 병합·배포는 미실행이다.
+
+- 로컬 브라우저 첫 시도: CI494의 frontend ZIP `f6c6189d19929276b594fcb33e1f9ad624d6e1a8bce5415bfda84f5c88bd253e`를 검증해 공식 builder로 현재 wheel `c0e35f3f49bbccecd813d4a6a5d3161430125d4a8754d11b411759e4fef47a2f`를 조립했다. Chromium은 제품을 읽기 전 `process_singleton_posix.cc:297 socket() failed: Operation not permitted`로 종료했고 ptrace도 차단됐다. 두 대상 검사는 환경 준비 실패이며 제품 실패/성공으로 판정하지 않는다. 이 제한을 우회하지 않고 CI의 실제 브라우저를 사용한다.
+- Figma 최종: 업무절차17판과 도구2.1판의 T08/T08A를 동기화하고 C156/PR126/B070을 기록했다. 고정 점검을 페이지당 한 호출로 나누되 기준·링크/이력 검사를 유지했다. 비백업17페이지 오류0, 기존 업무절차 크기 경고1(10,487요소·60,543자)은 관련 없는 대규모 정리 없이 보존한다. 기록 후 관리 페이지 재검사 오류0·경고0. [고정 PNG4개·해시](../docs/mockups/ees-work/procedure-publication-20261106/metadata.json)와 [점검 결과](../docs/mockups/ees-work/procedure-publication-20261106/figma-check.json)를 보존하고 실제 렌더를 직접 확인했다.
+- 시험 ID 감사: `python tests/ees_delivery_suite.py --audit --output dist/procedure-test-id-audit`는1737개 오류0. 실제 브라우저 회귀는 상태 선택만으로 쓰기 없음·게시 중 내용 저장·미게시 저장 전후의 서버 포인터와 이력 보존을 추가 확인한다.
+
+- 최초 CI494([실행](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/42133313139), head `6ac9433`, 통합 시험 commit `85fb305`): 실제 로그인·작성·저장·재시작·채팅·일반 사용자 실행을 포함한 Complete Native product는 성공했다. services의 `test_normalized_published_definition_never_replaces_the_authoring_draft`는 예전 “게시 중 저장 후에도 게시본은 human” 기대가 남아 실패했다. 제출 편집본이 게시본에 반영되는 기대와 저장 전 불변 단언을 함께 적용하고, normalized definition이 편집본을 덮지 않는 원래 단언은 유지했다. 해당 파일8/8 재검사 통과.
+- CI494 실제1920 화면의 상태 선택란은 기존 Native appearance 초기화 때문에 화살표가 없었다. 선택 가능한 상태값임을 드러내도록 해당 select에만 `appearance:auto`를 지정하고 Figma의 입력 배경과 같은 공통 흰색 토큰을 사용했다. 최종 새 빌드 화면에서 다시 확인한다. 게시 상태·저장 동작/크기는 바꾸지 않는다.
+
+- CI494 작성 Native40개 중39개가 통과했고 `test_procedure_visual_geometry_matches_figma_and_preserves_native_draft`는 선택란 글자가12px가 아닌13px로 계산돼 실패했다. 기존 일반 입력 규칙의 `:is(input:not(...),select,textarea)`가 선택란 규칙보다 우선해 padding/font를 덮었다. 새 상태 선택란의 ID에 한정한 규칙으로 우선순위를 맞추고12px 단언을 유지한다. 상태 선택·미완성 게시/미게시·도구 연결 흐름은 통과했다. 새 head로 넘어가며 남은 CI494 compose와 최종 집계가 취소됐으며, 이 실행을 전체 성공으로 간주하지 않는다.

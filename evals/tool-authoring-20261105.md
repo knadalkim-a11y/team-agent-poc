@@ -10,6 +10,9 @@
 - **최초 실패·보완:** 새 공통 필터를 standalone UI harness에 주입하지 않은 오류와 기존 전역 목록/제목/가져오기 인자 기대를 수정했다. 기존 scope 없는 도구를 열기만 해도 빈 scope를 추가해 미저장으로 표시하던 제품 문제를 고쳤다. 공통 분류의 공장 select를 setBusy가 다시 켜던 문제는 기존 data-preserve 규칙을 사용해 고쳤다. 재검에서 오래된 초안·생애주기·분류 변경/저장·다른 시스템 공장 선택을 함께 통과했다.
 - **설계·화면:** Figma T01의 공장/시스템 표시와 목록 분류, T02의 두 분류 입력·연결 서비스 문구를 직접 렌더 확인했다. [고정 PNG·해시](../docs/mockups/ees-work/tools-work-location-20261106/metadata.json)를 보존한다. `chromium --headless --no-sandbox --disable-gpu --dump-dom about:blank`도 socket/ptrace Operation not permitted로 종료134였다. 실제 제품 로드·computed style·3폭 비교는 미실행이며 Figma PNG나 합성 DOM 통과로 대체하지 않는다. 기존 Native 탐색 검사에 표시 유지·EMS/FDC 왕복·목록 제외·메뉴 유지·채팅 초안 보존을 추가했다.
 - **확대 회귀·고정 점검:** Node services 10스크립트 묶음은 TAP 708건 중707통과·기존 도구 공장 선택 금지 기대1실패였다. 해당 기대를 도구 선택 허용/관리 화면·Native 금지로 바꾸고 해당 모듈150/150 재검을 통과했다. 기존 시험을 삭제하지 않았고 제품 접근 제한을 완화하지 않았다. operations55개 통과, 시험 ID1,736개 감사 오류0, 문서/diff 오류0이다. Figma 고정 점검을 API의 한 호출/한 페이지 규칙에 맞게17페이지로 나눠 실행해 오류0·기존 업무절차 크기 경고1을 확인했다.
+- **PR #128 후속 재현·보완 (2026-11-06):** 시작 head `d7ffe22`, main `14de941`(#126/#127 포함)을 merge로 통합했다. STATUS·CHANGELOG·TASK 충돌은 양쪽 기록/계약을 보존했다. [CI498](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/42146004928)은 `native-compose`에서 실제 화면 제목이 ‘도구’인데 ‘도구 · 공용’을 기다린 11건(작성10·Native 복귀1)이 실패했다. 해당 제목 기대를 현재 계약으로 갱신하며 기존 입력·저장·권한 단언은 유지했다.
+- **미저장 초안 결함:** 리뷰 `discussion_r4488182810`의 다른 메뉴 경유 위치 변경을 Node에서 수정 전 2/2 실패로 재현했다. `render`의 도구 탭 조건 때문에 활성 초안이 이전 위치에 남았고 다음 render가 새 위치 캐시에 저장했다. 기존 위치에 보관한 뒤 모든 위치 변경에서 편집본을 분리하도록 고쳤다. 새 도구의 시스템/공장별 독립 캐시·저장된 도구의 미저장 변경·서버 저장 없음 검사가 통과했다. Native에도 업무절차 경유 EMS/FDC 왕복과 1920/1366/360 분류 입력 치수·캡처를 추가했다.
+- **후속 로컬 검증:** Node 작성/실행/런타임 UI 625/625, Python 작성14/14·runtime21/21·lifecycle19/19 통과. 로컬 Chromium은 `about:blank`에서도 socket/ptrace 권한 제한으로 종료134여서 실제 브라우저는 CI에서 검증한다. 최종 CI와 화면 증거의 판정은 PR 본문/Checks에 기록한다.
 - **남은 확인:** 원격 최신 head의 필수 CI·실제 제품 화면 판정. 병합·사내 적용은 미실행이다.
 
 <a id="pr123-merge-review-20261105"></a>

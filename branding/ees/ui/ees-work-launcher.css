@@ -71,11 +71,11 @@
 #ees-work-entry .ew-nav-caption{margin:12px 4px 6px;font-size:12px;line-height:18px;color:var(--ees-text-tertiary);}
 #ees-work-entry .ew-scope{display:grid;gap:0;margin:0 0 12px;}
 #ees-work-entry .ew-scope-field{position:relative;min-width:0;}
-#ees-work-entry [data-scope-trigger]{display:flex;gap:8px;align-items:center;width:100%;border:1px solid var(--ees-line-control);border-radius:6px;padding:8px 10px;min-height:38px;text-align:left;font-size:12px;font-weight:500;background:var(--ees-surface-default);}
+#ees-work-entry [data-scope-trigger]{display:flex;gap:8px;align-items:center;width:100%;border:1px solid var(--ees-line-control);border-radius:6px;padding:8px 10px;min-height:38px;text-align:left;font-size:12px;line-height:20px;font-weight:500;background:var(--ees-surface-default);}
 #ees-work-entry .ew-scope-field:not(:only-child):first-child [data-scope-trigger]{border-radius:6px 6px 0 0;}
 #ees-work-entry .ew-scope-field:not(:only-child):last-child [data-scope-trigger]{border-radius:0 0 6px 6px;margin-top:-1px;}
 #ees-work-entry [data-scope-trigger]>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-#ees-work-entry [data-scope-trigger]>small{color:var(--ees-text-tertiary);}
+#ees-work-entry [data-scope-trigger]>small{font-size:11px;line-height:20px;color:var(--ees-text-tertiary);}
 #ees-work-entry [data-scope-trigger][aria-expanded=true]{border-color:var(--ees-brand-solid);box-shadow:var(--ees-focus-ring);}
 #ees-work-entry .ew-scope-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:40;display:flex;flex-direction:column;max-height:360px;overflow:hidden;background:var(--ees-surface-default);border:1px solid var(--ees-line-control);border-radius:6px;box-shadow:0 4px 12px #1f20231a;}
 #ees-work-entry [data-scope-list]{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:4px;}
@@ -1344,10 +1344,8 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-dialog.ew-workflow-tool-dialog>footer{position:sticky;bottom:-27px;z-index:2;display:flex;justify-content:flex-end;gap:8px;margin:0;padding:16px 0 0;border-top:1px solid var(--ew-line);background:var(--ees-surface-sidebar);}
 #ees-work-dialog.ew-workflow-tool-dialog>footer button{min-width:72px;height:38px;min-height:0;padding:7px 14px;border-radius:6px;font-size:14px;line-height:22px;font-weight:500;}
 #ees-work-dialog.ew-workflow-tool-dialog>footer [data-dialog-confirm]{min-width:94px;}
-/* Only the workspace selection receives the approved two-row chooser metrics. */
+/* Workspace menu/list metrics; scope triggers share the common rules above. */
 #ees-work-entry[data-work-mode=author] .ew-mode>button{min-height:34px;}
-#ees-work-entry[data-work-mode=author] [data-scope-trigger]{line-height:20px;}
-#ees-work-entry[data-work-mode=author] [data-scope-trigger]>small{font-size:11px;line-height:20px;color:var(--ees-text-tertiary);}
 #ees-work-entry[data-work-mode=author] [data-scope-list]>button{min-height:38px;}
 @media(max-width:800px){#ees-work-designer:not([data-author-tab=tools])>.ew-author-scroll{padding-inline:18px;}}
 @media(hover:none){#ees-work-designer:not([data-author-tab=tools]) .ew-author-definition-head .ew-procedure-menu,#ees-work-designer:not([data-author-tab=tools]) .ew-stage-menu-button,#ees-work-designer:not([data-author-tab=tools]) .ew-job-row>.ew-job-menu-button,#ees-work-designer:not([data-author-tab=tools]) .ew-content-heading>.ew-help-trigger{opacity:1;pointer-events:auto;}}
@@ -1693,3 +1691,8 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 .ew-authored-result[data-compact=true] .ew-authored-document{padding-bottom:8px;}
 .ew-authored-result[data-compact=true] .ew-authored-document>div{flex-direction:row;flex-wrap:wrap;gap:6px;}
 .ew-authored-result[data-compact=true] .ew-authored-document small{font-size:13px;line-height:21px;}
+
+/* Procedure visibility is an editable field committed by the single Save action. */
+#ees-work-designer .ew-author-definition-head>.ew-author-heading{flex-wrap:wrap;}
+#ees-work-designer .ew-publication-field{display:flex;align-items:center;gap:6px;margin:0;flex:none;white-space:nowrap;font-size:12px;font-weight:400;color:var(--ees-text-secondary);}
+#ees-work-designer #ew-publication-state{appearance:auto;width:82px;min-height:32px;height:32px;margin:0;padding:4px 8px;background:var(--ees-surface-default);color:var(--ees-text-primary);font-size:12px;}
