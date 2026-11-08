@@ -290,6 +290,77 @@ body:has(:where(#chat-container)) #sidebar-chat-item:hover {
 .ees-native-voice-menu > summary:focus-visible {outline:2px solid var(--ees-blue);outline-offset:2px;}
 .ees-native-voice-menu > div {position:absolute;right:0;bottom:calc(100% + 8px);padding:12px;border:1px solid var(--ees-line);border-radius:8px;background:var(--ees-paper);z-index:40;}
 
+/* The message list and input share the same reading width in docked, overlay
+   and expanded chat. The native preference for full-width messages still wins. */
+[data-ees-source-shell] [data-ees-chat-surface] #chat-container {
+  --ees-chat-inset: 24px;
+  min-width: 0;
+}
+[data-ees-source-shell] [data-ees-chat-surface] #chat-container #messages-container .message-listitem:not(.max-w-full),
+[data-ees-source-shell] [data-ees-chat-surface] #chat-container #chat-pane [class~="max-w-[58rem]"]:not([data-ees-source-empty-chat]):has(#message-input-container),
+[data-ees-source-shell] [data-ees-chat-surface] #chat-container [data-ees-native-empty-composer]:has(#message-input-container) {
+  box-sizing: border-box;
+  width: min(760px, calc(100% - 2 * var(--ees-chat-inset)));
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: auto;
+  padding-inline: 0;
+}
+[data-ees-source-shell] [data-ees-chat-surface] #chat-container #chat-pane [data-ees-native-empty-composer] [class~="max-w-[58rem]"]:has(#message-input-container) {
+  width: 100%;
+}
+[data-ees-chat-surface] #chat-container #messages-container .message-listitem {
+  min-width: 0;
+  margin-bottom: 24px;
+}
+[data-ees-chat-surface] #chat-container #messages-container .message-listitem:first-child {
+  padding-top: 28px;
+}
+[data-ees-chat-surface] #chat-container :is(.chat-assistant, .chat-user, #message-input-container, #chat-input-container) {
+  min-width: 0;
+  max-width: 100%;
+}
+[data-ees-chat-surface] #chat-container .markdown-prose {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+[data-ees-chat-surface] #chat-container .markdown-prose pre {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-wrap: normal;
+}
+[data-ees-chat-surface] #chat-container .ees-work-message-reference button {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: start;
+}
+[data-ees-chat-surface] #chat-container :is(button, summary, a):focus-visible {
+  outline: 2px solid var(--ees-blue);
+  outline-offset: -2px;
+}
+/* #chat-pane is already a native inline-size container. A narrow dock on a
+   desktop needs the same compact prompt control as an equally wide overlay. */
+@container (max-width: 500px) {
+  [data-ees-chat-surface] #chat-container .ees-prompts-trigger {
+    margin-inline: 2px;
+    padding: 6px;
+    min-width: 32px;
+  }
+  [data-ees-chat-surface] #chat-container .ees-prompts-trigger > span,
+  [data-ees-chat-surface] #chat-container .ees-prompts-trigger > .ew-icon:last-child {
+    display: none;
+  }
+  [data-ees-chat-surface] #chat-container nav:has(#navbar-bg-gradient-to-b) > div:first-child {
+    padding-inline: 12px;
+  }
+}
+@media (max-width: 700px) {
+  [data-ees-source-shell] [data-ees-chat-surface] #chat-container {
+    --ees-chat-inset: 12px;
+  }
+}
+
 /* Source-present Native skin: share only the approved light palette and UI font.
  * The source shell exists on the first render; no later body marker is needed.
  * Include Native admin/personal portal surfaces without changing their layout,

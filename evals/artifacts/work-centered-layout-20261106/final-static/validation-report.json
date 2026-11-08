@@ -1,0 +1,21 @@
+{
+  "html": "/workspace/scratch/b6a22133a55b/source-review/docs/mockups/ees-work/design-mock-14-work-centered.html",
+  "static": {
+    "passed": true,
+    "duplicate_ids": [],
+    "external_resource_dependencies": [],
+    "missing_required_ids": [],
+    "script_parse": [
+      {
+        "index": 1,
+        "passed": true,
+        "error": ""
+      }
+    ],
+    "limitations": "Parsing does not prove visual layout, accessibility, click behavior, or draft preservation."
+  },
+  "browser": {
+    "status": "not_run",
+    "screenshots": []
+  }
+}

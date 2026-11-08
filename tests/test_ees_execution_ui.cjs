@@ -165,6 +165,24 @@ test('closing a panel during option lookup preserves the result and reference on
   assert.deepEqual(h.view.readInputs().inputs,{project:'typed project'});assert.deepEqual(focus,[false,true]);
  }
 });
+test('closing conversation leaves pending central work lookup, reference and unsaved input intact',async()=>{
+ const h=optionHarness(),pending=deferred();
+ h.api.setSelection({chat_reference:{kind:'workspace',workflow_id:'w',run_id:'r',job_id:'j'}});
+ h.setInputs({project:'typed project'});h.setReply(call=>call.url.endsWith('/workspace/options')?pending.promise:{ok:true,revision:2});
+ const reference=JSON.stringify(h.api.reference()),context=h.api.context(),waiting=h.api.loadOptions();
+ const reads=()=>h.calls.filter(call=>call.url.endsWith('/workspace/options'));
+ await h.api.sourceAction({action:'chat_open',open:'false'});
+ assert.equal(h.api.snapshot().selection.chat_open,false);
+ assert.equal(h.api.context(),context);assert.equal(JSON.stringify(h.api.reference()),reference);
+ pending.resolve({ok:true,options:[{id:'CR-1',name:'현재 CR'}],source:{kind:'tool'},context:{revision:2}});
+ await waiting;assert.equal(h.api.snapshot().state.input_options.cr.status,'ready');
+ await h.api.sourceAction({action:'chat_open',open:'true'});
+ assert.equal(h.api.snapshot().selection.chat_open,true);
+ await h.api.loadOptions();assert.equal(reads().length,1);
+ assert.equal(h.api.context(),context);assert.equal(JSON.stringify(h.api.reference()),reference);
+ assert.deepEqual(h.view.readInputs().inputs,{project:'typed project'});
+});
+
 test('late option results cannot replace a changed input dependency or another job',async()=>{for(const change of ['input','job','account']){const h=optionHarness(),pending=deferred();h.setReply(()=>pending.promise);const waiting=h.api.loadOptions();if(change==='input')h.setInputs({project:'changed'});else if(change==='job')h.api.setSelection({job_id:'other'});else h.setAuth('other');pending.resolve({ok:true,options:[{id:'stale'}]});await waiting;assert.equal(h.api.snapshot().state.input_options.cr.status,'loading');assert.equal(h.api.snapshot().state.input_options.cr.options.length,0);}});
 test('dynamic option failure disables selection without falling back to manual examples',async()=>{const h=optionHarness();h.setReply(()=>({ok:false,httpError:true,status:403,error:{message:'source access denied'}}));await h.api.loadOptions();const lookup=h.api.snapshot().state.input_options.cr;const out=html('workInputHTML(field,undefined,{lookup})',{field:{id:'cr',type:'single',options_source:'tool',options:['forbidden-static']},lookup});assert.match(out,/<select[^>]* disabled/);assert.match(out,/source access denied/);assert.doesNotMatch(out,/forbidden-static/);});
 test('removed dynamic selection stays explicit and no returned option is automatically chosen',()=>{const out=html('workInputHTML(field,"removed",{lookup})',{field:{id:'cr',type:'single',options_source:'common'},lookup:{status:'ready',options:[{id:'allowed',name:'현재 값'}],source:{kind:'common'}}});assert.match(out,/이전 선택 · 현재 목록 확인 필요/);assert.match(out,/removed[^>]* selected/);assert.doesNotMatch(out,/allowed[^>]* selected/);});
@@ -559,7 +577,7 @@ function appliedInputEditingController(){
  const fields=['first','other'].map(name=>({id:'ew-run-'+name,name,value:h.view.readInputs().inputs[name],dataset:{workInput:'',inputType:'text'},disabled:false,selectionStart:2,selectionEnd:2,selectionDirection:'none',
   closest:selector=>selector==='[data-ees-work]'?h.panel.host:null,matches:selector=>selector==='[data-work-input]',hasAttribute:attribute=>['id','name'].includes(attribute),getAttribute(attribute){return this[attribute]??null;},focus(){doc.activeElement=this;},setSelectionRange(start,end,direction){this.selectionStart=start;this.selectionEnd=end;this.selectionDirection=direction;}}));
  const form={dataset:{settings:'false',revision:'2'},querySelectorAll:selector=>selector==='[data-work-input]'?fields:[]};
- h.panel.host.querySelector=selector=>selector==='#ees-work-inputs'?form:null;h.panel.host.querySelectorAll=selector=>selector==='button,input,select,textarea,a,summary,[data-ees-panel-resize]'?fields:[];h.panel.host.contains=target=>fields.includes(target);doc.activeElement=fields[0];
+ h.panel.host.querySelector=selector=>selector==='#ees-work-inputs'?form:null;h.panel.host.querySelectorAll=selector=>selector==='button,input,select,textarea,a,summary'?fields:[];h.panel.host.contains=target=>fields.includes(target);doc.activeElement=fields[0];
  return {...h,fields,doc};
 }
 test('editing one applied text input immediately refreshes attribution and keeps the other field and caret',()=>{

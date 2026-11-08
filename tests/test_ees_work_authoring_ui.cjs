@@ -154,7 +154,7 @@ function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObser
 async function beginCreation(h,name='',description=''){h.click('create');await flush();assert.ok(h.forms['ew-procedure-create']);h.field('ew-procedure-name',name);h.field('ew-procedure-description',description);}
 async function submitCreation(h){h.click('procedure_create');await flush();}
 
-test('new Figma authoring keeps Native conversation untouched and has exact right-panel structure',async()=>{const h=harness();await flush();assert.match(h.markup,/class="ew-author(?:\s[^"]*)?"/);assert.match(h.markup,/업무 내용/);assert.doesNotMatch(h.markup,/data-tab="(?:summary|structure)"/);assert.doesNotMatch(source,/hideWorkspaceContent|chat\.hidden|ees-work-native-hidden/);});
+test('definition editor renders inside its workspace host without changing the Native conversation',async()=>{const h=harness();await flush();assert.match(h.markup,/class="ew-author(?:\s[^"]*)?"/);assert.match(h.markup,/업무 내용/);assert.doesNotMatch(h.markup,/data-tab="(?:summary|structure)"/);assert.doesNotMatch(source,/hideWorkspaceContent|chat\.hidden|ees-work-native-hidden/);});
 test('C66 content removes the needed-summary surface while preserving stored review decisions',async()=>{
  const h=harness(),value=definition();value.authoring_review={inputs:true,rules:false,custom:{keep:'opaque'}};installDefinition(h,value);
  assert.doesNotMatch(h.markup,/정해야 할 것|data-author-action="summary_open"|ew-content-needs/);
@@ -270,10 +270,22 @@ test('opaque Native references, dangling dependencies and compound conditions su
 test('factory settings preserve all eight input value types without coercing omitted fields',async()=>{const h=harness();const inputs=Object.keys(h.helpers.inputTypes).map((type,i)=>({id:'f'+i,name:type,type,scope:'workflow',options:['a','b']}));h.workflows.get('w').draft.nodes.j.inputs=inputs;h.render();const raw=['text','0','2026-10-03T10:30','a',['a','b'],'first\nsecond','group:operators','false'];const answer={};for(let i=0;i<inputs.length;i++){answer['override:f'+i]=true;answer['value:f'+i]=raw[i];}h.dialogs.push(answer);h.click('factory_settings');await flush();assert.deepEqual(h.writes.at(-1).values,{f0:'text',f1:0,f2:'2026-10-03T10:30',f3:'a',f4:['a','b'],f5:['first','second'],f6:{kind:'group',id:'operators'},f7:false});});
 test('late Native proposal after reset cannot expose the previous account preview',async()=>{const h=harness(),late={workflow_id:'w',base_revision:1,context_id:'a-context',definition:{...definition(),name:'A 비공개 제안'}};h.proposal(late.definition);h.designer.reset();h.state.capabilities.actor_id='b';h.selection.chat_id='b-chat';h.render();assert.throws(()=>h.designer.acceptProposal(late,{chatId:'private-chat'}));assert.doesNotMatch(h.markup,/A 비공개 제안/);assert.equal(h.buttons.some(button=>button.dataset.authorAction==='ai_apply'),false);assert.equal(h.writes.length,0);});
 
+test('centered procedure keeps edits and selected tab while switching to tools; only Save writes them',async()=>{
+ const h=harness();
+ h.field('overview_name','업무 1차 점검');h.field('overview_description','입력 중인 업무 설명');h.field('publication_state','published','change');
+ h.click('tab',{tab:'rules'});await flush();h.selection.tab='tools';h.render();h.render();
+ h.selection.tab='overview';h.render();
+ assert.match(h.markup,/data-author-tab="rules"/);
+ h.click('tab',{tab:'content'});await flush();
+ assert.equal(h.fields.find(field=>field.name==='overview_description').value,'입력 중인 업무 설명');assert.equal(h.writes.length,0);
+ h.click('save');await flush();
+ assert.equal(h.writes.length,1);assert.equal(h.writes[0].publication_state,'published');
+ assert.equal(h.writes[0].definition.name,'업무 1차 점검');assert.equal(h.writes[0].definition.description,'입력 중인 업무 설명');
+});
 test('unsaved publication state stays with its workflow across navigation',async()=>{const h=harness();h.field('publication_state','published','change');await h.open('q');assert.equal(h.draft().publication_state,'unpublished');assert.equal(h.draft().dirty,false);await h.open('w');assert.equal(h.draft().publication_state,'published');assert.equal(h.draft().dirty,true);assert.equal(h.writes.length,0);h.field('publication_state','unpublished','change');assert.equal(h.draft().dirty,false);assert.equal(actionButton(h,'save').disabled,true);});
 
 test('conflict comparison can discard only by explicit choice and load exact new revision',async()=>{const h=harness();await h.node();h.field('job_guidance','내 변경');h.workflows.get('w').revision=3;h.workflows.get('w').draft.nodes.j.instructions='서버 변경';h.dialogs.push({choice:'keep'});h.click('compare');await flush();assert.equal(h.draft().definition.nodes.j.instructions,'내 변경');assert.equal(h.draft().revision,1);h.dialogs.push({choice:'discard'});h.click('compare');await flush();assert.equal(h.draft().definition.nodes.j.instructions,'서버 변경');assert.equal(h.draft().revision,3);assert.equal(h.draft().dirty,false);});
-test('tool navigation returns to workflow editor without retaining tool-only surface',async()=>{const h=harness();h.selection.tab='tools';h.render();assert.match(h.markup,/>도구</);h.selection.tab='overview';h.render();assert.match(h.markup,/<header><strong>워크플로우<\/strong>/);assert.match(h.markup,/워크플로우 정보·분류 수정/);});
+test('tool navigation returns to workflow editor without retaining tool-only surface',async()=>{const h=harness();h.selection.tab='tools';h.render();assert.match(h.markup,/aria-label="도구 작성"/);h.selection.tab='overview';h.render();assert.match(h.markup,/aria-label="업무 절차 작성"/);assert.match(h.markup,/워크플로우 정보·분류 수정/);});
 test('hidden job trigger remains a stored offset after direct guidance editing',async()=>{const h=harness();h.workflows.get('w').draft.nodes.j.trigger={offset_seconds:3600};h.render();await h.node();assert.equal(h.fields.some(f=>f.name==='trigger_kind'),false);h.field('job_guidance','안내만 수정');h.click('save');await flush();assert.deepEqual(h.writes[0].definition.nodes.j.trigger,{offset_seconds:3600});assert.doesNotMatch(source,/setInterval|setTimeout/);});
 
 test('2026-11-02 authoring no longer creates reservations for a published periodic workflow',async()=>{const h=harness(),record=h.workflows.get('w');record.published_version=2;record.draft.mode='periodic';record.draft.schedule={timezone:'Asia/Seoul',anchor:'2026-10-05T09:00',frequency:'weekly',interval:1};record.draft.nodes.j.mode='tool';record.published=copy(record.draft);h.render();assert.doesNotMatch(h.markup,/일정 미리보기·서버 예약|게시 버전 예약 만들기|data-author-action="schedule_tools"/);h.click('schedule_tools');h.dialogs.push({timezone:'Asia/Seoul',anchor:'2026-10-05T09:00',frequency:'weekly',interval:'1',grace_seconds:'300',delegated:true,'job:j':true});h.click('schedule_create');await flush();assert.equal(h.operations.length,0);assert.equal(h.writes.length,0);assert.equal(h.dialogs.length,1);assert.deepEqual(h.draft().definition.schedule,record.published.schedule);});
@@ -626,7 +638,7 @@ test('shared discovery failure is explicit while legacy tools remain usable',asy
 
 test('B10 common heading empty list and unreviewed labels follow the specification cards',async()=>{
  const h=harness();const {search}=sharedReviewFixture(h);h.state.capabilities.is_admin=true;h.selection.tab='tools';search.version=0;search.state='review_required';h.render();
- const header=h.markup.match(/<header>([\s\S]*?)<\/header>/)?.[1];assert.ok(header);assert.match(header,/<strong>도구<\/strong>/);assert.doesNotMatch(header,/<small\b/);assert.match(header,/data-action="close_panel"/);assert.match(h.markup,/data-author-tab="tools"/);assert.match(h.markup,/data-state="unreviewed">확인 전<\/span>/);assert.doesNotMatch(h.markup,/data-state="review_required">도구 확인 필요/);
+ assert.match(h.markup,/aria-label="도구 작성"/);assert.doesNotMatch(h.markup,/data-action="close_panel"/);assert.match(h.markup,/data-author-tab="tools"/);assert.match(h.markup,/data-state="unreviewed">확인 전<\/span>/);assert.doesNotMatch(h.markup,/data-state="review_required">도구 확인 필요/);
  h.click('shared_open',{id:search.id});await flush();assert.match(h.markup,/지금 버전 확인 전/);assert.match(h.markup,/data-state="unreviewed">확인 전<\/span>/);
  h.click('shared_list');await flush();h.state.operations.shared_tools=[];h.render();assert.match(h.markup,/공용 도구 0개/);assert.match(h.markup,/쓸 수 있는 공용 도구가 없습니다. 필요한 도구는 관리자에게 요청하세요./);
 });
@@ -1252,7 +1264,7 @@ test('phase 1 import copies a permitted source to a new draft and keeps unsaved 
  const h=phase1Harness();await phase1New(h);h.click('draft_import_picker');await flush();assert.match(h.markup,/원본의 설정·개인 토큰은 가져오지 않습니다/);h.click('draft_import',{id:'native',function:'list_documents'});await flush();assert.deepEqual(Object.keys(h.operations.at(-1)).sort(),['action','expected_revision','function','request_id','scope','source_tool_id']);assert.equal(h.operations.at(-1).expected_revision,0);assert.match(h.markup,/원본은 바뀌지 않았습니다/);h.click('draft_list');await flush();h.click('draft_new');await flush();assert.equal(h.fields.find(field=>field.name==='draft_name').value,'새 문서 도구');
 });
 test('phase 1 drafts are searchable but never join the workflow picker and future tabs remain disabled',async()=>{
- const h=phase1Harness();await phase1Code(h);h.click('draft_save_next');await flush();for(const title of ['시험','사용·기록'])assert.match(h.markup,new RegExp('<button[^>]+role="tab"[^>]+disabled[^>]*>'+title));h.click('draft_list');await flush();h.field('ew-draft-search','없는 이름');assert.match(h.markup,/찾는 도구가 없습니다/);h.field('ew-draft-search','문서');assert.match(h.markup,/새 문서 도구/);assert.match(h.markup,/업무절차에서 고를 수 없습니다/);assert.deepEqual(h.state.tools,[]);assert.deepEqual(h.state.operations.shared_tools,[]);
+ const h=phase1Harness();await phase1Code(h);h.click('draft_save_next');await flush();for(const title of ['연결','시험','사용'])assert.match(h.markup,new RegExp('<button[^>]+role="tab"[^>]+disabled[^>]*>'+title));h.click('draft_list');await flush();h.field('ew-draft-search','없는 이름');assert.match(h.markup,/찾는 도구가 없습니다/);h.field('ew-draft-search','문서');assert.match(h.markup,/새 문서 도구/);assert.match(h.markup,/업무절차에서 고를 수 없습니다/);assert.deepEqual(h.state.tools,[]);assert.deepEqual(h.state.operations.shared_tools,[]);
 });
 test('phase 1 non-admin cannot create read import check or save drafts and permission loss hides source code',async()=>{
  const h=phase1Harness();await phase1Code(h);h.state.capabilities.is_admin=false;h.render();assert.doesNotMatch(h.markup,/name="draft_code"|name="draft_name"/);const count=h.operations.length;for(const action of ['draft_new','draft_open','draft_import','draft_check','draft_save']){h.click(action,{id:'native',function:'list_documents'});await flush();}assert.equal(h.operations.length,count);assert.doesNotMatch(h.markup,/data-author-action="draft_new"|data-author-action="draft_open"/);assert.match(h.markup,/도구 <small>/);
@@ -1355,6 +1367,15 @@ test('phase 2 use settings validate groups and evidence before writing and accep
 });
 test('phase 2 usage stop and resume are explicit revision guarded operations preserving the version',async()=>{
  const h=phase2Harness({connected:true});await phase2Activate(h);h.dialogs.push({});h.click('draft_use_disable');await flush();assert.equal(h.operations.at(-1).action,'tool_draft_use_disable');assert.equal(h.operations.at(-1).expected_use_revision,1);assert.match(h.markup,/data-use-state="disabled" data-active-version="1"/);assert.match(h.markup,/자동으로 다시 켜지지 않습니다/);h.dialogs.push({});h.click('draft_use_enable');await flush();assert.equal(h.operations.at(-1).expected_use_revision,2);assert.match(h.markup,/data-use-state="active" data-active-version="1"/);
+});
+test('tool function settings, connection, trial and use share the current unsaved draft',async()=>{
+ const h=phase2Harness({connected:true});await phase2Open(h);
+ h.click('draft_tab',{id:'basic'});await flush();h.field('draft_description','화면을 전환한 뒤에도 보존');
+ const calls=h.operations.length;h.click('draft_tab',{id:'connection'});await flush();h.render();
+ assert.match(h.markup,/연결 설정됨/);assert.match(h.markup,/data-author-action="draft_connection"/);
+ h.click('draft_tab',{id:'trial'});await flush();h.click('draft_tab',{id:'use'});await flush();h.click('draft_tab',{id:'basic'});await flush();
+ assert.equal(h.fields.find(field=>field.name==='draft_description').value,'화면을 전환한 뒤에도 보존');
+ assert.equal(h.operations.length,calls);
 });
 test('phase 2 draft and connection revisions invalidate old trials without changing the active version',async()=>{
  const h=phase2Harness({connected:true});await phase2Activate(h);h.click('draft_tab',{id:'basic'});await flush();h.field('draft_description','수정한 설명');h.click('draft_save');await flush();h.click('draft_tab',{id:'trial'});await flush();assert.match(h.markup,/수정 전 시험은 적용되지 않습니다/);assert.match(h.markup,/사용 버전 v1 유지/);assert.equal(h.buttons.find(button=>button.dataset.authorAction==='draft_use_open').disabled,true);assert.equal(h.phase2.active_version,1);h.click('draft_trial_start');await flush();h.click('draft_connection');await flush();h.field('draft_connection_url','https://next.example.invalid');h.click('draft_connection_save');await flush();assert.match(h.markup,/수정 전 시험은 적용되지 않습니다/);assert.equal(h.buttons.find(button=>button.dataset.authorAction==='draft_use_open').disabled,true);assert.equal(h.phase2.active_version,1);

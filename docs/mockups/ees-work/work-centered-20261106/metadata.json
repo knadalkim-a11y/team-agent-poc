@@ -1,0 +1,59 @@
+{
+  "revision": 1,
+  "date": "2026-11-06",
+  "base_commit": "0a6b0c0bde039b43f346247d105842d16ec2530e",
+  "status": "selected_for_product",
+  "product_implementation": "PR #131",
+  "figma": {
+    "file_key": "XK2wTos6sEuxSHhIj7cqg6",
+    "page": "897:761",
+    "header": "2188:149",
+    "operations": "2188:153",
+    "authoring": "2188:247",
+    "chat_collapsed": "2188:327",
+    "verified_at": "2026-11-06T09:00:51.160Z"
+  },
+  "viewport_contract": {
+    "1920": [
+      256,
+      1104,
+      560
+    ],
+    "1366": [
+      56,
+      830,
+      480
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "docs/mockups/ees-work/design-mock-src/14-work-centered.html",
+      "sha256": "1eed5284db4163ff9112ff27508109daa5915f52e34e8207fd3dbeba4cce90bc",
+      "bytes": 63836
+    },
+    {
+      "path": "docs/mockups/ees-work/design-mock-14-work-centered.html",
+      "sha256": "ca6f008d47ecf056de64005923f692a6d4b2c107b84a86f28563ceeb89d12a4a",
+      "bytes": 513719
+    }
+  ],
+  "validation": {
+    "official_wheel_and_fonts": "hash_verified",
+    "html_and_javascript_static": "passed",
+    "product_files": "unchanged",
+    "browser_render_and_click": "not_run_environment_policy",
+    "figma_html_pixel_parity": "not_verified",
+    "figma_rule_equivalent_audit": {
+      "errors": 0,
+      "warnings": 1,
+      "report": "figma-check.json"
+    }
+  },
+  "review_fixes": [
+    "Overlay expand action hidden when unavailable",
+    "Focus enters chat when opening overlay",
+    "Active tab restores current reference label"
+  ],
+  "selected_mock_commit": "41b8b086148a6d7256180e570fe3728d8c121a73",
+  "validation_scope": "design review at selected_mock_commit"
+}

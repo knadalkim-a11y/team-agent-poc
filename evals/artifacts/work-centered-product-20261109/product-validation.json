@@ -1,0 +1,51 @@
+{
+  "evidence_type": "제품 구현 로컬 검증 스냅샷 (PR 원격 CI 시작 전)",
+  "verified_at": "2026-11-09T07:06:37+09:00",
+  "upstream": {
+    "tag": "v0.11.3",
+    "commit": "2a960a59fe1dbbd35282f0556b3666d81102e781",
+    "patch_sha256": "26e98fd31c4f5bb5ce342b01e923d809e4d190299f8fe5073c98c858951de74f",
+    "verified_manifest_postimages": 35,
+    "manifest_postimages": 35
+  },
+  "local": [
+    {
+      "check": "깨끗한 upstream checkout에서 git apply --check 및 실제 git apply; manifest SHA256과 적용 파일 바이트 비교",
+      "status": "pass"
+    },
+    {
+      "check": "Node v22.16.0 / frontend source Python suite (실제 패치에서 가져온 Svelte·Native 생명주기와 권한·첨부·참고자료 경계)",
+      "command": "EES_TEST_FRONTEND_SOURCE_DIR=<patched-upstream> PYTHONPATH=.:tests python -m unittest -v test_ees_frontend_build",
+      "status": "pass",
+      "tests": 34,
+      "skipped": 0
+    },
+    {
+      "check": "Node v22.16.0 / 채팅 폭·닫기·오버레이·키보드, 업무 조회 중 채팅, Native 복귀·저장 프롬프트·협업",
+      "command": "node --test tests/test_ees_motion_svelte.cjs tests/test_ees_execution_ui.cjs tests/test_ees_native_return_selection.cjs tests/test_ees_saved_prompts.cjs tests/test_ees_cooperation_panel.cjs",
+      "status": "pass",
+      "tests": 204,
+      "skipped": 0
+    }
+  ],
+  "browser": {
+    "status": "not_run_locally",
+    "reason": "공식 ChromePipe로 Chromium 156 about:blank 진입 시 process_singleton_posix socket() failed: Operation not permitted. 실제 제품 화면이나 스크린샷 통과를 주장하지 않는다.",
+    "required_ci": "기존 ees-delivery.yml의 Native matrix와 실제 패키지 직렬 테스트; 실행 상태는 해당 PR의 검사에서 확인한다.",
+    "acceptance": [
+      "1920×1080: 탐색 256, 업무 1104, 채팅 560; 1536×864: 256,720,560; 1366×768: 56,830,480; 1280×768: 56,744,480",
+      "압축 탐색 56px일 때 1117/1116/1115 경계 및 480×768: 초기에 가운데 업무 표시, 채팅은 modal overlay, Escape·초점 복귀, 업무 입력·Native 초안 유지",
+      "데스크톱 채팅 접기·펼치기·확대·복귀 및 구분선 드래그/키보드: 가운데 최소 640, 오른쪽 기본/개인 설정 420–720. 계정 변경·재로드 시 다른 사용자의 폭을 공유하지 않음",
+      "실제 저장된 일반 대화/첨부의 후속 초안, 업무 회차 및 Native 자료를 오가도 composer 한 개와 작업 선택 유지; 관리자/사용자·준비되지 않은 권한과 임시대화 경계 보존"
+    ],
+    "tests": [
+      "test_ees_work_figma_layout_native.py",
+      "test_ees_motion_native.py",
+      "test_ees_source_shell_native.py",
+      "test_ees_work_figma_runtime_native.py",
+      "test_ees_work_demo.py",
+      "ees_work_integrated_app.py",
+      "ees_work_native_chat.py"
+    ]
+  }
+}

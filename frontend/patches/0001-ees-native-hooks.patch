@@ -143,7 +143,7 @@ index d552ba8..384bf93 100644
  </svelte:head>
  
 diff --git a/src/lib/components/chat/Chat.svelte b/src/lib/components/chat/Chat.svelte
-index 875aee0..00d8c07 100644
+index 875aee0..f42ae58 100644
 --- a/src/lib/components/chat/Chat.svelte
 +++ b/src/lib/components/chat/Chat.svelte
 @@ -109,6 +109,10 @@
@@ -165,7 +165,21 @@ index 875aee0..00d8c07 100644
  
  	let chatOwner = null;
  
-@@ -404,6 +409,22 @@
+@@ -384,10 +389,12 @@
+ 			return;
+ 		}
+ 
+-		chatOwner = await getUserInfoById(localStorage.token, userId).catch((error) => {
++		const actor = $user?.id, token = localStorage.token;
++		const owner = await getUserInfoById(token, userId).catch((error) => {
+ 			console.error(error);
+ 			return null;
+ 		});
++		if (eesDraftAlive && actor === $user?.id && token === localStorage.token && chat?.user_id === userId) chatOwner = owner;
+ 	};
+ 
+ 	$: if (readOnly && chat?.user_id) {
+@@ -404,6 +411,22 @@
  	};
  
  	let taskIds = null;
@@ -188,11 +202,17 @@ index 875aee0..00d8c07 100644
  
  	// Chat Input
  	let prompt = '';
-@@ -790,13 +811,20 @@
+@@ -790,13 +813,27 @@
  		initEmbeddedDraft();
  	}
  
-+	let eesNativeDraftLoads = 0;
++	let eesNativeDraftLoads = 0, eesConversationGeneration = 0;
++	// Late reads for a previous selection/account must never replace the right-hand conversation.
++	const conversationGuard = (generation = eesConversationGeneration, id = chatIdProp) => {
++		const actor = $user?.id, token = localStorage.token;
++		return () => eesDraftAlive && actor === $user?.id && token === localStorage.token &&
++			generation === eesConversationGeneration && id === chatIdProp;
++	};
 +	const eesNativeDraftLoad = async (load) => {
 +		eesNativeDraftLoads++;
 +		try { return await load(); }
@@ -207,10 +227,60 @@ index 875aee0..00d8c07 100644
  
 -	const navigateHandler = async () => {
 +	const navigateHandler = () => eesNativeDraftLoad(async () => {
++		const isCurrent = conversationGuard(++eesConversationGeneration);
  		noteChatDebug('navigateHandler start');
  		// Mark the outgoing chat as read before loading the new one.
  		// $chatId still holds the previous chat here — loadChat() updates it.
-@@ -859,9 +887,9 @@
+@@ -807,6 +844,7 @@
+ 
+ 		clearTimeout(saveControlsTimer);
+ 		await saveControls();
++		if (!isCurrent()) return;
+ 		loading = true;
+ 
+ 		prompt = '';
+@@ -823,16 +861,19 @@
+ 			`chat-input${chatIdProp ? `-${chatIdProp}` : ''}`
+ 		);
+ 
+-		const loaded = chatIdProp ? await loadChat() : false;
++		const loaded = chatIdProp ? await loadChat(isCurrent) : false;
++		if (!isCurrent()) return;
+ 		noteChatDebug('loadChat completed inside navigateHandler', { loaded });
+ 		if (loaded) {
+ 			await tick();
++			if (!isCurrent()) return;
+ 			loading = false;
+ 			noteChatDebug('embedded chat loading false');
+ 			window.setTimeout(() => scrollToBottom(), 0);
+ 
+ 			await tick();
+ 
++			if (!isCurrent()) return;
+ 			// Mark chat read when initially loading it
+ 			if (chatIdProp && !$temporaryChatEnabled) {
+ 				updateLastReadAt(chatIdProp);
+@@ -845,13 +886,17 @@
+ 				await processNextInQueue(chatIdProp);
+ 			}
+ 
+-			if (!(await restoreChatInput(storageChatInput))) {
++			if (!isCurrent()) return;
++			if (!(await restoreChatInput(storageChatInput)) && isCurrent()) {
+ 				await setDefaults();
+ 			}
+ 
+ 			messageInput?.focus({ preventScroll: true });
+ 		} else if (!embedded) {
+-			await goto('/');
++			if (window.__eesSourceShellV1?.screen?.().native) {
++				await initNewChat();
++				loading = false;
++			} else await goto('/');
+ 		} else {
+ 			loading = false;
+ 			console.warn('[note-chat] embedded load failed; clearing spinner', {
+@@ -859,9 +904,10 @@
  				activeChatId: $chatId
  			});
  		}
@@ -219,10 +289,11 @@ index 875aee0..00d8c07 100644
  
 -	const initEmbeddedDraft = async () => {
 +	const initEmbeddedDraft = () => eesNativeDraftLoad(async () => {
++		eesConversationGeneration++;
  		clearTimeout(saveControlsTimer);
  		await saveControls();
  
-@@ -899,7 +927,7 @@
+@@ -899,7 +945,7 @@
  		loading = false;
  		await tick();
  		messageInput?.focus({ preventScroll: true });
@@ -231,7 +302,7 @@ index 875aee0..00d8c07 100644
  
  	const onSelect = async (e) => {
  		const { type, data } = e;
-@@ -1530,6 +1558,53 @@
+@@ -1530,6 +1576,51 @@
  	};
  
  	onMount(() => {
@@ -241,17 +312,15 @@ index 875aee0..00d8c07 100644
 +			persistent: true,
 +			askHelp: (payload) => eesAskHelp(payload),
 +			activeChatId: () => $chatId,
++			readOnly: () => Boolean(readOnly || (!history.currentId && eesFolderReadOnly)),
 +			attachmentState: () => ({images:files.some(file=>file.type==='image'),uploading:files.some(file=>file.status==='uploading')}),
-+			newChat: () => initNewChat(),
++			newChat: (keepFolder = false) => initNewChat(keepFolder === true),
 +			focus: () => messageInput?.focus({preventScroll:true}),
 +			ready: () => {
 +				if (embedded || $temporaryChatEnabled || loading || !messageInput || eesNativeDraftLoads) return false;
-+				const path = window.location.pathname;
-+				const match = path.match(/^\/c\/([^/]+)\/?$/);
-+				let expected;
-+				try { expected = match ? decodeURIComponent(match[1]) : (path === '/' || /^\/folders\/[^/]+\/?$/.test(path)) ? '' : null; }
-+				catch { return false; }
-+				return expected !== null && (chatIdProp || '') === expected && ($chatId || '') === expected;
++				if (!eesDraftAlive || $user?.id !== eesDraftOwner) return false;
++				const expected = window.__eesSourceShellV1?.chatTarget?.();
++				return expected != null && (chatIdProp || '') === expected && ($chatId || '') === expected;
 +			},
 +			read: () => {
 +				if (!eesNativeDraftApi.ready()) return null;
@@ -285,16 +354,20 @@ index 875aee0..00d8c07 100644
  		loading = true;
  		console.log('mounted');
  		window.addEventListener('message', onMessageHandler);
-@@ -1553,7 +1628,7 @@
+@@ -1552,8 +1643,11 @@
+ 			});
  		}
  
++		let firstPage = true;
  		const pageSubscribe = page.subscribe(async (p) => {
 -			if (p.url.pathname === '/' || p.url.pathname.startsWith('/folders/')) {
-+			if ((p.url.pathname === '/' || p.url.pathname.startsWith('/folders/')) && window.__eesSourceShellV1?.shouldInitChat?.(p.url.pathname) !== false) {
++			const initialNative = firstPage && !embedded && !chatIdProp && !/^\/(?:c\/[^/]+\/?|folders\/[^/]+\/?)?$/.test(p.url.pathname);
++			firstPage = false;
++			if (initialNative || ((p.url.pathname === '/' || p.url.pathname.startsWith('/folders/')) && window.__eesSourceShellV1?.shouldInitChat?.(p.url.pathname) !== false)) {
  				await tick();
  				initNewChat();
  			}
-@@ -1582,7 +1657,7 @@
+@@ -1582,7 +1676,7 @@
  			`chat-input${chatIdProp ? `-${chatIdProp}` : ''}`
  		);
  
@@ -303,7 +376,7 @@ index 875aee0..00d8c07 100644
  			if (!chatIdProp) {
  				loading = false;
  				await tick();
-@@ -1604,10 +1679,11 @@
+@@ -1604,10 +1698,11 @@
  			}
  
  			messageInput?.focus({ preventScroll: true });
@@ -316,21 +389,48 @@ index 875aee0..00d8c07 100644
  			try {
  				clearTimeout(saveControlsTimer);
  				saveControls();
-@@ -1990,7 +2066,12 @@
+@@ -1990,7 +2085,17 @@
  		}, 0);
  	};
  
 -	const initNewChat = async () => {
-+	const initNewChat = () => eesNativeDraftLoad(async () => {
++	const initNewChat = (keepFolder = false) => eesNativeDraftLoad(async () => {
++		const generation = ++eesConversationGeneration, actor = $user?.id, token = localStorage.token;
++		const isCurrent = () => eesDraftAlive && generation === eesConversationGeneration && $user?.id === actor && localStorage.token === token;
 +		loadedChatIdProp = '';
-+		if (!embedded && $page.url.pathname.includes('/c/')) {
++		const nativeCenter = !embedded && window.__eesSourceShellV1?.screen?.().native;
++		const chatParams = nativeCenter ? new URLSearchParams() : $page.url.searchParams;
++		if (!embedded && keepFolder !== true && ($page.url.pathname.includes('/c/') || (nativeCenter && (chatIdProp || $chatId)))) {
 +			if (window.__eesSourceShellV1?.newChatStarted) await window.__eesSourceShellV1.newChatStarted();
 +			else window.history.replaceState(history.state, '', `/`);
 +		}
++		if (!isCurrent()) return;
  		console.log('initNewChat');
  		resetWebSearchConfirmation();
  
-@@ -2112,9 +2193,6 @@
+@@ -2017,6 +2122,7 @@
+ 			await temporaryChatEnabled.set(false);
+ 		}
+ 
++		if (!isCurrent()) return;
+ 		const availableModels = $models
+ 			.filter((m) => !(m?.info?.meta?.hidden ?? false))
+ 			.map((m) => m.id);
+@@ -2039,10 +2145,10 @@
+ 			}
+ 		};
+ 
+-		if ($page.url.searchParams.get('models') || $page.url.searchParams.get('model')) {
++		if (chatParams.get('models') || chatParams.get('model')) {
+ 			const urlModels = (
+-				$page.url.searchParams.get('models') ||
+-				$page.url.searchParams.get('model') ||
++				chatParams.get('models') ||
++				chatParams.get('model') ||
+ 				''
+ 			)?.split(',');
+ 
+@@ -2112,17 +2218,21 @@
  		await showCallOverlay.set(false);
  		await showArtifacts.set(false);
  
@@ -338,18 +438,173 @@ index 875aee0..00d8c07 100644
 -			window.history.replaceState(history.state, '', `/`);
 -		}
  
++		if (!isCurrent()) return;
++		chat = null; tags = []; chatOwner = null;
++		prompt = ''; messageInput?.setText(''); files = [];
  		autoScroll = true;
  
-@@ -2233,7 +2311,7 @@
+ 		// resetInput() must stay last: the selected model's defaults override the draft's selection.
+ 		await restoreChatInput(sessionStorage.getItem('chat-input'));
++		if (!isCurrent()) return;
+ 		await resetInput();
++		if (!isCurrent()) return;
+ 		await chatId.set('');
+ 		await chatTitle.set('');
++		if (!isCurrent()) return;
++		loading = false;
+ 
+ 		history = {
+ 			messages: {},
+@@ -2135,34 +2245,34 @@
+ 		taskIds = null;
+ 		chatTasks = [];
+ 
+-		if ($page.url.searchParams.get('youtube')) {
+-			await uploadWeb(`https://www.youtube.com/watch?v=${$page.url.searchParams.get('youtube')}`);
++		if (chatParams.get('youtube')) {
++			await uploadWeb(`https://www.youtube.com/watch?v=${chatParams.get('youtube')}`);
+ 		}
+ 
+-		if ($page.url.searchParams.get('load-url')) {
+-			await uploadWeb($page.url.searchParams.get('load-url'));
++		if (chatParams.get('load-url')) {
++			await uploadWeb(chatParams.get('load-url'));
+ 		}
+ 
+-		if ($page.url.searchParams.get('web-search') === 'true') {
++		if (chatParams.get('web-search') === 'true') {
+ 			webSearchEnabled = true;
+ 		}
+ 
+-		if ($page.url.searchParams.get('image-generation') === 'true') {
++		if (chatParams.get('image-generation') === 'true') {
+ 			imageGenerationEnabled = true;
+ 		}
+ 
+-		if ($page.url.searchParams.get('code-interpreter') === 'true') {
++		if (chatParams.get('code-interpreter') === 'true') {
+ 			codeInterpreterEnabled = true;
+ 		}
+ 
+-		if ($page.url.searchParams.get('tools')) {
+-			selectedToolIds = $page.url.searchParams
++		if (chatParams.get('tools')) {
++			selectedToolIds = chatParams
+ 				.get('tools')
+ 				?.split(',')
+ 				.map((id) => id.trim())
+ 				.filter((id) => id);
+-		} else if ($page.url.searchParams.get('tool-ids')) {
+-			selectedToolIds = $page.url.searchParams
++		} else if (chatParams.get('tool-ids')) {
++			selectedToolIds = chatParams
+ 				.get('tool-ids')
+ 				?.split(',')
+ 				.map((id) => id.trim())
+@@ -2178,7 +2288,7 @@
+ 			}
+ 		}
+ 
+-		if ($page.url.searchParams.get('call') === 'true') {
++		if (chatParams.get('call') === 'true') {
+ 			openCallOverlay();
+ 		}
+ 
+@@ -2215,12 +2325,12 @@
+ 					submitHandler(query || '');
+ 				}
+ 			}
+-		} else if ($page.url.searchParams.get('q')) {
+-			const q = $page.url.searchParams.get('q') ?? '';
++		} else if (chatParams.get('q')) {
++			const q = chatParams.get('q') ?? '';
+ 			messageInput?.setText(q);
+ 
+ 			if (q) {
+-				if (($page.url.searchParams.get('submit') ?? 'true') === 'true') {
++				if ((chatParams.get('submit') ?? 'true') === 'true') {
+ 					await tick();
+ 					submitHandler(q);
+ 				}
+@@ -2233,12 +2343,14 @@
  
  		await tick();
  		messageInput?.focus({ preventScroll: true });
 -	};
 +	});
  
- 	const loadChat = async () => {
+-	const loadChat = async () => {
++	const loadChat = async (isCurrent = conversationGuard()) => {
++		const requestedId = chatIdProp || $chatId;
++		if (!requestedId || !isCurrent()) return false;
  		noteChatDebug('loadChat start');
-@@ -2866,9 +2944,57 @@
+ 		// chatIdProp is empty for chats started from the home page (URL set via replaceState)
+-		chatId.set(chatIdProp || $chatId);
++		chatId.set(requestedId);
+ 		noteChatDebug('loadChat set active chat id');
+ 
+ 		if ($temporaryChatEnabled) {
+@@ -2246,26 +2358,24 @@
+ 			temporaryChatEnabled.set(false);
+ 		}
+ 
+-		chat = await getChatById(localStorage.token, $chatId).catch(async (error) => {
++		const fetchedChat = await getChatById(localStorage.token, requestedId).catch((error) => {
+ 			console.error('[note-chat] getChatById failed', {
+ 				chatIdProp,
+ 				activeChatId: $chatId,
+ 				error
+ 			});
+-			if (!embedded) {
+-				await goto('/');
+-			}
+ 			return null;
+ 		});
++		if (!isCurrent() || $chatId !== requestedId) return false;
+ 		noteChatDebug('getChatById completed', {
+-			found: !!chat,
+-			chatId: chat?.id,
+-			hasChatPayload: !!chat?.chat,
+-			title: chat?.title
++			found: !!fetchedChat,
++			chatId: fetchedChat?.id,
++			hasChatPayload: !!fetchedChat?.chat,
++			title: fetchedChat?.title
+ 		});
+ 
+-		if (chat) {
+-			tags = await getTagsById(localStorage.token, $chatId).catch(async (error) => {
++		if (fetchedChat) {
++			const fetchedTags = await getTagsById(localStorage.token, requestedId).catch(async (error) => {
+ 				console.warn('[note-chat] getTagsById failed; continuing without tags', {
+ 					chatIdProp,
+ 					activeChatId: $chatId,
+@@ -2273,6 +2383,8 @@
+ 				});
+ 				return [];
+ 			});
++			if (!isCurrent() || $chatId !== requestedId) return false;
++			chat = fetchedChat; tags = fetchedTags;
+ 			noteChatDebug('getTagsById completed', { tagCount: tags?.length ?? 0 });
+ 
+ 			const chatContent = chat.chat;
+@@ -2328,6 +2440,7 @@
+ 				autoScroll = true;
+ 				await tick();
+ 
++				if (!isCurrent() || $chatId !== requestedId) return false;
+ 				// Mark all non-current assistant messages as done
+ 				if (history.currentId) {
+ 					for (const message of Object.values(history.messages)) {
+@@ -2357,6 +2470,7 @@
+ 						});
+ 						return [];
+ 					});
++				if (!isCurrent() || $chatId !== requestedId) return false;
+ 				noteChatDebug('task reconciliation completed', {
+ 					pendingTaskCount: pendingTaskIds.length,
+ 					hasCurrentMessage: !!currentMessage
+@@ -2866,9 +2980,60 @@
  	// Chat functions
  	//////////////////////////
  
@@ -403,12 +658,15 @@ index 875aee0..00d8c07 100644
 +	};
 +	const submitPrompt = async (inputContent, inputFiles, eesHelp: any = null) => {
  		const _files = structuredClone(inputFiles);
++		// Freeze the evidence at send time, before a new chat is created or the user changes work.
++		const sentReference = eesHelp?.reference ?? (!embedded && !$temporaryChatEnabled
++			? window.__eesNativeWorkV1?.captureReference?.() : null) ?? { kind: 'none' };
  
 +		if (!eesHelp) {
  		chatFiles.push(
  			..._files.filter(
  				(item) =>
-@@ -2881,6 +3007,8 @@
+@@ -2881,6 +3046,8 @@
  			(item, index, array) => array.findIndex((i) => equal(i, item)) === index
  		);
  
@@ -417,17 +675,17 @@ index 875aee0..00d8c07 100644
  		// Create user message
  		let userMessageId = uuidv4();
  		let userMessage = {
-@@ -2891,7 +3019,8 @@
+@@ -2891,7 +3058,8 @@
  			content: inputContent,
  			files: _files.length > 0 ? _files : undefined,
  			timestamp: Math.floor(Date.now() / 1000), // Unix epoch
 -			models: selectedModels
 +			models: eesHelp ? [eesHelp.modelId] : selectedModels,
-+			...(eesHelp ? { meta: { ees_work_help: 1, ees_work_reference: structuredClone(eesHelp.reference) } } : {})
++			meta: { ...(eesHelp ? { ees_work_help: 1 } : {}), ees_work_reference: structuredClone(sentReference) }
  		};
  
  		// Add message to history and Set currentId to messageId
-@@ -2905,13 +3034,29 @@
+@@ -2905,13 +3073,29 @@
  		history.currentId = userMessageId;
  
  		// focus on chat input (skip during voice call to avoid triggering mobile keyboard)
@@ -461,7 +719,7 @@ index 875aee0..00d8c07 100644
  	};
  
  	const handleManualCompact = async () => {
-@@ -3201,12 +3346,14 @@
+@@ -3201,18 +3385,21 @@
  			messages = null,
  			modelId = null,
  			modelIdx = null,
@@ -477,7 +735,22 @@ index 875aee0..00d8c07 100644
  		} = {}
  	) => {
  		if (autoScroll) {
-@@ -3352,7 +3499,8 @@
+ 			scrollToBottom();
+ 		}
+ 
++		const sendGeneration = eesConversationGeneration;
+ 		let _chatId = JSON.parse(JSON.stringify($chatId));
+ 		_history = structuredClone(_history);
+ 
+@@ -3301,6 +3488,7 @@
+ 
+ 		await tick();
+ 
++		if (sendGeneration !== eesConversationGeneration || !eesDraftAlive || $user?.id !== eesDraftOwner) return;
+ 		// Re-clone history so sendMessageSocket gets the response messages we just added
+ 		_history = structuredClone(history);
+ 
+@@ -3352,7 +3540,8 @@
  						// regenerations in a duplicate-model chat, which would otherwise lose their
  						// column identity and collapse on reload.
  						messageIdsList: messageIdsList.length > 0 ? messageIdsList : undefined,
@@ -487,7 +760,7 @@ index 875aee0..00d8c07 100644
  					}
  				);
  			} finally {
-@@ -3407,29 +3555,33 @@
+@@ -3407,29 +3596,34 @@
  		{
  			messageIdsList,
  			regenerationPrompt,
@@ -504,7 +777,8 @@ index 875aee0..00d8c07 100644
  		const responseMessage = _history.messages[responseMessageId];
  		const userMessage = _history.messages[responseMessage.parentId];
 +		const eesHelp = userMessage?.meta?.ees_work_help === 1 && userMessage?.meta?.ees_work_reference?.kind === 'help';
-+		const eesSendActor = $user?.id, eesSendToken = localStorage.token;
++		const eesSendActor = $user?.id, eesSendToken = localStorage.token, eesSendGeneration = eesConversationGeneration;
++		const ownsResponse = () => eesDraftAlive && $user?.id === eesSendActor && localStorage.token === eesSendToken && eesConversationGeneration === eesSendGeneration;
  
  		const chatMessageFiles = _messages
  			.filter((message) => message.files)
@@ -525,7 +799,7 @@ index 875aee0..00d8c07 100644
  				(item) =>
  					['doc', 'text', 'note', 'chat', 'collection', 'folder'].includes(item.type) ||
  					(item.type === 'file' && !(item?.content_type ?? '').startsWith('image/'))
-@@ -3449,7 +3601,7 @@
+@@ -3449,7 +3643,7 @@
  		await tick();
  
  		let userLocation;
@@ -534,7 +808,7 @@ index 875aee0..00d8c07 100644
  			userLocation = await getAndUpdateUserLocation(localStorage.token).catch((err) => {
  				console.error(err);
  				return undefined;
-@@ -3522,7 +3674,7 @@
+@@ -3522,7 +3716,7 @@
  		const toolIds = [];
  		const toolServerIds = [];
  
@@ -543,7 +817,7 @@ index 875aee0..00d8c07 100644
  			if (toolId.startsWith('direct_server:')) {
  				let serverId = toolId.replace('direct_server:', '');
  				// Check if serverId is a number
-@@ -3538,18 +3690,25 @@
+@@ -3538,18 +3732,26 @@
  
  		// Menu-selected skills are sent as IDs; inline <$skillId|label> mentions stay
  		// in the message so the backend can inject their full content.
@@ -555,6 +829,7 @@ index 875aee0..00d8c07 100644
  		const useChatVariablesFallback =
  			!_chatId || $temporaryChatEnabled || isTemporaryChatId(_chatId);
  
++		if (!ownsResponse()) return;
 +		const eesCompletionOwner = window.__eesNativeWorkV1;
 +		let eesCompletionCreation = null;
 +		try { if (!embedded && !$temporaryChatEnabled) eesCompletionCreation = eesCompletionOwner?.beginChatCreation?.(); } catch {}
@@ -570,7 +845,7 @@ index 875aee0..00d8c07 100644
  				...(messages.length > 0 ? { messages } : {}),
  				params: {
  					...$settings?.params,
-@@ -3559,22 +3718,22 @@
+@@ -3559,22 +3761,22 @@
  
  				files: (files?.length ?? 0) > 0 ? files : undefined,
  
@@ -597,7 +872,7 @@ index 875aee0..00d8c07 100644
  				variables: {
  					...getPromptVariables(
  						$user?.name,
-@@ -3592,11 +3751,20 @@
+@@ -3592,11 +3794,19 @@
  				id: responseMessageId,
  				...(messageIdsList ? { message_ids: messageIdsList } : {}),
  				parent_id: userMessage?.parentId ?? null,
@@ -607,9 +882,8 @@ index 875aee0..00d8c07 100644
 +					...(eesHelp ? { files: [], models: [model.id] } : {}),
 +					meta: {
 +						...(userMessage.meta || {}),
-+						ees_work_reference: userMessage.meta?.ees_work_help === 1 && userMessage.meta?.ees_work_reference?.kind === 'help' ? structuredClone(userMessage.meta.ees_work_reference) : (!embedded && !$temporaryChatEnabled
-+							? window.__eesNativeWorkV1?.captureReference?.(_chatId || '', responseMessageId, userMessage)
-+							: null) || { kind: 'none' }
++						ees_work_reference: !embedded && !$temporaryChatEnabled && userMessage.meta?.ees_work_reference
++							? structuredClone(userMessage.meta.ees_work_reference) : { kind: 'none' }
 +					}
 +				} : userMessage,
  				...(regenerationPrompt ? { regeneration_prompt: regenerationPrompt } : {}),
@@ -620,7 +894,7 @@ index 875aee0..00d8c07 100644
  					...(!$temporaryChatEnabled &&
  					(!_chatId ||
  						(embedded &&
-@@ -3610,8 +3778,10 @@
+@@ -3610,8 +3820,11 @@
  					follow_up_generation: $settings?.autoFollowUps ?? true
  				}
  			},
@@ -628,11 +902,20 @@ index 875aee0..00d8c07 100644
 +			`${WEBUI_BASE_URL}/api`,
 +			{ preserveError: eesHelp }
  		).catch(async (error) => {
++			if (!ownsResponse()) return null;
 +			if (eesHelp && error?.detail?.code === 'work_help_unavailable' && error.detail.persisted === false) throw error.detail;
  			console.log(error);
  
  			let errorMessage = error;
-@@ -3661,7 +3831,10 @@
+@@ -3638,6 +3851,7 @@
+ 			return null;
+ 		});
+ 
++		if (!ownsResponse()) return;
+ 		if (res) {
+ 			if (res.error) {
+ 				await handleOpenAIError(res.error, responseMessage);
+@@ -3661,7 +3875,10 @@
  					});
  					await chatId.set(res.chat_id);
  					if (!$temporaryChatEnabled && !embedded) {
@@ -644,9 +927,11 @@ index 875aee0..00d8c07 100644
  						await refreshChatList(localStorage.token);
  
  						// Persist chat-level params (system prompt, advanced
-@@ -3923,6 +4096,9 @@
+@@ -3922,11 +4139,15 @@
+ 	};
  
  	const initChatHandler = async (history) => {
++		const stillCurrent = conversationGuard();
  		let _chatId = $chatId;
 +		let eesCreation = null;
 +		const eesWorkOwner = window.__eesNativeWorkV1;
@@ -654,10 +939,18 @@ index 875aee0..00d8c07 100644
  		const selectedFolderId = $selectedFolder?.id;
  
  		if (!$temporaryChatEnabled) {
-@@ -3944,10 +4120,13 @@
+-			chat = await createNewChat(
++			const createdChat = await createNewChat(
+ 				localStorage.token,
+ 				{
+ 					id: _chatId,
+@@ -3943,11 +4164,15 @@
+ 				chatVariables
  			);
  
- 			_chatId = chat.id;
+-			_chatId = chat.id;
++			if (!stillCurrent()) return;
++			chat = createdChat; _chatId = createdChat.id;
 +			try { if (eesCreation) eesWorkOwner?.finishChatCreation?.(eesCreation, _chatId); } catch {}
  			await chatId.set(_chatId);
  
@@ -669,15 +962,25 @@ index 875aee0..00d8c07 100644
  			}
  
  			await tick();
-@@ -3971,6 +4150,7 @@
+@@ -3971,20 +4196,25 @@
  	};
  
  	const saveChatHandler = async (_chatId, history) => {
++		const stillCurrent = conversationGuard();
 +		if (!eesDraftAlive || $user?.id !== eesDraftOwner) return;
  		if ($chatId == _chatId) {
  			if (!$temporaryChatEnabled) {
- 				chat = await updateChatById(localStorage.token, _chatId, {
-@@ -3985,6 +4165,8 @@
+-				chat = await updateChatById(localStorage.token, _chatId, {
++				const updated = await updateChatById(localStorage.token, _chatId, {
+ 					models: selectedModels,
+ 					history: history,
+ 					messages: createMessagesList(history, history.currentId),
+ 					params: params,
+ 					files: chatFiles
+ 				});
++				if (stillCurrent() && $chatId === _chatId) chat = updated;
+ 			}
+ 		}
  	};
  
  	const saveControls = async () => {
@@ -686,7 +989,7 @@ index 875aee0..00d8c07 100644
  		if (!$chatId || $temporaryChatEnabled) return;
  		const loaded = chat?.chat ?? {};
  		if (equal(params, loaded.params ?? {}) && equal(chatFiles, loaded.files ?? [])) return;
-@@ -3997,9 +4179,12 @@
+@@ -3997,9 +4227,12 @@
  			return null;
  		});
  		// Refresh the dedupe baseline so a later revert still saves.
@@ -700,7 +1003,7 @@ index 875aee0..00d8c07 100644
  	const MAX_DRAFT_LENGTH = 5000;
  	let saveDraftTimeout: ReturnType<typeof setTimeout> | null = null;
  	const getDraftChatId = () => chatIdProp || null;
-@@ -4023,13 +4208,14 @@
+@@ -4023,13 +4256,14 @@
  	});
  
  	const saveDraft = async (draft: any, chatId: string | null = null, debounce = true) => {
@@ -716,7 +1019,7 @@ index 875aee0..00d8c07 100644
  			if (debounce) {
  				saveDraftTimeout = setTimeout(write, 500);
  			} else {
-@@ -4055,6 +4241,7 @@
+@@ -4055,6 +4289,7 @@
  	};
  
  	const clearDraft = async (chatId: string | null = null) => {
@@ -724,7 +1027,29 @@ index 875aee0..00d8c07 100644
  		if (saveDraftTimeout) {
  			clearTimeout(saveDraftTimeout);
  		}
-@@ -4242,66 +4429,13 @@
+@@ -4084,8 +4319,8 @@
+ 	const archiveChatHandler = async (id: string) => {
+ 		try {
+ 			await archiveChatById(localStorage.token, id);
+-			initNewChat();
+-			await goto('/');
++			await initNewChat();
++			if (!window.__eesSourceShellV1?.screen?.().native) await goto('/');
+ 			await refreshChatList(localStorage.token, { refreshPinned: true });
+ 			await refreshFolderChatLists();
+ 			toast.success($i18n.t('Chat archived.'));
+@@ -4120,8 +4355,8 @@
+ 		try {
+ 			const res = await deleteChatById(localStorage.token, id);
+ 			if (res) {
+-				initNewChat();
+-				await goto('/');
++				await initNewChat();
++				if (!window.__eesSourceShellV1?.screen?.().native) await goto('/');
+ 				await refreshChatList(localStorage.token, { refreshPinned: true });
+ 				allTags.set(await getAllTags(localStorage.token));
+ 				toast.success($i18n.t('Chat deleted.'));
+@@ -4242,66 +4477,13 @@
  <div
  	class="{embedded
  		? 'h-full'
@@ -794,7 +1119,7 @@ index 875aee0..00d8c07 100644
  						<Navbar
  							bind:this={navbarElement}
  							{readOnly}
-@@ -4363,9 +4497,63 @@
+@@ -4363,9 +4545,63 @@
  								}
  							}}
  						/>
@@ -859,7 +1184,7 @@ index 875aee0..00d8c07 100644
  							<div
  								class=" pb-2.5 flex flex-col justify-between w-full flex-auto overflow-auto h-0 max-w-full z-10 scrollbar-hidden"
  								id="messages-container"
-@@ -4378,6 +4566,11 @@
+@@ -4378,6 +4614,11 @@
  								}}
  							>
  								<div class=" h-full w-full flex flex-col">
@@ -867,11 +1192,11 @@ index 875aee0..00d8c07 100644
 +										<EesProcedureIntro empty />
 +										{#if $selectedFolder}<Placeholder {history} {selectedModels} {stopResponse} {createMessagePair} showComposer={false} />{/if}
 +									{/if}
-+									{#if embedded || history.currentId || (!$eesSnapshot.procedure_start && !($eesSnapshot.selection?.mode === 'author' && $eesSnapshot.state?.workflow && !$models.length))}
++									{#if embedded || history.currentId || $eesSnapshot.native_shell || (!$eesSnapshot.procedure_start && !($eesSnapshot.selection?.mode === 'author' && $eesSnapshot.state?.workflow && !$models.length))}
  									<Messages
  										bind:this={messagesRef}
  										chatId={$chatId}
-@@ -4408,10 +4601,11 @@
+@@ -4408,10 +4649,11 @@
  										{onSelect}
  										{onInsertToNote}
  									/>
@@ -884,20 +1209,23 @@ index 875aee0..00d8c07 100644
  								<div class="pb-6 z-10">
  									<div class="text-xs text-gray-400 dark:text-gray-500 text-center">
  										{$i18n.t('Read only')}
-@@ -4422,7 +4616,12 @@
+@@ -4422,7 +4664,15 @@
  									id={embedded ? messageInputDropzoneId : undefined}
  									class=" pb-2 {dragged ? 'z-0' : 'z-10'}"
  								>
 +									{#if !embedded && history.currentId}<EesProcedureIntro />{/if}
-+									{#if !embedded && !$eesSnapshot.procedure_start && eesHelperNotice}
++									{#if !embedded && !$eesSnapshot.native_shell && !$eesSnapshot.procedure_start && eesHelperNotice}
 +										<div class="px-6 py-2"><div class="max-w-[760px] mx-auto"><EesHelperNotice /></div></div>
 +									{/if}
++									{#if !embedded && !$temporaryChatEnabled && $eesSnapshot.chat_reference_label}
++										<p data-ees-chat-reference class="mx-4 mb-1 truncate text-xs text-gray-500" title={$eesSnapshot.chat_reference_label}>{$i18n.t('EES.Chat.Reference',{defaultValue:'Current work'})} · {$eesSnapshot.chat_reference_label}</p>
++									{/if}
  									<MessageInput
-+										placeholder={!embedded && $eesSnapshot.selection?.mode === 'author' && !$models.length ? '업무 도우미 연결 전' : undefined}
++										placeholder={!embedded && !$eesSnapshot.native_shell && $eesSnapshot.selection?.mode === 'author' && !$models.length ? '업무 도우미 연결 전' : undefined}
  										bind:this={messageInput}
  										{history}
  										{taskIds}
-@@ -4574,7 +4773,7 @@
+@@ -4574,7 +4824,7 @@
  								</div>
  							</div>
  						{:else}
@@ -1089,17 +1417,16 @@ index c7a4f3c..5fe51cf 100644
  					<div class="flex {($settings?.chatBubble ?? true) ? 'justify-end pb-1' : 'w-full'}">
  						<div
 diff --git a/src/lib/components/chat/Navbar.svelte b/src/lib/components/chat/Navbar.svelte
-index b6a045e..7fd3b5c 100644
+index b6a045e..0e61f83 100644
 --- a/src/lib/components/chat/Navbar.svelte
 +++ b/src/lib/components/chat/Navbar.svelte
-@@ -1,4 +1,6 @@
+@@ -1,4 +1,5 @@
  <script lang="ts">
-+	import { eesSnapshot, eesAction } from '$lib/components/ees/state';
-+	import EesIcon from '$lib/components/ees/EesIcon.svelte';
++	import { eesChatDisplay } from '$lib/components/ees/state';
  	import { getContext } from 'svelte';
  	import { toast } from 'svelte-sonner';
  
-@@ -39,6 +41,7 @@
+@@ -39,6 +40,7 @@
  
  	const i18n = getContext('i18n');
  
@@ -1107,7 +1434,7 @@ index b6a045e..7fd3b5c 100644
  	export let initNewChat: Function;
  	export let readOnly: boolean = false;
  	export let shareEnabled: boolean = false;
-@@ -79,48 +82,27 @@
+@@ -79,48 +81,27 @@
  />
  
  <nav
@@ -1163,11 +1490,11 @@ index b6a045e..7fd3b5c 100644
 +								class="ees-context-title min-w-0 truncate py-1 text-left text-sm font-medium leading-[22px] tracking-[-0.042px] text-gray-700 dark:text-gray-300"
  							>
 -								{title || chat?.chat?.title || $i18n.t('New Chat')}
-+								{$eesSnapshot.context_title || $i18n.t('EES.Conversation',{defaultValue:'Conversation'})}
++								{chat?.chat?.title || chat?.title || $i18n.t('EES.Helper',{defaultValue:'Work assistant'})}
  							</div>
  
  							{#if shareEnabled && chat && (chat.id || $temporaryChatEnabled)}
-@@ -150,18 +132,21 @@
+@@ -150,18 +131,22 @@
  								</Menu>
  							{/if}
  						</div>
@@ -1185,21 +1512,30 @@ index b6a045e..7fd3b5c 100644
  
 -				<div class="lg:mr-1 flex flex-none items-center gap-2 self-center">
 +				<div class="ees-context-actions flex flex-none items-center gap-2 self-center">
-+                    {#if $eesSnapshot.selection?.panel_open === false}
-+                        <button
-+                            id="ees-work-panel-open"
-+                            class="ees-panel-open"
-+                            data-action="open_panel"
-+                            aria-expanded={$eesSnapshot.selection?.panel_open !== false}
-+                            aria-controls="ees-work-panel"
-+                            on:click={()=>eesAction({action:'open_panel'})}
-+                        ><EesIcon name="a9175"/>{$i18n.t('EES.OpenPanel',{defaultValue:'Open work panel'})}</button>
-+                    {/if}
++					{#if !$eesChatDisplay.overlay}
++						<button type="button" data-ees-chat-focus aria-pressed={$eesChatDisplay.expanded} aria-label={$i18n.t($eesChatDisplay.expanded ? 'EES.Chat.Restore' : 'EES.Chat.Expand',{defaultValue:$eesChatDisplay.expanded ? 'Restore chat width' : 'Expand chat'})}
++							title={$i18n.t($eesChatDisplay.expanded ? 'EES.Chat.Restore' : 'EES.Chat.Expand',{defaultValue:$eesChatDisplay.expanded ? 'Restore chat width' : 'Expand chat'})}
++							on:click={() => window.__eesSourceShellV1?.toggleChatExpanded?.()}>
++							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">{#if $eesChatDisplay.expanded}<path d="M10 3v7H3m18 4h-7v7M3 10l7-7m4 18 7-7"/>{:else}<path d="M3 9V3h6m6 18h6v-6M3 3l7 7m4 4 7 7"/>{/if}</svg>
++						</button>
++					{/if}
++					<button type="button" data-ees-chat-close aria-controls="ees-chat-surface" aria-label={$i18n.t('EES.Chat.Close',{defaultValue:'Close chat'})}
++						title={$i18n.t('EES.Chat.Close',{defaultValue:'Close chat'})} on:click={() => window.__eesSourceShellV1?.setChatOpen?.(false)}>
++						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
++					</button>
 +                    <button data-action="new_chat" on:click={()=>window.__eesSourceShellV1?.newChat?.()}>{$i18n.t('EES.Nav.NewChat',{defaultValue:'New chat'})}</button>
  					<!-- <div class="md:hidden flex self-center w-[0.0625rem] h-5 mx-2 bg-gray-300 dark:bg-stone-700" /> -->
  
  					{#if $user?.role === 'user' ? ($user?.permissions?.chat?.temporary ?? true) && !($user?.permissions?.chat?.temporary_enforced ?? false) : true}
-@@ -248,12 +233,6 @@
+@@ -178,6 +163,7 @@
+ 											await temporaryChatEnabled.set(!$temporaryChatEnabled);
+ 										}
+ 
++										if (window.__eesSourceShellV1?.screen?.().native) return;
+ 										if ($page.url.pathname !== '/') {
+ 											await goto('/');
+ 										}
+@@ -248,12 +234,6 @@
  		</div>
  	</div>
  
@@ -1212,17 +1548,16 @@ index b6a045e..7fd3b5c 100644
  	<div class="absolute top-[100%] left-0 right-0 h-fit">
  		{#if !history.currentId && !$chatId && ($banners.length > 0 || ($config?.license_metadata?.type ?? null) === 'trial' || (($config?.license_metadata?.seats ?? null) !== null && $config?.user_count > $config?.license_metadata?.seats))}
  			<div class=" w-full z-30">
-@@ -310,3 +289,12 @@
+@@ -310,3 +290,11 @@
  		{/if}
  	</div>
  </nav>
 +
 +<style>
 + #ees-work-context {height:48px;min-height:48px;padding:0;flex:none;display:flex;justify-content:center;border-bottom:1px solid #e6e6e9;background:#fff;font-size:14px;}
-+ #ees-work-context > div:first-child {padding:0 24px;}
++ #ees-work-context > div:first-child {padding:0 12px;}
 + .ees-context-actions {min-width:0;font-size:13px;}
 + .ees-context-actions button {padding:4px;border-radius:6px;}
-+ #ees-work-context button.ees-panel-open {display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid #d9dbde;font-size:13px;font-weight:500;color:#3f4147;white-space:nowrap;}
 + .ees-context-actions button:hover {background:#eef0f3;}
 +</style>
 diff --git a/src/lib/components/chat/Placeholder.svelte b/src/lib/components/chat/Placeholder.svelte
@@ -1401,6 +1736,42 @@ index c183993..e490262 100644
 -		</div>
  	{/if}
  </div>
+diff --git a/src/lib/components/chat/SettingsModal.svelte b/src/lib/components/chat/SettingsModal.svelte
+index 3f1360a..e416d59 100644
+--- a/src/lib/components/chat/SettingsModal.svelte
++++ b/src/lib/components/chat/SettingsModal.svelte
+@@ -8,7 +8,7 @@
+ 	import { getUserSettings, updateUserSettings } from '$lib/apis/users';
+ 	import { getBackendConfig, getModels as _getModels } from '$lib/apis';
+ 
+-	import Modal from '../common/Modal.svelte';
++	import EesSettingsFrame from '$lib/components/ees/EesSettingsFrame.svelte';
+ 	import Account from './Settings/Account.svelte';
+ 	import About from './Settings/About.svelte';
+ 	import General from './Settings/General.svelte';
+@@ -57,6 +57,7 @@
+ 
+ 	const i18n: Writable<any> = getContext('i18n');
+ 
++	export let embedded = false;
+ 	export let show: boolean | string | SettingsModalRequest = false;
+ 	let modalShow = false;
+ 	let lastShow: boolean | string | SettingsModalRequest = false;
+@@ -926,7 +927,7 @@
+ 	});
+ </script>
+ 
+-<Modal
++<EesSettingsFrame {embedded}
+ 	size="full"
+ 	containerClassName="p-4 sm:p-6 lg:p-8"
+ 	className="!w-[calc(100vw-2rem)] sm:!w-[calc(100vw-3rem)] lg:!w-[calc(100vw-4rem)] !max-w-[80rem] h-[min(max(54rem,80dvh),calc(100dvh-4rem))] max-h-[calc(100dvh-4rem)] flex flex-col md:flex-row bg-white dark:bg-gray-900 rounded-4xl overflow-hidden"
+@@ -1322,4 +1323,4 @@
+ 			{/if}
+ 		</div>
+ 	</div>
+-</Modal>
++</EesSettingsFrame>
 diff --git a/src/lib/components/common/Dropdown.svelte b/src/lib/components/common/Dropdown.svelte
 index 9234ec7..27056b0 100644
 --- a/src/lib/components/common/Dropdown.svelte
@@ -1518,15 +1889,15 @@ index 0000000..a509ea5
 +/>
 diff --git a/src/lib/components/ees/EesNavigation.svelte b/src/lib/components/ees/EesNavigation.svelte
 new file mode 100644
-index 0000000..3d2dff2
+index 0000000..e2b4810
 --- /dev/null
 +++ b/src/lib/components/ees/EesNavigation.svelte
-@@ -0,0 +1,220 @@
+@@ -0,0 +1,222 @@
 +<script lang="ts">
 +	import { getContext } from 'svelte';
 +	import { page } from '$app/stores';
 +	import EesScopeSelect from './EesScopeSelect.svelte';
-+	import { eesSnapshot, eesAction, eesCompact } from './state';
++	import { eesSnapshot, eesAction, eesCompact, eesChatHistoryOpen, toggleChatHistory } from './state';
 +	import Icon from './EesIcon.svelte';
 +	const i18n: any = getContext('i18n');
 +	const targets = [
@@ -1690,10 +2061,12 @@ index 0000000..3d2dff2
 +				{#each normal as [action, icon, key, label]}<button
 +						data-action={action}
 +						aria-label={t(key, label)}
-+						aria-current={s.tab === action ? 'page' : undefined}
++						aria-current={action !== 'chats' && s.tab === action ? 'page' : undefined}
++						aria-expanded={action === 'chats' ? $eesChatHistoryOpen && !$eesCompact : undefined}
++						aria-controls={action === 'chats' ? 'ees-chat-history' : undefined}
 +						on:click={() => {
-+							if (action === 'chats') eesCompact.set(false);
-+							eesAction({ action });
++							if (action === 'chats') toggleChatHistory();
++							else eesAction({ action });
 +						}}
 +						><Icon name={icon} /><span>{t(key, label)}</span
 +						></button
@@ -1744,7 +2117,7 @@ index 0000000..3d2dff2
 +</section>
 diff --git a/src/lib/components/ees/EesProcedureIntro.svelte b/src/lib/components/ees/EesProcedureIntro.svelte
 new file mode 100644
-index 0000000..8d49db6
+index 0000000..d280e04
 --- /dev/null
 +++ b/src/lib/components/ees/EesProcedureIntro.svelte
 @@ -0,0 +1,192 @@
@@ -1770,14 +2143,14 @@ index 0000000..8d49db6
 +	];
 +</script>
 +
-+{#if empty && $eesSnapshot.selection?.mode === 'author' && $eesSnapshot.state?.workflow && !$models.length}
++{#if empty && !$eesSnapshot.native_shell && $eesSnapshot.selection?.mode === 'author' && $eesSnapshot.state?.workflow && !$models.length}
 +	<section class="empty" data-ees-work data-ees-procedure-fallback>
 +		<div class="ees-helper-intro">
 +			<div class="ees-helper-unavailable" role="status"><Icon name="0a3bb" /><span>업무 도우미가 아직 연결되지 않았습니다. 관리자에게 연결을 요청하세요.</span></div>
-+			<p>대화 없이 오른쪽 ‘요약’에서 하나씩 직접 정할 수 있습니다. 도우미가 연결되면 지금까지 정한 것을 참고하여 대화를 이어갈 수 있습니다.</p>
++			<p>대화 없이 가운데 업무 화면의 ‘요약’에서 하나씩 직접 정할 수 있습니다. 도우미가 연결되면 지금까지 정한 것을 참고하여 대화를 이어갈 수 있습니다.</p>
 +		</div>
 +	</section>
-+{:else if $eesSnapshot.procedure_start}
++{:else if !$eesSnapshot.native_shell && $eesSnapshot.procedure_start}
 +	<section
 +		id="ees-work-procedure-start"
 +		data-ees-work
@@ -2416,6 +2789,32 @@ index 0000000..6e7a618
 +		</div>
 +	{/if}
 +</div>
+diff --git a/src/lib/components/ees/EesSettingsFrame.svelte b/src/lib/components/ees/EesSettingsFrame.svelte
+new file mode 100644
+index 0000000..8e0e8de
+--- /dev/null
++++ b/src/lib/components/ees/EesSettingsFrame.svelte
+@@ -0,0 +1,20 @@
++<script lang="ts">
++	import Modal from '../common/Modal.svelte';
++	export let embedded = false;
++	export let show = false;
++	export let size = 'full';
++	export let containerClassName = '';
++	export let className = '';
++</script>
++
++<!-- Keep Native's personal modal mounted. Its onDestroy closes its bound value,
++     so replacing it when entering admin would immediately close the new tab. -->
++<Modal {size} {containerClassName} {className}
++	bind:show={() => show && !embedded, (open) => { if (!embedded) show = open; }}>
++	{#if !embedded}<slot />{/if}
++</Modal>
++{#if embedded && show}
++	<div data-ees-admin-settings class="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden bg-white md:flex-row dark:bg-gray-900">
++		<slot />
++	</div>
++{/if}
 diff --git a/src/lib/components/ees/EesSettingsMenu.svelte b/src/lib/components/ees/EesSettingsMenu.svelte
 new file mode 100644
 index 0000000..fc64846
@@ -2518,133 +2917,170 @@ index 0000000..fc64846
 +{/if}
 diff --git a/src/lib/components/ees/EesShell.svelte b/src/lib/components/ees/EesShell.svelte
 new file mode 100644
-index 0000000..a4eef1d
+index 0000000..763300c
 --- /dev/null
 +++ b/src/lib/components/ees/EesShell.svelte
-@@ -0,0 +1,477 @@
+@@ -0,0 +1,379 @@
 +<script lang="ts">
 +	import { getContext, onMount, tick } from 'svelte';
 +	import { get } from 'svelte/store';
 +	import { goto, afterNavigate, beforeNavigate } from '$app/navigation';
 +	import { page } from '$app/stores';
 +	import { eesRequest } from '$lib/apis/ees-work';
-+	import { user, selectedFolder, showSettings, showSearch } from '$lib/stores';
++	import { getFolderById } from '$lib/apis/folders';
++	import { toast } from 'svelte-sonner';
++	import { user, selectedFolder, showSettings, showSearch, chatId, chatTitle, temporaryChatEnabled } from '$lib/stores';
 +	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 +	import Chat from '$lib/components/chat/Chat.svelte';
-+	import Navbar from '$lib/components/chat/Navbar.svelte';
 +	import Spinner from '$lib/components/common/Spinner.svelte';
-+	import {
-+		eesSnapshot,
-+		eesCompact,
-+		eesAction,
-+		eesSync,
-+		eesReferenceHosts,
-+		eesHelperState,
-+		eesSessionReady
-+	} from './state';
++	import SettingsModal from '$lib/components/chat/SettingsModal.svelte';
++	import { eesSnapshot, eesCompact, eesAction, eesSync, eesReferenceHosts, eesHelperState,
++		eesSessionReady, eesChatDisplay, eesChatHistoryOpen } from './state';
 +	const i18n: any = getContext('i18n');
 +	export let loaded = false;
-+	let panel: HTMLElement, panelRegion: HTMLElement, overlays: HTMLElement;
-+	let panelClosing = false, previousPanelOpen: boolean | null = null;
-+	let panelClose: Promise<boolean> = Promise.resolve(true);
-+	let mounted = false,
-+		width = typeof window !== 'undefined' ? window.innerWidth : 1440;
-+	let retainedChatId = $page.params.id || '',
-+		hasChat = /^\/(?:c\/[^/]+\/?)?$/.test($page.url.pathname);
-+	let lastChatPath: string | null = hasChat && retainedChatId ? $page.url.pathname : null;
-+	let transientWidth: number | null = null;
-+	let compactBreakpoint = width < 1440;
-+	$: if (width < 1440 !== compactBreakpoint) {
-+		compactBreakpoint = width < 1440;
-+		eesCompact.set(compactBreakpoint);
-+	}
-+	let resizing = false,
-+		dragX = 0,
-+		dragWidth = 480;
-+
-+	const clamp = (value) => Math.max(400, Math.min(720, Math.round(Number(value) || 480)));
++	let panel: HTMLElement, overlays: HTMLElement, chatSurface: HTMLElement, chatToggle: HTMLButtonElement;
++	let mounted = false, hasChat = false, centerNavigations = 0, admin = false, conversationChoice = 0;
++	let width = typeof window !== 'undefined' ? window.innerWidth : 1440;
++	let compactSize = width < 1440, smallSize = width < 1200;
++	// A small viewport starts on the work surface without overwriting a desktop preference.
++	let smallOpen = false, expanded = false, transientWidth: number | null = null;
++	let resizing = false, dragX = 0, dragWidth = 480;
++	let retainedChatId = /^\/c\//.test($page.url.pathname) ? $page.params.id || '' : '';
++	let syncedPath: string | null = null;
++	let lastChatPath: string | null = retainedChatId ? $page.url.pathname : null;
++	let nativeChatPath: string | null = null;
++	const clamp = (value, max = 720) => Math.max(420, Math.min(max, Math.round(value)));
 +	$: t = (key, fallback) => $i18n.t(key, { defaultValue: fallback });
-+	$: folderRoute = /^\/folders\/[^/]+\/?$/.test($page.url.pathname);
-+	$: folderReady = !folderRoute || $selectedFolder?.id === $page.params.folderId;
-+	$: chatRoute = folderRoute || /^\/(?:c\/[^/]+\/?)?$/.test($page.url.pathname);
++	$: path = $page.url.pathname;
++	$: folderRoute = /^\/folders\/[^/]+\/?$/.test(path);
++	$: folderReady = admin || !folderRoute || $selectedFolder?.id === $page.params.folderId;
++	$: chatRoute = folderRoute || /^\/(?:c\/[^/]+\/?)?$/.test(path);
 +	$: nativeRoute = !chatRoute;
-+	$: admin = typeof $showSettings === 'string' && $showSettings.startsWith('admin:');
-+	$: if (chatRoute && folderReady) {
++	// Native normalizes the requested tab to boolean true after accepting it.
++	$: if (!$showSettings || $user?.role !== 'admin') admin = false;
++	else if (typeof $showSettings === 'string') admin = $showSettings.startsWith('admin:');
++	else if (typeof $showSettings === 'object') admin = $showSettings.tab?.startsWith('admin:') === true;
++	$: if (chatRoute && !admin && folderReady && syncedPath !== path) {
++		syncedPath = path;
 +		retainedChatId = $page.params.id || '';
-+		hasChat = true;
-+		if (retainedChatId) lastChatPath = $page.url.pathname;
++		nativeChatPath = null;
++		if (retainedChatId) lastChatPath = path;
++	} else if (nativeRoute) {
++		syncedPath = null;
++		if (lastChatPath === null && !retainedChatId) lastChatPath = '/';
++	}
++	// Once permission is known, one Chat owns drafts, files and active responses for this account.
++	$: if (loaded && folderReady) hasChat = true;
++	$: if ((width < 1440) !== compactSize) {
++		compactSize = width < 1440;
++		eesCompact.set(compactSize);
++	}
++	$: if ((width < 1200) !== smallSize) {
++		smallSize = width < 1200;
++		if (smallSize) eesCompact.set(true);
++		smallOpen = false;
++		expanded = false;
 +	}
 +	$: s = $eesSnapshot.selection || {};
-+	$: procedurePanel = s.mode === 'author' && s.tab !== 'tools';
-+	$: fixedPanel = procedurePanel || Boolean($eesSnapshot.procedure_start);
-+	$: panelWidth = fixedPanel ? 480 : (transientWidth ?? clamp(s.panel_width));
-+	$: panelOpen = !nativeRoute && s.panel_open !== false;
-+	$: panelOverlay =
-+		width - ($eesCompact ? 56 : 256) - 480 < 560;
-+	$: if (mounted && panelRegion) syncPanelMotion(panelOpen, panelOverlay, nativeRoute);
-+	function syncPanelMotion(open: boolean, overlay: boolean, native: boolean) {
-+		const motion = window.__eesMotionV1;
-+		// Hydration starts in its final geometry. Docked and overlay layouts share
-+		// one surface, so crossing the breakpoint never restarts an active slide.
-+		if (previousPanelOpen === null) { previousPanelOpen = open; return; }
-+		if (native && panelClosing) {
-+			motion?.cancel(panelRegion);
-+			panelClosing = false;
-+			panelClose = Promise.resolve(false);
-+		}
-+		if (open === previousPanelOpen) return;
-+		previousPanelOpen = open;
-+		if (open) {
-+			const reopening = panelClosing;
-+			panelClosing = false;
-+			const enter = () => {
-+				if (!mounted || !panelOpen || !panelRegion || !panel) return;
-+				motion?.open(panelRegion);
-+				panelRegion.inert = false;
-+				panelRegion.removeAttribute('aria-hidden');
-+			};
-+			// A retained exit must stop before Svelte makes the panel interactive.
-+			if (reopening) enter(); else tick().then(enter);
-+		} else if (!native && motion) {
-+			panelClosing = true;
-+			panelClose = motion.close(panelRegion).then((finished) => {
-+				if (finished && !panelOpen) panelClosing = false;
-+				return finished;
-+			});
-+		} else {
-+			motion?.cancel(panelRegion);
-+			motion?.cancel(panel);
-+			panelClosing = false;
-+			panelClose = Promise.resolve(true);
-+		}
-+	}
++	$: dockAvailable = width - ($eesCompact ? 56 : 256) - 640;
++	$: overlay = dockAvailable < 420;
++	$: widthLimit = Math.max(420, Math.min(720, dockAvailable));
++	$: heading = admin ? t('EES.Nav.Admin', 'Administration') : nativeRoute
++		? ({ skills: t('EES.Nav.Skills', 'Work instructions'), knowledge: t('EES.Nav.Knowledge', 'Reference documents'), models: t('EES.Nav.Models', 'AI assistants'), tools: t('EES.Nav.Tools', 'Tools') }[$eesSnapshot.native_id] || t('EES.Nav.Workspace', 'Workspace'))
++		: s.mode === 'author' ? (s.tab === 'tools' ? t('EES.Nav.Tools', 'Tools') : t('EES.Nav.Procedures', 'Procedures')) : t('EES.Nav.Work', 'Work');
++	$: preferred = Number(s.chat_width) || (width >= 1440 ? 560 : 480);
++	$: chatWidth = overlay ? Math.max(1, Math.min(560, width - 56)) : clamp(transientWidth ?? preferred, widthLimit);
++	$: chatOpen = smallSize ? smallOpen : s.chat_open !== false;
++	$: chatState = !chatOpen ? 'closed' : overlay ? 'overlay' : expanded ? 'expanded' : 'docked';
++	$: eesChatDisplay.set({ open: chatOpen, expanded: chatState === 'expanded', overlay });
 +	$: if (mounted) {
-+		$page.url.pathname;
-+		$page.url.search;
-+		$user?.id;
-+		$eesSessionReady;
-+		$showSettings;
++		$page.url.pathname; $page.url.search; $user?.id; $eesSessionReady; $showSettings; $temporaryChatEnabled;
 +		tick().then(eesSync);
 +	}
-+	function panelKeydown(event: KeyboardEvent) {
-+		// Own panel Escape only; outside keys keep Native's document-level CLOSE_MODAL shortcut.
-+		// Scope menus handle their key at document; other nested surfaces consume it locally.
-+		if ((event.target as Element)?.closest?.('dialog, [role="dialog"], [role="menu"], [data-scope-dropdown], [data-scope-trigger][aria-expanded="true"]')) return;
-+		if (event.key !== 'Escape' || event.defaultPrevented || !panelOpen || !panelOverlay || nativeRoute || $showSettings) return;
-+		if (!panelRegion?.contains((event.target as Element))) return;
-+		event.preventDefault();
-+		event.stopPropagation();
-+		eesAction({ action: 'close_panel' });
++	// Do not hydrate a folder before Native has resolved access to it.
++	$: if (mounted && !admin && folderRoute && folderReady) {
++		const folderPath = path;
++		tick().then(() => {
++			if (!admin && location.pathname === folderPath && bridge.shouldInitChat(folderPath)) window.__eesNativeDraftV1?.newChat?.();
++		});
++	}
++
++	async function setChatOpen(open: boolean, focus = true) {
++		if (smallSize) smallOpen = open;
++		else if (chatOpen !== open) eesAction({ action: 'chat_open', open: String(open) });
++		if (!open) expanded = false;
++		await tick();
++		if (!focus) return;
++		if (open) {
++			chatSurface?.focus({ preventScroll: true });
++			if (overlay) window.__eesNativeDraftV1?.focus?.();
++		} else chatToggle?.focus({ preventScroll: true });
++	}
++	async function toggleChatExpanded() {
++		if (overlay) return;
++		expanded = !expanded;
++		await tick();
++		(expanded ? chatSurface?.querySelector<HTMLElement>('[data-ees-chat-focus]') : chatToggle)?.focus({ preventScroll: true });
++	}
++	function setWidth(next: number, persist = false) {
++		if (overlay || expanded) return;
++		const measured = clamp(next, widthLimit);
++		transientWidth = measured;
++		if (persist) {
++			eesAction({ action: 'chat_width', width: measured });
++			transientWidth = null;
++		}
++	}
++	function resizeStart(e: PointerEvent) {
++		if (e.button !== 0 || overlay || expanded) return;
++		e.preventDefault();
++		const handle = e.currentTarget as HTMLElement;
++		handle.focus({ preventScroll: true });
++		resizing = true; dragX = e.clientX; dragWidth = chatWidth;
++		handle.setPointerCapture(e.pointerId);
++	}
++	function resizeMove(e: PointerEvent) { if (resizing) setWidth(dragWidth + dragX - e.clientX); }
++	function resizeEnd() { if (resizing) { resizing = false; setWidth(transientWidth ?? chatWidth, true); } }
++	function resizeCancel() { resizing = false; transientWidth = null; }
++	function resizeKey(e: KeyboardEvent) {
++		const next = { ArrowLeft: chatWidth + 16, ArrowRight: chatWidth - 16, Home: 420, End: widthLimit }[e.key];
++		if (next !== undefined) { e.preventDefault(); setWidth(next, true); }
++	}
++	// The Native editor consumes Escape even with no suggestion open. Handle the panel
++	// in capture phase, leaving IME composition and explicit Native popups to their owner.
++	function chatEscape(e: KeyboardEvent) {
++		if (e.key !== 'Escape' || e.defaultPrevented || e.isComposing || e.keyCode === 229) return;
++		if ((chatState !== 'overlay' && chatState !== 'expanded') || ($showSettings && !admin)) return;
++		const target = e.target as Element;
++		if (target.closest('dialog, [role="menu"], [role="listbox"], [aria-expanded="true"], details[open]')) return;
++		const popup = 'dialog[open], [role="dialog"], [role="menu"], [role="listbox"], .suggestion-list-container';
++		const otherSurface = Array.from(document.querySelectorAll<HTMLElement>(popup)).some(el =>
++			el !== chatSurface && el.getClientRects().length && !el.closest('[inert],[hidden],[aria-hidden="true"]') && getComputedStyle(el).visibility === 'visible');
++		if (otherSurface) return;
++		e.preventDefault();
++		e.stopPropagation();
++		if (chatState === 'overlay') void setChatOpen(false); else void toggleChatExpanded();
++	}
++	function chatKeydown(e: KeyboardEvent) {
++		if (e.defaultPrevented || ($showSettings && !admin)) return;
++		if (e.key === 'Tab' && chatState === 'overlay') {
++			const target = e.target as Element;
++			const items = Array.from(chatSurface.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],input,textarea,[contenteditable=true],[tabindex="0"]'))
++				.filter(el => el.getClientRects().length && !el.closest('[inert],[hidden]'));
++			const first = items[0], last = items[items.length - 1];
++			if (!first || (!e.shiftKey && target === last) || (e.shiftKey && (target === first || target === chatSurface))) {
++				e.preventDefault(); (e.shiftKey ? last : first)?.focus();
++			}
++		}
 +	}
 +	function clearPrivateDrafts() {
-+		lastChatPath = null;
-+		selectedFolder.set(null);
-+		for (const key of Object.keys(sessionStorage))
-+			if (key.startsWith('chat-input')) sessionStorage.removeItem(key);
-+		eesSnapshot.set({
-+			state: null,
-+			selection: { mode: 'work', tab: 'overview', panel_open: true, collapsed: [] }
-+		});
++		lastChatPath = null; nativeChatPath = null; retainedChatId = ''; syncedPath = null;
++		smallOpen = false; expanded = false; conversationChoice++; resizeCancel();
++		eesChatHistoryOpen.set(false); selectedFolder.set(null);
++		chatId.set(''); chatTitle.set(''); temporaryChatEnabled.set(false);
++		for (const key of Object.keys(sessionStorage)) if (key.startsWith('chat-input')) sessionStorage.removeItem(key);
++		eesHelperState.set({ busy: false, notice: '' });
++		eesSnapshot.set({ state: null, selection: { mode: 'work', tab: 'overview', collapsed: [] } });
 +	}
 +	function rememberOwner(id) {
 +		const old = sessionStorage.getItem('ees-source-draft-owner');
@@ -2654,350 +3090,215 @@ index 0000000..a4eef1d
 +	}
 +	async function navigate(path) {
 +		if (path === '/admin/settings') {
-+			showSettings.set('admin:general');
-+			await tick();
-+			eesSync();
-+			return;
++			if (get(user)?.role !== 'admin') return;
++			admin = true; showSettings.set('admin:general'); await tick(); eesSync(); return;
 +		}
-+		showSettings.set(false);
-+		await goto(path);
-+		await tick();
-+		eesSync();
++		centerNavigations++;
++		try { showSettings.set(false); await goto(path); await tick(); eesSync(); }
++		finally { centerNavigations--; }
 +	}
 +	async function newChat() {
-+		showSettings.set(false);
++		eesChatHistoryOpen.set(false);
++		conversationChoice++;
++		if (!get(temporaryChatEnabled)) window.__eesNativeDraftV1?.flush?.();
++		await setChatOpen(true, false);
 +		selectedFolder.set(null);
-+		if ($page.url.pathname !== '/') await goto('/');
++		if (nativeRoute || admin) nativeChatPath = '/';
++		if (folderRoute && !admin) await navigate('/');
 +		else await window.__eesNativeDraftV1?.newChat?.();
-+		await tick();
-+		eesSync();
++		await tick(); eesSync();
 +	}
-+	function setWidth(next, persist = false) {
-+		if (fixedPanel) return;
-+		transientWidth = clamp(next);
-+		if (persist) {
-+			eesAction({ action: 'panel_width', width: transientWidth });
-+			transientWidth = null;
++	async function selectConversation(id: string) {
++		eesChatHistoryOpen.set(false);
++		conversationChoice++; showSearch.set(false);
++		if (!get(temporaryChatEnabled)) window.__eesNativeDraftV1?.flush?.();
++		if (retainedChatId !== id) {
++			selectedFolder.set(null);
++			retainedChatId = id;
 +		}
++		nativeChatPath = '/c/' + encodeURIComponent(id);
++		lastChatPath = nativeChatPath;
++		await setChatOpen(true, false);
++		await tick(); eesSync();
 +	}
-+	function resizeStart(e) {
-+		if (fixedPanel || e.button !== 0) return;
-+		e.preventDefault();
-+		// The prevented pointer event needs explicit focus for keyboard resizing.
-+		e.currentTarget.focus({ preventScroll: true });
-+		resizing = true;
-+		dragX = e.clientX;
-+		dragWidth = panelWidth;
-+		e.currentTarget.setPointerCapture(e.pointerId);
-+	}
-+	function resizeMove(e) {
-+		if (resizing) setWidth(dragWidth + dragX - e.clientX);
-+	}
-+	function resizeEnd() {
-+		if (!resizing) return;
-+		resizing = false;
-+		setWidth(panelWidth, true);
-+	}
-+	// A direct folder route waits for Native's folder permission/selection load.
-+	// Menu returns to the same folder keep the live composer untouched.
-+	$: if (mounted && folderRoute && folderReady) {
-+		const path = $page.url.pathname;
-+		tick().then(() => {
-+			if (location.pathname === path && bridge.shouldInitChat(path))
-+				window.__eesNativeDraftV1?.newChat?.();
-+		});
++	async function selectConversationFolder(id: string) {
++		eesChatHistoryOpen.set(false);
++		const choice = ++conversationChoice, owner = get(user)?.id, token = localStorage.token;
++		const current = () => mounted && choice === conversationChoice && get(user)?.id === owner && localStorage.token === token && (nativeRoute || admin);
++		if (!get(temporaryChatEnabled)) window.__eesNativeDraftV1?.flush?.();
++		// Native's sidebar resolves permissions before navigation; direct targets use the same API.
++		let folder = get(selectedFolder);
++		if (folder?.id !== id) {
++			try { folder = await getFolderById(token, id); }
++			catch (error) { if (current()) toast.error(String(error)); return; }
++		}
++		if (!current() || folder?.id !== id) return;
++		const folderPath = '/folders/' + encodeURIComponent(id);
++		showSearch.set(false);
++		if (lastChatPath !== folderPath || retainedChatId) {
++			selectedFolder.set(folder); retainedChatId = ''; nativeChatPath = folderPath; lastChatPath = folderPath;
++			await tick();
++			if (current()) await window.__eesNativeDraftV1?.newChat?.(true);
++		} else nativeChatPath = folderPath;
++		if (current()) await setChatOpen(true, false);
++		eesSync();
 +	}
 +	const bridge = {
 +		request: eesRequest,
-+		askHelp: (payload) => window.__eesNativeDraftV1?.askHelp?.(payload),
++		askHelp: async (payload) => { await setChatOpen(true, false); return window.__eesNativeDraftV1?.askHelp?.(payload); },
 +		helpState: () => get(eesHelperState),
 +		adoptChat: async (id) => {
 +			if (window.__eesNativeDraftV1?.activeChatId?.() !== id) return;
-+			retainedChatId = id;
-+			lastChatPath = `/c/${id}`;
++			retainedChatId = id; lastChatPath = '/c/' + encodeURIComponent(id);
 +			window.__eesNativeWorkV1?.chatCreated?.(id);
-+			if (nativeRoute || admin) {
-+				eesSync();
-+				return;
-+			}
-+			await goto(lastChatPath, { replaceState: true, keepFocus: true, noScroll: true });
-+			await tick();
-+			eesSync();
++			if (nativeRoute || admin) nativeChatPath = lastChatPath;
++			else await goto(lastChatPath, { replaceState: true, keepFocus: true, noScroll: true });
++			await tick(); eesSync();
 +		},
-+		retainFolder: () => nativeRoute,
++		retainFolder: () => nativeRoute || admin,
 +		newChatStarted: async () => {
-+			selectedFolder.set(null);
-+			retainedChatId = '';
-+			lastChatPath = '/';
-+			await goto('/', { replaceState: true, keepFocus: true, noScroll: true });
++			selectedFolder.set(null); retainedChatId = ''; lastChatPath = '/';
++			if (nativeRoute || admin) nativeChatPath = '/';
++			else if (location.pathname !== '/') await goto('/', { replaceState: true, keepFocus: true, noScroll: true });
 +		},
++		returnChatPath: (fallback = '/') => nativeChatPath ?? fallback,
++		chatTarget: () => folderReady && get(eesSessionReady) ? retainedChatId : null,
 +		hosts: () => ({ panel, overlays }),
 +		screen: () => ({
-+			active: Boolean(get(user)) && get(eesSessionReady),
-+			native: nativeRoute || admin,
-+			admin,
-+			chatReady:
-+				get(eesSessionReady) &&
-+				chatRoute &&
-+				folderReady &&
-+				Boolean(window.__eesNativeDraftV1?.ready?.()),
-+			path: location.pathname,
-+			search: location.search
++			active: Boolean(get(user)) && get(eesSessionReady), native: nativeRoute || admin, admin,
++			chatId: retainedChatId, workReady: get(eesSessionReady) && folderReady,
++			temporary: Boolean(get(temporaryChatEnabled)), readOnly: Boolean(window.__eesNativeDraftV1?.readOnly?.()),
++			chatReady: get(eesSessionReady) && folderReady && Boolean(window.__eesNativeDraftV1?.ready?.()),
++			path: location.pathname, search: location.search
 +		}),
 +		publish: (snapshot) => eesSnapshot.set(snapshot),
 +		toggleSidebar: () => eesCompact.set(!get(eesCompact)),
-+		navigate,
-+		closeSettings: () => showSettings.set(false),
-+		newChat,
-+		searchChats: () => showSearch.set(true),
-+		focusComposer: () => window.__eesNativeDraftV1?.focus?.(),
-+		focusPanel: async (open: boolean) => {
-+			const focusAtStart = document.activeElement;
-+			if (!open && focusAtStart && focusAtStart !== document.body && focusAtStart !== document.documentElement && !panelRegion?.contains(focusAtStart)) return;
-+			await tick();
-+			if (!open) {
-+				if (!(await panelClose)) return;
-+				const active = document.activeElement;
-+				if (active && active !== document.body && active !== document.documentElement && active !== focusAtStart && !panelRegion?.contains(active)) return;
-+			}
-+			if (!mounted || nativeRoute || admin || panelOpen !== open) return;
-+			const target = open ? panel : document.getElementById('ees-work-panel-open');
-+			target?.focus({ preventScroll: true });
-+		},
++		navigate, closeSettings: () => showSettings.set(false), newChat,
++		searchChats: () => showSearch.set(true), setChatOpen, toggleChatExpanded,
++		focusComposer: async () => { await setChatOpen(true, false); window.__eesNativeDraftV1?.focus?.(); },
++		focusPanel: async (open: boolean) => { if (open && !nativeRoute && !admin) { await tick(); panel?.focus({ preventScroll: true }); } },
 +		referenceHost: (id) => eesReferenceHosts.get(id),
 +		shouldInitChat: (path) => {
-+			if (
-+				path.startsWith('/folders/') &&
-+				get(selectedFolder)?.id !== decodeURIComponent(path.split('/')[2])
-+			)
-+				return false;
++			if (path.startsWith('/folders/') && get(selectedFolder)?.id !== decodeURIComponent(path.split('/')[2])) return false;
 +			if (path === lastChatPath) return false;
-+			lastChatPath = path;
-+			return true;
++			lastChatPath = path; return true;
 +		}
 +	};
-+	if (typeof window !== 'undefined') {
-+		rememberOwner($user?.id || '');
-+		window.__eesSourceShellV1 = bridge;
-+	}
-+	// A stable Chat instance keeps live image attachments and Native composer state
-+	// while source routing switches the visible region. No DOM is moved or rediscovered.
-+	beforeNavigate(() => {
-+		window.__eesNativeDraftV1?.flush?.();
-+	});
-+	afterNavigate(() => {
-+		if (mounted) tick().then(eesSync);
-+	});
-+	onMount(() => {
-+		rememberOwner($user?.id || '');
-+		window.__eesSourceShellV1 = bridge;
-+		mounted = true;
-+		eesSync();
-+		let previous = $user?.id || '';
-+		const unsubscribe = user.subscribe((value) => {
-+			const next = value?.id || '';
-+			if (next !== previous) {
-+				clearPrivateDrafts();
-+				rememberOwner(next);
-+				previous = next;
-+				eesSync();
++	if (typeof window !== 'undefined') { rememberOwner($user?.id || ''); window.__eesSourceShellV1 = bridge; }
++	beforeNavigate((navigation) => {
++		if (!get(temporaryChatEnabled)) window.__eesNativeDraftV1?.flush?.();
++		// Native search/history selects a right-hand conversation. Only an explicit work
++		// navigation (or browser back/forward) is allowed to replace the center route.
++		const target = navigation.to?.url;
++		if ((nativeRoute || admin) && !centerNavigations && navigation.type !== 'popstate' && target?.origin === location.origin) {
++			const match = target.pathname.match(/^\/(c|folders)\/([^/]+)\/?$/);
++			if (match && !(target.pathname === location.pathname && target.search !== location.search)) {
++				navigation.cancel();
++				const id = decodeURIComponent(match[2]);
++				if (match[1] === 'folders') void selectConversationFolder(id); else void selectConversation(id);
 +			}
++		} else if (!centerNavigations && navigation.type !== 'popstate' && target?.origin === location.origin && /^\/(?:c|folders)\/[^/]+\/?$/.test(target.pathname)) {
++			eesChatHistoryOpen.set(false);
++			void setChatOpen(true, false);
++		}
++	});
++	afterNavigate(() => { if (mounted) tick().then(eesSync); });
++	onMount(() => {
++		rememberOwner($user?.id || ''); window.__eesSourceShellV1 = bridge; mounted = true; eesSync();
++		let previous = $user?.id || '';
++		const unsubscribe = user.subscribe(value => {
++			const next = value?.id || '';
++			if (next !== previous) { clearPrivateDrafts(); rememberOwner(next); previous = next; eesSync(); }
 +		});
-+		return () => {
-+			unsubscribe();
-+			mounted = false;
-+			window.__eesMotionV1?.cancel(panelRegion);
-+			window.__eesMotionV1?.cancel(panel);
-+			if (window.__eesSourceShellV1 === bridge) delete window.__eesSourceShellV1;
-+		};
++		return () => { unsubscribe(); mounted = false; if (window.__eesSourceShellV1 === bridge) delete window.__eesSourceShellV1; };
 +	});
 +</script>
 +
 +<svelte:window bind:innerWidth={width} />
-+<div
-+	data-ees-source-shell
-+	data-ees-route={nativeRoute ? 'native' : 'chat'}
-+	class="ees-source-shell"
-+	on:keydown={panelKeydown}
-+	on:pointerdown={(event) => window.__eesNativeWorkV1?.dismissHelp?.(event)}
-+>
-+	<Sidebar />
-+	<section class="ees-center" aria-label={t('EES.Conversation', 'Conversation')}>
-+		{#if !nativeRoute && (!loaded || !hasChat || !folderReady)}<Navbar
-+				history={{ currentId: null }}
-+				initNewChat={() => {}}
-+				pending
-+			/>{/if}
-+		<main id="main-content" class="ees-main">
-+			{#if loaded}
-+				{#if hasChat}{#key $user?.id}<div
-+							class="ees-chat-region"
-+							hidden={nativeRoute || !folderReady}
-+							inert={nativeRoute || !folderReady}
-+							aria-hidden={nativeRoute || !folderReady}
-+							on:input={() => window.__eesNativeWorkV1?.interaction?.()}
-+							on:change={() => window.__eesNativeWorkV1?.interaction?.()}
-+						>
-+							<Chat chatIdProp={retainedChatId} />
-+						</div>{/key}{/if}
-+				{#if nativeRoute}<div class="ees-native-region" data-ees-native-surface>
-+						<slot />
-+					</div>{:else}<slot />{/if}
-+			{:else}<div class="ees-region-loading" role="status">
-+					<Spinner className="size-5" /><span>{t('EES.Loading', 'Loading…')}</span>
-+				</div>{/if}
-+		</main>
-+	</section>
-+	<div class="ees-panel-space" aria-hidden="true" data-open={panelOpen && !panelOverlay}
-+		data-resizing={resizing} style:width={`${panelOpen && !panelOverlay ? panelWidth : 0}px`}></div>
-+	<section
-+		class="ees-panel-region"
-+		style:width={`${panelWidth}px`}
-+		data-overlay={panelOverlay}
-+		data-ees-motion-kind="panel-slide"
-+		bind:this={panelRegion}
-+		hidden={!panelOpen && !panelClosing}
-+		inert={!panelOpen}
-+		aria-label={t('EES.Panel', 'Work panel')}
-+	>
-+		{#if !fixedPanel}
-+		<div
-+			class="ees-panel-resize"
-+			data-ees-panel-resize
-+			role="separator"
-+			tabindex="0"
-+			aria-label={t('EES.PanelWidth', 'Work panel width')}
-+			aria-orientation="vertical"
-+			aria-valuemin="400"
-+			aria-valuemax="720"
-+			aria-valuenow={panelWidth}
-+			on:pointerdown={resizeStart}
-+			on:pointermove={resizeMove}
-+			on:pointerup={resizeEnd}
-+			on:pointercancel={() => {
-+				resizing = false;
-+				transientWidth = null;
-+			}}
-+			on:keydown={(event) => {
-+				const next = {
-+					ArrowLeft: panelWidth + 16,
-+					ArrowRight: panelWidth - 16,
-+					Home: 400,
-+					End: 720
-+				}[event.key];
-+				if (next !== undefined) {
-+					event.preventDefault();
-+					setWidth(next, true);
-+				}
-+			}}
-+		></div>
++<div data-ees-source-shell data-ees-route={nativeRoute || admin ? 'native' : 'chat'} data-ees-chat-state={chatState}
++	data-resizing={resizing} class="ees-source-shell" style:--ees-chat-width={chatWidth + 'px'}
++	on:pointerdown={(event) => window.__eesNativeWorkV1?.dismissHelp?.(event)}>
++	<div class="ees-navigation" inert={chatState === 'overlay'}><Sidebar /></div>
++	<main id="main-content" data-ees-work-surface class="ees-center" inert={chatState === 'overlay' || chatState === 'expanded'}>
++		<header data-ees-work-toolbar class="ees-work-toolbar">
++			<strong>{heading}</strong>
++			<button type="button" data-ees-chat-toggle bind:this={chatToggle} aria-controls="ees-chat-surface" aria-expanded={chatOpen}
++				aria-label={t(chatOpen ? 'EES.Chat.Close' : 'EES.Chat.Open', chatOpen ? 'Close chat' : 'Open chat')}
++				on:click={() => setChatOpen(!chatOpen)}>
++				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 14a3 3 0 0 1-3 3H9l-5 3V7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3z"/></svg>
++				{t('EES.Conversation', 'Conversation')}
++			</button>
++		</header>
++		<section id="ees-work-panel" tabindex="-1" data-ees-work data-ees-source-slot bind:this={panel}
++			hidden={nativeRoute || admin} inert={nativeRoute || admin} aria-label={t('EES.Panel', 'Work area')}></section>
++		{#if loaded}
++			<div class="ees-native-region" data-ees-native-surface={nativeRoute && !admin ? '' : undefined} hidden={!nativeRoute || admin}><slot /></div>
++		{:else}<div class="ees-region-loading" role="status"><Spinner className="size-5" /><span>{t('EES.Loading', 'Loading…')}</span></div>{/if}
++		<div class="ees-settings-region" data-ees-native-surface={admin ? '' : undefined} hidden={!admin}>
++			<SettingsModal bind:show={$showSettings} embedded={admin} />
++		</div>
++	</main>
++	{#if chatState === 'overlay'}
++		<button class="ees-chat-scrim" data-ees-chat-scrim type="button" tabindex="-1" aria-label={t('EES.Chat.Close', 'Close chat')} on:click={() => setChatOpen(false)}></button>
++	{/if}
++	<div class="ees-chat-space" aria-hidden="true"></div>
++	<section id="ees-chat-surface" data-ees-chat-surface bind:this={chatSurface} class="ees-chat-region" tabindex="-1"
++		role={chatState === 'overlay' ? 'dialog' : 'region'} aria-modal={chatState === 'overlay' ? true : undefined}
++		aria-label={t('EES.Conversation', 'Conversation')} aria-hidden={!chatOpen} inert={!chatOpen} on:keydown|capture={chatEscape} on:keydown={chatKeydown}>
++		{#if chatState === 'docked'}
++			<div data-ees-chat-resize class="ees-chat-resize" role="separator" tabindex="0" aria-orientation="vertical"
++				aria-label={t('EES.Chat.Width', 'Chat width')} aria-controls="ees-chat-surface" aria-valuemin="420" aria-valuemax={widthLimit} aria-valuenow={chatWidth}
++				on:pointerdown={resizeStart} on:pointermove={resizeMove} on:pointerup={resizeEnd} on:pointercancel={resizeCancel} on:lostpointercapture={resizeEnd} on:keydown={resizeKey}></div>
 +		{/if}
-+		<aside
-+			id="ees-work-panel"
-+			data-ees-motion-kind="panel-content"
-+			tabindex="-1"
-+			data-ees-work
-+			data-ees-source-slot
-+			bind:this={panel}
-+			aria-label={t('EES.Panel', 'Work panel')}
-+		></aside>
++		{#if loaded && hasChat}{#key $user?.id}
++			<div class="ees-chat-live" hidden={!folderReady} inert={!folderReady}
++				on:input={() => window.__eesNativeWorkV1?.interaction?.()} on:change={() => window.__eesNativeWorkV1?.interaction?.()}>
++				<Chat chatIdProp={retainedChatId} />
++			</div>
++		{/key}{/if}
++		{#if !loaded || !hasChat || !folderReady}
++			<button type="button" class="ees-loading-close" data-ees-chat-close aria-label={t('EES.Chat.Close', 'Close chat')} on:click={() => setChatOpen(false)}>{t('EES.Chat.Close', 'Close chat')}</button>
++			<div class="ees-region-loading" role="status"><Spinner className="size-5" /><span>{t('EES.Loading', 'Loading…')}</span></div>
++		{/if}
 +	</section>
 +	<div data-ees-overlay-slot bind:this={overlays}></div>
 +</div>
 +
 +<style>
-+	.ees-source-shell {
-+		display: flex;
-+		position: relative;
-+		width: 100%;
-+		height: 100dvh;
-+		min-height: 0;
-+		overflow: hidden;
-+		background: #fff;
-+		color: #1f2023;
++	.ees-source-shell { display:flex; position:relative; isolation:isolate; width:100%; height:100dvh; min-height:0; overflow:hidden; background:var(--ees-surface-default,#fff); color:var(--ees-text-primary,#1f2023); }
++	.ees-navigation { flex:none; display:flex; height:100%; min-height:0; }
++	.ees-center { display:flex; flex:1 1 0; flex-direction:column; min-width:0; min-height:0; overflow:hidden; }
++	.ees-work-toolbar { display:flex; flex:none; height:48px; min-width:0; padding:0 20px; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid var(--ees-border,#e6e6e9); color:var(--ees-text-primary,#1f2023); }
++	.ees-work-toolbar strong { font-size:15px; font-weight:600; }
++	.ees-work-toolbar button { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border:1px solid var(--ees-border,#e0e1e4); border-radius:6px; font-size:13px; line-height:20px; }
++	.ees-work-toolbar button:hover { background:var(--ees-surface-hover,#f6f7f9); }
++	.ees-center :global(#ees-work-panel) { position:relative; inset:auto; flex:1 1 0; width:100%; min-width:0; height:auto; min-height:0; max-height:100%; border:0; }
++	.ees-native-region,.ees-settings-region,.ees-chat-live { display:flex; flex:1; width:100%; height:100%; min-width:0; min-height:0; overflow:hidden; }
++	.ees-chat-live { flex-direction:column; isolation:isolate; }
++	.ees-native-region > :global(div) { max-width:100%; max-height:100%; }
++	.ees-loading-close { align-self:flex-end; margin:8px; padding:4px 8px; font-size:13px; }
++	.ees-center :global(#ees-work-panel[hidden]),.ees-native-region[hidden],.ees-settings-region[hidden],.ees-chat-live[hidden] { display:none; }
++	.ees-region-loading { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; font-size:14px; }
++	.ees-chat-space { flex:none; width:var(--ees-chat-width); transition:width var(--ees-motion-open,180ms) var(--ees-motion-open-easing,ease); }
++	.ees-chat-region { display:flex; flex-direction:column; position:absolute; top:0; bottom:0; right:0; z-index:35; min-width:0; width:var(--ees-chat-width); border-left:1px solid var(--ees-border,#e6e6e9); background:var(--ees-surface-default,#fff); transform:translateX(0); transition:transform var(--ees-motion-open,180ms) var(--ees-motion-open-easing,ease); }
++	.ees-source-shell[data-ees-chat-state='closed'] .ees-chat-space,.ees-source-shell[data-ees-chat-state='overlay'] .ees-chat-space { width:0; }
++	.ees-source-shell[data-ees-chat-state='closed'] .ees-chat-region { transform:translateX(100%); visibility:hidden; transition:transform var(--ees-motion-close,150ms) var(--ees-motion-close-easing,ease),visibility 0s var(--ees-motion-close,150ms); }
++	.ees-source-shell[data-ees-chat-state='overlay'] .ees-chat-region { z-index:42; box-shadow:-8px 0 24px #0002; }
++	.ees-chat-scrim { position:absolute; inset:0; z-index:40; background:#17243338; }
++	.ees-source-shell[data-ees-chat-state='expanded'] .ees-center { display:none; }
++	.ees-source-shell[data-ees-chat-state='expanded'] .ees-chat-space { width:0; }
++	.ees-source-shell[data-ees-chat-state='expanded'] .ees-chat-region { position:relative; flex:1; width:auto; }
++	.ees-chat-resize { position:absolute; left:-4px; top:0; bottom:0; width:8px; z-index:2; cursor:col-resize; touch-action:none; }
++	.ees-chat-resize:focus-visible,.ees-work-toolbar button:focus-visible { outline:2px solid #2f5f98; outline-offset:-2px; }
++	.ees-source-shell[data-resizing='true'] .ees-chat-space,.ees-source-shell[data-resizing='true'] .ees-chat-region { transition:none; }
++	/* Below 56 + 640 + 420px a dock cannot fit. Release its space as soon as
++	   the viewport changes, even before the next resize event or animation frame. */
++	@media (width < 1116px) {
++		.ees-source-shell .ees-chat-space { width:0; transition:none; }
++		.ees-source-shell .ees-navigation :global(#sidebar) { transition-duration:0s; }
++		.ees-source-shell[data-ees-chat-state='docked'] .ees-chat-region { visibility:hidden; transition:none; }
 +	}
-+	.ees-center {
-+		display: flex;
-+		flex: 1;
-+		flex-direction: column;
-+		min-width: 0;
-+		min-height: 0;
-+	}
-+	.ees-main,
-+	.ees-chat-region,
-+	.ees-native-region {
-+		flex: 1;
-+		width: 100%;
-+		height: 100%;
-+		min-height: 0;
-+		min-width: 0;
-+		overflow: hidden;
-+	}
-+	.ees-chat-region {
-+		display: flex;
-+		flex-direction: column;
-+	}
-+	.ees-chat-region[hidden],
-+	.ees-panel-region[hidden] {
-+		display: none;
-+	}
-+	.ees-native-region {
-+		display: flex;
-+	}
-+	.ees-region-loading {
-+		display: flex;
-+		align-items: center;
-+		justify-content: center;
-+		gap: 8px;
-+		height: 100%;
-+		font-size: 14px;
-+	}
-+	.ees-panel-space {
-+		flex: none;
-+		transition: width var(--ees-motion-close) var(--ees-motion-close-easing);
-+	}
-+	.ees-panel-space[data-open='true'] {
-+		transition-duration: var(--ees-motion-open);
-+		transition-timing-function: var(--ees-motion-open-easing);
-+	}
-+	.ees-panel-space[data-resizing='true'] { transition: none; }
-+	.ees-panel-region {
-+		position: absolute;
-+		right: 0;
-+		top: 0;
-+		z-index: 35;
-+		flex: none;
-+		height: 100%;
-+		min-height: 0;
-+		border-left: 1px solid #e6e6e9;
-+		background: #fff;
-+	}
-+	.ees-panel-region[data-overlay='true'] {
-+		box-shadow: -8px 0 24px #0001;
-+		max-width: calc(100% - 56px);
-+	}
-+	.ees-panel-region :global(#ees-work-panel) {
-+		width: 100%;
-+		height: 100%;
-+		max-height: 100%;
-+		position: relative;
-+		inset: auto;
-+		border: 0;
-+	}
-+	.ees-panel-resize {
-+		position: absolute;
-+		left: -4px;
-+		top: 0;
-+		bottom: 0;
-+		width: 8px;
-+		z-index: 2;
-+		cursor: col-resize;
-+		touch-action: none;
-+	}
-+	.ees-panel-resize:focus-visible {
-+		outline: 2px solid #2f5f98;
-+		outline-offset: -3px;
-+	}
++	@media (prefers-reduced-motion: reduce) { .ees-source-shell .ees-chat-space,.ees-source-shell .ees-chat-region,.ees-source-shell[data-ees-chat-state='closed'] .ees-chat-region { transition:none; } }
 +</style>
 diff --git a/src/lib/components/ees/icons/5bc95.svg b/src/lib/components/ees/icons/5bc95.svg
 new file mode 100644
@@ -3012,11 +3313,11 @@ index 0000000..59f7e8d
 +</svg>
 diff --git a/src/lib/components/ees/state.ts b/src/lib/components/ees/state.ts
 new file mode 100644
-index 0000000..19d053d
+index 0000000..c5300c5
 --- /dev/null
 +++ b/src/lib/components/ees/state.ts
-@@ -0,0 +1,31 @@
-+import { writable } from 'svelte/store';
+@@ -0,0 +1,39 @@
++import { get, writable } from 'svelte/store';
 +export const eesSnapshot = writable<any>({
 +	state: null,
 +	selection: { mode: 'work', tab: 'overview', panel_open: true, collapsed: [] },
@@ -3026,6 +3327,14 @@ index 0000000..19d053d
 +export const eesHelperState = writable({ busy: false, notice: '' });
 +export const eesSessionReady = writable(true);
 +export const eesCompact = writable(typeof window !== 'undefined' && window.innerWidth < 1440);
++export const eesChatDisplay = writable({ open: true, expanded: false, overlay: false });
++export const eesChatHistoryOpen = writable(false);
++export function toggleChatHistory() {
++	// A click from the compact rail opens the list even when the expanded rail last showed it.
++	const railCompact = get(eesCompact);
++	eesCompact.set(false);
++	eesChatHistoryOpen.update(open => railCompact || !open);
++}
 +export const eesReferenceHosts = new Map<string, HTMLElement>();
 +export const eesSync = () => {
 +	if (typeof window !== 'undefined') window.__eesNativeWorkV1?.sync?.();
@@ -3048,7 +3357,7 @@ index 0000000..19d053d
 +	};
 +}
 diff --git a/src/lib/components/layout/Sidebar.svelte b/src/lib/components/layout/Sidebar.svelte
-index 007df31..1bdd8ca 100644
+index 007df31..ecdbd66 100644
 --- a/src/lib/components/layout/Sidebar.svelte
 +++ b/src/lib/components/layout/Sidebar.svelte
 @@ -92,6 +92,9 @@
@@ -3057,7 +3366,7 @@ index 007df31..1bdd8ca 100644
  	import MobileSwipePanel from '../common/MobileSwipePanel.svelte';
 +	import EesNavigation from '$lib/components/ees/EesNavigation.svelte';
 +	import EesSettingsMenu from '$lib/components/ees/EesSettingsMenu.svelte';
-+	import {eesSnapshot,eesCompact} from '$lib/components/ees/state';
++	import {eesSnapshot,eesCompact,eesChatHistoryOpen,toggleChatHistory} from '$lib/components/ees/state';
  
  	const BREAKPOINT = 768;
  	const DEFAULT_PINNED_ITEMS = ['notes', 'workspace'];
@@ -3115,7 +3424,7 @@ index 007df31..1bdd8ca 100644
  
  		window.addEventListener('keydown', onKeyDown);
  		window.addEventListener('keyup', onKeyUp);
-@@ -891,474 +849,13 @@
+@@ -891,474 +849,15 @@
  	on:pointercancel={resizeEndHandler}
  />
  
@@ -3592,12 +3901,14 @@ index 007df31..1bdd8ca 100644
 + <header class="ees-product"><a href="/" on:click|preventDefault={()=>window.__eesSourceShellV1?.newChat()} inert={$eesCompact} aria-label="EES Workflow"><span class="ees-product-icon">E</span><strong>EES Workflow</strong></a><button data-ees-sidebar-toggle aria-expanded={!$eesCompact} aria-label={$i18n.t($eesCompact?'EES.Sidebar.Expand':'EES.Sidebar.Collapse',{defaultValue:$eesCompact?'Expand sidebar':'Collapse sidebar'})} on:click={()=>eesCompact.set(!$eesCompact)}><Sidebar className="size-4"/></button></header>
 + <div class="ees-sidebar-scroll">
 + <EesNavigation />
-+ <div class="ees-chat-controls"><button id="sidebar-new-chat-button" on:click={()=>window.__eesSourceShellV1?.newChat()}><EditPencilIcon className="size-4"/><span>{$i18n.t('EES.Nav.NewChat',{defaultValue:'New chat'})}</span></button><button id="sidebar-search-button" on:click={()=>showSearch.set(true)}><SearchIcon className="size-4"/><span>{$i18n.t('EES.Nav.Search',{defaultValue:'Search chats'})}</span></button></div>
-+ <div class="ees-native-history" hidden={$eesSnapshot.selection?.tab!=='chats'||$eesCompact||$eesSnapshot.native_shell} inert={$eesSnapshot.selection?.tab!=='chats'||$eesCompact||$eesSnapshot.native_shell}>
++ <div class="ees-chat-controls"><button id="sidebar-new-chat-button" on:click={()=>window.__eesSourceShellV1?.newChat()}><EditPencilIcon className="size-4"/><span>{$i18n.t('EES.Nav.NewChat',{defaultValue:'New chat'})}</span></button><button id="sidebar-search-button" on:click={()=>showSearch.set(true)}><SearchIcon className="size-4"/><span>{$i18n.t('EES.Nav.Search',{defaultValue:'Search chats'})}</span></button>
++  {#if $eesSnapshot.native_shell || $eesSnapshot.selection?.mode === 'author'}<button data-action="chats" aria-label={$i18n.t('EES.Nav.Chats',{defaultValue:'Chat history'})} aria-expanded={$eesChatHistoryOpen && !$eesCompact} aria-controls="ees-chat-history" on:click={toggleChatHistory}><SearchIcon className="size-4"/><span>{$i18n.t('EES.Nav.Chats',{defaultValue:'Chat history'})}</span></button>{/if}
++ </div>
++ <div id="ees-chat-history" class="ees-native-history" hidden={!$eesChatHistoryOpen || $eesCompact} inert={!$eesChatHistoryOpen || $eesCompact}>
  					{#if $config?.features?.enable_folders && ($user?.role === 'admin' || ($user?.permissions?.features?.folders ?? true))}
  						<SidebarSection
  							id="sidebar-folders"
-@@ -1698,15 +1195,9 @@
+@@ -1698,15 +1197,9 @@
  							</div>
  						</div>
  					</SidebarSection>
@@ -3616,7 +3927,7 @@ index 007df31..1bdd8ca 100644
  								role={$user?.role}
  								profile={$config?.features?.enable_user_status ?? true}
  								className="w-[calc(var(--sidebar-width)-1rem)]"
-@@ -1738,34 +1229,22 @@
+@@ -1738,34 +1231,20 @@
  									</div>
  									<div class=" self-center font-normal truncate">{$user?.name}</div>
  								</button>
@@ -3666,8 +3977,6 @@ index 007df31..1bdd8ca 100644
 + #sidebar[data-compact=true] .ees-chat-controls button{gap:0}#sidebar[data-compact=true] .ees-chat-controls span{max-width:0;transition-duration:var(--ees-motion-close);transition-timing-function:var(--ees-motion-close-easing)}
 + #sidebar[data-compact=true] :global(.ew-empty),#sidebar[data-compact=true] :global(.ew-recent){display:none}
  </style>
-+
-+
 diff --git a/src/lib/components/workspace/Models.svelte b/src/lib/components/workspace/Models.svelte
 index 3b0513b..3f80d95 100644
 --- a/src/lib/components/workspace/Models.svelte
@@ -3711,10 +4020,10 @@ index 172ed9a..8873d62 100644
  export const WEBUI_HOSTNAME = '';
  export const WEBUI_BASE_URL = '';
 diff --git a/src/lib/i18n/locales/ko-KR/translation.json b/src/lib/i18n/locales/ko-KR/translation.json
-index 8eba682..c85018b 100644
+index 8eba682..d7d481c 100644
 --- a/src/lib/i18n/locales/ko-KR/translation.json
 +++ b/src/lib/i18n/locales/ko-KR/translation.json
-@@ -3081,5 +3081,99 @@
+@@ -3081,5 +3081,105 @@
  	"Youtube Language": "Youtube 언어",
  	"Youtube Proxy URL": "Youtube 프록시 URL",
  	"Zoom in": "",
@@ -3763,6 +4072,12 @@ index 8eba682..c85018b 100644
 +	"EES.Nav.NewChat": "새 대화",
 +	"EES.Nav.Search": "대화 검색",
 +	"EES.Conversation": "대화",
++	"EES.Chat.Open": "대화 열기",
++	"EES.Chat.Close": "대화 닫기",
++	"EES.Chat.Expand": "대화 확대",
++	"EES.Chat.Restore": "대화 폭 복원",
++	"EES.Chat.Width": "대화 폭",
++	"EES.Chat.Reference": "지금 화면",
 +	"EES.Reference": "참고",
 +	"EES.OpenPanel": "업무 패널 열기",
 +	"EES.Panel": "업무 패널",
@@ -3773,7 +4088,7 @@ index 8eba682..c85018b 100644
 +	"EES.Composer.Placeholder": "업무를 물어보거나, 필요한 작업을 요청하세요",
 +	"EES.Procedure.Start": "새 절차 작성 안내",
 +	"EES.Helper": "업무 도우미",
-+	"EES.Procedure.Intro": "새 업무 절차는 비슷한 예시를 복사해 고치는 것이 가장 쉽습니다. 오른쪽에서 예시를 고르거나 빈 절차로 시작하세요. 만드는 방법이 궁금하면 아래 질문을 보내 보세요. 지금은 대화 내용으로 초안을 바로 만들지는 않습니다. 게시 상태로 설정하면 미완성이어도 업무 화면에 표시됩니다.",
++	"EES.Procedure.Intro": "새 업무 절차는 비슷한 예시를 복사해 고치는 것이 가장 쉽습니다. 가운데 업무 화면에서 예시를 고르거나 빈 절차로 시작하세요. 만드는 방법이 궁금하면 아래 질문을 보내 보세요. 지금은 대화 내용으로 초안을 바로 만들지는 않습니다. 게시 상태로 설정하면 미완성이어도 업무 화면에 표시됩니다.",
 +	"EES.NoAccessibleScreens": "EES Workflow에서 열 수 있는 항목이 없습니다",
 +	"EES.Procedure.Question1": "신규 공장 횡전개 예시를 복사해서 우리 공장에 맞게 고치고 싶어",
 +	"EES.Procedure.Question2": "분류(셋업 · 운영 · 장애대응)가 뭔지 알려줘",
@@ -3816,19 +4131,20 @@ index 8eba682..c85018b 100644
 +	"EES.Prompts.SaveFailed": "저장하지 못했습니다. 입력한 내용은 유지됩니다."
  }
 diff --git a/src/routes/(app)/+layout.svelte b/src/routes/(app)/+layout.svelte
-index 633a9f7..943bf69 100644
+index 633a9f7..a50b708 100644
 --- a/src/routes/(app)/+layout.svelte
 +++ b/src/routes/(app)/+layout.svelte
-@@ -43,7 +43,7 @@
+@@ -43,8 +43,7 @@
  		chats
  	} from '$lib/stores';
  
 -	import Sidebar from '$lib/components/layout/Sidebar.svelte';
+-	import SettingsModal from '$lib/components/chat/SettingsModal.svelte';
 +	import EesShell from '$lib/components/ees/EesShell.svelte';
- 	import SettingsModal from '$lib/components/chat/SettingsModal.svelte';
  	import ChangelogModal from '$lib/components/ChangelogModal.svelte';
  	import AccountPending from '$lib/components/layout/Overlay/AccountPending.svelte';
-@@ -287,11 +287,11 @@
+ 	import UpdateInfoToast from '$lib/components/layout/UpdateInfoToast.svelte';
+@@ -287,11 +286,11 @@
  				} else if (shortcut === Shortcut.NEW_CHAT) {
  					console.log('Shortcut triggered: NEW_CHAT');
  					event.preventDefault();
@@ -3842,7 +4158,7 @@ index 633a9f7..943bf69 100644
  				} else if (shortcut === Shortcut.COPY_LAST_CODE_BLOCK) {
  					console.log('Shortcut triggered: COPY_LAST_CODE_BLOCK');
  					event.preventDefault();
-@@ -303,7 +303,7 @@
+@@ -303,7 +302,7 @@
  				} else if (shortcut === Shortcut.TOGGLE_SIDEBAR) {
  					console.log('Shortcut triggered: TOGGLE_SIDEBAR');
  					event.preventDefault();
@@ -3851,7 +4167,27 @@ index 633a9f7..943bf69 100644
  				} else if (shortcut === Shortcut.NAVIGATE_CHAT_UP) {
  					console.log('Shortcut triggered: NAVIGATE_CHAT_UP');
  					event.preventDefault();
-@@ -530,21 +530,7 @@
+@@ -344,10 +343,7 @@
+ 					} else {
+ 						temporaryChatEnabled.set(!$temporaryChatEnabled);
+ 					}
+-					await goto('/');
+-					setTimeout(() => {
+-						document.getElementById('new-chat-button')?.click();
+-					}, 0);
++					await window.__eesSourceShellV1?.newChat();
+ 				} else if (shortcut === Shortcut.GENERATE_MESSAGE_PAIR) {
+ 					console.log('Shortcut triggered: GENERATE_MESSAGE_PAIR');
+ 					event.preventDefault();
+@@ -452,7 +448,6 @@
+ 	};
+ </script>
+ 
+-<SettingsModal bind:show={$showSettings} />
+ <ChangelogModal bind:show={$showChangelog} />
+ 
+ {#if version && compareVersion(version.latest, version.current) && ($settings?.showUpdateToast ?? true)}
+@@ -530,21 +525,7 @@
  					</div>
  				{/if}
  

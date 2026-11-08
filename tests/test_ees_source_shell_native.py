@@ -21,24 +21,20 @@ from native_ui_fixture import NativeUIHandler
 
 class SourceShellNativeTests(IntegratedNativeCase):
     def r11_panel_roundtrip(self, key):
-        """Exercise native button activation and the resulting focus, not DOM clicks."""
-        opened = '#ees-work-context [data-action=open_panel]'
-        self.assertFalse(self.browser.evaluate('!!document.querySelector(' + json.dumps(opened) + ')'))
-        self.click('#ees-work-panel [data-action=close_panel]')
-        self.wait("document.querySelector('.ees-panel-region')?.hidden && document.querySelector('.ees-panel-region')?.inert")
-        self.wait('document.activeElement === document.querySelector(' + json.dumps(opened) + ')')
-        self.assertEqual(self.text(opened).strip(), '업무 패널 열기')
-        self.assertEqual(self.read(opened, 'ariaExpanded'), 'false')
-        style = self.browser.evaluate('(()=>{const s=getComputedStyle(document.querySelector(' + json.dumps(opened) + '));return {borderTopWidth:s.borderTopWidth,borderTopStyle:s.borderTopStyle,paddingTop:s.paddingTop,paddingRight:s.paddingRight,fontSize:s.fontSize};})()')
-        self.assertEqual(style, {'borderTopWidth': '1px', 'borderTopStyle': 'solid',
-                               'paddingTop': '4px', 'paddingRight': '10px', 'fontSize': '13px'})
-        target = self.read(opened, 'getAttribute("aria-controls")')
-        self.assertTrue(target, 'The open control must identify the work panel it opens')
-        self.assertTrue(self.browser.evaluate('!!document.getElementById(' + json.dumps(target) + ')'))
+        """Use actual shell controls; closing chat never retires the work host."""
+        toggle = '[data-ees-chat-toggle]'
+        self.browser.evaluate("window.__r11Nodes={chat:document.querySelector('#chat-input'),work:document.querySelector('#ees-work-panel')};true")
+        self.click('[data-ees-chat-close]')
+        self.wait("document.querySelector('[data-ees-source-shell]').dataset.eesChatState==='closed'")
+        self.wait("document.activeElement?.matches('[data-ees-chat-toggle]')")
+        self.assertEqual(self.read(toggle, 'ariaExpanded'), 'false')
+        target = self.read(toggle, 'getAttribute("aria-controls")')
+        self.assertTrue(self.browser.evaluate("document.getElementById("+json.dumps(target)+") === document.querySelector('[data-ees-chat-surface]')"))
+        self.assertTrue(self.browser.evaluate("!document.querySelector('[data-ees-work-surface]').inert && document.querySelector('#ees-work-panel').getBoundingClientRect().width>0"))
         self.scope_activate_key(key)
-        self.wait("!document.querySelector('.ees-panel-region').hidden && !document.querySelector('.ees-panel-region').inert")
-        self.wait('!document.querySelector(' + json.dumps(opened) + ')')
-        self.wait("document.querySelector('#ees-work-panel').contains(document.activeElement)")
+        self.wait("document.querySelector('[data-ees-source-shell]').dataset.eesChatState==='docked'")
+        self.assertEqual(self.read(toggle, 'ariaExpanded'), 'true')
+        self.assertTrue(self.browser.evaluate("window.__r11Nodes.chat===document.querySelector('#chat-input')&&window.__r11Nodes.work===document.querySelector('#ees-work-panel')"))
 
     def test_r11_navigation_toolbar_and_keyboard_panel_focus_preserve_work(self):
         workflow_id = self.author(fields=[{'id': 'note', 'type': 'text', 'scope': 'run'}])
@@ -79,10 +75,10 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.click('[data-author-action=create]')
         self.wait("document.querySelector('#ew-procedure-create [name=name]')")
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start')"))
-        # Creation now lives in the 480px workflow panel and keeps the Native
-        # conversation available; there is no name dialog or resize separator.
-        self.assertAlmostEqual(self.read('.ees-panel-region', 'getBoundingClientRect().width'), 480, delta=1)
-        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog,[data-ees-panel-resize]')"))
+        # The inline editor uses the whole center. Chat stays docked and resizable.
+        self.assertAlmostEqual(self.read('[data-ees-work-surface]', 'getBoundingClientRect().width'), 1104, delta=1)
+        self.assertTrue(self.browser.evaluate("!!document.querySelector('[data-ees-chat-resize]')"))
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog')"))
         self.fill('#ew-procedure-create [name=name]', '닫았다 열어도 남을 새 절차 이름')
         self.fill('#ew-procedure-create [name=description]', '취소해도 작성 중인 이름과 함께 보존할 목적')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[name=procedure_template]')"))
@@ -262,8 +258,8 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 self.wait("document.querySelector('#ees-work-designer')")
                 self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-work-site-trigger')"))
                 self.assertIn('작업 위치', self.text('#ees-work-entry'))
-                self.assertAlmostEqual(self.read('.ees-panel-region', 'getBoundingClientRect().width'), 480, delta=1)
-                self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-ees-panel-resize]')"))
+                self.assertGreaterEqual(self.read('[data-ees-work-surface]', 'getBoundingClientRect().width'), 640)
+                self.assertTrue(self.browser.evaluate("!!document.querySelector('[data-ees-chat-resize]')"))
             if variant == 'workspace-factory':
                 # The preceding keyboard loop can end on another enabled
                 # system. This search fixture has eight factories in EMS, so
@@ -516,7 +512,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 # Scope selection opens My work; enter the other scope-dependent
                 # list while its first real workspace response is still delayed.
                 self.click('#ees-work-entry [data-action=records]')
-                self.wait("document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '실행 기록'")
+                self.wait("document.querySelector('#ees-work-entry [data-action=records]')?.getAttribute('aria-current')==='page' && !!document.querySelector('#ees-work-content')")
             self.wait('window.__eesSourceFrameEvidence.samples.filter(s=>s.scopeLabel===' +
                       json.dumps(label) + ' && ' + ('s.scopePending' if unknown else 'true') + ').length >= 3')
             if unknown:
@@ -774,8 +770,9 @@ class SourceShellNativeTests(IntegratedNativeCase):
             for width, height in ((1366, 768), (360, 800)):
                 self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
                 self.wait('innerWidth === ' + str(width))
-                if self.browser.evaluate("!!document.querySelector('#ees-work-panel [data-action=close_panel]')?.getClientRects().length"):
-                    self.click('#ees-work-panel [data-action=close_panel]')
+                if self.browser.evaluate("document.querySelector('[data-ees-source-shell]').dataset.eesChatState==='closed'"):
+                    self.click('[data-ees-chat-toggle]')
+                self.wait("!document.querySelector('[data-ees-chat-surface]').inert")
                 self.click('#ees-saved-prompts-button')
                 self.wait("document.querySelectorAll('[data-saved-prompt]').length === 4")
                 self.wait("(()=>{const r=document.querySelector('.ees-prompts-popover').getBoundingClientRect();return r.x>=0&&r.right<=innerWidth&&r.y>=0&&r.bottom<=innerHeight;})()")
@@ -962,7 +959,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.step('warm-procedures', '[data-action=mode][data-mode=author]',
                   "document.querySelector('#ees-work-designer [data-author-action=create]')")
         self.step('warm-work-home', '[data-action=mode][data-mode=work]',
-                  "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '업무'")
+                  "!!document.querySelector('#ees-work-panel .ew-work-home')")
         self.assertIsNotNone(self.refresh(), 'Initial workspace/operations refresh did not complete')
         self.wait("document.querySelector('#ees-work-entry [data-action=mode][data-mode=work]') && document.querySelector('#ees-work-content .ew-work-home')")
         self.delay_workspace_reads()
@@ -986,7 +983,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
                             else '[data-action=mode][data-mode=work]')
                 condition = ("document.querySelector('#ees-work-designer [data-author-action=create]')"
                              if destination == 'procedures' else
-                             "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '업무'")
+                             "!!document.querySelector('#ees-work-panel .ew-work-home')")
                 different = destination == 'work-home' or native == 'tools'
                 if different:
                     # B10-2 departs from tools, so its procedures return also differs.
@@ -1057,9 +1054,9 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.fill('#chat-input', '다른 칸으로 돌아와도 유지할 대화 초안')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         panels = {
-            'tools': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '도구'",
-            'procedures': "document.querySelector('#ees-work-designer > header')?.firstChild?.textContent.trim() === '워크플로우'",
-            'work_home': "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '업무'",
+            'tools': "document.querySelector('#ees-work-designer')?.getAttribute('aria-label') === '도구 작성'",
+            'procedures': "document.querySelector('#ees-work-designer')?.getAttribute('aria-label') === '업무 절차 작성'",
+            'work_home': "!!document.querySelector('#ees-work-panel .ew-work-home')",
         }
         # Warm both author panels once before timing the return boundary.
         # Existing same-menu preservation coverage below keeps dirty draft DOM,
@@ -1207,8 +1204,9 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.delayed_step('preservation-native-return', '#ees-work-entry [data-action=procedures]',
                           "location.pathname === '/c/existing-chat' && document.querySelector('#ew-author-policies [name=completion_notes]')")
         returned = assert_preserved('Native return')
+        # The current published procedure remains selected when returning to work mode.
         self.delayed_step('preservation-work-home', '[data-action=mode][data-mode=work]',
-                          "document.querySelector('#ees-work-panel .ew-panel-header strong')?.textContent === '업무'")
+                          "document.querySelector('#ees-work-panel .ew-operation-overview')?.innerText.includes('증분 갱신 보존 절차')")
         self.delayed_step('preservation-author-return', '[data-action=mode][data-mode=author]',
                           "document.querySelector('#ew-author-policies [name=completion_notes]')")
         # Work mode deliberately mounts a different panel. Returning must
@@ -1277,6 +1275,9 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.step('work-tools', '#ees-work-entry [data-action=tools]',
                   "document.querySelector('[data-author-action=tool_create]')")
         labels.append('work-tools')
+        self.fill('#chat-input','Native 업무를 열어도 유지할 개인 대화 초안')
+        self.browser.evaluate("window.__routeChatQA={node:document.querySelector('#chat-input'),draft:window.__eesNativeDraftV1.read(),chatId:window.__eesSourceShellV1.screen().chatId};true")
+
         self.assertFalse(self.browser.evaluate("Boolean(document.querySelector('[data-action=workspace_admin], [data-action=admin_factory], [data-action=admin_access]'))"))
         self.step('work-procedures', '#ees-work-entry [data-action=procedures]',
                   "document.querySelector('#ees-work-designer')")
@@ -1286,6 +1287,10 @@ class SourceShellNativeTests(IntegratedNativeCase):
             self.step(label, self.native_link_selector(target, label, labels, return_from='skills' if target == 'tools' else None),
                       'location.pathname === ' + json.dumps('/workspace/' + target)
                       + ' && document.querySelector("#workspace-container input")')
+            self.assertTrue(self.browser.evaluate("document.querySelector('[data-ees-work-surface]').contains(document.querySelector('#workspace-container'))"))
+            self.assertTrue(self.browser.evaluate("document.querySelectorAll('#chat-input.ProseMirror').length===1 && document.querySelector('#chat-input')===window.__routeChatQA.node && document.querySelector('[data-ees-chat-surface]').contains(window.__routeChatQA.node)"))
+            self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'),self.browser.evaluate('window.__routeChatQA.draft'))
+            self.assertEqual(self.browser.evaluate('window.__eesSourceShellV1.screen().chatId'),self.browser.evaluate('window.__routeChatQA.chatId'))
             labels.append(label)
         frame_monitor.begin_native_return(self, 'native-return', selector='#ees-work-entry [data-action=procedures]',
             native='tools', destination='procedures', previous='tools')

@@ -66,14 +66,32 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             self.open_stage_from_overview()
         self.wait("document.querySelector('[data-authored-stage][data-stage-job=job-0]')")
 
+    def wait_for_work_layout(self, width):
+        # A viewport resize can finish before the sidebar and dock spacer do.
+        if width <= 480:
+            self.wait("""document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === 'true' &&
+                document.querySelector('[data-ees-source-shell]')?.dataset.eesChatState === 'closed'""")
+        self.wait("""!document.querySelector('[data-ees-source-shell]').getAnimations({subtree:true})
+            .some(animation => animation.effect?.target?.matches('#sidebar,.ees-chat-space,[data-ees-work-surface]'))""")
+        if width <= 480:
+            bounds = self.browser.evaluate("""(() => {
+                const rect = selector => document.querySelector(selector).getBoundingClientRect();
+                const rail = rect('[data-ees-source-sidebar]'), panel = rect('#ees-work-panel');
+                const center = rect('[data-ees-work-surface]');
+                return {rail:rail.width, left:center.left, right:center.right, panel:panel.width};
+            })()""")
+            self.assertAlmostEqual(bounds['rail'], 56, delta=1, msg=bounds)
+            self.assertAlmostEqual(bounds['left'], 56, delta=1, msg=bounds)
+            self.assertAlmostEqual(bounds['right'], width, delta=1, msg=bounds)
+            self.assertAlmostEqual(bounds['panel'], width - 56, delta=1, msg=bounds)
+
     def phase3_capture(self, label):
         observations = []
         for width, height in ((1920, 1080), (1366, 768), (360, 768)):
             self.browser.call('Emulation.setDeviceMetricsOverride', {
                 'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
             self.wait('innerWidth === ' + str(width) + ' && innerHeight === ' + str(height))
-            self.wait("document.querySelector('.ees-panel-region')?.dataset.overlay === " + json.dumps(str(width <= 480).lower()))
-            self.wait("!document.querySelector('#sidebar').getAnimations().length && !document.querySelector('.ees-panel-space').getAnimations().length")
+            self.wait_for_work_layout(width)
             geometry = self.browser.evaluate("""(()=>{const e=document.querySelector('#ees-work-panel'),r=e.getBoundingClientRect(),row=e.querySelector('[data-authored-stage]');return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,overflow:e.scrollWidth-e.clientWidth,rowOverflow:row.scrollWidth-row.clientWidth,documents:row.querySelectorAll('.ew-authored-document').length,checkboxes:row.querySelectorAll('[data-list-include],[data-item-verdict],[data-action=confirm_list]').length};})()""")
             self.assertGreaterEqual(geometry['left'], -1, geometry)
             self.assertLessEqual(geometry['right'], width + 1, geometry)
@@ -371,20 +389,21 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         return key, run
 
     def stage_capture(self, label):
+        self.wait_for_work_layout(self.browser.evaluate('innerWidth'))
         self.wait("!document.querySelector('[data-ees-motion=opening],[data-ees-motion=closing]')")
         observed = self.browser.evaluate("""(() => {
             const panel=document.querySelector('#ees-work-panel'), rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};};
             const styled=e=>{const s=getComputedStyle(e);return {...rect(e),fontSize:s.fontSize,lineHeight:s.lineHeight,background:s.backgroundColor,border:s.borderWidth};};
             return {viewport:{width:innerWidth,height:innerHeight},panel:rect(panel),overflow:panel.scrollWidth-panel.clientWidth,
-                header:styled(panel.querySelector('.ew-panel-header')),title:styled(panel.querySelector('h2')),
+                header:styled(document.querySelector('[data-ees-work-toolbar]')),title:styled(panel.querySelector('h2')),
                 rows:[...panel.querySelectorAll('[data-stage-job]')].map(e=>({job:e.dataset.stageJob,...rect(e)})),
                 menu:panel.querySelector('#ees-stage-verdict-menu')?styled(panel.querySelector('#ees-stage-verdict-menu')):null,
                 controls:[...panel.querySelectorAll('.ew-vd-pick,.ew-vd-run,.ew-vd-evidence-toggle')].filter(e=>e.getClientRects().length).map(e=>({text:e.innerText,...styled(e)}))};
         })()""")
         self.assertLessEqual(observed['overflow'], 1, observed)
         self.assertAlmostEqual(observed['header']['height'], 48, delta=1, msg=observed)
-        self.assertEqual(observed['title']['fontSize'], '20px', observed)
-        self.assertEqual(observed['title']['lineHeight'], '28px', observed)
+        self.assertEqual(observed['title']['fontSize'], '24px', observed)
+        self.assertEqual(observed['title']['lineHeight'], '34px', observed)
         if observed['menu']:
             self.assertAlmostEqual(observed['menu']['width'], 180, delta=1, msg=observed)
             self.assertAlmostEqual(observed['menu']['height'], 110, delta=1, msg=observed)
@@ -398,20 +417,22 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
         self.open_run(key, run, job='')
         self.wait("document.querySelector('#ees-work-panel.ew-vd h2')?.textContent === '1차 점검'")
-        self.assertEqual(self.text('.ew-run-back'), '배포 산출물 점검 / 전체 공장 · EMS')
-        self.assertIn('작업 12개', self.text('.ew-vd-head'))
-        self.assertNotIn('회차', self.text('.ew-run-nav') + self.text('.ew-vd-head'))
-        self.assertNotIn('자동실행 예약 없음', self.text('.ew-vd-head'))
-        self.assertNotIn('업무절차 · 수시 · 직접 시작', self.text('.ew-vd-head'))
+        self.assertEqual(self.text('.ew-center-breadcrumb .ew-run-back'), '배포 산출물 점검')
+        self.assertIn('전체 공장 · EMS', self.text('.ew-center-scope'))
+        self.assertEqual(self.text('.ew-stage-heading h2'),'1차 점검')
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-tabs [data-action=stage_tab]')].map(e=>e.textContent.trim())"), ['업무 내용','실행 기록','판정 기준'])
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-stage-job=internal-one],[data-stage-job=internal-two]')"))
-        self.assertEqual(self.read('[data-task-group=waiting] .ew-vd-label'), '대기5')
+        order=run['definition']['nodes']['stage']['children']
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-center-task-row[data-stage-job]')].map(e=>e.dataset.stageJob)"),
+                         [job for job in order if job in run['jobs']])
         self.assertEqual(self.text('[data-stage-job=job-3] [data-decision-status]'), '실행 실패')
         self.assertEqual(self.text('[data-stage-job=job-0] [data-decision-status]'), '실행 완료')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-stage-job=job-0] [data-action=stage_verdict]')"))
         self.stage_capture('operations-stage-default-1920')
         self.click('[data-action=stage_approved]')
-        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('[data-stage-job]')].map(e=>e.dataset.stageJob).sort()"), sorted(run['jobs']))
+        self.assertLess(self.browser.evaluate("document.querySelectorAll('[data-stage-job]').length"),len(run['jobs']))
         self.click('[data-action=stage_approved]')
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('[data-stage-job]')].map(e=>e.dataset.stageJob).sort()"), sorted(run['jobs']))
         for width in (1920, 480):
             self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
             self.wait('innerWidth === ' + str(width))
@@ -511,7 +532,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('.ew-operation-overview')?.textContent.includes('공장 A · EMS')")
         self.screenshot('operations31-overview-factory-a-1920')
         self.click('[data-action=stage_open][data-node-id=stage]')
-        self.wait("document.querySelector('.ew-run-back')?.textContent.includes('공장 A · EMS')")
+        self.wait("document.querySelector('.ew-center-scope')?.textContent.includes('공장 A · EMS')")
         self.stage_capture('operations31-stage-factory-a-1920')
         self.assert_only_selection_remembered(writes)
         self.assertEqual(self.state(workflow_id=key)['workflow'], published)
@@ -554,11 +575,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             self.wait('innerWidth===' + str(width))
             self.assertIn('업무 절차를 선택해 주세요', self.text('#ees-work-panel'))
             if width == 480:
-                # The work panel overlays navigation at this width. Follow the
-                # existing mobile close/select route before opening the menu.
-                self.wait("document.querySelector('.ees-panel-region')?.dataset.overlay==='true'")
-                self.click('#ees-work-panel [data-action=close_panel]')
-                self.wait("document.querySelector('.ees-panel-region')?.hidden")
+                self.wait_for_work_layout(width)
             self.open_sidebar()
             self.wait('document.querySelector(\'[data-action=workflow][data-workflow-id="' + published + '"]\')')
             visible = self.browser.evaluate("[...document.querySelectorAll('#sidebar [data-action=workflow]')].map(node=>node.dataset.workflowId)")

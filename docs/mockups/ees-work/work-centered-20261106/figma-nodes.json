@@ -1,0 +1,281 @@
+{
+  "pageId": "897:761",
+  "frames": [
+    {
+      "id": "2188:149",
+      "name": "업무 중심 화면 · 검토 안내",
+      "x": 160,
+      "y": 24500,
+      "width": 1920,
+      "height": 152,
+      "descendants": 3,
+      "counts": {
+        "TEXT": 3
+      },
+      "fonts": [
+        "Noto Sans KR Medium",
+        "Noto Sans KR Regular"
+      ],
+      "imageFillNodeIds": [],
+      "oldTerms": 0,
+      "children": [
+        {
+          "id": "2188:150",
+          "name": "제목",
+          "x": 28,
+          "width": 156,
+          "height": 40
+        },
+        {
+          "id": "2188:151",
+          "name": "판 정보",
+          "x": 28,
+          "width": 334,
+          "height": 22
+        },
+        {
+          "id": "2188:152",
+          "name": "안내",
+          "x": 28,
+          "width": 570,
+          "height": 20
+        }
+      ],
+      "taskList": []
+    },
+    {
+      "id": "2188:153",
+      "name": "운영 · 업무와 대화",
+      "x": 160,
+      "y": 24700,
+      "width": 1920,
+      "height": 1080,
+      "descendants": 203,
+      "counts": {
+        "FRAME": 80,
+        "TEXT": 78,
+        "VECTOR": 29,
+        "INSTANCE": 13,
+        "RECTANGLE": 3
+      },
+      "fonts": [
+        "Noto Sans KR Bold",
+        "Noto Sans KR Medium",
+        "Noto Sans KR Regular"
+      ],
+      "imageFillNodeIds": [],
+      "oldTerms": 0,
+      "children": [
+        {
+          "id": "2186:3471",
+          "name": "업무 중심 · 운영 탐색",
+          "x": 0,
+          "width": 256,
+          "height": 1080
+        },
+        {
+          "id": "2188:154",
+          "name": "가운데 업무",
+          "x": 256,
+          "width": 1104,
+          "height": 1080
+        },
+        {
+          "id": "2188:222",
+          "name": "오른쪽 채팅",
+          "x": 1360,
+          "width": 560,
+          "height": 1080
+        }
+      ],
+      "taskList": [
+        {
+          "id": "2188:177",
+          "children": [
+            {
+              "id": "2188:178",
+              "name": "CR 승인 확인",
+              "type": "INSTANCE"
+            },
+            {
+              "id": "2188:183",
+              "name": "배포 문서 점검",
+              "type": "INSTANCE"
+            },
+            {
+              "id": "2188:208",
+              "name": "선택 작업 상세",
+              "type": "FRAME"
+            },
+            {
+              "id": "2188:188",
+              "name": "배포 파일 검증",
+              "type": "INSTANCE"
+            },
+            {
+              "id": "2188:193",
+              "name": "변경 영향 확인",
+              "type": "INSTANCE"
+            },
+            {
+              "id": "2188:198",
+              "name": "운영 인수인계",
+              "type": "INSTANCE"
+            },
+            {
+              "id": "2188:203",
+              "name": "최종 점검",
+              "type": "INSTANCE"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2188:247",
+      "name": "작성 · 업무 절차와 대화",
+      "x": 160,
+      "y": 25900,
+      "width": 1920,
+      "height": 1080,
+      "descendants": 174,
+      "counts": {
+        "FRAME": 47,
+        "TEXT": 67,
+        "INSTANCE": 32,
+        "VECTOR": 27,
+        "RECTANGLE": 1
+      },
+      "fonts": [
+        "Inter Semi Bold",
+        "Noto Sans KR Bold",
+        "Noto Sans KR Regular",
+        "Noto Sans KR Medium"
+      ],
+      "imageFillNodeIds": [],
+      "oldTerms": 0,
+      "children": [
+        {
+          "id": "2186:3060",
+          "name": "업무 중심 · 작성 탐색",
+          "x": 0,
+          "width": 256,
+          "height": 1080
+        },
+        {
+          "id": "2188:248",
+          "name": "가운데 업무",
+          "x": 256,
+          "width": 1104,
+          "height": 1080
+        },
+        {
+          "id": "2188:302",
+          "name": "오른쪽 채팅",
+          "x": 1360,
+          "width": 560,
+          "height": 1080
+        }
+      ],
+      "taskList": []
+    },
+    {
+      "id": "2188:327",
+      "name": "운영 · 채팅 접힘",
+      "x": 160,
+      "y": 27100,
+      "width": 1920,
+      "height": 1080,
+      "descendants": 180,
+      "counts": {
+        "FRAME": 70,
+        "TEXT": 67,
+        "VECTOR": 29,
+        "INSTANCE": 11,
+        "RECTANGLE": 3
+      },
+      "fonts": [
+        "Noto Sans KR Bold",
+        "Noto Sans KR Medium",
+        "Noto Sans KR Regular"
+      ],
+      "imageFillNodeIds": [],
+      "oldTerms": 0,
+      "children": [
+        {
+          "id": "2188:328",
+          "name": "업무 중심 · 운영 탐색",
+          "x": 0,
+          "width": 256,
+          "height": 1080
+        },
+        {
+          "id": "2188:433",
+          "name": "가운데 업무",
+          "x": 256,
+          "width": 1664,
+          "height": 1080
+        }
+      ],
+      "taskList": [
+        {
+          "id": "2188:458",
+          "children": [
+            {
+              "id": "2188:459",
+              "name": "CR 승인 확인",
+              "type": "INSTANCE"
+            },
+            {
+              "id": "2188:464",
+              "name": "배포 문서 점검",
+              "type": "INSTANCE"
+            },
+            {
+              "id": "2188:489",
+              "name": "선택 작업 상세",
+              "type": "FRAME"
+            },
+            {
+              "id": "2188:469",
+              "name": "배포 파일 검증",
+              "type": "INSTANCE"
+            },
+            {
+              "id": "2188:474",
+              "name": "변경 영향 확인",
+              "type": "INSTANCE"
+            },
+            {
+              "id": "2188:479",
+              "name": "운영 인수인계",
+              "type": "INSTANCE"
+            },
+            {
+              "id": "2188:484",
+              "name": "최종 점검",
+              "type": "INSTANCE"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "verifiedAt": "2026-11-06T08:59:39.098Z",
+  "fileKey": "XK2wTos6sEuxSHhIj7cqg6",
+  "version": 1,
+  "status": "검토 시안 · 제품 구현 대상 판 지정 전",
+  "uiMockup": "docs/mockups/ees-work/design-mock-14-work-centered.html",
+  "sourcePagesUnmodified": [
+    "1284:3106",
+    "1285:1829"
+  ],
+  "logNodeId": "2197:3108",
+  "libraryDiscovery": "기존 EES 화면·컴포넌트·변수 재사용, 연결 라이브러리 8개 커뮤니티만 확인, 관련 Code Connect 없음",
+  "visualDifferences": "HTML 동작 목업이 1판 기준. Figma는 주요 구조·내용을 맞춘 편집 가능 대표 화면으로, 세부 밀도·행 높이·입력필드와 일부 기존 사이드바 항목·보조 액션 표현은 HTML과 다름. 도구/참고문서·좁은 화면 overlay·채팅 확대는 HTML에서 검증.",
+  "captures": [
+    "figma-operations.png",
+    "figma-authoring.png",
+    "figma-collapsed.png"
+  ]
+}
