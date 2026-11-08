@@ -59,7 +59,7 @@ function chatHarness(width = 1920, compact = false, selection = {}) {
     const declaration=shell.split('\n').find(line=>line.includes('$: '+name+' = '));
     assert.ok(declaration,name);return declaration.replace('$: ','');
   }).join('\n');
-  const funcs=Function('env',`with(env){${stripTypeScriptTypes(clamp+'\n'+f)};return {refresh(){${reactive}},setWidth,resizeStart,resizeMove,resizeEnd,resizeCancel,resizeKey,chatEscape,chatKeydown,setChatOpen,toggleChatExpanded};}`)(env);
+  const funcs=Function('env',`with(env){${stripTypeScriptTypes(clamp+'\n'+f)};return {refresh(){${reactive}},setWidth,resizeStart,resizeMove,resizeEnd,resizeCancel,resizeKey,focusOverlay,chatEscape,chatKeydown,setChatOpen,toggleChatExpanded};}`)(env);
   funcs.refresh(); return {env,...funcs};
 }
 function scopePositionHarness({ compact = true, width = 480, height = 768, bottom = 172 } = {}) {
@@ -138,16 +138,44 @@ test('narrow chat toggles locally; desktop display is an account preference and 
   assert.equal(narrow.env.chatState,'overlay');assert.deepEqual(narrow.env.actions,[]);
   const input={closest(selector){return selector==='[role="dialog"]'?narrow.env.chatSurface:null;}};
   const event=target=>({key:'Escape',target,defaultPrevented:false,stopPropagation(){this.stopped=true;},preventDefault(){this.defaultPrevented=true;}});
-  assert.match(component('EesShell'),/on:keydown\|capture=\{chatEscape\}/);
-  const nested=event({closest:()=>({})});narrow.chatEscape(nested);assert.equal(nested.stopped,undefined);
+  const nestedMenu={closest:()=>({})};
+  narrow.env.chatSurface.contains=node=>node===narrow.env.chatSurface||node===input||node===nestedMenu;
+  const nested=event(nestedMenu);narrow.chatEscape(nested);assert.equal(nested.stopped,undefined);
   const composing={...event(input),isComposing:true};narrow.chatEscape(composing);assert.equal(composing.stopped,undefined);
   const suggestion={getClientRects:()=>[{}],closest:()=>null};
   narrow.env.document.querySelectorAll=()=>[suggestion];
   const suggestionEscape=event(input);narrow.chatEscape(suggestionEscape);assert.equal(suggestionEscape.stopped,undefined);
   narrow.env.document.querySelectorAll=()=>[];
+  // Some toggles advertise an expanded state without opening a separate popup.
+  input.closest=selector=>selector.includes('aria-expanded')?{}:null;
   const dismissed=event(input);narrow.chatEscape(dismissed);await flush();narrow.refresh();
   assert.equal(dismissed.stopped,true);assert.equal(narrow.env.chatState,'closed');assert.equal(narrow.env.chatToggle.focused,1);
   const wide=chatHarness(1920);await wide.setChatOpen(false,false);assert.deepEqual(wide.env.actions,[{action:'chat_open',open:'false'}]);
+});
+test('crossing the dock threshold contains focus and handles Escape from the page',async()=>{
+  const shell=component('EesShell');
+  assert.match(shell,/<svelte:window[^>]*on:keydown\|capture=\{chatEscape\}/);
+  assert.equal((shell.match(/on:keydown\|capture=\{chatEscape\}/g)||[]).length,1);
+  assert.match(shell,/\$:\s*if \(chatState === 'overlay' && chatSurface\) void focusOverlay\(chatSurface\)/);
+  const h=chatHarness(1116,true);
+  h.env.smallOpen=true;h.refresh();assert.equal(h.env.chatState,'docked');
+  const page=element();h.env.document.activeElement=page;
+  h.env.width=1115;h.refresh();assert.equal(h.env.chatState,'overlay');
+  const surface=h.env.chatSurface;
+  const popup={getClientRects:()=>[{}],closest:()=>null};
+  h.env.document.querySelectorAll=()=>[popup];
+  await h.focusOverlay(surface);assert.equal(surface.focused,0,'preserve focus in a portaled submenu');
+  h.env.document.querySelectorAll=()=>[];
+  await h.focusOverlay(surface);assert.equal(surface.focused,1,'a removed separator cannot leave focus behind the overlay');
+  h.env.document.activeElement=surface;
+  await h.focusOverlay(surface);assert.equal(surface.focused,1,'preserve an existing chat focus');
+  // Chrome can send this event to the page body as the separator disappears.
+  const esc={key:'Escape',target:page,stopPropagation(){this.stopped=true;},preventDefault(){this.defaultPrevented=true;}};
+  h.chatEscape(esc);await flush();h.refresh();
+  assert.equal(h.env.chatState,'closed');assert.equal(esc.stopped,true);assert.equal(h.env.chatToggle.focused,1);
+  const wide=chatHarness(1920);
+  wide.env.expanded=true;wide.refresh();wide.chatEscape({...esc,defaultPrevented:false,stopped:false});
+  assert.equal(wide.env.expanded,true,'expanded chat does not capture Escape from the usable navigation');
 });
 test('scope close before its opening tick never opens a stale menu and restores focus after completion', async () => {
   const h = scopeHarness(); h.set(true); h.set(false); await flush();

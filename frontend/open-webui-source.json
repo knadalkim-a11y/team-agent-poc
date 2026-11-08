@@ -31,7 +31,7 @@
     "src/lib/components/ees/EesScopeSelect.svelte": "4906d92006b655ef5de8079ba0ea03a84ae9a584cd404585d530b4f35479afc4",
     "src/lib/components/ees/EesSettingsFrame.svelte": "248f940cf32eae6a431352b85a6050304addb6651f4cc75d454ab2080fb7eee5",
     "src/lib/components/ees/EesSettingsMenu.svelte": "5e6656f7c6ae10dd5c9be5a960444f1457c54188ea18cd9791e7f831e2d6b13f",
-    "src/lib/components/ees/EesShell.svelte": "1d91ff839cba8d796477707ca9cf9bfbf1e699c70cce80cbd753cf52102f0f6e",
+    "src/lib/components/ees/EesShell.svelte": "6f088a4c27504ffb49498abeac8c890450984024c4cb8d503d152d26bec1cc1e",
     "src/lib/components/ees/icons/5bc95.svg": "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7",
     "src/lib/components/ees/state.ts": "d4eee064c100832b93cfc7b984be708df871efcaf8ef009a0f0894e7f1afa712",
     "src/lib/components/layout/Sidebar.svelte": "bbc1ea199bae6144d5064a021ddb482b76f1290ea519d3cdd31846aafe63ac81",
@@ -50,7 +50,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "97e9d1b800e80174a7ee5d39ab82f71a807379ae85427852bd28d25980b7440a"
+      "sha256": "a5e7106b7f8bdf526d89a8f9f4357fbed9057e68a37de0398ed92bdde894ca38"
     }
   ],
   "pyodide_files": {

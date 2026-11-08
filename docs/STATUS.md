@@ -1,5 +1,12 @@
 # 현재 작업 상태
 
+## 2026-11-09 · 채팅이 겹쳐 열릴 때의 키보드 조작
+
+- PR #131 병합 후 `576a527c1fb7`에서 1116px → 1115px 전환 후 Escape가 채팅을 닫지 못하는 사례를 확인했다. 채팅 내부의 메뉴와 IME 입력을 유지하면서 겹침 상태에 초점을 맞추고 닫은 뒤 호출 버튼으로 돌린다. [첫 실행·재현 조건](../evals/artifacts/work-centered-product-20261109/merge-overlay-check.json).
+- 배포 판단은 보완 커밋의 main CI와 프로그램 ZIP을 기준으로 한다. 사내 적용 결과는 운영 PC의 상태에서 확인한다.
+
+> 아래는 변경 당시 기록이다.
+
 ## 2026-11-09 · 업무 중심 화면 제품 구현
 
 - 사용자 지정 목업은 [업무 중심 화면 1판](mockups/ees-work/design-mock-14-work-centered.html)이고 기준 커밋은 `41b8b086148a6d7256180e570fe3728d8c121a73`다. [구현 범위와 판 선택 근거](mockups/ees-work/TASK.md#work-centered-20261106).

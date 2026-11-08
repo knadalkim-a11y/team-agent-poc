@@ -2917,10 +2917,10 @@ index 0000000..fc64846
 +{/if}
 diff --git a/src/lib/components/ees/EesShell.svelte b/src/lib/components/ees/EesShell.svelte
 new file mode 100644
-index 0000000..763300c
+index 0000000..395dfd2
 --- /dev/null
 +++ b/src/lib/components/ees/EesShell.svelte
-@@ -0,0 +1,379 @@
+@@ -0,0 +1,390 @@
 +<script lang="ts">
 +	import { getContext, onMount, tick } from 'svelte';
 +	import { get } from 'svelte/store';
@@ -2993,6 +2993,7 @@ index 0000000..763300c
 +	$: chatOpen = smallSize ? smallOpen : s.chat_open !== false;
 +	$: chatState = !chatOpen ? 'closed' : overlay ? 'overlay' : expanded ? 'expanded' : 'docked';
 +	$: eesChatDisplay.set({ open: chatOpen, expanded: chatState === 'expanded', overlay });
++	$: if (chatState === 'overlay' && chatSurface) void focusOverlay(chatSurface);
 +	$: if (mounted) {
 +		$page.url.pathname; $page.url.search; $user?.id; $eesSessionReady; $showSettings; $temporaryChatEnabled;
 +		tick().then(eesSync);
@@ -3046,17 +3047,27 @@ index 0000000..763300c
 +		const next = { ArrowLeft: chatWidth + 16, ArrowRight: chatWidth - 16, Home: 420, End: widthLimit }[e.key];
 +		if (next !== undefined) { e.preventDefault(); setWidth(next, true); }
 +	}
++	function hasNestedPopup(surface: HTMLElement) {
++		const selector = 'dialog[open], [role="dialog"], [role="menu"], [role="listbox"], .suggestion-list-container';
++		return Array.from(document.querySelectorAll<HTMLElement>(selector)).some(el =>
++			el !== surface && el.getClientRects().length && !el.closest('[inert],[hidden],[aria-hidden="true"]') && getComputedStyle(el).visibility === 'visible');
++	}
++	// A resize can make the work area inert or remove the focused separator.
++	async function focusOverlay(surface: HTMLElement) {
++		await tick();
++		if (chatState !== 'overlay' || chatSurface !== surface || ($showSettings && !admin)) return;
++		if (!surface.contains(document.activeElement) && !hasNestedPopup(surface)) surface.focus({ preventScroll: true });
++	}
 +	// The Native editor consumes Escape even with no suggestion open. Handle the panel
 +	// in capture phase, leaving IME composition and explicit Native popups to their owner.
 +	function chatEscape(e: KeyboardEvent) {
 +		if (e.key !== 'Escape' || e.defaultPrevented || e.isComposing || e.keyCode === 229) return;
 +		if ((chatState !== 'overlay' && chatState !== 'expanded') || ($showSettings && !admin)) return;
 +		const target = e.target as Element;
-+		if (target.closest('dialog, [role="menu"], [role="listbox"], [aria-expanded="true"], details[open]')) return;
-+		const popup = 'dialog[open], [role="dialog"], [role="menu"], [role="listbox"], .suggestion-list-container';
-+		const otherSurface = Array.from(document.querySelectorAll<HTMLElement>(popup)).some(el =>
-+			el !== chatSurface && el.getClientRects().length && !el.closest('[inert],[hidden],[aria-hidden="true"]') && getComputedStyle(el).visibility === 'visible');
-+		if (otherSurface) return;
++		const insideChat = chatSurface?.contains(target);
++		if (chatState === 'expanded' && !insideChat) return;
++		if (insideChat && target.closest('dialog, [role="menu"], [role="listbox"], details[open]')) return;
++		if (hasNestedPopup(chatSurface)) return;
 +		e.preventDefault();
 +		e.stopPropagation();
 +		if (chatState === 'overlay') void setChatOpen(false); else void toggleChatExpanded();
@@ -3214,7 +3225,7 @@ index 0000000..763300c
 +	});
 +</script>
 +
-+<svelte:window bind:innerWidth={width} />
++<svelte:window bind:innerWidth={width} on:keydown|capture={chatEscape} />
 +<div data-ees-source-shell data-ees-route={nativeRoute || admin ? 'native' : 'chat'} data-ees-chat-state={chatState}
 +	data-resizing={resizing} class="ees-source-shell" style:--ees-chat-width={chatWidth + 'px'}
 +	on:pointerdown={(event) => window.__eesNativeWorkV1?.dismissHelp?.(event)}>
@@ -3244,7 +3255,7 @@ index 0000000..763300c
 +	<div class="ees-chat-space" aria-hidden="true"></div>
 +	<section id="ees-chat-surface" data-ees-chat-surface bind:this={chatSurface} class="ees-chat-region" tabindex="-1"
 +		role={chatState === 'overlay' ? 'dialog' : 'region'} aria-modal={chatState === 'overlay' ? true : undefined}
-+		aria-label={t('EES.Conversation', 'Conversation')} aria-hidden={!chatOpen} inert={!chatOpen} on:keydown|capture={chatEscape} on:keydown={chatKeydown}>
++		aria-label={t('EES.Conversation', 'Conversation')} aria-hidden={!chatOpen} inert={!chatOpen} on:keydown={chatKeydown}>
 +		{#if chatState === 'docked'}
 +			<div data-ees-chat-resize class="ees-chat-resize" role="separator" tabindex="0" aria-orientation="vertical"
 +				aria-label={t('EES.Chat.Width', 'Chat width')} aria-controls="ees-chat-surface" aria-valuemin="420" aria-valuemax={widthLimit} aria-valuenow={chatWidth}

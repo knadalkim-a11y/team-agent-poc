@@ -98,11 +98,15 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.viewport(1116)
         self.chat_state('docked')
         self.assertAlmostEqual(self.geometry()['work']['width'],640,delta=1)
+        # The focused split handle disappears when the same open chat becomes a dialog.
+        self.click('[data-ees-chat-resize]')
+        self.wait("document.activeElement?.matches('[data-ees-chat-resize]')")
         self.viewport(1115)
         if self.geometry()['state']=='closed':
             self.click('[data-ees-chat-toggle]')
         self.chat_state('overlay')
         self.assertAlmostEqual(self.geometry()['work']['width'],1115-56,delta=1)
+        self.wait("document.querySelector('[data-ees-chat-surface]').contains(document.activeElement)")
         self.key('Escape',27)
         self.chat_state('closed')
         self.viewport(480,overlay=True)
