@@ -1737,18 +1737,19 @@ index c183993..e490262 100644
  	{/if}
  </div>
 diff --git a/src/lib/components/chat/SettingsModal.svelte b/src/lib/components/chat/SettingsModal.svelte
-index 3f1360a..618e26b 100644
+index 3f1360a..e416d59 100644
 --- a/src/lib/components/chat/SettingsModal.svelte
 +++ b/src/lib/components/chat/SettingsModal.svelte
-@@ -9,6 +9,7 @@
+@@ -8,7 +8,7 @@
+ 	import { getUserSettings, updateUserSettings } from '$lib/apis/users';
  	import { getBackendConfig, getModels as _getModels } from '$lib/apis';
  
- 	import Modal from '../common/Modal.svelte';
+-	import Modal from '../common/Modal.svelte';
 +	import EesSettingsFrame from '$lib/components/ees/EesSettingsFrame.svelte';
  	import Account from './Settings/Account.svelte';
  	import About from './Settings/About.svelte';
  	import General from './Settings/General.svelte';
-@@ -57,6 +58,7 @@
+@@ -57,6 +57,7 @@
  
  	const i18n: Writable<any> = getContext('i18n');
  
@@ -1756,21 +1757,21 @@ index 3f1360a..618e26b 100644
  	export let show: boolean | string | SettingsModalRequest = false;
  	let modalShow = false;
  	let lastShow: boolean | string | SettingsModalRequest = false;
-@@ -926,7 +928,7 @@
+@@ -926,7 +927,7 @@
  	});
  </script>
  
 -<Modal
-+<svelte:component this={embedded ? EesSettingsFrame : Modal}
++<EesSettingsFrame {embedded}
  	size="full"
  	containerClassName="p-4 sm:p-6 lg:p-8"
  	className="!w-[calc(100vw-2rem)] sm:!w-[calc(100vw-3rem)] lg:!w-[calc(100vw-4rem)] !max-w-[80rem] h-[min(max(54rem,80dvh),calc(100dvh-4rem))] max-h-[calc(100dvh-4rem)] flex flex-col md:flex-row bg-white dark:bg-gray-900 rounded-4xl overflow-hidden"
-@@ -1322,4 +1324,4 @@
+@@ -1322,4 +1323,4 @@
  			{/if}
  		</div>
  	</div>
 -</Modal>
-+</svelte:component>
++</EesSettingsFrame>
 diff --git a/src/lib/components/common/Dropdown.svelte b/src/lib/components/common/Dropdown.svelte
 index 9234ec7..27056b0 100644
 --- a/src/lib/components/common/Dropdown.svelte
@@ -2790,19 +2791,26 @@ index 0000000..6e7a618
 +</div>
 diff --git a/src/lib/components/ees/EesSettingsFrame.svelte b/src/lib/components/ees/EesSettingsFrame.svelte
 new file mode 100644
-index 0000000..b66b213
+index 0000000..8e0e8de
 --- /dev/null
 +++ b/src/lib/components/ees/EesSettingsFrame.svelte
-@@ -0,0 +1,13 @@
+@@ -0,0 +1,20 @@
 +<script lang="ts">
-+	// Accept the Native modal's public props while keeping these settings in the work column.
-+	export let show = true;
-+	export let size = '';
++	import Modal from '../common/Modal.svelte';
++	export let embedded = false;
++	export let show = false;
++	export let size = 'full';
 +	export let containerClassName = '';
 +	export let className = '';
 +</script>
 +
-+{#if show}
++<!-- Keep Native's personal modal mounted. Its onDestroy closes its bound value,
++     so replacing it when entering admin would immediately close the new tab. -->
++<Modal {size} {containerClassName} {className}
++	bind:show={() => show && !embedded, (open) => { if (!embedded) show = open; }}>
++	{#if !embedded}<slot />{/if}
++</Modal>
++{#if embedded && show}
 +	<div data-ees-admin-settings class="flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden bg-white md:flex-row dark:bg-gray-900">
 +		<slot />
 +	</div>
@@ -2909,10 +2917,10 @@ index 0000000..fc64846
 +{/if}
 diff --git a/src/lib/components/ees/EesShell.svelte b/src/lib/components/ees/EesShell.svelte
 new file mode 100644
-index 0000000..8fcb849
+index 0000000..763300c
 --- /dev/null
 +++ b/src/lib/components/ees/EesShell.svelte
-@@ -0,0 +1,358 @@
+@@ -0,0 +1,379 @@
 +<script lang="ts">
 +	import { getContext, onMount, tick } from 'svelte';
 +	import { get } from 'svelte/store';
@@ -2969,6 +2977,7 @@ index 0000000..8fcb849
 +	}
 +	$: if ((width < 1200) !== smallSize) {
 +		smallSize = width < 1200;
++		if (smallSize) eesCompact.set(true);
 +		smallOpen = false;
 +		expanded = false;
 +	}
@@ -3037,16 +3046,25 @@ index 0000000..8fcb849
 +		const next = { ArrowLeft: chatWidth + 16, ArrowRight: chatWidth - 16, Home: 420, End: widthLimit }[e.key];
 +		if (next !== undefined) { e.preventDefault(); setWidth(next, true); }
 +	}
-+	function chatKeydown(e: KeyboardEvent) {
-+		if (e.defaultPrevented || ($showSettings && !admin) || !chatOpen) return;
++	// The Native editor consumes Escape even with no suggestion open. Handle the panel
++	// in capture phase, leaving IME composition and explicit Native popups to their owner.
++	function chatEscape(e: KeyboardEvent) {
++		if (e.key !== 'Escape' || e.defaultPrevented || e.isComposing || e.keyCode === 229) return;
++		if ((chatState !== 'overlay' && chatState !== 'expanded') || ($showSettings && !admin)) return;
 +		const target = e.target as Element;
-+		if (target?.closest('dialog, [role="menu"], [role="listbox"], [data-scope-dropdown]')) return;
-+		const dialog = target?.closest('[role="dialog"]');
-+		if (dialog && dialog !== chatSurface) return;
-+		if (e.key === 'Escape' && (overlay || expanded)) {
-+			e.preventDefault(); e.stopPropagation();
-+			if (overlay) void setChatOpen(false); else void toggleChatExpanded();
-+		} else if (e.key === 'Tab' && overlay) {
++		if (target.closest('dialog, [role="menu"], [role="listbox"], [aria-expanded="true"], details[open]')) return;
++		const popup = 'dialog[open], [role="dialog"], [role="menu"], [role="listbox"], .suggestion-list-container';
++		const otherSurface = Array.from(document.querySelectorAll<HTMLElement>(popup)).some(el =>
++			el !== chatSurface && el.getClientRects().length && !el.closest('[inert],[hidden],[aria-hidden="true"]') && getComputedStyle(el).visibility === 'visible');
++		if (otherSurface) return;
++		e.preventDefault();
++		e.stopPropagation();
++		if (chatState === 'overlay') void setChatOpen(false); else void toggleChatExpanded();
++	}
++	function chatKeydown(e: KeyboardEvent) {
++		if (e.defaultPrevented || ($showSettings && !admin)) return;
++		if (e.key === 'Tab' && chatState === 'overlay') {
++			const target = e.target as Element;
 +			const items = Array.from(chatSurface.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],input,textarea,[contenteditable=true],[tabindex="0"]'))
 +				.filter(el => el.getClientRects().length && !el.closest('[inert],[hidden]'));
 +			const first = items[0], last = items[items.length - 1];
@@ -3080,6 +3098,7 @@ index 0000000..8fcb849
 +		finally { centerNavigations--; }
 +	}
 +	async function newChat() {
++		eesChatHistoryOpen.set(false);
 +		conversationChoice++;
 +		if (!get(temporaryChatEnabled)) window.__eesNativeDraftV1?.flush?.();
 +		await setChatOpen(true, false);
@@ -3090,6 +3109,7 @@ index 0000000..8fcb849
 +		await tick(); eesSync();
 +	}
 +	async function selectConversation(id: string) {
++		eesChatHistoryOpen.set(false);
 +		conversationChoice++; showSearch.set(false);
 +		if (!get(temporaryChatEnabled)) window.__eesNativeDraftV1?.flush?.();
 +		if (retainedChatId !== id) {
@@ -3102,6 +3122,7 @@ index 0000000..8fcb849
 +		await tick(); eesSync();
 +	}
 +	async function selectConversationFolder(id: string) {
++		eesChatHistoryOpen.set(false);
 +		const choice = ++conversationChoice, owner = get(user)?.id, token = localStorage.token;
 +		const current = () => mounted && choice === conversationChoice && get(user)?.id === owner && localStorage.token === token && (nativeRoute || admin);
 +		if (!get(temporaryChatEnabled)) window.__eesNativeDraftV1?.flush?.();
@@ -3177,6 +3198,7 @@ index 0000000..8fcb849
 +				if (match[1] === 'folders') void selectConversationFolder(id); else void selectConversation(id);
 +			}
 +		} else if (!centerNavigations && navigation.type !== 'popstate' && target?.origin === location.origin && /^\/(?:c|folders)\/[^/]+\/?$/.test(target.pathname)) {
++			eesChatHistoryOpen.set(false);
 +			void setChatOpen(true, false);
 +		}
 +	});
@@ -3222,7 +3244,7 @@ index 0000000..8fcb849
 +	<div class="ees-chat-space" aria-hidden="true"></div>
 +	<section id="ees-chat-surface" data-ees-chat-surface bind:this={chatSurface} class="ees-chat-region" tabindex="-1"
 +		role={chatState === 'overlay' ? 'dialog' : 'region'} aria-modal={chatState === 'overlay' ? true : undefined}
-+		aria-label={t('EES.Conversation', 'Conversation')} aria-hidden={!chatOpen} inert={!chatOpen} on:keydown={chatKeydown}>
++		aria-label={t('EES.Conversation', 'Conversation')} aria-hidden={!chatOpen} inert={!chatOpen} on:keydown|capture={chatEscape} on:keydown={chatKeydown}>
 +		{#if chatState === 'docked'}
 +			<div data-ees-chat-resize class="ees-chat-resize" role="separator" tabindex="0" aria-orientation="vertical"
 +				aria-label={t('EES.Chat.Width', 'Chat width')} aria-controls="ees-chat-surface" aria-valuemin="420" aria-valuemax={widthLimit} aria-valuenow={chatWidth}
@@ -3252,7 +3274,7 @@ index 0000000..8fcb849
 +	.ees-work-toolbar button:hover { background:var(--ees-surface-hover,#f6f7f9); }
 +	.ees-center :global(#ees-work-panel) { position:relative; inset:auto; flex:1 1 0; width:100%; min-width:0; height:auto; min-height:0; max-height:100%; border:0; }
 +	.ees-native-region,.ees-settings-region,.ees-chat-live { display:flex; flex:1; width:100%; height:100%; min-width:0; min-height:0; overflow:hidden; }
-+	.ees-chat-live { flex-direction:column; }
++	.ees-chat-live { flex-direction:column; isolation:isolate; }
 +	.ees-native-region > :global(div) { max-width:100%; max-height:100%; }
 +	.ees-loading-close { align-self:flex-end; margin:8px; padding:4px 8px; font-size:13px; }
 +	.ees-center :global(#ees-work-panel[hidden]),.ees-native-region[hidden],.ees-settings-region[hidden],.ees-chat-live[hidden] { display:none; }
@@ -3269,6 +3291,13 @@ index 0000000..8fcb849
 +	.ees-chat-resize { position:absolute; left:-4px; top:0; bottom:0; width:8px; z-index:2; cursor:col-resize; touch-action:none; }
 +	.ees-chat-resize:focus-visible,.ees-work-toolbar button:focus-visible { outline:2px solid #2f5f98; outline-offset:-2px; }
 +	.ees-source-shell[data-resizing='true'] .ees-chat-space,.ees-source-shell[data-resizing='true'] .ees-chat-region { transition:none; }
++	/* Below 56 + 640 + 420px a dock cannot fit. Release its space as soon as
++	   the viewport changes, even before the next resize event or animation frame. */
++	@media (width < 1116px) {
++		.ees-source-shell .ees-chat-space { width:0; transition:none; }
++		.ees-source-shell .ees-navigation :global(#sidebar) { transition-duration:0s; }
++		.ees-source-shell[data-ees-chat-state='docked'] .ees-chat-region { visibility:hidden; transition:none; }
++	}
 +	@media (prefers-reduced-motion: reduce) { .ees-source-shell .ees-chat-space,.ees-source-shell .ees-chat-region,.ees-source-shell[data-ees-chat-state='closed'] .ees-chat-region { transition:none; } }
 +</style>
 diff --git a/src/lib/components/ees/icons/5bc95.svg b/src/lib/components/ees/icons/5bc95.svg

@@ -740,7 +740,7 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.login_ui("administrator@example.test", "Fixture-admin-only-42!")
         self.open_user_editor(account.email)
         self.select_native('select[aria-label]', 'user')
-        self.click('button[type="submit"]')
+        self.click_text("저장", selector='button[type="submit"]')
         self.wait("!document.querySelector('select[aria-label]')")
         self.assertEqual(self.fixture.run(self.fixture.users.Users.get_user_by_id(account.id)).role, 'user')
         self.screenshot("sa-native-approved-user")

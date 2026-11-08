@@ -66,15 +66,32 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             self.open_stage_from_overview()
         self.wait("document.querySelector('[data-authored-stage][data-stage-job=job-0]')")
 
+    def wait_for_work_layout(self, width):
+        # A viewport resize can finish before the sidebar and dock spacer do.
+        if width <= 480:
+            self.wait("""document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === 'true' &&
+                document.querySelector('[data-ees-source-shell]')?.dataset.eesChatState === 'closed'""")
+        self.wait("""!document.querySelector('[data-ees-source-shell]').getAnimations({subtree:true})
+            .some(animation => animation.effect?.target?.matches('#sidebar,.ees-chat-space,[data-ees-work-surface]'))""")
+        if width <= 480:
+            bounds = self.browser.evaluate("""(() => {
+                const rect = selector => document.querySelector(selector).getBoundingClientRect();
+                const rail = rect('[data-ees-source-sidebar]'), panel = rect('#ees-work-panel');
+                const center = rect('[data-ees-work-surface]');
+                return {rail:rail.width, left:center.left, right:center.right, panel:panel.width};
+            })()""")
+            self.assertAlmostEqual(bounds['rail'], 56, delta=1, msg=bounds)
+            self.assertAlmostEqual(bounds['left'], 56, delta=1, msg=bounds)
+            self.assertAlmostEqual(bounds['right'], width, delta=1, msg=bounds)
+            self.assertAlmostEqual(bounds['panel'], width - 56, delta=1, msg=bounds)
+
     def phase3_capture(self, label):
         observations = []
         for width, height in ((1920, 1080), (1366, 768), (360, 768)):
             self.browser.call('Emulation.setDeviceMetricsOverride', {
                 'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
             self.wait('innerWidth === ' + str(width) + ' && innerHeight === ' + str(height))
-            self.wait("!document.querySelector('#sidebar').getAnimations().length")
-            if width<=480:
-                self.wait("document.querySelector('[data-ees-source-shell]').dataset.eesChatState==='closed'")
+            self.wait_for_work_layout(width)
             geometry = self.browser.evaluate("""(()=>{const e=document.querySelector('#ees-work-panel'),r=e.getBoundingClientRect(),row=e.querySelector('[data-authored-stage]');return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,overflow:e.scrollWidth-e.clientWidth,rowOverflow:row.scrollWidth-row.clientWidth,documents:row.querySelectorAll('.ew-authored-document').length,checkboxes:row.querySelectorAll('[data-list-include],[data-item-verdict],[data-action=confirm_list]').length};})()""")
             self.assertGreaterEqual(geometry['left'], -1, geometry)
             self.assertLessEqual(geometry['right'], width + 1, geometry)
@@ -372,6 +389,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         return key, run
 
     def stage_capture(self, label):
+        self.wait_for_work_layout(self.browser.evaluate('innerWidth'))
         self.wait("!document.querySelector('[data-ees-motion=opening],[data-ees-motion=closing]')")
         observed = self.browser.evaluate("""(() => {
             const panel=document.querySelector('#ees-work-panel'), rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};};
@@ -557,9 +575,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             self.wait('innerWidth===' + str(width))
             self.assertIn('업무 절차를 선택해 주세요', self.text('#ees-work-panel'))
             if width == 480:
-                # The operation remains visible while the narrow-window chat starts closed.
-                self.wait("document.querySelector('[data-ees-source-shell]').dataset.eesChatState==='closed'")
-                self.assertGreater(self.read('[data-ees-work-surface]','getBoundingClientRect().width'),0)
+                self.wait_for_work_layout(width)
             self.open_sidebar()
             self.wait('document.querySelector(\'[data-action=workflow][data-workflow-id="' + published + '"]\')')
             visible = self.browser.evaluate("[...document.querySelectorAll('#sidebar [data-action=workflow]')].map(node=>node.dataset.workflowId)")

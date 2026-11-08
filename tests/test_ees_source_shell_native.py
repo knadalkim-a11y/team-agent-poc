@@ -23,7 +23,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
     def r11_panel_roundtrip(self, key):
         """Use actual shell controls; closing chat never retires the work host."""
         toggle = '[data-ees-chat-toggle]'
-        self.browser.evaluate("window.__r11Nodes={chat:document.querySelector('#chat-input'),work:document.querySelector('#ees-work-panel')}")
+        self.browser.evaluate("window.__r11Nodes={chat:document.querySelector('#chat-input'),work:document.querySelector('#ees-work-panel')};true")
         self.click('[data-ees-chat-close]')
         self.wait("document.querySelector('[data-ees-source-shell]').dataset.eesChatState==='closed'")
         self.wait("document.activeElement?.matches('[data-ees-chat-toggle]')")
@@ -1204,8 +1204,9 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.delayed_step('preservation-native-return', '#ees-work-entry [data-action=procedures]',
                           "location.pathname === '/c/existing-chat' && document.querySelector('#ew-author-policies [name=completion_notes]')")
         returned = assert_preserved('Native return')
+        # The current published procedure remains selected when returning to work mode.
         self.delayed_step('preservation-work-home', '[data-action=mode][data-mode=work]',
-                          "!!document.querySelector('#ees-work-panel .ew-work-home')")
+                          "document.querySelector('#ees-work-panel .ew-operation-overview')?.innerText.includes('증분 갱신 보존 절차')")
         self.delayed_step('preservation-author-return', '[data-action=mode][data-mode=author]',
                           "document.querySelector('#ew-author-policies [name=completion_notes]')")
         # Work mode deliberately mounts a different panel. Returning must
@@ -1275,7 +1276,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
                   "document.querySelector('[data-author-action=tool_create]')")
         labels.append('work-tools')
         self.fill('#chat-input','Native 업무를 열어도 유지할 개인 대화 초안')
-        self.browser.evaluate("window.__routeChatQA={node:document.querySelector('#chat-input'),draft:window.__eesNativeDraftV1.read(),chatId:window.__eesSourceShellV1.screen().chatId}")
+        self.browser.evaluate("window.__routeChatQA={node:document.querySelector('#chat-input'),draft:window.__eesNativeDraftV1.read(),chatId:window.__eesSourceShellV1.screen().chatId};true")
 
         self.assertFalse(self.browser.evaluate("Boolean(document.querySelector('[data-action=workspace_admin], [data-action=admin_factory], [data-action=admin_access]'))"))
         self.step('work-procedures', '#ees-work-entry [data-action=procedures]',

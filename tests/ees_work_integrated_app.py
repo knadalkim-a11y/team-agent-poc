@@ -776,7 +776,9 @@ def work_centered_chat_roundtrip(g,chat_id):
     initial=g.api('/api/v1/chats/'+chat_id)['chat']['history']
     state('docked')
     g.type('#chat-input',draft)
-    g.browser.evaluate("window.__workCenteredQA={composer:document.querySelector('#chat-input'),work:document.querySelector('#ees-work-panel'),draft:window.__eesNativeDraftV1.read()}")
+    g.wait("window.__eesNativeDraftV1.read()?.prompt?.includes("+json.dumps(draft)+")")
+    # Keep live DOM handles in the page. CDP only needs subsequent identity checks.
+    g.browser.evaluate("void (window.__workCenteredQA={composer:document.querySelector('#chat-input'),work:document.querySelector('#ees-work-panel'),draft:window.__eesNativeDraftV1.read()})")
     def kept():
         assert g.browser.evaluate("document.querySelectorAll('#chat-input.ProseMirror').length===1 && document.querySelector('#chat-input')===window.__workCenteredQA.composer && document.querySelector('#ees-work-panel')===window.__workCenteredQA.work")
         assert g.browser.evaluate("JSON.stringify(window.__eesNativeDraftV1.read())===JSON.stringify(window.__workCenteredQA.draft)")

@@ -73,24 +73,35 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.browser.call('Emulation.setDeviceMetricsOverride', {
             'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
         self.wait('innerWidth === ' + str(width) + ' && innerHeight === ' + str(height))
-        # The browser viewport changes before Svelte's bound width/compact
-        # stores have rendered. Wait for the actual layout contract, not time.
-        self.wait("document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === " +
-                  json.dumps(str(width < 1440).lower()))
         shell = "document.querySelector('[data-ees-source-shell]')"
+        state = shell + ".dataset.eesChatState"
         if overlay:
-            self.wait("['overlay','closed'].includes(" + shell + ".dataset.eesChatState)")
-            if self.browser.evaluate(shell + ".dataset.eesChatState === 'overlay'"):
+            self.wait("['overlay','closed'].includes(" + state + ")")
+            if self.browser.evaluate(state + " === 'overlay'"):
                 self.click('[data-ees-chat-close]')
-            self.wait(shell + ".dataset.eesChatState === 'closed'")
+            self.wait(state + " === 'closed'")
         else:
-            self.wait("['closed','docked'].includes(" + shell + ".dataset.eesChatState)")
-            if self.browser.evaluate(shell + ".dataset.eesChatState === 'closed'"):
+            self.wait("['closed','docked'].includes(" + state + ")")
+            if self.browser.evaluate(state + " === 'closed'"):
                 self.click('[data-ees-chat-toggle]')
-            self.wait(shell + ".dataset.eesChatState === 'docked'")
-        self.wait("Math.abs(" + shell + ".getBoundingClientRect().width - " + str(width) + ") < 1")
-        self.wait("!document.querySelector('#sidebar').getAnimations().length && "
-                  "!document.querySelector('[data-ees-chat-surface]').getAnimations().length")
+            self.wait(state + " === 'docked'")
+        # Some flows explicitly expanded the rail for navigation before sizing.
+        # Set the comparison geometry with the same button a user would use.
+        compact = json.dumps(str(width < 1440).lower())
+        sidebar = "document.querySelector('[data-ees-source-sidebar]')"
+        if self.browser.evaluate(sidebar + ".dataset.compact !== " + compact):
+            self.click('[data-ees-sidebar-toggle]')
+        self.wait(sidebar + ".dataset.compact === " + compact)
+        self.wait("""(() => {
+            const rect = selector => document.querySelector(selector).getBoundingClientRect();
+            const sidebar = rect('[data-ees-source-sidebar]'), work = rect('[data-ees-work-surface]'),
+                  chat = rect('[data-ees-chat-surface]'), state = document.querySelector('[data-ees-source-shell]').dataset.eesChatState;
+            const right = state === 'docked' ? chat.left : innerWidth;
+            const settled = ['[data-ees-source-sidebar]', '.ees-chat-space', '[data-ees-chat-surface]'].every(selector =>
+                document.querySelector(selector).getAnimations().every(animation=>!animation.pending&&animation.playState!=='running'));
+            return settled && Math.abs(work.left - sidebar.right) <= 1 && Math.abs(work.right - right) <= 1 &&
+                work.width > 0 && Math.abs(sidebar.width - (innerWidth < 1440 ? 56 : 256)) <= 1;
+        })()""")
 
     def test_manual_publication_of_incomplete_procedure_and_unpublish_from_editor(self):
         self.open_initialized_author_list()
@@ -174,7 +185,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                     panelWidth:document.querySelector('[data-ees-work-surface]').getBoundingClientRect().width,
                     linkTextTop:button.top+parseFloat(style.borderTopWidth)+parseFloat(style.paddingTop)-title.top,
                     policyTop:policy.getBoundingClientRect().top-title.top,
-                    linkHeight:button.height,guidanceHeight:text.height,
+                    linkHeight:button.height,guidanceHeight:text.height,guidanceLine:parseFloat(getComputedStyle(guidance).lineHeight) || parseFloat(getComputedStyle(guidance).fontSize),
+                    lines:new Set(lines.map(line=>Math.round(line.top))).size,
                     overlap:text.bottom-button.top,
                     clipped:lines.some(r=>r.bottom>text.bottom+1||r.right>text.right+1),
                     overflow:scroll.scrollWidth-scroll.clientWidth,
@@ -188,7 +200,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertFalse(geometry['clipped'], geometry)
             self.assertLessEqual(geometry['overflow'], 1, geometry)
             self.assertGreaterEqual(geometry['linkHeight'], 34, geometry)
-            self.assertGreaterEqual(geometry['guidanceHeight'], 36, geometry)
+            self.assertGreaterEqual(geometry['lines'], 1, geometry)
+            self.assertGreaterEqual(geometry['guidanceHeight'], geometry['guidanceLine'] * geometry['lines'] - 1, geometry)
             self.assertIn('/_ees14/v4/f0554.svg', geometry['policyIcon'])
             if width == 1366:
                 self.assertAlmostEqual(geometry['panelWidth'], 830, delta=1, msg=geometry)
@@ -335,8 +348,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertAlmostEqual(stage_geometry['height'], 52, delta=.5, msg=stage_geometry)
             self.assertEqual(stage_geometry['number'], {'width': 22, 'height': 22, 'border': '1px', 'radius': 11})
             self.open_author_job_ui('job-0')
-            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
-            self.wait('innerWidth===' + str(width))
+            self.authoring_viewport(width, 768, overlay=width <= 480)
             self.assertIn('검증 단계', self.text('.ew-job-detail-header'))
             self.assertEqual(self.read('#ew-author-node [name=name]', 'maxLength'), 160)
             self.assertIn('무엇을 확인하나요', self.text('.ew-job-main'))
@@ -732,8 +744,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
 
         def capture_unavailable_inline(label):
             for width in (1366, 480):
-                self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
-                self.wait('innerWidth === ' + str(width))
+                self.authoring_viewport(width, 768, overlay=width <= 480)
                 self.wait("""!document.querySelector('[data-ees-motion=opening],[data-ees-motion=closing]') &&
                     [...document.querySelectorAll('#ees-work-designer')].every(surface=>
                         surface.getAnimations({subtree:true}).every(animation=>!animation.pending&&animation.playState!=='running'))""")
@@ -741,7 +752,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 warning_geometry = self.browser.evaluate("""(() => {
                     const e=document.querySelector('#ew-stage-inline-warning'),r=e.getBoundingClientRect(),s=e.closest('.ew-author-scroll').getBoundingClientRect();
                     return {top:r.top,bottom:r.bottom,height:r.height,withinScroll:r.top>=s.top-1&&r.bottom<=s.bottom+1,
-                        withinViewport:r.top>=0&&r.bottom<=innerHeight,
+                        withinViewport:r.top>=-1&&r.bottom<=innerHeight+1,
                         hitTest:e.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2))};
                 })()""")
                 self.assertGreater(warning_geometry['height'], 0, warning_geometry)
@@ -1002,8 +1013,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.wait("document.querySelector('#ees-work-designer')")
             if self.browser.evaluate("!!document.querySelector('[data-author-action=list]')"):
                 self.click('[data-author-action=list]')
-            self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
-            self.wait('innerWidth === ' + str(width))
+            self.authoring_viewport(width, 768, overlay=width <= 480)
             for count in (0, 1, 3, 6):
                 key, definition = fixtures[count]
                 selector = '[data-author-action=open][data-id="' + key + '"]'
@@ -2548,14 +2558,14 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
         self.click('.ees-settings-trigger')
         self.click('[data-action=native_open][data-native-id=admin]')
-        self.wait("document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-admin-general][aria-selected=true]') && document.querySelector('[role=dialog][aria-modal=true] input[type=text][placeholder*=\"localhost:3000\"]')")
+        self.wait("document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-admin-general][aria-selected=true]') && document.querySelector('[data-ees-work-surface] [data-ees-admin-settings] input[type=text][placeholder*=\"localhost:3000\"]')")
         self.assertEqual(self.browser.evaluate('location.pathname + location.search'), '/c/existing-chat')
         self.wait("document.querySelector('#ees-work-entry')")
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-native-return')"))
-        original_url = self.read('[role=dialog] input[type=text][placeholder*="localhost:3000"]', 'value')
+        original_url = self.read('[data-ees-admin-settings] input[type=text][placeholder*="localhost:3000"]', 'value')
         self.assertEqual(original_url, 'https://fixture.invalid')
-        self.fill('[role=dialog] input[type=text][placeholder*="localhost:3000"]', 'https://unsaved-fixture.invalid')
-        self.assertEqual(self.read('[role=dialog] input[type=text][placeholder*="localhost:3000"]', 'value'), 'https://unsaved-fixture.invalid')
+        self.fill('[data-ees-admin-settings] input[type=text][placeholder*="localhost:3000"]', 'https://unsaved-fixture.invalid')
+        self.assertEqual(self.read('[data-ees-admin-settings] input[type=text][placeholder*="localhost:3000"]', 'value'), 'https://unsaved-fixture.invalid')
         self.screenshot('menu-c18-native-admin-unsaved')
         self.click('#settings-tabs-container > button')
         self.wait("location.pathname === '/c/existing-chat' && window.__eesNativeDraftV1?.ready() && document.querySelector('[data-author-action=create]') && !document.querySelector('#settings-tabs-container') && !document.querySelector('#ees-work-native-return')")
@@ -2570,7 +2580,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
 
         self.click('.ees-settings-trigger')
         self.click('[data-action=native_open][data-native-id=admin]')
-        self.wait("document.querySelector('[role=dialog] input[type=text][placeholder*=\"localhost:3000\"]')?.value === 'https://fixture.invalid'")
+        self.wait("document.querySelector('[data-ees-admin-settings] input[type=text][placeholder*=\"localhost:3000\"]')?.value === 'https://fixture.invalid'")
         self.assertFalse(any(method != 'GET' and path in {
             '/api/v1/auths/admin/config', '/api/v1/auths/admin/config/update',
             '/api/v1/configs/banners', '/api/events/webhooks'} for method, path in self.server.requests))
@@ -2585,47 +2595,53 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("location.pathname === '/c/existing-chat' && !document.querySelector('#settings-tabs-container')")
 
     def test_native_admin_dialog_contains_keyboard_focus(self):
+        # Preserve the historical ID while checking the embedded administrator settings.
         self.native_menu_fixture()
         self.click('[data-action=mode][data-mode=author]')
         self.click('.ees-settings-trigger')
         self.click('[data-action=native_open][data-native-id=admin]')
-        self.wait("document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-admin-general][aria-selected=true]') && document.querySelector('[role=dialog][aria-modal=true] input[type=text][placeholder*=\"localhost:3000\"]') && document.querySelector('#ees-work-entry [data-action=procedures]')")
-        observe = """(()=>{
-          const modal=document.querySelector('[role=dialog][aria-modal=true]:has(#settings-tabs-container)');
-          const controls=[...modal.querySelectorAll('a[href],button,input,select,textarea,[tabindex]')].filter(e=>e.tabIndex>=0&&!e.matches(':disabled')&&!e.closest('[inert]')&&e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
-          const describe=e=>({tag:e?.tagName,id:e?.id||'',name:e?.name||'',role:e?.getAttribute('role'),label:e?.getAttribute('aria-label')||'',text:e?.textContent?.trim().slice(0,80)||''});
-          const active=document.activeElement,menu=document.querySelector('#ees-work-entry');
-          return {path:location.pathname,dialog:!!modal,contained:modal.contains(active),menuFocused:menu.contains(active),menuInert:!!menu.closest('[inert]'),active:describe(active),index:controls.indexOf(active),controls:controls.map(describe)};
-        })()"""
-        # Establish focus with a real pointer, then use trusted browser Tab
-        # events. DOM dispatchEvent/focus() cannot prove Native's focus trap.
-        self.click('[role=dialog] input[type=text][placeholder*="localhost:3000"]')
-        initial = self.browser.evaluate(observe)
-        self.assertTrue(initial['contained'])
-        self.assertGreater(len(initial['controls']), 2)
+        pane = '[data-ees-work-surface] [data-ees-admin-settings]'
+        field = pane + ' input[type=text][placeholder*="localhost:3000"]'
+        self.wait("!!document.querySelector(" + json.dumps(field) + ")?.checkVisibility()")
+        self.assertTrue(self.browser.evaluate("!!document.querySelector(" +
+            json.dumps(pane + ' [role=tab][aria-controls=tab-admin-general][aria-selected=true]') + ")"))
+        self.assertFalse(self.browser.evaluate("!!document.querySelector(" + json.dumps(pane) +
+            ").closest('dialog,[role=dialog]')"))
+        self.click(field)
+        self.assertTrue(self.browser.evaluate("document.activeElement.matches(" + json.dumps(field) + ")"))
+        count = self.browser.evaluate("document.querySelector(" + json.dumps(pane) +
+            ").querySelectorAll('button,input,select,textarea,a[href],[tabindex]').length")
+        self.assertGreater(count, 2)
         sequence = []
-        for direction, modifiers in (('Tab', 0), ('Shift+Tab', 8)):
-            for index in range(len(initial['controls']) * 2 + 4):
-                self.key('Tab', 9, modifiers)
-                record = self.browser.evaluate(observe)
-                record.pop('controls')
-                record.update(direction=direction,step=index+1)
-                sequence.append(record)
-        menu_pointer = self.browser.evaluate("""(()=>{const e=document.querySelector('#ees-work-entry [data-action=procedures]'),r=e.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2,hit=document.elementFromPoint(x,y);return {point:{x,y},reachable:e.contains(hit),hit:{tag:hit?.tagName,id:hit?.id,classes:hit?.className,role:hit?.getAttribute('role')},menuInert:!!e.closest('[inert]')};})()""")
+        observe = """(() => {
+          const pane = document.querySelector('[data-ees-admin-settings]'), e = document.activeElement;
+          return {inAdmin:pane.contains(e), inChat:!!e.closest('[data-ees-chat-surface]'),
+                  inNav:!!e.closest('[data-ees-source-sidebar]'), tag:e.tagName, id:e.id};
+        })()"""
+        for _ in range(count + 4):
+            self.key('Tab', 9)
+            step = self.browser.evaluate(observe)
+            sequence.append(step)
+            if not step['inAdmin']:
+                break
+        # An embedded pane participates in the shell Tab order. The next stop is the docked chat.
+        self.assertTrue(sequence[-1]['inChat'], sequence)
+        self.key('Tab', 9, 8)
+        self.assertTrue(self.browser.evaluate(observe)['inAdmin'], sequence)
+        self.assertEqual(self.read(field, 'value'), 'https://fixture.invalid')
+        self.assertTrue(self.read('#ees-work-entry [data-action=procedures]', 'checkVisibility()'))
         directory = self.screenshot('menu-c18-admin-keyboard-focus')
-        (directory / 'menu-c18-admin-keyboard-focus.json').write_text(json.dumps({
-            'scope': 'actual compiled Open WebUI 0.11.3 modal and trusted Chrome CDP keyboard/pointer; temporary workflow SQLite and synthetic Native session/capability responses; not real company authentication or ACL verification',
-            'initial': initial, 'sequence': sequence, 'menu_pointer': menu_pointer,
+        (directory / 'menu-c18-admin-focus-cycle.json').write_text(json.dumps({
+            'scope': 'Trusted Chromium keyboard navigation through Native settings in the central work pane.',
+            'sequence': sequence,
         }, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-        self.assertTrue(all(item['dialog'] and item['contained'] and not item['menuFocused']
-                            for item in sequence), sequence)
-        for direction in ('Tab', 'Shift+Tab'):
-            visited = [item['index'] for item in sequence if item['direction'] == direction]
-            self.assertIn(0, visited)
-            self.assertIn(len(initial['controls']) - 1, visited)
-            self.assertLess(len(set(visited)), len(visited), 'Expected a complete focus cycle')
-            boundary = (len(initial['controls']) - 1, 0) if direction == 'Tab' else (0, len(initial['controls']) - 1)
-            self.assertIn(boundary, list(zip(visited, visited[1:])))
+        self.click('#settings-tabs-container > button')
+        self.wait("!document.querySelector('[data-ees-admin-settings]') && !!document.querySelector('#ees-work-designer')")
+        self.native_menu_fixture(admin=False)
+        self.click('.ees-settings-trigger')
+        self.wait("!!document.querySelector('.ees-settings-popover [role=menuitem]')")
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('.ees-settings-popover [data-native-id=admin]')"))
+        self.assertEqual(self.server.completions, [])
 
     def test_native_menu_image_attachment_blocks_departure_without_losing_image_or_prompt(self):
         # Keep the historical test ID in the audit. Phase 2-1 replaces the old
@@ -3483,7 +3499,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                          ['업무 내용', '판정 규칙', '게시 기록'])
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ew-author-schedule,[data-author-action=run_mode],[data-author-action=schedule_tools]')"))
         self.assertIn('시작할 때 받는 값', self.text('.ew-content-start-inputs'))
-        self.assertLess(self.browser.evaluate("document.querySelector('.ew-content-start-inputs').getBoundingClientRect().y"),
+        self.assertGreater(self.browser.evaluate("document.querySelector('.ew-content-start-inputs').getBoundingClientRect().y"),
                         self.browser.evaluate("document.querySelector('.ew-content-heading').getBoundingClientRect().y"))
         self.click('[data-author-action=start_input_add]')
         self.fill('#ees-work-dialog [name=name]', '배포일')

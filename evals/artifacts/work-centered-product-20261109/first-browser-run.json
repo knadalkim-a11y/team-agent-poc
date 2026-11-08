@@ -1,0 +1,82 @@
+{
+  "head": "95894dd225ac00516015d16ea9933381242bb716",
+  "run": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/42528638179",
+  "observed": {
+    "1920_columns_px": [
+      256,
+      1104,
+      560
+    ],
+    "1366_columns_px": [
+      56,
+      830,
+      480
+    ],
+    "native_message_send_reload": "passed",
+    "native_file_upload_send_reload": "passed",
+    "480_closed_columns_px": [
+      56,
+      424,
+      0
+    ],
+    "settled_horizontal_overflow_px": 0
+  },
+  "findings": [
+    {
+      "job": 128879299938,
+      "cause": "The older geometry check required the work panel to the right of the chat input.",
+      "correction": "Assert adjacent navigation/work/chat bounds once responsive motion has settled."
+    },
+    {
+      "job": 128879299842,
+      "cause": "The CDP test returned DOM nodes by value when saving references for the round trip.",
+      "correction": "Keep the references in the browser and return a primitive to CDP."
+    },
+    {
+      "job": 128879299996,
+      "cause": "Native chat content covered the center of the resize handle.",
+      "correction": "Isolate chat content stacking so the physical handle receives pointer input."
+    },
+    {
+      "job": 128879299996,
+      "cause": "An unscoped submit selector also matched the chat composer in the approval dialog test.",
+      "correction": "Click the visible save action in the user editor."
+    },
+    {
+      "artifact": "integrated-native-authoring-conflict.png",
+      "cause": "An icon width rule wrapped the stage-add button one Korean character per line.",
+      "correction": "Let the stage-add button take its label width and align it at the end of the heading."
+    },
+    {
+      "job": 128879300053,
+      "cause": "A reserved desktop chat column was still animating away after a narrow viewport resize, transiently leaving the center at zero width.",
+      "correction": "Release reserved space at the narrow breakpoint immediately and measure settled geometry in browser tests."
+    },
+    {
+      "job": 128879300053,
+      "cause": "The Native rich-text editor consumed Escape before the chat overlay received it.",
+      "correction": "Handle the overlay Escape before the editor except during composition or a nested menu/dialog."
+    },
+    {
+      "job": 128879300053,
+      "cause": "Selecting a new or existing conversation kept the history list open; the next history-button click closed it.",
+      "correction": "Close the history list when a conversation is chosen, without changing the work selection."
+    },
+    {
+      "job": 128879300053,
+      "cause": "Several assertions still targeted the former work header, fixed widths, section order, or modal focus trap.",
+      "correction": "Verify the center toolbar and inline management surface, real content boundaries and steady viewport sizes."
+    },
+    {
+      "job": 128879300053,
+      "cause": "Unmounting the ordinary Native modal emitted a stale close while switching into inline admin settings.",
+      "correction": "Keep the ordinary Native modal mounted with its own open state and render the active settings tab inline for admin. A close from the previous surface cannot cancel the incoming admin view."
+    },
+    {
+      "artifact": "e1-b-expanded-480.png",
+      "cause": "With the left rail manually expanded on a narrow screen, the 224px editor could wrap stage names one character at a time.",
+      "correction": "For narrow work content, give the title its own row and move the count below it."
+    }
+  ],
+  "next_validation": "Use the later product commit and PR #131 checks for the final result."
+}

@@ -23,7 +23,16 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
             if saved.get('chat_width') == width:
                 return
             time.sleep(.025)
-        self.fail(f'Private chat width not saved: {width}; observed {saved.get("chat_width")}')
+        measured=self.browser.evaluate("""(()=>{
+            const handle=document.querySelector('[data-ees-chat-resize]'),r=handle?.getBoundingClientRect();
+            const hit=r&&document.elementFromPoint(r.x+r.width/2,r.y+Math.min(100,r.height/2));
+            return {state:document.querySelector('[data-ees-source-shell]').dataset.eesChatState,
+                chatWidth:document.querySelector('[data-ees-chat-surface]').getBoundingClientRect().width,
+                handleRect:r&&[r.x,r.y,r.width,r.height],hit:hit?.tagName,hitClass:hit?.className,
+                handleReceivesPointer:!!hit&&handle.contains(hit),focused:document.activeElement===handle,
+                nativeReady:window.__eesNativeDraftV1?.ready?.()};
+        })()""")
+        self.fail(f'Private chat width not saved: {width}; observed {saved.get("chat_width")}; {measured}')
 
     def viewport(self, width, height=768, *, overlay=None):
         self.browser.call('Emulation.setDeviceMetricsOverride', {
@@ -176,9 +185,9 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.assertEqual(observed['cardMotion']['duration'].split(', '), ['0.12s'] * 4)
         self.assertEqual(observed['cardMotion']['easing'],
                          ', '.join(['cubic-bezier(0.2, 0.8, 0.2, 1)'] * 4))
-        hover('#ees-work-designer>header .ew-icon-button', 'rgb(236, 236, 239)')
-        observed['headerHover'] = background('#ees-work-designer>header .ew-icon-button')
-        self.assertEqual(observed['headerHover'], 'rgb(236, 236, 239)')
+        hover('[data-ees-work-toolbar] [data-ees-chat-toggle]', 'rgb(243, 243, 245)')
+        observed['headerHover'] = background('[data-ees-work-toolbar] [data-ees-chat-toggle]')
+        self.assertEqual(observed['headerHover'], 'rgb(243, 243, 245)')
         self.click('#ew-author-search')
         self.key('Tab', 9)
         self.assertTrue(self.browser.evaluate("document.activeElement?.matches('.ew-author-list>button:focus-visible')"))

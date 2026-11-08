@@ -22,17 +22,34 @@ class EESWorkNativeBrowserTests(IntegratedNativeCase):
         self.screenshot('integrated-empty-native')
 
     def test_native_three_regions_fonts_and_narrow_geometry(self):
-        for width in (1920, 1440, 1180):
+        for width, rail, work, chat in ((1920,256,1104,560),(1440,256,640,544),(1180,56,644,480)):
             with self.subTest(width=width):
-                self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+                self.browser.call('Emulation.setDeviceMetricsOverride', {
+                    'width': width, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
                 self.browser.evaluate('document.fonts.ready.then(()=>true)')
-                values = self.browser.evaluate("(()=>{const selectors=['#sidebar','#chat-input','#ees-work-panel'];return selectors.map(selector=>{const e=document.querySelector(selector),r=e.getBoundingClientRect(),s=getComputedStyle(e);return {selector,x:r.x,y:r.y,w:r.width,h:r.height,font:s.fontFamily,display:s.display};})})()")
-                for item in values:
-                    self.assertGreater(item['w'], 50, item); self.assertGreaterEqual(item['x'], -1, item)
-                    self.assertLessEqual(item['x'] + item['w'], width + 2, item)
-                self.assertGreater(values[1]['x'], values[0]['x'], values)
-                self.assertGreater(values[2]['x'], values[1]['x'], values)
-                self.screenshot('integrated-layout-' + str(width))
+                self.wait(f"innerWidth==={width} && Math.abs(document.querySelector('#sidebar').getBoundingClientRect().width-{rail})<1")
+                if width<1200:
+                    self.wait("document.querySelector('[data-ees-source-shell]').dataset.eesChatState==='closed'")
+                    self.click('[data-ees-chat-toggle]')
+                self.wait("document.querySelector('[data-ees-source-shell]').dataset.eesChatState==='docked'")
+                self.wait(f"Math.abs(document.querySelector('#ees-work-panel').getBoundingClientRect().width-{work})<1")
+                boxes=self.browser.evaluate("""(()=>{
+                    const read=selector=>{const e=document.querySelector(selector),r=e.getBoundingClientRect();
+                        return {x:r.x,right:r.right,w:r.width,font:getComputedStyle(e).fontFamily};};
+                    return {sidebar:read('#sidebar'),work:read('#ees-work-panel'),chat:read('[data-ees-chat-surface]'),
+                        input:read('#chat-input'),overflow:document.documentElement.scrollWidth>innerWidth};
+                })()""")
+                self.assertAlmostEqual(boxes['work']['x'],boxes['sidebar']['right'],delta=1)
+                self.assertAlmostEqual(boxes['work']['right'],boxes['chat']['x'],delta=1)
+                self.assertAlmostEqual(boxes['chat']['w'],chat,delta=1)
+                self.assertAlmostEqual(boxes['chat']['right'],width,delta=1)
+                self.assertGreaterEqual(boxes['input']['x'],boxes['chat']['x'])
+                self.assertLessEqual(boxes['input']['right'],width)
+                self.assertGreater(boxes['input']['w'],50)
+                for name in ('sidebar','work','input'):
+                    self.assertIn('EES Noto Sans KR',boxes[name]['font'],name)
+                self.assertFalse(boxes['overflow'],boxes)
+                self.screenshot('integrated-layout-'+str(width))
 
     def test_scope_dialog_escape_cancel_and_chat_draft_preservation(self):
         # Retain the audited test ID; C41 replaces the modal with a dropdown

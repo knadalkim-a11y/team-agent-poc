@@ -175,7 +175,7 @@ class MotionNativeTests(IntegratedNativeCase):
         self.click('#ees-work-entry [data-action=tools]')
         self.wait("document.querySelector('.ew-scope-wrap').getBoundingClientRect().height > 50")
         self.assertFalse(self.read('.ew-scope-wrap', 'inert'))
-        self.assertEqual(self.text('#ees-work-designer > header'), '도구')
+        self.assertEqual(self.read('#ees-work-designer', 'getAttribute("aria-label")'), '도구 작성')
         if self.browser.evaluate("!!document.querySelector('.ew-draft-legacy:not([open])')"):
             self.click('.ew-draft-legacy > summary')
         self.assertIn('EMS 전역 목록 검증', self.text('#ees-work-panel'))
@@ -365,7 +365,7 @@ class MotionNativeTests(IntegratedNativeCase):
             self.viewport(width,height)
             self.chat_state('docked')
             self.observe('attached-'+str(width))
-            self.browser.evaluate("window.__c3.chat=document.querySelector('#chat-input');window.__c3.work=document.querySelector('[data-work-input][name=note]')")
+            self.browser.evaluate("window.__c3.chat=document.querySelector('#chat-input');window.__c3.work=document.querySelector('[data-work-input][name=note]');true")
             self.click('[data-ees-chat-close]')
             self.chat_state('closed')
             self.wait("document.activeElement?.matches('[data-ees-chat-toggle]')")
@@ -383,7 +383,9 @@ class MotionNativeTests(IntegratedNativeCase):
         self.click('[data-ees-chat-focus]')
         self.chat_state('expanded')
         self.wait("document.querySelector('[data-ees-work-surface]').getBoundingClientRect().width<1")
-        self.assertAlmostEqual(self.read('[data-ees-chat-surface]','getBoundingClientRect().width'),1920-256,delta=1)
+        # The work host is hidden immediately; its reserved chat width still animates.
+        self.wait("Math.abs(document.querySelector('[data-ees-chat-surface]').getBoundingClientRect().width - (1920-256))<1")
+        self.assertAlmostEqual(self.read('[data-ees-chat-surface]','getBoundingClientRect().x'),256,delta=1)
         self.click('[data-ees-chat-focus]')
         self.chat_state('docked')
         self.wait("Math.abs(document.querySelector('[data-ees-chat-surface]').getBoundingClientRect().width-560)<1")
@@ -462,7 +464,7 @@ class MotionNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('[data-ees-chat-surface]').contains(document.activeElement)")
         self.fill('#chat-input','좁은 화면 채팅에서 보존할 초안')
         draft=self.browser.evaluate('window.__eesNativeDraftV1.read()')
-        self.browser.evaluate("window.__c3.chat=document.querySelector('#chat-input')")
+        self.browser.evaluate("window.__c3.chat=document.querySelector('#chat-input');true")
         self.assertTrue(self.browser.evaluate("document.querySelector('[data-ees-chat-surface]').matches('[role=dialog][aria-modal=true]')"))
         self.assertTrue(self.browser.evaluate("!!document.querySelector('[data-ees-work-surface]').closest('[inert]')"))
         for key,code,modifier in (('Tab',9,0),('Tab',9,8)):

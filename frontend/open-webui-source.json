@@ -21,7 +21,7 @@
     "src/lib/components/chat/Messages/UserMessage.svelte": "c677b13bf160de1bf0fafceef00ba5df098d661e6728c0dd5b1e6427b3e2eef8",
     "src/lib/components/chat/Navbar.svelte": "81e9bd4a59e1afa22c057ad7aceb7c5c0afdebd9d495882a6d6e34d6efc426e0",
     "src/lib/components/chat/Placeholder.svelte": "dc5512dc7648112edd011e27797c07cf5d8d52474be5490a1ae2bef434327036",
-    "src/lib/components/chat/SettingsModal.svelte": "232d16962636421a93f034419518ecd10243ae79e0c574a3ac26a7f99d613d21",
+    "src/lib/components/chat/SettingsModal.svelte": "f9f79015ffbee1164f25705b61196044853b673d92f6c0aacc940a7ade6c02c7",
     "src/lib/components/common/Dropdown.svelte": "e3e33dc08b8b84bcececa69136029ca6b7d01effd6b5343a98c0d83ff3bdb697",
     "src/lib/components/ees/EesHelperNotice.svelte": "22ceccc7ad93c5d820f73269baaa9b19f12c5c99054b76ecc8c89f7757f8bba0",
     "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
@@ -29,9 +29,9 @@
     "src/lib/components/ees/EesProcedureIntro.svelte": "0f628ffa1464a9477d822d930f48619a6b9e8ce501445a399d028213601d318c",
     "src/lib/components/ees/EesSavedPrompts.svelte": "acf5e702393e4c7218e63c6bd5554aadf1f9e33e9830f1369262caa4ac9fe8c1",
     "src/lib/components/ees/EesScopeSelect.svelte": "4906d92006b655ef5de8079ba0ea03a84ae9a584cd404585d530b4f35479afc4",
-    "src/lib/components/ees/EesSettingsFrame.svelte": "5d0bada3be21494a644ec4343748ffc5dc7d6aa5dc357f6c597c35c4859e57f1",
+    "src/lib/components/ees/EesSettingsFrame.svelte": "248f940cf32eae6a431352b85a6050304addb6651f4cc75d454ab2080fb7eee5",
     "src/lib/components/ees/EesSettingsMenu.svelte": "5e6656f7c6ae10dd5c9be5a960444f1457c54188ea18cd9791e7f831e2d6b13f",
-    "src/lib/components/ees/EesShell.svelte": "19f0b693aa3f18d137fe06ee7c11417fb84ee277d0a363db0127177f7c30c013",
+    "src/lib/components/ees/EesShell.svelte": "1d91ff839cba8d796477707ca9cf9bfbf1e699c70cce80cbd753cf52102f0f6e",
     "src/lib/components/ees/icons/5bc95.svg": "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7",
     "src/lib/components/ees/state.ts": "d4eee064c100832b93cfc7b984be708df871efcaf8ef009a0f0894e7f1afa712",
     "src/lib/components/layout/Sidebar.svelte": "bbc1ea199bae6144d5064a021ddb482b76f1290ea519d3cdd31846aafe63ac81",
@@ -50,7 +50,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "26e98fd31c4f5bb5ce342b01e923d809e4d190299f8fe5073c98c858951de74f"
+      "sha256": "97e9d1b800e80174a7ee5d39ab82f71a807379ae85427852bd28d25980b7440a"
     }
   ],
   "pyodide_files": {

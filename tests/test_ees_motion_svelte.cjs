@@ -47,7 +47,8 @@ function chatHarness(width = 1920, compact = false, selection = {}) {
   const env={width,$eesCompact:compact,s:{...selection},smallSize:width<1200,smallOpen:false,
     overlay:false,expanded:false,transientWidth:null,chatOpen:false,chatState:'',dockAvailable:0,widthLimit:0,preferred:0,chatWidth:0,
     $showSettings:false,actions:[],tick:()=>Promise.resolve(),chatToggle:element(),chatSurface:element(),
-    dragX:0,dragWidth:0,resizing:false,document:{activeElement:null}};
+    dragX:0,dragWidth:0,resizing:false,admin:false,document:{activeElement:null,querySelectorAll:()=>[]},
+    getComputedStyle:()=>({visibility:'visible'})};
   env.chatSurface.querySelector=()=>null;
   env.chatSurface.querySelectorAll=()=>[];
   env.eesAction=value=>env.actions.push(value);
@@ -58,7 +59,7 @@ function chatHarness(width = 1920, compact = false, selection = {}) {
     const declaration=shell.split('\n').find(line=>line.includes('$: '+name+' = '));
     assert.ok(declaration,name);return declaration.replace('$: ','');
   }).join('\n');
-  const funcs=Function('env',`with(env){${stripTypeScriptTypes(clamp+'\n'+f)};return {refresh(){${reactive}},setWidth,resizeStart,resizeMove,resizeEnd,resizeCancel,resizeKey,chatKeydown,setChatOpen,toggleChatExpanded};}`)(env);
+  const funcs=Function('env',`with(env){${stripTypeScriptTypes(clamp+'\n'+f)};return {refresh(){${reactive}},setWidth,resizeStart,resizeMove,resizeEnd,resizeCancel,resizeKey,chatEscape,chatKeydown,setChatOpen,toggleChatExpanded};}`)(env);
   funcs.refresh(); return {env,...funcs};
 }
 function scopePositionHarness({ compact = true, width = 480, height = 768, bottom = 172 } = {}) {
@@ -137,8 +138,14 @@ test('narrow chat toggles locally; desktop display is an account preference and 
   assert.equal(narrow.env.chatState,'overlay');assert.deepEqual(narrow.env.actions,[]);
   const input={closest(selector){return selector==='[role="dialog"]'?narrow.env.chatSurface:null;}};
   const event=target=>({key:'Escape',target,defaultPrevented:false,stopPropagation(){this.stopped=true;},preventDefault(){this.defaultPrevented=true;}});
-  const nested=event({closest:()=>({})});narrow.chatKeydown(nested);assert.equal(nested.stopped,undefined);
-  const dismissed=event(input);narrow.chatKeydown(dismissed);await flush();narrow.refresh();
+  assert.match(component('EesShell'),/on:keydown\|capture=\{chatEscape\}/);
+  const nested=event({closest:()=>({})});narrow.chatEscape(nested);assert.equal(nested.stopped,undefined);
+  const composing={...event(input),isComposing:true};narrow.chatEscape(composing);assert.equal(composing.stopped,undefined);
+  const suggestion={getClientRects:()=>[{}],closest:()=>null};
+  narrow.env.document.querySelectorAll=()=>[suggestion];
+  const suggestionEscape=event(input);narrow.chatEscape(suggestionEscape);assert.equal(suggestionEscape.stopped,undefined);
+  narrow.env.document.querySelectorAll=()=>[];
+  const dismissed=event(input);narrow.chatEscape(dismissed);await flush();narrow.refresh();
   assert.equal(dismissed.stopped,true);assert.equal(narrow.env.chatState,'closed');assert.equal(narrow.env.chatToggle.focused,1);
   const wide=chatHarness(1920);await wide.setChatOpen(false,false);assert.deepEqual(wide.env.actions,[{action:'chat_open',open:'false'}]);
 });
