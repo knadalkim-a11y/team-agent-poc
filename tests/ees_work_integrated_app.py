@@ -751,6 +751,7 @@ def integrated_flow(gate):
     g.record('Native physical send and storage reload',saved_messages=len(messages),chat_id=chat_id,model_boundary='loopback synthetic HTTP only')
     chat = native_attachment_flow(g, chat_id)
     q1_native_geometry(g,'figma-q1-1366x768-native-chat',require_messages=True)
+    work_centered_chat_roundtrip(g,chat_id)
     g.browser.call('Emulation.setDeviceMetricsOverride',{'width':1100,'height':800,'deviceScaleFactor':1,'mobile':False})
     g.capture('native-narrow')
     assert g.browser.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),'horizontal document overflow'
@@ -764,32 +765,78 @@ def integrated_flow(gate):
     g.record('Native and work restart persistence',chat_preserved=True,attempts_preserved=True)
 
 
+def work_centered_chat_roundtrip(g,chat_id):
+    """Operate the installed shell after a real attachment and saved conversation."""
+    draft='업무 폭을 바꿔도 전송되지 않을 개인 첨부 후속 질문'
+    def state(name):
+        g.wait("document.querySelector('[data-ees-source-shell]')?.dataset.eesChatState==="+json.dumps(name))
+    def resize(width,height):
+        g.browser.call('Emulation.setDeviceMetricsOverride',{'width':width,'height':height,'deviceScaleFactor':1,'mobile':False})
+        g.wait(f'innerWidth==={width} && innerHeight==={height}')
+    initial=g.api('/api/v1/chats/'+chat_id)['chat']['history']
+    state('docked')
+    g.type('#chat-input',draft)
+    g.browser.evaluate("window.__workCenteredQA={composer:document.querySelector('#chat-input'),work:document.querySelector('#ees-work-panel'),draft:window.__eesNativeDraftV1.read()}")
+    def kept():
+        assert g.browser.evaluate("document.querySelectorAll('#chat-input.ProseMirror').length===1 && document.querySelector('#chat-input')===window.__workCenteredQA.composer && document.querySelector('#ees-work-panel')===window.__workCenteredQA.work")
+        assert g.browser.evaluate("JSON.stringify(window.__eesNativeDraftV1.read())===JSON.stringify(window.__workCenteredQA.draft)")
+        assert g.browser.evaluate('location.pathname')=='/c/'+chat_id
+    g.click('[data-ees-chat-close]');state('closed');kept()
+    g.click('[data-ees-chat-toggle]');state('docked');kept()
+    g.click('[data-ees-chat-focus]');state('expanded');kept()
+    g.wait("document.querySelector('[data-ees-work-surface]').getBoundingClientRect().width<1")
+    g.click('[data-ees-chat-focus]');state('docked');kept()
+    g.capture('work-centered-1366-chat-docked')
+    resize(480,768);state('closed');kept()
+    g.wait("document.querySelector('[data-ees-work-surface]').getBoundingClientRect().width>400")
+    g.capture('work-centered-480-work')
+    g.click('[data-ees-chat-toggle]');state('overlay')
+    g.wait("document.querySelector('[data-ees-chat-surface]').contains(document.activeElement)")
+    kept()
+    g.capture('work-centered-480-native-chat-overlay')
+    for kind in ('keyDown','keyUp'):
+        g.browser.call('Input.dispatchKeyEvent',{'type':kind,'key':'Escape','code':'Escape','windowsVirtualKeyCode':27,'nativeVirtualKeyCode':27})
+    state('closed')
+    g.wait("document.activeElement?.matches('[data-ees-chat-toggle]')")
+    kept()
+    assert g.api('/api/v1/chats/'+chat_id)['chat']['history']==initial
+    resize(1920,1080)
+    g.wait("document.querySelector('#sidebar').getBoundingClientRect().width===256")
+    if g.browser.evaluate("document.querySelector('[data-ees-source-shell]').dataset.eesChatState==='closed'"):
+        g.click('[data-ees-chat-toggle]')
+    state('docked');kept()
+    g.capture('work-centered-1920-chat-docked')
+    g.record('Real retained Native composer, draft and saved attachment through dock, expand and modal chat',
+             saved_chat_id=chat_id,one_composer=True,saved_history_unchanged=True,viewport_widths=[1366,480,1920])
+
+
 def q1_native_geometry(g, name, *, require_action=False, require_messages=False):
     """Read the actual Native layout at the supported 768-pixel height."""
     g.browser.call('Emulation.setDeviceMetricsOverride',{'width':1366,'height':768,'deviceScaleFactor':1,'mobile':False})
     g.wait('document.querySelector("#sidebar[data-ees-source-sidebar][data-compact=true]") && Math.abs(document.querySelector("#sidebar").getBoundingClientRect().width-56)<1')
     stable=g.browser.evaluate('''new Promise(resolve=>{let last='',same=0;const end=performance.now()+3000;
-function check(){const elements=['#sidebar','.ees-panel-region','.ees-chat-region'].map(s=>document.querySelector(s));
+function check(){const elements=['#sidebar','[data-ees-work-surface]','[data-ees-chat-surface]'].map(s=>document.querySelector(s));
 const key=JSON.stringify(elements.map(e=>{const r=e?.getBoundingClientRect();return r?[r.x,r.y,r.width,r.height]:null;}));
 same=key===last?same+1:0;last=key;if(same>=3&&elements.every(Boolean))return resolve(true);
 if(performance.now()>end)return resolve(false);requestAnimationFrame(check);}check();})''')
     assert stable,'Native layout did not settle after viewport change'
     geometry=g.browser.evaluate('''(()=>{const rect=e=>{if(!e)return null;const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom,right:r.right};};
 return {viewport:[innerWidth,innerHeight],document_width:document.documentElement.scrollWidth,
-sidebar:rect(document.querySelector('#sidebar')),panel:rect(document.querySelector('.ees-panel-region')),
-chat:rect(document.querySelector('.ees-chat-region')),action:rect(document.querySelector('#ees-work-panel>.ew-job-actions')),
+sidebar:rect(document.querySelector('#sidebar')),panel:rect(document.querySelector('[data-ees-work-surface]')),
+chat:rect(document.querySelector('[data-ees-chat-surface]')),action:rect(document.querySelector('#ees-work-panel>.ew-job-actions')),
 messages:[...document.querySelectorAll('.message-listitem')].filter(e=>e.getClientRects().length).map(rect)};})()''')
     (g.out/(name+'-geometry.json')).write_text(json.dumps(geometry,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     assert geometry['document_width']<=1367,geometry
     assert abs(geometry['sidebar']['width']-56)<1,geometry
-    assert abs(geometry['panel']['width']-480)<1,geometry
-    assert 0<=geometry['panel']['x'] and geometry['panel']['right']<=1367,geometry
+    assert abs(geometry['panel']['width']-830)<1 and abs(geometry['chat']['width']-480)<1,geometry
+    assert abs(geometry['sidebar']['right']-geometry['panel']['x'])<1,geometry
+    assert abs(geometry['panel']['right']-geometry['chat']['x'])<1 and abs(geometry['chat']['right']-1366)<1,geometry
     if require_action:
         action=geometry['action'];assert action and action['height']>0 and action['y']>=0 and action['bottom']<=769,geometry
     if require_messages:
         assert geometry['messages'],geometry
-        bound=min(760,geometry['chat']['width']-48)
-        assert all(item['width']<=bound+1 for item in geometry['messages']),(bound,geometry)
+        assert all(item['x']>=geometry['chat']['x']-1 and item['right']<=geometry['chat']['right']+1
+                   for item in geometry['messages']),geometry
     g.capture(name)
     g.record('Q1 actual Native layout at 1366x768',action_bar_visible=require_action,
         message_width_checked=require_messages,geometry=geometry)

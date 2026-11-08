@@ -6,7 +6,7 @@ function dom(extra={}){
  function element(id=''){
   const classes=new Set(),events=new Map();let html='';
   const el={id,dataset:{},style:{setProperty(name,value){this[name]=String(value);},removeProperty(name){delete this[name];}},children:[],parentElement:null,isConnected:false,hidden:false,scrollTop:0,attributes:{},classList:{add:value=>classes.add(value),remove:value=>classes.delete(value),contains:value=>classes.has(value),toggle(value,force){const enabled=force===undefined?!classes.has(value):Boolean(force);if(enabled)classes.add(value);else classes.delete(value);return enabled;}},
-   setAttribute(name,value){this.attributes[name]=String(value);},removeAttribute(name){delete this.attributes[name];},getAttribute(name){return name==='id'?this.id:this.attributes[name] ?? null;},hasAttribute(name){return name==='id'?Boolean(this.id):Object.hasOwn(this.attributes,name);},querySelector(selector){return ids.get(selector.slice(1)) || null;},querySelectorAll(selector){return selector==='button,input,select,textarea,a,summary,[data-ees-panel-resize]'?(this.mockControls || []):[];},contains(target){return target===this||this.children.includes(target)||(this.mockControls || []).includes(target);},
+   setAttribute(name,value){this.attributes[name]=String(value);},removeAttribute(name){delete this.attributes[name];},getAttribute(name){return name==='id'?this.id:this.attributes[name] ?? null;},hasAttribute(name){return name==='id'?Boolean(this.id):Object.hasOwn(this.attributes,name);},querySelector(selector){return ids.get(selector.slice(1)) || null;},querySelectorAll(selector){return selector==='button,input,select,textarea,a,summary'?(this.mockControls || []):[];},contains(target){return target===this||this.children.includes(target)||(this.mockControls || []).includes(target);},
    append(child){child.remove();child.parentElement=this;child.isConnected=true;this.children.push(child);if(child.id)ids.set(child.id,child);},prepend(child){this.append(child);this.children.splice(this.children.indexOf(child),1);this.children.unshift(child);},
    replaceChildren(){this.children=[];html='';},remove(){if(this.parentElement)this.parentElement.children=this.parentElement.children.filter(child=>child!==this);this.parentElement=null;this.isConnected=false;},
    insertAdjacentElement(_,child){this.parentElement.append(child);},focus(){doc.activeElement=this;},getBoundingClientRect:()=>({left:0,right:360,top:0,bottom:30,width:360,height:100}),addEventListener(type,fn){events.set(type,fn);},removeEventListener(type,fn){if(events.get(type)===fn)events.delete(type);},dispatch(type,event={}){events.get(type)?.({target:this,...event});},showModal(){this.open=true;},close(){this.open=false;events.get('close')?.();},matches:()=>false};
@@ -197,4 +197,134 @@ test('A4a applied input footer keeps the Figma surface spacing and Korean word w
  const bar=rule('#ees-work-panel>.ew-input-applied-bar'),text=rule('#ees-work-panel>.ew-input-applied-bar>p'),button=rule('#ees-work-panel>.ew-input-applied-bar>button');
  assert.equal(bar.background,'var(--ees-surface-default)');assert.equal(bar.padding,'12px 20px');assert.equal(bar.gap,'10px');
  assert.equal(text.color,'var(--ees-text-secondary)');assert.equal(text['font-size'],'12px');assert.equal(text['line-height'],'18px');assert.equal(text['word-break'],'keep-all');assert.equal(text['overflow-wrap'],'normal');assert.equal(button.flex,'none');
+});
+
+test('chat layout can change on a Native management page without replacing work or its private drafts', async () => {
+  const h = controller();
+  h.context.location.pathname = '/workspace/knowledge';
+  const privateState = {other: 'keep', selection: {panel_open: false, panel_width: 410, verdict_drafts: {r: {note: '판정 중'}}}};
+  h.setReply(call => call.body ? {ok: true, revision: call.body.expected_revision + 1} : {
+    ok: true, capabilities: {actor_id: 'a'}, ui_state: {revision: 5, state: privateState}
+  });
+  h.api.setRestored(false);
+  await h.api.refresh();
+  const before = h.renders.length;
+  await h.api.sourceAction({action: 'chat_open', open: 'false'});
+  await h.api.sourceAction({action: 'chat_width', width: '1000'});
+  assert.equal(h.context.location.pathname, '/workspace/knowledge');
+  assert.equal(h.renders.length, before, 'a display preference must not rerender the work form');
+  const writes = h.calls.filter(call => call.body);
+  assert.deepEqual(writes.map(call => [call.body.action, call.body.expected_revision]), [['save_ui', 5], ['save_ui', 6]]);
+  assert.deepEqual(writes[1].body.state, {...privateState, selection: {...privateState.selection, chat_open: false, chat_width: 720}});
+});
+
+test('a conflicting chat resize merges only the width onto the other tab\'s latest selection', async () => {
+  const h = controller();
+  const other = {custom: 1, selection: {workflow_id: 'other', start_inputs: {job: {value: '작성 중'}}, chat_open: false}};
+  let saves = 0;
+  h.api.setSelection({workflow_id: 'local', start_inputs: {local: {value: 'local draft'}}});
+  h.setReply(call => {
+    if (!call.body) return {ok: true, ui_state: {revision: 12, state: other}};
+    return ++saves === 1 ? {httpError: true, status: 409, error: {code: 'revision_conflict'}} : {ok: true, revision: 13};
+  });
+  await h.api.sourceAction({action: 'chat_width', width: 601});
+  const writes = h.calls.filter(call => call.body);
+  assert.equal(writes.length, 2);
+  assert.equal(writes[1].body.expected_revision, 12);
+  assert.deepEqual(writes[1].body.state, {...other, selection: {...other.selection, chat_width: 601}});
+  assert.equal(h.api.snapshot().selection.workflow_id, 'local');
+});
+
+test('an early chat preference is applied after restoration and stays isolated from the next account', async () => {
+  const h = controller();
+  h.api.setRestored(false);
+  h.setReply(call => call.body ? {ok: true, revision: 7} : {ok: true, capabilities: {actor_id: 'a'}, ui_state: {revision: 6, state: {selection: {chat_open: true, panel_open: false}}}});
+  await h.api.sourceAction({action: 'chat_open', open: 'false'});
+  assert.equal(h.calls.some(call => call.body), false);
+  await h.api.refresh();
+  await new Promise(setImmediate);
+  const writes = h.calls.filter(call => call.body);
+  assert.equal(writes.length, 1);
+  assert.deepEqual(writes[0].body.state.selection, {chat_open: false, panel_open: false});
+  h.setAuth('actor-b-token');
+  h.api.reset();
+  h.api.setIdentity();
+  assert.equal(h.api.snapshot().selection.chat_open, undefined);
+});
+
+test('a work edit after a chat resize preserves another tab\'s new inputs and independent edits inside the same job', async () => {
+  const [a, b] = [controller(), controller()];
+  let revision = 1;
+  let state = {selection: {system_id: 'EMS', start_inputs: {job: {shared: 'initial'}}}};
+  const reply = call => {
+    if (call.url.startsWith('/api/ees-work/workspace?')) return {ok: true, systems: ['EMS'], capabilities: {actor_id: 'a'}, ui_state: {revision, state}};
+    if (!call.body) return {ok: true};
+    if (call.body.expected_revision !== revision) return {httpError: true, status: 409, error: {code: 'revision_conflict'}};
+    state = call.body.state;
+    return {ok: true, revision: ++revision};
+  };
+  const changeWork = async (tab, inputs) => {
+    tab.api.setSelection({start_inputs: inputs});
+    await tab.api.sourceAction({action:'category', category:'ops', open:'false'});
+    [...tab.timers.values()].at(-1)();
+    await new Promise(setImmediate);
+  };
+  for (const tab of [a,b]) {tab.api.setRestored(false); tab.setReply(reply); await tab.api.refresh();}
+  await changeWork(b, {job: {shared:'initial', fromB:'B draft'}, other: {memo:'keep'}});
+  await a.api.sourceAction({action:'chat_width', width:620});
+  await changeWork(a, {job: {shared:'initial', fromA:'A draft'}});
+  assert.deepEqual(state.selection.start_inputs, {job:{shared:'initial',fromA:'A draft',fromB:'B draft'},other:{memo:'keep'}});
+  assert.equal(state.selection.chat_width, 620);
+  assert.equal(revision, 4);
+});
+
+test('a pending work save from an old account cannot seed the next account\'s chat display write', async () => {
+  const h=controller(), started=deferred(), delayed=deferred();
+  let actor='a', revision=7;
+  const drafts={a: {a:'private A'}, b: {b:'private B'}};
+  h.setReply(call=>{
+    if(call.url.startsWith('/api/ees-work/workspace?'))return {ok:true,systems:['EMS'],capabilities:{actor_id:actor},ui_state:{revision,state:{selection:{system_id:'EMS',start_inputs:drafts[actor]}}}};
+    if(!call.body)return {ok:true};
+    if(actor==='a'){started.resolve();return delayed.promise;}
+    return {ok:true,revision:++revision};
+  });
+  h.api.setRestored(false);await h.api.refresh();
+  await h.api.sourceAction({action:'category',category:'ops',open:'false'});
+  [...h.timers.values()].at(-1)();await started.promise;
+  actor='b';revision=8;await h.api.refresh();
+  delayed.resolve({ok:true,revision:8});await new Promise(setImmediate);
+  await h.api.sourceAction({action:'chat_width',width:600});
+  const write=h.calls.filter(c=>c.body).at(-1).body;
+  assert.deepEqual(write.state.selection.start_inputs, drafts.b);
+  assert.equal(write.state.selection.chat_width, 600);
+});
+
+test('chat controls work while the permanent chat draft bridge is unavailable', async () => {
+  const h=controller();
+  Object.assign(h.sourceState,{workReady:true,chatReady:false,temporary:true});
+  h.api.setRestored(false);await h.api.refresh();
+  await h.api.sourceAction({action:'chat_open',open:'false'});
+  assert.equal(h.api.snapshot().selection.chat_open,false);
+  assert.equal(h.api.reference().kind,'none');
+  assert.equal(h.calls.filter(call=>call.body?.action==='save_ui').length,1);
+});
+
+test('read-only and temporary conversations can visit Native work and return without persisting a composer', async () => {
+  for (const mode of ['readOnly','temporary']) {
+    const h=controller();
+    Object.assign(h.sourceState,{workReady:true,chatReady:false,[mode]:true});
+    h.context.location.pathname='/c/retained';
+    h.context.window.__eesNativeDraftV1={ready:()=>false,read(){throw Error('no writable draft');},flush(){throw Error('must not persist');}};
+    const value={ok:true,systems:['EMS'],capabilities:{actor_id:'a',native_access_available:true,native_access:{knowledge:true}}};
+    h.setReply(()=>value);
+    await h.api.refresh();
+    await h.api.sourceAction({action:'native_open',nativeId:'knowledge'});
+    assert.equal(h.context.location.pathname,'/workspace/knowledge');
+    h.api.sync();await new Promise(setImmediate);
+    await h.api.sourceAction({action:'mode',mode:'work'});
+    assert.equal(h.context.location.pathname,'/c/retained');
+    h.api.sync();await new Promise(setImmediate);
+    assert.equal(h.api.snapshot().error,'');
+    assert.equal(h.api.reference().kind,'none');
+  }
 });

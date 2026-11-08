@@ -29,7 +29,6 @@ class CPhaseOneNativeTests(IntegratedNativeCase):
         run=self.command('close_run',run_id=run['id'],expected_revision=run['revision'])['run']
         self.refresh();self.click('[data-action="records"]');self.click('[data-action="open_run"][data-run-id="'+run['id']+'"]')
         self.click('[data-action=stage_open][data-node-id=stage]')
-        self.click('[data-action=stage_approved]')
         self.wait("document.querySelector('[data-action=job][data-job-id=job-0]')")
         self.click('[data-action="job"][data-job-id="job-0"]')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-action=confirm],[data-action=execute],[data-action=save_inputs]')"))

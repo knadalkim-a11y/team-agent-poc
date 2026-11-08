@@ -798,13 +798,18 @@ function stageRuntimeFixture(){
  return {...h,state,mutations:()=>h.calls.filter(call=>['human_confirm','decide','execute_job'].includes(call.body?.action))};
 }
 
-test('operations31 stage header shows workflow and actual target without recurrence metadata',()=>{
+test('centered stage separates the published breadcrumb, stage title and actual run scope from the shared toolbar',()=>{
  const {state}=stageRuntimeFixture(),stage=state.run.definition.nodes.t;
- let rendered=html('workStageHTML(state,{stage_tab:"work"},stage)',{state,stage});
- assert.match(rendered.header,/배포 산출물 점검/);assert.match(rendered.header,/전체 공장/);assert.doesNotMatch(rendered.header,/10.27 배포 회차/);assert.match(rendered.body,/1차 점검/);
- assert.doesNotMatch(rendered.header+rendered.body,/업무절차|직접 시작|자동실행 예약 없음|수시/);
- delete state.run.name;rendered=html('workStageHTML(state,{},stage)',{state,stage});assert.doesNotMatch(rendered.header+rendered.body,/회차|ew-stage-context/);
- state.run.name='접근 권한 신청 A';rendered=html('workStageHTML(state,{},stage)',{state,stage});assert.doesNotMatch(rendered.header,/접근 권한 신청 A/);assert.doesNotMatch(rendered.header+rendered.body,/회차/);
+ state.run.system_id='EMS';state.run.factory_id='f';state.factories=[{id:'f',name:'운영 공장'}];
+ const render=(selection={})=>html('workStageHTML(state,selection,stage).body',{state,stage,selection});
+ let body=render();
+ assert.match(body,/data-action="stage_back">배포 산출물 점검<\/button>/);
+ assert.match(body,/<span aria-current="page">1차 점검<\/span>/);assert.match(body,/<h2>1차 점검<\/h2>/);
+ assert.match(body,/<p class="ew-center-scope">10.27 배포 회차 · 운영 공장 · EMS<\/p>/);
+ assert.deepEqual([...body.matchAll(/data-action="stage_tab" data-tab="([^"]+)" aria-pressed="([^"]+)">([^<]+)</g)].map(m=>m.slice(1,4)),[['work','true','업무 내용'],['log','false','실행 기록'],['rules','false','판정 기준']]);
+ assert.doesNotMatch(body,/업무절차|직접 시작|자동실행 예약 없음|수시|ew-panel-header|close_panel/);
+ delete state.run.name;body=render();assert.match(body,/<p class="ew-center-scope">운영 공장 · EMS<\/p>/);assert.doesNotMatch(body,/회차|ew-stage-context/);
+ state.run.name='접근 권한 신청 A';assert.match(render({stage_tab:'rules'}),/<p class="ew-center-scope">접근 권한 신청 A · 운영 공장 · EMS<\/p>/);
 });
 
 test('stage rows use Jobs, preserve configured judgment meaning and distinguish failed execution',()=>{
@@ -825,11 +830,11 @@ test('stage actions mutate the exact row Job using existing execution and judgme
 
 test('2026-11-02 an unconnected tool job shows a reason and disables its run and the whole stage run',async()=>{
  const connected=stageRuntimeFixture(),connectedStage=html('workStageHTML(state,{stage_tab:"work"},stage)',{state:connected.state,stage:connected.state.run.definition.nodes.t});
- assert.doesNotMatch(connectedStage.body,/도구 연결 필요|data-tool-connection-required/);assert.match(connectedStage.body,/class="ew-primary ew-stage-run-button"[^>]*aria-label="1차 점검 단계 실행">/);
+ assert.doesNotMatch(connectedStage.body,/도구 연결 필요|data-tool-connection-required/);assert.match(connectedStage.body,/data-action="execute_scope"[^>]*aria-label="1차 점검 단계 실행">/);
  const h=stageRuntimeFixture(),nodes=h.state.run.definition.nodes;delete nodes.a.tool_reference;
  h.state.run.jobs.a={status:'pending',can_execute:false,permission_reason:'tool_connection_required',tool_connection_required:true};h.api.setState(h.state);
  const rendered=html('workStageHTML(state,{stage_tab:"work"},stage)',{state:h.state,stage:nodes.t});
- assert.match(rendered.body,/<span data-tool-connection-required>도구 연결 필요 1개 · 워크스페이스에서 연결해 다시 게시해야 실행됩니다<\/span>/);
+ assert.match(rendered.body,/data-tool-connection-required>도구 연결 필요 1개 · 워크스페이스에서 연결해 다시 게시해야 실행됩니다</);
  assert.match(rendered.body,/aria-label="1차 점검 단계 실행" disabled data-own-disabled="true" title="도구가 연결되지 않은 작업이 있어 이 단계를 실행할 수 없습니다"/);
  assert.match(rendered.body,/aria-label="실제 도구 실행" data-mutation disabled data-own-disabled="true" data-run-blocked title="도구가 연결되지 않아 실행할 수 없습니다"/);
  assert.match(rendered.body,/도구 연결 필요/);
@@ -991,7 +996,7 @@ test('operations overview shows no execution mode and uses the published name ah
  const h=stagePreviewFixture();h.state.workflow.name='미게시 이름';h.state.workflow.mode='on_demand';
  for(const mode of ['periodic','emergency','on_demand',undefined]){
   h.state.workflow.published.mode=mode;const out=html('workOperationOverviewHTML(state,{})',{state:h.state});assert.doesNotMatch(out,/<dt>주기<\/dt>|예약 없음|수시|비상|자동 실행/);assert.match(out,/<dt>적용 대상<\/dt>/);assert.match(out,/<h2>배포 산출물 점검<\/h2>/);assert.doesNotMatch(out,/미게시 이름/);
-  const stage=html('workStageHTML(state,{},workPublishedDefinition(state).nodes.t)',{state:h.state});assert.match(stage.header,/배포 산출물 점검/);assert.doesNotMatch(stage.header,/미게시 이름/);
+  const stage=html('workStageHTML(state,{},workPublishedDefinition(state).nodes.t)',{state:h.state});assert.match(stage.body,/data-action="stage_back">배포 산출물 점검<\/button>/);assert.doesNotMatch(stage.body,/미게시 이름/);
  }
 });
 test('restored unpublished operations selections return to my work while author drafts and existing runs remain selected',async()=>{
@@ -1099,15 +1104,49 @@ test('reason input reserves the existing judgment marker and rejects oversize te
  assert.equal(h.mutations().length,0);assert.match(h.api.snapshot().error,/아직 저장하지 않았습니다/);
  typeStageNote(h,'가'.repeat(limit));await h.api.handleClick({dataset:{action:'stage_decide',jobId:'h',judgmentId:'conditional',verdict:'completed'}});assert.equal(h.mutations()[0].body.note,'가'.repeat(limit));
 });
-test('one approved human remains in the expandable group after a failed automatic result',async()=>{
+test('folding completed work keeps the failed execution visible and never submits another verdict',async()=>{
  const h=stageRuntimeFixture();h.state.run.jobs.a={status:'failed'};h.state.run.jobs.h={status:'completed',decisions:{job:{item_id:'job',verdict:'completed',note:'확인 근거\n선택한 판정: 승인 (yes)',actor_id:'actor'}}};
- const render=selection=>html('workStageHTML(state,selection,state.run.definition.nodes.t).body',{state:h.state,selection});
- let out=render(h.api.snapshot().selection);assert.match(out,/나머지 승인 1건/);assert.match(out,/data-action="stage_approved" aria-expanded="false"/);assert.doesNotMatch(out,/data-stage-job="h"/);assert.match(out,/실행 실패/);
- await h.api.handleClick({dataset:{action:'stage_evidence',jobId:'h'}});out=render(h.api.snapshot().selection);assert.match(out,/data-action="stage_approved" aria-expanded="true"/);assert.ok(out.indexOf('data-action="stage_approved"')<out.indexOf('data-stage-job="h"'));assert.match(out,/stage-evidence-h/);
- await h.api.handleClick({dataset:{action:'stage_approved'}});out=render(h.api.snapshot().selection);assert.equal(h.api.snapshot().selection.stage_evidence,'');assert.match(out,/data-action="stage_approved" aria-expanded="false"/);assert.doesNotMatch(out,/data-stage-job="h"/);
- await h.api.handleClick({dataset:{action:'stage_approved'}});out=render(h.api.snapshot().selection);assert.match(out,/data-action="stage_approved" aria-expanded="true"/);assert.match(out,/data-stage-job="h"/);assert.equal(h.mutations().length,0);
+ const render=()=>html('workStageHTML(state,selection,state.run.definition.nodes.t).body',{state:h.state,selection:h.api.snapshot().selection});
+ let out=render();assert.match(out,/data-action="stage_approved" aria-expanded="true"/);assert.match(out,/data-stage-job="h"/);assert.match(out,/실행 실패/);
+ await h.api.handleClick({dataset:{action:'stage_evidence',jobId:'h'}});out=render();assert.match(out,/stage-evidence-h/);assert.match(out,/확인 근거/);
+ await h.api.handleClick({dataset:{action:'stage_approved'}});out=render();assert.equal(h.api.snapshot().selection.stage_evidence,'');assert.match(out,/data-action="stage_approved" aria-expanded="false"/);assert.doesNotMatch(out,/data-stage-job="h"/);assert.match(out,/data-stage-job="a"/);
+ await h.api.handleClick({dataset:{action:'stage_approved'}});out=render();assert.match(out,/data-action="stage_approved" aria-expanded="true"/);assert.match(out,/data-stage-job="h"/);assert.equal(h.mutations().length,0);
 });
-test('only an automatic positive is exposed ahead of grouped humans without relabelling execution as approval',()=>{
- const {state}=stageRuntimeFixture();state.run.jobs.a={status:'completed'};state.run.jobs.h={status:'completed',decisions:{job:{item_id:'job',verdict:'completed',note:'\n선택한 판정: 승인 (yes)',actor_id:'actor'}}};
- const out=html('workStageHTML(state,{stage_evidence:"h"},state.run.definition.nodes.t).body',{state});assert.ok(out.indexOf('data-stage-job="a"')<out.indexOf('data-action="stage_approved"'));assert.ok(out.indexOf('data-action="stage_approved"')<out.indexOf('data-stage-job="h"'));assert.match(out,/나머지 승인 1건/);assert.match(out,/실행 완료/);
+test('published job order survives changing decisions, with successful execution distinct from approval',()=>{
+ const {state}=stageRuntimeFixture(),{nodes}=state.run.definition;
+ nodes.p.children=['t'];nodes.t.children=['a','h']; // Opposite to the insertion order in nodes.
+ state.run.jobs.a={status:'completed'};state.run.jobs.h={status:'completed',decisions:{job:{item_id:'job',verdict:'completed',note:'\n선택한 판정: 승인 (yes)',actor_id:'actor'}}};
+ const render=selection=>html('workStageHTML(state,selection,state.run.definition.nodes.t).body',{state,selection});
+ const ids=out=>[...out.matchAll(/data-stage-job="([^"]+)"/g)].map(m=>m[1]);
+ assert.deepEqual(ids(render({})),['a','h']);assert.deepEqual(ids(render({stage_approved_expanded:false})),['a']);
+ const out=render({stage_approved_expanded:false,stage_evidence:'h'});assert.deepEqual(ids(out),['a','h']);assert.match(out,/stage-evidence-h/);
+ assert.match(out,/2 \/ 2 완료/);assert.match(out,/실행 완료 1<\/span>/);assert.match(out,/승인 1<\/span>/);
+ nodes.t.children.reverse();state.run.jobs.a={status:'failed'};const revised=render({});assert.deepEqual(ids(revised),['h','a']);assert.match(revised,/1 \/ 2 완료/);assert.match(revised,/실행 실패 1<\/span>/);
+});
+
+test('stage tabs restore their own scroll and the note caret survives chat layout changes',()=>{
+ const {state}=stageRuntimeFixture();
+ state.run.definition.nodes.next={id:'next',type:'t',parent:'p',children:[],name:'다음 단계'};
+ const document={activeElement:null,querySelector:()=>null,createElement:()=>({})};
+ let content=null,controls=[];
+ function control(tagName,attrs){
+  return {tagName,selectionStart:0,selectionEnd:0,selectionDirection:'none',getAttribute:key=>attrs[key] ?? null,hasAttribute:key=>Object.hasOwn(attrs,key),
+   focus(){document.activeElement=this;},setSelectionRange(start,end,direction){this.selectionStart=start;this.selectionEnd=end;this.selectionDirection=direction;}};
+ }
+ const host={dataset:{},isConnected:true,classList:{toggle(){}},setAttribute(){},contains:el=>controls.includes(el),querySelector:selector=>selector==='#ees-work-content'?content:null,
+  querySelectorAll:selector=>selector==='button,input,select,textarea,a,summary'?controls:[],
+  set innerHTML(value){content={scrollTop:0};controls=value.includes('data-stage-note')?[control('BUTTON',{'data-action':'job','data-job-id':'h'}),control('TEXTAREA',{'data-job-id':'h','data-stage-note':''})]:[];document.activeElement=null;}};
+ const context=renderer({document,window:{__eesSourceShellV1:{hosts:()=>({panel:host}),publish(){}}}}),view=run(context,'createWorkView({callbacks:{}})');
+ const render=(stage_id,stage_tab,layout={})=>view.render({state,selection:{mode:'work',workflow_id:'w',run_id:'r',tab:'overview',stage_id,stage_tab,stage_evidence:'h',stage_notes:{'actor/r/h//0':'개인 메모'},...layout}});
+ const initial=structuredClone(state);
+ render('t','work');content.scrollTop=215;const original=controls[1];original.focus();original.setSelectionRange(1,3,'forward');
+ render('t','work',{chat_open:false,chat_width:400});
+ assert.equal(content.scrollTop,215);assert.notEqual(controls[1],original);
+ assert.equal(document.activeElement,controls[1]);assert.deepEqual([controls[1].selectionStart,controls[1].selectionEnd,controls[1].selectionDirection],[1,3,'forward']);
+ render('t','log');assert.equal(content.scrollTop,0);content.scrollTop=88;
+ render('next','work');assert.equal(content.scrollTop,0);content.scrollTop=29;
+ render('t','work');assert.equal(content.scrollTop,215);
+ render('t','log');assert.equal(content.scrollTop,88);
+ render('next','work');assert.equal(content.scrollTop,29);
+ assert.deepEqual(state,initial);
 });

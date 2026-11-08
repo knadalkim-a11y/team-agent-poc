@@ -1,4 +1,4 @@
-"""Q1 actual built Native geometry and private panel preferences.
+"""Actual built Native work/chat geometry and account-private chat preferences.
 
 Native frontend, assets and workspace SQLite are real. Sessions and source data
 are synthetic here; the complete app/account gates test actual Native login.
@@ -13,123 +13,123 @@ import ees_source_frame_monitor as frame_monitor
 
 class FigmaLayoutNativeTests(IntegratedNativeCase):
     def wait_layout_motion(self):
-        self.wait("!document.querySelector('#sidebar').getAnimations().length && !document.querySelector('.ees-panel-space').getAnimations().length")
+        self.wait("!document.querySelector('[data-ees-source-shell]').getAnimations({subtree:true}).some(a=>a.effect?.target?.matches('#sidebar,.ees-chat-space,[data-ees-work-surface],[data-ees-chat-surface]'))")
 
     def wait_saved_width(self, width):
-        deadline=time.monotonic()+5
-        saved_width=None
-        while time.monotonic()<deadline:
-            saved_width=self.state().get('ui_state',{}).get('state',{}).get('selection',{}).get('panel_width')
-            if saved_width==width:return
+        deadline = time.monotonic() + 5
+        saved = {}
+        while time.monotonic() < deadline:
+            saved = self.state()['ui_state']['state'].get('selection', {})
+            if saved.get('chat_width') == width:
+                return
             time.sleep(.025)
-        observed={'saved_width':saved_width}
-        try:
-            observed.update(self.browser.evaluate("({panel_width:document.querySelector('.ees-panel-region')?.getBoundingClientRect().width,resize_focused:!!document.activeElement?.matches('[data-ees-panel-resize]'),native_ready:!!window.__eesNativeDraftV1?.ready?.()})"))
-        except AssertionError as error:
-            observed['capture_error']=str(error)
-        self.fail('Private panel width did not persist: '+str(width)+'; '+json.dumps(observed))
+        self.fail(f'Private chat width not saved: {width}; observed {saved.get("chat_width")}')
 
     def viewport(self, width, height=768, *, overlay=None):
         self.browser.call('Emulation.setDeviceMetricsOverride', {
             'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
-        self.wait('innerWidth === ' + str(width))
+        self.wait(f"innerWidth === {width} && innerHeight === {height}")
         self.wait("document.querySelector('[data-ees-source-sidebar]')?.dataset.compact === " + json.dumps(str(width < 1440).lower()))
-        self.wait("Math.abs(document.querySelector('[data-ees-source-shell]').getBoundingClientRect().width - "+str(width)+") < .01")
-        # CSS can resize before Svelte handles the window resize event. When
-        # compact stays unchanged, neither it nor idle animations prove that
-        # the panel has crossed its separate overlay breakpoint.
-        if overlay is not None:
-            self.wait("document.querySelector('.ees-panel-region')?.dataset.overlay === " + json.dumps(str(overlay).lower()))
+        if overlay:
+            self.wait("document.querySelector('[data-ees-source-shell]')?.dataset.eesChatState === 'closed'")
+        self.wait_layout_motion()
+
+    def chat_state(self, state):
+        self.wait("document.querySelector('[data-ees-source-shell]')?.dataset.eesChatState === " + json.dumps(state))
         self.wait_layout_motion()
 
     def geometry(self):
         return self.browser.evaluate("""(()=>{
-          const box=s=>{const e=document.querySelector(s),r=e?.getBoundingClientRect();return r?{x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom}:null;};
-          return {viewport:[innerWidth,innerHeight],sidebar:box('#sidebar'),panel:box('.ees-panel-region'),chat:box('.ees-chat-region'),header:box('#ees-work-context'),headerTitle:box('#ees-work-context .ees-context-title'),message:box('.message-listitem'),composer:box('#message-input-container'),footer:box('#ees-work-panel>.ew-job-actions'),overflow:document.documentElement.scrollWidth>innerWidth,overlay:document.querySelector('.ees-panel-region').dataset.overlay};
+          const box=s=>{const e=document.querySelector(s),r=e?.getBoundingClientRect();return r?{x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom,right:r.right}:null;};
+          return {viewport:[innerWidth,innerHeight],sidebar:box('#sidebar'),work:box('[data-ees-work-surface]'),chat:box('[data-ees-chat-surface]'),header:box('#ees-work-context'),message:box('.message-listitem'),composer:box('#message-input-container'),footer:box('#ees-work-panel>.ew-job-actions'),overflow:document.documentElement.scrollWidth>innerWidth,state:document.querySelector('[data-ees-source-shell]').dataset.eesChatState};
         })()""")
 
     def evidence(self, label):
         directory=self.screenshot(label)
         (directory/(label+'.json')).write_text(json.dumps(self.geometry(),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
-    def resize_keyboard(self, key, code):
-        # The source shell shows its default width before Native finishes
-        # loading and focusing the composer. Start keyboard input only after
-        # that lifecycle ends, then verify the physical click owns focus.
-        self.wait("window.__eesNativeDraftV1?.ready?.() && window.__eesSourceShellV1?.screen?.().chatReady")
-        self.click('[data-ees-panel-resize]')
-        self.wait("document.activeElement?.matches('[data-ees-panel-resize]')")
+    def resize_keyboard(self, key, code, expected):
+        self.wait("window.__eesNativeDraftV1?.ready?.()")
+        self.click('[data-ees-chat-resize]')
+        self.wait("document.activeElement?.matches('[data-ees-chat-resize]')")
         self.key(key,code)
-        expected={'Home':400,'End':720}.get(key)
-        if expected is not None:
-            self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width === "+str(expected))
+        self.wait(f"Math.abs(document.querySelector('[data-ees-chat-surface]').getBoundingClientRect().width - {expected}) < 1")
         self.wait_layout_motion()
 
     def test_q1_geometry_reading_width_footer_and_baseline_overlay(self):
         key=self.author(fields=[{'id':'field-'+str(i),'name':'확인 값 '+str(i),'type':'text'} for i in range(18)],jobs=1)
         run=self.start(key);self.open_run(key,run)
-        for width,sidebar in [(1920,256),(1536,256),(1366,56),(1280,56)]:
-            self.viewport(width)
-            geometry=self.geometry()
-            self.assertEqual(geometry['sidebar']['width'],sidebar)
-            self.assertEqual(geometry['panel']['width'],480)
-            self.assertEqual(geometry['chat']['width'],width-sidebar-480)
-            self.assertEqual(geometry['overlay'],'false')
-            self.assertFalse(geometry['overflow'])
-            self.assertEqual(geometry['header']['height'],48)
-            self.assertAlmostEqual(geometry['headerTitle']['x']-geometry['header']['x'],24,delta=1/64)
-            self.assertAlmostEqual(geometry['composer']['width'],min(760,geometry['chat']['width']-48),delta=1)
-            self.assertLessEqual(geometry['message']['width'],min(760,geometry['chat']['width']-48)+1)
-            self.assertLessEqual(geometry['footer']['bottom'],768)
-            self.assertGreaterEqual(geometry['footer']['height'],50)
-            self.assertTrue(self.browser.evaluate("document.querySelector('#ees-work-content').scrollHeight > document.querySelector('#ees-work-content').clientHeight"))
-            if width in (1920,1366):self.evidence('q1-'+str(width)+'x768')
-        self.click('[data-ees-sidebar-toggle]')
-        self.wait_layout_motion()
-        self.assertEqual(self.geometry()['sidebar']['width'],256)
-        self.assertEqual(self.geometry()['overlay'],'true')
-        self.click('[data-ees-sidebar-toggle]')
-        self.wait_layout_motion()
-        # Widening by itself does not activate the unresolved overlay policy.
-        self.resize_keyboard('End',35)
-        geometry=self.geometry()
-        self.assertEqual(geometry['sidebar']['width'],56)
-        self.assertEqual(geometry['panel']['width'],720)
-        # The flex remainder may differ by one observed 1/64 CSS pixel.
-        # Keep exact fixed widths and check adjoining edges and overflow too.
-        self.assertAlmostEqual(geometry['chat']['width'],504,delta=1/64)
-        self.assertAlmostEqual(geometry['chat']['x']+geometry['chat']['width'],geometry['panel']['x'],delta=1/64)
-        self.assertAlmostEqual(geometry['panel']['x']+geometry['panel']['width'],1280,delta=1/64)
-        self.assertEqual(geometry['overlay'],'false')
-        self.assertFalse(geometry['overflow'])
-        self.evidence('q1-wide-panel-1280x768')
-        self.resize_keyboard('Home',36)
-        self.assertEqual(self.geometry()['panel']['width'],400)
-        self.viewport(1095, overlay=True)
-        self.assertEqual(self.geometry()['overlay'],'true')
-        self.assertEqual(self.geometry()['chat']['width'],1039)
-        self.click('[data-action=close_panel]')
-        self.wait("document.querySelector('.ees-panel-region').hidden")
-        self.click('[data-action=open_panel]')
-        self.wait("!document.querySelector('.ees-panel-region').hidden")
-        self.evidence('q1-overlay-close-reopen')
+        for width,height,sidebar,chat in ((1920,1080,256,560),(1536,864,256,560),(1366,768,56,480),(1280,768,56,480)):
+            with self.subTest(width=width):
+                self.viewport(width,height)
+                self.chat_state('docked')
+                geometry=self.geometry()
+                sidebar_box,work,chat_box=geometry['sidebar'],geometry['work'],geometry['chat']
+                self.assertAlmostEqual(sidebar_box['width'],sidebar,delta=1)
+                self.assertAlmostEqual(sidebar_box['right'],work['x'],delta=1)
+                self.assertAlmostEqual(work['width'],width-sidebar-chat,delta=1)
+                self.assertAlmostEqual(work['right'],chat_box['x'],delta=1)
+                self.assertAlmostEqual(chat_box['width'],chat,delta=1)
+                self.assertAlmostEqual(chat_box['right'],width,delta=1)
+                self.assertFalse(geometry['overflow'],geometry)
+                for name in ('message','composer'):
+                    box=geometry[name]
+                    self.assertGreaterEqual(box['x'],chat_box['x']-1,name)
+                    self.assertLessEqual(box['right'],width+1,name)
+                self.assertLessEqual(geometry['footer']['bottom'],height)
+                self.assertGreaterEqual(geometry['footer']['height'],40)
+                if width in (1920,1366):self.evidence(f'q1-{width}x{height}')
+        self.resize_keyboard('End',35,584)  # 1280 - 56 - 640
+        self.resize_keyboard('Home',36,420)
+        # Split threshold is *available* width, including actual nav width.
+        self.viewport(1117)
+        if self.geometry()['state']=='closed':
+            self.click('[data-ees-chat-toggle]')
+        self.chat_state('docked')
+        self.viewport(1116)
+        self.chat_state('docked')
+        self.assertAlmostEqual(self.geometry()['work']['width'],640,delta=1)
+        self.viewport(1115)
+        if self.geometry()['state']=='closed':
+            self.click('[data-ees-chat-toggle]')
+        self.chat_state('overlay')
+        self.assertAlmostEqual(self.geometry()['work']['width'],1115-56,delta=1)
+        self.key('Escape',27)
+        self.chat_state('closed')
+        self.viewport(480,overlay=True)
+        work=self.geometry()['work']
+        self.assertAlmostEqual(work['width'],480-56,delta=1)
+        self.assertFalse(self.geometry()['overflow'])
+        self.evidence('q1-480x768-work')
+        self.click('[data-ees-chat-toggle]')
+        self.chat_state('overlay')
+        self.assertTrue(self.browser.evaluate("document.querySelector('[data-ees-chat-surface]').contains(document.activeElement)"))
+        self.assertTrue(self.browser.evaluate("document.querySelector('[data-ees-work-surface]').inert || !!document.querySelector('[data-ees-work-surface]').closest('[inert]')"))
+        self.assertFalse(self.geometry()['overflow'])
+        self.evidence('q1-480x768-chat')
+        self.key('Escape',27)
+        self.chat_state('closed')
+        self.wait("document.activeElement?.matches('[data-ees-chat-toggle]')")
 
     def test_q1_physical_drag_restores_per_actor_width_and_contrast(self):
-        handle=self.browser.evaluate("(()=>{const r=document.querySelector('[data-ees-panel-resize]').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+100};})()")
+        self.viewport(1920,1080)
+        self.chat_state('docked')
+        initial=self.geometry()['chat']['width']
+        self.assertAlmostEqual(initial,560,delta=1)
+        handle=self.browser.evaluate("(()=>{const r=document.querySelector('[data-ees-chat-resize]').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+100};})()")
         self.browser.call('Input.dispatchMouseEvent',{'type':'mousePressed',**handle,'button':'left','buttons':1,'clickCount':1})
-        self.browser.call('Input.dispatchMouseEvent',{'type':'mouseMoved','x':handle['x']-160,'y':handle['y'],'button':'left','buttons':1})
-        self.browser.call('Input.dispatchMouseEvent',{'type':'mouseReleased','x':handle['x']-160,'y':handle['y'],'button':'left','buttons':0,'clickCount':1})
-        self.wait("document.querySelector('.ees-panel-region').getBoundingClientRect().width === 640")
+        self.browser.call('Input.dispatchMouseEvent',{'type':'mouseMoved','x':handle['x']-80,'y':handle['y'],'button':'left','buttons':1})
+        self.browser.call('Input.dispatchMouseEvent',{'type':'mouseReleased','x':handle['x']-80,'y':handle['y'],'button':'left','buttons':0,'clickCount':1})
         self.wait_saved_width(640)
         actor_a=dict(self.server.user)
-        self.navigate('/c/existing-chat');self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width===640")
+        self.navigate('/c/existing-chat');self.wait("document.querySelector('[data-ees-chat-surface]')?.getBoundingClientRect().width===640")
         self.users['other-user']={**deepcopy(actor_a),'id':'other-user','name':'Other synthetic user'}
         self.server.user=self.users['other-user']
-        self.navigate('/');self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width===480")
-        self.resize_keyboard('Home',36)
-        self.wait_saved_width(400)
+        self.navigate('/');self.wait("document.querySelector('[data-ees-chat-surface]')?.getBoundingClientRect().width===560")
+        self.resize_keyboard('Home',36,420)
+        self.wait_saved_width(420)
         self.server.user=actor_a
-        self.navigate('/c/existing-chat');self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width===640")
+        self.navigate('/c/existing-chat');self.wait("document.querySelector('[data-ees-chat-surface]')?.getBoundingClientRect().width===640")
         ratios=self.browser.evaluate("""(()=>{
           const style=getComputedStyle(document.querySelector('#ees-work-panel')),hex=n=>style.getPropertyValue(n).trim();
           const lum=h=>{const c=h.replace('#','').match(/../g).map(x=>parseInt(x,16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
@@ -163,8 +163,7 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
             'panel': '#ees-work-panel', 'author': '#ees-work-designer',
             'card': '.ew-author-list', 'input': '#ew-author-search',
             'chat': '#chat-container #chat-pane'}.items()}
-        # The 2026-11-05 shared-panel decision extends the authoring canvas
-        # to every right-panel host; white inputs/chat and hover stay distinct.
+        # Work uses the authoring surface; white inputs and chat stay distinct.
         self.assertEqual(observed, {'panel': 'rgb(250, 250, 250)', 'author': 'rgb(250, 250, 250)',
             'card': 'rgba(0, 0, 0, 0)', 'input': 'rgb(255, 255, 255)', 'chat': 'rgb(255, 255, 255)'})
         hover('.ew-author-list>button', 'rgb(243, 243, 245)')
@@ -223,14 +222,17 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
                 self.assertEqual(result['author'], result['panel'], label)
                 self.assertEqual(background('#ees-work-designer>footer'), result['panel'], label)
             if tabs:
+                # Task-detail tabs retain their compact style; the stage and
+                # authoring pages use the larger primary navigation of mock 1.
+                primary_tabs=label=='work-stage' or label.startswith('author-')
                 self.assertEqual(result['tabs'], {
-                    'gap': '20px',
+                    'gap':'24px' if primary_tabs else '20px',
                     'active': {'color': 'rgb(31, 32, 35)', 'background': 'rgba(0, 0, 0, 0)',
-                               'font': '12px', 'line': '18px', 'weight': '500', 'height': 36,
-                               'paddingTop': '6px', 'paddingBottom': '10px'},
+                               'font': '13px' if primary_tabs else '12px', 'line': '18px', 'weight': '500', 'height': 38 if primary_tabs else 36,
+                               'paddingTop': '8px' if primary_tabs else '6px','paddingBottom':'12px' if primary_tabs else '10px'},
                     'inactive': {'color': 'rgb(92, 94, 101)', 'background': 'rgba(0, 0, 0, 0)',
-                                 'font': '12px', 'line': '18px', 'weight': '400', 'height': 36,
-                                 'paddingTop': '6px', 'paddingBottom': '10px'},
+                                 'font': '13px' if primary_tabs else '12px', 'line': '18px', 'weight': '400', 'height': 38 if primary_tabs else 36,
+                                 'paddingTop': '8px' if primary_tabs else '6px','paddingBottom':'12px' if primary_tabs else '10px'},
                     'underline': 'rgb(47, 95, 152)', 'underlineHeight': '2px'}, label)
             self.assertFalse(self.geometry()['overflow'], label)
             shared[label] = result

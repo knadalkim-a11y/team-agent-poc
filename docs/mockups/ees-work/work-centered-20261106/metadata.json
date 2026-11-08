@@ -2,8 +2,8 @@
   "revision": 1,
   "date": "2026-11-06",
   "base_commit": "0a6b0c0bde039b43f346247d105842d16ec2530e",
-  "status": "design_review",
-  "product_implementation": "not_started",
+  "status": "selected_for_product",
+  "product_implementation": "PR #131",
   "figma": {
     "file_key": "XK2wTos6sEuxSHhIj7cqg6",
     "page": "897:761",
@@ -53,5 +53,7 @@
     "Overlay expand action hidden when unavailable",
     "Focus enters chat when opening overlay",
     "Active tab restores current reference label"
-  ]
+  ],
+  "selected_mock_commit": "41b8b086148a6d7256180e570fe3728d8c121a73",
+  "validation_scope": "design review at selected_mock_commit"
 }

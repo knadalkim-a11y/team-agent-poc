@@ -5,6 +5,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const patch = fs.readFileSync(path.join(__dirname, '../frontend/patches/0001-ees-native-hooks.patch'), 'utf8');
 function component(name) {
+  if (process.env.EES_TEST_FRONTEND_SOURCE_DIR) {
+    return fs.readFileSync(path.join(process.env.EES_TEST_FRONTEND_SOURCE_DIR,'src/lib/components/ees',name+'.svelte'),'utf8');
+  }
   const key = `diff --git a/src/lib/components/ees/${name}.svelte`;
   const start = patch.indexOf(key), end = patch.indexOf('diff --git ', start + key.length);
   return patch.slice(start, end < 0 ? undefined : end).split('\n').filter(line => line.startsWith('+') && !line.startsWith('+++')).map(line => line.slice(1)).join('\n');
@@ -37,30 +40,26 @@ function scopeHarness(kind = 'factory') {
   env.eesAction = action => { env.value = action.factoryId ?? action.systemId; };
   return { env, m, choose, react() { react(env); }, boundary(next, context = env.selectionContext, selected = env.value, exit = next) { boundary(next, context, selected, exit); }, set(open, opened = open ? kind : '') { env.open = open; env.opened = opened; sync(open, opened); } };
 }
-function panelHarness() {
-  const m = motion(), trigger = element(), env = { window: { __eesMotionV1: m.api }, tick: () => Promise.resolve(), previousPanelOpen: null, previousPanelOverlay: null, panelOpen: false, panelOverlay: true, panelClosing: false, panelClose: Promise.resolve(true), nativeRoute: false, mounted: true, admin: false, panelRegion: element(), panel: element(), document: { getElementById: () => trigger, body: element(), documentElement: element() }, $showSettings: false, actions: [] };
-  env.eesAction = action => env.actions.push(action);
-  const shell = component('EesShell');
-  const sync = bind(between(shell, 'function syncPanelMotion(', '\n\t$: if (mounted)').replace('open: boolean, overlay: boolean, native: boolean', 'open, overlay, native'), env, 'syncPanelMotion');
-  const focusSource = between(shell, 'focusPanel: async', '\n\t\treferenceHost:').replace('(open: boolean)', '(open)');
-  const focus = Function('env', `with(env) { return { ${focusSource} }.focusPanel; }`)(env);
-  const key = bind(between(shell, 'function panelKeydown(', '\n\tfunction clearPrivateDrafts').replace('event: KeyboardEvent', 'event').replaceAll('(event.target as Element)', 'event.target'), env, 'panelKeydown');
-  sync(false, true, false);
-  return { env, m, trigger, focus, key, set(open, overlay = true, native = false) { env.panelOpen = open; env.panelOverlay = overlay; env.nativeRoute = native; sync(open, overlay, native); } };
-}
-function panelLayout(values = {}) {
-  const shell = component('EesShell'), env = {
-    s: { mode: 'work', tab: 'overview', panel_width: 640 }, $eesSnapshot: {},
-    transientWidth: null, width: 1350, $eesCompact: false,
-    procedurePanel: false, fixedPanel: false, panelWidth: 0, panelOverlay: false,
-    clamp: value => Math.max(400, Math.min(720, Math.round(Number(value) || 480))), ...values
-  };
-  const statements = ['procedurePanel', 'fixedPanel', 'panelWidth', 'panelOverlay'].map(name => {
-    const statement = shell.match(new RegExp('\\$:\\s*' + name + '\\s*=[\\s\\S]*?;'));
-    assert.ok(statement, name); return statement[0].replace(/^\$:\s*/, '');
+// Exercise the production declarations, keyboard handler and pointer arithmetic.
+// The packaged browser gate owns transitions, actual layout/hit-testing and focus.
+function chatHarness(width = 1920, compact = false, selection = {}) {
+  const shell=component('EesShell');
+  const env={width,$eesCompact:compact,s:{...selection},smallSize:width<1200,smallOpen:false,
+    overlay:false,expanded:false,transientWidth:null,chatOpen:false,chatState:'',dockAvailable:0,widthLimit:0,preferred:0,chatWidth:0,
+    $showSettings:false,actions:[],tick:()=>Promise.resolve(),chatToggle:element(),chatSurface:element(),
+    dragX:0,dragWidth:0,resizing:false,document:{activeElement:null}};
+  env.chatSurface.querySelector=()=>null;
+  env.chatSurface.querySelectorAll=()=>[];
+  env.eesAction=value=>env.actions.push(value);
+  const {stripTypeScriptTypes}=require('node:module');
+  const f=between(shell,'async function setChatOpen(', '\n\tfunction clearPrivateDrafts(');
+  const clamp=shell.split('\n').find(line=>line.includes('const clamp = '));
+  const reactive=['dockAvailable','overlay','widthLimit','preferred','chatWidth','chatOpen','chatState'].map(name=>{
+    const declaration=shell.split('\n').find(line=>line.includes('$: '+name+' = '));
+    assert.ok(declaration,name);return declaration.replace('$: ','');
   }).join('\n');
-  Function('env', `with(env) { ${statements} }`)(env);
-  return env;
+  const funcs=Function('env',`with(env){${stripTypeScriptTypes(clamp+'\n'+f)};return {refresh(){${reactive}},setWidth,resizeStart,resizeMove,resizeEnd,resizeCancel,resizeKey,chatKeydown,setChatOpen,toggleChatExpanded};}`)(env);
+  funcs.refresh(); return {env,...funcs};
 }
 function scopePositionHarness({ compact = true, width = 480, height = 768, bottom = 172 } = {}) {
   const documentListeners = new Map(), windowListeners = new Map(), closed = [];
@@ -104,27 +103,44 @@ test('compact scope allows list scroll but closes after anchor movement and remo
   h.windowListeners.get('resize')(); assert.deepEqual(h.closed, [false, false]);
   h.action.destroy(); assert.equal(h.documentListeners.size + h.windowListeners.size, 0);
 });
-test('procedure authoring uses 480px while work and Native management retain saved resize widths', () => {
-  for (const tab of ['overview', 'content', 'execution', 'decision', 'history']) {
-    const layout = panelLayout({ s: { mode: 'author', tab, panel_width: 680 }, transientWidth: 700 });
-    assert.equal(layout.panelWidth, 480); assert.equal(layout.fixedPanel, true);
-    assert.equal(layout.panelOverlay, false, '480px authoring leaves enough conversation room at 1350px');
+test('work takes the remainder after the actual rail and chat; 1116 is the first compact split',()=>{
+  for(const [width,compact,work,chat] of [[1920,false,1104,560],[1536,false,720,560],[1366,true,830,480],[1280,true,744,480],[1117,true,640,421],[1116,true,640,420]]){
+    const h=chatHarness(width,compact); if(width<1200){h.env.smallOpen=true;h.refresh();}
+    assert.equal(h.env.chatState,'docked');assert.equal(h.env.chatWidth,chat,width);
+    assert.equal(width-(compact?56:256)-chat,work);
   }
-  const creation = panelLayout({ $eesSnapshot: { procedure_start: { draftName: '새 절차' } }, transientWidth: 700 });
-  assert.equal(creation.panelWidth, 480); assert.equal(creation.fixedPanel, true);
-  assert.equal(panelLayout().panelWidth, 640);
-  for (const tab of ['tools']) {
-    assert.equal(panelLayout({ s: { mode: 'author', tab, panel_width: 680 } }).panelWidth, 680);
-    assert.equal(panelLayout({ s: { mode: 'author', tab, panel_width: 680 }, transientWidth: 600 }).panelWidth, 600);
-  }
+  for(const width of [1115,480]){const h=chatHarness(width,true);
+    assert.equal(h.env.chatState,'closed');h.env.smallOpen=true;h.refresh();assert.equal(h.env.chatState,'overlay');}
+  const h=chatHarness(1280,false);h.env.s.chat_open=true;h.refresh();
+  assert.equal(h.env.chatState,'overlay','An expanded sidebar must count against the available space');
 });
-test('retired resize gestures cannot persist a width while the authoring panel is fixed', () => {
-  const env = panelLayout({ s: { mode: 'author', tab: 'overview' } }), actions = [];
-  env.eesAction = action => actions.push(action);
-  const setWidth = bind(between(component('EesShell'), 'function setWidth(', '\n\tfunction resizeStart'), env, 'setWidth');
-  setWidth(700, true); assert.equal(env.transientWidth, null); assert.deepEqual(actions, []);
-  env.fixedPanel = false; setWidth(700, true);
-  assert.deepEqual(actions, [{ action: 'panel_width', width: 700 }]);
+test('private chat width is distinct from old panel width; authoring does not force a fixed work center',()=>{
+  const h=chatHarness(1920,false,{mode:'author',tab:'procedures',panel_width:420,panel_open:false});
+  assert.equal(h.env.chatWidth,560);assert.equal(h.env.chatState,'docked');
+  h.env.s.chat_width=690;h.refresh();assert.equal(h.env.chatWidth,690);
+  h.env.s.chat_open=false;h.refresh();assert.equal(h.env.chatState,'closed');
+});
+test('dock drag uses the left edge of chat; Home, End and arrows preserve minimum work width',()=>{
+  const h=chatHarness(1280,true);
+  const handle={focus(){},setPointerCapture(id){assert.equal(id,1);}};
+  h.resizeStart({button:0,currentTarget:handle,clientX:800,pointerId:1,preventDefault(){}});
+  h.resizeMove({clientX:736});h.refresh();assert.equal(h.env.chatWidth,544);
+  h.resizeEnd();assert.deepEqual(h.env.actions.pop(),{action:'chat_width',width:544});
+  for(const [key,value] of [['Home',420],['End',584],['ArrowLeft',496],['ArrowRight',464]]){
+    h.refresh();h.resizeKey({key,preventDefault(){}});assert.deepEqual(h.env.actions.pop(),{action:'chat_width',width:value});
+  }
+  h.env.expanded=true;h.refresh();h.setWidth(500,true);assert.deepEqual(h.env.actions,[]);
+  const narrow=chatHarness(480,true);narrow.setWidth(510,true);assert.deepEqual(narrow.env.actions,[]);
+});
+test('narrow chat toggles locally; desktop display is an account preference and nested Escape stays local',async()=>{
+  const narrow=chatHarness(480,true);await narrow.setChatOpen(true,false);narrow.refresh();
+  assert.equal(narrow.env.chatState,'overlay');assert.deepEqual(narrow.env.actions,[]);
+  const input={closest(selector){return selector==='[role="dialog"]'?narrow.env.chatSurface:null;}};
+  const event=target=>({key:'Escape',target,defaultPrevented:false,stopPropagation(){this.stopped=true;},preventDefault(){this.defaultPrevented=true;}});
+  const nested=event({closest:()=>({})});narrow.chatKeydown(nested);assert.equal(nested.stopped,undefined);
+  const dismissed=event(input);narrow.chatKeydown(dismissed);await flush();narrow.refresh();
+  assert.equal(dismissed.stopped,true);assert.equal(narrow.env.chatState,'closed');assert.equal(narrow.env.chatToggle.focused,1);
+  const wide=chatHarness(1920);await wide.setChatOpen(false,false);assert.deepEqual(wide.env.actions,[{action:'chat_open',open:'false'}]);
 });
 test('scope close before its opening tick never opens a stale menu and restores focus after completion', async () => {
   const h = scopeHarness(); h.set(true); h.set(false); await flush();
@@ -139,59 +155,9 @@ test('opening a sibling retires closing scope content immediately without restor
   const h = scopeHarness(); h.set(true); await flush(); h.set(false); h.set(false, 'system');
   assert.equal(h.env.shown, false); assert.equal(h.m.pending.size, 0); assert.equal(h.env.trigger.focused, 0);
 });
-test('initial panel geometry has no intro animation', async () => {
-  const h = panelHarness(); h.env.previousPanelOpen = null; h.set(true, false); await flush();
-  assert.deepEqual(h.m.opened, []); assert.equal(h.env.panelClosing, false);
-});
-test('docked panel slides the same surface and returns focus only after closing', async () => {
-  const h = panelHarness(); h.set(true, false); await flush(); assert.deepEqual(h.m.opened, [h.env.panelRegion]);
-  h.set(false, false); const focus = h.focus(false); await flush();
-  assert.equal(h.env.panelClosing, true); assert.equal(h.trigger.focused, 0);
-  h.m.api.finish(h.env.panelRegion); await focus; assert.equal(h.trigger.focused, 1);
-});
-test('overlay animates only the panel and returns focus after its completion', async () => {
-  const h = panelHarness(); h.set(true); await flush();
-  assert.deepEqual(h.m.opened, [h.env.panelRegion], 'Conversation has no panel backdrop animation');
-  h.set(false); const focus = h.focus(false); await flush();
-  assert.equal(h.env.panelClosing, true); assert.equal(h.trigger.focused, 0);
-  assert.equal(h.m.pending.size, 1, 'Panel completion must be the only exit gate');
-  h.m.api.finish(h.env.panelRegion); await focus;
-  assert.equal(h.env.panelClosing, false); assert.equal(h.trigger.focused, 1);
-});
-test('overlay reopening cancels old cleanup and focus without leaving interaction inert', async () => {
-  const h = panelHarness(); h.set(true); await flush(); h.set(false); const focus = h.focus(false); h.set(true); await flush(); await focus;
-  assert.equal(h.env.panelClosing, false); assert.equal(h.env.panelRegion.inert, false); assert.equal(h.trigger.focused, 0); assert.equal(h.m.pending.size, 0);
-});
-test('crossing the overlay breakpoint preserves the same active exit', async () => {
-  const h = panelHarness(); h.set(true); await flush(); h.set(false); const exit = h.env.panelClose; h.set(false, false);
-  assert.equal(h.env.panelClosing, true); assert.equal(h.m.pending.size, 1); assert.equal(h.env.panelClose, exit);
-  h.m.api.finish(h.env.panelRegion); await exit; assert.equal(h.env.panelClosing, false);
-});
-test('overlay Escape preserves nested consumed keys and ignores attached/native/settings surfaces', () => {
-  const h = panelHarness(), event = () => ({ key: 'Escape', target: h.env.panelRegion, defaultPrevented: false, stopPropagation() { this.stopped = true; }, preventDefault() { this.defaultPrevented = true; } });
-  h.set(true); h.key({ ...event(), defaultPrevented: true }); assert.equal(h.env.actions.length, 0);
-  h.set(true, false); h.key(event()); assert.equal(h.env.actions.length, 0);
-  h.set(true, true); h.env.$showSettings = true; h.key(event()); assert.equal(h.env.actions.length, 0);
-  h.env.$showSettings = false; h.key(event()); assert.deepEqual(h.env.actions, [{ action: 'close_panel' }]);
-});
-
-test('overlay close completion does not steal a new focus chosen on the released conversation', async () => {
-  const h = panelHarness(); h.set(true); await flush(); h.env.document.activeElement = h.env.panelRegion;
-  h.set(false); const focus = h.focus(false); await flush(); h.env.document.activeElement = element();
-  h.m.api.finish(h.env.panelRegion); await focus;
-  assert.equal(h.trigger.focused, 0);
-});
-
-test('queued panel entry does not restart after its shell is destroyed', async () => {
-  const h = panelHarness(); h.set(true); h.env.mounted = false; h.env.panelRegion = undefined; h.env.panel = undefined;
-  await flush(); assert.equal(h.m.opened.length, 0);
-});
-
-test('retained scope and overlay stop closing synchronously before reactive inert bindings update', async () => {
-  const scope = scopeHarness(); scope.set(true); await flush(); scope.set(false); scope.set(true);
-  assert.equal(scope.m.pending.size, 0); assert.equal(scope.env.dropdown.inert, false);
-  const panel = panelHarness(); panel.set(true); await flush(); panel.set(false); panel.set(true);
-  assert.equal(panel.m.pending.size, 0); assert.equal(panel.env.panelRegion.inert, false);
+test('retained scope cancels closing synchronously without leaving it inert',async()=>{
+  const scope=scopeHarness();scope.set(true);await flush();scope.set(false);scope.set(true);
+  assert.equal(scope.m.pending.size,0);assert.equal(scope.env.dropdown.inert,false);
 });
 test('own scope selection updates business value immediately and keeps the common exit until completion', async () => {
   for (const boundaryFirst of [true, false]) {
@@ -226,64 +192,6 @@ test('choosing the already selected option does not exempt a later navigation bo
   h.boundary('another-workflow');
   assert.equal(h.env.shown, false); assert.equal(h.m.pending.size, 0); assert.equal(h.env.trigger.focused, 0);
 });
-test('overlay Escape owns shell bubbling before Native unconditional document CLOSE_MODAL handling', () => {
-  const shell = component('EesShell');
-  assert.match(shell, /class="ees-source-shell"\s+on:keydown=\{panelKeydown\}/);
-  assert.doesNotMatch(shell, /<svelte:window[^>]*on:keydown/);
-  const h = panelHarness(); h.set(true); let nativeCalls = 0;
-  const event = { key: 'Escape', defaultPrevented: false, stopped: false,
-    target: h.env.panelRegion, preventDefault() { this.defaultPrevented = true; }, stopPropagation() { this.stopped = true; } };
-  h.key(event); if (!event.stopped) { nativeCalls++; event.preventDefault(); }
-  assert.equal(nativeCalls, 0); assert.deepEqual(h.env.actions, [{ action: 'close_panel' }]);
-  const scopeEvent = { ...event, stopped: false, defaultPrevented: false, target: { closest() { return {}; } } };
-  h.key(scopeEvent); assert.equal(scopeEvent.stopped, false); assert.equal(h.env.actions.length, 1);
-});
-
-test('overlay Escape outside the panel leaves Native bubbling and panel state untouched', () => {
-  for (const location of ['composer', 'sidebar']) {
-    const h = panelHarness(); h.set(true); let nativeCalls = 0;
-    const event = { key: 'Escape', target: { ...element(), location }, defaultPrevented: false, stopped: false, prevented: 0,
-      preventDefault() { this.prevented++; this.defaultPrevented = true; }, stopPropagation() { this.stopped = true; } };
-    h.key(event);
-    assert.deepEqual(h.env.actions, [], location);
-    assert.equal(event.prevented, 0, location); assert.equal(event.stopped, false, location);
-    if (!event.stopped) { nativeCalls++; event.preventDefault(); }
-    assert.equal(nativeCalls, 1, 'Native document CLOSE_MODAL still handles the outside Escape once');
-    assert.equal(h.env.panelOpen, true);
-  }
-});
-
-test('panel close never restores the opener when focus started outside the panel', async () => {
-  for (const overlay of [true, false]) {
-    const h = panelHarness(); h.set(true, overlay); await flush();
-    const composer = element(); h.env.document.activeElement = composer;
-    h.set(false, overlay); const focus = h.focus(false); await flush();
-    h.m.api.finish(h.env.panelRegion); await focus;
-    assert.equal(h.trigger.focused, 0, `outside focus with overlay=${overlay}`);
-    assert.equal(h.env.document.activeElement, composer);
-  }
-});
-
-test('panel close restores the opener when panel focus falls back to body during closing', async () => {
-  for (const overlay of [true, false]) {
-    const h = panelHarness(); h.set(true, overlay); await flush();
-    h.env.document.activeElement = h.env.panelRegion;
-    h.set(false, overlay); const focus = h.focus(false); h.env.document.activeElement = h.env.document.body;
-    await flush(); h.m.api.finish(h.env.panelRegion); await focus;
-    assert.equal(h.trigger.focused, 1, `panel-owned focus with overlay=${overlay}`);
-  }
-});
-
-test('Native dialog and menu targets keep their own Escape handling', () => {
-  const h = panelHarness(); h.set(true);
-  for (const surface of ['dialog', '[role="dialog"]', '[role="menu"]']) {
-    const event = { key: 'Escape', defaultPrevented: false, target: { closest(selector) { return selector.includes(surface) ? {} : null; } },
-      preventDefault() { throw Error('Native surface key was captured'); }, stopPropagation() { throw Error('Native surface key was captured'); } };
-    h.key(event);
-  }
-  assert.equal(h.env.actions.length, 0);
-});
-
 test('external boundary retirement cannot reopen from a stale derived open value in the same flush', async () => {
   const h = scopeHarness(); h.set(true); await flush();
   h.boundary('new-server-permissions');

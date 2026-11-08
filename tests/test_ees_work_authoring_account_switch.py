@@ -138,13 +138,15 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
             self.fixture.chats[identifier]=record
         a_text='A만의 저장하지 않은 수행 안내';a_question='A의 비공개 작성 질문';a_answer='늦게 도착한 계정 A 전용 응답';b_text='B가 현재 직접 작성한 수행 안내'
         self.login_ui(account_a['email'],'Fixture-person-only-42!');self.navigate('/c/private-account-a-chat');self.enter_authoring()
+        self.browser.call('Emulation.setDeviceMetricsOverride', {'width':1920,'height':1080,'deviceScaleFactor':1,'mobile':False})
+        self.wait("document.querySelector('[data-ees-source-shell]').dataset.eesChatState === 'docked'")
         self.click('[data-action=tools]')
-        self.click('[data-ees-panel-resize]');self.key('End',35)
-        self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width===720")
-        self.eventually(lambda: self.browser_api('GET','/api/ees-work/workspace')['data'].get('ui_state',{}).get('state',{}).get('selection',{}).get('panel_width')==720)
+        self.click('[data-ees-chat-resize]');self.key('End',35)
+        self.wait("document.querySelector('[data-ees-chat-surface]')?.getBoundingClientRect().width===720")
+        self.eventually(lambda: self.browser_api('GET','/api/ees-work/workspace')['data'].get('ui_state',{}).get('state',{}).get('selection',{}).get('chat_width')==720)
         self.open_workflow(workflow_a)
-        self.assertEqual(self.browser.evaluate("document.querySelector('.ees-panel-region').getBoundingClientRect().width"),480)
-        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-ees-panel-resize]')"))
+        self.assertEqual(self.browser.evaluate("document.querySelector('[data-ees-chat-surface]').getBoundingClientRect().width"),720)
+        self.assertTrue(self.browser.evaluate("!!document.querySelector('[data-ees-chat-resize]') && !!document.querySelector('[data-ees-work-surface] #ees-work-designer')"))
         self.fill('#ew-author-node [name=job_guidance]',a_text)
         a_proposed = deepcopy(workflow_a['draft'])
         a_proposed['description'] = a_answer
@@ -162,14 +164,16 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.browser.navigate('about:blank');self.browser.call('Runtime.enable');self.browser.call('Network.enable')
         self.navigate('/');self.wait("document.querySelector('#chat-input.ProseMirror')")
         self.logout_ui(account_a['name']);self.login_ui(account_b['email'],'Fixture-person-only-42!');self.navigate('/c/private-account-b-chat');self.enter_authoring()
+        self.browser.call('Emulation.setDeviceMetricsOverride', {'width':1920,'height':1080,'deviceScaleFactor':1,'mobile':False})
+        self.wait("document.querySelector('[data-ees-source-shell]').dataset.eesChatState === 'docked'")
         self.click('[data-action=tools]')
-        self.assertEqual(self.browser.evaluate("document.querySelector('.ees-panel-region').getBoundingClientRect().width"),480)
-        self.click('[data-ees-panel-resize]');self.key('Home',36)
-        self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width===400")
-        self.eventually(lambda: self.browser_api('GET','/api/ees-work/workspace')['data'].get('ui_state',{}).get('state',{}).get('selection',{}).get('panel_width')==400)
+        self.assertEqual(self.browser.evaluate("document.querySelector('[data-ees-chat-surface]').getBoundingClientRect().width"),560)
+        self.click('[data-ees-chat-resize]');self.key('Home',36)
+        self.wait("document.querySelector('[data-ees-chat-surface]')?.getBoundingClientRect().width===420")
+        self.eventually(lambda: self.browser_api('GET','/api/ees-work/workspace')['data'].get('ui_state',{}).get('state',{}).get('selection',{}).get('chat_width')==420)
         self.open_workflow(workflow_b)
-        self.assertEqual(self.browser.evaluate("document.querySelector('.ees-panel-region').getBoundingClientRect().width"),480)
-        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-ees-panel-resize]')"))
+        self.assertEqual(self.browser.evaluate("document.querySelector('[data-ees-chat-surface]').getBoundingClientRect().width"),420)
+        self.assertTrue(self.browser.evaluate("!!document.querySelector('[data-ees-chat-resize]') && !!document.querySelector('[data-ees-work-surface] #ees-work-designer')"))
         self.fill('#ew-author-node [name=job_guidance]',b_text);new_session=self.browser.session
         self.assertEqual(self.browser_api('GET','/api/v1/auths/')['data']['id'],account_b['id'])
         settings=self.browser_api('GET','/api/v1/users/user/settings')['data']
@@ -193,7 +197,7 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         self.assertEqual(late_on_former_a, {'ok': False, 'code': 'context_changed'})
         # This background tab restored B before B changed the preference. Its
         # active display may stay at B's previous width, never A's private 720.
-        self.assertNotEqual(self.browser.evaluate("document.querySelector('.ees-panel-region').getBoundingClientRect().width"),720)
+        self.assertNotEqual(self.browser.evaluate("document.querySelector('[data-ees-chat-surface]').getBoundingClientRect().width"),720)
         for secret in (a_text,a_question,a_answer):self.assertNotIn(secret,self.authoring_content())
         self.assertEqual(self.browser_api('GET','/api/v1/users/user/settings')['data']['ui']['params']['system'],'NU05 private Native setting B')
         self.screenshot('nu05-former-a-tab-now-b')
@@ -214,15 +218,15 @@ class NativeAuthoringAccountSwitchTests(unittest.TestCase):
         # former A tab must restore the latest stored B preference.
         self.activate_tab(old_session);self.navigate('/')
         self.enter_authoring();self.click('[data-action=tools]')
-        self.wait("document.querySelector('.ees-panel-region')?.getBoundingClientRect().width===400")
+        self.wait("document.querySelector('[data-ees-chat-surface]')?.getBoundingClientRect().width===420")
         self.activate_tab(new_session)
         for account,workflow in ((account_a,workflow_a),(account_b,workflow_b)):
             stored=self.api('GET','/api/ees-work/workspace?workflow_id='+workflow['id'],token=account['token'])
             self.assertEqual(stored.status_code,200,stored.text)
-            self.assertEqual(stored.json()['ui_state']['state']['selection']['panel_width'],720 if account['id']==account_a['id'] else 400)
+            self.assertEqual(stored.json()['ui_state']['state']['selection']['chat_width'],720 if account['id']==account_a['id'] else 420)
             self.assertEqual(stored.json()['workflow']['revision'],workflow['revision'])
             self.assertEqual(stored.json()['workflow']['draft'],workflow['draft'])
-        (self.evidence_directory()/'sa26-nu05-account-switch.json').write_text(json.dumps({'same_profile':True,'native_logout_signin_ui':True,'actual_native_acl':True,'delayed_authenticated_a_read_and_native_proposal':True,'late_callback_rejected_on_b_and_former_a':True,'b_unsaved_draft_preserved':True,'old_tab_a_private_state_cleared':True,'b_model_context_excludes_a':True,'native_settings_and_chat_ownership_separate':True,'private_panel_widths':{'A':720,'B':400},'automatic_authoring_persistence':False,'synthetic_boundary':'Only model replies, chat storage and queued Native Tool event delivery are synthetic; installed Tool validation, Native auth, users, membership, ACL and workspace storage are real. Actual central chat delivery is covered by ees_work_native_chat.py.'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        (self.evidence_directory()/'sa26-nu05-account-switch.json').write_text(json.dumps({'same_profile':True,'native_logout_signin_ui':True,'actual_native_acl':True,'delayed_authenticated_a_read_and_native_proposal':True,'late_callback_rejected_on_b_and_former_a':True,'b_unsaved_draft_preserved':True,'old_tab_a_private_state_cleared':True,'b_model_context_excludes_a':True,'native_settings_and_chat_ownership_separate':True,'private_chat_widths':{'A':720,'B':420},'automatic_authoring_persistence':False,'synthetic_boundary':'Only model replies, chat storage and queued Native Tool event delivery are synthetic; installed Tool validation, Native auth, users, membership, ACL and workspace storage are real. Actual central chat delivery is covered by ees_work_native_chat.py.'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
 
 if __name__=='__main__':
