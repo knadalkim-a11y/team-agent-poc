@@ -1,0 +1,745 @@
+{
+  "html": "docs/mockups/ees-work/design-mock-15-work-centered-wide.html",
+  "static": {
+    "passed": true,
+    "duplicateIds": [],
+    "externalResources": [],
+    "missingRequiredIds": [],
+    "scriptParse": [
+      {
+        "index": 1,
+        "passed": true
+      }
+    ],
+    "markers": {
+      "csp": true,
+      "mockLabel": true,
+      "newScreenCss": true,
+      "productCss": true,
+      "unresolvedIcons": false
+    },
+    "limitations": "Parsing does not prove layout, click behaviour, accessibility or draft preservation."
+  },
+  "browser": {
+    "status": "passed",
+    "checks": [
+      {
+        "name": "1920x1080: navigation width",
+        "passed": true,
+        "actual": 256,
+        "expected": 256
+      },
+      {
+        "name": "1920x1080: work width",
+        "passed": true,
+        "actual": 1104,
+        "expected": 1104
+      },
+      {
+        "name": "1920x1080: docked chat width",
+        "passed": true,
+        "actual": 560,
+        "expected": 560
+      },
+      {
+        "name": "1920x1080: layout with chat as opened at start",
+        "passed": true,
+        "actual": "split1",
+        "expected": "split1"
+      },
+      {
+        "name": "1920x1080: screen number shown",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1920x1080: no horizontal document overflow (W1)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1920x1080: visible button centers are clickable (W1)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "1920x1080: detail sits to the right of the list",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1920x1080: selecting a task updates the selection",
+        "passed": true,
+        "actual": "t5",
+        "expected": "t5"
+      },
+      {
+        "name": "1920x1080: preset verdict shows as chosen, not confirmed",
+        "passed": true,
+        "actual": "선택됨 · 확정 전",
+        "expected": "선택됨 · 확정 전"
+      },
+      {
+        "name": "1920x1080: list keeps its position while a task is selected",
+        "passed": true,
+        "actual": 223,
+        "expected": 223
+      },
+      {
+        "name": "1920x1080: verdict reason draft survives task switches",
+        "passed": true,
+        "actual": "사유 초안 보존 검증",
+        "expected": "사유 초안 보존 검증"
+      },
+      {
+        "name": "1920x1080: choosing a verdict marks it",
+        "passed": true,
+        "actual": "true",
+        "expected": "true"
+      },
+      {
+        "name": "1920x1080: chat closes",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "1920x1080: layout with chat closed",
+        "passed": true,
+        "actual": "split2",
+        "expected": "split2"
+      },
+      {
+        "name": "1920x1080: work width with chat closed",
+        "passed": true,
+        "actual": 1664,
+        "expected": 1664
+      },
+      {
+        "name": "1920x1080: no horizontal document overflow (chat closed)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1920x1080: screen number becomes W2",
+        "passed": true,
+        "actual": "W2",
+        "expected": "W2"
+      },
+      {
+        "name": "1920x1080: chat draft survives close/open",
+        "passed": true,
+        "actual": "채팅 초안 보존 검증",
+        "expected": "채팅 초안 보존 검증"
+      },
+      {
+        "name": "1920x1080: chat draft survives expansion",
+        "passed": true,
+        "actual": "채팅 초안 보존 검증",
+        "expected": "채팅 초안 보존 검증"
+      },
+      {
+        "name": "1920x1080: layout returns after expansion",
+        "passed": true,
+        "actual": "split1",
+        "expected": "split1"
+      },
+      {
+        "name": "1920x1080: keyboard resize widens chat by 16px",
+        "passed": true,
+        "actual": 16,
+        "expected": 16
+      },
+      {
+        "name": "1920x1080: W3 opens",
+        "passed": true,
+        "actual": "W3",
+        "expected": "W3"
+      },
+      {
+        "name": "1920x1080: no horizontal document overflow (W3)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1920x1080: visible button centers are clickable (W3)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "1920x1080: next action opens the task in the stage screen",
+        "passed": true,
+        "actual": [
+          "stage",
+          "t2"
+        ],
+        "expected": [
+          "stage",
+          "t2"
+        ]
+      },
+      {
+        "name": "1920x1080: W4 opens",
+        "passed": true,
+        "actual": "W4",
+        "expected": "W4"
+      },
+      {
+        "name": "1920x1080: no horizontal document overflow (W4)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1920x1080: visible button centers are clickable (W4)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "1920x1080: a person-check task hides the tool block",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1920x1080: switching to a tool shows the tool block",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1920x1080: task editor draft survives item and screen switches",
+        "passed": true,
+        "actual": "확인 기준 초안 보존 검증",
+        "expected": "확인 기준 초안 보존 검증"
+      },
+      {
+        "name": "1920x1080: basic info draft survives item switches",
+        "passed": true,
+        "actual": "업무 설명 초안 보존 검증",
+        "expected": "업무 설명 초안 보존 검증"
+      },
+      {
+        "name": "1920x1080: chat draft survives all screens",
+        "passed": true,
+        "actual": "채팅 초안 보존 검증",
+        "expected": "채팅 초안 보존 검증"
+      },
+      {
+        "name": "1366x768: navigation width",
+        "passed": true,
+        "actual": 56,
+        "expected": 56
+      },
+      {
+        "name": "1366x768: work width",
+        "passed": true,
+        "actual": 830,
+        "expected": 830
+      },
+      {
+        "name": "1366x768: docked chat width",
+        "passed": true,
+        "actual": 480,
+        "expected": 480
+      },
+      {
+        "name": "1366x768: layout with chat as opened at start",
+        "passed": true,
+        "actual": "single",
+        "expected": "single"
+      },
+      {
+        "name": "1366x768: screen number shown",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1366x768: no horizontal document overflow (W1)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1366x768: visible button centers are clickable (W1)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "1366x768: single layout puts the detail right after the selected row",
+        "passed": true,
+        "actual": "detail-t2",
+        "expected": "detail-t2"
+      },
+      {
+        "name": "1366x768: selecting a task updates the selection",
+        "passed": true,
+        "actual": "t5",
+        "expected": "t5"
+      },
+      {
+        "name": "1366x768: preset verdict shows as chosen, not confirmed",
+        "passed": true,
+        "actual": "선택됨 · 확정 전",
+        "expected": "선택됨 · 확정 전"
+      },
+      {
+        "name": "1366x768: verdict reason draft survives task switches",
+        "passed": true,
+        "actual": "사유 초안 보존 검증",
+        "expected": "사유 초안 보존 검증"
+      },
+      {
+        "name": "1366x768: choosing a verdict marks it",
+        "passed": true,
+        "actual": "true",
+        "expected": "true"
+      },
+      {
+        "name": "1366x768: chat closes",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "1366x768: layout with chat closed",
+        "passed": true,
+        "actual": "split2",
+        "expected": "split2"
+      },
+      {
+        "name": "1366x768: work width with chat closed",
+        "passed": true,
+        "actual": 1310,
+        "expected": 1310
+      },
+      {
+        "name": "1366x768: no horizontal document overflow (chat closed)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1366x768: chat draft survives close/open",
+        "passed": true,
+        "actual": "채팅 초안 보존 검증",
+        "expected": "채팅 초안 보존 검증"
+      },
+      {
+        "name": "1366x768: chat draft survives expansion",
+        "passed": true,
+        "actual": "채팅 초안 보존 검증",
+        "expected": "채팅 초안 보존 검증"
+      },
+      {
+        "name": "1366x768: layout returns after expansion",
+        "passed": true,
+        "actual": "single",
+        "expected": "single"
+      },
+      {
+        "name": "1366x768: keyboard resize widens chat by 16px",
+        "passed": true,
+        "actual": 16,
+        "expected": 16
+      },
+      {
+        "name": "1366x768: W3 opens",
+        "passed": true,
+        "actual": "W3",
+        "expected": "W3"
+      },
+      {
+        "name": "1366x768: no horizontal document overflow (W3)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1366x768: visible button centers are clickable (W3)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "1366x768: next action opens the task in the stage screen",
+        "passed": true,
+        "actual": [
+          "stage",
+          "t2"
+        ],
+        "expected": [
+          "stage",
+          "t2"
+        ]
+      },
+      {
+        "name": "1366x768: W4 opens",
+        "passed": true,
+        "actual": "W4",
+        "expected": "W4"
+      },
+      {
+        "name": "1366x768: no horizontal document overflow (W4)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1366x768: visible button centers are clickable (W4)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "1366x768: a person-check task hides the tool block",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1366x768: switching to a tool shows the tool block",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1366x768: task editor draft survives item and screen switches",
+        "passed": true,
+        "actual": "확인 기준 초안 보존 검증",
+        "expected": "확인 기준 초안 보존 검증"
+      },
+      {
+        "name": "1366x768: basic info draft survives item switches",
+        "passed": true,
+        "actual": "업무 설명 초안 보존 검증",
+        "expected": "업무 설명 초안 보존 검증"
+      },
+      {
+        "name": "1366x768: chat draft survives all screens",
+        "passed": true,
+        "actual": "채팅 초안 보존 검증",
+        "expected": "채팅 초안 보존 검증"
+      },
+      {
+        "name": "480x768: navigation width",
+        "passed": true,
+        "actual": 56,
+        "expected": 56
+      },
+      {
+        "name": "480x768: work width",
+        "passed": true,
+        "actual": 424,
+        "expected": 424
+      },
+      {
+        "name": "480x768: layout with chat as opened at start",
+        "passed": true,
+        "actual": "single",
+        "expected": "single"
+      },
+      {
+        "name": "480x768: screen number shown",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "480x768: no horizontal document overflow (W1)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "480x768: visible button centers are clickable (W1)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "480x768: single layout puts the detail right after the selected row",
+        "passed": true,
+        "actual": "detail-t2",
+        "expected": "detail-t2"
+      },
+      {
+        "name": "480x768: selecting a task updates the selection",
+        "passed": true,
+        "actual": "t5",
+        "expected": "t5"
+      },
+      {
+        "name": "480x768: preset verdict shows as chosen, not confirmed",
+        "passed": true,
+        "actual": "선택됨 · 확정 전",
+        "expected": "선택됨 · 확정 전"
+      },
+      {
+        "name": "480x768: verdict reason draft survives task switches",
+        "passed": true,
+        "actual": "사유 초안 보존 검증",
+        "expected": "사유 초안 보존 검증"
+      },
+      {
+        "name": "480x768: choosing a verdict marks it",
+        "passed": true,
+        "actual": "true",
+        "expected": "true"
+      },
+      {
+        "name": "480x768: Escape closes the overlay chat",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "480x768: chat closes",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "480x768: layout with chat closed",
+        "passed": true,
+        "actual": "single",
+        "expected": "single"
+      },
+      {
+        "name": "480x768: work width with chat closed",
+        "passed": true,
+        "actual": 424,
+        "expected": 424
+      },
+      {
+        "name": "480x768: no horizontal document overflow (chat closed)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "480x768: chat draft survives close/open",
+        "passed": true,
+        "actual": "채팅 초안 보존 검증",
+        "expected": "채팅 초안 보존 검증"
+      },
+      {
+        "name": "480x768: W3 opens",
+        "passed": true,
+        "actual": "W3",
+        "expected": "W3"
+      },
+      {
+        "name": "480x768: no horizontal document overflow (W3)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "480x768: visible button centers are clickable (W3)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "480x768: next action opens the task in the stage screen",
+        "passed": true,
+        "actual": [
+          "stage",
+          "t2"
+        ],
+        "expected": [
+          "stage",
+          "t2"
+        ]
+      },
+      {
+        "name": "480x768: W4 opens",
+        "passed": true,
+        "actual": "W4",
+        "expected": "W4"
+      },
+      {
+        "name": "480x768: no horizontal document overflow (W4)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "480x768: visible button centers are clickable (W4)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "480x768: a person-check task hides the tool block",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "480x768: switching to a tool shows the tool block",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "480x768: task editor draft survives item and screen switches",
+        "passed": true,
+        "actual": "확인 기준 초안 보존 검증",
+        "expected": "확인 기준 초안 보존 검증"
+      },
+      {
+        "name": "480x768: basic info draft survives item switches",
+        "passed": true,
+        "actual": "업무 설명 초안 보존 검증",
+        "expected": "업무 설명 초안 보존 검증"
+      },
+      {
+        "name": "480x768: chat draft survives all screens",
+        "passed": true,
+        "actual": "채팅 초안 보존 검증",
+        "expected": "채팅 초안 보존 검증"
+      }
+    ],
+    "errors": [],
+    "screenshots": [
+      "evals/artifacts/work-centered-wide-20261109/1920x1080-W1.png",
+      "evals/artifacts/work-centered-wide-20261109/1920x1080-W2.png",
+      "evals/artifacts/work-centered-wide-20261109/1920x1080-W3.png",
+      "evals/artifacts/work-centered-wide-20261109/1920x1080-W4.png",
+      "evals/artifacts/work-centered-wide-20261109/1366x768-W1.png",
+      "evals/artifacts/work-centered-wide-20261109/1366x768-W3.png",
+      "evals/artifacts/work-centered-wide-20261109/1366x768-W4.png",
+      "evals/artifacts/work-centered-wide-20261109/480x768-W1.png",
+      "evals/artifacts/work-centered-wide-20261109/480x768-W3.png",
+      "evals/artifacts/work-centered-wide-20261109/480x768-W4.png"
+    ],
+    "measurements": [
+      {
+        "viewport": "1920x1080",
+        "nav": {
+          "x": 0,
+          "y": 0,
+          "width": 256,
+          "height": 1080
+        },
+        "work": {
+          "x": 256,
+          "y": 0,
+          "width": 1104,
+          "height": 1080
+        },
+        "chat": {
+          "x": 1360,
+          "y": 0,
+          "width": 560,
+          "height": 1080
+        },
+        "state": {
+          "screen": "stage",
+          "screenNo": "W1",
+          "layout": "split1",
+          "workWidth": 1104,
+          "chatOpen": true,
+          "chatFocused": false,
+          "compact": false,
+          "overlay": false,
+          "chatWidth": 560,
+          "task": "t2",
+          "expanded": true,
+          "item": "p-t2",
+          "verdicts": {
+            "t5": "조건부 승인"
+          }
+        }
+      },
+      {
+        "viewport": "1366x768",
+        "nav": {
+          "x": 0,
+          "y": 0,
+          "width": 56,
+          "height": 768
+        },
+        "work": {
+          "x": 56,
+          "y": 0,
+          "width": 830,
+          "height": 768
+        },
+        "chat": {
+          "x": 886,
+          "y": 0,
+          "width": 480,
+          "height": 768
+        },
+        "state": {
+          "screen": "stage",
+          "screenNo": "W1",
+          "layout": "single",
+          "workWidth": 830,
+          "chatOpen": true,
+          "chatFocused": false,
+          "compact": true,
+          "overlay": false,
+          "chatWidth": 480,
+          "task": "t2",
+          "expanded": true,
+          "item": "p-t2",
+          "verdicts": {
+            "t5": "조건부 승인"
+          }
+        }
+      },
+      {
+        "viewport": "480x768",
+        "nav": {
+          "x": 0,
+          "y": 0,
+          "width": 56,
+          "height": 768
+        },
+        "work": {
+          "x": 56,
+          "y": 0,
+          "width": 424,
+          "height": 768
+        },
+        "chat": {
+          "x": 484,
+          "y": 0,
+          "width": 424,
+          "height": 768
+        },
+        "state": {
+          "screen": "stage",
+          "screenNo": "W1",
+          "layout": "single",
+          "workWidth": 424,
+          "chatOpen": false,
+          "chatFocused": false,
+          "compact": true,
+          "overlay": true,
+          "chatWidth": 480,
+          "task": "t2",
+          "expanded": true,
+          "item": "p-t2",
+          "verdicts": {
+            "t5": "조건부 승인"
+          }
+        }
+      }
+    ]
+  }
+}

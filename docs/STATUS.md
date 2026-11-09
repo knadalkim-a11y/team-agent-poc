@@ -1,11 +1,11 @@
 # 현재 작업 상태
 
-## 2026-11-09 · 넓어진 가운데 업무 화면 · 검토안 2판
+## 2026-11-09 · 넓어진 가운데 업무 화면 · 검토안·HTML 목업 2판
 
-- **요청·기준:** 사용자가 업무 패널이 가운데로 옮겨져 넓어진 만큼 UI/UX 개편이 필요하다고 요청했다. main `1eac86d`(공식 4페이지 C161)에서 시작했고 관련 열린 PR은 없다. 구현할 판은 지정되지 않았다. [계약](mockups/ees-work/TASK.md#work-centered-wide-20261109).
-- **현재:** Figma 작업실에 [검토 안내](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=2232-638)와 W1~W4(단계 작업·판정 채팅 열림/접힘, 회차 개요, 업무 절차 작성)·부품 6개를 만들었다. 목록+상세 분할과 가운데 영역 폭 기준 배치(1264px/864px)를 제안한다. 공식 기능 페이지·제품 코드는 바꾸지 않았다.
-- **검증:** 고정 점검(`scripts/figma_check.js`)을 변경 기록 전·후 실행해 오류0·경고0이고, 변경 기록 C162를 쓰며 C142를 91 보관으로 옮겼다. 네 화면의 1920 캡처를 직접 확인했으며 이미지 채움0·프레임 밖 넘침0이다. HTML 목업·브라우저 렌더·사용자 사용성 확인은 미실행이다. [캡처·노드](mockups/ees-work/work-centered-wide-20261109/metadata.json).
-- **다음 하나:** 사용자가 W1~W4 방향을 검토한다. 의견을 반영한 판으로 HTML 디자인 목업을 만들며 구현할 판 지정은 그 뒤다.
+- **요청·기준:** 사용자가 업무 패널이 가운데로 옮겨져 넓어진 만큼 UI/UX 개편이 필요하다고 요청했고, Figma 검토안 방향을 승인해 HTML 목업을 요청했다. main `1eac86d`(공식 4페이지 C161)에서 시작했고 관련 열린 PR은 없다. 구현할 판은 지정되지 않았다. [계약](mockups/ees-work/TASK.md#work-centered-wide-20261109).
+- **현재:** Figma 작업실의 [검토 안내](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=2232-638)·W1~W4를 [HTML 목업 2판](mockups/ees-work/design-mock-15-work-centered-wide.html)으로 옮겼다. 목록+상세 분할과 가운데 영역 폭 기준 배치(1264px/864px)를 직접 눌러 볼 수 있다. 공식 기능 페이지·제품 코드는 바꾸지 않았다.
+- **검증:** Figma 고정 점검은 변경 기록 전·후 오류0·경고0이고 C162를 기록했다. 목업은 Chromium 3폭에서 정적 검사와 브라우저 검사 95/95를 통과했고 페이지 오류0이다. 목업 빌더 시험 6/6이 통과했다. 탭 12px·배경 `#FAFAFA`는 공통 패널 기준을 따랐으며 Figma W 화면과의 차이로 기록했다. 사내 PC 열기·사용자 사용성 확인은 미실행이다. [목업 검증](../evals/artifacts/work-centered-wide-20261109/validation-report.json)·[캡처·노드](mockups/ees-work/work-centered-wide-20261109/metadata.json).
+- **다음 하나:** 사용자가 HTML 목업을 확인하고 W1~W4 의견이나 구현할 판을 정한다.
 
 > 아래는 변경 당시 기록이다.
 
