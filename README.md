@@ -1,6 +1,6 @@
 # Team Agent POC
 
-EES 팀의 문서 조회와 업무 처리를 대화·워크플로우 화면으로 연결하는 플랫폼 PoC입니다. 왼쪽 작업 위치·탐색, 가운데 Native 대화, 오른쪽 업무/작성 패널을 사용하며 기존 Open WebUI 인증·대화·첨부·모델과 실제 도구·개인 설정을 재사용합니다. 현재 개발·미해결·사내 적용 상태는 [STATUS](docs/STATUS.md)가 원본입니다. 새 설치의 기본 콘텐츠와 프로그램·사용자 자료의 관리 경계는 아래 [원본과 배포본](#원본과-배포본)을 따릅니다.
+EES 팀의 문서 조회와 업무 처리를 대화·워크플로우 화면으로 연결하는 플랫폼 PoC입니다. 왼쪽에서 작업 위치를 선택하고, 가운데에서 업무를 실행하거나 작성하며, 오른쪽에서 Native 대화를 사용합니다. 기존 Open WebUI 인증·대화·첨부·모델과 실제 도구·개인 설정을 재사용합니다. 현재 개발·미해결·사내 적용 상태는 [STATUS](docs/STATUS.md)가 원본입니다. 새 설치의 기본 콘텐츠와 프로그램·사용자 자료의 관리 경계는 아래 [원본과 배포본](#원본과-배포본)을 따릅니다.
 
 비개발자가 EES Workflow의 Chat UI에서 사내 문서와 업무 시스템을 활용하고, 관리자가 정한 공통 정책과 업무 처리 절차를 적용받는 플랫폼 POC입니다. 범용 대화·업무용 Prompt/Skill 공유를 유지하며 Open WebUI Native를 활용합니다. **공식 Open WebUI 패키지와 우리 프로젝트 래퍼** 두 구성으로 관리하며, 이 저장소는 사내 설정·Agent Pack과 Open WebUI 수정사항·빌드/적용 절차를 관리합니다. 기존 Python·호환 의존성을 재사용하고 데이터·키는 프로그램 변경과 분리합니다. [단순 유지보수 기준](docs/03-openwebui-native-agent.md#ees-wrapper-maintenance)과 실제 구현·적용 상태는 [STATUS](docs/STATUS.md)를 따릅니다.
 
@@ -12,27 +12,34 @@ EES 팀의 문서 조회와 업무 처리를 대화·워크플로우 화면으�
 
 <a id="design-sources"></a>
 
-현재 운영 화면은 [운영31·업무절차12 구현 범위](docs/mockups/ees-work/TASK.md#operations31-authoring12-parity-20261030)와 [Figma 업무·운영 페이지 헤더](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1284-3107)에서 시작합니다. Figma 기능 페이지에는 화면마다 최신판만 두며, 판 번호를 쓰는 페이지는 헤더 한 곳에만 적습니다. 워크플로우 이름과 필요한 업무 구분 정보를 위에 두고, 단계 제목·실행·진행·작업 목록의 위치를 고정합니다. 현재 제품 구현·검증과 사내 적용 여부는 [STATUS](docs/STATUS.md)에서 구분합니다. [목업29](docs/mockups/ees-work/TASK.md#work-operations-design)·[25판 확정](docs/mockups/ees-work/TASK.md#work-operations-approved25-20261028)·[Figma 보완](docs/mockups/ees-work/TASK.md#operations25-figma-sync-20261028)·[20판](docs/mockups/ees-work/TASK.md#design-mock-approved20-20261027)은 이전 기록으로 보존합니다.
+<a id="figma-active-pages"></a>
 
-Figma는 제품 기능을 **업무 · 운영 / 셋업 / 장애대응**으로 나누고, [업무 공통 기준](docs/mockups/ees-work/TASK.md#workflow-stage-common-standard)은 한 원본에서 연결합니다. 셋업·장애대응은 기존 참고 설계이며 아직 새 목업이 없습니다. 운영 목업의 합성 예시를 모든 업무의 실행·판정 정책으로 확대하지 않습니다.
+[Figma 기능 지도](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1288-2)에서 현재 설계를 찾습니다. 네 기능 페이지의 링크는 해당 페이지 헤더를 가리킵니다.
 
-작성 화면은 [워크.워크플로12판 제품 UI 범위](docs/mockups/ees-work/TASK.md#workspace-authoring12-ui-20261029), [후속 시각 일치 범위](docs/mockups/ees-work/TASK.md#operations31-authoring12-parity-20261030)와 [Figma 워크·업무 절차 페이지 헤더](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1285-1830)에서 시작합니다. 현재 Figma12판을 시각 기준으로 삼고, 페이지에 남아 있는 이전 B1 목록은 2026-10-30 사용자 정정에 따라 원복 대상에서 제외해 현재 제품 목록을 유지합니다. [기존 HTML12판](docs/mockups/ees-work/design-mock-08-workspace-authoring.html)은 변경 없이 이전 비교 근거로 보존하며, 기능 완성은 도구 만들기 설계 이후로 구분합니다. 구현·시각 대조·사내 적용 상태는 [STATUS](docs/STATUS.md)에서 각각 확인합니다.
+| 활성 기능 페이지 | 확인할 화면 |
+|---|---|
+| [공통 · 화면 틀](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1284-3047) | 왼쪽 탐색, 가운데 업무, 오른쪽 대화, 채팅 접기·확대와 작은 화면 배치 |
+| [업무 · 운영](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1284-3107) | 업무 선택, 진행 단계, 작업 결과와 판정. 셋업·장애대응 사례와 공통 운영 기준을 함께 찾습니다. |
+| [워크 · 업무 절차](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1285-1830) | 절차 목록, 단계·작업 작성, 게시와 변경 기록 |
+| [워크 · 도구](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1285-1842) | 도구 정의, 연결, 시험과 사용 |
 
-워크스페이스 메뉴와 대화의 저장한 프롬프트는 [메뉴 2판 계약](docs/mockups/ees-work/TASK.md#workspace-assets-prompts-20261106)과 [Figma C19](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=2153-225)을 따른다. 기존 Native 스킬·지식·모델·프롬프트 자산을 위치와 명칭으로 구분하며 저장 형식은 유지한다.
+[00 설계 관리](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=897-760)에서 관리 규칙을, [70 작업실](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=897-761)에서 검토 중인 시안을 찾습니다. [91 보관](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1722-1395)에는 [이전 92 작업실 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=2207-28518)가 있습니다.
+
+구현 기준은 사용자가 지정한 [업무 중심 화면 1판](docs/mockups/ees-work/TASK.md#work-centered-20261106)입니다. 이전 설계는 [운영31·작성12 비교 기록](docs/mockups/ees-work/TASK.md#operations31-authoring12-parity-20261030), [업무 공통 기준](docs/mockups/ees-work/TASK.md#workflow-stage-common-standard), [워크스페이스 메뉴 2판](docs/mockups/ees-work/TASK.md#workspace-assets-prompts-20261106)에서 당시 판의 화면과 함께 확인할 수 있습니다.
 
 ### 설계 문서의 역할과 찾는 순서
 
 | 필요한 답 | 관리 원본 | 읽고 고치는 범위 |
 |---|---|---|
 | 무엇을 만들고 각 부분은 어떻게 연결되는가 | 이 README의 목표·실행 구조·코드 책임 표 | 기능 간 책임이나 데이터·권한 경계가 바뀔 때 갱신 |
-| 어떤 화면과 문구를 보여 주는가 | [Figma 기능 지도](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1288-2) → 해당 화면·명세 카드, 공통 부품은 [C1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=948-1078)·상태는 [S1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=944-1036)·움직임 기준은 [C3](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1443-137)·반응형 기준은 [Q1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=979-1252) | 배치·표시 문구·화면 이동·상태 표현. 기능 페이지는 화면마다 최신판만 두고 판 번호는 페이지 헤더에 적음. 작업실 시안과 보관 화면은 채택된 설계와 구분. 사내 확인용 디자인 목업은 [화면이 바뀌는 기능의 개발 순서](AGENTS.md#design-mock-first)를 따름 |
+| 어떤 화면과 문구를 보여 주는가 | [Figma 기능 지도](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1288-2) → [네 기능 페이지의 헤더](#figma-active-pages) → 해당 화면·명세 카드 | 화면 배치·문구·상태·이동. 현재 기능마다 화면 한 벌을 유지하고 헤더에 판 번호를 기록합니다. |
 | 어떤 조건에서 저장·실행·완료되는가 | 대상 브랜치의 기능 명세가 있으면 그 명세, 없으면 [TASK의 해당 기능 계약](docs/mockups/ees-work/TASK.md) | 입력·권한·상태 변화·저장/반영·완료 조건. 화면 카드에는 규칙 ID와 기능별 표시 차이만 연결 |
 | 어디까지 구현·검증·사내 적용됐는가 | [STATUS](docs/STATUS.md)와 거기서 연결한 PR·Checks·[평가 기록](evals/v4-ui-20260930.md) | 구현할 판 지정·코드 구현·CI 검증·사내 확인을 구분 |
 | 개발 AI는 어떻게 작업하는가 | [AGENTS.md](AGENTS.md), Claude Code 진입은 [CLAUDE.md](CLAUDE.md) | 같은 지침 원본을 사용하며 기능별 상세 문서는 필요할 때 읽음 |
 
 새 도구는 [작성·저장 ST-P1 계약](docs/specs/shared-tools.md#tools-redesign-v2-phase1-20261105) → [연결·시험·사용 설정 ST-P2 계약](docs/specs/shared-tools.md#tools-redesign-v2-phase2-20261105)과 [관리자 작성 안내](docs/03-openwebui-native-agent.md#tool-authoring-phase1-20261105)에서 시작합니다. 이어서 [업무절차 연결·실행 ST-P3 계약](docs/specs/shared-tools.md#tools-redesign-v2-phase3-20261105)을 따릅니다. 기존 실행 도구의 관리 계약은 유지합니다.
 
-**공용 도구를 찾는 예:** [공용 도구 기능 명세](docs/specs/shared-tools.md)에서 시작해 [B10-1](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1369-732)·[B10-2](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1368-724)·[B10-5](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1372-741) 카드와 명세에 연결된 코드·시험 순서로 읽습니다. 이전 설계·결정 과정은 [TASK의 기능 계약](docs/mockups/ees-work/TASK.md#shared-tools-phase1-20261015)과 [PR #96](https://github.com/knadalkim-a11y/team-agent-poc/pull/96)에 보존하며, 구현·최종 검증·실제 적용 상태는 [STATUS](docs/STATUS.md)에서 구분합니다.
+공용 도구를 찾을 때는 [워크 · 도구 헤더](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1285-1842)에서 해당 화면을 선택하고 [공용 도구 기능 명세](docs/specs/shared-tools.md)에서 권한과 사용 조건을 확인합니다. 이전 설계와 결정 과정은 [당시 기능 계약](docs/mockups/ees-work/TASK.md#shared-tools-phase1-20261015)과 [PR #96](https://github.com/knadalkim-a11y/team-agent-poc/pull/96)에 보존합니다.
 
 설계 관리의 이번 정리 범위와 Figma 후속 대상은 [작은 개선 계획](docs/mockups/ees-work/TASK.md#design-maintenance-20261016)에 모았습니다.
 
@@ -60,6 +67,7 @@ Figma는 제품 기능을 **업무 · 운영 / 셋업 / 장애대응**으로 나
 - **권한별 메뉴와 Open WebUI 왕복**: [메뉴 사용 안내](docs/03-openwebui-native-agent.md#menu-integration-20261006) · [C18 PR 1 구현 계약](docs/mockups/ees-work/TASK.md#merge-ui-20261011). EES 작성 권한과 원래 Open WebUI 권한을 구분하며 작성 중인 내용을 같은 로그인 세션에서 보존합니다.
 - **시스템 담당자 작성·게시**: [v1.1 권한/보존 계약](docs/mockups/ees-work/TASK.md#system-authoring-20260924) → [가입·첫 이용·P 작성 안내](docs/07-team-quickstart.md#system-authoring-20260924) · [관리자 운영/복원/세션 경계](docs/03-openwebui-native-agent.md#system-authoring-20260924) · [SA/NU·사내 OP 평가](evals/scenarios.md#system-authoring-20260924). Native 개인 계정/그룹을 사용하고 담당 시스템의 선택 P만 저장·검사·게시합니다. 기존 업무 이용/실행/개인 자료 권한은 별도이며 A안 화면을 재사용합니다.
 - **공통 Native 도구·P/T 자동 실행**: [09-25 계약·두 예제](docs/mockups/ees-work/TASK.md#shared-native-runtime-20260925) → [승인·운영·복원 경계](docs/03-openwebui-native-agent.md#shared-native-runtime-20260925) · [사용 안내](docs/07-team-quickstart.md#shared-native-runtime-20260925) · [TR-01~24 근거](evals/scenarios.md#shared-native-runtime-20260925). 기존 등록본·ACL·개인 설정으로 실행하며 채팅과 패널이 같은 영속 서비스를 사용합니다. 기존 모의 진행과 새 실행 계약을 구분하고 Windows 셋업 자동화는 후속으로 유지합니다.
+- **업무와 대화 화면**은 왼쪽에서 공장·시스템과 업무를 선택하고, 가운데에서 업무 진행·작성을 하며 오른쪽에서 대화합니다. 작은 화면에서는 채팅을 업무 위에 열 수 있습니다. [화면 기준과 제품 구현 계약](docs/mockups/ees-work/TASK.md#work-centered-20261106)
 - **이전 EES Work 4차 UI 구현 근거**: [v1.1 구현 범위·재사용](docs/mockups/ees-work/TASK.md#v4-ui-20260930) → [V4-01~15·실제 검증 경계](evals/v4-ui-20260930.md). 왼쪽은 공장/시스템 작업 공간과 업무 탐색, 중앙은 목록·입력/실행/결과와 상세 정보, 오른쪽은 실제 Native EES Assistant입니다. 초안·저장값·실행 snapshot과 다음 질문 참고·메시지 당시 참고·실행 대상을 구분합니다. 실제 schema·저장/승인/실행·P/T·Workspace/게시·권한 서비스를 재사용하며 기존 대화/첨부와 사용자 자산을 유지합니다. [09-28 C안](docs/mockups/ees-work/TASK.md#c-design-phase1-20260928), [09-23 A안](docs/mockups/ees-work/TASK.md#a-design-20260923), [09-22 진행/기록](docs/mockups/ees-work/TASK.md#right-panel-20260922), [업무 패널·대화 계약](docs/mockups/ees-work/TASK.md#work-panel-chat-design-20260916)은 당시 기능/검사 근거로 보존하며 당시 V4 외형 기준을 대체하지 않습니다. 새 재구성의 화면 기준은 위 Step 0-A의 현재 Figma입니다. 장기 [공동 진행과 개인 대화 분리](docs/mockups/ees-work/TASK.md#ees-work-shared-target)는 현재 사용자별 진행 건과 별개입니다.
 - **준비·배포·검증 여부 확인**: [STATUS](docs/STATUS.md)의 요약과 연결된 [평가표](evals/scenarios.md)를 확인합니다. README에는 진행 상태를 복제하지 않습니다.
 
@@ -140,10 +148,10 @@ flowchart TD
 | 사용자 화면 | 역할 | 바꿀 때 함께 확인할 것 |
 |---|---|---|
 | 왼쪽 탐색 | 업무/워크스페이스 전환, 작업 위치와 대상 선택 | 선택 권한·범위, 이동 뒤 목적지, 미저장 내용 |
-| 가운데 대화 | 설명·질문·근거. AI가 사용자의 요청으로 업무 기능과 상호작용(상태 읽기·칸 채우기·다음 할 일 안내) | 개인 대화·첨부 보존, 현재 참고와 메시지 당시 참고, AI가 채운 값의 반영 여부 |
-| 오른쪽 업무 패널 | 구조화된 입력·결과·저장·게시·실행·확정. AI에게 초안을 맡기는 요청 기능은 두지 않고 AI가 채운 값은 구분해 표시 | 저장 전/후, 실행 권한, 회차와 게시 버전, 완료 기준 |
+| 가운데 업무·작성 화면 | 구조화된 입력·결과·저장·게시·실행·확정. AI에게 초안을 맡기는 요청 기능은 두지 않고 AI가 채운 값은 구분해 표시 | 저장 전/후, 실행 권한, 회차와 게시 버전, 완료 기준 |
+| 오른쪽 대화 | 설명·질문·근거. AI가 사용자의 요청으로 업무 기능과 상호작용(상태 읽기·칸 채우기·다음 할 일 안내) | 개인 대화·첨부 보존, 현재 참고와 메시지 당시 참고, AI가 채운 값의 반영 여부 |
 
-**AI의 역할(2026-10-26 사용자 결정):** 이 제품에는 업무 패널에서 ‘AI에게 초안을 맡기는 기능’이 따로 없습니다. AI는 두 가지로 쓰입니다. 하나는 가운데 대화에서 사용자의 요청을 받아 제품 기능과 상호작용하는 것으로, 업무 상태를 읽고 업무 패널의 입력·판정·보고 칸을 사람 확인 전 값으로 채우며 다음 할 일을 안내합니다. 다른 하나는 절차 안의 AI(LLM)로 처리하는 작업으로, 회차와 예약 실행이 다른 작업처럼 실행합니다. 어느 쪽이든 AI가 채운 값은 구분해 보이고, 사람 확인이 필요한 결과의 확정과 저장·게시는 사람이 합니다. 현재 구현된 대화 도구는 조회·입력 제안·화면 안내입니다. 수행 방법 ‘AI 초안’과 결과 형태 ‘AI 초안 검토’는 두 번째 방식의 현재 이름이며, 실행 방식은 유지하고 이름과 화면만 [화면이 바뀌는 기능의 개발 순서](AGENTS.md#design-mock-first)로 바꿉니다.
+**AI의 역할(2026-10-26 사용자 결정):** 이 제품에는 업무 패널에서 ‘AI에게 초안을 맡기는 기능’이 따로 없습니다. AI는 두 가지로 쓰입니다. 하나는 오른쪽 대화에서 사용자의 요청을 받아 제품 기능과 상호작용하는 것으로, 업무 상태를 읽고 업무 패널의 입력·판정·보고 칸을 사람 확인 전 값으로 채우며 다음 할 일을 안내합니다. 다른 하나는 절차 안의 AI(LLM)로 처리하는 작업으로, 회차와 예약 실행이 다른 작업처럼 실행합니다. 어느 쪽이든 AI가 채운 값은 구분해 보이고, 사람 확인이 필요한 결과의 확정과 저장·게시는 사람이 합니다. 현재 구현된 대화 도구는 조회·입력 제안·화면 안내입니다. 수행 방법 ‘AI 초안’과 결과 형태 ‘AI 초안 검토’는 두 번째 방식의 현재 이름이며, 실행 방식은 유지하고 이름과 화면만 [화면이 바뀌는 기능의 개발 순서](AGENTS.md#design-mock-first)로 바꿉니다.
 
 일부 자산 관리는 Native 화면을 사용합니다. EES 화면 틀과 Native 관리 화면의 전환 범위는 [메뉴 안내](docs/03-openwebui-native-agent.md#menu-integration-20261006)가 원본입니다. Figma의 목표 화면과 현재 구현의 예외를 구분합니다.
 

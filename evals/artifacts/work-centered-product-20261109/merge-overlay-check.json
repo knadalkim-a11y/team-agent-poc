@@ -1,0 +1,13 @@
+{
+  "observed_on_commit": "576a527c1fb7c60ddcbead3b99c4a924a8065f8c",
+  "run": "https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/42533403898",
+  "native_compose_job": 128893909668,
+  "sequence": [
+    "At 1116px the open chat is docked.",
+    "Shrink to 1115px so the resize separator disappears and the chat becomes an overlay.",
+    "Press Escape without clicking inside the chat."
+  ],
+  "observation": "The screenshot shows the overlay still open after Escape. The failure artifact does not record the event target. The previous product handled Escape only on the chat surface and did not recover focus on this responsive transition.",
+  "correction": "Keep keyboard focus in the chat when it becomes an overlay. Capture Escape once at the window, respecting nested dialogs, suggestions, menus and IME composition.",
+  "acceptance": "With work, body or the disappearing separator previously focused, the overlay closes and returns focus to the chat opener. A nested popup keeps its own Escape behavior."
+}

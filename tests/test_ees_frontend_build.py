@@ -28,10 +28,10 @@ def _between(text, start, end):
 
 def _hook_source():
     added = _added_source()
-    load = _between(added, "let eesNativeDraftLoads = 0;", "const eesNativeDraftApi =")
+    load = _between(added, "let eesNativeDraftLoads =", "const eesNativeDraftApi =")
     # Added unrelated hunks can precede the complete hook; the load helper ends
     # at its first closing semicolon and has no dependency on generated names.
-    load = load[:load.index("\n\t};") + len("\n\t};")]
+    load = load[:load.index("\n\t};",load.index("const eesNativeDraftLoad =")) + len("\n\t};")]
     hook = _between(added, "const eesNativeDraftApi =", "if (!embedded) window.__eesNativeDraftV1 = eesNativeDraftApi;")
     hook += "if (!embedded) window.__eesNativeDraftV1 = eesNativeDraftApi;"
     return (load + "\n" + hook).replace("(message: any)", "(message)")
@@ -126,10 +126,11 @@ class NativeDraftHookTests(unittest.TestCase):
 const assert = require('node:assert/strict');
 let current = {prompt:'original',selectedToolIds:['existing'],toolApprovalMode:'ask'};
 let approvalCalls=0, imported=[], persisted=[], saveDraftTimeout=null;
-let embedded=false,$temporaryChatEnabled=false,loading=false,messageInput={},chatIdProp='', $chatId='';
+let embedded=false,$temporaryChatEnabled=false,loading=false,messageInput={},chatIdProp='', $chatId='',target='',eesDraftAlive=true;
+const $user={id:'actor'},eesDraftOwner='actor',localStorage={token:'token'};
 let prompt='',files=[];
 const history={messages:{u:{id:'u',role:'user'},a:{id:'a',role:'assistant'}}};
-const window={location:{pathname:'/'}};
+const window={location:{pathname:'/'},__eesSourceShellV1:{chatTarget:()=>target}};
 const getChatInputDraft=()=>current, getDraftChatId=()=>'native-chat';
 const saveDraft=async(draft,chatId,debounce)=>persisted.push({draft,chatId,debounce});
 const restoreChatInput=async serialized=>{
@@ -140,6 +141,9 @@ const restoreChatInput=async serialized=>{
 ''' + _hook_source() + r'''
 (async()=>{
  const hook=window.__eesNativeDraftV1;
+ const previous=conversationGuard();assert.equal(previous(),true);
+ eesConversationGeneration++;assert.equal(previous(),false,'A pending read from the prior conversation cannot commit');
+ const ownerGuard=conversationGuard();localStorage.token='different-token';assert.equal(ownerGuard(),false);localStorage.token='token';
  let finishFirst,finishSecond;
  const first=eesNativeDraftLoad(()=>new Promise(resolve=>finishFirst=resolve));
  const second=eesNativeDraftLoad(()=>new Promise(resolve=>finishSecond=resolve));
@@ -148,10 +152,12 @@ const restoreChatInput=async serialized=>{
  await assert.rejects( eesNativeDraftLoad(async()=>{throw Error('failed native load');}),/failed native load/);
  assert.equal(hook.ready(),true,'Rejected native loads also release only their own count');
  assert.deepEqual(hook.workMessageIds(),['a']);
- window.location.pathname='/c/other';assert.equal(hook.ready(),false);assert.deepEqual(hook.workMessageIds(),[]);
+ target='other';window.location.pathname='/c/other';assert.equal(hook.ready(),false);assert.deepEqual(hook.workMessageIds(),[]);
  chatIdProp='other';$chatId='other';assert.equal(hook.ready(),true);
  loading=true;assert.equal(hook.ready(),false);loading=false;
- window.location.pathname='/';chatIdProp='';$chatId='';
+ window.location.pathname='/workspace/knowledge';assert.equal(hook.ready(),true,'Center routing must not invalidate the retained chat');
+ $user.id='other-actor';assert.equal(hook.ready(),false);$user.id='actor';
+ target=null;assert.equal(hook.ready(),false);target='';window.location.pathname='/';chatIdProp='';$chatId='';
  assert.equal(Object.hasOwn(hook.read(),'toolApprovalMode'),false);
  await hook.flush();
  assert.equal(await hook.restore(JSON.stringify({prompt:'restored',selectedToolIds:['kept'],toolApprovalMode:'full'})),true);
@@ -176,7 +182,8 @@ const restoreChatInput=async serialized=>{
         source = _added_source()
         self.assertIn("if (window.__eesNativeDraftV1 === eesNativeDraftApi) delete window.__eesNativeDraftV1", source)
         for name in ("navigateHandler", "initEmbeddedDraft", "initNewChat", "init"):
-            self.assertIn("const " + name + " = () => eesNativeDraftLoad(async () => {", source)
+            args="(keepFolder = false)" if name=="initNewChat" else "()"
+            self.assertIn("const " + name + " = " + args + " => eesNativeDraftLoad(async () => {", source)
 
 
 class BuildExecutableTests(unittest.TestCase):
@@ -241,7 +248,8 @@ class NativeSourceHookTests(unittest.TestCase):
         reference = "const referenceMessage=(_chatId,responseMessageId,userMessage)=>{const eesHelp=userMessage?.meta?.ees_work_help===1,model={id:'model'};return ({" + reference + "});};"
         probe = r'''
 const assert=require('node:assert/strict');
-let embedded=false,$temporaryChatEnabled=false,$chatId='',chatIdProp='',loading=false,prompt='',files=[];
+let embedded=false,$temporaryChatEnabled=false,$chatId='',chatIdProp='',loading=false,prompt='',files=[],eesDraftAlive=true;
+const $user={id:'actor'},eesDraftOwner='actor';
 let selectedToolIds=[],selectedSkillIds=[],selectedFilterIds=[],webSearchEnabled=false,imageGenerationEnabled=false,codeInterpreterEnabled=false,toolApprovalMode='ask';
 let chat=null,approvalCalls=0,failCreation=false,beginCalls=0,saveDraftTimeout=null,loadedChatIdProp='';
 const notifications=[],persisted=[],selectedModels=['model'],params={},chatVariables={},$settings={},$socket={id:'socket'};
@@ -254,7 +262,7 @@ const refreshChatList=async()=>{},refreshFolderChatLists=async()=>{},createMessa
 const getDraftChatId=()=>chatIdProp||null,saveDraft=async(value)=>persisted.push(value);
 const chatRequestQueues={update:callback=>callback({})},onToolCallResolved=()=>{},handleOpenAIError=async()=>{},updateChatById=async()=>{};
 const shouldAutoScrollResponse=()=>false,scrollToBottom=()=>{};
-const window={location:{pathname:'/'},history:{replaceState(state,title,path){window.location.pathname=path;}},__eesNativeWorkV1:{
+const window={location:{pathname:'/'},history:{replaceState(state,title,path){window.location.pathname=path;}},__eesSourceShellV1:{chatTarget:()=>chatIdProp},__eesNativeWorkV1:{
  beginChatCreation(){if(window.location.pathname!=='/')return null;return {sequence:++beginCalls};},
  finishChatCreation(ticket,id){notifications.push({ticket,id});},
  captureReference(){return {kind:'work',workflow_id:'captured-work'};}
@@ -285,16 +293,17 @@ const createNewChat=async()=>{if(failCreation)throw Error('synthetic creation fa
  // without the linked-chat loader resetting the live composer.
  embedded=false;$temporaryChatEnabled=false;$chatId='provisional5';chatIdProp='';loadedChatIdProp='';window.location.pathname='/';
  let adopted=0;
- window.__eesSourceShellV1={adoptChat:async id=>{assert.equal(loadedChatIdProp,id);adopted++;chatIdProp=id;window.location.pathname='/c/'+id;}};
+ window.__eesSourceShellV1={chatTarget:()=>chatIdProp,adoptChat:async id=>{assert.equal(loadedChatIdProp,id);adopted++;chatIdProp=id;window.location.pathname='/c/'+id;}};
  files=[{type:'image',url:'live-image'}];prompt='keep draft';
  await initChatHandler({state:{}});assert.equal(adopted,1);assert.equal(window.__eesNativeDraftV1.ready(),true);
  assert.equal(files[0].url,'live-image');assert.equal(prompt,'keep draft');
  $chatId='provisional6';chatIdProp='';loadedChatIdProp='';window.location.pathname='/';
  await probeCompletion({chat_id:'second-created'});assert.equal(adopted,2);assert.equal(window.__eesNativeDraftV1.ready(),true);
- const original={id:'message',meta:{kept:true}};const recorded=referenceMessage('chat','response',original).user_message;
+ const frozen=window.__eesNativeWorkV1.captureReference();const original={id:'message',meta:{kept:true,ees_work_reference:frozen}};const recorded=referenceMessage('chat','response',original).user_message;
  window.__eesNativeWorkV1.captureReference=()=>({kind:'work',workflow_id:'later-work'});
  assert.equal(recorded.meta.ees_work_reference.workflow_id,'captured-work');assert.equal(recorded.meta.kept,true);
- assert.equal(original.meta.ees_work_reference,undefined);embedded=true;
+ assert.deepEqual(original.meta.ees_work_reference,{kind:'work',workflow_id:'captured-work'});
+ assert.deepEqual(referenceMessage('chat','response',{id:'legacy',meta:{}}).user_message.meta.ees_work_reference,{kind:'none'});embedded=true;
  assert.deepEqual(referenceMessage('chat','response',original).user_message.meta.ees_work_reference,{kind:'none'});
  console.log('native_source_functions=pass');
 })().catch(e=>{console.error(e);process.exitCode=1;});
@@ -323,11 +332,13 @@ class SourcePatchTests(unittest.TestCase):
         root = Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"]).resolve()
         name = "src/lib/components/chat/Navbar.svelte"
         navbar = (root / name).read_text(encoding="utf-8")
-        at = navbar.index('data-action="open_panel"')
-        control = navbar[navbar.rfind('<button', 0, at):navbar.index('</button>', at)]
+        shell=(root / "src/lib/components/ees/EesShell.svelte").read_text(encoding="utf-8")
+        at = shell.index('data-ees-chat-toggle')
+        control = shell[shell.rfind('<button',0,at):shell.index('</button>',at)]
         self.assertIn('aria-expanded=', control)
         self.assertIn('aria-controls=', control)
-        self.assertIn('EES.OpenPanel', control)
+        self.assertIn('data-ees-chat-close',navbar)
+        self.assertIn('data-ees-chat-focus',navbar)
         self.assertIn('data-action="new_chat"', navbar)
         self.assertIn('window.__eesSourceShellV1?.newChat?.()', navbar)
         config = frontend.configuration()
@@ -339,7 +350,14 @@ class SourcePatchTests(unittest.TestCase):
             ("{#if $user?.role === 'admin' || ($user?.permissions.chat?.controls", '</Tooltip>'),
         ):
             with self.subTest(native_control=start):
-                self.assertEqual(_between(navbar, start, end), _between(original, start, end))
+                current=_between(navbar,start,end)
+                if 'temporary' in start:
+                    # One route guard keeps a temporary conversation on the right
+                    # when a Native resource is already open in the center.
+                    guard="if (window.__eesSourceShellV1?.screen?.().native) return;"
+                    self.assertIn(guard,current)
+                    current=re.sub(r"^.*"+re.escape(guard)+r".*\n","",current,flags=re.M)
+                self.assertEqual(current,_between(original,start,end))
 
     def test_layout_hooks_preserve_native_elements_and_reject_source_drift(self):
         root = Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"]).resolve()
@@ -359,9 +377,10 @@ class SourcePatchTests(unittest.TestCase):
             current = (root / name).read_bytes()
             self.assertEqual(re.search(pattern, current).group(), re.search(pattern, original).group(), name)
         shell = (root / "src/lib/components/ees/EesShell.svelte").read_text(encoding="utf-8")
-        for marker in ("data-ees-source-shell", "data-ees-source-slot", "hidden={nativeRoute || !folderReady}", "inert={nativeRoute || !folderReady}"):
+        for marker in ("data-ees-source-shell","data-ees-work-surface","data-ees-chat-surface","data-ees-chat-resize","data-ees-chat-state"):
             self.assertIn(marker, shell)
-        self.assertIn("<Chat chatIdProp={retainedChatId}", shell)
+        self.assertEqual(len(re.findall(r"<Chat\b",shell)),1, "one Native composer across both chat and workspace routes")
+        self.assertIn("chatIdProp={retainedChatId}",shell)
         for name in ("src/routes/(app)/+page.svelte", "src/routes/(app)/c/[id]/+page.svelte", "src/routes/(app)/folders/[folderId]/+page.svelte"):
             self.assertNotIn("<Chat", (root / name).read_text(encoding="utf-8"))
         # The newly exported R7 icon is a Vite source input, so prior installed
@@ -611,18 +630,19 @@ const sessionStorage={setItem:(key,value)=>values.set(key,value),removeItem:key=
         shell = (root / "src/lib/components/ees/EesShell.svelte").read_text(encoding="utf-8")
         chat = (root / "src/lib/components/chat/Chat.svelte").read_text(encoding="utf-8")
         bridge = _between(shell, "const bridge = {", "\n\tif (typeof window")
-        reset = _between(chat, "const initNewChat = () => eesNativeDraftLoad(async () => {", "\n\t\tconsole.log('initNewChat')") + "\n});"
+        reset = _between(chat, "const initNewChat = (keepFolder = false) => eesNativeDraftLoad(async () => {", "\n\t\tconsole.log('initNewChat')") + "\n});"
         linked = _between(chat, "$: if (chatIdProp && chatIdProp !== loadedChatIdProp)", "\n\t$: if (embedded")
         probe = r"""
 const assert=require('node:assert/strict');
-let nativeRoute=false,admin=false,chatRoute=true,folderReady=true,retainedChatId='old',lastChatPath='/c/old';
+let nativeRoute=false,admin=false,chatRoute=true,folderReady=true,retainedChatId='old',lastChatPath='/c/old',nativeChatPath=null;
 let activeId='new',chatIdProp='old',loadedChatIdProp='old',embedded=false,loads=0;
 let panel={},overlays={},eesRequest=()=>{},user={id:'actor'},selectedFolder={id:'folder-a',set() {}};
 const get=value=>value,eesSnapshot={set(){}},eesCompact={set(){}},showSettings={set(){}},showSearch={set(){}},eesReferenceHosts=new Map();
 const window={__eesNativeDraftV1:{activeChatId:()=>activeId,ready:()=>true},__eesNativeWorkV1:{chatCreated:id=>created.push(id)}};
-const created=[],navigations=[],$page={url:{pathname:'/c/old'}};
+const created=[],navigations=[],$page={url:{pathname:'/c/old',searchParams:new URLSearchParams()}},localStorage={token:'synthetic'},$user={id:'actor'};
+let eesConversationGeneration=0,eesDraftAlive=true;
 const location={pathname:'/c/old',search:''};
-const tick=async()=>{},eesSync=()=>{},navigate=()=>{},newChat=()=>{},noteChatDebug=()=>{};
+const tick=async()=>{},eesSync=()=>{},navigate=()=>{},newChat=()=>{},noteChatDebug=()=>{},setChatOpen=()=>{},toggleChatExpanded=()=>{},selectConversation=()=>{},eesSessionReady=true,temporaryChatEnabled=false;
 const eesNativeDraftLoad=async fn=>fn(),navigateHandler=()=>{loads++;};
 const goto=async(path,options)=>{navigations.push({path,options});location.pathname=path;$page.url.pathname=path;chatIdProp=path.startsWith('/c/')?path.slice(3):'';};
 """ + bridge + reset + "\nconst linkedUpdate=()=>{" + linked.replace("$: ", "", 1) + "};\n" + r"""
@@ -632,7 +652,7 @@ const goto=async(path,options)=>{navigations.push({path,options});location.pathn
  chatIdProp='old';linkedUpdate();assert.equal(loads,1);assert.equal(loadedChatIdProp,'old');
  await bridge.adoptChat('new');assert.equal(retainedChatId,'new');assert.equal(location.pathname,'/c/new');assert.equal(navigations.at(-1).options.replaceState,true);
  nativeRoute=true;location.pathname='/workspace/models';activeId='late';const before=navigations.length;
- await bridge.adoptChat('late');assert.equal(navigations.length,before);assert.equal(location.pathname,'/workspace/models');assert.equal(retainedChatId,'late');assert.equal(created.at(-1),'late');
+ await bridge.adoptChat('late');assert.equal(navigations.length,before);assert.equal(location.pathname,'/workspace/models');assert.equal(bridge.returnChatPath('/'),'/c/late');assert.equal(bridge.chatTarget(),'late');assert.equal(retainedChatId,'late');assert.equal(created.at(-1),'late');
  await bridge.adoptChat('wrong-owner-chat');assert.equal(retainedChatId,'late');
  nativeRoute=false;lastChatPath='/c/late';
  selectedFolder={id:'other'};assert.equal(bridge.shouldInitChat('/folders/folder-a'),false);
@@ -852,7 +872,7 @@ const selectedModels=['first','second'],selectedToolIds=['read-tool','direct_ser
 const selectedFilterIds=['personal-filter'],selectedSkillIds=['personal-skill'];
 const $settings={params:{temperature:.3},system:'personal system'},params={top_p:.8};
 const $user={id:'actor',name:'Actor',email:'actor@example.test'},eesDraftOwner='actor',eesDraftAlive=true;
-const localStorage={token:'token'},$temporaryChatEnabled=false,embedded=false;
+const localStorage={token:'token'},$temporaryChatEnabled=false,embedded=false;let eesConversationGeneration=0;
 const $toolServers=[{id:'direct-tool'}],$terminalServers=[{id:'terminal'}, {url:'http://localhost/terminal'}],$selectedTerminalId='terminal';
 const $models=[{id:'first',info:{meta:{capabilities:{}}}},{id:'second'}],$socket={id:'socket'},$selectedFolder=null;
 const WEBUI_BASE_URL='',chatVariables={},isTemporaryChatId=()=>false,equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
@@ -864,7 +884,7 @@ const requests=[];
 const generateOpenAIChatCompletion=async(token,body,url,options)=>{requests.push({body,options});return null;};
 const send=eval(compiled+';sendMessageSocket');
 const ref={kind:'help',context_id:'frozen',system_id:'sys',screen:'frozen-screen'};
-const historyFor=helper=>({messages:{question:{id:'question',parentId:null,role:'user',content:'only question',files:[{id:'doc',type:'doc'}],models:['first'],meta:helper?{ees_work_help:1,ees_work_reference:ref}:{}},answer:{id:'answer',parentId:'question'}}});
+const historyFor=helper=>({messages:{question:{id:'question',parentId:null,role:'user',content:'only question',files:[{id:'doc',type:'doc'}],models:['first'],meta:helper?{ees_work_help:1,ees_work_reference:ref}:{ees_work_reference:window.__eesNativeWorkV1.captureReference()}},answer:{id:'answer',parentId:'question'}}});
 (async()=>{
  const draftAssets=JSON.stringify({selectedModels,selectedToolIds,selectedFilterIds,selectedSkillIds,$selectedTerminalId});
  await send($models[0],[{files:[{id:'doc'}]}],historyFor(false),'answer','chat');

@@ -1,5 +1,35 @@
 # 현재 작업 상태
 
+## 2026-11-09 · Figma 기능 페이지 정리
+
+[00 기능 지도](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1288-2)와 [README의 네 헤더](../README.md#figma-active-pages)를 현재 설계의 진입점으로 사용한다. 공통 화면 틀, 업무 운영, 업무 절차 작성, 도구 페이지의 ID와 원본 헤더를 유지한다. [고정 점검기](../scripts/figma_check.js)는 각 헤더가 지정된 페이지에 있는지, 기능 지도가 네 헤더로 연결되는지 검사하며 이전 헤더를 가리키는 안내를 별도로 보고한다. 당시 판의 근거는 [업무 중심 화면 1판 기록](mockups/ees-work/work-centered-20261106/implementation-plan.md)에 있다.
+
+> 아래는 변경 당시 기록이다.
+
+## 2026-11-09 · 채팅이 겹쳐 열릴 때의 키보드 조작
+
+- PR #131 병합 후 `576a527c1fb7`에서 1116px → 1115px 전환 후 Escape가 채팅을 닫지 못하는 사례를 확인했다. 채팅 내부의 메뉴와 IME 입력을 유지하면서 겹침 상태에 초점을 맞추고 닫은 뒤 호출 버튼으로 돌린다. [첫 실행·재현 조건](../evals/artifacts/work-centered-product-20261109/merge-overlay-check.json).
+- 배포 판단은 보완 커밋의 main CI와 프로그램 ZIP을 기준으로 한다. 사내 적용 결과는 운영 PC의 상태에서 확인한다.
+
+> 아래는 변경 당시 기록이다.
+
+## 2026-11-09 · 업무 중심 화면 제품 구현
+
+- 사용자 지정 목업은 [업무 중심 화면 1판](mockups/ees-work/design-mock-14-work-centered.html)이고 기준 커밋은 `41b8b086148a6d7256180e570fe3728d8c121a73`다. [구현 범위와 판 선택 근거](mockups/ees-work/TASK.md#work-centered-20261106).
+- 가운데에 업무 진행·절차 작성·도구·Native 관리 화면을 두고 오른쪽에 같은 계정의 대화를 유지한다. 채팅 표시 설정과 기존 업무 선택·작성 초안은 각각 기존 저장 경로에서 처리한다.
+- [제품 PR #131과 CI 결과](https://github.com/knadalkim-a11y/team-agent-poc/pull/131). 사내 적용은 별도이며 다음 작업은 통합 커밋의 실제 브라우저와 프로그램 검증이다.
+
+> 아래는 변경 당시 기록이다.
+
+## 2026-11-06 · 업무 중심 화면 · 검토 목업 1판
+
+- **사용자 결정·기준:** 가운데 채팅과 오른쪽 업무의 위치를 바꿔 왼쪽 탐색 / 가운데 업무 / 오른쪽 채팅으로 통일하기로 했다. 서브에이전트 병렬 계획에 이어 진행을 요청했다. 원격 main `0a6b0c0bde039b43f346247d105842d16ec2530e`와 열린 PR 없음으로 시작했다.
+- **이번 범위:** 피그마 검토 화면, 클릭 가능한 [목업 1판](mockups/ees-work/design-mock-14-work-centered.html), [구현 계약·병렬 소유권](mockups/ees-work/work-centered-20261106/implementation-plan.md)을 작성했다. 제품 UI·서버·저장 형식·실행 엔진은 변경하지 않는다. [계약](mockups/ees-work/TASK.md#work-centered-20261106).
+- **검증:** 공식 wheel·폰트 해시와 HTML/JS 정적 검사를 통과했다. 좁은 화면 확대·초점·탭 참고 문구 3건을 코드 검토로 보완했다. 로컬 Chromium 및 CUA의 실행·URL 정책 제한으로 실제 HTML 렌더·클릭 검증은 미실행이며 Figma 캡처 확인과 구분한다. [검증 보고](../evals/artifacts/work-centered-layout-20261106/final-static/validation-report.json), [환경 제한](../evals/artifacts/work-centered-layout-20261106/environment-report.json).
+- **다음 하나:** 목업 1판을 검토하고 구현 기준 판을 지정한다. 이 단계는 제품 구현·CI·사내 적용 완료가 아니다. 실제 브라우저 검증과 Figma 캡처 확인을 구분하여 증거를 기록한다.
+
+> 아래는 변경 당시 기록이다.
+
 ## 2026-11-06 · 테마 시트 (사용자 결정 대기)
 
 - **현재:** 사용자 요청으로 화면 테마를 탐색해 Figma 작업실에 [테마 시트 · 나](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=2129-72)로 정리했다(근거 화면 [나](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=2105-72), 변경 기록 C155). 제품·코드에는 적용하지 않았고 활용 여부는 사용자 결정 대기다.
@@ -939,3 +969,4 @@
 2026-10-01 Step0-B: 기본 계약과 미확정 상세 경계 반영, 저장소 검증환경 준비, 실제 Native CLI/합성 데이터 브라우저 왕복, 관련8개 회귀를 검증했다. 제품/CI는 변경하지 않았으며 기본 설계·시험 도구 커밋을 분리했다. [이번 평가](../evals/v4-ui-20260930.md#restructure-step0b-evidence-20261001)에 원래 실패·후속 실패·재검·원격 CI를 각각 보존한다.
 
 상태가 바뀔 때만 이 문서를 갱신하고 다음 작업 하나·현재 미해결·최근 점검 요약을 유지합니다.
+

@@ -399,7 +399,7 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
 
     def current(self, chat_id=None):
         if chat_id is None:
-            chat_id = self.browser.evaluate("location.pathname.startsWith('/c/')?location.pathname.split('/')[2]:''")
+            chat_id = self.browser.evaluate("window.__eesSourceShellV1?.screen()?.chatId || ''")
         result = self.browser_api("GET", "/api/ees-work/state?chat_id=" + chat_id)
         self.assertEqual(result["status"], 200, result)
         return result["data"]
@@ -607,14 +607,16 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
 
     def send_native_chat_question(self, question):
         before = len(self.server.completions)
-        self.click('.ew-author>header [data-action=close_panel]')
-        self.wait("document.querySelector('.ees-panel-region')?.hidden")
+        if self.browser.evaluate("document.querySelector('[data-ees-source-shell]').dataset.eesChatState === 'closed'"):
+            self.click('[data-ees-chat-toggle]')
+        self.wait("document.querySelector('[data-ees-chat-surface] #chat-input')?.checkVisibility()")
         self.fill('#chat-input', question)
         self.click('#send-message-button')
         self.eventually(lambda: len(self.server.completions) > before)
         request = deepcopy(self.server.completions[-1])
-        self.click('#ees-work-panel-open')
-        self.wait("!document.querySelector('.ees-panel-region')?.hidden && document.querySelector('#ees-work-designer')")
+        if self.browser.evaluate("document.querySelector('[data-ees-source-shell]').dataset.eesChatState === 'overlay'"):
+            self.click('[data-ees-chat-close]')
+        self.wait("document.querySelector('[data-ees-work-surface] #ees-work-designer')?.checkVisibility()")
         return request
 
     def prepare_native_chat_proposal(self, definition, question='설명 제안'):
@@ -628,7 +630,7 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         import importlib
         tool = importlib.import_module('open_webui.ees_workflow_tool').Tools()
         reference = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')
-        chat_id = self.browser.evaluate("location.pathname.split('/c/')[1] || ''")
+        chat_id = self.browser.evaluate("window.__eesSourceShellV1?.screen()?.chatId || ''")
         self.assertTrue(chat_id, 'Native proposal requires an actual personal chat route')
         current = self.browser_api('GET', '/api/v1/auths/')['data']
         user = self.fixture.run(self.fixture.users.Users.get_user_by_id(current['id']))
@@ -738,7 +740,7 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.login_ui("administrator@example.test", "Fixture-admin-only-42!")
         self.open_user_editor(account.email)
         self.select_native('select[aria-label]', 'user')
-        self.click('button[type="submit"]')
+        self.click_text("저장", selector='button[type="submit"]')
         self.wait("!document.querySelector('select[aria-label]')")
         self.assertEqual(self.fixture.run(self.fixture.users.Users.get_user_by_id(account.id)).role, 'user')
         self.screenshot("sa-native-approved-user")

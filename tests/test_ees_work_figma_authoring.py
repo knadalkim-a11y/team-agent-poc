@@ -56,11 +56,11 @@ assert.equal(h.operations.length,0);assert.equal(h.writes.length,0);assert.equal
 })().catch(e=>{console.error(e);process.exitCode=1;});
 """)
 
-    def test_start_inputs_are_edited_in_the_content_tab_before_stages(self):
+    def test_start_inputs_are_edited_below_stages_in_the_content_tab(self):
         self.run_contract(r"""
 (async()=>{
 const h=harness();await flush();
-const at=label=>h.markup.indexOf(label);assert.ok(at('시작할 때 받는 값')>=0);assert.ok(at('시작할 때 받는 값')<at('단계와 작업'));
+const at=label=>h.markup.indexOf(label);assert.ok(at('시작할 때 받는 값')>=0);assert.ok(at('단계와 작업')>=0);assert.ok(at('시작할 때 받는 값')>at('단계와 작업'));
 h.dialogs.push({id:'incident_at',name:'발생 시각',type:'datetime',scope:'run',required:true,options_source:'manual',options:''});
 h.click('start_input_add');await flush();
 assert.equal(h.draft().definition.nodes.p.inputs[0].id,'incident_at');assert.equal(h.draft().definition.nodes.p.inputs[0].scope,'run');assert.equal(h.draft().definition.nodes.j.inputs.length,0);assert.equal(h.writes.length,0);

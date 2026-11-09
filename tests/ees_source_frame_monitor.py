@@ -97,14 +97,12 @@ FRAME_MONITOR = r"""(() => {
   };
   const rightPanels = () => {
     const panels = [];
-    for (const header of document.querySelectorAll('#ees-work-designer > header')) {
-      if (!visible(header)) continue;
-      const title = header.firstChild?.textContent.trim();
-      if (title === '도구' || title === '도구 · 공용') panels.push('tools');
-      if (title === '업무 절차' || title === '워크플로우') panels.push('procedures');
+    const designer = document.querySelector('[data-ees-work-surface] #ees-work-designer');
+    if (visible(designer)) {
+      if (designer.getAttribute('aria-label') === '도구 작성') panels.push('tools');
+      if (designer.getAttribute('aria-label') === '업무 절차 작성') panels.push('procedures');
     }
-    for (const header of document.querySelectorAll('#ees-work-panel .ew-panel-header strong'))
-      if (visible(header) && header.textContent.trim() === '업무') panels.push('work_home');
+    if (visible(document.querySelector('#ees-work-panel .ew-work-home'))) panels.push('work_home');
     return panels;
   };
   // Arm before physical CDP input, but start the boundary at the real click.
@@ -179,7 +177,7 @@ FRAME_MONITOR = r"""(() => {
       scopeControls: visible(document.querySelector('#ees-work-system-trigger')) &&
         [...document.querySelectorAll('#ees-work-entry [data-action=mode]')].filter(visible).length === 2 &&
         !![...document.querySelectorAll('#ees-work-entry [data-action=mode][data-mode=work], #ees-work-entry [data-action=procedures]')].find(visible),
-      content: visible(chat) || visible(workspace), adminDialog: visible(dialog),
+      content: visible(chat) || visible(workspace) || visible(document.querySelector('[data-ees-work-surface]')), adminDialog: visible(dialog),
       sourceText: source && !!shell.textContent.trim(),
       startupGate: document.documentElement?.dataset.eesStartup || null
     });

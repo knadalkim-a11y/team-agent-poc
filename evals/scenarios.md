@@ -4,6 +4,13 @@
 
 이 문서는 항목별 판정과 검증 증거의 기준 기록입니다. 현재 진행 단계·다음 작업·배포 준비 상태는 [STATUS](../docs/STATUS.md)에서 확인합니다. 과거 PASS를 버전 변경 후의 재검증으로 간주하지 않습니다.
 
+## 업무 중심 화면 · 2026-11-09
+
+[목업 1판과 제품 구현 계약](../docs/mockups/ees-work/TASK.md#work-centered-20261106)에 따라 업무·워크스페이스·Native 관리 화면에서 같은 대화를 오른쪽에 유지한다. [제품 PR 및 실제 브라우저 검사](https://github.com/knadalkim-a11y/team-agent-poc/pull/131/checks)에서 해당 제품 커밋에 대한 결과를 확인한다.
+
+- 로컬에서는 고정 Open WebUI 원본에 패치를 적용하고, 관리자 설정·개인 대화·반응형 화면 소스를 컴파일했다. 2개 탭의 독립 입력 병합, 계정 교체 시 늦은 응답 폐기, 일시 대화 중 폭·접기, 개인 설정 복원, 실제 진행 당시의 작업 제목을 확인했다.
+- 브라우저 검사는 1920/1536/1366/1280px와 겹쳐 열기 경계, 480px 모바일에서 배치·포커스·초안·첨부·작성·Native 경로를 확인한다. 로컬 Chromium의 소켓 실행 제한 때문에 이 항목의 판정 원본은 GitHub Actions다.
+
 ## Native 복귀 목적지 선택 · 2026-10-15 · 검증 중
 
 사용자 확인 사내 적용본은 #88·#89 병합 main `d4f1806`이다. [이번 계약](../docs/mockups/ees-work/TASK.md#native-return-selection-20261015)의 수정 전 controller23시험은 목적지18조합 FAIL·보호5개 PASS이며 이전 선택54회·이전 작성기36회를 관측했다. 이는 controller 관측값으로 실제 브라우저 프레임 수와 구분한다. 수정 후 새28개와 기존 Native92개, 전체 Node338개·Python controller 진입점은 통과했다.18전환의 이전 선택·작성기·aria 오류는0건이다. 첫 실제 브라우저에서 새9복귀의 이전 선택/작성기0건을 확인했지만 첫프레임의 Native 선택+목적지 자리표시와 기존 기준에서2시험이 실패했다. 보완 후 [PR #91 최종 CI](https://github.com/knadalkim-a11y/team-agent-poc/pull/91/checks)는 최초 결과와 구분해 판정한다.
