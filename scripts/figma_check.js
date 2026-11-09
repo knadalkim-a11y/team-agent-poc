@@ -1,4 +1,4 @@
-// Figma 설계 파일 고정 점검 (읽기 전용, 2026-10-29 C130)
+// Figma 설계 파일 고정 점검 (읽기 전용, 활성 기능 페이지 4개)
 // 실행: 이 파일 내용 전체를 Figma MCP use_figma의 code로 넘긴다 (파일 XK2wTos6sEuxSHhIj7cqg6).
 // Figma를 고친 뒤, 00 변경 기록에 한 줄을 쓰기 전에 실행한다. 아무것도 고치지 않고 보고만 한다.
 // 기준 숫자는 아래 LIMITS 한 곳에만 둔다. 규칙 원문: AGENTS.md의 Figma 항목, Figma 00 · 설계 관리.
@@ -12,13 +12,23 @@ const LIMITS = {
 const FILE_KEY = 'XK2wTos6sEuxSHhIj7cqg6';
 const LOG_ID = '898:31'; // 00 변경 기록
 const MAP_ID = '1288:2'; // 00 기능 지도
+// Keep the original outer headers: links to current designs survive a screen revision.
+const ACTIVE_PAGES = [
+  { id: '1284:3046', name: '공통 · 화면 틀', header: '1284:3047', row: '1288:11', former: ['1284:3058', '1284:3070', '1285:1853'] },
+  { id: '1284:3106', name: '업무 · 운영', header: '1284:3107', row: '1288:42', former: ['1689:1061', '1689:1062', '1689:1063', '1284:3118'] },
+  { id: '1285:1829', name: '워크 · 업무 절차', header: '1285:1830', row: '1288:63', former: ['1283:3107', '1285:1865'] },
+  { id: '1285:1841', name: '워크 · 도구', header: '1285:1842', row: '1288:68', former: [] }
+];
+const byPage = new Map(ACTIVE_PAGES.map((item) => [item.id, item]));
+const byHeader = new Map(ACTIVE_PAGES.map((item) => [item.header, item]));
+const byFormer = new Map(ACTIVE_PAGES.flatMap((item) => item.former.map((id) => [id, item])));
 const ARCHIVE_LIST = '지난 변경 기록 · 목록'; // 91 보관에서 지난 기록을 모은 프레임 이름
 const LINE = /^C(\d+) · (\d{4}-\d{2}-\d{2}) · (.+) · (PR #\d+|PR 없음) · (백업 B\d{3}|백업 없음)$/;
 const OLD_TERMS = [/(공통|업무|워크)-\d/, /페이지 이름 끝/];
 
 const started = Date.now(), errors = [], warnings = [];
 const kindOf = (name) => /^00 · /.test(name) ? 'admin' : /^70 · /.test(name) ? 'workshop'
-  : /^9[12] · 보관 · /.test(name) ? 'archive' : /^99 · |^(백업 )?B\d{3} · /.test(name) ? 'backup' : 'feature';
+  : /^9[12] · 보관(?: · |$)/.test(name) ? 'archive' : /^99 · |^(백업 )?B\d{3} · /.test(name) ? 'backup' : 'feature';
 const walk = (root, fn) => {
   const stack = [root];
   while (stack.length) {
@@ -53,6 +63,8 @@ const pages = figma.root.children, sizes = [], features = [], texts = [], backup
 let logFrame = null, archiveList = null;
 for (const page of pages) {
   const kind = kindOf(page.name);
+  const canonical = byPage.get(page.id);
+  if (canonical && page.name !== canonical.name) errors.push('활성 페이지 이름: ' + page.id + ' “' + page.name + '” → “' + canonical.name + '”');
   if (kind === 'backup') {
     const m = /^99 · 백업 · (B\d{3}) · (\d{4}-\d{2}-\d{2}) · (.+ 전)$/.exec(page.name);
     if (!m) { errors.push('백업 이름: ' + page.name); continue; }
@@ -63,6 +75,7 @@ for (const page of pages) {
   }
   if (kind === 'feature') {
     features.push(page);
+    if (!canonical) errors.push('등록되지 않은 활성 페이지: ' + page.id + ' “' + page.name + '”');
     if (!/^(공통|업무|워크) · \S/.test(page.name) || /(공통|업무|워크)-\d|초안|구현|사내 확인|\d+판|확정|현재|최신|이전/.test(page.name))
       errors.push('이름: ' + page.name + ' (‘구역 · 왼쪽 메뉴 이름’, 번호·상태 없음)');
   }
@@ -96,17 +109,55 @@ for (const text of texts) {
 }
 
 // 3) 링크: 없는 노드, 최신 안내가 보관 안의 화면을 가리키는 경우
+const formerLinks = [];
 for (const text of texts) for (const link of links(text)) {
   const target = await get(link.id);
+  const historical = logFrame && inside(text, logFrame);
+  // Former page IDs can survive in dated records. Report the current header without
+  // requiring every preserved frame under the old header to become a redirect.
+  const former = byFormer.get(link.id);
+  const oldHeader = target && !byHeader.has(target.id) && /^Header · /.test(target.name || '');
+  if (!historical && (former || oldHeader)) {
+    const owner = target && pageOf(target);
+    const destination = former || (owner && (byFormer.get(owner.id) || byPage.get(owner.id)));
+    formerLinks.push({ from: text.id, target: link.id, current: destination?.header || null });
+  }
+  if (!target && former && historical) continue;
   if (!target) { errors.push('없는 노드 링크: ' + text.id + ' → ' + link.id + ' “' + link.label.slice(0, 24) + '”'); continue; }
-  if (target.type === 'PAGE' || (logFrame && inside(text, logFrame))) continue;
+  if (historical) continue;
   const where = pageOf(target);
   if (where && /^(archive|backup)$/.test(kindOf(where.name)) && !/이전|보관|지난|PREVIOUS|백업/.test(link.label))
     warnings.push('보관을 가리키는 링크: ' + text.id + ' “' + link.label.slice(0, 24) + '” → ' + link.id);
 }
-const map = await get(MAP_ID), mapped = new Set();
-if (map) walk(map, (node) => { if (node.type === 'TEXT') for (const link of links(node)) mapped.add(link.id); });
-for (const page of features) if (!mapped.has(page.id)) warnings.push('기능 지도에 없는 기능 페이지: ' + page.name);
+// Only the four current feature rows own an official header. The map can also
+// link to the workshop, archives, backups and an end-to-end example.
+const map = await get(MAP_ID);
+if (!map || kindOf(pageOf(map)?.name || '') !== 'admin') errors.push('00 기능 지도 ' + MAP_ID + '을 찾지 못함');
+for (const item of ACTIVE_PAGES) {
+  const page = pages.find((p) => p.id === item.id);
+  if (!page || kindOf(page.name) !== 'feature') errors.push('활성 페이지 없음: ' + item.id + ' “' + item.name + '”');
+  const header = await get(item.header);
+  if (!header || header.type !== 'FRAME' || pageOf(header)?.id !== item.id) {
+    errors.push('활성 헤더 없음/위치 불일치: ' + item.header + ' → ' + item.id + ' “' + item.name + '”');
+  }
+  const row = await get(item.row);
+  if (!row || !map || !inside(row, map)) {
+    errors.push('기능 지도 행 없음: ' + item.row + ' “' + item.name + '”');
+    continue;
+  }
+  const rowLinks = [];
+  walk(row, (node) => {
+    if (node.type === 'TEXT') for (const link of links(node)) rowLinks.push({ from: node.id, ...link });
+  });
+  if (!rowLinks.some(link => link.id === item.header)) {
+    errors.push('기능 지도에 없는 헤더: ' + item.header + ' “' + item.name + '”');
+  }
+  for (const link of rowLinks) {
+    if (link.id !== item.header && link.id !== item.id) {
+      errors.push('기능 지도 진입점: ' + link.from + ' → ' + link.id + ' “' + link.label + '” (해당 페이지/헤더 사용)');
+    }
+  }
+}
 
 // 4) 00 변경 기록: 한 줄 형식·줄 수·번호
 const lines = [], archived = archiveList ? archiveList.children.filter((n) => n.type === 'TEXT') : [];
@@ -142,4 +193,5 @@ const backupReport = backups.map((b) => {
 await figma.setCurrentPageAsync(pages[0]);
 const cap = (list) => list.length > 40 ? list.slice(0, 40).concat(['… 외 ' + (list.length - 40) + '건']) : list;
 return { ok: errors.length === 0, errors: cap(errors), warnings: cap(warnings), next, logLines: lines.length,
-  ms: Date.now() - started, sizes, backups: backupReport };
+  ms: Date.now() - started, sizes, backups: backupReport,
+  activePages: ACTIVE_PAGES.map(({ id, name, header }) => ({ id, name, header })), formerLinks: cap(formerLinks) };
