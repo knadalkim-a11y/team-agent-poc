@@ -1,5 +1,14 @@
 # 현재 작업 상태
 
+## 2026-11-09 · 넓어진 가운데 업무 화면 · 검토안 2판
+
+- **요청·기준:** 사용자가 업무 패널이 가운데로 옮겨져 넓어진 만큼 UI/UX 개편이 필요하다고 요청했다. main `1eac86d`(공식 4페이지 C161)에서 시작했고 관련 열린 PR은 없다. 구현할 판은 지정되지 않았다. [계약](mockups/ees-work/TASK.md#work-centered-wide-20261109).
+- **현재:** Figma 작업실에 [검토 안내](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=2232-638)와 W1~W4(단계 작업·판정 채팅 열림/접힘, 회차 개요, 업무 절차 작성)·부품 6개를 만들었다. 목록+상세 분할과 가운데 영역 폭 기준 배치(1264px/864px)를 제안한다. 공식 기능 페이지·제품 코드는 바꾸지 않았다.
+- **검증:** 고정 점검(`scripts/figma_check.js`)을 변경 기록 전·후 실행해 오류0·경고0이고, 변경 기록 C162를 쓰며 C142를 91 보관으로 옮겼다. 네 화면의 1920 캡처를 직접 확인했으며 이미지 채움0·프레임 밖 넘침0이다. HTML 목업·브라우저 렌더·사용자 사용성 확인은 미실행이다. [캡처·노드](mockups/ees-work/work-centered-wide-20261109/metadata.json).
+- **다음 하나:** 사용자가 W1~W4 방향을 검토한다. 의견을 반영한 판으로 HTML 디자인 목업을 만들며 구현할 판 지정은 그 뒤다.
+
+> 아래는 변경 당시 기록이다.
+
 ## 2026-11-09 · Figma 기능 페이지 정리
 
 [00 기능 지도](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1288-2)와 [README의 네 헤더](../README.md#figma-active-pages)를 현재 설계의 진입점으로 사용한다. 공통 화면 틀, 업무 운영, 업무 절차 작성, 도구 페이지의 ID와 원본 헤더를 유지한다. [고정 점검기](../scripts/figma_check.js)는 각 헤더가 지정된 페이지에 있는지, 기능 지도가 네 헤더로 연결되는지 검사하며 이전 헤더를 가리키는 안내를 별도로 보고한다. 당시 판의 근거는 [업무 중심 화면 1판 기록](mockups/ees-work/work-centered-20261106/implementation-plan.md)에 있다.

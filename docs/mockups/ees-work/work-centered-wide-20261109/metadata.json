@@ -1,0 +1,81 @@
+{
+  "revision": 2,
+  "status": "review_proposal",
+  "date": "2026-11-09",
+  "request": "피그마 페이지봐봐. 채팅 패널을 오른쪽으로 옮기고, 업무 패널을 가운데로 옮겼어. 근데 기존에는 업무 패널이 오른쪽이었어서 가운데 패널로 옮기고, 넓어진만큼 ui/ux 및 디자인을 바꿔야할거같아",
+  "base_commit": "1eac86d6a52a21205e6a04b8adcea779cfe4fa3c",
+  "implementation_revision": null,
+  "figma": {
+    "file_key": "XK2wTos6sEuxSHhIj7cqg6",
+    "page": "897:761",
+    "header": "2232:638",
+    "parts": "2226:274",
+    "screens": {
+      "W1": { "node": "2225:1539", "name": "W1 · 운영 · 단계 작업과 판정 · 채팅 열림", "source": "2208:8262", "center_width": 1104 },
+      "W2": { "node": "2225:1709", "name": "W2 · 운영 · 단계 작업과 판정 · 채팅 접힘", "source": "2207:28697", "center_width": 1664 },
+      "W3": { "node": "2225:1858", "name": "W3 · 운영 · 회차 개요 · 채팅 열림", "source": "1762:456", "center_width": 1104 },
+      "W4": { "node": "2225:2064", "name": "W4 · 워크 · 업무 절차 작성 · 채팅 열림", "source": "836:372", "center_width": 1104 }
+    },
+    "components": {
+      "2226:276": "넓은 업무 / 작업 목록 행",
+      "2226:285": "넓은 업무 / 근거 문서 행",
+      "2226:295": "넓은 업무 / 판정 선택지",
+      "2226:298": "넓은 업무 / 단계 카드",
+      "2226:306": "넓은 업무 / 개요 작업 행",
+      "2226:316": "넓은 업무 / 구조 항목"
+    },
+    "tokens": "EES Work v4 / Color variables and EES v4 text styles (Noto Sans KR, numbers in Inter)",
+    "official_pages_changed": false,
+    "change_log": "C162 (C142 moved to 91 archive list)",
+    "verified_at": "2026-11-09T02:03:16Z"
+  },
+  "measured_problem_revision_1": {
+    "product_css": "--ees-work-page-inset: max(32px, calc((100% - 960px) / 2))",
+    "chat_open_1920": { "center": 1104, "content_max": 960 },
+    "chat_collapsed_1920": { "center": 1664, "content_max": 960, "unused": 704 },
+    "task_row": "960px wide with number, name and status only",
+    "task_detail": "accordion inside the list; evidence, criteria and verdict stacked vertically",
+    "authoring": "task detail opens as a separate screen and returns to the outline (B2-10)"
+  },
+  "layout_rules": {
+    "basis": "width of the center work area, not the window",
+    "split_two_column_detail": ">= 1264px center (list + detail with evidence | verdict)",
+    "split_single_column_detail": "864-1263px center (list + detail)",
+    "single_column": "< 864px center (revision 1 accordion)",
+    "examples": {
+      "1920_chat_open": "1104px -> list + single-column detail (W1, W3, W4)",
+      "1920_chat_collapsed": "1664px -> list + two-column detail (W2)",
+      "1366_chat_open": "830px -> single column"
+    }
+  },
+  "figma_check": {
+    "script": "scripts/figma_check.js",
+    "runs": [
+      { "when": "after drawing, before the change-log line", "ok": true, "errors": 0, "warnings": 0, "next": "C162", "log_lines": 20 },
+      { "when": "after C162 and the C142 archive move", "ok": true, "errors": 0, "warnings": 0, "next": "C163", "log_lines": 20, "archived_max": 142 }
+    ],
+    "page_sizes": {
+      "70 · 작업실 · 실험·검토": { "nodes": 1959, "chars": 7719 },
+      "워크 · 업무 절차": { "nodes": 8659, "chars": 49615 }
+    }
+  },
+  "readback": {
+    "image_fills": 0,
+    "overflow_outside_frame": 0,
+    "fonts": ["Noto Sans KR", "Inter"],
+    "placeholder_text": 0
+  },
+  "artifacts": [
+    { "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-review-header.png", "node": "2232:638", "size": [1920, 424], "bytes": 122687, "sha256": "a7355bda9505fe6f0cafd146ca230fe758917a9bb4e6cc405d62d3db053ca767" },
+    { "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-w1-stage-chat-open.png", "node": "2225:1539", "size": [1920, 1080], "bytes": 160660, "sha256": "55fc21fdcbecf3a355fffd86fdb642415af2fa63f0b89ee02d5545fdd48f0075" },
+    { "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-w2-stage-chat-collapsed.png", "node": "2225:1709", "size": [1920, 1080], "bytes": 125621, "sha256": "e0672b23647d0af6bfb287fc190df0ce2672d33444202add483f9697b50be320" },
+    { "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-w3-run-overview.png", "node": "2225:1858", "size": [1920, 1080], "bytes": 154020, "sha256": "701f32b33474f65ec0e37db9aa28792d0302bf6e7cefa40e61576b43fa36a4ae" },
+    { "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-w4-procedure-authoring.png", "node": "2225:2064", "size": [1920, 1080], "bytes": 191873, "sha256": "e4c17d51db87658f31b53bd3a1d9e66cfd2c31050785417a15a435c5bf1d1773" }
+  ],
+  "not_run": [
+    "clickable HTML design mock",
+    "browser render of a product or mock",
+    "user usability check",
+    "product, server and storage changes"
+  ]
+}
