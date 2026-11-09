@@ -11,6 +11,8 @@ on:
       - 'scripts/build_*.py'
       - 'scripts/render_ees_brand_assets.py'
       - 'scripts/check_docs.py'
+      - 'scripts/figma_check.js'
+      - 'tests/test_figma_check.cjs'
       - 'scripts/ees_deploy_*.py'
       - 'scripts/manage_ees.py'
       - 'scripts/dev_ees.py'

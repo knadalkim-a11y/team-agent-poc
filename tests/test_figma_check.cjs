@@ -45,21 +45,36 @@ function file(pages) {
 }
 
 function base(overrides = {}) {
-  const mapText = '공통 · 화면 틀·이동 / 워크 · 도구';
+  const entries = [
+    ['공통 · 화면 틀', '1288:11', '1284:3047', '1284:3046'], ['업무 · 운영', '1288:42', '1284:3107', '1284:3106'],
+    ['워크 · 업무 절차', '1288:63', '1285:1830', '1285:1829'], ['워크 · 도구', '1288:68', '1285:1842', '1285:1841']
+  ];
+  const currentRows = entries.map(([name, id, headerId, pageId]) => {
+    const label = name + ' (페이지)';
+    return { id, type: 'FRAME', name, children: [text(id + ':text', label, [
+      link(label, name, node('', headerId)), link(label, '페이지', node('', pageId))
+    ])] };
+  });
+  const extra = (id, label, target) => text(id, label, [link(label, label, node('', target))]);
   const archiveLine = '지난 기록은 91 · 보관 ‘지난 변경 기록’에 있습니다 →';
   return [
     { id: '897:760', name: '00 · 설계 관리 · 먼저 읽기', children: [
-      { id: '1288:2', type: 'FRAME', name: '기능 지도', children: [text('1288:12', mapText, [
-        link(mapText, '공통 · 화면 틀·이동', node('', '1284:3046')), link(mapText, '워크 · 도구', node('', '1285:1841'))])] },
+      { id: '1288:2', type: 'FRAME', name: '기능 지도', children: [...currentRows,
+        extra('2208:28371', '전체 사용 흐름', 'f:1'), extra('w:link', '작업실', '897:761'),
+        extra('r:link', '이전 작업실 보관', '2207:28518'), extra('b:link', 'B072 백업', '2206:4510')] },
       { id: '898:31', type: 'FRAME', name: '변경 기록', children: overrides.log || [
         text('898:32', '변경 기록'),
         text('a:1', archiveLine, [link(archiveLine, '지난 변경 기록', node('', 'r:list'))]),
         text('a:2', 'C130 · 2026-10-29 · 고정 점검 도입 · PR #106 · 백업 없음'),
         text('a:3', 'C131 · 2026-10-30 · 화면 수정 · PR #107 · 백업 B066')] }] },
-    { id: '1284:3046', name: overrides.featureName || '공통 · 화면 틀·이동', children: [
-      { id: 'h:1', type: 'FRAME', name: 'Header · 공통 · 화면 틀·이동', children: overrides.header || [text('h:2', '최신판 3판 · 공통 기준')] },
+    { id: '1284:3046', name: overrides.featureName || '공통 · 화면 틀', children: [
+      { id: '1284:3047', type: 'FRAME', name: 'Header · 공통 · 화면 틀', children: overrides.header || [text('h:2', '최신판 3판 · 공통 기준')] },
       ...(overrides.feature || [])] },
-    { id: '1285:1841', name: '워크 · 도구', children: [{ id: 'f:1', type: 'FRAME', name: 'B10-1 · 도구 목록', children: [
+    { id: '1284:3106', name: '업무 · 운영', children: [{ id: '1284:3107', type: 'FRAME', name: 'Header · 업무 · 운영' }] },
+    { id: '1285:1829', name: '워크 · 업무 절차', children: [{ id: '1285:1830', type: 'FRAME', name: 'Header · 워크 · 업무 절차' }] },
+    { id: '1285:1841', name: '워크 · 도구', children: [
+      { id: '1285:1842', type: 'FRAME', name: 'Header · 워크 · 도구' },
+      { id: 'f:1', type: 'FRAME', name: 'B10-1 · 도구 목록', children: [
       text('f:2', 'C66에서 작업실 → 공통-3으로 옮김')] }] },
     { id: '897:761', name: '70 · 작업실 · 실험·검토', children: [text('w:1', '작업실 사용 안내')] },
     { id: '1722:1395', name: '91 · 보관 · 기능 페이지 이전 판과 옛 설계', children: [
@@ -67,7 +82,9 @@ function base(overrides = {}) {
         text('r:1', 'C01  |  2026-10-01  |  Claude  |  공통-1 화면 정리'),
         text('r:2', 'C118 · 2026-10-28 KST · 워크-2 이전 화면을 보관으로 (백업 B056)'),
         text('r:3', 'C129 · 결과 확인 직접 표시')] },
-      { id: 'old:1', type: 'FRAME', name: 'PREVIOUS · B5 · 옛 도구 화면', children: [] }] },
+      { id: 'old:1', type: 'FRAME', name: 'PREVIOUS · B5 · 옛 도구 화면', children: [] },
+      { id: '2207:28518', type: 'FRAME', name: '92 · 보관 · 이전 작업실' }] },
+    { id: '2206:4510', name: '99 · 백업 · B072 · 2026-11-09 · 기능 페이지 정리 전', children: [] },
     { id: 'b:56', name: overrides.backupName || '99 · 백업 · B056 · 2026-10-28 · 도구 이전 화면 보관 전', children: [] },
     { id: 'b:66', name: '99 · 백업 · B066 · 2026-10-30 · 화면 수정 전', children: [] },
   ];
@@ -84,7 +101,7 @@ test('a file that follows the naming, log, link and backup rules passes and repo
   assert.equal(result.ok, true);
   assert.equal(result.next, 'C132');
   assert.equal(result.logLines, 2);
-  assert.deepEqual(result.backups, [['B056', '2026-10-28', 'C118', 'PR 확인 필요'], ['B066', '2026-10-30', 'C131', 'PR #107']]);
+  assert.deepEqual(result.backups, [['B072', '2026-11-09', '?', 'PR 확인 필요'], ['B056', '2026-10-28', 'C118', 'PR 확인 필요'], ['B066', '2026-10-30', 'C131', 'PR #107']]);
   assert.ok(!calls.some((name) => name.startsWith('99 · ')), 'backup pages are not opened');
   assert.equal(calls[calls.length - 1], '00 · 설계 관리 · 먼저 읽기');
 });
@@ -134,14 +151,63 @@ test('size limits: a heavy feature page is a cleanup warning, a heavy 00 page is
   const pages = base({ feature: heavy });
   pages[0].children.push(long);
   const { result } = await check(pages);
-  assert.ok(result.warnings.some((w) => w.startsWith('정리 신호: 공통 · 화면 틀·이동 요소 1')));
+  assert.ok(result.warnings.some((w) => w.startsWith('정리 신호: 공통 · 화면 틀 요소 1')));
   assert.ok(result.errors.some((e) => e.startsWith('00 글자 ')));
 });
 
-test('previous-version frames left on feature pages and pages missing from the function map are warnings', async () => {
+test('active page IDs, names, header parents and the four map entries agree', async () => {
   const pages = base({ feature: [{ id: 'p:1', type: 'FRAME', name: 'PREVIOUS20 · 업무 목업', children: [] }] });
-  pages.splice(2, 0, { id: 'new:1', name: '워크 · 빠른 문장', children: [] });
   const { result } = await check(pages);
-  assert.ok(result.warnings.some((w) => w.startsWith('이전 판으로 보이는 이름: 공통 · 화면 틀·이동 / PREVIOUS20')));
-  assert.ok(result.warnings.some((w) => w === '기능 지도에 없는 기능 페이지: 워크 · 빠른 문장'));
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.activePages.map(({ id, header }) => [id, header]),
+    [['1284:3046', '1284:3047'], ['1284:3106', '1284:3107'], ['1285:1829', '1285:1830'], ['1285:1841', '1285:1842']]);
+  assert.ok(result.warnings.some((w) => w.startsWith('이전 판으로 보이는 이름: 공통 · 화면 틀 / PREVIOUS20')));
+  pages.find(p => p.id === '1284:3106').children.push(...pages.find(p => p.id === '1285:1829').children.splice(0));
+  pages.splice(pages.findIndex(p => p.id === '1285:1841'), 1);
+  pages.push({ id: 'new:1', name: '워크 · 도구', children: [] });
+  const broken = (await check(pages)).result;
+  assert.equal(broken.ok, false);
+  assert.ok(broken.errors.some(e => e.includes('활성 헤더 없음/위치 불일치: 1285:1830')));
+  assert.ok(broken.errors.some(e => e.includes('등록되지 않은 활성 페이지: new:1')));
+  assert.ok(broken.errors.some(e => e.includes('활성 페이지 없음: 1285:1841')));
+});
+
+test('the map must link to canonical headers, even when an old page or content link still resolves', async () => {
+  const pages = base();
+  const rows = pages[0].children[0].children;
+  rows[0].children[0].links[0].hyperlink = { type: 'NODE', value: 'old:1' };
+  rows[1].children[0].links[0].hyperlink = { type: 'NODE', value: '1284:3106' };
+  const result = (await check(pages)).result;
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some(e => e.includes('기능 지도 진입점: 1288:11:text → old:1')));
+  assert.ok(result.errors.some(e => e.includes('기능 지도에 없는 헤더: 1284:3047')));
+  assert.ok(result.errors.some(e => e.includes('기능 지도에 없는 헤더: 1284:3107')));
+  assert.ok(!result.errors.some(e => e.includes('2208:28371') || e.includes('2207:28518') || e.includes('2206:4510')));
+});
+
+test('a moved header reports its replacement; dated log links keep their original target', async () => {
+  const pages = base();
+  const old = { id: 'legacy:4', type: 'FRAME', name: 'Header · 공통 · 상태·부품', children: [] };
+  pages[1].children.push(old, text('legacy:5', '옛 상태', [link('옛 상태', '옛 상태', node('', old.id))]));
+  pages[0].children[1].children.push(text('legacy:6', 'C 기록의 옛 페이지', [
+    link('C 기록의 옛 페이지', '옛 페이지', node('', '1284:3070'))]));
+  const result = (await check(pages)).result;
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.formerLinks, [{ from: 'legacy:5', target: 'legacy:4', current: '1284:3047' }]);
+});
+
+test('removing the feature map is an error', async () => {
+  const pages = base();
+  pages[0].children.shift();
+  const result = (await check(pages)).result;
+  assert.ok(result.errors.some(e => e.includes('00 기능 지도 1288:2을 찾지 못함')));
+});
+
+test('README sends each current feature to the same named header as the file checker', async () => {
+  const { result } = await check(base());
+  const readme = fs.readFileSync(path.join(__dirname, '..', 'README.md'), 'utf8');
+  const index = readme.split('<a id="figma-active-pages"></a>')[1].split('### 설계 문서의 역할')[0];
+  const rows = [...index.matchAll(/^\| \[([^\]]+)\]\(https:\/\/www\.figma\.com\/design\/([A-Za-z0-9]+)\?node-id=(\d+)-(\d+)\)/gm)]
+    .map(([, name, key, first, last]) => ({ name, key, header: first + ':' + last }));
+  assert.deepEqual(rows, result.activePages.map(({ name, header }) => ({ name, key: KEY, header })));
 });
