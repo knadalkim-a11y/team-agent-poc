@@ -1,11 +1,11 @@
 # 현재 작업 상태
 
-## 2026-11-09 · 넓어진 가운데 업무 화면 · 검토안·HTML 목업 2판
+## 2026-11-09 · 넓어진 가운데 업무 화면 · 검토안·HTML 목업 3판
 
-- **요청·기준:** 사용자가 업무 패널이 가운데로 옮겨져 넓어진 만큼 UI/UX 개편이 필요하다고 요청했고, Figma 검토안 방향을 승인해 HTML 목업을 요청했다. main `1eac86d`(공식 4페이지 C161)에서 시작했고 관련 열린 PR은 없다. 구현할 판은 지정되지 않았다. [계약](mockups/ees-work/TASK.md#work-centered-wide-20261109).
-- **현재:** Figma 작업실의 [검토 안내](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=2232-638)·W1~W4를 [HTML 목업 2판](mockups/ees-work/design-mock-15-work-centered-wide.html)으로 옮겼다. 목록+상세 분할과 가운데 영역 폭 기준 배치(1264px/864px)를 직접 눌러 볼 수 있다. 공식 기능 페이지·제품 코드는 바꾸지 않았다.
-- **검증:** Figma 고정 점검은 변경 기록 전·후 오류0·경고0이고 C162를 기록했다. 목업은 Chromium 3폭에서 정적 검사와 브라우저 검사 95/95를 통과했고 페이지 오류0이다. 목업 빌더 시험 6/6이 통과했다. 탭 12px·배경 `#FAFAFA`는 공통 패널 기준을 따랐으며 Figma W 화면과의 차이로 기록했다. 사내 PC 열기·사용자 사용성 확인은 미실행이다. [목업 검증](../evals/artifacts/work-centered-wide-20261109/validation-report.json)·[캡처·노드](mockups/ees-work/work-centered-wide-20261109/metadata.json).
-- **다음 하나:** 사용자가 HTML 목업을 확인하고 W1~W4 의견이나 구현할 판을 정한다.
+- **요청·기준:** 사용자가 업무 패널이 가운데로 옮겨져 넓어진 만큼 UI/UX 개편이 필요하다고 요청했다. Figma 검토안 방향을 승인한 뒤 HTML 목업을 요청했다. 2판을 보고는 화면별 상황이 잘 보이지 않고 테마가 어색하다고 했고, 질문에 대한 답으로 테마 시트 ‘나’ 적용과 어색한 점 네 가지를 골랐다. main `1eac86d`(공식 4페이지 C161)에서 시작했고 관련 열린 PR은 없다. 구현할 판은 지정되지 않았다. [계약](mockups/ees-work/TASK.md#work-centered-wide-20261109).
+- **현재:** [HTML 목업 3판](mockups/ees-work/design-mock-15-work-centered-wide.html)에 테마 시트 ‘나’를 가운데·메뉴·채팅에 함께 적용했다. 카드 없이 흰 바탕과 구분선을 쓰고, 상태 하나에 신호 줄 색 하나, 남색 대신 먹색, 화면마다 주 단추 하나다. 화면 위 안내 띠는 상황별로 화면을 열고 상황·들어오는 길·지금 배치를 보여 주며, 1366·480 창 폭 미리보기가 있다. 2판은 커밋 `755c864`에 있다. 목업 빌더에 테마 글꼴 입력을 더한 것 말고 제품 코드와 공식 기능 페이지는 바꾸지 않았다. 테마의 제품 적용은 결정 대기다.
+- **검증:** 목업은 Chromium 3폭에서 정적 검사와 브라우저 검사 146/146을 통과했고 페이지 오류0이다. 테마 값, 상태 색, 포커스, 안내·미리보기도 검사했다. 목업 빌더 시험 9/9(fontTools 있음)이 통과했다. 2판 원본을 다시 빌드하면 커밋된 2판과 바이트까지 같다. Figma W1~W4는 2판 값이라 다음 Figma 판에서 맞춘다. 사내 PC 열기·사용자 사용성 확인은 미실행이다. [목업 검증](../evals/artifacts/work-centered-wide-20261109/validation-report.json)·[캡처·노드](mockups/ees-work/work-centered-wide-20261109/metadata.json).
+- **다음 하나:** 사용자가 HTML 목업 3판을 확인하고 의견이나 구현할 판을 정한다. 테마까지 구현하려면 [결정 필요 4건](mockups/ees-work/TASK.md#work-centered-wide-20261109)을 함께 정한다.
 
 > 아래는 변경 당시 기록이다.
 

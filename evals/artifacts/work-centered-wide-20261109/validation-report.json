@@ -15,6 +15,8 @@
       "csp": true,
       "mockLabel": true,
       "newScreenCss": true,
+      "themeCss": true,
+      "themeFonts": true,
       "productCss": true,
       "unresolvedIcons": false
     },
@@ -54,6 +56,12 @@
         "expected": true
       },
       {
+        "name": "1920x1080: guide is open on wide windows and folded on narrow ones",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
         "name": "1920x1080: no horizontal document overflow (W1)",
         "passed": true,
         "actual": true,
@@ -66,10 +74,82 @@
         "expected": []
       },
       {
+        "name": "1920x1080: theme fonts load",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1920x1080: no navy colour on screen (W1)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "1920x1080: one main action (W1)",
+        "passed": true,
+        "actual": [
+          "판정 확정"
+        ],
+        "expected": [
+          "판정 확정"
+        ]
+      },
+      {
+        "name": "1920x1080: center font sizes are the theme sheet sizes (W1)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1920x1080: only the page title and brand use 600 (W1)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
         "name": "1920x1080: detail sits to the right of the list",
         "passed": true,
         "actual": true,
         "expected": true
+      },
+      {
+        "name": "1920x1080: 판정 필요 is an amber line with grey text in the list, detail and chat",
+        "passed": true,
+        "actual": [
+          [
+            "rgb(184, 130, 15)",
+            "rgb(94, 101, 115)"
+          ],
+          [
+            "rgb(184, 130, 15)",
+            "rgb(94, 101, 115)"
+          ],
+          "rgb(184, 130, 15)"
+        ],
+        "expected": [
+          [
+            "rgb(184, 130, 15)",
+            "rgb(94, 101, 115)"
+          ],
+          [
+            "rgb(184, 130, 15)",
+            "rgb(94, 101, 115)"
+          ],
+          "rgb(184, 130, 15)"
+        ]
+      },
+      {
+        "name": "1920x1080: 승인 is a green line with green text",
+        "passed": true,
+        "actual": [
+          "rgb(42, 125, 79)",
+          "rgb(42, 125, 79)"
+        ],
+        "expected": [
+          "rgb(42, 125, 79)",
+          "rgb(42, 125, 79)"
+        ]
       },
       {
         "name": "1920x1080: selecting a task updates the selection",
@@ -86,8 +166,8 @@
       {
         "name": "1920x1080: list keeps its position while a task is selected",
         "passed": true,
-        "actual": 223,
-        "expected": 223
+        "actual": 310,
+        "expected": 310
       },
       {
         "name": "1920x1080: verdict reason draft survives task switches",
@@ -132,6 +212,18 @@
         "expected": "W2"
       },
       {
+        "name": "1920x1080: guide follows the product route to W2",
+        "passed": true,
+        "actual": [
+          "true",
+          true
+        ],
+        "expected": [
+          "true",
+          true
+        ]
+      },
+      {
         "name": "1920x1080: chat draft survives close/open",
         "passed": true,
         "actual": "채팅 초안 보존 검증",
@@ -174,6 +266,22 @@
         "expected": []
       },
       {
+        "name": "1920x1080: no navy colour on screen (W3)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "1920x1080: one main action (W3)",
+        "passed": true,
+        "actual": [
+          "작업 열기"
+        ],
+        "expected": [
+          "작업 열기"
+        ]
+      },
+      {
         "name": "1920x1080: next action opens the task in the stage screen",
         "passed": true,
         "actual": [
@@ -202,6 +310,22 @@
         "passed": true,
         "actual": [],
         "expected": []
+      },
+      {
+        "name": "1920x1080: no navy colour on screen (W4)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "1920x1080: one main action (W4)",
+        "passed": true,
+        "actual": [
+          "저장"
+        ],
+        "expected": [
+          "저장"
+        ]
       },
       {
         "name": "1920x1080: a person-check task hides the tool block",
@@ -234,6 +358,200 @@
         "expected": "채팅 초안 보존 검증"
       },
       {
+        "name": "1920x1080: theme values (font, white center, clean-room menu, 21px/600 title, 14px tabs with ink underline)",
+        "passed": true,
+        "actual": [
+          true,
+          "rgb(255, 255, 255)",
+          "rgb(244, 245, 246)",
+          [
+            "21px",
+            "600"
+          ],
+          [
+            "14px",
+            "rgb(29, 33, 40)"
+          ]
+        ],
+        "expected": [
+          true,
+          "rgb(255, 255, 255)",
+          "rgb(244, 245, 246)",
+          [
+            "21px",
+            "600"
+          ],
+          [
+            "14px",
+            "rgb(29, 33, 40)"
+          ]
+        ]
+      },
+      {
+        "name": "1920x1080: keyboard focus on a list row is an inset 2px ink ring",
+        "passed": true,
+        "actual": [
+          "t3",
+          "solid",
+          "2px",
+          "rgb(29, 33, 40)",
+          "-2px"
+        ],
+        "expected": [
+          "t3",
+          "solid",
+          "2px",
+          "rgb(29, 33, 40)",
+          "-2px"
+        ]
+      },
+      {
+        "name": "1920x1080: keyboard focus on a button is a 2px ink ring 2px away",
+        "passed": true,
+        "actual": [
+          "지금 실행",
+          "solid",
+          "2px",
+          "rgb(29, 33, 40)",
+          "2px"
+        ],
+        "expected": [
+          "지금 실행",
+          "solid",
+          "2px",
+          "rgb(29, 33, 40)",
+          "2px"
+        ]
+      },
+      {
+        "name": "1920x1080: guide step W3 opens its screen and situation",
+        "passed": true,
+        "actual": [
+          "W3",
+          true
+        ],
+        "expected": [
+          "W3",
+          true
+        ]
+      },
+      {
+        "name": "1920x1080: guide step W1 opens its screen and situation",
+        "passed": true,
+        "actual": [
+          "W1",
+          true
+        ],
+        "expected": [
+          "W1",
+          true
+        ]
+      },
+      {
+        "name": "1920x1080: guide step W2 opens its screen and situation",
+        "passed": true,
+        "actual": [
+          "W2",
+          true
+        ],
+        "expected": [
+          "W2",
+          true
+        ]
+      },
+      {
+        "name": "1920x1080: guide step W4 opens its screen and situation",
+        "passed": true,
+        "actual": [
+          "W4",
+          true
+        ],
+        "expected": [
+          "W4",
+          true
+        ]
+      },
+      {
+        "name": "1920x1080: 1366 preview folds the menu and opens the selected task under its row",
+        "passed": true,
+        "actual": [
+          1366,
+          true,
+          830,
+          "single",
+          true
+        ],
+        "expected": [
+          1366,
+          true,
+          830,
+          "single",
+          true
+        ]
+      },
+      {
+        "name": "1920x1080: 1366 preview frame width",
+        "passed": true,
+        "actual": 1366,
+        "expected": 1366
+      },
+      {
+        "name": "1920x1080: layout line explains the preview",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1920x1080: 480 preview closes the chat into an overlay",
+        "passed": true,
+        "actual": [
+          480,
+          true,
+          false,
+          424,
+          "single"
+        ],
+        "expected": [
+          480,
+          true,
+          false,
+          424,
+          "single"
+        ]
+      },
+      {
+        "name": "1920x1080: no horizontal document overflow (480 preview)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1920x1080: preview returns to the real window",
+        "passed": true,
+        "actual": [
+          1920,
+          1920
+        ],
+        "expected": [
+          1920,
+          1920
+        ]
+      },
+      {
+        "name": "1920x1080: guide folds to the badge",
+        "passed": true,
+        "actual": [
+          false,
+          false,
+          true
+        ],
+        "expected": [
+          false,
+          false,
+          true
+        ]
+      },
+      {
         "name": "1366x768: navigation width",
         "passed": true,
         "actual": 56,
@@ -264,6 +582,12 @@
         "expected": true
       },
       {
+        "name": "1366x768: guide is open on wide windows and folded on narrow ones",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
         "name": "1366x768: no horizontal document overflow (W1)",
         "passed": true,
         "actual": true,
@@ -276,10 +600,82 @@
         "expected": []
       },
       {
+        "name": "1366x768: theme fonts load",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1366x768: no navy colour on screen (W1)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "1366x768: one main action (W1)",
+        "passed": true,
+        "actual": [
+          "판정 확정"
+        ],
+        "expected": [
+          "판정 확정"
+        ]
+      },
+      {
+        "name": "1366x768: center font sizes are the theme sheet sizes (W1)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "1366x768: only the page title and brand use 600 (W1)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
         "name": "1366x768: single layout puts the detail right after the selected row",
         "passed": true,
         "actual": "detail-t2",
         "expected": "detail-t2"
+      },
+      {
+        "name": "1366x768: 판정 필요 is an amber line with grey text in the list, detail and chat",
+        "passed": true,
+        "actual": [
+          [
+            "rgb(184, 130, 15)",
+            "rgb(94, 101, 115)"
+          ],
+          [
+            "rgb(184, 130, 15)",
+            "rgb(94, 101, 115)"
+          ],
+          "rgb(184, 130, 15)"
+        ],
+        "expected": [
+          [
+            "rgb(184, 130, 15)",
+            "rgb(94, 101, 115)"
+          ],
+          [
+            "rgb(184, 130, 15)",
+            "rgb(94, 101, 115)"
+          ],
+          "rgb(184, 130, 15)"
+        ]
+      },
+      {
+        "name": "1366x768: 승인 is a green line with green text",
+        "passed": true,
+        "actual": [
+          "rgb(42, 125, 79)",
+          "rgb(42, 125, 79)"
+        ],
+        "expected": [
+          "rgb(42, 125, 79)",
+          "rgb(42, 125, 79)"
+        ]
       },
       {
         "name": "1366x768: selecting a task updates the selection",
@@ -372,6 +768,22 @@
         "expected": []
       },
       {
+        "name": "1366x768: no navy colour on screen (W3)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "1366x768: one main action (W3)",
+        "passed": true,
+        "actual": [
+          "작업 열기"
+        ],
+        "expected": [
+          "작업 열기"
+        ]
+      },
+      {
         "name": "1366x768: next action opens the task in the stage screen",
         "passed": true,
         "actual": [
@@ -400,6 +812,22 @@
         "passed": true,
         "actual": [],
         "expected": []
+      },
+      {
+        "name": "1366x768: no navy colour on screen (W4)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "1366x768: one main action (W4)",
+        "passed": true,
+        "actual": [
+          "저장"
+        ],
+        "expected": [
+          "저장"
+        ]
       },
       {
         "name": "1366x768: a person-check task hides the tool block",
@@ -456,6 +884,12 @@
         "expected": true
       },
       {
+        "name": "480x768: guide is open on wide windows and folded on narrow ones",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
         "name": "480x768: no horizontal document overflow (W1)",
         "passed": true,
         "actual": true,
@@ -468,10 +902,82 @@
         "expected": []
       },
       {
+        "name": "480x768: theme fonts load",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "480x768: no navy colour on screen (W1)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "480x768: one main action (W1)",
+        "passed": true,
+        "actual": [
+          "판정 확정"
+        ],
+        "expected": [
+          "판정 확정"
+        ]
+      },
+      {
+        "name": "480x768: center font sizes are the theme sheet sizes (W1)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "480x768: only the page title and brand use 600 (W1)",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
         "name": "480x768: single layout puts the detail right after the selected row",
         "passed": true,
         "actual": "detail-t2",
         "expected": "detail-t2"
+      },
+      {
+        "name": "480x768: 판정 필요 is an amber line with grey text in the list, detail and chat",
+        "passed": true,
+        "actual": [
+          [
+            "rgb(184, 130, 15)",
+            "rgb(94, 101, 115)"
+          ],
+          [
+            "rgb(184, 130, 15)",
+            "rgb(94, 101, 115)"
+          ],
+          "rgb(184, 130, 15)"
+        ],
+        "expected": [
+          [
+            "rgb(184, 130, 15)",
+            "rgb(94, 101, 115)"
+          ],
+          [
+            "rgb(184, 130, 15)",
+            "rgb(94, 101, 115)"
+          ],
+          "rgb(184, 130, 15)"
+        ]
+      },
+      {
+        "name": "480x768: 승인 is a green line with green text",
+        "passed": true,
+        "actual": [
+          "rgb(42, 125, 79)",
+          "rgb(42, 125, 79)"
+        ],
+        "expected": [
+          "rgb(42, 125, 79)",
+          "rgb(42, 125, 79)"
+        ]
       },
       {
         "name": "480x768: selecting a task updates the selection",
@@ -552,6 +1058,22 @@
         "expected": []
       },
       {
+        "name": "480x768: no navy colour on screen (W3)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "480x768: one main action (W3)",
+        "passed": true,
+        "actual": [
+          "작업 열기"
+        ],
+        "expected": [
+          "작업 열기"
+        ]
+      },
+      {
         "name": "480x768: next action opens the task in the stage screen",
         "passed": true,
         "actual": [
@@ -580,6 +1102,22 @@
         "passed": true,
         "actual": [],
         "expected": []
+      },
+      {
+        "name": "480x768: no navy colour on screen (W4)",
+        "passed": true,
+        "actual": [],
+        "expected": []
+      },
+      {
+        "name": "480x768: one main action (W4)",
+        "passed": true,
+        "actual": [
+          "저장"
+        ],
+        "expected": [
+          "저장"
+        ]
       },
       {
         "name": "480x768: a person-check task hides the tool block",
@@ -618,6 +1156,8 @@
       "evals/artifacts/work-centered-wide-20261109/1920x1080-W2.png",
       "evals/artifacts/work-centered-wide-20261109/1920x1080-W3.png",
       "evals/artifacts/work-centered-wide-20261109/1920x1080-W4.png",
+      "evals/artifacts/work-centered-wide-20261109/1920x1080-preview1366-W1.png",
+      "evals/artifacts/work-centered-wide-20261109/1920x1080-preview480-W1.png",
       "evals/artifacts/work-centered-wide-20261109/1366x768-W1.png",
       "evals/artifacts/work-centered-wide-20261109/1366x768-W3.png",
       "evals/artifacts/work-centered-wide-20261109/1366x768-W4.png",
@@ -630,27 +1170,29 @@
         "viewport": "1920x1080",
         "nav": {
           "x": 0,
-          "y": 0,
+          "y": 99,
           "width": 256,
-          "height": 1080
+          "height": 981
         },
         "work": {
           "x": 256,
-          "y": 0,
+          "y": 99,
           "width": 1104,
-          "height": 1080
+          "height": 981
         },
         "chat": {
           "x": 1360,
-          "y": 0,
+          "y": 99,
           "width": 560,
-          "height": 1080
+          "height": 981
         },
         "state": {
           "screen": "stage",
           "screenNo": "W1",
           "layout": "split1",
           "workWidth": 1104,
+          "frameWidth": 1920,
+          "sim": 0,
           "chatOpen": true,
           "chatFocused": false,
           "compact": false,
@@ -661,34 +1203,37 @@
           "item": "p-t2",
           "verdicts": {
             "t5": "조건부 승인"
-          }
+          },
+          "guideOpen": true
         }
       },
       {
         "viewport": "1366x768",
         "nav": {
           "x": 0,
-          "y": 0,
+          "y": 99,
           "width": 56,
-          "height": 768
+          "height": 669
         },
         "work": {
           "x": 56,
-          "y": 0,
+          "y": 99,
           "width": 830,
-          "height": 768
+          "height": 669
         },
         "chat": {
           "x": 886,
-          "y": 0,
+          "y": 99,
           "width": 480,
-          "height": 768
+          "height": 669
         },
         "state": {
           "screen": "stage",
           "screenNo": "W1",
           "layout": "single",
           "workWidth": 830,
+          "frameWidth": 1366,
+          "sim": 0,
           "chatOpen": true,
           "chatFocused": false,
           "compact": true,
@@ -699,34 +1244,37 @@
           "item": "p-t2",
           "verdicts": {
             "t5": "조건부 승인"
-          }
+          },
+          "guideOpen": true
         }
       },
       {
         "viewport": "480x768",
         "nav": {
           "x": 0,
-          "y": 0,
+          "y": 47,
           "width": 56,
-          "height": 768
+          "height": 721
         },
         "work": {
           "x": 56,
-          "y": 0,
+          "y": 47,
           "width": 424,
-          "height": 768
+          "height": 721
         },
         "chat": {
           "x": 484,
-          "y": 0,
+          "y": 47,
           "width": 424,
-          "height": 768
+          "height": 721
         },
         "state": {
           "screen": "stage",
           "screenNo": "W1",
           "layout": "single",
           "workWidth": 424,
+          "frameWidth": 480,
+          "sim": 0,
           "chatOpen": false,
           "chatFocused": false,
           "compact": true,
@@ -737,9 +1285,312 @@
           "item": "p-t2",
           "verdicts": {
             "t5": "조건부 승인"
-          }
+          },
+          "guideOpen": false
         }
       }
-    ]
+    ],
+    "theme": {
+      "1920x1080 W1": {
+        "navyUse": [],
+        "sizes": [
+          "12px",
+          "13px",
+          "14px",
+          "18px",
+          "21px"
+        ],
+        "weights": [
+          "400",
+          "500",
+          "600"
+        ],
+        "heavy": [
+          "EES Workflow",
+          "1차 점검"
+        ],
+        "primaries": [
+          "판정 확정"
+        ],
+        "font": "\"EES Theme Latin\", \"EES Theme KR\", \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+        "centerBg": "rgb(255, 255, 255)",
+        "navBg": "rgb(244, 245, 246)",
+        "h1": [
+          "21px",
+          "600"
+        ],
+        "tab": [
+          "14px",
+          "rgb(29, 33, 40)"
+        ],
+        "fontsReady": true
+      },
+      "1920x1080 W3": {
+        "navyUse": [],
+        "sizes": [
+          "12px",
+          "13px",
+          "14px",
+          "18px",
+          "21px"
+        ],
+        "weights": [
+          "400",
+          "500",
+          "600"
+        ],
+        "heavy": [
+          "EES Workflow",
+          "배포 산출물 점검"
+        ],
+        "primaries": [
+          "작업 열기"
+        ],
+        "font": "\"EES Theme Latin\", \"EES Theme KR\", \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+        "centerBg": "rgb(255, 255, 255)",
+        "navBg": "rgb(244, 245, 246)",
+        "h1": [
+          "21px",
+          "600"
+        ],
+        "tab": [
+          null,
+          null
+        ],
+        "fontsReady": true
+      },
+      "1920x1080 W4": {
+        "navyUse": [],
+        "sizes": [
+          "12px",
+          "13px",
+          "14px",
+          "18px",
+          "21px"
+        ],
+        "weights": [
+          "400",
+          "500",
+          "600"
+        ],
+        "heavy": [
+          "EES Workflow",
+          "배포 산출물 점검"
+        ],
+        "primaries": [
+          "저장"
+        ],
+        "font": "\"EES Theme Latin\", \"EES Theme KR\", \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+        "centerBg": "rgb(255, 255, 255)",
+        "navBg": "rgb(244, 245, 246)",
+        "h1": [
+          "21px",
+          "600"
+        ],
+        "tab": [
+          "14px",
+          "rgb(29, 33, 40)"
+        ],
+        "fontsReady": true
+      },
+      "1366x768 W1": {
+        "navyUse": [],
+        "sizes": [
+          "12px",
+          "13px",
+          "14px",
+          "18px",
+          "21px"
+        ],
+        "weights": [
+          "400",
+          "500",
+          "600"
+        ],
+        "heavy": [
+          "1차 점검"
+        ],
+        "primaries": [
+          "판정 확정"
+        ],
+        "font": "\"EES Theme Latin\", \"EES Theme KR\", \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+        "centerBg": "rgb(255, 255, 255)",
+        "navBg": "rgb(244, 245, 246)",
+        "h1": [
+          "21px",
+          "600"
+        ],
+        "tab": [
+          "14px",
+          "rgb(29, 33, 40)"
+        ],
+        "fontsReady": true
+      },
+      "1366x768 W3": {
+        "navyUse": [],
+        "sizes": [
+          "12px",
+          "13px",
+          "14px",
+          "18px",
+          "21px"
+        ],
+        "weights": [
+          "400",
+          "500",
+          "600"
+        ],
+        "heavy": [
+          "배포 산출물 점검"
+        ],
+        "primaries": [
+          "작업 열기"
+        ],
+        "font": "\"EES Theme Latin\", \"EES Theme KR\", \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+        "centerBg": "rgb(255, 255, 255)",
+        "navBg": "rgb(244, 245, 246)",
+        "h1": [
+          "21px",
+          "600"
+        ],
+        "tab": [
+          null,
+          null
+        ],
+        "fontsReady": true
+      },
+      "1366x768 W4": {
+        "navyUse": [],
+        "sizes": [
+          "12px",
+          "13px",
+          "14px",
+          "18px",
+          "21px"
+        ],
+        "weights": [
+          "400",
+          "500",
+          "600"
+        ],
+        "heavy": [
+          "배포 산출물 점검"
+        ],
+        "primaries": [
+          "저장"
+        ],
+        "font": "\"EES Theme Latin\", \"EES Theme KR\", \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+        "centerBg": "rgb(255, 255, 255)",
+        "navBg": "rgb(244, 245, 246)",
+        "h1": [
+          "21px",
+          "600"
+        ],
+        "tab": [
+          "14px",
+          "rgb(29, 33, 40)"
+        ],
+        "fontsReady": true
+      },
+      "480x768 W1": {
+        "navyUse": [],
+        "sizes": [
+          "12px",
+          "13px",
+          "14px",
+          "18px",
+          "21px"
+        ],
+        "weights": [
+          "400",
+          "500",
+          "600"
+        ],
+        "heavy": [
+          "1차 점검"
+        ],
+        "primaries": [
+          "판정 확정"
+        ],
+        "font": "\"EES Theme Latin\", \"EES Theme KR\", \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+        "centerBg": "rgb(255, 255, 255)",
+        "navBg": "rgb(244, 245, 246)",
+        "h1": [
+          "21px",
+          "600"
+        ],
+        "tab": [
+          "14px",
+          "rgb(29, 33, 40)"
+        ],
+        "fontsReady": true
+      },
+      "480x768 W3": {
+        "navyUse": [],
+        "sizes": [
+          "12px",
+          "13px",
+          "14px",
+          "18px",
+          "21px"
+        ],
+        "weights": [
+          "400",
+          "500",
+          "600"
+        ],
+        "heavy": [
+          "배포 산출물 점검"
+        ],
+        "primaries": [
+          "작업 열기"
+        ],
+        "font": "\"EES Theme Latin\", \"EES Theme KR\", \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+        "centerBg": "rgb(255, 255, 255)",
+        "navBg": "rgb(244, 245, 246)",
+        "h1": [
+          "21px",
+          "600"
+        ],
+        "tab": [
+          null,
+          null
+        ],
+        "fontsReady": true
+      },
+      "480x768 W4": {
+        "navyUse": [],
+        "sizes": [
+          "12px",
+          "13px",
+          "14px",
+          "18px",
+          "21px"
+        ],
+        "weights": [
+          "400",
+          "500",
+          "600"
+        ],
+        "heavy": [
+          "배포 산출물 점검"
+        ],
+        "primaries": [
+          "저장"
+        ],
+        "font": "\"EES Theme Latin\", \"EES Theme KR\", \"EES Noto Sans KR\", \"EES Inter\", \"Segoe UI\", sans-serif",
+        "centerBg": "rgb(255, 255, 255)",
+        "navBg": "rgb(244, 245, 246)",
+        "h1": [
+          "21px",
+          "600"
+        ],
+        "tab": [
+          "14px",
+          "rgb(29, 33, 40)"
+        ],
+        "fontsReady": true
+      }
+    }
   }
 }

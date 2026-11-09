@@ -12,6 +12,7 @@ import io
 from pathlib import Path
 import re
 import struct
+import tarfile
 import tempfile
 import unittest
 from unittest import mock
@@ -31,13 +32,18 @@ SOURCE = (
 )
 
 
+THEME = {(package, member): b"woff2 theme" for package, member, *_ in builder.THEME_FONTS}
+THEME.update({(package, member): f"{package} license </script> text \r\nsecond line\t\r\n".encode("utf-8")
+              for package, member in builder.THEME_LICENSES})
+
+
 class DesignMockBuildTests(unittest.TestCase):
-    def build(self, source):
+    def build(self, source, theme=None):
         with tempfile.TemporaryDirectory() as tmp:
             src, out = Path(tmp, "mock-src.html"), Path(tmp, "mock.html")
             src.write_text(source, encoding="utf-8")
             with mock.patch.object(builder, "subset_font", return_value=(b"woff2", 3)) as subset:
-                builder.build(src, out, {name: b"ttf" for name in builder.FONT_FAMILIES})
+                builder.build(src, out, {name: b"ttf" for name in builder.FONT_FAMILIES}, theme)
             return out.read_text(encoding="utf-8"), subset
 
     def test_inlines_product_css_icons_and_fonts_without_network_references(self):
@@ -77,9 +83,50 @@ class DesignMockBuildTests(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 builder.load_fonts(fonts_dir=tmp)
 
+    def test_theme_fonts_are_opt_in_scoped_and_carry_their_licenses(self):
+        source = SOURCE.replace("<!--@mock:fonts-->", "<!--@mock:fonts-->" + builder.THEME_MARKER)
+        with self.assertRaises(SystemExit):
+            self.build(source)
+        html, subset = self.build(source, THEME)
+        faces = re.findall(r"@font-face\s*\{[^}]*\}", html)
+        self.assertEqual(len(faces), len(builder.FONT_FAMILIES) + len(builder.THEME_FONTS))
+        latin = [face for face in faces if 'font-family:"EES Theme Latin"' in face]
+        self.assertEqual(len(latin), 2)
+        self.assertTrue(all(f"unicode-range:{builder.LATIN_RANGE};" in face for face in latin))
+        self.assertEqual(sum('font-family:"EES Theme KR"' in face for face in faces), 3)
+        self.assertNotIn("Plex", "".join(re.findall(r'font-family:"([^"]+)"', html)))
+        self.assertNotIn("<!--@mock:", html)
+        licenses = re.search(r'<script type="text/plain" id="font-licenses">(.*?)</script>', html, re.S).group(1)
+        self.assertIn("Design mock theme fonts", licenses)
+        self.assertIn(builder.THEME_PACKAGES[builder.PLEX], licenses)
+        for package, _member in builder.THEME_LICENSES:
+            # CRLF and trailing spaces are normalized so the page stays clean for `git diff --check`.
+            self.assertIn(f"{package} license <\\/script> text\nsecond line\n", licenses)
+        self.assertNotIn("\r", licenses)
+        self.assertFalse([line for line in licenses.split("\n") if line != line.rstrip()])
+        self.assertIn("Theme fonts: subsets of IBM Plex Sans KR", html)
+        calls = subset.call_args_list[len(builder.FONT_FAMILIES):]
+        self.assertEqual([call.args[2] for call in calls], [builder.PLEX_RENAME] * 3 + [()] * 2)
+        self.assertEqual([call.args[1] for call in calls[3:]], [builder.LATIN_TEXT] * 2)
+        # A page without the marker does not need or embed the theme fonts.
+        html, _subset = self.build(SOURCE, THEME)
+        self.assertEqual(html.count("@font-face"), len(builder.FONT_FAMILIES))
+        self.assertNotIn("Design mock theme fonts", html)
+
+    def test_theme_packages_must_match_the_pinned_npm_integrity(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for package in builder.THEME_PACKAGES:
+                with tarfile.open(Path(tmp, package), "w:gz") as archive:
+                    info = tarfile.TarInfo("package/LICENSE")
+                    info.size = 4
+                    archive.addfile(info, io.BytesIO(b"fake"))
+            with self.assertRaisesRegex(SystemExit, "npm integrity"):
+                builder.load_theme_packages(tmp)
+
     def assert_committed_mock_fonts(self, pages):
         pages = sorted(pages)
         self.assertTrue(pages, "the checked-in design mock must be covered")
+        theme_faces = [(family, str(weight), unicode_range) for _p, _m, family, weight, unicode_range in builder.THEME_FONTS]
         for page in pages:
             content = page.read_bytes()
             expected_formats = ["woff2"] * len(builder.FONT_FAMILIES)
@@ -93,9 +140,19 @@ class DesignMockBuildTests(unittest.TestCase):
                 self.assertEqual(hashlib.sha256(content.replace(b"\r\n", b"\n")).hexdigest(),
                                  "d2aec2a3cf61f09ceb3915c778ef77b5a07b559b9fb57f545eb16cb11973079e")
                 expected_formats = ["woff2", "woff"]
-            faces = re.findall(r"@font-face\s*\{[^}]*\}", content.decode("utf-8"))
+            all_faces = re.findall(r"@font-face\s*\{[^}]*\}", content.decode("utf-8"))
+            faces = [face for face in all_faces if 'font-family:"EES Theme ' not in face]
+            themed = [face for face in all_faces if 'font-family:"EES Theme ' in face]
             self.assertEqual(len(faces), len(builder.FONT_FAMILIES), page.name)
-            for index, (face, family, expected) in enumerate(zip(faces, builder.FONT_FAMILIES.values(), expected_formats)):
+            if themed:
+                # A theme mock embeds exactly the pinned theme faces, also as WOFF2.
+                found = [(re.search(r'font-family:"([^"]+)"', face).group(1), re.search(r"font-weight:([^;]+);", face).group(1),
+                          (re.search(r"unicode-range:([^;]+);", face) or [None, None])[1]) for face in themed]
+                self.assertEqual(found, theme_faces, page.name)
+                faces += themed
+                expected_formats += ["woff2"] * len(themed)
+            families = list(builder.FONT_FAMILIES.values()) + [family for family, *_ in theme_faces[:len(themed)]]
+            for index, (face, family, expected) in enumerate(zip(faces, families, expected_formats)):
                 with self.subTest(page=page.name, font=index):
                     self.assertIn(f'font-family:"{family}"', face)
                     self.assertIn(f'format("{expected}")', face)
@@ -128,11 +185,11 @@ class DesignMockBuildTests(unittest.TestCase):
             with self.assertRaises(AssertionError):
                 self.assert_committed_mock_fonts([page])
 
-    def test_real_subset_keeps_requested_glyph_metrics_in_woff2(self):
+    def synthetic_font(self, names):
         try:
             from fontTools.fontBuilder import FontBuilder
             from fontTools.pens.ttGlyphPen import TTGlyphPen
-            from fontTools.ttLib import TTFont, woff2
+            from fontTools.ttLib import woff2
         except ImportError:
             self.skipTest("real font-format round trip requires fontTools")
         if not woff2.haveBrotli:
@@ -148,14 +205,34 @@ class DesignMockBuildTests(unittest.TestCase):
         font.setupGlyf(glyphs)
         font.setupHorizontalMetrics({name: (600, 0) for name in glyphs})
         font.setupHorizontalHeader(ascent=800, descent=-200)
-        font.setupNameTable({"familyName": "Mock format test", "styleName": "Regular"})
+        font.setupNameTable(names)
         font.setupOS2(sTypoAscender=800, sTypoDescender=-200, usWinAscent=800, usWinDescent=200)
         font.setupPost()
         font.setupMaxp()
         original = io.BytesIO()
         font.save(original)
+        return original.getvalue()
 
-        encoded, glyph_count = builder.subset_font(original.getvalue(), "A")
+    def test_real_subset_renames_the_reserved_font_name_but_keeps_notices(self):
+        data = self.synthetic_font({
+            "copyright": "Copyright 2018 IBM Corp. with Reserved Font Name Plex", "familyName": "IBM Plex Sans KR",
+            "styleName": "Regular", "uniqueFontIdentifier": "IBM;IBMPlexSansKR;1.003", "fullName": "IBM Plex Sans KR",
+            "psName": "IBMPlexSansKR", "trademark": "IBM Plex is a trademark of IBM Corp", "typographicFamily": "IBM Plex Sans KR"})
+        from fontTools.ttLib import TTFont
+        encoded, _glyphs = builder.subset_font(data, "A", builder.PLEX_RENAME)
+        names = {record.nameID: record.toUnicode() for record in TTFont(io.BytesIO(encoded))["name"].names}
+        self.assertEqual([names[name_id] for name_id in (1, 3, 4, 6, 16)],
+                         ["EES Theme KR", "IBM;EESThemeKR;1.003", "EES Theme KR", "EESThemeKR", "EES Theme KR"])
+        self.assertIn("Plex", names[0])
+        self.assertIn("Plex", names[7])
+        with self.assertRaisesRegex(SystemExit, "reserved font name"):
+            builder.subset_font(data, "A", (("Unrelated", "Name"),))
+
+    def test_real_subset_keeps_requested_glyph_metrics_in_woff2(self):
+        original = self.synthetic_font({"familyName": "Mock format test", "styleName": "Regular"})
+        from fontTools.ttLib import TTFont, woff2
+
+        encoded, glyph_count = builder.subset_font(original, "A")
         self.assertEqual(encoded[:4], b"wOF2")
         decoded = TTFont(io.BytesIO(encoded))
         self.assertEqual(decoded.flavor, "woff2")
@@ -165,7 +242,7 @@ class DesignMockBuildTests(unittest.TestCase):
         self.assertEqual(decoded["maxp"].numGlyphs, glyph_count)
         with mock.patch.object(woff2, "haveBrotli", False), mock.patch.object(woff2, "log"):
             with self.assertRaisesRegex(SystemExit, "WOFF2 encoding requires brotli"):
-                builder.subset_font(original.getvalue(), "A")
+                builder.subset_font(original, "A")
 
 
 if __name__ == "__main__":
