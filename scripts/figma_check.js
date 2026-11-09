@@ -23,7 +23,8 @@ const byPage = new Map(ACTIVE_PAGES.map((item) => [item.id, item]));
 const byHeader = new Map(ACTIVE_PAGES.map((item) => [item.header, item]));
 const byFormer = new Map(ACTIVE_PAGES.flatMap((item) => item.former.map((id) => [id, item])));
 const ARCHIVE_LIST = '지난 변경 기록 · 목록'; // 91 보관에서 지난 기록을 모은 프레임 이름
-const LINE = /^C(\d+) · (\d{4}-\d{2}-\d{2}) · (.+) · (PR #\d+|PR 없음) · (백업 B\d{3}|백업 없음)$/;
+// From C165 a line ends with the PR. Lines up to C164 keep their ' · 백업 …' field as written then.
+const LINE = /^C(\d+) · (\d{4}-\d{2}-\d{2}) · (.+) · (PR #\d+|PR 없음)(?: · (백업 B\d{3}|백업 없음))?$/;
 const OLD_TERMS = [/(공통|업무|워크)-\d/, /페이지 이름 끝/];
 
 const started = Date.now(), errors = [], warnings = [];
@@ -59,19 +60,16 @@ const links = (text) => {
 };
 
 // 1) 페이지 이름·크기
-const pages = figma.root.children, sizes = [], features = [], texts = [], backups = [], seen = new Set();
+const pages = figma.root.children, sizes = [], features = [], texts = [];
 let logFrame = null, archiveList = null;
 for (const page of pages) {
   const kind = kindOf(page.name);
   const canonical = byPage.get(page.id);
   if (canonical && page.name !== canonical.name) errors.push('활성 페이지 이름: ' + page.id + ' “' + page.name + '” → “' + canonical.name + '”');
   if (kind === 'backup') {
-    const m = /^99 · 백업 · (B\d{3}) · (\d{4}-\d{2}-\d{2}) · (.+ 전)$/.exec(page.name);
-    if (!m) { errors.push('백업 이름: ' + page.name); continue; }
-    if (seen.has(m[1])) errors.push('백업 번호 중복: ' + m[1]);
-    seen.add(m[1]);
-    backups.push({ b: m[1], date: m[2] });
-    continue; // 백업 안의 사본은 크기·글 점검에서 뺀다
+    // 2026-11-09 사용자 결정: 제품을 한 번 완성하기 전에는 백업 페이지와 복구 절차를 두지 않는다.
+    errors.push('백업 페이지: ' + page.name + ' (제품을 한 번 완성하기 전에는 백업 페이지를 두지 않음)');
+    continue; // 열지 않는다
   }
   if (kind === 'feature') {
     features.push(page);
@@ -130,7 +128,7 @@ for (const text of texts) for (const link of links(text)) {
     warnings.push('보관을 가리키는 링크: ' + text.id + ' “' + link.label.slice(0, 24) + '” → ' + link.id);
 }
 // Only the four current feature rows own an official header. The map can also
-// link to the workshop, archives, backups and an end-to-end example.
+// link to the workshop, archives and an end-to-end example.
 const map = await get(MAP_ID);
 if (!map || kindOf(pageOf(map)?.name || '') !== 'admin') errors.push('00 기능 지도 ' + MAP_ID + '을 찾지 못함');
 for (const item of ACTIVE_PAGES) {
@@ -177,21 +175,8 @@ for (const s of lines) {
 }
 const next = 'C' + (Math.max(archivedMax, ...lines.map(number)) + 1);
 
-// 5) 백업: 처음 언급한 기록(= 만든 기록)과 한 줄 기록의 PR. PR 병합 여부는 GitHub에서 확인한다.
-const first = new Map();
-for (const s of archived.map((n) => n.characters).concat(lines)) {
-  const one = LINE.exec(s), re = /B(\d{3})/g;
-  let m;
-  while ((m = re.exec(s))) if (!first.has('B' + m[1])) first.set('B' + m[1], { c: number(s) ? 'C' + number(s) : '?', pr: one ? one[4] : 'PR 확인 필요' });
-}
-const backupReport = backups.map((b) => {
-  const f = first.get(b.b);
-  if (!f) warnings.push('백업을 만든 기록이 없음: ' + b.b);
-  return [b.b, b.date, f ? f.c : '?', f ? f.pr : 'PR 확인 필요'];
-});
-
 await figma.setCurrentPageAsync(pages[0]);
 const cap = (list) => list.length > 40 ? list.slice(0, 40).concat(['… 외 ' + (list.length - 40) + '건']) : list;
 return { ok: errors.length === 0, errors: cap(errors), warnings: cap(warnings), next, logLines: lines.length,
-  ms: Date.now() - started, sizes, backups: backupReport,
+  ms: Date.now() - started, sizes,
   activePages: ACTIVE_PAGES.map(({ id, name, header }) => ({ id, name, header })), formerLinks: cap(formerLinks) };

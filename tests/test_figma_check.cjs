@@ -61,12 +61,13 @@ function base(overrides = {}) {
     { id: '897:760', name: '00 · 설계 관리 · 먼저 읽기', children: [
       { id: '1288:2', type: 'FRAME', name: '기능 지도', children: [...currentRows,
         extra('2208:28371', '전체 사용 흐름', 'f:1'), extra('w:link', '작업실', '897:761'),
-        extra('r:link', '이전 작업실 보관', '2207:28518'), extra('b:link', 'B072 백업', '2206:4510')] },
+        extra('r:link', '이전 작업실 보관', '2207:28518')] },
       { id: '898:31', type: 'FRAME', name: '변경 기록', children: overrides.log || [
         text('898:32', '변경 기록'),
         text('a:1', archiveLine, [link(archiveLine, '지난 변경 기록', node('', 'r:list'))]),
         text('a:2', 'C130 · 2026-10-29 · 고정 점검 도입 · PR #106 · 백업 없음'),
-        text('a:3', 'C131 · 2026-10-30 · 화면 수정 · PR #107 · 백업 B066')] }] },
+        text('a:3', 'C131 · 2026-10-30 · 화면 수정 · PR #107 · 백업 B066'),
+        text('a:4', 'C132 · 2026-11-09 · 백업 칸 없이 쓰는 형식 · PR 없음')] }] },
     { id: '1284:3046', name: overrides.featureName || '공통 · 화면 틀', children: [
       { id: '1284:3047', type: 'FRAME', name: 'Header · 공통 · 화면 틀', children: overrides.header || [text('h:2', '최신판 3판 · 공통 기준')] },
       ...(overrides.feature || [])] },
@@ -84,9 +85,6 @@ function base(overrides = {}) {
         text('r:3', 'C129 · 결과 확인 직접 표시')] },
       { id: 'old:1', type: 'FRAME', name: 'PREVIOUS · B5 · 옛 도구 화면', children: [] },
       { id: '2207:28518', type: 'FRAME', name: '92 · 보관 · 이전 작업실' }] },
-    { id: '2206:4510', name: '99 · 백업 · B072 · 2026-11-09 · 기능 페이지 정리 전', children: [] },
-    { id: 'b:56', name: overrides.backupName || '99 · 백업 · B056 · 2026-10-28 · 도구 이전 화면 보관 전', children: [] },
-    { id: 'b:66', name: '99 · 백업 · B066 · 2026-10-30 · 화면 수정 전', children: [] },
   ];
 }
 async function check(pages) {
@@ -95,22 +93,30 @@ async function check(pages) {
   return { result, calls: made.calls };
 }
 
-test('a file that follows the naming, log, link and backup rules passes and reports the next number', async () => {
+test('a file that follows the naming, log and link rules passes and reports the next number', async () => {
   const { result, calls } = await check(base());
   assert.deepEqual(result.errors, []);
   assert.equal(result.ok, true);
-  assert.equal(result.next, 'C132');
-  assert.equal(result.logLines, 2);
-  assert.deepEqual(result.backups, [['B072', '2026-11-09', '?', 'PR 확인 필요'], ['B056', '2026-10-28', 'C118', 'PR 확인 필요'], ['B066', '2026-10-30', 'C131', 'PR #107']]);
-  assert.ok(!calls.some((name) => name.startsWith('99 · ')), 'backup pages are not opened');
+  assert.equal(result.next, 'C133');
+  assert.equal(result.logLines, 3, 'lines with and without the old backup field both count');
+  assert.ok(!('backups' in result));
   assert.equal(calls[calls.length - 1], '00 · 설계 관리 · 먼저 읽기');
 });
 
-test('numbered or status page names and backup names without “무엇 고치기 전” are errors', async () => {
-  const { result } = await check(base({ featureName: '공통-1 · 화면 틀·이동 · 초안', backupName: 'B056 · 도구 이전 화면 · 2026-10-28' }));
+test('numbered or status page names are errors', async () => {
+  const { result } = await check(base({ featureName: '공통-1 · 화면 틀·이동 · 초안' }));
   assert.equal(result.ok, false);
   assert.ok(result.errors.some((e) => e.startsWith('이름: 공통-1')));
-  assert.ok(result.errors.some((e) => e.startsWith('백업 이름: B056')));
+});
+
+test('backup pages are errors until the product is completed once, and they are not opened', async () => {
+  const pages = base();
+  pages.push({ id: 'b:56', name: '99 · 백업 · B056 · 2026-10-28 · 도구 이전 화면 보관 전', children: [] },
+             { id: 'b:66', name: 'B066 · 화면 수정 · 2026-10-30', children: [] });
+  const { result, calls } = await check(pages);
+  assert.equal(result.ok, false);
+  assert.equal(result.errors.filter((e) => e.startsWith('백업 페이지: ')).length, 2);
+  assert.ok(!calls.some((name) => name.startsWith('99 · ') || name.startsWith('B066')), 'backup pages are not opened');
 });
 
 test('old page names in current guides are errors, history sentences and archives are not', async () => {
@@ -182,7 +188,7 @@ test('the map must link to canonical headers, even when an old page or content l
   assert.ok(result.errors.some(e => e.includes('기능 지도 진입점: 1288:11:text → old:1')));
   assert.ok(result.errors.some(e => e.includes('기능 지도에 없는 헤더: 1284:3047')));
   assert.ok(result.errors.some(e => e.includes('기능 지도에 없는 헤더: 1284:3107')));
-  assert.ok(!result.errors.some(e => e.includes('2208:28371') || e.includes('2207:28518') || e.includes('2206:4510')));
+  assert.ok(!result.errors.some(e => e.includes('2208:28371') || e.includes('2207:28518')));
 });
 
 test('a moved header reports its replacement; dated log links keep their original target', async () => {
