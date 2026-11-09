@@ -37,6 +37,78 @@
   "base_commit": "1eac86d6a52a21205e6a04b8adcea779cfe4fa3c",
   "implementation_revision": null,
   "figma": {
+    "revision": 4,
+    "file_key": "XK2wTos6sEuxSHhIj7cqg6",
+    "page": "897:761",
+    "header": "2269:1336",
+    "parts": "2255:153",
+    "screens": {
+      "W1": {
+        "node": "2261:162",
+        "name": "W1 · 운영 · 진행 건 요약 · 채팅 열림",
+        "center_width": 1104,
+        "layout": "split1, tree 340"
+      },
+      "W2": {
+        "node": "2266:431",
+        "name": "W2 · 운영 · 단계 · 채팅 열림",
+        "center_width": 1104,
+        "layout": "split1, tree 340"
+      },
+      "W3": {
+        "node": "2266:836",
+        "name": "W3 · 운영 · 작업 처리 · 채팅 열림",
+        "center_width": 1104,
+        "layout": "split1, tree 340"
+      },
+      "W4": {
+        "node": "2267:951",
+        "name": "W4 · 운영 · 작업 처리 · 채팅 접힘",
+        "center_width": 1664,
+        "layout": "split2, tree 360, verdict column 440"
+      },
+      "W5": {
+        "node": "2268:1160",
+        "name": "W5 · 워크 · 업무 절차 작성 · 채팅 열림",
+        "center_width": 1104,
+        "layout": "split1, structure 340"
+      }
+    },
+    "components": {
+      "2255:163": "넓은 업무 / 단추",
+      "2255:170": "넓은 업무 / 탭",
+      "2255:189": "넓은 업무 / 판정 선택지",
+      "2255:196": "넓은 업무 / 트리 요약 줄",
+      "2255:229": "넓은 업무 / 트리 단계 줄",
+      "2255:254": "넓은 업무 / 트리 작업 줄",
+      "2255:279": "넓은 업무 / 표 작업 행",
+      "2255:280": "넓은 업무 / 표 단계 행",
+      "2255:287": "넓은 업무 / 근거 문서 줄",
+      "2258:319": "넓은 업무 / 왼쪽 메뉴",
+      "2258:320": "넓은 업무 / 오른쪽 채팅",
+      "2268:1152": "넓은 업무 / 절차 구조 줄",
+      "2268:1159": "넓은 업무 / 선택 단추"
+    },
+    "built_from": "Measured box model of the HTML mock revision 4 (commit 4bce7a8) at 1920 x 1080: CSS paddings, gaps and borders, with borders included in the auto-layout size like the CSS box model.",
+    "tokens": "Theme sheet 나 values written directly (not in the file variables, same as the theme sheet C155): IBM Plex Sans KR 400/500/600 for Korean, B612 400/700 for digit and Latin runs.",
+    "official_pages_changed": false,
+    "change_log": "C163 (C143 moved to the 91 archive list)",
+    "revision_2_moved_to_archive": {
+      "page": "91 · 보관 · 이전 설계와 작업실 기록",
+      "container": "2207:28518",
+      "header": "2232:638",
+      "screens": [
+        "2225:1539",
+        "2225:1709",
+        "2225:1858",
+        "2225:2064"
+      ],
+      "parts": "2226:274",
+      "node_ids_kept": true
+    },
+    "verified_at": "2026-11-09T10:10:21Z"
+  },
+  "figma_revision_2": {
     "file_key": "XK2wTos6sEuxSHhIj7cqg6",
     "page": "897:761",
     "header": "2232:638",
@@ -289,13 +361,14 @@
     "first_run": "6 failures before fixing the validator: 3 buttons scrolled out of a scroll area were counted as covered, 2 checks inherited a chat width resized by hand earlier, 1 follow-on text check. The mock was not changed; the validator now skips clipped buttons and reloads before the guide and preview checks."
   },
   "differences_from_figma": [
-    "Figma W1–W4 and the parts keep the revision 2 structure, numbering and values (separate stage screen and run overview, v4 navy, cards, Noto Sans KR); revision 4 tree structure, numbering, theme, guide and state labels are defined by the mock.",
-    "Center background is white like the 나 screen; the shared panel contract uses --ees-surface-panel (theme mapping #F4F5F6).",
-    "Tabs are 14px as in the theme sheet sample; the shared .ew-tabs rule is 12px.",
-    "The theme sheet has no colour for 조건부 승인; the mock uses an amber dot in the verdict choice only, the same amber as the 판정 필요 line.",
-    "Left navigation and right chat reproduce the revision-1 frame with the theme values for context."
+    "Figma W1–W5 are drawn from the revision 4 mock; borders, dividers and selected rows sit on the same pixels (see figma_comparison).",
+    "Glyph rendering differs between Chromium and Figma (about 0.2–1.6% of pixels per region).",
+    "The composer placeholder uses the browser default grey (rgb(117,117,117)) in the mock because the mock does not style it; Figma uses the theme secondary text colour #5E6573.",
+    "The chat history keeps the mock's 15px scrollbar gutter (content 496px, right padding 39px).",
+    "The mock-only guide band and badge, and the single-column layouts (1366 and 480 windows), are not drawn in Figma; the mock captures show them.",
+    "Center background white, 14px tabs and the amber dot for 조건부 승인 are the same in Figma and the mock; they differ from the shared panel contract (open_decisions_for_product)."
   ],
-  "figma_sync_needed": "When the next Figma revision is reflected, redraw W1–W5 with the run tree, the theme values and the state labels; the guide band is mock-only.",
+  "figma_sync_needed": null,
   "implementation_impact": "The product switches screens overview → stage → task (← 회차 개요). Revision 4 replaces this with one tree selection: run-screen routing (procedure, stage and task selection), the back buttons, the stage tab location and their browser tests change; server and storage formats do not.",
   "open_decisions_for_product": [
     "white center versus the shared panel background",
@@ -304,6 +377,68 @@
     "adding the two fonts to the product and dark-mode values"
   ],
   "artifacts": [
+    {
+      "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-r4-review-header.png",
+      "node": "2269:1336",
+      "size": [
+        1920,
+        436
+      ],
+      "bytes": 146759,
+      "sha256": "2ba5132cdea1522e8f1910a9ecd5443289e66ff561d6786c39d9bf272f5843d8"
+    },
+    {
+      "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-r4-w1-run-summary.png",
+      "node": "2261:162",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 176831,
+      "sha256": "2499b2f8aade09b5c8431e8877f7bf00480ef130481ea9dbc530ebaed3201ad8"
+    },
+    {
+      "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-r4-w2-stage.png",
+      "node": "2266:431",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 158417,
+      "sha256": "51ed3c928ac4b17f6fd05f7f7bceeef54c6d4555052152bef40727fd5f5d5e74"
+    },
+    {
+      "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-r4-w3-task-chat-open.png",
+      "node": "2266:836",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 171427,
+      "sha256": "5d0ae269bbeea1f515edb919f68ce138fe08f5bbc94cb4b0bce78c832a7beef8"
+    },
+    {
+      "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-r4-w4-task-chat-collapsed.png",
+      "node": "2267:951",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 126274,
+      "sha256": "1247d0be1046671d93d4b21f58fe82031f1326a0338585ffccebf44527c0016b"
+    },
+    {
+      "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-r4-w5-procedure-authoring.png",
+      "node": "2268:1160",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 148013,
+      "sha256": "43188f5f6c91ca1e29bb20a18a166bf16e7a3084e74d656cab4f4dafb9b4f7ed"
+    }
+  ],
+  "artifacts_revision_2": [
     {
       "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-review-header.png",
       "node": "2232:638",
@@ -405,10 +540,53 @@
         "next": "C163",
         "log_lines": 20,
         "archived_max": 142
+      },
+      {
+        "when": "revision 4: after drawing, before the change-log line",
+        "ok": true,
+        "errors": 0,
+        "warnings": 0,
+        "next": "C163",
+        "log_lines": 20
+      },
+      {
+        "when": "revision 4: after C163 and the C143 archive move",
+        "ok": true,
+        "errors": 0,
+        "warnings": 0,
+        "next": "C164",
+        "log_lines": 20,
+        "archived_max": 143
       }
     ]
   },
+  "figma_comparison": {
+    "date": "2026-11-09",
+    "environment": "Linux container, Node 22.23.4, Playwright 1.63.0, Chromium 153.0.8010.12, Python 3.12.3, Pillow 10.2.0",
+    "commands": [
+      "node evals/artifacts/work-centered-wide-20261109/revision-4/figma_compare_render.cjs docs/mockups/ees-work/design-mock-15-work-centered-wide.html DIR",
+      "python evals/artifacts/work-centered-wide-20261109/revision-4/figma_compare.py DIR docs/mockups/ees-work/work-centered-wide-20261109 evals/artifacts/work-centered-wide-20261109/revision-4/figma-compare.json"
+    ],
+    "method": "Mock product area (guide band excluded) at 1920 x 1080 against the Figma frame captures at 1:1; rows and columns of long non-white runs (borders, dividers, selected rows) are compared per region, and the share of pixels differing by more than 48 in luminance is reported.",
+    "result": "Structural lines equal on W1–W5 in every region; differing pixels 0.22–1.55% per region (glyph rendering).",
+    "report": "evals/artifacts/work-centered-wide-20261109/revision-4/figma-compare.json",
+    "first_attempt": "The first W1 had the run head 1px taller and the nav and chat spacing off by 3–15px: border widths were added to the padding although this file includes strokes in the auto-layout size, and the nav and chat parts had been drawn from estimates. The paddings were set to the CSS values and the nav and chat parts were rebuilt from the measured box model before W2–W5 were drawn."
+  },
   "readback": {
+    "revision": 4,
+    "image_fills": 0,
+    "text_outside_screen_frames": 0,
+    "placeholder_text": 0,
+    "fonts": [
+      "IBM Plex Sans KR Regular",
+      "IBM Plex Sans KR Medium",
+      "IBM Plex Sans KR SemiBold",
+      "B612 Regular",
+      "B612 Bold"
+    ],
+    "components_used_by_screens": 13
+  },
+  "readback_revision_2": {
     "image_fills": 0,
     "overflow_outside_frame": 0,
     "fonts": [
@@ -419,7 +597,7 @@
   },
   "not_run": [
     "opening the HTML on an in-house PC",
-    "Figma update for revisions 3 and 4",
+    "Figma drawings of the single-column layouts (1366 and 480 windows)",
     "product implementation and product browser comparison",
     "user usability check"
   ]
