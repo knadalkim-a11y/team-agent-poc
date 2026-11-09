@@ -1,9 +1,19 @@
 {
-  "revision": 3,
+  "revision": 4,
   "status": "review_mock_ready",
   "date": "2026-11-09",
   "request": "피그마 페이지봐봐. 채팅 패널을 오른쪽으로 옮기고, 업무 패널을 가운데로 옮겼어. 근데 기존에는 업무 패널이 오른쪽이었어서 가운데 패널로 옮기고, 넓어진만큼 ui/ux 및 디자인을 바꿔야할거같아",
   "mock_request": "좋아 이 방향으로 HTML 목업 만들어줘",
+  "revision_4_feedback": {
+    "user": "단계가 작업보다 상위 레이어인데 왜 작업부터 보이는거야? 그리고 '회차개요' 페이지가 뭘 눌러서 저 화면으로 가는건지 잘 모르겠어",
+    "diagnosis": "Revision 3 opened on the stage screen (task list) with no other stage visible; the run overview was reached only by the menu item or the breadcrumb and no screen carried the name 회차 개요. The product also goes overview → stage → task, with ← 회차 개요 only on the task screen.",
+    "options_asked": [
+      "한 화면: 단계 › 작업 트리 (Recommended)",
+      "두 화면 + 단계 줄",
+      "두 화면 그대로, 시작만 개요"
+    ],
+    "answer": "한 화면: 단계 › 작업 트리 (Recommended)"
+  },
   "revision_3_feedback": {
     "user": "각 화면이 어떤 상황에 어떻게 표시되는건지 잘 감이안오네. 그리고 테마 자체도 좀 어색하고.",
     "answers": {
@@ -97,7 +107,28 @@
       "1366_chat_open": "830px -> single column",
       "1366_chat_collapsed": "1310px -> list + two-column detail",
       "480": "424px with overlay chat -> single column"
+    },
+    "revision_4": {
+      "split2": ">= 1264px center: tree 360px + content; a task shows evidence | verdict",
+      "split1": "864-1263px center: tree 340px + content",
+      "single": "< 864px center: one column; the selected item's content opens under its row in the tree; bottom action rows are not sticky"
     }
+  },
+  "revision_4_changes": {
+    "structure": "One run screen opened from the menu item: tree 단계와 작업 = 진행 건 요약, stages 1-4, and each stage's tasks indented under the stage name (only the stage in progress open at first); the right side shows the selected item. The separate run overview and stage screens are gone; the stage tabs (작업 / 실행 기록 / 판정 기준) moved into the stage content.",
+    "summary": "다음 할 일 with 작업 열기 (main action), 단계별 진행 table, 손이 필요한 작업, record export and run end/cancel.",
+    "stage": "Stage head with state, period and description, 지금 실행 (secondary) for the stage in progress, tabs with the stage task table, run history and rules.",
+    "task": "Same task content as revision 3 (evidence, criteria, verdict or record); waiting tasks state that they have not started and take no verdict.",
+    "screen_numbers": {
+      "W1": "업무 열기 · 진행 건 요약",
+      "W2": "단계 보기",
+      "W3": "작업 처리 · 채팅 열림",
+      "W4": "같은 작업 · 채팅 접힘",
+      "W5": "업무 절차 작성"
+    },
+    "number_mapping": "Revision 2-3 W3 (run overview) split into W1 and W2; revision 2-3 W1 → W3, W2 → W4, W4 → W5.",
+    "synthetic_additions": "Guide and criteria text for the six tasks of stages 1, 3 and 4 that the tree now shows; no new behaviour.",
+    "unchanged": "Theme sheet 나 values, state colours, situation guide (steps renumbered, badge 시안 4), width preview."
   },
   "revision_3_changes": {
     "theme": "Product variable names kept, values replaced by the sheet mapping in a data-mock-theme block on :root, applied to the center, the left navigation and the right chat.",
@@ -139,11 +170,11 @@
   },
   "html_mock": {
     "source": "docs/mockups/ees-work/design-mock-src/15-work-centered-wide.html",
-    "source_bytes": 94170,
-    "source_sha256": "8d56e5333b026bcea72d4f38d3f9d3b1c2487574fb074294b84eb62ce237b343",
+    "source_bytes": 97565,
+    "source_sha256": "686585d6df9aa423452e16e96a7f628af60b6fba564c3da99ccf2f183a8450bc",
     "output": "docs/mockups/ees-work/design-mock-15-work-centered-wide.html",
-    "output_bytes": 726536,
-    "output_sha256": "dff2426236140f7f32246f95d81596fcca58dc0a2d447c5c4c799a954a6f65e4",
+    "output_bytes": 732255,
+    "output_sha256": "adb2f3d9b6fde02fa0f422bffabb3b5138cbc83b5e4339139c8367fb516d4374",
     "build": "python scripts/build_design_mock.py docs/mockups/ees-work/design-mock-src/15-work-centered-wide.html docs/mockups/ees-work/design-mock-15-work-centered-wide.html --wheel open_webui-0.11.3-py3-none-any.whl --theme-packages DIR  (DIR holds the two npm pack files above)",
     "wheel_sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547",
     "product_css_sha256": {
@@ -152,13 +183,20 @@
     },
     "fonts": "Product fallback: Inter-Variable 331 glyphs / 54796 bytes, NotoSansKR-Variable 800 glyphs / 85996 bytes; theme fonts as above.",
     "screens": {
-      "W1": "stage screen with the chat open (guide: 작업 처리)",
-      "W2": "same stage screen with the chat folded (guide: 채팅 접기)",
-      "W3": "run overview (guide: 업무 열기)",
-      "W4": "procedure authoring (guide: 절차 고치기)"
+      "W1": "run screen, 진행 건 요약 selected (guide: 업무 열기)",
+      "W2": "run screen, stage 1차 점검 selected (guide: 단계 보기)",
+      "W3": "run screen, task 배포 문서 점검 selected, chat open (guide: 작업 처리)",
+      "W4": "same task with the chat folded (guide: 채팅 접기)",
+      "W5": "procedure authoring (guide: 절차 고치기)"
     },
-    "review_controls": "Top guide band (mock only): badge 시안 3 · 저장·실행 안 됨 · W번호, situation steps, window-width preview, fold button.",
+    "review_controls": "Top guide band (mock only): badge 시안 4 · 저장·실행 안 됨 · W번호, situation steps W1-W5, window-width preview, fold button.",
     "synthetic_only": "no server, storage, execution, account or tool connection; buttons that would change data show a notice instead"
+  },
+  "revision_3_mock": {
+    "commit": "335335f",
+    "output_sha256": "dff2426236140f7f32246f95d81596fcca58dc0a2d447c5c4c799a954a6f65e4",
+    "source_sha256": "8d56e5333b026bcea72d4f38d3f9d3b1c2487574fb074294b84eb62ce237b343",
+    "validation": "146/146 browser checks; report and captures stay at evals/artifacts/work-centered-wide-20261109/ (validator at 335335f)"
   },
   "revision_2_mock": {
     "commit": "755c864",
@@ -169,16 +207,54 @@
   },
   "validation": {
     "script": "evals/artifacts/work-centered-wide-20261109/validate_mock.cjs",
-    "report": "evals/artifacts/work-centered-wide-20261109/validation-report.json",
+    "report": "evals/artifacts/work-centered-wide-20261109/revision-4/validation-report.json",
     "environment": "Linux cloud container, Node 22.23.4, Playwright 1.63.0, headless Chromium 153.0.8010.12",
     "run_at": "2026-11-09",
     "static": "passed (no duplicate ids, no external resources, inline script parses, CSP, product CSS, theme block and theme fonts present, no unresolved icons)",
-    "browser": "146/146 checks passed, 0 page errors",
+    "browser": "162/162 checks passed, 0 page errors",
     "viewports": [
       "1920x1080",
       "1366x768",
       "480x768"
     ],
+    "added_checks": [
+      "menu opens the summary with only the stage in progress open",
+      "tree order 요약 › 단계 › 작업, task line under the stage name and task name further right, closed stages hide their tasks",
+      "stage content: six task rows, tabs switch inside the content, no main action",
+      "task row in the stage table opens the task; waiting task offers no verdict; summary 작업 열기 opens the task",
+      "chat folded: evidence beside verdict; tree position kept; drafts kept across screens"
+    ],
+    "theme_measured": {
+      "center_font_sizes": [
+        "12px",
+        "13px",
+        "14px",
+        "18px",
+        "21px"
+      ],
+      "font_weights": [
+        "400",
+        "500",
+        "600"
+      ],
+      "weight_600_only": [
+        "page title",
+        "EES Workflow"
+      ],
+      "navy_elements": 0,
+      "main_buttons": {
+        "W1": "작업 열기",
+        "W2": "none",
+        "W3": "판정 확정",
+        "W5": "저장"
+      }
+    },
+    "first_run": "4 failures, all in one column (1366, 480): task names sat left of the stage name (indent equal to the stage row, also visible at 1920) and the sticky bottom action row covered rows of the summary table. Fixed in the mock: tasks indented 44px, bottom action rows not sticky in one column.",
+    "tests": "tests/test_build_design_mock.py 9/9 with fontTools, 9 with 2 skipped without fontTools"
+  },
+  "validation_revision_3": {
+    "report": "evals/artifacts/work-centered-wide-20261109/validation-report.json",
+    "browser": "146/146",
     "theme_measured": {
       "center_font_sizes": [
         "12px",
@@ -210,17 +286,17 @@
       "approved": "green line and text rgb(42, 125, 79)",
       "focus": "2px solid ink; -2px inside list rows, 2px from buttons"
     },
-    "first_run": "6 failures before fixing the validator: 3 buttons scrolled out of a scroll area were counted as covered, 2 checks inherited a chat width resized by hand earlier, 1 follow-on text check. The mock was not changed; the validator now skips clipped buttons and reloads before the guide and preview checks.",
-    "tests": "tests/test_build_design_mock.py 9/9 with fontTools, 9 with 2 skipped without fontTools"
+    "first_run": "6 failures before fixing the validator: 3 buttons scrolled out of a scroll area were counted as covered, 2 checks inherited a chat width resized by hand earlier, 1 follow-on text check. The mock was not changed; the validator now skips clipped buttons and reloads before the guide and preview checks."
   },
   "differences_from_figma": [
-    "Figma W1–W4 and the parts still show revision 2 values (v4 navy, cards, Noto Sans KR); revision 3 theme, guide and state labels are defined by the mock.",
+    "Figma W1–W4 and the parts keep the revision 2 structure, numbering and values (separate stage screen and run overview, v4 navy, cards, Noto Sans KR); revision 4 tree structure, numbering, theme, guide and state labels are defined by the mock.",
     "Center background is white like the 나 screen; the shared panel contract uses --ees-surface-panel (theme mapping #F4F5F6).",
     "Tabs are 14px as in the theme sheet sample; the shared .ew-tabs rule is 12px.",
     "The theme sheet has no colour for 조건부 승인; the mock uses an amber dot in the verdict choice only, the same amber as the 판정 필요 line.",
     "Left navigation and right chat reproduce the revision-1 frame with the theme values for context."
   ],
-  "figma_sync_needed": "When the next Figma revision is reflected, move the theme values, state labels and tabs to W1–W4 and the parts; the guide band is mock-only.",
+  "figma_sync_needed": "When the next Figma revision is reflected, redraw W1–W5 with the run tree, the theme values and the state labels; the guide band is mock-only.",
+  "implementation_impact": "The product switches screens overview → stage → task (← 회차 개요). Revision 4 replaces this with one tree selection: run-screen routing (procedure, stage and task selection), the back buttons, the stage tab location and their browser tests change; server and storage formats do not.",
   "open_decisions_for_product": [
     "white center versus the shared panel background",
     "14px tabs versus the shared 12px tabs",
@@ -279,6 +355,23 @@
       "sha256": "e4c17d51db87658f31b53bd3a1d9e66cfd2c31050785417a15a435c5bf1d1773"
     }
   ],
+  "captures_revision_4": [
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1920x1080-W1.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1920x1080-W2.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1920x1080-W3.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1920x1080-W4.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1920x1080-W5.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1920x1080-preview1366-W3.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1920x1080-preview480-W3.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1366x768-W1.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1366x768-W2.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1366x768-W3.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1366x768-W5.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/480x768-W1.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/480x768-W2.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/480x768-W3.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/480x768-W5.png"
+  ],
   "captures_revision_3": [
     "evals/artifacts/work-centered-wide-20261109/1920x1080-W1.png",
     "evals/artifacts/work-centered-wide-20261109/1920x1080-W2.png",
@@ -326,7 +419,7 @@
   },
   "not_run": [
     "opening the HTML on an in-house PC",
-    "Figma update for revision 3",
+    "Figma update for revisions 3 and 4",
     "product implementation and product browser comparison",
     "user usability check"
   ]
