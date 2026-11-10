@@ -277,6 +277,23 @@ class CheckDocsTests(unittest.TestCase):
         path.write_bytes(b"\xff\xfe\xff")
         self.assertTrue(self.check()["errors"])
 
+    def test_document_size_is_counted_with_windows_line_endings(self):
+        # 100-byte LF lines: under the limit as stored, over it once a Windows checkout adds CR.
+        limit = CHECK_DOCS.MAX_DOCUMENT_BYTES
+        lf, crlf = b"x" * 99 + b"\n", b"x" * 99 + b"\r\n"
+        grown = self.root / "evals" / "grown.md"
+        grown.parent.mkdir()
+        grown.write_bytes(lf * (limit // len(lf)))
+        self.assertLess(grown.stat().st_size, limit)
+        report = self.check()
+        self.assertEqual([(item["code"], str(item["file"]).replace("\\", "/")) for item in report["errors"]],
+                         [("document_too_large", "evals/grown.md")])
+        # As many lines as fit with CRLF pass, whether they are stored with LF or with CRLF.
+        lines = limit // len(crlf)
+        grown.write_bytes(lf * lines)
+        (self.root / "evals" / "windows.md").write_bytes(crlf * lines)
+        self.assertEqual(self.check()["errors"], [])
+
     def test_checker_preserves_all_file_bytes_and_mtimes(self):
         self.write("README.md", "[Guide](docs/guide.md)\n[Missing](missing.md)\n")
         self.write("docs/guide.md", "# Guide\n")

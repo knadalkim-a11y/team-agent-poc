@@ -227,11 +227,13 @@ test('a sectioned page keeps only its header and sections at the top, and the he
   const tools = pages.find((p) => p.id === '1285:1841');
   tools.children.push({ id: 'loose:1', type: 'FRAME', name: 'T99 · 구역 밖 화면', children: [] },
     { id: 's:2', type: 'SECTION', name: '도구 작성', children: [] });
-  pages.find((p) => p.id === '1284:3106').children.push({ id: 'loose:2', type: 'FRAME', name: '운영 · 아직 구역 전', children: [] });
+  pages.find((p) => p.id === '1284:3046').children.push({ id: 'loose:2', type: 'FRAME', name: '공통 · 아직 구역 전', children: [] });
+  pages.find((p) => p.id === '1284:3106').children.push({ id: 'loose:3', type: 'FRAME', name: '운영 · 구역 밖 화면', children: [] });
   let { result } = await check(pages);
   assert.equal(result.ok, false);
   assert.ok(result.errors.includes('구역 밖 요소: 워크 · 도구 / T99 · 구역 밖 화면 (loose:1)'));
   assert.ok(result.errors.includes('머리말 색인에 없는 구역: 워크 · 도구 / 도구 작성'));
+  assert.ok(result.errors.includes('구역 밖 요소: 업무 · 운영 / 운영 · 구역 밖 화면 (loose:3)'));
   assert.ok(!result.errors.some((e) => e.includes('도구 목록') || e.includes('loose:2')),
     'indexed sections pass, and pages not moved into sections yet are not checked');
   const moved = base();

@@ -196,8 +196,11 @@ def check_repository(root):
             try:
                 with location.open("rb") as stream:
                     data = stream.read(MAX_DOCUMENT_BYTES + 1)
-                if len(data) > MAX_DOCUMENT_BYTES:
-                    issue("errors", "document_too_large", relative, "Document exceeds the 1 MiB scan limit.")
+                # Windows checkouts turn LF into CRLF for Markdown, so count the size a document has
+                # there. Otherwise a Linux run passes while the same check fails on the Windows runner.
+                if len(data) + data.count(b"\n") - data.count(b"\r\n") > MAX_DOCUMENT_BYTES:
+                    issue("errors", "document_too_large", relative,
+                          "Document exceeds the 1 MiB scan limit when counted with CRLF line endings.")
                     continue
                 documents[relative] = data.decode("utf-8-sig")
             except (OSError, UnicodeError):

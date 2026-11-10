@@ -31,6 +31,7 @@
 | CI 브라우저 시험 준비 단계의 Chrome 지연(`Chrome DevTools response timed out`·첫 화면 준비 초과) | [2026-11-04 CI447·CI449 재발·같은 tree 통과·한 번 재실행 성공·원인 미확정](factory-unit-runs-20261103.md#browser-startup-timeout-20261104) |
 | 도구 미연결 작업 때문에 게시가 막힘 · 실행 방식(주기·수시·비상) 제거 | [게시 허용·작업/단계 실행 거부·EES 요청 차단·저장값/이전 예약 보존 검증](no-run-mode-20261102.md#no-run-mode-20261102) |
 | frontend 패치를 고친 뒤 고정 해시 갱신 누락(#113과 같은 유형) | [커밋 전 발견·고정 커밋 원본으로 이전 값 재현·결과 29개 해시 확인](no-run-mode-20261102.md#no-run-mode-20261102) |
+| 문서 점검 `document_too_large`(Windows CRLF에서만 1 MiB 초과, #114·#115와 같은 유형) | [2026-11-11 세 번째 재발·LF만 세던 로컬 점검·CRLF 기준 점검과 시험](no-run-mode-20261102.md#doc-size-crlf-20261111) |
 | 탐색·패널 시안2 제품 전환/전역 도구 | [승인 기준·중간 프레임/초점/권한·첫 실패와 보완](navigation-motion-20261102.md#navigation-motion-product-20261102) |
 | 접힌 사이드바 범위 목록의 글자·선택 체크/너비 | [compact CSS 범위·고정 위치·실제 가시성/선택 회귀](v4-ui-20260930.md#compact-scope-dropdown-20261102) |
 | 미게시 절차가 운영 목록에 노출 | [게시 전용 운영 목록·작성 초안 보존·저장 선택/기존 회차 회귀](v4-ui-20260930.md#operations-published-only-20261102) |
