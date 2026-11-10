@@ -2,6 +2,7 @@
 // 실행: 이 파일 내용 전체를 Figma MCP use_figma의 code로 넘긴다 (파일 XK2wTos6sEuxSHhIj7cqg6).
 // Figma를 고친 뒤, 00 변경 기록에 한 줄을 쓰기 전에 실행한다. 아무것도 고치지 않고 보고만 한다.
 // 기준 숫자는 아래 LIMITS 한 곳에만 둔다. 규칙 원문: AGENTS.md의 Figma 항목, Figma 00 · 설계 관리.
+// 구역 구조: docs/mockups/ees-work/TASK.md#figma-page-structure-20261110
 const LIMITS = {
   featureNodes: 10000, // 기능 페이지 요소 수 (페이지를 열고 인스턴스 안까지 센 값) — 넘으면 정리 신호
   featureChars: 50000, // 기능 페이지 글자 수 — 넘으면 정리 신호
@@ -13,11 +14,13 @@ const FILE_KEY = 'XK2wTos6sEuxSHhIj7cqg6';
 const LOG_ID = '898:31'; // 00 변경 기록
 const MAP_ID = '1288:2'; // 00 기능 지도
 // Keep the original outer headers: links to current designs survive a screen revision.
+// sectioned: 맨 위에 머리말과 구역(Section)만 두는 페이지. 2026-11-11 '워크 · 도구' 시범부터 옮긴 페이지에만
+// 검사하고, 네 페이지를 다 옮기면 모든 기능 페이지에 적용한다 (TASK 계획 6단계).
 const ACTIVE_PAGES = [
   { id: '1284:3046', name: '공통 · 화면 틀', header: '1284:3047', row: '1288:11', former: ['1284:3058', '1284:3070', '1285:1853'] },
   { id: '1284:3106', name: '업무 · 운영', header: '1284:3107', row: '1288:42', former: ['1689:1061', '1689:1062', '1689:1063', '1284:3118'] },
   { id: '1285:1829', name: '워크 · 업무 절차', header: '1285:1830', row: '1288:63', former: ['1283:3107', '1285:1865'] },
-  { id: '1285:1841', name: '워크 · 도구', header: '1285:1842', row: '1288:68', former: [] }
+  { id: '1285:1841', name: '워크 · 도구', header: '1285:1842', row: '1288:68', former: [], sectioned: true }
 ];
 const byPage = new Map(ACTIVE_PAGES.map((item) => [item.id, item]));
 const byHeader = new Map(ACTIVE_PAGES.map((item) => [item.header, item]));
@@ -26,6 +29,7 @@ const ARCHIVE_LIST = '지난 변경 기록 · 목록'; // 91 보관에서 지난
 // From C165 a line ends with the PR. Lines up to C164 keep their ' · 백업 …' field as written then.
 const LINE = /^C(\d+) · (\d{4}-\d{2}-\d{2}) · (.+) · (PR #\d+|PR 없음)(?: · (백업 B\d{3}|백업 없음))?$/;
 const OLD_TERMS = [/(공통|업무|워크)-\d/, /페이지 이름 끝/];
+const STALE_NAME = /PREVIOUS|대체됨|이전 판|현재|최신|확정|\d+판/; // 기능 페이지 화면 이름에 남은 판·상태
 
 const started = Date.now(), errors = [], warnings = [];
 const kindOf = (name) => /^00 · /.test(name) ? 'admin' : /^70 · /.test(name) ? 'workshop'
@@ -92,8 +96,35 @@ for (const page of pages) {
   if (kind === 'admin' && chars > LIMITS.adminChars) errors.push('00 글자 ' + chars + ' > ' + LIMITS.adminChars + ' (오래된 기록을 91로)');
 }
 for (const page of features) for (const child of page.children)
-  if (!/^Header · /.test(child.name) && /PREVIOUS|대체됨|이전 판|현재|최신|확정|\d+판/.test(child.name))
+  if (!/^Header · /.test(child.name) && STALE_NAME.test(child.name))
     warnings.push('이전 판으로 보이는 이름: ' + page.name + ' / ' + child.name.slice(0, 40));
+
+// 1b) 구역: 옮긴 페이지는 맨 위에 머리말과 구역만 두고, 머리말의 색인에서 모든 구역으로 링크한다
+const sections = [];
+for (const item of ACTIVE_PAGES.filter((entry) => entry.sectioned)) {
+  const page = features.find((p) => p.id === item.id);
+  if (!page) continue; // 페이지가 없으면 3)의 활성 페이지 검사가 보고한다
+  const header = page.children.find((node) => node.id === item.header);
+  if (!header) errors.push('머리말이 맨 위에 없음: ' + page.name + ' (' + item.header + ')');
+  const indexed = new Set();
+  if (header) walk(header, (node) => { if (node.type === 'TEXT') for (const link of links(node)) indexed.add(link.id); });
+  for (const child of page.children) {
+    if (child === header) continue;
+    if (child.type !== 'SECTION') { errors.push('구역 밖 요소: ' + page.name + ' / ' + child.name.slice(0, 40) + ' (' + child.id + ')'); continue; }
+    if (!indexed.has(child.id)) errors.push('머리말 색인에 없는 구역: ' + page.name + ' / ' + child.name);
+    if (/\d|PREVIOUS|대체됨|이전|현재|최신|확정|초안|구현|사내 확인/.test(child.name))
+      warnings.push('구역 이름에 번호·판·상태: ' + page.name + ' / ' + child.name);
+    let nodes = 0, chars = 0;
+    walk(child, (node) => { if (node === child) return; nodes++; if (node.type === 'TEXT') chars += node.characters.length; });
+    sections.push([page.name, child.name, nodes, chars]);
+    if (nodes > LIMITS.featureNodes / 2 || chars > LIMITS.featureChars / 2)
+      warnings.push('구역 크기: ' + page.name + ' / ' + child.name + ' 요소 ' + nodes + ' · 글자 ' + chars
+        + ' (페이지 기준의 절반 초과 · 따로 고쳐지는 구역이면 새 페이지로 나눌지 사용자에게 묻기)');
+    for (const frame of child.children)
+      if (!/^Header · /.test(frame.name) && STALE_NAME.test(frame.name))
+        warnings.push('이전 판으로 보이는 이름: ' + page.name + ' / ' + child.name + ' / ' + frame.name.slice(0, 40));
+  }
+}
 
 // 2) 현재 안내의 옛 표기 (변경 기록과 ‘C##에서 옮김’ 같은 이력 문장은 뺀다)
 for (const text of texts) {
@@ -178,5 +209,5 @@ const next = 'C' + (Math.max(archivedMax, ...lines.map(number)) + 1);
 await figma.setCurrentPageAsync(pages[0]);
 const cap = (list) => list.length > 40 ? list.slice(0, 40).concat(['… 외 ' + (list.length - 40) + '건']) : list;
 return { ok: errors.length === 0, errors: cap(errors), warnings: cap(warnings), next, logLines: lines.length,
-  ms: Date.now() - started, sizes,
+  ms: Date.now() - started, sizes, sections: cap(sections),
   activePages: ACTIVE_PAGES.map(({ id, name, header }) => ({ id, name, header })), formerLinks: cap(formerLinks) };

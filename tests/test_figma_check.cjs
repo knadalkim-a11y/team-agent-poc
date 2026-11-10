@@ -56,6 +56,7 @@ function base(overrides = {}) {
     ])] };
   });
   const extra = (id, label, target) => text(id, label, [link(label, label, node('', target))]);
+  const index = '구역 색인  도구 목록(T01)';
   const archiveLine = '지난 기록은 91 · 보관 ‘지난 변경 기록’에 있습니다 →';
   return [
     { id: '897:760', name: '00 · 설계 관리 · 먼저 읽기', children: [
@@ -74,9 +75,11 @@ function base(overrides = {}) {
     { id: '1284:3106', name: '업무 · 운영', children: [{ id: '1284:3107', type: 'FRAME', name: 'Header · 업무 · 운영' }] },
     { id: '1285:1829', name: '워크 · 업무 절차', children: [{ id: '1285:1830', type: 'FRAME', name: 'Header · 워크 · 업무 절차' }] },
     { id: '1285:1841', name: '워크 · 도구', children: [
-      { id: '1285:1842', type: 'FRAME', name: 'Header · 워크 · 도구' },
-      { id: 'f:1', type: 'FRAME', name: 'B10-1 · 도구 목록', children: [
-      text('f:2', 'C66에서 작업실 → 공통-3으로 옮김')] }] },
+      { id: '1285:1842', type: 'FRAME', name: 'Header · 워크 · 도구', children: [
+        text('h:9', index, [link(index, '도구 목록', node('', 's:1'))])] },
+      { id: 's:1', type: 'SECTION', name: '도구 목록', children: [
+        { id: 'f:1', type: 'FRAME', name: 'B10-1 · 도구 목록', children: [
+        text('f:2', 'C66에서 작업실 → 공통-3으로 옮김')] }] }] },
     { id: '897:761', name: '70 · 작업실 · 실험·검토', children: [text('w:1', '작업실 사용 안내')] },
     { id: '1722:1395', name: '91 · 보관 · 기능 페이지 이전 판과 옛 설계', children: [
       { id: 'r:list', type: 'FRAME', name: '지난 변경 기록 · 목록', children: [
@@ -100,6 +103,7 @@ test('a file that follows the naming, log and link rules passes and reports the 
   assert.equal(result.next, 'C133');
   assert.equal(result.logLines, 3, 'lines with and without the old backup field both count');
   assert.ok(!('backups' in result));
+  assert.deepEqual(result.sections, [['워크 · 도구', '도구 목록', 2, 'C66에서 작업실 → 공통-3으로 옮김'.length]]);
   assert.equal(calls[calls.length - 1], '00 · 설계 관리 · 먼저 읽기');
 });
 
@@ -216,4 +220,37 @@ test('README sends each current feature to the same named header as the file che
   const rows = [...index.matchAll(/^\| \[([^\]]+)\]\(https:\/\/www\.figma\.com\/design\/([A-Za-z0-9]+)\?node-id=(\d+)-(\d+)\)/gm)]
     .map(([, name, key, first, last]) => ({ name, key, header: first + ':' + last }));
   assert.deepEqual(rows, result.activePages.map(({ name, header }) => ({ name, key: KEY, header })));
+});
+
+test('a sectioned page keeps only its header and sections at the top, and the header indexes every section', async () => {
+  const pages = base();
+  const tools = pages.find((p) => p.id === '1285:1841');
+  tools.children.push({ id: 'loose:1', type: 'FRAME', name: 'T99 · 구역 밖 화면', children: [] },
+    { id: 's:2', type: 'SECTION', name: '도구 작성', children: [] });
+  pages.find((p) => p.id === '1284:3106').children.push({ id: 'loose:2', type: 'FRAME', name: '운영 · 아직 구역 전', children: [] });
+  let { result } = await check(pages);
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.includes('구역 밖 요소: 워크 · 도구 / T99 · 구역 밖 화면 (loose:1)'));
+  assert.ok(result.errors.includes('머리말 색인에 없는 구역: 워크 · 도구 / 도구 작성'));
+  assert.ok(!result.errors.some((e) => e.includes('도구 목록') || e.includes('loose:2')),
+    'indexed sections pass, and pages not moved into sections yet are not checked');
+  const moved = base();
+  const page = moved.find((p) => p.id === '1285:1841');
+  page.children[1].children.push(page.children.shift());
+  ({ result } = await check(moved));
+  assert.ok(result.errors.includes('머리말이 맨 위에 없음: 워크 · 도구 (1285:1842)'));
+  assert.ok(result.errors.includes('머리말 색인에 없는 구역: 워크 · 도구 / 도구 목록'));
+});
+
+test('numbered or status section names, stale frame names in sections and oversized sections are warnings', async () => {
+  const pages = base();
+  const section = pages.find((p) => p.id === '1285:1841').children[1];
+  section.name = '도구 목록 2판';
+  section.children.push({ id: 'old:2', type: 'FRAME', name: 'PREVIOUS · T01 도구 목록', children: [] },
+    ...Array.from({ length: 5000 }, (_, i) => ({ id: 'm:' + i, type: 'FRAME', name: 'm', children: [] })));
+  const { result } = await check(pages);
+  assert.equal(result.ok, true, 'warnings only');
+  assert.ok(result.warnings.includes('구역 이름에 번호·판·상태: 워크 · 도구 / 도구 목록 2판'));
+  assert.ok(result.warnings.includes('이전 판으로 보이는 이름: 워크 · 도구 / 도구 목록 2판 / PREVIOUS · T01 도구 목록'));
+  assert.ok(result.warnings.some((w) => w.startsWith('구역 크기: 워크 · 도구 / 도구 목록 2판 요소 5003 · ')));
 });
