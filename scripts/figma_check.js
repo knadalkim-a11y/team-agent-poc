@@ -67,7 +67,7 @@ for (const page of pages) {
   const canonical = byPage.get(page.id);
   if (canonical && page.name !== canonical.name) errors.push('활성 페이지 이름: ' + page.id + ' “' + page.name + '” → “' + canonical.name + '”');
   if (kind === 'backup') {
-    // 2026-11-09 사용자 결정: 제품을 한 번 완성하기 전에는 백업 페이지와 복구 절차를 두지 않는다.
+    // 2026-11-10 사용자 결정: 제품을 한 번 완성하기 전에는 백업 페이지와 복구 절차를 두지 않는다.
     errors.push('백업 페이지: ' + page.name + ' (제품을 한 번 완성하기 전에는 백업 페이지를 두지 않음)');
     continue; // 열지 않는다
   }
