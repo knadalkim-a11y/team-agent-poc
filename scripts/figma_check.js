@@ -19,7 +19,7 @@ const MAP_ID = '1288:2'; // 00 기능 지도
 const ACTIVE_PAGES = [
   { id: '1284:3046', name: '공통 · 화면 틀', header: '1284:3047', row: '1288:11', former: ['1284:3058', '1284:3070', '1285:1853'], sectioned: true },
   { id: '1284:3106', name: '업무 · 운영', header: '1284:3107', row: '1288:42', former: ['1689:1061', '1689:1062', '1689:1063', '1284:3118'], sectioned: true },
-  { id: '1285:1829', name: '워크 · 업무 절차', header: '1285:1830', row: '1288:63', former: ['1283:3107', '1285:1865'] },
+  { id: '1285:1829', name: '워크 · 업무 절차', header: '1285:1830', row: '1288:63', former: ['1283:3107', '1285:1865'], sectioned: true },
   { id: '1285:1841', name: '워크 · 도구', header: '1285:1842', row: '1288:68', former: [], sectioned: true }
 ];
 const byPage = new Map(ACTIVE_PAGES.map((item) => [item.id, item]));
