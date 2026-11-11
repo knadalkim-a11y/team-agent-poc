@@ -22,7 +22,14 @@
   - 2단계 기록을 더하다 `evals/v4-ui-20260930.md`가 문서 점검의 1 MiB 한도를 넘었다. 1단계 커밋부터 이미 Windows 줄바꿈(CRLF) 기준으로는 넘어 있었다. 구조 개선 기록을 별도 파일로 옮기고, 문서 점검기가 CRLF 기준 크기를 보도록 고쳤다. [재발 기록](../evals/no-run-mode-20261102.md#doc-size-crlf-20261111).
   - 5단계: 70 작업실의 4판 검토안을 구역 하나로 묶고, 채택된 1판 검토안 5개를 91 ‘작업실 지난 시안과 검토’로 옮겼다(C171). 옮긴 화면은 내용이 같고, 91의 큰 좌표에서 생기는 0.01px 반올림 차이는 원래 자리로 되돌려 잰 진단으로 확인했다.
   - 6단계: 구역 규칙을 고정했다(C172). 고정 점검은 네 기능 페이지 모두에서 구역 밖 요소와 색인에 없는 구역을 오류로 본다. [AGENTS](../AGENTS.md#design-mock-first)·[README](../README.md#figma-active-pages)·Figma 00 관리 규칙에 구조와 읽는 순서(README → 머리말 → 구역 하나 → 화면)를 적었다. 점검은 기록 전과 후 모두 오류0·경고0이다.
-  - 7단계 내용 정리(명세 카드·메모의 결정 이력과 PR·CI 상태 빼기): 2026-11-11 사용자가 진행을 정했다. 카드·메모 원문을 [내보냈고](../evals/artifacts/figma-page-structure-20261110/step7-originals.json), [분류 제안](../evals/artifacts/figma-page-structure-20261110/step7-proposal.json)에 대한 사용자 확인을 기다린다. 제안은 세 묶음이다: A 계획 범위 29곳, B ‘지금 제품’ 열 머리글 3곳, C 같은 페이지의 다른 메모 10곳. Figma는 아직 바꾸지 않았다. [계획](mockups/ees-work/TASK.md#figma-page-structure-20261110)·[단계별 기록](../evals/figma-page-structure-20261110.md#figma-page-structure-rules-20261111).
+  - 7단계: ‘워크 · 업무 절차’의 명세 카드 2개와 메모에서 결정 날짜·변경 기록 번호·PR·CI·지운 백업 번호·지난 구현 상태를 뺐다(C173). 원문은 먼저 [Git에 내보냈다](../evals/artifacts/figma-page-structure-20261110/step7-originals.json).
+    - 사용자가 [분류 제안](../evals/artifacts/figma-page-structure-20261110/step7-proposal.json)의 세 묶음(A 계획 범위 29곳, B ‘지금 제품’ 열 머리글 3곳, C 같은 페이지의 다른 메모 10곳)을 모두 승인했다.
+    - 바꾸지 않은 글 314개는 원문과 해시가 같다. 고정 점검은 기록 전과 후 모두 오류0·경고0이다.
+    - 글자는 1,046자(2%) 줄어 업무 절차 페이지가 정리 기준의 97%로 남는다. [기록](../evals/figma-page-structure-20261110.md#figma-page-structure-content-20261111).
+  - 구조 개선 계획 일곱 단계를 모두 마쳤다. [계획](mockups/ees-work/TASK.md#figma-page-structure-20261110)·[단계별 기록](../evals/figma-page-structure-20261110.md). 남은 항목은 다음과 같다.
+    - ‘작성 때 제품’ 열의 칸 내용을 지금 제품 코드와 맞춰 보지 않았다.
+    - 옛 머리말 안의 ‘이번 변경 … 2판’ 줄 2곳이 남아 있다.
+    - 이 브랜치의 점검기·AGENTS·README 변경은 main에 아직 없다.
 - **백업 정리:** 2026-11-10(한국 시간) 사용자 결정으로, 제품을 한 번 완성하기 전(MVP 전)에는 Figma 백업 페이지와 복구 절차를 두지 않는다. 같은 날 PR #133에 연결된 B072의 통합 전 사본 15개를 먼저 지웠고(C164), 이어서 남은 백업 페이지(이전 백업 19개 B047–B071과 ‘백업 찾기’)를 지웠다(C165). 지운 내용은 Figma가 자동으로 남긴 버전 기록에 있다. 이름 붙인 버전 저장은 연결 도구가 지원하지 않아(‘not a supported API’) 하지 못했다. 00 관리 규칙·기능 지도·C161 기록의 링크를 고쳤고, 변경 기록은 C165부터 백업 칸 없이 쓴다. [고정 점검기](../scripts/figma_check.js)는 백업 페이지가 있으면 오류로 보고한다. 지운 뒤와 기록 뒤 모두 오류0·경고0이다. 처음에 날짜를 2026-11-09로 적어 C166에서 바로잡았다. [기록](../evals/v4-ui-20260930.md#figma-backup-pages-removed-20261110).
 
 > 아래는 변경 당시 기록이다.
