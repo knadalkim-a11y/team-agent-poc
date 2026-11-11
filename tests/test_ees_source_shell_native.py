@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 
 import ees_source_frame_monitor as frame_monitor
 from ees_work_integrated_fixture import IntegratedNativeCase
-from native_ui_fixture import NativeUIHandler
+from native_ui_fixture import MODELS, NativeUIHandler
 
 
 class SourceShellNativeTests(IntegratedNativeCase):
@@ -854,10 +854,29 @@ class SourceShellNativeTests(IntegratedNativeCase):
         file = dict(common, id='guide-pdf', filename='EMS 운영 매뉴얼.pdf',
                     meta={'name': 'EMS 운영 매뉴얼.pdf', 'content_type': 'application/pdf', 'size': 1234},
                     data={'status': 'completed'})
+        failed = dict(common, id='failed-guide', filename='이전 절차.pdf',
+                      meta={'name': '이전 절차.pdf', 'content_type': 'application/pdf', 'size': 467},
+                      data={'status': 'failed'})
+        files = [file, failed]
         knowledge = dict(common, id='kb-ems', name='EMS 운영 가이드', description='EMS 문서 모음',
-                         meta={}, data={'file_ids': [file['id']]}, files=[file])
+                         meta={}, data={'file_ids': [item['id'] for item in files]}, files=files)
         skill = dict(common, id='jira-read', name='Jira 읽기 지침', description='CR 조회 절차',
                      content='CR 번호로 해당 이슈를 조회합니다.', is_active=True, meta={})
+        model['meta'].update(skillIds=[skill['id']], knowledge=[{'id': knowledge['id'], 'name': knowledge['name'], 'type': 'collection'}])
+        self.server.models = [*deepcopy(MODELS), {
+            'id': model['id'], 'name': model['name'], 'object': 'model', 'owned_by': 'openai', 'info': deepcopy(model)}]
+        for system_id, title in [('EMS', '배포 산출물 점검'), ('APC', '다른 시스템 절차')]:
+            created = self.command('create_workflow', name=title, system_id=system_id)
+            definition = deepcopy(created['workflow']['draft'])
+            root = next(node for node in definition['nodes'].values() if node['type'] == 'p')
+            root['children'] = ['stage']
+            definition['nodes']['stage'] = {'id': 'stage', 'type': 't', 'name': '1차 점검',
+                'parent': root['id'], 'children': ['check-cr'], 'deps': []}
+            definition['nodes']['check-cr'] = {'id': 'check-cr', 'type': 'j', 'name': 'CR 검토',
+                'parent': 'stage', 'children': [], 'deps': [], 'mode': 'human', 'inputs': [],
+                'result_block': 'human_confirm', 'skills': [skill['id']]}
+            self.command('save_draft', workflow_id=created['workflow_id'],
+                         expected_revision=created['workflow']['revision'], definition=definition)
         listings = {'/api/v1/models/list': [model], '/api/v1/knowledge/list': [knowledge],
                     '/api/v1/knowledge/search': [knowledge], '/api/v1/skills/list': [skill]}
         records = {'/api/v1/models/model': model, '/api/v1/knowledge/kb-ems': knowledge,
@@ -871,7 +890,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
             if path in records:
                 return handler.send_content(records[path])
             if path.startswith('/api/v1/knowledge/kb-ems/files'):
-                return handler.send_content({'items': [file], 'total': 1})
+                return handler.send_content({'items': files, 'total': len(files)})
             return original(handler)
 
         cases = [
@@ -886,6 +905,16 @@ class SourceShellNativeTests(IntegratedNativeCase):
                     self.navigate(route)
                     self.wait("document.querySelector('[data-ees-asset=" + marker + "]')?.getBoundingClientRect().width > 0")
                     self.wait("document.querySelector('[data-ees-source-shell]')?.dataset.eesChatState === 'docked'")
+                    if marker == 'knowledge':
+                        self.wait("document.querySelector('[data-ees-file-status=failed]') && document.querySelector('[data-ees-file-retry]')")
+                        self.assertIn('이전 절차.pdf', self.text('#workspace-container'))
+                    if marker in ('knowledge', 'skill-editor'):
+                        self.wait("document.querySelector('[data-ees-asset-usage]')?.innerText.includes('EES 통합 Assistant')")
+                    if marker == 'skill-editor':
+                        self.wait("document.querySelector('[data-ees-asset-usage]')?.innerText.includes('배포 산출물 점검')")
+                        uses = self.text('[data-ees-asset-usage]')
+                        self.assertIn('CR 검토', uses)
+                        self.assertNotIn('다른 시스템 절차', uses)
                     geometry = self.browser.evaluate("""(() => {
                         const boxes = ['#sidebar', '[data-ees-work-surface]', '[data-ees-chat-surface]'].map(selector => {
                             const r = document.querySelector(selector).getBoundingClientRect();
