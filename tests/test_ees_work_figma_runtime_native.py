@@ -1420,13 +1420,14 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             'status_function': 'status', 'output_schema': {'type': 'object'}})['tool']
         tool = operation('tool_submit', tool['revision'], tool_contract_id=tool['id'])['tool']
         tool = operation('tool_review', tool['revision'], user=self.users['other-user'], tool_contract_id=tool['id'], decision='approve')['tool']
-        key = self.author(jobs=1, fields=[{'id': 'target', 'name': '대상', 'type': 'text', 'scope': 'run'},
+        key = self.author(jobs=2, fields=[{'id': 'target', 'name': '대상', 'type': 'text', 'scope': 'run'},
             {'id': 'stop', 'type': 'single', 'scope': 'run', 'options': ['graceful', 'force']},
             {'id': 'wait', 'type': 'number', 'scope': 'run'},
             {'id': 'unbound', 'name': '요청에 연결하지 않은 값', 'type': 'text', 'scope': 'run'}])
         draft = deepcopy(self.state(workflow_id=key)['workflow']['draft'])
-        draft['nodes']['job-0'].update(result_block='change_request', tool_contract_id=tool['id'], tool_contract_revision=tool['revision'],
-            approval_count=0, effect_criterion={'check': 'registered-status'})
+        for job_id in ('job-0', 'job-1'):
+            draft['nodes'][job_id].update(result_block='change_request', tool_contract_id=tool['id'],
+                tool_contract_revision=tool['revision'], approval_count=0, effect_criterion={'check': 'registered-status'})
         self.command('save_draft', workflow_id=key, expected_revision=3, definition=draft)
         self.command('validate_workflow', workflow_id=key, expected_revision=4)
         self.command('publish_workflow', workflow_id=key, expected_revision=4)
@@ -1479,6 +1480,36 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.assertNotEqual(request['state'], 'effect_verified')
         self.assertEqual(self.bridge.calls, [])
         self.screenshot('figma-a4-typed-request-unconnected')
+
+        class AcceptedConnector:
+            def __init__(self):
+                self.calls = []
+
+            async def request(self, actor, contract, inputs, correlation):
+                self.calls.append((contract['id'], deepcopy(inputs), correlation))
+                return {'state': 'accepted', 'job_number': 'QA-TRACK-001'}
+
+        connector = AcceptedConnector()
+        self.server.workflow.operations.connector = connector
+        latest = self.state(run_id=run['id'])['run']
+        prepared = operation('request_prepare', latest['revision'], run_id=run['id'], job_id='job-1',
+                             tool_contract_id=tool['id'], request_reason='합성 상태 추적')['request']
+        intent = operation('request_intent', prepared['revision'], external_request_id=prepared['id'])
+        accepted = operation('request_dispatch', prepared['revision'], external_request_id=prepared['id'],
+                             intent_token=intent['intent_token'])['request']
+        self.assertEqual((accepted['state'], accepted['job_number']), ('accepted', 'QA-TRACK-001'))
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+        reload_page(self.browser)
+        self.wait("document.querySelector('#ees-work-entry')")
+        self.open_run(key, run, job='job-1')
+        self.wait("document.querySelector('.ew-request-track[data-tracked=true] .ew-request-heading')?.innerText.includes('QA-TRACK-001')")
+        steps = self.browser.evaluate("Array.from(document.querySelectorAll('.ew-request-timeline .ew-request-step'), e=>[e.dataset.state,e.querySelector('[data-status]')?.dataset.status])")
+        self.assertEqual([key for key, _ in steps], ['requested', 'accepted', 'running', 'reported_complete', 'effect_verified'])
+        self.assertEqual(dict(steps)['effect_verified'], 'waiting')
+        self.assertEqual(len(connector.calls), 1)
+        self.assertEqual(connector.calls[0][1], {'target': 'SYNTHETIC-AP', 'stop': 'graceful', 'wait': 60})
+        self.screenshot('parity-a4-request-tracking-1920')
 
     def test_list_preview_add_exclude_confirm_and_history_preserve_original(self):
         self.bridge.result = {'status': 'succeeded', 'completeness': 'complete',
