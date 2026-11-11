@@ -14,7 +14,7 @@ EES 팀의 문서 조회와 업무 처리를 대화·워크플로우 화면으�
 
 <a id="figma-active-pages"></a>
 
-[Figma 기능 지도](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1288-2)에서 현재 설계를 찾습니다. 네 기능 페이지의 링크는 해당 페이지 헤더를 가리킵니다.
+[Figma 기능 지도](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1288-2)에서 현재 설계를 찾습니다. 네 기능 페이지의 링크는 해당 페이지 헤더를 가리킵니다. 페이지 맨 위에는 머리말과 세부 기능별 구역만 있으므로, 머리말의 ‘구역 색인’에서 필요한 구역을 골라 그 안의 화면만 읽습니다.
 
 | 활성 기능 페이지 | 확인할 화면 |
 |---|---|
@@ -212,7 +212,7 @@ AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs
 | 시스템/P별 절차 편집·미저장 초안·권한 상태·Native 셸 복원 | [ees-work-designer.js](branding/ees/ui/ees-work-designer.js) |
 | 고정 소스 프런트엔드 빌드·검증 | [build_ees_frontend.py](scripts/build_ees_frontend.py) |
 | 소스 조립·wheel 파일 목록·해시 | [build_ees_webui.py](scripts/build_ees_webui.py) |
-| 사내 확인용 디자인 목업(제품 CSS·아이콘·글꼴로 만든 단일 HTML) | [build_design_mock.py](scripts/build_design_mock.py), 원본 `docs/mockups/ees-work/design-mock-src/`, [개발 순서](AGENTS.md#design-mock-first) |
+| 사내 확인용 디자인 목업(제품 CSS·아이콘·글꼴로 만든 단일 HTML, 테마 시험 글꼴은 선택) | [build_design_mock.py](scripts/build_design_mock.py), 원본 `docs/mockups/ees-work/design-mock-src/`, [개발 순서](AGENTS.md#design-mock-first) |
 | Figma 설계 파일 고정 점검(읽기 전용, Figma 도구 use_figma로 실행) | [figma_check.js](scripts/figma_check.js), 시험 [test_figma_check.cjs](tests/test_figma_check.cjs), [규칙](AGENTS.md#design-mock-first) |
 
 factory는 배포 JS 내부에만 존재하고 기존 runtime UI/Tool 연결을 유지합니다. ees.11의 P별 작성 프로토콜·추가 메타데이터와 기존 전체 초안 호환은 [별도 계약](docs/mockups/ees-work/TASK.md#system-authoring-20260924)을 따릅니다. 화면 분리와 이전 프로그램 복원 검증의 실제 범위는 [R2/R3 기록](evals/scenarios.md#work-ui-refactor-20260915)을 따릅니다.
@@ -287,7 +287,7 @@ python scripts/check_docs.py --root . --json
 
 - 점검기는 읽기 전용·오프라인이며 파일 수정·삭제·보고서 파일 생성을 하지 않습니다. 오류는 종료 코드 `1`, 경고만 있거나 정상이면 `0`, 잘못된 CLI 인자는 `2`입니다.
 - Python 표준 라이브러리만 필요합니다. 일반 인라인·참조 링크, ATX/setext 제목·HTML id를 검사하지만 전체 CommonMark 렌더러는 아닙니다. 코드 블록·주석·외부 URL은 검사하지 않으며, 여러 줄에 걸친 링크·깊게 들여쓴 목록·복잡하거나 미완성인 문법은 수동 확인 대상입니다.
-- `.git`·가상환경·`node_modules`·`data`·`runtime`·`logs` 등 코드의 `IGNORED_DIRS`에 정한 폴더와 심볼릭 링크·경로가 재지정되는 항목을 스캔하지 않습니다. `.gitignore` 규칙을 해석하는 방식은 아니며, 개별 문서는 1 MiB까지 읽습니다.
+- `.git`·가상환경·`node_modules`·`data`·`runtime`·`logs` 등 코드의 `IGNORED_DIRS`에 정한 폴더와 심볼릭 링크·경로가 재지정되는 항목을 스캔하지 않습니다. `.gitignore` 규칙을 해석하는 방식은 아니며, 개별 문서는 1 MiB까지 읽습니다. 크기는 Windows 체크아웃처럼 줄바꿈을 CRLF로 셌을 때로 봅니다.
 - 링크가 살아 있어도 내용이 오래됐을 수 있고, 링크가 없어도 필요한 문서일 수 있습니다. 점검 통과는 문서 전체가 최신이라는 보장이 아닙니다.
 - 현재는 GPT 종료 규칙과 검사 명령까지 제공합니다. 모든 커밋을 차단하는 필수 CI나 자동 삭제·정기 실행은 구성하지 않았습니다.
 

@@ -1,0 +1,604 @@
+{
+  "revision": 4,
+  "status": "review_mock_ready",
+  "date": "2026-11-09",
+  "request": "피그마 페이지봐봐. 채팅 패널을 오른쪽으로 옮기고, 업무 패널을 가운데로 옮겼어. 근데 기존에는 업무 패널이 오른쪽이었어서 가운데 패널로 옮기고, 넓어진만큼 ui/ux 및 디자인을 바꿔야할거같아",
+  "mock_request": "좋아 이 방향으로 HTML 목업 만들어줘",
+  "revision_4_feedback": {
+    "user": "단계가 작업보다 상위 레이어인데 왜 작업부터 보이는거야? 그리고 '회차개요' 페이지가 뭘 눌러서 저 화면으로 가는건지 잘 모르겠어",
+    "diagnosis": "Revision 3 opened on the stage screen (task list) with no other stage visible; the run overview was reached only by the menu item or the breadcrumb and no screen carried the name 회차 개요. The product also goes overview → stage → task, with ← 회차 개요 only on the task screen.",
+    "options_asked": [
+      "한 화면: 단계 › 작업 트리 (Recommended)",
+      "두 화면 + 단계 줄",
+      "두 화면 그대로, 시작만 개요"
+    ],
+    "answer": "한 화면: 단계 › 작업 트리 (Recommended)"
+  },
+  "revision_3_feedback": {
+    "user": "각 화면이 어떤 상황에 어떻게 표시되는건지 잘 감이안오네. 그리고 테마 자체도 좀 어색하고.",
+    "answers": {
+      "theme": "테마 시트 '나' 적용 (Recommended)",
+      "awkward_points": [
+        "상자·테두리가 겹겹이",
+        "같은 상태가 다른 색",
+        "남색·굵은 글자가 많음",
+        "메뉴·채팅과 가운데가 따로 놂"
+      ]
+    },
+    "theme_source": {
+      "sheet": "2129:72",
+      "basis_screen": "2105:72",
+      "change_log": "C155",
+      "read_at": "2026-11-09",
+      "note": "The sheet node now sits on the 91 archive page; values were read from its text (color, type, shape, component states, variable mapping) and the link sample underline was sampled from a capture (#C9CCD2 default, #1D2128 hover)."
+    },
+    "product_adoption": "undecided; the theme is tried only in this mock"
+  },
+  "base_commit": "1eac86d6a52a21205e6a04b8adcea779cfe4fa3c",
+  "implementation_revision": null,
+  "figma": {
+    "revision": 4,
+    "file_key": "XK2wTos6sEuxSHhIj7cqg6",
+    "page": "897:761",
+    "header": "2269:1336",
+    "parts": "2255:153",
+    "screens": {
+      "W1": {
+        "node": "2261:162",
+        "name": "W1 · 운영 · 진행 건 요약 · 채팅 열림",
+        "center_width": 1104,
+        "layout": "split1, tree 340"
+      },
+      "W2": {
+        "node": "2266:431",
+        "name": "W2 · 운영 · 단계 · 채팅 열림",
+        "center_width": 1104,
+        "layout": "split1, tree 340"
+      },
+      "W3": {
+        "node": "2266:836",
+        "name": "W3 · 운영 · 작업 처리 · 채팅 열림",
+        "center_width": 1104,
+        "layout": "split1, tree 340"
+      },
+      "W4": {
+        "node": "2267:951",
+        "name": "W4 · 운영 · 작업 처리 · 채팅 접힘",
+        "center_width": 1664,
+        "layout": "split2, tree 360, verdict column 440"
+      },
+      "W5": {
+        "node": "2268:1160",
+        "name": "W5 · 워크 · 업무 절차 작성 · 채팅 열림",
+        "center_width": 1104,
+        "layout": "split1, structure 340"
+      }
+    },
+    "components": {
+      "2255:163": "넓은 업무 / 단추",
+      "2255:170": "넓은 업무 / 탭",
+      "2255:189": "넓은 업무 / 판정 선택지",
+      "2255:196": "넓은 업무 / 트리 요약 줄",
+      "2255:229": "넓은 업무 / 트리 단계 줄",
+      "2255:254": "넓은 업무 / 트리 작업 줄",
+      "2255:279": "넓은 업무 / 표 작업 행",
+      "2255:280": "넓은 업무 / 표 단계 행",
+      "2255:287": "넓은 업무 / 근거 문서 줄",
+      "2258:319": "넓은 업무 / 왼쪽 메뉴",
+      "2258:320": "넓은 업무 / 오른쪽 채팅",
+      "2268:1152": "넓은 업무 / 절차 구조 줄",
+      "2268:1159": "넓은 업무 / 선택 단추"
+    },
+    "built_from": "Measured box model of the HTML mock revision 4 (commit 4bce7a8) at 1920 x 1080: CSS paddings, gaps and borders, with borders included in the auto-layout size like the CSS box model.",
+    "tokens": "Theme sheet 나 values written directly (not in the file variables, same as the theme sheet C155): IBM Plex Sans KR 400/500/600 for Korean, B612 400/700 for digit and Latin runs.",
+    "official_pages_changed": false,
+    "change_log": "C163 (C143 moved to the 91 archive list)",
+    "revision_2_moved_to_archive": {
+      "page": "91 · 보관 · 이전 설계와 작업실 기록",
+      "container": "2207:28518",
+      "header": "2232:638",
+      "screens": [
+        "2225:1539",
+        "2225:1709",
+        "2225:1858",
+        "2225:2064"
+      ],
+      "parts": "2226:274",
+      "node_ids_kept": true
+    },
+    "verified_at": "2026-11-09T10:10:21Z"
+  },
+  "figma_revision_2": {
+    "file_key": "XK2wTos6sEuxSHhIj7cqg6",
+    "page": "897:761",
+    "header": "2232:638",
+    "parts": "2226:274",
+    "screens": {
+      "W1": {
+        "node": "2225:1539",
+        "name": "W1 · 운영 · 단계 작업과 판정 · 채팅 열림",
+        "source": "2208:8262",
+        "center_width": 1104
+      },
+      "W2": {
+        "node": "2225:1709",
+        "name": "W2 · 운영 · 단계 작업과 판정 · 채팅 접힘",
+        "source": "2207:28697",
+        "center_width": 1664
+      },
+      "W3": {
+        "node": "2225:1858",
+        "name": "W3 · 운영 · 회차 개요 · 채팅 열림",
+        "source": "1762:456",
+        "center_width": 1104
+      },
+      "W4": {
+        "node": "2225:2064",
+        "name": "W4 · 워크 · 업무 절차 작성 · 채팅 열림",
+        "source": "836:372",
+        "center_width": 1104
+      }
+    },
+    "components": {
+      "2226:276": "넓은 업무 / 작업 목록 행",
+      "2226:285": "넓은 업무 / 근거 문서 행",
+      "2226:295": "넓은 업무 / 판정 선택지",
+      "2226:298": "넓은 업무 / 단계 카드",
+      "2226:306": "넓은 업무 / 개요 작업 행",
+      "2226:316": "넓은 업무 / 구조 항목"
+    },
+    "tokens": "EES Work v4 / Color variables and EES v4 text styles (Noto Sans KR, numbers in Inter)",
+    "official_pages_changed": false,
+    "change_log": "C162 (C142 moved to 91 archive list)",
+    "verified_at": "2026-11-09T02:03:16Z"
+  },
+  "measured_problem_revision_1": {
+    "product_css": "--ees-work-page-inset: max(32px, calc((100% - 960px) / 2))",
+    "chat_open_1920": {
+      "center": 1104,
+      "content_max": 960
+    },
+    "chat_collapsed_1920": {
+      "center": 1664,
+      "content_max": 960,
+      "unused": 704
+    },
+    "task_row": "960px wide with number, name and status only",
+    "task_detail": "accordion inside the list; evidence, criteria and verdict stacked vertically",
+    "authoring": "task detail opens as a separate screen and returns to the outline (B2-10)"
+  },
+  "layout_rules": {
+    "basis": "width of the center work area, not the window",
+    "split_two_column_detail": ">= 1264px center (list + detail with evidence | verdict)",
+    "split_single_column_detail": "864-1263px center (list + detail)",
+    "single_column": "< 864px center (revision 1 accordion)",
+    "content_max_width": "1600px inside the center area (mock guard for very wide screens)",
+    "examples": {
+      "1920_chat_open": "1104px -> list + single-column detail (W1, W3, W4)",
+      "1920_chat_collapsed": "1664px -> list + two-column detail (W2)",
+      "1366_chat_open": "830px -> single column",
+      "1366_chat_collapsed": "1310px -> list + two-column detail",
+      "480": "424px with overlay chat -> single column"
+    },
+    "revision_4": {
+      "split2": ">= 1264px center: tree 360px + content; a task shows evidence | verdict",
+      "split1": "864-1263px center: tree 340px + content",
+      "single": "< 864px center: one column; the selected item's content opens under its row in the tree; bottom action rows are not sticky"
+    }
+  },
+  "revision_4_changes": {
+    "structure": "One run screen opened from the menu item: tree 단계와 작업 = 진행 건 요약, stages 1-4, and each stage's tasks indented under the stage name (only the stage in progress open at first); the right side shows the selected item. The separate run overview and stage screens are gone; the stage tabs (작업 / 실행 기록 / 판정 기준) moved into the stage content.",
+    "summary": "다음 할 일 with 작업 열기 (main action), 단계별 진행 table, 손이 필요한 작업, record export and run end/cancel.",
+    "stage": "Stage head with state, period and description, 지금 실행 (secondary) for the stage in progress, tabs with the stage task table, run history and rules.",
+    "task": "Same task content as revision 3 (evidence, criteria, verdict or record); waiting tasks state that they have not started and take no verdict.",
+    "screen_numbers": {
+      "W1": "업무 열기 · 진행 건 요약",
+      "W2": "단계 보기",
+      "W3": "작업 처리 · 채팅 열림",
+      "W4": "같은 작업 · 채팅 접힘",
+      "W5": "업무 절차 작성"
+    },
+    "number_mapping": "Revision 2-3 W3 (run overview) split into W1 and W2; revision 2-3 W1 → W3, W2 → W4, W4 → W5.",
+    "synthetic_additions": "Guide and criteria text for the six tasks of stages 1, 3 and 4 that the tree now shows; no new behaviour.",
+    "unchanged": "Theme sheet 나 values, state colours, situation guide (steps renumbered, badge 시안 4), width preview."
+  },
+  "revision_3_changes": {
+    "theme": "Product variable names kept, values replaced by the sheet mapping in a data-mock-theme block on :root, applied to the center, the left navigation and the right chat.",
+    "type": "IBM Plex Sans KR 400/500/600 for Korean, B612 400/700 for digits and Latin letters only (unicode-range); sizes 21/18/14/13/12, letter-spacing -0.5% on body text.",
+    "surfaces": "No cards: white center, 1px dividers, clean-room menu #F4F5F6; radius 2px controls, 4px groups and selected rows.",
+    "state": "One label and one colour per state: 승인 green 4px line and green text, 판정 필요 amber line and grey text, 대기 no line. Same in list, detail, overview table and chat. Combined labels such as 미승인 · 판정 필요 became the single product label 판정 필요 (승인 3 · 판정 필요 3).",
+    "emphasis": "Ink instead of navy for text, selected underline and the main button border; one main button per screen (판정 확정, 작업 열기, 저장), 지금 실행 is secondary.",
+    "guide": "Mock-only band above the frame: steps 업무 열기 W3 → 작업 처리 W1 → 채팅 접기 W2 and 절차 고치기 W4, each opening its screen and stating situation, route in, what is shown and next; current arrangement line with window, menu, chat and center widths and the width rule; follows product routes; folds to the badge 시안 3 · 저장·실행 안 됨 · W번호 (folded by default under 720px).",
+    "width_preview": "1366 and 480 window previews inside a wider window, using the same width rules as a real window.",
+    "removed": "Bottom-left dark review box."
+  },
+  "theme_fonts": {
+    "packages": {
+      "ibm-plex-sans-kr-1.1.0.tgz": {
+        "npm": "@ibm/plex-sans-kr@1.1.0",
+        "integrity": "sha512-oGwlBC7BYvcvOvs7d8SoumXJwNO3rjbplteyeYI7zgQmEWI+4qLdRhI/zBUO4Ioo55YymSMiMtRPqAAPZBrJqA==",
+        "license": "OFL-1.1, Reserved Font Name \"Plex\"",
+        "members": {
+          "package/fonts/complete/woff2/hinted/IBMPlexSansKR-Regular.woff2": "055a35664c3c3965161c92292504c5633ba9604ec904edc1ed799bf2a436276d",
+          "package/fonts/complete/woff2/hinted/IBMPlexSansKR-Medium.woff2": "c00dcd8a9c32a6b6ab8c6b3119e68b3d7aa6eba6f4441d5493019cc019dcdd1e",
+          "package/fonts/complete/woff2/hinted/IBMPlexSansKR-SemiBold.woff2": "5ad7db28ba74d59fe14c260205c62ddb701320f4f098d8a45ef2757bebc29666",
+          "package/LICENSE.txt": "7e6b2818edbd8f6a01ae80641cc8f16a51080d08fb4e532be3a0b6f74adb07da"
+        }
+      },
+      "fontsource-b612-5.3.0.tgz": {
+        "npm": "@fontsource/b612@5.3.0",
+        "integrity": "sha512-2AQPrSFDI9K00w/lPlgfcqve+ZPdRSCttvVUxcmv+UrnwwaKLMym+/uXmM7+dgPCVBIV9omoXUabFoyBFpc1Vg==",
+        "license": "OFL-1.1, no reserved font name",
+        "members": {
+          "package/files/b612-latin-400-normal.woff2": "a96e47feaec40f5b53b6c8e941e87ba7732d7935d47f2a554223585f36c6785d",
+          "package/files/b612-latin-700-normal.woff2": "95f39db174588831100e7e32a0329d4f91952a6c28f2fd91f207951e3a8c6788",
+          "package/LICENSE": "32927731ab48cd86ac01dd213d2db646c91665e8eb3e6a2de7e8b8c98ab415ed"
+        }
+      }
+    },
+    "embedded": "EES Theme KR 400/500/600: 742 glyphs each, 34452/35264/35556 bytes; EES Theme Latin 400/700: 63 glyphs, 11656/5948 bytes (WOFF2 subsets).",
+    "renaming": "Plex subsets: name records 1, 3, 4, 6 and 16 renamed to EES Theme KR / EESThemeKR (OFL 1.1 condition 3); copyright (0), trademark (7) and license (13, 14) records kept. B612 names unchanged.",
+    "licenses": "Both complete upstream license files and a notice are appended to the page's font-licenses block, with line endings normalized to LF and trailing spaces removed (the Plex file ships CRLF); the text is otherwise unchanged."
+  },
+  "html_mock": {
+    "source": "docs/mockups/ees-work/design-mock-src/15-work-centered-wide.html",
+    "source_bytes": 97565,
+    "source_sha256": "686585d6df9aa423452e16e96a7f628af60b6fba564c3da99ccf2f183a8450bc",
+    "output": "docs/mockups/ees-work/design-mock-15-work-centered-wide.html",
+    "output_bytes": 732255,
+    "output_sha256": "adb2f3d9b6fde02fa0f422bffabb3b5138cbc83b5e4339139c8367fb516d4374",
+    "build": "python scripts/build_design_mock.py docs/mockups/ees-work/design-mock-src/15-work-centered-wide.html docs/mockups/ees-work/design-mock-15-work-centered-wide.html --wheel open_webui-0.11.3-py3-none-any.whl --theme-packages DIR  (DIR holds the two npm pack files above)",
+    "wheel_sha256": "8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547",
+    "product_css_sha256": {
+      "branding/ees/ui/chat-theme.css": "c0f8b9b4a742e7e573969f9ef409ea8a17e88264241b6deb2a5f3240d6e89e23",
+      "branding/ees/ui/ees-work-launcher.css": "45322d3e0f2d7513a75fe96c82e0bcff05e7cac165b1cceaf2bb08006c9cde9b"
+    },
+    "fonts": "Product fallback: Inter-Variable 331 glyphs / 54796 bytes, NotoSansKR-Variable 800 glyphs / 85996 bytes; theme fonts as above.",
+    "screens": {
+      "W1": "run screen, 진행 건 요약 selected (guide: 업무 열기)",
+      "W2": "run screen, stage 1차 점검 selected (guide: 단계 보기)",
+      "W3": "run screen, task 배포 문서 점검 selected, chat open (guide: 작업 처리)",
+      "W4": "same task with the chat folded (guide: 채팅 접기)",
+      "W5": "procedure authoring (guide: 절차 고치기)"
+    },
+    "review_controls": "Top guide band (mock only): badge 시안 4 · 저장·실행 안 됨 · W번호, situation steps W1-W5, window-width preview, fold button.",
+    "synthetic_only": "no server, storage, execution, account or tool connection; buttons that would change data show a notice instead"
+  },
+  "revision_3_mock": {
+    "commit": "335335f",
+    "output_sha256": "dff2426236140f7f32246f95d81596fcca58dc0a2d447c5c4c799a954a6f65e4",
+    "source_sha256": "8d56e5333b026bcea72d4f38d3f9d3b1c2487574fb074294b84eb62ce237b343",
+    "validation": "146/146 browser checks; report and captures stay at evals/artifacts/work-centered-wide-20261109/ (validator at 335335f)"
+  },
+  "revision_2_mock": {
+    "commit": "755c864",
+    "output_sha256": "868de8e5b09b7d4adfae71720f69c4d03042594a4719ecb5dc887e6104acfc9c",
+    "source_sha256": "679a09cb0ec8bbcf43fe28ec3f24882b30e2f06cde6c3633b97081f55b3bf290",
+    "validation": "95/95 browser checks with the validator at that commit",
+    "rebuild_check": "The current builder rebuilds the 2판 source (from 755c864) identical to the committed 2판 output; the exact-path rebuild matched byte for byte."
+  },
+  "validation": {
+    "script": "evals/artifacts/work-centered-wide-20261109/validate_mock.cjs",
+    "report": "evals/artifacts/work-centered-wide-20261109/revision-4/validation-report.json",
+    "environment": "Linux cloud container, Node 22.23.4, Playwright 1.63.0, headless Chromium 153.0.8010.12",
+    "run_at": "2026-11-09",
+    "static": "passed (no duplicate ids, no external resources, inline script parses, CSP, product CSS, theme block and theme fonts present, no unresolved icons)",
+    "browser": "162/162 checks passed, 0 page errors",
+    "viewports": [
+      "1920x1080",
+      "1366x768",
+      "480x768"
+    ],
+    "added_checks": [
+      "menu opens the summary with only the stage in progress open",
+      "tree order 요약 › 단계 › 작업, task line under the stage name and task name further right, closed stages hide their tasks",
+      "stage content: six task rows, tabs switch inside the content, no main action",
+      "task row in the stage table opens the task; waiting task offers no verdict; summary 작업 열기 opens the task",
+      "chat folded: evidence beside verdict; tree position kept; drafts kept across screens"
+    ],
+    "theme_measured": {
+      "center_font_sizes": [
+        "12px",
+        "13px",
+        "14px",
+        "18px",
+        "21px"
+      ],
+      "font_weights": [
+        "400",
+        "500",
+        "600"
+      ],
+      "weight_600_only": [
+        "page title",
+        "EES Workflow"
+      ],
+      "navy_elements": 0,
+      "main_buttons": {
+        "W1": "작업 열기",
+        "W2": "none",
+        "W3": "판정 확정",
+        "W5": "저장"
+      }
+    },
+    "first_run": "4 failures, all in one column (1366, 480): task names sat left of the stage name (indent equal to the stage row, also visible at 1920) and the sticky bottom action row covered rows of the summary table. Fixed in the mock: tasks indented 44px, bottom action rows not sticky in one column.",
+    "tests": "tests/test_build_design_mock.py 9/9 with fontTools, 9 with 2 skipped without fontTools"
+  },
+  "validation_revision_3": {
+    "report": "evals/artifacts/work-centered-wide-20261109/validation-report.json",
+    "browser": "146/146",
+    "theme_measured": {
+      "center_font_sizes": [
+        "12px",
+        "13px",
+        "14px",
+        "18px",
+        "21px"
+      ],
+      "font_weights": [
+        "400",
+        "500",
+        "600"
+      ],
+      "weight_600_only": [
+        "page title",
+        "EES Workflow"
+      ],
+      "navy_elements": 0,
+      "main_buttons": {
+        "W1": "판정 확정",
+        "W3": "작업 열기",
+        "W4": "저장"
+      },
+      "center_background": "rgb(255, 255, 255)",
+      "menu_background": "rgb(244, 245, 246)",
+      "title": "21px / 600",
+      "tab": "14px, ink underline rgb(29, 33, 40)",
+      "judge_needed": "amber line rgb(184, 130, 15), grey text rgb(94, 101, 115)",
+      "approved": "green line and text rgb(42, 125, 79)",
+      "focus": "2px solid ink; -2px inside list rows, 2px from buttons"
+    },
+    "first_run": "6 failures before fixing the validator: 3 buttons scrolled out of a scroll area were counted as covered, 2 checks inherited a chat width resized by hand earlier, 1 follow-on text check. The mock was not changed; the validator now skips clipped buttons and reloads before the guide and preview checks."
+  },
+  "differences_from_figma": [
+    "Figma W1–W5 are drawn from the revision 4 mock; borders, dividers and selected rows sit on the same pixels (see figma_comparison).",
+    "Glyph rendering differs between Chromium and Figma (about 0.2–1.6% of pixels per region).",
+    "The composer placeholder uses the browser default grey (rgb(117,117,117)) in the mock because the mock does not style it; Figma uses the theme secondary text colour #5E6573.",
+    "The chat history keeps the mock's 15px scrollbar gutter (content 496px, right padding 39px).",
+    "The mock-only guide band and badge, and the single-column layouts (1366 and 480 windows), are not drawn in Figma; the mock captures show them.",
+    "Center background white, 14px tabs and the amber dot for 조건부 승인 are the same in Figma and the mock; they differ from the shared panel contract (open_decisions_for_product)."
+  ],
+  "figma_sync_needed": null,
+  "implementation_impact": "The product switches screens overview → stage → task (← 회차 개요). Revision 4 replaces this with one tree selection: run-screen routing (procedure, stage and task selection), the back buttons, the stage tab location and their browser tests change; server and storage formats do not.",
+  "open_decisions_for_product": [
+    "white center versus the shared panel background",
+    "14px tabs versus the shared 12px tabs",
+    "colour for 조건부 승인",
+    "adding the two fonts to the product and dark-mode values"
+  ],
+  "artifacts": [
+    {
+      "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-r4-review-header.png",
+      "node": "2269:1336",
+      "size": [
+        1920,
+        436
+      ],
+      "bytes": 146759,
+      "sha256": "2ba5132cdea1522e8f1910a9ecd5443289e66ff561d6786c39d9bf272f5843d8"
+    },
+    {
+      "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-r4-w1-run-summary.png",
+      "node": "2261:162",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 176831,
+      "sha256": "2499b2f8aade09b5c8431e8877f7bf00480ef130481ea9dbc530ebaed3201ad8"
+    },
+    {
+      "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-r4-w2-stage.png",
+      "node": "2266:431",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 158417,
+      "sha256": "51ed3c928ac4b17f6fd05f7f7bceeef54c6d4555052152bef40727fd5f5d5e74"
+    },
+    {
+      "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-r4-w3-task-chat-open.png",
+      "node": "2266:836",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 171427,
+      "sha256": "5d0ae269bbeea1f515edb919f68ce138fe08f5bbc94cb4b0bce78c832a7beef8"
+    },
+    {
+      "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-r4-w4-task-chat-collapsed.png",
+      "node": "2267:951",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 126274,
+      "sha256": "1247d0be1046671d93d4b21f58fe82031f1326a0338585ffccebf44527c0016b"
+    },
+    {
+      "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-r4-w5-procedure-authoring.png",
+      "node": "2268:1160",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 148013,
+      "sha256": "43188f5f6c91ca1e29bb20a18a166bf16e7a3084e74d656cab4f4dafb9b4f7ed"
+    }
+  ],
+  "artifacts_revision_2": [
+    {
+      "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-review-header.png",
+      "node": "2232:638",
+      "size": [
+        1920,
+        424
+      ],
+      "bytes": 122687,
+      "sha256": "a7355bda9505fe6f0cafd146ca230fe758917a9bb4e6cc405d62d3db053ca767"
+    },
+    {
+      "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-w1-stage-chat-open.png",
+      "node": "2225:1539",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 160660,
+      "sha256": "55fc21fdcbecf3a355fffd86fdb642415af2fa63f0b89ee02d5545fdd48f0075"
+    },
+    {
+      "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-w2-stage-chat-collapsed.png",
+      "node": "2225:1709",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 125621,
+      "sha256": "e0672b23647d0af6bfb287fc190df0ce2672d33444202add483f9697b50be320"
+    },
+    {
+      "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-w3-run-overview.png",
+      "node": "2225:1858",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 154020,
+      "sha256": "701f32b33474f65ec0e37db9aa28792d0302bf6e7cefa40e61576b43fa36a4ae"
+    },
+    {
+      "path": "docs/mockups/ees-work/work-centered-wide-20261109/figma-w4-procedure-authoring.png",
+      "node": "2225:2064",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 191873,
+      "sha256": "e4c17d51db87658f31b53bd3a1d9e66cfd2c31050785417a15a435c5bf1d1773"
+    }
+  ],
+  "captures_revision_4": [
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1920x1080-W1.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1920x1080-W2.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1920x1080-W3.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1920x1080-W4.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1920x1080-W5.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1920x1080-preview1366-W3.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1920x1080-preview480-W3.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1366x768-W1.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1366x768-W2.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1366x768-W3.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/1366x768-W5.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/480x768-W1.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/480x768-W2.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/480x768-W3.png",
+    "evals/artifacts/work-centered-wide-20261109/revision-4/480x768-W5.png"
+  ],
+  "captures_revision_3": [
+    "evals/artifacts/work-centered-wide-20261109/1920x1080-W1.png",
+    "evals/artifacts/work-centered-wide-20261109/1920x1080-W2.png",
+    "evals/artifacts/work-centered-wide-20261109/1920x1080-W3.png",
+    "evals/artifacts/work-centered-wide-20261109/1920x1080-W4.png",
+    "evals/artifacts/work-centered-wide-20261109/1920x1080-preview1366-W1.png",
+    "evals/artifacts/work-centered-wide-20261109/1920x1080-preview480-W1.png",
+    "evals/artifacts/work-centered-wide-20261109/1366x768-W1.png",
+    "evals/artifacts/work-centered-wide-20261109/1366x768-W3.png",
+    "evals/artifacts/work-centered-wide-20261109/1366x768-W4.png",
+    "evals/artifacts/work-centered-wide-20261109/480x768-W1.png",
+    "evals/artifacts/work-centered-wide-20261109/480x768-W3.png",
+    "evals/artifacts/work-centered-wide-20261109/480x768-W4.png"
+  ],
+  "figma_check": {
+    "script": "scripts/figma_check.js",
+    "runs": [
+      {
+        "when": "after drawing, before the change-log line",
+        "ok": true,
+        "errors": 0,
+        "warnings": 0,
+        "next": "C162",
+        "log_lines": 20
+      },
+      {
+        "when": "after C162 and the C142 archive move",
+        "ok": true,
+        "errors": 0,
+        "warnings": 0,
+        "next": "C163",
+        "log_lines": 20,
+        "archived_max": 142
+      },
+      {
+        "when": "revision 4: after drawing, before the change-log line",
+        "ok": true,
+        "errors": 0,
+        "warnings": 0,
+        "next": "C163",
+        "log_lines": 20
+      },
+      {
+        "when": "revision 4: after C163 and the C143 archive move",
+        "ok": true,
+        "errors": 0,
+        "warnings": 0,
+        "next": "C164",
+        "log_lines": 20,
+        "archived_max": 143
+      }
+    ]
+  },
+  "figma_comparison": {
+    "date": "2026-11-09",
+    "environment": "Linux container, Node 22.23.4, Playwright 1.63.0, Chromium 153.0.8010.12, Python 3.12.3, Pillow 10.2.0",
+    "commands": [
+      "node evals/artifacts/work-centered-wide-20261109/revision-4/figma_compare_render.cjs docs/mockups/ees-work/design-mock-15-work-centered-wide.html DIR",
+      "python evals/artifacts/work-centered-wide-20261109/revision-4/figma_compare.py DIR docs/mockups/ees-work/work-centered-wide-20261109 evals/artifacts/work-centered-wide-20261109/revision-4/figma-compare.json"
+    ],
+    "method": "Mock product area (guide band excluded) at 1920 x 1080 against the Figma frame captures at 1:1; rows and columns of long non-white runs (borders, dividers, selected rows) are compared per region, and the share of pixels differing by more than 48 in luminance is reported.",
+    "result": "Structural lines equal on W1–W5 in every region; differing pixels 0.22–1.55% per region (glyph rendering).",
+    "report": "evals/artifacts/work-centered-wide-20261109/revision-4/figma-compare.json",
+    "first_attempt": "The first W1 had the run head 1px taller and the nav and chat spacing off by 3–15px: border widths were added to the padding although this file includes strokes in the auto-layout size, and the nav and chat parts had been drawn from estimates. The paddings were set to the CSS values and the nav and chat parts were rebuilt from the measured box model before W2–W5 were drawn."
+  },
+  "readback": {
+    "revision": 4,
+    "image_fills": 0,
+    "text_outside_screen_frames": 0,
+    "placeholder_text": 0,
+    "fonts": [
+      "IBM Plex Sans KR Regular",
+      "IBM Plex Sans KR Medium",
+      "IBM Plex Sans KR SemiBold",
+      "B612 Regular",
+      "B612 Bold"
+    ],
+    "components_used_by_screens": 13
+  },
+  "readback_revision_2": {
+    "image_fills": 0,
+    "overflow_outside_frame": 0,
+    "fonts": [
+      "Noto Sans KR",
+      "Inter"
+    ],
+    "placeholder_text": 0
+  },
+  "not_run": [
+    "opening the HTML on an in-house PC",
+    "Figma drawings of the single-column layouts (1366 and 480 windows)",
+    "product implementation and product browser comparison",
+    "user usability check"
+  ]
+}

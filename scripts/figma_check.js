@@ -2,6 +2,7 @@
 // 실행: 이 파일 내용 전체를 Figma MCP use_figma의 code로 넘긴다 (파일 XK2wTos6sEuxSHhIj7cqg6).
 // Figma를 고친 뒤, 00 변경 기록에 한 줄을 쓰기 전에 실행한다. 아무것도 고치지 않고 보고만 한다.
 // 기준 숫자는 아래 LIMITS 한 곳에만 둔다. 규칙 원문: AGENTS.md의 Figma 항목, Figma 00 · 설계 관리.
+// 구역 구조: docs/mockups/ees-work/TASK.md#figma-page-structure-20261110
 const LIMITS = {
   featureNodes: 10000, // 기능 페이지 요소 수 (페이지를 열고 인스턴스 안까지 센 값) — 넘으면 정리 신호
   featureChars: 50000, // 기능 페이지 글자 수 — 넘으면 정리 신호
@@ -13,6 +14,7 @@ const FILE_KEY = 'XK2wTos6sEuxSHhIj7cqg6';
 const LOG_ID = '898:31'; // 00 변경 기록
 const MAP_ID = '1288:2'; // 00 기능 지도
 // Keep the original outer headers: links to current designs survive a screen revision.
+// 기능 페이지 맨 위에는 머리말과 구역(Section)만 둔다. 2026-11-11 네 페이지를 옮긴 뒤(C167~C170) 모두에 필수로 검사한다.
 const ACTIVE_PAGES = [
   { id: '1284:3046', name: '공통 · 화면 틀', header: '1284:3047', row: '1288:11', former: ['1284:3058', '1284:3070', '1285:1853'] },
   { id: '1284:3106', name: '업무 · 운영', header: '1284:3107', row: '1288:42', former: ['1689:1061', '1689:1062', '1689:1063', '1284:3118'] },
@@ -23,8 +25,10 @@ const byPage = new Map(ACTIVE_PAGES.map((item) => [item.id, item]));
 const byHeader = new Map(ACTIVE_PAGES.map((item) => [item.header, item]));
 const byFormer = new Map(ACTIVE_PAGES.flatMap((item) => item.former.map((id) => [id, item])));
 const ARCHIVE_LIST = '지난 변경 기록 · 목록'; // 91 보관에서 지난 기록을 모은 프레임 이름
-const LINE = /^C(\d+) · (\d{4}-\d{2}-\d{2}) · (.+) · (PR #\d+|PR 없음) · (백업 B\d{3}|백업 없음)$/;
+// From C165 a line ends with the PR. Lines up to C164 keep their ' · 백업 …' field as written then.
+const LINE = /^C(\d+) · (\d{4}-\d{2}-\d{2}) · (.+) · (PR #\d+|PR 없음)(?: · (백업 B\d{3}|백업 없음))?$/;
 const OLD_TERMS = [/(공통|업무|워크)-\d/, /페이지 이름 끝/];
+const STALE_NAME = /PREVIOUS|대체됨|이전 판|현재|최신|확정|\d+판/; // 기능 페이지 화면 이름에 남은 판·상태
 
 const started = Date.now(), errors = [], warnings = [];
 const kindOf = (name) => /^00 · /.test(name) ? 'admin' : /^70 · /.test(name) ? 'workshop'
@@ -59,19 +63,16 @@ const links = (text) => {
 };
 
 // 1) 페이지 이름·크기
-const pages = figma.root.children, sizes = [], features = [], texts = [], backups = [], seen = new Set();
+const pages = figma.root.children, sizes = [], features = [], texts = [];
 let logFrame = null, archiveList = null;
 for (const page of pages) {
   const kind = kindOf(page.name);
   const canonical = byPage.get(page.id);
   if (canonical && page.name !== canonical.name) errors.push('활성 페이지 이름: ' + page.id + ' “' + page.name + '” → “' + canonical.name + '”');
   if (kind === 'backup') {
-    const m = /^99 · 백업 · (B\d{3}) · (\d{4}-\d{2}-\d{2}) · (.+ 전)$/.exec(page.name);
-    if (!m) { errors.push('백업 이름: ' + page.name); continue; }
-    if (seen.has(m[1])) errors.push('백업 번호 중복: ' + m[1]);
-    seen.add(m[1]);
-    backups.push({ b: m[1], date: m[2] });
-    continue; // 백업 안의 사본은 크기·글 점검에서 뺀다
+    // 2026-11-10 사용자 결정: 제품을 한 번 완성하기 전에는 백업 페이지와 복구 절차를 두지 않는다.
+    errors.push('백업 페이지: ' + page.name + ' (제품을 한 번 완성하기 전에는 백업 페이지를 두지 않음)');
+    continue; // 열지 않는다
   }
   if (kind === 'feature') {
     features.push(page);
@@ -93,9 +94,33 @@ for (const page of pages) {
     warnings.push('정리 신호: ' + page.name + ' 요소 ' + nodes + ' · 글자 ' + chars + ' (기준 ' + LIMITS.featureNodes + ' · ' + LIMITS.featureChars + ')');
   if (kind === 'admin' && chars > LIMITS.adminChars) errors.push('00 글자 ' + chars + ' > ' + LIMITS.adminChars + ' (오래된 기록을 91로)');
 }
-for (const page of features) for (const child of page.children)
-  if (!/^Header · /.test(child.name) && /PREVIOUS|대체됨|이전 판|현재|최신|확정|\d+판/.test(child.name))
-    warnings.push('이전 판으로 보이는 이름: ' + page.name + ' / ' + child.name.slice(0, 40));
+// 1b) 구역: 기능 페이지는 맨 위에 머리말과 구역만 두고, 머리말의 색인에서 모든 구역으로 링크한다.
+// 맨 위의 다른 요소는 오류이고, 구역 이름 경고가 맨 위 이름의 판·상태 표기까지 맡는다.
+const sections = [];
+for (const item of ACTIVE_PAGES) {
+  const page = features.find((p) => p.id === item.id);
+  if (!page) continue; // 페이지가 없으면 3)의 활성 페이지 검사가 보고한다
+  const header = page.children.find((node) => node.id === item.header);
+  if (!header) errors.push('머리말이 맨 위에 없음: ' + page.name + ' (' + item.header + ')');
+  const indexed = new Set();
+  if (header) walk(header, (node) => { if (node.type === 'TEXT') for (const link of links(node)) indexed.add(link.id); });
+  for (const child of page.children) {
+    if (child === header) continue;
+    if (child.type !== 'SECTION') { errors.push('구역 밖 요소: ' + page.name + ' / ' + child.name.slice(0, 40) + ' (' + child.id + ')'); continue; }
+    if (!indexed.has(child.id)) errors.push('머리말 색인에 없는 구역: ' + page.name + ' / ' + child.name);
+    if (/\d|PREVIOUS|대체됨|이전|현재|최신|확정|초안|구현|사내 확인/.test(child.name))
+      warnings.push('구역 이름에 번호·판·상태: ' + page.name + ' / ' + child.name);
+    let nodes = 0, chars = 0;
+    walk(child, (node) => { if (node === child) return; nodes++; if (node.type === 'TEXT') chars += node.characters.length; });
+    sections.push([page.name, child.name, nodes, chars]);
+    if (nodes > LIMITS.featureNodes / 2 || chars > LIMITS.featureChars / 2)
+      warnings.push('구역 크기: ' + page.name + ' / ' + child.name + ' 요소 ' + nodes + ' · 글자 ' + chars
+        + ' (페이지 기준의 절반 초과 · 따로 고쳐지는 구역이면 새 페이지로 나눌지 사용자에게 묻기)');
+    for (const frame of child.children)
+      if (!/^Header · /.test(frame.name) && STALE_NAME.test(frame.name))
+        warnings.push('이전 판으로 보이는 이름: ' + page.name + ' / ' + child.name + ' / ' + frame.name.slice(0, 40));
+  }
+}
 
 // 2) 현재 안내의 옛 표기 (변경 기록과 ‘C##에서 옮김’ 같은 이력 문장은 뺀다)
 for (const text of texts) {
@@ -130,7 +155,7 @@ for (const text of texts) for (const link of links(text)) {
     warnings.push('보관을 가리키는 링크: ' + text.id + ' “' + link.label.slice(0, 24) + '” → ' + link.id);
 }
 // Only the four current feature rows own an official header. The map can also
-// link to the workshop, archives, backups and an end-to-end example.
+// link to the workshop, archives and an end-to-end example.
 const map = await get(MAP_ID);
 if (!map || kindOf(pageOf(map)?.name || '') !== 'admin') errors.push('00 기능 지도 ' + MAP_ID + '을 찾지 못함');
 for (const item of ACTIVE_PAGES) {
@@ -177,21 +202,8 @@ for (const s of lines) {
 }
 const next = 'C' + (Math.max(archivedMax, ...lines.map(number)) + 1);
 
-// 5) 백업: 처음 언급한 기록(= 만든 기록)과 한 줄 기록의 PR. PR 병합 여부는 GitHub에서 확인한다.
-const first = new Map();
-for (const s of archived.map((n) => n.characters).concat(lines)) {
-  const one = LINE.exec(s), re = /B(\d{3})/g;
-  let m;
-  while ((m = re.exec(s))) if (!first.has('B' + m[1])) first.set('B' + m[1], { c: number(s) ? 'C' + number(s) : '?', pr: one ? one[4] : 'PR 확인 필요' });
-}
-const backupReport = backups.map((b) => {
-  const f = first.get(b.b);
-  if (!f) warnings.push('백업을 만든 기록이 없음: ' + b.b);
-  return [b.b, b.date, f ? f.c : '?', f ? f.pr : 'PR 확인 필요'];
-});
-
 await figma.setCurrentPageAsync(pages[0]);
 const cap = (list) => list.length > 40 ? list.slice(0, 40).concat(['… 외 ' + (list.length - 40) + '건']) : list;
 return { ok: errors.length === 0, errors: cap(errors), warnings: cap(warnings), next, logLines: lines.length,
-  ms: Date.now() - started, sizes, backups: backupReport,
+  ms: Date.now() - started, sizes, sections: cap(sections),
   activePages: ACTIVE_PAGES.map(({ id, name, header }) => ({ id, name, header })), formerLinks: cap(formerLinks) };
