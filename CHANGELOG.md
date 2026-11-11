@@ -6,6 +6,7 @@
 - ‘업무 · 운영’도 같은 방식으로 구역 5개(운영·운영 기준·셋업·장애 대응·실행 기록)와 색인으로 정리하고, 겹쳐 있던 공동 진행 화면을 옆으로 옮겼다(C168). 고정 점검의 구역 검사 대상에 더했다. [기록](evals/figma-page-structure-20261110.md#figma-page-structure-operations-20261111).
 - ‘공통 · 화면 틀’도 구역 5개(화면 틀·작업 위치와 권한·대화와 저장한 프롬프트·AI 도우미 설정·상태와 공통 부품)와 색인으로 정리했다(C169). 원본 부품도 구역에 넣었고 인스턴스 연결은 그대로다. [기록](evals/figma-page-structure-20261110.md#figma-page-structure-common-20261111).
 - ‘워크 · 업무 절차’도 새 구역 5개와 이름을 맞춘 기존 구역 3개, 색인으로 정리하고, 주인 없는 장면 시각 하나를 지우고 B4 메모를 B4 옆으로 옮겼다(C170). 이제 네 기능 페이지 모두 맨 위에 머리말과 구역만 있다. [기록](evals/figma-page-structure-20261110.md#figma-page-structure-procedures-20261111).
+- 70 작업실의 4판 검토안을 구역 하나로 묶고, 채택된 1판 검토안 5개를 91의 지난 시안 프레임으로 옮겼다(C171). 조사 스크립트에 다른 페이지로 옮긴 화면을 따로 비교하는 기능을 더했다. [기록](evals/figma-page-structure-20261110.md#figma-page-structure-workroom-20261111).
 - 문서 점검기가 문서 크기를 Windows 줄바꿈(CRLF)으로 셌을 때로 본다. 4차 UI 기록이 Windows에서만 1 MiB 한도를 넘는 일이 세 번째로 생겨(#114·#115에 이어) Linux에서도 같은 결과가 나오게 했다(시험 1개 추가). Figma 구조 개선 기록은 [별도 파일](evals/figma-page-structure-20261110.md)로 옮겼다. [재발 기록](evals/no-run-mode-20261102.md#doc-size-crlf-20261111).
 
 ## 2026-11-10 · Figma 백업 페이지 폐지

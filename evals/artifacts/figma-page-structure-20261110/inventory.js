@@ -4,6 +4,8 @@
 const PAGE_IDS = ['1284:3046', '1284:3106', '1285:1829', '1285:1841', '897:761']; // 네 기능 페이지와 70 작업실
 const NEW_IDS = []; // 그 단계에서 새로 만든 구역·색인 글. ID 해시에서 뺀다 (안의 기존 요소는 그대로 센다)
 const SAMPLES = ['2017:76', '2052:358', '2018:194']; // 이 페이지에 있는 것만 PNG로 내보내 해시를 낸다
+const SKIP_TREES = []; // 다른 페이지로 옮길 요소. 그 아래 전체를 페이지의 수·해시·링크에서 뺀다
+const TREES = []; // 어느 페이지에 있든 따로 요약할 요소: 아래 전체의 ID·배치·인스턴스 해시, 수, PNG 해시
 const FILE_KEY = 'XK2wTos6sEuxSHhIj7cqg6';
 
 const started = Date.now();
@@ -24,6 +26,11 @@ const stat = (root) => {
 };
 async function inventory(page) {
   await page.loadAsync();
+  const skipTrees = new Set(SKIP_TREES);
+  const walkPage = (fn) => {
+    const stack = [...page.children];
+    while (stack.length) { const n = stack.pop(); if (skipTrees.has(n.id)) continue; fn(n); if ('children' in n && n.children) for (const c of n.children) stack.push(c); }
+  };
   const row = (n) => [n.id, n.name, n.type, ...at(n), r(n.width), r(n.height), ...stat(n)];
   const header = page.children.find((n) => /^Header · /.test(n.name)) || null;
   const inHeader = (n) => { for (let p = n; p && p !== page; p = p.parent) if (p === header) return true; return false; };
@@ -31,14 +38,13 @@ async function inventory(page) {
   const rootOf = (n) => { let x = n; while (x.parent && x.parent.type !== 'PAGE' && x.parent.type !== 'SECTION') x = x.parent; return x; };
 
   // 맨 위 요소 (구역이면 안의 요소까지)
-  const top = page.children.map((n) => n.type === 'SECTION' ? [...row(n), n.children.map(row)] : row(n));
+  const top = page.children.filter((n) => !skipTrees.has(n.id)).map((n) => n.type === 'SECTION' ? [...row(n), n.children.map(row)] : row(n));
 
   // 전후 비교용 해시: 노드 ID, 캔버스 위치·크기, 맨 위 요소 안의 배치, 인스턴스 → 원본 부품
   // (위치·배치에서 머리말은 뺀다. 색인 줄이 늘어나므로 머리말 글은 따로 기록한다)
   const ids = [], geo = [], lay = [], texts = [], inst = [];
   let nodes = 0, chars = 0;
-  walk(page, (n) => {
-    if (n === page) return;
+  walkPage((n) => {
     nodes++;
     if (n.type === 'TEXT') { chars += n.characters.length; texts.push(n); }
     if (n.type === 'INSTANCE') inst.push(n);
@@ -99,7 +105,33 @@ async function inventory(page) {
       layout: [lay.length, fnv(lay.sort().join('|'))], instances: [pairs.length, fnv(pairs.sort().join(','))] },
     top, header: header ? [...row(header), headerTexts] : null, links, samples };
 }
+// 따로 요약할 요소: 페이지를 옮겨도 같아야 하는 값 (위치는 요소 기준, 캔버스 위치는 따로 적는다)
+async function trees(ids) {
+  const out = [];
+  for (const id of ids) {
+    const root = await figma.getNodeByIdAsync(id);
+    let p = root;
+    while (p && p.type !== 'PAGE') p = p.parent;
+    if (p) await p.loadAsync();
+    const all = [], lay = [], inst = [];
+    const b = at(root);
+    walk(root, (n) => {
+      all.push(n.id);
+      const a = at(n);
+      lay.push(n.id + '@' + r(a[0] - b[0]) + ',' + r(a[1] - b[1]) + ',' + r(n.width) + 'x' + r(n.height));
+      if (n.type === 'INSTANCE') inst.push(n);
+    });
+    const pairs = [];
+    for (const n of inst) { const m = await n.getMainComponentAsync(); pairs.push(n.id + '>' + (m ? m.id : 'none')); }
+    const bytes = await root.exportAsync({ format: 'PNG', constraint: { type: 'SCALE', value: 1 } });
+    out.push({ id, name: root.name, page: p ? p.id : null, parent: root.parent.id, at: b, size: [r(root.width), r(root.height)], counts: stat(root),
+      ids: [all.length, fnv(all.sort().join(','))], layout: [lay.length, fnv(lay.sort().join('|'))],
+      instances: [pairs.length, fnv(pairs.sort().join(','))], png: [fnvBytes(bytes), bytes.length] });
+  }
+  return out;
+}
 const pages = [];
 for (const id of PAGE_IDS) pages.push(await inventory(await figma.getNodeByIdAsync(id)));
-return { marker: 'figma-structure-inventory', newIds: NEW_IDS, ms: Date.now() - started,
-  columns: ['id', 'name', 'type', 'x', 'y', 'w', 'h', 'nodes', 'chars', 'instances', 'children'], pages };
+return { marker: 'figma-structure-inventory', newIds: NEW_IDS, skipTrees: SKIP_TREES, ms: Date.now() - started,
+  columns: ['id', 'name', 'type', 'x', 'y', 'w', 'h', 'nodes', 'chars', 'instances', 'children'], pages,
+  trees: TREES.length ? await trees(TREES) : [] };
