@@ -2997,7 +2997,7 @@ diff --git a/src/lib/components/ees/EesShell.svelte b/src/lib/components/ees/Ees
 new file mode 100644
 --- /dev/null
 +++ b/src/lib/components/ees/EesShell.svelte
-@@ -0,0 +1,394 @@
+@@ -0,0 +1,401 @@
 +<script lang="ts">
 +	import { getContext, onMount, tick } from 'svelte';
 +	import { get } from 'svelte/store';
@@ -3006,11 +3006,12 @@ new file mode 100644
 +	import { eesRequest } from '$lib/apis/ees-work';
 +	import { getFolderById } from '$lib/apis/folders';
 +	import { toast } from 'svelte-sonner';
-+	import { user, selectedFolder, showSettings, showSearch, chatId, chatTitle, temporaryChatEnabled } from '$lib/stores';
++	import { user, workspaceActions, selectedFolder, showSettings, showSearch, chatId, chatTitle, temporaryChatEnabled } from '$lib/stores';
 +	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 +	import Chat from '$lib/components/chat/Chat.svelte';
 +	import Spinner from '$lib/components/common/Spinner.svelte';
 +	import SettingsModal from '$lib/components/chat/SettingsModal.svelte';
++	import SplitCreateButton from '$lib/components/common/SplitCreateButton.svelte';
 +	import { eesSnapshot, eesCompact, eesAction, eesSync, eesReferenceHosts, eesHelperState,
 +		eesSessionReady, eesChatDisplay, eesChatHistoryOpen } from './state';
 +	const i18n: any = getContext('i18n');
@@ -3033,6 +3034,8 @@ new file mode 100644
 +	$: folderReady = admin || !folderRoute || $selectedFolder?.id === $page.params.folderId;
 +	$: chatRoute = folderRoute || /^\/(?:c\/[^/]+\/?)?$/.test(path);
 +	$: nativeRoute = !chatRoute;
++	$: assetSection = /^\/workspace\/(models|knowledge|skills)(?:\/|$)/.exec(path)?.[1] ?? '';
++	$: assetCanCreate = loaded && !admin && $eesSessionReady && assetSection && ($user?.role === 'admin' || $user?.permissions?.workspace?.[assetSection]);
 +	// Native normalizes the requested tab to boolean true after accepting it.
 +	$: if (!$showSettings || $user?.role !== 'admin') admin = false;
 +	else if (typeof $showSettings === 'string') admin = $showSettings.startsWith('admin:');
@@ -3303,13 +3306,16 @@ new file mode 100644
 +</script>
 +
 +<svelte:window bind:innerWidth={width} on:keydown|capture={chatEscape} />
-+<div data-ees-source-shell data-ees-route={nativeRoute || admin ? 'native' : 'chat'} data-ees-chat-state={chatState}
++<div data-ees-source-shell data-ees-native-asset-toolbar data-ees-route={nativeRoute || admin ? 'native' : 'chat'} data-ees-chat-state={chatState}
 +	data-resizing={resizing} class="ees-source-shell" style:--ees-chat-width={chatWidth + 'px'}
 +	on:pointerdown={(event) => window.__eesNativeWorkV1?.dismissHelp?.(event)}>
 +	<div class="ees-navigation" inert={chatState === 'overlay'}><Sidebar /></div>
 +	<main id="main-content" data-ees-work-surface class="ees-center" inert={chatState === 'overlay' || chatState === 'expanded'}>
-+		<header data-ees-work-toolbar class="ees-work-toolbar">
-+			<strong>{heading}</strong>
++		<header data-ees-work-toolbar data-ees-source-workspace-heading={assetSection && !admin ? true : undefined} class="ees-work-toolbar">
++			{#if assetSection && !admin}
++				<h1 class="min-w-0 flex-1 truncate font-semibold">{t(({models:'EES.Nav.Models',knowledge:'EES.Nav.Knowledge',skills:'EES.Nav.Skills'})[assetSection],heading)}</h1>
++				{#if assetCanCreate}<SplitCreateButton actions={$workspaceActions} />{/if}
++			{:else}<strong>{heading}</strong>{/if}
 +			<button type="button" data-ees-chat-toggle bind:this={chatToggle} aria-controls="ees-chat-surface" aria-expanded={chatOpen}
 +				aria-label={t(chatOpen ? 'EES.Chat.Close' : 'EES.Chat.Open', chatOpen ? 'Close chat' : 'Open chat')}
 +				on:click={() => setChatOpen(!chatOpen)}>
@@ -3357,6 +3363,7 @@ new file mode 100644
 +	.ees-navigation { flex:none; display:flex; height:100%; min-height:0; }
 +	.ees-center { display:flex; flex:1 1 0; flex-direction:column; min-width:0; min-height:0; overflow:hidden; }
 +	.ees-work-toolbar { display:flex; flex:none; height:48px; min-width:0; padding:0 20px; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid var(--ees-border,#e6e6e9); color:var(--ees-text-primary,#1f2023); }
++	.ees-work-toolbar[data-ees-source-workspace-heading],
 +	.ees-center:has(:global(#ees-work-panel:not([hidden])[data-ees-mode='author'])) .ees-work-toolbar,
 +	.ees-center:has(:global(#ees-work-panel.ew-vd:not([hidden]))) .ees-work-toolbar,
 +	.ees-center:has(:global(#ees-work-panel:not([hidden]) .ew-record)) .ees-work-toolbar,
@@ -5115,7 +5122,23 @@ index 9aee4da..08ebc41 100644
 diff --git a/src/routes/(app)/workspace/+layout.svelte b/src/routes/(app)/workspace/+layout.svelte
 --- a/src/routes/(app)/workspace/+layout.svelte
 +++ b/src/routes/(app)/workspace/+layout.svelte
-@@ -116,138 +116,26 @@
+@@ -26,6 +26,7 @@
+ 	const i18n = getContext<Writable<i18nType>>('i18n');
+ 
+ 	let loaded = false;
++	let hasAssetToolbar = false;
+ 	let lastPath = '';
+ 	let activeWorkspaceSection = '';
+ 	let visibleActions = [];
+@@ -78,6 +79,7 @@
+ 	};
+ 
+ 	onMount(async () => {
++		hasAssetToolbar = Boolean(document.querySelector('[data-ees-native-asset-toolbar]'));
+ 		if ($user?.role !== 'admin') {
+ 			if ($page.url.pathname.includes('/models') && !$user?.permissions?.workspace?.models) {
+ 				goto('/', { replaceState: true });
+@@ -116,138 +118,28 @@
  
  {#if loaded}
  	<div
@@ -5246,7 +5269,9 @@ diff --git a/src/routes/(app)/workspace/+layout.svelte b/src/routes/(app)/worksp
 -				<!-- <div class="flex items-center text-xl font-normal">{$i18n.t('Workspace')}</div> -->
 -			</div>
 -		</nav>
++		{#if !hasAssetToolbar || !["models", "knowledge", "skills"].includes(activeWorkspaceSection)}
 +		<header data-ees-source-workspace-heading class="h-12 shrink-0 flex items-center px-4 border-b border-gray-200 gap-2"><h1 class="font-semibold flex-1">{$i18n.t(({models:'EES.Nav.Models',knowledge:'EES.Nav.Knowledge',prompts:'EES.Nav.Prompts',skills:'EES.Nav.Skills',tools:'EES.Nav.Connections'})[activeWorkspaceSection] || 'EES.Nav.Workspace',{defaultValue:'Workspace'})}</h1><SplitCreateButton actions={visibleActions}/></header>
++		{/if}
  
  		<div
  			class="  pb-1 px-3 flex-1 min-w-0 max-h-full overflow-y-auto overflow-x-hidden"
