@@ -1264,7 +1264,10 @@ test('phase 1 import copies a permitted source to a new draft and keeps unsaved 
  const h=phase1Harness();await phase1New(h);h.click('draft_import_picker');await flush();assert.match(h.markup,/원본의 설정·개인 토큰은 가져오지 않습니다/);h.click('draft_import',{id:'native',function:'list_documents'});await flush();assert.deepEqual(Object.keys(h.operations.at(-1)).sort(),['action','expected_revision','function','request_id','scope','source_tool_id']);assert.equal(h.operations.at(-1).expected_revision,0);assert.match(h.markup,/원본은 바뀌지 않았습니다/);h.click('draft_list');await flush();h.click('draft_new');await flush();assert.equal(h.fields.find(field=>field.name==='draft_name').value,'새 문서 도구');
 });
 test('phase 1 drafts are searchable but never join the workflow picker and future tabs remain disabled',async()=>{
- const h=phase1Harness();await phase1Code(h);h.click('draft_save_next');await flush();for(const title of ['연결','시험','사용'])assert.match(h.markup,new RegExp('<button[^>]+role="tab"[^>]+disabled[^>]*>'+title));h.click('draft_list');await flush();h.field('ew-draft-search','없는 이름');assert.match(h.markup,/찾는 도구가 없습니다/);h.field('ew-draft-search','문서');assert.match(h.markup,/새 문서 도구/);assert.match(h.markup,/업무절차에서 고를 수 없습니다/);assert.deepEqual(h.state.tools,[]);assert.deepEqual(h.state.operations.shared_tools,[]);
+ const h=phase1Harness();await phase1Code(h);h.click('draft_save_next');await flush();
+ const tabs=h.buttons.filter(button=>button.dataset.authorAction==='draft_tab');
+ assert.deepEqual(tabs.map(tab=>[tab.dataset.id,tab.disabled]),[['basic',false],['io',false],['trial',true],['use',true]]);
+ h.click('draft_list');await flush();h.field('ew-draft-search','없는 이름');assert.match(h.markup,/찾는 도구가 없습니다/);h.field('ew-draft-search','문서');assert.match(h.markup,/새 문서 도구/);assert.match(h.markup,/업무절차에서 고를 수 없습니다/);assert.deepEqual(h.state.tools,[]);assert.deepEqual(h.state.operations.shared_tools,[]);
 });
 test('phase 1 non-admin cannot create read import check or save drafts and permission loss hides source code',async()=>{
  const h=phase1Harness();await phase1Code(h);h.state.capabilities.is_admin=false;h.render();assert.doesNotMatch(h.markup,/name="draft_code"|name="draft_name"/);const count=h.operations.length;for(const action of ['draft_new','draft_open','draft_import','draft_check','draft_save']){h.click(action,{id:'native',function:'list_documents'});await flush();}assert.equal(h.operations.length,count);assert.doesNotMatch(h.markup,/data-author-action="draft_new"|data-author-action="draft_open"/);assert.match(h.markup,/도구 <small>/);
@@ -1368,11 +1371,12 @@ test('phase 2 use settings validate groups and evidence before writing and accep
 test('phase 2 usage stop and resume are explicit revision guarded operations preserving the version',async()=>{
  const h=phase2Harness({connected:true});await phase2Activate(h);h.dialogs.push({});h.click('draft_use_disable');await flush();assert.equal(h.operations.at(-1).action,'tool_draft_use_disable');assert.equal(h.operations.at(-1).expected_use_revision,1);assert.match(h.markup,/data-use-state="disabled" data-active-version="1"/);assert.match(h.markup,/자동으로 다시 켜지지 않습니다/);h.dialogs.push({});h.click('draft_use_enable');await flush();assert.equal(h.operations.at(-1).expected_use_revision,2);assert.match(h.markup,/data-use-state="active" data-active-version="1"/);
 });
-test('tool function settings, connection, trial and use share the current unsaved draft',async()=>{
+test('basic information, input/output, trial and use share one navigation level and preserve the unsaved draft',async()=>{
  const h=phase2Harness({connected:true});await phase2Open(h);
  h.click('draft_tab',{id:'basic'});await flush();h.field('draft_description','화면을 전환한 뒤에도 보존');
- const calls=h.operations.length;h.click('draft_tab',{id:'connection'});await flush();h.render();
- assert.match(h.markup,/연결 설정됨/);assert.match(h.markup,/data-author-action="draft_connection"/);
+ const calls=h.operations.length;
+ assert.deepEqual(h.buttons.filter(button=>button.dataset.authorAction==='draft_tab').map(button=>button.dataset.id),['basic','io','trial','use']);
+ h.click('draft_tab',{id:'io'});await flush();h.render();
  h.click('draft_tab',{id:'trial'});await flush();h.click('draft_tab',{id:'use'});await flush();h.click('draft_tab',{id:'basic'});await flush();
  assert.equal(h.fields.find(field=>field.name==='draft_description').value,'화면을 전환한 뒤에도 보존');
  assert.equal(h.operations.length,calls);

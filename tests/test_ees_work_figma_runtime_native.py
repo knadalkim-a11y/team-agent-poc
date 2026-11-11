@@ -403,7 +403,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.assertLessEqual(observed['overflow'], 1, observed)
         self.assertAlmostEqual(observed['header']['height'], 48, delta=1, msg=observed)
         self.assertEqual(observed['title']['fontSize'], '24px', observed)
-        self.assertEqual(observed['title']['lineHeight'], '34px', observed)
+        self.assertEqual(observed['title']['lineHeight'], '37px', observed)
         if observed['menu']:
             self.assertAlmostEqual(observed['menu']['width'], 180, delta=1, msg=observed)
             self.assertAlmostEqual(observed['menu']['height'], 110, delta=1, msg=observed)
@@ -1603,7 +1603,37 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         run = self.command('human_confirm', run_id=run['id'], job_id='job-0', expected_revision=run['revision'])['run']
         run = self.command('close_run', run_id=run['id'], expected_revision=run['revision'])['run']
         self.command('save_settings', workflow_id=key, expected_revision=1, values={'setting': '현재 값'})
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
         self.refresh(); self.click('[data-action="records"]')
+        preview = '[data-action=preview_record][data-run-id="' + run['id'] + '"]'
+        before_preview = self.state(run_id=run['id'])['run']
+        self.click(preview)
+        self.wait("document.querySelector('.ew-records-detail')?.innerText.includes('당시 값')")
+        self.assertNotIn('현재 값', self.text('.ew-records-detail'))
+        boxes = self.browser.evaluate("""(() => {
+            const rect = selector => {
+                const e = document.querySelector(selector), r = e.getBoundingClientRect();
+                return {left:r.left, right:r.right, width:r.width, top:r.top};
+            };
+            return {list:rect('.ew-records-list'), detail:rect('.ew-records-detail')};
+        })()""")
+        self.assertGreater(boxes['list']['width'], 0)
+        self.assertGreater(boxes['detail']['width'], 0)
+        self.assertLessEqual(boxes['list']['right'], boxes['detail']['left'] + 1)
+        self.assertAlmostEqual(boxes['list']['top'], boxes['detail']['top'], delta=1)
+        directory = self.screenshot('parity-records-selected-1920')
+        (directory / 'parity-records-selected-1920.json').write_text(
+            json.dumps(boxes, indent=2) + '\n', encoding='utf-8')
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 480, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+        self.wait("document.querySelector('[data-action=record_list_back]')?.getBoundingClientRect().width>0")
+        self.screenshot('parity-records-selected-480')
+        self.click('[data-action=record_list_back]')
+        self.wait('document.querySelector(' + json.dumps(preview) + ').getBoundingClientRect().width > 0')
+        self.assertEqual(self.state(run_id=run['id'])['run']['revision'], before_preview['revision'])
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
         self.click('[data-action="open_run"][data-run-id="' + run['id'] + '"]')
         self.open_run_details_from_overview()
         self.click('[data-action="workflow_records"]')

@@ -840,6 +840,67 @@ class SourceShellNativeTests(IntegratedNativeCase):
             self.wait("!document.querySelector('#ees-work-dialog')")
             self.assertEqual(self.browser.evaluate('location.pathname'), '/workspace/models')
 
+    def test_figma_native_asset_pages_render_real_entities_inside_the_three_panel_shell(self):
+        self.enable_native_menus()
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+        actor = self.server.user
+        common = {'user_id': actor['id'], 'user': {'id': actor['id'], 'name': actor['name']},
+                  'created_at': 1794301200, 'updated_at': 1794301200,
+                  'access_grants': [], 'write_access': True, 'can_write': True,
+                  'can_edit': True, 'is_owner': True}
+        model = dict(common, id='ees-assistant', name='EES 통합 Assistant', base_model_id='fixture-model',
+                     meta={'description': 'EMS 운영 검토'}, params={'system': 'EMS 절차를 안내합니다.'}, is_active=True)
+        file = dict(common, id='guide-pdf', filename='EMS 운영 매뉴얼.pdf',
+                    meta={'name': 'EMS 운영 매뉴얼.pdf', 'content_type': 'application/pdf', 'size': 1234},
+                    data={'status': 'completed'})
+        knowledge = dict(common, id='kb-ems', name='EMS 운영 가이드', description='EMS 문서 모음',
+                         meta={}, data={'file_ids': [file['id']]}, files=[file])
+        skill = dict(common, id='jira-read', name='Jira 읽기 지침', description='CR 조회 절차',
+                     content='CR 번호로 해당 이슈를 조회합니다.', is_active=True, meta={})
+        listings = {'/api/v1/models/list': [model], '/api/v1/knowledge/list': [knowledge],
+                    '/api/v1/knowledge/search': [knowledge], '/api/v1/skills/list': [skill]}
+        records = {'/api/v1/models/model': model, '/api/v1/knowledge/kb-ems': knowledge,
+                   '/api/v1/skills/id/jira-read': skill, '/api/v1/skills/jira-read': skill}
+        original = NativeUIHandler.do_GET
+
+        def get_asset(handler):
+            path = urlparse(handler.path).path.rstrip('/')
+            if path in listings:
+                return handler.send_content({'items': listings[path], 'total': len(listings[path])})
+            if path in records:
+                return handler.send_content(records[path])
+            if path.startswith('/api/v1/knowledge/kb-ems/files'):
+                return handler.send_content({'items': [file], 'total': 1})
+            return original(handler)
+
+        cases = [
+            ('/workspace/models', 'models', 'b6-models-list'),
+            ('/workspace/models/edit?id=ees-assistant', 'model-editor', 'b6-model-editor'),
+            ('/workspace/knowledge/kb-ems', 'knowledge', 'b7-knowledge-detail'),
+            ('/workspace/skills/edit?id=jira-read', 'skill-editor', 'b8-skill-editor'),
+        ]
+        with patch.object(NativeUIHandler, 'do_GET', get_asset):
+            for route, marker, label in cases:
+                with self.subTest(route=route):
+                    self.navigate(route)
+                    self.wait("document.querySelector('[data-ees-asset=" + marker + "]')?.getBoundingClientRect().width > 0")
+                    self.wait("document.querySelector('[data-ees-source-shell]')?.dataset.eesChatState === 'docked'")
+                    geometry = self.browser.evaluate("""(() => {
+                        const boxes = ['#sidebar', '[data-ees-work-surface]', '[data-ees-chat-surface]'].map(selector => {
+                            const r = document.querySelector(selector).getBoundingClientRect();
+                            return [r.x, r.width];
+                        });
+                        return {boxes, viewport: [innerWidth, innerHeight]};
+                    })()""")
+                    self.assertEqual(geometry['viewport'], [1920, 1080])
+                    for (left, width), (x, expected) in zip(geometry['boxes'], [(0, 256), (256, 1104), (1360, 560)]):
+                        self.assertAlmostEqual(left, x, delta=1)
+                        self.assertAlmostEqual(width, expected, delta=1)
+                    name = 'parity-' + label + '-1920'
+                    out = self.screenshot(name)
+                    (out / (name + '.json')).write_text(json.dumps(geometry, indent=2) + '\n', encoding='utf-8')
+
     def native_link_selector(self, target, label, labels, *, return_from=None):
         if target == 'models':
             self.click('.ees-settings-trigger')
