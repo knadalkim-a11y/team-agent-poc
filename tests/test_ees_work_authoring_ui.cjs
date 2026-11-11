@@ -1020,9 +1020,18 @@ test('Figma A12 compact completion preserves multiline text and metadata through
  const changed=rule+'\n셋째 줄: 담당자가 판정합니다.';h.field('completion_rule',changed);h.click('save');await flush();
  assert.deepEqual(h.writes.at(-1).definition.nodes.j.completion,{...value.nodes.j.completion,rule:changed});
 });
-test('A12 connected tool shows its name without a read badge or version pinning',async()=>{
- const h=harness(),{search}=sharedReviewFixture(h),value=definition();search.version=7;Object.assign(value.nodes.j,{mode:'tool',shared_tool_id:search.id,inputs:[{id:'query',name:'검색어',type:'text',scope:'factory'}],argument_bindings:{query:{input:'query'}}});installDefinition(h,value);await h.node();
- assert.match(h.markup,/연결된 도구/);assert.doesNotMatch(h.markup,/쓰는 도구|>조회<|class="ew-shared-picker"|도구에 넣을 값/);assert.match(h.markup,/Confluence 페이지 찾기/);assert.doesNotMatch(h.markup,/>v7</);search.version=8;h.render();assert.doesNotMatch(h.markup,/>v[78]</);assert.deepEqual(h.draft().definition,value);assert.equal(h.draft().dirty,false);
+test('B3 shows the accessible tool version and output without pinning either in the draft',async()=>{
+ const h=harness(),{search}=sharedReviewFixture(h),value=definition();
+ search.version=7;
+ Object.assign(value.nodes.j,{mode:'tool',shared_tool_id:search.id,inputs:[{id:'query',name:'검색어',type:'text',scope:'factory'}],argument_bindings:{query:{input:'query'}}});
+ installDefinition(h,value);await h.node();
+ assert.match(h.markup,/연결된 도구/);assert.match(h.markup,/Confluence 페이지 찾기/);
+ assert.doesNotMatch(h.markup,/쓰는 도구|>조회<|class="ew-shared-picker"|도구에 넣을 값/);
+ assert.match(h.markup,/>v7</);assert.match(h.markup,/class="ew-job-output"/);
+ search.version=8;h.render();assert.match(h.markup,/>v8</);assert.doesNotMatch(h.markup,/>v7</);
+ search.can_use=false;h.render();
+ assert.doesNotMatch(h.markup,/>v8<|class="ew-job-output"/);
+ assert.deepEqual(h.draft().definition,value);assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);
 });
 test('A12 setup stages candidates and input edits until explicit apply and isolates other workflows',async()=>{
  const h=harness();await c66SelectShared(h);const before=h.draft(),other=copy(h.workflows.get('q').draft);await a12Open(h,'shared:managed-get_page');h.modalField('data-job-tool-value','page_id','12345');assert.deepEqual(h.draft(),before);await h.modalClose('apply');const node=h.draft().definition.nodes.j;assert.equal(node.shared_tool_id,'managed-get_page');assert.deepEqual(node.argument_bindings.page_id,{constant:'12345'});assert.equal(node.human_confirmation,true);assert.deepEqual(h.workflows.get('q').draft,other);assert.equal(h.writes.length,0);
