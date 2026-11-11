@@ -2278,7 +2278,16 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 [data-ees-work-surface] #ees-work-panel .ew-request-controls .ew-request-external { overflow-wrap: anywhere; }
 
 /* The history breakpoint follows the work pane when either sidebar is resized. */
-[data-ees-work-surface] .ew-records-screen { container: ees-records / inline-size; min-width: 0; }
+/* Anchor the 960px spread to the normal start inset. The scroll host's
+   stable gutter occupies its end margin, not the two record columns. */
+[data-ees-work-surface] #ees-work-panel #ees-work-content:has(> .ew-records-screen) {
+  padding-inline-end: min(32px, var(--ees-work-page-inset));
+}
+[data-ees-work-surface] .ew-records-screen {
+  container: ees-records / inline-size;
+  max-inline-size: 960px;
+  min-width: 0;
+}
 [data-ees-work-surface] .ew-records-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
