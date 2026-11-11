@@ -234,8 +234,11 @@ class BuildExecutableTests(unittest.TestCase):
 class NativeSourceHookTests(unittest.TestCase):
     run_node = NativeDraftHookTests.run_node
     def test_real_native_restore_creation_and_late_completion_boundaries(self):
-        source = (Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"]) /
-                  "src/lib/components/chat/Chat.svelte").read_text(encoding="utf-8")
+        source_root = Path(os.environ["EES_TEST_FRONTEND_SOURCE_DIR"])
+        source = (source_root / "src/lib/components/chat/Chat.svelte").read_text(encoding="utf-8")
+        input_source = (source_root / "src/lib/components/chat/MessageInput.svelte").read_text(encoding="utf-8")
+        literal_restore = _between(input_source, "export const restoreDraftText =", "\n\texport const setText =")
+        literal_restore = literal_restore.replace("export ", "", 1).replace("text: string", "text")
         restore = _between(source, "const restoreChatInput =", "\n\tconst withSelectedText")
         restore = restore.replace("storageChatInput: string | null", "storageChatInput")
         draft = _between(source, "const getChatInputDraft =", "\n\tconst saveDraft =")
@@ -254,7 +257,10 @@ let selectedToolIds=[],selectedSkillIds=[],selectedFilterIds=[],webSearchEnabled
 let chat=null,approvalCalls=0,failCreation=false,beginCalls=0,saveDraftTimeout=null,loadedChatIdProp='';
 const notifications=[],persisted=[],selectedModels=['model'],params={},chatVariables={},$settings={},$socket={id:'socket'};
 const $selectedFolder=null,$i18n={t:x=>x};
-const messageInput={setText(value){prompt=value;}},history={messages:{}};
+let editorText='';
+const chatInputElement={setText(value){editorText=value;}};
+const messageInput={restoreDraftText(value){restoreDraftText(value);},
+ setText(){assert.fail('Saved text must not run asynchronous template expansion.');}},history={messages:{}};
 const localStorage={token:'synthetic'};
 const handleToolApprovalModeChange=async value=>{approvalCalls++;toolApprovalMode=value;};
 const chatId={set:async value=>{$chatId=value;chatIdProp=value;}},selectedFolder={set(){}},tick=async()=>{};
@@ -268,10 +274,14 @@ const window={location:{pathname:'/'},history:{replaceState(state,title,path){wi
  captureReference(){return {kind:'work',workflow_id:'captured-work'};}
 }};
 const createNewChat=async()=>{if(failCreation)throw Error('synthetic creation failure');return {id:'server-created'};};
-''' + restore + draft + create + completion + reference + _hook_source() + r'''
+''' + literal_restore + restore + draft + create + completion + reference + _hook_source() + r'''
 (async()=>{
  assert.equal(await window.__eesNativeDraftV1.restore(JSON.stringify({prompt:'restored',selectedToolIds:['kept'],toolApprovalMode:'full'})),true);
  assert.equal(prompt,'restored');assert.deepEqual(selectedToolIds,['kept']);assert.equal(toolApprovalMode,'ask');assert.equal(approvalCalls,0);
+ assert.equal(editorText,'restored');
+ const literal='작성 중인 {{USER_NAME}} · {{CLIPBOARD}}';
+ assert.equal(await restoreChatInput(JSON.stringify({prompt:literal,selectedToolIds:['kept']})),true);
+ assert.equal(prompt,literal);assert.equal(editorText,literal);
  files=[{type:'image',url:'private-image'},{type:'file',id:'doc',user:{private:true},access_grants:['private']}];
  const snapshot=window.__eesNativeDraftV1.read();assert.equal(snapshot.files.length,1);assert.equal(snapshot.files[0].user,undefined);
  assert.equal(snapshot.files[0].access_grants,undefined);assert.equal(Object.hasOwn(snapshot,'toolApprovalMode'),false);

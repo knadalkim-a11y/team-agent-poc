@@ -216,8 +216,11 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         def capture_style(label, tabs=None):
             self.browser.call('Input.dispatchMouseEvent', {'type': 'mouseMoved', 'x': 0, 'y': 0})
             if tabs:
-                self.wait('getComputedStyle(document.querySelector(' + json.dumps(tabs) +
-                          ').querySelector("button")).backgroundColor === "rgba(0, 0, 0, 0)"')
+                self.wait("""((selector) => {
+                    const buttons = document.querySelectorAll(selector + ' > button');
+                    return buttons.length > 0 && [...buttons].every(button =>
+                        getComputedStyle(button).backgroundColor === 'rgba(0, 0, 0, 0)');
+                })(""" + json.dumps(tabs) + ')')
             result = self.browser.evaluate("""((selector)=>{
               const panel=document.querySelector('#ees-work-panel'),author=panel.querySelector('#ees-work-designer');
               const result={panel:getComputedStyle(panel).backgroundColor,author:author?getComputedStyle(author).backgroundColor:null};

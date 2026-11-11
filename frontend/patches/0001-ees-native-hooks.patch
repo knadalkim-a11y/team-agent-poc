@@ -169,7 +169,7 @@ index d552ba8..384bf93 100644
  </svelte:head>
  
 diff --git a/src/lib/components/chat/Chat.svelte b/src/lib/components/chat/Chat.svelte
-index 875aee0..f42ae58 100644
+index 875aee0..d74a3fe 100644
 --- a/src/lib/components/chat/Chat.svelte
 +++ b/src/lib/components/chat/Chat.svelte
 @@ -109,6 +109,10 @@
@@ -228,6 +228,15 @@ index 875aee0..f42ae58 100644
  
  	// Chat Input
  	let prompt = '';
+@@ -745,7 +768,7 @@
+ 		try {
+ 			const input = JSON.parse(storageChatInput);
+ 			prompt = input.prompt ?? '';
+-			messageInput?.setText(prompt);
++			messageInput?.restoreDraftText(prompt);
+ 			files = input.files ?? [];
+ 			selectedToolIds = input.selectedToolIds ?? [];
+ 			selectedSkillIds = input.selectedSkillIds ?? [];
 @@ -790,13 +813,27 @@
  		initEmbeddedDraft();
  	}
@@ -1261,7 +1270,7 @@ index 875aee0..f42ae58 100644
  									{history}
  									bind:selectedModels
 diff --git a/src/lib/components/chat/MessageInput.svelte b/src/lib/components/chat/MessageInput.svelte
-index a2df614..6754484 100644
+index a2df614..0bc8c32 100644
 --- a/src/lib/components/chat/MessageInput.svelte
 +++ b/src/lib/components/chat/MessageInput.svelte
 @@ -1,5 +1,6 @@
@@ -1271,7 +1280,17 @@ index a2df614..6754484 100644
  	import { toast } from 'svelte-sonner';
  
  	import { marked } from 'marked';
-@@ -611,8 +612,22 @@
+@@ -404,6 +405,9 @@
+ 	export const focus = (options: FocusOptions = {}) => {
+ 		chatInputElement?.focus(options);
+ 	};
++
++	// A saved draft is literal editor content. Only explicit prompt insertion expands variables.
++	export const restoreDraftText = (text: string) => chatInputElement?.setText(text);
+ 
+ 	export const setText = async (text?: string, cb?: (text: string) => void) => {
+ 		const chatInput = document.getElementById('chat-input');
+@@ -611,8 +615,22 @@
  		}
  	};
  
@@ -1295,7 +1314,7 @@ index a2df614..6754484 100644
  
  		const { state, view } = editor;
  		let tr = state.tr;
-@@ -630,9 +645,11 @@
+@@ -630,9 +648,11 @@
  			tempDiv.innerHTML = htmlContent;
  			const fragment = DOMParser.fromSchema(state.schema).parse(tempDiv);
  			const nodesToInsert = [];
@@ -1308,7 +1327,7 @@ index a2df614..6754484 100644
  					nodesToInsert.push(...node.content.content);
  				} else {
  					nodesToInsert.push(node);
-@@ -641,14 +658,14 @@
+@@ -641,14 +661,14 @@
  
  			tr = tr.replaceWith(range.from, range.to, nodesToInsert);
  			const newPos = range.from + nodesToInsert.reduce((sum, node) => sum + node.nodeSize, 0);
@@ -1327,7 +1346,7 @@ index a2df614..6754484 100644
  				);
  			tr = tr.replaceWith(range.from, range.to, nodes);
  			const newPos = nodes.reduce((pos, node) => pos + node.nodeSize, range.from);
-@@ -708,6 +725,7 @@
+@@ -708,6 +728,7 @@
  
  	let chatInputContainerElement;
  	let chatInputElement;
@@ -1335,7 +1354,7 @@ index a2df614..6754484 100644
  	let modelSelector;
  
  	let filesInputElement;
-@@ -2014,6 +2032,7 @@
+@@ -2014,6 +2035,7 @@
  											{#key $settings?.showFormattingToolbar ?? false}
  												<RichTextInput
  													bind:this={chatInputElement}
@@ -1343,7 +1362,7 @@ index a2df614..6754484 100644
  													id="chat-input"
  													editable={!showInputModal}
  													onChange={(content) => {
-@@ -2034,7 +2053,7 @@
+@@ -2034,7 +2056,7 @@
  															navigator.maxTouchPoints > 0 ||
  															navigator.msMaxTouchPoints > 0
  														)}
@@ -1352,7 +1371,7 @@ index a2df614..6754484 100644
  													largeTextAsFile={($settings?.largeTextAsFile ?? false) && !shiftKey}
  													autocomplete={$config?.features?.enable_autocomplete_generation &&
  														($settings?.promptAutocomplete ?? false)}
-@@ -2302,6 +2321,8 @@
+@@ -2302,6 +2324,8 @@
  											</IntegrationsMenu>
  										{/if}
  
@@ -1361,7 +1380,7 @@ index a2df614..6754484 100644
  										{#if selectedModelIds.length === 1 && $models.find((m) => m.id === selectedModelIds[0])?.has_user_valves}
  											<div class="ml-1 flex gap-1.5 shrink-0">
  												<Tooltip content={$i18n.t('Valves')} placement="top">
-@@ -2520,6 +2541,7 @@
+@@ -2520,6 +2544,7 @@
  								</div>
  
  								<div class="self-end flex space-x-1 mr-1 min-w-0 gap-[0.03125rem]">
@@ -1369,7 +1388,7 @@ index a2df614..6754484 100644
  									<div class="flex min-w-0 max-w-[10rem] items-center sm:max-w-[13rem]">
  										<ModelSelector
  											bind:this={modelSelector}
-@@ -2530,6 +2552,7 @@
+@@ -2530,6 +2555,7 @@
  											triggerClassName="items-center gap-1.5 rounded-lg pl-2 pr-1.5 py-1 text-[0.8125rem] font-normal text-gray-600 transition-colors duration-100 hover:bg-gray-50/40 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800/40 dark:hover:text-gray-200"
  										/>
  									</div>
@@ -1377,7 +1396,7 @@ index a2df614..6754484 100644
  
  									{#if hasChatVariables}
  										<Tooltip content={$i18n.t('Chat Variables')} placement="top">
-@@ -2616,6 +2639,15 @@
+@@ -2616,6 +2642,15 @@
  										{/if}
  
  										{#if !embedded && prompt === '' && files.length === 0 && ($_user?.role === 'admin' || ($_user?.permissions?.chat?.call ?? true))}
@@ -1393,7 +1412,7 @@ index a2df614..6754484 100644
  											<div class=" flex items-center">
  												<!-- {$i18n.t('Call')} -->
  												<Tooltip content={$i18n.t('Voice mode')}>
-@@ -2678,7 +2710,9 @@
+@@ -2678,7 +2713,9 @@
  													</button>
  												</Tooltip>
  											</div>
@@ -1404,7 +1423,7 @@ index a2df614..6754484 100644
  											<div class=" flex items-center">
  												<Tooltip
  													content={uploadPending
-@@ -2712,7 +2746,6 @@
+@@ -2712,7 +2749,6 @@
  													</button>
  												</Tooltip>
  											</div>

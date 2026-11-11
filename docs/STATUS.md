@@ -2,7 +2,7 @@
 
 ## 2026-11-11 · 공식 화면과 제품 시각 비교
 
-[통합 PR #135](https://github.com/knadalkim-a11y/team-agent-poc/pull/135)의 실제 커밋과 EES delivery 결과를 기준으로 확인한다. 회차 목록·상세, 절차/도구 편집, Native 자산 화면, 화면별 검수 조건과 B1/A8의 제품 기준은 [23구역 비교 기록](../evals/figma-product-parity-20261111.md)에 있다. 작업실의 넓은 업무 화면 4판은 별도 검토안이다.
+[통합 PR #135](https://github.com/knadalkim-a11y/team-agent-poc/pull/135)의 실제 커밋과 EES delivery 결과를 기준으로 확인한다. 회차 목록·상세, 절차/도구 편집, Native 자산 화면, 화면별 검수 조건과 B1/A8의 제품 기준은 [23구역 비교 기록](../evals/figma-product-parity-20261111.md)에 있다. 작업실의 넓은 업무 화면 4판은 별도 검토안이다. [배포 검증 중 발견한 초안 복원 및 탭 전환 수정](../evals/figma-product-parity-20261111.md#draft-restore-20261112)도 같은 비교 기록에 정리했다.
 
 ## 2026-11-09 · 넓어진 가운데 업무 화면 · 검토안·HTML 목업 4판
 

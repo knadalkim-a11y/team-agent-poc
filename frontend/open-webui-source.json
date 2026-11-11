@@ -16,8 +16,8 @@
     "src/lib/apis/files/index.ts": "187d6ce446608f8dec895abd60bcaa12bc692d11c945eb5788fdd846248d1188",
     "src/lib/apis/openai/index.ts": "4fc60216e9fdfc930bef83fc34a739ce1767ad2f0a3a3525592f7bd9a0f199e5",
     "src/lib/components/channel/Channel.svelte": "49454dd5aa86f0bc1424ca286d1a7ffccef3103a81c5ac36a99ffc9fe03e2bfc",
-    "src/lib/components/chat/Chat.svelte": "ee11fcc6c5d2f69f73dacc441f879232c84752838a932816acfe21dabfc25273",
-    "src/lib/components/chat/MessageInput.svelte": "b185f8db73c30d327aab4d15d0a34c4ebf7833146edf989a1938f93bedd213a9",
+    "src/lib/components/chat/Chat.svelte": "33144b30eea1a9a93b02ef818ec3250480a8f43ee5e3de084c2325f43daf7de2",
+    "src/lib/components/chat/MessageInput.svelte": "9eb0859227331ff9e4138dcb6f5ec53e3d51ef87aeb1a8b6c058a5a9f4339ed2",
     "src/lib/components/chat/Messages/ResponseMessage.svelte": "64fb38010aa936ec0eea0d9c0dd79a087b9c5026f94be8d08139fbd6529c1270",
     "src/lib/components/chat/Messages/UserMessage.svelte": "c677b13bf160de1bf0fafceef00ba5df098d661e6728c0dd5b1e6427b3e2eef8",
     "src/lib/components/chat/Navbar.svelte": "81e9bd4a59e1afa22c057ad7aceb7c5c0afdebd9d495882a6d6e34d6efc426e0",
@@ -56,7 +56,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "20179c00a08b07be10ec145d040947a6b894c75f657fa88458e96c0e44b7cb42"
+      "sha256": "a153647b4fece0d5efa2becfc88927b5b9e15730a00e0159885e169f1928f653"
     }
   ],
   "pyodide_files": {
