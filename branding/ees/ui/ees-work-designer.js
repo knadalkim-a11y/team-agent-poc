@@ -400,7 +400,7 @@ function createWorkDesigner({callbacks}) {
     const settings = record?.settings || [];
     const local = settings.find(item => item.factory_id === site.id)?.values || {};
     const base = settings.find(item => !item.factory_id)?.values || {};
-    const fields = inputList(editor).filter(field => field.scope === 'workflow' && Object.hasOwn(local, field.id));
+    const fields = inputList(editor).filter(field => (field.scope === 'workflow' || field.scope === 'factory') && Object.hasOwn(local, field.id));
     if (!preview && !fields.length) return '';
     const conditions = preview?.conditions || {};
     const work = jobs(editor);
@@ -468,7 +468,28 @@ function createWorkDesigner({callbacks}) {
   function jobGuidance(node){const instructions=String(node.instructions||''),description=String(node.description||'');return !instructions.trim()?description:!description.trim()||instructions.trim()===description.trim()?instructions:instructions+'\n\n'+description;}
   function jobResultHTML(node){const connected=jobConnected(node),mode=jobResultMode(node),automatic=jobAutomaticSupported(node),hint=!connected?'도구를 연결하면 결과 확인 방식을 정할 수 있습니다.':jobListResult(node)?'문서 목록은 담당자가 확인해야 완료됩니다.':node.result_block==='item_verdict'?'항목별 판정은 담당자가 확인해야 완료됩니다.':mode==='automatic'?(automatic?'문서 내용을 정상적으로 받으면 읽기 완료됩니다. 업무 승인과는 별개입니다.':'기존 자동 완료 설정을 유지합니다. 이 도구의 새 자동 완료 설정은 지원하지 않습니다.'):automatic?'담당자가 읽은 내용을 확인하면 완료됩니다.':'담당자가 도구의 결과를 확인하면 완료됩니다.';return `<fieldset class="ew-job-method ew-job-result-confirmation" data-connected="${connected}" role="radiogroup" aria-describedby="ew-job-result-hint"><legend>결과 확인</legend><div>${Object.entries({manual:'담당자가 확인',automatic:'자동으로 완료'}).map(([value,label])=>`<label><input type="radio" name="result_confirmation" value="${value}" ${mode===value?'checked':''} ${!connected||value==='automatic'&&!automatic?'disabled data-preserve="true"':''}><span>${label}</span></label>`).join('')}</div><p class="ew-author-muted" id="ew-job-result-hint">${esc(hint)}</p></fieldset>`;}
   function jobValueSummary(node,id){const binding=jobBindings(node)[id],tool=jobTool(node);if(binding&&Object.hasOwn(binding,'constant')){if(tool?.source==='authored'){const labels=tool.input_ui?.[id]?.option_labels||{},value=binding.constant;return value===null?'값 없음':Array.isArray(value)?value.map(item=>labels[String(item)]??String(item)).join(', ')||'선택하지 않음':labels[String(value)]??(value===''?'빈 텍스트':String(value));}return jobValueText(binding.constant)||'지정하지 않음';}if(binding?.input){const field=(node.inputs||[]).find(input=>input.id===binding.input);return field?.scope==='factory'?'공장별로 정한 값':field?.scope==='workflow'?'업무에 정한 값':'업무를 실행할 때 물어봅니다';}return binding?'기존 연결 방식 유지':'지정하지 않음';}
-  function jobValuesHTML(node){const tool=jobTool(node),schema=jobArgumentSchema(node);return `<div class="ew-job-values"><dl>${Object.entries(schema.properties||{}).map(([id,field])=>`<div><dt>${esc(jobInputPresentation(tool,id,field).label)}</dt><dd>${esc(jobValueSummary(node,id))}</dd></div>`).join('')}</dl>${canAuthor()?b('설정 변경','job_tool_setup','class="ew-author-link" data-mutation aria-haspopup="dialog"'):''}</div>`;}
+  function jobValuesHTML(node) {
+    const tool = jobTool(node);
+    const fields = Object.entries(jobArgumentSchema(node).properties || {});
+    const label = jobToolFunction(tool) === 'search_pages' ? '검색 조건' : '입력값';
+    const rows = fields.map(([id, field]) => `<div><dt>${esc(jobInputPresentation(tool, id, field).label)}</dt><dd>${esc(jobValueSummary(node, id))}</dd></div>`).join('');
+    return `<div class="ew-job-values"><h4>${label} <small>${fields.length}개</small></h4><dl>${rows}</dl>${canAuthor() ? b('설정 변경','job_tool_setup','class="ew-author-link" data-mutation aria-haspopup="dialog"') : ''}</div>`;
+  }
+
+  function jobOutputLabel(tool) {
+    if (!tool) return '';
+    if (tool.source === 'authored') {
+      return (tool.output_ui?.fields || []).filter(field => !field.hidden).map(field => field.label || field.path).join(', ');
+    }
+    const schema = tool.output_schema;
+    if (!schema) return '';
+    const kind = {list:jobToolFunction(tool) === 'search_pages' ? '문서 목록' : '목록', evidence:'본문 근거'}[schema.kind];
+    const labels = Array.isArray(schema.fields)
+      ? schema.fields.filter(id => typeof id === 'string').map(id => sharedFieldNames[id] || id)
+      : Object.entries(schema.properties || {}).map(([id, field]) => field?.title || id);
+    const completeness = {page:'한 번에 한 쪽', partial_possible:'잘리면 일부'}[schema.completeness];
+    return [kind, labels.join(', '), completeness].filter(Boolean).join(' · ');
+  }
   const jobToolChoiceKey=node=>node.shared_tool_id?'shared:'+node.shared_tool_id:node.tool_contract_id?'legacy:'+node.tool_contract_id:jobTool(node)?'legacy:'+jobTool(node).id:'';
   function jobToolChoices(){return [...sharedTools().filter(item=>item.state==='available'&&item.can_use!==false).map(item=>({key:'shared:'+item.id,shared:true,item})),...allTools().filter(item=>(item.state||item.status)==='approved').map(item=>({key:'legacy:'+item.id,shared:false,item}))];}
   const jobChoiceSchema=choice=>choice?.item?.input_schema||{properties:{},required:[]};
@@ -557,7 +578,8 @@ function createWorkDesigner({callbacks}) {
     const tool=jobTool(node),messages=state.operations?.shared_tool_messages||{},unavailable=node.shared_tool_id&&(!tool||tool.state!=='available'||tool.can_use===false);
     const reason=unavailable?(!tool?state.operations?.shared_tools_notice||messages.shared_tool_review_required:tool.state==='disabled'?messages.shared_tool_disabled:tool.unavailable_message||messages[tool.can_use===false?'shared_tool_forbidden':'shared_tool_review_required']):'';
     const warning=unavailable?`<div class="ew-job-tool-state" role="status">${icon('676c3')}<div><strong>지금은 이 작업을 실행할 수 없습니다</strong><p>${esc(reason||'관리자가 도구의 상태와 연결 설정을 확인해야 합니다.')}</p>${capability().is_admin?`<div class="ew-job-tool-admin">${b('도구 열기','shared_open',`data-id="${esc(node.shared_tool_id)}" class="ew-author-link"`)}<small>관리자에게만 보임</small></div>`:''}</div></div>`:'';
-    return `<section class="ew-job-tool-summary">${state.operations?.shared_tools_notice?`<p role="status" class="ew-author-muted">${esc(state.operations.shared_tools_notice)}</p>`:''}<label>연결된 도구</label>${jobConnected(node)?`<div class="ew-job-tool-name"><span>${esc(tool?.name||'현재 연결 · 확인 필요')}</span>${unavailable?'<small class="ew-author-tag" data-state="review_required">도구 확인 필요</small>':''}</div>${warning}${jobValuesHTML(node)}`:`${canAuthor()?b('＋ 도구 연결','job_tool_setup','class="ew-author-link ew-job-connect" data-mutation aria-haspopup="dialog"'):''}<p class="ew-procedure-unconnected">할 일을 고르고 질문에 답한 뒤 도구를 연결합니다.</p><p class="ew-author-muted">필요한 도구가 없으면 관리자에게 요청하세요.</p>`}${scopeLoading?'<p role="status">받는 중</p>':''}</section>`;
+    const output = unavailable ? '' : jobOutputLabel(tool);
+    return `<section class="ew-job-tool-summary">${state.operations?.shared_tools_notice?`<p role="status" class="ew-author-muted">${esc(state.operations.shared_tools_notice)}</p>`:''}<label>연결된 도구</label>${jobConnected(node)?`<div class="ew-job-tool-name"><span>${esc(tool?.name||'현재 연결 · 확인 필요')}</span>${!unavailable&&tool?.version ? `<small class="ew-author-tag">v${esc(tool.version)}</small>` : ''}${unavailable?'<small class="ew-author-tag" data-state="review_required">도구 확인 필요</small>':''}</div>${warning}${output ? `<dl class="ew-job-output"><dt>돌려주는 것</dt><dd>${esc(output)}</dd></dl>` : ''}${jobValuesHTML(node)}`:`${canAuthor()?b('＋ 도구 연결','job_tool_setup','class="ew-author-link ew-job-connect" data-mutation aria-haspopup="dialog"'):''}<p class="ew-procedure-unconnected">할 일을 고르고 질문에 답한 뒤 도구를 연결합니다.</p><p class="ew-author-muted">필요한 도구가 없으면 관리자에게 요청하세요.</p>`}${scopeLoading?'<p role="status">받는 중</p>':''}</section>`;
   }
   function jobHTML(node){
     const stage=nodes(editor).find(item=>item.id===(node.parent_id||node.parent)),siblings=orderedNodes().filter(item=>item.type==='j'&&(item.parent_id||item.parent)===stage?.id),index=siblings.findIndex(item=>item.id===node.id),mode=node.mode||'human',humanOptions={human_confirm:'사람 확인',checklist:'확인 항목 · 항목마다 체크',item_verdict:'항목별 판정',values:'사람이 정하는 값'};if(node.result_block&&!humanOptions[node.result_block])humanOptions[node.result_block]=workAuthoring.blocks[node.result_block]||node.result_block;
