@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 
 import ees_source_frame_monitor as frame_monitor
 from ees_work_integrated_fixture import IntegratedNativeCase
-from native_ui_fixture import NativeUIHandler
+from native_ui_fixture import MODELS, NativeUIHandler
 
 
 class SourceShellNativeTests(IntegratedNativeCase):
@@ -839,6 +839,129 @@ class SourceShellNativeTests(IntegratedNativeCase):
             self.click('#ees-work-dialog [data-dialog-close]')
             self.wait("!document.querySelector('#ees-work-dialog')")
             self.assertEqual(self.browser.evaluate('location.pathname'), '/workspace/models')
+
+    def test_figma_native_asset_pages_render_real_entities_inside_the_three_panel_shell(self):
+        self.enable_native_menus()
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+        actor = self.server.user
+        common = {'user_id': actor['id'], 'user': {'id': actor['id'], 'name': actor['name']},
+                  'created_at': 1794301200, 'updated_at': 1794301200,
+                  'access_grants': [], 'write_access': True, 'can_write': True,
+                  'can_edit': True, 'is_owner': True}
+        model = dict(common, id='ees-assistant', name='EES 통합 Assistant', base_model_id='fixture-model',
+                     meta={'description': 'EMS 운영 검토'}, params={'system': 'EMS 절차를 안내합니다.'}, is_active=True)
+        file = dict(common, id='guide-pdf', filename='EMS 운영 매뉴얼.pdf',
+                    meta={'name': 'EMS 운영 매뉴얼.pdf', 'content_type': 'application/pdf', 'size': 1234},
+                    data={'status': 'completed'})
+        failed = dict(common, id='failed-guide', filename='이전 절차.pdf',
+                      meta={'name': '이전 절차.pdf', 'content_type': 'application/pdf', 'size': 467},
+                      data={'status': 'failed'})
+        files = [file, failed]
+        knowledge = dict(common, id='kb-ems', name='EMS 운영 가이드', description='EMS 문서 모음',
+                         meta={}, data={'file_ids': [item['id'] for item in files]}, files=files)
+        skill = dict(common, id='jira-read', name='Jira 읽기 지침', description='CR 조회 절차',
+                     content='CR 번호로 해당 이슈를 조회합니다.', is_active=True, meta={})
+        model['meta'].update(skillIds=[skill['id']], knowledge=[{'id': knowledge['id'], 'name': knowledge['name'], 'type': 'collection'}])
+        self.server.models = [*deepcopy(MODELS), {
+            'id': model['id'], 'name': model['name'], 'object': 'model', 'owned_by': 'openai', 'info': deepcopy(model)}]
+        for system_id, title in [('EMS', '배포 산출물 점검'), ('APC', '다른 시스템 절차')]:
+            created = self.command('create_workflow', name=title, system_id=system_id)
+            definition = deepcopy(created['workflow']['draft'])
+            root = next(node for node in definition['nodes'].values() if node['type'] == 'p')
+            root['children'] = ['stage']
+            definition['nodes']['stage'] = {'id': 'stage', 'type': 't', 'name': '1차 점검',
+                'parent': root['id'], 'children': ['check-cr'], 'deps': []}
+            definition['nodes']['check-cr'] = {'id': 'check-cr', 'type': 'j', 'name': 'CR 검토',
+                'parent': 'stage', 'children': [], 'deps': [], 'mode': 'human', 'inputs': [],
+                'result_block': 'human_confirm', 'skills': [skill['id']]}
+            self.command('save_draft', workflow_id=created['workflow_id'],
+                         expected_revision=created['workflow']['revision'], definition=definition)
+        listings = {'/api/v1/models/list': [model], '/api/v1/knowledge/list': [knowledge],
+                    '/api/v1/knowledge/search': [knowledge], '/api/v1/skills/list': [skill]}
+        records = {'/api/v1/models/model': model, '/api/v1/knowledge/kb-ems': knowledge,
+                   '/api/v1/skills/id/jira-read': skill, '/api/v1/skills/jira-read': skill}
+        original = NativeUIHandler.do_GET
+        original_post = NativeUIHandler.do_POST
+        retry_posts = []
+        status_reads = []
+
+        def get_asset(handler):
+            path = urlparse(handler.path).path.rstrip('/')
+            if path in listings:
+                return handler.send_content({'items': listings[path], 'total': len(listings[path])})
+            if path in records:
+                return handler.send_content(records[path])
+            if path.startswith('/api/v1/knowledge/kb-ems/files'):
+                summaries = [{key: value for key, value in item.items() if key != 'data'} for item in files]
+                return handler.send_content({'items': summaries, 'total': len(summaries)})
+            for item in files:
+                if path == '/api/v1/files/' + item['id'] + '/process/status':
+                    status_reads.append(handler.path)
+                    return handler.send_content({'status': item['data']['status']})
+                if path == '/api/v1/files/' + item['id']:
+                    return handler.send_content(item)
+            return original(handler)
+
+        def retry_asset(handler):
+            if urlparse(handler.path).path == '/api/v1/knowledge/kb-ems/file/update':
+                body = json.loads(handler.rfile.read(int(handler.headers.get('Content-Length', '0'))))
+                retry_posts.append(body)
+                if body == {'file_id': failed['id']}:
+                    failed['data']['status'] = 'completed'
+                    return handler.send_content(knowledge)
+                return handler.send_content({'detail': 'Unknown file'}, status=400)
+            return original_post(handler)
+
+        cases = [
+            ('/workspace/models', 'models', 'b6-models-list'),
+            ('/workspace/models/edit?id=ees-assistant', 'model-editor', 'b6-model-editor'),
+            ('/workspace/knowledge/kb-ems', 'knowledge', 'b7-knowledge-detail'),
+            ('/workspace/skills/edit?id=jira-read', 'skill-editor', 'b8-skill-editor'),
+        ]
+        with patch.object(NativeUIHandler, 'do_GET', get_asset), patch.object(NativeUIHandler, 'do_POST', retry_asset):
+            for route, marker, label in cases:
+                with self.subTest(route=route):
+                    self.navigate(route)
+                    self.wait("document.querySelector('[data-ees-asset=" + marker + "]')?.getBoundingClientRect().width > 0")
+                    self.wait("document.querySelector('[data-ees-source-shell]')?.dataset.eesChatState === 'docked'")
+                    if marker in ('models', 'model-editor'):
+                        self.wait("""(() => {
+                            const editor = document.querySelector('[data-ees-asset="MODEL_MARKER"]');
+                            return editor && (editor.innerText.includes('EES 통합 Assistant')
+                                || [...editor.querySelectorAll('input')].some(field => field.value === 'EES 통합 Assistant'));
+                        })()""".replace('MODEL_MARKER', marker))
+                    if marker == 'knowledge':
+                        self.wait("document.querySelector('[data-ees-file-status=failed]') && document.querySelector('[data-ees-file-retry]')")
+                        self.assertIn('이전 절차.pdf', self.text('#workspace-container'))
+                    if marker in ('knowledge', 'skill-editor'):
+                        self.wait("document.querySelector('[data-ees-asset-usage]')?.innerText.includes('EES 통합 Assistant')")
+                    if marker == 'skill-editor':
+                        self.wait("document.querySelector('[data-ees-asset-usage]')?.innerText.includes('배포 산출물 점검')")
+                        uses = self.text('[data-ees-asset-usage]')
+                        self.assertIn('CR 검토', uses)
+                        self.assertNotIn('다른 시스템 절차', uses)
+                    geometry = self.browser.evaluate("""(() => {
+                        const boxes = ['#sidebar', '[data-ees-work-surface]', '[data-ees-chat-surface]'].map(selector => {
+                            const r = document.querySelector(selector).getBoundingClientRect();
+                            return [r.x, r.width];
+                        });
+                        return {boxes, viewport: [innerWidth, innerHeight]};
+                    })()""")
+                    self.assertEqual(geometry['viewport'], [1920, 1080])
+                    for (left, width), (x, expected) in zip(geometry['boxes'], [(0, 256), (256, 1104), (1360, 560)]):
+                        self.assertAlmostEqual(left, x, delta=1)
+                        self.assertAlmostEqual(width, expected, delta=1)
+                    name = 'parity-' + label + '-1920'
+                    out = self.screenshot(name)
+                    (out / (name + '.json')).write_text(json.dumps(geometry, indent=2) + '\n', encoding='utf-8')
+                    if marker == 'knowledge':
+                        self.assertTrue(any('failed-guide/process/status' in path and 'stream=false' in path for path in status_reads))
+                        self.assertEqual(retry_posts, [])
+                        self.click('[data-ees-file-retry]')
+                        self.wait("document.querySelectorAll('[data-ees-file-status=completed]').length === 2 && !document.querySelector('[data-ees-file-retry]')")
+                        self.assertEqual(retry_posts, [{'file_id': failed['id']}])
+                        self.screenshot('parity-b7-after-retry-1920')
 
     def native_link_selector(self, target, label, labels, *, return_from=None):
         if target == 'models':

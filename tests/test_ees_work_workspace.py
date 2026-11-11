@@ -886,6 +886,50 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
             db.execute("UPDATE work_access SET active=0 WHERE principal_kind='user' AND principal_id='b'")
         self.assertEqual((await self.state('b'))['runs'], [])
 
+    def test_factory_condition_preview_marks_broken_saved_ancestry_unknown(self):
+        self.assertEqual(workspace._factory_condition_results({}, {}), {})
+        damaged = {'nodes': {
+            'cycle': {'type': 't', 'parent': 'cycle'},
+            'orphan': {'type': 'j', 'parent': 'absent'},
+            'broken': {'type': 't', 'parent': []},
+            'invalid': {'type': 'p', 'condition': {'unsupported': 'operator'}},
+            'malformed': 'old data',
+        }}
+        self.assertEqual(workspace._factory_condition_results(damaged, {}), dict.fromkeys(damaged['nodes']))
+
+    async def test_factory_authoring_preview_uses_visible_definition_and_never_starts_a_run(self):
+        for site, active in [('site-a', False), ('site-b', True)]:
+            self.assertTrue((await self.command('save_factory', factory_id=site, system_id='EMS',
+                                               name=site, attributes={'active': active}))['ok'])
+        granted = await self.command('save_access', principal_kind='user', principal_id='c',
+                                     system_id='EMS', factory_id='site-a', roles=['viewer'])
+        self.assertTrue(granted['ok'])
+        key, draft, revision = await self.create()
+        root = draft['nodes']['t']['parent']
+        draft['execution_scope'] = 'factory'
+        draft['nodes']['t']['condition'] = {'field': 'active', 'op': 'eq', 'value': True}
+        draft['nodes']['j']['condition'] = {'field': 'missing', 'op': 'eq', 'value': True}
+        saved = await self.command('save_draft', workflow_id=key, expected_revision=revision, definition=draft)
+        self.assertTrue(saved['ok'])
+        query = dict(workflow_id=key, system_id='EMS')
+        for site, stage, job in [('site-a', False, False), ('site-b', True, None)]:
+            for _ in range(2):
+                selected = (await self.state('admin', **query, factory_id=site))['workflow']
+                self.assertEqual(selected['factory_preview'], {'factory_id': site, 'revision': saved['revision'],
+                                                              'conditions': {root: True, 't': stage, 'j': job}})
+        # Viewer sees only the published version, which predates these two predicates.
+        visible = (await self.state('c', **query, factory_id='site-a'))['workflow']
+        self.assertNotIn('draft', visible)
+        self.assertTrue(all(visible['factory_preview']['conditions'].values()))
+        denied = await self.service.workspace_state(self.users['c'], **query, factory_id='site-b')
+        self.assertFalse(denied['ok'])
+        self.assertNotIn('factory_preview', (await self.state('admin', **query))['workflow'])
+        with self.service._db() as db:
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM work_runs').fetchone()[0], 0)
+            self.assertEqual(db.execute('SELECT COUNT(*) FROM work_attempts').fetchone()[0], 0)
+            self.assertEqual(db.execute('SELECT revision FROM work_definitions WHERE id=?', (key,)).fetchone()[0],
+                             saved['revision'])
+
     async def test_factory_unknown_is_blocked_not_excluded_and_conditions_safe(self):
         key, definition, revision = await self.create()
         definition['nodes']['j']['condition'] = {'field': 'tier', 'op': 'eq', 'value': 'production'}

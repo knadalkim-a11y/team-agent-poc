@@ -102,6 +102,32 @@ index 0000000..569b354
 +	}
 +	return result;
 +}
+diff --git a/src/lib/apis/files/index.ts b/src/lib/apis/files/index.ts
+--- a/src/lib/apis/files/index.ts
++++ b/src/lib/apis/files/index.ts
+@@ -95,18 +95,20 @@
+ 	return res;
+ };
+ 
+-export const getFileProcessStatus = async (token: string, id: string) => {
++export const getFileProcessStatus = async (token: string, id: string, stream = true, signal?: AbortSignal) => {
+ 	const queryParams = new URLSearchParams();
+-	queryParams.append('stream', 'true');
++	queryParams.append('stream', String(stream));
+ 
+ 	let error = null;
+ 	const res = await fetch(`${WEBUI_API_BASE_URL}/files/${id}/process/status?${queryParams}`, {
+ 		method: 'GET',
++		signal,
+ 		headers: {
+ 			Accept: 'application/json',
+ 			authorization: `Bearer ${token}`
+ 		}
+ 	}).catch((err) => {
++		if (err?.name === 'AbortError') return null;
+ 		error = err.detail;
+ 		console.error(err);
+ 		return null;
 diff --git a/src/lib/apis/openai/index.ts b/src/lib/apis/openai/index.ts
 index b895714..87422b9 100644
 --- a/src/lib/apis/openai/index.ts
@@ -1826,6 +1852,58 @@ index 9234ec7..27056b0 100644
  		}
  	}
  
+diff --git a/src/lib/components/ees/EesAssetUsage.svelte b/src/lib/components/ees/EesAssetUsage.svelte
+new file mode 100644
+--- /dev/null
++++ b/src/lib/components/ees/EesAssetUsage.svelte
+@@ -0,0 +1,47 @@
++<script lang="ts">
++	import { getContext } from 'svelte';
++	import { models, user } from '$lib/stores';
++	import { eesSnapshot, eesSessionReady } from './state';
++
++	export let kind: 'knowledge' | 'skill';
++	export let assetId: string;
++	const i18n = getContext('i18n');
++
++	function referencesKnowledge(items: any[], id: string) {
++		return Array.isArray(items) && items.some((ref) => ref && ref.type !== 'file' &&
++			(ref.id === id || ref.collection_name === id ||
++				(Array.isArray(ref.collection_names) && ref.collection_names.includes(id))));
++	}
++
++	$: ready = Boolean($user?.id) && $eesSnapshot.native_capabilities?.actor_id === $user?.id &&
++		$eesSessionReady && $eesSnapshot.native_scope && !$eesSnapshot.target_loading && !$eesSnapshot.scope_loading && !$eesSnapshot.error;
++	$: assistants = !assetId || !ready ? [] : ($models ?? []).filter((model) => {
++		const meta = model.info?.meta;
++		return kind === 'skill' ? Array.isArray(meta?.skillIds) && meta.skillIds.includes(assetId)
++			: referencesKnowledge(meta?.knowledge, assetId);
++	});
++	$: jobs = kind === 'skill' && assetId && ready
++		? ($eesSnapshot.native_scope.skill_uses ?? []).filter((ref) =>
++			ref.skill_id === assetId && (!$eesSnapshot.selection?.system_id || ref.system_id === $eesSnapshot.selection.system_id))
++		: [];
++</script>
++
++{#if assistants.length || jobs.length}
++	<section data-ees-asset-usage class="my-4">
++		<h3 class="mb-2 text-sm font-semibold">{$i18n.t('EES.Asset.Usage', { defaultValue: 'Used by' })}</h3>
++		<ul class="divide-y divide-gray-200 overflow-hidden rounded-lg border border-gray-200 bg-white text-sm dark:divide-gray-700 dark:border-gray-700 dark:bg-gray-900">
++			{#each jobs as ref}
++				<li class="flex flex-wrap items-center gap-2 px-3 py-2">
++					<strong class="font-medium">{[ref.workflow, ref.stage, ref.job].filter(Boolean).join(' › ')}</strong>
++					<small>{$i18n.t('EES.Nav.Procedures', { defaultValue: 'Work procedures' })} · {ref.system_id}</small>
++				</li>
++			{/each}
++			{#each assistants as model (model.id)}
++				<li class="flex flex-wrap items-center gap-2 px-3 py-2">
++					<strong class="font-medium">{model.name}</strong>
++					<small>{$i18n.t('EES.Assistants', { defaultValue: 'AI assistants' })}</small>
++				</li>
++			{/each}
++		</ul>
++	</section>
++{/if}
 diff --git a/src/lib/components/ees/EesHelperNotice.svelte b/src/lib/components/ees/EesHelperNotice.svelte
 new file mode 100644
 index 0000000..3ba519f
@@ -2917,10 +2995,9 @@ index 0000000..fc64846
 +{/if}
 diff --git a/src/lib/components/ees/EesShell.svelte b/src/lib/components/ees/EesShell.svelte
 new file mode 100644
-index 0000000..395dfd2
 --- /dev/null
 +++ b/src/lib/components/ees/EesShell.svelte
-@@ -0,0 +1,390 @@
+@@ -0,0 +1,401 @@
 +<script lang="ts">
 +	import { getContext, onMount, tick } from 'svelte';
 +	import { get } from 'svelte/store';
@@ -2929,11 +3006,12 @@ index 0000000..395dfd2
 +	import { eesRequest } from '$lib/apis/ees-work';
 +	import { getFolderById } from '$lib/apis/folders';
 +	import { toast } from 'svelte-sonner';
-+	import { user, selectedFolder, showSettings, showSearch, chatId, chatTitle, temporaryChatEnabled } from '$lib/stores';
++	import { user, workspaceActions, selectedFolder, showSettings, showSearch, chatId, chatTitle, temporaryChatEnabled } from '$lib/stores';
 +	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 +	import Chat from '$lib/components/chat/Chat.svelte';
 +	import Spinner from '$lib/components/common/Spinner.svelte';
 +	import SettingsModal from '$lib/components/chat/SettingsModal.svelte';
++	import SplitCreateButton from '$lib/components/common/SplitCreateButton.svelte';
 +	import { eesSnapshot, eesCompact, eesAction, eesSync, eesReferenceHosts, eesHelperState,
 +		eesSessionReady, eesChatDisplay, eesChatHistoryOpen } from './state';
 +	const i18n: any = getContext('i18n');
@@ -2956,6 +3034,8 @@ index 0000000..395dfd2
 +	$: folderReady = admin || !folderRoute || $selectedFolder?.id === $page.params.folderId;
 +	$: chatRoute = folderRoute || /^\/(?:c\/[^/]+\/?)?$/.test(path);
 +	$: nativeRoute = !chatRoute;
++	$: assetSection = /^\/workspace\/(models|knowledge|skills)(?:\/|$)/.exec(path)?.[1] ?? '';
++	$: assetCanCreate = loaded && !admin && $eesSessionReady && assetSection && ($user?.role === 'admin' || $user?.permissions?.workspace?.[assetSection]);
 +	// Native normalizes the requested tab to boolean true after accepting it.
 +	$: if (!$showSettings || $user?.role !== 'admin') admin = false;
 +	else if (typeof $showSettings === 'string') admin = $showSettings.startsWith('admin:');
@@ -3226,13 +3306,16 @@ index 0000000..395dfd2
 +</script>
 +
 +<svelte:window bind:innerWidth={width} on:keydown|capture={chatEscape} />
-+<div data-ees-source-shell data-ees-route={nativeRoute || admin ? 'native' : 'chat'} data-ees-chat-state={chatState}
++<div data-ees-source-shell data-ees-native-asset-toolbar data-ees-route={nativeRoute || admin ? 'native' : 'chat'} data-ees-chat-state={chatState}
 +	data-resizing={resizing} class="ees-source-shell" style:--ees-chat-width={chatWidth + 'px'}
 +	on:pointerdown={(event) => window.__eesNativeWorkV1?.dismissHelp?.(event)}>
 +	<div class="ees-navigation" inert={chatState === 'overlay'}><Sidebar /></div>
 +	<main id="main-content" data-ees-work-surface class="ees-center" inert={chatState === 'overlay' || chatState === 'expanded'}>
-+		<header data-ees-work-toolbar class="ees-work-toolbar">
-+			<strong>{heading}</strong>
++		<header data-ees-work-toolbar data-ees-source-workspace-heading={assetSection && !admin ? true : undefined} class="ees-work-toolbar">
++			{#if assetSection && !admin}
++				<h1 class="min-w-0 flex-1 truncate font-semibold">{t(({models:'EES.Nav.Models',knowledge:'EES.Nav.Knowledge',skills:'EES.Nav.Skills'})[assetSection],heading)}</h1>
++				{#if assetCanCreate}<SplitCreateButton actions={$workspaceActions} />{/if}
++			{:else}<strong>{heading}</strong>{/if}
 +			<button type="button" data-ees-chat-toggle bind:this={chatToggle} aria-controls="ees-chat-surface" aria-expanded={chatOpen}
 +				aria-label={t(chatOpen ? 'EES.Chat.Close' : 'EES.Chat.Open', chatOpen ? 'Close chat' : 'Open chat')}
 +				on:click={() => setChatOpen(!chatOpen)}>
@@ -3280,6 +3363,11 @@ index 0000000..395dfd2
 +	.ees-navigation { flex:none; display:flex; height:100%; min-height:0; }
 +	.ees-center { display:flex; flex:1 1 0; flex-direction:column; min-width:0; min-height:0; overflow:hidden; }
 +	.ees-work-toolbar { display:flex; flex:none; height:48px; min-width:0; padding:0 20px; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid var(--ees-border,#e6e6e9); color:var(--ees-text-primary,#1f2023); }
++	.ees-work-toolbar[data-ees-source-workspace-heading],
++	.ees-center:has(:global(#ees-work-panel:not([hidden])[data-ees-mode='author'])) .ees-work-toolbar,
++	.ees-center:has(:global(#ees-work-panel.ew-vd:not([hidden]))) .ees-work-toolbar,
++	.ees-center:has(:global(#ees-work-panel:not([hidden]) .ew-record)) .ees-work-toolbar,
++	.ees-center:has(:global(#ees-work-panel:not([hidden]) .ew-records)) .ees-work-toolbar { background:var(--ees-surface-work-canvas,#f3f3f5); }
 +	.ees-work-toolbar strong { font-size:15px; font-weight:600; }
 +	.ees-work-toolbar button { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border:1px solid var(--ees-border,#e0e1e4); border-radius:6px; font-size:13px; line-height:20px; }
 +	.ees-work-toolbar button:hover { background:var(--ees-surface-hover,#f6f7f9); }
@@ -3988,8 +4076,293 @@ index 007df31..ecdbd66 100644
 + #sidebar[data-compact=true] .ees-chat-controls button{gap:0}#sidebar[data-compact=true] .ees-chat-controls span{max-width:0;transition-duration:var(--ees-motion-close);transition-timing-function:var(--ees-motion-close-easing)}
 + #sidebar[data-compact=true] :global(.ew-empty),#sidebar[data-compact=true] :global(.ew-recent){display:none}
  </style>
+diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte
+--- a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte
++++ b/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte
+@@ -25,6 +25,7 @@
+ 		uploadFile,
+ 		deleteFileById,
+ 		getFileById,
++		getFileProcessStatus,
+ 		renameFileById
+ 	} from '$lib/apis/files';
+ 	import {
+@@ -54,6 +55,8 @@
+ 	import Spinner from '$lib/components/common/Spinner.svelte';
+ 	import Tooltip from '$lib/components/common/Tooltip.svelte';
+ 	import Files from './KnowledgeBase/Files.svelte';
++	import EesAssetUsage from '$lib/components/ees/EesAssetUsage.svelte';
++	import { eesSnapshot, eesSessionReady } from '$lib/components/ees/state';
+ 	import AddFilesPlaceholder from '$lib/components/AddFilesPlaceholder.svelte';
+ 
+ 	import AddContentMenu from './KnowledgeBase/AddContentMenu.svelte';
+@@ -112,7 +115,40 @@
+ 	let selectedFile = null;
+ 	let selectedFileContent = '';
+ 	let loadingFileContent = false;
++	let retryingFile = '';
++	let retryMounted = true;
++	onDestroy(() => { retryMounted = false; });
+ 
++	const retryFile = async (fileId: string) => {
++		if (!$eesSessionReady || !$user?.id || $eesSnapshot.native_capabilities?.actor_id !== $user.id || !knowledge?.write_access || isExternalKnowledge || !fileId || retryingFile) return;
++		const collection = knowledge.id;
++		const token = localStorage.token;
++		const actor = $user.id;
++		const selection = { ...$eesSnapshot.selection };
++		const current = () => retryMounted && $eesSessionReady && $eesSnapshot.native_capabilities?.actor_id === actor &&
++			$user?.id === actor && knowledge?.id === collection && token === localStorage.token &&
++			$eesSnapshot.selection?.system_id === selection.system_id && $eesSnapshot.selection?.factory_id === selection.factory_id;
++		retryingFile = fileId;
++		try {
++			const refreshed = await updateFileFromKnowledgeById(token, collection, fileId);
++			if (!current()) return;
++			if (!refreshed) throw new Error($i18n.t('EES.Document.Failed', { defaultValue: 'Processing failed' }));
++			const response = await getFileProcessStatus(token, fileId, false).catch(() => null);
++			const latest = response?.ok ? await response.json().catch(() => null) : null;
++			if (!current()) return;
++			const status = latest?.status || 'unavailable';
++			if (fileItems) fileItems = fileItems.map((file) => file.id === fileId
++				? { ...file, status, data: { ...file.data, status } } : file);
++			if (selectedFileId === fileId && selectedFile?.id === fileId) {
++				selectedFile = { ...selectedFile, data: { ...selectedFile.data, status } };
++			}
++		} catch (error) {
++			if (current()) toast.error(String(error));
++		} finally {
++			retryingFile = '';
++		}
++	};
++
+ 	let inputFiles = null;
+ 
+ 	let query = '';
+@@ -1211,7 +1247,7 @@
+ 	}}
+ />
+ 
+-<div class="flex flex-col w-full h-full min-h-full" id="collection-container">
++<div class="flex flex-col w-full h-full min-h-full" id="collection-container" data-ees-asset="knowledge">
+ 	{#if id && knowledge}
+ 		<AccessControlModal
+ 			bind:show={showAccessControlModal}
+@@ -1239,7 +1275,7 @@
+ 				}}
+ 			>
+ 				<ChevronLeft className="size-3" strokeWidth="2" />
+-				<span>{$i18n.t('Back')}</span>
++				<span>{$i18n.t('EES.Knowledge.List', { defaultValue: 'Reference documents' })}</span>
+ 			</button>
+ 
+ 			<div class=" flex w-full">
+@@ -1248,7 +1284,7 @@
+ 						<div class="w-full flex justify-between items-center">
+ 							<input
+ 								type="text"
+-								class="text-left w-full text-sm bg-transparent outline-hidden flex-1"
++								class="text-left w-full text-xl font-semibold bg-transparent outline-hidden flex-1"
+ 								bind:value={knowledge.name}
+ 								aria-label={$i18n.t('Knowledge Name')}
+ 								placeholder={$i18n.t('Knowledge Name')}
+@@ -1270,19 +1306,6 @@
+ 							</div>
+ 						</div>
+ 
+-						{#if knowledge?.write_access}
+-							<div class="self-center shrink-0">
+-								<AccessButton
+-									on:click={() => {
+-										showAccessControlModal = true;
+-									}}
+-								/>
+-							</div>
+-						{:else}
+-							<div class="text-xs shrink-0 text-gray-500">
+-								{$i18n.t('Read Only')}
+-							</div>
+-						{/if}
+ 					</div>
+ 
+ 					<div class="flex w-full items-center">
+@@ -1317,7 +1340,7 @@
+ 		</div>
+ 
+ 		<div
+-			class="mt-1.5 mb-2 py-1.5 -mx-0 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100/30 dark:border-gray-850/30 flex-1"
++			class="mt-1.5 mb-2 py-1.5 -mx-0 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 flex-1"
+ 		>
+ 			{#if isExternalKnowledge}
+ 				<div class="p-5 flex flex-col gap-4">
+@@ -1564,6 +1587,9 @@
+ 										<div class=" flex overflow-y-auto h-full w-full scrollbar-hidden text-xs">
+ 											<Files
+ 												files={fileItems}
++											{selectedFile}
++											{retryingFile}
++											onRetry={retryFile}
+ 												directories={directoryItems}
+ 												{knowledge}
+ 												{selectedFileId}
+@@ -1699,6 +1725,23 @@
+ 					</div>
+ 				{/if}
+ 			{/if}
++		</div>
++		<EesAssetUsage kind="knowledge" assetId={knowledge.id} />
++		<div class="my-3 flex flex-wrap items-center gap-3 border-y border-gray-200 px-1 py-3 dark:border-gray-700">
++			<span class="text-sm font-medium">{$i18n.t('EES.Asset.Access', { defaultValue: 'Who can use this?' })}</span>
++						{#if knowledge?.write_access}
++							<div class="self-center shrink-0">
++								<AccessButton
++									on:click={() => {
++										showAccessControlModal = true;
++									}}
++								/>
++							</div>
++						{:else}
++							<div class="text-xs shrink-0 text-gray-500">
++								{$i18n.t('Read Only')}
++							</div>
++						{/if}
+ 		</div>
+ 	{:else}
+ 		<Spinner className="size-5" />
+diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte b/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte
+--- a/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte
++++ b/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte
+@@ -6,7 +6,10 @@
+ 	dayjs.extend(duration);
+ 	dayjs.extend(relativeTime);
+ 
+-	import { getContext } from 'svelte';
++	import { getContext, onDestroy } from 'svelte';
++	import { getFileProcessStatus } from '$lib/apis/files';
++	import { user } from '$lib/stores';
++	import { eesSessionReady, eesSnapshot } from '$lib/components/ees/state';
+ 	const i18n = getContext('i18n');
+ 
+ 	import { capitalizeFirstLetter, formatFileSize } from '$lib/utils';
+@@ -29,6 +32,8 @@
+ 		itemId?: string;
+ 		name?: string;
+ 		status?: string;
++		filename?: string;
++		data?: {status?: string};
+ 		meta?: {
+ 			name?: string;
+ 			size?: number;
+@@ -42,6 +47,9 @@
+ 
+ 	export let knowledge = null;
+ 	export let selectedFileId = null;
++	export let selectedFile: KnowledgeFile | null = null;
++	export let retryingFile = '';
++	export let onRetry: ((id: string) => void) | undefined = undefined;
+ 	export let files: KnowledgeFile[] = [];
+ 	export let directories = [];
+ 
+@@ -61,6 +69,61 @@
+ 	let editName = '';
+ 	let editInput: HTMLInputElement;
+ 
++	// The knowledge list omits file.data. Read only this page's missing states
++	// through the existing authorized, non-streaming status endpoint.
++	let fetchedStatuses: Record<string, string> = {};
++	let statusRequest: AbortController | null = null;
++	$: verifiedActor = $eesSessionReady && $user?.id && $eesSnapshot.native_capabilities?.actor_id === $user.id
++		? $user.id : '';
++	$: missingIds = [...new Set(files.filter((file) => file.id && !file.status && !file.data?.status).map((file) => file.id as string))];
++	$: boundary = JSON.stringify([verifiedActor, knowledge?.id, $eesSnapshot.selection?.system_id, $eesSnapshot.selection?.factory_id, missingIds]);
++	$: refreshStatuses(boundary);
++
++	async function refreshStatuses(key: string) {
++		statusRequest?.abort();
++		statusRequest = null;
++		fetchedStatuses = {};
++		if (!verifiedActor || !knowledge?.id || !missingIds.length || typeof window === 'undefined') return;
++		const token = localStorage.token;
++		const request = new AbortController();
++		statusRequest = request;
++		const ids = [...missingIds];
++		const current = () => !request.signal.aborted && boundary === key && localStorage.token === token;
++		async function readNext() {
++			while (current() && ids.length) {
++				const id = ids.shift();
++				if (!id) return;
++				let status = 'unavailable';
++				try {
++					const response = await getFileProcessStatus(token, id, false, request.signal);
++					if (response?.ok) status = (await response.json())?.status || 'unavailable';
++				} catch {
++					// Other visible rows still have independent status results.
++				}
++				if (current()) fetchedStatuses = { ...fetchedStatuses, [id]: status };
++			}
++		}
++		await Promise.all(Array.from({ length: Math.min(3, ids.length) }, readNext));
++	}
++	onDestroy(() => statusRequest?.abort());
++
++	const statusLabel = (status?: string) => {
++		switch (status) {
++			case 'uploading':
++			case 'pending':
++			case 'processing':
++				return $i18n.t('EES.Document.Processing', { defaultValue: 'Processing' });
++			case 'completed':
++				return $i18n.t('EES.Document.Ready', { defaultValue: 'Ready' });
++			case 'failed':
++			case 'error':
++				return $i18n.t('EES.Document.Failed', { defaultValue: 'Processing failed' });
++			case 'unavailable':
++				return $i18n.t('EES.Document.Unavailable', { defaultValue: 'Status unavailable' });
++			default:
++				return '';
++		}
++	};
+ 	const startRename = (file: KnowledgeFile) => {
+ 		editingFileId = file?.id ?? file?.tempId;
+ 		editName = file?.name ?? file?.meta?.name ?? '';
+@@ -95,6 +158,8 @@
+ 
+ 	<!-- Files -->
+ 	{#each files as file (file?.id ?? file?.itemId ?? file?.tempId)}
++		{@const status = file?.status || (file.id && selectedFile?.id === file.id ? selectedFile?.data?.status : undefined) || file?.data?.status || (file.id ? fetchedStatuses[file.id] : undefined)}
++		{@const label = statusLabel(status)}
+ 		<div
+ 			class=" flex cursor-pointer w-full px-2 bg-transparent dark:hover:bg-gray-850/50 hover:bg-white rounded-xl transition {selectedFileId
+ 				? ''
+@@ -157,7 +222,7 @@
+ 							/>
+ 						{:else}
+ 							<div class="line-clamp-1 text-xs">
+-								{file?.name ?? file?.meta?.name}
++								{file?.name ?? file?.meta?.name ?? file?.filename}
+ 								{#if file?.meta?.size}
+ 									<span class="text-[0.6875rem] text-gray-500"
+ 										>{formatFileSize(file?.meta?.size)}</span
+@@ -169,6 +234,7 @@
+ 				</div>
+ 
+ 				<div class="flex items-center gap-2 shrink-0">
++					{#if label}<span data-ees-file-status={status} class="rounded bg-gray-100 px-2 py-0.5 text-xs dark:bg-gray-800">{label}</span>{/if}
+ 					{#if file?.updated_at}
+ 						<Tooltip content={dayjs(file.updated_at * 1000).format('LLLL')}>
+ 							<div class="text-xs text-gray-400">
+@@ -194,6 +260,12 @@
+ 					{/if}
+ 				</div>
+ 			</button>
++			{#if onRetry && (status === 'failed' || status === 'error') && file.id && knowledge?.write_access && knowledge?.meta?.source !== 'external'}
++				<button type="button" disabled={Boolean(retryingFile)} data-ees-file-retry
++					class="shrink-0 self-center rounded-md border border-gray-200 px-2 py-1 text-xs disabled:opacity-50 dark:border-gray-700"
++					on:click={() => file.id && onRetry?.(file.id)}>{$i18n.t('EES.Document.Retry', { defaultValue: 'Reprocess' })}</button>
++			{/if}
++
+ 
+ 			{#if knowledge?.write_access}
+ 				<div class="flex items-center">
 diff --git a/src/lib/components/workspace/Models.svelte b/src/lib/components/workspace/Models.svelte
-index 3b0513b..3f80d95 100644
 --- a/src/lib/components/workspace/Models.svelte
 +++ b/src/lib/components/workspace/Models.svelte
 @@ -35,6 +35,7 @@
@@ -4000,10 +4373,16 @@ index 3b0513b..3f80d95 100644
  	import { getGroups } from '$lib/apis/groups';
  	import { updateUserSettings } from '$lib/apis/users';
  
-@@ -511,6 +512,16 @@
+@@ -510,9 +511,23 @@
+ 		}}
  	/>
  
- 	<div class="space-y-1">
+-	<div class="space-y-1">
+-		<div class="flex h-8 flex-1 items-center w-full gap-2">
+-			<div class="flex min-w-0 flex-1 items-center">
++	<div data-ees-asset="models" class="space-y-3">
++		<div class="flex flex-wrap items-center justify-between gap-2">
++			<h2 class="text-xl font-semibold">{$i18n.t('EES.Assistants', { defaultValue: 'AI assistants' })}{#if total !== null} <span>{$i18n.t('EES.AssetCount', { count: total, defaultValue: '{{count}} items' })}</span>{/if}</h2>
 +		{#if $user?.role === 'admin' && ($eesSnapshot.native_capabilities ?? $eesSnapshot.state?.capabilities)?.is_admin === true}
 +			<div class="flex justify-end">
 +				<button
@@ -4014,9 +4393,448 @@ index 3b0513b..3f80d95 100644
 +				>{$i18n.t('EES.WorkToolSettings', { defaultValue: 'Work tool settings' })}</button>
 +			</div>
 +		{/if}
- 		<div class="flex h-8 flex-1 items-center w-full gap-2">
- 			<div class="flex min-w-0 flex-1 items-center">
++		</div>
++		<p class="text-xs text-gray-600 dark:text-gray-400">{$i18n.t('EES.Assistants.Description', { defaultValue: 'Choose the assistants available in chat. Each assistant combines a base model, instructions, tools, skills, and reference documents.' })}</p>
++		<div class="flex min-h-9 flex-1 items-center w-full gap-2">
++			<div class="flex min-w-0 flex-1 items-center rounded-md border border-gray-200 bg-white px-2 focus-within:ring-1 dark:border-gray-700 dark:bg-gray-900">
  				<div class=" self-center ml-1 mr-3">
+ 					<Search className="size-3.5" />
+ 				</div>
+@@ -520,7 +535,7 @@
+ 					class=" w-full text-sm py-1 rounded-r-xl outline-hidden bg-transparent"
+ 					bind:value={query}
+ 					aria-label={$i18n.t('Search Models')}
+-					placeholder={$i18n.t('Search Models')}
++					placeholder={$i18n.t('EES.FindByName', { defaultValue: 'Find by name' })}
+ 					maxlength="500"
+ 					on:input={() => {
+ 						clearTimeout(searchDebounceTimer);
+@@ -689,10 +704,10 @@
+ 						</button>
+ 					</div>
+ 
+-					<div class="grid gap-y-0.5">
++					<div class="grid overflow-hidden rounded-lg border border-gray-200 bg-white divide-y divide-gray-200 dark:border-gray-700 dark:divide-gray-700 dark:bg-gray-900">
+ 						{#each models as model (model.id)}
+ 							<div
+-								class="group flex min-h-8 w-full items-center gap-2 overflow-hidden rounded-xl px-2 py-1 text-left {model.write_access
++								class="group flex min-h-[68px] w-full items-center gap-3 overflow-hidden px-3 py-2 text-left {model.write_access
+ 									? 'cursor-pointer'
+ 									: ''} {model?.meta?.hidden ? 'opacity-50 dark:opacity-50' : ''}"
+ 								id="model-item-{model.id}"
+@@ -771,9 +786,10 @@
+ 											<div
+ 												class="truncate text-[0.6875rem] leading-4 text-gray-400 dark:text-gray-600"
+ 											>
+-												{(model?.meta?.description ?? '').trim() ||
+-													model.base_model_id ||
+-													$i18n.t('No description')}
++												{model.base_model_id || (model?.meta?.description ?? '').trim() || model.id}
++												{#if Array.isArray(model.meta?.toolIds)} · {$i18n.t('Tools')} {model.meta.toolIds.length}{/if}
++												{#if Array.isArray(model.meta?.skillIds)} · {$i18n.t('Skills')} {model.meta.skillIds.length}{/if}
++												{#if Array.isArray(model.meta?.knowledge)} · {$i18n.t('EES.Nav.Knowledge', { defaultValue: 'Reference documents' })} {model.meta.knowledge.length}{/if}
+ 											</div>
+ 										</Tooltip>
+ 									</div>
+diff --git a/src/lib/components/workspace/Models/ModelEditor.svelte b/src/lib/components/workspace/Models/ModelEditor.svelte
+--- a/src/lib/components/workspace/Models/ModelEditor.svelte
++++ b/src/lib/components/workspace/Models/ModelEditor.svelte
+@@ -501,7 +501,7 @@
+ 		shareUsers={($user?.permissions?.access_grants?.allow_users ?? true) || $user?.role === 'admin'}
+ 	/>
+ 
+-	<div class="flex h-full min-h-0 w-full flex-col">
++	<div data-ees-asset="model-editor" class="flex h-full min-h-0 w-full flex-col">
+ 		{#if onBack}
+ 			<button
+ 				class="mb-1 flex h-6 w-fit items-center gap-1 rounded-md text-xs text-gray-400 transition-colors duration-75 hover:text-gray-700 dark:text-gray-600 dark:hover:text-gray-300"
+@@ -511,7 +511,7 @@
+ 				}}
+ 			>
+ 				<ChevronLeft className="size-3" strokeWidth="2" />
+-				<span>{$i18n.t('Back')}</span>
++				<span>{$i18n.t('EES.Assistants.List', { defaultValue: 'AI assistants' })}</span>
+ 			</button>
+ 		{/if}
+ 
+@@ -683,11 +683,6 @@
+ 												required
+ 											/>
+ 
+-											<AccessButton
+-												on:click={() => {
+-													showAccessControlModal = true;
+-												}}
+-											/>
+ 										</div>
+ 
+ 										<input
+@@ -704,7 +699,7 @@
+ 							{#if preset}
+ 								<div>
+ 									<div class="mb-1 text-xs text-gray-400 dark:text-gray-600">
+-										{$i18n.t('Base Model (From)')}
++										{$i18n.t('EES.Assistants.Base', { defaultValue: 'Base model' })}
+ 									</div>
+ 
+ 									<ModelSelector
+@@ -719,71 +714,16 @@
+ 									/>
+ 								</div>
+ 							{/if}
+-
+-							<div>
+-								<div class="mb-1 flex w-full items-center justify-between">
+-									<div class="self-center text-xs text-gray-400 dark:text-gray-600">
+-										{$i18n.t('Description')}
+-									</div>
+-
+-									<button
+-										class="text-xs text-gray-500 transition hover:text-gray-700 dark:hover:text-gray-300"
+-										type="button"
+-										aria-pressed={enableDescription ? 'true' : 'false'}
+-										aria-label={enableDescription
+-											? $i18n.t('Custom description enabled')
+-											: $i18n.t('Default description enabled')}
+-										on:click={() => {
+-											enableDescription = !enableDescription;
+-										}}
+-									>
+-										{#if !enableDescription}
+-											<span>{$i18n.t('Default')}</span>
+-										{:else}
+-											<span>{$i18n.t('Custom')}</span>
+-										{/if}
+-									</button>
+-								</div>
+-
+-								{#if enableDescription}
+-									<Textarea
+-										className="w-full resize-none overflow-y-hidden bg-transparent py-1 text-[0.8125rem] text-gray-700 outline-hidden placeholder:text-gray-300 dark:text-gray-300 dark:placeholder:text-gray-700"
+-										placeholder={$i18n.t('Add a short description about what this model does')}
+-										minSize={32}
+-										bind:value={info.meta.description}
+-									/>
+-								{/if}
+-							</div>
+-
+-							<div class="w-full max-w-full">
+-								<Tags
+-									tags={info?.meta?.tags ?? []}
+-									{suggestionTags}
+-									on:delete={(e) => {
+-										const tagName = e.detail;
+-										info.meta.tags = info.meta.tags.filter((tag) => tag.name !== tagName);
+-									}}
+-									on:add={(e) => {
+-										const tagName = e.detail;
+-										if (!(info?.meta?.tags ?? null)) {
+-											info.meta.tags = [{ name: tagName }];
+-										} else {
+-											info.meta.tags = [...info.meta.tags, { name: tagName }];
+-										}
+-									}}
+-								/>
+-							</div>
+ 						</div>
+-
+-						<section class="mt-2.5">
++						<section class="mt-3 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
+ 							<div class="mb-2 text-xs text-gray-400 dark:text-gray-600">
+-								{$i18n.t('Model Params')}
++								{$i18n.t('EES.Assistants.Instructions', { defaultValue: 'Instructions' })}
+ 							</div>
+ 
+ 							<div class="space-y-2.5">
+ 								<div>
+ 									<div class="mb-1 text-xs text-gray-600 dark:text-gray-400">
+-										{$i18n.t('System Prompt')}
++										{$i18n.t('EES.Assistants.SystemPrompt', { defaultValue: 'Instructions the assistant always follows · System prompt' })}
+ 									</div>
+ 									<div>
+ 										<Textarea
+@@ -852,7 +792,81 @@
+ 										</div>
+ 									{/if}
+ 								</div>
++							</div>
++						</section>
++						<div class="my-3">
++							<ToolsSelector bind:selectedToolIds={toolIds} tools={$tools ?? []} />
++						</div>
+ 
++						<div class="my-3">
++							<SkillsSelector bind:selectedSkillIds={skillIds} skills={skillsList} />
++						</div>
++						<div class="my-3">
++							<Knowledge bind:selectedItems={knowledge} />
++						</div>
++						<div class="my-3 flex flex-wrap items-center gap-3 border-y border-gray-200 py-3 dark:border-gray-700">
++							<span class="text-sm font-medium">{$i18n.t('EES.Asset.Access', { defaultValue: 'Who can use this?' })}</span>
++											<AccessButton
++												on:click={() => {
++													showAccessControlModal = true;
++												}}
++											/>
++						</div>
++						<details class="my-3 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
++							<summary class="cursor-pointer text-sm font-medium">{$i18n.t('EES.Asset.Advanced', { defaultValue: 'Advanced settings' })}</summary>
++							<div>
++								<div class="mb-1 flex w-full items-center justify-between">
++									<div class="self-center text-xs text-gray-400 dark:text-gray-600">
++										{$i18n.t('Description')}
++									</div>
++
++									<button
++										class="text-xs text-gray-500 transition hover:text-gray-700 dark:hover:text-gray-300"
++										type="button"
++										aria-pressed={enableDescription ? 'true' : 'false'}
++										aria-label={enableDescription
++											? $i18n.t('Custom description enabled')
++											: $i18n.t('Default description enabled')}
++										on:click={() => {
++											enableDescription = !enableDescription;
++										}}
++									>
++										{#if !enableDescription}
++											<span>{$i18n.t('Default')}</span>
++										{:else}
++											<span>{$i18n.t('Custom')}</span>
++										{/if}
++									</button>
++								</div>
++
++								{#if enableDescription}
++									<Textarea
++										className="w-full resize-none overflow-y-hidden bg-transparent py-1 text-[0.8125rem] text-gray-700 outline-hidden placeholder:text-gray-300 dark:text-gray-300 dark:placeholder:text-gray-700"
++										placeholder={$i18n.t('Add a short description about what this model does')}
++										minSize={32}
++										bind:value={info.meta.description}
++									/>
++								{/if}
++							</div>
++
++							<div class="w-full max-w-full">
++								<Tags
++									tags={info?.meta?.tags ?? []}
++									{suggestionTags}
++									on:delete={(e) => {
++										const tagName = e.detail;
++										info.meta.tags = info.meta.tags.filter((tag) => tag.name !== tagName);
++									}}
++									on:add={(e) => {
++										const tagName = e.detail;
++										if (!(info?.meta?.tags ?? null)) {
++											info.meta.tags = [{ name: tagName }];
++										} else {
++											info.meta.tags = [...info.meta.tags, { name: tagName }];
++										}
++									}}
++								/>
++							</div>
+ 								<div class="flex h-7 w-full justify-between">
+ 									<div class="self-center text-xs text-gray-600 dark:text-gray-400">
+ 										{$i18n.t('Advanced Params')}
+@@ -878,9 +892,6 @@
+ 										<AdvancedParams admin={true} custom={true} layout="grid" bind:params />
+ 									</div>
+ 								{/if}
+-							</div>
+-						</section>
+-
+ 						<hr class=" border-gray-100/30 dark:border-gray-850/30 my-2" />
+ 
+ 						<section class="my-2.5">
+@@ -912,19 +923,6 @@
+ 								<PromptSuggestions bind:promptSuggestions={info.meta.suggestion_prompts} />
+ 							{/if}
+ 						</section>
+-
+-						<div class="my-3">
+-							<Knowledge bind:selectedItems={knowledge} />
+-						</div>
+-
+-						<div class="my-3">
+-							<ToolsSelector bind:selectedToolIds={toolIds} tools={$tools ?? []} />
+-						</div>
+-
+-						<div class="my-3">
+-							<SkillsSelector bind:selectedSkillIds={skillIds} skills={skillsList} />
+-						</div>
+-
+ 						{#if ($functions ?? []).filter((func) => func.type === 'filter').length > 0 || ($functions ?? []).filter((func) => func.type === 'action').length > 0}
+ 							<hr class="my-3 border-gray-100/30 dark:border-gray-850/30" />
+ 
+@@ -1011,31 +1009,7 @@
+ 
+ 						<hr class="my-3 border-gray-100/30 dark:border-gray-850/30" />
+ 
+-						<div class="my-2 flex justify-end">
+-							<button
+-								class=" text-sm px-3 py-2 transition rounded-lg {loading
+-									? ' cursor-not-allowed bg-black hover:bg-gray-900 text-white dark:bg-white dark:hover:bg-gray-100 dark:text-black'
+-									: 'bg-black hover:bg-gray-900 text-white dark:bg-white dark:hover:bg-gray-100 dark:text-black'} flex w-full justify-center"
+-								type="submit"
+-								disabled={loading}
+-							>
+-								<div class=" self-center font-normal">
+-									{#if edit}
+-										{$i18n.t('Save & Update')}
+-									{:else}
+-										{$i18n.t('Save & Create')}
+-									{/if}
+-								</div>
+-
+-								{#if loading}
+-									<div class="ml-1.5 self-center">
+-										<Spinner />
+-									</div>
+-								{/if}
+-							</button>
+-						</div>
+-
+-						<div class="my-2 text-gray-300 dark:text-gray-700 pb-20">
++						<div class="my-2 text-gray-300 dark:text-gray-700 pb-2">
+ 							<div class="flex w-full justify-between mb-2">
+ 								<div class=" self-center text-sm font-normal">{$i18n.t('JSON Preview')}</div>
+ 
+@@ -1065,6 +1039,28 @@
+ 									/>
+ 								</div>
+ 							{/if}
++						</div>
++						</details>
++						<div class="sticky bottom-0 z-10 mt-2 flex justify-end border-t border-gray-200 bg-white px-3 py-2 dark:border-gray-700 dark:bg-gray-900">
++							<button
++								class="flex min-h-8 items-center justify-center rounded-md bg-blue-800 px-4 text-sm font-medium text-white disabled:opacity-60"
++								type="submit"
++								disabled={loading}
++							>
++								<div class=" self-center font-normal">
++									{#if edit}
++										{$i18n.t('Save')}
++									{:else}
++										{$i18n.t('Save & Create')}
++									{/if}
++								</div>
++
++								{#if loading}
++									<div class="ml-1.5 self-center">
++										<Spinner />
++									</div>
++								{/if}
++							</button>
+ 						</div>
+ 					</div>
+ 				</form>
+diff --git a/src/lib/components/workspace/Skills/SkillEditor.svelte b/src/lib/components/workspace/Skills/SkillEditor.svelte
+--- a/src/lib/components/workspace/Skills/SkillEditor.svelte
++++ b/src/lib/components/workspace/Skills/SkillEditor.svelte
+@@ -12,6 +12,7 @@
+ 	import Spinner from '$lib/components/common/Spinner.svelte';
+ 	import { updateSkillAccessGrants } from '$lib/apis/skills';
+ 	import { goto } from '$app/navigation';
++	import EesAssetUsage from '$lib/components/ees/EesAssetUsage.svelte';
+ 
+ 	export let onSubmit: Function;
+ 	export let edit = false;
+@@ -30,6 +31,7 @@
+ 
+ 	let accessGrants = [];
+ 	let showAccessControlModal = false;
++	$: changedFields = edit && skill ? Number(name !== (skill.name ?? '')) + Number(description !== (skill.description ?? '')) + Number(content !== (skill.content ?? '')) : 0;
+ 	$: if (!edit && !clone && name) {
+ 		id = slugify(name);
+ 	}
+@@ -97,7 +99,7 @@
+ 	}}
+ />
+ 
+-<div class="flex h-full w-full min-w-0 flex-col overflow-hidden">
++<div data-ees-asset="skill-editor" class="flex h-full w-full min-w-0 flex-col overflow-hidden">
+ 	<form class="flex h-full min-h-0 min-w-0 flex-col" on:submit|preventDefault={submitHandler}>
+ 		<button
+ 			class="mb-1 flex h-6 w-fit items-center gap-1 rounded-md text-xs text-gray-400 transition-colors duration-75 hover:text-gray-700 dark:text-gray-600 dark:hover:text-gray-300"
+@@ -107,14 +109,15 @@
+ 			}}
+ 		>
+ 			<ChevronLeft className="size-3" strokeWidth="2" />
+-			<span>{$i18n.t('Back')}</span>
++			<span>{$i18n.t('EES.Skills.List', { defaultValue: 'Work instructions' })}</span>
+ 		</button>
+ 
++		<div class="min-h-0 flex-1 overflow-y-auto pb-2">
+ 		<div class="flex shrink-0 items-start gap-2 pb-2 px-1">
+ 			<div class="min-w-0 flex-1">
+ 				<Tooltip content={$i18n.t('e.g. Code Review Guidelines')} placement="top-start">
+ 					<input
+-						class="w-full bg-transparent text-sm outline-hidden"
++						class="w-full bg-transparent text-xl font-semibold outline-hidden"
+ 						type="text"
+ 						placeholder={$i18n.t('Skill Name')}
+ 						aria-label={$i18n.t('Skill Name')}
+@@ -164,26 +167,19 @@
+ 				</div>
+ 			</div>
+ 
+-			<div class="flex shrink-0 items-center gap-1 pr-0.5">
+-				{#if !disabled}
+-					<AccessButton on:click={() => (showAccessControlModal = true)} />
+-				{:else}
+-					<span class="rounded-lg bg-gray-100 px-2 py-1 text-xs text-gray-500 dark:bg-gray-850">
+-						{$i18n.t('Read Only')}
+-					</span>
+-				{/if}
+-			</div>
+ 		</div>
+ 
+-		<div class="min-h-0 flex-1 overflow-hidden rounded-lg bg-gray-50/60 dark:bg-white/[0.03]">
++		<h3 class="mt-4 mb-2 text-sm font-semibold">{$i18n.t('EES.Skill.Body', { defaultValue: 'Instructions' })} <small class="ml-2 font-normal text-gray-500">{$i18n.t('EES.Skill.BodyHint', { defaultValue: 'Instructions followed by the assistant' })}</small></h3>
++		<div class="min-h-24 overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+ 			{#if disabled}
+-				<div class="h-full overflow-y-auto px-3 py-2">
++				<div class="min-h-24 overflow-y-auto px-3 py-2">
+ 					<pre
+-						class="whitespace-pre-wrap font-mono text-[0.6875rem] leading-relaxed">{content}</pre>
++						class="whitespace-pre-wrap font-sans text-sm leading-relaxed">{content}</pre>
+ 				</div>
+ 			{:else}
+ 				<textarea
+-					class="h-full w-full resize-none bg-transparent px-3 py-2 font-mono text-[0.6875rem] leading-relaxed outline-hidden placeholder:text-gray-400 dark:placeholder:text-gray-600"
++					class="min-h-28 w-full resize-y bg-transparent px-3 py-2 font-sans text-sm leading-relaxed outline-hidden placeholder:text-gray-400 dark:placeholder:text-gray-600"
++					rows="5"
+ 					bind:value={content}
+ 					on:input={handleContentInput}
+ 					placeholder={$i18n.t('Enter skill instructions in markdown...')}
+@@ -192,11 +188,26 @@
+ 				></textarea>
+ 			{/if}
+ 		</div>
++		{#if edit && skill?.id}<EesAssetUsage kind="skill" assetId={skill.id} />{/if}
++		<div class="my-4 flex flex-wrap items-center gap-3 border-y border-gray-200 py-3 dark:border-gray-700">
++			<span class="text-sm font-medium">{$i18n.t('EES.Asset.Access', { defaultValue: 'Who can use this?' })}</span>
++			<div class="flex shrink-0 items-center gap-1 pr-0.5">
++				{#if !disabled}
++					<AccessButton on:click={() => (showAccessControlModal = true)} />
++				{:else}
++					<span class="rounded-lg bg-gray-100 px-2 py-1 text-xs text-gray-500 dark:bg-gray-850">
++						{$i18n.t('Read Only')}
++					</span>
++				{/if}
++			</div>
++		</div>
++		</div>
+ 
+ 		{#if !disabled}
+-			<div class="flex shrink-0 justify-end py-2">
++			<div class="flex shrink-0 items-center justify-end gap-3 border-t border-gray-200 py-3 dark:border-gray-700">
++				{#if changedFields}<small class="mr-auto text-gray-600 dark:text-gray-300" role="status">{$i18n.t('EES.Skill.Dirty', { count: changedFields, defaultValue: '{{count}} fields changed · Not saved' })}</small>{/if}
+ 				<button
+-					class="flex h-7 items-center gap-1.5 rounded-lg bg-gray-900 px-2.5 text-xs text-white transition hover:bg-black disabled:opacity-60 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
++					class="flex h-7 items-center gap-1.5 rounded-lg bg-blue-800 px-4 text-sm text-white transition hover:bg-blue-900 disabled:opacity-60 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
+ 					type="submit"
+ 					disabled={loading}
+ 				>
 diff --git a/src/lib/constants.ts b/src/lib/constants.ts
 index 172ed9a..8873d62 100644
 --- a/src/lib/constants.ts
@@ -4031,10 +4849,9 @@ index 172ed9a..8873d62 100644
  export const WEBUI_HOSTNAME = '';
  export const WEBUI_BASE_URL = '';
 diff --git a/src/lib/i18n/locales/ko-KR/translation.json b/src/lib/i18n/locales/ko-KR/translation.json
-index 8eba682..d7d481c 100644
 --- a/src/lib/i18n/locales/ko-KR/translation.json
 +++ b/src/lib/i18n/locales/ko-KR/translation.json
-@@ -3081,5 +3081,105 @@
+@@ -3081,5 +3081,126 @@
  	"Youtube Language": "Youtube 언어",
  	"Youtube Proxy URL": "Youtube 프록시 URL",
  	"Zoom in": "",
@@ -4139,7 +4956,28 @@ index 8eba682..d7d481c 100644
 +	"EES.Prompts.Empty": "저장한 프롬프트가 없습니다.",
 +	"EES.Prompts.NoMatches": "검색 결과가 없습니다.",
 +	"EES.Prompts.LoadFailed": "프롬프트를 불러오지 못했습니다.",
-+	"EES.Prompts.SaveFailed": "저장하지 못했습니다. 입력한 내용은 유지됩니다."
++	"EES.Prompts.SaveFailed": "저장하지 못했습니다. 입력한 내용은 유지됩니다.",
++	"EES.Assistants": "AI 도우미",
++	"EES.AssetCount": "{{count}}개",
++	"EES.Assistants.Description": "대화창에서 고르는 AI 도우미입니다. 기반 모델에 지침·도구·스킬·참고 문서를 묶어 만듭니다.",
++	"EES.FindByName": "이름으로 찾기",
++	"EES.Assistants.List": "AI 도우미 목록",
++	"EES.Assistants.Base": "기반 모델",
++	"EES.Assistants.Instructions": "지침",
++	"EES.Assistants.SystemPrompt": "이 도우미가 늘 지킬 말 · 시스템 프롬프트",
++	"EES.Asset.Access": "누가 쓸 수 있나요",
++	"EES.Asset.Advanced": "고급 · 세부 설정",
++	"EES.Skills.List": "작업 지침 목록",
++	"EES.Skill.Body": "본문",
++	"EES.Skill.BodyHint": "AI가 이 내용을 읽고 따릅니다",
++	"EES.Knowledge.List": "참고 문서 목록",
++	"EES.Asset.Usage": "쓰는 곳",
++	"EES.Document.Processing": "처리 중",
++	"EES.Document.Ready": "처리 완료",
++	"EES.Document.Failed": "처리 실패",
++	"EES.Document.Retry": "다시 처리",
++	"EES.Skill.Dirty": "바뀐 곳 {{count}} · 저장 전",
++	"EES.Document.Unavailable": "상태 확인 불가"
  }
 diff --git a/src/routes/(app)/+layout.svelte b/src/routes/(app)/+layout.svelte
 index 633a9f7..a50b708 100644
@@ -4282,10 +5120,25 @@ index 9aee4da..08ebc41 100644
  		<Spinner />
  	</div>
 diff --git a/src/routes/(app)/workspace/+layout.svelte b/src/routes/(app)/workspace/+layout.svelte
-index 11eed46..a11e88a 100644
 --- a/src/routes/(app)/workspace/+layout.svelte
 +++ b/src/routes/(app)/workspace/+layout.svelte
-@@ -116,132 +116,9 @@
+@@ -26,6 +26,7 @@
+ 	const i18n = getContext<Writable<i18nType>>('i18n');
+ 
+ 	let loaded = false;
++	let hasAssetToolbar = false;
+ 	let lastPath = '';
+ 	let activeWorkspaceSection = '';
+ 	let visibleActions = [];
+@@ -78,6 +79,7 @@
+ 	};
+ 
+ 	onMount(async () => {
++		hasAssetToolbar = Boolean(document.querySelector('[data-ees-native-asset-toolbar]'));
+ 		if ($user?.role !== 'admin') {
+ 			if ($page.url.pathname.includes('/models') && !$user?.permissions?.workspace?.models) {
+ 				goto('/', { replaceState: true });
+@@ -116,138 +118,28 @@
  
  {#if loaded}
  	<div
@@ -4416,10 +5269,29 @@ index 11eed46..a11e88a 100644
 -				<!-- <div class="flex items-center text-xl font-normal">{$i18n.t('Workspace')}</div> -->
 -			</div>
 -		</nav>
++		{#if !hasAssetToolbar || !["models", "knowledge", "skills"].includes(activeWorkspaceSection)}
 +		<header data-ees-source-workspace-heading class="h-12 shrink-0 flex items-center px-4 border-b border-gray-200 gap-2"><h1 class="font-semibold flex-1">{$i18n.t(({models:'EES.Nav.Models',knowledge:'EES.Nav.Knowledge',prompts:'EES.Nav.Prompts',skills:'EES.Nav.Skills',tools:'EES.Nav.Connections'})[activeWorkspaceSection] || 'EES.Nav.Workspace',{defaultValue:'Workspace'})}</h1><SplitCreateButton actions={visibleActions}/></header>
++		{/if}
  
  		<div
  			class="  pb-1 px-3 flex-1 min-w-0 max-h-full overflow-y-auto overflow-x-hidden"
++			data-ees-assets-layout={["models", "knowledge", "skills"].includes(activeWorkspaceSection) || undefined}
+ 			id="workspace-container"
+ 		>
+ 			<slot />
+ 		</div>
+ 	</div>
+ {/if}
++
++<style>
++	#workspace-container[data-ees-assets-layout] {
++		padding: 16px max(16px, calc((100% - 960px) / 2));
++		background-color: var(--ees-surface-work-canvas, #f3f3f5);
++	}
++	:global(.dark) #workspace-container[data-ees-assets-layout] {
++		background-color: var(--color-gray-900, #171717);
++	}
++</style>
 diff --git a/src/routes/+layout.svelte b/src/routes/+layout.svelte
 index cd832fd..fe3f661 100644
 --- a/src/routes/+layout.svelte

@@ -608,6 +608,13 @@ jobs:
       - name: Verify actual browser files before artifact upload
         if: always() && steps.native.outcome != 'skipped'
         run: python tests/ees_delivery_suite.py --browser-evidence dist/ees-work-screenshots --output dist/ees-results
+      - name: Include the offline Figma review beside measured product captures
+        if: always() && matrix.suite == 'native-compose' && steps.native.outcome != 'skipped'
+        run: |
+          cp -R evals/artifacts/figma-product-parity-20261111 dist/ees-results/figma-review
+          if [ "${{ steps.native.outcome }}" = "success" ]; then
+            python evals/artifacts/figma-product-parity-20261111/verify_evidence.py dist/ees-work-screenshots dist/ees-results/figma-review
+          fi
       - name: Keep browser results and actual evidence files
         if: always() && steps.native.outcome != 'skipped'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

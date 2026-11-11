@@ -499,11 +499,47 @@ function workResultHTML(job,saved={}, {readOnly=false,listDraft=null,reviewDraft
   else if(block==='values')body=Object.keys(result).length?`<dl class="ew-facts">${Object.entries(result).filter(([key])=>!['secret','token','pat','credential'].includes(key.toLowerCase())).map(([key,value])=>`<div><dt>${esc(key)}</dt><dd>${esc(typeof value==='object'?JSON.stringify(value):value)}</dd></div>`).join('')}</dl>`:empty;
   else body=workChecklistHTML(Array.isArray(job.confirmation_items)?job.confirmation_items:[],saved,true)+`<p>${esc(job.completion?.description || job.completion_criteria || job.instructions || '결과와 근거를 확인한 뒤 직접 확인해 주세요.')}</p>${result.summary?`<p>${esc(result.summary)}</p>`:''}`;
   if(result.result_kind==='evidence')body+=`<section class="ew-read-evidence"><h4>조회 근거</h4>${(result.evidence || []).map(item=>source(item.url)).join('')}<pre>${esc(result.data?.content || '')}</pre>${result.completeness==='truncated'?'<span class="ew-badge">부분 결과</span><p>본문이 길어 일부만 받았습니다.</p>':''}</section>`;
-  return `<section class="ew-result" data-result-block="${esc(block)}">${result.error?workNoticeHTML('조회 연결 확인',result.error.message||workReasonText(result.error.code,messages)):''}${saved.evidence_access==='requires_current_source_access'?'<p class="ew-warning">현재 계정의 원본 접근 권한으로 근거를 다시 확인해야 합니다. 이전 기록을 보존하고 현재 권한으로 다시 조회해 주세요.</p>':''}${block!=='list_confirm'&&(saved.status==='partial'||saved.result?.completeness==='partial')?workNoticeHTML('부분 결과','받은 범위만 확인했습니다. 사람 판정 뒤에도 조회 범위가 완전해지지는 않습니다.'):''}<h3>${esc({values:'확인한 값',schedule:'일정 안내',checklist:'확인 항목 결과',list_confirm:'목록 확정',item_verdict:'항목별 판정',ai_review:'초안 검토',human_confirm:'사람 확인',change_request:'EES 요청'}[block] || '결과')}</h3>${body}${job.result_block==='ai_review'&&saved.attempt_id?button('결과 초안 내보내기','export_result',`data-job-id="${esc(job.id)}" class="ew-text"`):''}${!readOnly&&items.length&&['list_confirm','item_verdict','checklist'].includes(block)&&!(block==='item_verdict'&&Object.keys(saved.decisions || {}).length)?button('목록 수정 · 다시 검토','amend_items','class="ew-text"'):''}</section>`;
+  return `<section class="ew-result" data-result-block="${esc(block)}">${result.error?workNoticeHTML('조회 연결 확인',result.error.message||workReasonText(result.error.code,messages)):''}${saved.evidence_access==='requires_current_source_access'?'<p class="ew-warning">현재 계정의 원본 접근 권한으로 근거를 다시 확인해야 합니다. 이전 기록을 보존하고 현재 권한으로 다시 조회해 주세요.</p>':''}${block!=='list_confirm'&&(saved.status==='partial'||saved.result?.completeness==='partial')?workNoticeHTML('부분 결과','받은 범위만 확인했습니다. 사람 판정 뒤에도 조회 범위가 완전해지지는 않습니다.'):''}${block==='change_request'?'':`<h3>${esc({values:'확인한 값',schedule:'일정 안내',checklist:'확인 항목 결과',list_confirm:'목록 확정',item_verdict:'항목별 판정',ai_review:'초안 검토',human_confirm:'사람 확인',change_request:'EES 요청'}[block] || '결과')}</h3>`}${body}${job.result_block==='ai_review'&&saved.attempt_id?button('결과 초안 내보내기','export_result',`data-job-id="${esc(job.id)}" class="ew-text"`):''}${!readOnly&&items.length&&['list_confirm','item_verdict','checklist'].includes(block)&&!(block==='item_verdict'&&Object.keys(saved.decisions || {}).length)?button('목록 수정 · 다시 검토','amend_items','class="ew-text"'):''}</section>`;
 }
 function workRequestHTML(request={},job={}){
-  const {esc,safeURL}=workUI,executionActor=request.execution_actor || job.execution_actor || 'EES',direct=executionActor==='EES Work',steps=[['requested','요청 보냄','EES Work'],['accepted','접수',executionActor],['running','실행 중',executionActor],['reported_complete','완료 보고',executionActor],['effect_verified','효과 확인','EES Work']],events=request.events || [];
-  return `<div class="ew-request-track">${direct?workNoticeHTML('직접 실행 · 예외','실행 주체 EES Workflow · 실행 연결 확인 필요. 등록·검토만으로 실제 작업을 실행하지 않습니다.'):''}${request.id?`<p>${workStatusHTML(request.state || request.status)} · 승인 ${esc(request.approvals?.length || 0)} / ${esc(request.approval_count || 0)}</p>${job.can_review_request!==false&&request.actor!==job.actor_id&&!(request.approvals || []).some(approval=>approval.actor===job.actor_id)&&request.state==='approval_pending'?workUI.button('요청 승인','approve_request',`data-request-id="${esc(request.id)}" data-request-revision="${esc(request.revision)}"`):''}${job.can_reconcile!==false&&['requested','accepted','running','reported_complete','unknown'].includes(request.state)?workUI.button('상태 다시 확인','reconcile_request',`data-request-id="${esc(request.id)}" data-request-revision="${esc(request.revision)}"`):''}`:''}${(request.external_job_id || request.job_number)?`<p>작업 번호 <strong>${esc((request.external_job_id || request.job_number))}</strong></p>`:''}${steps.map(([state,label,actor])=>{const event=events.find(e=>e.state===state || e.status===state || e.kind===state);return `<div>${workStatusHTML(event?state==='running'?'running':'completed':'waiting',label)}<span class="ew-actor" data-actor="${esc(actor)}">${esc(workUI.executionActorLabel(actor))}</span><small>${esc(event?workUI.time(event.at ?? event.created_at):'대기')}</small></div>`;}).join('')}${['unknown','partial'].includes(request.status || request.state)?workNoticeHTML('결과를 확인하지 못했습니다','중복 실행을 막기 위해 자동으로 다시 요청하지 않습니다. 같은 작업 번호의 상태만 다시 조회해 주세요.'):request.state==='failed'&&request.reported_complete&&!request.effect_verified?workNoticeHTML('EES는 완료했지만 효과가 확인되지 않았습니다','이 작업은 실패로 남습니다. 절차에 정한 다음 조치와 근거를 확인해 주세요.','danger'):request.reported_complete&&!request.effect_verified?workNoticeHTML('EES 완료 보고 후 효과 확인이 필요합니다','업무 완료로 처리하지 않았습니다.'):''}<p class="ew-muted">${esc(workUI.executionActorLabel(executionActor))} 완료 보고와 효과 확인이 모두 끝나야 업무를 완료합니다.</p>${(request.block_reason || request.reason)?`<p role="status">${esc(workReasonText(request.block_reason || request.reason))}</p>`:''}${safeURL(request.external_url)?`<a href="${esc(safeURL(request.external_url))}" target="_blank" rel="noopener noreferrer">EES에서 보기</a>`:''}${job.request_contract?.guide_url&&safeURL(job.request_contract.guide_url)?`<a href="${esc(safeURL(job.request_contract.guide_url))}" target="_blank" rel="noopener noreferrer">EES 가이드</a>`:''}</div>`;
+  const {esc,button,icon,safeURL,executionActorLabel}=workUI;
+  const actor=request.execution_actor || job.execution_actor || 'EES',state=request.state || request.status;
+  const steps=[['requested','요청 보냄','EES Work'],['accepted','접수',actor],['running','실행 중',actor],['reported_complete','완료 보고',actor],['effect_verified','효과 확인','EES Work']];
+  const events=request.events || [],number=request.external_job_id || request.job_number;
+  const timeline=steps.map(([key,label,executor])=>{
+    const event=events.find(entry=>entry.state===key || entry.status===key || entry.kind===key);
+    const status=!event?'waiting':key==='running'&&state==='running'?'running':'completed';
+    const glyph={waiting:'40ef1',running:'8f8a1',completed:'f4cb1'}[status];
+    return `<div class="ew-request-step" data-state="${key}"><span class="ew-status" data-status="${status}">${icon(glyph)}<span>${label}</span></span><span class="ew-actor" data-actor="${esc(executor)}">${esc(executionActorLabel(executor))}</span><small>${esc(event?workUI.time(event.at ?? event.created_at):'대기')}</small></div>`;
+  }).join('');
+  const controls=[];
+  if(request.id){
+    const id=`data-request-id="${esc(request.id)}" data-request-revision="${esc(request.revision)}"`;
+    if(state==='approval_pending' && job.can_review_request!==false && request.actor!==job.actor_id && !(request.approvals || []).some(approval=>approval.actor===job.actor_id)){
+      controls.push(button('요청 승인','approve_request',id));
+    }
+    if(job.can_reconcile!==false && ['requested','accepted','running','reported_complete','unknown'].includes(state)){
+      controls.push(button('상태 다시 확인','reconcile_request',id));
+    }
+  }
+  let notice='';
+  if(['unknown','partial'].includes(state)){
+    notice=workNoticeHTML('결과를 확인하지 못했습니다','중복 실행을 막기 위해 자동으로 다시 요청하지 않습니다. 같은 작업 번호의 상태만 다시 조회해 주세요.');
+  }else if(request.reported_complete&&!request.effect_verified){
+    notice=state==='failed'?workNoticeHTML('EES는 완료했지만 효과가 확인되지 않았습니다','이 작업은 실패로 남습니다. 절차에 정한 다음 조치와 근거를 확인해 주세요.','danger'):workNoticeHTML('EES 완료 보고 후 효과 확인이 필요합니다','업무 완료로 처리하지 않았습니다.');
+  }
+  const external=safeURL(request.external_url),guide=safeURL(job.request_contract?.guide_url);
+  if(guide)controls.push(`<a href="${esc(guide)}" target="_blank" rel="noopener noreferrer">EES 가이드</a>`);
+  if(external)controls.push(`<a class="ew-request-external" href="${esc(external)}" target="_blank" rel="noopener noreferrer">EES에서 보기</a>`);
+  return `<div class="ew-request-track" data-tracked="${Boolean(request.id)}">
+    <header class="ew-request-heading"><h3>EES 실행 요청</h3>${number?`<span class="ew-badge">작업 번호 ${esc(number)}</span>`:''}</header>
+    ${actor==='EES Work'?workNoticeHTML('직접 실행 · 예외','실행 주체 EES Workflow · 실행 연결 확인 필요. 등록·검토만으로 실제 작업을 실행하지 않습니다.'):''}
+    ${request.id && (request.approval_count || !events.some(event=>(event.state || event.status || event.kind)===state) || !steps.some(([key])=>key===state))?`<p>${workStatusHTML(state)} · 승인 ${esc(request.approvals?.length || 0)} / ${esc(request.approval_count || 0)}</p>`:''}
+    <div class="ew-request-timeline">${timeline}</div>${notice}
+    <p class="ew-muted">${esc(executionActorLabel(actor))} 완료 보고와 효과 확인이 모두 끝나야 업무를 완료합니다.</p>
+    ${(request.block_reason || request.reason)?`<p role="status">${esc(workReasonText(request.block_reason || request.reason))}</p>`:''}
+    ${controls.length?`<footer class="ew-request-controls">${controls.join('')}</footer>`:''}
+  </div>`;
 }
 function workHistoricalValuesHTML(attempt,currentSettings=null){
   if(attempt.snapshot?.shared_tool?.source==='authored')return attempt.evidence_access?'<p>현재 계정으로 입력 근거를 다시 확인해야 합니다.</p>':workAuthoredValuesHTML(attempt.snapshot.shared_tool,attempt.snapshot.effective_arguments ?? attempt.snapshot.arguments ?? attempt.inputs ?? {},attempt.snapshot.arguments);
@@ -516,14 +552,57 @@ function workCycleBarHTML(run,definition={}){
   if(!run)return '';const {esc,button,time}=workUI,stages=Object.values(definition.nodes || {}).filter(node=>node.type==='t'),done=stages.filter(stage=>Object.values(definition.nodes || {}).filter(node=>node.type==='j'&&workUI.lineage(node.id,definition).some(parent=>parent.id===stage.id)).every(node=>['completed','excluded'].includes(run.jobs?.[node.id]?.status))).length;
   return `<div class="ew-cycle-bar"><span>진행 건</span><strong>${esc(run.cycle?.name || run.name || definition.name || '진행 건')}</strong><small>${esc(time(run.created_at))} 개시${stages.length?` · ${done}/${stages.length}단계`:''}</small>${button('다른 진행 건','workflow_records','class="ew-text"')}</div>`;
 }
-function workRunRecordsHTML(runs=[],workflowId='',workflowName=''){
-  const {esc,button,finished,time}=workUI,rows=runs.filter(run=>!workflowId||run.workflow_id===workflowId).slice().sort((a,b)=>Number(finished(a))-Number(finished(b))||String(b.created_at).localeCompare(String(a.created_at)));
-  return `${workflowId?`<div class="ew-record-filter"><strong>${esc(workflowName || '선택한 업무 절차')}</strong><button type="button" data-action="all_records" class="ew-text" aria-label="업무 절차 필터 해제">${workUI.icon('6d84b')}</button></div>`:''}${rows.map(run=>`<button type="button" class="ew-record" data-action="open_run" data-run-id="${esc(run.id)}" data-workflow-id="${esc(run.workflow_id)}"><strong>${esc(run.name || run.definition?.name || run.workflow_name || run.id)}</strong>${workStatusHTML(run.status)}<small>게시 v${esc(run.version || run.published_version)} · 완료 ${esc(run.progress?.completed || 0)}/${esc(run.progress?.total || 0)}${run.closed_at?' · '+esc(time(run.closed_at))+' 닫힘':' · '+esc(time(run.created_at))+' 개시'}</small></button>`).join('') || '<p class="ew-empty">저장된 진행 건이 없습니다.</p>'}`;
+function workRunRecordsHTML(runs=[],workflowId='',workflowName='',selectedId=null){
+  const {esc,finished,time}=workUI;
+  const rows=runs.filter(run=>!workflowId||run.workflow_id===workflowId).slice()
+    .sort((a,b)=>Number(finished(a))-Number(finished(b))||String(b.created_at).localeCompare(String(a.created_at)));
+  const filter=workflowId?`<div class="ew-record-filter"><strong>${esc(workflowName || '선택한 업무 절차')}</strong><button type="button" data-action="all_records" class="ew-text" aria-label="업무 절차 필터 해제">${workUI.icon('6d84b')}</button></div>`:'';
+  const list=rows.map(run=>{
+    const name=run.cycle?.name || run.name || run.definition?.name || run.workflow_name || run.id;
+    const ids=`data-run-id="${esc(run.id)}" data-workflow-id="${esc(run.workflow_id)}"`;
+    const date=run.closed_at?time(run.closed_at)+' 닫힘':time(run.created_at)+' 개시';
+    const info=`<strong>${esc(name)}</strong>${workStatusHTML(run.status)}<small>게시 v${esc(run.version || run.published_version)} · 완료 ${esc(run.progress?.completed || 0)}/${esc(run.progress?.total || 0)} · ${esc(date)}</small>`;
+    if(selectedId===null)return `<button type="button" class="ew-record" data-action="open_run" ${ids}>${info}</button>`;
+    return `<div class="ew-record-row" data-key="record-${esc(run.id)}"><button type="button" class="ew-record" data-action="preview_record" ${ids} aria-pressed="${selectedId===run.id}" aria-controls="ees-record-detail">${info}</button><button type="button" class="ew-record-open ew-icon-button" data-action="open_run" ${ids} aria-label="${esc(name)} 회차 화면 열기" title="회차 화면 열기">${workUI.icon('69549')}</button></div>`;
+  }).join('');
+  return filter+(list || '<p class="ew-empty">저장된 진행 건이 없습니다.</p>');
 }
-function workHistoryHTML(run,jobId='',currentSettings=null){
+
+function workRecordDetailHTML(run,currentSettings){
+  const {esc,time,icon}=workUI;
+  const fields=new Map(Object.values(run.definition?.nodes || {}).flatMap(node=>(node.inputs || []).map(field=>[field.id,field.name])));
+  const inputs=Object.entries(run.inputs || {}).map(([key,value])=>`<div><dt>${esc(fields.get(key) || key)}</dt><dd>${esc(typeof value==='object'?JSON.stringify(value):value)}</dd></div>`).join('');
+  const dates=[run.created_at&&time(run.created_at)+' 개시',run.closed_at&&time(run.closed_at)+' 닫힘'].filter(Boolean);
+  // Historical inputs come from the chosen run's authorized snapshots, never today's defaults.
+  const attempts=(run.attempts || []).slice().sort((a,b)=>String(a.created_at || '').localeCompare(String(b.created_at || '')) || (a.number || 0)-(b.number || 0));
+  const latest=attempts.at(-1);
+  const values=latest?`<small>${esc(run.definition?.nodes?.[latest.job_id]?.name || latest.job_id)} · ${esc(time(latest.created_at))}</small>${workHistoricalValuesHTML(latest,currentSettings)}`:inputs?`<dl class="ew-history-values">${inputs}</dl>`:'<p class="ew-muted">기록된 입력 없음</p>';
+  const ask=attempts.length?`<button type="button" data-action="ask_record" class="ew-text">${icon('1c98e')} 이 기록에 대해 묻기</button>`:'';
+  return `<button type="button" class="ew-records-back ew-text" data-action="record_list_back">← 회차 목록</button>
+    <header><h3>${esc(run.cycle?.name || run.name || run.definition?.name || '선택한 회차')}</h3><span class="ew-badge">읽기 전용</span></header>
+    <p class="ew-muted">${esc(dates.join(' · '))} · 게시 v${esc(run.version || run.published_version)} · 완료 ${esc(run.progress?.completed || 0)}/${esc(run.progress?.total || 0)}</p>
+    <h4>${latest?'최근 실행에 쓴 값':'회차 입력'}</h4>${values}
+    <h4>주요 기록</h4>${workHistoryHTML({...run,attempts},'',currentSettings,true)}${ask}`;
+}
+
+function workRecordsScreenHTML(data,selection,loading=false){
+  const {esc}=workUI,filter=selection.records_workflow || '';
+  const rows=data.runs || [];
+  const chosen=rows.find(row=>row.id===selection.run_id && (!filter || row.workflow_id===filter));
+  const selected=!loading && chosen && data.run?.id===chosen.id ? data.run : null;
+  const loadingDetail=Boolean(loading && chosen);
+  const workflowName=(data.workflows || []).find(item=>item.id===filter)?.name || (data.workflow?.id===filter?data.workflow.name:'');
+  const scope=[(data.factories || []).find(item=>item.id===selection.factory_id)?.name || '전체 공장',selection.system_id].filter(Boolean).join(' · ');
+  return `<section class="ew-records-screen"><header class="ew-vd-head"><p class="ew-muted">업무 / 실행 기록</p><h2>실행 기록</h2><p>${esc(scope)}</p></header>
+    <div class="ew-records-grid" data-show-detail="${Boolean(selected || loadingDetail)}">
+      <section class="ew-records-list" aria-label="회차 목록"><h3>실행 기록</h3>${workRunRecordsHTML(rows,filter,workflowName,chosen?.id || '')}${filter?'':workLegacyHTML(data.legacy)}</section>
+      <section class="ew-records-detail" id="ees-record-detail" aria-label="선택 회차 상세">${selected?workRecordDetailHTML(selected,data.settings?.values):loadingDetail?'<button type="button" class="ew-records-back ew-text" data-action="record_list_back">← 회차 목록</button><p role="status" class="ew-muted">회차 기록을 불러오는 중입니다.</p>':'<p class="ew-empty">상세를 볼 회차를 선택해 주세요.</p>'}</section>
+    </div></section>`;
+}
+function workHistoryHTML(run,jobId='',currentSettings=null,showJob=false){
   const {esc}=workUI,attempts=(run?.attempts || []).filter(attempt=>!jobId||attempt.job_id===jobId);
   if(!attempts.length)return '<p class="ew-empty">저장된 실행 시도가 없습니다. 미수행을 성공으로 표시하지 않습니다.</p>';
-  return attempts.slice().reverse().map(attempt=>`<details class="ew-history" data-key="history-${esc(attempt.id)}"><summary>${workStatusHTML(attempt.status,attempt.snapshot?.job?.mode==='human'?'사람 확인 기록':'')}<span>${esc(attempt.number || attempt.sequence || attempt.id)}차 · ${esc(workUI.time(attempt.created_at || attempt.started_at))}</span></summary>${attempt.evidence_access==='requires_current_source_access'?'<p class="ew-warning">현재 계정의 원본 접근 권한을 다시 확인해야 합니다. 다른 사람의 비공개 근거를 표시하지 않습니다.</p>':''}<p>실행 당시 절차 v${esc(attempt.version || run.version)}${attempt.snapshot?.shared_tool?' · 공용 도구 v'+esc(attempt.snapshot.shared_tool.version):''} · 결과 r${esc(attempt.result_revision ?? attempt.number ?? '미기록')}</p>${workPartialSourceHTML(attempt,run)}<section><h4>이 실행에 쓴 값</h4>${workHistoricalValuesHTML(attempt,currentSettings)}</section><dl class="ew-facts"><div><dt>도구 참조</dt><dd><pre>${esc(JSON.stringify(attempt.tool_reference ?? attempt.snapshot?.tool_reference ?? attempt.snapshot?.job?.tool_reference ?? attempt.snapshot?.job?.tool_contract_id ?? {},null,2))}</pre></dd></div><div><dt>결과</dt><dd><pre>${esc(JSON.stringify(attempt.result ?? {},null,2))}</pre></dd></div></dl>${(attempt.review_history || []).map(review=>`<section class="ew-review-history"><h4>${review.decision_id?'사람 확정 당시 본문':'저장한 검토 초안'} · r${esc(review.revision)}</h4><p>${esc(workUI.time(review.created_at))} · ${esc(review.actor_id)}</p><pre>${esc(review.text)}</pre></section>`).join('')}${(attempt.decisions || (run?.jobs?.[attempt.job_id]?.decision_history ? run.jobs[attempt.job_id].decision_history.filter(decision=>decision.attempt_id===attempt.id) : [])).map(d=>`<p>사람 판정 · ${esc(d.actor_id)} · ${esc(d.verdict)} · ${esc(d.created_at)}${d.note?' · '+esc(d.note):''}</p>`).join('')}<button type="button" data-action="ask_record" data-attempt-id="${esc(attempt.id)}" data-job-id="${esc(attempt.job_id)}" class="ew-text">${workUI.icon('1c98e')} 이 기록에 대해 묻기</button></details>`).join('');
+  return attempts.slice().reverse().map(attempt=>`<details class="ew-history" data-key="history-${esc(attempt.id)}"><summary>${showJob?`<strong class="ew-history-job">${esc(run.definition?.nodes?.[attempt.job_id]?.name || attempt.job_id)}</strong>`:''}${workStatusHTML(attempt.status,attempt.snapshot?.job?.mode==='human'?'사람 확인 기록':'')}<span>${esc(attempt.number || attempt.sequence || attempt.id)}차 · ${esc(workUI.time(attempt.created_at || attempt.started_at))}</span></summary>${attempt.evidence_access==='requires_current_source_access'?'<p class="ew-warning">현재 계정의 원본 접근 권한을 다시 확인해야 합니다. 다른 사람의 비공개 근거를 표시하지 않습니다.</p>':''}<p>실행 당시 절차 v${esc(attempt.version || run.version)}${attempt.snapshot?.shared_tool?' · 공용 도구 v'+esc(attempt.snapshot.shared_tool.version):''} · 결과 r${esc(attempt.result_revision ?? attempt.number ?? '미기록')}</p>${workPartialSourceHTML(attempt,run)}<section><h4>이 실행에 쓴 값</h4>${workHistoricalValuesHTML(attempt,currentSettings)}</section><dl class="ew-facts"><div><dt>도구 참조</dt><dd><pre>${esc(JSON.stringify(attempt.tool_reference ?? attempt.snapshot?.tool_reference ?? attempt.snapshot?.job?.tool_reference ?? attempt.snapshot?.job?.tool_contract_id ?? {},null,2))}</pre></dd></div><div><dt>결과</dt><dd><pre>${esc(JSON.stringify(attempt.result ?? {},null,2))}</pre></dd></div></dl>${(attempt.review_history || []).map(review=>`<section class="ew-review-history"><h4>${review.decision_id?'사람 확정 당시 본문':'저장한 검토 초안'} · r${esc(review.revision)}</h4><p>${esc(workUI.time(review.created_at))} · ${esc(review.actor_id)}</p><pre>${esc(review.text)}</pre></section>`).join('')}${(attempt.decisions || (run?.jobs?.[attempt.job_id]?.decision_history ? run.jobs[attempt.job_id].decision_history.filter(decision=>decision.attempt_id===attempt.id) : [])).map(d=>`<p>사람 판정 · ${esc(d.actor_id)} · ${esc(d.verdict)} · ${esc(d.created_at)}${d.note?' · '+esc(d.note):''}</p>`).join('')}<button type="button" data-action="ask_record" data-attempt-id="${esc(attempt.id)}" data-job-id="${esc(attempt.job_id)}" class="ew-text">${workUI.icon('1c98e')} 이 기록에 대해 묻기</button></details>`).join('');
 }
 function workExportText(document){
   const run=document.run;if(!run)return '';const lines=[run.definition?.name || run.workflow_name || 'EES Workflow 기록',`진행 건 ${run.id} · 게시 v${run.version} · ${run.status}`,`내보낸 시각 ${document.exported_at || ''}`];
@@ -834,7 +913,6 @@ function workStageHTML(data,selection,stage,options={}){
   const completed=rows.filter(row=>row.state==='completed').length,counts=new Map();
   for(const row of rows){const key=row.tone+'|'+row.label;if(!counts.has(key))counts.set(key,{label:row.label,tone:row.tone,n:0});counts.get(key).n++;}
   const legend=[...counts.values()].map(({label,tone,n})=>`<span><i class="ew-vd-dot" data-verdict="${esc(tone)}"></i>${esc(label)} ${n}</span>`).join('');
-  const progress=`<div class="ew-vd-progress"><strong>${completed} / ${rows.length} 완료</strong><div class="ew-vd-bar" role="img" aria-label="작업 ${rows.length}개 중 ${completed}개 완료">${completed?`<i data-verdict="ok" style="flex:${completed} 1 0"></i>`:''}${rows.length>completed?`<i data-verdict="none" style="flex:${rows.length-completed} 1 0"></i>`:''}</div><div class="ew-center-counts">${legend}</div></div>`;
   const heading=(label,detail='')=>`<div class="ew-center-task-heading"><h3>${esc(label)}${label==='작업'?` <small>${rows.length}개</small>`:''}</h3>${detail?`<span>${esc(detail)}</span>`:''}</div>`;
   const {rest,expanded}=workStagePositiveGroup(rows,selection);
   // A scope execution can contain different judgment vocabularies. Only fold
@@ -844,8 +922,9 @@ function workStageHTML(data,selection,stage,options={}){
   const decided=rows.filter(row=>row.decision).length,pending=rows.filter(row=>row.canDecide).length;
   const authoredStatus=active?'조회 중':decided===rows.length?(rows.every(row=>row.decision?.verdict==='completed')?'승인':'판정 완료'):pending?'판정 필요':rows.some(row=>['failed','unknown','partial'].includes(row.state))?'확인 필요':'실행 전';
   const authoredNote=allAuthored?(!data.run?'<aside class="ew-authored-start-note"><strong>먼저 문서를 조회합니다</strong><p>실행 결과를 확인한 뒤 사람이 승인 여부를 기록합니다.</p></aside><p class="ew-authored-run-caption">진행 건이 없으면 실행 준비 창이 열립니다.</p>':decided===rows.length?'<p class="ew-authored-run-caption">저장됨 · 판정과 실행 근거를 함께 확인할 수 있습니다.</p>':''):'';
-  const head=`<header class="ew-vd-head${allAuthored?' ew-authored-stage-head':''}"><div class="ew-stage-heading"><div class="ew-vd-title"><h2>${esc(stage.name)}</h2><p class="ew-center-scope">${esc(scope)}</p></div><div class="ew-center-heading-actions">${allAuthored?`<span class="ew-authored-stage-status" data-stage-status>${authoredStatus}</span>`:execute}<button type="button" class="ew-icon-button" aria-label="단계 더 보기" data-action="stage_details">${icon('a953c')}</button></div></div></header>`;
-  const work=heading('작업','작업별 결과를 확인하고 판정합니다')+`<div class="ew-vd-body ew-center-task-list" id="ees-stage-tasks">${progress}${list || '<p class="ew-empty">등록된 작업이 없습니다.</p>'}${fold}</div>${authoredNote}`;
+  const head=`<header class="ew-vd-head${allAuthored?' ew-authored-stage-head':''}"><div class="ew-stage-heading"><div class="ew-vd-title"><h2>${esc(stage.name)}</h2><p class="ew-center-scope">${esc(scope)}</p></div><div class="ew-center-heading-actions">${allAuthored?`<span class="ew-authored-stage-status" data-stage-status>${authoredStatus}</span>`:tab==='work'?'':execute}<button type="button" class="ew-icon-button" aria-label="단계 더 보기" data-action="stage_details">${icon('a953c')}</button></div></div></header>`;
+  const summary=`<div class="ew-center-task-heading ew-stage-summary"><h3>작업 ${rows.length}개</h3><span class="ew-stage-completed">${completed} / ${rows.length} 완료</span><div class="ew-center-counts">${legend}</div>${allAuthored?'':execute}</div>`;
+  const work=summary+`<div class="ew-vd-body ew-center-task-list" id="ees-stage-tasks">${list || '<p class="ew-empty">등록된 작업이 없습니다.</p>'}${fold}</div>${authoredNote}`;
   const content=tab==='log'?heading(tabLabels.log)+workStageLogHTML(rows,data):tab==='rules'?heading(tabLabels.rules)+workStageRulesHTML(rows,data):work;
   return {body:breadcrumb+head+tabs+runtime+content,menu:tab==='work'?workStageMenuHTML(data,selection,rows):''};
 }
@@ -940,10 +1019,11 @@ function createWorkView({callbacks}){
     let body='';currentDraftKey='';
     if(snapshot.error&&!snapshot.state)body=`<div class="ew-error" role="alert"><p>${esc(snapshot.error)}</p>${button('다시 조회','refresh')}</div>`;
     else if(snapshot.scope_loading&&snapshot.state)body='<p role="status" class="ew-empty" data-ees-scope-loading="panel">'+(snapshot.error?'목록을 받지 못했습니다.':'받는 중')+'</p>';
+    else if(s.tab==='records'&&snapshot.state&&snapshot.target_loading)body=workRecordsScreenHTML(data,s,true);
     else if(!snapshot.state||snapshot.target_loading)body='<p role="status" class="ew-empty" data-ees-target-loading>업무 정보를 불러오는 중입니다.</p>';
     else if(s.tab==='historical_reference')body=workHistoricalReferenceHTML(data.run,s.historical_reference,data.workflow,data.settings?.values);
     else if(s.tab==='active_runs')body=workActiveRunsHTML(data,s);
-    else if(s.tab==='records')body=workRunRecordsHTML(data.runs || [],s.records_workflow || '',data.workflow?.name)+(s.records_workflow?'':workLegacyHTML(data.legacy));
+    else if(s.tab==='records')body=workRecordsScreenHTML(data,s);
     else if(!s.workflow_id)body='<div class="ew-empty ew-work-home"><h3>업무 절차를 선택해 주세요</h3><p>공장·시스템을 선택한 뒤 왼쪽 업무 목록에서 절차를 여세요.</p></div>';
     else if(stageScreen)body=stageScreen.body;
     else if(job()&&data.run)body=jobPanel();else if(job())body=`<button type="button" class="ew-text" data-action="stage_return">← 단계로 돌아가기</button><header class="ew-work-heading"><h2>${esc(job().name)}</h2><p>${esc(job().instructions || '')}</p></header><section><h3>확인 기준</h3><p>${esc(job().completion?.rule || '등록된 확인 기준이 없습니다.')}</p></section>${(job().inputs || []).length?`<section><h3>필요한 입력</h3>${(job().inputs || []).map(field=>`<p>${esc(field.name || field.id)}${field.required?' · 필수':''}</p>`).join('')}</section>`:''}`;else body=(data.run&&s.tab==='run_details'?`<button type="button" class="ew-text" data-action="stage_return">← 단계로 돌아가기</button>`:'')+runOverview();
@@ -954,7 +1034,7 @@ function createWorkView({callbacks}){
   function setBusy(value){host?.querySelectorAll('[data-mutation]').forEach(el=>{if(el.dataset.ownDisabled!=='true')el.disabled=Boolean(value)||el.closest('form')?.querySelector('.ew-warning')!==null&&Boolean(el.closest('form'));});host?.setAttribute('aria-busy',String(Boolean(value)));}
   function focusSnapshot(){
     const active=document.activeElement;if(!active||!host?.contains(active))return null;
-    const attributes=['id','name','data-action','data-job-id','data-workflow-id','data-tab','data-mode','data-item-id','data-item-verdict','data-item-confirm','data-field-id','data-work-input','data-stage-note','data-judgment-id','data-verdict','data-stage-attempt','data-tool-key','data-key'];
+    const attributes=['id','name','data-action','data-job-id','data-workflow-id','data-run-id','data-tab','data-mode','data-item-id','data-item-verdict','data-item-confirm','data-field-id','data-work-input','data-stage-note','data-judgment-id','data-verdict','data-stage-attempt','data-tool-key','data-key'];
     return {element:active,tag:active.tagName,attributes:attributes.filter(name=>active.hasAttribute?.(name)).map(name=>[name,active.getAttribute(name)]),start:active.selectionStart,end:active.selectionEnd,direction:active.selectionDirection};
   }
   function restoreFocus(saved){

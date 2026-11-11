@@ -1020,9 +1020,18 @@ test('Figma A12 compact completion preserves multiline text and metadata through
  const changed=rule+'\n셋째 줄: 담당자가 판정합니다.';h.field('completion_rule',changed);h.click('save');await flush();
  assert.deepEqual(h.writes.at(-1).definition.nodes.j.completion,{...value.nodes.j.completion,rule:changed});
 });
-test('A12 connected tool shows its name without a read badge or version pinning',async()=>{
- const h=harness(),{search}=sharedReviewFixture(h),value=definition();search.version=7;Object.assign(value.nodes.j,{mode:'tool',shared_tool_id:search.id,inputs:[{id:'query',name:'검색어',type:'text',scope:'factory'}],argument_bindings:{query:{input:'query'}}});installDefinition(h,value);await h.node();
- assert.match(h.markup,/연결된 도구/);assert.doesNotMatch(h.markup,/쓰는 도구|>조회<|class="ew-shared-picker"|도구에 넣을 값/);assert.match(h.markup,/Confluence 페이지 찾기/);assert.doesNotMatch(h.markup,/>v7</);search.version=8;h.render();assert.doesNotMatch(h.markup,/>v[78]</);assert.deepEqual(h.draft().definition,value);assert.equal(h.draft().dirty,false);
+test('B3 shows the accessible tool version and output without pinning either in the draft',async()=>{
+ const h=harness(),{search}=sharedReviewFixture(h),value=definition();
+ search.version=7;
+ Object.assign(value.nodes.j,{mode:'tool',shared_tool_id:search.id,inputs:[{id:'query',name:'검색어',type:'text',scope:'factory'}],argument_bindings:{query:{input:'query'}}});
+ installDefinition(h,value);await h.node();
+ assert.match(h.markup,/연결된 도구/);assert.match(h.markup,/Confluence 페이지 찾기/);
+ assert.doesNotMatch(h.markup,/쓰는 도구|>조회<|class="ew-shared-picker"|도구에 넣을 값/);
+ assert.match(h.markup,/>v7</);assert.match(h.markup,/class="ew-job-output"/);
+ search.version=8;h.render();assert.match(h.markup,/>v8</);assert.doesNotMatch(h.markup,/>v7</);
+ search.can_use=false;h.render();
+ assert.doesNotMatch(h.markup,/>v8<|class="ew-job-output"/);
+ assert.deepEqual(h.draft().definition,value);assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);
 });
 test('A12 setup stages candidates and input edits until explicit apply and isolates other workflows',async()=>{
  const h=harness();await c66SelectShared(h);const before=h.draft(),other=copy(h.workflows.get('q').draft);await a12Open(h,'shared:managed-get_page');h.modalField('data-job-tool-value','page_id','12345');assert.deepEqual(h.draft(),before);await h.modalClose('apply');const node=h.draft().definition.nodes.j;assert.equal(node.shared_tool_id,'managed-get_page');assert.deepEqual(node.argument_bindings.page_id,{constant:'12345'});assert.equal(node.human_confirmation,true);assert.deepEqual(h.workflows.get('q').draft,other);assert.equal(h.writes.length,0);
@@ -1264,7 +1273,10 @@ test('phase 1 import copies a permitted source to a new draft and keeps unsaved 
  const h=phase1Harness();await phase1New(h);h.click('draft_import_picker');await flush();assert.match(h.markup,/원본의 설정·개인 토큰은 가져오지 않습니다/);h.click('draft_import',{id:'native',function:'list_documents'});await flush();assert.deepEqual(Object.keys(h.operations.at(-1)).sort(),['action','expected_revision','function','request_id','scope','source_tool_id']);assert.equal(h.operations.at(-1).expected_revision,0);assert.match(h.markup,/원본은 바뀌지 않았습니다/);h.click('draft_list');await flush();h.click('draft_new');await flush();assert.equal(h.fields.find(field=>field.name==='draft_name').value,'새 문서 도구');
 });
 test('phase 1 drafts are searchable but never join the workflow picker and future tabs remain disabled',async()=>{
- const h=phase1Harness();await phase1Code(h);h.click('draft_save_next');await flush();for(const title of ['연결','시험','사용'])assert.match(h.markup,new RegExp('<button[^>]+role="tab"[^>]+disabled[^>]*>'+title));h.click('draft_list');await flush();h.field('ew-draft-search','없는 이름');assert.match(h.markup,/찾는 도구가 없습니다/);h.field('ew-draft-search','문서');assert.match(h.markup,/새 문서 도구/);assert.match(h.markup,/업무절차에서 고를 수 없습니다/);assert.deepEqual(h.state.tools,[]);assert.deepEqual(h.state.operations.shared_tools,[]);
+ const h=phase1Harness();await phase1Code(h);h.click('draft_save_next');await flush();
+ const tabs=h.buttons.filter(button=>button.dataset.authorAction==='draft_tab');
+ assert.deepEqual(tabs.map(tab=>[tab.dataset.id,tab.disabled]),[['basic',false],['io',false],['trial',true],['use',true]]);
+ h.click('draft_list');await flush();h.field('ew-draft-search','없는 이름');assert.match(h.markup,/찾는 도구가 없습니다/);h.field('ew-draft-search','문서');assert.match(h.markup,/새 문서 도구/);assert.match(h.markup,/‘확인 전’ 도구는 저장돼 있지만 업무절차에서 아직 고를 수 없습니다/);assert.deepEqual(h.state.tools,[]);assert.deepEqual(h.state.operations.shared_tools,[]);
 });
 test('phase 1 non-admin cannot create read import check or save drafts and permission loss hides source code',async()=>{
  const h=phase1Harness();await phase1Code(h);h.state.capabilities.is_admin=false;h.render();assert.doesNotMatch(h.markup,/name="draft_code"|name="draft_name"/);const count=h.operations.length;for(const action of ['draft_new','draft_open','draft_import','draft_check','draft_save']){h.click(action,{id:'native',function:'list_documents'});await flush();}assert.equal(h.operations.length,count);assert.doesNotMatch(h.markup,/data-author-action="draft_new"|data-author-action="draft_open"/);assert.match(h.markup,/도구 <small>/);
@@ -1294,8 +1306,8 @@ test('phase 1 removed enum values have an explicit cleanup path while allowed la
 });
 test('phase 1 losing access to the selected shared tool returns to the filtered new catalog',async()=>{
  const h=phase1Harness(),{search}=sharedReviewFixture(h);h.state.operations.tool_drafts=[];h.render();h.click('shared_open',{id:search.id});await flush();assert.match(h.markup,/지금 버전/);
- h.state.capabilities.is_admin=false;h.state.capabilities.managed_systems=[];h.state.operations.shared_tools=[];h.render();assert.match(h.markup,/class="ew-draft-list"/);assert.match(h.markup,/등록된 도구가 없습니다/);assert.doesNotMatch(h.markup,/공용 도구 0개|지금 버전|data-author-action="draft_new"|data-author-action="draft_open"|data-author-action="shared_review"|data-author-action="shared_access"/);assert.equal(h.operations.length,0);
- h.state.operations.shared_tools=[search];h.render();assert.match(h.markup,/class="ew-draft-list"/);assert.doesNotMatch(h.markup,/지금 버전/);h.click('shared_open',{id:search.id});await flush();assert.match(h.markup,/지금 버전/);assert.doesNotMatch(h.markup,/data-author-action="shared_review"|data-author-action="shared_access"/);
+ h.state.capabilities.is_admin=false;h.state.capabilities.managed_systems=[];h.state.operations.shared_tools=[];h.render();assert.match(h.markup,/<div class="ew-draft-list(?: [^"]+)?"/);assert.match(h.markup,/등록된 도구가 없습니다/);assert.doesNotMatch(h.markup,/공용 도구 0개|지금 버전|data-author-action="draft_new"|data-author-action="draft_open"|data-author-action="shared_review"|data-author-action="shared_access"/);assert.equal(h.operations.length,0);
+ h.state.operations.shared_tools=[search];h.render();assert.match(h.markup,/<div class="ew-draft-list(?: [^"]+)?"/);assert.doesNotMatch(h.markup,/지금 버전/);h.click('shared_open',{id:search.id});await flush();assert.match(h.markup,/지금 버전/);assert.doesNotMatch(h.markup,/data-author-action="shared_review"|data-author-action="shared_access"/);
 });
 test('phase 1 result examples reflect visible roles and remain explicit non-executable samples',async()=>{
  const h=phase1Harness();await phase1New(h);h.click('draft_import_picker');await flush();h.click('draft_import',{id:'native',function:'list_documents'});await flush();h.click('draft_tab',{id:'io'});await flush();h.click('draft_part',{id:'outputs'});await flush();const preview=()=>h.markup.match(/<section class="ew-draft-card ew-draft-result-preview"[\s\S]*?<\/section>/)?.[0] || '';assert.equal((preview().match(/class="ew-draft-result-example"/g)||[]).length,2);assert.match(preview(),/예시 문서 1/);assert.match(preview(),/예시 분류 2/);assert.equal((preview().match(/class="ew-draft-example-open" disabled/g)||[]).length,2);assert.doesNotMatch(preview(),/문서 번호|href=/);assert.match(h.markup,/예시 데이터 · 실행 전/);assert.match(h.markup,/실제 실행 결과가 아닙니다/);assert.equal(h.fields.find(field=>field.name==='draft_output_kind').value,'list');const count=h.operations.length;h.field('draft_output_2_hidden',true,'change');h.click('draft_part',{id:'outputs'});await flush();assert.doesNotMatch(preview(),/ew-draft-example-open/);assert.equal(h.operations.length,count);
@@ -1368,11 +1380,12 @@ test('phase 2 use settings validate groups and evidence before writing and accep
 test('phase 2 usage stop and resume are explicit revision guarded operations preserving the version',async()=>{
  const h=phase2Harness({connected:true});await phase2Activate(h);h.dialogs.push({});h.click('draft_use_disable');await flush();assert.equal(h.operations.at(-1).action,'tool_draft_use_disable');assert.equal(h.operations.at(-1).expected_use_revision,1);assert.match(h.markup,/data-use-state="disabled" data-active-version="1"/);assert.match(h.markup,/자동으로 다시 켜지지 않습니다/);h.dialogs.push({});h.click('draft_use_enable');await flush();assert.equal(h.operations.at(-1).expected_use_revision,2);assert.match(h.markup,/data-use-state="active" data-active-version="1"/);
 });
-test('tool function settings, connection, trial and use share the current unsaved draft',async()=>{
+test('basic information, input/output, trial and use share one navigation level and preserve the unsaved draft',async()=>{
  const h=phase2Harness({connected:true});await phase2Open(h);
  h.click('draft_tab',{id:'basic'});await flush();h.field('draft_description','화면을 전환한 뒤에도 보존');
- const calls=h.operations.length;h.click('draft_tab',{id:'connection'});await flush();h.render();
- assert.match(h.markup,/연결 설정됨/);assert.match(h.markup,/data-author-action="draft_connection"/);
+ const calls=h.operations.length;
+ assert.deepEqual(h.buttons.filter(button=>button.dataset.authorAction==='draft_tab').map(button=>button.dataset.id),['basic','io','trial','use']);
+ h.click('draft_tab',{id:'io'});await flush();h.render();
  h.click('draft_tab',{id:'trial'});await flush();h.click('draft_tab',{id:'use'});await flush();h.click('draft_tab',{id:'basic'});await flush();
  assert.equal(h.fields.find(field=>field.name==='draft_description').value,'화면을 전환한 뒤에도 보존');
  assert.equal(h.operations.length,calls);
@@ -1471,7 +1484,7 @@ test('tool catalog combines selected factory and system with common tools and de
 test('new tool inherits work location and scope changes preserve separate unfinished forms',async()=>{
  const h=phase1Harness();h.state.systems=['EMS','FDC'];h.state.factories=[{id:'f1',name:'천안',system_id:'EMS'}];h.selection.factory_id='f1';h.render();await phase1New(h);
  assert.equal(h.fields.find(item=>item.name==='draft_system').value,'EMS');assert.equal(h.fields.find(item=>item.name==='draft_factory').value,'f1');
- h.selection.system_id='FDC';h.selection.factory_id='';h.render();assert.match(h.markup,/class="ew-draft-list"/);await phase1New(h);h.field('draft_name','FDC 작성 중');
+ h.selection.system_id='FDC';h.selection.factory_id='';h.render();assert.match(h.markup,/<div class="ew-draft-list(?: [^"]+)?"/);await phase1New(h);h.field('draft_name','FDC 작성 중');
  h.selection.system_id='EMS';h.selection.factory_id='f1';h.render();h.click('draft_new');await flush();assert.equal(h.fields.find(item=>item.name==='draft_name').value,'새 문서 도구');h.click('draft_save');await flush();assert.deepEqual(h.operations.at(-1).draft.scope,{system_id:'EMS',factory_id:'f1'});
  h.state.operations.tool_scope_factories=[...h.state.factories,{id:'fdc-factory',name:'FDC 공장',system_id:'FDC'}];h.field('draft_system','FDC','change');assert.match(h.markup,/<option value="fdc-factory"/);h.field('draft_factory','fdc-factory','change');h.click('draft_save');await flush();assert.deepEqual(h.operations.at(-1).draft.scope,{system_id:'FDC',factory_id:'fdc-factory'});
  h.field('draft_system','','change');assert.equal(h.fields.find(item=>item.name==='draft_factory').disabled,true);h.click('draft_save');await flush();assert.deepEqual(h.operations.at(-1).draft.scope,{system_id:'',factory_id:''});
@@ -1484,7 +1497,7 @@ test('tool drafts stay with their original work location when it changes from Pr
   Object.assign(h.selection,origin);h.render();await phase1New(h);h.field('draft_name','첫 위치의 미저장 도구');
   Object.assign(h.selection,destination);h.render();await phase1New(h);h.field('draft_name','두 번째 위치의 미저장 도구');
   h.selection.tab='procedures';h.render();Object.assign(h.selection,origin);h.render();
-  h.selection.tab='tools';h.render();assert.ok(!h.forms['ew-tool-draft-form']);assert.match(h.markup,/class="ew-draft-list"/);
+  h.selection.tab='tools';h.render();assert.ok(!h.forms['ew-tool-draft-form']);assert.match(h.markup,/<div class="ew-draft-list(?: [^"]+)?"/);
   h.click('draft_new');await flush();assert.equal(h.fields.find(item=>item.name==='draft_name').value,'첫 위치의 미저장 도구');
   assert.equal(h.fields.find(item=>item.name==='draft_system').value,origin.system_id);assert.equal(h.fields.find(item=>item.name==='draft_factory').value,origin.factory_id);
   h.selection.tab='procedures';h.render();Object.assign(h.selection,destination);h.render();h.selection.tab='tools';h.render();

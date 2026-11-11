@@ -12,6 +12,29 @@
     const match=location.pathname.match(/^\/c\/([^/]+)\/?$/);
     return match?decodeURIComponent(match[1]):'';
   };
+  function nativeSkillUses(workflows) {
+    const uses = new Map();
+    for (const workflow of workflows || []) {
+      const definitions = [workflow.published];
+      if (workflow.can_manage) definitions.push(workflow.draft);
+      for (const definition of definitions) {
+        const nodes = definition?.nodes;
+        if (!nodes) continue;
+        for (const [id, job] of Object.entries(nodes)) {
+          if (job?.type !== 'j' || !Array.isArray(job.skills)) continue;
+          for (const skillId of job.skills) {
+            if (typeof skillId !== 'string' || !skillId) continue;
+            const key = JSON.stringify([workflow.id, id, skillId]);
+            if (!uses.has(key)) {
+              uses.set(key, {system_id: workflow.system_id, workflow: definition.name || workflow.name,
+                stage: nodes[job.parent]?.name || '', job: job.name || '', skill_id: skillId});
+            }
+          }
+        }
+      }
+    }
+    return [...uses.values()];
+  }
   const source=()=>window.__eesSourceShellV1;
   const screen=()=>source()?.screen?.() || {};
   const available=()=>{const current=screen();return Boolean(token()&&current.active&&!current.native&&(current.workReady ?? current.chatReady));};
@@ -85,7 +108,7 @@
     const action=dataset.action;
     if(action==='mode')return ['work','author'].includes(dataset.mode)&&(dataset.mode!=='author'||workCanWorkspace(capabilities()))?{mode:dataset.mode,tab:'overview',...(dataset.mode==='work'?{job_id:'',stage_id:'',stage_overview:false}:{})}:null;
     if(action==='procedures'||action==='tools')return workCanCreate(capabilities())?{mode:'author',tab:action==='tools'?'tools':'overview',workflow_id:'',run_id:'',job_id:''}:null;
-    if(action==='records')return {mode:'work',tab:action,panel_open:true,job_id:'',records_workflow:''};
+    if(action==='records')return {mode:'work',tab:action,panel_open:true,workflow_id:'',run_id:'',job_id:'',records_workflow:''};
     if(action==='chats')return {mode:'work',tab:'chats'};
     return null;
   }
@@ -288,7 +311,7 @@
         }
         if(at!==context())return refresh();
       }
-      if(nativePage()){nativeCapabilities=result.capabilities || {};nativeScope={systems:result.systems || [],factories:result.factories || [],scope_options:result.scope_options};error='';render();refreshTimer=setTimeout(refresh,30000);return state;}
+      if(nativePage()){nativeCapabilities=result.capabilities || {};nativeScope={systems:result.systems || [],factories:result.factories || [],scope_options:result.scope_options,skill_uses:nativeSkillUses(result.workflows)};error='';render();refreshTimer=setTimeout(refresh,30000);return state;}
       // Drafts remain available to authors, but a saved operations selection
       // must not reopen one. Existing runs keep their own published snapshot.
       if((selection.mode!=='author'||!workCanWorkspace(result.capabilities))&&selection.workflow_id&&!selection.run_id&&result.workflow?.id===selection.workflow_id&&result.workflow.published_version==null){
@@ -441,7 +464,10 @@
       Object.keys(patch).every(key=>key==='tab'||JSON.stringify(patch[key])===JSON.stringify(previous[key]));
     if(state&&!stateKey)stateKey=workspaceKey();cacheWorkspace();
     if(!restored)initialSelectionPatch={...initialSelectionPatch,chat_reference:null,...patch};
-    selection=next;changeWorkspace(previous);epoch++;workEpoch++;chatCreations.clear();chatAliases.clear();
+    selection=next;changeWorkspace(previous);
+    // Record previews contain historical inputs. Reauthorize the selected target before painting even a cached detail.
+    if(next.tab==='records' && next.run_id && (previous.tab!=='records' || previous.run_id!==next.run_id))targetLoading=true;
+    epoch++;workEpoch++;chatCreations.clear();chatAliases.clear();
     // A tab visit changes request epochs, but the same job's unsaved proposal
     // remains reviewable. Never revive one invalidated before this navigation.
     if(sameInputTarget){if(pendingInputProposal?.context===before)pendingInputProposal.context=context();else pendingInputProposal=null;}
@@ -740,7 +766,7 @@
     if(action==='confirm_list')return confirmList();
     if(action==='save_list_selection')return confirmList(false);
     if(action==='save_review_draft')return saveReviewDraft();
-    if(action==='workflow_records')return select({tab:'records',job_id:'',records_workflow:selection.workflow_id});
+    if(action==='workflow_records')return select({tab:'records',run_id:'',job_id:'',records_workflow:selection.workflow_id});
     if(action==='all_records')return select({tab:'records',records_workflow:'',workflow_id:'',run_id:'',job_id:''});
     if(action==='ask_record'){const run=state?.run,attempts=(run?.attempts || []).filter(attempt=>!target.dataset.jobId||attempt.job_id===target.dataset.jobId).slice().sort((a,b)=>String(a.created_at || '').localeCompare(String(b.created_at || ''))||a.number-b.number),attempt=target.dataset.attemptId?attempts.find(item=>item.id===target.dataset.attemptId):attempts.at(-1);if(!run||!attempt)throw new Error('참고할 당시 실행 기록이 없습니다.');selection.chat_reference={kind:'workspace',reference_kind:'historical',workflow_id:run.workflow_id,run_id:run.id,job_id:attempt.job_id,attempt_id:attempt.id,version:run.version,result_revision:attempt.number,created_at:attempt.created_at,revision:run.revision,system_id:run.system_id,factory_id:run.factory_id};remember();render();source()?.focusComposer?.();return;}
     if(action==='apply_input_proposal')return applyInputProposal();
@@ -765,6 +791,21 @@
       return select({[factory?'factory_id':'system_id']:id,...(!factory?{factory_id:''}:{}),...(author?{mode:'author'}:{}),workflow_id:'',run_id:'',job_id:'',tab:author?'overview':'overview'});
     }
     if(action==='workflow'){const id=target.dataset.workflowId,workflow=(state?.workflows || []).find(item=>item.id===id);if(selection.mode!=='author'&&workflow?.published_version==null)return;const runs=selection.mode==='author'?[]:workUnitActiveRuns(state,selection,workflow);return select({workflow_id:id,run_id:runs.length===1?runs[0].id:'',job_id:'',stage_id:'',stage_overview:false,tab:runs.length>1?'active_runs':'overview',panel_open:true});}
+    if(action==='preview_record'||action==='record_list_back'){
+      if(selection.tab!=='records'||scopeLoading||evidenceUnavailable)return;
+      const opening=action==='preview_record';
+      const runId=opening?target.dataset.runId:selection.run_id;
+      const row=state?.runs?.find(run=>run.id===runId && (!selection.records_workflow || run.workflow_id===selection.records_workflow));
+      if(!row || (opening && row.workflow_id!==target.dataset.workflowId))return;
+      const patch={workflow_id:opening?row.workflow_id:selection.records_workflow || '',run_id:opening?row.id:'',job_id:'',stage_id:'',tab:'records'};
+      const result=await select(patch);
+      if(!result||selection.tab!=='records'||selection.run_id!==patch.run_id)return;
+      const panel=source()?.hosts?.()?.panel;
+      const back=opening?panel?.querySelector('[data-action="record_list_back"]'):null;
+      const control=back?.getClientRects().length?back:[...(panel?.querySelectorAll('[data-action="preview_record"]') || [])].find(el=>el.dataset.runId===runId);
+      control?.focus({preventScroll:true});
+      return;
+    }
     if(action==='open_run')return select({workflow_id:target.dataset.workflowId,run_id:target.dataset.runId,job_id:'',stage_id:'',stage_overview:false,mode:'work',tab:'overview',panel_open:true});
     if(action==='job')return select({job_id:target.dataset.jobId,tab:'current'});
     if(action==='overview')return select({job_id:'',stage_id:'',stage_overview:true,tab:'overview'},{fetch:false});

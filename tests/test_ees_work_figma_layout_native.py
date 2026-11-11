@@ -177,11 +177,11 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
             'card': '.ew-author-list', 'input': '#ew-author-search',
             'chat': '#chat-container #chat-pane'}.items()}
         # Work uses the authoring surface; white inputs and chat stay distinct.
-        self.assertEqual(observed, {'panel': 'rgb(250, 250, 250)', 'author': 'rgb(250, 250, 250)',
+        self.assertEqual(observed, {'panel': 'rgb(243, 243, 245)', 'author': 'rgb(243, 243, 245)',
             'card': 'rgba(0, 0, 0, 0)', 'input': 'rgb(255, 255, 255)', 'chat': 'rgb(255, 255, 255)'})
-        hover('.ew-author-list>button', 'rgb(243, 243, 245)')
+        hover('.ew-author-list>button', 'rgb(236, 236, 239)')
         observed['cardHover'] = background('.ew-author-list>button')
-        self.assertEqual(observed['cardHover'], 'rgb(243, 243, 245)')
+        self.assertEqual(observed['cardHover'], 'rgb(236, 236, 239)')
         observed['cardMotion'] = self.browser.evaluate("(()=>{const e=document.querySelector('.ew-author-list>button'),s=getComputedStyle(e);return {focusVisible:e.matches(':focus-visible'),property:s.transitionProperty,duration:s.transitionDuration,easing:s.transitionTimingFunction};})()")
         self.assertFalse(observed['cardMotion']['focusVisible'])
         self.assertEqual(observed['cardMotion']['property'].split(', '),
@@ -230,7 +230,9 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
               }
               return result;
             })(""" + json.dumps(tabs) + ')')
-            self.assertEqual(result['panel'], 'rgb(250, 250, 250)', label)
+            work_canvas = label in ('work-stage', 'tools') or label.startswith('author-')
+            expected_panel = 'rgb(243, 243, 245)' if work_canvas else 'rgb(250, 250, 250)'
+            self.assertEqual(result['panel'], expected_panel, label)
             if result['author'] is not None:
                 self.assertEqual(result['author'], result['panel'], label)
                 self.assertEqual(background('#ees-work-designer>footer'), result['panel'], label)
@@ -239,13 +241,13 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
                 # authoring pages use the larger primary navigation of mock 1.
                 primary_tabs=label=='work-stage' or label.startswith('author-')
                 self.assertEqual(result['tabs'], {
-                    'gap':'24px' if primary_tabs else '20px',
+                    'gap':'20px',
                     'active': {'color': 'rgb(31, 32, 35)', 'background': 'rgba(0, 0, 0, 0)',
-                               'font': '13px' if primary_tabs else '12px', 'line': '18px', 'weight': '500', 'height': 38 if primary_tabs else 36,
-                               'paddingTop': '8px' if primary_tabs else '6px','paddingBottom':'12px' if primary_tabs else '10px'},
+                               'font': '14px' if primary_tabs else '12px', 'line': '22px' if primary_tabs else '18px', 'weight': '500', 'height': 40 if primary_tabs else 36,
+                               'paddingTop': '8px' if primary_tabs else '6px','paddingBottom':'10px'},
                     'inactive': {'color': 'rgb(92, 94, 101)', 'background': 'rgba(0, 0, 0, 0)',
-                                 'font': '13px' if primary_tabs else '12px', 'line': '18px', 'weight': '400', 'height': 38 if primary_tabs else 36,
-                                 'paddingTop': '8px' if primary_tabs else '6px','paddingBottom':'12px' if primary_tabs else '10px'},
+                                 'font': '14px' if primary_tabs else '12px', 'line': '22px' if primary_tabs else '18px', 'weight': '400', 'height': 40 if primary_tabs else 36,
+                                 'paddingTop': '8px' if primary_tabs else '6px','paddingBottom':'10px'},
                     'underline': 'rgb(47, 95, 152)', 'underlineHeight': '2px'}, label)
             self.assertFalse(self.geometry()['overflow'], label)
             shared[label] = result

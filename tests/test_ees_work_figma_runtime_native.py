@@ -403,7 +403,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.assertLessEqual(observed['overflow'], 1, observed)
         self.assertAlmostEqual(observed['header']['height'], 48, delta=1, msg=observed)
         self.assertEqual(observed['title']['fontSize'], '24px', observed)
-        self.assertEqual(observed['title']['lineHeight'], '34px', observed)
+        self.assertEqual(observed['title']['lineHeight'], '37px', observed)
         if observed['menu']:
             self.assertAlmostEqual(observed['menu']['width'], 180, delta=1, msg=observed)
             self.assertAlmostEqual(observed['menu']['height'], 110, delta=1, msg=observed)
@@ -1420,13 +1420,14 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             'status_function': 'status', 'output_schema': {'type': 'object'}})['tool']
         tool = operation('tool_submit', tool['revision'], tool_contract_id=tool['id'])['tool']
         tool = operation('tool_review', tool['revision'], user=self.users['other-user'], tool_contract_id=tool['id'], decision='approve')['tool']
-        key = self.author(jobs=1, fields=[{'id': 'target', 'name': '대상', 'type': 'text', 'scope': 'run'},
+        key = self.author(jobs=2, fields=[{'id': 'target', 'name': '대상', 'type': 'text', 'scope': 'run'},
             {'id': 'stop', 'type': 'single', 'scope': 'run', 'options': ['graceful', 'force']},
             {'id': 'wait', 'type': 'number', 'scope': 'run'},
             {'id': 'unbound', 'name': '요청에 연결하지 않은 값', 'type': 'text', 'scope': 'run'}])
         draft = deepcopy(self.state(workflow_id=key)['workflow']['draft'])
-        draft['nodes']['job-0'].update(result_block='change_request', tool_contract_id=tool['id'], tool_contract_revision=tool['revision'],
-            approval_count=0, effect_criterion={'check': 'registered-status'})
+        for job_id in ('job-0', 'job-1'):
+            draft['nodes'][job_id].update(result_block='change_request', tool_contract_id=tool['id'],
+                tool_contract_revision=tool['revision'], approval_count=0, effect_criterion={'check': 'registered-status'})
         self.command('save_draft', workflow_id=key, expected_revision=3, definition=draft)
         self.command('validate_workflow', workflow_id=key, expected_revision=4)
         self.command('publish_workflow', workflow_id=key, expected_revision=4)
@@ -1479,6 +1480,36 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.assertNotEqual(request['state'], 'effect_verified')
         self.assertEqual(self.bridge.calls, [])
         self.screenshot('figma-a4-typed-request-unconnected')
+
+        class AcceptedConnector:
+            def __init__(self):
+                self.calls = []
+
+            async def request(self, actor, contract, inputs, correlation):
+                self.calls.append((contract['id'], deepcopy(inputs), correlation))
+                return {'state': 'accepted', 'job_number': 'QA-TRACK-001'}
+
+        connector = AcceptedConnector()
+        self.server.workflow.operations.connector = connector
+        latest = self.state(run_id=run['id'])['run']
+        prepared = operation('request_prepare', latest['revision'], run_id=run['id'], job_id='job-1',
+                             tool_contract_id=tool['id'], request_reason='합성 상태 추적')['request']
+        intent = operation('request_intent', prepared['revision'], external_request_id=prepared['id'])
+        accepted = operation('request_dispatch', prepared['revision'], external_request_id=prepared['id'],
+                             intent_token=intent['intent_token'])['request']
+        self.assertEqual((accepted['state'], accepted['job_number']), ('accepted', 'QA-TRACK-001'))
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+        reload_page(self.browser)
+        self.wait("document.querySelector('#ees-work-entry')")
+        self.open_run(key, run, job='job-1')
+        self.wait("document.querySelector('.ew-request-track[data-tracked=true] .ew-request-heading')?.innerText.includes('QA-TRACK-001')")
+        steps = self.browser.evaluate("Array.from(document.querySelectorAll('.ew-request-timeline .ew-request-step'), e=>[e.dataset.state,e.querySelector('[data-status]')?.dataset.status])")
+        self.assertEqual([key for key, _ in steps], ['requested', 'accepted', 'running', 'reported_complete', 'effect_verified'])
+        self.assertEqual(dict(steps)['effect_verified'], 'waiting')
+        self.assertEqual(len(connector.calls), 1)
+        self.assertEqual(connector.calls[0][1], {'target': 'SYNTHETIC-AP', 'stop': 'graceful', 'wait': 60})
+        self.screenshot('parity-a4-request-tracking-1920')
 
     def test_list_preview_add_exclude_confirm_and_history_preserve_original(self):
         self.bridge.result = {'status': 'succeeded', 'completeness': 'complete',
@@ -1603,7 +1634,37 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         run = self.command('human_confirm', run_id=run['id'], job_id='job-0', expected_revision=run['revision'])['run']
         run = self.command('close_run', run_id=run['id'], expected_revision=run['revision'])['run']
         self.command('save_settings', workflow_id=key, expected_revision=1, values={'setting': '현재 값'})
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
         self.refresh(); self.click('[data-action="records"]')
+        preview = '[data-action=preview_record][data-run-id="' + run['id'] + '"]'
+        before_preview = self.state(run_id=run['id'])['run']
+        self.click(preview)
+        self.wait("document.querySelector('.ew-records-detail')?.innerText.includes('당시 값')")
+        self.assertNotIn('현재 값', self.text('.ew-records-detail'))
+        boxes = self.browser.evaluate("""(() => {
+            const rect = selector => {
+                const e = document.querySelector(selector), r = e.getBoundingClientRect();
+                return {left:r.left, right:r.right, width:r.width, top:r.top};
+            };
+            return {list:rect('.ew-records-list'), detail:rect('.ew-records-detail')};
+        })()""")
+        self.assertGreater(boxes['list']['width'], 0)
+        self.assertGreater(boxes['detail']['width'], 0)
+        self.assertLessEqual(boxes['list']['right'], boxes['detail']['left'] + 1)
+        self.assertAlmostEqual(boxes['list']['top'], boxes['detail']['top'], delta=1)
+        directory = self.screenshot('parity-records-selected-1920')
+        (directory / 'parity-records-selected-1920.json').write_text(
+            json.dumps(boxes, indent=2) + '\n', encoding='utf-8')
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 480, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
+        self.wait("document.querySelector('[data-action=record_list_back]')?.getBoundingClientRect().width>0")
+        self.screenshot('parity-records-selected-480')
+        self.click('[data-action=record_list_back]')
+        self.wait('document.querySelector(' + json.dumps(preview) + ').getBoundingClientRect().width > 0')
+        self.assertEqual(self.state(run_id=run['id'])['run']['revision'], before_preview['revision'])
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
         self.click('[data-action="open_run"][data-run-id="' + run['id'] + '"]')
         self.open_run_details_from_overview()
         self.click('[data-action="workflow_records"]')
