@@ -85,7 +85,7 @@
     const action=dataset.action;
     if(action==='mode')return ['work','author'].includes(dataset.mode)&&(dataset.mode!=='author'||workCanWorkspace(capabilities()))?{mode:dataset.mode,tab:'overview',...(dataset.mode==='work'?{job_id:'',stage_id:'',stage_overview:false}:{})}:null;
     if(action==='procedures'||action==='tools')return workCanCreate(capabilities())?{mode:'author',tab:action==='tools'?'tools':'overview',workflow_id:'',run_id:'',job_id:''}:null;
-    if(action==='records')return {mode:'work',tab:action,panel_open:true,job_id:'',records_workflow:''};
+    if(action==='records')return {mode:'work',tab:action,panel_open:true,workflow_id:'',run_id:'',job_id:'',records_workflow:''};
     if(action==='chats')return {mode:'work',tab:'chats'};
     return null;
   }
@@ -740,7 +740,7 @@
     if(action==='confirm_list')return confirmList();
     if(action==='save_list_selection')return confirmList(false);
     if(action==='save_review_draft')return saveReviewDraft();
-    if(action==='workflow_records')return select({tab:'records',job_id:'',records_workflow:selection.workflow_id});
+    if(action==='workflow_records')return select({tab:'records',run_id:'',job_id:'',records_workflow:selection.workflow_id});
     if(action==='all_records')return select({tab:'records',records_workflow:'',workflow_id:'',run_id:'',job_id:''});
     if(action==='ask_record'){const run=state?.run,attempts=(run?.attempts || []).filter(attempt=>!target.dataset.jobId||attempt.job_id===target.dataset.jobId).slice().sort((a,b)=>String(a.created_at || '').localeCompare(String(b.created_at || ''))||a.number-b.number),attempt=target.dataset.attemptId?attempts.find(item=>item.id===target.dataset.attemptId):attempts.at(-1);if(!run||!attempt)throw new Error('참고할 당시 실행 기록이 없습니다.');selection.chat_reference={kind:'workspace',reference_kind:'historical',workflow_id:run.workflow_id,run_id:run.id,job_id:attempt.job_id,attempt_id:attempt.id,version:run.version,result_revision:attempt.number,created_at:attempt.created_at,revision:run.revision,system_id:run.system_id,factory_id:run.factory_id};remember();render();source()?.focusComposer?.();return;}
     if(action==='apply_input_proposal')return applyInputProposal();
@@ -765,6 +765,21 @@
       return select({[factory?'factory_id':'system_id']:id,...(!factory?{factory_id:''}:{}),...(author?{mode:'author'}:{}),workflow_id:'',run_id:'',job_id:'',tab:author?'overview':'overview'});
     }
     if(action==='workflow'){const id=target.dataset.workflowId,workflow=(state?.workflows || []).find(item=>item.id===id);if(selection.mode!=='author'&&workflow?.published_version==null)return;const runs=selection.mode==='author'?[]:workUnitActiveRuns(state,selection,workflow);return select({workflow_id:id,run_id:runs.length===1?runs[0].id:'',job_id:'',stage_id:'',stage_overview:false,tab:runs.length>1?'active_runs':'overview',panel_open:true});}
+    if(action==='preview_record'||action==='record_list_back'){
+      if(selection.tab!=='records'||targetLoading||scopeLoading||evidenceUnavailable)return;
+      const opening=action==='preview_record';
+      const runId=opening?target.dataset.runId:selection.run_id;
+      const row=state?.runs?.find(run=>run.id===runId && (!selection.records_workflow || run.workflow_id===selection.records_workflow));
+      if(!row || (opening && row.workflow_id!==target.dataset.workflowId))return;
+      const patch={workflow_id:opening?row.workflow_id:selection.records_workflow || '',run_id:opening?row.id:'',job_id:'',stage_id:'',tab:'records'};
+      const result=await select(patch);
+      if(!result||selection.tab!=='records'||selection.run_id!==patch.run_id)return;
+      const panel=source()?.hosts?.()?.panel;
+      const back=opening?panel?.querySelector('[data-action="record_list_back"]'):null;
+      const control=back?.getClientRects().length?back:[...(panel?.querySelectorAll('[data-action="preview_record"]') || [])].find(el=>el.dataset.runId===runId);
+      control?.focus({preventScroll:true});
+      return;
+    }
     if(action==='open_run')return select({workflow_id:target.dataset.workflowId,run_id:target.dataset.runId,job_id:'',stage_id:'',stage_overview:false,mode:'work',tab:'overview',panel_open:true});
     if(action==='job')return select({job_id:target.dataset.jobId,tab:'current'});
     if(action==='overview')return select({job_id:'',stage_id:'',stage_overview:true,tab:'overview'},{fetch:false});
