@@ -464,7 +464,10 @@
       Object.keys(patch).every(key=>key==='tab'||JSON.stringify(patch[key])===JSON.stringify(previous[key]));
     if(state&&!stateKey)stateKey=workspaceKey();cacheWorkspace();
     if(!restored)initialSelectionPatch={...initialSelectionPatch,chat_reference:null,...patch};
-    selection=next;changeWorkspace(previous);epoch++;workEpoch++;chatCreations.clear();chatAliases.clear();
+    selection=next;changeWorkspace(previous);
+    // Record previews contain historical inputs. Reauthorize the selected target before painting even a cached detail.
+    if(next.tab==='records' && next.run_id && (previous.tab!=='records' || previous.run_id!==next.run_id))targetLoading=true;
+    epoch++;workEpoch++;chatCreations.clear();chatAliases.clear();
     // A tab visit changes request epochs, but the same job's unsaved proposal
     // remains reviewable. Never revive one invalidated before this navigation.
     if(sameInputTarget){if(pendingInputProposal?.context===before)pendingInputProposal.context=context();else pendingInputProposal=null;}
@@ -789,7 +792,7 @@
     }
     if(action==='workflow'){const id=target.dataset.workflowId,workflow=(state?.workflows || []).find(item=>item.id===id);if(selection.mode!=='author'&&workflow?.published_version==null)return;const runs=selection.mode==='author'?[]:workUnitActiveRuns(state,selection,workflow);return select({workflow_id:id,run_id:runs.length===1?runs[0].id:'',job_id:'',stage_id:'',stage_overview:false,tab:runs.length>1?'active_runs':'overview',panel_open:true});}
     if(action==='preview_record'||action==='record_list_back'){
-      if(selection.tab!=='records'||targetLoading||scopeLoading||evidenceUnavailable)return;
+      if(selection.tab!=='records'||scopeLoading||evidenceUnavailable)return;
       const opening=action==='preview_record';
       const runId=opening?target.dataset.runId:selection.run_id;
       const row=state?.runs?.find(run=>run.id===runId && (!selection.records_workflow || run.workflow_id===selection.records_workflow));
