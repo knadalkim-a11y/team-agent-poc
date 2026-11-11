@@ -910,7 +910,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 if body == {'file_id': failed['id']}:
                     failed['data']['status'] = 'completed'
                     return handler.send_content(knowledge)
-                return handler.send_content({'detail': 'Unknown file'}, 400)
+                return handler.send_content({'detail': 'Unknown file'}, status=400)
             return original_post(handler)
 
         cases = [
