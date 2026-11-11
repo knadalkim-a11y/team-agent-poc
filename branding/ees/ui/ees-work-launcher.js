@@ -12,6 +12,29 @@
     const match=location.pathname.match(/^\/c\/([^/]+)\/?$/);
     return match?decodeURIComponent(match[1]):'';
   };
+  function nativeSkillUses(workflows) {
+    const uses = new Map();
+    for (const workflow of workflows || []) {
+      const definitions = [workflow.published];
+      if (workflow.can_manage) definitions.push(workflow.draft);
+      for (const definition of definitions) {
+        const nodes = definition?.nodes;
+        if (!nodes) continue;
+        for (const [id, job] of Object.entries(nodes)) {
+          if (job?.type !== 'j' || !Array.isArray(job.skills)) continue;
+          for (const skillId of job.skills) {
+            if (typeof skillId !== 'string' || !skillId) continue;
+            const key = JSON.stringify([workflow.id, id, skillId]);
+            if (!uses.has(key)) {
+              uses.set(key, {system_id: workflow.system_id, workflow: definition.name || workflow.name,
+                stage: nodes[job.parent]?.name || '', job: job.name || '', skill_id: skillId});
+            }
+          }
+        }
+      }
+    }
+    return [...uses.values()];
+  }
   const source=()=>window.__eesSourceShellV1;
   const screen=()=>source()?.screen?.() || {};
   const available=()=>{const current=screen();return Boolean(token()&&current.active&&!current.native&&(current.workReady ?? current.chatReady));};
@@ -288,7 +311,7 @@
         }
         if(at!==context())return refresh();
       }
-      if(nativePage()){nativeCapabilities=result.capabilities || {};nativeScope={systems:result.systems || [],factories:result.factories || [],scope_options:result.scope_options};error='';render();refreshTimer=setTimeout(refresh,30000);return state;}
+      if(nativePage()){nativeCapabilities=result.capabilities || {};nativeScope={systems:result.systems || [],factories:result.factories || [],scope_options:result.scope_options,skill_uses:nativeSkillUses(result.workflows)};error='';render();refreshTimer=setTimeout(refresh,30000);return state;}
       // Drafts remain available to authors, but a saved operations selection
       // must not reopen one. Existing runs keep their own published snapshot.
       if((selection.mode!=='author'||!workCanWorkspace(result.capabilities))&&selection.workflow_id&&!selection.run_id&&result.workflow?.id===selection.workflow_id&&result.workflow.published_version==null){
