@@ -23,7 +23,7 @@
     "src/lib/components/chat/Placeholder.svelte": "dc5512dc7648112edd011e27797c07cf5d8d52474be5490a1ae2bef434327036",
     "src/lib/components/chat/SettingsModal.svelte": "f9f79015ffbee1164f25705b61196044853b673d92f6c0aacc940a7ade6c02c7",
     "src/lib/components/common/Dropdown.svelte": "e3e33dc08b8b84bcececa69136029ca6b7d01effd6b5343a98c0d83ff3bdb697",
-    "src/lib/components/ees/EesAssetUsage.svelte": "b4b645bcf6b4efd281f4ffd0aa79f3b9ccad252edef14667aac0fcc1ae6e4ae8",
+    "src/lib/components/ees/EesAssetUsage.svelte": "33780319dd9321382040d91bb96c42958940a51d00955df0c24d0e531d00056a",
     "src/lib/components/ees/EesHelperNotice.svelte": "22ceccc7ad93c5d820f73269baaa9b19f12c5c99054b76ecc8c89f7757f8bba0",
     "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
     "src/lib/components/ees/EesNavigation.svelte": "86fdddd89cf32c0b8932f6f2dc12cedd4397d79da5ca337d299652efcfa80679",
@@ -37,7 +37,7 @@
     "src/lib/components/ees/state.ts": "d4eee064c100832b93cfc7b984be708df871efcaf8ef009a0f0894e7f1afa712",
     "src/lib/components/layout/Sidebar.svelte": "bbc1ea199bae6144d5064a021ddb482b76f1290ea519d3cdd31846aafe63ac81",
     "src/lib/components/workspace/Knowledge/KnowledgeBase.svelte": "613c9d62779bbcb34417bf65474830d5f94670ddcd444729b722290f2216bc22",
-    "src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte": "c44524e305216db2d694f2ad7d58eecde94b193c7c2f66f296d0e25d7ec0b9ca",
+    "src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte": "bd715cce4ec200eaf9487efb1079de4d2c330576a5ecaedc5a548b074d9260c8",
     "src/lib/components/workspace/Models.svelte": "9a991a5b62b87277d6785f9a3015194530e78442d2de05d38cf29f5df99cc1e2",
     "src/lib/components/workspace/Models/ModelEditor.svelte": "8254ac12ed49504d9bfa7f7e2a5753174c879fb88cf54ec27b0e07371c57ea03",
     "src/lib/components/workspace/Skills/SkillEditor.svelte": "ae6a7f7a7e6df646920136a662115c7a0aabc4f0f9bca3a4575ce0e3f0dfcefa",
@@ -55,7 +55,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "e31c0493ee6e1f0f014c5a3e7594ba879b3ee555f49bd3a13ab29974473ac482"
+      "sha256": "4957ec081ba6cdc0afd5630ce9b6103e8a0c897aac7ef5ffba9a1ac4523556e2"
     }
   ],
   "pyodide_files": {
