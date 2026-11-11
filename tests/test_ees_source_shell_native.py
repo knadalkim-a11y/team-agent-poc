@@ -882,6 +882,9 @@ class SourceShellNativeTests(IntegratedNativeCase):
         records = {'/api/v1/models/model': model, '/api/v1/knowledge/kb-ems': knowledge,
                    '/api/v1/skills/id/jira-read': skill, '/api/v1/skills/jira-read': skill}
         original = NativeUIHandler.do_GET
+        original_post = NativeUIHandler.do_POST
+        retry_posts = []
+        status_reads = []
 
         def get_asset(handler):
             path = urlparse(handler.path).path.rstrip('/')
@@ -890,8 +893,25 @@ class SourceShellNativeTests(IntegratedNativeCase):
             if path in records:
                 return handler.send_content(records[path])
             if path.startswith('/api/v1/knowledge/kb-ems/files'):
-                return handler.send_content({'items': files, 'total': len(files)})
+                summaries = [{key: value for key, value in item.items() if key != 'data'} for item in files]
+                return handler.send_content({'items': summaries, 'total': len(summaries)})
+            for item in files:
+                if path == '/api/v1/files/' + item['id'] + '/process/status':
+                    status_reads.append(handler.path)
+                    return handler.send_content({'status': item['data']['status']})
+                if path == '/api/v1/files/' + item['id']:
+                    return handler.send_content(item)
             return original(handler)
+
+        def retry_asset(handler):
+            if urlparse(handler.path).path == '/api/v1/knowledge/kb-ems/file/update':
+                body = json.loads(handler.rfile.read(int(handler.headers.get('Content-Length', '0'))))
+                retry_posts.append(body)
+                if body == {'file_id': failed['id']}:
+                    failed['data']['status'] = 'completed'
+                    return handler.send_content(knowledge)
+                return handler.send_content({'detail': 'Unknown file'}, status=400)
+            return original_post(handler)
 
         cases = [
             ('/workspace/models', 'models', 'b6-models-list'),
@@ -899,12 +919,18 @@ class SourceShellNativeTests(IntegratedNativeCase):
             ('/workspace/knowledge/kb-ems', 'knowledge', 'b7-knowledge-detail'),
             ('/workspace/skills/edit?id=jira-read', 'skill-editor', 'b8-skill-editor'),
         ]
-        with patch.object(NativeUIHandler, 'do_GET', get_asset):
+        with patch.object(NativeUIHandler, 'do_GET', get_asset), patch.object(NativeUIHandler, 'do_POST', retry_asset):
             for route, marker, label in cases:
                 with self.subTest(route=route):
                     self.navigate(route)
                     self.wait("document.querySelector('[data-ees-asset=" + marker + "]')?.getBoundingClientRect().width > 0")
                     self.wait("document.querySelector('[data-ees-source-shell]')?.dataset.eesChatState === 'docked'")
+                    if marker in ('models', 'model-editor'):
+                        self.wait("""(() => {
+                            const editor = document.querySelector('[data-ees-asset="MODEL_MARKER"]');
+                            return editor && (editor.innerText.includes('EES 통합 Assistant')
+                                || [...editor.querySelectorAll('input')].some(field => field.value === 'EES 통합 Assistant'));
+                        })()""".replace('MODEL_MARKER', marker))
                     if marker == 'knowledge':
                         self.wait("document.querySelector('[data-ees-file-status=failed]') && document.querySelector('[data-ees-file-retry]')")
                         self.assertIn('이전 절차.pdf', self.text('#workspace-container'))
@@ -929,6 +955,13 @@ class SourceShellNativeTests(IntegratedNativeCase):
                     name = 'parity-' + label + '-1920'
                     out = self.screenshot(name)
                     (out / (name + '.json')).write_text(json.dumps(geometry, indent=2) + '\n', encoding='utf-8')
+                    if marker == 'knowledge':
+                        self.assertTrue(any('failed-guide/process/status' in path and 'stream=false' in path for path in status_reads))
+                        self.assertEqual(retry_posts, [])
+                        self.click('[data-ees-file-retry]')
+                        self.wait("document.querySelectorAll('[data-ees-file-status=completed]').length === 2 && !document.querySelector('[data-ees-file-retry]')")
+                        self.assertEqual(retry_posts, [{'file_id': failed['id']}])
+                        self.screenshot('parity-b7-after-retry-1920')
 
     def native_link_selector(self, target, label, labels, *, return_from=None):
         if target == 'models':
