@@ -886,6 +886,17 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
             db.execute("UPDATE work_access SET active=0 WHERE principal_kind='user' AND principal_id='b'")
         self.assertEqual((await self.state('b'))['runs'], [])
 
+    def test_factory_condition_preview_marks_broken_saved_ancestry_unknown(self):
+        self.assertEqual(workspace._factory_condition_results({}, {}), {})
+        damaged = {'nodes': {
+            'cycle': {'type': 't', 'parent': 'cycle'},
+            'orphan': {'type': 'j', 'parent': 'absent'},
+            'broken': {'type': 't', 'parent': []},
+            'invalid': {'type': 'p', 'condition': {'unsupported': 'operator'}},
+            'malformed': 'old data',
+        }}
+        self.assertEqual(workspace._factory_condition_results(damaged, {}), dict.fromkeys(damaged['nodes']))
+
     async def test_factory_authoring_preview_uses_visible_definition_and_never_starts_a_run(self):
         for site, active in [('site-a', False), ('site-b', True)]:
             self.assertTrue((await self.command('save_factory', factory_id=site, system_id='EMS',

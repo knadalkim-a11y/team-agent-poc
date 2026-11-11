@@ -131,17 +131,29 @@ def _condition(condition, attributes):
 
 
 def _factory_condition_results(definition, attributes):
-    """Resolve the same saved stage/job predicates for authoring and execution."""
-    nodes = definition['nodes']
+    """A job inherits every ancestor predicate; an unreadable chain stays unknown."""
+    nodes = definition.get('nodes') if isinstance(definition, dict) else None
+    if not isinstance(nodes, dict):
+        return {}
     results = {}
     for key, node in nodes.items():
-        values = [_condition(node.get('condition'), attributes)]
-        parent = node.get('parent')
-        while parent in nodes:
-            ancestor = nodes[parent]
-            values.append(_condition(ancestor.get('condition'), attributes))
-            parent = ancestor.get('parent')
-        results[key] = False if False in values else None if None in values else True
+        results[key] = None
+        values = []
+        seen = {key}
+        while isinstance(node, dict):
+            condition = node.get('condition')
+            if not _condition_valid(condition):
+                break
+            values.append(_condition(condition, attributes))
+            parent = node.get('parent')
+            if parent is None:
+                if node.get('type') == 'p':
+                    results[key] = False if False in values else None if None in values else True
+                break
+            if not isinstance(parent, str) or parent in seen:
+                break
+            seen.add(parent)
+            node = nodes.get(parent)
     return results
 
 
@@ -1329,7 +1341,7 @@ class WorkspaceMixin:
                     # collection carries attributes that can contribute to a preview.
                     site = next((item for item in factories if item['id'] == factory_id), None)
                     definition = selected_workflow.get('draft') or selected_workflow['published']
-                    if site and definition and definition.get('execution_scope') != 'system':
+                    if site and isinstance(site['attributes'], dict) and isinstance(definition, dict) and definition.get('execution_scope') != 'system':
                         attributes = {**site['attributes'], 'factory_id': factory_id}
                         selected_workflow['factory_preview'] = {
                             'factory_id': factory_id, 'revision': selected_workflow['revision'],
