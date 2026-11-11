@@ -1830,10 +1830,10 @@ diff --git a/src/lib/components/ees/EesAssetUsage.svelte b/src/lib/components/ee
 new file mode 100644
 --- /dev/null
 +++ b/src/lib/components/ees/EesAssetUsage.svelte
-@@ -0,0 +1,46 @@
+@@ -0,0 +1,47 @@
 +<script lang="ts">
 +	import { getContext } from 'svelte';
-+	import { models } from '$lib/stores';
++	import { models, user } from '$lib/stores';
 +	import { eesSnapshot, eesSessionReady } from './state';
 +
 +	export let kind: 'knowledge' | 'skill';
@@ -1846,7 +1846,8 @@ new file mode 100644
 +				(Array.isArray(ref.collection_names) && ref.collection_names.includes(id))));
 +	}
 +
-+	$: ready = $eesSessionReady && $eesSnapshot.native_scope && !$eesSnapshot.target_loading && !$eesSnapshot.scope_loading && !$eesSnapshot.error;
++	$: ready = Boolean($user?.id) && $eesSnapshot.native_capabilities?.actor_id === $user?.id &&
++		$eesSessionReady && $eesSnapshot.native_scope && !$eesSnapshot.target_loading && !$eesSnapshot.scope_loading && !$eesSnapshot.error;
 +	$: assistants = !assetId || !ready ? [] : ($models ?? []).filter((model) => {
 +		const meta = model.info?.meta;
 +		return kind === 'skill' ? Array.isArray(meta?.skillIds) && meta.skillIds.includes(assetId)
@@ -4224,7 +4225,7 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte b
  
  	<!-- Files -->
  	{#each files as file (file?.id ?? file?.itemId ?? file?.tempId)}
-+		{@const status = file?.status || file?.data?.status || (file.id && selectedFile?.id === file.id ? selectedFile?.data?.status : undefined)}
++		{@const status = file?.status || (file.id && selectedFile?.id === file.id ? selectedFile?.data?.status : undefined) || file?.data?.status}
 +		{@const label = statusLabel(status)}
  		<div
  			class=" flex cursor-pointer w-full px-2 bg-transparent dark:hover:bg-gray-850/50 hover:bg-white rounded-xl transition {selectedFileId
