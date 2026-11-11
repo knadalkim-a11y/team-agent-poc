@@ -33,7 +33,7 @@
     "src/lib/components/ees/EesScopeSelect.svelte": "4906d92006b655ef5de8079ba0ea03a84ae9a584cd404585d530b4f35479afc4",
     "src/lib/components/ees/EesSettingsFrame.svelte": "248f940cf32eae6a431352b85a6050304addb6651f4cc75d454ab2080fb7eee5",
     "src/lib/components/ees/EesSettingsMenu.svelte": "5e6656f7c6ae10dd5c9be5a960444f1457c54188ea18cd9791e7f831e2d6b13f",
-    "src/lib/components/ees/EesShell.svelte": "8fec48645c5b1e773dedc1eec61d9fcca4d2ed3d4f28bd385109f4e26b68282f",
+    "src/lib/components/ees/EesShell.svelte": "0784a70359efe234e64a30abfb0cd5d2184ae55c24aaadfb6a75853a8393b52b",
     "src/lib/components/ees/icons/5bc95.svg": "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7",
     "src/lib/components/ees/state.ts": "d4eee064c100832b93cfc7b984be708df871efcaf8ef009a0f0894e7f1afa712",
     "src/lib/components/layout/Sidebar.svelte": "bbc1ea199bae6144d5064a021ddb482b76f1290ea519d3cdd31846aafe63ac81",
@@ -48,7 +48,7 @@
     "src/routes/(app)/+page.svelte": "7cdd5f35c6d1064663d2bafd03263585ca270ce24d26788a656d465339e6cb03",
     "src/routes/(app)/c/[id]/+page.svelte": "2cf8b7796915e7711e467a4142d96ad1d4afc0366221236620719193d91d0ad2",
     "src/routes/(app)/folders/[folderId]/+page.svelte": "3d5ab0fda767627ae3c4b773c77ec150bf4cdccff5c8d5cc976c07cae612acdc",
-    "src/routes/(app)/workspace/+layout.svelte": "ab47c3a5a8812eb737ae1c9f5af81f0509dd922e762b165c4af9e26c83ad22d0",
+    "src/routes/(app)/workspace/+layout.svelte": "9d4b91035a0e7a7b3650d4db4c2ca6df0735981662b9b266944540c02b90917f",
     "src/routes/+layout.svelte": "b9d4891c49d7bd40ae70abc1fa4b78860f1678cf7ead94f949fdb13e0d48be4c",
     "svelte.config.js": "95f9ac49b1c1c3c14f23f5a06300de631d974f725ce8c4958f799d42955e1f37",
     "vite.config.ts": "793bfdc367867f486b504434bbbb79d0b7c69a5b4bd8572c0368138b60598bd2"
@@ -56,7 +56,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "fd923a3d6a13e40553d92cabbd606fd98b43a549defe601ae91d8b6a398a07c5"
+      "sha256": "20179c00a08b07be10ec145d040947a6b894c75f657fa88458e96c0e44b7cb42"
     }
   ],
   "pyodide_files": {
