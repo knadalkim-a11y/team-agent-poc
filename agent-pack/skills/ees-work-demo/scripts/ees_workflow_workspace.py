@@ -130,6 +130,21 @@ def _condition(condition, attributes):
         return None
 
 
+def _factory_condition_results(definition, attributes):
+    """Resolve the same saved stage/job predicates for authoring and execution."""
+    nodes = definition['nodes']
+    results = {}
+    for key, node in nodes.items():
+        values = [_condition(node.get('condition'), attributes)]
+        parent = node.get('parent')
+        while parent in nodes:
+            ancestor = nodes[parent]
+            values.append(_condition(ancestor.get('condition'), attributes))
+            parent = ancestor.get('parent')
+        results[key] = False if False in values else None if None in values else True
+    return results
+
+
 def _condition_valid(value, depth=0):
     if not value:
         return value in (None, {})
@@ -1310,6 +1325,16 @@ class WorkspaceMixin:
                     factory = db.execute('SELECT system_id FROM work_factories WHERE id=?', (factory_id,)).fetchone()
                     if not factory or factory['system_id'] != selected_workflow['system_id']:
                         _fail('target_mismatch', '선택한 공장과 절차의 시스템이 다릅니다. 작업 위치를 다시 선택해 주세요.')
+                    # The picker includes denied names. Only the authorized factory
+                    # collection carries attributes that can contribute to a preview.
+                    site = next((item for item in factories if item['id'] == factory_id), None)
+                    definition = selected_workflow.get('draft') or selected_workflow['published']
+                    if site and definition and definition.get('execution_scope') != 'system':
+                        attributes = {**site['attributes'], 'factory_id': factory_id}
+                        selected_workflow['factory_preview'] = {
+                            'factory_id': factory_id, 'revision': selected_workflow['revision'],
+                            'conditions': _factory_condition_results(definition, attributes),
+                        }
                 ui = db.execute('SELECT * FROM work_ui WHERE actor_id=?', (_value(actor, 'id'),)).fetchone()
                 capabilities['managed_systems'] = []
                 for system in systems:
@@ -1661,12 +1686,7 @@ class WorkspaceMixin:
             errors = self._work_input_errors(db, definition, list(fields.values()), inputs, False)
             if errors: _fail('invalid_inputs', '\n'.join(errors))
             attributes = json.loads(factory['attributes']) if factory else {}; attributes['factory_id'] = factory_id
-            conditions = {}
-            for key, node in definition['nodes'].items():
-                values = [_condition(node.get('condition'), attributes)]; parent = node.get('parent')
-                while parent in definition['nodes']:
-                    ancestor = definition['nodes'][parent]; values.append(_condition(ancestor.get('condition'), attributes)); parent = ancestor.get('parent')
-                conditions[key] = False if False in values else None if None in values else True
+            conditions = _factory_condition_results(definition, attributes)
             snapshot = {'definition': definition, 'definition_hash': published['hash'], 'factory': dict(factory) | {'attributes': attributes} if factory else None, 'condition_results': conditions}
             key = str(uuid4()); mode = definition.get('mode', 'on_demand')
             active_definition = {'nodes': {job_id: node for job_id, node in definition['nodes'].items() if node['type'] == 'j' and conditions[job_id] is not False}}
