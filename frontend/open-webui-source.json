@@ -23,6 +23,7 @@
     "src/lib/components/chat/Placeholder.svelte": "dc5512dc7648112edd011e27797c07cf5d8d52474be5490a1ae2bef434327036",
     "src/lib/components/chat/SettingsModal.svelte": "f9f79015ffbee1164f25705b61196044853b673d92f6c0aacc940a7ade6c02c7",
     "src/lib/components/common/Dropdown.svelte": "e3e33dc08b8b84bcececa69136029ca6b7d01effd6b5343a98c0d83ff3bdb697",
+    "src/lib/components/ees/EesAssetUsage.svelte": "b4b645bcf6b4efd281f4ffd0aa79f3b9ccad252edef14667aac0fcc1ae6e4ae8",
     "src/lib/components/ees/EesHelperNotice.svelte": "22ceccc7ad93c5d820f73269baaa9b19f12c5c99054b76ecc8c89f7757f8bba0",
     "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
     "src/lib/components/ees/EesNavigation.svelte": "86fdddd89cf32c0b8932f6f2dc12cedd4397d79da5ca337d299652efcfa80679",
@@ -31,18 +32,22 @@
     "src/lib/components/ees/EesScopeSelect.svelte": "4906d92006b655ef5de8079ba0ea03a84ae9a584cd404585d530b4f35479afc4",
     "src/lib/components/ees/EesSettingsFrame.svelte": "248f940cf32eae6a431352b85a6050304addb6651f4cc75d454ab2080fb7eee5",
     "src/lib/components/ees/EesSettingsMenu.svelte": "5e6656f7c6ae10dd5c9be5a960444f1457c54188ea18cd9791e7f831e2d6b13f",
-    "src/lib/components/ees/EesShell.svelte": "6f088a4c27504ffb49498abeac8c890450984024c4cb8d503d152d26bec1cc1e",
+    "src/lib/components/ees/EesShell.svelte": "8fec48645c5b1e773dedc1eec61d9fcca4d2ed3d4f28bd385109f4e26b68282f",
     "src/lib/components/ees/icons/5bc95.svg": "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7",
     "src/lib/components/ees/state.ts": "d4eee064c100832b93cfc7b984be708df871efcaf8ef009a0f0894e7f1afa712",
     "src/lib/components/layout/Sidebar.svelte": "bbc1ea199bae6144d5064a021ddb482b76f1290ea519d3cdd31846aafe63ac81",
-    "src/lib/components/workspace/Models.svelte": "86721bb1f2a7ca4601180340c465de0d38aad7db295475480c6665322efb505f",
+    "src/lib/components/workspace/Knowledge/KnowledgeBase.svelte": "613c9d62779bbcb34417bf65474830d5f94670ddcd444729b722290f2216bc22",
+    "src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte": "c44524e305216db2d694f2ad7d58eecde94b193c7c2f66f296d0e25d7ec0b9ca",
+    "src/lib/components/workspace/Models.svelte": "9a991a5b62b87277d6785f9a3015194530e78442d2de05d38cf29f5df99cc1e2",
+    "src/lib/components/workspace/Models/ModelEditor.svelte": "8254ac12ed49504d9bfa7f7e2a5753174c879fb88cf54ec27b0e07371c57ea03",
+    "src/lib/components/workspace/Skills/SkillEditor.svelte": "ae6a7f7a7e6df646920136a662115c7a0aabc4f0f9bca3a4575ce0e3f0dfcefa",
     "src/lib/constants.ts": "0fd43314837a2d7775810c3f08fc82b8042c34a5b6e52f1a7e4513f303a07b5d",
-    "src/lib/i18n/locales/ko-KR/translation.json": "1d138a21e1ab93eb85b95247ac690e9d165c543ec11b3786b837cac83427299b",
+    "src/lib/i18n/locales/ko-KR/translation.json": "fb6765e3dd2e807ffee7136d24cb108c0e6c699cfd478f642165b99afa4f4a25",
     "src/routes/(app)/+layout.svelte": "cd5c01d65ef4b75e85db3cda21f02bc8968f9b187db9e95f184d03f31a94c126",
     "src/routes/(app)/+page.svelte": "7cdd5f35c6d1064663d2bafd03263585ca270ce24d26788a656d465339e6cb03",
     "src/routes/(app)/c/[id]/+page.svelte": "2cf8b7796915e7711e467a4142d96ad1d4afc0366221236620719193d91d0ad2",
     "src/routes/(app)/folders/[folderId]/+page.svelte": "3d5ab0fda767627ae3c4b773c77ec150bf4cdccff5c8d5cc976c07cae612acdc",
-    "src/routes/(app)/workspace/+layout.svelte": "5ac4f3ffe09e4820024c06289c341ffd564aa0dbe1d57f8157c866d78325126d",
+    "src/routes/(app)/workspace/+layout.svelte": "ab47c3a5a8812eb737ae1c9f5af81f0509dd922e762b165c4af9e26c83ad22d0",
     "src/routes/+layout.svelte": "b9d4891c49d7bd40ae70abc1fa4b78860f1678cf7ead94f949fdb13e0d48be4c",
     "svelte.config.js": "95f9ac49b1c1c3c14f23f5a06300de631d974f725ce8c4958f799d42955e1f37",
     "vite.config.ts": "793bfdc367867f486b504434bbbb79d0b7c69a5b4bd8572c0368138b60598bd2"
@@ -50,7 +55,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "a5e7106b7f8bdf526d89a8f9f4357fbed9057e68a37de0398ed92bdde894ca38"
+      "sha256": "e31c0493ee6e1f0f014c5a3e7594ba879b3ee555f49bd3a13ab29974473ac482"
     }
   ],
   "pyodide_files": {
@@ -130,7 +135,11 @@
     "src/lib/components/chat/SettingsModal.svelte": "206ecef8e8d32fc62d63e919d374c05608a73b9bf271bd4f465354d6a113b9c6",
     "src/lib/components/common/Dropdown.svelte": "59b37357bba7dda36582eac6addf5d9cc05cee9190a93bd5b461ce528ff425e2",
     "src/lib/components/layout/Sidebar.svelte": "e7c417808351138ea2ae1566412f4ead696df4a68212402d024010925f49a753",
+    "src/lib/components/workspace/Knowledge/KnowledgeBase.svelte": "fd722ed3293b425a3de1366eeeadf3851d7ca212e72201543b84648b94e3dcf2",
+    "src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte": "e6e19eed0b071b497463b7705a6ed4bdcfce5a035aede4ac713b401723e2bfee",
     "src/lib/components/workspace/Models.svelte": "f9304918c5c3ab02c48ad0694cf1f8d23abf4553e3baf7e04e3fa8277bb38855",
+    "src/lib/components/workspace/Models/ModelEditor.svelte": "7184214576bf31d99f1c98e52ee67862414dba4963aa5cbc97751ff4ebc8422a",
+    "src/lib/components/workspace/Skills/SkillEditor.svelte": "b90be15b5fbe595accf8fb5dbaaaa507e6278afcd35f1cd0e467cb8aca76f793",
     "src/lib/constants.ts": "9d7ec9a98066a08cbfd93cbc11f67f1858703d28a8e13534eea265c138db4f67",
     "src/lib/i18n/locales/ko-KR/translation.json": "2408f6e27737eba3c1386cde921cdbe436297262fd3921c309aba948601560dd",
     "src/routes/(app)/+layout.svelte": "3e547eaf66969957c12a3ee5833e93282f66c6fb0ce598dc8a5e7f82b908364e",
