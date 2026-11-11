@@ -102,6 +102,32 @@ index 0000000..569b354
 +	}
 +	return result;
 +}
+diff --git a/src/lib/apis/files/index.ts b/src/lib/apis/files/index.ts
+--- a/src/lib/apis/files/index.ts
++++ b/src/lib/apis/files/index.ts
+@@ -95,18 +95,20 @@
+ 	return res;
+ };
+ 
+-export const getFileProcessStatus = async (token: string, id: string) => {
++export const getFileProcessStatus = async (token: string, id: string, stream = true, signal?: AbortSignal) => {
+ 	const queryParams = new URLSearchParams();
+-	queryParams.append('stream', 'true');
++	queryParams.append('stream', String(stream));
+ 
+ 	let error = null;
+ 	const res = await fetch(`${WEBUI_API_BASE_URL}/files/${id}/process/status?${queryParams}`, {
+ 		method: 'GET',
++		signal,
+ 		headers: {
+ 			Accept: 'application/json',
+ 			authorization: `Bearer ${token}`
+ 		}
+ 	}).catch((err) => {
++		if (err?.name === 'AbortError') return null;
+ 		error = err.detail;
+ 		console.error(err);
+ 		return null;
 diff --git a/src/lib/apis/openai/index.ts b/src/lib/apis/openai/index.ts
 index b895714..87422b9 100644
 --- a/src/lib/apis/openai/index.ts
@@ -4046,39 +4072,56 @@ index 007df31..ecdbd66 100644
 diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte
 --- a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte
 +++ b/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte
-@@ -54,6 +54,7 @@
+@@ -25,6 +25,7 @@
+ 		uploadFile,
+ 		deleteFileById,
+ 		getFileById,
++		getFileProcessStatus,
+ 		renameFileById
+ 	} from '$lib/apis/files';
+ 	import {
+@@ -54,6 +55,8 @@
  	import Spinner from '$lib/components/common/Spinner.svelte';
  	import Tooltip from '$lib/components/common/Tooltip.svelte';
  	import Files from './KnowledgeBase/Files.svelte';
 +	import EesAssetUsage from '$lib/components/ees/EesAssetUsage.svelte';
++	import { eesSnapshot, eesSessionReady } from '$lib/components/ees/state';
  	import AddFilesPlaceholder from '$lib/components/AddFilesPlaceholder.svelte';
  
  	import AddContentMenu from './KnowledgeBase/AddContentMenu.svelte';
-@@ -112,7 +113,32 @@
+@@ -112,7 +115,40 @@
  	let selectedFile = null;
  	let selectedFileContent = '';
  	let loadingFileContent = false;
 +	let retryingFile = '';
++	let retryMounted = true;
++	onDestroy(() => { retryMounted = false; });
  
 +	const retryFile = async (fileId: string) => {
-+		if (!knowledge?.write_access || isExternalKnowledge || !fileId || retryingFile) return;
++		if (!$eesSessionReady || !$user?.id || $eesSnapshot.native_capabilities?.actor_id !== $user.id || !knowledge?.write_access || isExternalKnowledge || !fileId || retryingFile) return;
 +		const collection = knowledge.id;
 +		const token = localStorage.token;
++		const actor = $user.id;
++		const selection = { ...$eesSnapshot.selection };
++		const current = () => retryMounted && $eesSessionReady && $eesSnapshot.native_capabilities?.actor_id === actor &&
++			$user?.id === actor && knowledge?.id === collection && token === localStorage.token &&
++			$eesSnapshot.selection?.system_id === selection.system_id && $eesSnapshot.selection?.factory_id === selection.factory_id;
 +		retryingFile = fileId;
 +		try {
 +			const refreshed = await updateFileFromKnowledgeById(token, collection, fileId);
-+			if (knowledge?.id !== collection || token !== localStorage.token) return;
++			if (!current()) return;
 +			if (!refreshed) throw new Error($i18n.t('EES.Document.Failed', { defaultValue: 'Processing failed' }));
-+			const latest = await getFileById(token, fileId).catch(() => null);
-+			if (knowledge?.id !== collection || token !== localStorage.token) return;
-+			const status = latest?.data?.status;
++			const response = await getFileProcessStatus(token, fileId, false).catch(() => null);
++			const latest = response?.ok ? await response.json().catch(() => null) : null;
++			if (!current()) return;
++			const status = latest?.status || 'unavailable';
 +			if (fileItems) fileItems = fileItems.map((file) => file.id === fileId
 +				? { ...file, status, data: { ...file.data, status } } : file);
 +			if (selectedFileId === fileId && selectedFile?.id === fileId) {
 +				selectedFile = { ...selectedFile, data: { ...selectedFile.data, status } };
 +			}
 +		} catch (error) {
-+			if (knowledge?.id === collection && token === localStorage.token) toast.error(String(error));
++			if (current()) toast.error(String(error));
 +		} finally {
 +			retryingFile = '';
 +		}
@@ -4087,7 +4130,7 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/l
  	let inputFiles = null;
  
  	let query = '';
-@@ -1211,7 +1237,7 @@
+@@ -1211,7 +1247,7 @@
  	}}
  />
  
@@ -4096,7 +4139,7 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/l
  	{#if id && knowledge}
  		<AccessControlModal
  			bind:show={showAccessControlModal}
-@@ -1239,7 +1265,7 @@
+@@ -1239,7 +1275,7 @@
  				}}
  			>
  				<ChevronLeft className="size-3" strokeWidth="2" />
@@ -4105,7 +4148,7 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/l
  			</button>
  
  			<div class=" flex w-full">
-@@ -1248,7 +1274,7 @@
+@@ -1248,7 +1284,7 @@
  						<div class="w-full flex justify-between items-center">
  							<input
  								type="text"
@@ -4114,7 +4157,7 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/l
  								bind:value={knowledge.name}
  								aria-label={$i18n.t('Knowledge Name')}
  								placeholder={$i18n.t('Knowledge Name')}
-@@ -1270,19 +1296,6 @@
+@@ -1270,19 +1306,6 @@
  							</div>
  						</div>
  
@@ -4134,7 +4177,7 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/l
  					</div>
  
  					<div class="flex w-full items-center">
-@@ -1317,7 +1330,7 @@
+@@ -1317,7 +1340,7 @@
  		</div>
  
  		<div
@@ -4143,7 +4186,7 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/l
  		>
  			{#if isExternalKnowledge}
  				<div class="p-5 flex flex-col gap-4">
-@@ -1564,6 +1577,9 @@
+@@ -1564,6 +1587,9 @@
  										<div class=" flex overflow-y-auto h-full w-full scrollbar-hidden text-xs">
  											<Files
  												files={fileItems}
@@ -4153,7 +4196,7 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/l
  												directories={directoryItems}
  												{knowledge}
  												{selectedFileId}
-@@ -1699,6 +1715,23 @@
+@@ -1699,6 +1725,23 @@
  					</div>
  				{/if}
  			{/if}
@@ -4180,7 +4223,19 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/l
 diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte b/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte
 --- a/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte
 +++ b/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte
-@@ -29,6 +29,8 @@
+@@ -6,7 +6,10 @@
+ 	dayjs.extend(duration);
+ 	dayjs.extend(relativeTime);
+ 
+-	import { getContext } from 'svelte';
++	import { getContext, onDestroy } from 'svelte';
++	import { getFileProcessStatus } from '$lib/apis/files';
++	import { user } from '$lib/stores';
++	import { eesSessionReady, eesSnapshot } from '$lib/components/ees/state';
+ 	const i18n = getContext('i18n');
+ 
+ 	import { capitalizeFirstLetter, formatFileSize } from '$lib/utils';
+@@ -29,6 +32,8 @@
  		itemId?: string;
  		name?: string;
  		status?: string;
@@ -4189,7 +4244,7 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte b
  		meta?: {
  			name?: string;
  			size?: number;
-@@ -42,6 +44,9 @@
+@@ -42,6 +47,9 @@
  
  	export let knowledge = null;
  	export let selectedFileId = null;
@@ -4199,10 +4254,48 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte b
  	export let files: KnowledgeFile[] = [];
  	export let directories = [];
  
-@@ -61,6 +66,21 @@
+@@ -61,6 +69,61 @@
  	let editName = '';
  	let editInput: HTMLInputElement;
  
++	// The knowledge list omits file.data. Read only this page's missing states
++	// through the existing authorized, non-streaming status endpoint.
++	let fetchedStatuses: Record<string, string> = {};
++	let statusRequest: AbortController | null = null;
++	$: verifiedActor = $eesSessionReady && $user?.id && $eesSnapshot.native_capabilities?.actor_id === $user.id
++		? $user.id : '';
++	$: missingIds = [...new Set(files.filter((file) => file.id && !file.status && !file.data?.status).map((file) => file.id as string))];
++	$: boundary = JSON.stringify([verifiedActor, knowledge?.id, $eesSnapshot.selection?.system_id, $eesSnapshot.selection?.factory_id, missingIds]);
++	$: refreshStatuses(boundary);
++
++	async function refreshStatuses(key: string) {
++		statusRequest?.abort();
++		statusRequest = null;
++		fetchedStatuses = {};
++		if (!verifiedActor || !knowledge?.id || !missingIds.length || typeof window === 'undefined') return;
++		const token = localStorage.token;
++		const request = new AbortController();
++		statusRequest = request;
++		const ids = [...missingIds];
++		const current = () => !request.signal.aborted && boundary === key && localStorage.token === token;
++		async function readNext() {
++			while (current() && ids.length) {
++				const id = ids.shift();
++				if (!id) return;
++				let status = 'unavailable';
++				try {
++					const response = await getFileProcessStatus(token, id, false, request.signal);
++					if (response?.ok) status = (await response.json())?.status || 'unavailable';
++				} catch {
++					// Other visible rows still have independent status results.
++				}
++				if (current()) fetchedStatuses = { ...fetchedStatuses, [id]: status };
++			}
++		}
++		await Promise.all(Array.from({ length: Math.min(3, ids.length) }, readNext));
++	}
++	onDestroy(() => statusRequest?.abort());
++
 +	const statusLabel = (status?: string) => {
 +		switch (status) {
 +			case 'uploading':
@@ -4214,6 +4307,8 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte b
 +			case 'failed':
 +			case 'error':
 +				return $i18n.t('EES.Document.Failed', { defaultValue: 'Processing failed' });
++			case 'unavailable':
++				return $i18n.t('EES.Document.Unavailable', { defaultValue: 'Status unavailable' });
 +			default:
 +				return '';
 +		}
@@ -4221,16 +4316,16 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte b
  	const startRename = (file: KnowledgeFile) => {
  		editingFileId = file?.id ?? file?.tempId;
  		editName = file?.name ?? file?.meta?.name ?? '';
-@@ -95,6 +115,8 @@
+@@ -95,6 +158,8 @@
  
  	<!-- Files -->
  	{#each files as file (file?.id ?? file?.itemId ?? file?.tempId)}
-+		{@const status = file?.status || (file.id && selectedFile?.id === file.id ? selectedFile?.data?.status : undefined) || file?.data?.status}
++		{@const status = file?.status || (file.id && selectedFile?.id === file.id ? selectedFile?.data?.status : undefined) || file?.data?.status || (file.id ? fetchedStatuses[file.id] : undefined)}
 +		{@const label = statusLabel(status)}
  		<div
  			class=" flex cursor-pointer w-full px-2 bg-transparent dark:hover:bg-gray-850/50 hover:bg-white rounded-xl transition {selectedFileId
  				? ''
-@@ -157,7 +179,7 @@
+@@ -157,7 +222,7 @@
  							/>
  						{:else}
  							<div class="line-clamp-1 text-xs">
@@ -4239,7 +4334,7 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte b
  								{#if file?.meta?.size}
  									<span class="text-[0.6875rem] text-gray-500"
  										>{formatFileSize(file?.meta?.size)}</span
-@@ -169,6 +191,7 @@
+@@ -169,6 +234,7 @@
  				</div>
  
  				<div class="flex items-center gap-2 shrink-0">
@@ -4247,7 +4342,7 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte b
  					{#if file?.updated_at}
  						<Tooltip content={dayjs(file.updated_at * 1000).format('LLLL')}>
  							<div class="text-xs text-gray-400">
-@@ -194,6 +217,12 @@
+@@ -194,6 +260,12 @@
  					{/if}
  				</div>
  			</button>
@@ -4749,7 +4844,7 @@ index 172ed9a..8873d62 100644
 diff --git a/src/lib/i18n/locales/ko-KR/translation.json b/src/lib/i18n/locales/ko-KR/translation.json
 --- a/src/lib/i18n/locales/ko-KR/translation.json
 +++ b/src/lib/i18n/locales/ko-KR/translation.json
-@@ -3081,5 +3081,125 @@
+@@ -3081,5 +3081,126 @@
  	"Youtube Language": "Youtube 언어",
  	"Youtube Proxy URL": "Youtube 프록시 URL",
  	"Zoom in": "",
@@ -4874,7 +4969,8 @@ diff --git a/src/lib/i18n/locales/ko-KR/translation.json b/src/lib/i18n/locales/
 +	"EES.Document.Ready": "처리 완료",
 +	"EES.Document.Failed": "처리 실패",
 +	"EES.Document.Retry": "다시 처리",
-+	"EES.Skill.Dirty": "바뀐 곳 {{count}} · 저장 전"
++	"EES.Skill.Dirty": "바뀐 곳 {{count}} · 저장 전",
++	"EES.Document.Unavailable": "상태 확인 불가"
  }
 diff --git a/src/routes/(app)/+layout.svelte b/src/routes/(app)/+layout.svelte
 index 633a9f7..a50b708 100644
