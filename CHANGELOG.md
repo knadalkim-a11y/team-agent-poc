@@ -1,12 +1,13 @@
 # Changelog
 
-## 2026-11-11 · Figma 기능 페이지 구역 시범
+## 2026-11-11 · Figma 기능 페이지 구역 정리
 
 - ‘워크 · 도구’ 페이지의 화면 19개를 세부 기능 구역 5개로 묶고 머리말에 구역 색인을 넣었다(C167). 노드 ID와 화면 내용은 그대로다. 고정 점검은 구역으로 옮긴 페이지에서 맨 위 요소와 색인을 검사하고 구역 이름·크기를 경고로 보고한다(Node 시험 2개 추가). [기록](evals/figma-page-structure-20261110.md#figma-page-structure-pilot-20261111).
 - ‘업무 · 운영’도 같은 방식으로 구역 5개(운영·운영 기준·셋업·장애 대응·실행 기록)와 색인으로 정리하고, 겹쳐 있던 공동 진행 화면을 옆으로 옮겼다(C168). 고정 점검의 구역 검사 대상에 더했다. [기록](evals/figma-page-structure-20261110.md#figma-page-structure-operations-20261111).
 - ‘공통 · 화면 틀’도 구역 5개(화면 틀·작업 위치와 권한·대화와 저장한 프롬프트·AI 도우미 설정·상태와 공통 부품)와 색인으로 정리했다(C169). 원본 부품도 구역에 넣었고 인스턴스 연결은 그대로다. [기록](evals/figma-page-structure-20261110.md#figma-page-structure-common-20261111).
 - ‘워크 · 업무 절차’도 새 구역 5개와 이름을 맞춘 기존 구역 3개, 색인으로 정리하고, 주인 없는 장면 시각 하나를 지우고 B4 메모를 B4 옆으로 옮겼다(C170). 이제 네 기능 페이지 모두 맨 위에 머리말과 구역만 있다. [기록](evals/figma-page-structure-20261110.md#figma-page-structure-procedures-20261111).
 - 70 작업실의 4판 검토안을 구역 하나로 묶고, 채택된 1판 검토안 5개를 91의 지난 시안 프레임으로 옮겼다(C171). 조사 스크립트에 다른 페이지로 옮긴 화면을 따로 비교하는 기능을 더했다. [기록](evals/figma-page-structure-20261110.md#figma-page-structure-workroom-20261111).
+- 구역 규칙을 고정했다(C172). 고정 점검은 구역 검사를 네 기능 페이지 모두에 하고, 구역 이름과 맨 위 이름의 중복 경고를 없앴다(Node 시험 조건 추가). AGENTS·README·Figma 00 관리 규칙에 구조와 읽는 순서(README → 머리말 → 구역 하나 → 화면)를 적었다. [기록](evals/figma-page-structure-20261110.md#figma-page-structure-rules-20261111).
 - 문서 점검기가 문서 크기를 Windows 줄바꿈(CRLF)으로 셌을 때로 본다. 4차 UI 기록이 Windows에서만 1 MiB 한도를 넘는 일이 세 번째로 생겨(#114·#115에 이어) Linux에서도 같은 결과가 나오게 했다(시험 1개 추가). Figma 구조 개선 기록은 [별도 파일](evals/figma-page-structure-20261110.md)로 옮겼다. [재발 기록](evals/no-run-mode-20261102.md#doc-size-crlf-20261111).
 
 ## 2026-11-10 · Figma 백업 페이지 폐지

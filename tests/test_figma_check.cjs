@@ -224,19 +224,22 @@ test('README sends each current feature to the same named header as the file che
   assert.deepEqual(rows, result.activePages.map(({ name, header }) => ({ name, key: KEY, header })));
 });
 
-test('a sectioned page keeps only its header and sections at the top, and the header indexes every section', async () => {
+test('every feature page keeps only its header and sections at the top, and the header indexes every section', async () => {
   const pages = base();
   const tools = pages.find((p) => p.id === '1285:1841');
   tools.children.push({ id: 'loose:1', type: 'FRAME', name: 'T99 · 구역 밖 화면', children: [] },
     { id: 's:2', type: 'SECTION', name: '도구 작성', children: [] });
   pages.find((p) => p.id === '1285:1829').children.push({ id: 'loose:2', type: 'FRAME', name: '업무 절차 · 구역 밖 화면', children: [] });
   pages.find((p) => p.id === '1284:3106').children.push({ id: 'loose:3', type: 'FRAME', name: '운영 · 구역 밖 화면', children: [] });
+  pages.find((p) => p.id === '1284:3046').children.push({ id: 'loose:4', type: 'FRAME', name: 'PREVIOUS · 화면 틀', children: [] });
   let { result } = await check(pages);
   assert.equal(result.ok, false);
   assert.ok(result.errors.includes('구역 밖 요소: 워크 · 도구 / T99 · 구역 밖 화면 (loose:1)'));
   assert.ok(result.errors.includes('머리말 색인에 없는 구역: 워크 · 도구 / 도구 작성'));
   assert.ok(result.errors.includes('구역 밖 요소: 업무 · 운영 / 운영 · 구역 밖 화면 (loose:3)'));
   assert.ok(result.errors.includes('구역 밖 요소: 워크 · 업무 절차 / 업무 절차 · 구역 밖 화면 (loose:2)'));
+  assert.ok(result.errors.includes('구역 밖 요소: 공통 · 화면 틀 / PREVIOUS · 화면 틀 (loose:4)'));
+  assert.ok(!result.warnings.some((w) => w.includes('PREVIOUS · 화면 틀')), 'a loose element is reported once, as an error');
   assert.ok(!result.errors.some((e) => e.includes('도구 목록')), 'indexed sections pass');
   const moved = base();
   const page = moved.find((p) => p.id === '1285:1841');
@@ -255,6 +258,7 @@ test('numbered or status section names, stale frame names in sections and oversi
   const { result } = await check(pages);
   assert.equal(result.ok, true, 'warnings only');
   assert.ok(result.warnings.includes('구역 이름에 번호·판·상태: 워크 · 도구 / 도구 목록 2판'));
+  assert.ok(!result.warnings.includes('이전 판으로 보이는 이름: 워크 · 도구 / 도구 목록 2판'), 'one warning per section name');
   assert.ok(result.warnings.includes('이전 판으로 보이는 이름: 워크 · 도구 / 도구 목록 2판 / PREVIOUS · T01 도구 목록'));
   assert.ok(result.warnings.some((w) => w.startsWith('구역 크기: 워크 · 도구 / 도구 목록 2판 요소 5003 · ')));
 });

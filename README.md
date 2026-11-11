@@ -14,7 +14,7 @@ EES 팀의 문서 조회와 업무 처리를 대화·워크플로우 화면으�
 
 <a id="figma-active-pages"></a>
 
-[Figma 기능 지도](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1288-2)에서 현재 설계를 찾습니다. 네 기능 페이지의 링크는 해당 페이지 헤더를 가리킵니다.
+[Figma 기능 지도](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1288-2)에서 현재 설계를 찾습니다. 네 기능 페이지의 링크는 해당 페이지 헤더를 가리킵니다. 페이지 맨 위에는 머리말과 세부 기능별 구역만 있으므로, 머리말의 ‘구역 색인’에서 필요한 구역을 골라 그 안의 화면만 읽습니다.
 
 | 활성 기능 페이지 | 확인할 화면 |
 |---|---|

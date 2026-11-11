@@ -14,13 +14,12 @@ const FILE_KEY = 'XK2wTos6sEuxSHhIj7cqg6';
 const LOG_ID = '898:31'; // 00 변경 기록
 const MAP_ID = '1288:2'; // 00 기능 지도
 // Keep the original outer headers: links to current designs survive a screen revision.
-// sectioned: 맨 위에 머리말과 구역(Section)만 두는 페이지. 2026-11-11 '워크 · 도구' 시범부터 옮긴 페이지에만
-// 검사하고, 네 페이지를 다 옮기면 모든 기능 페이지에 적용한다 (TASK 계획 6단계).
+// 기능 페이지 맨 위에는 머리말과 구역(Section)만 둔다. 2026-11-11 네 페이지를 옮긴 뒤(C167~C170) 모두에 필수로 검사한다.
 const ACTIVE_PAGES = [
-  { id: '1284:3046', name: '공통 · 화면 틀', header: '1284:3047', row: '1288:11', former: ['1284:3058', '1284:3070', '1285:1853'], sectioned: true },
-  { id: '1284:3106', name: '업무 · 운영', header: '1284:3107', row: '1288:42', former: ['1689:1061', '1689:1062', '1689:1063', '1284:3118'], sectioned: true },
-  { id: '1285:1829', name: '워크 · 업무 절차', header: '1285:1830', row: '1288:63', former: ['1283:3107', '1285:1865'], sectioned: true },
-  { id: '1285:1841', name: '워크 · 도구', header: '1285:1842', row: '1288:68', former: [], sectioned: true }
+  { id: '1284:3046', name: '공통 · 화면 틀', header: '1284:3047', row: '1288:11', former: ['1284:3058', '1284:3070', '1285:1853'] },
+  { id: '1284:3106', name: '업무 · 운영', header: '1284:3107', row: '1288:42', former: ['1689:1061', '1689:1062', '1689:1063', '1284:3118'] },
+  { id: '1285:1829', name: '워크 · 업무 절차', header: '1285:1830', row: '1288:63', former: ['1283:3107', '1285:1865'] },
+  { id: '1285:1841', name: '워크 · 도구', header: '1285:1842', row: '1288:68', former: [] }
 ];
 const byPage = new Map(ACTIVE_PAGES.map((item) => [item.id, item]));
 const byHeader = new Map(ACTIVE_PAGES.map((item) => [item.header, item]));
@@ -95,13 +94,10 @@ for (const page of pages) {
     warnings.push('정리 신호: ' + page.name + ' 요소 ' + nodes + ' · 글자 ' + chars + ' (기준 ' + LIMITS.featureNodes + ' · ' + LIMITS.featureChars + ')');
   if (kind === 'admin' && chars > LIMITS.adminChars) errors.push('00 글자 ' + chars + ' > ' + LIMITS.adminChars + ' (오래된 기록을 91로)');
 }
-for (const page of features) for (const child of page.children)
-  if (!/^Header · /.test(child.name) && STALE_NAME.test(child.name))
-    warnings.push('이전 판으로 보이는 이름: ' + page.name + ' / ' + child.name.slice(0, 40));
-
-// 1b) 구역: 옮긴 페이지는 맨 위에 머리말과 구역만 두고, 머리말의 색인에서 모든 구역으로 링크한다
+// 1b) 구역: 기능 페이지는 맨 위에 머리말과 구역만 두고, 머리말의 색인에서 모든 구역으로 링크한다.
+// 맨 위의 다른 요소는 오류이고, 구역 이름 경고가 맨 위 이름의 판·상태 표기까지 맡는다.
 const sections = [];
-for (const item of ACTIVE_PAGES.filter((entry) => entry.sectioned)) {
+for (const item of ACTIVE_PAGES) {
   const page = features.find((p) => p.id === item.id);
   if (!page) continue; // 페이지가 없으면 3)의 활성 페이지 검사가 보고한다
   const header = page.children.find((node) => node.id === item.header);
