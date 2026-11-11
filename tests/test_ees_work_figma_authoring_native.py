@@ -569,6 +569,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('#ees-work-site-trigger')
         self.click('[data-action=choose_factory][data-factory-id=c66-factory]')
         self.wait("document.querySelector('#ees-work-site-trigger')?.innerText.includes('C66 합성 공장') && document.querySelector('[data-author-action=factory_settings]')")
+        self.authoring_viewport(1920, 1080, overlay=False)
+        self.wait("document.querySelector('.ew-factory-values')?.innerText.includes('이미 저장된 공장 값')")
+        self.screenshot('procedure-factory-differences-1920')
         for width in (1366, 480):
             self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
             self.wait('innerWidth===' + str(width))
@@ -604,6 +607,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait("window.__eesNativeWorkV1.captureReference().workflow_id === " + json.dumps(key) +
                   " && window.__eesNativeWorkV1.captureReference().factory_id === ''")
         self.assertEqual(self.text('.ew-author-definition-head h2'), 'C66 공장 보기 보존')
+        self.assertNotIn('이미 저장된 공장 값', self.text('#ees-work-designer'))
         self.assertEqual(self.state(workflow_id=key)['workflow'], saved)
         self.click('[data-author-action=factory_settings]')
         self.wait("document.querySelector('#ees-work-dialog[open] [name=\"value:site-note\"]')")
