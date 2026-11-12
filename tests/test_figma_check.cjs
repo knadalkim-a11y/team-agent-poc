@@ -262,3 +262,20 @@ test('numbered or status section names, stale frame names in sections and oversi
   assert.ok(result.warnings.includes('이전 판으로 보이는 이름: 워크 · 도구 / 도구 목록 2판 / PREVIOUS · T01 도구 목록'));
   assert.ok(result.warnings.some((w) => w.startsWith('구역 크기: 워크 · 도구 / 도구 목록 2판 요소 5003 · ')));
 });
+
+test('a separate review page keeps the 70 prefix so it stays a workroom page, an unprefixed one is an unregistered feature page', async () => {
+  // 2026-11-12 사용자 결정: 따로 다듬는 검토 주제는 ‘70 · 작업실 · 주제’ 별도 페이지에 둘 수 있다.
+  const pages = base();
+  pages.splice(pages.findIndex((page) => page.id === '897:761') + 1, 0, { id: 'w2:1', name: '70 · 작업실 · API 도구 검토', children: [
+    { id: 'w2:s', type: 'SECTION', name: 'API 도구 검토', children: [
+      { id: 'w2:f', type: 'FRAME', name: 'AP1 · 도구 목록', children: [text('w2:t', '1판 검토안 · 시안')] }] }] });
+  const { result } = await check(pages);
+  assert.deepEqual(result.errors, []);
+  assert.deepEqual(result.warnings, []);
+  assert.ok(result.sizes.some(([name, nodes]) => name === '70 · 작업실 · API 도구 검토'.slice(0, 24) && nodes === 3));
+  const unprefixed = base();
+  unprefixed.push({ id: 'w3:1', name: 'API 도구 검토', children: [] });
+  const { result: bad } = await check(unprefixed);
+  assert.equal(bad.ok, false);
+  assert.ok(bad.errors.includes('등록되지 않은 활성 페이지: w3:1 “API 도구 검토”'));
+});

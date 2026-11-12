@@ -23,7 +23,7 @@ EES 팀의 문서 조회와 업무 처리를 대화·워크플로우 화면으�
 | [워크 · 업무 절차](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1285-1830) | 절차 목록, 단계·작업 작성, 게시와 변경 기록 |
 | [워크 · 도구](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1285-1842) | 도구 정의, 연결, 시험과 사용 |
 
-[00 설계 관리](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=897-760)에서 관리 규칙을, [70 작업실](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=897-761)에서 검토 중인 시안을 찾습니다. [91 보관](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1722-1395)에는 [이전 92 작업실 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=2207-28518)가 있습니다.
+[00 설계 관리](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=897-760)에서 관리 규칙을, [70 작업실](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=897-761)에서 검토 중인 시안을 찾습니다. 따로 다듬는 주제는 이름이 ‘70 · 작업실 · ’으로 시작하는 별도 페이지에 있습니다(지금은 [API 도구 검토](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=2377-1475)). [91 보관](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1722-1395)에는 [이전 92 작업실 보드](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=2207-28518)가 있습니다.
 
 구현 기준은 사용자가 지정한 [업무 중심 화면 1판](docs/mockups/ees-work/TASK.md#work-centered-20261106)입니다. 이전 설계는 [운영31·작성12 비교 기록](docs/mockups/ees-work/TASK.md#operations31-authoring12-parity-20261030), [업무 공통 기준](docs/mockups/ees-work/TASK.md#workflow-stage-common-standard), [워크스페이스 메뉴 2판](docs/mockups/ees-work/TASK.md#workspace-assets-prompts-20261106)에서 당시 판의 화면과 함께 확인할 수 있습니다.
 

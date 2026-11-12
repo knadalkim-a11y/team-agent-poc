@@ -3,7 +3,7 @@
 ## 2026-11-12 · 워크 · 도구를 API 도구로 · 명세·목업 16 1판
 
 - **요청·기준:** 사용자가 새 도구의 기본을 화면에서 코드를 쓰는 방식 대신 정해진 API를 부르는 ‘API 도구’로 바꾸기로 정했다. 파라미터 조정과 결과 고르기는 정의로 한다. 이어서 권장안대로 명세와 목업을 요청했다. main `d4c2f3b`에서 시작했고 관련 열린 PR은 없다. 구현할 판은 지정되지 않았다. [계약](mockups/ees-work/TASK.md#tools-api-20261112).
-- **현재:** [명세 · API 도구 설계](specs/shared-tools.md#tools-api-20261112)(ST-API-1~12, 결정 필요 3건, 모두 ‘설계’), [HTML 목업 16 1판](mockups/ees-work/design-mock-16-api-tools.html)(AP1~AP8, 고정 커밋 `b60df43`), Figma 작업실 [API 도구 검토](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=2370-1247) 구역(검토 안내·AP1~AP8, C174)이 있다. 제품 코드와 공식 기능 페이지는 바꾸지 않았다.
+- **현재:** [명세 · API 도구 설계](specs/shared-tools.md#tools-api-20261112)(ST-API-1~12, 결정 필요 3건, 모두 ‘설계’), [HTML 목업 16 1판](mockups/ees-work/design-mock-16-api-tools.html)(AP1~AP8, 고정 커밋 `b60df43`), Figma [API 도구 검토](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=2370-1247) 구역(검토 안내·AP1~AP8, C174)이 있다. 사용자 요청으로 이 구역을 별도 페이지 ‘70 · 작업실 · API 도구 검토’(`2377:1475`)로 옮겼다(노드 ID 유지, C175). 제품 코드와 공식 기능 페이지는 바꾸지 않았다.
 - **검증:** 목업은 Chromium 3폭에서 119/119를 통과했고 페이지 오류는 0이다. Figma 고정 점검은 오류 0·경고 0이다. AP1은 공식 T01과 나란히 대조했고, AP2~AP8은 눈으로만 대조했다(픽셀 대조 미실행). 사내 PC에서 열어 보기와 사용자 확인은 미실행이다. [기록](../evals/tool-authoring-20261105.md#tools-api-20261112)·[캡처·노드](mockups/ees-work/tools-api-20261112/metadata.json).
 - **미확인:** EMS·APC·FDC에 HTTP API가 있는지, https인지, 인증 방식은 무엇인지(ST-API-OPEN-2). 제품의 도구 작성 선택 상자에 화살표가 없는지(목업에서 같은 CSS로 관찰, 제품 화면 미확인).
 - **다음 하나:** 사용자가 HTML 목업·Figma 1판을 보고 의견이나 구현할 판을 정한다. 결정 필요 ST-API-OPEN-1·3도 함께 정한다.
