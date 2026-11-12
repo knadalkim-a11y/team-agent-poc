@@ -8,7 +8,7 @@
 
 - **사용자 결정:** 2026-11-12 08:07~08:15(한국 시간). 화면에서 스크립트 코드를 직접 입력하는 구조는 프로젝트 방향과 맞지 않는다. 특정 API를 실행하는 것을 주된 도구로 하고, API의 입력 파라미터 조정과 반환값 선택은 도구 정의에서 한다. 권장안대로 새 코드 작성은 막고 기존 코드 도구는 유지하며, 읽기부터 시작한다.
 - **근거:** [README 목표](../../README.md#프로젝트-목표) 5의 ‘승인된 업무 기능’ 연결은 ‘이 API를 이 입력으로 호출한다’로 검토하기 쉽다. 공통 자산의 원본은 Git이고([AGENTS](../../AGENTS.md#5-비밀정보와-배포)), 화면에서 쓴 코드는 PR 검토를 거치지 않는다. 화면 작성 코드는 서버 권한으로 실행되며 정적 검사와 시험 실행은 보안 격리가 아니다(ST-P2-2).
-- **상태:** 설계. 화면은 [디자인 목업 16](../mockups/ees-work/design-mock-16-api-tools.html)(AP1~AP8)과 Figma 70 작업실의 ‘API 도구 검토’ 구역이다. 제품 코드·API·저장 형식은 바꾸지 않았다.
+- **상태:** 설계. 화면은 [디자인 목업 16](../mockups/ees-work/design-mock-16-api-tools.html)(AP1~AP8)과 Figma 70 작업실의 [API 도구 검토](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=2370-1247) 구역이다. 제품 코드·API·저장 형식은 바꾸지 않았다. [작업 계약·검증](../mockups/ees-work/TASK.md#tools-api-20261112).
 - **그대로 쓰는 것:** 분류(ST-SCOPE), 권한(ST-AUTH), 시험·사용 설정·불변 버전(ST-P2), 업무절차 연결·회차 고정·실행·사람 판정(ST-P3), 기본 제공 도구와 이전 방식 도구의 계약. API 도구도 기존 `shared_tool_id`·`work_shared_tool_pins`·attempt를 쓴다.
 
 | 용어 | 뜻 |

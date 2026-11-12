@@ -1,0 +1,85 @@
+{
+  "revision": 1,
+  "status": "review_mock_ready",
+  "date": "2026-11-12",
+  "request": [
+    "정리는 이정도면 됐어. '워크.도구' 쪽의 개념을 좀 수정하려고하는데 말이지. 스크립트를 직접 코드를 입력하는 구조잖아? 이게 가능하면 좋긴한데 뭔가 프로젝트의 방향이랑도 잘 안맞는거같아서, 특정 api를 실행하는게 주된 도구가 되는게 맞아보이거든? 어떻게생각해",
+    "응 api의 입력 파라미터 조정이나 반환값을 다르게 받을수잇잖아?",
+    "응 권장대로 명세랑 목업 진행해줘"
+  ],
+  "decision": {
+    "time": "2026-11-12 08:07~08:15 KST",
+    "summary": "New tools call one defined API (connection, request, inputs, parameters, result fields). Creating tools by writing or importing code is closed; existing code tools keep working. Reading first.",
+    "spec": "docs/specs/shared-tools.md#tools-api-20261112",
+    "open_decisions": ["ST-API-OPEN-1 code editing of existing code tools", "ST-API-OPEN-2 HTTP API, https and auth of EMS/APC/FDC (unconfirmed)", "ST-API-OPEN-3 who registers connections"]
+  },
+  "base_commit": "d4c2f3b7e769991a11290945e12a65a26d1f44b6",
+  "mock_commit": "b60df43e21511d29ca0fcc184c53bff7c88e98ec",
+  "implementation_revision": null,
+  "mock": {
+    "html": "docs/mockups/ees-work/design-mock-16-api-tools.html",
+    "source": "docs/mockups/ees-work/design-mock-src/16-api-tools.html",
+    "builder": "scripts/build_design_mock.py --wheel open_webui-0.11.3-py3-none-any.whl",
+    "centre": "Current product tool editor markup (ees-work-designer.js output) on the product CSS; Open WebUI 0.11.3 base layer and the work-surface toolbar are copied into data-mock-host; new parts are in data-new-screen=\"api-tools\".",
+    "context": "Left navigation and chat are reproduced from mock 14 (data-mock-context) and are not compared.",
+    "screens": {
+      "AP1": "도구 목록",
+      "AP2": "API 도구 · 기본 정보",
+      "AP3": "API 도구 · 요청",
+      "AP4": "API 도구 · 입력",
+      "AP5": "API 도구 · 결과 받기",
+      "AP6": "API 도구 · 시험 (state preview: 정상 응답 / 인증 실패 / 응답 형식 오류)",
+      "AP7": "연결 관리",
+      "AP8": "기존 코드 도구"
+    },
+    "validation": {
+      "script": "evals/artifacts/tools-api-20261112/validate_mock.cjs",
+      "environment": "Linux container, Node 22.23.4, Playwright 1.63.0, Chromium 153.0.8010.12",
+      "viewports": ["1920x1080", "1366x768", "480x900"],
+      "result": "119/119 passed, page errors 0"
+    }
+  },
+  "figma": {
+    "file_key": "XK2wTos6sEuxSHhIj7cqg6",
+    "page": "897:761",
+    "section": "2370:1247",
+    "section_name": "API 도구 검토",
+    "guide": "2370:1248",
+    "screens": {
+      "AP1": {"node": "2370:1279", "source": "T01 centre 가운데 업무 · 도구 목록 (2017:76)", "size": [1104, 1080]},
+      "AP2": {"node": "2370:1365", "source": "T02 panel (2016:2)", "size": [1104, 1080]},
+      "AP3": {"node": "2371:1241", "source": "AP2", "size": [1104, 1080]},
+      "AP4": {"node": "2372:1346", "source": "T03 panel (2016:84)", "size": [1104, 1411]},
+      "AP5": {"node": "2372:1487", "source": "T04 panel (2016:186)", "size": [1104, 1080]},
+      "AP6": {"node": "2372:1593", "source": "T05 panel (2016:277)", "size": [1104, 1292]},
+      "AP7": {"node": "2374:1442", "source": "AP1", "size": [1104, 1198]},
+      "AP8": {"node": "2371:1428", "source": "AP2", "size": [1104, 1080]}
+    },
+    "read_back": {"nodes": 850, "frames": 299, "texts": 327, "instances": 141, "vectors": 83, "image_fills": 0, "fonts": ["Noto Sans KR Regular", "Noto Sans KR Medium", "Noto Sans KR Bold"], "variable_bound_nodes": 563},
+    "components": ["Button v4", "도구 / 입력 항목", "Tag", "Icon/arrow-left", "Icon/chevron-right", "Icon/more", "Icon/panel-right"],
+    "workroom_guide_change": "899:2 · 지금 구역은 넓은 업무 화면 검토(4판)와 API 도구 검토(1판)입니다.",
+    "change_log": {"line": "C174", "node": "2375:18696", "archived": "C154 → 91 지난 변경 기록 · 목록 (1932:5)", "pointer": "1932:8 C154까지"},
+    "checks": {
+      "before": {"ok": true, "errors": 0, "warnings": 0, "next": "C174", "workshop_nodes": 2143},
+      "after_build": {"ok": true, "errors": 0, "warnings": 0, "next": "C174", "workshop_nodes": 2994},
+      "after_log": {"ok": true, "errors": 0, "warnings": 0, "next": "C175", "log_lines": 20}
+    },
+    "captures": {
+      "figma-review-guide.png": "guide, scale 0.55",
+      "figma-ap1-tool-list.png": "AP1, scale 0.6",
+      "figma-ap2-basic.png": "AP2, scale 0.6",
+      "figma-ap3-request.png": "AP3, scale 0.6",
+      "figma-ap4-inputs.png": "AP4, scale 0.5",
+      "figma-ap5-results.png": "AP5, scale 0.5",
+      "figma-ap6-trial.png": "AP6, scale 0.5",
+      "figma-ap7-connections.png": "AP7, scale 0.5",
+      "figma-ap8-code-tool.png": "AP8, scale 0.5",
+      "figma-section-overview.png": "whole section, scale 0.12"
+    }
+  },
+  "known_differences": [
+    "Select boxes: the HTML mock uses the product CSS and shows no arrow (Open WebUI select appearance none plus .ew-author select background). Figma keeps the design arrow (도구 / 입력 항목 Select=true). The product screen itself was not captured.",
+    "AP5 omits the existing 결과 미리보기 (example data) in both HTML and Figma because it does not change.",
+    "Figma screens were checked against the HTML mock by eye and structure; no pixel overlay was run this time."
+  ]
+}
