@@ -54,6 +54,9 @@ on:
       - 'tests/test_ees_work_workspace.py'
       - 'tests/test_ees_work_operations.py'
       - 'tests/test_ees_tool_*.py'
+      - 'tests/test_ees_api_*.py'
+      - 'tests/ees_api_visual_review.py'
+      - 'docs/mockups/ees-work/api-tools-20261113/figma-*.png'
       - 'tests/fixtures/tools_phase1_contract.json'
       - 'tests/fixtures/tools_phase2_contract.json'
       - 'tests/fixtures/tools_phase3_contract.json'
@@ -109,7 +112,7 @@ permissions:
   contents: read
 
 env:
-  EES_FIXED_TEST_DEPENDENCIES: uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0
+  EES_FIXED_TEST_DEPENDENCIES: uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0 PyYAML==6.0.3
 
 jobs:
   source-frontend:
@@ -614,6 +617,7 @@ jobs:
           cp -R evals/artifacts/figma-product-parity-20261111 dist/ees-results/figma-review
           if [ "${{ steps.native.outcome }}" = "success" ]; then
             python evals/artifacts/figma-product-parity-20261111/verify_evidence.py dist/ees-work-screenshots dist/ees-results/figma-review
+            python tests/ees_api_visual_review.py dist/ees-work-screenshots dist/ees-results/api-v11
           fi
       - name: Keep browser results and actual evidence files
         if: always() && steps.native.outcome != 'skipped'

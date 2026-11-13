@@ -57,7 +57,14 @@ V4_ICON_FILES += tuple("v4/" + name for name in (
     "1a06f.svg", "2fe77.svg", "2eb05.svg", "b355c.svg", "66c71.svg", "45242.svg",
 ))
 UI_FILES.update({name: name for name in V4_ICON_FILES})
-WORK_LAUNCHER_SOURCES = ("ees-work-view.js", "ees-work-designer.js", "ees-work-launcher.js")
+WORK_LAUNCHER_UNITS = (
+    ("ees-work-view.js", "createWorkView"),
+    ("ees-work-api-catalog.js", "createWorkApiCatalog"),
+    ("ees-work-api-picker.js", "createWorkApiPicker"),
+    ("ees-work-designer.js", "createWorkDesigner"),
+    ("ees-work-launcher.js", None),
+)
+WORK_LAUNCHER_SOURCES = tuple(name for name, _ in WORK_LAUNCHER_UNITS)
 WORK_DIR = ASSET_DIR.parents[2] / "agent-pack" / "skills" / "ees-work-demo"
 WORK_ASSETS = {"scripts/ees_work_demo.py": "open_webui/ees_work_demo.py",
                **{"ui/" + name: "open_webui/ees_work_demo_ui/" + name
@@ -139,6 +146,13 @@ for _draft_module in ("ees_workflow_tool_drafts.py", "ees_workflow_tool_draft_ch
                       "ees_workflow_tool_worker.py", "ees_workflow_tool_runtime.py"):
     WORK_ASSETS["scripts/" + _draft_module] = "open_webui/" + _draft_module
     WORK_FILES += (WORK_ASSETS["scripts/" + _draft_module],)
+API_TOOL_MODULES = (
+    "ees_workflow_api_catalog.py", "ees_workflow_api_openapi.py",
+    "ees_workflow_api_binding.py", "ees_workflow_api_http.py",
+)
+for module in API_TOOL_MODULES:
+    WORK_ASSETS["scripts/" + module] = "open_webui/" + module
+WORK_FILES += tuple("open_webui/" + module for module in API_TOOL_MODULES)
 # Copy these already bundled upstream fonts byte-for-byte into the new cache
 # namespace; no font download, transformation, or runtime dependency is needed.
 FONT_SOURCES = {
@@ -515,16 +529,15 @@ def assemble_work_launcher(ui_dir=UI_DIR):
     or duplicate declarations instead of shipping a partly assembled launcher.
     Bytes are preserved, including line endings; no loader or JS bundler runs.
     """
-    expected = (("ees-work-view.js", "createWorkView"),
-                ("ees-work-designer.js", "createWorkDesigner"),
-                ("ees-work-launcher.js", None))
+    expected = WORK_LAUNCHER_UNITS
     if WORK_LAUNCHER_SOURCES != tuple(name for name, _ in expected):
         raise ValueError("EES Workflow launcher source order differs.")
     root = Path(ui_dir)
     if any(path.is_symlink() for path in (root, *root.parents)):
         raise ValueError("Linked EES Workflow launcher source directory.")
     parts = []
-    declaration = re.compile(rb"\b(?:function\s+|(?:const|let|var)\s+)(createWorkView|createWorkDesigner)\b")
+    factory_names = b"|".join(name.encode("ascii") for _, name in expected if name)
+    declaration = re.compile(rb"\b(?:function\s+|(?:const|let|var)\s+)(" + factory_names + rb")\b")
     for filename, factory in expected:
         path = root / filename
         if path.is_symlink() or not path.is_file():

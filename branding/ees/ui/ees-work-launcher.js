@@ -47,21 +47,69 @@
   const initialSelection=()=>({mode:'work',tab:'overview',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]});
   let selection=initialSelection(),lastLocalSelection=initialSelection();
   const receipts=new Map(),optionCache=new Map(),chatCreations=new Map(),chatAliases=new Map();let workEpoch=0;let referenceChat='',referenceTimer=null,referenceRead=0,messageReferences=new Map();let uiWrites=Promise.resolve(),optionTimer=null,pendingInputProposal=null,inputProposalApplied=null,reviewTimer=null,reviewSaving=null;
+  let apiContextGeneration=0, apiContextSignature="", purposeRequest=null;
   const context=()=>JSON.stringify([epoch,token()===identity,location.pathname,location.search,selection.system_id,selection.factory_id,selection.workflow_id,selection.run_id,selection.job_id]);
   const view=createWorkView({callbacks:{panelWidth:width=>{if(!restored)initialSelectionPatch={...initialSelectionPatch,panel_width:width};selection.panel_width=width;remember(width);}}});
-  const designer=createWorkDesigner({callbacks:{command,read,openNative,models:models,askHelp,helpState:()=>source()?.helpState?.(),startContextChanged:value=>{procedureStart=value;if(state&&available()&&chatPrepared())view.sync(snapshot());},openTools:async()=>select({mode:'author',tab:'tools',workflow_id:'',run_id:'',job_id:''}),openWorkflow:async(id,systemId)=>select({...(systemId&&systemId!==selection.system_id?{system_id:systemId,factory_id:''}:{}),workflow_id:id,run_id:'',job_id:'',mode:'author',tab:'overview'}),changed:refresh,navigate:mode=>select({mode}),operationsRead,operationsCommand,options:async body=>{const at=context();const result=await api('workspace/options',body);if(at!==context())throw new Error('작업 위치가 바뀌어 선택 목록을 적용하지 않았습니다.');return result;},resources:async()=>{const at=context();const result=await api('resources');return at===context()?result:null;}}});
+  const designer=createWorkDesigner({callbacks:{command,read,openNative,models:models,askHelp,apiContextChanged:syncApiContext,helpState:()=>source()?.helpState?.(),startContextChanged:value=>{procedureStart=value;if(state&&available()&&chatPrepared())view.sync(snapshot());},openTools:async()=>select({mode:'author',tab:'tools',workflow_id:'',run_id:'',job_id:''}),openWorkflow:async(id,systemId)=>select({...(systemId&&systemId!==selection.system_id?{system_id:systemId,factory_id:''}:{}),workflow_id:id,run_id:'',job_id:'',mode:'author',tab:'overview'}),changed:refresh,navigate:mode=>select({mode}),operationsRead,operationsCommand,options:async body=>{const at=context();const result=await api('workspace/options',body);if(at!==context())throw new Error('작업 위치가 바뀌어 선택 목록을 적용하지 않았습니다.');return result;},resources:async()=>{const at=context();const result=await api('resources');return at===context()?result:null;}}});
+  function currentApiContext(){
+    if(selection.mode!=='author'||selection.tab!=='tools'||nativePage()||nativeReturnPreview()||targetLoading||evidenceUnavailable)return null;
+    return designer.readApiContext?.() || null;
+  }
+  function syncApiContext(){
+    const value=currentApiContext(), signature=JSON.stringify([actor(),value]);
+    if(apiContextSignature!==signature){apiContextSignature=signature;apiContextGeneration++;purposeRequest=null;}
+    if(state&&available()&&chatPrepared())view.sync(snapshot());
+  }
+  function apiAssistantState(){
+    const value=currentApiContext();
+    if(!value||!available()||!chatPrepared())return null;
+    const edit=['API 명세 등록','API 명세 편집'].includes(value.screen);
+    const questions=edit?(value.screen==='API 명세 등록'?['등록 항목 확인','작성 중인 요청 요약','용도 설명 제안']:['현재 요청 · 응답 요약','용도 설명 제안']):[];
+    return {questions,requestId:purposeRequest?.id || '',screen:value.screen};
+  }
+  function helpContextId(){return currentApiContext()?context()+'#api-'+apiContextGeneration:context();}
+  function draftDescription(value){
+    // Describe the open form only. Omit hosts, query values, headers, raw examples and credentials.
+    return {name:value.draftName,service:value.service,method:value.method,path:value.path,
+      purpose:value.purpose,inputs:value.inputs,fields:value.fields};
+  }
+  async function askApiQuestion(label){
+    const ui=apiAssistantState(),value=currentApiContext();
+    if(!ui?.questions.includes(label)||!value)return;
+    const purpose=label==='용도 설명 제안';
+    const target=JSON.stringify(value);
+    const request=purpose?{id:workUI.newId(),target,actor:actor(),generation:apiContextGeneration}:null;
+    if(request){purposeRequest=request;view.sync(snapshot());}
+    const question=(purpose?'이 API의 업무 용도를 한 문장으로 제안해 주세요. 답에는 반영할 문장만 써 주세요.':label+'을 해 주세요.')+
+      '\n현재 양식의 참고 데이터: '+JSON.stringify(draftDescription(value));
+    let sent=false;
+    try{
+      sent=await askHelp(question,{...value,term_id:'api_specification',api_draft_request:request?.id});
+    }finally{
+      if(request&&purposeRequest===request&&(!sent||!available()||JSON.stringify(currentApiContext())!==target)){
+        purposeRequest=null;view.sync(snapshot());
+      }
+    }
+  }
+  function applyApiPurpose(requestId,text){
+    const value=currentApiContext(),current=purposeRequest;
+    if(!value||!current||current.id!==requestId||actor()!==current.actor||current.generation!==apiContextGeneration||
+       current.target!==JSON.stringify(value)||typeof text!=='string'||!text.trim()||text.trim().length>1000)return false;
+    if(!designer.applyApiSuggestion?.({purpose:text.trim()},value))return false;
+    purposeRequest=null;view.sync(snapshot());return true;
+  }
   const capabilities=()=>nativeCapabilities ?? state?.capabilities;
   const nativeReturnPreview=()=>pendingNativeAction?.patch&&!pendingNativeAction.same&&pendingNativeAction.auth===token()&&pendingNativeAction.actor===actor()&&(nativePage()||pendingNativeAction.path===location.pathname+location.search)?navigationPatch(pendingNativeAction.dataset):null;
   function currentReferenceLabel(){
     const ref=reference();
-    if(ref.kind==='help')return selection.tab==='tools'?'도구':'업무 절차';
+    if(ref.kind==='help')return [ref.screen,ref.title].filter(Boolean).join(' · ') || (selection.tab==='tools'?'도구':'업무 절차');
     if(ref.kind!=='workspace')return '';
     const definition=workOperationDefinition(state || {});
     const workflow=definition?.name || state?.run?.workflow_name || state?.workflow?.name || '';
     const job=definition?.nodes?.[ref.job_id]?.name;
     return [workflow,job,ref.reference_kind==='historical'?'실행 기록':''].filter(Boolean).join(' / ');
   }
-  const snapshot=()=>{const destination=nativeReturnPreview();return {state:state?{...state,input_proposal:pendingInputProposal?{values:pendingInputProposal.values,warnings:pendingInputProposal.warnings}:null,input_proposal_applied:inputProposalApplied}:null,native_capabilities:nativeCapabilities,native_scope:nativeScope,target_loading:targetLoading||Boolean(destination),scope_loading:scopeLoading,evidence_unavailable:evidenceUnavailable,selection:{...clone(selection),stage_notes:Object.fromEntries(stageNotes),...(destination?{mode:destination.mode,tab:destination.tab}:{}),chat_id:chatId()},chat_reference_label:currentReferenceLabel(),native_return_pending:Boolean(destination),native_shell:nativePage()&&!destination,native_id:nativePage()&&!destination?(workNativeTargets.find(item=>location.pathname===item.path||location.pathname.startsWith(item.path+'/'))?.id || (adminNativePage()?'admin':'native')):'',busy,error:error || commandError,procedure_start:destination?null:procedureStart};};
+  const snapshot=()=>{const destination=nativeReturnPreview();return {state:state?{...state,input_proposal:pendingInputProposal?{values:pendingInputProposal.values,warnings:pendingInputProposal.warnings}:null,input_proposal_applied:inputProposalApplied}:null,native_capabilities:nativeCapabilities,native_scope:nativeScope,target_loading:targetLoading||Boolean(destination),scope_loading:scopeLoading,evidence_unavailable:evidenceUnavailable,selection:{...clone(selection),stage_notes:Object.fromEntries(stageNotes),...(destination?{mode:destination.mode,tab:destination.tab}:{}),chat_id:chatId()},chat_reference_label:currentReferenceLabel(),api_assistant:apiAssistantState(),native_return_pending:Boolean(destination),native_shell:nativePage()&&!destination,native_id:nativePage()&&!destination?(workNativeTargets.find(item=>location.pathname===item.path||location.pathname.startsWith(item.path+'/'))?.id || (adminNativePage()?'admin':'native')):'',busy,error:error || commandError,procedure_start:destination?null:procedureStart};};
   // The last successful workspace remains visible during route validation.
   // References and queued actions still wait for the current route and Chat.
   const chatPrepared=()=>screen().chatReady && readyRoute===route&&(!route||route===location.pathname+location.search+'#chat')&&(!nativeTicket||nativeTicket.phase==='leaving');
@@ -205,23 +253,23 @@
   let helpWriting=null;
   function syncHelpState(){workUI.syncHelpState?.();designer.syncHelpState?.();}
   async function askHelp(question,visible={}){
-    const bridge=source(),at=context(),auth=token();
+    const bridge=source(),at=helpContextId(),auth=token();
     if(helpWriting||bridge?.helpState?.()?.busy)throw new Error('앞선 답변을 마친 뒤 질문을 보내 주세요.');
     if(typeof question!=='string'||!question.trim()||question.length>8000)throw new Error('대화에 보낼 질문을 확인해 주세요.');
     if(!available()||!chatPrepared()||nativeReturnPreview()||typeof bridge?.askHelp!=='function')throw new Error('업무 도우미 연결을 준비한 뒤 다시 시도해 주세요. 작성 중인 내용은 그대로입니다.');
     const reference={kind:'help',system_id:selection.system_id || '',context_id:at};
-    for(const [name,value,limit] of [['screen',visible.screen,200],['term_id',visible.term_id,100],['title',visible.title ?? visible.draftName,200]]){
+    for(const [name,value,limit] of [['screen',visible.screen,200],['term_id',visible.term_id,100],['api_draft_request',visible.api_draft_request,40],['title',visible.title ?? visible.draftName,200]]){
       if(value===undefined||value==='')continue;
       if(typeof value!=='string'||value.length>limit)throw new Error('질문의 참고 정보를 확인해 주세요.');
       reference[name]=value;
     }
-    if(auth!==token()||at!==context()||bridge!==source())return false;
+    if(auth!==token()||at!==helpContextId()||bridge!==source())return false;
     const operation={};helpWriting=operation;
     try{
       // Source Chat owns one real send. Never read, replace or restore the live
       // composer; its text, attachments and selected assets stay untouched.
       const result=await bridge.askHelp({question:question.trim(),reference:Object.freeze(reference)});
-      if(auth!==token()||at!==context()||bridge!==source())return false;
+      if(auth!==token()||at!==helpContextId()||bridge!==source())return false;
       if(result?.accepted===false)return false; // Source already owns the one-line notice.
       if(result?.accepted!==true)throw new Error('질문을 보내지 못했습니다. 업무 도우미 연결을 확인해 주세요.');
       return true;
@@ -546,7 +594,8 @@
     if(busy||!inputsSaved())return;const at=context(),run=state?.run,jobId=selection.job_id,saved=run?.jobs?.[jobId],draft=view.readList();
     if(!saved||saved.can_decide===false||draft.attempt_id!==saved.attempt_id||draft.result_revision!==saved.result_revision)throw new Error('현재 목록의 근거와 처리 권한을 다시 확인해 주세요.');
     const selected=draft.items.filter(item=>item.selected),sharedSearch=Boolean(run.definition?.nodes?.[jobId]?.shared_tool_id)&&saved.result?.scope==='single_page',emptyConfirmation=confirm&&!selected.length;
-    if(emptyConfirmation&&!sharedSearch)throw new Error('포함할 항목이 없습니다. 빈 목록의 완료 정책을 먼저 확인해 주세요.');
+    const apiEmpty=Boolean(run.definition?.nodes?.[jobId]?.api_binding)&&saved.result?.completeness==='empty'&&saved.result?.items?.length===0;
+    if(emptyConfirmation&&!sharedSearch&&!apiEmpty)throw new Error('포함할 항목이 없습니다. 빈 목록의 완료 정책을 먼저 확인해 주세요.');
     const source=workListSourceAttempt(run,saved.attempt_id),noResults=emptyConfirmation&&Array.isArray(source?.result?.items)&&source.result.items.length===0;
     let reason=noResults?'0건 확인':emptyConfirmation?'맞는 문서 없음 · 0개 선택':'';
     const pending=noResults?Promise.resolve(true):dialog({title:emptyConfirmation?'맞는 문서가 없는 것으로 확정할까요?':confirm?'이 목록으로 확정할까요?':'선택한 목록을 저장할까요?',note:confirm?'선택한 포함·제외와 사람의 확인을 함께 저장합니다. AI 후보를 자동 확정하지 않습니다.':'새 검토 시도로 선택 상태를 저장합니다. 업무 완료로 확정하지 않습니다.',html:`<p>포함 ${selected.length}건 · 제외 ${draft.items.filter(item=>!item.selected).length}건</p>${emptyConfirmation?'':'<label>확인·변경 이유<input id="ees-list-confirm-reason" required></label>'}`,confirmLabel:confirm?'목록 확정':'선택 목록 저장'});
@@ -756,6 +805,8 @@
     if(action.startsWith('stage_'))return stageAction(action,target);
     if(action==='panel_width'){const width=Number(target.dataset.width);if(Number.isFinite(width)){selection.panel_width=Math.max(400,Math.min(720,Math.round(width)));if(!restored)initialSelectionPatch={...initialSelectionPatch,panel_width:selection.panel_width};remember(selection.panel_width);render();}return;}
     if(action==='category'){const value=target.dataset.category;if(value!=='assets'&&!Object.hasOwn(workUI.categories,value))return;const collapsed=new Set(selection.collapsed || []);if(target.dataset.open==='true')collapsed.delete(value);else collapsed.add(value);selection.collapsed=[...collapsed];remember();render();return;}
+    if(action==='api_question')return askApiQuestion(target.dataset.question);
+    if(action==='api_apply_purpose')return applyApiPurpose(target.dataset.requestId,target.dataset.purpose);
     if(action==='procedure_question'){
       const current=designer.readStartContext?.(),index=Number(target.dataset.questionIndex),fallback=workUI.procedureQuestions[index];
       if(!current||!Number.isInteger(index)||!fallback||selection.mode!=='author')return;
@@ -873,7 +924,7 @@
     if(event.type==='change'&&target.matches?.('[data-list-include]')){view.refreshResults();return;}
     if(event.type==='change'&&(target.matches?.('[data-item-verdict]')||target.matches?.('[data-item-confirm]'))){const verdict=target.matches('[data-item-confirm]')?(target.checked?'completed':'unknown'):target.value;if(verdict)mutate({action:'decide',run_id:selection.run_id,job_id:selection.job_id,item_id:target.dataset.itemId,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,verdict});}
   }
-  function reset(){accountGeneration++;stageNotes.clear();helpWriting=null;nativeCapabilities=null;nativeScope=null;workspaceCache.clear();stateKey='';targetLoading=false;scopeLoading=false;evidenceUnavailable=false;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;inputProposalApplied=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;savedUIState={};source()?.modelCount?.(0);selection=initialSelection();lastLocalSelection=initialSelection();}
+  function reset(){purposeRequest=null;apiContextSignature='';apiContextGeneration++;accountGeneration++;stageNotes.clear();helpWriting=null;nativeCapabilities=null;nativeScope=null;workspaceCache.clear();stateKey='';targetLoading=false;scopeLoading=false;evidenceUnavailable=false;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;inputProposalApplied=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;savedUIState={};source()?.modelCount?.(0);selection=initialSelection();lastLocalSelection=initialSelection();}
   function sync(){
     scheduled=false;bindHosts();syncHelpState();const auth=token();if(auth!==identity){reset();identity=auth;route='';}
     syncNativeReturn();
@@ -903,7 +954,12 @@
   // No observer, document event interception or history monkey patch is needed.
 
   window.__eesNativeWork=true;
-  const reference=()=>!chatPrepared()||nativeReturnPreview()||targetLoading||evidenceUnavailable?{kind:'none'}:available()&&selection.mode==='author'&&(selection.tab==='tools'||designer.readStartContext?.())?{kind:'help',system_id:selection.system_id || '',context_id:context()}:available()&&selection.chat_reference&&selection.chat_reference.run_id===state?.run?.id?{...clone(selection.chat_reference),context_id:context()}:available()&&(state?.workflow||state?.run)&&selection.workflow_id?{kind:'workspace',workflow_id:selection.workflow_id,run_id:selection.run_id,job_id:selection.job_id,system_id:state?.run?.system_id || selection.system_id,factory_id:state?.run?.factory_id ?? selection.factory_id,version:state?.run?.version ?? state?.workflow?.published_version,workflow_revision:state?.workflow?.revision,attempt_id:state?.run?.jobs?.[selection.job_id]?.current_attempt,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,revision:state?.run?.revision ?? state?.workflow?.revision ?? 0,created_at:state?.run?.updated_at ?? state?.workflow?.updated_at,context_id:context()}:{kind:'none'};
+  function toolHelpReference(){
+    const current=currentApiContext(),ref={kind:'help',system_id:selection.system_id || '',context_id:helpContextId()};
+    if(current){ref.screen=current.screen;ref.term_id='api_specification';ref.title=(current.draftName||'').slice(0,200);}
+    return ref;
+  }
+  const reference=()=>!chatPrepared()||nativeReturnPreview()||targetLoading||evidenceUnavailable?{kind:'none'}:available()&&selection.mode==='author'&&(selection.tab==='tools'||designer.readStartContext?.())?toolHelpReference():available()&&selection.chat_reference&&selection.chat_reference.run_id===state?.run?.id?{...clone(selection.chat_reference),context_id:context()}:available()&&(state?.workflow||state?.run)&&selection.workflow_id?{kind:'workspace',workflow_id:selection.workflow_id,run_id:selection.run_id,job_id:selection.job_id,system_id:state?.run?.system_id || selection.system_id,factory_id:state?.run?.factory_id ?? selection.factory_id,version:state?.run?.version ?? state?.workflow?.published_version,workflow_revision:state?.workflow?.revision,attempt_id:state?.run?.jobs?.[selection.job_id]?.current_attempt,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,revision:state?.run?.revision ?? state?.workflow?.revision ?? 0,created_at:state?.run?.updated_at ?? state?.workflow?.updated_at,context_id:context()}:{kind:'none'};
   function clearMessageReferences(){for(const host of renderedReferenceHosts)host.replaceChildren();renderedReferenceHosts.clear();}
   function renderMessageReferences(){
     if(!chatId()||referenceChat!==chatId())return;
@@ -966,6 +1022,6 @@
     if(selection.mode==='author')designer.render({state,selection:{...clone(selection),chat_id:id},host:view.authoringHost()});
     return designer.acceptProposal(payload,{chatId:id});
   }
-  window.__eesNativeWorkV1=Object.freeze({sync:schedule,action:sourceAction,dismissHelp:workUI.dismissHelp,refresh,open:()=>setPanelOpen(true),selection:id=>id===chatId()?{ok:true,...reference()}:{ok:false,code:'selection_unconfirmed'},captureReference:()=>reference(),helpContext:()=>available()&&chatPrepared()&&!nativeReturnPreview()?{context_id:context(),system_id:selection.system_id || ''}:null,chatCreated,beginChatCreation,finishChatCreation,ensureChat:async()=>({ok:true}),refreshActionRecords:()=>{},propose:acceptNativeProposal,display:async(id,options)=>{if(id!==chatId()||!available())return {ok:false};const allowed=['panel_open','workflow_id','run_id','job_id'];if(Object.keys(options || {}).some(key=>!allowed.includes(key)))return {ok:false};const result=await select(options);if(!result||options.workflow_id&&result.workflow?.id!==options.workflow_id||options.run_id&&result.run?.id!==options.run_id||options.job_id&&!result.run?.definition?.nodes?.[options.job_id])return {ok:false};return {ok:true};}});
+  window.__eesNativeWorkV1=Object.freeze({sync:schedule,action:sourceAction,dismissHelp:workUI.dismissHelp,refresh,open:()=>setPanelOpen(true),selection:id=>id===chatId()?{ok:true,...reference()}:{ok:false,code:'selection_unconfirmed'},captureReference:()=>reference(),helpContext:()=>available()&&chatPrepared()&&!nativeReturnPreview()?{context_id:helpContextId(),system_id:selection.system_id || ''}:null,chatCreated,beginChatCreation,finishChatCreation,ensureChat:async()=>({ok:true}),refreshActionRecords:()=>{},propose:acceptNativeProposal,display:async(id,options)=>{if(id!==chatId()||!available())return {ok:false};const allowed=['panel_open','workflow_id','run_id','job_id'];if(Object.keys(options || {}).some(key=>!allowed.includes(key)))return {ok:false};const result=await select(options);if(!result||options.workflow_id&&result.workflow?.id!==options.workflow_id||options.run_id&&result.run?.id!==options.run_id||options.job_id&&!result.run?.definition?.nodes?.[options.job_id])return {ok:false};return {ok:true};}});
   schedule();
 })();

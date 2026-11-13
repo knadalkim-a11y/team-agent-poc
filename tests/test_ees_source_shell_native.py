@@ -977,7 +977,8 @@ class SourceShellNativeTests(IntegratedNativeCase):
         # C45 keeps Native tools reachable through B10-2, with the same frame
         # observation and draft preservation checks as other Native screens.
         for suffix, selector, condition in (
-            ('list', '[data-action=tools]', "document.querySelector('[data-author-action=shared_open],[data-author-action=shared_native]')"),
+            ('list', '[data-action=tools]', "document.querySelector('[data-api-action=legacy]')"),
+            ('managed', '[data-api-action=legacy]', "document.querySelector('[data-author-action=shared_open],[data-author-action=shared_native]')"),
             ('detail', '[data-author-action=shared_open][data-id=managed-search_pages]', "document.querySelector('[data-author-action=shared_native]')"),
         ):
             if suffix == 'detail' and self.browser.evaluate("!!document.querySelector('[data-author-action=shared_native]')"):
@@ -1396,7 +1397,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
                   "document.querySelector('#ees-work-designer')")
         labels.append('work-authoring')
         self.step('work-tools', '#ees-work-entry [data-action=tools]',
-                  "document.querySelector('[data-author-action=tool_create]')")
+                  "document.querySelector('[data-api-screen=list]')")
         labels.append('work-tools')
         self.fill('#chat-input','Native 업무를 열어도 유지할 개인 대화 초안')
         self.browser.evaluate("window.__routeChatQA={node:document.querySelector('#chat-input'),draft:window.__eesNativeDraftV1.read(),chatId:window.__eesSourceShellV1.screen().chatId};true")

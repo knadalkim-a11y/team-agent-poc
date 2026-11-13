@@ -2348,6 +2348,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
     def open_tools(self, *, shared_list=False):
         self.click('[data-action="mode"][data-mode="author"]')
         self.click('[data-action="tools"]')
+        self.wait("document.querySelector('[data-api-action=legacy], .ew-draft-list')")
+        if self.read('[data-api-action=legacy]', 'checkVisibility()'):
+            self.click('[data-api-action=legacy]')
         if shared_list:
             self.wait("document.querySelector('#ees-work-designer')?.ariaLabel === '도구 작성' && document.querySelector('.ew-draft-list')")
         else:
@@ -2539,6 +2542,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.screenshot('menu-c18-procedure-returned')
 
         self.click('[data-action=tools]')
+        self.click('[data-api-action=legacy]')
         self.wait("document.querySelector('[data-author-action=tool_create]')")
         self.create_legacy_tool()
         self.click('[data-author-action=tool_example][data-id=jira-query]')

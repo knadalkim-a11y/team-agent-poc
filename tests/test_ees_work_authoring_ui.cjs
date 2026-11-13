@@ -4,6 +4,8 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const {renderer,run}=require('./ees_workspace_ui_fixture.cjs');
 // A captured main source can prove new requirements fail before parallel product edits.
 const source=fs.readFileSync(process.env.EES_AUTHORING_TEST_SOURCE || path.join(__dirname,'../branding/ees/ui/ees-work-designer.js'),'utf8');
+const apiSources=['ees-work-api-catalog.js','ees-work-api-picker.js']
+ .map(name=>fs.readFileSync(path.join(__dirname,'../branding/ees/ui',name),'utf8')).join('\n');
 const copy=value=>JSON.parse(JSON.stringify(value));
 const toolExamples=[
  {id:'jira-query',name:'Jira 조회',description:'배포 전에 CR 승인 상태를 확인합니다.',kind:'read',match:{function:'jira_search_crs'}},
@@ -142,7 +144,7 @@ function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObser
  }
  const workUI={showHelp:options=>{(h.helpCalls ||= []).push(options);},newId:run(renderer({crypto:cryptoProvider}),'workUI.newId'),esc:value=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'),icon:id=>'<img src="/_ees13/v4/'+id+'.svg" alt="">',$:selector=>selector==='#ees-work-dialog'?dialog:null,dialog:options=>{h.dialogHistory ||= [];h.dialogHistory.push(options);if(options.html?.includes('ew-workflow-tool-setup')||options.html?.includes('ew-tool-workflow-target'))return toolDialog(options);const answer=h.dialogs.shift();assert.notEqual(answer,undefined,'dialog answer is explicit');const listeners={};dialog={addEventListener:(event,cb)=>{(listeners[event] ||= []).push(cb);},querySelectorAll:()=>Object.entries(answer || {}).map(([name,value])=>({name,value,type:typeof value==='boolean'?'checkbox':'text',checked:!!value}))};return Promise.resolve().then(async()=>{await h.dialogHook?.();for(const listener of listeners.click || [])listener({target:{closest:selector=>selector==='[data-dialog-confirm]'?true:null},preventDefault:noop,stopPropagation:noop});return answer!==null;});}};
  const FormData=class{constructor(form){this.data=form.controls.filter(c=>c.name&&!c.disabled&&(!['checkbox','radio'].includes(c.type)||c.checked)).map(c=>[c.name,c.value || (c.type==='checkbox'?'on':'')]);}has(key){return this.data.some(([name])=>name===key);}get(key){return this.data.find(([name])=>name===key)?.[1]??null;}getAll(key){return this.data.filter(([name])=>name===key).map(([,v])=>v);}entries(){return this.data.values();}};
- const context={workToolCatalog:run(renderer(),'workToolCatalog'),workToolMatchesScope:run(renderer(),'workToolMatchesScope'),workUI,URL,ResizeObserver:resizeObserver,crypto:cryptoProvider,AbortController,FormData,document:{activeElement:null},console,proposalChangesObserver};vm.createContext(context);const observedSource=proposalChangesObserver?source.replace('function proposalChanges(before,after) {','function proposalChanges(before,after) { proposalChangesObserver();'):source;vm.runInContext(observedSource,context);context.callbacks=callbacks;h.designer=vm.runInContext('createWorkDesigner({callbacks})',context);h.helpers=vm.runInContext('workAuthoring',context);h.host=host;h.callbacks=callbacks;h.document=context.document;
+ const context={workToolCatalog:run(renderer(),'workToolCatalog'),workToolMatchesScope:run(renderer(),'workToolMatchesScope'),workUI,URL,ResizeObserver:resizeObserver,crypto:cryptoProvider,AbortController,FormData,document:{activeElement:null},console,proposalChangesObserver};vm.createContext(context);const observedSource=proposalChangesObserver?source.replace('function proposalChanges(before,after) {','function proposalChanges(before,after) { proposalChangesObserver();'):source;vm.runInContext(apiSources,context);vm.runInContext(observedSource,context);context.callbacks=callbacks;h.designer=vm.runInContext('createWorkDesigner({callbacks})',context);h.helpers=vm.runInContext('workAuthoring',context);h.host=host;h.callbacks=callbacks;h.document=context.document;
  h.render=()=>h.designer.render({state:h.state,selection:h.selection,host});h.render();
  h.click=(action,data={})=>{const button=h.buttons.find(node=>node.dataset.authorAction===action&&Object.entries(data).every(([key,value])=>node.dataset[key]===value));button?.focus();const control={dataset:{authorAction:action,...data}};h.designer.handleEvent({type:'click',target:button || {closest:selector=>selector==='#ees-work-designer'?host:selector==='[data-author-action]'?control:null}});};
  // The outer work host captures overlay clicks before workUI.dialog settles its promise.
@@ -1514,4 +1516,65 @@ test('saved tool edits survive indirect scope navigation without following the n
  h.selection.system_id='EMS';h.render();h.click('draft_open',{id:'draft-1'});await flush();
  assert.equal(h.fields.find(item=>item.name==='draft_name').value,'저장 전 수정한 도구');assert.equal(h.operations.length,calls);
  assert.equal(h.records.get('draft-1').draft.name,'새 문서 도구');assert.equal(h.records.get('draft-1').revision,1);
+});
+
+function apiCatalogHarness(){
+ const data={services:[{id:'s',name:'사내 백업'}],apis:[],can_manage:true},requests=[],responses={},returns=[];
+ const factory=vm.runInNewContext(apiSources+'\ncreateWorkApiCatalog',{URL,queueMicrotask,workUI:{esc:value=>String(value??'').replaceAll('"','&quot;').replaceAll('<','&lt;')}});
+ const component=factory({catalog:()=>data,paint:()=>{},newId:crypto.randomUUID,legacyAvailable:()=>true,returnToJob:async id=>returns.push(id),
+   command:async body=>{requests.push(copy(body));if(responses[body.action])return responses[body.action](body);
+     if(body.action==='api_detail')return {ok:true,uses:[]};
+     if(body.action==='api_change_preview')return {ok:true,operation:{changes:[],uses:[]}};
+     if(body.action==='api_save'){const api={...copy(body.api),id:body.api.id||'saved',revision:1,version:1};data.apis=[api];return {ok:true,api};}
+     throw Error('Unexpected action '+body.action);}});
+ const element=(dataset,attrs={})=>({...attrs,dataset,closest:s=>s==='[data-api-catalog]'?{}:s==='[data-api-action]'&&dataset.apiAction?{dataset}:null});
+ return {data,requests,responses,returns,component,html:()=>component.html(),field:(name,value,dataset={})=>component.handle({type:'input',target:element(dataset,{name:'api-'+name,value})}),
+   click:async(action,attrs={})=>{component.handle({type:'click',target:element({apiAction:action,...attrs})});await flush();}};
+}
+
+test('registered API catalog saves a typed form and does not persist discarded changes',async()=>{
+ const h=apiCatalogHarness();await h.click('create');assert.match(h.html(),/name="api-name" value=""/);
+ h.field('url','https://ems.example/alarm?private=omit');h.field('name','알람 조회');h.field('purpose','알람 확인');
+ assert.equal(h.component.context().path,'/alarm');assert.doesNotMatch(JSON.stringify(h.component.context()),/private=omit/);
+ const previous=h.component.context();h.field('url','https://ems.example/{equipment}');assert.equal(h.component.suggest({purpose:'이전 폼'},previous),false);
+ assert.equal(h.component.suggest({purpose:'알람 상태 확인'},h.component.context()),true);assert.deepEqual(h.requests,[]);
+ h.field('service_id','s');await h.click('save');assert.match(h.html(),/data-api-screen="list"/);
+ assert.equal(h.requests[0].api.inputs[0].name,'equipment');assert.equal(h.requests[0].api.purpose,'알람 상태 확인');
+ await h.click('open',{id:'saved'});await h.click('edit');assert.match(h.html(),/name="api-name" value="알람 조회"/);
+ h.field('name','남기지 않음');await h.click('cancel');assert.match(h.html(),/변경 버리고 이동/);await h.click('discard');
+ assert.match(h.html(),/data-api-screen="detail"/);assert.deepEqual(h.requests.map(p=>p.action),['api_save','api_detail']);
+});
+
+test('API import preserves the direct draft and applies the reviewed document to the calling job',async()=>{
+ const h=apiCatalogHarness();h.component.start(null,true);h.field('name','입력 중');await h.click('import');await h.click('direct');assert.match(h.html(),/입력 중/);
+ await h.click('import');h.field('import_text','{"openapi":"3.0.0"}');
+ h.responses.api_import_preview=()=>({ok:true,operations:[{key:'GET /backups',name:'백업 결과',method:'GET',url:'https://backup.example/backups',mode:'new',expected_revision:0}],document_hash:'reviewed',service_name:'사내 백업'});
+ h.responses.api_import_apply=()=>({ok:true,apis:[{id:'new-api'}]});
+ await h.click('import-text');assert.match(h.html(),/등록할 기능 선택/);await h.click('import-confirm');
+ const payload=h.requests.at(-1);assert.equal(payload.document_hash,'reviewed');assert.equal(payload.service_id,'s');assert.deepEqual(payload.selections,[{key:'GET /backups',expected_revision:0}]);assert.deepEqual(h.returns,['new-api']);
+});
+
+test('API repairs send a selected replacement only for an affected editable workflow revision',async()=>{
+ const h=apiCatalogHarness();h.data.apis.push({id:'alarm',revision:4,version:4,name:'알람',purpose:'조회',method:'GET',url:'https://ems.example/alarms',service_id:'',inputs:[],result_path:'items',fields:[{path:'code',type:'string',label:'코드'}]});
+ await h.click('open',{id:'alarm'});await h.click('edit');h.field('','alarmCode',{map:'fields',index:0,key:'path'});
+ const use={workflow_id:'W',workflow_name:'점검',job_id:'J',job_name:'알람 조회',kind:'draft',revision:7,version:4,fields:['code'],editable:true};
+ h.responses.api_change_preview=({api})=>({ok:true,operation:{...api,changes:[{kind:'field',path:'code',change:'removed',before:{type:'string'},after:null}],uses:[use,{...use,kind:'published',editable:false}]}});
+ await h.click('save');assert.match(h.html(),/data-api-screen="impact"/);assert.match(h.html(),/게시 버전/);
+ await h.click('impact-apply');assert.match(h.html(),/변경된 결과 필드/);assert.equal(h.requests.filter(p=>p.action==='api_save').length,0);
+ h.field('repair','alarmCode',{repairWorkflow:JSON.stringify(['alarm','W']),repairPath:'code'});await h.click('impact-apply');
+ assert.deepEqual(h.requests.at(-1).repairs,[{api_id:'alarm',workflow_id:'W',expected_revision:7,fields:{code:'alarmCode'}}]);
+});
+
+test('API catalog discards an old account import reply after reset',async()=>{
+ const h=apiCatalogHarness();await h.click('create');await h.click('import');h.field('import_url','https://ems.example/spec');
+ const waiting=deferred();h.responses.api_import_preview=()=>waiting.promise;await h.click('import-url');h.component.reset();
+ waiting.resolve({ok:true,operations:[],service_name:'other account'});await flush();assert.match(h.html(),/data-api-screen="list"/);assert.doesNotMatch(h.html(),/other account/);
+});
+
+test('a temporary operations gap keeps the legacy catalog while a new scope loads',async()=>{
+ const h=apiCatalogHarness();await h.click('legacy');assert.equal(h.component.isLegacy(),true);
+ h.component.reconcile(h.data,undefined);h.component.reconcile(undefined,{...h.data});assert.equal(h.component.isLegacy(),true);
+ h.component.reset();assert.equal(h.component.isLegacy(),false);
+ h.component.start();h.field('name','이전 관리자');h.component.reconcile(h.data,undefined);
+ h.data.can_manage=false;h.component.reconcile(undefined,h.data);assert.match(h.html(),/data-api-screen="list"/);assert.doesNotMatch(h.html(),/이전 관리자/);
 });

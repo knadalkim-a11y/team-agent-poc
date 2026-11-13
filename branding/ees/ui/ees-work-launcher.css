@@ -2387,3 +2387,120 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
   [data-ees-work-surface] #ees-work-panel { --ees-work-page-inset: 16px; }
   [data-ees-work-surface] #ees-work-designer .ew-procedure-info { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* API specifications. The shell provides the actual menu, chat and work pane. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer > .ew-author-scroll:has([data-api-catalog]) {
+  padding: 24px clamp(16px, 3vw, 48px) 40px;
+  background: #f3f3f5;
+  scrollbar-gutter: auto;
+}
+#ees-work-designer:has([data-api-catalog]) > footer:empty { display:none; }
+#ees-work-designer [data-api-catalog] {
+  width:100%; max-width:960px; min-width:0; margin:0 auto; color:#3f4147;
+  font-size:14px; line-height:1.5;
+}
+#ees-work-designer [data-api-catalog] *, #ees-work-designer [data-api-catalog] *::before { box-sizing:border-box; }
+#ees-work-designer [data-api-catalog] .ew-api-controls { display:block; border:0; padding:0; margin:0; min-width:0; }
+#ees-work-designer [data-api-catalog] :is(.ew-api-head,.ew-api-head>div,.ew-api-actions,.ew-api-subhead,.ew-api-tabs,.ew-api-foot,.ew-api-service) {display:flex;align-items:center;gap:8px;}
+#ees-work-designer [data-api-catalog] .ew-api-head {justify-content:space-between;gap:16px;min-height:34px;margin:0 0 16px;flex-wrap:wrap;}
+#ees-work-designer [data-api-catalog] :is(h2,h3) {margin:0;line-height:1.5;color:#3f4147;}
+#ees-work-designer [data-api-catalog] h2 {font-size:20px;font-weight:700;}
+#ees-work-designer [data-api-screen=list] h2 {font-size:22px;}
+#ees-work-designer [data-api-catalog] h3 {font-size:16px;margin:20px 0 8px;}
+#ees-work-designer [data-api-catalog] label {display:flex;flex-direction:column;gap:6px;margin:0;min-width:0;font-weight:400;font-size:13px;line-height:20px;color:#5c5e65;}
+#ees-work-designer [data-api-catalog] :is(input:not([type=checkbox]),select,textarea) {display:block;width:100%;min-width:0;margin:0;height:47px;min-height:0;padding:10px 12px;border:1px solid #d5d6da;border-radius:6px;background-color:#fff;color:#1f2023;font:inherit;font-size:14px;line-height:24px;box-shadow:none;}
+#ees-work-designer [data-api-catalog] select {appearance:auto;padding-right:12px;}
+#ees-work-designer [data-api-catalog] textarea {height:auto;resize:vertical;}
+#ees-work-designer [data-api-catalog] :is(input,textarea)::placeholder {color:#6f7178;}
+#ees-work-designer [data-api-catalog] .ew-api-btn {display:inline-flex;align-items:center;justify-content:center;width:auto;min-width:0;min-height:34px;margin:0;padding:5px 14px;border:1px solid #d5d6da;border-radius:6px;background:#fff;color:#3f4147;font-size:14px;font-weight:500;line-height:22px;white-space:normal;text-align:center;cursor:pointer;}
+#ees-work-designer [data-api-catalog] .ew-api-btn.primary {background:#2f5f98;border-color:#2f5f98;color:#fff;}
+#ees-work-designer [data-api-catalog] .ew-api-btn.link {color:#2f5f98;background:transparent;border-color:transparent;padding-inline:5px;}
+#ees-work-designer [data-api-catalog] .ew-api-btn:disabled {cursor:default;opacity:.65;}
+#ees-work-designer [data-api-catalog] .ew-api-btn.back {display:flex;min-height:32px;margin:0 0 14px;}
+#ees-work-designer [data-api-catalog] :is(.ew-api-request,.ew-api-pair) {display:grid;gap:12px;margin:0 0 16px;}
+#ees-work-designer [data-api-catalog] .ew-api-request {grid-template-columns:140px minmax(0,1fr);}
+#ees-work-designer [data-api-catalog] .ew-api-pair {grid-template-columns:repeat(2,minmax(0,1fr));}
+#ees-work-designer [data-api-catalog] .ew-api-tabs {margin:0 0 14px;}
+#ees-work-designer [data-api-catalog] [data-api-action=missing] {margin:15px 0 16px;}
+#ees-work-designer [data-api-catalog] .ew-api-advanced {display:block;border:0;border-top:1px solid #e6e6e9;padding:0;background:transparent;margin:0;}
+#ees-work-designer [data-api-screen=edit] .ew-api-advanced {margin-top:18px;}
+#ees-work-designer [data-api-catalog] .ew-api-advanced>summary {list-style:none;color:#2f5f98;padding:19px 5px;font-size:14px;font-weight:600;cursor:pointer;}
+#ees-work-designer [data-api-catalog] .ew-api-advanced[open]>*:not(summary) {margin-bottom:12px;}
+#ees-work-designer [data-api-catalog] .ew-api-subhead {justify-content:space-between;margin:14px 0 8px;overflow-wrap:anywhere;}
+#ees-work-designer [data-api-catalog] .ew-api-subhead h3 {margin:0;}
+#ees-work-designer [data-api-catalog] .ew-api-foot {justify-content:flex-end;border-top:1px solid #e6e6e9;padding:16px 0;}
+#ees-work-designer [data-api-catalog] .ew-api-groups {margin-top:16px;}
+#ees-work-designer [data-api-catalog] .ew-api-group {display:block;margin:0;padding:0;border:0;background:transparent;}
+#ees-work-designer [data-api-catalog] .ew-api-group>summary {display:flex;justify-content:space-between;align-items:center;list-style:none;margin:0;padding:8px 3px 17px;cursor:pointer;color:#58595f;font-size:13px;font-weight:500;}
+#ees-work-designer [data-api-catalog] .ew-api-group>summary>span:last-child::before {content:'›';display:inline-block;margin-right:10px;}
+#ees-work-designer [data-api-catalog] .ew-api-group[open]>summary>span:last-child::before {transform:rotate(90deg);}
+#ees-work-designer [data-api-catalog] .ew-api-row {display:block;width:100%;min-height:67px;margin:0 0 3px;padding:9px 13px;border:1px solid #c3d6f3;border-radius:5px;background:#f0f5fd;color:#1f2023;text-align:left;cursor:pointer;overflow-wrap:anywhere;}
+#ees-work-designer [data-api-catalog] .ew-api-row[data-method=POST] {background:#ecf6f0;border-color:#d1e5d8;}
+#ees-work-designer [data-api-catalog] .ew-api-line {display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;}
+#ees-work-designer [data-api-catalog] .ew-api-line i {margin-left:auto;color:#6f7178;font-style:normal;font-size:20px;}
+#ees-work-designer [data-api-catalog] .ew-api-method {padding:2px 9px;border-radius:5px;background:#2a5fae;color:#fff;font-size:12px;}
+#ees-work-designer [data-api-catalog] [data-method=POST] .ew-api-method {background:#1b7748;}
+#ees-work-designer [data-api-catalog] .ew-api-description {display:block;margin-top:2px;color:#5c5e65;font-size:13px;}
+#ees-work-designer [data-api-catalog] .ew-api-legacy {margin-top:18px;font-size:13px;}
+#ees-work-designer [data-api-catalog] .ew-api-card {border:1px solid #d5d6da;background:#fff;border-radius:6px;padding:15px;margin:12px 0;}
+#ees-work-designer [data-api-catalog] .ew-api-service {padding:12px 0;border-bottom:1px solid #e6e6e9;}
+#ees-work-designer [data-api-catalog] .ew-api-service button {margin-left:auto;}
+#ees-work-designer [data-api-catalog] .ew-api-map {display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));align-items:end;gap:8px;margin:10px 0;}
+#ees-work-designer [data-api-catalog] .ew-api-choice {display:flex;flex-direction:row;align-items:center;gap:10px;padding:12px 0;}
+#ees-work-designer [data-api-catalog] .ew-api-choice small {display:block;}
+#ees-work-designer [data-api-catalog] .ew-api-table {overflow:auto;}
+#ees-work-designer [data-api-catalog] table {width:100%;margin:8px 0 16px;border-collapse:collapse;}
+#ees-work-designer [data-api-catalog] :is(th,td) {padding:8px 10px;border-bottom:1px solid #d5d6da;text-align:left;overflow-wrap:anywhere;}
+#ees-work-designer [data-api-catalog] pre {overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#fff;padding:12px;border-radius:6px;}
+#ees-work-designer [data-api-catalog] :is(.ew-api-empty,.ew-api-status,.ew-api-error) {padding:10px 0;color:#5c5e65;}
+#ees-work-designer [data-api-catalog] .ew-api-error {color:#9b3931;}
+@media(max-width:700px){
+  #ees-work-designer [data-api-catalog] .ew-api-pair {grid-template-columns:1fr;}
+  #ees-work-designer [data-api-catalog] .ew-api-request {grid-template-columns:minmax(80px,1fr) minmax(0,3fr);}
+}
+
+/* Workflow API selection uses the work panel's existing typography and theme. */
+#ees-work-designer .ew-job-row:has(.ew-api-row-action) { flex-wrap:wrap; }
+#ees-work-designer .ew-api-row-action { display:inline-flex; align-items:center; gap:4px; padding:6px 12px; white-space:nowrap; }
+#ees-work-designer .ew-api-job-binding { display:grid; flex-basis:100%; gap:3px; padding:0 12px 10px; font-size:13px; color:var(--ees-text-secondary); }
+#ees-work-designer .ew-api-job-binding small { font-size:12px; color:var(--ees-text-tertiary); }
+#ees-work-dialog .ew-api-picker [data-api-choices] { display:grid; gap:4px; margin:8px 0; }
+#ees-work-dialog .ew-api-picker [data-api-candidate] { display:grid; gap:4px; width:100%; text-align:left; padding:8px; border-radius:6px; }
+#ees-work-dialog .ew-api-picker [data-api-candidate][aria-pressed=true] { background:var(--ees-surface-selected); }
+#ees-work-dialog .ew-api-picker [data-api-candidate] small { color:var(--ees-text-secondary); overflow-wrap:anywhere; }
+#ees-work-dialog .ew-api-picker [data-api-config] { display:grid; align-content:start; gap:10px; min-width:0; }
+#ees-work-dialog .ew-api-map-row label { display:grid; gap:5px; margin:5px 0; }
+#ees-work-dialog .ew-api-picker pre,.ew-api-table { overflow:auto; }
+
+/* API-only procedures expose task connections from the stage list. The
+   procedure menu's editing view retains metadata, order and input controls. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-api-overview=true] > .ew-author-scroll {
+  box-sizing:border-box; width:100%; max-width:1104px; margin-inline:auto;
+  padding:18px max(16px,calc((100% - 960px)/2)) 28px; scrollbar-gutter:auto;
+}
+#ees-work-designer[data-api-overview=true] :is(.ew-content-overview,.ew-author-definition-head > .ew-author-muted,.ew-content-start-inputs,.ew-stage-description,[data-author-action=add_stage],[data-author-action=add_job],[data-author-action=factory_settings],.ew-job-meta,.ew-author-job>.ew-icon,.ew-job-row>.ew-job-menu-button,.ew-factory-differences) { display:none!important; }
+#ees-work-designer[data-api-overview=true] .ew-content-stage { border:1px solid var(--ees-line-divider); border-radius:8px; background:var(--ees-surface-sidebar); }
+#ees-work-designer[data-api-overview=true] .ew-stage-list { display:grid; gap:8px; border:0; }
+#ees-work-designer[data-api-overview=true] .ew-stage-head > .ew-stage-toggle { padding-inline:14px; min-height:52px; }
+#ees-work-designer[data-api-overview=true] .ew-stage-body { padding:0; gap:0; border-top:1px solid var(--ees-line-divider); }
+#ees-work-designer[data-api-overview=true] .ew-job-row { min-height:56px; padding-right:8px; border-bottom:0; }
+#ees-work-designer[data-api-overview=true] .ew-job-row+.ew-job-row { border-top:1px solid var(--ees-line-divider); }
+#ees-work-designer[data-api-overview=true] .ew-job-row>.ew-author-job { padding:12px 4px 12px 48px; }
+#ees-work-designer[data-api-overview=true] .ew-job-row:has([data-api-job-binding])>.ew-author-job { padding-bottom:2px; }
+#ees-work-designer[data-api-overview=true] .ew-api-job-binding { padding-left:48px; padding-bottom:14px; font-size:12px; gap:3px; }
+#ees-work-designer[data-api-overview=true] .ew-api-row-action { display:inline-flex; color:var(--ees-brand-text); background:transparent; }
+#ees-work-designer[data-api-overview=true] .ew-author-tabs { margin:12px 0; }
+#ees-work-designer[data-api-overview=true] .ew-author-heading { min-height:32px; }
+#ees-work-designer [data-api-screen=create] .ew-api-tabs {margin-bottom:7px;}
+#ees-work-designer [data-api-screen=create] :is(.ew-api-request,.ew-api-pair) {margin-bottom:15px;}
+#ees-work-designer [data-api-screen=edit] .ew-api-head {margin-bottom:17px;}
+#ees-work-designer [data-api-screen=edit] :is(.ew-api-request,.ew-api-pair) {margin-bottom:18px;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-api-overview=true] > .ew-author-scroll { padding-top:20px; }
+#ees-work-designer[data-api-overview=true] .ew-job-row { min-height:58px; }
+#ees-work-designer[data-api-overview=true] .ew-api-job-binding { padding-bottom:24px; }
+#ees-work-designer .ew-api-stage-actions { display:grid; justify-items:start; gap:10px; }
+#ees-work-dialog .ew-api-result-example { max-height:60vh; overflow:auto; white-space:pre-wrap; }
+#ees-work-designer [data-api-catalog] dialog[data-api-modal] {position:fixed;inset:0;width:min(620px,calc(100vw - 32px));max-height:85vh;overflow:auto;margin:auto;padding:22px 26px;background:#fafafa;color:#3f4147;border:1px solid #e6e6e9;border-radius:8px;}
+#ees-work-designer [data-api-screen=impact] dialog[data-api-modal] {width:min(716px,calc(100vw - 32px));}
+#ees-work-designer [data-api-catalog] dialog[data-api-modal]::backdrop {background:rgb(31 36 46 / 30%);}
+#ees-work-designer [data-api-catalog] .ew-api-service-close {justify-content:flex-end;margin-top:14px;}

@@ -33,6 +33,7 @@ from .ees_workflow_workspace import WorkspaceMixin
 from .ees_workflow_operations import OperationsRuntime
 from .ees_workflow_shared_tools import SharedTools
 from .ees_workflow_tool_drafts import ToolDrafts
+from .ees_workflow_api_catalog import ApiCatalog
 
 _service = None
 
@@ -58,6 +59,7 @@ class WorkflowService(WorkspaceMixin, AuthoringMixin):
         self.asset_lookup = asset_lookup
         self.group_lookup, self.group_list_lookup = group_lookup, group_list_lookup
         self.database.parent.mkdir(parents=True, exist_ok=True)
+        self.api_catalog = ApiCatalog(self)
         with self._db(write=True) as db:
             db.execute("CREATE TABLE IF NOT EXISTS catalog (id INTEGER PRIMARY KEY CHECK(id=1), "
                        "published TEXT NOT NULL, draft TEXT NOT NULL, revision INTEGER NOT NULL, validated INTEGER)")
@@ -74,6 +76,7 @@ class WorkflowService(WorkspaceMixin, AuthoringMixin):
             self._init_authoring(db, preserve_catalog=True)
             init_execution(db)
             self._init_workspace(db)
+            self.api_catalog.init(db)
         self.execution = ExecutionRuntime(self, native_bridge, model_executor)
         self.operations = OperationsRuntime(self, bridge=native_bridge, model=model_executor)
         self.shared_tools = SharedTools(self)

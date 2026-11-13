@@ -298,7 +298,8 @@ function workInputHTML(field,value,{disabled=false,prefix='run',people=[],lookup
     const previous=field.type==='multi'?(Array.isArray(value)?value:[]):value===undefined?[]:[value];
     for(const old of previous)if(!options.some(option=>JSON.stringify(option.value)===JSON.stringify(old)))options.push({value:old,label:'이전 선택 · 현재 목록 확인 필요',stale:true});
     control=`<select ${name}${field.type==='multi'?' multiple':''}>${field.type!=='multi'?'<option value="">선택 안 함</option>':''}${options.map(option=>`<option value="${esc(JSON.stringify(option.value))}"${(field.type==='multi'?Array.isArray(value)&&value.some(v=>JSON.stringify(v)===JSON.stringify(option.value)):JSON.stringify(value)===JSON.stringify(option.value))?' selected':''}${option.stale?' data-stale-option':''}>${esc(option.label)}</option>`).join('')}</select>`;
-  }else if(field.type==='list')control=`<textarea ${name} rows="3" placeholder="한 줄에 하나씩 입력">${esc(Array.isArray(value)?value.map(valueText).join('\n'):value ?? '')}</textarea>`;
+  }else if(field.type==='json_object')control=`<textarea ${name} rows="3" placeholder='{"key":"value"}'>${esc(value===undefined?'':JSON.stringify(value,null,2))}</textarea>`;
+  else if(field.type==='list')control=`<textarea ${name} rows="3" placeholder="한 줄에 하나씩 입력">${esc(Array.isArray(value)?value.map(valueText).join('\n'):value ?? '')}</textarea>`;
   else control=`<input ${name} type="${field.type==='number'?'number':field.type==='datetime'?(/^\d{4}-\d{2}-\d{2}$/.test(value || '')?'date':/(Z|[+-]\d{2}:\d{2})$/.test(value || '')?'text':'datetime-local'):'text'}"${field.type==='number'?` step="${field.integer?'1':'any'}"${field.minimum!==undefined?` min="${esc(field.minimum)}"`:''}${field.maximum!==undefined?` max="${esc(field.maximum)}"`:''}`:''} value="${esc(value ?? '')}">${field.unit?`<span class="ew-unit">${esc(field.unit)}</span>`:''}`;
   if(dynamic)control+=`<small class="ew-option-source" role="status">${esc(lookup?.status==='ready'?`현재 권한으로 조회 · ${lookup.source?.kind || field.options_source} · ${lookup.options.length}개`:lookup?.status==='failed'?`목록 조회 실패 · ${lookup.error}`:'선택 목록을 확인하는 중입니다.')}</small>${!disabled?workUI.button('목록 다시 조회','reload_options',`data-field-id="${esc(field.id)}" class="ew-text"${lookup?.status==='loading'?' disabled':''}`):''}`;
   return `<label class="ew-input-row${proposal?' ew-input-proposed':''}"${proposal?` data-proposal-field="${esc(field.id)}"`:''} for="${esc(id)}"><span>${esc(field.name || field.id)}${field.required?'<span aria-label="필수"> *</span>':''}</span><span class="ew-input-control">${applied?'<small class="ew-input-proposal-source">도우미</small>':''}${control}${proposal?`<small id="${esc(id)}-proposal" class="ew-input-proposal-value">제안 · ${esc(workInputProposalValue(field,proposal.value,{people,lookup}))}</small>`:''}${field.help?`<small>${esc(field.help)}</small>`:''}</span></label>`;
@@ -351,6 +352,12 @@ function workReadInputs(container){
     if(type==='boolean')values[key]=field.value==='true';
     else if(['single','person'].includes(type))values[key]=JSON.parse(field.value);
     else if(type==='number'){const number=Number(field.value);if(!Number.isFinite(number))throw new Error('숫자 입력을 확인해 주세요.');values[key]=number;}
+    else if(type==='json_object'){
+      let parsed;
+      try{parsed=JSON.parse(field.value);}catch{throw new Error('JSON 객체 형식을 확인해 주세요.');}
+      if(!parsed||typeof parsed!=='object'||Array.isArray(parsed))throw new Error('JSON 객체를 입력해 주세요.');
+      values[key]=parsed;
+    }
     else if(type==='list')values[key]=field.value.split(/\r?\n/).map(value=>value.trim()).filter(Boolean);
     else values[key]=field.value;
   }
@@ -372,6 +379,7 @@ function workSettingsOverrides(settings,draft,fields){
 }
 
 function workRequestFields(node,tools=[]){
+  if(node.api_binding)return (node.inputs||[]).filter(field=>Object.values(node.api_binding.inputs).some(source=>source.input===field.id));
   const contract=tools.find(tool=>tool.id===(node.tool_contract_id || node.tool_reference?.contract_id)),schema=contract?.input_schema;
   if(!schema||schema.type!=='object'||!schema.properties)return null;
   const fields=Object.entries(schema.properties).map(([argument,spec])=>{
@@ -441,6 +449,17 @@ function workListItems(result={}){
   const actual=Array.isArray(result.items)?result.items:[],ids=new Set(actual.map(item=>item.id));
   return [...actual.map(item=>({...workUI.clone(item),selected:item.selected!==false,manual:item.source?.kind==='human_added'||item.manual===true})),...(Array.isArray(result.suggestions)?result.suggestions:[]).filter(item=>item&&typeof item.id==='string'&&!ids.has(item.id)).map(item=>({...workUI.clone(item),selected:false,candidate:true}))];
 }
+function workApiResultTable(result, fields, selection=null) {
+  const {esc}=workUI;
+  const rows=selection?.items || result?.items;
+  if(!Array.isArray(rows))return '';
+  if(!rows.length)return '<p>조회 결과가 없습니다.</p>';
+  const value=v=>v===null?'—':typeof v==='object'?JSON.stringify(v):String(v??'');
+  const cell=(item,path)=>'<td>'+esc(value(item.row?.[path]))+'</td>';
+  const include=item=>`<td><input type="checkbox" data-item-confirm data-list-include data-item-id="${esc(item.id)}" aria-label="${esc(item.title||item.id)} 포함" ${item.selected!==false?'checked':''} ${selection?.readonly?'disabled':''}></td>`;
+  const headers=fields.map(path=>'<th>'+esc(result.field_labels?.[path] || path)+'</th>').join('');
+  return `<div class="ew-api-table"><table class="ew-list-table"><thead><tr>${selection?'<th>포함</th>':''}${headers}</tr></thead><tbody>${rows.map(item=>'<tr>'+(selection?include(item):'')+fields.map(path=>cell(item,path)).join('')+'</tr>').join('')}</tbody></table></div>`;
+}
 function workListHTML(saved={}, {readOnly=false,listDraft=null,sourceCount,sharedSearch=false,target=''}={}){
   if(saved.evidence_access)return workNoticeHTML('현재 원본 접근 권한을 확인해 주세요','이전 목록이나 작성 중인 선택을 현재 근거로 대신 표시하지 않습니다.');
   const {esc,button,safeURL}=workUI,result=saved.result || {},items=listDraft?.items || workListItems(result),included=items.filter(item=>item.selected),extra=items.filter(item=>item.selected&&item.candidate);
@@ -491,6 +510,16 @@ function workResultHTML(job,saved={}, {readOnly=false,listDraft=null,reviewDraft
   let body='';
   if(attempt?.snapshot?.shared_tool?.source==='authored'||result.source==='authored')body=workAuthoredResultHTML(saved.evidence_access?{...attempt,evidence_access:saved.evidence_access}:attempt);
   else if(block==='schedule')body=`<div class="ew-result-schedule">${esc(result.notice || result.summary || '일정 확인이 필요합니다.')}${result.due_at?`<time datetime="${esc(result.due_at)}">${esc(result.due_at)}</time>`:''}${result.calendar_available===false?'<p>공휴일 달력 미연결 · 일정 확인 필요</p>':''}</div>`;
+  else if(block==='list_confirm' && job.api_binding && !saved.evidence_access){
+    const rows=listDraft?.items||workListItems(result);
+    const readonly=readOnly||Object.keys(saved.decisions||{}).length>0;
+    const selected=rows.filter(row=>row.selected!==false).length;
+    body=workApiResultTable(result,job.api_binding.outputs,{items:rows,readonly});
+    if(!readonly && rows.length)body+=button('선택 목록 저장','save_list_selection','data-mutation class="ew-secondary"')+
+        button('목록 확정 ('+selected+'건)','confirm_list',`data-mutation class="ew-primary" ${!selected?'disabled data-own-disabled="true"':''}`);
+    if(!readonly && result.source==='api' && result.completeness==='empty' && Array.isArray(result.items) && !result.items.length)body+=button('조회 결과 0건 확인','confirm_list','data-mutation class="ew-primary"');
+    if(!Array.isArray(result.items))body=empty;
+  }
   else if(block==='list_confirm')body=workListHTML(saved,{readOnly,listDraft,sourceCount,sharedSearch:Boolean(job.shared_tool_id)&&(job.shared_function==='search_pages'||result.scope==='single_page'),target});
   else if(block==='checklist')body=workChecklistHTML(items,saved);
   else if(block==='item_verdict')body=items.length?`<div class="ew-result-items">${items.map(item=>`<article><header><strong>${esc(item.name || item.title || item.id)}</strong>${source(item.url)}</header>${item.evidence?.map(e=>`<p>${workStatusHTML(e.status || 'unknown',e.label || e.name)}${e.content_reviewed===false?'<small>내용 적정성 미검토</small>':''}</p>`).join('') || ''}${item.ai_suggestion&&!saved.decisions?.[item.id]?`<p class="ew-ai-proposal">AI 제안 · ${esc(item.ai_suggestion)} · 사람 미확정</p>`:''}${decision(item)}${!saved.decisions?.[item.id]&&verdictDraft[item.id]?.verdict?'<small>내 선택 · 확정 전 · 자동 저장</small>':''}</article>`).join('')}<p class="ew-muted">선택은 자동 저장되는 확정 전 초안입니다. 모든 항목을 선택한 뒤 판정 확정으로 최종 반영합니다.</p>${items.every(item=>saved.decisions?.[item.id])?'<p>모든 항목의 판정이 확정되었습니다.</p>':!readOnly?button('판정 확정','confirm_verdicts',`data-mutation class="ew-primary"${items.every(item=>saved.decisions?.[item.id]||verdictDraft[item.id]?.verdict)?'':' disabled data-own-disabled="true"'}`):''}</div>`:empty;
@@ -498,8 +527,12 @@ function workResultHTML(job,saved={}, {readOnly=false,listDraft=null,reviewDraft
   else if(block==='change_request')body=workRequestHTML(saved.request || result.request || {},{...job,actor_id:actorId,execution_actor:job.execution_actor,can_request:saved.can_request ?? (!readOnly&&saved.can_execute!==false),can_review_request:saved.can_review_request ?? (!readOnly&&saved.can_execute!==false),can_reconcile:saved.can_reconcile ?? (!readOnly&&saved.can_execute!==false)});
   else if(block==='values')body=Object.keys(result).length?`<dl class="ew-facts">${Object.entries(result).filter(([key])=>!['secret','token','pat','credential'].includes(key.toLowerCase())).map(([key,value])=>`<div><dt>${esc(key)}</dt><dd>${esc(typeof value==='object'?JSON.stringify(value):value)}</dd></div>`).join('')}</dl>`:empty;
   else body=workChecklistHTML(Array.isArray(job.confirmation_items)?job.confirmation_items:[],saved,true)+`<p>${esc(job.completion?.description || job.completion_criteria || job.instructions || '결과와 근거를 확인한 뒤 직접 확인해 주세요.')}</p>${result.summary?`<p>${esc(result.summary)}</p>`:''}`;
+  if(job.api_binding && !saved.evidence_access && block!=='list_confirm'){
+    const apiResult=block==='change_request'?(saved.request?.api_result || result.request?.api_result):result;
+    body+=workApiResultTable(apiResult,job.api_binding.outputs);
+  }
   if(result.result_kind==='evidence')body+=`<section class="ew-read-evidence"><h4>조회 근거</h4>${(result.evidence || []).map(item=>source(item.url)).join('')}<pre>${esc(result.data?.content || '')}</pre>${result.completeness==='truncated'?'<span class="ew-badge">부분 결과</span><p>본문이 길어 일부만 받았습니다.</p>':''}</section>`;
-  return `<section class="ew-result" data-result-block="${esc(block)}">${result.error?workNoticeHTML('조회 연결 확인',result.error.message||workReasonText(result.error.code,messages)):''}${saved.evidence_access==='requires_current_source_access'?'<p class="ew-warning">현재 계정의 원본 접근 권한으로 근거를 다시 확인해야 합니다. 이전 기록을 보존하고 현재 권한으로 다시 조회해 주세요.</p>':''}${block!=='list_confirm'&&(saved.status==='partial'||saved.result?.completeness==='partial')?workNoticeHTML('부분 결과','받은 범위만 확인했습니다. 사람 판정 뒤에도 조회 범위가 완전해지지는 않습니다.'):''}${block==='change_request'?'':`<h3>${esc({values:'확인한 값',schedule:'일정 안내',checklist:'확인 항목 결과',list_confirm:'목록 확정',item_verdict:'항목별 판정',ai_review:'초안 검토',human_confirm:'사람 확인',change_request:'EES 요청'}[block] || '결과')}</h3>`}${body}${job.result_block==='ai_review'&&saved.attempt_id?button('결과 초안 내보내기','export_result',`data-job-id="${esc(job.id)}" class="ew-text"`):''}${!readOnly&&items.length&&['list_confirm','item_verdict','checklist'].includes(block)&&!(block==='item_verdict'&&Object.keys(saved.decisions || {}).length)?button('목록 수정 · 다시 검토','amend_items','class="ew-text"'):''}</section>`;
+  return `<section class="ew-result" data-result-block="${esc(block)}">${result.error?workNoticeHTML('조회 연결 확인',result.error.message||workReasonText(result.error.code,messages)):''}${saved.evidence_access==='requires_current_source_access'?'<p class="ew-warning">현재 계정의 원본 접근 권한으로 근거를 다시 확인해야 합니다. 이전 기록을 보존하고 현재 권한으로 다시 조회해 주세요.</p>':''}${block!=='list_confirm'&&(saved.status==='partial'||saved.result?.completeness==='partial')?workNoticeHTML('부분 결과','받은 범위만 확인했습니다. 사람 판정 뒤에도 조회 범위가 완전해지지는 않습니다.'):''}${block==='change_request'?'':`<h3>${esc({values:'확인한 값',schedule:'일정 안내',checklist:'확인 항목 결과',list_confirm:'목록 확정',item_verdict:'항목별 판정',ai_review:'초안 검토',human_confirm:'사람 확인',change_request:'EES 요청'}[block] || '결과')}</h3>`}${body}${job.result_block==='ai_review'&&saved.attempt_id?button('결과 초안 내보내기','export_result',`data-job-id="${esc(job.id)}" class="ew-text"`):''}${!readOnly&&!job.api_binding&&items.length&&['list_confirm','item_verdict','checklist'].includes(block)&&!(block==='item_verdict'&&Object.keys(saved.decisions || {}).length)?button('목록 수정 · 다시 검토','amend_items','class="ew-text"'):''}</section>`;
 }
 function workRequestHTML(request={},job={}){
   const {esc,button,icon,safeURL,executionActorLabel}=workUI;
@@ -780,7 +813,7 @@ function workStageCanDecide(node,saved={},run={}){
 }
 function workStageAutomatic(node){return node.mode!=='human'&&Boolean(node.mode)&&node.human_confirmation===false&&!['item_verdict','ai_review','change_request'].includes(node.result_block);}
 function workStageTone(value,label=''){return label==='조건부 승인'?'cond':value==='completed'?'ok':value==='failed'?'bad':'none';}
-function workToolConnectionRequired(node){const execution=node?.execution&&typeof node.execution==='object'?node.execution:{};return node?.mode==='tool'&&node.result_block!=='change_request'&&!(node.shared_tool_id||node.tool_contract_id||node.tool_reference||execution.reference);}
+function workToolConnectionRequired(node){const execution=node?.execution&&typeof node.execution==='object'?node.execution:{};return node?.mode==='tool'&&node.result_block!=='change_request'&&!(node.api_binding||node.shared_tool_id||node.tool_contract_id||node.tool_reference||execution.reference);}
 function workStageCanExecute(node,saved,run,data){
   if(workToolConnectionRequired(node))return false;
   if(!['tool','ai'].includes(node.mode)||node.result_block==='change_request'||workUI.finished(run)||run.can_write===false||saved.can_execute===false||['running','excluded'].includes(saved.status))return false;
