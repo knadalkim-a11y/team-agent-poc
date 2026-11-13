@@ -256,6 +256,7 @@ print("installed_workflow_contract=pass")
                          "ees_workflow_workspace.py", "ees_workflow_operations.py", "ees_workflow_shared_tools.py", "ees_workflow_model.py",
                          "ees_workflow_tool_drafts.py", "ees_workflow_tool_draft_check.py",
                          "ees_workflow_tool_lifecycle.py", "ees_workflow_tool_native.py", "ees_workflow_tool_worker.py", "ees_workflow_tool_runtime.py",
+                         *builder.API_TOOL_MODULES,
                          "ees_workflow_tool.py", "workflow_policy.json", "workflow_help.json", "workflow_tool_examples.json",
                          "workflow_procedure_examples.json"):
                 target = root / "open_webui" / name
@@ -624,6 +625,8 @@ class BrandingBuildTests(unittest.TestCase):
             (self.ui / name).write_bytes(b"reviewed UI asset " + name.encode())
         for name, content in {
             "ees-work-view.js": b"function createWorkView() { return 'view'; }\n",
+            "ees-work-api-catalog.js": b"function createWorkApiCatalog() {}\n",
+            "ees-work-api-picker.js": b"function createWorkApiPicker() {}\n",
             "ees-work-designer.js": b"function createWorkDesigner() { return 'designer'; }\n",
             "ees-work-launcher.js": b"(() => { window.fixture = [createWorkView(), createWorkDesigner()]; })();\n",
         }.items():

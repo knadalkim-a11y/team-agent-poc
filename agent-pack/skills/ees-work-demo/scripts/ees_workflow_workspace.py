@@ -19,8 +19,9 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from .ees_workflow_authoring import WorkflowError, _value, _resolve, _now, _hash, _fail
 from .ees_workflow_definition import SYSTEMS, CATEGORIES, IDENTIFIER, MAX_DOCUMENT_BYTES, _dump, tool_connection_required, concurrent_runs_allowed
 from .ees_workflow_view import workflow_help
+from .ees_workflow_api_binding import binding_errors, binding_shape
 
-INPUT_TYPES = ('text', 'number', 'datetime', 'single', 'multi', 'list', 'person', 'boolean')
+INPUT_TYPES = ('text', 'number', 'datetime', 'single', 'multi', 'list', 'person', 'boolean', 'json_object')
 BLOCKS = ('values', 'schedule', 'checklist', 'list_confirm', 'item_verdict', 'ai_review', 'human_confirm', 'change_request')
 TERMINAL = {'completed', 'cancelled'}
 SECRET_KEYS = re.compile(r'(^|_)(pat|password|secret|token|authorization|api_key|credential)(_|$)', re.I)
@@ -63,7 +64,11 @@ def _copy_definition_nodes(definition):
         criterion = node.get('effect_criterion')
         if isinstance(criterion, dict) and criterion.get('job_id') in mapping:
             criterion['job_id'] = mapping[criterion['job_id']]
-        for binding in node.get('argument_bindings', {}).values():
+        if 'api_generated_deps' in node:
+            node['api_generated_deps'] = [mapping.get(dep, dep) for dep in node['api_generated_deps']]
+        workflow_bindings = list(node.get('argument_bindings', {}).values())
+        workflow_bindings.extend((node.get('api_binding') or {}).get('inputs', {}).values())
+        for binding in workflow_bindings:
             result = binding.get('result') if isinstance(binding, dict) else None
             if isinstance(result, dict) and result.get('job_id') in mapping:
                 result['job_id'] = mapping[result['job_id']]
@@ -315,7 +320,11 @@ def definition_check(definition, complete=True):
         if node.get('shared_tool_id'):
             if not _id(node['shared_tool_id']) or node.get('tool_reference') or node.get('tool_contract_id') or node.get('tool_contract_revision') or node.get('mode') != 'tool':
                 errors.append(f'{key}: 공용 도구 ID와 이전 방식 도구를 함께 저장할 수 없습니다.')
-        if node.get('mode') == 'tool' and complete and not node.get('shared_tool_id'):
+        if 'api_binding' in node:
+            error = binding_shape(node, WorkspaceMixin._work_prerequisite_jobs(definition, node['id']))
+            if error:
+                errors.append(f'{key}: {error}')
+        if node.get('mode') == 'tool' and complete and not node.get('shared_tool_id') and 'api_binding' not in node:
             ref = node.get('tool_reference')
             if tool_connection_required(node):
                 warnings.append(f'{key}: 도구가 연결되지 않았습니다. 게시는 되지만, 도구를 연결해 다시 게시하기 전까지 이 작업과 이 작업이 있는 단계는 실행할 수 없습니다.')
@@ -447,6 +456,7 @@ def input_errors(fields, values, complete=True, options_snapshot=None):
         elif kind == 'boolean': valid = isinstance(value, bool)
         elif kind == 'person': valid = isinstance(value, dict) and set(value) == {'kind', 'id'} and value['kind'] in ('user', 'group') and _id(value['id'])
         elif kind == 'list': valid = isinstance(value, list) and len(value) <= 1000
+        elif kind == 'json_object': valid = isinstance(value, dict)
         elif kind in ('single', 'multi'):
             options = [entry.get('id') if isinstance(entry, dict) else entry for entry in (options_record['options'] if options_record else field.get('options', []))]
             if field.get('options_source', 'manual') != 'manual' and not options_record and not complete:
@@ -689,11 +699,15 @@ class WorkspaceMixin:
             pin = json.loads(row[0]) if row else None
             if pin and self.shared_tools.authored.is_authored_reference(pin.get('reference')):
                 pin = self.shared_tools.authored.describe_pin(db, pin)
+        reference = deepcopy(pin['reference'] if pin else job.get('tool_reference'))
+        if job.get('api_binding'):
+            binding = job['api_binding']
+            reference = {'kind': 'api', 'tool_id': binding['operation_id'], 'version': binding['version']}
         return {'job': deepcopy(job), 'definition': deepcopy(definition), 'version': run['version'],
                 'definition_hash': saved['definition_hash'], 'factory': saved.get('factory'),
                 'condition_results': saved.get('condition_results', {}), 'inputs': values,
                 'settings_sources': {key: sources[key] for key in values},
-                **({'shared_tool': pin} if pin else {}), 'tool_reference': deepcopy(pin['reference'] if pin else job.get('tool_reference')), 'model_id': job.get('model_id'), 'deadline': deadline, 'deadline_source': deadline_source}
+                **({'shared_tool': pin} if pin else {}), 'tool_reference': reference, 'model_id': job.get('model_id'), 'deadline': deadline, 'deadline_source': deadline_source}
 
     @staticmethod
     def _work_dependent_ids(definition, job_id):
@@ -757,6 +771,15 @@ class WorkspaceMixin:
     def _work_shared_search(node, attempt):
         snapshot = json.loads(attempt['snapshot'])
         return bool(node.get('shared_tool_id') and snapshot.get('shared_tool', {}).get('reference', {}).get('function') == 'search_pages')
+
+    @staticmethod
+    def _work_allows_empty_list(node, attempt):
+        if WorkspaceMixin._work_shared_search(node, attempt):
+            return True
+        if not node.get('api_binding'):
+            return False
+        result = json.loads(attempt['result']) if attempt['result'] else {}
+        return result.get('source') == 'api' and result.get('completeness') == 'empty' and result.get('items') == []
 
     def _work_dependencies_ready(self, db, run_id, definition, job_id):
         node = definition['nodes'][job_id]
@@ -860,8 +883,9 @@ class WorkspaceMixin:
 
     @staticmethod
     def _work_prerequisite_jobs(definition, job_id):
-        nodes = definition['nodes']; deps = set(); current = job_id
-        while current in nodes:
+        nodes = definition['nodes']; deps = set(); current = job_id; parents = set()
+        while current in nodes and current not in parents:
+            parents.add(current)
             deps.update(nodes[current].get('deps', [])); current = nodes[current].get('parent')
         jobs, seen = set(), set()
         while deps:
@@ -919,7 +943,17 @@ class WorkspaceMixin:
         if snapshot['job'].get('mode') == 'ai' and self._work_prerequisite_jobs(snapshot['definition'], snapshot['job']['id']) and not snapshot.get('evidence_attempt_ids'):
             _fail('evidence_access_required', '근거의 권한을 다시 조회해 주세요.')
         bridge = getattr(getattr(self, 'operations', None), 'bridge', None) or getattr(getattr(self, 'execution', None), 'bridge', None)
+        api_refs = [ref for ref in refs if isinstance(ref, dict) and ref.get('kind') == 'api']
+        if api_refs:
+            from .ees_workflow_api_http import authorize_service
+            actor, _, groups = await self._work_actor(actor)
+            with self._db() as db:
+                for ref in api_refs:
+                    operation = self.api_catalog.resolve(db, ref['tool_id'], ref['version'], groups=groups, evidence=True)
+                    authorize_service(operation, actor)
         for ref in refs:
+            if ref in api_refs:
+                continue
             if snapshot.get('shared_tool') and ref == snapshot['shared_tool']['reference']:
                 continue  # Current shared-tool ACL/source was checked above.
             if self.shared_tools.authored.is_authored_reference(ref):
@@ -1484,6 +1518,8 @@ class WorkspaceMixin:
                     # definition_check reports it as a publishable warning.
                     if node.get('mode') != 'tool' or tool_connection_required(node):
                         continue
+                    if 'api_binding' in node:
+                        continue  # Resolved against the stored API version inside the transaction.
                     if node.get('shared_tool_id'):
                         if self.shared_tools.authored.is_key(node['shared_tool_id']):
                             continue
@@ -1605,6 +1641,8 @@ class WorkspaceMixin:
                 if body.get('mode') is not None: definition['mode'] = body['mode']
                 if body.get('execution_scope') is not None: definition['execution_scope'] = body['execution_scope']
             errors, _ = definition_check(definition, False)
+            if not errors:
+                errors.extend(binding_errors(self, db, groups, definition, for_new=True))
             if errors: _fail('invalid_definition', '\n'.join(errors))
             db.execute('INSERT INTO work_definitions VALUES(?,?,?,1,NULL,NULL,?,?)', (key, system, _dump(definition), actor_id, now))
             return {'workflow_id': key, 'revision': 1, 'workflow': self._work_workflow_view(db, actor, groups, self._work_definition(db, actor, groups, key, True))}
@@ -1638,6 +1676,8 @@ class WorkspaceMixin:
             _revision(body, row['revision'])
             if action == 'save_draft':
                 definition = body.get('definition'); errors, _ = definition_check(definition, False)
+                if not errors:
+                    errors.extend(binding_errors(self, db, groups, definition, previous=json.loads(row['draft']), for_new=True))
                 if errors: _fail('invalid_definition', '\n'.join(errors))
                 if definition['id'] != row['id'] or definition['system_id'] != row['system_id']: _fail('immutable_identity', '절차 ID와 관리 시스템은 바꿀 수 없습니다.')
                 if 'publication_state' not in body:
@@ -1653,6 +1693,10 @@ class WorkspaceMixin:
                 db.execute('UPDATE work_definitions SET published_version=NULL,revision=revision+1,validation=NULL,updated_at=? WHERE id=?', (now, row['id']))
                 return {'workflow_id': row['id'], 'revision': row['revision'] + 1, 'published_version': None}
             errors, warnings = definition_check(definition)
+            api_errors = binding_errors(self, db, groups, definition) if not errors else []
+            if api_errors and action != 'validate_workflow':
+                _fail('api_binding_invalid', '\n'.join(api_errors))
+            errors.extend(api_errors)
             errors.extend(settings_errors(definition, db.execute('SELECT factory_id,values_json FROM work_settings WHERE workflow_id=?', (row['id'],))))
             errors.extend(publication_errors)
             if hasattr(self, 'operations') and hasattr(self.operations, 'validate_publication'):
@@ -1701,6 +1745,9 @@ class WorkspaceMixin:
             conditions = _factory_condition_results(definition, attributes)
             snapshot = {'definition': definition, 'definition_hash': published['hash'], 'factory': dict(factory) | {'attributes': attributes} if factory else None, 'condition_results': conditions}
             key = str(uuid4()); mode = definition.get('mode', 'on_demand')
+            api_errors = binding_errors(self, db, groups, definition)
+            if api_errors:
+                _fail('execution_not_ready', '\n'.join(api_errors))
             active_definition = {'nodes': {job_id: node for job_id, node in definition['nodes'].items() if node['type'] == 'j' and conditions[job_id] is not False}}
             if hasattr(self, 'operations') and hasattr(self.operations, 'validate_publication'):
                 errors = self.operations.validate_publication(db, {**definition, 'nodes': active_definition['nodes']}, actor, groups, authoring=False, factory_id=factory_id)
@@ -1805,10 +1852,12 @@ class WorkspaceMixin:
                         item['selected'] = item.get('selected', True)
                         item['required'] = item['selected']
                     empty_selection = not any(item['selected'] for item in items)
-                    if empty_selection and not self._work_shared_search(node, current):
+                    if empty_selection and not self._work_allows_empty_list(node, current):
                         _fail('zero_selection_policy_required', '선택 항목이 없는 목록의 완료 정책이 정해지지 않았습니다. 확정을 보류합니다.')
                     original = json.loads(current['result']) or {}
                     previous = original.get('items', [])
+                    if node.get('api_binding') and {i['id'] for i in items} != {i['id'] for i in previous}:
+                        _fail('invalid_amendment', 'API에서 실제로 받은 항목의 포함 여부만 변경할 수 있습니다.')
                     fields = ('id', 'title', 'name', 'selected', 'required', 'note')
                     comparable = lambda item: {key: item.get(key, True if key in ('selected', 'required') else None) for key in fields}
                     previous_by_id = {item['id']: item for item in previous if isinstance(item, dict) and 'id' in item}
@@ -1848,6 +1897,8 @@ class WorkspaceMixin:
                     if any(not isinstance(item, dict) or not _id(item.get('id')) for item in items) or len({item['id'] for item in items}) != len(items):
                         _fail('invalid_amendment', '중복 없는 항목 ID를 확인해 주세요.')
                     original = json.loads(current['result']) or {}; old_items = {item['id']: item for item in original.get('items', []) if isinstance(item, dict) and 'id' in item}
+                    if node.get('api_binding') and ({i['id'] for i in items} != set(old_items) or current['id'] not in (evidence_access or set())):
+                        _fail('invalid_amendment', '현재 접근할 수 있는 API 결과에서 포함할 항목을 선택해 주세요.')
                     amended = []
                     for item in items:
                         allowed = {field: item[field] for field in ('id', 'title', 'name', 'selected', 'required', 'note') if field in item}
@@ -1918,11 +1969,13 @@ class WorkspaceMixin:
         result = json.loads(attempt['result']) if attempt['result'] else {}
         items = result.get('items', []) if isinstance(result, dict) else []
         required = {str(item['id']) for item in items if isinstance(item, dict) and 'id' in item and item.get('required', True)}
+        if node.get('api_binding') and node.get('result_block') == 'human_confirm':
+            required = {'job'}  # One verdict confirms the API response as a whole.
         shared_empty_selection = False
         if node.get('result_block') == 'list_confirm':
             required = {str(item['id']) for item in items if isinstance(item, dict) and 'id' in item and item.get('required', True) and item.get('selected', True)}
             if not required and verdict == 'completed':
-                shared_empty_selection = self._work_shared_search(node, attempt)
+                shared_empty_selection = self._work_allows_empty_list(node, attempt)
                 if not shared_empty_selection:
                     _fail('zero_selection_policy_required', '선택 항목이 없는 목록의 완료 정책이 정해지지 않았습니다. 확정을 보류합니다.')
                 # The source classification survives amendments and is never

@@ -22,6 +22,7 @@ from uuid import uuid4
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from .ees_workflow_authoring import WorkflowError
+from . import ees_workflow_api_http as api_http
 from .ees_workflow_definition import TOOL_CONNECTION_MESSAGE, tool_connection_required
 
 INTENT_TTL = 120
@@ -353,7 +354,59 @@ class OperationsRuntime:
     def _save_request(self, db, request):
         db.execute("INSERT INTO work_external_requests VALUES(?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET revision=excluded.revision,state=excluded.state,data=excluded.data", (request["id"], request["run_id"], request["job_id"], request["actor"], request["revision"], request["state"], dump(request)))
 
+    def _api_operation(self, db, reference, groups):
+        return self.service.api_catalog.resolve(db, reference['tool_id'], reference['version'], groups=groups)
+
+    @staticmethod
+    def _api_reference(binding):
+        return {'kind': 'api', 'tool_id': binding['operation_id'], 'version': binding['version']}
+
+    def _request_contract(self, db, groups, key, reference=None):
+        if reference and reference.get('kind') == 'api':
+            operation = self._api_operation(db, reference, groups)
+            if operation['id'] != key or operation['method'] in api_http.READ_METHODS:
+                fail('request_job_mismatch')
+            return {'id': key, 'state': 'approved', 'revision': operation['version'], 'kind': 'request',
+                    'operation': operation, 'reference': reference}
+        return self._tool(db, key)
+
+    async def _api_test(self, actor, groups, body):
+        if value(actor, 'role') != 'admin': fail('admin_required', '관리자만 API 시험을 실행할 수 있습니다.')
+        ref = {'tool_id': identifier(body.get('api_id')), 'version': body.get('version')}
+        if type(ref['version']) is not int: fail('api_version_invalid')
+        arguments = clean(body.get('arguments', {}))
+        with self.service._db(write=True) as db:
+            operation = self._api_operation(db, ref, groups)
+            existing = self._receipt(db, actor, body)
+            if existing is not None:
+                api_http.authorize_service(operation, actor)
+                return existing
+            # Persist intent before crossing the HTTP boundary. An interrupted trial never repeats.
+            self._remember(db, actor, body, {'ok':False, 'error':{'code':'api_trial_in_progress','message':'시험 응답을 기다리고 있습니다.'}})
+        try:
+            result = await api_http.invoke_http(operation, arguments, actor, preview=operation['method'] not in api_http.READ_METHODS)
+            result = clean(result)
+            outcome = {'ok':result['status'] in ('succeeded','partial','preview'), 'result':result}
+        except WorkflowError as error:
+            outcome = {'ok':False, 'error':{'code':error.code,'message':error.message}}
+        actor, _, groups = await self._actor(actor)
+        with self.service._db(write=True) as db:
+            if value(actor, 'role') != 'admin': fail('admin_required')
+            self._api_operation(db, ref, groups)
+            if outcome.get("result"):
+                api_http.authorize_service(operation,actor)
+            self._event(db, ref['tool_id'], actor, 'api_test', {'version':ref['version'], 'status':outcome.get('result',{}).get('status','failed')})
+            db.execute('UPDATE work_operation_receipts SET outcome=? WHERE actor=? AND request_id=? AND payload_hash=?',
+                       (dump(outcome), value(actor,'id'),body['request_id'],digest(body)))
+        return outcome
+
     async def _inspect_reference(self, actor, reference, kind):
+        if reference.get('kind') == 'api':
+            _, _, groups = await self._actor(actor)
+            with self.service._db() as db:
+                operation = self._api_operation(db, reference, groups)
+                api_http.authorize_service(operation,actor)
+                return operation
         self.configure()
         if kind == "read":
             result = await self.bridge.inspect(actor, reference.get("tool_id", ""), reference.get("function", ""))
@@ -368,6 +421,10 @@ class OperationsRuntime:
             fail("command_invalid")
         actor, caps, groups = await self._actor(user)
         action = body.get("action")
+        if action == 'api_test':
+            return await self._api_test(actor, groups, body)
+        if str(action).startswith('api_'):
+            return await self.service.api_catalog.command(actor, body)
         if str(action).startswith("tool_draft_"):
             return await self.service.tool_drafts.command(actor, body)
         if action == "shared_tool_accept_version":
@@ -395,13 +452,22 @@ class OperationsRuntime:
         with self.service._db() as db:
             if action == "request_prepare":
                 run = self.service._work_run(db, actor, groups, identifier(body.get("run_id")), write=True)
-                tool = self._tool(db, body.get("tool_contract_id"))
+                snapshot = self.service._work_snapshot(db, run, identifier(body.get('job_id')))
+                binding = snapshot['job'].get('api_binding')
+                reference = self._api_reference(binding) if binding else None
+                tool = self._request_contract(db, groups, body.get('tool_contract_id') or (binding or {}).get('operation_id'), reference)
             else:
                 request = self._request(db, actor, groups, body.get("external_request_id"), write=True)
-                tool = self._tool(db, request["tool_contract_id"])
+                tool = self._request_contract(db, groups, request["tool_contract_id"], request["reference"])
                 run = self.service._work_run(db, actor, groups, request["run_id"], write=True)
             self._scope(db, actor, groups, run["system_id"], run["factory_id"], "requester" if action != "request_approve" else "approver")
         await self._inspect_reference(actor, tool["reference"], tool["kind"])
+        if 'operation' in tool:
+            with self.service._db() as db:
+                source_job = self.service._work_snapshot(db, run, body['job_id'] if action == 'request_prepare' else request['job_id'])
+                _, _, records = self._api_arguments(db, run, source_job['job'], source_job['inputs'], tool['operation'])
+            for record in records:
+                await self.service._work_check_evidence(actor, record)
         actor, caps, groups = await self._actor(actor)
         with self.service._db(write=True) as db:
             current_run = self.service._work_run(db, actor, groups, run["id"], write=True)
@@ -409,7 +475,7 @@ class OperationsRuntime:
             receipt = self._receipt(db, actor, body)
             if receipt is not None:
                 return receipt
-            current_tool = self._tool(db, tool["id"])
+            current_tool = self._request_contract(db, groups, tool["id"], tool["reference"])
             if current_tool["revision"] != tool["revision"] or current_tool["state"] != "approved" or current_tool["kind"] not in {"request", "direct"}:
                 fail("tool_review_required")
             run = self.service._work_run(db, actor, groups, run["id"], write=True)
@@ -419,18 +485,25 @@ class OperationsRuntime:
                 job_id = identifier(body.get("job_id"))
                 snapshot = self.service._work_snapshot(db, run, job_id)
                 job = snapshot["job"]
-                if (job.get("tool_contract_id") or (job.get("tool_reference") or {}).get("contract_id")) != tool["id"] or self._job_kind(job) != "request":
+                binding = job.get('api_binding') or {}
+                if (binding.get('operation_id') or job.get("tool_contract_id") or (job.get("tool_reference") or {}).get("contract_id")) != tool["id"] or self._job_kind(job) != "request":
                     fail("request_job_mismatch")
-                if job.get("tool_contract_revision") != tool["revision"]:
+                if binding.get("version",job.get("tool_contract_revision")) != tool["revision"]:
                     fail("tool_contract_changed", "게시된 도구 계약이 바뀌었습니다. 절차를 다시 검사·게시해 주세요.")
                 required = job.get("approval_count", 0)
                 if type(required) is not int or required not in (0, 1, 2):
                     fail("approval_count_invalid")
                 inputs = self._arguments(job, snapshot.get("inputs", {})) if job.get("argument_bindings") else deepcopy(snapshot.get("inputs", {}))
-                if "inputs" in body and digest(clean(body["inputs"])) != digest(inputs):
+                if "operation" not in tool and "inputs" in body and digest(clean(body["inputs"])) != digest(inputs):
                     fail("request_input_mismatch", "저장된 이번 입력과 요청 대상이 다릅니다. 값을 먼저 저장해 주세요.")
-                source_hash = digest({"inputs": snapshot.get("inputs", {}), "sources": snapshot.get("settings_sources", {})})
-                schema_check(tool["input_schema"], inputs)
+                source_hash = self._request_source_hash(db, run, snapshot, tool)
+                if 'operation' in tool:
+                    inputs, _, _ = self._api_arguments(db, run, job, snapshot['inputs'], tool['operation'])
+                    if 'inputs' in body and clean(body['inputs']) != inputs: fail('request_input_mismatch')
+                    # Validate the actual address/credentials before asking for confirmation.
+                    api_http.prepare_request(tool['operation'], inputs, actor)
+                else:
+                    schema_check(tool["input_schema"], inputs)
                 request_reason = body.get("request_reason", "")
                 if not isinstance(request_reason, str) or len(request_reason) > 4000:
                     fail("request_reason_invalid", "요청 사유는 4,000자 이내의 글로 입력해 주세요.")
@@ -439,12 +512,13 @@ class OperationsRuntime:
                     fail("previous_request_unresolved", "이전 요청의 접수·효과를 먼저 확인해 주세요. 자동 재요청하지 않습니다.")
                 request = {"id": str(uuid4()), "run_id": run["id"], "job_id": job_id, "actor": value(actor, "id"), "revision": 1, "run_revision": run["revision"], "tool_contract_id": tool["id"], "tool_revision": tool["revision"], "reference": deepcopy(tool["reference"]), "input_hash": digest(inputs), "input_source_hash": source_hash, "inputs": inputs, "approval_count": required, "approvals": [], "state": "approval_pending" if required else "ready", "created_at": self.clock(), "effect_criterion": deepcopy(job.get("effect_criterion", {})), "correlation_id": str(uuid4()), "job_number": None, "reported_complete": False, "effect_verified": False, "connector_configured": self.connector is not None}
                 request.update(request_reason=request_reason, execution_actor="EES Work" if tool["kind"] == "direct" else "EES")
+                if 'operation' in tool: request['connector_configured'] = True
                 if tool["kind"] == "direct": request["connector_configured"] = False
             else:
                 request = self._request(db, actor, groups, request["id"], write=True)
                 self._revision(body, request["revision"])
                 current_snapshot = self.service._work_snapshot(db, run, request["job_id"])
-                if request["input_source_hash"] != digest({"inputs": current_snapshot["inputs"], "sources": current_snapshot["settings_sources"]}) or request["tool_revision"] != tool["revision"] or request["run_revision"] != run["revision"]:
+                if request["input_source_hash"] != self._request_source_hash(db, run, current_snapshot, tool) or request["tool_revision"] != tool["revision"] or request["run_revision"] != run["revision"]:
                     fail("request_stale", "입력·작업·도구가 바뀌었습니다. 요청과 승인을 다시 준비해 주세요.")
                 if action == "request_cancel":
                     if request["actor"] != value(actor, "id") or request["state"] not in {"ready", "approval_pending", "prepared"}:
@@ -598,44 +672,71 @@ class OperationsRuntime:
             request = self._request(db, actor, groups, request_id, write=True)
             run = self.service._work_run(db, actor, groups, request["run_id"], write=True)
             self._scope(db, actor, groups, run["system_id"], run["factory_id"], "requester")
-            tool = self._tool(db, request["tool_contract_id"])
+            tool = self._request_contract(db, groups, request["tool_contract_id"], request['reference'])
             snapshot = self.service._work_snapshot(db, run, request["job_id"])
-        if request["input_source_hash"] != digest({"inputs": snapshot["inputs"], "sources": snapshot["settings_sources"]}) or tool["state"] != "approved" or tool["revision"] != request["tool_revision"] or request["run_revision"] != run["revision"]:
+            source_hash = self._request_source_hash(db, run, snapshot, tool)
+            records = self._api_arguments(db, run, snapshot['job'], snapshot['inputs'], tool['operation'])[2] if 'operation' in tool else []
+        for record in records:
+            await self.service._work_check_evidence(actor, record)
+        if request["input_source_hash"] != source_hash or tool["state"] != "approved" or tool["revision"] != request["tool_revision"] or request["run_revision"] != run["revision"]:
             fail("request_stale")
         await self._inspect_reference(actor, request["reference"], "request")
-        status_contract = await self.bridge.inspect_registered(actor, tool["reference"]["tool_id"], tool["status_function"])
-        if status_contract["reference"] != tool.get("status_reference"):
-            fail("native_version_changed")
+        if 'operation' not in tool:
+            status_contract = await self.bridge.inspect_registered(actor, tool["reference"]["tool_id"], tool["status_function"])
+            if status_contract["reference"] != tool.get("status_reference"):
+                fail("native_version_changed")
         # Every approval must still be held by a distinct current approver.
-        approvers = set()
+        approvers = {}
         for approval in request["approvals"]:
             approver, _, members = await self._actor({"id": approval["actor"]})
             with self.service._db() as db:
                 self._scope(db, approver, members, run["system_id"], run["factory_id"], "approver")
             if approval["actor"] == request["actor"] or approval["input_hash"] != request["input_hash"] or approval["tool_revision"] != request["tool_revision"]:
                 fail("approval_stale")
-            approvers.add(approval["actor"])
+            approvers[approval["actor"]] = approver, members
         if len(approvers) < request["approval_count"]:
             fail("approval_required")
-        return request, tool
+        return request, tool, list(approvers.values())
+
+    async def _check_api_request_evidence(self, actor, request):
+        if request['reference'].get('kind') != 'api' or not request.get('attempt_id'):
+            return
+        with self.service._db() as db:
+            attempt = db.execute('SELECT * FROM work_attempts WHERE id=?',(request['attempt_id'],)).fetchone()
+        if not attempt: fail('evidence_access_required')
+        await self.service._work_check_evidence(actor,dict(attempt))
 
     async def _dispatch(self, actor, groups, body):
-        request, tool = await self._approved_request(actor, groups, body.get("external_request_id"))
-        if request["actor"] != value(actor, "id"):
+        # Lost-response retry after dispatch returns the stored state without re-sending.
+        with self.service._db() as db:
+            prior = self._request(db, actor, groups, body.get('external_request_id'), write=True)
+            cached = self._receipt(db, actor, body)
+            if cached is not None and prior['reference'].get('kind') == 'api':
+                api_http.authorize_service(self._api_operation(db, prior['reference'], groups),actor)
+                run = self.service._work_run(db, actor, groups, prior['run_id'], write=True)
+                self._scope(db, actor, groups, run['system_id'], run['factory_id'], 'requester')
+                if prior['actor'] != value(actor,'id'): fail('request_actor_mismatch')
+        if cached is not None and prior['reference'].get('kind') == 'api':
+            await self._check_api_request_evidence(actor,prior)
+            return {'ok':prior['state'] not in ('failed','rejected','unknown'),'request':self._public_request(prior)}
+        if prior["actor"] != value(actor, "id"):
             fail("request_actor_mismatch")
-        options_snapshot = await self.service._work_resolve_job_options(actor, request["run_id"], request["job_id"])
+        options_snapshot = await self.service._work_resolve_job_options(actor, prior["run_id"], prior["job_id"])
         actor, _, groups = await self._actor(actor)
+        request, tool, approvers = await self._approved_request(actor, groups, prior['id'])
         with self.service._db(write=True) as db:
             receipt = self._receipt(db, actor, body)
             if receipt is not None:
                 return receipt
             current = self._request(db, actor, groups, request["id"], write=True)
-            latest_tool = self._tool(db, request["tool_contract_id"])
+            latest_tool = self._request_contract(db, groups, request["tool_contract_id"], request["reference"])
             current_run = self.service._work_run(db, actor, groups, request["run_id"], write=True)
             self._scope(db, actor, groups, current_run["system_id"], current_run["factory_id"], "requester")
+            for reviewer, membership in approvers:
+                self._scope(db, reviewer, membership, current_run["system_id"], current_run["factory_id"], "approver")
             self._revision(body, current["revision"])
             latest_snapshot = self.service._work_snapshot(db, current_run, request["job_id"])
-            if request["input_source_hash"] != digest({"inputs": latest_snapshot["inputs"], "sources": latest_snapshot["settings_sources"]}) or latest_tool["state"] != "approved" or latest_tool["revision"] != request["tool_revision"] or current_run["revision"] != request["run_revision"] or current != request or current["state"] != "ready":
+            if request["input_source_hash"] != self._request_source_hash(db, current_run, latest_snapshot, tool) or latest_tool["state"] != "approved" or latest_tool["revision"] != request["tool_revision"] or current_run["revision"] != request["run_revision"] or current != request or current["state"] != "ready":
                 fail("request_stale")
             intent = db.execute("SELECT * FROM work_request_intents WHERE hash=?", (digest(body.get("intent_token", "")),)).fetchone()
             if not intent or intent["consumed"] or intent["expires"] <= self.clock() or intent["request_id"] != request["id"] or intent["actor"] != value(actor, "id") or intent["binding"] != digest(self._binding(request)):
@@ -645,7 +746,9 @@ class OperationsRuntime:
                 request.update(state="blocked", reason="direct_executor_unconfigured", execution_actor="EES Work", revision=request["revision"] + 1)
                 self._save_request(db, request)
                 return self._remember(db, actor, body, {"ok": False, "request": self._public_request(request), "error": {"code": "direct_executor_unconfigured", "message": "담당자 소유의 허용 명령·전용 계정·효과 조회 연결을 확인해야 합니다. 직접 실행 연결은 아직 구성되지 않았습니다."}})
-            if self.connector is None:
+            if 'operation' in tool:
+                api_http.prepare_request(tool['operation'], request['inputs'], actor)
+            if self.connector is None and 'operation' not in tool:
                 request.update(state="blocked", reason="ees_connector_unconfigured", revision=request["revision"] + 1)
                 self._save_request(db, request)
                 return self._remember(db, actor, body, {"ok": False, "request": self._public_request(request), "error": {"code": "ees_connector_unconfigured", "message": "실제 EES 기능·인증·상태 조회 연결을 설정한 뒤 요청할 수 있습니다."}})
@@ -653,6 +756,12 @@ class OperationsRuntime:
             if unresolved:
                 fail("previous_request_unresolved")
             attempt = self.service._work_begin_attempt(db, actor, groups, request["run_id"], request["job_id"], request["run_revision"], options_snapshot=options_snapshot)
+            if 'operation' in tool:
+                inputs, sources, records = self._api_arguments(db,current_run,latest_snapshot['job'],latest_snapshot['inputs'],tool['operation'])
+                attempt['snapshot'].update(arguments=inputs, argument_sources=sources, tool_reference=tool['reference'],
+                    evidence_attempt_ids=[row['id'] for row in records],
+                    source_references=[ref for row in records for ref in self.service._work_evidence_references(json.loads(row['snapshot']))])
+                db.execute("UPDATE work_attempts SET snapshot=? WHERE id=? AND status='running'",(dump(attempt['snapshot']),attempt['id']))
             request["attempt_id"] = attempt["id"]
             request.update(state="requested", requested_at=self.clock(), revision=request["revision"] + 1)
             self._save_request(db, request)
@@ -662,7 +771,20 @@ class OperationsRuntime:
         # Durable request exists before network I/O. A timeout is UNKNOWN and
         # cannot enter this path again, even after a worker or browser restart.
         try:
-            result = await self.connector.request(actor, deepcopy(tool), deepcopy(request["inputs"]), request["correlation_id"])
+            if 'operation' in tool:
+                await self._check_api_request_evidence(actor,request)
+                response = await api_http.invoke_http(tool['operation'], request['inputs'], actor, outputs=latest_snapshot['job']['api_binding']['outputs'], correlation_id=request['correlation_id'])
+                await self._check_api_request_evidence(actor,request)
+                actor, _, groups = await self._actor(actor)
+                with self.service._db() as db:
+                    run = self.service._work_run(db, actor, groups, request['run_id'], write=True)
+                    self._scope(db, actor, groups, run['system_id'], run['factory_id'], 'requester')
+                    api_http.authorize_service(self._api_operation(db, request['reference'], groups),actor)
+                result = {'state': 'accepted' if response['status'] in ('succeeded','partial') else 'rejected' if response['status'] == 'failed' else 'unknown', 'api_result': clean(response)}
+                if response.get('job_number'):
+                    result['job_number'] = response['job_number']
+            else:
+                result = await self.connector.request(actor, deepcopy(tool), deepcopy(request["inputs"]), request["correlation_id"])
         except BaseException as error:
             self._observe(request["id"], "unknown", {"reason": "request_result_unknown"})
             if isinstance(error, asyncio.CancelledError):
@@ -689,7 +811,16 @@ class OperationsRuntime:
             if request.get("attempt_id") and state in {"effect_verified", "failed", "rejected"}:
                 attempt = db.execute("SELECT status FROM work_attempts WHERE id=?", (request["attempt_id"],)).fetchone()
                 if attempt and attempt[0] == "running":
-                    self.service._work_finish_attempt(db, request["attempt_id"], "succeeded" if state == "effect_verified" else "failed", {"status": "succeeded" if state == "effect_verified" else "failed", "completeness": "complete", "external_request_id": request_id, "reported_complete": request.get("reported_complete", False), "effect_verified": request.get("effect_verified", False), "effect_evidence": request.get("effect_evidence", []), "reason": request.get("reason", "")})
+                    status = "succeeded" if state == "effect_verified" else "failed"
+                    result = {"status":status, "completeness":"complete", "external_request_id":request_id,
+                              "reported_complete":request.get("reported_complete", False), "effect_verified":request.get("effect_verified", False),
+                              "effect_evidence":request.get("effect_evidence", []), "reason":request.get("reason", "")}
+                    if request['reference'].get('kind') == 'api':
+                        projection = request.get('api_result',{})
+                        for key in ('items','count','field_labels','http_status','source'):
+                            if key in projection: result[key] = deepcopy(projection[key])
+                        if projection.get('completeness'): result['completeness'] = projection['completeness']
+                    self.service._work_finish_attempt(db,request['attempt_id'],status,result)
             if request.get("attempt_id") and state == "unknown":
                 db.execute("UPDATE work_jobs SET status='unknown',revision=revision+1,reason='EES 요청 결과 확인 필요' WHERE run_id=? AND job_id=? AND current_attempt=?", (request["run_id"], request["job_id"], request["attempt_id"]))
             self._event(db, request_id, "EES", "request_observed", {"state": state, "revision": request["revision"], "observation": clean(details), "correlation_id": request["correlation_id"]})
@@ -701,6 +832,8 @@ class OperationsRuntime:
             self._observe(request_id, "unknown", {"reason": "ees_response_invalid"})
             return
         details = {key: clean(result[key]) for key in ("job_number", "external_reference", "reason") if key in result}
+        if 'api_result' in result:
+            details['api_result'] = clean(result['api_result'])
         if result["state"] == "reported_complete":
             details["reported_complete"] = True
         self._observe(request_id, result["state"], details)
@@ -709,12 +842,18 @@ class OperationsRuntime:
         # Reconciliation never calls connector.request and never claims rollback.
         with self.service._db() as db:
             request = self._request(db, actor, groups, body.get("external_request_id"))
-            tool = self._tool(db, request["tool_contract_id"])
+            tool = self._request_contract(db, groups, request["tool_contract_id"], request['reference'])
             run = self.service._work_run(db, actor, groups, request["run_id"])
             self._scope(db, actor, groups, run["system_id"], run["factory_id"], "requester")
+            if 'operation' in tool:
+                if request['actor'] != value(actor,'id'): fail('request_actor_mismatch')
+                if request['state'] not in ('requested','accepted','running','reported_complete','unknown','effect_verified'):
+                    fail('api_request_not_dispatched', '접수한 요청의 상태를 확인할 수 있습니다.')
+                api_http.observation_config(tool['operation'], actor)
             if tool["kind"] == "direct":
                 fail("direct_executor_unconfigured", "직접 실행과 효과 조회 연결이 아직 구성되지 않았습니다.")
         await self._inspect_reference(actor, request["reference"], "request")
+        await self._check_api_request_evidence(actor,request)
         with self.service._db(write=True) as db:
             receipt = self._receipt(db, actor, body)
             if receipt is not None:
@@ -726,18 +865,26 @@ class OperationsRuntime:
             self._remember(db, actor, body, {"ok": True, "request": self._public_request(request)})
         if tool["state"] != "approved" or tool["revision"] != request["tool_revision"]:
             fail("tool_review_required")
-        if self.connector is None:
+        if self.connector is None and "operation" not in tool:
             fail("ees_connector_unconfigured")
         try:
             actor, groups = await self._reconcile_access(actor, request, tool)
-            result = await self.connector.status(actor, deepcopy(tool), request["correlation_id"], request.get("job_number"))
+            if 'operation' in tool:
+                result = await api_http.observe_http(tool['operation'],actor,request)
+                await self._reconcile_access(actor,request,tool)
+            else:
+                result = await self.connector.status(actor, deepcopy(tool), request["correlation_id"], request.get("job_number"))
             self._record_external(request["id"], result)
             if isinstance(result, dict) and result.get("state") == "reported_complete":
                 if not request.get("effect_criterion"):
                     self._observe(request["id"], "reported_complete", {"reason": "effect_criterion_required"})
                 else:
                     actor, groups = await self._reconcile_access(actor, request, tool)
-                    observed = await self.connector.effect(actor, deepcopy(tool), deepcopy(request["effect_criterion"]), request["correlation_id"])
+                    if 'operation' in tool:
+                        observed = await api_http.observe_http(tool['operation'],actor,request,effect=True)
+                        await self._reconcile_access(actor,request,tool)
+                    else:
+                        observed = await self.connector.effect(actor, deepcopy(tool), deepcopy(request["effect_criterion"]), request["correlation_id"])
                     if isinstance(observed, dict) and observed.get("satisfied") is True and observed.get("evidence"):
                         self._observe(request["id"], "effect_verified", {"reported_complete": True, "effect_verified": True, "effect_evidence": clean(observed["evidence"])})
                     elif isinstance(observed, dict) and observed.get("satisfied") is False and observed.get("evidence"):
@@ -1307,6 +1454,13 @@ class OperationsRuntime:
         if kind in {"human", "request"}:
             fail("human_command_required", "사람 작업은 직접 확인하고, EES 요청은 요청 확인 창에서 진행해 주세요.")
         reference = deepcopy(job.get("tool_reference", job.get("execution", {}).get("reference", snapshot.get("tool_reference"))))
+        api_operation = None
+        if job.get('api_binding'):
+            reference = self._api_reference(job['api_binding'])
+            with self.service._db() as db:
+                api_operation = self._api_operation(db, reference, groups)
+            if api_operation['method'] not in api_http.READ_METHODS:
+                fail('request_confirmation_required', '상태 변경 API는 요청 확인 후 실행해 주세요.')
         if shared_pin:
             reference = deepcopy(shared_pin["reference"])
         if reference:
@@ -1314,10 +1468,10 @@ class OperationsRuntime:
         if kind == "tool":
             if not reference:
                 fail("native_tool_required", "연결된 도구 정보를 찾지 못해 실행할 수 없습니다. 워크스페이스에서 이 작업의 도구 연결을 확인해 주세요.")
-            if not self.service.shared_tools.authored.is_authored_reference(reference):
+            if not api_operation and not self.service.shared_tools.authored.is_authored_reference(reference):
                 await self.bridge.check(actor, reference)
             with self.service._db() as db:
-                arguments, argument_sources, argument_records = self._resolve_arguments(db, run, job, snapshot["inputs"])
+                arguments, argument_sources, argument_records = (self._api_arguments(db, run, job, snapshot['inputs'], api_operation) if api_operation else self._resolve_arguments(db, run, job, snapshot["inputs"]))
             effective_arguments = (self.service.shared_tools.authored.validate_arguments(reference, arguments)
                 if self.service.shared_tools.authored.is_authored_reference(reference) else None)
             for record in argument_records:
@@ -1372,6 +1526,8 @@ class OperationsRuntime:
         actor, _, groups = await self._actor(actor)
         with self.service._db(write=True) as db:
             self.service._work_run(db, actor, groups, run["id"], write=True)
+            if api_operation:
+                api_http.authorize_service(self._api_operation(db, reference, groups),actor)
             if schedule_guard is not None:
                 self._current_schedule(db, schedule_guard)
             if scope_guard is not None:
@@ -1380,7 +1536,7 @@ class OperationsRuntime:
                     fail("scope_claim_lost")
             receipt = self._receipt(db, actor, body)
             if receipt is not None:
-                if shared_pin and self.service.shared_tools.authored.is_authored_reference(shared_pin['reference']):
+                if api_operation or (shared_pin and self.service.shared_tools.authored.is_authored_reference(shared_pin['reference'])):
                     # A client disconnect or revoked access can stop the final
                     # response after the immutable attempt was persisted. Read
                     # that outcome; never replay a stale "running" receipt.
@@ -1392,7 +1548,7 @@ class OperationsRuntime:
                 return receipt
             self._check_read_contract(db, job)
             if kind == "tool":
-                current_arguments, current_sources, _ = self._resolve_arguments(db, run, job, snapshot["inputs"])
+                current_arguments, current_sources, _ = (self._api_arguments(db, run, job, snapshot['inputs'], api_operation) if api_operation else self._resolve_arguments(db, run, job, snapshot["inputs"]))
                 if current_arguments != arguments or current_sources != argument_sources:
                     fail("result_source_changed")
             if retry_guard is not None:
@@ -1407,6 +1563,7 @@ class OperationsRuntime:
                 attempt["snapshot"]["shared_tool"] = (self.service.shared_tools.authored.describe_pin(db, shared_pin)
                     if self.service.shared_tools.authored.is_authored_reference(shared_pin["reference"]) else deepcopy(shared_pin))
                 attempt["snapshot"]["tool_reference"] = deepcopy(shared_pin["reference"])
+            if api_operation: attempt['snapshot']['tool_reference'] = reference
             if kind == "tool":
                 attempt["snapshot"]["arguments"] = arguments
                 if effective_arguments is not None:
@@ -1438,7 +1595,17 @@ class OperationsRuntime:
                 if shared_pin:
                     await self.service.shared_tools.resolve(actor, job["shared_tool_id"], kind="work", run_id=run["id"])
                 invoke = self.service.shared_tools.authored.invoke if self.service.shared_tools.authored.is_authored_reference(reference) else self.bridge.invoke
-                result = await invoke(actor, reference, arguments, {"run_id": run["id"], "job_id": job["id"], "call_id": attempt["id"], **({"shared_tool_id": job["shared_tool_id"], "shared_run_kind": "work"} if shared_pin else {})})
+                if api_operation:
+                    actor, _, groups = await self._actor(actor)
+                    with self.service._db() as db:
+                        self._api_guard(db, actor, groups, attempt, arguments, argument_sources)
+                    result = await api_http.invoke_http(api_operation, arguments, actor, outputs=job['api_binding']['outputs'])
+                    result = clean(result)
+                    if job.get('result_block') == 'human_confirm':
+                        for item in result['items']:
+                            item['required'] = False
+                else:
+                    result = await invoke(actor, reference, arguments, {"run_id": run["id"], "job_id": job["id"], "call_id": attempt["id"], **({"shared_tool_id": job["shared_tool_id"], "shared_run_kind": "work"} if shared_pin else {})})
 
             elif job.get("result_block") in {"item_verdict", "ai_review"}:
                 proposal_kind = "verdicts" if job["result_block"] == "item_verdict" else "report"
@@ -1492,7 +1659,7 @@ class OperationsRuntime:
         except asyncio.CancelledError:
             raise
         except WorkflowError as error:
-            status, result = "blocked", {"error": {"code": error.code}}
+            status, result = ('unknown' if error.code == 'api_io_unknown' else 'failed' if api_operation and error.code in ('api_result_mapping_invalid','api_response_invalid','api_response_too_large') else 'blocked'), {"error": {"code": error.code}}
         except Exception:
             status, result = "unknown", {"error": {"code": "execution_result_unknown"}}
         finally:
@@ -1500,6 +1667,12 @@ class OperationsRuntime:
             await asyncio.gather(heartbeat, return_exceptions=True)
             # No await separates this Work CAS from persistence. Native already
             # rechecked the execution account after the worker returned.
+            if api_operation:
+                try:
+                    actor, _, groups = await self._actor(actor)
+                    for record in argument_records: await self.service._work_check_evidence(actor, record)
+                except WorkflowError as error:
+                    status, result = 'unknown', {'error':{'code':error.code}}
             final_check = getattr(result, 'check_current', None)
             if final_check:
                 try:
@@ -1507,6 +1680,11 @@ class OperationsRuntime:
                 except WorkflowError as error:
                     status, result = 'unknown', {'source': 'authored', 'status': 'unknown', 'completeness': 'unknown', 'items': [], 'count': 0, 'raw_result': None, 'error': {'code': error.code}}
             with self.service._db(write=True) as db:
+                if api_operation:
+                    try:
+                        self._api_guard(db, actor, groups, attempt, arguments, argument_sources)
+                    except WorkflowError as error:
+                        status, result = 'unknown', {'error':{'code':error.code}}
                 final_check = getattr(result, 'check_current', None)
                 if final_check:
                     try:
@@ -1529,6 +1707,70 @@ class OperationsRuntime:
         with self.service._db(write=True) as db:
             db.execute("UPDATE work_operation_receipts SET outcome=? WHERE actor=? AND request_id=? AND payload_hash=?", (dump(outcome), value(actor, "id"), body["request_id"], digest(body)))
         return outcome
+
+    def _api_arguments(self, db, run, job, inputs, operation):
+        binding = job['api_binding']
+        arguments, sources, records = {}, {}, []
+        definition = json.loads(run['snapshot'])['definition']
+        prerequisites = self.service._work_prerequisite_jobs(definition, job['id'])
+        fields = {field['name']:field for field in operation['inputs']}
+        for name, source in binding['inputs'].items():
+            if name not in fields: fail('api_arguments_invalid')
+            if 'constant' in source:
+                arguments[name] = deepcopy(source['constant'])
+            elif 'input' in source:
+                if source['input'] in inputs: arguments[name] = inputs[source['input']]
+            elif source.get('context') in ('system_id','factory_id'):
+                arguments[name] = run[source['context']]
+            else:
+                spec = source.get('result') or {}
+                if spec.get('job_id') not in prerequisites or spec.get('confirmed') is not True: fail('result_binding_invalid')
+                row = db.execute('SELECT a.*,j.status AS business_status FROM work_jobs j JOIN work_attempts a ON a.id=j.current_attempt WHERE j.run_id=? AND j.job_id=?', (run['id'],spec['job_id'])).fetchone()
+                if not row or row['business_status'] != 'completed' or row['status'] != 'succeeded': fail('confirmed_result_required')
+                previous = json.loads(row['result'])
+                if previous.get('completeness') not in ('complete','empty'): fail('complete_result_required')
+                if json.loads(row['inputs']) != self.service._work_snapshot(db,run,spec['job_id'])['inputs']: fail('result_source_changed')
+                chosen = [item for item in previous.get('items',[]) if item.get('selected',True) is not False]
+                if any(spec.get('field') not in item.get('row',{}) for item in chosen): fail('result_binding_invalid')
+                values = [item['row'][spec['field']] for item in chosen]
+                if len(values) == 1 and api_http._matches(values[0], fields[name]['type']): arguments[name] = values[0]
+                elif fields[name]['type'] == 'array': arguments[name] = values
+                else: fail('api_result_cardinality', '다음 작업의 입력으로 사용할 결과 한 건을 확정해 주세요.')
+                sources[name] = {'job_id':row['job_id'], 'attempt_id':row['id'], 'result_hash':digest(previous)}
+                records.append(dict(row))
+        if any(field.get('required') and field['name'] not in arguments for field in fields.values()): fail('api_input_required')
+        if any(not api_http._matches(val, fields[name]['type']) for name,val in arguments.items()): fail('api_input_type')
+        return clean(arguments), sources, records
+
+    def _request_source_hash(self, db, run, snapshot, tool):
+        metadata = {'inputs':snapshot['inputs'], 'sources':snapshot['settings_sources']}
+        if 'operation' in tool:
+            values, sources, _ = self._api_arguments(db,run,snapshot['job'],snapshot['inputs'],tool['operation'])
+            metadata.update(resolved=values, evidence=sources)
+        return digest(metadata)
+
+    def _api_guard(self, db, actor, groups, attempt, arguments, sources):
+        run = self.service._work_run(db, actor, groups, attempt['run_id'], write=True)
+        snapshot = self.service._work_snapshot(db, run, attempt['job_id'])
+        previous = attempt['snapshot']
+        operation = self._api_operation(db,previous['tool_reference'],groups)
+        api_http.authorize_service(operation,actor)
+        current, current_sources, records = self._api_arguments(db,run,snapshot['job'],snapshot['inputs'],operation)
+        for record in records:
+            source_ref = json.loads(record['snapshot']).get('tool_reference') or {}
+            if source_ref.get('kind') == 'api':
+                api_http.authorize_service(self._api_operation(db,source_ref,groups),actor)
+        deadline = (snapshot.get('deadline_source') or {}).get('value')
+        prior_deadline = (previous.get('deadline_source') or {}).get('value')
+        if (current != arguments or current_sources != sources or snapshot['inputs'] != previous['inputs']
+                or deadline != prior_deadline or not self.service._work_sources_current(db, run, previous)):
+            fail('result_source_changed')
+        claim = db.execute('SELECT c.*, a.status AS attempt_state, j.status AS job_state, j.current_attempt FROM work_job_claims c JOIN work_attempts a ON c.attempt_id=a.id JOIN work_jobs j ON j.run_id=a.run_id AND j.job_id=a.job_id WHERE c.attempt_id=?', (attempt['id'],)).fetchone()
+        if (not claim or claim['state'] != 'running' or claim['worker'] != self.worker or claim['lease'] < self.clock()
+                or claim['actor'] != value(actor,'id') or claim['attempt_state'] != 'running'
+                or claim['job_state'] != 'running' or claim['current_attempt'] != attempt['id']):
+            fail('scope_claim_lost')
+        return operation
 
     def _resolve_arguments(self, db, run, job, inputs):
         bindings = job.get("argument_bindings", job.get("execution", {}).get("argument_bindings", {}))
@@ -1637,10 +1879,15 @@ class OperationsRuntime:
         self.configure()
         for record, public in request_records:
             try:
+                if record['reference'].get('kind') == 'api':
+                    if record['actor'] != value(actor,'id'):
+                        fail('evidence_access_required')
+                    await self._check_api_request_evidence(actor,record)
                 await self._inspect_reference(actor, record["reference"], "request")
                 public["inputs"] = deepcopy(record["inputs"])
             except WorkflowError:
                 public.pop("effect_evidence", None)
+                public.pop("api_result", None)
                 public["evidence_access_required"] = True
             requests.append(public)
         reviewers = []
@@ -1689,7 +1936,8 @@ class OperationsRuntime:
         else:
             with self.service._db() as db:
                 tool_scope_factories = [dict(row) for row in db.execute("SELECT id,name,system_id FROM work_factories ORDER BY name,id")]
-        return {"tool_draft_phase": 3, "tool_scope_factories": tool_scope_factories, "tool_drafts": tool_drafts, "tool_import_sources": tool_import_sources, "shared_tools": shared_tools, "shared_tools_notice": shared_notice, "shared_tool_messages": deepcopy(MESSAGES), "shared_tool_access": shared_tool_access, "ok": True, "scope_runs": scopes, "tools": tools, "all_tools": all_tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
+        catalog = await self.service.api_catalog.state(actor)
+        return {"api_catalog": catalog, "tool_draft_phase": 3, "tool_scope_factories": tool_scope_factories, "tool_drafts": tool_drafts, "tool_import_sources": tool_import_sources, "shared_tools": shared_tools, "shared_tools_notice": shared_notice, "shared_tool_messages": deepcopy(MESSAGES), "shared_tool_access": shared_tool_access, "ok": True, "scope_runs": scopes, "tools": tools, "all_tools": all_tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
 
     def start(self):
         self._closing = False
@@ -1738,6 +1986,8 @@ class OperationsRuntime:
         for job in definition.get("nodes", {}).values():
             if job.get("type") != "j":
                 continue
+            if job.get('api_binding'):
+                continue  # Workspace validates API bindings and pinned schemas together.
             if job.get("shared_tool_id"):
                 # Manual publication may retain an incomplete authored-tool
                 # setup. Readiness is checked against the pinned use at I/O.
@@ -1865,14 +2115,15 @@ class OperationsRuntime:
     async def _reconcile_access(self, actor, request, tool):
         actor, _, groups = await self._actor(actor)
         await self._inspect_reference(actor, request["reference"], "request")
-        status_contract = await self.bridge.inspect_registered(actor, tool["reference"]["tool_id"], tool["status_function"])
-        if status_contract["reference"] != tool.get("status_reference"):
-            fail("native_version_changed")
+        if 'operation' not in tool:
+            status_contract = await self.bridge.inspect_registered(actor, tool["reference"]["tool_id"], tool["status_function"])
+            if status_contract["reference"] != tool.get("status_reference"):
+                fail("native_version_changed")
         actor, _, groups = await self._actor(actor)
         with self.service._db() as db:
             run = self.service._work_run(db, actor, groups, request["run_id"])
             self._scope(db, actor, groups, run["system_id"], run["factory_id"], "requester")
-            current = self._tool(db, tool["id"])
+            current = self._request_contract(db, groups, tool["id"], tool['reference'])
             if current["state"] != "approved" or current["revision"] != request["tool_revision"]:
                 fail("tool_review_required")
         return actor, groups

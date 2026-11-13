@@ -16,6 +16,14 @@
       "related": ["request_tool", "direct_tool", "connected_function"]
     },
     {
+      "id": "api_specification",
+      "name": "API 명세",
+      "aliases": ["API 등록", "API 엔드포인트", "API 연결"],
+      "summary": "워크스페이스 도구에서 서비스가 제공한 API 주소와 요청 방식, 업무 이름·용도를 등록합니다. 업무 절차에서는 단계의 작업에 API를 연결하고 사용할 입력과 결과 필드를 지정합니다.",
+      "example": "백업 결과 조회는 GET으로 작업 상태를 받고, 설비 알람 확인 등록은 앞 작업에서 선택한 알람 코드를 입력으로 사용할 수 있습니다.",
+      "related": ["read_tool", "request_tool"]
+    },
+    {
       "id": "request_tool",
       "name": "EES에 작업 부탁",
       "aliases": ["요청 도구"],

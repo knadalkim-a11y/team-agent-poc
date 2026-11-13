@@ -169,7 +169,7 @@ index d552ba8..384bf93 100644
  </svelte:head>
  
 diff --git a/src/lib/components/chat/Chat.svelte b/src/lib/components/chat/Chat.svelte
-index 875aee0..d74a3fe 100644
+index 875aee0..9d4567a 100644
 --- a/src/lib/components/chat/Chat.svelte
 +++ b/src/lib/components/chat/Chat.svelte
 @@ -109,6 +109,10 @@
@@ -1248,7 +1248,7 @@ index 875aee0..d74a3fe 100644
  									id={embedded ? messageInputDropzoneId : undefined}
  									class=" pb-2 {dragged ? 'z-0' : 'z-10'}"
  								>
-+									{#if !embedded && history.currentId}<EesProcedureIntro />{/if}
++									{#if !embedded && history.currentId}<EesProcedureIntro answer={history.messages[history.currentId]} parent={history.messages[history.messages[history.currentId]?.parentId]} />{/if}
 +									{#if !embedded && !$eesSnapshot.native_shell && !$eesSnapshot.procedure_start && eesHelperNotice}
 +										<div class="px-6 py-2"><div class="max-w-[760px] mx-auto"><EesHelperNotice /></div></div>
 +									{/if}
@@ -2214,10 +2214,10 @@ index 0000000..e2b4810
 +</section>
 diff --git a/src/lib/components/ees/EesProcedureIntro.svelte b/src/lib/components/ees/EesProcedureIntro.svelte
 new file mode 100644
-index 0000000..d280e04
+index 0000000..58eb095
 --- /dev/null
 +++ b/src/lib/components/ees/EesProcedureIntro.svelte
-@@ -0,0 +1,192 @@
+@@ -0,0 +1,214 @@
 +<script lang="ts">
 +	import { getContext } from 'svelte';
 +	import { eesSnapshot, eesAction, eesHelperState } from './state';
@@ -2226,6 +2226,12 @@ index 0000000..d280e04
 +	import EesHelperNotice from './EesHelperNotice.svelte';
 +	const i18n: any = getContext('i18n');
 +	export let empty = false;
++	export let answer: any = null;
++	export let parent: any = null;
++	$: api = $eesSnapshot.api_assistant;
++	$: purpose = api?.requestId && parent?.meta?.ees_work_reference?.api_draft_request === api.requestId &&
++		answer?.parentId === parent?.id && answer?.role === 'assistant' && answer?.done === true &&
++		typeof answer?.content === 'string' && answer.content.trim().length <= 1000 ? answer.content.trim() : '';
 +	$: t = (key, fallback) => $i18n.t(key, { defaultValue: fallback });
 +	const questions = [
 +		[
@@ -2240,7 +2246,18 @@ index 0000000..d280e04
 +	];
 +</script>
 +
-+{#if empty && !$eesSnapshot.native_shell && $eesSnapshot.selection?.mode === 'author' && $eesSnapshot.state?.workflow && !$models.length}
++{#if !$eesSnapshot.native_shell && api?.questions?.length}
++	<section class="api-prompts" aria-label="API 명세 도우미">
++		{#each api.questions as label}
++			<button type="button" data-api-help disabled={$eesHelperState.busy}
++				on:click={() => eesAction({action: 'api_question', question: label})}>{label}</button>
++		{/each}
++		{#if purpose}
++			<button type="button" data-api-apply-purpose
++				on:click={() => eesAction({action: 'api_apply_purpose', requestId: api.requestId, purpose})}>용도에 반영</button>
++		{/if}
++	</section>
++{:else if empty && !$eesSnapshot.native_shell && $eesSnapshot.selection?.mode === 'author' && $eesSnapshot.state?.workflow && !$models.length}
 +	<section class="empty" data-ees-work data-ees-procedure-fallback>
 +		<div class="ees-helper-intro">
 +			<div class="ees-helper-unavailable" role="status"><Icon name="0a3bb" /><span>업무 도우미가 아직 연결되지 않았습니다. 관리자에게 연결을 요청하세요.</span></div>
@@ -2303,6 +2320,11 @@ index 0000000..d280e04
 +{/if}
 +
 +<style>
++	.api-prompts { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:20px 24px 8px; }
++	.api-prompts button { border:1px solid var(--ees-line-divider); border-radius:6px; padding:6px 12px; background:var(--ees-surface-primary,white); font-size:14px; }
++	.api-prompts button:hover { background:var(--ees-surface-sidebar); }
++	.api-prompts button:disabled { opacity:.55; }
++
 +	section {
 +		flex: none;
 +		padding: 8px 24px;

@@ -132,7 +132,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         writes = len(self.server.workspace_commands)
         self.choose('#ew-publication-state', 'published')
         self.assertIsNone(self.state(workflow_id=key)['workflow']['published_version'])
-        self.assertEqual(len(self.server.workspace_commands), writes)
+        # Navigation preferences can flush while the user changes the select.
+        commands = self.server.workspace_commands[writes:]
+        self.assertEqual([body['action'] for body in commands if body['action'] != 'save_ui'], [])
         self.assertEqual(self.text('[data-author-status]'), '저장하지 않은 변경 있음')
         self.assertFalse(self.read('[data-author-action=save]', 'disabled'))
         self.click('[data-author-action=save]')
@@ -2348,6 +2350,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
     def open_tools(self, *, shared_list=False):
         self.click('[data-action="mode"][data-mode="author"]')
         self.click('[data-action="tools"]')
+        self.wait("document.querySelector('[data-api-action=legacy], .ew-draft-list')")
+        if self.read('[data-api-action=legacy]', 'checkVisibility()'):
+            self.click('[data-api-action=legacy]')
         if shared_list:
             self.wait("document.querySelector('#ees-work-designer')?.ariaLabel === '도구 작성' && document.querySelector('.ew-draft-list')")
         else:
@@ -2539,6 +2544,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.screenshot('menu-c18-procedure-returned')
 
         self.click('[data-action=tools]')
+        self.click('[data-api-action=legacy]')
         self.wait("document.querySelector('[data-author-action=tool_create]')")
         self.create_legacy_tool()
         self.click('[data-author-action=tool_example][data-id=jira-query]')

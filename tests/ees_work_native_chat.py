@@ -398,6 +398,7 @@ def helper_chat_flow(g,key,chat_id):
     before=g.api('/api/ees-work/workspace?workflow_id='+key)
     g.click('[data-action=mode][data-mode=author]')
     g.click('[data-action=tools]')
+    g.click('[data-api-action=legacy]')
     g.wait("document.querySelector('[data-author-action=tool_create]')")
     if g.browser.evaluate("!!document.querySelector('.ew-draft-legacy:not([open])')"):
         g.click('.ew-draft-legacy > summary')
