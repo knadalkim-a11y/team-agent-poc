@@ -179,9 +179,11 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
   }
   function impactHTML(){
     const {operations,values}=impact;
+    const kindLabels={input:'입력',field:'결과 필드',state:'사용 상태',operation:'명세'};
+    const changeLabels={added:'추가',removed:'삭제',changed:'변경'};
     const uses=impacted(operations);
     return `${back('편집으로 돌아가기','impact-back')}<div class="ew-api-head"><h2 id="ew-api-modal-title" tabindex="-1">명세 변경 영향</h2></div>
-      ${operations.map(op=>`<h3>${esc(op.name)}</h3>${table(['변경','항목','차이'],(op.changes||[]).map(c=>[c.kind,c.path,c.change]))}`).join('')}
+      ${operations.map(op=>`<h3>${esc(op.name)}</h3>${table(['변경','항목','차이'],(op.changes||[]).map(c=>[kindLabels[c.kind]||c.kind,c.path,changeLabels[c.change]||c.change]))}`).join('')}
       <h3>영향받는 작업</h3>${uses.map(({use,op,fields},i)=>`<section class="ew-api-card"><strong>${esc([use.workflow_name||use.workflow_id,use.job_name||use.job_id].join(' › '))}</strong>
         <p>${esc(({draft:'초안',published:'게시 버전',schedule:'예약 버전'}[use.kind])||use.kind)}${use.version?' v'+esc(use.version):''}</p>
         ${(use.dependent_inputs||[]).filter(ref=>fields.includes(ref.field)).map(ref=>`<p>${esc(ref.field)} → ${esc(ref.job_name||ref.job_id)} · ${esc(ref.input)}</p>`).join('')}
@@ -379,12 +381,25 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
     const contents=await file.text();if(token!==generation||m!==importing)return;
     m.source_text=contents;m.preview=null;m.selected=[];m.attach=true;paint();
   }
+  function syncSave(target){
+    const saveButton=target.closest?.('[data-api-catalog]')?.querySelector?.('[data-api-action=save]');
+    if(saveButton&&screen==='edit')saveButton.disabled=!dirty();
+  }
   function input(target){
     const data=target.dataset||{},v=target.value,name=target.name?.replace(/^api-/,'');
     if(name==='search'){query=v;paint();return;}
     if(data.trial!==undefined&&trial){trial.values[data.trial]=v;return;}
     if(!admin())return;
-    if(data.map){const row=draft?.[data.map]?.[Number(data.index)];if(row){row[data.key]=data.key==='required'?v==='true':v;if(data.key==='in'&&v==='path')row.required=true;announce();}return;}
+    if(data.map){
+      const row=draft?.[data.map]?.[Number(data.index)];
+      if(row){
+        if(data.key==='name'&&row.wire_name===row.name)row.wire_name=v;
+        row[data.key]=data.key==='required'?v==='true':v;
+        if(data.key==='in'&&v==='path'){row.required=true;paint();}
+        syncSave(target);announce();
+      }
+      return;
+    }
     if(data.repairWorkflow&&impact){(impact.values[data.repairWorkflow]||={})[data.repairPath]=v;paint();return;}
     if(data.opIndex!==undefined&&importing){const i=Number(data.opIndex);importing.selected=importing.selected.filter(x=>x!==i);if(target.checked)importing.selected.push(i);paint();return;}
     if(name==='service_edit'&&serviceEdit){serviceEdit.name=v;return;}
@@ -404,8 +419,7 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
       else if(name==='example')example=v;
       else if(['url','name','method','purpose','service_id','result_path'].includes(name))draft[name]=v;
       if(name==='service_id')paint();
-      const root=target.closest?.('[data-api-catalog]');
-      const saveButton=root?.querySelector?.('[data-api-action=save]');if(saveButton&&screen==='edit')saveButton.disabled=!dirty();
+      syncSave(target);
       if(['name','url','method','purpose','service_id','service_name'].includes(name))announce();
     }
   }
@@ -419,6 +433,7 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
       const action=screen==='services'?'list':'impact-back';act(action,target).catch(err=>report(err,token));return {handled:true,preventDefault:true};
     }
     if(event.type==='click'&&target.matches?.('dialog[data-api-modal]')){
+      if(busy)return {handled:true,preventDefault:true};
       const box=target.getBoundingClientRect();
       if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom){
         act(screen==='services'?'list':'impact-back',target).catch(err=>report(err,token));return {handled:true,preventDefault:true};

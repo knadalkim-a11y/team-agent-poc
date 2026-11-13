@@ -717,12 +717,14 @@ def install(app, verified_user):
         code = value.get("error", {}).get("code")
         status = 200 if value.get("ok") else 401 if code == "unauthorized" else 403 if code in {
             "chat_forbidden", "admin_required", "workflow_manage_forbidden", "scope_forbidden", "run_forbidden",
-            "approval_forbidden", "access_denied"} else 409 if code in {
+            "approval_forbidden", "access_denied", "api_forbidden"} else 409 if code in {
                 "revision_conflict", "chat_already_bound", "chat_mismatch", "published_version_conflict",
                 "request_conflict", "case_selection_required", "case_completed", "authoring_upgrade_required",
                 "execution_overlap", "execution_service_required", "result_confirmation_required", "run_completed",
                 "draft_revision_conflict", "workflow_baseline_changed", "validation_required",
-                "legacy_execution_retired", "intent_expired", "intent_changed", "already_claimed"} else 404 if code in {"process_not_found", "workflow_not_found", "run_not_found"} else 503 if code in {
+                "api_version_changed", "api_import_changed", "api_duplicate", "api_service_duplicate", "api_service_in_use",
+                "legacy_execution_retired", "intent_expired", "intent_changed", "already_claimed"} else 404 if code in {"process_not_found", "workflow_not_found", "run_not_found",
+                    "api_not_found", "api_service_not_found"} else 503 if code in {
                     "authoring_authorization_unavailable", "authoring_unavailable"} else 400
         return JSONResponse(value, status_code=status, headers={"Cache-Control": "no-store"})
 
