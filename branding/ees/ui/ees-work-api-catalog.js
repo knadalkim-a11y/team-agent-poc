@@ -103,16 +103,28 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
       ${mappingHTML()}${edit?'':`<div class="ew-api-foot">${actions}</div>`}`;
   }
   const table=(headers,rows)=>rows.length?`<div class="ew-api-table"><table><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map(v=>`<td>${esc(v??'')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`:'<p class="ew-api-empty">등록된 항목이 없습니다.</p>';
+  function exampleHTML(operation){
+    if(operation.example==null)return '';
+    const at=(record,path)=>path?path.split('.').reduce((value,key)=>value!=null&&Object.hasOwn(Object(value),key)?value[key]:undefined,record):record;
+    const extracted=at(operation.example,operation.result_path);
+    const records=Array.isArray(extracted)?extracted:extracted===undefined?[]:[extracted];
+    const headers=operation.fields||[];
+    const rows=records.slice(0,20).map(record=>headers.map(f=>{
+      const value=at(record,f.path);return value===undefined?'':typeof value==='object'?JSON.stringify(value):String(value);
+    }));
+    return `<h3>응답 예시</h3>${headers.length?table(headers.map(f=>f.label||f.path),rows):''}${records.length>20?'<p>처음 20개 결과</p>':''}
+      <details><summary>응답 원문</summary><pre>${esc(json(operation.example))}</pre></details>`;
+  }
   function detailHTML(){
     const x=api();if(!x)return back('API 명세 목록','list')+'<p role="status">API를 찾을 수 없거나 접근 권한이 변경되었습니다.</p>';
     const used=detailUses||x.uses, source=x.source_url||x.source?.url;
-    return `${back('API 명세 목록','list')}<small>${esc(serviceLabel(x.service_id))}</small><div class="ew-api-head"><h2>${esc(x.name)}</h2>${admin()?btn('명세 편집','edit'):''}</div><p>${esc(x.purpose)}</p>
-      <div class="ew-api-subhead"><strong>${esc(x.method)}　${esc(x.url)}</strong>${btn('시험 실행','test')}</div>
+    return `${back('API 명세 목록','list')}<div class="ew-api-head"><h2>${esc(x.name)}</h2><div>${btn('시험 실행','test')}${admin()?btn('명세 편집','edit','link'):''}</div></div>
+      <div class="ew-api-route" data-method="${esc(x.method)}"><b class="ew-api-method">${esc(x.method)}</b><strong>${esc(addr(x.url))}</strong><code>${esc(x.url)}</code></div>
+      <p>${esc(x.purpose)}</p><p><small>서비스</small>　${esc(serviceLabel(x.service_id))}</p>
       ${source?`<p>서비스 명세　${esc(source)} ${admin()?btn('변경 확인','refresh-import','link'):''}</p>`:''}
-      <h3>요청</h3>${table(['항목','위치','자료형','필수'],(x.inputs||[]).map(p=>[p.name,p.in,p.type,p.required?'필수':'선택']))}
-      <h3>응답</h3><p>결과 위치　${esc(x.result_path||'전체 응답')}</p>${table(['응답 필드','표시 이름'],(x.fields||[]).map(p=>[p.path,p.label]))}
-      ${x.example===undefined?'':`<details><summary>응답 예시</summary><pre>${esc(json(x.example))}</pre></details>`}
-      <h3>사용 중인 작업</h3>${!used?'<p class="ew-api-empty">사용처를 확인하고 있습니다.</p>':used.length?table(['업무 절차','작업'],used.map(u=>[u.workflow_name||u.workflow_id,u.job_name||u.job_id])):'<p class="ew-api-empty">연결된 작업이 없습니다.</p>'}`;
+      <h3>요청 파라미터</h3>${table(['이름','위치','필수','업무에서 쓰는 값'],(x.inputs||[]).map(p=>[p.wire_name||p.name,p.in,p.required?'필수':'—',p.label||p.name]))}
+      <h3>응답</h3><small>결과 위치　${esc(x.result_path||'전체 응답')}</small>${table(['응답 필드','자료형','표시 이름'],(x.fields||[]).map(p=>[p.path,p.type,p.label]))}
+      ${exampleHTML(x)}<h3>사용 중인 작업</h3>${!used?'<p class="ew-api-empty">사용처를 확인하고 있습니다.</p>':used.length?table(['업무 절차','작업'],used.map(u=>[u.workflow_name||u.workflow_id,u.job_name||u.job_id])):'<p class="ew-api-empty">연결된 작업이 없습니다.</p>'}`;
   }
   function servicesHTML(){
     const editing=serviceEdit;
@@ -120,19 +132,34 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
       ${editing?`<div class="ew-api-card">${field('service_edit','서비스 이름',editing.name,'maxlength="80" required')}<div class="ew-api-actions">${editing.id&&!all().some(x=>x.service_id===editing.id)?btn(editing.confirm?'삭제 확정':'서비스 삭제','service-delete','link'):''}${btn('취소','service-cancel')}${btn('저장','service-save','primary')}</div></div>`:''}
       ${services().map(s=>`<div class="ew-api-service"><strong>${esc(s.name)}</strong><small>API ${all().filter(x=>x.service_id===s.id).length}개</small>${btn('이름 변경','service-edit','link',`data-id="${esc(s.id)}"`)}</div>`).join('')||'<p class="ew-api-empty">등록된 서비스가 없습니다.</p>'}<div class="ew-api-actions ew-api-service-close">${btn('닫기','list')}</div>`;
   }
+  const sampleSpecification=()=>JSON.stringify({openapi:'3.0.3',info:{title:'EMS 설비 이력',version:'1.0.0'},servers:[{url:'https://ems.example/api'}],paths:{
+    '/equipment/{equipmentId}/alarms':{
+      parameters:[{name:'equipmentId',in:'path',required:true,schema:{type:'string'}}],
+      get:{operationId:'listEquipmentAlarms',summary:'설비 알람 조회',description:'설비 번호로 최근 알람 목록을 조회합니다.',responses:{
+        '200':{description:'알람 목록',content:{'application/json':{schema:{type:'array',items:{type:'object',properties:{code:{type:'string',title:'알람 코드'},state:{type:'string',title:'알람 상태'}}}},example:[{code:'F101',state:'점검 필요'}]}}}}},
+      post:{operationId:'acknowledgeEquipmentAlarm',summary:'알람 확인 등록',description:'설비 알람을 확인한 결과를 기록합니다.',
+        requestBody:{required:true,content:{'application/json':{schema:{type:'object',properties:{code:{type:'string',title:'알람 코드'}},required:['code']}}}},
+        responses:{'202':{description:'확인 접수',content:{'application/json':{schema:{type:'object',properties:{receipt:{type:'string',title:'접수 번호'}}}}}}}}
+    }}},null,2);
   const importable=op=>!op.error&&(fromJob?['new','same','changed'].includes(op.mode)&&op.state!=='withdrawn'&&op.state!=='deprecated':!['blocked','same'].includes(op.mode));
   function importHTML(){
     const m=importing,ops=m.preview?.operations||[];
-    const options=ops.map((op,index)=>`<label class="ew-api-choice"><input type="checkbox" name="api-operation-${index}" data-op-index="${index}" ${m.selected.includes(index)?'checked':''} ${importable(op)?'':'disabled'}><span><strong>${esc(op.method)}　${esc(addr(op.url))}　${esc(op.name)}</strong><small>${esc(op.error||({same:'이미 등록됨',removed:'명세에서 제거됨',changed:'변경 있음',new:'새 기능'}[op.mode])||'')}</small></span></label>`).join('');
+    const options=ops.map((op,index)=>`<label class="ew-api-choice" data-method="${esc(op.method)}"><input type="checkbox" name="api-operation-${index}" data-op-index="${index}" ${m.selected.includes(index)?'checked':''} ${importable(op)?'':'disabled'}><b class="ew-api-method">${esc(op.method)}</b><span>${esc(addr(op.url))}</span><strong>${esc(op.name)}</strong><small>${esc(op.error||({same:'이미 등록됨',removed:'명세에서 제거됨',changed:'변경 있음'}[op.mode])||'')}</small></label>`).join('');
+    if(m.preview){
+      const label=m.refresh?'변경 확인':fromJob?'선택한 기능 등록하고 연결':'선택한 기능 등록';
+      return `${back('등록 취소',m.refresh?'cancel-import':'cancel')}<div class="ew-api-head"><h2>등록할 기능 선택</h2></div>
+        <strong>${esc(m.preview.service_name||'서비스 명세')}${m.preview.service_version?' · v'+esc(m.preview.service_version):''}</strong>
+        <p>서비스에서 사용할 기능을 선택하세요.</p>${options||'<p>가져올 기능이 없습니다.</p>'}
+        <details class="ew-api-destination"><summary>소속 서비스 변경</summary>${select('import_service','서비스',serviceChoices(),m.service_id)}${m.service_id==='__new__'?field('import_service_name','새 서비스 이름',m.service_name):''}</details>
+        <div class="ew-api-import-end">${btn('다른 명세 선택','import-another','link')}<div>${btn('취소',m.refresh?'cancel-import':'cancel')}${btn(label,'import-confirm','primary',m.selected.length?'':'disabled')}</div></div>`;
+    }
     return `${back(m.refresh?'API 상세':'등록 취소',m.refresh?'cancel-import':'cancel')}<div class="ew-api-head"><h2>${m.refresh?'명세 변경 확인':'API 명세 등록'}</h2></div>
       ${m.refresh?'':`<div class="ew-api-tabs">${btn('API 주소 직접 등록','direct','link')}${btn('서비스 명세 URL','import','active')}</div>`}
-      ${field('import_url','서비스 명세 URL',m.source_url,'type="url" spellcheck="false" placeholder="https://ems.example/openapi.json"')}
-      <div class="ew-api-actions">${btn('명세 가져오기','import-url')}</div>
-      <details class="ew-api-advanced" ${m.attach?'open':''} data-import-more><summary>파일 또는 텍스트로 가져오기</summary>
+      ${field('import_url','OpenAPI 명세 URL',m.source_url,'type="url" spellcheck="false" placeholder="https://ems.example/openapi.json"')}
+      <details class="ew-api-advanced" ${m.attach?'open':''} data-import-more><summary>파일 업로드 · 붙여넣기</summary>
       <label><span>명세 파일</span><input type="file" name="api-file" accept=".json,.yaml,.yml"></label>
       <label><span>OpenAPI JSON 또는 YAML</span><textarea name="api-import_text" rows="6">${esc(m.source_text)}</textarea></label>${btn('명세 읽기','import-text')}</details>
-      ${m.preview?`<h3>등록할 기능 선택</h3>${options||'<p>가져올 기능이 없습니다.</p>'}${select('import_service','서비스',serviceChoices(),m.service_id)}${m.service_id==='__new__'?field('import_service_name','새 서비스 이름',m.service_name):''}
-      <div class="ew-api-foot">${btn('취소','cancel-import')}${btn('선택한 기능 적용','import-confirm','primary',m.selected.length?'':'disabled')}</div>`:''}`;
+      <div class="ew-api-import-end">${btn('예시 명세 불러오기','import-example','link')}<div>${btn('취소',m.refresh?'cancel-import':'cancel')}${btn('기능 불러오기','import-url','primary')}</div></div>`;
   }
   function impacted(ops){
     const affected=new Map();
@@ -329,6 +356,8 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
       case 'import':importStart();break;
       case 'refresh-import':importStart(true);break;
       case 'cancel-import':if(importing.refresh){importing=null;go('detail');}else if(draft)go('create');else go('list');break;
+      case 'import-example':importing.source_url='';importing.source_text=sampleSpecification();importing.attach=false;await previewImport(false);break;
+      case 'import-another':importing.preview=null;importing.selected=[];paint();focus?.('[name=api-import_url]');break;
       case 'import-url':await previewImport(true);break;
       case 'import-text':await previewImport(false);break;
       case 'import-confirm':await applyImport();break;

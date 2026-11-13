@@ -84,7 +84,8 @@ function createWorkApiPicker(){
     const oldInputs = node.inputs || [];
     const local = oldInputs.filter(f=>!f.source?.api_operation_id && !f.source?.shared_tool_id);
     const existing = new Map(oldInputs.map(f=>[f.id,f]));
-    const publishedDeps = new Set(node.deps || []);
+    const manualDeps=new Set((node.deps||[]).filter(id=>!(node.api_generated_deps||[]).includes(id)));
+    const publishedDeps = new Set(manualDeps);
     const ids = new Set(Object.keys(draft.inputs));
     for (const field of op.inputs) {
       if (field.required && !ids.has(field.name)) throw Error((field.label||field.name)+' 입력을 지정해 주세요.');
@@ -93,7 +94,9 @@ function createWorkApiPicker(){
       if ('constant' in ref) inputs[field.name] = {constant:constant(draft.raw[field.name] ?? (typeof ref.constant==='string'?ref.constant:JSON.stringify(ref.constant)),field.type)};
       else if ('input' in ref) {
         const retain = node.api_binding?.operation_id===op.id && node.api_binding.inputs[field.name]?.input;
-        const id = retain || 'api_'+node.id+'_'+op.inputs.indexOf(field);
+        const baseId='api_'+node.id.slice(0,100)+'_'+op.inputs.indexOf(field);
+        let id=retain || baseId, suffix=0;
+        if(!retain)while(local.some(input=>input.id===id))id=baseId+'_'+(++suffix);
         let input = local.find(f=>f.id===id);
         if (!input) {
           const old = retain && existing.get(retain);
@@ -112,6 +115,8 @@ function createWorkApiPicker(){
     next.inputs = local;
     next.mode = 'tool';
     next.deps = [...publishedDeps];
+    const generated=[...publishedDeps].filter(id=>!manualDeps.has(id));
+    if(generated.length)next.api_generated_deps=generated;else delete next.api_generated_deps;
     next.result_block = writable(op) ? 'change_request' : (op.result_path || Array.isArray(op.example) ? 'list_confirm' : 'human_confirm');
     next.human_confirmation = true;
     next.api_binding = {operation_id:op.id,version:op.version,inputs,outputs:[...draft.outputs]};

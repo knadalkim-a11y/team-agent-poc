@@ -1,8 +1,11 @@
 """Product browser evidence for the six screens pinned by the v11 design."""
 from copy import deepcopy
 import json
+import os
+from unittest.mock import patch
 
 from ees_work_integrated_fixture import IntegratedNativeCase
+from test_ees_api_spec_execution import backup_service
 import test_ees_work_figma_authoring_native as authoring
 
 
@@ -163,3 +166,61 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.assertEqual(saved['job-1']['api_binding']['operation_id'], writer['id'])
         source = saved['job-1']['api_binding']['inputs']['code']['result']
         self.assertEqual(source, {'job_id':'job-0', 'field':'code', 'confirmed':True})
+
+    def test_registered_query_reaches_service_and_result_reopens_from_records(self):
+        http = self.enterContext(backup_service())
+        url = f'http://127.0.0.1:{http.server_port}'
+        service = self.register_service('실행 검증')
+        self.enterContext(patch.dict(os.environ, {'EES_WORK_API_SERVICES':json.dumps({service:{'base_url':url}})}))
+        key = self.author(name='백업 확인', jobs=1)
+        saved = self.state(workflow_id=key)['workflow']
+        definition = deepcopy(saved['draft'])
+        definition['nodes']['job-0'].update(name='백업 확인 작업', mode='tool')
+        self.command('save_draft', workflow_id=key, expected_revision=saved['revision'], definition=definition)
+        self.authoring_viewport(1920, 1080, overlay=False)
+        self.open_catalog()
+        self.click('[data-api-action=create]')
+        self.fill('[name=api-name]', '백업 결과 조회')
+        self.fill('[name=api-purpose]', '백업 서비스 응답의 이름을 확인합니다.')
+        self.fill('[name=api-url]', url + '/backups')
+        self.choose('[name=api-service_id]', service)
+        self.click('[data-api-advanced] > summary')
+        self.fill('[name=api-result_path]', 'backup.entries')
+        self.click('[data-api-action=add-field]')
+        self.fill('[name=api-fields-0-path]', 'label')
+        self.fill('[name=api-fields-0-label]', '백업 이름')
+        self.click('[data-api-action=save]')
+        self.wait("document.querySelector('[data-api-screen=list] [data-api-action=open]')")
+        api = self.read('[data-api-action=open]', 'dataset.id')
+        self.click('[data-action=procedures]')
+        self.click('[data-author-action=open][data-id="' + key + '"]')
+        self.click('[data-author-action=tab][data-tab=content]')
+        link = '[data-job-id=job-0] [data-author-action=job_api_setup]'
+        if not self.read(link, 'isConnected'):
+            self.click('[data-author-action=stage_toggle][data-id=stage]')
+        self.click(link)
+        self.click('[data-api-candidate="' + api + '"]')
+        self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.wait("document.querySelector('[data-api-job-binding]')")
+        self.click('[data-author-action=save]')
+        self.wait("document.querySelector('[data-author-status]')?.dataset.dirty === 'false'")
+        current = self.state(workflow_id=key)['workflow']
+        self.assertEqual(current['draft']['nodes']['job-0']['api_binding']['operation_id'], api)
+        # Use the same workspace commands as the publication and new-run forms.
+        self.command('publish_workflow', workflow_id=key, expected_revision=current['revision'])
+        run = self.start(key)
+        self.refresh()
+        self.click('[data-action=mode][data-mode=work]')
+        self.open_run(key, run)
+        self.assertEqual(http.requests, [])
+        self.click('[data-action=execute]')
+        self.wait("document.querySelector('.ew-api-table')?.innerText.includes('nightly-ok')")
+        self.assertIn('백업 이름', self.text('.ew-api-table'))
+        self.assertEqual(http.requests, [('/backups', {})])
+        self.navigate('/c/existing-chat')
+        self.wait("document.querySelector('#ees-work-panel')")
+        self.click('[data-action=mode][data-mode=work]')
+        self.open_run(key, run)
+        self.wait("document.querySelector('.ew-api-table')?.innerText.includes('nightly-ok')")
+        self.assertEqual(len(self.state(run_id=run['id'])['run']['attempts']), 1)
+        self.assertEqual(http.requests, [('/backups', {})])

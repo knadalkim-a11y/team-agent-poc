@@ -64,6 +64,8 @@ def _copy_definition_nodes(definition):
         criterion = node.get('effect_criterion')
         if isinstance(criterion, dict) and criterion.get('job_id') in mapping:
             criterion['job_id'] = mapping[criterion['job_id']]
+        if 'api_generated_deps' in node:
+            node['api_generated_deps'] = [mapping.get(dep, dep) for dep in node['api_generated_deps']]
         workflow_bindings = list(node.get('argument_bindings', {}).values())
         workflow_bindings.extend((node.get('api_binding') or {}).get('inputs', {}).values())
         for binding in workflow_bindings:
@@ -943,10 +945,10 @@ class WorkspaceMixin:
         bridge = getattr(getattr(self, 'operations', None), 'bridge', None) or getattr(getattr(self, 'execution', None), 'bridge', None)
         api_refs = [ref for ref in refs if isinstance(ref, dict) and ref.get('kind') == 'api']
         if api_refs:
+            from .ees_workflow_api_http import authorize_service
             actor, _, groups = await self._work_actor(actor)
             with self._db() as db:
                 for ref in api_refs:
-                    from .ees_workflow_api_http import authorize_service
                     operation = self.api_catalog.resolve(db, ref['tool_id'], ref['version'], groups=groups, evidence=True)
                     authorize_service(operation, actor)
         for ref in refs:

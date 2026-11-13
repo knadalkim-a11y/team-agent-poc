@@ -18,6 +18,9 @@ def binding_shape(node, required_jobs):
             or not isinstance(binding, dict) or set(binding) != {'operation_id', 'version', 'inputs', 'outputs'}
             or not _tokens(binding['operation_id'], 160) or type(binding['version']) is not int or binding['version'] < 1):
         return '작업의 API 참조와 버전을 확인해 주세요.'
+    generated = node.get('api_generated_deps', [])
+    if not isinstance(generated, list) or any(not _tokens(k) or k not in node.get('deps', []) for k in generated):
+        return '자동으로 연결한 선행 작업을 확인해 주세요.'
     fields, outputs = binding['inputs'], binding['outputs']
     if (not isinstance(fields, dict) or len(fields) > 100 or not isinstance(outputs, list)
             or len(outputs) > 100 or any(not _tokens(field) for field in outputs) or len(set(outputs)) != len(outputs)):
@@ -219,7 +222,15 @@ def apply_api_repairs(service, db, actor, groups, old, new, repairs):
                 node.setdefault('inputs', []).append({'id':field_id,'type':kind,'name':arg.get('label') or name,
                     'required':bool(arg.get('required')),'scope':'run','source':{'api_operation_id':op['id']}})
                 binding['inputs'][name] = {'input':field_id}
-        errs = binding_errors(service, db, groups, definition, overrides={(new['id'],new['version']):new})
+            if node.get('api_generated_deps'):
+                used = {v['result']['job_id'] for v in binding.get('inputs', {}).values() if 'result' in v}
+                auto = set(node['api_generated_deps'])
+                node['deps'] = [dep for dep in node.get('deps', []) if dep not in auto or dep in used]
+                node['api_generated_deps'] = [dep for dep in node['api_generated_deps'] if dep in used]
+        from .ees_workflow_workspace import definition_check
+        errs, _ = definition_check(definition, False)
+        if not errs:
+            errs = binding_errors(service, db, groups, definition, overrides={(new['id'], new['version']): new})
         if errs:
             _fail('api_repairs_invalid', '\n'.join(errs))
         plans.append((row['id'], _dump(definition)))
