@@ -132,7 +132,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         writes = len(self.server.workspace_commands)
         self.choose('#ew-publication-state', 'published')
         self.assertIsNone(self.state(workflow_id=key)['workflow']['published_version'])
-        self.assertEqual(len(self.server.workspace_commands), writes)
+        # Navigation preferences can flush while the user changes the select.
+        commands = self.server.workspace_commands[writes:]
+        self.assertEqual([body['action'] for body in commands if body['action'] != 'save_ui'], [])
         self.assertEqual(self.text('[data-author-status]'), '저장하지 않은 변경 있음')
         self.assertFalse(self.read('[data-author-action=save]', 'disabled'))
         self.click('[data-author-action=save]')

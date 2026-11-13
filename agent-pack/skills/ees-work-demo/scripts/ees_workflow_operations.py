@@ -686,17 +686,17 @@ class OperationsRuntime:
             if status_contract["reference"] != tool.get("status_reference"):
                 fail("native_version_changed")
         # Every approval must still be held by a distinct current approver.
-        approvers = set()
+        approvers = {}
         for approval in request["approvals"]:
             approver, _, members = await self._actor({"id": approval["actor"]})
             with self.service._db() as db:
                 self._scope(db, approver, members, run["system_id"], run["factory_id"], "approver")
             if approval["actor"] == request["actor"] or approval["input_hash"] != request["input_hash"] or approval["tool_revision"] != request["tool_revision"]:
                 fail("approval_stale")
-            approvers.add(approval["actor"])
+            approvers[approval["actor"]] = approver, members
         if len(approvers) < request["approval_count"]:
             fail("approval_required")
-        return request, tool
+        return request, tool, list(approvers.values())
 
     async def _check_api_request_evidence(self, actor, request):
         if request['reference'].get('kind') != 'api' or not request.get('attempt_id'):
@@ -719,11 +719,11 @@ class OperationsRuntime:
         if cached is not None and prior['reference'].get('kind') == 'api':
             await self._check_api_request_evidence(actor,prior)
             return {'ok':prior['state'] not in ('failed','rejected','unknown'),'request':self._public_request(prior)}
-        request, tool = await self._approved_request(actor, groups, body.get("external_request_id"))
-        if request["actor"] != value(actor, "id"):
+        if prior["actor"] != value(actor, "id"):
             fail("request_actor_mismatch")
-        options_snapshot = await self.service._work_resolve_job_options(actor, request["run_id"], request["job_id"])
+        options_snapshot = await self.service._work_resolve_job_options(actor, prior["run_id"], prior["job_id"])
         actor, _, groups = await self._actor(actor)
+        request, tool, approvers = await self._approved_request(actor, groups, prior['id'])
         with self.service._db(write=True) as db:
             receipt = self._receipt(db, actor, body)
             if receipt is not None:
@@ -732,6 +732,8 @@ class OperationsRuntime:
             latest_tool = self._request_contract(db, groups, request["tool_contract_id"], request["reference"])
             current_run = self.service._work_run(db, actor, groups, request["run_id"], write=True)
             self._scope(db, actor, groups, current_run["system_id"], current_run["factory_id"], "requester")
+            for reviewer, membership in approvers:
+                self._scope(db, reviewer, membership, current_run["system_id"], current_run["factory_id"], "approver")
             self._revision(body, current["revision"])
             latest_snapshot = self.service._work_snapshot(db, current_run, request["job_id"])
             if request["input_source_hash"] != self._request_source_hash(db, current_run, latest_snapshot, tool) or latest_tool["state"] != "approved" or latest_tool["revision"] != request["tool_revision"] or current_run["revision"] != request["run_revision"] or current != request or current["state"] != "ready":
@@ -1758,10 +1760,16 @@ class OperationsRuntime:
             source_ref = json.loads(record['snapshot']).get('tool_reference') or {}
             if source_ref.get('kind') == 'api':
                 api_http.authorize_service(self._api_operation(db,source_ref,groups),actor)
-        if current != arguments or current_sources != sources or snapshot['inputs'] != previous['inputs']:
+        deadline = (snapshot.get('deadline_source') or {}).get('value')
+        prior_deadline = (previous.get('deadline_source') or {}).get('value')
+        if (current != arguments or current_sources != sources or snapshot['inputs'] != previous['inputs']
+                or deadline != prior_deadline or not self.service._work_sources_current(db, run, previous)):
             fail('result_source_changed')
-        claim = db.execute('SELECT * FROM work_job_claims WHERE attempt_id=?',(attempt['id'],)).fetchone()
-        if not claim or claim['state'] != 'running' or claim['worker'] != self.worker or claim['lease'] < self.clock(): fail('scope_claim_lost')
+        claim = db.execute('SELECT c.*, a.status AS attempt_state, j.status AS job_state, j.current_attempt FROM work_job_claims c JOIN work_attempts a ON c.attempt_id=a.id JOIN work_jobs j ON j.run_id=a.run_id AND j.job_id=a.job_id WHERE c.attempt_id=?', (attempt['id'],)).fetchone()
+        if (not claim or claim['state'] != 'running' or claim['worker'] != self.worker or claim['lease'] < self.clock()
+                or claim['actor'] != value(actor,'id') or claim['attempt_state'] != 'running'
+                or claim['job_state'] != 'running' or claim['current_attempt'] != attempt['id']):
+            fail('scope_claim_lost')
         return operation
 
     def _resolve_arguments(self, db, run, job, inputs):

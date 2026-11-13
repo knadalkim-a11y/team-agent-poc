@@ -115,7 +115,7 @@ class RegisteredApiExecutionTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(saved["ok"], saved)
         return saved["api"]
 
-    async def start_workflow(self, api_record, *, handoff=False):
+    async def start_workflow(self, api_record, *, handoff=False, approvals=0, map_previous=True):
         created = await self.workspace("create_workflow", name="Backup verification", system_id="EMS")
         definition = created["workflow"]["draft"]
         root_id = next(iter(definition["nodes"]))
@@ -134,13 +134,14 @@ class RegisteredApiExecutionTests(unittest.IsolatedAsyncioTestCase):
             },
         }
         if api_record["method"] == "POST":
-            definition["nodes"]["backup-job"].update(result_block="change_request", approval_count=0,
+            definition["nodes"]["backup-job"].update(result_block="change_request", approval_count=approvals,
                 effect_criterion={"check": "inspect backup status"})
         if handoff:
             successor = deepcopy(definition["nodes"]["backup-job"])
             successor.update(id="follow-up", name="Follow up", deps=["backup-job"])
             source = {"job_id": "backup-job", "field": "label", "confirmed": True}
-            successor["api_binding"]["inputs"] = {"line": {"result": source}}
+            if map_previous:
+                successor["api_binding"]["inputs"] = {"line": {"result": source}}
             definition["nodes"]["stage"]["children"].append("follow-up")
             definition["nodes"]["follow-up"] = successor
         workflow_id = created["workflow_id"]
@@ -253,3 +254,100 @@ class RegisteredApiExecutionTests(unittest.IsolatedAsyncioTestCase):
             "execute_job", run_id=run_id, job_id="follow-up", expected_revision=confirmed["run"]["revision"]))
         self.assertEqual(result["attempt"]["status"], "succeeded", result)
         self.assertEqual(self.http.requests[-1], ("/backups", {"line": ["nightly-ok"]}))
+
+    async def test_reviewer_revoked_while_dispatch_is_resolving_inputs_blocks_http(self):
+        api = await self.register_backup('POST')
+        run_id = await self.start_workflow(api, approvals=1)
+        actor, reviewer = self.users['operator'], self.users['outsider']
+        await self.workspace('save_access', principal_kind='user', principal_id='outsider',
+                             system_id='EMS', factory_id='*', roles=['participant','reviewer'])
+        runtime = self.service.operations
+        prepared = await runtime.command(actor,self.command('request_prepare',run_id=run_id,job_id='backup-job',expected_revision=1))
+        request = prepared['request']
+        fields = {'external_request_id':request['id'], 'expected_revision':request['revision']}
+        for action in ('request_intent','request_approve','request_dispatch'):
+            with self.assertRaises(workflow.WorkflowError):
+                await runtime.command(actor,self.command(action,**fields))
+        approved = (await runtime.command(reviewer,self.command('request_approve',**fields)))['request']
+        fields['expected_revision'] = approved['revision']
+        intent = await runtime.command(actor,self.command('request_intent',**fields))
+        original = self.service._work_resolve_job_options
+        async def revoke(*args, **kwargs):
+            result = await original(*args,**kwargs)
+            with self.service._db(write=True) as db:
+                db.execute("UPDATE work_access SET active=0, revision=revision+1 WHERE principal_id='outsider'")
+            return result
+        with patch.object(self.service,'_work_resolve_job_options',revoke):
+            with self.assertRaises(workflow.WorkflowError):
+                await runtime.command(actor,self.command('request_dispatch',intent_token=intent['intent_token'],**fields))
+        self.assertEqual(self.http.requests,[])
+        with self.service._db() as db:
+            self.assertEqual(db.execute('SELECT consumed FROM work_request_intents').fetchone()[0],0)
+
+    async def test_existing_publication_starts_new_run_with_version_pinned_before_edit(self):
+        api = await self.register_backup()
+        run_id = await self.start_workflow(api)
+        actor = self.users['operator']
+        revised = await self.service.operations.command(self.users['admin'],self.command('api_save',
+            api={**api,'url':self.base_url+'/new-endpoint'},expected_revision=api['revision']))
+        self.assertEqual(revised['api']['version'],2)
+        state = await self.service.workspace_state(actor,run_id=run_id)
+        workflow_id = state['run']['workflow_id']
+        self.service = self.open_service()
+        old = await self.service.operations.command(actor,self.execution_command(run_id))
+        self.assertEqual(old['attempt']['status'],'succeeded',old)
+        self.assertEqual(old['attempt']['snapshot']['tool_reference']['version'],1)
+        state = await self.service.workspace_state(actor,run_id=run_id)
+        await self.workspace('cancel_run',actor='operator',run_id=run_id,expected_revision=state['run']['revision'],reason='test complete')
+        details = await self.service.workspace_state(self.users['admin'],workflow_id=workflow_id)
+        new = await self.workspace('start_run',actor='operator',workflow_id=workflow_id,
+                                   expected_revision=details['workflow']['revision'],inputs={})
+        result = await self.service.operations.command(actor,self.execution_command(new['run_id']))
+        self.assertEqual(result['attempt']['snapshot']['tool_reference']['version'],1)
+        self.assertEqual(result['attempt']['status'],'succeeded',result)
+        self.assertEqual([path for path,_ in self.http.requests],['/backups','/backups'])
+
+    async def test_current_api_group_revoked_in_flight_hides_result_and_history(self):
+        api = await self.register_backup()
+        run_id = await self.start_workflow(api)
+        actor, runtime = self.users['operator'], self.service.operations
+        self.service.group_list_lookup = lambda:[{'id':'restricted','name':'Restricted'}]
+        module = importlib.import_module(package.__name__+'.ees_workflow_api_http')
+        invoke = module.invoke_http
+        async def revoke_after_response(*args, **kwargs):
+            response = await invoke(*args,**kwargs)
+            await runtime.command(self.users['admin'],self.command('api_save',api={**api,'group_ids':['restricted']},expected_revision=1))
+            return response
+        with patch.object(module,'invoke_http',revoke_after_response), self.assertRaises(workflow.WorkflowError):
+            await runtime.command(actor,self.execution_command(run_id))
+        self.assertEqual(len(self.http.requests),1)
+        with self.service._db() as db:
+            attempt = db.execute('SELECT status,result FROM work_attempts').fetchone()
+            self.assertEqual(attempt['status'],'unknown')
+            self.assertNotIn('nightly-ok',attempt['result'])
+        history = await self.history(run_id)
+        self.assertIsNone(history[0]['result'])
+        self.assertNotIn('nightly-ok',json.dumps(history))
+
+    async def test_dispatch_discards_read_after_a_declared_prerequisite_is_reopened(self):
+        api = await self.register_backup()
+        run_id = await self.start_workflow(api,handoff=True, map_previous=False)
+        actor, runtime = self.users['operator'], self.service.operations
+        first = await runtime.command(actor,self.execution_command(run_id))
+        state = await self.service.workspace_state(actor,run_id=run_id)
+        confirmed = await self.workspace('decide',actor='operator',run_id=run_id,job_id='backup-job',
+            expected_revision=state['run']['revision'],result_revision=first['attempt']['number'],item_id='job',verdict='completed')
+        module = importlib.import_module(package.__name__+'.ees_workflow_api_http')
+        invoke = module.invoke_http
+        async def reopen_after_response(*args, **kwargs):
+            response = await invoke(*args,**kwargs)
+            state = await self.service.workspace_state(actor,run_id=run_id)
+            original = self.command('execute_job',run_id=run_id,job_id='backup-job',expected_revision=state['run']['revision'])
+            with patch.object(module,'invoke_http',invoke):
+                await runtime.command(actor,original)
+            return response
+        with patch.object(module,'invoke_http',reopen_after_response):
+            result=await runtime.command(actor,self.command('execute_job',run_id=run_id,job_id='follow-up',expected_revision=confirmed['run']['revision']))
+        self.assertEqual(result['attempt']['status'],'unknown')
+        self.assertEqual(result['attempt']['result']['error']['code'],'result_source_changed')
+        self.assertNotIn('nightly-ok',json.dumps(result['attempt']['result']))
