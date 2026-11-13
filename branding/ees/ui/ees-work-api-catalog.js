@@ -216,7 +216,10 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
   function recordForSave(){
     const source=clone(draft);
     for(const k of ['name','purpose','url'])if(!source[k]?.trim())throw Error(({name:'API 이름',purpose:'용도',url:'API 주소'}[k])+'를 입력하세요.');
-    let parsed;try{parsed=new URL(source.url);}catch{throw Error('HTTP(S) API 주소를 확인하세요.');}
+    let parsed;
+    try{
+      parsed=source.id&&draft.source_path&&/^\/(?!\/)/.test(source.url)?new URL(source.url,'http://relative.invalid'):new URL(source.url);
+    }catch{throw Error('HTTP(S) API 주소를 확인하세요.');}
     if(!['http:','https:'].includes(parsed.protocol)||parsed.username||parsed.password||parsed.hash)throw Error('계정 정보와 # 표시가 없는 HTTP(S) API 주소를 입력하세요.');
     if(source.service_id==='__new__'&&!serviceName.trim())throw Error('새 서비스 이름을 입력하세요.');
     if(source.service_id==='__new__')source.service_id='';
@@ -271,15 +274,17 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
     const result=await request(deleting?'api_service_delete':'api_service_save',{...payload,expected_revision:s.revision||0},{write:true});
     if(result){serviceEdit=null;status=deleting?'서비스를 삭제했습니다.':'서비스 이름을 저장했습니다.';paint();}
   }
-  async function previewImport(url){
+  async function previewImport(url,detectService=true){
     const m=importing;
     const input=url?{source_url:m.source_url.trim()}:{source_text:m.source_text};
     if(!Object.values(input)[0])throw Error(url?'명세 URL을 입력하세요.':'파일을 선택하거나 명세를 붙여넣으세요.');
-    const result=await request('api_import_preview',{...input,service_id:m.service_id==='__new__'?'':m.service_id});
+    const result=await request('api_import_preview',{...input,service_id:m.service_id==='__new__'?'':m.service_id,
+      ...(m.service_id==='__new__'?{service_name:m.service_name}:{})});
     if(!result)return;
     m.source=input;m.preview=result;m.selected=[];
-    if(!m.service_id&&result.service_name){
+    if(detectService&&!m.service_id&&result.service_name){
       const found=services().find(s=>s.name===result.service_name);m.service_id=found?.id||'__new__';m.service_name=result.service_name;
+      if(found){await previewImport(url,false);return;}
     }
     const enabled=result.operations.map((op,i)=>importable(op)?i:-1).filter(i=>i>=0);
     if(enabled.length===1)m.selected=enabled;
@@ -387,7 +392,12 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
       importing[name==='import_url'?'source_url':'source_text']=v;
       if(importing.preview){importing.preview=null;importing.selected=[];paint();}return;
     }
-    if(name==='import_service'){importing.service_id=v;paint();return;}
+    if(name==='import_service'){
+      if(importing.service_id===v)return;
+      const viaUrl=Boolean(importing.source?.source_url);importing.service_id=v;importing.selected=[];
+      if(importing.preview)previewImport(viaUrl,false).catch(err=>{error=err.message;paint();});
+      else paint();return;
+    }
     if(name==='import_service_name'){importing.service_name=v;return;}
     if(draft){
       if(name==='service_name')serviceName=v;

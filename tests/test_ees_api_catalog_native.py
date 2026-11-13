@@ -1,4 +1,5 @@
 """Product browser evidence for the six screens pinned by the v11 design."""
+import asyncio
 from copy import deepcopy
 import json
 import os
@@ -224,3 +225,32 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('.ew-api-table')?.innerText.includes('nightly-ok')")
         self.assertEqual(len(self.state(run_id=run['id'])['run']['attempts']), 1)
         self.assertEqual(http.requests, [('/backups', {})])
+
+    def test_manage_service_and_import_selected_openapi_operation(self):
+        self.click('[data-action=mode][data-mode=author]')
+        self.open_workspace_assets()
+        self.click('[data-action=tools]')
+        self.click('[data-api-action=services]')
+        self.wait("document.querySelector('dialog[data-api-modal]')?.matches(':modal')")
+        self.click('[data-api-action=service-new]')
+        self.fill('[name=api-service_edit]','설비 이력')
+        self.click('[data-api-action=service-save]')
+        self.wait("document.querySelector('.ew-api-service')?.textContent.includes('설비 이력')")
+        self.click('[data-api-action=service-edit]')
+        self.fill('[name=api-service_edit]','현장 설비')
+        self.click('[data-api-action=service-save]')
+        self.wait("document.querySelector('.ew-api-service')?.textContent.includes('현장 설비')")
+        self.click('[data-api-action=list]')
+        self.click('[data-api-action=create]')
+        self.click('[data-api-action=import]')
+        self.click('[data-api-action=import-example]')
+        self.wait("document.querySelectorAll('[data-op-index]').length===2")
+        self.click('[data-op-index="0"]')
+        self.click('[data-api-action=import-confirm]')
+        self.wait("document.querySelector('[data-api-screen=list] [data-api-action=open]')")
+        apis = asyncio.run(self.server.workflow.api_catalog.state(self.server.user))['apis']
+        self.assertEqual(len(apis),1)
+        self.click('[data-api-action=open]')
+        self.wait("document.querySelector('[data-api-screen=detail]')?.textContent.includes('연결된 작업이 없습니다.')")
+        self.assertIn(apis[0]['name'],self.text('[data-api-screen=detail]'))
+        self.assertIn('요청 파라미터',self.text('[data-api-screen=detail]'))

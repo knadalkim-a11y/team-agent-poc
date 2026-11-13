@@ -1,0 +1,71 @@
+{
+  "viewport": [
+    1920,
+    1080
+  ],
+  "dpr": 1,
+  "sidebar": {
+    "x": 0,
+    "y": 0,
+    "width": 256,
+    "height": 1080
+  },
+  "work": {
+    "x": 256,
+    "y": 0,
+    "width": 1104,
+    "height": 1080
+  },
+  "chat": {
+    "x": 1360,
+    "y": 0,
+    "width": 560,
+    "height": 1080
+  },
+  "form": {
+    "x": 328,
+    "y": 72,
+    "width": 960,
+    "height": 580
+  },
+  "save": {
+    "x": 1232.078125,
+    "y": 602,
+    "width": 55.921875,
+    "height": 34
+  },
+  "title": {
+    "x": 328,
+    "y": 122,
+    "width": 115.203125,
+    "height": 30
+  },
+  "search": null,
+  "fields": [
+    {
+      "x": 480,
+      "y": 237,
+      "width": 808,
+      "height": 47
+    },
+    {
+      "x": 328,
+      "y": 325,
+      "width": 474,
+      "height": 47
+    },
+    {
+      "x": 328,
+      "y": 413,
+      "width": 960,
+      "height": 47
+    }
+  ],
+  "stage": null,
+  "jobs": [
+    null,
+    null
+  ],
+  "bindings": [],
+  "scene": "tools-create"
+}

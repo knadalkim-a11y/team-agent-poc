@@ -1,0 +1,56 @@
+{
+  "viewport": [
+    1920,
+    1080
+  ],
+  "dpr": 1,
+  "sidebar": {
+    "x": 0,
+    "y": 0,
+    "width": 256,
+    "height": 1080
+  },
+  "work": {
+    "x": 256,
+    "y": 0,
+    "width": 1104,
+    "height": 1080
+  },
+  "chat": {
+    "x": 1360,
+    "y": 0,
+    "width": 560,
+    "height": 1080
+  },
+  "form": null,
+  "save": null,
+  "title": null,
+  "search": null,
+  "fields": [
+    null,
+    null,
+    null
+  ],
+  "stage": {
+    "x": 328,
+    "y": 235,
+    "width": 960,
+    "height": 169
+  },
+  "jobs": [
+    {
+      "x": 342,
+      "y": 288,
+      "width": 932,
+      "height": 58
+    },
+    {
+      "x": 342,
+      "y": 346,
+      "width": 932,
+      "height": 58
+    }
+  ],
+  "bindings": [],
+  "scene": "task-connection"
+}

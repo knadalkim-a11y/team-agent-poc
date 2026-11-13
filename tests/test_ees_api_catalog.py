@@ -230,6 +230,36 @@ class CatalogTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual((await self.catalog.state(self.users["admin"]))["apis"],[])
 
 
+class ApiAssistantReferenceTest(unittest.IsolatedAsyncioTestCase):
+    async def test_native_help_keeps_the_offer_id_and_rejects_scope_or_permission_changes(self):
+        from fastapi import HTTPException
+        from types import SimpleNamespace
+        native = importlib.import_module(package.__name__ + ".ees_workflow_native")
+        reference = {"kind":"help", "term_id":"api_specification", "system_id":"EMS",
+                     "context_id":"editor-1", "api_draft_request":"offer-1", "screen":"API 명세 등록"}
+        meta = {"chat_id":"chat-1", "user_message":{"id":"question","content":"용도 설명 제안",
+                "meta":{"ees_work_help":1,"ees_work_reference":reference}}}
+        form = {"model":"fixture-model"}
+        request = SimpleNamespace(state=SimpleNamespace())
+        with patch.object(native,"_help_access",AsyncMock(return_value=("owner","current"))):
+            self.assertTrue(await native.prepare_chat_work_help(request,{},meta,form))
+            self.assertEqual(meta["ees_work_reference"]["api_draft_request"],"offer-1")
+            self.assertEqual(form["tool_ids"],["ees_workflow"])
+            meta["ees_work_reference"]["api_draft_request"]="different-offer"
+            with self.assertRaises(HTTPException) as stale:
+                await native.enforce_chat_work_help(request,{},meta,form)
+            self.assertEqual(stale.exception.detail["reason"],"work_chat_context_changed")
+        meta["ees_work_reference"]["api_draft_request"]="offer-1"
+        with patch.object(native,"_help_access",AsyncMock(side_effect=native.WorkflowError(
+                "work_chat_forbidden","편집 권한이 변경되었습니다."))):
+            with self.assertRaises(HTTPException) as forbidden:
+                await native.enforce_chat_work_help(request,{},meta,form)
+            self.assertEqual(forbidden.exception.detail["reason"],"work_chat_forbidden")
+        for bad in (dict(reference,term_id="read_tool"),dict(reference,api_draft_request="x"*41)):
+            with self.subTest(reference=bad), self.assertRaises(native.WorkflowError):
+                native._help_reference(bad)
+
+
 class CompilerTest(unittest.TestCase):
     def test_yaml_and_local_refs_standalone_errors(self):
         import yaml

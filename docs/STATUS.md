@@ -2,7 +2,7 @@
 
 ## 2026-11-13 · 워크 · 도구 API 명세 관리
 
-사용자가 공식 Figma의 API 명세 구조를 제품 구현 대상으로 지정했다. [지정 판과 대표 화면](mockups/ees-work/api-tools-20261113/README.md)에 Figma·브라우저 PNG와 동작 목업 v11을 고정했다. 구현 브랜치에서 API 명세 저장·가져오기, 작업 연결, HTTP 호출과 이력 조회를 구현했다. 개발용 HTTP 서버로 등록부터 실행까지 확인했다. 제품 대조 기준은 1920 × 1080 Figma 6개 상태이며, [서비스 연결과 실행 조건](specs/shared-tools.md#api-tools-v11)을 따른다. 정식 CI와 사내 서비스 인증·호출 확인은 별도로 기록한다.
+사용자가 공식 Figma의 API 명세 구조를 제품 구현 대상으로 지정했다. [지정 판과 대표 화면](mockups/ees-work/api-tools-20261113/README.md)에 Figma·브라우저 PNG와 동작 목업 v11을 고정했다. 구현 브랜치에서 API 명세 저장·가져오기, 작업 연결, HTTP 호출과 이력 조회를 구현했다. 개발용 HTTP 서버로 등록부터 실행까지 확인했다. [제품 화면 6개와 실측값](../evals/artifacts/api-tools-20261113/README.md)을 Figma와 함께 비교할 수 있다. 제품 대조 기준은 1920 × 1080 Figma 6개 상태이며, [서비스 연결과 실행 조건](specs/shared-tools.md#api-tools-v11)을 따른다. 정식 CI와 사내 서비스 인증·호출 확인은 별도로 기록한다.
 
 ## 2026-11-11 · 공식 화면과 제품 시각 비교
 
