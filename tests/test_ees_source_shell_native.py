@@ -977,10 +977,14 @@ class SourceShellNativeTests(IntegratedNativeCase):
         # C45 keeps Native tools reachable through B10-2, with the same frame
         # observation and draft preservation checks as other Native screens.
         for suffix, selector, condition in (
-            ('list', '[data-action=tools]', "document.querySelector('[data-api-action=legacy]')"),
+            ('list', '[data-action=tools]', "document.querySelector('[data-api-action=legacy],[data-author-action=shared_open],[data-author-action=shared_native]')"),
             ('managed', '[data-api-action=legacy]', "document.querySelector('[data-author-action=shared_open],[data-author-action=shared_native]')"),
             ('detail', '[data-author-action=shared_open][data-id=managed-search_pages]', "document.querySelector('[data-author-action=shared_native]')"),
         ):
+            # Returning to tools can restore the managed list or its last detail.
+            # Follow the catalog link only when that is the rendered entry point.
+            if suffix == 'managed' and not self.read('[data-api-action=legacy]', 'checkVisibility()'):
+                continue
             if suffix == 'detail' and self.browser.evaluate("!!document.querySelector('[data-author-action=shared_native]')"):
                 continue  # Returning to the same detail preserves its selection.
             step_label = label + '-shared-' + suffix
