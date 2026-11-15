@@ -384,3 +384,11 @@ Figma `XK2wTos6sEuxSHhIj7cqg6` 도구 2판 T06 `2017:333`, T06A `2054:384`, T07 
 - 예시의 주소와 사용자를 실제 서비스 계약에 맞춘다. `EES_BACKUP_AUTH`는 서버에 별도 주입하는 HTTP 헤더 값의 환경 변수 이름이다. 인증이 없는 서비스는 헤더 설정을 생략할 수 있다. 사용자별 자격이 필요한 서비스는 `user_credential_headers`를 사용하고, 공용 서비스 자격을 사용하는 계약에서만 `credential_headers`를 사용한다. `actor_ids`를 설정하면 지정된 계정만 호출할 수 있다.
 - EES Web 개발 요청 화면의 실제 주소는 서버의 `EES_WORK_API_REQUEST_URL`에 설정한다. 설정 전에도 개발 요청 경로를 안내하며, 공개된 API는 도구에 등록한 뒤 업무에 연결한다.
 - 실제 서비스의 URL, 인증값, 운영 데이터는 설계 예시와 CI에서 사용하지 않는다. 사내 검증은 승인된 테스트 API 호출, 요청값·응답·업무 이력 대조, 권한이 없는 계정의 호출 거부까지 확인한다.
+
+### Confluence 문서 조회로 업무 연결 확인
+
+[읽기 API 명세](../../examples/confluence/confluence-readonly.openapi.json)의 `servers[0].url`을 배포 환경의 Confluence Data Center 기본 주소와 REST 경로로 바꾼다. 예제는 `기준 문서 확인`의 페이지 ID와 `하위 문서 목록 조회`의 `results` 배열을 사용한다. 서비스 설정은 위의 서버 허용 주소와 사용자별 인증 규칙을 따른다.
+
+[시험 절차 등록 스크립트](../../examples/confluence/register_confluence_demo.py)는 EES Workflow 관리자 계정으로 명세 두 개를 등록하고 지정한 시스템의 운영 절차를 게시한다. 압축을 푼 예제 폴더에서 `python register_confluence_demo.py --ees-url <EES Workflow 주소> --email <EES 관리자 이메일> --system <시스템 ID>`를 실행한다. 로그인 암호는 숨김 입력한다. 프로그램 배포와 예제 등록은 별개의 작업이다.
+
+`업무 → 운영`에서 시험 절차를 시작하고 읽기 권한이 있는 기준 문서의 `pageId`를 한 번 입력한다. 첫 작업에서 표시된 문서 제목과 ID를 확인·확정한 뒤 두 번째 작업을 실행한다. 하위 문서는 실행 계정이 볼 수 있는 직계 자식 중 첫 5건까지만 표시한다. 자식이 없는 문서는 정상적으로 0건이다.

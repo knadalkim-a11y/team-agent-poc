@@ -3,8 +3,11 @@ import asyncio
 from copy import deepcopy
 import json
 import os
+from pathlib import Path
+import tempfile
 from unittest.mock import patch
 
+from confluence_provider import CHILDREN, PAGE, PAGE_ID, confluence_provider
 from ees_work_integrated_fixture import IntegratedNativeCase
 from test_ees_api_spec_execution import backup_service
 import test_ees_work_figma_authoring_native as authoring
@@ -254,3 +257,94 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('[data-api-screen=detail]')?.textContent.includes('연결된 작업이 없습니다.')")
         self.assertIn(apis[0]['name'],self.text('[data-api-screen=detail]'))
         self.assertIn('요청 파라미터',self.text('[data-api-screen=detail]'))
+
+    def test_confluence_readonly_import_mapping_and_execution(self):
+        """Exercise the shipped content/children contract over authenticated loopback HTTPS."""
+        directory = self.enterContext(tempfile.TemporaryDirectory())
+        upstream = self.enterContext(confluence_provider(directory))
+        self.enterContext(patch.dict(os.environ, {'SSL_CERT_FILE':upstream.ca,
+            'EES_CONFLUENCE_AUTHORIZATION':upstream.bearer,
+            'EES_WORK_API_SERVICES':json.dumps({'confluence': {'base_url':upstream.base_url, 'credential_headers':{'Authorization':'EES_CONFLUENCE_AUTHORIZATION'}}})}))
+        spec = json.loads((Path(__file__).resolve().parents[1] / 'examples/confluence/confluence-readonly.openapi.json').read_text(encoding='utf-8'))
+        spec['servers'][0]['url'] = upstream.base_url
+        key = self.author(name='Confluence 점검 문서 확인', jobs=2)
+        base = self.state(workflow_id=key)['workflow']
+        definition = deepcopy(base['draft'])
+        names = ['기준 문서 확인','하위 문서 목록 조회']
+        for i, name in enumerate(names):
+            definition['nodes']['job-'+str(i)].update(name=name, mode='tool')
+        self.command('save_draft', workflow_id=key, expected_revision=base['revision'], definition=definition)
+        self.authoring_viewport(1920,1080,overlay=False)
+        self.open_catalog()
+        self.click('[data-api-action=create]')
+        self.click('[data-api-action=import]')
+        self.click('[data-import-more] > summary')
+        self.fill('[name=api-import_text]', json.dumps(spec,ensure_ascii=False))
+        self.click('[data-api-action=import-text]')
+        self.wait("document.querySelectorAll('[data-op-index]').length === 2")
+        for i in range(2):
+            self.click(f'[data-op-index="{i}"]')
+        self.click('[data-api-action=import-confirm]')
+        self.wait("document.querySelectorAll('[data-api-screen=list] [data-api-action=open]').length === 2")
+        rows = self.browser.evaluate("[...document.querySelectorAll('[data-api-action=open]')].map(n=>({id:n.dataset.id,name:n.innerText}))")
+        ids = [next(row['id'] for row in rows if name in row['name']) for name in names]
+        self.click('[data-action=procedures]')
+        self.click('[data-author-action=open][data-id="'+key+'"]')
+        self.click('[data-author-action=tab][data-tab=content]')
+        if not self.read('[data-job-id=job-0] [data-author-action=job_api_setup]', 'isConnected'):
+            self.click('[data-author-action=stage_toggle][data-id=stage]')
+        for i, id_ in enumerate(ids):
+            self.click(f'[data-job-id=job-{i}] [data-author-action=job_api_setup]')
+            self.click(f'[data-api-candidate="{id_}"]')
+            if i == 0:
+                self.choose('[data-api-source="id"]','input')
+            else:
+                self.choose('[data-api-source="id"]','result')
+                self.choose('[data-api-result="id"]','["job-0","id"]')
+                self.choose('[data-api-source="limit"]','constant')
+                self.fill('[data-api-value="limit"]','5')
+            self.click('#ees-work-dialog [data-dialog-confirm]')
+            self.wait("!document.querySelector('#ees-work-dialog[open]')")
+        self.click('[data-author-action=save]')
+        self.wait("document.querySelector('[data-author-status]')?.dataset.dirty === 'false'")
+        saved = self.state(workflow_id=key)['workflow']
+        jobs = saved['draft']['nodes']
+        input_id = jobs['job-0']['api_binding']['inputs']['id']['input']
+        self.assertEqual(jobs['job-1']['api_binding']['inputs']['id']['result']['field'],'id')
+        self.command('publish_workflow', workflow_id=key, expected_revision=saved['revision'])
+        run = self.start(key, inputs={input_id: PAGE_ID})
+        self.refresh()
+        self.click('[data-action=mode][data-mode=work]')
+        self.open_run(key,run)
+        self.assertEqual(upstream.records, [])
+        self.click('[data-action=execute]')
+        self.wait("document.querySelector('.ew-api-table')?.innerText.includes(" + json.dumps(PAGE['title']) + ")")
+        page_table = self.text('.ew-api-table')
+        self.assertIn('페이지 ID',page_table)
+        self.assertIn(PAGE_ID,page_table)
+        self.screenshot('confluence-page')
+        self.click('[data-action=confirm]')
+        self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.wait("!document.querySelector('[data-action=confirm]')")
+        self.open_run(key,run,job='job-1')
+        self.click('[data-action=execute]')
+        self.wait("document.querySelector('.ew-api-table')?.innerText.includes('주간 점검표')")
+        child_table = self.text('.ew-api-table')
+        for row in CHILDREN:
+            self.assertIn(row['title'],child_table)
+        self.screenshot('confluence-children')
+        self.click('[data-action=confirm_list]')
+        self.fill('#ees-list-confirm-reason', '하위 문서 두 건을 확인했습니다.')
+        self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.wait("!document.querySelector('[data-action=confirm_list]')")
+        self.navigate('/c/existing-chat')
+        self.wait("document.querySelector('#ees-work-panel')")
+        self.click('[data-action=mode][data-mode=work]')
+        self.open_run(key,run,job='job-1')
+        self.wait("document.querySelector('.ew-api-table')?.innerText.includes('주간 점검표')")
+        final = self.state(run_id=run['id'])['run']
+        self.assertEqual(len(final['attempts']),2)
+        self.assertEqual([final['jobs']['job-'+str(i)]['status'] for i in range(2)], ['completed','completed'])
+        self.assertEqual(upstream.records, [
+            ('/rest/api/content/'+PAGE_ID,{},True),
+            ('/rest/api/content/'+PAGE_ID+'/child/page',{'limit':['5']},True)])

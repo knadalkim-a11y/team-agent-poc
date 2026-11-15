@@ -37,6 +37,8 @@ on:
       - 'tests/test_ees_specialists_tool.py'
       - 'tests/test_ees_update_download.py'
       - 'tests/test_confluence*.py'
+      - 'tests/confluence_provider.py'
+      - 'examples/confluence/**'
       - 'tests/test_jira_read.py'
       - 'tests/test_jira_work_contract.py'
       - 'tests/test_github_tool.py'
