@@ -29,9 +29,10 @@ def make_definition(draft, apis):
     nodes[root].update(name=TITLE, children=["documents"])
     nodes["documents"] = {"id": "documents", "type": "t", "parent": root,
                           "name": "문서 구조 확인", "children": ["page", "children"], "deps": []}
-    for key, operation in (("page", apis[PAGE]), ("children", apis[CHILDREN])):
+    for key, operation, result_block in (("page", apis[PAGE], "human_confirm"),
+                                         ("children", apis[CHILDREN], "list_confirm")):
         nodes[key] = {"id": key, "type": "j", "parent": "documents", "name": operation["name"],
-                      "children": [], "deps": [], "mode": "tool", "result_block": "list_confirm",
+                      "children": [], "deps": [], "mode": "tool", "result_block": result_block, "human_confirmation": True,
                       "api_binding": {"operation_id": operation["id"], "version": operation["version"],
                                       "inputs": {}, "outputs": ["title", "id", "type"]}}
     nodes["page"]["inputs"] = [{"id": "page-id", "name": "페이지 ID", "type": "text",

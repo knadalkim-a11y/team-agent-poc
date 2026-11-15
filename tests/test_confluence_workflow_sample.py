@@ -119,6 +119,11 @@ class ConfluenceWorkflowContractTests(unittest.TestCase):
         self.workflow_id = self.record['workflow_id']
         authoring = self.call('workspace', query={'workflow_id': self.workflow_id})['workflow']
         self.assertIsNotNone(authoring['published_version'])
+        jobs = authoring['published']['nodes']
+        self.assertEqual(jobs['page']['result_block'], 'human_confirm')
+        self.assertEqual(jobs['children']['result_block'], 'list_confirm')
+        self.assertTrue(jobs['page']['human_confirmation'])
+        self.assertTrue(jobs['children']['human_confirmation'])
         self.command('workspace/command', 'save_access', actor='admin', system_id='EMS', factory_id='*',
                      roles=['participant'], principal_kind='user', principal_id='operator')
         result = self.command('workspace/command', 'start_run', authoring['revision'],
@@ -135,6 +140,9 @@ class ConfluenceWorkflowContractTests(unittest.TestCase):
 
     def confirm(self, run_id, attempt, job):
         revision = self.state(run_id)['revision']
+        if job == 'page':
+            return self.command('workspace/command', 'decide', revision, job_id=job, run_id=run_id,
+                                item_id='job', verdict='completed', result_revision=attempt['number'])
         items = [{'id': item['id'], 'title': item['title'], 'selected': True, 'required': True}
                  for item in attempt['result']['items']]
         return self.command('workspace/command', 'confirm_list', revision, job_id=job, run_id=run_id,
