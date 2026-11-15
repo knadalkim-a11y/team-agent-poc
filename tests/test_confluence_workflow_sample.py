@@ -1,5 +1,5 @@
 """Verify the shipped Confluence registration script with product HTTP routes and HTTPS."""
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib import import_module
 import json
@@ -175,7 +175,7 @@ class ConfluenceWorkflowContractTests(unittest.TestCase):
         self.assertEqual(drafts[0]['revision'], 1)
         self.assertIsNone(drafts[0]['published_version'])
         self.assertFalse(self.provider.records)
-        with sqlite3.connect(self.db) as database:
+        with closing(sqlite3.connect(self.db)) as database:
             self.assertEqual(database.execute('SELECT COUNT(*) FROM work_api_operations').fetchone()[0], 0)
 
     def test_two_authenticated_gets_handoff_and_persistent_history(self):
