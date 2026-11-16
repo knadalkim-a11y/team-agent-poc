@@ -2540,7 +2540,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer [data-api-screen=list] .ew-api-toolbar h2 {margin-left:auto;color:var(--ees-text-secondary);font-size:13px;line-height:20px;font-weight:400;white-space:nowrap;}
 #ees-work-designer [data-api-screen=detail] .ew-api-head {align-items:flex-start;flex-wrap:nowrap;margin-bottom:12px;}
 #ees-work-designer [data-api-catalog] .ew-api-head>.ew-api-title {display:block;flex:1;min-width:0;}
-#ees-work-designer [data-api-catalog] .ew-api-title p {margin:4px 0 0;color:var(--ees-text-secondary);overflow-wrap:anywhere;}
+#ees-work-designer [data-api-catalog] .ew-api-title p {margin:4px 0 0;color:var(--ees-text-secondary);word-break:keep-all;overflow-wrap:anywhere;}
 #ees-work-designer [data-api-catalog] .ew-api-btn.strong {border-color:var(--ees-text-primary);}
 #ees-work-designer [data-api-catalog] .ew-api-source {margin:0 0 18px;overflow-wrap:anywhere;}
 #ees-work-designer [data-api-catalog] .ew-api-columns {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border-top:1px solid var(--ees-line-divider);}
@@ -2557,10 +2557,18 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer [data-api-screen=detail] .ew-api-columns th {background:transparent;}
 #ees-work-designer [data-api-screen=detail] .ew-api-columns h3+small {display:block;margin:-4px 0 4px;color:var(--ees-text-secondary);}
 #ees-work-designer [data-api-catalog] .ew-api-top {display:grid;grid-template-columns:132px minmax(0,1.2fr) 200px minmax(0,1fr);gap:12px;margin:0 0 16px;}
-#ees-work-designer [data-api-screen=edit] .ew-api-foot {position:sticky;bottom:0;z-index:1;background:var(--ees-surface-panel);}
+/* The save row stays at the bottom edge while the settings scroll under it. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer > .ew-author-scroll:has([data-api-screen=edit]) {padding-bottom:0;}
+#ees-work-designer [data-api-screen=edit] .ew-api-foot {position:sticky;bottom:0;z-index:1;padding:12px 0 16px;background:var(--ees-surface-panel);}
 #ees-work-designer [data-api-screen=edit] .ew-api-foot [data-api-dirty] {margin-right:auto;color:var(--ees-text-secondary);font-size:12px;line-height:18px;}
+/* Six controls on a parameter line need about 440px; below that the two settings columns stack. */
+@container ees-api-catalog (max-width: 900px) {
+  #ees-work-designer [data-api-catalog] .ew-api-columns[data-api-mapping] {grid-template-columns:minmax(0,1fr);}
+  #ees-work-designer [data-api-catalog] .ew-api-columns[data-api-mapping]>div {padding-right:0;}
+  #ees-work-designer [data-api-catalog] .ew-api-columns[data-api-mapping]>div+div {padding-left:0;border-left:0;border-top:1px solid var(--ees-line-divider);}
+}
 @container ees-api-catalog (max-width: 720px) {
-  #ees-work-designer [data-api-catalog] .ew-api-columns, #ees-work-designer [data-api-catalog] .ew-api-columns[data-api-mapping] {grid-template-columns:minmax(0,1fr);}
+  #ees-work-designer [data-api-catalog] .ew-api-columns {grid-template-columns:minmax(0,1fr);}
   #ees-work-designer [data-api-catalog] .ew-api-columns>div {padding-right:0;}
   #ees-work-designer [data-api-catalog] .ew-api-columns>div+div {padding-left:0;border-left:0;border-top:1px solid var(--ees-line-divider);}
   #ees-work-designer [data-api-catalog] .ew-api-top {grid-template-columns:132px minmax(0,1fr);}
@@ -2569,7 +2577,8 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
   #ees-work-designer [data-api-catalog] :is(.ew-api-name strong,.ew-api-description) {white-space:normal;}
   #ees-work-designer [data-api-catalog] .ew-api-map-head {display:none;}
   #ees-work-designer [data-api-catalog] [data-map-kind=inputs] {grid-template-columns:repeat(3,minmax(0,1fr)) 28px;}
-  #ees-work-designer [data-api-catalog] .ew-api-map[data-map-kind=inputs]>:is(:nth-child(1),:nth-child(5)) {grid-column:1 / -2;}
+  #ees-work-designer [data-api-catalog] .ew-api-map[data-map-kind=inputs]>:nth-child(1) {grid-column:1 / -1;}
+  #ees-work-designer [data-api-catalog] .ew-api-map[data-map-kind=inputs]>:nth-child(5) {grid-column:1 / -2;}
 }
 @container ees-api-catalog (max-width: 420px) {
   #ees-work-designer [data-api-catalog] .ew-api-top {grid-template-columns:minmax(0,1fr);}

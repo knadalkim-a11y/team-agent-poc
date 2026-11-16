@@ -1,0 +1,72 @@
+{
+ "date": "2026-11-16",
+ "what": "Product screens of workspace design mock 17 revision 2, step 1, taken from the running product",
+ "mock": {
+  "file": "docs/mockups/ees-work/design-mock-17-workspace.html",
+  "commit": "d6da045",
+  "screens": {
+   "product-WS1-1920.png": "WS1.png",
+   "product-WS3-1920.png": "WS3.png",
+   "product-WS4-1920.png": "WS4.png",
+   "product-WS5-1920.png": "WS5.png"
+  },
+  "captures": "docs/mockups/ees-work/workspace-screens-20261116"
+ },
+ "product": {
+  "program": "0.11.3+ees.14",
+  "wheel_sha256": "904c3445b9403ec60f12d85fa8fee9ad0f4a5b3682d2d5e06f8f7107508f8eee",
+  "built_from": "the branding/ees sources of the commit that adds this file (all 143 build inputs matched the build manifest before committing), Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0, npm 10.9.2",
+  "server": "tests/native_ui_fixture.py: the built frontend with synthetic sign-in, chat and model, and the real workflow service on a temporary database",
+  "browser": "Chromium 153 headless, device scale factor 1",
+  "data": "synthetic services and APIs (사내 백업, 사내 위키) and the default procedures of a new installation"
+ },
+ "state": {
+  "1920": "sidebar 256px open, chat 560px docked, work area 1104px",
+  "1366": "sidebar compact, chat docked",
+  "480": "sidebar compact, chat closed"
+ },
+ "files": {
+  "product-WS1-1920.png": {
+   "sha256": "b65c967feed900d605b4d01886d4987e21968c6ff5e703b07164f28c0ac6c12e",
+   "size": [
+    1920,
+    1080
+   ]
+  },
+  "product-WS3-1920.png": {
+   "sha256": "5302ecfbeddea2dfca474727d2ee34713701dfac050841e0284e9721658f6931",
+   "size": [
+    1920,
+    1080
+   ]
+  },
+  "product-WS4-1920.png": {
+   "sha256": "6220f6c3fbbe620d16014aa191e3b54a9aec72d657467123c621a319b7c2e459",
+   "size": [
+    1920,
+    1080
+   ]
+  },
+  "product-WS5-1920.png": {
+   "sha256": "8907c8997e98f35c47eb0f03648b13d10f97bf8bfbcca03edcdaac9c7b8887d7",
+   "size": [
+    1920,
+    1080
+   ]
+  },
+  "product-WS5-1366.png": {
+   "sha256": "0adf9d8f1b84f95eb3b9aa58a9b1939c2b1d1fa3c374cc3b9b4c5a4908a19a68",
+   "size": [
+    1366,
+    768
+   ]
+  },
+  "product-WS5-480.png": {
+   "sha256": "e217b9a0d745b0b85198b8762d3b624181d4543c4b45c7c65a99ea619f1f2288",
+   "size": [
+    480,
+    800
+   ]
+  }
+ }
+}

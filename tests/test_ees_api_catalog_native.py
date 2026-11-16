@@ -176,6 +176,51 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.click('[data-api-action=edit]')
         self.assertEqual(self.read('[name=api-purpose]', 'value'), '완료 시각과 처리 상태를 함께 확인합니다.')
 
+    def test_edit_settings_stay_readable_and_save_stays_at_the_bottom_edge_when_narrow(self):
+        backup = self.register_service('사내 백업')
+        api = self.seed_api(backup, 'GET', 'https://backup.example/backups', '백업 결과 조회',
+                            '백업 작업별 성공 여부와 완료 시각을 확인합니다.',
+                            inputs=[{'name': 'date', 'in': 'query', 'type': 'string', 'required': True, 'label': '조회 날짜'},
+                                    {'name': 'status', 'in': 'query', 'type': 'string', 'required': False, 'label': '작업 상태'}],
+                            result_path='items',
+                            fields=[{'path': 'job_name', 'type': 'string', 'label': '작업 이름'},
+                                    {'path': 'succeeded', 'type': 'boolean', 'label': '성공 여부'},
+                                    {'path': 'finished_at', 'type': 'string', 'label': '완료 시각'}],
+                            example={'items': [{'job_name': 'EMS 운영 DB 백업', 'succeeded': True, 'finished_at': '2026-11-05 02:14'}]})
+        self.authoring_viewport(1920, 1080, overlay=False)
+        self.open_catalog()
+        self.click('[data-api-action=open][data-id="' + api['id'] + '"]')
+        self.click('[data-api-action=edit]')
+        self.wait("document.querySelector('[data-api-screen=edit] [data-api-mapping]')")
+
+        def measure():
+            return self.browser.evaluate("""(() => {
+              const box = e => { const {x, y, width, height, right, bottom} = e.getBoundingClientRect(); return {x, y, width, height, right, bottom}; };
+              const area = box(document.querySelector('#ees-work-designer > .ew-author-scroll'));
+              const catalog = document.querySelector('[data-api-catalog]');
+              return {columns:[...document.querySelectorAll('[data-api-mapping]>div')].map(box), area, catalog:box(catalog),
+                foot:box(document.querySelector('.ew-api-foot')),
+                controls:[...document.querySelectorAll('.ew-api-map :is(input,select)')].map(e => e.getBoundingClientRect().width),
+                overflow:document.documentElement.scrollWidth > innerWidth ||
+                  [...catalog.querySelectorAll('*')].some(e => e.getClientRects().length && e.getBoundingClientRect().right > area.right + 1)};
+            })()""")
+
+        wide = measure()
+        self.assertAlmostEqual(wide['columns'][0]['y'], wide['columns'][1]['y'], delta=1)
+        self.assertGreater(wide['columns'][1]['x'], wide['columns'][0]['right'] - 1)
+        for width, height, overlay in ((1366, 768, False), (480, 800, True)):
+            with self.subTest(width=width):
+                self.authoring_viewport(width, height, overlay=overlay)
+                self.wait("document.querySelector('[data-api-screen=edit] [data-api-mapping]')?.checkVisibility()")
+                narrow = measure()
+                # Six controls on a parameter line do not fit beside the result settings here: the columns stack.
+                self.assertGreater(narrow['columns'][1]['y'], narrow['columns'][0]['bottom'] - 1, narrow['columns'])
+                self.assertGreaterEqual(min(narrow['controls']), 56, narrow['controls'])
+                self.assertFalse(narrow['overflow'])
+                # The settings are longer than the work area; the save row stays flush with its bottom edge.
+                self.assertGreater(narrow['catalog']['bottom'], narrow['area']['bottom'])
+                self.assertAlmostEqual(narrow['foot']['bottom'], narrow['area']['bottom'], delta=1)
+
     def test_open_workflow_connect_apis_and_persist_handoff(self):
         service = self.register_service('EMS 설비 이력')
         reader = self.seed_api(service, 'GET', 'https://ems.example/equipment/{equipmentId}/alarms',
