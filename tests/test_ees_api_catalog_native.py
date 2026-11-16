@@ -1,4 +1,8 @@
-"""Product browser evidence for the six screens pinned by the v11 design."""
+"""Product browser evidence for the API screens.
+
+Registration and task connection follow the v11 frames. The list, the opened API and editing follow
+design mock 17 revision 2 (docs/mockups/ees-work/TASK.md#workspace-product-step1-20261116).
+"""
 import asyncio
 from copy import deepcopy
 import json
@@ -43,7 +47,10 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
             sidebar:rect('[data-ees-source-sidebar]'), work:rect('[data-ees-work-surface]'),
             chat:rect('[data-ees-chat-surface]'), form:rect('[data-api-catalog]'),
             save:rect('[data-api-action=save]'), title:rect('[data-api-catalog] h2'),
-            search:rect('[name=api-search]'),
+            search:rect('[name=api-search]'), create:rect('[data-api-action=create]'),
+            thead:rect('.ew-api-thead'), columns:[...document.querySelectorAll('.ew-api-columns>div')].map(e=>{
+              const {x, y, width, height} = e.getBoundingClientRect(); return {x, y, width, height};}),
+            mapping:rect('[data-api-mapping]'), foot:rect('.ew-api-foot'),
             fields:['url','name','purpose'].map(name=>rect('[name=api-'+name+']')),
             stage:rect('[data-stage-id=stage]'), jobs:['job-0','job-1'].map(id=>rect('[data-job-id='+id+']')),
             bindings:[...document.querySelectorAll('[data-api-job-binding]')].map(e=>e.innerText)};
@@ -60,18 +67,43 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         if name.startswith('tools-'):
             self.assertAlmostEqual(report['form']['x'], 328, delta=1)
             self.assertAlmostEqual(report['form']['width'], 960, delta=1)
-        if name in ('tools-create-empty', 'tools-create', 'tools-edit'):
-            expected_tops = (197, 288, 379) if name == 'tools-edit' else (237, 325, 413)
-            for field, y in zip(report['fields'], expected_tops):
+        if name in ('tools-create-empty', 'tools-create'):
+            for field, y in zip(report['fields'], (237, 325, 413)):
                 self.assertAlmostEqual(field['y'], y, delta=2, msg=name)
                 self.assertAlmostEqual(field['height'], 46, delta=2, msg=name)
+        if name == 'tools-list':
+            # One search row, then one table: no second title above them.
+            self.assertAlmostEqual(report['search']['x'], 328, delta=1)
+            self.assertLess(report['search']['y'], 100)
+            self.assertAlmostEqual(report['create']['x'] + report['create']['width'], 1288, delta=1)
+            self.assertLess(abs(report['create']['y'] + report['create']['height'] / 2 -
+                                report['search']['y'] - report['search']['height'] / 2), 2)
+            self.assertAlmostEqual(report['thead']['width'], 960, delta=1)
+            self.assertGreater(report['thead']['y'], report['search']['y'] + report['search']['height'])
+        if name in ('tools-detail', 'tools-edit'):
+            # What is sent sits beside what comes back.
+            left, right = report['columns']
+            self.assertAlmostEqual(left['x'], 328, delta=1, msg=name)
+            self.assertAlmostEqual(left['y'], right['y'], delta=1, msg=name)
+            self.assertGreater(right['x'], left['x'] + 400, msg=name)
+            self.assertAlmostEqual(right['x'] + right['width'], 1288, delta=1, msg=name)
+        if name == 'tools-edit':
+            url, api_name, purpose = report['fields']
+            self.assertAlmostEqual(url['y'], api_name['y'], delta=1)
+            self.assertGreater(api_name['x'], url['x'] + url['width'])
+            self.assertGreater(purpose['y'], url['y'] + url['height'])
+            self.assertAlmostEqual(purpose['x'], 328, delta=1)
+            self.assertAlmostEqual(purpose['width'], 960, delta=1)
+            self.assertGreater(report['mapping']['y'], purpose['y'] + purpose['height'])
         if name.startswith('task-'):
             self.assertAlmostEqual(report['stage']['x'], 328, delta=2)
             self.assertAlmostEqual(report['stage']['width'], 960, delta=2)
             self.assertAlmostEqual(report['stage']['y'], 234, delta=2)
         if name == 'tools-edit':
+            # Save stays below the settings, at the right edge of the form.
             self.assertGreater(report['save']['x'], report['form']['x'] + 800)
-            self.assertLess(abs(report['save']['y'] - report['title']['y']), 22)
+            self.assertGreater(report['save']['y'], report['mapping']['y'] + report['mapping']['height'] - 1)
+            self.assertGreater(report['save']['y'], report['foot']['y'])
 
     def open_catalog(self):
         self.click('[data-action=mode][data-mode=author]')
@@ -103,14 +135,38 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         rows = self.browser.evaluate("""[...document.querySelectorAll('[data-api-action=open]')]
           .map(e=>({id:e.dataset.id,text:e.innerText}))""")
         row = next(r for r in rows if '백업 결과 조회' in r['text'])
-        self.assertLess(row['text'].index('/backups'), row['text'].index('백업 결과 조회'))
+        self.assertLess(row['text'].index('백업 결과 조회'), row['text'].index('/backups'))
+        self.assertEqual(self.text('[data-api-screen=list] h2'), 'API 명세 3개')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-api-screen=list] .ew-api-head')"))
+        methods = self.browser.evaluate("""Object.fromEntries([...document.querySelectorAll('.ew-api-row')].map(row => {
+          const style = getComputedStyle(row.querySelector('.ew-api-method'));
+          return [row.dataset.method, [style.backgroundColor, style.color, getComputedStyle(row).backgroundColor]];}))""")
+        # Reading is outlined and a request that changes something is filled; rows carry no tint.
+        self.assertEqual(methods['GET'], ['rgba(0, 0, 0, 0)', 'rgb(31, 32, 35)', 'rgba(0, 0, 0, 0)'])
+        self.assertEqual(methods['POST'], ['rgb(31, 32, 35)', 'rgb(255, 255, 255)', 'rgba(0, 0, 0, 0)'])
+        self.fill('[name=api-search]', '재처리')
+        self.wait("document.querySelector('[data-api-screen=list] h2')?.textContent === 'API 명세 3개 중 1개'")
+        self.assertEqual(self.browser.evaluate("document.querySelectorAll('[data-api-action=open]').length"), 1)
+        self.fill('[name=api-search]', '사내')
+        self.wait("document.querySelector('[data-api-screen=list] h2')?.textContent === 'API 명세 3개 중 3개'")
         opener = '[data-api-action=open][data-id="' + row['id'] + '"]'
         self.click(opener)
+        self.wait("document.querySelector('[data-api-screen=detail]')?.textContent.includes('연결된 작업이 없습니다.')")
+        self.assertEqual(self.text('[data-api-screen=detail] .ew-api-route').split(), ['GET', '사내', '백업', 'https://backup.example/backups'])
+        self.assertEqual([line for line in self.text('[data-api-screen=detail] .ew-api-title').split('\n') if line],
+                         ['백업 결과 조회', '백업 작업별 성공 여부와 완료 시각을 확인합니다.'])
+        self.capture_state('tools-detail', '[data-api-screen=detail]')
         self.click('[data-api-action=edit]')
         self.assertEqual(self.read('[name=api-service_id]', 'value'), backup)
         self.assertEqual(self.read(url, 'value'), 'https://backup.example/backups')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-api-screen=edit] [data-api-advanced]')"))
+        self.assertTrue(self.read('[data-api-action=save]', 'disabled'))
+        self.assertTrue(self.read('[data-api-dirty]', 'hidden'))
         self.capture_state('tools-edit', '[data-api-screen=edit]')
         self.fill('[name=api-purpose]', '완료 시각과 처리 상태를 함께 확인합니다.')
+        self.assertFalse(self.read('[data-api-action=save]', 'disabled'))
+        self.assertFalse(self.read('[data-api-dirty]', 'hidden'))
+        self.assertEqual(self.text('[data-api-dirty]'), '저장하지 않은 변경 있음')
         self.click('[data-api-action=save]')
         self.wait("document.querySelector('[data-api-screen=list]')")
         self.navigate('/c/existing-chat')
@@ -369,7 +425,9 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.click('#ees-work-designer [data-action=refresh]')
         self.wait("document.querySelector('[data-api-action=open][data-id=guide-confluence-page]')")
         self.click('[data-api-action=open][data-id=guide-confluence-page]')
-        self.assertIn('서비스 기본 주소 + /{id}', self.text('[data-api-screen=detail] .ew-api-route'))
+        # A path is shown with its service; the route keeps the base-address wording as its description.
+        self.assertEqual(self.text('[data-api-screen=detail] .ew-api-route').split()[-1], '/{id}')
+        self.assertEqual(self.read('[data-api-screen=detail] .ew-api-route', 'title'), '서비스 기본 주소 + /{id}')
         self.click('[data-action=procedures]')
         key = 'guide-confluence-documents'
         self.wait("document.querySelector('[data-author-action=open][data-id=guide-confluence-documents]')")

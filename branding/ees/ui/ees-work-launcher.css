@@ -2429,23 +2429,39 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer [data-api-catalog] .ew-api-subhead {justify-content:space-between;margin:14px 0 8px;overflow-wrap:anywhere;}
 #ees-work-designer [data-api-catalog] .ew-api-subhead h3 {margin:0;}
 #ees-work-designer [data-api-catalog] .ew-api-foot {justify-content:flex-end;border-top:1px solid #e6e6e9;padding:16px 0;}
-#ees-work-designer [data-api-catalog] .ew-api-groups {margin-top:16px;}
+#ees-work-designer [data-api-catalog] .ew-api-groups {margin-top:0;}
 #ees-work-designer [data-api-catalog] .ew-api-group {display:block;margin:0;padding:0;border:0;background:transparent;}
-#ees-work-designer [data-api-catalog] .ew-api-group>summary {display:flex;justify-content:space-between;align-items:center;list-style:none;margin:0;padding:8px 3px 17px;cursor:pointer;color:#58595f;font-size:13px;font-weight:500;}
-#ees-work-designer [data-api-catalog] .ew-api-group>summary>span:last-child::before {content:'›';display:inline-block;margin-right:10px;}
-#ees-work-designer [data-api-catalog] .ew-api-group[open]>summary>span:last-child::before {transform:rotate(90deg);}
-#ees-work-designer [data-api-catalog] .ew-api-row {display:block;width:100%;min-height:67px;margin:0 0 3px;padding:9px 13px;border:1px solid #c3d6f3;border-radius:5px;background:#f0f5fd;color:#1f2023;text-align:left;cursor:pointer;overflow-wrap:anywhere;}
-#ees-work-designer [data-api-catalog] .ew-api-row[data-method=POST] {background:#ecf6f0;border-color:#d1e5d8;}
-#ees-work-designer [data-api-catalog] .ew-api-line {display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;}
-#ees-work-designer [data-api-catalog] .ew-api-line i {margin-left:auto;color:#6f7178;font-style:normal;font-size:20px;}
-#ees-work-designer [data-api-catalog] .ew-api-method {padding:2px 9px;border-radius:5px;background:#2a5fae;color:#fff;font-size:12px;}
-#ees-work-designer [data-api-catalog] [data-method=POST] .ew-api-method {background:#1b7748;}
-#ees-work-designer [data-api-catalog] .ew-api-description {display:block;margin-top:2px;color:#5c5e65;font-size:13px;}
+#ees-work-designer [data-api-catalog] .ew-api-group>summary {display:flex;align-items:center;gap:8px;list-style:none;margin:0;padding:18px 8px 6px 4px;border-bottom:1px solid var(--ees-line-control);cursor:pointer;color:var(--ees-text-primary);font-size:13px;line-height:20px;font-weight:500;}
+#ees-work-designer [data-api-catalog] .ew-api-thead+.ew-api-group>summary {padding-top:10px;}
+#ees-work-designer [data-api-catalog] .ew-api-group>summary::-webkit-details-marker {display:none;}
+#ees-work-designer [data-api-catalog] .ew-api-group>summary::before {content:'›';display:inline-block;width:16px;text-align:center;color:var(--ees-text-secondary);font-size:16px;line-height:20px;transition:transform .15s ease;}
+#ees-work-designer [data-api-catalog] .ew-api-group[open]>summary::before {transform:rotate(90deg);}
+#ees-work-designer [data-api-catalog] .ew-api-group>summary>span:last-child {font-size:12px;font-weight:400;color:var(--ees-text-secondary);}
+#ees-work-designer [data-api-catalog] :is(.ew-api-thead,.ew-api-row) {display:grid;grid-template-columns:56px minmax(0,1.2fr) minmax(0,1fr) 16px;align-items:center;gap:16px;width:100%;padding:8px;}
+#ees-work-designer [data-api-catalog] .ew-api-thead {border-bottom:1px solid var(--ees-line-control);color:var(--ees-text-secondary);font-size:12px;line-height:18px;}
+#ees-work-designer [data-api-catalog] .ew-api-row {min-height:60px;margin:0;border:0;border-bottom:1px solid var(--ees-line-divider);border-radius:0;background:transparent;color:var(--ees-text-primary);text-align:left;cursor:pointer;}
+#ees-work-designer [data-api-catalog] .ew-api-row:hover {background:var(--ees-surface-hover);}
+#ees-work-designer [data-api-catalog] .ew-api-name {display:flex;flex-direction:column;min-width:0;}
+#ees-work-designer [data-api-catalog] .ew-api-name strong {font-size:14px;line-height:22px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#ees-work-designer [data-api-catalog] .ew-api-description {display:block;color:var(--ees-text-secondary);font-size:12px;line-height:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#ees-work-designer [data-api-catalog] .ew-api-path {min-width:0;color:var(--ees-text-secondary);font-family:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;font-size:12px;line-height:18px;overflow-wrap:anywhere;}
+#ees-work-designer [data-api-catalog] .ew-api-row i {justify-self:end;color:var(--ees-text-secondary);font-style:normal;font-size:18px;line-height:1;}
+#ees-work-designer [data-api-catalog] .ew-api-method {display:inline-flex;align-items:center;justify-content:center;width:52px;min-height:22px;padding:0;border:1px solid var(--ees-text-primary);border-radius:4px;background:var(--ees-text-primary);color:var(--ees-text-inverse);font-family:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.02em;line-height:18px;}
+#ees-work-designer [data-api-catalog] :is([data-method=GET],[data-method=HEAD],[data-method=OPTIONS]) .ew-api-method {border-color:var(--ees-line-control);background:transparent;color:var(--ees-text-primary);}
 #ees-work-designer [data-api-catalog] .ew-api-legacy {margin-top:18px;font-size:13px;}
 #ees-work-designer [data-api-catalog] .ew-api-card {border:1px solid #d5d6da;background:#fff;border-radius:6px;padding:15px;margin:12px 0;}
 #ees-work-designer [data-api-catalog] .ew-api-service {padding:12px 0;border-bottom:1px solid #e6e6e9;}
 #ees-work-designer [data-api-catalog] .ew-api-service button {margin-left:auto;}
-#ees-work-designer [data-api-catalog] .ew-api-map {display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));align-items:end;gap:8px;margin:10px 0;}
+#ees-work-designer [data-api-catalog] :is(.ew-api-map-head,.ew-api-map) {display:grid;align-items:center;gap:8px;}
+#ees-work-designer [data-api-catalog] [data-map-kind=inputs] {grid-template-columns:minmax(0,1fr) 84px 96px 72px minmax(0,1fr) 28px;}
+#ees-work-designer [data-api-catalog] [data-map-kind=fields] {grid-template-columns:minmax(0,1fr) minmax(0,1fr) 96px 28px;}
+#ees-work-designer [data-api-catalog] .ew-api-map-head {padding-bottom:6px;border-bottom:1px solid var(--ees-line-control);color:var(--ees-text-secondary);font-size:12px;line-height:18px;}
+#ees-work-designer [data-api-catalog] .ew-api-map {margin:0;padding:6px 0;border-bottom:1px solid var(--ees-line-divider);}
+#ees-work-designer [data-api-catalog] .ew-api-advanced[open]>.ew-api-map {margin-bottom:0;}
+#ees-work-designer [data-api-catalog] .ew-api-map :is(input,select) {height:34px;padding:4px 8px;font-size:13px;line-height:20px;}
+#ees-work-designer [data-api-catalog] .ew-api-map select {padding-inline:6px 2px;}
+#ees-work-designer [data-api-catalog] :is(.ew-api-search,.ew-api-map label)>span {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+#ees-work-designer [data-api-catalog] .ew-api-btn.remove {width:28px;min-height:28px;padding:0;color:var(--ees-text-secondary);font-size:16px;line-height:1;}
 #ees-work-designer [data-api-catalog] .ew-api-choice {display:flex;flex-direction:row;align-items:center;gap:10px;padding:12px 0;}
 #ees-work-designer [data-api-catalog] .ew-api-choice small {display:block;}
 #ees-work-designer [data-api-catalog] .ew-api-table {overflow:auto;}
@@ -2504,14 +2520,77 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer [data-api-screen=impact] dialog[data-api-modal] {width:min(716px,calc(100vw - 32px));}
 #ees-work-designer [data-api-catalog] dialog[data-api-modal]::backdrop {background:rgb(31 36 46 / 30%);}
 #ees-work-designer [data-api-catalog] .ew-api-service-close {justify-content:flex-end;margin-top:14px;}
-#ees-work-designer [data-api-catalog] .ew-api-route {display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:8px 12px;min-height:46px;margin:0 0 18px;border:1px solid #c3d6f3;border-radius:5px;background:#f0f5fd;overflow-wrap:anywhere;}
-#ees-work-designer [data-api-catalog] .ew-api-route code {margin-left:auto;}
-#ees-work-designer [data-api-screen=detail] :is(th,td) {padding:5px 10px;border:0;}
-#ees-work-designer [data-api-screen=detail] th {background:#f0f5fd;font-weight:500;}
+#ees-work-designer [data-api-catalog] .ew-api-route {display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 18px;overflow-wrap:anywhere;}
+#ees-work-designer [data-api-catalog] .ew-api-route>span {color:var(--ees-text-secondary);}
+#ees-work-designer [data-api-catalog] .ew-api-route strong {font-family:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;font-weight:500;}
+#ees-work-designer [data-api-screen=detail] :is(th,td) {padding:9px 8px;border-bottom:1px solid var(--ees-line-divider);}
+#ees-work-designer [data-api-screen=detail] th {border-bottom-color:var(--ees-line-control);color:var(--ees-text-secondary);font-size:12px;line-height:18px;font-weight:400;}
 #ees-work-designer [data-api-catalog] .ew-api-import-end {display:flex;justify-content:space-between;gap:8px;margin:10px 0;}
 #ees-work-designer [data-api-catalog] .ew-api-import-end>div {display:flex;gap:8px;margin-inline-start:auto;}
 #ees-work-designer [data-api-screen=import] .ew-api-advanced {border:0;}
-#ees-work-designer [data-api-catalog] .ew-api-choice {display:flex;flex-direction:row;gap:8px;min-height:42px;padding:7px 10px;margin:10px 0;background:#f0f5fd;border-radius:5px;}
-#ees-work-designer [data-api-catalog] .ew-api-choice[data-method=POST] {background:#ecf6f0;}
+#ees-work-designer [data-api-catalog] .ew-api-choice {display:flex;flex-direction:row;gap:8px;min-height:42px;padding:7px 10px;margin:10px 0;background:var(--ees-surface-hover);border-radius:5px;}
 #ees-work-designer [data-api-catalog] .ew-api-choice input {width:16px;height:16px;min-height:0;margin:0;}
 #ees-work-designer [data-api-catalog] .ew-api-destination {margin:12px 0;border:0;background:transparent;font-size:13px;}
+/* Workspace design mock 17, revision 2, step 1: the API list is one table under a search row,
+   an opened API shows what is sent beside what comes back, and editing keeps save at the bottom. */
+#ees-work-designer [data-api-catalog] {container:ees-api-catalog / inline-size;}
+#ees-work-designer [data-api-catalog] .ew-api-toolbar {display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin:0 0 12px;}
+#ees-work-designer [data-api-catalog] .ew-api-search {flex:1 1 220px;max-width:360px;}
+#ees-work-designer [data-api-catalog] .ew-api-search input {height:36px;padding:5px 12px;}
+#ees-work-designer [data-api-screen=list] .ew-api-toolbar h2 {margin-left:auto;color:var(--ees-text-secondary);font-size:13px;line-height:20px;font-weight:400;white-space:nowrap;}
+#ees-work-designer [data-api-screen=detail] .ew-api-head {align-items:flex-start;flex-wrap:nowrap;margin-bottom:12px;}
+#ees-work-designer [data-api-catalog] .ew-api-head>.ew-api-title {display:block;flex:1;min-width:0;}
+#ees-work-designer [data-api-catalog] .ew-api-title p {margin:4px 0 0;color:var(--ees-text-secondary);overflow-wrap:anywhere;}
+#ees-work-designer [data-api-catalog] .ew-api-btn.strong {border-color:var(--ees-text-primary);}
+#ees-work-designer [data-api-catalog] .ew-api-source {margin:0 0 18px;overflow-wrap:anywhere;}
+#ees-work-designer [data-api-catalog] .ew-api-columns {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border-top:1px solid var(--ees-line-divider);}
+#ees-work-designer [data-api-catalog] .ew-api-columns[data-api-mapping] {grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);margin-top:18px;}
+#ees-work-designer [data-api-catalog] .ew-api-columns>div {min-width:0;padding:0 24px 24px 0;}
+#ees-work-designer [data-api-catalog] .ew-api-columns>div+div {padding:0 0 24px 24px;border-left:1px solid var(--ees-line-divider);}
+#ees-work-designer [data-api-catalog] .ew-api-columns h3 {font-size:14px;line-height:22px;font-weight:600;}
+#ees-work-designer [data-api-catalog] .ew-api-columns .ew-api-subhead {margin:20px 0 8px;}
+#ees-work-designer [data-api-catalog] .ew-api-columns .ew-api-subhead h3 {margin:0;}
+#ees-work-designer [data-api-catalog] .ew-api-columns[data-api-mapping] :is(label,.ew-api-map-head) {margin-top:12px;}
+#ees-work-designer [data-api-catalog] .ew-api-columns[data-api-mapping] .ew-api-map label {margin:0;}
+#ees-work-designer [data-api-catalog] .ew-api-columns[data-api-mapping] textarea[name=api-example] {height:auto;min-height:132px;font-family:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;font-size:12px;line-height:18px;}
+#ees-work-panel #ees-work-designer [data-api-screen=detail] .ew-api-columns table {margin:0 0 4px;border:0;border-radius:0;border-collapse:collapse;background:transparent;font-size:13px;}
+#ees-work-designer [data-api-screen=detail] .ew-api-columns th {background:transparent;}
+#ees-work-designer [data-api-screen=detail] .ew-api-columns h3+small {display:block;margin:-4px 0 4px;color:var(--ees-text-secondary);}
+#ees-work-designer [data-api-catalog] .ew-api-top {display:grid;grid-template-columns:132px minmax(0,1.2fr) 200px minmax(0,1fr);gap:12px;margin:0 0 16px;}
+#ees-work-designer [data-api-screen=edit] .ew-api-foot {position:sticky;bottom:0;z-index:1;background:var(--ees-surface-panel);}
+#ees-work-designer [data-api-screen=edit] .ew-api-foot [data-api-dirty] {margin-right:auto;color:var(--ees-text-secondary);font-size:12px;line-height:18px;}
+@container ees-api-catalog (max-width: 720px) {
+  #ees-work-designer [data-api-catalog] .ew-api-columns, #ees-work-designer [data-api-catalog] .ew-api-columns[data-api-mapping] {grid-template-columns:minmax(0,1fr);}
+  #ees-work-designer [data-api-catalog] .ew-api-columns>div {padding-right:0;}
+  #ees-work-designer [data-api-catalog] .ew-api-columns>div+div {padding-left:0;border-left:0;border-top:1px solid var(--ees-line-divider);}
+  #ees-work-designer [data-api-catalog] .ew-api-top {grid-template-columns:132px minmax(0,1fr);}
+  #ees-work-designer [data-api-catalog] :is(.ew-api-thead,.ew-api-row) {grid-template-columns:56px minmax(0,1fr) 16px;}
+  #ees-work-designer [data-api-catalog] :is(.ew-api-thead>span:nth-child(3),.ew-api-path) {display:none;}
+  #ees-work-designer [data-api-catalog] :is(.ew-api-name strong,.ew-api-description) {white-space:normal;}
+  #ees-work-designer [data-api-catalog] .ew-api-map-head {display:none;}
+  #ees-work-designer [data-api-catalog] [data-map-kind=inputs] {grid-template-columns:repeat(3,minmax(0,1fr)) 28px;}
+  #ees-work-designer [data-api-catalog] .ew-api-map[data-map-kind=inputs]>:is(:nth-child(1),:nth-child(5)) {grid-column:1 / -2;}
+}
+@container ees-api-catalog (max-width: 420px) {
+  #ees-work-designer [data-api-catalog] .ew-api-top {grid-template-columns:minmax(0,1fr);}
+}
+/* Workspace design mock 17, revision 2, step 1: the procedure list is one table under a search row. */
+#ees-work-designer:not([data-author-tab=tools]) .ew-list-toolbar {display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin:0 0 12px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-list-toolbar #ew-author-search {flex:1 1 220px;width:auto;max-width:360px;height:36px;margin:0;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-list-toolbar>h2 {margin:0 0 0 auto;color:var(--ees-text-secondary);font-size:13px;line-height:20px;font-weight:400;white-space:nowrap;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-list-toolbar .ew-new-workflow {display:inline-flex;align-items:center;justify-content:center;width:auto;min-height:34px;margin:0;padding:5px 14px;border:1px solid var(--ees-brand-solid);border-radius:6px;background:var(--ees-brand-solid);color:var(--ees-text-inverse);font-size:14px;line-height:22px;font-weight:500;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-list-toolbar .ew-new-workflow:hover:not(:disabled) {background:var(--ees-brand-hover);}
+#ees-work-designer:not([data-author-tab=tools]) .ew-list-toolbar+.ew-workflow-create {margin:0 0 12px;}
+#ees-work-designer:not([data-author-tab=tools]) :is(.ew-list-thead,.ew-author-list>button) {display:grid;grid-template-columns:minmax(0,1.7fr) minmax(72px,.5fr) minmax(120px,.6fr) 64px 16px;align-items:center;gap:16px;padding:8px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-list-thead {border-bottom:1px solid var(--ees-line-control);color:var(--ees-text-secondary);font-size:12px;line-height:18px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-author-list>button {min-height:60px;border-bottom:1px solid var(--ees-line-divider);}
+#ees-work-designer:not([data-author-tab=tools]) .ew-author-list .ew-author-row-main strong {margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:22px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-author-list .ew-author-row-main small {overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:18px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-author-list .ew-list-cell {min-width:0;color:var(--ees-text-secondary);font-size:13px;line-height:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-author-list .ew-author-tag {justify-self:start;margin:0;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-author-list {container:ees-procedure-list / inline-size;}
+@container ees-procedure-list (max-width: 640px) {
+  #ees-work-designer:not([data-author-tab=tools]) :is(.ew-list-thead,.ew-author-list>button) {grid-template-columns:minmax(0,1fr) 64px 16px;}
+  #ees-work-designer:not([data-author-tab=tools]) :is(.ew-list-thead>span:nth-child(2),.ew-list-thead>span:nth-child(3),.ew-list-cell) {display:none;}
+  #ees-work-designer:not([data-author-tab=tools]) .ew-author-list .ew-author-row-main :is(strong,small) {white-space:normal;}
+}

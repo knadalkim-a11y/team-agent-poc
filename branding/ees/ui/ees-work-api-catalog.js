@@ -57,28 +57,37 @@ function createWorkApiCatalog({catalog, command, changed, paint, sampleImport=()
   function listHTML(){
     const needle=query.trim().toLocaleLowerCase(), records=all();
     const groups=[...services().map(s=>[s.id,s.name]),['','미분류']];
+    let shown=0;
     const parts=groups.map(([sid,name])=>{
       const members=records.filter(x=>(x.service_id||'')===sid).sort((a,b)=>addr(a.url).localeCompare(addr(b.url))||methods.indexOf(a.method)-methods.indexOf(b.method)||a.name.localeCompare(b.name));
       const rows=members.filter(x=>[x.name,x.purpose,x.url,name].join(' ').toLocaleLowerCase().includes(needle));
       if(!rows.length)return '';
-      return `<details class="ew-api-group" data-group="${esc(sid)}" ${filterGroups.has(sid)?'':'open'}><summary><span>${esc(name)}</span><span>${rows.length}개</span></summary>${rows.map(x=>`<button type="button" class="ew-api-row" data-method="${esc(x.method)}" data-api-action="open" data-id="${esc(x.id)}"><span class="ew-api-line"><b class="ew-api-method">${esc(x.method)}</b><span>${esc(addr(x.url))}</span><strong>${esc(x.name)}</strong><i aria-hidden="true">›</i></span><span class="ew-api-description">${esc(x.purpose)}</span></button>`).join('')}</details>`;
+      shown+=rows.length;
+      return `<details class="ew-api-group" data-group="${esc(sid)}" ${filterGroups.has(sid)?'':'open'}><summary><span>${esc(name)}</span><span>${rows.length}개</span></summary>${rows.map(x=>`<button type="button" class="ew-api-row" data-method="${esc(x.method)}" data-api-action="open" data-id="${esc(x.id)}"><b class="ew-api-method">${esc(x.method)}</b><span class="ew-api-name"><strong>${esc(x.name)}</strong><span class="ew-api-description">${esc(x.purpose)}</span></span><span class="ew-api-path">${esc(addr(x.url))}</span><i aria-hidden="true">›</i></button>`).join('')}</details>`;
     }).join('');
-    return `<div class="ew-api-head"><h2>API 명세 ${records.length}개</h2><div>${admin()?btn('서비스 관리','services')+btn('API 명세 등록','create','primary'):''}</div></div>
-      ${field('search','API 찾기',query,'type="search" placeholder="이름, 용도, 서비스 또는 주소로 검색"')}
-      <div class="ew-api-groups" aria-label="서비스별 API 명세">${parts||`<p class="ew-api-empty">${needle?'검색 결과가 없습니다.':'등록된 API 명세가 없습니다.'}</p>`}</div>`;
+    // The header band names the menu, so the list carries its count instead of a second title.
+    const count=`API 명세 ${records.length}개`+(needle?` 중 ${shown}개`:'');
+    return `<div class="ew-api-toolbar"><label class="ew-api-search"><span>API 찾기</span><input name="api-search" type="search" value="${esc(query)}" placeholder="이름, 용도, 서비스, 주소로 찾기"></label><h2>${count}</h2>${admin()?btn('서비스 관리','services')+btn('API 명세 등록','create','primary'):''}</div>
+      <div class="ew-api-groups" aria-label="서비스별 API 명세">${parts?`<div class="ew-api-thead" aria-hidden="true"><span>방식</span><span>이름 · 용도</span><span>주소</span></div>${parts}`:`<p class="ew-api-empty">${needle?'검색 결과가 없습니다.':'등록된 API 명세가 없습니다.'}</p>`}</div>`;
   }
   function gridCell(list,i,key,value,label,choices){
     const attrs=`name="api-${list}-${i}-${key}" data-map="${list}" data-index="${i}" data-key="${key}" aria-label="${esc(label)} ${i+1}"`;
     return `<label><span>${esc(label)}</span>${choices?`<select ${attrs}>${opts(choices,String(value??''))}</select>`:`<input ${attrs} value="${esc(value??'')}">`}</label>`;
   }
+  // One line per parameter or result field. Column names sit once above the lines;
+  // each control keeps its own label for assistive technology.
+  const mapHead=(kind,labels)=>`<div class="ew-api-map-head" data-map-kind="${kind}" aria-hidden="true">${labels.map(label=>`<span>${esc(label)}</span>`).join('')}<span></span></div>`;
+  const removeRow=(list,i,label)=>btn('×','remove-row','link remove',`data-list="${list}" data-index="${i}" aria-label="${label} ${i+1} 삭제" title="삭제"`);
   function mappingHTML(){
-    const rows=(draft.inputs||[]).map((p,i)=>`<div class="ew-api-map">${gridCell('inputs',i,'name',p.name,'파라미터 이름')}${gridCell('inputs',i,'in',p.in,'전송 위치',pairs(['path','query','header','body']))}${gridCell('inputs',i,'type',p.type,'자료형',pairs(types))}${gridCell('inputs',i,'required',p.required!==false,'필수 여부',[['true','필수'],['false','선택']])}${gridCell('inputs',i,'label',p.label,'업무 입력 이름')}${btn('삭제','remove-row','link',`data-list="inputs" data-index="${i}" aria-label="입력 ${i+1} 삭제"`)}</div>`).join('');
-    const fields=(draft.fields||[]).map((p,i)=>`<div class="ew-api-map">${gridCell('fields',i,'path',p.path,'응답 필드')}${gridCell('fields',i,'label',p.label,'표시 이름')}${gridCell('fields',i,'type',p.type||'string','자료형',pairs(types))}${btn('삭제','remove-row','link',`data-list="fields" data-index="${i}" aria-label="결과 ${i+1} 삭제"`)}</div>`).join('');
-    return `<details class="ew-api-advanced" data-api-advanced ${advanced?'open':''}><summary>입력·결과 설정</summary>
-      <div class="ew-api-subhead"><h3>요청 파라미터</h3>${btn('입력 추가','add-input','link')}</div>${rows}
-      <div class="ew-api-subhead"><h3>결과에 표시할 항목</h3>${btn('결과 추가','add-field','link')}</div>
-      ${field('result_path','응답에서 결과가 있는 위치',draft.result_path,'placeholder="예: items · 비워두면 전체 응답"')}${fields}
-      <label><span>예시 응답 (JSON, 선택)</span><textarea name="api-example" rows="4" maxlength="20000">${esc(example)}</textarea></label></details>`;
+    const rows=(draft.inputs||[]).map((p,i)=>`<div class="ew-api-map" data-map-kind="inputs">${gridCell('inputs',i,'name',p.name,'파라미터 이름')}${gridCell('inputs',i,'in',p.in,'전송 위치',pairs(['path','query','header','body']))}${gridCell('inputs',i,'type',p.type,'자료형',pairs(types))}${gridCell('inputs',i,'required',p.required!==false,'필수 여부',[['true','필수'],['false','선택']])}${gridCell('inputs',i,'label',p.label,'업무 입력 이름')}${removeRow('inputs',i,'입력')}</div>`).join('');
+    const fields=(draft.fields||[]).map((p,i)=>`<div class="ew-api-map" data-map-kind="fields">${gridCell('fields',i,'path',p.path,'응답 필드')}${gridCell('fields',i,'label',p.label,'표시 이름')}${gridCell('fields',i,'type',p.type||'string','자료형',pairs(types))}${removeRow('fields',i,'결과')}</div>`).join('');
+    const request=`<div class="ew-api-subhead"><h3>요청 파라미터</h3>${btn('입력 추가','add-input','link')}</div>${rows?mapHead('inputs',['파라미터 이름','전송 위치','자료형','필수','업무 입력 이름'])+rows:''}`;
+    const result=`<div class="ew-api-subhead"><h3>결과에 표시할 항목</h3>${btn('결과 추가','add-field','link')}</div>
+      ${field('result_path','응답에서 결과가 있는 위치',draft.result_path,'placeholder="예: items · 비워두면 전체 응답"')}${fields?mapHead('fields',['응답 필드','표시 이름','자료형'])+fields:''}
+      <label><span>예시 응답 (JSON, 선택)</span><textarea name="api-example" rows="4" maxlength="20000">${esc(example)}</textarea></label>`;
+    // Editing shows what is sent beside what comes back. Registration starts from the address alone.
+    if(screen==='edit')return `<div class="ew-api-columns" data-api-mapping><div>${request}</div><div>${result}</div></div>`;
+    return `<details class="ew-api-advanced" data-api-advanced ${advanced?'open':''}><summary>입력·결과 설정</summary>${request}${result}</details>`;
   }
   function developmentHelp(){
     let link='';
@@ -93,13 +102,21 @@ function createWorkApiCatalog({catalog, command, changed, paint, sampleImport=()
     const actions=btn('취소','cancel')+btn(edit?'저장':fromJob?'등록하고 선택':'등록','save','primary',edit&&!dirty()?'disabled':'');
     const sf=select('service_id','서비스',serviceChoices(),draft.service_id);
     const nf=field('name','API 이름',draft.name,'required maxlength="160" placeholder="예: 설비 알람 조회"');
-    return `${back(edit?'API 상세':'등록 취소')}<div class="ew-api-head"><h2 tabindex="-1">${edit?'API 명세 편집':'API 명세 등록'}</h2>${edit?`<div>${actions}</div>`:''}</div>
-      ${edit?'':`<div class="ew-api-tabs">${btn('API 주소 직접 등록','direct','active')}${btn('서비스 명세 URL','import','link')}</div>`}
-      <div class="ew-api-request">${select('method','요청 방식',pairs(methods),draft.method)}${field('url',draft.url.startsWith('/')?'서비스 기본 주소 뒤의 경로':'API 주소',draft.url,'required spellcheck="false" placeholder="https://ems.example/api/equipment/{equipmentId}/alarms"')}</div>
-      <div class="ew-api-pair">${edit?sf+nf:nf+sf}</div>${draft.service_id==='__new__'?field('service_name','새 서비스 이름',serviceName,'maxlength="80" placeholder="예: 사내 백업"'):''}
-      ${field('purpose','용도',draft.purpose,'required maxlength="1000" placeholder="예: 설비에서 발생한 알람을 조회합니다."')}
-      ${edit?'':btn('API 주소가 없나요?','missing','link')}${missing?developmentHelp():''}
-      ${mappingHTML()}${edit?'':`<div class="ew-api-foot">${actions}</div>`}`;
+    const mf=select('method','요청 방식',pairs(methods),draft.method);
+    const uf=field('url',draft.url.startsWith('/')?'서비스 기본 주소 뒤의 경로':'API 주소',draft.url,'required spellcheck="false" placeholder="https://ems.example/api/equipment/{equipmentId}/alarms"');
+    const added=draft.service_id==='__new__'?field('service_name','새 서비스 이름',serviceName,'maxlength="80" placeholder="예: 사내 백업"'):'';
+    const purpose=field('purpose','용도',draft.purpose,'required maxlength="1000" placeholder="예: 설비에서 발생한 알람을 조회합니다."');
+    if(edit)return `${back('API 상세')}<div class="ew-api-head"><h2 tabindex="-1">API 명세 편집</h2></div>
+      <div class="ew-api-top">${mf}${uf}${sf}${nf}</div>${added}
+      ${purpose}
+      ${mappingHTML()}<div class="ew-api-foot"><small data-api-dirty ${dirty()?'':'hidden'}>저장하지 않은 변경 있음</small>${actions}</div>`;
+    return `${back('등록 취소')}<div class="ew-api-head"><h2 tabindex="-1">API 명세 등록</h2></div>
+      <div class="ew-api-tabs">${btn('API 주소 직접 등록','direct','active')}${btn('서비스 명세 URL','import','link')}</div>
+      <div class="ew-api-request">${mf}${uf}</div>
+      <div class="ew-api-pair">${nf+sf}</div>${added}
+      ${purpose}
+      ${btn('API 주소가 없나요?','missing','link')}${missing?developmentHelp():''}
+      ${mappingHTML()}<div class="ew-api-foot">${actions}</div>`;
   }
   const table=(headers,rows)=>rows.length?`<div class="ew-api-table"><table><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map(v=>`<td>${esc(v??'')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`:'<p class="ew-api-empty">등록된 항목이 없습니다.</p>';
   function exampleHTML(operation){
@@ -117,13 +134,15 @@ function createWorkApiCatalog({catalog, command, changed, paint, sampleImport=()
   function detailHTML(){
     const x=api();if(!x)return back('API 명세 목록','list')+'<p role="status">API를 찾을 수 없거나 접근 권한이 변경되었습니다.</p>';
     const used=detailUses||x.uses, source=x.source_url||x.source?.url;
-    return `${back('API 명세 목록','list')}<div class="ew-api-head"><h2>${esc(x.name)}</h2><div>${btn('시험 실행','test')}${admin()?btn('명세 편집','edit','link'):''}</div></div>
-      <div class="ew-api-route" data-method="${esc(x.method)}"><b class="ew-api-method">${esc(x.method)}</b><strong>${esc(addr(x.url))}</strong><code>${esc(x.url.startsWith('/')?'서비스 기본 주소 + '+x.url:x.url)}</code></div>
-      <p>${esc(x.purpose)}</p><p><small>서비스</small>　${esc(serviceLabel(x.service_id))}</p>
-      ${source?`<p>서비스 명세　${esc(source)} ${admin()?btn('변경 확인','refresh-import','link'):''}</p>`:''}
-      <h3>요청 파라미터</h3>${table(['이름','위치','필수','업무에서 쓰는 값'],(x.inputs||[]).map(p=>[p.wire_name||p.name,p.in,p.required?'필수':'—',p.label||p.name]))}
-      <h3>응답</h3><small>결과 위치　${esc(x.result_path||'전체 응답')}</small>${table(['응답 필드','자료형','표시 이름'],(x.fields||[]).map(p=>[p.path,p.type,p.label]))}
-      ${exampleHTML(x)}<h3>사용 중인 작업</h3>${!used?'<p class="ew-api-empty">사용처를 확인하고 있습니다.</p>':used.length?table(['업무 절차','작업'],used.map(u=>[u.workflow_name||u.workflow_id,u.job_name||u.job_id])):'<p class="ew-api-empty">연결된 작업이 없습니다.</p>'}`;
+    const uses=!used?'<p class="ew-api-empty">사용처를 확인하고 있습니다.</p>':used.length?table(['업무 절차','작업'],used.map(u=>[u.workflow_name||u.workflow_id,u.job_name||u.job_id])):'<p class="ew-api-empty">연결된 작업이 없습니다.</p>';
+    // A path is called behind the address the server holds for its service.
+    return `${back('API 명세 목록','list')}<div class="ew-api-head"><div class="ew-api-title"><h2>${esc(x.name)}</h2><p>${esc(x.purpose)}</p></div><div>${admin()?btn('명세 편집','edit'):''}${btn('시험 실행','test','strong')}</div></div>
+      <div class="ew-api-route" data-method="${esc(x.method)}"${x.url.startsWith('/')?` title="서비스 기본 주소 + ${esc(x.url)}"`:''}><b class="ew-api-method">${esc(x.method)}</b><span>${esc(serviceLabel(x.service_id))}</span><strong>${esc(x.url)}</strong></div>
+      ${source?`<p class="ew-api-source">서비스 명세　${esc(source)} ${admin()?btn('변경 확인','refresh-import','link'):''}</p>`:''}
+      <div class="ew-api-columns"><div><h3>요청 파라미터</h3>${table(['이름','위치','필수','업무에서 쓰는 값'],(x.inputs||[]).map(p=>[p.wire_name||p.name,p.in,p.required?'필수':'—',p.label||p.name]))}
+      <h3>사용 중인 작업</h3>${uses}</div>
+      <div><h3>응답</h3><small>결과 위치　${esc(x.result_path||'전체 응답')}</small>${table(['응답 필드','자료형','표시 이름'],(x.fields||[]).map(p=>[p.path,p.type,p.label]))}
+      ${exampleHTML(x)}</div></div>`;
   }
   function servicesHTML(){
     const editing=serviceEdit;
@@ -381,7 +400,11 @@ function createWorkApiCatalog({catalog, command, changed, paint, sampleImport=()
   }
   function syncSave(target){
     const saveButton=target.closest?.('[data-api-catalog]')?.querySelector?.('[data-api-action=save]');
-    if(saveButton&&screen==='edit')saveButton.disabled=!dirty();
+    if(saveButton&&screen==='edit'){
+      saveButton.disabled=!dirty();
+      const marker=saveButton.closest('.ew-api-foot')?.querySelector?.('[data-api-dirty]');
+      if(marker)marker.hidden=!dirty();
+    }
   }
   function input(target){
     const data=target.dataset||{},v=target.value,name=target.name?.replace(/^api-/,'');

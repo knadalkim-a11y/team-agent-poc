@@ -194,6 +194,9 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.assertEqual(observed['headerHover'], 'rgb(243, 243, 245)')
         self.click('#ew-author-search')
         self.key('Tab', 9)
+        # The search row ends with the new-procedure button; the rows follow it.
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('.ew-list-toolbar [data-author-action=create]:focus-visible')"))
+        self.key('Tab', 9)
         self.assertTrue(self.browser.evaluate("document.activeElement?.matches('.ew-author-list>button:focus-visible')"))
         observed['keyboardOutline'] = self.browser.evaluate('getComputedStyle(document.activeElement).outline')
         self.assertIn('solid', observed['keyboardOutline'])

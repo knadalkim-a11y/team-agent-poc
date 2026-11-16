@@ -528,8 +528,8 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 self.assertIn('저장된 진행 건이 없습니다.', self.text('#ees-work-panel'))
             elif unknown:
                 self.wait("document.querySelectorAll('[data-author-action=open]').length === 3")
-                self.assertEqual(self.text('#ees-work-designer .ew-author-heading h2'), '워크플로우')
-                self.assertEqual(self.text('#ees-work-designer .ew-author-heading small'), '3개')
+                self.assertEqual(self.text('#ees-work-designer .ew-list-toolbar h2'), '3개')
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-designer .ew-author-heading')"))
                 self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-entry [data-action=procedures] small')"))
             labels.append(label)
             (unknown_labels if unknown else cached_labels).append(label)
