@@ -1,5 +1,17 @@
 # 도구 작성·연결·시험·사용 설정 검증
 
+<a id="api-summary-and-pinned-runs-20261116"></a>
+
+## 2026-11-16 · 미분류 API와 이전 공용 도구 회차
+
+종전 `main`의 `d1ba8555991f`에서 미분류 API 한 건을 등록하면 도우미가 서비스 이름을 찾지 못해 조회 가능한 API를 모두 누락했다. 이전 공용 도구의 단계 실행과 새 버전 확인은 비어 있는 작성용 도구 목록을 참조해 동작하지 않았다.
+
+도우미가 미분류·서비스 지정 API를 함께 반환하는지, 사용자 그룹과 사용 중단 상태에 따라 목록을 제한하는지 SQLite에서 검사했다. 단계의 ‘지금 실행’과 작업 실행은 회차에 고정한 버전과 현재 도구가 일치하고 권한이 있을 때 활성화된다. 버전 불일치·접근 거부·연결 불가 상태의 차단과, 명시적으로 확인한 새 버전만 해당 회차에 저장되는 것도 검사했다.
+
+수정 전에는 미분류 API 목록, 단계 실행 단추, 새 버전 확인 명령의 회귀 검사가 각 증상을 재현했다. [API 목록 검사](../tests/test_ees_api_catalog.py), [단계·작업 UI 검사](../tests/test_ees_work_figma_runtime_ui.cjs), [회차 버전과 설정 종료 검사](../tests/test_confluence_workflow_sample.py)에 보존했다.
+
+로컬에서 Python 26건과 Node 495건이 통과했다. [Native 브라우저 검사](../tests/test_ees_work_figma_runtime_native.py)의 `test_upgraded_shared_run_accepts_new_version_and_executes_from_stage`는 실제 제품에서 이전 회차를 열어 새 버전을 확인하고 단계 화면에서 작업을 실행한다.
+
 <a id="tools-work-location-20261106"></a>
 
 ## 2026-11-06 · 도구의 공장·시스템 분류

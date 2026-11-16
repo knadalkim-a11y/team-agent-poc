@@ -1145,7 +1145,7 @@ async def chat_api_summary(service, actor):
         catalog = await service.api_catalog.state(actor)
         services = {item["id"]: item["name"] for item in catalog["services"]}
         return {"available_apis": [
-            {"name": op["name"], "purpose": op["purpose"], "service": services[op["service_id"]], "method": op["method"]}
+            {"name": op["name"], "purpose": op["purpose"], "service": services.get(op["service_id"], "미분류"), "method": op["method"]}
             for op in catalog["apis"] if op["can_use"] and op["state"] == "active"
         ]}
     except Exception as error:

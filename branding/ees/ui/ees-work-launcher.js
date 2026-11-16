@@ -870,7 +870,20 @@
     if(action==='new_chat'){return source()?.newChat?.();}
     if(action==='start_run')return startRun(target);
     if(action==='execute_scope'){if(busy||!state?.run||!inputsSaved(true))return;setBusy(true);try{const model=executionModel();await operationsCommand({action:'execute_scope',run_id:selection.run_id,node_id:target.dataset.nodeId,expected_revision:state.run.revision,...(model?{model_id:model}:{})});await refresh();}finally{setBusy(false);}return;}
-    if(action==='shared_accept_version'){if(busy)return;const item=state.operations?.shared_tools?.find(item=>item.id===target.dataset.sharedId);if(!item)return;if(!await confirmDialog({title:'이 회차에서 v'+item.version+'으로 계속할까요?',html:'<p>이 회차에서 같은 도구를 쓰는 다음 실행부터 새 버전을 사용합니다. 이미 남긴 실행 기록은 그대로 유지됩니다.</p>',confirmLabel:'새 버전으로 계속'}))return;await operationsCommand({action:'shared_tool_accept_version',run_id:selection.run_id,shared_tool_id:item.id,version:item.version,expected_revision:state.run.revision});await refresh();return;}
+    if (action === 'shared_accept_version') {
+      const run = state?.run;
+      const node = run?.definition?.nodes?.[selection.job_id];
+      if (busy || !node?.shared_tool_id || node.shared_tool_id !== target.dataset.sharedId) return;
+      const access = state.operations?.shared_tool_access?.[node.id];
+      const tool = workCurrentSharedTool(node, state.operations);
+      if (access?.can_accept_version !== true || access.can_use === false || tool?.state !== 'available' ||
+          tool.can_use === false || tool.id !== node.shared_tool_id || String(tool.version) !== target.dataset.version) return;
+      if (!await confirmDialog({title:'이 회차에서 v'+tool.version+' 버전을 사용할까요?',html:'<p>이 회차에서 같은 도구를 쓰는 다음 실행부터 새 버전을 사용합니다. 이미 남긴 실행 기록은 그대로 유지됩니다.</p>',confirmLabel:'새 버전으로 계속'})) return;
+      await operationsCommand({action:'shared_tool_accept_version', run_id:run.id, shared_tool_id:tool.id,
+        version:tool.version, expected_revision:run.revision});
+      await refresh();
+      return;
+    }
     if(action==='execute'){if(busy||!inputsSaved())return;setBusy(true);try{const model=executionModel();await operationsCommand({action:'execute_job',run_id:selection.run_id,job_id:selection.job_id,expected_revision:state.run.revision,...(model?{model_id:model}:{})});await refresh();}finally{setBusy(false);}return;}
     if(action==='retry_private_save'){remember();return;}
     if(action==='confirm_verdicts'){

@@ -813,11 +813,19 @@ function workStageCanDecide(node,saved={},run={}){
 function workStageAutomatic(node){return node.mode!=='human'&&Boolean(node.mode)&&node.human_confirmation===false&&!['item_verdict','ai_review','change_request'].includes(node.result_block);}
 function workStageTone(value,label=''){return label==='조건부 승인'?'cond':value==='completed'?'ok':value==='failed'?'bad':'none';}
 function workToolConnectionRequired(node){const execution=node?.execution&&typeof node.execution==='object'?node.execution:{};return node?.mode==='tool'&&node.result_block!=='change_request'&&!(node.api_binding||node.shared_tool_id||node.tool_contract_id||node.tool_reference||execution.reference);}
+function workCurrentSharedTool(node, operations) {
+  return operations?.shared_tool_access?.[node.id]?.current_tool
+    ?? operations?.shared_tools?.find(tool => tool.id === node.shared_tool_id);
+}
 function workStageCanExecute(node,saved,run,data){
   if(workToolConnectionRequired(node))return false;
   if(!['tool','ai'].includes(node.mode)||node.result_block==='change_request'||workUI.finished(run)||run.can_write===false||saved.can_execute===false||['running','excluded'].includes(saved.status))return false;
-  if(node.shared_tool_id){const shared=data.operations?.shared_tools?.find(item=>item.id===node.shared_tool_id),pin=run.shared_tools?.find(item=>item.id===node.shared_tool_id),access=data.operations?.shared_tool_access?.[node.id];if(!shared||shared.state!=='available'||shared.can_use===false||access?.can_use===false||(pin&&pin.version!==shared.version))return false;}
-  return true;
+  if (!node.shared_tool_id) return true;
+  const shared = workCurrentSharedTool(node, data.operations);
+  const pin = run.shared_tools?.find(tool => tool.id === node.shared_tool_id);
+  const access = data.operations?.shared_tool_access?.[node.id];
+  return shared?.state === 'available' && shared.can_use !== false &&
+    access?.can_use !== false && (!pin || shared.version === pin.version);
 }
 // Ordering belongs to the saved definition, not the serialization order of its
 // nodes map. Retain older definitions without a complete children array.
@@ -1025,7 +1033,7 @@ function createWorkView({callbacks}){
     currentDraftKey=inputKey();const draft=drafts.read(currentDraftKey,source,revision),visibleFields=fields.filter(field=>(['workflow','factory'].includes(field.scope))===settings);
     const header=`${workCycleBarHTML(run,definition())}<button class="ew-text" type="button" data-action="overview">← 회차 개요</button><header class="ew-work-heading"><h2>${esc(node.name)}</h2>${workStatusHTML(saved.status || 'unstarted')}<p>${esc(node.instructions || '')}</p>${workAssignmentHTML(node,saved,data.people)}${saved.partial_prerequisites?.length?workNoticeHTML('부분 결과에서 시작함',saved.partial_prerequisites.map(source=>source.name || source.job_id).join(' · ')):''}${saved.claim_actor===data.capabilities?.actor_id&&!readonly&&saved.status!=='running'?button('맡기 해제','release_task','class="ew-text"'):''}</header><nav class="ew-tabs" aria-label="작업 보기">${[['current','현재 상태'],['history','실행 기록'],['settings','업무 설정']].map(([tab,label])=>button(label,'tab',`data-tab="${tab}" aria-pressed="${s.tab===tab}"`)).join('')}</nav>`;
     if(s.tab==='history')return header+`<div class="ew-export-actions">${button('기록 JSON 내보내기','export_json')}${button('기록 텍스트 내보내기','export_text')}</div>`+workHistoryHTML(run,node.id,data.settings?.values)+`<button type="button" data-action="ask_record" data-job-id="${esc(node.id)}" class="ew-text">${icon('1c98e')} 최근 기록에 대해 묻기</button>`;
-    const access=data.operations?.shared_tool_access?.[node.id] || {},shared=access.current_tool || (data.operations?.shared_tools || []).find(item=>item.id===node.shared_tool_id),pin=(run?.shared_tools || []).find(item=>item.id===node.shared_tool_id),messages=data.operations?.shared_tool_messages || {},changed=!!(shared&&pin&&shared.version!==pin.version),groupDenied=!!node.shared_tool_id&&(access.can_use===false||shared?.can_use===false),sharedBlocked=!!node.shared_tool_id&&(!shared||groupDenied||shared.state!=='available'||changed);
+    const access=data.operations?.shared_tool_access?.[node.id] || {},shared=workCurrentSharedTool(node, data.operations),pin=(run?.shared_tools || []).find(item=>item.id===node.shared_tool_id),messages=data.operations?.shared_tool_messages || {},changed=!!(shared&&pin&&shared.version!==pin.version),groupDenied=!!node.shared_tool_id&&(access.can_use===false||shared?.can_use===false),sharedBlocked=!!node.shared_tool_id&&(!shared||groupDenied||shared.state!=='available'||changed);
     const running=Object.values(run?.jobs || {}).some(item=>item.status==='running'),canAccept=changed&&shared.state==='available'&&!groupDenied&&!readonly&&!running&&access.can_accept_version===true;
     const sharedMessage=!shared?data.operations?.shared_tools_notice || workReasonText('shared_tool_review_required',messages):shared.state==='disabled'?workReasonText('shared_tool_disabled',messages):shared.state!=='available'?(shared.unavailable_message||workReasonText('shared_tool_review_required',messages)):changed?workReasonText('shared_tool_version_changed',messages,{pinned:pin.version,current:shared.version}):'';
     const sharedNotice=node.shared_tool_id?`<section class="ew-shared-runtime"><h3>${esc(shared?.name || pin?.name || '공용 도구')} · 회차 v${esc(pin?.version || '미확인')}</h3>${groupDenied?`<span class="ew-badge">보기 전용</span><p>이 도구로 실행할 수 있는 사람 · ${esc((access.group_names || []).join(' · ') || '그룹 확인 필요')}</p><p>지금 담당 · ${esc(access.assignee_name || '미지정')}</p>`:sharedMessage?`<p>${esc(sharedMessage)}</p>`:''}${canAccept?button('v'+shared.version+' 버전으로 계속하기','shared_accept_version',`data-shared-id="${esc(shared.id)}" data-version="${shared.version}" data-mutation`):''}</section>`:'';

@@ -730,6 +730,33 @@ function sharedRuntimeFixture(){
  context.snapshot=snapshot;run(context,'globalThis.sharedView=createWorkView({callbacks:{}});');
  return {snapshot,panel(){run(context,'sharedView.sync(snapshot)');return run(context,'sharedView.testJobPanel()');},overview(){run(context,'sharedView.sync(snapshot)');return run(context,'sharedView.testRunOverview()');}};
 }
+test('a preserved run can accept its displayed shared tool version with an empty authoring catalog', async () => {
+ const h = controller();
+ const {state} = sharedRuntimeFixture().snapshot;
+ const access = state.operations.shared_tool_access.j;
+ const tool = state.operations.shared_tools.pop();
+ access.current_tool = tool;
+ h.api.setState(state);
+ h.api.setSelection({mode:'work', tab:'current', run_id:state.run.id, job_id:'j'});
+ const dialogs = [];
+ h.setDialog(async options => { dialogs.push(options.title); return true; });
+ const dataset = {action:'shared_accept_version', sharedId:tool.id, version:String(tool.version)};
+ const commands = () => h.calls.filter(call => call.body?.action === 'shared_tool_accept_version');
+ await h.api.handleClick({dataset:{...dataset, version:'1'}});
+ access.can_accept_version = false;
+ await h.api.handleClick({dataset});
+ assert.equal(dialogs.length, 0);
+ assert.equal(commands().length, 0);
+
+ access.can_accept_version = true;
+ await h.api.handleClick({dataset});
+ assert.equal(dialogs.length, 1);
+ assert.match(dialogs[0], /v2/);
+ assert.equal(commands().length, 1);
+ const {run_id, shared_tool_id, version, expected_revision} = commands()[0].body;
+ assert.deepEqual([run_id, shared_tool_id, version, expected_revision], [state.run.id, tool.id, 2, state.run.revision]);
+});
+
 test('shared execution uses canonical server wording and hides version changes while any job runs or automatic work is not stopped',()=>{
  const h=sharedRuntimeFixture(),state=h.snapshot.state;assert.ok(h.panel().includes('회차 시작 뒤 도구가 v1에서 v2 버전으로 바뀌었습니다. 이 회차를 새 버전으로 계속할지 고르세요.'));assert.match(h.panel(),/data-action="shared_accept_version"/);
  state.operations.shared_tool_messages.shared_tool_version_changed='버전 원본 {pinned} → {current}';assert.match(h.panel(),/버전 원본 1 → 2/);
@@ -802,6 +829,39 @@ function stageRuntimeFixture(){
  h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true});
  return {...h,state,mutations:()=>h.calls.filter(call=>['human_confirm','decide','execute_job'].includes(call.body?.action))};
 }
+
+test('stage and job execution buttons use the current tool of a preserved run', () => {
+ const {state} = stageRuntimeFixture();
+ const job = state.run.definition.nodes.a;
+ delete job.tool_reference;
+ job.shared_tool_id = 'managed-read';
+ const tool = {id:job.shared_tool_id, version:1, state:'available', can_use:true};
+ const access = {can_use:true, current_tool:tool};
+ state.run.shared_tools = [{id:tool.id, version:tool.version}];
+ state.operations = {shared_tools:[], shared_tool_access:{a:access}};
+
+ function assertButtonsEnabled(expected) {
+  const body = html('workStageHTML(state, {}, state.run.definition.nodes.t).body', {state});
+  for (const action of ['stage_execute', 'execute_scope']) {
+   const button = body.match(new RegExp('<button\\b[^>]*data-action="' + action + '"[^>]*>'));
+   assert.ok(button, action);
+   assert.equal(!/\sdisabled\b/.test(button[0]), expected, action);
+  }
+ }
+
+ assertButtonsEnabled(true);
+ delete access.current_tool;
+ assertButtonsEnabled(false);
+ state.operations.shared_tools = [tool];
+ assertButtonsEnabled(true);
+ access.current_tool = {...tool, version:2};
+ assertButtonsEnabled(false);
+ access.current_tool = {...tool, state:'unavailable', can_use:false};
+ assertButtonsEnabled(false);
+ access.current_tool = tool;
+ access.can_use = false;
+ assertButtonsEnabled(false);
+});
 
 test('centered stage separates the published breadcrumb, stage title and actual run scope from the shared toolbar',()=>{
  const {state}=stageRuntimeFixture(),stage=state.run.definition.nodes.t;
