@@ -1,0 +1,53 @@
+name: Windows one-command deployment check
+on:
+  push:
+    branches: [deploy/one-command-b540a230ea2a]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  check:
+    runs-on: windows-2022
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.11'
+      - name: Exercise deployment and optional connection
+        shell: powershell
+        run: python -B -m unittest discover -s delivery/one-command/tests -v
+      - name: Fetch and start the pinned launcher using Windows PowerShell
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $repo = $env:GITHUB_WORKSPACE
+          $pin = $env:GITHUB_SHA
+          $app = Join-Path ([IO.Path]::GetTempPath()) ('ees-deploy-' + [guid]::NewGuid() + '.pyz')
+          try {
+            git -C $repo fetch --quiet --no-tags origin refs/heads/deploy/one-command-b540a230ea2a
+            if ($LASTEXITCODE -ne 0) { throw 'fetch failed' }
+            git -C $repo archive --format=zip "--output=$app" "${pin}:delivery/one-command/ship"
+            if ($LASTEXITCODE -ne 0) { throw 'archive failed' }
+            & python -I -B $app --help
+            if ($LASTEXITCODE -ne 0) { throw 'launcher failed' }
+          } finally {
+            Remove-Item -LiteralPath $app -Force -ErrorAction SilentlyContinue
+          }
+      - name: Download and verify the official program archive
+        shell: python
+        env:
+          EES_CHECK_TOKEN: ${{ github.token }}
+        run: |
+          import os, sys, tempfile
+          from pathlib import Path
+          sys.path[:0] = ['delivery/one-command/ship', 'scripts']
+          import ees_update_download as downloader
+          import upgrade_once as launcher
+          with tempfile.TemporaryDirectory() as folder:
+              path = Path(folder) / 'release.zip'
+              downloader.GithubClient(os.environ.pop('EES_CHECK_TOKEN'))._download(
+                  launcher.ARTIFACT_ID, path, launcher.DIGEST, launcher.SIZE)
+              assert launcher.verified(path)
