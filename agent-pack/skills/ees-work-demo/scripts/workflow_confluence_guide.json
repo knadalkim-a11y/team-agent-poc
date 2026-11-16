@@ -1,0 +1,258 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "사내 Confluence",
+    "version": "1.0.0",
+    "description": "Confluence Data Center 9.2.26 읽기 전용 업무 예제"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "운영자가 설정한 Confluence REST content 주소"
+    }
+  ],
+  "paths": {
+    "/{id}": {
+      "get": {
+        "operationId": "getConfluencePage",
+        "summary": "기준 문서 확인",
+        "description": "페이지 ID로 문서 제목과 문서 유형을 확인합니다.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Confluence 페이지 정보에서 확인한 숫자 ID",
+            "schema": {
+              "type": "string",
+              "title": "페이지 ID",
+              "pattern": "^[0-9]+$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "읽기 권한이 있는 문서의 조회 결과",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageSummary"
+                },
+                "example": {
+                  "title": "설비 점검 안내 (예시)",
+                  "id": "12345",
+                  "type": "page"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{id}/child/page": {
+      "get": {
+        "operationId": "listConfluenceChildPages",
+        "summary": "하위 문서 목록 조회",
+        "description": "기준 문서 바로 아래에서 읽을 수 있는 페이지를 한 번에 지정한 수만큼 조회합니다.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Confluence 페이지 정보에서 확인한 숫자 ID",
+            "schema": {
+              "type": "string",
+              "title": "페이지 ID",
+              "pattern": "^[0-9]+$"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "title": "표시할 문서 수",
+              "minimum": 1,
+              "example": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "읽기 권한이 있는 문서의 조회 결과",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PageSummary"
+                      }
+                    },
+                    "size": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "results": [
+                    {
+                      "title": "일상 점검표 (예시)",
+                      "id": "23456",
+                      "type": "page"
+                    }
+                  ],
+                  "size": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PageSummary": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "문서 제목"
+          },
+          "id": {
+            "type": "string",
+            "title": "페이지 ID"
+          },
+          "type": {
+            "type": "string",
+            "title": "문서 유형"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "confluenceBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "security": [
+    {
+      "confluenceBearer": []
+    }
+  ],
+  "x-ees-procedure-example": {
+    "id": "confluence_documents",
+    "name": "Confluence 문서 확인 가이드",
+    "description": "페이지 ID를 한 번 입력해 기준 문서를 확인하고 직계 하위 문서를 최대 5건 조회합니다.",
+    "definition": {
+      "category": "ops",
+      "nodes": {
+        "guide-root": {
+          "id": "guide-root",
+          "type": "p",
+          "parent": null,
+          "children": [
+            "documents"
+          ],
+          "deps": [],
+          "name": "Confluence 문서 확인 가이드"
+        },
+        "documents": {
+          "id": "documents",
+          "type": "t",
+          "parent": "guide-root",
+          "name": "문서 구조 확인",
+          "children": [
+            "page",
+            "children"
+          ],
+          "deps": []
+        },
+        "page": {
+          "id": "page",
+          "type": "j",
+          "parent": "documents",
+          "name": "기준 문서 확인",
+          "children": [],
+          "deps": [],
+          "mode": "tool",
+          "result_block": "human_confirm",
+          "human_confirmation": true,
+          "api_binding": {
+            "operation_id": "guide-confluence-page",
+            "version": 1,
+            "inputs": {
+              "id": {
+                "input": "page-id"
+              }
+            },
+            "outputs": [
+              "title",
+              "id",
+              "type"
+            ]
+          },
+          "inputs": [
+            {
+              "id": "page-id",
+              "name": "페이지 ID",
+              "type": "text",
+              "scope": "run",
+              "required": true,
+              "source": {
+                "api_operation_id": "guide-confluence-page"
+              }
+            }
+          ],
+          "instructions": "Confluence 페이지 정보의 페이지 ID를 입력하세요. 실행 결과의 제목과 ID가 기준 문서와 일치하면 확정하세요."
+        },
+        "children": {
+          "id": "children",
+          "type": "j",
+          "parent": "documents",
+          "name": "하위 문서 목록 조회",
+          "children": [],
+          "deps": [
+            "page"
+          ],
+          "mode": "tool",
+          "result_block": "list_confirm",
+          "human_confirmation": true,
+          "api_binding": {
+            "operation_id": "guide-confluence-children",
+            "version": 1,
+            "inputs": {
+              "id": {
+                "result": {
+                  "confirmed": true,
+                  "job_id": "page",
+                  "field": "id"
+                }
+              },
+              "limit": {
+                "constant": 5
+              }
+            },
+            "outputs": [
+              "title",
+              "id",
+              "type"
+            ]
+          },
+          "api_generated_deps": [
+            "page"
+          ],
+          "instructions": "확정한 기준 문서 바로 아래의 페이지를 최대 5건 조회합니다. 제목을 확인하고 목록을 확정하세요."
+        }
+      },
+      "name": "Confluence 문서 확인 가이드",
+      "execution_scope": "system"
+    }
+  }
+}

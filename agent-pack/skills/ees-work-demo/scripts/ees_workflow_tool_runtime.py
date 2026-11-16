@@ -187,7 +187,10 @@ class AuthoredToolRuntime:
     async def list(self, user, *, usable_only=False, summary=False):
         actor, _, groups = await self.service._work_actor(user)
         with self.service._db() as db:
-            keys = [row[0] for row in db.execute("SELECT tool_id FROM work_tool_uses WHERE json_extract(data,'$.active_version') IS NOT NULL")]
+            query = "SELECT tool_id FROM work_tool_uses WHERE json_extract(data,'$.active_version') IS NOT NULL"
+            if getattr(self.service, "confluence_guide", False):
+                query += " AND tool_id NOT IN (SELECT id FROM work_guide_retired_tools WHERE kind='authored')"
+            keys = [row[0] for row in db.execute(query)]
         result = []
         for key in keys:
             with self.service._db() as db:

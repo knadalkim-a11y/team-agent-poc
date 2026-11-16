@@ -39,7 +39,8 @@ SUITES = {
         "test_ees_work_workspace.py", "test_ees_work_operations.py", "test_ees_delivery_artifacts.py",
         "test_ees_work_figma_authoring.py", "test_ees_work_figma_contracts.py",
         "test_ees_work_figma_schedule.py", "test_ees_work_history_reference.py", "test_ees_tool_drafts.py",
-        "test_ees_tool_draft_check.py", "test_ees_tool_lifecycle.py", "test_ees_tool_runtime.py"],
+        "test_ees_tool_draft_check.py", "test_ees_tool_lifecycle.py", "test_ees_tool_runtime.py",
+        "test_ees_api_spec_execution.py", "test_ees_api_http.py", "test_ees_api_catalog.py", "test_ees_api_binding.py"],
     "contracts": ["test_ees_workflow_execution.py", "test_ees_shared_tools_native.py",
         "test_ees_workflow_model_native.py", "test_ees_tool_native.py", "test_ees_tool_runtime_native.py",
         "test_ees_work_authoring.py"],
@@ -64,7 +65,7 @@ SUITES = {
     "native-compose": ["test_ees_work_c_phase1_native.py", "test_ees_work_c_phase2_native.py",
         "test_ees_work_figma_authoring_native.py", "test_ees_work_figma_runtime_native.py",
         "test_ees_work_figma_layout_native.py", "test_ees_source_shell_native.py",
-        "test_ees_helper_chat_native.py", "test_ees_motion_native.py"],
+        "test_ees_helper_chat_native.py", "test_ees_motion_native.py", "test_ees_api_catalog_native.py", "test_ees_api_job_registration_native.py"],
     "native-execution": ["test_ees_work_c_phase3_native.py", "test_ees_work_c_phase3_privacy.py"],
 }
 # Each real fixed-wheel Apply/Restore performs a full filesystem walk. On

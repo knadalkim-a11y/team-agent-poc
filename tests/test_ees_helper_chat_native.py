@@ -4,6 +4,7 @@ The real source components, Native composer, uploads, history and socket event
 handling run in Chrome. These checks do not represent in-house model quality or
 live Native authentication/ACL; the server tests cover the status endpoint.
 """
+import asyncio
 from copy import deepcopy
 import json
 from pathlib import Path
@@ -57,10 +58,37 @@ class HelperChatNativeTests(IntegratedNativeCase):
         self.helper_status = install_helper_status_fixture(self)
         self.wait('window.__eesNativeDraftV1?.ready()')
 
+    def test_api_purpose_reply_changes_only_the_open_draft_until_save(self):
+        sentence = '설비에서 최근에 발생한 알람 목록을 조회합니다.'
+        self.server.reply_chunks = (sentence,)
+        self.click('[data-action=mode][data-mode=author]')
+        self.open_workspace_assets()
+        self.click('[data-action=tools]')
+        self.click('[data-api-action=create]')
+        self.fill('[name=api-url]', 'https://ems.example/alarms')
+        self.fill('[name=api-name]', '알람 상태')
+        self.wait("Array.from(document.querySelectorAll('[data-api-help]')).some(b=>b.textContent==='용도 설명 제안')")
+        self.browser.evaluate("Array.from(document.querySelectorAll('[data-api-help]')).find(b=>b.textContent==='용도 설명 제안').click()")
+        self.wait("document.querySelector('[data-api-apply-purpose]')?.checkVisibility()")
+        self.assertEqual(self.read('[name=api-purpose]', 'value'), '')
+        reference = self.server.completions[-1]['user_message']['meta']['ees_work_reference']
+        self.assertEqual(reference['term_id'], 'api_specification')
+        self.assertEqual(reference['title'], '알람 상태')
+        self.assertTrue(reference['api_draft_request'])
+        self.click('[data-api-apply-purpose]')
+        self.assertEqual(self.read('[name=api-purpose]', 'value'), sentence)
+        catalog = self.server.workflow.api_catalog
+        self.assertEqual(asyncio.run(catalog.state(self.server.user))['apis'], [])
+        self.click('[data-api-action=save]')
+        self.wait("document.querySelector('[data-api-screen=list] [data-api-action=open]')")
+        saved = asyncio.run(catalog.state(self.server.user))['apis']
+        self.assertEqual([(op['name'],op['purpose']) for op in saved], [('알람 상태',sentence)])
+
     def open_guide(self):
         self.click('[data-action=mode][data-mode=author]')
         self.open_workspace_assets()
         self.click('[data-action=tools]')
+        self.click('[data-api-action=legacy]')
         self.create_legacy_tool()
         self.wait('document.querySelector(' + json.dumps(QUESTION) + ')?.checkVisibility({visibilityProperty:true})')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-procedure-start')"))
@@ -350,6 +378,7 @@ class HelperChatNativeTests(IntegratedNativeCase):
         before = self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.click('[data-action=mode][data-mode=author]')
         self.click('[data-action=tools]')
+        self.click('[data-api-action=legacy]')
         self.create_legacy_tool()
         self.click('[data-author-action=tool_example][data-id=jira-query]')
         self.click('[data-author-action=help][data-id=read_tool]')

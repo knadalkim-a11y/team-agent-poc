@@ -26,7 +26,7 @@ def tool_connection_required(node):
     if not isinstance(node, dict) or node.get("type", "j") != "j" or node.get("mode") != "tool" or node.get("result_block") == "change_request":
         return False
     execution = node.get("execution") if isinstance(node.get("execution"), dict) else {}
-    return not (node.get("shared_tool_id") or node.get("tool_contract_id") or node.get("tool_reference") or execution.get("reference"))
+    return not (node.get("api_binding") or node.get("shared_tool_id") or node.get("tool_contract_id") or node.get("tool_reference") or execution.get("reference"))
 
 
 def concurrent_runs_allowed(definition):

@@ -119,7 +119,10 @@ class ToolDrafts:
         if _value(actor, "role") != "admin":
             return []
         with self.service._db() as db:
-            records = [json.loads(row[0]) for row in db.execute("SELECT data FROM work_tool_drafts ORDER BY id")]
+            query = "SELECT data FROM work_tool_drafts"
+            if self.service.confluence_guide:
+                query += " WHERE id NOT IN (SELECT id FROM work_guide_retired_tools WHERE kind='authored')"
+            records = [json.loads(row[0]) for row in db.execute(query + " ORDER BY id")]
             uses = {row[0]: json.loads(row[1]) for row in db.execute("SELECT tool_id,data FROM work_tool_uses")}
         return [{"id": item["id"], **{key: item["draft"][key] for key in ("name", "description", "target", "kind")},
                  "scope": deepcopy(item["draft"].get("scope", {})),

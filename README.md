@@ -174,7 +174,7 @@ Native 대화와 업무 서비스는 같은 Open WebUI 프로세스에 있다. �
 
 - `AGENTS.md`는 개발 지침이며, `agent-pack/`의 공통 코드·실제 읽기 도구는 배포 원본이다.
 - `skills`/`demo`라는 폴더 이름은 삭제 범위가 아니다. 기존 공통 서버 경로를 유지한다.
-- Skill 콘텐츠·Python Tool·Native 모델 연결은 다른 자산이다. 기본 등록 콘텐츠는 비어 있으며 현재 Native 관리 기능은 유지한다.
+- 기본 업무 콘텐츠는 [Confluence 문서 확인 가이드](docs/specs/shared-tools.md#confluence-starter) 절차 한 개와 읽기 API 두 개다. Native의 Skill·Python Tool·모델 연결은 별도로 관리한다.
 - Git 반영·프로그램 Restore·사용자 자산 삭제/복구·실제 사내 검증은 각각 별도 결과다.
 
 AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs/mockups/ees-work/TASK.md#refactoring-design)의 파일별 책임·공개 연결·자료 보존·검증 기준을 따른다. 설계와 실제 구현/배포 상태는 구분한다.

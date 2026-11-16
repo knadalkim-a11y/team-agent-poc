@@ -1,0 +1,59 @@
+{
+  "viewport": [
+    1920,
+    1080
+  ],
+  "dpr": 1,
+  "sidebar": {
+    "x": 0,
+    "y": 0,
+    "width": 256,
+    "height": 1080
+  },
+  "work": {
+    "x": 256,
+    "y": 0,
+    "width": 1104,
+    "height": 1080
+  },
+  "chat": {
+    "x": 1360,
+    "y": 0,
+    "width": 560,
+    "height": 1080
+  },
+  "form": null,
+  "save": null,
+  "title": null,
+  "search": null,
+  "fields": [
+    null,
+    null,
+    null
+  ],
+  "stage": {
+    "x": 328,
+    "y": 235,
+    "width": 960,
+    "height": 301.1875
+  },
+  "jobs": [
+    {
+      "x": 342,
+      "y": 288,
+      "width": 932,
+      "height": 123.59375
+    },
+    {
+      "x": 342,
+      "y": 411.59375,
+      "width": 932,
+      "height": 124.59375
+    }
+  ],
+  "bindings": [
+    "설비 번호 EQ-100\n받는 결과 · 알람 코드, 알람 상태\nEMS 설비 이력　GET　/equipment/{equipmentId}/alarms",
+    "알람 코드 ← 설비 알람 조회에서 선택한 결과\n받는 결과 · 접수 번호\nEMS 설비 이력　POST　/equipment/{equipmentId}/alarms"
+  ],
+  "scene": "task-mapped"
+}

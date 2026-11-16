@@ -1150,3 +1150,34 @@ test('stage tabs restore their own scroll and the note caret survives chat layou
  render('next','work');assert.equal(content.scrollTop,29);
  assert.deepEqual(state,initial);
 });
+
+test('the API assistant applies one matching Native reply to the open editor and waits for an explicit Save',async()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const h=controller(),requests=[],replies=[];
+ const source=fs.readFileSync(path.join(__dirname,'../branding/ees/ui/ees-work-api-catalog.js'),'utf8');
+ run(h.context,source);
+ const catalog={apis:[],services:[],can_manage:true};
+ const editor=run(h.context,'createWorkApiCatalog')({catalog:()=>catalog,paint(){},newId:crypto.randomUUID,legacyAvailable:()=>true,
+   contextChanged:()=>h.designer.callbacks.apiContextChanged(),command:async msg=>{requests.push(JSON.parse(JSON.stringify(msg)));return {ok:true,api:{id:'result'}};}});
+ h.api.setState({capabilities:{actor_id:'a'}});h.api.setSelection({mode:'author',tab:'tools',system_id:'EMS'});
+ h.designer.readApiContext=()=>editor.context();h.designer.applyApiSuggestion=(values,expected)=>editor.suggest(values,expected);
+ h.context.window.__eesSourceShellV1.askHelp=async payload=>{replies.push(JSON.parse(JSON.stringify(payload)));return {accepted:true};};
+ const field=(name,value)=>editor.handle({type:'input',target:{name:'api-'+name,value,dataset:{},closest:selector=>selector==='[data-api-catalog]'?{}:null}});
+ const ask=async()=>{await h.api.handleClick({dataset:{action:'api_question',question:'용도 설명 제안'}});return replies.at(-1).reference.api_draft_request;};
+ const apply=(requestId,purpose)=>h.api.handleClick({dataset:{action:'api_apply_purpose',requestId,purpose}});
+ editor.start();field('name','알람 조회');field('url','https://private.example/api/alarms?key=concealed');
+ let request=await ask();
+ assert.doesNotMatch(replies[0].question,/private\.example|concealed/);assert.match(replies[0].question,/알람 조회/);assert.match(replies[0].question,/api\/alarms/);
+ assert.equal(replies[0].reference.kind,'help');assert.equal(replies[0].reference.title,'알람 조회');
+ field('name','수정한 이름');assert.equal(await apply(request,'다른 편집 상태의 제안'),false);
+ request=await ask();h.api.setSelection({tab:'overview'});assert.equal(await apply(request,'다른 화면의 제안'),false);
+ h.api.setSelection({tab:'tools'});request=await ask();catalog.can_manage=false;
+ assert.equal(await apply(request,'권한 회수 후 제안'),false);catalog.can_manage=true;
+ h.designer.callbacks.apiContextChanged();request=await ask();
+ assert.equal(await apply('wrong-request','무관한 답변'),false);
+ const sentence='설비에서 최근에 발생한 알람 목록을 조회합니다.';
+ assert.equal(await apply(request,sentence),true);assert.match(editor.html(),/name="api-purpose" value="설비에서 최근에 발생한 알람 목록을 조회합니다\."/);
+ assert.equal(await apply(request,'중복 반영'),false);assert.deepEqual(requests,[]);assert.equal(h.calls.length,0);
+ const target={dataset:{apiAction:'save'},closest:s=>s==='[data-api-catalog]'?{}:s==='[data-api-action]'?target:null};
+ editor.handle({type:'click',target});await new Promise(resolve=>setImmediate(resolve));assert.equal(requests.length,1);assert.equal(requests[0].api.purpose,sentence);
+});

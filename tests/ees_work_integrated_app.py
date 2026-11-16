@@ -299,8 +299,20 @@ font:getComputedStyle(e).fontFamily,display:getComputedStyle(e).display,overflow
         credentials={'name':'통합 검증 관리자','email':uuid4().hex+'@example.test','password':secrets.token_urlsafe(32)}
         session=self.api('/api/v1/auths/signup',credentials); assert session['role']=='admin'
         self.headers={'Authorization':'Bearer '+session['token']}
-        empty=self.api('/api/ees-work/workspace'); assert not empty.get('workflows') and not empty.get('runs')
-        self.record('empty Native installation', workflows=0,runs=0)
+        initial = self.api('/api/ees-work/workspace')
+        assert initial['runs'] == [], initial['runs']
+        assert [(item['id'], item['system_id']) for item in initial['workflows']] == [
+            ('guide-confluence-documents', 'EMS')], initial['workflows']
+        guide = self.api('/api/ees-work/workspace?workflow_id=guide-confluence-documents')['workflow']
+        assert guide['name'] == 'Confluence 문서 확인 가이드' and guide['published_version'] == 1
+        expected = {'guide-confluence-page', 'guide-confluence-children'}
+        operations = self.api('/api/ees-work/operations')['api_catalog']['apis']
+        assert len(operations) == 2 and {op['id'] for op in operations} == expected, operations
+        assert all(op['method'] == 'GET' and op['service_id'] == 'confluence-readonly-pilot' for op in operations)
+        jobs = [node for node in guide['published']['nodes'].values() if node['type'] == 'j']
+        assert len(jobs) == 2 and {node['api_binding']['operation_id'] for node in jobs} == expected
+        self.record('fresh Native installation with published Confluence guide', workflows=1,
+            published_version=guide['published_version'], read_operations=len(operations), runs=0)
         self.api('/api/v1/users/user/settings/update',{'ui':{'language':'ko-KR','showChangelog':False,'models':['c3-synthetic-model']}})
         models = self.api('/api/models')
         self.record('Native model availability', models=[{'id': item.get('id'), 'direct': item.get('direct'),
@@ -312,7 +324,7 @@ font:getComputedStyle(e).fontFamily,display:getComputedStyle(e).display,overflow
             'localStorage.setItem("token",'+json.dumps(session['token'])+');localStorage.setItem("locale","ko-KR");localStorage.setItem("version","0.11.3+ees.13");'})['identifier']
         self.navigate('/'); self.wait('!!document.querySelector("#ees-work-entry")&&!!document.querySelector("#chat-input")')
         self.wait('!document.querySelector("#ees-work-panel")?.innerText.includes("불러오는 중")')
-        self.capture('a0-empty')
+        self.capture('a0-confluence-guide')
         self.record('actual built Native render', viewport=[1920,1080])
 
     def run(self):

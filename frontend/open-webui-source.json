@@ -16,7 +16,7 @@
     "src/lib/apis/files/index.ts": "187d6ce446608f8dec895abd60bcaa12bc692d11c945eb5788fdd846248d1188",
     "src/lib/apis/openai/index.ts": "4fc60216e9fdfc930bef83fc34a739ce1767ad2f0a3a3525592f7bd9a0f199e5",
     "src/lib/components/channel/Channel.svelte": "49454dd5aa86f0bc1424ca286d1a7ffccef3103a81c5ac36a99ffc9fe03e2bfc",
-    "src/lib/components/chat/Chat.svelte": "33144b30eea1a9a93b02ef818ec3250480a8f43ee5e3de084c2325f43daf7de2",
+    "src/lib/components/chat/Chat.svelte": "72c0a2bf17352aa0c8216fca862822c4784d4ce5927a4de9125fcd20a948abb1",
     "src/lib/components/chat/MessageInput.svelte": "9eb0859227331ff9e4138dcb6f5ec53e3d51ef87aeb1a8b6c058a5a9f4339ed2",
     "src/lib/components/chat/Messages/ResponseMessage.svelte": "64fb38010aa936ec0eea0d9c0dd79a087b9c5026f94be8d08139fbd6529c1270",
     "src/lib/components/chat/Messages/UserMessage.svelte": "c677b13bf160de1bf0fafceef00ba5df098d661e6728c0dd5b1e6427b3e2eef8",
@@ -28,7 +28,7 @@
     "src/lib/components/ees/EesHelperNotice.svelte": "22ceccc7ad93c5d820f73269baaa9b19f12c5c99054b76ecc8c89f7757f8bba0",
     "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
     "src/lib/components/ees/EesNavigation.svelte": "86fdddd89cf32c0b8932f6f2dc12cedd4397d79da5ca337d299652efcfa80679",
-    "src/lib/components/ees/EesProcedureIntro.svelte": "0f628ffa1464a9477d822d930f48619a6b9e8ce501445a399d028213601d318c",
+    "src/lib/components/ees/EesProcedureIntro.svelte": "656a4f28d11dad693da1edd0827fcf910b075259d2925b51b3806863139276da",
     "src/lib/components/ees/EesSavedPrompts.svelte": "acf5e702393e4c7218e63c6bd5554aadf1f9e33e9830f1369262caa4ac9fe8c1",
     "src/lib/components/ees/EesScopeSelect.svelte": "4906d92006b655ef5de8079ba0ea03a84ae9a584cd404585d530b4f35479afc4",
     "src/lib/components/ees/EesSettingsFrame.svelte": "248f940cf32eae6a431352b85a6050304addb6651f4cc75d454ab2080fb7eee5",
@@ -56,7 +56,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "a153647b4fece0d5efa2becfc88927b5b9e15730a00e0159885e169f1928f653"
+      "sha256": "e85c191c37c2e10fc2637df1727f8e9222d8856daf3464c0196ebd93c727654d"
     }
   ],
   "pyodide_files": {

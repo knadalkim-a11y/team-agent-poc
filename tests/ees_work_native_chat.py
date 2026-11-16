@@ -214,7 +214,8 @@ def central_flow(g):
     assert setup['state']=='ready',setup
     registered=g.api('/api/v1/tools/id/ees_workflow')
     assert hashlib.sha256(registered['content'].encode()).hexdigest()==status['source_sha256']
-    assert g.api('/api/ees-work/workspace')['workflows']==[]
+    visible = g.api('/api/ees-work/workspace')['workflows']
+    assert [item['id'] for item in visible] == ['guide-confluence-documents'], visible
     g.record('explicit packaged read-only Work tool registration',id='ees_workflow',source_sha256=status['source_sha256'],private_native_grant=True,model_presets_created=False)
     g.open_initialized_author_list();g.click('[data-author-action="create"]')
     g.type('#ew-procedure-create #ew-procedure-name','중앙 대화 제안 검증')
@@ -396,19 +397,14 @@ def input_and_history_flow(g,key,chat_id):
 def helper_chat_flow(g,key,chat_id):
     """Physical helper send, actual isolated tool dispatch, then live ACL denial."""
     before=g.api('/api/ees-work/workspace?workflow_id='+key)
-    g.click('[data-action=mode][data-mode=author]')
-    g.click('[data-action=tools]')
-    g.wait("document.querySelector('[data-author-action=tool_create]')")
-    if g.browser.evaluate("!!document.querySelector('.ew-draft-legacy:not([open])')"):
-        g.click('.ew-draft-legacy > summary')
-    g.click('[data-author-action=tool_create]')
-    g.select('#ees-work-dialog [name=system_id]','EMS');g.click('#ees-work-dialog [data-dialog-confirm]')
-    selector='[data-author-action=tool_question]'
-    g.wait('document.querySelector('+json.dumps(selector)+') && !document.querySelector('+json.dumps(selector)+').disabled')
-    question=g.browser.evaluate('document.querySelector('+json.dumps(selector)+').innerText.trim()')
-    assert question
+    g.open_initialized_author_list()
+    g.click('[data-author-action=open][data-id=guide-confluence-documents]')
     draft='업무 도우미 질문과 함께 보내지 않을 작성 중인 글'
     g.type('#chat-input',draft)
+    g.click('[data-author-action=help][data-id=stages_and_jobs]')
+    assert g.browser.evaluate('document.querySelector("#ees-work-help-title").innerText')=='단계와 작업'
+    selector='#ees-work-help [data-help-ask]'
+    question='EES Workflow 도움말 ‘단계와 작업’의 뜻과 지금 화면에서 쓰는 방법을 알려줘.'
     prior_chat=g.api('/api/v1/chats/'+chat_id)['chat'];count=len(prior_chat['history']['messages'])
     event_start=len(g.browser.events);call_start=len(g.provider.calls)
     g.provider.mode='help';g.provider.helper_question=question;g.provider.helper_workflow=key
@@ -418,7 +414,8 @@ def helper_chat_flow(g,key,chat_id):
     users=[item for item in chat['history']['messages'].values() if item.get('role')=='user' and item.get('content')==question]
     assert len(users)==1,users
     message=users[0];reference=deepcopy(message['meta']['ees_work_reference'])
-    assert reference['kind']=='help' and reference['screen']=='새 도구 시작' and reference['context_id'],reference
+    assert reference['kind']=='help' and reference['screen']=='절차 설정' and reference['context_id'],reference
+    assert reference['term_id']=='stages_and_jobs' and reference['title']=='Confluence 문서 확인 가이드',reference
     assert message['meta'].get('ees_work_help')==1,message
     assert not message.get('files') and message.get('models')==['c3-synthetic-model'],message
     assert g.browser.evaluate('document.querySelector("#chat-input").innerText')==draft

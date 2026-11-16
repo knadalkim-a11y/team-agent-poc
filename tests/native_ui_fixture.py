@@ -156,7 +156,8 @@ class NativeUIServer(ThreadingHTTPServer):
             if self.tool_call and "점검" in content:
                 result = self.tool_call(body)
                 self.tool_results.append(result)
-            for chunk in ("테스트 모델 응답: ", "실제 대화 입력이 전달되었습니다."):
+            chunks = getattr(self, "reply_chunks", ("테스트 모델 응답: ", "실제 대화 입력이 전달되었습니다."))
+            for chunk in chunks:
                 self.emit("events", {"chat_id": chat_id, "message_id": message_id,
                           "data": {"type": "chat:completion", "data": {"choices": [{"delta": {"content": chunk}}]}}})
                 self.stream_started.set()
@@ -164,7 +165,7 @@ class NativeUIServer(ThreadingHTTPServer):
             record = self.chats[chat_id]["chat"]
             user_message = dict(user_message)
             user_message["childrenIds"] = [message_id]
-            assistant = {"id": message_id, "role": "assistant", "content": "테스트 모델 응답: 실제 대화 입력이 전달되었습니다.",
+            assistant = {"id": message_id, "role": "assistant", "content": "".join(chunks),
                          "done": True, "model": body["model"], "parentId": user_message["id"], "childrenIds": []}
             record["history"]["messages"].update({user_message["id"]: user_message, message_id: assistant})
             record["history"]["currentId"] = message_id
