@@ -19,7 +19,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from .ees_workflow_authoring import WorkflowError, _value, _resolve, _now, _hash, _fail
 from .ees_workflow_definition import SYSTEMS, CATEGORIES, IDENTIFIER, MAX_DOCUMENT_BYTES, _dump, tool_connection_required, concurrent_runs_allowed
 from .ees_workflow_view import workflow_help
-from .ees_workflow_api_binding import binding_errors, binding_shape
+from .ees_workflow_api_binding import binding_errors, binding_shape, retired_binding_errors
 
 INPUT_TYPES = ('text', 'number', 'datetime', 'single', 'multi', 'list', 'person', 'boolean', 'json_object')
 BLOCKS = ('values', 'schedule', 'checklist', 'list_confirm', 'item_verdict', 'ai_review', 'human_confirm', 'change_request')
@@ -86,7 +86,7 @@ def _public(value, depth=0):
     if isinstance(value, dict):
         for key, child in value.items():
             if not isinstance(key, str) or SECRET_KEYS.search(key):
-                _fail('secret_forbidden', '비밀정보는 Native 개인 설정에 보관해 주세요.')
+                _fail('secret_forbidden', '인증 정보는 운영 환경의 서비스 연결에 설정해 주세요.')
             _public(child, depth + 1)
     elif isinstance(value, list):
         for child in value:
@@ -1199,6 +1199,8 @@ class WorkspaceMixin:
         with self._db() as db:
             field, values, context = self._work_options_context(db, actor, groups, body)
         source = field.get('options_source', 'manual')
+        if self.confluence_guide and source == 'tool' and not body.get('run_id'):
+            _fail('options_unconfigured', '입력 선택지는 직접 정의하거나 공통 설정 목록에서 선택해 주세요.')
         query = field.get('options_query', {})
         reference = None
         if source == 'manual':
@@ -1555,6 +1557,10 @@ class WorkspaceMixin:
                         if errors: _fail('invalid_definition', '\n'.join(errors))
                         if definition['id'] != prepared['id'] or definition['system_id'] != prepared['system_id']:
                             _fail('immutable_identity', '절차 ID와 관리 시스템은 바꿀 수 없습니다.')
+                if self.confluence_guide:
+                    retired = retired_binding_errors(definition)
+                    if retired:
+                        _fail('invalid_definition', '\n'.join(retired))
                 if any(node.get('skills') for node in definition.get('nodes', {}).values()):
                     assets = await self._assets(actor)
                     allowed_skills = {entry.get('id') if isinstance(entry, dict) else entry for entry in assets.get('skills', [])}

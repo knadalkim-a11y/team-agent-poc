@@ -424,7 +424,7 @@ def report(args, result, failed=False):
           + (manager.failure_fields(result) if failed else "")
           + (" report=unavailable" if not saved else ""))
     if work_tool:
-        print("EES 적용 뒤 Work 도구 설정 확인")
+        print("EES 적용 뒤 업무 도우미 연결 확인")
 
 
 def manual_promote_ready(config):

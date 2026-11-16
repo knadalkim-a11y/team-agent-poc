@@ -215,8 +215,7 @@ def begin_scope_read(case, label, *, system, factory='', unknown=True):
 
 def begin_native_return(case, label, *, selector, native, destination, previous):
     """Observe a different-menu return from the actual physical click onward."""
-    # C45 removed the Native tools menu; its B10-2 route has no selected Native item.
-    before = [] if native == 'tools' else ['native_open:' + native]
+    before = ['native_open:' + native]
     expected = {'label': label, 'selector': selector, 'native': native,
                 'destination': destination, 'previous': previous, 'expectedBefore': before,
                 'allowed': before + [destination],

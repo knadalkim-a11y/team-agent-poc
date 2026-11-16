@@ -61,7 +61,7 @@ async function submitInline(h){const result=h.designer.handleEvent({type:'submit
 async function beginInline(h,kind){h.click(kind==='stage'?'stage_edit':kind,kind==='stage'?{id:'t0'}:kind==='add_job'?{parent:'t0'}:{});await flush();}
 
 function footerNodes(html){const result={};for(const m of html.matchAll(/<(small|p)\b([^>]*)>([\s\S]*?)<\/\1>/g)){const attributes=m[2],id=attr(attributes,'id'),summary=attributes.match(/data-(procedure|tool)-summary/)?.[0],node={textContent:decode(m[3])};if(id)result['#'+id]=node;if(summary)result['['+summary+']']=node;}return result;}
-function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObserver}={}){const h={startContexts:[],writes:[],operations:[],reads:[],dialogs:[],proposals:[],markup:'',forms:{},buttons:[],fields:[]};h.workflows=new Map(['w','q'].map(id=>[id,{id,name:'절차 '+id,system_id:'EMS',can_manage:true,revision:1,published_version:null,draft:definition(id),validation:{revision:1,errors:[],warnings:[]},versions:[]}]));h.state={help:workflowHelp,capabilities:{actor_id:'a',can_author:true,managed_systems:['EMS']},workflows:[...h.workflows.values()],workflow:h.workflows.get('w'),factories:[{id:'f',name:'공장'}],tools:[],native_functions:[],tool_examples:copy(toolExamples),procedure_examples:copy(procedureExamples)};h.selection={system_id:'EMS',workflow_id:'w',mode:'author',chat_id:'private-chat'};
+function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObserver,legacyToolAuthoring=true}={}){const h={startContexts:[],writes:[],operations:[],reads:[],dialogs:[],proposals:[],markup:'',forms:{},buttons:[],fields:[]};h.workflows=new Map(['w','q'].map(id=>[id,{id,name:'절차 '+id,system_id:'EMS',can_manage:true,revision:1,published_version:null,draft:definition(id),validation:{revision:1,errors:[],warnings:[]},versions:[]}]));h.state={help:workflowHelp,capabilities:{actor_id:'a',can_author:true,managed_systems:['EMS']},workflows:[...h.workflows.values()],workflow:h.workflows.get('w'),factories:[{id:'f',name:'공장'}],tools:[],native_functions:[],tool_examples:copy(toolExamples),procedure_examples:copy(procedureExamples)};h.selection={system_id:'EMS',workflow_id:'w',mode:'author',chat_id:'private-chat'};
  const noop=()=>{};let dialog=null;
  const matches=(node,selector)=>{
   if(selector.includes(','))return selector.split(',').some(part=>matches(node,part.trim()));
@@ -146,7 +146,7 @@ function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObser
  const workUI={showHelp:options=>{(h.helpCalls ||= []).push(options);},newId:run(renderer({crypto:cryptoProvider}),'workUI.newId'),esc:value=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'),icon:id=>'<img src="/_ees13/v4/'+id+'.svg" alt="">',$:selector=>selector==='#ees-work-dialog'?dialog:null,dialog:options=>{h.dialogHistory ||= [];h.dialogHistory.push(options);if(options.html?.includes('ew-workflow-tool-setup')||options.html?.includes('ew-tool-workflow-target'))return toolDialog(options);const answer=h.dialogs.shift();assert.notEqual(answer,undefined,'dialog answer is explicit');const listeners={};dialog={addEventListener:(event,cb)=>{(listeners[event] ||= []).push(cb);},querySelectorAll:()=>Object.entries(answer || {}).map(([name,value])=>({name,value,type:typeof value==='boolean'?'checkbox':'text',checked:!!value}))};return Promise.resolve().then(async()=>{await h.dialogHook?.();for(const listener of listeners.click || [])listener({target:{closest:selector=>selector==='[data-dialog-confirm]'?true:null},preventDefault:noop,stopPropagation:noop});return answer!==null;});}};
  const FormData=class{constructor(form){this.data=form.controls.filter(c=>c.name&&!c.disabled&&(!['checkbox','radio'].includes(c.type)||c.checked)).map(c=>[c.name,c.value || (c.type==='checkbox'?'on':'')]);}has(key){return this.data.some(([name])=>name===key);}get(key){return this.data.find(([name])=>name===key)?.[1]??null;}getAll(key){return this.data.filter(([name])=>name===key).map(([,v])=>v);}entries(){return this.data.values();}};
  const context={workToolCatalog:run(renderer(),'workToolCatalog'),workToolMatchesScope:run(renderer(),'workToolMatchesScope'),workUI,URL,ResizeObserver:resizeObserver,crypto:cryptoProvider,AbortController,FormData,document:{activeElement:null},console,proposalChangesObserver};vm.createContext(context);const observedSource=proposalChangesObserver?source.replace('function proposalChanges(before,after) {','function proposalChanges(before,after) { proposalChangesObserver();'):source;vm.runInContext(apiSources,context);vm.runInContext(observedSource,context);context.callbacks=callbacks;h.designer=vm.runInContext('createWorkDesigner({callbacks})',context);h.helpers=vm.runInContext('workAuthoring',context);h.host=host;h.callbacks=callbacks;h.document=context.document;
- h.render=()=>h.designer.render({state:h.state,selection:h.selection,host});h.render();
+ h.render=()=>{if(legacyToolAuthoring)(h.state.operations ||= {}).legacy_tool_authoring=true;h.designer.render({state:h.state,selection:h.selection,host});};h.render();
  h.click=(action,data={})=>{const button=h.buttons.find(node=>node.dataset.authorAction===action&&Object.entries(data).every(([key,value])=>node.dataset[key]===value));button?.focus();const control={dataset:{authorAction:action,...data}};h.designer.handleEvent({type:'click',target:button || {closest:selector=>selector==='#ees-work-designer'?host:selector==='[data-author-action]'?control:null}});};
  // The outer work host captures overlay clicks before workUI.dialog settles its promise.
  h.clickDialogCancel=()=>{assert.ok(dialog,'a confirmation overlay is open');const target={tagName:'BUTTON',id:'ees-work-dialog-cancel',closest:selector=>{const selectors=selector.split(',').map(value=>value.trim());return selectors.includes('[data-dialog-cancel]')?target:selectors.includes('#ees-work-dialog')?dialog:null;}};h.document.activeElement=target;return h.designer.handleEvent({type:'click',target,preventDefault:noop,stopPropagation:noop});};
@@ -225,7 +225,7 @@ test('A12 sidebar scope and tab visits preserve existing factory conditions and 
 });
 test('A12 explicit settings editing uses the sidebar factory while browsing and cancellation never write overrides',async()=>{
  const h=harness(),value=definition();value.execution_scope='factory';value.nodes.j.inputs=[{id:'target',name:'대상',type:'text',scope:'workflow'}];h.workflows.get('w').settings=[{factory_id:'f',revision:2,values:{target:'공장별 원래값'}},{factory_id:'',revision:1,values:{target:'기본값'}}];const settings=copy(h.workflows.get('w').settings);installDefinition(h,value);h.selection.factory_id='f';h.render();assert.equal(h.writes.length,0);
- h.dialogs.push(null);h.click('factory_settings');await flush();assert.equal(h.dialogHistory.at(-1).title,'공장별 업무 설정');assert.match(h.dialogHistory.at(-1).html,/공장별 원래값/);assert.equal(h.writes.length,0);assert.deepEqual(h.workflows.get('w').settings,settings);
+ h.dialogs.push(null);h.click('factory_settings');await flush();assert.equal(h.dialogHistory.at(-1).title,'공장별 업무 설정');assert.match(h.dialogHistory.at(-1).html,/공장별 원래값/);assert.doesNotMatch(h.dialogHistory.at(-1).html,/Native 개인 설정|개인 PAT/);assert.equal(h.writes.length,0);assert.deepEqual(h.workflows.get('w').settings,settings);
  h.dialogs.push({'override:target':true,'value:target':'명시적으로 고친 공장 값'});h.click('factory_settings');await flush();assert.equal(h.writes.length,1);assert.equal(h.writes[0].factory_id,'f');assert.equal(h.writes[0].expected_revision,2);assert.deepEqual(h.writes[0].values,{target:'명시적으로 고친 공장 값'});
  h.selection.factory_id='';h.render();h.dialogs.push(null);h.click('factory_settings');await flush();assert.equal(h.dialogHistory.at(-1).title,'기본 업무 설정');assert.match(h.dialogHistory.at(-1).html,/기본값/);assert.equal(h.writes.length,1);assert.deepEqual(h.draft().definition,value);assert.equal(h.draft().dirty,false);assert.equal(h.operations.length,0);
 });
@@ -1519,10 +1519,10 @@ test('saved tool edits survive indirect scope navigation without following the n
  assert.equal(h.records.get('draft-1').draft.name,'새 문서 도구');assert.equal(h.records.get('draft-1').revision,1);
 });
 
-function apiCatalogHarness(guideEnabled=()=>false){
+function apiCatalogHarness(){
  const data={services:[{id:'s',name:'사내 백업'}],apis:[],can_manage:true},requests=[],responses={},returns=[];
  const factory=vm.runInNewContext(apiSources+'\ncreateWorkApiCatalog',{URL,queueMicrotask,workUI:{esc:value=>String(value??'').replaceAll('"','&quot;').replaceAll('<','&lt;')}});
- const component=factory({catalog:()=>data,paint:()=>{},newId:crypto.randomUUID,guideEnabled,legacyAvailable:()=>true,returnToJob:async id=>returns.push(id),
+ const component=factory({catalog:()=>data,paint:()=>{},newId:crypto.randomUUID,returnToJob:async id=>returns.push(id),
    command:async body=>{requests.push(copy(body));if(responses[body.action])return responses[body.action](body);
      if(body.action==='api_detail')return {ok:true,uses:[]};
      if(body.action==='api_change_preview')return {ok:true,operation:{changes:[],uses:[]}};
@@ -1572,25 +1572,74 @@ test('API catalog discards an old account import reply after reset',async()=>{
  waiting.resolve({ok:true,operations:[],service_name:'other account'});await flush();assert.match(h.html(),/data-api-screen="list"/);assert.doesNotMatch(h.html(),/other account/);
 });
 
-test('a temporary operations gap keeps the legacy catalog while a new scope loads',async()=>{
- const h=apiCatalogHarness();await h.click('legacy');assert.equal(h.component.isLegacy(),true);
- h.component.reconcile(h.data,undefined);h.component.reconcile(undefined,{...h.data});assert.equal(h.component.isLegacy(),true);
- h.component.reset();assert.equal(h.component.isLegacy(),false);
+test('losing catalog access clears privileged edits even after a temporary missing response',async()=>{
+ const h=apiCatalogHarness();
  h.component.start();h.field('name','이전 관리자');h.component.reconcile(h.data,undefined);
  h.data.can_manage=false;h.component.reconcile(undefined,h.data);assert.match(h.html(),/data-api-screen="list"/);assert.doesNotMatch(h.html(),/이전 관리자/);
 });
 
+test('current workspace does not expose the old admin on stale, incomplete or malformed payloads',async()=>{
+ const h=harness({legacyToolAuthoring:false});h.state.capabilities.is_admin=true;h.selection.tab='tools';
+ for(const catalog of [undefined,{}, {apis:{},services:[]},{apis:[null],services:[]}]){
+  h.state.operations={api_catalog:catalog,all_tools:[{id:'old',name:'지난 도구'}],tool_drafts:[]};h.render();
+  assert.match(h.markup,/API 목록을 불러오지 못했습니다/);
+  assert.doesNotMatch(h.markup,/지난 도구|이전 방식 도구|새 도구|기존 도구 관리|data-api-action="legacy"/);
+  h.click('tool_create');h.click('legacy_catalog');h.click('draft_new');h.click('draft_check');await flush();
+  assert.equal(h.operations.length,0);assert.equal(h.dialogs.length,0);
+ }
+ h.state.operations.api_catalog={apis:[],services:[],can_manage:true};h.render();
+ assert.match(h.markup,/API 명세 등록/);assert.doesNotMatch(h.markup,/이전 방식 도구|기존 도구 관리|data-api-action="legacy"/);
+ const v=definition();Object.assign(v.nodes.j,{mode:'tool',shared_tool_id:'retired'});h.selection.tab='procedures';installDefinition(h,v);await h.node();
+ assert.match(h.markup,/data-author-action="job_api_setup"/);
+ assert.doesNotMatch(h.markup,/data-author-action="(?:job_tool_setup|shared_open|pick_job_tool)"/);
+ h.click('job_tool_setup');h.click('pick_job_tool',{id:'old'});await flush();assert.equal(h.operations.length,0);assert.equal(h.dialogs.length,0);
+});
 
-test('a migrated workspace exposes registered APIs and keeps old catalog actions out of the editor', async () => {
- let migrated = false;
- const h = apiCatalogHarness(() => migrated);
- await h.click('legacy');
- assert.equal(h.component.isLegacy(), true);
- migrated = true;
- assert.equal(h.component.isLegacy(), false);
- assert.doesNotMatch(h.html(), /data-api-action="legacy"/);
- h.component.openLegacy();
- assert.equal(h.component.isLegacy(), false);
+test('current procedure input settings and assistant previews accept only current sources',async()=>{
+ const h=harness({legacyToolAuthoring:false});await h.node();
+ h.dialogs.push(null);h.click('input_add');await flush();const html=h.dialogHistory.at(-1).html;
+ assert.match(html,/공통 설정 목록/);assert.doesNotMatch(html,/도구에서 가져옴|source_reference|source_list|tool_argument|선택지 조회 Native/);
+ for(const value of [
+  {tool_reference:{tool_id:'old'}},{shared_tool_id:'old'},{tool_contract_revision:1},{execution:{reference:{function:'old'}}},
+  {inputs:[{id:'choice',type:'single',options_source:'tool'}]}]){
+  const model=definition();Object.assign(model.nodes.j,value);
+  assert.throws(()=>h.designer.acceptProposal({workflow_id:'w',base_revision:1,context_id:'current',definition:model},{chatId:'private-chat'}),/등록된 API/);
+ }
+ const before=copy(h.draft());h.dialogs.push({id:'field',name:'old',type:'single',scope:'run',options_source:'tool'});h.click('input_add');await flush();
+ assert.deepEqual(h.draft().definition,before.definition);assert.equal(h.operations.length,0);
+});
+
+test('authoring refresh of a saved legacy location cannot reopen its settings without an explicit adapter',async()=>{
+ const h=harness({legacyToolAuthoring:false});h.state.capabilities.is_admin=true;h.selection.tab='tools';
+ h.state.operations={legacy_tool_authoring:true,api_catalog:{apis:[],services:[],can_manage:true},tool_drafts:[]};h.render();
+ h.click('legacy_catalog');await flush();assert.match(h.markup,/ew-draft-legacy/);
+ delete h.state.operations.legacy_tool_authoring;h.render();
+ assert.match(h.markup,/API 명세 등록/);assert.doesNotMatch(h.markup,/ew-draft-legacy|‹  API 명세 목록/);
+ h.click('legacy_catalog');await flush();assert.doesNotMatch(h.markup,/ew-draft-legacy/);
+});
+
+test('in-flight scope gaps hide archive controls while keeping drafts isolated for a confirmed historical adapter',async()=>{
+ const h=harness({legacyToolAuthoring:false});
+ h.state.capabilities.is_admin=true;
+ const archive={legacy_tool_authoring:true,api_catalog:{apis:[],services:[],can_manage:true},tool_drafts:[]};
+ h.selection.tab='tools';h.state.operations=archive;h.render();
+ h.click('legacy_catalog');await flush();h.click('draft_new');await flush();h.field('draft_name','EMS 초안');
+ for(const [system,expected] of [['FDC',''],['EMS','EMS 초안'],['FDC','FDC 초안']]){
+  h.selection.tab='procedures';h.render();
+  h.selection.system_id=system;h.state.operations={};h.selection.tab='tools';h.render();
+  assert.match(h.markup,/API 목록을 불러오지 못했습니다/);assert.doesNotMatch(h.markup,/이전 방식 도구|draft_name/);
+  h.click('draft_new');await flush();assert.ok(!h.forms['ew-tool-draft-form']);
+  h.state.operations=archive;h.render();assert.match(h.markup,/ew-draft-legacy/);
+  h.click('draft_new');await flush();assert.equal(h.fields.find(item=>item.name==='draft_name').value,expected);
+  if(!expected)h.field('draft_name','FDC 초안');
+ }
+ assert.equal(h.operations.length,0);
+});
+
+test('API catalog ignores a retired control and exposes registered APIs only', async () => {
+ const h=apiCatalogHarness();await h.click('legacy');
+ assert.match(h.html(),/data-api-screen="list"/);
+ assert.doesNotMatch(h.html(),/data-api-action="legacy"/);
  h.component.start();
  await h.click('import');
  assert.match(h.html(), /name="api-file"/);

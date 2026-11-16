@@ -575,8 +575,8 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
             before = service.database.read_bytes()
             ai = await item['callable'](workflow_id='unrelated-secret', run_id='do-not-read')
             ui = await service.workspace_state(self.admin)
-            self.assertEqual(set(ai), {'ok', 'help', 'help_context', 'shared_tools'})
-            self.assertEqual(ai['shared_tools'], [])
+            self.assertEqual(set(ai), {'ok', 'help', 'help_context', 'available_apis'})
+            self.assertEqual(ai['available_apis'], [])
             self.assertEqual(ai['help'], ui['help'])
             self.assertEqual(ui['workflows'], [])
             self.assertEqual(service.database.read_bytes(), before)
@@ -840,9 +840,9 @@ class NativeReadBridgeTests(unittest.IsolatedAsyncioTestCase):
         # ST-OPEN-7: transport failures and preflight failures use the same
         # shipped copy as the UI, without retaining arbitrary plugin strings.
         for code, expected in (
-            ('pat_required', '개인 PAT 필요 · 기존 도구의 개인 설정에 본인 PAT를 저장하세요. 채팅에 입력하지 마세요.'),
-            ('encryption_required', '개인 설정 암호화 필요 · 관리자에게 요청하세요. 채팅에 PAT를 입력하지 마세요.'),
-            ('authentication_failed', '개인 PAT 인증 실패 · 기존 도구 개인 설정에서 본인 PAT의 만료·권한을 확인하세요. 채팅에 입력하지 마세요.'),
+            ('pat_required', '이 회차를 실행할 계정의 인증 정보가 없습니다. 서비스 담당자에게 연결을 확인해 주세요.'),
+            ('encryption_required', '인증 정보를 사용할 수 없습니다. 관리자에게 서버의 인증 정보 암호화 설정을 확인해 주세요.'),
+            ('authentication_failed', '서비스 인증에 실패했습니다. 서비스 담당자에게 실행 계정의 토큰 만료와 열람 권한을 확인해 주세요.'),
         ):
             with self.subTest(personal_reason=code):
                 failed = self.native.normalize_result('get_page', {'ok': False, 'error': {'code': code, 'message': 'synthetic-secret'}}, ref, {}, ('synthetic-secret',))

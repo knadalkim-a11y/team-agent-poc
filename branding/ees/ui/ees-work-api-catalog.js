@@ -1,18 +1,17 @@
 // The workspace owns storage and authorization. This controller owns the current editor only.
-function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable, guideEnabled=()=>false, returnToJob, contextChanged, focus, newId}) {
+function createWorkApiCatalog({catalog, command, changed, paint, sampleImport=()=>false, returnToJob, contextChanged, focus, newId}) {
   const {esc}=workUI;
   const clone=value=>JSON.parse(JSON.stringify(value));
   const blank=()=>({name:'',purpose:'',service_id:'',method:'GET',url:'',inputs:[],result_path:'',fields:[]});
   const screenNames={list:'API 명세 목록',detail:'API 상세',create:'API 명세 등록',edit:'API 명세 편집',services:'서비스 관리',import:'서비스 명세 URL',impact:'명세 변경 영향',test:'시험 실행'};
   let screen='list', id='', draft=null, original='', serviceName='', query='', filterGroups=new Set();
-  let error='', status='', busy=false, legacy=false, advanced=false, missing=false, leave=false;
+  let error='', status='', busy=false, advanced=false, missing=false, leave=false;
   let generation=0, serviceEdit=null, importing=null, impact=null, trial=null, example='', fromJob=false;
   let receiptKey='', receiptId='', detailUses=null, detailVersion=0;
   const current=()=>catalog()||{services:[],apis:[],can_manage:false};
   const all=()=>current().apis||[], services=()=>current().services||[];
   const api=()=>all().find(item=>item.id===id);
   const admin=()=>current().can_manage===true;
-  const allowLegacy=()=>!guideEnabled()&&legacyAvailable();
   const serviceLabel=value=>services().find(item=>item.id===value)?.name||'미분류';
   const snap=()=>JSON.stringify([draft,serviceName,example]);
   const dirty=()=>draft&&snap()!==original;
@@ -42,11 +41,11 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
   }
   function reset(){
     generation++;screen='list';id='';draft=null;original='';serviceName='';query='';filterGroups=new Set();
-    error='';status='';busy=false;advanced=false;missing=false;leave=false;legacy=false;fromJob=false;
+    error='';status='';busy=false;advanced=false;missing=false;leave=false;fromJob=false;
     serviceEdit=null;importing=null;impact=null;trial=null;example='';receiptKey='';receiptId='';detailUses=null;detailVersion=0;
   }
   function start(record=null,job=false){
-    legacy=false;fromJob=job;draft=record?clone(record):blank();id=record?.id||'';
+    fromJob=job;draft=record?clone(record):blank();id=record?.id||'';
     serviceName='';example=draft.example==null?'':json(draft.example);advanced=false;missing=false;original=snap();importing=null;impact=null;status='';
     go(record?'edit':'create','[data-api-catalog] h2');
   }
@@ -66,8 +65,7 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
     }).join('');
     return `<div class="ew-api-head"><h2>API 명세 ${records.length}개</h2><div>${admin()?btn('서비스 관리','services')+btn('API 명세 등록','create','primary'):''}</div></div>
       ${field('search','API 찾기',query,'type="search" placeholder="이름, 용도, 서비스 또는 주소로 검색"')}
-      <div class="ew-api-groups" aria-label="서비스별 API 명세">${parts||`<p class="ew-api-empty">${needle?'검색 결과가 없습니다.':'등록된 API 명세가 없습니다.'}</p>`}</div>
-      ${allowLegacy()?btn('기존 도구 관리','legacy','link ew-api-legacy'):''}`;
+      <div class="ew-api-groups" aria-label="서비스별 API 명세">${parts||`<p class="ew-api-empty">${needle?'검색 결과가 없습니다.':'등록된 API 명세가 없습니다.'}</p>`}</div>`;
   }
   function gridCell(list,i,key,value,label,choices){
     const attrs=`name="api-${list}-${i}-${key}" data-map="${list}" data-index="${i}" data-key="${key}" aria-label="${esc(label)} ${i+1}"`;
@@ -160,7 +158,7 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
       <details class="ew-api-advanced" ${m.attach?'open':''} data-import-more><summary>파일 업로드 · 붙여넣기</summary>
       <label><span>명세 파일</span><input type="file" name="api-file" accept=".json,.yaml,.yml"></label>
       <label><span>OpenAPI JSON 또는 YAML</span><textarea name="api-import_text" rows="6">${esc(m.source_text)}</textarea></label>${btn('명세 읽기','import-text')}</details>
-      <div class="ew-api-import-end">${guideEnabled()?'':btn('예시 명세 불러오기','import-example','link')}<div>${btn('취소',m.refresh?'cancel-import':'cancel')}${btn('기능 불러오기','import-url','primary')}</div></div>`;
+      <div class="ew-api-import-end">${sampleImport()?btn('예시 명세 불러오기','import-example','link'):''}<div>${btn('취소',m.refresh?'cancel-import':'cancel')}${btn('기능 불러오기','import-url','primary')}</div></div>`;
   }
   function impacted(ops){
     const affected=new Map();
@@ -338,7 +336,7 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
   async function act(action,target){
     if(busy)return;
     const data=target.dataset;
-    if(!['open','list','detail','legacy','test','test-run'].includes(action)&&!admin())throw Error('도구를 편집할 권한이 없습니다.');
+    if(!['open','list','detail','test','test-run'].includes(action)&&!admin())throw Error('도구를 편집할 권한이 없습니다.');
     error='';status='';
     switch(action){
       case 'create':start();break;
@@ -364,7 +362,7 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
       case 'import':importStart();break;
       case 'refresh-import':importStart(true);break;
       case 'cancel-import':if(importing.refresh){importing=null;go('detail');}else if(draft)go('create');else go('list');break;
-      case 'import-example':if(guideEnabled())break;importing.source_url='';importing.source_text=sampleSpecification();importing.attach=false;await previewImport(false);break;
+      case 'import-example':if(!sampleImport())break;importing.source_url='';importing.source_text=sampleSpecification();importing.attach=false;await previewImport(false);break;
       case 'import-another':importing.preview=null;importing.selected=[];paint();focus?.('[name=api-import_url]');break;
       case 'import-url':await previewImport(true);break;
       case 'import-text':await previewImport(false);break;
@@ -373,7 +371,6 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
       case 'impact-apply':{const fixed=repairs();if(impact.from==='import')await applyImport(fixed);else await save(fixed);break;}
       case 'test':trial={values:{},result:null};go('test');break;
       case 'test-run':await testRun();break;
-      case 'legacy':if(allowLegacy()){legacy=true;paint();announce();}break;
     }
   }
   async function fileRead(target){
@@ -475,5 +472,5 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
     const dialog=host?.querySelector?.('dialog[data-api-modal]');
     if(dialog&&!dialog.open&&typeof dialog.showModal==='function')dialog.showModal();
   }
-  return {html,handle,start,reset,reconcile,afterPaint,context,suggest,openLegacy:()=>{legacy=allowLegacy();},isLegacy:()=>legacy&&!guideEnabled(),pending:()=>busy,signature:()=>[screen,id,serviceEdit?.id||''],showList:()=>{legacy=false;go('list');}};
+  return {html,handle,start,reset,reconcile,afterPaint,context,suggest,pending:()=>busy,signature:()=>[screen,id,serviceEdit?.id||''],showList:()=>go('list')};
 }

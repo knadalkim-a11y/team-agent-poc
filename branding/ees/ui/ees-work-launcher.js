@@ -654,7 +654,7 @@
     const at=context(),auth=token(),current=()=>at===context()&&auth===token();
     const setupState=nativePage()?await api('workspace'):state;if(!current())return;
     if(!setupState?.capabilities?.is_admin)throw new Error('Native 관리자 권한이 필요합니다.');
-    const setupAPI=async(body,path=body?'setup':'status')=>{const response=await fetch('/api/v1/ees/assets/work-tool/'+path,{method:body?'POST':'GET',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json',Authorization:'Bearer '+auth,...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});const result=await response.json();if(!response.ok||result.ok===false)throw new Error(result.error?.message || result.detail?.message || (typeof result.detail==='string'?result.detail:result.reason) || 'Native Work 도구 설정을 확인하지 못했습니다.');return result;};
+    const setupAPI=async(body,path=body?'setup':'status')=>{const response=await fetch('/api/v1/ees/assets/work-tool/'+path,{method:body?'POST':'GET',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json',Authorization:'Bearer '+auth,...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});const result=await response.json();if(!response.ok||result.ok===false)throw new Error(result.error?.message || result.detail?.message || (typeof result.detail==='string'?result.detail:result.reason) || '업무 도우미 연결 상태를 확인하지 못했습니다.');return result;};
     const status=await setupAPI();if(!current())return;
     const description=`<p>Native 도구 ID · ${esc(status.id)}</p><p>등록 원본 SHA256</p><pre>${esc(status.registered_source_sha256 || '미등록')}</pre><p>지금 프로그램 원본 SHA256</p><pre>${esc(status.source_sha256)}</pre>`;
     const preserve='<p>그대로 두는 것 · 이름·소유자·읽기 권한·설정</p><p>바뀌는 것 · 코드 원본</p>';
@@ -677,10 +677,10 @@
       }
     }else if(status.state==='missing'){
       let grants=[];const people=(setupState.people || []).filter(person=>person.value?.kind==='user'),groups=setupState.native_groups || [];
-      const pending=dialog({title:'Native 대화에 Work 도구를 등록할까요?',note:'조회·제안 기능만 등록합니다. 저장·게시·실행·확정 도구를 AI에 추가하지 않습니다.',html:description+`<p>허용 함수</p><pre>${esc(JSON.stringify(status.functions || [],null,2))}</pre><fieldset class="ew-admin-grants"><legend>읽기·제안 권한</legend><p>선택하지 않으면 등록 관리자 개인 범위입니다. 공개 권한은 만들지 않습니다.</p>${people.map(person=>`<label><input type="checkbox" data-work-grant data-kind="user" value="${esc(person.id)}">${esc(person.name)} · ${esc(person.id)}</label>`).join('')}${groups.map(group=>`<label><input type="checkbox" data-work-grant data-kind="group" value="${esc(group.id)}">${esc(group.name)} · ${esc(group.id)}</label>`).join('')}</fieldset>`,confirmLabel:'확인한 원본 등록'});
+      const pending=dialog({title:'대화에서 업무 도우미를 사용할까요?',note:'조회·제안 기능만 등록합니다. 저장·게시·실행·확정 도구를 AI에 추가하지 않습니다.',html:description+`<p>허용 함수</p><pre>${esc(JSON.stringify(status.functions || [],null,2))}</pre><fieldset class="ew-admin-grants"><legend>읽기·제안 권한</legend><p>선택하지 않으면 등록 관리자 개인 범위입니다. 공개 권한은 만들지 않습니다.</p>${people.map(person=>`<label><input type="checkbox" data-work-grant data-kind="user" value="${esc(person.id)}">${esc(person.name)} · ${esc(person.id)}</label>`).join('')}${groups.map(group=>`<label><input type="checkbox" data-work-grant data-kind="group" value="${esc(group.id)}">${esc(group.name)} · ${esc(group.id)}</label>`).join('')}</fieldset>`,confirmLabel:'확인한 원본 등록'});
       $('#ees-work-dialog')?.addEventListener('change',()=>{grants=[...document.querySelectorAll('#ees-work-dialog [data-work-grant]:checked')].map(field=>({principal_type:field.dataset.kind,principal_id:field.value,permission:'read'}));});
       if(!await pending||!current())return;body={access_grants:grants};
-    }else return dialog({title:'Work 도구 상태를 확인해 주세요',readOnlyDetail:true,html:description+`<p>${esc(status.reason || '지원되는 상태를 확인하지 못해 변경하지 않았습니다.')}</p>`});
+    }else return dialog({title:'업무 도우미 연결 상태를 확인해 주세요',readOnlyDetail:true,html:description+`<p>${esc(status.reason || '지원되는 상태를 확인하지 못해 변경하지 않았습니다.')}</p>`});
     try{const result=await setupAPI({expected_token:status.expected_token,source_sha256:status.source_sha256,confirmation,...body},path);if(!current())return;commandError='';await refresh();if(!current())return;const message=path==='restore'?'비공개 백업의 코드 원본으로 되돌렸습니다.':confirmation==='update_readonly_work_tool'?'지금 프로그램 원본으로 바꿨습니다. 이전 코드 원본은 비공개 백업으로 보존했습니다.':result.changed?'확인한 제품 원본을 등록했습니다.':'기존 원본과 권한을 유지했습니다.';return dialog({title:'Native Work 도구 확인',readOnlyDetail:true,html:`<p>${esc(message)}</p>${confirmation==='register_readonly_work_tool'?'':'<p>이름·소유자·읽기 권한·설정을 유지했습니다.</p>'}<p>업무 도우미의 사용 가능 상태를 다시 확인해 주세요. 현재 대화의 도구 선택은 자동으로 바꾸지 않았습니다.</p>`});}
     catch(failure){if(current()){commandError=failure.message;render();}throw failure;}
   }
@@ -936,6 +936,9 @@
     const current=location.pathname+location.search+(nativePage()?'#native':'#chat');
     if(route!==current){
       workUI.closeHelp({restoreFocus:false});for(const [key,alias] of chatAliases)if(alias.chat_id!==chatId())chatAliases.delete(key);
+      if(location.pathname==='/'&&new URLSearchParams(location.search).get('ees-work')==='api-catalog'){
+        commitSelection({mode:'author',tab:'tools',panel_open:true,workflow_id:'',run_id:'',job_id:''});
+      }
       route=current;readyRoute='';epoch++;applyNativeDestination();render();
       refresh().then(()=>resumeNativeAction()).catch(failure=>{error=failure.message;render();});
       if(available())models().catch(()=>{});

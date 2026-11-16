@@ -40,14 +40,14 @@ MESSAGES = {
     'native_schema_invalid': '설치된 도구의 입력 형식을 확인해야 합니다. 관리자에게 확인을 요청하세요.',
     'shared_tool_unavailable': 'Open WebUI 도구를 확인하지 못했습니다. 관리자에게 확인을 요청하세요.',
     'shared_tool_review_required': '도구 확인 필요 · 관리자에게 입력·결과와 연결 설정 확인을 요청하세요.',
-    'shared_tool_disabled': '도구 사용 중지 · 관리자에게 다시 켜기를 요청하세요.',
+    'shared_tool_disabled': '이 도구의 사용이 중지되었습니다. 절차 담당자에게 사용할 API를 확인해 주세요.',
     'shared_tool_forbidden': '이 도구를 쓸 수 있는 그룹 권한이 없습니다. 관리자에게 확인을 요청하세요.',
     'shared_tool_plan_changed': '공용 도구가 바뀌었습니다. 새 실행 계획을 확인해 주세요.',
     'shared_tool_version_changed': '회차 시작 뒤 도구가 v{pinned}에서 v{current} 버전으로 바뀌었습니다. 이 회차를 새 버전으로 계속할지 고르세요.',
     'shared_tool_breaking_change': '입력·결과 모양이 호환되지 않아 같은 도구로 확인할 수 없습니다. 개발 담당자에게 새 도구를 요청하세요.',
-    'native_personal_connection_required': '개인 PAT 필요 · 기존 도구의 개인 설정에 본인 PAT를 저장하세요. 채팅에 입력하지 마세요.',
-    'encryption_required': '개인 설정 암호화 필요 · 관리자에게 요청하세요. 채팅에 PAT를 입력하지 마세요.',
-    'authentication_failed': '개인 PAT 인증 실패 · 기존 도구 개인 설정에서 본인 PAT의 만료·권한을 확인하세요. 채팅에 입력하지 마세요.',
+    'native_personal_connection_required': '이 회차를 실행할 계정의 인증 정보가 없습니다. 서비스 담당자에게 연결을 확인해 주세요.',
+    'encryption_required': '인증 정보를 사용할 수 없습니다. 관리자에게 서버의 인증 정보 암호화 설정을 확인해 주세요.',
+    'authentication_failed': '서비스 인증에 실패했습니다. 서비스 담당자에게 실행 계정의 토큰 만료와 열람 권한을 확인해 주세요.',
     'automatic_run_active': '자동 실행 회차가 멈춘 뒤 도구 버전을 바꿀 수 있습니다.',
     'execution_running': '실행 중인 작업이 끝난 뒤 도구 버전을 바꿀 수 있습니다.',
 }
@@ -159,7 +159,9 @@ class SharedTools:
     async def list(self, user, *, usable_only=False, summary=False):
         actor, _, groups = await self.service._work_actor(user)
         admin = _get(actor, 'role') == 'admin'
-        available = [] if getattr(self.service, "confluence_guide", False) else await self.discover(actor)
+        if getattr(self.service, "confluence_guide", False):
+            return []
+        available = await self.discover(actor)
         result = []
         with self.service._db() as db:
             saved = {row['id']: json.loads(row['data']) for row in db.execute('SELECT * FROM work_shared_tools')}
@@ -363,15 +365,30 @@ class SharedTools:
         return ''
 
     async def run_access(self, user, run_id):
-        """Names needed by S1 for an already visible run; no tool/PAT data."""
+        """Return authorized controls for pinned jobs on an already visible run."""
         from .ees_workflow_authoring import _resolve
         actor, _, groups = await self.service._work_actor(user)
         with self.service._db() as db:
             run = self.service._work_run(db, actor, groups, run_id)
             nodes = json.loads(run['snapshot'])['definition']['nodes']
             jobs = [dict(row) for row in db.execute('SELECT * FROM work_jobs WHERE run_id=?', (run_id,)) if nodes[row['job_id']].get('shared_tool_id')]
+            pinned_ids = set()
+            if self.service.confluence_guide and jobs:
+                pinned_ids = {row[0] for row in db.execute(
+                    "SELECT tool_id FROM work_shared_tool_pins WHERE run_kind='work' AND run_id=?", (run_id,))}
         if not jobs:
             return {}
+        # Check the latest source/credentials without modifying the saved run pin.
+        # The two versions are compared by the view; explicit acceptance still has its own write gate.
+        observed = {}
+        for key in pinned_ids.intersection(nodes[job['job_id']]['shared_tool_id'] for job in jobs):
+            try:
+                observed[key] = await self.resolve(actor, key)
+            except WorkflowError as error:
+                observed[key] = {'error': error.code}
+            except Exception:
+                # Missing Native source metadata may block this one tool but never its run history.
+                observed[key] = {'error': 'shared_tool_unavailable'}
         native_groups = {group['id']: group['name'] for group in await self.service._native_groups()}
         names = {}
         for job in jobs:
@@ -414,6 +431,19 @@ class SharedTools:
                     'group_names': [native_groups.get(key) or '그룹 확인 필요' for key in tool.get('group_ids', [])],
                     'assignee_name': assignee_name,
                     'can_accept_version': bool(can_write and allowed and not blocked)}
+                key = node['shared_tool_id']
+                if key in observed and allowed:
+                    current = observed[key]
+                    unchanged = (tool.get('state') == 'available' and 'error' not in current
+                                 and current['reference'] == tool['reference'] and current['version'] == tool['version'])
+                    if unchanged:
+                        result[saved['job_id']]['current_tool'] = {
+                            **{field: tool[field] for field in ('id', 'name', 'version', 'state', 'function')}, 'can_use': True}
+                    else:
+                        reason = current.get('error', 'shared_tool_review_required')
+                        result[saved['job_id']]['current_tool'] = {
+                            'id':key, 'state':'unavailable', 'can_use':False, 'unavailable_message':message_for(reason)}
+                        result[saved['job_id']]['can_accept_version'] = False
             return result
 
 

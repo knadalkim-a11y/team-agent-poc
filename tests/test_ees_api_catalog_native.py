@@ -337,7 +337,37 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.open_catalog()
         api_names = self.browser.evaluate("[...document.querySelectorAll('[data-api-screen=list] .ew-api-row strong')].map(e=>e.textContent)")
         self.assertCountEqual(api_names, ['기준 문서 확인', '하위 문서 목록 조회'])
-        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-api-action=legacy]')"))
+        retired = ('[data-api-action=legacy],.ew-draft-list,.ew-draft-legacy,'
+                   '[data-author-action=tool_create],[data-author-action=draft_new],'
+                   '[data-author-action=draft_import],[data-author-action=job_tool_setup]')
+        self.assertFalse(self.browser.evaluate('!!document.querySelector(' + json.dumps(retired) + ')'))
+        self.click('[data-api-action=create]')
+        self.wait("document.querySelector('[name=api-url]')?.checkVisibility()")
+        self.assertFalse(self.browser.evaluate('!!document.querySelector(' + json.dumps(retired) + ')'))
+        self.click('[data-api-action=cancel]')
+        self.wait("document.querySelector('[data-api-screen=list]')")
+        # Simulate a stale/partial API response on a previously selected Tools tab.
+        # The old server included admin data and had neither guide nor API catalog.
+        # Loading failures must offer a retry instead of changing editor type.
+        current_workspace = self.server.workflow.workspace_state
+        async def stale_workspace(*args, **kwargs):
+            payload = await current_workspace(*args, **kwargs)
+            payload.pop('confluence_guide', None)
+            return payload
+        async def stale_operations(*_args, **_kwargs):
+            return {'ok': True, 'tool_draft_phase': 3,
+                    'tool_drafts': [{'id':'old-tool','name':'전환 전 코드 도구'}],
+                    'shared_tools': [], 'all_tools': []}
+        with (patch.object(self.server.workflow, 'workspace_state', stale_workspace),
+              patch.object(self.server.workflow.operations, 'state', stale_operations)):
+            self.refresh()
+            self.wait("document.querySelector('#ees-work-designer [data-action=refresh]')?.checkVisibility()")
+            self.assertFalse(self.browser.evaluate('!!document.querySelector(' + json.dumps(retired) + ')'))
+            panel = self.text('#ees-work-designer')
+            for label in ('기존 도구 관리','이전 방식 도구','기존 도구에서 가져오기','전환 전 코드 도구'):
+                self.assertNotIn(label, panel)
+        self.click('#ees-work-designer [data-action=refresh]')
+        self.wait("document.querySelector('[data-api-action=open][data-id=guide-confluence-page]')")
         self.click('[data-api-action=open][data-id=guide-confluence-page]')
         self.assertIn('서비스 기본 주소 + /{id}', self.text('[data-api-screen=detail] .ew-api-route'))
         self.click('[data-action=procedures]')

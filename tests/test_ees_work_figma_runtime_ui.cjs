@@ -56,6 +56,7 @@ function nativeNavigationHarness(capabilities=nativeCapabilities({is_admin:true,
 test('workspace assets and settings retain server permissions without duplicate prompt or Native labels',()=>{
  const admin=nativeCapabilities({is_admin:true,can_author:true,native_access:{models:true,knowledge:true,prompts:true,skills:true,tools:true,admin:true}});
  const rendered=html('workWorkspaceMenuHTML({capabilities}, {tab:"tools"})',{capabilities:admin});
+ assert.equal(html("workNativeAllowed(capabilities,'tools')",{capabilities:admin}),false);
  assert.equal((rendered.match(/class="ew-nav-group ew-assets-group"/g)||[]).length,1);
  for(const label of ['업무 절차','도구·자료','작업 지침','AI 도우미 설정','참고 문서','관리자 설정'])assert.ok(rendered.includes(label),label);
  assert.doesNotMatch(rendered,/공장·접근 범위|workspace_admin|admin_factory|admin_access|업무 만들기|AI 설정|관리자만|스킬·지침|빠른 문장|data-native-id="(?:tools|prompts)"|ew-nav-native-name/);
@@ -150,8 +151,9 @@ test('factory scope stays available in tools and unavailable in Native managemen
  await h.api.handleClick({dataset:{action:'choose_factory',factoryId:'factory-a'}});
  assert.equal(h.api.snapshot().selection.factory_id,'');assert.equal(h.calls.length,before);assert.equal(h.context.location.pathname,'/workspace/skills');
 });
-test('all six allowed Native destinations use direct static routes without a sidebar link',async()=>{
- for(const id of ['skills','models','knowledge','prompts','tools','admin']){const h=nativeNavigationHarness();await h.open(id);assert.deepEqual(h.navigation,[id==='admin'?'/admin/settings':'/workspace/'+id]);assert.equal(h.renders.at(-1)?.native_shell,true);assert.equal(h.renders.at(-1)?.native_id,id);assert.equal(h.calls.filter(call=>call.body).length,0);}
+test('allowed Native destinations use static routes and the retired tool shortcut stays closed',async()=>{
+ const old=nativeNavigationHarness();await old.open('tools');assert.deepEqual(old.navigation,[]);
+ for(const id of ['skills','models','knowledge','prompts','admin']){const h=nativeNavigationHarness();await h.open(id);assert.deepEqual(h.navigation,[id==='admin'?'/admin/settings':'/workspace/'+id]);assert.equal(h.renders.at(-1)?.native_shell,true);assert.equal(h.renders.at(-1)?.native_id,id);assert.equal(h.calls.filter(call=>call.body).length,0);}
 });
 test('same-section EES menu preserves selection and unsaved designer session plus the full composer without sending',async()=>{
  const h=nativeNavigationHarness(),before=JSON.parse(JSON.stringify(h.api.snapshot().selection)),draft=JSON.parse(JSON.stringify(h.readDraft()));let captures=0,designerCaptures=0,closed=0;
@@ -689,9 +691,12 @@ test('same shared-tool review leaves an ongoing run executable and changed versi
  assert.match(panel(),/data-action="execute"[^>]*>/);assert.doesNotMatch(panel(),/data-action="execute"[^>]*disabled/);
  context.snapshot.state.operations.shared_tools[0].revision=2; // evidence-only review
  run(context,'sharedView.sync(snapshot)');assert.doesNotMatch(panel(),/data-action="execute"[^>]*disabled/);
- context.snapshot.state.operations.shared_tools[0].version=2;
+ const ops=context.snapshot.state.operations,tool=ops.shared_tools[0];
+ ops.shared_tools=[];ops.shared_tool_access.j.current_tool=tool;
+ run(context,'sharedView.sync(snapshot)');assert.match(panel(),/페이지 찾기/);assert.doesNotMatch(panel(),/개인 PAT|data-action="execute"[^>]*disabled/);
+ tool.version=2;
  run(context,'sharedView.sync(snapshot)');assert.match(panel(),/v2 버전으로 계속하기/);assert.match(panel(),/data-action="execute"[^>]*disabled/);
- context.snapshot.state.operations.shared_tools[0].state='unavailable';context.snapshot.state.operations.shared_tools[0].unavailable_message='Open WebUI 도구의 연결 설정을 확인해야 합니다.';
+ tool.state='unavailable';tool.unavailable_message='Open WebUI 도구의 연결 설정을 확인해야 합니다.';
  run(context,'sharedView.sync(snapshot)');assert.match(panel(),/연결 설정을 확인해야/);assert.doesNotMatch(panel(),/버전으로 계속하기/);
 });
 

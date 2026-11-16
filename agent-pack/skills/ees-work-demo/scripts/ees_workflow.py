@@ -35,7 +35,7 @@ from .ees_workflow_operations import OperationsRuntime
 from .ees_workflow_shared_tools import SharedTools
 from .ees_workflow_tool_drafts import ToolDrafts
 from .ees_workflow_api_catalog import ApiCatalog, CORE, ORIGIN
-from .ees_workflow_api_binding import binding_errors
+from .ees_workflow_api_binding import binding_errors, retired_binding_errors
 from .ees_workflow_api_openapi import parse_document
 
 _service = None
@@ -376,7 +376,13 @@ async def _registered_assets(user):
 
 
 async def get_state(user, chat_id="", case_id="", process_id="", selection=None):
-    return await _production_service().get_state(user, chat_id, case_id, process_id, selection)
+    service = _production_service()
+    if service.confluence_guide and (process_id or selection is not None or not (case_id or chat_id)):
+        return await _retired_for(user)
+    state = await service.get_state(user, chat_id, case_id, process_id, selection)
+    if service.confluence_guide and state.get("ok") and not state.get("case"):
+        return _retired_action()
+    return state
 
 
 async def handle_action(user, body):
@@ -571,6 +577,8 @@ async def workspace_proposal(user, body):
             source = deepcopy(body.get("definition", json.loads(row["draft"])))
         _public(source)
         errors, _warnings = definition_check(source, complete=False)
+        if not errors and service.confluence_guide:
+            errors.extend(retired_binding_errors(source))
         if errors or source.get("id") != workflow_id:
             raise WorkflowError("invalid_proposal", "초안의 구조와 대상 식별자를 확인해 주세요.")
         model = service.operations.model
@@ -583,6 +591,8 @@ async def workspace_proposal(user, body):
         with service._db() as db:
             row = service._work_definition(db, actor, groups, workflow_id, manage=True)
             _revision(body, row["revision"])
+        if service.confluence_guide and retired_binding_errors(result["proposal"]):
+            raise WorkflowError("invalid_proposal", "작업 자동화에 사용할 API를 선택해 주세요.")
         return {**result, "workflow_id": workflow_id, "base_revision": revision,
                 "context_id": body["context_id"], "definition": result["proposal"], "saved": False}
     except WorkflowError as error:
@@ -777,7 +787,7 @@ def install(app, verified_user):
                 "execution_overlap", "execution_service_required", "result_confirmation_required", "run_completed",
                 "draft_revision_conflict", "workflow_baseline_changed", "validation_required",
                 "api_version_changed", "api_import_changed", "api_duplicate", "api_service_duplicate", "api_service_in_use",
-                "legacy_execution_retired", "intent_expired", "intent_changed", "already_claimed"} else 404 if code in {"process_not_found", "workflow_not_found", "run_not_found",
+                "legacy_execution_retired", "tool_authoring_retired", "intent_expired", "intent_changed", "already_claimed"} else 404 if code in {"process_not_found", "workflow_not_found", "run_not_found",
                     "api_not_found", "api_service_not_found"} else 503 if code in {
                     "authoring_authorization_unavailable", "authoring_unavailable"} else 400
         return JSONResponse(value, status_code=status, headers={"Cache-Control": "no-store"})
@@ -865,7 +875,10 @@ def install(app, verified_user):
 
     @app.get("/api/ees-work/authoring", include_in_schema=False)
     async def authoring_state_route(system_id: str = "", process_id: str = "", legacy_id: int | None = None, user=Depends(verified_user)):
-        return response(await _production_service().get_authoring(user, system_id, process_id, legacy_id))
+        service = _production_service()
+        if service.confluence_guide:
+            return response(await _retired_for(user))
+        return response(await service.get_authoring(user, system_id, process_id, legacy_id))
 
     @app.post("/api/ees-work/authoring/action", include_in_schema=False)
     async def authoring_action_route(body: dict = Body(...), user=Depends(verified_user)):
@@ -888,6 +901,8 @@ def install(app, verified_user):
         try:
             service = _production_service()
             current = await service._user(user)
+            if service.confluence_guide:
+                raise WorkflowError("tool_authoring_retired", "워크스페이스의 도구에서 사용할 API를 등록해 주세요.")
             service.execution.configure(app)
             return response({"ok": True, "capability": await service.execution.bridge.inspect(current, tool_id, function)})
         except WorkflowError as error:
@@ -898,6 +913,8 @@ def install(app, verified_user):
         try:
             service = _production_service()
             current = await service._user(user)
+            if service.confluence_guide:
+                raise WorkflowError("tool_authoring_retired", "워크스페이스의 도구에서 사용할 API를 등록해 주세요.")
             service.execution.configure(app)
             approved = await service.execution.bridge.approval_action(current, body)
             return response({"ok": True, "capability": approved})

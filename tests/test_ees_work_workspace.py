@@ -468,6 +468,10 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
                           for term in actual['terms']], expected['terms'])
         ids = [term['id'] for term in actual['terms']]
         self.assertEqual(len(ids), len(set(ids)))
+        self.assertTrue({'api_specification', 'connected_function', 'output_schema', 'connection_request'} <= set(ids))
+        self.assertFalse({'direct_tool', 'reviewer', 'tool_states'} & set(ids))
+        request = next(term for term in actual['terms'] if term['id'] == 'connection_request')
+        self.assertIn('EES Web', request['summary'])
         for term in actual['terms']:
             self.assertTrue(set(term['related']) <= set(ids))
             self.assertEqual(term['evidence'], f"근거 · EES Workflow 도움말 ‘{term['name']}’")
