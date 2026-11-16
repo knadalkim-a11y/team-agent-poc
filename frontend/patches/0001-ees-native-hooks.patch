@@ -5476,7 +5476,7 @@ new file mode 100644
 +	redirect(307, '/?ees-work=api-catalog');
 +};
 diff --git a/svelte.config.js b/svelte.config.js
-index 82e0595..6f11820 100644
+index 82e0595..b1e13a6 100644
 --- a/svelte.config.js
 +++ b/svelte.config.js
 @@ -9,6 +9,7 @@ const config = {
@@ -5492,7 +5492,7 @@ index 82e0595..6f11820 100644
  		// poll for new version name every 60 seconds (to trigger reload mechanic in +layout.svelte)
  		version: {
 -			name: (() => {
-+			name: process.env.EES_PROGRAM_VERSION || (() => {
++			name: process.env.EES_BROWSER_BUILD || (() => {
  				try {
  					return child_process.execSync('git rev-parse HEAD').toString().trim();
  				} catch {

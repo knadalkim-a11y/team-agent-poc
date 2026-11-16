@@ -51,13 +51,13 @@
     "src/routes/(app)/workspace/+layout.svelte": "9d4b91035a0e7a7b3650d4db4c2ca6df0735981662b9b266944540c02b90917f",
     "src/routes/(app)/workspace/tools/+layout.ts": "00d6b19ff20d96795606d188f8b9df9ec8a2d8015702f8fd9f0b0fb9e50e83b8",
     "src/routes/+layout.svelte": "b9d4891c49d7bd40ae70abc1fa4b78860f1678cf7ead94f949fdb13e0d48be4c",
-    "svelte.config.js": "95f9ac49b1c1c3c14f23f5a06300de631d974f725ce8c4958f799d42955e1f37",
+    "svelte.config.js": "49f9703d56eebe0c2f7171410939354b7b1414524d7d91c0a96b6ef97d5c8f74",
     "vite.config.ts": "793bfdc367867f486b504434bbbb79d0b7c69a5b4bd8572c0368138b60598bd2"
   },
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "5e3a2107ddf9db6c1a1d73e193571dda6d03c7270f4dc45d0fbcc4783af46436"
+      "sha256": "18b33e75886b17dab70bab890c460a2fb0004879f4e536ef1490c2cd01614889"
     }
   ],
   "pyodide_files": {

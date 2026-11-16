@@ -1279,6 +1279,12 @@ def serve(*, host, port):
         self.assertEqual((self.data / 'webui.db').read_bytes(), b'synthetic-existing-data')
         self.assertEqual((self.cwd / '.webui_secret_key').read_bytes(), b'synthetic-existing-key')
 
+    def test_current_package_starts_with_its_browser_build_fingerprint(self):
+        path = self.package / 'frontend' / self.frontend_name / 'version.json'
+        path.write_text(json.dumps({'version': self.version + '.ui.' + 'b' * 64}), encoding='utf-8')
+        result = self.run_child()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_guard_prefix_preserves_original_arguments_and_customized_isolation(self):
         original = self.command(original=True)
         prefix, code = original[2].split('\n', 1)
