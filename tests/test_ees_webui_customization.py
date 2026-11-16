@@ -1119,6 +1119,16 @@ print("v4_database_" + phase + "=pass")
                 self.assertEqual(self.registry["schema_version"], 1)
                 self.assertFalse(self.program.exists())
 
+    def test_browser_fingerprint_preserves_package_version_and_rejects_malformed_build(self):
+        path = branding.TARGET_APP + "version.json"
+        for value in (None, branding.VERSION + ".ui.short", "0.11.3+ees.13.ui." + "a" * 64):
+            with self.subTest(value=value), self.assertRaises(custom.CustomizationError):
+                custom._wheel_layout(make_wheel(replacement={path: json.dumps({"version": value}).encode()}))
+        version = branding.VERSION + ".ui." + "a" * 64
+        self.write_bundle(make_wheel(replacement={path: json.dumps({"version": version}).encode()}))
+        self.assertTrue(self.apply()["changed"])
+        self.assertEqual(self.registry["customization"]["active"]["webui_version"], branding.VERSION)
+
     def test_identical_app_from_new_commit_restores_previous_commit(self):
         self.apply()
         self.write_bundle(commit="b" * 40)
@@ -1810,7 +1820,9 @@ print("workflow_" + phase + "=pass")
             self.assertEqual(len(distributions), 1)
             self.assertEqual(distributions[0].version, branding.VERSION)
             self.assertEqual(Path(distributions[0].locate_file("")), program)
-            self.assertEqual(json.loads((program / (branding.TARGET_APP + "version.json")).read_bytes())["version"], branding.VERSION)
+            from scripts import build_ees_frontend
+            expected = build_ees_frontend._browser_build(branding.VERSION, manifest["source_frontend"]["source_inputs"])
+            self.assertEqual(json.loads((program / (branding.TARGET_APP + "version.json")).read_bytes())["version"], expected)
             self.assertIn(b"EES Workflow", (program / "open_webui/frontend/index.html").read_bytes())
             # v0.11.3 config.py rewrites package/static from frontend/static
             # at startup. Reproduce those file operations without app imports.

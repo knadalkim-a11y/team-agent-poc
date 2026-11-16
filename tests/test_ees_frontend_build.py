@@ -430,8 +430,9 @@ class FrontendProvenanceTests(unittest.TestCase):
         config_patch.start()
         self.addCleanup(config_patch.stop)
         app = self.config["app_dir"]
+        self.browser_build = frontend._browser_build(self.config["version"], frontend._source_inputs())
         self.files = {"index.html": b"<html>source built</html>", "pyodide/fixture.js": b"pinned pyodide",
-                      app + "/version.json": json.dumps({"version": self.config["version"]}).encode("utf-8"),
+                      app + "/version.json": json.dumps({"version": self.browser_build}).encode("utf-8"),
                       app + "/immutable/entry/start.js": b"__eesNativeDraftV1 __eesNativeWorkV1 ees_work_reference beginChatCreation finishChatCreation __eesSourceShellV1 data-ees-source-sidebar data-ees-source-shell"}
         for name, content in self.files.items():
             path = self.build / name
@@ -502,13 +503,13 @@ class FrontendProvenanceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "source fingerprints"):
             frontend.validate_frontend(self.root)
 
-    def test_program_version_keeps_existing_apply_and_restore_contract(self):
+    def test_browser_build_must_match_current_inputs(self):
         name = self.config["app_dir"] + "/version.json"
-        self.files[name] = json.dumps({"version": self.config["version"] + ".unexpected-revision"}).encode("utf-8")
+        self.files[name] = json.dumps({"version": frontend._browser_build(self.config["version"], {"changed": "0" * 64})}).encode("utf-8")
         (self.build / name).write_bytes(self.files[name])
         self.manifest["files"] = frontend._digest_map(self.files)
         self.save()
-        with self.assertRaisesRegex(ValueError, "Apply/Restore contract"):
+        with self.assertRaisesRegex(ValueError, "browser build"):
             frontend.validate_frontend(self.root)
 
     def test_manifest_duplicate_keys_and_symlinked_build_content_are_rejected(self):

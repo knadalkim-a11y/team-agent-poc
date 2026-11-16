@@ -78,6 +78,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import re
 import signal
 import sys
 
@@ -127,11 +128,14 @@ try:
     spec = importlib.util.find_spec('open_webui')
     if spec is None or spec.origin is None or Path(spec.origin).resolve() != code:
         reject()
+    browser = json.loads(required[-1].read_text(encoding='utf-8')).get('version')
+    if browser != version and not (frontend_name == '_ees14' and isinstance(browser, str)
+                                   and re.fullmatch(re.escape(version) + r'\.ui\.[a-f0-9]{64}', browser)):
+        reject()
     distribution = metadata.distribution('open-webui')
     if (distribution.metadata.get('Name') != 'open-webui' or distribution.version != version
             or Path(distribution.locate_file('')).resolve() != root
-            or distribution.read_text('METADATA') != (metadata_dir / 'METADATA').read_text(encoding='utf-8')
-            or json.loads(required[-1].read_text(encoding='utf-8')).get('version') != version):
+            or distribution.read_text('METADATA') != (metadata_dir / 'METADATA').read_text(encoding='utf-8')):
         reject()
 except (OSError, ValueError, TypeError, AttributeError, ImportError, IndexError):
     reject()
