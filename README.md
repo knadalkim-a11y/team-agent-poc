@@ -37,9 +37,7 @@ EES 팀의 문서 조회와 업무 처리를 대화·워크플로우 화면으�
 | 어디까지 구현·검증·사내 적용됐는가 | [STATUS](docs/STATUS.md)와 거기서 연결한 PR·Checks·[평가 기록](evals/v4-ui-20260930.md) | 구현할 판 지정·코드 구현·CI 검증·사내 확인을 구분 |
 | 개발 AI는 어떻게 작업하는가 | [AGENTS.md](AGENTS.md), Claude Code 진입은 [CLAUDE.md](CLAUDE.md) | 같은 지침 원본을 사용하며 기능별 상세 문서는 필요할 때 읽음 |
 
-새 도구는 [작성·저장 ST-P1 계약](docs/specs/shared-tools.md#tools-redesign-v2-phase1-20261105) → [연결·시험·사용 설정 ST-P2 계약](docs/specs/shared-tools.md#tools-redesign-v2-phase2-20261105)과 [관리자 작성 안내](docs/03-openwebui-native-agent.md#tool-authoring-phase1-20261105)에서 시작합니다. 이어서 [업무절차 연결·실행 ST-P3 계약](docs/specs/shared-tools.md#tools-redesign-v2-phase3-20261105)을 따릅니다. 기존 실행 도구의 관리 계약은 유지합니다.
-
-공용 도구를 찾을 때는 [워크 · 도구 헤더](https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=1285-1842)에서 해당 화면을 선택하고 [공용 도구 기능 명세](docs/specs/shared-tools.md)에서 권한과 사용 조건을 확인합니다. 이전 설계와 결정 과정은 [당시 기능 계약](docs/mockups/ees-work/TASK.md#shared-tools-phase1-20261015)과 [PR #96](https://github.com/knadalkim-a11y/team-agent-poc/pull/96)에 보존합니다.
+**워크스페이스 → 도구**에서 서비스 API의 이름, 용도, 주소, 입력과 응답을 등록합니다. **업무 절차 → 단계 → 작업**에서 등록한 API를 선택해 사용할 값을 연결합니다. Confluence 문서 조회는 기본 가이드에서 바로 시작할 수 있습니다. [API 명세 관리](docs/specs/shared-tools.md#api-tools-v11) · [가이드 실행 및 서비스 연결](docs/specs/shared-tools.md#confluence-starter) · [워크 · 도구 화면](docs/mockups/ees-work/api-tools-20261113/README.md)
 
 설계 관리의 이번 정리 범위와 Figma 후속 대상은 [작은 개선 계획](docs/mockups/ees-work/TASK.md#design-maintenance-20261016)에 모았습니다.
 

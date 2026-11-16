@@ -159,8 +159,7 @@ const workUI = (() => {
       element.style.top=Math.max(12,below+height<=viewportHeight-12?below:Math.min(rect.top-height-8,viewportHeight-height-12))+'px';
     };
     element.id='ees-work-help';element.className='ew-help-popover';element.dataset.eesWork='';element.dataset.eesMotionKind='help';element.setAttribute('role','dialog');element.setAttribute('aria-labelledby','ees-work-help-title');
-    const aliases=item=>(item.aliases || []).length?`<small>예전 이름: ${esc(item.aliases.join(' · '))}</small>`:'';
-    element.innerHTML=`<header><div><strong id="ees-work-help-title">${esc(selected.name)}</strong>${aliases(selected)}</div><button type="button" class="ew-help-close" data-help-close aria-label="도움말 닫기">닫기</button></header><p class="ew-help-summary" id="ees-work-help-body" tabindex="-1">${esc(selected.summary)}</p>${selected.example?`<p class="ew-help-example">예: ${esc(selected.example)}</p>`:''}${related.length?`<section class="ew-help-related"><h3>관련 도움말</h3>${related.map(item=>`<article><div><strong>${esc(item.name)}</strong>${aliases(item)}</div><p>${esc(item.summary)}</p></article>`).join('')}</section>`:''}<p class="ew-help-error" data-help-error role="alert" hidden></p><footer><button type="button" class="ew-help-ask" data-help-ask${typeof onAsk!=='function'?' disabled':''}>${icon('1c98e')}대화창에서 더 묻기</button><small>도움말 · ${esc(selected.name)}</small></footer>`;
+    element.innerHTML=`<header><div><strong id="ees-work-help-title">${esc(selected.name)}</strong></div><button type="button" class="ew-help-close" data-help-close aria-label="도움말 닫기">닫기</button></header><p class="ew-help-summary" id="ees-work-help-body" tabindex="-1">${esc(selected.summary)}</p>${selected.example?`<p class="ew-help-example">예: ${esc(selected.example)}</p>`:''}${related.length?`<section class="ew-help-related"><h3>관련 도움말</h3>${related.map(item=>`<article><div><strong>${esc(item.name)}</strong></div><p>${esc(item.summary)}</p></article>`).join('')}</section>`:''}<p class="ew-help-error" data-help-error role="alert" hidden></p><footer><button type="button" class="ew-help-ask" data-help-ask${typeof onAsk!=='function'?' disabled':''}>${icon('1c98e')}대화창에서 더 묻기</button><small>도움말 · ${esc(selected.name)}</small></footer>`;
     const priorExpanded=previous?.getAttribute?.('aria-expanded'),priorControls=previous?.getAttribute?.('aria-controls');
     previous?.setAttribute?.('aria-expanded','true');previous?.setAttribute?.('aria-controls',element.id);
     const restoreAttribute=(name,value)=>value===null||value===undefined?previous?.removeAttribute?.(name):previous?.setAttribute?.(name,value);
@@ -645,7 +644,8 @@ function workExportText(document){
 }
 function workLegacyHTML(legacy){
   const {esc,button}=workUI;if(!legacy)return '';if(legacy.error)return `<p class="ew-warning">이전 기록 조회 실패 · ${esc(legacy.error)}</p>`;
-  return `<section class="ew-legacy"><h3>이전 버전 기록</h3><p class="ew-muted">${esc(legacy.notice || '이전 실행 기능은 사용 중지되었습니다. 남아 있는 과거 기록만 읽습니다.')}</p>${(legacy.records || []).map(item=>button(`${item.process_name || item.id} · ${item.status || '상태 미기록'}${item.simulation?' · 시뮬레이션':''}`,'open_legacy',`data-case-id="${esc(item.id)}" class="ew-record"`)).join('') || '<p class="ew-empty">조회할 이전 기록이 없습니다.</p>'}</section>`;
+  if(!legacy.records?.length)return '';
+  return `<section class="ew-legacy"><h3>이전 버전 기록</h3><p class="ew-muted">${esc(legacy.notice || '이전 실행 기능은 사용 중지되었습니다. 남아 있는 과거 기록만 읽습니다.')}</p>${legacy.records.map(item=>button(`${item.process_name || item.id} · ${item.status || '상태 미기록'}${item.simulation?' · 시뮬레이션':''}`,'open_legacy',`data-case-id="${esc(item.id)}" class="ew-record"`)).join('')}</section>`;
 }
 
 function workHistoricalReferenceHTML(run,reference,workflow,currentSettings=null){
@@ -719,7 +719,6 @@ const workNativeTargets=Object.freeze([
   {id:'models',label:'AI 도우미 설정',name:'모델',path:'/workspace/models',icon:'cf77a'},
   {id:'knowledge',label:'참고 문서',name:'지식',path:'/workspace/knowledge',icon:'730b1'},
   {id:'prompts',label:'저장한 프롬프트',name:'프롬프트',path:'/workspace/prompts',icon:'093d6'},
-  {id:'tools',label:'Open WebUI 도구',name:'도구',path:'/workspace/tools',icon:'cece5',admin:true},
   {id:'admin',label:'관리자 설정',name:'관리자',path:'/admin/settings',icon:'f34f3',admin:true}
 ].map(Object.freeze));
 function workNativeAllowed(capabilities,id){
@@ -741,7 +740,7 @@ function workCanWorkspace(capabilities){
 }
 function workWorkspaceMenuHTML(state,selection,error=''){
   const {esc,icon}=workUI,capabilities=state.capabilities || {},current=(state.workflows || []).filter(workflow=>!selection.system_id||workflow.system_id===selection.system_id);
-  const item=(action,asset,label,{active=false,count,native,id}={})=>`<button type="button" class="ew-nav-button" data-action="${action}"${id?` data-native-id="${id}"`:''} aria-label="${label}" title="${label}"${active?' aria-current="page"':''}>${['models','tools','admin'].includes(id)?`<span class="ew-icon ew-native-icon" data-native-icon="${id}" aria-hidden="true"></span>`:icon(asset)}<span class="ew-nav-label">${label}</span>${native?`<small class="ew-nav-native-name">${native}</small>`:count===undefined?'':`<small>${count}</small>`}</button>`;
+  const item=(action,asset,label,{active=false,count,native,id}={})=>`<button type="button" class="ew-nav-button" data-action="${action}"${id?` data-native-id="${id}"`:''} aria-label="${label}" title="${label}"${active?' aria-current="page"':''}>${['models','admin'].includes(id)?`<span class="ew-icon ew-native-icon" data-native-icon="${id}" aria-hidden="true"></span>`:icon(asset)}<span class="ew-nav-label">${label}</span>${native?`<small class="ew-nav-native-name">${native}</small>`:count===undefined?'':`<small>${count}</small>`}</button>`;
   const native=target=>item('native_open',target.icon,target.label,{id:target.id,active:selection.native_id===target.id});
   const create=workCanCreate(capabilities)?`<nav class="ew-nav-links ew-procedure-link">${item('procedures','e8a37','업무 절차',{active:!selection.native_id&&selection.tab!=='tools'})}</nav>`:'';
   const tools=workCanCreate(capabilities)?item('tools','d1220','도구',{active:!selection.native_id&&selection.tab==='tools'}):'';
@@ -1004,7 +1003,7 @@ function createWorkView({callbacks}){
   function publish(){
     const node=job();
     window.__eesSourceShellV1?.publish?.({...snapshot,
-      tool_count:workToolCatalog(state(),selection()).length,
+      tool_count:state().operations?.api_catalog?.apis?.length || 0,
       context_title:snapshot.native_return_pending?'대화':snapshot.procedure_start?'새 업무 절차 만들기':node?.name || workStageTarget(state(),selection())?.name || state().workflow?.name || '대화'});
   }
   function runOverview(){

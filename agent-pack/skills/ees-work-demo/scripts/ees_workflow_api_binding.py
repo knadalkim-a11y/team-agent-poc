@@ -53,10 +53,29 @@ def _compatible(actual, expected):
     return actual == expected or actual == 'integer' and expected == 'number'
 
 
+def retired_binding_errors(definition):
+    """Only current procedure definitions use this gate. Run snapshots keep their pins."""
+    errors = []
+    nodes = definition.get('nodes') if isinstance(definition, dict) else None
+    if not isinstance(nodes, dict):
+        return errors  # Structural checks report malformed documents.
+    for key, node in nodes.items():
+        if not isinstance(node, dict):
+            continue
+        execution = node.get('execution')
+        if (any(node.get(field) for field in ('shared_tool_id', 'tool_contract_id', 'tool_contract_revision', 'tool_reference'))
+                or isinstance(execution, dict) and execution.get('reference')):
+            errors.append(f'{key}: 작업에서 사용할 API를 도구 목록에서 선택해 주세요.')
+        fields = node.get('inputs')
+        if isinstance(fields, list) and any(isinstance(field, dict) and field.get('options_source') == 'tool' for field in fields):
+            errors.append(f'{key}: 입력 선택지는 직접 정의하거나 공통 설정 목록에서 선택해 주세요.')
+    return errors
+
+
 def binding_errors(service, db, groups, definition, *, previous=None, for_new=False, overrides=None):
     """Resolve immutable contracts and current ACLs in the save/start transaction."""
     nodes = definition['nodes']
-    errors = []
+    errors = retired_binding_errors(definition) if getattr(service, 'confluence_guide', False) else []
     catalog = getattr(service, 'api_catalog', None)
     ops = {}
     for job_id, node in nodes.items():

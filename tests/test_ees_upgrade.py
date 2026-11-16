@@ -130,7 +130,7 @@ class WorkToolUpgradeHintTests(unittest.TestCase):
                 self.assertEqual(" work_tool=" in lines[0], expected)
                 if expected:
                     self.assertIn(" work_tool=" + value, lines[0])
-                self.assertEqual("EES 적용 뒤 Work 도구 설정 확인" in lines, expected)
+                self.assertEqual("EES 적용 뒤 업무 도우미 연결 확인" in lines, expected)
                 self.assertIn("next=refresh_browser", lines[0])
                 self.assertNotIn("private-value", output.getvalue())
                 self.assertEqual(result, original)
@@ -315,7 +315,7 @@ class UpgradeDeploymentTests(unittest.TestCase):
         saved = json.loads((self.root / "last-operation.json").read_bytes())
         self.assertEqual(saved["result"]["work_tool"], "update_needed")
         self.assertIn("work_tool=update_needed", self.output.getvalue())
-        self.assertIn("적용 뒤 Work 도구 설정 확인", self.output.getvalue())
+        self.assertIn("적용 뒤 업무 도우미 연결 확인", self.output.getvalue())
         self.assertEqual(self.registry, before)
         self.assertTrue(upgrade.receipt_matches(self.config, self.artifact, self.selected))
         for call in self.mock["record"].call_args_list:

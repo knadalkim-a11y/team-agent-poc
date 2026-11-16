@@ -1139,17 +1139,22 @@ async def check_chat_work_tool(request, user, tool):
         request.state.ees_work_tool_source_hash = observed
 
 
-async def shared_tool_summary(service, actor):
-    """Optional public context must not discard successful help/view results."""
+async def chat_api_summary(service, actor):
+    """Expose only the same active APIs the caller can select for a new job."""
     try:
-        return {"shared_tools": await service.shared_tools.list(actor, usable_only=True, summary=True)}
+        catalog = await service.api_catalog.state(actor)
+        services = {item["id"]: item["name"] for item in catalog["services"]}
+        return {"available_apis": [
+            {"name": op["name"], "purpose": op["purpose"], "service": services[op["service_id"]], "method": op["method"]}
+            for op in catalog["apis"] if op["can_use"] and op["state"] == "active"
+        ]}
     except Exception as error:
         import logging
         import traceback
         # Keep call-site diagnostics, never exception text, source lines or locals.
         locations = [f"{frame.name}:{frame.lineno}" for frame in traceback.extract_tb(error.__traceback__)]
-        logging.getLogger(__name__).warning("shared_tool_summary_unavailable: %s at %s", type(error).__name__, " > ".join(locations))
-        return {"shared_tools": [], "shared_tools_notice": "도구 목록을 불러오지 못했습니다."}
+        logging.getLogger(__name__).warning("chat_api_summary_unavailable: %s at %s", type(error).__name__, " > ".join(locations))
+        return {"available_apis": [], "available_apis_notice": "API 목록을 불러오지 못했습니다."}
 
 
 def wrap_chat_work_tools(request, user, tools):
@@ -1189,11 +1194,17 @@ def wrap_chat_work_tools(request, user, tools):
                     with service._db() as db:
                         if help_context["system_id"] and not service._work_system_visible(db, actor, groups, help_context["system_id"]):
                             _fail("scope_forbidden")
-                    return {"ok": True, "help": workflow_help(), **await shared_tool_summary(service, actor), "help_context": {"kind": "help", **help_context}}
+                    return {"ok": True, "help": workflow_help(), **await chat_api_summary(service, actor), "help_context": {"kind": "help", **help_context}}
+                if _function == "ees_workflow_propose":
+                    from .ees_workflow import _production_service
+                    from .ees_workflow_api_binding import retired_binding_errors
+                    definition = kwargs.get("definition") if len(args) < 3 else args[2]
+                    if definition and retired_binding_errors(definition) and _production_service().confluence_guide:
+                        return {"ok": False, "error": {"code": "invalid_proposal", "message": "작업 자동화에 사용할 API를 선택해 주세요."}}
                 result = await _native(*args, **kwargs)
                 if _function == "ees_workflow_view" and isinstance(result, dict) and result.get("ok") and "historical" not in result:
                     from .ees_workflow import _production_service
-                    result = {**result, "help": workflow_help(), **await shared_tool_summary(_production_service(), actor)}
+                    result = {**result, "help": workflow_help(), **await chat_api_summary(_production_service(), actor)}
                 return result
             except Exception:
                 if help_context is not None:

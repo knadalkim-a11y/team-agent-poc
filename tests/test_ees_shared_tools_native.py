@@ -542,7 +542,7 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(truncated['completeness'],'truncated')
         await self.f.tools.Tools.update_user_valves_by_id_and_user_id(item['reference']['tool_id'], 'reader', {'PAT':''})
         error = await self.assert_code('native_personal_connection_required', self.tools.resolve(self.reader,key))
-        self.assertIn('개인 PAT', str(error))
+        self.assertIn('서비스 담당자에게 연결을 확인', str(error))
 
     async def test_automatic_schedule_uses_delegating_identity_pat(self):
         await self.review()
@@ -842,12 +842,12 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         for help_context in (None, {'system_id':'','context_id':'draft'}):
             request=SimpleNamespace(state=SimpleNamespace(ees_work_tool_source_hash='expected',ees_work_help_context=help_context))
             original=AsyncMock(return_value={'ok':True,'kept':'authorized view'})
-            with patch.object(self.f.native,'_chat_work_access',return_value=(self.admin,'expected')), patch.object(self.f.workflow,'_production_service',return_value=self.service), patch.object(self.tools,'list',side_effect=RuntimeError('synthetic-secret')), self.assertLogs(self.f.native.__name__,level='WARNING') as logs:
+            with patch.object(self.f.native,'_chat_work_access',return_value=(self.admin,'expected')), patch.object(self.f.workflow,'_production_service',return_value=self.service), patch.object(self.service.api_catalog,'state',side_effect=RuntimeError('synthetic-secret')), self.assertLogs(self.f.native.__name__,level='WARNING') as logs:
                 wrapped=self.f.native.wrap_chat_work_tools(request,self.admin,{'view':{'tool_id':'ees_workflow','spec':{'name':'ees_workflow_view'},'callable':original}})
                 result=await wrapped['view']['callable']()
             self.assertTrue(result['ok'])
-            self.assertEqual(result['shared_tools'],[])
-            self.assertIn('불러오지 못',result['shared_tools_notice'])
+            self.assertEqual(result['available_apis'],[])
+            self.assertIn('불러오지 못',result['available_apis_notice'])
             self.assertIn('help',result)
             self.assertNotIn('synthetic-secret',json.dumps(result)+str(logs.output))
             if help_context is None:

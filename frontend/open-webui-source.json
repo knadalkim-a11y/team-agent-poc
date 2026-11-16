@@ -39,11 +39,11 @@
     "src/lib/components/layout/Sidebar.svelte": "bbc1ea199bae6144d5064a021ddb482b76f1290ea519d3cdd31846aafe63ac81",
     "src/lib/components/workspace/Knowledge/KnowledgeBase.svelte": "997c77a9fcfbd479e1d3e1c66266cfcf18ef4cbce4ee74ee0420ad08f76c197d",
     "src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte": "fa80b08dfa9cc79c1bb98e794f52b72355fc5f0cc0d1ad586504b5ab7531441a",
-    "src/lib/components/workspace/Models.svelte": "9a991a5b62b87277d6785f9a3015194530e78442d2de05d38cf29f5df99cc1e2",
+    "src/lib/components/workspace/Models.svelte": "96f0dbbde04cdd021df0cfdd15ec8e6961c0151963692f4f2d340e8ec9c41470",
     "src/lib/components/workspace/Models/ModelEditor.svelte": "8254ac12ed49504d9bfa7f7e2a5753174c879fb88cf54ec27b0e07371c57ea03",
     "src/lib/components/workspace/Skills/SkillEditor.svelte": "ae6a7f7a7e6df646920136a662115c7a0aabc4f0f9bca3a4575ce0e3f0dfcefa",
     "src/lib/constants.ts": "0fd43314837a2d7775810c3f08fc82b8042c34a5b6e52f1a7e4513f303a07b5d",
-    "src/lib/i18n/locales/ko-KR/translation.json": "1d42aba6dce1aede14633e56342c1668a8eeec29c9ea1d99311cc050cd1ec587",
+    "src/lib/i18n/locales/ko-KR/translation.json": "7397369e1c689d082b61ea09209cbfd6075f210ef79ad080004c72722c295379",
     "src/routes/(app)/+layout.svelte": "cd5c01d65ef4b75e85db3cda21f02bc8968f9b187db9e95f184d03f31a94c126",
     "src/routes/(app)/+page.svelte": "7cdd5f35c6d1064663d2bafd03263585ca270ce24d26788a656d465339e6cb03",
     "src/routes/(app)/c/[id]/+page.svelte": "2cf8b7796915e7711e467a4142d96ad1d4afc0366221236620719193d91d0ad2",
@@ -56,7 +56,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "e85c191c37c2e10fc2637df1727f8e9222d8856daf3464c0196ebd93c727654d"
+      "sha256": "491e196d2f4c86e77a0b8ff26960db1c05a4803e76eb6c5a842be5803a558997"
     }
   ],
   "pyodide_files": {

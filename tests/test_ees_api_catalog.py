@@ -99,6 +99,18 @@ class CatalogTest(unittest.IsolatedAsyncioTestCase):
         await self.assert_error("api_groups_invalid",self.call("api_save",api=dict(api,group_ids=["missing"]),expected_revision=1))
         await self.assert_error("api_invalid",self.call("api_save",api=dict(raw,inputs=[])))
 
+    async def test_chat_describes_only_currently_selectable_apis(self):
+        native = importlib.import_module(package.__name__ + ".ees_workflow_native")
+        saved = (await self.call("api_save", api={**self.api, "group_ids": ["operations"]}, service_name="운영 전용"))["api"]
+        summary = {"name": self.api["name"], "purpose": self.api["purpose"], "service": "운영 전용", "method": self.api["method"]}
+        async def available(actor):
+            return (await native.chat_api_summary(self.service, self.users[actor]))["available_apis"]
+        self.assertEqual(await available("karin"), [summary])
+        self.assertEqual(await available("kim"), [])
+        self.assertEqual(await available("admin"), [])
+        await self.call("api_save", api={**saved, "state": "deprecated"}, expected_revision=1)
+        self.assertEqual(await available("karin"), [])
+
     async def test_revoked_authorizations_and_old_versions(self):
         op=(await self.call("api_save",api={**self.api,"group_ids":["operations"]},service_name="운영 전용"))["api"]
         self.assertTrue((await self.catalog.state(self.users["karin"]))["apis"][0]["can_use"])

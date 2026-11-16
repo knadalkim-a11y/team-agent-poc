@@ -330,7 +330,7 @@ class ToolLifecycle:
         inputs = _inputs(checked["input_schema"], body.get("inputs"))
         metadata = await self.native.inspect(actor, connection["native_id"])
         if not metadata.get("token_set"):
-            _fail("native_personal_connection_required", "개인 PAT 필요 · 기존 도구의 개인 설정에 본인 PAT를 저장하세요. 채팅에 입력하지 마세요.")
+            _fail("native_personal_connection_required", "이 회차를 실행할 계정의 인증 정보가 없습니다. 서비스 담당자에게 연결을 확인해 주세요.")
         public_inputs = await self.native.redact(actor, connection["native_id"], inputs)
         actor = await self.drafts._admin(actor)
         trial = {"id": "trial-" + uuid4().hex, "tool_id": key, "actor": _get(actor, "id"), "draft_revision": draft["revision"],

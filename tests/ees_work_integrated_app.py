@@ -113,9 +113,20 @@ class ProductGate:
     def write_report(self):
         (self.out/'report.json').write_text(json.dumps(self.report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
 
-    def launch(self):
+    def launch(self, *, historical_fixture=False):
+        entry = 'from open_webui import app; app()'
+        if historical_fixture:
+            # Seed a temporary pre-guide installation through its real HTTP APIs.
+            # This constructor override lives only in the fixture process.
+            entry = """from open_webui import app, ees_workflow
+class PreGuideService(ees_workflow.WorkflowService):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **dict(kwargs, confluence_guide=False))
+ees_workflow.WorkflowService = PreGuideService
+app()
+"""
         self.log = (self.work/'native-server.log').open('a', encoding='utf-8')
-        self.server = subprocess.Popen([sys.executable, '-c', 'from open_webui import app; app()',
+        self.server = subprocess.Popen([sys.executable, '-c', entry,
             'serve', '--host', '127.0.0.1', '--port', str(self.port)], cwd=self.work,
             env=self.environment, stdout=self.log, stderr=subprocess.STDOUT)
         deadline = time.monotonic()+45
@@ -294,25 +305,28 @@ font:getComputedStyle(e).fontFamily,display:getComputedStyle(e).display,overflow
         details['requests']=[{'path':event['params']['response']['url'].split(self.base)[-1].split('?')[0],'status':event['params']['response']['status']} for event in self.browser.events if event.get('method')=='Network.responseReceived' and '/api/ees-work/' in event['params']['response'].get('url','')]
         (self.out/(name+'.json')).write_text(json.dumps(details,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
-    def setup(self):
-        self.launch()
+    def setup(self, *, historical_fixture=False):
+        self.launch(historical_fixture=historical_fixture)
         credentials={'name':'통합 검증 관리자','email':uuid4().hex+'@example.test','password':secrets.token_urlsafe(32)}
         session=self.api('/api/v1/auths/signup',credentials); assert session['role']=='admin'
         self.headers={'Authorization':'Bearer '+session['token']}
         initial = self.api('/api/ees-work/workspace')
         assert initial['runs'] == [], initial['runs']
-        assert [(item['id'], item['system_id']) for item in initial['workflows']] == [
-            ('guide-confluence-documents', 'EMS')], initial['workflows']
-        guide = self.api('/api/ees-work/workspace?workflow_id=guide-confluence-documents')['workflow']
-        assert guide['name'] == 'Confluence 문서 확인 가이드' and guide['published_version'] == 1
-        expected = {'guide-confluence-page', 'guide-confluence-children'}
-        operations = self.api('/api/ees-work/operations')['api_catalog']['apis']
-        assert len(operations) == 2 and {op['id'] for op in operations} == expected, operations
-        assert all(op['method'] == 'GET' and op['service_id'] == 'confluence-readonly-pilot' for op in operations)
-        jobs = [node for node in guide['published']['nodes'].values() if node['type'] == 'j']
-        assert len(jobs) == 2 and {node['api_binding']['operation_id'] for node in jobs} == expected
-        self.record('fresh Native installation with published Confluence guide', workflows=1,
-            published_version=guide['published_version'], read_operations=len(operations), runs=0)
+        if historical_fixture:
+            assert initial.get('confluence_guide') is False and not initial['workflows']
+        else:
+            assert [(item['id'], item['system_id']) for item in initial['workflows']] == [
+                ('guide-confluence-documents', 'EMS')], initial['workflows']
+            guide = self.api('/api/ees-work/workspace?workflow_id=guide-confluence-documents')['workflow']
+            assert guide['name'] == 'Confluence 문서 확인 가이드' and guide['published_version'] == 1
+            expected = {'guide-confluence-page', 'guide-confluence-children'}
+            operations = self.api('/api/ees-work/operations')['api_catalog']['apis']
+            assert len(operations) == 2 and {op['id'] for op in operations} == expected, operations
+            assert all(op['method'] == 'GET' and op['service_id'] == 'confluence-readonly-pilot' for op in operations)
+            jobs = [node for node in guide['published']['nodes'].values() if node['type'] == 'j']
+            assert len(jobs) == 2 and {node['api_binding']['operation_id'] for node in jobs} == expected
+            self.record('fresh Native installation with published Confluence guide', workflows=1,
+                published_version=guide['published_version'], read_operations=len(operations), runs=0)
         self.api('/api/v1/users/user/settings/update',{'ui':{'language':'ko-KR','showChangelog':False,'models':['c3-synthetic-model']}})
         models = self.api('/api/models')
         self.record('Native model availability', models=[{'id': item.get('id'), 'direct': item.get('direct'),
@@ -324,7 +338,7 @@ font:getComputedStyle(e).fontFamily,display:getComputedStyle(e).display,overflow
             'localStorage.setItem("token",'+json.dumps(session['token'])+');localStorage.setItem("locale","ko-KR");localStorage.setItem("version","0.11.3+ees.13");'})['identifier']
         self.navigate('/'); self.wait('!!document.querySelector("#ees-work-entry")&&!!document.querySelector("#chat-input")')
         self.wait('!document.querySelector("#ees-work-panel")?.innerText.includes("불러오는 중")')
-        self.capture('a0-confluence-guide')
+        self.capture('pre-guide-installation' if historical_fixture else 'a0-confluence-guide')
         self.record('actual built Native render', viewport=[1920,1080])
 
     def run(self):
@@ -333,8 +347,25 @@ font:getComputedStyle(e).fontFamily,display:getComputedStyle(e).display,overflow
         # in one gate so screenshots always correspond to the tested wheel.
         integrated_flow(self)
         figma_delta_flow(self)
-        authored_trial_smoke(self)
-        authored_workflow_flow(self)
+        self.browser.close()
+        self.report['browser_cleanup_diagnostics']=self.browser.final_diagnostics
+        self.browser=None
+        self.stop_server()
+        previous = ProductGate(argparse.Namespace(**{**vars(self.args), 'output': self.out/'previous-installation'}))
+        try:
+            previous.setup(historical_fixture=True)
+            authored_trial_smoke(previous)
+            authored_workflow_flow(previous)
+            previous.report['status']='passed'; previous.write_report()
+        except BaseException as error:
+            previous.report.update(status='failed',failure={'type':type(error).__name__,'message':str(error)[:1200]})
+            previous.write_report()
+            if previous.browser:
+                previous.capture('failure')
+            raise
+        finally:
+            previous.close()
+        self.record('Pre-guide installation upgraded with archived member evidence intact')
         self.report['status']='passed'; self.write_report()
 
     def close(self):
@@ -625,6 +656,34 @@ def authored_workflow_flow(g):
         actor_id=member['id'],count=len(result['items']),attempts=1,decision_items=['job'],
         native_personal_encryption=True,administrator_pat_unchanged=True,missing_member_pat_blocked=True,
         shared_progress=True,other_actor_evidence_hidden=True,full_native_imports=True,fixture_external_io=False)
+
+    # Boot the unmodified shipped app on the very same Native and EES databases.
+    # A historical start can never serve the assertions below.
+    g.stop_server()
+    g.launch()
+    installed = g.api('/api/ees-work/workspace', headers=admin_headers)
+    assert installed.get('confluence_guide') is True, installed
+    assert {item['id'] for item in installed['workflows']} == {'guide-confluence-documents'}
+    catalog = g.api('/api/ees-work/operations', headers=admin_headers)
+    assert {item['id'] for item in catalog['api_catalog']['apis']} == {'guide-confluence-page','guide-confluence-children'}
+    assert not any(catalog.get(key) for key in ('tool_drafts','shared_tools','native_functions','tool_import_sources','all_tools'))
+    for action, extras in [('tool_draft_get', {'tool_id': draft['id']}),
+                           ('tool_draft_connection_get', {'tool_id': draft['id']}),
+                           ('tool_draft_save', {'draft': fixture['draft']})]:
+        blocked = g.client.post('/api/ees-work/operations', headers=admin_headers,
+            json={'action':action,'request_id':uuid4().hex,'expected_revision':0,**extras})
+        assert 400 <= blocked.status_code < 500, (action,blocked.status_code)
+        reply = blocked.json()
+        assert reply.get('ok') is False and reply.get('error',{}).get('code') == 'tool_authoring_retired', (action,reply)
+        assert 'tool_draft' not in reply and all(secret not in blocked.text for secret in private_values)
+    restored = state(run_id)
+    assert restored['jobs'][job_id]['decisions'] == confirmed['jobs'][job_id]['decisions']
+    assert restored['attempts'][0]['snapshot']['shared_tool'] == pin
+    assert restored['attempts'][0]['result'] == result
+    assert state(run_id,admin_headers)['attempts'][0]['result'] is None
+    assert sealed_settings(admin['id'],connected['native_id']) == admin_sealed
+    g.record('Upgraded Native CLI keeps authorized historical evidence and rejects code-tool administration',
+             run_id=run_id,tool_version=pin['version'],decisions=1,legacy_settings_visible=False)
 
 
 def integrated_flow(gate):
@@ -922,7 +981,7 @@ def native_attachment_flow(g, chat_id):
 def figma_delta_flow(g):
     """Reconstructed actual-product delta gate; all tested actions use real input.
 
-    API writes prepare isolated fixtures only. Native source registration,
+    API writes prepare isolated fixtures only. API registration, Native chat,
     permissions, storage, history and dispatch are the actual packaged product.
     This new source must be rerun; lost prior screenshots are not recreated.
     """
@@ -975,7 +1034,8 @@ def figma_delta_flow(g):
     query_template=next(ast.literal_eval(node.value) for node in config_tree.body if isinstance(node,ast.Assign)
         and any(isinstance(target,ast.Name) and target.id=='DEFAULT_QUERY_GENERATION_PROMPT_TEMPLATE' for target in node.targets))
     assert isinstance(query_template,str) and '{{CURRENT_DATE}}' in query_template and '{{MESSAGES:END:6}}' in query_template
-    jira_http=[]
+    issue_path="/figma/issues"
+    issue_reads=[]
 
     def save_history_evidence():
         value={key:history[key] for key in ('reference','calls','results','errors','routes')}
@@ -1025,10 +1085,15 @@ def figma_delta_flow(g):
 
     class ReportHandler(parent_handler):
         def do_GET(self):
-            fixtures={'/rest/api/2/project':[{'key':'EESEMS','name':'합성 검증 프로젝트'}],
-                '/rest/api/2/project/EESEMS/statuses':[{'statuses':[{'id':'1','name':'Open'}]}],
-                '/rest/api/2/field':[{'id':'updated','name':'수정일','schema':{'type':'datetime'},'searchable':True}]}
-            if self.path in fixtures:return self.answer(fixtures[self.path])
+            if self.path.split('?',1)[0] == issue_path:
+                # Verify the actual connection encoded the saved workflow value.
+                if self.path != issue_path+'?project=EESEMS':
+                    return self.answer({'error':'Fixture input mismatch'},400)
+                if g.provider.fail_next:
+                    g.provider.fail_next=False
+                    return self.answer({'error':'Synthetic service temporarily unavailable'},503)
+                return self.answer({'issues':[{'key':'EESEMS-1','summary':'합성 이슈'},
+                    {'key':'EESEMS-2','summary':'추가 합성 이슈'}]})
             return super().do_GET()
 
         def do_POST(self):
@@ -1064,11 +1129,8 @@ def figma_delta_flow(g):
             return super().do_POST()
 
         def answer(self,value,code=200):
-            if self.path.startswith('/rest/api/'):
-                jira_http.append({'path':self.path.split('?')[0],'status':code})
-                if isinstance(value,dict) and isinstance(value.get('issues'),list):
-                    for issue in value['issues']:
-                        issue['fields']['status']['id']='1';issue['fields']['attachment']=[]
+            if self.path.split('?',1)[0]==issue_path:
+                issue_reads.append({'target':self.path,'status':code})
             if isinstance(value,dict) and value.get('object')=='chat.completion':
                 if getattr(self,'retrieval_query',False):value['choices'][0]['message']['content']=json.dumps({'queries':['EESEMS 합성 첨부 검증']},ensure_ascii=False)
                 if getattr(self,'report_context',None):value['choices'][0]['message']['content']=json.dumps({'context':self.report_context,'proposal':'합성 AI 검토 원문: 실제 송부하지 않은 결과 초안입니다.'},ensure_ascii=False)
@@ -1083,14 +1145,22 @@ def figma_delta_flow(g):
     g.wait_work_ready()
     assert not g.browser.evaluate("!!document.querySelector('[data-action=my_work],.ew-my-work-empty,.ew-todo')"), 'Retired personal queue is visible'
     g.capture('system-work-return')
-    tool='integrated_figma_jira'
-    source=(Path(__file__).resolve().parents[1]/'agent-pack/skills/jira-read/scripts/jira_tool.py').read_text(encoding='utf-8')
-    g.api('/api/v1/tools/create',{'id':tool,'name':'합성 Figma 검수 Jira','content':source,'meta':{'description':'Isolated loopback verification only'},'access_grants':[]})
-    g.api('/api/v1/tools/id/'+tool+'/valves/update',{'ENABLED':True,'ALLOW_HTTP':True,'JIRA_BASE_URL':g.provider.base,'ALLOWED_PROJECTS':'EESEMS','TIMEOUT_SECONDS':30})
-    g.api('/api/v1/tools/id/'+tool+'/valves/user/update',{'PAT':'synthetic-local-figma'})
-    inspected=g.api('/api/ees-work/execution/capability?tool_id='+tool+'&function=jira_search_crs')['capability']
-    reference=g.api('/api/ees-work/execution/capability/action',{'action':'approve','reference':inspected['reference'],
-        'evidence':'Actual Native connector; isolated loopback synthetic Jira'})['capability']['reference']
+    def api_command(action, **fields):
+        return g.api('/api/ees-work/operations',{'action':action,'expected_revision':0,'request_id':uuid4().hex,**fields})
+
+    service=api_command('api_service_save',service={'name':'합성 변경 조회 서비스'})['service']
+    operation=api_command('api_save',api={'service_id':service['id'],'name':'변경 목록 조회',
+        'purpose':'선택한 프로젝트의 변경 내용을 확인합니다.','method':'GET','url':g.provider.base+issue_path,
+        'inputs':[{'name':'project','in':'query','type':'string','required':True,'label':'프로젝트'}],
+        'result_path':'issues','fields':[{'path':'key','label':'번호','type':'string'},
+            {'path':'summary','label':'제목','type':'string'}],
+        'example':{'issues':[{'key':'EXAMPLE','summary':'명세 예시'}]}})['api']
+    # Both the registered service identity and allowed target belong to the real
+    # packaged server. Restart to apply its deployment configuration.
+    registry=json.loads(g.environment.get('EES_WORK_API_SERVICES','{}'))
+    registry[service['id']]={'base_url':g.provider.base+issue_path}
+    g.environment['EES_WORK_API_SERVICES']=json.dumps(registry)
+    g.stop_server();g.launch()
     actor=g.api('/api/v1/auths/')['id'];status=g.api('/api/v1/ees/assets/work-tool/status')
     assert status['source_sha256']==hashlib.sha256((g.program/'open_webui/ees_workflow_tool.py').read_bytes()).hexdigest()
     setup=g.api('/api/v1/ees/assets/work-tool/setup',{'source_sha256':status['source_sha256'],'expected_token':status['expected_token'],
@@ -1105,19 +1175,19 @@ def figma_delta_flow(g):
     definition['nodes'][root]['children']=['qa-stage']
     definition['nodes']['qa-stage']={'id':'qa-stage','type':'t','name':'합성 조회와 검토','parent':root,'children':['qa-list','qa-report'],'deps':[]}
     definition['nodes']['qa-list']={'id':'qa-list','type':'j','name':'합성 Jira 목록 확정','parent':'qa-stage','children':[],'deps':[],
-        'mode':'tool','result_block':'list_confirm','human_confirmation':True,'read_retry':{'count':1,'deadline_seconds':30},
+        'mode':'tool','result_block':'list_confirm','human_confirmation':True,
         'inputs':[{'id':'project','name':'조회 프로젝트','type':'text','scope':'workflow','required':True}],
-        'tool_reference':reference,'argument_bindings':{'project_key':{'input':'project'},'status_ids':{'constant':['1']},
-            'date_field':{'constant':'updated'},'start_date':{'constant':'2026-09-01'},'end_date':{'constant':'2026-09-30'},'start_at':{'constant':0}},
-        'instructions':'실제 Native 등록 도구로 합성 Jira 목록을 조회합니다.'}
+        'api_binding':{'operation_id':operation['id'],'version':operation['version'],
+            'inputs':{'project':{'input':'project'}},'outputs':['key','summary']},
+        'instructions':'등록한 조회 API에서 프로젝트 변경 목록을 확인합니다.'}
     definition['nodes']['qa-report']={'id':'qa-report','type':'j','name':'합성 결과 초안 검토','parent':'qa-stage','children':[],'deps':['qa-list'],
         'mode':'ai','result_block':'ai_review','human_confirmation':True,'inputs':[],'completion':{'kind':'review'},
         'instructions':'확정 목록을 바탕으로 검토 초안을 작성합니다. 실제 송부하지 않습니다.'}
     command('save_draft',1,workflow_id=workflow_id,definition=definition)
     assert command('validate_workflow',2,workflow_id=workflow_id)['validation']['errors']==[]
     command('publish_workflow',2,workflow_id=workflow_id);command('save_settings',workflow_id=workflow_id,values={'project':'EESEMS'})
-    g.record('latest Figma isolated API fixtures',workflow_id=workflow_id,native_tool_source_sha256=hashlib.sha256(source.encode()).hexdigest(),
-        business_completion=False,external_boundary='Loopback synthetic Jira and model HTTP only')
+    g.record('latest Figma isolated API fixtures',workflow_id=workflow_id,operation_id=operation['id'],operation_version=operation['version'],
+        business_completion=False,external_boundary='Loopback issue service and model HTTP only')
 
     # Isolated unpublished checklist fixture makes B2-2 meaningful without
     # changing the existing human_confirm contract exercised above.
@@ -1193,40 +1263,42 @@ def figma_delta_flow(g):
     g.wait_work_ready(workflow_id=workflow_id,run_id=run_id,selector='.ew-phase-job[data-job-id="qa-list"]')
     assets('figma-a5-cycle',{'a28e3.svg':13,'b22ad.svg':13,'69549.svg':14});g.capture('figma-a5-cycle-overview')
     g.click('[data-action="job"][data-job-id="qa-list"]');g.wait_work_ready(run_id=run_id,selector='[data-action="execute"]')
-    g.provider.fail_next=True;http_start=len(jira_http);g.click('[data-action="execute"]')
+    assert not issue_reads, 'Registration, publication and opening a run cannot dispatch the API'
+    g.provider.fail_next=True;g.click('[data-action="execute"]')
+    failed_run=settle_server(lambda value:len([a for a in value['attempts'] if a['job_id']=='qa-list'])==1
+        and value['jobs']['qa-list']['status']!='running','Failed API read was not recorded')
+    failed=next(a for a in failed_run['attempts'] if a['job_id']=='qa-list')
+    assert failed['status']=='failed' and failed['result']['http_status']==503 and failed['result']['error']['code']=='api_http_error'
+    # Reopen the job through normal navigation. Its retry uses the latest
+    # persisted revision even if the prior HTTP failure surfaced a command error.
+    g.click('[data-action="overview"]');g.open_operation_stage();g.click('[data-action="job"][data-job-id="qa-list"]')
+    g.wait("document.querySelector('[data-action=execute]')?.innerText.includes('다시 조회')")
+    g.click('[data-action="execute"]')
     retried=settle_server(lambda value:len([a for a in value['attempts'] if a['job_id']=='qa-list'])==2
-        and value['jobs']['qa-list']['status']!='running','Actual bounded read retry did not finish')
-    retry_http=jira_http[http_start:]
-    (g.out/'figma-s1-read-retry-server.json').write_text(json.dumps({'run':retried,'http':retry_http,'scope':'Synthetic actual Native connector HTTP'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-    failed,original=[a for a in retried['attempts'] if a['job_id']=='qa-list']
-    assert failed['status']=='failed' and original['status']=='succeeded'
-    assert failed['result']['error']['code']=='upstream_error' and failed['result']['failure_confirmed'] is True
-    assert retry_http==[
-        {'path':'/rest/api/2/myself','status':503},
-        {'path':'/rest/api/2/myself','status':200},
-        {'path':'/rest/api/2/project','status':200},
-        {'path':'/rest/api/2/project/EESEMS/statuses','status':200},
-        {'path':'/rest/api/2/field','status':200},
-        {'path':'/rest/api/2/search','status':200}],retry_http
-    assert original['inputs']['project']=='EESEMS' and len(original['result']['items'])==1
+        and value['jobs']['qa-list']['status']!='running','The requested API retry did not finish')
+    failed_again,original=[a for a in retried['attempts'] if a['job_id']=='qa-list']
+    assert failed_again==failed and original['status']=='succeeded'
+    assert issue_reads==[{'target':issue_path+'?project=EESEMS','status':code} for code in (503,200)],issue_reads
+    (g.out/'figma-s1-read-retry-server.json').write_text(json.dumps({'run':retried,'http':issue_reads,
+        'scope':'Actual registered API and operator-requested retry'},ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    assert original['inputs']['project']=='EESEMS' and [item['row']['key'] for item in original['result']['items']]==['EESEMS-1','EESEMS-2']
     assert retried['jobs']['qa-list']['status']=='waiting_confirmation' and not retried['jobs']['qa-list']['decisions']
-    g.wait_work_ready(run_id=run_id,selector='.ew-list-confirm');g.wait('!!document.querySelector(\'[data-item-id="EESEMS-1"]\')')
+    g.wait_work_ready(run_id=run_id,selector='.ew-api-table [data-item-id="row-1"]')
+    assert 'EESEMS-2' in g.browser.evaluate('document.querySelector(".ew-api-table").innerText')
     g.capture('figma-s1-read-retry-awaits-human')
-    g.record('Figma S1 actual HTTP failure and bounded read retry',attempt_statuses=['failed','succeeded'],external_http_requests=retry_http,
-        native_tool_attempts=2,business_completed=False,failed_result_preserved=True)
-    g.click('[data-item-id="EESEMS-1"]');assert len(run_state()['attempts'])==2
-    g.click('[data-item-id="EESEMS-1"]')
-    g.click('[data-action="add_list_item"]');g.type('#ees-list-add-id','SYNTHETIC-MANUAL-2');g.type('#ees-list-add-name','합성 수동 검토 항목')
-    g.click('#ees-work-dialog [data-dialog-confirm]');assert len(run_state()['attempts'])==2
-    assets('figma-a6-list',{'f1e53.svg':13,'b456d.svg':13});g.capture('figma-a6-list-local-selection')
+    g.record('Registered GET failure and physical retry',attempt_statuses=['failed','succeeded'],external_http_requests=issue_reads,
+        api_attempts=2,business_completed=False,failed_result_preserved=True)
+    g.click('[data-item-id="row-2"]');assert len(run_state()['attempts'])==2
+    g.wait("document.querySelector('[data-action=confirm_list]')?.innerText.includes('1건')")
+    g.capture('figma-a6-list-local-selection')
     g.click('[data-action="confirm_list"]');g.wait("document.activeElement?.id === 'ees-list-confirm-reason'")
-    g.type('#ees-list-confirm-reason','합성 검토자가 원본 목록과 추가 항목을 확인했습니다.');g.click('#ees-work-dialog [data-dialog-confirm]')
-    g.wait('document.querySelector(".ew-list-confirm")?.innerText.includes("사람 확정 기록 있음")')
-    confirmed=run_state();assert confirmed['jobs']['qa-list']['status']=='completed'
+    g.type('#ees-list-confirm-reason','조회한 두 항목 중 첫 항목을 담당자가 확정했습니다.');g.click('#ees-work-dialog [data-dialog-confirm]')
+    g.wait("!document.querySelector('[data-action=confirm_list]')")
+    confirmed=settle_server(lambda value:value['jobs']['qa-list']['status']=='completed','API result list was not confirmed')
     assert confirmed['attempts'][0]==failed and confirmed['attempts'][1]['result']==original['result'] and len(confirmed['attempts'])==3
-    assert {item['item_id'] for item in confirmed['jobs']['qa-list']['decisions']}=={'EESEMS-1','SYNTHETIC-MANUAL-2'}
+    assert {item['item_id'] for item in confirmed['jobs']['qa-list']['decisions']}=={'row-1'}
     g.wait_work_ready(run_id=run_id);g.capture('figma-a6-list-confirmed')
-    g.record('Figma A6 physical Native tool call list selection and atomic confirmation',attempts=3,original_result_preserved=True,confirmed_items=2)
+    g.record('Figma A6 registered API list selection and atomic confirmation',attempts=3,original_result_preserved=True,confirmed_items=1)
 
     g.click('[data-action="overview"]');g.open_operation_stage();g.click('[data-action="job"][data-job-id="qa-report"]')
     select_execution_model();g.click('[data-action="execute"]')

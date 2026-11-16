@@ -58,7 +58,7 @@ def clean(value_, depth=0):
         fail("input_too_deep")
     if isinstance(value_, dict):
         if any(not isinstance(key, str) or SECRET_KEY.search(key) for key in value_):
-            fail("secret_input_forbidden", "비밀정보는 Native 개인 설정에 보관해 주세요.")
+            fail("secret_input_forbidden", "인증 정보는 운영 환경의 서비스 연결에 설정해 주세요.")
         return {key: clean(item, depth + 1) for key, item in value_.items()}
     if isinstance(value_, list):
         if len(value_) > 1000:
@@ -425,6 +425,10 @@ class OperationsRuntime:
             return await self._api_test(actor, groups, body)
         if str(action).startswith('api_'):
             return await self.service.api_catalog.command(actor, body)
+        if self.service.confluence_guide and (str(action).startswith("tool_draft_")
+                or action in {"tool_save", "tool_submit", "tool_review", "shared_tool_review",
+                              "shared_tool_disable", "shared_tool_enable", "shared_tool_access"}):
+            fail("tool_authoring_retired", "워크스페이스의 도구에서 사용할 API를 등록해 주세요.")
         if str(action).startswith("tool_draft_"):
             return await self.service.tool_drafts.command(actor, body)
         if action == "shared_tool_accept_version":
@@ -1850,10 +1854,8 @@ class OperationsRuntime:
             for row in db.execute("SELECT principal_id,roles FROM work_access WHERE principal_kind='user' AND active=1 AND (?='' OR system_id=?)", (system_id, system_id)):
                 if "manager" in json.loads(row["roles"]):
                     reviewer_ids.add(row["principal_id"])
-            contracts = "SELECT data FROM work_tool_contracts"
-            if self.service.confluence_guide:
-                contracts += " WHERE id NOT IN (SELECT id FROM work_guide_retired_tools WHERE kind='contract')"
-            for row in db.execute(contracts + " ORDER BY id"):
+            contracts = () if self.service.confluence_guide else db.execute("SELECT data FROM work_tool_contracts ORDER BY id")
+            for row in contracts:
                 item = json.loads(row[0])
                 try:
                     self._scope(db, actor, groups, item["system_id"])
@@ -1932,6 +1934,18 @@ class OperationsRuntime:
             if state is not None:
                 automatic[(slot["workflow_id"], slot["factory_id"])] = {"workflow_id": slot["workflow_id"], "factory_id": slot["factory_id"], "status": state, "scheduled_at": slot["scheduled_at"]}
         can_author_direct = value(actor, "role") == "admin" or any(item["id"] == value(actor, "id") for item in reviewers)
+        shared_tool_access = await self.service.shared_tools.run_access(actor, run_id) if run_id else {}
+        legacy = {"tools": tools, "all_tools": all_tools, "native_functions": native_functions,
+                  "tool_drafts": [], "tool_import_sources": [], "tool_examples": [], "shared_tools": []}
+        if not self.service.confluence_guide:
+            legacy.update(await self._legacy_authoring_state(actor))
+        if shared_tool_access or not self.service.confluence_guide:
+            from .ees_workflow_shared_tools import MESSAGES
+            legacy["shared_tool_messages"] = deepcopy(MESSAGES)
+        catalog = await self.service.api_catalog.state(actor)
+        return {"confluence_guide": self.service.confluence_guide, "api_catalog": catalog, **legacy, "shared_tool_access": shared_tool_access, "ok": True, "scope_runs": scopes, "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
+
+    async def _legacy_authoring_state(self, actor):
         shared_notice = ""
         try:
             shared_tools = await self.service.shared_tools.list(actor)
@@ -1941,18 +1955,17 @@ class OperationsRuntime:
             locations = [f"{frame.name}:{frame.lineno}" for frame in traceback.extract_tb(error.__traceback__)]
             logging.getLogger(__name__).warning("shared_tool_state_unavailable: %s at %s", type(error).__name__, " > ".join(locations))
             shared_tools, shared_notice = [], "공용 도구 목록을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요."
-        from .ees_workflow_shared_tools import MESSAGES
-        shared_tool_access = await self.service.shared_tools.run_access(actor, run_id) if run_id else {}
         tool_drafts = await self.service.tool_drafts.summaries(actor)
-        tool_import_sources = [] if self.service.confluence_guide else await self.service.tool_drafts.sources(actor)
+        tool_import_sources = await self.service.tool_drafts.sources(actor)
         tool_scope_factories = []
         if value(await self.service._user(actor), "role") != "admin":
             tool_drafts, tool_import_sources = [], []
         else:
             with self.service._db() as db:
                 tool_scope_factories = [dict(row) for row in db.execute("SELECT id,name,system_id FROM work_factories ORDER BY name,id")]
-        catalog = await self.service.api_catalog.state(actor)
-        return {"confluence_guide": self.service.confluence_guide, "api_catalog": catalog, "tool_draft_phase": 3, "tool_scope_factories": tool_scope_factories, "tool_drafts": tool_drafts, "tool_import_sources": tool_import_sources, "shared_tools": shared_tools, "shared_tools_notice": shared_notice, "shared_tool_messages": deepcopy(MESSAGES), "shared_tool_access": shared_tool_access, "ok": True, "scope_runs": scopes, "tools": tools, "all_tools": all_tools, "native_functions": native_functions, "tool_examples": [] if self.service.confluence_guide else tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
+        return {"legacy_tool_authoring": True, "tool_draft_phase": 3, "tool_drafts": tool_drafts,
+                "tool_scope_factories": tool_scope_factories, "tool_import_sources": tool_import_sources,
+                "shared_tools": shared_tools, "shared_tools_notice": shared_notice, "tool_examples": tool_examples()}
 
     def start(self):
         self._closing = False

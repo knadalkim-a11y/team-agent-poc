@@ -1,5 +1,6 @@
 """Verify the shipped Confluence registration script with product HTTP routes and HTTPS."""
 from contextlib import closing, contextmanager
+from copy import deepcopy
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib import import_module
 import json
@@ -12,7 +13,7 @@ import tempfile
 from threading import Thread
 from types import ModuleType
 import unittest
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 from fastapi import FastAPI, Header, HTTPException
@@ -164,6 +165,59 @@ class ConfluenceWorkflowContractTests(unittest.TestCase):
         self.enterContext(patch.dict(os.environ, {'EES_WORK_API_SERVICES': json.dumps(registry),
                                                   'EES_WORK_GUIDE_SYSTEM': 'EMS'}))
         self.webui = self.enterContext(workflow_server(database, self.users, confluence_guide=True))
+
+    def test_api_only_install_retires_old_authoring_controls(self):
+        self.open_guide(self.db.with_name('api-only.sqlite3'))
+        for actor in ('admin', 'operator'):
+            with self.subTest(actor=actor):
+                for action in ('tool_draft_get', 'tool_draft_save', 'tool_draft_check',
+                               'tool_draft_connection_get', 'tool_draft_connection_save', 'tool_draft_trial_start',
+                               'tool_draft_use_enable', 'shared_tool_access', 'shared_tool_review',
+                               'tool_save', 'tool_submit', 'tool_review'):
+                    response = self.command('operations', action, actor=actor, check=False)
+                    self.assertEqual(response['error']['code'], 'tool_authoring_retired', action)
+                state = self.call('operations', actor=actor)
+                for key in ('tool_draft_phase', 'tool_scope_factories', 'shared_tool_messages', 'legacy_tool_authoring'):
+                    self.assertNotIn(key, state)
+                self.assertTrue(state['api_catalog']['apis'])
+        self.assertFalse(self.call('authoring', check=False)['ok'])
+        self.assertEqual(self.call('execution/capability', check=False)['error']['code'], 'tool_authoring_retired')
+        self.assertEqual(self.call('execution/capability/action', {'action':'approve'}, check=False)['error']['code'],
+                         'tool_authoring_retired')
+        guide = self.call('workspace', query={'workflow_id':'guide-confluence-documents'})['workflow']
+        for old in ({'tool_contract_id':'old-code'}, {'shared_tool_id':'authored-new'},
+                    {'tool_reference':{'tool_id':'earlier','function':'get_page'}},
+                    {'execution':{'reference':{'tool_id':'earlier','function':'get_page'}}},
+                    {'inputs':[{'id':'jira-field','type':'single','options_source':'tool'}]}):
+            with self.subTest(connection=old):
+                draft = deepcopy(guide['draft'])
+                job = draft['nodes']['page']
+                job.pop('api_binding')
+                job.update(old)
+                response = self.command('workspace/command', 'save_draft', guide['revision'], actor='admin',
+                                        check=False, workflow_id=guide['id'], definition=draft)
+                self.assertFalse(response['ok'])
+                self.assertIn('입력 선택지' if 'inputs' in old else '사용할 API', response['error']['message'])
+                self.assertEqual(self.call('workspace', query={'workflow_id':guide['id']})['workflow']['revision'],
+                                 guide['revision'])
+
+    def test_chat_rejects_retired_binding_before_browser_preview(self):
+        self.open_guide(self.db.with_name('assistant-api-only.sqlite3'))
+        native = import_module(package.__name__ + '.ees_workflow_native')
+        from types import SimpleNamespace
+        request = SimpleNamespace(state=SimpleNamespace(ees_work_tool_source_hash='verified'))
+        actor = self.users['admin']
+        native_tools = SimpleNamespace(Tools=SimpleNamespace(get_tool_by_id=AsyncMock(return_value='ees_workflow')))
+        original = AsyncMock(return_value={'ok':True})
+        functions = {'propose': {'tool_id':'ees_workflow','spec':{'name':'ees_workflow_propose'},'callable':original}}
+        with patch.dict(sys.modules, {'open_webui.models.tools': native_tools}), patch.object(
+                    native,'_chat_work_access',new=AsyncMock(return_value=(actor,'verified'))):
+            guarded = native.wrap_chat_work_tools(request, actor, functions)['propose']['callable']
+            rejected = asyncio.run(guarded(definition={'nodes':{'j':{'shared_tool_id':'old'}}}))
+            self.assertEqual(rejected['error']['code'], 'invalid_proposal')
+            original.assert_not_awaited()
+            self.assertTrue(asyncio.run(guarded(definition={'nodes':{'j':{'api_binding':{'operation_id':'api'}}}}))['ok'])
+            original.assert_awaited_once()
 
     def test_clean_deployment_publishes_runnable_guide_without_registration(self):
         database = self.db.with_name('fresh-guide.sqlite3')

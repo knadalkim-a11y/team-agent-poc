@@ -40,14 +40,14 @@ MESSAGES = {
     'native_schema_invalid': '설치된 도구의 입력 형식을 확인해야 합니다. 관리자에게 확인을 요청하세요.',
     'shared_tool_unavailable': 'Open WebUI 도구를 확인하지 못했습니다. 관리자에게 확인을 요청하세요.',
     'shared_tool_review_required': '도구 확인 필요 · 관리자에게 입력·결과와 연결 설정 확인을 요청하세요.',
-    'shared_tool_disabled': '도구 사용 중지 · 관리자에게 다시 켜기를 요청하세요.',
+    'shared_tool_disabled': '이 도구의 사용이 중지되었습니다. 절차 담당자에게 사용할 API를 확인해 주세요.',
     'shared_tool_forbidden': '이 도구를 쓸 수 있는 그룹 권한이 없습니다. 관리자에게 확인을 요청하세요.',
     'shared_tool_plan_changed': '공용 도구가 바뀌었습니다. 새 실행 계획을 확인해 주세요.',
     'shared_tool_version_changed': '회차 시작 뒤 도구가 v{pinned}에서 v{current} 버전으로 바뀌었습니다. 이 회차를 새 버전으로 계속할지 고르세요.',
     'shared_tool_breaking_change': '입력·결과 모양이 호환되지 않아 같은 도구로 확인할 수 없습니다. 개발 담당자에게 새 도구를 요청하세요.',
-    'native_personal_connection_required': '개인 PAT 필요 · 기존 도구의 개인 설정에 본인 PAT를 저장하세요. 채팅에 입력하지 마세요.',
-    'encryption_required': '개인 설정 암호화 필요 · 관리자에게 요청하세요. 채팅에 PAT를 입력하지 마세요.',
-    'authentication_failed': '개인 PAT 인증 실패 · 기존 도구 개인 설정에서 본인 PAT의 만료·권한을 확인하세요. 채팅에 입력하지 마세요.',
+    'native_personal_connection_required': '이 회차를 실행할 계정의 인증 정보가 없습니다. 서비스 담당자에게 연결을 확인해 주세요.',
+    'encryption_required': '인증 정보를 사용할 수 없습니다. 관리자에게 서버의 인증 정보 암호화 설정을 확인해 주세요.',
+    'authentication_failed': '서비스 인증에 실패했습니다. 서비스 담당자에게 실행 계정의 토큰 만료와 열람 권한을 확인해 주세요.',
     'automatic_run_active': '자동 실행 회차가 멈춘 뒤 도구 버전을 바꿀 수 있습니다.',
     'execution_running': '실행 중인 작업이 끝난 뒤 도구 버전을 바꿀 수 있습니다.',
 }
@@ -159,7 +159,9 @@ class SharedTools:
     async def list(self, user, *, usable_only=False, summary=False):
         actor, _, groups = await self.service._work_actor(user)
         admin = _get(actor, 'role') == 'admin'
-        available = [] if getattr(self.service, "confluence_guide", False) else await self.discover(actor)
+        if getattr(self.service, "confluence_guide", False):
+            return []
+        available = await self.discover(actor)
         result = []
         with self.service._db() as db:
             saved = {row['id']: json.loads(row['data']) for row in db.execute('SELECT * FROM work_shared_tools')}
