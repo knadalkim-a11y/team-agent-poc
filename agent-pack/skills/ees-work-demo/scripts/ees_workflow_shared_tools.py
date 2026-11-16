@@ -365,15 +365,30 @@ class SharedTools:
         return ''
 
     async def run_access(self, user, run_id):
-        """Names needed by S1 for an already visible run; no tool/PAT data."""
+        """Return authorized controls for pinned jobs on an already visible run."""
         from .ees_workflow_authoring import _resolve
         actor, _, groups = await self.service._work_actor(user)
         with self.service._db() as db:
             run = self.service._work_run(db, actor, groups, run_id)
             nodes = json.loads(run['snapshot'])['definition']['nodes']
             jobs = [dict(row) for row in db.execute('SELECT * FROM work_jobs WHERE run_id=?', (run_id,)) if nodes[row['job_id']].get('shared_tool_id')]
+            pinned_ids = set()
+            if self.service.confluence_guide and jobs:
+                pinned_ids = {row[0] for row in db.execute(
+                    "SELECT tool_id FROM work_shared_tool_pins WHERE run_kind='work' AND run_id=?", (run_id,))}
         if not jobs:
             return {}
+        # Check the latest source/credentials without modifying the saved run pin.
+        # The two versions are compared by the view; explicit acceptance still has its own write gate.
+        observed = {}
+        for key in pinned_ids.intersection(nodes[job['job_id']]['shared_tool_id'] for job in jobs):
+            try:
+                observed[key] = await self.resolve(actor, key)
+            except WorkflowError as error:
+                observed[key] = {'error': error.code}
+            except Exception:
+                # Missing Native source metadata may block this one tool but never its run history.
+                observed[key] = {'error': 'shared_tool_unavailable'}
         native_groups = {group['id']: group['name'] for group in await self.service._native_groups()}
         names = {}
         for job in jobs:
@@ -416,6 +431,19 @@ class SharedTools:
                     'group_names': [native_groups.get(key) or '그룹 확인 필요' for key in tool.get('group_ids', [])],
                     'assignee_name': assignee_name,
                     'can_accept_version': bool(can_write and allowed and not blocked)}
+                key = node['shared_tool_id']
+                if key in observed and allowed:
+                    current = observed[key]
+                    unchanged = (tool.get('state') == 'available' and 'error' not in current
+                                 and current['reference'] == tool['reference'] and current['version'] == tool['version'])
+                    if unchanged:
+                        result[saved['job_id']]['current_tool'] = {
+                            **{field: tool[field] for field in ('id', 'name', 'version', 'state', 'function')}, 'can_use': True}
+                    else:
+                        reason = current.get('error', 'shared_tool_review_required')
+                        result[saved['job_id']]['current_tool'] = {
+                            'id':key, 'state':'unavailable', 'can_use':False, 'unavailable_message':message_for(reason)}
+                        result[saved['job_id']]['can_accept_version'] = False
             return result
 
 

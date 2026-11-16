@@ -433,6 +433,26 @@ function inputProposalPanel({proposal=null,applied=null}={}){
  const view=run(context,'createWorkView({callbacks:{}})'),state={capabilities:{actor_id:'a'},run:{id:'r',workflow_id:'w',revision:2,status:'open',inputs:{first:'사람이 쓴 값',other:'유지'},jobs:{j:{can_execute:true}},definition:{nodes:{j:{id:'j',name:'입력 확인',type:'j',mode:'tool',result_block:'values',inputs:[{id:'first',name:'첫 칸',type:'text',scope:'run'},{id:'other',name:'다른 칸',type:'text',scope:'run'}]}}}},input_proposal:proposal,input_proposal_applied:applied},selection={mode:'work',tab:'current',system_id:'EMS',workflow_id:'w',run_id:'r',job_id:'j'};
  view.render({state,selection});return {host,view,state,selection,context,render:()=>view.render({state,selection})};
 }
+test('registered API list keeps physical checkbox choices on repaint and ignores read-only history',()=>{
+ const h=inputProposalPanel(),job=h.state.run.definition.nodes.j,saved=h.state.run.jobs.j;
+ Object.assign(job,{result_block:'list_confirm',api_binding:{outputs:['title']}});
+ Object.assign(saved,{attempt_id:'attempt',result_revision:1,result:{source:'api',items:[
+  {id:'row-1',row:{title:'첫 문서'}},{id:'row-2',row:{title:'두 번째 문서'}}]}});
+ h.render();
+ assert.match(h.host.innerHTML,/class="ew-result" data-result-block="list_confirm"/);
+ assert.match(h.host.innerHTML,/ew-api-table/);
+ assert.match(h.host.innerHTML,/목록 확정 \(2건\)/);
+ const checkbox={dataset:{itemId:'row-2'},checked:false,disabled:false};
+ h.host.querySelector=selector=>selector==='.ew-result[data-result-block="list_confirm"]'?{
+  querySelectorAll:s=>s==='[data-list-include]'?[checkbox]:[]
+ }:null;
+ h.view.refreshResults();
+ assert.match(h.host.innerHTML,/목록 확정 \(1건\)/);
+ assert.equal(h.view.readList().items[1].selected,false);
+ checkbox.disabled=true;checkbox.checked=true;
+ h.view.refreshResults();
+ assert.equal(h.view.readList().items[1].selected,false);
+});
 test('chat input preview highlights proposed fields without changing controls or exposing JSON',()=>{
  const h=inputProposalPanel({proposal:{values:{first:'제안한 값'},warnings:['선택 목록 확인 필요']}}),out=h.host.innerHTML;
  assert.match(out,/class="ew-input-row ew-input-proposed" data-proposal-field="first"/);assert.doesNotMatch(out,/data-proposal-field="other"/);

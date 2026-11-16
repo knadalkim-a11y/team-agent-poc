@@ -691,9 +691,12 @@ test('same shared-tool review leaves an ongoing run executable and changed versi
  assert.match(panel(),/data-action="execute"[^>]*>/);assert.doesNotMatch(panel(),/data-action="execute"[^>]*disabled/);
  context.snapshot.state.operations.shared_tools[0].revision=2; // evidence-only review
  run(context,'sharedView.sync(snapshot)');assert.doesNotMatch(panel(),/data-action="execute"[^>]*disabled/);
- context.snapshot.state.operations.shared_tools[0].version=2;
+ const ops=context.snapshot.state.operations,tool=ops.shared_tools[0];
+ ops.shared_tools=[];ops.shared_tool_access.j.current_tool=tool;
+ run(context,'sharedView.sync(snapshot)');assert.match(panel(),/페이지 찾기/);assert.doesNotMatch(panel(),/개인 PAT|data-action="execute"[^>]*disabled/);
+ tool.version=2;
  run(context,'sharedView.sync(snapshot)');assert.match(panel(),/v2 버전으로 계속하기/);assert.match(panel(),/data-action="execute"[^>]*disabled/);
- context.snapshot.state.operations.shared_tools[0].state='unavailable';context.snapshot.state.operations.shared_tools[0].unavailable_message='Open WebUI 도구의 연결 설정을 확인해야 합니다.';
+ tool.state='unavailable';tool.unavailable_message='Open WebUI 도구의 연결 설정을 확인해야 합니다.';
  run(context,'sharedView.sync(snapshot)');assert.match(panel(),/연결 설정을 확인해야/);assert.doesNotMatch(panel(),/버전으로 계속하기/);
 });
 

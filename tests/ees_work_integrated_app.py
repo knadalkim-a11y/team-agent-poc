@@ -1,6 +1,6 @@
 """Complete packaged Native app gate for the integrated work contract.
 
-One temporary DATA_DIR and a loopback synthetic model are used. Native auth,
+The current and pre-upgrade installations use isolated temporary data and a loopback synthetic model. Native auth,
 chat/file storage, workflow APIs, worker and frontend are the built product.
 No company credentials, DB or service is read. Physical CDP input drives UI;
 read-only DOM evaluation inspects readiness and results. Failure evidence is

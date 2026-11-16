@@ -166,6 +166,44 @@ class ConfluenceWorkflowContractTests(unittest.TestCase):
                                                   'EES_WORK_GUIDE_SYSTEM': 'EMS'}))
         self.webui = self.enterContext(workflow_server(database, self.users, confluence_guide=True))
 
+    def test_pinned_run_access_does_not_reopen_the_catalog(self):
+        run_id = self.create_run()
+        key = 'managed-get_page'
+        reference = {'tool_id':'earlier-only-code', 'function':'get_page'}
+        tool = {'id':key, 'version':2, 'state':'available', 'name':'기준 문서', 'function':'get_page',
+                'group_ids':['readers'], 'reference':reference, 'private_marker':'must-never-be-in-the-summary'}
+        with closing(sqlite3.connect(self.db)) as db, db:
+            saved = json.loads(db.execute('SELECT snapshot FROM work_runs WHERE id=?', (run_id,)).fetchone()[0])
+            node = saved['definition']['nodes']['page']
+            node.pop('api_binding')
+            node['shared_tool_id'] = key
+            db.execute('UPDATE work_runs SET snapshot=? WHERE id=?', (json.dumps(saved),run_id))
+            db.execute('INSERT INTO work_shared_tools VALUES(?,?,?)', (key,1,json.dumps(tool)))
+            db.execute('INSERT INTO work_shared_tool_pins VALUES(?,?,?,?)',
+                       ('work',run_id,key,json.dumps({'id':key,'version':1,'reference':reference})))
+        self.open_guide(self.db)
+        service = workflow._production_service()
+        current = {field:tool[field] for field in ('id','version','reference')}
+        query = {'system_id':'EMS','run_id':run_id}
+        with patch.object(service,'group_lookup',return_value=[{'id':'readers'}]), patch.object(
+                service.shared_tools,'resolve',new=AsyncMock(return_value=current)) as resolve:
+            state = self.call('operations', query=query, actor='operator')
+            access = state['shared_tool_access']['page']
+            resolve.assert_awaited_once()
+            self.assertEqual(state['shared_tools'], [])
+            self.assertTrue(access['can_accept_version'])
+            self.assertEqual(access['current_tool'], {
+                'id':key, 'name':'기준 문서','version':2,'state':'available','function':'get_page','can_use':True})
+            resolve.side_effect = workflow.WorkflowError('native_access_denied','detailed-private-message')
+            unavailable = self.call('operations', query=query, actor='operator')['shared_tool_access']['page']
+            self.assertEqual(unavailable['current_tool']['can_use'], False)
+            self.assertNotIn('name', unavailable['current_tool'])
+            self.assertNotIn('detailed-private-message', str(unavailable))
+            self.assertFalse(unavailable['can_accept_version'])
+        outside = self.call('operations', query=query, actor='operator')['shared_tool_access']['page']
+        self.assertFalse(outside['can_use'])
+        self.assertNotIn('current_tool', outside)
+
     def test_api_only_install_retires_old_authoring_controls(self):
         self.open_guide(self.db.with_name('api-only.sqlite3'))
         for actor in ('admin', 'operator'):
@@ -181,6 +219,9 @@ class ConfluenceWorkflowContractTests(unittest.TestCase):
                     self.assertNotIn(key, state)
                 self.assertTrue(state['api_catalog']['apis'])
         self.assertFalse(self.call('authoring', check=False)['ok'])
+        for query in ({}, {'process_id':'old'}, {'chat_id':'empty-chat'}):
+            self.assertFalse(self.call('state', query=query, check=False)['ok'])
+        self.assertTrue(self.call('legacy')['read_only'])
         self.assertEqual(self.call('execution/capability', check=False)['error']['code'], 'tool_authoring_retired')
         self.assertEqual(self.call('execution/capability/action', {'action':'approve'}, check=False)['error']['code'],
                          'tool_authoring_retired')

@@ -130,4 +130,5 @@ def historical_facade(package_name):
         # type. Production classes never inherit or import these old writers.
         authoring.WorkflowError = module.WorkflowError
         module.WorkflowService.__bases__ = (authoring.AuthoringMixin,)
+        module.WorkflowService.confluence_guide = False
     return sys.modules[name]

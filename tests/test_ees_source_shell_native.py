@@ -963,7 +963,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
                         self.assertEqual(retry_posts, [{'file_id': failed['id']}])
                         self.screenshot('parity-b7-after-retry-1920')
 
-    def native_link_selector(self, target, label, labels, *, return_from=None):
+    def native_link_selector(self, target, label, labels):
         if target == 'models':
             self.click('.ees-settings-trigger')
         if target == 'prompts':
@@ -972,40 +972,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
                           "!!document.querySelector('#ees-saved-prompts-button') && window.__eesNativeDraftV1?.ready()")
                 labels.append(label + '-return-to-composer')
             self.click('#ees-saved-prompts-button')
-        if target != 'tools':
-            return '[data-action=native_open][data-native-id=' + target + ']'
-        # C45 keeps Native tools reachable through B10-2, with the same frame
-        # observation and draft preservation checks as other Native screens.
-        for suffix, selector, condition in (
-            ('list', '[data-action=tools]', "document.querySelector('[data-api-action=legacy],[data-author-action=shared_open],[data-author-action=shared_native]')"),
-            ('managed', '[data-api-action=legacy]', "document.querySelector('[data-author-action=shared_open],[data-author-action=shared_native]')"),
-            ('detail', '[data-author-action=shared_open][data-id=managed-search_pages]', "document.querySelector('[data-author-action=shared_native]')"),
-        ):
-            # Returning to tools can restore the managed list or its last detail.
-            # Follow the catalog link only when that is the rendered entry point.
-            if suffix == 'managed' and not self.read('[data-api-action=legacy]', 'checkVisibility()'):
-                continue
-            if suffix == 'detail' and self.browser.evaluate("!!document.querySelector('[data-author-action=shared_native]')"):
-                continue  # Returning to the same detail preserves its selection.
-            step_label = label + '-shared-' + suffix
-            returning = suffix == 'list' and return_from is not None
-            if returning:
-                frame_monitor.begin_native_return(self, step_label, selector=selector, native=return_from, destination='tools', previous='procedures')
-                # The DOM can be ready between animation frames, after three
-                # loading samples already satisfied collect(). Keep the return
-                # boundary open until its destination is actually observed,
-                # using the same step timeout as the DOM readiness condition.
-                condition += (' && window.__eesSourceFrameEvidence.samples.some(sample=>'
-                              'sample.nativeReturnLabel===' + json.dumps(step_label) +
-                              " && sample.rightPanels.includes('tools') && sample.menuCurrent.length===1 && sample.menuCurrent[0].key==='tools')")
-            if hasattr(self.server, 'navigation_reads'):
-                self.delayed_step(step_label, selector, condition, paths=())
-            else:
-                self.step(step_label, selector, condition)
-            if returning:
-                frame_monitor.end_native_return(self)
-            labels.append(step_label)
-        return '[data-author-action=shared_native]'
+        return '[data-action=native_open][data-native-id=' + target + ']'
 
     def capture_failure(self):
         super().capture_failure()
@@ -1094,13 +1061,21 @@ class SourceShellNativeTests(IntegratedNativeCase):
         frame_monitor.guard_loading(self)
         labels = []
 
-        for native in ('skills', 'tools', 'models'):
+        for native in ('skills', 'knowledge', 'models'):
             for destination in ('procedures', 'work-home'):
                 label = native + '-to-' + destination
                 enter = label + '-enter-workspace'
                 self.delayed_step(enter, '[data-action=mode][data-mode=author]',
                                   "document.querySelector('#ees-work-designer')")
                 labels.append(enter)
+                origin = 'tools' if native == 'knowledge' else 'procedures'
+                origin_condition = ("document.querySelector('[data-api-screen=list] [data-api-action=create]')"
+                                    if origin == 'tools' else
+                                    "document.querySelector('#ees-work-designer [data-author-action=create]')")
+                if not self.browser.evaluate('!!' + origin_condition):
+                    self.delayed_step(enter + '-' + origin, '#ees-work-entry [data-action=' + origin + ']',
+                                      origin_condition, paths=())
+                    labels.append(enter + '-' + origin)
                 native_label = label + '-native'
                 self.delayed_step(native_label, self.native_link_selector(native, native_label, labels),
                                   'location.pathname === ' + json.dumps('/workspace/' + native)
@@ -1112,16 +1087,15 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 condition = ("document.querySelector('#ees-work-designer [data-author-action=create]')"
                              if destination == 'procedures' else
                              "!!document.querySelector('#ees-work-panel .ew-work-home')")
-                different = destination == 'work-home' or native == 'tools'
+                different = destination == 'work-home' or origin == 'tools'
                 if different:
-                    # B10-2 departs from tools, so its procedures return also differs.
                     # The 10-15 contract permits a local destination placeholder
                     # for a different-menu return, with destination selection
                     # already visible. Same-menu returns keep zero loading.
                     frame_monitor.begin_native_return(self, label,
                         selector='#ees-work-entry ' + selector, native=native,
                         destination='work_home' if destination == 'work-home' else 'procedures',
-                        previous='tools' if native == 'tools' else 'procedures')
+                        previous=origin)
                 self.delayed_step(label, '#ees-work-entry ' + selector,
                                   "location.pathname === '/c/existing-chat' && (" + condition + ')')
                 if different:
@@ -1148,7 +1122,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
         evidence['scope'] = ('Real compiled frontend candidate; historical 42cc756 failure is retained in evals, '
                              'physical CDP clicks, temporary production workflow service; both workspace '
                              'and operations HTTP GETs delayed by 1000ms; no DOM masking or expected failure. '
-                             'Only different-menu returns (including B10-2 tools-to-procedures) permit a local target placeholder '
+                             'Only different-menu returns (including API catalog to procedures via knowledge) permit a local target placeholder '
                              'with the exact destination selected; same-menu and other transitions retain zero loading.')
         evidence['reads'] = self.server.navigation_reads
         evidence['counts'] = {label: {
@@ -1167,9 +1141,10 @@ class SourceShellNativeTests(IntegratedNativeCase):
             json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         self.assertTrue(self.server.navigation_reads)
         self.assertEqual([row['label'] for row in evidence['nativeReturns']],
-                         ['skills-to-work-home', 'tools-to-procedures', 'tools-to-work-home', 'models-to-work-home'])
+                         ['skills-to-work-home', 'knowledge-to-procedures', 'knowledge-to-work-home', 'models-to-work-home'])
         for row in self.server.navigation_reads:
             self.assertGreaterEqual(row['released'] - row['started'], .99)
+        self.assertNotIn('/workspace/tools', {row['path'] for row in evidence['samples']})
         frame_monitor.assert_clean(self, evidence, labels=labels)
         self.assertEqual(self.server.completions, [], 'Navigation must not submit a conversation')
 
@@ -1410,9 +1385,9 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.step('work-procedures', '#ees-work-entry [data-action=procedures]',
                   "document.querySelector('#ees-work-designer')")
         labels.append('work-procedures')
-        for target in ('models', 'knowledge', 'prompts', 'skills', 'tools'):
+        for target in ('models', 'knowledge', 'prompts', 'skills'):
             label = 'native-' + target
-            self.step(label, self.native_link_selector(target, label, labels, return_from='skills' if target == 'tools' else None),
+            self.step(label, self.native_link_selector(target, label, labels),
                       'location.pathname === ' + json.dumps('/workspace/' + target)
                       + ' && document.querySelector("#workspace-container input")')
             self.assertTrue(self.browser.evaluate("document.querySelector('[data-ees-work-surface]').contains(document.querySelector('#workspace-container'))"))
@@ -1420,13 +1395,15 @@ class SourceShellNativeTests(IntegratedNativeCase):
             self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'),self.browser.evaluate('window.__routeChatQA.draft'))
             self.assertEqual(self.browser.evaluate('window.__eesSourceShellV1.screen().chatId'),self.browser.evaluate('window.__routeChatQA.chatId'))
             labels.append(label)
-        frame_monitor.begin_native_return(self, 'native-return', selector='#ees-work-entry [data-action=procedures]',
-            native='tools', destination='procedures', previous='tools')
-        self.step('native-return', '#ees-work-entry [data-action=procedures]',
-                  "location.pathname === '/c/existing-chat' && document.querySelector('#ees-work-designer [data-author-action=create]')")
-        self.wait("window.__eesSourceFrameEvidence.samples.some(sample=>sample.label==='native-return' && sample.rightPanels.includes('procedures') && sample.menuCurrent.length===1 && sample.menuCurrent[0].key==='procedures')")
+        catalog_menu = '#ees-work-entry [data-action=tools]'
+        frame_monitor.begin_native_return(self, 'native-return', selector=catalog_menu,
+            native='skills', destination='tools', previous='procedures')
+        self.step('native-return', catalog_menu,
+                  "location.pathname === '/c/existing-chat' && document.querySelector('[data-api-screen=list] [data-api-action=create]')")
+        self.wait("window.__eesSourceFrameEvidence.samples.some(sample=>sample.label==='native-return' && sample.rightPanels.includes('tools') && sample.menuCurrent.length===1 && sample.menuCurrent[0].key==='tools')")
         frame_monitor.end_native_return(self)
         labels.append('native-return')
+        self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), self.browser.evaluate('window.__routeChatQA.draft'))
         self.click('.ees-settings-trigger')
         self.step('admin-open', '[data-action=native_open][data-native-id=admin]',
                   "document.querySelector('#settings-tabs-container [role=tab][aria-controls=tab-admin-general][aria-selected=true]')")
@@ -1446,6 +1423,7 @@ class SourceShellNativeTests(IntegratedNativeCase):
             for item in evidence['samples'])
         (directory / 'source-shell-all-navigation-frames.json').write_text(
             json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        self.assertNotIn('/workspace/tools', {row['path'] for row in evidence['samples']})
         frame_monitor.assert_clean(self, evidence, labels=labels)
         self.assertEqual(self.server.completions, [], 'Navigation must not submit a conversation')
 

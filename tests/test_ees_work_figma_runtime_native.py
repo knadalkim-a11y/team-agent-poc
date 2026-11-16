@@ -1218,7 +1218,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
                 run = self.start(key, inputs={'query': '운영 안내'}); self.open_run(key, run)
                 if shared:
                     self.assertIn('Confluence 페이지 찾기 · 회차 v1', self.text('.ew-shared-runtime'))
-                    self.assertIn('개인 PAT(기존 방식)', self.text('.ew-shared-runtime'))
+                    self.assertNotIn('개인 PAT', self.text('.ew-shared-runtime'))
                     self.assertFalse(self.read('[data-action=execute]', 'disabled'))
                     self.screenshot('shared-runtime-normal')
                 self.click('[data-action=execute]')

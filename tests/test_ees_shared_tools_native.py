@@ -421,6 +421,18 @@ class SharedToolsNativeTests(unittest.IsolatedAsyncioTestCase):
         with self.service._db() as db:
             self.assertEqual(db.execute('SELECT count(*) FROM work_versions WHERE workflow_id=?', (wid,)).fetchone()[0],1)
 
+    async def test_guide_upgrade_can_continue_a_permitted_pinned_native_job(self):
+        item = await self.review()
+        run = await self.start(await self.workflow(), self.reader)
+        self.service.install_confluence_guide()
+        state = await self.service.operations.state(self.reader, "EMS", run['run_id'])
+        self.assertEqual(state['shared_tools'], [])
+        current = state['shared_tool_access']['j1']['current_tool']
+        self.assertEqual(current, {**{key:item[key] for key in ('id','name','version','state','function')}, 'can_use':True})
+        result = await self.execute(run)
+        self.assertEqual(result['attempt']['snapshot']['shared_tool']['version'],item['version'])
+        self.assertEqual(result['attempt']['status'],'partial',result)
+
     async def test_outside_group_run_view_exposes_only_permitted_group_and_assignee_names(self):
         await self.review()
         run = await self.start(await self.workflow(), self.admin)

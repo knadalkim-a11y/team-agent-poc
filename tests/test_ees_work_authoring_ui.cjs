@@ -1618,6 +1618,24 @@ test('authoring refresh of a saved legacy location cannot reopen its settings wi
  h.click('legacy_catalog');await flush();assert.doesNotMatch(h.markup,/ew-draft-legacy/);
 });
 
+test('in-flight scope gaps hide archive controls while keeping drafts isolated for a confirmed historical adapter',async()=>{
+ const h=harness({legacyToolAuthoring:false});
+ h.state.capabilities.is_admin=true;
+ const archive={legacy_tool_authoring:true,api_catalog:{apis:[],services:[],can_manage:true},tool_drafts:[]};
+ h.selection.tab='tools';h.state.operations=archive;h.render();
+ h.click('legacy_catalog');await flush();h.click('draft_new');await flush();h.field('draft_name','EMS 초안');
+ for(const [system,expected] of [['FDC',''],['EMS','EMS 초안'],['FDC','FDC 초안']]){
+  h.selection.tab='procedures';h.render();
+  h.selection.system_id=system;h.state.operations={};h.selection.tab='tools';h.render();
+  assert.match(h.markup,/API 목록을 불러오지 못했습니다/);assert.doesNotMatch(h.markup,/이전 방식 도구|draft_name/);
+  h.click('draft_new');await flush();assert.ok(!h.forms['ew-tool-draft-form']);
+  h.state.operations=archive;h.render();assert.match(h.markup,/ew-draft-legacy/);
+  h.click('draft_new');await flush();assert.equal(h.fields.find(item=>item.name==='draft_name').value,expected);
+  if(!expected)h.field('draft_name','FDC 초안');
+ }
+ assert.equal(h.operations.length,0);
+});
+
 test('API catalog ignores a retired control and exposes registered APIs only', async () => {
  const h=apiCatalogHarness();await h.click('legacy');
  assert.match(h.html(),/data-api-screen="list"/);

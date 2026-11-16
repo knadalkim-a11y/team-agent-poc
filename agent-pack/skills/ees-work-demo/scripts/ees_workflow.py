@@ -376,7 +376,13 @@ async def _registered_assets(user):
 
 
 async def get_state(user, chat_id="", case_id="", process_id="", selection=None):
-    return await _production_service().get_state(user, chat_id, case_id, process_id, selection)
+    service = _production_service()
+    if service.confluence_guide and (process_id or selection is not None or not (case_id or chat_id)):
+        return await _retired_for(user)
+    state = await service.get_state(user, chat_id, case_id, process_id, selection)
+    if service.confluence_guide and state.get("ok") and not state.get("case"):
+        return _retired_action()
+    return state
 
 
 async def handle_action(user, body):
