@@ -789,7 +789,7 @@ def install(app, verified_user):
                 "api_version_changed", "api_import_changed", "api_duplicate", "api_service_duplicate", "api_service_in_use",
                 "legacy_execution_retired", "tool_authoring_retired", "intent_expired", "intent_changed", "already_claimed"} else 404 if code in {"process_not_found", "workflow_not_found", "run_not_found",
                     "api_not_found", "api_service_not_found"} else 503 if code in {
-                    "authoring_authorization_unavailable", "authoring_unavailable"} else 400
+                    "authoring_authorization_unavailable", "authoring_unavailable", "api_catalog_unavailable"} else 400
         return JSONResponse(value, status_code=status, headers={"Cache-Control": "no-store"})
 
     @app.get("/api/ees-work/workspace", include_in_schema=False)
@@ -827,6 +827,17 @@ def install(app, verified_user):
                 for skill in assets.get("skills", [])]})
         except WorkflowError as error:
             return response({"ok": False, "error": {"code": error.code, "message": error.message}})
+
+    @app.get("/api/ees-work/api-catalog", include_in_schema=False)
+    async def api_catalog_route(user=Depends(verified_user)):
+        try:
+            catalog = await _production_service().api_catalog.state(user)
+            return response({"ok": True, "api_catalog": catalog})
+        except WorkflowError as error:
+            return response({"ok": False, "error": {"code": error.code, "message": error.message}})
+        except sqlite3.Error:
+            return response({"ok": False, "error": {"code": "api_catalog_unavailable",
+                "message": "API 명세를 불러오지 못했습니다. 잠시 후 다시 조회하세요."}})
 
     @app.get("/api/ees-work/operations", include_in_schema=False)
     async def operations_route(system_id: str = "", run_id: str = "", user=Depends(verified_user)):
