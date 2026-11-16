@@ -1,0 +1,1138 @@
+{
+ "mock": "design-mock-17-workspace.html",
+ "sha256": "8a99e3b52d316b58e05b69a7e8034dc00d64b3b3d16b76eacba21f4d79bd9a51",
+ "bytes": 779944,
+ "browser": "Chromium (Playwright, headless)",
+ "widths": [
+  "1920x1080",
+  "1366x768",
+  "480x800"
+ ],
+ "total": 167,
+ "passed": 167,
+ "failed": [],
+ "checks": [
+  {
+   "name": "static: CSP blocks every network load",
+   "pass": true
+  },
+  {
+   "name": "static: no external resource reference",
+   "pass": true
+  },
+  {
+   "name": "static: every screen has a section",
+   "pass": true
+  },
+  {
+   "name": "1920 WS1: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS1"
+   ]
+  },
+  {
+   "name": "1920 WS1: badge says 시안 · 저장·실행 안 됨 · WS1",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS1"
+  },
+  {
+   "name": "1920 WS1: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "업무 절차"
+    ],
+    "업무 절차"
+   ]
+  },
+  {
+   "name": "1920 WS1: chat reference follows the screen",
+   "pass": true,
+   "detail": "업무 절차 목록"
+  },
+  {
+   "name": "1920 WS1: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920: layout for this width",
+   "pass": true,
+   "detail": {
+    "shown": [
+     "WS1"
+    ],
+    "current": [
+     "업무 절차"
+    ],
+    "badge": "시안 1 · 저장·실행 안 됨 · WS1",
+    "area": "업무 절차",
+    "ctx": "업무 절차 목록",
+    "docOverflow": false,
+    "wide": 0,
+    "layout": "split1",
+    "overlay": "false",
+    "compact": "false"
+   }
+  },
+  {
+   "name": "1920 WS2: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS2"
+   ]
+  },
+  {
+   "name": "1920 WS2: badge says 시안 · 저장·실행 안 됨 · WS2",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS2"
+  },
+  {
+   "name": "1920 WS2: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "업무 절차"
+    ],
+    "업무 절차"
+   ]
+  },
+  {
+   "name": "1920 WS2: chat reference follows the screen",
+   "pass": true,
+   "detail": "배포 산출물 점검 / 기본 정보"
+  },
+  {
+   "name": "1920 WS2: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 WS3: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS3"
+   ]
+  },
+  {
+   "name": "1920 WS3: badge says 시안 · 저장·실행 안 됨 · WS3",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS3"
+  },
+  {
+   "name": "1920 WS3: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "1920 WS3: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 명세 목록"
+  },
+  {
+   "name": "1920 WS3: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 WS4: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS4"
+   ]
+  },
+  {
+   "name": "1920 WS4: badge says 시안 · 저장·실행 안 됨 · WS4",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS4"
+  },
+  {
+   "name": "1920 WS4: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "1920 WS4: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 상세 / 백업 결과 조회"
+  },
+  {
+   "name": "1920 WS4: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 WS5: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS5"
+   ]
+  },
+  {
+   "name": "1920 WS5: badge says 시안 · 저장·실행 안 됨 · WS5",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS5"
+  },
+  {
+   "name": "1920 WS5: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "1920 WS5: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 명세 편집 / 백업 결과 조회"
+  },
+  {
+   "name": "1920 WS5: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 WS6: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS6"
+   ]
+  },
+  {
+   "name": "1920 WS6: badge says 시안 · 저장·실행 안 됨 · WS6",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS6"
+  },
+  {
+   "name": "1920 WS6: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "작업 지침"
+    ],
+    "작업 지침"
+   ]
+  },
+  {
+   "name": "1920 WS6: chat reference follows the screen",
+   "pass": true,
+   "detail": "작업 지침 목록"
+  },
+  {
+   "name": "1920 WS6: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 WS7: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS7"
+   ]
+  },
+  {
+   "name": "1920 WS7: badge says 시안 · 저장·실행 안 됨 · WS7",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS7"
+  },
+  {
+   "name": "1920 WS7: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "작업 지침"
+    ],
+    "작업 지침"
+   ]
+  },
+  {
+   "name": "1920 WS7: chat reference follows the screen",
+   "pass": true,
+   "detail": "작업 지침 / Jira 읽기 지침"
+  },
+  {
+   "name": "1920 WS7: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 WS8: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS8"
+   ]
+  },
+  {
+   "name": "1920 WS8: badge says 시안 · 저장·실행 안 됨 · WS8",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS8"
+  },
+  {
+   "name": "1920 WS8: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "참고 문서"
+    ],
+    "참고 문서"
+   ]
+  },
+  {
+   "name": "1920 WS8: chat reference follows the screen",
+   "pass": true,
+   "detail": "참고 문서 목록"
+  },
+  {
+   "name": "1920 WS8: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 WS9: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS9"
+   ]
+  },
+  {
+   "name": "1920 WS9: badge says 시안 · 저장·실행 안 됨 · WS9",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS9"
+  },
+  {
+   "name": "1920 WS9: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "참고 문서"
+    ],
+    "참고 문서"
+   ]
+  },
+  {
+   "name": "1920 WS9: chat reference follows the screen",
+   "pass": true,
+   "detail": "참고 문서 / EMS 운영 가이드"
+  },
+  {
+   "name": "1920 WS9: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "WS1 → WS2 by row",
+   "pass": true
+  },
+  {
+   "name": "WS2 → WS1 by back link",
+   "pass": true
+  },
+  {
+   "name": "WS1 search keeps matching rows",
+   "pass": true
+  },
+  {
+   "name": "WS1 search shows the empty state",
+   "pass": true
+  },
+  {
+   "name": "WS1 search clears",
+   "pass": true
+  },
+  {
+   "name": "WS1 new procedure asks name and purpose",
+   "pass": true
+  },
+  {
+   "name": "WS1 new procedure can be cancelled",
+   "pass": true
+  },
+  {
+   "name": "WS2 task shows its linked tool",
+   "pass": true
+  },
+  {
+   "name": "WS2 starts without an unsaved marker",
+   "pass": true
+  },
+  {
+   "name": "WS2 edit shows the unsaved marker",
+   "pass": true
+  },
+  {
+   "name": "WS2 tab shows only its panel",
+   "pass": true
+  },
+  {
+   "name": "WS2 keeps the edited value across tabs",
+   "pass": true
+  },
+  {
+   "name": "WS3 group folds",
+   "pass": true
+  },
+  {
+   "name": "WS3 search finds by address and opens its group",
+   "pass": true
+  },
+  {
+   "name": "WS3 → WS4 → WS5",
+   "pass": true
+  },
+  {
+   "name": "WS5 edit shows the unsaved marker",
+   "pass": true
+  },
+  {
+   "name": "WS7 starts without 바뀜",
+   "pass": true
+  },
+  {
+   "name": "WS7 body edit shows 바뀜 and the unsaved text",
+   "pass": true
+  },
+  {
+   "name": "WS7 one access choice at a time",
+   "pass": true
+  },
+  {
+   "name": "mock actions only show a notice",
+   "pass": true
+  },
+  {
+   "name": "chat folds",
+   "pass": true
+  },
+  {
+   "name": "chat opens again",
+   "pass": true
+  },
+  {
+   "name": "rows and menu items are buttons",
+   "pass": true
+  },
+  {
+   "name": "1366 WS1: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS1"
+   ]
+  },
+  {
+   "name": "1366 WS1: badge says 시안 · 저장·실행 안 됨 · WS1",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS1"
+  },
+  {
+   "name": "1366 WS1: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "업무 절차"
+    ],
+    "업무 절차"
+   ]
+  },
+  {
+   "name": "1366 WS1: chat reference follows the screen",
+   "pass": true,
+   "detail": "업무 절차 목록"
+  },
+  {
+   "name": "1366 WS1: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1366: layout for this width",
+   "pass": true,
+   "detail": {
+    "shown": [
+     "WS1"
+    ],
+    "current": [
+     "업무 절차"
+    ],
+    "badge": "시안 1 · 저장·실행 안 됨 · WS1",
+    "area": "업무 절차",
+    "ctx": "업무 절차 목록",
+    "docOverflow": false,
+    "wide": 0,
+    "layout": "single",
+    "overlay": "false",
+    "compact": "false"
+   }
+  },
+  {
+   "name": "1366 WS2: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS2"
+   ]
+  },
+  {
+   "name": "1366 WS2: badge says 시안 · 저장·실행 안 됨 · WS2",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS2"
+  },
+  {
+   "name": "1366 WS2: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "업무 절차"
+    ],
+    "업무 절차"
+   ]
+  },
+  {
+   "name": "1366 WS2: chat reference follows the screen",
+   "pass": true,
+   "detail": "배포 산출물 점검 / 기본 정보"
+  },
+  {
+   "name": "1366 WS2: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1366 WS3: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS3"
+   ]
+  },
+  {
+   "name": "1366 WS3: badge says 시안 · 저장·실행 안 됨 · WS3",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS3"
+  },
+  {
+   "name": "1366 WS3: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "1366 WS3: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 명세 목록"
+  },
+  {
+   "name": "1366 WS3: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1366 WS4: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS4"
+   ]
+  },
+  {
+   "name": "1366 WS4: badge says 시안 · 저장·실행 안 됨 · WS4",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS4"
+  },
+  {
+   "name": "1366 WS4: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "1366 WS4: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 상세 / 백업 결과 조회"
+  },
+  {
+   "name": "1366 WS4: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1366 WS5: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS5"
+   ]
+  },
+  {
+   "name": "1366 WS5: badge says 시안 · 저장·실행 안 됨 · WS5",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS5"
+  },
+  {
+   "name": "1366 WS5: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "1366 WS5: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 명세 편집 / 백업 결과 조회"
+  },
+  {
+   "name": "1366 WS5: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1366 WS6: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS6"
+   ]
+  },
+  {
+   "name": "1366 WS6: badge says 시안 · 저장·실행 안 됨 · WS6",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS6"
+  },
+  {
+   "name": "1366 WS6: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "작업 지침"
+    ],
+    "작업 지침"
+   ]
+  },
+  {
+   "name": "1366 WS6: chat reference follows the screen",
+   "pass": true,
+   "detail": "작업 지침 목록"
+  },
+  {
+   "name": "1366 WS6: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1366 WS7: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS7"
+   ]
+  },
+  {
+   "name": "1366 WS7: badge says 시안 · 저장·실행 안 됨 · WS7",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS7"
+  },
+  {
+   "name": "1366 WS7: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "작업 지침"
+    ],
+    "작업 지침"
+   ]
+  },
+  {
+   "name": "1366 WS7: chat reference follows the screen",
+   "pass": true,
+   "detail": "작업 지침 / Jira 읽기 지침"
+  },
+  {
+   "name": "1366 WS7: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1366 WS8: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS8"
+   ]
+  },
+  {
+   "name": "1366 WS8: badge says 시안 · 저장·실행 안 됨 · WS8",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS8"
+  },
+  {
+   "name": "1366 WS8: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "참고 문서"
+    ],
+    "참고 문서"
+   ]
+  },
+  {
+   "name": "1366 WS8: chat reference follows the screen",
+   "pass": true,
+   "detail": "참고 문서 목록"
+  },
+  {
+   "name": "1366 WS8: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1366 WS9: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS9"
+   ]
+  },
+  {
+   "name": "1366 WS9: badge says 시안 · 저장·실행 안 됨 · WS9",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS9"
+  },
+  {
+   "name": "1366 WS9: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "참고 문서"
+    ],
+    "참고 문서"
+   ]
+  },
+  {
+   "name": "1366 WS9: chat reference follows the screen",
+   "pass": true,
+   "detail": "참고 문서 / EMS 운영 가이드"
+  },
+  {
+   "name": "1366 WS9: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 WS1: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS1"
+   ]
+  },
+  {
+   "name": "480 WS1: badge says 시안 · 저장·실행 안 됨 · WS1",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS1"
+  },
+  {
+   "name": "480 WS1: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "업무 절차"
+    ],
+    "업무 절차"
+   ]
+  },
+  {
+   "name": "480 WS1: chat reference follows the screen",
+   "pass": true,
+   "detail": "업무 절차 목록"
+  },
+  {
+   "name": "480 WS1: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480: layout for this width",
+   "pass": true,
+   "detail": {
+    "shown": [
+     "WS1"
+    ],
+    "current": [
+     "업무 절차"
+    ],
+    "badge": "시안 1 · 저장·실행 안 됨 · WS1",
+    "area": "업무 절차",
+    "ctx": "업무 절차 목록",
+    "docOverflow": false,
+    "wide": 0,
+    "layout": "single",
+    "overlay": "true",
+    "compact": "true"
+   }
+  },
+  {
+   "name": "480 WS2: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS2"
+   ]
+  },
+  {
+   "name": "480 WS2: badge says 시안 · 저장·실행 안 됨 · WS2",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS2"
+  },
+  {
+   "name": "480 WS2: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "업무 절차"
+    ],
+    "업무 절차"
+   ]
+  },
+  {
+   "name": "480 WS2: chat reference follows the screen",
+   "pass": true,
+   "detail": "배포 산출물 점검 / 기본 정보"
+  },
+  {
+   "name": "480 WS2: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 WS3: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS3"
+   ]
+  },
+  {
+   "name": "480 WS3: badge says 시안 · 저장·실행 안 됨 · WS3",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS3"
+  },
+  {
+   "name": "480 WS3: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "480 WS3: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 명세 목록"
+  },
+  {
+   "name": "480 WS3: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 WS4: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS4"
+   ]
+  },
+  {
+   "name": "480 WS4: badge says 시안 · 저장·실행 안 됨 · WS4",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS4"
+  },
+  {
+   "name": "480 WS4: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "480 WS4: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 상세 / 백업 결과 조회"
+  },
+  {
+   "name": "480 WS4: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 WS5: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS5"
+   ]
+  },
+  {
+   "name": "480 WS5: badge says 시안 · 저장·실행 안 됨 · WS5",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS5"
+  },
+  {
+   "name": "480 WS5: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "480 WS5: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 명세 편집 / 백업 결과 조회"
+  },
+  {
+   "name": "480 WS5: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 WS6: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS6"
+   ]
+  },
+  {
+   "name": "480 WS6: badge says 시안 · 저장·실행 안 됨 · WS6",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS6"
+  },
+  {
+   "name": "480 WS6: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "작업 지침"
+    ],
+    "작업 지침"
+   ]
+  },
+  {
+   "name": "480 WS6: chat reference follows the screen",
+   "pass": true,
+   "detail": "작업 지침 목록"
+  },
+  {
+   "name": "480 WS6: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 WS7: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS7"
+   ]
+  },
+  {
+   "name": "480 WS7: badge says 시안 · 저장·실행 안 됨 · WS7",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS7"
+  },
+  {
+   "name": "480 WS7: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "작업 지침"
+    ],
+    "작업 지침"
+   ]
+  },
+  {
+   "name": "480 WS7: chat reference follows the screen",
+   "pass": true,
+   "detail": "작업 지침 / Jira 읽기 지침"
+  },
+  {
+   "name": "480 WS7: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 WS8: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS8"
+   ]
+  },
+  {
+   "name": "480 WS8: badge says 시안 · 저장·실행 안 됨 · WS8",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS8"
+  },
+  {
+   "name": "480 WS8: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "참고 문서"
+    ],
+    "참고 문서"
+   ]
+  },
+  {
+   "name": "480 WS8: chat reference follows the screen",
+   "pass": true,
+   "detail": "참고 문서 목록"
+  },
+  {
+   "name": "480 WS8: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 WS9: only this screen is shown",
+   "pass": true,
+   "detail": [
+    "WS9"
+   ]
+  },
+  {
+   "name": "480 WS9: badge says 시안 · 저장·실행 안 됨 · WS9",
+   "pass": true,
+   "detail": "시안 1 · 저장·실행 안 됨 · WS9"
+  },
+  {
+   "name": "480 WS9: menu and header name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "참고 문서"
+    ],
+    "참고 문서"
+   ]
+  },
+  {
+   "name": "480 WS9: chat reference follows the screen",
+   "pass": true,
+   "detail": "참고 문서 / EMS 운영 가이드"
+  },
+  {
+   "name": "480 WS9: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 chat opens over the work area",
+   "pass": true
+  },
+  {
+   "name": "480 Escape closes the chat",
+   "pass": true
+  },
+  {
+   "name": "no page error, console error or network request",
+   "pass": true,
+   "detail": []
+  }
+ ]
+}
