@@ -1,5 +1,5 @@
 // The workspace owns storage and authorization. This controller owns the current editor only.
-function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable, returnToJob, contextChanged, focus, newId}) {
+function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable, guideEnabled=()=>false, returnToJob, contextChanged, focus, newId}) {
   const {esc}=workUI;
   const clone=value=>JSON.parse(JSON.stringify(value));
   const blank=()=>({name:'',purpose:'',service_id:'',method:'GET',url:'',inputs:[],result_path:'',fields:[]});
@@ -12,6 +12,7 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
   const all=()=>current().apis||[], services=()=>current().services||[];
   const api=()=>all().find(item=>item.id===id);
   const admin=()=>current().can_manage===true;
+  const allowLegacy=()=>!guideEnabled()&&legacyAvailable();
   const serviceLabel=value=>services().find(item=>item.id===value)?.name||'미분류';
   const snap=()=>JSON.stringify([draft,serviceName,example]);
   const dirty=()=>draft&&snap()!==original;
@@ -66,7 +67,7 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
     return `<div class="ew-api-head"><h2>API 명세 ${records.length}개</h2><div>${admin()?btn('서비스 관리','services')+btn('API 명세 등록','create','primary'):''}</div></div>
       ${field('search','API 찾기',query,'type="search" placeholder="이름, 용도, 서비스 또는 주소로 검색"')}
       <div class="ew-api-groups" aria-label="서비스별 API 명세">${parts||`<p class="ew-api-empty">${needle?'검색 결과가 없습니다.':'등록된 API 명세가 없습니다.'}</p>`}</div>
-      ${legacyAvailable()?btn('기존 도구 관리','legacy','link ew-api-legacy'):''}`;
+      ${allowLegacy()?btn('기존 도구 관리','legacy','link ew-api-legacy'):''}`;
   }
   function gridCell(list,i,key,value,label,choices){
     const attrs=`name="api-${list}-${i}-${key}" data-map="${list}" data-index="${i}" data-key="${key}" aria-label="${esc(label)} ${i+1}"`;
@@ -96,7 +97,7 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
     const nf=field('name','API 이름',draft.name,'required maxlength="160" placeholder="예: 설비 알람 조회"');
     return `${back(edit?'API 상세':'등록 취소')}<div class="ew-api-head"><h2 tabindex="-1">${edit?'API 명세 편집':'API 명세 등록'}</h2>${edit?`<div>${actions}</div>`:''}</div>
       ${edit?'':`<div class="ew-api-tabs">${btn('API 주소 직접 등록','direct','active')}${btn('서비스 명세 URL','import','link')}</div>`}
-      <div class="ew-api-request">${select('method','요청 방식',pairs(methods),draft.method)}${field('url','API 주소',draft.url,'required spellcheck="false" placeholder="https://ems.example/api/equipment/{equipmentId}/alarms"')}</div>
+      <div class="ew-api-request">${select('method','요청 방식',pairs(methods),draft.method)}${field('url',draft.url.startsWith('/')?'서비스 기본 주소 뒤의 경로':'API 주소',draft.url,'required spellcheck="false" placeholder="https://ems.example/api/equipment/{equipmentId}/alarms"')}</div>
       <div class="ew-api-pair">${edit?sf+nf:nf+sf}</div>${draft.service_id==='__new__'?field('service_name','새 서비스 이름',serviceName,'maxlength="80" placeholder="예: 사내 백업"'):''}
       ${field('purpose','용도',draft.purpose,'required maxlength="1000" placeholder="예: 설비에서 발생한 알람을 조회합니다."')}
       ${edit?'':btn('API 주소가 없나요?','missing','link')}${missing?developmentHelp():''}
@@ -119,7 +120,7 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
     const x=api();if(!x)return back('API 명세 목록','list')+'<p role="status">API를 찾을 수 없거나 접근 권한이 변경되었습니다.</p>';
     const used=detailUses||x.uses, source=x.source_url||x.source?.url;
     return `${back('API 명세 목록','list')}<div class="ew-api-head"><h2>${esc(x.name)}</h2><div>${btn('시험 실행','test')}${admin()?btn('명세 편집','edit','link'):''}</div></div>
-      <div class="ew-api-route" data-method="${esc(x.method)}"><b class="ew-api-method">${esc(x.method)}</b><strong>${esc(addr(x.url))}</strong><code>${esc(x.url)}</code></div>
+      <div class="ew-api-route" data-method="${esc(x.method)}"><b class="ew-api-method">${esc(x.method)}</b><strong>${esc(addr(x.url))}</strong><code>${esc(x.url.startsWith('/')?'서비스 기본 주소 + '+x.url:x.url)}</code></div>
       <p>${esc(x.purpose)}</p><p><small>서비스</small>　${esc(serviceLabel(x.service_id))}</p>
       ${source?`<p>서비스 명세　${esc(source)} ${admin()?btn('변경 확인','refresh-import','link'):''}</p>`:''}
       <h3>요청 파라미터</h3>${table(['이름','위치','필수','업무에서 쓰는 값'],(x.inputs||[]).map(p=>[p.wire_name||p.name,p.in,p.required?'필수':'—',p.label||p.name]))}
@@ -159,7 +160,7 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
       <details class="ew-api-advanced" ${m.attach?'open':''} data-import-more><summary>파일 업로드 · 붙여넣기</summary>
       <label><span>명세 파일</span><input type="file" name="api-file" accept=".json,.yaml,.yml"></label>
       <label><span>OpenAPI JSON 또는 YAML</span><textarea name="api-import_text" rows="6">${esc(m.source_text)}</textarea></label>${btn('명세 읽기','import-text')}</details>
-      <div class="ew-api-import-end">${btn('예시 명세 불러오기','import-example','link')}<div>${btn('취소',m.refresh?'cancel-import':'cancel')}${btn('기능 불러오기','import-url','primary')}</div></div>`;
+      <div class="ew-api-import-end">${guideEnabled()?'':btn('예시 명세 불러오기','import-example','link')}<div>${btn('취소',m.refresh?'cancel-import':'cancel')}${btn('기능 불러오기','import-url','primary')}</div></div>`;
   }
   function impacted(ops){
     const affected=new Map();
@@ -363,7 +364,7 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
       case 'import':importStart();break;
       case 'refresh-import':importStart(true);break;
       case 'cancel-import':if(importing.refresh){importing=null;go('detail');}else if(draft)go('create');else go('list');break;
-      case 'import-example':importing.source_url='';importing.source_text=sampleSpecification();importing.attach=false;await previewImport(false);break;
+      case 'import-example':if(guideEnabled())break;importing.source_url='';importing.source_text=sampleSpecification();importing.attach=false;await previewImport(false);break;
       case 'import-another':importing.preview=null;importing.selected=[];paint();focus?.('[name=api-import_url]');break;
       case 'import-url':await previewImport(true);break;
       case 'import-text':await previewImport(false);break;
@@ -372,7 +373,7 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
       case 'impact-apply':{const fixed=repairs();if(impact.from==='import')await applyImport(fixed);else await save(fixed);break;}
       case 'test':trial={values:{},result:null};go('test');break;
       case 'test-run':await testRun();break;
-      case 'legacy':legacy=true;paint();announce();break;
+      case 'legacy':if(allowLegacy()){legacy=true;paint();announce();}break;
     }
   }
   async function fileRead(target){
@@ -474,5 +475,5 @@ function createWorkApiCatalog({catalog, command, changed, paint, legacyAvailable
     const dialog=host?.querySelector?.('dialog[data-api-modal]');
     if(dialog&&!dialog.open&&typeof dialog.showModal==='function')dialog.showModal();
   }
-  return {html,handle,start,reset,reconcile,afterPaint,context,suggest,openLegacy:()=>{legacy=true;},isLegacy:()=>legacy,pending:()=>busy,signature:()=>[screen,id,serviceEdit?.id||''],showList:()=>{legacy=false;go('list');}};
+  return {html,handle,start,reset,reconcile,afterPaint,context,suggest,openLegacy:()=>{legacy=allowLegacy();},isLegacy:()=>legacy&&!guideEnabled(),pending:()=>busy,signature:()=>[screen,id,serviceEdit?.id||''],showList:()=>{legacy=false;go('list');}};
 }

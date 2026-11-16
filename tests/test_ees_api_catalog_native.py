@@ -315,24 +315,67 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         run = self.start(key, inputs={input_id: PAGE_ID})
         self.refresh()
         self.click('[data-action=mode][data-mode=work]')
-        self.open_run(key,run)
+        self.check_confluence_results(key, run, 'job-0', 'job-1', upstream, 'confluence')
+
+    def test_upgrade_shows_only_shipped_confluence_guide_and_starts_it_from_operations(self):
+        """Exercise the operator's first run from an existing installation with old assets."""
+        old_workflow = self.author(name='전환 전 업무', jobs=1)
+        old_service = self.register_service('전환 전 서비스')
+        self.seed_api(old_service, 'GET', 'https://previous.example/check', '전환 전 조회', '이전 목록 점검')
+        directory = self.enterContext(tempfile.TemporaryDirectory())
+        upstream = self.enterContext(confluence_provider(directory))
+        actor = self.server.user['id']
+        config = {'confluence-readonly-pilot': {'base_url': upstream.base_url + '/content',
+                  'actor_ids': [actor], 'user_credential_headers': {actor: {'Authorization': 'EES_GUIDE_TEST_AUTH'}}}}
+        self.enterContext(patch.dict(os.environ, {'SSL_CERT_FILE': upstream.ca,
+            'EES_GUIDE_TEST_AUTH': upstream.bearer, 'EES_WORK_API_SERVICES': json.dumps(config)}))
+        self.server.workflow = self.backend.WorkflowService(Path(self.temporary.name) / 'work.sqlite3',
+            self.users.get, self.server.chats.get, native_bridge=self.bridge, confluence_guide=True)
+        self.backend._service = self.server.workflow
+        self.authoring_viewport(1920, 1080, overlay=False)
+        self.refresh()
+        self.open_catalog()
+        api_names = self.browser.evaluate("[...document.querySelectorAll('[data-api-screen=list] .ew-api-row strong')].map(e=>e.textContent)")
+        self.assertCountEqual(api_names, ['기준 문서 확인', '하위 문서 목록 조회'])
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-api-action=legacy]')"))
+        self.click('[data-api-action=open][data-id=guide-confluence-page]')
+        self.assertIn('서비스 기본 주소 + /{id}', self.text('[data-api-screen=detail] .ew-api-route'))
+        self.click('[data-action=procedures]')
+        key = 'guide-confluence-documents'
+        self.wait("document.querySelector('[data-author-action=open][data-id=guide-confluence-documents]')")
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-author-list [data-author-action=open]')].map(e=>e.dataset.id)"), [key])
+        self.click('[data-action=mode][data-mode=work]')
+        self.click('[data-action=workflow][data-workflow-id=guide-confluence-documents]')
+        self.assertNotIn(old_workflow, self.browser.evaluate("[...document.querySelectorAll('[data-action=workflow]')].map(e=>e.dataset.workflowId)"))
+        self.click('[data-action=stage_open][data-node-id=documents]')
+        self.click('[data-action=stage_start][data-node-id=documents]')
+        self.fill('#ees-work-dialog [data-work-input][name="page-id"]', PAGE_ID)
+        self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.wait("!document.querySelector('#ees-work-dialog[open]') && window.__eesNativeWorkV1.captureReference()?.run_id")
+        run_id = self.browser.evaluate('window.__eesNativeWorkV1.captureReference().run_id')
+        run = self.state(run_id=run_id)['run']
+        self.assertEqual(run['inputs'], {'page-id': PAGE_ID})
+        self.check_confluence_results(key, run, 'page', 'children', upstream, 'confluence-guide')
+
+    def check_confluence_results(self, key, run, page_job, children_job, upstream, capture_name):
+        self.open_run(key, run, job=page_job)
         self.assertEqual(upstream.records, [])
         self.click('[data-action=execute]')
         self.wait("document.querySelector('.ew-api-table')?.innerText.includes(" + json.dumps(PAGE['title']) + ")")
         page_table = self.text('.ew-api-table')
         self.assertIn('페이지 ID',page_table)
         self.assertIn(PAGE_ID,page_table)
-        self.screenshot('confluence-page')
+        self.screenshot(capture_name + '-page')
         self.click('[data-action=confirm]')
         self.click('#ees-work-dialog [data-dialog-confirm]')
         self.wait("!document.querySelector('[data-action=confirm]')")
-        self.open_run(key,run,job='job-1')
+        self.open_run(key, run, job=children_job)
         self.click('[data-action=execute]')
         self.wait("document.querySelector('.ew-api-table')?.innerText.includes('주간 점검표')")
         child_table = self.text('.ew-api-table')
         for row in CHILDREN:
             self.assertIn(row['title'],child_table)
-        self.screenshot('confluence-children')
+        self.screenshot(capture_name + '-children')
         self.click('[data-action=confirm_list]')
         self.fill('#ees-list-confirm-reason', '하위 문서 두 건을 확인했습니다.')
         self.click('#ees-work-dialog [data-dialog-confirm]')
@@ -340,11 +383,11 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.navigate('/c/existing-chat')
         self.wait("document.querySelector('#ees-work-panel')")
         self.click('[data-action=mode][data-mode=work]')
-        self.open_run(key,run,job='job-1')
+        self.open_run(key, run, job=children_job)
         self.wait("document.querySelector('.ew-api-table')?.innerText.includes('주간 점검표')")
         final = self.state(run_id=run['id'])['run']
         self.assertEqual(len(final['attempts']),2)
-        self.assertEqual([final['jobs']['job-'+str(i)]['status'] for i in range(2)], ['completed','completed'])
+        self.assertEqual([final['jobs'][job]['status'] for job in (page_job, children_job)], ['completed','completed'])
         self.assertEqual(upstream.records, [
             ('/rest/api/content/'+PAGE_ID,{},True),
             ('/rest/api/content/'+PAGE_ID+'/child/page',{'limit':['5']},True)])

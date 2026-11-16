@@ -1518,10 +1518,10 @@ test('saved tool edits survive indirect scope navigation without following the n
  assert.equal(h.records.get('draft-1').draft.name,'새 문서 도구');assert.equal(h.records.get('draft-1').revision,1);
 });
 
-function apiCatalogHarness(){
+function apiCatalogHarness(guideEnabled=()=>false){
  const data={services:[{id:'s',name:'사내 백업'}],apis:[],can_manage:true},requests=[],responses={},returns=[];
  const factory=vm.runInNewContext(apiSources+'\ncreateWorkApiCatalog',{URL,queueMicrotask,workUI:{esc:value=>String(value??'').replaceAll('"','&quot;').replaceAll('<','&lt;')}});
- const component=factory({catalog:()=>data,paint:()=>{},newId:crypto.randomUUID,legacyAvailable:()=>true,returnToJob:async id=>returns.push(id),
+ const component=factory({catalog:()=>data,paint:()=>{},newId:crypto.randomUUID,guideEnabled,legacyAvailable:()=>true,returnToJob:async id=>returns.push(id),
    command:async body=>{requests.push(copy(body));if(responses[body.action])return responses[body.action](body);
      if(body.action==='api_detail')return {ok:true,uses:[]};
      if(body.action==='api_change_preview')return {ok:true,operation:{changes:[],uses:[]}};
@@ -1577,4 +1577,45 @@ test('a temporary operations gap keeps the legacy catalog while a new scope load
  h.component.reset();assert.equal(h.component.isLegacy(),false);
  h.component.start();h.field('name','이전 관리자');h.component.reconcile(h.data,undefined);
  h.data.can_manage=false;h.component.reconcile(undefined,h.data);assert.match(h.html(),/data-api-screen="list"/);assert.doesNotMatch(h.html(),/이전 관리자/);
+});
+
+
+test('a migrated workspace exposes registered APIs and keeps old catalog actions out of the editor', async () => {
+ let migrated = false;
+ const h = apiCatalogHarness(() => migrated);
+ await h.click('legacy');
+ assert.equal(h.component.isLegacy(), true);
+ migrated = true;
+ assert.equal(h.component.isLegacy(), false);
+ assert.doesNotMatch(h.html(), /data-api-action="legacy"/);
+ h.component.openLegacy();
+ assert.equal(h.component.isLegacy(), false);
+ h.component.start();
+ await h.click('import');
+ assert.match(h.html(), /name="api-file"/);
+ assert.doesNotMatch(h.html(), /data-api-action="import-example"/);
+ await h.click('import-example');
+ assert.deepEqual(h.requests, []);
+});
+
+
+test('an empty managed system can create the Confluence guide from its template or start blank', async () => {
+ const h = harness();
+ h.workflows.clear();
+ h.state.workflows = [];
+ h.selection.system_id = 'APC';
+ h.state.confluence_guide = true;
+ h.state.procedure_examples = [{id:'confluence_documents',name:'Confluence 문서 확인 가이드'}];
+ h.state.capabilities.managed_systems = ['APC'];
+ await h.open('');
+ assert.match(h.markup, /가이드로 시작/);
+ assert.match(h.markup, /새 워크플로우/);
+ assert.equal(h.writes.length, 0);
+ h.dialogs.push({name:'APC 문서 확인'});
+ h.click('guide_create'); await flush();
+ assert.equal(h.writes.length, 1);
+ assert.equal(h.writes[0].action, 'create_workflow');
+ assert.equal(h.writes[0].system_id, 'APC');
+ assert.equal(h.writes[0].template_id, 'confluence_documents');
+ assert.equal(h.writes[0].name, 'APC 문서 확인');
 });

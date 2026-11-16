@@ -1,5 +1,9 @@
 # 현재 작업 상태
 
+## 2026-11-16 · Confluence 기본 업무 가이드
+
+새 설치와 기존 설치에서 같은 [업무 가이드 및 서비스 설정](specs/shared-tools.md#confluence-starter)을 사용한다. 적용 전 업무 목록은 한 번 정리하고 과거 회차를 보존한다. 사내 서버의 접근·인증·실제 데이터 확인은 배포 환경에서 진행한다.
+
 ## 2026-11-13 · 워크 · 도구 API 명세 관리
 
 사용자가 공식 Figma의 API 명세 구조를 제품 구현 대상으로 지정했다. [지정 판과 대표 화면](mockups/ees-work/api-tools-20261113/README.md)에 Figma·브라우저 PNG와 동작 목업 v11을 고정했다. 구현 브랜치에서 API 명세 저장·가져오기, 작업 연결, HTTP 호출과 이력 조회를 구현했다. 개발용 HTTP 서버로 등록부터 실행까지 확인했다. [제품 화면 6개와 실측값](../evals/artifacts/api-tools-20261113/README.md)을 Figma와 함께 비교할 수 있다. 제품 대조 기준은 1920 × 1080 Figma 6개 상태이며, [서비스 연결과 실행 조건](specs/shared-tools.md#api-tools-v11)을 따른다. [제품 PR #138](https://github.com/knadalkim-a11y/team-agent-poc/pull/138)의 [첫 정식 제품 검증](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/43374926909)에서는 등록·업무 호출·도우미 제안 반영과 전체 Native 제품 검사가 통과했다. 지연된 화면 전환 뒤 기존 도구 상세가 이미 복원된 경우를 브라우저 시험에 반영했다. 최종 CI와 사내 인증·호출 확인은 별도로 기록한다.

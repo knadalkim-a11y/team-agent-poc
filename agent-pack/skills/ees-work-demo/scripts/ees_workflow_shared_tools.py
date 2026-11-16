@@ -159,7 +159,7 @@ class SharedTools:
     async def list(self, user, *, usable_only=False, summary=False):
         actor, _, groups = await self.service._work_actor(user)
         admin = _get(actor, 'role') == 'admin'
-        available = await self.discover(actor)
+        available = [] if getattr(self.service, "confluence_guide", False) else await self.discover(actor)
         result = []
         with self.service._db() as db:
             saved = {row['id']: json.loads(row['data']) for row in db.execute('SELECT * FROM work_shared_tools')}

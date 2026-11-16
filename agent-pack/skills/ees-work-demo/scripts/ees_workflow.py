@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 import hashlib
 import inspect
 import json
+import os
 from pathlib import Path
 import re
 import sqlite3
@@ -26,14 +27,16 @@ from .ees_workflow_definition import (
     _draft_shape_errors, validate_definition,
 )
 from .ees_workflow_view import _applicable, _finished, _missing, _inputs, _view, _workflow
-from .ees_workflow_authoring import AuthoringMixin, WorkflowError
+from .ees_workflow_authoring import AuthoringMixin, WorkflowError, _hash
 from .ees_workflow_execution import ExecutionRuntime, init_execution
 from .ees_workflow_contract import validate_inputs
-from .ees_workflow_workspace import WorkspaceMixin
+from .ees_workflow_workspace import WorkspaceMixin, definition_check
 from .ees_workflow_operations import OperationsRuntime
 from .ees_workflow_shared_tools import SharedTools
 from .ees_workflow_tool_drafts import ToolDrafts
-from .ees_workflow_api_catalog import ApiCatalog
+from .ees_workflow_api_catalog import ApiCatalog, CORE, ORIGIN
+from .ees_workflow_api_binding import binding_errors
+from .ees_workflow_api_openapi import parse_document
 
 _service = None
 
@@ -53,7 +56,8 @@ def _now():
 class WorkflowService(WorkspaceMixin, AuthoringMixin):
     """The injected lookups use the same current user and chat store as WebUI."""
 
-    def __init__(self, database, user_lookup, chat_lookup, asset_lookup=None, group_lookup=None, group_list_lookup=None, *, native_bridge=None, model_executor=None):
+    def __init__(self, database, user_lookup, chat_lookup, asset_lookup=None, group_lookup=None, group_list_lookup=None, *, native_bridge=None, model_executor=None, confluence_guide=False):
+        self.confluence_guide = confluence_guide
         self.database = Path(database)
         self.user_lookup, self.chat_lookup = user_lookup, chat_lookup
         self.asset_lookup = asset_lookup
@@ -81,6 +85,55 @@ class WorkflowService(WorkspaceMixin, AuthoringMixin):
         self.operations = OperationsRuntime(self, bridge=native_bridge, model=model_executor)
         self.shared_tools = SharedTools(self)
         self.tool_drafts = ToolDrafts(self)
+        if self.confluence_guide:
+            self.install_confluence_guide()
+
+    @staticmethod
+    def _work_guide_example():
+        source = Path(__file__).with_name('workflow_confluence_guide.json')
+        return json.loads(source.read_text(encoding='utf-8'))['x-ees-procedure-example']
+
+    def install_confluence_guide(self):
+        """Switch the visible catalog once; each later start retains edits and publications."""
+        with self._db(write=True) as db:
+            db.execute('CREATE TABLE IF NOT EXISTS work_product_guides (id TEXT PRIMARY KEY)')
+            marker = 'confluence-documents-v1'
+            if db.execute('SELECT 1 FROM work_product_guides WHERE id=?', (marker,)).fetchone():
+                self.confluence_guide = True
+                return
+            system = os.environ.get('EES_WORK_GUIDE_SYSTEM', 'EMS').strip().upper()
+            if system not in (*SYSTEMS, 'COMMON'):
+                raise WorkflowError('invalid_system', '가이드를 게시할 EES_WORK_GUIDE_SYSTEM을 확인하세요.')
+            text = Path(__file__).with_name('workflow_confluence_guide.json').read_text(encoding='utf-8')
+            guide = json.loads(text)['x-ees-procedure-example']
+            specification = parse_document(text)
+            service_id = 'confluence-readonly-pilot'
+            actor_id = 'ees-product-guide'
+            self._work_archive_previous_catalog(db)
+            db.execute('INSERT INTO work_api_services(id,name,revision) VALUES(?,?,1)',
+                       (service_id, specification['service_name']))
+            candidates = self.api_catalog._candidates(db, actor_id, [], specification, '', service_id)
+            api_ids = {'getConfluencePage': 'guide-confluence-page', 'listConfluenceChildPages': 'guide-confluence-children'}
+            if len(candidates) != len(api_ids) or {row.get('operation_key') for row in candidates} != set(api_ids):
+                raise WorkflowError('invalid_guide', '기본 Confluence API 명세를 확인하세요.')
+            for row in candidates:
+                if row.get('mode') != 'new' or row['method'] != 'GET':
+                    raise WorkflowError('invalid_guide', '가이드 명세는 새 조회 API여야 합니다.')
+                data = {key: row[key] for key in (*CORE, *ORIGIN) if key in row}
+                self.api_catalog._persist(db, actor_id, None, data, new_id=api_ids[row['operation_key']])
+            definition = dict(guide['definition'], id='guide-confluence-documents', system_id=system)
+            errors, _ = definition_check(definition)
+            errors.extend(binding_errors(self, db, [], definition, for_new=True))
+            if errors:
+                raise WorkflowError('invalid_guide', '\n'.join(errors))
+            key, now = definition['id'], _now()
+            db.execute('INSERT INTO work_definitions VALUES(?,?,?,1,1,NULL,?,?)',
+                       (key, system, _dump(definition), actor_id, now))
+            published = dict(definition, resource_versions={'skills': {}})
+            db.execute('INSERT INTO work_versions VALUES(?,1,?,?,?,?)',
+                       (key, _dump(published), _hash(published), actor_id, now))
+            db.execute('INSERT INTO work_product_guides VALUES(?)', (marker,))
+        self.confluence_guide = True
 
     @contextmanager
     def _db(self, write=False):
@@ -293,7 +346,8 @@ def _production_service():
 
         _service = WorkflowService(Path(DATA_DIR) / "ees-work.sqlite3", Users.get_user_by_id,
                                    Chats.get_chat_by_id, _registered_assets,
-                                   Groups.get_groups_by_member_id, lambda: Groups.get_groups({}))
+                                   Groups.get_groups_by_member_id, lambda: Groups.get_groups({}),
+                                   confluence_guide=True)
     return _service
 
 

@@ -1004,6 +1004,8 @@ class OperationsRuntime:
             previous = json.loads(row[0]) if row else None
             self._revision(body, previous["revision"] if previous else 0)
             if action == "schedule_save":
+                if not db.execute("SELECT 1 FROM work_definitions WHERE id=?", (data["workflow_id"],)).fetchone():
+                    fail("workflow_not_found")
                 if previous and (previous["workflow_id"] != data["workflow_id"] or previous["scope"] != data["scope"]):
                     fail("schedule_scope_immutable")
                 # Editing a rule cannot alter already materialized slots.
@@ -1120,6 +1122,8 @@ class OperationsRuntime:
     def enqueue_scope(self, db, actor, groups, run_id, node_id=None, expected_revision=None, request_id=None, model_identity=None, emergency=False):
         """Persist coordination only. All external calls reuse the J executor."""
         run = self.service._work_run(db, actor, groups, run_id, write=True)
+        if not db.execute("SELECT 1 FROM work_definitions WHERE id=?", (run["workflow_id"],)).fetchone():
+            fail("workflow_archived", "보관한 절차는 기존 회차의 작업을 개별 확인해 주세요.")
         if expected_revision is not None and run["revision"] != expected_revision:
             fail("revision_conflict")
         definition = json.loads(run["snapshot"])["definition"]
@@ -1528,12 +1532,7 @@ class OperationsRuntime:
             self.service._work_run(db, actor, groups, run["id"], write=True)
             if api_operation:
                 api_http.authorize_service(self._api_operation(db, reference, groups),actor)
-            if schedule_guard is not None:
-                self._current_schedule(db, schedule_guard)
-            if scope_guard is not None:
-                guard = db.execute("SELECT * FROM work_scope_runs WHERE id=?", (scope_guard["id"],)).fetchone()
-                if not guard or guard["status"] != "running" or guard["worker"] != self.worker or guard["lease"] < self.clock() or guard["actor"] != value(actor, "id"):
-                    fail("scope_claim_lost")
+            self._check_automatic_dispatch(db, actor, schedule_guard, scope_guard)
             receipt = self._receipt(db, actor, body)
             if receipt is not None:
                 if api_operation or (shared_pin and self.service.shared_tools.authored.is_authored_reference(shared_pin['reference'])):
@@ -1584,6 +1583,12 @@ class OperationsRuntime:
             self._remember(db, actor, body, outcome)
         heartbeat = asyncio.create_task(self._heartbeat("work_job_claims", "attempt_id", attempt["id"]))
         status, result = "unknown", {"error": {"code": "execution_result_unknown"}}
+
+        def check_dispatch():
+            if scope_guard is not None or schedule_guard is not None:
+                with self.service._db() as db:
+                    self._check_automatic_dispatch(db, actor, schedule_guard, scope_guard)
+
         try:
             if await self._skills(actor, job, snapshot["definition"]) != skill_snapshots:
                 fail("skill_changed", "연결된 Native 지침의 권한·내용이 바뀌었습니다.")
@@ -1599,12 +1604,14 @@ class OperationsRuntime:
                     actor, _, groups = await self._actor(actor)
                     with self.service._db() as db:
                         self._api_guard(db, actor, groups, attempt, arguments, argument_sources)
+                    check_dispatch()
                     result = await api_http.invoke_http(api_operation, arguments, actor, outputs=job['api_binding']['outputs'])
                     result = clean(result)
                     if job.get('result_block') == 'human_confirm':
                         for item in result['items']:
                             item['required'] = False
                 else:
+                    check_dispatch()
                     result = await invoke(actor, reference, arguments, {"run_id": run["id"], "job_id": job["id"], "call_id": attempt["id"], **({"shared_tool_id": job["shared_tool_id"], "shared_run_kind": "work"} if shared_pin else {})})
 
             elif job.get("result_block") in {"item_verdict", "ai_review"}:
@@ -1622,6 +1629,7 @@ class OperationsRuntime:
                            "source": {"results": stored_results, "human_decisions": source_decisions, "inputs": attempt["inputs"], "skills": skill_snapshots,
                                       "judgment_rules": {"judgments": deepcopy(job.get("judgments", snapshot["definition"].get("judgments", []))), "suggestion_rules": deepcopy(job.get("suggestion_rules", {})), "confirmation_notes": job.get("confirmation_notes", "")},
                                       "limitations": ["Attachment presence and access metadata do not prove document content or adequacy.", "This is an AI suggestion, not a human decision or a sent report."]}}
+                check_dispatch()
                 proposed = await self.model.propose(actor, model_identity["id"], context, job.get("instructions") or "Review only the supplied current evidence; preserve unknowns and human decisions. Do not infer document adequacy from metadata.")
                 expected_context = {key: context[key] for key in ("context_id", "target_id", "revision", "kind")}
                 if not isinstance(proposed, dict) or proposed.get("ok") is not True or proposed.get("context") != expected_context:
@@ -1644,6 +1652,7 @@ class OperationsRuntime:
             else:
                 node = {"id": job["id"], "execution": {**job.get("execution", {}), "kind": "ai", "model_id": model_identity["id"], "evidence": evidence}}
                 results = stored_results
+                check_dispatch()
                 result = await self.model.invoke(actor, node, {"run_id": run["id"], "model_identity": model_identity, "instructions": [job.get("instructions", "")], "skills": skill_snapshots}, results, attempt["inputs"])
                 from .ees_workflow_contract import _evaluate_summary
                 validation = _evaluate_summary(node["execution"], result, results)
@@ -1841,7 +1850,10 @@ class OperationsRuntime:
             for row in db.execute("SELECT principal_id,roles FROM work_access WHERE principal_kind='user' AND active=1 AND (?='' OR system_id=?)", (system_id, system_id)):
                 if "manager" in json.loads(row["roles"]):
                     reviewer_ids.add(row["principal_id"])
-            for row in db.execute("SELECT data FROM work_tool_contracts ORDER BY id"):
+            contracts = "SELECT data FROM work_tool_contracts"
+            if self.service.confluence_guide:
+                contracts += " WHERE id NOT IN (SELECT id FROM work_guide_retired_tools WHERE kind='contract')"
+            for row in db.execute(contracts + " ORDER BY id"):
                 item = json.loads(row[0])
                 try:
                     self._scope(db, actor, groups, item["system_id"])
@@ -1852,7 +1864,10 @@ class OperationsRuntime:
                 all_tools.append(item)
                 if not system_id or item["system_id"] == system_id:
                     tools.append(item)
-            for row in db.execute("SELECT data FROM work_schedules ORDER BY next_at,id"):
+            active_schedules = "SELECT data FROM work_schedules"
+            if self.service.confluence_guide:
+                active_schedules += " WHERE workflow_id IN (SELECT id FROM work_definitions)"
+            for row in db.execute(active_schedules + " ORDER BY next_at,id"):
                 item = json.loads(row[0])
                 if system_id and item["system_id"] != system_id:
                     continue
@@ -1902,7 +1917,7 @@ class OperationsRuntime:
                 continue
         native_functions = []
         self.configure()
-        if hasattr(self.bridge, "registered_capabilities"):
+        if not self.service.confluence_guide and hasattr(self.bridge, "registered_capabilities"):
             native_functions = await self.bridge.registered_capabilities(actor)
         models = []
         if self.model is not None and hasattr(self.model, "available"):
@@ -1929,7 +1944,7 @@ class OperationsRuntime:
         from .ees_workflow_shared_tools import MESSAGES
         shared_tool_access = await self.service.shared_tools.run_access(actor, run_id) if run_id else {}
         tool_drafts = await self.service.tool_drafts.summaries(actor)
-        tool_import_sources = await self.service.tool_drafts.sources(actor)
+        tool_import_sources = [] if self.service.confluence_guide else await self.service.tool_drafts.sources(actor)
         tool_scope_factories = []
         if value(await self.service._user(actor), "role") != "admin":
             tool_drafts, tool_import_sources = [], []
@@ -1937,7 +1952,7 @@ class OperationsRuntime:
             with self.service._db() as db:
                 tool_scope_factories = [dict(row) for row in db.execute("SELECT id,name,system_id FROM work_factories ORDER BY name,id")]
         catalog = await self.service.api_catalog.state(actor)
-        return {"api_catalog": catalog, "tool_draft_phase": 3, "tool_scope_factories": tool_scope_factories, "tool_drafts": tool_drafts, "tool_import_sources": tool_import_sources, "shared_tools": shared_tools, "shared_tools_notice": shared_notice, "shared_tool_messages": deepcopy(MESSAGES), "shared_tool_access": shared_tool_access, "ok": True, "scope_runs": scopes, "tools": tools, "all_tools": all_tools, "native_functions": native_functions, "tool_examples": tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
+        return {"confluence_guide": self.service.confluence_guide, "api_catalog": catalog, "tool_draft_phase": 3, "tool_scope_factories": tool_scope_factories, "tool_drafts": tool_drafts, "tool_import_sources": tool_import_sources, "shared_tools": shared_tools, "shared_tools_notice": shared_notice, "shared_tool_messages": deepcopy(MESSAGES), "shared_tool_access": shared_tool_access, "ok": True, "scope_runs": scopes, "tools": tools, "all_tools": all_tools, "native_functions": native_functions, "tool_examples": [] if self.service.confluence_guide else tool_examples(), "can_author_direct": can_author_direct, "reviewers": reviewers, "schedules": schedules, "slots": slots, "automatic_statuses": list(automatic.values()), "actionable": actionable, "requests": requests, "models": models, "show_model_selector": len(models) > 1, "model_configured": bool(models), "ees_connector_configured": self.connector is not None}
 
     def start(self):
         self._closing = False
@@ -1989,6 +2004,11 @@ class OperationsRuntime:
             if job.get('api_binding'):
                 continue  # Workspace validates API bindings and pinned schemas together.
             if job.get("shared_tool_id"):
+                key = job["shared_tool_id"]
+                if self.service.confluence_guide and (not self.service.shared_tools.authored.is_key(key) or
+                        db.execute("SELECT 1 FROM work_guide_retired_tools WHERE kind='authored' AND id=?", (key,)).fetchone()):
+                    errors.append(job["id"] + ": 이전 도구를 새 작업에 연결할 수 없습니다.")
+                    continue
                 # Manual publication may retain an incomplete authored-tool
                 # setup. Readiness is checked against the pinned use at I/O.
                 if self.service.shared_tools.authored.is_key(job['shared_tool_id']):
@@ -2031,6 +2051,9 @@ class OperationsRuntime:
             if self._job_kind(job) != "request" and not key:
                 continue
             try:
+                if self.service.confluence_guide and db.execute(
+                        "SELECT 1 FROM work_guide_retired_tools WHERE kind='contract' AND id=?", (key,)).fetchone():
+                    fail("tool_unavailable", "이전 도구를 새 작업에 연결할 수 없습니다.")
                 tool = self._tool(db, key)
                 self._scope(db, actor, groups, tool["system_id"],
                             factory="" if authoring else factory_id,
@@ -2102,6 +2125,15 @@ class OperationsRuntime:
         if type(offset) is not int or not 0 <= offset <= 366 * 86400:
             fail("job_trigger_invalid")
         return slot_time + offset
+
+    def _check_automatic_dispatch(self, db, actor, schedule, scope):
+        if schedule is not None:
+            self._current_schedule(db, schedule)
+        if scope is not None:
+            claim = db.execute("SELECT * FROM work_scope_runs WHERE id=?", (scope["id"],)).fetchone()
+            if (not claim or claim["status"] != "running" or claim["worker"] != self.worker
+                    or claim["lease"] < self.clock() or claim["actor"] != value(actor, "id")):
+                fail("scope_claim_lost")
 
     def _current_schedule(self, db, schedule):
         row = db.execute("SELECT enabled,data FROM work_schedules WHERE id=?", (schedule["id"],)).fetchone()

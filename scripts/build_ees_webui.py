@@ -153,6 +153,9 @@ API_TOOL_MODULES = (
 for module in API_TOOL_MODULES:
     WORK_ASSETS["scripts/" + module] = "open_webui/" + module
 WORK_FILES += tuple("open_webui/" + module for module in API_TOOL_MODULES)
+GUIDE_ASSET = "workflow_confluence_guide.json"
+WORK_ASSETS["scripts/" + GUIDE_ASSET] = "open_webui/" + GUIDE_ASSET
+WORK_FILES += (WORK_ASSETS["scripts/" + GUIDE_ASSET],)
 # Copy these already bundled upstream fonts byte-for-byte into the new cache
 # namespace; no font download, transformation, or runtime dependency is needed.
 FONT_SOURCES = {

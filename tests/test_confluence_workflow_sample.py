@@ -31,10 +31,16 @@ sys.modules[package.__name__] = package
 workflow = import_module(package.__name__ + '.ees_workflow')
 
 
+class EmptyNativeRegistry:
+    async def invoke(self, *_args):
+        raise AssertionError('An API-only workflow must use the registered HTTP transport')
+
+
 @contextmanager
-def workflow_server(database, client_users):
+def workflow_server(database, client_users, *, confluence_guide=False):
     """Serve the product's routes; substitute only the signed-in identity and isolated DB."""
-    service = workflow.WorkflowService(database, client_users.get, lambda _: None)
+    service = workflow.WorkflowService(database, client_users.get, lambda _: None,
+                                       native_bridge=EmptyNativeRegistry(), confluence_guide=confluence_guide)
     app = FastAPI()
 
     async def verified(authorization: str = Header(default='')):
@@ -148,6 +154,159 @@ class ConfluenceWorkflowContractTests(unittest.TestCase):
         return self.command('workspace/command', 'confirm_list', revision, job_id=job, run_id=run_id,
                 items=items, attempt_id=attempt['id'], result_revision=attempt['number'],
                 reason='' if items else '확인할 하위 문서가 없습니다.')
+
+    def open_guide(self, database, previous_service=None):
+        service = {'base_url': self.provider.base_url + '/content', 'actor_ids': ['operator'],
+                   'user_credential_headers': {'operator': {'Authorization': 'EES_CONFLUENCE_TEST_HEADER'}}}
+        registry = {'confluence-readonly-pilot': service}
+        if previous_service:
+            registry[previous_service] = service
+        self.enterContext(patch.dict(os.environ, {'EES_WORK_API_SERVICES': json.dumps(registry),
+                                                  'EES_WORK_GUIDE_SYSTEM': 'EMS'}))
+        self.webui = self.enterContext(workflow_server(database, self.users, confluence_guide=True))
+
+    def test_clean_deployment_publishes_runnable_guide_without_registration(self):
+        database = self.db.with_name('fresh-guide.sqlite3')
+        self.assertFalse(database.exists())
+        self.users['unassigned'] = {'id': 'unassigned', 'role': 'user'}
+        self.open_guide(database)
+        workspace = self.call('workspace', query={'system_id': 'EMS'})
+        self.assertEqual([w['id'] for w in workspace['workflows']], ['guide-confluence-documents'])
+        self.assertEqual([p['id'] for p in workspace['procedure_examples']], ['confluence_documents'])
+        def inspect_only(route, data=None, query=None):
+            self.assertIsNone(data, 'The legacy installer must not write after the guide is installed')
+            return self.call(route, query=query)
+
+        for system in ('EMS', 'APC'):
+            installed = provision(inspect_only, self.spec, system)
+            self.assertEqual(installed['status'], 'built_in')
+            self.assertEqual(installed['system_id'], 'EMS')
+            self.assertEqual(installed['workflow_id'], 'guide-confluence-documents')
+        operations = self.call('operations', query={'system_id': 'EMS'})
+        self.assertTrue(operations['confluence_guide'])
+        for key in ('tool_examples', 'tools', 'shared_tools', 'tool_drafts', 'tool_import_sources'):
+            self.assertEqual(operations[key], [], key)
+        catalog = operations['api_catalog']
+        self.assertEqual({op['id'] for op in catalog['apis']}, {'guide-confluence-page', 'guide-confluence-children'})
+        self.assertEqual({op['service_id'] for op in catalog['apis']}, {'confluence-readonly-pilot'})
+        self.assertEqual({op['method'] for op in catalog['apis']}, {'GET'})
+        for system in ('EMS', 'APC'):
+            init = self.command('workspace/command', 'initialize_procedures', actor='admin', system_id=system)
+            self.assertEqual(init['created_workflow_ids'], [])
+        procedures = self.call('workspace')['workflows']
+        self.assertEqual([wf['id'] for wf in procedures], ['guide-confluence-documents'])
+        guide = workspace['workflows'][0]
+        self.assertEqual(guide['published_version'], 1)
+        args = {'workflow_id': guide['id'], 'inputs': {'page-id': PAGE_ID}}
+        denied = self.command('workspace/command', 'start_run', guide['revision'], actor='unassigned', check=False, **args)
+        self.assertFalse(denied['ok'])
+        self.command('workspace/command', 'save_access', actor='admin', system_id='EMS', factory_id='*',
+                     roles=['participant'], principal_kind='user', principal_id='operator')
+        run = self.command('workspace/command', 'start_run', guide['revision'], **args)['run_id']
+        self.assertEqual(self.provider.records, [])
+        first = self.run_step(run, 'page')
+        self.assertEqual(first['result']['items'][0]['row']['title'], PAGE['title'])
+        denied = self.command('operations', 'execute_job', self.state(run)['revision'],
+                              job_id='children', run_id=run, check=False)
+        self.assertFalse(denied['ok'])
+        self.assertEqual(len(self.provider.records), 1)
+        self.confirm(run, first, 'page')
+        children = self.run_step(run, 'children')
+        self.assertEqual([item['row']['id'] for item in children['result']['items']], [p['id'] for p in CHILDREN])
+        self.confirm(run, children, 'children')
+        self.command('workspace/command', 'close_run', self.state(run)['revision'], run_id=run)
+        self.open_guide(database)
+        reopened = self.state(run)
+        self.assertEqual(reopened['status'], 'completed')
+        self.assertEqual([a['result']['http_status'] for a in reopened['attempts']], [200, 200])
+        self.assertEqual(self.provider.records, [
+            ('/rest/api/content/' + PAGE_ID, {}, True),
+            ('/rest/api/content/' + PAGE_ID + '/child/page', {'limit': ['5']}, True),
+        ])
+        self.assertNotIn(self.provider.bearer, json.dumps(reopened))
+
+    def test_upgrade_archives_old_catalog_and_preserves_runs_and_later_authoring(self):
+        old = self.create_run()
+        self.confirm(old, self.run_step(old, 'page'), 'page')
+        self.confirm(old, self.run_step(old, 'children'), 'children')
+        self.command('workspace/command', 'close_run', self.state(old)['revision'], run_id=old)
+        old_attempts = self.state(old)['attempts']
+        previous = self.call('workspace', query={'workflow_id': self.workflow_id})['workflow']
+        active = self.command('workspace/command', 'start_run', previous['revision'],
+                              workflow_id=self.workflow_id, inputs={'page-id': PAGE_ID})['run_id']
+        old_catalog = self.call('operations', query={'system_id': 'EMS'})['api_catalog']
+        previous_service = old_catalog['apis'][0]['service_id']
+        self.open_guide(self.db, previous_service)
+        catalog = self.call('operations', query={'system_id': 'EMS'})['api_catalog']
+        self.assertEqual({op['id'] for op in catalog['apis']}, {'guide-confluence-page', 'guide-confluence-children'})
+        self.assertNotIn(previous_service, [svc['id'] for svc in catalog['services']])
+        visible = self.call('workspace', query={'system_id': 'EMS'})['workflows']
+        self.assertEqual([wf['id'] for wf in visible], ['guide-confluence-documents'])
+        denied = self.command('workspace/command', 'start_run', previous['revision'], check=False,
+                              workflow_id=previous['id'], inputs={'page-id': PAGE_ID})
+        self.assertFalse(denied['ok'])
+        for run_id in (old, active):
+            restored = self.call('workspace', query={'workflow_id': previous['id'], 'run_id': run_id},
+                                 actor='operator')['run']
+            self.assertEqual(restored['workflow_id'], previous['id'])
+            if run_id == old:
+                self.assertEqual(restored['status'], 'completed')
+                self.assertEqual(restored['attempts'], old_attempts)
+        created = self.command('workspace/command', 'create_workflow', actor='admin', name='신규 절차', system_id='EMS')
+        op = self.command('operations', 'api_save', actor='admin', api={
+            'name': '신규 API', 'purpose': '새 서비스 조회', 'method': 'GET', 'url': 'https://new.example/status',
+            'inputs': [], 'fields': []})['api']
+        self.open_guide(self.db, previous_service)
+        catalog = self.call('operations', query={'system_id': 'EMS'})['api_catalog']
+        self.assertEqual({row['id'] for row in catalog['apis']},
+                         {'guide-confluence-page', 'guide-confluence-children', op['id']})
+        visible = self.call('workspace', query={'system_id': 'EMS'})['workflows']
+        self.assertEqual({wf['id'] for wf in visible}, {'guide-confluence-documents', created['workflow_id']})
+        self.assertEqual(len(self.provider.records), 2, 'A restart or migration called Confluence')
+
+    def test_upgrade_does_not_dispatch_older_queued_or_claimed_work(self):
+        run_id = self.create_run()
+        initial = self.state(run_id)
+        scope = self.command('operations', 'execute_scope', initial['revision'], run_id=run_id)['scope']
+        # A real queue lease shows that a worker might already have contacted the provider.
+        worker = workflow._production_service().operations
+        claimed = worker._claim_scope()
+        self.assertEqual(claimed['id'], scope['id'])
+        schedule = {'id': 'automatic', 'workflow_id': self.workflow_id, 'scope': 'EMS',
+                    'system_id': 'EMS', 'factory_id': '', 'identity_user_id': 'operator',
+                    'enabled': True, 'revision': 1, 'next_at': 1}
+        states = ('queued', 'waiting', 'running')
+        with closing(sqlite3.connect(self.db)) as db, db:
+            db.execute('INSERT INTO work_schedules VALUES(?,?,?,?,?,?,?,?)',
+                       ('automatic', self.workflow_id, 'EMS', 'operator', 1, 1, 1, json.dumps(schedule)))
+            # Simulate persisted due slots from a live scheduler immediately before the restart.
+            for stamp, status in enumerate(states, 1):
+                leased = ('prior-worker', 12345) if status == 'running' else (None, None)
+                slot = {'id': 'slot-' + status, 'schedule': schedule, 'scheduled_at': stamp,
+                        'next_due': stamp, 'run_id': run_id, 'state': status}
+                db.execute('INSERT INTO work_schedule_slots VALUES(?,?,?,?,?,?,?,?,?)',
+                           (slot['id'], 'automatic', self.workflow_id, 'EMS', stamp, status,
+                            *leased, json.dumps(slot)))
+        self.open_guide(self.db)
+        denied = self.command('operations', 'execute_scope', initial['revision'], run_id=run_id, check=False)
+        self.assertEqual(denied['error']['code'], 'workflow_archived')
+        for _ in range(2):
+            worker = workflow._production_service().operations
+            self.assertFalse(asyncio.run(worker.process_once()))
+            self.assertEqual(self.provider.records, [])
+            self.assertEqual(self.state(run_id)['attempts'], [])
+            with closing(sqlite3.connect(self.db)) as db:
+                self.assertEqual(db.execute('SELECT enabled FROM work_schedules').fetchone(), (0,))
+                self.assertEqual(db.execute('SELECT enabled FROM work_guide_archive_schedules').fetchone(), (1,))
+                classified = db.execute("SELECT status,worker,lease,json_extract(data,'$.reason') "
+                                        "FROM work_scope_runs WHERE id=?", (scope['id'],)).fetchone()
+                self.assertEqual(classified, ('unknown', None, None, 'workflow_archived'))
+                self.assertEqual(db.execute('SELECT status FROM work_guide_archive_scope_runs').fetchone(), ('running',))
+                slots = list(db.execute('SELECT status,worker,lease FROM work_schedule_slots ORDER BY scheduled_at'))
+                self.assertEqual(slots, [('blocked', None, None), ('blocked', None, None), ('unknown', None, None)])
+                self.assertEqual([row[0] for row in db.execute('SELECT status FROM work_guide_archive_schedule_slots '
+                                                               'ORDER BY scheduled_at')], list(states))
+            self.open_guide(self.db)
 
     def test_retry_after_interrupted_save_resumes_same_draft(self):
         def interrupted(route, data=None, query=None):

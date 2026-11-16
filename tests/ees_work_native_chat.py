@@ -214,7 +214,8 @@ def central_flow(g):
     assert setup['state']=='ready',setup
     registered=g.api('/api/v1/tools/id/ees_workflow')
     assert hashlib.sha256(registered['content'].encode()).hexdigest()==status['source_sha256']
-    assert g.api('/api/ees-work/workspace')['workflows']==[]
+    visible = g.api('/api/ees-work/workspace')['workflows']
+    assert [item['id'] for item in visible] == ['guide-confluence-documents'], visible
     g.record('explicit packaged read-only Work tool registration',id='ees_workflow',source_sha256=status['source_sha256'],private_native_grant=True,model_presets_created=False)
     g.open_initialized_author_list();g.click('[data-author-action="create"]')
     g.type('#ew-procedure-create #ew-procedure-name','중앙 대화 제안 검증')

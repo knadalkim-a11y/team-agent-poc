@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-16 · 기본 업무를 Confluence 조회 가이드로 전환
+
+업무 서비스 최초 적용 시 이전 절차와 도구를 새 업무 목록에서 정리하고, 기준 문서와 직계 하위 문서를 조회하는 게시 절차 하나와 읽기 API 두 개를 제공한다. [사용·연결 안내](docs/specs/shared-tools.md#confluence-starter)
+
 ## 2026-11-12 · 기존 대화에서 초안 복원
 
 기존 대화를 연 직후 입력한 문장이 이전 초안으로 덮이는 문제를 수정했다. [재현 조건과 브라우저 검사](evals/figma-product-parity-20261111.md#draft-restore-20261112)

@@ -2509,7 +2509,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer [data-api-screen=detail] :is(th,td) {padding:5px 10px;border:0;}
 #ees-work-designer [data-api-screen=detail] th {background:#f0f5fd;font-weight:500;}
 #ees-work-designer [data-api-catalog] .ew-api-import-end {display:flex;justify-content:space-between;gap:8px;margin:10px 0;}
-#ees-work-designer [data-api-catalog] .ew-api-import-end>div {display:flex;gap:8px;}
+#ees-work-designer [data-api-catalog] .ew-api-import-end>div {display:flex;gap:8px;margin-inline-start:auto;}
 #ees-work-designer [data-api-screen=import] .ew-api-advanced {border:0;}
 #ees-work-designer [data-api-catalog] .ew-api-choice {display:flex;flex-direction:row;gap:8px;min-height:42px;padding:7px 10px;margin:10px 0;background:#f0f5fd;border-radius:5px;}
 #ees-work-designer [data-api-catalog] .ew-api-choice[data-method=POST] {background:#ecf6f0;}

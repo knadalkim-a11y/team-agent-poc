@@ -140,10 +140,11 @@ class ApiCatalog:
     def _all(db):
         return [json.loads(row[0]) for row in db.execute("SELECT data FROM work_api_operations ORDER BY service_id,id")]
 
-    @staticmethod
-    def _get(db, key):
+    def _get(self, db, key, *, pinned=False):
         key = string(key,160,required=True)
         row = db.execute("SELECT data FROM work_api_operations WHERE id=?",(key,)).fetchone()
+        if not row and pinned and self.service.confluence_guide:
+            row = db.execute("SELECT data FROM work_guide_archive_api_operations WHERE id=?", (key,)).fetchone()
         if not row:
             invalid("API를 찾을 수 없습니다.", "api_not_found")
         return json.loads(row[0])
@@ -153,7 +154,7 @@ class ApiCatalog:
         return not op["group_ids"] or bool(set(op["group_ids"]).intersection(groups))
 
     def resolve(self, db, api_id, version=None, *, groups, for_new=False, evidence=False):
-        current = self._get(db, api_id)
+        current = self._get(db, api_id, pinned=version is not None and not for_new)
         if not self._allowed(current, groups):
             invalid("이 API를 사용할 권한이 없습니다.", "api_forbidden")
         if not evidence and (current["state"] == "withdrawn" or for_new and current["state"] != "active"):
@@ -230,11 +231,11 @@ class ApiCatalog:
             invalid("같은 이름의 서비스가 있습니다.", "api_service_duplicate")
         return {"ok":True,"service":self._service(db,key)}
 
-    def _persist(self, db, actor, old, data):
+    def _persist(self, db, actor, old, data, *, new_id=None):
         if old and all(old.get(k) == data.get(k) for k in (*CORE,*ORIGIN)):
             return old
         version = old["version"]+1 if old else 1
-        record = dict(data,id=old["id"] if old else "api-"+uuid4().hex,version=version,revision=version)
+        record = dict(data,id=old["id"] if old else (new_id or "api-"+uuid4().hex),version=version,revision=version)
         encoded = dump(record)
         try:
             db.execute("INSERT INTO work_api_operations VALUES(?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET revision=excluded.revision,service_id=excluded.service_id,method=excluded.method,url=excluded.url,data=excluded.data",

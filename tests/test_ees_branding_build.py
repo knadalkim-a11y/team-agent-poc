@@ -248,7 +248,7 @@ print("installed_workflow_contract=pass")
             test.assertFalse(any(name.startswith("open_webui/ees_work_demo_ui/") for name in archive.namelist()))
             test.assertEqual(archive.read("open_webui/ees_workflow_tool.py"),
                              (builder.WORK_DIR / "scripts/workflow_tool.py").read_bytes())
-            for name in ("workflow_help.json", "workflow_tool_examples.json", "workflow_procedure_examples.json"):
+            for name in ("workflow_help.json", "workflow_tool_examples.json", "workflow_procedure_examples.json", builder.GUIDE_ASSET):
                 test.assertEqual(archive.read("open_webui/" + name),
                                  (builder.WORK_DIR / "scripts" / name).read_bytes())
             for name in ("ees_workflow.py", "ees_workflow_definition.py", "ees_workflow_view.py", "ees_workflow_authoring.py",
@@ -258,7 +258,7 @@ print("installed_workflow_contract=pass")
                          "ees_workflow_tool_lifecycle.py", "ees_workflow_tool_native.py", "ees_workflow_tool_worker.py", "ees_workflow_tool_runtime.py",
                          *builder.API_TOOL_MODULES,
                          "ees_workflow_tool.py", "workflow_policy.json", "workflow_help.json", "workflow_tool_examples.json",
-                         "workflow_procedure_examples.json"):
+                         "workflow_procedure_examples.json", builder.GUIDE_ASSET):
                 target = root / "open_webui" / name
                 target.parent.mkdir(exist_ok=True)
                 target.write_bytes(archive.read("open_webui/" + name))

@@ -33,9 +33,9 @@ def _procedure_examples():
     return json.loads(Path(__file__).with_name('workflow_procedure_examples.json').read_text(encoding='utf-8'))
 
 
-def _procedure_example_summaries():
+def _procedure_example_summaries(examples):
     summaries = []
-    for example in _procedure_examples():
+    for example in examples:
         definition = example['definition']; nodes = definition['nodes']
         root = next(node for node in nodes.values() if node['type'] == 'p')
         stages = [nodes[key] for key in root['children']]
@@ -470,6 +470,60 @@ def input_errors(fields, values, complete=True, options_snapshot=None):
 
 
 class WorkspaceMixin:
+    @staticmethod
+    def _work_archive_previous_catalog(db):
+        """Archive only live EES catalogs in the same transaction that installs the guide.
+
+        Keep published versions, access grants, run snapshots, attempts and decisions in
+        place. Moving the active rows releases unique display names and API addresses.
+        """
+        for table in ('definitions', 'api_operations', 'api_services'):
+            archive = 'work_guide_archive_' + table
+            db.execute(f'CREATE TABLE {archive} AS SELECT * FROM work_{table}')
+            db.execute(f'CREATE UNIQUE INDEX {archive}_id ON {archive}(id)')
+            db.execute(f'DELETE FROM work_{table}')
+
+        db.execute('CREATE TABLE work_guide_retired_tools(kind TEXT NOT NULL, id TEXT NOT NULL, PRIMARY KEY(kind,id))')
+        tables = {row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        for kind, table in (('contract', 'work_tool_contracts'), ('authored', 'work_tool_drafts')):
+            if table in tables:
+                db.execute(f'INSERT INTO work_guide_retired_tools SELECT ?,id FROM {table}', (kind,))
+        if 'work_schedules' in tables:
+            # Already-started runs remain open. Stop materializing future cycles.
+            db.execute('CREATE TABLE work_guide_archive_schedules AS SELECT * FROM work_schedules WHERE enabled=1')
+            db.execute("""UPDATE work_schedules SET enabled=0, revision=revision+1,
+                          data=json_set(data,'$.enabled',json('false'),'$.revision',revision+1) WHERE enabled=1""")
+        # A queued stage and a materialized schedule slot can run independently
+        # of the current catalog. Preserve their original records, retire the
+        # pending dispatches, and leave business runs and individual attempts intact.
+        for table, state_field in (('work_scope_runs', 'status'), ('work_schedule_slots', 'state')):
+            if table not in tables:
+                continue
+            pending = "status IN ('queued','waiting','running')"
+            if table == 'work_scope_runs':
+                pending += " AND run_id IN (SELECT id FROM work_runs WHERE workflow_id IN (SELECT id FROM work_guide_archive_definitions))"
+            else:
+                pending += " AND workflow_id IN (SELECT id FROM work_guide_archive_definitions)"
+            archived = 'work_guide_archive_' + table.removeprefix('work_')
+            db.execute(f"CREATE TABLE {archived} AS SELECT * FROM {table} WHERE {pending}")
+            # Leased work might already have reached its provider.
+            disposition = "CASE WHEN status='running' THEN 'unknown' ELSE 'blocked' END"
+            db.execute(f"""UPDATE {table} SET status={disposition}, worker=NULL, lease=NULL,
+                        data=json_set(data,'$.{state_field}',{disposition},'$.reason','workflow_archived')
+                        WHERE {pending}""")
+        for row in db.execute('SELECT actor_id,state FROM work_ui').fetchall():
+            state = json.loads(row['state'])
+            selected = state.get('selection')
+            if not isinstance(selected, dict):
+                continue
+            if selected.get('workflow_id') and not selected.get('run_id'):
+                selected.update(workflow_id='', job_id='', stage_id='', tab='overview')
+                db.execute('UPDATE work_ui SET revision=revision+1,state=? WHERE actor_id=?',
+                           (_dump(state), row['actor_id']))
+
+    def _work_active_examples(self):
+        return [self._work_guide_example()] if self.confluence_guide else _procedure_examples()
+
     def _work_input_errors(self, db, definition, fields, values, complete=True, options_snapshot=None, run_id=None):
         """Validate authored bindings from server-owned schemas, never UI hints."""
         from .ees_workflow_tool_draft_check import _matches
@@ -1353,7 +1407,10 @@ class WorkspaceMixin:
                         continue
                     runs.append(self._work_run_view(db, actor, groups, row, evidence_access, read=read))
                 selected_workflow = None
-                if workflow_id:
+                historical_run = bool(self.confluence_guide and run_id and workflow_id and db.execute(
+                    'SELECT 1 FROM work_guide_archive_definitions d JOIN work_runs r ON r.workflow_id=d.id '
+                    'WHERE d.id=? AND r.id=?', (workflow_id, run_id)).fetchone())
+                if workflow_id and not historical_run:
                     row = self._work_definition(db, actor, groups, workflow_id, read=read)
                     existing = next((item for item in workflows if item['id'] == workflow_id), None)
                     selected_workflow = deepcopy(existing) if existing is not None else self._work_workflow_view(db, actor, groups, row, read=read)
@@ -1389,13 +1446,15 @@ class WorkspaceMixin:
                     except WorkflowError: pass
                 capabilities['can_author'] = bool(capabilities['managed_systems'])
                 access = [dict(row) | {'roles': json.loads(row['roles'])} for row in db.execute('SELECT * FROM work_access ORDER BY id')] if capabilities['is_admin'] else []
-                example = next((item for item in _procedure_examples() if item['id'] == example_id), None) if example_id else None
+                examples = self._work_active_examples()
+                example = next((item for item in examples if item['id'] == example_id), None) if example_id else None
                 if example_id and example is None:
                     _fail('procedure_example_not_found', '기본 제공 절차를 다시 선택해 주세요.')
-                return {'ok': True, 'protocol': 2, 'help': workflow_help(), 'procedure_examples': _procedure_example_summaries(),
+                return {'ok': True, 'protocol': 2, 'help': workflow_help(), 'procedure_examples': _procedure_example_summaries(examples),
+                        'confluence_guide': self.confluence_guide,
                         **({'procedure_example': example} if example is not None else {}),
                         'capabilities': capabilities, 'systems': systems, 'factories': factories, 'scope_options': scope_options,
-                        'initial_procedures_ready': bool(db.execute('SELECT 1 FROM work_initial_procedures WHERE system_id=?', (system_id,)).fetchone()) if system_id in systems else None,
+                        'initial_procedures_ready': (self.confluence_guide or bool(db.execute('SELECT 1 FROM work_initial_procedures WHERE system_id=?', (system_id,)).fetchone())) if system_id in systems else None,
                         'workflows': workflows, 'runs': runs, 'workflow': selected_workflow, 'run': selected_run,
                         'workflow_active_runs': workflow_active_runs,
                         'access': access, 'people': people, 'native_groups': native_groups,
@@ -1569,7 +1628,7 @@ class WorkspaceMixin:
             system = body.get('system_id')
             self._work_authorize_scope(db, actor, groups, system, '', 'manager')
             _revision(body, 0)
-            if db.execute('SELECT 1 FROM work_initial_procedures WHERE system_id=?', (system,)).fetchone():
+            if self.confluence_guide or db.execute('SELECT 1 FROM work_initial_procedures WHERE system_id=?', (system,)).fetchone():
                 return {'system_id': system, 'created_workflow_ids': []}
             names = {json.loads(row['draft'])['name'] for row in db.execute('SELECT draft FROM work_definitions WHERE system_id=?', (system,))}
             created = []
@@ -1626,7 +1685,7 @@ class WorkspaceMixin:
                     _fail('procedure_example_not_found', '시작할 예시를 다시 선택해 주세요.')
                 if any(field in body for field in ('definition', 'nodes', 'category', 'mode', 'execution_scope', 'schedule')):
                     _fail('procedure_example_override', '예시와 절차 이름으로 초안을 만든 뒤 절차 설정에서 고쳐 주세요.')
-                example = next((item for item in _procedure_examples() if item['id'] == template_id), None)
+                example = next((item for item in self._work_active_examples() if item['id'] == template_id), None)
                 if example is None:
                     _fail('procedure_example_not_found', '시작할 예시를 다시 선택해 주세요.')
                 definition = _copy_definition_nodes(example['definition'])

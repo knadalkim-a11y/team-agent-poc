@@ -56,6 +56,10 @@ def provision(call, spec_text, system):
     state = call("workspace", query={"system_id": system})
     if not state.get("capabilities", {}).get("is_admin"):
         raise SetupError("API 명세 등록은 EES Workflow 관리자 계정으로 로그인하세요.")
+    if state.get("confluence_guide"):
+        guide = call("workspace", query={"workflow_id": "guide-confluence-documents"})["workflow"]
+        return {"workflow_id": guide["id"], "system_id": guide["system_id"], "status": "built_in",
+                "published_version": guide.get("published_version")}
     if system not in state["capabilities"]["managed_systems"]:
         raise SetupError("선택한 시스템에 업무 절차를 등록할 권한이 없습니다.")
     existing = [wf for wf in state["workflows"] if wf["name"] == TITLE and wf["system_id"] == system]
@@ -172,7 +176,9 @@ def main():
     print(f"EES Workflow {args.ees_url}  |  시스템 {args.system}  |  게시할 절차 {TITLE}")
     spec = args.spec.read_text(encoding="utf-8-sig")
     out = provision(session(args.ees_url, args.email), spec, args.system)
-    if out["status"] == "existing":
+    if out["status"] == "built_in":
+        print(f"{out['system_id']} 시스템에 기본 Confluence 가이드가 있습니다. 업무 → 운영에서 열 수 있습니다.")
+    elif out["status"] == "existing":
         print("같은 구성이 이미 게시되어 있습니다. 변경하지 않았습니다.")
     else:
         print("시험 절차를 게시했습니다. 업무 · 운영에서 페이지 ID를 입력하고 시작하세요.")

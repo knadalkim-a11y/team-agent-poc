@@ -385,10 +385,32 @@ Figma `XK2wTos6sEuxSHhIj7cqg6` 도구 2판 T06 `2017:333`, T06A `2054:384`, T07 
 - EES Web 개발 요청 화면의 실제 주소는 서버의 `EES_WORK_API_REQUEST_URL`에 설정한다. 설정 전에도 개발 요청 경로를 안내하며, 공개된 API는 도구에 등록한 뒤 업무에 연결한다.
 - 실제 서비스의 URL, 인증값, 운영 데이터는 설계 예시와 CI에서 사용하지 않는다. 사내 검증은 승인된 테스트 API 호출, 요청값·응답·업무 이력 대조, 권한이 없는 계정의 호출 거부까지 확인한다.
 
-### Confluence 문서 조회로 업무 연결 확인
+<a id="confluence-starter"></a>
 
-[읽기 API 명세](../../examples/confluence/confluence-readonly.openapi.json)의 `servers[0].url`을 배포 환경의 Confluence Data Center 기본 주소와 REST 경로로 바꾼다. 예제는 `기준 문서 확인`의 페이지 ID와 `하위 문서 목록 조회`의 `results` 배열을 사용한다. 서비스 설정은 위의 서버 허용 주소와 사용자별 인증 규칙을 따른다.
+### Confluence 문서 확인 가이드
 
-[시험 절차 등록 스크립트](../../examples/confluence/register_confluence_demo.py)는 EES Workflow 관리자 계정으로 명세 두 개를 등록하고 지정한 시스템의 운영 절차를 게시한다. 압축을 푼 예제 폴더에서 `python register_confluence_demo.py --ees-url <EES Workflow 주소> --email <EES 관리자 이메일> --system <시스템 ID>`를 실행한다. 로그인 암호는 숨김 입력한다. 프로그램 배포와 예제 등록은 별개의 작업이다.
+배포 후 업무 서비스를 처음 열면 `EMS → 운영`에 게시된 가이드 하나가 생긴다. `워크 · 도구`에는 `기준 문서 확인`과 `하위 문서 목록 조회`가 있다. 운영자가 최초 설치 전에 `EES_WORK_GUIDE_SYSTEM`으로 설치 대상 시스템을 지정할 수 있다. 두 API는 여러 절차에서 재사용한다. 다른 시스템의 절차 목록이 비어 있으면 관리자가 `가이드로 시작`에서 복사본을 만들 수 있다.
 
-`업무 → 운영`에서 시험 절차를 시작하고 읽기 권한이 있는 기준 문서의 `pageId`를 한 번 입력한다. 첫 작업에서 표시된 문서 제목과 ID를 확인·확정한 뒤 두 번째 작업을 실행한다. 하위 문서는 실행 계정이 볼 수 있는 직계 자식 중 첫 5건까지만 표시한다. 자식이 없는 문서는 정상적으로 0건이다.
+1. 담당자가 가이드를 열고 기준 문서의 숫자 `pageId`를 한 번 입력한다.
+2. `기준 문서 확인`을 실행해 제목과 ID를 확인하고 판정을 확정한다.
+3. `하위 문서 목록 조회`를 실행하면 그 ID가 자동 전달된다. 담당자가 볼 수 있는 직계 하위 문서를 최대 5건 표시한다. 하위 문서가 없는 페이지는 0건으로 확정할 수 있다. 결과와 판정은 해당 회차에 남는다.
+
+첫 적용은 기존 업무 절차와 도구를 새 절차 선택·편집·연결 목록에서 제외하고 이전 절차의 예약과 대기 중인 단계 자동 실행을 중지한다. 전송 여부를 단정할 수 없는 진행 중 요청은 확인 대상으로 남기고 자동 재시도하지 않는다. 기존 게시본과 회차의 실행 기록은 업무 DB에 보존한다. 적용 후 생성한 절차와 도구에는 일반 등록·게시 규칙을 적용한다. 서버를 다시 시작해도 새로 만든 자산을 정리하거나 가이드를 중복 등록하지 않는다.
+
+#### 실제 Confluence 연결
+
+서버의 `EES_WORK_API_SERVICES`에 아래 항목을 기존 서비스 설정과 병합한다. `base_url`은 사이트 기본 주소(필요한 경우 컨텍스트 경로 포함) 뒤에 `/rest/api/content`를 붙인다. 가이드의 상대 경로 `/{id}`와 `/{id}/child/page`를 이 기준으로 호출한다. 담당자가 접근할 수 있는 읽기 계정의 인증 헤더를 실행 프로세스에 제공한다. 운영 주소와 토큰은 명세에 저장하지 않는다.
+
+```json
+{
+  "confluence-readonly-pilot": {
+    "base_url": "https://wiki.example.invalid/rest/api/content",
+    "actor_ids": ["example-ees-user"],
+    "user_credential_headers": {
+      "example-ees-user": {"Authorization": "EES_CONFLUENCE_PILOT_AUTHORIZATION"}
+    }
+  }
+}
+```
+
+`EES_CONFLUENCE_PILOT_AUTHORIZATION`의 값은 `Bearer ` 뒤에 해당 계정의 PAT를 붙인 헤더 값이다. 회차에서 함께 볼 수 있는 문서를 사용한다. 서비스 접속은 작업 실행 때 발생한다. [표준 OpenAPI 예제](../../examples/confluence/confluence-readonly.openapi.json)에는 두 응답의 예시 구조가 있다.
