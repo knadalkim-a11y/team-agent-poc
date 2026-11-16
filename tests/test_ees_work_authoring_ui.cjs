@@ -1649,6 +1649,19 @@ test('API catalog ignores a retired control and exposes registered APIs only', a
 });
 
 
+test('an authorized system can find the guide alongside existing procedures', async () => {
+ const h=harness();
+ h.state.confluence_guide=true;
+ h.state.procedure_examples=[{id:'confluence_documents',name:'Confluence 문서 확인 가이드'}];
+ await h.open('');
+ assert.match(h.markup,/가이드로 시작/);
+ h.state.workflows.push({id:'guide-confluence-documents',name:'Confluence 문서 확인 가이드',system_id:'EMS',published_version:1});
+ h.render();
+ assert.doesNotMatch(h.markup,/가이드로 시작/);
+ assert.match(h.markup,/data-id="guide-confluence-documents"/);
+ assert.equal(h.writes.length,0);
+});
+
 test('an empty managed system can create the Confluence guide from its template or start blank', async () => {
  const h = harness();
  h.workflows.clear();

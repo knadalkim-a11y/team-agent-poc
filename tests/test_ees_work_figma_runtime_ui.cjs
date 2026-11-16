@@ -33,6 +33,29 @@ test('initial registration is not attempted by readers, tools pages or ordinary 
  }
 });
 
+test('the product Tools tab reads the registered catalog without operational dependencies', async()=>{
+ const h=controller(), catalog={services:[{id:'confluence'}],apis:[{id:'page'},{id:'children'}],can_manage:true};
+ const state={ok:true,confluence_guide:true,capabilities:{actor_id:'a',is_admin:true},systems:['EMS'],workflows:[],runs:[],ui_state:{revision:0,state:{}}};
+ h.api.setState(state);h.api.setSelection({mode:'author',tab:'tools',system_id:'EMS'});
+ h.setReply(call=>{
+  if(call.url.includes('workspace?'))return state;
+  if(call.url.endsWith('/api-catalog'))return {ok:true,api_catalog:catalog};
+  return {httpError:true,status:500,error:{message:'Execution state unavailable'}};
+ });
+ await h.api.refresh();
+ assert.deepEqual([...h.api.snapshot().state.operations.api_catalog.apis].map(api=>api.id),['page','children']);
+ assert.equal(h.calls.filter(call=>call.url.includes('/operations?')).length,0);
+ h.api.setSelection({tab:'overview'});
+ await h.api.refresh();
+ assert.equal(h.api.snapshot().state.operations.error,'Execution state unavailable');
+ assert.deepEqual([...h.api.snapshot().state.operations.api_catalog.apis].map(api=>api.id),['page','children']);
+ h.setReply(call=>call.url.includes('workspace?')?state:{httpError:true,status:403,error:{message:'Denied'}});
+ const before=h.calls.length;
+ await h.api.refresh();
+ assert.equal(h.api.snapshot().state,null);
+ assert.ok(!h.calls.slice(before).some(call=>call.url.endsWith('/api-catalog')));
+});
+
 test('initial registration failure is reported without pretending procedures exist',async()=>{
  const h=controller(),state={ok:true,capabilities:{actor_id:'a',can_author:true,managed_systems:['EMS']},systems:['EMS'],initial_procedures_ready:false,workflows:[],runs:[],ui_state:{revision:0,state:{}}};
  h.api.setState(state);h.api.setSelection({mode:'author',tab:'overview',system_id:'EMS'});
