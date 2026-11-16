@@ -194,6 +194,10 @@ class ConfluenceWorkflowContractTests(unittest.TestCase):
             self.assertTrue(access['can_accept_version'])
             self.assertEqual(access['current_tool'], {
                 'id':key, 'name':'기준 문서','version':2,'state':'available','function':'get_page','can_use':True})
+            self.command('operations', 'shared_tool_accept_version', self.state(run_id)['revision'],
+                         run_id=run_id, shared_tool_id=key, version=2)
+            self.assertIn({'id':key, 'version':2}, self.state(run_id)['shared_tools'])
+            self.assertEqual(self.call('operations', query=query, actor='operator')['shared_tools'], [])
             resolve.side_effect = workflow.WorkflowError('native_access_denied','detailed-private-message')
             unavailable = self.call('operations', query=query, actor='operator')['shared_tool_access']['page']
             self.assertEqual(unavailable['current_tool']['can_use'], False)

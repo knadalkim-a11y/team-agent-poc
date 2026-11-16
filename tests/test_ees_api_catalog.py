@@ -108,8 +108,13 @@ class CatalogTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(await available("karin"), [summary])
         self.assertEqual(await available("kim"), [])
         self.assertEqual(await available("admin"), [])
+        await self.call("api_save", api={**self.api, "name": "상태 조회", "url": "https://backup.example/status"})
+        standalone = {**summary, "name": "상태 조회", "service": "미분류"}
+        self.assertCountEqual(await available("karin"), [summary, standalone])
+        self.assertEqual(await available("kim"), [standalone])
+        self.assertEqual(await available("admin"), [standalone])
         await self.call("api_save", api={**saved, "state": "deprecated"}, expected_revision=1)
-        self.assertEqual(await available("karin"), [])
+        self.assertEqual(await available("karin"), [standalone])
 
     async def test_revoked_authorizations_and_old_versions(self):
         op=(await self.call("api_save",api={**self.api,"group_ids":["operations"]},service_name="운영 전용"))["api"]

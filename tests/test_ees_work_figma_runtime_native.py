@@ -1301,6 +1301,33 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
                 self.assertEqual(len(sent), 1)
                 self.screenshot('shared-runtime-zero-confirmed' if empty else 'shared-runtime-zero-selection-confirmed')
 
+    def test_upgraded_shared_run_accepts_new_version_and_executes_from_stage(self):
+        self.shared_fixture()
+        key = self.shared_workflow(jobs=1)
+        run = self.start(key, inputs={'query': '운영 안내'})
+        self.shared_reference['config_hash'] = 'e' * 64
+        self.review_shared()
+        self.server.workflow.install_confluence_guide()
+        operations = asyncio.run(self.server.workflow.operations.state(self.server.user, 'EMS', run['id']))
+        self.assertEqual(operations['shared_tools'], [])
+
+        self.open_run(key, run)
+        self.wait("document.querySelector('[data-action=shared_accept_version]')?.dataset.version === '2'")
+        self.assertTrue(self.read('[data-action=execute]', 'disabled'))
+        self.click('[data-action=shared_accept_version]')
+        self.click('[data-dialog-confirm]')
+        self.wait("document.querySelector('.ew-shared-runtime')?.innerText.includes('회차 v2')")
+
+        self.open_run(key, run, job='')
+        if self.browser.evaluate("!!document.querySelector('#ees-work-panel .ew-operation-overview')"):
+            self.open_stage_from_overview()
+        self.wait("document.querySelector('[data-action=execute_scope][data-node-id=stage]')?.disabled === false")
+        job = '[data-action=stage_execute][data-job-id=job-0]'
+        self.wait("document.querySelector(" + json.dumps(job) + ")?.disabled === false")
+        self.click(job)
+        self.assertTrue(self.bridge.started.wait(5))
+        self.assertEqual([call['context']['job_id'] for call in self.bridge.calls], ['job-0'])
+
     def test_shared_runtime_group_review_version_and_running_gates(self):
         self.shared_fixture()
         key = self.shared_workflow(jobs=1)
