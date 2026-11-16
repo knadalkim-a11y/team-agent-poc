@@ -936,6 +936,9 @@
     const current=location.pathname+location.search+(nativePage()?'#native':'#chat');
     if(route!==current){
       workUI.closeHelp({restoreFocus:false});for(const [key,alias] of chatAliases)if(alias.chat_id!==chatId())chatAliases.delete(key);
+      if(location.pathname==='/'&&new URLSearchParams(location.search).get('ees-work')==='api-catalog'){
+        commitSelection({mode:'author',tab:'tools',panel_open:true,workflow_id:'',run_id:'',job_id:''});
+      }
       route=current;readyRoute='';epoch++;applyNativeDestination();render();
       refresh().then(()=>resumeNativeAction()).catch(failure=>{error=failure.message;render();});
       if(available())models().catch(()=>{});

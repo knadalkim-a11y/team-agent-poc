@@ -5464,6 +5464,17 @@ index cd832fd..fe3f661 100644
  {/if}
  
  {#if $config?.features.enable_community_sharing}
+diff --git a/src/routes/(app)/workspace/tools/+layout.ts b/src/routes/(app)/workspace/tools/+layout.ts
+new file mode 100644
+--- /dev/null
++++ b/src/routes/(app)/workspace/tools/+layout.ts
+@@ -0,0 +1,6 @@
++import { redirect } from '@sveltejs/kit';
++import type { LayoutLoad } from './$types';
++
++export const load: LayoutLoad = () => {
++	redirect(307, '/?ees-work=api-catalog');
++};
 diff --git a/svelte.config.js b/svelte.config.js
 index 82e0595..6f11820 100644
 --- a/svelte.config.js

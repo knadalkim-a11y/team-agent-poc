@@ -1041,6 +1041,48 @@ class SourceShellNativeTests(IntegratedNativeCase):
         self.step(label, selector, condition)
         self.wait_delayed_reads(start, paths)
 
+    def test_native_tool_bookmarks_open_api_catalog_without_painting_the_old_editor(self):
+        self.server.workflow.install_confluence_guide()
+        self.enable_native_menus()
+        # Observe from document creation. Keep a first bad paint across a hard
+        # redirect so inspecting only the final catalog cannot mask a flash.
+        monitor = self.browser.call('Page.addScriptToEvaluateOnNewDocument', {'source': """
+          requestAnimationFrame(function sample() {
+            const oldControls = document.querySelectorAll(
+              '#workspace-container input[placeholder], #workspace-container form textarea, ' +
+              '#workspace-container .cm-editor, [data-api-action=legacy], .ew-draft-legacy');
+            for (const node of oldControls) {
+              if (node.checkVisibility({checkOpacity:true, checkVisibilityCSS:true}) &&
+                  node.getBoundingClientRect().height > 0) {
+                sessionStorage.setItem('ees-test-old-tool-paint', location.pathname + ' ' + node.outerHTML.slice(0,160));
+                break;
+              }
+            }
+            requestAnimationFrame(sample);
+          });
+        """})['identifier']
+        self.addCleanup(lambda: self.browser.call('Page.removeScriptToEvaluateOnNewDocument', {'identifier': monitor}))
+        frame_monitor.install(self)
+        for route in ('/workspace/tools', '/workspace/tools/create', '/workspace/tools/edit?id=previous'):
+            with self.subTest(bookmark=route):
+                previous_document = self.browser.evaluate('performance.timeOrigin')
+                start = len(self.server.requests)
+                self.navigate(route)
+                self.wait('performance.timeOrigin !== ' + json.dumps(previous_document) +
+                          " && !location.pathname.startsWith('/workspace/tools')" +
+                          " && document.querySelector('#ees-work-entry [data-action=tools][aria-current=page]')" +
+                          " && document.querySelector('[data-api-screen=list] [data-api-action=create]')")
+                self.wait("window.__eesSourceFrameEvidence?.samples.some(frame => frame.rightPanels.includes('tools'))")
+                self.assertIsNone(self.browser.evaluate("sessionStorage.getItem('ees-test-old-tool-paint')"))
+                self.assertFalse(self.browser.evaluate("new URLSearchParams(location.search).has('id')"))
+                self.assertIn(('GET', urlparse(route).path), self.server.requests[start:])
+                self.assertFalse([(method, path) for method, path in self.server.requests[start:]
+                    if path.startswith('/api/v1/tools/id/previous')
+                    or (path.startswith('/api/v1/tools/') and method != 'GET')])
+        self.assertFalse([item for item in self.server.workspace_commands
+                          if item.get('action', '').startswith(('tool_', 'shared_tool_'))])
+        self.assertEqual(self.server.completions, [])
+
     def test_delayed_navigation_never_replaces_loaded_menu_or_panel_with_loading(self):
         self.enable_native_menus()
         workflow_id = self.author(name='지연 응답 이동 검증 절차', jobs=2)
