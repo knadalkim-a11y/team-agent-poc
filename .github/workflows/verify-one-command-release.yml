@@ -18,7 +18,7 @@ jobs:
           python-version: '3.11'
       - name: Exercise deployment and optional connection
         shell: powershell
-        run: python -B -m unittest discover -s delivery/one-command/tests -v
+        run: python -X utf8 -B -m unittest discover -s delivery/one-command/tests -v
       - name: Fetch and start the pinned launcher using Windows PowerShell
         shell: powershell
         run: |
@@ -31,7 +31,7 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'fetch failed' }
             git -C $repo archive --format=zip "--output=$app" "${pin}:delivery/one-command/ship"
             if ($LASTEXITCODE -ne 0) { throw 'archive failed' }
-            & python -I -B $app --help
+            & python -I -X utf8 -B $app --help
             if ($LASTEXITCODE -ne 0) { throw 'launcher failed' }
           } finally {
             Remove-Item -LiteralPath $app -Force -ErrorAction SilentlyContinue
