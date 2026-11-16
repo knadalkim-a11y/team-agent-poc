@@ -6,6 +6,7 @@ const {renderer,run}=require('./ees_workspace_ui_fixture.cjs');
 const source=fs.readFileSync(process.env.EES_AUTHORING_TEST_SOURCE || path.join(__dirname,'../branding/ees/ui/ees-work-designer.js'),'utf8');
 const apiSources=['ees-work-api-catalog.js','ees-work-api-picker.js']
  .map(name=>fs.readFileSync(path.join(__dirname,'../branding/ees/ui',name),'utf8')).join('\n');
+const workflowHelp=JSON.parse(fs.readFileSync(path.join(__dirname,'../agent-pack/skills/ees-work-demo/scripts/workflow_help.json'),'utf8'));
 const copy=value=>JSON.parse(JSON.stringify(value));
 const toolExamples=[
  {id:'jira-query',name:'Jira 조회',description:'배포 전에 CR 승인 상태를 확인합니다.',kind:'read',match:{function:'jira_search_crs'}},
@@ -60,7 +61,7 @@ async function submitInline(h){const result=h.designer.handleEvent({type:'submit
 async function beginInline(h,kind){h.click(kind==='stage'?'stage_edit':kind,kind==='stage'?{id:'t0'}:kind==='add_job'?{parent:'t0'}:{});await flush();}
 
 function footerNodes(html){const result={};for(const m of html.matchAll(/<(small|p)\b([^>]*)>([\s\S]*?)<\/\1>/g)){const attributes=m[2],id=attr(attributes,'id'),summary=attributes.match(/data-(procedure|tool)-summary/)?.[0],node={textContent:decode(m[3])};if(id)result['#'+id]=node;if(summary)result['['+summary+']']=node;}return result;}
-function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObserver}={}){const h={startContexts:[],writes:[],operations:[],reads:[],dialogs:[],proposals:[],markup:'',forms:{},buttons:[],fields:[]};h.workflows=new Map(['w','q'].map(id=>[id,{id,name:'절차 '+id,system_id:'EMS',can_manage:true,revision:1,published_version:null,draft:definition(id),validation:{revision:1,errors:[],warnings:[]},versions:[]}]));h.state={capabilities:{actor_id:'a',can_author:true,managed_systems:['EMS']},workflows:[...h.workflows.values()],workflow:h.workflows.get('w'),factories:[{id:'f',name:'공장'}],tools:[],native_functions:[],tool_examples:copy(toolExamples),procedure_examples:copy(procedureExamples)};h.selection={system_id:'EMS',workflow_id:'w',mode:'author',chat_id:'private-chat'};
+function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObserver}={}){const h={startContexts:[],writes:[],operations:[],reads:[],dialogs:[],proposals:[],markup:'',forms:{},buttons:[],fields:[]};h.workflows=new Map(['w','q'].map(id=>[id,{id,name:'절차 '+id,system_id:'EMS',can_manage:true,revision:1,published_version:null,draft:definition(id),validation:{revision:1,errors:[],warnings:[]},versions:[]}]));h.state={help:workflowHelp,capabilities:{actor_id:'a',can_author:true,managed_systems:['EMS']},workflows:[...h.workflows.values()],workflow:h.workflows.get('w'),factories:[{id:'f',name:'공장'}],tools:[],native_functions:[],tool_examples:copy(toolExamples),procedure_examples:copy(procedureExamples)};h.selection={system_id:'EMS',workflow_id:'w',mode:'author',chat_id:'private-chat'};
  const noop=()=>{};let dialog=null;
  const matches=(node,selector)=>{
   if(selector.includes(','))return selector.split(',').some(part=>matches(node,part.trim()));

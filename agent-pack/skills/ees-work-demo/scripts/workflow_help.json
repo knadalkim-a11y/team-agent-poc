@@ -16,6 +16,14 @@
       "related": ["request_tool", "direct_tool", "connected_function"]
     },
     {
+      "id": "stages_and_jobs",
+      "name": "단계와 작업",
+      "aliases": [],
+      "summary": "단계는 작업을 묶는 이름입니다. 개수·이름·순서는 업무에 맞게 정합니다.\n\n단계와 작업은 적힌 순서대로 진행합니다. 기존에 정한 적용 조건과 작업 연결은 유지됩니다.",
+      "example": "",
+      "related": []
+    },
+    {
       "id": "api_specification",
       "name": "API 명세",
       "aliases": ["API 등록", "API 엔드포인트", "API 연결"],

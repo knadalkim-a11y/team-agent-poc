@@ -1228,7 +1228,6 @@ function createWorkDesigner({callbacks}) {
     if(action==='inline_cancel'){const edit=inlineEdit,stage=nodes(editor).find(node=>node.type==='t'&&node.id===(edit?.kind==='stage'?edit.id:edit?.parent));inlineEdit=null;if(!stage)focusAction('add_stage');else if(edit?.kind==='stage')focusAction('stage_edit',edit.id);else focusAction('add_job','',edit.parent);stash();paint();return;}
     if(action==='inline_apply'){applyInline();return;}
     if(action==='stage_toggle'){expandedStage=expandedStage===target.dataset.id?'':target.dataset.id;jobMenu='';focusAction('stage_toggle',target.dataset.id);stash();paint();return;}
-    if(action==='stage_help'||action==='help'&&target.dataset.id==='stages_and_jobs'){workUI.showHelp?.({termId:'stages_and_jobs',help:{...(state.help || {}),terms:[...(state.help?.terms || []),{id:'stages_and_jobs',name:'단계와 작업',summary:'단계는 작업을 묶는 이름입니다. 개수·이름·순서는 업무에 맞게 정합니다.\n\n단계와 작업은 적힌 순서대로 진행합니다. 기존에 정한 적용 조건과 작업 연결은 유지됩니다.'}]},context:helpContext(),trigger:target,onAsk:callbacks.askHelp});return;}
     if(action==='job_menu'||action==='stage_menu'){if(!canAuthor())return;jobMenu=jobMenu===target.dataset.id?'':target.dataset.id;focusAction(action,target.dataset.id);paint();return;}
     if(action==='api_catalog_return'){apiCatalog.showList();return;}
     if(action==='api_structure_edit'){apiStructureEditKey=compactApiStructure()?key():null;paint();return;}
@@ -1254,7 +1253,7 @@ function createWorkDesigner({callbacks}) {
     if(action==='tool_open'){sharedToolId='';const tool=allTools().find(tool=>tool.id===target.dataset.id);if(!tool)return;openTool(tool);await loadToolContext();return;}
     if(action==='tool_list'){openTool(null);paint();return;}
     if(action==='tool_start_back'){toolStart=false;toolChanging=false;paint();return;}
-    if(action==='help'){workUI.showHelp?.({termId:target.dataset.id,help:state.help,context:helpContext(),trigger:target,onAsk:callbacks.askHelp});return;}
+    if(action==='help'||action==='stage_help'){workUI.showHelp?.({termId:action==='stage_help'?'stages_and_jobs':target.dataset.id,help:state.help,context:helpContext(),trigger:target,onAsk:callbacks.askHelp});return;}
     if(action==='tool_question'){const question=toolQuestions[Number(target.dataset.id)];if(question)await callbacks.askHelp?.(question,{...helpContext(),screen:'새 도구 시작'});return;}
     if(action==='ai_discard'){pendingProposal=null;paint();return;}if(!canAuthor())return;
     if(action==='summary_edit')openSummary(target.dataset.id);
