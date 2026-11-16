@@ -97,7 +97,7 @@ function createWorkApiCatalog({catalog, command, changed, paint, sampleImport=()
     }catch{}
     return `<p role="note">EES Web 담당자에게 필요한 기능 개발을 요청한 뒤, 공개된 API 주소를 등록하세요.${link}</p>`;
   }
-  function editorHTML(){
+  function editorHTML(message=''){
     const edit=screen==='edit';
     const actions=btn('취소','cancel')+btn(edit?'저장':fromJob?'등록하고 선택':'등록','save','primary',edit&&!dirty()?'disabled':'');
     const sf=select('service_id','서비스',serviceChoices(),draft.service_id);
@@ -106,10 +106,10 @@ function createWorkApiCatalog({catalog, command, changed, paint, sampleImport=()
     const uf=field('url',draft.url.startsWith('/')?'서비스 기본 주소 뒤의 경로':'API 주소',draft.url,'required spellcheck="false" placeholder="https://ems.example/api/equipment/{equipmentId}/alarms"');
     const added=draft.service_id==='__new__'?field('service_name','새 서비스 이름',serviceName,'maxlength="80" placeholder="예: 사내 백업"'):'';
     const purpose=field('purpose','용도',draft.purpose,'required maxlength="1000" placeholder="예: 설비에서 발생한 알람을 조회합니다."');
-    if(edit)return `${back('API 상세')}<div class="ew-api-head"><h2 tabindex="-1">API 명세 편집</h2></div>
+    if(edit)return `<div class="ew-api-body">${back('API 상세')}<div class="ew-api-head"><h2 tabindex="-1">API 명세 편집</h2></div>
       <div class="ew-api-top">${mf}${uf}${sf}${nf}</div>${added}
       ${purpose}
-      ${mappingHTML()}<div class="ew-api-foot"><small data-api-dirty ${dirty()?'':'hidden'}>저장하지 않은 변경 있음</small>${actions}</div>`;
+      ${mappingHTML()}</div><div class="ew-api-end">${message}<div class="ew-api-foot"><small data-api-dirty ${dirty()?'':'hidden'}>저장하지 않은 변경 있음</small>${actions}</div></div>`;
     return `${back('등록 취소')}<div class="ew-api-head"><h2 tabindex="-1">API 명세 등록</h2></div>
       <div class="ew-api-tabs">${btn('API 주소 직접 등록','direct','active')}${btn('서비스 명세 URL','import','link')}</div>
       <div class="ew-api-request">${mf}${uf}</div>
@@ -230,7 +230,8 @@ function createWorkApiCatalog({catalog, command, changed, paint, sampleImport=()
     const message=error?`<p class="ew-api-error" role="alert">${esc(error)}</p>`:status?`<p class="ew-api-status" role="status">${esc(status)}</p>`:'';
     const confirmLeave=`<div class="ew-api-card" role="alert"><h3>저장하지 않은 변경사항</h3><p>이 화면을 떠나면 편집 중인 내용이 사라집니다.</p>${btn('변경 버리고 이동','discard')}${btn('계속 편집','stay','primary')}</div>`;
     const modal=['services','impact'].includes(screen);
-    const surface=modal?`<dialog data-api-modal aria-labelledby="ew-api-modal-title">${views[screen]()} ${message}</dialog>`:(leave?confirmLeave:views[screen]())+message;
+    const pinned=screen==='edit'&&!leave;
+    const surface=modal?`<dialog data-api-modal aria-labelledby="ew-api-modal-title">${views[screen]()} ${message}</dialog>`:pinned?editorHTML(message):(leave?confirmLeave:views[screen]())+message;
     return `<section data-api-catalog data-api-screen="${screen}" aria-label="${esc(screenNames[screen])}" ${busy?'aria-busy="true"':''}><fieldset class="ew-api-controls" ${busy?'disabled':''}>${surface}</fieldset></section>`;
   }
   function recordForSave(){

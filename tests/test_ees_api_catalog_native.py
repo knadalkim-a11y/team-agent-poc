@@ -100,10 +100,11 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
             self.assertAlmostEqual(report['stage']['width'], 960, delta=2)
             self.assertAlmostEqual(report['stage']['y'], 234, delta=2)
         if name == 'tools-edit':
-            # Save stays below the settings, at the right edge of the form.
+            # Save stays below the settings, at the right edge of the form and the bottom edge of the pane.
             self.assertGreater(report['save']['x'], report['form']['x'] + 800)
             self.assertGreater(report['save']['y'], report['mapping']['y'] + report['mapping']['height'] - 1)
             self.assertGreater(report['save']['y'], report['foot']['y'])
+            self.assertAlmostEqual(report['foot']['y'] + report['foot']['height'], report['viewport'][1], delta=1)
 
     def open_catalog(self):
         self.click('[data-action=mode][data-mode=author]')
@@ -176,7 +177,7 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.click('[data-api-action=edit]')
         self.assertEqual(self.read('[name=api-purpose]', 'value'), '완료 시각과 처리 상태를 함께 확인합니다.')
 
-    def test_edit_settings_stay_readable_and_save_stays_at_the_bottom_edge_when_narrow(self):
+    def test_edit_save_row_stays_at_the_bottom_edge_and_settings_stay_readable_when_narrow(self):
         backup = self.register_service('사내 백업')
         api = self.seed_api(backup, 'GET', 'https://backup.example/backups', '백업 결과 조회',
                             '백업 작업별 성공 여부와 완료 시각을 확인합니다.',
@@ -208,6 +209,11 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         wide = measure()
         self.assertAlmostEqual(wide['columns'][0]['y'], wide['columns'][1]['y'], delta=1)
         self.assertGreater(wide['columns'][1]['x'], wide['columns'][0]['right'] - 1)
+        # These settings are shorter than the work area: the save row is still at its bottom edge, not under the settings.
+        self.assertGreater(wide['foot']['y'], max(column['bottom'] for column in wide['columns']) + 40, wide)
+        self.assertAlmostEqual(wide['foot']['bottom'], wide['area']['bottom'], delta=1)
+        self.assertLessEqual(wide['catalog']['bottom'], wide['area']['bottom'] + 1)
+        self.assertFalse(wide['overflow'])
         for width, height, overlay in ((1366, 768, False), (480, 800, True)):
             with self.subTest(width=width):
                 self.authoring_viewport(width, height, overlay=overlay)
@@ -220,6 +226,19 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
                 # The settings are longer than the work area; the save row stays flush with its bottom edge.
                 self.assertGreater(narrow['catalog']['bottom'], narrow['area']['bottom'])
                 self.assertAlmostEqual(narrow['foot']['bottom'], narrow['area']['bottom'], delta=1)
+
+        # A refused save is reported with the save row, in view without scrolling the long settings.
+        self.fill('[name=api-url]', 'not a url')
+        self.click('[data-api-action=save]')
+        self.wait("document.querySelector('[data-api-screen=edit] .ew-api-error')")
+        refused = self.browser.evaluate("""(() => {
+          const box = e => { const {y, bottom} = e.getBoundingClientRect(); return {y, bottom}; };
+          return {error:box(document.querySelector('[data-api-screen=edit] .ew-api-error')),
+            foot:box(document.querySelector('.ew-api-foot')), area:box(document.querySelector('#ees-work-designer > .ew-author-scroll'))};
+        })()""")
+        self.assertGreater(refused['error']['y'], refused['area']['y'], refused)
+        self.assertLessEqual(refused['error']['bottom'], refused['foot']['y'] + 1, refused)
+        self.assertAlmostEqual(refused['foot']['bottom'], refused['area']['bottom'], delta=1, msg=refused)
 
     def test_open_workflow_connect_apis_and_persist_handoff(self):
         service = self.register_service('EMS 설비 이력')

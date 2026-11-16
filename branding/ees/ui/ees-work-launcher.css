@@ -2557,9 +2557,15 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer [data-api-screen=detail] .ew-api-columns th {background:transparent;}
 #ees-work-designer [data-api-screen=detail] .ew-api-columns h3+small {display:block;margin:-4px 0 4px;color:var(--ees-text-secondary);}
 #ees-work-designer [data-api-catalog] .ew-api-top {display:grid;grid-template-columns:132px minmax(0,1.2fr) 200px minmax(0,1fr);gap:12px;margin:0 0 16px;}
-/* The save row stays at the bottom edge while the settings scroll under it. */
-[data-ees-work-surface] #ees-work-panel #ees-work-designer > .ew-author-scroll:has([data-api-screen=edit]) {padding-bottom:0;}
-#ees-work-designer [data-api-screen=edit] .ew-api-foot {position:sticky;bottom:0;z-index:1;padding:12px 0 16px;background:var(--ees-surface-panel);}
+/* The save row stays at the bottom edge of the pane: below short settings, and over long ones as they scroll under it.
+   A message about the save is part of that row's block, so it is in view wherever the settings are scrolled. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer > .ew-author-scroll:has([data-api-screen=edit]) {display:flex;flex-direction:column;padding-bottom:0;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer > .ew-author-scroll:has([data-api-screen=edit]) > button {align-self:flex-start;}
+#ees-work-designer :is([data-api-catalog][data-api-screen=edit],[data-api-screen=edit] .ew-api-controls) {flex:1 0 auto;display:flex;flex-direction:column;}
+#ees-work-designer [data-api-screen=edit] .ew-api-body {flex:1 0 auto;min-width:0;}
+#ees-work-designer [data-api-screen=edit] .ew-api-end {position:sticky;bottom:0;z-index:1;background:var(--ees-surface-panel);border-top:1px solid var(--ees-line-divider);border-image:linear-gradient(var(--ees-line-divider),var(--ees-line-divider)) 1 / 1px 0 0 / 0 100vmax;}
+#ees-work-designer [data-api-screen=edit] .ew-api-end :is(.ew-api-error,.ew-api-status) {margin:0;padding:10px 0 0;}
+#ees-work-designer [data-api-screen=edit] .ew-api-foot {border-top:0;padding:12px 0;}
 #ees-work-designer [data-api-screen=edit] .ew-api-foot [data-api-dirty] {margin-right:auto;color:var(--ees-text-secondary);font-size:12px;line-height:18px;}
 /* Six controls on a parameter line need about 440px; below that the two settings columns stack. */
 @container ees-api-catalog (max-width: 900px) {
