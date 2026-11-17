@@ -8,6 +8,8 @@
 
 운영 상태 조회 중 모델 목록에서 오류를 발생시키면 같은 응답에 담던 API 목록도 받을 수 없었다. [HTTP 회귀 검사](../tests/test_confluence_workflow_sample.py)는 모델 조회 실패, 연결 설정이 없는 기본 가이드, 그룹별 권한을 검사한다. [실제 배포 패키지의 브라우저 검사](../tests/ees_work_integrated_app.py)는 두 자료 메뉴 클릭과 주소 직접 열기, 예시 API 두 건과 게시된 절차의 화면 표시를 검사한다. 사내 문서 조회에는 해당 서버의 연결 설정과 읽기 권한이 필요하다.
 
+**병합 전 CI(2026-11-17):** 사용자 지시로 [PR #142](https://github.com/knadalkim-a11y/team-agent-poc/pull/142)에 main(1단계 병합 뒤)을 합친 `e4a8e9e`의 [실행 567](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44014693399) 첫 시도에서 Windows `platform`의 `test_another_process_can_stop_saved_identity` 한 건이 실패했다. 다른 프로세스가 저장된 식별 정보로 서버를 종료하려 할 때 `process_inspect`가 0.17초 만에 `identity_unavailable`, `winerror 5`(접근 거부)로 끝났다. 이 시험과 `scripts/ees_deploy_process.py`는 CI를 통과했던 `a23bb62`와 같고, 합친 내용은 화면 코드와 기록 문서뿐이다. 실패한 작업만 한 번 다시 돌려 통과했고 `5efd0a1`로 병합했다. 원인은 확인하지 못했다. 다시 돌려 통과한 것을 해결로 보지 않으며, 같은 실패가 다시 나오면 그 실행에서 대상 프로세스가 살아 있었는지와 같은 작업의 다른 시험이 남긴 프로세스가 있었는지부터 본다.
+
 <a id="api-summary-and-pinned-runs-20261116"></a>
 
 ## 2026-11-16 · 미분류 API와 이전 공용 도구 회차

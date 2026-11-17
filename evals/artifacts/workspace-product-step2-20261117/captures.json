@@ -1,0 +1,88 @@
+{
+ "date": "2026-11-17",
+ "what": "Product screens of workspace design mock 17 revision 2, step 2 (work instructions and reference documents), taken from the running product",
+ "mock": {
+  "file": "docs/mockups/ees-work/design-mock-17-workspace.html",
+  "commit": "d6da045",
+  "screens": {
+   "product-WS6-1920.png": "WS6.png",
+   "product-WS7-1920.png": "WS7.png",
+   "product-WS8-1920.png": "WS8.png",
+   "product-WS9-1920.png": "WS9.png"
+  },
+  "captures": "docs/mockups/ees-work/workspace-screens-20261116"
+ },
+ "product": {
+  "program": "0.11.3+ees.14",
+  "wheel_sha256": "9deffe72d8fb8875d97d53ff7651f96143fc47f01f810975a359975df433a0a2",
+  "built_from": "the source patch and branding/ees sources of the commit that last changed this file (all build inputs matched the build manifest before committing), Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0, npm 10.9.2",
+  "server": "tests/native_ui_fixture.py: the built frontend with synthetic sign-in, chat and model, and the real workflow service on a temporary database",
+  "taken_by": "tests/test_ees_source_shell_native.py: test_figma_native_asset_pages_render_real_entities_inside_the_three_panel_shell",
+  "browser": "Chromium 153 headless, device scale factor 1",
+  "data": "synthetic work instructions and reference documents served by the test; one work procedure whose task uses the opened instruction"
+ },
+ "state": {
+  "1920": "sidebar 256px open, chat 560px docked, work area 1104px",
+  "1366": "sidebar compact, chat docked",
+  "480": "sidebar compact, chat closed"
+ },
+ "files": {
+  "product-WS6-1920.png": {
+   "sha256": "9286423bb9a2d5f5a1112fc3254dea5d63c7bc346b853fcea99801e8c3a1dc40",
+   "size": [
+    1920,
+    1080
+   ]
+  },
+  "product-WS6-480.png": {
+   "sha256": "2bb8b6bddde24b8782b34123685c714b4978a1bf5313bbba0f968f36bf245872",
+   "size": [
+    480,
+    800
+   ]
+  },
+  "product-WS7-1366.png": {
+   "sha256": "1de968143367f016831925e0319a70219ac55716ed2ccf9a596f27e5ed69e113",
+   "size": [
+    1366,
+    768
+   ]
+  },
+  "product-WS7-1920.png": {
+   "sha256": "1a5ab9bc80efea45b79f6a86f4f4a3b1b1e453e17564df6487c80f9358f29a36",
+   "size": [
+    1920,
+    1080
+   ]
+  },
+  "product-WS7-480.png": {
+   "sha256": "0c628c6dd40da51f90624a8c6930865d5628b90b0dd0c246cd909cb453ad9ef4",
+   "size": [
+    480,
+    800
+   ]
+  },
+  "product-WS8-1920.png": {
+   "sha256": "3847848434af2a6eda93a7b86d7b95d7ca4c891952dc56379b13d9df767fa829",
+   "size": [
+    1920,
+    1080
+   ]
+  },
+  "product-WS9-1920.png": {
+   "sha256": "501a7e671bd1edee469ceb2eeb9cc04ac82e2a2d1fcb5db46905e6881238c563",
+   "size": [
+    1920,
+    1080
+   ]
+  },
+  "product-WS9-480.png": {
+   "sha256": "83bc6496291a10c73cd06e866f31c565f51b898f914da44c456f703675952a7f",
+   "size": [
+    480,
+    800
+   ]
+  }
+ },
+ "revised": "Retaken from the wheel built after PR #142 was merged into this branch and new items were made to start readable by everyone. The first captures are in commit dee2260."
+}
