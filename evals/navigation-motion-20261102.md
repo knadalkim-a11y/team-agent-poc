@@ -137,6 +137,23 @@
 - **보완·판정:** Q1의 이 전환에 실제 `data-overlay=true` 준비 대기를 추가한다. 같은 viewport helper에 선택적인 기대 상태를 전달하므로 제품 속성을 직접 바꾸거나 기다리는 시간을 늘리지 않는다. 기존 overlay 단언·대화 폭1039px·닫기/재열기와 다른 치수 단언은 유지한다. Python 구문·문서·diff 검사 후 최종 head 전체 CI로 판정하며 이 준비 누락을 단순 재시도 성공으로 해결했다고 쓰지 않는다. #121의 좁은 화면 검사에도 같은 준비 조건을 사용한다.
 
 
+<a id="narrow-viewport-load-20261117"></a>
+
+## 2026-11-17 · 부하가 있을 때 좁은 창 전환 시험 두 개가 가끔 실패함(원인 미확인)
+
+- **증상:** [PR #143](https://github.com/knadalkim-a11y/team-agent-poc/pull/143)을 병합한 main `89247a7`의 [실행 566](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/43989451352) 첫 시도에서 Ubuntu native-compose가 두 시험으로 실패했다. Chrome 157.0.8103.50.
+  - `test_c3_overlay_panel_closing_releases_hit_testing_and_restores_focus`: 480px에서 대화를 열 때 업무 영역 폭을 차지한 프레임이 있었다(`Opening narrow chat should never take space away from the work surface`).
+  - `test_procedure_visual_geometry_matches_figma_and_preserves_native_draft`: 창 크기를 바꾼 뒤 왼쪽 메뉴가 접힌 상태(`dataset.compact === "true"`)가 되기를 기다리다 시간이 넘었다.
+- **같은 코드의 다른 결과:** 병합 전 main이 움직이지 않아 `89247a7`의 파일은 PR 최종 커밋 `8963692`와 같다. 그 커밋의 PR 실행 565는 같은 작업을 포함해 성공했고, 이 개발 환경의 전체 실행 세 번도 통과했다.
+- **시도와 결과:**
+  - 실패한 작업만 한 번 다시 돌렸다(둘째 시도). 성공했다. 다시 돌려 통과한 것은 원인을 고친 것이 아니다.
+  - 이 개발 환경(4코어, Chromium 153)에서 빈 반복문 여섯 개로 부하를 걸고 첫째 시험을 되풀이했다. 1단계 코드에서 6번 중 1번 같은 단언으로 실패했다.
+  - 가설: 시험 도우미가 `innerWidth`만 기다리고 화면 틀이 resize 이벤트로 새 폭을 반영하기 전에 다음 조작을 한다([2026-11-05의 같은 유형](#q1-viewport-settle-20261105) 참고). 도우미에 두 프레임 대기를 넣고 같은 부하로 12번 돌렸더니 2번 실패했다. 가설이 맞다는 증거를 얻지 못해 그 변경은 되돌렸다.
+  - 1단계 이전 코드(main `a11e417`과 그때 빌드한 wheel)로 같은 부하에서 12번 돌렸더니 1번 실패했다.
+- **원인 판단:** 1단계 변경과 무관하게 전부터 있던, 실행 환경이 느릴 때만 드러나는 실패다. 시험 쪽 대기 누락인지 제품이 한 프레임 동안 잘못된 배치를 그리는 것인지는 가리지 못했다. 둘째 시험은 따로 재현하지 않았다.
+- **남은 항목:** 원인 미확인. 다음에 같은 두 시험이 CI에서 실패하면 그 실행의 프레임 기록(`c3-overlay-close-reopen` 증거)에서 폭을 차지한 프레임의 대화 상태 값을 먼저 본다. 이 항목만으로 재진단을 시작하지 않는다.
+- **재발 방지:** 반영하지 않았다. 원인을 모른 채 대기 시간을 늘리거나 단언을 느슨하게 하면 실제 결함을 가릴 수 있다.
+
 <a id="workspace-heading-clip-20261105"></a>
 
 ## 2026-11-05 · 워크스페이스 메뉴 제목 잘림
