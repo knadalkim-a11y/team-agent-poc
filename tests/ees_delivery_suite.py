@@ -176,8 +176,8 @@ def plan(scope, suites="", event="workflow_dispatch", ref=""):
             "package": complete and event != "pull_request"}
 
 
-# A skipped job never reads its matrix, but an empty one is not valid JSON
-# for a matrix. These rows only keep the expression well-formed.
+# A skipped job never runs its matrix, but an empty list is not a valid
+# matrix. These rows only keep the expression well-formed.
 IDLE_MATRIX = {"service": {"include": [{"os": LINUX, "suite": "none", "fixtures": "upstream", "timeout": 10}]},
                "native": {"suite": ["none"]}, "audit": {"os": [LINUX]}}
 
