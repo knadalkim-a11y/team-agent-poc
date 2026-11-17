@@ -19,6 +19,7 @@ parser.add_argument('--dump-pass', action='store_true')
 parser.add_argument('--css', default='')
 parser.add_argument('--tail', type=int, default=330)
 parser.add_argument('--menu-close-range', default='')
+parser.add_argument('--geom', action='store_true')
 args = parser.parse_args()
 module_name, class_name, method = args.test.split('.')
 module = __import__(module_name)
@@ -36,6 +37,30 @@ PROBE = r"""(()=>{ if(window.__probe)return; const log=[]; const t=()=>Math.roun
  new MutationObserver(rs=>{for(const r of rs){ if(r.type==='childList'){const where=id(r.target); if(/ees-work|ew-|DETAILS|SECTION|ASIDE/.test(where)||r.target.id==='ees-work-designer'||r.target.querySelector?.('#ees-work-designer')) log.push([t(),'childList',where,'+'+r.addedNodes.length,'-'+r.removedNodes.length,'active='+id(document.activeElement)]);}
    else log.push([t(),'attr',r.attributeName,id(r.target),String(r.target.getAttribute(r.attributeName)),'active='+id(document.activeElement)]);}}).observe(document,{subtree:true,childList:true,attributes:true,attributeFilter:['open','inert','data-ees-motion','data-ees-chat-state','data-author-split']});
  const raf=()=>{requestAnimationFrame(raf);}; })()"""
+GEOM = r"""(()=>{ if(window.__geom)return; const rows=[],calls=[]; window.__geom={rows,calls};
+ const t=()=>Math.round(performance.now()*10)/10;
+ const id=e=>e?(e===document?'#document':(e.tagName+(e.id?'#'+e.id:'')+(e.className&&typeof e.className==='string'?'.'+e.className.split(' ').slice(0,2).join('.'):''))):'null';
+ const q=s=>document.querySelector(s);
+ const rect=e=>{if(!e)return null;const r=e.getBoundingClientRect();return [Math.round(r.left*10)/10,Math.round(r.right*10)/10];};
+ const stack=()=>String(new Error().stack).split('\n').slice(3,8).map(s=>s.trim().replace(location.origin,'').slice(0,100)).join(' < ');
+ const scrolled=()=>{const out=[];for(const e of document.querySelectorAll('*')){if(e.scrollLeft)out.push(id(e)+':'+e.scrollLeft);}return out.join('|');};
+ const sample=()=>{requestAnimationFrame(sample);const shell=q('[data-ees-source-shell]');if(!shell)return;const work=q('[data-ees-work-surface]');if(!work)return;
+  rows.push({t:t(),inner:innerWidth,sx:scrollX,vv:window.visualViewport?[visualViewport.offsetLeft,visualViewport.pageLeft,visualViewport.width,visualViewport.scale]:null,
+   shell:rect(shell),shellScroll:[shell.scrollLeft,shell.scrollWidth,shell.clientWidth],work:rect(work),workTf:getComputedStyle(work).transform,
+   center:rect(work.parentElement),centerId:id(work.parentElement),region:rect(q('.ees-chat-region')),space:rect(q('.ees-chat-space')),rail:rect(shell.firstElementChild),
+   state:shell.dataset.eesChatState,scrolled:scrolled(),active:id(document.activeElement)});
+  if(rows.length>900)rows.splice(0,rows.length-900);};
+ requestAnimationFrame(sample);
+ document.addEventListener('scroll',e=>{const x=e.target===document?document.scrollingElement:e.target;calls.push([t(),'scroll-event',id(e.target),x?.scrollLeft,x?.scrollTop]);},true);
+ const wrap=(proto,name)=>{const f=proto[name];if(!f)return;proto[name]=function(...a){calls.push([t(),name,id(this),JSON.stringify(a[0]??null),stack()]);return f.apply(this,a);};};
+ wrap(HTMLElement.prototype,'focus');wrap(Element.prototype,'scrollIntoView');wrap(Element.prototype,'scrollTo');wrap(Element.prototype,'scrollBy');wrap(Element.prototype,'scroll');wrap(Element.prototype,'scrollIntoViewIfNeeded');
+ const d=Object.getOwnPropertyDescriptor(Element.prototype,'scrollLeft');
+ Object.defineProperty(Element.prototype,'scrollLeft',{configurable:true,get(){return d.get.call(this);},set(v){calls.push([t(),'scrollLeft=',id(this),v,stack()]);d.set.call(this,v);}});
+ const sel=Selection.prototype;for(const name of ['collapse','setBaseAndExtent','addRange','extend']){const f=sel[name];sel[name]=function(...a){calls.push([t(),'selection.'+name,id(a[0]?.nodeType===1?a[0]:a[0]?.parentElement||a[0]?.startContainer?.parentElement),'',stack()]);return f.apply(this,a);};}
+})()"""
+GEOM_READ = """(()=>{const g=window.__geom;if(!g)return null;const bad=g.rows.map((r,i)=>[r,i]).filter(([r])=>Math.abs(r.inner-r.work[1])>=1).map(([r,i])=>i);
+ if(!bad.length)return {bad:0,rows:g.rows.length,last:g.rows.slice(-2)};const lo=Math.max(0,bad[0]-4),hi=Math.min(g.rows.length,bad[bad.length-1]+5);
+ const from=g.rows[lo].t-40,to=g.rows[hi-1].t+20;return {bad:bad.length,rows:g.rows.slice(lo,hi),calls:g.calls.filter(c=>c[0]>=from&&c[0]<=to).slice(0,80)};})()"""
 original_setup = case.setUp
 def set_up(self):
     original_setup(self)
@@ -68,6 +93,9 @@ def set_up(self):
     if args.probe:
         self.browser.call('Page.addScriptToEvaluateOnNewDocument', {'source': PROBE})
         self.browser.evaluate(PROBE)
+    if args.geom:
+        self.browser.call('Page.addScriptToEvaluateOnNewDocument', {'source': GEOM})
+        self.browser.evaluate(GEOM)
 case.setUp = set_up
 original_test = getattr(case, method)
 def wrapped(self):
@@ -85,6 +113,16 @@ def wrapped(self):
                 print('PROBE_FRAMES round=%d %s' % (wrapped.round, json.dumps(frames, ensure_ascii=False)[:6000]), flush=True)
             except Exception as error:
                 print('PROBE_FRAMES unavailable', repr(error)[:200], flush=True)
+            if args.geom:
+                try:
+                    geom = self.browser.evaluate(GEOM_READ)
+                    print('PROBE_GEOM round=%d bad=%s' % (wrapped.round, geom and geom.get('bad')), flush=True)
+                    for row in (geom or {}).get('rows') or (geom or {}).get('last') or []:
+                        print('PROBE_GEOM_ROW ' + json.dumps(row, ensure_ascii=False)[:900], flush=True)
+                    for call in (geom or {}).get('calls') or []:
+                        print('PROBE_GEOM_CALL ' + json.dumps(call, ensure_ascii=False)[:700], flush=True)
+                except Exception as error:
+                    print('PROBE_GEOM unavailable', repr(error)[:300], flush=True)
             rows = (data.get('probe') or [])[-args.tail:]
             print('PROBE_FAILURE round=%d now=%s active=%s' % (wrapped.round, data.get('now'), (data.get('active') or '')[:160].replace('\n', ' ')), flush=True)
             for row in rows:
