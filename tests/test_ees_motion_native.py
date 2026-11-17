@@ -499,9 +499,14 @@ class MotionNativeTests(IntegratedNativeCase):
         self.refresh()
         self.fill('#chat-input', '확인 창과 도움말 왕복 후 보존할 문장')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
-        self.click('[data-action=mode][data-mode=author]')
+        # The starter procedures arrive after the first author entry and move
+        # the rows. In CI runs 568, 575 and 583 the click by coordinates opened
+        # the starter '일일 시스템 점검', whose menu has one more item.
+        self.open_initialized_author_list()
         self.click('[data-author-action=open][data-id="' + identifier + '"]')
         self.wait("document.querySelector('.ew-procedure-menu > summary')")
+        self.assertEqual(self.browser.evaluate('window.__eesNativeWorkV1.captureReference().workflow_id'), identifier,
+                         'Another procedure than the created one was opened')
 
         def open_copy_dialog():
             # The workflow menu is revealed by trusted hover/focus in HTML 12.

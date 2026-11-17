@@ -22,18 +22,6 @@ from test_ees_helper_chat_native import install_helper_status_fixture
 
 
 class FigmaAuthoringNativeTests(IntegratedNativeCase):
-    def open_initialized_author_list(self):
-        # First author entry creates the default procedures and reorders the
-        # list. Finish that preparation before adding/selecting fixture rows.
-        self.click('[data-action=mode][data-mode=author]')
-        prepared = self.refresh()
-        self.assertTrue(prepared and prepared['initial_procedures_ready'], prepared)
-        self.wait("document.querySelector('.ew-author-list,[data-author-action=list]')")
-        if self.browser.evaluate("!!document.querySelector('[data-author-action=list]')"):
-            self.click('[data-author-action=list]')
-        self.wait("JSON.stringify([...document.querySelectorAll('.ew-author-list [data-author-action=open]')].map(button=>button.dataset.id)) === JSON.stringify(" +
-                  json.dumps([workflow['id'] for workflow in prepared['workflows']]) + ")")
-
     def test_figma_b2_ems_procedure_overview_matches_its_saved_definition(self):
         self.authoring_viewport(1920, 1080, overlay=False)
         self.open_initialized_author_list()
@@ -2378,19 +2366,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         provider = patch.object(native, 'native_workspace_access', access)
         provider.start()
         self.addCleanup(provider.stop)
-        # refresh() resolves with null, before any state is applied, when the
-        # product's own refresh for a route change supersedes it. CI runs 568
-        # and 583 then read the menu while it still listed a revoked item.
-        # Ask again until the applied state carries this fixture's grants.
-        deadline = time.monotonic() + 9
-        while True:
-            state = self.refresh()
-            access = ((state or {}).get('capabilities') or {}).get('native_access')
-            if access == self.menu_grants:
-                return
-            if time.monotonic() >= deadline:
-                self.fail('The workspace did not apply the access fixture: ' + repr(access))
-            time.sleep(.05)
+        # A superseded refresh() applies nothing. CI runs 568 and 583 then
+        # read the menu while it still listed a revoked item.
+        self.refresh_until(lambda state: (state.get('capabilities') or {}).get('native_access') == self.menu_grants)
 
     def assert_reference_preserved(self, before):
         after = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')

@@ -472,6 +472,35 @@ class IntegratedNativeCase(unittest.TestCase):
     def refresh(self):
         return self.browser.evaluate('window.__eesNativeWorkV1.refresh()')
 
+    def refresh_until(self, accepted, timeout=9):
+        """Refresh until an applied state satisfies accepted(state).
+
+        refresh() resolves with null, before any state is applied, when the
+        product's own refresh for a route change or a first author entry
+        supersedes it. Reading the page right after such a call sees the
+        previous state, so ask again until the wanted state was applied.
+        """
+        deadline = time.monotonic() + timeout
+        while True:
+            state = self.refresh()
+            if state and accepted(state):
+                return state
+            if time.monotonic() >= deadline:
+                self.fail('The workspace did not apply the expected state: ' + repr(state)[:300])
+            time.sleep(.05)
+
+    def open_initialized_author_list(self):
+        # First author entry creates the default procedures and reorders the
+        # list. A row clicked by its coordinates during that repaint opens a
+        # different procedure, so finish the preparation before selecting rows.
+        self.click('[data-action=mode][data-mode=author]')
+        prepared = self.refresh_until(lambda state: state.get('initial_procedures_ready'))
+        self.wait("document.querySelector('.ew-author-list,[data-author-action=list]')")
+        if self.browser.evaluate("!!document.querySelector('[data-author-action=list]')"):
+            self.click('[data-author-action=list]')
+        self.wait("JSON.stringify([...document.querySelectorAll('.ew-author-list [data-author-action=open]')].map(button=>button.dataset.id)) === JSON.stringify(" +
+                  json.dumps([workflow['id'] for workflow in prepared['workflows']]) + ")")
+
     def navigate(self, path):
         self.browser.call('Page.navigate', {'url': self.server.url + path})
 
