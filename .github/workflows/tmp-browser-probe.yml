@@ -51,4 +51,4 @@ jobs:
           EES_REQUIRE_AUTHORING_NATIVE: '1'
         run: |
           google-chrome --version
-          python -X warn_default_encoding -W error::EncodingWarning tests/tmp_browser_probe.py test_ees_motion_native.MotionNativeTests.test_c3_dialog_and_help_close_preserve_draft_and_release_modal_blocker --rounds 220 --probe --fetch-delay 1 --out dist/probe-dialog | grep -v "Chrome startup"
+          python -X warn_default_encoding -W error::EncodingWarning tests/tmp_browser_probe.py test_ees_motion_native.MotionNativeTests.test_c3_dialog_and_help_close_preserve_draft_and_release_modal_blocker --rounds 221 --probe --fetch-delay 1 --out dist/probe-dialog | grep -v "Chrome startup"
