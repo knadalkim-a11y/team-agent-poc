@@ -1871,8 +1871,90 @@ index 9234ec7..27056b0 100644
  		}
  	}
  
+diff --git a/src/lib/components/common/SplitCreateButton.svelte b/src/lib/components/common/SplitCreateButton.svelte
+index 00a701f..7291b5d 100644
+--- a/src/lib/components/common/SplitCreateButton.svelte
++++ b/src/lib/components/common/SplitCreateButton.svelte
+@@ -22,6 +22,8 @@
+ 
+ 	export let actions: SplitCreateAction[] = [];
+ 	export let label = 'Create';
++	// 'primary' is the one main action of a list toolbar.
++	export let variant = '';
+ 
+ 	const i18n = getContext<Writable<i18nType>>('i18n');
+ 
+@@ -50,7 +52,10 @@
+ 
+ {#if visibleActions.length === 1}
+ 	<button
+-		class="focus-ring ml-1 rounded-lg bg-gray-50 px-2.5 py-1 text-xs text-gray-900 transition ring-1 ring-gray-200 hover:bg-gray-100 dark:bg-gray-850 dark:text-gray-100 dark:ring-gray-800 dark:hover:bg-gray-800"
++		data-ees-create
++		class={variant === 'primary'
++			? 'focus-ring h-9 shrink-0 rounded-sm bg-gray-900 px-3.5 text-sm text-white transition hover:bg-gray-850 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white'
++			: 'focus-ring ml-1 rounded-lg bg-gray-50 px-2.5 py-1 text-xs text-gray-900 transition ring-1 ring-gray-200 hover:bg-gray-100 dark:bg-gray-850 dark:text-gray-100 dark:ring-gray-800 dark:hover:bg-gray-800'}
+ 		type="button"
+ 		on:click={() => {
+ 			runAction(primaryAction);
+@@ -60,10 +65,15 @@
+ 	</button>
+ {:else if visibleActions.length > 1}
+ 	<div
+-		class="ml-1 flex overflow-hidden rounded-lg bg-gray-50 text-xs text-gray-900 transition ring-1 ring-gray-200 dark:bg-gray-850 dark:text-gray-100 dark:ring-gray-800"
++		class={variant === 'primary'
++			? 'flex h-9 shrink-0 overflow-hidden rounded-sm text-sm'
++			: 'ml-1 flex overflow-hidden rounded-lg bg-gray-50 text-xs text-gray-900 transition ring-1 ring-gray-200 dark:bg-gray-850 dark:text-gray-100 dark:ring-gray-800'}
+ 	>
+ 		<button
+-			class="focus-ring px-2.5 py-1 transition hover:bg-gray-100 dark:hover:bg-gray-800"
++			data-ees-create
++			class={variant === 'primary'
++				? 'focus-ring bg-gray-900 px-3.5 text-white transition hover:bg-gray-850 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white'
++				: 'focus-ring px-2.5 py-1 transition hover:bg-gray-100 dark:hover:bg-gray-800'}
+ 			on:click={() => {
+ 				runAction(primaryAction);
+ 			}}
+@@ -73,7 +83,9 @@
+ 
+ 		<Dropdown bind:show={showMenu} align="end" sideOffset={6}>
+ 			<button
+-				class="focus-ring flex items-center border-l border-gray-200 px-1.5 py-1 transition hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-gray-800"
++				class={variant === 'primary'
++					? 'focus-ring flex h-9 items-center border-l border-white/30 bg-gray-900 px-2 text-white transition hover:bg-gray-850 dark:border-gray-300 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white'
++					: 'focus-ring flex items-center border-l border-gray-200 px-1.5 py-1 transition hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-gray-800'}
+ 				aria-label={$i18n.t('Open create menu')}
+ 			>
+ 				<ChevronDown className="size-2.5" strokeWidth="2.5" />
+diff --git a/src/lib/components/ees/EesAccessTag.svelte b/src/lib/components/ees/EesAccessTag.svelte
+new file mode 100644
+index 0000000..b20bed7
+--- /dev/null
++++ b/src/lib/components/ees/EesAccessTag.svelte
+@@ -0,0 +1,21 @@
++<script lang="ts">
++	import { getContext } from 'svelte';
++	import { eesAccessKind } from './assets';
++
++	export let grants: any[] | null | undefined = [];
++	const i18n = getContext('i18n');
++	const labels = {
++		private: ['EES.Access.Private', 'Private'],
++		public: ['EES.Access.Public', 'Everyone'],
++		groups: ['EES.Access.Groups', 'Selected groups'],
++		shared: ['EES.Access.Shared', 'Selected people and groups']
++	};
++	$: kind = eesAccessKind(grants);
++</script>
++
++<span
++	data-ees-access={kind}
++	class="inline-flex h-[1.375rem] max-w-full items-center truncate rounded-sm border px-2 text-xs {kind === 'private'
++		? 'border-gray-200 text-gray-500 dark:border-gray-700 dark:text-gray-400'
++		: 'border-gray-300 text-gray-800 dark:border-gray-600 dark:text-gray-200'}"
++>{$i18n.t(labels[kind][0], { defaultValue: labels[kind][1] })}</span>
 diff --git a/src/lib/components/ees/EesAssetUsage.svelte b/src/lib/components/ees/EesAssetUsage.svelte
 new file mode 100644
+index 0000000..b40068d
 --- /dev/null
 +++ b/src/lib/components/ees/EesAssetUsage.svelte
 @@ -0,0 +1,47 @@
@@ -1905,19 +1987,19 @@ new file mode 100644
 +</script>
 +
 +{#if assistants.length || jobs.length}
-+	<section data-ees-asset-usage class="my-4">
++	<section data-ees-asset-usage class="mb-5">
 +		<h3 class="mb-2 text-sm font-semibold">{$i18n.t('EES.Asset.Usage', { defaultValue: 'Used by' })}</h3>
-+		<ul class="divide-y divide-gray-200 overflow-hidden rounded-lg border border-gray-200 bg-white text-sm dark:divide-gray-700 dark:border-gray-700 dark:bg-gray-900">
++		<ul class="divide-y divide-gray-200 border-y border-gray-200 text-sm dark:divide-gray-700 dark:border-gray-700">
 +			{#each jobs as ref}
-+				<li class="flex flex-wrap items-center gap-2 px-3 py-2">
-+					<strong class="font-medium">{[ref.workflow, ref.stage, ref.job].filter(Boolean).join(' › ')}</strong>
-+					<small>{$i18n.t('EES.Nav.Procedures', { defaultValue: 'Work procedures' })} · {ref.system_id}</small>
++				<li class="min-w-0 py-2">
++					<strong class="block truncate font-medium">{ref.workflow}</strong>
++					<small class="block truncate text-xs leading-[1.125rem] text-gray-500">{[$i18n.t('EES.Nav.Procedures', { defaultValue: 'Work procedures' }), ref.system_id, [ref.stage, ref.job].filter(Boolean).join(' › ')].filter(Boolean).join(' · ')}</small>
 +				</li>
 +			{/each}
 +			{#each assistants as model (model.id)}
-+				<li class="flex flex-wrap items-center gap-2 px-3 py-2">
-+					<strong class="font-medium">{model.name}</strong>
-+					<small>{$i18n.t('EES.Assistants', { defaultValue: 'AI assistants' })}</small>
++				<li class="min-w-0 py-2">
++					<strong class="block truncate font-medium">{model.name}</strong>
++					<small class="block truncate text-xs leading-[1.125rem] text-gray-500">{$i18n.t('EES.Assistants', { defaultValue: 'AI assistants' })}</small>
 +				</li>
 +			{/each}
 +		</ul>
@@ -3036,6 +3118,7 @@ index 0000000..fc64846
 +{/if}
 diff --git a/src/lib/components/ees/EesShell.svelte b/src/lib/components/ees/EesShell.svelte
 new file mode 100644
+index 0000000..79863d4
 --- /dev/null
 +++ b/src/lib/components/ees/EesShell.svelte
 @@ -0,0 +1,401 @@
@@ -3355,7 +3438,7 @@ new file mode 100644
 +		<header data-ees-work-toolbar data-ees-source-workspace-heading={assetSection && !admin ? true : undefined} class="ees-work-toolbar">
 +			{#if assetSection && !admin}
 +				<h1 class="min-w-0 flex-1 truncate font-semibold">{t(({models:'EES.Nav.Models',knowledge:'EES.Nav.Knowledge',skills:'EES.Nav.Skills'})[assetSection],heading)}</h1>
-+				{#if assetCanCreate}<SplitCreateButton actions={$workspaceActions} />{/if}
++				{#if assetCanCreate && assetSection === 'models'}<SplitCreateButton actions={$workspaceActions} />{/if}
 +			{:else}<strong>{heading}</strong>{/if}
 +			<button type="button" data-ees-chat-toggle bind:this={chatToggle} aria-controls="ees-chat-surface" aria-expanded={chatOpen}
 +				aria-label={t(chatOpen ? 'EES.Chat.Close' : 'EES.Chat.Open', chatOpen ? 'Close chat' : 'Open chat')}
@@ -3440,6 +3523,34 @@ new file mode 100644
 +	}
 +	@media (prefers-reduced-motion: reduce) { .ees-source-shell .ees-chat-space,.ees-source-shell .ees-chat-region,.ees-source-shell[data-ees-chat-state='closed'] .ees-chat-region { transition:none; } }
 +</style>
+diff --git a/src/lib/components/ees/assets.ts b/src/lib/components/ees/assets.ts
+new file mode 100644
+index 0000000..a163fce
+--- /dev/null
++++ b/src/lib/components/ees/assets.ts
+@@ -0,0 +1,22 @@
++// Shared by the work instruction and reference document screens.
++type Grant = { principal_type?: string; principal_id?: string; permission?: string };
++
++// Who can read an asset. The access dialog stays the place to change it.
++export function eesAccessKind(grants: Grant[] | null | undefined): 'private' | 'public' | 'groups' | 'shared' {
++	const valid = (Array.isArray(grants) ? grants : []).filter(
++		(grant) => grant && grant.principal_type && grant.principal_id && grant.permission
++	);
++	if (valid.some((grant) => grant.principal_id === '*')) return 'public';
++	if (!valid.length) return 'private';
++	return valid.every((grant) => grant.principal_type === 'group') ? 'groups' : 'shared';
++}
++
++// 11.06 within this year, 2025.11.06 otherwise.
++export function eesShortDate(seconds: number | null | undefined, now = new Date()): string {
++	if (!seconds) return '';
++	const date = new Date(seconds * 1000);
++	if (Number.isNaN(date.getTime())) return '';
++	const two = (value: number) => String(value).padStart(2, '0');
++	const day = two(date.getMonth() + 1) + '.' + two(date.getDate());
++	return date.getFullYear() === now.getFullYear() ? day : date.getFullYear() + '.' + day;
++}
 diff --git a/src/lib/components/ees/icons/5bc95.svg b/src/lib/components/ees/icons/5bc95.svg
 new file mode 100644
 index 0000000..59f7e8d
@@ -4117,7 +4228,389 @@ index 007df31..ecdbd66 100644
 + #sidebar[data-compact=true] .ees-chat-controls button{gap:0}#sidebar[data-compact=true] .ees-chat-controls span{max-width:0;transition-duration:var(--ees-motion-close);transition-timing-function:var(--ees-motion-close-easing)}
 + #sidebar[data-compact=true] :global(.ew-empty),#sidebar[data-compact=true] :global(.ew-recent){display:none}
  </style>
+diff --git a/src/lib/components/workspace/Knowledge.svelte b/src/lib/components/workspace/Knowledge.svelte
+index 479efc6..69f2125 100644
+--- a/src/lib/components/workspace/Knowledge.svelte
++++ b/src/lib/components/workspace/Knowledge.svelte
+@@ -34,6 +34,10 @@
+ 	import ViewSelector from './common/ViewSelector.svelte';
+ 	import TagSelector from './common/TagSelector.svelte';
+ 	import Loader from '../common/Loader.svelte';
++	import SplitCreateButton from '../common/SplitCreateButton.svelte';
++	import EesAccessTag from '../ees/EesAccessTag.svelte';
++	import { eesShortDate } from '../ees/assets';
++	import { eesSessionReady } from '../ees/state';
+ 
+ 	type KnowledgeListItem = {
+ 		id: string;
+@@ -72,6 +76,10 @@
+ 
+ 	let allItemsLoaded = false;
+ 	let itemsLoading = false;
++	// The whole count is kept while a search narrows the list: "4 of 12".
++	let unfilteredTotal: number | null = null;
++	const columns =
++		'grid grid-cols-[minmax(0,1fr)_auto_2rem] items-center gap-x-3 px-2 @2xl:grid-cols-[minmax(0,1fr)_7.5rem_8.5rem_4rem_2rem]';
+ 
+ 	$: if (loaded) {
+ 		workspaceActions.set([
+@@ -153,6 +161,7 @@
+ 		if (res) {
+ 			console.log(res);
+ 			total = res.total;
++			if (!query && !viewOption && !sourceOption) unfilteredTotal = res.total ?? null;
+ 			workspaceCounts.update((counts) => ({ ...counts, knowledge: total }));
+ 			const pageItems: KnowledgeListItem[] = res.items ?? [];
+ 
+@@ -310,48 +319,49 @@
+ 		/>
+ 	</Modal>
+ 
+-	<div class="space-y-1">
+-		<div class="flex h-8 w-full items-center gap-2">
+-			<div class="flex min-w-0 flex-1">
+-				<div class=" self-center ml-1 mr-3">
++	<div data-ees-asset="knowledge-list" class="@container">
++		<div data-ees-asset-toolbar class="flex flex-wrap items-center gap-x-3 gap-y-2 pb-4">
++			<div class="relative flex h-9 min-w-[10rem] max-w-[22.5rem] flex-1 items-center">
++				<div class="pointer-events-none absolute left-3 text-gray-500">
+ 					<Search className="size-3.5" />
+ 				</div>
+ 				<input
+-					class=" w-full text-sm py-1 rounded-r-xl outline-hidden bg-transparent"
++					class="h-9 w-full rounded-sm border border-gray-300 bg-white pl-9 pr-8 text-sm outline-hidden placeholder:text-gray-500 focus:border-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:focus:border-gray-300"
+ 					bind:value={query}
+ 					on:input={handleSearchInput}
+ 					aria-label={$i18n.t('Search Knowledge')}
+-					placeholder={$i18n.t('Search Knowledge')}
++					placeholder={$i18n.t('EES.FindByName', { defaultValue: 'Find by name' })}
+ 				/>
+ 				{#if query}
+-					<div class="self-center pl-1.5 translate-y-[0.5px] rounded-l-xl bg-transparent">
+-						<button
+-							class="p-0.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 transition"
+-							aria-label={$i18n.t('Clear search')}
+-							on:click={() => {
+-								query = '';
+-								handleSearchInput();
+-							}}
+-						>
+-							<XMark className="size-3" strokeWidth="2" />
+-						</button>
+-					</div>
++					<button
++						class="absolute right-2 rounded-full p-0.5 text-gray-500 transition hover:bg-gray-100 dark:hover:bg-gray-800"
++						type="button"
++						aria-label={$i18n.t('Clear search')}
++						on:click={() => {
++							query = '';
++							handleSearchInput();
++						}}
++					>
++						<XMark className="size-3" strokeWidth="2" />
++					</button>
+ 				{/if}
+ 			</div>
+ 
+-			<div
+-				class="flex max-w-[55%] shrink-0 overflow-x-auto scrollbar-none"
+-				bind:this={tagsContainerElement}
+-				on:wheel={(e) => {
+-					if (e.deltaY !== 0) {
+-						e.preventDefault();
+-						e.currentTarget.scrollLeft += e.deltaY;
+-					}
+-				}}
+-			>
+-				<div
+-					class="flex w-fit gap-0.5 text-center text-sm rounded-full bg-transparent whitespace-nowrap"
+-				>
++			<div class="ml-auto flex shrink-0 flex-wrap items-center justify-end gap-x-3 gap-y-2">
++				{#if items !== null && total !== null}
++					<span data-ees-asset-count class="whitespace-nowrap text-[0.8125rem] text-gray-500 dark:text-gray-400">
++						{#if (query || viewOption || sourceOption) && unfilteredTotal !== null}
++							{$i18n.t('EES.AssetCountOf', {
++								count: total,
++								total: unfilteredTotal,
++								defaultValue: '{{count}} of {{total}}'
++							})}
++						{:else}
++							{$i18n.t('EES.AssetCount', { count: total, defaultValue: '{{count}} items' })}
++						{/if}
++					</span>
++				{/if}
++				<div class="flex shrink-0 items-center gap-0.5 whitespace-nowrap">
+ 					<ViewSelector
+ 						bind:value={viewOption}
+ 						align="end"
+@@ -376,21 +386,28 @@
+ 						}}
+ 					/>
+ 				</div>
++				{#if $eesSessionReady}
++					<SplitCreateButton
++						actions={$workspaceActions}
++						variant="primary"
++						label={$i18n.t('EES.Knowledge.New', { defaultValue: 'New reference documents' })}
++					/>
++				{/if}
+ 			</div>
+ 		</div>
+ 
+ 		{#if items !== null && total !== null}
+ 			{#if (items ?? []).length !== 0}
+-				<div class="my-1">
++				<div data-ees-asset-table class="text-sm">
+ 					<div
+-						class="flex w-full items-center gap-2 px-1.5 pb-0.5 text-xs text-gray-400 dark:text-gray-600"
++						class="{columns} border-b border-gray-300 pb-2 text-xs text-gray-500 dark:border-gray-600 dark:text-gray-400"
+ 					>
+ 						<button
+-							class="flex min-w-0 flex-1 items-center gap-1 py-0.5 text-left"
++							class="flex min-w-0 items-center gap-1 text-left"
+ 							type="button"
+ 							on:click={() => setSortKey('name')}
+ 						>
+-							{$i18n.t('Title')}
++							{$i18n.t('Name')}
+ 							{#if sortKey === 'name'}
+ 								{#if sortDirection === 'asc'}
+ 									<ChevronUp className="size-2" />
+@@ -399,15 +416,14 @@
+ 								{/if}
+ 							{/if}
+ 						</button>
+-
+-						<div class="hidden w-44 shrink-0 md:block"></div>
+-
++						<span>{$i18n.t('EES.Asset.AccessColumn', { defaultValue: 'Access' })}</span>
++						<span class="hidden @2xl:block">{$i18n.t('EES.Asset.Owner', { defaultValue: 'Created by' })}</span>
+ 						<button
+-							class="flex w-36 shrink-0 items-center justify-end gap-1 py-0.5 text-right"
++							class="hidden items-center gap-1 text-left @2xl:flex"
+ 							type="button"
+ 							on:click={() => setSortKey('updated_at')}
+ 						>
+-							{$i18n.t('Updated at')}
++							{$i18n.t('EES.Asset.Updated', { defaultValue: 'Updated' })}
+ 							{#if sortKey === 'updated_at'}
+ 								{#if sortDirection === 'asc'}
+ 									<ChevronUp className="size-2" />
+@@ -416,111 +432,94 @@
+ 								{/if}
+ 							{/if}
+ 						</button>
++						<span></span>
+ 					</div>
+ 
+-					<div class="grid gap-y-0.5">
+-						{#each items as item}
+-							{@const metaPreview = getKnowledgeMetaPreview(item)}
+-							<div
+-								class="group flex min-h-8 w-full cursor-pointer items-center gap-2 overflow-hidden rounded-xl px-2 py-1 text-left"
+-								role="button"
+-								tabindex="0"
+-								on:click={(e) => {
+-									if (shouldIgnoreRowClick(e.target)) return;
++					{#each items as item}
++						{@const metaPreview = getKnowledgeMetaPreview(item)}
++						<div
++							data-ees-asset-row
++							class="group {columns} min-h-14 cursor-pointer border-b border-gray-200 py-2 text-left hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-850"
++							role="button"
++							tabindex="0"
++							on:click={(e) => {
++								if (shouldIgnoreRowClick(e.target)) return;
++								openKnowledge(item);
++							}}
++							on:keydown={(e) => {
++								if (e.currentTarget !== e.target) return;
++								if (e.key === 'Enter' || e.key === ' ') {
++									e.preventDefault();
+ 									openKnowledge(item);
+-								}}
+-								on:keydown={(e) => {
+-									if (e.currentTarget !== e.target) return;
+-									if (e.key === 'Enter' || e.key === ' ') {
+-										e.preventDefault();
+-										openKnowledge(item);
+-									}
+-								}}
+-							>
+-								<div class="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
+-									<div class="flex min-w-0 flex-1 flex-col overflow-hidden">
+-										<div class="flex min-w-0 items-center gap-2 overflow-hidden">
+-											<div class="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+-												<Tooltip
+-													content={item?.description ?? item.name}
+-													className="min-w-0"
+-													placement="top-start"
+-												>
+-													<div
+-														class="truncate text-[0.8125rem] leading-5 text-gray-800 group-hover:underline dark:text-gray-200"
+-													>
+-														{item.name}
+-													</div>
+-												</Tooltip>
+-
+-												{#if item?.meta?.source === 'external'}
+-													<Badge
+-														type="muted"
+-														content={item?.meta?.external?.provider ?? $i18n.t('Connected')}
+-													/>
+-													<Badge type="muted" content={$i18n.t('Read Only')} />
+-												{/if}
+-
+-												{#if !item?.write_access && item?.meta?.source !== 'external'}
+-													<Badge type="muted" content={$i18n.t('Read Only')} />
+-												{/if}
+-
+-												<Tooltip content={dayjs(item.updated_at * 1000).format('LLLL')}>
+-													<div
+-														class="shrink-0 truncate text-[0.6875rem] leading-5 text-gray-400 dark:text-gray-600"
+-													>
+-														{dayjs(item.updated_at * 1000).fromNow()}
+-													</div>
+-												</Tooltip>
+-											</div>
+-										</div>
+-
+-										{#if metaPreview}
+-											<Tooltip content={metaPreview} className="min-w-0" placement="top-start">
+-												<div
+-													class="mt-0.5 truncate text-[0.6875rem] leading-4 text-gray-400 dark:text-gray-600"
+-												>
+-													{metaPreview}
+-												</div>
+-											</Tooltip>
+-										{/if}
++								}
++							}}
++						>
++							<div class="min-w-0">
++								<div class="flex min-w-0 items-center gap-2">
++									<div
++										class="truncate text-sm font-medium leading-[1.375rem] text-gray-900 group-hover:underline dark:text-gray-100"
++									>
++										{item.name}
+ 									</div>
++
++									{#if item?.meta?.source === 'external'}
++										<Badge
++											type="muted"
++											content={item?.meta?.external?.provider ?? $i18n.t('Connected')}
++										/>
++										<Badge type="muted" content={$i18n.t('Read Only')} />
++									{/if}
++
++									{#if !item?.write_access && item?.meta?.source !== 'external'}
++										<Badge type="muted" content={$i18n.t('Read Only')} />
++									{/if}
+ 								</div>
+ 
+-								<div
+-									class="hidden max-w-44 shrink-0 self-center truncate text-right text-[0.6875rem] leading-5 text-gray-500 dark:text-gray-500 md:block"
+-								>
+-									<Tooltip
+-										content={item?.user?.email ?? $i18n.t('Deleted User')}
+-										className="min-w-0"
+-										placement="top-start"
++								{#if metaPreview}
++									<div
++										class="truncate text-xs leading-[1.125rem] text-gray-500 dark:text-gray-400"
++										title={metaPreview}
+ 									>
+-										<div class="truncate">
+-											{capitalizeFirstLetter(
+-												item?.user?.name ?? item?.user?.email ?? $i18n.t('Deleted User')
+-											)}
+-										</div>
+-									</Tooltip>
+-								</div>
++										{metaPreview}
++									</div>
++								{/if}
++							</div>
++
++							<div class="min-w-0"><EesAccessTag grants={item.access_grants} /></div>
++
++							<div
++								class="hidden min-w-0 truncate text-[0.8125rem] text-gray-600 @2xl:block dark:text-gray-400"
++								title={item?.user?.email ?? ''}
++							>
++								{capitalizeFirstLetter(
++									item?.user?.name ?? item?.user?.email ?? $i18n.t('Deleted User')
++								)}
++							</div>
++
++							<div
++								class="hidden text-[0.8125rem] tabular-nums text-gray-600 @2xl:block dark:text-gray-400"
++								title={dayjs(item.updated_at * 1000).format('LLLL')}
++							>
++								{eesShortDate(item.updated_at)}
++							</div>
+ 
++							<div class="flex min-w-0 items-center justify-end">
+ 								{#if item?.write_access || $user?.role === 'admin'}
+-									<div class="ml-2 flex shrink-0 flex-row items-center self-center">
+-										<ItemMenu
+-											onExport={$user?.role === 'admin'
+-												? () => {
+-														exportHandler(item);
+-													}
+-												: null}
+-											on:delete={() => {
+-												selectedItem = item;
+-												showDeleteConfirm = true;
+-											}}
+-										/>
+-									</div>
++									<ItemMenu
++										onExport={$user?.role === 'admin'
++											? () => {
++													exportHandler(item);
++												}
++											: null}
++										on:delete={() => {
++											selectedItem = item;
++											showDeleteConfirm = true;
++										}}
++									/>
+ 								{/if}
+ 							</div>
+-						{/each}
+-					</div>
++						</div>
++					{/each}
+ 				</div>
+ 
+ 				{#if !allItemsLoaded}
+@@ -538,14 +537,15 @@
+ 					</Loader>
+ 				{/if}
+ 			{:else}
+-				<div class="flex w-full flex-col items-center justify-center py-16 pb-24">
+-					<div class="max-w-sm text-center text-gray-900 dark:text-gray-100">
+-						<div class="mb-1.5 text-sm">{$i18n.t('No knowledge found')}</div>
+-						<div class="text-center text-xs leading-5 text-gray-500">
+-							{$i18n.t('Try adjusting your search or filter to find what you are looking for.')}
+-						</div>
+-					</div>
+-				</div>
++				<p data-ees-asset-empty class="border-b border-gray-200 px-2 py-6 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
++					{#if query}
++						{$i18n.t('EES.Knowledge.NoMatch', { defaultValue: 'No reference documents match.' })}
++					{:else if viewOption || sourceOption}
++						{$i18n.t('EES.Asset.NoFiltered', { defaultValue: 'Nothing in this view.' })}
++					{:else}
++						{$i18n.t('EES.Knowledge.Empty', { defaultValue: 'No reference documents yet.' })}
++					{/if}
++				</p>
+ 			{/if}
+ 		{:else}
+ 			<div class="w-full h-full flex justify-center items-center py-10">
 diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte
+index de04f3e..2d35417 100644
 --- a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte
 +++ b/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte
 @@ -25,6 +25,7 @@
@@ -4128,23 +4621,24 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/l
  		renameFileById
  	} from '$lib/apis/files';
  	import {
-@@ -54,6 +55,8 @@
+@@ -54,6 +55,9 @@
  	import Spinner from '$lib/components/common/Spinner.svelte';
  	import Tooltip from '$lib/components/common/Tooltip.svelte';
  	import Files from './KnowledgeBase/Files.svelte';
 +	import EesAssetUsage from '$lib/components/ees/EesAssetUsage.svelte';
++	import EesAccessTag from '$lib/components/ees/EesAccessTag.svelte';
 +	import { eesSnapshot, eesSessionReady } from '$lib/components/ees/state';
  	import AddFilesPlaceholder from '$lib/components/AddFilesPlaceholder.svelte';
  
  	import AddContentMenu from './KnowledgeBase/AddContentMenu.svelte';
-@@ -112,7 +115,40 @@
+@@ -112,6 +116,39 @@
  	let selectedFile = null;
  	let selectedFileContent = '';
  	let loadingFileContent = false;
 +	let retryingFile = '';
 +	let retryMounted = true;
 +	onDestroy(() => { retryMounted = false; });
- 
++
 +	const retryFile = async (fileId: string) => {
 +		if (!$eesSessionReady || !$user?.id || $eesSnapshot.native_capabilities?.actor_id !== $user.id || !knowledge?.write_access || isExternalKnowledge || !fileId || retryingFile) return;
 +		const collection = knowledge.id;
@@ -4174,20 +4668,28 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/l
 +			retryingFile = '';
 +		}
 +	};
-+
+ 
  	let inputFiles = null;
  
- 	let query = '';
-@@ -1211,7 +1247,7 @@
+@@ -1211,7 +1248,7 @@
  	}}
  />
  
 -<div class="flex flex-col w-full h-full min-h-full" id="collection-container">
-+<div class="flex flex-col w-full h-full min-h-full" id="collection-container" data-ees-asset="knowledge">
++<div class="@container flex flex-col w-full h-full min-h-full" id="collection-container" data-ees-asset="knowledge">
  	{#if id && knowledge}
  		<AccessControlModal
  			bind:show={showAccessControlModal}
-@@ -1239,7 +1275,7 @@
+@@ -1230,7 +1267,7 @@
+ 			}}
+ 			accessRoles={['read', 'write']}
+ 		/>
+-		<div class="w-full px-2">
++		<div data-ees-asset-head class="w-full shrink-0 border-b border-gray-200 pb-3 dark:border-gray-700">
+ 			<button
+ 				class="mb-1 flex h-6 w-fit items-center gap-1 rounded-md text-xs text-gray-400 transition-colors duration-75 hover:text-gray-700 dark:text-gray-600 dark:hover:text-gray-300"
+ 				type="button"
+@@ -1239,16 +1276,16 @@
  				}}
  			>
  				<ChevronLeft className="size-3" strokeWidth="2" />
@@ -4196,16 +4698,27 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/l
  			</button>
  
  			<div class=" flex w-full">
-@@ -1248,7 +1284,7 @@
+-				<div class="flex-1 px-1">
++				<div class="flex-1">
+ 					<div class="flex items-center justify-between w-full">
  						<div class="w-full flex justify-between items-center">
  							<input
  								type="text"
 -								class="text-left w-full text-sm bg-transparent outline-hidden flex-1"
-+								class="text-left w-full text-xl font-semibold bg-transparent outline-hidden flex-1"
++								class="text-left w-full text-xl font-semibold leading-8 bg-transparent! outline-hidden flex-1"
  								bind:value={knowledge.name}
  								aria-label={$i18n.t('Knowledge Name')}
  								placeholder={$i18n.t('Knowledge Name')}
-@@ -1270,19 +1306,6 @@
+@@ -1258,7 +1295,7 @@
+ 								}}
+ 							/>
+ 
+-							<div class="shrink-0 mr-2.5">
++							<div class="shrink-0 ml-3">
+ 								{#if fileItemsTotal}
+ 									<div class="text-xs text-gray-500">
+ 										<!-- {$i18n.t('{{COUNT}} files')} -->
+@@ -1270,25 +1307,12 @@
  							</div>
  						</div>
  
@@ -4225,16 +4738,36 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/l
  					</div>
  
  					<div class="flex w-full items-center">
-@@ -1317,7 +1340,7 @@
+ 						<input
+ 							type="text"
+-							class="text-left text-xs w-full text-gray-500 bg-transparent outline-hidden flex-1"
++							class="text-left text-sm w-full text-gray-500 bg-transparent! outline-hidden flex-1"
+ 							bind:value={knowledge.description}
+ 							aria-label={$i18n.t('Knowledge Description')}
+ 							placeholder={$i18n.t('Knowledge Description')}
+@@ -1301,7 +1325,7 @@
+ 						<div class="hidden md:block">
+ 							<Tooltip content={$i18n.t('Click to copy ID')}>
+ 								<button
+-									class="text-xs text-gray-500 font-mono shrink-0 px-2 py-1 rounded-lg cursor-pointer hover:underline transition whitespace-nowrap"
++									class="text-xs text-gray-500 font-mono shrink-0 pl-2 py-1 rounded-lg cursor-pointer hover:underline transition whitespace-nowrap"
+ 									on:click={() => {
+ 										copyToClipboard(id);
+ 										toast.success($i18n.t('ID copied to clipboard'));
+@@ -1316,8 +1340,11 @@
+ 			</div>
  		</div>
  
++		<!-- The documents use the width that is left; where they are used and who can use them sit beside them. -->
++		<div data-ees-asset-columns class="flex min-h-0 flex-1 flex-col pt-2 @3xl:flex-row">
++		<div data-ees-asset-main class="flex min-w-0 flex-1 flex-col">
  		<div
 -			class="mt-1.5 mb-2 py-1.5 -mx-0 bg-white dark:bg-gray-900 rounded-3xl border border-gray-100/30 dark:border-gray-850/30 flex-1"
 +			class="mt-1.5 mb-2 py-1.5 -mx-0 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 flex-1"
  		>
  			{#if isExternalKnowledge}
  				<div class="p-5 flex flex-col gap-4">
-@@ -1564,6 +1587,9 @@
+@@ -1564,6 +1591,9 @@
  										<div class=" flex overflow-y-auto h-full w-full scrollbar-hidden text-xs">
  											<Files
  												files={fileItems}
@@ -4244,30 +4777,45 @@ diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/l
  												directories={directoryItems}
  												{knowledge}
  												{selectedFileId}
-@@ -1699,6 +1725,23 @@
- 					</div>
+@@ -1700,6 +1730,38 @@
  				{/if}
  			{/if}
-+		</div>
-+		<EesAssetUsage kind="knowledge" assetId={knowledge.id} />
-+		<div class="my-3 flex flex-wrap items-center gap-3 border-y border-gray-200 px-1 py-3 dark:border-gray-700">
-+			<span class="text-sm font-medium">{$i18n.t('EES.Asset.Access', { defaultValue: 'Who can use this?' })}</span>
-+						{#if knowledge?.write_access}
-+							<div class="self-center shrink-0">
-+								<AccessButton
-+									on:click={() => {
-+										showAccessControlModal = true;
-+									}}
-+								/>
-+							</div>
-+						{:else}
-+							<div class="text-xs shrink-0 text-gray-500">
-+								{$i18n.t('Read Only')}
-+							</div>
-+						{/if}
  		</div>
++		{#if !isExternalKnowledge}
++			<p data-ees-asset-note class="px-1 pb-2 text-xs text-gray-500">
++				{$i18n.t('EES.Document.ReadyNote', {
++					defaultValue: 'Only documents that finished processing can be found by the assistant.'
++				})}
++			</p>
++		{/if}
++		</div>
++		<aside
++			data-ees-asset-aside
++			class="shrink-0 border-t border-gray-200 pt-4 pb-4 @3xl:mt-1.5 @3xl:w-[21rem] @3xl:border-t-0 @3xl:pt-1 @3xl:pl-6 dark:border-gray-700"
++		>
++			<EesAssetUsage kind="knowledge" assetId={knowledge.id} />
++			<section data-ees-asset-access class="mb-5">
++				<h3 class="mb-2 text-sm font-semibold">{$i18n.t('EES.Asset.Access', { defaultValue: 'Who can use this?' })}</h3>
++				<div class="flex flex-wrap items-center gap-2">
++					<EesAccessTag grants={knowledge.access_grants} />
++					{#if knowledge?.write_access}
++						<AccessButton
++							on:click={() => {
++								showAccessControlModal = true;
++							}}
++						/>
++					{:else}
++						<span class="text-xs shrink-0 text-gray-500">
++							{$i18n.t('Read Only')}
++						</span>
++					{/if}
++				</div>
++			</section>
++		</aside>
++		</div>
  	{:else}
  		<Spinner className="size-5" />
+ 	{/if}
 diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte b/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte
 --- a/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte
 +++ b/src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte
@@ -4768,18 +5316,507 @@ diff --git a/src/lib/components/workspace/Models/ModelEditor.svelte b/src/lib/co
  						</div>
  					</div>
  				</form>
+diff --git a/src/lib/components/workspace/Skills.svelte b/src/lib/components/workspace/Skills.svelte
+index ca52980..1d95348 100644
+--- a/src/lib/components/workspace/Skills.svelte
++++ b/src/lib/components/workspace/Skills.svelte
+@@ -45,6 +45,10 @@
+ 	import Pagination from '../common/Pagination.svelte';
+ 	import ChevronDown from '../icons/ChevronDown.svelte';
+ 	import ChevronUp from '../icons/ChevronUp.svelte';
++	import SplitCreateButton from '../common/SplitCreateButton.svelte';
++	import EesAccessTag from '../ees/EesAccessTag.svelte';
++	import { eesShortDate } from '../ees/assets';
++	import { eesSessionReady } from '../ees/state';
+ 
+ 	let shiftKey = false;
+ 	let loaded = false;
+@@ -68,6 +72,10 @@
+ 	let sortDirection = 'desc';
+ 	let openSkillMenuId: string | null = null;
+ 	let page = 1;
++	// The whole count is kept while a search narrows the list: "4 of 12".
++	let unfilteredTotal: number | null = null;
++	const columns =
++		'grid grid-cols-[minmax(0,1fr)_auto_4.75rem] items-center gap-x-3 px-2 @2xl:grid-cols-[minmax(0,1fr)_7.5rem_8.5rem_4rem_4.75rem]';
+ 
+ 	$: if (loaded) {
+ 		workspaceActions.set([
+@@ -123,6 +131,7 @@
+ 			if (res) {
+ 				filteredItems = res.items;
+ 				total = res.total;
++				if (!query && !viewOption) unfilteredTotal = res.total;
+ 				workspaceCounts.update((counts) => ({ ...counts, skills: total }));
+ 			}
+ 		} catch (err) {
+@@ -330,48 +339,49 @@
+ 		}}
+ 	/>
+ 
+-	<div class="space-y-1">
+-		<div class="flex h-8 w-full items-center gap-2">
+-			<div class="flex min-w-0 flex-1">
+-				<div class=" self-center ml-1 mr-3">
++	<div data-ees-asset="skills" class="@container">
++		<div data-ees-asset-toolbar class="flex flex-wrap items-center gap-x-3 gap-y-2 pb-4">
++			<div class="relative flex h-9 min-w-[10rem] max-w-[22.5rem] flex-1 items-center">
++				<div class="pointer-events-none absolute left-3 text-gray-500">
+ 					<Search className="size-3.5" />
+ 				</div>
+ 				<input
+-					class=" w-full text-sm pr-4 py-1 rounded-r-xl outline-hidden bg-transparent"
++					class="h-9 w-full rounded-sm border border-gray-300 bg-white pl-9 pr-8 text-sm outline-hidden placeholder:text-gray-500 focus:border-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:focus:border-gray-300"
+ 					bind:value={query}
+ 					on:input={handleSearchInput}
+ 					aria-label={$i18n.t('Search Skills')}
+-					placeholder={$i18n.t('Search Skills')}
++					placeholder={$i18n.t('EES.FindByName', { defaultValue: 'Find by name' })}
+ 				/>
+ 				{#if query}
+-					<div class="self-center pl-1.5 translate-y-[0.5px] rounded-l-xl bg-transparent">
+-						<button
+-							class="p-0.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-900 transition"
+-							aria-label={$i18n.t('Clear search')}
+-							on:click={() => {
+-								query = '';
+-								handleSearchInput();
+-							}}
+-						>
+-							<XMark className="size-3" strokeWidth="2" />
+-						</button>
+-					</div>
++					<button
++						class="absolute right-2 rounded-full p-0.5 text-gray-500 transition hover:bg-gray-100 dark:hover:bg-gray-800"
++						type="button"
++						aria-label={$i18n.t('Clear search')}
++						on:click={() => {
++							query = '';
++							handleSearchInput();
++						}}
++					>
++						<XMark className="size-3" strokeWidth="2" />
++					</button>
+ 				{/if}
+ 			</div>
+ 
+-			<div
+-				class="flex max-w-[55%] shrink-0 overflow-x-auto scrollbar-none"
+-				bind:this={tagsContainerElement}
+-				on:wheel={(e) => {
+-					if (e.deltaY !== 0) {
+-						e.preventDefault();
+-						e.currentTarget.scrollLeft += e.deltaY;
+-					}
+-				}}
+-			>
+-				<div
+-					class="flex w-fit gap-0.5 text-center text-sm rounded-full bg-transparent whitespace-nowrap"
+-				>
++			<div class="ml-auto flex shrink-0 items-center gap-3">
++				{#if filteredItems !== null && total !== null && !loading}
++					<span data-ees-asset-count class="whitespace-nowrap text-[0.8125rem] text-gray-500 dark:text-gray-400">
++						{#if (query || viewOption) && unfilteredTotal !== null}
++							{$i18n.t('EES.AssetCountOf', {
++								count: total,
++								total: unfilteredTotal,
++								defaultValue: '{{count}} of {{total}}'
++							})}
++						{:else}
++							{$i18n.t('EES.AssetCount', { count: total, defaultValue: '{{count}} items' })}
++						{/if}
++					</span>
++				{/if}
++				<div class="shrink-0 whitespace-nowrap">
+ 					<ViewSelector
+ 						bind:value={viewOption}
+ 						align="end"
+@@ -382,6 +392,13 @@
+ 						}}
+ 					/>
+ 				</div>
++				{#if $eesSessionReady}
++					<SplitCreateButton
++						actions={$workspaceActions}
++						variant="primary"
++						label={$i18n.t('EES.Skills.New', { defaultValue: 'New work instruction' })}
++					/>
++				{/if}
+ 			</div>
+ 		</div>
+ 
+@@ -390,16 +407,16 @@
+ 				<Spinner className="size-5" />
+ 			</div>
+ 		{:else if (filteredItems ?? []).length !== 0}
+-			<div class="my-1">
++			<div data-ees-asset-table class="text-sm">
+ 				<div
+-					class="flex w-full items-center gap-2 px-1.5 pb-0.5 text-xs text-gray-400 dark:text-gray-600"
++					class="{columns} border-b border-gray-300 pb-2 text-xs text-gray-500 dark:border-gray-600 dark:text-gray-400"
+ 				>
+ 					<button
+-						class="flex min-w-0 flex-1 items-center gap-1 py-0.5 text-left"
++						class="flex min-w-0 items-center gap-1 text-left"
+ 						type="button"
+ 						on:click={() => setSortKey('name')}
+ 					>
+-						{$i18n.t('Title')}
++						{$i18n.t('Name')}
+ 						{#if sortKey === 'name'}
+ 							{#if sortDirection === 'asc'}
+ 								<ChevronUp className="size-2" />
+@@ -408,15 +425,14 @@
+ 							{/if}
+ 						{/if}
+ 					</button>
+-
+-					<div class="hidden w-44 shrink-0 md:block"></div>
+-
++					<span>{$i18n.t('EES.Asset.AccessColumn', { defaultValue: 'Access' })}</span>
++					<span class="hidden @2xl:block">{$i18n.t('EES.Asset.Owner', { defaultValue: 'Created by' })}</span>
+ 					<button
+-						class="flex w-36 shrink-0 items-center justify-end gap-1 py-0.5 text-right"
++						class="hidden items-center gap-1 text-left @2xl:flex"
+ 						type="button"
+ 						on:click={() => setSortKey('updated_at')}
+ 					>
+-						{$i18n.t('Updated at')}
++						{$i18n.t('EES.Asset.Updated', { defaultValue: 'Updated' })}
+ 						{#if sortKey === 'updated_at'}
+ 							{#if sortDirection === 'asc'}
+ 								<ChevronUp className="size-2" />
+@@ -425,172 +441,149 @@
+ 							{/if}
+ 						{/if}
+ 					</button>
++					<span></span>
+ 				</div>
+ 
+-				<div class="grid gap-y-0.5">
+-					{#each filteredItems as skill (skill.id)}
+-						<div
+-							class="group flex min-h-8 w-full cursor-pointer items-center gap-2 overflow-hidden rounded-xl px-2 py-1 text-left"
+-							role="button"
+-							tabindex="0"
+-							on:click={(e) => {
+-								if (shouldIgnoreRowClick(e.target)) return;
++				{#each filteredItems as skill (skill.id)}
++					<div
++						data-ees-asset-row
++						class="group {columns} min-h-14 cursor-pointer border-b border-gray-200 py-2 text-left hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-850"
++						role="button"
++						tabindex="0"
++						on:click={(e) => {
++							if (shouldIgnoreRowClick(e.target)) return;
++							openSkill(skill);
++						}}
++						on:keydown={(e) => {
++							if (e.currentTarget !== e.target) return;
++							if (e.key === 'Enter' || e.key === ' ') {
++								e.preventDefault();
+ 								openSkill(skill);
+-							}}
+-							on:keydown={(e) => {
+-								if (e.currentTarget !== e.target) return;
+-								if (e.key === 'Enter' || e.key === ' ') {
+-									e.preventDefault();
+-									openSkill(skill);
+-								}
+-							}}
+-						>
+-							<div class="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
+-								<div class="flex min-w-0 flex-1 flex-col overflow-hidden">
+-									<div class="flex min-w-0 items-center gap-2 overflow-hidden">
+-										<div class="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+-											<Tooltip content={skill.id} className="min-w-0" placement="top-start">
+-												<div
+-													class="truncate text-[0.8125rem] leading-5 text-gray-800 group-hover:underline dark:text-gray-200"
+-												>
+-													{skill.name}
+-												</div>
+-											</Tooltip>
++							}
++						}}
++					>
++						<div class="min-w-0">
++							<div class="flex min-w-0 items-center gap-2">
++								<Tooltip content={skill.id} className="min-w-0" placement="top-start">
++									<div
++										class="truncate text-sm font-medium leading-[1.375rem] text-gray-900 group-hover:underline dark:text-gray-100"
++									>
++										{skill.name}
++									</div>
++								</Tooltip>
+ 
+-											<div
+-												class="min-w-0 max-w-[40%] shrink-0 truncate text-[0.6875rem] leading-5 text-gray-500"
+-											>
+-												/{skill.id}
+-											</div>
++								{#if !skill.is_active}
++									<Badge type="muted" content={$i18n.t('Inactive')} />
++								{/if}
+ 
+-											<Tooltip
+-												content={dayjs((skill.updated_at ?? skill.created_at) * 1000).format(
+-													'LLLL'
+-												)}
+-											>
+-												<div
+-													class="shrink-0 truncate text-[0.6875rem] leading-5 text-gray-400 dark:text-gray-600"
+-												>
+-													{dayjs((skill.updated_at ?? skill.created_at) * 1000).fromNow()}
+-												</div>
+-											</Tooltip>
++								{#if !skill.write_access}
++									<Badge type="muted" content={$i18n.t('Read Only')} />
++								{/if}
++							</div>
+ 
+-											{#if !skill.is_active}
+-												<Badge type="muted" content={$i18n.t('Inactive')} />
+-											{/if}
++							{#if skill.description}
++								<div
++									class="truncate text-xs leading-[1.125rem] text-gray-500 dark:text-gray-400"
++									title={skill.description}
++								>
++									{skill.description}
++								</div>
++							{/if}
++						</div>
+ 
+-											{#if !skill.write_access}
+-												<Badge type="muted" content={$i18n.t('Read Only')} />
+-											{/if}
+-										</div>
+-									</div>
++						<div class="min-w-0"><EesAccessTag grants={skill.access_grants} /></div>
+ 
+-									{#if skill.description}
+-										<Tooltip content={skill.description} className="min-w-0" placement="top-start">
+-											<div
+-												class="mt-0.5 truncate text-[0.6875rem] leading-4 text-gray-400 dark:text-gray-600"
+-											>
+-												{skill.description}
+-											</div>
+-										</Tooltip>
+-									{/if}
+-								</div>
+-							</div>
++						<div
++							class="hidden min-w-0 truncate text-[0.8125rem] text-gray-600 @2xl:block dark:text-gray-400"
++							title={skill?.user?.email ?? ''}
++						>
++							{capitalizeFirstLetter(
++								skill?.user?.name ?? skill?.user?.email ?? $i18n.t('Deleted User')
++							)}
++						</div>
+ 
+-							<div
+-								class="hidden max-w-44 shrink-0 self-center truncate text-right text-[0.6875rem] leading-5 text-gray-500 dark:text-gray-500 md:block"
+-							>
+-								<Tooltip
+-									content={skill?.user?.email ?? $i18n.t('Deleted User')}
+-									className="min-w-0"
+-									placement="top-start"
+-								>
+-									<div class="truncate">
+-										{capitalizeFirstLetter(
+-											skill?.user?.name ?? skill?.user?.email ?? $i18n.t('Deleted User')
+-										)}
+-									</div>
+-								</Tooltip>
+-							</div>
++						<div
++							class="hidden text-[0.8125rem] tabular-nums text-gray-600 @2xl:block dark:text-gray-400"
++							title={dayjs((skill.updated_at ?? skill.created_at) * 1000).format('LLLL')}
++						>
++							{eesShortDate(skill.updated_at ?? skill.created_at)}
++						</div>
+ 
++						<div class="flex min-w-0 items-center justify-end">
+ 							{#if skill.write_access}
+-								<div class="ml-2 flex shrink-0 flex-row items-center self-center">
+-									{#if shiftKey}
+-										<Tooltip content={$i18n.t('Delete')}>
++								{#if shiftKey}
++									<Tooltip content={$i18n.t('Delete')}>
++										<button
++											class="flex size-6 items-center justify-center rounded-lg text-gray-400 transition dark:text-gray-500"
++											type="button"
++											aria-label={$i18n.t('Delete')}
++											on:click={(e) => {
++												e.preventDefault();
++												e.stopPropagation();
++												deleteHandler(skill);
++											}}
++										>
++											<GarbageBin className="size-4" />
++										</button>
++									</Tooltip>
++								{:else}
++									<div class="flex shrink-0 flex-row items-center gap-1.5 self-center">
++										<SkillMenu
++											show={openSkillMenuId === skill.id}
++											editHandler={() => {
++												goto(`/workspace/skills/edit?id=${encodeURIComponent(skill.id)}`);
++											}}
++											cloneHandler={() => {
++												cloneHandler(skill);
++											}}
++											exportHandler={() => {
++												exportHandler(skill);
++											}}
++											deleteHandler={async () => {
++												selectedSkill = skill;
++												showDeleteConfirm = true;
++											}}
++											onClose={() => {
++												openSkillMenuId = null;
++											}}
++										>
+ 											<button
+ 												class="flex size-6 items-center justify-center rounded-lg text-gray-400 transition dark:text-gray-500"
+ 												type="button"
+-												aria-label={$i18n.t('Delete')}
++												aria-label={$i18n.t('Skill Menu')}
+ 												on:click={(e) => {
+ 													e.preventDefault();
+ 													e.stopPropagation();
+-													deleteHandler(skill);
++													openSkillMenuId = openSkillMenuId === skill.id ? null : skill.id;
+ 												}}
+ 											>
+-												<GarbageBin className="size-4" />
++												<EllipsisHorizontal className="size-4" />
+ 											</button>
+-										</Tooltip>
+-									{:else}
+-										<div class="flex shrink-0 flex-row items-center gap-1.5 self-center">
+-											<SkillMenu
+-												show={openSkillMenuId === skill.id}
+-												editHandler={() => {
+-													goto(`/workspace/skills/edit?id=${encodeURIComponent(skill.id)}`);
+-												}}
+-												cloneHandler={() => {
+-													cloneHandler(skill);
+-												}}
+-												exportHandler={() => {
+-													exportHandler(skill);
+-												}}
+-												deleteHandler={async () => {
+-													selectedSkill = skill;
+-													showDeleteConfirm = true;
+-												}}
+-												onClose={() => {
+-													openSkillMenuId = null;
+-												}}
+-											>
+-												<button
+-													class="flex size-6 items-center justify-center rounded-lg text-gray-400 transition dark:text-gray-500"
+-													type="button"
+-													aria-label={$i18n.t('Skill Menu')}
+-													on:click={(e) => {
+-														e.preventDefault();
+-														e.stopPropagation();
+-														openSkillMenuId = openSkillMenuId === skill.id ? null : skill.id;
++										</SkillMenu>
++
++										<button
++											class="flex h-6 items-center"
++											type="button"
++											on:click={(e) => {
++												e.stopPropagation();
++												e.preventDefault();
++											}}
++										>
++											<Tooltip content={skill.is_active ? $i18n.t('Enabled') : $i18n.t('Disabled')}>
++												<Switch
++													bind:state={skill.is_active}
++													on:change={async () => {
++														toggleSkillById(localStorage.token, skill.id);
+ 													}}
+-												>
+-													<EllipsisHorizontal className="size-4" />
+-												</button>
+-											</SkillMenu>
+-
+-											<button
+-												class="flex h-6 items-center"
+-												type="button"
+-												on:click={(e) => {
+-													e.stopPropagation();
+-													e.preventDefault();
+-												}}
+-											>
+-												<Tooltip
+-													content={skill.is_active ? $i18n.t('Enabled') : $i18n.t('Disabled')}
+-												>
+-													<Switch
+-														bind:state={skill.is_active}
+-														on:change={async () => {
+-															toggleSkillById(localStorage.token, skill.id);
+-														}}
+-													/>
+-												</Tooltip>
+-											</button>
+-										</div>
+-									{/if}
+-								</div>
++												/>
++											</Tooltip>
++										</button>
++									</div>
++								{/if}
+ 							{/if}
+ 						</div>
+-					{/each}
+-				</div>
++					</div>
++				{/each}
+ 			</div>
+ 
+ 			{#if total > 30}
+@@ -599,14 +592,15 @@
+ 				</div>
+ 			{/if}
+ 		{:else}
+-			<div class="flex w-full flex-col items-center justify-center py-16 pb-24">
+-				<div class="max-w-sm text-center text-gray-900 dark:text-gray-100">
+-					<div class="mb-1.5 text-sm">{$i18n.t('No skills found')}</div>
+-					<div class="text-center text-xs leading-5 text-gray-500">
+-						{$i18n.t('Try adjusting your search or filter to find what you are looking for.')}
+-					</div>
+-				</div>
+-			</div>
++			<p data-ees-asset-empty class="border-b border-gray-200 px-2 py-6 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
++				{#if query}
++					{$i18n.t('EES.Skills.NoMatch', { defaultValue: 'No work instructions match.' })}
++				{:else if viewOption}
++					{$i18n.t('EES.Asset.NoFiltered', { defaultValue: 'Nothing in this view.' })}
++				{:else}
++					{$i18n.t('EES.Skills.Empty', { defaultValue: 'No work instructions yet.' })}
++				{/if}
++			</p>
+ 		{/if}
+ 	</div>
+ 
 diff --git a/src/lib/components/workspace/Skills/SkillEditor.svelte b/src/lib/components/workspace/Skills/SkillEditor.svelte
+index ae0923d..a3a405f 100644
 --- a/src/lib/components/workspace/Skills/SkillEditor.svelte
 +++ b/src/lib/components/workspace/Skills/SkillEditor.svelte
-@@ -12,6 +12,7 @@
+@@ -12,6 +12,8 @@
  	import Spinner from '$lib/components/common/Spinner.svelte';
  	import { updateSkillAccessGrants } from '$lib/apis/skills';
  	import { goto } from '$app/navigation';
 +	import EesAssetUsage from '$lib/components/ees/EesAssetUsage.svelte';
++	import EesAccessTag from '$lib/components/ees/EesAccessTag.svelte';
  
  	export let onSubmit: Function;
  	export let edit = false;
-@@ -30,6 +31,7 @@
+@@ -30,6 +32,7 @@
  
  	let accessGrants = [];
  	let showAccessControlModal = false;
@@ -4787,16 +5824,19 @@ diff --git a/src/lib/components/workspace/Skills/SkillEditor.svelte b/src/lib/co
  	$: if (!edit && !clone && name) {
  		id = slugify(name);
  	}
-@@ -97,7 +99,7 @@
+@@ -97,106 +100,147 @@
  	}}
  />
  
 -<div class="flex h-full w-full min-w-0 flex-col overflow-hidden">
-+<div data-ees-asset="skill-editor" class="flex h-full w-full min-w-0 flex-col overflow-hidden">
++<div data-ees-asset="skill-editor" class="@container flex h-full w-full min-w-0 flex-col overflow-hidden">
  	<form class="flex h-full min-h-0 min-w-0 flex-col" on:submit|preventDefault={submitHandler}>
  		<button
- 			class="mb-1 flex h-6 w-fit items-center gap-1 rounded-md text-xs text-gray-400 transition-colors duration-75 hover:text-gray-700 dark:text-gray-600 dark:hover:text-gray-300"
-@@ -107,14 +109,15 @@
+-			class="mb-1 flex h-6 w-fit items-center gap-1 rounded-md text-xs text-gray-400 transition-colors duration-75 hover:text-gray-700 dark:text-gray-600 dark:hover:text-gray-300"
++			class="mb-1 flex h-6 w-fit shrink-0 items-center gap-1 rounded-md text-xs text-gray-400 transition-colors duration-75 hover:text-gray-700 dark:text-gray-600 dark:hover:text-gray-300"
+ 			type="button"
+ 			on:click={() => {
+ 				goto('/workspace/skills');
  			}}
  		>
  			<ChevronLeft className="size-3" strokeWidth="2" />
@@ -4804,20 +5844,96 @@ diff --git a/src/lib/components/workspace/Skills/SkillEditor.svelte b/src/lib/co
 +			<span>{$i18n.t('EES.Skills.List', { defaultValue: 'Work instructions' })}</span>
  		</button>
  
-+		<div class="min-h-0 flex-1 overflow-y-auto pb-2">
- 		<div class="flex shrink-0 items-start gap-2 pb-2 px-1">
- 			<div class="min-w-0 flex-1">
- 				<Tooltip content={$i18n.t('e.g. Code Review Guidelines')} placement="top-start">
+-		<div class="flex shrink-0 items-start gap-2 pb-2 px-1">
+-			<div class="min-w-0 flex-1">
+-				<Tooltip content={$i18n.t('e.g. Code Review Guidelines')} placement="top-start">
++		<div data-ees-asset-head class="shrink-0 border-b border-gray-200 pb-3 dark:border-gray-700">
++			<Tooltip content={$i18n.t('e.g. Code Review Guidelines')} placement="top-start">
++				<input
++					class="w-full bg-transparent! text-xl font-semibold leading-8 outline-hidden"
++					type="text"
++					placeholder={$i18n.t('Skill Name')}
++					aria-label={$i18n.t('Skill Name')}
++					bind:value={name}
++					required
++					{disabled}
++				/>
++			</Tooltip>
++
++			<div class="mt-0.5 flex min-w-0 items-center gap-3 text-sm text-gray-500">
++				<Tooltip
++					className="flex min-w-0 flex-1 items-center"
++					content={$i18n.t('e.g. Step-by-step instructions for code reviews')}
++					placement="top-start"
++				>
  					<input
 -						class="w-full bg-transparent text-sm outline-hidden"
-+						class="w-full bg-transparent text-xl font-semibold outline-hidden"
++						class="w-full bg-transparent! outline-hidden"
  						type="text"
- 						placeholder={$i18n.t('Skill Name')}
- 						aria-label={$i18n.t('Skill Name')}
-@@ -164,26 +167,19 @@
- 				</div>
- 			</div>
+-						placeholder={$i18n.t('Skill Name')}
+-						aria-label={$i18n.t('Skill Name')}
+-						bind:value={name}
+-						required
++						placeholder={$i18n.t('Skill Description')}
++						aria-label={$i18n.t('Skill Description')}
++						bind:value={description}
+ 						{disabled}
+ 					/>
+ 				</Tooltip>
  
+-				<div class="mt-0.5 flex min-w-0 items-center gap-2 text-xs text-gray-500">
+-					{#if edit}
+-						<div class="shrink-0 truncate font-mono" title={id}>
+-							{id}
+-						</div>
+-					{:else}
+-						<Tooltip
+-							className="min-w-[8rem] flex-1"
+-							content={$i18n.t('e.g. code-review-guidelines')}
+-							placement="top-start"
+-						>
+-							<input
+-								class="w-full bg-transparent font-mono outline-hidden disabled:text-gray-500"
+-								type="text"
+-								placeholder={$i18n.t('Skill ID')}
+-								aria-label={$i18n.t('Skill ID')}
+-								bind:value={id}
+-								required
+-								disabled={edit}
+-							/>
+-						</Tooltip>
+-					{/if}
+-
++				{#if edit}
++					<div class="max-w-[40%] shrink-0 truncate font-mono text-xs" title={id}>
++						{id}
++					</div>
++				{:else}
+ 					<Tooltip
+-						className="flex min-w-0 flex-1 items-center"
+-						content={$i18n.t('e.g. Step-by-step instructions for code reviews')}
++						className="w-48 shrink-0"
++						content={$i18n.t('e.g. code-review-guidelines')}
+ 						placement="top-start"
+ 					>
+ 						<input
+-							class="w-full bg-transparent outline-hidden"
++							class="w-full bg-transparent! font-mono text-xs outline-hidden disabled:text-gray-500"
+ 							type="text"
+-							placeholder={$i18n.t('Skill Description')}
+-							aria-label={$i18n.t('Skill Description')}
+-							bind:value={description}
+-							{disabled}
++							placeholder={$i18n.t('Skill ID')}
++							aria-label={$i18n.t('Skill ID')}
++							bind:value={id}
++							required
++							disabled={edit}
+ 						/>
+ 					</Tooltip>
+-				</div>
+-			</div>
+-
 -			<div class="flex shrink-0 items-center gap-1 pr-0.5">
 -				{#if !disabled}
 -					<AccessButton on:click={() => (showAccessControlModal = true)} />
@@ -4825,54 +5941,102 @@ diff --git a/src/lib/components/workspace/Skills/SkillEditor.svelte b/src/lib/co
 -					<span class="rounded-lg bg-gray-100 px-2 py-1 text-xs text-gray-500 dark:bg-gray-850">
 -						{$i18n.t('Read Only')}
 -					</span>
--				{/if}
--			</div>
+ 				{/if}
+ 			</div>
  		</div>
  
 -		<div class="min-h-0 flex-1 overflow-hidden rounded-lg bg-gray-50/60 dark:bg-white/[0.03]">
-+		<h3 class="mt-4 mb-2 text-sm font-semibold">{$i18n.t('EES.Skill.Body', { defaultValue: 'Instructions' })} <small class="ml-2 font-normal text-gray-500">{$i18n.t('EES.Skill.BodyHint', { defaultValue: 'Instructions followed by the assistant' })}</small></h3>
-+		<div class="min-h-24 overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
- 			{#if disabled}
+-			{#if disabled}
 -				<div class="h-full overflow-y-auto px-3 py-2">
-+				<div class="min-h-24 overflow-y-auto px-3 py-2">
- 					<pre
+-					<pre
 -						class="whitespace-pre-wrap font-mono text-[0.6875rem] leading-relaxed">{content}</pre>
-+						class="whitespace-pre-wrap font-sans text-sm leading-relaxed">{content}</pre>
++		<!-- The instructions use the height that is left; where they are used and who can use them sit beside them. -->
++		<div
++			data-ees-asset-columns
++			class="flex min-h-0 flex-1 flex-col overflow-y-auto @3xl:flex-row @3xl:overflow-hidden"
++		>
++			<div data-ees-asset-main class="flex min-h-72 min-w-0 flex-1 flex-col pt-4 pb-4 @3xl:min-h-0 @3xl:pr-6">
++				<h3 class="mb-2 shrink-0 text-sm font-semibold">
++					<label for="ees-skill-body">{$i18n.t('EES.Skill.Body', { defaultValue: 'Instructions' })}</label>
++				</h3>
++				<div
++					class="flex min-h-0 flex-1 overflow-hidden rounded-sm border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
++				>
++					{#if disabled}
++						<div class="min-h-24 w-full overflow-y-auto px-3 py-2">
++							<pre
++								class="whitespace-pre-wrap font-sans text-sm leading-relaxed">{content}</pre>
++						</div>
++					{:else}
++						<textarea
++							id="ees-skill-body"
++							class="h-full min-h-28 w-full flex-1 resize-none border-0 bg-transparent px-3 py-2 font-sans text-sm leading-relaxed outline-hidden placeholder:text-gray-400 dark:placeholder:text-gray-600"
++							rows="5"
++							bind:value={content}
++							on:input={handleContentInput}
++							placeholder={$i18n.t('Enter skill instructions in markdown...')}
++							aria-label={$i18n.t('Skill Instructions')}
++							required
++						></textarea>
++					{/if}
  				</div>
- 			{:else}
- 				<textarea
+-			{:else}
+-				<textarea
 -					class="h-full w-full resize-none bg-transparent px-3 py-2 font-mono text-[0.6875rem] leading-relaxed outline-hidden placeholder:text-gray-400 dark:placeholder:text-gray-600"
-+					class="min-h-28 w-full resize-y bg-transparent px-3 py-2 font-sans text-sm leading-relaxed outline-hidden placeholder:text-gray-400 dark:placeholder:text-gray-600"
-+					rows="5"
- 					bind:value={content}
- 					on:input={handleContentInput}
- 					placeholder={$i18n.t('Enter skill instructions in markdown...')}
-@@ -192,11 +188,26 @@
- 				></textarea>
- 			{/if}
- 		</div>
-+		{#if edit && skill?.id}<EesAssetUsage kind="skill" assetId={skill.id} />{/if}
-+		<div class="my-4 flex flex-wrap items-center gap-3 border-y border-gray-200 py-3 dark:border-gray-700">
-+			<span class="text-sm font-medium">{$i18n.t('EES.Asset.Access', { defaultValue: 'Who can use this?' })}</span>
-+			<div class="flex shrink-0 items-center gap-1 pr-0.5">
-+				{#if !disabled}
-+					<AccessButton on:click={() => (showAccessControlModal = true)} />
-+				{:else}
-+					<span class="rounded-lg bg-gray-100 px-2 py-1 text-xs text-gray-500 dark:bg-gray-850">
-+						{$i18n.t('Read Only')}
-+					</span>
-+				{/if}
+-					bind:value={content}
+-					on:input={handleContentInput}
+-					placeholder={$i18n.t('Enter skill instructions in markdown...')}
+-					aria-label={$i18n.t('Skill Instructions')}
+-					required
+-				></textarea>
+-			{/if}
 +			</div>
-+		</div>
-+		</div>
++
++			<aside
++				data-ees-asset-aside
++				class="shrink-0 border-t border-gray-200 pt-4 pb-4 @3xl:w-[21rem] @3xl:overflow-y-auto @3xl:border-t-0 @3xl:border-l @3xl:pl-6 dark:border-gray-700"
++			>
++				{#if edit && skill?.id}<EesAssetUsage kind="skill" assetId={skill.id} />{/if}
++				<section data-ees-asset-access class="mb-5">
++					<h3 class="mb-2 text-sm font-semibold">{$i18n.t('EES.Asset.Access', { defaultValue: 'Who can use this?' })}</h3>
++					<div class="flex flex-wrap items-center gap-2">
++						<EesAccessTag grants={accessGrants} />
++						{#if !disabled}
++							<AccessButton on:click={() => (showAccessControlModal = true)} />
++						{:else}
++							<span class="rounded-lg bg-gray-100 px-2 py-1 text-xs text-gray-500 dark:bg-gray-850">
++								{$i18n.t('Read Only')}
++							</span>
++						{/if}
++					</div>
++				</section>
++				{#if edit && !disabled}
++					<p data-ees-asset-note class="border-l-2 border-amber-600 pl-3 text-xs leading-5 text-gray-700 dark:text-gray-300">
++						{$i18n.t('EES.Skill.SaveNote', {
++							defaultValue:
++								'After saving, tasks that use this instruction cannot run until their procedure is checked and published again. Runs opened after that use the changed instruction; runs already open do not resume.'
++						})}
++					</p>
++				{/if}
++			</aside>
+ 		</div>
  
  		{#if !disabled}
 -			<div class="flex shrink-0 justify-end py-2">
-+			<div class="flex shrink-0 items-center justify-end gap-3 border-t border-gray-200 py-3 dark:border-gray-700">
++			<div data-ees-asset-foot class="flex shrink-0 items-center justify-end gap-2 border-t border-gray-200 py-3 dark:border-gray-700">
 +				{#if changedFields}<small class="mr-auto text-gray-600 dark:text-gray-300" role="status">{$i18n.t('EES.Skill.Dirty', { count: changedFields, defaultValue: '{{count}} fields changed · Not saved' })}</small>{/if}
++				<button
++					class="flex h-9 items-center rounded-sm border border-gray-300 bg-white px-3.5 text-sm text-gray-900 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-850"
++					type="button"
++					on:click={() => {
++						goto('/workspace/skills');
++					}}
++				>
++					{$i18n.t('Cancel')}
++				</button>
  				<button
 -					class="flex h-7 items-center gap-1.5 rounded-lg bg-gray-900 px-2.5 text-xs text-white transition hover:bg-black disabled:opacity-60 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
-+					class="flex h-7 items-center gap-1.5 rounded-lg bg-blue-800 px-4 text-sm text-white transition hover:bg-blue-900 disabled:opacity-60 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
++					class="flex h-9 items-center gap-1.5 rounded-sm bg-gray-900 px-3.5 text-sm text-white transition hover:bg-gray-850 disabled:opacity-60 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
  					type="submit"
  					disabled={loading}
  				>
@@ -4890,9 +6054,46 @@ index 172ed9a..8873d62 100644
  export const WEBUI_HOSTNAME = '';
  export const WEBUI_BASE_URL = '';
 diff --git a/src/lib/i18n/locales/ko-KR/translation.json b/src/lib/i18n/locales/ko-KR/translation.json
+index 8eba682..3f8b0cd 100644
 --- a/src/lib/i18n/locales/ko-KR/translation.json
 +++ b/src/lib/i18n/locales/ko-KR/translation.json
-@@ -3081,5 +3081,126 @@
+@@ -10,7 +10,7 @@
+ 	"{{COUNT}} Available Tools": "사용 가능한 도구 {{COUNT}}개",
+ 	"{{COUNT}} characters": "{{COUNT}} 문자",
+ 	"{{COUNT}} extracted lines": "추출된 줄 {{COUNT}}개",
+-	"{{count}} files_other": "",
++	"{{count}} files_other": "파일 {{count}}개",
+ 	"{{COUNT}} files": "{{COUNT}}개 파일",
+ 	"{{count}} files selected. Only new and modified files will be uploaded. Deleted files will be removed. The folder structure will be mirrored. Continue?_other": "",
+ 	"{{count}} filters_other": "",
+@@ -38,7 +38,7 @@
+ 	"{{user}}'s Chats": "{{user}}의 채팅",
+ 	"{{webUIName}} Backend Required": "{{webUIName}} 백엔드가 필요합니다.",
+ 	"*Prompt node ID(s) are required for image generation": "이미지 생성에는 프롬프트 노드 ID가 필요합니다.",
+-	"1 file": "",
++	"1 file": "파일 1개",
+ 	"1 group": "",
+ 	"1 hour before": "1시간 전",
+ 	"1 Source": "소스 1",
+@@ -145,7 +145,7 @@
+ 	"All models are now visible": "모든 모델이 이제 표시됩니다",
+ 	"All models deleted successfully": "성공적으로 모든 모델이 삭제되었습니다",
+ 	"All shared chats have been unshared.": "",
+-	"All Sources": "",
++	"All Sources": "모든 출처",
+ 	"All time": "전체 기간",
+ 	"All Users": "모든 사용자",
+ 	"All users and system events": "",
+@@ -597,7 +597,7 @@
+ 	"Connect to the ComfyUI server used for image edits.": "",
+ 	"Connect to your own OpenAI compatible API endpoints.": "OpenAI 호환 API 엔드포인트에 연결합니다.",
+ 	"Connect to your own OpenAPI compatible external tool servers.": "OpenAPI 호환 외부 도구 서버에 연결합니다.",
+-	"Connected": "",
++	"Connected": "연결됨",
+ 	"Connected ({{type}})": "{{type}}에 연결됨",
+ 	"Connection failed": "연결 실패",
+ 	"Connection lost. Reconnecting...": "연결이 끊겼습니다. 재연결 중...",
+@@ -3081,5 +3081,143 @@
  	"Youtube Language": "Youtube 언어",
  	"Youtube Proxy URL": "Youtube 프록시 URL",
  	"Zoom in": "",
@@ -5018,7 +6219,24 @@ diff --git a/src/lib/i18n/locales/ko-KR/translation.json b/src/lib/i18n/locales/
 +	"EES.Document.Failed": "처리 실패",
 +	"EES.Document.Retry": "다시 처리",
 +	"EES.Skill.Dirty": "바뀐 곳 {{count}} · 저장 전",
-+	"EES.Document.Unavailable": "상태 확인 불가"
++	"EES.Document.Unavailable": "상태 확인 불가",
++	"EES.AssetCountOf": "{{total}}개 중 {{count}}개",
++	"EES.Skills.New": "새 작업 지침",
++	"EES.Knowledge.New": "새 참고 문서",
++	"EES.Asset.AccessColumn": "접근",
++	"EES.Asset.Owner": "만든 사람",
++	"EES.Asset.Updated": "수정",
++	"EES.Access.Private": "비공개",
++	"EES.Access.Public": "팀 전체",
++	"EES.Access.Groups": "선택한 그룹",
++	"EES.Access.Shared": "선택한 사람·그룹",
++	"EES.Skills.NoMatch": "찾는 이름의 작업 지침이 없습니다.",
++	"EES.Skills.Empty": "아직 작업 지침이 없습니다.",
++	"EES.Knowledge.NoMatch": "찾는 이름의 참고 문서가 없습니다.",
++	"EES.Knowledge.Empty": "아직 참고 문서가 없습니다.",
++	"EES.Asset.NoFiltered": "이 보기에는 항목이 없습니다.",
++	"EES.Skill.SaveNote": "저장하면 이 지침을 쓰는 작업은 실행할 수 없게 됩니다. 절차를 다시 검사·게시하면, 그 뒤에 여는 회차부터 바뀐 지침으로 실행합니다. 이미 열린 회차는 다시 게시해도 이어지지 않습니다.",
++	"EES.Document.ReadyNote": "처리가 끝난 문서만 AI가 찾아볼 수 있습니다."
  }
 diff --git a/src/routes/(app)/+layout.svelte b/src/routes/(app)/+layout.svelte
 index 633a9f7..a50b708 100644

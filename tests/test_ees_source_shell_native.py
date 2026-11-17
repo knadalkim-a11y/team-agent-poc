@@ -6,13 +6,14 @@ and its temporary SQLite state use the production implementation.
 """
 import importlib
 from copy import deepcopy
+from datetime import datetime
 import json
 import os
 from pathlib import Path
 import re
 import time
 from unittest.mock import patch
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 import ees_source_frame_monitor as frame_monitor
 from ees_work_integrated_fixture import IntegratedNativeCase
@@ -858,11 +859,28 @@ class SourceShellNativeTests(IntegratedNativeCase):
                       meta={'name': '이전 절차.pdf', 'content_type': 'application/pdf', 'size': 467},
                       data={'status': 'failed'})
         files = [file, failed]
-        knowledge = dict(common, id='kb-ems', name='EMS 운영 가이드', description='EMS 문서 모음',
+        everyone = [{'principal_type': 'user', 'principal_id': '*', 'permission': 'read'}]
+        group = [{'principal_type': 'group', 'principal_id': 'ems-operators', 'permission': 'read'}]
+        knowledge = dict(common, id='kb-ems', name='EMS 운영 가이드', description='EMS 문서 모음', access_grants=everyone,
                          meta={}, data={'file_ids': [item['id'] for item in files]}, files=files)
-        skill = dict(common, id='jira-read', name='Jira 읽기 지침', description='CR 조회 절차',
+        skill = dict(common, id='jira-read', name='Jira 읽기 지침', description='CR 조회 절차', access_grants=everyone,
                      content='CR 번호로 해당 이슈를 조회합니다.', is_active=True, meta={})
         model['meta'].update(skillIds=[skill['id']], knowledge=[{'id': knowledge['id'], 'name': knowledge['name'], 'type': 'collection'}])
+        # The lists show who can use each item, who made it and when it last changed.
+        skill_rows = [skill,
+                      dict(common, id='confluence-check', name='Confluence 문서 확인 지침',
+                           description='기준 문서를 찾고 최종 수정본인지 확인하는 순서입니다.',
+                           is_active=True, meta={}, access_grants=everyone, updated_at=1794128400),
+                      dict(common, id='result-summary', name='점검 결과 정리 지침',
+                           description='점검 결과를 근거와 함께 짧게 정리하는 형식입니다.',
+                           is_active=True, meta={}, access_grants=group, updated_at=1793696400),
+                      dict(common, id='incident-draft', name='장애 보고 초안 지침', description='',
+                           is_active=False, meta={}, write_access=False, updated_at=1792918800)]
+        knowledge_rows = [dict(knowledge, file_count=2),
+                          dict(common, id='kb-release', name='배포 점검 자료', description='배포 전 확인 항목과 점검 기록 양식입니다.',
+                               meta={}, file_count=1, access_grants=group, updated_at=1793955600),
+                          dict(common, id='kb-setup', name='신규 공장 셋업 자료', description='횡전개 때 옮길 설정 목록과 확인 순서입니다.',
+                               meta={}, file_count=0, updated_at=1792400400)]
         self.server.models = [*deepcopy(MODELS), {
             'id': model['id'], 'name': model['name'], 'object': 'model', 'owned_by': 'openai', 'info': deepcopy(model)}]
         for system_id, title in [('EMS', '배포 산출물 점검'), ('APC', '다른 시스템 절차')]:
@@ -877,8 +895,8 @@ class SourceShellNativeTests(IntegratedNativeCase):
                 'result_block': 'human_confirm', 'skills': [skill['id']]}
             self.command('save_draft', workflow_id=created['workflow_id'],
                          expected_revision=created['workflow']['revision'], definition=definition)
-        listings = {'/api/v1/models/list': [model], '/api/v1/knowledge/list': [knowledge],
-                    '/api/v1/knowledge/search': [knowledge], '/api/v1/skills/list': [skill]}
+        listings = {'/api/v1/models/list': [model], '/api/v1/knowledge/list': knowledge_rows,
+                    '/api/v1/knowledge/search': knowledge_rows, '/api/v1/skills/list': skill_rows}
         records = {'/api/v1/models/model': model, '/api/v1/knowledge/kb-ems': knowledge,
                    '/api/v1/skills/id/jira-read': skill, '/api/v1/skills/jira-read': skill}
         original = NativeUIHandler.do_GET
@@ -889,7 +907,8 @@ class SourceShellNativeTests(IntegratedNativeCase):
         def get_asset(handler):
             path = urlparse(handler.path).path.rstrip('/')
             if path in listings:
-                return handler.send_content({'items': listings[path], 'total': len(listings[path])})
+                first = parse_qs(urlparse(handler.path).query).get('page', ['1'])[0] in ('', '1')
+                return handler.send_content({'items': listings[path] if first else [], 'total': len(listings[path])})
             if path in records:
                 return handler.send_content(records[path])
             if path.startswith('/api/v1/knowledge/kb-ems/files'):
@@ -916,7 +935,9 @@ class SourceShellNativeTests(IntegratedNativeCase):
         cases = [
             ('/workspace/models', 'models', 'b6-models-list'),
             ('/workspace/models/edit?id=ees-assistant', 'model-editor', 'b6-model-editor'),
+            ('/workspace/knowledge', 'knowledge-list', 'ws8-knowledge-list'),
             ('/workspace/knowledge/kb-ems', 'knowledge', 'b7-knowledge-detail'),
+            ('/workspace/skills', 'skills', 'ws6-skills-list'),
             ('/workspace/skills/edit?id=jira-read', 'skill-editor', 'b8-skill-editor'),
         ]
         with patch.object(NativeUIHandler, 'do_GET', get_asset), patch.object(NativeUIHandler, 'do_POST', retry_asset):
@@ -934,8 +955,11 @@ class SourceShellNativeTests(IntegratedNativeCase):
                     if marker == 'knowledge':
                         self.wait("document.querySelector('[data-ees-file-status=failed]') && document.querySelector('[data-ees-file-retry]')")
                         self.assertIn('이전 절차.pdf', self.text('#workspace-container'))
+                    if marker in ('skills', 'knowledge-list'):
+                        self.assert_asset_list(marker, skill_rows if marker == 'skills' else knowledge_rows, actor['name'])
                     if marker in ('knowledge', 'skill-editor'):
                         self.wait("document.querySelector('[data-ees-asset-usage]')?.innerText.includes('EES 통합 Assistant')")
+                        self.assert_asset_columns(marker)
                     if marker == 'skill-editor':
                         self.wait("document.querySelector('[data-ees-asset-usage]')?.innerText.includes('배포 산출물 점검')")
                         uses = self.text('[data-ees-asset-usage]')
@@ -962,6 +986,114 @@ class SourceShellNativeTests(IntegratedNativeCase):
                         self.wait("document.querySelectorAll('[data-ees-file-status=completed]').length === 2 && !document.querySelector('[data-ees-file-retry]')")
                         self.assertEqual(retry_posts, [{'file_id': failed['id']}])
                         self.screenshot('parity-b7-after-retry-1920')
+            # Narrower work areas keep every control inside the pane: the list drops its two
+            # secondary columns and the side column moves under the main one.
+            for width, height in ((1366, 768), (480, 800)):
+                self.browser.call('Emulation.setDeviceMetricsOverride', {
+                    'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
+                for route, marker, label in cases[2:]:
+                    with self.subTest(route=route, width=width):
+                        self.navigate(route)
+                        self.wait("document.querySelector('[data-ees-asset=" + marker + "]')?.getBoundingClientRect().width > 0")
+                        self.wait("document.querySelector('[data-ees-asset=" + marker + "] :is([data-ees-asset-row],[data-ees-asset-usage])')"
+                                  " && !document.querySelector('[data-ees-asset=" + marker + "] .animate-pulse')")
+                        narrow = self.browser.evaluate("""(() => {
+                            const root = document.querySelector('[data-ees-asset=MARKER]');
+                            const pane = document.querySelector('[data-ees-work-surface]').getBoundingClientRect();
+                            const box = e => { if (!e) return null; const r = e.getBoundingClientRect(); return {x:r.x, y:r.y, right:r.right, bottom:r.bottom, width:r.width}; };
+                            const row = root.querySelector('[data-ees-asset-row]');
+                            return {overflow:document.documentElement.scrollWidth > innerWidth ||
+                                [...root.querySelectorAll('*')].some(e => e.getClientRects().length && e.getBoundingClientRect().right > pane.right + 1),
+                              width:root.getBoundingClientRect().width,
+                              cells:row ? [...row.children].map(e => e.checkVisibility()) : null,
+                              main:box(root.querySelector('[data-ees-asset-main]')), aside:box(root.querySelector('[data-ees-asset-aside]'))};
+                        })()""".replace('MARKER', marker))
+                        self.assertFalse(narrow['overflow'], (route, width))
+                        if narrow['cells']:
+                            # name, access and the row's own controls stay; maker and last change need 672px.
+                            self.assertEqual(narrow['cells'], [True, True, narrow['width'] >= 672, narrow['width'] >= 672, True], (route, width))
+                        else:
+                            beside = narrow['width'] >= 768
+                            self.assertEqual(narrow['aside']['x'] > narrow['main']['right'] - 1, beside, (route, width, narrow))
+                            if not beside:
+                                self.assertGreaterEqual(narrow['aside']['y'], narrow['main']['bottom'] - 1)
+                                self.assertAlmostEqual(narrow['aside']['width'], narrow['main']['width'], delta=1)
+                        self.screenshot('parity-' + label + '-' + str(width))
+
+    def assert_asset_list(self, marker, expected, owner):
+        """One search row, then one table: name and description, access, maker and last change."""
+        root = '[data-ees-asset=' + marker + ']'
+        self.wait("document.querySelectorAll('" + root + " [data-ees-asset-row]').length === " + str(len(expected)))
+        self.wait("!document.querySelector('" + root + " .animate-pulse')")
+        seen = self.browser.evaluate("""(() => {
+            const root = document.querySelector('ROOT');
+            const box = e => { const r = e.getBoundingClientRect(); return {x:r.x, y:r.y, right:r.right, bottom:r.bottom, width:r.width, height:r.height}; };
+            const create = root.querySelector('[data-ees-create]');
+            return {search:box(root.querySelector('[data-ees-asset-toolbar] input')), create:box(create), createText:create.innerText.trim(),
+              actions:box(root.querySelector('[data-ees-asset-toolbar]').lastElementChild),
+              count:root.querySelector('[data-ees-asset-count]').innerText.trim(),
+              head:[...root.querySelector('[data-ees-asset-table]').firstElementChild.children].map(e => e.innerText.trim()).filter(Boolean),
+              rows:[...root.querySelectorAll('[data-ees-asset-row]')].map(row => ({box:box(row),
+                cells:[...row.children].slice(0, 4).map(e => e.innerText.trim()), access:row.querySelector('[data-ees-access]').dataset.eesAccess})),
+              topbar:!!document.querySelector('[data-ees-work-toolbar] [data-ees-create]')};
+        })()""".replace('ROOT', root))
+        self.assertAlmostEqual(seen['search']['x'], 328, delta=1, msg=marker)
+        # Count, view filter and the create button (with its import menu, where there is one) end at the right edge.
+        self.assertAlmostEqual(seen['actions']['right'], 1288, delta=1, msg=marker)
+        self.assertGreater(seen['create']['x'], seen['search']['right'], marker)
+        self.assertLess(abs(seen['search']['y'] + seen['search']['height'] / 2 - seen['create']['y'] - seen['create']['height'] / 2), 2, marker)
+        self.assertEqual(seen['createText'], '새 작업 지침' if marker == 'skills' else '새 참고 문서')
+        self.assertEqual(seen['count'], str(len(expected)) + '개')
+        self.assertEqual(seen['head'], ['이름', '접근', '만든 사람', '수정'])
+        # The main action is in the list row; the top bar keeps only the screen name and the chat toggle.
+        self.assertFalse(seen['topbar'], marker)
+        labels = {'public': '팀 전체', 'groups': '선택한 그룹', 'private': '비공개'}
+        year = datetime.now().year
+        for row, item in zip(seen['rows'], expected):
+            kind = ('public' if any(grant['principal_id'] == '*' for grant in item['access_grants'])
+                    else 'groups' if item['access_grants'] else 'private')
+            changed = datetime.fromtimestamp(item['updated_at'])
+            self.assertIn(item['name'], row['cells'][0])
+            if item.get('description'):
+                self.assertIn(item['description'], row['cells'][0])
+            self.assertEqual((row['access'], row['cells'][1], row['cells'][2]), (kind, labels[kind], owner), item['name'])
+            self.assertEqual(row['cells'][3], changed.strftime('%m.%d' if changed.year == year else '%Y.%m.%d'), item['name'])
+            self.assertAlmostEqual(row['box']['x'], 328, delta=1)
+            self.assertAlmostEqual(row['box']['width'], 960, delta=1)
+        tops = [row['box']['y'] for row in seen['rows']]
+        self.assertEqual(tops, sorted(tops))
+        self.assertGreater(tops[0], seen['search']['bottom'])
+
+    def assert_asset_columns(self, marker):
+        """What is edited sits on the left; where it is used and who can use it sit beside it."""
+        seen = self.browser.evaluate("""(() => {
+            const root = document.querySelector('[data-ees-asset=MARKER]');
+            const box = e => { if (!e) return null; const r = e.getBoundingClientRect(); return {x:r.x, y:r.y, right:r.right, bottom:r.bottom, width:r.width, height:r.height}; };
+            const aside = root.querySelector('[data-ees-asset-aside]');
+            return {main:box(root.querySelector('[data-ees-asset-main]')), aside:box(aside), body:box(root.querySelector('#ees-skill-body')),
+              foot:box(root.querySelector('[data-ees-asset-foot]')), usage:aside.contains(root.querySelector('[data-ees-asset-usage]')),
+              access:aside.querySelector('[data-ees-asset-access] [data-ees-access]')?.innerText.trim(),
+              dialog:!!aside.querySelector('[data-ees-asset-access] button'), note:root.querySelector('[data-ees-asset-note]')?.innerText.trim() || '',
+              actions:[...(root.querySelector('[data-ees-asset-foot]')?.querySelectorAll('button') || [])].map(e => e.innerText.trim()),
+              hint:root.innerText.includes('AI가 이 내용을 읽고 따릅니다')};
+        })()""".replace('MARKER', marker))
+        self.assertAlmostEqual(seen['main']['x'], 328, delta=1, msg=marker)
+        self.assertAlmostEqual(seen['aside']['right'], 1288, delta=1, msg=marker)
+        self.assertGreater(seen['aside']['x'], seen['main']['right'] - 1, marker)
+        self.assertGreater(seen['main']['width'], seen['aside']['width'] + 200, marker)
+        self.assertLess(abs(seen['main']['y'] - seen['aside']['y']), 12, marker)
+        self.assertTrue(seen['usage'], marker)
+        # Access keeps its own dialog; the column shows the current state beside the button that opens it.
+        self.assertEqual((seen['access'], seen['dialog']), ('팀 전체', True), marker)
+        if marker == 'skill-editor':
+            # The instructions use the height that is left above the save row.
+            self.assertGreater(seen['body']['height'], 500)
+            self.assertGreaterEqual(seen['foot']['y'], seen['main']['bottom'] - 1)
+            self.assertEqual(seen['actions'], ['취소', '저장'])
+            self.assertIn('다시 검사·게시', seen['note'])
+            self.assertFalse(seen['hint'])
+        else:
+            self.assertEqual(seen['note'], '처리가 끝난 문서만 AI가 찾아볼 수 있습니다.')
 
     def native_link_selector(self, target, label, labels):
         if target == 'models':

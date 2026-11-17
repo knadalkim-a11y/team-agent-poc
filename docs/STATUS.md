@@ -1,15 +1,16 @@
 # 현재 작업 상태
 
-## 2026-11-16 · 워크스페이스 2판 제품 구현 · 1단계
+## 2026-11-17 · 워크스페이스 2판 제품 구현 · 2단계
 
-- **요청·기준:** 사용자가 [목업 2판](mockups/ees-work/design-mock-17-workspace.html)(커밋 `d6da045`)을 구현 기준으로 정하고, 배치를 먼저 반영하고 테마는 넓은 업무 화면 4판과 함께 나중에 적용하는 순서의 1단계부터 진행하라고 했다. main `a11e417`에서 시작했다. [계약·바뀐 화면·목업과 다른 점](mockups/ees-work/TASK.md#workspace-product-step1-20261116).
-- **현재:** 업무 절차 목록과 도구의 목록·상세·편집을 제품 코드에 반영했다. 목록은 찾기·건수·주 동작 한 줄 아래의 표이고, API 상세와 편집은 보내는 것과 받는 것의 두 열이다. 색·글꼴·내용 폭(960px)은 지금 제품 값이다. 서버·저장 형식·권한은 바꾸지 않았다. 사용자 요청으로 [PR #143](https://github.com/knadalkim-a11y/team-agent-poc/pull/143)을 만들었고 병합은 요청받지 않았다.
-- **검증:** 이 개발 환경에서 고정 소스로 프런트엔드와 배포 wheel을 빌드해 실제 제품을 띄웠다. 제품 브라우저 시험 16개 모듈 175개, Node 774개, 서비스·계약·플랫폼 묶음, 시험 ID 감사가 통과했다. 1920·1366·480 폭의 제품 캡처로 목업과 배치를 대조했다. [결과와 처음 발견한 문제](../evals/figma-product-parity-20261111.md#workspace-product-step1-20261116). Windows 시험을 포함한 GitHub CI는 PR #143에서 돌리며 결과는 그 PR에 있다. 사내 적용·사용자 확인은 미실행이다.
+- **요청·기준:** 사용자가 1단계 PR의 병합과 2단계 진행을 지시했다. [목업 2판](mockups/ees-work/design-mock-17-workspace.html)(커밋 `d6da045`)의 작업 지침·참고 문서 네 화면이 대상이고 main `89247a7`에서 시작했다. [계약·바뀐 화면·목업과 다른 점](mockups/ees-work/TASK.md#workspace-product-step2-20261117).
+- **1단계:** [PR #143](https://github.com/knadalkim-a11y/team-agent-poc/pull/143)이 Windows를 포함한 CI 통과 뒤 `89247a7`로 병합됐다. [계약](mockups/ees-work/TASK.md#workspace-product-step1-20261116).
+- **현재:** 작업 지침·참고 문서의 목록을 찾기·건수·만들기 한 줄 아래의 표로, 내용 화면을 왼쪽 내용과 오른쪽 쓰는 곳·접근의 두 열로 바꿨다. Open WebUI 화면이라 소스 패치를 고쳤다. 접근 권한을 바꾸는 대화상자와 목록의 기존 조작, 서버·저장 형식·권한은 그대로다. 작업 브랜치 `claude/brave-bell-p1tp73`에 있고 PR은 만들지 않았다.
+- **검증:** 이 개발 환경에서 고정 소스로 프런트엔드와 배포 wheel을 빌드해 실제 제품을 띄웠다. [결과와 발견한 문제](../evals/figma-product-parity-20261111.md#workspace-product-step2-20261117). Windows·GitHub CI·사내 적용·사용자 확인은 미실행이다.
 - **미해결:**
-  - 열린 [PR #142](https://github.com/knadalkim-a11y/team-agent-poc/pull/142)가 업무 절차 목록의 같은 함수를 고친다. 먼저 병합되면 충돌을 풀어야 한다.
-  - 공식 Figma ‘워크 · 도구’·‘워크 · 업무 절차’ 페이지는 2판을 반영하지 않았다.
-  - 목업과 다른 점 다섯 가지는 사용자 확인이 필요하다.
-- **다음 하나:** PR #143의 CI 결과를 보고, 사용자가 목업과 다른 점 다섯 가지를 확인한다.
+  - 목업과 다른 점 일곱 가지는 사용자 확인이 필요하다. 가장 큰 것은 접근 권한을 화면 안의 선택 단추가 아니라 기존 대화상자로 바꾸는 점이다.
+  - 열린 [PR #142](https://github.com/knadalkim-a11y/team-agent-poc/pull/142)와 소스 패치·패치 해시에서 충돌한다. 1단계 병합으로 생긴 `ees-work-designer.js`·STATUS·CHANGELOG 충돌도 그 PR에 남아 있다.
+  - 공식 Figma 페이지는 2판을 반영하지 않았다.
+- **다음 하나:** 사용자가 2단계 결과와 목업과 다른 점을 확인하고, PR·CI를 진행할지 정한다.
 
 ## 2026-11-16 · API 전용 도구 관리
 
