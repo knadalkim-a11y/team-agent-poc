@@ -4,6 +4,10 @@ Each module runs in its own Python process, as in the original workflow. This
 avoids sharing Native fixture module replacements across unrelated suites.
 The manifest audit rejects unclassified old test IDs; replacements must point
 to an existing test and explain the retired behavior/protection carried over.
+
+The workflow asks --plan which jobs a scope runs, so the suite list, each
+suite's fixtures and the release-gate rule stay in this one file. --quick is
+the pull-request check: the source-only modules, without the built program.
 """
 from __future__ import annotations
 
@@ -99,6 +103,109 @@ NODE_SCRIPTS = {
                  "test_ees_work_figma_runtime_ui.cjs", "test_ees_motion.cjs", "test_ees_motion_svelte.cjs",
                  "test_figma_check.cjs", "test_ees_saved_prompts.cjs"],
 }
+
+
+# Which fixtures each service job downloads and verifies. The Windows platform
+# job also rebuilds the legacy program from its pinned source.
+SERVICE_FIXTURES = {
+    "services": "upstream legacy", "contracts": "upstream legacy previous",
+    "native-contracts": "upstream", "native-grounding": "upstream", "platform": "upstream",
+    "program-install": "upstream", "program-wheel": "upstream",
+    "restore-ees10": "upstream legacy", "restore-ees11": "upstream previous",
+    "restore-ees12": "upstream previous12 previous-v4", "restore-ees13": "upstream previous13",
+}
+WINDOWS_FIXTURES = {"platform": "upstream legacy"}
+NATIVE_SUITES = ("native-account", "native-work", "native-compose", "native-execution")
+PRODUCT = "native-product"
+LINUX, WINDOWS = "ubuntu-24.04", "windows-2022"
+# quick: pull requests. browser: the real browser suites. linux/windows: every
+# suite of that system. full: both systems; the only scope that may package.
+SCOPES = {"quick": (), "browser": (LINUX,), "linux": (LINUX,), "windows": (WINDOWS,), "full": (LINUX, WINDOWS)}
+JOBS = ("quick", "audit", "source-frontend", "upstream-fixture", "historical-fixtures", "fixtures",
+        "service", "native", "native-product")
+# Source-only checks: these run without the built program. Tests that need
+# the program skip here and stay required in the full scope.
+QUICK_SUITES = ("services", "platform")
+QUICK_MODULES = ("test_ees_workflow_execution.py", "test_ees_work_authoring.py")
+
+
+class PlanError(ValueError):
+    pass
+
+
+def plan(scope, suites="", event="workflow_dispatch", ref=""):
+    """Return the jobs one run executes and the result each job must report."""
+    if event == "pull_request":
+        scope, suites = "quick", ""
+    if scope not in SCOPES:
+        raise PlanError("Unknown scope: " + scope)
+    names = suites.split()
+    known = set(SERVICE_FIXTURES) | set(NATIVE_SUITES) | {PRODUCT}
+    unknown = sorted(set(names) - known)
+    if unknown:
+        raise PlanError("Unknown suite: " + " ".join(unknown))
+    if names and scope == "quick":
+        raise PlanError("The quick scope has no selectable suites")
+    complete = scope == "full" and not names
+    # The in-house update trusts any successful run on main. A partial run
+    # there would look like a passed release gate, so main only runs it whole.
+    if ref == "refs/heads/main" and event != "pull_request" and not complete:
+        raise PlanError("On main only the complete full scope runs; choose a branch for partial runs")
+    systems = SCOPES[scope]
+    wanted = (lambda name: name in names) if names else (lambda name: True)
+    service = [] if scope in ("quick", "browser") else [
+        {"os": system, "suite": suite, "fixtures": WINDOWS_FIXTURES.get(suite, fixtures) if system == WINDOWS else fixtures,
+         "timeout": 15 if system == WINDOWS and suite == "contracts" else 10}
+        for system in systems for suite, fixtures in SERVICE_FIXTURES.items() if wanted(suite)]
+    browser = scope in ("browser", "linux", "full")
+    native = [suite for suite in NATIVE_SUITES if browser and wanted(suite)]
+    product = browser and wanted(PRODUCT)
+    scheduled = {item["suite"] for item in service} | set(native) | ({PRODUCT} if product else set())
+    absent = sorted(set(names) - scheduled)
+    if absent:
+        raise PlanError("Not part of the " + scope + " scope: " + " ".join(absent))
+    audit = [] if names or scope in ("quick", "browser") else list(systems)
+    build = bool(service or native or product)
+    runs = {"quick": scope == "quick", "audit": bool(audit), "source-frontend": build, "upstream-fixture": build,
+            "historical-fixtures": bool(service), "fixtures": build, "service": bool(service),
+            "native": bool(native), "native-product": product}
+    return {"scope": scope, "runs": runs,
+            "expected": {job: "success" if runs[job] else "skipped" for job in JOBS},
+            "service": {"include": service}, "native": {"suite": native}, "audit": {"os": audit},
+            "check": {"os": [LINUX, WINDOWS] if complete else [LINUX]},
+            "package": complete and event != "pull_request"}
+
+
+# A skipped job never reads its matrix, but an empty one is not valid JSON
+# for a matrix. These rows only keep the expression well-formed.
+IDLE_MATRIX = {"service": {"include": [{"os": LINUX, "suite": "none", "fixtures": "upstream", "timeout": 10}]},
+               "native": {"suite": ["none"]}, "audit": {"os": [LINUX]}}
+
+
+def plan_outputs(result):
+    """One name=value line per workflow output; JSON values stay on one line."""
+    compact = lambda value: json.dumps(value, separators=(",", ":"))
+    result = dict(result, **{name: matrix for name, matrix in IDLE_MATRIX.items()
+                             if not next(iter(result[name].values()))})
+    lines = ["scope=" + result["scope"], "package=" + str(result["package"]).lower(),
+             "expected=" + compact(result["expected"])]
+    lines += ["run_" + job.replace("-", "_") + "=" + str(value).lower() for job, value in result["runs"].items()]
+    lines += [name + "=" + compact(result[name]) for name in ("service", "native", "audit", "check")]
+    return lines
+
+
+def check_results(expected, needs):
+    """Compare every job result with the plan; an unplanned or missing job fails."""
+    errors = []
+    if (needs.get("plan") or {}).get("result") != "success":
+        errors.append("plan: " + str((needs.get("plan") or {}).get("result")))
+    if set(expected) != set(JOBS):
+        errors.append("The plan does not name every job")
+    for job in JOBS:
+        actual = (needs.get(job) or {}).get("result")
+        if actual != expected.get(job):
+            errors.append(job + ": expected " + str(expected.get(job)) + ", got " + str(actual))
+    return errors
 
 
 def selected(suite):
@@ -287,10 +394,50 @@ def main():
     parser.add_argument("--module")
     parser.add_argument("--partition", choices=SUITES)
     parser.add_argument("--audit", action="store_true")
+    parser.add_argument("--quick", action="store_true", help="run the pull-request source checks")
+    parser.add_argument("--plan", metavar="SCOPE", help="print the jobs this scope runs as workflow outputs")
+    parser.add_argument("--suites", default="", help="with --plan: only these suites, separated by spaces")
+    parser.add_argument("--event", default="workflow_dispatch")
+    parser.add_argument("--ref", default="")
+    parser.add_argument("--check-results", action="store_true",
+                        help="compare EES_EXPECTED_RESULTS with EES_JOB_RESULTS (both JSON)")
     parser.add_argument("--browser-evidence", type=Path)
-    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
+    if args.plan is not None:
+        try:
+            result = plan(args.plan, args.suites, args.event, args.ref)
+        except PlanError as error:
+            print("Plan refused: " + str(error), file=sys.stderr)
+            return 2
+        print("\n".join(plan_outputs(result)))
+        return 0
+    if args.check_results:
+        try:
+            expected = json.loads(os.environ.get("EES_EXPECTED_RESULTS") or "{}")
+            needs = json.loads(os.environ.get("EES_JOB_RESULTS") or "{}")
+        except ValueError:
+            expected, needs = {}, {}
+        errors = check_results(expected, needs)
+        print(json.dumps({"expected": expected, "errors": errors}, indent=2))
+        return int(bool(errors))
+    if not args.output:
+        parser.error("--output is required")
     args.output.mkdir(parents=True, exist_ok=True)
+    if args.quick:
+        results = []
+        for suite in QUICK_SUITES:
+            completed = subprocess.run([sys.executable, "-X", "warn_default_encoding", "-W", "error::EncodingWarning",
+                str(Path(__file__).resolve()), "--suite", suite, "--output", str(args.output / suite)], cwd=ROOT, check=False)
+            results.append({"suite": suite, "exit_code": completed.returncode})
+        for filename in QUICK_MODULES:
+            completed = subprocess.run([sys.executable, "-X", "warn_default_encoding", "-W", "error::EncodingWarning",
+                str(Path(__file__).resolve()), "--module", filename, "--output", str(args.output / "modules")], cwd=ROOT, check=False)
+            results.append({"module": filename, "exit_code": completed.returncode})
+        (args.output / "quick.json").write_text(json.dumps({"results": results}, indent=2) + "\n", encoding="utf-8")
+        failed = [item for item in results if item["exit_code"]]
+        print("Quick source checks:", "failed " + json.dumps(failed) if failed else "passed")
+        return int(bool(failed))
     if args.browser_evidence:
         files = sorted(path for path in args.browser_evidence.glob("**/*") if path.is_file())
         screenshots = [path for path in files if path.suffix == ".png"]
@@ -309,7 +456,7 @@ def main():
         print(json.dumps({key: report[key] for key in ("baseline", "old_ids", "current_ids", "errors")}))
         return bool(report["errors"])
     if not args.suite:
-        parser.error("--suite, --module or --audit is required")
+        parser.error("--suite, --module, --audit, --quick, --plan or --check-results is required")
     results = []
     for filename in selected(args.suite):
         command = [sys.executable, "-X", "warn_default_encoding", "-W", "error::EncodingWarning",

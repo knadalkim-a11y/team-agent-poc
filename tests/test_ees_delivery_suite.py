@@ -155,5 +155,106 @@ class DeliveryCoverageTests(unittest.TestCase):
         self.assertEqual(result["outcomes"][0]["status"], "failed")
 
 
+class DeliveryPlanTests(unittest.TestCase):
+    """Which jobs a run executes, and when a run may count as the release gate."""
+
+    def test_pull_request_runs_only_the_quick_source_checks(self):
+        result = runner.plan("full", "native-compose", event="pull_request", ref="refs/pull/7/merge")
+        self.assertEqual(result["scope"], "quick")
+        self.assertEqual([job for job, value in result["runs"].items() if value], ["quick"])
+        self.assertEqual(result["expected"]["quick"], "success")
+        self.assertEqual(set(result["expected"].values()), {"success", "skipped"})
+        self.assertEqual(result["check"], {"os": [runner.LINUX]})
+        self.assertFalse(result["package"])
+
+    def test_full_scope_keeps_every_suite_on_both_systems_and_alone_packages(self):
+        result = runner.plan("full", ref="refs/heads/main")
+        self.assertTrue(result["package"])
+        self.assertEqual(result["check"], {"os": [runner.LINUX, runner.WINDOWS]})
+        self.assertEqual(result["expected"], dict.fromkeys(runner.JOBS, "success") | {"quick": "skipped"})
+        rows = result["service"]["include"]
+        self.assertEqual({(row["os"], row["suite"]) for row in rows},
+                         {(system, suite) for system in (runner.LINUX, runner.WINDOWS) for suite in runner.SERVICE_FIXTURES})
+        self.assertEqual(len(rows), 22)
+        by_key = {(row["os"], row["suite"]): row for row in rows}
+        self.assertEqual(by_key[(runner.WINDOWS, "platform")]["fixtures"], "upstream legacy")
+        self.assertEqual(by_key[(runner.LINUX, "platform")]["fixtures"], "upstream")
+        self.assertEqual(by_key[(runner.WINDOWS, "contracts")]["timeout"], 15)
+        self.assertEqual({row["timeout"] for key, row in by_key.items() if key != (runner.WINDOWS, "contracts")}, {10})
+        self.assertEqual(result["native"], {"suite": list(runner.NATIVE_SUITES)})
+        self.assertEqual(result["audit"], {"os": [runner.LINUX, runner.WINDOWS]})
+
+    def test_every_suite_is_reachable_and_every_fixture_is_declared(self):
+        scheduled = set(runner.SERVICE_FIXTURES) | set(runner.NATIVE_SUITES)
+        self.assertEqual(scheduled, set(runner.SUITES))
+        for fixtures in list(runner.SERVICE_FIXTURES.values()) + list(runner.WINDOWS_FIXTURES.values()):
+            self.assertIn("upstream", fixtures.split())
+            self.assertLessEqual(set(fixtures.split()), {"upstream", "legacy", "previous", "previous12", "previous-v4", "previous13"})
+        for name in runner.QUICK_SUITES:
+            self.assertIn(name, runner.SUITES)
+        for filename in runner.QUICK_MODULES:
+            self.assertTrue((Path(__file__).parent / filename).is_file(), filename)
+
+    def test_partial_scopes_never_package_and_run_only_their_part(self):
+        browser = runner.plan("browser")
+        self.assertEqual([job for job, value in browser["runs"].items() if value],
+                         ["source-frontend", "upstream-fixture", "fixtures", "native", "native-product"])
+        windows = runner.plan("windows")
+        self.assertEqual({row["os"] for row in windows["service"]["include"]}, {runner.WINDOWS})
+        self.assertFalse(windows["runs"]["native"] or windows["runs"]["native-product"])
+        self.assertEqual(windows["audit"], {"os": [runner.WINDOWS]})
+        linux = runner.plan("linux")
+        self.assertEqual({row["os"] for row in linux["service"]["include"]}, {runner.LINUX})
+        self.assertTrue(linux["runs"]["native"] and linux["runs"]["native-product"])
+        for result in (browser, windows, linux, runner.plan("quick"), runner.plan("full", "platform")):
+            self.assertFalse(result["package"])
+            self.assertEqual(result["check"], {"os": [runner.LINUX]})
+
+    def test_named_suites_narrow_a_scope_and_unknown_or_absent_names_are_refused(self):
+        result = runner.plan("linux", "native-compose restore-ees12")
+        self.assertEqual([(row["os"], row["suite"]) for row in result["service"]["include"]], [(runner.LINUX, "restore-ees12")])
+        self.assertEqual(result["native"], {"suite": ["native-compose"]})
+        self.assertFalse(result["runs"]["native-product"] or result["runs"]["audit"])
+        self.assertTrue(result["runs"]["historical-fixtures"])
+        only_product = runner.plan("browser", "native-product")
+        self.assertTrue(only_product["runs"]["native-product"])
+        self.assertFalse(only_product["runs"]["native"] or only_product["runs"]["historical-fixtures"])
+        for scope, suites in (("windows", "native-compose"), ("browser", "platform"), ("full", "typo"),
+                              ("quick", "services"), ("everything", "")):
+            with self.assertRaises(runner.PlanError, msg=(scope, suites)):
+                runner.plan(scope, suites)
+
+    def test_main_refuses_partial_runs_so_a_success_there_is_always_the_full_gate(self):
+        for scope, suites in (("quick", ""), ("browser", ""), ("linux", ""), ("windows", ""), ("full", "platform")):
+            with self.assertRaises(runner.PlanError, msg=(scope, suites)):
+                runner.plan(scope, suites, ref="refs/heads/main")
+        self.assertEqual(runner.plan("browser", ref="refs/heads/topic")["scope"], "browser")
+
+    def test_outputs_are_single_lines_and_idle_matrices_stay_well_formed(self):
+        lines = dict(line.split("=", 1) for line in runner.plan_outputs(runner.plan("quick")))
+        self.assertEqual(lines["run_quick"], "true")
+        self.assertEqual(lines["run_native_product"], "false")
+        self.assertEqual(lines["package"], "false")
+        for name in ("service", "native", "audit", "check", "expected"):
+            self.assertNotIn("\n", lines[name])
+            self.assertTrue(json.loads(lines[name]))
+        self.assertEqual(json.loads(lines["native"]), {"suite": ["none"]})
+        self.assertEqual(json.loads(lines["service"])["include"][0]["suite"], "none")
+        full = dict(line.split("=", 1) for line in runner.plan_outputs(runner.plan("full")))
+        self.assertEqual(len(json.loads(full["service"])["include"]), 22)
+
+    def test_result_check_requires_exactly_the_planned_outcome(self):
+        expected = runner.plan("browser")["expected"]
+        needs = {job: {"result": outcome} for job, outcome in expected.items()} | {"plan": {"result": "success"}}
+        self.assertEqual(runner.check_results(expected, needs), [])
+        for job, outcome in (("native", "failure"), ("native", "cancelled"), ("native", "skipped"),
+                             ("service", "success"), ("plan", "failure")):
+            changed = dict(needs, **{job: {"result": outcome}})
+            self.assertTrue(runner.check_results(expected, changed), (job, outcome))
+        self.assertTrue(runner.check_results(expected, {key: value for key, value in needs.items() if key != "fixtures"}))
+        self.assertTrue(runner.check_results({}, needs))
+        self.assertTrue(runner.check_results({"quick": "success"}, needs))
+
+
 if __name__ == "__main__":
     unittest.main()
