@@ -14,8 +14,8 @@
  },
  "product": {
   "program": "0.11.3+ees.14",
-  "wheel_sha256": "904c3445b9403ec60f12d85fa8fee9ad0f4a5b3682d2d5e06f8f7107508f8eee",
-  "built_from": "the branding/ees sources of the commit that adds this file (all 143 build inputs matched the build manifest before committing), Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0, npm 10.9.2",
+  "wheel_sha256": "e408cdcfc53766696369ffbca5caf7d3351b061f85f19b5d4617000e76422528",
+  "built_from": "the branding/ees sources at commit 80b6efb (all 143 build inputs matched the build manifest), Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0, npm 10.9.2",
   "server": "tests/native_ui_fixture.py: the built frontend with synthetic sign-in, chat and model, and the real workflow service on a temporary database",
   "browser": "Chromium 153 headless, device scale factor 1",
   "data": "synthetic services and APIs (사내 백업, 사내 위키) and the default procedures of a new installation"
@@ -23,18 +23,19 @@
  "state": {
   "1920": "sidebar 256px open, chat 560px docked, work area 1104px",
   "1366": "sidebar compact, chat docked",
-  "480": "sidebar compact, chat closed"
+  "480": "sidebar compact, chat closed",
+  "refused": "product-WS5-1366-refused.png: 1366px, after a save refused for an invalid address; the reason is shown with the save row"
  },
  "files": {
   "product-WS1-1920.png": {
-   "sha256": "b65c967feed900d605b4d01886d4987e21968c6ff5e703b07164f28c0ac6c12e",
+   "sha256": "642146b6bafdf5025c83b187d45738b36e8b3b1a544bb325c287de8a87baab46",
    "size": [
     1920,
     1080
    ]
   },
   "product-WS3-1920.png": {
-   "sha256": "5302ecfbeddea2dfca474727d2ee34713701dfac050841e0284e9721658f6931",
+   "sha256": "cc70987c2ea3acf61643238108ebdb0ec54e12eca8a2a89b456076fac13f6aa1",
    "size": [
     1920,
     1080
@@ -47,26 +48,34 @@
     1080
    ]
   },
-  "product-WS5-1920.png": {
-   "sha256": "8907c8997e98f35c47eb0f03648b13d10f97bf8bfbcca03edcdaac9c7b8887d7",
-   "size": [
-    1920,
-    1080
-   ]
-  },
-  "product-WS5-1366.png": {
-   "sha256": "0adf9d8f1b84f95eb3b9aa58a9b1939c2b1d1fa3c374cc3b9b4c5a4908a19a68",
+  "product-WS5-1366-refused.png": {
+   "sha256": "e856d837e7da7558e49c2b87e13e4a4c410ae317bca847cae39fe8b2a05fbf63",
    "size": [
     1366,
     768
    ]
   },
+  "product-WS5-1366.png": {
+   "sha256": "75c0834add5dd012f3f76c67a95c3249e1a30f5f843b25df0483b51d815d896a",
+   "size": [
+    1366,
+    768
+   ]
+  },
+  "product-WS5-1920.png": {
+   "sha256": "db82d43b9ed244b0bb38014606cf4478720acf7e78e4fcef0df4dea3381f6b50",
+   "size": [
+    1920,
+    1080
+   ]
+  },
   "product-WS5-480.png": {
-   "sha256": "e217b9a0d745b0b85198b8762d3b624181d4543c4b45c7c65a99ea619f1f2288",
+   "sha256": "efaa623389c8156ac1170b0f5bd6ddb6c468374f63cd50d55191a01ee8804a31",
    "size": [
     480,
     800
    ]
   }
- }
+ },
+ "revised": "All captures were retaken from this wheel after the save row of the edit screen was moved to the bottom edge of the work area (PR #143 review). The first captures are in commit c459b03."
 }
