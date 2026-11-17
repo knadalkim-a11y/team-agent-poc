@@ -2378,7 +2378,19 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         provider = patch.object(native, 'native_workspace_access', access)
         provider.start()
         self.addCleanup(provider.stop)
-        self.refresh()
+        # refresh() resolves with null, before any state is applied, when the
+        # product's own refresh for a route change supersedes it. CI runs 568
+        # and 583 then read the menu while it still listed a revoked item.
+        # Ask again until the applied state carries this fixture's grants.
+        deadline = time.monotonic() + 9
+        while True:
+            state = self.refresh()
+            access = ((state or {}).get('capabilities') or {}).get('native_access')
+            if access == self.menu_grants:
+                return
+            if time.monotonic() >= deadline:
+                self.fail('The workspace did not apply the access fixture: ' + repr(access))
+            time.sleep(.05)
 
     def assert_reference_preserved(self, before):
         after = self.browser.evaluate('window.__eesNativeWorkV1.captureReference()')

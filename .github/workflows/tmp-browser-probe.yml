@@ -1,0 +1,54 @@
+# TEMPORARY investigation workflow. Delete before any merge.
+name: TEMP browser focus probe
+on:
+  push:
+    branches: [claude/brave-goodall-jaf2vt]
+    paths: ['tests/tmp_browser_probe.py', '.github/workflows/tmp-browser-probe.yml']
+permissions:
+  contents: read
+env:
+  EES_FIXED_TEST_DEPENDENCIES: uv==0.12.7 cryptography==46.0.0 nltk==3.9.2 pydantic==2.13.4 fastapi==0.136.3 httpx==0.28.1 sqlalchemy==2.0.50 aiosqlite==0.22.1 loguru==0.7.3 orjson==3.11.9 aiohttp==3.13.5 bcrypt==5.0.0 PyJWT==2.15.0 pytz==2026.4 tzdata==2026.4 requests==2.34.2 ldap3==2.9.1 python-mimeparse==2.0.0 PyYAML==6.0.3
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: open-webui/open-webui
+          ref: 2a960a59fe1dbbd35282f0556b3666d81102e781
+          path: dist/open-webui-source
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+          cache-dependency-path: dist/open-webui-source/package-lock.json
+      - name: Build the program exactly as the delivery workflow does
+        env:
+          CYPRESS_INSTALL_BINARY: '0'
+          ONNXRUNTIME_NODE_INSTALL_CUDA: skip
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: |
+          (cd dist/open-webui-source && npm ci --force --no-audit --no-fund)
+          python -m pip download --no-deps --only-binary=:all: --dest dist/upstream open-webui==0.11.3
+          python scripts/build_ees_frontend.py --source-dir dist/open-webui-source --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/frontend
+          python scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --frontend-dir dist/frontend --output-dir dist/branding
+          python -m pip install ${{ env.EES_FIXED_TEST_DEPENDENCIES }}
+      - name: Repeat the dialog focus test with the page instrumented
+        env:
+          EES_TEST_CHROME: google-chrome
+          EES_TEST_UPSTREAM_WHEEL: dist/upstream/open_webui-0.11.3-py3-none-any.whl
+          EES_TEST_BRANDING_DIR: dist/branding
+          EES_TEST_FRONTEND_DIR: dist/frontend
+          EES_TEST_SCREENSHOT_DIR: dist/probe-shots
+          EES_REQUIRE_AUTHORING_NATIVE: '1'
+        run: |
+          google-chrome --version
+          python -X warn_default_encoding -W error::EncodingWarning tests/tmp_browser_probe.py test_ees_motion_native.MotionNativeTests.test_c3_dialog_and_help_close_preserve_draft_and_release_modal_blocker --rounds 70 --probe --fetch-delay 1 --out dist/probe-dialog | grep -v "Chrome startup"
