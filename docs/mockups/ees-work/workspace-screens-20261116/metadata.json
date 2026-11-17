@@ -1,0 +1,78 @@
+{
+ "revision": 2,
+ "status": "review_mock_ready",
+ "date": "2026-11-16",
+ "request": "워크스페이스에 업무절차/도구/작업지침/참고문서 얘내들있잖아? 뭔가 디자인이 전체적으로 제품같지가 않네. 그냥 poc로 만든 html같아.",
+ "go_ahead": "너 판단대로 진행해줘",
+ "base_commit": "a11e41755b4cf8c3face5e0d9b6e6d51888e1ad7",
+ "implementation_revision": null,
+ "mock": {
+  "file": "docs/mockups/ees-work/design-mock-17-workspace.html",
+  "sha256": "311ec16b59dd2b8cc49c6b36a281ddc7832a5d1455c6905f1bb7e7a667639d5d",
+  "bytes": 782733,
+  "source": "docs/mockups/ees-work/design-mock-src/17-workspace.html",
+  "source_sha256": "5b03ba2862ecdebb1dac3c92d8e654f65d1c53f8c3cd193edbf74eaae222ed28",
+  "theme": "theme sheet 나 (Figma 2129:72), copied from design-mock-src/15-work-centered-wide.html revision 4; tried only in the mock"
+ },
+ "screens": {
+  "WS1": "업무 절차 목록",
+  "WS2": "업무 절차 내용",
+  "WS3": "도구 · API 명세 목록",
+  "WS4": "API 상세",
+  "WS5": "API 명세 편집",
+  "WS6": "작업 지침 목록",
+  "WS7": "작업 지침 내용",
+  "WS8": "참고 문서 목록",
+  "WS9": "참고 문서 내용"
+ },
+ "captures": {
+  "1920x1080": [
+   "WS1.png",
+   "WS2.png",
+   "WS3.png",
+   "WS4.png",
+   "WS5.png",
+   "WS6.png",
+   "WS7.png",
+   "WS8.png",
+   "WS9.png"
+  ],
+  "1920x1080 chat folded": [
+   "WS1-WS2-wide.png",
+   "WS3-WS4-wide.png",
+   "WS3-WS5-wide.png",
+   "WS6-WS7-wide.png",
+   "WS8-WS9-wide.png"
+  ],
+  "480x800": [
+   "WS3-480.png",
+   "WS7-480.png"
+  ]
+ },
+ "validation": "evals/artifacts/workspace-screens-20261116/validation-report.json",
+ "figma": null,
+ "product_adoption": "undecided; no product code, API, storage or Figma page was changed",
+ "not_run": [
+  "in-house PC open",
+  "user review",
+  "Figma",
+  "comparison with the running product"
+ ],
+ "revision_2_feedback": {
+  "user": "한번 더 검토해줘. 넓은 화면을 최대한 잘 활용하는지, 의미없는 설명문구 라벨들이 포함되어있지 않은지 등 말이야.",
+  "findings": [
+   "with the chat folded (center 1664px) every table stretched to 1600px and the content sat at the left",
+   "list screens repeated the menu name of the header band as a second title and carried a description the product does not have",
+   "the count was shown twice on each list",
+   "API detail repeated the service, method and address in a separate block",
+   "API edit had group headings and a notice added by the mock, and hid the input and result settings behind a link",
+   "hint texts beside block titles restated the title or a notice on the same screen"
+  ],
+  "previous_revision_commit": "b24fedf5eb7103b1e0fa920476dbbc83f58478ea"
+ },
+ "layout_rule": {
+  "split2": "center 1264px or wider: list (420px) beside the opened item",
+  "split1": "864~1263px: list and opened item in turn",
+  "single": "below 864px: one column"
+ }
+}
