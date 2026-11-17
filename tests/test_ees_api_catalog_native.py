@@ -202,6 +202,11 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
               return {columns:[...document.querySelectorAll('[data-api-mapping]>div')].map(box), area, catalog:box(catalog),
                 foot:box(document.querySelector('.ew-api-foot')),
                 controls:[...document.querySelectorAll('.ew-api-map :is(input,select)')].map(e => e.getBoundingClientRect().width),
+                titles:[...document.querySelectorAll('.ew-api-map-head')].every(e => e.checkVisibility()),
+                names:[...document.querySelectorAll('.ew-api-map label>span')].map(e => {
+                  const {width, height, bottom} = e.getBoundingClientRect();
+                  return {text:e.textContent, shown:width > 8 && height > 8, above:bottom <= e.parentElement.querySelector('input,select').getBoundingClientRect().y + 1};
+                }),
                 overflow:document.documentElement.scrollWidth > innerWidth ||
                   [...catalog.querySelectorAll('*')].some(e => e.getClientRects().length && e.getBoundingClientRect().right > area.right + 1)};
             })()""")
@@ -214,6 +219,10 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.assertAlmostEqual(wide['foot']['bottom'], wide['area']['bottom'], delta=1)
         self.assertLessEqual(wide['catalog']['bottom'], wide['area']['bottom'] + 1)
         self.assertFalse(wide['overflow'])
+        # Column titles name the controls here, so the controls' own names are for assistive technology only.
+        self.assertTrue(wide['titles'])
+        self.assertEqual(len(wide['names']), 19)
+        self.assertFalse(any(name['shown'] for name in wide['names']), wide['names'])
         for width, height, overlay in ((1366, 768, False), (480, 800, True)):
             with self.subTest(width=width):
                 self.authoring_viewport(width, height, overlay=overlay)
@@ -223,6 +232,13 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
                 self.assertGreater(narrow['columns'][1]['y'], narrow['columns'][0]['bottom'] - 1, narrow['columns'])
                 self.assertGreaterEqual(min(narrow['controls']), 56, narrow['controls'])
                 self.assertFalse(narrow['overflow'])
+                # Every control is named on screen: by the column titles, or by its own name once the lines wrap.
+                self.assertEqual(narrow['titles'], width == 1366)
+                for name in narrow['names']:
+                    self.assertTrue(name['text'].strip())
+                    self.assertEqual(name['shown'], width == 480, name)
+                    if width == 480:
+                        self.assertTrue(name['above'], name)
                 # The settings are longer than the work area; the save row stays flush with its bottom edge.
                 self.assertGreater(narrow['catalog']['bottom'], narrow['area']['bottom'])
                 self.assertAlmostEqual(narrow['foot']['bottom'], narrow['area']['bottom'], delta=1)

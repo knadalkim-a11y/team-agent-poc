@@ -2581,7 +2581,11 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
   #ees-work-designer [data-api-catalog] :is(.ew-api-thead,.ew-api-row) {grid-template-columns:56px minmax(0,1fr) 16px;}
   #ees-work-designer [data-api-catalog] :is(.ew-api-thead>span:nth-child(3),.ew-api-path) {display:none;}
   #ees-work-designer [data-api-catalog] :is(.ew-api-name strong,.ew-api-description) {white-space:normal;}
+  /* The column titles do not line up with wrapped controls, so each control shows its own name instead. */
   #ees-work-designer [data-api-catalog] .ew-api-map-head {display:none;}
+  #ees-work-designer [data-api-catalog] .ew-api-map {align-items:end;}
+  #ees-work-designer [data-api-catalog] .ew-api-map label>span {position:static;width:auto;height:auto;overflow:visible;clip-path:none;display:block;margin-bottom:2px;color:var(--ees-text-secondary);font-size:12px;line-height:18px;}
+  #ees-work-designer [data-api-catalog] .ew-api-map .ew-api-btn.remove {margin-bottom:3px;}
   #ees-work-designer [data-api-catalog] [data-map-kind=inputs] {grid-template-columns:repeat(3,minmax(0,1fr)) 28px;}
   #ees-work-designer [data-api-catalog] .ew-api-map[data-map-kind=inputs]>:nth-child(1) {grid-column:1 / -1;}
   #ees-work-designer [data-api-catalog] .ew-api-map[data-map-kind=inputs]>:nth-child(5) {grid-column:1 / -2;}

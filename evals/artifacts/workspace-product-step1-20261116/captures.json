@@ -14,8 +14,8 @@
  },
  "product": {
   "program": "0.11.3+ees.14",
-  "wheel_sha256": "e408cdcfc53766696369ffbca5caf7d3351b061f85f19b5d4617000e76422528",
-  "built_from": "the branding/ees sources at commit 80b6efb (all 143 build inputs matched the build manifest), Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0, npm 10.9.2",
+  "wheel_sha256": "8156373ce3b175326e200d9c6b425c117e580f17d5500b90273f5c11cd0c1515",
+  "built_from": "the branding/ees sources of the commit that last changed this file (all 143 build inputs matched the build manifest before committing), Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0, npm 10.9.2",
   "server": "tests/native_ui_fixture.py: the built frontend with synthetic sign-in, chat and model, and the real workflow service on a temporary database",
   "browser": "Chromium 153 headless, device scale factor 1",
   "data": "synthetic services and APIs (사내 백업, 사내 위키) and the default procedures of a new installation"
@@ -24,18 +24,19 @@
   "1920": "sidebar 256px open, chat 560px docked, work area 1104px",
   "1366": "sidebar compact, chat docked",
   "480": "sidebar compact, chat closed",
-  "refused": "product-WS5-1366-refused.png: 1366px, after a save refused for an invalid address; the reason is shown with the save row"
+  "refused": "product-WS5-1366-refused.png: 1366px, after a save refused for an invalid address; the reason is shown with the save row",
+  "rows": "product-WS5-480-rows.png: 480px, scrolled to the request parameters; each control shows its name"
  },
  "files": {
   "product-WS1-1920.png": {
-   "sha256": "642146b6bafdf5025c83b187d45738b36e8b3b1a544bb325c287de8a87baab46",
+   "sha256": "b65c967feed900d605b4d01886d4987e21968c6ff5e703b07164f28c0ac6c12e",
    "size": [
     1920,
     1080
    ]
   },
   "product-WS3-1920.png": {
-   "sha256": "cc70987c2ea3acf61643238108ebdb0ec54e12eca8a2a89b456076fac13f6aa1",
+   "sha256": "618afd3bb9f382feb753aac0790f0d553a3991e0ef14e552a626a80faae5a496",
    "size": [
     1920,
     1080
@@ -69,13 +70,20 @@
     1080
    ]
   },
+  "product-WS5-480-rows.png": {
+   "sha256": "c7254e38bc0ba15916b2c412aa40cc60f1b6d581bbd04a194c298c24c9d31f95",
+   "size": [
+    480,
+    800
+   ]
+  },
   "product-WS5-480.png": {
-   "sha256": "efaa623389c8156ac1170b0f5bd6ddb6c468374f63cd50d55191a01ee8804a31",
+   "sha256": "977530009946a7b22224dbcd626cf00cb60db62fb207b92d551a5c1be0f23d78",
    "size": [
     480,
     800
    ]
   }
  },
- "revised": "All captures were retaken from this wheel after the save row of the edit screen was moved to the bottom edge of the work area (PR #143 review). The first captures are in commit c459b03."
+ "revised": "All captures were retaken from this wheel after two fixes from the PR #143 review: the save row of the edit screen stays at the bottom edge of the work area, and each control of a parameter or result line shows its name once the lines wrap. The first captures are in commit c459b03."
 }
