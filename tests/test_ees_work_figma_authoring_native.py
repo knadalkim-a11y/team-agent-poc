@@ -1424,8 +1424,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         def assert_neutral_badge(colors):
             # The B10 cards distinguish unreviewed gray from the warm warning
             # badge. Check rendered colors, independent of CSS token/class names.
+            # The theme's secondary text is a cool gray (#5E6573, channel spread 21);
+            # the warm warning badge text (#96590C) has a spread of 138.
             for channels in colors.values():
-                self.assertLessEqual(max(channels[:3])-min(channels[:3]), 20, colors)
+                self.assertLessEqual(max(channels[:3])-min(channels[:3]), 24, colors)
                 if len(channels) == 4:
                     self.assertGreaterEqual(channels[3], 0.95, colors)
             self.assertGreater(sum(colors['background'][:3])/3, 180, colors)

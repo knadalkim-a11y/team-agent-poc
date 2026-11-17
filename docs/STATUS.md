@@ -1,18 +1,21 @@
 # 현재 작업 상태
 
-## 2026-11-17 · 워크스페이스 2판 제품 구현 · 3단계
+## 2026-11-17 · 워크스페이스 2판 제품 구현 · 4단계(테마 색)
 
-- **요청·기준:** 사용자가 2단계 병합 결과를 안내받고 3단계 진행을 지시했다. [목업 2판](mockups/ees-work/design-mock-17-workspace.html)(커밋 `d6da045`)의 넓은 배치가 대상이다. [계약·바뀐 것·목업과 다른 점](mockups/ees-work/TASK.md#workspace-product-step3-20261117).
-- **앞선 병합:** 1단계 [PR #143](https://github.com/knadalkim-a11y/team-agent-poc/pull/143)이 `89247a7`로, 배포 뒤 오류를 고치는 [PR #142](https://github.com/knadalkim-a11y/team-agent-poc/pull/142)가 `5efd0a1`로, 2단계 [PR #144](https://github.com/knadalkim-a11y/team-agent-poc/pull/144)가 `93ec537`로, 기록 [PR #145](https://github.com/knadalkim-a11y/team-agent-poc/pull/145)가 `42e86ce`로 병합됐다. [1단계](mockups/ees-work/TASK.md#workspace-product-step1-20261116)·[2단계](mockups/ees-work/TASK.md#workspace-product-step2-20261117) 계약.
-- **현재:** 가운데 작업 영역이 1264px 이상이면 업무 절차·도구·작업 지침·참고 문서에서 항목을 열었을 때 목록(420px)이 왼쪽에 남고 내용이 나머지 폭을 쓴다. 더 좁으면 전처럼 내용이 목록을 대신한다. 목록만 보는 화면, 각 내용 화면 안의 배치, 서버·저장 형식·권한은 그대로다. 작업 브랜치 `claude/brave-bell-p1tp73`에 있고 PR은 만들지 않았다.
-- **검증:** 이 개발 환경에서 고정 소스로 프런트엔드와 배포 wheel을 빌드해 실제 제품을 띄웠다. [결과와 발견한 문제](../evals/figma-product-parity-20261111.md#workspace-product-step3-20261117). Windows·GitHub CI·사내 적용·사용자 확인은 미실행이다.
-- **결정 필요:** 작업 지침은 저장하지 않고 다른 화면으로 가면 고친 내용이 확인 없이 사라진다(전부터 그렇다). 목록이 옆에 있으면 다른 줄을 누르는 것만으로 같은 일이 생긴다. 확인을 넣을지 사용자가 정한다.
+- **요청·기준:** 사용자가 3단계 병합 뒤 4단계 진행을 지시했고, 테마를 제품에 쓸 때의 결정 네 가지를 권장안대로 정했다(제품 전체, 지금 글꼴 유지, 가운데 흰 바탕, 밝은 모드만). [계약·바뀐 값·넣지 않은 것](mockups/ees-work/TASK.md#workspace-product-step4-20261117).
+- **앞선 병합:** 1단계 [PR #143](https://github.com/knadalkim-a11y/team-agent-poc/pull/143) `89247a7`, [PR #142](https://github.com/knadalkim-a11y/team-agent-poc/pull/142) `5efd0a1`, 2단계 [PR #144](https://github.com/knadalkim-a11y/team-agent-poc/pull/144) `93ec537`, 기록 [PR #145](https://github.com/knadalkim-a11y/team-agent-poc/pull/145) `42e86ce`, 3단계 [PR #146](https://github.com/knadalkim-a11y/team-agent-poc/pull/146) `efd0214`. [1단계](mockups/ees-work/TASK.md#workspace-product-step1-20261116)·[2단계](mockups/ees-work/TASK.md#workspace-product-step2-20261117)·[3단계](mockups/ees-work/TASK.md#workspace-product-step3-20261117) 계약.
+- **현재:** 테마 시트 ‘나’의 색 값을 제품 전체의 밝은 모드에 적용했다. 가운데 작업 영역은 흰색, 강조색은 먹색, 왼쪽 메뉴는 `#F4F5F6`이다. 색을 직접 적어 둔 곳은 공통 색 값을 쓰도록 고쳤다. 글꼴·배치·상태 색·어두운 모드 값·서버·저장 형식은 그대로다. 작업 브랜치 `claude/brave-bell-p1tp73`에 있고 PR은 만들지 않았다.
+- **검증:** 이 개발 환경에서 고정 소스로 프런트엔드와 배포 wheel을 빌드해 실제 제품을 띄웠다. [결과와 고친 시험](../evals/figma-product-parity-20261111.md#workspace-product-step4-20261117). Windows·GitHub CI·사내 적용·사용자 확인은 미실행이다.
+- **사용자가 밝힌 다음 순서(2026-11-17):** ① 가운데를 흰색으로 바꾸고 관련 색을 맞춘다(이번 4단계). ② API 연동보다 먼저, 사람들이 이 시스템에서 자기 업무 플로우를 등록할 수 있게 한다. ③ 그 뒤에 API를 등록할 수 있게 한다. ④ ②에서 등록한 업무 플로우에 API를 맞춰 연계한다. ①②는 최대한 빠르게 진행하기를 원한다.
+- **결정 필요:**
+  - ②를 막는 것은 검증이 아니라 권한이다. 사람이 확인하는 작업만으로 된 업무 절차는 지금도 저장·게시·실행된다. 일반 팀원은 시스템 담당자 권한이 없어 업무 절차 메뉴가 보이지 않고 만들 수 없다(`ees_workflow_workspace.py`의 작성 명령은 담당자 권한을 요구한다). 권한을 주는 화면은 2026-11-06에 없앴고, 시스템 목록은 다섯 개와 공통으로 고정돼 있다. 누가·어디에·누구에게 보이게 등록하는지는 [2026-09-24의 작성 권한 결정](mockups/ees-work/TASK.md#system-authoring-20260924)을 바꾸는 일이라 사용자가 정한다.
+  - 작업 지침은 저장하지 않고 다른 화면으로 가면 고친 내용이 확인 없이 사라진다(전부터 그렇다). 3단계 뒤로는 옆 목록의 다른 줄을 누르는 것만으로 같은 일이 생긴다. 확인을 넣을지 사용자가 정한다.
 - **미해결:**
   - 일반 사용자의 새 항목이 ‘팀 전체’로 시작하려면 사내 Open WebUI 관리자 설정에서 공개 공유 권한이 켜져 있어야 한다. 사내에서 확인하지 않았다.
-  - 공식 Figma 페이지는 2판을 반영하지 않았다.
+  - 공식 Figma 페이지는 2판과 테마 색을 반영하지 않았다.
   - main의 CI가 2026-11-17에 두 번(1단계 병합 뒤, #142 병합 뒤) 첫 시도에서 브라우저 시험으로 실패했고 다시 돌려 통과했다. 실패한 시험은 매번 달랐고 원인은 확인하지 못했다. 이 개발 환경에서는 창 크기를 바꾸는 시험 하나가 3단계 이전 코드에서도 8번 중 3번 실패한다. [기록](../evals/navigation-motion-20261102.md#narrow-viewport-load-20261117).
   - PR #142의 CI는 첫 시도에서 Windows의 프로세스 종료 시험 한 건이 접근 거부로 실패했고 다시 돌려 통과했다. 원인은 확인하지 못했다. [기록](../evals/tool-authoring-20261105.md#workspace-resource-and-guide-20261116).
-- **다음 하나:** 사용자가 3단계의 PR·병합 여부를 정한다. 그 뒤는 사내 적용과 4단계(테마)다.
+- **다음 하나:** 사용자가 4단계의 PR·병합 여부와 ②의 등록 방식을 정한다.
 
 ## 2026-11-16 · 배포 후 워크스페이스 자료와 기본 API 열기
 
