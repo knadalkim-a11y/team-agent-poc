@@ -250,4 +250,5 @@ PR의 최신 EES delivery 실행에서 `ees-work-browser-evidence-native-compose
 - **따라가다 본 오류와 판단:** 처음 따라갔을 때 채팅 영역이 ‘불러오는 중’에 머물고 페이지 오류(`Cannot read properties of undefined (reading 'chat')`)가 났다. 합성 계정을 `id·role·name`만으로 만든 시험 틀 쪽 원인이었다. 실제 로그인 응답에 있는 권한·이메일 값을 채워(기존 `test_ees_work_figma_runtime_native.py`가 팀원 계정을 만드는 방식) 다시 따라가니 오류 없이 끝났고 채팅도 떴다. 제품 결함이 아니다.
 - **시험:** 고친 빌드로 제품 브라우저 시험 16개 모듈 178개, Node 777개(정적 시험을 더하기 전), 서비스 47개·플랫폼 26개·계약 6개 모듈, 시험 ID 감사(1,815개, 오류 0)가 통과했다. 메뉴 문구를 검사하던 Node 시험 한 줄의 기대값을 새 문구로 고쳤고, 위 정적 시험 하나를 더한 뒤 Node를 다시 돌려 778개가 통과했다. 문서 점검 오류 0, `git diff --check` 통과.
 - **화면:** [캡처 다섯 장](artifacts/first-procedure-walkthrough-20261117/captures.json)(새 업무 절차 폼, 저장 뒤 메뉴, 내용 확인, 게시, 판정 뒤).
-- **미실행:** 사내 서버, 실제 시스템 공용 계정, Windows, GitHub CI(이 변경은 작업 브랜치에만 있다). 서버의 다른 오류 문구에 남은 ‘워크플로우’ 네 곳(`ees_workflow.py`, `ees_workflow_definition.py` 두 곳, `ees_workflow_execution.py`)은 따라간 과정에서 보이지 않았고 뜻을 확인하지 못해 그대로 두었다.
+- **병합(2026-11-17):** 사용자가 “문구 수정 PR 만들고 병합해. CI는 하지말고”라고 지시했다. [PR #148](https://github.com/knadalkim-a11y/team-agent-poc/pull/148)을 만들어 CI 결과를 기다리지 않고 병합한다. 병합 전에 최종 커밋의 전체 필수 CI 성공을 확인한다는 기준의 예외이고, 근거는 위 개발 환경 시험뿐이다.
+- **미실행:** 사내 서버, 실제 시스템 공용 계정, Windows, 이 변경에 대한 GitHub CI 결과 확인. 서버의 다른 오류 문구에 남은 ‘워크플로우’ 네 곳(`ees_workflow.py`, `ees_workflow_definition.py` 두 곳, `ees_workflow_execution.py`)은 따라간 과정에서 보이지 않았고 뜻을 확인하지 못해 그대로 두었다.
