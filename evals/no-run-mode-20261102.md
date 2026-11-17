@@ -179,3 +179,56 @@ CI456 (`77ca5cd`)의 실제 전체 제품과 새 미완성 게시/360px 흐름�
   - GitHub 브랜치 보호에 필수 검사 이름이 걸려 있는지는 확인할 수 없었다. 집계 작업 이름 `Delivery checks (ubuntu-24.04)`는 모든 범위에서 유지하고, `(windows-2022)`는 전체 범위에서만 나온다.
   - 사내 Upgrade는 실행하지 않았다. 워크플로 파일이 프로그램 빌드 입력이라, 병합 뒤 첫 사내 적용 전에 main에서 전체 검사를 한 번 실행해 새 프로그램 ZIP을 만들어야 한다.
 - **재발 방지 연결:** 운영 방법은 [가이드의 검사 범위](../docs/03-openwebui-native-agent.md#ci-scopes), 판단 기준은 [AGENTS의 CI 실행 비용 관리](../AGENTS.md#ci-cost)에 반영했다.
+
+<a id="flaky-root-cause-20261118"></a>
+
+## 전체 검사 간헐 실패의 원인 조사 (2026-11-18)
+
+사용자가 [CI 실행 방식 변경](#ci-on-demand-20261117) 뒤 간헐 실패 두 유형의 원인 조사를 지시했다. main `368a60f`(PR #149 병합)에서 시작했다. 실패한 시험은 세 개이고 원인은 서로 다르다. 셋 다 확인했다.
+
+### Windows · 프로세스 종료 시험 (제품 결함)
+
+- **증상:** Windows platform의 `test_another_process_can_stop_saved_identity`가 `process_inspect`·`identity_unavailable`로 가끔 실패한다. [실행 567](tool-authoring-20261105.md#workspace-resource-and-guide-20261116), 실행 584, 이전의 CI327·CI426과 같은 시험이다. 실행 584의 값은 오류 5(접근 거부), 0.27초였다.
+- **확인된 원인:** Windows에서 프로세스는 종료 코드가 정해진 뒤 핸들이 신호 상태가 되기 전까지 실행 파일 경로 조회(`QueryFullProcessImageNameW`)를 접근 거부로 거절한다. 제품의 `_windows_identity`는 조회가 실패하면 같은 핸들을 대기 시간 0으로 한 번만 다시 보고, 아직 신호 전이면 ‘검사할 수 없는 살아 있는 프로세스’로 판단해 오류를 냈다.
+- **측정(수정 전, [임시 실행 44190057410](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44190057410), windows-2022 빌드 20348, Python 3.11.9):**
+  - 종료 신호 뒤 같은 Windows 호출을 연속으로 불렀다(80번, 표본 273,575개). 80번 모두에서 `GetProcessTimes`는 성공하고 경로 조회만 오류 5로 실패하는 상태가 있었다. 그때 종료 코드는 이미 0이었고 핸들은 1.5~2.5ms(중앙값 1.7ms) 뒤 신호됐다.
+  - 제품의 `_identity()`를 같은 방식으로 부르면 80번 가운데 80번 `process_inspect`·`identity_unavailable`·오류 5를 냈다.
+  - 시험과 같은 상황(다른 프로세스가 `stop_server` 호출)은 200번 가운데 0번 실패했다. 제품은 0.1초 간격으로 확인하므로 2ms 구간에 걸리는 일은 드물다. CI의 간헐 실패가 이 경우다.
+- **조치(`71ae4da`):** 조회가 거절되면 같은 핸들을 최대 2초 기다린다. 그 안에 신호되면 정상 종료로, 아니면 전과 같은 오류로 처리한다. 다른 핸들이나 PID로는 판단하지 않는다. 콘솔 연결·신호 실패 뒤의 확인과 명시적 종료(`terminate_registered_process`)의 같은 조회에도 적용했다. Stop·Apply·Status가 모두 이 함수를 거친다.
+- **검증:**
+  - [임시 실행 44191294199](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44191294199)(같은 환경): Windows의 거절 상태는 그대로 80번 모두 있었고, 제품의 `_identity()`는 80번 가운데 0번 오류를 냈다. 시험 상황 200번 가운데 0번 실패.
+  - 계약 시험 `test_exiting_process_that_refuses_its_image_query_is_an_ordinary_exit`를 더하고 기존 두 시험의 기대값을 맞췄다. 수정 전 코드에서는 새 시험을 포함해 실패한다(오류 4, 실패 1). Linux 로컬 69개 통과, 2개 건너뜀.
+  - 정식 Windows platform 묶음: 범위 지정 [실행 588](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44192980459)(`windows`, `platform`) 성공, 14분.
+  - 임시 실행 44191294199는 실패로 끝났다. 임시 워크플로에 더한 시험 모듈 실행 단계가 고정 의존성(cryptography)을 설치하지 않아 `CustomizedLauncherTests` 14건이 가져오기 오류로 실패한 것이고, 측정 단계와 종료 관련 시험은 통과했다.
+- **남은 항목:** 사내에서 이 오류로 Stop이나 Apply가 실패한 적이 있는지는 확인하지 않았다. 사내 적용은 미실행이다.
+
+### 브라우저 · 설정 메뉴의 관리자 항목 시험 (시험의 대기 누락)
+
+- **증상:** native-compose의 `test_native_admin_dialog_contains_keyboard_focus`가 마지막 단언에서 `True is not false`로 실패한다(실행 568, 583). 관리자 권한을 뺀 뒤에도 설정 메뉴에 관리자 항목이 있었다.
+- **확인된 원인:** 시험은 권한 fixture를 바꾸고 `refresh()`를 기다린 뒤 메뉴를 연다. 그런데 관리자 설정 화면에서 돌아오는 순간 제품이 화면 전환용 새로고침을 따로 시작하고, 그보다 먼저 시작한 시험의 `refresh()`는 밀려나 상태를 반영하지 않은 채 끝난다. 제품의 새로고침은 요청을 한 번 더(`operations`) 거친 뒤에야 상태를 반영하므로, 서버 응답이 느리면 시험이 이전 권한의 메뉴를 읽는다.
+- **재현(로컬, Chromium 153, 서버 응답 200ms 지연):** 수정 전 14번 가운데 6번이 같은 줄, 같은 단언으로 실패했다. 한 회차의 기록에서 시험의 `workspace` 요청이 시작된 2.6ms 뒤 제품의 `workspace` 요청이 시작됐고, 시험의 요청이 끝난 20ms 뒤 시험이 메뉴를 눌렀으며, 그때 제품의 `operations` 요청은 아직 끝나지 않았다.
+- **조치:** 시험 fixture에 `refresh_until()`을 더해, 반영된 상태가 바꾼 권한을 담을 때까지 다시 요청한다. 같은 지연에서 18번 모두 통과했다.
+- **제품 판단:** 제품 결함으로 보지 않는다. 메뉴는 권한이 바뀌면 스스로 닫히고 권한은 서버가 따로 검사한다.
+
+### 브라우저 · 대화상자 초점 시험 (시험이 다른 절차를 엶)
+
+- **증상:** native-compose의 `test_c3_dialog_and_help_close_preserve_draft_and_release_modal_blocker`가 `Timed out: document.activeElement?.matches('[data-author-action=copy]')`로 실패한다([실행 568, 575, 583](navigation-motion-20261102.md#narrow-viewport-load-20261117)).
+- **확인된 원인:** 작성 화면에 처음 들어가면 제품이 기본 절차를 만들고 목록을 다시 그려 줄이 아래로 밀린다. 시험은 자기가 만든 절차의 줄을 좌표로 누르는데, 좌표를 잰 뒤 목록이 밀리면 그 자리의 기본 절차 ‘일일 시스템 점검’이 열린다. 그 절차는 메뉴 첫 항목으로 ‘절차 편집’이 하나 더 있어 Tab 두 번이 ‘다른 이름으로 저장’에 닿지 못한다.
+- **증거:**
+  - 실행 583의 실패 로그에 찍힌 화면 글자가 시험이 만든 ‘모달 움직임 검증 절차’가 아니라 ‘일일 시스템 점검’과 ‘절차 편집’ 항목이었다.
+  - 계측을 넣고 되풀이한 [임시 실행 44193589216](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44193589216)(ubuntu-24.04, Chrome 157.0.8103.50)에서 70번 가운데 1번 같은 단언으로 실패했다. 그 회차의 초점은 메뉴 단추에서 ‘절차 편집’, ‘업무 절차 정보·분류 수정’ 순으로 움직였다.
+  - 수정 전 시험에서 목록이 늘어난 뒤 이전 좌표로 누르게 하면(로컬) 3번 모두 같은 단언으로 실패했다. 만든 절차의 줄은 y 191에서 371로 밀렸고 이전 좌표에는 ‘일일 시스템 점검’이 있었다.
+  - 기록 범위를 넓힌 임시 실행 44195587840(수정 전 시험, 220번)의 결과는 끝나면 여기에 적는다.
+- **재현하지 못한 시도(로컬, Chromium 153):** 부하 프로세스 4개로 20번, 화면 처리 속도를 4배·8배 늦춰 12번씩, 메뉴 닫힘 시간을 무작위로 바꿔 40번, 서버 응답을 200ms 늦춰 8번·무작위로 늦춰 36번 돌렸고 한 번도 실패하지 않았다. 메뉴와 대화상자가 닫히는 순서가 원인이라는 가설은 순서를 뒤바꿔도 통과해 버렸다.
+- **이전 조치와 빠진 경로:** 같은 문제를 막는 도우미 `open_initialized_author_list()`가 작성 화면 시험과 API 명세 시험에는 쓰이고 있었다. 이 도우미는 작성 화면 시험 클래스에만 있었고 움직임 시험은 쓰지 않았다.
+- **조치:** 도우미를 공통 fixture(`IntegratedNativeCase`)로 옮기고 `refresh_until()`을 쓰게 했다. 움직임 시험이 이 도우미로 들어가고, 연 절차가 만든 절차인지 바로 확인한다.
+- **같은 유형이 남은 곳:** `test_ees_source_shell_native.py`와 `test_ees_work_figma_layout_native.py`, `test_ees_helper_chat_native.py`에도 작성 화면에 들어가 줄을 누르는 곳이 있다. 진입 과정 자체를 재는 시험이 섞여 있어 바꾸지 않았다. 이 시험들이 다른 절차가 열린 화면으로 실패하면 같은 원인을 먼저 본다.
+- **제품 관찰:** 사용자가 어떤 시스템의 작성 화면에 처음 들어갈 때도 기본 절차가 잠시 뒤 추가되면서 줄이 밀린다. 시스템마다 한 번이다. 제품은 바꾸지 않았다.
+
+### 검증과 남은 것
+
+- 로컬(Chromium 153): 움직임 시험 6개, API 명세 시험 8개, 작업 등록 시험 1개 통과. 작성 화면 시험 43개는 실행 중이며 결과를 여기에 적는다.
+- GitHub: 고친 시험의 221번 반복과 `browser` 범위 실행은 진행 중이며 결과를 여기에 적는다.
+- 임시 워크플로 두 개와 임시 스크립트 두 개는 조사 뒤 지웠다. 측정 값은 위 임시 실행의 로그에 있다.
+- 실행 566의 두 시험(`test_c3_overlay_panel_closing_releases_hit_testing_and_restores_focus`, `test_procedure_visual_geometry_matches_figma_and_preserves_native_draft`)과 개발 환경에서 자주 실패하는 `test_tools_phase2_trial_activation_revision_groups_and_disable_roundtrip`은 이번에 조사하지 않았다. 원인 미확인으로 남는다.
+- **재발 방지 연결:** 제품 수정은 `scripts/ees_deploy_process.py`, 시험 보완은 `tests/ees_work_integrated_fixture.py`의 `refresh_until()`·`open_initialized_author_list()`에 있다.
