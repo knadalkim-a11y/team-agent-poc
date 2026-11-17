@@ -1,0 +1,41 @@
+{
+ "date": "2026-11-17",
+ "what": "Walk-through of registering a first work procedure without tools or APIs, as a non-admin account that holds the system manager role, on the running product",
+ "product": {
+  "program": "0.11.3+ees.14",
+  "wheel_sha256": "ab198914a3a6a8f4b26d6a75404b9ce3d851b74d4da0535a696c3a35e7d4b2b8",
+  "built_from": "the source patch and branding/ees sources of the commit that added this file, Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0, npm 10.9.2",
+  "server": "tests/native_ui_fixture.py: the built frontend with synthetic sign-in, chat and model, and the real workflow service on a temporary database",
+  "account": "synthetic user other-user, role user (not admin), given manager and participant on EMS / all factories through the admin-only save_access command; session fields copied the way tests/test_ees_work_figma_runtime_native.py builds a member",
+  "taken_by": "a one-off script outside the repository that subclasses tests/test_ees_work_figma_authoring_native.py FigmaAuthoringNativeTests and clicks the real controls",
+  "viewport": "1920x1080, device scale factor 1"
+ },
+ "captures": [
+  {
+   "file": "01-new-procedure-form-1920.png",
+   "shows": "Workspace > 업무 절차 > 새 업무 절차: the name and purpose form with 취소/추가",
+   "sha256": "df66ec60433d782f5372682cdcddb6c281810d8ea29153f5103ba812dc5ba84f"
+  },
+  {
+   "file": "02-saved-menu-open-1920.png",
+   "shows": "After adding one stage and one human-check job and saving: the title menu now reads 업무 절차 정보·분류 수정",
+   "sha256": "c8f78196215734acd5cd4ac3fc36c41d7149981fb6680319bd42162db513ce84"
+  },
+  {
+   "file": "03-content-check-1920.png",
+   "shows": "내용 확인 result: 통과 2, first line reads 절차·단계·작업 구조와 선행 연결·입력 형식",
+   "sha256": "564c28c34ac30b994f342d6526b77f80da21ef66f72d49c2d04979737eed58e3"
+  },
+  {
+   "file": "04-published-1920.png",
+   "shows": "게시 chosen and saved: 게시 v1",
+   "sha256": "a3ceb1f21e45af7b1bfe0ea017e58ef3554863de20d427544ab197b50cdcc780"
+  },
+  {
+   "file": "05-work-judged-1920.png",
+   "shows": "업무 > 운영 > the procedure > its stage after 지금 실행 > 진행 건 시작 and choosing 적합: 1 / 1 완료, helper chat loaded",
+   "sha256": "687431d1fe8700066eb32d6b453913755ec6d094f2c82182a0387670b9b3d143"
+  }
+ ],
+ "not_covered": "in-house server, a real shared system account, Windows"
+}

@@ -196,7 +196,7 @@ def definition_check(definition, complete=True):
             errors.append('판정 문구는 완료·실패·미확인·사람 조치 필요의 의미에 연결해 주세요.')
     nodes = definition.get('nodes')
     if not isinstance(nodes, dict) or len(nodes) > 250:
-        return errors + ['P/T/J 구조를 확인해 주세요.'], warnings
+        return errors + ['절차·단계·작업 구조를 확인해 주세요.'], warnings
     # 2026-11-02: schedules are no longer authored with the procedure. A rule
     # left in an earlier draft is kept as data but cannot be edited on screen,
     # so it no longer blocks publication. Reservations validate their own rule.
@@ -1768,7 +1768,7 @@ class WorkspaceMixin:
                 errors.extend(self.operations.validate_publication(db, definition, actor, groups))
                 warnings.extend(self.operations.publication_warnings(db, definition))
             validation = {'revision': row['revision'], 'definition_hash': _hash(definition), 'resource_versions': publication_resources or {'skills': {}}, 'errors': errors, 'warnings': warnings, 'checked_at': now,
-                          'checks': ['P/T/J 구조·선행 연결·입력 형식', '현재 도구·지침 참조와 게시 권한'] if not errors else []}
+                          'checks': ['절차·단계·작업 구조와 선행 연결·입력 형식', '현재 도구·지침 참조와 게시 권한'] if not errors else []}
             if action == 'validate_workflow':
                 db.execute('UPDATE work_definitions SET validation=? WHERE id=?', (_dump(validation), row['id']))
                 return {'workflow_id': row['id'], 'revision': row['revision'], 'validation': validation}

@@ -28,6 +28,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
+| 담당자 계정으로 업무 절차를 처음 등록(도구 없이)·남은 ‘워크플로우’ 표기·‘P/T/J’ 문구 | [2026-11-17 따라간 순서·고친 문구·고치지 않은 것·권한 지정 화면 없음](figma-product-parity-20261111.md#first-procedure-walkthrough-20261117) |
 | CI 브라우저 시험 준비 단계의 Chrome 지연(`Chrome DevTools response timed out`·첫 화면 준비 초과) | [2026-11-04 CI447·CI449 재발·같은 tree 통과·한 번 재실행 성공·원인 미확정](factory-unit-runs-20261103.md#browser-startup-timeout-20261104) |
 | 도구 미연결 작업 때문에 게시가 막힘 · 실행 방식(주기·수시·비상) 제거 | [게시 허용·작업/단계 실행 거부·EES 요청 차단·저장값/이전 예약 보존 검증](no-run-mode-20261102.md#no-run-mode-20261102) |
 | frontend 패치를 고친 뒤 고정 해시 갱신 누락(#113과 같은 유형) | [커밋 전 발견·고정 커밋 원본으로 이전 값 재현·결과 29개 해시 확인](no-run-mode-20261102.md#no-run-mode-20261102) |
