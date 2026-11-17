@@ -1,0 +1,62 @@
+{
+ "date": "2026-11-17",
+ "what": "Product screens after the theme sheet 'na' colour values were applied to the whole product (workspace design mock 17 revision 2, step 4), taken from the running product",
+ "theme": {
+  "figma": "https://www.figma.com/design/XK2wTos6sEuxSHhIj7cqg6?node-id=2129-72",
+  "values_from": "docs/mockups/ees-work/design-mock-17-workspace.html, commit d6da045, style block data-mock-theme=\"theme-sheet-na\""
+ },
+ "before": "evals/artifacts/workspace-product-step3-20261117 holds the same workspace screens with the previous colours",
+ "product": {
+  "program": "0.11.3+ees.14",
+  "wheel_sha256": "290c7c39375e5edc724e914392216d28d80ea38ffa98cade49fe79079bb41594",
+  "built_from": "the source patch and branding/ees sources of the commit that last changed this file (all build inputs matched the build manifest before committing), Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0, npm 10.9.2",
+  "server": "tests/native_ui_fixture.py: the built frontend with synthetic sign-in, chat and model, and the real workflow service on a temporary database",
+  "taken_by": "tests/test_ees_work_figma_authoring_native.py: test_wide_work_area_keeps_the_procedure_list_beside_the_opened_procedure; tests/test_ees_api_catalog_native.py: test_wide_work_area_keeps_the_api_list_beside_the_opened_api; tests/test_ees_source_shell_native.py: test_wide_work_area_keeps_the_asset_list_beside_the_opened_item and test_figma_native_asset_pages_render_real_entities_inside_the_three_panel_shell; tests/test_ees_work_figma_runtime_native.py: test_operations_stage_actual_jobs_header_and_judgment_menu_at_two_widths",
+  "browser": "Chromium 153 headless, device scale factor 1, light mode",
+  "data": "synthetic procedures, API specifications, work instructions and runs created or served by the tests"
+ },
+ "state": {
+  "product-WS1-WS2-1920.png": "chat closed, work area 1664px",
+  "product-WS3-WS5-1920.png": "chat closed, work area 1664px",
+  "product-WS6-WS7-1920.png": "chat closed, work area 1664px",
+  "product-run-stage-1920.png": "chat 560px docked, work area 1104px",
+  "product-WS7-chat-docked-1920.png": "chat 560px docked, work area 1104px"
+ },
+ "files": {
+  "product-WS1-WS2-1920.png": {
+   "sha256": "38452716ca38a8984b62727be3311f32e1bae26d0b4de84f112ffac94afeeb57",
+   "size": [
+    1920,
+    1080
+   ]
+  },
+  "product-WS3-WS5-1920.png": {
+   "sha256": "fc6705ad47e6f1aebb2fa4e2d812a5fed12f17761087c2bb0abc09737a895f3e",
+   "size": [
+    1920,
+    1080
+   ]
+  },
+  "product-WS6-WS7-1920.png": {
+   "sha256": "72ef364330a38eaa4035db444e45c0dcf5760efede03bf41a7dc88f1e8599103",
+   "size": [
+    1920,
+    1080
+   ]
+  },
+  "product-WS7-chat-docked-1920.png": {
+   "sha256": "7daa0716eb317a3bad0aeecec6d6d956b753a8fa9109d30100ec6e766bcd34f2",
+   "size": [
+    1920,
+    1080
+   ]
+  },
+  "product-run-stage-1920.png": {
+   "sha256": "3ec3fd94cc06b13e0ffe32f4823a3b8092eb76e4948c70c6899da371f31a6a8b",
+   "size": [
+    1920,
+    1080
+   ]
+  }
+ }
+}

@@ -916,7 +916,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.assertEqual(observed['bar']['gap'], '10px', observed)
         self.assertEqual(observed['hint']['wordBreak'], 'keep-all', observed)
         self.assertEqual(observed['hint']['overflowWrap'], 'normal', observed)
-        self.assertEqual(observed['hint']['color'], 'rgb(92, 94, 101)', observed)
+        self.assertEqual(observed['hint']['color'], 'rgb(94, 101, 115)', observed)
         self.assertEqual(observed['hint']['fontSize'], '12px', observed)
         self.assertEqual(observed['hint']['lineHeight'], '18px', observed)
         self.assertGreater(observed['badge']['height'], 0, observed)
