@@ -932,7 +932,6 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
  * execution controls. Match the current 06-task-groups source new-screen rules;
  * opt in only on the focused task panel with #ees-work-panel.ew-vd. */
 #ees-work-panel.ew-vd #ees-work-content.ew-vd-padding-reset{padding:0;}
-#ees-work-panel.ew-vd{--ees-text-tertiary:var(--ees-text-tertiary)}
 #ees-work-panel.ew-vd>.ew-panel-header.ew-run-nav{gap:2px;padding:0 10px 0 8px}
 #ees-work-panel.ew-vd .ew-run-nav>span{flex:1}
 #ees-work-panel.ew-vd .ew-run-back{display:inline-flex;align-items:center;gap:6px;min-width:0;min-height:32px;padding:4px 8px;border:0;border-radius:6px;background:transparent;font-size:14px;line-height:20px;font-weight:500;color:var(--ees-text-strong)}
@@ -1200,7 +1199,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-summary-actions{gap:8px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-summary-actions>button{font-size:12px;min-height:0;padding:6px 11px;}
 /* Job detail: same plane as stages, with intentional borders only on controls. */
-#ees-work-designer:not([data-author-tab=tools]) .ew-job-detail{--ees-text-tertiary:var(--ees-text-tertiary);gap:0;margin-top:24px;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-job-detail{gap:0;margin-top:24px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-detail-header{gap:6px;min-height:30px;margin-bottom:24px;font-size:12px;line-height:18px;color:var(--ees-text-tertiary);}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-field-label{display:inline;font-size:12px;line-height:18px;font-weight:500;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-job-field-required{margin-left:5px;font-size:11px;line-height:18px;font-weight:400;color:var(--ees-text-tertiary);}

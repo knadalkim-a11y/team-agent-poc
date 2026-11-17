@@ -8,7 +8,7 @@
  "before": "evals/artifacts/workspace-product-step3-20261117 holds the same workspace screens with the previous colours",
  "product": {
   "program": "0.11.3+ees.14",
-  "wheel_sha256": "9c2a4efc0b5b951f4ceeec6d438b395ef076126cc3d7febc4a64cebd6d8dfb2c",
+  "wheel_sha256": "290c7c39375e5edc724e914392216d28d80ea38ffa98cade49fe79079bb41594",
   "built_from": "the source patch and branding/ees sources of the commit that last changed this file (all build inputs matched the build manifest before committing), Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0, npm 10.9.2",
   "server": "tests/native_ui_fixture.py: the built frontend with synthetic sign-in, chat and model, and the real workflow service on a temporary database",
   "taken_by": "tests/test_ees_work_figma_authoring_native.py: test_wide_work_area_keeps_the_procedure_list_beside_the_opened_procedure; tests/test_ees_api_catalog_native.py: test_wide_work_area_keeps_the_api_list_beside_the_opened_api; tests/test_ees_source_shell_native.py: test_wide_work_area_keeps_the_asset_list_beside_the_opened_item and test_figma_native_asset_pages_render_real_entities_inside_the_three_panel_shell; tests/test_ees_work_figma_runtime_native.py: test_operations_stage_actual_jobs_header_and_judgment_menu_at_two_widths",
@@ -31,7 +31,7 @@
    ]
   },
   "product-WS3-WS5-1920.png": {
-   "sha256": "dd59230c9abc59b6360206056ca497715c5e85e04db5d51da32bfc8100dfc0c3",
+   "sha256": "fc6705ad47e6f1aebb2fa4e2d812a5fed12f17761087c2bb0abc09737a895f3e",
    "size": [
     1920,
     1080
@@ -45,14 +45,14 @@
    ]
   },
   "product-WS7-chat-docked-1920.png": {
-   "sha256": "fe9c59b37b00dcb036f0fe0d9b2ba915956549038843ae9b1a9b5a343b57d968",
+   "sha256": "7daa0716eb317a3bad0aeecec6d6d956b753a8fa9109d30100ec6e766bcd34f2",
    "size": [
     1920,
     1080
    ]
   },
   "product-run-stage-1920.png": {
-   "sha256": "8409d754eb74ddcab55c27cd14524eeb1462ded08ccfb8cf869aaa79aeb34cb6",
+   "sha256": "3ec3fd94cc06b13e0ffe32f4823a3b8092eb76e4948c70c6899da371f31a6a8b",
    "size": [
     1920,
     1080

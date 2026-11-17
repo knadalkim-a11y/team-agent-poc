@@ -191,6 +191,16 @@ test('visible message reference hosts retain click handling across work renders 
  probe.clearMessageReferences();probe.bindHosts();assert.equal(handlers.has('click'),false);assert.equal(host.innerHTML,'');
 });
 
+test('style sheets never define a custom property as itself',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ // `--name:var(--name)` is a cycle: the property becomes invalid there and every use of it falls back to the inherited value.
+ for(const file of ['../branding/ees/ui/ees-work-launcher.css','../branding/ees/ui/chat-theme.css','../frontend/patches/0001-ees-native-hooks.patch']){
+  const text=fs.readFileSync(path.join(__dirname,file),'utf8');
+  const cycles=[...text.matchAll(/(--[a-z0-9-]+)\s*:\s*var\(\s*(--[a-z0-9-]+)\s*[,)]/g)].filter(found=>found[1]===found[2]).map(found=>found[0]);
+  assert.deepEqual(cycles,[],file);
+ }
+});
+
 test('A4a applied input footer keeps the Figma surface spacing and Korean word wrapping scoped to its bar',()=>{
  const fs=require('node:fs'),path=require('node:path'),css=fs.readFileSync(path.join(__dirname,'../branding/ees/ui/ees-work-launcher.css'),'utf8');
  const rule=selector=>{const start=css.indexOf(selector+'{');assert.notEqual(start,-1,'Missing A4a scoped rule: '+selector);return Object.fromEntries(css.slice(start+selector.length+1,css.indexOf('}',start)).split(';').filter(Boolean).map(item=>item.split(':')));};
