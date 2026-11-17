@@ -1971,8 +1971,8 @@ GitHub URL에 저장된 기존 Git 프록시 설정을 API·artifact 다운로�
 
 실행은 다음 순서입니다.
 
-1. origin이 지정 HTTPS 저장소이고 브랜치가 main이며 추적 파일에 로컬 수정이 없는지 확인합니다. main을 fetch하고 그 커밋의 성공한 EES delivery CI를 확인한 뒤 fast-forward합니다. 래퍼가 바뀌면 갱신된 Python 코드로 이어서 실행합니다.
-2. 새 main과 프로그램 빌드 입력이 같은 조상 커밋 중 가장 최근의 유효한 프로그램 artifact를 선택합니다. 임의의 최신 ZIP·실패한 CI·Agent Pack 전용 ZIP으로 대체하지 않습니다. 해당 프로그램이 없거나 만료됐다면 관리자가 Actions의 **EES delivery → Run workflow → main → include_branding=true**로 생성하고 성공 뒤 다시 실행합니다. Upgrade가 workflow를 자동 실행하거나 쓰기 토큰을 요구하지 않습니다.
+1. origin이 지정 HTTPS 저장소이고 브랜치가 main이며 추적 파일에 로컬 수정이 없는지 확인합니다. main을 fetch하고 그 커밋의 성공한 EES delivery CI를 확인한 뒤 fast-forward합니다. 2026-11-17부터 main의 검사는 자동으로 돌지 않으므로, 적용하기 전에 [전체 검사를 한 번 실행](#ci-scopes)해 둡니다. 래퍼가 바뀌면 갱신된 Python 코드로 이어서 실행합니다.
+2. 새 main과 프로그램 빌드 입력이 같은 조상 커밋 중 가장 최근의 유효한 프로그램 artifact를 선택합니다. 임의의 최신 ZIP·실패한 CI·Agent Pack 전용 ZIP으로 대체하지 않습니다. 해당 프로그램이 없거나 만료됐다면 관리자가 Actions의 **EES delivery → Run workflow → main**(범위 `full`·프로그램 포함은 기본값)으로 생성하고 성공 뒤 다시 실행합니다. Upgrade가 workflow를 자동 실행하거나 쓰기 토큰을 요구하지 않습니다.
 3. 바깥 artifact ZIP의 digest를 확인하고 안쪽 EES-demo ZIP을 자동 선택합니다. manifest·프로그램 해시·버전/의존성과 등록 상태를 확인한 뒤 기존 잠금·Stop/Apply/Start를 사용합니다. Python·의존성 전체 재설치와 데이터·키 재생성은 없습니다. Start의 정상 응답 확인은 기본 120초로 한 번만 수행합니다.
 4. 적용 기록과 현재 설치본이 일치하면 다운로드와 재시작을 생략합니다. 다른 커밋의 ZIP이라도 프로그램 wheel이 같으면 다시 시작하지 않습니다. 이 경우에도 현재 관리 프로세스·정상 응답을 확인하고, 정지/비정상이면 실패를 알리며 자동 복구하지 않습니다.
 
@@ -2449,7 +2449,23 @@ Resume은 정상 작업 잠금과 서버 종료·포트 검사를 유지합니�
 
 ### 검사와 전달물 생성
 
-관련 PR과 모든 main 변경에 Python 3.11 / Windows·Linux의 패키징 시험, 문서·diff 점검을 실행합니다. Upgrade가 정확한 main HEAD의 성공 CI를 요구하므로 main은 문서만 바뀌어도 검사합니다. main에서는 `EES-demo-<commit>.zip`을 Actions artifact로 생성합니다. Draft PR도 실제 제품 검사를 통과한 동일 wheel로 `ees-review-candidate-<PR head SHA>` 검토 ZIP을 만듭니다. 이 산출물은 병합/사내 실행 승인이 아니며 기본 Upgrade는 성공한 main CI만 선택합니다. Prompt·Skill 수정만 있으면 작은 Agent Pack 묶음만 만들며 브랜딩 자산·패키징 도구/검사·workflow가 바뀐 커밋에만 프로그램 wheel도 포함합니다. 프로그램을 다시 만들려면 Actions → **EES delivery → Run workflow → main → include_branding=true**를 선택합니다. 자동 검사에는 패키징, 배포 상태·백업, 고정 의존성의 오프라인 설치, 실제 합성 서버의 시작·정상 종료와 Upgrade의 선택/다운로드/실패 경계가 포함됩니다. Linux CI는 기본 Chrome에서 실제 wheel의 CSS·폰트와 기본 대화 구조의 fixture를 사용해 밝은/어두운/좁은 화면의 계산된 스타일도 확인합니다. 전체 WebUI 로그인·스트리밍 통합이나 사내 실제 화면 확인을 대신하지 않습니다.
+<a id="ci-scopes"></a>
+
+검사는 필요한 만큼만 돌립니다(2026-11-17 사용자 결정). 이전에는 관련 PR과 모든 main 변경마다 전체 검사를 실행했습니다.
+
+| 언제 | 실행되는 것 | 시작 방법 |
+|---|---|---|
+| PR을 열거나 고칠 때 | 빠른 검사: 시험 ID 감사, 문서 점검, 프로그램 빌드 없이 도는 Python·Node 시험 | 자동 |
+| 화면·Windows·설치/복구를 바꿔 확인이 필요할 때 | 고른 범위만: `browser`(실제 브라우저 화면), `linux`·`windows`(그 OS의 모든 묶음). 묶음 이름을 적으면 그 묶음만 | Actions → **EES delivery → Run workflow** → 작업 브랜치 선택 |
+| 사내에 적용하기 전 | 전체 검사(`full`)와 프로그램 ZIP 생성 | Actions → **EES delivery → Run workflow → main**(기본값 그대로) |
+
+- main에 병합해도 검사는 자동으로 돌지 않습니다. Upgrade는 정확한 main HEAD의 성공한 EES delivery 실행을 요구하므로, 문서만 바뀐 커밋이라도 적용 전에 main에서 전체 검사를 한 번 실행합니다.
+- main에서는 전체만 실행됩니다. 부분 범위를 고르면 계획 단계에서 거절되어 실패로 끝납니다. Upgrade가 main의 성공을 전체 검사 통과로 믿기 때문입니다.
+- 브랜치의 부분 실행은 그 브랜치의 최신 커밋을 검사하며 main과 합친 결과가 아닙니다. ZIP을 만들지 않고 배포 근거도 아닙니다.
+- 빠른 검사에서는 프로그램이 필요한 시험이 건너뛰어집니다. 그 시험은 전체 검사에서 필수입니다.
+- 범위별 작업과 묶음 이름은 `tests/ees_delivery_suite.py`의 `plan()`이 정합니다. `python tests/ees_delivery_suite.py --plan browser --suites native-compose`로 어떤 작업이 도는지 미리 볼 수 있습니다.
+
+전체 검사가 Python 3.11 / Windows·Linux의 패키징·설치·복구 시험과 실제 브라우저 검사를 모두 통과하면 `EES-demo-<commit>.zip`을 Actions artifact로 생성합니다. 브랜치에서 `browser`·`linux`·`full` 범위를 실행하면 실제 제품 검사를 통과한 동일 wheel로 `ees-review-candidate-<SHA>` 검토 ZIP도 만듭니다. 이 산출물은 병합/사내 실행 승인이 아니며 기본 Upgrade는 성공한 main 실행만 선택합니다. 전체 실행은 기본으로 프로그램 wheel을 포함합니다. Prompt·Skill만 바뀌어 작은 Agent Pack 묶음만 필요하면 실행할 때 `include_branding`을 끕니다. 전체 검사에는 패키징, 배포 상태·백업, 고정 의존성의 오프라인 설치, 실제 합성 서버의 시작·정상 종료와 Upgrade의 선택/다운로드/실패 경계가 포함됩니다. Linux CI는 기본 Chrome에서 실제 wheel의 CSS·폰트와 기본 대화 구조의 fixture를 사용해 밝은/어두운/좁은 화면의 계산된 스타일도 확인합니다. 전체 WebUI 로그인·스트리밍 통합이나 사내 실제 화면 확인을 대신하지 않습니다.
 
 프로그램 포함 artifact는 `ees-program-<40자리 SHA>`로 **90일**, Agent Pack 전용은 `ees-demo-<40자리 SHA>`로 **14일** 보존합니다. 한 실행에서는 둘 중 해당하는 artifact 한 개만 만들며 안쪽 ZIP 이름은 계속 `EES-demo-<commit>.zip`입니다. Upgrade는 이름으로 프로그램 산출물을 구분하고 내용도 검증합니다. 적용할 ZIP과 직전 배포 ZIP은 승인된 내부 위치에 보관합니다. ZIP의 `manifest.json`에 원본 커밋·파일별 SHA-256/크기를 기록하며 브랜딩 포함 시 그 manifest도 넣습니다. 배포 도구는 Git 추적 파일 중 정한 경로만 포함하고 `.env`·DB·키·비추적 파일을 제외합니다. 운영 데이터나 사용자 작성물을 Git/전달 폴더에 넣지 않습니다.
 

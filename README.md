@@ -99,7 +99,7 @@ flowchart TD
 - **규칙은 한 곳에 둡니다.** 작업 범위, 검증, 종료 절차는 [AGENTS.md](AGENTS.md)가 원본이고 현재 상태는 [STATUS](docs/STATUS.md)가 원본입니다.
 - **화면은 목업부터 만듭니다.** 눌러 볼 수 있는 HTML 목업과 Figma 시안을 먼저 확인하고, 사람이 구현할 판을 지정하면 제품을 그 판과 같은 창 크기·상태에서 대조합니다. [개발 순서](AGENTS.md#design-mock-first)
 - **실패를 지우지 않습니다.** 최초 실패, 재시도 이유, 원인 판단과 조치를 [평가 기록](evals/scenarios.md#evidence-index)에 남기고, 개발 환경의 자동 검증과 사내 실제 확인을 구분합니다.
-- **CI가 제품을 빌드해 검사합니다.** 고정 소스를 빌드해 실제 브라우저로 화면을 검사하고, Linux와 Windows에서 설치와 이전 버전 복원을 검사합니다. [EES delivery](.github/workflows/ees-delivery.yml)
+- **CI가 제품을 빌드해 검사합니다.** 고정 소스를 빌드해 실제 브라우저로 화면을 검사하고, Linux와 Windows에서 설치와 이전 버전 복원을 검사합니다. PR에서는 빌드 없는 빠른 검사만 자동으로 돌고, 이 전체 검사는 사내 배포 전에 직접 실행합니다. [EES delivery](.github/workflows/ees-delivery.yml) · [범위와 실행 방법](docs/03-openwebui-native-agent.md#ci-scopes)
 
 ## 현재 단계
 
