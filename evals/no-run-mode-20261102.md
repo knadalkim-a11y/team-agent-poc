@@ -151,3 +151,27 @@ CI456 (`77ca5cd`)의 실제 전체 제품과 새 미완성 게시/360px 흐름�
   - 옮긴 뒤 CRLF 크기는 4차 UI 기록 1,044,619바이트(여유 3,957), 새 파일 11,914바이트, 시나리오 35,633바이트 여유다. 저장소 문서 가운데 CRLF로 한도를 넘는 것은 없다.
   - Windows CI는 아직 돌지 않았다(PR 없음).
 - **남은 항목:** 4차 UI 기록의 여유가 4KB가 안 된다. 새 기록은 주제별 파일에 쓴다. 넘으면 이제 로컬 점검에서 바로 오류가 난다.
+
+<a id="ci-on-demand-20261117"></a>
+
+## CI를 필요한 만큼만 실행 (2026-11-17)
+
+- **요청·결정:** 사용자가 “CI는 최소화하고 필요할 때만 특정해서 실행”하기로 정하고 트리거 변경을 지시했다. main `3b7c653`에서 시작했고 관련 열린 PR은 없었다. 같은 시각 다른 세션이 업무 절차 등록 화면을 고치고 있어 그 파일(`ees-work-designer.js`, 작성 화면 시험)은 건드리지 않았다.
+- **바꾸기 전 측정:** PR #147의 [실행 576](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44055042593)은 작업 40개, 작업 시간 합계 104.2분, 시작부터 끝까지 16.7분이었다. 가장 긴 경로는 프런트엔드 빌드 4.3분 뒤의 native-compose 10.6분과 Windows contracts 10.5분이다. README만 고친 PR #141도 같은 전체 검사를 돌았고, PR과 병합 뒤 main에서 한 번씩 두 번 실행됐다.
+- **바꾼 것:**
+  - PR에서는 빠른 검사만 자동으로 돈다. 시험 ID 감사, 문서 점검, 프로그램 빌드 없이 도는 services·platform 묶음과 계약 모듈 두 개(`test_ees_workflow_execution.py`, `test_ees_work_authoring.py`)다. 변경 경로 목록은 없앴고 모든 PR에서 돈다.
+  - main push의 자동 실행을 없앴다. 그 밖의 검사는 Run workflow에서 범위(`full`·`quick`·`browser`·`linux`·`windows`)와 묶음 이름을 골라 실행한다.
+  - main에서는 전체만 실행된다. 사내 Upgrade(`ees_update_download.py`)가 main의 성공한 실행을 전체 검사 통과로 믿으므로, main에서 부분 범위를 고르면 계획 단계가 실패로 끝난다. 프로그램 ZIP은 전체 범위에서만 만들고 기본으로 프로그램 wheel을 포함한다.
+  - 범위별 작업, 묶음별 자료, 시간 제한을 `tests/ees_delivery_suite.py`의 `plan()` 한 곳으로 옮겼다. 워크플로에 따로 적혀 있던 묶음 목록과 자료 목록은 없앴다. 마지막 집계 작업은 모든 작업이 계획한 결과(성공 또는 건너뜀)로 끝났는지 비교한다.
+- **빠른 검사에서 빠지는 것:** 프로그램 wheel이 필요한 시험은 건너뛴다. 로컬 실행 기준 services 3개, platform 98개, 계약 모듈 두 개에서 8개다. contracts 묶음의 나머지 네 모듈과 브라우저·설치·복구 묶음은 빠른 검사에 없다. 모두 전체 검사에서는 필수다.
+- **검증:**
+  - 로컬(Linux, Python 3.11.18, Node 22.23.4): 빠른 검사 통과(130초, services 649 통과, platform 653 통과), 계획 단위 시험 8개를 더한 `test_ees_delivery_suite` 19개 통과, 시험 ID 감사 오류 0, 문서 점검 오류 0.
+  - GitHub, 작업 브랜치 `45ee699`: 빠른 검사 [실행 581](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44062928871) 성공, 2분 51초. 나머지 작업 8종은 건너뜀으로 끝났다.
+  - GitHub, 같은 커밋: `browser` 범위에 `native-work` 묶음만 고른 [실행 582](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44062934057) 성공, 7분 43초. 프런트엔드 빌드, 프로그램 준비, native-work, 집계만 실행됐고 ZIP 작업은 건너뛰었다.
+  - 전체 범위 실행 결과는 이 기록을 올린 커밋에서 실행한 뒤 아래에 적는다.
+- **정리한 것:** 어디서도 불러오지 않는 시험 도구 다섯 개(1,707줄)를 지웠다. `tests/ees_work_c_phase1_app.py`, `ees_work_c_visual_fullapp.py`, `ees_work_c_visual_interactions.py`, `ees_work_c_visual_compare.py`, `ees_source_navigation_baseline.py`다. CI와 다른 시험, 스크립트에서 참조가 없고 과거 기록에 이름만 남아 있다. 9월 C 화면 수동 게이트와 특정 옛 커밋의 대조 게이트였고 지금은 `ees_work_integrated_app.py`가 전체 제품 검사를 맡는다. 원문은 커밋 `45ee699`에 있다.
+- **미확인:**
+  - PR 이벤트로 시작되는 실행은 PR을 만들지 않아 확인하지 못했다. 수동 `quick` 실행과 같은 작업을 쓴다.
+  - GitHub 브랜치 보호에 필수 검사 이름이 걸려 있는지는 확인할 수 없었다. 집계 작업 이름 `Delivery checks (ubuntu-24.04)`는 모든 범위에서 유지하고, `(windows-2022)`는 전체 범위에서만 나온다.
+  - 사내 Upgrade는 실행하지 않았다. 워크플로 파일이 프로그램 빌드 입력이라, 병합 뒤 첫 사내 적용 전에 main에서 전체 검사를 한 번 실행해 새 프로그램 ZIP을 만들어야 한다.
+- **재발 방지 연결:** 운영 방법은 [가이드의 검사 범위](../docs/03-openwebui-native-agent.md#ci-scopes), 판단 기준은 [AGENTS의 CI 실행 비용 관리](../AGENTS.md#ci-cost)에 반영했다.
