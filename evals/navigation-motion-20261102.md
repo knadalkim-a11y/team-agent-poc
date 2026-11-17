@@ -139,7 +139,7 @@
 
 <a id="narrow-viewport-load-20261117"></a>
 
-## 2026-11-17 · 부하가 있을 때 좁은 창 전환 시험 두 개가 가끔 실패함(원인 미확인)
+## 2026-11-17 · 창 크기·초점 전환 시험이 CI 첫 시도에서 가끔 실패함(원인 미확인)
 
 - **증상:** [PR #143](https://github.com/knadalkim-a11y/team-agent-poc/pull/143)을 병합한 main `89247a7`의 [실행 566](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/43989451352) 첫 시도에서 Ubuntu native-compose가 두 시험으로 실패했다. Chrome 157.0.8103.50.
   - `test_c3_overlay_panel_closing_releases_hit_testing_and_restores_focus`: 480px에서 대화를 열 때 업무 영역 폭을 차지한 프레임이 있었다(`Opening narrow chat should never take space away from the work surface`).
@@ -151,7 +151,13 @@
   - 가설: 시험 도우미가 `innerWidth`만 기다리고 화면 틀이 resize 이벤트로 새 폭을 반영하기 전에 다음 조작을 한다([2026-11-05의 같은 유형](#q1-viewport-settle-20261105) 참고). 도우미에 두 프레임 대기를 넣고 같은 부하로 12번 돌렸더니 2번 실패했다. 가설이 맞다는 증거를 얻지 못해 그 변경은 되돌렸다.
   - 1단계 이전 코드(main `a11e417`과 그때 빌드한 wheel)로 같은 부하에서 12번 돌렸더니 1번 실패했다.
 - **원인 판단:** 1단계 변경과 무관하게 전부터 있던, 실행 환경이 느릴 때만 드러나는 실패다. 시험 쪽 대기 누락인지 제품이 한 프레임 동안 잘못된 배치를 그리는 것인지는 가리지 못했다. 둘째 시험은 따로 재현하지 않았다.
-- **남은 항목:** 원인 미확인. 다음에 같은 두 시험이 CI에서 실패하면 그 실행의 프레임 기록(`c3-overlay-close-reopen` 증거)에서 폭을 차지한 프레임의 대화 상태 값을 먼저 본다. 이 항목만으로 재진단을 시작하지 않는다.
+- **남은 항목:** 원인 미확인. 재실행으로 넘어가는 일이 되풀이되면 병합 판단의 근거가 약해지므로, 이 작업의 시험들이 상태 변화를 기다리는 방식을 따로 조사할지 사용자가 정한다. 다음에 첫째 두 시험이 CI에서 실패하면 그 실행의 프레임 기록(`c3-overlay-close-reopen` 증거)에서 폭을 차지한 프레임의 대화 상태 값을 먼저 본다. 이 항목만으로 재진단을 시작하지 않는다.
+- **같은 날 두 번째 발생:** [PR #142](https://github.com/knadalkim-a11y/team-agent-poc/pull/142)를 병합한 main `5efd0a1`의 [실행 568](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44018898035) 첫 시도에서도 Ubuntu native-compose가 실패했다. 이번에는 다른 두 시험이다.
+  - `test_c3_dialog_and_help_close_preserve_draft_and_release_modal_blocker`: 대화상자를 닫은 뒤 초점이 복사 단추(`[data-author-action=copy]`)로 돌아오기를 기다리다 시간이 넘었다.
+  - `test_native_admin_dialog_contains_keyboard_focus`: 설정 메뉴에 관리자 항목이 남아 있었다(`True is not false`).
+  - 같은 파일의 PR 실행 567은 이 작업을 통과했다. 실패한 작업만 한 번 다시 돌려 통과했다.
+  - 이어진 [PR #144](https://github.com/knadalkim-a11y/team-agent-poc/pull/144) 병합 뒤의 main `93ec537` [실행 570](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44021112790)은 첫 시도에 통과했다.
+- **하루 동안의 집계(2026-11-17):** native-compose는 main 푸시 실행 세 번 가운데 두 번(566, 568) 첫 시도에 실패했고 PR 실행 세 번(565, 567, 569)은 통과했다. 실패한 시험 네 개는 모두 창 크기나 초점이 바뀐 직후의 상태를 보는 시험이고 서로 다르다. 워크플로는 푸시와 PR에서 같은 작업을 돌린다. 표본이 작아 푸시 실행에서만 생긴다고 볼 근거는 없다.
 - **재발 방지:** 반영하지 않았다. 원인을 모른 채 대기 시간을 늘리거나 단언을 느슨하게 하면 실제 결함을 가릴 수 있다.
 
 <a id="workspace-heading-clip-20261105"></a>
