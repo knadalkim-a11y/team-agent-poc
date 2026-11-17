@@ -1,0 +1,83 @@
+{
+ "date": "2026-11-17",
+ "what": "Product screens of workspace design mock 17 revision 2, step 3 (the list beside the opened item when the work area is 1264px or wider), taken from the running product",
+ "mock": {
+  "file": "docs/mockups/ees-work/design-mock-17-workspace.html",
+  "commit": "d6da045",
+  "screens": {
+   "product-WS1-WS2-1920.png": "WS1-WS2-wide.png",
+   "product-WS3-WS4-1920.png": "WS3-WS4-wide.png",
+   "product-WS3-WS5-1920.png": "WS3-WS5-wide.png",
+   "product-WS6-WS7-1920.png": "WS6-WS7-wide.png",
+   "product-WS8-WS9-1920.png": "WS8-WS9-wide.png"
+  },
+  "captures": "docs/mockups/ees-work/workspace-screens-20261116"
+ },
+ "product": {
+  "program": "0.11.3+ees.14",
+  "wheel_sha256": "80266c50b81e6abadf073106663fdf745fda5b55bf7557f1f1bf8075a6cabc75",
+  "built_from": "the source patch and branding/ees sources of the commit that last changed this file (all build inputs matched the build manifest before committing), Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0, npm 10.9.2",
+  "server": "tests/native_ui_fixture.py: the built frontend with synthetic sign-in, chat and model, and the real workflow service on a temporary database",
+  "taken_by": {
+   "1920": "tests/test_ees_work_figma_authoring_native.py: test_wide_work_area_keeps_the_procedure_list_beside_the_opened_procedure; tests/test_ees_api_catalog_native.py: test_wide_work_area_keeps_the_api_list_beside_the_opened_api; tests/test_ees_source_shell_native.py: test_wide_work_area_keeps_the_asset_list_beside_the_opened_item",
+   "1366": "a one-off script outside the repository that opens the same screens with the same synthetic data, resizes the window and closes the chat"
+  },
+  "browser": "Chromium 153 headless, device scale factor 1",
+  "data": "synthetic procedures, API specifications, work instructions and reference documents created or served by the tests"
+ },
+ "state": {
+  "1920": "sidebar 256px open, chat closed, work area 1664px",
+  "1366": "sidebar compact (56px), chat closed, work area 1310px"
+ },
+ "files": {
+  "product-WS1-WS2-1920.png": {
+   "sha256": "50b20a6913f7d432597aa57aae9d4978243f22a163243e1eb259b7112b831bb1",
+   "size": [
+    1920,
+    1080
+   ]
+  },
+  "product-WS3-WS4-1920.png": {
+   "sha256": "d1985176bf36bfcab0293103c9b09a8155c0f2efe918cce863145bb7d968ece9",
+   "size": [
+    1920,
+    1080
+   ]
+  },
+  "product-WS3-WS5-1366.png": {
+   "sha256": "847939f8f4edce301e3e8ad9ae56aacfc91e3d41c374cf074f9789a37e30ada9",
+   "size": [
+    1366,
+    768
+   ]
+  },
+  "product-WS3-WS5-1920.png": {
+   "sha256": "a4b528fc4cdac461c2a0d0622f71ed07935a434b3965a09d4b374a31befa541c",
+   "size": [
+    1920,
+    1080
+   ]
+  },
+  "product-WS6-WS7-1366.png": {
+   "sha256": "1ad22f4b145681af379dc6ca82d1fe538d90c875726770ef13f0b1ffbcc7388f",
+   "size": [
+    1366,
+    768
+   ]
+  },
+  "product-WS6-WS7-1920.png": {
+   "sha256": "96e211c1c877b89842d897051b7f7b6c942f33c445272f0e03ea0926b9186b56",
+   "size": [
+    1920,
+    1080
+   ]
+  },
+  "product-WS8-WS9-1920.png": {
+   "sha256": "13c55d870093ec522d721a728c54b59b201edce453638381fb83122ca4a50a0e",
+   "size": [
+    1920,
+    1080
+   ]
+  }
+ }
+}

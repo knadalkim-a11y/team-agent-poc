@@ -1872,19 +1872,19 @@ index 9234ec7..27056b0 100644
  	}
  
 diff --git a/src/lib/components/common/SplitCreateButton.svelte b/src/lib/components/common/SplitCreateButton.svelte
-index 00a701f..7291b5d 100644
+index 00a701f..28bd229 100644
 --- a/src/lib/components/common/SplitCreateButton.svelte
 +++ b/src/lib/components/common/SplitCreateButton.svelte
 @@ -22,6 +22,8 @@
  
  	export let actions: SplitCreateAction[] = [];
  	export let label = 'Create';
-+	// 'primary' is the one main action of a list toolbar.
++	// 'primary' is the one main action of a list toolbar; 'outline' is that action in the list shown beside an opened item.
 +	export let variant = '';
  
  	const i18n = getContext<Writable<i18nType>>('i18n');
  
-@@ -50,7 +52,10 @@
+@@ -50,7 +52,12 @@
  
  {#if visibleActions.length === 1}
  	<button
@@ -1892,17 +1892,21 @@ index 00a701f..7291b5d 100644
 +		data-ees-create
 +		class={variant === 'primary'
 +			? 'focus-ring h-9 shrink-0 rounded-sm bg-gray-900 px-3.5 text-sm text-white transition hover:bg-gray-850 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white'
++			: variant === 'outline'
++				? 'focus-ring h-9 shrink-0 rounded-sm border border-gray-900 bg-white px-3.5 text-sm text-gray-900 transition hover:bg-gray-50 dark:border-gray-100 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-850'
 +			: 'focus-ring ml-1 rounded-lg bg-gray-50 px-2.5 py-1 text-xs text-gray-900 transition ring-1 ring-gray-200 hover:bg-gray-100 dark:bg-gray-850 dark:text-gray-100 dark:ring-gray-800 dark:hover:bg-gray-800'}
  		type="button"
  		on:click={() => {
  			runAction(primaryAction);
-@@ -60,10 +65,15 @@
+@@ -60,10 +67,19 @@
  	</button>
  {:else if visibleActions.length > 1}
  	<div
 -		class="ml-1 flex overflow-hidden rounded-lg bg-gray-50 text-xs text-gray-900 transition ring-1 ring-gray-200 dark:bg-gray-850 dark:text-gray-100 dark:ring-gray-800"
 +		class={variant === 'primary'
 +			? 'flex h-9 shrink-0 overflow-hidden rounded-sm text-sm'
++			: variant === 'outline'
++				? 'flex h-9 shrink-0 overflow-hidden rounded-sm border border-gray-900 text-sm dark:border-gray-100'
 +			: 'ml-1 flex overflow-hidden rounded-lg bg-gray-50 text-xs text-gray-900 transition ring-1 ring-gray-200 dark:bg-gray-850 dark:text-gray-100 dark:ring-gray-800'}
  	>
  		<button
@@ -1910,17 +1914,21 @@ index 00a701f..7291b5d 100644
 +			data-ees-create
 +			class={variant === 'primary'
 +				? 'focus-ring bg-gray-900 px-3.5 text-white transition hover:bg-gray-850 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white'
++				: variant === 'outline'
++					? 'focus-ring bg-white px-3.5 text-gray-900 transition hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-850'
 +				: 'focus-ring px-2.5 py-1 transition hover:bg-gray-100 dark:hover:bg-gray-800'}
  			on:click={() => {
  				runAction(primaryAction);
  			}}
-@@ -73,7 +83,9 @@
+@@ -73,7 +89,11 @@
  
  		<Dropdown bind:show={showMenu} align="end" sideOffset={6}>
  			<button
 -				class="focus-ring flex items-center border-l border-gray-200 px-1.5 py-1 transition hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-gray-800"
 +				class={variant === 'primary'
 +					? 'focus-ring flex h-9 items-center border-l border-white/30 bg-gray-900 px-2 text-white transition hover:bg-gray-850 dark:border-gray-300 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white'
++					: variant === 'outline'
++						? 'focus-ring flex h-full items-center border-l border-gray-900 bg-white px-2 text-gray-900 transition hover:bg-gray-50 dark:border-gray-100 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-850'
 +					: 'focus-ring flex items-center border-l border-gray-200 px-1.5 py-1 transition hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-gray-800'}
  				aria-label={$i18n.t('Open create menu')}
  			>
@@ -3525,11 +3533,24 @@ index 0000000..79863d4
 +</style>
 diff --git a/src/lib/components/ees/assets.ts b/src/lib/components/ees/assets.ts
 new file mode 100644
-index 0000000..a163fce
+index 0000000..ff465a0
 --- /dev/null
 +++ b/src/lib/components/ees/assets.ts
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,35 @@
 +// Shared by the work instruction and reference document screens.
++import { writable } from 'svelte/store';
++
++// An opened item reports what was saved so that the list shown beside it stays current.
++export type EesAssetChange = { kind: 'skill' | 'knowledge'; id: string; name?: string; description?: string; access_grants?: any[] };
++export const eesAssetChange = writable<EesAssetChange | null>(null);
++export const eesApplyAssetChange = <T extends { id: string }>(items: T[] | null, change: EesAssetChange | null, kind: string): T[] | null =>
++	!items || !change || change.kind !== kind
++		? items
++		: items.map((item) => {
++				if (item.id !== change.id) return item;
++				const { kind: _kind, id: _id, ...fields } = change;
++				return { ...item, ...fields };
++			});
 +type Grant = { principal_type?: string; principal_id?: string; permission?: string };
 +
 +// Who can read an asset. The access dialog stays the place to change it.
@@ -4229,7 +4250,7 @@ index 007df31..ecdbd66 100644
 + #sidebar[data-compact=true] :global(.ew-empty),#sidebar[data-compact=true] :global(.ew-recent){display:none}
  </style>
 diff --git a/src/lib/components/workspace/Knowledge.svelte b/src/lib/components/workspace/Knowledge.svelte
-index 479efc6..69f2125 100644
+index 479efc6..52d0444 100644
 --- a/src/lib/components/workspace/Knowledge.svelte
 +++ b/src/lib/components/workspace/Knowledge.svelte
 @@ -34,6 +34,10 @@
@@ -4238,23 +4259,64 @@ index 479efc6..69f2125 100644
  	import Loader from '../common/Loader.svelte';
 +	import SplitCreateButton from '../common/SplitCreateButton.svelte';
 +	import EesAccessTag from '../ees/EesAccessTag.svelte';
-+	import { eesShortDate } from '../ees/assets';
++	import { eesShortDate, eesAssetChange, eesApplyAssetChange } from '../ees/assets';
 +	import { eesSessionReady } from '../ees/state';
  
  	type KnowledgeListItem = {
  		id: string;
-@@ -72,6 +76,10 @@
+@@ -51,6 +55,9 @@
+ 
+ 	export let showCreateOnMount = false;
+ 	export let createModalCloseHref = '';
++	// The list shown beside opened reference documents: name and access only, with the opened row marked.
++	export let pane = false;
++	export let selectedId = '';
+ 
+ 	let loaded = false;
+ 	let showDeleteConfirm = false;
+@@ -72,9 +79,23 @@
  
  	let allItemsLoaded = false;
  	let itemsLoading = false;
 +	// The whole count is kept while a search narrows the list: "4 of 12".
 +	let unfilteredTotal: number | null = null;
-+	const columns =
-+		'grid grid-cols-[minmax(0,1fr)_auto_2rem] items-center gap-x-3 px-2 @2xl:grid-cols-[minmax(0,1fr)_7.5rem_8.5rem_4rem_2rem]';
++	$: columns = pane
++		? 'grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 px-2'
++		: 'grid grid-cols-[minmax(0,1fr)_auto_2rem] items-center gap-x-3 px-2 @2xl:grid-cols-[minmax(0,1fr)_7.5rem_8.5rem_4rem_2rem]';
++	let actions = [];
++	// The workspace layout clears the shared actions on every path change, so the list beside an item keeps its own.
++	$: if (loaded && !pane) workspaceActions.set(actions);
++	// A save in the opened item updates its row here; the value already in the store when this list mounts is old.
++	let changeArmed = false;
++	const stopAssetChange = eesAssetChange.subscribe((change) => {
++		if (pane && changeArmed) items = eesApplyAssetChange(items, change, 'knowledge');
++	});
++	changeArmed = true;
  
  	$: if (loaded) {
- 		workspaceActions.set([
-@@ -153,6 +161,7 @@
+-		workspaceActions.set([
++		actions = [
+ 			{
+ 				id: 'knowledge-new',
+ 				label: $i18n.t('Create'),
+@@ -82,7 +103,7 @@
+ 					showCreateModal = true;
+ 				}
+ 			}
+-		]);
++		];
+ 	}
+ 
+ 	const handleSearchInput = () => {
+@@ -94,6 +115,7 @@
+ 
+ 	onDestroy(() => {
+ 		clearTimeout(searchDebounceTimer);
++		stopAssetChange();
+ 	});
+ 
+ 	$: if (
+@@ -153,6 +175,7 @@
  		if (res) {
  			console.log(res);
  			total = res.total;
@@ -4262,7 +4324,22 @@ index 479efc6..69f2125 100644
  			workspaceCounts.update((counts) => ({ ...counts, knowledge: total }));
  			const pageItems: KnowledgeListItem[] = res.items ?? [];
  
-@@ -310,48 +319,49 @@
+@@ -288,9 +311,11 @@
+ 	<!-- LICENSE covers this Open WebUI browser-title identifier.
+ 	Do not alter, remove, obscure, or replace it except as LICENSE permits:
+ 	https://docs.openwebui.com/license. -->
+-	<title>
+-		{$i18n.t('Knowledge')} / {$WEBUI_NAME}
+-	</title>
++	{#if !pane}
++		<title>
++			{$i18n.t('Knowledge')} / {$WEBUI_NAME}
++		</title>
++	{/if}
+ </svelte:head>
+ 
+ {#if loaded}
+@@ -310,48 +335,49 @@
  		/>
  	</Modal>
  
@@ -4343,14 +4420,14 @@ index 479efc6..69f2125 100644
  					<ViewSelector
  						bind:value={viewOption}
  						align="end"
-@@ -376,21 +386,28 @@
+@@ -376,21 +402,28 @@
  						}}
  					/>
  				</div>
 +				{#if $eesSessionReady}
 +					<SplitCreateButton
-+						actions={$workspaceActions}
-+						variant="primary"
++						{actions}
++						variant={pane ? 'outline' : 'primary'}
 +						label={$i18n.t('EES.Knowledge.New', { defaultValue: 'New reference documents' })}
 +					/>
 +				{/if}
@@ -4376,7 +4453,7 @@ index 479efc6..69f2125 100644
  							{#if sortKey === 'name'}
  								{#if sortDirection === 'asc'}
  									<ChevronUp className="size-2" />
-@@ -399,15 +416,14 @@
+@@ -399,15 +432,14 @@
  								{/if}
  							{/if}
  						</button>
@@ -4396,11 +4473,11 @@ index 479efc6..69f2125 100644
  							{#if sortKey === 'updated_at'}
  								{#if sortDirection === 'asc'}
  									<ChevronUp className="size-2" />
-@@ -416,111 +432,94 @@
+@@ -416,111 +448,97 @@
  								{/if}
  							{/if}
  						</button>
-+						<span></span>
++						{#if !pane}<span></span>{/if}
  					</div>
  
 -					<div class="grid gap-y-0.5">
@@ -4416,6 +4493,7 @@ index 479efc6..69f2125 100644
 +						{@const metaPreview = getKnowledgeMetaPreview(item)}
 +						<div
 +							data-ees-asset-row
++							aria-current={pane && item.id === selectedId ? 'true' : undefined}
 +							class="group {columns} min-h-14 cursor-pointer border-b border-gray-200 py-2 text-left hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-850"
 +							role="button"
 +							tabindex="0"
@@ -4533,7 +4611,7 @@ index 479efc6..69f2125 100644
 +							</div>
 +
 +							<div class="min-w-0"><EesAccessTag grants={item.access_grants} /></div>
-+
+ 
 +							<div
 +								class="hidden min-w-0 truncate text-[0.8125rem] text-gray-600 @2xl:block dark:text-gray-400"
 +								title={item?.user?.email ?? ''}
@@ -4549,7 +4627,8 @@ index 479efc6..69f2125 100644
 +							>
 +								{eesShortDate(item.updated_at)}
 +							</div>
- 
++
++							{#if !pane}
 +							<div class="flex min-w-0 items-center justify-end">
  								{#if item?.write_access || $user?.role === 'admin'}
 -									<div class="ml-2 flex shrink-0 flex-row items-center self-center">
@@ -4580,12 +4659,13 @@ index 479efc6..69f2125 100644
  							</div>
 -						{/each}
 -					</div>
++							{/if}
 +						</div>
 +					{/each}
  				</div>
  
  				{#if !allItemsLoaded}
-@@ -538,14 +537,15 @@
+@@ -538,14 +556,15 @@
  					</Loader>
  				{/if}
  			{:else}
@@ -4628,7 +4708,7 @@ index 9734387..37a7820 100644
  	const submitHandler = async () => {
  		loading = true;
 diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte
-index de04f3e..2d35417 100644
+index de04f3e..7b8f996 100644
 --- a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte
 +++ b/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte
 @@ -25,6 +25,7 @@
@@ -4639,17 +4719,18 @@ index de04f3e..2d35417 100644
  		renameFileById
  	} from '$lib/apis/files';
  	import {
-@@ -54,6 +55,9 @@
+@@ -54,6 +55,10 @@
  	import Spinner from '$lib/components/common/Spinner.svelte';
  	import Tooltip from '$lib/components/common/Tooltip.svelte';
  	import Files from './KnowledgeBase/Files.svelte';
 +	import EesAssetUsage from '$lib/components/ees/EesAssetUsage.svelte';
 +	import EesAccessTag from '$lib/components/ees/EesAccessTag.svelte';
++	import { eesAssetChange } from '$lib/components/ees/assets';
 +	import { eesSnapshot, eesSessionReady } from '$lib/components/ees/state';
  	import AddFilesPlaceholder from '$lib/components/AddFilesPlaceholder.svelte';
  
  	import AddContentMenu from './KnowledgeBase/AddContentMenu.svelte';
-@@ -112,6 +116,39 @@
+@@ -112,6 +117,39 @@
  	let selectedFile = null;
  	let selectedFileContent = '';
  	let loadingFileContent = false;
@@ -4689,7 +4770,15 @@ index de04f3e..2d35417 100644
  
  	let inputFiles = null;
  
-@@ -1211,7 +1248,7 @@
+@@ -990,6 +1028,7 @@
+ 
+ 			if (res) {
+ 				toast.success($i18n.t('Knowledge updated successfully'));
++				eesAssetChange.set({ kind: 'knowledge', id, name: knowledge.name, description: knowledge.description });
+ 			}
+ 		}, 1000);
+ 	};
+@@ -1211,7 +1250,7 @@
  	}}
  />
  
@@ -4698,16 +4787,25 @@ index de04f3e..2d35417 100644
  	{#if id && knowledge}
  		<AccessControlModal
  			bind:show={showAccessControlModal}
-@@ -1230,7 +1267,7 @@
+@@ -1224,14 +1263,16 @@
+ 				try {
+ 					await updateKnowledgeAccessGrants(localStorage.token, id, knowledge.access_grants ?? []);
+ 					toast.success($i18n.t('Saved'));
++					eesAssetChange.set({ kind: 'knowledge', id, access_grants: knowledge.access_grants ?? [] });
+ 				} catch (error) {
+ 					toast.error(`${error}`);
+ 				}
  			}}
  			accessRoles={['read', 'write']}
  		/>
 -		<div class="w-full px-2">
 +		<div data-ees-asset-head class="w-full shrink-0 border-b border-gray-200 pb-3 dark:border-gray-700">
  			<button
++				data-ees-asset-back
  				class="mb-1 flex h-6 w-fit items-center gap-1 rounded-md text-xs text-gray-400 transition-colors duration-75 hover:text-gray-700 dark:text-gray-600 dark:hover:text-gray-300"
  				type="button"
-@@ -1239,16 +1276,16 @@
+ 				on:click={() => {
+@@ -1239,16 +1280,16 @@
  				}}
  			>
  				<ChevronLeft className="size-3" strokeWidth="2" />
@@ -4727,7 +4825,7 @@ index de04f3e..2d35417 100644
  								bind:value={knowledge.name}
  								aria-label={$i18n.t('Knowledge Name')}
  								placeholder={$i18n.t('Knowledge Name')}
-@@ -1258,7 +1295,7 @@
+@@ -1258,7 +1299,7 @@
  								}}
  							/>
  
@@ -4736,7 +4834,7 @@ index de04f3e..2d35417 100644
  								{#if fileItemsTotal}
  									<div class="text-xs text-gray-500">
  										<!-- {$i18n.t('{{COUNT}} files')} -->
-@@ -1270,25 +1307,12 @@
+@@ -1270,25 +1311,12 @@
  							</div>
  						</div>
  
@@ -4763,7 +4861,7 @@ index de04f3e..2d35417 100644
  							bind:value={knowledge.description}
  							aria-label={$i18n.t('Knowledge Description')}
  							placeholder={$i18n.t('Knowledge Description')}
-@@ -1301,7 +1325,7 @@
+@@ -1301,7 +1329,7 @@
  						<div class="hidden md:block">
  							<Tooltip content={$i18n.t('Click to copy ID')}>
  								<button
@@ -4772,7 +4870,7 @@ index de04f3e..2d35417 100644
  									on:click={() => {
  										copyToClipboard(id);
  										toast.success($i18n.t('ID copied to clipboard'));
-@@ -1316,8 +1340,11 @@
+@@ -1316,8 +1344,11 @@
  			</div>
  		</div>
  
@@ -4785,7 +4883,7 @@ index de04f3e..2d35417 100644
  		>
  			{#if isExternalKnowledge}
  				<div class="p-5 flex flex-col gap-4">
-@@ -1564,6 +1591,9 @@
+@@ -1564,6 +1595,9 @@
  										<div class=" flex overflow-y-auto h-full w-full scrollbar-hidden text-xs">
  											<Files
  												files={fileItems}
@@ -4795,7 +4893,7 @@ index de04f3e..2d35417 100644
  												directories={directoryItems}
  												{knowledge}
  												{selectedFileId}
-@@ -1700,6 +1730,38 @@
+@@ -1700,6 +1734,38 @@
  				{/if}
  			{/if}
  		</div>
@@ -5335,32 +5433,59 @@ diff --git a/src/lib/components/workspace/Models/ModelEditor.svelte b/src/lib/co
  					</div>
  				</form>
 diff --git a/src/lib/components/workspace/Skills.svelte b/src/lib/components/workspace/Skills.svelte
-index ca52980..1d95348 100644
+index ca52980..bbca26a 100644
 --- a/src/lib/components/workspace/Skills.svelte
 +++ b/src/lib/components/workspace/Skills.svelte
-@@ -45,6 +45,10 @@
+@@ -45,6 +45,14 @@
  	import Pagination from '../common/Pagination.svelte';
  	import ChevronDown from '../icons/ChevronDown.svelte';
  	import ChevronUp from '../icons/ChevronUp.svelte';
 +	import SplitCreateButton from '../common/SplitCreateButton.svelte';
 +	import EesAccessTag from '../ees/EesAccessTag.svelte';
-+	import { eesShortDate } from '../ees/assets';
++	import { eesShortDate, eesAssetChange, eesApplyAssetChange } from '../ees/assets';
 +	import { eesSessionReady } from '../ees/state';
++
++	// The list shown beside an opened work instruction: name and access only, with the opened row marked.
++	export let pane = false;
++	export let selectedId = '';
  
  	let shiftKey = false;
  	let loaded = false;
-@@ -68,6 +72,10 @@
+@@ -68,9 +76,23 @@
  	let sortDirection = 'desc';
  	let openSkillMenuId: string | null = null;
  	let page = 1;
 +	// The whole count is kept while a search narrows the list: "4 of 12".
 +	let unfilteredTotal: number | null = null;
-+	const columns =
-+		'grid grid-cols-[minmax(0,1fr)_auto_4.75rem] items-center gap-x-3 px-2 @2xl:grid-cols-[minmax(0,1fr)_7.5rem_8.5rem_4rem_4.75rem]';
++	$: columns = pane
++		? 'grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 px-2'
++		: 'grid grid-cols-[minmax(0,1fr)_auto_4.75rem] items-center gap-x-3 px-2 @2xl:grid-cols-[minmax(0,1fr)_7.5rem_8.5rem_4rem_4.75rem]';
++	let actions = [];
++	// The workspace layout clears the shared actions on every path change, so the list beside an item keeps its own.
++	$: if (loaded && !pane) workspaceActions.set(actions);
++	// A save in the opened item updates its row here; the value already in the store when this list mounts is old.
++	let changeArmed = false;
++	const stopAssetChange = eesAssetChange.subscribe((change) => {
++		if (pane && changeArmed) filteredItems = eesApplyAssetChange(filteredItems, change, 'skill');
++	});
++	changeArmed = true;
  
  	$: if (loaded) {
- 		workspaceActions.set([
-@@ -123,6 +131,7 @@
+-		workspaceActions.set([
++		actions = [
+ 			{
+ 				id: 'skills-new',
+ 				label: $i18n.t('Create'),
+@@ -100,7 +122,7 @@
+ 				},
+ 				visible: $user?.role === 'admin' || $user?.permissions?.workspace?.skills_export
+ 			}
+-		]);
++		];
+ 	}
+ 
+ 	const loadSkillItems = async () => {
+@@ -123,6 +145,7 @@
  			if (res) {
  				filteredItems = res.items;
  				total = res.total;
@@ -5368,7 +5493,30 @@ index ca52980..1d95348 100644
  				workspaceCounts.update((counts) => ({ ...counts, skills: total }));
  			}
  		} catch (err) {
-@@ -330,48 +339,49 @@
+@@ -251,6 +274,7 @@
+ 
+ 	onDestroy(() => {
+ 		clearTimeout(searchDebounceTimer);
++		stopAssetChange();
+ 	});
+ </script>
+ 
+@@ -258,9 +282,11 @@
+ 	<!-- LICENSE covers this Open WebUI browser-title identifier.
+ 	Do not alter, remove, obscure, or replace it except as LICENSE permits:
+ 	https://docs.openwebui.com/license. -->
+-	<title>
+-		{$i18n.t('Skills')} / {$WEBUI_NAME}
+-	</title>
++	{#if !pane}
++		<title>
++			{$i18n.t('Skills')} / {$WEBUI_NAME}
++		</title>
++	{/if}
+ </svelte:head>
+ 
+ {#if loaded}
+@@ -330,48 +356,49 @@
  		}}
  	/>
  
@@ -5449,21 +5597,21 @@ index ca52980..1d95348 100644
  					<ViewSelector
  						bind:value={viewOption}
  						align="end"
-@@ -382,6 +392,13 @@
+@@ -382,6 +409,13 @@
  						}}
  					/>
  				</div>
 +				{#if $eesSessionReady}
 +					<SplitCreateButton
-+						actions={$workspaceActions}
-+						variant="primary"
++						{actions}
++						variant={pane ? 'outline' : 'primary'}
 +						label={$i18n.t('EES.Skills.New', { defaultValue: 'New work instruction' })}
 +					/>
 +				{/if}
  			</div>
  		</div>
  
-@@ -390,16 +407,16 @@
+@@ -390,16 +424,16 @@
  				<Spinner className="size-5" />
  			</div>
  		{:else if (filteredItems ?? []).length !== 0}
@@ -5484,7 +5632,7 @@ index ca52980..1d95348 100644
  						{#if sortKey === 'name'}
  							{#if sortDirection === 'asc'}
  								<ChevronUp className="size-2" />
-@@ -408,15 +425,14 @@
+@@ -408,15 +442,14 @@
  							{/if}
  						{/if}
  					</button>
@@ -5504,11 +5652,11 @@ index ca52980..1d95348 100644
  						{#if sortKey === 'updated_at'}
  							{#if sortDirection === 'asc'}
  								<ChevronUp className="size-2" />
-@@ -425,172 +441,149 @@
+@@ -425,172 +458,152 @@
  							{/if}
  						{/if}
  					</button>
-+					<span></span>
++					{#if !pane}<span></span>{/if}
  				</div>
  
 -				<div class="grid gap-y-0.5">
@@ -5522,6 +5670,7 @@ index ca52980..1d95348 100644
 +				{#each filteredItems as skill (skill.id)}
 +					<div
 +						data-ees-asset-row
++						aria-current={pane && skill.id === selectedId ? 'true' : undefined}
 +						class="group {columns} min-h-14 cursor-pointer border-b border-gray-200 py-2 text-left hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-850"
 +						role="button"
 +						tabindex="0"
@@ -5654,6 +5803,7 @@ index ca52980..1d95348 100644
 +							{eesShortDate(skill.updated_at ?? skill.created_at)}
 +						</div>
  
++						{#if !pane}
 +						<div class="flex min-w-0 items-center justify-end">
  							{#if skill.write_access}
 -								<div class="ml-2 flex shrink-0 flex-row items-center self-center">
@@ -5792,12 +5942,13 @@ index ca52980..1d95348 100644
  						</div>
 -					{/each}
 -				</div>
++						{/if}
 +					</div>
 +				{/each}
  			</div>
  
  			{#if total > 30}
-@@ -599,14 +592,15 @@
+@@ -599,14 +612,15 @@
  				</div>
  			{/if}
  		{:else}
@@ -5822,19 +5973,20 @@ index ca52980..1d95348 100644
  	</div>
  
 diff --git a/src/lib/components/workspace/Skills/SkillEditor.svelte b/src/lib/components/workspace/Skills/SkillEditor.svelte
-index ae0923d..5dce434 100644
+index ae0923d..6c9fca5 100644
 --- a/src/lib/components/workspace/Skills/SkillEditor.svelte
 +++ b/src/lib/components/workspace/Skills/SkillEditor.svelte
-@@ -12,6 +12,8 @@
+@@ -12,6 +12,9 @@
  	import Spinner from '$lib/components/common/Spinner.svelte';
  	import { updateSkillAccessGrants } from '$lib/apis/skills';
  	import { goto } from '$app/navigation';
 +	import EesAssetUsage from '$lib/components/ees/EesAssetUsage.svelte';
 +	import EesAccessTag from '$lib/components/ees/EesAccessTag.svelte';
++	import { eesAssetChange } from '$lib/components/ees/assets';
  
  	export let onSubmit: Function;
  	export let edit = false;
-@@ -30,6 +32,7 @@
+@@ -30,6 +33,7 @@
  
  	let accessGrants = [];
  	let showAccessControlModal = false;
@@ -5842,7 +5994,17 @@ index ae0923d..5dce434 100644
  	$: if (!edit && !clone && name) {
  		id = slugify(name);
  	}
-@@ -74,6 +77,10 @@
+@@ -62,6 +66,9 @@
+ 			meta: { tags: [] },
+ 			access_grants: accessGrants
+ 		});
++		// The page replaces `skill` with what the server stored; nothing changes after a refused save.
++		await tick();
++		if (edit && skill?.id) eesAssetChange.set({ kind: 'skill', id: skill.id, name: skill.name, description: skill.description, access_grants: skill.access_grants });
+ 
+ 		loading = false;
+ 	};
+@@ -74,6 +81,10 @@
  			description = skill.description || '';
  			content = skill.content || '';
  			accessGrants = skill?.access_grants === undefined ? [] : skill?.access_grants;
@@ -5853,7 +6015,15 @@ index ae0923d..5dce434 100644
  		}
  	});
  </script>
-@@ -97,106 +104,147 @@
+@@ -90,6 +101,7 @@
+ 			try {
+ 				await updateSkillAccessGrants(localStorage.token, skill.id, accessGrants);
+ 				toast.success($i18n.t('Saved'));
++				eesAssetChange.set({ kind: 'skill', id: skill.id, access_grants: accessGrants });
+ 			} catch (error) {
+ 				toast.error(`${error}`);
+ 			}
+@@ -97,106 +109,148 @@
  	}}
  />
  
@@ -5862,6 +6032,7 @@ index ae0923d..5dce434 100644
  	<form class="flex h-full min-h-0 min-w-0 flex-col" on:submit|preventDefault={submitHandler}>
  		<button
 -			class="mb-1 flex h-6 w-fit items-center gap-1 rounded-md text-xs text-gray-400 transition-colors duration-75 hover:text-gray-700 dark:text-gray-600 dark:hover:text-gray-300"
++			data-ees-asset-back
 +			class="mb-1 flex h-6 w-fit shrink-0 items-center gap-1 rounded-md text-xs text-gray-400 transition-colors duration-75 hover:text-gray-700 dark:text-gray-600 dark:hover:text-gray-300"
  			type="button"
  			on:click={() => {
@@ -6408,9 +6579,17 @@ index 9aee4da..08ebc41 100644
  		<Spinner />
  	</div>
 diff --git a/src/routes/(app)/workspace/+layout.svelte b/src/routes/(app)/workspace/+layout.svelte
+index 11eed46..e25eb6e 100644
 --- a/src/routes/(app)/workspace/+layout.svelte
 +++ b/src/routes/(app)/workspace/+layout.svelte
-@@ -26,6 +26,7 @@
+@@ -21,14 +21,23 @@
+ 	import Tooltip from '$lib/components/common/Tooltip.svelte';
+ 	import Sidebar from '$lib/components/icons/Sidebar.svelte';
+ 	import SplitCreateButton from '$lib/components/common/SplitCreateButton.svelte';
++	import Skills from '$lib/components/workspace/Skills.svelte';
++	import Knowledge from '$lib/components/workspace/Knowledge.svelte';
+ 	import { formatNumber } from '$lib/utils';
+ 
  	const i18n = getContext<Writable<i18nType>>('i18n');
  
  	let loaded = false;
@@ -6418,7 +6597,30 @@ diff --git a/src/routes/(app)/workspace/+layout.svelte b/src/routes/(app)/worksp
  	let lastPath = '';
  	let activeWorkspaceSection = '';
  	let visibleActions = [];
-@@ -78,6 +79,7 @@
++	// From this width the list stays beside an opened work instruction or reference documents
++	// (workspace design mock 17, revision 2, step 3).
++	const SPLIT_WIDTH = 1264;
++	let containerWidth = 0;
++	let openedAsset = '';
++	let split = false;
+ 
+ 	$: if ($page.url.pathname !== lastPath) {
+ 		lastPath = $page.url.pathname;
+@@ -41,6 +50,13 @@
+ 
+ 	$: activeWorkspaceSection = $page.url.pathname.split('/')[2] ?? '';
+ 	$: visibleActions = $workspaceActions.filter((action) => action.visible ?? true);
++	$: openedAsset =
++		$page.url.pathname === '/workspace/skills/edit'
++			? ($page.url.searchParams.get('id') ?? '')
++			: activeWorkspaceSection === 'knowledge' && $page.params.id
++				? $page.params.id
++				: '';
++	$: split = hasAssetToolbar && Boolean(openedAsset) && containerWidth >= SPLIT_WIDTH;
+ 
+ 	const getCount = (res: any) => res?.total ?? (Array.isArray(res) ? res.length : null);
+ 	const formatCount = (count: number | null) => formatNumber(count ?? 0);
+@@ -78,6 +94,7 @@
  	};
  
  	onMount(async () => {
@@ -6426,7 +6628,7 @@ diff --git a/src/routes/(app)/workspace/+layout.svelte b/src/routes/(app)/worksp
  		if ($user?.role !== 'admin') {
  			if ($page.url.pathname.includes('/models') && !$user?.permissions?.workspace?.models) {
  				goto('/', { replaceState: true });
-@@ -116,138 +118,28 @@
+@@ -116,138 +133,84 @@
  
  {#if loaded}
  	<div
@@ -6564,9 +6766,29 @@ diff --git a/src/routes/(app)/workspace/+layout.svelte b/src/routes/(app)/worksp
  		<div
  			class="  pb-1 px-3 flex-1 min-w-0 max-h-full overflow-y-auto overflow-x-hidden"
 +			data-ees-assets-layout={["models", "knowledge", "skills"].includes(activeWorkspaceSection) || undefined}
++			data-ees-assets-split={split || undefined}
++			bind:offsetWidth={containerWidth}
  			id="workspace-container"
  		>
- 			<slot />
+-			<slot />
++			{#if split}
++				<aside
++					data-ees-asset-pane
++					aria-label={$i18n.t(activeWorkspaceSection === 'skills' ? 'EES.Skills.List' : 'EES.Knowledge.List')}
++				>
++					{#if activeWorkspaceSection === 'skills'}
++						<Skills pane selectedId={openedAsset} />
++					{:else}
++						<Knowledge pane selectedId={openedAsset} />
++					{/if}
++				</aside>
++			{/if}
++			<!-- The item pages read their id once when they mount, so another item mounts the page again. -->
++			<div data-ees-asset-content>
++				{#key activeWorkspaceSection + '/' + openedAsset}
++					<slot />
++				{/key}
++			</div>
  		</div>
  	</div>
  {/if}
@@ -6578,6 +6800,43 @@ diff --git a/src/routes/(app)/workspace/+layout.svelte b/src/routes/(app)/worksp
 +	}
 +	:global(.dark) #workspace-container[data-ees-assets-layout] {
 +		background-color: var(--color-gray-900, #171717);
++	}
++	#workspace-container > [data-ees-asset-content] {
++		display: contents;
++	}
++	/* The list takes 420px, the opened item takes the rest, and each side scrolls on its own. */
++	#workspace-container[data-ees-assets-split] {
++		display: grid;
++		grid-template-columns: 420px minmax(0, 1fr);
++		grid-template-rows: minmax(0, 1fr);
++		padding: 0;
++		overflow: hidden;
++	}
++	#workspace-container[data-ees-assets-split] > :is([data-ees-asset-pane], [data-ees-asset-content]) {
++		display: block;
++		min-width: 0;
++		min-height: 0;
++		overflow-x: hidden;
++		overflow-y: auto;
++	}
++	#workspace-container[data-ees-assets-split] > [data-ees-asset-pane] {
++		padding: 16px 16px 16px 32px;
++		border-right: 1px solid var(--ees-line-divider, #e9e9ed);
++	}
++	#workspace-container[data-ees-assets-split] > [data-ees-asset-content] {
++		padding: 16px 32px 16px 24px;
++	}
++	#workspace-container[data-ees-assets-split] :global([data-ees-asset-back]) {
++		display: none;
++	}
++	#workspace-container :global([data-ees-asset-pane] [data-ees-asset-row][aria-current='true']) {
++		background-color: var(--ees-surface-selected, #ececec);
++	}
++	:global(.dark) #workspace-container[data-ees-assets-split] > [data-ees-asset-pane] {
++		border-right-color: var(--color-gray-700, #4e4e4e);
++	}
++	:global(.dark) #workspace-container :global([data-ees-asset-pane] [data-ees-asset-row][aria-current='true']) {
++		background-color: var(--color-gray-850, #262626);
 +	}
 +</style>
 diff --git a/src/routes/+layout.svelte b/src/routes/+layout.svelte

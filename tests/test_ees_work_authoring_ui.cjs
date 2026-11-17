@@ -1417,10 +1417,14 @@ test('phase 2 protected historical success is not rendered as a real empty query
 
 test('phase 2 evidence height follows observed width without input events and disconnects with the modal',async()=>{
  const observers=[];class EvidenceObserver{constructor(callback){this.callback=callback;this.live=false;observers.push(this);}observe(target){this.target=target;this.live=true;}disconnect(){this.live=false;}width(width){this.callback([{target:this.target,contentRect:{width}}]);}}
- const h=phase2Harness({connected:true,resizeObserver:EvidenceObserver});await phase2Trial(h);h.field('draft_trial_evidence',phase2Fixture.evidence);h.click('draft_use_open');await flush();let observer=observers.at(-1),field=h.fields.find(item=>item.name==='draft_use_evidence');assert.equal(observers.filter(item=>item.live).length,1);assert.equal(field.style.height,'21px');observer.width(430);field.scrollHeight=42;observer.width(294);assert.equal(field.style.height,'42px');assert.equal(field.value,phase2Fixture.evidence);assert.equal(observers.filter(item=>item.live).length,1);
+ const h=phase2Harness({connected:true,resizeObserver:EvidenceObserver});await phase2Trial(h);h.field('draft_trial_evidence',phase2Fixture.evidence);h.click('draft_use_open');await flush();let observer=observers.at(-1),field=h.fields.find(item=>item.name==='draft_use_evidence');
+ // The designer also watches the width of its own host; these counts are the evidence field's observers.
+ const watching=()=>observers.filter(item=>item.live&&item.target?.name==='draft_use_evidence').length;assert.equal(observer.target,field);assert.equal(watching(),1);assert.equal(field.style.height,'21px');observer.width(430);field.scrollHeight=42;observer.width(294);assert.equal(field.style.height,'42px');assert.equal(field.value,phase2Fixture.evidence);assert.equal(watching(),1);
  // A height-only observer notification must not restart sizing or add observers.
- field.style.height='42px';field.scrollHeight=84;observer.width(294);assert.equal(field.style.height,'42px');field.scrollHeight=400;observer.width(293);assert.equal(field.style.height,'180px');h.click('draft_modal_cancel');await flush();assert.equal(observers.filter(item=>item.live).length,0);observer.width(200);assert.equal(observers.filter(item=>item.live).length,0);
- h.click('draft_use_open');await flush();assert.equal(observers.filter(item=>item.live).length,1);h.designer.closePrivateDialogs();assert.equal(observers.filter(item=>item.live).length,0);h.render();h.click('draft_use_open');await flush();assert.equal(observers.filter(item=>item.live).length,1);h.designer.reset();assert.equal(observers.filter(item=>item.live).length,0);
+ field.style.height='42px';field.scrollHeight=84;observer.width(294);assert.equal(field.style.height,'42px');field.scrollHeight=400;observer.width(293);assert.equal(field.style.height,'180px');h.click('draft_modal_cancel');await flush();assert.equal(observer.live,false);assert.equal(watching(),0);observer.width(200);assert.equal(watching(),0);
+ h.click('draft_use_open');await flush();assert.equal(watching(),1);h.designer.closePrivateDialogs();assert.equal(watching(),0);h.render();h.click('draft_use_open');await flush();assert.equal(watching(),1);
+ // Reset stops every observer, the host width one included.
+ h.designer.reset();assert.equal(observers.filter(item=>item.live).length,0);
 });
 
 // Phase 3 projects the confirmed version into the existing workflow editor.

@@ -3360,6 +3360,69 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.server.completions[1]['user_message']['meta']['ees_work_reference']['kind'], 'help')
         self.assertEqual(self.operations()['tools'], [])
 
+    def test_wide_work_area_keeps_the_procedure_list_beside_the_opened_procedure(self):
+        """From 1264px of work area the procedure list stays beside the opened procedure; narrower, the procedure replaces the list."""
+        self.authoring_viewport(1920, 1080, overlay=False)
+        self.open_initialized_author_list()
+        first = self.command('create_workflow', system_id='EMS', name='넓은 화면 절차 가')['workflow_id']
+        second = self.command('create_workflow', system_id='EMS', name='넓은 화면 절차 나')['workflow_id']
+        self.refresh()
+        row = '[data-author-action=open][data-id="%s"]'
+        chat = "document.querySelector('[data-ees-source-shell]').dataset.eesChatState"
+        split = "document.querySelector('#ees-work-designer').dataset.authorSplit"
+        width = "document.querySelector('#ees-work-authoring-panel').getBoundingClientRect().width"
+        title = "document.querySelector('.ew-author-definition-head h2')?.textContent"
+        description = '#ew-procedure-info [name=overview_description]'
+
+        def layout():
+            return self.browser.evaluate("""(() => {
+              const box = e => { if (!e) return null; const r = e.getBoundingClientRect(); return {x:r.x, right:r.right, width:r.width, bottom:r.bottom}; };
+              const pane = document.querySelector('.ew-author-pane'), area = document.querySelector('#ees-work-authoring-panel').getBoundingClientRect();
+              return {pane:box(pane), content:box(document.querySelector('#ees-work-designer > .ew-author-scroll')),
+                foot:box(document.querySelector('#ees-work-designer > footer')),
+                current:[...document.querySelectorAll('.ew-author-pane [aria-current=true] strong')].map(e => e.textContent),
+                columns:pane ? [...pane.querySelectorAll('.ew-list-thead > span')].filter(e => e.checkVisibility()).map(e => e.textContent) : [],
+                toList:!!document.querySelector('#ees-work-designer [data-author-action=list]')?.checkVisibility(),
+                overflow:document.documentElement.scrollWidth > innerWidth ||
+                  [...document.querySelectorAll('#ees-work-designer *')].some(e => e.getClientRects().length && e.getBoundingClientRect().right > area.right + 1)};
+            })()""")
+
+        # With the chat docked the work area is 1104px: the procedure replaces the list and links back to it.
+        self.click(row % first)
+        self.wait(title + " === '넓은 화면 절차 가' && document.querySelector(" + json.dumps(description) + ")")
+        single = layout()
+        self.assertEqual((self.browser.evaluate(split), single['pane'], single['toList']), ('false', None, True), single)
+        # Closing the chat widens it to 1664px: the same procedure stays open and the list appears beside it.
+        self.click('[data-ees-chat-close]')
+        self.wait(chat + " === 'closed' && " + width + " === 1664 && " + split + " === 'true'")
+        beside = layout()
+        self.assertEqual((beside['pane']['x'], beside['pane']['width'], beside['content']['x'], beside['content']['right'], beside['foot']['x']),
+                         (256, 420, 676, 1920, 676), beside)
+        # The 420px list shows the name and whether it is published, and marks the opened procedure.
+        self.assertEqual((beside['current'], beside['columns']), (['넓은 화면 절차 가'], ['이름', '게시']), beside)
+        self.assertFalse(beside['toList'] or beside['overflow'], beside)
+        self.screenshot('ws1-ws2-wide')
+        # Unsaved changes stay with their procedure while another one is opened from the list.
+        self.fill(description, '목록 옆에서 고친 설명')
+        self.assertEqual(self.text('[data-author-status]'), '저장하지 않은 변경 있음')
+        self.click(row % second)
+        self.wait(title + " === '넓은 화면 절차 나'")
+        self.assertEqual((layout()['current'], self.text('[data-author-status]')), (['넓은 화면 절차 나'], '저장됨'))
+        self.click(row % first)
+        self.wait(title + " === '넓은 화면 절차 가' && document.querySelector(" + json.dumps(description) + ")?.value === '목록 옆에서 고친 설명'")
+        self.assertEqual(self.text('[data-author-status]'), '저장하지 않은 변경 있음')
+        # What was typed survives the list leaving as the chat opens.
+        self.click('[data-ees-chat-toggle]')
+        self.wait(chat + " === 'docked' && " + width + " === 1104 && " + split + " === 'false'")
+        single = layout()
+        self.assertEqual((single['pane'], single['toList'], self.read(description, 'value')), (None, True, '목록 옆에서 고친 설명'), single)
+        self.assertFalse(self.state(workflow_id=first)['workflow']['draft'].get('description'))
+        # The list's own action still starts a new procedure from the list.
+        self.click('[data-ees-chat-close]')
+        self.wait(chat + " === 'closed' && " + width + " === 1664 && " + split + " === 'true'")
+        self.click('.ew-author-pane [data-author-action=create]')
+        self.wait("document.activeElement?.id === 'ew-procedure-name' && " + split + " === 'false'")
+
     def test_initial_procedures_open_editable_and_save_as_creates_an_unpublished_draft(self):
         self.browser.evaluate("Object.defineProperty(crypto,'randomUUID',{value:undefined,configurable:true});true")
         self.fill('#chat-input', '새 절차 전에 작성한 개인 질문')

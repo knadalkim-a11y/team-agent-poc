@@ -1043,6 +1043,132 @@ class SourceShellNativeTests(IntegratedNativeCase):
                                 self.assertAlmostEqual(narrow['aside']['width'], narrow['main']['width'], delta=1)
                         self.screenshot('parity-' + label + '-' + str(width))
 
+    def test_wide_work_area_keeps_the_asset_list_beside_the_opened_item(self):
+        """From 1264px of work area the list stays beside an opened work instruction or reference documents."""
+        self.enable_native_menus()
+        self.browser.call('Emulation.setDeviceMetricsOverride', {
+            'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+        actor = self.server.user
+        common = {'user_id': actor['id'], 'user': {'id': actor['id'], 'name': actor['name']},
+                  'created_at': 1794301200, 'updated_at': 1794301200, 'access_grants': [], 'write_access': True,
+                  'can_write': True, 'can_edit': True, 'is_owner': True, 'meta': {}}
+        everyone = [{'principal_type': 'user', 'principal_id': '*', 'permission': 'read'}]
+        skills = {
+            'jira-read': dict(common, id='jira-read', name='Jira 읽기 지침', description='CR 조회 절차',
+                              content='CR 번호로 해당 이슈를 조회합니다.', is_active=True, access_grants=everyone),
+            'result-summary': dict(common, id='result-summary', name='점검 결과 정리 지침',
+                                   description='점검 결과를 짧게 정리하는 형식입니다.',
+                                   content='근거와 함께 정리합니다.', is_active=True),
+        }
+        bases = {
+            'kb-ems': dict(common, id='kb-ems', name='EMS 운영 가이드', description='EMS 문서 모음',
+                           data={'file_ids': []}, files=[], file_count=0, access_grants=everyone),
+            'kb-release': dict(common, id='kb-release', name='배포 점검 자료', description='배포 전 확인 항목입니다.',
+                               data={'file_ids': []}, files=[], file_count=0),
+        }
+        original = NativeUIHandler.do_GET
+        original_post = NativeUIHandler.do_POST
+
+        def get_asset(handler):
+            path = urlparse(handler.path).path.rstrip('/')
+            rows = {'/api/v1/skills/list': skills, '/api/v1/knowledge/list': bases, '/api/v1/knowledge/search': bases}.get(path)
+            if rows is not None:
+                first = parse_qs(urlparse(handler.path).query).get('page', ['1'])[0] in ('', '1')
+                return handler.send_content({'items': list(rows.values()) if first else [], 'total': len(rows)})
+            if path.startswith('/api/v1/skills/id/') and path.rsplit('/', 1)[1] in skills:
+                return handler.send_content(skills[path.rsplit('/', 1)[1]])
+            parts = path.removeprefix('/api/v1/knowledge/').split('/')
+            if path.startswith('/api/v1/knowledge/') and parts[0] in bases:
+                if parts[1:2] == ['files']:
+                    return handler.send_content({'items': [], 'total': 0})
+                if len(parts) == 1:
+                    return handler.send_content(bases[parts[0]])
+            return original(handler)
+
+        def update_asset(handler):
+            path = urlparse(handler.path).path
+            found = re.fullmatch(r'/api/v1/skills/id/([^/]+)/update', path)
+            if found and found.group(1) in skills:
+                body = json.loads(handler.rfile.read(int(handler.headers.get('Content-Length', '0'))))
+                skills[found.group(1)].update({key: body[key] for key in ('name', 'description', 'content') if key in body})
+                return handler.send_content(skills[found.group(1)])
+            return original_post(handler)
+
+        shell = "document.querySelector('[data-ees-source-shell]').dataset.eesChatState"
+        row = "[data-ees-asset-pane] [data-ees-asset-table] > [data-ees-asset-row]:nth-child(%d)"
+        name_field = "document.querySelector('[data-ees-asset=%s] [data-ees-asset-head] input')?.value"
+
+        wide = shell + " === 'closed' && document.querySelector('#workspace-container')?.offsetWidth === 1664"
+
+        def layout():
+            return self.browser.evaluate("""(() => {
+                const box = e => { if (!e) return null; const r = e.getBoundingClientRect(); return {x:r.x, right:r.right, width:r.width, bottom:r.bottom}; };
+                const pane = document.querySelector('[data-ees-asset-pane]'), current = pane?.querySelector('[data-ees-asset-row][aria-current=true]');
+                const area = document.querySelector('[data-ees-work-surface]').getBoundingClientRect();
+                return {pane:box(pane), content:box(document.querySelector('[data-ees-asset-content] > [data-ees-asset]')),
+                  current:current?.querySelector('.truncate')?.innerText.trim() || '', cells:current ? [...current.children].filter(e => e.checkVisibility()).length : 0,
+                  rows:pane ? pane.querySelectorAll('[data-ees-asset-row]').length : 0,
+                  create:pane?.querySelector('[data-ees-create]')?.innerText.trim() || '',
+                  back:!!document.querySelector('[data-ees-asset-back]')?.checkVisibility(),
+                  overflow:document.documentElement.scrollWidth > innerWidth ||
+                    [...document.querySelectorAll('#workspace-container *')].some(e => e.getClientRects().length && e.getBoundingClientRect().right > area.right + 1)};
+            })()""")
+
+        with patch.object(NativeUIHandler, 'do_GET', get_asset), patch.object(NativeUIHandler, 'do_POST', update_asset):
+            self.navigate('/workspace/skills')
+            self.wait("document.querySelectorAll('[data-ees-asset=skills] [data-ees-asset-row]').length === 2 && " + shell + " === 'docked'")
+            self.click('[data-ees-chat-close]')
+            self.wait(wide)
+            # The list alone keeps its centered width; nothing is opened for the person.
+            alone = layout()
+            self.assertIsNone(alone['pane'])
+            self.click('[data-ees-asset=skills] [data-ees-asset-row]')
+            self.wait("location.search === '?id=jira-read' && " + name_field % 'skill-editor' + " === 'Jira 읽기 지침'"
+                      " && document.querySelector('[data-ees-asset-pane] [data-ees-asset-row][aria-current=true]')")
+            beside = layout()
+            self.assertEqual((beside['pane']['x'], beside['pane']['width']), (256, 420), beside)
+            self.assertAlmostEqual(beside['content']['x'], 700, delta=1, msg=beside)
+            self.assertAlmostEqual(beside['content']['right'], 1888, delta=1, msg=beside)
+            # The list shows the name and who can use each item, marks the opened row and keeps its new-item action.
+            self.assertEqual((beside['current'], beside['cells'], beside['rows'], beside['create']),
+                             ('Jira 읽기 지침', 2, 2, '새 작업 지침'), beside)
+            self.assertFalse(beside['back'] or beside['overflow'], beside)
+            self.screenshot('ws6-ws7-wide')
+            # Another row opens that item in place.
+            self.click(row % 3)
+            self.wait("location.search === '?id=result-summary' && " + name_field % 'skill-editor' + " === '점검 결과 정리 지침'")
+            self.assertEqual(layout()['current'], '점검 결과 정리 지침')
+            # A saved name shows in the list without reloading it.
+            self.fill('[data-ees-asset=skill-editor] [data-ees-asset-head] input', '점검 결과 요약 지침')
+            self.click('[data-ees-asset=skill-editor] [data-ees-asset-foot] button[type=submit]')
+            self.wait("document.querySelector('[data-ees-asset-pane] [data-ees-asset-row][aria-current=true]')?.innerText.includes('점검 결과 요약 지침')")
+            self.assertEqual(skills['result-summary']['name'], '점검 결과 요약 지침')
+            # Opening the chat narrows the work area: the same item stays open with what was typed, and the list link returns.
+            self.fill('#ees-skill-body', '근거와 함께 세 줄로 정리합니다.')
+            self.click('[data-ees-chat-toggle]')
+            self.wait(shell + " === 'docked' && !document.querySelector('[data-ees-asset-pane]')")
+            single = layout()
+            self.assertTrue(single['back'])
+            self.assertFalse(single['overflow'], single)
+            self.assertEqual(self.read('#ees-skill-body', 'value'), '근거와 함께 세 줄로 정리합니다.')
+            self.click('[data-ees-chat-close]')
+            self.wait(shell + " === 'closed' && document.querySelector('[data-ees-asset-pane] [data-ees-asset-row][aria-current=true]')")
+            self.assertEqual(self.read('#ees-skill-body', 'value'), '근거와 함께 세 줄로 정리합니다.')
+
+            # Closing the chat is a saved choice, so a page opened by its address starts with the list beside it.
+            self.navigate('/workspace/knowledge/kb-ems')
+            self.wait(name_field % 'knowledge' + " === 'EMS 운영 가이드' && " + wide +
+                      " && document.querySelector('[data-ees-asset-pane] [data-ees-asset-row][aria-current=true]')")
+            beside = layout()
+            self.assertEqual((beside['pane']['x'], beside['pane']['width']), (256, 420), beside)
+            self.assertEqual((beside['current'], beside['cells'], beside['rows'], beside['create']),
+                             ('EMS 운영 가이드', 2, 2, '새 참고 문서'), beside)
+            self.assertFalse(beside['back'] or beside['overflow'], beside)
+            self.screenshot('ws8-ws9-wide')
+            self.click(row % 3)
+            self.wait("location.pathname === '/workspace/knowledge/kb-release' && " + name_field % 'knowledge' + " === '배포 점검 자료'")
+            self.assertEqual(layout()['current'], '배포 점검 자료')
+
     def assert_asset_list(self, marker, expected, owner):
         """One search row, then one table: name and description, access, maker and last change."""
         root = '[data-ees-asset=' + marker + ']'

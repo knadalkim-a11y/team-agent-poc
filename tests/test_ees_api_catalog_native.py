@@ -256,6 +256,100 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.assertLessEqual(refused['error']['bottom'], refused['foot']['y'] + 1, refused)
         self.assertAlmostEqual(refused['foot']['bottom'], refused['area']['bottom'], delta=1, msg=refused)
 
+    def test_wide_work_area_keeps_the_api_list_beside_the_opened_api(self):
+        """From 1264px of work area the API list stays beside the opened API; narrower, the API replaces the list."""
+        backup = self.register_service('사내 백업')
+        retry = self.seed_api(backup, 'POST', 'https://backup.example/backups/retries', '실패 백업 재처리',
+                              '실패한 백업 작업의 재처리를 요청합니다.')
+        purpose = '백업 작업별 성공 여부와 완료 시각을 확인합니다.'
+        api = self.seed_api(backup, 'GET', 'https://backup.example/backups', '백업 결과 조회', purpose,
+                            inputs=[{'name': 'date', 'in': 'query', 'type': 'string', 'required': True, 'label': '조회 날짜'}],
+                            result_path='items', fields=[{'path': 'job_name', 'type': 'string', 'label': '작업 이름'}])
+        self.authoring_viewport(1920, 1080, overlay=False)
+        self.open_catalog()
+        row = '[data-api-action=open][data-id="%s"]'
+        chat = "document.querySelector('[data-ees-source-shell]').dataset.eesChatState"
+        split = "document.querySelector('[data-api-catalog]')?.dataset.apiSplit"
+        width = "document.querySelector('#ees-work-authoring-panel').getBoundingClientRect().width"
+
+        def layout():
+            return self.browser.evaluate("""(() => {
+              const box = e => { if (!e) return null; const r = e.getBoundingClientRect(); return {x:r.x, y:r.y, right:r.right, bottom:r.bottom, width:r.width}; };
+              const pane = document.querySelector('.ew-api-pane'), main = document.querySelector('.ew-api-main');
+              const area = document.querySelector('#ees-work-authoring-panel').getBoundingClientRect();
+              return {pane:box(pane), main:box(main), foot:box(document.querySelector('.ew-api-foot')),
+                current:[...document.querySelectorAll('.ew-api-row[aria-current=true] strong')].map(e => e.textContent),
+                rows:pane ? pane.querySelectorAll('.ew-api-row').length : 0,
+                address:!!pane?.querySelector('.ew-api-path')?.checkVisibility(),
+                toList:!!document.querySelector('[data-api-catalog] [data-api-action=list]')?.checkVisibility(),
+                title:(main || document.querySelector('[data-api-catalog]')).querySelector('.ew-api-head h2')?.textContent || '',
+                overflow:document.documentElement.scrollWidth > innerWidth ||
+                  [...document.querySelectorAll('[data-api-catalog] *')].some(e => e.getClientRects().length && e.getBoundingClientRect().right > area.right + 1)};
+            })()""")
+
+        # With the chat docked the work area is 1104px: the API replaces the list and links back to it.
+        self.click(row % api['id'])
+        self.wait("document.querySelector('[data-api-screen=detail]')?.textContent.includes('연결된 작업이 없습니다.')")
+        single = layout()
+        self.assertEqual((self.browser.evaluate(split), single['pane'], single['toList'], single['title']),
+                         ('false', None, True, '백업 결과 조회'), single)
+        # Closing the chat widens it to 1664px: the same API stays open and the list appears beside it.
+        self.click('[data-ees-chat-close]')
+        self.wait(chat + " === 'closed' && " + width + " === 1664 && " + split + " === 'true'")
+        beside = layout()
+        self.assertEqual((beside['pane']['x'], beside['pane']['width'], beside['main']['x'], beside['main']['right']),
+                         (256, 420, 676, 1920), beside)
+        self.assertEqual((beside['current'], beside['rows'], beside['title']), (['백업 결과 조회'], 2, '백업 결과 조회'), beside)
+        # The 420px list shows the method and the name; the opened API is marked, so no link back to the list is needed.
+        self.assertFalse(beside['address'] or beside['toList'] or beside['overflow'], beside)
+        self.screenshot('ws3-ws4-wide')
+
+        self.click('[data-api-action=edit]')
+        self.wait("document.querySelector('[data-api-screen=edit][data-api-split=true] [data-api-mapping]')")
+        self.wait("document.activeElement?.matches('.ew-api-main .ew-api-head h2')")
+        editing = layout()
+        self.assertAlmostEqual(editing['foot']['bottom'], editing['main']['bottom'], delta=1, msg=editing)
+        self.assertGreaterEqual(editing['foot']['x'], editing['main']['x'])
+        self.assertFalse(editing['overflow'], editing)
+        self.screenshot('ws3-ws5-wide')
+
+        # Another row is a way out of the editor, so unsaved changes are confirmed first, as with Cancel.
+        changed = '완료 시각과 처리 상태를 함께 확인합니다.'
+        self.fill('[name=api-purpose]', changed)
+        self.click(row % retry['id'])
+        self.wait("document.activeElement?.matches('.ew-api-main [data-api-action=stay]')")
+        self.assertEqual(self.read('[data-api-catalog]', 'dataset.apiScreen'), 'edit')
+        self.click('[data-api-action=stay]')
+        self.wait("document.querySelector('[name=api-purpose]')?.value === " + json.dumps(changed))
+        # What was typed and the place the editor was scrolled to survive the list leaving and returning
+        # as the chat opens and closes. A short window makes the settings longer than the work area.
+        self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 600, 'deviceScaleFactor': 1, 'mobile': False})
+        self.wait("innerHeight === 600 && document.querySelector('.ew-api-main').scrollHeight > document.querySelector('.ew-api-main').clientHeight + 140")
+        self.browser.evaluate("document.querySelector('.ew-api-main').scrollTop = 140")
+        self.click('[data-ees-chat-toggle]')
+        self.wait(chat + " === 'docked' && " + width + " === 1104 && " + split + " === 'false'")
+        self.assertEqual((self.read('[name=api-purpose]', 'value'), layout()['pane']), (changed, None))
+        self.assertEqual(self.read('#ees-work-designer > .ew-author-scroll', 'scrollTop'), 140)
+        self.click('[data-ees-chat-close]')
+        self.wait(chat + " === 'closed' && " + width + " === 1664 && " + split + " === 'true'")
+        self.assertEqual((self.read('[name=api-purpose]', 'value'), self.read('.ew-api-main', 'scrollTop')), (changed, 140))
+        self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
+        self.wait('innerHeight === 1080')
+        self.click(row % retry['id'])
+        self.wait("document.querySelector('.ew-api-main [data-api-action=discard]')")
+        self.click('[data-api-action=discard]')
+        self.wait("document.querySelector('[data-api-screen=detail] .ew-api-main .ew-api-head h2')?.textContent === '실패 백업 재처리'")
+        self.assertEqual(layout()['current'], ['실패 백업 재처리'])
+        # The opened row keeps keyboard focus, so the next row is one key away.
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('.ew-api-pane .ew-api-row[aria-current=true]')"))
+        apis = asyncio.run(self.server.workflow.api_catalog.state(self.server.user))['apis']
+        self.assertEqual(next(item for item in apis if item['id'] == api['id'])['purpose'], purpose)
+        # Service management opened from the list returns to the opened API.
+        self.click('[data-api-action=services]')
+        self.wait("document.querySelector('dialog[data-api-modal]')?.matches(':modal')")
+        self.click('dialog[data-api-modal] [data-api-action=list]')
+        self.wait("document.querySelector('[data-api-screen=detail][data-api-split=true] .ew-api-main .ew-api-head h2')?.textContent === '실패 백업 재처리'")
+
     def test_open_workflow_connect_apis_and_persist_handoff(self):
         service = self.register_service('EMS 설비 이력')
         reader = self.seed_api(service, 'GET', 'https://ems.example/equipment/{equipmentId}/alarms',
