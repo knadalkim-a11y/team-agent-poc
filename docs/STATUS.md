@@ -3,10 +3,11 @@
 ## 2026-11-17 · 업무 플로우 등록 준비(사용자 계획 ②) · 워크스페이스 2판 4단계 병합
 
 - **요청·기준:** 사용자가 4단계는 “PR 만들고 통과하면 병합”을, ②에서 등록할 사람은 “시스템 공용 계정의 담당자”를 골랐다(2026-11-17). 4단계의 결정 네 가지는 권장안대로다(제품 전체, 지금 글꼴 유지, 가운데 흰 바탕, 밝은 모드만). [4단계 계약](mockups/ees-work/TASK.md#workspace-product-step4-20261117).
-- **병합:** 1단계 [PR #143](https://github.com/knadalkim-a11y/team-agent-poc/pull/143) `89247a7`, [PR #142](https://github.com/knadalkim-a11y/team-agent-poc/pull/142) `5efd0a1`, 2단계 [PR #144](https://github.com/knadalkim-a11y/team-agent-poc/pull/144) `93ec537`, 기록 [PR #145](https://github.com/knadalkim-a11y/team-agent-poc/pull/145) `42e86ce`, 3단계 [PR #146](https://github.com/knadalkim-a11y/team-agent-poc/pull/146) `efd0214`, 4단계 [PR #147](https://github.com/knadalkim-a11y/team-agent-poc/pull/147) `3b7c653`. [1단계](mockups/ees-work/TASK.md#workspace-product-step1-20261116)·[2단계](mockups/ees-work/TASK.md#workspace-product-step2-20261117)·[3단계](mockups/ees-work/TASK.md#workspace-product-step3-20261117) 계약. 워크스페이스 2판의 네 단계가 모두 main에 있다.
+- **병합:** 1단계 [PR #143](https://github.com/knadalkim-a11y/team-agent-poc/pull/143) `89247a7`, [PR #142](https://github.com/knadalkim-a11y/team-agent-poc/pull/142) `5efd0a1`, 2단계 [PR #144](https://github.com/knadalkim-a11y/team-agent-poc/pull/144) `93ec537`, 기록 [PR #145](https://github.com/knadalkim-a11y/team-agent-poc/pull/145) `42e86ce`, 3단계 [PR #146](https://github.com/knadalkim-a11y/team-agent-poc/pull/146) `efd0214`, 4단계 [PR #147](https://github.com/knadalkim-a11y/team-agent-poc/pull/147) `3b7c653`, 등록 화면 문구 [PR #148](https://github.com/knadalkim-a11y/team-agent-poc/pull/148) `06cccd3`. [1단계](mockups/ees-work/TASK.md#workspace-product-step1-20261116)·[2단계](mockups/ees-work/TASK.md#workspace-product-step2-20261117)·[3단계](mockups/ees-work/TASK.md#workspace-product-step3-20261117) 계약. 워크스페이스 2판의 네 단계가 모두 main에 있다.
 - **4단계 결과:** 테마 시트 ‘나’의 색 값이 제품 전체의 밝은 모드에 들어갔다. 가운데는 흰색, 강조색은 먹색, 왼쪽 메뉴는 `#F4F5F6`이다. PR 리뷰에서 나온 결함(보조 글자색 변수 두 곳)을 고쳤다. 최종 커밋 CI와 병합 뒤 main CI가 첫 시도에 통과했다. [검증·결함·CI](../evals/figma-product-parity-20261111.md#workspace-product-step4-20261117).
 - **현재(②):** 담당자 권한이 있는 일반 계정으로 처음 등록하는 과정을 실제 제품에서 따라갔다. 도구·API 없이 등록·게시·실행·판정까지 된다. 걸린 점 가운데 문구와 안내를 고쳤다(편집 화면에 남은 ‘워크플로우’ 표기 네 곳, 내용 확인의 ‘P/T/J’ 문구, 사용 안내에 [처음 업무 절차 등록하기](07-team-quickstart.md#first-procedure-20261117)). [PR #148](https://github.com/knadalkim-a11y/team-agent-poc/pull/148)로 main에 넣는다. 사용자가 이 PR은 CI 없이 병합하라고 지시해(2026-11-17) GitHub CI 결과를 기다리지 않았다. [따라간 순서·고친 것·남긴 것](../evals/figma-product-parity-20261111.md#first-procedure-walkthrough-20261117).
 - **검증(②의 문구 수정):** 개발 환경에서 다시 빌드해 제품 브라우저 시험 16개 모듈 178개, Node 778개, 서비스·플랫폼·계약 묶음, 시험 ID 감사, 문서 점검이 통과했다. 이 변경의 GitHub CI 결과와 Windows에서의 시험은 확인하지 않았다(사용자 지시에 따른 예외). 사내 적용·사용자 확인은 미실행이다.
+- **사내 적용본(사용자 보고, 2026-11-17):** 사내에 배포된 것은 `d0f205874936`(main의 [PR #140](https://github.com/knadalkim-a11y/team-agent-poc/pull/140) 병합, 2026-11-16)이다. 그 뒤 main에 들어간 여덟 병합(#141~#148: 워크스페이스 2판 1~4단계, #142의 작업 지침·참고 문서 오류 수정, 등록 화면 문구)은 사내에 적용하지 않았다. 담당자 권한 판정은 `d0f2058`과 main이 같고, 그 판에서는 만들기 단추 이름이 ‘＋ 새 워크플로우’다.
 - **사용자가 밝힌 순서(2026-11-17):** ① 가운데를 흰색으로 바꾸고 관련 색을 맞춘다(4단계로 끝남). ② API 연동보다 먼저, 사람들이 이 시스템에서 자기 업무 플로우를 등록할 수 있게 한다. ③ 그 뒤에 API를 등록할 수 있게 한다. ④ ②에서 등록한 업무 플로우에 API를 맞춰 연계한다. ①②는 최대한 빠르게 진행하기를 원한다.
 - **결정 필요:**
   - ②를 실제로 막는 것은 권한이다. 계정을 시스템 담당자로 지정하는 화면이 없다(2026-11-03에 지정 방법을 결정 대기로 남겼고 2026-11-06에 접근 범위 화면을 없앴다). 관리자 계정, 전에 권한을 받은 계정, 담당 그룹에 든 계정만 ‘새 업무 절차’ 단추가 보인다. 사내의 시스템 공용 계정에 그 단추가 보이는지 사용자가 확인하고, 보이지 않으면 지정 방법(관리자용 최소 화면 또는 관리자가 한 번 실행하는 명령)을 정한다.
@@ -17,7 +18,7 @@
   - 공식 Figma 페이지는 2판과 테마 색을 반영하지 않았다.
   - CI의 브라우저 시험이 2026-11-17에 세 번(main 실행 566·568, PR 실행 575) 첫 시도에서 실패했다. 566·568은 다시 돌려 통과했고 575는 다음 커밋의 실행이 통과했다. 원인은 확인하지 못했다. 같은 초점 시험이 568과 575에서 두 번 실패했다. 이 개발 환경에서는 창 크기를 바꾸는 시험 하나가 3단계 이전 코드에서도 8번 중 3번 실패한다. [기록](../evals/navigation-motion-20261102.md#narrow-viewport-load-20261117).
   - PR #142의 CI는 첫 시도에서 Windows의 프로세스 종료 시험 한 건이 접근 거부로 실패했고 다시 돌려 통과했다. 원인은 확인하지 못했다. [기록](../evals/tool-authoring-20261105.md#workspace-resource-and-guide-20261116).
-- **다음 하나:** 사용자가 사내의 시스템 공용 계정에서 ‘새 업무 절차’ 단추가 보이는지 확인해 알려 주고, 보이지 않으면 담당자 지정 방법을 정한다.
+- **다음 하나:** 사용자가 지금 사내 배포본에서 시스템 공용 계정으로 `워크스페이스 → 업무 절차`의 ‘＋ 새 워크플로우’ 단추가 보이는지 확인해 알려 주고, 보이지 않으면 담당자 지정 방법을 정한다. 최신 main의 사내 적용은 사용자가 따로 정한다.
 
 ## 2026-11-16 · 배포 후 워크스페이스 자료와 기본 API 열기
 
