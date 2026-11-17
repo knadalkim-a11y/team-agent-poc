@@ -12,6 +12,7 @@ import hashlib
 import io
 import json
 import os
+import re
 from pathlib import Path
 import stat
 import sys
@@ -183,7 +184,9 @@ def _metadata(read, version=branding.VERSION):
         frontend = json.loads(read(app + "version.json"))
     except (ValueError, UnicodeError):
         raise CustomizationError("The selected frontend version metadata is invalid.") from None
-    if not isinstance(frontend, dict) or frontend.get("version") != version:
+    browser = frontend.get("version") if isinstance(frontend, dict) else None
+    if browser != version and not (version == branding.VERSION and isinstance(browser, str)
+                                   and re.fullmatch(re.escape(version) + r"\.ui\.[a-f0-9]{64}", browser)):
         raise CustomizationError("The selected app and frontend versions differ.")
     return sorted(metadata.get_all("Requires-Dist", []))
 

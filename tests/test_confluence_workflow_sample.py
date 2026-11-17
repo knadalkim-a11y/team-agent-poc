@@ -264,6 +264,31 @@ class ConfluenceWorkflowContractTests(unittest.TestCase):
             self.assertTrue(asyncio.run(guarded(definition={'nodes':{'j':{'api_binding':{'operation_id':'api'}}}}))['ok'])
             original.assert_awaited_once()
 
+    def test_guide_catalog_without_confluence_or_model_connection(self):
+        self.enterContext(patch.dict(os.environ, {'EES_WORK_API_SERVICES': '{}', 'EES_WORK_GUIDE_SYSTEM': 'EMS'}))
+        self.webui = self.enterContext(workflow_server(self.db.with_name('unconfigured.sqlite3'),
+                                       self.users, confluence_guide=True))
+        service = workflow._production_service()
+        self.enterContext(patch.object(service, 'group_list_lookup', return_value=[{'id': 'team', 'name': '팀'}]))
+        self.command('operations', 'api_save', actor='admin', service_name='그룹 전용',
+                     api={'name': '제한된 조회', 'purpose': '권한 확인', 'method': 'GET',
+                          'url': 'https://restricted.example/status', 'group_ids': ['team']})
+        model = AsyncMock()
+        model.available.side_effect = workflow.WorkflowError('model_unavailable', '모델을 조회할 수 없습니다.')
+        self.enterContext(patch.object(service.operations, 'model', model))
+        self.assertEqual(self.call('operations', check=False)['error']['code'], 'model_unavailable')
+        model.available.reset_mock()
+        guide = self.call('workspace', query={'system_id': 'EMS'})['workflows']
+        self.assertEqual([(w['id'], w['published_version']) for w in guide], [('guide-confluence-documents', 1)])
+        catalog = self.call('api-catalog', actor='operator')['api_catalog']
+        self.assertCountEqual([row['name'] for row in catalog['apis']], ['기준 문서 확인', '하위 문서 목록 조회'])
+        self.assertEqual([row['id'] for row in catalog['services']], ['confluence-readonly-pilot'])
+        self.assertFalse(catalog['can_manage'])
+        self.assertEqual(len(self.call('api-catalog')['api_catalog']['apis']), 3)
+        self.assertEqual(self.http.get(self.webui + '/api/ees-work/api-catalog').status_code, 401)
+        model.available.assert_not_awaited()
+        self.assertEqual(self.provider.records, [])
+
     def test_clean_deployment_publishes_runnable_guide_without_registration(self):
         database = self.db.with_name('fresh-guide.sqlite3')
         self.assertFalse(database.exists())
