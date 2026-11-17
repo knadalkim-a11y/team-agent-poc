@@ -343,6 +343,7 @@ font:getComputedStyle(e).fontFamily,display:getComputedStyle(e).display,overflow
 
     def run(self):
         self.setup()
+        verify_workspace_entry_points(self)
         # Detailed work authoring/runtime/UI assertions are deliberately kept
         # in one gate so screenshots always correspond to the tested wheel.
         integrated_flow(self)
@@ -684,6 +685,26 @@ def authored_workflow_flow(g):
     assert sealed_settings(admin['id'],connected['native_id']) == admin_sealed
     g.record('Upgraded Native CLI keeps authorized historical evidence and rejects code-tool administration',
              run_id=run_id,tool_version=pin['version'],decisions=1,legacy_settings_visible=False)
+
+
+def verify_workspace_entry_points(g):
+    g.click('#ees-work-entry [data-mode=author]')
+    for name, listing in (('skills', '/api/v1/skills/list'), ('knowledge', '/api/v1/knowledge/search')):
+        assert isinstance(g.api(listing)['items'], list), listing
+        path = '/workspace/' + name
+        ready = 'location.pathname === ' + json.dumps(path) + ' && document.querySelector("#workspace-container input")'
+        g.click('#ees-work-entry [data-action=native_open][data-native-id=' + name + ']')
+        g.wait(ready)
+        g.navigate(path)
+        g.wait(ready)
+        g.click('#ees-work-entry [data-action=procedures]')
+        g.wait("document.querySelector('[data-author-action=open][data-id=guide-confluence-documents]')")
+    g.click('#ees-work-entry [data-action=tools]')
+    for key in ('guide-confluence-page', 'guide-confluence-children'):
+        g.wait("document.querySelector('[data-api-action=open][data-id=" + key + "]')?.checkVisibility()")
+    g.click('#ees-work-entry [data-action=mode][data-mode=work]')
+    g.wait("document.querySelector('.ew-work-home')")
+    g.record('Skills and Knowledge list navigation and direct loads with shipped Confluence catalog visible')
 
 
 def integrated_flow(gate):

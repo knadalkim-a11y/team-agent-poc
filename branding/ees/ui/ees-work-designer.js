@@ -319,8 +319,9 @@ function createWorkDesigner({callbacks}) {
     setBusy(busy);
   }
   function procedureCreateHTML(){const scope=procedureScopes[procedureChoice]||{factoryName:factories().find(item=>item.id===selection.factory_id)?.name||'전체 공장',system:selection.system_id||'시스템 미지정'};return `<form id="ew-procedure-create" class="ew-workflow-create"><p class="ew-author-muted">새 업무 절차의 초기 범위: ${esc(scope.factoryName)} · ${esc(scope.system)}</p><div class="ew-author-fields"><label><span class="ew-job-field-label">업무 절차 이름 <small class="ew-job-field-required">필수</small></span><input id="ew-procedure-name" name="name" value="${esc(procedureName())}" required maxlength="160" autocomplete="off" aria-describedby="ew-procedure-name-hint"><small id="ew-procedure-name-hint" class="ew-author-muted">160자 이내</small></label><label>업무 목적<textarea id="ew-procedure-description" name="description">${esc(procedureDescription())}</textarea></label></div><div class="ew-procedure-create-actions">${b('취소','procedure_cancel')}${b('추가','procedure_create',`data-mutation class="ew-primary" ${procedureCreateReason()?'disabled':''}`)}</div></form>`;}
-  function emptyScopeGuide(){
-    if(!guideEnabled()||scopeLoading||procedureStart||search||allWorkflows().length||!canAuthor())return null;
+  function scopeGuideTemplate(){
+    if(!guideEnabled()||scopeLoading||procedureStart||search||!canAuthor())return null;
+    if(allWorkflows().some(workflow=>workflow.id==='guide-confluence-documents'))return null;
     if(!capability().is_admin&&!capability().managed_systems?.includes(selection.system_id))return null;
     return procedureExamples().find(item=>item.id==='confluence_documents');
   }
@@ -341,7 +342,7 @@ function createWorkDesigner({callbacks}) {
     const list=scopeLoading?'<p role="status" class="ew-author-muted" data-ees-scope-loading="panel">받는 중</p>'
       :`<div class="ew-author-list">${rows.length?'<div class="ew-list-thead" aria-hidden="true"><span>이름</span><span>분류</span><span>단계 · 작업</span><span>게시</span><span></span></div>':''}${rows.map(row).join('')}</div>`;
     const empty=!scopeLoading&&!rows.length?(search?'<div class="ew-author-empty">검색 결과가 없습니다. 검색어를 바꿔 주세요.</div>':'<div class="ew-author-empty">아직 업무 절차가 없습니다.</div>'):'';
-    return `<div class="ew-list-toolbar"><label class="ew-visually-hidden" for="ew-author-search">업무 절차 찾기</label><input id="ew-author-search" type="search" value="${esc(search)}" placeholder="이름으로 찾기"><h2 class="ew-list-count">${count}</h2>${canAuthor()&&!creating?b('새 업무 절차','create','class="ew-new-workflow ew-primary"'):''}</div>${creating?procedureCreateHTML():''}${list}${empty}${emptyScopeGuide()?b('가이드로 시작','guide_create','class="ew-author-link"'):''}`;
+    return `<div class="ew-list-toolbar"><label class="ew-visually-hidden" for="ew-author-search">업무 절차 찾기</label><input id="ew-author-search" type="search" value="${esc(search)}" placeholder="이름으로 찾기"><h2 class="ew-list-count">${count}</h2>${canAuthor()&&!creating?b('새 업무 절차','create','class="ew-new-workflow ew-primary"'):''}</div>${creating?procedureCreateHTML():''}${list}${empty}${scopeGuideTemplate()?b('가이드로 시작','guide_create','class="ew-author-link"'):''}`;
   }
   function isJobDetail(){return tab==='content'&&Boolean(editor&&nodes(editor).some(node=>node.id===selectedNode&&node.type==='j'));}
 
@@ -1307,7 +1308,7 @@ function createWorkDesigner({callbacks}) {
     else if(action==='suggestion_add'||action==='suggestion_edit')await editSuggestion(action==='suggestion_add'?null:Number(target.dataset.id));
     else if(action==='start_input_add'||action==='start_input_edit'){const root=nodes(editor).find(node=>node.type==='p');if(root)await editInput(target.dataset.id || '',root.id);}
     else if(action==='start_input_delete'){const root=nodes(editor).find(node=>node.type==='p'),field=root?.inputs?.find(input=>input.id===target.dataset.id);if(field&&await confirmDialog({title:'시작 입력을 삭제할까요?',html:`<p>${esc(field.name || field.id)} 입력 선언을 초안에서 삭제합니다. 기존 진행 건과 기록은 유지하며 남은 참조는 내용 확인에서 검사합니다.</p>`,confirmLabel:'입력 삭제'})){root.inputs=root.inputs.filter(input=>input.id!==field.id);dirty=true;stash();paint();}}
-    else if(action==='compare')await compare();else if(action==='create')await create();else if(action==='guide_create'){const guide=emptyScopeGuide();if(guide)await create(guide.id);}else if(action==='procedure_create')await createProcedure();else if(action==='edit_workflow')await editWorkflow();else if(action==='save')await command(actions.save,{definition:clone(editor),publication_state:publicationState});else if(action==='validate'){if(unsaved()){error='변경 내용을 저장한 뒤 내용 확인을 해 주세요.';paint();return;}await command(actions.validate);}
+    else if(action==='compare')await compare();else if(action==='create')await create();else if(action==='guide_create'){const guide=scopeGuideTemplate();if(guide)await create(guide.id);}else if(action==='procedure_create')await createProcedure();else if(action==='edit_workflow')await editWorkflow();else if(action==='save')await command(actions.save,{definition:clone(editor),publication_state:publicationState});else if(action==='validate'){if(unsaved()){error='변경 내용을 저장한 뒤 내용 확인을 해 주세요.';paint();return;}await command(actions.validate);}
     else if(action==='copy'){
       const boundary={epoch,key:key()},restoreCopyFocus=()=>{if(boundary.epoch===epoch&&boundary.key===key())host?.querySelector?.('.ew-procedure-menu > summary')?.focus?.({preventScroll:true});};
       // The copy action closes its menu, so return to its visible trigger.

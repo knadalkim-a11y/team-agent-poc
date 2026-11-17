@@ -298,6 +298,9 @@ class NativeUIHandler(BaseHTTPRequestHandler):
             if path == "/api/ees-work/operations" and self.server.workflow:
                 return self.send_workflow(asyncio.run(self.server.workflow.operations.state(self.server.user,
                     system_id=query.get("system_id", [""])[0], run_id=query.get("run_id", [""])[0])))
+            if path == "/api/ees-work/api-catalog" and self.server.workflow:
+                catalog = asyncio.run(self.server.workflow.api_catalog.state(self.server.user))
+                return self.send_workflow({"ok": True, "api_catalog": catalog})
             if path == "/api/ees-work/execution/state" and self.server.workflow:
                 return self.send_workflow(asyncio.run(self.server.workflow.execution_state(self.server.user,
                     case_id=query.get("case_id", [""])[0], run_id=query.get("run_id", [""])[0],

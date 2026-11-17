@@ -922,7 +922,13 @@ class SourceShellNativeTests(IntegratedNativeCase):
                     return handler.send_content(item)
             return original(handler)
 
+        created = []
+
         def retry_asset(handler):
+            if urlparse(handler.path).path in ('/api/v1/skills/create', '/api/v1/knowledge/create'):
+                body = json.loads(handler.rfile.read(int(handler.headers.get('Content-Length', '0'))))
+                created.append((urlparse(handler.path).path, body))
+                return handler.send_content(knowledge if 'knowledge' in handler.path else dict(skill, **body))
             if urlparse(handler.path).path == '/api/v1/knowledge/kb-ems/file/update':
                 body = json.loads(handler.rfile.read(int(handler.headers.get('Content-Length', '0'))))
                 retry_posts.append(body)
@@ -986,6 +992,23 @@ class SourceShellNativeTests(IntegratedNativeCase):
                         self.wait("document.querySelectorAll('[data-ees-file-status=completed]').length === 2 && !document.querySelector('[data-ees-file-retry]')")
                         self.assertEqual(retry_posts, [{'file_id': failed['id']}])
                         self.screenshot('parity-b7-after-retry-1920')
+            # A new item starts readable by everyone (2026-11-17 decision); the access dialog narrows it.
+            self.navigate('/workspace/skills/create')
+            self.wait("document.querySelector('[data-ees-asset=skill-editor] [data-ees-asset-access] [data-ees-access]')?.dataset.eesAccess === 'public'")
+            self.fill('[data-ees-asset=skill-editor] [data-ees-asset-head] input', 'New instruction')
+            self.fill('#ees-skill-body', 'Check the request first.')
+            self.click('[data-ees-asset=skill-editor] [data-ees-asset-foot] button[type=submit]')
+            self.wait("location.pathname === '/workspace/skills' && document.querySelector('[data-ees-asset=skills] [data-ees-create]')")
+            self.navigate('/workspace/knowledge')
+            self.click('[data-ees-asset=knowledge-list] [data-ees-create]')
+            self.wait("document.querySelector('.modal form textarea')")
+            self.fill('.modal form input', 'New documents')
+            self.fill('.modal form textarea', 'Documents for a new line.')
+            self.click('.modal form button[type=submit]')
+            self.wait("location.pathname === '/workspace/knowledge/kb-ems'")
+            self.assertEqual([(path, body['name'], body['access_grants']) for path, body in created],
+                             [('/api/v1/skills/create', 'New instruction', everyone),
+                              ('/api/v1/knowledge/create', 'New documents', everyone)])
             # Narrower work areas keep every control inside the pane: the list drops its two
             # secondary columns and the side column moves under the main one.
             for width, height in ((1366, 768), (480, 800)):

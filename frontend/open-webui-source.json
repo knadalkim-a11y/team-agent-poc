@@ -41,12 +41,13 @@
     "src/lib/components/ees/state.ts": "d4eee064c100832b93cfc7b984be708df871efcaf8ef009a0f0894e7f1afa712",
     "src/lib/components/layout/Sidebar.svelte": "bbc1ea199bae6144d5064a021ddb482b76f1290ea519d3cdd31846aafe63ac81",
     "src/lib/components/workspace/Knowledge.svelte": "1de505eed0b17c74cf8d10a0e84b5916538cf2de08d8b9f1b6fa93f4ebd7f6a0",
+    "src/lib/components/workspace/Knowledge/CreateKnowledgeBase.svelte": "6e8c0ffa2cd66e6fb11502b9498e67ae4daa78914e01b7632b204d6581709bc7",
     "src/lib/components/workspace/Knowledge/KnowledgeBase.svelte": "66dcfd61314a19e02d5038a3e302d6445e0f156bd2da9adc06ece37056315278",
     "src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte": "fa80b08dfa9cc79c1bb98e794f52b72355fc5f0cc0d1ad586504b5ab7531441a",
     "src/lib/components/workspace/Models.svelte": "96f0dbbde04cdd021df0cfdd15ec8e6961c0151963692f4f2d340e8ec9c41470",
     "src/lib/components/workspace/Models/ModelEditor.svelte": "8254ac12ed49504d9bfa7f7e2a5753174c879fb88cf54ec27b0e07371c57ea03",
     "src/lib/components/workspace/Skills.svelte": "438b2d0503630070deb11fbf8e8a908d64ae1cfda2d9e9de1b8b0ea890152189",
-    "src/lib/components/workspace/Skills/SkillEditor.svelte": "085393356626caa191681bdeda5aa5a144f981d6fb0a8db038842d376e20516c",
+    "src/lib/components/workspace/Skills/SkillEditor.svelte": "82b15238110966806c3f8c0f2d9fbaa9f0f33951208bf6b115ed3fcc88d984ab",
     "src/lib/constants.ts": "0fd43314837a2d7775810c3f08fc82b8042c34a5b6e52f1a7e4513f303a07b5d",
     "src/lib/i18n/locales/ko-KR/translation.json": "4d0a0bb7d9a04309d5893aef8d6b90578e9029e79fabe71c46e89427e0a0ed93",
     "src/routes/(app)/+layout.svelte": "cd5c01d65ef4b75e85db3cda21f02bc8968f9b187db9e95f184d03f31a94c126",
@@ -56,13 +57,13 @@
     "src/routes/(app)/workspace/+layout.svelte": "9d4b91035a0e7a7b3650d4db4c2ca6df0735981662b9b266944540c02b90917f",
     "src/routes/(app)/workspace/tools/+layout.ts": "00d6b19ff20d96795606d188f8b9df9ec8a2d8015702f8fd9f0b0fb9e50e83b8",
     "src/routes/+layout.svelte": "b9d4891c49d7bd40ae70abc1fa4b78860f1678cf7ead94f949fdb13e0d48be4c",
-    "svelte.config.js": "95f9ac49b1c1c3c14f23f5a06300de631d974f725ce8c4958f799d42955e1f37",
+    "svelte.config.js": "49f9703d56eebe0c2f7171410939354b7b1414524d7d91c0a96b6ef97d5c8f74",
     "vite.config.ts": "793bfdc367867f486b504434bbbb79d0b7c69a5b4bd8572c0368138b60598bd2"
   },
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "370d5a5c6fd45048458bfc0133c70766e6dcc023dd150b25d66c37b99fd25056"
+      "sha256": "17fd2cb0c27e03f07f7e735993dfd5d750b6291a6781da7efa93af57dc7a3461"
     }
   ],
   "pyodide_files": {
@@ -145,6 +146,7 @@
     "src/lib/components/common/SplitCreateButton.svelte": "b2a4c7bc542c262f52f8130ae9c70bddc3859f669fc2b581222e09006475b5c8",
     "src/lib/components/layout/Sidebar.svelte": "e7c417808351138ea2ae1566412f4ead696df4a68212402d024010925f49a753",
     "src/lib/components/workspace/Knowledge.svelte": "9fbd8ec0e20b41bd25a56f87ac5d4a56fe9fb22c997ac462d67e0a0cbcdd1af8",
+    "src/lib/components/workspace/Knowledge/CreateKnowledgeBase.svelte": "0e0d78859be3b99aae53df33f3fdb70c4e71f675295c563289937d2dbc06b2fc",
     "src/lib/components/workspace/Knowledge/KnowledgeBase.svelte": "fd722ed3293b425a3de1366eeeadf3851d7ca212e72201543b84648b94e3dcf2",
     "src/lib/components/workspace/Knowledge/KnowledgeBase/Files.svelte": "e6e19eed0b071b497463b7705a6ed4bdcfce5a035aede4ac713b401723e2bfee",
     "src/lib/components/workspace/Models.svelte": "f9304918c5c3ab02c48ad0694cf1f8d23abf4553e3baf7e04e3fa8277bb38855",

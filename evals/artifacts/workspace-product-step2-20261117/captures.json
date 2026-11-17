@@ -14,8 +14,8 @@
  },
  "product": {
   "program": "0.11.3+ees.14",
-  "wheel_sha256": "c64e8b41d324bcd71f2a858e4308dd6def2bbd3e5db23b35883d4a717d86fac3",
-  "built_from": "the source patch and branding/ees sources of the commit that adds this file (all 143 build inputs matched the build manifest before committing), Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0, npm 10.9.2",
+  "wheel_sha256": "9deffe72d8fb8875d97d53ff7651f96143fc47f01f810975a359975df433a0a2",
+  "built_from": "the source patch and branding/ees sources of the commit that last changed this file (all build inputs matched the build manifest before committing), Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0, npm 10.9.2",
   "server": "tests/native_ui_fixture.py: the built frontend with synthetic sign-in, chat and model, and the real workflow service on a temporary database",
   "taken_by": "tests/test_ees_source_shell_native.py: test_figma_native_asset_pages_render_real_entities_inside_the_three_panel_shell",
   "browser": "Chromium 153 headless, device scale factor 1",
@@ -28,28 +28,28 @@
  },
  "files": {
   "product-WS6-1920.png": {
-   "sha256": "7d58ea29bc26d3ab3a933d11e0efcf0d4c7ed0d16de9b0aacafbacde960b5586",
+   "sha256": "9286423bb9a2d5f5a1112fc3254dea5d63c7bc346b853fcea99801e8c3a1dc40",
    "size": [
     1920,
     1080
    ]
   },
   "product-WS6-480.png": {
-   "sha256": "8daa4b0995f31303fa52fcdbcd5c57dc0b43dacdc9bc0f90cd599a5eb827eb24",
+   "sha256": "2bb8b6bddde24b8782b34123685c714b4978a1bf5313bbba0f968f36bf245872",
    "size": [
     480,
     800
    ]
   },
   "product-WS7-1366.png": {
-   "sha256": "d2b48ab750961d93e2b0cfabb7b0a0e30192f987c0f16040dbb6936f6ab86c38",
+   "sha256": "1de968143367f016831925e0319a70219ac55716ed2ccf9a596f27e5ed69e113",
    "size": [
     1366,
     768
    ]
   },
   "product-WS7-1920.png": {
-   "sha256": "521818007f8a11384ac9a866582bd9f79f7c4a8d72818cd6d6123af9373e48c6",
+   "sha256": "1a5ab9bc80efea45b79f6a86f4f4a3b1b1e453e17564df6487c80f9358f29a36",
    "size": [
     1920,
     1080
@@ -70,18 +70,19 @@
    ]
   },
   "product-WS9-1920.png": {
-   "sha256": "4d7ac81d04fef45d096f6fc7e7b99c2132d68ecfc96d146d12da5eec4732e2ae",
+   "sha256": "501a7e671bd1edee469ceb2eeb9cc04ac82e2a2d1fcb5db46905e6881238c563",
    "size": [
     1920,
     1080
    ]
   },
   "product-WS9-480.png": {
-   "sha256": "a69bc6313464aaa5179487ad9bb9dd6550c25b757569d4908da2535267d0a47c",
+   "sha256": "83bc6496291a10c73cd06e866f31c565f51b898f914da44c456f703675952a7f",
    "size": [
     480,
     800
    ]
   }
- }
+ },
+ "revised": "Retaken from the wheel built after PR #142 was merged into this branch and new items were made to start readable by everyone. The first captures are in commit dee2260."
 }

@@ -9,7 +9,7 @@ import json
 import os
 from pathlib import Path
 import tempfile
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 from confluence_provider import CHILDREN, PAGE, PAGE_ID, confluence_provider
 from ees_work_integrated_fixture import IntegratedNativeCase
@@ -502,8 +502,20 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
             panel = self.text('#ees-work-designer')
             for label in ('기존 도구 관리','이전 방식 도구','기존 도구에서 가져오기','전환 전 코드 도구'):
                 self.assertNotIn(label, panel)
-        self.click('#ees-work-designer [data-action=refresh]')
-        self.wait("document.querySelector('[data-api-action=open][data-id=guide-confluence-page]')")
+        # The guide catalog has an independent read, including on retry after
+        # an incomplete catalog response. Other integrations can stay offline.
+        with patch.object(self.server.workflow.operations, 'state', new_callable=AsyncMock) as operations:
+            operations.return_value = {'ok': False, 'error': {'code':'unavailable','message':'운영 상태 조회 실패'}}
+            with patch.object(self.server.workflow.api_catalog, 'state', new_callable=AsyncMock,
+                              return_value={'services': []}) as catalog:
+                self.click('#ees-work-designer [data-action=refresh]')
+                self.wait("document.querySelector('#ees-work-designer [data-action=refresh]')?.checkVisibility()")
+                self.refresh()
+                catalog.assert_awaited()
+            self.click('#ees-work-designer [data-action=refresh]')
+            self.wait("document.querySelector('[data-api-action=open][data-id=guide-confluence-page]')")
+            self.assertEqual(self.browser.evaluate("document.querySelectorAll('[data-api-screen=list] .ew-api-row').length"), 2)
+            operations.assert_not_awaited()
         self.click('[data-api-action=open][data-id=guide-confluence-page]')
         # A path is shown with its service; the route keeps the base-address wording as its description.
         self.assertEqual(self.text('[data-api-screen=detail] .ew-api-route').split()[-1], '/{id}')

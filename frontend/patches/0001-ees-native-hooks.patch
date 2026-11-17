@@ -4609,6 +4609,24 @@ index 479efc6..69f2125 100644
  			{/if}
  		{:else}
  			<div class="w-full h-full flex justify-center items-center py-10">
+diff --git a/src/lib/components/workspace/Knowledge/CreateKnowledgeBase.svelte b/src/lib/components/workspace/Knowledge/CreateKnowledgeBase.svelte
+index 9734387..37a7820 100644
+--- a/src/lib/components/workspace/Knowledge/CreateKnowledgeBase.svelte
++++ b/src/lib/components/workspace/Knowledge/CreateKnowledgeBase.svelte
+@@ -23,7 +23,12 @@
+ 	let name = '';
+ 	let description = '';
+ 	/** @type {{ id?: string; principal_type: 'user' | 'group'; principal_id: string; permission: 'read' | 'write' }[]} */
+-	let accessGrants = [];
++	// New reference documents start readable by everyone; the access control below narrows it.
++	// Users who may not share with everyone keep the private start the server would enforce anyway.
++	let accessGrants =
++		$user?.permissions?.sharing?.public_knowledge || $user?.role === 'admin'
++			? [{ principal_type: 'user', principal_id: '*', permission: 'read' }]
++			: [];
+ 
+ 	const submitHandler = async () => {
+ 		loading = true;
 diff --git a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte b/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte
 index de04f3e..2d35417 100644
 --- a/src/lib/components/workspace/Knowledge/KnowledgeBase.svelte
@@ -5804,7 +5822,7 @@ index ca52980..1d95348 100644
  	</div>
  
 diff --git a/src/lib/components/workspace/Skills/SkillEditor.svelte b/src/lib/components/workspace/Skills/SkillEditor.svelte
-index ae0923d..a3a405f 100644
+index ae0923d..5dce434 100644
 --- a/src/lib/components/workspace/Skills/SkillEditor.svelte
 +++ b/src/lib/components/workspace/Skills/SkillEditor.svelte
 @@ -12,6 +12,8 @@
@@ -5824,7 +5842,18 @@ index ae0923d..a3a405f 100644
  	$: if (!edit && !clone && name) {
  		id = slugify(name);
  	}
-@@ -97,106 +100,147 @@
+@@ -74,6 +77,10 @@
+ 			description = skill.description || '';
+ 			content = skill.content || '';
+ 			accessGrants = skill?.access_grants === undefined ? [] : skill?.access_grants;
++		} else if (!edit && ($user?.permissions?.sharing?.public_skills || $user?.role === 'admin')) {
++			// A new work instruction starts readable by everyone; the access dialog narrows it.
++			// Users who may not share with everyone keep the private start the server would enforce anyway.
++			accessGrants = [{ principal_type: 'user', principal_id: '*', permission: 'read' }];
+ 		}
+ 	});
+ </script>
+@@ -97,106 +104,147 @@
  	}}
  />
  
@@ -6694,7 +6723,7 @@ new file mode 100644
 +	redirect(307, '/?ees-work=api-catalog');
 +};
 diff --git a/svelte.config.js b/svelte.config.js
-index 82e0595..6f11820 100644
+index 82e0595..b1e13a6 100644
 --- a/svelte.config.js
 +++ b/svelte.config.js
 @@ -9,6 +9,7 @@ const config = {
@@ -6710,7 +6739,7 @@ index 82e0595..6f11820 100644
  		// poll for new version name every 60 seconds (to trigger reload mechanic in +layout.svelte)
  		version: {
 -			name: (() => {
-+			name: process.env.EES_PROGRAM_VERSION || (() => {
++			name: process.env.EES_BROWSER_BUILD || (() => {
  				try {
  					return child_process.execSync('git rev-parse HEAD').toString().trim();
  				} catch {

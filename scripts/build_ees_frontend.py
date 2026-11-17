@@ -200,12 +200,18 @@ def _apply_ees(source, config, wheel):
         (ROOT / "branding" / "ees" / "assets" / "favicon.png").read_bytes())
 
 
-def _verify_output(files, config, mode):
+def _browser_build(version, inputs):
+    # SvelteKit compares this value before recovering a missing lazy route chunk.
+    fingerprint = _sha(json.dumps(inputs, sort_keys=True, separators=(",", ":")).encode("utf-8"))
+    return f"{version}.ui.{fingerprint}"
+
+
+def _verify_output(files, config, mode, inputs):
     app_dir = config["app_dir"] if mode == "ees" else "_app"
     if not {"index.html", app_dir + "/version.json"}.issubset(files):
         raise ValueError("Frontend output lacks its entry page or version.")
-    if mode == "ees" and json.loads(files[app_dir + "/version.json"].decode("utf-8")) != {"version": config["version"]}:
-        raise ValueError("Frontend program version differs from the Apply/Restore contract.")
+    if mode == "ees" and json.loads(files[app_dir + "/version.json"].decode("utf-8")) != {"version": _browser_build(config["version"], inputs)}:
+        raise ValueError("Frontend browser build differs from the reviewed source inputs.")
     if not any(name.startswith(app_dir + "/immutable/entry/") and name.endswith(".js") for name in files):
         raise ValueError("Frontend output lacks native Svelte entry modules.")
     if mode == "ees":
@@ -244,6 +250,7 @@ def build(source_dir, wheel, output_dir, *, baseline=False):
     env["npm_package_version"] = package_version
     if not baseline:
         env.update(EES_PROGRAM_VERSION=config["version"],
+                   EES_BROWSER_BUILD=_browser_build(config["version"], inputs),
                    APP_BUILD_HASH=config["commit"])
     try:
         _run(["node", "node_modules/vite/bin/vite.js", "build"], source, capture=False, env=env)
@@ -252,7 +259,7 @@ def build(source_dir, wheel, output_dir, *, baseline=False):
         # Preserve build failures and all source patches for inspection.
         (source / "static" / "pyodide" / "pyodide-lock.json").write_bytes(original_pyodide_lock)
     files = _inventory(source / "build")
-    _verify_output(files, config, mode)
+    _verify_output(files, config, mode, inputs)
     # Ensure patch/source/asset edits during a long build cannot be published as
     # if they came from the original reviewed inputs.
     if inputs != _source_inputs(mode) or source_files != {
@@ -310,7 +317,7 @@ def validate_frontend(frontend_dir, mode="ees"):
                if name.startswith("pyodide/")}
     if manifest.get("pyodide_files") != config["pyodide_files"] or pyodide != config["pyodide_files"]:
         raise ValueError("Frontend Pyodide payload differs from the pinned official release.")
-    _verify_output(files, config, mode)
+    _verify_output(files, config, mode, manifest["source_inputs"])
     return files
 
 

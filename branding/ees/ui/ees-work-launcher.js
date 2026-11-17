@@ -333,6 +333,26 @@
     state=next;stateKey=workspaceKey();targetLoading=false;scopeLoading=false;evidenceUnavailable=false;nativeCapabilities=null;cacheWorkspace();
   }
   const accessFailure=failure=>[401,403,404].includes(failure.status)||['auth_required','unauthorized','scope_forbidden','run_forbidden','access_denied','workflow_manage_forbidden','admin_required','workflow_not_found','run_not_found'].includes(failure.code);
+  async function workspaceOperations(workspace){
+    const authoring=workspace.confluence_guide===true&&selection.mode==='author';
+    const catalogOnly=authoring&&selection.tab==='tools';
+    const path=catalogOnly?'api-catalog':'operations?'+new URLSearchParams({system_id:selection.system_id,run_id:selection.run_id});
+    try{
+      return await api(path);
+    }catch(failure){
+      if(accessFailure(failure))throw failure;
+      // Procedure editors still need API bindings if execution or model state is unavailable.
+      if(authoring&&!catalogOnly){
+        try{
+          const {api_catalog}=await api('api-catalog');
+          return {api_catalog,error:failure.message};
+        }catch(catalogFailure){
+          if(accessFailure(catalogFailure))throw catalogFailure;
+        }
+      }
+      return {error:failure.message};
+    }
+  }
   async function refresh(){
     if(!screenAvailable())return null;clearTimeout(refreshTimer);const at=context(),n=++serial;
     try{
@@ -370,7 +390,9 @@
         if(at!==context()||n!==serial||!screenAvailable())return null;
         return refresh();
       }
-      let operations={};try{operations=await api('operations?'+new URLSearchParams({system_id:selection.system_id,run_id:selection.run_id}));}catch(failure){if(accessFailure(failure))throw failure;operations={error:failure.message};}if(at!==context()||n!==serial)return null;let legacy;if(selection.tab==='records'){try{legacy=await api('legacy');}catch(failure){legacy={error:failure.message};}if(at!==context()||n!==serial)return null;}acceptWorkspace(normalized({...result,operations,legacy}));if(selection.mode==='author'&&!workCanWorkspace(state.capabilities)){selection={...selection,mode:'work',tab:'overview'};}error='';readyRoute=route;syncNativeReturn();render();loadOptions();
+      const operations=await workspaceOperations(result);
+      if(at!==context()||n!==serial)return null;
+      let legacy;if(selection.tab==='records'){try{legacy=await api('legacy');}catch(failure){legacy={error:failure.message};}if(at!==context()||n!==serial)return null;}acceptWorkspace(normalized({...result,operations,legacy}));if(selection.mode==='author'&&!workCanWorkspace(state.capabilities)){selection={...selection,mode:'work',tab:'overview'};}error='';readyRoute=route;syncNativeReturn();render();loadOptions();
       const active=Object.values(state.run?.jobs || {}).some(job=>job.status==='running')||(state.operations?.scope_runs || []).some(scope=>['queued','running'].includes(scope.status))||(state.operations?.requests || []).some(request=>['requested','accepted','running','reported_complete'].includes(request.state));refreshTimer=setTimeout(refresh,active||busy?2500:30000);
       return state;
     }catch(failure){if(at!==context()||n!==serial)return null;error=failure.message;if(!nativePage()&&pendingNativeAction?.applied){pendingNativeAction=null;invalidateWorkspace();}if(nativePage()){nativeCapabilities={};nativeScope=null;}if(accessFailure(failure)){invalidateWorkspace();nativeCapabilities={};nativeScope=null;}
