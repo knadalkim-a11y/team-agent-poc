@@ -2537,7 +2537,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer [data-api-catalog] .ew-api-toolbar {display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin:0 0 12px;}
 #ees-work-designer [data-api-catalog] .ew-api-search {flex:1 1 220px;max-width:360px;}
 #ees-work-designer [data-api-catalog] .ew-api-search input {height:36px;padding:5px 12px;}
-#ees-work-designer [data-api-screen=list] .ew-api-toolbar h2 {margin-left:auto;color:var(--ees-text-secondary);font-size:13px;line-height:20px;font-weight:400;white-space:nowrap;}
+#ees-work-designer [data-api-catalog] .ew-api-toolbar h2 {margin-left:auto;color:var(--ees-text-secondary);font-size:13px;line-height:20px;font-weight:400;white-space:nowrap;}
 #ees-work-designer [data-api-screen=detail] .ew-api-head {align-items:flex-start;flex-wrap:nowrap;margin-bottom:12px;}
 #ees-work-designer [data-api-catalog] .ew-api-head>.ew-api-title {display:block;flex:1;min-width:0;}
 #ees-work-designer [data-api-catalog] .ew-api-title p {margin:4px 0 0;color:var(--ees-text-secondary);word-break:keep-all;overflow-wrap:anywhere;}
@@ -2613,3 +2613,30 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
   #ees-work-designer:not([data-author-tab=tools]) :is(.ew-list-thead>span:nth-child(2),.ew-list-thead>span:nth-child(3),.ew-list-cell) {display:none;}
   #ees-work-designer:not([data-author-tab=tools]) .ew-author-list .ew-author-row-main :is(strong,small) {white-space:normal;}
 }
+/* Workspace design mock 17, revision 2, step 3: from 1264px of work area the list stays beside the opened item.
+   The list takes 420px, the item takes the rest, and each side scrolls on its own. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-split=true] {display:grid;grid-template-columns:420px minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;}
+#ees-work-designer[data-author-split=true] > .ew-author-pane {grid-column:1;grid-row:1 / -1;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;padding:30px 16px 32px 32px;border-right:1px solid var(--ees-line-divider);}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-split=true] > .ew-author-scroll {grid-column:2;grid-row:1;width:auto;max-width:none;margin:0;padding:30px 32px 32px 24px;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-split=true] > footer {grid-column:2;grid-row:2;padding-inline:24px 32px;}
+#ees-work-designer :is(.ew-author-pane .ew-author-list>button,[data-api-catalog] .ew-api-row)[aria-current=true] {background:var(--ees-surface-selected);}
+/* In the 420px list: the name and its state only, one line each, and the new-item action is outlined. */
+#ees-work-designer[data-author-split=true] .ew-author-pane .ew-list-toolbar #ew-author-search {flex-basis:160px;}
+#ees-work-designer[data-author-split=true] .ew-author-pane .ew-list-toolbar .ew-new-workflow {background:var(--ees-surface-default);border-color:var(--ees-text-primary);color:var(--ees-text-primary);}
+#ees-work-designer[data-author-split=true] .ew-author-pane .ew-list-toolbar .ew-new-workflow:hover:not(:disabled) {background:var(--ees-surface-hover);}
+#ees-work-designer[data-author-split=true] .ew-author-pane :is(.ew-list-thead,.ew-author-list>button) {grid-template-columns:minmax(0,1fr) 64px;}
+#ees-work-designer[data-author-split=true] .ew-author-pane :is(.ew-list-thead>span:last-child,.ew-author-list>button>.ew-icon) {display:none;}
+#ees-work-designer[data-author-split=true] .ew-author-pane .ew-author-list .ew-author-row-main :is(strong,small) {white-space:nowrap;}
+/* API list beside an opened API. The two sides are the query containers, so each lays out for its own width. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer > .ew-author-scroll:has([data-api-split=true]) {display:flex;flex-direction:column;padding:0;overflow:hidden;scrollbar-gutter:auto;}
+#ees-work-designer > .ew-author-scroll:has([data-api-split=true]) > :not([data-api-catalog]) {flex:none;margin:12px 32px 0;}
+#ees-work-designer [data-api-catalog][data-api-split=true] {flex:1 1 0;max-width:none;min-height:0;margin:0;display:flex;flex-direction:column;}
+#ees-work-designer [data-api-split=true] > .ew-api-controls {flex:1 1 0;min-height:0;display:grid;grid-template-columns:420px minmax(0,1fr);grid-template-rows:minmax(0,1fr);}
+#ees-work-designer [data-api-split=true] :is(.ew-api-pane,.ew-api-main) {min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;container:ees-api-catalog / inline-size;}
+#ees-work-designer [data-api-split=true] .ew-api-pane {padding:30px 16px 32px 32px;border-right:1px solid var(--ees-line-divider);}
+#ees-work-designer [data-api-split=true] .ew-api-main {padding:30px 32px 32px 24px;}
+#ees-work-designer [data-api-split=true][data-api-screen=edit] .ew-api-main {display:flex;flex-direction:column;padding-bottom:0;}
+#ees-work-designer [data-api-split=true] .ew-api-pane .ew-api-btn.primary {background:var(--ees-surface-default);border-color:var(--ees-text-primary);color:var(--ees-text-primary);}
+#ees-work-designer [data-api-split=true] .ew-api-pane :is(.ew-api-thead,.ew-api-row) {grid-template-columns:56px minmax(0,1fr);}
+#ees-work-designer [data-api-split=true] .ew-api-pane .ew-api-row i {display:none;}
+#ees-work-designer [data-api-split=true] .ew-api-pane :is(.ew-api-name strong,.ew-api-description) {white-space:nowrap;}

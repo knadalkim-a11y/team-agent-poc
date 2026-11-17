@@ -1,5 +1,5 @@
 // The workspace owns storage and authorization. This controller owns the current editor only.
-function createWorkApiCatalog({catalog, command, changed, paint, sampleImport=()=>false, returnToJob, contextChanged, focus, newId}) {
+function createWorkApiCatalog({catalog, command, changed, paint, sampleImport=()=>false, returnToJob, contextChanged, focus, newId, wide=()=>false}) {
   const {esc}=workUI;
   const clone=value=>JSON.parse(JSON.stringify(value));
   const blank=()=>({name:'',purpose:'',service_id:'',method:'GET',url:'',inputs:[],result_path:'',fields:[]});
@@ -7,7 +7,9 @@ function createWorkApiCatalog({catalog, command, changed, paint, sampleImport=()
   let screen='list', id='', draft=null, original='', serviceName='', query='', filterGroups=new Set();
   let error='', status='', busy=false, advanced=false, missing=false, leave=false;
   let generation=0, serviceEdit=null, importing=null, impact=null, trial=null, example='', fromJob=false;
-  let receiptKey='', receiptId='', detailUses=null, detailVersion=0;
+  let receiptKey='', receiptId='', detailUses=null, detailVersion=0, leaveNext=null, serviceReturn='list';
+  // An opened API keeps the list in view when the work area is wide enough for both.
+  const split=()=>wide()&&['detail','edit','test'].includes(screen);
   const current=()=>catalog()||{services:[],apis:[],can_manage:false};
   const all=()=>current().apis||[], services=()=>current().services||[];
   const api=()=>all().find(item=>item.id===id);
@@ -36,25 +38,25 @@ function createWorkApiCatalog({catalog, command, changed, paint, sampleImport=()
       inputs:(record?.inputs||[]).slice(0,20).map(p=>p.label||p.name),fields:(record?.fields||[]).slice(0,20).map(p=>p.label||p.path)};
   }
   function go(next,focusSelector){
-    screen=next;error='';leave=false;generation++;busy=false;paint();announce();
+    screen=next;error='';leave=false;leaveNext=null;generation++;busy=false;paint();announce();
     if(focusSelector)focus?.(focusSelector);
   }
   function reset(){
     generation++;screen='list';id='';draft=null;original='';serviceName='';query='';filterGroups=new Set();
-    error='';status='';busy=false;advanced=false;missing=false;leave=false;fromJob=false;
+    error='';status='';busy=false;advanced=false;missing=false;leave=false;fromJob=false;leaveNext=null;serviceReturn='list';
     serviceEdit=null;importing=null;impact=null;trial=null;example='';receiptKey='';receiptId='';detailUses=null;detailVersion=0;
   }
   function start(record=null,job=false){
     fromJob=job;draft=record?clone(record):blank();id=record?.id||'';
     serviceName='';example=draft.example==null?'':json(draft.example);advanced=false;missing=false;original=snap();importing=null;impact=null;status='';
-    go(record?'edit':'create','[data-api-catalog] h2');
+    go(record?'edit':'create','[data-api-catalog] h2[tabindex]');
   }
   async function exitEditor(force=false){
     if(!force&&(dirty()||importing?.source_text||importing?.source_url)){leave=true;paint();focus?.('[data-api-action=stay]');return;}
     const edit=Boolean(draft?.id),job=fromJob;draft=null;original='';serviceName='';importing=null;impact=null;fromJob=false;go(edit?'detail':'list');
     if(job)await returnToJob(null);
   }
-  function listHTML(){
+  function listHTML(pane=false){
     const needle=query.trim().toLocaleLowerCase(), records=all();
     const groups=[...services().map(s=>[s.id,s.name]),['','미분류']];
     let shown=0;
@@ -63,7 +65,7 @@ function createWorkApiCatalog({catalog, command, changed, paint, sampleImport=()
       const rows=members.filter(x=>[x.name,x.purpose,x.url,name].join(' ').toLocaleLowerCase().includes(needle));
       if(!rows.length)return '';
       shown+=rows.length;
-      return `<details class="ew-api-group" data-group="${esc(sid)}" ${filterGroups.has(sid)?'':'open'}><summary><span>${esc(name)}</span><span>${rows.length}개</span></summary>${rows.map(x=>`<button type="button" class="ew-api-row" data-method="${esc(x.method)}" data-api-action="open" data-id="${esc(x.id)}"><b class="ew-api-method">${esc(x.method)}</b><span class="ew-api-name"><strong>${esc(x.name)}</strong><span class="ew-api-description">${esc(x.purpose)}</span></span><span class="ew-api-path">${esc(addr(x.url))}</span><i aria-hidden="true">›</i></button>`).join('')}</details>`;
+      return `<details class="ew-api-group" data-group="${esc(sid)}" ${filterGroups.has(sid)?'':'open'}><summary><span>${esc(name)}</span><span>${rows.length}개</span></summary>${rows.map(x=>`<button type="button" class="ew-api-row" data-method="${esc(x.method)}" data-api-action="open" data-id="${esc(x.id)}"${pane&&x.id===id?' aria-current="true"':''}><b class="ew-api-method">${esc(x.method)}</b><span class="ew-api-name"><strong>${esc(x.name)}</strong><span class="ew-api-description">${esc(x.purpose)}</span></span><span class="ew-api-path">${esc(addr(x.url))}</span><i aria-hidden="true">›</i></button>`).join('')}</details>`;
     }).join('');
     // The header band names the menu, so the list carries its count instead of a second title.
     const count=`API 명세 ${records.length}개`+(needle?` 중 ${shown}개`:'');
@@ -132,11 +134,12 @@ function createWorkApiCatalog({catalog, command, changed, paint, sampleImport=()
       <details><summary>응답 원문</summary><pre>${esc(json(operation.example))}</pre></details>`;
   }
   function detailHTML(){
-    const x=api();if(!x)return back('API 명세 목록','list')+'<p role="status">API를 찾을 수 없거나 접근 권한이 변경되었습니다.</p>';
+    const toList=split()?'':back('API 명세 목록','list');
+    const x=api();if(!x)return toList+'<p role="status">API를 찾을 수 없거나 접근 권한이 변경되었습니다.</p>';
     const used=detailUses||x.uses, source=x.source_url||x.source?.url;
     const uses=!used?'<p class="ew-api-empty">사용처를 확인하고 있습니다.</p>':used.length?table(['업무 절차','작업'],used.map(u=>[u.workflow_name||u.workflow_id,u.job_name||u.job_id])):'<p class="ew-api-empty">연결된 작업이 없습니다.</p>';
     // A path is called behind the address the server holds for its service.
-    return `${back('API 명세 목록','list')}<div class="ew-api-head"><div class="ew-api-title"><h2>${esc(x.name)}</h2><p>${esc(x.purpose)}</p></div><div>${admin()?btn('명세 편집','edit'):''}${btn('시험 실행','test','strong')}</div></div>
+    return `${toList}<div class="ew-api-head"><div class="ew-api-title"><h2>${esc(x.name)}</h2><p>${esc(x.purpose)}</p></div><div>${admin()?btn('명세 편집','edit'):''}${btn('시험 실행','test','strong')}</div></div>
       <div class="ew-api-route" data-method="${esc(x.method)}"${x.url.startsWith('/')?` title="서비스 기본 주소 + ${esc(x.url)}"`:''}><b class="ew-api-method">${esc(x.method)}</b><span>${esc(serviceLabel(x.service_id))}</span><strong>${esc(x.url)}</strong></div>
       ${source?`<p class="ew-api-source">서비스 명세　${esc(source)} ${admin()?btn('변경 확인','refresh-import','link'):''}</p>`:''}
       <div class="ew-api-columns"><div><h3>요청 파라미터</h3>${table(['이름','위치','필수','업무에서 쓰는 값'],(x.inputs||[]).map(p=>[p.wire_name||p.name,p.in,p.required?'필수':'—',p.label||p.name]))}
@@ -231,8 +234,9 @@ function createWorkApiCatalog({catalog, command, changed, paint, sampleImport=()
     const confirmLeave=`<div class="ew-api-card" role="alert"><h3>저장하지 않은 변경사항</h3><p>이 화면을 떠나면 편집 중인 내용이 사라집니다.</p>${btn('변경 버리고 이동','discard')}${btn('계속 편집','stay','primary')}</div>`;
     const modal=['services','impact'].includes(screen);
     const pinned=screen==='edit'&&!leave;
-    const surface=modal?`<dialog data-api-modal aria-labelledby="ew-api-modal-title">${views[screen]()} ${message}</dialog>`:pinned?editorHTML(message):(leave?confirmLeave:views[screen]())+message;
-    return `<section data-api-catalog data-api-screen="${screen}" aria-label="${esc(screenNames[screen])}" ${busy?'aria-busy="true"':''}><fieldset class="ew-api-controls" ${busy?'disabled':''}>${surface}</fieldset></section>`;
+    const body=modal?`<dialog data-api-modal aria-labelledby="ew-api-modal-title">${views[screen]()} ${message}</dialog>`:pinned?editorHTML(message):(leave?confirmLeave:views[screen]())+message;
+    const surface=split()?`<div class="ew-api-pane">${listHTML(true)}</div><div class="ew-api-main">${body}</div>`:body;
+    return `<section data-api-catalog data-api-screen="${screen}" data-api-split="${split()}" aria-label="${esc(screenNames[screen])}" ${busy?'aria-busy="true"':''}><fieldset class="ew-api-controls" ${busy?'disabled':''}>${surface}</fieldset></section>`;
   }
   function recordForSave(){
     const source=clone(draft);
@@ -358,21 +362,32 @@ function createWorkApiCatalog({catalog, command, changed, paint, sampleImport=()
     const data=target.dataset;
     if(!['open','list','detail','test','test-run'].includes(action)&&!admin())throw Error('도구를 편집할 권한이 없습니다.');
     error='';status='';
+    // The list beside an open editor can start another screen; unsaved changes are confirmed first, as with Cancel.
+    if(draft&&screen==='edit'&&['open','create','services'].includes(action)){
+      if(dirty()){leave=true;leaveNext={action,id:data.id||''};paint();focus?.('[data-api-action=stay]');return;}
+      draft=null;original='';serviceName='';importing=null;impact=null;
+    }
     switch(action){
       case 'create':start();break;
-      case 'open':id=data.id;detailUses=null;go('detail');await loadUses(id);break;
-      case 'list':{const wasService=screen==='services';serviceEdit=null;go('list',wasService?'[data-api-action=services]':null);break;}
+      // In the list beside the API the opened row keeps keyboard focus; without that list nothing matches.
+      case 'open':id=data.id;detailUses=null;go('detail','.ew-api-pane .ew-api-row[aria-current=true]');await loadUses(id);break;
+      case 'list':{const wasService=screen==='services';serviceEdit=null;go(wasService&&api()?serviceReturn:'list',wasService?'[data-api-action=services]':null);break;}
       case 'detail':trial=null;go('detail');break;
       case 'edit':if(api())start(api());break;
       case 'cancel':await exitEditor();break;
-      case 'discard':await exitEditor(true);break;
-      case 'stay':leave=false;paint();break;
+      case 'discard':{
+        const next=leaveNext;leaveNext=null;
+        if(!next){await exitEditor(true);break;}
+        draft=null;original='';serviceName='';importing=null;impact=null;leave=false;
+        await act(next.action,{dataset:{id:next.id}});break;
+      }
+      case 'stay':leave=false;leaveNext=null;paint();break;
       case 'save':await save();break;
       case 'missing':missing=!missing;paint();break;
       case 'add-input':draft.inputs.push({name:'',in:'query',type:'string',required:true,label:''});advanced=true;paint();break;
       case 'add-field':draft.fields.push({path:'',type:'string',label:''});advanced=true;paint();break;
       case 'remove-row':if(['inputs','fields'].includes(data.list))draft[data.list].splice(Number(data.index),1);advanced=true;paint();break;
-      case 'services':serviceEdit=null;go('services','#ew-api-modal-title');break;
+      case 'services':serviceReturn=split()?'detail':'list';trial=null;serviceEdit=null;go('services','#ew-api-modal-title');break;
       case 'service-new':serviceEdit={name:''};paint();focus?.('[name=api-service_edit]');break;
       case 'service-edit':{const s=services().find(x=>x.id===data.id);if(s)serviceEdit=clone(s);paint();focus?.('[name=api-service_edit]');break;}
       case 'service-cancel':serviceEdit=null;paint();break;

@@ -234,6 +234,7 @@ AI 개발을 위한 다음 내부 정리는 [제한적 리팩토링 설계](docs
 | 왼쪽 탐색·범위 드롭다운 | 같은 패치의 `EesNavigation.svelte` · `EesScopeSelect.svelte` |
 | Svelte 공유 상태·현재 로그인 세션의 API 요청 | 같은 패치의 `src/lib/components/ees/state.ts` · `src/lib/apis/ees-work.ts` |
 | 작업 지침·참고 문서의 목록과 내용(표, 두 열 배치, 쓰는 곳, 접근 표시) | 같은 패치의 `src/lib/components/workspace/Skills.svelte` · `Knowledge.svelte` · `Skills/SkillEditor.svelte` · `Knowledge/KnowledgeBase.svelte`, 함께 쓰는 `ees/EesAssetUsage.svelte` · `ees/EesAccessTag.svelte` · `ees/assets.ts`. 시험은 [test_ees_source_shell_native.py](tests/test_ees_source_shell_native.py) |
+| 워크스페이스 네 메뉴에서 넓을 때 목록 옆에 내용을 두는 배치(가운데 1264px 기준) | 업무 절차는 [ees-work-designer.js](branding/ees/ui/ees-work-designer.js)(폭을 재는 곳), 도구는 [ees-work-api-catalog.js](branding/ees/ui/ees-work-api-catalog.js), 작업 지침·참고 문서는 같은 패치의 `src/routes/(app)/workspace/+layout.svelte`. [계약](docs/mockups/ees-work/TASK.md#workspace-product-step3-20261117) |
 | 서버 요청·대화 연결·개인 초안·응답 순서 | [ees-work-launcher.js](branding/ees/ui/ees-work-launcher.js) |
 | 공장 선택·단계별 진행·업무 패널·조건 탐색/복귀·읽기 전용 수행 상세·크기 | [ees-work-view.js](branding/ees/ui/ees-work-view.js) |
 | 시스템/P별 절차 편집·미저장 초안·권한 상태·Native 셸 복원 | [ees-work-designer.js](branding/ees/ui/ees-work-designer.js) |
