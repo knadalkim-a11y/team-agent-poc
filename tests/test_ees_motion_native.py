@@ -45,6 +45,12 @@ class MotionNativeTests(IntegratedNativeCase):
     def chat_state(self, desired):
         self.wait("document.querySelector('[data-ees-source-shell]')?.dataset.eesChatState===" + json.dumps(desired))
 
+    def chat_at_rest(self):
+        # click() scrolls its target into view. Inside a chat panel that is still sliding,
+        # that scroll moves the whole shell for a frame, which this module would then
+        # measure as space taken from the work surface. Wait for the slide first.
+        self.wait("!document.querySelector('[data-ees-chat-surface]').getAnimations().length")
+
     def observe(self, label):
         self.browser.evaluate("""(()=>{
           window.__c3?.stop();
@@ -459,10 +465,12 @@ class MotionNativeTests(IntegratedNativeCase):
     def test_c3_overlay_panel_closing_releases_hit_testing_and_restores_focus(self):
         self.viewport(480,768)
         self.chat_state('closed')
+        self.chat_at_rest()
         self.observe('overlay')
         self.click('[data-ees-chat-toggle]')
         self.chat_state('overlay')
         self.wait("document.querySelector('[data-ees-chat-surface]').contains(document.activeElement)")
+        self.chat_at_rest()
         self.fill('#chat-input','좁은 화면 채팅에서 보존할 초안')
         draft=self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.browser.evaluate("window.__c3.chat=document.querySelector('#chat-input');true")
@@ -479,6 +487,7 @@ class MotionNativeTests(IntegratedNativeCase):
         self.chat_state('overlay')
         self.assertTrue(self.browser.evaluate("window.__c3.chat===document.querySelector('#chat-input')"))
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'),draft)
+        self.chat_at_rest()
         self.click('[data-ees-chat-close]')
         self.chat_state('closed')
         evidence=self.finish_evidence('c3-overlay-close-reopen')
