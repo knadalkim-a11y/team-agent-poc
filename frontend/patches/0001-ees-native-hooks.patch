@@ -1462,7 +1462,7 @@ index c7a4f3c..5fe51cf 100644
  					<div class="flex {($settings?.chatBubble ?? true) ? 'justify-end pb-1' : 'w-full'}">
  						<div
 diff --git a/src/lib/components/chat/Navbar.svelte b/src/lib/components/chat/Navbar.svelte
-index b6a045e..0e61f83 100644
+index b6a045e..bf54b00 100644
 --- a/src/lib/components/chat/Navbar.svelte
 +++ b/src/lib/components/chat/Navbar.svelte
 @@ -1,4 +1,5 @@
@@ -1599,11 +1599,11 @@ index b6a045e..0e61f83 100644
  </nav>
 +
 +<style>
-+ #ees-work-context {height:48px;min-height:48px;padding:0;flex:none;display:flex;justify-content:center;border-bottom:1px solid #e6e6e9;background:#fff;font-size:14px;}
++ #ees-work-context {height:48px;min-height:48px;padding:0;flex:none;display:flex;justify-content:center;border-bottom:1px solid var(--ees-line-divider,#e7e8eb);background:var(--ees-surface-default,#fff);font-size:14px;}
 + #ees-work-context > div:first-child {padding:0 12px;}
 + .ees-context-actions {min-width:0;font-size:13px;}
 + .ees-context-actions button {padding:4px;border-radius:6px;}
-+ .ees-context-actions button:hover {background:#eef0f3;}
++ .ees-context-actions button:hover {background:var(--ees-surface-panel-hover,#e7e8eb);}
 +</style>
 diff --git a/src/lib/components/chat/Placeholder.svelte b/src/lib/components/chat/Placeholder.svelte
 index c183993..e490262 100644
@@ -2015,7 +2015,7 @@ index 0000000..b40068d
 +{/if}
 diff --git a/src/lib/components/ees/EesHelperNotice.svelte b/src/lib/components/ees/EesHelperNotice.svelte
 new file mode 100644
-index 0000000..3ba519f
+index 0000000..6685869
 --- /dev/null
 +++ b/src/lib/components/ees/EesHelperNotice.svelte
 @@ -0,0 +1,38 @@
@@ -2045,9 +2045,9 @@ index 0000000..3ba519f
 +		padding: 8px 12px;
 +		border: 0;
 +		border-radius: 8px;
-+		background: #fafafa;
++		background: var(--ees-surface-sidebar, #f4f5f6);
 +		box-shadow: none;
-+		color: #5c5e65;
++		color: var(--ees-text-secondary, #5e6573);
 +		font-family: 'Noto Sans KR', sans-serif;
 +		font-size: 13px;
 +		font-weight: 400;
@@ -2304,7 +2304,7 @@ index 0000000..e2b4810
 +</section>
 diff --git a/src/lib/components/ees/EesProcedureIntro.svelte b/src/lib/components/ees/EesProcedureIntro.svelte
 new file mode 100644
-index 0000000..58eb095
+index 0000000..76e93c5
 --- /dev/null
 +++ b/src/lib/components/ees/EesProcedureIntro.svelte
 @@ -0,0 +1,214 @@
@@ -2442,7 +2442,7 @@ index 0000000..58eb095
 +		display: flex;
 +		flex-direction: column;
 +		gap: 12px;
-+		color: #1f2023;
++		color: var(--ees-text-primary, #1d2128);
 +		font-size: 14px;
 +		line-height: 22px;
 +		letter-spacing: -0.042px;
@@ -2454,14 +2454,14 @@ index 0000000..58eb095
 +		font-size: 12px;
 +		line-height: 16px;
 +		font-weight: 500;
-+		color: #5c5e65;
++		color: var(--ees-text-secondary, #5e6573);
 +	}
 +	.ees-helper-avatar {
 +		width: 16px;
 +		height: 16px;
 +		border-radius: 8px;
-+		background: #eef3f9;
-+		color: #2f5f98;
++		background: var(--ees-surface-selected, #e7e8eb);
++		color: var(--ees-brand-text, #1d2128);
 +		display: inline-flex;
 +		align-items: center;
 +		justify-content: center;
@@ -2472,7 +2472,7 @@ index 0000000..58eb095
 +		margin: 0;
 +	}
 +	.ees-helper-questions {
-+		border: 1px solid #e6e6e9;
++		border: 1px solid var(--ees-line-divider, #e7e8eb);
 +		border-radius: 8px;
 +		overflow: hidden;
 +	}
@@ -2495,7 +2495,7 @@ index 0000000..58eb095
 +		line-height: 20px;
 +	}
 +	button + button {
-+		border-top: 1px solid #e6e6e9;
++		border-top: 1px solid var(--ees-line-divider, #e7e8eb);
 +	}
 +	button > span {
 +		flex: 1;
@@ -2506,10 +2506,10 @@ index 0000000..58eb095
 +		flex: none;
 +	}
 +	button:hover:not(:disabled) {
-+		background: var(--ees-surface-hover, #f8f8fa);
++		background: var(--ees-surface-hover, #f8f9fa);
 +	}
 +	button:focus-visible {
-+		outline: 2px solid #2f5f98;
++		outline: 2px solid var(--ees-brand-solid, #1d2128);
 +		outline-offset: -3px;
 +	}
 +	button:disabled {
@@ -2517,7 +2517,7 @@ index 0000000..58eb095
 +		cursor: not-allowed;
 +	}
 +	small {
-+		color: #7e8088;
++		color: var(--ees-text-tertiary, #5e6573);
 +		font-size: 12px;
 +		line-height: 18px;
 +	}
@@ -3126,7 +3126,7 @@ index 0000000..fc64846
 +{/if}
 diff --git a/src/lib/components/ees/EesShell.svelte b/src/lib/components/ees/EesShell.svelte
 new file mode 100644
-index 0000000..79863d4
+index 0000000..d535459
 --- /dev/null
 +++ b/src/lib/components/ees/EesShell.svelte
 @@ -0,0 +1,401 @@
@@ -3491,18 +3491,18 @@ index 0000000..79863d4
 +</div>
 +
 +<style>
-+	.ees-source-shell { display:flex; position:relative; isolation:isolate; width:100%; height:100dvh; min-height:0; overflow:hidden; background:var(--ees-surface-default,#fff); color:var(--ees-text-primary,#1f2023); }
++	.ees-source-shell { display:flex; position:relative; isolation:isolate; width:100%; height:100dvh; min-height:0; overflow:hidden; background:var(--ees-surface-default,#fff); color:var(--ees-text-primary,#1d2128); }
 +	.ees-navigation { flex:none; display:flex; height:100%; min-height:0; }
 +	.ees-center { display:flex; flex:1 1 0; flex-direction:column; min-width:0; min-height:0; overflow:hidden; }
-+	.ees-work-toolbar { display:flex; flex:none; height:48px; min-width:0; padding:0 20px; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid var(--ees-border,#e6e6e9); color:var(--ees-text-primary,#1f2023); }
++	.ees-work-toolbar { display:flex; flex:none; height:48px; min-width:0; padding:0 20px; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid var(--ees-line-divider,#e7e8eb); color:var(--ees-text-primary,#1d2128); }
 +	.ees-work-toolbar[data-ees-source-workspace-heading],
 +	.ees-center:has(:global(#ees-work-panel:not([hidden])[data-ees-mode='author'])) .ees-work-toolbar,
 +	.ees-center:has(:global(#ees-work-panel.ew-vd:not([hidden]))) .ees-work-toolbar,
 +	.ees-center:has(:global(#ees-work-panel:not([hidden]) .ew-record)) .ees-work-toolbar,
-+	.ees-center:has(:global(#ees-work-panel:not([hidden]) .ew-records)) .ees-work-toolbar { background:var(--ees-surface-work-canvas,#f3f3f5); }
++	.ees-center:has(:global(#ees-work-panel:not([hidden]) .ew-records)) .ees-work-toolbar { background:var(--ees-surface-work-canvas,#fff); }
 +	.ees-work-toolbar strong { font-size:15px; font-weight:600; }
-+	.ees-work-toolbar button { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border:1px solid var(--ees-border,#e0e1e4); border-radius:6px; font-size:13px; line-height:20px; }
-+	.ees-work-toolbar button:hover { background:var(--ees-surface-hover,#f6f7f9); }
++	.ees-work-toolbar button { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border:1px solid var(--ees-line-control,#c9ccd2); border-radius:6px; font-size:13px; line-height:20px; }
++	.ees-work-toolbar button:hover { background:var(--ees-surface-hover,#f8f9fa); }
 +	.ees-center :global(#ees-work-panel) { position:relative; inset:auto; flex:1 1 0; width:100%; min-width:0; height:auto; min-height:0; max-height:100%; border:0; }
 +	.ees-native-region,.ees-settings-region,.ees-chat-live { display:flex; flex:1; width:100%; height:100%; min-width:0; min-height:0; overflow:hidden; }
 +	.ees-chat-live { flex-direction:column; isolation:isolate; }
@@ -3511,7 +3511,7 @@ index 0000000..79863d4
 +	.ees-center :global(#ees-work-panel[hidden]),.ees-native-region[hidden],.ees-settings-region[hidden],.ees-chat-live[hidden] { display:none; }
 +	.ees-region-loading { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; font-size:14px; }
 +	.ees-chat-space { flex:none; width:var(--ees-chat-width); transition:width var(--ees-motion-open,180ms) var(--ees-motion-open-easing,ease); }
-+	.ees-chat-region { display:flex; flex-direction:column; position:absolute; top:0; bottom:0; right:0; z-index:35; min-width:0; width:var(--ees-chat-width); border-left:1px solid var(--ees-border,#e6e6e9); background:var(--ees-surface-default,#fff); transform:translateX(0); transition:transform var(--ees-motion-open,180ms) var(--ees-motion-open-easing,ease); }
++	.ees-chat-region { display:flex; flex-direction:column; position:absolute; top:0; bottom:0; right:0; z-index:35; min-width:0; width:var(--ees-chat-width); border-left:1px solid var(--ees-line-divider,#e7e8eb); background:var(--ees-surface-default,#fff); transform:translateX(0); transition:transform var(--ees-motion-open,180ms) var(--ees-motion-open-easing,ease); }
 +	.ees-source-shell[data-ees-chat-state='closed'] .ees-chat-space,.ees-source-shell[data-ees-chat-state='overlay'] .ees-chat-space { width:0; }
 +	.ees-source-shell[data-ees-chat-state='closed'] .ees-chat-region { transform:translateX(100%); visibility:hidden; transition:transform var(--ees-motion-close,150ms) var(--ees-motion-close-easing,ease),visibility 0s var(--ees-motion-close,150ms); }
 +	.ees-source-shell[data-ees-chat-state='overlay'] .ees-chat-region { z-index:42; box-shadow:-8px 0 24px #0002; }
@@ -3520,7 +3520,7 @@ index 0000000..79863d4
 +	.ees-source-shell[data-ees-chat-state='expanded'] .ees-chat-space { width:0; }
 +	.ees-source-shell[data-ees-chat-state='expanded'] .ees-chat-region { position:relative; flex:1; width:auto; }
 +	.ees-chat-resize { position:absolute; left:-4px; top:0; bottom:0; width:8px; z-index:2; cursor:col-resize; touch-action:none; }
-+	.ees-chat-resize:focus-visible,.ees-work-toolbar button:focus-visible { outline:2px solid #2f5f98; outline-offset:-2px; }
++	.ees-chat-resize:focus-visible,.ees-work-toolbar button:focus-visible { outline:2px solid var(--ees-brand-solid,#1d2128); outline-offset:-2px; }
 +	.ees-source-shell[data-resizing='true'] .ees-chat-space,.ees-source-shell[data-resizing='true'] .ees-chat-region { transition:none; }
 +	/* Below 56 + 640 + 420px a dock cannot fit. Release its space as soon as
 +	   the viewport changes, even before the next resize event or animation frame. */
@@ -3629,7 +3629,7 @@ index 0000000..c5300c5
 +	};
 +}
 diff --git a/src/lib/components/layout/Sidebar.svelte b/src/lib/components/layout/Sidebar.svelte
-index 007df31..ecdbd66 100644
+index 007df31..6be5ec0 100644
 --- a/src/lib/components/layout/Sidebar.svelte
 +++ b/src/lib/components/layout/Sidebar.svelte
 @@ -92,6 +92,9 @@
@@ -4235,8 +4235,8 @@ index 007df31..ecdbd66 100644
 -			touch-action: pan-y;
 -		}
 -	}
-+ #sidebar{position:relative;display:flex;flex-direction:column;flex:none;width:256px;height:100%;min-width:0;background:#fafafa;border-right:1px solid #e6e6e9;overflow:hidden;font-size:14px;color:#1f2023}
-+ #sidebar[data-compact=true]{width:56px}.ees-product{height:48px;flex:none;display:flex;align-items:center;gap:8px;padding:0 12px 0 16px}.ees-product a{display:flex;align-items:center;gap:8px;flex:1;white-space:nowrap}.ees-product-icon{width:22px;height:22px;display:grid;place-items:center;background:#2f5f98;color:white;border-radius:6px;font-size:12px;font-weight:600}.ees-product strong{font-size:14px}.ees-product button{padding:4px}.ees-sidebar-scroll{flex:1;min-height:0;overflow:auto}.ees-profile{padding:8px;border-top:1px solid #e6e6e9}.ees-chat-controls{display:flex;flex-direction:column;padding:8px;gap:4px}.ees-chat-controls button{display:flex;gap:8px;align-items:center;text-align:left;min-height:34px;padding:6px 8px;border-radius:6px}.ees-chat-controls button:hover{background:#eef0f3}.ees-native-history[hidden]{display:none}.ees-native-history{padding:0 8px}
++ #sidebar{position:relative;display:flex;flex-direction:column;flex:none;width:256px;height:100%;min-width:0;background:var(--ees-surface-sidebar,#f4f5f6);border-right:1px solid var(--ees-line-divider,#e7e8eb);overflow:hidden;font-size:14px;color:var(--ees-text-primary,#1d2128)}
++ #sidebar[data-compact=true]{width:56px}.ees-product{height:48px;flex:none;display:flex;align-items:center;gap:8px;padding:0 12px 0 16px}.ees-product a{display:flex;align-items:center;gap:8px;flex:1;white-space:nowrap}.ees-product-icon{width:22px;height:22px;display:grid;place-items:center;background:var(--ees-brand-solid,#1d2128);color:white;border-radius:6px;font-size:12px;font-weight:600}.ees-product strong{font-size:14px}.ees-product button{padding:4px}.ees-sidebar-scroll{flex:1;min-height:0;overflow:auto}.ees-profile{padding:8px;border-top:1px solid var(--ees-line-divider,#e7e8eb)}.ees-chat-controls{display:flex;flex-direction:column;padding:8px;gap:4px}.ees-chat-controls button{display:flex;gap:8px;align-items:center;text-align:left;min-height:34px;padding:6px 8px;border-radius:6px}.ees-chat-controls button:hover{background:var(--ees-surface-panel-hover,#e7e8eb)}.ees-native-history[hidden]{display:none}.ees-native-history{padding:0 8px}
 + #sidebar{transition:width var(--ees-motion-open) var(--ees-motion-open-easing)}
 + #sidebar[data-compact=true]{transition-duration:var(--ees-motion-close);transition-timing-function:var(--ees-motion-close-easing)}
 + .ees-product{overflow:hidden;gap:0;padding:0 10px}
@@ -6579,7 +6579,7 @@ index 9aee4da..08ebc41 100644
  		<Spinner />
  	</div>
 diff --git a/src/routes/(app)/workspace/+layout.svelte b/src/routes/(app)/workspace/+layout.svelte
-index 11eed46..e25eb6e 100644
+index 11eed46..6a9b2c3 100644
 --- a/src/routes/(app)/workspace/+layout.svelte
 +++ b/src/routes/(app)/workspace/+layout.svelte
 @@ -21,14 +21,23 @@
@@ -6796,7 +6796,7 @@ index 11eed46..e25eb6e 100644
 +<style>
 +	#workspace-container[data-ees-assets-layout] {
 +		padding: 16px max(16px, calc((100% - 960px) / 2));
-+		background-color: var(--ees-surface-work-canvas, #f3f3f5);
++		background-color: var(--ees-surface-work-canvas, #fff);
 +	}
 +	:global(.dark) #workspace-container[data-ees-assets-layout] {
 +		background-color: var(--color-gray-900, #171717);
@@ -6821,7 +6821,7 @@ index 11eed46..e25eb6e 100644
 +	}
 +	#workspace-container[data-ees-assets-split] > [data-ees-asset-pane] {
 +		padding: 16px 16px 16px 32px;
-+		border-right: 1px solid var(--ees-line-divider, #e9e9ed);
++		border-right: 1px solid var(--ees-line-divider, #e7e8eb);
 +	}
 +	#workspace-container[data-ees-assets-split] > [data-ees-asset-content] {
 +		padding: 16px 32px 16px 24px;
@@ -6830,7 +6830,7 @@ index 11eed46..e25eb6e 100644
 +		display: none;
 +	}
 +	#workspace-container :global([data-ees-asset-pane] [data-ees-asset-row][aria-current='true']) {
-+		background-color: var(--ees-surface-selected, #ececec);
++		background-color: var(--ees-surface-selected, #e7e8eb);
 +	}
 +	:global(.dark) #workspace-container[data-ees-assets-split] > [data-ees-asset-pane] {
 +		border-right-color: var(--color-gray-700, #4e4e4e);

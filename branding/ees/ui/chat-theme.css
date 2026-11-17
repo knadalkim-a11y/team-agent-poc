@@ -20,14 +20,14 @@
 :root {
   --ees-font: "EES Noto Sans KR", "EES Inter", "Segoe UI", sans-serif;
   --ees-paper: #ffffff;
-  --ees-side: #f5f7fa;
-  --ees-soft: #f0f4f8;
-  --ees-ink: #1f2023;
-  --ees-muted: #5c5e65;
-  --ees-line: #d5d6da;
-  --ees-blue: #2f5f98;
-  --ees-tint: #eef5fa;
-  --ees-warning: #7e673e;
+  --ees-side: #f4f5f6;
+  --ees-soft: #f4f5f6;
+  --ees-ink: #1d2128;
+  --ees-muted: #5e6573;
+  --ees-line: #c9ccd2;
+  --ees-blue: #1d2128;
+  --ees-tint: #e7e8eb;
+  --ees-warning: #8a6408;
 }
 html.dark {
   --ees-paper: #191d23;

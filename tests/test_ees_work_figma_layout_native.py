@@ -176,12 +176,12 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
             'panel': '#ees-work-panel', 'author': '#ees-work-designer',
             'card': '.ew-author-list', 'input': '#ew-author-search',
             'chat': '#chat-container #chat-pane'}.items()}
-        # Work uses the authoring surface; white inputs and chat stay distinct.
-        self.assertEqual(observed, {'panel': 'rgb(243, 243, 245)', 'author': 'rgb(243, 243, 245)',
+        # Theme sheet colours (2026-11-17): the work area is white like the inputs and the chat.
+        self.assertEqual(observed, {'panel': 'rgb(255, 255, 255)', 'author': 'rgb(255, 255, 255)',
             'card': 'rgba(0, 0, 0, 0)', 'input': 'rgb(255, 255, 255)', 'chat': 'rgb(255, 255, 255)'})
-        hover('.ew-author-list>button', 'rgb(236, 236, 239)')
+        hover('.ew-author-list>button', 'rgb(231, 232, 235)')
         observed['cardHover'] = background('.ew-author-list>button')
-        self.assertEqual(observed['cardHover'], 'rgb(236, 236, 239)')
+        self.assertEqual(observed['cardHover'], 'rgb(231, 232, 235)')
         observed['cardMotion'] = self.browser.evaluate("(()=>{const e=document.querySelector('.ew-author-list>button'),s=getComputedStyle(e);return {focusVisible:e.matches(':focus-visible'),property:s.transitionProperty,duration:s.transitionDuration,easing:s.transitionTimingFunction};})()")
         self.assertFalse(observed['cardMotion']['focusVisible'])
         self.assertEqual(observed['cardMotion']['property'].split(', '),
@@ -189,9 +189,9 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.assertEqual(observed['cardMotion']['duration'].split(', '), ['0.12s'] * 4)
         self.assertEqual(observed['cardMotion']['easing'],
                          ', '.join(['cubic-bezier(0.2, 0.8, 0.2, 1)'] * 4))
-        hover('[data-ees-work-toolbar] [data-ees-chat-toggle]', 'rgb(243, 243, 245)')
+        hover('[data-ees-work-toolbar] [data-ees-chat-toggle]', 'rgb(248, 249, 250)')
         observed['headerHover'] = background('[data-ees-work-toolbar] [data-ees-chat-toggle]')
-        self.assertEqual(observed['headerHover'], 'rgb(243, 243, 245)')
+        self.assertEqual(observed['headerHover'], 'rgb(248, 249, 250)')
         self.click('#ew-author-search')
         self.key('Tab', 9)
         # The search row ends with the new-procedure button; the rows follow it.
@@ -236,9 +236,8 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
               }
               return result;
             })(""" + json.dumps(tabs) + ')')
-            work_canvas = label in ('work-stage', 'tools') or label.startswith('author-')
-            expected_panel = 'rgb(243, 243, 245)' if work_canvas else 'rgb(250, 250, 250)'
-            self.assertEqual(result['panel'], expected_panel, label)
+            # Every panel uses the one white surface of the theme sheet (2026-11-17).
+            self.assertEqual(result['panel'], 'rgb(255, 255, 255)', label)
             if result['author'] is not None:
                 self.assertEqual(result['author'], result['panel'], label)
                 self.assertEqual(background('#ees-work-designer>footer'), result['panel'], label)
@@ -248,13 +247,13 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
                 primary_tabs=label=='work-stage' or label.startswith('author-')
                 self.assertEqual(result['tabs'], {
                     'gap':'20px',
-                    'active': {'color': 'rgb(31, 32, 35)', 'background': 'rgba(0, 0, 0, 0)',
+                    'active': {'color': 'rgb(29, 33, 40)', 'background': 'rgba(0, 0, 0, 0)',
                                'font': '14px' if primary_tabs else '12px', 'line': '22px' if primary_tabs else '18px', 'weight': '500', 'height': 40 if primary_tabs else 36,
                                'paddingTop': '8px' if primary_tabs else '6px','paddingBottom':'10px'},
-                    'inactive': {'color': 'rgb(92, 94, 101)', 'background': 'rgba(0, 0, 0, 0)',
+                    'inactive': {'color': 'rgb(94, 101, 115)', 'background': 'rgba(0, 0, 0, 0)',
                                  'font': '14px' if primary_tabs else '12px', 'line': '22px' if primary_tabs else '18px', 'weight': '400', 'height': 40 if primary_tabs else 36,
                                  'paddingTop': '8px' if primary_tabs else '6px','paddingBottom':'10px'},
-                    'underline': 'rgb(47, 95, 152)', 'underlineHeight': '2px'}, label)
+                    'underline': 'rgb(29, 33, 40)', 'underlineHeight': '2px'}, label)
             self.assertFalse(self.geometry()['overflow'], label)
             shared[label] = result
 
@@ -287,7 +286,7 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
             self.click('[data-author-action=tab][data-tab=' + tab + ']')
             self.wait("document.querySelector('.ew-author-tabs [data-tab=" + tab + "]')?.getAttribute('aria-selected') === 'true'")
             capture_style('author-' + tab, '.ew-author-tabs')
-        hover('.ew-author-tabs [aria-selected=false]', 'rgb(236, 236, 239)')
+        hover('.ew-author-tabs [aria-selected=false]', 'rgb(231, 232, 235)')
         self.open_workspace_assets()
         self.click('[data-action=tools]')
         self.wait("document.querySelector('#ees-work-designer[data-author-tab=tools]')")
@@ -306,7 +305,7 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         capture_style('work-stage', '.ew-tabs')
         capture_tab_focus('work-stage', '.ew-tabs')
         self.screenshot('shared-panel-stage-1366')
-        hover('.ew-tabs [aria-pressed=false]', 'rgb(236, 236, 239)')
+        hover('.ew-tabs [aria-pressed=false]', 'rgb(231, 232, 235)')
         self.open_run(workflow_id, run)
         self.wait("document.querySelector('#ees-work-panel:not(.ew-vd) .ew-tabs')")
         capture_style('work-task', '.ew-tabs')
