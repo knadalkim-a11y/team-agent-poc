@@ -236,7 +236,7 @@ test('C66 losing factory visibility removes hidden selection without changing sa
  assert.deepEqual(h.writes.at(-1).values,{target:'기본에만 저장'});assert.equal(h.draft().definition.execution_scope,'system');
 });
 test('name-only creation does not publish the retired example-helper screen',async()=>{const h=harness();await h.open('');h.click('create');await flush();assert.ok(h.forms['ew-procedure-create']);assert.doesNotMatch(h.markup,/procedure_template|예시에서 시작|직접 만들기/);h.click('procedure_cancel');await flush();assert.equal(h.writes.length,0);});
-test('empty workspace listing does not create drafts or runs',async()=>{const h=harness();h.state.workflows=[];await h.open('');assert.match(h.markup,/아직 워크플로우가 없습니다/);assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);});
+test('empty workspace listing does not create drafts or runs',async()=>{const h=harness();h.state.workflows=[];await h.open('');assert.match(h.markup,/아직 업무 절차가 없습니다/);assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);});
 test('direct editing saves only the chosen definition with current revision and request ID',async()=>{const h=harness();await h.node();h.field('job_guidance','직접 수정');h.click('save');await flush();assert.equal(h.writes[0].action,'save_draft');assert.equal(h.writes[0].workflow_id,'w');assert.equal(h.writes[0].expected_revision,1);assert.ok(h.writes[0].request_id);assert.equal(h.writes[0].definition.nodes.j.instructions,'직접 수정');assert.equal(h.workflows.get('q').draft.nodes.j.instructions,'원래 안내');assert.equal(h.draft().revision,2);assert.equal(h.draft().dirty,false);});
 test('dirty drafts and per-workflow node selection survive navigation',async()=>{const h=harness();await h.node();h.field('job_guidance','W 비공개 초안');await h.open('q');await h.node();h.field('job_guidance','Q 초안');await h.open('w');assert.equal(h.draft().definition.nodes.j.instructions,'W 비공개 초안');assert.match(h.markup,/W 비공개 초안/);assert.equal(h.writes.length,0);});
 test('typing during save preserves later edits and acknowledges only own base revision',async()=>{const h=harness(),pending=deferred();await h.node();h.field('job_guidance','저장 요청');h.writeOverride=()=>pending.promise;h.click('save');await flush();h.field('job_guidance','요청 뒤 새 글');pending.resolve({ok:true,revision:2});await flush();assert.equal(h.draft().definition.nodes.j.instructions,'요청 뒤 새 글');assert.equal(h.draft().revision,2);assert.equal(h.draft().dirty,true);});
@@ -501,7 +501,7 @@ test('server tool validation errors explain the next action and preserve the edi
 });
 
 test('new procedure uses the approved inline name and purpose form and cancellation does not create anything',async()=>{
- const h=harness();await beginCreation(h);assert.match(h.markup,/워크플로우 이름|업무 목적/);assert.doesNotMatch(h.markup,/procedure_template|name="(?:category|mode|execution_scope)"/);assert.equal((h.dialogHistory||[]).length,0);h.click('procedure_cancel');await flush();assert.equal(h.writes.length,0);assert.doesNotMatch(h.markup,/기본 제공 절차|예시에서 시작|직접 만들기/);
+ const h=harness();await beginCreation(h);assert.match(h.markup,/업무 절차 이름/);assert.match(h.markup,/업무 목적/);assert.doesNotMatch(h.markup,/procedure_template|name="(?:category|mode|execution_scope)"/);assert.equal((h.dialogHistory||[]).length,0);h.click('procedure_cancel');await flush();assert.equal(h.writes.length,0);assert.doesNotMatch(h.markup,/기본 제공 절차|예시에서 시작|직접 만들기/);
 });
 test('named blank creation sends only a name and system and opens content',async()=>{
  const h=harness();await beginCreation(h,'  직접 작성  ');await submitCreation(h);
@@ -510,7 +510,7 @@ test('named blank creation sends only a name and system and opens content',async
  assert.equal(h.selection.workflow_id,'created-1');assert.match(h.markup,/업무 내용/);assert.match(h.markup,/아직 단계가 없습니다/);assert.doesNotMatch(h.markup,/class="ew-summary-card"/);assert.equal(h.operations.length,0);
 });
 test('empty or whitespace name never creates a procedure',async()=>{
- for(const name of ['','   ']){const h=harness();await beginCreation(h,name);assert.equal(actionButton(h,'procedure_create').disabled,true);h.designer.handleEvent({type:'submit',target:h.forms['ew-procedure-create']});await flush();assert.equal(h.writes.length,0);assert.match(h.markup,/워크플로우 이름을 입력/);}
+ for(const name of ['','   ']){const h=harness();await beginCreation(h,name);assert.equal(actionButton(h,'procedure_create').disabled,true);h.designer.handleEvent({type:'submit',target:h.forms['ew-procedure-create']});await flush();assert.equal(h.writes.length,0);assert.match(h.markup,/업무 절차 이름을 입력/);}
 });
 test('initial procedures use the same list, editor and save command as authored procedures',async()=>{
  const h=harness();h.workflows.get('w').name='신규 공장 횡전개';h.workflows.get('w').draft.name='신규 공장 횡전개';
@@ -560,8 +560,8 @@ test('tool starter questions use the same source help callback without mutating 
 test('unreceived procedure scope retains heading and controls without claiming an empty list or zero count',()=>{
  const h=harness();h.selection={...h.selection,system_id:'APC',workflow_id:''};h.state={...h.state,workflow:null,workflows:[]};
  h.designer.render({state:h.state,selection:h.selection,host:h.host,scope_loading:true});
- assert.match(h.markup,/전체 공장 · APC에서 사용할 업무를 작성합니다/);assert.match(h.markup,/data-ees-scope-loading="panel"[^>]*>받는 중/);assert.match(h.markup,/id="ew-author-search"/);assert.match(h.markup,/data-author-action="create"/);assert.doesNotMatch(h.markup,/<small>0개<|아직 워크플로우가 없습니다/);
- h.designer.render({state:h.state,selection:h.selection,host:h.host,scope_loading:false});assert.match(h.markup,/<small>0개<\/small>/);assert.match(h.markup,/아직 워크플로우가 없습니다/);
+ assert.match(h.markup,/<h2 class="ew-list-count"><\/h2>/);assert.match(h.markup,/data-ees-scope-loading="panel"[^>]*>받는 중/);assert.match(h.markup,/id="ew-author-search"/);assert.match(h.markup,/data-author-action="create"/);assert.doesNotMatch(h.markup,/0개|아직 업무 절차가 없습니다|ew-list-thead/);
+ h.designer.render({state:h.state,selection:h.selection,host:h.host,scope_loading:false});assert.match(h.markup,/<h2 class="ew-list-count">0개<\/h2>/);assert.match(h.markup,/아직 업무 절차가 없습니다/);
 });
 
 function sharedReviewFixture(h){
@@ -1672,7 +1672,7 @@ test('an empty managed system can create the Confluence guide from its template 
  h.state.capabilities.managed_systems = ['APC'];
  await h.open('');
  assert.match(h.markup, /가이드로 시작/);
- assert.match(h.markup, /새 워크플로우/);
+ assert.match(h.markup, /새 업무 절차/);
  assert.equal(h.writes.length, 0);
  h.dialogs.push({name:'APC 문서 확인'});
  h.click('guide_create'); await flush();
@@ -1681,4 +1681,54 @@ test('an empty managed system can create the Confluence guide from its template 
  assert.equal(h.writes[0].system_id, 'APC');
  assert.equal(h.writes[0].template_id, 'confluence_documents');
  assert.equal(h.writes[0].name, 'APC 문서 확인');
+});
+
+// Design mock 17 revision 2, step 1 (docs/mockups/ees-work/TASK.md#workspace-product-step1-20261116).
+test('workspace procedure list is one table with a count and no second title or description',async()=>{
+ const h=harness();
+ h.state.workflows=[{id:'w',name:'배포 산출물 점검',system_id:'EMS',category:'ops',published_version:3,draft:{definition:{...definition('w'),description:'정기 배포 전 문서를 확인하는 업무'}}},
+  {id:'q',name:'설비 알람 처리',system_id:'EMS',category:'incident',published_version:null,draft:{definition:definition('q')}}];
+ await h.open('');
+ assert.match(h.markup,/<h2 class="ew-list-count">2개<\/h2>/);
+ assert.match(h.markup,/class="ew-list-thead"[^>]*><span>이름<\/span><span>분류<\/span><span>단계 · 작업<\/span><span>게시<\/span>/);
+ assert.match(h.markup,/<strong>배포 산출물 점검<\/strong><small>정기 배포 전 문서를 확인하는 업무<\/small><\/span><span class="ew-list-cell">운영<\/span><span class="ew-list-cell">단계 1 · 작업 1<\/span><span class="ew-author-tag" data-state="published">게시<\/span>/);
+ assert.match(h.markup,/<strong>설비 알람 처리<\/strong><\/span><span class="ew-list-cell">장애대응<\/span><span class="ew-list-cell">단계 1 · 작업 1<\/span><span class="ew-author-tag" data-state="draft">미게시<\/span>/);
+ // The header band names the menu; the list repeats neither that name nor what the screen is for.
+ assert.doesNotMatch(h.markup,/워크플로우|에서 사용할 업무를 작성합니다|미완성이어도/);
+ assert.ok(h.markup.indexOf('data-author-action="create"')<h.markup.indexOf('class="ew-author-list"'),'the new-procedure button sits in the search row');
+ await beginCreation(h,'주간 백업 점검');
+ assert.ok(h.markup.indexOf('id="ew-procedure-create"')<h.markup.indexOf('class="ew-author-list"'),'a new procedure opens above the rows it will join');
+ assert.doesNotMatch(h.markup,/data-author-action="create"/);
+ assert.equal(h.writes.length,0);
+});
+
+test('an opened API shows what is sent beside what comes back and editing keeps save below',async()=>{
+ const h=apiCatalogHarness();
+ h.data.apis=[{id:'a',revision:1,version:1,service_id:'s',method:'GET',url:'/backups',name:'백업 결과 조회',purpose:'백업 결과를 확인합니다.',
+   inputs:[{name:'date',in:'query',type:'string',required:true,label:'조회 날짜'}],result_path:'items',fields:[{path:'job_name',type:'string',label:'작업 이름'}],example:{items:[{job_name:'DB 백업'}]}},
+  {id:'b',revision:1,version:1,service_id:'',method:'POST',url:'https://backup.example/backups/retries',name:'실패 백업 재처리',purpose:'재처리를 요청합니다.',inputs:[],result_path:'',fields:[]}];
+ let html=h.html();
+ assert.match(html,/<h2>API 명세 2개<\/h2>/);assert.doesNotMatch(html,/ew-api-head/);
+ assert.match(html,/class="ew-api-thead"[^>]*><span>방식<\/span><span>이름 · 용도<\/span><span>주소<\/span>/);
+ assert.match(html,/data-id="a"><b class="ew-api-method">GET<\/b><span class="ew-api-name"><strong>백업 결과 조회<\/strong><span class="ew-api-description">백업 결과를 확인합니다.<\/span><\/span><span class="ew-api-path">\/backups<\/span>/);
+ h.field('search','재처리');assert.match(h.html(),/<h2>API 명세 2개 중 1개<\/h2>/);assert.doesNotMatch(h.html(),/data-id="a"/);h.field('search','');
+ await h.click('open',{id:'a'});html=h.html();
+ assert.match(html,/class="ew-api-route" data-method="GET" title="서비스 기본 주소 \+ \/backups"><b class="ew-api-method">GET<\/b><span>사내 백업<\/span><strong>\/backups<\/strong><\/div>/);
+ assert.match(html,/<div class="ew-api-columns"><div><h3>요청 파라미터<\/h3>[\s\S]*<h3>사용 중인 작업<\/h3>[\s\S]*<\/div>\s*<div><h3>응답<\/h3>[\s\S]*<h3>응답 예시<\/h3>/);
+ await h.click('open',{id:'b'});html=h.html();
+ assert.match(html,/class="ew-api-route" data-method="POST"><b class="ew-api-method">POST<\/b><span>미분류<\/span><strong>https:\/\/backup.example\/backups\/retries<\/strong>/);
+ await h.click('list');await h.click('open',{id:'a'});await h.click('edit');html=h.html();
+ // Editing lays the settings open in two columns; registration still starts from the address alone.
+ assert.doesNotMatch(html,/data-api-advanced|입력·결과 설정/);
+ assert.match(html,/<span>서비스 기본 주소 뒤의 경로<\/span><input name="api-url" value="\/backups"/);
+ assert.match(html,/data-api-mapping><div><div class="ew-api-subhead"><h3>요청 파라미터<\/h3>[\s\S]*<\/div><div><div class="ew-api-subhead"><h3>결과에 표시할 항목<\/h3>/);
+ assert.match(html,/class="ew-api-map-head" data-map-kind="inputs" aria-hidden="true"><span>파라미터 이름<\/span><span>전송 위치<\/span><span>자료형<\/span><span>필수<\/span><span>업무 입력 이름<\/span>/);
+ assert.match(html,/aria-label="입력 1 삭제" title="삭제">×<\/button>/);assert.match(html,/aria-label="결과 1 삭제"/);
+ assert.ok(html.indexOf('class="ew-api-foot"')>html.indexOf('data-api-mapping'),'save stays below the settings');
+ assert.match(html,/<small data-api-dirty hidden>저장하지 않은 변경 있음<\/small>/);assert.match(html,/data-api-action="save" class="ew-api-btn primary" disabled/);
+ h.field('purpose','완료 시각을 함께 확인합니다.');html=h.html();
+ assert.match(html,/<small data-api-dirty\s*>저장하지 않은 변경 있음<\/small>/);assert.doesNotMatch(html,/data-api-action="save" class="ew-api-btn primary" disabled/);
+ await h.click('cancel');await h.click('discard');await h.click('list');await h.click('create');
+ assert.match(h.html(),/<details class="ew-api-advanced" data-api-advanced\s*><summary>입력·결과 설정<\/summary>/);
+ assert.deepEqual(h.requests.map(p=>p.action),['api_detail','api_detail','api_detail']);
 });

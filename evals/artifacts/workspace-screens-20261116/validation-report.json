@@ -1,0 +1,2031 @@
+{
+ "mock": "design-mock-17-workspace.html",
+ "revision": 2,
+ "sha256": "311ec16b59dd2b8cc49c6b36a281ddc7832a5d1455c6905f1bb7e7a667639d5d",
+ "bytes": 782733,
+ "browser": "Chromium (Playwright, headless)",
+ "views": [
+  "1920x1080",
+  "1920x1080 chat folded",
+  "1366x768",
+  "480x800"
+ ],
+ "total": 291,
+ "passed": 291,
+ "failed": [],
+ "usage_1920": [
+  {
+   "chat": "open",
+   "screen": "WS1",
+   "work_px": 1104,
+   "covered_percent": 8
+  },
+  {
+   "chat": "open",
+   "screen": "WS2",
+   "work_px": 1104,
+   "covered_percent": 14
+  },
+  {
+   "chat": "open",
+   "screen": "WS3",
+   "work_px": 1104,
+   "covered_percent": 6
+  },
+  {
+   "chat": "open",
+   "screen": "WS4",
+   "work_px": 1104,
+   "covered_percent": 9
+  },
+  {
+   "chat": "open",
+   "screen": "WS5",
+   "work_px": 1104,
+   "covered_percent": 29
+  },
+  {
+   "chat": "open",
+   "screen": "WS6",
+   "work_px": 1104,
+   "covered_percent": 7
+  },
+  {
+   "chat": "open",
+   "screen": "WS7",
+   "work_px": 1104,
+   "covered_percent": 51
+  },
+  {
+   "chat": "open",
+   "screen": "WS8",
+   "work_px": 1104,
+   "covered_percent": 6
+  },
+  {
+   "chat": "open",
+   "screen": "WS9",
+   "work_px": 1104,
+   "covered_percent": 8
+  },
+  {
+   "chat": "folded",
+   "screen": "WS1 + WS2",
+   "work_px": 1664,
+   "covered_percent": 14
+  },
+  {
+   "chat": "folded",
+   "screen": "WS1 + WS2",
+   "work_px": 1664,
+   "covered_percent": 14
+  },
+  {
+   "chat": "folded",
+   "screen": "WS3 + WS4",
+   "work_px": 1664,
+   "covered_percent": 9
+  },
+  {
+   "chat": "folded",
+   "screen": "WS3 + WS4",
+   "work_px": 1664,
+   "covered_percent": 9
+  },
+  {
+   "chat": "folded",
+   "screen": "WS3 + WS5",
+   "work_px": 1664,
+   "covered_percent": 25
+  },
+  {
+   "chat": "folded",
+   "screen": "WS6 + WS7",
+   "work_px": 1664,
+   "covered_percent": 45
+  },
+  {
+   "chat": "folded",
+   "screen": "WS6 + WS7",
+   "work_px": 1664,
+   "covered_percent": 45
+  },
+  {
+   "chat": "folded",
+   "screen": "WS8 + WS9",
+   "work_px": 1664,
+   "covered_percent": 8
+  },
+  {
+   "chat": "folded",
+   "screen": "WS8 + WS9",
+   "work_px": 1664,
+   "covered_percent": 8
+  }
+ ],
+ "checks": [
+  {
+   "name": "static: CSP blocks every network load",
+   "pass": true
+  },
+  {
+   "name": "static: no external resource reference",
+   "pass": true
+  },
+  {
+   "name": "static: every screen has a pane",
+   "pass": true
+  },
+  {
+   "name": "1920 WS1: panes in view are WS1",
+   "pass": true,
+   "detail": [
+    "WS1"
+   ]
+  },
+  {
+   "name": "1920 WS1: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS1"
+  },
+  {
+   "name": "1920 WS1: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "업무 절차"
+    ],
+    "업무 절차"
+   ]
+  },
+  {
+   "name": "1920 WS1: chat reference follows the screen",
+   "pass": true,
+   "detail": "업무 절차 목록"
+  },
+  {
+   "name": "1920 WS1: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 WS1: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 WS1: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920: layout for this width",
+   "pass": true,
+   "detail": {
+    "panes": [
+     "WS1"
+    ],
+    "current": [
+     "업무 절차"
+    ],
+    "badge": "시안 2 · 저장·실행 안 됨 · WS1",
+    "area": "업무 절차",
+    "ctx": "업무 절차 목록",
+    "docOverflow": false,
+    "wide": 0,
+    "layout": "split1",
+    "overlay": "false",
+    "compact": "false",
+    "work": 1104,
+    "covered": 8,
+    "listTitles": 0,
+    "backToList": 0,
+    "currentRows": 0
+   }
+  },
+  {
+   "name": "1920 WS2: panes in view are WS2",
+   "pass": true,
+   "detail": [
+    "WS2"
+   ]
+  },
+  {
+   "name": "1920 WS2: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS2"
+  },
+  {
+   "name": "1920 WS2: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "업무 절차"
+    ],
+    "업무 절차"
+   ]
+  },
+  {
+   "name": "1920 WS2: chat reference follows the screen",
+   "pass": true,
+   "detail": "배포 산출물 점검 / 기본 정보"
+  },
+  {
+   "name": "1920 WS2: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 WS2: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 WS2: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 WS3: panes in view are WS3",
+   "pass": true,
+   "detail": [
+    "WS3"
+   ]
+  },
+  {
+   "name": "1920 WS3: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS3"
+  },
+  {
+   "name": "1920 WS3: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "1920 WS3: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 명세 목록"
+  },
+  {
+   "name": "1920 WS3: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 WS3: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 WS3: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 WS4: panes in view are WS4",
+   "pass": true,
+   "detail": [
+    "WS4"
+   ]
+  },
+  {
+   "name": "1920 WS4: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS4"
+  },
+  {
+   "name": "1920 WS4: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "1920 WS4: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 상세 / 백업 결과 조회"
+  },
+  {
+   "name": "1920 WS4: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 WS4: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 WS4: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 WS5: panes in view are WS5",
+   "pass": true,
+   "detail": [
+    "WS5"
+   ]
+  },
+  {
+   "name": "1920 WS5: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS5"
+  },
+  {
+   "name": "1920 WS5: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "1920 WS5: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 명세 편집 / 백업 결과 조회"
+  },
+  {
+   "name": "1920 WS5: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 WS5: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 WS5: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 WS6: panes in view are WS6",
+   "pass": true,
+   "detail": [
+    "WS6"
+   ]
+  },
+  {
+   "name": "1920 WS6: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS6"
+  },
+  {
+   "name": "1920 WS6: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "작업 지침"
+    ],
+    "작업 지침"
+   ]
+  },
+  {
+   "name": "1920 WS6: chat reference follows the screen",
+   "pass": true,
+   "detail": "작업 지침 목록"
+  },
+  {
+   "name": "1920 WS6: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 WS6: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 WS6: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 WS7: panes in view are WS7",
+   "pass": true,
+   "detail": [
+    "WS7"
+   ]
+  },
+  {
+   "name": "1920 WS7: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS7"
+  },
+  {
+   "name": "1920 WS7: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "작업 지침"
+    ],
+    "작업 지침"
+   ]
+  },
+  {
+   "name": "1920 WS7: chat reference follows the screen",
+   "pass": true,
+   "detail": "작업 지침 / Jira 읽기 지침"
+  },
+  {
+   "name": "1920 WS7: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 WS7: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 WS7: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 WS8: panes in view are WS8",
+   "pass": true,
+   "detail": [
+    "WS8"
+   ]
+  },
+  {
+   "name": "1920 WS8: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS8"
+  },
+  {
+   "name": "1920 WS8: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "참고 문서"
+    ],
+    "참고 문서"
+   ]
+  },
+  {
+   "name": "1920 WS8: chat reference follows the screen",
+   "pass": true,
+   "detail": "참고 문서 목록"
+  },
+  {
+   "name": "1920 WS8: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 WS8: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 WS8: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 WS9: panes in view are WS9",
+   "pass": true,
+   "detail": [
+    "WS9"
+   ]
+  },
+  {
+   "name": "1920 WS9: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS9"
+  },
+  {
+   "name": "1920 WS9: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "참고 문서"
+    ],
+    "참고 문서"
+   ]
+  },
+  {
+   "name": "1920 WS9: chat reference follows the screen",
+   "pass": true,
+   "detail": "참고 문서 / EMS 운영 가이드"
+  },
+  {
+   "name": "1920 WS9: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 WS9: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 WS9: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "WS1 → WS2 by row",
+   "pass": true
+  },
+  {
+   "name": "WS2 → WS1 by back link",
+   "pass": true
+  },
+  {
+   "name": "WS1 search keeps matching rows and counts them",
+   "pass": true
+  },
+  {
+   "name": "WS1 search shows the empty state",
+   "pass": true
+  },
+  {
+   "name": "WS1 search clears",
+   "pass": true
+  },
+  {
+   "name": "WS1 new procedure asks name and purpose",
+   "pass": true
+  },
+  {
+   "name": "WS1 new procedure can be cancelled",
+   "pass": true
+  },
+  {
+   "name": "WS2 shows no status text before a change",
+   "pass": true
+  },
+  {
+   "name": "WS2 task shows its linked tool",
+   "pass": true
+  },
+  {
+   "name": "WS2 edit shows the unsaved marker",
+   "pass": true
+  },
+  {
+   "name": "WS2 tab shows only its panel",
+   "pass": true
+  },
+  {
+   "name": "WS2 keeps the edited value across tabs",
+   "pass": true
+  },
+  {
+   "name": "WS3 group folds",
+   "pass": true
+  },
+  {
+   "name": "WS3 search finds by address and opens its group",
+   "pass": true
+  },
+  {
+   "name": "WS3 → WS4 → WS5",
+   "pass": true
+  },
+  {
+   "name": "WS5 save is off until something changes",
+   "pass": true
+  },
+  {
+   "name": "WS5 change turns save on and shows the unsaved marker",
+   "pass": true
+  },
+  {
+   "name": "WS7 starts without 바뀜",
+   "pass": true
+  },
+  {
+   "name": "WS7 body uses the height of its column",
+   "pass": true,
+   "detail": {
+    "text": 667,
+    "room": 759
+   }
+  },
+  {
+   "name": "WS7 body edit shows 바뀜 and the unsaved text",
+   "pass": true
+  },
+  {
+   "name": "WS7 one access choice at a time",
+   "pass": true
+  },
+  {
+   "name": "mock actions only show a notice",
+   "pass": true
+  },
+  {
+   "name": "chat folds",
+   "pass": true
+  },
+  {
+   "name": "chat opens again",
+   "pass": true
+  },
+  {
+   "name": "rows and menu items are buttons",
+   "pass": true
+  },
+  {
+   "name": "1920 chat folded WS1: panes in view are WS1 + WS2",
+   "pass": true,
+   "detail": [
+    "WS1",
+    "WS2"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS1: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS1 + WS2"
+  },
+  {
+   "name": "1920 chat folded WS1: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "업무 절차"
+    ],
+    "업무 절차"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS1: chat reference follows the screen",
+   "pass": true,
+   "detail": "배포 산출물 점검 / 기본 정보"
+  },
+  {
+   "name": "1920 chat folded WS1: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 chat folded WS1: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 chat folded WS1: the open row is marked and no link leads back to the list beside it",
+   "pass": true,
+   "detail": {
+    "rows": 1,
+    "back": 0
+   }
+  },
+  {
+   "name": "1920 chat folded: layout for this width",
+   "pass": true,
+   "detail": {
+    "panes": [
+     "WS1",
+     "WS2"
+    ],
+    "current": [
+     "업무 절차"
+    ],
+    "badge": "시안 2 · 저장·실행 안 됨 · WS1 + WS2",
+    "area": "업무 절차",
+    "ctx": "배포 산출물 점검 / 기본 정보",
+    "docOverflow": false,
+    "wide": 0,
+    "layout": "split2",
+    "overlay": "false",
+    "compact": "false",
+    "work": 1664,
+    "covered": 14,
+    "listTitles": 0,
+    "backToList": 0,
+    "currentRows": 1
+   }
+  },
+  {
+   "name": "1920 chat folded WS2: panes in view are WS1 + WS2",
+   "pass": true,
+   "detail": [
+    "WS1",
+    "WS2"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS2: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS1 + WS2"
+  },
+  {
+   "name": "1920 chat folded WS2: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "업무 절차"
+    ],
+    "업무 절차"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS2: chat reference follows the screen",
+   "pass": true,
+   "detail": "배포 산출물 점검 / 기본 정보"
+  },
+  {
+   "name": "1920 chat folded WS2: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 chat folded WS2: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 chat folded WS2: the open row is marked and no link leads back to the list beside it",
+   "pass": true,
+   "detail": {
+    "rows": 1,
+    "back": 0
+   }
+  },
+  {
+   "name": "1920 chat folded WS3: panes in view are WS3 + WS4",
+   "pass": true,
+   "detail": [
+    "WS3",
+    "WS4"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS3: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS3 + WS4"
+  },
+  {
+   "name": "1920 chat folded WS3: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS3: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 상세 / 백업 결과 조회"
+  },
+  {
+   "name": "1920 chat folded WS3: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 chat folded WS3: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 chat folded WS3: the open row is marked and no link leads back to the list beside it",
+   "pass": true,
+   "detail": {
+    "rows": 1,
+    "back": 0
+   }
+  },
+  {
+   "name": "1920 chat folded WS4: panes in view are WS3 + WS4",
+   "pass": true,
+   "detail": [
+    "WS3",
+    "WS4"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS4: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS3 + WS4"
+  },
+  {
+   "name": "1920 chat folded WS4: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS4: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 상세 / 백업 결과 조회"
+  },
+  {
+   "name": "1920 chat folded WS4: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 chat folded WS4: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 chat folded WS4: the open row is marked and no link leads back to the list beside it",
+   "pass": true,
+   "detail": {
+    "rows": 1,
+    "back": 0
+   }
+  },
+  {
+   "name": "1920 chat folded WS5: panes in view are WS3 + WS5",
+   "pass": true,
+   "detail": [
+    "WS3",
+    "WS5"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS5: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS3 + WS5"
+  },
+  {
+   "name": "1920 chat folded WS5: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS5: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 명세 편집 / 백업 결과 조회"
+  },
+  {
+   "name": "1920 chat folded WS5: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 chat folded WS5: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 chat folded WS5: the open row is marked and no link leads back to the list beside it",
+   "pass": true,
+   "detail": {
+    "rows": 1,
+    "back": 0
+   }
+  },
+  {
+   "name": "1920 chat folded WS6: panes in view are WS6 + WS7",
+   "pass": true,
+   "detail": [
+    "WS6",
+    "WS7"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS6: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS6 + WS7"
+  },
+  {
+   "name": "1920 chat folded WS6: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "작업 지침"
+    ],
+    "작업 지침"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS6: chat reference follows the screen",
+   "pass": true,
+   "detail": "작업 지침 / Jira 읽기 지침"
+  },
+  {
+   "name": "1920 chat folded WS6: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 chat folded WS6: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 chat folded WS6: the open row is marked and no link leads back to the list beside it",
+   "pass": true,
+   "detail": {
+    "rows": 1,
+    "back": 0
+   }
+  },
+  {
+   "name": "1920 chat folded WS7: panes in view are WS6 + WS7",
+   "pass": true,
+   "detail": [
+    "WS6",
+    "WS7"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS7: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS6 + WS7"
+  },
+  {
+   "name": "1920 chat folded WS7: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "작업 지침"
+    ],
+    "작업 지침"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS7: chat reference follows the screen",
+   "pass": true,
+   "detail": "작업 지침 / Jira 읽기 지침"
+  },
+  {
+   "name": "1920 chat folded WS7: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 chat folded WS7: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 chat folded WS7: the open row is marked and no link leads back to the list beside it",
+   "pass": true,
+   "detail": {
+    "rows": 1,
+    "back": 0
+   }
+  },
+  {
+   "name": "1920 chat folded WS8: panes in view are WS8 + WS9",
+   "pass": true,
+   "detail": [
+    "WS8",
+    "WS9"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS8: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS8 + WS9"
+  },
+  {
+   "name": "1920 chat folded WS8: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "참고 문서"
+    ],
+    "참고 문서"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS8: chat reference follows the screen",
+   "pass": true,
+   "detail": "참고 문서 / EMS 운영 가이드"
+  },
+  {
+   "name": "1920 chat folded WS8: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 chat folded WS8: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 chat folded WS8: the open row is marked and no link leads back to the list beside it",
+   "pass": true,
+   "detail": {
+    "rows": 1,
+    "back": 0
+   }
+  },
+  {
+   "name": "1920 chat folded WS9: panes in view are WS8 + WS9",
+   "pass": true,
+   "detail": [
+    "WS8",
+    "WS9"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS9: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS8 + WS9"
+  },
+  {
+   "name": "1920 chat folded WS9: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "참고 문서"
+    ],
+    "참고 문서"
+   ]
+  },
+  {
+   "name": "1920 chat folded WS9: chat reference follows the screen",
+   "pass": true,
+   "detail": "참고 문서 / EMS 운영 가이드"
+  },
+  {
+   "name": "1920 chat folded WS9: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1920 chat folded WS9: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1920 chat folded WS9: the open row is marked and no link leads back to the list beside it",
+   "pass": true,
+   "detail": {
+    "rows": 1,
+    "back": 0
+   }
+  },
+  {
+   "name": "wide: the list pane keeps a fixed width",
+   "pass": true,
+   "detail": 420
+  },
+  {
+   "name": "wide: edit opens beside the list",
+   "pass": true
+  },
+  {
+   "name": "wide: ← API 상세 returns to the detail",
+   "pass": true
+  },
+  {
+   "name": "wide: opening the chat returns to one pane",
+   "pass": true
+  },
+  {
+   "name": "1366 WS1: panes in view are WS1",
+   "pass": true,
+   "detail": [
+    "WS1"
+   ]
+  },
+  {
+   "name": "1366 WS1: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS1"
+  },
+  {
+   "name": "1366 WS1: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "업무 절차"
+    ],
+    "업무 절차"
+   ]
+  },
+  {
+   "name": "1366 WS1: chat reference follows the screen",
+   "pass": true,
+   "detail": "업무 절차 목록"
+  },
+  {
+   "name": "1366 WS1: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1366 WS1: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1366 WS1: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1366: layout for this width",
+   "pass": true,
+   "detail": {
+    "panes": [
+     "WS1"
+    ],
+    "current": [
+     "업무 절차"
+    ],
+    "badge": "시안 2 · 저장·실행 안 됨 · WS1",
+    "area": "업무 절차",
+    "ctx": "업무 절차 목록",
+    "docOverflow": false,
+    "wide": 0,
+    "layout": "single",
+    "overlay": "false",
+    "compact": "false",
+    "work": 625,
+    "covered": 19,
+    "listTitles": 0,
+    "backToList": 0,
+    "currentRows": 0
+   }
+  },
+  {
+   "name": "1366 WS2: panes in view are WS2",
+   "pass": true,
+   "detail": [
+    "WS2"
+   ]
+  },
+  {
+   "name": "1366 WS2: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS2"
+  },
+  {
+   "name": "1366 WS2: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "업무 절차"
+    ],
+    "업무 절차"
+   ]
+  },
+  {
+   "name": "1366 WS2: chat reference follows the screen",
+   "pass": true,
+   "detail": "배포 산출물 점검 / 기본 정보"
+  },
+  {
+   "name": "1366 WS2: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1366 WS2: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1366 WS2: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1366 WS3: panes in view are WS3",
+   "pass": true,
+   "detail": [
+    "WS3"
+   ]
+  },
+  {
+   "name": "1366 WS3: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS3"
+  },
+  {
+   "name": "1366 WS3: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "1366 WS3: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 명세 목록"
+  },
+  {
+   "name": "1366 WS3: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1366 WS3: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1366 WS3: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1366 WS4: panes in view are WS4",
+   "pass": true,
+   "detail": [
+    "WS4"
+   ]
+  },
+  {
+   "name": "1366 WS4: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS4"
+  },
+  {
+   "name": "1366 WS4: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "1366 WS4: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 상세 / 백업 결과 조회"
+  },
+  {
+   "name": "1366 WS4: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1366 WS4: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1366 WS4: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1366 WS5: panes in view are WS5",
+   "pass": true,
+   "detail": [
+    "WS5"
+   ]
+  },
+  {
+   "name": "1366 WS5: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS5"
+  },
+  {
+   "name": "1366 WS5: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "1366 WS5: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 명세 편집 / 백업 결과 조회"
+  },
+  {
+   "name": "1366 WS5: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1366 WS5: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1366 WS5: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1366 WS6: panes in view are WS6",
+   "pass": true,
+   "detail": [
+    "WS6"
+   ]
+  },
+  {
+   "name": "1366 WS6: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS6"
+  },
+  {
+   "name": "1366 WS6: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "작업 지침"
+    ],
+    "작업 지침"
+   ]
+  },
+  {
+   "name": "1366 WS6: chat reference follows the screen",
+   "pass": true,
+   "detail": "작업 지침 목록"
+  },
+  {
+   "name": "1366 WS6: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1366 WS6: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1366 WS6: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1366 WS7: panes in view are WS7",
+   "pass": true,
+   "detail": [
+    "WS7"
+   ]
+  },
+  {
+   "name": "1366 WS7: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS7"
+  },
+  {
+   "name": "1366 WS7: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "작업 지침"
+    ],
+    "작업 지침"
+   ]
+  },
+  {
+   "name": "1366 WS7: chat reference follows the screen",
+   "pass": true,
+   "detail": "작업 지침 / Jira 읽기 지침"
+  },
+  {
+   "name": "1366 WS7: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1366 WS7: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1366 WS7: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1366 WS8: panes in view are WS8",
+   "pass": true,
+   "detail": [
+    "WS8"
+   ]
+  },
+  {
+   "name": "1366 WS8: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS8"
+  },
+  {
+   "name": "1366 WS8: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "참고 문서"
+    ],
+    "참고 문서"
+   ]
+  },
+  {
+   "name": "1366 WS8: chat reference follows the screen",
+   "pass": true,
+   "detail": "참고 문서 목록"
+  },
+  {
+   "name": "1366 WS8: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1366 WS8: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1366 WS8: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1366 WS9: panes in view are WS9",
+   "pass": true,
+   "detail": [
+    "WS9"
+   ]
+  },
+  {
+   "name": "1366 WS9: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS9"
+  },
+  {
+   "name": "1366 WS9: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "참고 문서"
+    ],
+    "참고 문서"
+   ]
+  },
+  {
+   "name": "1366 WS9: chat reference follows the screen",
+   "pass": true,
+   "detail": "참고 문서 / EMS 운영 가이드"
+  },
+  {
+   "name": "1366 WS9: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "1366 WS9: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "1366 WS9: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 WS1: panes in view are WS1",
+   "pass": true,
+   "detail": [
+    "WS1"
+   ]
+  },
+  {
+   "name": "480 WS1: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS1"
+  },
+  {
+   "name": "480 WS1: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "업무 절차"
+    ],
+    "업무 절차"
+   ]
+  },
+  {
+   "name": "480 WS1: chat reference follows the screen",
+   "pass": true,
+   "detail": "업무 절차 목록"
+  },
+  {
+   "name": "480 WS1: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 WS1: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 WS1: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480: layout for this width",
+   "pass": true,
+   "detail": {
+    "panes": [
+     "WS1"
+    ],
+    "current": [
+     "업무 절차"
+    ],
+    "badge": "시안 2 · 저장·실행 안 됨 · WS1",
+    "area": "업무 절차",
+    "ctx": "업무 절차 목록",
+    "docOverflow": false,
+    "wide": 0,
+    "layout": "single",
+    "overlay": "true",
+    "compact": "true",
+    "work": 365,
+    "covered": 35,
+    "listTitles": 0,
+    "backToList": 0,
+    "currentRows": 0
+   }
+  },
+  {
+   "name": "480 WS2: panes in view are WS2",
+   "pass": true,
+   "detail": [
+    "WS2"
+   ]
+  },
+  {
+   "name": "480 WS2: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS2"
+  },
+  {
+   "name": "480 WS2: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "업무 절차"
+    ],
+    "업무 절차"
+   ]
+  },
+  {
+   "name": "480 WS2: chat reference follows the screen",
+   "pass": true,
+   "detail": "배포 산출물 점검 / 기본 정보"
+  },
+  {
+   "name": "480 WS2: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 WS2: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 WS2: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 WS3: panes in view are WS3",
+   "pass": true,
+   "detail": [
+    "WS3"
+   ]
+  },
+  {
+   "name": "480 WS3: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS3"
+  },
+  {
+   "name": "480 WS3: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "480 WS3: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 명세 목록"
+  },
+  {
+   "name": "480 WS3: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 WS3: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 WS3: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 WS4: panes in view are WS4",
+   "pass": true,
+   "detail": [
+    "WS4"
+   ]
+  },
+  {
+   "name": "480 WS4: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS4"
+  },
+  {
+   "name": "480 WS4: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "480 WS4: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 상세 / 백업 결과 조회"
+  },
+  {
+   "name": "480 WS4: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 WS4: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 WS4: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 WS5: panes in view are WS5",
+   "pass": true,
+   "detail": [
+    "WS5"
+   ]
+  },
+  {
+   "name": "480 WS5: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS5"
+  },
+  {
+   "name": "480 WS5: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "도구"
+    ],
+    "도구"
+   ]
+  },
+  {
+   "name": "480 WS5: chat reference follows the screen",
+   "pass": true,
+   "detail": "API 명세 편집 / 백업 결과 조회"
+  },
+  {
+   "name": "480 WS5: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 WS5: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 WS5: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 WS6: panes in view are WS6",
+   "pass": true,
+   "detail": [
+    "WS6"
+   ]
+  },
+  {
+   "name": "480 WS6: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS6"
+  },
+  {
+   "name": "480 WS6: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "작업 지침"
+    ],
+    "작업 지침"
+   ]
+  },
+  {
+   "name": "480 WS6: chat reference follows the screen",
+   "pass": true,
+   "detail": "작업 지침 목록"
+  },
+  {
+   "name": "480 WS6: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 WS6: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 WS6: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 WS7: panes in view are WS7",
+   "pass": true,
+   "detail": [
+    "WS7"
+   ]
+  },
+  {
+   "name": "480 WS7: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS7"
+  },
+  {
+   "name": "480 WS7: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "작업 지침"
+    ],
+    "작업 지침"
+   ]
+  },
+  {
+   "name": "480 WS7: chat reference follows the screen",
+   "pass": true,
+   "detail": "작업 지침 / Jira 읽기 지침"
+  },
+  {
+   "name": "480 WS7: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 WS7: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 WS7: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 WS8: panes in view are WS8",
+   "pass": true,
+   "detail": [
+    "WS8"
+   ]
+  },
+  {
+   "name": "480 WS8: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS8"
+  },
+  {
+   "name": "480 WS8: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "참고 문서"
+    ],
+    "참고 문서"
+   ]
+  },
+  {
+   "name": "480 WS8: chat reference follows the screen",
+   "pass": true,
+   "detail": "참고 문서 목록"
+  },
+  {
+   "name": "480 WS8: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 WS8: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 WS8: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 WS9: panes in view are WS9",
+   "pass": true,
+   "detail": [
+    "WS9"
+   ]
+  },
+  {
+   "name": "480 WS9: badge names the screens in view",
+   "pass": true,
+   "detail": "시안 2 · 저장·실행 안 됨 · WS9"
+  },
+  {
+   "name": "480 WS9: menu and header band name the same place",
+   "pass": true,
+   "detail": [
+    [
+     "참고 문서"
+    ],
+    "참고 문서"
+   ]
+  },
+  {
+   "name": "480 WS9: chat reference follows the screen",
+   "pass": true,
+   "detail": "참고 문서 / EMS 운영 가이드"
+  },
+  {
+   "name": "480 WS9: nothing runs past the work area or the window",
+   "pass": true,
+   "detail": {
+    "docOverflow": false,
+    "wide": 0
+   }
+  },
+  {
+   "name": "480 WS9: a list carries no second title or description",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 WS9: no row is marked while the list is alone",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "480 chat opens over the work area",
+   "pass": true
+  },
+  {
+   "name": "480 Escape closes the chat",
+   "pass": true
+  },
+  {
+   "name": "no page error, console error or network request",
+   "pass": true,
+   "detail": []
+  }
+ ]
+}
