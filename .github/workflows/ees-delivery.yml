@@ -737,7 +737,10 @@ jobs:
     name: Prepare delivery files
     needs: [plan, check]
     # Only the complete full scope packages; partial runs never produce a ZIP.
-    if: needs.plan.outputs.package == 'true'
+    # The quick job is skipped in the full scope, and a skipped ancestor skips
+    # every later job that relies on the default success check. State the
+    # required results instead.
+    if: ${{ !cancelled() && needs.plan.outputs.package == 'true' && needs.plan.result == 'success' && needs.check.result == 'success' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:

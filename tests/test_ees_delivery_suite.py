@@ -255,6 +255,33 @@ class DeliveryPlanTests(unittest.TestCase):
         self.assertTrue(runner.check_results({}, needs))
         self.assertTrue(runner.check_results({"quick": "success"}, needs))
 
+    def test_packaging_states_its_required_results_because_quick_is_skipped_in_full(self):
+        # Run 583: every check passed but the ZIP job was skipped. GitHub skips
+        # a job that relies on the default success check when any ancestor,
+        # here the quick job behind the final check, was skipped.
+        workflow = (Path(__file__).parents[1] / ".github/workflows/ees-delivery.yml").read_text(encoding="utf-8")
+        package = workflow.split("\n  package:\n", 1)[1]
+        condition = next(line.strip() for line in package.splitlines() if line.strip().startswith("if:"))
+        for required in ("!cancelled()", "needs.plan.outputs.package == 'true'", "needs.check.result == 'success'"):
+            self.assertIn(required, condition)
+        self.assertEqual(runner.plan("full")["expected"]["quick"], "skipped")
+        # Every other job only follows jobs that run whenever it runs.
+        ancestors = {"quick": [], "audit": [], "source-frontend": [], "upstream-fixture": [],
+                     "historical-fixtures": ["upstream-fixture"], "fixtures": ["source-frontend", "upstream-fixture"],
+                     "service": ["fixtures", "historical-fixtures"], "native": ["fixtures"], "native-product": ["fixtures"]}
+        self.assertEqual(set(ancestors), set(runner.JOBS))
+        for job, needed in ancestors.items():
+            line = "\n  " + job + ":\n"
+            self.assertIn(line, workflow)
+            declared = workflow.split(line, 1)[1].split("\n    needs: ", 1)[1].splitlines()[0]
+            self.assertEqual(declared.strip("[]").replace(" ", "").split(","), (["plan"] + needed) if needed else ["plan"], job)
+        for scope, suites in (("quick", ""), ("browser", ""), ("browser", "native-product"), ("linux", ""),
+                              ("linux", "restore-ees12"), ("windows", ""), ("full", ""), ("full", "native-work")):
+            runs = runner.plan(scope, suites)["runs"]
+            for job, needed in ancestors.items():
+                if runs[job]:
+                    self.assertTrue(all(runs[name] for name in needed), (scope, suites, job))
+
 
 if __name__ == "__main__":
     unittest.main()
