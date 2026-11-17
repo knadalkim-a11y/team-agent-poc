@@ -10,6 +10,8 @@
 
 **병합 전 CI(2026-11-17):** 사용자 지시로 [PR #142](https://github.com/knadalkim-a11y/team-agent-poc/pull/142)에 main(1단계 병합 뒤)을 합친 `e4a8e9e`의 [실행 567](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44014693399) 첫 시도에서 Windows `platform`의 `test_another_process_can_stop_saved_identity` 한 건이 실패했다. 다른 프로세스가 저장된 식별 정보로 서버를 종료하려 할 때 `process_inspect`가 0.17초 만에 `identity_unavailable`, `winerror 5`(접근 거부)로 끝났다. 이 시험과 `scripts/ees_deploy_process.py`는 CI를 통과했던 `a23bb62`와 같고, 합친 내용은 화면 코드와 기록 문서뿐이다. 실패한 작업만 한 번 다시 돌려 통과했고 `5efd0a1`로 병합했다. 원인은 확인하지 못했다. 다시 돌려 통과한 것을 해결로 보지 않으며, 같은 실패가 다시 나오면 그 실행에서 대상 프로세스가 살아 있었는지와 같은 작업의 다른 시험이 남긴 프로세스가 있었는지부터 본다.
 
+**같은 날 재발(2026-11-17):** CI 실행 방식을 바꾸는 작업 브랜치 `8452e11`의 전체 범위 [실행 584](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44069983964) 첫 시도에서 같은 시험이 `process_inspect`·`identity_unavailable`(0.27초)로 실패했다. 그 브랜치는 배포 스크립트와 이 시험을 건드리지 않았다. 실패한 작업만 한 번 다시 돌려 통과했다. 원인은 여전히 확인하지 못했다. [그 실행의 기록](no-run-mode-20261102.md#ci-on-demand-20261117).
+
 <a id="api-summary-and-pinned-runs-20261116"></a>
 
 ## 2026-11-16 · 미분류 API와 이전 공용 도구 회차
