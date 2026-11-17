@@ -22,3 +22,8 @@ jobs:
           python-version: '3.11'
       - name: Probe the exiting server
         run: python -X utf8 tests/tmp_stop_probe.py --a 200 --b 80 --c 80
+      - name: Run the real Windows lifecycle tests three times
+        run: |
+          python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_deploy_process.py
+          python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_deploy_process.py
+          python -X warn_default_encoding -W error::EncodingWarning -m unittest discover -s tests -p test_ees_deploy_process.py

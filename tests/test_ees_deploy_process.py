@@ -721,7 +721,32 @@ class WindowsIdentityContracts(unittest.TestCase):
                     self.assertIsNone(manager._windows_identity(123, send_to=self.saved))
                 finally:
                     function.side_effect = original
-        self.assertTrue(all(call.args == (987654, 0) for call in self.kernel.WaitForSingleObject.call_args_list))
+        # The first wait only samples; the wait after a refused query gives an
+        # exit already in progress time to finish on the same handle.
+        self.assertEqual([call.args for call in self.kernel.WaitForSingleObject.call_args_list],
+                         [(987654, 0), (987654, manager._EXIT_SETTLE_MILLISECONDS)] * 2)
+        self.kernel.GenerateConsoleCtrlEvent.assert_not_called()
+        self.assertEqual(self.kernel.CloseHandle.call_count, 2)
+
+    def test_exiting_process_that_refuses_its_image_query_is_an_ordinary_exit(self):
+        # Measured on windows-2022 (probe run 44190057410): after the exit code
+        # is set, GetProcessTimes still succeeds, the image query fails with
+        # access denied, and the handle is signaled 1.5-2.5 ms later. A zero
+        # wait at that point reported a live process that cannot be inspected.
+        self.kernel.QueryFullProcessImageNameW.side_effect = None
+        self.kernel.QueryFullProcessImageNameW.return_value = 0
+        waits = []
+
+        def wait(handle, milliseconds):
+            waits.append(milliseconds)
+            return 0 if milliseconds >= 3 else 258
+
+        self.kernel.WaitForSingleObject.side_effect = wait
+        self.assertIsNone(manager._windows_identity(123))
+        self.assertIsNone(manager._windows_identity(123, send_to=self.saved))
+        self.assertEqual(waits, [0, manager._EXIT_SETTLE_MILLISECONDS] * 2)
+        self.assertGreaterEqual(manager._EXIT_SETTLE_MILLISECONDS, 1000)
+        self.kernel.AttachConsole.assert_not_called()
         self.kernel.GenerateConsoleCtrlEvent.assert_not_called()
         self.assertEqual(self.kernel.CloseHandle.call_count, 2)
 
@@ -1002,7 +1027,8 @@ class ExplicitTerminationContracts(unittest.TestCase):
             with self.subTest(name=name):
                 function.side_effect = None
                 function.return_value = 0
-                self.kernel.WaitForSingleObject.side_effect = [258]
+                # Still running after the bounded wait: a real refusal.
+                self.kernel.WaitForSingleObject.side_effect = [258, 258]
                 try:
                     with self.assertRaises(manager.ProcessError) as failure:
                         manager.terminate_registered_process(self.saved)
@@ -1012,10 +1038,17 @@ class ExplicitTerminationContracts(unittest.TestCase):
                     self.assertIs(error.terminated, False)
                     self.assertNotIn('synthetic-private', str(error))
                     self.assertNotIn('synthetic-private', json.dumps(vars(error)))
+                    self.assertEqual(self.kernel.WaitForSingleObject.call_args.args,
+                                     (self.handle, manager._EXIT_SETTLE_MILLISECONDS))
+                    # An exit already in progress finishes on the same handle.
+                    self.kernel.WaitForSingleObject.side_effect = [258, 0]
+                    self.assertIs(manager.terminate_registered_process(self.saved), False)
+                    self.kernel.TerminateProcess.assert_not_called()
                 finally:
                     function.side_effect = original
         self.kernel.TerminateProcess.assert_not_called()
-        self.assertEqual(self.kernel.CloseHandle.call_count, 2)
+        # Each query runs twice: the real refusal and the exit in progress.
+        self.assertEqual(self.kernel.CloseHandle.call_count, 4)
 
     def test_mismatched_image_or_creation_time_never_terminates(self):
         for field, value in (('executable', self.saved['executable'] + '-other'),
