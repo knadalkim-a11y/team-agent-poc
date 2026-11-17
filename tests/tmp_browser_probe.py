@@ -17,7 +17,7 @@ parser.add_argument('--raf-delay', type=int, default=0)
 parser.add_argument('--fetch-delay', type=int, default=0)
 parser.add_argument('--dump-pass', action='store_true')
 parser.add_argument('--css', default='')
-parser.add_argument('--tail', type=int, default=90)
+parser.add_argument('--tail', type=int, default=330)
 parser.add_argument('--menu-close-range', default='')
 args = parser.parse_args()
 module_name, class_name, method = args.test.split('.')
@@ -77,13 +77,16 @@ def wrapped(self):
             (out / ('pass-%d.json' % wrapped.round)).write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
     except BaseException:
         try:
-            data = self.browser.evaluate("(()=>{try{window.__c3?.stop();}catch(e){};return {c3:window.__c3?.evidence?{inputs:window.__c3.evidence.inputs,events:window.__c3.evidence.events.slice(-80),frames:window.__c3.evidence.frames.slice(-200).map(f=>({t:f.t,focus:f.focus,nodes:f.nodes.map(n=>({kind:n.kind,state:n.state,id:n.id,inert:n.inert}))}))}:null,probe:window.__probe?.log||null,active:document.activeElement?.outerHTML?.slice(0,300),menu:document.querySelector('.ew-procedure-menu')?.outerHTML?.slice(0,900),now:performance.now()};})()")
+            data = self.browser.evaluate("(()=>{try{window.__c3?.stop();}catch(e){};return {c3:window.__c3?.evidence?{inputs:window.__c3.evidence.inputs,events:window.__c3.evidence.events.slice(-80),frames:window.__c3.evidence.frames.slice(-200).map(f=>({t:f.t,focus:f.focus,nodes:f.nodes.map(n=>({kind:n.kind,state:n.state,id:n.id,inert:n.inert}))}))}:null,probe:window.__probe?.log||null,active:document.activeElement?.outerHTML?.slice(0,300),menu:document.querySelector('.ew-procedure-menu')?.outerHTML?.slice(0,900),heading:document.querySelector('.ew-author-definition-head')?.innerText?.slice(0,200),designer:document.querySelector('#ees-work-designer')?.innerText?.slice(0,700),list:[...document.querySelectorAll('[data-author-action=open]')].map(e=>(e.dataset.id||'')+':'+e.textContent.trim().slice(0,40)),now:performance.now()};})()")
             (out / ('failure-%d.json' % wrapped.round)).write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding='utf-8')
             rows = (data.get('probe') or [])[-args.tail:]
             print('PROBE_FAILURE round=%d now=%s active=%s' % (wrapped.round, data.get('now'), (data.get('active') or '')[:160].replace('\n', ' ')), flush=True)
             for row in rows:
                 print('PROBE_ROW ' + ' '.join(str(item) for item in row)[:230], flush=True)
             print('PROBE_MENU ' + (data.get('menu') or '')[:700].replace('\n', ' '), flush=True)
+            print('PROBE_HEADING ' + repr(data.get('heading')), flush=True)
+            print('PROBE_DESIGNER ' + repr(data.get('designer')), flush=True)
+            print('PROBE_LIST ' + repr(data.get('list')), flush=True)
         except Exception as error:
             (out / ('failure-%d.txt' % wrapped.round)).write_text('evidence unavailable: %r' % (error,), encoding='utf-8')
         raise
