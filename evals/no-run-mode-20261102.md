@@ -218,7 +218,7 @@ CI456 (`77ca5cd`)의 실제 전체 제품과 새 미완성 게시/360px 흐름�
   - 실행 583의 실패 로그에 찍힌 화면 글자가 시험이 만든 ‘모달 움직임 검증 절차’가 아니라 ‘일일 시스템 점검’과 ‘절차 편집’ 항목이었다.
   - 계측을 넣고 되풀이한 [임시 실행 44193589216](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44193589216)(ubuntu-24.04, Chrome 157.0.8103.50)에서 70번 가운데 1번 같은 단언으로 실패했다. 그 회차의 초점은 메뉴 단추에서 ‘절차 편집’, ‘업무 절차 정보·분류 수정’ 순으로 움직였다.
   - 수정 전 시험에서 목록이 늘어난 뒤 이전 좌표로 누르게 하면(로컬) 3번 모두 같은 단언으로 실패했다. 만든 절차의 줄은 y 191에서 371로 밀렸고 이전 좌표에는 ‘일일 시스템 점검’이 있었다.
-  - 기록 범위를 넓힌 임시 실행 44195587840(수정 전 시험, 220번)의 결과는 끝나면 여기에 적는다.
+  - 기록 범위를 넓힌 [임시 실행 44195587840](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44195587840)(수정 전 시험, 같은 환경)에서는 220번 가운데 3번 실패했고, 세 번 모두 열린 절차가 ‘일일 시스템 점검’이었다. 첫 실패 회차에서 기본 절차 세 줄이 목록에 추가된 시각은 875.5ms, 시험의 클릭이 닿은 시각은 879.7ms였고 이어진 요청은 만든 절차가 아닌 다른 절차를 읽었다. 두 임시 실행을 합치면 수정 전 290번 가운데 4번 실패다.
 - **재현하지 못한 시도(로컬, Chromium 153):** 부하 프로세스 4개로 20번, 화면 처리 속도를 4배·8배 늦춰 12번씩, 메뉴 닫힘 시간을 무작위로 바꿔 40번, 서버 응답을 200ms 늦춰 8번·무작위로 늦춰 36번 돌렸고 한 번도 실패하지 않았다. 메뉴와 대화상자가 닫히는 순서가 원인이라는 가설은 순서를 뒤바꿔도 통과해 버렸다.
 - **이전 조치와 빠진 경로:** 같은 문제를 막는 도우미 `open_initialized_author_list()`가 작성 화면 시험과 API 명세 시험에는 쓰이고 있었다. 이 도우미는 작성 화면 시험 클래스에만 있었고 움직임 시험은 쓰지 않았다.
 - **조치:** 도우미를 공통 fixture(`IntegratedNativeCase`)로 옮기고 `refresh_until()`을 쓰게 했다. 움직임 시험이 이 도우미로 들어가고, 연 절차가 만든 절차인지 바로 확인한다.
@@ -227,8 +227,9 @@ CI456 (`77ca5cd`)의 실제 전체 제품과 새 미완성 게시/360px 흐름�
 
 ### 검증과 남은 것
 
-- 로컬(Chromium 153): 움직임 시험 6개, API 명세 시험 8개, 작업 등록 시험 1개 통과. 작성 화면 시험 43개는 실행 중이며 결과를 여기에 적는다.
-- GitHub: 고친 시험의 221번 반복과 `browser` 범위 실행은 진행 중이며 결과를 여기에 적는다.
+- 로컬(Linux, Python 3.11.18, Chromium 153): 바꾼 도우미를 쓰는 브라우저 시험 네 모듈(움직임 6개, 작업 등록 1개, API 명세 8개, 작성 화면 43개)이 통과했다. 임시 파일을 지운 뒤의 빠른 검사는 1,373개 통과, 109개 건너뜀이고 시험 ID 감사와 문서 점검은 오류 0이다.
+- GitHub `browser` 범위 [실행 589](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44196652378)(커밋 `0343bc1`): native-account·native-work·native-execution과 전체 제품 검사는 성공했다. native-compose는 고친 두 시험을 포함해 129개 가운데 128개가 통과했고, `test_c3_overlay_panel_closing_releases_hit_testing_and_restores_focus` 한 건이 `Opening narrow chat should never take space away from the work surface`로 실패했다. 실행 566에서 실패했던 시험과 단언이 같다. 아래에서 따로 다룬다.
+- GitHub: 고친 대화상자 초점 시험의 221번 반복(임시 실행 44196698628)은 진행 중이며 결과를 여기에 적는다.
 - 임시 워크플로 두 개와 임시 스크립트 두 개는 조사 뒤 지웠다. 측정 값은 위 임시 실행의 로그에 있다.
 - 실행 566의 두 시험(`test_c3_overlay_panel_closing_releases_hit_testing_and_restores_focus`, `test_procedure_visual_geometry_matches_figma_and_preserves_native_draft`)과 개발 환경에서 자주 실패하는 `test_tools_phase2_trial_activation_revision_groups_and_disable_roundtrip`은 이번에 조사하지 않았다. 원인 미확인으로 남는다.
 - **재발 방지 연결:** 제품 수정은 `scripts/ees_deploy_process.py`, 시험 보완은 `tests/ees_work_integrated_fixture.py`의 `refresh_until()`·`open_initialized_author_list()`에 있다.

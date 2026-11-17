@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-18 · 종료 중인 Windows 프로세스의 조회 거부 처리, 간헐 실패 시험 보완
+
+사용자 지시로 전체 검사의 간헐 실패 원인을 조사해 세 건을 확인했다. Windows에서 프로세스는 종료 중 약 2ms 동안 실행 파일 경로 조회를 접근 거부로 거절하는데, 제품이 이를 검사할 수 없는 살아 있는 프로세스로 보고 Stop을 실패시킬 수 있었다. 같은 핸들을 최대 2초 기다려 종료가 끝나는지 확인하게 고쳤다(`scripts/ees_deploy_process.py`). 브라우저 시험 두 건은 시험의 대기 누락이어서 공통 fixture에 `refresh_until()`을 더하고 `open_initialized_author_list()`를 옮겨 쓰게 했다. 제품 화면 코드는 바꾸지 않았다. [원인·증거·검증](evals/no-run-mode-20261102.md#flaky-root-cause-20261118)
+
 ## 2026-11-17 · CI를 필요한 만큼만 실행
 
 사용자 결정으로 CI 실행 방식을 바꿨다. PR에서는 빌드 없이 도는 빠른 검사만 자동으로 돌고(약 3분), main에 병합해도 자동 실행은 없다. 브라우저·Windows·설치/복구 검사는 Actions의 Run workflow에서 범위와 묶음을 골라 실행한다. 전체 검사와 프로그램 ZIP 생성은 사내 배포 전에 main에서 한 번 실행하며, main에서는 부분 실행이 거절된다. 범위별 작업 목록은 `tests/ees_delivery_suite.py`의 `plan()` 한 곳에서 정한다. 어디서도 불러오지 않는 옛 시험 도구 다섯 개를 지웠다. [측정·검증·미확인](evals/no-run-mode-20261102.md#ci-on-demand-20261117) · [실행 방법](docs/03-openwebui-native-agent.md#ci-scopes)
