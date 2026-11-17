@@ -101,6 +101,8 @@ original_test = getattr(case, method)
 def wrapped(self):
     try:
         original_test(self)
+        if args.dump_pass and args.geom:
+            (out / ('pass-geom-%d.json' % wrapped.round)).write_text(json.dumps(self.browser.evaluate('({rows:window.__geom.rows,calls:window.__geom.calls})'), ensure_ascii=False), encoding='utf-8')
         if args.dump_pass:
             data = self.browser.evaluate("window.__probe?.log||null")
             (out / ('pass-%d.json' % wrapped.round)).write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
