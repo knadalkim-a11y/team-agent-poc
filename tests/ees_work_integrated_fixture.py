@@ -422,15 +422,19 @@ class IntegratedNativeCase(unittest.TestCase):
         return key
 
     def add_stage_ui(self, name):
-        self.click('[data-author-action=add_stage]')
-        self.wait("document.querySelector('#ew-stage-editor [name=name]')")
+        # With no stage yet the stage name field is already open.
+        if not self.browser.evaluate("!!document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 단계 이름\"]')"):
+            self.click('[data-author-action=add_stage]')
+        self.wait("document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 단계 이름\"]')")
         self.fill('#ew-stage-editor [name=name]', name)
         self.click('[data-author-action=inline_apply]')
-        self.wait("!document.querySelector('#ew-stage-editor') && document.querySelector('[data-author-action=add_job]')")
+        # A new stage opens with its job name field ready.
+        self.wait("document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 작업 이름\"]')")
 
     def add_job_ui(self, name):
-        self.click('[data-author-action=add_job]')
-        self.wait("document.querySelector('#ew-stage-editor [name=name]')")
+        if not self.browser.evaluate("!!document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 작업 이름\"]')"):
+            self.click('[data-author-action=add_job]')
+        self.wait("document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 작업 이름\"]')")
         self.fill('#ew-stage-editor [name=name]', name)
         self.click('[data-author-action=inline_apply]')
         self.wait("document.querySelector('#ew-author-node [name=job_guidance]')")

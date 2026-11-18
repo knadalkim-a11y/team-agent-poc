@@ -552,7 +552,8 @@ class SourceShellNativeTests(IntegratedNativeCase):
             self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'), draft)
             self.assertEqual(self.browser.evaluate('location.pathname'), '/c/existing-chat')
             if screen == 'work_home':
-                self.assertIn('업무 절차를 선택해 주세요', self.text('#ees-work-panel'))
+                # A scope with nothing published says so; one with a published procedure asks to pick it.
+                self.assertIn('아직 업무가 없습니다' if system == 'APC' else '업무 절차를 선택해 주세요', self.text('#ees-work-panel'))
             elif screen == 'records':
                 self.assertIn('저장된 진행 건이 없습니다.', self.text('#ees-work-panel'))
             elif unknown:

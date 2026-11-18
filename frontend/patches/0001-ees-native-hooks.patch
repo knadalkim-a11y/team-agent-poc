@@ -2079,7 +2079,7 @@ new file mode 100644
 index 0000000..e2b4810
 --- /dev/null
 +++ b/src/lib/components/ees/EesNavigation.svelte
-@@ -0,0 +1,222 @@
+@@ -0,0 +1,228 @@
 +<script lang="ts">
 +	import { getContext } from 'svelte';
 +	import { page } from '$app/stores';
@@ -2118,6 +2118,8 @@ index 0000000..e2b4810
 +		cap.managed_systems?.length ||
 +		(cap.native_access_available && Object.values(cap.native_access || {}).some(Boolean));
 +	$: current = (data.workflows || []).filter((w) => (!s.system_id || w.system_id === s.system_id) && (author || w.published_version != null));
++	// Saved but not published yet. Listed for accounts that may author, so a first draft stays in view.
++	$: pending = !author && create ? (data.workflows || []).filter((w) => (!s.system_id || w.system_id === s.system_id) && w.published_version == null && w.can_manage !== false) : [];
 +	let openedScope = '';
 +	$: scope = $eesSnapshot.native_shell && $eesSnapshot.native_scope ? $eesSnapshot.native_scope : data;
 +	$: scopeRole = (item) => item.allowed === false ? '' : item.role || (item.roles?.includes('manager') || cap.is_admin || cap.managed_systems?.includes(item.system_id || item.id) ? 'owner' : 'participant');
@@ -2290,6 +2292,10 @@ index 0000000..e2b4810
 +									>{/if}</button
 +							>{/each}
 +					</div></div></div>{/each}
++				{#if pending.length && !$eesCompact}<button class="ew-pending" data-action={pending.length === 1 ? 'pending_open' : 'pending_list'}
++						data-workflow-id={pending.length === 1 ? pending[0].id : undefined}
++						on:click={() => eesAction(pending.length === 1 ? { action: 'pending_open', workflowId: pending[0].id } : { action: 'pending_list' })}
++						><span>{t('EES.Pending', 'Not published yet')}</span><b>{pending.length}</b></button>{/if}
 +				{#if $eesSnapshot.scope_loading}<p class="ew-empty" role="status" data-ees-scope-loading="navigation">{t($eesSnapshot.error ? 'EES.ListUnavailable' : 'EES.Receiving', $eesSnapshot.error ? 'Could not receive the list.' : 'Receiving')}</p>
 +				{:else if !current.length}<p class="ew-empty">
 +						{t('EES.NoProcedures', 'No published procedures.')}
@@ -6293,7 +6299,7 @@ index 8eba682..3f8b0cd 100644
  	"Connected ({{type}})": "{{type}}에 연결됨",
  	"Connection failed": "연결 실패",
  	"Connection lost. Reconnecting...": "연결이 끊겼습니다. 재연결 중...",
-@@ -3081,5 +3081,143 @@
+@@ -3081,5 +3081,144 @@
  	"Youtube Language": "Youtube 언어",
  	"Youtube Proxy URL": "Youtube 프록시 URL",
  	"Zoom in": "",
@@ -6336,6 +6342,7 @@ index 8eba682..3f8b0cd 100644
 +	"EES.Category.Setup": "셋업",
 +	"EES.Category.Incident": "장애대응",
 +	"EES.NoProcedures": "게시된 업무 절차가 없습니다.",
++	"EES.Pending": "게시 전",
 +	"EES.Retry": "다시 확인",
 +	"EES.Sidebar.Expand": "사이드바 펼치기",
 +	"EES.Sidebar.Collapse": "사이드바 접기",

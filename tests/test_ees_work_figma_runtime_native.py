@@ -398,6 +398,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
                 header:styled(document.querySelector('[data-ees-work-toolbar]')),title:styled(panel.querySelector('h2')),
                 rows:[...panel.querySelectorAll('[data-stage-job]')].map(e=>({job:e.dataset.stageJob,...rect(e)})),
                 menu:panel.querySelector('#ees-stage-verdict-menu')?styled(panel.querySelector('#ees-stage-verdict-menu')):null,
+                menuItems:panel.querySelectorAll('#ees-stage-verdict-menu [role=menuitemradio]').length,
                 controls:[...panel.querySelectorAll('.ew-vd-pick,.ew-vd-run,.ew-vd-evidence-toggle')].filter(e=>e.getClientRects().length).map(e=>({text:e.innerText,...styled(e)}))};
         })()""")
         self.assertLessEqual(observed['overflow'], 1, observed)
@@ -406,7 +407,9 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.assertEqual(observed['title']['lineHeight'], '37px', observed)
         if observed['menu']:
             self.assertAlmostEqual(observed['menu']['width'], 180, delta=1, msg=observed)
-            self.assertAlmostEqual(observed['menu']['height'], 110, delta=1, msg=observed)
+            # 32px rows with a 2px gap inside 4px padding and a 1px border: 110px for three words.
+            # An undecided human check lists only the words other than its one-click answer.
+            self.assertAlmostEqual(observed['menu']['height'], 34 * observed['menuItems'] + 8, delta=1, msg=observed)
             self.assertGreaterEqual(observed['menu']['x'], observed['panel']['x'] + 7, observed)
             self.assertLessEqual(observed['menu']['x'] + observed['menu']['width'], observed['panel']['x'] + observed['panel']['width'] - 7, observed)
         directory = self.screenshot(label)
@@ -438,20 +441,21 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             self.wait('innerWidth === ' + str(width))
             self.click('[data-action=stage_verdict][data-job-id=job-2]')
             self.wait("document.querySelector('#ees-stage-verdict-menu [role=menuitemradio]')")
-            self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('#ees-stage-verdict-menu b')].map(e=>e.textContent)"), ['승인', '조건부 승인', '미승인'])
+            # 승인 is the one-click answer on the row; the arrow lists the other answers.
+            self.assertEqual(self.read('[data-action=stage_decide][data-job-id=job-2]', 'textContent'), '승인')
+            self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('#ees-stage-verdict-menu b')].map(e=>e.textContent)"), ['조건부 승인', '미승인'])
             self.stage_capture('operations-stage-menu-' + str(width))
             self.key('Escape', 27)
             self.wait("!document.querySelector('#ees-stage-verdict-menu')")
             self.assertEqual(self.browser.evaluate('document.activeElement.dataset.action'), 'stage_verdict')
-        self.click('[data-action=stage_verdict][data-job-id=job-2]')
-        self.click('[data-action=stage_decide][data-judgment-id=approved]')
+        self.click('[data-action=stage_decide][data-job-id=job-2][data-judgment-id=approved]')
         self.wait("document.querySelector('[data-action=stage_verdict][data-job-id=job-2]')?.innerText.includes('승인')")
         first = deepcopy(self.state(run_id=run['id'])['run'])
         first_decision = first['jobs']['job-2']['decisions'][0]
         self.assertEqual(first_decision['verdict'], 'completed')
         self.assertTrue(first_decision['note'].endswith('선택한 판정: 승인 (approved)'))
         self.click('[data-action=stage_verdict][data-job-id=job-2]')
-        self.assertEqual(self.read('[data-action=stage_decide][data-judgment-id=approved]', "getAttribute('aria-checked')"), 'true')
+        self.assertEqual(self.read('#ees-stage-verdict-menu [data-action=stage_decide][data-judgment-id=approved]', "getAttribute('aria-checked')"), 'true')
         self.stage_capture('operations-stage-selected-menu-480')
         self.key('ArrowDown', 40); self.key('Enter', 13)
         self.wait("document.querySelector('[data-action=stage_verdict][data-job-id=job-2]')?.innerText.includes('조건부 승인')")
@@ -595,7 +599,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             control = '#sidebar [data-action=workflow][data-workflow-id="' + item + '"]'
             self.wait('document.querySelector(' + json.dumps(control) + ')')
             self.click(control)
-            self.wait("document.querySelector('#ees-work-designer')?.textContent.includes(" + json.dumps(workflows[item]['name']) + ") && document.querySelector('[data-author-action=add_stage]')")
+            self.wait("document.querySelector('#ees-work-designer')?.textContent.includes(" + json.dumps(workflows[item]['name']) + ") && document.querySelector('[data-author-action=add_stage],#ew-stage-editor [name=name]')")
             self.screenshot('authoring-unpublished-kept-' + label)
             self.assertEqual(self.state(workflow_id=item)['workflow'], workflows[item])
         self.click('[data-action=mode][data-mode=work]')
@@ -809,7 +813,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             self.click('#stage-evidence-job-2 [data-stage-note]')
             self.stage_capture('operations31-reason-saved-' + str(width))
         self.click('[data-action=stage_verdict][data-job-id=job-2]')
-        self.click('[data-action=stage_decide][data-judgment-id=approved]')
+        self.click('#ees-stage-verdict-menu [data-action=stage_decide][data-judgment-id=approved]')
         self.wait("document.querySelector('[data-action=stage_verdict][data-job-id=job-2]')?.textContent.trim()==='승인' && !document.querySelector('#ees-stage-verdict-menu')")
         final = self.state(run_id=run['id'])['run']
         self.assertEqual([item for item in final['jobs']['job-2']['decisions'] if item['id'] == first['id']], [first])

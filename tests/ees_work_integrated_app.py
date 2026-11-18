@@ -220,14 +220,28 @@ if(performance.now()>end)return resolve(null);requestAnimationFrame(check)}check
         self.click('.ew-operation-overview [data-action="stage_open"]')
         self.wait_work_ready(selector='[data-action="stage_details"]')
 
-    def open_operation_start(self, *, expect_form=True):
+    def open_operation_start(self, *, expect_form=None):
+        """Press the stage's start control and report whether the start form opened.
+
+        2026-11-18: the form opens only for a procedure that asks something at the start;
+        otherwise the control starts the run at once.
+        """
         self.open_operation_stage()
         self.click('.ew-stage-run-button[data-action="stage_start"]')
-        self.wait_work_ready(selector='#ees-work-dialog[open]')
-        assert self.browser.evaluate("!!document.querySelector('.ew-vd-head')"), 'Execution preparation must keep the stage behind its dialog'
+        self.wait("document.querySelector('#ees-work-dialog[open]') || !document.querySelector('.ew-stage-run-button[data-action=\"stage_start\"]')")
+        opened = self.browser.evaluate("!!document.querySelector('#ees-work-dialog[open]')")
+        if expect_form is not None:
+            assert opened == expect_form, ('Start form presence', opened, expect_form)
+        assert self.browser.evaluate("!!document.querySelector('.ew-vd-head')"), 'Starting must keep the stage in view'
         assert not self.browser.evaluate("!!document.querySelector('.ew-adhoc-start,.ew-active-runs,#ees-start-factory')"), 'The removed start screen and duplicate factory picker must remain absent'
-        if expect_form:
+        if opened:
             self.wait_work_ready(selector='#ees-work-dialog #ees-work-start')
+        return opened
+
+    def confirm_operation_start(self):
+        """Start through the form when the procedure has one, or directly when it has none."""
+        if self.open_operation_start():
+            self.click('#ees-work-dialog [data-dialog-confirm]')
 
     def open_operation_details(self):
         self.open_operation_stage()
@@ -721,11 +735,13 @@ def integrated_flow(gate):
     g.type('#ew-procedure-create [name=description]',purpose)
     g.click('[data-author-action="procedure_create"]')
     g.wait('!!document.querySelector("[data-author-action=tab][data-tab=content]")')
-    g.wait('!!document.querySelector(\'[data-author-action="add_stage"]\')')
-    g.click('[data-author-action="add_stage"]')
+    # 2026-11-18: a new procedure opens with its stage name field ready, and a new stage
+    # with its job name field ready; there is no add control to press first.
+    g.wait('!!document.querySelector(\'#ew-stage-editor input[name="name"][aria-label="새 단계 이름"]\')')
+    assert not g.browser.evaluate('!!document.querySelector(\'[data-author-action="add_stage"]\')')
     g.type('#ew-stage-editor input[name="name"]','자료 검토')
     g.click('[data-author-action=inline_apply]')
-    g.click('[data-author-action="add_job"]')
+    g.wait('!!document.querySelector(\'#ew-stage-editor input[name="name"][aria-label="새 작업 이름"]\')')
     g.type('#ew-stage-editor input[name="name"]','사람의 근거 확인')
     g.click('[data-author-action=inline_apply]')
     # 2026-11-02 moves run start inputs from the removed execution-mode tab to
@@ -794,7 +810,7 @@ def integrated_flow(gate):
     g.record('physical validate and publish with legacy job-input fixture',workflow_id=identifier,version=1)
     g.click('[data-action="mode"][data-mode="work"]')
     g.click('[data-action="workflow"][data-workflow-id="'+identifier+'"]')
-    g.open_operation_start()
+    g.open_operation_start(expect_form=True)
     g.type('#ees-work-start [name="evidence_note"]','개발용 시작 근거')
     g.capture('figma-a8-first-start')
     g.click('#ees-work-dialog [data-dialog-confirm]')
@@ -1262,9 +1278,9 @@ def figma_delta_flow(g):
     g.wait('!!document.querySelector("[data-author-action=tab][data-tab=content]")')
     # 2026-11-02: no execution-mode tab or schedule authoring. A schedule saved
     # earlier stays data in the draft and in the immutable publication.
-    assert g.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim()).join('|')")=='업무 내용|판정 규칙|게시 기록'
+    assert g.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim()).join('|')")=='업무 내용|판정 단어|게시 기록'
     assert not g.browser.evaluate('!!document.querySelector("#ew-author-schedule,[data-author-action=run_mode],[data-author-action=schedule_tools],[data-author-action=schedule_preview]")')
-    assert '시작할 때 받는 값' in g.browser.evaluate('document.querySelector(".ew-content-start-inputs")?.innerText || ""')
+    assert '시작할 때 물어볼 것' in g.browser.evaluate('document.querySelector(".ew-content-start-inputs")?.innerText || ""')
     g.capture('no-run-mode-content-tab')
     saved=g.api('/api/ees-work/workspace?workflow_id='+workflow_id)['workflow']
     assert saved['draft']['schedule']==saved['published']['schedule'] and saved['draft']['schedule']['opening']=='after_previous_closed'
@@ -1272,8 +1288,7 @@ def figma_delta_flow(g):
     assert not g.api('/api/ees-work/operations?system_id=EMS')['schedules']
     g.record('2026-11-02 authoring without an execution-mode tab keeps stored schedule data',draft_revision=saved['revision'],published_version=1,reservation_created=False)
     g.click('[data-action="mode"][data-mode="work"]');g.click('[data-action="workflow"][data-workflow-id="'+workflow_id+'"]')
-    g.open_operation_start()
-    g.click('#ees-work-dialog [data-dialog-confirm]')
+    g.confirm_operation_start()
     # A single-stage run opens its stage first. Inspect that entry separately,
     # then physically open run details for the existing A5 checks.
     run_id=g.wait_work_ready(workflow_id=workflow_id,require_run=True,selector='[data-action="stage_back"]')['reference']['run_id']
@@ -1453,9 +1468,9 @@ def figma_delta_flow(g):
     g.click('[data-action="choose_factory"][data-factory-id="'+factory_id+'"]')
     g.wait('document.querySelector("#ees-work-site-trigger")?.innerText.includes("합성 C12 검수 공장")')
     g.click('[data-action="workflow"][data-workflow-id="'+delivery_id+'"]')
-    g.open_operation_start()
-    g.capture('figma-a8-factory-ready')
-    g.click('#ees-work-dialog [data-dialog-confirm]')
+    if g.open_operation_start():
+        g.capture('figma-a8-factory-ready')
+        g.click('#ees-work-dialog [data-dialog-confirm]')
     delivery_run_id=g.wait_work_ready(workflow_id=delivery_id,require_run=True,selector='[data-action="job"][data-job-id="delivery-report"]')['reference']['run_id']
     g.click('[data-action="job"][data-job-id="delivery-report"]');select_execution_model();g.click('[data-action="execute"]')
     g.wait('document.querySelector("#ees-review-text")?.value.includes("합성 AI 검토 원문")',20000)
@@ -1483,7 +1498,7 @@ def figma_delta_flow(g):
     resumed=g.wait_work_ready(workflow_id=delivery_id,run_id=delivery_run_id,selector='#ees-work-panel .ew-stage-run-button[data-action="execute_scope"]')
     assert resumed['reference']['factory_id']==factory_id,resumed
     g.wait('!document.querySelector("#ees-work-dialog")')
-    start_controls=g.browser.evaluate('[...document.querySelectorAll(\'#ees-work-panel #ees-work-start,#ees-work-panel [data-action="stage_start"],#ees-work-panel [data-action="start_run"]\')].map(e=>e.outerHTML)')
+    start_controls=g.browser.evaluate('[...document.querySelectorAll(\'#ees-work-panel #ees-work-start,#ees-work-panel [data-action="stage_start"],#ees-work-panel [data-action="start_run"],#ees-work-panel [data-action="overview_start"]\')].map(e=>e.outerHTML)')
     assert start_controls==[],start_controls
     assert g.api('/api/ees-work/workspace?run_id='+delivery_run_id)['run']==blocked
     g.capture('figma-a8-active-factory-duplicate-disabled')

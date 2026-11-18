@@ -2639,3 +2639,77 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer [data-api-split=true] .ew-api-pane :is(.ew-api-thead,.ew-api-row) {grid-template-columns:56px minmax(0,1fr);}
 #ees-work-designer [data-api-split=true] .ew-api-pane .ew-api-row i {display:none;}
 #ees-work-designer [data-api-split=true] .ew-api-pane :is(.ew-api-name strong,.ew-api-description) {white-space:nowrap;}
+
+/* First-user flow (2026-11-18, mock 18 revision 2). A control keeps the size of what it holds;
+   width that is left over is used by placing related fields side by side, not by stretching. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer {--ew-w-name:480px;--ew-w-text:720px;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer > .ew-author-scroll {container:ees-author-form / inline-size;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer :is(.ew-procedure-info,.ew-workflow-create,.ew-job-main[data-job-mode=human]) input:not([type=radio]):not([type=checkbox]) {max-width:var(--ew-w-name);}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer :is(.ew-procedure-info,.ew-workflow-create,.ew-job-main[data-job-mode=human]) textarea {max-width:var(--ew-w-text);}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-job-main[data-job-mode=human] select {max-width:320px;}
+/* A choice is as wide as its words. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer:not([data-author-tab=tools]) .ew-job-method>div {display:inline-grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(112px,max-content);max-width:100%;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer:not([data-author-tab=tools]) .ew-job-method span {padding:4px 16px;}
+/* New procedure and the editor's first card: name and purpose side by side when there is room. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-scope-chip-row {margin:0;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-scope-chip {display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:11px;background:var(--ees-surface-muted);font-size:12px;line-height:18px;color:var(--ees-text-secondary);}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-procedure-info > .ew-author-link {justify-self:start;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-procedure-create-actions {justify-content:flex-start;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-workflow-create textarea {min-height:64px;height:64px;}
+@container ees-author-form (min-width:720px) {
+  [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-procedure-info,
+  [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-workflow-create > .ew-author-fields {grid-template-columns:minmax(220px,360px) minmax(0,var(--ew-w-text));justify-content:start;align-items:start;}
+  [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-procedure-info .ew-procedure-description {grid-column:auto;}
+}
+/* Adding a stage or a job: one row with the name and its button. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-stage-editor.ew-add-row {display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:44px;margin:8px 0;padding:0;border:0;border-radius:0;background:transparent;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-add-row > i {display:grid;place-items:center;flex:none;width:22px;height:22px;border:1px solid var(--ees-line-control);border-radius:50%;font-style:normal;font-size:12px;line-height:1;color:var(--ees-text-secondary);}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-add-row > input {flex:0 1 var(--ew-w-name);width:auto;min-width:0;min-height:36px;padding:0 12px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-default);font-size:14px;line-height:22px;color:var(--ees-text-primary);}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-add-row > input::placeholder {color:var(--ees-text-secondary);}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-add-row > button {flex:none;min-height:36px;padding:0 14px;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-add-row > button[data-author-action=inline_cancel] {border:0;background:transparent;font-size:13px;color:var(--ees-text-secondary);}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-add-row > .ew-inline-error {flex-basis:100%;margin:0;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-stage-body > .ew-add-row {margin:4px 0 4px 10px;}
+/* Start questions: the heading, the count and the add control on one row. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-content-start-inputs {margin-top:24px;padding-top:16px;border-top:1px solid var(--ees-line-divider);}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-content-start-inputs > .ew-start-row {justify-content:flex-start;gap:8px;margin:0;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-content-start-inputs > .ew-start-row > h3 {font-size:14px;line-height:20px;font-weight:700;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-content-start-inputs > .ew-start-row > small {margin-left:0;font-weight:400;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-content-start-inputs > .ew-start-row > .ew-author-link {margin-left:8px;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-content-start-inputs > .ew-start-input-definition:first-of-type {margin-top:12px;}
+/* A human job: the task on the left, how it is confirmed on the right. The order is unchanged. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-job-col {display:grid;gap:18px;align-content:start;min-width:0;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-job-col > p {margin:0;color:var(--ees-text-secondary);font-size:12px;line-height:18px;overflow-wrap:anywhere;}
+@container ees-author-form (min-width:864px) {
+  [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-job-detail .ew-job-main[data-job-mode=human] {grid-template-columns:minmax(0,var(--ew-w-name)) minmax(0,1fr);column-gap:48px;align-items:start;}
+}
+/* First-user flow, work side: the first screen, one control to start or finish, one-click confirm. */
+[data-ees-work-surface] #ees-work-panel .ew-work-home > .ew-primary {margin-top:4px;}
+[data-ees-work-surface] #ees-work-panel .ew-home-pending {margin-top:32px;max-width:560px;}
+[data-ees-work-surface] #ees-work-panel .ew-home-pending h4 {margin:0 0 4px;font-size:12px;line-height:18px;font-weight:500;color:var(--ees-text-secondary);}
+[data-ees-work-surface] #ees-work-panel .ew-home-pending button {display:flex;width:100%;align-items:center;gap:12px;min-height:44px;padding:0 4px;border:0;border-top:1px solid var(--ees-line-divider);border-radius:0;background:transparent;box-shadow:none;font:inherit;color:inherit;text-align:left;cursor:pointer;}
+[data-ees-work-surface] #ees-work-panel .ew-home-pending button:last-child {border-bottom:1px solid var(--ees-line-divider);}
+[data-ees-work-surface] #ees-work-panel .ew-home-pending button:hover {background:var(--ees-surface-hover);}
+[data-ees-work-surface] #ees-work-panel .ew-home-pending button strong {flex:1;min-width:0;font-weight:500;}
+[data-ees-work-surface] #ees-work-panel .ew-home-pending button small {font-size:12px;color:var(--ees-text-secondary);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-overview-head {display:flex;align-items:flex-start;gap:16px;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-overview-head > div {flex:1;min-width:0;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-overview-head h2 {margin:0;font-size:20px;font-weight:700;line-height:28px;color:var(--ees-text-primary);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-overview-purpose {margin:6px 0 0;color:var(--ees-text-secondary);overflow-wrap:anywhere;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-last-run {display:flex;align-items:center;gap:6px;margin:10px 0 0;font-size:12px;line-height:18px;color:var(--ees-text-secondary);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-last-run > i {flex:none;width:6px;height:6px;border-radius:50%;background:var(--ees-status-success,#2a7d4f);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-overview-head .ew-stage-run-button {width:108px;height:34px;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-overview-head .ew-stage-run-button:not(:disabled) {background:var(--ees-brand-solid);color:var(--ees-text-inverse);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-overview-head .ew-stage-run-button:not(:disabled):hover {background:var(--ees-brand-hover);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-confirm {display:inline-flex;align-items:stretch;flex:none;border:1px solid var(--ees-line-control);border-radius:6px;overflow:hidden;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-confirm > button {min-height:30px;padding:0 12px;border:0;border-radius:0;background:var(--ees-surface-default);box-shadow:none;font-size:13px;line-height:20px;font-weight:500;color:var(--ees-text-primary);cursor:pointer;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-confirm > button + button {display:inline-flex;align-items:center;padding:0 8px;border-left:1px solid var(--ees-line-control);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-confirm > button:hover:not(:disabled) {background:var(--ees-surface-hover);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-confirm > button:focus-visible {outline:2px solid var(--ees-brand-text);outline-offset:-2px;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-state {display:flex;align-items:center;gap:6px;min-height:30px;font-size:12px;line-height:18px;color:var(--ees-text-secondary);}
+/* The confirmation hint sits with its field in the job form. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-job-col > select + p, [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-job-col > label + p {margin-top:-10px;}
+/* Left menu: procedures that are saved but not published yet (accounts that may author). */
+#ees-work-entry .ew-workflows > .ew-pending {display:flex;width:100%;align-items:center;justify-content:space-between;min-height:32px;margin-top:4px;padding:0 8px 0 12px;border:0;border-radius:6px;background:transparent;box-shadow:none;font:inherit;font-size:13px;line-height:20px;color:var(--ees-text-secondary);text-align:left;cursor:pointer;}
+#ees-work-entry .ew-workflows > .ew-pending:hover {background:var(--ees-surface-panel-hover);}
+#ees-work-entry .ew-workflows > .ew-pending > b {font-weight:500;color:var(--ees-text-primary);}

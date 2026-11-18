@@ -742,7 +742,7 @@
     const workflow=state?.workflow,definition=workPublishedDefinition(state);
     if(busy||state?.run||!workflow?.id||!workflow.published_version||!definition.nodes)return;
     const at=context(),auth=token(),owner=actor();
-    const requestedStage=target.dataset.startStageId || selection.start_stage_id,returnStage=definition.nodes[requestedStage]?.type==='t'?requestedStage:'';
+    const fromOverview=target.dataset.overview==='true',requestedStage=fromOverview?'':target.dataset.startStageId || selection.start_stage_id,returnStage=definition.nodes[requestedStage]?.type==='t'?requestedStage:'';
     // 2026-11-02: execution modes are no longer authored. Every start uses the same
     // start-input form; earlier periodic/emergency versions and incident work keep
     // parallel runs (same rule as concurrent_runs_allowed()).
@@ -752,16 +752,19 @@
     const active=workUnitActiveRuns(state,selection);
     if(!parallel&&active.length)return select({run_id:active.length===1?active[0].id:'',job_id:'',stage_id:'',stage_overview:false,tab:active.length===1?'overview':'active_runs'});
     let version=workflow.published_version,inputs={};
-    const html=workRunStartFieldsHTML(state,selection,definition);
-    const pending=dialog({title:'실행 준비',note:'선택한 게시 버전과 이번 진행 건을 따로 보존합니다.',html,confirmLabel:'진행 건 시작'}),element=$('#ees-work-dialog');
-    const read=()=>{
-      if(at!==context()||auth!==token()||owner!==actor())return;
-      const form=element.querySelector('#ees-work-start');if(!form)return;inputs=workReadInputs(form);
-    };
-    read();element.addEventListener('input',read);element.addEventListener('change',read);
-    // Capture before the dialog removes itself, including reduced-motion closes.
-    element.addEventListener('click',event=>{if(event.target.closest?.('[data-dialog-confirm]'))read();},true);
-    if(!await pending||at!==context()||auth!==token()||owner!==actor())return;
+    // With nothing to ask, the start control starts the run; the form appears only for start questions.
+    if(Object.values(definition.nodes || {}).some(node=>(node.inputs || []).some(field=>(field.scope || 'run')==='run'))){
+      const html=workRunStartFieldsHTML(state,selection,definition);
+      const pending=dialog({title:'실행 준비',note:'선택한 게시 버전과 이번 진행 건을 따로 보존합니다.',html,confirmLabel:'시작'}),element=$('#ees-work-dialog');
+      const read=()=>{
+        if(at!==context()||auth!==token()||owner!==actor())return;
+        const form=element.querySelector('#ees-work-start');if(!form)return;inputs=workReadInputs(form);
+      };
+      read();element.addEventListener('input',read);element.addEventListener('change',read);
+      // Capture before the dialog removes itself, including reduced-motion closes.
+      element.addEventListener('click',event=>{if(event.target.closest?.('[data-dialog-confirm]'))read();},true);
+      if(!await pending||at!==context()||auth!==token()||owner!==actor())return;
+    }
     const result=await mutate({action:'start_run',expected_revision:workflow.revision,workflow_id:workflow.id,factory_id:factory,version,inputs},{refreshAfter:false});
     if(!result||at!==context())return;
     const id=result.run?.id || result.run_id || result.id;
@@ -891,6 +894,24 @@
     if(action==='native_open')return openNative(target.dataset.nativeId);
     if(action==='new_chat'){return source()?.newChat?.();}
     if(action==='start_run')return startRun(target);
+    if(action==='overview_start')return startRun({dataset:{overview:'true'}});
+    // Finishing is offered only when every job is settled, so it needs no further question.
+    if(action==='finish_run'){
+      if(busy||!state?.run||!workRunFinishable(state))return;
+      const at=context(),run=state.run,result=await mutate({action:'close_run',run_id:run.id,expected_revision:run.revision});
+      if(!result||at!==context())return;
+      return select({run_id:'',job_id:'',stage_id:'',stage_verdict_job:'',tab:'overview'});
+    }
+    if(action==='procedure_new'){
+      if(!workCanCreate(capabilities()))return;
+      await select({mode:'author',tab:'overview',workflow_id:'',run_id:'',job_id:''});
+      return designer.startProcedure();
+    }
+    if(action==='pending_list')return workPendingWorkflows(state || {},selection).length?select({mode:'work',tab:'overview',workflow_id:'',run_id:'',job_id:'',stage_id:''}):undefined;
+    if(action==='pending_open'){
+      const id=target.dataset.workflowId;if(!workPendingWorkflows(state || {},selection).some(workflow=>workflow.id===id))return;
+      return select({mode:'author',tab:'overview',workflow_id:id,run_id:'',job_id:'',stage_id:'',stage_overview:false,panel_open:true});
+    }
     if(action==='execute_scope'){if(busy||!state?.run||!inputsSaved(true))return;setBusy(true);try{const model=executionModel();await operationsCommand({action:'execute_scope',run_id:selection.run_id,node_id:target.dataset.nodeId,expected_revision:state.run.revision,...(model?{model_id:model}:{})});await refresh();}finally{setBusy(false);}return;}
     if (action === 'shared_accept_version') {
       const run = state?.run;

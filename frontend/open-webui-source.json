@@ -29,7 +29,7 @@
     "src/lib/components/ees/EesAssetUsage.svelte": "b3134a9d7cef6fc1f5711ed53ae740584e52bce414f0450c3e7b4148a1cd0840",
     "src/lib/components/ees/EesHelperNotice.svelte": "9d5aefbdece6c8e4b0918386709d3e8bd93f2e17921b555a00f01f8eb752d8fa",
     "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
-    "src/lib/components/ees/EesNavigation.svelte": "86fdddd89cf32c0b8932f6f2dc12cedd4397d79da5ca337d299652efcfa80679",
+    "src/lib/components/ees/EesNavigation.svelte": "a4be32e128d2296f918403a58384fa12b9ec122440d4beb128bace4f90686a92",
     "src/lib/components/ees/EesProcedureIntro.svelte": "838cb9b1eb728027bd397c9a4b35fae0260038afe3664d4c668975bba0717672",
     "src/lib/components/ees/EesSavedPrompts.svelte": "acf5e702393e4c7218e63c6bd5554aadf1f9e33e9830f1369262caa4ac9fe8c1",
     "src/lib/components/ees/EesScopeSelect.svelte": "4906d92006b655ef5de8079ba0ea03a84ae9a584cd404585d530b4f35479afc4",
@@ -49,7 +49,7 @@
     "src/lib/components/workspace/Skills.svelte": "165303161c8cc6f6d59d7c946689dfd63121ba94d0cdab0d8d01fea0c5966824",
     "src/lib/components/workspace/Skills/SkillEditor.svelte": "3adc549edada1199f7acf3669983adb665654640c3f447da30cdb2355a2b3b1a",
     "src/lib/constants.ts": "0fd43314837a2d7775810c3f08fc82b8042c34a5b6e52f1a7e4513f303a07b5d",
-    "src/lib/i18n/locales/ko-KR/translation.json": "4d0a0bb7d9a04309d5893aef8d6b90578e9029e79fabe71c46e89427e0a0ed93",
+    "src/lib/i18n/locales/ko-KR/translation.json": "57371e55893d7316fb24cb0630003498919a10ac4e93915cb207450d48b01796",
     "src/routes/(app)/+layout.svelte": "cd5c01d65ef4b75e85db3cda21f02bc8968f9b187db9e95f184d03f31a94c126",
     "src/routes/(app)/+page.svelte": "7cdd5f35c6d1064663d2bafd03263585ca270ce24d26788a656d465339e6cb03",
     "src/routes/(app)/c/[id]/+page.svelte": "2cf8b7796915e7711e467a4142d96ad1d4afc0366221236620719193d91d0ad2",
@@ -63,7 +63,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "a8739e55838de3bf406a97cc9cac3dde9416e31411387a349fc77fe0400b2c57"
+      "sha256": "110412f92d65b63c57f72eef113ff4499984f9ce16ac3f18797883dfb9cc225b"
     }
   ],
   "pyodide_files": {

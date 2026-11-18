@@ -853,11 +853,29 @@ function workStageRows(data,stage){
     else if(['failed','partial','unknown','cancelled','excluded'].includes(state)){group='result';label=state==='failed'?'실행 실패':workUI.statuses[state] || state;}
     else if(workToolConnectionRequired(node))label='도구 연결 필요';
     else if(['waiting_input','awaiting_input','blocked','scheduled'].includes(state))label=workUI.statuses[state];
-    else if((node.mode || 'human')==='human'||['waiting_confirmation','awaiting_confirmation'].includes(state))label='판정 필요';
+    else if((node.mode || 'human')==='human')label='확인 필요';
+    else if(['waiting_confirmation','awaiting_confirmation'].includes(state))label='판정 필요';
     else label='실행 필요';
     return {node,saved,attempt,attempts,decision,automatic,state,group,label,tone,toolMissing:workToolConnectionRequired(node),canDecide:Boolean(data.run)&&workStageCanDecide(node,saved,run),canExecute:Boolean(data.run)&&workStageCanExecute(node,saved,run,data)};
   });
 }
+// The usual answer of a person's check is one click; the other answers stay behind the arrow.
+function workStagePrimaryJudgment(row,data){
+  if((row.node.mode || 'human')!=='human'||!row.canDecide||row.decision)return null;
+  return workStageJudgments(row.node,workOperationDefinition(data)).find(word=>word.status==='completed') || null;
+}
+// Same rule the server applies to close_run: every job is completed, excluded or a confirmed partial result.
+function workRunFinishable(data){
+  const run=data.run;if(!run||workUI.finished(run)||run.can_write===false)return false;
+  const jobs=Object.values(workOperationDefinition(data).nodes || {}).filter(node=>node.type==='j');
+  return jobs.length>0&&jobs.every(node=>{const saved=run.jobs?.[node.id] || {};return ['completed','excluded'].includes(saved.status)||saved.partial_confirmed===true;});
+}
+function workLastFinishedRun(data,selection){
+  const workflow=data.workflow;if(!workflow?.id)return null;
+  const definition=workPublishedDefinition({workflow}),factory=definition.execution_scope==='system'?'':selection.factory_id || '';
+  return (data.runs || []).filter(run=>run.workflow_id===workflow.id&&workUI.finished(run)&&run.closed_at&&(run.factory_id || '')===factory).sort((a,b)=>String(b.closed_at).localeCompare(String(a.closed_at)))[0] || null;
+}
+const workFinishButtonHTML='<button type="button" class="ew-secondary ew-stage-run-button" data-action="finish_run" data-mutation><span>끝내기</span></button>';
 const workStageActionIcons=Object.freeze({play:'<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.5 2.75L11 7L4.5 11.25V2.75Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg>',retry:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.5V5h-2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'});
 function workStageValuesHTML(value){
   const {esc}=workUI,entries=value&&typeof value==='object'&&!Array.isArray(value)?Object.entries(value):[['값',value]];
@@ -909,7 +927,10 @@ function workStageRowHTML(row,data,selection,number){
   const {esc,icon}=workUI,{node,saved,automatic,group,label,tone,canDecide,canExecute}=row,id=node.id,opened=selection.stage_evidence===id;
   const hasExecution=['tool','ai'].includes(node.mode)&&node.result_block!=='change_request',runLabel=row.state==='running'?'실행 중':row.attempts.length?'다시 실행':'실행';
   const execution=hasExecution?`<button type="button" class="ew-vd-run" data-action="${data.run?'stage_execute':'stage_start'}" data-job-id="${esc(id)}" aria-label="${esc(node.name+' '+runLabel)}"${data.run?' data-mutation':''}${row.toolMissing?' disabled data-own-disabled="true" data-run-blocked title="도구가 연결되지 않아 실행할 수 없습니다"':!data.run||canExecute?'':` disabled data-own-disabled="true"${row.state==='running'?'':' data-run-blocked'}`}>${row.attempts.length?workStageActionIcons.retry:workStageActionIcons.play}<span>${runLabel}</span></button>`:'';
-  const dot=group==='result'?`<i class="ew-vd-dot" data-verdict="${tone}"></i>`:'',choice=canDecide||!data.run&&!automatic?`<button type="button" class="ew-vd-pick" data-action="${data.run?'stage_verdict':'stage_start'}" data-job-id="${esc(id)}"${group==='result'?` data-verdict="${tone}"`:''} ${data.run?`aria-haspopup="menu" aria-expanded="${selection.stage_verdict_job===id}" aria-controls="ees-stage-verdict-menu"`:''} aria-label="${esc(data.run?node.name+' '+label:node.name+' 판정을 위한 진행 건 시작 설정')}">${dot}<span>${esc(label)}</span>${icon('f17e6')}</button>`:`<span class="${group==='result'?'ew-vd-final':'ew-vd-state'}" data-decision-status>${dot}<span>${esc(label)}</span></span>`;
+  const dot=group==='result'?`<i class="ew-vd-dot" data-verdict="${tone}"></i>`:'',primary=workStagePrimaryJudgment(row,data),others=primary?workStageJudgments(node,workOperationDefinition(data)).filter(word=>word.id!==primary.id):[];
+  const state=`<span class="${group==='result'?'ew-vd-final':'ew-vd-state'}" data-decision-status>${dot}<span>${esc(label)}</span></span>`;
+  const choice=primary?`<span class="ew-vd-confirm"><button type="button" class="ew-vd-confirm-main" data-action="stage_decide" data-job-id="${esc(id)}"${primary.legacy?'':` data-judgment-id="${esc(primary.id)}"`} data-verdict="${esc(primary.status)}" data-mutation aria-label="${esc(node.name+' '+primary.label)}">${esc(primary.label)}</button>${others.length?`<button type="button" class="ew-vd-confirm-more" data-action="stage_verdict" data-job-id="${esc(id)}" aria-haspopup="menu" aria-expanded="${selection.stage_verdict_job===id}" aria-controls="ees-stage-verdict-menu" aria-label="${esc(node.name)} 다른 판정">${icon('f17e6')}</button>`:''}</span>`
+    :canDecide?`<button type="button" class="ew-vd-pick" data-action="stage_verdict" data-job-id="${esc(id)}"${group==='result'?` data-verdict="${tone}"`:''} aria-haspopup="menu" aria-expanded="${selection.stage_verdict_job===id}" aria-controls="ees-stage-verdict-menu" aria-label="${esc(node.name+' '+label)}">${dot}<span>${esc(label)}</span>${icon('f17e6')}</button>`:state;
   const hasEvidence=(!node.mode||node.mode==='human')||row.attempts.length,evidenceLabel=(!node.mode||node.mode==='human')?'판정 기록':'판정 근거',evidence=hasEvidence?`<button type="button" class="ew-vd-evidence-toggle" data-action="stage_evidence" data-job-id="${esc(id)}" aria-expanded="${opened}"${opened?` aria-controls="stage-evidence-${esc(id)}"`:''} aria-label="${esc(node.name+' '+evidenceLabel+' '+(opened?'접기':'펼치기'))}">${evidenceLabel}${icon('f17e6')}</button>`:'';
   const description=node.description || node.instructions || '',actor=automatic?'자동 판정':'직접 판정';
   return `<section class="ew-vd-entry ew-center-task-row" data-key="stage-job-${esc(id)}" data-stage-job="${esc(id)}" data-vd-item="${esc(id)}" data-handler="${automatic?'service':'human'}" data-expanded="${opened}"><div class="ew-vd-item"><span class="ew-center-task-number" aria-hidden="true">${number}</span><div class="ew-vd-item-top"><button type="button" class="ew-vd-name" data-action="job" data-job-id="${esc(id)}">${esc(node.name)}</button><small class="ew-center-task-description"><b data-decision-actor>${actor}</b>${description?' · '+esc(description):''}</small></div><div class="ew-vd-item-meta">${execution}<div class="ew-vd-decision">${choice}${evidence}</div></div></div>${opened?workStageEvidenceHTML(row,data,selection):''}</section>`;
@@ -918,7 +939,7 @@ function workStageMenuHTML(data,selection,rows){
   const row=rows.find(item=>item.node.id===selection.stage_verdict_job);if(!row?.canDecide)return '';
   if(workAuthoredStageTool(row,data)&&(row.attempt?.evidence_access||selection.stage_attempts?.[row.node.id]&&selection.stage_attempts[row.node.id]!==row.attempt?.id))return '';
   const {esc,icon}=workUI;
-  return `<div id="ees-stage-verdict-menu" class="ew-vd-menu" role="menu" data-job-id="${esc(row.node.id)}" aria-label="${esc(row.node.name)} 판정 고르기">${workStageJudgments(row.node,workOperationDefinition(data)).map(word=>`<button type="button" role="menuitemradio" class="ew-vd-option" data-action="stage_decide" data-job-id="${esc(row.node.id)}"${word.legacy?'':` data-judgment-id="${esc(word.id)}"`} data-verdict="${esc(word.status)}" aria-checked="${row.decision?.judgment_id===word.id}" tabindex="-1" data-mutation><i class="ew-vd-dot" data-verdict="${workStageTone(word.status,word.label)}"></i><span><b>${esc(word.label)}</b></span>${row.decision?.judgment_id===word.id?icon('9d8d5'):''}</button>`).join('')}</div>`;
+  return `<div id="ees-stage-verdict-menu" class="ew-vd-menu" role="menu" data-job-id="${esc(row.node.id)}" aria-label="${esc(row.node.name)} 판정 고르기">${workStageJudgments(row.node,workOperationDefinition(data)).filter(word=>word.id!==workStagePrimaryJudgment(row,data)?.id).map(word=>`<button type="button" role="menuitemradio" class="ew-vd-option" data-action="stage_decide" data-job-id="${esc(row.node.id)}"${word.legacy?'':` data-judgment-id="${esc(word.id)}"`} data-verdict="${esc(word.status)}" aria-checked="${row.decision?.judgment_id===word.id}" tabindex="-1" data-mutation><i class="ew-vd-dot" data-verdict="${workStageTone(word.status,word.label)}"></i><span><b>${esc(word.label)}</b></span>${row.decision?.judgment_id===word.id?icon('9d8d5'):''}</button>`).join('')}</div>`;
 }
 function workStageLogHTML(rows,data){
   const {esc,time}=workUI,events=[];
@@ -944,7 +965,11 @@ function workStageHTML(data,selection,stage,options={}){
   const executable=rows.some(row=>row.canExecute&&!row.attempts.length),toolBlocked=rows.filter(row=>row.toolMissing&&!['completed','excluded'].includes(row.state)),allAuthored=rows.length>0&&rows.every(row=>workAuthoredStageTool(row,data));
   const tab=['work','log','rules'].includes(selection.stage_tab)?selection.stage_tab:'work',workflowName=definition.name || data.workflow?.name || '업무',scope=[run.cycle?.name || run.name,workOperationTarget(data,selection)].filter(Boolean).join(' · ');
   const breadcrumb=`<nav class="ew-center-breadcrumb" aria-label="업무 경로"><button type="button" class="ew-run-back" data-action="stage_back">${esc(workflowName)}</button><span aria-hidden="true">›</span><span aria-current="page">${esc(stage.name)}</span></nav>`;
-  const execute=`<button type="button" class="ew-secondary ew-stage-run-button" data-action="${data.run?'execute_scope':'stage_start'}" data-node-id="${esc(stage.id)}"${data.run?' data-mutation':''} aria-label="${esc(stage.name)} 단계 ${data.run?'실행':'시작'}"${toolBlocked.length?' disabled data-own-disabled="true" title="도구가 연결되지 않은 작업이 있어 이 단계를 실행할 수 없습니다"':(!data.run||executable)&&!active?'':' disabled data-own-disabled="true"'}>${workStageActionIcons.play}<span>${active?scopeLabel:data.run?'지금 실행':'시작'}</span></button>`;
+  // Before a run the control starts it. During a run it runs tool/AI work if the stage has any;
+  // a stage of human checks has nothing to run, so it shows nothing until the run can be finished.
+  const hasExecution=rows.some(row=>['tool','ai'].includes(row.node.mode)&&row.node.result_block!=='change_request'),finishable=workRunFinishable(data);
+  const runButton=`<button type="button" class="ew-secondary ew-stage-run-button" data-action="${data.run?'execute_scope':'stage_start'}" data-node-id="${esc(stage.id)}"${data.run?' data-mutation':''} aria-label="${esc(stage.name)} 단계 ${data.run?'실행':'시작'}"${toolBlocked.length?' disabled data-own-disabled="true" title="도구가 연결되지 않은 작업이 있어 이 단계를 실행할 수 없습니다"':(!data.run||executable)&&!active?'':' disabled data-own-disabled="true"'}>${workStageActionIcons.play}<span>${active?scopeLabel:data.run?'지금 실행':'시작'}</span></button>`;
+  const execute=finishable?workFinishButtonHTML:!data.run||hasExecution||active?runButton:'';
   const tabLabels={work:'업무 내용',log:'실행 기록',rules:'판정 기준'};
   const tabs=`<nav class="ew-tabs ew-center-tabs" aria-label="업무 진행 보기">${Object.entries(tabLabels).map(([key,label])=>`<button type="button" data-action="stage_tab" data-tab="${key}" aria-pressed="${tab===key}">${label}</button>`).join('')}</nav>`;
   const modelControls=data.run&&rows.some(row=>row.node.mode==='ai')&&!workUI.finished(run)?(options.modelControls ?? workExecutionModelHTML(data.operations || {},selection.stage_model_id || '')):'';
@@ -962,14 +987,27 @@ function workStageHTML(data,selection,stage,options={}){
   const list=rows.map((row,i)=>allAuthored||expanded||!rest.includes(row)?workStageRowHTML(row,data,selection,i+1):'').join('');
   const decided=rows.filter(row=>row.decision).length,pending=rows.filter(row=>row.canDecide).length;
   const authoredStatus=active?'조회 중':decided===rows.length?(rows.every(row=>row.decision?.verdict==='completed')?'승인':'판정 완료'):pending?'판정 필요':rows.some(row=>['failed','unknown','partial'].includes(row.state))?'확인 필요':'실행 전';
-  const authoredNote=allAuthored?(!data.run?'<aside class="ew-authored-start-note"><strong>먼저 문서를 조회합니다</strong><p>실행 결과를 확인한 뒤 사람이 승인 여부를 기록합니다.</p></aside><p class="ew-authored-run-caption">진행 건이 없으면 실행 준비 창이 열립니다.</p>':decided===rows.length?'<p class="ew-authored-run-caption">저장됨 · 판정과 실행 근거를 함께 확인할 수 있습니다.</p>':''):'';
+  const authoredNote=allAuthored?(!data.run?'<aside class="ew-authored-start-note"><strong>먼저 문서를 조회합니다</strong><p>실행 결과를 확인한 뒤 사람이 승인 여부를 기록합니다.</p></aside>':decided===rows.length?'<p class="ew-authored-run-caption">저장됨 · 판정과 실행 근거를 함께 확인할 수 있습니다.</p>':''):'';
   const head=`<header class="ew-vd-head${allAuthored?' ew-authored-stage-head':''}"><div class="ew-stage-heading"><div class="ew-vd-title"><h2>${esc(stage.name)}</h2><p class="ew-center-scope">${esc(scope)}</p></div><div class="ew-center-heading-actions">${allAuthored?`<span class="ew-authored-stage-status" data-stage-status>${authoredStatus}</span>`:tab==='work'?'':execute}<button type="button" class="ew-icon-button" aria-label="단계 더 보기" data-action="stage_details">${icon('a953c')}</button></div></div></header>`;
-  const summary=`<div class="ew-center-task-heading ew-stage-summary"><h3>작업 ${rows.length}개</h3><span class="ew-stage-completed">${completed} / ${rows.length} 완료</span><div class="ew-center-counts">${legend}</div>${allAuthored?'':execute}</div>`;
+  const summary=`<div class="ew-center-task-heading ew-stage-summary"><h3>작업 ${rows.length}개</h3><span class="ew-stage-completed">${completed} / ${rows.length} 완료</span><div class="ew-center-counts">${legend}</div>${allAuthored?(finishable?workFinishButtonHTML:''):execute}</div>`;
   const work=summary+`<div class="ew-vd-body ew-center-task-list" id="ees-stage-tasks">${list || '<p class="ew-empty">등록된 작업이 없습니다.</p>'}${fold}</div>${authoredNote}`;
   const content=tab==='log'?heading(tabLabels.log)+workStageLogHTML(rows,data):tab==='rules'?heading(tabLabels.rules)+workStageRulesHTML(rows,data):work;
   return {body:breadcrumb+head+tabs+runtime+content,menu:tab==='work'?workStageMenuHTML(data,selection,rows):''};
 }
 
+// First screen of the work side. An account that may author sees where to make a procedure,
+// and procedures that are saved but not published yet, instead of an empty list.
+function workPendingWorkflows(data,selection={}){
+  if(!workCanCreate(data.capabilities))return [];
+  return (data.workflows || []).filter(workflow=>(!selection.system_id||workflow.system_id===selection.system_id)&&workflow.published_version==null&&workflow.can_manage!==false);
+}
+function workHomeHTML(data,selection){
+  const {esc,icon}=workUI,published=(data.workflows || []).some(workflow=>(!selection.system_id||workflow.system_id===selection.system_id)&&workflow.published_version!=null);
+  const pending=workPendingWorkflows(data,selection),count=workflow=>{const nodes=Object.values((workflow.draft || workflow.definition || {}).nodes || {});return nodes.length?`<small>단계 ${nodes.filter(node=>node.type==='t').length} · 작업 ${nodes.filter(node=>node.type==='j').length}</small>`:'';};
+  const drafts=pending.length?`<div class="ew-home-pending"><h4>게시 전</h4>${pending.map(workflow=>`<button type="button" data-action="pending_open" data-workflow-id="${esc(workflow.id)}"><strong>${esc(workflow.name)}</strong>${count(workflow)}${icon('69549')}</button>`).join('')}</div>`:'';
+  if(published)return `<div class="ew-empty ew-work-home"><h3>업무 절차를 선택해 주세요</h3><p>공장·시스템을 선택한 뒤 왼쪽 업무 목록에서 절차를 여세요.</p>${drafts}</div>`;
+  return `<div class="ew-empty ew-work-home"><h3>아직 업무가 없습니다</h3>${workCanCreate(data.capabilities)?'<button type="button" class="ew-primary" data-action="procedure_new">새 업무 절차</button>':''}${drafts}</div>`;
+}
 function workOperationOverviewHTML(data,selection){
   const {esc,icon}=workUI,definition=workOperationDefinition(data),stages=workOrderedNodes(definition).filter(node=>node.type==='t');
   const schedules=(data.operations?.schedules || []).filter(item=>item.workflow_id===data.workflow?.id&&item.enabled);
@@ -980,7 +1018,9 @@ function workOperationOverviewHTML(data,selection){
     const status=[...counts].map(([label,count])=>label+' '+count).join(' · ');
     return `<button type="button" class="ew-operation-stage" data-action="stage_open" data-node-id="${esc(stage.id)}"><span><strong>${esc(stage.name)}</strong><small>작업 ${rows.length}개${status?' · '+esc(status):''}</small></span>${icon('69549')}</button>`;
   }).join('');
-  return `<section class="ew-operation-overview"><h2>${esc(definition.name || data.workflow?.name || '업무')}</h2><dl class="ew-operation-context">${schedules.length?`<dt>자동 실행</dt><dd>이전에 맡긴 예약 ${schedules.length}개</dd>`:''}<dt>적용 대상</dt><dd>${esc(workOperationTarget(data,selection))}</dd></dl><section class="ew-operation-stages"><h3>업무 단계</h3>${summaries || `<p class="ew-empty">${esc(empty)}</p>`}</section></section>`;
+  const last=!data.run?workLastFinishedRun(data,selection):null;
+  const go=workRunFinishable(data)?workFinishButtonHTML:!data.run&&data.workflow?.published_version&&stages.length?`<button type="button" class="ew-secondary ew-stage-run-button" data-action="overview_start" aria-label="${esc((definition.name || data.workflow?.name || '업무')+' 시작')}">${workStageActionIcons.play}<span>시작</span></button>`:'';
+  return `<section class="ew-operation-overview"><div class="ew-overview-head"><div><h2>${esc(definition.name || data.workflow?.name || '업무')}</h2>${definition.description?`<p class="ew-overview-purpose">${esc(definition.description)}</p>`:''}${last?`<p class="ew-last-run"><i aria-hidden="true"></i>지난 회차 · ${esc(workUI.time(last.closed_at))} ${last.status==='cancelled'?'취소':'끝남'}</p>`:''}</div>${go}</div><dl class="ew-operation-context">${schedules.length?`<dt>자동 실행</dt><dd>이전에 맡긴 예약 ${schedules.length}개</dd>`:''}<dt>적용 대상</dt><dd>${esc(workOperationTarget(data,selection))}</dd></dl><section class="ew-operation-stages"><h3>업무 단계</h3>${summaries || `<p class="ew-empty">${esc(empty)}</p>`}</section></section>`;
 }
 
 function createWorkView({callbacks}){
@@ -1065,7 +1105,7 @@ function createWorkView({callbacks}){
     else if(s.tab==='historical_reference')body=workHistoricalReferenceHTML(data.run,s.historical_reference,data.workflow,data.settings?.values);
     else if(s.tab==='active_runs')body=workActiveRunsHTML(data,s);
     else if(s.tab==='records')body=workRecordsScreenHTML(data,s);
-    else if(!s.workflow_id)body='<div class="ew-empty ew-work-home"><h3>업무 절차를 선택해 주세요</h3><p>공장·시스템을 선택한 뒤 왼쪽 업무 목록에서 절차를 여세요.</p></div>';
+    else if(!s.workflow_id)body=workHomeHTML(data,s);
     else if(stageScreen)body=stageScreen.body;
     else if(job()&&data.run)body=jobPanel();else if(job())body=`<button type="button" class="ew-text" data-action="stage_return">← 단계로 돌아가기</button><header class="ew-work-heading"><h2>${esc(job().name)}</h2><p>${esc(job().instructions || '')}</p></header><section><h3>확인 기준</h3><p>${esc(job().completion?.rule || '등록된 확인 기준이 없습니다.')}</p></section>${(job().inputs || []).length?`<section><h3>필요한 입력</h3>${(job().inputs || []).map(field=>`<p>${esc(field.name || field.id)}${field.required?' · 필수':''}</p>`).join('')}</section>`:''}`;else body=(data.run&&s.tab==='run_details'?`<button type="button" class="ew-text" data-action="stage_return">← 단계로 돌아가기</button>`:'')+runOverview();
     paint(`<div id="ees-work-content" class="ew-scroll ew-center-content${stageScreen?' ew-centered-stage':overview?' ew-centered-overview':''}">${snapshot.error&&snapshot.state?`<div class="ew-error" role="alert">${esc(snapshot.error)}${snapshot.error.startsWith('작성한 선택의 자동 저장 실패')?button('자동 저장 다시 시도','retry_private_save'):''}</div>`:''}${data.operations?.error?`<p class="ew-warning" role="alert">실행·예약 정보를 조회하지 못했습니다. ${esc(data.operations.error)}</p>`:''}${body}</div>${stageScreen?.menu || ''}`);

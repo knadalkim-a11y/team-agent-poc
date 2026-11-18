@@ -587,20 +587,25 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.wait("document.querySelector('#ew-procedure-create #ew-procedure-name')")
         self.fill('#ew-procedure-name',name);self.click('[data-author-action=procedure_create]')
         self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
-        self.wait("document.querySelector('[data-author-action=add_stage]')")
+        # A new procedure has no stage yet: its stage name field is already open.
+        self.wait("document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 단계 이름\"]')")
         state=self.browser_api("GET","/api/ees-work/workspace")["data"]
         return next(item["id"] for item in state["workflows"] if item["name"]==name)
 
     def add_stage_ui(self, name):
-        self.click('[data-author-action=add_stage]')
-        self.wait("document.querySelector('#ew-stage-editor [name=name]')")
+        # With no stage yet the stage name field is already open.
+        if not self.browser.evaluate("!!document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 단계 이름\"]')"):
+            self.click('[data-author-action=add_stage]')
+        self.wait("document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 단계 이름\"]')")
         self.fill('#ew-stage-editor [name=name]', name)
         self.click('[data-author-action=inline_apply]')
-        self.wait("!document.querySelector('#ew-stage-editor') && document.querySelector('[data-author-action=add_job]')")
+        # A new stage opens with its job name field ready.
+        self.wait("document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 작업 이름\"]')")
 
     def add_job_ui(self, name):
-        self.click('[data-author-action=add_job]')
-        self.wait("document.querySelector('#ew-stage-editor [name=name]')")
+        if not self.browser.evaluate("!!document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 작업 이름\"]')"):
+            self.click('[data-author-action=add_job]')
+        self.wait("document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 작업 이름\"]')")
         self.fill('#ew-stage-editor [name=name]', name)
         self.click('[data-author-action=inline_apply]')
         self.wait("document.querySelector('#ew-author-node [name=job_guidance]')")
