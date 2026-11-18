@@ -2713,3 +2713,26 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-entry .ew-workflows > .ew-pending {display:flex;width:100%;align-items:center;justify-content:space-between;min-height:32px;margin-top:4px;padding:0 8px 0 12px;border:0;border-radius:6px;background:transparent;box-shadow:none;font:inherit;font-size:13px;line-height:20px;color:var(--ees-text-secondary);text-align:left;cursor:pointer;}
 #ees-work-entry .ew-workflows > .ew-pending:hover {background:var(--ees-surface-panel-hover);}
 #ees-work-entry .ew-workflows > .ew-pending > b {font-weight:500;color:var(--ees-text-primary);}
+/* Check items (2026-11-18): typed where the job is edited, ticked on the job row. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-check-items {display:grid;gap:6px;max-width:560px;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-check-items > ol {display:grid;gap:6px;margin:0;padding:0;list-style:none;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-check-items li {display:grid;grid-template-columns:20px minmax(0,1fr) 32px;align-items:center;gap:6px;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-check-items li > span {font-size:12px;line-height:18px;color:var(--ees-text-secondary);text-align:right;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-check-items li > input[name=check_item_name] {width:100%;min-height:36px;padding:0 12px;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-check-items li > input::placeholder {color:var(--ees-text-secondary);}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-check-items li > button {width:32px;height:32px;min-height:0;padding:0;border:0;border-radius:6px;background:transparent;box-shadow:none;font-size:16px;line-height:1;color:var(--ees-text-secondary);}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-check-items li > button:hover {background:var(--ees-surface-muted);color:var(--ees-text-primary);}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-confirm-more {font-size:12px;line-height:18px;color:var(--ees-text-secondary);}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-confirm-more > summary {width:max-content;cursor:pointer;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-confirm-more > .ew-job-method {margin-top:6px;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-checks {display:grid;margin:0 16px 8px 50px;padding:0;list-style:none;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-checks > li {display:flex;align-items:center;gap:10px;min-height:36px;font-size:13px;line-height:20px;color:var(--ees-text-primary);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-checks label {display:flex;align-items:center;gap:10px;flex:1;min-width:0;min-height:36px;cursor:pointer;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-checks input[type=checkbox] {flex:none;width:16px;height:16px;margin:0;accent-color:var(--ees-brand-solid);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-checks input[type=checkbox]:disabled + span {color:var(--ees-text-secondary);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-checks label:has(input:disabled) {cursor:default;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-checks small {margin-left:auto;flex:none;font-size:12px;line-height:18px;color:var(--ees-text-secondary);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-checks li[data-done=true] > span:not(.ew-vd-check-done) {color:var(--ees-text-secondary);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-check-done {display:grid;place-items:center;flex:none;width:16px;height:16px;border-radius:3px;background:var(--ees-brand-solid);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-check-done > .ew-icon {width:12px;height:12px;filter:brightness(0) invert(1);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-count {min-width:44px;font-size:12px;line-height:18px;color:var(--ees-text-secondary);text-align:right;}

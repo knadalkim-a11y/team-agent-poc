@@ -1055,7 +1055,7 @@ test('A12 human detail has two real method choices and no duplicate result-confi
  const h=harness();await h.node();assert.match(h.markup,/단계와 작업/);assert.deepEqual(h.fields.filter(f=>f.name==='mode').map(f=>[f.type,f.value,f.checked]),[['radio','human',true],['radio','tool',false]]);assert.match(h.markup,/무엇을 확인하나요|확인 방법|완료 기준/);assert.equal(h.fields.some(f=>f.name==='result_confirmation'),false);assert.equal(h.fields.find(f=>f.name==='name').getAttribute('maxlength'),'160');assert.ok(actionButton(h,'job_menu','j'));assert.equal(h.draft().dirty,false);
 });
 for(const oldBlock of ['change_request','schedule','list_confirm'])test('A12 human detail preserves older result kinds: '+oldBlock,async()=>{
- const h=harness(),value=definition();value.nodes.j.result_block=oldBlock;value.nodes.j.completion={rule:'기존 완료 기준',opaque:'keep'};installDefinition(h,value);await h.node();assert.equal(h.fields.find(f=>f.name==='result_block').value,oldBlock);h.field('job_guidance','확인 안내만 수정');h.click('save');await flush();assert.equal(h.writes[0].definition.nodes.j.result_block,oldBlock);assert.deepEqual(h.writes[0].definition.nodes.j.completion,value.nodes.j.completion);
+ const h=harness(),value=definition();value.nodes.j.result_block=oldBlock;value.nodes.j.completion={rule:'기존 완료 기준',opaque:'keep'};installDefinition(h,value);await h.node();assert.equal(h.fields.find(f=>f.name==='result_block'&&f.checked).value,oldBlock);assert.match(h.markup,/<details class="ew-confirm-more" open><summary>다른 방식<\/summary>/);h.field('job_guidance','확인 안내만 수정');h.click('save');await flush();assert.equal(h.writes[0].definition.nodes.j.result_block,oldBlock);assert.deepEqual(h.writes[0].definition.nodes.j.completion,value.nodes.j.completion);
 });
 test('A12 an unconnected tool displays disabled result choices and preserves hidden completion data',async()=>{
  for(const human of [true,false]){const h=harness(),value=definition();Object.assign(value.nodes.j,{mode:'tool',human_confirmation:human,completion:{rule:'연결 전에도 보존할 기준',opaque:'keep'}});installDefinition(h,value);await h.node();
@@ -1788,4 +1788,38 @@ test('first-user: the open name row is not an edit in progress until something i
  h.field('name','쓰다 만 단계');h.click('tab',{tab:'rules'});await flush();
  assert.match(h.markup,/data-author-tab="content"/);assert.match(inlineMarkup(h),/^<p id="ew-stage-inline-warning" class="ew-inline-error" role="alert">편집 중인 항목을 먼저 적용하거나 취소해 주세요.<\/p>/);
  h.click('inline_cancel');await flush();assert.match(inlineMarkup(h),/<input\b[^>]*name="name"[^>]*value=""/);assert.equal(h.buttons.some(button=>button.dataset.authorAction==='inline_cancel'),false);
+});
+
+// Check items (2026-11-18): a person's check list is written where the job is edited.
+test('check items: the confirmation kind is a choice of two, with the older kinds folded away',async()=>{
+ const h=harness();await h.node();const kinds=h.fields.filter(f=>f.name==='result_block').map(f=>[f.type,f.value,f.checked]);
+ assert.deepEqual(kinds,[['radio','human_confirm',true],['radio','checklist',false],['radio','item_verdict',false],['radio','values',false]]);
+ assert.match(h.markup,/<legend>확인 방식<\/legend><div><label><input type="radio" name="result_block" value="human_confirm" checked><span>한 번에 확인<\/span><\/label><label><input type="radio" name="result_block" value="checklist" ><span>항목마다 체크<\/span>/);
+ assert.match(h.markup,/<details class="ew-confirm-more"><summary>다른 방식<\/summary>/);assert.doesNotMatch(h.markup,/ew-check-items|담당자가 내용을 확인하고 완료합니다|판정 단어 탭에서 정합니다/);
+});
+test('check items: choosing 항목마다 체크 opens the list, and rows are kept in order with stable ids',async()=>{
+ const h=harness();await h.node();const pick=value=>{const field=h.fields.find(f=>f.name==='result_block'&&f.value===value);h.fields.filter(f=>f.name==='result_block').forEach(f=>{f.checked=f===field;});h.designer.handleEvent({type:'change',target:field});};
+ pick('checklist');assert.equal(h.draft().definition.nodes.j.result_block,'checklist');assert.equal(h.draft().dirty,true);
+ const rows=()=>h.fields.filter(f=>f.name==='check_item_name'),ids=()=>h.fields.filter(f=>f.name==='check_item_id').map(f=>f.value);
+ assert.equal(rows().length,1);assert.equal(rows()[0].getAttribute('placeholder'),'항목 추가');assert.equal(rows()[0].getAttribute('aria-label'),'새 확인 항목');assert.notEqual(h.draft().definition.nodes.j.confirmation_items?.length>0,true);
+ const type=(index,text)=>{const field=rows()[index];field.value=text;h.designer.handleEvent({type:'input',target:field});};
+ type(0,'펌프 누수 없음');assert.equal(rows().length,2,'typing in the last row adds the next one');type(1,'밸브 개폐 정상');assert.equal(rows().length,3);
+ const saved=h.draft().definition.nodes.j.confirmation_items;assert.deepEqual(saved.map(item=>item.name),['펌프 누수 없음','밸브 개폐 정상']);assert.equal(new Set(saved.map(item=>item.id)).size,2);assert.ok(saved.every(item=>/^check-/.test(item.id)));
+ type(0,'펌프 누수·소음 없음');assert.deepEqual(h.draft().definition.nodes.j.confirmation_items,[{id:saved[0].id,name:'펌프 누수·소음 없음'},saved[1]],'editing a row keeps its id');
+ // Leaving a row or pressing a key in the middle of a Korean syllable must not redraw the input in use.
+ const before=h.markup,composing=h.designer.handleEvent({type:'keydown',key:'Enter',isComposing:true,target:rows()[0]});assert.deepEqual(copy(composing),{handled:true,preventDefault:false});
+ h.designer.handleEvent({type:'change',target:rows()[0]});assert.equal(h.markup,before,'no redraw on change');
+ const enter=h.designer.handleEvent({type:'keydown',key:'Enter',target:rows()[0]});assert.deepEqual(copy(enter),{handled:true,preventDefault:true});assert.equal(h.document.activeElement,rows()[1]);
+ // An emptied row is dropped from the definition; its × only redraws the list.
+ type(1,'');assert.deepEqual(h.draft().definition.nodes.j.confirmation_items.map(item=>item.id),[saved[0].id]);h.click('check_item_remove',{item:saved[1].id});await flush();assert.equal(rows().length,2);
+ type(1,'밸브 개폐 정상');const again=h.draft().definition.nodes.j.confirmation_items;assert.deepEqual(again.map(item=>item.name),['펌프 누수·소음 없음','밸브 개폐 정상']);
+ h.click('check_item_remove',{item:again[0].id});await flush();assert.deepEqual(h.draft().definition.nodes.j.confirmation_items,[again[1]]);assert.equal(rows().length,2);
+ h.click('save');await flush();assert.equal(h.writes.length,1);assert.deepEqual(h.writes[0].definition.nodes.j.confirmation_items,[again[1]]);assert.equal(h.writes[0].definition.nodes.j.result_block,'checklist');
+ h.click('node',{id:''});await flush();assert.match(h.markup,/<small class="ew-job-meta">사람이 확인 · 항목 1개<\/small>/);
+});
+test('check items: going back to 한 번에 확인 hides the list and keeps what was typed',async()=>{
+ const h=harness(),value=definition();Object.assign(value.nodes.j,{result_block:'checklist',confirmation_items:[{id:'a',name:'하나'},{id:'b',name:'둘'}]});installDefinition(h,value);await h.node();
+ assert.deepEqual(h.fields.filter(f=>f.name==='check_item_name').map(f=>f.value),['하나','둘','']);assert.equal(h.draft().dirty,false);
+ const once=h.fields.find(f=>f.name==='result_block'&&f.value==='human_confirm');h.fields.filter(f=>f.name==='result_block').forEach(f=>{f.checked=f===once;});h.designer.handleEvent({type:'change',target:once});
+ assert.equal(h.fields.some(f=>f.name==='check_item_name'),false);assert.equal(h.draft().definition.nodes.j.result_block,'human_confirm');assert.deepEqual(h.draft().definition.nodes.j.confirmation_items,value.nodes.j.confirmation_items);
 });

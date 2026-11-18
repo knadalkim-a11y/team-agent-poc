@@ -1377,3 +1377,44 @@ test('first-user: a draft opens in the workspace and the new-procedure control o
  let started=0;h.designer.startProcedure=()=>{started++;};h.api.setSelection({mode:'work',workflow_id:''});
  await h.api.handleClick({dataset:{action:'procedure_new'}});assert.equal(h.api.snapshot().selection.mode,'author');assert.equal(h.api.snapshot().selection.workflow_id,'');assert.equal(started,1);
 });
+
+// Check items (2026-11-18): a person's check list is ticked on the job row.
+function checkListFixture(){
+ const h=stageRuntimeFixture(),nodes=h.state.run.definition.nodes;delete nodes.a;delete nodes.other;delete h.state.run.jobs.a;
+ Object.assign(nodes.h,{result_block:'checklist',confirmation_items:[{id:'pump',name:'펌프 누수 없음'},{id:'valve',name:'밸브 개폐 정상'}]});h.state.people=[{id:'actor',name:'담당자'}];
+ const row=()=>html('workStageHTML(state,selection,state.run.definition.nodes.t).body',{state:h.state,selection:h.api.snapshot().selection}).match(/<section class="ew-vd-entry[^>]*data-stage-job="h"[\s\S]*?<\/section>/)[0];
+ const tick=item=>h.api.handleEvent({type:'change',target:{checked:true,dataset:{jobId:'h',itemId:item},matches:selector=>selector==='[data-stage-check]',closest:selector=>selector==='[data-ees-work]'?{}:null}});
+ return {...h,row,tick,sent:()=>h.calls.filter(call=>call.body?.action==='human_confirm')};
+}
+test("check items: a person's list shows under its job with a count, and each item is ticked in place",async()=>{
+ const h=checkListFixture();
+ assert.match(h.row(),/<span class="ew-vd-count" data-decision-status>0 \/ 2<\/span>/);assert.doesNotMatch(h.row(),/ew-vd-confirm|ew-vd-pick/);
+ assert.deepEqual([...h.row().matchAll(/<label><input type="checkbox" data-stage-check data-job-id="h" data-item-id="([^"]+)" data-mutation><span>([^<]+)<\/span><\/label>/g)].map(match=>[match[1],match[2]]),[['pump','펌프 누수 없음'],['valve','밸브 개폐 정상']]);
+ h.api.setState(h.state);h.tick('pump');await new Promise(setImmediate);
+ assert.equal(h.sent().length,1);assert.deepEqual({job:h.sent()[0].body.job_id,item:h.sent()[0].body.item_id,verdict:h.sent()[0].body.verdict,revision:h.sent()[0].body.expected_revision},{job:'h',item:'pump',verdict:'completed',revision:8});
+ // a recorded tick is shown with who and when, and is no longer a control
+ h.state.run.jobs.h={status:'waiting_confirmation',can_decide:true,can_execute:true,decisions:{pump:{item_id:'pump',verdict:'completed',actor_id:'actor',created_at:'2026-11-18T01:00:00Z'}}};
+ assert.match(h.row(),/<li data-done="true"><span class="ew-vd-check-done" role="img" aria-label="확인함">[\s\S]*?<\/span><span>펌프 누수 없음<\/span><small>[^<]+ · 담당자<\/small><\/li>/);
+ assert.match(h.row(),/<span class="ew-vd-count" data-decision-status>1 \/ 2<\/span>/);assert.equal([...h.row().matchAll(/data-stage-check/g)].length,1);
+ assert.doesNotMatch(h.row(),/data-action="stage_evidence"/,'each item carries its own record');
+ assert.match(html('workStageLogHTML(workStageRows(state,state.run.definition.nodes.t),state)',{state:h.state}),/직접 확인 · 펌프 누수 없음 확인 · 담당자/);
+ h.api.setState(h.state);h.tick('pump');await new Promise(setImmediate);assert.equal(h.sent().length,1,'an item that is already recorded is not sent again');
+ h.tick('other');await new Promise(setImmediate);assert.equal(h.sent().length,1,'only items of the list are sent');
+ // all ticked: the job is complete and the run can be finished
+ h.state.run.jobs.h={status:'completed',can_decide:true,can_execute:true,decisions:{pump:{item_id:'pump',verdict:'completed',actor_id:'actor',created_at:'2026-11-18T01:00:00Z'},valve:{item_id:'valve',verdict:'completed',actor_id:'actor',created_at:'2026-11-18T01:01:00Z'}}};
+ assert.doesNotMatch(h.row(),/data-stage-check|ew-vd-count/);assert.match(h.row(),/class="ew-vd-final" data-decision-status><i class="ew-vd-dot" data-verdict="ok"><\/i><span>완료<\/span>/);
+ assert.match(html('workStageHTML(state,selection,state.run.definition.nodes.t).body',{state:h.state,selection:h.api.snapshot().selection}),/data-action="finish_run"/);
+});
+test('check items: before a run and for someone who may not act, the list is shown but cannot be ticked',()=>{
+ const h=checkListFixture();h.state.run.jobs.h.can_decide=false;
+ assert.equal([...h.row().matchAll(/<input type="checkbox" data-stage-check[^>]* disabled data-own-disabled="true">/g)].length,2);
+ const preview=stagePreviewFixture(),nodes=preview.state.workflow.published.nodes;Object.assign(nodes.h,{result_block:'checklist',confirmation_items:[{id:'pump',name:'펌프 누수 없음'}]});
+ const body=html('workStageHTML(state,selection,workPublishedDefinition(state).nodes.t).body',{state:preview.state,selection:{stage_id:'t'}}),row=body.match(/<section class="ew-vd-entry[^>]*data-stage-job="h"[\s\S]*?<\/section>/)[0];
+ assert.match(row,/<input type="checkbox" data-stage-check data-job-id="h" data-item-id="pump" disabled data-own-disabled="true"><span>펌프 누수 없음<\/span>/);assert.match(row,/0 \/ 1/);
+});
+test('check items: a list without items and a tool check list behave as before',()=>{
+ const empty=checkListFixture();empty.state.run.definition.nodes.h.confirmation_items=[];assert.doesNotMatch(empty.row(),/ew-vd-checks|ew-vd-count/);
+ assert.equal(html('workHumanCheckItems(node).length',{node:{mode:'tool',result_block:'checklist',confirmation_items:[{id:'a',name:'하나'}]}}),0);
+ assert.equal(html('workHumanCheckItems(node).length',{node:{result_block:'human_confirm',confirmation_items:[{id:'a',name:'하나'}]}}),0);
+ assert.equal(html('workHumanCheckItems(node).map(item=>item.id).join()',{node:{result_block:'checklist',confirmation_items:[{id:'a',name:'하나'},{id:'b',name:' '},null]}}),'a');
+});

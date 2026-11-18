@@ -717,6 +717,70 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.assertIsNone(after['published_version'])
         self.screenshot('integrated-native-ai-proposal-not-auto-save')
 
+    def test_native_check_items_are_written_ticked_and_finish_the_round(self):
+        # 2026-11-18: a person's check list is written with the job and ticked on the job row.
+        self.login_ui("administrator@example.test", "Fixture-admin-only-42!")
+        key = self.create_ui_procedure("확인 항목 검증")
+        self.add_stage_ui('점검')
+        self.add_job_ui('설비 두 곳 점검')
+        kinds = "[...document.querySelectorAll('#ew-author-node [name=result_block]')].filter(e=>e.checked).map(e=>e.value).join()"
+        self.assertEqual(self.browser.evaluate(kinds), 'human_confirm')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-check-items')"))
+        self.click('#ew-author-node input[name=result_block][value=checklist] + span')
+        self.wait("document.querySelector('#ew-check-item-0')")
+        names = ['펌프 누수 없음', '밸브 개폐 정상']
+        self.fill('#ew-check-item-0', names[0])
+        self.wait("document.querySelector('#ew-check-item-1')")
+        # A Korean syllable composed in the last row adds the next row without redrawing the input in use.
+        self.click('#ew-check-item-1')
+        self.browser.evaluate("document.querySelector('#ew-check-item-1').dataset.probe='kept'")
+        self.browser.call('Input.imeSetComposition', {'text': '밸', 'selectionStart': 1, 'selectionEnd': 1})
+        self.wait("document.querySelector('#ew-check-item-2')")
+        focused = "[document.activeElement.id,document.activeElement.dataset.probe,document.activeElement.value].join('|')"
+        self.assertEqual(self.browser.evaluate(focused), 'ew-check-item-1|kept|밸')
+        self.browser.call('Input.insertText', {'text': names[1]})
+        self.assertEqual(self.browser.evaluate(focused), 'ew-check-item-1|kept|' + names[1])
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('#ew-author-node [data-author-action=check_item_remove]')].map(e=>e.getAttribute('aria-label')).join()"), '확인 항목 1 삭제,확인 항목 2 삭제')
+        self.screenshot('check-items-authoring')
+        # Saving straight from the row being typed takes one click.
+        self.click('[data-author-action=save]')
+        self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
+        self.select_native('#ew-publication-state', 'published')
+        self.assertEqual(self.text('[data-author-action=save]'), '저장 · 게시')
+        self.click('[data-author-action=save]')
+        self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
+        saved = self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['workflow']
+        job = next(node for node in saved['draft']['nodes'].values() if node['type'] == 'j')
+        self.assertEqual(saved['published_version'], 1)
+        self.assertEqual(job['result_block'], 'checklist')
+        self.assertEqual([item['name'] for item in job['confirmation_items']], names)
+        # Work side: start without a form, tick each item where it is listed, then finish.
+        self.click('[data-action=mode][data-mode=work]')
+        control = '#sidebar [data-action=workflow][data-workflow-id="' + key + '"]'
+        self.wait('document.querySelector(' + json.dumps(control) + ')')
+        self.click(control)
+        self.wait("document.querySelector('#ees-work-panel [data-action=overview_start]')")
+        self.click('#ees-work-panel [data-action=overview_start]')
+        self.wait("document.querySelectorAll('#ees-work-panel input[data-stage-check]:not(:disabled)').length === 2")
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog')"))
+        self.assertEqual(self.text('#ees-work-panel .ew-vd-count'), '0 / 2')
+        for done in (1, 2):
+            self.click('#ees-work-panel input[data-stage-check]')
+            self.wait("document.querySelectorAll('#ees-work-panel .ew-vd-check-done').length === %d" % done)
+        self.wait("document.querySelector('#ees-work-panel [data-action=finish_run]')")
+        self.screenshot('check-items-all-ticked')
+        state = self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']
+        run = next(item for item in state['runs'] if item['workflow_id'] == key)
+        ticked = next(iter(run['jobs'].values()))
+        self.assertEqual(ticked['status'], 'completed')
+        self.assertEqual(sorted(item['item_id'] for item in ticked['decisions']), sorted(item['id'] for item in job['confirmation_items']))
+        self.assertEqual(len(run['attempts']), 1)
+        self.click('#ees-work-panel [data-action=finish_run]')
+        self.wait("document.querySelector('#ees-work-panel [data-action=overview_start]') && document.querySelector('#ees-work-panel .ew-last-run')")
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog')"))
+        closed = next(item for item in self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['runs'] if item['id'] == run['id'])
+        self.assertEqual(closed['status'], 'completed')
+
     def test_native_new_signup_and_approval_ui(self):
         account = self.signup_ui()
         self.wait("document.body.innerText.includes('계정 활성화 대기')")

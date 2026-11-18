@@ -975,6 +975,13 @@
       }
       optionTimer=setTimeout(()=>loadOptions(),300);
     }
+    if(event.type==='change'&&target.matches?.('[data-stage-check]')){
+      // A tick is saved at once as that item's record. Anything that stops it puts the box back.
+      const current=stageJob(target.dataset.jobId),item=target.dataset.itemId;
+      if(!target.checked||busy||!current||!state.run||!workStageCanCheck(current.node,current.saved,current.run)||!workHumanCheckItems(current.node).some(entry=>entry.id===item)||current.saved.decisions?.[item]||!inputsSaved(true)){render();return;}
+      mutate({action:'human_confirm',run_id:current.run.id,job_id:current.node.id,item_id:item,expected_revision:current.run.revision,verdict:'completed'}).then(result=>{if(!result)render();}).catch(failure=>{error=failure.message;render();});
+      return;
+    }
     if(event.type==='change'&&target.matches?.('[data-stage-attempt]')){const current=stageJob(target.dataset.jobId);if(!current||!(current.run.attempts || []).some(attempt=>attempt.id===target.value&&attempt.job_id===current.node.id))return;selection.stage_attempts={...(selection.stage_attempts || {}),[current.node.id]:target.value};selection.stage_tool='';render();return;}
     if(event.type==='change'&&target.matches?.('[data-item-verdict]')){const saved=state?.run?.jobs?.[selection.job_id];if(!saved||saved.can_decide===false||saved.decisions?.[target.dataset.itemId])return;const key=selection.run_id+'/'+selection.job_id+'/'+saved.attempt_id;selection.verdict_drafts ||= {};selection.verdict_drafts[key] ||= {};const option=target.selectedOptions?.[0];selection.verdict_drafts[key][target.dataset.itemId]={verdict:option?.dataset.verdict || target.value,...(option?.dataset.judgmentId?{judgment_id:option.dataset.judgmentId}:{})};remember();render();return;}
     if(event.type==='change'&&target.matches?.('[data-list-include]')){view.refreshResults();return;}

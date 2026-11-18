@@ -73,6 +73,83 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         listed = await self.service.workspace_state(self.users['admin'])
         self.assertNotIn('잘못된 목적', [item['name'] for item in listed['workflows']])
 
+    async def check_list_procedure(self, items):
+        created = await self.command('create_workflow', name='주간 설비 점검', system_id='EMS')
+        key = created['workflow_id']; definition = created['workflow']['draft']; root = next(iter(definition['nodes']))
+        definition['nodes'][root]['children'] = ['t']
+        definition['nodes']['t'] = {'id': 't', 'type': 't', 'name': '점검', 'parent': root, 'children': ['j'], 'deps': []}
+        definition['nodes']['j'] = {'id': 'j', 'type': 'j', 'name': '설비 세 곳 점검', 'parent': 't', 'children': [], 'deps': [],
+                                    'mode': 'human', 'inputs': [], 'result_block': 'checklist'}
+        if items is not None: definition['nodes']['j']['confirmation_items'] = items
+        saved = await self.command('save_draft', workflow_id=key, definition=definition, expected_revision=1)
+        if not saved['ok']: return key, definition, saved
+        validated = await self.command('validate_workflow', workflow_id=key, expected_revision=2)
+        return key, definition, validated
+
+    async def test_human_check_items_are_ticked_one_by_one_and_complete_the_job(self):
+        # 2026-11-18: a person's check list is written with the job and ticked item by item.
+        items = [{'id': 'pump', 'name': '펌프 누수 없음'}, {'id': 'valve', 'name': '밸브 개폐 정상'}]
+        key, definition, validated = await self.check_list_procedure(items)
+        self.assertFalse(validated['validation']['errors'], validated)
+        published = await self.command('publish_workflow', workflow_id=key, expected_revision=2)
+        self.assertTrue(published['ok'], published)
+        run = await self.start(key, revision=published['revision'])
+        self.assertEqual(run['definition']['nodes']['j']['confirmation_items'], items)
+        # A list is not answered by the whole-job confirmation or by an item it does not have.
+        for extra in ({}, {'item_id': 'job'}, {'item_id': 'other'}):
+            refused = await self.command('human_confirm', actor='a', run_id=run['id'], job_id='j', expected_revision=run['revision'], **extra)
+            self.assertEqual(refused['error']['code'], 'item_not_found', extra)
+        self.assertEqual((await self.state(run_id=run['id']))['run']['attempts'], [])
+        first = await self.command('human_confirm', actor='a', run_id=run['id'], job_id='j', item_id='pump', expected_revision=run['revision'])
+        self.assertTrue(first['ok'], first)
+        job = first['run']['jobs']['j']
+        self.assertEqual(job['status'], 'waiting_confirmation')
+        self.assertEqual([(item['item_id'], item['verdict'], item['actor_id']) for item in job['decisions']], [('pump', 'completed', 'a')])
+        self.assertEqual(len(first['run']['attempts']), 1)
+        self.assertEqual(first['run']['attempts'][0]['result']['items'],
+                         [{'id': 'pump', 'name': '펌프 누수 없음', 'required': True}, {'id': 'valve', 'name': '밸브 개폐 정상', 'required': True}])
+        # A tick is a record: the same item cannot be ticked twice, and an unfinished list does not finish the run.
+        again = await self.command('human_confirm', actor='a', run_id=run['id'], job_id='j', item_id='pump', expected_revision=first['revision'])
+        self.assertEqual(again['error']['code'], 'decision_conflict')
+        early = await self.command('close_run', actor='a', run_id=run['id'], expected_revision=first['revision'])
+        self.assertEqual(early['error']['code'], 'completion_required')
+        second = await self.command('human_confirm', actor='a', run_id=run['id'], job_id='j', item_id='valve', expected_revision=first['revision'])
+        self.assertTrue(second['ok'], second)
+        self.assertEqual(second['run']['jobs']['j']['status'], 'completed')
+        self.assertEqual(len(second['run']['attempts']), 1, 'the ticks of one round share one attempt')
+        self.assertEqual([item['item_id'] for item in second['run']['jobs']['j']['decisions']], ['pump', 'valve'])
+        closed = await self.command('close_run', actor='a', run_id=run['id'], expected_revision=second['revision'])
+        self.assertTrue(closed['ok'], closed)
+        # The next round starts with an empty list.
+        again_run = await self.start(key, revision=published['revision'])
+        self.assertEqual(again_run['jobs']['j'].get('decisions', []), [])
+
+    async def test_human_check_list_without_items_keeps_the_single_confirmation(self):
+        # Procedures saved before 2026-11-18 have no items; they confirm the job as a whole as before.
+        for items in (None, []):
+            key, definition, validated = await self.check_list_procedure(items)
+            self.assertFalse(validated['validation']['errors'], validated)
+            published = await self.command('publish_workflow', workflow_id=key, expected_revision=2)
+            run = await self.start(key, revision=published['revision'])
+            done = await self.command('human_confirm', actor='a', run_id=run['id'], job_id='j', expected_revision=run['revision'])
+            self.assertTrue(done['ok'], done)
+            self.assertEqual(done['run']['jobs']['j']['status'], 'completed')
+
+    async def test_check_items_need_a_name_a_unique_id_and_a_sane_count(self):
+        for invalid in ('글', [{'id': 'a'}], [{'id': 'a', 'name': '  '}], [{'id': 'a', 'name': '가' * 161}], [{'id': 'job', 'name': '전체'}],
+                        [{'id': 'a', 'name': '하나'}, {'id': 'a', 'name': '둘'}], [{'id': 'a', 'name': '하나', 'done': True}],
+                        [{'id': 'item-' + str(index), 'name': '항목'} for index in range(101)]):
+            # A list that cannot be asked is refused when it is saved, so it never reaches a run.
+            key, definition, refused = await self.check_list_procedure(invalid)
+            label = invalid if len(str(invalid)) < 80 else 'too many'
+            self.assertEqual(refused.get('error', {}).get('code'), 'invalid_definition', label)
+            self.assertIn('확인 항목', refused['error']['message'], label)
+            self.assertNotIn('confirmation_items', (await self.state(actor='admin', workflow_id=key))['workflow']['draft']['nodes'].get('j', {}), label)
+        # Items on a job that is not a human check list are kept as data and never asked for.
+        self.assertEqual(workspace.human_check_items({'mode': 'tool', 'result_block': 'checklist', 'confirmation_items': [{'id': 'a', 'name': '하나'}]}), [])
+        self.assertEqual(workspace.human_check_items({'mode': 'human', 'result_block': 'human_confirm', 'confirmation_items': [{'id': 'a', 'name': '하나'}]}), [])
+        self.assertEqual(workspace.human_check_items({'result_block': 'checklist', 'confirmation_items': [{'id': 'a', 'name': '하나'}, {'id': 'b', 'name': ''}]}), [{'id': 'a', 'name': '하나'}])
+
     async def test_save_publication_updates_new_runs_and_preserves_existing_snapshots(self):
         key, definition, revision = await self.create()
         definition['category'] = 'incident'
