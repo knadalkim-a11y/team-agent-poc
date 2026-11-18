@@ -28,6 +28,7 @@
 
 | 찾는 내용 | 이슈·조치·확인 범위 |
 |---|---|
+| 처음 쓰는 비개발자가 업무 절차 등록·실행에서 막히는 곳 | [2026-11-18 첫 사용자 관점 점검: 다시 시작 경로·점검 항목 없음·처음 화면 안내 등 13건](figma-product-parity-20261111.md#first-user-usability-20261118) |
 | main 8866719 사내 적용 준비(전체 검사 597·프로그램 ZIP·적용 블록) | [2026-11-18 전체 검사 첫 시도 성공·ZIP 값·내려받기 검증 미실행·블록 유효 조건](no-run-mode-20261102.md#main-8866719-apply-prep-20261118) |
 | 담당자 계정으로 업무 절차를 처음 등록(도구 없이)·남은 ‘워크플로우’ 표기·‘P/T/J’ 문구 | [2026-11-17 따라간 순서·고친 문구·고치지 않은 것·권한 지정 화면 없음](figma-product-parity-20261111.md#first-procedure-walkthrough-20261117) |
 | CI 브라우저 시험 준비 단계의 Chrome 지연(`Chrome DevTools response timed out`·첫 화면 준비 초과) | [2026-11-04 CI447·CI449 재발·같은 tree 통과·한 번 재실행 성공·원인 미확정](factory-unit-runs-20261103.md#browser-startup-timeout-20261104) |

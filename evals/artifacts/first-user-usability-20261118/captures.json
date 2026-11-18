@@ -1,0 +1,54 @@
+{
+ "date": "2026-11-18",
+ "what": "First-user walk-through of registering, publishing, running and judging a work procedure without tools, looking for where a non-developer would stop",
+ "product": {
+  "program": "0.11.3+ees.14",
+  "built_from": "main 88667199157da5a9688a91ac74273c1362c3f8a7 sources (build inputs), Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0",
+  "server": "tests/native_ui_fixture.py: the built frontend with synthetic sign-in, chat and model, and the real workflow service on a temporary database",
+  "account": "synthetic non-admin user with the manager and participant roles on EMS / all factories",
+  "taken_by": "one-off scripts outside the repository that subclass tests/test_ees_work_figma_authoring_native.py and click the real controls"
+ },
+ "captures": [
+  {
+   "file": "01-first-screen-1920.png",
+   "shows": "First screen after sign-in for an account that may author: only \"업무 절차를 선택해 주세요\" and \"게시된 업무 절차가 없습니다\"",
+   "sha256": "af5a2c92866ad4baddc1f3b8e8fb05e396116c440b2dbee5bda6139b8651849b"
+  },
+  {
+   "file": "02-editor-help-box-1920.png",
+   "shows": "New procedure editor with the 단계와 작업 help box open: it covers the left menu, away from its question mark",
+   "sha256": "cbf072cec6af40f6c8527a6dcd5ddeae1567b4dc5ebd7d6e41c8e4907e2c8546"
+  },
+  {
+   "file": "03-job-fields-1920.png",
+   "shows": "Job detail as first opened: 수행 방법 and 확인 방법 side by side, no examples in 무엇을 확인하나요 and 완료 기준",
+   "sha256": "a5b720d4e56b8c1bf4bc21f59a7f1fbacf36ac62978377178167f19a5771b539"
+  },
+  {
+   "file": "04-run-before-start-1920.png",
+   "shows": "Run screen of a stage with one human-check job before starting: 지금 실행 and 판정 필요",
+   "sha256": "2192bf759cceafecf5a4ada27b95088c762c5e14da08b664fc875ca1996ae359"
+  },
+  {
+   "file": "05-run-done-start-off-1920.png",
+   "shows": "Same screen after the job was judged 적합: 1 / 1 완료, 지금 실행 is off and nothing says why or what comes next",
+   "sha256": "41e9b598b859e6190864fa5e5e275f84275a5bb447982ea00a19bf2d81489689"
+  },
+  {
+   "file": "06-finish-is-on-another-screen-1920.png",
+   "shows": "The screen behind the stage \"...\" control: 진행 건 종료 sits beside 기록 JSON 내보내기; only after it can the work be started again",
+   "sha256": "43ef14381ef3a49d49323cd21121588ff549e441a687b049c3282a226b904458"
+  },
+  {
+   "file": "07-checklist-job-without-items-1920.png",
+   "shows": "A job set to 확인 항목 · 항목마다 체크 opened during a run: no items, only 확인 완료, on a differently shaped screen",
+   "sha256": "39c7831be3c3a6b3b8d4a0bdf6d5a6bbf390830da3788d9691089c2e4d756cf0"
+  },
+  {
+   "file": "08-job-editor-1366.png",
+   "shows": "Job editor on a 1366x768 window: fits, the left menu shrinks to icons",
+   "sha256": "c8979b47685a13251e42cd1443c4af0c7c469c194a42f4a33c2121a8b74abb00"
+  }
+ ],
+ "not_covered": "real team members, the in-house server, Windows browsers, the helper chat answers (the model is synthetic here)"
+}
