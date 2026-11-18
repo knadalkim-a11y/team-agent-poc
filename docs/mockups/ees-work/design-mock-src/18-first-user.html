@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>첫 사용자 흐름 시안 1 · EES Workflow</title>
+<!--@mock:provenance-->
+<!--@mock:fonts-->
+<!--@mock:product-css-->
+<!-- Mock only: the guide strip above the frame. Not product UI; excluded from comparison. -->
+<style data-mock-frame>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff}
+body{display:flex;flex-direction:column}
+.mk-guide{flex:none;position:relative;z-index:90;font:400 13px/20px var(--ees-font-sans);color:var(--ees-text-primary);background:#fff;border-bottom:1px dashed var(--ees-text-tertiary);padding:8px 16px 10px}
+.mk-guide *{box-sizing:border-box}
+.mk-row{display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;min-width:0}
+.mk-tag{font-size:12px;line-height:18px;font-weight:500;padding:4px 8px;border:1px dashed var(--ees-text-secondary);border-radius:2px;white-space:nowrap}
+.mk-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
+.mk-guide button{font:inherit;font-size:13px;line-height:20px;font-weight:500;color:var(--ees-text-primary);background:#fff;border:1px solid var(--ees-line-control);border-radius:2px;min-height:28px;padding:0 10px;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.mk-guide button small{font-size:12px;font-weight:400;color:var(--ees-text-secondary)}
+.mk-guide button:hover{background:var(--ees-surface-hover)}
+.mk-guide button[aria-pressed="true"]{background:var(--ees-surface-selected);border-color:var(--ees-text-primary)}
+.mk-guide button:focus-visible{outline:2px solid var(--ees-text-primary);outline-offset:2px}
+.mk-guide [hidden]{display:none!important}
+.mk-guide .mk-fold{margin-left:auto;border-color:transparent}
+.mk-text{margin:6px 0 0;display:flex;flex-wrap:wrap;gap:2px 20px;min-width:0}
+.mk-text b{font-weight:400;font-size:12px;color:var(--ees-text-secondary);margin-right:6px}
+.mk-words{margin:8px 0 0;border-collapse:collapse;font-size:12px;line-height:18px}
+.mk-words th,.mk-words td{text-align:left;font-weight:400;padding:2px 20px 2px 0;vertical-align:top}
+.mk-words th{color:var(--ees-text-secondary)}
+.mk-guide[data-collapsed="true"] :is(.mk-hide,.mk-text,.mk-words){display:none}
+.mk-stage{flex:1;min-height:0;display:flex;position:relative}
+</style>
+<!-- Context only: the frame around the work panel (left menu shell, top bar, chat). The product draws these in its
+     Svelte shell; the mock copies their measured sizes and colours. The left menu content and the work panel use the
+     product's own markup and style sheet. -->
+<style data-mock-context="frame">
+.fu-shell{flex:1;min-width:0;display:grid;grid-template-columns:256px minmax(0,1fr) 560px;color:var(--ees-text-primary);font:400 14px/20px var(--ees-font-sans);letter-spacing:0}
+.fu-shell *{box-sizing:border-box}
+.fu-side{background:var(--ees-surface-sidebar);border-right:1px solid var(--ees-line-divider);display:flex;flex-direction:column;min-height:0}
+.fu-brand{height:48px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;font-weight:700;font-size:15px}
+.fu-logo{width:22px;height:22px;border-radius:6px;background:var(--ees-brand-solid);color:#fff;font-size:12px;display:grid;place-items:center}
+.fu-side #ees-work-entry{flex:1;min-height:0;overflow:auto;padding:0 8px}
+.fu-user{flex:none;height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;border-top:1px solid var(--ees-line-divider);font-size:14px}
+.fu-user i{width:22px;height:22px;border-radius:50%;background:var(--ees-line-control)}
+.fu-main{display:flex;flex-direction:column;min-width:0;min-height:0;background:#fff}
+.fu-top{height:48px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--ees-line-divider)}
+.fu-top strong{font-size:15px;font-weight:700}
+.fu-top span{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 10px;border:1px solid var(--ees-line-control);border-radius:6px;font-size:13px}
+.fu-main #ees-work-panel{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;background:#fff}
+.fu-main #ees-work-panel>div{flex:1;min-height:0}
+.fu-chat{border-left:1px solid var(--ees-line-divider);display:flex;flex-direction:column;min-height:0;background:#fff}
+.fu-chat header{height:48px;flex:none;display:flex;align-items:center;padding:0 12px;font-size:14px}
+.fu-chat-empty{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 80px;font-size:30px;line-height:36px;color:var(--ees-text-disabled,#8c93a0)}
+.fu-chat-empty b{color:var(--ees-text-primary);font-weight:400}
+.fu-chat-input{margin:0 24px 16px;height:86px;border:1px solid var(--ees-text-primary);border-radius:8px;padding:16px;font-size:14px;color:var(--ees-text-secondary)}
+.fu-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);max-width:min(560px,calc(100% - 32px));padding:10px 16px;border-radius:4px;background:#fff;color:var(--ees-text-primary);border:1px solid var(--ees-line-control);font:400 13px/20px var(--ees-font-sans);z-index:80;box-shadow:0 4px 16px #1d21281f}
+@media (max-width:1500px){.fu-shell{grid-template-columns:256px minmax(0,1fr) 420px}}
+@media (max-width:1180px){.fu-shell{grid-template-columns:56px minmax(0,1fr)}.fu-chat,.fu-side #ees-work-entry,.fu-brand strong,.fu-user span{display:none}}
+</style>
+<!-- New screen CSS for this proposal. Written with product tokens; to be reused when a version of this mock is
+     chosen for the product. -->
+<style data-new-screen="first-user">
+/* FU1 · first screen for an account that may author */
+.fu-home .ew-primary{margin-top:4px}
+.fu-drafts{margin-top:32px;max-width:560px}
+.fu-drafts h4{margin:0 0 4px;font-size:12px;line-height:18px;font-weight:500;color:var(--ees-text-secondary)}
+.fu-drafts button{display:flex;width:100%;align-items:center;gap:12px;min-height:44px;padding:0 4px;border:0;border-top:1px solid var(--ees-line-divider);background:transparent;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.fu-drafts button:last-child{border-bottom:1px solid var(--ees-line-divider)}
+.fu-drafts button:hover{background:var(--ees-surface-hover)}
+.fu-drafts button strong{flex:1;min-width:0;font-weight:500}
+.fu-drafts button small{color:var(--ees-text-secondary);font-size:12px}
+/* left menu: procedures that are saved but not published yet */
+.fu-pending{display:flex;width:100%;align-items:center;justify-content:space-between;min-height:32px;margin-top:4px;padding:0 8px 0 12px;border:0;border-radius:6px;background:transparent;font:inherit;font-size:13px;color:var(--ees-text-secondary);cursor:pointer}
+.fu-pending:hover{background:var(--ees-surface-panel-hover)}
+.fu-pending b{font-weight:500;color:var(--ees-text-primary)}
+/* FU2 · the scope of a new procedure as a chip instead of a sentence */
+.fu-chip{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:11px;background:var(--ees-surface-muted);font-size:12px;line-height:18px;color:var(--ees-text-secondary)}
+/* FU3/FU5 · start questions folded into one row */
+.fu-start-row{display:flex;align-items:center;gap:8px;margin-top:24px;padding-top:16px;border-top:1px solid var(--ees-line-divider)}
+.fu-start-row h3{margin:0;font-size:14px;line-height:20px;font-weight:700}
+.fu-start-row small{color:var(--ees-text-secondary);font-size:12px}
+.fu-start-row .ew-author-link{margin-left:auto}
+/* FU4 · check items typed where the job is edited */
+.fu-item-editor{display:grid;gap:6px}
+.fu-items{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.fu-items li{display:grid;grid-template-columns:20px minmax(0,1fr) 32px;align-items:center;gap:6px}
+.fu-items li>span{font-size:12px;color:var(--ees-text-secondary);text-align:right}
+.fu-items input{width:100%;min-height:36px;padding:0 12px;border:1px solid var(--ees-line-control);border-radius:6px;background:#fff;font:inherit;color:inherit}
+.fu-items input::placeholder{color:var(--ees-text-secondary)}
+.fu-items button{width:32px;height:32px;border:0;border-radius:6px;background:transparent;font-size:16px;line-height:1;color:var(--ees-text-secondary);cursor:pointer}
+.fu-items button:hover{background:var(--ees-surface-muted);color:var(--ees-text-primary)}
+.fu-more{font-size:12px;color:var(--ees-text-secondary)}
+.fu-more summary{cursor:pointer;width:max-content}
+.fu-more div{display:flex;gap:16px;margin-top:6px}
+/* FU6 · purpose and one start control on the procedure's first screen */
+.fu-overview-head{display:flex;align-items:flex-start;gap:16px}
+.fu-overview-head>div{flex:1;min-width:0}
+.fu-purpose{margin:6px 0 0;color:var(--ees-text-secondary)}
+.fu-last{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:0;border:0;background:transparent;font:inherit;font-size:12px;color:var(--ees-text-secondary);cursor:pointer}
+.fu-last i{width:6px;height:6px;border-radius:50%;background:var(--ees-signal-green,#2a7d4f)}
+.fu-go{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:none;min-width:116px;min-height:32px;padding:0 14px}
+/* FU7 · check items ticked in the job row, one-click confirm for a single check */
+.fu-checks{display:grid;margin:4px 16px 8px 50px;padding:0;list-style:none}
+.fu-checks label{display:flex;align-items:center;gap:10px;min-height:36px;cursor:pointer}
+.fu-checks input{width:16px;height:16px;accent-color:var(--ees-brand-solid);margin:0}
+.fu-checks small{margin-left:auto;font-size:12px;color:var(--ees-text-secondary)}
+.fu-checks li[data-done="true"] span{color:var(--ees-text-secondary)}
+.fu-count{font-size:12px;color:var(--ees-text-secondary);min-width:44px;text-align:right}
+.fu-confirm{display:inline-flex;align-items:stretch;border:1px solid var(--ees-line-control);border-radius:6px;overflow:hidden}
+.fu-confirm button{min-height:30px;padding:0 12px;border:0;background:#fff;font:inherit;font-size:13px;font-weight:500;color:inherit;cursor:pointer}
+.fu-confirm button+button{padding:0 8px;border-left:1px solid var(--ees-line-control)}
+.fu-confirm button:hover{background:var(--ees-surface-hover)}
+.fu-done{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500}
+.fu-menu{position:absolute;z-index:30;min-width:140px;padding:4px;border:1px solid var(--ees-line-control);border-radius:6px;background:#fff;box-shadow:0 4px 12px #1118270f;display:grid}
+.fu-menu button{display:flex;align-items:center;gap:8px;min-height:32px;padding:0 10px;border:0;border-radius:4px;background:transparent;font:inherit;font-size:13px;text-align:left;cursor:pointer}
+.fu-menu button:hover{background:var(--ees-surface-hover)}
+</style>
+</head>
+<body>
+<div class="mk-guide" id="mock-guide" data-collapsed="false" role="region" aria-label="시안 안내 · 제품 화면 아님">
+ <div class="mk-row">
+  <strong class="mk-tag" id="mock-badge">시안 1 · 저장·실행 안 됨 · FU1</strong>
+  <div class="mk-group mk-hide" role="group" aria-label="화면 바로 보기">
+   <button data-step="FU1" aria-pressed="true">처음 화면 <small>FU1</small></button>
+   <button data-step="FU2" aria-pressed="false">새 절차 <small>FU2</small></button>
+   <button data-step="FU3" aria-pressed="false">편집 <small>FU3</small></button>
+   <button data-step="FU4" aria-pressed="false">점검 항목 <small>FU4</small></button>
+   <button data-step="FU5" aria-pressed="false">게시 <small>FU5</small></button>
+   <button data-step="FU6" aria-pressed="false">업무 시작 <small>FU6</small></button>
+   <button data-step="FU7" aria-pressed="false">점검하기 <small>FU7</small></button>
+   <button data-step="FU8" aria-pressed="false">끝내고 다시 <small>FU8</small></button>
+  </div>
+  <button class="mk-fold" id="mock-words-toggle" aria-expanded="false" aria-controls="mock-words">낯선 말 후보</button>
+  <button class="mk-fold" id="mock-fold" style="margin-left:0" aria-expanded="true">안내 접기</button>
+ </div>
+ <p class="mk-text" id="mock-step-text"></p>
+ <table class="mk-words" id="mock-words" hidden>
+  <tr><th>지금 말</th><th>후보(권장이 앞)</th><th>이 시안에서</th></tr>
+  <tr><td>진행 건</td><td>회차 · 이번 업무</td><td>화면에서 뺌(단추와 날짜로 대신)</td></tr>
+  <tr><td>판정 필요</td><td>확인 필요</td><td>‘확인 필요 1’, 단추는 ‘적합’</td></tr>
+  <tr><td>확인 방법</td><td>확인 방식</td><td>한 번에 확인 / 항목마다 체크</td></tr>
+  <tr><td>분류·수행 범위 수정</td><td>분류·범위</td><td>분류·범위</td></tr>
+  <tr><td>업무 설명(편집) · 업무 목적(만들 때)</td><td>업무 목적 하나로</td><td>업무 목적</td></tr>
+  <tr><td>판정 규칙(탭)</td><td>판정 단어</td><td>판정 단어</td></tr>
+  <tr><td>시작할 때 받는 값</td><td>시작할 때 물어볼 것</td><td>한 줄로 접음</td></tr>
+  <tr><td>게시 / 미게시</td><td>그대로 · 사용 중 / 준비 중</td><td>그대로 둠(2026-11-06 결정)</td></tr>
+ </table>
+</div>
+<div class="mk-stage" id="mock-stage">
+<div class="fu-shell" id="fu-shell">
+ <aside class="fu-side" aria-label="탐색" data-ees-source-sidebar data-compact="false">
+  <div class="fu-brand"><span class="fu-logo">E</span><strong>EES Workflow</strong></div>
+  <section id="ees-work-entry" data-ees-work data-work-mode="work" aria-label="업무 탐색"></section>
+  <div class="fu-user"><i></i><span>공용 계정 담당자</span></div>
+ </aside>
+ <main class="fu-main" data-ees-work-surface>
+  <header class="fu-top"><strong id="fu-area">업무</strong><span><img class="ew-icon" src="v4/093d6.svg" alt="">대화</span></header>
+  <section id="ees-work-panel" tabindex="-1" data-ees-work data-ees-source-slot aria-label="업무 패널" data-ees-mode="work"></section>
+ </main>
+ <aside class="fu-chat" aria-label="업무 도우미 대화(맥락)">
+  <header>업무 도우미</header>
+  <div class="fu-chat-empty"><b>업무 도우미</b>무엇을 도와드릴까요?</div>
+  <div class="fu-chat-input">업무를 물어보거나, 필요한 작업을 요청하세요</div>
+ </aside>
+</div>
+</div>
+<div class="fu-toast" id="mock-toast" role="status" hidden></div>
+<script>
+(()=>{'use strict';
+const $=s=>document.querySelector(s),panel=$('#ees-work-panel'),entry=$('#ees-work-entry'),guide=$('#mock-guide');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// Icon files are written out in full so the mock builder can embed each one.
+const ICON={
+ '093d6':'v4/093d6.svg',
+ '126c7':'v4/126c7.svg',
+ '40095':'v4/40095.svg',
+ '4df0d':'v4/4df0d.svg',
+ '69549':'v4/69549.svg',
+ '9acc8':'v4/9acc8.svg',
+ '9ce50':'v4/9ce50.svg',
+ 'a953c':'v4/a953c.svg',
+ 'c325d':'v4/c325d.svg',
+ 'cb8e2':'v4/cb8e2.svg',
+ 'cece5':'v4/cece5.svg',
+ 'd1220':'v4/d1220.svg',
+ 'e1049':'v4/e1049.svg',
+ 'e8a37':'v4/e8a37.svg',
+ 'ead50':'v4/ead50.svg',
+ 'f0554':'v4/f0554.svg',
+ 'f34f3':'v4/f34f3.svg',
+ 'f6bbc':'v4/f6bbc.svg',
+ '4fb09':'v4/4fb09.svg'
+};
+const I=n=>`<img class="ew-icon" src="${ICON[n]}" alt="" aria-hidden="true">`;
+// What each mock screen shows and what differs from the product today. Guide text only.
+const SCREENS={
+ FU1:{when:'로그인 직후 · 업무가 하나도 없을 때',change:'만들 수 있는 계정에는 ‘새 업무 절차’ 단추가 바로 보임. 저장만 해 둔 절차는 ‘게시 전’으로 나옴'},
+ FU2:{when:'새 업무 절차를 눌렀을 때',change:'범위 안내 문장을 작은 표시로 바꿈. 추가하면 목적까지 저장된 채 열림'},
+ FU3:{when:'새 절차를 연 직후',change:'단계 이름 칸이 바로 열려 있음(단계를 넣으면 작업 이름 칸도). 게시 상태는 늘 제목 옆. ‘시작할 때 물어볼 것’은 한 줄'},
+ FU4:{when:'작업을 열었을 때',change:'확인 방식을 둘 중에 고름. ‘항목마다 체크’를 고르면 그 자리에서 항목을 적음'},
+ FU5:{when:'단계와 작업을 다 적은 뒤',change:'게시를 고르면 저장 단추가 ‘저장 · 게시’로 바뀜. 고르고 저장하는 방식은 그대로'},
+ FU6:{when:'업무 › 운영 › 절차를 열었을 때',change:'업무 목적이 보이고 ‘시작’이 첫 화면에 있음. 물어볼 것이 없으면 확인 창 없이 시작'},
+ FU7:{when:'시작한 뒤 단계 화면',change:'점검 항목을 그 줄에서 체크. 한 번에 확인하는 작업은 ‘적합’ 한 번. 할 일이 없는 ‘지금 실행’은 없앰'},
+ FU8:{when:'모두 확인했을 때',change:'‘끝내기’가 나오고, 끝내면 ‘시작’으로 돌아옴. 지난 회차는 날짜 한 줄로 남음'}
+};
+const fresh=()=>({screen:'FU1',mode:'work',name:'주간 설비 점검',purpose:'매주 월요일 설비 상태를 확인하고 이상을 기록합니다.',created:false,stage:'',job:'',guide:'',kind:'once',
+ items:[],job2:'',saved:true,state:'unpublished',published:false,run:'idle',checked:[],second:'',last:'',addStage:false,addJob:false,menu:false});
+let S=fresh();
+const SAMPLE=['펌프 누수 없음','밸브 개폐 정상','배관 진동 없음'];
+// Jumping from the guide prepares the state a person would have reached by then.
+const PRESET={
+ FU1:s=>s,
+ FU2:s=>Object.assign(s,{mode:'author'}),
+ FU3:s=>Object.assign(s,{mode:'author',created:true}),
+ FU4:s=>Object.assign(s,{mode:'author',created:true,stage:'점검',job:'설비 세 곳 점검',guide:'펌프, 밸브, 배관을 차례로 봅니다.',kind:'items',items:[...SAMPLE],saved:false}),
+ FU5:s=>Object.assign(s,{mode:'author',created:true,stage:'점검',job:'설비 세 곳 점검',guide:'펌프, 밸브, 배관을 차례로 봅니다.',kind:'items',items:[...SAMPLE],job2:'이상 내용 기록',state:'published'}),
+ FU6:s=>Object.assign(s,{created:true,stage:'점검',job:'설비 세 곳 점검',guide:'펌프, 밸브, 배관을 차례로 봅니다.',kind:'items',items:[...SAMPLE],job2:'이상 내용 기록',state:'published',published:true}),
+ FU7:s=>Object.assign(PRESET.FU6(s),{run:'running',checked:[0]}),
+ FU8:s=>Object.assign(PRESET.FU6(s),{run:'running',checked:[0,1,2],second:'적합'})
+};
+function toast(text){const t=$('#mock-toast');t.textContent=text;t.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>{t.hidden=true;},2600);}
+const NOT_HERE='시안입니다. 이 단추는 이번 시안에서 다루지 않습니다.';
+const itemList=()=>S.kind==='items'?S.items.filter(x=>x.trim()):[];
+const jobCount=()=>(S.job?1:0)+(S.job2?1:0);
+const firstDone=()=>S.kind==='items'?itemList().length>0&&itemList().every((_,i)=>S.checked.includes(i)):S.checked.includes(0);
+const doneCount=()=>(firstDone()?1:0)+(S.job2&&S.second?1:0);
+const allDone=()=>firstDone()&&(!S.job2||Boolean(S.second));
+
+function entryHTML(){
+ const modes=`<nav class="ew-mode" aria-label="작업 모드"><button data-mode="work" data-go-mode="work" aria-pressed="${S.mode==='work'}">${I('4df0d')}<span>업무</span></button> <button data-mode="author" data-go-mode="author" aria-pressed="${S.mode==='author'}">${I('cece5')}<span>워크스페이스</span></button></nav>`;
+ const scope=`<div class="ew-scope-wrap" data-collapsed="false"><div class="ew-scope-inner"><p class="ew-nav-caption">작업 위치</p><div class="ew-scope"><div class="ew-scope-field"><button type="button" data-scope-trigger="factory" data-none>${I('40095')}<small>공장</small><span>전체 공장</span>${I('ead50')}</button></div><div class="ew-scope-field"><button type="button" data-scope-trigger="system" data-none>${I('f34f3')}<small>시스템</small><span>EMS</span>${I('ead50')}</button></div></div></div></div>`;
+ if(S.mode==='author')return modes+scope+`<nav class="ew-nav-links ew-procedure-link"><button class="ew-nav-button" data-go="list" aria-current="page">${I('e8a37')}<span>업무 절차</span></button></nav><section class="ew-nav-group ew-assets-group"><button class="ew-assets-toggle" aria-expanded="true" data-none><span>도구·자료</span>${I('ead50')}</button><div class="ew-category-body" aria-hidden="false"><nav class="ew-nav-links ew-category-items"><button class="ew-nav-button" data-none>${I('d1220')}<span>도구</span></button></nav></div></section>${S.created?`<p class="ew-nav-caption">최근 편집</p><nav class="ew-workflows ew-recent"><button data-go="editor">${I('126c7')}<span>${esc(S.name)}</span></button></nav>`:''}`;
+ const category=(key,icon,label,body)=>`<div class="ew-category" data-category="${key}"><button class="ew-category-toggle" aria-expanded="true" data-none>${I(icon)}<span>${label}</span>${I('ead50')}</button><div class="ew-category-body" aria-hidden="false"><div class="ew-category-items">${body}</div></div></div>`;
+ const published=S.published?`<button data-go="overview"${['FU6','FU7','FU8'].includes(S.screen)?' aria-current="page"':''}><span>${esc(S.name)}</span></button>`:'';
+ // New: a saved procedure that is not published yet is reachable from the work menu.
+ const pending=S.created&&!S.published?`<button class="fu-pending" data-go="editor"><span>게시 전</span><b>1</b></button>`:'';
+ return modes+scope+`<nav class="ew-nav-links"><button data-none>${I('c325d')}<span>실행 기록</span></button><button data-none>${I('093d6')}<span>대화 기록</span></button></nav><p class="ew-nav-caption">업무</p><nav class="ew-workflows">${category('ops','126c7','운영',published)}${category('setup','f6bbc','셋업','')}${category('incident','4fb09','장애대응','')}${pending}</nav>`;
+}
+
+function homeHTML(){
+ const drafts=S.created&&!S.published?`<div class="fu-drafts"><h4>게시 전</h4><button data-go="editor"><strong>${esc(S.name)}</strong><small>${S.stage?'단계 1':'단계 0'} · 작업 ${jobCount()}</small>${I('69549')}</button></div>`:'';
+ return `<div id="ees-work-content" class="ew-scroll ew-center-content"><div class="ew-empty ew-work-home fu-home"><h3>${S.published?'업무 절차를 선택해 주세요':'아직 업무가 없습니다'}</h3>${S.published?'':`<button type="button" class="ew-primary" data-go="create">새 업무 절차</button>`}${drafts}</div></div>`;
+}
+
+function listHTML(open){
+ const row=(name,cat,count,tag,go)=>`<button type="button" ${go?'data-go="editor"':'data-none'}><span class="ew-author-row-main"><strong>${esc(name)}</strong></span><span class="ew-list-cell">${cat}</span><span class="ew-list-cell">${count}</span><span class="ew-author-tag" data-state="${tag==='게시'?'published':'draft'}">${tag}</span>${I('69549')}</button>`;
+ const form=open?`<form id="ew-procedure-create" class="ew-workflow-create"><p><span class="fu-chip">전체 공장 · EMS</span></p><div class="ew-author-fields"><label><span class="ew-job-field-label">업무 절차 이름 <small class="ew-job-field-required">필수</small></span><input id="ew-procedure-name" name="name" value="" maxlength="160" autocomplete="off" placeholder="예: 주간 설비 점검"></label><label>업무 목적<textarea id="ew-procedure-description" name="description" placeholder="예: 매주 월요일 설비 상태를 확인하고 이상을 기록합니다."></textarea></label></div><div class="ew-procedure-create-actions"><button type="button" data-go="list">취소</button><button type="button" id="fu-create" class="ew-primary" disabled>추가</button></div></form>`:'';
+ const mine=S.created?row(S.name,'운영',`단계 ${S.stage?1:0} · 작업 ${jobCount()}`,S.published?'게시':'미게시',true):'';
+ return `<div id="ees-work-authoring-panel" class="ew-scroll"><section class="ew-author " id="ees-work-designer" data-ees-work aria-label="업무 절차 작성" data-author-tab="content"><div class="ew-author-scroll"><div class="ew-list-toolbar"><input id="ew-author-search" type="search" placeholder="이름으로 찾기" aria-label="업무 절차 찾기"><h2 class="ew-list-count">${S.created?4:3}개</h2>${open?'':`<button type="button" data-go="create" class="ew-new-workflow ew-primary">새 업무 절차</button>`}</div>${form}<div class="ew-author-list"><div class="ew-list-thead" aria-hidden="true"><span>이름</span><span>분류</span><span>단계 · 작업</span><span>게시</span><span></span></div>${mine}${row('일일 시스템 점검','운영','단계 1 · 작업 1','미게시')}${row('신규 공장 횡전개','셋업','단계 4 · 작업 6','미게시')}${row('배포 산출물 점검','운영','단계 4 · 작업 9','미게시')}</div></div><footer></footer></section></div>`;
+}
+
+// The title row is the same on every editor screen: name, publication state, menu.
+function editorHead(){
+ const select=`<label class="ew-publication-field">게시 상태<select id="ew-publication-state"><option value="unpublished"${S.state==='unpublished'?' selected':''}>미게시</option><option value="published"${S.state==='published'?' selected':''}>게시</option></select></label>`;
+ return `<div class="ew-author-definition-head"><div class="ew-author-heading"><h2>${esc(S.name)}</h2>${select}<details class="ew-procedure-menu"><summary aria-label="업무 절차 메뉴">${I('cb8e2')}</summary><div><button type="button" class="ew-author-link" data-none>업무 절차 정보·분류 수정</button><button type="button" class="ew-author-link" data-none>다른 이름으로 저장</button><button type="button" class="ew-author-link" data-none>내용 확인</button></div></details></div><p class="ew-author-muted">EMS${S.published?' · 게시 v1':''}</p></div><nav class="ew-author-tabs" role="tablist" aria-label="업무 절차 편집"><button type="button" role="tab" aria-selected="true">업무 내용</button><button type="button" role="tab" aria-selected="false" data-none>판정 단어</button><button type="button" role="tab" aria-selected="false" data-none>게시 기록</button></nav>`;
+}
+function saveBar(){
+ const pending=S.state!==(S.published?'published':'unpublished'),dirty=!S.saved||pending;
+ const label=pending?(S.state==='published'?'저장 · 게시':'저장 · 게시 내림'):'저장';
+ return `<footer><small data-author-status data-dirty="${dirty}">${dirty?'저장하지 않은 변경 있음':'저장됨'}</small><button type="button" id="fu-save" class="ew-primary"${dirty?'':' disabled'}>${label}</button></footer>`;
+}
+function editorHTML(){
+ // With nothing added yet the name field is already open, so the next step needs no sentence.
+ const inline=(label,placeholder,id,done,cancel)=>`<form class="ew-stage-editor"><label>${label}<input name="name" id="${id}" placeholder="${placeholder}" autocomplete="off"></label><div class="ew-stage-editor-actions">${cancel?'<button type="button" data-cancel>취소</button>':''}<button type="button" class="ew-primary" data-apply="${done}">추가</button></div></form>`;
+ const jobRow=S.job?`<div class="ew-job-row"><button type="button" class="ew-author-job" data-go="job"><span class="ew-job-row-label"><span>${esc(S.job)}</span><small class="ew-job-meta">사람이 확인${S.kind==='items'&&itemList().length?' · 항목 '+itemList().length+'개':''}</small></span>${I('f0554')}</button><button type="button" class="ew-job-menu-button" aria-label="${esc(S.job)} 메뉴" data-none>${I('a953c')}</button></div>${S.job2?`<div class="ew-job-row"><button type="button" class="ew-author-job" data-none><span class="ew-job-row-label"><span>${esc(S.job2)}</span><small class="ew-job-meta">사람이 확인</small></span>${I('f0554')}</button><button type="button" class="ew-job-menu-button" aria-label="${esc(S.job2)} 메뉴" data-none>${I('a953c')}</button></div>`:''}`:'';
+ const stage=S.stage?`<div class="ew-stage-list"><section class="ew-content-stage"><div class="ew-stage-head"><button type="button" class="ew-stage-toggle" aria-expanded="true" data-none><span class="ew-author-stage-number">1</span><span class="ew-stage-name">${esc(S.stage)}</span><small class="ew-stage-count">${jobCount()}개 작업</small>${I('e1049')}</button><button type="button" class="ew-job-menu-button ew-stage-menu-button" aria-label="${esc(S.stage)} 메뉴" data-none>${I('a953c')}</button></div><div class="ew-stage-body"><div class="ew-stage-jobs">${jobRow}${S.addJob||!S.job?inline('새 작업 이름','예: 설비 외관 확인','fu-new-job','job',Boolean(S.job)):`<button type="button" class="ew-author-link" data-author-action="add_job" data-add="job">${I('9ce50')}작업 추가</button>`}</div></div></section></div>`:'';
+ return `<div id="ees-work-authoring-panel" class="ew-scroll"><section class="ew-author " id="ees-work-designer" data-ees-work aria-label="업무 절차 작성" data-author-tab="content"><div class="ew-author-scroll"><nav class="ew-author-breadcrumb" aria-label="현재 위치"><button type="button" data-go="list" class="ew-author-back">${I('9acc8')}업무 절차 목록</button></nav>${editorHead()}<section class="ew-work-content"><section class="ew-content-overview"><form class="ew-procedure-info" id="ew-procedure-info"><label>업무 절차 이름<input value="${esc(S.name)}" maxlength="160"></label><label class="ew-procedure-description">업무 목적<textarea rows="2">${esc(S.purpose)}</textarea></label><button type="button" class="ew-author-link" data-none>분류·범위</button></form></section><div class="ew-content-heading"><h3>단계와 작업</h3><small>${S.stage?1:0}개 단계</small></div>${stage}${S.addStage||!S.stage?inline('새 단계 이름','예: 점검','fu-new-stage','stage',Boolean(S.stage)):`<button type="button" class="ew-author-link ew-stage-add" data-author-action="add_stage" data-add="stage">${I('9ce50')}단계 추가</button>`}<div class="fu-start-row"><h3>시작할 때 물어볼 것</h3><small>0개</small><button type="button" class="ew-author-link" data-author-action="start_input_add" data-none>＋ 추가</button></div></section></div>${saveBar()}</section></div>`;
+}
+function jobHTML(){
+ const rows=S.items.map((text,i)=>`<li><span>${i+1}</span><input value="${esc(text)}" data-item="${i}" aria-label="확인 항목 ${i+1}"><button type="button" data-remove="${i}" aria-label="확인 항목 ${i+1} 삭제">×</button></li>`).join('')+`<li><span>${S.items.length+1}</span><input value="" data-item="${S.items.length}" placeholder="항목 추가" aria-label="새 확인 항목"><i></i></li>`;
+ const items=S.kind==='items'?`<div class="fu-item-editor"><span class="ew-job-field-label">확인 항목</span><ol class="fu-items">${rows}</ol></div>`:'';
+ return `<div id="ees-work-authoring-panel" class="ew-scroll"><section class="ew-author " id="ees-work-designer" data-ees-work aria-label="업무 절차 작성" data-author-tab="content" data-author-detail="true"><div class="ew-author-scroll">${editorHead()}<section class="ew-job-detail"><header class="ew-job-detail-header"><button type="button" data-go="editor" class="ew-author-back">${I('9acc8')}단계와 작업</button><span>/ 1 ${esc(S.stage)}</span><button type="button" class="ew-job-menu-button" aria-label="${esc(S.job)} 메뉴" data-none>${I('cb8e2')}</button></header><form id="ew-author-node"><section class="ew-job-card ew-job-main" data-job-mode="human"><label><span class="ew-job-field-label">작업 이름</span><input name="name" value="${esc(S.job)}" maxlength="160"></label><fieldset class="ew-job-method" role="radiogroup"><legend>수행 방법</legend><div><label><input type="radio" name="mode" checked><span>사람이 확인</span></label><label><input type="radio" name="mode" data-none-change><span>도구로 처리</span></label></div></fieldset><label>무엇을 확인하나요<textarea name="job_guidance" id="fu-guide" placeholder="예: 설비 외관에 누수나 파손이 없는지 봅니다.">${esc(S.guide)}</textarea></label><fieldset class="ew-job-method" role="radiogroup"><legend>확인 방식</legend><div><label><input type="radio" name="kind" value="once"${S.kind==='once'?' checked':''}><span>한 번에 확인</span></label><label><input type="radio" name="kind" value="items"${S.kind==='items'?' checked':''}><span>항목마다 체크</span></label></div></fieldset>${items}<details class="fu-more"><summary>다른 방식</summary><div><span>항목별 판정</span><span>사람이 정하는 값</span></div></details><label>완료 기준<textarea rows="1" class="ew-job-completion-rule" placeholder="예: 이상이 없으면 완료합니다."></textarea></label><details class="ew-job-assignment"><summary>담당자 설정</summary></details></section></form></section></div>${saveBar()}</section></div>`;
+}
+
+function overviewHTML(){
+ const done=S.run==='running'&&allDone();
+ const go=S.run==='idle'?`<button type="button" class="ew-primary fu-go" data-run="start"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.5 2.75L11 7L4.5 11.25V2.75Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg><span>시작</span></button>`:done?`<button type="button" class="ew-primary fu-go" data-run="finish"><span>끝내기</span></button>`:'';
+ const progress=S.run==='running'?` · ${progressText()}`:'';
+ return `<div id="ees-work-content" class="ew-scroll ew-center-content ew-centered-overview"><section class="ew-operation-overview"><div class="fu-overview-head"><div><h2>${esc(S.name)}</h2><p class="fu-purpose">${esc(S.purpose)}</p>${S.last?`<button type="button" class="fu-last" data-none><i></i>지난 회차 · ${S.last} 끝남</button>`:''}</div>${go}</div><dl class="ew-operation-context"><dt>적용 대상</dt><dd>전체 공장 · EMS</dd></dl><section class="ew-operation-stages"><h3>업무 단계</h3><button type="button" class="ew-operation-stage" data-go="stage"><span><strong>${esc(S.stage)}</strong><small>작업 ${jobCount()}개${progress}</small></span>${I('69549')}</button></section></section></div>`;
+}
+const progressText=()=>`${doneCount()} / ${jobCount()} 완료`;
+function stageHTML(){
+ const list=itemList(),first=firstDone(),running=S.run==='running',done=running&&allDone();
+ const head=S.run==='idle'?`<button type="button" class="ew-secondary ew-stage-run-button" data-run="start"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.5 2.75L11 7L4.5 11.25V2.75Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg><span>시작</span></button>`:done?`<button type="button" class="ew-secondary ew-stage-run-button" data-run="finish"><span>끝내기</span></button>`:'';
+ const left=jobCount()-doneCount(),ok=(first?1:0)+(S.job2&&S.second==='적합'?1:0);
+ const counts=[left?`<span><i class="ew-vd-dot" data-verdict="none"></i>확인 필요 ${left}</span>`:'',ok?`<span><i class="ew-vd-dot" data-verdict="ok"></i>적합 ${ok}</span>`:'',S.job2&&S.second&&S.second!=='적합'?`<span><i class="ew-vd-dot" data-verdict="bad"></i>${S.second} 1</span>`:''].join('');
+ const checks=S.kind==='items'?`<ol class="fu-checks">${list.map((text,i)=>`<li data-done="${S.checked.includes(i)}"><label><input type="checkbox" data-check="${i}"${S.checked.includes(i)?' checked':''}${running?'':' disabled'}><span>${esc(text)}</span>${S.checked.includes(i)?'<small>방금 · 담당자</small>':''}</label></li>`).join('')}</ol>`:'';
+ const firstMeta=S.kind==='items'?(first?`<span class="fu-done"><i class="ew-vd-dot" data-verdict="ok"></i>적합</span>`:`<span class="fu-count">${S.checked.length} / ${list.length}</span>`):confirmControl(0,S.checked.includes(0)?'적합':'',running);
+ const row=(n,name,desc,meta,extra='')=>`<section class="ew-vd-entry ew-center-task-row" data-handler="human"><div class="ew-vd-item"><span class="ew-center-task-number" aria-hidden="true">${n}</span><div class="ew-vd-item-top"><button type="button" class="ew-vd-name" data-none>${esc(name)}</button><small class="ew-center-task-description">${esc(desc)}</small></div><div class="ew-vd-item-meta"><div class="ew-vd-decision">${meta}</div></div></div>${extra}</section>`;
+ return `<div id="ees-work-content" class="ew-scroll ew-center-content ew-centered-stage"><nav class="ew-center-breadcrumb" aria-label="업무 경로"><button type="button" class="ew-run-back" data-go="overview">${esc(S.name)}</button><span aria-hidden="true">›</span><span aria-current="page">${esc(S.stage)}</span></nav><header class="ew-vd-head"><div class="ew-stage-heading"><div class="ew-vd-title"><h2>${esc(S.stage)}</h2><p class="ew-center-scope">전체 공장 · EMS</p></div><div class="ew-center-heading-actions"><button type="button" class="ew-icon-button" aria-label="단계 더 보기" data-none>${I('a953c')}</button></div></div></header><nav class="ew-tabs ew-center-tabs" aria-label="업무 진행 보기"><button type="button" aria-pressed="true">업무 내용</button><button type="button" aria-pressed="false" data-none>실행 기록</button><button type="button" aria-pressed="false" data-none>판정 기준</button></nav><div class="ew-center-task-heading ew-stage-summary"><h3>작업 ${jobCount()}개</h3><span class="ew-stage-completed">${progressText()}</span><div class="ew-center-counts">${counts}</div>${head}</div><div class="ew-vd-body ew-center-task-list" id="ees-stage-tasks">${row(1,S.job,S.guide||'',firstMeta,checks)}${S.job2?row(2,S.job2,'이상이 있으면 내용을 적습니다.',confirmControl(1,S.second,running)):''}</div></div>`;
+}
+// One click for the usual answer, the other answers behind the arrow.
+function confirmControl(index,value,running){
+ if(value)return `<span class="fu-done"><i class="ew-vd-dot" data-verdict="${value==='적합'?'ok':'bad'}"></i>${value}</span>`;
+ if(!running)return `<span class="fu-count">확인 필요</span>`;
+ return `<span class="fu-confirm"><button type="button" data-verdict="${index}:적합">적합</button><button type="button" data-verdict-menu="${index}" aria-label="다른 판정" aria-haspopup="menu">▾</button></span>`;
+}
+
+function render(){
+ const screen=S.screen;
+ panel.dataset.eesMode=S.mode;panel.className=['FU6','FU7','FU8'].includes(screen)?'ew-vd':'';
+ entry.dataset.workMode=S.mode;entry.innerHTML=entryHTML();
+ $('#fu-area').textContent=S.mode==='author'?'업무 절차':'업무';
+ panel.innerHTML=screen==='FU1'?homeHTML():screen==='FU2'?listHTML(true):screen==='LIST'?listHTML(false):screen==='FU3'||screen==='FU5'?editorHTML():screen==='FU4'?jobHTML():screen==='FU6'?overviewHTML():stageHTML();
+ const id=screen==='LIST'?'FU2':screen;
+ $('#mock-badge').textContent='시안 1 · 저장·실행 안 됨 · '+id;
+ for(const button of guide.querySelectorAll('[data-step]'))button.setAttribute('aria-pressed',String(button.dataset.step===id));
+ const info=SCREENS[id];$('#mock-step-text').innerHTML=`<span><b>언제</b>${esc(info.when)}</span><span><b>바뀐 점</b>${esc(info.change)}</span>`;
+ const focus=panel.querySelector('#ew-procedure-name,#fu-new-stage,#fu-new-job');if(focus)focus.focus();
+}
+function go(screen){S.screen=screen;S.addStage=S.addJob=false;render();}
+const now=()=>{const d=new Date();return `${d.getMonth()+1}.${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;};
+
+guide.addEventListener('click',event=>{
+ const step=event.target.closest('[data-step]');
+ if(step){S=PRESET[step.dataset.step](fresh());S.screen=step.dataset.step;if(S.screen==='FU8')S.screen='FU7';render();if(step.dataset.step==='FU8'){$('#mock-badge').textContent='시안 1 · 저장·실행 안 됨 · FU8';for(const b of guide.querySelectorAll('[data-step]'))b.setAttribute('aria-pressed',String(b.dataset.step==='FU8'));const info=SCREENS.FU8;$('#mock-step-text').innerHTML=`<span><b>언제</b>${esc(info.when)}</span><span><b>바뀐 점</b>${esc(info.change)}</span>`;}return;}
+ if(event.target.closest('#mock-fold')){const collapsed=guide.dataset.collapsed!=='true';guide.dataset.collapsed=String(collapsed);event.target.closest('#mock-fold').textContent=collapsed?'안내 펴기':'안내 접기';return;}
+ if(event.target.closest('#mock-words-toggle')){const table=$('#mock-words');table.hidden=!table.hidden;event.target.closest('#mock-words-toggle').setAttribute('aria-expanded',String(!table.hidden));}
+});
+document.addEventListener('click',event=>{
+ const target=event.target,menu=document.querySelector('.fu-menu');
+ if(menu&&!target.closest('.fu-menu')&&!target.closest('[data-verdict-menu]'))menu.remove();
+ if(target.closest('#mock-guide'))return;
+ const mode=target.closest('[data-go-mode]');
+ if(mode){S.mode=mode.dataset.goMode;go(S.mode==='author'?(S.created?'FU5':'LIST'):(S.published?'FU6':'FU1'));return;}
+ const dest=target.closest('[data-go]');
+ if(dest){const where=dest.dataset.go;
+  if(where==='create'){S.mode='author';go('FU2');}
+  else if(where==='list'){S.mode='author';go('LIST');}
+  else if(where==='editor'){S.mode='author';go(S.stage&&S.job?'FU5':'FU3');}
+  else if(where==='job')go('FU4');
+  else if(where==='overview'){S.mode='work';go('FU6');}
+  else if(where==='stage')go('FU7');
+  return;}
+ if(target.closest('#fu-create')){S.name=$('#ew-procedure-name').value.trim()||S.name;S.purpose=$('#ew-procedure-description').value.trim()||S.purpose;S.created=true;S.saved=true;go('FU3');return;}
+ const add=target.closest('[data-add]');
+ if(add){S.addStage=add.dataset.add==='stage';S.addJob=add.dataset.add==='job';render();return;}
+ if(target.closest('[data-cancel]')){S.addStage=S.addJob=false;render();return;}
+ const apply=target.closest('[data-apply]');
+ if(apply){const value=(apply.dataset.apply==='stage'?$('#fu-new-stage'):$('#fu-new-job')).value.trim();if(!value)return;
+  if(apply.dataset.apply==='stage'){S.stage=value;S.saved=false;S.addStage=false;render();}else if(S.job){S.job2=value;S.saved=false;S.addJob=false;render();}else{S.job=value;S.saved=false;S.addJob=false;go('FU4');}return;}
+ const remove=target.closest('[data-remove]');
+ if(remove){S.items.splice(Number(remove.dataset.remove),1);S.saved=false;render();return;}
+ if(target.closest('#fu-save')){S.published=S.state==='published';S.saved=true;render();toast(S.published?'저장했습니다. 업무 목록에 나옵니다.':'저장했습니다.');return;}
+ const run=target.closest('[data-run]');
+ if(run){if(run.dataset.run==='start'){S.run='running';S.checked=[];S.second='';go('FU7');}else{S.run='idle';S.last=now();S.checked=[];S.second='';go('FU6');}return;}
+ const verdict=target.closest('[data-verdict]');
+ if(verdict&&verdict.dataset.verdict.includes(':')){const [index,value]=verdict.dataset.verdict.split(':');if(index==='0')S.checked=[0];else S.second=value;document.querySelector('.fu-menu')?.remove();render();return;}
+ const opener=target.closest('[data-verdict-menu]');
+ if(opener){document.querySelector('.fu-menu')?.remove();const box=opener.getBoundingClientRect(),list=document.createElement('div');list.className='fu-menu';list.setAttribute('role','menu');list.innerHTML=['미흡','판단 불가'].map(word=>`<button type="button" role="menuitem" data-verdict="${opener.dataset.verdictMenu}:${word}"><i class="ew-vd-dot" data-verdict="bad"></i>${word}</button>`).join('');document.body.append(list);list.style.left=Math.max(8,box.right-140)+'px';list.style.top=box.bottom+4+'px';return;}
+ if(target.closest('[data-none]')){event.preventDefault();toast(NOT_HERE);}
+});
+document.addEventListener('input',event=>{
+ const target=event.target;
+ if(target.id==='ew-procedure-name'){$('#fu-create').disabled=!target.value.trim();return;}
+ if(target.id==='fu-guide')S.guide=target.value;
+ if(target.dataset.item!==undefined){const index=Number(target.dataset.item),appended=index===S.items.length;S.items[index]=target.value;S.saved=false;
+  if(appended){render();const field=panel.querySelector(`[data-item="${index}"]`);field.focus();field.setSelectionRange(field.value.length,field.value.length);}
+  else{const status=panel.querySelector('[data-author-status]'),save=$('#fu-save');status.textContent='저장하지 않은 변경 있음';status.dataset.dirty='true';save.disabled=false;}
+  return;}
+ if(target.closest('#ees-work-designer')&&target.matches('input:not([type=radio]):not([type=search]),textarea')){S.saved=false;const status=panel.querySelector('[data-author-status]'),save=$('#fu-save');if(status){status.textContent='저장하지 않은 변경 있음';status.dataset.dirty='true';save.disabled=false;}}
+});
+document.addEventListener('change',event=>{
+ const target=event.target;
+ if(target.id==='ew-publication-state'){S.state=target.value;render();return;}
+ if(target.name==='kind'){S.kind=target.value;if(S.kind==='items'&&!S.items.length)S.items=[];S.saved=false;render();return;}
+ if(target.matches('[data-none-change]')){toast(NOT_HERE);render();return;}
+ if(target.dataset.check!==undefined){const index=Number(target.dataset.check);S.checked=target.checked?[...new Set([...S.checked,index])]:S.checked.filter(i=>i!==index);render();}
+});
+document.addEventListener('keydown',event=>{
+ if(event.key!=='Enter')return;const target=event.target;
+ if(target.id==='fu-new-stage'||target.id==='fu-new-job'){event.preventDefault();target.closest('form').querySelector('[data-apply]').click();}
+ else if(target.id==='ew-procedure-name'){event.preventDefault();if(target.value.trim())$('#fu-create').click();}
+ else if(target.dataset.item!==undefined){event.preventDefault();const next=panel.querySelector(`[data-item="${Number(target.dataset.item)+1}"]`);if(next)next.focus();}
+});
+render();
+})();
+</script>
+<!--@mock:font-licenses-->
+</body>
+</html>
