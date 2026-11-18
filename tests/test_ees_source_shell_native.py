@@ -389,6 +389,34 @@ class SourceShellNativeTests(IntegratedNativeCase):
         (directory / 'source-scope-three-dropdowns.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         (directory / 'source-scope-api-permissions.json').write_text(json.dumps(self.scope_api_evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
+    def test_closed_chat_content_brought_into_view_never_moves_the_shell(self):
+        # A closed chat panel sits beyond the right edge. While the shell could scroll,
+        # anything that brought chat content into view (the editor placing its cursor,
+        # a tool result that scrolls to itself) moved the whole screen left by up to the
+        # chat width and left it there until the chat was opened again.
+        shell = "document.querySelector('[data-ees-source-shell]')"
+        measure = ("(()=>{const s=" + shell + ",box=e=>{const r=e.getBoundingClientRect();return [Math.round(r.left),Math.round(r.right)];};"
+                   "return {scroll:[s.scrollLeft,s.scrollTop],menu:box(s.firstElementChild),work:box(document.querySelector('[data-ees-work-surface]'))};})()")
+        for width, height in ((480, 768), (1920, 1080)):
+            with self.subTest(width=width):
+                self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
+                self.wait('innerWidth === ' + str(width))
+                self.viewport_applied()
+                if self.browser.evaluate(shell + ".dataset.eesChatState !== 'closed'"):
+                    self.click('[data-ees-chat-close]')
+                self.wait(shell + ".dataset.eesChatState === 'closed'")
+                # The panel slides out and, on a wide window, the space it reserved closes after it.
+                self.wait("![...document.querySelectorAll('[data-ees-chat-surface],.ees-chat-space')].some(e=>e.getAnimations().length)")
+                before = self.browser.evaluate(measure)
+                self.assertEqual(before['scroll'], [0, 0])
+                self.assertEqual(before['work'][1], width)
+                self.browser.evaluate("document.querySelector('#chat-input').scrollIntoView({block:'center'});true")
+                self.assertTrue(self.browser.evaluate("window.__eesNativeDraftV1.restore(JSON.stringify({prompt:" +
+                                                      json.dumps('닫힌 대화에 넣는 초안 ' + str(width)) + "}))"))
+                self.viewport_applied()
+                self.assertEqual(self.browser.evaluate(measure), before)
+                self.assertEqual(self.browser.evaluate("window.__eesNativeDraftV1.read().prompt"), '닫힌 대화에 넣는 초안 ' + str(width))
+
     def test_compact_product_link_leaves_tab_order_and_restores_visible_focus(self):
         self.fill('#chat-input', '키보드 탐색에서도 유지할 대화 초안')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')

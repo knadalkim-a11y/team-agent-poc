@@ -35,6 +35,7 @@
 | 문서 점검 `document_too_large`(Windows CRLF에서만 1 MiB 초과, #114·#115와 같은 유형) | [2026-11-11 세 번째 재발·LF만 세던 로컬 점검·CRLF 기준 점검과 시험](no-run-mode-20261102.md#doc-size-crlf-20261111) |
 | CI 실행 범위 · PR 빠른 검사와 수동 전체 검사 | [2026-11-17 바꾸기 전 측정·범위별 작업·main 부분 실행 거절·검증과 미확인](no-run-mode-20261102.md#ci-on-demand-20261117) |
 | 이전 버전(ees.10~13) 복구 시험 삭제 | [2026-11-18 지운 시험·묶음·고정 자료, 남긴 것과 없어진 보호](no-run-mode-20261102.md#restore-tests-removed-20261118) |
+| 대화가 닫혀 있을 때 화면 전체가 왼쪽으로 밀린 채 남음 | [2026-11-18 화면 틀의 가로 스크롤·한 줄 보강·회귀 시험](no-run-mode-20261102.md#shell-no-sideways-scroll-20261118) |
 | 탐색·패널 시안2 제품 전환/전역 도구 | [승인 기준·중간 프레임/초점/권한·첫 실패와 보완](navigation-motion-20261102.md#navigation-motion-product-20261102) |
 | 접힌 사이드바 범위 목록의 글자·선택 체크/너비 | [compact CSS 범위·고정 위치·실제 가시성/선택 회귀](v4-ui-20260930.md#compact-scope-dropdown-20261102) |
 | 미게시 절차가 운영 목록에 노출 | [게시 전용 운영 목록·작성 초안 보존·저장 선택/기존 회차 회귀](v4-ui-20260930.md#operations-published-only-20261102) |
