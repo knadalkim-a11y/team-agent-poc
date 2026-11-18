@@ -472,6 +472,13 @@ class IntegratedNativeCase(unittest.TestCase):
     def refresh(self):
         return self.browser.evaluate('window.__eesNativeWorkV1.refresh()')
 
+    def viewport_applied(self):
+        # innerWidth changes before the page hears about it. The shell takes its width from
+        # the resize event, which arrives with the next frame. Until then the chat and sidebar
+        # state still describe the previous window, and a click that "corrects" them lands
+        # after the shell has corrected them itself and undoes it.
+        self.browser.evaluate('new Promise(done=>requestAnimationFrame(()=>requestAnimationFrame(()=>done(true))))')
+
     def refresh_until(self, accepted, timeout=9):
         """Refresh until an applied state satisfies accepted(state).
 

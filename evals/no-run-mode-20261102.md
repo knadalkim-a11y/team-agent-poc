@@ -184,7 +184,7 @@ CI456 (`77ca5cd`)의 실제 전체 제품과 새 미완성 게시/360px 흐름�
 
 ## 전체 검사 간헐 실패의 원인 조사 (2026-11-18)
 
-사용자가 [CI 실행 방식 변경](#ci-on-demand-20261117) 뒤 간헐 실패 두 유형의 원인 조사를 지시했다. main `368a60f`(PR #149 병합)에서 시작했다. 실패한 시험은 세 개이고 원인은 서로 다르다. 셋 다 확인했다.
+사용자가 [CI 실행 방식 변경](#ci-on-demand-20261117) 뒤 간헐 실패 두 유형의 원인 조사를 지시했다. main `368a60f`(PR #149 병합)에서 시작했다. 실패가 기록된 시험은 여섯 개이고 원인은 다섯 가지다. 다섯 가지 모두 재현하거나 측정해 확인했다. 하나(Windows)는 제품 결함이고 넷은 시험 쪽 문제다.
 
 ### Windows · 프로세스 종료 시험 (제품 결함)
 
@@ -225,11 +225,45 @@ CI456 (`77ca5cd`)의 실제 전체 제품과 새 미완성 게시/360px 흐름�
 - **같은 유형이 남은 곳:** `test_ees_source_shell_native.py`와 `test_ees_work_figma_layout_native.py`, `test_ees_helper_chat_native.py`에도 작성 화면에 들어가 줄을 누르는 곳이 있다. 진입 과정 자체를 재는 시험이 섞여 있어 바꾸지 않았다. 이 시험들이 다른 절차가 열린 화면으로 실패하면 같은 원인을 먼저 본다.
 - **제품 관찰:** 사용자가 어떤 시스템의 작성 화면에 처음 들어갈 때도 기본 절차가 잠시 뒤 추가되면서 줄이 밀린다. 시스템마다 한 번이다. 제품은 바꾸지 않았다.
 
+### 브라우저 · 좁은 창 대화 패널 시험 (시험의 누르기가 화면을 밂)
+
+- **증상:** native-compose의 `test_c3_overlay_panel_closing_releases_hit_testing_and_restores_focus`가 `Opening narrow chat should never take space away from the work surface`로 실패한다([실행 566](navigation-motion-20261102.md#narrow-viewport-load-20261117), [실행 589](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44196652378)).
+- **확인된 원인:** 시험 도우미 `click()`은 누를 대상에 `scrollIntoView`를 호출하고 좌표를 잰다. 이 시험은 창을 480px로 줄인 직후(대화 패널이 닫히며 오른쪽으로 미끄러져 나가는 중)에 대화 단추를 누르고, 패널이 되돌아오는 도중에 입력창을 누른다. 그때 입력창 오른쪽 끝이 화면 밖에 3~4px 남아 있어 브라우저가 화면 틀(`.ees-source-shell`)을 그만큼 가로로 스크롤한다. 패널이 제자리에 오면 넘치는 부분이 없어져 스크롤은 0으로 돌아온다. 그 사이에 프레임이 하나 그려지면 왼쪽 메뉴와 업무 영역이 함께 3~4px 왼쪽에 찍히고, 시험은 이를 ‘대화가 업무 영역 폭을 차지했다’로 잰다.
+- **증거:**
+  - [임시 실행 44199974623](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44199974623)(수정 전, ubuntu-24.04, Chrome 157.0.8103.50): 180번 가운데 12번 실패. 실패 회차마다 어긋난 프레임은 대화 단추를 누른 직후의 하나뿐이고 값은 3 또는 4px, 업무 영역 폭은 424px 그대로였다.
+  - 스크롤 위치·좌표·스크롤을 일으킬 수 있는 호출을 기록하게 한 [임시 실행 44202740123](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44202740123)(수정 전, 같은 환경): 150번 가운데 26번 실패. 로그에 남은 17건 모두 어긋난 프레임에서 화면 틀의 가로 스크롤이 3 또는 4였고 왼쪽 메뉴가 [-4, 52]처럼 함께 밀렸다. 스크롤 직전의 호출은 17건 모두 시험 도우미의 `scrollIntoView(#chat-input)`였다. 제품이 대화 영역과 입력창에 초점을 옮기는 호출 두 번은 모두 `preventScroll: true`였다.
+  - 로컬(Chromium 153, 같은 기록): 수정 전 60번 가운데 7번 실패, 기록 내용은 CI와 같다. 통과한 회차 3개 가운데 2개에서도 화면 틀의 스크롤 이벤트가 있었고, 프레임이 그려지기 전에 0으로 돌아와 잡히지 않았을 뿐이다. 패널이 나갔다 돌아오는 데 걸린 프레임 수(2 또는 3)가 통과와 실패를 갈랐다.
+- **기각한 가설:** 제품이 대화 입력창으로 초점을 옮기면서 화면이 밀린다고 보았으나, 제품의 초점 이동은 스크롤 방지 옵션을 쓰고 기록에서도 스크롤을 일으키지 않았다. [2026-11-17의 가설](navigation-motion-20261102.md#narrow-viewport-load-20261117)(창 크기 반영 전 조작)도 이 시험의 원인이 아니었다.
+- **조치(`77e5470`):** 움직임 시험에 `chat_at_rest()`를 더해, 창을 줄인 직후와 패널 안(입력창·닫기 단추)을 누르기 전에 패널의 전환이 끝나기를 기다린다.
+- **검증:** 같은 기록 조건에서 로컬 120번 가운데 0번 실패, [임시 실행 44203582254](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44203582254)(CI, Chrome 157.0.8103.50) 150번 가운데 0번 실패. 수정 뒤 통과 회차 8개의 기록에서 화면 틀 스크롤 이벤트는 0건이다.
+- **제품 판단:** 이 실패는 시험의 누르기가 만든 움직임이고 제품 결함이 아니다.
+- **제품 관찰(고치지 않음):** 화면 틀은 `overflow:hidden`이어서 보이지는 않아도 스크롤은 된다. 대화 패널이 닫혀 화면 밖에 있을 때는 창 너비와 관계없이 대화 폭만큼 가로로 스크롤할 여지가 생긴다.
+  - 실험(로컬, 제품 빌드): 대화를 닫은 상태에서 대화 안의 요소를 화면으로 끌어오는 호출을 하면 화면 전체가 480px 창에서 395px, 1920px 창에서 519px 왼쪽으로 밀리고 2.6초 뒤에도 그대로였다. 대화를 열면 0으로 돌아온다.
+  - 대화를 닫은 상태에서 입력창에 글을 넣는 제품 내부 함수(`__eesNativeDraftV1.restore`)를 직접 부르면 편집기가 커서 위치로 스크롤하면서 화면이 267px 밀렸다. 이 함수를 부르는 제품 코드는 찾지 못했다.
+  - 실제 사용 흐름 두 가지에서는 밀리지 않았다. 초안을 쓰고 대화를 닫은 뒤 새로고침(480px·1920px), 초안을 쓰고 대화를 닫은 채 시스템을 바꿨다가 돌아오기(1920px).
+  - 확인하지 않은 흐름: 대화를 닫은 동안 도구 결과 화면이 도착하는 경우(제품이 그 화면으로 자동 스크롤한다)와 업무 화면에서 대화를 열며 질문을 넣는 경우. 사용자가 화면이 왼쪽으로 밀린 채 남는 현상을 보면 이 항목을 먼저 본다. 화면 틀을 스크롤되지 않게 바꾸면 가능성 자체가 없어지지만 제품 화면 패치 변경이라 사용자가 정한다.
+- **같은 유형:** 도우미 `click()`은 모든 브라우저 시험이 쓴다. 프레임마다 좌표를 재는 시험이 움직이는 패널 안을 누르면 같은 일이 생긴다.
+
+### 브라우저 · 창 크기를 바꾸는 작성 화면 시험 (옛 상태를 읽고 누름)
+
+- **증상:** 시험 도우미 `authoring_viewport()`가 창 크기를 바꾼 뒤 다음 가운데 하나로 실패한다.
+  - `Timed out: …dataset.compact === "true"`: [실행 566](navigation-motion-20261102.md#narrow-viewport-load-20261117)의 `test_procedure_visual_geometry_matches_figma_and_preserves_native_draft`.
+  - `Timed out: …dataset.eesChatState === 'docked'`: 개발 환경의 `test_tools_phase2_trial_activation_revision_groups_and_disable_roundtrip`(2026-11-17 기록에서 8번 중 3번, 14번 중 4번).
+  - `Control not visibly ready for a physical click:[data-ees-sidebar-toggle]`: 같은 시험, 대화상자가 열린 채 창 크기를 바꿀 때.
+- **확인된 원인:** 창 크기를 바꾸면 `innerWidth`는 바로 바뀌지만 제품은 다음 프레임에 오는 resize 이벤트에서 새 폭을 받아 대화 상태와 왼쪽 메뉴 접힘을 스스로 맞춘다. 도우미는 `innerWidth`만 기다린 뒤 곧바로 상태를 읽어, 이전 창 크기의 상태를 보고 ‘대화가 닫혀 있다’ 또는 ‘메뉴 접힘이 다르다’고 판단해 단추를 누른다. 누르기는 두 프레임 뒤에 닿으므로 그때는 제품이 이미 맞춰 놓은 상태이고, 누르기가 그것을 반대로 뒤집는다. 그 뒤의 대기는 끝나지 않는다.
+- **재현(로컬, Chromium 153, 부하 없음):** 수정 전 10번 가운데 4번 실패했고 위 세 문구가 모두 나왔다. 한 회차의 기록에서 360px에서 1920px로 바꾼 뒤 제품이 대화 상태를 `docked`로 바꾼 시각은 1953.0ms, 시험의 대화 단추 클릭은 1979.0ms, 그 클릭으로 상태가 `closed`가 된 시각은 1980.7ms였다. 다른 회차에서는 1366px로 바꾼 11ms 뒤 시험이 왼쪽 메뉴 단추를 눌러 제품이 접어 둔 메뉴를 다시 폈다.
+- **이전 조치와 빠진 경로:** [2026-11-05](navigation-motion-20261102.md#q1-viewport-settle-20261105)에 같은 유형(제품이 resize를 반영하기 전에 조건이 만족됨)을 확인했지만 그때는 한 전환에 기대 상태 대기를 더하는 데 그쳤다. 반영 전 상태를 읽는 것 자체는 도우미마다 남아 있었다.
+- **조치:** 공통 fixture에 `viewport_applied()`를 더했다. 창 크기를 바꾼 뒤 화면이 두 프레임 그려질 때까지 기다려 resize 이벤트가 전달된 뒤에 상태를 읽는다. `authoring_viewport()`가 이것을 쓴다. 이 도우미를 부르는 곳은 작성 화면·API 명세·작업 등록 시험 세 모듈의 34곳이다.
+- **검증:** 같은 시험을 로컬에서 24번 되풀이해 0번 실패했다. 회차마다 6.6~7.0초였다(수정 전 실패 회차는 8.8~14.2초).
+- **제품 판단:** 제품 결함이 아니다. 사용자는 창 크기를 바꾼 같은 프레임 안에 단추를 누를 수 없다.
+- **같은 유형이 남은 곳:** 창 크기를 바꾸는 도우미는 다른 시험 모듈에도 있다(`test_ees_motion_native.py`의 `viewport()`, `test_ees_work_figma_layout_native.py`, `test_ees_work_figma_runtime_native.py`, `test_ees_source_shell_native.py`, `test_ees_helper_chat_native.py` 등). 이 도우미들에서 같은 실패가 기록된 적은 없다. 하나씩 확인하지 않았고 바꾸지 않았다. 창 크기를 바꾼 직후의 대기에서 시간이 넘으면 이 원인을 먼저 본다.
+
 ### 검증과 남은 것
 
 - 로컬(Linux, Python 3.11.18, Chromium 153): 바꾼 도우미를 쓰는 브라우저 시험 네 모듈(움직임 6개, 작업 등록 1개, API 명세 8개, 작성 화면 43개)이 통과했다. 임시 파일을 지운 뒤의 빠른 검사는 1,373개 통과, 109개 건너뜀이고 시험 ID 감사와 문서 점검은 오류 0이다.
-- GitHub `browser` 범위 [실행 589](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44196652378)(커밋 `0343bc1`): native-account·native-work·native-execution과 전체 제품 검사는 성공했다. native-compose는 고친 두 시험을 포함해 129개 가운데 128개가 통과했고, `test_c3_overlay_panel_closing_releases_hit_testing_and_restores_focus` 한 건이 `Opening narrow chat should never take space away from the work surface`로 실패했다. 실행 566에서 실패했던 시험과 단언이 같다. 아래에서 따로 다룬다.
-- GitHub: 고친 대화상자 초점 시험의 221번 반복(임시 실행 44196698628)은 진행 중이며 결과를 여기에 적는다.
-- 임시 워크플로 두 개와 임시 스크립트 두 개는 조사 뒤 지웠다. 측정 값은 위 임시 실행의 로그에 있다.
-- 실행 566의 두 시험(`test_c3_overlay_panel_closing_releases_hit_testing_and_restores_focus`, `test_procedure_visual_geometry_matches_figma_and_preserves_native_draft`)과 개발 환경에서 자주 실패하는 `test_tools_phase2_trial_activation_revision_groups_and_disable_roundtrip`은 이번에 조사하지 않았다. 원인 미확인으로 남는다.
-- **재발 방지 연결:** 제품 수정은 `scripts/ees_deploy_process.py`, 시험 보완은 `tests/ees_work_integrated_fixture.py`의 `refresh_until()`·`open_initialized_author_list()`에 있다.
+- GitHub `browser` 범위 [실행 589](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44196652378)(커밋 `0343bc1`, 앞의 세 건만 고친 상태): native-account·native-work·native-execution과 전체 제품 검사는 성공했다. native-compose는 고친 두 시험을 포함해 129개 가운데 128개가 통과했고 `test_c3_overlay_panel_closing_releases_hit_testing_and_restores_focus` 한 건이 실패했다. 이 실패가 위 ‘좁은 창 대화 패널 시험’ 조사의 출발점이다.
+- GitHub: 고친 대화상자 초점 시험을 되풀이한 [임시 실행 44196698628](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44196698628)은 221번 가운데 0번 실패했다(수정 전 290번 가운데 4번).
+- GitHub `browser` 범위(다섯 건을 모두 고친 커밋): 이 커밋을 올린 뒤 실행하고 결과를 여기에 적는다.
+- 조사에 쓴 임시 워크플로와 임시 스크립트는 지웠다. 측정 값은 위 임시 실행들의 로그에 있다.
+- 실패가 기록된 시험 가운데 원인을 확인하지 못한 것은 없다. 다만 간헐 실패는 일어나지 않았다는 것으로 고쳐졌음을 증명할 수 없다. 위 시험들이 다시 실패하면 같은 문구인지부터 보고 이 기록에 잇는다.
+- **재발 방지 연결:** 제품 수정은 `scripts/ees_deploy_process.py`, 시험 보완은 `tests/ees_work_integrated_fixture.py`의 `refresh_until()`·`open_initialized_author_list()`·`viewport_applied()`와 `tests/test_ees_motion_native.py`의 `chat_at_rest()`에 있다.

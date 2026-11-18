@@ -73,6 +73,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.browser.call('Emulation.setDeviceMetricsOverride', {
             'width': width, 'height': height, 'deviceScaleFactor': 1, 'mobile': False})
         self.wait('innerWidth === ' + str(width) + ' && innerHeight === ' + str(height))
+        self.viewport_applied()
         shell = "document.querySelector('[data-ees-source-shell]')"
         state = shell + ".dataset.eesChatState"
         if overlay:
