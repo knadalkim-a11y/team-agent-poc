@@ -1032,6 +1032,37 @@ test('explicit run overview and closed-run history remain reachable after enteri
  assert.equal(html('workStageTarget(state,{mode:"work",tab:"overview",stage_id:"t"}).id',{state:h.state}),'t');
 });
 
+// 2026-11-18 first-user review: a run of human checks showed the sentence about running tool and AI work.
+test('run details explain tool and AI execution only when such work can be run',()=>{
+ const h=sharedRuntimeFixture(),runState=h.snapshot.state.run;h.snapshot.selection.tab='run_details';
+ runState.definition.nodes={p:{id:'p',type:'p',name:'절차'},t:{id:'t',type:'t',parent:'p',name:'점검'},j:{id:'j',type:'j',parent:'t',name:'사람 확인',mode:'human',inputs:[],result_block:'human_confirm'}};
+ runState.jobs={j:{status:'ready'}};
+ let out=h.overview();
+ assert.doesNotMatch(out,/ew-scope-execution|도구·AI 작업을 진행합니다|data-action="execute_scope"/);
+ runState.definition.nodes.j={id:'j',type:'j',parent:'t',name:'문서 찾기',mode:'tool',shared_tool_id:'shared',inputs:[],result_block:'list_confirm'};runState.jobs={j:{can_execute:true}};out=h.overview();
+ assert.match(out,/class="ew-scope-execution">.*data-action="execute_scope".*도구·AI 작업을 진행합니다/);
+});
+
+// 2026-11-18 first-user review: the log printed the account id of whoever judged a job.
+test('stage log names the person who judged a job the way the judgment record does',()=>{
+ const {state}=stageRuntimeFixture();state.people=[{id:'actor',name:'김담당',label:'김담당',value:{kind:'user',id:'actor'}}];
+ state.run.jobs.h.decision_history=[{item_id:'job',judgment_id:'yes',verdict:'completed',actor_id:'actor',created_at:'2026-10-27T14:21:00Z'}];
+ const named=html('workStageHTML(state,{stage_tab:"log"},state.run.definition.nodes.t).body',{state});
+ assert.match(named,/직접 확인 · [^<·]+ · 김담당</);assert.doesNotMatch(named,/· actor</);
+ state.people=[];
+ assert.match(html('workStageHTML(state,{stage_tab:"log"},state.run.definition.nodes.t).body',{state}),/직접 확인 · [^<·]+ · actor</);
+});
+
+// Before a run exists the stage button only starts one. "실행" is kept for tool work in a started run.
+test('stage button reads 시작 until a run exists and 지금 실행 afterwards',()=>{
+ const started=stageRuntimeFixture().state,nodes=started.run.definition.nodes;
+ const running=html('workStageHTML(state,{stage_tab:"work"},stage).body',{state:started,stage:nodes.t});
+ assert.match(running,/data-action="execute_scope"[^>]*aria-label="1차 점검 단계 실행"[^>]*>(?:<svg[\s\S]*?<\/svg>)?<span>지금 실행<\/span>/);
+ const idle={...started,run:null,workflow:{...started.workflow,published_version:1,published:{name:'배포 산출물 점검',nodes}}};
+ const waiting=html('workStageHTML(state,{stage_tab:"work"},stage).body',{state:idle,stage:nodes.t});
+ assert.match(waiting,/data-action="stage_start"[^>]*aria-label="1차 점검 단계 시작"[^>]*>(?:<svg[\s\S]*?<\/svg>)?<span>시작<\/span>/);assert.doesNotMatch(waiting,/지금 실행/);
+});
+
 test('stage log keeps its compact time column and retains the full timestamp accessibly',()=>{
  const {state}=stageRuntimeFixture();state.run.attempts=[{id:'a1',job_id:'a',number:1,status:'succeeded',created_at:'2026-10-27T14:20:00Z'}];
  const out=html('workStageHTML(state,{stage_tab:"log"},state.run.definition.nodes.t).body',{state});

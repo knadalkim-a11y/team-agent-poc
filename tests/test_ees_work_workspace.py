@@ -53,6 +53,26 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(started['ok'], started)
         self.assertEqual(started['run']['definition']['authoring_review'], definition['authoring_review'])
 
+    async def test_new_procedure_keeps_the_purpose_typed_with_its_name(self):
+        # 2026-11-18: the create form asks for the purpose with the name. It used to stay an
+        # unsaved edit, so a new procedure opened as "저장하지 않은 변경 있음".
+        created = await self.command('create_workflow', name='주간 설비 점검', system_id='EMS',
+                                     description='매주 월요일 설비 상태를 확인합니다.')
+        self.assertTrue(created['ok'], created)
+        self.assertEqual(created['workflow']['draft']['description'], '매주 월요일 설비 상태를 확인합니다.')
+        self.assertEqual(created['revision'], 1)
+        self.service = self.new_service()
+        reopened = await self.service.workspace_state(self.users['admin'], workflow_id=created['workflow_id'])
+        self.assertEqual(reopened['workflow']['draft']['description'], '매주 월요일 설비 상태를 확인합니다.')
+        for empty in ({}, {'description': ''}, {'description': '   '}):
+            plain = await self.command('create_workflow', name='목적 없는 절차', system_id='EMS', **empty)
+            self.assertTrue(plain['ok'], plain)
+            self.assertNotIn('description', plain['workflow']['draft'])
+        invalid = await self.command('create_workflow', name='잘못된 목적', system_id='EMS', description=['목록'])
+        self.assertEqual(invalid['error']['code'], 'invalid_definition')
+        listed = await self.service.workspace_state(self.users['admin'])
+        self.assertNotIn('잘못된 목적', [item['name'] for item in listed['workflows']])
+
     async def test_save_publication_updates_new_runs_and_preserves_existing_snapshots(self):
         key, definition, revision = await self.create()
         definition['category'] = 'incident'

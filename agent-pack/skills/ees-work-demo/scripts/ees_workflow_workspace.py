@@ -1705,6 +1705,12 @@ class WorkspaceMixin:
                 # is still validated for earlier clients.
                 if body.get('mode') is not None: definition['mode'] = body['mode']
                 if body.get('execution_scope') is not None: definition['execution_scope'] = body['execution_scope']
+                # The create form asks for the purpose with the name. Storing it here keeps
+                # a new procedure from opening as an unsaved edit.
+                description = body.get('description')
+                if description is not None and not isinstance(description, str):
+                    _fail('invalid_definition', '업무 목적은 글로 입력해 주세요.')
+                if description and description.strip(): definition['description'] = description
             errors, _ = definition_check(definition, False)
             if not errors:
                 errors.extend(binding_errors(self, db, groups, definition, for_new=True))

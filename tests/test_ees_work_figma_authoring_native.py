@@ -1182,7 +1182,13 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.wait("document.querySelector('#ees-work-help')")
             self.assertIn('단계는 작업을 묶는 이름입니다. 개수·이름·순서는 업무에 맞게 정합니다.', self.text('#ees-work-help'))
             self.assertIn('단계와 작업은 적힌 순서대로 진행합니다.', self.text('#ees-work-help'))
-            self.assertIn('기존에 정한 적용 조건과 작업 연결은 유지됩니다.', self.text('#ees-work-help'))
+            self.assertNotIn('기존에 정한', self.text('#ees-work-help'))
+            # The box stays on the work surface its question mark belongs to (it used to open
+            # over the left menu when the question mark sat near the left edge).
+            placed = self.browser.evaluate("(()=>{const h=document.querySelector('#ees-work-help').getBoundingClientRect(),p=document.querySelector('#ees-work-panel').getBoundingClientRect(),t=document.querySelector('[data-author-action=help][data-id=stages_and_jobs]').getBoundingClientRect();return {help:[Math.round(h.left),Math.round(h.right),Math.round(h.top)],panel:[Math.round(p.left),Math.round(p.right)],trigger:[Math.round(t.left),Math.round(t.right),Math.round(t.bottom)],viewport:innerWidth};})()")
+            self.assertGreaterEqual(placed['help'][0], min(placed['panel'][0], placed['viewport'] - (placed['help'][1] - placed['help'][0]) - 12), placed)
+            self.assertLessEqual(placed['help'][1], placed['viewport'], placed)
+            self.assertGreaterEqual(placed['help'][2], placed['trigger'][2], placed)
             capture('e1-example10-stage-help-' + str(width))
             self.key('Escape', 27)
             self.click('[data-author-action=stage_toggle][data-id=stage-0]')
