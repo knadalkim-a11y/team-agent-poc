@@ -268,3 +268,26 @@ CI456 (`77ca5cd`)의 실제 전체 제품과 새 미완성 게시/360px 흐름�
 - 조사에 쓴 임시 워크플로와 임시 스크립트는 지웠다. 측정 값은 위 임시 실행들의 로그에 있다.
 - 실패가 기록된 시험 가운데 원인을 확인하지 못한 것은 없다. 다만 간헐 실패는 일어나지 않았다는 것으로 고쳐졌음을 증명할 수 없다. 위 시험들이 다시 실패하면 같은 문구인지부터 보고 이 기록에 잇는다.
 - **재발 방지 연결:** 제품 수정은 `scripts/ees_deploy_process.py`, 시험 보완은 `tests/ees_work_integrated_fixture.py`의 `refresh_until()`·`open_initialized_author_list()`·`viewport_applied()`와 `tests/test_ees_motion_native.py`의 `chat_at_rest()`에 있다.
+
+<a id="restore-tests-removed-20261118"></a>
+
+## 이전 버전(ees.10~13) 복구 시험 삭제 (2026-11-18)
+
+- **요청·근거:** 사용자가 사내 PC의 프로그램이 ees.14라고 알리고(2026-11-17) 이전 버전 복구 시험을 지우라고 지시했다(2026-11-18). 사내에 설치된 커밋은 확인하지 않았다.
+- **지운 것:**
+  - `tests/test_ees_webui_customization.py`의 시험 다섯 개와 그 시험만 쓰던 도우미 두 개(194줄). 실제 ees.10·ees.11·ees.12(두 커밋)·ees.13 프로그램을 설치한 상태에서 실제 새 프로그램을 적용하고 복구해, 프로그램 파일·DB·키가 그대로인지 보던 시험이다.
+    - `test_real_ees10_to_authoring_apply_restore_preserves_program_and_data`
+    - `test_real_ees11_to_execution_apply_restore_preserves_program_and_data`
+    - `test_real_ees12_visual_revision_apply_restore_preserves_prior_asset_inventory`
+    - `test_real_ees12_v4_apply_restore_preserves_program_and_additive_work_database`
+    - `test_real_ees13_to_source_frontend_apply_restore_preserves_program_and_data`
+  - 이 시험만 돌리던 CI 묶음 `restore-ees10`·`restore-ees11`·`restore-ees12`·`restore-ees13`(Linux·Windows 각 4개).
+  - 이 시험만 쓰던 고정 자료 `previous12`·`previous-v4`·`previous13`의 준비 작업과 내려받기 단계, Windows에서 ees.12를 다시 빌드하던 세 줄.
+- **남긴 것:**
+  - 고정 자료 `legacy`(ees.10)와 `previous`(ees.11). 업무 절차 시험과 Windows 진단이 계속 쓴다.
+  - 같은 파일의 나머지 시험 72개. 만든 wheel로 적용·복구·중단 뒤 재개·이전 버전 파일 목록 고정을 본다. 실제로 빌드한 현재 wheel의 구성 검사(`program-wheel`)도 그대로다.
+  - 제품의 이전 버전 호환 코드(`scripts/ees_webui_customization.py`의 ees.12·ees.13 파일 목록 등)는 바꾸지 않았다.
+- **없어진 보호:** 실제로 설치된 이전 프로그램 위에 실제 새 프로그램을 적용하고 복구하는 시험은 남지 않았다. 사내 설치본(ees.14)에서 다음 버전으로 올리는 경로를 실제 파일로 보는 시험도 없다. 프로그램 버전을 올릴 때 그 시점의 설치본을 고정 자료로 삼는 시험이 필요한지 사용자가 정한다.
+- **보존한 증거:** 지운 시험의 코드는 커밋 `098aeb3`까지의 Git 기록에 있다. 당시 실행 결과는 [v4 기록](v4-ui-20260930.md)과 [제품 대조 기록](figma-product-parity-20261111.md)의 해당 날짜 항목에 그대로 둔다. 시험 ID 감사 기준(`tests/ees_delivery_baseline.json`)에 있던 세 개에는 삭제 사유와 남은 시험을 적었다.
+- **효과:** 전체 검사의 작업이 41개에서 30개로 줄었다(묶음 8개, 고정 자료 준비 3개). 2026-11-17에 13개가 준다고 보고한 것은 `legacy`·`previous`를 다른 시험도 쓴다는 점을 빼고 센 값이었다.
+- **검증:** 로컬(Linux, Python 3.11.18)에서 시험 ID 감사 오류 0, 계획 시험 20개와 고정 자료 시험 10개 통과, 남은 설치·복구 시험 72개 통과(3개 건너뜀), 빠른 검사 1,373개 통과(109개 건너뜀), 문서 점검 오류 0. GitHub 실행 결과는 아래에 잇는다.

@@ -5455,6 +5455,35 @@
       "tests": [
         "test_ees_frontend_build.SourcePatchTests.test_layout_hooks_preserve_native_elements_and_reject_source_drift"
       ]
+    },
+    "test_ees_webui_customization.CustomizationTests.test_real_ees10_to_authoring_apply_restore_preserves_program_and_data": {
+      "classification": "retired-feature",
+      "reason": "Retired by the user's decision on 2026-11-18: the in-house installation is ees.14, so Apply from and Restore to the real ees.10-13 programs is no longer a path in use. The suites restore-ees10..13 and their pinned fixtures previous12, previous-v4 and previous13 were removed with these tests. Synthetic-wheel Apply/Restore, the frozen previous inventories and the real built-wheel check remain. No remaining test applies the real current wheel over a real earlier program.",
+      "tests": [
+        "test_ees_webui_customization.CustomizationTests.test_apply_idempotence_first_restore_and_original_state_preserved",
+        "test_ees_webui_customization.CustomizationTests.test_restore_returns_immediately_preceding_program_only_once",
+        "test_ees_webui_customization.RealBrandingWheelTests.test_real_built_wheel_has_complete_purelib_app_metadata_and_frontend"
+      ]
+    },
+    "test_ees_webui_customization.CustomizationTests.test_real_ees11_to_execution_apply_restore_preserves_program_and_data": {
+      "classification": "retired-feature",
+      "reason": "Retired by the user's decision on 2026-11-18: the in-house installation is ees.14, so Apply from and Restore to the real ees.10-13 programs is no longer a path in use. The suites restore-ees10..13 and their pinned fixtures previous12, previous-v4 and previous13 were removed with these tests. Synthetic-wheel Apply/Restore, the frozen previous inventories and the real built-wheel check remain. No remaining test applies the real current wheel over a real earlier program.",
+      "tests": [
+        "test_ees_webui_customization.CustomizationTests.test_apply_idempotence_first_restore_and_original_state_preserved",
+        "test_ees_webui_customization.CustomizationTests.test_restore_returns_immediately_preceding_program_only_once",
+        "test_ees_webui_customization.RealBrandingWheelTests.test_real_built_wheel_has_complete_purelib_app_metadata_and_frontend"
+      ]
+    },
+    "test_ees_webui_customization.CustomizationTests.test_real_ees12_visual_revision_apply_restore_preserves_prior_asset_inventory": {
+      "classification": "retired-feature",
+      "reason": "Retired by the user's decision on 2026-11-18: the in-house installation is ees.14, so Apply from and Restore to the real ees.10-13 programs is no longer a path in use. The suites restore-ees10..13 and their pinned fixtures previous12, previous-v4 and previous13 were removed with these tests. Synthetic-wheel Apply/Restore, the frozen previous inventories and the real built-wheel check remain. No remaining test applies the real current wheel over a real earlier program.",
+      "tests": [
+        "test_ees_webui_customization.CustomizationTests.test_apply_idempotence_first_restore_and_original_state_preserved",
+        "test_ees_webui_customization.CustomizationTests.test_restore_returns_immediately_preceding_program_only_once",
+        "test_ees_webui_customization.RealBrandingWheelTests.test_real_built_wheel_has_complete_purelib_app_metadata_and_frontend",
+        "test_ees_webui_customization.CustomizationTests.test_ees12_inventory_is_frozen_and_frontend_namespaces_cannot_be_interchanged",
+        "test_ees_webui_customization.CustomizationTests.test_resume_updated_and_identical_bytes_preserves_exact_predecessor"
+      ]
     }
   },
   "javascript_migrations": {

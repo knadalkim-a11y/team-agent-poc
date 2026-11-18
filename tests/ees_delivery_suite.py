@@ -59,10 +59,6 @@ SUITES = {
     # testing plus 98s preparing. Move its 141s Native bridge module here (279s).
     "native-contracts": ["test_ees_workflow_examples_native.py", "test_ees_workflow_native.py"],
     "native-grounding": ["test_ees_workflow_examples_native.py"],
-    "restore-ees10": ["test_ees_webui_customization.py"],
-    "restore-ees11": ["test_ees_webui_customization.py"],
-    "restore-ees12": ["test_ees_webui_customization.py"],
-    "restore-ees13": ["test_ees_webui_customization.py"],
     "native-account": ["test_ees_work_authoring_native.py", "test_ees_work_authoring_account_switch.py",
         "test_ees_chat_theme.py"],
     "native-work": ["test_ees_work_demo.py"],
@@ -72,11 +68,8 @@ SUITES = {
         "test_ees_helper_chat_native.py", "test_ees_motion_native.py", "test_ees_api_catalog_native.py", "test_ees_api_job_registration_native.py"],
     "native-execution": ["test_ees_work_c_phase3_native.py", "test_ees_work_c_phase3_privacy.py"],
 }
-# Each real fixed-wheel Apply/Restore performs a full filesystem walk. On
-# Windows one ees.10 case takes 157 seconds; isolate these cases without
-# changing their assertions, artifact pins, or the overall required gate.
-# The current full-wheel Apply/Restore also has its own required job; all
-# remaining methods stay together without changing the ten-minute limit.
+# The real built wheel check has its own required job; all remaining methods
+# stay together without changing the ten-minute limit.
 CASE_PARTITIONS = {
     # Windows CI exhausted the job budget after 278s of preparation and the
     # first three successful examples. Isolate the three-run grounding case;
@@ -88,11 +81,6 @@ CASE_PARTITIONS = {
     "test_ees_webui_customization.py": {
         "program-install": None,  # Every remaining/currently added method stays here.
         "program-wheel": ["test_ees_webui_customization.RealBrandingWheelTests.test_real_built_wheel_has_complete_purelib_app_metadata_and_frontend"],
-        "restore-ees10": ["test_ees_webui_customization.CustomizationTests.test_real_ees10_to_authoring_apply_restore_preserves_program_and_data"],
-        "restore-ees11": ["test_ees_webui_customization.CustomizationTests.test_real_ees11_to_execution_apply_restore_preserves_program_and_data"],
-        "restore-ees13": ["test_ees_webui_customization.CustomizationTests.test_real_ees13_to_source_frontend_apply_restore_preserves_program_and_data"],
-        "restore-ees12": ["test_ees_webui_customization.CustomizationTests.test_real_ees12_visual_revision_apply_restore_preserves_prior_asset_inventory",
-                          "test_ees_webui_customization.CustomizationTests.test_real_ees12_v4_apply_restore_preserves_program_and_additive_work_database"],
     },
 }
 
@@ -111,8 +99,6 @@ SERVICE_FIXTURES = {
     "services": "upstream legacy", "contracts": "upstream legacy previous",
     "native-contracts": "upstream", "native-grounding": "upstream", "platform": "upstream",
     "program-install": "upstream", "program-wheel": "upstream",
-    "restore-ees10": "upstream legacy", "restore-ees11": "upstream previous",
-    "restore-ees12": "upstream previous12 previous-v4", "restore-ees13": "upstream previous13",
 }
 WINDOWS_FIXTURES = {"platform": "upstream legacy"}
 NATIVE_SUITES = ("native-account", "native-work", "native-compose", "native-execution")

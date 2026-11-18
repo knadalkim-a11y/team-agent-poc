@@ -16,7 +16,7 @@ on:
         options: [full, quick, browser, linux, windows]
         default: full
       suites:
-        description: '특정 묶음만 실행(선택, 띄어쓰기로 구분). 예: native-compose 또는 platform restore-ees13. 비우면 범위 전체'
+        description: '특정 묶음만 실행(선택, 띄어쓰기로 구분). 예: native-compose 또는 platform program-install. 비우면 범위 전체'
         type: string
         default: ''
       include_branding:
@@ -283,7 +283,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fixture: [legacy, previous, previous12, previous-v4, previous13]
+        fixture: [legacy, previous]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -394,12 +394,6 @@ jobs:
       EES_REQUIRE_ASSET_NATIVE: '1'
       EES_REQUIRE_MODEL_NATIVE: '1'
       EES_REQUIRE_LEGACY_WORKFLOW: '1'
-      EES_TEST_PREVIOUS_C_WHEEL: dist/previous12-branding/open_webui-0.11.3+ees.12-py3-none-any.whl
-      EES_REQUIRE_PREVIOUS_C: '1'
-      EES_TEST_PREVIOUS_V4_WHEEL: dist/previous-v4-branding/open_webui-0.11.3+ees.12-py3-none-any.whl
-      EES_REQUIRE_PREVIOUS_V4: '1'
-      EES_TEST_PREVIOUS13_WHEEL: dist/previous13-branding/open_webui-0.11.3+ees.13-py3-none-any.whl
-      EES_REQUIRE_PREVIOUS13: '1'
       EES_TEST_PREVIOUS_WORKFLOW_SOURCE: dist/previous-source
       EES_REQUIRE_PREVIOUS_WORKFLOW: '1'
       EES_RUN_REAL_UV_TEST: '1'
@@ -436,24 +430,6 @@ jobs:
         with:
           name: ees-fixture-previous-${{ github.sha }}
           path: dist
-      - name: Download the required previous12 fixture
-        if: contains(format(' {0} ', matrix.fixtures), ' previous12 ')
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: ees-fixture-previous12-${{ github.sha }}
-          path: dist
-      - name: Download the required previous-v4 fixture
-        if: contains(format(' {0} ', matrix.fixtures), ' previous-v4 ')
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: ees-fixture-previous-v4-${{ github.sha }}
-          path: dist
-      - name: Download the required previous13 fixture
-        if: contains(format(' {0} ', matrix.fixtures), ' previous13 ')
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: ees-fixture-previous13-${{ github.sha }}
-          path: dist
       - name: Verify every assigned fixture before collecting tests
         env:
           REQUIRED_FIXTURES: ${{ matrix.fixtures }}
@@ -468,10 +444,7 @@ jobs:
           git -c core.autocrlf=false -c core.eol=lf archive --format=tar --output=dist/windows-previous-source.tar 991cdb1d80ae07471fb50594831d74fe602b1ef7
           python -c "import tarfile; tarfile.open('dist/windows-previous-source.tar').extractall('dist/windows-previous-source', filter='data')"
           python dist/windows-previous-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/windows-previous-branding
-          git -c core.autocrlf=false -c core.eol=lf archive --format=tar --output=dist/windows-previous12-source.tar 8027aaf2e654778f052a966e5a49feed0fc54f69
-          python -c "import tarfile; tarfile.open('dist/windows-previous12-source.tar').extractall('dist/windows-previous12-source', filter='data')"
-          python dist/windows-previous12-source/scripts/build_ees_webui.py --wheel dist/upstream/open_webui-0.11.3-py3-none-any.whl --output-dir dist/windows-previous12-branding
-          python -c "import os,pathlib; values={'EES_TEST_BRANDING_DIR':'dist/windows-branding','EES_TEST_LEGACY_WORKFLOW_WHEEL':'dist/windows-legacy-branding/open_webui-0.11.3+ees.10-py3-none-any.whl','EES_TEST_PREVIOUS_WORKFLOW_WHEEL':'dist/windows-previous-branding/open_webui-0.11.3+ees.11-py3-none-any.whl','EES_TEST_PREVIOUS_WORKFLOW_SOURCE':'dist/windows-previous-source','EES_TEST_PREVIOUS_C_WHEEL':'dist/windows-previous12-branding/open_webui-0.11.3+ees.12-py3-none-any.whl'}; pathlib.Path(os.environ['GITHUB_ENV']).open('a',encoding='utf-8').write(''.join(key+'='+value+'\n' for key,value in values.items()))"
+          python -c "import os,pathlib; values={'EES_TEST_BRANDING_DIR':'dist/windows-branding','EES_TEST_LEGACY_WORKFLOW_WHEEL':'dist/windows-legacy-branding/open_webui-0.11.3+ees.10-py3-none-any.whl','EES_TEST_PREVIOUS_WORKFLOW_WHEEL':'dist/windows-previous-branding/open_webui-0.11.3+ees.11-py3-none-any.whl','EES_TEST_PREVIOUS_WORKFLOW_SOURCE':'dist/windows-previous-source'}; pathlib.Path(os.environ['GITHUB_ENV']).open('a',encoding='utf-8').write(''.join(key+'='+value+'\n' for key,value in values.items()))"
       - name: Verify trial source preparation with Windows long paths disabled
         if: runner.os == 'Windows' && matrix.suite == 'platform'
         shell: powershell
