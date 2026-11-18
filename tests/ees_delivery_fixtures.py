@@ -26,9 +26,6 @@ from scripts.build_ees_webui import SOURCE_FILENAME, SOURCE_SHA256, UPSTREAM_VER
 SOURCE_PINS = {
     "legacy": "a443d30c6694df0e1cbe082a0b99aa5f2d566917",
     "previous": "991cdb1d80ae07471fb50594831d74fe602b1ef7",
-    "previous12": "8027aaf2e654778f052a966e5a49feed0fc54f69",
-    "previous-v4": "3a51f9d2bc604e768a59a522d6f34a34c2cb05d3",
-    "previous13": "1c6ddaa04f05b2eea02bbf15155b8602f1e4a1a8",
 }
 
 

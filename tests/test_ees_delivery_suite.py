@@ -175,7 +175,7 @@ class DeliveryPlanTests(unittest.TestCase):
         rows = result["service"]["include"]
         self.assertEqual({(row["os"], row["suite"]) for row in rows},
                          {(system, suite) for system in (runner.LINUX, runner.WINDOWS) for suite in runner.SERVICE_FIXTURES})
-        self.assertEqual(len(rows), 22)
+        self.assertEqual(len(rows), 14)
         by_key = {(row["os"], row["suite"]): row for row in rows}
         self.assertEqual(by_key[(runner.WINDOWS, "platform")]["fixtures"], "upstream legacy")
         self.assertEqual(by_key[(runner.LINUX, "platform")]["fixtures"], "upstream")
@@ -189,7 +189,7 @@ class DeliveryPlanTests(unittest.TestCase):
         self.assertEqual(scheduled, set(runner.SUITES))
         for fixtures in list(runner.SERVICE_FIXTURES.values()) + list(runner.WINDOWS_FIXTURES.values()):
             self.assertIn("upstream", fixtures.split())
-            self.assertLessEqual(set(fixtures.split()), {"upstream", "legacy", "previous", "previous12", "previous-v4", "previous13"})
+            self.assertLessEqual(set(fixtures.split()), {"upstream", "legacy", "previous"})
         for name in runner.QUICK_SUITES:
             self.assertIn(name, runner.SUITES)
         for filename in runner.QUICK_MODULES:
@@ -211,8 +211,8 @@ class DeliveryPlanTests(unittest.TestCase):
             self.assertEqual(result["check"], {"os": [runner.LINUX]})
 
     def test_named_suites_narrow_a_scope_and_unknown_or_absent_names_are_refused(self):
-        result = runner.plan("linux", "native-compose restore-ees12")
-        self.assertEqual([(row["os"], row["suite"]) for row in result["service"]["include"]], [(runner.LINUX, "restore-ees12")])
+        result = runner.plan("linux", "native-compose program-install")
+        self.assertEqual([(row["os"], row["suite"]) for row in result["service"]["include"]], [(runner.LINUX, "program-install")])
         self.assertEqual(result["native"], {"suite": ["native-compose"]})
         self.assertFalse(result["runs"]["native-product"] or result["runs"]["audit"])
         self.assertTrue(result["runs"]["historical-fixtures"])
@@ -241,7 +241,7 @@ class DeliveryPlanTests(unittest.TestCase):
         self.assertEqual(json.loads(lines["native"]), {"suite": ["none"]})
         self.assertEqual(json.loads(lines["service"])["include"][0]["suite"], "none")
         full = dict(line.split("=", 1) for line in runner.plan_outputs(runner.plan("full")))
-        self.assertEqual(len(json.loads(full["service"])["include"]), 22)
+        self.assertEqual(len(json.loads(full["service"])["include"]), 14)
 
     def test_result_check_requires_exactly_the_planned_outcome(self):
         expected = runner.plan("browser")["expected"]
@@ -276,7 +276,7 @@ class DeliveryPlanTests(unittest.TestCase):
             declared = workflow.split(line, 1)[1].split("\n    needs: ", 1)[1].splitlines()[0]
             self.assertEqual(declared.strip("[]").replace(" ", "").split(","), (["plan"] + needed) if needed else ["plan"], job)
         for scope, suites in (("quick", ""), ("browser", ""), ("browser", "native-product"), ("linux", ""),
-                              ("linux", "restore-ees12"), ("windows", ""), ("full", ""), ("full", "native-work")):
+                              ("linux", "program-install"), ("windows", ""), ("full", ""), ("full", "native-work")):
             runs = runner.plan(scope, suites)["runs"]
             for job, needed in ancestors.items():
                 if runs[job]:

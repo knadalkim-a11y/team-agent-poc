@@ -179,3 +179,115 @@ CI456 (`77ca5cd`)의 실제 전체 제품과 새 미완성 게시/360px 흐름�
   - GitHub 브랜치 보호에 필수 검사 이름이 걸려 있는지는 확인할 수 없었다. 집계 작업 이름 `Delivery checks (ubuntu-24.04)`는 모든 범위에서 유지하고, `(windows-2022)`는 전체 범위에서만 나온다.
   - 사내 Upgrade는 실행하지 않았다. 워크플로 파일이 프로그램 빌드 입력이라, 병합 뒤 첫 사내 적용 전에 main에서 전체 검사를 한 번 실행해 새 프로그램 ZIP을 만들어야 한다.
 - **재발 방지 연결:** 운영 방법은 [가이드의 검사 범위](../docs/03-openwebui-native-agent.md#ci-scopes), 판단 기준은 [AGENTS의 CI 실행 비용 관리](../AGENTS.md#ci-cost)에 반영했다.
+
+<a id="flaky-root-cause-20261118"></a>
+
+## 전체 검사 간헐 실패의 원인 조사 (2026-11-18)
+
+사용자가 [CI 실행 방식 변경](#ci-on-demand-20261117) 뒤 간헐 실패 두 유형의 원인 조사를 지시했다. main `368a60f`(PR #149 병합)에서 시작했다. 실패가 기록된 시험은 여섯 개이고 원인은 다섯 가지다. 다섯 가지 모두 재현하거나 측정해 확인했다. 하나(Windows)는 제품 결함이고 넷은 시험 쪽 문제다.
+
+### Windows · 프로세스 종료 시험 (제품 결함)
+
+- **증상:** Windows platform의 `test_another_process_can_stop_saved_identity`가 `process_inspect`·`identity_unavailable`로 가끔 실패한다. [실행 567](tool-authoring-20261105.md#workspace-resource-and-guide-20261116), 실행 584, 이전의 CI327·CI426과 같은 시험이다. 실행 584의 값은 오류 5(접근 거부), 0.27초였다.
+- **확인된 원인:** Windows에서 프로세스는 종료 코드가 정해진 뒤 핸들이 신호 상태가 되기 전까지 실행 파일 경로 조회(`QueryFullProcessImageNameW`)를 접근 거부로 거절한다. 제품의 `_windows_identity`는 조회가 실패하면 같은 핸들을 대기 시간 0으로 한 번만 다시 보고, 아직 신호 전이면 ‘검사할 수 없는 살아 있는 프로세스’로 판단해 오류를 냈다.
+- **측정(수정 전, [임시 실행 44190057410](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44190057410), windows-2022 빌드 20348, Python 3.11.9):**
+  - 종료 신호 뒤 같은 Windows 호출을 연속으로 불렀다(80번, 표본 273,575개). 80번 모두에서 `GetProcessTimes`는 성공하고 경로 조회만 오류 5로 실패하는 상태가 있었다. 그때 종료 코드는 이미 0이었고 핸들은 1.5~2.5ms(중앙값 1.7ms) 뒤 신호됐다.
+  - 제품의 `_identity()`를 같은 방식으로 부르면 80번 가운데 80번 `process_inspect`·`identity_unavailable`·오류 5를 냈다.
+  - 시험과 같은 상황(다른 프로세스가 `stop_server` 호출)은 200번 가운데 0번 실패했다. 제품은 0.1초 간격으로 확인하므로 2ms 구간에 걸리는 일은 드물다. CI의 간헐 실패가 이 경우다.
+- **조치(`71ae4da`):** 조회가 거절되면 같은 핸들을 최대 2초 기다린다. 그 안에 신호되면 정상 종료로, 아니면 전과 같은 오류로 처리한다. 다른 핸들이나 PID로는 판단하지 않는다. 콘솔 연결·신호 실패 뒤의 확인과 명시적 종료(`terminate_registered_process`)의 같은 조회에도 적용했다. Stop·Apply·Status가 모두 이 함수를 거친다.
+- **검증:**
+  - [임시 실행 44191294199](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44191294199)(같은 환경): Windows의 거절 상태는 그대로 80번 모두 있었고, 제품의 `_identity()`는 80번 가운데 0번 오류를 냈다. 시험 상황 200번 가운데 0번 실패.
+  - 계약 시험 `test_exiting_process_that_refuses_its_image_query_is_an_ordinary_exit`를 더하고 기존 두 시험의 기대값을 맞췄다. 수정 전 코드에서는 새 시험을 포함해 실패한다(오류 4, 실패 1). Linux 로컬 69개 통과, 2개 건너뜀.
+  - 정식 Windows platform 묶음: 범위 지정 [실행 588](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44192980459)(`windows`, `platform`) 성공, 14분.
+  - 임시 실행 44191294199는 실패로 끝났다. 임시 워크플로에 더한 시험 모듈 실행 단계가 고정 의존성(cryptography)을 설치하지 않아 `CustomizedLauncherTests` 14건이 가져오기 오류로 실패한 것이고, 측정 단계와 종료 관련 시험은 통과했다.
+- **남은 항목:** 사내에서 이 오류로 Stop이나 Apply가 실패한 적이 있는지는 확인하지 않았다. 사내 적용은 미실행이다.
+
+### 브라우저 · 설정 메뉴의 관리자 항목 시험 (시험의 대기 누락)
+
+- **증상:** native-compose의 `test_native_admin_dialog_contains_keyboard_focus`가 마지막 단언에서 `True is not false`로 실패한다(실행 568, 583). 관리자 권한을 뺀 뒤에도 설정 메뉴에 관리자 항목이 있었다.
+- **확인된 원인:** 시험은 권한 fixture를 바꾸고 `refresh()`를 기다린 뒤 메뉴를 연다. 그런데 관리자 설정 화면에서 돌아오는 순간 제품이 화면 전환용 새로고침을 따로 시작하고, 그보다 먼저 시작한 시험의 `refresh()`는 밀려나 상태를 반영하지 않은 채 끝난다. 제품의 새로고침은 요청을 한 번 더(`operations`) 거친 뒤에야 상태를 반영하므로, 서버 응답이 느리면 시험이 이전 권한의 메뉴를 읽는다.
+- **재현(로컬, Chromium 153, 서버 응답 200ms 지연):** 수정 전 14번 가운데 6번이 같은 줄, 같은 단언으로 실패했다. 한 회차의 기록에서 시험의 `workspace` 요청이 시작된 2.6ms 뒤 제품의 `workspace` 요청이 시작됐고, 시험의 요청이 끝난 20ms 뒤 시험이 메뉴를 눌렀으며, 그때 제품의 `operations` 요청은 아직 끝나지 않았다.
+- **조치:** 시험 fixture에 `refresh_until()`을 더해, 반영된 상태가 바꾼 권한을 담을 때까지 다시 요청한다. 같은 지연에서 18번 모두 통과했다.
+- **제품 판단:** 제품 결함으로 보지 않는다. 메뉴는 권한이 바뀌면 스스로 닫히고 권한은 서버가 따로 검사한다.
+
+### 브라우저 · 대화상자 초점 시험 (시험이 다른 절차를 엶)
+
+- **증상:** native-compose의 `test_c3_dialog_and_help_close_preserve_draft_and_release_modal_blocker`가 `Timed out: document.activeElement?.matches('[data-author-action=copy]')`로 실패한다([실행 568, 575, 583](navigation-motion-20261102.md#narrow-viewport-load-20261117)).
+- **확인된 원인:** 작성 화면에 처음 들어가면 제품이 기본 절차를 만들고 목록을 다시 그려 줄이 아래로 밀린다. 시험은 자기가 만든 절차의 줄을 좌표로 누르는데, 좌표를 잰 뒤 목록이 밀리면 그 자리의 기본 절차 ‘일일 시스템 점검’이 열린다. 그 절차는 메뉴 첫 항목으로 ‘절차 편집’이 하나 더 있어 Tab 두 번이 ‘다른 이름으로 저장’에 닿지 못한다.
+- **증거:**
+  - 실행 583의 실패 로그에 찍힌 화면 글자가 시험이 만든 ‘모달 움직임 검증 절차’가 아니라 ‘일일 시스템 점검’과 ‘절차 편집’ 항목이었다.
+  - 계측을 넣고 되풀이한 [임시 실행 44193589216](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44193589216)(ubuntu-24.04, Chrome 157.0.8103.50)에서 70번 가운데 1번 같은 단언으로 실패했다. 그 회차의 초점은 메뉴 단추에서 ‘절차 편집’, ‘업무 절차 정보·분류 수정’ 순으로 움직였다.
+  - 수정 전 시험에서 목록이 늘어난 뒤 이전 좌표로 누르게 하면(로컬) 3번 모두 같은 단언으로 실패했다. 만든 절차의 줄은 y 191에서 371로 밀렸고 이전 좌표에는 ‘일일 시스템 점검’이 있었다.
+  - 기록 범위를 넓힌 [임시 실행 44195587840](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44195587840)(수정 전 시험, 같은 환경)에서는 220번 가운데 3번 실패했고, 세 번 모두 열린 절차가 ‘일일 시스템 점검’이었다. 첫 실패 회차에서 기본 절차 세 줄이 목록에 추가된 시각은 875.5ms, 시험의 클릭이 닿은 시각은 879.7ms였고 이어진 요청은 만든 절차가 아닌 다른 절차를 읽었다. 두 임시 실행을 합치면 수정 전 290번 가운데 4번 실패다.
+- **재현하지 못한 시도(로컬, Chromium 153):** 부하 프로세스 4개로 20번, 화면 처리 속도를 4배·8배 늦춰 12번씩, 메뉴 닫힘 시간을 무작위로 바꿔 40번, 서버 응답을 200ms 늦춰 8번·무작위로 늦춰 36번 돌렸고 한 번도 실패하지 않았다. 메뉴와 대화상자가 닫히는 순서가 원인이라는 가설은 순서를 뒤바꿔도 통과해 버렸다.
+- **이전 조치와 빠진 경로:** 같은 문제를 막는 도우미 `open_initialized_author_list()`가 작성 화면 시험과 API 명세 시험에는 쓰이고 있었다. 이 도우미는 작성 화면 시험 클래스에만 있었고 움직임 시험은 쓰지 않았다.
+- **조치:** 도우미를 공통 fixture(`IntegratedNativeCase`)로 옮기고 `refresh_until()`을 쓰게 했다. 움직임 시험이 이 도우미로 들어가고, 연 절차가 만든 절차인지 바로 확인한다.
+- **같은 유형이 남은 곳:** `test_ees_source_shell_native.py`와 `test_ees_work_figma_layout_native.py`, `test_ees_helper_chat_native.py`에도 작성 화면에 들어가 줄을 누르는 곳이 있다. 진입 과정 자체를 재는 시험이 섞여 있어 바꾸지 않았다. 이 시험들이 다른 절차가 열린 화면으로 실패하면 같은 원인을 먼저 본다.
+- **제품 관찰:** 사용자가 어떤 시스템의 작성 화면에 처음 들어갈 때도 기본 절차가 잠시 뒤 추가되면서 줄이 밀린다. 시스템마다 한 번이다. 제품은 바꾸지 않았다.
+
+### 브라우저 · 좁은 창 대화 패널 시험 (시험의 누르기가 화면을 밂)
+
+- **증상:** native-compose의 `test_c3_overlay_panel_closing_releases_hit_testing_and_restores_focus`가 `Opening narrow chat should never take space away from the work surface`로 실패한다([실행 566](navigation-motion-20261102.md#narrow-viewport-load-20261117), [실행 589](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44196652378)).
+- **확인된 원인:** 시험 도우미 `click()`은 누를 대상에 `scrollIntoView`를 호출하고 좌표를 잰다. 이 시험은 창을 480px로 줄인 직후(대화 패널이 닫히며 오른쪽으로 미끄러져 나가는 중)에 대화 단추를 누르고, 패널이 되돌아오는 도중에 입력창을 누른다. 그때 입력창 오른쪽 끝이 화면 밖에 3~4px 남아 있어 브라우저가 화면 틀(`.ees-source-shell`)을 그만큼 가로로 스크롤한다. 패널이 제자리에 오면 넘치는 부분이 없어져 스크롤은 0으로 돌아온다. 그 사이에 프레임이 하나 그려지면 왼쪽 메뉴와 업무 영역이 함께 3~4px 왼쪽에 찍히고, 시험은 이를 ‘대화가 업무 영역 폭을 차지했다’로 잰다.
+- **증거:**
+  - [임시 실행 44199974623](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44199974623)(수정 전, ubuntu-24.04, Chrome 157.0.8103.50): 180번 가운데 12번 실패. 실패 회차마다 어긋난 프레임은 대화 단추를 누른 직후의 하나뿐이고 값은 3 또는 4px, 업무 영역 폭은 424px 그대로였다.
+  - 스크롤 위치·좌표·스크롤을 일으킬 수 있는 호출을 기록하게 한 [임시 실행 44202740123](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44202740123)(수정 전, 같은 환경): 150번 가운데 26번 실패. 로그에 남은 17건 모두 어긋난 프레임에서 화면 틀의 가로 스크롤이 3 또는 4였고 왼쪽 메뉴가 [-4, 52]처럼 함께 밀렸다. 스크롤 직전의 호출은 17건 모두 시험 도우미의 `scrollIntoView(#chat-input)`였다. 제품이 대화 영역과 입력창에 초점을 옮기는 호출 두 번은 모두 `preventScroll: true`였다.
+  - 로컬(Chromium 153, 같은 기록): 수정 전 60번 가운데 7번 실패, 기록 내용은 CI와 같다. 통과한 회차 3개 가운데 2개에서도 화면 틀의 스크롤 이벤트가 있었고, 프레임이 그려지기 전에 0으로 돌아와 잡히지 않았을 뿐이다. 기록을 본 실패 3회차는 패널이 3프레임, 통과 3회차는 2프레임 동안 나갔다가 되돌아왔다.
+- **기각한 가설:** 제품이 대화 입력창으로 초점을 옮기면서 화면이 밀린다고 보았으나, 제품의 초점 이동은 스크롤 방지 옵션을 쓰고 기록에서도 스크롤을 일으키지 않았다. [2026-11-17의 가설](navigation-motion-20261102.md#narrow-viewport-load-20261117)(창 크기 반영 전 조작)도 이 시험의 원인이 아니었다.
+- **조치(`77e5470`):** 움직임 시험에 `chat_at_rest()`를 더해, 창을 줄인 직후와 패널 안(입력창·닫기 단추)을 누르기 전에 패널의 전환이 끝나기를 기다린다.
+- **검증:** 같은 기록 조건에서 로컬 120번 가운데 0번 실패, [임시 실행 44203582254](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44203582254)(CI, Chrome 157.0.8103.50) 150번 가운데 0번 실패. 수정 뒤 통과 회차 8개의 기록에서 화면 틀 스크롤 이벤트는 0건이다.
+- **제품 판단:** 이 실패는 시험의 누르기가 만든 움직임이고 제품 결함이 아니다.
+- **제품 관찰(고치지 않음):** 화면 틀은 `overflow:hidden`이어서 보이지는 않아도 스크롤은 된다. 대화 패널이 닫혀 화면 밖에 있을 때는 창 너비와 관계없이 대화 폭만큼 가로로 스크롤할 여지가 생긴다.
+  - 실험(로컬, 제품 빌드): 대화를 닫은 상태에서 대화 안의 요소를 화면으로 끌어오는 호출을 하면 화면 전체가 480px 창에서 395px, 1920px 창에서 519px 왼쪽으로 밀리고 2.6초 뒤에도 그대로였다. 대화를 열면 0으로 돌아온다.
+  - 대화를 닫은 상태에서 입력창에 글을 넣는 제품 내부 함수(`__eesNativeDraftV1.restore`)를 직접 부르면 편집기가 커서 위치로 스크롤하면서 화면이 267px 밀렸다. 이 함수를 부르는 제품 코드는 찾지 못했다.
+  - 실제 사용 흐름 두 가지에서는 밀리지 않았다. 초안을 쓰고 대화를 닫은 뒤 새로고침(480px·1920px), 초안을 쓰고 대화를 닫은 채 시스템을 바꿨다가 돌아오기(1920px).
+  - 확인하지 않은 흐름: 대화를 닫은 동안 도구 결과 화면이 도착하는 경우(제품이 그 화면으로 자동 스크롤한다)와 업무 화면에서 대화를 열며 질문을 넣는 경우. 사용자가 화면이 왼쪽으로 밀린 채 남는 현상을 보면 이 항목을 먼저 본다. 화면 틀을 스크롤되지 않게 바꾸면 가능성 자체가 없어지지만 제품 화면 패치 변경이라 사용자가 정한다.
+- **같은 유형:** 도우미 `click()`은 모든 브라우저 시험이 쓴다. 프레임마다 좌표를 재는 시험이 움직이는 패널 안을 누르면 같은 일이 생긴다.
+
+### 브라우저 · 창 크기를 바꾸는 작성 화면 시험 (옛 상태를 읽고 누름)
+
+- **증상:** 시험 도우미 `authoring_viewport()`가 창 크기를 바꾼 뒤 다음 가운데 하나로 실패한다.
+  - `Timed out: …dataset.compact === "true"`: [실행 566](navigation-motion-20261102.md#narrow-viewport-load-20261117)의 `test_procedure_visual_geometry_matches_figma_and_preserves_native_draft`.
+  - `Timed out: …dataset.eesChatState === 'docked'`: 개발 환경의 `test_tools_phase2_trial_activation_revision_groups_and_disable_roundtrip`(2026-11-17 기록에서 8번 중 3번, 14번 중 4번).
+  - `Control not visibly ready for a physical click:[data-ees-sidebar-toggle]`: 같은 시험, 대화상자가 열린 채 창 크기를 바꿀 때.
+- **확인된 원인:** 창 크기를 바꾸면 `innerWidth`는 바로 바뀌지만 제품은 다음 프레임에 오는 resize 이벤트에서 새 폭을 받아 대화 상태와 왼쪽 메뉴 접힘을 스스로 맞춘다. 도우미는 `innerWidth`만 기다린 뒤 곧바로 상태를 읽어, 이전 창 크기의 상태를 보고 ‘대화가 닫혀 있다’ 또는 ‘메뉴 접힘이 다르다’고 판단해 단추를 누른다. 누르기는 두 프레임 뒤에 닿으므로 그때는 제품이 이미 맞춰 놓은 상태이고, 누르기가 그것을 반대로 뒤집는다. 그 뒤의 대기는 끝나지 않는다.
+- **재현(로컬, Chromium 153, 부하 없음):** 수정 전 10번 가운데 4번 실패했고 위 세 문구가 모두 나왔다. 한 회차의 기록에서 360px에서 1920px로 바꾼 뒤 제품이 대화 상태를 `docked`로 바꾼 시각은 1953.0ms, 시험의 대화 단추 클릭은 1979.0ms, 그 클릭으로 상태가 `closed`가 된 시각은 1980.7ms였다. 다른 회차에서는 1366px로 바꾼 11ms 뒤 시험이 왼쪽 메뉴 단추를 눌러 제품이 접어 둔 메뉴를 다시 폈다.
+- **이전 조치와 빠진 경로:** [2026-11-05](navigation-motion-20261102.md#q1-viewport-settle-20261105)에 같은 유형(제품이 resize를 반영하기 전에 조건이 만족됨)을 확인했지만 그때는 한 전환에 기대 상태 대기를 더하는 데 그쳤다. 반영 전 상태를 읽는 것 자체는 도우미마다 남아 있었다.
+- **조치:** 공통 fixture에 `viewport_applied()`를 더했다. 창 크기를 바꾼 뒤 화면이 두 프레임 그려질 때까지 기다려 resize 이벤트가 전달된 뒤에 상태를 읽는다. `authoring_viewport()`가 이것을 쓴다. 이 도우미를 부르는 곳은 작성 화면·API 명세·작업 등록 시험 세 모듈의 34곳이다.
+- **검증:** 같은 시험을 로컬에서 24번 되풀이해 0번 실패했다. 회차마다 6.6~7.0초였다(수정 전 실패 회차는 8.8~14.2초).
+- **제품 판단:** 제품 결함이 아니다. 사용자는 창 크기를 바꾼 같은 프레임 안에 단추를 누를 수 없다.
+- **같은 유형이 남은 곳:** 창 크기를 바꾸는 도우미는 다른 시험 모듈에도 있다(`test_ees_motion_native.py`의 `viewport()`, `test_ees_work_figma_layout_native.py`, `test_ees_work_figma_runtime_native.py`, `test_ees_source_shell_native.py`, `test_ees_helper_chat_native.py` 등). 이 도우미들에서 같은 실패가 기록된 적은 없다. 하나씩 확인하지 않았고 바꾸지 않았다. 창 크기를 바꾼 직후의 대기에서 시간이 넘으면 이 원인을 먼저 본다.
+
+### 검증과 남은 것
+
+- 로컬(Linux, Python 3.11.18, Chromium 153): 바꾼 도우미를 쓰는 브라우저 시험 네 모듈(움직임 6개, 작업 등록 1개, API 명세 8개, 작성 화면 43개)이 통과했다. 임시 파일을 지운 뒤의 빠른 검사는 1,373개 통과, 109개 건너뜀이고 시험 ID 감사와 문서 점검은 오류 0이다.
+- GitHub `browser` 범위 [실행 589](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44196652378)(커밋 `0343bc1`, 앞의 세 건만 고친 상태): native-account·native-work·native-execution과 전체 제품 검사는 성공했다. native-compose는 고친 두 시험을 포함해 129개 가운데 128개가 통과했고 `test_c3_overlay_panel_closing_releases_hit_testing_and_restores_focus` 한 건이 실패했다. 이 실패가 위 ‘좁은 창 대화 패널 시험’ 조사의 출발점이다.
+- GitHub: 고친 대화상자 초점 시험을 되풀이한 [임시 실행 44196698628](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44196698628)은 221번 가운데 0번 실패했다(수정 전 290번 가운데 4번).
+- GitHub `browser` 범위 [실행 590](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44206456099)(다섯 건을 모두 고친 커밋 `cff1ac8`, Chrome 157.0.8103.50): 첫 시도에 성공했다. native-compose·native-work·native-account·native-execution과 전체 제품 검사가 통과했고 17분 32초가 걸렸다. 한 번의 통과는 간헐 실패가 없어졌다는 증거가 아니다. 근거는 위의 원인별 반복 측정이다.
+- 실행하지 않은 것: 마지막 커밋의 `windows`·`linux` 범위와 전체 검사(`full`). Windows platform 묶음은 제품 수정 직후의 커밋에서 실행 588로 확인했고 그 뒤에는 브라우저 시험과 문서만 바꿨다. 전체 검사는 사내 배포 전에 main에서 실행한다.
+- 조사에 쓴 임시 워크플로와 임시 스크립트는 지웠다. 측정 값은 위 임시 실행들의 로그에 있다.
+- 실패가 기록된 시험 가운데 원인을 확인하지 못한 것은 없다. 다만 간헐 실패는 일어나지 않았다는 것으로 고쳐졌음을 증명할 수 없다. 위 시험들이 다시 실패하면 같은 문구인지부터 보고 이 기록에 잇는다.
+- **재발 방지 연결:** 제품 수정은 `scripts/ees_deploy_process.py`, 시험 보완은 `tests/ees_work_integrated_fixture.py`의 `refresh_until()`·`open_initialized_author_list()`·`viewport_applied()`와 `tests/test_ees_motion_native.py`의 `chat_at_rest()`에 있다.
+
+<a id="restore-tests-removed-20261118"></a>
+
+## 이전 버전(ees.10~13) 복구 시험 삭제 (2026-11-18)
+
+- **요청·근거:** 사용자가 사내 PC의 프로그램이 ees.14라고 알리고(2026-11-17) 이전 버전 복구 시험을 지우라고 지시했다(2026-11-18). 사내에 설치된 커밋은 확인하지 않았다.
+- **지운 것:**
+  - `tests/test_ees_webui_customization.py`의 시험 다섯 개와 그 시험만 쓰던 도우미 두 개(194줄). 실제 ees.10·ees.11·ees.12(두 커밋)·ees.13 프로그램을 설치한 상태에서 실제 새 프로그램을 적용하고 복구해, 프로그램 파일·DB·키가 그대로인지 보던 시험이다.
+    - `test_real_ees10_to_authoring_apply_restore_preserves_program_and_data`
+    - `test_real_ees11_to_execution_apply_restore_preserves_program_and_data`
+    - `test_real_ees12_visual_revision_apply_restore_preserves_prior_asset_inventory`
+    - `test_real_ees12_v4_apply_restore_preserves_program_and_additive_work_database`
+    - `test_real_ees13_to_source_frontend_apply_restore_preserves_program_and_data`
+  - 이 시험만 돌리던 CI 묶음 `restore-ees10`·`restore-ees11`·`restore-ees12`·`restore-ees13`(Linux·Windows 각 4개).
+  - 이 시험만 쓰던 고정 자료 `previous12`·`previous-v4`·`previous13`의 준비 작업과 내려받기 단계, Windows에서 ees.12를 다시 빌드하던 세 줄.
+- **남긴 것:**
+  - 고정 자료 `legacy`(ees.10)와 `previous`(ees.11). 업무 절차 시험과 Windows 진단이 계속 쓴다.
+  - 같은 파일의 나머지 시험 72개. 만든 wheel로 적용·복구·중단 뒤 재개·이전 버전 파일 목록 고정을 본다. 실제로 빌드한 현재 wheel의 구성 검사(`program-wheel`)도 그대로다.
+  - 제품의 이전 버전 호환 코드(`scripts/ees_webui_customization.py`의 ees.12·ees.13 파일 목록 등)는 바꾸지 않았다.
+- **없어진 보호:** 실제로 설치된 이전 프로그램 위에 실제 새 프로그램을 적용하고 복구하는 시험은 남지 않았다. 사내 설치본(ees.14)에서 다음 버전으로 올리는 경로를 실제 파일로 보는 시험도 없다. 프로그램 버전을 올릴 때 그 시점의 설치본을 고정 자료로 삼는 시험이 필요한지 사용자가 정한다.
+- **보존한 증거:** 지운 시험의 코드는 커밋 `098aeb3`까지의 Git 기록에 있다. 당시 실행 결과는 [v4 기록](v4-ui-20260930.md)과 [제품 대조 기록](figma-product-parity-20261111.md)의 해당 날짜 항목에 그대로 둔다. 시험 ID 감사 기준(`tests/ees_delivery_baseline.json`)에 있던 세 개에는 삭제 사유와 남은 시험을 적었다.
+- **효과:** 전체 검사의 작업이 41개에서 30개로 줄었다(묶음 8개, 고정 자료 준비 3개). 2026-11-17에 13개가 준다고 보고한 것은 `legacy`·`previous`를 다른 시험도 쓴다는 점을 빼고 센 값이었다.
+- **검증:** 로컬(Linux, Python 3.11.18)에서 시험 ID 감사 오류 0, 계획 시험 20개와 고정 자료 시험 10개 통과, 남은 설치·복구 시험 72개 통과(3개 건너뜀), 빠른 검사 1,373개 통과(109개 건너뜀), 문서 점검 오류 0. GitHub [실행 591](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44210635619)(커밋 `4ed3127`, 범위 `full`, 묶음 `program-install program-wheel platform`)에서 Linux·Windows의 여섯 작업과 고정 자료 준비 두 개(`legacy`, `previous`)가 첫 시도에 성공했다. 12분 17초가 걸렸다. Windows의 platform 작업에는 고친 다시 빌드 단계와 프로세스 종료 시험이 들어 있다. [PR #150](https://github.com/knadalkim-a11y/team-agent-poc/pull/150)의 빠른 검사 [실행 592](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44210699601)도 3분 5초에 성공했다. 나머지 묶음(`services`·`contracts`·`native-contracts`·`native-grounding`)과 전체 검사는 이 커밋에서 실행하지 않았다.

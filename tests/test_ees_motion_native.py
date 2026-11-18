@@ -45,6 +45,12 @@ class MotionNativeTests(IntegratedNativeCase):
     def chat_state(self, desired):
         self.wait("document.querySelector('[data-ees-source-shell]')?.dataset.eesChatState===" + json.dumps(desired))
 
+    def chat_at_rest(self):
+        # click() scrolls its target into view. Inside a chat panel that is still sliding,
+        # that scroll moves the whole shell for a frame, which this module would then
+        # measure as space taken from the work surface. Wait for the slide first.
+        self.wait("!document.querySelector('[data-ees-chat-surface]').getAnimations().length")
+
     def observe(self, label):
         self.browser.evaluate("""(()=>{
           window.__c3?.stop();
@@ -459,10 +465,12 @@ class MotionNativeTests(IntegratedNativeCase):
     def test_c3_overlay_panel_closing_releases_hit_testing_and_restores_focus(self):
         self.viewport(480,768)
         self.chat_state('closed')
+        self.chat_at_rest()
         self.observe('overlay')
         self.click('[data-ees-chat-toggle]')
         self.chat_state('overlay')
         self.wait("document.querySelector('[data-ees-chat-surface]').contains(document.activeElement)")
+        self.chat_at_rest()
         self.fill('#chat-input','좁은 화면 채팅에서 보존할 초안')
         draft=self.browser.evaluate('window.__eesNativeDraftV1.read()')
         self.browser.evaluate("window.__c3.chat=document.querySelector('#chat-input');true")
@@ -479,6 +487,7 @@ class MotionNativeTests(IntegratedNativeCase):
         self.chat_state('overlay')
         self.assertTrue(self.browser.evaluate("window.__c3.chat===document.querySelector('#chat-input')"))
         self.assertEqual(self.browser.evaluate('window.__eesNativeDraftV1.read()'),draft)
+        self.chat_at_rest()
         self.click('[data-ees-chat-close]')
         self.chat_state('closed')
         evidence=self.finish_evidence('c3-overlay-close-reopen')
@@ -499,9 +508,14 @@ class MotionNativeTests(IntegratedNativeCase):
         self.refresh()
         self.fill('#chat-input', '확인 창과 도움말 왕복 후 보존할 문장')
         draft = self.browser.evaluate('window.__eesNativeDraftV1.read()')
-        self.click('[data-action=mode][data-mode=author]')
+        # The starter procedures arrive after the first author entry and move
+        # the rows. In CI runs 568, 575 and 583 the click by coordinates opened
+        # the starter '일일 시스템 점검', whose menu has one more item.
+        self.open_initialized_author_list()
         self.click('[data-author-action=open][data-id="' + identifier + '"]')
         self.wait("document.querySelector('.ew-procedure-menu > summary')")
+        self.assertEqual(self.browser.evaluate('window.__eesNativeWorkV1.captureReference().workflow_id'), identifier,
+                         'Another procedure than the created one was opened')
 
         def open_copy_dialog():
             # The workflow menu is revealed by trusted hover/focus in HTML 12.
