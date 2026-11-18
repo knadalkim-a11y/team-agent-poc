@@ -263,7 +263,8 @@ CI456 (`77ca5cd`)의 실제 전체 제품과 새 미완성 게시/360px 흐름�
 - 로컬(Linux, Python 3.11.18, Chromium 153): 바꾼 도우미를 쓰는 브라우저 시험 네 모듈(움직임 6개, 작업 등록 1개, API 명세 8개, 작성 화면 43개)이 통과했다. 임시 파일을 지운 뒤의 빠른 검사는 1,373개 통과, 109개 건너뜀이고 시험 ID 감사와 문서 점검은 오류 0이다.
 - GitHub `browser` 범위 [실행 589](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44196652378)(커밋 `0343bc1`, 앞의 세 건만 고친 상태): native-account·native-work·native-execution과 전체 제품 검사는 성공했다. native-compose는 고친 두 시험을 포함해 129개 가운데 128개가 통과했고 `test_c3_overlay_panel_closing_releases_hit_testing_and_restores_focus` 한 건이 실패했다. 이 실패가 위 ‘좁은 창 대화 패널 시험’ 조사의 출발점이다.
 - GitHub: 고친 대화상자 초점 시험을 되풀이한 [임시 실행 44196698628](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44196698628)은 221번 가운데 0번 실패했다(수정 전 290번 가운데 4번).
-- GitHub `browser` 범위(다섯 건을 모두 고친 커밋): 이 커밋을 올린 뒤 실행하고 결과를 여기에 적는다.
+- GitHub `browser` 범위 [실행 590](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/44206456099)(다섯 건을 모두 고친 커밋 `cff1ac8`, Chrome 157.0.8103.50): 첫 시도에 성공했다. native-compose·native-work·native-account·native-execution과 전체 제품 검사가 통과했고 17분 32초가 걸렸다. 한 번의 통과는 간헐 실패가 없어졌다는 증거가 아니다. 근거는 위의 원인별 반복 측정이다.
+- 실행하지 않은 것: 마지막 커밋의 `windows`·`linux` 범위와 전체 검사(`full`). Windows platform 묶음은 제품 수정 직후의 커밋에서 실행 588로 확인했고 그 뒤에는 브라우저 시험과 문서만 바꿨다. 전체 검사는 사내 배포 전에 main에서 실행한다.
 - 조사에 쓴 임시 워크플로와 임시 스크립트는 지웠다. 측정 값은 위 임시 실행들의 로그에 있다.
 - 실패가 기록된 시험 가운데 원인을 확인하지 못한 것은 없다. 다만 간헐 실패는 일어나지 않았다는 것으로 고쳐졌음을 증명할 수 없다. 위 시험들이 다시 실패하면 같은 문구인지부터 보고 이 기록에 잇는다.
 - **재발 방지 연결:** 제품 수정은 `scripts/ees_deploy_process.py`, 시험 보완은 `tests/ees_work_integrated_fixture.py`의 `refresh_until()`·`open_initialized_author_list()`·`viewport_applied()`와 `tests/test_ees_motion_native.py`의 `chat_at_rest()`에 있다.
