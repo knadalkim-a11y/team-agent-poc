@@ -232,7 +232,12 @@ if(performance.now()>end)return resolve(null);requestAnimationFrame(check)}check
         opened = self.browser.evaluate("!!document.querySelector('#ees-work-dialog[open]')")
         if expect_form is not None:
             assert opened == expect_form, ('Start form presence', opened, expect_form)
-        assert self.browser.evaluate("!!document.querySelector('.ew-vd-head')"), 'Starting must keep the stage in view'
+        if opened:
+            assert self.browser.evaluate("!!document.querySelector('.ew-vd-head')"), 'Execution preparation must keep the stage behind its dialog'
+        else:
+            # Without a form the run starts at once and the view returns to the stage that
+            # started it; a procedure with several stages passes through its first screen.
+            self.wait("document.querySelector('.ew-vd-head') && !document.querySelector('.ew-stage-run-button[data-action=\"stage_start\"]')")
         assert not self.browser.evaluate("!!document.querySelector('.ew-adhoc-start,.ew-active-runs,#ees-start-factory')"), 'The removed start screen and duplicate factory picker must remain absent'
         if opened:
             self.wait_work_ready(selector='#ees-work-dialog #ees-work-start')
@@ -1468,9 +1473,9 @@ def figma_delta_flow(g):
     g.click('[data-action="choose_factory"][data-factory-id="'+factory_id+'"]')
     g.wait('document.querySelector("#ees-work-site-trigger")?.innerText.includes("합성 C12 검수 공장")')
     g.click('[data-action="workflow"][data-workflow-id="'+delivery_id+'"]')
-    if g.open_operation_start():
-        g.capture('figma-a8-factory-ready')
-        g.click('#ees-work-dialog [data-dialog-confirm]')
+    opened=g.open_operation_start()
+    g.capture('figma-a8-factory-ready')
+    if opened:g.click('#ees-work-dialog [data-dialog-confirm]')
     delivery_run_id=g.wait_work_ready(workflow_id=delivery_id,require_run=True,selector='[data-action="job"][data-job-id="delivery-report"]')['reference']['run_id']
     g.click('[data-action="job"][data-job-id="delivery-report"]');select_execution_model();g.click('[data-action="execute"]')
     g.wait('document.querySelector("#ees-review-text")?.value.includes("합성 AI 검토 원문")',20000)
