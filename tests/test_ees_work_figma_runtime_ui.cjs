@@ -1716,6 +1716,44 @@ test('values of a job (second review): a job placed directly under the procedure
   staged:{id:'staged',type:'j',parent:'t',mode:'human',result_block:'human_confirm',inputs:[{id:'lot',name:'LOT',type:'text',scope:'run'}]}}};
  assert.equal(html('workRunStartFields(definition).map(field=>field.id).join()',{definition}),'note');
 });
+// ---- The PR's automated review (Codex, PR #153, 2026-11-19). Each failed before its fix. ----
+test('values of a job (PR review): a tool result is not confirmed or answered while its values were changed under the row',async()=>{
+ const h=askFixture(),nodes=h.state.run.definition.nodes;
+ nodes.b.inputs=[{id:'limit',name:'표시할 문서 수',type:'number',scope:'run'}];nodes.b.api_binding.inputs.limit={input:'limit'};
+ h.state.run.inputs={'page-id':'27182',limit:5};
+ Object.assign(h.state.run.jobs.a,{status:'completed',decisions:{job:{item_id:'job',verdict:'completed'}},result:{items:[{id:'r',row:{id:'27182'}}]}});
+ Object.assign(h.state.run.jobs.b,{status:'waiting_confirmation',attempt_id:'bt',current_attempt:'bt',result_revision:1,result:{items:[{id:'r1',row:{title:'주간 점검표',id:'301'}}]}});
+ h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'b'});
+ replies(h,call=>{if(call.body?.action==='save_inputs'){h.state.run.inputs=call.body.inputs;h.state.run.jobs.b.status='review_required';}});
+ h.type('b','limit','10','number');
+ await h.api.handleClick({dataset:{action:'stage_confirm_list',jobId:'b'}});
+ assert.deepEqual(h.sent('save_inputs','confirm_list').map(body=>body.action),['save_inputs'],'the changed value is saved and the old list is not confirmed');
+ assert.deepEqual(h.sent('save_inputs')[0].inputs,{'page-id':'27182',limit:10});assert.doesNotMatch(h.row('b'),/stage_confirm_list/);
+ // a tool job's answer the same way
+ const t=askFixture();t.state.run.inputs={'page-id':'111'};
+ Object.assign(t.state.run.jobs.a,{status:'waiting_confirmation',attempt_id:'at',current_attempt:'at',result_revision:1,result:{items:[{id:'r',row:{id:'111'}}]}});
+ t.api.setSelection({...t.api.snapshot().selection,stage_evidence:'a'});
+ replies(t,call=>{if(call.body?.action==='save_inputs'){t.state.run.inputs=call.body.inputs;t.state.run.jobs.a.status='review_required';}});
+ t.type('a','page-id','222');
+ await t.api.handleClick({dataset:{action:'stage_decide',jobId:'a',verdict:'completed'}});
+ assert.deepEqual(t.sent('save_inputs','decide','human_confirm').map(body=>body.action),['save_inputs']);
+ // with nothing changed the answer goes as before
+ const u=askFixture();u.state.run.inputs={'page-id':'111'};
+ Object.assign(u.state.run.jobs.a,{status:'waiting_confirmation',attempt_id:'at',current_attempt:'at',result_revision:1,result:{items:[{id:'r',row:{id:'111'}}]}});
+ replies(u);await u.api.handleClick({dataset:{action:'stage_decide',jobId:'a',verdict:'completed'}});
+ assert.deepEqual(u.sent('save_inputs','decide').map(body=>body.action),['decide']);
+});
+test('values of a job (PR review): a value someone else saved in between is shown before it is overwritten',async()=>{
+ const h=askFixture();h.state.run.inputs={'page-id':'111'};h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'a'});
+ h.type('a','page-id','222');
+ h.state.run.inputs={'page-id':'333'};h.state.run.revision=9;replies(h);
+ await h.api.handleClick({dataset:{action:'stage_execute',jobId:'a'}});
+ assert.deepEqual(h.sent('save_inputs','execute_job'),[],'nothing is saved over the other value and nothing runs');
+ assert.match(h.row('a'),/type="text" value="222"><small class="ew-vd-ask-error" id="ew-stage-a-page-id-error" role="alert">다른 사람이 바꾼 값 · 333<\/small>/);
+ // pressed again after seeing it, the typed value is saved and the job runs
+ await h.api.handleClick({dataset:{action:'stage_execute',jobId:'a'}});
+ assert.deepEqual(h.sent('save_inputs','execute_job').map(body=>body.action),['save_inputs','execute_job']);assert.deepEqual(h.sent('save_inputs')[0].inputs,{'page-id':'222'});
+});
 test('check items: before a run and for someone who may not act, the list is shown but cannot be ticked',()=>{
  const h=checkListFixture();h.state.run.jobs.h.can_decide=false;
  assert.equal([...h.row().matchAll(/<input type="checkbox" data-stage-check[^>]* disabled data-own-disabled="true">/g)].length,2);

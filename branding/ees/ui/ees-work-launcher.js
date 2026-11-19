@@ -41,7 +41,9 @@
   let state=null,identity='',epoch=0,serial=0,busy=false,scheduled=false,error='',commandError='',route='',readyRoute='',refreshTimer=null,uiTimer=null,uiRevision=0,restored=false,initialSelectionPatch=null;
   let savedUIState={},accountGeneration=0;
   let procedureStart=null,nativeCapabilities=null,nativeScope=null,stateKey='',targetLoading=false,scopeLoading=false,evidenceUnavailable=false;
-  const workspaceCache=new Map(),stageNotes=new Map(),stageValues=new Map(),stageValueErrors=new Map();
+  // stageValueBases keeps, per typed value, the saved value it was typed over: a value someone else saves in between
+  // is shown before it is overwritten, as the job screen does with its drafts.
+  const workspaceCache=new Map(),stageNotes=new Map(),stageValues=new Map(),stageValueErrors=new Map(),stageValueBases=new Map();
   const pendingInputMessage='업무 도우미 입력 제안을 먼저 반영하거나 버려 주세요.';
   let nativeTicket=null,nativeNavigationBusy=false,pendingNativeAction=null;
   const initialSelection=()=>({mode:'work',tab:'overview',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]});
@@ -776,7 +778,7 @@
     const result=await mutate({action:'start_run',expected_revision:workflow.revision,workflow_id:workflow.id,factory_id:factory,version,inputs},{refreshAfter:false});
     if(!result||at!==context())return;
     const id=result.run?.id || result.run_id || result.id;
-    delete selection.start_inputs?.[workflow.id];stageValues.delete(typedScope);stageValueErrors.delete(typedScope);
+    delete selection.start_inputs?.[workflow.id];stageValues.delete(typedScope);stageValueErrors.delete(typedScope);stageValueBases.delete(typedScope);
     const openJob=selection.stage_evidence;
     await select({factory_id:factory,run_id:id,start_stage_id:'',tab:'overview'});
     if(returnStage&&state?.run?.id===id&&state.run.definition?.nodes?.[returnStage]?.type==='t')await select({stage_id:returnStage,stage_overview:false,stage_evidence:openJob,tab:'overview'},{fetch:false});
@@ -795,7 +797,7 @@
   // Read what is typed under the open job into the kept values. A field left empty is not a value.
   function captureStageValues(jobId){
     const panel=stageValuePanel(jobId),current=stageJob(jobId);if(!panel||!current)return true;
-    const scope=workStageValueScope(state,selection),kept={...(stageValues.get(scope) || {})},saved=state.run?.inputs || {};
+    const scope=workStageValueScope(state,selection),kept={...(stageValues.get(scope) || {})},saved=state.run?.inputs || {},bases={...(stageValueBases.get(scope) || {})};
     // What cannot be read is not guessed: the caller stops and says so.
     let read={};try{read=workReadInputs(panel);}catch(_){return false;}
     for(const field of workStageAskFields(current.node,current.definition)){
@@ -804,8 +806,11 @@
       if(empty){if(Object.hasOwn(saved,field.id)&&saved[field.id]!==''&&saved[field.id]!==null)kept[field.id]=null;else delete kept[field.id];}
       else if(Object.hasOwn(saved,field.id)&&workValuesEqual(saved[field.id],value))delete kept[field.id];
       else kept[field.id]=value;
+      if(!Object.hasOwn(kept,field.id))delete bases[field.id];
+      else if(!Object.hasOwn(bases,field.id))bases[field.id]={value:saved[field.id]};
     }
     if(Object.keys(kept).length)stageValues.set(scope,kept);else stageValues.delete(scope);
+    if(Object.keys(bases).length)stageValueBases.set(scope,bases);else stageValueBases.delete(scope);
     return true;
   }
   function stageValuesUnread(){commandError='입력값을 확인해 주세요.';render();}
@@ -836,6 +841,19 @@
   }
   // Save with the run what was typed for the jobs that are acted on. A value typed under another job waits for
   // that job. Nothing typed, nothing sent.
+  // Values changed under a tool or AI job that already ran are not confirmed with its old result: they are saved (the
+  // job then waits for another review) and 실행 of the row has the focus. Answers whether that happened.
+  async function stageValuesChangeResult(node){
+    if(!captureStageValues(node.id)){stageValuesUnread();return true;}
+    if(!stageValuesPending([node]).length)return false;
+    const current=stageJob(node.id);if(!current)return true;
+    if(!checkStageValues(current)){selection.stage_verdict_job='';openStageValues(node.id);render();focusStageValue(node.id);return true;}
+    selection.stage_verdict_job='';
+    if(!await saveStageValues([node])){showStageValueFailure({message:commandError},node.id);return true;}
+    openStageValues(node.id);render();
+    [...(source()?.hosts?.()?.panel?.querySelectorAll?.('.ew-vd-run') || [])].find(item=>item.dataset.jobId===node.id&&!item.disabled)?.focus?.({preventScroll:true});
+    return true;
+  }
   // The values typed for these jobs that are not saved yet.
   function stageValuesPending(nodes){
     const kept=stageValues.get(workStageValueScope(state,selection)),definition=workOperationDefinition(state);
@@ -844,10 +862,22 @@
   async function saveStageValues(nodes){
     const run=state?.run,scope=workStageValueScope(state,selection),kept=stageValues.get(scope),ids=stageValuesPending(nodes);
     if(!run||!ids.length)return true;
+    // A value someone else saved after this one was typed is shown at its field first. Pressing again after seeing
+    // it saves the typed value.
+    const bases={...(stageValueBases.get(scope) || {})},saved=run.inputs || {},text=value=>value===undefined||value===null||value===''?'비어 있음':typeof value==='object'?JSON.stringify(value):String(value);
+    const changed=ids.filter(id=>Object.hasOwn(bases,id)&&!workValuesEqual(saved[id],bases[id].value));
+    if(changed.length){
+      for(const id of changed)bases[id]={value:saved[id]};
+      stageValueBases.set(scope,bases);
+      commandError=changed.map(id=>id+': 다른 사람이 바꾼 값 · '+text(saved[id])).join('\n');
+      return false;
+    }
     const inputs={...(run.inputs || {})};for(const id of ids){if(kept[id]===null)delete inputs[id];else inputs[id]=kept[id];}
     const result=await mutate({action:'save_inputs',run_id:run.id,inputs,expected_revision:run.revision},{accept:()=>{
-      const left={...(stageValues.get(scope) || {})};for(const id of ids)if(workValuesEqual(left[id],kept[id]))delete left[id];
+      const left={...(stageValues.get(scope) || {})},kept_bases={...(stageValueBases.get(scope) || {})};
+      for(const id of ids)if(workValuesEqual(left[id],kept[id])){delete left[id];delete kept_bases[id];}
       if(Object.keys(left).length)stageValues.set(scope,left);else stageValues.delete(scope);
+      if(Object.keys(kept_bases).length)stageValueBases.set(scope,kept_bases);else stageValueBases.delete(scope);
     }});
     return Boolean(result);
   }
@@ -924,6 +954,7 @@
     if(action==='stage_execute')return runStageJob(node.id);
     if(action==='stage_confirm_list'){
       if(!workStageCanConfirmList(node,saved,run))return;
+      if(await stageValuesChangeResult(node))return;
       await confirmList(true,node.id);
       // As with an answer: the confirmed job closes and the next job that asks for a value opens.
       if(state?.run?.jobs?.[node.id]?.status==='completed'&&selection.stage_evidence===node.id)openNextStageJob({focus:true});
@@ -939,7 +970,9 @@
       if(busy||!inputsSaved(true))return;
       const judgment=workStageJudgments(node,definition).find(item=>String(item.id)===(data.judgmentId || data.verdict)&&String(item.status)===data.verdict);
       if(!judgment)return;
-      // The values asked under the row go with the answer: checked at their fields, then saved.
+      // A tool's result is about the values it ran with: changed values are saved and the job is run again first.
+      if(['tool','ai'].includes(node.mode)){if(await stageValuesChangeResult(node))return;return decideStageJob(node.id,judgment);}
+      // The values asked under a person's row go with the answer: checked at their fields, then saved.
       if(workStageAskFields(node,definition).length){
         if(!captureStageValues(node.id))return stageValuesUnread();
         if(!checkStageValues(current)){selection.stage_verdict_job='';openStageValues(node.id);render();focusStageValue(node.id);return;}
@@ -1184,7 +1217,7 @@
     if(event.type==='change'&&target.matches?.('[data-list-include]')){view.refreshResults();return;}
     if(event.type==='change'&&(target.matches?.('[data-item-verdict]')||target.matches?.('[data-item-confirm]'))){const verdict=target.matches('[data-item-confirm]')?(target.checked?'completed':'unknown'):target.value;if(verdict)mutate({action:'decide',run_id:selection.run_id,job_id:selection.job_id,item_id:target.dataset.itemId,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,verdict});}
   }
-  function reset(){purposeRequest=null;apiContextSignature='';apiContextGeneration++;accountGeneration++;stageNotes.clear();stageValues.clear();stageValueErrors.clear();helpWriting=null;nativeCapabilities=null;nativeScope=null;workspaceCache.clear();stateKey='';targetLoading=false;scopeLoading=false;evidenceUnavailable=false;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;inputProposalApplied=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;savedUIState={};source()?.modelCount?.(0);selection=initialSelection();lastLocalSelection=initialSelection();}
+  function reset(){purposeRequest=null;apiContextSignature='';apiContextGeneration++;accountGeneration++;stageNotes.clear();stageValues.clear();stageValueErrors.clear();stageValueBases.clear();helpWriting=null;nativeCapabilities=null;nativeScope=null;workspaceCache.clear();stateKey='';targetLoading=false;scopeLoading=false;evidenceUnavailable=false;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;inputProposalApplied=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;savedUIState={};source()?.modelCount?.(0);selection=initialSelection();lastLocalSelection=initialSelection();}
   function sync(){
     scheduled=false;bindHosts();syncHelpState();const auth=token();if(auth!==identity){reset();identity=auth;route='';}
     syncNativeReturn();

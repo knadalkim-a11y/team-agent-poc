@@ -12,7 +12,7 @@
   "built_from": "work branch claude/brave-bell-p1tp73 with this change, Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0",
   "ui_sources_sha256": {
    "ees-work-view.js": "c4b9c19d5d51da23ecb26aba7242f1c949320021cd6c5cd67027c49174458bfe",
-   "ees-work-launcher.js": "93015c785bc1325f8ede4826c8556784c3d7a0a6db32925b3fe3224eb1737d8b",
+   "ees-work-launcher.js": "bbc8597996b204c08eea9e20e0337e3638ab202443d700ea531d98fe8062c943",
    "ees-work-launcher.css": "59c2170c40472a8c604ed81d72c7154d218368e6f5ed9d5871478c043242c718"
   },
   "server": "tests/native_ui_fixture.py; SQ1-SQ5 use the shipped guide with a synthetic Confluence provider, SQ6 a synthetic procedure with one person's job that asks for a number and a note",
@@ -60,21 +60,21 @@
    "screen": "SQ4",
    "window": "1920x1080",
    "shows": "실행한 뒤: 입력 아래에 결과. 둘째 작업은 대기",
-   "sha256": "b22e53272b6dc20093ab54117c78161d79c9fb1f04fbccc9a7e52bf74fec74f7"
+   "sha256": "99addfac944662cb49b17d08c239c53e40efadb1494264c370d8befc7e503a28"
   },
   {
    "file": "SQ4-ran-1366.png",
    "screen": "SQ4",
    "window": "1366x768",
    "shows": "같은 화면, 좁은 창",
-   "sha256": "d57b748c3a4815ef4ac1f6430a076df7417af7e266b99840680f8d64679d0140"
+   "sha256": "414e65e004a982375e969c4d7662783721f300729c35e6968d6e11b89fc0935a"
   },
   {
    "file": "SQ4-record-1920.png",
    "screen": "SQ4",
    "window": "1920x1080",
    "shows": "목업과 다른 곳: 판정 근거를 누르면 제품이 두던 기록이 결과 아래에 더해진다",
-   "sha256": "b4c07cfc84e4b21bb9550724812d89040f980c21ff3ed680e5336227084f8d3e"
+   "sha256": "995bf91b0b033bd7ced307994e7613fd6e2895592f376367e96339fc3c64bfc2"
   },
   {
    "file": "SQ5-next-1920.png",
@@ -88,7 +88,7 @@
    "screen": "SQ5",
    "window": "1920x1080",
    "shows": "둘째 작업을 실행한 뒤: 결과에 목록, 줄에 목록 확정",
-   "sha256": "7455e860e418bd2abc48f10c89dd249052c5690653ca34d216f1ddd9bd99a388"
+   "sha256": "34e7ac4d51f9404590cd6b3a61f70cfa56a930b9ad7433b22b4a6bb6419656a7"
   },
   {
    "file": "SQ6-person-1920.png",
