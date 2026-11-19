@@ -11,8 +11,8 @@
   "program": "0.11.3+ees.14",
   "built_from": "work branch claude/brave-bell-p1tp73 with this change, Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0",
   "ui_sources_sha256": {
-   "ees-work-view.js": "b30b7ec43a25f5f520bfae635bdda65f4fb7309ec5dfae9fd7fc3829ceed0c24",
-   "ees-work-launcher.js": "0a11326052173def32f794e5c1e0512775cf0163abe25117ecbf96f2df52d357",
+   "ees-work-view.js": "c4b9c19d5d51da23ecb26aba7242f1c949320021cd6c5cd67027c49174458bfe",
+   "ees-work-launcher.js": "93015c785bc1325f8ede4826c8556784c3d7a0a6db32925b3fe3224eb1737d8b",
    "ees-work-launcher.css": "59c2170c40472a8c604ed81d72c7154d218368e6f5ed9d5871478c043242c718"
   },
   "server": "tests/native_ui_fixture.py; SQ1-SQ5 use the shipped guide with a synthetic Confluence provider, SQ6 a synthetic procedure with one person's job that asks for a number and a note",
@@ -60,21 +60,21 @@
    "screen": "SQ4",
    "window": "1920x1080",
    "shows": "실행한 뒤: 입력 아래에 결과. 둘째 작업은 대기",
-   "sha256": "3627051978c897d3a7d5a350f6ed024becf4e60a0c814dfdd288bf3d304da572"
+   "sha256": "b22e53272b6dc20093ab54117c78161d79c9fb1f04fbccc9a7e52bf74fec74f7"
   },
   {
    "file": "SQ4-ran-1366.png",
    "screen": "SQ4",
    "window": "1366x768",
    "shows": "같은 화면, 좁은 창",
-   "sha256": "af9f68b7983d29d6e0b3fb03cadf970245202cb711ca24a70d967d16dac23e96"
+   "sha256": "d57b748c3a4815ef4ac1f6430a076df7417af7e266b99840680f8d64679d0140"
   },
   {
    "file": "SQ4-record-1920.png",
    "screen": "SQ4",
    "window": "1920x1080",
    "shows": "목업과 다른 곳: 판정 근거를 누르면 제품이 두던 기록이 결과 아래에 더해진다",
-   "sha256": "2c241238783bcc7d3346554003c8f6667fafd1119a40838fce9d6c8e1b89ff23"
+   "sha256": "b4c07cfc84e4b21bb9550724812d89040f980c21ff3ed680e5336227084f8d3e"
   },
   {
    "file": "SQ5-next-1920.png",
@@ -88,7 +88,7 @@
    "screen": "SQ5",
    "window": "1920x1080",
    "shows": "둘째 작업을 실행한 뒤: 결과에 목록, 줄에 목록 확정",
-   "sha256": "0092be63a48bed26859a617218fdef68749f7a2627c12b4dae02a2feffede07d"
+   "sha256": "7455e860e418bd2abc48f10c89dd249052c5690653ca34d216f1ddd9bd99a388"
   },
   {
    "file": "SQ6-person-1920.png",
@@ -102,7 +102,7 @@
    "screen": "SQ6",
    "window": "1366x768",
    "shows": "같은 화면, 좁은 창",
-   "sha256": "c7d85963f65280c27e59b722fa42998eaffd5d16560e3cb522067cd53f3b47c3"
+   "sha256": "9b0fa67779194009cfe20af5be048c10126355f09fd81d51a16a0ccba4a1755e"
   },
   {
    "file": "SQ6-person-missing-1920.png",

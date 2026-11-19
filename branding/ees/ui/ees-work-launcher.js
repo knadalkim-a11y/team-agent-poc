@@ -836,9 +836,13 @@
   }
   // Save with the run what was typed for the jobs that are acted on. A value typed under another job waits for
   // that job. Nothing typed, nothing sent.
+  // The values typed for these jobs that are not saved yet.
+  function stageValuesPending(nodes){
+    const kept=stageValues.get(workStageValueScope(state,selection)),definition=workOperationDefinition(state);
+    return [...new Set(nodes.flatMap(node=>workStageAskFields(node,definition).map(field=>field.id)))].filter(id=>kept&&Object.hasOwn(kept,id));
+  }
   async function saveStageValues(nodes){
-    const run=state?.run,scope=workStageValueScope(state,selection),kept=stageValues.get(scope),definition=workOperationDefinition(state);
-    const ids=[...new Set(nodes.flatMap(node=>workStageAskFields(node,definition).map(field=>field.id)))].filter(id=>kept&&Object.hasOwn(kept,id));
+    const run=state?.run,scope=workStageValueScope(state,selection),kept=stageValues.get(scope),ids=stageValuesPending(nodes);
     if(!run||!ids.length)return true;
     const inputs={...(run.inputs || {})};for(const id of ids){if(kept[id]===null)delete inputs[id];else inputs[id]=kept[id];}
     const result=await mutate({action:'save_inputs',run_id:run.id,inputs,expected_revision:run.revision},{accept:()=>{
@@ -939,7 +943,11 @@
       if(workStageAskFields(node,definition).length){
         if(!captureStageValues(node.id))return stageValuesUnread();
         if(!checkStageValues(current)){selection.stage_verdict_job='';openStageValues(node.id);render();focusStageValue(node.id);return;}
+        // An answer given with changed values is an answer about those values: it is sent also when it is the
+        // answer the job already has, whoever gave that one.
+        const changed=stageValuesPending([node]).length>0;
         if(!await saveStageValues([node])){showStageValueFailure({message:commandError},node.id);return;}
+        return decideStageJob(node.id,judgment,{again:changed});
       }
       return decideStageJob(node.id,judgment);
     }
@@ -957,12 +965,12 @@
     const result=await mutate({action:'human_confirm',run_id:current.run.id,job_id:current.node.id,item_id:item,expected_revision:current.run.revision,verdict:'completed'});
     if(!result&&!showStageValueFailure({message:commandError},jobId))render();
   }
-  async function decideStageJob(jobId,judgment){
+  async function decideStageJob(jobId,judgment,{again=false}={}){
     const current=stageJob(jobId);if(!current||!state.run)return;
     const {run,node,saved,definition}=current;
     {
       // The same answer again is nothing to do, unless the job waits for another review (a value of it changed).
-      const existing=workStageDecision(node,saved,definition);if(existing?.judgment_id===judgment.id&&!saved.result_stale&&saved.status!=='review_required')return closeStageMenu(true);
+      const existing=workStageDecision(node,saved,definition);if(existing?.judgment_id===judgment.id&&!again&&!saved.result_stale&&saved.status!=='review_required')return closeStageMenu(true);
       selection.stage_verdict_job='';selection.stage_approved_expanded=true;
       const noteKey=workStageNoteKey(state,node),note=stageNotes.get(noteKey) || '';
       const noteLimit=workStageNoteLimit(node,definition);if(Array.from(note).length>noteLimit){commandError=`판정 사유를 ${noteLimit}자 이내로 줄여 주세요. 사유와 판정은 아직 저장하지 않았습니다.`;render();return;}
@@ -1072,9 +1080,10 @@
     }
     if(action==='execute_scope'){
       if(busy||!state?.run||!inputsSaved(true))return;
-      // Values typed under the rows of this stage are saved first; what the server refuses is said at its field.
+      // Values typed under the tool and AI rows of this stage are saved first; what the server refuses is said at its
+      // field. A person's values wait for that person's answer or tick, which saves them.
       const open=selection.stage_evidence;if(open&&!captureStageValues(open))return stageValuesUnread();
-      if(!await saveStageValues(stageValueRows().map(row=>row.node))){showStageValueFailure({message:commandError},open);return;}
+      if(!await saveStageValues(stageValueRows().filter(row=>['tool','ai'].includes(row.node.mode)).map(row=>row.node))){showStageValueFailure({message:commandError},open);return;}
       setBusy(true);
       try{const model=executionModel();await operationsCommand({action:'execute_scope',run_id:selection.run_id,node_id:target.dataset.nodeId,expected_revision:state.run.revision,...(model?{model_id:model}:{})});await refresh();}
       catch(failure){if(!showStageValueFailure(failure,open))throw failure;}

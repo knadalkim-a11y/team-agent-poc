@@ -1668,6 +1668,54 @@ test('values of a job (review): only the rows a list hands over count as the val
  h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'b'});
  assert.match(h.row('b'),/<dt>페이지 ID<\/dt><dd><span>27182<\/span><span class="ew-vd-given">기준 문서 확인에서<\/span><\/dd>/);
 });
+// ---- A second review, of the fixes above (2026-11-19). Each failed before its fix. ----
+test('values of a job (second review): a field is open only while something on its row can save it',()=>{
+ const h=askFixture(),nodes=h.state.run.definition.nodes,field=(row,name)=>row.match(new RegExp('<input name="'+name+'"[^>]*>'))?.[0] || '';
+ nodes.c={id:'c',type:'j',parent:'t',name:'펌프 점검',mode:'human',result_block:'checklist',confirmation_items:[{id:'pump',name:'누수 없음'}],inputs:[{id:'pressure',name:'압력',type:'number',scope:'run'}]};
+ nodes.d={id:'d',type:'j',parent:'t',name:'외관 확인',mode:'human',result_block:'human_confirm',inputs:[{id:'memo',name:'비고',type:'text',scope:'run'}]};
+ h.state.run.jobs.c={status:'completed',can_decide:true,can_execute:true,attempt_id:'ct',current_attempt:'ct',decisions:{pump:{item_id:'pump',verdict:'completed',actor_id:'actor'}}};
+ h.state.run.jobs.d={status:'ready',can_decide:false,can_execute:true};
+ const open=id=>{h.api.setSelection({...h.api.snapshot().selection,stage_evidence:id});return h.row(id);};
+ // every item ticked: no tick and no answer is left on the row, so nothing would save the field
+ assert.match(field(open('c'),'pressure'),/ disabled/);
+ // a person who may not answer the job
+ assert.match(field(open('d'),'memo'),/ disabled/);
+ // a tool job that may not run now
+ h.state.run.jobs.a.can_execute=false;assert.match(field(open('a'),'page-id'),/ disabled/);h.state.run.jobs.a.can_execute=true;
+ // still open: a tick to make, an answer to give, a run that is waiting for an earlier job's value
+ h.state.run.jobs.c={status:'ready',can_decide:true,can_execute:true};assert.doesNotMatch(field(open('c'),'pressure'),/ disabled/);
+ h.state.run.jobs.d.can_decide=true;assert.doesNotMatch(field(open('d'),'memo'),/ disabled/);
+ nodes.b.inputs=[{id:'limit',name:'건수',type:'number',scope:'run'}];assert.match(open('b'),/<span>대기<\/span>/);assert.doesNotMatch(field(open('b'),'limit'),/ disabled/);
+});
+test('values of a job (second review): changed values with the answer someone else gave are sent as a new answer',async()=>{
+ const h=askFixture(),nodes=h.state.run.definition.nodes;
+ nodes.c={id:'c',type:'j',parent:'t',name:'펌프 상태 기록',mode:'human',result_block:'human_confirm',inputs:[{id:'pressure',name:'압력',type:'number',scope:'run'}]};
+ h.state.run.inputs={pressure:3.1};h.state.run.attempts=[{id:'c1',job_id:'c',number:1,status:'succeeded',actor_id:'other'}];
+ // another person answered 미흡; saving a value does not mark that answer for review
+ h.state.run.jobs.c={status:'failed',can_decide:true,can_execute:true,attempt_id:'c1',current_attempt:'c1',result_revision:1,decisions:{job:{item_id:'job',verdict:'failed',result_revision:1,attempt_id:'c1',actor_id:'other'}}};
+ h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'c'});
+ replies(h,call=>{if(call.body?.action==='save_inputs')h.state.run.inputs=call.body.inputs;});
+ h.type('c','pressure','2.4','number');
+ await h.api.handleClick({dataset:{action:'stage_decide',jobId:'c',verdict:'failed'}});
+ assert.deepEqual(h.sent('save_inputs','human_confirm').map(body=>body.action+(body.verdict?':'+body.verdict:'')),['save_inputs','human_confirm:failed']);
+ // with nothing changed, the same answer is still nothing to do
+ await h.api.handleClick({dataset:{action:'stage_decide',jobId:'c',verdict:'failed'}});assert.equal(h.sent('human_confirm').length,1);
+});
+test('values of a job (second review): running a stage saves the values of the jobs it runs, not a person\'s',async()=>{
+ const h=askFixture(),nodes=h.state.run.definition.nodes;
+ nodes.c={id:'c',type:'j',parent:'t',name:'외관 확인',mode:'human',result_block:'human_confirm',inputs:[{id:'memo',name:'비고',type:'text',scope:'run'}]};
+ h.state.run.jobs.c={status:'completed',can_decide:true,can_execute:true,decisions:{job:{item_id:'job',verdict:'completed'}}};
+ h.type('a','page-id','27182');h.type('c','memo','고쳐 둔 메모');replies(h);
+ await h.api.handleClick({dataset:{action:'execute_scope',nodeId:'t'}});
+ assert.deepEqual(h.sent('save_inputs').map(body=>body.inputs),[{'page-id':'27182'}],'the answered person job is not sent back for review by a stage run');
+ assert.equal(h.sent('execute_scope').length,1);
+});
+test('values of a job (second review): a job placed directly under the procedure keeps its question in the start form',()=>{
+ const definition={nodes:{p:{id:'p',type:'p'},t:{id:'t',type:'t',parent:'p'},
+  loose:{id:'loose',type:'j',parent:'p',mode:'human',result_block:'human_confirm',inputs:[{id:'note',name:'메모',type:'text',scope:'run'}]},
+  staged:{id:'staged',type:'j',parent:'t',mode:'human',result_block:'human_confirm',inputs:[{id:'lot',name:'LOT',type:'text',scope:'run'}]}}};
+ assert.equal(html('workRunStartFields(definition).map(field=>field.id).join()',{definition}),'note');
+});
 test('check items: before a run and for someone who may not act, the list is shown but cannot be ticked',()=>{
  const h=checkListFixture();h.state.run.jobs.h.can_decide=false;
  assert.equal([...h.row().matchAll(/<input type="checkbox" data-stage-check[^>]* disabled data-own-disabled="true">/g)].length,2);

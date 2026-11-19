@@ -409,7 +409,9 @@ function workChecklistHTML(items,saved={},human=false){
 // that cannot be drawn under its row. A job asks for its plain values under its row on the stage screen
 // (2026-11-19), so those are not asked here.
 function workRunStartFields(definition={}){
-  const nodes=Object.values(definition.nodes || {}),own=new Set(nodes.filter(node=>node.type==='j').flatMap(node=>workStageAskFields(node,definition).map(field=>field.id)));
+  // Only a job inside a stage has a row to ask under; a job placed directly under the procedure keeps the form.
+  const nodes=Object.values(definition.nodes || {}),staged=node=>workUI.lineage(node.id,definition).some(parent=>parent.type==='t');
+  const own=new Set(nodes.filter(node=>node.type==='j'&&staged(node)).flatMap(node=>workStageAskFields(node,definition).map(field=>field.id)));
   return [...new Map(nodes.flatMap(node=>Array.isArray(node.inputs)?node.inputs:[]).filter(field=>field&&field.id&&(field.scope || 'run')==='run'&&!own.has(field.id)).map(field=>[field.id,field])).values()];
 }
 function workRunStartFieldsHTML(data,selection,definition){
@@ -914,7 +916,12 @@ function workStageJobValuesHTML(row,data,selection){
   if(!asks.length&&!given.length&&!result)return '';
   const errors=selection.stage_value_errors?.[workStageValueScope(data,selection)] || {};
   // Before the run a person's job is not started from its row, so its fields wait for 시작 as its answer does.
-  const locked=workUI.finished(run)||run.can_write===false||saved.can_execute===false||['running','excluded'].includes(saved.status)||(!data.run&&(node.mode || 'human')==='human');
+  // A field is open only while something on the row can save it: 실행 of a tool or AI job (also while it waits for
+  // an earlier job's value), a person's answer, or a tick still to make. Before the round only 실행 can.
+  const tool=['tool','ai'].includes(node.mode),checks=workHumanCheckItems(node),ticks=workCheckDecisions(saved);
+  const saves=tool?(data.run?workStageCanExecute(node,saved,run,data):!row.toolMissing)
+    :!data.run?false:checks.length?workStageCanCheck(node,saved,run)&&checks.some(item=>!ticks[item.id]):Boolean(row.canDecide);
+  const locked=!saves||workUI.finished(run)||run.can_write===false||saved.can_execute===false||['running','excluded'].includes(saved.status);
   const text=value=>value===undefined||value===null?'':typeof value==='object'?JSON.stringify(value):String(value);
   const askRows=asks.map(field=>{
     const value=workStageValue(data,selection,field),error=errors[field.id] || '',control=workInputHTML(field,value,{disabled:locked,prefix:'stage-'+id,people:data.people || [],bare:true,invalid:error});
