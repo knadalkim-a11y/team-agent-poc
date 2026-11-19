@@ -400,10 +400,13 @@ class IntegratedNativeCase(unittest.TestCase):
             expected_use_revision=tested['use']['revision'], trial_id=tested['trial']['id'],
             groups=fixture['groups'], evidence=fixture['evidence'])['tool_draft']
 
-    def author(self, name='합성 절차', fields=None, jobs=2, mode='human', block='human_confirm'):
+    def author(self, name='합성 절차', fields=None, jobs=2, mode='human', block='human_confirm', start_fields=None):
         created = self.command('create_workflow', name=name, system_id='EMS')
         key = created['workflow_id']; definition = created['workflow']['draft']; root = next(iter(definition['nodes']))
         definition['nodes'][root]['children'] = ['stage']
+        # What is asked of the whole procedure when a round starts; a job's own fields are asked under its row.
+        if start_fields:
+            definition['nodes'][root]['inputs'] = deepcopy(start_fields)
         definition['nodes']['stage'] = {'id': 'stage', 'type': 't', 'name': '검증 단계', 'parent': root,
             'children': ['job-' + str(index) for index in range(jobs)], 'deps': []}
         for index in range(jobs):
@@ -472,6 +475,18 @@ class IntegratedNativeCase(unittest.TestCase):
             self.wait('document.querySelector(' + json.dumps(selector) + ')')
             self.click(selector)
             self.wait("document.querySelector('#ees-work-panel h2')?.textContent === " + json.dumps(run['definition']['nodes'][job]['name']))
+
+    def open_stage_job(self, job):
+        """Go from the stage screen to a job's own screen.
+
+        2026-11-19: the name of a job that has values opens the area under its row, and 자세히 at the end of
+        that area is the way to its screen. The name of any other job goes there directly, as before.
+        """
+        direct = '#ees-work-panel [data-action="job"][data-job-id="' + job + '"]'
+        if not self.browser.evaluate('!!document.querySelector(' + json.dumps(direct) + ')'):
+            self.click('#ees-work-panel [data-stage-job="' + job + '"] .ew-vd-name')
+            self.wait('document.querySelector(' + json.dumps(direct) + ')')
+        self.click(direct)
 
     def refresh(self):
         return self.browser.evaluate('window.__eesNativeWorkV1.refresh()')

@@ -145,13 +145,13 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.click('#ees-work-dialog [data-dialog-confirm]')
         self.wait("!document.querySelector('#ees-work-dialog') && window.__eesNativeWorkV1.captureReference()?.run_id")
         run_id = self.browser.evaluate('window.__eesNativeWorkV1.captureReference().run_id')
-        started = self.state(run_id=run_id)['run']
-        self.assertEqual(started['inputs'], fixture['inputs'])
-        self.assertEqual(started['attempts'], [])
-        self.assertEqual(self.authored_native.execution_calls, [])
-        self.click('[data-action=stage_execute][data-job-id=job-0]')
+        # 2026-11-19: 실행 on a row does what it says. With the start form answered the round starts with those
+        # values and that job runs, once; it used to stop after starting the round and wait for a second press.
         self.wait("document.querySelector('[data-authored-result]')?.textContent.includes('EMS 인터페이스 설계서')")
         queried = self.state(run_id=run_id)['run']
+        self.assertEqual(queried['inputs'], fixture['inputs'])
+        self.assertEqual(len(queried['attempts']), 1)
+        self.assertEqual(len(self.authored_native.execution_calls), 1)
         first = deepcopy(queried['attempts'][0])
         self.assertEqual(queried['jobs']['job-0']['status'], 'waiting_confirmation')
         self.assertEqual(queried['jobs']['job-0']['decisions'], [])
@@ -344,6 +344,9 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         key, definition = created['workflow_id'], created['workflow']['draft']
         root = next(iter(definition['nodes']))
         definition['nodes'][root]['children'] = ['stage']
+        # One value used by nine jobs is asked of the whole procedure, once, when the round starts. A value that
+        # only a job names is asked under that job's row (2026-11-19).
+        definition['nodes'][root]['inputs'] = [{'id': 'query', 'name': '조회 조건', 'type': 'text', 'scope': 'run'}]
         names = ['로그인 화면 문구 수정', '알람 기준값 조정', '보고서 출력 양식 변경', '대시보드 필터 추가',
             '설비 목록 정렬 수정', '데이터 보관 기간 변경', '배치 주기 조정', '메일 발송 대상 추가',
             '화면 응답 속도 개선', '권한 그룹 정리', '이력 조회 기간 확대', '오류 메시지 정리']
@@ -650,8 +653,10 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             with self.subTest(reduced_motion=reduced):
                 self.browser.call('Emulation.setEmulatedMedia', {'features': [
                     {'name': 'prefers-reduced-motion', 'value': 'reduce' if reduced else 'no-preference'}]})
+                # The start form asks what is asked of the whole procedure (2026-11-19: a job's own values are asked
+                # under its row, so the question of this test is written on the procedure).
                 key = self.author(name='실행 준비 검증 ' + str(reduced), jobs=1,
-                    fields=[{'id': 'query', 'name': '조회 조건', 'type': 'text', 'scope': 'run', 'required': True}])
+                    start_fields=[{'id': 'query', 'name': '조회 조건', 'type': 'text', 'scope': 'run', 'required': True}])
                 self.open_sidebar()
                 self.refresh()
                 control = '[data-action=workflow][data-workflow-id="' + key + '"]'
@@ -696,6 +701,99 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             self.assertEqual(db.execute('SELECT COUNT(*) FROM work_decisions').fetchone()[0], 0)
         self.assertEqual(self.bridge.calls, [])
         self.assertEqual(self.server.completions, [])
+
+    def test_a_persons_job_asks_for_its_values_under_its_row(self):
+        """Design mock 19 revision 3 (SQ6): no start window; the values are typed under the row and go with the answer."""
+        created = self.command('create_workflow', name='주간 설비 점검', system_id='EMS')
+        key = created['workflow_id']; definition = created['workflow']['draft']; root = next(iter(definition['nodes']))
+        definition['nodes'][root]['children'] = ['stage']
+        definition['nodes']['stage'] = {'id': 'stage', 'type': 't', 'name': '현장 점검', 'parent': root, 'children': ['pump', 'look'], 'deps': []}
+        definition['nodes']['pump'] = {'id': 'pump', 'type': 'j', 'name': '펌프 상태 기록', 'parent': 'stage', 'children': [], 'deps': [],
+            'mode': 'human', 'result_block': 'human_confirm', 'instructions': '펌프 압력계의 값을 읽어 적습니다.',
+            'inputs': [{'id': 'pressure', 'name': '압력', 'type': 'number', 'scope': 'run', 'required': True, 'unit': 'bar', 'example': '3.2'},
+                       {'id': 'memo', 'name': '비고', 'type': 'text', 'scope': 'run'}]}
+        definition['nodes']['look'] = {'id': 'look', 'type': 'j', 'name': '외관 확인', 'parent': 'stage', 'children': [], 'deps': [],
+            'mode': 'human', 'result_block': 'human_confirm', 'instructions': '누수나 파손이 없는지 봅니다.', 'inputs': []}
+        self.command('save_draft', workflow_id=key, expected_revision=1, definition=definition)
+        self.assertEqual(self.command('validate_workflow', workflow_id=key, expected_revision=2)['validation']['errors'], [])
+        self.command('publish_workflow', workflow_id=key, expected_revision=2)
+        self.open_sidebar(); self.refresh()
+        control = '[data-action=workflow][data-workflow-id="' + key + '"]'
+        self.wait('document.querySelector(' + json.dumps(control) + ')')
+        self.click(control)
+        self.wait("document.querySelector('.ew-operation-overview')")
+        self.open_stage_from_overview()
+        pressure = '#stage-values-pump [data-work-input][name=pressure]'
+        memo = '#stage-values-pump [data-work-input][name=memo]'
+        sent = lambda: [body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui']
+        # Before the round starts the job that asks is open and its fields wait, as its answer does.
+        self.wait("document.querySelector('[data-stage-job=pump]')?.dataset.expanded === 'true'")
+        self.assertEqual([self.read(pressure, 'disabled'), self.read(pressure, 'placeholder'), self.read(memo, 'disabled')], [True, '예: 3.2', True])
+        self.assertEqual(self.read('[data-stage-job=pump] .ew-vd-name', 'dataset.action'), 'stage_values')
+        # The area holds the values only; the record of answers stays behind its own control.
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#stage-evidence-pump')"))
+        self.assertEqual(self.text('#stage-under-pump').split(), ['입력', '압력', 'bar', '비고', '자세히'])
+        # A job that asks for nothing is as it was: its name goes to the job screen.
+        self.assertEqual(self.read('[data-stage-job=look] .ew-vd-name', 'dataset.action'), 'job')
+        writes = len(self.server.workspace_commands)
+        self.click('[data-action=stage_start][data-node-id=stage]')
+        self.wait('document.activeElement?.matches(' + json.dumps(pressure) + ')')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog[open]')"))
+        self.assertEqual([(body['action'], body['inputs']) for body in sent()], [('start_run', {})])
+        writes = len(self.server.workspace_commands)
+        # 적합 without the required value answers nothing and says so at the field.
+        self.click('[data-stage-job=pump] .ew-vd-confirm-main')
+        self.wait("document.querySelector('#stage-under-pump .ew-vd-ask-error')?.textContent === '값을 넣어 주세요'")
+        self.assertEqual([self.read(pressure, 'ariaInvalid'), self.read(memo, 'ariaInvalid')], ['true', None])
+        self.assertTrue(self.browser.evaluate('document.activeElement?.matches(' + json.dumps(pressure) + ')'))
+        self.assertEqual(sent(), [])
+        self.screenshot('stage-values-person-missing')
+        # A number is typed across a redraw of the screen, and Enter moves to the next field.
+        self.browser.call('Input.insertText', {'text': '3.'})
+        self.refresh()
+        self.browser.call('Input.insertText', {'text': '1'})
+        self.assertEqual(self.read(pressure, 'value'), '3.1')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#stage-under-pump .ew-vd-ask-error')"))
+        self.key('Enter', 13)
+        self.wait('document.activeElement?.matches(' + json.dumps(memo) + ')')
+        # Korean typed with an IME: a redraw in the middle of a syllable keeps the text and the caret, and the
+        # Enter that ends the composition does not answer the job.
+        for text in ('ㅇ', '이', '잇', '이사', '이상'):
+            self.browser.call('Input.imeSetComposition', {'text': text, 'selectionStart': len(text), 'selectionEnd': len(text)})
+        self.refresh()
+        self.assertEqual(self.read(memo, 'value'), '이상')
+        for text in ('이상 ㅇ', '이상 어', '이상 없', '이상 없으', '이상 없음'):
+            self.browser.call('Input.imeSetComposition', {'text': text, 'selectionStart': len(text), 'selectionEnd': len(text)})
+        self.browser.call('Input.dispatchKeyEvent', {'type': 'keyDown', 'key': 'Process', 'code': 'Enter', 'windowsVirtualKeyCode': 229, 'nativeVirtualKeyCode': 229})
+        self.browser.call('Input.insertText', {'text': '이상 없음'})
+        self.browser.call('Input.dispatchKeyEvent', {'type': 'keyUp', 'key': 'Enter', 'code': 'Enter', 'windowsVirtualKeyCode': 13, 'nativeVirtualKeyCode': 13})
+        self.assertEqual(self.read(memo, 'value'), '이상 없음')
+        self.assertTrue(self.browser.evaluate('document.activeElement?.matches(' + json.dumps(memo) + ')'))
+        self.assertEqual(sent(), [])
+        self.screenshot('stage-values-person-typed')
+        # Enter in the last field does what the row's 적합 does: the values are saved, then the answer.
+        self.key('Enter', 13)
+        self.wait("document.querySelector('[data-stage-job=pump]')?.dataset.expanded === 'false'")
+        self.assertEqual([(body['action'], body.get('inputs'), body.get('verdict')) for body in sent()],
+            [('save_inputs', {'pressure': 3.1, 'memo': '이상 없음'}, None), ('human_confirm', None, 'completed')])
+        run_id = self.browser.evaluate('window.__eesNativeWorkV1.captureReference().run_id')
+        run = self.state(run_id=run_id)['run']
+        self.assertEqual(run['inputs'], {'pressure': 3.1, 'memo': '이상 없음'})
+        self.assertEqual({job: saved['status'] for job, saved in run['jobs'].items()}, {'pump': 'completed', 'look': 'pending'})
+        # The values stay under the name of the answered job; 판정 기록 adds the record and closes the area again.
+        self.click('[data-stage-job=pump] .ew-vd-name')
+        self.wait("document.querySelector(" + json.dumps(pressure) + ")?.value === '3.1'")
+        self.assertEqual(self.read(memo, 'value'), '이상 없음')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#stage-evidence-pump')"))
+        self.click('[data-stage-job=pump] .ew-vd-evidence-toggle')
+        self.wait("document.querySelector('#stage-under-pump #stage-evidence-pump')")
+        self.assertEqual(self.read('[data-stage-job=pump] .ew-vd-evidence-toggle', 'ariaExpanded'), 'true')
+        self.click('[data-stage-job=pump] .ew-vd-evidence-toggle')
+        self.wait("document.querySelector('[data-stage-job=pump]')?.dataset.expanded === 'false'")
+        # 자세히 at the end of the area is the way to the job screen.
+        self.click('[data-stage-job=pump] .ew-vd-name')
+        self.click('#stage-under-pump .ew-vd-more [data-action=job]')
+        self.wait("document.querySelector('#ees-work-panel h2')?.textContent === '펌프 상태 기록'")
 
     def test_workflow_entry_opens_another_users_two_completed_stages(self):
         self.command('save_factory', factory_id='shared-factory', system_id='EMS', name='공장 A')
@@ -992,9 +1090,9 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
                 self.preview_inputs(run, {'note': '다른 작업으로 가기 전 제안'})
                 if applied:
                     self.click('[data-action=apply_input_proposal]')
-                self.click('[data-action=overview]'); self.open_stage_from_overview(); self.click('[data-action=job][data-job-id=job-1]')
+                self.click('[data-action=overview]'); self.open_stage_from_overview(); self.open_stage_job('job-1')
                 self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-input-proposal-bar,.ew-input-proposal-applied,.ew-input-proposal-source')"))
-                self.click('[data-action=overview]'); self.open_stage_from_overview(); self.click('[data-action=job][data-job-id=job-0]')
+                self.click('[data-action=overview]'); self.open_stage_from_overview(); self.open_stage_job('job-0')
                 self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-input-proposal-bar,.ew-input-proposal-applied,.ew-input-proposal-source')"))
             self.assertEqual(self.state(run_id=run['id'])['run'], before)
 
@@ -1246,7 +1344,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
                 confirmed = self.state(run_id=run['id'])['run']
                 self.assertEqual(confirmed['jobs']['job-0']['status'], 'partial')
                 self.assertTrue(confirmed['jobs']['job-0']['partial_confirmed'])
-                self.click('[data-action=overview]'); self.open_stage_from_overview(); self.click('[data-action=job][data-job-id=job-1]')
+                self.click('[data-action=overview]'); self.open_stage_from_overview(); self.open_stage_job('job-1')
                 self.assertIn('부분 결과에서 시작함', self.text('#ees-work-panel'))
                 self.click('[data-action=confirm]'); self.click('[data-dialog-confirm]')
                 self.wait("document.querySelector('#ees-work-panel .ew-work-heading .ew-status')?.dataset.status === 'completed'")

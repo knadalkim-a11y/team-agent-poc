@@ -1,0 +1,115 @@
+{
+ "date": "2026-11-19",
+ "what": "Design mock 19 revision 3 in the product: values asked under the job row. Compared with the mock captures in docs/mockups/ees-work/ask-in-row-20261119/",
+ "mock": {
+  "file": "docs/mockups/ees-work/design-mock-19-ask-in-row.html",
+  "revision": 3,
+  "commit": "aba309b",
+  "sha256": "53c502e6b969a1f6b1874d9005300eb0099b021d1446362f94c874ab2e9de577"
+ },
+ "product": {
+  "program": "0.11.3+ees.14",
+  "built_from": "work branch claude/brave-bell-p1tp73 with this change, Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0",
+  "ui_sources_sha256": {
+   "ees-work-view.js": "a7346d8201ebe9c40fc1fc8916aea206fc8e0acc8fe00e822f3bbbee2c46dcd6",
+   "ees-work-launcher.js": "50312e4958f05ad516801c791eedabf68830e10d293d2e6e0f42120828ac6817",
+   "ees-work-launcher.css": "59c2170c40472a8c604ed81d72c7154d218368e6f5ed9d5871478c043242c718"
+  },
+  "server": "tests/native_ui_fixture.py; SQ1-SQ5 use the shipped guide with a synthetic Confluence provider, SQ6 a synthetic procedure with one person's job that asks for a number and a note",
+  "taken_by": "one-off scripts outside the repository that click and type in the real controls (Chromium 153)"
+ },
+ "data_differs_from_mock": "The mock shows page 123456789 \"설비 점검 안내 (예시)\"; the test provider answers page 27182 \"점검 기준서\" with two child pages. SQ6 in the mock asks for 압력 and 온도; here 압력 and 비고.",
+ "captures": [
+  {
+   "file": "SQ1-first-screen-1920.png",
+   "screen": "SQ1",
+   "window": "1920x1080",
+   "shows": "절차의 첫 화면. 시작을 누르면 창 없이 단계 화면으로 간다",
+   "sha256": "ad6e263e6e6cc4313fe6716115eb22257b107d1ee1c38e24fa6d80a2c384ce43"
+  },
+  {
+   "file": "SQ2-ask-1920.png",
+   "screen": "SQ2",
+   "window": "1920x1080",
+   "shows": "시작한 뒤의 단계 화면: 값을 묻는 작업 아래가 열려 있고 칸에 커서가 있다. 둘째 작업은 대기",
+   "sha256": "1d70de2587aa34c97ad5f39f81965b5e28c0df46f8b06bd40d574ed1df108ab1"
+  },
+  {
+   "file": "SQ2-ask-1366.png",
+   "screen": "SQ2",
+   "window": "1366x768",
+   "shows": "같은 화면, 좁은 창(왼쪽 메뉴는 제품에서 접힌다)",
+   "sha256": "7b9e235eb8b94950d9ad2387183bf5348cfb0dbe59dff1f2f736b5519ebb83f1"
+  },
+  {
+   "file": "SQ3-missing-1920.png",
+   "screen": "SQ3",
+   "window": "1920x1080",
+   "shows": "값 없이 실행을 누른 뒤: 아무것도 보내지 않고 그 칸에 표시",
+   "sha256": "54887a23f6f1f0f77238a82b80b8ccc2093cd70500987a7630877ef269687e6a"
+  },
+  {
+   "file": "SQ3-not-a-number-1920.png",
+   "screen": "SQ3",
+   "window": "1920x1080",
+   "shows": "목업과 다른 곳: 숫자가 아닌 페이지 ID는 칸에서 막지 않고 실행 실패로 기록된다",
+   "sha256": "9e9ab51188ec71ca44440c98b4b43060316bdcb93e574bbf2118907df7b22398"
+  },
+  {
+   "file": "SQ4-ran-1920.png",
+   "screen": "SQ4",
+   "window": "1920x1080",
+   "shows": "실행한 뒤: 입력 아래에 결과. 둘째 작업은 대기",
+   "sha256": "ac39565d03a8ec06f45b861c5a43c80cd743853e09ac8ba56fde10087b7baa54"
+  },
+  {
+   "file": "SQ4-ran-1366.png",
+   "screen": "SQ4",
+   "window": "1366x768",
+   "shows": "같은 화면, 좁은 창",
+   "sha256": "7c191593f4d8bfa9b28b04d0407bddbf3fe3cfbd3de9143b772b787b69bc81a3"
+  },
+  {
+   "file": "SQ4-record-1920.png",
+   "screen": "SQ4",
+   "window": "1920x1080",
+   "shows": "목업과 다른 곳: 판정 근거를 누르면 제품이 두던 기록이 결과 아래에 더해진다",
+   "sha256": "e9aca5873c704829d8c21656ca181ea1a1c46f04eb92352e3a842fd11d6ffdc9"
+  },
+  {
+   "file": "SQ5-next-1920.png",
+   "screen": "SQ5",
+   "window": "1920x1080",
+   "shows": "첫 작업을 적합으로 확인한 뒤: 첫 작업은 닫히고 둘째 작업이 열려 넘어온 값과 출처가 보인다",
+   "sha256": "baeff8315278ea97031a57b1f226ac4df42a2d63195c285f9f5b1a2be9540c83"
+  },
+  {
+   "file": "SQ5-list-1920.png",
+   "screen": "SQ5",
+   "window": "1920x1080",
+   "shows": "둘째 작업을 실행한 뒤: 결과에 목록, 줄에 목록 확정",
+   "sha256": "0daa30fc8092da0f3c03a1df924ea7135039572baef61bcd8293fa1aa1f3b60c"
+  },
+  {
+   "file": "SQ6-person-1920.png",
+   "screen": "SQ6",
+   "window": "1920x1080",
+   "shows": "사람이 확인하는 작업이 값을 묻는 경우, 시작한 뒤",
+   "sha256": "7a7d41b8954319401bfc3c3f352e9461179d7d3ecfd0d5d5822d86c0701147d0"
+  },
+  {
+   "file": "SQ6-person-1366.png",
+   "screen": "SQ6",
+   "window": "1366x768",
+   "shows": "같은 화면, 좁은 창",
+   "sha256": "9b0fa67779194009cfe20af5be048c10126355f09fd81d51a16a0ccba4a1755e"
+  },
+  {
+   "file": "SQ6-person-missing-1920.png",
+   "screen": "SQ6",
+   "window": "1920x1080",
+   "shows": "값 없이 적합을 누른 뒤: 확인하지 않고 그 칸에 표시",
+   "sha256": "52b027bcebd4e5e864c6c37b0fb37735dcfece5e4a0daa00a3c61993e4f051f4"
+  }
+ ]
+}

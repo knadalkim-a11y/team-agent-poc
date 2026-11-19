@@ -1642,6 +1642,22 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         target['inputs'].append(deepcopy(definition['nodes']['j']['inputs'][0]))
         self.assertEqual(workspace.definition_check(definition)[0], [])
 
+    async def test_input_example_is_an_optional_short_single_line(self):
+        key, definition, _ = await self.create(fields=[{'id': 'page-id', 'type': 'text', 'example': '123456789'}])
+        field = definition['nodes']['j']['inputs'][0]
+        self.assertEqual(field['example'], '123456789')
+        self.assertEqual(workspace.definition_check(definition)[0], [])
+        # the definition is stored and read back with the example as it was written
+        stored = (await self.state(actor='admin', workflow_id=key))['workflow']
+        self.assertEqual(stored['draft']['nodes']['j']['inputs'][0]['example'], '123456789')
+        self.assertEqual(stored['published']['nodes']['j']['inputs'][0]['example'], '123456789')
+        for wrong in ('', '   ', 'x' * 81, '첫 줄\n둘째 줄', 5, ['123']):
+            with self.subTest(example=wrong):
+                field['example'] = wrong
+                self.assertEqual(workspace.definition_check(definition)[0], ['page-id: 예시는 한 줄 80자 이내로 적어 주세요.'])
+        del field['example']
+        self.assertEqual(workspace.definition_check(definition)[0], [])
+
     async def test_report_all_resolved_requires_actual_current_decisions_and_never_approves_source(self):
         key, definition, revision = await self.create(block='item_verdict', dependent=True)
         definition['nodes']['next'].update(mode='ai', result_block='ai_review', dependency_policy='all_resolved')

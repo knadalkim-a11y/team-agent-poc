@@ -335,6 +335,11 @@ def definition_check(definition, complete=True):
                 errors.append(f'{field_id}: 저장 범위와 필수 여부를 확인해 주세요.')
             if field.get('options_source', 'manual') not in ('manual', 'tool', 'common'):
                 errors.append(f'{field_id}: 선택지 원본 종류를 확인해 주세요.')
+            # A short sample shown inside the empty field ("예: 123456789"). Optional; older programs ignore it.
+            example = field.get('example')
+            if example is not None and (not isinstance(example, str) or not example.strip() or len(example) > 80
+                                        or any(ord(char) < 32 for char in example)):
+                errors.append(f'{field_id}: 예시는 한 줄 80자 이내로 적어 주세요.')
             if complete and field.get('options_source', 'manual') != 'manual' and not _options_query_valid(field):
                 errors.append(f'{field_id}: 현재 권한으로 조회하는 선택지 연결이 아직 구성되지 않았습니다.')
             if field['type'] in ('single', 'multi') and not isinstance(field.get('options', []), list):

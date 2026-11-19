@@ -1422,6 +1422,172 @@ test('check items: after an input or an earlier job changes, the list is ticked 
  h.state.run.jobs.h={status:'waiting_confirmation',can_decide:true,can_execute:true,decisions:{pump:{item_id:'pump',verdict:'completed',actor_id:'actor',created_at:'2026-11-18T02:00:00Z',result_revision:2}}};
  assert.match(h.row(),/<span class="ew-vd-count" data-decision-status>1 \/ 2<\/span>/);assert.doesNotMatch(h.row(),/data-recheck/);
 });
+// ---- Values of a job under its row (2026-11-19, design mock 19 revision 3) ----
+function askFixture({started=true}={}){
+ const h=stageRuntimeFixture(),nodes=h.state.run.definition.nodes;delete nodes.h;delete nodes.other;delete h.state.run.jobs.h;
+ delete nodes.a.tool_reference;Object.assign(nodes.a,{name:'기준 문서 확인',result_block:'human_confirm',human_confirmation:true,instructions:'페이지 ID를 입력하세요.',api_binding:{operation_id:'page',version:1,inputs:{id:{input:'page-id'}},outputs:['title','id']},inputs:[{id:'page-id',name:'페이지 ID',type:'text',scope:'run',required:true,example:'123456789'}]});
+ nodes.b={id:'b',type:'j',parent:'t',name:'하위 문서 목록 조회',mode:'tool',result_block:'list_confirm',human_confirmation:true,deps:['a'],api_binding:{operation_id:'children',version:1,inputs:{id:{result:{job_id:'a',field:'id',confirmed:true}},limit:{constant:5}},outputs:['title','id']}};
+ Object.assign(h.state.run,{inputs:{},jobs:{a:{status:'ready',can_execute:true,can_decide:true},b:{status:'pending',can_execute:true,can_decide:true}}});
+ Object.assign(h.state.workflow,{published:{name:'가이드',execution_scope:'system',nodes},published_version:1,revision:3});
+ const run=h.state.run;if(!started)delete h.state.run;
+ // the fields a person types into: one fake field for each field of the open job
+ const typed={},unmarked=[];
+ const panelOf=job=>({dataset:{jobId:job},querySelectorAll:selector=>selector==='[data-work-input]'?Object.entries(typed[job] || {}).map(([name,field])=>({name,type:'text',disabled:false,...field})):[]});
+ const panel={isConnected:true,addEventListener(){},removeEventListener(){},querySelectorAll:selector=>selector==='[data-stage-values]'?Object.keys(typed).map(panelOf):[],querySelector:()=>null};
+ h.context.window.__eesSourceShellV1.hosts=()=>({panel});
+ const type=(job,name,value,inputType='text')=>{typed[job]={...(typed[job] || {}),[name]:{value,dataset:{inputType}}};h.api.handleEvent({type:'input',target:{name,value,matches:selector=>selector==='[data-work-input]',closest:selector=>selector==='[data-stage-values]'?panelOf(job):selector==='[data-ees-work]'?{}:null,removeAttribute(name){unmarked.push(name);}}});};
+ const seen=()=>h.api.drawn().selection;
+ const body=()=>html('workStageHTML(state,selection,workOperationDefinition(state).nodes.t).body',{state:h.api.snapshot().state,selection:seen()});
+ const row=id=>{const text=body(),at=text.indexOf('data-stage-job="'+id+'"'),from=text.lastIndexOf('<section class="ew-vd-entry',at),next=text.indexOf('<section class="ew-vd-entry',at);return text.slice(from,next<0?undefined:next);};
+ const sent=(...actions)=>h.calls.filter(call=>actions.includes(call.body?.action)).map(call=>call.body);
+ return {...h,run,type,seen,body,row,sent,unmarked};
+}
+test('values of a job: the row is unchanged, its name opens the area under it, and the area holds what is asked',()=>{
+ const h=askFixture(),closed=h.row('a');
+ assert.match(closed,/<button type="button" class="ew-vd-name" data-action="stage_values" data-job-id="a" aria-expanded="false">기준 문서 확인<\/button>/);
+ assert.doesNotMatch(closed,/ew-vd-under|data-stage-values/);assert.match(closed,/<button type="button" class="ew-vd-run" data-action="stage_execute" data-job-id="a"/);
+ h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'a'});const open=h.row('a');
+ // what is on the row itself does not change when the area opens
+ const head=text=>text.slice(0,text.indexOf('</div></div>')).replace(/ aria-(expanded|controls)="[^"]*"/g,'').replace(/ data-expanded="[^"]*"/,'');assert.equal(head(open),head(closed));
+ assert.match(open,/<div class="ew-vd-under" id="stage-under-a"><div class="ew-vd-evidence ew-vd-job-values" id="stage-values-a"><div class="ew-vd-tool-detail" data-stage-values data-job-id="a"><section><h4>입력<\/h4><dl class="ew-vd-tool-values ew-vd-ask-values"><dt><label for="ew-stage-a-page-id">페이지 ID<\/label><\/dt><dd><input name="page-id" data-work-input[^>]* id="ew-stage-a-page-id" required placeholder="예: 123456789" type="text" value=""><\/dd><\/dl><\/section><\/div><\/div>/);
+ assert.match(open,/<p class="ew-vd-more"><button type="button" class="ew-text" data-action="job" data-job-id="a" aria-label="기준 문서 확인 자세히">자세히<\/button><\/p><\/div><\/section>$/);
+ assert.doesNotMatch(open,/아직 실행하지 않았습니다|data-stage-result/,'nothing is shown for a run that has not happened');
+ // a value already saved with the run, then a value being typed over it
+ h.state.run.inputs={'page-id':'111'};assert.match(h.row('a'),/id="ew-stage-a-page-id" required placeholder="예: 123456789" type="text" value="111">/);
+ h.type('a','page-id','222');h.api.handleClick({dataset:{action:'stage_values',jobId:'a'}});assert.equal(h.api.snapshot().selection.stage_evidence,'');h.api.handleClick({dataset:{action:'stage_values',jobId:'a'}});
+ assert.match(h.row('a'),/type="text" value="222">/,'what is typed is kept while the area is closed and opened');
+});
+test('values of a job: a value from an earlier job is shown, and the job waits until that job is confirmed',()=>{
+ const h=askFixture();h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'b'});let row=h.row('b');
+ assert.match(row,/<button type="button" class="ew-vd-run" data-action="stage_execute" data-job-id="b"[^>]* disabled data-own-disabled="true" data-run-blocked>/);assert.match(row,/<span class="ew-vd-state" data-decision-status><span>대기<\/span><\/span>/);
+ assert.match(row,/<section><h4>입력<\/h4><dl class="ew-vd-tool-values ew-vd-ask-values"><dt>페이지 ID<\/dt><dd><span class="ew-vd-given">기준 문서 확인에서<\/span><\/dd><\/dl><\/section>/);assert.doesNotMatch(row,/<input/);
+ assert.match(h.body(),/실행 필요 1<\/span><span><i class="ew-vd-dot" data-verdict="none"><\/i>대기 1/);
+ // run but not confirmed yet: still waiting. The server marks the job after a job that ran for another review;
+ // a job that has done nothing yet has nothing to review again and stays 대기, then 실행 필요.
+ Object.assign(h.state.run.jobs.a,{status:'waiting_confirmation',attempt_id:'at',result_revision:1,result:{items:[{id:'row-1',row:{title:'점검 기준서',id:'27182'}}],field_labels:{title:'문서 제목',id:'페이지 ID'}}});
+ h.state.run.jobs.b.status='review_required';
+ assert.match(h.row('b'),/<span>대기<\/span>/);assert.doesNotMatch(h.body(),/다시 검토 필요/);
+ Object.assign(h.state.run.jobs.a,{status:'completed',decisions:{job:{item_id:'job',verdict:'completed'}}});row=h.row('b');
+ assert.match(row,/<dt>페이지 ID<\/dt><dd><span>27182<\/span><span class="ew-vd-given">기준 문서 확인에서<\/span><\/dd>/);
+ assert.match(row,/<button type="button" class="ew-vd-run" data-action="stage_execute" data-job-id="b" aria-label="하위 문서 목록 조회 실행" data-mutation>/);assert.match(row,/<span>실행 필요<\/span>/);
+ // once it has run, a run of the job before it does ask for another review
+ h.state.run.attempts=[...(h.state.run.attempts || []),{id:'bt',job_id:'b',number:1,status:'succeeded'}];Object.assign(h.state.run.jobs.b,{attempt_id:'bt',current_attempt:'bt'});
+ assert.match(h.row('b'),/<span>다시 검토 필요<\/span>/);h.state.run.attempts=h.state.run.attempts.filter(item=>item.id!=='bt');delete h.state.run.jobs.b.attempt_id;delete h.state.run.jobs.b.current_attempt;
+ // before a run exists the row cannot start it either
+ const before=askFixture({started:false});assert.match(before.row('b'),/data-action="stage_start" data-job-id="b"[^>]* disabled data-own-disabled="true" data-run-blocked>/);assert.match(before.row('a'),/data-action="stage_start" data-job-id="a" aria-label="기준 문서 확인 실행">/);
+});
+test('values of a job: what an API job brought back is shown under 입력, one record as a list of names and a list as rows',()=>{
+ const h=askFixture();h.state.run.inputs={'page-id':'27182'};h.state.run.attempts=[{id:'at',job_id:'a',number:1,status:'succeeded',finished_at:'2026-11-19T01:00:00Z'},{id:'bt',job_id:'b',number:1,status:'succeeded',finished_at:'2026-11-19T01:05:00Z'}];
+ Object.assign(h.state.run.jobs.a,{status:'waiting_confirmation',attempt_id:'at',current_attempt:'at',result_revision:1,result:{items:[{id:'row-1',row:{title:'점검 기준서',id:'27182'}}],field_labels:{title:'문서 제목',id:'페이지 ID'}}});
+ h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'a'});let row=h.row('a');
+ assert.match(row,/<section data-stage-result><h4>결과<span>1차 · [^<]+<\/span><\/h4><dl class="ew-vd-tool-values"><dt>문서 제목<\/dt><dd>점검 기준서<\/dd><dt>페이지 ID<\/dt><dd>27182<\/dd><\/dl><\/section>/);
+ assert.ok(row.indexOf('data-stage-result')>row.indexOf('<h4>입력</h4>'),'입력, then 결과');
+ // opened by its name the area holds the values only; 판정 근거 on the row adds the record the product keeps, and
+ // pressed again closes the area as it always did
+ assert.doesNotMatch(row,/id="stage-evidence-a"/);assert.match(row,/data-stage-result>[\s\S]*<\/section><\/div><\/div><p class="ew-vd-more">/);
+ assert.match(row,/class="ew-vd-evidence-toggle" data-action="stage_evidence" data-job-id="a" aria-expanded="false" aria-label="기준 문서 확인 판정 근거 펼치기"/);
+ h.api.handleClick({dataset:{action:'stage_evidence',jobId:'a'}});row=h.row('a');
+ assert.ok(row.indexOf('data-stage-result')<row.indexOf('id="stage-evidence-a"'),'the record comes after 결과');
+ assert.match(row,/id="stage-evidence-a">[\s\S]*현재 실행 결과 · 1차[\s\S]*<p class="ew-vd-more">/);assert.match(row,/class="ew-vd-evidence-toggle" data-action="stage_evidence" data-job-id="a" aria-expanded="true" aria-controls="stage-evidence-a" aria-label="기준 문서 확인 판정 근거 접기"/);
+ h.api.handleClick({dataset:{action:'stage_evidence',jobId:'a'}});assert.equal(h.api.snapshot().selection.stage_evidence,'');assert.doesNotMatch(h.row('a'),/ew-vd-under/);
+ h.api.handleClick({dataset:{action:'stage_evidence',jobId:'a'}});assert.match(h.row('a'),/id="stage-values-a"[\s\S]*id="stage-evidence-a"/,'from a closed row 판정 근거 opens the area with the record');
+ h.api.handleClick({dataset:{action:'stage_values',jobId:'a'}});h.api.handleClick({dataset:{action:'stage_values',jobId:'a'}});row=h.row('a');assert.doesNotMatch(row,/id="stage-evidence-a"/,'opened again by its name: the values only');
+ // a run that failed brought nothing back: no 결과, the record of the run stays
+ const came=h.state.run.jobs.a;h.state.run.jobs.a={...came,status:'failed',result:{items:[],field_labels:{}}};
+ assert.doesNotMatch(h.row('a'),/data-stage-result/);h.api.handleClick({dataset:{action:'stage_evidence',jobId:'a'}});assert.match(h.row('a'),/<h4>입력<\/h4>[\s\S]*id="stage-evidence-a"/);h.api.handleClick({dataset:{action:'stage_values',jobId:'a'}});h.api.handleClick({dataset:{action:'stage_values',jobId:'a'}});h.state.run.jobs.a=came;
+ Object.assign(h.state.run.jobs.a,{status:'completed',decisions:{job:{item_id:'job',verdict:'completed',attempt_id:'at'}}});
+ Object.assign(h.state.run.jobs.b,{status:'waiting_confirmation',attempt_id:'bt',current_attempt:'bt',result_revision:1,result:{items:[{id:'r1',row:{title:'주간 점검표',id:'301'}},{id:'r2',row:{title:'월간 점검표',id:'302'}}],field_labels:{title:'문서 제목',id:'페이지 ID'}}});
+ h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'b'});row=h.row('b');
+ assert.match(row,/<section data-stage-result><h4>결과<span>2건 · 1차 · [^<]+<\/span><\/h4><ol class="ew-vd-rows" aria-label="하위 문서 목록 조회 결과"><li><span>주간 점검표<\/span><span>301<\/span><\/li><li><span>월간 점검표<\/span><span>302<\/span><\/li><\/ol><\/section>/);
+ // the list is confirmed from its row
+ assert.match(row,/<span class="ew-vd-confirm"><button type="button" class="ew-vd-confirm-main" data-action="stage_confirm_list" data-job-id="b" data-mutation aria-label="하위 문서 목록 조회 목록 확정">목록 확정<\/button><\/span>/);
+ h.state.run.jobs.b.result_stale=true;assert.doesNotMatch(h.row('b'),/stage_confirm_list/);
+});
+test('values of a job: one press of 실행 before a run starts it with what was typed and runs the job, with no window',async()=>{
+ const h=askFixture({started:false});let dialogs=0;h.setDialog(()=>{dialogs++;return Promise.resolve(true);});
+ h.setReply(call=>{if(call.body?.action==='start_run'){h.state.run={...h.run,inputs:call.body.inputs};return {ok:true,run:{id:'r'}};}if(call.body?.action==='execute_job')Object.assign(h.state.run.jobs.a,{status:'waiting_confirmation',attempt_id:'at',result_revision:1});return call.url.startsWith('/api/ees-work/workspace?')?h.state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true};});
+ h.api.setSelection({...h.api.snapshot().selection,run_id:'',stage_evidence:'a'});h.type('a','page-id','123456789');
+ await h.api.handleClick({dataset:{action:'stage_start',jobId:'a'}});
+ assert.equal(dialogs,0);assert.deepEqual(h.sent('start_run','save_inputs','execute_job').map(body=>body.action),['start_run','execute_job']);
+ assert.deepEqual(h.sent('start_run')[0].inputs,{'page-id':'123456789'});assert.deepEqual({run:h.sent('execute_job')[0].run_id,job:h.sent('execute_job')[0].job_id},{run:'r',job:'a'});
+ assert.equal(h.api.snapshot().selection.stage_evidence,'a','the job stays open to show what came back');assert.equal(h.api.snapshot().selection.stage_id,'t');
+});
+test('values of a job: 실행 without the value runs nothing and says so at the field; a refusal of the server lands there too',async()=>{
+ const h=askFixture();await h.api.handleClick({dataset:{action:'stage_execute',jobId:'a'}});
+ assert.deepEqual(h.sent('start_run','save_inputs','execute_job'),[]);assert.equal(h.api.snapshot().selection.stage_evidence,'a','a closed job opens');
+ assert.match(h.row('a'),/id="ew-stage-a-page-id" aria-invalid="true" aria-describedby="ew-stage-a-page-id-error" required placeholder="예: 123456789" type="text" value=""><small class="ew-vd-ask-error" id="ew-stage-a-page-id-error" role="alert">값을 넣어 주세요<\/small>/);
+ const drawn=h.renders.length;h.type('a','page-id','기준 문서');
+ assert.equal(h.renders.length,drawn,'the field being typed in is not redrawn');assert.deepEqual(h.unmarked,['aria-invalid','aria-describedby'],'the mark is taken off the field in place');assert.doesNotMatch(h.row('a'),/aria-invalid|ew-vd-ask-error/,'and it does not come back with the next drawing');
+ h.setReply(call=>call.body?.action==='execute_job'?{httpError:true,status:400,error:{code:'invalid_inputs',message:'page-id: 숫자만 입력해 주세요.'}}:call.url.startsWith('/api/ees-work/workspace?')?h.state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true,revision:9});
+ await h.api.handleClick({dataset:{action:'stage_execute',jobId:'a'}});
+ assert.deepEqual(h.sent('save_inputs','execute_job').map(body=>body.action),['save_inputs','execute_job']);assert.deepEqual(h.sent('save_inputs')[0].inputs,{'page-id':'기준 문서'});
+ assert.match(h.row('a'),/<small class="ew-vd-ask-error" id="ew-stage-a-page-id-error" role="alert">숫자만 입력해 주세요\.<\/small>/);assert.equal(h.api.snapshot().error,'','what the field says is not repeated above the screen');
+});
+test('values of a job: a person\'s answer carries the values typed under the row, and a missing value stops it at the field',async()=>{
+ const h=askFixture(),nodes=h.state.run.definition.nodes;
+ nodes.c={id:'c',type:'j',parent:'t',name:'펌프 상태 기록',mode:'human',result_block:'human_confirm',inputs:[{id:'pressure',name:'압력',type:'number',scope:'run',required:true,unit:'bar',example:'3.2'},{id:'memo',name:'비고',type:'text',scope:'run'}]};
+ h.state.run.jobs.c={status:'ready',can_decide:true,can_execute:true};h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'c'});
+ const open=h.row('c');
+ assert.match(open,/<dt><label for="ew-stage-c-pressure">압력<\/label><\/dt><dd><input name="pressure" data-work-input[^>]* id="ew-stage-c-pressure" required placeholder="예: 3\.2" type="number" step="any" value=""><span class="ew-unit">bar<\/span><\/dd><dt><label for="ew-stage-c-memo">비고<\/label><\/dt><dd><input name="memo"[^>]* type="text" value=""><\/dd>/);
+ assert.match(open,/<span class="ew-vd-confirm"><button type="button" class="ew-vd-confirm-main" data-action="stage_decide" data-job-id="c"/,'the row keeps its one-click answer');
+ assert.doesNotMatch(open,/id="stage-evidence-c"/,'the record of answers is opened by 판정 기록, as before');
+ h.api.handleClick({dataset:{action:'stage_evidence',jobId:'c'}});assert.ok(h.row('c').indexOf('id="stage-values-c"')<h.row('c').indexOf('id="stage-evidence-c"'),'the values come before the record of answers');
+ await h.api.handleClick({dataset:{action:'stage_decide',jobId:'c',verdict:'completed'}});
+ assert.deepEqual(h.sent('save_inputs','human_confirm'),[]);assert.match(h.row('c'),/id="ew-stage-c-pressure" aria-invalid="true"[^>]*><span class="ew-unit">bar<\/span><small class="ew-vd-ask-error"[^>]*>값을 넣어 주세요<\/small>/);assert.doesNotMatch(h.row('c'),/id="ew-stage-c-memo" aria-invalid/);
+ h.type('c','pressure','3.1','number');h.type('c','memo','이상 없음');
+ h.setReply(call=>{if(call.body?.action==='save_inputs'){h.state.run.inputs=call.body.inputs;h.state.run.revision=9;}if(call.body?.action==='human_confirm')Object.assign(h.state.run.jobs.c,{status:'completed',decisions:{job:{item_id:'job',verdict:'completed'}}});return call.url.startsWith('/api/ees-work/workspace?')?h.state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true,revision:9};});
+ await h.api.handleClick({dataset:{action:'stage_decide',jobId:'c',verdict:'completed'}});
+ assert.deepEqual(h.sent('save_inputs','human_confirm').map(body=>body.action),['save_inputs','human_confirm']);assert.deepEqual(h.sent('save_inputs')[0].inputs,{pressure:3.1,memo:'이상 없음'});assert.equal(h.sent('human_confirm')[0].expected_revision,9);
+ assert.equal(h.api.snapshot().selection.stage_evidence,'a','the answered job closes and the next job that asks for a value opens');
+ // before a run a person's fields wait for 시작 as the answer does
+ const before=askFixture({started:false});before.state.workflow.published.nodes.c=nodes.c;before.api.setSelection({...before.api.snapshot().selection,run_id:'',stage_evidence:'c'});
+ assert.match(before.row('c'),/id="ew-stage-c-pressure" required disabled placeholder/);
+});
+test('values of a job: entering a stage opens the job that asks for a value; a job with nothing to show keeps the way to the job screen',async()=>{
+ const h=askFixture(),nodes=h.state.run.definition.nodes;
+ nodes.plain={id:'plain',type:'j',parent:'t',name:'도구만 실행',mode:'tool',result_block:'values',human_confirmation:false,tool_reference:{tool_id:'native',function:'read',content_hash:'synthetic'}};h.state.run.jobs.plain={status:'ready',can_execute:true};
+ h.api.setSelection({...h.api.snapshot().selection,stage_id:'',stage_overview:true,stage_evidence:''});
+ await h.api.handleClick({dataset:{action:'stage_open',nodeId:'t'}});assert.equal(h.api.snapshot().selection.stage_evidence,'a');
+ assert.match(h.row('plain'),/<button type="button" class="ew-vd-name" data-action="job" data-job-id="plain">도구만 실행<\/button>/);
+ // a job that is done is not reopened; the next one that asks or is given a value is
+ Object.assign(h.state.run.jobs.a,{status:'completed',decisions:{job:{item_id:'job',verdict:'completed'}},result:{items:[{id:'r',row:{id:'27182'}}],field_labels:{id:'페이지 ID'}}});
+ h.api.setSelection({...h.api.snapshot().selection,stage_id:'',stage_evidence:''});await h.api.handleClick({dataset:{action:'stage_open',nodeId:'t'}});assert.equal(h.api.snapshot().selection.stage_evidence,'b');
+ // a stage where nothing is asked opens nothing
+ const quiet=stageRuntimeFixture();quiet.api.setSelection({...quiet.api.snapshot().selection,stage_id:'',stage_evidence:''});await quiet.api.handleClick({dataset:{action:'stage_open',nodeId:'t'}});assert.equal(quiet.api.snapshot().selection.stage_evidence,'');
+});
+test('values of a job: the start form asks only what belongs to the whole procedure',async()=>{
+ const h=askFixture({started:false}),definition=h.state.workflow.published;
+ assert.equal(html('workRunStartFields(definition).length',{definition}),0);
+ let dialogs=0;h.setDialog(()=>{dialogs++;return Promise.resolve(false);});h.api.setSelection({...h.api.snapshot().selection,run_id:''});
+ h.setReply(call=>{if(call.body?.action==='start_run'){h.state.run={...h.run};return {ok:true,run:{id:'r'}};}return call.url.startsWith('/api/ees-work/workspace?')?h.state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true};});
+ await h.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});
+ assert.equal(dialogs,0);assert.equal(h.sent('start_run').length,1);assert.deepEqual(h.sent('start_run')[0].inputs,{});assert.equal(h.api.snapshot().selection.stage_evidence,'a','after starting, the job that asks for a value is open');
+ definition.nodes.p.inputs=[{id:'target',name:'점검 대상',type:'text',scope:'run'},{id:'page-id',name:'페이지 ID',type:'text',scope:'run',required:true,example:'123456789'}];
+ // a value asked of the whole procedure is asked once, at the start, also when a job names the same value
+ assert.equal(html('workRunStartFields(definition).map(field=>field.id).join()',{definition}),'target,page-id');
+ assert.equal(html('workStageAskFields(definition.nodes.a,definition).length',{definition}),0);
+ h.state.workflow.published=definition;assert.doesNotMatch(html('workStageRowHTML(workStageRows(state,workOperationDefinition(state).nodes.t)[0],state,{},1)',{state:{...h.state,run:null}}),/stage_values|ew-vd-under/,'and the row of that job is as it was');
+ // a value the row cannot draw as it is (choices read from a tool, choices that depend on another value, the form
+ // of a shared tool) keeps the start form and is not drawn under the row
+ definition.nodes.b.inputs=[{id:'project',name:'프로젝트',type:'single',scope:'run',options_source:'tool'},{id:'status',name:'상태',type:'single',scope:'run',options:['열림'],depends_on:['project']},{id:'shape',name:'조건',type:'text',scope:'run',authored_schema:{type:'string'}},{id:'limit',name:'건수',type:'number',scope:'run'},{id:'site',name:'공장 값',type:'text',scope:'workflow'}];
+ assert.equal(html('workRunStartFields(definition).map(field=>field.id).join()',{definition}),'target,page-id,project,status,shape');
+ assert.equal(html('workStageAskFields(definition.nodes.b,definition).map(field=>field.id).join()',{definition}),'limit');
+});
+test('values of a job: a list is confirmed from its row as it came back, with the reason the product asks for',async()=>{
+ const h=askFixture();Object.assign(h.state.run.jobs.a,{status:'completed',decisions:{job:{item_id:'job',verdict:'completed'}}});
+ Object.assign(h.state.run.jobs.b,{status:'waiting_confirmation',attempt_id:'bt',current_attempt:'bt',result_revision:2,result:{items:[{id:'r1',title:'주간 점검표',row:{title:'주간 점검표',id:'301'},required:false},{id:'r2',title:'월간 점검표',row:{title:'월간 점검표',id:'302'},required:false}]}});
+ const asked=[];h.context.document.querySelector=selector=>selector==='#ees-list-confirm-reason'?{addEventListener:(kind,fn)=>fn({target:{value:'두 건 확인'}})}:{};
+ h.setDialog(options=>{asked.push(options);return Promise.resolve(true);});
+ await h.api.handleClick({dataset:{action:'stage_confirm_list',jobId:'b'}});
+ assert.equal(asked.length,1);assert.equal(asked[0].confirmLabel,'목록 확정');
+ const sent=h.sent('confirm_list');assert.equal(sent.length,1);assert.deepEqual({job:sent[0].job_id,attempt:sent[0].attempt_id,revision:sent[0].result_revision,reason:sent[0].reason,ids:sent[0].items.map(item=>item.id)},{job:'b',attempt:'bt',revision:2,reason:'두 건 확인',ids:['r1','r2']});
+ assert.equal(h.api.snapshot().selection.job_id,'','the stage screen stays');
+ // as with an answer, the confirmed job closes; here nothing else asks for a value
+ Object.assign(h.state.run.jobs.b,{status:'waiting_confirmation'});h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'b'});
+ h.setReply(call=>{if(call.body?.action==='confirm_list')Object.assign(h.state.run.jobs.b,{status:'completed'});return call.url.startsWith('/api/ees-work/workspace?')?h.state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true};});
+ await h.api.handleClick({dataset:{action:'stage_confirm_list',jobId:'b'}});
+ assert.equal(h.sent('confirm_list').length,2);assert.equal(h.api.snapshot().selection.stage_evidence,'');
+});
 test('check items: before a run and for someone who may not act, the list is shown but cannot be ticked',()=>{
  const h=checkListFixture();h.state.run.jobs.h.can_decide=false;
  assert.equal([...h.row().matchAll(/<input type="checkbox" data-stage-check[^>]* disabled data-own-disabled="true">/g)].length,2);

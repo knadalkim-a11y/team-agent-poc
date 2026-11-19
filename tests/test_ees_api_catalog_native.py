@@ -624,14 +624,67 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.click('[data-action=workflow][data-workflow-id=guide-confluence-documents]')
         self.assertNotIn(old_workflow, self.browser.evaluate("[...document.querySelectorAll('[data-action=workflow]')].map(e=>e.dataset.workflowId)"))
         self.click('[data-action=stage_open][data-node-id=documents]')
-        self.click('[data-action=stage_start][data-node-id=documents]')
-        self.fill('#ees-work-dialog [data-work-input][name="page-id"]', PAGE_ID)
-        self.click('#ees-work-dialog [data-dialog-confirm]')
-        self.wait("!document.querySelector('#ees-work-dialog[open]') && window.__eesNativeWorkV1.captureReference()?.run_id")
+        # 2026-11-19: no window asks for the value. The job that asks for it is open under its row with the field
+        # ready, and the job that waits for the first job's result cannot run yet.
+        field = '#stage-values-page [data-work-input][name="page-id"]'
+        no_window = "!document.querySelector('#ees-work-dialog[open]')"
+        self.wait('document.activeElement?.matches(' + json.dumps(field) + ')')
+        self.assertEqual(self.read(field, 'placeholder'), '예: 123456789')
+        self.assertEqual(self.read('[data-stage-job=page]', 'dataset.expanded'), 'true')
+        self.assertTrue(self.read('[data-stage-job=children] .ew-vd-run', 'disabled'))
+        self.assertEqual(self.text('[data-stage-job=children] [data-decision-status]'), '대기')
+        # 실행 without the value starts nothing and says so at the field.
+        self.click('[data-stage-job=page] .ew-vd-run')
+        self.wait("document.querySelector('#stage-values-page .ew-vd-ask-error')?.textContent === '값을 넣어 주세요'")
+        self.assertEqual(self.read(field, 'ariaInvalid'), 'true')
+        self.assertTrue(self.browser.evaluate(no_window + ' && !window.__eesNativeWorkV1.captureReference()?.run_id'))
+        self.assertEqual(upstream.records, [])
+        # Enter in the field does what the row's 실행 does: the round starts with the value and the job runs.
+        self.click(field); self.browser.call('Input.insertText', {'text': PAGE_ID})
+        self.wait("!document.querySelector('#stage-values-page .ew-vd-ask-error')")
+        self.key('Enter', 13)
+        self.wait("document.querySelector('#stage-values-page [data-stage-result]')?.innerText.includes(" + json.dumps(PAGE['title']) + ")")
+        self.assertTrue(self.browser.evaluate(no_window))
         run_id = self.browser.evaluate('window.__eesNativeWorkV1.captureReference().run_id')
         run = self.state(run_id=run_id)['run']
         self.assertEqual(run['inputs'], {'page-id': PAGE_ID})
-        self.check_confluence_results(key, run, 'page', 'children', upstream, 'confluence-guide')
+        self.assertEqual([(attempt['job_id'], attempt['status']) for attempt in run['attempts']], [('page', 'succeeded')])
+        self.assertEqual(upstream.records, [('/rest/api/content/' + PAGE_ID, {}, True)])
+        result = self.text('#stage-values-page [data-stage-result]')
+        for word in ('문서 제목', PAGE['title'], '페이지 ID', PAGE_ID):
+            self.assertIn(word, result)
+        self.assertEqual(self.read(field, 'value'), PAGE_ID)
+        self.screenshot('confluence-guide-page')
+        # The answer is given on the row as before. The answered job closes and the next opens with the value it is
+        # given, which it could not run without.
+        self.click('[data-action=stage_verdict][data-job-id=page]')
+        self.click('#ees-stage-verdict-menu [data-action=stage_decide][data-verdict=completed]')
+        self.wait("document.querySelector('[data-stage-job=children]')?.dataset.expanded === 'true' && document.querySelector('[data-stage-job=page]')?.dataset.expanded === 'false'")
+        given = self.text('#stage-values-children')
+        self.assertIn(PAGE_ID, given); self.assertIn('기준 문서 확인에서', given)
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#stage-values-children [data-work-input]')"))
+        self.click('[data-stage-job=children] .ew-vd-run')
+        self.wait("document.querySelector('#stage-values-children .ew-vd-rows')?.innerText.includes('주간 점검표')")
+        rows = self.text('#stage-values-children .ew-vd-rows')
+        for row in CHILDREN:
+            self.assertIn(row['title'], rows)
+        self.screenshot('confluence-guide-children')
+        # The list is confirmed from its row with the reason the product asks for.
+        self.click('[data-action=stage_confirm_list][data-job-id=children]')
+        self.fill('#ees-list-confirm-reason', '하위 문서 두 건을 확인했습니다.')
+        self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.wait("!document.querySelector('[data-action=stage_confirm_list]') && document.querySelector('[data-stage-job=children]')?.dataset.expanded === 'false'")
+        final = self.state(run_id=run_id)['run']
+        self.assertEqual(len(final['attempts']), 2)
+        self.assertEqual([final['jobs'][job]['status'] for job in ('page', 'children')], ['completed', 'completed'])
+        self.assertEqual(upstream.records, [
+            ('/rest/api/content/' + PAGE_ID, {}, True),
+            ('/rest/api/content/' + PAGE_ID + '/child/page', {'limit': ['5']}, True)])
+        # The name opens and closes the area; the way to the job screen is 자세히 at its end.
+        self.click('[data-stage-job=children] .ew-vd-name')
+        self.click('#stage-under-children .ew-vd-more [data-action=job]')
+        self.wait("document.querySelector('.ew-api-table')?.innerText.includes('주간 점검표')")
+        self.assertEqual(self.text('#ees-work-panel h2'), run['definition']['nodes']['children']['name'])
 
     def check_confluence_results(self, key, run, page_job, children_job, upstream, capture_name):
         self.open_run(key, run, job=page_job)
