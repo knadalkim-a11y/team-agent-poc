@@ -1,5 +1,5 @@
 {
- "revision": 2,
+ "revision": 3,
  "status": "review_mock_ready",
  "date": "2026-11-19",
  "request": "실행을 누르니까 '실행준비' 팝업이 뜨네. 여기에 페이지 id를 입력하라고 하는데 무슨 페이지 id인거야? 이 팝업이 뜨는 구조가 좀 직관적이지 않은거같은데",
@@ -10,17 +10,22 @@
    "revision": 1,
    "commit": "f8816bb",
    "sha256": "dd17d7d217cc96987e2023a3afed3e6e890ce92183da709e80567e733219a803"
+  },
+  {
+   "revision": 2,
+   "commit": "6074258",
+   "sha256": "33de457e26b83a1c6c2eea50bb204afb520f0b245feac370f0471fcf57fcbe79"
   }
  ],
- "base_commit": "f8816bb",
+ "base_commit": "6074258",
  "product_commit": "77ec384",
  "implementation_revision": null,
  "mock": {
   "file": "docs/mockups/ees-work/design-mock-19-ask-in-row.html",
-  "sha256": "33de457e26b83a1c6c2eea50bb204afb520f0b245feac370f0471fcf57fcbe79",
-  "bytes": 531728,
+  "sha256": "53c502e6b969a1f6b1874d9005300eb0099b021d1446362f94c874ab2e9de577",
+  "bytes": 531022,
   "source": "docs/mockups/ees-work/design-mock-src/19-ask-in-row.html",
-  "source_sha256": "6769d141e9336eebcae42911da386cf6e4a3e964c7b6ab6b713bcca15434d717",
+  "source_sha256": "c5530d50b7f4903ed49f71bb822a0f4c27d9d1c655bb14fd18e27f9152b8d556",
   "product_css": {
    "chat-theme.css": "b0c9b3298702fe77d758839265370080b9cf33f403c558c96dc4e95e114f222e",
    "ees-work-launcher.css": "c5dc813f45194978fdf50f3a69fa837db6f9d411b658a109eb983c83c7e99c85"
@@ -42,48 +47,49 @@
   {
    "file": "SQ1.png",
    "shows": "절차 첫 화면: 시작(창 없음)",
-   "sha256": "7566945be1542812147f906b5397f112342a8e5d56087096d28f97c5b827a3b2"
+   "sha256": "d5aba9153a4852ed1617901918f389da171835c22b06285c547d3f954c964e79"
   },
   {
    "file": "SQ2.png",
-   "shows": "단계 화면: 값을 물어야 하는 작업이 펼쳐져 있고 그 안에 페이지 ID 칸과 실행",
-   "sha256": "17d773a5a5524acaa22846f79c015f352690a0ea7b79494849a1c04be2c7d6a5"
+   "shows": "단계 화면: 작업 줄은 지금 그대로, 값을 넣어야 하는 작업 아래에 입력(페이지 ID 칸)",
+   "sha256": "39f48ddb3588783fee8686bc034f0605dd92c181a19ac39650263a9de37b62fa"
   },
   {
    "file": "SQ3.png",
    "shows": "값이 숫자가 아닐 때: 그 칸에 표시",
-   "sha256": "caa0e1045a2401f18c39c46ca34c2cb12df44c2b244dd97f5a9cbb37efb49f53"
+   "sha256": "c7998cac27034610fd81b29ff1194644b2848eb3cd6ed17a8b7ad030484e5115"
   },
   {
    "file": "SQ4.png",
-   "shows": "실행한 뒤: 조회한 내용과 적합이 펼친 곳에 보임",
-   "sha256": "8ac204d7be7d57771da28f5c1907a2bf8ee1fe45bd3e0baf535e06d9570bd911"
+   "shows": "실행한 뒤: 입력 아래에 결과, 줄의 단추는 지금 그대로",
+   "sha256": "fac79ebe175068c0ec921d90bd1d4ef21925eda132e8c2cb977e7cb440357176"
   },
   {
    "file": "SQ5.png",
-   "shows": "적합 뒤: 확인한 작업은 접히고 다음 작업이 넘어온 값과 함께 펼쳐짐",
-   "sha256": "5d4c0547ac554efed55acde0257e7612eabd2455b3c75507d6a12e812db8d095"
+   "shows": "적합 뒤: 확인한 작업은 접히고 다음 작업 아래에 넘어온 값",
+   "sha256": "c78c840f86986eeb29d7b480b7069dded8aa0375820ede46b0e4b60aeb62affd"
   },
   {
    "file": "SQ6.png",
-   "shows": "사람이 확인하는 작업: 펼친 곳에 값 칸 둘과 적합, 값을 묻지 않는 작업은 줄에서 적합",
-   "sha256": "cb83beeaa4b1f7af296044564408e5e8b2b267e6d93c454f0456988e823e1fa8"
+   "shows": "사람이 확인하는 작업: 줄에 적합, 그 아래 입력에 값 칸 둘",
+   "sha256": "6086d577b6f314f5b592cd35c2236d4c2d59c989f82d3e90271a37ea74509910"
   },
   {
    "file": "SQ2-1366.png",
    "shows": "SQ2 · 1366x768",
-   "sha256": "6d04da990612d78887b5e87202e5e95a5d70cc379c462f4cf01c314e48e34db0"
+   "sha256": "82700aef6e3284f3d602e53e88cd3c8a2b35d7fce7b5f463089569516c138514"
   },
   {
    "file": "SQ4-1366.png",
    "shows": "SQ4 · 1366x768",
-   "sha256": "244d7709662f9c7a4a4a9583bede32667caed035cf01aeb0234f51d511b9bf5c"
+   "sha256": "09e99cbb46d760c366c56015cb671731effa3e7ecff86d2bb9c6532a57621a40"
   },
   {
    "file": "SQ6-1366.png",
    "shows": "SQ6 · 1366x768",
-   "sha256": "646f7ea0d5f83c3bf589bb46843b3e6c3110db89401f56552684063dd7a14732"
+   "sha256": "144a6f0aadcc179c93a6f59d57220f26f6a235d77074dcc74a4d1d113afe7261"
   }
  ],
- "validation": "evals/artifacts/first-user-usability-20261118/mock19-validation-report.json"
+ "validation": "evals/artifacts/first-user-usability-20261118/mock19-validation-report.json",
+ "revision_3_feedback": "내가생각한거랑 조금 다르네, 기존 작업 칸이 지금은 그냥 커지기만 한거같은데.. 좀 더 기존 디자인을 유지하면서 깔끔하게 수정할수없을까"
 }

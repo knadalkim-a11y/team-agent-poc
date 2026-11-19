@@ -33,6 +33,11 @@
    "file": "05-after-run.png",
    "shows": "첫 작업을 실행한 뒤의 줄",
    "sha256": "a825073f649ce04faf617ac6e6e237133ec1d664b5e730dad5be91011861f91b"
+  },
+  {
+   "file": "06-evidence-open.png",
+   "shows": "판정 근거를 편 모습: 줄은 그대로 강조되고 그 아래 흰 영역이 펼쳐짐(목업 19번 3판이 따르는 기존 모양)",
+   "sha256": "ffef2ac789fe3f7a76c0b06a154e7109d24d126b651eb802e330f01fccac2a00"
   }
  ]
 }
