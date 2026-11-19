@@ -108,7 +108,8 @@
   - 독립 검토: 구현 커밋(`89bd377`)을 다른 AI에게 결함만 찾게 했고 여덟 건이 나왔다(다른 사람이 연 회차에서 작업이 실행될 수 있음 등). 모두 고치고 건마다 회귀 시험을 더했다. 새 시험 일곱 개는 고치기 전 코드에서 실패한다.
   - 브랜치 CI: `browser` 범위의 실행 605(구현 커밋 `89bd377`)와 실행 606(검토 결함을 고친 `29ebd65`)이 모두 첫 시도에 성공했다.
   - 미실행: Windows, 전체 검사, 사내 화면, 실제 Confluence, 실제 팀원의 사용, Windows 한글 입력기, Figma 반영, 480px 폭.
-- **다음 하나:** 사용자가 [비교 화면](../../../evals/artifacts/first-user-usability-20261118/ask-in-row-product-20261119/captures.json)과 ‘목업과 다르게 구현한 곳’을 보고 고칠 것을 정한다. main 반영과 사내 적용은 사용자가 정한다.
+- **main 반영(사용자 결정, 2026-11-19):** [비교 화면](../../../evals/artifacts/first-user-usability-20261118/ask-in-row-product-20261119/captures.json)과 ‘목업과 다르게 구현한 곳’을 본 사용자가 “main에 넣고 사내 적용하자.”라고 했다. 다른 곳 가운데 고칠 것은 따로 정하지 않았다. [PR #153](https://github.com/knadalkim-a11y/team-agent-poc/pull/153).
+- **다음 하나:** 사내에 적용한 뒤 사용자가 써 보고 고칠 것을 정한다.
 
 <a id="first-user-flow-20261118"></a>
 
