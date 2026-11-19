@@ -98,7 +98,9 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         if name.startswith('task-'):
             self.assertAlmostEqual(report['stage']['x'], 328, delta=2)
             self.assertAlmostEqual(report['stage']['width'], 960, delta=2)
-            self.assertAlmostEqual(report['stage']['y'], 234, delta=2)
+            # 2026-11-18: the publication state sits in the title row on every editor screen,
+            # which makes that row 3px taller than the status tag it replaces here.
+            self.assertAlmostEqual(report['stage']['y'], 237, delta=2)
         if name == 'tools-edit':
             # Save stays below the settings, at the right edge of the form and the bottom edge of the pane.
             self.assertGreater(report['save']['x'], report['form']['x'] + 800)

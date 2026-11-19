@@ -33,7 +33,7 @@ record.draft.mode='periodic';record.draft.schedule=copy(schedule);h.render();con
 assert.doesNotMatch(h.markup,/실행 방식|data-tab="schedule"|data-author-action="run_mode"|data-author-action="schedule_tools"|일정 미리보기·서버 예약/);
 for(const tab of ['content','rules','history'])assert.match(h.markup,new RegExp('data-tab="'+tab+'"'));
 h.click('tab',{tab:'schedule'});await flush();
-assert.match(h.markup,/data-author-tab="content"/);assert.match(h.markup,/시작할 때 받는 값/);assert.match(h.markup,/단계와 작업/);
+assert.match(h.markup,/data-author-tab="content"/);assert.match(h.markup,/시작할 때 물어볼 것/);assert.match(h.markup,/단계와 작업/);
 assert.deepEqual(h.draft().definition,original);assert.equal(h.draft().dirty,false);assert.equal(h.forms['ew-author-schedule'],undefined);
 h.click('run_mode',{id:'emergency'});h.click('schedule_tools');await flush();assert.equal(h.draft().definition.mode,'periodic');assert.equal(h.draft().dirty,false);
 h.dialogs.push({id:'release_date',name:'배포일',type:'datetime',scope:'run',required:true,options_source:'manual',options:''});
@@ -60,7 +60,7 @@ assert.equal(h.operations.length,0);assert.equal(h.writes.length,0);assert.equal
         self.run_contract(r"""
 (async()=>{
 const h=harness();await flush();
-const at=label=>h.markup.indexOf(label);assert.ok(at('시작할 때 받는 값')>=0);assert.ok(at('단계와 작업')>=0);assert.ok(at('시작할 때 받는 값')>at('단계와 작업'));
+const at=label=>h.markup.indexOf(label);assert.ok(at('시작할 때 물어볼 것')>=0);assert.ok(at('단계와 작업')>=0);assert.ok(at('시작할 때 물어볼 것')>at('단계와 작업'));
 h.dialogs.push({id:'incident_at',name:'발생 시각',type:'datetime',scope:'run',required:true,options_source:'manual',options:''});
 h.click('start_input_add');await flush();
 assert.equal(h.draft().definition.nodes.p.inputs[0].id,'incident_at');assert.equal(h.draft().definition.nodes.p.inputs[0].scope,'run');assert.equal(h.draft().definition.nodes.j.inputs.length,0);assert.equal(h.writes.length,0);

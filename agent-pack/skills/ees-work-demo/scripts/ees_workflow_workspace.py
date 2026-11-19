@@ -175,6 +175,20 @@ def _condition_valid(value, depth=0):
             (value['op'] not in ('in', 'not_in') or isinstance(value['value'], list)))
 
 
+def human_check_items(node):
+    """Items a person ticks one by one in a human job (2026-11-18).
+
+    Only a human job whose confirmation kind is the checklist has them. A tool job's
+    checklist still comes from its tool result, and a human checklist without items
+    keeps its earlier single confirmation.
+    """
+    items = node.get('confirmation_items')
+    if node.get('mode', 'human') != 'human' or node.get('result_block') != 'checklist' or not isinstance(items, list):
+        return []
+    return [{'id': item['id'], 'name': item['name']} for item in items
+            if isinstance(item, dict) and _id(item.get('id')) and isinstance(item.get('name'), str) and item['name'].strip()]
+
+
 def definition_check(definition, complete=True):
     """Validation is independent of the editor and never evaluates expressions."""
     errors, warnings = [], []
@@ -259,6 +273,14 @@ def definition_check(definition, complete=True):
             errors.append(f'{key}: 판정 완료 근거의 사용은 AI 결과 초안에만 허용됩니다.')
         if node.get('mode', 'human') not in ('human', 'tool', 'ai') or node.get('result_block', 'human_confirm') not in BLOCKS:
             errors.append(f'{key}: 실행 방법과 주 결과 블록을 확인해 주세요.')
+        if 'confirmation_items' in node:
+            # 'job' is the item ID of a whole-job confirmation and stays reserved.
+            items = node['confirmation_items']
+            if (not isinstance(items, list) or len(items) > 100
+                    or any(not isinstance(item, dict) or set(item) - {'id', 'name'} or not _id(item.get('id')) or item.get('id') == 'job'
+                           or not isinstance(item.get('name'), str) or not item['name'].strip() or len(item['name']) > 160 for item in items)
+                    or len({item['id'] for item in items}) != len(items)):
+                errors.append(f'{key}: 확인 항목의 이름과 개수를 확인해 주세요.')
         if (node.get('result_block') == 'item_verdict' or node.get('mode') == 'ai' and node.get('result_block') == 'ai_review') and node.get('human_confirmation', True) is not True:
             errors.append(f'{key}: AI 제안과 항목 판정은 사람 확인이 필요합니다.')
         if not isinstance(node.get('human_confirmation', True), bool):
@@ -1705,6 +1727,12 @@ class WorkspaceMixin:
                 # is still validated for earlier clients.
                 if body.get('mode') is not None: definition['mode'] = body['mode']
                 if body.get('execution_scope') is not None: definition['execution_scope'] = body['execution_scope']
+                # The create form asks for the purpose with the name. Storing it here keeps
+                # a new procedure from opening as an unsaved edit.
+                description = body.get('description')
+                if description is not None and not isinstance(description, str):
+                    _fail('invalid_definition', '업무 목적은 글로 입력해 주세요.')
+                if description and description.strip(): definition['description'] = description
             errors, _ = definition_check(definition, False)
             if not errors:
                 errors.extend(binding_errors(self, db, groups, definition, for_new=True))
@@ -1988,11 +2016,29 @@ class WorkspaceMixin:
                     if action == 'human_confirm':
                         if node.get('result_block') == 'change_request': _fail('request_confirmation_required', '등록된 EES 요청의 승인·확인·효과 확인 경로를 사용해 주세요.')
                         if node.get('mode', 'human') != 'human': _fail('result_confirmation_required', '현재 실행 결과의 revision을 확인해 판정해 주세요.')
-                        attempt = self._work_begin_attempt(db, actor, groups, row['id'], job_id, row['revision'], options_snapshot=options_snapshot)
-                        self._work_finish_attempt(db, attempt['id'], 'succeeded', {'human_input': attempt['inputs']})
-                        if evidence_access is not None: evidence_access.add(attempt['id'])
-                        job = db.execute('SELECT * FROM work_jobs WHERE run_id=? AND job_id=?', (row['id'], job_id)).fetchone()
-                        body = {**body, 'result_revision': attempt['number'], 'item_id': 'job', 'verdict': body.get('verdict', 'completed')}
+                        check_items = human_check_items(node)
+                        if check_items:
+                            # Each tick is one decision on one item; the ticks of a round share one attempt.
+                            if body.get('item_id') not in {item['id'] for item in check_items}:
+                                _fail('item_not_found', '확인할 항목을 선택해 주세요.')
+                            current = db.execute('SELECT * FROM work_attempts WHERE id=?', (job['current_attempt'],)).fetchone() if job['current_attempt'] else None
+                            listed = [item.get('id') for item in (json.loads(current['result']) or {}).get('items', [])] if current and current['result'] else []
+                            if (job['status'] == 'waiting_confirmation' and current and listed == [item['id'] for item in check_items]
+                                    and json.loads(current['inputs']) == self._work_snapshot(db, row, job_id)['inputs']):
+                                attempt = {'id': current['id'], 'number': current['number']}
+                            else:
+                                attempt = self._work_begin_attempt(db, actor, groups, row['id'], job_id, row['revision'], options_snapshot=options_snapshot)
+                                self._work_finish_attempt(db, attempt['id'], 'succeeded', {'human_input': attempt['inputs'],
+                                    'items': [{'id': item['id'], 'name': item['name'], 'required': True} for item in check_items]})
+                            if evidence_access is not None: evidence_access.add(attempt['id'])
+                            job = db.execute('SELECT * FROM work_jobs WHERE run_id=? AND job_id=?', (row['id'], job_id)).fetchone()
+                            body = {**body, 'result_revision': attempt['number'], 'verdict': 'completed'}
+                        else:
+                            attempt = self._work_begin_attempt(db, actor, groups, row['id'], job_id, row['revision'], options_snapshot=options_snapshot)
+                            self._work_finish_attempt(db, attempt['id'], 'succeeded', {'human_input': attempt['inputs']})
+                            if evidence_access is not None: evidence_access.add(attempt['id'])
+                            job = db.execute('SELECT * FROM work_jobs WHERE run_id=? AND job_id=?', (row['id'], job_id)).fetchone()
+                            body = {**body, 'result_revision': attempt['number'], 'item_id': 'job', 'verdict': body.get('verdict', 'completed')}
                     self._work_decide(db, actor, row, job, node, body)
             db.execute('UPDATE work_runs SET revision=revision+1,updated_at=? WHERE id=?', (now, row['id']))
             current = self._work_run(db, actor, groups, row['id'])

@@ -12,7 +12,7 @@ class EESWorkNativeBrowserTests(IntegratedNativeCase):
         self.assertEqual(self.state()['workflows'], [])
         self.assertEqual(self.state()['runs'], [])
         self.assertIn('게시된 업무 절차가 없습니다', self.text('#ees-work-entry'))
-        self.assertIn('업무 절차를 선택해 주세요', self.text('#ees-work-panel'))
+        self.assertIn('아직 업무가 없습니다', self.text('#ees-work-panel'))
         self.assertNotIn('내 업무', self.text('#ees-work-entry'))
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-action=my_work],.ew-my-work-empty,.ew-todo')"))
         self.assertNotIn('my_work', self.state())

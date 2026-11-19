@@ -1,0 +1,101 @@
+{
+ "date": "2026-11-18",
+ "what": "Product screens of the first-user flow after implementing mock 18 revision 2 without check items; same synthetic names as the mock",
+ "mock": {
+  "file": "docs/mockups/ees-work/design-mock-18-first-user.html",
+  "commit": "d83b7f1",
+  "sha256": "2170e2fa8023feb5ec14e757d1992de07dcc75a20f5c31fb778250dee1792355"
+ },
+ "product": {
+  "program": "0.11.3+ees.14",
+  "built_from": "work branch claude/brave-bell-p1tp73 working tree on top of d83b7f1 (sources of this commit), Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0",
+  "server": "tests/native_ui_fixture.py: the built frontend with synthetic sign-in, chat and model, and the real workflow service on a temporary database",
+  "account": "synthetic non-admin user with the manager and participant roles on EMS / all factories",
+  "window": "1920x1080 with the left menu open and the chat docked; two captures at 1366x768",
+  "taken_by": "one-off scripts outside the repository that click the real controls"
+ },
+ "captures": [
+  {
+   "file": "FU1.png",
+   "shows": "업무 처음 화면: 업무가 없을 때 새 업무 절차 단추",
+   "sha256": "1a8e7a78d7908f335ac1203367c7373ca079c2df5f73c71597db71f7ac898929"
+  },
+  {
+   "file": "FU1-pending.png",
+   "shows": "업무 처음 화면: 저장만 한 절차가 게시 전으로 나옴(가운데 목록, 왼쪽 메뉴 게시 전 n)",
+   "sha256": "d59d1ac881e2046e53cad34a96b7f834e40d20ee0b7682acac69936b16141ea8"
+  },
+  {
+   "file": "FU2.png",
+   "shows": "새 업무 절차: 범위 표시, 이름과 목적 나란히",
+   "sha256": "cabd3694b871ffef9b08a0d6bb2bc5f72c1510d0495e3c1d42b2469323d557da"
+  },
+  {
+   "file": "FU3.png",
+   "shows": "편집(빈 절차): 단계 이름 칸이 열려 있음, 게시 상태가 제목 옆",
+   "sha256": "7169d1db1578268ebb91356b475c3f064980468ce4e9313b3c766cf082baa48d"
+  },
+  {
+   "file": "FU3-stage-added.png",
+   "shows": "편집: 단계를 넣은 뒤 작업 이름 칸이 열려 있음",
+   "sha256": "5259f0f0d546bf435f7067beae6fc349a6b60b9015f21bde2802d16d15523b46"
+  },
+  {
+   "file": "FU4.png",
+   "shows": "작업: 왼쪽에 작업, 오른쪽에 확인 방식(선택 상자)·완료 기준. 확인 항목은 구현 범위 밖",
+   "sha256": "2a5519d71af9382f6337bcb597ae39e8c96ba0849dec2538c3c0cf9f47220859"
+  },
+  {
+   "file": "FU5.png",
+   "shows": "게시를 고른 뒤 저장 단추가 저장 · 게시",
+   "sha256": "d727af89cb28b9ebfc19acf68be1d4238705eeac490151a5c14ce0a2bf440589"
+  },
+  {
+   "file": "FU6.png",
+   "shows": "절차 첫 화면: 업무 목적과 시작",
+   "sha256": "5de49646e286bbb26a8ad0cb092e0417d9b391fbe4ba64fcf69a314ed8dd25cf"
+  },
+  {
+   "file": "FU7.png",
+   "shows": "단계 화면(시작 직후): 확인 필요 2, 작업마다 적합 단추와 화살표",
+   "sha256": "9d6379bfc63e8c39cea87b84198ce7da6a6bdd2b860a6e28b94d5d231c04f8d9"
+  },
+  {
+   "file": "FU7-menu.png",
+   "shows": "화살표 뒤의 다른 판정(미흡, 판단 불가)",
+   "sha256": "7c22cb7b80a440de034cb84d3908a0afae08ef35d1d41347fab4903d56f92d1a"
+  },
+  {
+   "file": "FU7-bad.png",
+   "shows": "미흡이 하나 있을 때: 끝내기가 나오지 않음",
+   "sha256": "20f61e7b83c30a729669ee2f59cb48780f6dd52a6808c977bf423e2831f8418a"
+  },
+  {
+   "file": "FU8.png",
+   "shows": "모든 작업이 적합일 때 끝내기",
+   "sha256": "2ecc40ba414b87e31882592ba26ee9721ceabeb91f4461287c3fa975acd78d4d"
+  },
+  {
+   "file": "FU8-after-finish.png",
+   "shows": "끝낸 뒤: 시작과 지난 회차 한 줄",
+   "sha256": "ebaade27efd3f019f809812b886fb3536de9606dda2ddc731d503c5414307fae"
+  },
+  {
+   "file": "FU4-1366.png",
+   "shows": "작업 화면, 1366×768(한 열)",
+   "sha256": "b27ce0fe5384a01f2667dd75583d7a08bded6a27c27c0969f8fe102ad70f91a1"
+  },
+  {
+   "file": "FU7-1366.png",
+   "shows": "단계 화면, 1366×768",
+   "sha256": "177c9778487e412e19befc054eb17811348d22d0cef23647d0a3bddea77c066d"
+  }
+ ],
+ "differences_from_mock": [
+  "끝내기 appears only when every job is completed or excluded (server rule); the mock drew it with a 미흡",
+  "FU4 keeps the confirmation select because check items are out of scope",
+  "the question-mark help beside 단계와 작업, the stage description row, 직접 판정 and 판정 기록 on job rows, and 게시된 업무 절차가 없습니다 in the left menu are kept",
+  "a decided answer stays a control with an arrow so it can be changed",
+  "the last finished run shows the product date format"
+ ]
+}

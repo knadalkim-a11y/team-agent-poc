@@ -1,0 +1,597 @@
+{
+ "file": "docs/mockups/ees-work/design-mock-18-first-user.html",
+ "sizes": {
+  "1920x1080": {
+   "FU1": {
+    "badge": "시안 2 · 저장·실행 안 됨 · FU1",
+    "docOverflow": 0,
+    "panelWidth": 1104,
+    "outside": 0,
+    "primary": {
+     "visible": true,
+     "disabled": false
+    },
+    "sentences": [
+     "아직 업무가 없습니다"
+    ],
+    "controls": [
+     {
+      "kind": "button",
+      "width": 92,
+      "what": "새 업무 절차"
+     }
+    ]
+   },
+   "FU2": {
+    "badge": "시안 2 · 저장·실행 안 됨 · FU2",
+    "docOverflow": 0,
+    "panelWidth": 1104,
+    "outside": 0,
+    "primary": {
+     "visible": true,
+     "disabled": true
+    },
+    "sentences": [],
+    "controls": [
+     {
+      "kind": "name",
+      "width": 360,
+      "what": "name"
+     },
+     {
+      "kind": "text",
+      "width": 550,
+      "what": "description"
+     },
+     {
+      "kind": "button",
+      "width": 46,
+      "what": "fu-create"
+     }
+    ]
+   },
+   "FU3": {
+    "badge": "시안 2 · 저장·실행 안 됨 · FU3",
+    "docOverflow": 0,
+    "panelWidth": 1104,
+    "outside": 0,
+    "primary": {
+     "visible": true,
+     "disabled": false
+    },
+    "sentences": [],
+    "controls": [
+     {
+      "kind": "name",
+      "width": 360,
+      "what": ""
+     },
+     {
+      "kind": "name",
+      "width": 480,
+      "what": "새 단계 이름"
+     },
+     {
+      "kind": "text",
+      "width": 534,
+      "what": "매주 월요일 설비 상태를 확인하고 이상을 기"
+     },
+     {
+      "kind": "button",
+      "width": 54,
+      "what": "추가"
+     },
+     {
+      "kind": "button",
+      "width": 50,
+      "what": "fu-save"
+     }
+    ]
+   },
+   "FU4": {
+    "badge": "시안 2 · 저장·실행 안 됨 · FU4",
+    "docOverflow": 0,
+    "panelWidth": 1104,
+    "outside": 0,
+    "primary": {
+     "visible": true,
+     "disabled": false
+    },
+    "sentences": [],
+    "controls": [
+     {
+      "kind": "name",
+      "width": 480,
+      "what": "name"
+     },
+     {
+      "kind": "name",
+      "width": 358,
+      "what": "확인 항목 1"
+     },
+     {
+      "kind": "name",
+      "width": 358,
+      "what": "확인 항목 2"
+     },
+     {
+      "kind": "name",
+      "width": 358,
+      "what": "확인 항목 3"
+     },
+     {
+      "kind": "name",
+      "width": 358,
+      "what": "새 확인 항목"
+     },
+     {
+      "kind": "text",
+      "width": 480,
+      "what": "job_guidance"
+     },
+     {
+      "kind": "text",
+      "width": 422,
+      "what": ""
+     },
+     {
+      "kind": "choice",
+      "width": 112,
+      "what": "사람이 확인"
+     },
+     {
+      "kind": "choice",
+      "width": 112,
+      "what": "도구로 처리"
+     },
+     {
+      "kind": "choice",
+      "width": 112,
+      "what": "한 번에 확인"
+     },
+     {
+      "kind": "choice",
+      "width": 112,
+      "what": "항목마다 체크"
+     },
+     {
+      "kind": "button",
+      "width": 50,
+      "what": "fu-save"
+     }
+    ]
+   },
+   "FU5": {
+    "badge": "시안 2 · 저장·실행 안 됨 · FU5",
+    "docOverflow": 0,
+    "panelWidth": 1104,
+    "outside": 0,
+    "primary": {
+     "visible": true,
+     "disabled": false
+    },
+    "sentences": [],
+    "controls": [
+     {
+      "kind": "name",
+      "width": 360,
+      "what": ""
+     },
+     {
+      "kind": "text",
+      "width": 534,
+      "what": "매주 월요일 설비 상태를 확인하고 이상을 기"
+     },
+     {
+      "kind": "button",
+      "width": 85,
+      "what": "fu-save"
+     }
+    ]
+   },
+   "FU6": {
+    "badge": "시안 2 · 저장·실행 안 됨 · FU6",
+    "docOverflow": 0,
+    "panelWidth": 1104,
+    "outside": 0,
+    "primary": {
+     "visible": true,
+     "disabled": false
+    },
+    "sentences": [
+     "매주 월요일 설비 상태를 확인하고 이상을 기록합니다."
+    ],
+    "controls": [
+     {
+      "kind": "button",
+      "width": 116,
+      "what": "시작"
+     }
+    ]
+   },
+   "FU7": {
+    "badge": "시안 2 · 저장·실행 안 됨 · FU7",
+    "docOverflow": 0,
+    "panelWidth": 1104,
+    "outside": 0,
+    "primary": {
+     "visible": true,
+     "disabled": false
+    },
+    "sentences": [
+     "펌프, 밸브, 배관을 차례로 봅니다.",
+     "이상이 있으면 내용을 적습니다."
+    ],
+    "controls": [
+     {
+      "kind": "button",
+      "width": 73,
+      "what": "적합▾"
+     }
+    ]
+   },
+   "FU8": {
+    "badge": "시안 2 · 저장·실행 안 됨 · FU8",
+    "docOverflow": 0,
+    "panelWidth": 1104,
+    "outside": 0,
+    "primary": {
+     "visible": true,
+     "disabled": false
+    },
+    "sentences": [
+     "펌프, 밸브, 배관을 차례로 봅니다.",
+     "이상이 있으면 내용을 적습니다."
+    ],
+    "controls": [
+     {
+      "kind": "button",
+      "width": 108,
+      "what": "끝내기"
+     }
+    ]
+   }
+  },
+  "1366x768": {
+   "FU1": {
+    "badge": "시안 2 · 저장·실행 안 됨 · FU1",
+    "docOverflow": 0,
+    "panelWidth": 690,
+    "outside": 0,
+    "primary": {
+     "visible": true,
+     "disabled": false
+    },
+    "sentences": [
+     "아직 업무가 없습니다"
+    ],
+    "controls": [
+     {
+      "kind": "button",
+      "width": 92,
+      "what": "새 업무 절차"
+     }
+    ]
+   },
+   "FU2": {
+    "badge": "시안 2 · 저장·실행 안 됨 · FU2",
+    "docOverflow": 0,
+    "panelWidth": 690,
+    "outside": 0,
+    "primary": {
+     "visible": true,
+     "disabled": true
+    },
+    "sentences": [],
+    "controls": [
+     {
+      "kind": "name",
+      "width": 480,
+      "what": "name"
+     },
+     {
+      "kind": "text",
+      "width": 588,
+      "what": "description"
+     },
+     {
+      "kind": "button",
+      "width": 46,
+      "what": "fu-create"
+     }
+    ]
+   },
+   "FU3": {
+    "badge": "시안 2 · 저장·실행 안 됨 · FU3",
+    "docOverflow": 0,
+    "panelWidth": 690,
+    "outside": 0,
+    "primary": {
+     "visible": true,
+     "disabled": false
+    },
+    "sentences": [],
+    "controls": [
+     {
+      "kind": "name",
+      "width": 280,
+      "what": ""
+     },
+     {
+      "kind": "name",
+      "width": 480,
+      "what": "새 단계 이름"
+     },
+     {
+      "kind": "text",
+      "width": 578,
+      "what": "매주 월요일 설비 상태를 확인하고 이상을 기"
+     },
+     {
+      "kind": "button",
+      "width": 54,
+      "what": "추가"
+     },
+     {
+      "kind": "button",
+      "width": 50,
+      "what": "fu-save"
+     }
+    ]
+   },
+   "FU4": {
+    "badge": "시안 2 · 저장·실행 안 됨 · FU4",
+    "docOverflow": 0,
+    "panelWidth": 690,
+    "outside": 0,
+    "primary": {
+     "visible": true,
+     "disabled": false
+    },
+    "sentences": [],
+    "controls": [
+     {
+      "kind": "name",
+      "width": 480,
+      "what": "name"
+     },
+     {
+      "kind": "name",
+      "width": 480,
+      "what": "확인 항목 1"
+     },
+     {
+      "kind": "name",
+      "width": 480,
+      "what": "확인 항목 2"
+     },
+     {
+      "kind": "name",
+      "width": 480,
+      "what": "확인 항목 3"
+     },
+     {
+      "kind": "name",
+      "width": 480,
+      "what": "새 확인 항목"
+     },
+     {
+      "kind": "text",
+      "width": 616,
+      "what": "job_guidance"
+     },
+     {
+      "kind": "text",
+      "width": 616,
+      "what": ""
+     },
+     {
+      "kind": "choice",
+      "width": 112,
+      "what": "사람이 확인"
+     },
+     {
+      "kind": "choice",
+      "width": 112,
+      "what": "도구로 처리"
+     },
+     {
+      "kind": "choice",
+      "width": 112,
+      "what": "한 번에 확인"
+     },
+     {
+      "kind": "choice",
+      "width": 112,
+      "what": "항목마다 체크"
+     },
+     {
+      "kind": "button",
+      "width": 50,
+      "what": "fu-save"
+     }
+    ]
+   },
+   "FU5": {
+    "badge": "시안 2 · 저장·실행 안 됨 · FU5",
+    "docOverflow": 0,
+    "panelWidth": 690,
+    "outside": 0,
+    "primary": {
+     "visible": true,
+     "disabled": false
+    },
+    "sentences": [],
+    "controls": [
+     {
+      "kind": "name",
+      "width": 280,
+      "what": ""
+     },
+     {
+      "kind": "text",
+      "width": 578,
+      "what": "매주 월요일 설비 상태를 확인하고 이상을 기"
+     },
+     {
+      "kind": "button",
+      "width": 85,
+      "what": "fu-save"
+     }
+    ]
+   },
+   "FU6": {
+    "badge": "시안 2 · 저장·실행 안 됨 · FU6",
+    "docOverflow": 0,
+    "panelWidth": 690,
+    "outside": 0,
+    "primary": {
+     "visible": true,
+     "disabled": false
+    },
+    "sentences": [
+     "매주 월요일 설비 상태를 확인하고 이상을 기록합니다."
+    ],
+    "controls": [
+     {
+      "kind": "button",
+      "width": 116,
+      "what": "시작"
+     }
+    ]
+   },
+   "FU7": {
+    "badge": "시안 2 · 저장·실행 안 됨 · FU7",
+    "docOverflow": 0,
+    "panelWidth": 690,
+    "outside": 0,
+    "primary": {
+     "visible": true,
+     "disabled": false
+    },
+    "sentences": [
+     "펌프, 밸브, 배관을 차례로 봅니다.",
+     "이상이 있으면 내용을 적습니다."
+    ],
+    "controls": [
+     {
+      "kind": "button",
+      "width": 73,
+      "what": "적합▾"
+     }
+    ]
+   },
+   "FU8": {
+    "badge": "시안 2 · 저장·실행 안 됨 · FU8",
+    "docOverflow": 0,
+    "panelWidth": 690,
+    "outside": 0,
+    "primary": {
+     "visible": true,
+     "disabled": false
+    },
+    "sentences": [
+     "펌프, 밸브, 배관을 차례로 봅니다.",
+     "이상이 있으면 내용을 적습니다."
+    ],
+    "controls": [
+     {
+      "kind": "button",
+      "width": 108,
+      "what": "끝내기"
+     }
+    ]
+   }
+  }
+ },
+ "flow": [
+  {
+   "name": "create is off until a name is typed",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "new procedure opens saved",
+   "ok": true,
+   "detail": "저장됨"
+  },
+  {
+   "name": "saved-only procedure is listed as 게시 전 on the work side",
+   "ok": true,
+   "detail": "아직 업무가 없습니다 새 업무 절차 게시 전 일일 펌프 점검 단계 0 · 작업 0"
+  },
+  {
+   "name": "stage name field is open and focused",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "job name field is open and focused",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "job opens with 한 번에 확인 chosen",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "job row shows the item count",
+   "ok": true,
+   "detail": "사람이 확인 · 항목 3개"
+  },
+  {
+   "name": "save button reads 저장 · 게시 after choosing 게시",
+   "ok": true,
+   "detail": "저장 · 게시"
+  },
+  {
+   "name": "saved and published",
+   "ok": true,
+   "detail": "저장됨"
+  },
+  {
+   "name": "work overview shows purpose and 시작",
+   "ok": true,
+   "detail": "일일 펌프 점검 매일 아침 펌프 세 대를 점검합니다. 시작 적용 대상 전체 공장 · EMS 업무 단계 아침 점검 작업 2개"
+  },
+  {
+   "name": "start opens the stage with no dialog",
+   "ok": true,
+   "detail": "작업 2개 0 / 2 완료 확인 필요 2"
+  },
+  {
+   "name": "ticking every item completes the job",
+   "ok": true,
+   "detail": "작업 2개 1 / 2 완료 확인 필요 1 적합 1"
+  },
+  {
+   "name": "other verdicts are behind the arrow",
+   "ok": true,
+   "detail": "미흡 판단 불가"
+  },
+  {
+   "name": "끝내기 appears when everything is confirmed",
+   "ok": true,
+   "detail": "작업 2개 2 / 2 완료 적합 1 미흡 1 끝내기"
+  },
+  {
+   "name": "after 끝내기 the work can be started again",
+   "ok": true,
+   "detail": "일일 펌프 점검 매일 아침 펌프 세 대를 점검합니다. 지난 회차 · 11.18 07:25 끝남 시작 적용 대상 전체 공장 · EMS 업무 단계 아침 점검 작업 2개"
+  },
+  {
+   "name": "second start begins clean",
+   "ok": true,
+   "detail": "작업 2개 0 / 2 완료 확인 필요 2"
+  }
+ ],
+ "pageErrors": [],
+ "consoleErrors": [],
+ "requests": [],
+ "checks": {
+  "total": 99,
+  "passed": 99,
+  "failed": []
+ }
+}

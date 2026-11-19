@@ -1,0 +1,131 @@
+{
+ "revision": 2,
+ "status": "review_mock_ready",
+ "date": "2026-11-18",
+ "request": "각 단계별로 완성도를 높이고 넘어가고싶어. … 2단계의 완성도 기준은 얼마나 비개발자/첫 사용자 들이 사용하기 쉽냐가 관건이거든",
+ "go_ahead": "권장대로 진행하되, ui에 장황한 설명을 적어서 첫사용자들을 안내하는 방식은 지양해줘. 최대한 ux로 해결했으면 좋겠어.",
+ "base_commit": "1c01ae6",
+ "implementation_revision": null,
+ "mock": {
+  "file": "docs/mockups/ees-work/design-mock-18-first-user.html",
+  "sha256": "2170e2fa8023feb5ec14e757d1992de07dcc75a20f5c31fb778250dee1792355",
+  "bytes": 544054,
+  "source": "docs/mockups/ees-work/design-mock-src/18-first-user.html",
+  "source_sha256": "9bb5dc2f9cfb1730ae147ceaecebfe3483c9028324be6fdb9e2816a7947b2240",
+  "product_css": {
+   "chat-theme.css": "b0c9b3298702fe77d758839265370080b9cf33f403c558c96dc4e95e114f222e",
+   "ees-work-launcher.css": "41b5b75bc0a4ad0c1f0e92f6aeb9eaf998147db83e33ab1544abc4d79033ec64"
+  }
+ },
+ "screens": {
+  "FU1": "처음 화면",
+  "FU2": "새 업무 절차",
+  "FU3": "편집(빈 절차)",
+  "FU4": "작업 · 확인 항목",
+  "FU5": "게시",
+  "FU6": "업무 첫 화면 · 시작",
+  "FU7": "단계 화면 · 점검",
+  "FU8": "끝내고 다시"
+ },
+ "window": {
+  "1920x1080": "왼쪽 메뉴 256px 펼침, 가운데 1104px, 대화 560px 열림",
+  "1366x768": "왼쪽 메뉴 256px 펼침(제품은 이 폭에서 그림만 남긴다. 이 시안은 재현하지 않음), 가운데 690px, 대화 420px"
+ },
+ "captures": [
+  {
+   "file": "FU1.png",
+   "shows": "처음 화면: 업무가 없을 때 새 업무 절차 단추",
+   "sha256": "ae0a055f82e2719f999ce8b9ba797376c9788195b64b239700a9801a0e9d28d3"
+  },
+  {
+   "file": "FU1-pending.png",
+   "shows": "처음 화면: 저장만 한 절차가 게시 전으로 나옴(가운데 목록과 왼쪽 메뉴)",
+   "sha256": "a7bc3416f41ab1f1bdecaada1f2fb2eeff144b5c61977c0095e2c947e51c11bc"
+  },
+  {
+   "file": "FU2.png",
+   "shows": "새 업무 절차: 이름·목적 입력, 범위는 작은 표시",
+   "sha256": "b229400edde8797d10a69548ac30eb176576df923394c9f1d2847870fef3d20d"
+  },
+  {
+   "file": "FU3.png",
+   "shows": "편집(빈 절차): 단계 이름 칸이 열려 있음",
+   "sha256": "a9778a28cfc15eb390cb17eb7c38f7f4e14730f78b01ace19635848e276d1578"
+  },
+  {
+   "file": "FU3-stage-added.png",
+   "shows": "편집: 단계를 넣은 뒤 작업 이름 칸이 열려 있음",
+   "sha256": "ac2aef02107433f534a33dae6d3b80c4126e7ccd5032b7c9f57af9d967d0499a"
+  },
+  {
+   "file": "FU4.png",
+   "shows": "작업: 왼쪽에 작업, 오른쪽에 확인 방식과 확인 항목",
+   "sha256": "6cfa7ac47300bc52beb7b9ade8d0898b01363bd37ee2344bb8b2425e8f8192de"
+  },
+  {
+   "file": "FU5.png",
+   "shows": "게시: 게시를 고르면 저장 단추가 저장 · 게시",
+   "sha256": "edb1ff39714d4bd5a03b2e79a7fb022aee5181873da37075951c599ad8e60071"
+  },
+  {
+   "file": "FU6.png",
+   "shows": "업무 첫 화면: 목적과 시작 단추",
+   "sha256": "4a4292d5bd5607e7131f8c08a7b2bd06c6ad65146c8d8abf570e9cd71db747c0"
+  },
+  {
+   "file": "FU7.png",
+   "shows": "단계 화면: 항목 체크, 한 번에 확인하는 작업의 적합 단추",
+   "sha256": "40104d49a8df93eaf99bd2a8456498ce29471bf6d7e67393b1d7751216d12485"
+  },
+  {
+   "file": "FU8.png",
+   "shows": "모두 확인한 뒤 끝내기",
+   "sha256": "ec8a74613cd250b11043f0ffeb7fcbfc515007961a43ae7ccb6ee99d67875987"
+  },
+  {
+   "file": "FU8-after-finish.png",
+   "shows": "끝낸 뒤: 시작 단추와 지난 회차 한 줄",
+   "sha256": "83075685caf174e23d2b2424d80605a8eae695c0dafae0c5cedb27567044b1f4"
+  },
+  {
+   "file": "FU4-1366.png",
+   "shows": "작업 화면, 1366×768: 한 열, 지금 제품과 같은 순서",
+   "sha256": "0321636f856e063c3da937727b6a09a1d73633e390086b601f885a851bc6f20c"
+  },
+  {
+   "file": "FU7-1366.png",
+   "shows": "단계 화면, 1366×768",
+   "sha256": "5ec406f702f563d43eab6f3b3d112ddfbd518bcfd42cacbbaa78f102f5a0cc91"
+  },
+  {
+   "file": "FU3-1366.png",
+   "shows": "편집(빈 절차), 1366×768: 한 열",
+   "sha256": "cc34844f2436908a2a0623622a35ab566b15ead34fed5ec982579b75b277a3ed"
+  }
+ ],
+ "validation": "evals/artifacts/first-user-usability-20261118/mock-validation-report.json",
+ "not_done": [
+  "Figma 반영",
+  "사내 PC에서 열기",
+  "사용자 확인",
+  "실제 제품과의 대조(구현 전)",
+  "480px 폭",
+  "왼쪽 메뉴가 접힌 상태"
+ ],
+ "feedback": {
+  "2": "목업을 보니 화면을 넓게쓰는건 좋은데, 화면을 넓게쓰기위해 오브젝트?라고 해야하나 버튼같은것들을 좀 억지로 늘려놓은느낌이네."
+ },
+ "previous": {
+  "1": {
+   "commit": "1c01ae6",
+   "sha256": "33d7ac6486fdded1c04f020f12021fc23d3e11796f468523d8767db5f5633495"
+  }
+ },
+ "sizes": {
+  "name_input_max": 480,
+  "prose_input_max": 720,
+  "check_item_row_max": 560,
+  "choice": "as wide as its label, at least 112px each",
+  "side_by_side": "name | purpose from 720px of editor width, job in two groups from 864px"
+ }
+}

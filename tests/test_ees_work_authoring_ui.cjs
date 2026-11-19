@@ -110,7 +110,7 @@ function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObser
    h.buttons=h.buttons.filter(b=>b.dataset.authorAction!=='schedule_preview');for(const m of next.matchAll(/<button\b([^>]*)>/g)){const attributes=controlAttributes(m[1]);h.buttons.push(decorate({tagName:'BUTTON',className:attr(m[1],'class'),disabled:/\bdisabled\b/.test(m[1]),mutation:/data-mutation/.test(m[1])},attributes));}
   }});}
  },get innerHTML(){return h.markup;}};
- const callbacks={startContextChanged:value=>h.startContexts.push(value),read:async query=>{h.reads.push(copy(query));if(h.readOverride)return h.readOverride(query);return query.workflow_id?{workflow:copy(h.workflows.get(query.workflow_id)),capabilities:copy(h.state.capabilities)}:{workflows:copy([...h.workflows.values()]),capabilities:copy(h.state.capabilities)};},command:async body=>{h.writes.push(copy(body));if(h.writeOverride)return h.writeOverride(body);if(body.action==='create_workflow'){const id='created-'+h.writes.length,draft=definition(id);draft.name=body.name;draft.system_id=body.system_id;draft.nodes={p:{id:'p',type:'p',name:body.name,parent:null,children:[]}};const record={id,name:body.name,system_id:body.system_id,can_manage:true,revision:1,published_version:null,draft,validation:null,versions:[]};h.workflows.set(id,record);h.state.workflows=[...h.workflows.values()];return {ok:true,workflow_id:id,revision:1,workflow:copy(record)};}const record=h.workflows.get(body.workflow_id);if(body.action==='save_draft'){record.draft=copy(body.definition);record.revision++;record.validation=null;if(body.publication_state==='published'){record.published_version=Math.max(record.published_version||0,...record.versions.map(v=>v.version))+1;record.published=copy(record.draft);record.versions.push({version:record.published_version,definition:copy(record.draft)});}else if(body.publication_state==='unpublished')record.published_version=null;return {ok:true,revision:record.revision,published_version:record.published_version};}if(body.action==='validate_workflow'){record.validation={revision:record.revision,errors:[],warnings:[]};return {ok:true,revision:record.revision,validation:copy(record.validation)};}if(body.action==='unpublish_workflow'){record.revision++;record.published_version=null;record.validation=null;return {ok:true,revision:record.revision};}if(body.action==='publish_workflow'){record.revision++;record.published_version=(record.published_version || 0)+1;record.validation=null;return {ok:true,revision:record.revision,version:record.published_version};}return {ok:true};},operationsRead:async query=>{(h.operationReads ||= []).push(copy(query));return h.operationReadOverride?h.operationReadOverride(query):{reviewers:copy(h.state.reviewers || []),can_author_direct:h.state.can_author_direct ?? h.state.operations?.can_author_direct ?? false};},operationsCommand:async body=>{h.operations.push(copy(body));if(h.operationOverride)return h.operationOverride(body);return {ok:true,tool:{...copy(body.tool || h.state.tools.find(t=>t.id===body.tool_contract_id)),id:'tool',revision:2,state:body.action==='tool_submit'?'review_requested':'draft'}};},models:async()=>{h.modelReads=(h.modelReads || 0)+1;return h.modelsOverride?h.modelsOverride():{models:[{id:'m',name:'Native 모델'}],preferred:['m']};},propose:async body=>{h.proposals.push(body);return h.proposeOverride?h.proposeOverride(body):{workflow_id:body.workflow_id,base_revision:body.expected_revision,context_id:body.context_id,definition:{...copy(body.definition),name:'AI 제안'},summary:'초안 제안'};},openWorkflow:async id=>{h.selection.workflow_id=id;h.state.workflow=h.workflows.get(id) || null;h.designer.render({state:h.state,selection:h.selection,host});},changed:async()=>{h.state.workflow=h.workflows.get(h.selection.workflow_id) || null;h.designer.render({state:h.state,selection:h.selection,host});}};
+ const callbacks={startContextChanged:value=>h.startContexts.push(value),read:async query=>{h.reads.push(copy(query));if(h.readOverride)return h.readOverride(query);return query.workflow_id?{workflow:copy(h.workflows.get(query.workflow_id)),capabilities:copy(h.state.capabilities)}:{workflows:copy([...h.workflows.values()]),capabilities:copy(h.state.capabilities)};},command:async body=>{h.writes.push(copy(body));if(h.writeOverride)return h.writeOverride(body);if(body.action==='create_workflow'){const id='created-'+h.writes.length,draft=definition(id);draft.name=body.name;draft.system_id=body.system_id;if(body.description&&!h.ignoreCreateDescription)draft.description=body.description;draft.nodes={p:{id:'p',type:'p',name:body.name,parent:null,children:[]}};const record={id,name:body.name,system_id:body.system_id,can_manage:true,revision:1,published_version:null,draft,validation:null,versions:[]};h.workflows.set(id,record);h.state.workflows=[...h.workflows.values()];return {ok:true,workflow_id:id,revision:1,workflow:copy(record)};}const record=h.workflows.get(body.workflow_id);if(body.action==='save_draft'){record.draft=copy(body.definition);record.revision++;record.validation=null;if(body.publication_state==='published'){record.published_version=Math.max(record.published_version||0,...record.versions.map(v=>v.version))+1;record.published=copy(record.draft);record.versions.push({version:record.published_version,definition:copy(record.draft)});}else if(body.publication_state==='unpublished')record.published_version=null;return {ok:true,revision:record.revision,published_version:record.published_version};}if(body.action==='validate_workflow'){record.validation={revision:record.revision,errors:[],warnings:[]};return {ok:true,revision:record.revision,validation:copy(record.validation)};}if(body.action==='unpublish_workflow'){record.revision++;record.published_version=null;record.validation=null;return {ok:true,revision:record.revision};}if(body.action==='publish_workflow'){record.revision++;record.published_version=(record.published_version || 0)+1;record.validation=null;return {ok:true,revision:record.revision,version:record.published_version};}return {ok:true};},operationsRead:async query=>{(h.operationReads ||= []).push(copy(query));return h.operationReadOverride?h.operationReadOverride(query):{reviewers:copy(h.state.reviewers || []),can_author_direct:h.state.can_author_direct ?? h.state.operations?.can_author_direct ?? false};},operationsCommand:async body=>{h.operations.push(copy(body));if(h.operationOverride)return h.operationOverride(body);return {ok:true,tool:{...copy(body.tool || h.state.tools.find(t=>t.id===body.tool_contract_id)),id:'tool',revision:2,state:body.action==='tool_submit'?'review_requested':'draft'}};},models:async()=>{h.modelReads=(h.modelReads || 0)+1;return h.modelsOverride?h.modelsOverride():{models:[{id:'m',name:'Native 모델'}],preferred:['m']};},propose:async body=>{h.proposals.push(body);return h.proposeOverride?h.proposeOverride(body):{workflow_id:body.workflow_id,base_revision:body.expected_revision,context_id:body.context_id,definition:{...copy(body.definition),name:'AI 제안'},summary:'초안 제안'};},openWorkflow:async id=>{h.selection.workflow_id=id;h.state.workflow=h.workflows.get(id) || null;h.designer.render({state:h.state,selection:h.selection,host});},changed:async()=>{h.state.workflow=h.workflows.get(h.selection.workflow_id) || null;h.designer.render({state:h.state,selection:h.selection,host});}};
  // Model only the existing dialog host lifecycle. Candidate/value listeners below
  // are the product handlers; the fixture does not apply drafts on their behalf.
  function toolDialog(options){
@@ -510,7 +510,7 @@ test('named blank creation sends only a name and system and opens content',async
  const h=harness();await beginCreation(h,'  직접 작성  ');await submitCreation(h);
  assert.equal(h.writes.length,1);assert.equal(h.writes[0].name,'직접 작성');assert.equal(h.writes[0].system_id,'EMS');
  for(const field of ['template_id','definition','description','factory_id','category','mode','execution_scope','schedule'])assert.equal(Object.hasOwn(h.writes[0],field),false,field);
- assert.equal(h.selection.workflow_id,'created-1');assert.match(h.markup,/업무 내용/);assert.match(h.markup,/아직 단계가 없습니다/);assert.doesNotMatch(h.markup,/class="ew-summary-card"/);assert.equal(h.operations.length,0);
+ assert.equal(h.selection.workflow_id,'created-1');assert.match(h.markup,/업무 내용/);assert.doesNotMatch(h.markup,/아직 단계가 없습니다/);assert.match(inlineMarkup(h),/<input\b[^>]*name="name"[^>]*aria-label="새 단계 이름"[^>]*placeholder="단계 이름 · 예: 점검"/);assert.equal(h.document.activeElement,h.forms['ew-stage-editor'].controls.find(field=>field.name==='name'));assert.doesNotMatch(h.markup,/class="ew-summary-card"/);assert.equal(h.operations.length,0);
 });
 test('empty or whitespace name never creates a procedure',async()=>{
  for(const name of ['','   ']){const h=harness();await beginCreation(h,name);assert.equal(actionButton(h,'procedure_create').disabled,true);h.designer.handleEvent({type:'submit',target:h.forms['ew-procedure-create']});await flush();assert.equal(h.writes.length,0);assert.match(h.markup,/업무 절차 이름을 입력/);}
@@ -726,7 +726,7 @@ test('content renders 0 1 3 and 6 stages initially collapsed with exactly one ex
   assert.equal(h.buttons.filter(button=>button.getAttribute('aria-expanded')==='true').length,0);
   assert.equal(h.buttons.filter(button=>button.dataset.authorAction==='node'&&button.dataset.id).length,0);
   assert.match(h.markup,new RegExp('<small>'+count+'개 단계</small>'));
-  if(!count){assert.match(h.markup,/아직 단계가 없습니다. 먼저 단계를 추가하세요./);continue;}
+  if(!count){assert.doesNotMatch(h.markup,/아직 단계가 없습니다/);assert.match(inlineMarkup(h),/<i aria-hidden="true">1<\/i><input\b[^>]*name="name"[^>]*placeholder="단계 이름 · 예: 점검"/);assert.deepEqual([...inlineMarkup(h).matchAll(/data-author-action="(inline_[^"]+)"/g)].map(match=>match[1]),['inline_apply']);assert.equal(h.buttons.some(button=>button.dataset.authorAction==='add_stage'),false);assert.equal(h.draft().dirty,false);continue;}
   h.click('stage_toggle',{id:'t0'});await flush();assert.equal(stageButton(h,'t0').getAttribute('aria-expanded'),'true');
   if(count>1){h.click('stage_toggle',{id:'t1'});await flush();assert.equal(stageButton(h,'t0').getAttribute('aria-expanded'),'false');assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');}
   const last=count>1?'t1':'t0';assert.equal(h.buttons.filter(button=>button.dataset.authorAction==='stage_toggle'&&button.getAttribute('aria-expanded')==='true').length,1);
@@ -802,7 +802,7 @@ for(const kind of ['stage','add_stage','add_job']){
  test('C61 '+kind+' same revision keeps Apply and submit while name validation remains field-specific',async()=>{
   const h=harness();installDefinition(h,stagedDefinition(2,1));await beginInline(h,kind);const before=h.draft();h.render();assert.ok(h.buttons.find(button=>button.dataset.authorAction==='inline_apply'));assert.doesNotMatch(inlineMarkup(h),/저장된 초안이 바뀌었습니다/);
   for(const value of ['', '긴'.repeat(161)]){h.field('name',value);await submitInline(h);const html=inlineMarkup(h);assert.match(html,/<input\b[^>]*name="name"[^>]*aria-invalid="true"[^>]*aria-describedby="ew-stage-name-error"/);assert.match(html,/id="ew-stage-name-error"/);assert.match(html,value?/이름은 160자 이내로 입력해 주세요./:kind==='add_job'?/작업 이름을 입력해 주세요./:/단계 이름을 입력해 주세요./);assert.deepEqual(h.draft(),before);}
-  h.field('name','같은 버전의 정상 이름');await submitInline(h);assert.equal(h.forms['ew-stage-editor'],undefined);assert.equal(Object.values(h.draft().definition.nodes).filter(node=>node.name==='같은 버전의 정상 이름').length,1);assert.equal(h.draft().revision,1);assert.equal(h.draft().dirty,true);assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);
+  h.field('name','같은 버전의 정상 이름');await submitInline(h);if(kind==='add_stage')assert.match(inlineMarkup(h),/<input\b[^>]*name="name"[^>]*value=""[^>]*aria-label="새 작업 이름"/);else assert.equal(h.forms['ew-stage-editor'],undefined);assert.equal(Object.values(h.draft().definition.nodes).filter(node=>node.name==='같은 버전의 정상 이름').length,1);assert.equal(h.draft().revision,1);assert.equal(h.draft().dirty,true);assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);
  });
 }
 test('same revision polls allow inline apply and same revision proposal replacement closes only a clean form',async()=>{
@@ -823,9 +823,9 @@ test('unchanged inline form closes on navigation while Escape cancels changed va
 });
 test('stage and job creation require names and retain existing add defaults without writes',async()=>{
  const h=harness();installDefinition(h,stagedDefinition(0));const expected={description:'',instructions:'',children:[],mode:'human',inputs:[],result_block:'human_confirm',deps:[],human_confirmation:true,completion:{rule:''}};
- h.click('add_stage');await flush();assert.equal(Object.values(h.draft().definition.nodes).length,1);h.click('inline_apply');await flush();assert.match(h.markup,/class="ew-inline-error"/);assert.match(h.markup,/단계 이름을 입력해 주세요./);assert.equal(Object.values(h.draft().definition.nodes).length,1);
- await h.inline('  운영 인계  ');const stage=Object.values(h.draft().definition.nodes).find(node=>node.type==='t');assert.deepEqual(stage,{id:stage.id,type:'t',parent:'p',name:'운영 인계',...expected});assert.deepEqual(h.draft().definition.nodes.p.children,[stage.id]);assert.equal(stageButton(h,stage.id).getAttribute('aria-expanded'),'true');assert.equal(h.document.activeElement.dataset.authorAction,'add_job');assert.equal(h.document.activeElement.dataset.parent,stage.id);assert.match(h.markup,/아직 작업이 없습니다/);
- h.click('add_job',{parent:stage.id});await flush();assert.equal(Object.values(h.draft().definition.nodes).filter(node=>node.type==='j').length,0);h.field('name','   ');h.click('inline_apply');await flush();assert.match(h.markup,/작업 이름을 입력해 주세요./);await h.inline('첫 인계 작업');const job=Object.values(h.draft().definition.nodes).find(node=>node.type==='j');assert.deepEqual(job,{id:job.id,type:'j',parent:stage.id,name:'첫 인계 작업',...expected});assert.deepEqual(h.draft().definition.nodes[stage.id].children,[job.id]);assert.ok(h.forms['ew-author-node']);assert.equal(h.draft().dirty,true);assert.equal(h.writes.length,0);
+ assert.equal(h.buttons.some(button=>['add_stage','inline_cancel'].includes(button.dataset.authorAction)),false);assert.equal(Object.values(h.draft().definition.nodes).length,1);h.click('inline_apply');await flush();assert.match(h.markup,/class="ew-inline-error"/);assert.match(h.markup,/단계 이름을 입력해 주세요./);assert.equal(Object.values(h.draft().definition.nodes).length,1);
+ await h.inline('  운영 인계  ');const stage=Object.values(h.draft().definition.nodes).find(node=>node.type==='t');assert.deepEqual(stage,{id:stage.id,type:'t',parent:'p',name:'운영 인계',...expected});assert.deepEqual(h.draft().definition.nodes.p.children,[stage.id]);assert.equal(stageButton(h,stage.id).getAttribute('aria-expanded'),'true');assert.equal(h.document.activeElement,h.forms['ew-stage-editor'].controls.find(field=>field.name==='name'));assert.match(inlineMarkup(h),/aria-label="새 작업 이름"/);assert.doesNotMatch(h.markup,/아직 작업이 없습니다/);assert.equal(h.buttons.some(button=>button.dataset.authorAction==='add_job'),false);assert.ok(h.buttons.some(button=>button.dataset.authorAction==='add_stage'));
+ assert.equal(Object.values(h.draft().definition.nodes).filter(node=>node.type==='j').length,0);h.field('name','   ');h.click('inline_apply');await flush();assert.match(h.markup,/작업 이름을 입력해 주세요./);await h.inline('첫 인계 작업');const job=Object.values(h.draft().definition.nodes).find(node=>node.type==='j');assert.deepEqual(job,{id:job.id,type:'j',parent:stage.id,name:'첫 인계 작업',...expected});assert.deepEqual(h.draft().definition.nodes[stage.id].children,[job.id]);assert.ok(h.forms['ew-author-node']);assert.equal(h.draft().dirty,true);assert.equal(h.writes.length,0);
 });
 test('stage and job ordering targets explicit IDs and preserves parents deadlines expansion and focus',async()=>{
  const h=harness(),value=stagedDefinition(3,3);value.schedule={stage_deadlines:{t0:{offset_days:-2},t1:{offset_days:0},t2:{offset_days:2}}};installDefinition(h,value);
@@ -877,7 +877,7 @@ test('unapplied business purpose edit blocks proposal application and preserves 
  h.click('summary_cancel');h.click('ai_apply');await flush();assert.equal(h.draft().definition.description,'대화 제안 목적');assert.equal(h.draft().dirty,true);assert.equal(h.writes.length,0);
 });
 test('stage help supplies both exact paragraphs to the shared help dialog',async()=>{
- const h=harness();h.click('help',{id:'stages_and_jobs'});await flush();assert.equal(h.helpCalls.length,1);const call=h.helpCalls[0],term=call.help.terms.find(term=>term.id==='stages_and_jobs');assert.equal(call.termId,'stages_and_jobs');assert.equal(term.name,'단계와 작업');assert.equal(term.summary,'단계는 작업을 묶는 이름입니다. 개수·이름·순서는 업무에 맞게 정합니다.\n\n단계와 작업은 적힌 순서대로 진행합니다. 기존에 정한 적용 조건과 작업 연결은 유지됩니다.');assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);
+ const h=harness();h.click('help',{id:'stages_and_jobs'});await flush();assert.equal(h.helpCalls.length,1);const call=h.helpCalls[0],term=call.help.terms.find(term=>term.id==='stages_and_jobs');assert.equal(call.termId,'stages_and_jobs');assert.equal(term.name,'단계와 작업');assert.equal(term.summary,'단계는 작업을 묶는 이름입니다. 개수·이름·순서는 업무에 맞게 정합니다.\n\n단계와 작업은 적힌 순서대로 진행합니다.');assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);
 });
 
 
@@ -933,8 +933,8 @@ test('stage reorder updates hidden live text without adding a visible notice and
  h.click('stage_menu',{id:'t1'});h.click('move_up',{id:'t1'});await flush();assert.match(h.markup,/data-author-live aria-live="polite" aria-atomic="true">2번째로 옮겼습니다/);assert.doesNotMatch(h.markup,/3번째로 옮겼습니다/);
 });
 
-test('new stage and job name fields show the Figma examples',async()=>{
- const h=harness();installDefinition(h,stagedDefinition(1,1));h.click('add_stage');await flush();assert.match(h.markup,/name="name"[^>]*placeholder="예: 운영 인계"/);h.click('inline_cancel');await flush();h.click('stage_toggle',{id:'t0'});await flush();h.click('add_job',{parent:'t0'});await flush();assert.match(h.markup,/name="name"[^>]*placeholder="예: 설치 상태 확인"/);
+test('new stage and job name fields say what to type and show an example',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(1,1));h.click('add_stage');await flush();assert.match(h.markup,/name="name"[^>]*placeholder="단계 이름 · 예: 점검"/);h.click('inline_cancel');await flush();h.click('stage_toggle',{id:'t0'});await flush();h.click('add_job',{parent:'t0'});await flush();assert.match(h.markup,/name="name"[^>]*placeholder="작업 이름 · 예: 설비 외관 확인"/);
 });
 
 
@@ -1055,7 +1055,7 @@ test('A12 human detail has two real method choices and no duplicate result-confi
  const h=harness();await h.node();assert.match(h.markup,/단계와 작업/);assert.deepEqual(h.fields.filter(f=>f.name==='mode').map(f=>[f.type,f.value,f.checked]),[['radio','human',true],['radio','tool',false]]);assert.match(h.markup,/무엇을 확인하나요|확인 방법|완료 기준/);assert.equal(h.fields.some(f=>f.name==='result_confirmation'),false);assert.equal(h.fields.find(f=>f.name==='name').getAttribute('maxlength'),'160');assert.ok(actionButton(h,'job_menu','j'));assert.equal(h.draft().dirty,false);
 });
 for(const oldBlock of ['change_request','schedule','list_confirm'])test('A12 human detail preserves older result kinds: '+oldBlock,async()=>{
- const h=harness(),value=definition();value.nodes.j.result_block=oldBlock;value.nodes.j.completion={rule:'기존 완료 기준',opaque:'keep'};installDefinition(h,value);await h.node();assert.equal(h.fields.find(f=>f.name==='result_block').value,oldBlock);h.field('job_guidance','확인 안내만 수정');h.click('save');await flush();assert.equal(h.writes[0].definition.nodes.j.result_block,oldBlock);assert.deepEqual(h.writes[0].definition.nodes.j.completion,value.nodes.j.completion);
+ const h=harness(),value=definition();value.nodes.j.result_block=oldBlock;value.nodes.j.completion={rule:'기존 완료 기준',opaque:'keep'};installDefinition(h,value);await h.node();assert.equal(h.fields.find(f=>f.name==='result_block'&&f.checked).value,oldBlock);assert.match(h.markup,/<details class="ew-confirm-more" open><summary>다른 방식<\/summary>/);h.field('job_guidance','확인 안내만 수정');h.click('save');await flush();assert.equal(h.writes[0].definition.nodes.j.result_block,oldBlock);assert.deepEqual(h.writes[0].definition.nodes.j.completion,value.nodes.j.completion);
 });
 test('A12 an unconnected tool displays disabled result choices and preserves hidden completion data',async()=>{
  for(const human of [true,false]){const h=harness(),value=definition();Object.assign(value.nodes.j,{mode:'tool',human_confirmation:human,completion:{rule:'연결 전에도 보존할 기준',opaque:'keep'}});installDefinition(h,value);await h.node();
@@ -1174,10 +1174,21 @@ test('A12 followup the workflow menu has no schedule tools and earlier reservati
  h.click('schedule_tools');await flush();assert.equal(actionButton(h,'schedule_preview'),undefined);assert.equal(h.details.find(item=>item.className==='ew-author-schedules'),undefined);assert.deepEqual(h.draft(),before);assert.equal(h.operations.length,0);
  const other=harness();installDefinition(other,value);other.state.operations={schedules:[{id:'stored',workflow_id:'w',version:3,identity_user_id:'a',enabled:true,delegated:false,rule:{timezone:'Asia/Seoul',frequency:'weekly'}}]};other.render();assert.doesNotMatch(other.markup,/게시 v3/);other.click('tab',{tab:'history'});await flush();assert.match(other.markup,/이전에 맡긴 자동 실행/);assert.match(other.markup,/게시 v3/);assert.ok(actionButton(other,'schedule_disable'));assert.equal(other.writes.length,0);assert.equal(other.operations.length,0);
 });
-test('A12 followup inline purpose remains private until an explicit draft save and never gains factory ownership',async()=>{
+// 2026-11-18: the purpose is stored with the new procedure. Until then it was kept as an unsaved edit so
+// that the first inline-create change needed no server change, and a first-time author met
+// '저장하지 않은 변경 있음' right after pressing 추가.
+test('A12 followup inline purpose is stored with the new procedure and never gains factory ownership',async()=>{
  const h=harness();h.selection.factory_id='f';await beginCreation(h,'설계한 업무','직접 적은 목적');const button=actionButton(h,'procedure_create'),field=h.fields.find(item=>item.id==='ew-procedure-description');h.field('ew-procedure-description','최종 목적','change');assert.equal(actionButton(h,'procedure_create'),button);assert.equal(h.fields.find(item=>item.id==='ew-procedure-description'),field);await submitCreation(h);
- assert.equal(h.writes.length,1);assert.equal(h.writes[0].description,undefined);assert.equal(h.writes[0].factory_id,undefined);assert.equal(h.workflows.get('created-1').draft.description,undefined);assert.equal(h.draft().definition.description,'최종 목적');assert.equal(h.draft().dirty,true);assert.equal(h.draft().definition.factory_id,undefined);
- h.click('save');await flush();assert.equal(h.writes[1].action,'save_draft');assert.equal(h.writes[1].definition.description,'최종 목적');assert.equal(h.draft().dirty,false);assert.equal(h.operations.length,0);
+ assert.equal(h.writes.length,1);assert.equal(h.writes[0].description,'최종 목적');assert.equal(h.writes[0].factory_id,undefined);assert.equal(h.workflows.get('created-1').draft.description,'최종 목적');assert.equal(h.draft().definition.description,'최종 목적');assert.equal(h.draft().dirty,false);assert.equal(h.draft().definition.factory_id,undefined);assert.equal(h.operations.length,0);
+});
+test('A12 followup inline purpose survives as an unsaved edit when the server did not store it',async()=>{
+ const h=harness();h.ignoreCreateDescription=true;await beginCreation(h,'설계한 업무','직접 적은 목적');await submitCreation(h);
+ assert.equal(h.writes.length,1);assert.equal(h.workflows.get('created-1').draft.description,undefined);assert.equal(h.draft().definition.description,'직접 적은 목적');assert.equal(h.draft().dirty,true);
+ h.click('save');await flush();assert.equal(h.writes[1].action,'save_draft');assert.equal(h.writes[1].definition.description,'직접 적은 목적');assert.equal(h.draft().dirty,false);
+});
+test('A12 followup a new procedure without a purpose sends none',async()=>{
+ const h=harness();await beginCreation(h,'이름만 적은 업무','   ');await submitCreation(h);
+ assert.equal(h.writes.length,1);assert.equal(Object.hasOwn(h.writes[0],'description'),false);assert.equal(h.draft().dirty,false);
 });
 test('A12 followup opening another workflow protects the unfinished creation buffer and the old private draft',async()=>{
  const h=harness();await h.node();h.field('job_guidance','기존 미저장 안내');const before=h.draft().definition;await beginCreation(h,'새 워크플로우','새 목적');h.click('open',{id:'q'});await flush();assert.equal(h.selection.workflow_id,'');assert.ok(h.forms['ew-procedure-create']);assert.match(h.markup,/추가하거나 취소한 뒤/);assert.equal(h.fields.find(field=>field.id==='ew-procedure-description').value,'새 목적');assert.equal(h.writes.length,0);
@@ -1738,4 +1749,77 @@ test('an opened API shows what is sent beside what comes back and editing keeps 
  await h.click('cancel');await h.click('discard');await h.click('list');await h.click('create');
  assert.match(h.html(),/<details class="ew-api-advanced" data-api-advanced\s*><summary>입력·결과 설정<\/summary>/);
  assert.deepEqual(h.requests.map(p=>p.action),['api_detail','api_detail','api_detail']);
+});
+
+// First-user flow (2026-11-18, mock 18 revision 2): the next step is a visible control, not a sentence.
+test('first-user: the save button says what saving does to the publication state',async()=>{
+ const h=harness(),label=()=>h.markup.match(/<button\b[^>]*data-author-action="save"[^>]*>([^<]*)<\/button>/)[1];
+ assert.equal(label(),'저장');assert.equal(actionButton(h,'save').disabled,true);
+ h.field('publication_state','published','change');assert.equal(actionButton(h,'save').textContent,'저장 · 게시');assert.equal(actionButton(h,'save').disabled,false);
+ h.render();assert.equal(label(),'저장 · 게시');
+ h.field('publication_state','unpublished','change');h.render();assert.equal(label(),'저장');assert.equal(h.writes.length,0);
+});
+test('first-user: the publication state sits in the title row and the first card holds only name and purpose',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(1,1));
+ const head=h.markup.match(/<div class="ew-author-heading"><h2>[\s\S]*?<details class="ew-procedure-menu">/)[0];assert.match(head,/<select id="ew-publication-state"/);
+ const info=h.markup.match(/<form class="ew-procedure-info"[\s\S]*?<\/form>/)[0];
+ assert.doesNotMatch(info,/publication/);assert.match(info,/업무 목적<textarea/);assert.match(info,/>분류·범위<\/button>/);
+ assert.equal([...h.markup.matchAll(/id="ew-publication-state"/g)].length,1);assert.doesNotMatch(h.markup,/게시본 없음|업무 설명|분류·수행 범위|판정 규칙<\/button>/);assert.match(h.markup,/>판정 단어<\/button>/);
+ h.click('stage_toggle',{id:'t0'});h.click('node',{id:'j0-0'});await flush();assert.ok(h.forms['ew-author-node']);assert.equal([...h.markup.matchAll(/id="ew-publication-state"/g)].length,1);
+});
+test('first-user: a new procedure shows its scope as a chip and puts the add button first',async()=>{
+ const h=harness();await beginCreation(h);const form=h.markup.match(/<form id="ew-procedure-create"[\s\S]*?<\/form>/)[0];
+ assert.match(form,/<span class="ew-scope-chip">[^<]+ · EMS<\/span>/);assert.doesNotMatch(form,/초기 범위|160자 이내/);
+ assert.deepEqual([...form.matchAll(/data-author-action="(procedure_[a-z]+)"/g)].map(match=>match[1]),['procedure_create','procedure_cancel']);
+});
+test('first-user: start questions are one row with the add control and no explanation',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(1,1));const section=h.markup.match(/<section class="ew-schedule-section ew-content-start-inputs">[\s\S]*?<\/section>/)[0];
+ assert.match(section,/<h3>시작할 때 물어볼 것<\/h3><small>0개<\/small><button\b[^>]*data-author-action="start_input_add"/);assert.doesNotMatch(section,/<p\b/);assert.doesNotMatch(h.markup,/시작할 때 받는 값|시작 입력 추가/);
+});
+test('first-user: a human job is laid out as the task and how it is confirmed, in the order it had',async()=>{
+ const h=harness();await h.node();const main=h.markup.match(/<section class="ew-job-card ew-job-main" data-job-mode="human">([\s\S]*?)<\/section>/)[1];
+ const groups=main.split('<div class="ew-job-col">');assert.equal(groups.length,3);assert.equal(groups[0],'');
+ assert.match(groups[1],/작업 이름[\s\S]*수행 방법[\s\S]*무엇을 확인하나요/);assert.match(groups[2],/확인 방식[\s\S]*완료 기준[\s\S]*담당자 설정/);assert.doesNotMatch(main,/확인 방법|판정 규칙/);
+});
+test('first-user: the open name row is not an edit in progress until something is typed',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(0));assert.equal(h.draft().dirty,false);assert.equal(actionButton(h,'save').disabled,true);
+ h.field('overview_description','목적만 고침');h.click('save');await flush();
+ assert.equal(h.writes.length,1);assert.equal(h.writes[0].definition.description,'목적만 고침');assert.doesNotMatch(h.markup,/단계 이름을 입력해 주세요/);assert.match(inlineMarkup(h),/placeholder="단계 이름 · 예: 점검"/);
+ h.field('name','쓰다 만 단계');h.click('tab',{tab:'rules'});await flush();
+ assert.match(h.markup,/data-author-tab="content"/);assert.match(inlineMarkup(h),/^<p id="ew-stage-inline-warning" class="ew-inline-error" role="alert">편집 중인 항목을 먼저 적용하거나 취소해 주세요.<\/p>/);
+ h.click('inline_cancel');await flush();assert.match(inlineMarkup(h),/<input\b[^>]*name="name"[^>]*value=""/);assert.equal(h.buttons.some(button=>button.dataset.authorAction==='inline_cancel'),false);
+});
+
+// Check items (2026-11-18): a person's check list is written where the job is edited.
+test('check items: the confirmation kind is a choice of two, with the older kinds folded away',async()=>{
+ const h=harness();await h.node();const kinds=h.fields.filter(f=>f.name==='result_block').map(f=>[f.type,f.value,f.checked]);
+ assert.deepEqual(kinds,[['radio','human_confirm',true],['radio','checklist',false],['radio','item_verdict',false],['radio','values',false]]);
+ assert.match(h.markup,/<legend>확인 방식<\/legend><div><label><input type="radio" name="result_block" value="human_confirm" checked><span>한 번에 확인<\/span><\/label><label><input type="radio" name="result_block" value="checklist" ><span>항목마다 체크<\/span>/);
+ assert.match(h.markup,/<details class="ew-confirm-more"><summary>다른 방식<\/summary>/);assert.doesNotMatch(h.markup,/ew-check-items|담당자가 내용을 확인하고 완료합니다|판정 단어 탭에서 정합니다/);
+});
+test('check items: choosing 항목마다 체크 opens the list, and rows are kept in order with stable ids',async()=>{
+ const h=harness();await h.node();const pick=value=>{const field=h.fields.find(f=>f.name==='result_block'&&f.value===value);h.fields.filter(f=>f.name==='result_block').forEach(f=>{f.checked=f===field;});h.designer.handleEvent({type:'change',target:field});};
+ pick('checklist');assert.equal(h.draft().definition.nodes.j.result_block,'checklist');assert.equal(h.draft().dirty,true);
+ const rows=()=>h.fields.filter(f=>f.name==='check_item_name'),ids=()=>h.fields.filter(f=>f.name==='check_item_id').map(f=>f.value);
+ assert.equal(rows().length,1);assert.equal(rows()[0].getAttribute('placeholder'),'항목 추가');assert.equal(rows()[0].getAttribute('aria-label'),'새 확인 항목');assert.notEqual(h.draft().definition.nodes.j.confirmation_items?.length>0,true);
+ const type=(index,text)=>{const field=rows()[index];field.value=text;h.designer.handleEvent({type:'input',target:field});};
+ type(0,'펌프 누수 없음');assert.equal(rows().length,2,'typing in the last row adds the next one');type(1,'밸브 개폐 정상');assert.equal(rows().length,3);
+ const saved=h.draft().definition.nodes.j.confirmation_items;assert.deepEqual(saved.map(item=>item.name),['펌프 누수 없음','밸브 개폐 정상']);assert.equal(new Set(saved.map(item=>item.id)).size,2);assert.ok(saved.every(item=>/^check-/.test(item.id)));
+ type(0,'펌프 누수·소음 없음');assert.deepEqual(h.draft().definition.nodes.j.confirmation_items,[{id:saved[0].id,name:'펌프 누수·소음 없음'},saved[1]],'editing a row keeps its id');
+ // Leaving a row or pressing a key in the middle of a Korean syllable must not redraw the input in use.
+ const before=h.markup,composing=h.designer.handleEvent({type:'keydown',key:'Enter',isComposing:true,target:rows()[0]});assert.deepEqual(copy(composing),{handled:true,preventDefault:false});
+ h.designer.handleEvent({type:'change',target:rows()[0]});assert.equal(h.markup,before,'no redraw on change');
+ const enter=h.designer.handleEvent({type:'keydown',key:'Enter',target:rows()[0]});assert.deepEqual(copy(enter),{handled:true,preventDefault:true});assert.equal(h.document.activeElement,rows()[1]);
+ // An emptied row is dropped from the definition; its × only redraws the list.
+ type(1,'');assert.deepEqual(h.draft().definition.nodes.j.confirmation_items.map(item=>item.id),[saved[0].id]);h.click('check_item_remove',{item:saved[1].id});await flush();assert.equal(rows().length,2);
+ type(1,'밸브 개폐 정상');const again=h.draft().definition.nodes.j.confirmation_items;assert.deepEqual(again.map(item=>item.name),['펌프 누수·소음 없음','밸브 개폐 정상']);
+ h.click('check_item_remove',{item:again[0].id});await flush();assert.deepEqual(h.draft().definition.nodes.j.confirmation_items,[again[1]]);assert.equal(rows().length,2);
+ h.click('save');await flush();assert.equal(h.writes.length,1);assert.deepEqual(h.writes[0].definition.nodes.j.confirmation_items,[again[1]]);assert.equal(h.writes[0].definition.nodes.j.result_block,'checklist');
+ h.click('node',{id:''});await flush();assert.match(h.markup,/<small class="ew-job-meta">사람이 확인 · 항목 1개<\/small>/);
+});
+test('check items: going back to 한 번에 확인 hides the list and keeps what was typed',async()=>{
+ const h=harness(),value=definition();Object.assign(value.nodes.j,{result_block:'checklist',confirmation_items:[{id:'a',name:'하나'},{id:'b',name:'둘'}]});installDefinition(h,value);await h.node();
+ assert.deepEqual(h.fields.filter(f=>f.name==='check_item_name').map(f=>f.value),['하나','둘','']);assert.equal(h.draft().dirty,false);
+ const once=h.fields.find(f=>f.name==='result_block'&&f.value==='human_confirm');h.fields.filter(f=>f.name==='result_block').forEach(f=>{f.checked=f===once;});h.designer.handleEvent({type:'change',target:once});
+ assert.equal(h.fields.some(f=>f.name==='check_item_name'),false);assert.equal(h.draft().definition.nodes.j.result_block,'human_confirm');assert.deepEqual(h.draft().definition.nodes.j.confirmation_items,value.nodes.j.confirmation_items);
 });

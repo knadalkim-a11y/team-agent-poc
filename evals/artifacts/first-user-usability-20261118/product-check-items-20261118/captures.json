@@ -1,0 +1,44 @@
+{
+ "date": "2026-11-18",
+ "what": "Product screens of the check items (mock 18 revision 2, FU4 and FU7) after implementing them; same synthetic names as the mock",
+ "mock": {
+  "file": "docs/mockups/ees-work/design-mock-18-first-user.html",
+  "commit": "d83b7f1",
+  "sha256": "2170e2fa8023feb5ec14e757d1992de07dcc75a20f5c31fb778250dee1792355"
+ },
+ "product": {
+  "program": "0.11.3+ees.14",
+  "built_from": "work branch claude/brave-bell-p1tp73 working tree on top of ecaafcd (sources of the commit that adds this file), Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0",
+  "server": "tests/native_ui_fixture.py: the built frontend with synthetic sign-in, chat and model, and the real workflow service on a temporary database",
+  "account": "synthetic non-admin user with the manager and participant roles on EMS / all factories",
+  "window": "1920x1080 with the left menu open and the chat docked; one capture at 1366x768",
+  "taken_by": "one-off script outside the repository that clicks the real controls"
+ },
+ "captures": [
+  {
+   "file": "FU4-check-items.png",
+   "shows": "작업 편집: 확인 방식 항목마다 체크, 확인 항목 세 줄과 다음 빈 줄(1920x1080)",
+   "sha256": "ae4ea3e88f1a37892562b267e5afcc97be2a05a60d3bc9cc74842edf376424be"
+  },
+  {
+   "file": "FU4-check-items-1366.png",
+   "shows": "작업 편집: 같은 화면(1366x768, 한 열)",
+   "sha256": "05c2314f8e17a468df3293582684eb24aa92be83eb73134804d330d933735dc0"
+  },
+  {
+   "file": "FU7-before-start.png",
+   "shows": "단계 화면: 시작 전, 항목이 보이고 체크 칸은 꺼져 있음",
+   "sha256": "bb3e132f8d71922b1579d1f539a9c29236ad96e7843dcec150f75bf55b073e91"
+  },
+  {
+   "file": "FU7-one-ticked.png",
+   "shows": "단계 화면: 시작 뒤 한 항목 체크, 시각과 사람, 1 / 3",
+   "sha256": "b6e2c910709a7d1d765a62f8c465e8e01844806c3ca0f0d923403c40f045ed40"
+  },
+  {
+   "file": "FU8-all-ticked-finish.png",
+   "shows": "단계 화면: 항목을 모두 체크해 작업 완료, 다른 작업 적합, 끝내기",
+   "sha256": "7996db6014e4b8285b7964a75034590e59e546da8a860980479e433fa61d3b1c"
+  }
+ ]
+}

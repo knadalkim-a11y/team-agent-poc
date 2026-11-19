@@ -220,8 +220,9 @@ def central_flow(g):
     g.open_initialized_author_list();g.click('[data-author-action="create"]')
     g.type('#ew-procedure-create #ew-procedure-name','중앙 대화 제안 검증')
     g.click('#ew-procedure-create [data-author-action=procedure_create]')
-    g.wait('document.querySelector("[data-author-action=add_stage]")')
-    g.click('[data-author-action=add_stage]');g.type('#ew-stage-editor [name=name]','대화 제안 검토 단계')
+    # 2026-11-18: a new procedure opens with its stage name field ready.
+    g.wait('document.querySelector("#ew-stage-editor [name=name][aria-label=\\"새 단계 이름\\"]")')
+    g.type('#ew-stage-editor [name=name]','대화 제안 검토 단계')
     g.click('[data-author-action=inline_apply]')
     g.click('[data-author-action=stage_edit]');g.type('#ew-stage-editor [name=description]','저장된 기준 안내')
     g.click('[data-author-action=inline_apply]')
@@ -276,7 +277,9 @@ def input_and_history_flow(g,key,chat_id):
     """Real input suggestion plus immutable message-reference lookup."""
     g.provider.mode='plain'
     # Create the human task through the current visible authoring controls.
-    g.click('[data-author-action=add_job]')
+    # A stage with no job already shows its job name field; otherwise press the add control.
+    if g.browser.evaluate("!!document.querySelector('[data-author-action=add_job]')"):g.click('[data-author-action=add_job]')
+    g.wait('document.querySelector("#ew-stage-editor [name=name][aria-label=\\"새 작업 이름\\"]")')
     g.type('#ew-stage-editor [name=name]','입력 제안과 과거 근거');g.click('[data-author-action=inline_apply]')
     g.click('[data-author-action=save]')
     g.wait('document.querySelector("[data-author-status]")?.textContent.includes("저장됨")')
@@ -318,8 +321,7 @@ def input_and_history_flow(g,key,chat_id):
     g.wait('document.querySelector(".ew-author-history")?.textContent.includes("게시 v1")')
     assert g.api('/api/ees-work/workspace?workflow_id='+key)['workflow']['published_version']==1
     g.click('[data-action=mode][data-mode=work]');g.click('[data-action=workflow][data-workflow-id="'+key+'"]')
-    g.open_operation_start()
-    g.click('#ees-work-dialog [data-dialog-confirm]')
+    g.confirm_operation_start()
     run_id=g.wait_work_ready(workflow_id=key,require_run=True,selector='[data-action=job]')['reference']['run_id']
     run=g.api('/api/ees-work/workspace?run_id='+run_id)['run']
     assert run['workflow_id']==key and run['version']==1 and run['status']=='open' and not run['attempts'],run

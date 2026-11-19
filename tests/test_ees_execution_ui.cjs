@@ -216,15 +216,16 @@ test('start-run mutation uses workflow revision rather than absent run revision'
 test('start dialog retains its captured workflow revision across a concurrent refresh',async()=>{
  for(const mode of ['on_demand','periodic']){
   const h=controller(),pending=deferred(),dialogs=[],form={querySelectorAll:()=>[]};
-  const published={mode,execution_scope:'system',nodes:{p:{id:'p',type:'p',children:['t']},t:{id:'t',type:'t',parent:'p',name:'검토',children:[]}}};
+  const published={mode,execution_scope:'system',nodes:{p:{id:'p',type:'p',children:['t'],inputs:[{id:'note',name:'시작 메모',type:'text',scope:'run'}]},t:{id:'t',type:'t',parent:'p',name:'검토',children:[]}}};
   const element={addEventListener(){},querySelector:selector=>selector==='#ees-work-start'?form:selector==='#ees-start-version'?{value:'1'}:null,querySelectorAll:()=>[]};
   h.context.document.querySelector=selector=>selector==='#ees-work-dialog'?element:null;
   h.api.setState({workflow:{id:'w',revision:6,published_version:1,published,versions:[{version:1,definition:published}]}});
   h.api.setSelection({mode:'work',workflow_id:'w',stage_id:'t',tab:'overview'});
   h.setDialog(options=>{dialogs.push(options);return pending.promise;});
   const waiting=h.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});
-  assert.equal(dialogs.length,1);assert.equal(dialogs[0].confirmLabel,'진행 건 시작');
+  assert.equal(dialogs.length,1);assert.equal(dialogs[0].confirmLabel,'시작');
   // 2026-11-02: every start, including a version saved as periodic, uses the start-input form.
+  // 2026-11-18: the form opens only when the procedure asks something at the start.
   assert.match(dialogs[0].html,/id="ees-work-start"/);assert.doesNotMatch(dialogs[0].html,/id="ees-start-version"/);
   assert.equal(h.calls.length,0,'Opening the start dialog must not create or execute a run');
   h.api.setState({workflow:{id:'w',revision:7,published_version:2,published,versions:[{version:2,definition:published}]}});
@@ -371,8 +372,8 @@ test('unreceived scope panels never render empty My Work or history before their
   const host={dataset:{},isConnected:true,querySelector:()=>null,querySelectorAll:()=>[],setAttribute(){},innerHTML:''};
   const context=renderer({document:{activeElement:null,querySelector:()=>null}});context.window.__eesSourceShellV1={hosts:()=>({panel:host}),publish(){}};
   const view=run(context,'createWorkView({callbacks:{}})'),state={capabilities:{actor_id:'a'},workflows:[],runs:[]},selection={mode:'work',tab,system_id:'APC'};
-  view.render({state,selection,scope_loading:true});assert.match(host.innerHTML,/data-ees-scope-loading="panel"[^>]*>받는 중/);assert.doesNotMatch(host.innerHTML,/업무 절차를 선택해 주세요|저장된 진행 건이 없습니다/);
-  run(context,'createWorkView({callbacks:{}})').render({state,selection,scope_loading:false});assert.match(host.innerHTML,tab==='overview'?/업무 절차를 선택해 주세요/:/저장된 진행 건이 없습니다/);
+  view.render({state,selection,scope_loading:true});assert.match(host.innerHTML,/data-ees-scope-loading="panel"[^>]*>받는 중/);assert.doesNotMatch(host.innerHTML,/업무 절차를 선택해 주세요|아직 업무가 없습니다|저장된 진행 건이 없습니다/);
+  run(context,'createWorkView({callbacks:{}})').render({state,selection,scope_loading:false});assert.match(host.innerHTML,tab==='overview'?/아직 업무가 없습니다/:/저장된 진행 건이 없습니다/);
  }
 });
 test('denied target removes cached private evidence and cannot restore it on a later visit',async()=>{
