@@ -521,7 +521,7 @@ function workResultHTML(job,saved={}, {readOnly=false,listDraft=null,reviewDraft
     if(!Array.isArray(result.items))body=empty;
   }
   else if(block==='list_confirm')body=workListHTML(saved,{readOnly,listDraft,sourceCount,sharedSearch:Boolean(job.shared_tool_id)&&(job.shared_function==='search_pages'||result.scope==='single_page'),target});
-  else if(block==='checklist')body=items.length||!workHumanCheckItems(job).length?workChecklistHTML(items,saved):workChecklistHTML(workHumanCheckItems(job),saved,true);
+  else if(block==='checklist')body=items.length||!workHumanCheckItems(job).length?workChecklistHTML(items,saved):workChecklistHTML(workHumanCheckItems(job),{...saved,decisions:workCheckDecisions(saved)},true);
   else if(block==='item_verdict')body=items.length?`<div class="ew-result-items">${items.map(item=>`<article><header><strong>${esc(item.name || item.title || item.id)}</strong>${source(item.url)}</header>${item.evidence?.map(e=>`<p>${workStatusHTML(e.status || 'unknown',e.label || e.name)}${e.content_reviewed===false?'<small>내용 적정성 미검토</small>':''}</p>`).join('') || ''}${item.ai_suggestion&&!saved.decisions?.[item.id]?`<p class="ew-ai-proposal">AI 제안 · ${esc(item.ai_suggestion)} · 사람 미확정</p>`:''}${decision(item)}${!saved.decisions?.[item.id]&&verdictDraft[item.id]?.verdict?'<small>내 선택 · 확정 전 · 자동 저장</small>':''}</article>`).join('')}<p class="ew-muted">선택은 자동 저장되는 확정 전 초안입니다. 모든 항목을 선택한 뒤 판정 확정으로 최종 반영합니다.</p>${items.every(item=>saved.decisions?.[item.id])?'<p>모든 항목의 판정이 확정되었습니다.</p>':!readOnly?button('판정 확정','confirm_verdicts',`data-mutation class="ew-primary"${items.every(item=>saved.decisions?.[item.id]||verdictDraft[item.id]?.verdict)?'':' disabled data-own-disabled="true"'}`):''}</div>`:empty;
   else if(block==='ai_review')body=workReviewDraftHTML(job,saved,{readOnly,reviewDraft});
   else if(block==='change_request')body=workRequestHTML(saved.request || result.request || {},{...job,actor_id:actorId,execution_actor:job.execution_actor,can_request:saved.can_request ?? (!readOnly&&saved.can_execute!==false),can_review_request:saved.can_review_request ?? (!readOnly&&saved.can_execute!==false),can_reconcile:saved.can_reconcile ?? (!readOnly&&saved.can_execute!==false)});
@@ -865,6 +865,14 @@ function workHumanCheckItems(node={}){
   if((node.mode || 'human')!=='human'||node.result_block!=='checklist'||!Array.isArray(node.confirmation_items))return [];
   return node.confirmation_items.filter(item=>item&&typeof item.id==='string'&&item.id&&typeof item.name==='string'&&item.name.trim());
 }
+// Ticks made before an input or an earlier job changed no longer count: the list is ticked again and the
+// earlier ticks stay in the record.
+function workCheckStale(saved={}){
+  return Boolean(saved.result_stale||saved.status==='review_required');
+}
+function workCheckDecisions(saved={}){
+  return workCheckStale(saved)?{}:saved.decisions || {};
+}
 function workStageCanCheck(node,saved={},run={}){
   return !workUI.finished(run)&&run.can_write!==false&&saved.can_decide!==false&&saved.can_execute!==false&&!['running','excluded','completed'].includes(saved.status);
 }
@@ -943,10 +951,10 @@ function workStageRowHTML(row,data,selection,number){
   const hasEvidence=!workHumanCheckItems(node).length&&((!node.mode||node.mode==='human')||row.attempts.length),evidenceLabel=(!node.mode||node.mode==='human')?'판정 기록':'판정 근거',evidence=hasEvidence?`<button type="button" class="ew-vd-evidence-toggle" data-action="stage_evidence" data-job-id="${esc(id)}" aria-expanded="${opened}"${opened?` aria-controls="stage-evidence-${esc(id)}"`:''} aria-label="${esc(node.name+' '+evidenceLabel+' '+(opened?'접기':'펼치기'))}">${evidenceLabel}${icon('f17e6')}</button>`:'';
   const description=node.description || node.instructions || '',actor=automatic?'자동 판정':'직접 판정';
   // A person's check list is ticked on the row. A tick is a record, so a ticked item is no longer a control.
-  const checks=workHumanCheckItems(node),checked=checks.filter(item=>saved.decisions?.[item.id]),canCheck=Boolean(data.run)&&workStageCanCheck(node,saved,data.run || {});
+  const checks=workHumanCheckItems(node),ticks=workCheckDecisions(saved),recheck=workCheckStale(saved),checked=checks.filter(item=>ticks[item.id]),canCheck=Boolean(data.run)&&workStageCanCheck(node,saved,data.run || {});
   const person=decision=>{const found=(data.people || []).find(item=>item.id===decision.actor_id||item.value?.id===decision.actor_id);return found?.name || found?.label || decision.actor_id;};
-  const checkList=checks.length?`<ol class="ew-vd-checks" aria-label="${esc(node.name)} 확인 항목">${checks.map(item=>{const decision=saved.decisions?.[item.id];return `<li data-done="${Boolean(decision)}">${decision?`<span class="ew-vd-check-done" role="img" aria-label="확인함">${icon('9d8d5')}</span><span>${esc(item.name)}</span><small>${esc(workUI.time(decision.created_at))} · ${esc(person(decision))}</small>`:`<label><input type="checkbox" data-stage-check data-job-id="${esc(id)}" data-item-id="${esc(item.id)}"${canCheck?' data-mutation':' disabled data-own-disabled="true"'}><span>${esc(item.name)}</span></label>`}</li>`;}).join('')}</ol>`:'';
-  const progress=checks.length&&group!=='result'?`<span class="ew-vd-count" data-decision-status>${checked.length} / ${checks.length}</span>`:'';
+  const checkList=checks.length?`<ol class="ew-vd-checks" aria-label="${esc(node.name)} 확인 항목">${checks.map(item=>{const decision=ticks[item.id];return `<li data-done="${Boolean(decision)}">${decision?`<span class="ew-vd-check-done" role="img" aria-label="확인함">${icon('9d8d5')}</span><span>${esc(item.name)}</span><small>${esc(workUI.time(decision.created_at))} · ${esc(person(decision))}</small>`:`<label><input type="checkbox" data-stage-check data-job-id="${esc(id)}" data-item-id="${esc(item.id)}"${canCheck?' data-mutation':' disabled data-own-disabled="true"'}><span>${esc(item.name)}</span></label>`}</li>`;}).join('')}</ol>`:'';
+  const progress=checks.length&&group!=='result'?`${recheck?`<span class="ew-vd-state" data-recheck>${esc(label)}</span>`:''}<span class="ew-vd-count" data-decision-status>${checked.length} / ${checks.length}</span>`:'';
   return `<section class="ew-vd-entry ew-center-task-row" data-key="stage-job-${esc(id)}" data-stage-job="${esc(id)}" data-vd-item="${esc(id)}" data-handler="${automatic?'service':'human'}" data-expanded="${opened}"><div class="ew-vd-item"><span class="ew-center-task-number" aria-hidden="true">${number}</span><div class="ew-vd-item-top"><button type="button" class="ew-vd-name" data-action="job" data-job-id="${esc(id)}">${esc(node.name)}</button><small class="ew-center-task-description"><b data-decision-actor>${actor}</b>${description?' · '+esc(description):''}</small></div><div class="ew-vd-item-meta">${execution}<div class="ew-vd-decision">${progress || choice}${evidence}</div></div></div>${checkList}${opened?workStageEvidenceHTML(row,data,selection):''}</section>`;
 }
 function workStageMenuHTML(data,selection,rows){

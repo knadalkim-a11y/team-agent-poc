@@ -73,13 +73,13 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         listed = await self.service.workspace_state(self.users['admin'])
         self.assertNotIn('잘못된 목적', [item['name'] for item in listed['workflows']])
 
-    async def check_list_procedure(self, items):
+    async def check_list_procedure(self, items, fields=None):
         created = await self.command('create_workflow', name='주간 설비 점검', system_id='EMS')
         key = created['workflow_id']; definition = created['workflow']['draft']; root = next(iter(definition['nodes']))
         definition['nodes'][root]['children'] = ['t']
         definition['nodes']['t'] = {'id': 't', 'type': 't', 'name': '점검', 'parent': root, 'children': ['j'], 'deps': []}
         definition['nodes']['j'] = {'id': 'j', 'type': 'j', 'name': '설비 세 곳 점검', 'parent': 't', 'children': [], 'deps': [],
-                                    'mode': 'human', 'inputs': [], 'result_block': 'checklist'}
+                                    'mode': 'human', 'inputs': fields or [], 'result_block': 'checklist'}
         if items is not None: definition['nodes']['j']['confirmation_items'] = items
         saved = await self.command('save_draft', workflow_id=key, definition=definition, expected_revision=1)
         if not saved['ok']: return key, definition, saved
@@ -123,6 +123,37 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         # The next round starts with an empty list.
         again_run = await self.start(key, revision=published['revision'])
         self.assertEqual(again_run['jobs']['j'].get('decisions', []), [])
+
+    async def test_ticked_check_items_are_ticked_again_after_an_input_of_the_job_changes(self):
+        # 2026-11-19 (PR #152 review): a changed input asks for the job to be checked again. The earlier
+        # ticks stay as records of the earlier result and the new ticks complete the job.
+        items = [{'id': 'pump', 'name': '펌프 누수 없음'}, {'id': 'valve', 'name': '밸브 개폐 정상'}]
+        key, _, validated = await self.check_list_procedure(items, fields=[{'id': 'note', 'label': '비고', 'type': 'text', 'required': False}])
+        self.assertFalse(validated['validation']['errors'], validated)
+        published = await self.command('publish_workflow', workflow_id=key, expected_revision=2)
+        run = await self.start(key, revision=published['revision'])
+
+        async def tick(item):
+            result = await self.command('human_confirm', actor='a', run_id=run['id'], job_id='j', item_id=item, expected_revision=run['revision'], verdict='completed')
+            self.assertTrue(result['ok'], result)
+            return result['run']
+
+        for item in ('pump', 'valve'): run = await tick(item)
+        self.assertEqual(run['jobs']['j']['status'], 'completed')
+        changed = await self.command('save_inputs', actor='a', run_id=run['id'], expected_revision=run['revision'], inputs={'note': '밸브 손잡이 헐거움'})
+        self.assertTrue(changed['ok'], changed)
+        run = changed['run']; job = run['jobs']['j']
+        self.assertEqual((job['status'], job['result_revision'], job['can_decide']), ('review_required', 1, True))
+        blocked = await self.command('close_run', actor='a', run_id=run['id'], expected_revision=run['revision'])
+        self.assertFalse(blocked['ok'], blocked)
+        run = await tick('pump'); job = run['jobs']['j']
+        self.assertEqual((job['status'], job['result_revision']), ('waiting_confirmation', 2))
+        run = await tick('valve'); job = run['jobs']['j']
+        self.assertEqual(job['status'], 'completed')
+        self.assertEqual(sorted((item['item_id'], item['result_revision']) for item in job['decisions']),
+                         [('pump', 1), ('pump', 2), ('valve', 1), ('valve', 2)])
+        closed = await self.command('close_run', actor='a', run_id=run['id'], expected_revision=run['revision'])
+        self.assertTrue(closed['ok'], closed)
 
     async def test_human_check_list_without_items_keeps_the_single_confirmation(self):
         # Procedures saved before 2026-11-18 have no items; they confirm the job as a whole as before.

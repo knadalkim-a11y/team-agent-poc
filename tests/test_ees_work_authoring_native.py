@@ -780,6 +780,59 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog')"))
         closed = next(item for item in self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['runs'] if item['id'] == run['id'])
         self.assertEqual(closed['status'], 'completed')
+        # A changed input asks for the list to be ticked again (PR #152 review, 2026-11-19). The earlier
+        # ticks used to stay shown as done, leaving nothing to tick and no way to finish the round.
+        def command(**body):
+            result = self.browser_api('POST', '/api/ees-work/workspace/command', {'request_id': str(uuid4()), **body})
+            self.assertTrue(result['data'].get('ok'), result)
+            return result['data']
+
+        def open_stage():
+            self.browser.evaluate('location.reload()')
+            self.wait("document.querySelector('[data-action=mode][data-mode=work]')")
+            self.click('[data-action=mode][data-mode=work]')
+            self.wait('document.querySelector(' + json.dumps(control) + ')')
+            self.click(control)
+
+        latest = self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['workflow']
+        draft = latest['draft']; job_id = next(name for name, node in draft['nodes'].items() if node['type'] == 'j')
+        draft['nodes'][job_id]['inputs'] = [{'id': 'note', 'name': '비고', 'type': 'text', 'required': False}]
+        saved_again = command(action='save_draft', workflow_id=key, definition=draft, expected_revision=latest['revision'])
+        command(action='publish_workflow', workflow_id=key, expected_revision=saved_again['revision'])
+        open_stage()
+        self.wait("document.querySelector('#ees-work-panel [data-action=overview_start]')")
+        self.click('#ees-work-panel [data-action=overview_start]')
+        # The job now asks for a value, so starting opens the form; the value is left empty here.
+        self.wait("document.querySelector('#ees-work-dialog [data-dialog-confirm]')")
+        self.assertEqual(self.text('#ees-work-dialog [data-dialog-confirm]'), '시작')
+        self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.wait("document.querySelectorAll('#ees-work-panel input[data-stage-check]:not(:disabled)').length === 2")
+        for done in (1, 2):
+            self.click('#ees-work-panel input[data-stage-check]')
+            self.wait("document.querySelectorAll('#ees-work-panel .ew-vd-check-done').length === %d" % done)
+        self.wait("document.querySelector('#ees-work-panel [data-action=finish_run]')")
+        second = next(item for item in self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['runs'] if item['status'] == 'open')
+        changed = command(action='save_inputs', run_id=second['id'], expected_revision=second['revision'], inputs={'note': '밸브 손잡이 헐거움'})
+        self.assertEqual(changed['run']['jobs'][job_id]['status'], 'review_required')
+        open_stage()
+        self.wait("document.querySelector('#ees-work-panel [data-action=stage_open]') || document.querySelector('#ees-work-panel input[data-stage-check]')")
+        if self.browser.evaluate("!document.querySelector('#ees-work-panel input[data-stage-check]')"):
+            self.click('#ees-work-panel [data-action=stage_open]')
+        self.wait("document.querySelectorAll('#ees-work-panel input[data-stage-check]:not(:disabled)').length === 2")
+        self.assertEqual(self.text('#ees-work-panel [data-recheck]'), '다시 검토 필요')
+        self.assertEqual(self.text('#ees-work-panel .ew-vd-count'), '0 / 2')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-panel .ew-vd-check-done,#ees-work-panel [data-action=finish_run]')"))
+        self.screenshot('check-items-tick-again')
+        for done in (1, 2):
+            self.click('#ees-work-panel input[data-stage-check]')
+            self.wait("document.querySelectorAll('#ees-work-panel .ew-vd-check-done').length === %d" % done)
+        self.wait("document.querySelector('#ees-work-panel [data-action=finish_run]')")
+        self.click('#ees-work-panel [data-action=finish_run]')
+        self.wait("document.querySelector('#ees-work-panel [data-action=overview_start]')")
+        finished = next(item for item in self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['runs'] if item['id'] == second['id'])
+        self.assertEqual(finished['status'], 'completed')
+        self.assertEqual(sorted((item['item_id'], item['result_revision']) for item in finished['jobs'][job_id]['decisions']),
+                         sorted((item['id'], revision) for item in job['confirmation_items'] for revision in (1, 2)))
 
     def test_native_new_signup_and_approval_ui(self):
         account = self.signup_ui()

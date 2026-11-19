@@ -1405,6 +1405,23 @@ test("check items: a person's list shows under its job with a count, and each it
  assert.doesNotMatch(h.row(),/data-stage-check|ew-vd-count/);assert.match(h.row(),/class="ew-vd-final" data-decision-status><i class="ew-vd-dot" data-verdict="ok"><\/i><span>완료<\/span>/);
  assert.match(html('workStageHTML(state,selection,state.run.definition.nodes.t).body',{state:h.state,selection:h.api.snapshot().selection}),/data-action="finish_run"/);
 });
+test('check items: after an input or an earlier job changes, the list is ticked again and the earlier ticks stay in the record',async()=>{
+ // 2026-11-19 (PR #152 review): the earlier ticks stayed shown as done, so nothing was left to tick and the round could not be finished.
+ const h=checkListFixture(),ticked={pump:{item_id:'pump',verdict:'completed',actor_id:'actor',created_at:'2026-11-18T01:00:00Z',result_revision:1},valve:{item_id:'valve',verdict:'completed',actor_id:'actor',created_at:'2026-11-18T01:01:00Z',result_revision:1}};
+ for(const stale of [{status:'review_required'},{status:'waiting_confirmation',result_stale:true}]){
+  h.state.run.jobs.h={can_decide:true,can_execute:true,decisions:ticked,decision_history:Object.values(ticked),...stale};
+  assert.equal([...h.row().matchAll(/<label><input type="checkbox" data-stage-check data-job-id="h" data-item-id="[^"]+" data-mutation>/g)].length,2,JSON.stringify(stale));
+  assert.doesNotMatch(h.row(),/ew-vd-check-done/);
+  assert.match(h.row(),/<span class="ew-vd-state" data-recheck>다시 검토 필요<\/span><span class="ew-vd-count" data-decision-status>0 \/ 2<\/span>/);
+  const log=html('workStageLogHTML(workStageRows(state,state.run.definition.nodes.t),state)',{state:h.state});assert.match(log,/펌프 누수 없음 확인 · 담당자/);assert.match(log,/밸브 개폐 정상 확인 · 담당자/);
+  assert.doesNotMatch(html('workResultHTML(state.run.definition.nodes.h,state.run.jobs.h,state)',{state:h.state}),/확인 · actor/,'the job panel does not show the earlier ticks as current');
+ }
+ h.api.setState(h.state);h.tick('pump');await new Promise(setImmediate);
+ assert.equal(h.sent().length,1,'a tick that no longer counts can be made again');assert.equal(h.sent()[0].body.item_id,'pump');
+ // the new ticks are on a new result: only they count
+ h.state.run.jobs.h={status:'waiting_confirmation',can_decide:true,can_execute:true,decisions:{pump:{item_id:'pump',verdict:'completed',actor_id:'actor',created_at:'2026-11-18T02:00:00Z',result_revision:2}}};
+ assert.match(h.row(),/<span class="ew-vd-count" data-decision-status>1 \/ 2<\/span>/);assert.doesNotMatch(h.row(),/data-recheck/);
+});
 test('check items: before a run and for someone who may not act, the list is shown but cannot be ticked',()=>{
  const h=checkListFixture();h.state.run.jobs.h.can_decide=false;
  assert.equal([...h.row().matchAll(/<input type="checkbox" data-stage-check[^>]* disabled data-own-disabled="true">/g)].length,2);

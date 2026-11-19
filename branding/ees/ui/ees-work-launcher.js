@@ -978,7 +978,7 @@
     if(event.type==='change'&&target.matches?.('[data-stage-check]')){
       // A tick is saved at once as that item's record. Anything that stops it puts the box back.
       const current=stageJob(target.dataset.jobId),item=target.dataset.itemId;
-      if(!target.checked||busy||!current||!state.run||!workStageCanCheck(current.node,current.saved,current.run)||!workHumanCheckItems(current.node).some(entry=>entry.id===item)||current.saved.decisions?.[item]||!inputsSaved(true)){render();return;}
+      if(!target.checked||busy||!current||!state.run||!workStageCanCheck(current.node,current.saved,current.run)||!workHumanCheckItems(current.node).some(entry=>entry.id===item)||workCheckDecisions(current.saved)[item]||!inputsSaved(true)){render();return;}
       mutate({action:'human_confirm',run_id:current.run.id,job_id:current.node.id,item_id:item,expected_revision:current.run.revision,verdict:'completed'}).then(result=>{if(!result)render();}).catch(failure=>{error=failure.message;render();});
       return;
     }
