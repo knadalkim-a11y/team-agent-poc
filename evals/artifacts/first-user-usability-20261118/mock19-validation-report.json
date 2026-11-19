@@ -1,13 +1,14 @@
 {
  "file": "design-mock-19-ask-in-row.html",
+ "revision": 2,
  "date": "2026-11-19",
  "browser": "Chromium (Playwright)",
  "sizes": [
   "1920x1080",
   "1366x768"
  ],
- "total": 126,
- "passed": 126,
+ "total": 202,
+ "passed": 202,
  "failed": 0,
  "pageErrors": [],
  "consoleErrors": [],
@@ -21,43 +22,43 @@
   },
   {
    "size": "1920x1080",
-   "name": "SQ1 has one start control",
-   "ok": true,
-   "detail": ""
-  },
-  {
-   "size": "1920x1080",
    "name": "SQ1 → 시작 goes to the stage without a window",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "after 시작 the field that is needed first has the focus",
+   "name": "after 시작 the job that needs a value is open and the other is closed",
+   "ok": true,
+   "detail": "[{\"key\":\"page\",\"open\":true,\"detail\":true,\"state\":\"실행 필요\",\"shortcut\":\"\",\"described\":false},{\"key\":\"child\",\"open\":false,\"detail\":false,\"state\":\"대기\",\"shortcut\":\"\",\"described\":true}]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "after 시작 the field has the focus",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "after 시작 the stage control reads 지금 실행",
+   "name": "after 시작 the stage shows no second run control",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ2: nothing leaves its row or scrolls sideways",
+   "name": "SQ2: nothing leaves its job or scrolls sideways",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ2: controls in a row do not overlap",
+   "name": "SQ2: controls do not overlap",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ2: fields and run buttons keep their own size",
+   "name": "SQ2: fields, run buttons and results keep their own size",
    "ok": true,
    "detail": ""
   },
@@ -69,25 +70,139 @@
   },
   {
    "size": "1920x1080",
-   "name": "SQ2 the field has its name and an example",
+   "name": "SQ2: at most one job is open",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ2 the field sits right before 실행 in the same row",
+   "name": "SQ2 the job that needs a value is open on entry",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ2 the second job shows where its value comes from and cannot run yet",
+   "name": "SQ2 the field has its name above it and an example in it",
    "ok": true,
    "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 실행 is right after the field, inside the open job",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 the open job shows its guidance once",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 the open job shows only its state on the row",
+   "ok": true,
+   "detail": "{\"key\":\"page\",\"open\":true,\"detail\":true,\"state\":\"실행 필요\",\"shortcut\":\"\",\"described\":false}"
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 the next job waits: no control on its row",
+   "ok": true,
+   "detail": "{\"key\":\"child\",\"open\":false,\"detail\":false,\"state\":\"대기\",\"shortcut\":\"\",\"described\":true}"
   },
   {
    "size": "1920x1080",
    "name": "SQ2 none of the sentences of the old window is on the screen",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "pressing the job name closes it; the closed row has one shortcut",
+   "ok": true,
+   "detail": "{\"key\":\"page\",\"open\":false,\"detail\":false,\"state\":\"실행 필요\",\"shortcut\":\"실행\",\"described\":true}"
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 all closed: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 all closed: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 all closed: fields, run buttons and results keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 all closed: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 all closed: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "the shortcut of a job that still needs its value opens it with the field ready",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "opening another job closes the first",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "the waiting job says where its value comes from and cannot run",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 second job open: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 second job open: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 second job open: fields, run buttons and results keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 second job open: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 second job open: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "the arrow at the end of the row opens and closes too",
    "ok": true,
    "detail": ""
   },
@@ -117,19 +232,19 @@
   },
   {
    "size": "1920x1080",
-   "name": "SQ3: nothing leaves its row or scrolls sideways",
+   "name": "SQ3: nothing leaves its job or scrolls sideways",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ3: controls in a row do not overlap",
+   "name": "SQ3: controls do not overlap",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ3: fields and run buttons keep their own size",
+   "name": "SQ3: fields, run buttons and results keep their own size",
    "ok": true,
    "detail": ""
   },
@@ -141,7 +256,13 @@
   },
   {
    "size": "1920x1080",
-   "name": "SQ4 running is shown on the row",
+   "name": "SQ3: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4 running is shown",
    "ok": true,
    "detail": ""
   },
@@ -153,25 +274,43 @@
   },
   {
    "size": "1920x1080",
-   "name": "SQ4 the value stays on the row",
+   "name": "SQ4 what came back is shown in the open job",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ4: nothing leaves its row or scrolls sideways",
+   "name": "SQ4 the answer is given right under it with one click",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ4: controls in a row do not overlap",
+   "name": "SQ4 the value stays in its field",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ4: fields and run buttons keep their own size",
+   "name": "SQ4 the row says what is left to do",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4: fields, run buttons and results keep their own size",
    "ok": true,
    "detail": ""
   },
@@ -183,13 +322,13 @@
   },
   {
    "size": "1920x1080",
-   "name": "SQ4 the evidence opens as in the product",
+   "name": "SQ4: at most one job is open",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ4 the verdict menu offers the three words",
+   "name": "SQ4 the other answers are behind the arrow",
    "ok": true,
    "detail": ""
   },
@@ -201,31 +340,31 @@
   },
   {
    "size": "1920x1080",
-   "name": "SQ5 after 적합",
+   "name": "SQ5 after 적합 the answered job closes and the next opens",
+   "ok": true,
+   "detail": "[{\"key\":\"page\",\"open\":false,\"detail\":false,\"state\":\"적합\",\"shortcut\":\"\",\"described\":true},{\"key\":\"child\",\"open\":true,\"detail\":true,\"state\":\"실행 필요\",\"shortcut\":\"\",\"described\":false}]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 the next job shows the value and can run",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ5 the second job shows the value and can run",
+   "name": "SQ5: nothing leaves its job or scrolls sideways",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ5: nothing leaves its row or scrolls sideways",
+   "name": "SQ5: controls do not overlap",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ5: controls in a row do not overlap",
-   "ok": true,
-   "detail": ""
-  },
-  {
-   "size": "1920x1080",
-   "name": "SQ5: fields and run buttons keep their own size",
+   "name": "SQ5: fields, run buttons and results keep their own size",
    "ok": true,
    "detail": ""
   },
@@ -237,25 +376,31 @@
   },
   {
    "size": "1920x1080",
-   "name": "SQ5 the second job ran",
+   "name": "SQ5: at most one job is open",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ5 after the second run: nothing leaves its row or scrolls sideways",
+   "name": "SQ5 the list that came back is shown with its control",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ5 after the second run: controls in a row do not overlap",
+   "name": "SQ5 after the second run: nothing leaves its job or scrolls sideways",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ5 after the second run: fields and run buttons keep their own size",
+   "name": "SQ5 after the second run: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 after the second run: fields, run buttons and results keep their own size",
    "ok": true,
    "detail": ""
   },
@@ -267,7 +412,37 @@
   },
   {
    "size": "1920x1080",
-   "name": "a new value and 다시 실행 asks for the verdict again and holds the next job",
+   "name": "SQ5 after the second run: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 confirming the list says that the product asks for a reason there",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "all done: 끝내기 is the one control of the stage",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "an answered job reopens with its value, result and answer",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "a new value and 다시 실행 asks again and holds the next job",
+   "ok": true,
+   "detail": "[{\"key\":\"page\",\"open\":true,\"detail\":true,\"state\":\"확인 필요\",\"shortcut\":\"\",\"described\":false},{\"key\":\"child\",\"open\":false,\"detail\":false,\"state\":\"대기\",\"shortcut\":\"\",\"described\":true}]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "끝내기 returns to the first screen with 시작 and the last round",
    "ok": true,
    "detail": ""
   },
@@ -279,19 +454,19 @@
   },
   {
    "size": "1920x1080",
-   "name": "SQ6: nothing leaves its row or scrolls sideways",
+   "name": "SQ6: nothing leaves its job or scrolls sideways",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ6: controls in a row do not overlap",
+   "name": "SQ6: controls do not overlap",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ6: fields and run buttons keep their own size",
+   "name": "SQ6: fields, run buttons and results keep their own size",
    "ok": true,
    "detail": ""
   },
@@ -303,7 +478,19 @@
   },
   {
    "size": "1920x1080",
-   "name": "SQ6 two fields with units and examples beside the answer",
+   "name": "SQ6: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 the job that asks for values is open; the one that asks nothing is answered on its row",
+   "ok": true,
+   "detail": "[{\"key\":\"pump\",\"open\":true,\"detail\":true,\"state\":\"확인 필요\",\"shortcut\":\"\",\"described\":false},{\"key\":\"note\",\"open\":false,\"detail\":false,\"state\":\"\",\"shortcut\":\"적합|\",\"described\":true}]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 two fields with names above, units and examples, and the answer beside them",
    "ok": true,
    "detail": ""
   },
@@ -315,15 +502,45 @@
   },
   {
    "size": "1920x1080",
+   "name": "SQ6 values missing: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 values missing: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 values missing: fields, run buttons and results keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 values missing: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 values missing: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
    "name": "SQ6 Enter moves to the next field",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ6 confirmed with the values",
+   "name": "SQ6 confirmed with the values: the job closes",
    "ok": true,
-   "detail": ""
+   "detail": "[{\"key\":\"pump\",\"open\":false,\"detail\":false,\"state\":\"적합\",\"shortcut\":\"\",\"described\":true},{\"key\":\"note\",\"open\":false,\"detail\":false,\"state\":\"\",\"shortcut\":\"적합|\",\"described\":true}]"
   },
   {
    "size": "1920x1080",
@@ -333,25 +550,37 @@
   },
   {
    "size": "1920x1080",
-   "name": "SQ6 asked again: nothing leaves its row or scrolls sideways",
+   "name": "SQ6 asked again: nothing leaves its job or scrolls sideways",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ6 asked again: controls in a row do not overlap",
+   "name": "SQ6 asked again: controls do not overlap",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
-   "name": "SQ6 asked again: fields and run buttons keep their own size",
+   "name": "SQ6 asked again: fields, run buttons and results keep their own size",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1920x1080",
    "name": "SQ6 asked again: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 asked again: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 a job that asks nothing can be opened too: the answer is then in the open part",
    "ok": true,
    "detail": ""
   },
@@ -375,7 +604,7 @@
   },
   {
    "size": "1920x1080",
-   "name": "entering the stage before starting shows 시작 and the field",
+   "name": "entering the stage before starting shows 시작 and the open job with its field",
    "ok": true,
    "detail": ""
   },
@@ -399,43 +628,43 @@
   },
   {
    "size": "1366x768",
-   "name": "SQ1 has one start control",
-   "ok": true,
-   "detail": ""
-  },
-  {
-   "size": "1366x768",
    "name": "SQ1 → 시작 goes to the stage without a window",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "after 시작 the field that is needed first has the focus",
+   "name": "after 시작 the job that needs a value is open and the other is closed",
+   "ok": true,
+   "detail": "[{\"key\":\"page\",\"open\":true,\"detail\":true,\"state\":\"실행 필요\",\"shortcut\":\"\",\"described\":false},{\"key\":\"child\",\"open\":false,\"detail\":false,\"state\":\"대기\",\"shortcut\":\"\",\"described\":true}]"
+  },
+  {
+   "size": "1366x768",
+   "name": "after 시작 the field has the focus",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "after 시작 the stage control reads 지금 실행",
+   "name": "after 시작 the stage shows no second run control",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ2: nothing leaves its row or scrolls sideways",
+   "name": "SQ2: nothing leaves its job or scrolls sideways",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ2: controls in a row do not overlap",
+   "name": "SQ2: controls do not overlap",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ2: fields and run buttons keep their own size",
+   "name": "SQ2: fields, run buttons and results keep their own size",
    "ok": true,
    "detail": ""
   },
@@ -447,25 +676,139 @@
   },
   {
    "size": "1366x768",
-   "name": "SQ2 the field has its name and an example",
+   "name": "SQ2: at most one job is open",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ2 the field sits right before 실행 in the same row",
+   "name": "SQ2 the job that needs a value is open on entry",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ2 the second job shows where its value comes from and cannot run yet",
+   "name": "SQ2 the field has its name above it and an example in it",
    "ok": true,
    "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 실행 is right after the field, inside the open job",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 the open job shows its guidance once",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 the open job shows only its state on the row",
+   "ok": true,
+   "detail": "{\"key\":\"page\",\"open\":true,\"detail\":true,\"state\":\"실행 필요\",\"shortcut\":\"\",\"described\":false}"
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 the next job waits: no control on its row",
+   "ok": true,
+   "detail": "{\"key\":\"child\",\"open\":false,\"detail\":false,\"state\":\"대기\",\"shortcut\":\"\",\"described\":true}"
   },
   {
    "size": "1366x768",
    "name": "SQ2 none of the sentences of the old window is on the screen",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "pressing the job name closes it; the closed row has one shortcut",
+   "ok": true,
+   "detail": "{\"key\":\"page\",\"open\":false,\"detail\":false,\"state\":\"실행 필요\",\"shortcut\":\"실행\",\"described\":true}"
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 all closed: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 all closed: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 all closed: fields, run buttons and results keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 all closed: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 all closed: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "the shortcut of a job that still needs its value opens it with the field ready",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "opening another job closes the first",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "the waiting job says where its value comes from and cannot run",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 second job open: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 second job open: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 second job open: fields, run buttons and results keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 second job open: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 second job open: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "the arrow at the end of the row opens and closes too",
    "ok": true,
    "detail": ""
   },
@@ -495,19 +838,19 @@
   },
   {
    "size": "1366x768",
-   "name": "SQ3: nothing leaves its row or scrolls sideways",
+   "name": "SQ3: nothing leaves its job or scrolls sideways",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ3: controls in a row do not overlap",
+   "name": "SQ3: controls do not overlap",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ3: fields and run buttons keep their own size",
+   "name": "SQ3: fields, run buttons and results keep their own size",
    "ok": true,
    "detail": ""
   },
@@ -519,7 +862,13 @@
   },
   {
    "size": "1366x768",
-   "name": "SQ4 running is shown on the row",
+   "name": "SQ3: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4 running is shown",
    "ok": true,
    "detail": ""
   },
@@ -531,25 +880,43 @@
   },
   {
    "size": "1366x768",
-   "name": "SQ4 the value stays on the row",
+   "name": "SQ4 what came back is shown in the open job",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ4: nothing leaves its row or scrolls sideways",
+   "name": "SQ4 the answer is given right under it with one click",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ4: controls in a row do not overlap",
+   "name": "SQ4 the value stays in its field",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ4: fields and run buttons keep their own size",
+   "name": "SQ4 the row says what is left to do",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4: fields, run buttons and results keep their own size",
    "ok": true,
    "detail": ""
   },
@@ -561,13 +928,13 @@
   },
   {
    "size": "1366x768",
-   "name": "SQ4 the evidence opens as in the product",
+   "name": "SQ4: at most one job is open",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ4 the verdict menu offers the three words",
+   "name": "SQ4 the other answers are behind the arrow",
    "ok": true,
    "detail": ""
   },
@@ -579,31 +946,31 @@
   },
   {
    "size": "1366x768",
-   "name": "SQ5 after 적합",
+   "name": "SQ5 after 적합 the answered job closes and the next opens",
+   "ok": true,
+   "detail": "[{\"key\":\"page\",\"open\":false,\"detail\":false,\"state\":\"적합\",\"shortcut\":\"\",\"described\":true},{\"key\":\"child\",\"open\":true,\"detail\":true,\"state\":\"실행 필요\",\"shortcut\":\"\",\"described\":false}]"
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 the next job shows the value and can run",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ5 the second job shows the value and can run",
+   "name": "SQ5: nothing leaves its job or scrolls sideways",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ5: nothing leaves its row or scrolls sideways",
+   "name": "SQ5: controls do not overlap",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ5: controls in a row do not overlap",
-   "ok": true,
-   "detail": ""
-  },
-  {
-   "size": "1366x768",
-   "name": "SQ5: fields and run buttons keep their own size",
+   "name": "SQ5: fields, run buttons and results keep their own size",
    "ok": true,
    "detail": ""
   },
@@ -615,25 +982,31 @@
   },
   {
    "size": "1366x768",
-   "name": "SQ5 the second job ran",
+   "name": "SQ5: at most one job is open",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ5 after the second run: nothing leaves its row or scrolls sideways",
+   "name": "SQ5 the list that came back is shown with its control",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ5 after the second run: controls in a row do not overlap",
+   "name": "SQ5 after the second run: nothing leaves its job or scrolls sideways",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ5 after the second run: fields and run buttons keep their own size",
+   "name": "SQ5 after the second run: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 after the second run: fields, run buttons and results keep their own size",
    "ok": true,
    "detail": ""
   },
@@ -645,7 +1018,37 @@
   },
   {
    "size": "1366x768",
-   "name": "a new value and 다시 실행 asks for the verdict again and holds the next job",
+   "name": "SQ5 after the second run: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 confirming the list says that the product asks for a reason there",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "all done: 끝내기 is the one control of the stage",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "an answered job reopens with its value, result and answer",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "a new value and 다시 실행 asks again and holds the next job",
+   "ok": true,
+   "detail": "[{\"key\":\"page\",\"open\":true,\"detail\":true,\"state\":\"확인 필요\",\"shortcut\":\"\",\"described\":false},{\"key\":\"child\",\"open\":false,\"detail\":false,\"state\":\"대기\",\"shortcut\":\"\",\"described\":true}]"
+  },
+  {
+   "size": "1366x768",
+   "name": "끝내기 returns to the first screen with 시작 and the last round",
    "ok": true,
    "detail": ""
   },
@@ -657,19 +1060,19 @@
   },
   {
    "size": "1366x768",
-   "name": "SQ6: nothing leaves its row or scrolls sideways",
+   "name": "SQ6: nothing leaves its job or scrolls sideways",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ6: controls in a row do not overlap",
+   "name": "SQ6: controls do not overlap",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ6: fields and run buttons keep their own size",
+   "name": "SQ6: fields, run buttons and results keep their own size",
    "ok": true,
    "detail": ""
   },
@@ -681,7 +1084,19 @@
   },
   {
    "size": "1366x768",
-   "name": "SQ6 two fields with units and examples beside the answer",
+   "name": "SQ6: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 the job that asks for values is open; the one that asks nothing is answered on its row",
+   "ok": true,
+   "detail": "[{\"key\":\"pump\",\"open\":true,\"detail\":true,\"state\":\"확인 필요\",\"shortcut\":\"\",\"described\":false},{\"key\":\"note\",\"open\":false,\"detail\":false,\"state\":\"\",\"shortcut\":\"적합|\",\"described\":true}]"
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 two fields with names above, units and examples, and the answer beside them",
    "ok": true,
    "detail": ""
   },
@@ -693,15 +1108,45 @@
   },
   {
    "size": "1366x768",
+   "name": "SQ6 values missing: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 values missing: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 values missing: fields, run buttons and results keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 values missing: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 values missing: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
    "name": "SQ6 Enter moves to the next field",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ6 confirmed with the values",
+   "name": "SQ6 confirmed with the values: the job closes",
    "ok": true,
-   "detail": ""
+   "detail": "[{\"key\":\"pump\",\"open\":false,\"detail\":false,\"state\":\"적합\",\"shortcut\":\"\",\"described\":true},{\"key\":\"note\",\"open\":false,\"detail\":false,\"state\":\"\",\"shortcut\":\"적합|\",\"described\":true}]"
   },
   {
    "size": "1366x768",
@@ -711,25 +1156,37 @@
   },
   {
    "size": "1366x768",
-   "name": "SQ6 asked again: nothing leaves its row or scrolls sideways",
+   "name": "SQ6 asked again: nothing leaves its job or scrolls sideways",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ6 asked again: controls in a row do not overlap",
+   "name": "SQ6 asked again: controls do not overlap",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
-   "name": "SQ6 asked again: fields and run buttons keep their own size",
+   "name": "SQ6 asked again: fields, run buttons and results keep their own size",
    "ok": true,
    "detail": ""
   },
   {
    "size": "1366x768",
    "name": "SQ6 asked again: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 asked again: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 a job that asks nothing can be opened too: the answer is then in the open part",
    "ok": true,
    "detail": ""
   },
@@ -753,7 +1210,7 @@
   },
   {
    "size": "1366x768",
-   "name": "entering the stage before starting shows 시작 and the field",
+   "name": "entering the stage before starting shows 시작 and the open job with its field",
    "ok": true,
    "detail": ""
   },

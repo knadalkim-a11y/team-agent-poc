@@ -1,18 +1,26 @@
 {
- "revision": 1,
+ "revision": 2,
  "status": "review_mock_ready",
  "date": "2026-11-19",
  "request": "실행을 누르니까 '실행준비' 팝업이 뜨네. 여기에 페이지 id를 입력하라고 하는데 무슨 페이지 id인거야? 이 팝업이 뜨는 구조가 좀 직관적이지 않은거같은데",
  "go_ahead": "권장대로 진행해줘. (권장: 창을 없애고 작업 줄에서 묻기, 목업 먼저)",
- "base_commit": "5b9f64e",
+ "revision_2_feedback": "지금 구조가 좀 더 좋긴한데, 작업에 바로 옆에 박스가 있고 보이는거보다, 작업을 클릭하면 그 아래로 상세가 나오는 구조가 더 낫지않아?",
+ "previous_revisions": [
+  {
+   "revision": 1,
+   "commit": "f8816bb",
+   "sha256": "dd17d7d217cc96987e2023a3afed3e6e890ce92183da709e80567e733219a803"
+  }
+ ],
+ "base_commit": "f8816bb",
  "product_commit": "77ec384",
  "implementation_revision": null,
  "mock": {
   "file": "docs/mockups/ees-work/design-mock-19-ask-in-row.html",
-  "sha256": "dd17d7d217cc96987e2023a3afed3e6e890ce92183da709e80567e733219a803",
-  "bytes": 527319,
+  "sha256": "33de457e26b83a1c6c2eea50bb204afb520f0b245feac370f0471fcf57fcbe79",
+  "bytes": 531728,
   "source": "docs/mockups/ees-work/design-mock-src/19-ask-in-row.html",
-  "source_sha256": "19143dfe9e9d00a610797147ba7b6507181b923098199ff57768e9ce71e6957f",
+  "source_sha256": "6769d141e9336eebcae42911da386cf6e4a3e964c7b6ab6b713bcca15434d717",
   "product_css": {
    "chat-theme.css": "b0c9b3298702fe77d758839265370080b9cf33f403c558c96dc4e95e114f222e",
    "ees-work-launcher.css": "c5dc813f45194978fdf50f3a69fa837db6f9d411b658a109eb983c83c7e99c85"
@@ -34,47 +42,47 @@
   {
    "file": "SQ1.png",
    "shows": "절차 첫 화면: 시작(창 없음)",
-   "sha256": "c2b5c272f9fdc60d95ca55704b6da8e8964e1ec01e66dc2009332168587e29b7"
+   "sha256": "7566945be1542812147f906b5397f112342a8e5d56087096d28f97c5b827a3b2"
   },
   {
    "file": "SQ2.png",
-   "shows": "단계 화면: 값 넣기 전, 작업 줄에 페이지 ID 칸과 실행",
-   "sha256": "3f489d58e3fb01a5ba9ecef2b5d7e6d9e47e6178f6aa471ffeae290bf25c1514"
+   "shows": "단계 화면: 값을 물어야 하는 작업이 펼쳐져 있고 그 안에 페이지 ID 칸과 실행",
+   "sha256": "17d773a5a5524acaa22846f79c015f352690a0ea7b79494849a1c04be2c7d6a5"
   },
   {
    "file": "SQ3.png",
    "shows": "값이 숫자가 아닐 때: 그 칸에 표시",
-   "sha256": "995f2bbb23f407f556fcedcd1e69e7ffd3291f55a763b37fbe6bfd893d6de18c"
+   "sha256": "caa0e1045a2401f18c39c46ca34c2cb12df44c2b244dd97f5a9cbb37efb49f53"
   },
   {
    "file": "SQ4.png",
-   "shows": "실행한 뒤: 값이 줄에 남음, 판정 부분은 지금 제품 그대로",
-   "sha256": "9539774c16536fea2e26f38d422fb9aefd97ebc8d228cb47fa630197df5e6893"
+   "shows": "실행한 뒤: 조회한 내용과 적합이 펼친 곳에 보임",
+   "sha256": "8ac204d7be7d57771da28f5c1907a2bf8ee1fe45bd3e0baf535e06d9570bd911"
   },
   {
    "file": "SQ5.png",
-   "shows": "적합 뒤: 둘째 작업에 넘어온 값과 켜진 실행",
-   "sha256": "fa270b851db1cb6bfb1dd8f6098e4e18c12e5bdbe13d574604d45a16d4d5c4d4"
+   "shows": "적합 뒤: 확인한 작업은 접히고 다음 작업이 넘어온 값과 함께 펼쳐짐",
+   "sha256": "5d4c0547ac554efed55acde0257e7612eabd2455b3c75507d6a12e812db8d095"
   },
   {
    "file": "SQ6.png",
-   "shows": "사람이 확인하는 작업: 값 칸 둘과 적합",
-   "sha256": "8bb08143a883cdef1f5e45589e6766555be935edb1215389bf2d4ae1e56c3938"
+   "shows": "사람이 확인하는 작업: 펼친 곳에 값 칸 둘과 적합, 값을 묻지 않는 작업은 줄에서 적합",
+   "sha256": "cb83beeaa4b1f7af296044564408e5e8b2b267e6d93c454f0456988e823e1fa8"
   },
   {
    "file": "SQ2-1366.png",
    "shows": "SQ2 · 1366x768",
-   "sha256": "3a811590520e5ce0b427d1003d2460802c7d158b03e73805e09c20280636276d"
+   "sha256": "6d04da990612d78887b5e87202e5e95a5d70cc379c462f4cf01c314e48e34db0"
   },
   {
    "file": "SQ4-1366.png",
-   "shows": "SQ4 · 1366x768(줄이 접힘)",
-   "sha256": "256cd41a5f2e67e9f2b9ea94a17132e8bb3ea00192453b7ac43d8349bebad755"
+   "shows": "SQ4 · 1366x768",
+   "sha256": "244d7709662f9c7a4a4a9583bede32667caed035cf01aeb0234f51d511b9bf5c"
   },
   {
    "file": "SQ6-1366.png",
    "shows": "SQ6 · 1366x768",
-   "sha256": "f0c5e00a901caea8404033681ac3b19308f215751ef679a42c21f37678babefc"
+   "sha256": "646f7ea0d5f83c3bf589bb46843b3e6c3110db89401f56552684063dd7a14732"
   }
  ],
  "validation": "evals/artifacts/first-user-usability-20261118/mock19-validation-report.json"
