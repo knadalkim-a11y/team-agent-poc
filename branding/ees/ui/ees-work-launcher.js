@@ -750,9 +750,11 @@
     // parallel runs (same rule as concurrent_runs_allowed()).
     const parallel=workParallelRuns(workflow);
     const factory=definition.execution_scope==='system'?'':selection.factory_id || '';
-    if(definition.execution_scope==='factory'&&!factory)return dialog({title:'공장을 선택해 주세요',readOnlyDetail:true,html:'<p>왼쪽 작업 위치에서 공장을 선택한 뒤 다시 실행해 주세요.</p>'});
+    // Only a round this call started is answered with its id: a caller that goes on to run a job must not run it in
+    // a round that was already open.
+    if(definition.execution_scope==='factory'&&!factory){await dialog({title:'공장을 선택해 주세요',readOnlyDetail:true,html:'<p>왼쪽 작업 위치에서 공장을 선택한 뒤 다시 실행해 주세요.</p>'});return null;}
     const active=workUnitActiveRuns(state,selection);
-    if(!parallel&&active.length)return select({run_id:active.length===1?active[0].id:'',job_id:'',stage_id:'',stage_overview:false,tab:active.length===1?'overview':'active_runs'});
+    if(!parallel&&active.length){await select({run_id:active.length===1?active[0].id:'',job_id:'',stage_id:'',stage_overview:false,tab:active.length===1?'overview':'active_runs'});return null;}
     let version=workflow.published_version,inputs={};
     // The start control starts the run. A form appears only for what is asked of the whole procedure; a job asks
     // for its own values under its row on the stage screen (2026-11-19).
@@ -769,7 +771,7 @@
       if(!await pending||at!==context()||auth!==token()||owner!==actor())return;
     }
     // Values typed under a job before the run exists start with it.
-    const typedScope=workStageValueScope(state),typed=stageValues.get(typedScope) || {};
+    const typedScope=workStageValueScope(state,selection),typed=stageValues.get(typedScope) || {};
     inputs={...inputs,...typed};
     const result=await mutate({action:'start_run',expected_revision:workflow.revision,workflow_id:workflow.id,factory_id:factory,version,inputs},{refreshAfter:false});
     if(!result||at!==context())return;
@@ -792,9 +794,10 @@
   }
   // Read what is typed under the open job into the kept values. A field left empty is not a value.
   function captureStageValues(jobId){
-    const panel=stageValuePanel(jobId),current=stageJob(jobId);if(!panel||!current)return;
-    const scope=workStageValueScope(state),kept={...(stageValues.get(scope) || {})},saved=state.run?.inputs || {};
-    let read={};try{read=workReadInputs(panel);}catch(_){return;}
+    const panel=stageValuePanel(jobId),current=stageJob(jobId);if(!panel||!current)return true;
+    const scope=workStageValueScope(state,selection),kept={...(stageValues.get(scope) || {})},saved=state.run?.inputs || {};
+    // What cannot be read is not guessed: the caller stops and says so.
+    let read={};try{read=workReadInputs(panel);}catch(_){return false;}
     for(const field of workStageAskFields(current.node,current.definition)){
       if([...panel.querySelectorAll('[data-work-input]')].some(item=>item.name===field.id&&item.disabled))continue;
       const value=read[field.id],empty=value===undefined||value===null||value===''||Array.isArray(value)&&!value.length;
@@ -803,13 +806,15 @@
       else kept[field.id]=value;
     }
     if(Object.keys(kept).length)stageValues.set(scope,kept);else stageValues.delete(scope);
+    return true;
   }
+  function stageValuesUnread(){commandError='입력값을 확인해 주세요.';render();}
   // Open the area under a job for its values. An area that is already open keeps what it shows.
   function openStageValues(jobId){if(selection.stage_evidence!==jobId)selection.stage_record='';selection.stage_evidence=jobId;selection.stage_tool='';}
-  function setStageValueErrors(errors){const scope=workStageValueScope(state);if(Object.keys(errors).length)stageValueErrors.set(scope,errors);else stageValueErrors.delete(scope);}
+  function setStageValueErrors(errors){const scope=workStageValueScope(state,selection);if(Object.keys(errors).length)stageValueErrors.set(scope,errors);else stageValueErrors.delete(scope);}
   // What is missing or of the wrong kind is said at the field. The server says the rest in the same place.
   function checkStageValues(current,{complete=true}={}){
-    const scope=workStageValueScope(state),kept=stageValues.get(scope) || {},saved=state.run?.inputs || {},errors={};
+    const scope=workStageValueScope(state,selection),kept=stageValues.get(scope) || {},saved=state.run?.inputs || {},errors={};
     for(const field of workStageAskFields(current.node,current.definition)){
       const value=Object.hasOwn(kept,field.id)?kept[field.id]:saved[field.id],empty=value===undefined||value===null||value===''||Array.isArray(value)&&!value.length;
       if(empty){if(complete&&field.required)errors[field.id]='값을 넣어 주세요';}
@@ -819,20 +824,27 @@
     return !Object.keys(errors).length;
   }
   // The server answers "field id: what is wrong" line by line. Lines about a field of this stage go to that field.
-  function showStageValueFailure(failure){
-    const asked=workOperationDefinition(state),fields=new Map(stageValueRows().flatMap(row=>workStageAskFields(row.node,asked).map(field=>[field.id,row.node.id]))),errors={},rest=[];
+  function showStageValueFailure(failure,actedJob=''){
+    const asked=workOperationDefinition(state),fields=new Map();
+    for(const row of stageValueRows())for(const field of workStageAskFields(row.node,asked))if(!fields.has(field.id)||row.node.id===actedJob)fields.set(field.id,row.node.id);
+    const errors={},rest=[];
     for(const line of String(failure?.message || '').split('\n')){const at=line.indexOf(': '),id=at>0?line.slice(0,at):'';if(fields.has(id))errors[id]=line.slice(at+2);else if(line.trim())rest.push(line);}
     if(!Object.keys(errors).length)return false;
     setStageValueErrors(errors);commandError=rest.join('\n');
     const job=fields.get(Object.keys(errors)[0]);if(selection.stage_evidence!==job)selection.stage_record='';selection.stage_evidence=job;selection.stage_tool='';render();focusStageValue(job,Object.keys(errors)[0]);
     return true;
   }
-  // Save what was typed for this stage with the run. Nothing typed, nothing sent.
-  async function saveStageValues(){
-    const run=state?.run,scope=workStageValueScope(state),kept=stageValues.get(scope);
-    if(!run||!kept||!Object.keys(kept).length)return true;
-    const inputs={...(run.inputs || {})};for(const [id,value] of Object.entries(kept)){if(value===null)delete inputs[id];else inputs[id]=value;}
-    const result=await mutate({action:'save_inputs',run_id:run.id,inputs,expected_revision:run.revision},{accept:()=>{stageValues.delete(scope);}});
+  // Save with the run what was typed for the jobs that are acted on. A value typed under another job waits for
+  // that job. Nothing typed, nothing sent.
+  async function saveStageValues(nodes){
+    const run=state?.run,scope=workStageValueScope(state,selection),kept=stageValues.get(scope),definition=workOperationDefinition(state);
+    const ids=[...new Set(nodes.flatMap(node=>workStageAskFields(node,definition).map(field=>field.id)))].filter(id=>kept&&Object.hasOwn(kept,id));
+    if(!run||!ids.length)return true;
+    const inputs={...(run.inputs || {})};for(const id of ids){if(kept[id]===null)delete inputs[id];else inputs[id]=kept[id];}
+    const result=await mutate({action:'save_inputs',run_id:run.id,inputs,expected_revision:run.revision},{accept:()=>{
+      const left={...(stageValues.get(scope) || {})};for(const id of ids)if(workValuesEqual(left[id],kept[id]))delete left[id];
+      if(Object.keys(left).length)stageValues.set(scope,left);else stageValues.delete(scope);
+    }});
     return Boolean(result);
   }
   // The job to do now that asks for a value or is given one is open; an answered job closes and the next one opens.
@@ -850,23 +862,24 @@
   async function runStageJob(jobId){
     let current=stageJob(jobId);if(!current||busy)return;
     if(!['tool','ai'].includes(current.node.mode)||workStageAwaitsValue(current.node,current.definition,current.run))return;
-    captureStageValues(jobId);
+    if(!captureStageValues(jobId))return stageValuesUnread();
     if(!checkStageValues(current)){openStageValues(jobId);render();focusStageValue(jobId);return;}
     if(!state.run){
       const stage=workStageTarget(state,selection);if(!stage)return;
       if(workStageHasValues({node:current.node,saved:{}},state))openStageValues(jobId);
-      if(!await startRun({dataset:{startStageId:stage.id}})){showStageValueFailure({message:commandError});return;}
-      current=stageJob(jobId);if(!current||!state.run)return;
+      const started=await startRun({dataset:{startStageId:stage.id}});
+      if(!started){showStageValueFailure({message:commandError},jobId);return;}
+      current=stageJob(jobId);if(!current||state.run?.id!==started)return;
     }
     if(!workStageCanExecute(current.node,current.saved,current.run,state)||!inputsSaved(true))return;
     try{
-      if(!await saveStageValues()){showStageValueFailure({message:commandError});return;}
+      if(!await saveStageValues([current.node])){showStageValueFailure({message:commandError},jobId);return;}
       current=stageJob(jobId);if(!current)return;
       setBusy(true);
       try{const model=executionModel();await operationsCommand({action:'execute_job',run_id:current.run.id,job_id:current.node.id,expected_revision:current.run.revision,...(model?{model_id:model}:{})});await refresh();}
       finally{setBusy(false);}
       if(workStageHasValues({node:current.node,saved:state?.run?.jobs?.[jobId] || {}},state)){openStageValues(jobId);render();}
-    }catch(failure){if(!showStageValueFailure(failure))throw failure;}
+    }catch(failure){if(!showStageValueFailure(failure,jobId))throw failure;}
   }
   async function stageAction(action,target){
     const data=target.dataset;
@@ -924,23 +937,37 @@
       if(!judgment)return;
       // The values asked under the row go with the answer: checked at their fields, then saved.
       if(workStageAskFields(node,definition).length){
-        captureStageValues(node.id);
+        if(!captureStageValues(node.id))return stageValuesUnread();
         if(!checkStageValues(current)){selection.stage_verdict_job='';openStageValues(node.id);render();focusStageValue(node.id);return;}
-        if(!await saveStageValues()){showStageValueFailure({message:commandError});return;}
+        if(!await saveStageValues([node])){showStageValueFailure({message:commandError},node.id);return;}
       }
       return decideStageJob(node.id,judgment);
     }
+  }
+  // A tick of a check item. The values asked under the row go with it, as with an answer: checked at their fields,
+  // then saved, then the tick.
+  async function tickStageCheck(jobId,item){
+    let current=stageJob(jobId);if(!current)return;
+    if(workStageAskFields(current.node,current.definition).length){
+      if(!captureStageValues(jobId))return stageValuesUnread();
+      if(!checkStageValues(current)){openStageValues(jobId);render();focusStageValue(jobId);return;}
+      if(!await saveStageValues([current.node])){if(!showStageValueFailure({message:commandError},jobId))render();return;}
+      current=stageJob(jobId);if(!current||!state.run)return;
+    }
+    const result=await mutate({action:'human_confirm',run_id:current.run.id,job_id:current.node.id,item_id:item,expected_revision:current.run.revision,verdict:'completed'});
+    if(!result&&!showStageValueFailure({message:commandError},jobId))render();
   }
   async function decideStageJob(jobId,judgment){
     const current=stageJob(jobId);if(!current||!state.run)return;
     const {run,node,saved,definition}=current;
     {
-      const existing=workStageDecision(node,saved,definition);if(existing?.judgment_id===judgment.id)return closeStageMenu(true);
+      // The same answer again is nothing to do, unless the job waits for another review (a value of it changed).
+      const existing=workStageDecision(node,saved,definition);if(existing?.judgment_id===judgment.id&&!saved.result_stale&&saved.status!=='review_required')return closeStageMenu(true);
       selection.stage_verdict_job='';selection.stage_approved_expanded=true;
       const noteKey=workStageNoteKey(state,node),note=stageNotes.get(noteKey) || '';
       const noteLimit=workStageNoteLimit(node,definition);if(Array.from(note).length>noteLimit){commandError=`판정 사유를 ${noteLimit}자 이내로 줄여 주세요. 사유와 판정은 아직 저장하지 않았습니다.`;render();return;}
       const decided=await mutate({action:(node.mode || 'human')==='human'?'human_confirm':'decide',run_id:run.id,job_id:node.id,item_id:'job',expected_revision:run.revision,result_revision:saved.result_revision,verdict:judgment.status,...(note?{note}:{}),...(!judgment.legacy?{judgment_id:judgment.id}:{})},{accept:()=>{if(stageNotes.get(noteKey)===note)stageNotes.delete(noteKey);}});
-      if(!decided&&showStageValueFailure({message:commandError}))return;
+      if(!decided&&showStageValueFailure({message:commandError},node.id))return;
       [...(source()?.hosts?.()?.panel?.querySelectorAll?.('[data-action="stage_verdict"]') || [])].find(item=>item.dataset.jobId===node.id)?.focus?.({preventScroll:true});
       // An answered job that was open closes and the next job that asks for a value opens.
       if(decided&&selection.stage_evidence===node.id&&workStageHasValues({node,saved:state?.run?.jobs?.[node.id] || {}},state))openNextStageJob({focus:true});
@@ -1046,11 +1073,11 @@
     if(action==='execute_scope'){
       if(busy||!state?.run||!inputsSaved(true))return;
       // Values typed under the rows of this stage are saved first; what the server refuses is said at its field.
-      const open=selection.stage_evidence;if(open)captureStageValues(open);
-      if(!await saveStageValues()){showStageValueFailure({message:commandError});return;}
+      const open=selection.stage_evidence;if(open&&!captureStageValues(open))return stageValuesUnread();
+      if(!await saveStageValues(stageValueRows().map(row=>row.node))){showStageValueFailure({message:commandError},open);return;}
       setBusy(true);
       try{const model=executionModel();await operationsCommand({action:'execute_scope',run_id:selection.run_id,node_id:target.dataset.nodeId,expected_revision:state.run.revision,...(model?{model_id:model}:{})});await refresh();}
-      catch(failure){if(!showStageValueFailure(failure))throw failure;}
+      catch(failure){if(!showStageValueFailure(failure,open))throw failure;}
       finally{setBusy(false);}
       return;
     }
@@ -1102,13 +1129,15 @@
     // while it is typed in: a mark of a wrong value is taken off in place.
     if(['input','change'].includes(event.type)&&target.matches?.('[data-work-input]')&&target.closest?.('[data-stage-values]')){
       const jobId=target.closest('[data-stage-values]').dataset.jobId;captureStageValues(jobId);
-      const scope=workStageValueScope(state),errors=stageValueErrors.get(scope);
+      const scope=workStageValueScope(state,selection),errors=stageValueErrors.get(scope);
       if(errors&&Object.hasOwn(errors,target.name)){const next={...errors};delete next[target.name];setStageValueErrors(next);target.removeAttribute('aria-invalid');target.removeAttribute('aria-describedby');target.closest('dd')?.querySelector('.ew-vd-ask-error')?.remove();}
       return;
     }
     // Enter in a value field moves to the next field of the job, then does what the row's control does.
     if(event.type==='keydown'&&event.key==='Enter'&&!event.isComposing&&event.keyCode!==229&&target.matches?.('input[data-work-input]')&&target.closest?.('[data-stage-values]')){
       event.preventDefault();
+      // A held key does one thing: it must not answer this job and then run the next one the focus moved to.
+      if(event.repeat)return;
       const panel=target.closest('[data-stage-values]'),jobId=panel.dataset.jobId,current=stageJob(jobId);if(!current)return;
       const fields=[...panel.querySelectorAll('input[data-work-input],select[data-work-input],textarea[data-work-input]')].filter(field=>!field.disabled&&field.type!=='checkbox'),next=fields[fields.indexOf(target)+1];
       if(next){next.focus({preventScroll:true});return;}
@@ -1138,7 +1167,7 @@
       // A tick is saved at once as that item's record. Anything that stops it puts the box back.
       const current=stageJob(target.dataset.jobId),item=target.dataset.itemId;
       if(!target.checked||busy||!current||!state.run||!workStageCanCheck(current.node,current.saved,current.run)||!workHumanCheckItems(current.node).some(entry=>entry.id===item)||workCheckDecisions(current.saved)[item]||!inputsSaved(true)){render();return;}
-      mutate({action:'human_confirm',run_id:current.run.id,job_id:current.node.id,item_id:item,expected_revision:current.run.revision,verdict:'completed'}).then(result=>{if(!result)render();}).catch(failure=>{error=failure.message;render();});
+      tickStageCheck(current.node.id,item).catch(failure=>{error=failure.message;render();});
       return;
     }
     if(event.type==='change'&&target.matches?.('[data-stage-attempt]')){const current=stageJob(target.dataset.jobId);if(!current||!(current.run.attempts || []).some(attempt=>attempt.id===target.value&&attempt.job_id===current.node.id))return;selection.stage_attempts={...(selection.stage_attempts || {}),[current.node.id]:target.value};selection.stage_tool='';render();return;}

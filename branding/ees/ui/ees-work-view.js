@@ -701,7 +701,8 @@ function workPatchContent(host,html){
     for(const attr of [...current.attributes])if(!wanted.hasAttribute(attr.name))current.removeAttribute(attr.name);
     for(const attr of [...wanted.attributes])if(current.getAttribute(attr.name)!==attr.value)current.setAttribute(attr.name,attr.value);
     if(current.tagName==='TEXTAREA'){
-      if(current.value!==wanted.value)current.value=wanted.value;
+      // As for an input below: a list typed under a job row keeps its text (a line just begun is not yet a value).
+      if(current.value!==wanted.value&&!(current===document.activeElement&&current.closest('[data-stage-values]')))current.value=wanted.value;
       if(current.defaultValue!==wanted.defaultValue)current.defaultValue=wanted.defaultValue;
     }else{
       children(current,wanted);
@@ -860,19 +861,27 @@ function workOrderedNodes(definition){
 // A job asks under its row for the values it can draw there as they are. A value whose choices are read from a
 // tool or depend on another value, and the form of a shared tool, keep the start form and the job screen.
 function workStageAsksInRow(field){
-  return Boolean(field&&field.id&&(field.scope || 'run')==='run'&&!field.authored_schema&&(field.options_source || 'manual')==='manual'&&!(Array.isArray(field.depends_on)?field.depends_on.length:field.depends_on));
+  return Boolean(field&&field.id&&(field.scope || 'run')==='run'&&!field.authored_schema&&field.type!=='json_object'&&(field.options_source || 'manual')==='manual'&&!(Array.isArray(field.depends_on)?field.depends_on.length:field.depends_on));
+}
+// The values typed under a row are saved by what the row itself does: 실행 of a tool or AI job, a person's answer,
+// a person's tick. A job whose row has none of these (a change request, a person's item verdicts or list) keeps the
+// start form and its own screen.
+function workStageRowCarriesValues(node={}){
+  if(['tool','ai'].includes(node.mode))return node.result_block!=='change_request';
+  return workHumanCheckItems(node).length>0||!['item_verdict','list_confirm','checklist','ai_review','change_request'].includes(node.result_block);
 }
 // A value that is asked of the whole procedure or of a stage is asked once, when the round starts, also when a job
 // names the same value.
 function workStageAskFields(node={},definition={}){
   const atStart=new Set(Object.values(definition.nodes || {}).filter(item=>item&&item.type!=='j').flatMap(item=>Array.isArray(item.inputs)?item.inputs:[]).filter(field=>field&&(field.scope || 'run')==='run').map(field=>field.id));
+  if(!workStageRowCarriesValues(node))return [];
   return (Array.isArray(node.inputs)?node.inputs:[]).filter(field=>workStageAsksInRow(field)&&!atStart.has(field.id));
 }
 function workStageGivenValues(node={},definition={},run={}){
   const given=[];
   for(const [name,source] of Object.entries(node.api_binding?.inputs || {})){
     const ref=source?.result,from=ref&&definition.nodes?.[ref.job_id];if(!from)continue;
-    const saved=run.jobs?.[from.id] || {},ready=saved.status==='completed',items=Array.isArray(saved.result?.items)?saved.result.items:[];
+    const saved=run.jobs?.[from.id] || {},ready=saved.status==='completed',items=(Array.isArray(saved.result?.items)?saved.result.items:[]).filter(item=>item&&item.selected!==false);
     const values=items.map(item=>item?.row?.[ref.field]).filter(value=>value!==undefined&&value!==null&&typeof value!=='object');
     // The name people already know: the result's own label, else the name under which the earlier job asked for it.
     const asked=from.api_binding?.inputs?.[name]?.input,field=(from.inputs || []).find(item=>item.id===asked);
@@ -882,9 +891,9 @@ function workStageGivenValues(node={},definition={},run={}){
 }
 function workStageAwaitsValue(node,definition,run){return workStageGivenValues(node,definition,run).some(value=>!value.ready);}
 // Typed values are kept until they are saved with the run. One key for a run, one for the time before it starts.
-function workStageValueScope(data){return [data.capabilities?.actor_id || '',data.workflow?.id || data.run?.workflow_id || '',data.run?.id || 'new'].join('/');}
+function workStageValueScope(data,selection={}){return [data.capabilities?.actor_id || '',data.workflow?.id || data.run?.workflow_id || '',data.run?.id || 'new@'+(selection.factory_id || '')].join('/');}
 function workStageValue(data,selection,field){
-  const draft=selection.stage_values?.[workStageValueScope(data)];
+  const draft=selection.stage_values?.[workStageValueScope(data,selection)];
   return draft&&Object.hasOwn(draft,field.id)?draft[field.id]:data.run?.inputs?.[field.id];
 }
 // What a job that reads through an API brought back, with the names the API specification gives its fields.
@@ -903,7 +912,7 @@ function workStageJobValuesHTML(row,data,selection){
   const {esc,time}=workUI,{node,saved,attempt}=row,run=data.run || {},id=node.id,definition=workOperationDefinition(data);
   const asks=workStageAskFields(node,definition),given=workStageGivenValues(node,definition,run),result=data.run?workStageResultView(node,saved):null;
   if(!asks.length&&!given.length&&!result)return '';
-  const errors=selection.stage_value_errors?.[workStageValueScope(data)] || {};
+  const errors=selection.stage_value_errors?.[workStageValueScope(data,selection)] || {};
   // Before the run a person's job is not started from its row, so its fields wait for 시작 as its answer does.
   const locked=workUI.finished(run)||run.can_write===false||saved.can_execute===false||['running','excluded'].includes(saved.status)||(!data.run&&(node.mode || 'human')==='human');
   const text=value=>value===undefined||value===null?'':typeof value==='object'?JSON.stringify(value):String(value);

@@ -790,6 +790,19 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.assertEqual(self.read('[data-stage-job=pump] .ew-vd-evidence-toggle', 'ariaExpanded'), 'true')
         self.click('[data-stage-job=pump] .ew-vd-evidence-toggle')
         self.wait("document.querySelector('[data-stage-job=pump]')?.dataset.expanded === 'false'")
+        # A value changed under an answered job, then the same answer: the value is saved and the job is answered
+        # again. It used to be left waiting for a review that the same answer could not give (review, 2026-11-19).
+        self.click('[data-stage-job=pump] .ew-vd-name')
+        writes = len(self.server.workspace_commands)
+        self.click(pressure); self.key('a', 65, 2); self.browser.call('Input.insertText', {'text': '3.4'})
+        self.click('[data-action=stage_verdict][data-job-id=pump]')
+        self.click('#ees-stage-verdict-menu [data-action=stage_decide][data-verdict=completed]')
+        self.wait("document.querySelector('[data-stage-job=pump]')?.dataset.expanded === 'false'")
+        self.assertEqual([(body['action'], body.get('inputs'), body.get('verdict')) for body in sent()],
+            [('save_inputs', {'pressure': 3.4, 'memo': '이상 없음'}, None), ('human_confirm', None, 'completed')])
+        again = self.state(run_id=run_id)['run']
+        self.assertEqual(again['inputs'], {'pressure': 3.4, 'memo': '이상 없음'})
+        self.assertEqual(again['jobs']['pump']['status'], 'completed')
         # 자세히 at the end of the area is the way to the job screen.
         self.click('[data-stage-job=pump] .ew-vd-name')
         self.click('#stage-under-pump .ew-vd-more [data-action=job]')

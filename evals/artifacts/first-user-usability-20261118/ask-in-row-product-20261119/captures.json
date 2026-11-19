@@ -11,8 +11,8 @@
   "program": "0.11.3+ees.14",
   "built_from": "work branch claude/brave-bell-p1tp73 with this change, Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0",
   "ui_sources_sha256": {
-   "ees-work-view.js": "a7346d8201ebe9c40fc1fc8916aea206fc8e0acc8fe00e822f3bbbee2c46dcd6",
-   "ees-work-launcher.js": "50312e4958f05ad516801c791eedabf68830e10d293d2e6e0f42120828ac6817",
+   "ees-work-view.js": "b30b7ec43a25f5f520bfae635bdda65f4fb7309ec5dfae9fd7fc3829ceed0c24",
+   "ees-work-launcher.js": "0a11326052173def32f794e5c1e0512775cf0163abe25117ecbf96f2df52d357",
    "ees-work-launcher.css": "59c2170c40472a8c604ed81d72c7154d218368e6f5ed9d5871478c043242c718"
   },
   "server": "tests/native_ui_fixture.py; SQ1-SQ5 use the shipped guide with a synthetic Confluence provider, SQ6 a synthetic procedure with one person's job that asks for a number and a note",
@@ -53,28 +53,28 @@
    "screen": "SQ3",
    "window": "1920x1080",
    "shows": "목업과 다른 곳: 숫자가 아닌 페이지 ID는 칸에서 막지 않고 실행 실패로 기록된다",
-   "sha256": "9e9ab51188ec71ca44440c98b4b43060316bdcb93e574bbf2118907df7b22398"
+   "sha256": "fd8704ce87e175620cbe2d5d424a4951bdfe05fb01aac5cc0481e123694a8413"
   },
   {
    "file": "SQ4-ran-1920.png",
    "screen": "SQ4",
    "window": "1920x1080",
    "shows": "실행한 뒤: 입력 아래에 결과. 둘째 작업은 대기",
-   "sha256": "ac39565d03a8ec06f45b861c5a43c80cd743853e09ac8ba56fde10087b7baa54"
+   "sha256": "3627051978c897d3a7d5a350f6ed024becf4e60a0c814dfdd288bf3d304da572"
   },
   {
    "file": "SQ4-ran-1366.png",
    "screen": "SQ4",
    "window": "1366x768",
    "shows": "같은 화면, 좁은 창",
-   "sha256": "7c191593f4d8bfa9b28b04d0407bddbf3fe3cfbd3de9143b772b787b69bc81a3"
+   "sha256": "af9f68b7983d29d6e0b3fb03cadf970245202cb711ca24a70d967d16dac23e96"
   },
   {
    "file": "SQ4-record-1920.png",
    "screen": "SQ4",
    "window": "1920x1080",
    "shows": "목업과 다른 곳: 판정 근거를 누르면 제품이 두던 기록이 결과 아래에 더해진다",
-   "sha256": "e9aca5873c704829d8c21656ca181ea1a1c46f04eb92352e3a842fd11d6ffdc9"
+   "sha256": "2c241238783bcc7d3346554003c8f6667fafd1119a40838fce9d6c8e1b89ff23"
   },
   {
    "file": "SQ5-next-1920.png",
@@ -88,7 +88,7 @@
    "screen": "SQ5",
    "window": "1920x1080",
    "shows": "둘째 작업을 실행한 뒤: 결과에 목록, 줄에 목록 확정",
-   "sha256": "0daa30fc8092da0f3c03a1df924ea7135039572baef61bcd8293fa1aa1f3b60c"
+   "sha256": "0092be63a48bed26859a617218fdef68749f7a2627c12b4dae02a2feffede07d"
   },
   {
    "file": "SQ6-person-1920.png",
@@ -102,7 +102,7 @@
    "screen": "SQ6",
    "window": "1366x768",
    "shows": "같은 화면, 좁은 창",
-   "sha256": "9b0fa67779194009cfe20af5be048c10126355f09fd81d51a16a0ccba4a1755e"
+   "sha256": "c7d85963f65280c27e59b722fa42998eaffd5d16560e3cb522067cd53f3b47c3"
   },
   {
    "file": "SQ6-person-missing-1920.png",

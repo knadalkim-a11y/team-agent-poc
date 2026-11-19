@@ -1432,15 +1432,16 @@ function askFixture({started=true}={}){
  const run=h.state.run;if(!started)delete h.state.run;
  // the fields a person types into: one fake field for each field of the open job
  const typed={},unmarked=[];
- const panelOf=job=>({dataset:{jobId:job},querySelectorAll:selector=>selector==='[data-work-input]'?Object.entries(typed[job] || {}).map(([name,field])=>({name,type:'text',disabled:false,...field})):[]});
+ const panelOf=job=>({dataset:{jobId:job},querySelectorAll:selector=>selector==='[data-work-input]'?Object.entries(typed[job] || {}).map(([name,field])=>({name,type:'text',disabled:false,getAttribute:()=>null,focus(){},...field})):[]});
  const panel={isConnected:true,addEventListener(){},removeEventListener(){},querySelectorAll:selector=>selector==='[data-stage-values]'?Object.keys(typed).map(panelOf):[],querySelector:()=>null};
  h.context.window.__eesSourceShellV1.hosts=()=>({panel});
- const type=(job,name,value,inputType='text')=>{typed[job]={...(typed[job] || {}),[name]:{value,dataset:{inputType}}};h.api.handleEvent({type:'input',target:{name,value,matches:selector=>selector==='[data-work-input]',closest:selector=>selector==='[data-stage-values]'?panelOf(job):selector==='[data-ees-work]'?{}:null,removeAttribute(name){unmarked.push(name);}}});};
+ const target=(job,name,value)=>({name,value,matches:selector=>selector==='[data-work-input]'||selector==='input[data-work-input]',closest:selector=>selector==='[data-stage-values]'?panelOf(job):selector==='[data-ees-work]'?{}:null,removeAttribute(name){unmarked.push(name);}});
+ const type=(job,name,value,inputType='text')=>{typed[job]={...(typed[job] || {}),[name]:{value,dataset:{inputType}}};h.api.handleEvent({type:'input',target:target(job,name,value)});};
  const seen=()=>h.api.drawn().selection;
  const body=()=>html('workStageHTML(state,selection,workOperationDefinition(state).nodes.t).body',{state:h.api.snapshot().state,selection:seen()});
  const row=id=>{const text=body(),at=text.indexOf('data-stage-job="'+id+'"'),from=text.lastIndexOf('<section class="ew-vd-entry',at),next=text.indexOf('<section class="ew-vd-entry',at);return text.slice(from,next<0?undefined:next);};
  const sent=(...actions)=>h.calls.filter(call=>actions.includes(call.body?.action)).map(call=>call.body);
- return {...h,run,type,seen,body,row,sent,unmarked};
+ return {...h,run,type,seen,body,row,sent,unmarked,typed,panelOf,target};
 }
 test('values of a job: the row is unchanged, its name opens the area under it, and the area holds what is asked',()=>{
  const h=askFixture(),closed=h.row('a');
@@ -1587,6 +1588,85 @@ test('values of a job: a list is confirmed from its row as it came back, with th
  h.setReply(call=>{if(call.body?.action==='confirm_list')Object.assign(h.state.run.jobs.b,{status:'completed'});return call.url.startsWith('/api/ees-work/workspace?')?h.state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true};});
  await h.api.handleClick({dataset:{action:'stage_confirm_list',jobId:'b'}});
  assert.equal(h.sent('confirm_list').length,2);assert.equal(h.api.snapshot().selection.stage_evidence,'');
+});
+// ---- Defects an independent review found in the first implementation (2026-11-19). Each failed before its fix. ----
+const settle=()=>new Promise(resolve=>setTimeout(resolve,20));
+const replies=(h,change=()=>{})=>h.setReply(call=>{const answer=change(call);return answer || (call.url.startsWith('/api/ees-work/workspace?')?h.state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true,revision:9});});
+test('values of a job (review): 실행 before a round never runs the job in a round that is already open',async()=>{
+ const h=askFixture({started:false}),existing={...h.run,id:'r-other',inputs:{'page-id':'999'}};
+ h.state.runs=[{id:'r-other',workflow_id:'w',status:'open',factory_id:''}];
+ h.api.setSelection({...h.api.snapshot().selection,run_id:'',stage_evidence:'a'});
+ h.setReply(call=>{if(call.url.startsWith('/api/ees-work/workspace?'))return new URL('http://x'+call.url).searchParams.get('run_id')==='r-other'?{...h.state,run:existing}:h.state;return call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true,revision:9};});
+ h.type('a','page-id','123');
+ await h.api.handleClick({dataset:{action:'stage_start',jobId:'a'}});
+ assert.deepEqual(h.sent('start_run','save_inputs','execute_job'),[],'the open round is shown and nothing is started, saved or run');
+ assert.equal(h.api.snapshot().state.run?.id,'r-other');
+});
+test('values of a job (review): a tick carries the values typed under its row, and a missing value stops the tick',async()=>{
+ const h=askFixture(),nodes=h.state.run.definition.nodes;
+ nodes.c={id:'c',type:'j',parent:'t',name:'펌프 점검',mode:'human',result_block:'checklist',confirmation_items:[{id:'pump',name:'누수 없음'},{id:'valve',name:'밸브 닫힘'}],inputs:[{id:'pressure',name:'압력',type:'number',scope:'run',required:true}]};
+ h.state.run.jobs.c={status:'ready',can_decide:true,can_execute:true};h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'c'});replies(h,call=>{if(call.body?.action==='save_inputs')h.state.run.inputs=call.body.inputs;});
+ const tick=item=>h.api.handleEvent({type:'change',target:{checked:true,dataset:{jobId:'c',itemId:item},matches:selector=>selector==='[data-stage-check]',closest:selector=>selector==='[data-ees-work]'?{}:null}});
+ tick('pump');await settle();
+ assert.deepEqual(h.sent('save_inputs','human_confirm'),[]);assert.match(h.row('c'),/id="ew-stage-c-pressure" aria-invalid="true"/);
+ h.type('c','pressure','3.1','number');tick('pump');await settle();
+ assert.deepEqual(h.sent('save_inputs','human_confirm').map(body=>body.action+(body.item_id?':'+body.item_id:'')),['save_inputs','human_confirm:pump']);assert.deepEqual(h.sent('save_inputs')[0].inputs,{pressure:3.1});
+});
+test('values of a job (review): an answered job whose value changes is answered again, also with the same answer',async()=>{
+ const h=askFixture(),nodes=h.state.run.definition.nodes;
+ nodes.c={id:'c',type:'j',parent:'t',name:'펌프 상태 기록',mode:'human',result_block:'human_confirm',inputs:[{id:'pressure',name:'압력',type:'number',scope:'run',required:true}]};
+ h.state.run.inputs={pressure:3.1};h.state.run.attempts=[{id:'c1',job_id:'c',number:1,status:'succeeded'}];
+ h.state.run.jobs.c={status:'completed',can_decide:true,can_execute:true,attempt_id:'c1',current_attempt:'c1',result_revision:1,decisions:{job:{item_id:'job',verdict:'completed',result_revision:1,attempt_id:'c1',actor_id:'actor'}}};
+ h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'c'});
+ replies(h,call=>{if(call.body?.action==='save_inputs'){h.state.run.inputs=call.body.inputs;h.state.run.jobs.c.status='review_required';}if(call.body?.action==='human_confirm')h.state.run.jobs.c.status='completed';});
+ h.type('c','pressure','4.2','number');
+ await h.api.handleClick({dataset:{action:'stage_decide',jobId:'c',verdict:'completed'}});
+ assert.deepEqual(h.sent('save_inputs','human_confirm').map(body=>body.action),['save_inputs','human_confirm'],'the changed value is not left waiting for a review nobody can give');assert.equal(h.state.run.jobs.c.status,'completed');
+ // with nothing changed, the same answer again is still nothing to do
+ await h.api.handleClick({dataset:{action:'stage_decide',jobId:'c',verdict:'completed'}});assert.equal(h.sent('human_confirm').length,1);
+});
+test('values of a job (review): a held Enter does one thing',async()=>{
+ const h=askFixture();h.state.run.inputs={'page-id':'111'};h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'a'});replies(h);
+ h.typed.a={'page-id':{value:'111',dataset:{inputType:'text'}}};
+ const control={dataset:{action:'stage_execute',jobId:'a'},disabled:false},rowElement={querySelector:selector=>selector==='.ew-vd-run'?control:null};
+ const press=repeat=>{const field=h.target('a','page-id','111'),base=field.closest,panel=h.panelOf('a');field.closest=selector=>selector==='[data-stage-job]'?rowElement:selector==='[data-mutation]'?null:selector==='[data-stage-values]'?{...panel,querySelectorAll:inner=>inner.startsWith('input[data-work-input]')?[field]:panel.querySelectorAll(inner)}:base(selector);return {type:'keydown',key:'Enter',repeat,isComposing:false,keyCode:13,target:field,preventDefault(){},stopImmediatePropagation(){}};};
+ for(const repeat of [false,true,true]){h.api.handleEvent(press(repeat));await settle();}
+ assert.equal(h.sent('execute_job').length,1);
+});
+test('values of a job (review): what is typed is saved and shown for the job that is acted on',async()=>{
+ // a refusal about a value two jobs ask for is shown at the job that ran, not at the last job that asks for it
+ let h=askFixture(),nodes=h.state.run.definition.nodes;
+ nodes.c={id:'c',type:'j',parent:'t',name:'둘째 조회',mode:'tool',result_block:'values',human_confirmation:false,api_binding:{operation_id:'page',version:1,inputs:{id:{input:'page-id'}},outputs:['title']},inputs:[{id:'page-id',name:'페이지 ID',type:'text',scope:'run',required:true}]};
+ h.state.run.jobs.c={status:'ready',can_execute:true};h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'a'});h.type('a','page-id','abc');
+ replies(h,call=>call.body?.action==='execute_job'?{httpError:true,status:400,error:{code:'invalid_inputs',message:'page-id: 숫자만 입력해 주세요.'}}:null);
+ await h.api.handleClick({dataset:{action:'stage_execute',jobId:'a'}});assert.equal(h.api.snapshot().selection.stage_evidence,'a');
+ // a value typed under another job waits for that job: running this one does not save it over a newer saved value
+ h=askFixture();nodes=h.state.run.definition.nodes;
+ nodes.q={id:'q',type:'j',parent:'t',name:'메모 확인',mode:'human',result_block:'human_confirm',inputs:[{id:'lot',name:'LOT',type:'text',scope:'run'}]};h.state.run.jobs.q={status:'ready',can_execute:true,can_decide:true};
+ h.state.run.inputs={'page-id':'111'};h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'q'});h.type('q','lot','OLD-TYPED');
+ h.state.run.inputs={'page-id':'111',lot:'NEWER-SAVED'};replies(h);
+ await h.api.handleClick({dataset:{action:'stage_execute',jobId:'a'}});
+ assert.deepEqual(h.sent('save_inputs'),[]);assert.equal(h.sent('execute_job').length,1);
+ // a job whose row has nothing that would save a value does not ask for it there: the start form does, as before
+ const definition={nodes:{p:{id:'p',type:'p'},t:{id:'t',type:'t',parent:'p'},
+  request:{id:'request',type:'j',parent:'t',mode:'tool',result_block:'change_request',inputs:[{id:'lot',name:'LOT',type:'text',scope:'run'}]},
+  verdicts:{id:'verdicts',type:'j',parent:'t',mode:'human',result_block:'item_verdict',inputs:[{id:'basis',name:'기준',type:'text',scope:'run'}]},
+  shape:{id:'shape',type:'j',parent:'t',mode:'tool',result_block:'values',inputs:[{id:'filter',name:'조건',type:'json_object',scope:'run'},{id:'count',name:'건수',type:'number',scope:'run'}]}}};
+ assert.equal(html('["request","verdicts","shape"].map(id=>workStageAskFields(definition.nodes[id],definition).map(field=>field.id).join("+")).join()',{definition}),',,count');
+ assert.equal(html('workRunStartFields(definition).map(field=>field.id).join()',{definition}),'lot,basis,filter');
+});
+test('values of a job (review): a value typed before a round belongs to the place that round would start in',async()=>{
+ const h=askFixture({started:false});h.state.workflow.published.execution_scope='factory';h.state.factories=[{id:'F1',name:'1공장'},{id:'F2',name:'2공장'}];
+ h.api.setSelection({...h.api.snapshot().selection,run_id:'',factory_id:'F1',stage_evidence:'a'});h.type('a','page-id','F1-ONLY');
+ h.setReply(call=>{if(call.body?.action==='start_run'){h.state.run={...h.run,factory_id:call.body.factory_id,inputs:call.body.inputs};return {ok:true,run:{id:'r'}};}return call.url.startsWith('/api/ees-work/workspace?')?h.state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true};});
+ await h.api.select({factory_id:'F2',stage_id:'',tab:'overview'});
+ await h.api.handleClick({dataset:{action:'overview_start'}});
+ assert.deepEqual(h.sent('start_run').map(body=>({factory:body.factory_id,inputs:body.inputs})),[{factory:'F2',inputs:{}}]);
+});
+test('values of a job (review): only the rows a list hands over count as the value a job is given',()=>{
+ const h=askFixture();Object.assign(h.state.run.jobs.a,{status:'completed',decisions:{job:{item_id:'job',verdict:'completed'}},result:{items:[{id:'r1',selected:false,row:{id:'1'}},{id:'r2',row:{id:'27182'}}],field_labels:{id:'페이지 ID'}}});
+ h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'b'});
+ assert.match(h.row('b'),/<dt>페이지 ID<\/dt><dd><span>27182<\/span><span class="ew-vd-given">기준 문서 확인에서<\/span><\/dd>/);
 });
 test('check items: before a run and for someone who may not act, the list is shown but cannot be ticked',()=>{
  const h=checkListFixture();h.state.run.jobs.h.can_decide=false;
