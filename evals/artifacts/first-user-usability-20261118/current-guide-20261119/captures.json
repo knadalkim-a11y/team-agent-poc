@@ -1,0 +1,43 @@
+{
+ "date": "2026-11-19",
+ "what": "The shipped Confluence guide in the product today (main 77ec384): what the in-house user met",
+ "product": {
+  "program": "0.11.3+ees.14",
+  "built_from": "main 77ec384 sources (work branch tree, documents only differ), Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0",
+  "server": "tests/native_ui_fixture.py with the shipped guide and a synthetic Confluence provider",
+  "window": "1920x1080",
+  "taken_by": "one-off script outside the repository that clicks the real controls"
+ },
+ "captures": [
+  {
+   "file": "01-stage-before-start.png",
+   "shows": "단계 화면, 시작 전: 두 작업 모두 실행 단추",
+   "sha256": "055eb4a91b0d5731a58dea7c463c8429ab42f42e5aec34fca4b175d569bb223c"
+  },
+  {
+   "file": "02-start-window.png",
+   "shows": "작업의 실행을 누르면 뜨는 실행 준비 창",
+   "sha256": "19b5c1297280eadede7e60d7b2efb5fe3a8d92ddeb3ccef5cd157b77d9afa68a"
+  },
+  {
+   "file": "03-after-start-nothing-ran.png",
+   "shows": "창에서 시작을 누른 뒤: 회차만 만들어지고 작업은 실행되지 않음",
+   "sha256": "4404c1bc7f72e1fe9cac8c47ae33d67268d72bdd06633c73e936ed355243fe07"
+  },
+  {
+   "file": "04-second-job-first-error.png",
+   "shows": "앞 작업 확인 전에 둘째 작업의 실행을 누르면 나오는 오류 줄",
+   "sha256": "f42d2f6204cd4c9d508a1607d5038d50bbf869f37ad1642cedfebc4956b237bd"
+  },
+  {
+   "file": "05-after-run.png",
+   "shows": "첫 작업을 실행한 뒤의 줄",
+   "sha256": "a825073f649ce04faf617ac6e6e237133ec1d664b5e730dad5be91011861f91b"
+  },
+  {
+   "file": "06-evidence-open.png",
+   "shows": "판정 근거를 편 모습: 줄은 그대로 강조되고 그 아래 흰 영역이 펼쳐짐(목업 19번 3판이 따르는 기존 모양)",
+   "sha256": "ffef2ac789fe3f7a76c0b06a154e7109d24d126b651eb802e330f01fccac2a00"
+  }
+ ]
+}

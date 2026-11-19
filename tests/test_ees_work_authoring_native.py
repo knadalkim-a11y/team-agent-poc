@@ -802,11 +802,11 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         open_stage()
         self.wait("document.querySelector('#ees-work-panel [data-action=overview_start]')")
         self.click('#ees-work-panel [data-action=overview_start]')
-        # The job now asks for a value, so starting opens the form; the value is left empty here.
-        self.wait("document.querySelector('#ees-work-dialog [data-dialog-confirm]')")
-        self.assertEqual(self.text('#ees-work-dialog [data-dialog-confirm]'), '시작')
-        self.click('#ees-work-dialog [data-dialog-confirm]')
+        # The job now asks for a value. No window asks for it at the start (2026-11-19): it is asked under the job's
+        # row, next to the list to tick, and is left empty here.
         self.wait("document.querySelectorAll('#ees-work-panel input[data-stage-check]:not(:disabled)').length === 2")
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog[open]')"))
+        self.assertEqual(self.read('#ees-work-panel [data-stage-values] [data-work-input][name=note]', 'value'), '')
         for done in (1, 2):
             self.click('#ees-work-panel input[data-stage-check]')
             self.wait("document.querySelectorAll('#ees-work-panel .ew-vd-check-done').length === %d" % done)

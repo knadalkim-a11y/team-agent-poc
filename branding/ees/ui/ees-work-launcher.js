@@ -41,7 +41,9 @@
   let state=null,identity='',epoch=0,serial=0,busy=false,scheduled=false,error='',commandError='',route='',readyRoute='',refreshTimer=null,uiTimer=null,uiRevision=0,restored=false,initialSelectionPatch=null;
   let savedUIState={},accountGeneration=0;
   let procedureStart=null,nativeCapabilities=null,nativeScope=null,stateKey='',targetLoading=false,scopeLoading=false,evidenceUnavailable=false;
-  const workspaceCache=new Map(),stageNotes=new Map();
+  // stageValueBases keeps, per typed value, the saved value it was typed over: a value someone else saves in between
+  // is shown before it is overwritten, as the job screen does with its drafts.
+  const workspaceCache=new Map(),stageNotes=new Map(),stageValues=new Map(),stageValueErrors=new Map(),stageValueBases=new Map();
   const pendingInputMessage='업무 도우미 입력 제안을 먼저 반영하거나 버려 주세요.';
   let nativeTicket=null,nativeNavigationBusy=false,pendingNativeAction=null;
   const initialSelection=()=>({mode:'work',tab:'overview',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]});
@@ -109,7 +111,7 @@
     const job=definition?.nodes?.[ref.job_id]?.name;
     return [workflow,job,ref.reference_kind==='historical'?'실행 기록':''].filter(Boolean).join(' / ');
   }
-  const snapshot=()=>{const destination=nativeReturnPreview();return {state:state?{...state,input_proposal:pendingInputProposal?{values:pendingInputProposal.values,warnings:pendingInputProposal.warnings}:null,input_proposal_applied:inputProposalApplied}:null,native_capabilities:nativeCapabilities,native_scope:nativeScope,target_loading:targetLoading||Boolean(destination),scope_loading:scopeLoading,evidence_unavailable:evidenceUnavailable,selection:{...clone(selection),stage_notes:Object.fromEntries(stageNotes),...(destination?{mode:destination.mode,tab:destination.tab}:{}),chat_id:chatId()},chat_reference_label:currentReferenceLabel(),api_assistant:apiAssistantState(),native_return_pending:Boolean(destination),native_shell:nativePage()&&!destination,native_id:nativePage()&&!destination?(workNativeTargets.find(item=>location.pathname===item.path||location.pathname.startsWith(item.path+'/'))?.id || (adminNativePage()?'admin':'native')):'',busy,error:error || commandError,procedure_start:destination?null:procedureStart};};
+  const snapshot=()=>{const destination=nativeReturnPreview();return {state:state?{...state,input_proposal:pendingInputProposal?{values:pendingInputProposal.values,warnings:pendingInputProposal.warnings}:null,input_proposal_applied:inputProposalApplied}:null,native_capabilities:nativeCapabilities,native_scope:nativeScope,target_loading:targetLoading||Boolean(destination),scope_loading:scopeLoading,evidence_unavailable:evidenceUnavailable,selection:{...clone(selection),stage_notes:Object.fromEntries(stageNotes),stage_values:Object.fromEntries(stageValues),stage_value_errors:Object.fromEntries(stageValueErrors),...(destination?{mode:destination.mode,tab:destination.tab}:{}),chat_id:chatId()},chat_reference_label:currentReferenceLabel(),api_assistant:apiAssistantState(),native_return_pending:Boolean(destination),native_shell:nativePage()&&!destination,native_id:nativePage()&&!destination?(workNativeTargets.find(item=>location.pathname===item.path||location.pathname.startsWith(item.path+'/'))?.id || (adminNativePage()?'admin':'native')):'',busy,error:error || commandError,procedure_start:destination?null:procedureStart};};
   // The last successful workspace remains visible during route validation.
   // References and queued actions still wait for the current route and Chat.
   const chatPrepared=()=>screen().chatReady && readyRoute===route&&(!route||route===location.pathname+location.search+'#chat')&&(!nativeTicket||nativeTicket.phase==='leaving');
@@ -528,7 +530,7 @@
     designer.closePrivateDialogs?.();
     if(pendingNativeAction?.applied)pendingNativeAction=null;clearTimeout(reviewTimer);
     const previous={...selection},before=context(),next={...selection,chat_reference:null,...patch};
-    if(['system_id','factory_id','workflow_id','run_id'].some(key=>previous[key]!==next[key]))Object.assign(next,{start_stage_id:previous.workflow_id===next.workflow_id&&previous.system_id===next.system_id&&next.tab==='start'?previous.start_stage_id || '':'',stage_id:'',stage_overview:false,stage_tab:'work',stage_evidence:'',stage_tool:'',stage_attempts:{},stage_approved_expanded:true,stage_verdict_job:''});
+    if(['system_id','factory_id','workflow_id','run_id'].some(key=>previous[key]!==next[key]))Object.assign(next,{start_stage_id:previous.workflow_id===next.workflow_id&&previous.system_id===next.system_id&&next.tab==='start'?previous.start_stage_id || '':'',stage_id:'',stage_overview:false,stage_tab:'work',stage_evidence:'',stage_record:'',stage_tool:'',stage_attempts:{},stage_approved_expanded:true,stage_verdict_job:''});
     const sameInputTarget=token()===identity&&previous.run_id&&previous.job_id&&
       ['mode','system_id','factory_id','workflow_id','run_id','job_id'].every(key=>previous[key]===next[key])&&
       Object.keys(patch).every(key=>key==='tab'||JSON.stringify(patch[key])===JSON.stringify(previous[key]));
@@ -612,8 +614,10 @@
     $('#ees-work-dialog').addEventListener('input',()=>{id=$('#ees-list-add-id').value.trim();name=$('#ees-list-add-name').value.trim();});
     if(await pending&&at===context())view.addListItem({id,name});
   }
-  async function confirmList(confirm=true){
-    if(busy||!inputsSaved())return;const at=context(),run=state?.run,jobId=selection.job_id,saved=run?.jobs?.[jobId],draft=view.readList();
+  async function confirmList(confirm=true,rowJob=''){
+    if(busy||!inputsSaved())return;const at=context(),run=state?.run,jobId=rowJob || selection.job_id,saved=run?.jobs?.[jobId];
+    // From a row of the stage screen the list is confirmed as it came back; choosing what to keep stays on the job screen.
+    const draft=rowJob?{items:workListItems(saved?.result || {}),attempt_id:saved?.attempt_id,result_revision:saved?.result_revision}:view.readList();
     if(!saved||saved.can_decide===false||draft.attempt_id!==saved.attempt_id||draft.result_revision!==saved.result_revision)throw new Error('현재 목록의 근거와 처리 권한을 다시 확인해 주세요.');
     const selected=draft.items.filter(item=>item.selected),sharedSearch=Boolean(run.definition?.nodes?.[jobId]?.shared_tool_id)&&saved.result?.scope==='single_page',emptyConfirmation=confirm&&!selected.length;
     const apiEmpty=Boolean(run.definition?.nodes?.[jobId]?.api_binding)&&saved.result?.completeness==='empty'&&saved.result?.items?.length===0;
@@ -748,12 +752,15 @@
     // parallel runs (same rule as concurrent_runs_allowed()).
     const parallel=workParallelRuns(workflow);
     const factory=definition.execution_scope==='system'?'':selection.factory_id || '';
-    if(definition.execution_scope==='factory'&&!factory)return dialog({title:'공장을 선택해 주세요',readOnlyDetail:true,html:'<p>왼쪽 작업 위치에서 공장을 선택한 뒤 다시 실행해 주세요.</p>'});
+    // Only a round this call started is answered with its id: a caller that goes on to run a job must not run it in
+    // a round that was already open.
+    if(definition.execution_scope==='factory'&&!factory){await dialog({title:'공장을 선택해 주세요',readOnlyDetail:true,html:'<p>왼쪽 작업 위치에서 공장을 선택한 뒤 다시 실행해 주세요.</p>'});return null;}
     const active=workUnitActiveRuns(state,selection);
-    if(!parallel&&active.length)return select({run_id:active.length===1?active[0].id:'',job_id:'',stage_id:'',stage_overview:false,tab:active.length===1?'overview':'active_runs'});
+    if(!parallel&&active.length){await select({run_id:active.length===1?active[0].id:'',job_id:'',stage_id:'',stage_overview:false,tab:active.length===1?'overview':'active_runs'});return null;}
     let version=workflow.published_version,inputs={};
-    // With nothing to ask, the start control starts the run; the form appears only for start questions.
-    if(Object.values(definition.nodes || {}).some(node=>(node.inputs || []).some(field=>(field.scope || 'run')==='run'))){
+    // The start control starts the run. A form appears only for what is asked of the whole procedure; a job asks
+    // for its own values under its row on the stage screen (2026-11-19).
+    if(workRunStartFields(definition).length){
       const html=workRunStartFieldsHTML(state,selection,definition);
       const pending=dialog({title:'실행 준비',note:'선택한 게시 버전과 이번 진행 건을 따로 보존합니다.',html,confirmLabel:'시작'}),element=$('#ees-work-dialog');
       const read=()=>{
@@ -765,18 +772,155 @@
       element.addEventListener('click',event=>{if(event.target.closest?.('[data-dialog-confirm]'))read();},true);
       if(!await pending||at!==context()||auth!==token()||owner!==actor())return;
     }
+    // Values typed under a job before the run exists start with it.
+    const typedScope=workStageValueScope(state,selection),typed=stageValues.get(typedScope) || {};
+    inputs={...inputs,...typed};
     const result=await mutate({action:'start_run',expected_revision:workflow.revision,workflow_id:workflow.id,factory_id:factory,version,inputs},{refreshAfter:false});
     if(!result||at!==context())return;
     const id=result.run?.id || result.run_id || result.id;
-    delete selection.start_inputs?.[workflow.id];
+    delete selection.start_inputs?.[workflow.id];stageValues.delete(typedScope);stageValueErrors.delete(typedScope);stageValueBases.delete(typedScope);
+    const openJob=selection.stage_evidence;
     await select({factory_id:factory,run_id:id,start_stage_id:'',tab:'overview'});
-    if(returnStage&&state?.run?.id===id&&state.run.definition?.nodes?.[returnStage]?.type==='t')await select({stage_id:returnStage,stage_overview:false,tab:'overview'},{fetch:false});
+    if(returnStage&&state?.run?.id===id&&state.run.definition?.nodes?.[returnStage]?.type==='t')await select({stage_id:returnStage,stage_overview:false,stage_evidence:openJob,tab:'overview'},{fetch:false});
+    return state?.run?.id===id?id:null;
+  }
+  // ---- Values a job asks for under its row (2026-11-19, design mock 19 revision 3) ----
+  function stageValueRows(){const stage=workStageTarget(state,selection);return stage?workStageRows(state,stage):[];}
+  function stageValuePanel(jobId){return [...(source()?.hosts?.()?.panel?.querySelectorAll?.('[data-stage-values]') || [])].find(item=>item.dataset.jobId===jobId) || null;}
+  function focusStageValue(jobId,fieldId=''){
+    const panel=stageValuePanel(jobId);if(!panel)return;
+    const fields=[...panel.querySelectorAll('[data-work-input]')].filter(field=>!field.disabled&&field.type!=='checkbox');
+    const field=(fieldId&&fields.find(item=>item.name===fieldId)) || fields.find(item=>item.getAttribute('aria-invalid')==='true') || fields.find(item=>!String(item.value || '').trim()) || fields[0];
+    // With nothing to type in, what comes next is the row's own 실행.
+    (field || panel.closest?.('[data-stage-job]')?.querySelector?.('.ew-vd-run:not(:disabled)'))?.focus?.({preventScroll:true});
+  }
+  // Read what is typed under the open job into the kept values. A field left empty is not a value.
+  function captureStageValues(jobId){
+    const panel=stageValuePanel(jobId),current=stageJob(jobId);if(!panel||!current)return true;
+    const scope=workStageValueScope(state,selection),kept={...(stageValues.get(scope) || {})},saved=state.run?.inputs || {},bases={...(stageValueBases.get(scope) || {})};
+    // What cannot be read is not guessed: the caller stops and says so.
+    let read={};try{read=workReadInputs(panel);}catch(_){return false;}
+    for(const field of workStageAskFields(current.node,current.definition)){
+      if([...panel.querySelectorAll('[data-work-input]')].some(item=>item.name===field.id&&item.disabled))continue;
+      const value=read[field.id],empty=value===undefined||value===null||value===''||Array.isArray(value)&&!value.length;
+      if(empty){if(Object.hasOwn(saved,field.id)&&saved[field.id]!==''&&saved[field.id]!==null)kept[field.id]=null;else delete kept[field.id];}
+      else if(Object.hasOwn(saved,field.id)&&workValuesEqual(saved[field.id],value))delete kept[field.id];
+      else kept[field.id]=value;
+      if(!Object.hasOwn(kept,field.id))delete bases[field.id];
+      else if(!Object.hasOwn(bases,field.id))bases[field.id]={value:saved[field.id]};
+    }
+    if(Object.keys(kept).length)stageValues.set(scope,kept);else stageValues.delete(scope);
+    if(Object.keys(bases).length)stageValueBases.set(scope,bases);else stageValueBases.delete(scope);
+    return true;
+  }
+  function stageValuesUnread(){commandError='입력값을 확인해 주세요.';render();}
+  // Open the area under a job for its values. An area that is already open keeps what it shows.
+  function openStageValues(jobId){if(selection.stage_evidence!==jobId)selection.stage_record='';selection.stage_evidence=jobId;selection.stage_tool='';}
+  function setStageValueErrors(errors){const scope=workStageValueScope(state,selection);if(Object.keys(errors).length)stageValueErrors.set(scope,errors);else stageValueErrors.delete(scope);}
+  // What is missing or of the wrong kind is said at the field. The server says the rest in the same place.
+  function checkStageValues(current,{complete=true}={}){
+    const scope=workStageValueScope(state,selection),kept=stageValues.get(scope) || {},saved=state.run?.inputs || {},errors={};
+    for(const field of workStageAskFields(current.node,current.definition)){
+      const value=Object.hasOwn(kept,field.id)?kept[field.id]:saved[field.id],empty=value===undefined||value===null||value===''||Array.isArray(value)&&!value.length;
+      if(empty){if(complete&&field.required)errors[field.id]='값을 넣어 주세요';}
+      else if(field.type==='number'&&(typeof value!=='number'||!Number.isFinite(value)))errors[field.id]='숫자만 넣어 주세요';
+    }
+    setStageValueErrors(errors);
+    return !Object.keys(errors).length;
+  }
+  // The server answers "field id: what is wrong" line by line. Lines about a field of this stage go to that field.
+  function showStageValueFailure(failure,actedJob=''){
+    const asked=workOperationDefinition(state),fields=new Map();
+    for(const row of stageValueRows())for(const field of workStageAskFields(row.node,asked))if(!fields.has(field.id)||row.node.id===actedJob)fields.set(field.id,row.node.id);
+    const errors={},rest=[];
+    for(const line of String(failure?.message || '').split('\n')){const at=line.indexOf(': '),id=at>0?line.slice(0,at):'';if(fields.has(id))errors[id]=line.slice(at+2);else if(line.trim())rest.push(line);}
+    if(!Object.keys(errors).length)return false;
+    setStageValueErrors(errors);commandError=rest.join('\n');
+    const job=fields.get(Object.keys(errors)[0]);if(selection.stage_evidence!==job)selection.stage_record='';selection.stage_evidence=job;selection.stage_tool='';render();focusStageValue(job,Object.keys(errors)[0]);
+    return true;
+  }
+  // Save with the run what was typed for the jobs that are acted on. A value typed under another job waits for
+  // that job. Nothing typed, nothing sent.
+  // Values changed under a tool or AI job that already ran are not confirmed with its old result: they are saved (the
+  // job then waits for another review) and 실행 of the row has the focus. Answers whether that happened.
+  async function stageValuesChangeResult(node){
+    if(!captureStageValues(node.id)){stageValuesUnread();return true;}
+    if(!stageValuesPending([node]).length)return false;
+    const current=stageJob(node.id);if(!current)return true;
+    if(!checkStageValues(current)){selection.stage_verdict_job='';openStageValues(node.id);render();focusStageValue(node.id);return true;}
+    selection.stage_verdict_job='';
+    if(!await saveStageValues([node])){showStageValueFailure({message:commandError},node.id);return true;}
+    openStageValues(node.id);render();
+    [...(source()?.hosts?.()?.panel?.querySelectorAll?.('.ew-vd-run') || [])].find(item=>item.dataset.jobId===node.id&&!item.disabled)?.focus?.({preventScroll:true});
+    return true;
+  }
+  // The values typed for these jobs that are not saved yet.
+  function stageValuesPending(nodes){
+    const kept=stageValues.get(workStageValueScope(state,selection)),definition=workOperationDefinition(state);
+    return [...new Set(nodes.flatMap(node=>workStageAskFields(node,definition).map(field=>field.id)))].filter(id=>kept&&Object.hasOwn(kept,id));
+  }
+  async function saveStageValues(nodes){
+    const run=state?.run,scope=workStageValueScope(state,selection),kept=stageValues.get(scope),ids=stageValuesPending(nodes);
+    if(!run||!ids.length)return true;
+    // A value someone else saved after this one was typed is shown at its field first. Pressing again after seeing
+    // it saves the typed value.
+    const bases={...(stageValueBases.get(scope) || {})},saved=run.inputs || {},text=value=>value===undefined||value===null||value===''?'비어 있음':typeof value==='object'?JSON.stringify(value):String(value);
+    const changed=ids.filter(id=>Object.hasOwn(bases,id)&&!workValuesEqual(saved[id],bases[id].value));
+    if(changed.length){
+      for(const id of changed)bases[id]={value:saved[id]};
+      stageValueBases.set(scope,bases);
+      commandError=changed.map(id=>id+': 다른 사람이 바꾼 값 · '+text(saved[id])).join('\n');
+      return false;
+    }
+    const inputs={...(run.inputs || {})};for(const id of ids){if(kept[id]===null)delete inputs[id];else inputs[id]=kept[id];}
+    const result=await mutate({action:'save_inputs',run_id:run.id,inputs,expected_revision:run.revision},{accept:()=>{
+      const left={...(stageValues.get(scope) || {})},kept_bases={...(stageValueBases.get(scope) || {})};
+      for(const id of ids)if(workValuesEqual(left[id],kept[id])){delete left[id];delete kept_bases[id];}
+      if(Object.keys(left).length)stageValues.set(scope,left);else stageValues.delete(scope);
+      if(Object.keys(kept_bases).length)stageValueBases.set(scope,kept_bases);else stageValueBases.delete(scope);
+    }});
+    return Boolean(result);
+  }
+  // The job to do now that asks for a value or is given one is open; an answered job closes and the next one opens.
+  function openNextStageJob({focus=false}={}){
+    const rows=stageValueRows();if(!rows.length||selection.mode!=='work')return;
+    const done=row=>['completed','excluded'].includes(row.state),open=rows.find(row=>row.node.id===selection.stage_evidence);
+    if(open&&!done(open)){if(focus)focusStageValue(open.node.id);return;}
+    const definition=workOperationDefinition(state),run=state.run || {};
+    const next=rows.find(row=>!done(row)&&!workAuthoredStageTool(row,state)&&(workStageAskFields(row.node,definition).length||workStageGivenValues(row.node,definition,run).length));
+    if(!next&&!open)return;
+    selection.stage_evidence=next?next.node.id:'';selection.stage_record='';selection.stage_tool='';selection.stage_verdict_job='';render();
+    if(focus&&next)focusStageValue(next.node.id);
+  }
+  // One press of 실행 on a row: check the values where they are typed, start the run if there is none, save, run.
+  async function runStageJob(jobId){
+    let current=stageJob(jobId);if(!current||busy)return;
+    if(!['tool','ai'].includes(current.node.mode)||workStageAwaitsValue(current.node,current.definition,current.run))return;
+    if(!captureStageValues(jobId))return stageValuesUnread();
+    if(!checkStageValues(current)){openStageValues(jobId);render();focusStageValue(jobId);return;}
+    if(!state.run){
+      const stage=workStageTarget(state,selection);if(!stage)return;
+      if(workStageHasValues({node:current.node,saved:{}},state))openStageValues(jobId);
+      const started=await startRun({dataset:{startStageId:stage.id}});
+      if(!started){showStageValueFailure({message:commandError},jobId);return;}
+      current=stageJob(jobId);if(!current||state.run?.id!==started)return;
+    }
+    if(!workStageCanExecute(current.node,current.saved,current.run,state)||!inputsSaved(true))return;
+    try{
+      if(!await saveStageValues([current.node])){showStageValueFailure({message:commandError},jobId);return;}
+      current=stageJob(jobId);if(!current)return;
+      setBusy(true);
+      try{const model=executionModel();await operationsCommand({action:'execute_job',run_id:current.run.id,job_id:current.node.id,expected_revision:current.run.revision,...(model?{model_id:model}:{})});await refresh();}
+      finally{setBusy(false);}
+      if(workStageHasValues({node:current.node,saved:state?.run?.jobs?.[jobId] || {}},state)){openStageValues(jobId);render();}
+    }catch(failure){if(!showStageValueFailure(failure,jobId))throw failure;}
   }
   async function stageAction(action,target){
     const data=target.dataset;
     if(action==='stage_open'){
       if(workOperationDefinition(state).nodes?.[data.nodeId]?.type!=='t')return;
-      return select({stage_id:data.nodeId,stage_overview:false,stage_tab:'work',stage_evidence:'',stage_tool:'',stage_verdict_job:'',job_id:'',tab:'overview'},{fetch:false});
+      await select({stage_id:data.nodeId,stage_overview:false,stage_tab:'work',stage_evidence:'',stage_record:'',stage_tool:'',stage_verdict_job:'',job_id:'',tab:'overview'},{fetch:false});
+      openNextStageJob({focus:true});return;
     }
     if(action==='stage_back')return select({stage_id:'',stage_overview:true,stage_verdict_job:'',job_id:'',tab:'overview'},{fetch:false});
     if(action==='stage_return')return select({stage_id:selection.stage_id || selection.start_stage_id || '',stage_overview:false,job_id:'',tab:'overview'},{fetch:false});
@@ -784,19 +928,37 @@
     if(action==='stage_start'||action==='stage_details'){
       const stage=workStageTarget(state,selection);
       if(action==='stage_start'&&(state.run||data.jobId&&!stageJob(data.jobId)||data.nodeId&&data.nodeId!==stage.id))return;
-      if(!state.run)return startRun({dataset:{startStageId:stage.id}});
+      // 실행 on a row before the run exists starts the run and runs that job in one press.
+      if(action==='stage_start'&&data.jobId)return runStageJob(data.jobId);
+      if(!state.run){if(await startRun({dataset:{startStageId:stage.id}}))openNextStageJob({focus:true});return;}
       return select({start_stage_id:stage.id,job_id:'',stage_verdict_job:'',tab:'run_details'},{fetch:false});
     }
     if(action==='stage_tab'){if(!['work','log','rules'].includes(data.tab))return;selection.stage_tab=data.tab;selection.stage_verdict_job='';render();remember();return;}
     if(action==='stage_approved'){const group=workStagePositiveGroup(workStageRows(state,workStageTarget(state,selection)),selection);selection.stage_approved_expanded=!group.expanded;if(group.expanded&&group.rest.some(row=>row.node.id===selection.stage_evidence)){selection.stage_evidence='';selection.stage_tool='';}selection.stage_verdict_job='';render();remember();return;}
     const current=stageJob(data.jobId);if(!current)return;
     const {run,node,saved,definition}=current;
-    if(action==='stage_evidence'){if(data.attemptId){if(!(run.attempts || []).some(attempt=>attempt.id===data.attemptId&&attempt.job_id===node.id))return;selection.stage_attempts={...(selection.stage_attempts || {}),[node.id]:data.attemptId};selection.stage_tab='work';selection.stage_evidence=node.id;}else selection.stage_evidence=selection.stage_evidence===node.id?'':node.id;selection.stage_tool='';selection.stage_verdict_job='';render();return;}
-    if(action==='stage_tool'){selection.stage_evidence=node.id;selection.stage_tool=selection.stage_tool===data.toolKey?'':data.toolKey;render();return;}
+    // The name of a job with values opens and closes the area under its row: what it asks for and what came back.
+    if(action==='stage_values'){
+      if(selection.stage_evidence===node.id)captureStageValues(node.id);
+      selection.stage_evidence=selection.stage_evidence===node.id?'':node.id;selection.stage_record='';selection.stage_tool='';selection.stage_verdict_job='';render();return;
+    }
+    // 판정 근거 · 판정 기록 opens and closes the record. Under a job with values the record is added to the open area.
+    if(action==='stage_evidence'){
+      const shown=selection.stage_evidence===node.id&&(selection.stage_record===node.id||!workStageHasValues({node,saved},state));
+      if(data.attemptId){if(!(run.attempts || []).some(attempt=>attempt.id===data.attemptId&&attempt.job_id===node.id))return;selection.stage_attempts={...(selection.stage_attempts || {}),[node.id]:data.attemptId};selection.stage_tab='work';selection.stage_evidence=node.id;selection.stage_record=node.id;}
+      else{if(selection.stage_evidence===node.id)captureStageValues(node.id);selection.stage_evidence=shown?'':node.id;selection.stage_record=shown?'':node.id;}
+      selection.stage_tool='';selection.stage_verdict_job='';render();return;
+    }
+    if(action==='stage_tool'){selection.stage_evidence=node.id;selection.stage_record=node.id;selection.stage_tool=selection.stage_tool===data.toolKey?'':data.toolKey;render();return;}
     if(!state.run)return;
-    if(action==='stage_execute'){
-      if(busy||!workStageCanExecute(node,saved,run,state)||!inputsSaved(true))return;
-      setBusy(true);try{const model=executionModel();await operationsCommand({action:'execute_job',run_id:run.id,job_id:node.id,expected_revision:run.revision,...(model?{model_id:model}:{})});await refresh();}finally{setBusy(false);}return;
+    if(action==='stage_execute')return runStageJob(node.id);
+    if(action==='stage_confirm_list'){
+      if(!workStageCanConfirmList(node,saved,run))return;
+      if(await stageValuesChangeResult(node))return;
+      await confirmList(true,node.id);
+      // As with an answer: the confirmed job closes and the next job that asks for a value opens.
+      if(state?.run?.jobs?.[node.id]?.status==='completed'&&selection.stage_evidence===node.id)openNextStageJob({focus:true});
+      return;
     }
     if(!workStageCanDecide(node,saved,run))return;
     if(action==='stage_verdict'){
@@ -808,12 +970,49 @@
       if(busy||!inputsSaved(true))return;
       const judgment=workStageJudgments(node,definition).find(item=>String(item.id)===(data.judgmentId || data.verdict)&&String(item.status)===data.verdict);
       if(!judgment)return;
-      const existing=workStageDecision(node,saved,definition);if(existing?.judgment_id===judgment.id)return closeStageMenu(true);
+      // A tool's result is about the values it ran with: changed values are saved and the job is run again first.
+      if(['tool','ai'].includes(node.mode)){if(await stageValuesChangeResult(node))return;return decideStageJob(node.id,judgment);}
+      // The values asked under a person's row go with the answer: checked at their fields, then saved.
+      if(workStageAskFields(node,definition).length){
+        if(!captureStageValues(node.id))return stageValuesUnread();
+        if(!checkStageValues(current)){selection.stage_verdict_job='';openStageValues(node.id);render();focusStageValue(node.id);return;}
+        // An answer given with changed values is an answer about those values: it is sent also when it is the
+        // answer the job already has, whoever gave that one.
+        const changed=stageValuesPending([node]).length>0;
+        if(!await saveStageValues([node])){showStageValueFailure({message:commandError},node.id);return;}
+        return decideStageJob(node.id,judgment,{again:changed});
+      }
+      return decideStageJob(node.id,judgment);
+    }
+  }
+  // A tick of a check item. The values asked under the row go with it, as with an answer: checked at their fields,
+  // then saved, then the tick.
+  async function tickStageCheck(jobId,item){
+    let current=stageJob(jobId);if(!current)return;
+    if(workStageAskFields(current.node,current.definition).length){
+      if(!captureStageValues(jobId))return stageValuesUnread();
+      if(!checkStageValues(current)){openStageValues(jobId);render();focusStageValue(jobId);return;}
+      if(!await saveStageValues([current.node])){if(!showStageValueFailure({message:commandError},jobId))render();return;}
+      current=stageJob(jobId);if(!current||!state.run)return;
+    }
+    const result=await mutate({action:'human_confirm',run_id:current.run.id,job_id:current.node.id,item_id:item,expected_revision:current.run.revision,verdict:'completed'});
+    if(!result&&!showStageValueFailure({message:commandError},jobId))render();
+  }
+  async function decideStageJob(jobId,judgment,{again=false}={}){
+    const current=stageJob(jobId);if(!current||!state.run)return;
+    const {run,node,saved,definition}=current;
+    {
+      // The same answer again is nothing to do, unless the job waits for another review (a value of it changed).
+      const existing=workStageDecision(node,saved,definition);if(existing?.judgment_id===judgment.id&&!again&&!saved.result_stale&&saved.status!=='review_required')return closeStageMenu(true);
       selection.stage_verdict_job='';selection.stage_approved_expanded=true;
       const noteKey=workStageNoteKey(state,node),note=stageNotes.get(noteKey) || '';
       const noteLimit=workStageNoteLimit(node,definition);if(Array.from(note).length>noteLimit){commandError=`판정 사유를 ${noteLimit}자 이내로 줄여 주세요. 사유와 판정은 아직 저장하지 않았습니다.`;render();return;}
-      await mutate({action:(node.mode || 'human')==='human'?'human_confirm':'decide',run_id:run.id,job_id:node.id,item_id:'job',expected_revision:run.revision,result_revision:saved.result_revision,verdict:judgment.status,...(note?{note}:{}),...(!judgment.legacy?{judgment_id:judgment.id}:{})},{accept:()=>{if(stageNotes.get(noteKey)===note)stageNotes.delete(noteKey);}});
-      [...(source()?.hosts?.()?.panel?.querySelectorAll?.('[data-action="stage_verdict"]') || [])].find(item=>item.dataset.jobId===node.id)?.focus?.({preventScroll:true});return;
+      const decided=await mutate({action:(node.mode || 'human')==='human'?'human_confirm':'decide',run_id:run.id,job_id:node.id,item_id:'job',expected_revision:run.revision,result_revision:saved.result_revision,verdict:judgment.status,...(note?{note}:{}),...(!judgment.legacy?{judgment_id:judgment.id}:{})},{accept:()=>{if(stageNotes.get(noteKey)===note)stageNotes.delete(noteKey);}});
+      if(!decided&&showStageValueFailure({message:commandError},node.id))return;
+      [...(source()?.hosts?.()?.panel?.querySelectorAll?.('[data-action="stage_verdict"]') || [])].find(item=>item.dataset.jobId===node.id)?.focus?.({preventScroll:true});
+      // An answered job that was open closes and the next job that asks for a value opens.
+      if(decided&&selection.stage_evidence===node.id&&workStageHasValues({node,saved:state?.run?.jobs?.[node.id] || {}},state))openNextStageJob({focus:true});
+      return;
     }
   }
   async function handleClick(target){
@@ -894,7 +1093,7 @@
     if(action==='native_open')return openNative(target.dataset.nativeId);
     if(action==='new_chat'){return source()?.newChat?.();}
     if(action==='start_run')return startRun(target);
-    if(action==='overview_start')return startRun({dataset:{overview:'true'}});
+    if(action==='overview_start'){if(await startRun({dataset:{overview:'true'}}))openNextStageJob({focus:true});return;}
     // Finishing is offered only when every job is settled, so it needs no further question.
     if(action==='finish_run'){
       if(busy||!state?.run||!workRunFinishable(state))return;
@@ -912,7 +1111,18 @@
       const id=target.dataset.workflowId;if(!workPendingWorkflows(state || {},selection).some(workflow=>workflow.id===id))return;
       return select({mode:'author',tab:'overview',workflow_id:id,run_id:'',job_id:'',stage_id:'',stage_overview:false,panel_open:true});
     }
-    if(action==='execute_scope'){if(busy||!state?.run||!inputsSaved(true))return;setBusy(true);try{const model=executionModel();await operationsCommand({action:'execute_scope',run_id:selection.run_id,node_id:target.dataset.nodeId,expected_revision:state.run.revision,...(model?{model_id:model}:{})});await refresh();}finally{setBusy(false);}return;}
+    if(action==='execute_scope'){
+      if(busy||!state?.run||!inputsSaved(true))return;
+      // Values typed under the tool and AI rows of this stage are saved first; what the server refuses is said at its
+      // field. A person's values wait for that person's answer or tick, which saves them.
+      const open=selection.stage_evidence;if(open&&!captureStageValues(open))return stageValuesUnread();
+      if(!await saveStageValues(stageValueRows().filter(row=>['tool','ai'].includes(row.node.mode)).map(row=>row.node))){showStageValueFailure({message:commandError},open);return;}
+      setBusy(true);
+      try{const model=executionModel();await operationsCommand({action:'execute_scope',run_id:selection.run_id,node_id:target.dataset.nodeId,expected_revision:state.run.revision,...(model?{model_id:model}:{})});await refresh();}
+      catch(failure){if(!showStageValueFailure(failure,open))throw failure;}
+      finally{setBusy(false);}
+      return;
+    }
     if (action === 'shared_accept_version') {
       const run = state?.run;
       const node = run?.definition?.nodes?.[selection.job_id];
@@ -957,6 +1167,26 @@
     const author=designer.handleEvent?.(event);if(author?.handled){if(author.preventDefault){event.preventDefault();if(event.type==='keydown'&&event.key==='Escape')event.stopPropagation();}return;}
     const target=event.target;if(event.type==='submit'&&target.closest?.('[data-ees-work]')){event.preventDefault();return;}if(event.type==='keydown'&&event.repeat&&target.closest?.('[data-mutation]')){event.preventDefault();event.stopImmediatePropagation();return;}if(!target?.closest?.('[data-ees-work]'))return;
     if(event.type==='click'){const buttonTarget=target.closest('button[data-action]');if(!buttonTarget||buttonTarget.disabled)return;event.preventDefault();if(nativePage()&&buttonTarget.closest('#ees-work-entry')&&!['native_open','refresh'].includes(buttonTarget.dataset.action)){returnFromNative(buttonTarget);return;}Promise.resolve(handleClick(buttonTarget)).catch(failure=>{error=failure.message;render();});}
+    // Values typed under a job row are kept until they are saved with the run. The field in use is never redrawn
+    // while it is typed in: a mark of a wrong value is taken off in place.
+    if(['input','change'].includes(event.type)&&target.matches?.('[data-work-input]')&&target.closest?.('[data-stage-values]')){
+      const jobId=target.closest('[data-stage-values]').dataset.jobId;captureStageValues(jobId);
+      const scope=workStageValueScope(state,selection),errors=stageValueErrors.get(scope);
+      if(errors&&Object.hasOwn(errors,target.name)){const next={...errors};delete next[target.name];setStageValueErrors(next);target.removeAttribute('aria-invalid');target.removeAttribute('aria-describedby');target.closest('dd')?.querySelector('.ew-vd-ask-error')?.remove();}
+      return;
+    }
+    // Enter in a value field moves to the next field of the job, then does what the row's control does.
+    if(event.type==='keydown'&&event.key==='Enter'&&!event.isComposing&&event.keyCode!==229&&target.matches?.('input[data-work-input]')&&target.closest?.('[data-stage-values]')){
+      event.preventDefault();
+      // A held key does one thing: it must not answer this job and then run the next one the focus moved to.
+      if(event.repeat)return;
+      const panel=target.closest('[data-stage-values]'),jobId=panel.dataset.jobId,current=stageJob(jobId);if(!current)return;
+      const fields=[...panel.querySelectorAll('input[data-work-input],select[data-work-input],textarea[data-work-input]')].filter(field=>!field.disabled&&field.type!=='checkbox'),next=fields[fields.indexOf(target)+1];
+      if(next){next.focus({preventScroll:true});return;}
+      const row=target.closest('[data-stage-job]'),control=['tool','ai'].includes(current.node.mode)?row?.querySelector('.ew-vd-run'):row?.querySelector('.ew-vd-confirm-main[data-action="stage_decide"]');
+      if(control&&!control.disabled)Promise.resolve(handleClick(control)).catch(failure=>{error=failure.message;render();});
+      return;
+    }
     if(event.type==='input'){
       if(target.matches?.('[data-stage-note]')){const current=stageJob(target.dataset.jobId);if(current&&state.run&&!target.readOnly&&workStageCanDecide(current.node,current.saved,current.run)&&!current.saved.decisions?.job)stageNotes.set(workStageNoteKey(state,current.node),String(target.value));return;}
       if(target.closest?.('#ees-work-start')){const form=target.closest('#ees-work-start');selection.start_inputs ||= {};selection.start_inputs[selection.workflow_id]=workReadInputs(form);remember();return;}
@@ -979,7 +1209,7 @@
       // A tick is saved at once as that item's record. Anything that stops it puts the box back.
       const current=stageJob(target.dataset.jobId),item=target.dataset.itemId;
       if(!target.checked||busy||!current||!state.run||!workStageCanCheck(current.node,current.saved,current.run)||!workHumanCheckItems(current.node).some(entry=>entry.id===item)||workCheckDecisions(current.saved)[item]||!inputsSaved(true)){render();return;}
-      mutate({action:'human_confirm',run_id:current.run.id,job_id:current.node.id,item_id:item,expected_revision:current.run.revision,verdict:'completed'}).then(result=>{if(!result)render();}).catch(failure=>{error=failure.message;render();});
+      tickStageCheck(current.node.id,item).catch(failure=>{error=failure.message;render();});
       return;
     }
     if(event.type==='change'&&target.matches?.('[data-stage-attempt]')){const current=stageJob(target.dataset.jobId);if(!current||!(current.run.attempts || []).some(attempt=>attempt.id===target.value&&attempt.job_id===current.node.id))return;selection.stage_attempts={...(selection.stage_attempts || {}),[current.node.id]:target.value};selection.stage_tool='';render();return;}
@@ -987,7 +1217,7 @@
     if(event.type==='change'&&target.matches?.('[data-list-include]')){view.refreshResults();return;}
     if(event.type==='change'&&(target.matches?.('[data-item-verdict]')||target.matches?.('[data-item-confirm]'))){const verdict=target.matches('[data-item-confirm]')?(target.checked?'completed':'unknown'):target.value;if(verdict)mutate({action:'decide',run_id:selection.run_id,job_id:selection.job_id,item_id:target.dataset.itemId,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,verdict});}
   }
-  function reset(){purposeRequest=null;apiContextSignature='';apiContextGeneration++;accountGeneration++;stageNotes.clear();helpWriting=null;nativeCapabilities=null;nativeScope=null;workspaceCache.clear();stateKey='';targetLoading=false;scopeLoading=false;evidenceUnavailable=false;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;inputProposalApplied=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;savedUIState={};source()?.modelCount?.(0);selection=initialSelection();lastLocalSelection=initialSelection();}
+  function reset(){purposeRequest=null;apiContextSignature='';apiContextGeneration++;accountGeneration++;stageNotes.clear();stageValues.clear();stageValueErrors.clear();stageValueBases.clear();helpWriting=null;nativeCapabilities=null;nativeScope=null;workspaceCache.clear();stateKey='';targetLoading=false;scopeLoading=false;evidenceUnavailable=false;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;inputProposalApplied=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;savedUIState={};source()?.modelCount?.(0);selection=initialSelection();lastLocalSelection=initialSelection();}
   function sync(){
     scheduled=false;bindHosts();syncHelpState();const auth=token();if(auth!==identity){reset();identity=auth;route='';}
     syncNativeReturn();

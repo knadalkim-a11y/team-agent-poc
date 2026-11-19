@@ -1,0 +1,1314 @@
+{
+ "file": "design-mock-19-ask-in-row.html",
+ "revision": 3,
+ "date": "2026-11-19",
+ "browser": "Chromium (Playwright)",
+ "sizes": [
+  "1920x1080",
+  "1366x768"
+ ],
+ "total": 216,
+ "passed": 216,
+ "failed": 0,
+ "pageErrors": [],
+ "consoleErrors": [],
+ "requests": [],
+ "checks": [
+  {
+   "size": "1920x1080",
+   "name": "SQ1 opens first",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ1 → 시작 goes to the stage without a window",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "after 시작 the job that needs a value is open and the other is closed",
+   "ok": true,
+   "detail": "[{\"key\":\"page\",\"open\":true,\"under\":true,\"head\":\"1 기준 문서 확인 직접 판정 · Confluence 페이지 정보의 페이지 ID를 입력하세요. 실행 결과의 제목과 ID가 기준 문서와 일치하면 확정하세요. 실행 실행 필요\",\"controls\":\"실행\",\"state\":\"실행 필요\",\"sections\":\"입력\"},{\"key\":\"child\",\"open\":false,\"under\":false,\"head\":\"2 하위 문서 목록 조회 직접 판정 · 확정한 기준 문서 바로 아래의 페이지를 최대 5건 조회합니다."
+  },
+  {
+   "size": "1920x1080",
+   "name": "after 시작 the field has the focus",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 the row is the product row: guidance, 실행 and state stay on it",
+   "ok": true,
+   "detail": "1 기준 문서 확인 직접 판정 · Confluence 페이지 정보의 페이지 ID를 입력하세요. 실행 결과의 제목과 ID가 기준 문서와 일치하면 확정하세요. 실행 실행 필요"
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 under the row there is only 입력",
+   "ok": true,
+   "detail": "입력 페이지 ID"
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 the field has its name beside it and an example in it",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 the next job waits: its 실행 is off",
+   "ok": true,
+   "detail": "{\"key\":\"child\",\"open\":false,\"under\":false,\"head\":\"2 하위 문서 목록 조회 직접 판정 · 확정한 기준 문서 바로 아래의 페이지를 최대 5건 조회합니다. 제목을 확인하고 목록을 확정하세요. 실행 대기\",\"controls\":\"실행(꺼짐)\",\"state\":\"대기\",\"sections\":\"\"}"
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 none of the sentences of the old window is on the screen",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "pressing the job name closes it and the row reads the same",
+   "ok": true,
+   "detail": "1 기준 문서 확인 직접 판정 · Confluence 페이지 정보의 페이지 ID를 입력하세요. 실행 결과의 제목과 ID가 기준 문서와 일치하면 확정하세요. 실행 실행 필요"
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 all closed: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 all closed: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 all closed: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 all closed: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 all closed: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 all closed: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "pressing another job name opens that job",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "the waiting job says where its value comes from",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 second job open: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 second job open: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 second job open: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 second job open: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 second job open: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 second job open: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3 실행 without a value opens the job and says so at the field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3 nothing ran",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3 typing clears the mark and keeps the focus",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3 not a number: said at the field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4 running is shown on the row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4 after the run the row has the product controls",
+   "ok": true,
+   "detail": "다시 실행|판정 필요|판정 근거"
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4 입력 and 결과 are under the row",
+   "ok": true,
+   "detail": "입력 페이지 ID 결과1차 · 2026. 11. 19. 04:52 문서 제목 설비 점검 안내 (예시) 페이지 ID 123456789 문서 유형 page"
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4 the value stays in its field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4 판정 근거 closes the same area",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4 판정 근거 opens it again",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4 the verdict menu offers the three words",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4 the menu stays inside the panel",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 after 적합 the answered job closes and the next opens",
+   "ok": true,
+   "detail": "[{\"key\":\"page\",\"open\":false,\"under\":false,\"head\":\"1 기준 문서 확인 직접 판정 · Confluence 페이지 정보의 페이지 ID를 입력하세요. 실행 결과의 제목과 ID가 기준 문서와 일치하면 확정하세요. 다시 실행 적합 판정 근거\",\"controls\":\"다시 실행|판정 근거\",\"state\":\"적합\",\"sections\":\"\"},{\"key\":\"child\",\"open\":true,\"under\":true,\"head\":\"2 하위 문서 목록 조회 직접 판정 · 확정한 기준 문서 바로 아래의 페이지를 최대"
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 the next job shows the value it was given and can run",
+   "ok": true,
+   "detail": "{\"key\":\"child\",\"open\":true,\"under\":true,\"head\":\"2 하위 문서 목록 조회 직접 판정 · 확정한 기준 문서 바로 아래의 페이지를 최대 5건 조회합니다. 제목을 확인하고 목록을 확정하세요. 실행 실행 필요\",\"controls\":\"실행\",\"state\":\"실행 필요\",\"sections\":\"입력\"}"
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 the list that came back is under the row",
+   "ok": true,
+   "detail": "입력 페이지 ID 123456789 기준 문서 확인에서 결과2건 주간 점검표 (예시) 123456801 월간 점검표 (예시) 123456802"
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 the row has the control that confirms the list",
+   "ok": true,
+   "detail": "다시 실행|목록 확정|판정 근거"
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 after the second run: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 after the second run: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 after the second run: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 after the second run: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 after the second run: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 after the second run: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 confirming the list says that the product asks for a reason there",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "all done: 끝내기 is the one control of the stage",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "an answered job reopens with its value and result",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "a new value and Enter runs again, asks again and holds the next job",
+   "ok": true,
+   "detail": "[{\"key\":\"page\",\"open\":true,\"under\":true,\"head\":\"1 기준 문서 확인 직접 판정 · Confluence 페이지 정보의 페이지 ID를 입력하세요. 실행 결과의 제목과 ID가 기준 문서와 일치하면 확정하세요. 다시 실행 판정 필요 판정 근거\",\"controls\":\"다시 실행|판정 필요|판정 근거\",\"state\":\"\",\"sections\":\"입력|결과\"},{\"key\":\"child\",\"open\":false,\"under\":false,\"head\":\"2 하위 문서 목록 조회 직접 판정 · 확정한 기준 문서 바로"
+  },
+  {
+   "size": "1920x1080",
+   "name": "끝내기 returns to the first screen with 시작 and the last round",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 opens",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 the rows keep the one-click answer of the product",
+   "ok": true,
+   "detail": "[{\"key\":\"pump\",\"open\":true,\"under\":true,\"head\":\"1 펌프 상태 기록 직접 판정 · 압력계와 온도계의 값을 적고, 기준 범위 안이면 적합으로 확인합니다. 적합\",\"controls\":\"적합|\",\"state\":\"\",\"sections\":\"입력\"},{\"key\":\"note\",\"open\":false,\"under\":false,\"head\":\"2 이상 내용 기록 직접 판정 · 이상이 있으면 내용을 적습니다. 적합\",\"controls\":\"적합|\",\"state\":\"\",\"sections\":\"\"}]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 the job that asks for values is open: two fields with names, units and examples",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 적합 without the values: said at each field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 values missing: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 values missing: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 values missing: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 values missing: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 values missing: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 values missing: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 Enter moves to the next field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 confirmed with the values: the job closes",
+   "ok": true,
+   "detail": "[{\"key\":\"pump\",\"open\":false,\"under\":false,\"head\":\"1 펌프 상태 기록 직접 판정 · 압력계와 온도계의 값을 적고, 기준 범위 안이면 적합으로 확인합니다. 적합\",\"controls\":\"\",\"state\":\"적합\",\"sections\":\"\"},{\"key\":\"note\",\"open\":false,\"under\":false,\"head\":\"2 이상 내용 기록 직접 판정 · 이상이 있으면 내용을 적습니다. 적합\",\"controls\":\"적합|\",\"state\":\"\",\"sections\":\"\"}]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 a value changed after the answer asks again",
+   "ok": true,
+   "detail": "{\"key\":\"pump\",\"open\":true,\"under\":true,\"head\":\"1 펌프 상태 기록 직접 판정 · 압력계와 온도계의 값을 적고, 기준 범위 안이면 적합으로 확인합니다. 다시 검토 필요 적합\",\"controls\":\"적합|\",\"state\":\"다시 검토 필요\",\"sections\":\"입력\"}"
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 asked again: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 asked again: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 asked again: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 asked again: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 asked again: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 asked again: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 a job that asks nothing has nothing to open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 the other answers are behind the arrow",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 both confirmed: 끝내기",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 끝내기 returns to the first screen with 시작",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "left menu opens the other procedure",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "entering the stage before starting shows 시작 and the open job with its field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "a control outside this mock says so",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "mock mark is always shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ1 opens first",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ1 → 시작 goes to the stage without a window",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "after 시작 the job that needs a value is open and the other is closed",
+   "ok": true,
+   "detail": "[{\"key\":\"page\",\"open\":true,\"under\":true,\"head\":\"1 기준 문서 확인 직접 판정 · Confluence 페이지 정보의 페이지 ID를 입력하세요. 실행 결과의 제목과 ID가 기준 문서와 일치하면 확정하세요. 실행 실행 필요\",\"controls\":\"실행\",\"state\":\"실행 필요\",\"sections\":\"입력\"},{\"key\":\"child\",\"open\":false,\"under\":false,\"head\":\"2 하위 문서 목록 조회 직접 판정 · 확정한 기준 문서 바로 아래의 페이지를 최대 5건 조회합니다."
+  },
+  {
+   "size": "1366x768",
+   "name": "after 시작 the field has the focus",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 the row is the product row: guidance, 실행 and state stay on it",
+   "ok": true,
+   "detail": "1 기준 문서 확인 직접 판정 · Confluence 페이지 정보의 페이지 ID를 입력하세요. 실행 결과의 제목과 ID가 기준 문서와 일치하면 확정하세요. 실행 실행 필요"
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 under the row there is only 입력",
+   "ok": true,
+   "detail": "입력 페이지 ID"
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 the field has its name beside it and an example in it",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 the next job waits: its 실행 is off",
+   "ok": true,
+   "detail": "{\"key\":\"child\",\"open\":false,\"under\":false,\"head\":\"2 하위 문서 목록 조회 직접 판정 · 확정한 기준 문서 바로 아래의 페이지를 최대 5건 조회합니다. 제목을 확인하고 목록을 확정하세요. 실행 대기\",\"controls\":\"실행(꺼짐)\",\"state\":\"대기\",\"sections\":\"\"}"
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 none of the sentences of the old window is on the screen",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "pressing the job name closes it and the row reads the same",
+   "ok": true,
+   "detail": "1 기준 문서 확인 직접 판정 · Confluence 페이지 정보의 페이지 ID를 입력하세요. 실행 결과의 제목과 ID가 기준 문서와 일치하면 확정하세요. 실행 실행 필요"
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 all closed: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 all closed: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 all closed: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 all closed: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 all closed: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 all closed: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "pressing another job name opens that job",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "the waiting job says where its value comes from",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 second job open: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 second job open: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 second job open: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 second job open: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 second job open: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 second job open: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3 실행 without a value opens the job and says so at the field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3 nothing ran",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3 typing clears the mark and keeps the focus",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3 not a number: said at the field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4 running is shown on the row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4 after the run the row has the product controls",
+   "ok": true,
+   "detail": "다시 실행|판정 필요|판정 근거"
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4 입력 and 결과 are under the row",
+   "ok": true,
+   "detail": "입력 페이지 ID 결과1차 · 2026. 11. 19. 04:52 문서 제목 설비 점검 안내 (예시) 페이지 ID 123456789 문서 유형 page"
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4 the value stays in its field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4 판정 근거 closes the same area",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4 판정 근거 opens it again",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4 the verdict menu offers the three words",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4 the menu stays inside the panel",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 after 적합 the answered job closes and the next opens",
+   "ok": true,
+   "detail": "[{\"key\":\"page\",\"open\":false,\"under\":false,\"head\":\"1 기준 문서 확인 직접 판정 · Confluence 페이지 정보의 페이지 ID를 입력하세요. 실행 결과의 제목과 ID가 기준 문서와 일치하면 확정하세요. 다시 실행 적합 판정 근거\",\"controls\":\"다시 실행|판정 근거\",\"state\":\"적합\",\"sections\":\"\"},{\"key\":\"child\",\"open\":true,\"under\":true,\"head\":\"2 하위 문서 목록 조회 직접 판정 · 확정한 기준 문서 바로 아래의 페이지를 최대"
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 the next job shows the value it was given and can run",
+   "ok": true,
+   "detail": "{\"key\":\"child\",\"open\":true,\"under\":true,\"head\":\"2 하위 문서 목록 조회 직접 판정 · 확정한 기준 문서 바로 아래의 페이지를 최대 5건 조회합니다. 제목을 확인하고 목록을 확정하세요. 실행 실행 필요\",\"controls\":\"실행\",\"state\":\"실행 필요\",\"sections\":\"입력\"}"
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 the list that came back is under the row",
+   "ok": true,
+   "detail": "입력 페이지 ID 123456789 기준 문서 확인에서 결과2건 주간 점검표 (예시) 123456801 월간 점검표 (예시) 123456802"
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 the row has the control that confirms the list",
+   "ok": true,
+   "detail": "다시 실행|목록 확정|판정 근거"
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 after the second run: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 after the second run: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 after the second run: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 after the second run: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 after the second run: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 after the second run: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 confirming the list says that the product asks for a reason there",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "all done: 끝내기 is the one control of the stage",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "an answered job reopens with its value and result",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "a new value and Enter runs again, asks again and holds the next job",
+   "ok": true,
+   "detail": "[{\"key\":\"page\",\"open\":true,\"under\":true,\"head\":\"1 기준 문서 확인 직접 판정 · Confluence 페이지 정보의 페이지 ID를 입력하세요. 실행 결과의 제목과 ID가 기준 문서와 일치하면 확정하세요. 다시 실행 판정 필요 판정 근거\",\"controls\":\"다시 실행|판정 필요|판정 근거\",\"state\":\"\",\"sections\":\"입력|결과\"},{\"key\":\"child\",\"open\":false,\"under\":false,\"head\":\"2 하위 문서 목록 조회 직접 판정 · 확정한 기준 문서 바로"
+  },
+  {
+   "size": "1366x768",
+   "name": "끝내기 returns to the first screen with 시작 and the last round",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 opens",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 the rows keep the one-click answer of the product",
+   "ok": true,
+   "detail": "[{\"key\":\"pump\",\"open\":true,\"under\":true,\"head\":\"1 펌프 상태 기록 직접 판정 · 압력계와 온도계의 값을 적고, 기준 범위 안이면 적합으로 확인합니다. 적합\",\"controls\":\"적합|\",\"state\":\"\",\"sections\":\"입력\"},{\"key\":\"note\",\"open\":false,\"under\":false,\"head\":\"2 이상 내용 기록 직접 판정 · 이상이 있으면 내용을 적습니다. 적합\",\"controls\":\"적합|\",\"state\":\"\",\"sections\":\"\"}]"
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 the job that asks for values is open: two fields with names, units and examples",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 적합 without the values: said at each field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 values missing: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 values missing: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 values missing: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 values missing: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 values missing: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 values missing: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 Enter moves to the next field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 confirmed with the values: the job closes",
+   "ok": true,
+   "detail": "[{\"key\":\"pump\",\"open\":false,\"under\":false,\"head\":\"1 펌프 상태 기록 직접 판정 · 압력계와 온도계의 값을 적고, 기준 범위 안이면 적합으로 확인합니다. 적합\",\"controls\":\"\",\"state\":\"적합\",\"sections\":\"\"},{\"key\":\"note\",\"open\":false,\"under\":false,\"head\":\"2 이상 내용 기록 직접 판정 · 이상이 있으면 내용을 적습니다. 적합\",\"controls\":\"적합|\",\"state\":\"\",\"sections\":\"\"}]"
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 a value changed after the answer asks again",
+   "ok": true,
+   "detail": "{\"key\":\"pump\",\"open\":true,\"under\":true,\"head\":\"1 펌프 상태 기록 직접 판정 · 압력계와 온도계의 값을 적고, 기준 범위 안이면 적합으로 확인합니다. 다시 검토 필요 적합\",\"controls\":\"적합|\",\"state\":\"다시 검토 필요\",\"sections\":\"입력\"}"
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 asked again: nothing leaves its job or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 asked again: controls do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 asked again: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 asked again: the open part is the white area under a highlighted row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 asked again: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 asked again: at most one job is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 a job that asks nothing has nothing to open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 the other answers are behind the arrow",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 both confirmed: 끝내기",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 끝내기 returns to the first screen with 시작",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "left menu opens the other procedure",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "entering the stage before starting shows 시작 and the open job with its field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "a control outside this mock says so",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "mock mark is always shown",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}

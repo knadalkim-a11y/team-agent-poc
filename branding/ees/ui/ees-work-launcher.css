@@ -2736,3 +2736,31 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 [data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-check-done {display:grid;place-items:center;flex:none;width:16px;height:16px;border-radius:3px;background:var(--ees-brand-solid);}
 [data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-check-done > .ew-icon {width:12px;height:12px;filter:brightness(0) invert(1);}
 [data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-count {min-width:44px;font-size:12px;line-height:18px;color:var(--ees-text-secondary);text-align:right;}
+
+/* Values of a job under its row (2026-11-19, design mock 19 revision 3). The row is untouched. What opens under it
+   is the white area the product already opens for 판정 근거, with the product's 입력/출력 list. New here: a field
+   inside that list, the mark of a wrong value, a value handed over by an earlier job, and the way to the job screen. */
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-under {background:var(--ees-surface-default);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-job-values > .ew-vd-tool-detail {padding:0;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-job-values + .ew-vd-evidence {padding-top:16px;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-ask-values {align-items:center;row-gap:8px;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-ask-values dd {display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;min-height:32px;font-size:13px;line-height:20px;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-ask-values :is(input:not([type=checkbox]),select,textarea) {box-sizing:border-box;width:148px;min-height:32px;margin:0;padding:0 10px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-default);font:inherit;font-size:13px;line-height:20px;color:var(--ees-text-primary);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-ask-values input:not([type=checkbox]) {height:32px;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-ask-values textarea {width:min(100%,360px);padding:6px 10px;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-ask-values select {width:auto;min-width:148px;max-width:100%;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-ask-values input[type=number] {width:76px;text-align:right;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-ask-values :is(input,textarea)::placeholder {color:var(--ees-text-tertiary);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-ask-values :is(input,select,textarea):focus-visible {outline:2px solid var(--ees-brand-text);outline-offset:1px;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-ask-values :is(input,select,textarea):disabled {background:var(--ees-surface-muted);color:var(--ees-text-tertiary);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-ask-values :is(input:not([type=checkbox]),select,textarea)[aria-invalid=true] {border-color:var(--ees-status-danger);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-tool-detail .ew-vd-ask-error {display:inline;margin:0;font-size:12px;line-height:18px;color:var(--ees-status-danger);white-space:nowrap;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-given {color:var(--ees-text-tertiary);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-rows {display:grid;gap:4px;margin:0;padding:0;list-style:none;font-size:13px;line-height:20px;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-rows li {display:grid;grid-template-columns:minmax(0,320px) repeat(auto-fit,minmax(60px,max-content));gap:10px;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-rows li > span {overflow-wrap:anywhere;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-rows li > span + span {color:var(--ees-text-tertiary);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-more {margin:0;padding:0 20px 14px;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-more > .ew-text {min-height:24px;font-size:12px;font-weight:400;color:var(--ees-text-secondary);cursor:pointer;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-more > .ew-text:hover {text-decoration:underline;}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-more > .ew-text:focus-visible {outline:2px solid var(--ees-brand-text);outline-offset:2px;}
