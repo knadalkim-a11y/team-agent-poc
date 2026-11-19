@@ -1,0 +1,773 @@
+{
+ "file": "design-mock-19-ask-in-row.html",
+ "date": "2026-11-19",
+ "browser": "Chromium (Playwright)",
+ "sizes": [
+  "1920x1080",
+  "1366x768"
+ ],
+ "total": 126,
+ "passed": 126,
+ "failed": 0,
+ "pageErrors": [],
+ "consoleErrors": [],
+ "requests": [],
+ "checks": [
+  {
+   "size": "1920x1080",
+   "name": "SQ1 opens first",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ1 has one start control",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ1 → 시작 goes to the stage without a window",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "after 시작 the field that is needed first has the focus",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "after 시작 the stage control reads 지금 실행",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2: nothing leaves its row or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2: controls in a row do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 the field has its name and an example",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 the field sits right before 실행 in the same row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 the second job shows where its value comes from and cannot run yet",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ2 none of the sentences of the old window is on the screen",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3 empty value: said at the field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3 nothing ran",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3 typing clears the mark and keeps the focus",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3 not a number: said at the field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3: nothing leaves its row or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3: controls in a row do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ3: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4 running is shown on the row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4 after the run",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4 the value stays on the row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4: nothing leaves its row or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4: controls in a row do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4 the evidence opens as in the product",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4 the verdict menu offers the three words",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ4 the menu stays inside the panel",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 after 적합",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 the second job shows the value and can run",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5: nothing leaves its row or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5: controls in a row do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 the second job ran",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 after the second run: nothing leaves its row or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 after the second run: controls in a row do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 after the second run: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ5 after the second run: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "a new value and 다시 실행 asks for the verdict again and holds the next job",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 opens",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6: nothing leaves its row or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6: controls in a row do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 two fields with units and examples beside the answer",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 적합 without the values: said at the fields",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 Enter moves to the next field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 confirmed with the values",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 a value changed after the answer asks again",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 asked again: nothing leaves its row or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 asked again: controls in a row do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 asked again: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 asked again: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 both confirmed: 끝내기",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "SQ6 끝내기 returns to the first screen with 시작",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "left menu opens the other procedure",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "entering the stage before starting shows 시작 and the field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "a control outside this mock says so",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "mock mark is always shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ1 opens first",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ1 has one start control",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ1 → 시작 goes to the stage without a window",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "after 시작 the field that is needed first has the focus",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "after 시작 the stage control reads 지금 실행",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2: nothing leaves its row or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2: controls in a row do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 the field has its name and an example",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 the field sits right before 실행 in the same row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 the second job shows where its value comes from and cannot run yet",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ2 none of the sentences of the old window is on the screen",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3 empty value: said at the field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3 nothing ran",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3 typing clears the mark and keeps the focus",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3 not a number: said at the field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3: nothing leaves its row or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3: controls in a row do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ3: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4 running is shown on the row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4 after the run",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4 the value stays on the row",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4: nothing leaves its row or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4: controls in a row do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4 the evidence opens as in the product",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4 the verdict menu offers the three words",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ4 the menu stays inside the panel",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 after 적합",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 the second job shows the value and can run",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5: nothing leaves its row or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5: controls in a row do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 the second job ran",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 after the second run: nothing leaves its row or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 after the second run: controls in a row do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 after the second run: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ5 after the second run: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "a new value and 다시 실행 asks for the verdict again and holds the next job",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 opens",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6: nothing leaves its row or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6: controls in a row do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 two fields with units and examples beside the answer",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 적합 without the values: said at the fields",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 Enter moves to the next field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 confirmed with the values",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 a value changed after the answer asks again",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 asked again: nothing leaves its row or scrolls sideways",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 asked again: controls in a row do not overlap",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 asked again: fields and run buttons keep their own size",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 asked again: no window is used",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 both confirmed: 끝내기",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "SQ6 끝내기 returns to the first screen with 시작",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "left menu opens the other procedure",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "entering the stage before starting shows 시작 and the field",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "a control outside this mock says so",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "mock mark is always shown",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}
