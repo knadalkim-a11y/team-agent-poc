@@ -201,6 +201,32 @@ test('style sheets never define a custom property as itself',()=>{
  }
 });
 
+test('theme step 1: corners and shadows come from the shared tokens',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const css=fs.readFileSync(path.join(__dirname,'../branding/ees/ui/ees-work-launcher.css'),'utf8').replace(/\/\*[\s\S]*?\*\//g,'');
+ // 2026-11-20 user decision: controls 4px, floating layers (menus, popovers, dialogs) 8px, dots and avatars round.
+ const radius=/^(0|50%|11px|var\(--ees-radius-(control|float)\)|calc\(var\(--ees-radius-control\) - 2px\)|((0|var\(--ees-radius-control\))( |$)){2,4})$/;
+ const radii=[...css.matchAll(/border-radius\s*:\s*([^;}]+)/g)].map(m=>m[1].trim()).filter(v=>!radius.test(v));
+ assert.deepEqual(radii,[],'border-radius must use --ees-radius-control/--ees-radius-float');
+ const shadows=[...css.matchAll(/box-shadow\s*:\s*([^;}]+)/g)].map(m=>m[1].trim()).filter(v=>!/^(none|var\(--ees-(shadow-(raised|float|overlay|side)|focus-ring|focus-input)\))(\s*!important)?$/.test(v));
+ assert.deepEqual(shadows,[],'box-shadow must use one of the shadow tokens');
+ const root=css.match(/:root\{([^}]*)\}/)[1];const token=name=>root.match(new RegExp(name+':([^;]+)'))[1];
+ assert.equal(token('--ees-radius-control'),'4px');assert.equal(token('--ees-radius-float'),'8px');
+ // Input line: 3:1 or more on white and on the menu grey (2026-11-20 user decision).
+ assert.equal(token('--ees-line-input'),'#878d99');
+ // Hover, selected and pressed are three different backgrounds.
+ assert.equal(new Set([token('--ees-surface-panel-hover'),token('--ees-surface-selected'),token('--ees-surface-pressed')]).size,3);
+});
+
+test('theme step 1: icons are drawn only in theme colours',()=>{
+ const fs=require('node:fs'),path=require('node:path'),dir=path.join(__dirname,'../branding/ees/ui/v4');
+ const allowed=new Set(['#1d2128','#5e6573','#a3a5ac','#96590c','#2a744c','#bf3a2b']);
+ const off=[];for(const name of fs.readdirSync(dir).filter(n=>n.endsWith('.svg'))){
+  for(const m of fs.readFileSync(path.join(dir,name),'utf8').matchAll(/(?:fill|stroke)="(#[0-9a-fA-F]{6})"/g))if(!allowed.has(m[1].toLowerCase()))off.push(name+' '+m[1]);
+ }
+ assert.deepEqual(off,[]);
+});
+
 test('A4a applied input footer keeps the Figma surface spacing and Korean word wrapping scoped to its bar',()=>{
  const fs=require('node:fs'),path=require('node:path'),css=fs.readFileSync(path.join(__dirname,'../branding/ees/ui/ees-work-launcher.css'),'utf8');
  const rule=selector=>{const start=css.indexOf(selector+'{');assert.notEqual(start,-1,'Missing A4a scoped rule: '+selector);return Object.fromEntries(css.slice(start+selector.length+1,css.indexOf('}',start)).split(';').filter(Boolean).map(item=>item.split(':')));};

@@ -903,6 +903,8 @@ test('centered stage separates the published breadcrumb, stage title and actual 
 test('stage rows use Jobs, preserve configured judgment meaning and distinguish failed execution',()=>{
  const {state}=stageRuntimeFixture();state.run.jobs.a={status:'failed',result:{items:[{id:'CR-1',name:'도구의 내부 항목'}]}};
  const rows=html('workStageRows(state,state.run.definition.nodes.t)',{state});assert.equal(rows.length,2);assert.equal(rows.find(row=>row.node.id==='a').label,'실행 실패');assert.equal(rows.find(row=>row.node.id==='a').decision,null);
+ // Theme step 1 (2026-11-20): a failed run is red like any other failure, not grey like 실행 필요.
+ assert.equal(rows.find(row=>row.node.id==='a').tone,'bad');
  state.run.jobs.h={status:'completed',decisions:{job:{id:10,verdict:'completed',note:'검토 근거\n선택한 판정: 조건부 승인 (conditional)',actor_id:'actor'}}};
  const decision=html('workStageDecision(state.run.definition.nodes.h,state.run.jobs.h,state.run.definition)',{state});assert.equal(decision.label,'조건부 승인');assert.equal(decision.judgment_id,'conditional');assert.equal(decision.note,'검토 근거');
  const previous={snapshot:{job:{judgments:[{id:'old',label:'이전 정의',status:'completed'}]}}};
@@ -1242,7 +1244,7 @@ test('published job order survives changing decisions, with successful execution
  assert.deepEqual(ids(render({})),['a','h']);assert.deepEqual(ids(render({stage_approved_expanded:false})),['a']);
  const out=render({stage_approved_expanded:false,stage_evidence:'h'});assert.deepEqual(ids(out),['a','h']);assert.match(out,/stage-evidence-h/);
  assert.match(out,/2 \/ 2 완료/);assert.match(out,/실행 완료 1<\/span>/);assert.match(out,/승인 1<\/span>/);
- nodes.t.children.reverse();state.run.jobs.a={status:'failed'};const revised=render({});assert.deepEqual(ids(revised),['h','a']);assert.match(revised,/1 \/ 2 완료/);assert.match(revised,/실행 실패 1<\/span>/);
+ nodes.t.children.reverse();state.run.jobs.a={status:'failed'};const revised=render({});assert.deepEqual(ids(revised),['h','a']);assert.match(revised,/1 \/ 2 완료/);assert.match(revised,/<i class="ew-vd-dot" data-verdict="bad"><\/i>실행 실패 1<\/span>/);
 });
 
 test('stage tabs restore their own scroll and the note caret survives chat layout changes',()=>{

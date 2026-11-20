@@ -20,26 +20,26 @@
     "src/lib/components/chat/MessageInput.svelte": "9eb0859227331ff9e4138dcb6f5ec53e3d51ef87aeb1a8b6c058a5a9f4339ed2",
     "src/lib/components/chat/Messages/ResponseMessage.svelte": "64fb38010aa936ec0eea0d9c0dd79a087b9c5026f94be8d08139fbd6529c1270",
     "src/lib/components/chat/Messages/UserMessage.svelte": "c677b13bf160de1bf0fafceef00ba5df098d661e6728c0dd5b1e6427b3e2eef8",
-    "src/lib/components/chat/Navbar.svelte": "e507a731ecc92a641c7cf809e79e121bdf9b51ce15d69197d26afb8bd08cceba",
+    "src/lib/components/chat/Navbar.svelte": "31586d73c6aa2ac58d8a4067f971669d6654c10bde3c1d4166dbb250067b08e8",
     "src/lib/components/chat/Placeholder.svelte": "dc5512dc7648112edd011e27797c07cf5d8d52474be5490a1ae2bef434327036",
     "src/lib/components/chat/SettingsModal.svelte": "f9f79015ffbee1164f25705b61196044853b673d92f6c0aacc940a7ade6c02c7",
     "src/lib/components/common/Dropdown.svelte": "e3e33dc08b8b84bcececa69136029ca6b7d01effd6b5343a98c0d83ff3bdb697",
     "src/lib/components/common/SplitCreateButton.svelte": "1bc864c54033a135e5459fd2a2fb7a6ffa56026d350e5fd7e6b3ddbf1cf4a7b6",
     "src/lib/components/ees/EesAccessTag.svelte": "409d179d7ea8a2082792ab37464ac46021ff57b72c3f87a3b68de8881b7c200b",
     "src/lib/components/ees/EesAssetUsage.svelte": "b3134a9d7cef6fc1f5711ed53ae740584e52bce414f0450c3e7b4148a1cd0840",
-    "src/lib/components/ees/EesHelperNotice.svelte": "9d5aefbdece6c8e4b0918386709d3e8bd93f2e17921b555a00f01f8eb752d8fa",
+    "src/lib/components/ees/EesHelperNotice.svelte": "10c7d6fd9f2c84119a7a2db355f143279dea69c7a136878b3213cf70045f3eab",
     "src/lib/components/ees/EesIcon.svelte": "ad67fa20b39f3b58a91411a06140d1c17819feecf8c13568b8ca24e5e14410ea",
     "src/lib/components/ees/EesNavigation.svelte": "a4be32e128d2296f918403a58384fa12b9ec122440d4beb128bace4f90686a92",
-    "src/lib/components/ees/EesProcedureIntro.svelte": "838cb9b1eb728027bd397c9a4b35fae0260038afe3664d4c668975bba0717672",
+    "src/lib/components/ees/EesProcedureIntro.svelte": "52778782aa90c39221d660371baab35df1db8e1dd43663eecbf366a563ab3b82",
     "src/lib/components/ees/EesSavedPrompts.svelte": "acf5e702393e4c7218e63c6bd5554aadf1f9e33e9830f1369262caa4ac9fe8c1",
     "src/lib/components/ees/EesScopeSelect.svelte": "4906d92006b655ef5de8079ba0ea03a84ae9a584cd404585d530b4f35479afc4",
     "src/lib/components/ees/EesSettingsFrame.svelte": "248f940cf32eae6a431352b85a6050304addb6651f4cc75d454ab2080fb7eee5",
     "src/lib/components/ees/EesSettingsMenu.svelte": "5e6656f7c6ae10dd5c9be5a960444f1457c54188ea18cd9791e7f831e2d6b13f",
-    "src/lib/components/ees/EesShell.svelte": "a0cb7a4deb5902816472cd30ad9c7c9c7a046ea5ee7f029c96e968989d633b61",
+    "src/lib/components/ees/EesShell.svelte": "5053baa79334d451719f5f2cc0a7ef901358b9661bc918b4705ff7cd9ab12e52",
     "src/lib/components/ees/assets.ts": "4c100d3fedd46094a4c59a14595cbc5609a87fc9eed8b4c16f1bd038577d321f",
-    "src/lib/components/ees/icons/5bc95.svg": "3768ff838f3b7cf08a02413d1cca7a7e3d330e42303398a379eec0043ab149d7",
+    "src/lib/components/ees/icons/5bc95.svg": "cb6dcafe1832ca36c73cc4e87f1c5df1e869afe0ec8bb052d3da0a2298109e0a",
     "src/lib/components/ees/state.ts": "d4eee064c100832b93cfc7b984be708df871efcaf8ef009a0f0894e7f1afa712",
-    "src/lib/components/layout/Sidebar.svelte": "f16bfb3ff5260e3f44320e43bf1622989c8028e816707cc0f978a79fa945fdfa",
+    "src/lib/components/layout/Sidebar.svelte": "764b8b85a47f4566b9b70ec589318e049df09a80b27ba8d16bade42010c57e46",
     "src/lib/components/workspace/Knowledge.svelte": "731e8ac6609984a71b594d14cc3189ea1d808d024258499c01ed6c18e1b68749",
     "src/lib/components/workspace/Knowledge/CreateKnowledgeBase.svelte": "6e8c0ffa2cd66e6fb11502b9498e67ae4daa78914e01b7632b204d6581709bc7",
     "src/lib/components/workspace/Knowledge/KnowledgeBase.svelte": "51f42a23fdc304bf0ad6b369f3063f7092212a5d930436e0c19c006f52ae4ba1",
@@ -63,7 +63,7 @@
   "patches": [
     {
       "path": "patches/0001-ees-native-hooks.patch",
-      "sha256": "110412f92d65b63c57f72eef113ff4499984f9ce16ac3f18797883dfb9cc225b"
+      "sha256": "5aec417a9a502cb9adfaea7e074fb142dced7fc2796fb083692ef730ab48bef1"
     }
   ],
   "pyodide_files": {

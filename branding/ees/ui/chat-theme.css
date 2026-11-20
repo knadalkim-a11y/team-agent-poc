@@ -25,6 +25,8 @@
   --ees-ink: #1d2128;
   --ees-muted: #5e6573;
   --ees-line: #c9ccd2;
+  /* Text fields: 3.3:1 on white (theme step 1, 2026-11-20). */
+  --ees-field: #878d99;
   --ees-blue: #1d2128;
   --ees-tint: #e7e8eb;
   --ees-warning: #8a6408;
@@ -36,6 +38,7 @@ html.dark {
   --ees-ink: #e8edf5;
   --ees-muted: #a6b2c3;
   --ees-line: #343e4b;
+  --ees-field: #343e4b;
   --ees-blue: #91bddf;
   --ees-tint: #223342;
   --ees-warning: #d1bc92;
@@ -55,6 +58,14 @@ html.dark #chat-container { color-scheme: dark; }
 }
 #chat-container :is(button, input, textarea, select) {
   font-family: var(--ees-font);
+}
+
+/* Theme step 1 (2026-11-20): Open WebUI's base family (Tailwind --font-sans, which starts with
+ * var(--app-font-family)) also starts with the EES families inside the EES shell. The work toolbar
+ * title, its chat toggle and other text that only inherits the page font used the Native stack
+ * (Inter, then the system Korean font on Windows). Code and math keep their explicit families. */
+html:has([data-ees-source-shell]) {
+  --app-font-family: "EES Noto Sans KR", "EES Inter";
 }
 
 /* Use the same already-bundled family outside the chat column as well.
@@ -179,16 +190,19 @@ nav:has(a[href="/workspace/models"]),
   font-family: var(--ees-font);
   color: var(--ees-ink);
   background-color: var(--ees-paper);
-  border-color: var(--ees-line);
-  border-radius: 8px;
+  border-color: var(--ees-field);
+  border-radius: 4px;
   box-shadow: none;
   backdrop-filter: none;
 }
 #chat-container #message-input-container:hover {
-  border-color: var(--ees-line);
+  border-color: var(--ees-field);
 }
 #chat-container #message-input-container:focus-within {
   border-color: var(--ees-blue);
+}
+html:not(.dark) #chat-container #message-input-container:focus-within {
+  box-shadow: 0 0 0 3px #1d21281f;
 }
 #chat-container #chat-input-container {
   padding: .625rem .375rem .25rem;
@@ -232,7 +246,7 @@ body:has(:where(#chat-container)) #sidebar-chat-item {
   font-size: .75rem;
   font-weight: 400;
   color: var(--ees-muted);
-  border-radius: .375rem;
+  border-radius: .25rem;
 }
 body:has(:where(#chat-container)) #sidebar-chat-item[aria-current="page"] {
   color: var(--ees-ink);
@@ -285,10 +299,10 @@ body:has(:where(#chat-container)) #sidebar-chat-item:hover {
 
 /* Existing Native voice controls remain available in their real menu. */
 .ees-native-voice-menu {position:relative;align-self:center;}
-.ees-native-voice-menu > summary {list-style:none;cursor:pointer;border-radius:6px;padding:4px 6px;color:var(--ees-muted);font-size:12px;line-height:22px;white-space:nowrap;}
+.ees-native-voice-menu > summary {list-style:none;cursor:pointer;border-radius:4px;padding:4px 6px;color:var(--ees-muted);font-size:12px;line-height:22px;white-space:nowrap;}
 .ees-native-voice-menu > summary::-webkit-details-marker {display:none;}
 .ees-native-voice-menu > summary:focus-visible {outline:2px solid var(--ees-blue);outline-offset:2px;}
-.ees-native-voice-menu > div {position:absolute;right:0;bottom:calc(100% + 8px);padding:12px;border:1px solid var(--ees-line);border-radius:8px;background:var(--ees-paper);z-index:40;}
+.ees-native-voice-menu > div {position:absolute;right:0;bottom:calc(100% + 8px);padding:12px;border:1px solid var(--ees-line);border-radius:8px;background:var(--ees-paper);box-shadow:0 4px 12px #1d212814,0 1px 2px #1d21280f;z-index:40;}
 
 /* The message list and input share the same reading width in docked, overlay
    and expanded chat. The native preference for full-width messages still wins. */
@@ -322,6 +336,12 @@ body:has(:where(#chat-container)) #sidebar-chat-item:hover {
 }
 [data-ees-chat-surface] #chat-container .markdown-prose {
   min-width: 0;
+  overflow-wrap: anywhere;
+  /* Korean words stay whole at a line end; a run too long for the line still wraps. */
+  word-break: keep-all;
+}
+[data-ees-chat-surface] #chat-container :is(.chat-user, .chat-assistant) .whitespace-pre-wrap {
+  word-break: keep-all;
   overflow-wrap: anywhere;
 }
 [data-ees-chat-surface] #chat-container .markdown-prose pre {

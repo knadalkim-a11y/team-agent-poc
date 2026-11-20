@@ -953,7 +953,7 @@ function workStageRows(data,stage){
     else if((saved.result_stale||state==='review_required')&&(attempts.length||Object.keys(saved.decisions || {}).length||saved.attempt_id||saved.current_attempt))label='다시 검토 필요';
     else if(decision){group='result';label=decision.label;tone=workStageTone(decision.verdict,label);}
     else if(state==='completed'){group='result';label=automatic?'실행 완료':'완료';tone='ok';}
-    else if(['failed','partial','unknown','cancelled','excluded'].includes(state)){group='result';label=state==='failed'?'실행 실패':workUI.statuses[state] || state;}
+    else if(['failed','partial','unknown','cancelled','excluded'].includes(state)){group='result';label=state==='failed'?'실행 실패':workUI.statuses[state] || state;if(state==='failed')tone='bad';}
     else if(workToolConnectionRequired(node))label='도구 연결 필요';
     else if(awaits)label='대기';
     else if(['waiting_input','awaiting_input','blocked','scheduled'].includes(state))label=workUI.statuses[state];

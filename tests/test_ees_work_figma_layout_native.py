@@ -179,9 +179,10 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         # Theme sheet colours (2026-11-17): the work area is white like the inputs and the chat.
         self.assertEqual(observed, {'panel': 'rgb(255, 255, 255)', 'author': 'rgb(255, 255, 255)',
             'card': 'rgba(0, 0, 0, 0)', 'input': 'rgb(255, 255, 255)', 'chat': 'rgb(255, 255, 255)'})
-        hover('.ew-author-list>button', 'rgb(231, 232, 235)')
+        # Theme step 1 (2026-11-20): hover on the panel (#EDEEF0) differs from the selected background (#E7E8EB).
+        hover('.ew-author-list>button', 'rgb(237, 238, 240)')
         observed['cardHover'] = background('.ew-author-list>button')
-        self.assertEqual(observed['cardHover'], 'rgb(231, 232, 235)')
+        self.assertEqual(observed['cardHover'], 'rgb(237, 238, 240)')
         observed['cardMotion'] = self.browser.evaluate("(()=>{const e=document.querySelector('.ew-author-list>button'),s=getComputedStyle(e);return {focusVisible:e.matches(':focus-visible'),property:s.transitionProperty,duration:s.transitionDuration,easing:s.transitionTimingFunction};})()")
         self.assertFalse(observed['cardMotion']['focusVisible'])
         self.assertEqual(observed['cardMotion']['property'].split(', '),
@@ -286,7 +287,7 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
             self.click('[data-author-action=tab][data-tab=' + tab + ']')
             self.wait("document.querySelector('.ew-author-tabs [data-tab=" + tab + "]')?.getAttribute('aria-selected') === 'true'")
             capture_style('author-' + tab, '.ew-author-tabs')
-        hover('.ew-author-tabs [aria-selected=false]', 'rgb(231, 232, 235)')
+        hover('.ew-author-tabs [aria-selected=false]', 'rgb(237, 238, 240)')
         self.open_workspace_assets()
         self.click('[data-action=tools]')
         self.wait("document.querySelector('#ees-work-designer[data-author-tab=tools]')")
@@ -305,7 +306,7 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         capture_style('work-stage', '.ew-tabs')
         capture_tab_focus('work-stage', '.ew-tabs')
         self.screenshot('shared-panel-stage-1366')
-        hover('.ew-tabs [aria-pressed=false]', 'rgb(231, 232, 235)')
+        hover('.ew-tabs [aria-pressed=false]', 'rgb(237, 238, 240)')
         self.open_run(workflow_id, run)
         self.wait("document.querySelector('#ees-work-panel:not(.ew-vd) .ew-tabs')")
         capture_style('work-task', '.ew-tabs')
