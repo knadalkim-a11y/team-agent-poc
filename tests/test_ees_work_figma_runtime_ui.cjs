@@ -846,7 +846,8 @@ test('run editors can accept a shared version even when another person has claim
 
 function stageRuntimeFixture(){
  const judgments=[{id:'yes',label:'승인',status:'completed'},{id:'conditional',label:'조건부 승인',status:'completed'},{id:'no',label:'미승인',status:'failed'}];
- const nodes={p:{id:'p',type:'p'},t:{id:'t',type:'t',parent:'p',name:'1차 점검'},h:{id:'h',type:'j',parent:'t',name:'직접 확인',mode:'human',result_block:'human_confirm',judgments},a:{id:'a',type:'j',parent:'t',name:'실제 도구',mode:'tool',human_confirmation:false,result_block:'values',tool_reference:{tool_id:'native',function:'read',content_hash:'synthetic'}},other:{id:'other',type:'j',parent:'p',name:'다른 단계 작업',mode:'human'}};
+ const nodes={p:{id:'p',type:'p'},t:{id:'t',type:'t',parent:'p',name:'1차 점검'},h:{id:'h',type:'j',parent:'t',name:'직접 확인',mode:'human',result_block:'human_confirm',judgments},a:{id:'a',type:'j',parent:'t',name:'실제 도구',mode:'tool',human_confirmation:false,result_block:'values',tool_reference:{tool_id:'native',function:'read',content_hash:'synthetic'}},t2:{id:'t2',type:'t',parent:'p',name:'2차 점검'},other:{id:'other',type:'j',parent:'t2',name:'다른 단계 작업',mode:'human'}};
+ // Two stages: the stage screen of a procedure with several stages. One stage is the procedure's own screen (design mock 20).
  const state={ok:true,capabilities:{actor_id:'actor'},workflow:{id:'w',name:'배포 산출물 점검'},run:{id:'r',workflow_id:'w',status:'open',revision:8,name:'10.27 배포 회차',definition:{name:'배포 산출물 점검',nodes},jobs:{h:{status:'ready',can_decide:true,can_execute:true},a:{status:'ready',can_execute:true}},attempts:[]},operations:{},ui_state:{revision:0,state:{}}};
  const h=controller();h.api.setState(state);h.api.setSelection({mode:'work',workflow_id:'w',run_id:'r',job_id:'',tab:'overview',stage_id:'t'});
  h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true});
@@ -1368,7 +1369,10 @@ test('first-user: the work side opens with a way to make a procedure and lists t
  const pending=view({capabilities:author,workflows:[draft,elsewhere]});
  assert.match(pending,/<h3>아직 업무가 없습니다<\/h3><button type="button" class="ew-primary" data-action="procedure_new">새 업무 절차<\/button><div class="ew-home-pending"><h4>게시 전<\/h4><button type="button" data-action="pending_open" data-workflow-id="d"><strong>일일 펌프 점검<\/strong><small>단계 1 · 작업 1<\/small>/);assert.doesNotMatch(pending,/다른 시스템 초안/);
  assert.doesNotMatch(view({capabilities:{actor_id:'b'},workflows:[draft]}),/게시 전|일일 펌프 점검/,'drafts are for accounts that may author');
- const mixed=view({capabilities:author,workflows:[draft,{id:'p1',name:'게시된 절차',system_id:'EMS',published_version:1}]});assert.match(mixed,/업무 절차를 선택해 주세요/);assert.match(mixed,/data-action="pending_open" data-workflow-id="d"/);assert.doesNotMatch(mixed,/procedure_new/);
+ // With published procedures the first screen lists them (design mock 20); drafts stay under them for authors.
+ const mixed=view({capabilities:author,workflows:[draft,{id:'p1',name:'게시된 절차',system_id:'EMS',published_version:1}]});assert.match(mixed,/^<section class="ew-fg-home" aria-label="업무 목록"><article class="ew-fg-card"><div><h3>게시된 절차<\/h3>/);
+ assert.match(mixed,/data-action="pending_open" data-workflow-id="d"/);assert.match(mixed,/<button type="button" class="ew-text ew-fg-new" data-action="procedure_new">＋ 새 업무 절차<\/button><\/section>/);
+ assert.doesNotMatch(view({capabilities:{actor_id:'b'},workflows:[{id:'p1',name:'게시된 절차',system_id:'EMS',published_version:1}]}),/procedure_new/,'only accounts that may author make a procedure');
 });
 test('first-user: a draft opens in the workspace and the new-procedure control opens the form there',async()=>{
  const h=stagePreviewFixture();h.state.capabilities.can_author=true;h.state.workflows=[{id:'d',name:'초안',system_id:'EMS',published_version:null,can_manage:true}];h.api.setState(h.state);h.api.setSelection({system_id:'EMS',workflow_id:'',stage_id:''});
@@ -1425,7 +1429,9 @@ test('check items: after an input or an earlier job changes, the list is ticked 
 // ---- Values of a job under its row (2026-11-19, design mock 19 revision 3) ----
 function askFixture({started=true}={}){
  const h=stageRuntimeFixture(),nodes=h.state.run.definition.nodes;delete nodes.h;delete nodes.other;delete h.state.run.jobs.h;
- delete nodes.a.tool_reference;Object.assign(nodes.a,{name:'기준 문서 확인',result_block:'human_confirm',human_confirmation:true,instructions:'페이지 ID를 입력하세요.',api_binding:{operation_id:'page',version:1,inputs:{id:{input:'page-id'}},outputs:['title','id']},inputs:[{id:'page-id',name:'페이지 ID',type:'text',scope:'run',required:true,example:'123456789'}]});
+ // Job a is given its own judgment words, so it keeps the row of mock 19; a lookup with the usual words is asked as a
+ // question (design mock 20, tested with lookupFixture).
+ delete nodes.a.tool_reference;Object.assign(nodes.a,{name:'기준 문서 확인',result_block:'human_confirm',human_confirmation:true,judgments:[{id:'ok',label:'적합',status:'completed'},{id:'bad',label:'미흡',status:'failed'}],instructions:'페이지 ID를 입력하세요.',api_binding:{operation_id:'page',version:1,inputs:{id:{input:'page-id'}},outputs:['title','id']},inputs:[{id:'page-id',name:'페이지 ID',type:'text',scope:'run',required:true,example:'123456789'}]});
  nodes.b={id:'b',type:'j',parent:'t',name:'하위 문서 목록 조회',mode:'tool',result_block:'list_confirm',human_confirmation:true,deps:['a'],api_binding:{operation_id:'children',version:1,inputs:{id:{result:{job_id:'a',field:'id',confirmed:true}},limit:{constant:5}},outputs:['title','id']}};
  Object.assign(h.state.run,{inputs:{},jobs:{a:{status:'ready',can_execute:true,can_decide:true},b:{status:'pending',can_execute:true,can_decide:true}}});
  Object.assign(h.state.workflow,{published:{name:'가이드',execution_scope:'system',nodes},published_version:1,revision:3});
@@ -1459,23 +1465,24 @@ test('values of a job: the row is unchanged, its name opens the area under it, a
  assert.match(h.row('a'),/type="text" value="222">/,'what is typed is kept while the area is closed and opened');
 });
 test('values of a job: a value from an earlier job is shown, and the job waits until that job is confirmed',()=>{
+ // b looks something up and confirms it with the usual words: its row is a lookup's (design mock 20).
  const h=askFixture();h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'b'});let row=h.row('b');
- assert.match(row,/<button type="button" class="ew-vd-run" data-action="stage_execute" data-job-id="b"[^>]* disabled data-own-disabled="true" data-run-blocked>/);assert.match(row,/<span class="ew-vd-state" data-decision-status><span>대기<\/span><\/span>/);
- assert.match(row,/<section><h4>입력<\/h4><dl class="ew-vd-tool-values ew-vd-ask-values"><dt>페이지 ID<\/dt><dd><span class="ew-vd-given">기준 문서 확인에서<\/span><\/dd><\/dl><\/section>/);assert.doesNotMatch(row,/<input/);
- assert.match(h.body(),/실행 필요 1<\/span><span><i class="ew-vd-dot" data-verdict="none"><\/i>대기 1/);
+ assert.match(row,/<button type="button" class="ew-primary" data-stage-run data-action="stage_execute" data-job-id="b" data-mutation disabled data-own-disabled="true">찾기<\/button>/);assert.match(row,/<span class="ew-vd-state" data-decision-status><span>1번 다음<\/span><\/span>/);
+ assert.match(row,/<div class="ew-fg-ask"><span class="ew-fg-key">1번 결과<\/span><span class="ew-fg-given"><\/span><button/);assert.doesNotMatch(row,/<input/);
+ assert.match(h.body(),/실행 필요 1<\/span><span><i class="ew-vd-dot" data-verdict="none"><\/i>1번 다음 1/,'the counts say what the rows say');
  // run but not confirmed yet: still waiting. The server marks the job after a job that ran for another review;
  // a job that has done nothing yet has nothing to review again and stays 대기, then 실행 필요.
  Object.assign(h.state.run.jobs.a,{status:'waiting_confirmation',attempt_id:'at',result_revision:1,result:{items:[{id:'row-1',row:{title:'점검 기준서',id:'27182'}}],field_labels:{title:'문서 제목',id:'페이지 ID'}}});
  h.state.run.jobs.b.status='review_required';
- assert.match(h.row('b'),/<span>대기<\/span>/);assert.doesNotMatch(h.body(),/다시 검토 필요/);
+ assert.match(h.row('b'),/<span>1번 다음<\/span>/);assert.doesNotMatch(h.body(),/다시 검토 필요|다시 찾을 차례/);
  Object.assign(h.state.run.jobs.a,{status:'completed',decisions:{job:{item_id:'job',verdict:'completed'}}});row=h.row('b');
- assert.match(row,/<dt>페이지 ID<\/dt><dd><span>27182<\/span><span class="ew-vd-given">기준 문서 확인에서<\/span><\/dd>/);
- assert.match(row,/<button type="button" class="ew-vd-run" data-action="stage_execute" data-job-id="b" aria-label="하위 문서 목록 조회 실행" data-mutation>/);assert.match(row,/<span>실행 필요<\/span>/);
+ assert.match(row,/<span class="ew-fg-key">1번 결과<\/span><span class="ew-fg-given">점검 기준서<\/span>/,'the value is shown by the name a person confirmed');
+ assert.match(row,/<button type="button" class="ew-primary" data-stage-run data-action="stage_execute" data-job-id="b" data-mutation>찾기<\/button>/);assert.match(row,/<span>할 차례<\/span>/);
  // once it has run, a run of the job before it does ask for another review
  h.state.run.attempts=[...(h.state.run.attempts || []),{id:'bt',job_id:'b',number:1,status:'succeeded'}];Object.assign(h.state.run.jobs.b,{attempt_id:'bt',current_attempt:'bt'});
- assert.match(h.row('b'),/<span>다시 검토 필요<\/span>/);h.state.run.attempts=h.state.run.attempts.filter(item=>item.id!=='bt');delete h.state.run.jobs.b.attempt_id;delete h.state.run.jobs.b.current_attempt;
+ assert.match(h.row('b'),/<span>다시 찾을 차례<\/span>/);h.state.run.attempts=h.state.run.attempts.filter(item=>item.id!=='bt');delete h.state.run.jobs.b.attempt_id;delete h.state.run.jobs.b.current_attempt;
  // before a run exists the row cannot start it either
- const before=askFixture({started:false});assert.match(before.row('b'),/data-action="stage_start" data-job-id="b"[^>]* disabled data-own-disabled="true" data-run-blocked>/);assert.match(before.row('a'),/data-action="stage_start" data-job-id="a" aria-label="기준 문서 확인 실행">/);
+ const before=askFixture({started:false});before.api.setSelection({...before.api.snapshot().selection,stage_evidence:'b'});assert.match(before.row('b'),/data-action="stage_start" data-job-id="b" disabled data-own-disabled="true">찾기/);assert.match(before.row('a'),/data-action="stage_start" data-job-id="a" aria-label="기준 문서 확인 실행">/);
 });
 test('values of a job: what an API job brought back is shown under 입력, one record as a list of names and a list as rows',()=>{
  const h=askFixture();h.state.run.inputs={'page-id':'27182'};h.state.run.attempts=[{id:'at',job_id:'a',number:1,status:'succeeded',finished_at:'2026-11-19T01:00:00Z'},{id:'bt',job_id:'b',number:1,status:'succeeded',finished_at:'2026-11-19T01:05:00Z'}];
@@ -1499,9 +1506,8 @@ test('values of a job: what an API job brought back is shown under 입력, one r
  Object.assign(h.state.run.jobs.a,{status:'completed',decisions:{job:{item_id:'job',verdict:'completed',attempt_id:'at'}}});
  Object.assign(h.state.run.jobs.b,{status:'waiting_confirmation',attempt_id:'bt',current_attempt:'bt',result_revision:1,result:{items:[{id:'r1',row:{title:'주간 점검표',id:'301'}},{id:'r2',row:{title:'월간 점검표',id:'302'}}],field_labels:{title:'문서 제목',id:'페이지 ID'}}});
  h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'b'});row=h.row('b');
- assert.match(row,/<section data-stage-result><h4>결과<span>2건 · 1차 · [^<]+<\/span><\/h4><ol class="ew-vd-rows" aria-label="하위 문서 목록 조회 결과"><li><span>주간 점검표<\/span><span>301<\/span><\/li><li><span>월간 점검표<\/span><span>302<\/span><\/li><\/ol><\/section>/);
- // the list is confirmed from its row
- assert.match(row,/<span class="ew-vd-confirm"><button type="button" class="ew-vd-confirm-main" data-action="stage_confirm_list" data-job-id="b" data-mutation aria-label="하위 문서 목록 조회 목록 확정">목록 확정<\/button><\/span>/);
+ // a lookup's list (design mock 20): what was found by name, then the question
+ assert.match(row,/<div class="ew-fg-found"><small>찾은 결과 2개<\/small><ol class="ew-fg-list" aria-label="하위 문서 목록 조회 결과"><li><span class="ew-fg-title">주간 점검표<\/span><small>페이지 ID 301<\/small><\/li><li><span class="ew-fg-title">월간 점검표<\/span><small>페이지 ID 302<\/small><\/li><\/ol><\/div><div class="ew-fg-question"><strong>이 목록으로 할까요\?<\/strong><button type="button" class="ew-primary" data-stage-answer data-action="stage_confirm_list" data-job-id="b" data-mutation>네<\/button><\/div>/);
  h.state.run.jobs.b.result_stale=true;assert.doesNotMatch(h.row('b'),/stage_confirm_list/);
 });
 test('values of a job: one press of 실행 before a run starts it with what was typed and runs the job, with no window',async()=>{
@@ -1534,7 +1540,7 @@ test('values of a job: a person\'s answer carries the values typed under the row
  assert.doesNotMatch(open,/id="stage-evidence-c"/,'the record of answers is opened by 판정 기록, as before');
  h.api.handleClick({dataset:{action:'stage_evidence',jobId:'c'}});assert.ok(h.row('c').indexOf('id="stage-values-c"')<h.row('c').indexOf('id="stage-evidence-c"'),'the values come before the record of answers');
  await h.api.handleClick({dataset:{action:'stage_decide',jobId:'c',verdict:'completed'}});
- assert.deepEqual(h.sent('save_inputs','human_confirm'),[]);assert.match(h.row('c'),/id="ew-stage-c-pressure" aria-invalid="true"[^>]*><span class="ew-unit">bar<\/span><small class="ew-vd-ask-error"[^>]*>값을 넣어 주세요<\/small>/);assert.doesNotMatch(h.row('c'),/id="ew-stage-c-memo" aria-invalid/);
+ assert.deepEqual(h.sent('save_inputs','human_confirm'),[]);assert.match(h.row('c'),/id="ew-stage-c-pressure" aria-invalid="true"[^>]*><span class="ew-unit">bar<\/span><small class="ew-vd-ask-error"[^>]*>압력을 넣어 주세요<\/small>/);assert.doesNotMatch(h.row('c'),/id="ew-stage-c-memo" aria-invalid/);
  h.type('c','pressure','3.1','number');h.type('c','memo','이상 없음');
  h.setReply(call=>{if(call.body?.action==='save_inputs'){h.state.run.inputs=call.body.inputs;h.state.run.revision=9;}if(call.body?.action==='human_confirm')Object.assign(h.state.run.jobs.c,{status:'completed',decisions:{job:{item_id:'job',verdict:'completed'}}});return call.url.startsWith('/api/ees-work/workspace?')?h.state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true,revision:9};});
  await h.api.handleClick({dataset:{action:'stage_decide',jobId:'c',verdict:'completed'}});
@@ -1574,14 +1580,15 @@ test('values of a job: the start form asks only what belongs to the whole proced
  assert.equal(html('workRunStartFields(definition).map(field=>field.id).join()',{definition}),'target,page-id,project,status,shape');
  assert.equal(html('workStageAskFields(definition.nodes.b,definition).map(field=>field.id).join()',{definition}),'limit');
 });
-test('values of a job: a list is confirmed from its row as it came back, with the reason the product asks for',async()=>{
+test('values of a job: a lookup list is confirmed by its question as it came back, with no window and no reason',async()=>{
  const h=askFixture();Object.assign(h.state.run.jobs.a,{status:'completed',decisions:{job:{item_id:'job',verdict:'completed'}}});
  Object.assign(h.state.run.jobs.b,{status:'waiting_confirmation',attempt_id:'bt',current_attempt:'bt',result_revision:2,result:{items:[{id:'r1',title:'주간 점검표',row:{title:'주간 점검표',id:'301'},required:false},{id:'r2',title:'월간 점검표',row:{title:'월간 점검표',id:'302'},required:false}]}});
  const asked=[];h.context.document.querySelector=selector=>selector==='#ees-list-confirm-reason'?{addEventListener:(kind,fn)=>fn({target:{value:'두 건 확인'}})}:{};
  h.setDialog(options=>{asked.push(options);return Promise.resolve(true);});
  await h.api.handleClick({dataset:{action:'stage_confirm_list',jobId:'b'}});
- assert.equal(asked.length,1);assert.equal(asked[0].confirmLabel,'목록 확정');
- const sent=h.sent('confirm_list');assert.equal(sent.length,1);assert.deepEqual({job:sent[0].job_id,attempt:sent[0].attempt_id,revision:sent[0].result_revision,reason:sent[0].reason,ids:sent[0].items.map(item=>item.id)},{job:'b',attempt:'bt',revision:2,reason:'두 건 확인',ids:['r1','r2']});
+ // the server asks a reason only when the list is changed; 네 does not change it
+ assert.equal(asked.length,0);
+ const sent=h.sent('confirm_list');assert.equal(sent.length,1);assert.deepEqual({job:sent[0].job_id,attempt:sent[0].attempt_id,revision:sent[0].result_revision,reason:sent[0].reason,ids:sent[0].items.map(item=>item.id)},{job:'b',attempt:'bt',revision:2,reason:'',ids:['r1','r2']});
  assert.equal(h.api.snapshot().selection.job_id,'','the stage screen stays');
  // as with an answer, the confirmed job closes; here nothing else asks for a value
  Object.assign(h.state.run.jobs.b,{status:'waiting_confirmation'});h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'b'});
@@ -1628,7 +1635,7 @@ test('values of a job (review): an answered job whose value changes is answered 
 test('values of a job (review): a held Enter does one thing',async()=>{
  const h=askFixture();h.state.run.inputs={'page-id':'111'};h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'a'});replies(h);
  h.typed.a={'page-id':{value:'111',dataset:{inputType:'text'}}};
- const control={dataset:{action:'stage_execute',jobId:'a'},disabled:false},rowElement={querySelector:selector=>selector==='.ew-vd-run'?control:null};
+ const control={dataset:{action:'stage_execute',jobId:'a'},disabled:false},rowElement={querySelector:selector=>selector.split(',').includes('.ew-vd-run')?control:null};
  const press=repeat=>{const field=h.target('a','page-id','111'),base=field.closest,panel=h.panelOf('a');field.closest=selector=>selector==='[data-stage-job]'?rowElement:selector==='[data-mutation]'?null:selector==='[data-stage-values]'?{...panel,querySelectorAll:inner=>inner.startsWith('input[data-work-input]')?[field]:panel.querySelectorAll(inner)}:base(selector);return {type:'keydown',key:'Enter',repeat,isComposing:false,keyCode:13,target:field,preventDefault(){},stopImmediatePropagation(){}};};
  for(const repeat of [false,true,true]){h.api.handleEvent(press(repeat));await settle();}
  assert.equal(h.sent('execute_job').length,1);
@@ -1666,7 +1673,7 @@ test('values of a job (review): a value typed before a round belongs to the plac
 test('values of a job (review): only the rows a list hands over count as the value a job is given',()=>{
  const h=askFixture();Object.assign(h.state.run.jobs.a,{status:'completed',decisions:{job:{item_id:'job',verdict:'completed'}},result:{items:[{id:'r1',selected:false,row:{id:'1'}},{id:'r2',row:{id:'27182'}}],field_labels:{id:'페이지 ID'}}});
  h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'b'});
- assert.match(h.row('b'),/<dt>페이지 ID<\/dt><dd><span>27182<\/span><span class="ew-vd-given">기준 문서 확인에서<\/span><\/dd>/);
+ assert.match(h.row('b'),/<span class="ew-fg-key">1번 결과<\/span><span class="ew-fg-given">27182<\/span>/);
 });
 // ---- A second review, of the fixes above (2026-11-19). Each failed before its fix. ----
 test('values of a job (second review): a field is open only while something on its row can save it',()=>{
@@ -1685,7 +1692,7 @@ test('values of a job (second review): a field is open only while something on i
  // still open: a tick to make, an answer to give, a run that is waiting for an earlier job's value
  h.state.run.jobs.c={status:'ready',can_decide:true,can_execute:true};assert.doesNotMatch(field(open('c'),'pressure'),/ disabled/);
  h.state.run.jobs.d.can_decide=true;assert.doesNotMatch(field(open('d'),'memo'),/ disabled/);
- nodes.b.inputs=[{id:'limit',name:'건수',type:'number',scope:'run'}];assert.match(open('b'),/<span>대기<\/span>/);assert.doesNotMatch(field(open('b'),'limit'),/ disabled/);
+ nodes.b.inputs=[{id:'limit',name:'건수',type:'number',scope:'run'}];assert.match(open('b'),/<span>1번 다음<\/span>/);assert.doesNotMatch(field(open('b'),'limit'),/ disabled/);assert.match(open('b'),/data-stage-run[^>]* disabled/,'찾기 waits');
 });
 test('values of a job (second review): changed values with the answer someone else gave are sent as a new answer',async()=>{
  const h=askFixture(),nodes=h.state.run.definition.nodes;
@@ -1735,12 +1742,12 @@ test('values of a job (PR review): a tool result is not confirmed or answered wh
  t.api.setSelection({...t.api.snapshot().selection,stage_evidence:'a'});
  replies(t,call=>{if(call.body?.action==='save_inputs'){t.state.run.inputs=call.body.inputs;t.state.run.jobs.a.status='review_required';}});
  t.type('a','page-id','222');
- await t.api.handleClick({dataset:{action:'stage_decide',jobId:'a',verdict:'completed'}});
+ await t.api.handleClick({dataset:{action:'stage_decide',jobId:'a',judgmentId:'ok',verdict:'completed'}});
  assert.deepEqual(t.sent('save_inputs','decide','human_confirm').map(body=>body.action),['save_inputs']);
  // with nothing changed the answer goes as before
  const u=askFixture();u.state.run.inputs={'page-id':'111'};
  Object.assign(u.state.run.jobs.a,{status:'waiting_confirmation',attempt_id:'at',current_attempt:'at',result_revision:1,result:{items:[{id:'r',row:{id:'111'}}]}});
- replies(u);await u.api.handleClick({dataset:{action:'stage_decide',jobId:'a',verdict:'completed'}});
+ replies(u);await u.api.handleClick({dataset:{action:'stage_decide',jobId:'a',judgmentId:'ok',verdict:'completed'}});
  assert.deepEqual(u.sent('save_inputs','decide').map(body=>body.action),['decide']);
 });
 test('values of a job (PR review): a value someone else saved in between is shown before it is overwritten',async()=>{
@@ -1766,4 +1773,189 @@ test('check items: a list without items and a tool check list behave as before',
  assert.equal(html('workHumanCheckItems(node).length',{node:{mode:'tool',result_block:'checklist',confirmation_items:[{id:'a',name:'하나'}]}}),0);
  assert.equal(html('workHumanCheckItems(node).length',{node:{result_block:'human_confirm',confirmation_items:[{id:'a',name:'하나'}]}}),0);
  assert.equal(html('workHumanCheckItems(node).map(item=>item.id).join()',{node:{result_block:'checklist',confirmation_items:[{id:'a',name:'하나'},{id:'b',name:' '},null]}}),'a');
+});
+
+// ---- 2026-11-20 · design mock 20 revision 1: the first use of the guide as one flow ----
+// The shipped guide's shape: one stage, a lookup by document address, then a lookup of the pages under it.
+function lookupFixture({started=true}={}){
+ const h=askFixture({started}),nodes=(started?h.state.run:h.run).definition.nodes;delete nodes.t2;delete nodes.a.judgments;
+ Object.assign(nodes.a,{name:'기준 문서 찾기',instructions:'찾을 문서의 Confluence 주소를 넣으세요.'});
+ Object.assign(nodes.a.inputs[0],{name:'문서 주소',example:'https://wiki…/pages/123456789',accepts:'confluence_page'});
+ Object.assign(nodes.b,{name:'하위 문서 찾기',instructions:'1번 문서 바로 아래 문서를 5개까지 찾습니다.'});
+ (started?h.state.run:h.run).definition.description='문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다.';
+ h.state.workflow.published.description='문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다.';
+ h.state.operations={api_catalog:{apis:[{id:'page',service_id:'wiki'},{id:'children',service_id:'wiki'}],services:[{id:'wiki',name:'Confluence'}]}};
+ return h;
+}
+// The product reads a job's result from its attempt (normalized() in the launcher).
+const found=(h,job='a')=>{const saved=foundJob(h,job);h.state.run.attempts=[...(h.state.run.attempts || []).filter(item=>item.job_id!==job),{id:job+'t',job_id:job,number:1,status:'succeeded',result:saved.result}];return saved;};
+const foundJob=(h,job)=>(Object.assign(h.state.run.jobs[job],job==='a'?{status:'waiting_confirmation',attempt_id:'at',current_attempt:'at',result_revision:1,result:{items:[{id:'row-1',row:{title:'설비 점검 안내',id:'123456789'},required:false}],field_labels:{title:'문서 제목',id:'페이지 ID'}}}
+ :{status:'waiting_confirmation',attempt_id:'bt',current_attempt:'bt',result_revision:1,result:{items:[{id:'r1',title:'주간 점검표',row:{title:'주간 점검표',id:'301'},required:false},{id:'r2',title:'월간 점검표',row:{title:'월간 점검표',id:'302'},required:false}],field_labels:{title:'문서 제목',id:'페이지 ID'}}}));
+test('first use: a procedure with one stage is its own screen, with no tabs, counts or run control a job can do itself',()=>{
+ const h=lookupFixture({started:false}),body=h.body();
+ assert.match(body,/^<nav class="ew-center-breadcrumb" aria-label="업무 경로"><button type="button" class="ew-run-back" data-action="work_home">업무<\/button><span aria-hidden="true">›<\/span><span aria-current="page">가이드<\/span><\/nav>/);
+ assert.match(body,/<h2>가이드<\/h2><p class="ew-fg-purpose">문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다\.<\/p><p class="ew-center-scope">전체 공장<\/p>/);
+ assert.match(body,/<button type="button" class="ew-icon-button" aria-label="더 보기\(기록, 판정 기준\)" data-action="stage_more" aria-haspopup="menu" aria-expanded="false"/);
+ assert.match(body,/<div class="ew-center-task-heading ew-stage-summary"><h3>할 일 2개<\/h3><span class="ew-stage-completed">0 \/ 2 완료<\/span><\/div>/);
+ for(const word of ['ew-tabs','ew-center-counts','ew-stage-run-button','직접 판정','판정 필요','실행 필요','대기','지금 실행','1차'])assert.ok(!body.includes(word),word);
+ // a procedure whose jobs cannot start the round keeps 시작; two jobs that can run at once get 지금 실행
+ const people=lookupFixture({started:false}),nodes=people.run.definition.nodes;for(const id of ['a','b'])Object.assign(nodes[id],{mode:'human',result_block:'human_confirm'});delete nodes.a.api_binding;delete nodes.b.api_binding;
+ assert.match(people.body(),/data-action="stage_start" data-node-id="t"[^>]*><svg[\s\S]*?<span>시작<\/span>/);
+ const two=lookupFixture();delete two.state.run.definition.nodes.b.api_binding.inputs.id;two.state.run.definition.nodes.b.api_binding.inputs.id={input:'page-id'};
+ Object.assign(two.state.run.jobs.b,{status:'ready'});assert.match(two.body(),/data-action="execute_scope"[^>]*>(?:<svg[\s\S]*?<\/svg>)?<span>지금 실행<\/span>/);
+});
+test('first use: a lookup asks under its row with 찾기 beside the field, and the next job waits for the one before it',()=>{
+ const h=lookupFixture({started:false});h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'a'});const a=h.row('a'),b=h.row('b');
+ assert.match(a,/<small class="ew-center-task-description">찾을 문서의 Confluence 주소를 넣으세요\.<\/small><\/div><div class="ew-vd-item-meta"><div class="ew-vd-decision"><span class="ew-vd-state" data-decision-status><span>할 차례<\/span><\/span><\/div><\/div><\/div>/);
+ assert.match(a,/<div class="ew-vd-evidence ew-vd-service-evidence" id="stage-under-a"><div class="ew-fg-under" data-stage-values data-job-id="a"><div class="ew-fg-ask"><label for="ew-stage-a-page-id">문서 주소<\/label><input name="page-id"[^>]* placeholder="예: https:\/\/wiki…\/pages\/123456789" type="text" value=""><button type="button" class="ew-primary" data-stage-run data-action="stage_start" data-job-id="a">찾기<\/button><\/div><p class="ew-fg-more"><button type="button" class="ew-text" data-action="job" data-job-id="a" aria-label="기준 문서 찾기 자세히">자세히<\/button><\/p><\/div><\/div><\/section>$/);
+ assert.match(b,/<span>1번 다음<\/span>/);assert.doesNotMatch(b,/stage-under-b/,'one job is open at a time');
+});
+test('first use: 찾기 checks the address where it is typed, in the words of the field',async()=>{
+ const h=lookupFixture({started:false});replies(h);h.api.setSelection({...h.api.snapshot().selection,run_id:'',stage_evidence:'a'});
+ const said=()=>(h.row('a').match(/<p class="ew-fg-error" id="ew-stage-a-page-id-error" role="alert" data-stage-value-error>([^<]*)<\/p>/) || [])[1];
+ await h.api.handleClick({dataset:{action:'stage_start',jobId:'a'}});assert.equal(said(),'문서 주소를 넣어 주세요');
+ for(const [text,words] of [['점검 기준서','Confluence 문서 주소가 아니에요'],['https://wiki.example.com/display/EMS/Title','문서 번호가 없는 주소예요. 페이지 정보 화면의 주소를 넣어 주세요']]){
+  h.type('a','page-id',text);await h.api.handleClick({dataset:{action:'stage_start',jobId:'a'}});assert.equal(said(),words,text);
+ }
+ assert.deepEqual(h.sent('start_run','execute_job'),[],'nothing starts or runs with a wrong address');
+ h.setReply(call=>{if(call.body?.action==='start_run'){h.state.run={...h.run,inputs:call.body.inputs};return {ok:true,run:{id:'r'}};}if(call.body?.action==='execute_job')found(h);return call.url.startsWith('/api/ees-work/workspace?')?h.state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true};});
+ h.type('a','page-id','https://wiki.example.com/pages/viewpage.action?pageId=123456789');await h.api.handleClick({dataset:{action:'stage_start',jobId:'a'}});
+ assert.deepEqual(h.sent('start_run')[0].inputs,{'page-id':'https://wiki.example.com/pages/viewpage.action?pageId=123456789'},'what was typed is kept; the server reads the number in it');
+ assert.equal(h.sent('execute_job').length,1);
+});
+test('first use: what was found is asked as a question, and 맞아요 confirms it with the usual completed answer',async()=>{
+ const h=lookupFixture();found(h);h.state.run.inputs={'page-id':'123456789'};h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'a'});let a=h.row('a');
+ assert.match(a,/<span>확인할 차례<\/span>/);
+ assert.match(a,/<button type="button" data-stage-run data-action="stage_execute" data-job-id="a" data-mutation>다시 찾기<\/button><\/div><div class="ew-fg-found"><span class="ew-fg-title">설비 점검 안내<\/span><small>페이지 ID 123456789<\/small><\/div><div class="ew-fg-question"><strong>이 결과가 맞나요\?<\/strong><button type="button" class="ew-primary" data-stage-answer data-action="stage_decide" data-job-id="a" data-judgment-id="completed" data-verdict="completed" data-mutation>맞아요<\/button><button type="button" data-action="stage_again" data-job-id="a">아니에요<\/button><\/div>/);
+ replies(h,call=>{if(call.body?.action==='decide')Object.assign(h.state.run.jobs.a,{status:'completed',decisions:{job:{item_id:'job',verdict:'completed',attempt_id:'at'}}});});
+ await h.api.handleClick({dataset:{action:'stage_decide',jobId:'a',judgmentId:'completed',verdict:'completed'}});
+ const sent=h.sent('decide');assert.equal(sent.length,1);assert.deepEqual({item:sent[0].item_id,verdict:sent[0].verdict,judgment:sent[0].judgment_id},{item:'job',verdict:'completed',judgment:undefined});
+ a=h.row('a');assert.match(a,/<small class="ew-center-task-description ew-fg-outcome">설비 점검 안내<\/small>/);assert.match(a,/<span class="ew-vd-final" data-decision-status><i class="ew-vd-dot" data-verdict="ok"><\/i><span>맞음<\/span><\/span>/);
+ assert.equal(h.api.snapshot().selection.stage_evidence,'b','the next job opens');assert.match(h.row('b'),/<span class="ew-fg-key">1번 결과<\/span><span class="ew-fg-given">설비 점검 안내<\/span><button type="button" class="ew-primary" data-stage-run/);
+});
+test('first use: 아니에요 records nothing and puts the person back in the field',async()=>{
+ const h=lookupFixture();found(h);h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'a'});replies(h);
+ let focused=0,selected=0;const field={focus(){focused++;},select(){selected++;}};
+ h.context.window.__eesSourceShellV1.hosts=()=>({panel:{querySelectorAll:selector=>selector==='[data-stage-values]'?[{dataset:{jobId:'a'},querySelector:inner=>inner.startsWith('[data-work-input]')?field:null,querySelectorAll:()=>[]}]:[],querySelector:()=>null}});
+ await h.api.handleClick({dataset:{action:'stage_again',jobId:'a'}});
+ assert.deepEqual([focused,selected],[1,1]);assert.equal(h.calls.filter(call=>call.body&&call.body.action!=='save_ui').length,0);
+ // a lookup that asks for nothing has no 아니에요: 다시 찾기 stands beside it
+ const n=lookupFixture();n.state.run.definition.nodes.a.inputs=[];n.state.run.definition.nodes.a.api_binding.inputs={id:{constant:'1'}};found(n);n.api.setSelection({...n.api.snapshot().selection,stage_evidence:'a'});
+ assert.doesNotMatch(n.row('a'),/stage_again/);assert.match(n.row('a'),/<div class="ew-fg-ask"><button type="button" data-stage-run[^>]*>다시 찾기<\/button><\/div>/);
+});
+test('first use: 이 목록으로 할까요? 네 confirms the list as it came back, then the end of the flow is under the last job',async()=>{
+ const h=lookupFixture();Object.assign(h.state.run.jobs.a,{status:'completed',attempt_id:'at',current_attempt:'at',decisions:{job:{item_id:'job',verdict:'completed'}},result:{items:[{id:'row-1',row:{title:'설비 점검 안내',id:'123456789'}}]}});found(h,'b');
+ h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'b'});let dialogs=0;h.setDialog(()=>{dialogs++;return Promise.resolve(true);});
+ assert.match(h.row('b'),/<div class="ew-fg-question"><strong>이 목록으로 할까요\?<\/strong><button type="button" class="ew-primary" data-stage-answer data-action="stage_confirm_list" data-job-id="b" data-mutation>네<\/button><\/div>/);
+ replies(h,call=>{if(call.body?.action==='confirm_list')Object.assign(h.state.run.jobs.b,{status:'completed',result:{...h.state.run.jobs.b.result,items:h.state.run.jobs.b.result.items.map(item=>({...item,selected:true}))}});});
+ await h.api.handleClick({dataset:{action:'stage_confirm_list',jobId:'b'}});
+ assert.equal(dialogs,0);assert.equal(h.sent('confirm_list')[0].reason,'');
+ const body=h.body();assert.match(h.row('b'),/<small class="ew-center-task-description ew-fg-outcome">2건 · 주간 점검표, 월간 점검표<\/small>[\s\S]*<span>확인함<\/span>/);
+ assert.match(body,/<span class="ew-stage-completed">2 \/ 2 완료<\/span><\/div><div class="ew-vd-body ew-center-task-list" id="ees-stage-tasks">[\s\S]*<\/div><section class="ew-fg-done" aria-label="다 했어요"><h3>다 했어요<\/h3><p>설비 점검 안내 외 2건<\/p><button type="button" class="ew-primary" data-action="finish_run" data-mutation>끝내기<\/button><\/section>$/);
+ assert.doesNotMatch(body,/ew-stage-run-button/,'끝내기 is at the end of the flow only');
+});
+test('first use: what went wrong is said under the job with the one thing to do next',async()=>{
+ const h=lookupFixture();h.state.run.inputs={'page-id':'123456789'};h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'a'});
+ h.setReply(call=>call.body?.action==='execute_job'?{httpError:true,status:400,error:{code:'api_service_unconfigured',message:'서버에 이 서비스의 허용 주소를 설정해 주세요.'}}:call.url.startsWith('/api/ees-work/workspace?')?h.state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true,revision:9});
+ await h.api.handleClick({dataset:{action:'stage_execute',jobId:'a'}});
+ assert.equal(h.api.snapshot().error,'','not above the screen');
+ assert.match(h.row('a'),/<span>연결 필요<\/span>[\s\S]*<div class="ew-fg-problem" role="alert"><strong>Confluence에 연결되어 있지 않아요<\/strong><span>운영 담당자에게 Confluence 연결을 요청한 뒤 다시 찾으세요\.<\/span><\/div>/);
+ assert.equal(h.api.snapshot().selection.stage_problems,undefined,'the mark is not kept with the saved screen');
+ // no service for the API's address at all: the usual case before Confluence is set up
+ h.setReply(call=>call.body?.action==='execute_job'?{httpError:true,status:400,error:{code:'api_target_forbidden',message:'상대 경로에는 해당 서비스의 허용 주소가 필요합니다.'}}:call.url.startsWith('/api/ees-work/workspace?')?h.state:call.url.startsWith('/api/ees-work/operations?')?h.state.operations:{ok:true,revision:9});
+ await h.api.handleClick({dataset:{action:'stage_execute',jobId:'a'}});assert.equal(h.api.snapshot().error,'');assert.match(h.row('a'),/<span>연결 필요<\/span>/);
+ // another kind of refusal stays above the screen as before
+ h.setReply(call=>call.body?.action==='execute_job'?{httpError:true,status:400,error:{code:'stale_revision',message:'다시 조회해 주세요.'}}:call.url.startsWith('/api/ees-work/workspace?')?h.state:call.url.startsWith('/api/ees-work/operations?')?h.state.operations:{ok:true,revision:9});
+ await h.api.handleClick({dataset:{action:'stage_execute',jobId:'a'}}).catch(()=>{});assert.equal(h.api.snapshot().error,'다시 조회해 주세요.');assert.doesNotMatch(h.row('a'),/ew-fg-problem/,'the earlier mark goes when the job is run again');
+ // a run the server records as failed answers with an error and the attempt: said under the job only
+ const recorded={id:'at',job_id:'a',number:1,status:'failed',result:{http_status:404,error:{code:'api_http_error'}}};
+ h.setReply(call=>{if(call.body?.action==='execute_job'){h.state.run.attempts=[recorded];Object.assign(h.state.run.jobs.a,{status:'failed',attempt_id:'at',current_attempt:'at'});return {httpError:true,status:400,ok:false,attempt:recorded};}return call.url.startsWith('/api/ees-work/workspace?')?h.state:call.url.startsWith('/api/ees-work/operations?')?h.state.operations:{ok:true,revision:9};});
+ await h.api.handleClick({dataset:{action:'stage_execute',jobId:'a'}});
+ assert.equal(h.api.snapshot().error,'','not above the screen as well');assert.match(h.row('a'),/<strong>이 주소의 문서를 열 수 없어요<\/strong>/);
+ // a page that cannot be opened, recorded by the run
+ h.state.run.attempts=[{id:'at',job_id:'a',number:1,status:'failed'}];Object.assign(h.state.run.jobs.a,{status:'failed',attempt_id:'at',current_attempt:'at'});
+ for(const [status,title,state] of [[404,'이 주소의 문서를 열 수 없어요','열 수 없음'],[403,'이 주소의 문서를 열 수 없어요','열 수 없음'],[401,'Confluence에 연결되어 있지 않아요','연결 필요'],[500,'찾지 못했어요','찾지 못함']]){
+  h.state.run.attempts[0].result={http_status:status,error:{code:'api_http_error'}};replies(h,call=>call.url.startsWith('/api/ees-work/operations?')?h.state.operations:undefined);
+  await h.api.handleClick({dataset:{action:'stage_execute',jobId:'a'}}).catch(()=>{});
+  h.state.run.attempts[0].result={http_status:status,error:{code:'api_http_error'}};Object.assign(h.state.run.jobs.a,{status:'failed'});
+  const row=h.row('a');assert.match(row,new RegExp('<span>'+state+'</span>'),String(status));assert.match(row,new RegExp('<strong>'+title+'</strong>'),String(status));assert.doesNotMatch(row,/ew-fg-question|ew-fg-found/);
+ }
+});
+test('first use: the first screen lists each procedure with its purpose, how far it is, or what it found last',()=>{
+ const view=(state,selection={system_id:'EMS'})=>html('workHomeHTML(state,selection)',{state,selection});
+ const definition={name:'가이드',description:'문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다.',execution_scope:'system',nodes:{p:{id:'p',type:'p'},t:{id:'t',type:'t',parent:'p'},a:{id:'a',type:'j',parent:'t',api_binding:{outputs:['title']}},b:{id:'b',type:'j',parent:'t',api_binding:{outputs:['title']}}}};
+ const workflow={id:'w',name:'가이드',system_id:'EMS',published_version:1,published:definition};
+ let out=view({capabilities:{actor_id:'x'},workflows:[workflow],runs:[]});
+ assert.equal(out,'<section class="ew-fg-home" aria-label="업무 목록"><article class="ew-fg-card"><div><h3>가이드</h3><p>문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다.</p><small>할 일 2개</small></div><button type="button" class="ew-primary" data-action="workflow" data-workflow-id="w" data-home-start="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.5 2.75L11 7L4.5 11.25V2.75Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg><span>시작</span></button></article></section>');
+ const going={id:'r1',workflow_id:'w',status:'open',factory_id:'',definition,jobs:{a:{status:'completed'},b:{status:'ready'}}};
+ out=view({capabilities:{actor_id:'x'},workflows:[workflow],runs:[going]});assert.match(out,/<small>하는 중 · 1 \/ 2 완료<\/small><\/div><button type="button" class="ew-primary" data-action="workflow" data-workflow-id="w" data-home-start="true">이어서 하기<\/button>/);
+ const last={id:'r0',workflow_id:'w',status:'completed',factory_id:'',closed_at:'2026-11-20T05:00:00Z',definition,jobs:{a:{status:'completed',result:{items:[{id:'1',row:{title:'설비 점검 안내'}}]}},b:{status:'completed',result:{items:[{id:'2',row:{title:'주간'}},{id:'3',row:{title:'월간'}},{id:'4',selected:false,row:{title:'제외'}}]}}}};
+ out=view({capabilities:{actor_id:'x'},workflows:[workflow],runs:[last,{...last,id:'cancelled',status:'cancelled',closed_at:'2026-11-20T06:00:00Z'}]});assert.match(out,/<small><i><\/i>지난번 \d\d\. \d\d\. \d\d:\d\d 끝냄 · 설비 점검 안내 외 2건<\/small>/);
+ // a round in the list keeps its results with its attempts
+ const listed={...last,jobs:{a:{status:'completed',attempt_id:'x1'},b:{status:'completed',attempt_id:'x2'}},attempts:[{id:'x1',result:last.jobs.a.result},{id:'x2',result:last.jobs.b.result}]};
+ assert.match(view({capabilities:{actor_id:'x'},workflows:[workflow],runs:[listed]}),/끝냄 · 설비 점검 안내 외 2건/);
+});
+test('first use: a procedure with one stage opens on its things to do, 업무 goes back, and 끝내기 ends on the first screen',async()=>{
+ const h=lookupFixture({started:false});h.state.workflows=[{...h.state.workflow,system_id:'EMS'}];h.state.runs=[];replies(h);
+ h.api.setSelection({mode:'work',system_id:'EMS',workflow_id:'',run_id:'',tab:'overview'});
+ const drawn=h.renders.length;await h.api.handleClick({dataset:{action:'workflow',workflowId:'w',homeStart:'true'}});
+ assert.ok(h.renders.slice(drawn).every(view=>view.selection?.workflow_id!=='w'||view.selection.stage_id==='t'),'the overview is never drawn on the way');
+ let seen=h.api.snapshot().selection;assert.deepEqual({workflow:seen.workflow_id,stage:seen.stage_id,open:seen.stage_evidence,run:seen.run_id},{workflow:'w',stage:'t',open:'a',run:''});
+ assert.deepEqual(h.sent('start_run'),[],'the first job starts the round with its 찾기');
+ await h.api.handleClick({dataset:{action:'work_home'}});seen=h.api.snapshot().selection;assert.deepEqual({workflow:seen.workflow_id,stage:seen.stage_id},{workflow:'',stage:''});
+ // a procedure of people's checks starts its round from the first screen
+ const p=lookupFixture({started:false}),nodes=p.run.definition.nodes;for(const id of ['a','b']){Object.assign(nodes[id],{mode:'human',result_block:'human_confirm'});delete nodes[id].api_binding;}
+ p.state.workflows=[{...p.state.workflow,system_id:'EMS'}];p.state.runs=[];
+ p.setReply(call=>{if(call.body?.action==='start_run'){p.state.run={...p.run,jobs:{a:{status:'ready',can_decide:true},b:{status:'ready',can_decide:true}}};return {ok:true,run:{id:'r'}};}return call.url.startsWith('/api/ees-work/workspace?')?p.state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true};});
+ p.api.setSelection({mode:'work',system_id:'EMS',workflow_id:'',run_id:'',tab:'overview'});
+ await p.api.handleClick({dataset:{action:'workflow',workflowId:'w',homeStart:'true'}});assert.equal(p.sent('start_run').length,1);
+ // 끝내기
+ const f=lookupFixture();for(const id of ['a','b'])Object.assign(f.state.run.jobs[id],{status:'completed'});f.state.workflows=[{...f.state.workflow,system_id:'EMS'}];replies(f);
+ await f.api.handleClick({dataset:{action:'finish_run'}});assert.equal(f.sent('close_run').length,1);seen=f.api.snapshot().selection;assert.deepEqual({workflow:seen.workflow_id,run:seen.run_id},{workflow:'',run:''});
+});
+test('first use: ⋯ holds the records and the judgment rules, and a record view can go back to the things to do',async()=>{
+ const h=lookupFixture();replies(h);
+ await h.api.handleClick({dataset:{action:'stage_more'}});assert.equal(h.api.snapshot().selection.stage_verdict_job,'#more');
+ const menu=html('workStageHTML(state,selection,workOperationDefinition(state).nodes.t).menu',{state:h.api.snapshot().state,selection:h.api.drawn().selection});
+ assert.equal(menu,'<div id="ees-stage-verdict-menu" class="ew-vd-menu" role="menu" data-job-id="#more" aria-label="더 보기"><button type="button" role="menuitem" class="ew-vd-option" data-action="stage_tab" data-tab="log" tabindex="-1"><span><b>실행 기록</b></span></button><button type="button" role="menuitem" class="ew-vd-option" data-action="stage_tab" data-tab="rules" tabindex="-1"><span><b>판정 기준</b></span></button><button type="button" role="menuitem" class="ew-vd-option" data-action="stage_details" tabindex="-1"><span><b>진행 상세</b></span></button></div>');
+ await h.api.handleClick({dataset:{action:'stage_tab',tab:'log'}});assert.equal(h.api.snapshot().selection.stage_verdict_job,'');
+ assert.match(h.body(),/<nav class="ew-tabs ew-center-tabs" aria-label="업무 진행 보기"><button type="button" data-action="stage_tab" data-tab="work" aria-pressed="false">할 일<\/button>/);
+});
+test('first use: 찾기 says 찾는 중 while the lookup runs, and the question has the focus after it',async()=>{
+ const h=lookupFixture();h.state.run.inputs={'page-id':'123456789'};h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'a'});h.typed.a={'page-id':{value:'123456789',dataset:{inputType:'text'}}};
+ let during='';h.setReply(call=>{if(call.body?.action==='execute_job'){during=h.row('a');found(h);}return call.url.startsWith('/api/ees-work/workspace?')?h.state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true};});
+ let focused='';const base=h.panelOf('a');h.context.window.__eesSourceShellV1.hosts=()=>({panel:{querySelectorAll:selector=>selector==='[data-stage-values]'?[{...base,querySelector:inner=>inner.startsWith('[data-stage-answer]')?{focus(){focused='answer';}}:null}]:[],querySelector:()=>null,addEventListener(){},removeEventListener(){},isConnected:true}});
+ await h.api.handleClick({dataset:{action:'stage_execute',jobId:'a'}});
+ assert.match(during,/<span>찾는 중<\/span>/);assert.match(during,/data-stage-run[^>]* disabled data-own-disabled="true">찾는 중<\/button>/);
+ assert.doesNotMatch(h.row('a'),/찾는 중/);assert.equal(focused,'answer');
+});
+
+test('first use (review): a refusal said under a job ends when the job runs another way, and a held-back job has not failed',()=>{
+ const h=lookupFixture(),key=html('workStageValueScope(state,selection)',{state:h.state,selection:h.api.snapshot().selection})+'/a';
+ h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'a'});
+ const draw=problems=>html('workStageHTML(state,selection,workOperationDefinition(state).nodes.t).body',{state:h.state,selection:{...h.api.snapshot().selection,stage_problems:problems}});
+ assert.match(draw({[key]:'api_service_unconfigured||ready'}),/<span>연결 필요<\/span>/);
+ // run from the job screen or by someone else afterwards: it waits for an answer, and the old refusal is gone
+ found(h);const later=draw({[key]:'api_service_unconfigured||ready'});assert.doesNotMatch(later,/연결 필요|ew-fg-problem/);assert.match(later,/이 결과가 맞나요\?/);
+ // held back by a condition before it ran: said as the product says it, not as a failed lookup
+ const b=lookupFixture();Object.assign(b.state.run.jobs.a,{status:'blocked'});const row=b.row('a');assert.doesNotMatch(row,/찾지 못함|ew-fg-problem/);
+});
+test('first use (review): 시작 stays on a one-stage procedure unless every job can start the round itself',async()=>{
+ const h=lookupFixture({started:false}),nodes=h.run.definition.nodes;Object.assign(nodes.b,{mode:'human',result_block:'human_confirm'});delete nodes.b.api_binding;
+ assert.match(h.body(),/data-action="stage_start" data-node-id="t"/);
+ h.state.workflows=[{...h.state.workflow,system_id:'EMS'}];h.state.runs=[];
+ h.setReply(call=>{if(call.body?.action==='start_run'){h.state.run={...h.run,jobs:{a:{status:'ready',can_execute:true},b:{status:'ready',can_decide:true}}};return {ok:true,run:{id:'r'}};}return call.url.startsWith('/api/ees-work/workspace?')?h.state:call.url.startsWith('/api/ees-work/operations?')?{}:{ok:true};});
+ h.api.setSelection({mode:'work',system_id:'EMS',workflow_id:'',run_id:'',tab:'overview'});
+ await h.api.handleClick({dataset:{action:'workflow',workflowId:'w',homeStart:'true'}});assert.equal(h.sent('start_run').length,1,'시작 on the first screen starts it');
+});
+test('first use (review): 맞아요 answers with the job\'s own completed word of an older definition',async()=>{
+ const h=lookupFixture();h.state.run.definition.nodes.a.verdicts=[{id:'ok',label:'적합',status:'completed'},{id:'ng',label:'미흡',status:'failed'}];found(h);
+ h.api.setSelection({...h.api.snapshot().selection,stage_evidence:'a'});assert.match(h.row('a'),/data-judgment-id="ok" data-verdict="completed"/);
+ replies(h);await h.api.handleClick({dataset:{action:'stage_decide',jobId:'a',judgmentId:'ok',verdict:'completed'}});
+ const sent=h.sent('decide');assert.equal(sent.length,1);assert.deepEqual({verdict:sent[0].verdict,judgment:sent[0].judgment_id},{verdict:'completed',judgment:undefined});
+});
+test('first use (review): the address check takes the forms people copy',()=>{
+ const check=text=>html('workConfluenceAddressError(text)',{text});
+ for(const ok of ['HTTPS://wiki.example.com/pages/viewpage.action?pageId=1','https://x.atlassian.net/wiki/spaces/A/pages/edit-v2/77','https://wiki/pages/viewinfo.action?pageId=9#c',' 42 '])assert.equal(check(ok),'',ok);
+ assert.match(check('https://wiki/display/A/T'),/번호가 없는 주소/);assert.equal(check('https://wiki/pages/edit-v2/'),'Confluence 문서 주소가 아니에요');
 });

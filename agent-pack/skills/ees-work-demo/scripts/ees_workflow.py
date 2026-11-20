@@ -88,23 +88,37 @@ class WorkflowService(WorkspaceMixin, AuthoringMixin):
         if self.confluence_guide:
             self.install_confluence_guide()
 
-    @staticmethod
-    def _work_guide_example():
-        source = Path(__file__).with_name('workflow_confluence_guide.json')
-        return json.loads(source.read_text(encoding='utf-8'))['x-ees-procedure-example']
+    GUIDE_FILE = Path(__file__).with_name('workflow_confluence_guide.json')
+
+    @classmethod
+    def _work_guide_example(cls):
+        return json.loads(cls.GUIDE_FILE.read_text(encoding='utf-8'))['x-ees-procedure-example']
+
+    # The guide's definition as earlier programs installed it, without its system. The guide is installed once, so
+    # a database keeps the wording of the program that first installed it: b031cb6 (2026-11-16, also what the
+    # programs of d0f2058, 8866719 and 77ec384 install) or 89bd377 (2026-11-19, the field example added).
+    # An installed guide that still has exactly one of these and was never saved or published again is replaced by
+    # the new wording once; anything an administrator changed is left as it is.
+    CONFLUENCE_GUIDE_V1 = frozenset({
+        'd87bbfd4045033301282bbbad9c6636785ee9d733b32bd8353f77c0a7d760572',  # b031cb6
+        '4574fc1dc2c0d0b134e1a3b889a7e44cd54d5112ae6c12d78c74d2d431d85abd',  # 89bd377
+    })
 
     def install_confluence_guide(self):
         """Switch the visible catalog once; each later start retains edits and publications."""
         with self._db(write=True) as db:
             db.execute('CREATE TABLE IF NOT EXISTS work_product_guides (id TEXT PRIMARY KEY)')
-            marker = 'confluence-documents-v1'
+            marker, wording = 'confluence-documents-v1', 'confluence-documents-v2'
             if db.execute('SELECT 1 FROM work_product_guides WHERE id=?', (marker,)).fetchone():
+                if not db.execute('SELECT 1 FROM work_product_guides WHERE id=?', (wording,)).fetchone():
+                    self._upgrade_confluence_guide(db)
+                    db.execute('INSERT INTO work_product_guides VALUES(?)', (wording,))
                 self.confluence_guide = True
                 return
             system = os.environ.get('EES_WORK_GUIDE_SYSTEM', 'EMS').strip().upper()
             if system not in (*SYSTEMS, 'COMMON'):
                 raise WorkflowError('invalid_system', '가이드를 게시할 EES_WORK_GUIDE_SYSTEM을 확인하세요.')
-            text = Path(__file__).with_name('workflow_confluence_guide.json').read_text(encoding='utf-8')
+            text = self.GUIDE_FILE.read_text(encoding='utf-8')
             guide = json.loads(text)['x-ees-procedure-example']
             specification = parse_document(text)
             service_id = 'confluence-readonly-pilot'
@@ -133,7 +147,32 @@ class WorkflowService(WorkspaceMixin, AuthoringMixin):
             db.execute('INSERT INTO work_versions VALUES(?,1,?,?,?,?)',
                        (key, _dump(published), _hash(published), actor_id, now))
             db.execute('INSERT INTO work_product_guides VALUES(?)', (marker,))
+            db.execute('INSERT INTO work_product_guides VALUES(?)', (wording,))
         self.confluence_guide = True
+
+    def _upgrade_confluence_guide(self, db):
+        """Give an untouched v1 guide the 2026-11-20 wording as its next published version.
+
+        Rounds already started keep the version they started with. The API services and operations are not
+        touched: their addresses and connection settings belong to the operator."""
+        key = 'guide-confluence-documents'
+        row = db.execute('SELECT * FROM work_definitions WHERE id=?', (key,)).fetchone()
+        versions = [item[0] for item in db.execute('SELECT version FROM work_versions WHERE workflow_id=?', (key,))]
+        if not row or row['revision'] != 1 or row['published_version'] != 1 or versions != [1]:
+            return
+        draft = json.loads(row['draft'])
+        if not isinstance(draft, dict) or _hash({k: v for k, v in draft.items() if k != 'system_id'}) not in self.CONFLUENCE_GUIDE_V1:
+            return
+        guide = self._work_guide_example()
+        definition = dict(guide['definition'], id=key, system_id=row['system_id'])
+        errors, _ = definition_check(definition)
+        errors.extend(binding_errors(self, db, [], definition, previous=draft, for_new=True))
+        if errors:
+            return  # The operator changed what the guide uses; the installed guide stays as it is.
+        now = _now()
+        published = dict(definition, resource_versions={'skills': {}})
+        db.execute('INSERT INTO work_versions VALUES(?,2,?,?,?,?)', (key, _dump(published), _hash(published), 'ees-product-guide', now))
+        db.execute('UPDATE work_definitions SET draft=?,revision=2,published_version=2,validation=NULL,updated_at=? WHERE id=?', (_dump(definition), now, key))
 
     @contextmanager
     def _db(self, write=False):

@@ -471,7 +471,13 @@ class IntegratedNativeCase(unittest.TestCase):
                 if self.browser.evaluate("!!document.querySelector('.ew-operation-overview')"):
                     self.click('.ew-operation-stage[data-action=stage_open]')
                     self.wait("document.querySelector('#ees-work-panel .ew-run-nav [data-action=stage_details]')")
-                self.click('[data-action=stage_details]')
+                # A procedure with one stage keeps the round's details under ⋯ (2026-11-20, design mock 20).
+                if self.browser.evaluate("!!document.querySelector('#ees-work-panel [data-action=stage_more]')"):
+                    self.click('#ees-work-panel [data-action=stage_more]')
+                    self.wait("document.querySelector('#ees-stage-verdict-menu [data-action=stage_details]')")
+                    self.click('#ees-stage-verdict-menu [data-action=stage_details]')
+                else:
+                    self.click('[data-action=stage_details]')
             self.wait('document.querySelector(' + json.dumps(selector) + ')')
             self.click(selector)
             self.wait("document.querySelector('#ees-work-panel h2')?.textContent === " + json.dumps(run['definition']['nodes'][job]['name']))

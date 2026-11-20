@@ -43,7 +43,8 @@
   let procedureStart=null,nativeCapabilities=null,nativeScope=null,stateKey='',targetLoading=false,scopeLoading=false,evidenceUnavailable=false;
   // stageValueBases keeps, per typed value, the saved value it was typed over: a value someone else saves in between
   // is shown before it is overwritten, as the job screen does with its drafts.
-  const workspaceCache=new Map(),stageNotes=new Map(),stageValues=new Map(),stageValueErrors=new Map(),stageValueBases=new Map();
+  const workspaceCache=new Map(),stageNotes=new Map(),stageValues=new Map(),stageValueErrors=new Map(),stageValueBases=new Map(),stageProblems=new Map();
+  let stageRunning='';
   const pendingInputMessage='업무 도우미 입력 제안을 먼저 반영하거나 버려 주세요.';
   let nativeTicket=null,nativeNavigationBusy=false,pendingNativeAction=null;
   const initialSelection=()=>({mode:'work',tab:'overview',panel_open:true,system_id:'',factory_id:'',workflow_id:'',run_id:'',job_id:'',collapsed:[]});
@@ -111,7 +112,7 @@
     const job=definition?.nodes?.[ref.job_id]?.name;
     return [workflow,job,ref.reference_kind==='historical'?'실행 기록':''].filter(Boolean).join(' / ');
   }
-  const snapshot=()=>{const destination=nativeReturnPreview();return {state:state?{...state,input_proposal:pendingInputProposal?{values:pendingInputProposal.values,warnings:pendingInputProposal.warnings}:null,input_proposal_applied:inputProposalApplied}:null,native_capabilities:nativeCapabilities,native_scope:nativeScope,target_loading:targetLoading||Boolean(destination),scope_loading:scopeLoading,evidence_unavailable:evidenceUnavailable,selection:{...clone(selection),stage_notes:Object.fromEntries(stageNotes),stage_values:Object.fromEntries(stageValues),stage_value_errors:Object.fromEntries(stageValueErrors),...(destination?{mode:destination.mode,tab:destination.tab}:{}),chat_id:chatId()},chat_reference_label:currentReferenceLabel(),api_assistant:apiAssistantState(),native_return_pending:Boolean(destination),native_shell:nativePage()&&!destination,native_id:nativePage()&&!destination?(workNativeTargets.find(item=>location.pathname===item.path||location.pathname.startsWith(item.path+'/'))?.id || (adminNativePage()?'admin':'native')):'',busy,error:error || commandError,procedure_start:destination?null:procedureStart};};
+  const snapshot=()=>{const destination=nativeReturnPreview();return {state:state?{...state,input_proposal:pendingInputProposal?{values:pendingInputProposal.values,warnings:pendingInputProposal.warnings}:null,input_proposal_applied:inputProposalApplied}:null,native_capabilities:nativeCapabilities,native_scope:nativeScope,target_loading:targetLoading||Boolean(destination),scope_loading:scopeLoading,evidence_unavailable:evidenceUnavailable,selection:{...clone(selection),stage_notes:Object.fromEntries(stageNotes),stage_values:Object.fromEntries(stageValues),stage_value_errors:Object.fromEntries(stageValueErrors),stage_running:stageRunning,stage_problems:Object.fromEntries(stageProblems),...(destination?{mode:destination.mode,tab:destination.tab}:{}),chat_id:chatId()},chat_reference_label:currentReferenceLabel(),api_assistant:apiAssistantState(),native_return_pending:Boolean(destination),native_shell:nativePage()&&!destination,native_id:nativePage()&&!destination?(workNativeTargets.find(item=>location.pathname===item.path||location.pathname.startsWith(item.path+'/'))?.id || (adminNativePage()?'admin':'native')):'',busy,error:error || commandError,procedure_start:destination?null:procedureStart};};
   // The last successful workspace remains visible during route validation.
   // References and queued actions still wait for the current route and Chat.
   const chatPrepared=()=>screen().chatReady && readyRoute===route&&(!route||route===location.pathname+location.search+'#chat')&&(!nativeTicket||nativeTicket.phase==='leaving');
@@ -530,7 +531,10 @@
     designer.closePrivateDialogs?.();
     if(pendingNativeAction?.applied)pendingNativeAction=null;clearTimeout(reviewTimer);
     const previous={...selection},before=context(),next={...selection,chat_reference:null,...patch};
+    const openStage=typeof next.open_stage_id==='string'?next.open_stage_id:'';delete next.open_stage_id;
     if(['system_id','factory_id','workflow_id','run_id'].some(key=>previous[key]!==next[key]))Object.assign(next,{start_stage_id:previous.workflow_id===next.workflow_id&&previous.system_id===next.system_id&&next.tab==='start'?previous.start_stage_id || '':'',stage_id:'',stage_overview:false,stage_tab:'work',stage_evidence:'',stage_record:'',stage_tool:'',stage_attempts:{},stage_approved_expanded:true,stage_verdict_job:''});
+    // A procedure with one stage opens on that stage in the same step (design mock 20): no overview in between.
+    if(openStage)next.stage_id=openStage;
     const sameInputTarget=token()===identity&&previous.run_id&&previous.job_id&&
       ['mode','system_id','factory_id','workflow_id','run_id','job_id'].every(key=>previous[key]===next[key])&&
       Object.keys(patch).every(key=>key==='tab'||JSON.stringify(patch[key])===JSON.stringify(previous[key]));
@@ -614,7 +618,9 @@
     $('#ees-work-dialog').addEventListener('input',()=>{id=$('#ees-list-add-id').value.trim();name=$('#ees-list-add-name').value.trim();});
     if(await pending&&at===context())view.addListItem({id,name});
   }
-  async function confirmList(confirm=true,rowJob=''){
+  // A lookup's list is confirmed by its question (이 목록으로 할까요? 네) as it came back: no window and no reason,
+  // as the server asks a reason only when the list is changed.
+  async function confirmList(confirm=true,rowJob='',{question=false}={}){
     if(busy||!inputsSaved())return;const at=context(),run=state?.run,jobId=rowJob || selection.job_id,saved=run?.jobs?.[jobId];
     // From a row of the stage screen the list is confirmed as it came back; choosing what to keep stays on the job screen.
     const draft=rowJob?{items:workListItems(saved?.result || {}),attempt_id:saved?.attempt_id,result_revision:saved?.result_revision}:view.readList();
@@ -624,8 +630,8 @@
     if(emptyConfirmation&&!sharedSearch&&!apiEmpty)throw new Error('포함할 항목이 없습니다. 빈 목록의 완료 정책을 먼저 확인해 주세요.');
     const source=workListSourceAttempt(run,saved.attempt_id),noResults=emptyConfirmation&&Array.isArray(source?.result?.items)&&source.result.items.length===0;
     let reason=noResults?'0건 확인':emptyConfirmation?'맞는 문서 없음 · 0개 선택':'';
-    const pending=noResults?Promise.resolve(true):dialog({title:emptyConfirmation?'맞는 문서가 없는 것으로 확정할까요?':confirm?'이 목록으로 확정할까요?':'선택한 목록을 저장할까요?',note:confirm?'선택한 포함·제외와 사람의 확인을 함께 저장합니다. AI 후보를 자동 확정하지 않습니다.':'새 검토 시도로 선택 상태를 저장합니다. 업무 완료로 확정하지 않습니다.',html:`<p>포함 ${selected.length}건 · 제외 ${draft.items.filter(item=>!item.selected).length}건</p>${emptyConfirmation?'':'<label>확인·변경 이유<input id="ees-list-confirm-reason" required></label>'}`,confirmLabel:confirm?'목록 확정':'선택 목록 저장'});
-    if(!emptyConfirmation)$('#ees-list-confirm-reason').addEventListener('input',event=>{reason=event.target.value;});
+    const pending=noResults||question&&rowJob?Promise.resolve(true):dialog({title:emptyConfirmation?'맞는 문서가 없는 것으로 확정할까요?':confirm?'이 목록으로 확정할까요?':'선택한 목록을 저장할까요?',note:confirm?'선택한 포함·제외와 사람의 확인을 함께 저장합니다. AI 후보를 자동 확정하지 않습니다.':'새 검토 시도로 선택 상태를 저장합니다. 업무 완료로 확정하지 않습니다.',html:`<p>포함 ${selected.length}건 · 제외 ${draft.items.filter(item=>!item.selected).length}건</p>${emptyConfirmation?'':'<label>확인·변경 이유<input id="ees-list-confirm-reason" required></label>'}`,confirmLabel:confirm?'목록 확정':'선택 목록 저장'});
+    if(!emptyConfirmation&&!(question&&rowJob))$('#ees-list-confirm-reason').addEventListener('input',event=>{reason=event.target.value;});
     if(await pending&&at===context())await mutate({action:confirm?'confirm_list':'amend_items',run_id:run.id,job_id:jobId,attempt_id:draft.attempt_id,result_revision:draft.result_revision,expected_revision:run.revision,items:draft.items.filter(item=>!item.candidate||item.selected).map(item=>({...clone(item),selected:Boolean(item.selected),required:Boolean(item.selected)})),reason});
   }
   function saveReviewDraft(){if(reviewSaving)return reviewSaving;const pending=performSaveReviewDraft().finally(()=>{if(reviewSaving===pending)reviewSaving=null;});reviewSaving=pending;return pending;}
@@ -718,25 +724,27 @@
   function positionStageMenu(){
     if(!selection.stage_verdict_job)return;
     const menu=source()?.hosts?.()?.panel?.querySelector?.('#ees-stage-verdict-menu');if(!menu?.getBoundingClientRect)return;
-    const panel=menu.parentElement,trigger=[...(panel?.querySelectorAll('[data-action="stage_verdict"]') || [])].find(item=>item.dataset.jobId===selection.stage_verdict_job);
+    const panel=menu.parentElement,trigger=stageMenuTrigger(panel,selection.stage_verdict_job);
     if(!trigger?.getBoundingClientRect)return;
     const bounds=panel.getBoundingClientRect(),anchor=trigger.getBoundingClientRect(),rect=menu.getBoundingClientRect();
     const top=anchor.bottom+6+rect.height<=bounds.bottom-8?anchor.bottom+6:anchor.top-6-rect.height;
     menu.style.left=Math.max(8,Math.min(anchor.left-bounds.left,bounds.width-rect.width-8))+'px';
     menu.style.top=Math.max(8,top-bounds.top)+'px';
   }
+  // The menu opens from a job's judgment control or, on a procedure with one stage, from ⋯ ('#more').
+  function stageMenuTrigger(panel,id){return id==='#more'?panel?.querySelector?.('[data-action="stage_more"]'):[...(panel?.querySelectorAll?.('[data-action="stage_verdict"]') || [])].find(item=>item.dataset.jobId===id);}
   function closeStageMenu(restoreFocus=false){
     const id=selection.stage_verdict_job;if(!id)return;selection.stage_verdict_job='';render();
-    if(restoreFocus)[...(source()?.hosts?.()?.panel?.querySelectorAll?.('[data-action="stage_verdict"]') || [])].find(item=>item.dataset.jobId===id)?.focus?.({preventScroll:true});
+    if(restoreFocus)stageMenuTrigger(source()?.hosts?.()?.panel,id)?.focus?.({preventScroll:true});
   }
   function stageMenuEvent(event){
     if(!selection.stage_verdict_job)return false;
     const target=event.target,inMenu=target.closest?.('#ees-stage-verdict-menu');
-    if(event.type==='click'&&!inMenu&&!target.closest?.('[data-action="stage_verdict"]')){closeStageMenu();return false;}
-    if(event.type!=='keydown'||!inMenu&&!target.closest?.('[data-action="stage_verdict"]'))return false;
+    if(event.type==='click'&&!inMenu&&!target.closest?.('[data-action="stage_verdict"],[data-action="stage_more"]')){closeStageMenu();return false;}
+    if(event.type!=='keydown'||!inMenu&&!target.closest?.('[data-action="stage_verdict"],[data-action="stage_more"]'))return false;
     if(event.key==='Escape'||event.key==='Tab'){closeStageMenu(true);if(event.key==='Escape'){event.preventDefault();event.stopPropagation();}return event.key==='Escape';}
     if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){
-      const options=[...(source()?.hosts?.()?.panel?.querySelectorAll?.('#ees-stage-verdict-menu [role="menuitemradio"]') || [])];if(!options.length)return false;
+      const options=[...(source()?.hosts?.()?.panel?.querySelectorAll?.('#ees-stage-verdict-menu [role^="menuitem"]') || [])];if(!options.length)return false;
       const at=options.indexOf(target),next=event.key==='Home'?0:event.key==='End'?options.length-1:(at+(event.key==='ArrowDown'?1:-1)+options.length)%options.length;
       options[next].focus();event.preventDefault();event.stopPropagation();return true;
     }
@@ -792,7 +800,7 @@
     const fields=[...panel.querySelectorAll('[data-work-input]')].filter(field=>!field.disabled&&field.type!=='checkbox');
     const field=(fieldId&&fields.find(item=>item.name===fieldId)) || fields.find(item=>item.getAttribute('aria-invalid')==='true') || fields.find(item=>!String(item.value || '').trim()) || fields[0];
     // With nothing to type in, what comes next is the row's own 실행.
-    (field || panel.closest?.('[data-stage-job]')?.querySelector?.('.ew-vd-run:not(:disabled)'))?.focus?.({preventScroll:true});
+    (field || panel.closest?.('[data-stage-job]')?.querySelector?.('.ew-vd-run:not(:disabled),[data-stage-run]:not(:disabled)'))?.focus?.({preventScroll:true});
   }
   // Read what is typed under the open job into the kept values. A field left empty is not a value.
   function captureStageValues(jobId){
@@ -822,8 +830,9 @@
     const scope=workStageValueScope(state,selection),kept=stageValues.get(scope) || {},saved=state.run?.inputs || {},errors={};
     for(const field of workStageAskFields(current.node,current.definition)){
       const value=Object.hasOwn(kept,field.id)?kept[field.id]:saved[field.id],empty=value===undefined||value===null||value===''||Array.isArray(value)&&!value.length;
-      if(empty){if(complete&&field.required)errors[field.id]='값을 넣어 주세요';}
+      if(empty){if(complete&&field.required)errors[field.id]=workObjectParticle(field.name)+' 넣어 주세요';}
       else if(field.type==='number'&&(typeof value!=='number'||!Number.isFinite(value)))errors[field.id]='숫자만 넣어 주세요';
+      else if(field.accepts==='confluence_page'){const wrong=workConfluenceAddressError(value);if(wrong)errors[field.id]=wrong;}
     }
     setStageValueErrors(errors);
     return !Object.keys(errors).length;
@@ -851,7 +860,7 @@
     selection.stage_verdict_job='';
     if(!await saveStageValues([node])){showStageValueFailure({message:commandError},node.id);return true;}
     openStageValues(node.id);render();
-    [...(source()?.hosts?.()?.panel?.querySelectorAll?.('.ew-vd-run') || [])].find(item=>item.dataset.jobId===node.id&&!item.disabled)?.focus?.({preventScroll:true});
+    [...(source()?.hosts?.()?.panel?.querySelectorAll?.('.ew-vd-run,[data-stage-run]') || [])].find(item=>item.dataset.jobId===node.id&&!item.disabled)?.focus?.({preventScroll:true});
     return true;
   }
   // The values typed for these jobs that are not saved yet.
@@ -891,6 +900,24 @@
     if(!next&&!open)return;
     selection.stage_evidence=next?next.node.id:'';selection.stage_record='';selection.stage_tool='';selection.stage_verdict_job='';render();
     if(focus&&next)focusStageValue(next.node.id);
+    else if(focus)source()?.hosts?.()?.panel?.querySelector?.('[data-action="finish_run"]:not(:disabled)')?.focus?.({preventScroll:true});
+  }
+  // A refusal before anything ran (no connection to the service) is said under the job that was asked to run.
+  function stageProblemKey(jobId){return workStageValueScope(state,selection)+'/'+jobId;}
+  function showStageProblem(failure,jobId){
+    const row=stageJob(jobId);if(!row||!workStageLookup(row.node,row.definition)||!workStageConnectCodes.includes(failure?.code))return false;
+    // Kept with the job's run and state of the moment; another run of it (from anywhere) ends it.
+    const now=stageJob(jobId)?.saved || {};stageProblems.set(stageProblemKey(jobId),[failure.code,now.attempt_id || now.current_attempt || '',now.status || 'unstarted'].join('|'));commandError='';error='';
+    selection.stage_evidence=jobId;render();focusStageValue(jobId);return true;
+  }
+  function clearStageProblem(jobId){
+    // Also the one said before the round existed: the round 찾기 started has another key.
+    for(const key of [...stageProblems.keys()])if(key.endsWith('/'+jobId))stageProblems.delete(key);
+  }
+  // After 찾기 the question has the focus; when nothing came back, the field.
+  function focusStageAnswer(jobId){
+    const panel=stageValuePanel(jobId),answer=panel?.querySelector?.('[data-stage-answer]:not(:disabled)');
+    if(answer)answer.focus({preventScroll:true});else focusStageValue(jobId);
   }
   // One press of 실행 on a row: check the values where they are typed, start the run if there is none, save, run.
   async function runStageJob(jobId){
@@ -898,6 +925,7 @@
     if(!['tool','ai'].includes(current.node.mode)||workStageAwaitsValue(current.node,current.definition,current.run))return;
     if(!captureStageValues(jobId))return stageValuesUnread();
     if(!checkStageValues(current)){openStageValues(jobId);render();focusStageValue(jobId);return;}
+    clearStageProblem(jobId);
     if(!state.run){
       const stage=workStageTarget(state,selection);if(!stage)return;
       if(workStageHasValues({node:current.node,saved:{}},state))openStageValues(jobId);
@@ -906,14 +934,21 @@
       current=stageJob(jobId);if(!current||state.run?.id!==started)return;
     }
     if(!workStageCanExecute(current.node,current.saved,current.run,state)||!inputsSaved(true))return;
+    // A lookup says 찾는 중 under its row while it runs, and what went wrong under it afterwards (design mock 20).
+    const lookup=workStageLookup(current.node,current.definition);
     try{
       if(!await saveStageValues([current.node])){showStageValueFailure({message:commandError},jobId);return;}
       current=stageJob(jobId);if(!current)return;
-      setBusy(true);
+      setBusy(true);if(lookup){stageRunning=jobId;render();}
       try{const model=executionModel();await operationsCommand({action:'execute_job',run_id:current.run.id,job_id:current.node.id,expected_revision:current.run.revision,...(model?{model_id:model}:{})});await refresh();}
-      finally{setBusy(false);}
+      finally{if(stageRunning===jobId){stageRunning='';render();}setBusy(false);}
       if(workStageHasValues({node:current.node,saved:state?.run?.jobs?.[jobId] || {}},state)){openStageValues(jobId);render();}
-    }catch(failure){if(!showStageValueFailure(failure,jobId))throw failure;}
+      if(lookup)focusStageAnswer(jobId);
+    }catch(failure){
+      // A run the server recorded as failed is said under the lookup by its own record, not again above the screen.
+      if(lookup&&failure?.result?.attempt&&stageJob(jobId)){commandError='';error='';await refresh();openStageValues(jobId);render();focusStageValue(jobId);return;}
+      if(!showStageValueFailure(failure,jobId)&&!showStageProblem(failure,jobId))throw failure;
+    }
   }
   async function stageAction(action,target){
     const data=target.dataset;
@@ -934,9 +969,19 @@
       return select({start_stage_id:stage.id,job_id:'',stage_verdict_job:'',tab:'run_details'},{fetch:false});
     }
     if(action==='stage_tab'){if(!['work','log','rules'].includes(data.tab))return;selection.stage_tab=data.tab;selection.stage_verdict_job='';render();remember();return;}
+    if(action==='stage_more'){
+      selection.stage_verdict_job=selection.stage_verdict_job==='#more'?'':'#more';render();
+      if(selection.stage_verdict_job){source()?.hosts?.()?.panel?.querySelector?.('#ees-stage-verdict-menu [role="menuitem"]')?.focus?.({preventScroll:true});source()?.hosts?.()?.panel?.querySelector?.('#ees-work-content')?.addEventListener?.('scroll',()=>closeStageMenu(),{once:true});}
+      return;
+    }
     if(action==='stage_approved'){const group=workStagePositiveGroup(workStageRows(state,workStageTarget(state,selection)),selection);selection.stage_approved_expanded=!group.expanded;if(group.expanded&&group.rest.some(row=>row.node.id===selection.stage_evidence)){selection.stage_evidence='';selection.stage_tool='';}selection.stage_verdict_job='';render();remember();return;}
     const current=stageJob(data.jobId);if(!current)return;
     const {run,node,saved,definition}=current;
+    // 아니에요: nothing is recorded; the value goes back to its field to be changed and looked up again.
+    if(action==='stage_again'){
+      const field=stageValuePanel(node.id)?.querySelector?.('[data-work-input]:not(:disabled)');if(!field)return;
+      field.focus({preventScroll:true});field.select?.();return;
+    }
     // The name of a job with values opens and closes the area under its row: what it asks for and what came back.
     if(action==='stage_values'){
       if(selection.stage_evidence===node.id)captureStageValues(node.id);
@@ -955,7 +1000,7 @@
     if(action==='stage_confirm_list'){
       if(!workStageCanConfirmList(node,saved,run))return;
       if(await stageValuesChangeResult(node))return;
-      await confirmList(true,node.id);
+      await confirmList(true,node.id,{question:workStageLookup(node,definition)});
       // As with an answer: the confirmed job closes and the next job that asks for a value opens.
       if(state?.run?.jobs?.[node.id]?.status==='completed'&&selection.stage_evidence===node.id)openNextStageJob({focus:true});
       return;
@@ -1065,7 +1110,17 @@
       if(factory&&author)return select({factory_id:id},{preserveAuthorStart:true});
       return select({[factory?'factory_id':'system_id']:id,...(!factory?{factory_id:''}:{}),...(author?{mode:'author'}:{}),workflow_id:'',run_id:'',job_id:'',tab:author?'overview':'overview'});
     }
-    if(action==='workflow'){const id=target.dataset.workflowId,workflow=(state?.workflows || []).find(item=>item.id===id);if(selection.mode!=='author'&&workflow?.published_version==null)return;const runs=selection.mode==='author'?[]:workUnitActiveRuns(state,selection,workflow);return select({workflow_id:id,run_id:runs.length===1?runs[0].id:'',job_id:'',stage_id:'',stage_overview:false,tab:runs.length>1?'active_runs':'overview',panel_open:true});}
+    if(action==='workflow'){const id=target.dataset.workflowId,workflow=(state?.workflows || []).find(item=>item.id===id);if(selection.mode!=='author'&&workflow?.published_version==null)return;const runs=selection.mode==='author'?[]:workUnitActiveRuns(state,selection,workflow);
+      // A procedure with one stage opens on its things to do (design mock 20); several rounds still list them first.
+      const published=workPublishedDefinition({workflow}),single=selection.mode!=='author'&&runs.length<=1&&workSingleStage(published),stage=single?Object.values(published.nodes).find(node=>node.type==='t').id:'';
+      await select({workflow_id:id,run_id:runs.length===1?runs[0].id:'',job_id:'',stage_id:'',open_stage_id:stage,stage_overview:false,tab:runs.length>1?'active_runs':'overview',panel_open:true});
+      if(!single||selection.workflow_id!==id||!workStageTarget(state,selection))return;
+      // 시작 on the first screen starts the round when no job on the screen can start it by itself.
+      const rows=stageValueRows();
+      if(target.dataset.homeStart==='true'&&!state.run&&!(rows.length&&rows.every(workStageStartsRound))){await startRun({dataset:{startStageId:stage}});}
+      openNextStageJob({focus:true});return;}
+    // 업무 on a procedure's own screen goes back to the first screen.
+    if(action==='work_home')return select({workflow_id:'',run_id:'',job_id:'',stage_id:'',stage_overview:false,stage_evidence:'',stage_record:'',stage_verdict_job:'',tab:'overview'});
     if(action==='preview_record'||action==='record_list_back'){
       if(selection.tab!=='records'||scopeLoading||evidenceUnavailable)return;
       const opening=action==='preview_record';
@@ -1099,6 +1154,8 @@
       if(busy||!state?.run||!workRunFinishable(state))return;
       const at=context(),run=state.run,result=await mutate({action:'close_run',run_id:run.id,expected_revision:run.revision});
       if(!result||at!==context())return;
+      // A procedure with one stage ends on the first screen, where it shows what this round found.
+      if(workSingleStage(run.definition || {})){const id=run.workflow_id;await select({workflow_id:'',run_id:'',job_id:'',stage_id:'',stage_evidence:'',stage_record:'',stage_verdict_job:'',tab:'overview'});[...(source()?.hosts?.()?.panel?.querySelectorAll?.('[data-home-start]') || [])].find(item=>item.dataset.workflowId===id)?.focus?.({preventScroll:true});return;}
       return select({run_id:'',job_id:'',stage_id:'',stage_verdict_job:'',tab:'overview'});
     }
     if(action==='procedure_new'){
@@ -1172,7 +1229,7 @@
     if(['input','change'].includes(event.type)&&target.matches?.('[data-work-input]')&&target.closest?.('[data-stage-values]')){
       const jobId=target.closest('[data-stage-values]').dataset.jobId;captureStageValues(jobId);
       const scope=workStageValueScope(state,selection),errors=stageValueErrors.get(scope);
-      if(errors&&Object.hasOwn(errors,target.name)){const next={...errors};delete next[target.name];setStageValueErrors(next);target.removeAttribute('aria-invalid');target.removeAttribute('aria-describedby');target.closest('dd')?.querySelector('.ew-vd-ask-error')?.remove();}
+      if(errors&&Object.hasOwn(errors,target.name)){const next={...errors};delete next[target.name];setStageValueErrors(next);target.removeAttribute('aria-invalid');target.removeAttribute('aria-describedby');target.closest('dd')?.querySelector('.ew-vd-ask-error')?.remove();target.closest('.ew-fg-ask')?.querySelector('[data-stage-value-error]')?.remove();}
       return;
     }
     // Enter in a value field moves to the next field of the job, then does what the row's control does.
@@ -1183,7 +1240,7 @@
       const panel=target.closest('[data-stage-values]'),jobId=panel.dataset.jobId,current=stageJob(jobId);if(!current)return;
       const fields=[...panel.querySelectorAll('input[data-work-input],select[data-work-input],textarea[data-work-input]')].filter(field=>!field.disabled&&field.type!=='checkbox'),next=fields[fields.indexOf(target)+1];
       if(next){next.focus({preventScroll:true});return;}
-      const row=target.closest('[data-stage-job]'),control=['tool','ai'].includes(current.node.mode)?row?.querySelector('.ew-vd-run'):row?.querySelector('.ew-vd-confirm-main[data-action="stage_decide"]');
+      const row=target.closest('[data-stage-job]'),control=['tool','ai'].includes(current.node.mode)?row?.querySelector('.ew-vd-run,[data-stage-run]'):row?.querySelector('.ew-vd-confirm-main[data-action="stage_decide"]');
       if(control&&!control.disabled)Promise.resolve(handleClick(control)).catch(failure=>{error=failure.message;render();});
       return;
     }
@@ -1217,7 +1274,7 @@
     if(event.type==='change'&&target.matches?.('[data-list-include]')){view.refreshResults();return;}
     if(event.type==='change'&&(target.matches?.('[data-item-verdict]')||target.matches?.('[data-item-confirm]'))){const verdict=target.matches('[data-item-confirm]')?(target.checked?'completed':'unknown'):target.value;if(verdict)mutate({action:'decide',run_id:selection.run_id,job_id:selection.job_id,item_id:target.dataset.itemId,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,verdict});}
   }
-  function reset(){purposeRequest=null;apiContextSignature='';apiContextGeneration++;accountGeneration++;stageNotes.clear();stageValues.clear();stageValueErrors.clear();stageValueBases.clear();helpWriting=null;nativeCapabilities=null;nativeScope=null;workspaceCache.clear();stateKey='';targetLoading=false;scopeLoading=false;evidenceUnavailable=false;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;inputProposalApplied=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;savedUIState={};source()?.modelCount?.(0);selection=initialSelection();lastLocalSelection=initialSelection();}
+  function reset(){purposeRequest=null;apiContextSignature='';apiContextGeneration++;accountGeneration++;stageNotes.clear();stageValues.clear();stageValueErrors.clear();stageValueBases.clear();stageProblems.clear();stageRunning='';helpWriting=null;nativeCapabilities=null;nativeScope=null;workspaceCache.clear();stateKey='';targetLoading=false;scopeLoading=false;evidenceUnavailable=false;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;inputProposalApplied=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;savedUIState={};source()?.modelCount?.(0);selection=initialSelection();lastLocalSelection=initialSelection();}
   function sync(){
     scheduled=false;bindHosts();syncHelpState();const auth=token();if(auth!==identity){reset();identity=auth;route='';}
     syncNativeReturn();

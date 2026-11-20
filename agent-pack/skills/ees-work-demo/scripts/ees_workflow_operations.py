@@ -23,7 +23,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from .ees_workflow_authoring import WorkflowError
 from . import ees_workflow_api_http as api_http
-from .ees_workflow_definition import TOOL_CONNECTION_MESSAGE, tool_connection_required
+from .ees_workflow_definition import TOOL_CONNECTION_MESSAGE, tool_connection_required, confluence_page_id
 
 INTENT_TTL = 120
 LEASE_SECONDS = 30
@@ -1732,7 +1732,14 @@ class OperationsRuntime:
             if 'constant' in source:
                 arguments[name] = deepcopy(source['constant'])
             elif 'input' in source:
-                if source['input'] in inputs: arguments[name] = inputs[source['input']]
+                if source['input'] in inputs:
+                    arguments[name] = inputs[source['input']]
+                    # A Confluence document is typed by its address; the API takes its page number.
+                    field = next((item for item in job.get('inputs', []) if isinstance(item, dict) and item.get('id') == source['input']), {})
+                    if field.get('accepts') == 'confluence_page':
+                        number = confluence_page_id(arguments[name])
+                        if number is None: fail('api_input_invalid', '문서 주소를 확인해 주세요.')
+                        arguments[name] = number
             elif source.get('context') in ('system_id','factory_id'):
                 arguments[name] = run[source['context']]
             else:

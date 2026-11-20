@@ -149,7 +149,7 @@
   "x-ees-procedure-example": {
     "id": "confluence_documents",
     "name": "Confluence 문서 확인 가이드",
-    "description": "페이지 ID를 한 번 입력해 기준 문서를 확인하고 직계 하위 문서를 최대 5건 조회합니다.",
+    "description": "문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다.",
     "definition": {
       "category": "ops",
       "nodes": {
@@ -178,7 +178,7 @@
           "id": "page",
           "type": "j",
           "parent": "documents",
-          "name": "기준 문서 확인",
+          "name": "기준 문서 찾기",
           "children": [],
           "deps": [],
           "mode": "tool",
@@ -194,30 +194,30 @@
             },
             "outputs": [
               "title",
-              "id",
-              "type"
+              "id"
             ]
           },
           "inputs": [
             {
               "id": "page-id",
-              "name": "페이지 ID",
+              "name": "문서 주소",
               "type": "text",
               "scope": "run",
               "required": true,
-              "example": "123456789",
+              "example": "https://wiki…/pages/123456789",
               "source": {
                 "api_operation_id": "guide-confluence-page"
-              }
+              },
+              "accepts": "confluence_page"
             }
           ],
-          "instructions": "Confluence 페이지 정보의 페이지 ID를 입력하세요. 실행 결과의 제목과 ID가 기준 문서와 일치하면 확정하세요."
+          "instructions": "찾을 문서의 Confluence 주소를 넣으세요."
         },
         "children": {
           "id": "children",
           "type": "j",
           "parent": "documents",
-          "name": "하위 문서 목록 조회",
+          "name": "하위 문서 찾기",
           "children": [],
           "deps": [
             "page"
@@ -242,18 +242,18 @@
             },
             "outputs": [
               "title",
-              "id",
-              "type"
+              "id"
             ]
           },
           "api_generated_deps": [
             "page"
           ],
-          "instructions": "확정한 기준 문서 바로 아래의 페이지를 최대 5건 조회합니다. 제목을 확인하고 목록을 확정하세요."
+          "instructions": "1번 문서 바로 아래 문서를 5개까지 찾습니다."
         }
       },
       "name": "Confluence 문서 확인 가이드",
-      "execution_scope": "system"
+      "execution_scope": "system",
+      "description": "문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다."
     }
   }
 }

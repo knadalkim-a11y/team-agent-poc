@@ -2764,3 +2764,53 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 [data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-more > .ew-text {min-height:24px;font-size:12px;font-weight:400;color:var(--ees-text-secondary);cursor:pointer;}
 [data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-more > .ew-text:hover {text-decoration:underline;}
 [data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-more > .ew-text:focus-visible {outline:2px solid var(--ees-brand-text);outline-offset:2px;}
+
+/* The first use as one flow (2026-11-20, design mock 20 revision 1), from the mock's new-screen CSS. The job rows are the product's rows; the area under a row is
+   the product's white area. New here: the work list of the first screen, the address field with its button beside it,
+   the question that replaces 판정, and the end of the flow. */
+/* the first screen: the procedures one may run, each with its purpose and its start */
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-home{display:grid;gap:12px;max-width:960px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 24px;padding:16px 20px;border:1px solid var(--ees-line-divider);border-radius:8px;background:var(--ees-surface-default)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-card h3{margin:0;font-size:15px;line-height:22px;font-weight:700;color:var(--ees-text-primary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-card p{margin:2px 0 0;font-size:13px;line-height:20px;color:var(--ees-text-secondary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-card small{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-card small i{width:6px;height:6px;border-radius:50%;background:var(--ees-status-success)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-card .ew-primary{grid-column:2;grid-row:1 / span 3;min-width:96px;height:36px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-new{justify-self:start;font-size:13px}
+/* the procedure's own screen: its purpose under the name, no tabs */
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-purpose{margin:4px 0 0;font-size:13px;line-height:20px;color:var(--ees-text-secondary)}
+/* under a row: the field and its button side by side, the answer as a question next to its buttons */
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-under{display:grid;gap:14px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-ask{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-ask label,[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-key{flex:none;width:72px;font-size:13px;line-height:20px;color:var(--ees-text-secondary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-ask input{box-sizing:border-box;width:min(100%,400px);height:34px;margin:0;padding:0 10px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-default);font:inherit;font-size:13px;line-height:20px;color:var(--ees-text-primary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-ask input::placeholder{color:var(--ees-text-tertiary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-ask input:focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:1px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-ask input[aria-invalid=true]{border-color:var(--ees-status-danger)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-ask button{min-height:34px;height:34px;padding:0 16px;font-size:13px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-error{flex-basis:100%;margin:0 0 0 82px;font-size:12px;line-height:18px;color:var(--ees-status-danger)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-given{font-size:13px;line-height:20px;color:var(--ees-text-primary)}
+/* what was found: the document's title links to it */
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-found{display:grid;gap:4px;padding-left:82px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-found a{font-size:14px;line-height:22px;font-weight:500}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-found small{font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-list{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-list li{display:flex;align-items:baseline;gap:10px;font-size:14px;line-height:22px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-list li small{font-size:12px;color:var(--ees-text-tertiary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-question{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-left:82px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-question strong{margin-right:6px;font-size:14px;line-height:22px;font-weight:700;color:var(--ees-text-primary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-question button{min-height:34px;height:34px;padding:0 16px;font-size:13px}
+/* a problem is said where it happened, with the one thing to do next */
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-problem{display:grid;gap:2px;padding:10px 12px 10px 14px;margin-left:82px;border-left:3px solid var(--ees-status-danger);background:var(--ees-status-danger-bg);border-radius:0 6px 6px 0}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-problem strong{font-size:13px;line-height:20px;font-weight:700;color:var(--ees-text-primary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-problem span{font-size:12px;line-height:18px;color:var(--ees-text-secondary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-more{margin:0;padding-left:82px}
+/* a row that is done says what was decided instead of what to do */
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-outcome{color:var(--ees-text-primary)}
+/* the end of the flow, where the last answer was given */
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-done{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 24px;margin-top:16px;padding:16px 20px;border:1px solid var(--ees-line-divider);border-radius:8px;background:var(--ees-surface-default)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-done h3{margin:0;font-size:15px;line-height:22px;font-weight:700}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-done p{margin:0;font-size:13px;line-height:20px;color:var(--ees-text-secondary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-done .ew-primary{grid-column:2;grid-row:1 / span 2;min-width:96px;height:36px}
+/* what was found has no address to open in the API result: its name is shown as the mock's link text is */
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-found .ew-fg-title{font-size:14px;line-height:22px;font-weight:500;color:var(--ees-text-primary)}

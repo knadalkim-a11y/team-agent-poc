@@ -131,7 +131,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.click('[data-action=choose_factory][data-factory-id=phase3-factory]')
         self.wait("document.querySelector('[data-action=workflow][data-workflow-id=\"" + key + "\"]')")
         self.click('[data-action=workflow][data-workflow-id="' + key + '"]')
-        self.wait("document.querySelector('.ew-operation-overview')")
+        self.enter_procedure()
         self.open_stage_from_overview()
         self.wait("document.querySelector('[data-authored-stage]')")
         self.phase3_capture('tools-phase3-o15a-before-execution')
@@ -324,13 +324,24 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-authored-stage] [data-action=stage_verdict]')"))
         self.screenshot('tools-phase3-revoked-late-result-hidden-1920')
 
+    def enter_procedure(self):
+        """After choosing a procedure: the overview of one with several stages, or the things to do of one with a
+        single stage (2026-11-20, design mock 20)."""
+        self.wait("document.querySelector('.ew-operation-overview, #ees-work-panel.ew-vd [data-action=stage_more]')")
+
     def open_stage_from_overview(self):
-        self.click('[data-action=stage_open][data-node-id=stage]')
+        self.enter_procedure()
+        if self.browser.evaluate("!!document.querySelector('.ew-operation-overview')"):
+            self.click('[data-action=stage_open][data-node-id=stage]')
         self.wait("document.querySelector('#ees-work-panel.ew-vd h2')")
 
     def open_run_details_from_overview(self):
         self.open_stage_from_overview()
-        self.click('[data-action=stage_details]')
+        if self.browser.evaluate("!!document.querySelector('#ees-work-panel [data-action=stage_more]')"):
+            self.click('#ees-work-panel [data-action=stage_more]')
+            self.click('#ees-stage-verdict-menu [data-action=stage_details]')
+        else:
+            self.click('[data-action=stage_details]')
         self.wait("document.querySelector('.ew-phase-overview')")
 
     def operations_stage(self, *, start=True):
@@ -343,7 +354,14 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         created = self.command('create_workflow', name='배포 산출물 점검', system_id='EMS')
         key, definition = created['workflow_id'], created['workflow']['draft']
         root = next(iter(definition['nodes']))
-        definition['nodes'][root]['children'] = ['stage']
+        # Two stages: these tests are about the overview and the stage screen of a procedure with several stages. A
+        # procedure with one stage opens on its things to do (2026-11-20, design mock 20).
+        definition['nodes'][root]['children'] = ['stage', 'stage-after']
+        definition['nodes']['stage-after'] = {'id': 'stage-after', 'type': 't', 'name': '배포 후 확인', 'parent': root,
+            'children': ['after-check'], 'deps': []}
+        definition['nodes']['after-check'] = {'id': 'after-check', 'type': 'j', 'name': '배포 후 화면 확인', 'parent': 'stage-after',
+            'children': [], 'deps': [], 'mode': 'human', 'result_block': 'human_confirm', 'inputs': [],
+            'instructions': '배포한 화면이 열리는지 봅니다.'}
         # One value used by nine jobs is asked of the whole procedure, once, when the round starts. A value that
         # only a job names is asked under that job's row (2026-11-19).
         definition['nodes'][root]['inputs'] = [{'id': 'query', 'name': '조회 조건', 'type': 'text', 'scope': 'run'}]
@@ -422,6 +440,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         key, run = self.operations_stage()
         self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
         self.open_run(key, run, job='')
+        self.open_stage_from_overview()
         self.wait("document.querySelector('#ees-work-panel.ew-vd h2')?.textContent === '1차 점검'")
         self.assertEqual(self.text('.ew-center-breadcrumb .ew-run-back'), '배포 산출물 점검')
         self.assertIn('전체 공장 · EMS', self.text('.ew-center-scope'))
@@ -438,7 +457,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.click('[data-action=stage_approved]')
         self.assertLess(self.browser.evaluate("document.querySelectorAll('[data-stage-job]').length"),len(run['jobs']))
         self.click('[data-action=stage_approved]')
-        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('[data-stage-job]')].map(e=>e.dataset.stageJob).sort()"), sorted(run['jobs']))
+        self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('[data-stage-job]')].map(e=>e.dataset.stageJob).sort()"), sorted(run['definition']['nodes']['stage']['children']))
         for width in (1920, 480):
             self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
             self.wait('innerWidth === ' + str(width))
@@ -575,12 +594,12 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             'tab': 'start', 'stage_id': 'private-stage', 'panel_open': True}})
         writes = len(self.server.workspace_commands)
         reload_page(self.browser)
-        self.wait("document.querySelector('#ees-work-panel .ew-work-home')")
+        self.wait("document.querySelector('#ees-work-panel .ew-fg-home, #ees-work-panel .ew-work-home')")
         for width in (1920, 480):
             self.browser.call('Emulation.setDeviceMetricsOverride', {'width': width, 'height': 1080,
                 'deviceScaleFactor': 1, 'mobile': False})
             self.wait('innerWidth===' + str(width))
-            self.assertIn('업무 절차를 선택해 주세요', self.text('#ees-work-panel'))
+            self.assertTrue(self.browser.evaluate("!!document.querySelector('#ees-work-panel .ew-fg-home [data-home-start]')"))
             if width == 480:
                 self.wait_for_work_layout(width)
             self.open_sidebar()
@@ -606,7 +625,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             self.screenshot('authoring-unpublished-kept-' + label)
             self.assertEqual(self.state(workflow_id=item)['workflow'], workflows[item])
         self.click('[data-action=mode][data-mode=work]')
-        self.wait("document.querySelector('#ees-work-panel .ew-work-home')")
+        self.wait("document.querySelector('#ees-work-panel .ew-fg-home, #ees-work-panel .ew-work-home')")
         self.wait("!window.__eesNativeWorkV1.captureReference()?.workflow_id")
         self.assert_only_selection_remembered(writes)
         with self.server.workflow._db() as db:
@@ -630,12 +649,10 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         control = '[data-action=workflow][data-workflow-id="' + key + '"]'
         self.wait('document.querySelector(' + json.dumps(control) + ')')
         self.click(control)
-        self.wait("document.querySelector('.ew-operation-overview')")
-        self.assertIn('게시된 운영 절차', self.text('.ew-operation-overview'))
-        self.assertIn('검증 단계', self.text('.ew-operation-overview'))
-        self.assertNotIn('아직 게시하지 않은', self.text('#ees-work-panel'))
-        self.open_stage_from_overview()
-        self.assertEqual(self.text('#ees-work-panel.ew-vd h2'), '검증 단계')
+        # A procedure with one stage opens on its things to do under the published name (2026-11-20).
+        self.enter_procedure()
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-operation-overview')"))
+        self.assertEqual(self.text('#ees-work-panel.ew-vd h2'), '게시된 운영 절차')
         self.assertIn('합성 작업 0', self.text('#ees-work-panel'))
         self.assertNotIn('아직 게시하지 않은', self.text('#ees-work-panel'))
         self.screenshot('operations-published-before-draft')
@@ -662,12 +679,11 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
                 control = '[data-action=workflow][data-workflow-id="' + key + '"]'
                 self.wait('document.querySelector(' + json.dumps(control) + ')')
                 self.click(control)
-                self.wait("document.querySelector('.ew-operation-overview')")
                 self.open_stage_from_overview()
                 writes = len(self.server.workspace_commands)
                 self.click('[data-action=stage_start][data-node-id=stage]')
                 self.wait("document.querySelector('#ees-work-dialog[open] #ees-work-start')")
-                self.assertEqual(self.text('#ees-work-panel.ew-vd h2'), '검증 단계')
+                self.assertEqual(self.text('#ees-work-panel.ew-vd h2'), '실행 준비 검증 ' + str(reduced))
                 self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-start-factory,#ees-work-panel #ees-work-start')"))
                 self.fill('#ees-work-dialog [data-work-input][name=query]', '취소한 입력')
                 self.click('#ees-work-dialog [data-dialog-cancel]')
@@ -683,7 +699,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
                 self.screenshot('operations-start-dialog-' + ('reduced' if reduced else 'normal'))
                 self.click('#ees-work-dialog [data-dialog-confirm]')
                 self.wait("!document.querySelector('#ees-work-dialog[open]') && window.__eesNativeWorkV1.captureReference()?.run_id")
-                self.wait("document.querySelector('#ees-work-panel.ew-vd h2')?.textContent==='검증 단계'")
+                self.wait("document.querySelector('#ees-work-panel.ew-vd h2')?.textContent==='실행 준비 검증 " + str(reduced) + "'")
                 commands = [body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui']
                 self.assertEqual([body['action'] for body in commands], ['start_run'], commands)
                 self.assertEqual(commands[0]['inputs'], {'query': value})
@@ -721,7 +737,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         control = '[data-action=workflow][data-workflow-id="' + key + '"]'
         self.wait('document.querySelector(' + json.dumps(control) + ')')
         self.click(control)
-        self.wait("document.querySelector('.ew-operation-overview')")
+        self.enter_procedure()
         self.open_stage_from_overview()
         pressure = '#stage-values-pump [data-work-input][name=pressure]'
         memo = '#stage-values-pump [data-work-input][name=memo]'
@@ -743,7 +759,8 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         writes = len(self.server.workspace_commands)
         # 적합 without the required value answers nothing and says so at the field.
         self.click('[data-stage-job=pump] .ew-vd-confirm-main')
-        self.wait("document.querySelector('#stage-under-pump .ew-vd-ask-error')?.textContent === '값을 넣어 주세요'")
+        # The field is named in what it says (2026-11-20): 압력을 넣어 주세요.
+        self.wait("document.querySelector('#stage-under-pump .ew-vd-ask-error')?.textContent === '압력을 넣어 주세요'")
         self.assertEqual([self.read(pressure, 'ariaInvalid'), self.read(memo, 'ariaInvalid')], ['true', None])
         self.assertTrue(self.browser.evaluate('document.activeElement?.matches(' + json.dumps(pressure) + ')'))
         self.assertEqual(sent(), [])
@@ -875,8 +892,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         control = '[data-action=open_run][data-run-id="' + run['id'] + '"]'
         self.wait('document.querySelector(' + json.dumps(control) + ')')
         self.click(control)
-        self.wait("document.querySelector('#ees-work-panel.ew-vd h2')?.textContent==='검증 단계'")
-        self.assertIn('첫 게시 운영 절차', self.text('#ees-work-panel'))
+        self.wait("document.querySelector('#ees-work-panel.ew-vd h2')?.textContent==='첫 게시 운영 절차'")
         self.assertIn('합성 작업 0', self.text('#ees-work-panel'))
         self.assertNotIn('다음 게시', self.text('#ees-work-panel'))
         self.assertEqual(self.browser.evaluate('window.__eesNativeWorkV1.captureReference().run_id'), run['id'])
@@ -890,6 +906,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         key, run = self.operations_stage()
         self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
         self.open_run(key, run, job='')
+        self.open_stage_from_overview()
         self.wait("document.querySelector('#ees-work-panel.ew-vd')")
         self.click('[data-action=stage_evidence][data-job-id=job-2]')
         note = '적용 대상 확인을 마친 뒤 배포합니다.\n기존 자료와 이전 판정을 보존합니다.'
@@ -935,6 +952,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         key, run = self.operations_stage()
         self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 1920, 'height': 1080, 'deviceScaleFactor': 1, 'mobile': False})
         self.open_run(key, run, job='')
+        self.open_stage_from_overview()
         self.wait("document.querySelector('#ees-work-panel.ew-vd')")
         original = deepcopy(next(a for a in run['attempts'] if a['job_id'] == 'job-3'))
         self.click('[data-action=stage_evidence][data-job-id=job-3]')
@@ -1436,7 +1454,8 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.open_run(key, run, job='')
         if self.browser.evaluate("!!document.querySelector('#ees-work-panel .ew-operation-overview')"):
             self.open_stage_from_overview()
-        self.wait("document.querySelector('[data-action=execute_scope][data-node-id=stage]')?.disabled === false")
+        # One job on a one-stage screen: its own 실행 (지금 실행 appears only for two or more, 2026-11-20).
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-action=execute_scope]')"))
         job = '[data-action=stage_execute][data-job-id=job-0]'
         self.wait("document.querySelector(" + json.dumps(job) + ")?.disabled === false")
         self.click(job)
