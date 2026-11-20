@@ -215,10 +215,13 @@ if(performance.now()>end)return resolve(null);requestAnimationFrame(check)}check
         self.record('initial author list ready before physical creation',workflow_ids=workflow_ids)
 
     def open_operation_stage(self):
-        """Follow the published overview's first stage through physical input."""
-        self.wait_work_ready(selector='.ew-operation-overview [data-action="stage_open"]')
-        self.click('.ew-operation-overview [data-action="stage_open"]')
-        self.wait_work_ready(selector='[data-action="stage_details"]')
+        """Follow the published overview's first stage through physical input. A procedure with one stage opens on
+        its things to do without an overview (2026-11-20, design mock 20)."""
+        self.wait("document.querySelector('.ew-operation-overview [data-action=\"stage_open\"], #ees-work-panel [data-action=\"stage_more\"]')")
+        if self.browser.evaluate("!!document.querySelector('.ew-operation-overview [data-action=\"stage_open\"]')"):
+            self.wait_work_ready(selector='.ew-operation-overview [data-action="stage_open"]')
+            self.click('.ew-operation-overview [data-action="stage_open"]')
+        self.wait_work_ready(selector='[data-action="stage_details"], [data-action="stage_more"]')
 
     def open_operation_start(self, *, expect_form=None):
         """Press the stage's start control and report whether the start form opened.
@@ -248,9 +251,24 @@ if(performance.now()>end)return resolve(null);requestAnimationFrame(check)}check
         if self.open_operation_start():
             self.click('#ees-work-dialog [data-dialog-confirm]')
 
+    def open_job(self, job_id):
+        """A job's own screen from the stage screen: its name, or 자세히 under a row that opens by its name (a lookup
+        answered by a question, 2026-11-20)."""
+        link='#ees-work-panel [data-action="job"][data-job-id="'+job_id+'"]'
+        if not self.browser.evaluate('!!document.querySelector('+json.dumps(link)+')?.getClientRects().length'):
+            self.click('#ees-work-panel [data-stage-job="'+job_id+'"] .ew-vd-name')
+            self.wait('document.querySelector('+json.dumps(link)+')?.getClientRects().length')
+        self.click(link)
+
     def open_operation_details(self):
         self.open_operation_stage()
-        self.click('[data-action="stage_details"]')
+        # The round's details are under ⋯ on a procedure with one stage.
+        if self.browser.evaluate("!!document.querySelector('#ees-work-panel [data-action=\"stage_more\"]')"):
+            self.click('#ees-work-panel [data-action="stage_more"]')
+            self.wait("document.querySelector('#ees-stage-verdict-menu [data-action=\"stage_details\"]')")
+            self.click('#ees-stage-verdict-menu [data-action="stage_details"]')
+        else:
+            self.click('[data-action="stage_details"]')
         self.wait_work_ready(selector='.ew-phase-overview')
 
     def select(self, selector, value):
@@ -722,7 +740,8 @@ def verify_workspace_entry_points(g):
     for key in ('guide-confluence-page', 'guide-confluence-children'):
         g.wait("document.querySelector('[data-api-action=open][data-id=" + key + "]')?.checkVisibility()")
     g.click('#ees-work-entry [data-action=mode][data-mode=work]')
-    g.wait("document.querySelector('.ew-work-home')")
+    # The first screen lists the published procedures (2026-11-20, design mock 20).
+    g.wait("document.querySelector('.ew-fg-home, .ew-work-home')")
     g.record('Skills and Knowledge list navigation and direct loads with shipped Confluence catalog visible')
 
 
@@ -1294,12 +1313,11 @@ def figma_delta_flow(g):
     g.record('2026-11-02 authoring without an execution-mode tab keeps stored schedule data',draft_revision=saved['revision'],published_version=1,reservation_created=False)
     g.click('[data-action="mode"][data-mode="work"]');g.click('[data-action="workflow"][data-workflow-id="'+workflow_id+'"]')
     g.confirm_operation_start()
-    # A single-stage run opens its stage first. Inspect that entry separately,
-    # then physically open run details for the existing A5 checks.
-    run_id=g.wait_work_ready(workflow_id=workflow_id,require_run=True,selector='[data-action="stage_back"]')['reference']['run_id']
+    # A single-stage run opens its stage first (its things to do, 2026-11-20). Inspect that entry separately,
+    # then physically open run details (⋯) for the existing A5 checks.
+    run_id=g.wait_work_ready(workflow_id=workflow_id,require_run=True,selector='[data-action="stage_more"]')['reference']['run_id']
     assert g.api('/api/ees-work/workspace?run_id='+run_id)['run']['workflow_id']==workflow_id
     g.capture('figma-stage-single-entry')
-    g.click('[data-action="stage_back"]')
     g.open_operation_details()
     g.wait_work_ready(workflow_id=workflow_id,run_id=run_id,selector='.ew-phase-job[data-job-id="qa-list"]')
     assets('figma-a5-cycle',{'a28e3.svg':13,'b22ad.svg':13,'69549.svg':14});g.capture('figma-a5-cycle-overview')
@@ -1312,7 +1330,7 @@ def figma_delta_flow(g):
     assert failed['status']=='failed' and failed['result']['http_status']==503 and failed['result']['error']['code']=='api_http_error'
     # Reopen the job through normal navigation. Its retry uses the latest
     # persisted revision even if the prior HTTP failure surfaced a command error.
-    g.click('[data-action="overview"]');g.open_operation_stage();g.click('[data-action="job"][data-job-id="qa-list"]')
+    g.click('[data-action="overview"]');g.open_operation_stage();g.open_job('qa-list')
     g.wait("document.querySelector('[data-action=execute]')?.innerText.includes('다시 조회')")
     g.click('[data-action="execute"]')
     retried=settle_server(lambda value:len([a for a in value['attempts'] if a['job_id']=='qa-list'])==2
@@ -1341,7 +1359,7 @@ def figma_delta_flow(g):
     g.wait_work_ready(run_id=run_id);g.capture('figma-a6-list-confirmed')
     g.record('Figma A6 registered API list selection and atomic confirmation',attempts=3,original_result_preserved=True,confirmed_items=1)
 
-    g.click('[data-action="overview"]');g.open_operation_stage();g.click('[data-action="job"][data-job-id="qa-report"]')
+    g.click('[data-action="overview"]');g.open_operation_stage();g.open_job('qa-report')
     select_execution_model();g.click('[data-action="execute"]')
     g.wait('document.querySelector("#ees-review-text")?.value.includes("합성 AI 검토 원문")',20000)
     original_report=next(item for item in run_state()['attempts'] if item['job_id']=='qa-report')['result']
@@ -1500,7 +1518,7 @@ def figma_delta_flow(g):
     # Opening ordinary work resumes the selected factory's active run. The
     # single-stage product view is ready before checking that it offers no
     # second start; entering work must preserve the reviewed blocked result.
-    resumed=g.wait_work_ready(workflow_id=delivery_id,run_id=delivery_run_id,selector='#ees-work-panel .ew-stage-run-button[data-action="execute_scope"]')
+    resumed=g.wait_work_ready(workflow_id=delivery_id,run_id=delivery_run_id,selector='#ees-work-panel [data-action="stage_more"]')
     assert resumed['reference']['factory_id']==factory_id,resumed
     g.wait('!document.querySelector("#ees-work-dialog")')
     start_controls=g.browser.evaluate('[...document.querySelectorAll(\'#ees-work-panel #ees-work-start,#ees-work-panel [data-action="stage_start"],#ees-work-panel [data-action="start_run"],#ees-work-panel [data-action="overview_start"]\')].map(e=>e.outerHTML)')
@@ -1510,7 +1528,7 @@ def figma_delta_flow(g):
     g.click('[data-action="records"]')
     g.wait_work_ready(selector='[data-action="open_run"][data-run-id="'+delivery_run_id+'"]')
     g.click('[data-action="open_run"][data-run-id="'+delivery_run_id+'"]')
-    g.wait_work_ready(workflow_id=delivery_id,run_id=delivery_run_id,selector='[data-action="stage_back"]')
+    g.wait_work_ready(workflow_id=delivery_id,run_id=delivery_run_id,selector='[data-action="stage_more"]')
     assert g.api('/api/ees-work/workspace?run_id='+delivery_run_id)['run']==blocked
     assert len([item for item in g.api('/api/ees-work/workspace?workflow_id='+delivery_id)['runs'] if item['factory_id']==factory_id])==1
     g.record('Figma A8 active factory remains visible and duplicate start is disabled',factory_id=factory_id,

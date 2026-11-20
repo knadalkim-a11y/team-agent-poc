@@ -1117,7 +1117,7 @@
       if(!single||selection.workflow_id!==id||!workStageTarget(state,selection))return;
       // 시작 on the first screen starts the round when no job on the screen can start it by itself.
       const rows=stageValueRows();
-      if(target.dataset.homeStart==='true'&&!state.run&&!(rows.length&&rows.every(workStageStartsRound))){await startRun({dataset:{startStageId:stage}});}
+      if(target.dataset.homeStart==='true'&&!state.run&&!(rows.length&&rows.every(row=>workStageStartsRound(row,workOperationDefinition(state))))){await startRun({dataset:{startStageId:stage}});}
       openNextStageJob({focus:true});return;}
     // 업무 on a procedure's own screen goes back to the first screen.
     if(action==='work_home')return select({workflow_id:'',run_id:'',job_id:'',stage_id:'',stage_overview:false,stage_evidence:'',stage_record:'',stage_verdict_job:'',tab:'overview'});

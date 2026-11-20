@@ -1253,14 +1253,17 @@ function workStageHTML(data,selection,stage,options={}){
   if(!allAuthored&&workSingleStage(definition))return workSimpleStageHTML(data,selection,{rows,list,fold,runtime,runButton,active,finishable,completed,tab,workflowName});
   return {body:breadcrumb+head+tabs+runtime+content,menu:tab==='work'?workStageMenuHTML(data,selection,rows):''};
 }
-function workStageStartsRound(row){return ['tool','ai'].includes(row.node.mode)&&row.node.result_block!=='change_request'&&!row.toolMissing;}
+// A job whose 찾기 starts the round itself, so the screen needs no separate 시작: a lookup answered by a question
+// (design mock 20). Other tool and AI jobs keep 시작, where an AI job's model is chosen before its first run.
+function workStageStartsRound(row,definition={}){return workStageLookup(row.node,definition)&&!row.toolMissing;}
 // A procedure with one stage is shown as the procedure itself (design mock 20): its name and purpose, the things to
 // do, and the end of the flow under the last of them. No tabs or counts: the records and the judgment rules are
 // under ⋯. 시작 is there only when no job can start the round itself, 지금 실행 only when two or more jobs can run.
 function workSimpleStageHTML(data,selection,{rows,list,fold,runtime,runButton,active,finishable,completed,tab,workflowName}){
   const {esc,icon}=workUI,run=data.run || {},definition=workOperationDefinition(data),scope=[run.cycle?.name,workOperationTarget(data,selection)].filter(Boolean).join(' · ');
-  // 시작 stays unless every job can start the round by itself (a person's check cannot be answered before it).
-  const startsItself=rows.length>0&&rows.every(workStageStartsRound);
+  // 시작 stays unless every job is a lookup that starts the round by itself (a person's check cannot be answered
+  // before a round; an AI job's model is chosen on the round).
+  const startsItself=rows.length>0&&rows.every(row=>workStageStartsRound(row,definition));
   const control=finishable?'':!data.run?(startsItself?'':runButton):active||rows.filter(row=>row.canExecute&&!row.attempts.length).length>1?runButton:'';
   const breadcrumb=`<nav class="ew-center-breadcrumb" aria-label="업무 경로"><button type="button" class="ew-run-back" data-action="work_home">업무</button><span aria-hidden="true">›</span><span aria-current="page">${esc(workflowName)}</span></nav>`;
   const more=`<button type="button" class="ew-icon-button" aria-label="더 보기(기록, 판정 기준)" data-action="stage_more" aria-haspopup="menu" aria-expanded="${selection.stage_verdict_job==='#more'}" aria-controls="ees-stage-verdict-menu">${icon('a953c')}</button>`;

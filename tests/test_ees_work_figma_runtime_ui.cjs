@@ -1959,3 +1959,11 @@ test('first use (review): the address check takes the forms people copy',()=>{
  for(const ok of ['HTTPS://wiki.example.com/pages/viewpage.action?pageId=1','https://x.atlassian.net/wiki/spaces/A/pages/edit-v2/77','https://wiki/pages/viewinfo.action?pageId=9#c',' 42 '])assert.equal(check(ok),'',ok);
  assert.match(check('https://wiki/display/A/T'),/번호가 없는 주소/);assert.equal(check('https://wiki/pages/edit-v2/'),'Confluence 문서 주소가 아니에요');
 });
+
+test('first use (CI product check): an AI job keeps 시작 on a one-stage procedure, so its model is chosen on the round',()=>{
+ const h=lookupFixture({started:false}),nodes=h.run.definition.nodes;Object.assign(nodes.b,{mode:'ai',result_block:'ai_review'});delete nodes.b.api_binding;
+ assert.match(h.body(),/data-action="stage_start" data-node-id="t"/);
+ const tool=lookupFixture({started:false});Object.assign(tool.run.definition.nodes.b,{result_block:'values',human_confirmation:false});
+ assert.match(tool.body(),/data-action="stage_start" data-node-id="t"/,'a tool job that is not a lookup keeps it too');
+ assert.doesNotMatch(lookupFixture({started:false}).body(),/data-action="stage_start" data-node-id="t"/,'only lookups start the round themselves');
+});
