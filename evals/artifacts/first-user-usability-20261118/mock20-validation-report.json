@@ -1,0 +1,11 @@
+{
+ "file": "/home/user/team-agent-poc/docs/mockups/ees-work/design-mock-20-first-guide.html",
+ "checks": 150,
+ "passed": 150,
+ "failed": [],
+ "problems": {
+  "pageErrors": [],
+  "consoleErrors": [],
+  "requests": []
+ }
+}
