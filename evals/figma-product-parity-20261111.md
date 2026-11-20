@@ -536,3 +536,4 @@ PR의 최신 EES delivery 실행에서 `ees-work-browser-evidence-native-compose
   - 실제 팀원의 사용
   - 시험 틀의 동시 누르기는 몇 ms 차이라 실제보다 빠르다.
 - **캡처:** [11장과 판·시나리오](artifacts/shared-account-20261120/captures.json).
+- **후속(같은 날):** 사용자가 시험 방식을 크게 바꾸는 목업을 요청했다. 게시하지 않고 작성 화면에서 시험하며, 시험은 연 브라우저 창의 것이다. [목업 21번 2판의 화면·규칙·결정 필요](../docs/mockups/ees-work/TASK.md#try-before-publish-20261120)과 [브라우저 검사 보고](artifacts/shared-account-20261120/mock21-validation-report.json)를 남겼다. 검사는 Chromium 153 headless, 1920×1080·1366×768에서 356/356이다. 1판에 대한 독립 검토 45건을 고친 결과이고, 실제 사용자 확인은 미실행이다.
