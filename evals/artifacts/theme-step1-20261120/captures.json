@@ -1,0 +1,59 @@
+{
+ "date": "2026-11-20",
+ "what": "Theme step 1 (values only): the same product screens before and after, taken from the running product with the same synthetic data and window sizes",
+ "contract": "docs/mockups/ees-work/TASK.md#theme-step1-20261120",
+ "before": {
+  "source": "main e494605 (exported copy)",
+  "program": "0.11.3+ees.14",
+  "wheel_sha256": "048945bd1b5df5743e99c5ac1bf438ba4421a0fcec062f8dfb6d7c893a903420"
+ },
+ "after": {
+  "source": "branch claude/quirky-gates-8sevak with the step-1 change (final build of this session)",
+  "program": "0.11.3+ees.14",
+  "wheel_sha256": "651a90c7321818fa5521e3248a66046c3edac8d56a05e0cc318be2ce8fe5519f"
+ },
+ "built_with": "Open WebUI source 2a960a59fe1dbbd35282f0556b3666d81102e781, Node 22.16.0, npm 10.9.2, official wheel open_webui-0.11.3 sha256 8436f9bb29c5accbdfd90d78470fcc917c882bd53f72ed88fed91b1ee97fa547",
+ "server": "tests/native_ui_fixture.py: the built frontend with synthetic sign-in, chat and model, and the real workflow service on a temporary database",
+ "taken_by": "one-off capture module outside the repository that reuses FigmaRuntimeNativeTests (operations_stage, a synthetic procedure whose job asks for 점검 기준 페이지 ID); it waits for open/close motion to end before each capture. ws3-ws5 comes from tests/test_ees_api_catalog_native.py: test_wide_work_area_keeps_the_api_list_beside_the_opened_api",
+ "browser": "Chrome 153 headless, device scale factor 1, light mode",
+ "states": {
+  "T1-run-stage-1920": "1920x1080, menu open, chat docked; job 4 failed, jobs 3/7/10 wait for a person",
+  "T5-ask-row-focus-1180": "1180x900 (menu collapses, chat closed), the stage started, the cursor in the number field",
+  "ws3-ws5-1920": "1920x1080, chat closed, API list beside the opened API editor",
+  "font-probe": "the computed first font family of every visible text element on the stage screen, then with the verdict menu open",
+  "font-noto-vs-inter": "the two fonts shipped in the pinned wheel, drawn with product strings: Noto (now), Inter default, Inter with tabular figures and slashed zero / tailed l / serifed I",
+  "compare-before-after": "crops of the same regions from the before and after captures"
+ },
+ "files": {
+  "after-T1-run-stage-1920.png": {
+   "sha256": "446ba8628a879390361115af267f69bb87f9928162635e6eb8e653e9564807e5"
+  },
+  "after-T5-ask-row-focus-1180.png": {
+   "sha256": "448f784c176ae0bd209ec427c0ef4b312dccdd8cb445a9c577db29678bccb88a"
+  },
+  "after-font-probe.json": {
+   "sha256": "e5094c4ed9285919b42f71622393f2968e7501464573c99fc3364b3143037fda"
+  },
+  "after-ws3-ws5-1920.png": {
+   "sha256": "5b1d060a2dbba489de151542fccea1c11a1741272bdb36a503705f591911452f"
+  },
+  "before-T1-run-stage-1920.png": {
+   "sha256": "b94a3e5ac82da8ea706f43318b9496363d7bb75ce342dd58886f29b372aee3b8"
+  },
+  "before-T5-ask-row-focus-1180.png": {
+   "sha256": "ae1d452f5f25e1bb5a07ff30a2d3d086878eb13a6b3e90ad729845e525305c5d"
+  },
+  "before-font-probe.json": {
+   "sha256": "5365b3b67b58d0eca5059ceb31bbd62dbdc058545d4cdad58f8bef3ac6dc0603"
+  },
+  "before-ws3-ws5-1920.png": {
+   "sha256": "dd59230c9abc59b6360206056ca497715c5e85e04db5d51da32bfc8100dfc0c3"
+  },
+  "compare-before-after.png": {
+   "sha256": "0a6181e471c435fe4bd390b36eb4bbfb56ff817f2a2c8d62e2649287cdb72fd9"
+  },
+  "font-noto-vs-inter.png": {
+   "sha256": "39837b0092138217eba005f30f33c346da87dc82b4ff9f806e80b40728d7f0b4"
+  }
+ }
+}
