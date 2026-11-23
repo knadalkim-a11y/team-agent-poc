@@ -17,7 +17,7 @@ from uuid import uuid4
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from .ees_workflow_authoring import WorkflowError, _value, _resolve, _now, _hash, _fail
-from .ees_workflow_definition import SYSTEMS, CATEGORIES, IDENTIFIER, MAX_DOCUMENT_BYTES, _dump, tool_connection_required, concurrent_runs_allowed, INPUT_ACCEPTS, confluence_address_error
+from .ees_workflow_definition import SYSTEMS, CATEGORIES, IDENTIFIER, MAX_DOCUMENT_BYTES, _dump, tool_connection_required, concurrent_runs_allowed
 from .ees_workflow_view import workflow_help
 from .ees_workflow_api_binding import binding_errors, binding_shape, retired_binding_errors
 
@@ -340,10 +340,6 @@ def definition_check(definition, complete=True):
             if example is not None and (not isinstance(example, str) or not example.strip() or len(example) > 80
                                         or any(ord(char) < 32 for char in example)):
                 errors.append(f'{field_id}: 예시는 한 줄 80자 이내로 적어 주세요.')
-            # What a text field takes in (2026-11-20): a Confluence document address is turned into its page number
-            # where the API is called. Optional; older programs ignore it and pass the text as it is.
-            if 'accepts' in field and (field['accepts'] not in INPUT_ACCEPTS or field['type'] != 'text'):
-                errors.append(f'{field_id}: 받는 값의 종류를 확인해 주세요.')
             if complete and field.get('options_source', 'manual') != 'manual' and not _options_query_valid(field):
                 errors.append(f'{field_id}: 현재 권한으로 조회하는 선택지 연결이 아직 구성되지 않았습니다.')
             if field['type'] in ('single', 'multi') and not isinstance(field.get('options', []), list):
@@ -495,8 +491,6 @@ def input_errors(fields, values, complete=True, options_snapshot=None):
             valid = (isinstance(value, (str, int)) and not isinstance(value, bool) and value in options if kind == 'single' else isinstance(value, list) and len(value) == len(set(map(str, value))) and all(isinstance(item, (str, int)) and not isinstance(item, bool) and item in options for item in value))
         if not valid:
             errors.append(f'{key}: {kind} 입력 형식과 선택지를 확인해 주세요.')
-        elif field.get('accepts') == 'confluence_page' and value.strip() and confluence_address_error(value):
-            errors.append(f'{key}: {confluence_address_error(value)}')
         if complete and field.get('required') and value in ('', []):
             errors.append(f'{key}: 필수값을 입력해 주세요.')
     return errors

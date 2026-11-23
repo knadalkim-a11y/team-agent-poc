@@ -61,11 +61,7 @@ test('authored execution rows use frozen metadata and whole-job verdict with no 
  assert.match(out,/data-action="stage_verdict"/);assert.match(out,/data-authored-result/);assert.match(out,/href="https:\/\/example.test\/doc"/);
  assert.doesNotMatch(out,/새 카탈로그|새 질문|숨기기로 정한 값|data-item-confirm|data-list-include|data-action="execute_scope"/);
  const menu=html('workStageHTML(data,{stage_verdict_job:"j"},data.run.definition.nodes.t).menu',{data});assert.match(menu,/data-action="stage_decide"/);
- const mixed=structuredClone(data);mixed.run.definition.nodes.h={id:'h',type:'j',parent:'t',mode:'human',name:'다른 확인'};mixed.run.definition.nodes.t.children.push('h');
- // A procedure with one stage shows 지금 실행 only when two or more jobs can run (design mock 20); with several
- // stages a mixed stage keeps its stage control.
- assert.doesNotMatch(html('workStageHTML(data,{},data.run.definition.nodes.t).body',{data:mixed}),/data-action="execute_scope"/);
- mixed.run.definition.nodes.t2={id:'t2',type:'t',parent:mixed.run.definition.nodes.t.parent,name:'다음 단계',children:[]};assert.match(html('workStageHTML(data,{},data.run.definition.nodes.t).body',{data:mixed}),/data-action="execute_scope"/);
+ const mixed=structuredClone(data);mixed.run.definition.nodes.h={id:'h',type:'j',parent:'t',mode:'human',name:'다른 확인'};mixed.run.definition.nodes.t.children.push('h');assert.match(html('workStageHTML(data,{},data.run.definition.nodes.t).body',{data:mixed}),/data-action="execute_scope"/);
 });
 test('authored result fields reject unsafe URLs and unavailable snapshots without latest metadata fallback',()=>{
  for(const url of ['javascript:alert(1)','data:text/html,bad','https://name:password@example.test/doc','//example.test/doc','https://example.test\\bad','https://example.test/a b']){const {attempt}=authoredExecutionData();attempt.result.items[0].row.url=url;const out=html('workAuthoredResultHTML(attempt)',{attempt});assert.doesNotMatch(out,/<a /);}

@@ -759,11 +759,8 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         control = '#sidebar [data-action=workflow][data-workflow-id="' + key + '"]'
         self.wait('document.querySelector(' + json.dumps(control) + ')')
         self.click(control)
-        # A procedure with one stage opens on its things to do with 시작 (2026-11-20, design mock 20).
-        start = '#ees-work-panel [data-action=stage_start]:not([data-job-id])'
-        self.wait('document.querySelector(' + json.dumps(start) + ')')
-        self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-panel .ew-operation-overview')"))
-        self.click(start)
+        self.wait("document.querySelector('#ees-work-panel [data-action=overview_start]')")
+        self.click('#ees-work-panel [data-action=overview_start]')
         self.wait("document.querySelectorAll('#ees-work-panel input[data-stage-check]:not(:disabled)').length === 2")
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog')"))
         self.assertEqual(self.text('#ees-work-panel .ew-vd-count'), '0 / 2')
@@ -778,11 +775,8 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.assertEqual(ticked['status'], 'completed')
         self.assertEqual(sorted(item['item_id'] for item in ticked['decisions']), sorted(item['id'] for item in job['confirmation_items']))
         self.assertEqual(len(run['attempts']), 1)
-        self.assertIn('다 했어요', self.text('#ees-work-panel .ew-fg-done'))
-        self.click('#ees-work-panel .ew-fg-done [data-action=finish_run]')
-        # 끝내기 ends on the first screen, where the procedure shows when it was finished last.
-        card = '#ees-work-panel .ew-fg-card [data-home-start][data-workflow-id="' + key + '"]'
-        self.wait('document.querySelector(' + json.dumps(card) + ")?.closest('.ew-fg-card')?.innerText.includes('끝냄')")
+        self.click('#ees-work-panel [data-action=finish_run]')
+        self.wait("document.querySelector('#ees-work-panel [data-action=overview_start]') && document.querySelector('#ees-work-panel .ew-last-run')")
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog')"))
         closed = next(item for item in self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['runs'] if item['id'] == run['id'])
         self.assertEqual(closed['status'], 'completed')
@@ -806,8 +800,8 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         saved_again = command(action='save_draft', workflow_id=key, definition=draft, expected_revision=latest['revision'])
         command(action='publish_workflow', workflow_id=key, expected_revision=saved_again['revision'])
         open_stage()
-        self.wait('document.querySelector(' + json.dumps(start) + ')')
-        self.click(start)
+        self.wait("document.querySelector('#ees-work-panel [data-action=overview_start]')")
+        self.click('#ees-work-panel [data-action=overview_start]')
         # The job now asks for a value. No window asks for it at the start (2026-11-19): it is asked under the job's
         # row, next to the list to tick, and is left empty here.
         self.wait("document.querySelectorAll('#ees-work-panel input[data-stage-check]:not(:disabled)').length === 2")
@@ -834,7 +828,7 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
             self.wait("document.querySelectorAll('#ees-work-panel .ew-vd-check-done').length === %d" % done)
         self.wait("document.querySelector('#ees-work-panel [data-action=finish_run]')")
         self.click('#ees-work-panel [data-action=finish_run]')
-        self.wait('document.querySelector(' + json.dumps(card) + ')')
+        self.wait("document.querySelector('#ees-work-panel [data-action=overview_start]')")
         finished = next(item for item in self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['runs'] if item['id'] == second['id'])
         self.assertEqual(finished['status'], 'completed')
         self.assertEqual(sorted((item['item_id'], item['result_revision']) for item in finished['jobs'][job_id]['decisions']),

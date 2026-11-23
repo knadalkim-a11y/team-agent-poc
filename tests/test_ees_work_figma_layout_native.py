@@ -296,17 +296,11 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.click('[data-action=mode][data-mode=work]')
         self.wait("document.querySelector('[data-action=records]')")
         self.open_run(workflow_id, run, job=None)
-        if self.browser.evaluate("!!document.querySelector('#ees-work-panel [data-action=stage_more]')"):
-            # A procedure with one stage opens on its things to do and has no overview (2026-11-20, design mock 20);
-            # its record tabs are behind ⋯.
-            self.click('#ees-work-panel [data-action=stage_more]')
-            self.click('#ees-stage-verdict-menu [data-action=stage_tab][data-tab=log]')
-        else:
-            if not self.browser.evaluate("!!document.querySelector('.ew-operation-overview')"):
-                self.click('[data-action=stage_back]')
-            self.wait("document.querySelector('.ew-operation-overview')")
-            capture_style('work-overview')
-            self.click('.ew-operation-stage[data-action=stage_open]')
+        if not self.browser.evaluate("!!document.querySelector('.ew-operation-overview')"):
+            self.click('[data-action=stage_back]')
+        self.wait("document.querySelector('.ew-operation-overview')")
+        capture_style('work-overview')
+        self.click('.ew-operation-stage[data-action=stage_open]')
         self.wait("document.querySelector('#ees-work-panel.ew-vd .ew-tabs')")
         capture_style('work-stage', '.ew-tabs')
         capture_tab_focus('work-stage', '.ew-tabs')

@@ -274,33 +274,3 @@ def validate_definition(definition):
     if any(not visit(node_id) for node_id in graph):
         reject("선행 작업이 순환합니다. 서로를 기다리는 의존 관계를 수정해 주세요.")
     return list(dict.fromkeys(errors))
-
-
-# ---- A Confluence document typed by its address (2026-11-20, design mock 20) ----
-# An input that declares accepts="confluence_page" takes what a person copies from the browser: the address of a
-# Confluence page or its bare number. The number is what the API is called with. Addresses that carry no number
-# (/display/…, /x/…) are said apart, so the person can bring an address that has one.
-INPUT_ACCEPTS = ('confluence_page',)
-_CONFLUENCE_NUMBER = re.compile(r'^[0-9]{1,30}$')
-_CONFLUENCE_ADDRESS = re.compile(r'^https?://[^\s/?#]+[^\s]*?(?:[?&]pageId=([0-9]{1,30})(?:[&#]|$)|/pages/(?:edit-v2/|edit/)?([0-9]{1,30})(?:[/?#]|$))', re.I)
-_CONFLUENCE_NUMBERLESS = re.compile(r'^https?://[^\s/?#]+[^\s]*?/(?:display|x)/', re.I)
-
-
-def confluence_page_id(value):
-    """The page number in a Confluence address or a bare number; None when the text holds none."""
-    if not isinstance(value, str):
-        return None
-    text = value.strip()
-    if _CONFLUENCE_NUMBER.match(text):
-        return text
-    match = _CONFLUENCE_ADDRESS.match(text)
-    return (match.group(1) or match.group(2)) if match else None
-
-
-def confluence_address_error(value):
-    """What is wrong with the text as a Confluence document address, in the words the field shows."""
-    if confluence_page_id(value) is not None:
-        return ''
-    if isinstance(value, str) and _CONFLUENCE_NUMBERLESS.match(value.strip()):
-        return '문서 번호가 없는 주소예요. 페이지 정보 화면의 주소를 넣어 주세요.'
-    return 'Confluence 문서 주소가 아니에요.'

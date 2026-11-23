@@ -1823,13 +1823,3 @@ test('check items: going back to 한 번에 확인 hides the list and keeps what
  const once=h.fields.find(f=>f.name==='result_block'&&f.value==='human_confirm');h.fields.filter(f=>f.name==='result_block').forEach(f=>{f.checked=f===once;});h.designer.handleEvent({type:'change',target:once});
  assert.equal(h.fields.some(f=>f.name==='check_item_name'),false);assert.equal(h.draft().definition.nodes.j.result_block,'human_confirm');assert.deepEqual(h.draft().definition.nodes.j.confirmation_items,value.nodes.j.confirmation_items);
 });
-
-// 2026-11-20 review: what a text field takes in (accepts: a Confluence address) goes when the field stops being text,
-// so the procedure can still be saved; it stays while the field stays text.
-test('an address field keeps what it takes in while it is text and drops it when its type changes',async()=>{
- const h=harness();h.workflows.get('w').draft.nodes.j.inputs=[{id:'page-id',name:'문서 주소',type:'text',scope:'run',required:true,accepts:'confluence_page'}];h.render();await h.node();
- h.dialogs.push({id:'page-id',name:'문서 주소(수정)',type:'text',scope:'run'});h.click('input_edit',{id:'page-id'});await flush();
- assert.equal(h.draft().definition.nodes.j.inputs[0].accepts,'confluence_page');
- h.dialogs.push({id:'page-id',name:'문서 번호',type:'number',scope:'run'});h.click('input_edit',{id:'page-id'});await flush();
- assert.equal(h.draft().definition.nodes.j.inputs[0].type,'number');assert.equal('accepts' in h.draft().definition.nodes.j.inputs[0],false);
-});

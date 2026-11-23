@@ -621,92 +621,70 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.wait("document.querySelector('[data-author-action=open][data-id=guide-confluence-documents]')")
         self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-author-list [data-author-action=open]')].map(e=>e.dataset.id)"), [key])
         self.click('[data-action=mode][data-mode=work]')
-        # 2026-11-20 (design mock 20): the first screen lists the guide with its purpose and 시작. A procedure with one
-        # stage opens on its things to do, with the address field of the first job ready and no window.
-        start = '.ew-fg-home [data-home-start][data-workflow-id=guide-confluence-documents]'
-        self.wait('document.querySelector(' + json.dumps(start) + ')')
-        self.assertIn('문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다.', self.text('.ew-fg-card'))
+        self.click('[data-action=workflow][data-workflow-id=guide-confluence-documents]')
         self.assertNotIn(old_workflow, self.browser.evaluate("[...document.querySelectorAll('[data-action=workflow]')].map(e=>e.dataset.workflowId)"))
-        inner = ('판정', '실행 필요', '대기', '지금 실행', '1차', 'guide-confluence', '진행 건', '회차', '업무 절차를 선택해 주세요')
-        def plain_words(label):
-            text = self.browser.evaluate("document.querySelector('#ees-work-panel').innerText")
-            self.assertEqual([word for word in inner if word in text], [], label)
-        plain_words('first screen')
-        self.click(start)
-        field = '#stage-under-page [data-work-input][name="page-id"]'
+        self.click('[data-action=stage_open][data-node-id=documents]')
+        # 2026-11-19: no window asks for the value. The job that asks for it is open under its row with the field
+        # ready, and the job that waits for the first job's result cannot run yet.
+        field = '#stage-values-page [data-work-input][name="page-id"]'
         no_window = "!document.querySelector('#ees-work-dialog[open]')"
         self.wait('document.activeElement?.matches(' + json.dumps(field) + ')')
-        self.assertEqual(self.read(field, 'placeholder'), '예: https://wiki…/pages/123456789')
+        self.assertEqual(self.read(field, 'placeholder'), '예: 123456789')
         self.assertEqual(self.read('[data-stage-job=page]', 'dataset.expanded'), 'true')
-        self.assertEqual(self.text('[data-stage-job=children] [data-decision-status]'), '1번 다음')
-        self.assertTrue(self.browser.evaluate("!document.querySelector('#ees-work-panel .ew-tabs, #ees-work-panel .ew-stage-run-button, #ees-work-panel .ew-center-counts')"))
-        plain_words('things to do')
-        # 찾기 without the value, then with words that are no address: said at the field; nothing starts.
-        error = "document.querySelector('#stage-under-page [data-stage-value-error]')?.textContent"
-        self.click('#stage-under-page [data-stage-run]')
-        self.wait(error + " === '문서 주소를 넣어 주세요'")
+        self.assertTrue(self.read('[data-stage-job=children] .ew-vd-run', 'disabled'))
+        self.assertEqual(self.text('[data-stage-job=children] [data-decision-status]'), '대기')
+        # 실행 without the value starts nothing and says so at the field.
+        self.click('[data-stage-job=page] .ew-vd-run')
+        self.wait("document.querySelector('#stage-values-page .ew-vd-ask-error')?.textContent === '값을 넣어 주세요'")
         self.assertEqual(self.read(field, 'ariaInvalid'), 'true')
-        self.click(field); self.browser.call('Input.insertText', {'text': '점검 기준서'})
-        self.wait("!document.querySelector('#stage-under-page [data-stage-value-error]')")
-        self.key('Enter', 13)
-        self.wait(error + " === 'Confluence 문서 주소가 아니에요'")
         self.assertTrue(self.browser.evaluate(no_window + ' && !window.__eesNativeWorkV1.captureReference()?.run_id'))
         self.assertEqual(upstream.records, [])
-        # The address a person copies; Enter does what 찾기 does: the round starts with it and the job runs.
-        address = 'https://wiki.example.com/pages/viewpage.action?pageId=' + PAGE_ID
-        self.browser.evaluate('document.querySelector(' + json.dumps(field) + ').select()')
-        self.browser.call('Input.insertText', {'text': address})
+        # Enter in the field does what the row's 실행 does: the round starts with the value and the job runs.
+        self.click(field); self.browser.call('Input.insertText', {'text': PAGE_ID})
+        self.wait("!document.querySelector('#stage-values-page .ew-vd-ask-error')")
         self.key('Enter', 13)
-        self.wait("document.querySelector('#stage-under-page .ew-fg-question')?.innerText.includes('이 결과가 맞나요?')")
-        self.wait("document.activeElement?.matches('[data-stage-answer][data-job-id=page]')")
-        self.assertIn(PAGE['title'], self.text('#stage-under-page .ew-fg-found'))
-        self.assertEqual(self.text('[data-stage-job=page] [data-decision-status]'), '확인할 차례')
+        self.wait("document.querySelector('#stage-values-page [data-stage-result]')?.innerText.includes(" + json.dumps(PAGE['title']) + ")")
         self.assertTrue(self.browser.evaluate(no_window))
         run_id = self.browser.evaluate('window.__eesNativeWorkV1.captureReference().run_id')
         run = self.state(run_id=run_id)['run']
-        self.assertEqual(run['inputs'], {'page-id': address})
+        self.assertEqual(run['inputs'], {'page-id': PAGE_ID})
         self.assertEqual([(attempt['job_id'], attempt['status']) for attempt in run['attempts']], [('page', 'succeeded')])
         self.assertEqual(upstream.records, [('/rest/api/content/' + PAGE_ID, {}, True)])
-        plain_words('found')
+        result = self.text('#stage-values-page [data-stage-result]')
+        for word in ('문서 제목', PAGE['title'], '페이지 ID', PAGE_ID):
+            self.assertIn(word, result)
+        self.assertEqual(self.read(field, 'value'), PAGE_ID)
         self.screenshot('confluence-guide-page')
-        # 맞아요: the job closes with the document's title and the next opens with it, 찾기 ready.
-        self.click('[data-stage-answer][data-job-id=page]')
+        # The answer is given on the row as before. The answered job closes and the next opens with the value it is
+        # given, which it could not run without.
+        self.click('[data-action=stage_verdict][data-job-id=page]')
+        self.click('#ees-stage-verdict-menu [data-action=stage_decide][data-verdict=completed]')
         self.wait("document.querySelector('[data-stage-job=children]')?.dataset.expanded === 'true' && document.querySelector('[data-stage-job=page]')?.dataset.expanded === 'false'")
-        self.assertEqual(self.text('[data-stage-job=page] .ew-fg-outcome'), PAGE['title'])
-        self.assertEqual(self.text('[data-stage-job=page] [data-decision-status]'), '맞음')
-        self.assertIn('1번 결과', self.text('#stage-under-children')); self.assertIn(PAGE['title'], self.text('#stage-under-children'))
-        self.assertFalse(self.browser.evaluate("!!document.querySelector('#stage-under-children [data-work-input]')"))
-        self.wait("document.activeElement?.matches('#stage-under-children [data-stage-run]')")
-        self.key('Enter', 13)
-        self.wait("document.querySelector('#stage-under-children .ew-fg-list')?.innerText.includes('주간 점검표')")
-        rows = self.text('#stage-under-children .ew-fg-list')
+        given = self.text('#stage-values-children')
+        self.assertIn(PAGE_ID, given); self.assertIn('기준 문서 확인에서', given)
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('#stage-values-children [data-work-input]')"))
+        self.click('[data-stage-job=children] .ew-vd-run')
+        self.wait("document.querySelector('#stage-values-children .ew-vd-rows')?.innerText.includes('주간 점검표')")
+        rows = self.text('#stage-values-children .ew-vd-rows')
         for row in CHILDREN:
             self.assertIn(row['title'], rows)
         self.screenshot('confluence-guide-children')
-        # 네 confirms the list as it came back: no window, no reason. The end of the flow is under the last job.
-        self.click('[data-stage-answer][data-job-id=children]')
-        self.wait("document.querySelector('.ew-fg-done') && document.activeElement?.matches('.ew-fg-done [data-action=finish_run]')")
-        self.assertTrue(self.browser.evaluate(no_window))
-        self.assertIn('다 했어요', self.text('.ew-fg-done'))
+        # The list is confirmed from its row with the reason the product asks for.
+        self.click('[data-action=stage_confirm_list][data-job-id=children]')
+        self.fill('#ees-list-confirm-reason', '하위 문서 두 건을 확인했습니다.')
+        self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.wait("!document.querySelector('[data-action=stage_confirm_list]') && document.querySelector('[data-stage-job=children]')?.dataset.expanded === 'false'")
         final = self.state(run_id=run_id)['run']
         self.assertEqual(len(final['attempts']), 2)
         self.assertEqual([final['jobs'][job]['status'] for job in ('page', 'children')], ['completed', 'completed'])
         self.assertEqual(upstream.records, [
             ('/rest/api/content/' + PAGE_ID, {}, True),
             ('/rest/api/content/' + PAGE_ID + '/child/page', {'limit': ['5']}, True)])
-        plain_words('done')
         # The name opens and closes the area; the way to the job screen is 자세히 at its end.
         self.click('[data-stage-job=children] .ew-vd-name')
-        self.click('#stage-under-children .ew-fg-more [data-action=job]')
+        self.click('#stage-under-children .ew-vd-more [data-action=job]')
         self.wait("document.querySelector('.ew-api-table')?.innerText.includes('주간 점검표')")
         self.assertEqual(self.text('#ees-work-panel h2'), run['definition']['nodes']['children']['name'])
-        # Back through the left menu to the round, then 끝내기 ends on the first screen with what was found.
-        self.click('[data-action=workflow][data-workflow-id=guide-confluence-documents]')
-        self.wait("document.querySelector('.ew-fg-done [data-action=finish_run]')")
-        self.click('.ew-fg-done [data-action=finish_run]')
-        self.wait("document.querySelector('.ew-fg-card small')?.innerText.includes('끝냄')")
-        self.assertIn(PAGE['title'] + ' 외 ' + str(len(CHILDREN)) + '건', self.text('.ew-fg-card small'))
-        self.assertEqual(self.state(run_id=run_id)['run']['status'], 'completed')
 
     def check_confluence_results(self, key, run, page_job, children_job, upstream, capture_name):
         self.open_run(key, run, job=page_job)
