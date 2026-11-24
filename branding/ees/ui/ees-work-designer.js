@@ -1929,7 +1929,7 @@ function createWorkDesigner({callbacks}) {
     const box=host.querySelector?.('.ew-author-scroll'),position=panelPositions.get(target);if(box){if(position)[...(box.querySelectorAll?.('details:not(.ew-stage-advanced):not(.ew-tool-advanced):not(.ew-proposal-other)') || [])].forEach((item,index)=>{if(index<position.details.length)item.open=position.details[index];});itemScroller().scrollTop=position?.scroll ?? (sameTarget?scroll:0);}
     // The list beside the item keeps its place; when it first appears the opened row is brought into view.
     const pane=host.querySelector?.('.ew-author-pane,.ew-api-pane');if(pane){if(paneBefore?.className===pane.className)pane.scrollTop=paneScroll;else pane.querySelector?.('[aria-current=true]')?.scrollIntoView?.({block:'nearest'});}
-    if(focusData){let field=focusData.create?host.querySelector?.('[data-author-action=create]'):focusData.action?Array.from(host.querySelectorAll?.('[data-author-action]') || []).find(item=>item.dataset.authorAction===focusData.action&&item.dataset.id===focusData.nodeId&&item.dataset.parent===focusData.parent&&item.dataset.tab===focusData.tab&&item.dataset.apiSetup===focusData.apiSetup):Array.from(host.querySelectorAll?.('input,select,textarea') || []).find(item=>focusData.id?item.id===focusData.id:item.name===focusData.name);if(!field&&focusData.button&&inlineConflict())field=host.querySelector?.('[data-author-action=inline_cancel]');field?.focus?.({preventScroll:true});if(typeof focusData.start==='number'&&field?.setSelectionRange&&['text','search','textarea','url',''].includes(field.type || ''))try{field.setSelectionRange(focusData.start,focusData.end);}catch(_){} }
+    if(tryFocus)tryRestoreFocus(tryFocus);else if(focusData){let field=focusData.create?host.querySelector?.('[data-author-action=create]'):focusData.action?Array.from(host.querySelectorAll?.('[data-author-action]') || []).find(item=>item.dataset.authorAction===focusData.action&&item.dataset.id===focusData.nodeId&&item.dataset.parent===focusData.parent&&item.dataset.tab===focusData.tab&&item.dataset.apiSetup===focusData.apiSetup):Array.from(host.querySelectorAll?.('input,select,textarea') || []).find(item=>focusData.id?item.id===focusData.id:item.name===focusData.name);if(!field&&focusData.button&&inlineConflict())field=host.querySelector?.('[data-author-action=inline_cancel]');field?.focus?.({preventScroll:true});if(typeof focusData.start==='number'&&field?.setSelectionRange&&['text','search','textarea','url',''].includes(field.type || ''))try{field.setSelectionRange(focusData.start,focusData.end);}catch(_){} }
     if(focusRequest){
       const request=focusRequest;focusRequest=null;
       const button=()=>Array.from(host.querySelectorAll?.('[data-author-action]') || []).find(item=>item.dataset.authorAction===request.action&&(!request.id||item.dataset.id===request.id)&&(!request.parent||item.dataset.parent===request.parent));
@@ -1943,6 +1943,9 @@ function createWorkDesigner({callbacks}) {
         }
       }
     }
+    // The work rows of the try need the work panel's row scope (the view sets it too when it repaints).
+    host.closest?.('#ees-work-panel')?.classList?.toggle?.('ew-vd',tab==='try');
+    if(tab==='try')placeTryMenu();
     resizeAuthoredEvidence();setBusy(busy);workUI.reanchorHelp?.(host,helpContext());reportStartContext();if(editor&&!resourcesLoaded&&!resourcesLoading&&callbacks.resources)loadResources();
   }
   function syncHelpState(){const busy=Boolean(callbacks.helpState?.()?.busy);host?.querySelectorAll?.('[data-author-action=tool_question]').forEach(button=>{button.disabled=busy;});}

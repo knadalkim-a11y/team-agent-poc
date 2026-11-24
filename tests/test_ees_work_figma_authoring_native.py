@@ -188,7 +188,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.authoring_viewport(width, 768, overlay=width <= 480)
             self.assertEqual(self.browser.evaluate(
                 "[...document.querySelectorAll('.ew-author-tabs > button')].map(button=>button.dataset.tab)"),
-                ['content', 'history'])
+                ['content', 'try', 'history'])
             self.open_author_job_ui('job-0')
             choice = '[data-author-action=judgment_choices][data-id=job-0]'
             self.click(choice)
