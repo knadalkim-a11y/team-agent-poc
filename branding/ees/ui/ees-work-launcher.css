@@ -2082,10 +2082,6 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
   line-height: 22px;
 }
 [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-procedure-info textarea { height: 42px; resize: vertical; }
-[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-procedure-info > .ew-author-link {
-  grid-column: 1 / -1;
-  justify-self: center;
-}
 [data-ees-work-surface] #ees-work-panel #ees-work-designer:not([data-author-tab=tools]) > footer:not(:empty) { min-height: 59px; }
 [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-stage-add { justify-self: start; }
 [data-ees-work-surface] #ees-work-panel .ew-author-list > button:hover:not(:disabled):not([aria-current]):not([aria-pressed=true]) {
@@ -2650,16 +2646,16 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 /* A choice is as wide as its words. */
 [data-ees-work-surface] #ees-work-panel #ees-work-designer:not([data-author-tab=tools]) .ew-job-method>div {display:inline-grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(112px,max-content);max-width:100%;}
 [data-ees-work-surface] #ees-work-panel #ees-work-designer:not([data-author-tab=tools]) .ew-job-method span {padding:4px 16px;}
-/* New procedure and the editor's first card: name and purpose side by side when there is room. */
+/* Keep classification beside the name when it fits, and the purpose below. */
 [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-scope-chip-row {margin:0;}
 [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-scope-chip {display:inline-flex;align-items:center;min-height:22px;padding:0 8px;border-radius:11px;background:var(--ees-surface-muted);font-size:12px;line-height:18px;color:var(--ees-text-secondary);}
-[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-procedure-info > .ew-author-link {justify-self:start;}
 [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-procedure-create-actions {justify-content:flex-start;}
 [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-workflow-create textarea {min-height:64px;height:64px;}
-@container ees-author-form (min-width:720px) {
-  [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-procedure-info,
-  [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-workflow-create > .ew-author-fields {grid-template-columns:minmax(220px,360px) minmax(0,var(--ew-w-text));justify-content:start;align-items:start;}
-  [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-procedure-info .ew-procedure-description {grid-column:auto;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer :is(#ew-procedure-category,#ew-overview-category) {width:100%;min-width:0;max-width:182px;}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer :is(#ew-procedure-create > .ew-author-fields,#ew-procedure-info) {grid-template-columns:minmax(0,1fr);}
+@container ees-author-form (min-width:440px) {
+  [data-ees-work-surface] #ees-work-panel #ees-work-designer :is(#ew-procedure-create > .ew-author-fields,#ew-procedure-info) {grid-template-columns:minmax(0,340px) minmax(0,176px);justify-content:start;align-items:start;}
+  [data-ees-work-surface] #ees-work-panel #ees-work-designer :is(#ew-procedure-create,#ew-procedure-info) .ew-procedure-description {grid-column:1 / -1;}
 }
 /* Adding a stage or a job: one row with the name and its button. */
 [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-stage-editor.ew-add-row {display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:44px;margin:8px 0;padding:0;border:0;border-radius:0;background:transparent;}

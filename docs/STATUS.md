@@ -1,5 +1,12 @@
 # 현재 작업 상태
 
+## 2026-11-24 · 업무 분류 선택과 단계 안의 작업 연속 추가
+
+- **기준:** 사용자가 검토한 **제시한 안**(Site 커밋 `c15b79d`)을 main `e494605` 기준의 PR로 준비한다. [구현 범위](mockups/ees-work/TASK.md#procedure-category-and-repeat-20261124)
+- **사내 설치본:** 사용자 보고 기준 `e49460569155`.
+- **검수:** [시안과 제품 확인 기록](../evals/figma-product-parity-20261111.md#procedure-category-and-repeat-verification-20261124).
+- **다음 하나:** 이번 PR의 자동 검사 결과를 확인한다.
+
 ## 2026-11-19 · 값을 묻는 작업(목업 19번 3판)을 main에 넣고 사내 적용 준비 · 사내는 main 77ec384(사용자 보고)
 
 - **요청·기준:** 사용자가 이번 구현을 main에 넣고 새로 사내 적용을 준비하라고 정했고(2026-11-19), 전체 검사가 끝나면 사내 적용 명령을 알려 달라고 했다. main `77ec384`([PR #152](https://github.com/knadalkim-a11y/team-agent-poc/pull/152) 병합), 열린 PR 없음.

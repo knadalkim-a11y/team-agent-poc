@@ -608,6 +608,8 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.wait("document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 작업 이름\"]')")
         self.fill('#ew-stage-editor [name=name]', name)
         self.click('[data-author-action=inline_apply]')
+        self.wait("document.activeElement?.matches('#ew-stage-editor [name=name]') && document.activeElement.value === ''")
+        self.click('.ew-stage-body .ew-job-row:last-child [data-author-action=node]')
         self.wait("document.querySelector('#ew-author-node [name=job_guidance]')")
 
     def send_native_chat_question(self, question):
