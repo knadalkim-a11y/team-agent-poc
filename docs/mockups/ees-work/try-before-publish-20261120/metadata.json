@@ -1,0 +1,138 @@
+{
+ "revision": 2,
+ "status": "review_mock_ready",
+ "date": "2026-11-20",
+ "request": "크게 가는 쪽으로 목업 그려줘",
+ "context": "시스템별 공용 계정을 사람들이 같이쓰면서, 시스템별 워크플로우를 만드는게 가장 급하거든 · 공용 계정 진단(evals/figma-product-parity-20261111.md#shared-account-20261120)에서 시험이 실제 게시·진행 건이라 섞이는 문제가 가장 컸고, 크게 가는 쪽은 게시하지 않고 작성 화면에서 바로 시험해 보는 방식",
+ "base_commit": "ffb9530",
+ "product_commit": "e494605",
+ "implementation_revision": null,
+ "previous_revision": {
+  "revision": 1,
+  "commit": "ffb9530",
+  "note": "검토 전 판. 사용자에게 전달하지 않았고 독립 검토 45건을 고쳐 2판이 됨"
+ },
+ "mock": {
+  "file": "docs/mockups/ees-work/design-mock-21-try-before-publish.html",
+  "sha256": "5f131e124491c6f7702925d37de9f1fcbbd9df44ec61a6b142cf5fd88cab66c3",
+  "bytes": 590298,
+  "source": "docs/mockups/ees-work/design-mock-src/21-try-before-publish.html",
+  "source_sha256": "e5b9c928af7a1c07c587193dfc5e5c0adc7f11b04cfa6f0bc026ad913d1fd1f0",
+  "product_css": {
+   "chat-theme.css": "b0c9b3298702fe77d758839265370080b9cf33f403c558c96dc4e95e114f222e",
+   "ees-work-launcher.css": "808fff5005533fcc0815dd85e3794e1fc19d96eb2f8df4245aa78bf441357eec"
+  }
+ },
+ "screens": {
+  "T1": "작성 화면 · 11:42에 저장, 아직 게시 전. 탭에 시험해 보기, 제목 옆 미게시, 바닥 저장·게시",
+  "T2": "시험해 보기를 처음 눌렀을 때 · 위 줄 시험·팀에 안 보임·11:42 저장본, 작업 줄은 업무 화면 그대로",
+  "T3": "해 보다가 빠진 점검 항목을 알아챘을 때 · 줄 끝 고치기, 위 줄 처음부터",
+  "T4": "줄의 고치기를 눌렀을 때 · 그 작업의 편집 화면, 새 항목 칸에 커서",
+  "T5": "고쳐 저장(11:47)하고 돌아왔을 때 · 새 저장본으로 처음부터, 바뀐 작업에 바뀜, 페이지 ID는 다시 채움",
+  "T6": "시험이 모두 적합일 때 · 마지막 줄 아래 모두 적합, 게시가 주 단추",
+  "T7": "게시한 뒤 · 게시 v1, 바닥 게시함·방금·업무에서 보기, 업무 내용 탭",
+  "T8": "같은 공용 계정으로 다른 PC의 B · 업무 목록(운영)에 게시 전 절차가 없음",
+  "T9": "게시된 절차(v1)에 항목을 더해 저장했을 때 · 게시 v1 · 게시 안 한 변경 있음",
+  "T10": "시험에서 실행했는데 Confluence 연결이 없을 때 · 그 줄 아래 연결 설정 열기",
+  "T11": "시험에서 없는 문서의 페이지 ID일 때 · 그 줄 아래 페이지 ID 고치기"
+ },
+ "window": {
+  "1920x1080": "왼쪽 메뉴 256px 펼침, 가운데 1104px, 대화 560px 열림",
+  "1366x768": "왼쪽 메뉴 56px 접힘(제품의 1440px 미만 동작), 가운데 830px, 대화 480px 열림"
+ },
+ "captures": [
+  {
+   "file": "T1.png",
+   "shows": "작성 화면 · 11:42에 저장, 아직 게시 전. 탭에 시험해 보기, 제목 옆 미게시, 바닥 저장·게시",
+   "sha256": "9cfc00a8feb1bad8e6eecafe01808beefdffd383943c4d0a194bd58ea6cb44bb"
+  },
+  {
+   "file": "T2.png",
+   "shows": "시험해 보기를 처음 눌렀을 때 · 위 줄 시험·팀에 안 보임·11:42 저장본, 작업 줄은 업무 화면 그대로",
+   "sha256": "50184e2c1da324e3880c3942121a45107a2efb5056ef51432b2a03101486246c"
+  },
+  {
+   "file": "T3.png",
+   "shows": "해 보다가 빠진 점검 항목을 알아챘을 때 · 줄 끝 고치기, 위 줄 처음부터",
+   "sha256": "65ef68ba886aecd23b09a8b4ab36f19bfed98255d56c88de9fa9a634eeb90cf8"
+  },
+  {
+   "file": "T4.png",
+   "shows": "줄의 고치기를 눌렀을 때 · 그 작업의 편집 화면, 새 항목 칸에 커서",
+   "sha256": "f64cfba75748c6c289db803a577527decac8d58355ecf807bb7c33e8a95834e8"
+  },
+  {
+   "file": "T5.png",
+   "shows": "고쳐 저장(11:47)하고 돌아왔을 때 · 새 저장본으로 처음부터, 바뀐 작업에 바뀜, 페이지 ID는 다시 채움",
+   "sha256": "f9dae9dfb7c8829aecd5365964edb35e0c335a2fc0e179fbbf6f87981106169a"
+  },
+  {
+   "file": "T6.png",
+   "shows": "시험이 모두 적합일 때 · 마지막 줄 아래 모두 적합, 게시가 주 단추",
+   "sha256": "025edc13b0cfcde02a0572f442bd90455705714041acfc40ce9823851d805634"
+  },
+  {
+   "file": "T7.png",
+   "shows": "게시한 뒤 · 게시 v1, 바닥 게시함·방금·업무에서 보기, 업무 내용 탭",
+   "sha256": "e77d4e626255bddea56841c2fb4ac523bad93a0e2a6d7894c261daba4082eb6d"
+  },
+  {
+   "file": "T8.png",
+   "shows": "같은 공용 계정으로 다른 PC의 B · 업무 목록(운영)에 게시 전 절차가 없음",
+   "sha256": "dcaf5e9bb4e2b45e6c73d25600fa627d8b3698600f21bb356e75de493a63f0b9"
+  },
+  {
+   "file": "T9.png",
+   "shows": "게시된 절차(v1)에 항목을 더해 저장했을 때 · 게시 v1 · 게시 안 한 변경 있음",
+   "sha256": "f21a6bbf7756e30250591737869fdfc0e50777e601622edbb88737bf8053e567"
+  },
+  {
+   "file": "T10.png",
+   "shows": "시험에서 실행했는데 Confluence 연결이 없을 때 · 그 줄 아래 연결 설정 열기",
+   "sha256": "3d96aa22257cceb1300200ed456c08e2eb52dce072906f498efa000845749fca"
+  },
+  {
+   "file": "T11.png",
+   "shows": "시험에서 없는 문서의 페이지 ID일 때 · 그 줄 아래 페이지 ID 고치기",
+   "sha256": "5eec1ee73f0574eb8ed4b4c5f0798a55c5664bee96c42bf300c130483865edb8"
+  },
+  {
+   "file": "T8-trial.png",
+   "shows": "T8 · B가 시험해 보면 · B 창의 새 시험(A의 체크 없음, 고치기 없음)",
+   "sha256": "80aeac7153a7d04e2c26f48ee793f945a43297ffeca57276f19db34cfd9c040e"
+  },
+  {
+   "file": "T8-saved.png",
+   "shows": "T8 · B가 11:50에 저장한 뒤 A의 시험 · 새 저장본 있음, 새 저장본으로 처음부터",
+   "sha256": "778e557063c7ec563d89abc7565d6a825c1ca1f288330da641121f894f6dce67"
+  },
+  {
+   "file": "T9-try.png",
+   "shows": "T9 · 저장한 변경(항목 5개)으로 시험, 아래는 같은 시각 팀이 쓰는 v1(비교, 제품 화면 아님)",
+   "sha256": "9eed08e01ce4f403f9677c7ab86a40aabd09eaa4c20232393f3fbdfd19313a80"
+  },
+  {
+   "file": "T3-1366.png",
+   "shows": "T3 · 1366x768(왼쪽 메뉴 접힘)",
+   "sha256": "6058fc3a0ebba61a70d2ec744d07dbdc6f8f83e543334e304b1273aefe4ff00b"
+  },
+  {
+   "file": "T8-1366.png",
+   "shows": "T8 · 1366x768(왼쪽 메뉴 접힘)",
+   "sha256": "aff68ef819c56c514fb0235abed60b1d8ee4b05a85eeff6076d9fdfe703cc705"
+  },
+  {
+   "file": "T11-1366.png",
+   "shows": "T11 · 1366x768(왼쪽 메뉴 접힘)",
+   "sha256": "971330ac0f1cbefe311f6382f5110ee0c47684f195063262188ecdc2e39aded1"
+  }
+ ],
+ "validation": {
+  "report": "evals/artifacts/shared-account-20261120/mock21-validation-report.json",
+  "checks": 356,
+  "passed": 356,
+  "page_errors": 0,
+  "console_errors": 0,
+  "requests": 0
+ }
+}

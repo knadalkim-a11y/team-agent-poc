@@ -1,0 +1,22 @@
+{
+ "file": "docs/mockups/ees-work/design-mock-21-try-before-publish.html",
+ "checks": 356,
+ "passed": 356,
+ "failed": [],
+ "problems": {
+  "pageErrors": [],
+  "consoleErrors": [],
+  "requests": []
+ },
+ "sha256": "5f131e124491c6f7702925d37de9f1fcbbd9df44ec61a6b142cf5fd88cab66c3",
+ "date": "2026-11-20",
+ "environment": {
+  "browser": "Chromium 153.0.8010.12 (Playwright 1.63.0, headless)",
+  "windows": [
+   "1920x1080",
+   "1366x768"
+  ],
+  "device_scale_factor": 1
+ },
+ "revision": 2
+}

@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>처음 쓰는 흐름 시안 1 · EES Workflow</title>
+<!--@mock:provenance-->
+<!--@mock:fonts-->
+<!--@mock:product-css-->
+<!-- Mock only: the guide strip above the frame. Not product UI; excluded from comparison. -->
+<style data-mock-frame>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff}
+body{display:flex;flex-direction:column}
+.mk-guide{flex:none;position:relative;z-index:90;font:400 13px/20px var(--ees-font-sans);color:var(--ees-text-primary);background:#fff;border-bottom:1px dashed var(--ees-text-tertiary);padding:8px 16px 10px}
+.mk-guide *{box-sizing:border-box}
+.mk-row{display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;min-width:0}
+.mk-tag{font-size:12px;line-height:18px;font-weight:500;padding:4px 8px;border:1px dashed var(--ees-text-secondary);border-radius:2px;white-space:nowrap}
+.mk-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
+.mk-guide button{font:inherit;font-size:13px;line-height:20px;font-weight:500;color:var(--ees-text-primary);background:#fff;border:1px solid var(--ees-line-control);border-radius:2px;min-height:28px;padding:0 10px;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.mk-guide button small{font-size:12px;font-weight:400;color:var(--ees-text-secondary)}
+.mk-guide button:hover{background:var(--ees-surface-hover)}
+.mk-guide button[aria-pressed="true"]{background:var(--ees-surface-selected);border-color:var(--ees-text-primary)}
+.mk-guide button:focus-visible{outline:2px solid var(--ees-text-primary);outline-offset:2px}
+.mk-guide [hidden]{display:none!important}
+.mk-guide .mk-fold{margin-left:auto;border-color:transparent}
+.mk-text{margin:6px 0 0;display:flex;flex-wrap:wrap;gap:2px 20px;min-width:0}
+.mk-text b{font-weight:400;font-size:12px;color:var(--ees-text-secondary);margin-right:6px}
+.mk-words{margin:8px 0 0;border-collapse:collapse;font-size:12px;line-height:18px}
+.mk-words th,.mk-words td{text-align:left;font-weight:400;padding:2px 20px 2px 0;vertical-align:top}
+.mk-words th{color:var(--ees-text-secondary)}
+.mk-guide[data-collapsed="true"] :is(.mk-hide,.mk-text,.mk-words){display:none}
+.mk-stage{flex:1;min-height:0;display:flex;position:relative}
+</style>
+<!-- Context only: the frame around the work panel (left menu shell, top bar, chat). The product draws these in its
+     Svelte shell; the mock copies their measured sizes and colours. The left menu content and the work panel use the
+     product's own markup and style sheet. -->
+<style data-mock-context="frame">
+.fu-shell{flex:1;min-width:0;display:grid;grid-template-columns:256px minmax(0,1fr) 560px;color:var(--ees-text-primary);font:400 14px/20px var(--ees-font-sans);letter-spacing:0}
+.fu-shell *{box-sizing:border-box}
+.fu-side{background:var(--ees-surface-sidebar);border-right:1px solid var(--ees-line-divider);display:flex;flex-direction:column;min-height:0}
+.fu-brand{height:48px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;font-weight:700;font-size:15px}
+.fu-logo{width:22px;height:22px;border-radius:6px;background:var(--ees-brand-solid);color:#fff;font-size:12px;display:grid;place-items:center}
+.fu-side #ees-work-entry{flex:1;min-height:0;overflow:auto;padding:0 8px}
+.fu-user{flex:none;height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;border-top:1px solid var(--ees-line-divider);font-size:14px}
+.fu-user i{width:22px;height:22px;border-radius:50%;background:var(--ees-line-control)}
+.fu-main{display:flex;flex-direction:column;min-width:0;min-height:0;background:#fff}
+.fu-top{height:48px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--ees-line-divider)}
+.fu-top strong{font-size:15px;font-weight:700}
+.fu-top span{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 10px;border:1px solid var(--ees-line-control);border-radius:6px;font-size:13px}
+.fu-main #ees-work-panel{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;background:#fff}
+.fu-main #ees-work-panel>div{flex:1;min-height:0}
+.fu-chat{border-left:1px solid var(--ees-line-divider);display:flex;flex-direction:column;min-height:0;background:#fff}
+.fu-chat header{height:48px;flex:none;display:flex;align-items:center;padding:0 12px;font-size:14px}
+.fu-chat-empty{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 80px;font-size:30px;line-height:36px;color:var(--ees-text-disabled,#8c93a0)}
+.fu-chat-empty b{color:var(--ees-text-primary);font-weight:400}
+.fu-chat-input{margin:0 24px 16px;height:86px;border:1px solid var(--ees-text-primary);border-radius:8px;padding:16px;font-size:14px;color:var(--ees-text-secondary)}
+.fu-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);max-width:min(560px,calc(100% - 32px));padding:10px 16px;border-radius:4px;background:#fff;color:var(--ees-text-primary);border:1px solid var(--ees-line-control);font:400 13px/20px var(--ees-font-sans);box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:100}
+@media (max-width:1500px){.fu-shell{grid-template-columns:256px minmax(0,1fr) 420px}}
+@media (max-width:1180px){.fu-shell{grid-template-columns:56px minmax(0,1fr)}.fu-chat,.fu-side #ees-work-entry,.fu-brand strong,.fu-user span{display:none}}
+</style>
+<!-- New screen CSS for this proposal. Written with product tokens; to be reused when a version of this mock is
+     chosen for the product. -->
+<style data-new-screen="first-guide">
+/* 1판 · the first use of the shipped guide as one flow. The job rows are the product's rows; the area under a row is
+   the product's white area. New here: the work list of the first screen, the address field with its button beside it,
+   the question that replaces 판정, and the end of the flow. */
+/* the first screen: the procedures one may run, each with its purpose and its start */
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-home{display:grid;gap:12px;max-width:960px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 24px;padding:16px 20px;border:1px solid var(--ees-line-divider);border-radius:8px;background:var(--ees-surface-default)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-card h3{margin:0;font-size:15px;line-height:22px;font-weight:700;color:var(--ees-text-primary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-card p{margin:2px 0 0;font-size:13px;line-height:20px;color:var(--ees-text-secondary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-card small{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-card small i{width:6px;height:6px;border-radius:50%;background:var(--ees-status-success)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-card .ew-primary{grid-column:2;grid-row:1 / span 3;min-width:96px;height:36px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-new{justify-self:start;font-size:13px}
+/* the procedure's own screen: its purpose under the name, no tabs */
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-purpose{margin:4px 0 0;font-size:13px;line-height:20px;color:var(--ees-text-secondary)}
+/* under a row: the field and its button side by side, the answer as a question next to its buttons */
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-under{display:grid;gap:14px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-ask{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-ask label,[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-key{flex:none;width:72px;font-size:13px;line-height:20px;color:var(--ees-text-secondary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-ask input{box-sizing:border-box;width:min(100%,400px);height:34px;margin:0;padding:0 10px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-default);font:inherit;font-size:13px;line-height:20px;color:var(--ees-text-primary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-ask input::placeholder{color:var(--ees-text-tertiary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-ask input:focus-visible{outline:2px solid var(--ees-brand-text);outline-offset:1px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-ask input[aria-invalid=true]{border-color:var(--ees-status-danger)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-ask button{min-height:34px;height:34px;padding:0 16px;font-size:13px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-error{flex-basis:100%;margin:0 0 0 82px;font-size:12px;line-height:18px;color:var(--ees-status-danger)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-given{font-size:13px;line-height:20px;color:var(--ees-text-primary)}
+/* what was found: the document's title links to it */
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-found{display:grid;gap:4px;padding-left:82px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-found a{font-size:14px;line-height:22px;font-weight:500}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-found small{font-size:12px;line-height:18px;color:var(--ees-text-tertiary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-list{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-list li{display:flex;align-items:baseline;gap:10px;font-size:14px;line-height:22px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-list li small{font-size:12px;color:var(--ees-text-tertiary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-question{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-left:82px}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-question strong{margin-right:6px;font-size:14px;line-height:22px;font-weight:700;color:var(--ees-text-primary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-question button{min-height:34px;height:34px;padding:0 16px;font-size:13px}
+/* a problem is said where it happened, with the one thing to do next */
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-problem{display:grid;gap:2px;padding:10px 12px 10px 14px;margin-left:82px;border-left:3px solid var(--ees-status-danger);background:var(--ees-status-danger-bg);border-radius:0 6px 6px 0}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-problem strong{font-size:13px;line-height:20px;font-weight:700;color:var(--ees-text-primary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-problem span{font-size:12px;line-height:18px;color:var(--ees-text-secondary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-more{margin:0;padding-left:82px}
+/* a row that is done says what was decided instead of what to do */
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-outcome{color:var(--ees-text-primary)}
+/* the end of the flow, where the last answer was given */
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-done{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 24px;margin-top:16px;padding:16px 20px;border:1px solid var(--ees-line-divider);border-radius:8px;background:var(--ees-surface-default)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-done h3{margin:0;font-size:15px;line-height:22px;font-weight:700}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-done p{margin:0;font-size:13px;line-height:20px;color:var(--ees-text-secondary)}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-fg-done .ew-primary{grid-column:2;grid-row:1 / span 2;min-width:96px;height:36px}
+</style>
+</head>
+<body>
+<div class="mk-guide" id="mock-guide" data-collapsed="false" role="region" aria-label="시안 안내 · 제품 화면 아님">
+ <div class="mk-row">
+  <strong class="mk-tag" id="mock-badge">시안 1 · 저장·실행 안 됨 · GF1</strong>
+  <div class="mk-group mk-hide" role="group" aria-label="화면 바로 보기">
+   <button data-step="GF1" aria-pressed="true">처음 화면 <small>GF1</small></button>
+   <button data-step="GF2" aria-pressed="false">시작한 뒤 <small>GF2</small></button>
+   <button data-step="GF3" aria-pressed="false">주소가 틀렸을 때 <small>GF3</small></button>
+   <button data-step="GF4" aria-pressed="false">문서를 찾은 뒤 <small>GF4</small></button>
+   <button data-step="GF5" aria-pressed="false">맞다고 한 뒤 <small>GF5</small></button>
+   <button data-step="GF6" aria-pressed="false">목록을 찾은 뒤 <small>GF6</small></button>
+   <button data-step="GF7" aria-pressed="false">다 했을 때 <small>GF7</small></button>
+   <button data-step="GF8" aria-pressed="false">연결 안 됨 <small>GF8</small></button>
+   <button data-step="GF9" aria-pressed="false">문서를 못 열 때 <small>GF9</small></button>
+  </div>
+  <button class="mk-hide" id="mock-words-toggle" aria-expanded="false">바뀐 말</button>
+  <button class="mk-fold" id="mock-fold" aria-expanded="true">안내 접기</button>
+ </div>
+ <p class="mk-text" id="mock-step-text"></p>
+ <table class="mk-words" id="mock-words" hidden>
+  <thead><tr><th>지금 제품</th><th>이 시안</th></tr></thead>
+  <tbody>
+   <tr><td>업무 절차를 선택해 주세요 · 공장·시스템을 선택한 뒤 왼쪽 업무 목록에서 절차를 여세요</td><td>할 수 있는 업무 목록(업무 목적 한 줄, 시작)</td></tr>
+   <tr><td>절차 첫 화면 → 업무 단계 → 단계 화면</td><td>단계가 하나면 바로 할 일 화면</td></tr>
+   <tr><td>업무 내용 · 실행 기록 · 판정 기준(탭)</td><td>⋯ 안으로</td></tr>
+   <tr><td>작업 2개 · 실행 필요 1 · 대기 1 · 지금 실행</td><td>할 일 2개 · 0 / 2 완료</td></tr>
+   <tr><td>직접 판정 ·</td><td>(뺌)</td></tr>
+   <tr><td>페이지 ID</td><td>문서 주소</td></tr>
+   <tr><td>실행(줄 오른쪽)</td><td>찾기(칸 바로 옆)</td></tr>
+   <tr><td>실행 필요 · 대기 · 판정 필요</td><td>할 차례 · 1번 다음 · 확인할 차례</td></tr>
+   <tr><td>판정 필요 ▾ → 적합 · 미흡 · 판단 불가</td><td>이 문서가 맞나요? 맞아요 · 아니에요</td></tr>
+   <tr><td>목록 확정 → 사유 창(이유 필수)</td><td>이 목록으로 할까요? 네</td></tr>
+   <tr><td>판정 근거 · 1차 · 실행 도구 guide-confluence-page</td><td>(뺌) 필요하면 ‘자세히’</td></tr>
+   <tr><td>끝내기(맨 위 오른쪽)</td><td>다 했어요 · 끝내기(흐름의 끝)</td></tr>
+  </tbody>
+ </table>
+</div>
+<div class="mk-stage" id="mock-stage">
+<div class="fu-shell" id="fu-shell">
+ <aside class="fu-side" aria-label="탐색" data-ees-source-sidebar data-compact="false">
+  <div class="fu-brand"><span class="fu-logo">E</span><strong>EES Workflow</strong></div>
+  <section id="ees-work-entry" data-ees-work data-work-mode="work" aria-label="업무 탐색"></section>
+  <div class="fu-user"><i></i><span>시스템 담당자</span></div>
+ </aside>
+ <main class="fu-main" data-ees-work-surface>
+  <header class="fu-top"><strong>업무</strong><span><img class="ew-icon" src="v4/093d6.svg" alt="">대화</span></header>
+  <section id="ees-work-panel" class="ew-vd" tabindex="-1" data-ees-work data-ees-source-slot aria-label="업무 패널" data-ees-mode="work"></section>
+ </main>
+ <aside class="fu-chat" aria-label="업무 도우미 대화(맥락)">
+  <header>업무 도우미</header>
+  <div class="fu-chat-empty"><b>업무 도우미</b>무엇을 도와드릴까요?</div>
+  <div class="fu-chat-input">업무를 물어보거나, 필요한 작업을 요청하세요</div>
+ </aside>
+</div>
+</div>
+<div class="fu-toast" id="mock-toast" role="status" hidden></div>
+<script>
+(()=>{'use strict';
+const $=s=>document.querySelector(s),panel=$('#ees-work-panel'),entry=$('#ees-work-entry'),guide=$('#mock-guide');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// Icon files are written out in full so the mock builder can embed each one.
+const ICON={
+ '093d6':'v4/093d6.svg',
+ '126c7':'v4/126c7.svg',
+ '40095':'v4/40095.svg',
+ '4df0d':'v4/4df0d.svg',
+ '4fb09':'v4/4fb09.svg',
+ 'a953c':'v4/a953c.svg',
+ 'c325d':'v4/c325d.svg',
+ 'cece5':'v4/cece5.svg',
+ 'ead50':'v4/ead50.svg',
+ 'f34f3':'v4/f34f3.svg',
+ 'f6bbc':'v4/f6bbc.svg'
+};
+const I=n=>`<img class="ew-icon" src="${ICON[n]}" alt="" aria-hidden="true">`;
+const PLAY='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.5 2.75L11 7L4.5 11.25V2.75Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg>';
+// What each mock screen shows and what differs from the product today. Guide text only.
+const SCREENS={
+ GF1:{when:'처음 들어왔을 때(업무)',change:'“업무 절차를 선택해 주세요” 대신 할 수 있는 업무 목록. 업무마다 목적 한 줄과 ‘시작’. 왼쪽 메뉴를 몰라도 시작할 수 있음'},
+ GF2:{when:'‘시작’을 누른 뒤',change:'단계가 하나인 절차는 개요 화면 없이 바로 할 일 화면. 탭·지금 실행·직접 판정을 뺌. 첫 할 일에 문서 주소 칸과 바로 옆 ‘찾기’, 커서가 칸에 있음'},
+ GF3:{when:'주소가 비었거나 Confluence 문서 주소가 아닐 때',change:'칸 아래에 무엇이 틀렸는지. 숫자만 넣어도(페이지 ID) 받아들임'},
+ GF4:{when:'문서를 찾은 뒤',change:'찾은 문서 제목(누르면 Confluence에서 열림). ‘판정 필요 ▾ → 적합’ 대신 “이 문서가 맞나요?” 맞아요 · 아니에요'},
+ GF5:{when:'‘맞아요’를 누른 뒤',change:'첫 할 일은 접히고 줄에 확인한 문서 제목. 다음 할 일이 펼쳐지고 기준 문서가 제목으로 보임. ‘찾기’에 초점'},
+ GF6:{when:'하위 문서를 찾은 뒤',change:'찾은 문서 목록. ‘목록 확정’과 이유를 적는 창 대신 “이 목록으로 할까요?” 네'},
+ GF7:{when:'둘 다 확인했을 때',change:'흐름의 끝에 ‘다 했어요’와 찾은 것 요약, ‘끝내기’. 끝내면 처음 화면에 지난 결과가 남음'},
+ GF8:{when:'Confluence 연결이 안 되어 있을 때',change:'화면 위 오류 줄 대신 그 할 일 아래에 무엇이 안 됐는지와 할 일 하나'},
+ GF9:{when:'없는 문서이거나 볼 권한이 없을 때',change:'그 할 일 아래에 무엇이 안 됐는지. 주소 칸이 그대로 있어 바로 다시 찾을 수 있음'}
+};
+const PURPOSE='문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다.';
+const DOC={title:'설비 점검 안내 (예시)',id:'123456789'};
+const CHILDREN=[{title:'주간 점검표 (예시)',id:'123456801'},{title:'월간 점검표 (예시)',id:'123456802'}];
+const now=()=>{const d=new Date();return `${d.getMonth()+1}. ${d.getDate()}. ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;};
+const fresh=()=>({view:'home',started:false,addr:'',addrError:'',page:'idle',child:'idle',open:'',fail:'',last:null});
+let S=fresh();
+// Jumping from the guide prepares the state a person would have reached by then.
+const ADDR='https://wiki.example.com/pages/viewpage.action?pageId=123456789';
+const PRESET={
+ GF1:s=>s,
+ GF2:s=>Object.assign(s,{view:'work',started:true,open:'page'}),
+ GF3:s=>Object.assign(s,{view:'work',started:true,open:'page',addr:'점검 기준서',addrError:'Confluence 문서 주소가 아니에요'}),
+ GF4:s=>Object.assign(s,{view:'work',started:true,open:'page',addr:ADDR,page:'found'}),
+ GF5:s=>Object.assign(s,{view:'work',started:true,open:'child',addr:ADDR,page:'confirmed'}),
+ GF6:s=>Object.assign(s,{view:'work',started:true,open:'child',addr:ADDR,page:'confirmed',child:'found'}),
+ GF7:s=>Object.assign(s,{view:'work',started:true,open:'',addr:ADDR,page:'confirmed',child:'confirmed'}),
+ GF8:s=>Object.assign(s,{view:'work',started:true,open:'page',addr:ADDR,page:'failed',fail:'connect'}),
+ GF9:s=>Object.assign(s,{view:'work',started:true,open:'page',addr:'https://wiki.example.com/pages/404',page:'failed',fail:'denied'})
+};
+function toast(text){const t=$('#mock-toast');t.textContent=text;t.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>{t.hidden=true;},2600);}
+const NOT_HERE='시안입니다. 이 단추는 이번 시안에서 다루지 않습니다.';
+
+// The left menu is the product's, unchanged. The guide stays where it is today.
+function entryHTML(){
+ const modes=`<nav class="ew-mode" aria-label="작업 모드"><button data-mode="work" aria-pressed="true" data-none>${I('4df0d')}<span>업무</span></button> <button data-mode="author" aria-pressed="false" data-none>${I('cece5')}<span>워크스페이스</span></button></nav>`;
+ const scope=`<div class="ew-scope-wrap" data-collapsed="false"><div class="ew-scope-inner"><p class="ew-nav-caption">작업 위치</p><div class="ew-scope"><div class="ew-scope-field"><button type="button" data-scope-trigger="factory" data-none>${I('40095')}<small>공장</small><span>전체 공장</span>${I('ead50')}</button></div><div class="ew-scope-field"><button type="button" data-scope-trigger="system" data-none>${I('f34f3')}<small>시스템</small><span>EMS</span>${I('ead50')}</button></div></div></div></div>`;
+ const category=(key,icon,label,body)=>`<div class="ew-category" data-category="${key}"><button class="ew-category-toggle" aria-expanded="true" data-none>${I(icon)}<span>${label}</span>${I('ead50')}</button><div class="ew-category-body" aria-hidden="false"><div class="ew-category-items">${body}</div></div></div>`;
+ const item=`<button data-go="work"${S.view==='work'?' aria-current="page"':''}><span>Confluence 문서 확인 가이드</span></button>`;
+ return modes+scope+`<nav class="ew-nav-links"><button data-none>${I('c325d')}<span>실행 기록</span></button><button data-none>${I('093d6')}<span>대화 기록</span></button></nav><p class="ew-nav-caption">업무</p><nav class="ew-workflows">${category('ops','126c7','운영',item)}${category('setup','f6bbc','셋업','')}${category('incident','4fb09','장애대응','')}</nav>`;
+}
+
+// GF1 · the first screen: what one may run, what each is for, and its start. A round in progress is continued.
+function homeHTML(){
+ const going=S.started&&!(S.page==='confirmed'&&S.child==='confirmed');
+ const done=(S.page==='confirmed'?1:0)+(S.child==='confirmed'?1:0);
+ const meta=going?`<small>하는 중 · ${done} / 2 완료</small>`:S.last?`<small><i></i>지난번 ${esc(S.last.at)} 끝냄 · ${esc(S.last.doc)} 외 ${S.last.count}건</small>`:'<small>할 일 2개</small>';
+ return `<div id="ees-work-content" class="ew-scroll ew-center-content ew-centered-overview"><section class="ew-fg-home" aria-label="업무 목록">`
+  +`<article class="ew-fg-card"><div><h3>Confluence 문서 확인 가이드</h3><p>${esc(PURPOSE)}</p>${meta}</div><button type="button" class="ew-primary" data-run="start">${going?'이어서 하기':`${PLAY}<span>시작</span>`}</button></article>`
+  +`<button type="button" class="ew-text ew-fg-new" data-none>＋ 새 업무 절차</button></section></div>`;
+}
+
+// A job row is the product's row: number, name, a short line, and on the right where it stands.
+function row(key,n,name,line,state,detail,done){
+ const open=S.open===key,id='gf-detail-'+key;
+ return `<section class="ew-vd-entry ew-center-task-row" data-job="${key}" data-handler="human" data-expanded="${open}"><div class="ew-vd-item"><span class="ew-center-task-number" aria-hidden="true">${n}</span><div class="ew-vd-item-top"><button type="button" class="ew-vd-name" data-toggle="${key}" aria-expanded="${open}" aria-controls="${id}">${esc(name)}</button><small class="ew-center-task-description${done?' ew-fg-outcome':''}">${esc(line)}</small></div><div class="ew-vd-item-meta"><div class="ew-vd-decision">${state}</div></div></div>${open?`<div class="ew-vd-evidence ew-vd-service-evidence" id="${id}"><div class="ew-fg-under">${detail}<p class="ew-fg-more"><button type="button" class="ew-text" data-none>자세히</button></p></div></div>`:''}</section>`;
+}
+const waiting=text=>`<span class="ew-vd-state" data-decision-status><span>${esc(text)}</span></span>`;
+const settled=text=>`<span class="ew-vd-final" data-decision-status><i class="ew-vd-dot" data-verdict="ok"></i><span>${esc(text)}</span></span>`;
+
+// The first job: the address, then what was found and the question.
+function pageDetail(){
+ const busy=S.page==='running',found=S.page==='found',failed=S.page==='failed';
+ const ask=`<div class="ew-fg-ask"><label for="gf-addr">문서 주소</label><input id="gf-addr" type="text" inputmode="url" autocomplete="off" placeholder="예: https://wiki…/pages/123456789" value="${esc(S.addr)}"${S.addrError?' aria-invalid="true" aria-describedby="gf-addr-error"':''}${busy?' disabled':''}><button type="button" class="${found?'':'ew-primary'}" data-run="page"${busy?' disabled':''}>${busy?'찾는 중':found||failed?'다시 찾기':'찾기'}</button>${S.addrError?`<p class="ew-fg-error" id="gf-addr-error" role="alert">${esc(S.addrError)}</p>`:''}</div>`;
+ if(failed&&S.fail==='connect')return ask+`<div class="ew-fg-problem" role="alert"><strong>Confluence에 연결되어 있지 않아요</strong><span>운영 담당자에게 Confluence 연결을 요청한 뒤 다시 찾으세요.</span></div>`;
+ if(failed)return ask+`<div class="ew-fg-problem" role="alert"><strong>이 주소의 문서를 열 수 없어요</strong><span>없는 문서이거나 볼 권한이 없어요.</span></div>`;
+ if(!found)return ask;
+ return ask+`<div class="ew-fg-found"><a href="#" data-none>${esc(DOC.title)}</a><small>페이지 ${esc(DOC.id)}</small></div>`
+  +`<div class="ew-fg-question"><strong>이 문서가 맞나요?</strong><button type="button" class="ew-primary" data-answer="page:yes">맞아요</button><button type="button" data-answer="page:no">아니에요</button></div>`;
+}
+// The second job: the document it starts from is given, then the list and the question.
+function childDetail(){
+ const busy=S.child==='running',found=S.child==='found';
+ const given=`<div class="ew-fg-ask"><span class="ew-fg-key">기준 문서</span><span class="ew-fg-given">${esc(DOC.title)}</span><button type="button" class="${found?'':'ew-primary'}" data-run="child"${busy?' disabled':''}>${busy?'찾는 중':found?'다시 찾기':'찾기'}</button></div>`;
+ if(!found)return given;
+ return given+`<div class="ew-fg-found"><small>찾은 문서 ${CHILDREN.length}개</small><ol class="ew-fg-list" aria-label="찾은 하위 문서">${CHILDREN.map(doc=>`<li><a href="#" data-none>${esc(doc.title)}</a><small>페이지 ${esc(doc.id)}</small></li>`).join('')}</ol></div>`
+  +`<div class="ew-fg-question"><strong>이 목록으로 할까요?</strong><button type="button" class="ew-primary" data-answer="child:yes">네</button></div>`;
+}
+
+// GF2–GF9 · the procedure's own screen. A procedure with one stage opens here directly.
+function workHTML(){
+ const pageDone=S.page==='confirmed',childDone=S.child==='confirmed',done=(pageDone?1:0)+(childDone?1:0);
+ const pageState=pageDone?settled('맞음'):S.page==='found'?waiting('확인할 차례'):S.page==='running'?waiting('찾는 중'):S.page==='failed'?waiting(S.fail==='connect'?'연결 필요':'열 수 없음'):waiting('할 차례');
+ const childState=childDone?settled('확인함'):!pageDone?waiting('1번 다음'):S.child==='found'?waiting('확인할 차례'):S.child==='running'?waiting('찾는 중'):waiting('할 차례');
+ const rows=row('page',1,'기준 문서 찾기',pageDone?DOC.title:'찾을 문서의 Confluence 주소를 넣으세요.',pageState,pageDetail(),pageDone)
+  +row('child',2,'하위 문서 찾기',childDone?`${CHILDREN.length}건 · ${CHILDREN.map(doc=>doc.title).join(', ')}`:'1번 문서 바로 아래 문서를 5개까지 찾습니다.',childState,childDetail(),childDone);
+ const end=done===2?`<section class="ew-fg-done" aria-label="다 했어요"><h3>다 했어요</h3><p>기준 문서 ${esc(DOC.title)} · 하위 문서 ${CHILDREN.length}건</p><button type="button" class="ew-primary" data-run="finish">끝내기</button></section>`:'';
+ return `<div id="ees-work-content" class="ew-scroll ew-center-content ew-centered-stage"><nav class="ew-center-breadcrumb" aria-label="업무 경로"><button type="button" class="ew-run-back" data-go="home">업무</button><span aria-hidden="true">›</span><span aria-current="page">Confluence 문서 확인 가이드</span></nav>`
+  +`<header class="ew-vd-head"><div class="ew-stage-heading"><div class="ew-vd-title"><h2>Confluence 문서 확인 가이드</h2><p class="ew-fg-purpose">${esc(PURPOSE)}</p><p class="ew-center-scope">전체 공장 · EMS</p></div><div class="ew-center-heading-actions"><button type="button" class="ew-icon-button" aria-label="더 보기(기록, 판정 기준)" data-more>${I('a953c')}</button></div></div></header>`
+  +`<div class="ew-center-task-heading ew-stage-summary"><h3>할 일 2개</h3><span class="ew-stage-completed">${done} / 2 완료</span></div><div class="ew-vd-body ew-center-task-list" id="ees-stage-tasks">${rows}</div>${end}</div>`;
+}
+
+function screenId(){
+ if(S.view==='home')return 'GF1';
+ if(S.page==='failed')return S.fail==='connect'?'GF8':'GF9';
+ if(S.addrError)return 'GF3';
+ if(S.page==='confirmed'&&S.child==='confirmed')return 'GF7';
+ if(S.child==='found')return 'GF6';
+ if(S.page==='confirmed')return 'GF5';
+ if(S.page==='found')return 'GF4';
+ return 'GF2';
+}
+function render(){
+ entry.innerHTML=entryHTML();
+ panel.innerHTML=S.view==='home'?homeHTML():workHTML();
+ const id=screenId();
+ $('#mock-badge').textContent='시안 1 · 저장·실행 안 됨 · '+id;
+ for(const button of guide.querySelectorAll('[data-step]'))button.setAttribute('aria-pressed',String(button.dataset.step===id));
+ const info=SCREENS[id];$('#mock-step-text').innerHTML=`<span><b>언제</b>${esc(info.when)}</span><span><b>바뀐 점</b>${esc(info.change)}</span>`;
+}
+function focus(selector){const target=panel.querySelector(selector);if(target&&!target.disabled){target.focus();if(target.tagName==='INPUT'){const end=target.value.length;try{target.setSelectionRange(end,end);}catch(_){}}}}
+// A Confluence page address or a bare page number. Anything else is said at the field.
+function pageOf(text){
+ const value=text.trim();
+ if(/^[0-9]+$/.test(value))return value;
+ const match=value.match(/^https?:\/\/[^\s]+?(?:pageId=([0-9]+)|\/pages\/([0-9]+))/);
+ return match?(match[1]||match[2]):'';
+}
+function findPage(){
+ S.open='page';S.addr=(panel.querySelector('#gf-addr')?.value ?? S.addr);
+ if(!S.addr.trim()){S.addrError='문서 주소를 넣어 주세요';render();focus('#gf-addr');return;}
+ const id=pageOf(S.addr);
+ if(!id){S.addrError='Confluence 문서 주소가 아니에요';render();focus('#gf-addr');return;}
+ S.addrError='';S.started=true;S.page='running';S.fail='';S.child='idle';render();
+ setTimeout(()=>{if(S.page!=='running')return;
+  // In the mock, page 404 cannot be opened; every other page is the example document.
+  if(id==='404'){S.page='failed';S.fail='denied';render();focus('#gf-addr');return;}
+  S.page='found';render();focus('[data-answer="page:yes"]');},700);
+}
+function findChildren(){
+ if(S.page!=='confirmed')return;
+ S.open='child';S.child='running';render();
+ setTimeout(()=>{if(S.child!=='running')return;S.child='found';render();focus('[data-answer="child:yes"]');},700);
+}
+function answer(key,value){
+ if(key==='page'&&value==='yes'){S.page='confirmed';S.open='child';render();focus('[data-run=child]');return;}
+ if(key==='page'){S.page='idle';render();focus('#gf-addr');const field=panel.querySelector('#gf-addr');field?.select();return;}
+ if(key==='child'){S.child='confirmed';S.open='';render();focus('[data-run=finish]');}
+}
+
+guide.addEventListener('click',event=>{
+ const step=event.target.closest('[data-step]');
+ if(step){const last=S.last;S=PRESET[step.dataset.step](fresh());if(step.dataset.step==='GF1')S.last=last;render();
+  if(step.dataset.step==='GF2')focus('#gf-addr');return;}
+ const words=event.target.closest('#mock-words-toggle');
+ if(words){const table=$('#mock-words'),open=table.hidden;table.hidden=!open;words.setAttribute('aria-expanded',String(open));return;}
+ if(event.target.closest('#mock-fold')){const collapsed=guide.dataset.collapsed!=='true';guide.dataset.collapsed=String(collapsed);const button=event.target.closest('#mock-fold');button.textContent=collapsed?'안내 펴기':'안내 접기';button.setAttribute('aria-expanded',String(!collapsed));}
+});
+document.addEventListener('click',event=>{
+ const target=event.target;
+ if(target.closest('#mock-guide'))return;
+ const go=target.closest('[data-go]');
+ if(go){S.view=go.dataset.go;if(S.view==='work'&&!S.open)S.open=S.page!=='confirmed'?'page':S.child!=='confirmed'?'child':'';render();if(S.view==='work'&&S.open==='page'&&S.page==='idle')focus('#gf-addr');return;}
+ const run=target.closest('[data-run]');
+ if(run){const what=run.dataset.run;
+  if(what==='start'){const going=S.started&&!(S.page==='confirmed'&&S.child==='confirmed');if(!going){const last=S.last;S=fresh();S.last=last;S.started=true;}S.view='work';S.open=S.page!=='confirmed'?'page':S.child!=='confirmed'?'child':'';render();focus(S.open==='page'?'#gf-addr':'[data-run=child]');}
+  else if(what==='page')findPage();
+  else if(what==='child')findChildren();
+  else if(what==='finish'){const last={at:now(),doc:DOC.title,count:CHILDREN.length};S=fresh();S.last=last;render();focus('[data-run=start]');}
+  return;}
+ const toggle=target.closest('[data-toggle]');
+ if(toggle){const key=toggle.dataset.toggle;S.open=S.open===key?'':key;render();return;}
+ const reply=target.closest('[data-answer]');
+ if(reply){const [key,value]=reply.dataset.answer.split(':');answer(key,value);return;}
+ if(target.closest('[data-more]')){toast('시안입니다. 실행 기록과 판정 기준은 여기(⋯) 안으로 옮깁니다.');return;}
+ if(target.closest('[data-none]')){event.preventDefault();toast(NOT_HERE);}
+});
+document.addEventListener('input',event=>{
+ if(event.target.id!=='gf-addr')return;
+ S.addr=event.target.value;
+ // The mark of a wrong value goes once the field is typed in again.
+ if(S.addrError){S.addrError='';event.target.removeAttribute('aria-invalid');event.target.removeAttribute('aria-describedby');panel.querySelector('#gf-addr-error')?.remove();}
+});
+document.addEventListener('keydown',event=>{
+ if(event.key!=='Enter'||event.isComposing||event.repeat)return;
+ if(event.target.id==='gf-addr'){event.preventDefault();findPage();}
+});
+render();
+})();
+</script>
+<!--@mock:font-licenses-->
+</body>
+</html>

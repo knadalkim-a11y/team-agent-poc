@@ -430,7 +430,8 @@ class SharedTools:
                 result[saved['job_id']] = {'can_use': allowed,
                     'group_names': [native_groups.get(key) or '그룹 확인 필요' for key in tool.get('group_ids', [])],
                     'assignee_name': assignee_name,
-                    'can_accept_version': bool(can_write and allowed and not blocked)}
+                    # A try picks up the current tool when it starts over instead.
+                    'can_accept_version': bool(can_write and allowed and not blocked and run['mode'] != 'try')}
                 key = node['shared_tool_id']
                 if key in observed and allowed:
                     current = observed[key]
@@ -451,7 +452,9 @@ class SharedTools:
         actor, _, groups = await self.service._work_actor(user)
         key, run_id = body.get('shared_tool_id'), body.get('run_id')
         with self.service._db() as db:
-            self.service._work_run(db, actor, groups, run_id, write=True)
+            if self.service._work_run(db, actor, groups, run_id, write=True)['mode'] == 'try':
+                # A try picks up the current tool when it starts over instead.
+                raise WorkflowError('try_not_supported', '시험에서는 할 수 없어요.')
         pin = await self.resolve(actor, key)
         actor, _, groups = await self.service._work_actor(actor)
         with self.service._db(write=True) as db:
