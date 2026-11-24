@@ -1,0 +1,358 @@
+{
+ "date": "2026-11-20",
+ "build": "0.11.3+ees.14 built from the working tree (frontend and wheel, local build b19)",
+ "browser": "Chromium (Playwright, headless) inside the native test harness, synthetic Confluence responses",
+ "mock": {
+  "file": "docs/mockups/ees-work/design-mock-20-first-guide.html",
+  "sha256": "d9e13e7b1166ed0a5c81f6f70be9e1c8851d7b10fb74942338aed39342d4771f",
+  "commit": "03a4cca"
+ },
+ "windows": [
+  "1920x1080 (left menu 256px open, work 1104px, chat 560px open; as the mock)",
+  "1366x768 (the product folds the left menu; the mock keeps it open)"
+ ],
+ "compare": [
+  "compare-1920.txt",
+  "compare-1366.txt"
+ ],
+ "screens": [
+  {
+   "capture": "GF1-1366",
+   "panel": {
+    "w": 830,
+    "h": 720,
+    "x": 56
+   },
+   "focus": "mode|업무",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 할 일 2개 시작 ＋ 새 업무 절차",
+   "png": null
+  },
+  {
+   "capture": "GF1-1920",
+   "panel": {
+    "w": 1104,
+    "h": 1032,
+    "x": 256
+   },
+   "focus": "mode|업무",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 할 일 2개 시작 ＋ 새 업무 절차",
+   "png": "GF1-1920.png"
+  },
+  {
+   "capture": "GF1-after-1366",
+   "panel": {
+    "w": 830,
+    "h": 720,
+    "x": 56
+   },
+   "focus": "workflow|시작",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 지난번 11. 20. 03:02 끝냄 · 점검 기준서 외 2건 시작 ＋ 새 업무 절차",
+   "png": null
+  },
+  {
+   "capture": "GF1-after-1920",
+   "panel": {
+    "w": 1104,
+    "h": 1032,
+    "x": 256
+   },
+   "focus": "workflow|시작",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 지난번 11. 20. 03:01 끝냄 · 점검 기준서 외 2건 시작 ＋ 새 업무 절차",
+   "png": "GF1-after-1920.png"
+  },
+  {
+   "capture": "GF2-1366",
+   "panel": {
+    "w": 830,
+    "h": 720,
+    "x": 56
+   },
+   "focus": "ew-stage-page-page-id|",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 0 / 2 완료 1 기준 문서 찾기 찾을 문서의 Confluence 주소를 넣으세요. 할 차례 문서 주소 찾기 자세히 2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 1번 다음",
+   "png": "GF2-1366.png"
+  },
+  {
+   "capture": "GF2-1920",
+   "panel": {
+    "w": 1104,
+    "h": 1032,
+    "x": 256
+   },
+   "focus": "ew-stage-page-page-id|",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 0 / 2 완료 1 기준 문서 찾기 찾을 문서의 Confluence 주소를 넣으세요. 할 차례 문서 주소 찾기 자세히 2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 1번 다음",
+   "png": "GF2-1920.png"
+  },
+  {
+   "capture": "GF3-1366",
+   "panel": {
+    "w": 830,
+    "h": 720,
+    "x": 56
+   },
+   "focus": "ew-stage-page-page-id|",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 0 / 2 완료 1 기준 문서 찾기 찾을 문서의 Confluence 주소를 넣으세요. 할 차례 문서 주소 찾기 Confluence 문서 주소가 아니에요 자세히 2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 1번 다음",
+   "png": null
+  },
+  {
+   "capture": "GF3-1920",
+   "panel": {
+    "w": 1104,
+    "h": 1032,
+    "x": 256
+   },
+   "focus": "ew-stage-page-page-id|",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 0 / 2 완료 1 기준 문서 찾기 찾을 문서의 Confluence 주소를 넣으세요. 할 차례 문서 주소 찾기 Confluence 문서 주소가 아니에요 자세히 2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 1번 다음",
+   "png": "GF3-1920.png"
+  },
+  {
+   "capture": "GF3-empty-1366",
+   "panel": {
+    "w": 830,
+    "h": 720,
+    "x": 56
+   },
+   "focus": "ew-stage-page-page-id|",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 0 / 2 완료 1 기준 문서 찾기 찾을 문서의 Confluence 주소를 넣으세요. 할 차례 문서 주소 찾기 문서 주소를 넣어 주세요 자세히 2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 1번 다음",
+   "png": null
+  },
+  {
+   "capture": "GF3-empty-1920",
+   "panel": {
+    "w": 1104,
+    "h": 1032,
+    "x": 256
+   },
+   "focus": "ew-stage-page-page-id|",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 0 / 2 완료 1 기준 문서 찾기 찾을 문서의 Confluence 주소를 넣으세요. 할 차례 문서 주소 찾기 문서 주소를 넣어 주세요 자세히 2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 1번 다음",
+   "png": "GF3-empty-1920.png"
+  },
+  {
+   "capture": "GF4-1366",
+   "panel": {
+    "w": 830,
+    "h": 720,
+    "x": 56
+   },
+   "focus": "stage_decide|맞아요",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [
+    "페이지 ID"
+   ],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 0 / 2 완료 1 기준 문서 찾기 찾을 문서의 Confluence 주소를 넣으세요. 확인할 차례 문서 주소 다시 찾기 점검 기준서 페이지 ID 27182 이 결과가 맞나요? 맞아요 아니에요 자세히 2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 1번 다음",
+   "png": "GF4-1366.png"
+  },
+  {
+   "capture": "GF4-1920",
+   "panel": {
+    "w": 1104,
+    "h": 1032,
+    "x": 256
+   },
+   "focus": "stage_decide|맞아요",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [
+    "페이지 ID"
+   ],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 0 / 2 완료 1 기준 문서 찾기 찾을 문서의 Confluence 주소를 넣으세요. 확인할 차례 문서 주소 다시 찾기 점검 기준서 페이지 ID 27182 이 결과가 맞나요? 맞아요 아니에요 자세히 2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 1번 다음",
+   "png": "GF4-1920.png"
+  },
+  {
+   "capture": "GF5-1366",
+   "panel": {
+    "w": 830,
+    "h": 720,
+    "x": 56
+   },
+   "focus": "stage_execute|찾기",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 1 / 2 완료 1 기준 문서 찾기 점검 기준서 맞음 2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 할 차례 1번 결과 점검 기준서 찾기 자세히",
+   "png": null
+  },
+  {
+   "capture": "GF5-1920",
+   "panel": {
+    "w": 1104,
+    "h": 1032,
+    "x": 256
+   },
+   "focus": "stage_execute|찾기",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 1 / 2 완료 1 기준 문서 찾기 점검 기준서 맞음 2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 할 차례 1번 결과 점검 기준서 찾기 자세히",
+   "png": "GF5-1920.png"
+  },
+  {
+   "capture": "GF6-1366",
+   "panel": {
+    "w": 830,
+    "h": 720,
+    "x": 56
+   },
+   "focus": "stage_confirm_list|네",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [
+    "페이지 ID"
+   ],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 1 / 2 완료 1 기준 문서 찾기 점검 기준서 맞음 2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 확인할 차례 1번 결과 점검 기준서 다시 찾기 찾은 결과 2개 교대 점검표 페이지 ID 31415 주간 점검표 페이지 ID 31416 이 목록으로 할까요? 네 자세히",
+   "png": null
+  },
+  {
+   "capture": "GF6-1920",
+   "panel": {
+    "w": 1104,
+    "h": 1032,
+    "x": 256
+   },
+   "focus": "stage_confirm_list|네",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [
+    "페이지 ID"
+   ],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 1 / 2 완료 1 기준 문서 찾기 점검 기준서 맞음 2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 확인할 차례 1번 결과 점검 기준서 다시 찾기 찾은 결과 2개 교대 점검표 페이지 ID 31415 주간 점검표 페이지 ID 31416 이 목록으로 할까요? 네 자세히",
+   "png": "GF6-1920.png"
+  },
+  {
+   "capture": "GF7-1366",
+   "panel": {
+    "w": 830,
+    "h": 720,
+    "x": 56
+   },
+   "focus": "finish_run|끝내기",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 2 / 2 완료 1 기준 문서 찾기 점검 기준서 맞음 2 하위 문서 찾기 2건 · 교대 점검표, 주간 점검표 확인함 다 했어요 점검 기준서 외 2건 끝내기",
+   "png": "GF7-1366.png"
+  },
+  {
+   "capture": "GF7-1920",
+   "panel": {
+    "w": 1104,
+    "h": 1032,
+    "x": 256
+   },
+   "focus": "finish_run|끝내기",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 2 / 2 완료 1 기준 문서 찾기 점검 기준서 맞음 2 하위 문서 찾기 2건 · 교대 점검표, 주간 점검표 확인함 다 했어요 점검 기준서 외 2건 끝내기",
+   "png": "GF7-1920.png"
+  },
+  {
+   "capture": "GF8-1366",
+   "panel": {
+    "w": 830,
+    "h": 720,
+    "x": 56
+   },
+   "focus": "ew-stage-page-page-id|",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 0 / 2 완료 1 기준 문서 찾기 찾을 문서의 Confluence 주소를 넣으세요. 연결 필요 문서 주소 다시 찾기 사내 Confluence에 연결되어 있지 않아요 운영 담당자에게 사내 Confluence 연결을 요청한 뒤 다시 찾으세요. 자세히 2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 1번 다음",
+   "png": null
+  },
+  {
+   "capture": "GF8-1920",
+   "panel": {
+    "w": 1104,
+    "h": 1032,
+    "x": 256
+   },
+   "focus": "ew-stage-page-page-id|",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 0 / 2 완료 1 기준 문서 찾기 찾을 문서의 Confluence 주소를 넣으세요. 연결 필요 문서 주소 다시 찾기 사내 Confluence에 연결되어 있지 않아요 운영 담당자에게 사내 Confluence 연결을 요청한 뒤 다시 찾으세요. 자세히 2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 1번 다음",
+   "png": "GF8-1920.png"
+  },
+  {
+   "capture": "GF9-1366",
+   "panel": {
+    "w": 830,
+    "h": 720,
+    "x": 56
+   },
+   "focus": "ew-stage-page-page-id|",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 0 / 2 완료 1 기준 문서 찾기 찾을 문서의 Confluence 주소를 넣으세요. 열 수 없음 문서 주소 다시 찾기 이 주소의 문서를 열 수 없어요 없는 문서이거나 볼 권한이 없어요. 자세히 2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 1번 다음",
+   "png": "GF9-1366.png"
+  },
+  {
+   "capture": "GF9-1920",
+   "panel": {
+    "w": 1104,
+    "h": 1032,
+    "x": 256
+   },
+   "focus": "ew-stage-page-page-id|",
+   "stretched_controls": [],
+   "outside_panel": [],
+   "inner_words": [],
+   "error_above_screen": false,
+   "text": "업무 › Confluence 문서 확인 가이드 Confluence 문서 확인 가이드 문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다. 전체 공장 · EMS 할 일 2개 0 / 2 완료 1 기준 문서 찾기 찾을 문서의 Confluence 주소를 넣으세요. 열 수 없음 문서 주소 다시 찾기 이 주소의 문서를 열 수 없어요 없는 문서이거나 볼 권한이 없어요. 자세히 2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 1번 다음",
+   "png": "GF9-1920.png"
+  }
+ ]
+}

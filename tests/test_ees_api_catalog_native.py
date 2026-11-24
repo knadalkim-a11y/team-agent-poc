@@ -396,7 +396,7 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.assertFalse(self.read('[data-author-action=api_structure_edit]', 'isConnected'))
         self.assertFalse(self.read('.ew-work-content .ew-content-start-inputs', 'isConnected'))
         self.assertEqual(self.browser.evaluate("Array.from(document.querySelectorAll('.ew-author-tabs [role=tab]'), button => button.dataset.tab)"),
-                         ['content', 'history'])
+                         ['content', 'try', 'history'])
         first = '[data-job-id=job-0] [data-author-action=job_api_setup]'
         if not self.read(first, 'isConnected'):
             self.click('[data-author-action=stage_toggle][data-id=stage]')

@@ -727,3 +727,27 @@ test('Native Work settings cannot reuse revoked administration or a stale accoun
   assert.equal(h.calls.length,1);assert.equal(h.dialogs.length,0);
  }
 });
+
+// ---- 2026-11-20, design mock 21 revision 2: the editor's try goes through the launcher's request boundary ----
+test('mock 21: the editor try reads and writes in POST bodies only and its failures stay off the work screen',async()=>{
+ const h=controller(),key='window-key-0123456789';h.api.setState({capabilities:{actor_id:'a'},workflows:[],runs:[]});h.api.setSelection({mode:'author',workflow_id:'w',system_id:'EMS'});
+ h.setReply(call=>call.url==='/api/ees-work/workspace/try'?{ok:true,try:null,operations:{},workflow:{id:'w',revision:1}}:call.body?.action==='human_confirm'?{ok:false,error:{code:'revision_conflict',message:'시험이 바뀌었습니다.'}}:{ok:true,run_id:'try-1'});
+ const read=await h.designer.callbacks.tryRead({workflow_id:'w',system_id:'EMS',factory_id:'',try_window:key});
+ const sent=h.calls.at(-1);assert.equal(sent.url,'/api/ees-work/workspace/try');assert.equal(sent.options.method,'POST');assert.equal(sent.body.try_window,key);assert.equal(read.try,null);
+ await assert.rejects(h.designer.callbacks.tryCommand('workspace/command',{action:'human_confirm',run_id:'try-1',job_id:'c',item_id:'i',try_window:key,expected_revision:3}),/시험이 바뀌었습니다/);
+ assert.equal(h.calls.at(-1).body.expected_revision,3);assert.ok(h.calls.at(-1).body.request_id);assert.equal(h.api.snapshot().error,'','a try failure is not the work screen error line');
+ await h.designer.callbacks.tryCommand('operations',{action:'execute_job',run_id:'try-1',job_id:'d',try_window:key,expected_revision:4});assert.equal(h.calls.at(-1).url,'/api/ees-work/operations');assert.equal(h.calls.at(-1).body.try_window,key);
+ assert.ok(h.calls.every(call=>!call.url.includes(key)),'the key never travels in a URL');
+ assert.equal(h.calls.some(call=>call.body?.action==='save_ui'),false);assert.doesNotMatch(JSON.stringify(h.api.snapshot().selection),/try|window-key/);
+ // 업무에서 보기 opens this procedure on the work side.
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a'},systems:['EMS'],workflows:[],runs:[],ui_state:{revision:0,state:{}}}:{ok:true});
+ await h.designer.callbacks.navigate('work',{tab:'overview',workflow_id:'w',run_id:'',job_id:'',stage_id:'',stage_overview:false});
+ const selection=h.api.snapshot().selection;assert.equal(selection.mode,'work');assert.equal(selection.workflow_id,'w');assert.equal(selection.tab,'overview');
+});
+test('mock 21: a running try job keeps the refresh at 2.5 seconds and each author refresh re-reads the try',async()=>{
+ const h=controller();let reads=0,active=true;h.designer.refreshTry=()=>{reads++;};h.designer.tryActive=()=>active;
+ h.setReply(call=>call.url.startsWith('/api/ees-work/workspace?')?{ok:true,capabilities:{actor_id:'a',can_author:true},systems:['EMS'],workflows:[],runs:[],ui_state:{revision:0,state:{}}}:{ok:true});
+ h.api.setSelection({mode:'author',system_id:'EMS',workflow_id:'',tab:'overview'});await h.api.refresh();assert.equal(reads,1);assert.equal(h.delays.at(-1),2500);
+ active=false;await h.api.refresh();assert.equal(reads,2);assert.equal(h.delays.at(-1),30000);
+ active=true;h.api.setSelection({mode:'work'});await h.api.refresh();assert.equal(reads,2,'the work side has no try');assert.equal(h.delays.at(-1),30000);
+});

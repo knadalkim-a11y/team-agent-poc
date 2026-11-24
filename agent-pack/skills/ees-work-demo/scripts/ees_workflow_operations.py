@@ -27,6 +27,9 @@ from .ees_workflow_definition import TOOL_CONNECTION_MESSAGE, tool_connection_re
 
 INTENT_TTL = 120
 LEASE_SECONDS = 30
+TRY_SWEEP_SECONDS = 600
+# Tries deleted per background sweep; each sweep runs in one write transaction.
+TRY_SWEEP_LIMIT = 20
 REQUEST_STATES = {"prepared", "approval_pending", "ready", "requested", "accepted", "running", "reported_complete", "effect_verified", "failed", "rejected", "unknown", "blocked"}
 SECRET_KEY = re.compile(r"(^|_)(pat|password|secret|token|cookie|authorization|headers)($|_)", re.I)
 
@@ -294,6 +297,7 @@ class OperationsRuntime:
         self.worker = str(uuid4())
         self.task = None
         self._closing = False
+        self._try_swept_at = None
         with service._db(write=True) as db:
             init_operations(db)
 
@@ -350,6 +354,13 @@ class OperationsRuntime:
         request = json.loads(row[0])
         self.service._work_run(db, actor, groups, request["run_id"], write=write)
         return request
+
+    @staticmethod
+    def _refuse_try_request(run):
+        # A try never sends an EES change request: the shared account cannot
+        # approve its own request, and a sent one would leave a try nobody can clear.
+        if run is not None and run["mode"] == "try":
+            fail("try_request_blocked", "시험에서는 변경 요청을 보내지 않아요.")
 
     def _save_request(self, db, request):
         db.execute("INSERT INTO work_external_requests VALUES(?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET revision=excluded.revision,state=excluded.state,data=excluded.data", (request["id"], request["run_id"], request["job_id"], request["actor"], request["revision"], request["state"], dump(request)))
@@ -421,6 +432,16 @@ class OperationsRuntime:
             fail("command_invalid")
         actor, caps, groups = await self._actor(user)
         action = body.get("action")
+        if isinstance(body.get("run_id"), str) and body["run_id"]:
+            # A try answers only the window holding its key; to any other caller
+            # it does not exist. Background workers do not come through here.
+            with self.service._db() as db:
+                run = self.service._work_try_gate(db, actor, groups, db.execute("SELECT * FROM work_runs WHERE id=?", (body["run_id"],)).fetchone(), body)
+            if run is not None and run["mode"] == "try":
+                if action == "request_prepare":
+                    self._refuse_try_request(run)
+                if action in {"execute_scope", "shared_tool_accept_version"}:
+                    fail("try_not_supported", "시험에서는 할 수 없어요.")
         if action == 'api_test':
             return await self._api_test(actor, groups, body)
         if str(action).startswith('api_'):
@@ -456,6 +477,7 @@ class OperationsRuntime:
         with self.service._db() as db:
             if action == "request_prepare":
                 run = self.service._work_run(db, actor, groups, identifier(body.get("run_id")), write=True)
+                self._refuse_try_request(run)
                 snapshot = self.service._work_snapshot(db, run, identifier(body.get('job_id')))
                 binding = snapshot['job'].get('api_binding')
                 reference = self._api_reference(binding) if binding else None
@@ -464,6 +486,8 @@ class OperationsRuntime:
                 request = self._request(db, actor, groups, body.get("external_request_id"), write=True)
                 tool = self._request_contract(db, groups, request["tool_contract_id"], request["reference"])
                 run = self.service._work_run(db, actor, groups, request["run_id"], write=True)
+                if action != "request_cancel":
+                    self._refuse_try_request(run)
             self._scope(db, actor, groups, run["system_id"], run["factory_id"], "requester" if action != "request_approve" else "approver")
         await self._inspect_reference(actor, tool["reference"], tool["kind"])
         if 'operation' in tool:
@@ -484,6 +508,8 @@ class OperationsRuntime:
                 fail("tool_review_required")
             run = self.service._work_run(db, actor, groups, run["id"], write=True)
             self._scope(db, actor, groups, run["system_id"], run["factory_id"], "approver" if action == "request_approve" else "requester")
+            if action != "request_cancel":
+                self._refuse_try_request(run)
             if action == "request_prepare":
                 self._revision(body, run["revision"])
                 job_id = identifier(body.get("job_id"))
@@ -714,6 +740,7 @@ class OperationsRuntime:
         # Lost-response retry after dispatch returns the stored state without re-sending.
         with self.service._db() as db:
             prior = self._request(db, actor, groups, body.get('external_request_id'), write=True)
+            self._refuse_try_request(db.execute("SELECT mode FROM work_runs WHERE id=?", (prior["run_id"],)).fetchone())
             cached = self._receipt(db, actor, body)
             if cached is not None and prior['reference'].get('kind') == 'api':
                 api_http.authorize_service(self._api_operation(db, prior['reference'], groups),actor)
@@ -735,6 +762,8 @@ class OperationsRuntime:
             current = self._request(db, actor, groups, request["id"], write=True)
             latest_tool = self._request_contract(db, groups, request["tool_contract_id"], request["reference"])
             current_run = self.service._work_run(db, actor, groups, request["run_id"], write=True)
+            # Again before the attempt and the network I/O below (defense in depth).
+            self._refuse_try_request(current_run)
             self._scope(db, actor, groups, current_run["system_id"], current_run["factory_id"], "requester")
             for reviewer, membership in approvers:
                 self._scope(db, reviewer, membership, current_run["system_id"], current_run["factory_id"], "approver")
@@ -1063,7 +1092,7 @@ class OperationsRuntime:
         """Opted-in lifecycle uses the existing human/unknown completion guard."""
         cursor = getattr(self, "_close_cursor", None)
         with self.service._db() as db:
-            rows = db.execute("SELECT s.data AS schedule,l.data AS slot,l.id AS slot_id,l.scheduled_at,r.id AS run_id,r.revision FROM work_schedules s JOIN work_schedule_slots l ON l.schedule_id=s.id JOIN work_runs r ON r.id=json_extract(l.data,'$.run_id') WHERE s.enabled=1 AND json_extract(s.data,'$.lifecycle_enabled')=1 AND json_extract(s.data,'$.delegated')=1 AND json_extract(l.data,'$.schedule.rule.closing')='after_last_stage' AND r.status='open' AND json_extract(l.data,'$.schedule.lifecycle_enabled')=1 AND NOT EXISTS (SELECT 1 FROM work_jobs j WHERE j.run_id=r.id AND j.status NOT IN ('completed','excluded','partial')) AND NOT EXISTS (SELECT 1 FROM work_external_requests e WHERE e.run_id=r.id AND e.state IN ('requested','accepted','running','reported_complete','unknown')) AND (? IS NULL OR (l.scheduled_at,l.id)>(?,?)) ORDER BY l.scheduled_at,l.id LIMIT 100", (cursor[0] if cursor else None, cursor[0] if cursor else 0, cursor[1] if cursor else '')).fetchall()
+            rows = db.execute("SELECT s.data AS schedule,l.data AS slot,l.id AS slot_id,l.scheduled_at,r.id AS run_id,r.revision FROM work_schedules s JOIN work_schedule_slots l ON l.schedule_id=s.id JOIN work_runs r ON r.id=json_extract(l.data,'$.run_id') WHERE s.enabled=1 AND json_extract(s.data,'$.lifecycle_enabled')=1 AND json_extract(s.data,'$.delegated')=1 AND json_extract(l.data,'$.schedule.rule.closing')='after_last_stage' AND r.status='open' AND r.mode<>'try' AND json_extract(l.data,'$.schedule.lifecycle_enabled')=1 AND NOT EXISTS (SELECT 1 FROM work_jobs j WHERE j.run_id=r.id AND j.status NOT IN ('completed','excluded','partial')) AND NOT EXISTS (SELECT 1 FROM work_external_requests e WHERE e.run_id=r.id AND e.state IN ('requested','accepted','running','reported_complete','unknown')) AND (? IS NULL OR (l.scheduled_at,l.id)>(?,?)) ORDER BY l.scheduled_at,l.id LIMIT 100", (cursor[0] if cursor else None, cursor[0] if cursor else 0, cursor[1] if cursor else '')).fetchall()
         # Native permission failures cannot be filtered in SQL. Advance this
         # bounded scanner too, then wrap; a revoked actor cannot starve others.
         self._close_cursor = (rows[-1]['scheduled_at'], rows[-1]['slot_id']) if rows else None
@@ -1126,6 +1155,9 @@ class OperationsRuntime:
     def enqueue_scope(self, db, actor, groups, run_id, node_id=None, expected_revision=None, request_id=None, model_identity=None, emergency=False):
         """Persist coordination only. All external calls reuse the J executor."""
         run = self.service._work_run(db, actor, groups, run_id, write=True)
+        if run["mode"] == "try":
+            # Stage and procedure runs go to the background worker, which has no window key.
+            fail("try_not_supported", "시험에서는 할 수 없어요.")
         if not db.execute("SELECT 1 FROM work_definitions WHERE id=?", (run["workflow_id"],)).fetchone():
             fail("workflow_archived", "보관한 절차는 기존 회차의 작업을 개별 확인해 주세요.")
         if expected_revision is not None and run["revision"] != expected_revision:
@@ -1277,7 +1309,25 @@ class OperationsRuntime:
             await asyncio.gather(heartbeat, return_exceptions=True)
         return True
 
+    def _sweep_tries(self):
+        """At most every ten minutes, delete up to TRY_SWEEP_LIMIT tries untouched for 24 hours."""
+        now = self.clock()
+        if self._try_swept_at is not None and now - self._try_swept_at < TRY_SWEEP_SECONDS:
+            return []
+        self._try_swept_at = now
+        with self.service._db() as db:
+            if not db.execute("SELECT 1 FROM work_runs WHERE mode='try' LIMIT 1").fetchone():
+                return []
+        with self.service._db(write=True) as db:
+            return self.service._work_sweep_tries(db, now, TRY_SWEEP_LIMIT)
+
     async def process_once(self):
+        try:
+            self._sweep_tries()
+        except Exception as error:
+            # Cleanup must never stop schedules; the next sweep retries.
+            import logging
+            logging.getLogger(__name__).warning("try_sweep_failed: %s", type(error).__name__)
         await self._close_cycles()
         scope_worked = await self._process_scope()
         materialized = self._materialize()
@@ -1393,7 +1443,9 @@ class OperationsRuntime:
                     if receipt is None:
                         fail("read_retry_deadline", "조회 제한 시간 안에 실행 준비를 마치지 못했습니다.")
                     attempt = db.execute("SELECT status,result FROM work_attempts WHERE id=?", (receipt["attempt"]["id"],)).fetchone()
-                    outcome = {"ok": False, "attempt": {"id": receipt["attempt"]["id"], "number": receipt["attempt"]["number"], "status": "unknown", "result": {"error": {"code": "read_retry_deadline"}}}}
+                    # run_id as in every other execution outcome: deleting a try
+                    # finds its receipts by it.
+                    outcome = {"ok": False, "attempt": {"id": receipt["attempt"]["id"], "run_id": run["id"], "number": receipt["attempt"]["number"], "status": "unknown", "result": {"error": {"code": "read_retry_deadline"}}}}
                     self._event(db, receipt["attempt"]["id"], actor, "read_retry_timeout", {"recorded_status": attempt["status"], "deadline_seconds": policy["deadline_seconds"]})
                     db.execute("UPDATE work_operation_receipts SET outcome=? WHERE actor=? AND request_id=? AND payload_hash=?", (dump(outcome), value(actor, "id"), current_body["request_id"], digest(current_body)))
             # Keep the original idempotency receipt tied to the latest recorded
@@ -1849,7 +1901,8 @@ class OperationsRuntime:
                 fail("argument_input_missing")
         return arguments
 
-    async def state(self, user, system_id="", run_id=""):
+    async def state(self, user, system_id="", run_id="", *, allow_try=False):
+        # allow_try: only try_state, which checked the window key, reads a try here.
         actor, caps, groups = await self._actor(user)
         tools, all_tools, schedules, slots, requests, scopes = [], [], [], [], [], []
         request_records = []
@@ -1888,7 +1941,7 @@ class OperationsRuntime:
                     data = json.loads(slot[0])
                     slots.append({**{key: val for key, val in data.items() if key != "schedule"}, "factory_id": item["factory_id"], "workflow_id": item["workflow_id"]})
             if run_id:
-                self.service._work_run(db, actor, groups, run_id)
+                (self.service._work_run if allow_try else self.service._work_real_run)(db, actor, groups, run_id)
                 scopes = [json.loads(row[0]) for row in db.execute("SELECT data FROM work_scope_runs WHERE run_id=? ORDER BY id", (run_id,))]
                 for scope in scopes:
                     scope.pop("model_identity", None)

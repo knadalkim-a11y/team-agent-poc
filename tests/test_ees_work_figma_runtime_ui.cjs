@@ -1873,3 +1873,53 @@ test('check items: a list without items and a tool check list behave as before',
  assert.equal(html('workHumanCheckItems(node).length',{node:{result_block:'human_confirm',confirmation_items:[{id:'a',name:'하나'}]}}),0);
  assert.equal(html('workHumanCheckItems(node).map(item=>item.id).join()',{node:{result_block:'checklist',confirmation_items:[{id:'a',name:'하나'},{id:'b',name:' '},null]}}),'a');
 });
+
+// ---- 2026-11-20, design mock 21 revision 2: the editor's try reuses these rows through additive options ----
+const copy=value=>JSON.parse(JSON.stringify(value));
+function tryRowsData(){
+ const nodes={p:{id:'p',type:'p',children:['t']},t:{id:'t',type:'t',parent:'p',name:'점검',children:['c','d','r']},
+  c:{id:'c',type:'j',parent:'t',name:'체크',mode:'human',result_block:'checklist',confirmation_items:[{id:'i',name:'항목'}]},
+  d:{id:'d',type:'j',parent:'t',name:'문서',mode:'tool',api_binding:{operation_id:'op',version:1,inputs:{id:{input:'page'}},outputs:['title']},inputs:[{id:'page',name:'페이지 ID',type:'text',scope:'run'}],result_block:'human_confirm',human_confirmation:true},
+  r:{id:'r',type:'j',parent:'t',name:'요청',mode:'tool',result_block:'change_request'}};
+ return {capabilities:{actor_id:'a'},workflow:{id:'w'},people:[],operations:{},run:{id:'try-1',workflow_id:'w',status:'open',revision:2,inputs:{page:'1'},definition:{nodes},
+  jobs:{c:{status:'pending',can_execute:true,can_decide:true,decisions:[]},d:{status:'failed',can_execute:true,can_decide:true,current_attempt:'at',result_revision:1,decisions:[{id:'x',item_id:'job',attempt_id:'at',result_revision:1,verdict:'failed',actor_id:'a',created_at:'2026-11-20T02:50:00Z'}]},r:{status:'pending',can_execute:true,can_decide:true,decisions:[]}},
+  attempts:[{id:'at',job_id:'d',number:1,status:'succeeded',inputs:{page:'1'},result:{items:[{id:'x',row:{title:'문서 제목'}}],field_labels:{title:'제목'}},snapshot:{job:{}},created_at:'2026-11-20T02:49:00Z'}]}};
+}
+test('mock 21: work rows draw as before without options; the try options add only the try marks',()=>{
+ const context=renderer({data:tryRowsData(),selection:{stage_evidence:'d'}});run(context,'workNormalizeRun(data.run,{})');
+ const draw=(rowOptions,htmlOptions)=>run(context,`workStageRows(data,data.run.definition.nodes.t${rowOptions}).map((row,i)=>workStageRowHTML(row,data,selection,i+1${htmlOptions})).join('')`);
+ const base=draw('','');assert.equal(draw(',{}',',{}'),base);
+ assert.match(base,/<button type="button" class="ew-vd-name" data-action="job" data-job-id="c">체크<\/button>/);assert.match(base,/aria-label="문서 자세히">자세히<\/button>/);assert.doesNotMatch(base,/ew-try-|시험에서는/);
+ const tried=draw(',{try:true}',',{try:true,startForm:false,changed:row.node.id==="c",fix:"<button data-fix>고치기</button>",problem:row.node.id==="d"?"<div class=\\"ew-try-problem\\">P</div>":""}');
+ assert.doesNotMatch(tried,/data-action="job"|자세히/);
+ assert.match(tried,/<button type="button" class="ew-vd-name">체크<span class="ew-try-changed">바뀜<\/span><\/button>/);
+ assert.match(tried,/<span class="ew-vd-count" data-decision-status>0 \/ 1<\/span><\/div><button data-fix>고치기<\/button><\/div><\/div><ol class="ew-vd-checks"/);
+ assert.match(tried,/data-stage-values data-job-id="d"><div class="ew-try-problem">P<\/div><section><h4>입력/);
+ // Rule 10: 미흡 stays a choice in a try; on the work screen it is a final word.
+ assert.match(tried,/class="ew-vd-pick" data-action="stage_verdict" data-job-id="d" data-verdict="bad"/);assert.doesNotMatch(base,/data-action="stage_verdict" data-job-id="d"/);
+ // A change request is never sent from a try.
+ assert.match(tried,/<span class="ew-vd-state" data-decision-status><span>시험에서는 보내지 않아요<\/span><\/span>/);
+ const rows=run(context,'workStageRows(data,data.run.definition.nodes.t,{try:true,running:"c",failures:{d:"열 수 없음"}}).map(row=>[row.node.id,row.label,row.group,row.canDecide,row.canExecute])');
+ assert.deepEqual(copy(rows),[['c','실행 중','running',false,false],['d','열 수 없음','waiting',false,true],['r','시험에서는 보내지 않아요','waiting',false,false]]);
+ const typed=run(context,'workStageRows(data,data.run.definition.nodes.t,{try:true,retyped:{d:true}}).find(row=>row.node.id==="d")');
+ assert.deepEqual([typed.label,typed.state,typed.decision,typed.canDecide,typed.retyped],['실행 필요','unstarted',null,false,true]);
+ assert.doesNotMatch(run(context,'workStageRowHTML(workStageRows(data,data.run.definition.nodes.t,{try:true,retyped:{d:true}})[1],data,selection,2,{try:true})'),/data-stage-result|ew-vd-pick/);
+});
+test('mock 21: the stage counts, the run shape and the menu placement are shared helpers with the work screen',()=>{
+ const h=stageRuntimeFixture(),context=renderer({state:h.state,stage:h.state.run.definition.nodes.t});
+ const screen=run(context,'workStageHTML(state,{stage_tab:"work"},stage).body'),tally=run(context,'workStageTally(workStageRows(state,stage))');
+ assert.ok(screen.includes('<span class="ew-stage-completed">'+tally.completed+' / 2 완료</span><div class="ew-center-counts">'+tally.legend+'</div>'));
+ const sample={id:'r',jobs:{a:{current_attempt:'x',result_revision:2,decisions:[{item_id:'job',result_revision:2},{item_id:'i',result_revision:1}]},b:{decisions:[]}},attempts:[{id:'x',job_id:'a',result:{ok:1},evidence_access:'e'},{id:'y',job_id:'b',result:{b:1}}]};
+ const viaLauncher=h.api.normalized({run:copy(sample),operations:{requests:[{job_id:'a',state:'requested'}]}}).run,viaView=run(renderer({sample}),'workNormalizeRun(sample,{requests:[{job_id:"a",state:"requested"}]})');
+ assert.deepEqual(copy(viaView),copy(viaLauncher));
+ const placed=run(renderer(),'(()=>{const menu={style:{},getBoundingClientRect:()=>({height:90,width:180})};workPlaceStageMenu({getBoundingClientRect:()=>({left:100,top:50,bottom:650,width:800})},menu,{getBoundingClientRect:()=>({left:400,top:200,bottom:230})});return menu.style;})()');
+ assert.deepEqual(copy(placed),{left:'300px',top:'186px'});
+});
+test('mock 21: opening the procedure menu puts its first item in reach; other menus keep their focus',()=>{
+ const context=renderer(),ui=run(context,'workUI');
+ const menu=(kind)=>{let focused=false;const first={focus:()=>{focused=true;}},content={dataset:{},style:{setProperty(){},removeProperty(){}},querySelector:selector=>selector==='button:not(:disabled)'?first:null,getAttribute:()=>null,setAttribute(){},removeAttribute(){},addEventListener(){},removeEventListener(){}};
+  const summary={setAttribute(){},getAttribute:()=>null,contains:target=>target===summary},details={open:false,matches:selector=>selector==='.'+kind,querySelector:selector=>selector==='summary'?summary:selector===':scope > div'?content:null,contains:()=>true};
+  summary.closest=()=>details;return {details,summary,focused:()=>focused};};
+ const procedure=menu('ew-procedure-menu');assert.equal(ui.menuEvent({type:'click',target:procedure.summary,preventDefault(){},stopPropagation(){}}),true);assert.equal(procedure.details.open,true);assert.equal(procedure.focused(),true);
+ const picker=menu('ew-shared-picker');assert.equal(ui.menuEvent({type:'click',target:picker.summary,preventDefault(){},stopPropagation(){}}),true);assert.equal(picker.details.open,true);assert.equal(picker.focused(),false);
+});
