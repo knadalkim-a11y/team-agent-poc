@@ -3447,9 +3447,11 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertIsNone(record['published_version'])
         self.assertTrue(self.browser.evaluate("""(() => {
             const section = document.querySelector('.ew-work-content');
+            const heading = section.querySelector('.ew-content-heading');
             const stages = section.querySelector('.ew-stage-list');
-            const add = section.querySelector(':scope > [data-author-action=add_stage]');
-            return !!add && !!stages && add.getBoundingClientRect().top >= stages.getBoundingClientRect().bottom - 1;
+            const add = heading?.querySelector(':scope > [data-author-action=add_stage]');
+            return add?.checkVisibility() && !!stages &&
+                add.getBoundingClientRect().bottom <= stages.getBoundingClientRect().top;
         })()"""))
         self.screenshot('procedure-initial-editable')
         self.click('.ew-procedure-menu summary')

@@ -1613,6 +1613,43 @@ test('current workspace does not expose the old admin on stale, incomplete or ma
  h.click('job_tool_setup');h.click('pick_job_tool',{id:'old'});await flush();assert.equal(h.operations.length,0);assert.equal(h.dialogs.length,0);
 });
 
+test('API-only procedures expose structure editing and keep tool actions on their own jobs',async()=>{
+ const h=harness({legacyToolAuthoring:false}), value=stagedDefinition(2,2);
+ const reader={id:'reader',name:'설비 조회',service_id:'service',method:'GET',url:'https://ems.example/equipment',
+  inputs:[],fields:[{path:'code',label:'설비 코드'}],example:{code:'EMS-101'}};
+ const writer={id:'writer',name:'확인 등록',service_id:'service',method:'POST',url:'https://ems.example/confirmations',
+  inputs:[{name:'code',label:'설비 코드'}],fields:[{path:'receipt',label:'접수 번호'}]};
+ h.state.operations={api_catalog:{services:[{id:'service',name:'설비 관리'}],apis:[reader,writer]}};
+ for(const node of Object.values(value.nodes))if(node.type==='j')node.mode='tool';
+ value.nodes['j0-0'].api_binding={operation_id:reader.id,version:1,inputs:{},outputs:['code']};
+ value.nodes['j0-1'].api_binding={operation_id:writer.id,version:1,
+  inputs:{code:{result:{job_id:'j0-0',field:'code',confirmed:true}}},outputs:['receipt']};
+ installDefinition(h,value);
+
+ assert.ok(actionButton(h,'add_stage')?.closest('.ew-content-heading'));
+ assert.equal(actionButton(h,'add_job'),undefined,'collapsed stages do not expose job creation');
+ assert.equal(actionButton(h,'api_structure_edit'),undefined);
+ h.click('stage_toggle',{id:'t0'});await flush();
+ const addJob=actionButton(h,'add_job');
+ assert.equal(addJob.dataset.parent,'t0');
+ assert.ok(addJob.closest('.ew-stage-head'));
+ assert.match(h.markup,/받는 결과 · 설비 코드/);
+ assert.match(h.markup,/설비 코드 ← 작업 1-1/);
+ assert.equal(actionButton(h,'job_api_example','j0-0').closest('[data-job-id]').attributes['data-job-id'],'j0-0');
+ assert.equal(actionButton(h,'job_api_example','j0-1'),undefined);
+ const writerActions=h.buttons.filter(button=>button.dataset.authorAction==='job_api_setup'&&button.dataset.id==='j0-1');
+ assert.equal(writerActions.length,2);
+ assert.ok(writerActions.every(button=>button.closest('[data-job-id]').attributes['data-job-id']==='j0-1'));
+
+ h.dialogs.push(null);h.click('job_api_example',{id:'j0-0'});await flush();
+ assert.match(h.dialogHistory.at(-1).html,/EMS-101/);
+ h.click('add_job',{parent:'t0'});await flush();await h.inline('결과 확인');
+ const added=Object.values(h.draft().definition.nodes).find(node=>node.name==='결과 확인');
+ assert.equal(added.parent,'t0');
+ assert.deepEqual(h.draft().definition.nodes['j0-1'].api_binding,value.nodes['j0-1'].api_binding);
+ assert.equal(h.writes.length,0);
+});
+
 test('current procedure input settings and assistant previews accept only current sources',async()=>{
  const h=harness({legacyToolAuthoring:false});await h.node();
  h.dialogs.push(null);h.click('input_add');await flush();const html=h.dialogHistory.at(-1).html;

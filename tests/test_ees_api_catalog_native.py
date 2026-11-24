@@ -53,6 +53,10 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
             mapping:rect('[data-api-mapping]'), foot:rect('.ew-api-foot'),
             fields:['url','name','purpose'].map(name=>rect('[name=api-'+name+']')),
             stage:rect('[data-stage-id=stage]'), jobs:['job-0','job-1'].map(id=>rect('[data-job-id='+id+']')),
+            overview:rect('.ew-content-overview'), stageHeading:rect('.ew-content-heading'),
+            addStage:rect('.ew-content-heading > [data-author-action=add_stage]'),
+            stageHead:rect('[data-stage-id=stage] .ew-stage-head'),
+            addJob:rect('[data-stage-id=stage] .ew-stage-head > [data-author-action=add_job]'),
             bindings:[...document.querySelectorAll('[data-api-job-binding]')].map(e=>e.innerText)};
         })()""")
         report['scene'] = name
@@ -96,11 +100,17 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
             self.assertAlmostEqual(purpose['width'], 960, delta=1)
             self.assertGreater(report['mapping']['y'], purpose['y'] + purpose['height'])
         if name.startswith('task-'):
-            self.assertAlmostEqual(report['stage']['x'], 328, delta=2)
-            self.assertAlmostEqual(report['stage']['width'], 960, delta=2)
-            # 2026-11-18: the publication state sits in the title row on every editor screen,
-            # which makes that row 3px taller than the status tag it replaces here.
-            self.assertAlmostEqual(report['stage']['y'], 237, delta=2)
+            overview, heading, stage = (report[key] for key in ('overview', 'stageHeading', 'stage'))
+            self.assertGreater(overview['height'], 0)
+            self.assertGreaterEqual(heading['y'], overview['y'] + overview['height'])
+            self.assertGreaterEqual(stage['y'], heading['y'] + heading['height'])
+            self.assertAlmostEqual(stage['x'], overview['x'], delta=2)
+            self.assertAlmostEqual(stage['width'], overview['width'], delta=2)
+            for control, row in ((report['addStage'], heading), (report['addJob'], report['stageHead'])):
+                self.assertGreaterEqual(control['height'], 32)
+                self.assertGreater(control['width'], 24)
+                self.assertGreaterEqual(control['y'], row['y'])
+                self.assertLessEqual(control['y'] + control['height'], row['y'] + row['height'])
         if name == 'tools-edit':
             # Save stays below the settings, at the right edge of the form and the bottom edge of the pane.
             self.assertGreater(report['save']['x'], report['form']['x'] + 800)
@@ -376,9 +386,14 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.open_initialized_author_list()
         self.click('[data-author-action=open][data-id="' + key + '"]')
         self.click('[data-author-action=tab][data-tab=content]')
+        add_stage = '.ew-content-heading > [data-author-action=add_stage]'
+        add_job = '[data-stage-id=stage] .ew-stage-head > [data-author-action=add_job]'
+        self.wait(f'document.querySelector({json.dumps(add_stage)})?.checkVisibility()')
+        self.assertFalse(self.read('[data-author-action=api_structure_edit]', 'isConnected'))
         first = '[data-job-id=job-0] [data-author-action=job_api_setup]'
         if not self.read(first, 'isConnected'):
             self.click('[data-author-action=stage_toggle][data-id=stage]')
+        self.wait(f'document.querySelector({json.dumps(add_job)})?.checkVisibility()')
         self.capture_state('task-connection', first)
         self.assertFalse(self.read('[data-api-job-binding]', 'isConnected'))
         for job, op in (('job-0', reader), ('job-1', writer)):
@@ -392,9 +407,23 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
             self.click('#ees-work-dialog [data-dialog-confirm]')
             self.wait("!document.querySelector('#ees-work-dialog[open]')")
         self.capture_state('task-mapped', '[data-api-job-binding]')
-        self.click('[data-author-action=job_api_example]')
+        self.click('[data-job-id=job-0] [data-author-action=job_api_example]')
         self.wait("document.querySelector('#ees-work-dialog[open] .ew-api-result-example')?.textContent.includes('F101')")
         self.key('Escape', 27)
+        self.click('[data-job-id=job-1] [data-author-action=job_api_setup][data-api-setup=inputs]')
+        self.assertEqual(self.read('#ees-work-dialog [data-api-result="code"]', 'value'), '["job-0","code"]')
+        self.key('Escape', 27)
+        self.wait("!document.querySelector('#ees-work-dialog[open]')")
+
+        self.click(add_stage)
+        inline_name = '#ew-stage-editor [name=name]'
+        self.wait(f'document.activeElement?.matches({json.dumps(inline_name)})')
+        self.fill(inline_name, '결과 검토')
+        self.click('[data-author-action=inline_apply]')
+        self.wait(f'document.activeElement?.matches({json.dumps(inline_name)}) && document.activeElement.getAttribute("aria-label") === "새 작업 이름"')
+        self.fill(inline_name, '요청 등록 결과 확인')
+        self.click('[data-author-action=inline_apply]')
+        self.wait("document.querySelector('#ew-author-node [name=name]')?.value === '요청 등록 결과 확인'")
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('[data-author-status]')?.dataset.dirty === 'false'")
         saved = self.state(workflow_id=key)['workflow']['draft']['nodes']
@@ -402,6 +431,9 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.assertEqual(saved['job-1']['api_binding']['operation_id'], writer['id'])
         source = saved['job-1']['api_binding']['inputs']['code']['result']
         self.assertEqual(source, {'job_id':'job-0', 'field':'code', 'confirmed':True})
+        added_stage = next(node for node in saved.values() if node['name'] == '결과 검토')
+        added_job = next(node for node in saved.values() if node['name'] == '요청 등록 결과 확인')
+        self.assertEqual(added_job['parent'], added_stage['id'])
 
     def test_registered_query_reaches_service_and_result_reopens_from_records(self):
         http = self.enterContext(backup_service())
