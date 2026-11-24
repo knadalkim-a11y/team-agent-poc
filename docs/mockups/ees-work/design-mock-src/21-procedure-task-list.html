@@ -1,0 +1,1207 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EES Workflow · 업무 절차 작성 방식 비교</title>
+<style data-new-screen="">
+  :root {
+    color-scheme: light;
+    font: 14px/1.5 "Malgun Gothic", "Noto Sans CJK KR", system-ui, sans-serif;
+    color: #20242b;
+    --muted: #586272;
+    --line: #e1e4e8;
+    --control: #c4cbd3;
+    --side: #f4f5f6;
+    --ink: #20242b;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: white; }
+  [hidden] { display: none !important; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button, summary { cursor: pointer; }
+  button:focus-visible, input:focus-visible, select:focus-visible,
+  textarea:focus-visible, summary:focus-visible { outline: 2px solid #4b6380; outline-offset: 3px; }
+  button { border: 0; background: transparent; }
+  h1, h2, h3, p { margin: 0; }
+  .app { display: grid; grid-template-columns: 256px minmax(0, 1fr) clamp(320px, 29vw, 560px); min-height: 100dvh; }
+  .sidebar { background: var(--side); border-right: 1px solid var(--line); padding: 12px 8px; }
+  .brand { display: flex; gap: 8px; align-items: center; padding: 0 4px; font-weight: 700; }
+  .mark { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; background: var(--ink); color: white; font-size: 13px; }
+  .modes { display: grid; grid-template-columns: 1fr 1fr; margin: 16px 0 22px; padding: 3px; border-radius: 6px; background: #e8eaed; text-align: center; font-size: 13px; }
+  .modes span { padding: 6px; }
+  .modes .selected { background: white; border-radius: 5px; box-shadow: 0 1px 2px #20242b14; font-weight: 600; }
+  .sidebar h2 { margin: 0 5px 6px; color: var(--muted); font-size: 12px; font-weight: 400; }
+  .scope { display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 8px 10px; border: 1px solid var(--line); border-radius: 5px; background: white; font-size: 13px; }
+  .scope + .scope { margin-top: 4px; }
+  .scope span { color: var(--muted); }
+  .scope strong { font-weight: 500; }
+  .nav { display: grid; gap: 4px; margin-top: 18px; }
+  .nav div { padding: 10px 12px; }
+  .nav .selected { background: #e7e9ec; border-radius: 6px; font-weight: 600; }
+  .recent { margin-top: 24px; border-top: 1px solid var(--line); padding: 14px 4px; }
+  .recent p { padding: 5px 6px; font-size: 13px; color: var(--muted); }
+  main { display: flex; flex-direction: column; height: 100dvh; min-width: 0; }
+  .bar { display: flex; align-items: center; justify-content: space-between; min-height: 48px; gap: 10px; padding: 8px 20px; border-bottom: 1px solid var(--line); font-weight: 600; }
+  .preview { font-size: 12px; color: var(--muted); font-weight: 400; white-space: nowrap; }
+  .preview-tools { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 7px 12px; }
+  .preview-tools select { padding: 4px 8px; font-size: 12px; background: var(--side); }
+  .preview-tools .label { color: var(--muted); }
+  .scroll { flex: 1 1 auto; overflow: auto; min-height: 0; }
+  .page { max-width: 1104px; margin-inline: auto; padding: 17px clamp(20px, 4vw, 72px) 30px; }
+  .crumb { color: var(--muted); font-size: 13px; }
+  .title { margin-top: 12px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+  h1 { font-size: 21px; line-height: 1.4; letter-spacing: -.025em; }
+  .publication { display: flex; gap: 6px; align-items: center; color: var(--muted); font-size: 12px; }
+  input, select, textarea { border: 1px solid var(--control); border-radius: 6px; background: white; padding: 8px 10px; }
+  .publication select { padding: 5px 8px; }
+  .more { position: relative; margin-left: auto; }
+  .more summary { list-style: none; padding: 2px 9px; border-radius: 6px; background: var(--side); font-size: 17px; }
+  .more summary::-webkit-details-marker { display: none; }
+  .more-menu { position: absolute; z-index: 1; top: calc(100% + 6px); right: 0; min-width: max-content; margin: 0; padding: 6px; list-style: none; border: 1px solid var(--line); border-radius: 6px; background: white; box-shadow: 0 4px 12px #20242b18; }
+  .more-menu li { padding: 7px 10px; font-size: 13px; }
+  .more-menu li:has(button) { padding: 0; }
+  .more-menu button { width: 100%; padding: 7px 10px; border-radius: 4px; text-align: left; }
+  .more-menu button:hover { background: var(--side); }
+  .system { margin-top: 6px; font-size: 12px; color: var(--muted); }
+  .tabbar { display: flex; gap: 20px; margin: 12px 0; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  .tabbar span { padding: 8px 0; }
+  .tabbar [aria-current] { border-bottom: 2px solid var(--ink); font-weight: 600; color: var(--ink); }
+  .overview { padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; background: #fcfcfd; }
+  .label { font-size: 12px; font-weight: 600; }
+  .overview p + p { margin-top: 4px; color: var(--muted); }
+  .section-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 20px 0 8px; }
+  .section-label { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; }
+  h2 { font-size: 15px; font-weight: 700; }
+  .count { color: var(--muted); font-size: 12px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    border: 1px solid var(--control); border-radius: 6px; background: white; min-height: 34px;
+    padding: 5px 10px; font-size: 13px; font-weight: 600; white-space: nowrap;
+  }
+  .btn:hover { background: #f0f2f4; border-color: #a8b1bc; }
+  .btn.primary { background: var(--ink); color: white; border-color: var(--ink); }
+  .btn.primary:hover { background: #363c46; }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .add-action {
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px; flex: none;
+    min-height: 34px; padding: 5px 9px; border-radius: 6px;
+    background: var(--side); color: #1d2128; font-size: 13px; font-weight: 500; line-height: 20px;
+    white-space: nowrap;
+  }
+  .add-action:hover { background: #e7e8eb; }
+  .add-action:focus-visible { outline-color: currentColor; outline-offset: 2px; box-shadow: 0 0 0 2px #1d212826; }
+  .plus { display: grid; place-items: center; width: 14px; height: 14px; flex: none; }
+  .plus::before, .plus::after { content: ""; grid-area: 1 / 1; border-radius: 1px; background: currentColor; }
+  .plus::before { width: 10px; height: 1.5px; }
+  .plus::after { width: 1.5px; height: 10px; }
+  .stage { border: 1px solid var(--line); border-radius: 8px; margin-bottom: 8px; overflow: clip; }
+  .stage-head { display: flex; align-items: center; gap: 6px; background: #fafbfc; padding-right: 12px; }
+  .stage-toggle { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; min-height: 51px; padding: 8px 12px; text-align: left; }
+  .stage-toggle:hover { background: #eff1f4; }
+  .stage-toggle:focus-visible { outline-offset: -3px; }
+  .stage-toggle .count { margin-left: auto; white-space: nowrap; }
+  .number { display: grid; place-items: center; width: 22px; height: 22px; border: 1px solid var(--control); background: white; border-radius: 50%; font-size: 12px; flex: none; color: var(--muted); }
+  .stage-name { font-weight: 600; overflow-wrap: anywhere; }
+  .chevron { width: 7px; height: 7px; border: solid var(--muted); border-width: 0 1.5px 1.5px 0; transform: rotate(-45deg); margin: 0 3px 0 2px; flex: none; }
+  [aria-expanded="true"] .chevron { transform: rotate(45deg) translate(-1px, -1px); }
+  .stage-body { padding: 0 14px 0 38px; border-top: 1px solid var(--line); }
+  .job { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; padding: 12px 0; }
+  .job + .job { border-top: 1px solid var(--line); }
+  .job-open { padding: 0; font-weight: 600; text-align: left; }
+  .job-open:hover, .text-btn:hover { text-decoration: underline; }
+  .job-info { margin-top: 3px; display: grid; gap: 1px; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+  .job-actions { display: grid; justify-items: end; gap: 3px; flex: none; }
+  .text-btn { padding: 0; color: #34475f; font-size: 12px; min-height: 22px; text-align: left; }
+  code { font-size: 11px; }
+  .add-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; padding: 10px 0; }
+  .add-row label, .job-form label { display: grid; gap: 4px; }
+  .add-row label { flex: 0 1 340px; min-width: min(100%, 160px); }
+  .add-row input { height: 36px; }
+  .add-row .btn { min-height: 36px; }
+  .job-form { display: grid; gap: 14px; max-width: 540px; margin-top: 14px; }
+  .job-form textarea { resize: vertical; }
+  .foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; border-top: 1px solid var(--line); padding: 10px clamp(20px, 4vw, 72px); }
+  .foot p { color: var(--muted); font-size: 12px; }
+  .chat { display: flex; flex-direction: column; border-left: 1px solid var(--line); color: var(--muted); }
+  .chat .bar { color: var(--ink); font-weight: 500; }
+  .chat-body { display: grid; flex: 1; place-content: center; text-align: center; }
+  .chat-body p:first-child { color: var(--ink); font-size: 22px; }
+  .chat-body p + p { margin-top: 3px; }
+  .chat-input { border: 1px solid var(--line); border-radius: 12px; margin: 12px; padding: 12px; font-size: 13px; }
+  dialog { color: var(--ink); background: white; border: 1px solid var(--line); border-radius: 9px; width: min(calc(100% - 28px), 520px); padding: 20px; }
+  dialog::backdrop { background: #151a264d; }
+  dialog h2 { margin-bottom: 12px; }
+  dialog p { color: var(--muted); }
+  dialog pre { padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--side); white-space: pre-wrap; overflow-wrap: anywhere; }
+  dialog form { margin-top: 16px; text-align: right; }
+  .binding-form { display: grid; gap: 10px; text-align: left; }
+  .binding-form label { display: grid; gap: 4px; }
+  .binding-form input, .binding-form select { width: 100%; }
+  .binding-form .btn { justify-self: end; }
+  .binding-list { display: grid; grid-template-columns: minmax(75px, 1fr) minmax(0, 2fr); gap: 8px 12px; margin: 12px 0; font-size: 13px; }
+  .binding-list dt { font-weight: 600; }
+  .binding-list dd { margin: 0; color: var(--muted); }
+  @media (max-width: 1150px) {
+    .app { grid-template-columns: 210px minmax(0, 1fr); }
+    .chat { display: none; }
+  }
+  @media (max-width: 650px) {
+    .app { display: block; }
+    .sidebar { display: none; }
+    .bar { padding-inline: 14px; }
+    .bar:has(.preview-tools) { align-items: flex-start; flex-direction: column; }
+    .preview-tools { justify-content: flex-start; }
+    .page { padding-inline: 14px; }
+    .stage-body { padding-inline: 12px; }
+    .stage-head { padding-right: 6px; gap: 2px; }
+    .stage-toggle { padding-inline: 6px; }
+    .stage-toggle .count { display: none; }
+    .job { gap: 8px; }
+  }
+  .run-overview, .run-controls, .run-job-title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .run-overview > div, .run-job-title h3 { flex: 1 1 auto; }
+  .run-setup { margin-top: 8px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 6px; }
+  .run-inline-form { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
+  .run-inline-form label { display: grid; gap: 4px; }
+  .run-inline-form input { min-width: 0; width: min(200px, 58vw); height: 34px; }
+  .run-stage-head { padding: 8px 12px; min-height: 46px; }
+  .run-stage-body { padding-inline: 14px; }
+  .run-job { display: grid; gap: 6px; justify-content: stretch; }
+  .run-job h3 { font-size: 14px; }
+  .run-job > .btn { justify-self: start; }
+  .run-value { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; color: var(--muted); font-size: 12px; }
+  .run-value strong { color: var(--ink); overflow-wrap: anywhere; }
+  .run-value small { font-size: inherit; }
+  .run-preview > .run-value { margin-top: 10px; }
+  .run-results { display: grid; gap: 4px; padding: 8px 10px; margin: 0; background: var(--side); border-radius: 6px; }
+  .run-results > div { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 13px; }
+  .run-results dt { color: var(--muted); }
+  .run-results dd { margin: 0; overflow-wrap: anywhere; }
+</style>
+<style>
+.compare-tools{padding:7px clamp(12px,2vw,32px);border-bottom:1px solid var(--line);background:#fbfbfc}
+.compare-tools .preview{margin-right:auto}.compare-switch{display:inline-flex;border:1px solid var(--control);border-radius:6px;overflow:hidden}.compare-switch button{font-size:12px;padding:5px 9px}.compare-switch button[aria-pressed=true]{background:var(--ink);color:white}
+main{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto}
+.tabbar button{color:var(--muted);padding:9px 0;border-radius:0}.tabbar button[aria-selected=true]{border-bottom:2px solid var(--ink);font-weight:600;color:var(--ink)}
+.overview-fields{display:grid;gap:8px}.overview-fields label{display:grid;gap:3px}.overview-fields :is(input,textarea){width:100%;min-width:0}
+.stage-meta{display:flex;justify-content:space-between;align-items:center;padding:7px 0}.stage-head>.text-btn:last-child{margin-right:6px}
+#proposed-group-dialog .binding-list{grid-template-columns:1fr}#proposed-group-dialog .binding-list label{display:flex;flex-direction:row;gap:7px;align-items:center}#proposed-group-dialog .binding-list input{width:auto}
+@media(max-width:650px){.compare-tools{flex-wrap:wrap}}
+:root {
+  --ink: #202226;
+  --muted: #5e6370;
+  --line: #e6e6e9;
+  --control: #d5d6da;
+  --side: #fafafa;
+  --canvas: #f3f3f5;
+  --pressed: #ececef;
+  --brand: #2f5f98;
+  --brand-tint: #eef3f9;
+  --brand-hover: #244d7d;
+  --page-inset: max(32px, calc((100% - 960px) / 2));
+  font-family: "Noto Sans KR", "Malgun Gothic", "Noto Sans CJK KR", system-ui, sans-serif;
+}
+
+.app {
+  grid-template-columns: 256px minmax(0, 1fr) clamp(340px, 29.167vw, 560px);
+  min-height: 100dvh;
+}
+.app:has(.chat[hidden]), .app[data-chat-open="false"] {
+  grid-template-columns: 256px minmax(0, 1fr);
+}
+
+.sidebar {
+  min-width: 0;
+  height: 100dvh;
+  overflow: auto;
+  padding: 0 8px 18px;
+}
+.sidebar svg, .bar svg {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sidebar .brand {
+  min-height: 48px;
+  gap: 8px;
+  padding-inline: 2px;
+  font-size: 14px;
+}
+.sidebar .mark { background: var(--brand); }
+.sidebar .modes {
+  margin: 0 7px 22px 0;
+  min-height: 38px;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--pressed);
+}
+.sidebar .modes > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 4px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.sidebar .modes > .selected { color: var(--ink); }
+.sidebar h2 { margin: 0 4px 6px; }
+.rail-location, .sidebar .nav { margin-right: 7px; }
+.rail-scopes {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--control);
+  border-radius: 6px;
+  background: #fff;
+}
+.rail-scopes .scope {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) 16px;
+  justify-content: start;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 0;
+  font-size: 12px;
+}
+.rail-scopes .scope + .scope { margin-top: 0; border-top: 1px solid var(--control); }
+.rail-scopes dt { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+.rail-scopes dt svg { color: var(--ink); }
+.rail-scopes dd { overflow: hidden; margin: 0; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.rail-chevron { color: #858a94; }
+.sidebar .nav { gap: 4px; margin-top: 20px; }
+.sidebar .nav > div { display: flex; align-items: center; gap: 12px; padding: 9px 12px; }
+.sidebar .nav > .selected { min-height: 40px; color: var(--brand); background: var(--brand-tint); font-weight: 500; }
+.sidebar .nav > .rail-nav-group {
+  justify-content: space-between;
+  min-height: 36px;
+  margin-top: 8px;
+  border-radius: 8px;
+  background: var(--pressed);
+  font-size: 13px;
+  font-weight: 500;
+}
+.sidebar .nav > .rail-nav-child { padding-inline-start: 28px; }
+.sidebar .recent { margin-top: 18px; padding: 13px 0 0; }
+.rail-list { display: grid; gap: 1px; margin: 0; padding: 0; list-style: none; }
+.rail-list li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 35px;
+  min-width: 0;
+  padding: 5px 8px;
+  font-size: 13px;
+}
+.rail-list li > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rail-conversations { margin-top: 7px; }
+
+.app > main, .foot { background: var(--canvas); }
+.app > .chat { min-width: 0; height: 100dvh; background: #fff; }
+.bar {
+  min-height: 48px;
+  flex: 0 0 auto;
+  gap: 10px;
+  padding: 6px 20px;
+  background: #fff;
+}
+.app > main > .bar > #view-name { white-space: nowrap; }
+.preview-tools { gap: 6px 10px; min-width: 0; }
+.preview-tools .preview { color: var(--muted); }
+.preview-tools > label { display: flex; gap: 6px; align-items: center; min-width: 0; }
+.preview-tools select {
+  max-width: 164px;
+  min-width: 0;
+  min-height: 30px;
+  padding: 4px 6px;
+  background: #fff;
+  color: var(--ink);
+}
+.preview-tools .btn, #chat-toggle { min-height: 30px; padding: 3px 8px; font-size: 12px; font-weight: 500; }
+#chat-toggle { display: inline-flex; flex: none; align-items: center; gap: 6px; }
+.compare-switch {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  gap: 2px;
+  min-height: 32px;
+  padding: 2px;
+  overflow: visible;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--pressed);
+}
+.compare-switch button {
+  min-height: 26px;
+  padding: 3px 8px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: nowrap;
+}
+.compare-switch button:hover { color: var(--ink); }
+.compare-switch button[aria-pressed="true"] {
+  border-color: var(--control);
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 1px 1px #2022260d;
+}
+.compare-switch button:focus-visible { outline-color: var(--brand); outline-offset: 1px; }
+.chat .bar { padding-inline: 14px; }
+.chat-body { min-height: 0; overflow: auto; padding: 24px; }
+.chat-input { margin: 12px 24px 16px; padding: 12px 16px; border-color: var(--control); border-radius: 8px; }
+
+.scroll { overscroll-behavior: contain; scrollbar-width: thin; }
+.page {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  padding: 20px var(--page-inset) 32px;
+}
+.crumb { min-height: 22px; padding: 0; color: var(--muted); font-size: 14px; text-align: left; }
+button.crumb:hover { color: var(--brand); text-decoration: underline; }
+.title { gap: 8px; margin-top: 8px; }
+.title h1 { font-size: 20px; line-height: 28px; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.publication select { min-height: 30px; border-color: var(--control); }
+.more summary { background: var(--side); }
+.more summary:hover { background: var(--pressed); }
+.system { margin-top: 5px; }
+.tabbar { gap: 20px; margin: 10px 0 12px; font-size: 14px; }
+.tabbar > :is(button, span) {
+  padding: 8px 0 10px;
+  border-bottom: 2px solid transparent;
+  color: inherit;
+}
+.tabbar > :is([aria-current="page"], [aria-selected="true"], [aria-pressed="true"]) {
+  border-bottom-color: var(--brand);
+  color: var(--ink);
+  font-weight: 600;
+}
+.overview { padding: 14px 18px; background: #fff; }
+.overview-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px 18px; }
+.overview-fields > label { display: grid; align-content: start; min-width: 0; gap: 6px; font-size: 14px; }
+.overview-fields .label { font-size: 14px; font-weight: 500; }
+.overview-fields :is(input, textarea) { width: 100%; min-width: 0; min-height: 42px; padding: 9px 10px; }
+.overview-fields textarea { height: 42px; resize: vertical; }
+.overview-fields > button { grid-column: 1 / -1; justify-self: center; }
+.overview > .text-btn { display: block; margin: 8px auto 0; }
+.section-head { min-height: 33px; margin: 12px 0 8px; }
+.section-label { gap: 7px; }
+.section-label h2 { font-size: 14px; font-weight: 600; }
+
+.stage { overflow: visible; padding-inline: 14px; border-color: var(--line); background: #fff; }
+.stage:not([data-proposed-stage]):has(+ .stage:not([data-proposed-stage])) {
+  margin-bottom: 0;
+  border-bottom-width: 0;
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+.stage:not([data-proposed-stage]) + .stage:not([data-proposed-stage]) {
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+}
+.stage-head { min-width: 0; padding: 0; background: #fff; border-radius: 8px; }
+.stage-toggle { padding: 9px 12px; border-radius: 5px; gap: 10px; font-size: 13px; }
+.stage-toggle:hover { background: var(--side); }
+.stage-toggle .count { margin-inline-start: auto; }
+.stage-body { padding: 0; }
+.stage-body:has(.job) { padding-bottom: 0; }
+.stage-body > .add-row { padding-inline: 12px; }
+.stage-body > p { padding: 10px 12px 0; }
+.stage-body > .text-btn { margin: 5px 12px 8px; }
+.stage-meta { gap: 8px; padding-inline: 12px; }
+.stage-head > .text-btn { flex: none; padding-inline: 4px; }
+.job { align-items: center; min-height: 58px; padding: 10px 12px 10px 24px; font-size: 13px; }
+.job > div:first-child { min-width: 0; }
+.job-open { font-size: 13px; font-weight: 500; overflow-wrap: anywhere; }
+.job-info { margin-top: 3px; }
+.stage-body .job { padding-inline-start: 48px; }
+.job-actions { max-width: 40%; }
+.job-actions .text-btn { overflow-wrap: anywhere; }
+.job[data-proposed-job] { border-block-start: 1px solid var(--line); }
+.stage-body .job[data-proposed-job]:first-child { border-block-start: 0; }
+.page #content > .job[data-proposed-job] { padding-inline: 14px; border-radius: 0; background: #fff; }
+.page #content > .job[data-proposed-job]:is(.section-head + .job, .stage + .job) { border-start-start-radius: 8px; border-start-end-radius: 8px; }
+.page #content > .job[data-proposed-job]:has(+ :not(.job)) { border-end-start-radius: 8px; border-end-end-radius: 8px; }
+[data-proposed^="move-"] { min-width: 28px; min-height: 28px; padding: 0 4px; border-radius: 5px; text-align: center; }
+[data-proposed^="move-"]:hover { background: var(--pressed); text-decoration: none; }
+#proposed-group-dialog .binding-list { grid-template-columns: max-content minmax(0, 1fr); align-items: center; max-height: 240px; overflow: auto; }
+#proposed-group-dialog .binding-list input { width: 16px; height: 16px; margin: 0; accent-color: var(--brand); }
+#proposed-group-dialog [data-proposed-group-error] { color: #884600; }
+#proposed-group-dialog .binding-form > div:last-child { display: flex; justify-content: flex-end; gap: 8px; }
+.text-btn { color: var(--brand); }
+.btn.primary { border-color: var(--brand); background: var(--brand); }
+.btn.primary:hover:not(:disabled) { border-color: var(--brand-hover); background: var(--brand-hover); }
+.foot {
+  min-height: 59px;
+  padding: 10px var(--page-inset);
+}
+
+@media (max-width: 1150px) {
+  .app, .app:has(.chat[hidden]), .app[data-chat-open="false"] { grid-template-columns: 210px minmax(0, 1fr); }
+  .app > .chat:not([hidden]) {
+    position: fixed;
+    z-index: 3;
+    inset: 54px 8px 8px auto;
+    display: flex;
+    width: min(390px, calc(100% - 16px));
+    height: auto;
+    max-height: min(560px, calc(100dvh - 62px));
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    box-shadow: 0 8px 30px #20222626;
+  }
+}
+
+@media (max-width: 650px) {
+  :root { --page-inset: 16px; }
+  .app > main > .bar { align-items: flex-start; padding: 8px 14px; }
+  .preview-tools { gap: 6px 8px; }
+  .preview-tools .preview { white-space: normal; }
+  .page { padding-top: 16px; }
+  .overview { padding: 12px; }
+  .overview-fields { grid-template-columns: minmax(0, 1fr); }
+  .stage { padding-inline: 8px; }
+  .stage-toggle {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr) 10px;
+    gap: 2px 6px;
+    padding-inline: 4px;
+  }
+  .stage-toggle > .count { display: block; grid-column: 2; grid-row: 2; margin-inline-start: 0; }
+  .stage-toggle > .chevron { grid-column: 3; grid-row: 1 / 3; }
+  .stage-meta { flex-wrap: wrap; padding-inline: 6px; }
+  .stage-body .job { padding-inline: 10px 4px; }
+  .stage-body > .add-row { padding-inline: 4px; }
+  .job-actions { max-width: 42%; }
+  .chat-input { margin-inline: 12px; }
+}
+
+</style><style id="review-preview-styles">
+  .review-preview {
+    width: min(1440px, 100%);
+    margin: 0 auto;
+    padding: 28px clamp(16px, 3vw, 42px) 36px;
+  }
+  .review-heading { margin-bottom: 20px; }
+  .review-heading h1 { font-size: clamp(24px, 3vw, 36px); line-height: 1.28; }
+  .review-heading p { margin-top: 6px; color: var(--muted); font-size: 15px; }
+  .review-jump { display: none; gap: 8px; margin-top: 12px; }
+  .review-jump a, .review-try, .review-demo-header > a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 34px;
+    padding: 6px 10px;
+    border: 1px solid var(--control);
+    border-radius: 6px;
+    background: white;
+    color: var(--brand);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .review-jump a:hover, .review-try:hover, .review-demo-header > a:hover { background: var(--brand-tint); border-color: var(--brand); }
+  .review-jump a:focus-visible, .review-try:focus-visible, .review-demo-header > a:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .review-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  .review-pane { position: relative; display: flex; min-width: 0; flex-direction: column; scroll-margin-top: 12px; }
+  .review-pane-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 8px; margin-bottom: 10px; }
+  .review-pane-header h2 { font-size: 18px; }
+  .review-pane-header p { margin-top: 2px; color: var(--muted); font-size: 13px; }
+  .review-try { border-color: var(--brand); background: var(--brand); color: white; }
+  .review-try:hover { background: var(--brand-hover); }
+  .review-try::after { position: absolute; z-index: 1; inset: 0; content: ''; }
+  .review-pane:has(.review-try:hover) .review-window { border-color: var(--brand); }
+  .review-window {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--control);
+    border-radius: 9px;
+    background: var(--canvas);
+  }
+  .review-window .bar { min-height: 42px; padding-inline: 16px; }
+  .review-window .page { padding: 10px clamp(12px, 2vw, 25px) 16px; }
+  .review-window .crumb { min-height: 19px; font-size: 12px; }
+  .review-window .title { margin-top: 6px; }
+  .review-window .title h3 { overflow-wrap: anywhere; font-size: 19px; line-height: 27px; }
+  .review-window .system { margin-top: 2px; }
+  .review-window .tabbar { margin: 6px 0 10px; }
+  .review-window .tabbar > :is(button, span) { padding: 5px 0 7px; }
+  .review-window .foot { min-height: 45px; margin-top: auto; padding: 5px clamp(12px, 2vw, 25px); }
+  .review-window .section-head { min-height: 22px; margin: 0 0 7px; }
+  .review-window .stage { margin: 0; padding-inline: 10px; }
+  .review-window .stage-toggle { min-height: 40px; padding: 5px 8px; }
+  .review-window .job { min-height: 40px; padding: 5px 8px 5px 40px; }
+  .review-window .job-info { margin: 0; }
+  .review-window .add-row { flex-wrap: nowrap; padding: 9px 7px; }
+  .review-window .add-row label { min-width: 0; flex: 1 1 250px; }
+  .review-window .add-row label input { min-width: 0; width: 100%; }
+  .review-window .add-row .btn { min-width: fit-content; }
+  .review-window .job-form { gap: 10px; max-width: none; margin-top: 10px; }
+  .review-window [data-review-focus] { outline: 2px solid #4b6380; outline-offset: 2px; }
+  .review-demo { border-top: 1px solid var(--line); }
+  .review-demo-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; padding: 12px clamp(16px, 3vw, 42px); }
+  .review-demo-header h2 { font-size: 16px; }
+  .review-visually-hidden {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+    clip-path: inset(50%); white-space: nowrap; border: 0;
+  }
+  @media (max-width: 760px) {
+    .review-preview { padding-top: 20px; }
+    .review-jump { display: flex; }
+    .review-grid { grid-template-columns: minmax(0, 1fr); }
+    .review-window .job { padding-inline-start: 24px; }
+  }
+  @media (max-width: 420px) {
+    .review-window .publication { gap: 3px; }
+    .review-window .add-row { flex-wrap: wrap; }
+    .review-window .add-row label { flex-basis: 100%; }
+  }
+</style>
+</head>
+<body>
+<section id="comparison" class="review-preview" aria-labelledby="review-title">
+  <header class="review-heading">
+    <h1 id="review-title">업무 절차 작성 방식 비교</h1>
+    <p>‘교대 일지 확인’을 추가한 직후의 목업 화면입니다.</p>
+    <nav class="review-jump" aria-label="작성 방식 살펴보기"><a href="#review-current">기존 방식</a><a href="#review-proposed">제안 방식</a></nav>
+  </header>
+  <div class="review-grid"><article class="review-pane" id="review-current" data-review-pane="current" aria-labelledby="review-current-title">
+    <header class="review-pane-header">
+      <div><h2 id="review-current-title">기존 방식</h2><p>추가하면 작업 상세가 열립니다.</p></div>
+      <a class="review-try" href="#try-editor" data-review-mode="current">직접 작성해 보기<span class="review-visually-hidden"> · 기존 방식</span><span aria-hidden="true">→</span></a>
+    </header>
+    <div class="review-window" inert=""><div class="bar product-bar"><span>업무 절차</span></div><article class="page">
+        <p class="crumb">‹ 업무 절차 목록</p>
+        <div class="title">
+          <h3>교대 인수인계</h3>
+          <label class="publication">게시 상태 <select><option value="unpublished">미게시</option><option value="published" selected="">게시</option></select></label>
+          <details class="more">
+            <summary aria-label="업무 절차 메뉴">⋯</summary>
+            <ul class="more-menu"><li><button type="button">업무 절차 정보·분류 수정</button></li><li><button type="button">실행 파라미터</button></li></ul>
+          </details>
+        </div>
+        <p class="system">EMS · 게시 v1</p>
+        <div class="tabbar" aria-label="업무 절차 메뉴 예시"><button type="button" aria-selected="true">업무 내용</button><button type="button" aria-selected="false">게시 기록</button></div>
+        <div class="review-content"><button class="text-btn" type="button">← 단계와 작업</button><span class="count"> / 인계 준비</span><div class="job-form"><label><span class="label">작업 이름</span><input maxlength="160" value="교대 일지 확인" data-review-focus="" readonly=""></label><label><span class="label">수행 방법</span><span>사람이 확인</span></label><label><span class="label">무엇을 확인하나요</span><textarea rows="2" readonly=""></textarea></label><label><span class="label">완료 기준</span><textarea rows="2" readonly=""></textarea></label></div></div>
+      </article><footer class="foot"><p role="status">저장하지 않은 변경 있음</p><button class="btn primary">저장</button></footer></div>
+  </article><article class="review-pane" id="review-proposed" data-review-pane="proposed" aria-labelledby="review-proposed-title">
+    <header class="review-pane-header">
+      <div><h2 id="review-proposed-title">제안 방식</h2><p>추가한 작업이 목록에 남고 같은 단계에서 다음 작업을 입력합니다.</p></div>
+      <a class="review-try" href="#try-editor" data-review-mode="proposed">직접 작성해 보기<span class="review-visually-hidden"> · 제안 방식</span><span aria-hidden="true">→</span></a>
+    </header>
+    <div class="review-window" inert=""><div class="bar product-bar"><span>업무 절차</span></div><article class="page">
+        <p class="crumb">‹ 업무 절차 목록</p>
+        <div class="title">
+          <h3>교대 인수인계</h3>
+          <label class="publication">게시 상태 <select><option value="unpublished">미게시</option><option value="published" selected="">게시</option></select></label>
+          <details class="more">
+            <summary aria-label="업무 절차 메뉴">⋯</summary>
+            <ul class="more-menu"><li><button type="button">업무 절차 정보·분류 수정</button></li><li><button type="button">실행 파라미터</button></li></ul>
+          </details>
+        </div>
+        <p class="system">EMS · 게시 v1</p>
+        <div class="tabbar" aria-label="업무 절차 메뉴 예시"><button type="button" aria-selected="true">업무 내용</button><button type="button" aria-selected="false">게시 기록</button></div>
+        <div class="review-content"><div class="section-head"><div class="section-label"><h2>단계와 작업</h2><span class="count">4개 작업</span></div>
+
+    </div>
+    <section class="stage"><header class="stage-head">
+      <button class="stage-toggle" type="button" aria-expanded="true"><span class="number">1</span><span class="stage-name">인계 준비</span>
+        <span class="count">4개 작업</span><span class="chevron" aria-hidden="true"></span></button>
+
+
+      <button class="text-btn" type="button" aria-label="인계 준비 묶음 풀기">묶음 풀기</button>
+    </header><div class="stage-body">
+      <div class="job"><div>
+      <button class="job-open" type="button">전 근무자의 특이사항 확인</button>
+      <div class="job-info"><span>사람이 확인</span></div>
+    </div><div class="job-actions"><span><button class="text-btn" type="button" aria-label="전 근무자의 특이사항 확인 아래로" title="아래로">↓</button></span></div></div><div class="job"><div>
+      <button class="job-open" type="button">미조치 알람 확인</button>
+      <div class="job-info"><span>사람이 확인</span></div>
+    </div><div class="job-actions"><span><button class="text-btn" type="button" aria-label="미조치 알람 확인 위로" title="위로">↑</button> <button class="text-btn" type="button" aria-label="미조치 알람 확인 아래로" title="아래로">↓</button></span></div></div><div class="job"><div>
+      <button class="job-open" type="button">다음 근무자에게 전달</button>
+      <div class="job-info"><span>사람이 확인</span></div>
+    </div><div class="job-actions"><span><button class="text-btn" type="button" aria-label="다음 근무자에게 전달 위로" title="위로">↑</button> <button class="text-btn" type="button" aria-label="다음 근무자에게 전달 아래로" title="아래로">↓</button></span></div></div><div class="job"><div>
+      <button class="job-open" type="button">교대 일지 확인</button>
+      <div class="job-info"><span>사람이 확인</span></div>
+    </div><div class="job-actions"><span><button class="text-btn" type="button" aria-label="교대 일지 확인 위로" title="위로">↑</button></span></div></div>
+      <form class="add-row">
+      <label><span class="label">작업 이름</span><input required="" maxlength="160" placeholder="예: 교대 일지 확인" value="" data-review-focus="" readonly=""></label>
+      <button type="submit" class="btn primary">작업 추가</button>
+      <button class="btn" type="button">취소</button><span class="count" role="status" hidden="">작업을 추가하거나 입력을 지운 뒤 묶음을 풀어 주세요.</span>
+    </form>
+    </div></section>
+
+    </div>
+      </article><footer class="foot"><p role="status">저장하지 않은 변경 있음</p><button class="btn primary">저장</button></footer></div>
+  </article></div>
+</section>
+<section id="try-editor" class="review-demo" tabindex="-1" aria-labelledby="try-editor-title">
+  <header class="review-demo-header"><h2 id="try-editor-title">직접 작성해 보기</h2><a href="#comparison">비교로 돌아가기<span aria-hidden="true">↑</span></a></header>
+  <div class="app">
+  <aside class="sidebar" aria-label="워크스페이스 탐색">
+    <div class="brand"><span class="mark" aria-hidden="true">E</span><strong>EES Workflow</strong></div>
+    <div class="modes">
+      <span id="side-work">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m2.3 4.5 1.4 1.4 2.5-2.7M8 4.5h5.5M2.3 10l1.4 1.5 2.5-2.7M8 10h5.5"></path></svg>
+        업무
+      </span>
+      <span id="side-editor" class="selected">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.1 6.9 4 12a1.3 1.3 0 0 1-1.8-1.8l5.1-5.1A3.3 3.3 0 0 1 11.7 1L9.8 3l.4 1.6 1.6.4 2-1.9a3.3 3.3 0 0 1-4.7 3.8Z"></path></svg>
+        워크스페이스
+      </span>
+    </div>
+    <section class="rail-location" aria-labelledby="rail-location-title">
+      <h2 id="rail-location-title">작업 위치</h2>
+      <dl class="rail-scopes">
+        <div class="scope">
+          <dt><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 13V6l4 2V5l4 2V3h3v10H2Zm3-2h1m2 0h1m2 0h1"></path></svg>공장</dt>
+          <dd id="scope-factory">전체 공장</dd>
+          <svg class="rail-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"></path></svg>
+        </div>
+        <div class="scope">
+          <dt><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2.8" width="12" height="4.8" rx="1"></rect><rect x="2" y="8.4" width="12" height="4.8" rx="1"></rect><path d="M4.5 5.2h.4m-.4 5.6h.4"></path></svg>시스템</dt>
+          <dd id="scope-system">EMS</dd>
+          <svg class="rail-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"></path></svg>
+        </div>
+      </dl>
+    </section>
+    <div class="nav">
+      <div class="selected" aria-current="page"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.8" y="1.8" width="5" height="5" rx=".9"></rect><rect x="9.2" y="9.2" width="5" height="5" rx=".9"></rect><path d="M4.3 6.8v3.4c0 1 .6 1.5 1.5 1.5h3.4"></path></svg>업무 절차</div>
+      <div class="rail-nav-group">도구·자료<svg class="rail-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"></path></svg></div>
+      <div class="rail-nav-child"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.1 6.9 4 12a1.3 1.3 0 0 1-1.8-1.8l5.1-5.1A3.3 3.3 0 0 1 11.7 1L9.8 3l.4 1.6 1.6.4 2-1.9a3.3 3.3 0 0 1-4.7 3.8Z"></path></svg>도구</div>
+    </div>
+    <section class="recent" aria-labelledby="rail-recent-title">
+      <h2 id="rail-recent-title">최근 편집</h2>
+      <ul class="rail-list">
+        <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.4 8h2.8l2-4.8 2.8 9.3 2-4.5h3.6"></path></svg><span id="recent-procedure">Confluence 문서 확인</span></li>
+        <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.4 8h2.8l2-4.8 2.8 9.3 2-4.5h3.6"></path></svg>일일 시스템 점검</li>
+        <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m8 1.8 5.5 3.1v6.2L8 14.2l-5.5-3.1V4.9L8 1.8Zm0 6.1 5.5-3M8 7.9 2.5 4.9M8 7.9v6.3"></path></svg>신규 공장 횡전개</li>
+        <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.4 8h2.8l2-4.8 2.8 9.3 2-4.5h3.6"></path></svg>배포 산출물 점검</li>
+      </ul>
+    </section>
+    <ul class="rail-list rail-conversations" aria-label="대화">
+      <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m10.9 2.7 2.4 2.4M2.5 13.5l.4-3.1 8.2-8.2a1.2 1.2 0 0 1 1.7 0l1 1a1.2 1.2 0 0 1 0 1.7l-8.2 8.2-3.1.4Z"></path></svg>새 대화</li>
+      <li><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="6.7" cy="6.7" r="4.4"></circle><path d="m10 10 3.2 3.2"></path></svg>대화 검색</li>
+      <li><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="6.7" cy="6.7" r="4.4"></circle><path d="m10 10 3.2 3.2"></path></svg>대화 기록</li>
+    </ul>
+  </aside>
+
+  <main>
+    <div class="bar product-bar"><span id="view-name">업무 절차</span><button type="button" class="btn" id="chat-toggle" aria-controls="compare-chat" aria-expanded="true">대화</button></div>
+    <div class="preview-tools compare-tools" aria-label="목업 비교 도구"><span class="preview">목업 비교</span>
+      <div class="compare-switch" role="group" aria-label="작업 작성 방식"><button type="button" id="method-current" aria-pressed="false">기존 방식</button><button type="button" id="method-proposed" aria-pressed="true">제안 방식</button></div>
+      <label><span class="label">예시</span> <select id="compare-example"><option value="handover">교대 인수인계</option><option value="blank">빈 절차</option></select></label></div>
+    <div class="scroll">
+      <article class="page">
+        <p class="crumb" id="procedure-crumb">‹ 업무 절차 목록</p>
+        <div class="title">
+          <h1 id="procedure-title">교대 인수인계</h1>
+          <label class="publication" id="publication-field">게시 상태 <select id="publication"><option value="unpublished">미게시</option><option value="published" selected="">게시</option></select></label>
+          <details class="more" id="procedure-menu">
+            <summary aria-label="업무 절차 메뉴">⋯</summary>
+            <ul class="more-menu"><li><button type="button" data-menu="info">업무 절차 정보·분류 수정</button></li><li><button type="button" data-menu="params">실행 파라미터</button></li></ul>
+          </details>
+        </div>
+        <p class="system" id="procedure-system">EMS · 게시 v1</p>
+        <div class="tabbar" id="editor-tabs" aria-label="업무 절차 메뉴 예시"><button type="button" data-tab="content" aria-selected="true">업무 내용</button><button type="button" data-tab="history" aria-selected="false">게시 기록</button></div>
+        <div id="content"><div class="overview overview-fields"><label><span class="label">업무 절차 이름</span><input id="overview-name" value="교대 인수인계" maxlength="160" placeholder="절차 이름 입력"></label><label><span class="label">업무 목적</span><textarea id="overview-purpose" rows="2">근무 교대 전 설비 상태와 미조치 사항을 확인합니다.</textarea></label><button class="text-btn" type="button" data-action="scope">분류·범위</button></div><div class="section-head"><div class="section-label"><h2>단계와 작업</h2><span class="count">3개 작업</span></div>
+
+    </div>
+    <section class="stage" data-proposed-stage="1"><header class="stage-head">
+      <button class="stage-toggle" type="button" data-proposed="toggle-stage" data-id="1" aria-expanded="true" aria-controls="proposed-stage-1"><span class="number">1</span><span class="stage-name">인계 준비</span>
+        <span class="count">3개 작업</span><span class="chevron" aria-hidden="true"></span></button>
+      <button class="add-action" type="button" data-proposed="open-stage-task" data-id="1"><span class="plus" aria-hidden="true"></span>작업 추가</button>
+
+      <button class="text-btn" type="button" data-proposed="ungroup" data-id="1" aria-label="인계 준비 묶음 풀기">묶음 풀기</button>
+    </header><div class="stage-body" id="proposed-stage-1">
+      <div class="job" data-proposed-job="1"><div>
+      <button class="job-open" type="button" data-proposed="open-task" data-id="1">전 근무자의 특이사항 확인</button>
+      <div class="job-info"><span>사람이 확인</span></div>
+    </div><div class="job-actions"><span><button class="text-btn" type="button" data-proposed="move-task" data-id="1" data-direction="down" aria-label="전 근무자의 특이사항 확인 아래로" title="아래로">↓</button></span></div></div><div class="job" data-proposed-job="2"><div>
+      <button class="job-open" type="button" data-proposed="open-task" data-id="2">미조치 알람 확인</button>
+      <div class="job-info"><span>사람이 확인</span></div>
+    </div><div class="job-actions"><span><button class="text-btn" type="button" data-proposed="move-task" data-id="2" data-direction="up" aria-label="미조치 알람 확인 위로" title="위로">↑</button> <button class="text-btn" type="button" data-proposed="move-task" data-id="2" data-direction="down" aria-label="미조치 알람 확인 아래로" title="아래로">↓</button></span></div></div><div class="job" data-proposed-job="3"><div>
+      <button class="job-open" type="button" data-proposed="open-task" data-id="3">다음 근무자에게 전달</button>
+      <div class="job-info"><span>사람이 확인</span></div>
+    </div><div class="job-actions"><span><button class="text-btn" type="button" data-proposed="move-task" data-id="3" data-direction="up" aria-label="다음 근무자에게 전달 위로" title="위로">↑</button></span></div></div>
+
+    </div></section>
+    <form class="add-row" data-proposed="add-task">
+      <label><span class="label">작업 이름</span><input id="proposed-next-job" name="name" required="" maxlength="160" placeholder="예: 교대 일지 확인" value=""></label>
+      <button type="submit" class="btn primary" data-proposed="submit-task">작업 추가</button>
+
+    </form>
+    </div>
+      </article>
+    </div>
+    <footer class="foot" id="editor-footer"><p id="status" role="status">저장됨</p><button class="btn primary" id="save" disabled="">저장</button></footer>
+  </main>
+  <aside class="chat" id="compare-chat" aria-label="업무 도우미 화면 예시">
+    <div class="bar">업무 도우미</div>
+    <div class="chat-body"><p>업무 도우미</p><p>무엇을 도와드릴까요?</p></div>
+    <div class="chat-input">업무를 물어보거나, 필요한 작업을 요청하세요</div>
+  </aside>
+</div>
+</section>
+<dialog id="tool-dialog" aria-labelledby="dialog-title">
+  <h2 id="dialog-title"></h2>
+  <div id="dialog-content"></div>
+  <form method="dialog"><button class="btn" autofocus="">닫기</button></form>
+</dialog>
+<script>
+function makeProposedEditor({stages, escapeText, nextJobId, nextStageId, redraw, changed, openTask}) {
+  const collapsed = new Set();
+  const stageEntries = new Map();
+  let nextName = '';
+
+  function layout() {
+    const blocks = [];
+    for (const stage of stages) {
+      if (stage.name) blocks.push({stage});
+      else for (const job of stage.jobs) blocks.push({stage, job});
+    }
+    return blocks;
+  }
+
+  function updateLayout(blocks) {
+    const next = [];
+    const used = new Set();
+    for (const {stage, job} of blocks) {
+      if (!job) {
+        next.push(stage);
+        used.add(stage.id);
+        continue;
+      }
+      const previous = next.at(-1);
+      if (previous?.name === '') {
+        previous.jobs.push(job);
+        continue;
+      }
+      const loose = stage && !stage.name && !used.has(stage.id)
+        ? stage : {id:nextStageId(), name:''};
+      loose.jobs = [job];
+      next.push(loose);
+      used.add(loose.id);
+    }
+    stages.splice(0,stages.length,...next);
+  }
+
+  function control(label, action, {id, direction, className='text-btn', attributes=''} = {}) {
+    return `<button class="${className}" type="button" data-proposed="${action}"${id === undefined ? '' : ' data-id="' + id + '"'}${direction ? ' data-direction="' + direction + '"' : ''}${attributes ? ' ' + attributes : ''}>${label}</button>`;
+  }
+
+  function moves(kind, name, id, index, count) {
+    return [['up', '↑', '위로', index > 0], ['down', '↓', '아래로', index < count - 1]]
+      .filter(([, , , available]) => available)
+      .map(([direction, icon, word]) => control(icon,'move-' + kind,{
+        id,direction,attributes:`aria-label="${escapeText(name + ' ' + word)}" title="${word}"`
+      })).join(' ');
+  }
+
+  function jobRow(job,index,count) {
+    return `<div class="job" data-proposed-job="${job.id}"><div>
+      ${control(escapeText(job.name),'open-task',{id:job.id,className:'job-open'})}
+      <div class="job-info"><span>${job.mode === 'tool' ? '도구로 처리' : '사람이 확인'}</span></div>
+    </div><div class="job-actions"><span>${moves('task',job.name,job.id,index,count)}</span></div></div>`;
+  }
+
+  function stageCard(stage,number,index,count) {
+    const open = !collapsed.has(stage.id);
+    const adding = stageEntries.has(stage.id);
+    return `<section class="stage" data-proposed-stage="${stage.id}"><header class="stage-head">
+      ${control(`<span class="number">${number}</span><span class="stage-name">${escapeText(stage.name)}</span>
+        <span class="count">${stage.jobs.length}개 작업</span><span class="chevron" aria-hidden="true"></span>`,
+        'toggle-stage',{id:stage.id,className:'stage-toggle',attributes:`aria-expanded="${open}" aria-controls="proposed-stage-${stage.id}"`})}
+      ${open && !adding ? control('<span class="plus" aria-hidden="true"></span>작업 추가','open-stage-task',{id:stage.id,className:'add-action'}) : ''}
+      ${moves('stage',stage.name,stage.id,index,count)}
+      ${control('묶음 풀기','ungroup',{id:stage.id,attributes:`aria-label="${escapeText(stage.name)} 묶음 풀기"`})}
+    </header><div class="stage-body" id="proposed-stage-${stage.id}"${open ? '' : ' hidden'}>
+      ${stage.jobs.map((job,jobIndex) => jobRow(job,jobIndex,stage.jobs.length)).join('')}
+      ${open && adding ? addTaskForm(stage.id) : ''}
+    </div></section>`;
+  }
+
+  function addTaskForm(stageId) {
+    const local = stageId !== undefined;
+    return `<form class="add-row" data-proposed="${local ? 'add-stage-task' : 'add-task'}"${local ? ' data-stage-id="' + stageId + '"' : ''}>
+      <label><span class="label">작업 이름</span><input id="proposed-next-job${local ? '-' + stageId : ''}" name="name" required maxlength="160"
+        placeholder="예: 교대 일지 확인" value="${escapeText(local ? stageEntries.get(stageId) : nextName)}"></label>
+      <button type="submit" class="btn primary" data-proposed="${local ? 'submit-stage-task' : 'submit-task'}">작업 추가</button>
+      ${local ? control('취소','cancel-stage-task',{id:stageId,className:'btn'}) +
+        '<span class="count" data-stage-entry-warning role="status" hidden>작업을 추가하거나 입력을 지운 뒤 묶음을 풀어 주세요.</span>' : ''}
+    </form>`;
+  }
+
+  function groupDialog(blocks) {
+    return `<dialog id="proposed-group-dialog" aria-labelledby="proposed-group-title">
+      <h2 id="proposed-group-title">단계로 묶기</h2>
+      <form class="binding-form" data-proposed="group">
+        <label><span class="label">단계 이름</span><input name="name" required maxlength="160" placeholder="예: 인계 준비"></label>
+        <div><p class="label" id="proposed-group-tasks">묶을 작업</p><div class="binding-list" role="group" aria-labelledby="proposed-group-tasks">
+          ${blocks.filter(block => block.job).map(({job}) => `<input type="checkbox" name="job" id="proposed-group-task-${job.id}" value="${job.id}">
+            <label for="proposed-group-task-${job.id}">${escapeText(job.name)}</label>`).join('')}
+        </div></div>
+        <p data-proposed-group-error role="status" hidden></p>
+        <div>
+          ${control('취소','cancel-group',{className:'btn'})}
+          <button type="submit" class="btn primary" data-proposed="submit-group" disabled>묶기</button>
+        </div>
+      </form>
+    </dialog>`;
+  }
+
+  function html() {
+    const blocks = layout();
+    const count = stages.reduce((sum,stage) => sum + stage.jobs.length,0);
+    const hasLoose = blocks.some(block => block.job);
+    let number = 0;
+    return `<div class="section-head"><div class="section-label"><h2>단계와 작업</h2><span class="count">${count}개 작업</span></div>
+      ${hasLoose ? control('단계로 묶기','open-group',{className:'add-action',attributes:'id="proposed-group-button" aria-haspopup="dialog"'}) : ''}
+    </div>
+    ${blocks.map(({stage,job},index) => job
+      ? jobRow(job,index,blocks.length)
+      : stageCard(stage,++number,index,blocks.length)).join('')}
+    ${addTaskForm()}
+    ${hasLoose ? groupDialog(blocks) : ''}`;
+  }
+
+  function focus(selector,fallback) {
+    const item = document.querySelector(selector) || (fallback && document.querySelector(fallback));
+    item?.scrollIntoView?.({block:'nearest'});
+    item?.focus?.({preventScroll:true});
+  }
+
+  function renderChanged(selector,fallback) {
+    changed();
+    redraw();
+    focus(selector,fallback);
+  }
+
+  function closeGroup(dialog) {
+    if (typeof dialog.close === 'function') dialog.close();
+    else dialog.open = false;
+  }
+
+  function grouping(form) {
+    const ids = new Set(Array.from(form.querySelectorAll('input[name="job"]:checked'),input => Number(input.value)));
+    const selected = layout().map((block,index) => ({...block,index})).filter(block => ids.has(block.job?.id));
+    const gap = selected.length > 1 && selected.at(-1).index - selected[0].index + 1 !== selected.length;
+    const name = form.elements.name.value.trim();
+    const warning = form.querySelector('[data-proposed-group-error]');
+    warning.hidden = !gap;
+    warning.textContent = gap ? '순서를 유지하려면 연속된 작업을 선택해 주세요.' : '';
+    form.querySelector('[data-proposed="submit-group"]').disabled = !name || !selected.length || gap;
+    return {selected,gap,name};
+  }
+
+  function click(button) {
+    const {proposed:action,id,direction} = button.dataset;
+    if (!action || action === 'submit-task' || action === 'submit-group') return false;
+    const key = Number(id);
+    if (action === 'open-group') {
+      const dialog = document.getElementById('proposed-group-dialog');
+      if (!dialog || dialog.open) return true;
+      dialog.querySelector('form').reset();
+      grouping(dialog.querySelector('form'));
+      if (typeof dialog.showModal === 'function') dialog.showModal();
+      else dialog.open = true;
+      dialog.querySelector('input[name="name"]').focus();
+    } else if (action === 'cancel-group') {
+      const dialog = button.closest('dialog');
+      closeGroup(dialog);
+      focus('#proposed-group-button');
+    } else if (action === 'open-task') {
+      const stage = stages.find(item => item.jobs.some(job => job.id === key));
+      if (stage) openTask(stage,stage.jobs.find(job => job.id === key));
+    } else if (action === 'toggle-stage') {
+      if (!collapsed.delete(key)) collapsed.add(key);
+      redraw();
+      focus(`[data-proposed="toggle-stage"][data-id="${key}"]`);
+    } else if (action === 'open-stage-task') {
+      stageEntries.set(key,'');
+      redraw();
+      focus('#proposed-next-job-' + key);
+    } else if (action === 'cancel-stage-task') {
+      stageEntries.delete(key);
+      redraw();
+      focus(`[data-proposed="open-stage-task"][data-id="${key}"]`);
+    } else if (action === 'ungroup') {
+      const stage = stages.find(item => item.id === key && item.name);
+      if (!stage) return true;
+      if (stageEntries.get(key)?.trim()) {
+        if (collapsed.delete(key)) redraw();
+        const field = document.getElementById('proposed-next-job-' + key);
+        const warning = field?.form.querySelector('[data-stage-entry-warning]');
+        if (warning) warning.hidden = false;
+        focus('#proposed-next-job-' + key);
+        return true;
+      }
+      const next = stage.jobs[0]?.id;
+      stage.name = '';
+      updateLayout(layout());
+      collapsed.delete(key);
+      stageEntries.delete(key);
+      renderChanged(next === undefined ? '#proposed-next-job' : `[data-proposed="open-task"][data-id="${next}"]`);
+    } else if (action === 'move-task' || action === 'move-stage') {
+      const stage = action === 'move-task' && stages.find(item => item.name && item.jobs.some(job => job.id === key));
+      const items = stage ? stage.jobs : layout();
+      const index = items.findIndex(item => stage ? item.id === key : action === 'move-task' ? item.job?.id === key : !item.job && item.stage.id === key);
+      const next = index + (direction === 'up' ? -1 : 1);
+      if (index < 0 || next < 0 || next >= items.length) return true;
+      [items[index],items[next]] = [items[next],items[index]];
+      if (!stage) updateLayout(items);
+      renderChanged(`[data-proposed="${action}"][data-id="${key}"][data-direction="${direction}"]`,
+        `[data-proposed="${action === 'move-task' ? 'open-task' : 'toggle-stage'}"][data-id="${key}"]`);
+    } else return false;
+    return true;
+  }
+
+  function submit(form) {
+    if (['add-task','add-stage-task'].includes(form.dataset.proposed)) {
+      const field = form.elements.name;
+      const name = field.value.trim();
+      if (!name) {
+        field.setCustomValidity('이름을 입력해 주세요.');
+        field.reportValidity();
+        return true;
+      }
+      const local = form.dataset.proposed === 'add-stage-task';
+      const id = Number(form.dataset.stageId);
+      if (!local && stages.at(-1)?.name !== '') stages.push({id:nextStageId(),name:'',jobs:[]});
+      const stage = local ? stages.find(item => item.id === id && item.name) : stages.at(-1);
+      if (!stage) return true;
+      stage.jobs.push({id:nextJobId(),name,mode:'human'});
+      if (local) stageEntries.set(id,'');
+      else nextName = '';
+      renderChanged(local ? '#proposed-next-job-' + id : '#proposed-next-job');
+      return true;
+    }
+    if (form.dataset.proposed === 'group') {
+      const {selected,gap,name} = grouping(form);
+      if (gap || !selected.length || !name) return true;
+      const blocks = layout();
+      const stage = {id:nextStageId(),name,jobs:selected.map(block => block.job)};
+      blocks.splice(selected[0].index,selected.length,{stage});
+      updateLayout(blocks);
+      closeGroup(form.closest('dialog'));
+      renderChanged(`[data-proposed="toggle-stage"][data-id="${stage.id}"]`);
+      return true;
+    }
+    return false;
+  }
+
+  function input(field) {
+    const form = field.closest('form');
+    if (['add-task','add-stage-task'].includes(form?.dataset.proposed)) {
+      const value = form.elements.name.value;
+      if (form.dataset.proposed === 'add-stage-task') {
+        stageEntries.set(Number(form.dataset.stageId),value);
+        form.querySelector('[data-stage-entry-warning]').hidden = true;
+      } else nextName = value;
+      field.setCustomValidity?.('');
+      return true;
+    }
+    if (form?.dataset.proposed === 'group') {
+      grouping(form);
+      return true;
+    }
+    return false;
+  }
+
+  return {html,click,submit,input};
+}
+
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const row = (id, name) => ({id, name, mode:'human', guidance:'', criterion:''});
+  const demos = {
+    handover: {name:'교대 인수인계', purpose:'근무 교대 전 설비 상태와 미조치 사항을 확인합니다.', stages:[
+      {id:1, name:'인계 준비', jobs:[row(1,'전 근무자의 특이사항 확인'),row(2,'미조치 알람 확인'),row(3,'다음 근무자에게 전달')]}], published:true, version:1},
+    blank: {name:'', purpose:'', stages:[], published:false, version:0}
+  };
+  const storageKey = 'ees-editor-comparison-2-';
+  const records = {};
+  function load(key) {
+    let saved;
+    try { saved = JSON.parse(localStorage.getItem(storageKey+key)); } catch {}
+    const valid = saved && typeof saved.name === 'string' && typeof saved.purpose === 'string'
+      && Number.isSafeInteger(saved.version) && typeof saved.published==='boolean' && Array.isArray(saved.stages)
+      && saved.stages.every(s=>Number.isSafeInteger(s.id) && typeof s.name==='string' && Array.isArray(s.jobs)
+        && s.jobs.every(j=>Number.isSafeInteger(j.id) && typeof j.name==='string'));
+    const value=valid?saved:JSON.parse(JSON.stringify(demos[key]));
+    return {...value, lastPublished:value.published, dirty:false, message:'저장됨', loaded:Boolean(valid)};
+  }
+  Object.keys(demos).forEach(key=>{records[key]=load(key);});
+  let example='handover', mode='proposed', tab='content', detail=null;
+  let expanded=records.handover.stages[0]?.id??null, adding=null, proposal, originalDrafts=new Map();
+  const data=()=>records[example], stages=()=>data().stages;
+  let next=1+Math.max(1,...Object.values(records).flatMap(record=>record.stages.flatMap(stage=>[stage.id,...stage.jobs.map(job=>job.id)])));
+  const allocate=()=>next++;
+  function setupProposal() {
+    proposal=makeProposedEditor({stages:stages(),escapeText:esc,nextJobId:allocate,nextStageId:allocate,redraw:render,
+      changed,openTask});
+  }
+  function refreshHeader(){
+    const d=data(), name=d.name.trim()||'새 업무 절차';
+    $('procedure-title').textContent=name;
+    if($('recent-procedure')) $('recent-procedure').textContent=name;
+    $('procedure-system').textContent='EMS'+(d.version?' · 게시 v'+d.version:'');
+    $('publication').value=d.published?'published':'unpublished';
+    $('save').disabled=!d.dirty;
+    $('save').textContent=d.published===d.lastPublished?'저장':d.published?'저장 · 게시':'저장 · 게시 내림';
+    $('status').textContent=d.message;
+    for(const id of ['current','proposed']) $('method-'+id).setAttribute('aria-pressed',String(mode===id));
+    for(const button of $('editor-tabs').querySelectorAll('button')) button.setAttribute('aria-selected',String(button.dataset.tab===tab));
+  }
+  function changed(){data().dirty=true;data().message='저장하지 않은 변경 있음';refreshHeader();}
+  function focus(selector){const el=$('content').querySelector(selector);el?.focus();el?.scrollIntoView?.({block:'nearest'});}
+  const plus=(label,action,id='')=>'<button class="add-action" type="button" data-action="'+action+'" data-id="'+id+'"><span class="plus" aria-hidden="true"></span>'+label+'</button>';
+  function oldForm(type,id='',cancel=false) {
+    const key=type+':'+id, value=originalDrafts.get(key)||'';
+    return '<form class="add-row" data-add="'+type+'" data-id="'+id+'"><label><input name="name" required maxlength="160" aria-label="새 '+(type==='job'?'작업':'단계')+' 이름" placeholder="'+(type==='job'?'작업 이름 · 예: 설비 외관 확인':'단계 이름 · 예: 점검')+'" value="'+esc(value)+'"></label><button class="btn primary">'+(type==='stage'?'단계 추가':'작업 추가')+'</button>'+(cancel?'<button class="btn" type="button" data-action="cancel">취소</button>':'')+'</form>';
+  }
+  function oldRows(){
+    const ss=stages();
+    let html='<div class="section-head"><div class="section-label"><h2>단계와 작업</h2><span class="count">'+ss.length+'개 단계</span></div>'+(ss.length && !adding?plus('단계 추가','add-stage'):'')+'</div>';
+    for(const [i,s] of ss.entries()){
+      const open=s.id===expanded, input=open&&((adding?.type==='job'&&adding.id===s.id)||(!adding&&!s.jobs.length));
+      html+='<section class="stage"><header class="stage-head"><button class="stage-toggle" data-action="stage" data-id="'+s.id+'" aria-expanded="'+open+'"><span class="number">'+(i+1)+'</span><span class="stage-name">'+esc(s.name||'기본 단계')+'</span><span class="count">'+s.jobs.length+'개 작업</span><span class="chevron" aria-hidden="true"></span></button>'+(open&&!input&&s.jobs.length&&!adding?plus('작업 추가','add-job',s.id):'')+'</header>';
+      if(open) html+='<div class="stage-body"><div class="stage-meta"><span class="count">'+esc(s.description||'설명 없음')+'</span> <button class="text-btn" data-action="edit-stage" data-id="'+s.id+'">단계 정보 수정</button></div>'+s.jobs.map(j=>'<div class="job"><div><button class="job-open" data-action="job" data-id="'+j.id+'">'+esc(j.name)+'</button><div class="job-info">사람이 확인</div></div></div>').join('')+(input?oldForm('job',s.id,!!adding):'')+'</div>';
+      html+='</section>';
+    }
+    return html+(!ss.length||adding?.type==='stage'?oldForm('stage','',!!adding):'');
+  }
+  function overview() {
+    const d=data();
+    return '<div class="overview overview-fields"><label><span class="label">업무 절차 이름</span><input id="overview-name" value="'+esc(d.name)+'" maxlength="160" placeholder="절차 이름 입력"></label><label><span class="label">업무 목적</span><textarea id="overview-purpose" rows="2">'+esc(d.purpose)+'</textarea></label><button class="text-btn" type="button" data-action="scope">분류·범위</button></div>';
+  }
+  function openTask(stage,job){detail={stage,job};adding=null;render();focus('#job-name');}
+  function taskDetail(){
+    const {stage,job}=detail;
+    return '<button class="text-btn" type="button" data-action="back">← 단계와 작업</button><span class="count"> / '+esc(stage.name||'작업')+'</span><div class="job-form"><label><span class="label">작업 이름</span><input id="job-name" maxlength="160" value="'+esc(job.name)+'"></label><label><span class="label">수행 방법</span><span>사람이 확인</span></label><label><span class="label">무엇을 확인하나요</span><textarea id="job-guidance" rows="2">'+esc(job.guidance)+'</textarea></label><label><span class="label">완료 기준</span><textarea id="job-criterion" rows="2">'+esc(job.criterion)+'</textarea></label></div>';
+  }
+  function render(){
+    refreshHeader();
+    if(tab==='history'){$('content').innerHTML='<div class="overview"><p class="label">게시 기록</p><p>'+ (data().version ? '게시 v'+data().version+' · '+esc(data().name) : '아직 게시 기록이 없습니다.')+'</p></div>';return;}
+    $('content').innerHTML=detail?taskDetail():overview()+(mode==='current'?oldRows():proposal.html());
+  }
+  function switchMode(to){
+    mode=to;tab='content';detail=null;adding=null;render();
+  }
+  $('method-current').onclick=()=>switchMode('current');
+  $('method-proposed').onclick=()=>switchMode('proposed');
+  const proposals=new Map(), draftsByExample=new Map();
+  $('compare-example').onchange=event=>{
+    proposals.set(example,proposal);draftsByExample.set(example,originalDrafts);
+    example=event.target.value;tab='content';detail=null;adding=null;expanded=stages()[0]?.id??null;originalDrafts=draftsByExample.get(example)||new Map();
+    if(proposals.has(example)) proposal=proposals.get(example);else setupProposal();
+    render();
+  };
+  $('editor-tabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(b){tab=b.dataset.tab;detail=null;adding=null;render();}};
+  $('content').addEventListener('input',e=>{
+    const el=e.target;
+    if(el.id==='overview-name'){data().name=el.value;el.setCustomValidity('');}
+    else if(el.id==='overview-purpose') data().purpose=el.value;
+    else if(el.id==='job-name'&&detail) detail.job.name=el.value;
+    else if(el.id==='job-guidance'&&detail) detail.job.guidance=el.value;
+    else if(el.id==='job-criterion'&&detail) detail.job.criterion=el.value;
+    else if(el.closest('[data-add]')){const f=el.form;originalDrafts.set(f.dataset.add+':'+f.dataset.id,el.value);el.setCustomValidity('');changed();return;}
+    else {if(mode==='proposed'){proposal.input(el);if(el.matches('form.add-row input[name=name]'))changed();}return;}
+    changed();
+  });
+  $('content').addEventListener('change',e=>{if(mode==='proposed'&&e.target.matches('input[type=checkbox]'))proposal.input(e.target);});
+  $('content').addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b)return;
+    if(b.hasAttribute('data-proposed')){if(proposal.click(b))e.preventDefault();return;}
+    const id=Number(b.dataset.id), s=stages().find(s=>s.id===id), a=b.dataset.action;
+    if(!a)return;
+    if(a==='back'){
+      if(detail)expanded=detail.stage.id;
+      const last=detail?.job.id;detail=null;render();focus(mode==='current'?'[data-action="job"][data-id="'+last+'"]':'[data-proposed="open-task"][data-id="'+last+'"]');return;
+    }
+    if(a==='job'){const owner=stages().find(s=>s.jobs.some(j=>j.id===id));if(owner)openTask(owner,owner.jobs.find(j=>j.id===id));return;}
+    if(a==='stage'){expanded=expanded===id?null:id;adding=null;}
+    if(a==='add-stage')adding={type:'stage'};
+    if(a==='add-job'){adding={type:'job',id};expanded=id;}
+    if(a==='cancel'){if(adding)originalDrafts.delete(adding.type+':'+(adding.id??''));adding=null;}
+    if(a==='scope'){
+      const dlg=$('tool-dialog'), d=data();
+      $('dialog-title').textContent='분류·범위';
+      $('dialog-content').innerHTML='<form class="job-form"><label>분류<select name="category"><option>운영</option><option>셋업</option><option>장애대응</option></select></label><label>수행 범위<select name="scope"><option>나중에 정하기</option><option>공장별 수행</option><option>시스템 공통 수행</option></select></label><button class="btn primary">적용</button></form>';
+      const f=$('dialog-content').querySelector('form');f.elements.category.value=d.category||'운영';f.elements.scope.value=d.scopeName||'나중에 정하기';
+      f.onsubmit=event=>{event.preventDefault();d.category=f.elements.category.value;d.scopeName=f.elements.scope.value;dlg.close();changed();};dlg.showModal();return;
+    }
+    if(a==='edit-stage'&&s){showStageDialog(s);return;}
+    render();
+    if(a==='add-job'||a==='add-stage')focus('.add-row input');
+  });
+  $('content').addEventListener('submit',e=>{
+    e.preventDefault();
+    const f=e.target;
+    if(f.hasAttribute('data-proposed')){proposal.submit(f);return;}
+    if(!f.dataset.add)return;
+    const field=f.elements.name, name=field.value.trim();if(!name){field.setCustomValidity('이름을 입력해 주세요.');field.reportValidity();return;}
+    originalDrafts.delete(f.dataset.add+':'+f.dataset.id);adding=null;
+    if(f.dataset.add==='stage'){const s={id:allocate(),name,jobs:[]};stages().push(s);expanded=s.id;changed();render();focus('.add-row input');}
+    else {const s=stages().find(s=>s.id===Number(f.dataset.id)),j=row(allocate(),name);s.jobs.push(j);changed();openTask(s,j);}
+  });
+  function showStageDialog(stage){
+    const dlg=$('tool-dialog');$('dialog-title').textContent='단계 정보 수정';
+    $('dialog-content').innerHTML='<form class="job-form"><label>단계 이름<input name="stageName" required maxlength="160" value="'+esc(stage.name)+'"></label><label>설명<textarea name="description">'+esc(stage.description||'')+'</textarea></label><button class="btn primary">적용</button></form>';
+    $('dialog-content').querySelector('form').onsubmit=e=>{e.preventDefault();const f=e.target;if(!f.elements.stageName.value.trim())return;stage.name=f.elements.stageName.value.trim();stage.description=f.elements.description.value;dlg.close();changed();render();};
+    dlg.showModal();
+  }
+  $('procedure-menu').addEventListener('click',e=>{
+    const b=e.target.closest('[data-menu]');if(!b)return;
+    $('procedure-menu').open=false;
+    if(b.dataset.menu==='info'){tab='content';detail=null;render();focus('#overview-name');return;}
+    const dlg=$('tool-dialog');$('dialog-title').textContent=b.textContent;
+    $('dialog-content').textContent=b.dataset.menu==='params'?'등록된 실행 파라미터가 없습니다.':'이 예시는 사람이 확인하는 작업으로 구성되어 있습니다.';
+    dlg.showModal();
+  });
+  $('publication').onchange=e=>{data().published=e.target.value==='published';changed();};
+  $('save').onclick=()=>{
+    const d=data();if(!d.dirty)return;
+    if(!d.name.trim()){tab='content';detail=null;render();focus('#overview-name');$('overview-name').setCustomValidity('업무 절차 이름을 입력해 주세요.');$('overview-name').reportValidity();return;}
+    for(const pending of Array.from($('content').querySelectorAll('form.add-row'))){
+      if(!pending.elements.name?.value.trim())continue;
+      if(pending.dataset.proposed) proposal.submit(pending);
+      else if(pending.dataset.add) pending.requestSubmit();
+    }
+    if(stages().some(s=>s.jobs.some(j=>!j.name.trim()))){d.message='작업 이름을 입력해 주세요.';refreshHeader();return;}
+    d.name=d.name.trim();if(d.published)d.version++;d.lastPublished=d.published;d.dirty=false;
+    const record={name:d.name,purpose:d.purpose,stages:d.stages,version:d.version,published:d.published,category:d.category,scopeName:d.scopeName};
+    try{localStorage.setItem(storageKey+example,JSON.stringify(record));d.message='저장됨 · 이 브라우저';}catch{d.message='이 창에 저장됨';}
+    render();
+  };
+  const chat=document.querySelector('.chat');
+  function showChat(open){chat.hidden=!open;document.querySelector('.app').dataset.chatOpen=String(open);$('chat-toggle').setAttribute('aria-expanded',String(open));}
+  $('chat-toggle').onclick=()=>showChat(chat.hidden);
+  showChat(!(window.matchMedia?.('(max-width: 1150px)').matches));
+  setupProposal();render();
+})();
+
+</script>
+<script>
+  document.querySelectorAll('[data-review-mode]').forEach(link => {
+    link.addEventListener('click', () => document.getElementById('method-' + link.dataset.reviewMode).click());
+  });
+</script>
+</body></html>

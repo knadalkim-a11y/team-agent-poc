@@ -54,7 +54,7 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
             fields:['url','name','purpose'].map(name=>rect('[name=api-'+name+']')),
             stage:rect('[data-stage-id=stage]'), jobs:['job-0','job-1'].map(id=>rect('[data-job-id='+id+']')),
             overview:rect('.ew-content-overview'), stageHeading:rect('.ew-content-heading'),
-            addStage:rect('.ew-content-heading > [data-author-action=add_stage]'),
+            looseJobForm:rect('#ew-loose-job-editor'), addJobToList:rect('#ew-loose-job-editor [data-author-action=loose_apply]'),
             stageHead:rect('[data-stage-id=stage] .ew-stage-head'),
             addJob:rect('[data-stage-id=stage] .ew-stage-head > [data-author-action=add_job]'),
             bindings:[...document.querySelectorAll('[data-api-job-binding]')].map(e=>e.innerText)};
@@ -106,7 +106,7 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
             self.assertGreaterEqual(stage['y'], heading['y'] + heading['height'])
             self.assertAlmostEqual(stage['x'], overview['x'], delta=2)
             self.assertAlmostEqual(stage['width'], overview['width'], delta=2)
-            for control, row in ((report['addStage'], heading), (report['addJob'], report['stageHead'])):
+            for control, row in ((report['addJobToList'], report['looseJobForm']), (report['addJob'], report['stageHead'])):
                 self.assertGreaterEqual(control['height'], 32)
                 self.assertGreater(control['width'], 24)
                 self.assertGreaterEqual(control['y'], row['y'])
@@ -390,9 +390,9 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.open_initialized_author_list()
         self.click('[data-author-action=open][data-id="' + key + '"]')
         self.click('[data-author-action=tab][data-tab=content]')
-        add_stage = '.ew-content-heading > [data-author-action=add_stage]'
+        add_job_to_list = '#ew-loose-job-editor [data-author-action=loose_apply]'
         add_job = '[data-stage-id=stage] .ew-stage-head > [data-author-action=add_job]'
-        self.wait(f'document.querySelector({json.dumps(add_stage)})?.checkVisibility()')
+        self.wait(f'document.querySelector({json.dumps(add_job_to_list)})?.checkVisibility()')
         self.assertFalse(self.read('[data-author-action=api_structure_edit]', 'isConnected'))
         self.assertFalse(self.read('.ew-work-content .ew-content-start-inputs', 'isConnected'))
         self.assertEqual(self.browser.evaluate("Array.from(document.querySelectorAll('.ew-author-tabs [role=tab]'), button => button.dataset.tab)"),
@@ -431,15 +431,8 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.key('Escape', 27)
         self.wait("!document.querySelector('#ees-work-dialog[open]')")
 
-        self.click(add_stage)
-        inline_name = '#ew-stage-editor [name=name]'
-        self.wait(f'document.activeElement?.matches({json.dumps(inline_name)})')
-        self.fill(inline_name, '결과 검토')
-        self.click('[data-author-action=inline_apply]')
-        self.wait(f'document.activeElement?.matches({json.dumps(inline_name)}) && document.activeElement.getAttribute("aria-label") === "새 작업 이름"')
-        self.fill(inline_name, '요청 등록 결과 확인')
-        self.click('[data-author-action=inline_apply]')
-        self.wait("document.querySelector('#ew-author-node [name=name]')?.value === '요청 등록 결과 확인'")
+        added_job_id = self.add_loose_job_ui('요청 등록 결과 확인')
+        added_stage_id = self.group_jobs_ui('결과 검토', [added_job_id])
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('[data-author-status]')?.dataset.dirty === 'false'")
         saved = self.state(workflow_id=key)['workflow']['draft']['nodes']
@@ -451,9 +444,8 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
             self.assertFalse(any(field['id'] == 'target-equipment' for field in saved[job_id]['inputs']))
         source = saved['job-1']['api_binding']['inputs']['code']['result']
         self.assertEqual(source, {'job_id':'job-0', 'field':'code', 'confirmed':True})
-        added_stage = next(node for node in saved.values() if node['name'] == '결과 검토')
-        added_job = next(node for node in saved.values() if node['name'] == '요청 등록 결과 확인')
-        self.assertEqual(added_job['parent'], added_stage['id'])
+        self.assertEqual(saved[added_stage_id]['name'], '결과 검토')
+        self.assertEqual(saved[added_job_id]['parent'], added_stage_id)
 
         # The authored run field is collected once. The reader's hours still
         # belongs to the reader, so the start form must not collect it.

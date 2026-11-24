@@ -627,6 +627,7 @@ class BrandingBuildTests(unittest.TestCase):
             "ees-work-view.js": b"function createWorkView() { return 'view'; }\n",
             "ees-work-api-catalog.js": b"function createWorkApiCatalog() {}\n",
             "ees-work-api-picker.js": b"function createWorkApiPicker() {}\n",
+            "ees-work-task-layout.js": b"function createWorkTaskLayout() {}\n",
             "ees-work-designer.js": b"function createWorkDesigner() { return 'designer'; }\n",
             "ees-work-launcher.js": b"(() => { window.fixture = [createWorkView(), createWorkDesigner()]; })();\n",
         }.items():
@@ -914,10 +915,11 @@ class BrandingBuildTests(unittest.TestCase):
     def test_launcher_assembly_order_is_private_and_has_one_runtime_asset(self):
         source = builder.assemble_work_launcher(self.ui)
         self.assertLess(source.index(b"function createWorkView"), source.index(b"function createWorkDesigner"))
+        self.assertLess(source.index(b"function createWorkTaskLayout"), source.index(b"function createWorkDesigner"))
         self.assertLess(source.index(b"function createWorkDesigner"), source.index(b"window.fixture"))
         manifest = self.build()
         self.assertEqual([name for name in manifest["changed_files"] if name.endswith((
-            "ees-work-view.js", "ees-work-designer.js", "ees-work-launcher.js"))],
+            "ees-work-view.js", "ees-work-task-layout.js", "ees-work-designer.js", "ees-work-launcher.js"))],
             [builder.TARGET_APP + "ees-work-launcher.js"])
         if shutil.which("node"):
             result = run_launcher_assembly_probe(shutil.which("node"), source)

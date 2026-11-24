@@ -220,10 +220,9 @@ def central_flow(g):
     g.open_initialized_author_list();g.click('[data-author-action="create"]')
     g.type('#ew-procedure-create #ew-procedure-name','중앙 대화 제안 검증')
     g.click('#ew-procedure-create [data-author-action=procedure_create]')
-    # 2026-11-18: a new procedure opens with its stage name field ready.
-    g.wait('document.querySelector("#ew-stage-editor [name=name][aria-label=\\"새 단계 이름\\"]")')
-    g.type('#ew-stage-editor [name=name]','대화 제안 검토 단계')
-    g.click('[data-author-action=inline_apply]')
+    g.wait("document.activeElement?.matches('#ew-loose-job-editor [name=name]')")
+    job_id = g.add_loose_job_ui('입력 제안과 과거 근거')
+    g.group_jobs_ui('대화 제안 검토 단계', [job_id])
     g.click('[data-author-action=stage_edit]');g.type('#ew-stage-editor [name=description]','저장된 기준 안내')
     g.click('[data-author-action=inline_apply]')
     g.click('[data-author-action=save]');g.wait('document.querySelector("[data-author-status]")?.dataset.authorRevision === "2"')
@@ -276,13 +275,6 @@ def central_flow(g):
 def input_and_history_flow(g,key,chat_id):
     """Real input suggestion plus immutable message-reference lookup."""
     g.provider.mode='plain'
-    # Create the human task through the current visible authoring controls.
-    # A stage with no job already shows its job name field; otherwise press the add control.
-    if g.browser.evaluate("!!document.querySelector('[data-author-action=add_job]')"):g.click('[data-author-action=add_job]')
-    g.wait('document.querySelector("#ew-stage-editor [name=name][aria-label=\\"새 작업 이름\\"]")')
-    g.type('#ew-stage-editor [name=name]','입력 제안과 과거 근거');g.click('[data-author-action=inline_apply]')
-    g.click('[data-author-action=save]')
-    g.wait('document.querySelector("[data-author-status]")?.textContent.includes("저장됨")')
     # HTML 12 no longer exposes the old job-input definition editor. Prepare
     # one existing job-local input through the real authenticated save API.
     # Stage/root inputs are not substitutes: _work_snapshot filters job.inputs.
@@ -307,9 +299,7 @@ def input_and_history_flow(g,key,chat_id):
     g.record('isolated existing job-input definition fixture',workflow_id=key,
              job_id=declared_job['id'],field=note_field,draft_revision=seeded['revision'],
              boundary='Actual authenticated save_draft; no input values, publication or execution seeded')
-    # Job detail returns to stages before the workflow-list navigation appears.
     # Reopen visibly so the browser reads the fixture revision before publishing.
-    g.click('[data-author-action=node][data-id=""]')
     g.wait('document.querySelector(".ew-work-content")')
     g.click('[data-author-action=list]')
     g.click('[data-author-action=open][data-id="'+key+'"]')

@@ -61,6 +61,7 @@ WORK_LAUNCHER_UNITS = (
     ("ees-work-view.js", "createWorkView"),
     ("ees-work-api-catalog.js", "createWorkApiCatalog"),
     ("ees-work-api-picker.js", "createWorkApiPicker"),
+    ("ees-work-task-layout.js", "createWorkTaskLayout"),
     ("ees-work-designer.js", "createWorkDesigner"),
     ("ees-work-launcher.js", None),
 )

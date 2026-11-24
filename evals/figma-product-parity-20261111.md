@@ -397,3 +397,15 @@ PR의 최신 EES delivery 실행에서 `ees-work-browser-evidence-native-compose
 - **독립 검토:** 시작 창에서 공장 A에 작성하고 취소한 공통값이 공장 B의 단계 시작 창에 남는 경로를 찾았다. 새 공통값은 그 시작 창에서만 보존하고 기존 입력의 임시 작성값은 기존처럼 관리하도록 수정했다. 서버에서는 같은 수치라도 정수 `1`과 실수 `1.0`의 형식이 다르므로 공통값 변경을 검출해 API 형식을 다시 검사한다.
 - **로컬 결과:** `node --test tests/test_*.cjs` 833개 통과. `python3 -B -m unittest discover -s tests -p 'test_ees_api*.py'` 37개 통과, 브라우저 전용 클래스 2개 건너뜀. `python3 -B -m unittest discover -s tests -p 'test_ees_work_workspace.py'` 96개 통과. 문서 링크 검사와 변경분 공백 검사 통과.
 - **미확인:** 실제 제품 브라우저의 시안 4 대조와 사내 환경 확인.
+
+<a id="procedure-task-list-verification-20261124"></a>
+
+## 2026-11-24 · 업무 절차 목록에서 작업 추가 검수
+
+- **대상:** [작업 추가 비교 시안과 화면 계약](../docs/mockups/ees-work/TASK.md#procedure-task-list-20261124). 기존 소스 `e494605`에서는 작업을 추가하면 그 작업을 선택하고 상세 화면의 이름 칸으로 이동하는 것을 확인했다.
+- **시안 결과:** Linux 개발 환경의 Node 24.22.3과 jsdom에서 HTML의 처음 상태와 기존·제안 선택을 확인했다. 스크립트 없는 상태에서도 같은 작업을 추가한 뒤의 기존 상세와 제안 목록을 볼 수 있다. 스크립트를 켜면 방식 간 전환과 예시 선택, 작업 연속 추가와 다음 입력 칸의 포커스, 순서 이동, 이어지는 작업 묶기·풀기, 작업 상세와 브라우저 안의 저장이 동작했다. 두 검사에서 외부 요청과 스크립트 오류는 없었다.
+- **로컬 제품 연동:** 실제 편집 컴포넌트 `createWorkDesigner`를 jsdom에 띄우고 제품 `WorkflowService`와 임시 SQLite 파일에 연결했다. 빈 절차에서 Enter와 단추로 작업을 추가하고, 분류·범위를 편집하고, 이어진 작업을 묶고, 단계 안에서 작업을 추가했다. 한 번에 저장·게시한 뒤 새 서버 프로세스에서 다시 열었을 때 작업 ID와 목록 순서가 유지됐다.
+- **Chrome 컴포넌트:** PR의 실제 편집 JS·CSS를 합성 화면 틀과 브라우저 저장소에 연결했다. 빈 절차에서 Enter와 단추로 추가한 두 작업을 ‘인계 준비’로 묶고, 단계 안에 ‘교대 일지 확인’을 추가했다. 이름 칸으로 돌아온 포커스와 저장·새로고침 뒤 같은 단계의 작업 세 줄을 확인했다.
+- **자동 검사:** `node --test tests/*.cjs` 845개 통과. 편집 화면 361개와 작업 배치 9개를 포함한다. `python3 -B -m unittest discover -s tests -p 'test_ees_work_workspace.py'`는 98개 통과했다. `test_ees_branding_build.py`는 33개 통과, 공식 wheel과 프런트엔드 산출물이 필요한 시험 1개는 건너뛰었다. 문서 링크와 변경분 공백 검사도 통과했다.
+- **빠른 검사에서 남은 실패:** Linux에서 Windows CA 내보내기 오류를 검사하는 `test_bad_export_is_rejected_without_creating_bundle`의 하위 사례 세 개가 실패했다. 기준 커밋 `f582e1d`의 작업 트리에도 같은 시험을 실행해 같은 실패를 확인했다.
+- **미실행:** Native 프로그램 전체의 시안 대조, 사내 적용과 실제 사용자 확인.

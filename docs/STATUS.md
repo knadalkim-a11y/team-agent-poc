@@ -1,5 +1,12 @@
 # 현재 작업 상태
 
+## 2026-11-24 · 업무 절차에서 작업을 이어서 추가하기
+
+- **기준:** 사용자가 두 방식의 비교 시안에서 검토한 작업 목록 편집을 기존 [PR #154](https://github.com/knadalkim-a11y/team-agent-poc/pull/154)에 추가한다. [시안과 구현 범위](mockups/ees-work/TASK.md#procedure-task-list-20261124)
+- **사내 설치본:** 사용자 보고 기준 `e49460569155`.
+- **로컬 검수:** [시안·제품 확인 기록](../evals/figma-product-parity-20261111.md#procedure-task-list-verification-20261124)을 참고한다.
+- **다음 하나:** 변경된 작성 화면의 PR 검사를 확인한다.
+
 ## 2026-11-24 · 실행 파라미터와 판정 선택지
 
 - **기준:** 사용자가 승인한 시안 4를 제품에 반영해 관련 [PR #154](https://github.com/knadalkim-a11y/team-agent-poc/pull/154)에 추가한다. [시안과 구현 범위](mockups/ees-work/TASK.md#procedure-execution-parameters-20261124)

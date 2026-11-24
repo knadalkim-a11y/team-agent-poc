@@ -6,6 +6,7 @@ const {renderer,run}=require('./ees_workspace_ui_fixture.cjs');
 const source=fs.readFileSync(process.env.EES_AUTHORING_TEST_SOURCE || path.join(__dirname,'../branding/ees/ui/ees-work-designer.js'),'utf8');
 const apiSources=['ees-work-api-catalog.js','ees-work-api-picker.js']
  .map(name=>fs.readFileSync(path.join(__dirname,'../branding/ees/ui',name),'utf8')).join('\n');
+const taskLayoutSource=fs.readFileSync(path.join(__dirname,'../branding/ees/ui/ees-work-task-layout.js'),'utf8');
 const workflowHelp=JSON.parse(fs.readFileSync(path.join(__dirname,'../agent-pack/skills/ees-work-demo/scripts/workflow_help.json'),'utf8'));
 const copy=value=>JSON.parse(JSON.stringify(value));
 const toolExamples=[
@@ -115,7 +116,7 @@ function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObser
  // are the product handlers; the fixture does not apply drafts on their behalf.
  function toolDialog(options){
   let markup=options.html+'<footer><button data-dialog-cancel>취소</button><button data-dialog-confirm>적용</button></footer>',resolve;
-  const listeners={},surface={id:'ees-work-dialog',closest:()=>null,classList:{add(){},remove(){}},addEventListener(type,fn){(listeners[type] ||= []).push(fn);},contains(target){return h.modalNodes.includes(target);}};
+  const listeners={},surface={id:'ees-work-dialog',closest:()=>null,classList:{add(){},remove(){}},addEventListener(type,fn){(listeners[type] ||= []).push(fn);},removeEventListener(type,fn){listeners[type]=(listeners[type] || []).filter(listener=>listener!==fn);},contains(target){return h.modalNodes.includes(target);}};
   const bounds=node=>{const start=markup.indexOf('>',node.offset)+1;let depth=1,end=start;const re=/<(\/?)([a-z][\w-]*)\b[^>]*>/gi;re.lastIndex=start;for(let m;(m=re.exec(markup));){if(m[2].toLowerCase()!==node.tagName.toLowerCase())continue;depth+=m[1]?-1:1;if(!depth){end=m.index;break;}}return [start,end];};
   const select=(selector,within)=>{
    if(selector.includes(','))return [...new Set(selector.split(',').flatMap(s=>select(s.trim(),within)))];
@@ -143,9 +144,9 @@ function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObser
   h.modalClose=async(kind='cancel',{immediate=false}={})=>{const finish=accepted=>{if(immediate)options.restoreFocus?.();resolve(accepted);};if(kind==='apply'){const button=surface.querySelector('[data-dialog-confirm]');if(button.disabled)return false;if(!h.modalEvent('click',button))return false;finish(true);}else {h.modalEvent(kind==='escape'?'keydown':'click',kind==='escape'?surface:surface.querySelector('[data-dialog-cancel]'),{key:kind==='escape'?'Escape':undefined});finish(false);}await flush();if(!immediate)options.restoreFocus?.();if(h.modal===surface){h.modal=null;dialog=null;}return true;};
   surface.eesClose=()=>resolve(false);return new Promise(done=>{resolve=done;});
  }
- const workUI={showHelp:options=>{(h.helpCalls ||= []).push(options);},newId:run(renderer({crypto:cryptoProvider}),'workUI.newId'),esc:value=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'),icon:id=>'<img src="/_ees13/v4/'+id+'.svg" alt="">',$:selector=>selector==='#ees-work-dialog'?dialog:null,dialog:options=>{h.dialogHistory ||= [];h.dialogHistory.push(options);if(['ew-workflow-tool-setup','ew-tool-workflow-target','ew-execution-parameters'].some(name=>options.html?.includes(name)))return toolDialog(options);const answer=h.dialogs.shift();assert.notEqual(answer,undefined,'dialog answer is explicit');const listeners={};dialog={addEventListener:(event,cb)=>{(listeners[event] ||= []).push(cb);},querySelectorAll:()=>Object.entries(answer || {}).map(([name,value])=>({name,value,type:typeof value==='boolean'?'checkbox':'text',checked:!!value}))};return Promise.resolve().then(async()=>{await h.dialogHook?.();for(const listener of listeners.click || [])listener({target:{closest:selector=>selector==='[data-dialog-confirm]'?true:null},preventDefault:noop,stopPropagation:noop});return answer!==null;});}};
+ const workUI={showHelp:options=>{(h.helpCalls ||= []).push(options);},newId:run(renderer({crypto:cryptoProvider}),'workUI.newId'),esc:value=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'),icon:id=>'<img src="/_ees13/v4/'+id+'.svg" alt="">',$:selector=>selector==='#ees-work-dialog'?dialog:null,dialog:options=>{h.dialogHistory ||= [];h.dialogHistory.push(options);if(['ew-workflow-tool-setup','ew-tool-workflow-target','ew-execution-parameters','ew-stage-group-form'].some(name=>options.html?.includes(name)))return toolDialog(options);const answer=h.dialogs.shift();assert.notEqual(answer,undefined,'dialog answer is explicit');const listeners={};dialog={addEventListener:(event,cb)=>{(listeners[event] ||= []).push(cb);},querySelectorAll:()=>Object.entries(answer || {}).map(([name,value])=>({name,value,type:typeof value==='boolean'?'checkbox':'text',checked:!!value}))};return Promise.resolve().then(async()=>{await h.dialogHook?.();for(const listener of listeners.click || [])listener({target:{closest:selector=>selector==='[data-dialog-confirm]'?true:null},preventDefault:noop,stopPropagation:noop});return answer!==null;});}};
  const FormData=class{constructor(form){this.data=form.controls.filter(c=>c.name&&!c.disabled&&(!['checkbox','radio'].includes(c.type)||c.checked)).map(c=>[c.name,c.value || (c.type==='checkbox'?'on':'')]);}has(key){return this.data.some(([name])=>name===key);}get(key){return this.data.find(([name])=>name===key)?.[1]??null;}getAll(key){return this.data.filter(([name])=>name===key).map(([,v])=>v);}entries(){return this.data.values();}};
- const context={workToolCatalog:run(renderer(),'workToolCatalog'),workToolMatchesScope:run(renderer(),'workToolMatchesScope'),workUI,URL,ResizeObserver:resizeObserver,crypto:cryptoProvider,AbortController,FormData,document:{activeElement:null},console,proposalChangesObserver};vm.createContext(context);const observedSource=proposalChangesObserver?source.replace('function proposalChanges(before,after) {','function proposalChanges(before,after) { proposalChangesObserver();'):source;vm.runInContext(apiSources,context);vm.runInContext(observedSource,context);context.callbacks=callbacks;h.designer=vm.runInContext('createWorkDesigner({callbacks})',context);h.helpers=vm.runInContext('workAuthoring',context);h.host=host;h.callbacks=callbacks;h.document=context.document;
+ const context={workToolCatalog:run(renderer(),'workToolCatalog'),workToolMatchesScope:run(renderer(),'workToolMatchesScope'),workUI,URL,ResizeObserver:resizeObserver,crypto:cryptoProvider,AbortController,FormData,document:{activeElement:null},console,proposalChangesObserver};vm.createContext(context);const observedSource=proposalChangesObserver?source.replace('function proposalChanges(before,after) {','function proposalChanges(before,after) { proposalChangesObserver();'):source;vm.runInContext(apiSources,context);vm.runInContext(taskLayoutSource,context);vm.runInContext(observedSource,context);context.callbacks=callbacks;h.designer=vm.runInContext('createWorkDesigner({callbacks})',context);h.helpers=vm.runInContext('workAuthoring',context);h.host=host;h.callbacks=callbacks;h.document=context.document;
  h.render=()=>{if(legacyToolAuthoring)(h.state.operations ||= {}).legacy_tool_authoring=true;h.designer.render({state:h.state,selection:h.selection,host});};h.render();
  h.click=(action,data={})=>{const button=h.buttons.find(node=>node.dataset.authorAction===action&&Object.entries(data).every(([key,value])=>node.dataset[key]===value));button?.focus();const control={dataset:{authorAction:action,...data}};h.designer.handleEvent({type:'click',target:button || {closest:selector=>selector==='#ees-work-designer'?host:selector==='[data-author-action]'?control:null}});};
  // The outer work host captures overlay clicks before workUI.dialog settles its promise.
@@ -156,6 +157,30 @@ function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObser
 
 async function beginCreation(h,name='',description=''){h.click('create');await flush();assert.ok(h.forms['ew-procedure-create']);h.field('ew-procedure-name',name);h.field('ew-procedure-description',description);}
 async function submitCreation(h){h.click('procedure_create');await flush();}
+const looseInput='#ew-loose-job-editor [name=name]';
+function formName(h,id,value){
+ const input=h.forms[id]?.controls.find(field=>field.name==='name');
+ assert.ok(input,id+' name input');
+ input.value=value;input.focus();h.designer.handleEvent({type:'input',target:input});
+ return input;
+}
+async function addLoose(h,name){
+ formName(h,'ew-loose-job-editor',name);h.click('loose_apply');await flush();
+ return Object.values(h.draft().definition.nodes).find(node=>node.type==='j'&&node.name===name);
+}
+function rootItems(h){
+ const {nodes}=h.draft().definition;
+ return nodes.p.children.flatMap(id=>nodes[id].ungrouped?nodes[id].children:[id]);
+}
+async function openGrouping(h,name){
+ assert.ok(actionButton(h,'group_jobs'),'visible grouping action');
+ h.click('group_jobs');await flush();
+ assert.match(h.modalMarkup,/ew-stage-group-form/);
+ h.modalField('name','name',name);
+}
+function groupChoice(h,id,checked=true){
+ h.modalField('name','job:'+id,checked,'change');
+}
 async function openExecutionParameters(h){h.click('execution_parameters');await flush();assert.match(h.modalMarkup,/ew-execution-parameters/);}
 async function executionParameterClick(h,action,id,answer){
  const button=h.modal.querySelectorAll('[data-execution-parameter-action]').find(node=>node.dataset.executionParameterAction===action&&node.dataset.id===id);
@@ -171,13 +196,14 @@ test('C66 content removes the needed-summary surface while preserving stored rev
  await h.node();h.field('job_guidance','검토 기록을 보존할 안내');h.click('save');await flush();
  assert.deepEqual(h.writes.at(-1).definition.authoring_review,value.authoring_review);assert.equal(h.writes.at(-1).definition.nodes.j.instructions,'검토 기록을 보존할 안내');
 });
-test('C66 expanded stages keep edit visible and disclose move and delete only through their menu',async()=>{
+test('C66 stage rows expose move controls and keep delete in the expanded menu',async()=>{
  const h=harness();installDefinition(h,stagedDefinition(3));
  assert.equal(h.buttons.some(button=>button.dataset.authorAction==='stage_menu'),false);
  h.click('stage_toggle',{id:'t1'});await flush();assert.ok(actionButton(h,'stage_edit','t1'));assert.ok(actionButton(h,'stage_menu','t1'));
- for(const action of ['move_up','move_down','delete_node'])assert.equal(Boolean(actionButton(h,action,'t1')),false,action+' is not an always-visible stage action');
+ for(const action of ['move_up','move_down'])assert.ok(actionButton(h,action,'t1').closest('.ew-structure-move'));
+ assert.equal(actionButton(h,'delete_node','t1'),undefined);
  h.click('stage_menu',{id:'t1'});await flush();assert.equal(actionButton(h,'stage_menu','t1').getAttribute('aria-expanded'),'true');
- for(const action of ['move_up','move_down','delete_node'])assert.ok(actionButton(h,action,'t1'),action+' is available in the open menu');
+ assert.ok(actionButton(h,'delete_node','t1').closest('.ew-job-menu'));
  assert.equal(h.writes.length,0);assert.equal(h.draft().dirty,false);
 });
 test('C66 stage menu Escape closes only an open menu and restores its trigger',async()=>{
@@ -302,12 +328,10 @@ test('tool navigation returns to workflow editor without retaining tool-only sur
 test('hidden job trigger remains a stored offset after direct guidance editing',async()=>{const h=harness();h.workflows.get('w').draft.nodes.j.trigger={offset_seconds:3600};h.render();await h.node();assert.equal(h.fields.some(f=>f.name==='trigger_kind'),false);h.field('job_guidance','안내만 수정');h.click('save');await flush();assert.deepEqual(h.writes[0].definition.nodes.j.trigger,{offset_seconds:3600});assert.doesNotMatch(source,/setInterval|setTimeout/);});
 
 test('2026-11-02 authoring no longer creates reservations for a published periodic workflow',async()=>{const h=harness(),record=h.workflows.get('w');record.published_version=2;record.draft.mode='periodic';record.draft.schedule={timezone:'Asia/Seoul',anchor:'2026-10-05T09:00',frequency:'weekly',interval:1};record.draft.nodes.j.mode='tool';record.published=copy(record.draft);h.render();assert.doesNotMatch(h.markup,/일정 미리보기·서버 예약|게시 버전 예약 만들기|data-author-action="schedule_tools"/);h.click('schedule_tools');h.dialogs.push({timezone:'Asia/Seoul',anchor:'2026-10-05T09:00',frequency:'weekly',interval:'1',grace_seconds:'300',delegated:true,'job:j':true});h.click('schedule_create');await flush();assert.equal(h.operations.length,0);assert.equal(h.writes.length,0);assert.equal(h.dialogs.length,1);assert.deepEqual(h.draft().definition.schedule,record.published.schedule);});
-test('2026-11-02 start inputs sit in the stage-and-job view and a new job detail returns to them through its back link',async()=>{
- // A newly added job opens its detail, with run parameters available from the title menu.
- const h=harness();h.click('add_stage');await flush();await h.inline('자료 검토');
- const stage=Object.values(h.draft().definition.nodes).find(node=>node.type==='t'&&node.name==='자료 검토');
+test('run parameters stay available when opening a new job and returning to the task list',async()=>{
+ const h=harness();
  assert.doesNotMatch(h.markup,/ew-content-start-inputs/);assert.ok(actionButton(h,'execution_parameters'));
- h.click('add_job',{parent:stage.id});await flush();await h.inline('사람의 근거 확인');
+ const job=await addLoose(h,'사람의 근거 확인');await h.node(job.id);
  assert.ok(h.forms['ew-author-node']);assert.ok(actionButton(h,'execution_parameters'));
  assert.match(h.markup,/<header class="ew-job-detail-header"><button type="button" data-author-action="node" data-id="" class="ew-author-back">/);
  h.click('node',{id:''});await flush();
@@ -427,6 +451,7 @@ test('missing randomUUID permits create and authoring IDs through the shared hel
  h.click('add_stage');await flush();await h.inline('추가 단계');const stage=Object.values(h.draft().definition.nodes).find(node=>node.id.startsWith('stage-'));
  assert.match(stage.id.slice(6),uuidV4);h.click('add_job',{parent:stage.id});await flush();await h.inline('추가 작업');
  const job=Object.values(h.draft().definition.nodes).find(node=>node.id.startsWith('job-'));assert.match(job.id.slice(4),uuidV4);
+ await h.node(job.id);
  const answer={name:'대상 서버',type:'text',scope:'run',options_source:'manual'};
  h.dialogHook=()=>{answer.id=controls(h.dialogHistory.at(-1).html).find(field=>field.name==='id').value;};
  h.dialogs.push(answer);h.click('input_add');await flush();h.dialogHook=null;
@@ -530,7 +555,7 @@ test('named blank creation sends only a name and system and opens content',async
  const h=harness();await beginCreation(h,'  직접 작성  ');await submitCreation(h);
  assert.equal(h.writes.length,1);assert.equal(h.writes[0].name,'직접 작성');assert.equal(h.writes[0].system_id,'EMS');
  for(const field of ['template_id','definition','description','factory_id','category','mode','execution_scope','schedule'])assert.equal(Object.hasOwn(h.writes[0],field),false,field);
- assert.equal(h.selection.workflow_id,'created-1');assert.match(h.markup,/업무 내용/);assert.doesNotMatch(h.markup,/아직 단계가 없습니다/);assert.match(inlineMarkup(h),/<input\b[^>]*name="name"[^>]*aria-label="새 단계 이름"[^>]*placeholder="단계 이름 · 예: 점검"/);assert.equal(h.document.activeElement,h.forms['ew-stage-editor'].controls.find(field=>field.name==='name'));assert.doesNotMatch(h.markup,/class="ew-summary-card"/);assert.equal(h.operations.length,0);
+ assert.equal(h.selection.workflow_id,'created-1');assert.match(h.markup,/업무 내용/);assert.doesNotMatch(h.markup,/아직 단계가 없습니다/);assert.ok(h.host.querySelector(looseInput));assert.equal(h.document.activeElement,h.host.querySelector(looseInput));assert.equal(h.forms['ew-stage-editor'],undefined);assert.doesNotMatch(h.markup,/class="ew-summary-card"/);assert.equal(h.operations.length,0);
 });
 test('empty or whitespace name never creates a procedure',async()=>{
  for(const name of ['','   ']){const h=harness();await beginCreation(h,name);assert.equal(actionButton(h,'procedure_create').disabled,true);h.designer.handleEvent({type:'submit',target:h.forms['ew-procedure-create']});await flush();assert.equal(h.writes.length,0);assert.match(h.markup,/업무 절차 이름을 입력/);}
@@ -745,8 +770,8 @@ test('content renders 0 1 3 and 6 stages initially collapsed with exactly one ex
   assert.equal(h.buttons.filter(button=>button.dataset.authorAction==='stage_toggle').length,count);
   assert.equal(h.buttons.filter(button=>button.getAttribute('aria-expanded')==='true').length,0);
   assert.equal(h.buttons.filter(button=>button.dataset.authorAction==='node'&&button.dataset.id).length,0);
-  assert.match(h.markup,new RegExp('<small>'+count+'개 단계</small>'));
-  if(!count){assert.doesNotMatch(h.markup,/아직 단계가 없습니다/);assert.match(inlineMarkup(h),/<i aria-hidden="true">1<\/i><input\b[^>]*name="name"[^>]*placeholder="단계 이름 · 예: 점검"/);assert.deepEqual([...inlineMarkup(h).matchAll(/data-author-action="(inline_[^"]+)"/g)].map(match=>match[1]),['inline_apply']);assert.equal(h.buttons.some(button=>button.dataset.authorAction==='add_stage'),false);assert.equal(h.draft().dirty,false);continue;}
+  assert.ok(h.host.querySelector(looseInput));
+  if(!count){assert.doesNotMatch(h.markup,/아직 단계가 없습니다/);assert.equal(h.forms['ew-stage-editor'],undefined);assert.ok(actionButton(h,'loose_apply'));assert.equal(actionButton(h,'add_stage'),undefined);assert.equal(h.draft().dirty,false);continue;}
   h.click('stage_toggle',{id:'t0'});await flush();assert.equal(stageButton(h,'t0').getAttribute('aria-expanded'),'true');
   if(count>1){h.click('stage_toggle',{id:'t1'});await flush();assert.equal(stageButton(h,'t0').getAttribute('aria-expanded'),'false');assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');}
   const last=count>1?'t1':'t0';assert.equal(h.buttons.filter(button=>button.dataset.authorAction==='stage_toggle'&&button.getAttribute('aria-expanded')==='true').length,1);
@@ -775,14 +800,14 @@ for(const kind of ['add_stage','add_job'])test(kind+' inline form cannot attach 
  const h=harness();installDefinition(h,stagedDefinition(1,1));await beginInline(h,kind);h.field('name','아직 추가하지 않은 이름');
  const record=h.workflows.get('w');record.revision=2;record.draft.nodes.t0.name='최신 단계';h.render();const latest=h.draft();assert.equal(latest.revision,2);assertUnavailableInline(h,staleInlineMessage);
  await submitInline(h);assert.deepEqual(h.draft(),latest);assert.equal(h.fields.find(field=>field.name==='name').value,'아직 추가하지 않은 이름');assertUnavailableInline(h,staleInlineMessage);assert.equal(h.writes.length,0);
- h.click('inline_cancel');await flush();assert.equal(h.document.activeElement.dataset.authorAction,kind);if(kind==='add_job')assert.equal(h.document.activeElement.dataset.parent,'t0');assert.deepEqual(h.draft(),latest);
+ h.click('inline_cancel');await flush();if(kind==='add_job'){assert.equal(h.document.activeElement.dataset.authorAction,kind);assert.equal(h.document.activeElement.dataset.parent,'t0');}else assert.equal(h.document.activeElement,h.host.querySelector(looseInput));assert.deepEqual(h.draft(),latest);
 });
 for(const kind of ['stage','add_job'])test('remote stage deletion keeps the '+kind+' inline buffer reviewable and cancellable',async()=>{
  const h=harness();installDefinition(h,stagedDefinition(2,1));await beginInline(h,kind);h.field('name','삭제 전 작성한 이름');if(kind==='stage')h.field('description','삭제 전 작성한 설명');
  const record=h.workflows.get('w');record.revision=2;h.helpers.removeNode(record.draft,'t0');h.render();const latest=h.draft();assert.equal(latest.revision,2);assert.equal(latest.definition.nodes.t0,undefined);assertUnavailableInline(h,deletedInlineMessage);
  h.click('add_stage');await flush();assert.deepEqual(h.draft(),latest);assert.ok(h.forms['ew-stage-editor'],'remote deletion must leave a visible way to review and cancel the blocked buffer');assert.equal(h.forms['ew-stage-editor'].controls.find(field=>field.name==='name').value,'삭제 전 작성한 이름');if(kind==='stage')assert.equal(h.fields.find(field=>field.name==='description').value,'삭제 전 작성한 설명');assertUnavailableInline(h,deletedInlineMessage);assert.doesNotMatch(inlineMarkup(h),/추가 설정|저장된 초안이 바뀌었습니다/);assert.equal(h.scrollRequests.at(-1).node,h.forms['ew-stage-editor'].inlineError);
  await submitInline(h);assert.deepEqual(h.draft(),latest);assertUnavailableInline(h,deletedInlineMessage);assert.equal(h.writes.length,0);
- h.click('inline_cancel');await flush();assert.equal(h.forms['ew-stage-editor'],undefined);assert.deepEqual(h.draft(),latest);assert.equal(h.document.activeElement.dataset.authorAction,'add_stage');h.click('stage_toggle',{id:'t1'});await flush();assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');assert.equal(h.writes.length,0);
+ h.click('inline_cancel');await flush();assert.equal(h.forms['ew-stage-editor'],undefined);assert.deepEqual(h.draft(),latest);assert.equal(h.document.activeElement,h.host.querySelector(looseInput));h.click('stage_toggle',{id:'t1'});await flush();assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');assert.equal(h.writes.length,0);
 });
 test('C61 remote deletion moves a disappearing advanced-settings button focus to Cancel',async()=>{
  const h=harness();installDefinition(h,stagedDefinition(2,1));await beginInline(h,'stage');h.field('name','보존할 단계 이름');const advanced=actionButton(h,'node','t0');assert.equal(advanced.tagName,'BUTTON');assert.equal(advanced.closest('#ew-stage-editor'),h.forms['ew-stage-editor']);advanced.focus();
@@ -822,7 +847,7 @@ for(const kind of ['stage','add_stage','add_job']){
  test('C61 '+kind+' same revision keeps Apply and submit while name validation remains field-specific',async()=>{
   const h=harness();installDefinition(h,stagedDefinition(2,1));await beginInline(h,kind);const before=h.draft();h.render();assert.ok(h.buttons.find(button=>button.dataset.authorAction==='inline_apply'));assert.doesNotMatch(inlineMarkup(h),/저장된 초안이 바뀌었습니다/);
   for(const value of ['', '긴'.repeat(161)]){h.field('name',value);await submitInline(h);const html=inlineMarkup(h);assert.match(html,/<input\b[^>]*name="name"[^>]*aria-invalid="true"[^>]*aria-describedby="ew-stage-name-error"/);assert.match(html,/id="ew-stage-name-error"/);assert.match(html,value?/이름은 160자 이내로 입력해 주세요./:kind==='add_job'?/작업 이름을 입력해 주세요./:/단계 이름을 입력해 주세요./);assert.deepEqual(h.draft(),before);}
-  h.field('name','같은 버전의 정상 이름');await submitInline(h);if(kind==='add_stage')assert.match(inlineMarkup(h),/<input\b[^>]*name="name"[^>]*value=""[^>]*aria-label="새 작업 이름"/);else assert.equal(h.forms['ew-stage-editor'],undefined);assert.equal(Object.values(h.draft().definition.nodes).filter(node=>node.name==='같은 버전의 정상 이름').length,1);assert.equal(h.draft().revision,1);assert.equal(h.draft().dirty,true);assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);
+  h.field('name','같은 버전의 정상 이름');await submitInline(h);if(kind==='stage')assert.equal(h.forms['ew-stage-editor'],undefined);else assert.match(inlineMarkup(h),/<input\b[^>]*name="name"[^>]*value=""[^>]*aria-label="새 작업 이름"/);assert.equal(Object.values(h.draft().definition.nodes).filter(node=>node.name==='같은 버전의 정상 이름').length,1);assert.equal(h.draft().revision,1);assert.equal(h.draft().dirty,true);assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);
  });
 }
 test('same revision polls allow inline apply and same revision proposal replacement closes only a clean form',async()=>{
@@ -842,16 +867,116 @@ test('unchanged inline form closes on navigation while Escape cancels changed va
  h.click('node',{id:''});h.click('stage_edit',{id:'t0'});await flush();h.field('description','취소할 첫 줄\n둘째 줄');const result=h.escape('#ew-stage-editor');await flush();assert.equal(result.handled,true);assert.equal(result.preventDefault,true);assert.equal(h.forms['ew-stage-editor'],undefined);assert.equal(h.draft().definition.nodes.t0.description,'첫 줄\n둘째 줄');assert.equal(h.draft().dirty,false);
 });
 test('stage and job creation require names and retain existing add defaults without writes',async()=>{
- const h=harness();installDefinition(h,stagedDefinition(0));const expected={description:'',instructions:'',children:[],mode:'human',inputs:[],result_block:'human_confirm',deps:[],human_confirmation:true,completion:{rule:''}};
- assert.equal(h.buttons.some(button=>['add_stage','inline_cancel'].includes(button.dataset.authorAction)),false);assert.equal(Object.values(h.draft().definition.nodes).length,1);h.click('inline_apply');await flush();assert.match(h.markup,/class="ew-inline-error"/);assert.match(h.markup,/단계 이름을 입력해 주세요./);assert.equal(Object.values(h.draft().definition.nodes).length,1);
- await h.inline('  운영 인계  ');const stage=Object.values(h.draft().definition.nodes).find(node=>node.type==='t');assert.deepEqual(stage,{id:stage.id,type:'t',parent:'p',name:'운영 인계',...expected});assert.deepEqual(h.draft().definition.nodes.p.children,[stage.id]);assert.equal(stageButton(h,stage.id).getAttribute('aria-expanded'),'true');assert.equal(h.document.activeElement,h.forms['ew-stage-editor'].controls.find(field=>field.name==='name'));assert.match(inlineMarkup(h),/aria-label="새 작업 이름"/);assert.doesNotMatch(h.markup,/아직 작업이 없습니다/);assert.equal(h.buttons.some(button=>button.dataset.authorAction==='add_job'),false);assert.ok(h.buttons.some(button=>button.dataset.authorAction==='add_stage'));
- assert.equal(Object.values(h.draft().definition.nodes).filter(node=>node.type==='j').length,0);h.field('name','   ');h.click('inline_apply');await flush();assert.match(h.markup,/작업 이름을 입력해 주세요./);await h.inline('첫 인계 작업');const job=Object.values(h.draft().definition.nodes).find(node=>node.type==='j');assert.deepEqual(job,{id:job.id,type:'j',parent:stage.id,name:'첫 인계 작업',...expected});assert.deepEqual(h.draft().definition.nodes[stage.id].children,[job.id]);assert.ok(h.forms['ew-author-node']);assert.equal(h.draft().dirty,true);assert.equal(h.writes.length,0);
+ const h=harness();installDefinition(h,stagedDefinition(0));
+ const expected={description:'',instructions:'',children:[],mode:'human',inputs:[],result_block:'human_confirm',deps:[],human_confirmation:true,completion:{rule:''}};
+ assert.equal(actionButton(h,'add_stage'),undefined);
+ const composing=formName(h,'ew-loose-job-editor','첫');
+ const key=h.designer.handleEvent({type:'keydown',key:'Enter',isComposing:true,keyCode:229,target:composing});
+ await flush();assert.equal(key.preventDefault,false);assert.deepEqual(rootItems(h),[]);
+ formName(h,'ew-loose-job-editor','   ');h.click('loose_apply');await flush();
+ assert.deepEqual(rootItems(h),[]);
+ assert.equal(h.host.querySelector(looseInput).getAttribute('aria-invalid'),'true');
+ assert.equal(h.document.activeElement,h.host.querySelector(looseInput));
+ assert.match(h.markup,/작업 이름을 입력해 주세요/);
+ const job=await addLoose(h,'첫 인계 작업');
+ assert.ok(h.draft().definition.nodes[job.parent].ungrouped);
+ assert.deepEqual(job,{id:job.id,type:'j',parent:job.parent,name:'첫 인계 작업',...expected});
+ assert.deepEqual(rootItems(h),[job.id]);
+ assert.equal(h.document.activeElement,h.host.querySelector(looseInput));
+ assert.ok(actionButton(h,'node',job.id)?.closest('.ew-ungrouped-jobs'));
+ assert.equal(h.forms['ew-author-node'],undefined);
+ assert.equal(h.buttons.some(button=>button.dataset.authorAction==='stage_toggle'),false);
+ await openGrouping(h,'   ');groupChoice(h,job.id);
+ assert.equal(await h.modalClose('apply'),false,'group name cannot be blank');
+ assert.equal(h.draft().definition.nodes[job.id].parent,job.parent);
+ h.modalField('name','name','운영 인계');
+ assert.equal(await h.modalClose('apply'),true);
+ const stage=Object.values(h.draft().definition.nodes).find(node=>node.type==='t'&&node.name==='운영 인계');
+ assert.deepEqual(stage.children,[job.id]);
+ assert.equal(h.draft().definition.nodes[job.id].parent,stage.id);
+ assert.equal(stageButton(h,stage.id).getAttribute('aria-expanded'),'true');
+ assert.equal(h.writes.length,0);
+});
+
+test('flat task editor groups adjacent tasks, moves blocks and unwraps without changing job IDs or data',async()=>{
+ const h=harness(),value=stagedDefinition(1,1);installDefinition(h,value);
+ const first=await addLoose(h,'설비 확인');
+ const second=await addLoose(h,'부품 확인');
+ const third=await addLoose(h,'결과 기록');
+ await h.node(second.id);h.field('job_guidance','보존할 작업 안내');await h.node('');
+ const nodes=h.draft().definition.nodes;
+ assert.deepEqual(rootItems(h),['t0',first.id,second.id,third.id]);
+ await openGrouping(h,'현장 점검');
+ groupChoice(h,first.id);groupChoice(h,third.id);
+ assert.equal(await h.modalClose('apply'),false,'nonadjacent selections cannot reorder jobs silently');
+ assert.deepEqual(rootItems(h),['t0',first.id,second.id,third.id]);
+ groupChoice(h,third.id,false);groupChoice(h,second.id);
+ assert.equal(await h.modalClose('apply'),true);
+ const stage=Object.values(h.draft().definition.nodes).find(node=>node.name==='현장 점검');
+ assert.deepEqual(stage.children,[first.id,second.id]);
+ assert.deepEqual(rootItems(h),['t0',stage.id,third.id]);
+ await openGrouping(h,'취소할 단계');
+ const candidates=h.modal.querySelectorAll('[data-group-job]');
+ assert.deepEqual(candidates.map(field=>field.name),['job:'+third.id],'only root jobs can be grouped');
+ await h.modalClose('cancel');
+ assert.ok(actionButton(h,'move_up',stage.id).closest('.ew-structure-move'));
+ assert.ok(actionButton(h,'move_up',third.id).closest('.ew-structure-move'));
+ h.click('move_up',{id:stage.id});await flush();
+ h.click('move_up',{id:third.id});await flush();
+ assert.deepEqual(rootItems(h),[stage.id,third.id,'t0']);
+ assert.deepEqual(h.draft().definition.nodes[stage.id].children,[first.id,second.id]);
+ assert.ok(actionButton(h,'ungroup_stage',stage.id));
+ h.click('ungroup_stage',{id:stage.id});await flush();
+ const ungrouped=h.draft().definition.nodes;
+ assert.deepEqual(rootItems(h),[first.id,second.id,third.id,'t0']);
+ assert.equal(ungrouped[stage.id],undefined);
+ for(const id of [first.id,second.id,third.id]){
+  assert.ok(ungrouped[ungrouped[id].parent].ungrouped);
+  assert.deepEqual({...ungrouped[id],parent:nodes[id].parent},nodes[id]);
+ }
+ for(const id of ['t0','j0-0'])assert.deepEqual(ungrouped[id],nodes[id]);
+ h.click('save');await flush();await h.open('q');await h.open('w');
+ assert.deepEqual(rootItems(h),[first.id,second.id,third.id,'t0']);
+ assert.deepEqual(h.workflows.get('w').draft.nodes,ungrouped);
+ assert.equal(h.writes.length,1);
+});
+
+test('flat task editor keeps local stage entry focused for repeat adds and respects composition and read-only access',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(1,1));
+ h.click('stage_toggle',{id:'t0'});await flush();
+ h.click('add_job',{parent:'t0'});await flush();
+ const composing=formName(h,'ew-stage-editor','온도');
+ const guarded=h.designer.handleEvent({type:'keydown',key:'Enter',isComposing:true,keyCode:229,target:composing});
+ await flush();
+ assert.equal(guarded.preventDefault,false);
+ assert.deepEqual(h.draft().definition.nodes.t0.children,['j0-0']);
+ formName(h,'ew-stage-editor','   ');
+ await submitInline(h);
+ assert.deepEqual(h.draft().definition.nodes.t0.children,['j0-0']);
+ assert.equal(h.host.querySelector('#ew-stage-editor [name=name]').getAttribute('aria-invalid'),'true');
+ for(const name of ['온도','진동']){
+  formName(h,'ew-stage-editor',name);await submitInline(h);
+  const local=h.host.querySelector('#ew-stage-editor [name=name]');
+  assert.equal(local.value,'');
+  assert.equal(h.document.activeElement,local);
+  assert.equal(h.forms['ew-author-node'],undefined);
+ }
+ const loose=await addLoose(h,'마무리');
+ assert.deepEqual(h.draft().definition.nodes.t0.children.map(id=>h.draft().definition.nodes[id].name),['작업 1-1','온도','진동']);
+ h.click('save');await flush();
+ h.state.workflow.can_manage=false;h.state.capabilities.can_author=false;h.state.capabilities.managed_systems=[];h.render();
+ assert.equal(h.forms['ew-loose-job-editor'],undefined);
+ for(const action of ['loose_apply','group_jobs','add_job','stage_menu','move_up','move_down'])assert.equal(actionButton(h,action),undefined,action);
+ assert.ok(actionButton(h,'node',loose.id));
+ await h.node(loose.id);
+ assert.ok(h.forms['ew-author-node']);
+ assert.equal(h.writes.length,1);
 });
 test('stage and job ordering targets explicit IDs and preserves parents deadlines expansion and focus',async()=>{
  const h=harness(),value=stagedDefinition(3,3);value.schedule={stage_deadlines:{t0:{offset_days:-2},t1:{offset_days:0},t2:{offset_days:2}}};installDefinition(h,value);
- h.click('stage_toggle',{id:'t0'});h.click('stage_menu',{id:'t0'});await flush();assert.equal(actionButton(h,'move_up','t0').disabled,true);h.click('stage_toggle',{id:'t2'});h.click('stage_menu',{id:'t2'});await flush();assert.equal(actionButton(h,'move_down','t2').disabled,true);
- h.click('stage_toggle',{id:'t1'});h.click('stage_menu',{id:'t1'});await flush();h.click('move_up',{id:'t1'});await flush();assert.deepEqual(h.draft().definition.nodes.p.children,['t1','t0','t2']);assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');assert.equal(h.document.activeElement.dataset.id,'t1');assert.equal(h.document.activeElement.dataset.authorAction,'stage_menu');assert.equal(actionButton(h,'stage_menu','t1').getAttribute('aria-expanded'),'false');assert.match(h.markup,/<span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true">1번째로 옮겼습니다/);assert.doesNotMatch(h.markup,/class="ew-author-note"/);
- h.click('job_menu',{id:'j1-0'});await flush();assert.equal(actionButton(h,'move_up','j1-0').disabled,true);h.click('job_menu',{id:'j1-2'});await flush();assert.equal(actionButton(h,'move_down','j1-2').disabled,true);h.click('move_up',{id:'j1-2'});await flush();const draft=h.draft().definition;assert.deepEqual(draft.nodes.t1.children,['j1-0','j1-2','j1-1']);assert.equal(draft.nodes['j1-2'].parent,'t1');assert.deepEqual(draft.schedule,value.schedule);assert.deepEqual(Object.keys(draft.nodes),Object.keys(value.nodes));assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');assert.equal(h.writes.length,0);
+ assert.equal(actionButton(h,'move_up','t0'),undefined);assert.equal(actionButton(h,'move_down','t2'),undefined);
+ h.click('stage_toggle',{id:'t1'});await flush();h.click('move_up',{id:'t1'});await flush();assert.deepEqual(h.draft().definition.nodes.p.children,['t1','t0','t2']);assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');assert.equal(h.document.activeElement,actionButton(h,'move_down','t1'));assert.equal(actionButton(h,'stage_menu','t1').getAttribute('aria-expanded'),'false');assert.match(h.markup,/<span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true">1번째로 옮겼습니다/);assert.doesNotMatch(h.markup,/class="ew-author-note"/);
+ assert.equal(actionButton(h,'move_up','j1-0'),undefined);assert.equal(actionButton(h,'move_down','j1-2'),undefined);h.click('move_up',{id:'j1-2'});await flush();const draft=h.draft().definition;assert.deepEqual(draft.nodes.t1.children,['j1-0','j1-2','j1-1']);assert.equal(draft.nodes['j1-2'].parent,'t1');assert.deepEqual(draft.schedule,value.schedule);assert.deepEqual(Object.keys(draft.nodes),Object.keys(value.nodes));assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');assert.equal(h.writes.length,0);
 });
 test('stage deletion confirmation lists affected jobs and deadline cleanup only when present',async()=>{
  for(const deadline of [false,true]){const h=harness(),value=stagedDefinition(2,2);if(deadline)value.schedule={stage_deadlines:{t0:{offset_days:-1},t1:{offset_days:1}}};value.nodes['j1-0'].deps=['j0-0'];installDefinition(h,value);h.click('stage_toggle',{id:'t0'});await flush();h.dialogs.push({});h.click('delete_node',{id:'t0'});await flush();const options=h.dialogHistory.at(-1);assert.match(options.html,/단계 1/);assert.match(options.html,/2개/);assert.match(options.html,/작업 1-1/);assert.match(options.html,/작업 1-2/);assert.match(options.html,/게시/);if(deadline){assert.match(options.html,/이 단계의 기간 설정도 함께 지웁니다./);assert.doesNotMatch(options.html,/실행 방식/);}else assert.doesNotMatch(options.html,/기간 설정/);
@@ -897,7 +1022,7 @@ test('unapplied business purpose edit blocks proposal application and preserves 
  h.click('summary_cancel');h.click('ai_apply');await flush();assert.equal(h.draft().definition.description,'대화 제안 목적');assert.equal(h.draft().dirty,true);assert.equal(h.writes.length,0);
 });
 test('stage help supplies both exact paragraphs to the shared help dialog',async()=>{
- const h=harness();h.click('help',{id:'stages_and_jobs'});await flush();assert.equal(h.helpCalls.length,1);const call=h.helpCalls[0],term=call.help.terms.find(term=>term.id==='stages_and_jobs');assert.equal(call.termId,'stages_and_jobs');assert.equal(term.name,'단계와 작업');assert.equal(term.summary,'단계는 작업을 묶는 이름입니다. 개수·이름·순서는 업무에 맞게 정합니다.\n\n단계와 작업은 적힌 순서대로 진행합니다.');assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);
+ const h=harness();h.click('help',{id:'stages_and_jobs'});await flush();assert.equal(h.helpCalls.length,1);const call=h.helpCalls[0],term=call.help.terms.find(term=>term.id==='stages_and_jobs');assert.equal(call.termId,'stages_and_jobs');assert.equal(term.name,'단계와 작업');assert.equal(term.summary,'작업 이름을 입력하고 작업 추가를 누릅니다. 목록에서 이어지는 작업은 단계로 묶을 수 있습니다.\n\n먼저 끝내야 하는 작업은 작업 상세의 앞 작업에서 지정합니다.');assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);
 });
 
 
@@ -949,8 +1074,8 @@ test('closed job menu does not handle Escape and open menu returns focus to its 
 
 test('stage reorder updates hidden live text without adding a visible notice and preserves scroll',async()=>{
  const h=harness();installDefinition(h,stagedDefinition(4,2));h.click('stage_toggle',{id:'t1'});await flush();h.scroll.scrollTop=217;
- h.click('stage_menu',{id:'t1'});h.click('move_down',{id:'t1'});await flush();assert.doesNotMatch(h.markup,/class="ew-author-note"/);assert.match(h.markup,/data-author-live aria-live="polite" aria-atomic="true">3번째로 옮겼습니다/);assert.equal(h.scroll.scrollTop,217);assert.equal(h.document.activeElement.dataset.id,'t1');assert.equal(h.document.activeElement.dataset.authorAction,'stage_menu');
- h.click('stage_menu',{id:'t1'});h.click('move_up',{id:'t1'});await flush();assert.match(h.markup,/data-author-live aria-live="polite" aria-atomic="true">2번째로 옮겼습니다/);assert.doesNotMatch(h.markup,/3번째로 옮겼습니다/);
+ h.click('move_down',{id:'t1'});await flush();assert.doesNotMatch(h.markup,/class="ew-author-note"/);assert.match(h.markup,/data-author-live aria-live="polite" aria-atomic="true">3번째로 옮겼습니다/);assert.equal(h.scroll.scrollTop,217);assert.equal(h.document.activeElement,actionButton(h,'move_down','t1'));
+ h.click('move_up',{id:'t1'});await flush();assert.match(h.markup,/data-author-live aria-live="polite" aria-atomic="true">2번째로 옮겼습니다/);assert.doesNotMatch(h.markup,/3번째로 옮겼습니다/);
 });
 
 test('new stage and job name fields say what to type and show an example',async()=>{
@@ -958,17 +1083,17 @@ test('new stage and job name fields say what to type and show an example',async(
 });
 
 
-test('stage movement skips other kinds in a mixed draft and preserves their slots',async()=>{
+test('stage movement crosses an earlier root job and preserves its existing parent',async()=>{
  const h=harness(),value=stagedDefinition(2,1);value.nodes.rootJob={...copy(value.nodes['j0-0']),id:'rootJob',parent:'p',name:'단계 밖 초안 작업'};value.nodes.p.children=['t0','rootJob','t1'];installDefinition(h,value);
- h.click('stage_toggle',{id:'t0'});h.click('stage_menu',{id:'t0'});await flush();assert.equal(actionButton(h,'move_down','t0').disabled,false);h.click('move_down',{id:'t0'});await flush();
- assert.deepEqual(h.draft().definition.nodes.p.children,['t1','rootJob','t0']);assert.deepEqual(h.draft().definition.nodes.rootJob,value.nodes.rootJob);assert.match(h.markup,/data-author-live[^>]*>2번째로 옮겼습니다/);assert.equal(h.document.activeElement.dataset.authorAction,'stage_menu');assert.equal(actionButton(h,'stage_menu','t0').getAttribute('aria-expanded'),'false');
- h.click('stage_menu',{id:'t0'});await flush();assert.equal(actionButton(h,'move_down','t0').disabled,true);h.click('move_up',{id:'t0'});await flush();assert.deepEqual(h.draft().definition.nodes.p.children,value.nodes.p.children);assert.match(h.markup,/data-author-live[^>]*>1번째로 옮겼습니다/);assert.equal(h.writes.length,0);
+ h.click('stage_toggle',{id:'t0'});await flush();h.click('move_down',{id:'t0'});await flush();
+ assert.deepEqual(rootItems(h),['rootJob','t0','t1']);assert.deepEqual(h.draft().definition.nodes.rootJob,value.nodes.rootJob);assert.match(h.markup,/data-author-live[^>]*>2번째로 옮겼습니다/);assert.equal(h.document.activeElement,actionButton(h,'move_down','t0'));assert.equal(actionButton(h,'stage_menu','t0').getAttribute('aria-expanded'),'false');
+ h.click('move_down',{id:'t0'});await flush();assert.equal(actionButton(h,'move_down','t0'),undefined);assert.equal(h.document.activeElement,actionButton(h,'move_up','t0'));assert.deepEqual(rootItems(h),['rootJob','t1','t0']);assert.equal(h.writes.length,0);
 });
 
-test('job movement skips other kinds in a mixed draft and keeps endpoints unchanged',async()=>{
+test('job movement preserves malformed legacy child links for review',async()=>{
  const h=harness(),value=stagedDefinition(1,2);value.nodes.mixed={id:'mixed',type:'t',name:'초안 구조 확인 대상',parent:'t0',children:[],deps:[]};value.nodes.t0.children=['j0-0','mixed','j0-1'];installDefinition(h,value);
- h.click('stage_toggle',{id:'t0'});await flush();h.click('job_menu',{id:'j0-0'});await flush();h.click('move_down',{id:'j0-0'});await flush();assert.deepEqual(h.draft().definition.nodes.t0.children,['j0-1','mixed','j0-0']);assert.deepEqual(h.draft().definition.nodes.mixed,value.nodes.mixed);assert.equal(h.document.activeElement.dataset.authorAction,'job_menu');assert.equal(actionButton(h,'job_menu','j0-0').getAttribute('aria-expanded'),'false');h.click('job_menu',{id:'j0-0'});await flush();assert.equal(actionButton(h,'move_down','j0-0').disabled,true);
- h.click('move_down',{id:'j0-0'});await flush();assert.deepEqual(h.draft().definition.nodes.t0.children,['j0-1','mixed','j0-0']);assert.equal(h.writes.length,0);
+ h.click('stage_toggle',{id:'t0'});await flush();h.click('move_down',{id:'j0-0'});await flush();
+ assert.deepEqual(h.draft().definition,value);assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);
 });
 
 test('one proposal comparison feeds all 248 job marks list and footer per paint',async t=>{
@@ -1653,7 +1778,7 @@ test('API-only procedures expose structure editing and keep tool actions on thei
   inputs:{code:{result:{job_id:'j0-0',field:'code',confirmed:true}}},outputs:['receipt']};
  installDefinition(h,value);
 
- assert.ok(actionButton(h,'add_stage')?.closest('.ew-content-heading'));
+ assert.ok(actionButton(h,'loose_apply')?.closest('.ew-add-loose-job'));
  assert.equal(actionButton(h,'add_job'),undefined,'collapsed stages do not expose job creation');
  assert.equal(actionButton(h,'api_structure_edit'),undefined);
  h.click('stage_toggle',{id:'t0'});await flush();
@@ -1879,13 +2004,16 @@ test('first-user: a human job is laid out as the task and how it is confirmed, i
  const groups=main.split('<div class="ew-job-col">');assert.equal(groups.length,3);assert.equal(groups[0],'');
  assert.match(groups[1],/작업 이름[\s\S]*수행 방법[\s\S]*무엇을 확인하나요/);assert.match(groups[2],/확인 방식[\s\S]*완료 기준[\s\S]*담당자 설정/);assert.doesNotMatch(main,/확인 방법|판정 규칙/);
 });
-test('first-user: the open name row is not an edit in progress until something is typed',async()=>{
+test('first-user: the global task name persists across tabs, can be cancelled, and saves with the draft',async()=>{
  const h=harness();installDefinition(h,stagedDefinition(0));assert.equal(h.draft().dirty,false);assert.equal(actionButton(h,'save').disabled,true);
  h.field('overview_description','목적만 고침');h.click('save');await flush();
- assert.equal(h.writes.length,1);assert.equal(h.writes[0].definition.description,'목적만 고침');assert.doesNotMatch(h.markup,/단계 이름을 입력해 주세요/);assert.match(inlineMarkup(h),/placeholder="단계 이름 · 예: 점검"/);
- h.field('name','쓰다 만 단계');h.click('tab',{tab:'history'});await flush();
- assert.match(h.markup,/data-author-tab="content"/);assert.match(inlineMarkup(h),/^<p id="ew-stage-inline-warning" class="ew-inline-error" role="alert">편집 중인 항목을 먼저 적용하거나 취소해 주세요.<\/p>/);
- h.click('inline_cancel');await flush();assert.match(inlineMarkup(h),/<input\b[^>]*name="name"[^>]*value=""/);assert.equal(h.buttons.some(button=>button.dataset.authorAction==='inline_cancel'),false);
+ assert.equal(h.writes.length,1);assert.equal(h.writes[0].definition.description,'목적만 고침');assert.ok(h.host.querySelector(looseInput));
+ formName(h,'ew-loose-job-editor','쓰다 만 작업');assert.equal(actionButton(h,'save').disabled,false);
+ h.click('tab',{tab:'history'});await flush();assert.match(h.markup,/data-author-tab="history"/);
+ h.click('tab',{tab:'content'});await flush();assert.equal(h.host.querySelector(looseInput).value,'쓰다 만 작업');
+ h.click('loose_cancel');await flush();assert.equal(h.host.querySelector(looseInput).value,'');assert.equal(actionButton(h,'save').disabled,true);
+ formName(h,'ew-loose-job-editor','저장할 작업');h.click('save');await flush();
+ assert.equal(h.writes.length,2);assert.deepEqual(Object.values(h.writes[1].definition.nodes).filter(node=>node.type==='j').map(node=>node.name),['저장할 작업']);
 });
 
 // Check items (2026-11-18): a person's check list is written where the job is edited.
