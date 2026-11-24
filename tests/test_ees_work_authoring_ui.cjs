@@ -120,9 +120,11 @@ function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObser
  const tryJobs=draft=>Object.fromEntries(Object.values(draft.nodes).filter(node=>node.type==='j').map(node=>[node.id,{job_id:node.id,status:'pending',current_attempt:null,result_revision:null,decisions:[],can_execute:true,can_decide:true}]));
  const newTry=(record,window,changed=[])=>({id:'try-'+(++h.tryCount),workflow_id:record.id,mode:'try',status:'open',revision:1,can_write:true,inputs:{},definition:copy(record.draft),jobs:tryJobs(record.draft),attempts:[],try:{draft_hash:h.hashOf(record.draft),saved_at:record.draft_saved_at,changed,started:false},window});
  const tryFail=(code,message,result)=>{throw Object.assign(new Error(message),{code,result,status:400});};
- h.tryRead=async body=>{h.tryReads.push(copy(body));if(h.tryReadOverride){const value=await h.tryReadOverride(body);if(value!==undefined)return value;}const record=h.workflows.get(body.workflow_id),found=h.tries.get(body.workflow_id+'|'+body.try_window),{window,...view}=found || {};return {ok:true,try:found?copy(view):null,operations:copy(h.tryOperations || {}),workflow:{id:record.id,revision:record.revision,draft_hash:record.draft_hash,draft_saved_at:record.draft_saved_at,published_version:record.published_version,unpublished_changes:record.unpublished_changes}};};
+ // As on the server: a try is of one procedure, window and factory; a system-wide draft has one try whatever factory is chosen.
+ const tryPlace=(record,body)=>record.id+'|'+body.try_window+'|'+(record.draft.execution_scope==='factory'?body.factory_id || '':'');
+ h.tryRead=async body=>{h.tryReads.push(copy(body));if(h.tryReadOverride){const value=await h.tryReadOverride(body);if(value!==undefined)return value;}const record=h.workflows.get(body.workflow_id),found=h.tries.get(tryPlace(record,body)),{window,...view}=found || {};return {ok:true,try:found?copy(view):null,operations:copy(h.tryOperations || {}),workflow:{id:record.id,revision:record.revision,draft_hash:record.draft_hash,draft_saved_at:record.draft_saved_at,published_version:record.published_version,unpublished_changes:record.unpublished_changes}};};
  h.tryCommand=async(path,body)=>{h.tryWrites.push({path,...copy(body)});if(h.tryOverride){const value=await h.tryOverride(path,body);if(value!==undefined)return value;}
-  if(body.action==='try_open'){const record=h.workflows.get(body.workflow_id),key=record.id+'|'+body.try_window;if(!h.tries.has(key))h.tries.set(key,newTry(record,body.try_window));return {ok:true,run_id:h.tries.get(key).id};}
+  if(body.action==='try_open'){const record=h.workflows.get(body.workflow_id),key=tryPlace(record,body);if(!h.tries.has(key))h.tries.set(key,newTry(record,body.try_window));return {ok:true,run_id:h.tries.get(key).id};}
   const entry=[...h.tries.entries()].find(([,item])=>item.id===body.run_id&&item.window===body.try_window);if(!entry)tryFail('run_not_found','접근할 수 있는 진행 건이 없습니다.');
   const [key,run]=entry;if(body.expected_revision!==run.revision)tryFail('revision_conflict','다른 변경이 있습니다.');
   if(body.action==='try_restart'){const record=h.workflows.get(run.workflow_id),old=run.definition.nodes,changed=Object.values(record.draft.nodes).filter(node=>node.type==='j'&&h.hashOf(old[node.id] || null)!==h.hashOf(node)).map(node=>node.id).sort(),next=newTry(record,run.window,changed);h.tries.set(key,next);return {ok:true,run_id:next.id};}
@@ -2307,4 +2309,28 @@ test('mock 21 review 11: a refused 게시 내림 still returns the cursor to the
  h.click('unpublish');await flush();
  assert.equal(h.writes.at(-1).action,'unpublish_workflow');assert.equal(record.published_version,1);assert.match(h.markup,/<p role="alert" class="ew-author-error">게시를 내릴 권한이 없습니다./);
  assert.equal(h.details.find(item=>item.className==='ew-procedure-menu').open,false);assert.equal(h.document.activeElement?.tagName,'SUMMARY');
+});
+
+// PR #157 review: the factory chosen on the left is part of what a try is.
+test('mock 21 PR review: the try of another factory is never drawn or acted on while the new one is read',async()=>{
+ const value=tryDefinition();value.execution_scope='factory';
+ const h=harness();h.selection={...h.selection,factory_id:'F1'};installDefinition(h,value);await enterTry(h);tryType(h,'doc','page_id','123');
+ assert.match(rowMarkup(h,'checks'),/data-stage-check/);assert.equal(h.tryReads.at(-1).factory_id,'F1');
+ // The person picks another factory; its try is still being read.
+ let answer;h.tryReadOverride=()=>new Promise(resolve=>{answer=resolve;});
+ const reads=h.tryReads.length,writes=h.tryWrites.length;
+ h.selection={...h.selection,factory_id:'F2'};h.render();await flush();
+ assert.equal(h.tryReads.length,reads+1);assert.equal(h.tryReads.at(-1).factory_id,'F2');
+ assert.equal(rowMarkup(h,'checks'),'','the other factory\'s rows are not on screen');assert.equal(tryBox(h,'i1'),undefined);assert.equal(tryControl(h,'stage_execute','doc'),undefined);
+ assert.match(tryMarkup(h),/<p role="status" class="ew-author-muted">받는 중<\/p>/);assert.equal(h.tryWrites.length,writes,'nothing is sent with the other factory\'s try');
+ // A failed read leaves no rows either.
+ h.tryReadOverride=null;answer(Promise.reject(Object.assign(new Error('업무 저장 상태를 확인하지 못했습니다.'),{code:'workspace_unavailable'})));await flush();await flush();
+ assert.equal(rowMarkup(h,'checks'),'');assert.deepEqual(tryErrors(h),['업무 저장 상태를 확인하지 못했습니다.']);assert.equal(h.tryWrites.length,writes);
+ // Read again for that factory: its own try opens with that factory, and values typed for the first are not carried over.
+ h.designer.refreshTry();await flush();await flush();
+ const opened=h.tryWrites.filter(body=>body.action==='try_open').at(-1);assert.equal(opened.factory_id,'F2');
+ assert.match(rowMarkup(h,'checks'),/data-stage-check/);assert.equal(tryInput(h,'doc','page_id').value,'');
+ // Back at the first factory its typed value is still there.
+ h.selection={...h.selection,factory_id:'F1'};h.render();await flush();await flush();
+ assert.equal(h.tryReads.at(-1).factory_id,'F1');assert.equal(tryInput(h,'doc','page_id').value,'123');assert.equal(h.tries.size,2,'one try per factory');
 });

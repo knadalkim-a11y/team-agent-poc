@@ -108,7 +108,7 @@ function createWorkDesigner({callbacks}) {
   // 시험해 보기: this window's try of the saved draft. The server keeps it for this browser window only (its key goes
   // in POST bodies, never in a URL); nothing of it enters the launcher's selection or the account's saved screen.
   // tryView: the try of the open procedure; tryUI: which row is open, the verdict menu, field errors and reasons of
-  // that try; tryValues: what this window typed under rows, per procedure (refilled into a new try, T5);
+  // that try; tryValues: what this window typed under rows, per procedure and factory (refilled into a new try, T5);
   // tryFailures: failures thrown before an attempt, per try and job; trySaved: the content this window saved last.
   // tryOpening: the try_open or try_restart on its way ({key, promise}); tryPending: the try action that holds the
   // try until it ends ({key}); tryRefused: the start the server last refused, for the saved content it was about;
@@ -897,7 +897,10 @@ function createWorkDesigner({callbacks}) {
     else{tryWindowKey=workUI.newId();try{sessionStorage.setItem(tryStorageKey,JSON.stringify({actor,key:tryWindowKey}));}catch(_){}}
     return tryWindowKey;
   }
-  const tryCurrent=()=>tryView&&tryView.key===key()?tryView:null;
+  // A try is of one procedure in one work location: the factory chosen on the left is part of what it is, so the
+  // try of another factory is never drawn or acted on while this one is read (PR #157 review).
+  const tryKey=()=>JSON.stringify([actor,selection.system_id || '',workflowId(),selection.factory_id || '']);
+  const tryCurrent=()=>tryView&&tryView.key===tryKey()?tryView:null;
   const tryBody=()=>({workflow_id:workflowId(),system_id:selection.system_id || '',factory_id:selection.factory_id || '',try_window:tryWindow()});
   // A try command carries this window's key; the launcher sends it without touching the work screen's error line.
   const trySend=(action,body,operations=false)=>callbacks.tryCommand(operations?'operations':'workspace/command',{action,...body,try_window:tryWindow()});
@@ -941,7 +944,7 @@ function createWorkDesigner({callbacks}) {
     const body=action==='try_open'?{...tryBody(),expected_revision:result.workflow?.revision ?? revision}:{...tryBody(),run_id:run,expected_revision:result.try.revision};
     const promise=new Promise(resolve=>resolve(trySend(action,body))).then(()=>null,reason=>reason || new Error('')).then(failure=>{
       if(tryOpening?.promise===promise)tryOpening=null;
-      if(failure?.code&&!['revision_conflict','run_not_found','workspace_unavailable'].includes(failure.code)&&generation===epoch&&context===key())
+      if(failure?.code&&!['revision_conflict','run_not_found','workspace_unavailable'].includes(failure.code)&&generation===epoch&&context===tryKey())
         tryRefused={key:context,action,hash,run,code:failure.code,lines:action==='try_open'||tryCannot.has(failure.code)?String(failure.message || '').split('\n').filter(Boolean):null};
       return failure;
     });
@@ -953,7 +956,7 @@ function createWorkDesigner({callbacks}) {
   // only while the person is where the action started (origin).
   async function loadTry({open=false,focus='',origin=null}={}){
     if(!callbacks.tryRead||!workflowId()||!editor||!canAuthor())return false;
-    const context=key(),generation=epoch,serial=++tryReads,current=()=>generation===epoch&&context===key()&&serial===tryReads;
+    const context=tryKey(),generation=epoch,serial=++tryReads,current=()=>generation===epoch&&context===tryKey()&&serial===tryReads;
     if(!tryCurrent())tryView={key:context,run:null,operations:{},workflow:null,problem:null,error:'',errorRun:'',readError:'',loading:true};
     const read=async()=>{const value=await callbacks.tryRead(tryBody());if(value&&current())tryRemember(value.workflow);return value;};
     tryReading++;
@@ -994,7 +997,7 @@ function createWorkDesigner({callbacks}) {
     const origin=tryFocusOrigin();
     if(unsaved()&&(!await command(actions.save,{definition:clone(editor)})||unsaved()))return;
     // Entering again may send a start the server refused once more.
-    if(tryRefused?.key===key())tryRefused=null;
+    if(tryRefused?.key===tryKey())tryRefused=null;
     // What is on screen is not shown meanwhile when a new try is coming: the box of a refusal, or the rows of earlier
     // content after a save from this window (its restart). '받는 중' until the try is read.
     const view=tryCurrent();
@@ -1004,7 +1007,7 @@ function createWorkDesigner({callbacks}) {
   }
   // The launcher's refresh (every 2.5 s while a try job runs, else as usual) re-reads the try on screen.
   function refreshTry(){if(tab==='try'&&canAuthor()&&!tryReading&&!tryWork&&!tryOpening&&!tryLocked())loadTry({open:true});}
-  const tryLocked=()=>Boolean(tryPending&&tryPending.key===key());
+  const tryLocked=()=>Boolean(tryPending&&tryPending.key===tryKey());
   // Where the person is when an action starts. Afterwards the cursor moves only while the try is on screen and the
   // person is still there (or on the control a redraw put in its place), on nothing, or inside the try: what arrives
   // while they are in the chat, on another tab or in another field keeps their place (design mock 21 revision 2).
@@ -1019,7 +1022,7 @@ function createWorkDesigner({callbacks}) {
   // meanwhile. task gets where the action started and gives back where the cursor goes after it, if anywhere.
   async function tryHeld(task){
     if(tryLocked()||tryWork||busy)return false;
-    const hold={key:key()},origin=tryFocusOrigin();tryPending=hold;
+    const hold={key:tryKey()},origin=tryFocusOrigin();tryPending=hold;
     let next=null;
     try{next=await task(origin);}
     finally{if(tryPending===hold){tryPending=null;setBusy(busy);}}
@@ -1048,7 +1051,7 @@ function createWorkDesigner({callbacks}) {
   }
   // The rows of each stage, in order. A job placed outside every stage has no row, as on the work screen.
   function tryGroups(view,data){
-    const run=view.run,definition=run.definition || {},typed=tryValues.get(key()) || {},problems={},failures={},retyped={};
+    const run=view.run,definition=run.definition || {},typed=tryValues.get(tryKey()) || {},problems={},failures={},retyped={};
     for(const node of Object.values(definition.nodes || {})){
       if(node?.type!=='j')continue;
       const saved=run.jobs?.[node.id] || {},attempt=(run.attempts || []).find(item=>item.id===(saved.attempt_id || saved.current_attempt));
@@ -1073,7 +1076,7 @@ function createWorkDesigner({callbacks}) {
   // The row state the work screen keeps in its selection lives here, per try; none of it is saved for the account.
   function trySelection(data,groups){
     const scope=workStageValueScope(data,{factory_id:selection.factory_id});
-    return {factory_id:selection.factory_id || '',stage_evidence:tryOpenRow(groups,data.run),stage_record:tryUI.record,stage_tool:tryUI.tool,stage_attempts:tryUI.attempts,stage_verdict_job:tryUI.menu,stage_values:{[scope]:tryValues.get(key()) || {}},stage_value_errors:{[scope]:tryUI.errors},stage_notes:tryUI.notes};
+    return {factory_id:selection.factory_id || '',stage_evidence:tryOpenRow(groups,data.run),stage_record:tryUI.record,stage_tool:tryUI.tool,stage_attempts:tryUI.attempts,stage_verdict_job:tryUI.menu,stage_values:{[scope]:tryValues.get(tryKey()) || {}},stage_value_errors:{[scope]:tryUI.errors},stage_notes:tryUI.notes};
   }
   function tryState(){const view=tryCurrent();if(!view?.run)return null;const data=tryData(view),groups=tryGroups(view,data);return {view,data,groups,selection:trySelection(data,groups)};}
   const tryRowIn=(now,id)=>now?.groups.flatMap(group=>group.rows).find(row=>row.node.id===id) || null;
@@ -1151,7 +1154,7 @@ function createWorkDesigner({callbacks}) {
     if(tryTake(tryControl('[data-stage-check]',id)))return true;
     if(row.canDecide&&tryTake(tryControl('.ew-vd-confirm-main',id) || tryControl('[data-action="stage_verdict"]',id)))return true;
     if(row.problem&&tryTake(tryControl('[data-author-action="try_refix"]',id)))return true;
-    const typed=tryValues.get(key()) || {},empty=row.canExecute&&workStageAskFields(row.node,now.data.run.definition || {},{startForm:false}).find(field=>{const value=Object.hasOwn(typed,field.id)?typed[field.id]:now.data.run.inputs?.[field.id];return value===undefined||value===null||value==='';});
+    const typed=tryValues.get(tryKey()) || {},empty=row.canExecute&&workStageAskFields(row.node,now.data.run.definition || {},{startForm:false}).find(field=>{const value=Object.hasOwn(typed,field.id)?typed[field.id]:now.data.run.inputs?.[field.id];return value===undefined||value===null||value==='';});
     if(empty){if(now.selection.stage_evidence!==id){tryUI.open=id;paint();}if(tryTake(tryField(id,empty.id)))return true;}
     return tryTake(tryControl('[data-action="stage_execute"]',id));
   }
@@ -1168,16 +1171,16 @@ function createWorkDesigner({callbacks}) {
   function tryCaptureValues(id){
     const panel=tryPanel(id),run=tryCurrent()?.run,node=run?.definition?.nodes?.[id];if(!panel||!node)return true;
     let read={};try{read=workReadInputs(panel);}catch(_){return false;}
-    const kept={...(tryValues.get(key()) || {})},controls=[...panel.querySelectorAll('[data-work-input]')];
+    const kept={...(tryValues.get(tryKey()) || {})},controls=[...panel.querySelectorAll('[data-work-input]')];
     for(const field of workStageAskFields(node,run.definition,{startForm:false})){
       if(!controls.some(item=>item.name===field.id)||controls.some(item=>item.name===field.id&&item.disabled))continue;
       const value=read[field.id];kept[field.id]=value===undefined||value===''||Array.isArray(value)&&!value.length?null:value;
     }
-    tryValues.set(key(),kept);return true;
+    tryValues.set(tryKey(),kept);return true;
   }
   // What is missing or of the wrong kind is said at the field, with the work screen's words.
   function tryCheckValues(row){
-    const run=tryCurrent()?.run,typed=tryValues.get(key()) || {},errors={};
+    const run=tryCurrent()?.run,typed=tryValues.get(tryKey()) || {},errors={};
     for(const field of workStageAskFields(row.node,run?.definition || {},{startForm:false})){
       const value=Object.hasOwn(typed,field.id)?typed[field.id]:run.inputs?.[field.id],empty=value===undefined||value===null||value===''||Array.isArray(value)&&!value.length;
       if(empty){if(field.required)errors[field.id]='값을 넣어 주세요';}
@@ -1186,7 +1189,7 @@ function createWorkDesigner({callbacks}) {
     tryUI.errors=errors;return !Object.keys(errors).length;
   }
   async function trySaveValues(row){
-    const run=tryCurrent()?.run,typed=tryValues.get(key()) || {};if(!run)return false;
+    const run=tryCurrent()?.run,typed=tryValues.get(tryKey()) || {};if(!run)return false;
     const ids=workStageAskFields(row.node,run.definition || {},{startForm:false}).map(field=>field.id).filter(id=>Object.hasOwn(typed,id)&&!workValuesEqual(typed[id]===null?undefined:typed[id],run.inputs?.[id]));
     if(!ids.length)return true;
     const inputs={...(run.inputs || {})};for(const id of ids){if(typed[id]===null)delete inputs[id];else inputs[id]=typed[id];}
@@ -1196,13 +1199,13 @@ function createWorkDesigner({callbacks}) {
   // row, or in the line under its bar; never on the screen's top error line (decision 7).
   async function tryAct(action,body,{operations=false,job=''}={}){
     const view=tryCurrent();if(!view?.run||tryWork||busy)return false;
-    const context=key(),generation=epoch,runId=view.run.id;
+    const context=tryKey(),generation=epoch,runId=view.run.id;
     tryWork={action,job,run:action==='execute_job'?job:''};view.error='';view.errorRun='';
     let failure=null;
     try{await trySend(action,{run_id:runId,expected_revision:view.run.revision,...body},operations);}
     catch(reason){failure=reason;}
     finally{tryWork=null;}
-    if(generation!==epoch||context!==key())return false;
+    if(generation!==epoch||context!==tryKey())return false;
     if(failure)tryFailed(failure,action,job,runId);
     await loadTry({open:failure?.code==='run_not_found'});
     return !failure;
@@ -1328,9 +1331,9 @@ function createWorkDesigner({callbacks}) {
     if(event.type==='change'&&target.matches?.('[data-try-model]')){tryModels.set(key(),String(target.value || ''));paint();return {handled:true,preventDefault:false};}
     if(['input','change'].includes(event.type)&&target.matches?.('[data-work-input]')){
       const id=target.closest?.('[data-stage-values]')?.dataset?.jobId,now=tryState(),row=tryRowIn(now,id);if(!row)return {handled:true,preventDefault:false};
-      const node=row.node,before=tryRetyped(node,row.attempt,now.data.run,tryValues.get(key()) || {});
+      const node=row.node,before=tryRetyped(node,row.attempt,now.data.run,tryValues.get(tryKey()) || {});
       tryCaptureValues(id);
-      let repaint=before!==tryRetyped(node,row.attempt,now.data.run,tryValues.get(key()) || {});
+      let repaint=before!==tryRetyped(node,row.attempt,now.data.run,tryValues.get(tryKey()) || {});
       if(Object.hasOwn(tryUI.errors,target.name)){const errors={...tryUI.errors};delete errors[target.name];tryUI.errors=errors;repaint=true;}
       // The field in use keeps its text and cursor: the repaint patches the row around it.
       if(repaint)paint();
