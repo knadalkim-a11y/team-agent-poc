@@ -1,5 +1,12 @@
 # 현재 작업 상태
 
+## 2026-11-24 · 실행 파라미터와 판정 선택지
+
+- **기준:** 사용자가 승인한 시안 4를 제품에 반영해 관련 [PR #154](https://github.com/knadalkim-a11y/team-agent-poc/pull/154)에 추가한다. [시안과 구현 범위](mockups/ees-work/TASK.md#procedure-execution-parameters-20261124)
+- **사내 설치본:** 사용자 보고 기준 `e49460569155`.
+- **로컬 검수:** 작성·실행 관련 회귀 확인과 남은 브라우저 검수 범위는 [검수 기록](../evals/figma-product-parity-20261111.md#procedure-execution-parameters-verification-20261124)을 참고한다.
+- **다음 하나:** PR에서 작성·실행 회귀 검사 결과를 확인한다.
+
 ## 2026-11-24 · 업무 절차 편집 진입 개선
 
 - **기준:** 사용자가 시안 2를 지정하고 PR 생성을 요청했다. [시안·구현 범위](mockups/ees-work/TASK.md#unified-procedure-editor-20261124)

@@ -31,7 +31,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(self.text('.ew-author-definition-head h2'), item['name'])
         self.assertEqual(self.read('#ew-publication-state', 'value'), 'unpublished')
         self.assertEqual(self.browser.evaluate("Array.from(document.querySelectorAll('.ew-author-tabs [role=tab]'), e=>e.textContent.trim())"),
-                         ['업무 내용', '판정 단어', '게시 기록'])
+                         ['업무 내용', '게시 기록'])
         self.screenshot('parity-b2-ems-procedure-1920')
 
     def save_publication(self, state='published'):
@@ -158,73 +158,47 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait('!document.querySelector(' + json.dumps('[data-action=workflow][data-workflow-id="' + key + '"]') + ')')
         self.screenshot('procedure-manual-unpublication')
 
-    def test_authoring12_empty_rules_spacing_and_wrapped_guidance(self):
-        """Figma 1902:3197 text/divider positions, without overlapping hit areas."""
+    def test_authoring_judgments_and_policies_remain_accessible_without_a_top_level_tab(self):
         self.open_initialized_author_list()
-        key = self.author(name='판정 규칙 간격 검증', jobs=1)
+        key = self.author(name='작업별 판정 선택지 검증', jobs=1)
+        record = self.state(workflow_id=key)['workflow']
+        definition = deepcopy(record['draft'])
+        definition['nodes']['job-0']['result_block'] = 'item_verdict'
+        self.command('save_draft', workflow_id=key, expected_revision=record['revision'], definition=definition)
         self.refresh()
         self.click('[data-author-action=open][data-id="' + key + '"]')
         self.wait("window.__eesNativeWorkV1.captureReference().workflow_id === " + json.dumps(key))
         original = deepcopy(self.state(workflow_id=key)['workflow'])
         writes = len(self.server.workspace_commands)
-        observations = []
         for width in (1366, 480, 360):
             self.authoring_viewport(width, 768, overlay=width <= 480)
-            self.click('[data-author-action=tab][data-tab=rules]')
-            self.wait("document.querySelector('.ew-author-rule-card>.ew-author-empty')")
-            directory = self.screenshot('a12-rules-empty-' + str(width))
-            geometry = self.browser.evaluate("""(() => {
-                const card=document.querySelector('.ew-author-rule-card'),
-                    title=card.querySelector('h3').getBoundingClientRect(),
-                    guidance=card.querySelector('.ew-author-empty p:last-child'),
-                    link=card.querySelector('.ew-author-empty+.ew-author-link'),
-                    policy=document.querySelector('.ew-author-rule-policy'),
-                    text=guidance.getBoundingClientRect(),button=link.getBoundingClientRect(),
-                    style=getComputedStyle(link),range=document.createRange(),
-                    scroll=document.querySelector('.ew-author-scroll');
-                range.selectNodeContents(guidance);
-                const lines=[...range.getClientRects()];
-                return {
-                    panelWidth:document.querySelector('[data-ees-work-surface]').getBoundingClientRect().width,
-                    linkTextTop:button.top+parseFloat(style.borderTopWidth)+parseFloat(style.paddingTop)-title.top,
-                    policyTop:policy.getBoundingClientRect().top-title.top,
-                    linkHeight:button.height,guidanceHeight:text.height,guidanceLine:parseFloat(getComputedStyle(guidance).lineHeight) || parseFloat(getComputedStyle(guidance).fontSize),
-                    lines:new Set(lines.map(line=>Math.round(line.top))).size,
-                    overlap:text.bottom-button.top,
-                    clipped:lines.some(r=>r.bottom>text.bottom+1||r.right>text.right+1),
-                    overflow:scroll.scrollWidth-scroll.clientWidth,
-                    policyIcon:getComputedStyle(policy.querySelector('summary'),'::before').backgroundImage
-                };
-            })()""")
-            observations.append({'width': width, **geometry})
-            (directory / 'a12-rules-empty-geometry.json').write_text(
-                json.dumps(observations, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-            self.assertLessEqual(geometry['overlap'], .5, geometry)
-            self.assertFalse(geometry['clipped'], geometry)
-            self.assertLessEqual(geometry['overflow'], 1, geometry)
-            self.assertGreaterEqual(geometry['linkHeight'], 34, geometry)
-            self.assertGreaterEqual(geometry['lines'], 1, geometry)
-            self.assertGreaterEqual(geometry['guidanceHeight'], geometry['guidanceLine'] * geometry['lines'] - 1, geometry)
-            self.assertIn('/_ees14/v4/f0554.svg', geometry['policyIcon'])
-            if width == 1366:
-                self.assertAlmostEqual(geometry['panelWidth'], 830, delta=1, msg=geometry)
-                self.assertGreater(geometry['linkTextTop'], 0, geometry)
-                self.assertGreater(geometry['policyTop'], geometry['linkTextTop'], geometry)
-            self.click('.ew-author-rule-policy>summary')
-            self.wait("document.querySelector('.ew-author-rule-policy').open")
-            self.click('.ew-author-rule-policy>summary')
-            self.click('.ew-author-rule-card>.ew-author-link')
-            self.wait("document.querySelector('.ew-work-content')")
-            stored = self.state(workflow_id=key)['workflow']
-            commands = self.server.workspace_commands[writes:]
-            observations[-1].update(workflowUnchanged=stored == original,
-                                    workspaceActions=[body.get('action') for body in commands])
-            (directory / 'a12-rules-empty-geometry.json').write_text(
-                json.dumps(observations, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-            self.assertEqual(stored, original)
-            # Opening a workflow legitimately remembers its private selection
-            # through debounced save_ui; shared workflow/run writes are forbidden.
-            self.assertEqual([body for body in commands if body.get('action') != 'save_ui'], [])
+            self.assertEqual(self.browser.evaluate(
+                "[...document.querySelectorAll('.ew-author-tabs > button')].map(button=>button.dataset.tab)"),
+                ['content', 'history'])
+            self.open_author_job_ui('job-0')
+            choice = '[data-author-action=judgment_choices][data-id=job-0]'
+            self.click(choice)
+            self.wait("document.activeElement?.id === 'ew-author-judgments-title'")
+            self.assertEqual(self.text('#ew-author-judgments-title'), '판정 선택지')
+            self.assertFalse(self.read('#ew-author-node', 'isConnected'))
+            self.assertGreaterEqual(self.browser.evaluate(
+                "document.querySelector('[data-author-action=judgment_add]').getBoundingClientRect().height"), 34)
+            self.assertLessEqual(self.browser.evaluate(
+                'document.querySelector(".ew-author-scroll").scrollWidth - '
+                'document.querySelector(".ew-author-scroll").clientWidth'), 1)
+            self.screenshot('author-judgment-choices-' + str(width))
+            self.click('[data-author-action=judgment_back]')
+            self.wait('document.activeElement?.matches(' + json.dumps(choice) + ')')
+            self.click('[data-author-action=node][data-id=""]')
+            self.click('.ew-procedure-menu > summary')
+            self.click('[data-author-action=policy_settings]')
+            self.wait("document.querySelector('.ew-author-rule-policy')?.open")
+            self.assertEqual(self.text('#ew-author-policies-title'), '업무 완료·송부 정책')
+            self.click('[data-author-action=policy_back]')
+            self.wait("document.activeElement?.matches('.ew-procedure-menu > summary')")
+        self.assertEqual(self.state(workflow_id=key)['workflow'], original)
+        self.assertEqual([body for body in self.server.workspace_commands[writes:]
+                          if body.get('action') != 'save_ui'], [])
 
     def test_c66_job_methods_arguments_d5_and_read_only_at_480_and_1366(self):
         """C66 uses real controls/SQLite; installed Confluence metadata is synthetic."""
@@ -884,23 +858,25 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-action="mode"][data-mode="author"]')
         self.click('[data-author-action=open][data-id="' + identifier + '"]')
         self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
-        # 2026-11-02 removes the execution-mode tab; start inputs keep the same
-        # cancel/save contract in the content tab.
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-author-action=tab][data-tab=schedule]')"))
-        self.click('[data-author-action=start_input_add]')
+        self.click('.ew-procedure-menu > summary')
+        self.click('[data-author-action=execution_parameters]')
+        self.click('#ees-work-dialog [data-execution-parameter-action=add]')
         self.fill('#ees-work-dialog [name=name]', '취소할 입력')
         self.key('Escape', 27)
         self.assertFalse(any(node.get('inputs') for node in self.state(workflow_id=identifier)['workflow']['draft']['nodes'].values()))
         self.browser.call('Emulation.setDeviceMetricsOverride', {'width': 540, 'height': 768, 'deviceScaleFactor': 1, 'mobile': False})
-        self.click('[data-author-action=start_input_add]')
+        self.wait("document.querySelector('#ees-work-dialog [data-execution-parameter-action=add]')")
+        self.click('#ees-work-dialog [data-execution-parameter-action=add]')
         self.assertEqual(self.browser.evaluate('document.activeElement.name'), 'name')
         self.fill('#ees-work-dialog [name=name]', '설치 경로')
         self.fill('#ees-work-dialog [name=description]', '실행자가 실제 설치할 폴더를 입력합니다.')
-        self.click('#ees-work-dialog [name=required]')
-        self.assertIn('실제 값 입력이나 초안 저장은 하지 않습니다', self.text('#ees-work-dialog'))
+        self.assertTrue(self.read('#ees-work-dialog [name=required]', 'checked'))
         self.assertLessEqual(self.browser.evaluate("document.querySelector('#ees-work-dialog').scrollWidth-document.querySelector('#ees-work-dialog').clientWidth"), 1)
         self.screenshot('c44-input-definition-540')
         self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.wait("document.querySelector('#ees-work-dialog [data-execution-parameter-id]')")
+        self.key('Escape', 27)
         self.assertEqual(self.state(workflow_id=identifier)['workflow']['revision'], 1)
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
@@ -1383,7 +1359,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertLess(metrics['purpose']['y'], metrics['steps']['y'])
             self.assertLess(metrics['steps']['y'], metrics['list']['y'])
             self.assertEqual(self.browser.evaluate("document.querySelectorAll('[data-author-action=stage_toggle]').length"), 0)
-            self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim())"), ['업무 내용', '판정 단어', '게시 기록'])
+            self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim())"), ['업무 내용', '게시 기록'])
             self.assertGreaterEqual(metrics['footer']['height'], 44)
             self.assertEqual(len(metrics['footerItems']), 2)
             for item in metrics['footerItems']:
@@ -3607,14 +3583,16 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait('window.__eesNativeWorkV1?.captureReference()?.workflow_id === ' + json.dumps(key))
         self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
         self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim())"),
-                         ['업무 내용', '판정 단어', '게시 기록'])
+                         ['업무 내용', '게시 기록'])
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ew-author-schedule,[data-author-action=run_mode],[data-author-action=schedule_tools]')"))
-        self.assertIn('시작할 때 물어볼 것', self.text('.ew-content-start-inputs'))
-        self.assertGreater(self.browser.evaluate("document.querySelector('.ew-content-start-inputs').getBoundingClientRect().y"),
-                        self.browser.evaluate("document.querySelector('.ew-content-heading').getBoundingClientRect().y"))
-        self.click('[data-author-action=start_input_add]')
+        self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-content-start-inputs')"))
+        self.click('.ew-procedure-menu > summary')
+        self.click('[data-author-action=execution_parameters]')
+        self.click('#ees-work-dialog [data-execution-parameter-action=add]')
         self.fill('#ees-work-dialog [name=name]', '배포일')
         self.click('#ees-work-dialog [data-dialog-confirm]')
+        self.wait("document.querySelector('#ees-work-dialog [data-execution-parameter-id]')")
+        self.key('Escape', 27)
         self.click('[data-author-action="save"]')
         self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
         saved = self.state(workflow_id=key)['workflow']['draft']

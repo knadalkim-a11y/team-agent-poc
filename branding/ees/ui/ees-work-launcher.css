@@ -696,6 +696,14 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-dialog .ew-author-fields>label.ew-author-inline{display:flex;align-items:center;gap:8px;}
 #ees-work-dialog .ew-input-advanced{margin:12px 0;}
 #ees-work-dialog .ew-input-advanced>summary{cursor:pointer;font-weight:500;}
+#ees-work-dialog .ew-execution-parameters{display:grid;gap:12px;justify-items:start;}
+#ees-work-dialog .ew-execution-parameter{display:grid;gap:8px;width:100%;padding-bottom:12px;border-bottom:1px solid var(--ees-line-divider);}
+#ees-work-dialog .ew-execution-parameter .ew-author-heading{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0;}
+#ees-work-dialog .ew-execution-parameter h3{flex:1;min-width:0;margin:0;font-size:14px;overflow-wrap:anywhere;}
+#ees-work-dialog .ew-execution-parameter dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:5px 12px;margin:0;font-size:13px;}
+#ees-work-dialog .ew-execution-parameter dt{font-weight:500;}
+#ees-work-dialog .ew-execution-parameter dd{margin:0;color:var(--ees-text-secondary);overflow-wrap:anywhere;}
+#ees-work-dialog .ew-execution-parameter p{margin:0;font-size:12px;}
 @media(max-width:600px){.ew-author .ew-summary-fields>label{grid-template-columns:minmax(0,1fr);}.ew-summary-actions{flex-wrap:wrap;}}
 .ew-builtin-list{margin-top:26px;}
 .ew-procedure-menu{position:relative;margin-left:auto;}
@@ -1043,6 +1051,9 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-panel.ew-vd .ew-vd-tool-values dt{color:var(--ees-text-tertiary)}
 #ees-work-panel.ew-vd .ew-vd-tool-values dd{margin:0;overflow-wrap:anywhere;color:var(--ees-text-primary)}
 #ees-work-panel.ew-vd .ew-vd-tool-values pre{margin:0;font:inherit;}
+#ees-work-panel .ew-job-given{display:grid;grid-template-columns:minmax(84px,auto) minmax(0,1fr);gap:4px 10px;margin:0;}
+#ees-work-panel .ew-job-given dt,#ees-work-panel .ew-job-given .ew-vd-given{color:var(--ees-text-tertiary);}
+#ees-work-panel .ew-job-given dd{display:flex;flex-wrap:wrap;gap:4px 8px;margin:0;overflow-wrap:anywhere;}
 #ees-work-panel.ew-vd .ew-vd-tool-result{padding-top:10px;border-top:1px solid var(--ees-line-divider)}
 #ees-work-panel.ew-vd .ew-vd-task-result{display:grid;gap:4px;margin:0;padding-top:12px;border-top:1px solid var(--ees-line-divider)}
 #ees-work-panel.ew-vd .ew-vd-task-result b{font-weight:500;color:var(--ees-text-primary)}
@@ -1287,12 +1298,11 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-schedule-stage-deadline>.ew-schedule-offset-fields{margin-top:10px;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-schedule-note{min-height:21px;margin-top:12px;font-size:12px;line-height:18px;font-weight:500;color:var(--ees-text-secondary);}
 #ees-work-designer:not([data-author-tab=tools]) .ew-schedule-section>[data-author-action=start_input_add]{display:block;width:auto;min-height:34px;margin-top:12px;padding:6px;font-size:14px;line-height:22px;font-weight:500;text-align:left;}
-#ees-work-designer:not([data-author-tab=tools]) :is(.ew-start-input-definition,.ew-judgment-definition){min-width:0;margin-top:16px;padding:20px 0;border-top:1px solid var(--ew-line);}
-#ees-work-designer:not([data-author-tab=tools]) .ew-start-input-definition+.ew-start-input-definition,#ees-work-designer:not([data-author-tab=tools]) .ew-judgment-definition+.ew-judgment-definition{margin-top:0;}
-#ees-work-designer:not([data-author-tab=tools]) :is(.ew-start-input-definition,.ew-judgment-definition)>.ew-author-heading{justify-content:space-between;margin:0;}
-#ees-work-designer:not([data-author-tab=tools]) :is(.ew-start-input-definition,.ew-judgment-definition) h4{margin:0;font-size:13px;line-height:22.1px;font-weight:500;}
-#ees-work-designer:not([data-author-tab=tools]) :is(.ew-start-input-definition,.ew-judgment-definition)>.ew-author-fields{margin:18px 0 0;}
-#ees-work-designer:not([data-author-tab=tools]) .ew-start-input-definition .ew-author-inline{font-weight:400;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-judgment-definition{min-width:0;margin-top:16px;padding:20px 0;border-top:1px solid var(--ew-line);}
+#ees-work-designer:not([data-author-tab=tools]) .ew-judgment-definition+.ew-judgment-definition{margin-top:0;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-judgment-definition>.ew-author-heading{justify-content:space-between;margin:0;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-judgment-definition h4{margin:0;font-size:13px;line-height:22.1px;font-weight:500;}
+#ees-work-designer:not([data-author-tab=tools]) .ew-judgment-definition>.ew-author-fields{margin:18px 0 0;}
 #ees-work-designer:not([data-author-tab=tools]) .ew-schedule-section>.ew-author-empty{min-height:21px;margin:0;padding:0;text-align:left;font-size:12px;line-height:18px;font-weight:500;color:var(--ees-text-secondary);}
 #ees-work-designer:not([data-author-tab=tools]) .ew-author-rule-card{display:block;margin:0;padding:16px 0 0;border:0;border-radius:0;background:var(--ees-surface-sidebar);}
 #ees-work-designer:not([data-author-tab=tools]) .ew-author-rule-card h3{margin:0 0 12px;font-size:15px;line-height:22px;font-weight:500;}
@@ -2649,12 +2659,6 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-add-row > .ew-inline-error {flex-basis:100%;margin:0;}
 [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-stage-body > .ew-add-row {margin:4px 0 4px 10px;}
 /* Start questions: the heading, the count and the add control on one row. */
-[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-content-start-inputs {margin-top:24px;padding-top:16px;border-top:1px solid var(--ees-line-divider);}
-[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-content-start-inputs > .ew-start-row {justify-content:flex-start;gap:8px;margin:0;}
-[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-content-start-inputs > .ew-start-row > h3 {font-size:14px;line-height:20px;font-weight:700;}
-[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-content-start-inputs > .ew-start-row > small {margin-left:0;font-weight:400;}
-[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-content-start-inputs > .ew-start-row > .ew-author-link {margin-left:8px;}
-[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-content-start-inputs > .ew-start-input-definition:first-of-type {margin-top:12px;}
 /* A human job: the task on the left, how it is confirmed on the right. The order is unchanged. */
 [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-job-col {display:grid;gap:18px;align-content:start;min-width:0;}
 [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-job-col > p {margin:0;color:var(--ees-text-secondary);font-size:12px;line-height:18px;overflow-wrap:anywhere;}
@@ -2679,6 +2683,17 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 [data-ees-work-surface] #ees-work-panel.ew-vd .ew-overview-head .ew-stage-run-button {width:108px;height:34px;}
 [data-ees-work-surface] #ees-work-panel.ew-vd .ew-overview-head .ew-stage-run-button:not(:disabled) {background:var(--ees-brand-solid);color:var(--ees-text-inverse);}
 [data-ees-work-surface] #ees-work-panel.ew-vd .ew-overview-head .ew-stage-run-button:not(:disabled):hover {background:var(--ees-brand-hover);}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-overview-start-form {
+  display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 12px;margin:12px 0 16px;padding:12px 16px;
+  border:1px solid var(--ees-line-divider);border-radius:6px;background:var(--ees-surface-default);
+}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-overview-start-form > .ew-input-row {
+  display:grid;gap:4px;flex:0 1 220px;min-width:0;padding:0;border:0;
+}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-overview-start-form > .ew-input-row > span:first-child {
+  width:auto;margin:0;padding:0;color:var(--ees-text-primary);font-weight:500;
+}
+[data-ees-work-surface] #ees-work-panel.ew-vd .ew-overview-start-actions {display:flex;flex-wrap:wrap;gap:8px;}
 [data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-confirm {display:inline-flex;align-items:stretch;flex:none;border:1px solid var(--ees-line-control);border-radius:6px;overflow:hidden;}
 [data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-confirm > button {min-height:30px;padding:0 12px;border:0;border-radius:0;background:var(--ees-surface-default);box-shadow:none;font-size:13px;line-height:20px;font-weight:500;color:var(--ees-text-primary);cursor:pointer;}
 [data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-confirm > button + button {display:inline-flex;align-items:center;padding:0 8px;border-left:1px solid var(--ees-line-control);}

@@ -1048,11 +1048,13 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
             for _ in range(2):
                 selected = (await self.state('admin', **query, factory_id=site))['workflow']
                 self.assertEqual(selected['factory_preview'], {'factory_id': site, 'revision': saved['revision'],
-                                                              'conditions': {root: True, 't': stage, 'j': job}})
+                                                              'conditions': {root: True, 't': stage, 'j': job},
+                                                              'published_conditions': {root: True, 't': True, 'j': True}})
         # Viewer sees only the published version, which predates these two predicates.
         visible = (await self.state('c', **query, factory_id='site-a'))['workflow']
         self.assertNotIn('draft', visible)
         self.assertTrue(all(visible['factory_preview']['conditions'].values()))
+        self.assertEqual(visible['factory_preview']['conditions'], visible['factory_preview']['published_conditions'])
         denied = await self.service.workspace_state(self.users['c'], **query, factory_id='site-b')
         self.assertFalse(denied['ok'])
         self.assertNotIn('factory_preview', (await self.state('admin', **query))['workflow'])

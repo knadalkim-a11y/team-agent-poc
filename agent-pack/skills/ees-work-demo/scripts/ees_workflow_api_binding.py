@@ -2,15 +2,45 @@
 import json
 from uuid import uuid4
 
+from .ees_workflow_api_http import _matches
 from .ees_workflow_authoring import WorkflowError, _fail, _now
 from .ees_workflow_definition import _dump
+
+
+INPUT_FIELD_TYPES = {
+    'string': ('text', 'single', 'datetime'),
+    'number': ('number',),
+    'integer': ('number',),
+    'array': ('list', 'multi'),
+    'boolean': ('boolean',),
+    'object': ('json_object',),
+}
 
 
 def _tokens(value, limit=240):
     return isinstance(value, str) and 0 < len(value) <= limit
 
 
-def binding_shape(node, required_jobs):
+def procedure_run_inputs(definition):
+    roots = [node for node in definition['nodes'].values()
+             if isinstance(node, dict) and node.get('type') == 'p' and node.get('parent') is None]
+    fields = roots[0].get('inputs', []) if len(roots) == 1 else []
+    if not isinstance(fields, list) or len(fields) > 100:
+        return {}
+    return {field['id']: field for field in fields
+            if isinstance(field, dict) and isinstance(field.get('id'), str) and field.get('scope', 'run') == 'run'}
+
+
+def binding_run_input_ids(node):
+    binding = node.get('api_binding')
+    sources = binding.get('inputs') if isinstance(binding, dict) else None
+    if not isinstance(sources, dict):
+        return set()
+    return {source['run_input'] for source in sources.values()
+            if isinstance(source, dict) and isinstance(source.get('run_input'), str)}
+
+
+def binding_shape(node, required_jobs, run_inputs=None):
     binding = node.get('api_binding')
     if (node.get('type') != 'j' or node.get('mode') != 'tool'
             or any(node.get(k) for k in ('tool_contract_id', 'tool_contract_revision', 'tool_reference',
@@ -33,6 +63,10 @@ def binding_shape(node, required_jobs):
             continue
         if 'input' in source and isinstance(source['input'], str) and source['input'] in local:
             continue
+        if 'run_input' in source:
+            if isinstance(source['run_input'], str) and source['run_input'] in (run_inputs or {}):
+                continue
+            return '연결된 실행 파라미터를 절차에서 선택해 주세요.'
         if 'context' in source and source['context'] in ('factory_id', 'system_id'):
             continue
         result = source.get('result')
@@ -72,17 +106,19 @@ def retired_binding_errors(definition):
     return errors
 
 
-def binding_errors(service, db, groups, definition, *, previous=None, for_new=False, overrides=None):
+def binding_errors(service, db, groups, definition, *, previous=None, for_new=False, overrides=None,
+                   run_values=None, condition_results=None):
     """Resolve immutable contracts and current ACLs in the save/start transaction."""
     nodes = definition['nodes']
     errors = retired_binding_errors(definition) if getattr(service, 'confluence_guide', False) else []
     catalog = getattr(service, 'api_catalog', None)
+    run_inputs = procedure_run_inputs(definition)
     ops = {}
     for job_id, node in nodes.items():
         if 'api_binding' not in node:
             continue
         b = node['api_binding']
-        message = binding_shape(node, service._work_prerequisite_jobs(definition, job_id))
+        message = binding_shape(node, service._work_prerequisite_jobs(definition, job_id), run_inputs)
         if message:
             errors.append(f'{job_id}: {message}')
             continue
@@ -123,8 +159,16 @@ def binding_errors(service, db, groups, definition, *, previous=None, for_new=Fa
                 ok = expected == 'string'
             elif 'input' in source:
                 declared = local[source['input']]['type']
-                ok = declared in {'string': ('text', 'single','datetime'), 'number':('number',),
-                                  'integer':('number',), 'array':('list','multi'), 'boolean':('boolean',), 'object':('json_object',)}.get(expected, ())
+                ok = declared in INPUT_FIELD_TYPES.get(expected, ())
+            elif 'run_input' in source:
+                param_id = source['run_input']
+                declared = run_inputs[param_id]
+                if f.get('required') and not declared.get('required'):
+                    errors.append(f"{node['name']} · {f.get('label') or f['name']}: 필수 API 입력에 연결할 실행 파라미터를 필수로 지정해 주세요.")
+                ok = declared.get('type') in INPUT_FIELD_TYPES.get(expected, ())
+                if (ok and run_values is not None and (condition_results or {}).get(job_id) is not False
+                        and run_values.get(param_id) is not None and not _matches(run_values[param_id], expected)):
+                    errors.append(f"{declared['name']}: API의 {expected} 입력 형식에 맞는 값을 입력해 주세요.")
             else:
                 ref = source['result']
                 upstream = ops.get(ref['job_id'])

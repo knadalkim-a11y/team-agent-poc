@@ -408,16 +408,37 @@ function workChecklistHTML(items,saved={},human=false){
 // What is asked when a round starts: the questions written for the whole procedure or a stage, and a job's value
 // that cannot be drawn under its row. A job asks for its plain values under its row on the stage screen
 // (2026-11-19), so those are not asked here.
-function workRunStartFields(definition={}){
+function workProcedureRunInputs(definition={}){
+  const root=Object.values(definition.nodes || {}).find(node=>node?.type==='p');
+  return (Array.isArray(root?.inputs)?root.inputs:[]).filter(field=>field?.id&&(field.scope || 'run')==='run');
+}
+function workPublishedFactoryConditions(data,selection){
+  const preview=data.workflow?.factory_preview;
+  return preview?.factory_id===selection.factory_id&&preview?.revision===data.workflow?.revision?preview?.published_conditions:undefined;
+}
+function workRunParameterFields(definition={},conditions={}){
+  const used=new Set(Object.values(definition.nodes || {}).filter(node=>node?.type==='j'&&conditions[node.id]!==false)
+    .flatMap(node=>Object.values(node.api_binding?.inputs || {}).map(source=>source?.run_input)));
+  return workProcedureRunInputs(definition).filter(field=>used.has(field.id));
+}
+function workRunStartFields(definition={},conditions){
   // Only a job inside a stage has a row to ask under; a job placed directly under the procedure keeps the form.
   const nodes=Object.values(definition.nodes || {}),staged=node=>workUI.lineage(node.id,definition).some(parent=>parent.type==='t');
   const own=new Set(nodes.filter(node=>node.type==='j'&&staged(node)).flatMap(node=>workStageAskFields(node,definition).map(field=>field.id)));
-  return [...new Map(nodes.flatMap(node=>Array.isArray(node.inputs)?node.inputs:[]).filter(field=>field&&field.id&&(field.scope || 'run')==='run'&&!own.has(field.id)).map(field=>[field.id,field])).values()];
+  const linked=new Set(workRunParameterFields(definition,conditions).map(field=>field.id));
+  return [...new Map(nodes.flatMap(node=>Array.isArray(node.inputs)?node.inputs:[]).filter(field=>field&&field.id&&(field.scope || 'run')==='run'&&!own.has(field.id)&&(!field.execution_parameter||linked.has(field.id))).map(field=>[field.id,field])).values()];
 }
-function workRunStartFieldsHTML(data,selection,definition){
-  const {esc}=workUI,workflow=data.workflow || {},draft=selection.start_inputs?.[workflow.id] || {},captured=Object.hasOwn(selection.start_inputs || {},workflow.id);
-  const fields=workRunStartFields(definition);
-  return `<form id="ees-work-start"><p class="ew-muted">적용 대상 · ${esc(workOperationTarget(data,selection))}</p><p class="ew-muted">이 공장·시스템에 접근할 수 있는 사람과 진행 상태를 함께 봅니다. 개인 대화는 공유하지 않습니다.</p>${fields.map(field=>workInputHTML(field,!captured&&field.authored_schema&&Object.hasOwn(field,'default')?field.default:draft[field.id],{prefix:'start',people:data.people || []})).join('')}</form>`;
+function workRunStartFieldsHTML(data,selection,definition,{inline=false}={}){
+  const {esc}=workUI,workflow=data.workflow || {},draft=inline?selection.inline_start_values:selection.start_inputs?.[workflow.id];
+  const fields=workRunStartFields(definition,workPublishedFactoryConditions(data,selection));
+  const common=inline?null:new Set(workRunParameterFields(definition).map(field=>field.id));
+  const context=inline?'':`<p class="ew-muted">적용 대상 · ${esc(workOperationTarget(data,selection))}</p><p class="ew-muted">이 공장·시스템에 접근할 수 있는 사람과 진행 상태를 함께 봅니다. 개인 대화는 공유하지 않습니다.</p>`;
+  const controls=fields.map(field=>{
+    const saved=common?.has(field.id)?null:draft;
+    return workInputHTML(field,!saved&&field.authored_schema&&Object.hasOwn(field,'default')?field.default:saved?.[field.id],{prefix:'start',people:data.people || []});
+  }).join('');
+  const buttons=inline?'<div class="ew-overview-start-actions"><button type="submit" class="ew-primary" data-mutation>시작</button><button type="button" class="ew-secondary" data-action="overview_start_cancel">취소</button></div>':'';
+  return `<form id="ees-work-start"${inline?' class="ew-overview-start-form" data-inline-start':''}>${context}${controls}${buttons}</form>`;
 }
 
 function workValuesEqual(left,right){
@@ -704,14 +725,14 @@ function workPatchContent(host,html){
     for(const attr of [...wanted.attributes])if(current.getAttribute(attr.name)!==attr.value)current.setAttribute(attr.name,attr.value);
     if(current.tagName==='TEXTAREA'){
       // As for an input below: a list typed under a job row keeps its text (a line just begun is not yet a value).
-      if(current.value!==wanted.value&&!(current===document.activeElement&&current.closest('[data-stage-values]')))current.value=wanted.value;
+      if(current.value!==wanted.value&&!(current===document.activeElement&&current.closest('[data-stage-values],[data-inline-start]')))current.value=wanted.value;
       if(current.defaultValue!==wanted.defaultValue)current.defaultValue=wanted.defaultValue;
     }else{
       children(current,wanted);
       if(current.tagName==='INPUT'){
         // A value field under a job row keeps its text while it is typed in: what is kept for it is the value read
         // from it, which for a number being typed ("3.") is not yet its text.
-        const typing=current===document.activeElement&&current.closest('[data-stage-values]');
+        const typing=current===document.activeElement&&current.closest('[data-stage-values],[data-inline-start]');
         if(current.type!=='file'&&!typing&&current.value!==wanted.value)current.value=wanted.value;
         if(current.checked!==wanted.checked)current.checked=wanted.checked;
       }else if(current.tagName==='SELECT'){
@@ -879,9 +900,25 @@ function workStageAskFields(node={},definition={}){
   if(!workStageRowCarriesValues(node))return [];
   return (Array.isArray(node.inputs)?node.inputs:[]).filter(field=>workStageAsksInRow(field)&&!atStart.has(field.id));
 }
-function workStageGivenValues(node={},definition={},run={}){
+function workStageGivenValues(node={},definition={},run={},data={},selection={}){
   const given=[];
   for(const [name,source] of Object.entries(node.api_binding?.inputs || {})){
+    if(source?.run_input){
+      const field=workProcedureRunInputs(definition).find(item=>item.id===source.run_input);
+      if(field)given.push({name,label:field.name || name,source:'시작할 때 입력',ready:true,value:workInputProposalValue(field,run.inputs?.[field.id],{people:data.people || []})});
+      continue;
+    }
+    if(source?.context==='factory_id'){
+      const id=definition.execution_scope==='system'?'':run.factory_id ?? selection.factory_id;
+      const value=(data.factories || []).find(item=>item.id===id&&(!item.system_id||item.system_id===(run.system_id||selection.system_id||data.workflow?.system_id)))?.name || run.factory_name || id || '';
+      if(id)given.push({name,label:'공장',source:'현재 업무의 공장',ready:true,value});
+      continue;
+    }
+    if(source?.context==='system_id'){
+      const value=run.system_id || selection.system_id || data.workflow?.system_id || '';
+      if(value)given.push({name,label:'시스템',source:'현재 업무의 시스템',ready:true,value});
+      continue;
+    }
     const ref=source?.result,from=ref&&definition.nodes?.[ref.job_id];if(!from)continue;
     const saved=run.jobs?.[from.id] || {},ready=saved.status==='completed',items=(Array.isArray(saved.result?.items)?saved.result.items:[]).filter(item=>item&&item.selected!==false);
     const values=items.map(item=>item?.row?.[ref.field]).filter(value=>value!==undefined&&value!==null&&typeof value!=='object');
@@ -905,14 +942,18 @@ function workStageResultView(node={},saved={}){
   const labels=result.field_labels || {},paths=(Array.isArray(node.api_binding.outputs)?node.api_binding.outputs:Object.keys(labels)).filter(path=>typeof path==='string');
   return {items:result.items,fields:paths.map(path=>({path,label:labels[path] || path}))};
 }
-function workStageHasValues(row,data){
+function workStageHasValues(row,data,selection){
   const {node,saved}=row;
   const definition=workOperationDefinition(data);
-  return workStageAskFields(node,definition).length>0||workStageGivenValues(node,definition,data.run || {}).length>0||Boolean(data.run&&workStageResultView(node,saved));
+  return workStageAskFields(node,definition).length>0||workStageGivenValues(node,definition,data.run || {},data,selection).length>0||Boolean(data.run&&workStageResultView(node,saved));
+}
+function workGivenValueRowsHTML(given){
+  const {esc}=workUI;
+  return given.map(value=>`<dt>${esc(value.label)}</dt><dd>${value.value!==''?`<span>${esc(value.value)}</span>`:''}<span class="ew-vd-given">${esc(value.source || (value.from || '앞 작업')+'에서')}</span></dd>`).join('');
 }
 function workStageJobValuesHTML(row,data,selection){
   const {esc,time}=workUI,{node,saved,attempt}=row,run=data.run || {},id=node.id,definition=workOperationDefinition(data);
-  const asks=workStageAskFields(node,definition),given=workStageGivenValues(node,definition,run),result=data.run?workStageResultView(node,saved):null;
+  const asks=workStageAskFields(node,definition),given=workStageGivenValues(node,definition,run,data,selection),result=data.run?workStageResultView(node,saved):null;
   if(!asks.length&&!given.length&&!result)return '';
   const errors=selection.stage_value_errors?.[workStageValueScope(data,selection)] || {};
   // Before the run a person's job is not started from its row, so its fields wait for 시작 as its answer does.
@@ -927,7 +968,7 @@ function workStageJobValuesHTML(row,data,selection){
     const value=workStageValue(data,selection,field),error=errors[field.id] || '',control=workInputHTML(field,value,{disabled:locked,prefix:'stage-'+id,people:data.people || [],bare:true,invalid:error});
     return `<dt><label for="ew-stage-${esc(id)}-${esc(field.id)}">${esc(field.name || field.id)}</label></dt><dd>${control}${error?`<small class="ew-vd-ask-error" id="ew-stage-${esc(id)}-${esc(field.id)}-error" role="alert">${esc(error)}</small>`:''}</dd>`;
   }).join('');
-  const givenRows=given.map(value=>`<dt>${esc(value.label)}</dt><dd>${value.value?`<span>${esc(value.value)}</span>`:''}<span class="ew-vd-given">${esc(value.from)}에서</span></dd>`).join('');
+  const givenRows=workGivenValueRowsHTML(given);
   const asked=asks.length||given.length?`<section><h4>입력</h4><dl class="ew-vd-tool-values ew-vd-ask-values">${askRows}${givenRows}</dl></section>`:'';
   let came='';
   if(result){
@@ -1056,7 +1097,7 @@ function workStageRowHTML(row,data,selection,number){
   // A job with values opens under its row by its name: what it asks for and what came back. The record the product
   // keeps there (판정 근거 · 판정 기록) is added by its own control, as before. A job without values is as it was:
   // its name goes to the job screen and its record opens by that control.
-  const hasValues=workStageHasValues(row,data),record=opened&&(!hasValues||selection.stage_record===id);
+  const hasValues=workStageHasValues(row,data,selection),record=opened&&(!hasValues||selection.stage_record===id);
   const hasEvidence=!workHumanCheckItems(node).length&&((!node.mode||node.mode==='human')||row.attempts.length),evidenceLabel=(!node.mode||node.mode==='human')?'판정 기록':'판정 근거',evidence=hasEvidence?`<button type="button" class="ew-vd-evidence-toggle" data-action="stage_evidence" data-job-id="${esc(id)}" aria-expanded="${record}"${record?` aria-controls="stage-evidence-${esc(id)}"`:''} aria-label="${esc(node.name+' '+evidenceLabel+' '+(record?'접기':'펼치기'))}">${evidenceLabel}${icon('f17e6')}</button>`:'';
   const values=opened&&hasValues?workStageJobValuesHTML(row,data,selection):'';
   const description=node.description || node.instructions || '',actor=automatic?'자동 판정':'직접 판정';
@@ -1151,8 +1192,10 @@ function workOperationOverviewHTML(data,selection){
     return `<button type="button" class="ew-operation-stage" data-action="stage_open" data-node-id="${esc(stage.id)}"><span><strong>${esc(stage.name)}</strong><small>작업 ${rows.length}개${status?' · '+esc(status):''}</small></span>${icon('69549')}</button>`;
   }).join('');
   const last=!data.run?workLastFinishedRun(data,selection):null;
-  const go=workRunFinishable(data)?workFinishButtonHTML:!data.run&&data.workflow?.published_version&&stages.length?`<button type="button" class="ew-secondary ew-stage-run-button" data-action="overview_start" aria-label="${esc((definition.name || data.workflow?.name || '업무')+' 시작')}">${workStageActionIcons.play}<span>시작</span></button>`:'';
-  return `<section class="ew-operation-overview"><div class="ew-overview-head"><div><h2>${esc(definition.name || data.workflow?.name || '업무')}</h2>${definition.description?`<p class="ew-overview-purpose">${esc(definition.description)}</p>`:''}${last?`<p class="ew-last-run"><i aria-hidden="true"></i>지난 회차 · ${esc(workUI.time(last.closed_at))} ${last.status==='cancelled'?'취소':'끝남'}</p>`:''}</div>${go}</div><dl class="ew-operation-context">${schedules.length?`<dt>자동 실행</dt><dd>이전에 맡긴 예약 ${schedules.length}개</dd>`:''}<dt>적용 대상</dt><dd>${esc(workOperationTarget(data,selection))}</dd></dl><section class="ew-operation-stages"><h3>업무 단계</h3>${summaries || `<p class="ew-empty">${esc(empty)}</p>`}</section></section>`;
+  const startable=!data.run&&data.workflow?.published_version&&stages.length;
+  const starting=startable&&selection.inline_start&&workRunParameterFields(definition,workPublishedFactoryConditions(data,selection)).length;
+  const go=workRunFinishable(data)?workFinishButtonHTML:startable&&!starting?`<button type="button" class="ew-secondary ew-stage-run-button" data-action="overview_start" aria-label="${esc((definition.name || data.workflow?.name || '업무')+' 시작')}">${workStageActionIcons.play}<span>시작</span></button>`:'';
+  return `<section class="ew-operation-overview"><div class="ew-overview-head"><div><h2>${esc(definition.name || data.workflow?.name || '업무')}</h2>${definition.description?`<p class="ew-overview-purpose">${esc(definition.description)}</p>`:''}${last?`<p class="ew-last-run"><i aria-hidden="true"></i>지난 회차 · ${esc(workUI.time(last.closed_at))} ${last.status==='cancelled'?'취소':'끝남'}</p>`:''}</div>${go}</div><dl class="ew-operation-context">${schedules.length?`<dt>자동 실행</dt><dd>이전에 맡긴 예약 ${schedules.length}개</dd>`:''}<dt>적용 대상</dt><dd>${esc(workOperationTarget(data,selection))}</dd></dl>${starting?workRunStartFieldsHTML(data,selection,definition,{inline:true}):''}<section class="ew-operation-stages"><h3>업무 단계</h3>${summaries || `<p class="ew-empty">${esc(empty)}</p>`}</section></section>`;
 }
 
 function createWorkView({callbacks}){
@@ -1213,11 +1256,13 @@ function createWorkView({callbacks}){
     const modelControls=node.mode==='ai'?executionModels():'';
     const proposal=!settings?data.input_proposal:null,applied=!settings?data.input_proposal_applied:null;
     const canEditInputs=!readonly&&!groupDenied&&(settings?saved.can_manage_settings!==false:saved.can_execute!==false),appliedUnsaved=Boolean(applied&&draft.dirty);
+    const given=settings?[]:workStageGivenValues(node,definition(),run,data,s).filter(value=>value.source);
+    const connectedInputs=given.length?`<section><h3>연결된 입력</h3><dl class="ew-job-given">${workGivenValueRowsHTML(given)}</dl></section>`:'';
     const inputs=visibleFields.length?`<section><h3>${settings?'업무 설정':'이번 진행 건 입력'} <small>${settings?'다음 실행에도 계속 사용':'이번 실행에 사용'}</small>${proposal?'<span class="ew-input-proposal-status">업무 도우미 제안 · 반영 전</span>':appliedUnsaved?'<span class="ew-input-proposal-applied" role="status">저장 전</span>':''}</h3><form id="ees-work-inputs" data-settings="${settings}" data-revision="${draft.revision}">${visibleFields.map(field=>workInputHTML(field,field.constant?field.value:draft.inputs[field.id],{disabled:field.constant||readonly||groupDenied||(settings?saved.can_manage_settings===false:saved.can_execute===false),prefix:settings?'settings':'run',people:data.people || [],lookup:data.input_options?.[field.id],proposal:proposal&&Object.hasOwn(proposal.values,field.id)?{value:proposal.values[field.id]}:null,applied:Boolean(applied&&Object.hasOwn(applied.values,field.id)&&workValuesEqual(applied.values[field.id],draft.inputs[field.id]))})).join('')}${draft.conflict?'<p class="ew-warning" role="alert">다른 사람이 값을 변경했습니다. 작성 중인 값은 보존했습니다. 최신 값과 비교해 다시 입력해 주세요.</p>'+button('최신 값으로 돌아가기','discard_inputs'):''}${canEditInputs&&!proposal&&!appliedUnsaved?button(settings?'설정 저장':'입력 저장','save_inputs',`data-mutation class="ew-secondary"${draft.conflict?' disabled':''}`):''}</form></section>`:'';
     const queryAttempt=workListSourceAttempt(run,saved.attempt_id),querySummary=node.result_block==='list_confirm'&&!settings&&queryAttempt&&!queryAttempt.evidence_access?`<section class="ew-query-summary"><header><h4>${icon('f1e53')} 조회 조건</h4><small>${esc(workUI.time(queryAttempt.created_at))} 조회</small>${button('업무 설정 보기','tab','data-tab="settings" class="ew-text"')}</header><p>${Object.entries(queryAttempt.inputs || {}).map(([key,value])=>`${esc(fields.find(field=>field.id===key)?.name || key)} · ${esc(typeof value==='object'?JSON.stringify(value):value)}`).join(' · ') || '이 실행에 선언된 조회 입력 없음'}</p></section>`:'';
     const proposalHTML=proposal?(proposal.warnings || []).map(warning=>`<p class="ew-warning" role="status">${esc(warning)}</p>`).join(''):'';
     const requestReason=node.result_block==='change_request'&&!settings?`<label class="ew-input-row"><span>요청 사유</span><textarea id="ees-request-reason" rows="2" maxlength="4000"${readonly||saved.can_request===false?' readonly':''}>${esc(s.request_reasons?.[run.id+'/'+node.id] || saved.request?.request_reason || '')}</textarea></label>${workRequestFields(node,data.operations?.tools)===null?workNoticeHTML('EES 입력 정의 확인 필요','도구의 입력 정의를 확인한 뒤 요청할 수 있습니다.'):''}`:'';
-    return header+sharedNotice+inputs+requestReason+proposalHTML+modelControls+querySummary+(saved.partial_prerequisites?.length?'':workPartialSourceHTML((run.attempts || []).find(attempt=>attempt.id===saved.attempt_id),run))+(settings?'':workResultHTML({...node,shared_function:shared?.function || pin?.reference?.function,judgments:node.judgments || definition().judgments,execution_actor:data.operations?.tools?.find(tool=>tool.id===node.tool_contract_id)?.kind==='direct'?'EES Work':'EES'},saved,{readOnly:readonly||groupDenied||saved.can_decide===false,attempt:(run?.attempts || []).find(item=>item.id===(saved.attempt_id || saved.current_attempt)),messages,target:shared?.target,actorId:data.capabilities?.actor_id,verdictDraft:s.verdict_drafts?.[run.id+'/'+node.id+'/'+saved.attempt_id] || {},sourceCount:Array.isArray(queryAttempt?.result?.items)?queryAttempt.result.items.filter(item=>item.source?.kind!=='human_added').length:null,listDraft:node.result_block==='list_confirm'?listDraft():null,reviewDraft:node.result_block==='ai_review'?reviewDraft():null})+(proposal?workInputProposalBar(proposal,node,{disabled:!canEditInputs}):appliedUnsaved&&canEditInputs?`<footer class="ew-job-actions ew-input-applied-bar"><p>${node.result_block==='change_request'?'저장해야 요청할 수 있습니다':node.mode==='human'||node.result_block==='human_confirm'?'저장해야 확인할 수 있습니다':'저장해야 실행할 수 있습니다'}</p>${button('최신 값으로 돌아가기','discard_inputs','class="ew-secondary"')}${button('입력 저장','save_inputs',`data-mutation class="ew-primary"${draft.conflict?' disabled data-own-disabled="true"':''}`)}</footer>`:`<footer class="ew-job-actions">${(saved.block_reason || saved.reason)?`<p class="ew-warning">${esc((saved.block_reason || saved.reason)==='delivery_unconfigured'?'본문 검토는 저장했습니다. 실제 송부와 결과 확인 전에는 이 작업을 완료하지 않습니다.':workReasonText(saved.block_reason || saved.reason,data.operations?.shared_tool_messages,{pinned:pin?.version,current:shared?.version}))}</p>`:''}${groupDenied?'':readonly||saved.can_execute===false?`<p>${esc(finished(run)?'종료된 진행 건 · 당시 기록을 조회하고 있습니다.':({assignee_required:'보기 전용 · 배정된 담당자나 그룹이 처리할 수 있습니다.',task_claimed:'보기 전용 · 다른 담당자가 처리 중입니다.',scope_forbidden:'보기 전용 · 업무 참여 권한이 필요합니다.',run_closed:'종료된 진행 건 · 당시 기록을 조회하고 있습니다.'}[saved.permission_reason || run.permission_reason] || '보기 전용 · 현재 계정은 이 작업을 수행할 수 없습니다.'))}</p>`:node.result_block==='change_request'?(saved.can_request===false?'<p>보기 전용 · EES 요청 권한이 있는 담당자가 처리할 수 있습니다.</p>':button('요청 내용 확인…','request_intent',`data-mutation class="ew-primary"${workRequestFields(node,data.operations?.tools)===null?' disabled data-own-disabled="true"':''}`)):node.mode==='human'?(workHumanCheckItems(node).length?'':button('확인 완료','confirm','data-mutation class="ew-primary"')):button(saved.evidence_access==='requires_current_source_access'&&node.mode==='tool'?'현재 권한으로 다시 조회':['failed','unknown'].includes(saved.status)&&node.mode==='tool'?'다시 조회':saved.attempt_id?'다시 실행':'지금 실행','execute',`data-mutation class="ew-primary"${sharedBlocked?' disabled data-own-disabled="true"':''}`)+(saved.can_decide!==false&&!saved.decisions?.job&&node.human_confirmation!==false&&!['list_confirm','item_verdict','checklist'].includes(node.result_block)?button(node.completion?.kind==='delivery'?'본문 검토 확정':'판정 확정','confirm','data-mutation class="ew-secondary"'):'')}</footer>`));
+    return header+sharedNotice+connectedInputs+inputs+requestReason+proposalHTML+modelControls+querySummary+(saved.partial_prerequisites?.length?'':workPartialSourceHTML((run.attempts || []).find(attempt=>attempt.id===saved.attempt_id),run))+(settings?'':workResultHTML({...node,shared_function:shared?.function || pin?.reference?.function,judgments:node.judgments || definition().judgments,execution_actor:data.operations?.tools?.find(tool=>tool.id===node.tool_contract_id)?.kind==='direct'?'EES Work':'EES'},saved,{readOnly:readonly||groupDenied||saved.can_decide===false,attempt:(run?.attempts || []).find(item=>item.id===(saved.attempt_id || saved.current_attempt)),messages,target:shared?.target,actorId:data.capabilities?.actor_id,verdictDraft:s.verdict_drafts?.[run.id+'/'+node.id+'/'+saved.attempt_id] || {},sourceCount:Array.isArray(queryAttempt?.result?.items)?queryAttempt.result.items.filter(item=>item.source?.kind!=='human_added').length:null,listDraft:node.result_block==='list_confirm'?listDraft():null,reviewDraft:node.result_block==='ai_review'?reviewDraft():null})+(proposal?workInputProposalBar(proposal,node,{disabled:!canEditInputs}):appliedUnsaved&&canEditInputs?`<footer class="ew-job-actions ew-input-applied-bar"><p>${node.result_block==='change_request'?'저장해야 요청할 수 있습니다':node.mode==='human'||node.result_block==='human_confirm'?'저장해야 확인할 수 있습니다':'저장해야 실행할 수 있습니다'}</p>${button('최신 값으로 돌아가기','discard_inputs','class="ew-secondary"')}${button('입력 저장','save_inputs',`data-mutation class="ew-primary"${draft.conflict?' disabled data-own-disabled="true"':''}`)}</footer>`:`<footer class="ew-job-actions">${(saved.block_reason || saved.reason)?`<p class="ew-warning">${esc((saved.block_reason || saved.reason)==='delivery_unconfigured'?'본문 검토는 저장했습니다. 실제 송부와 결과 확인 전에는 이 작업을 완료하지 않습니다.':workReasonText(saved.block_reason || saved.reason,data.operations?.shared_tool_messages,{pinned:pin?.version,current:shared?.version}))}</p>`:''}${groupDenied?'':readonly||saved.can_execute===false?`<p>${esc(finished(run)?'종료된 진행 건 · 당시 기록을 조회하고 있습니다.':({assignee_required:'보기 전용 · 배정된 담당자나 그룹이 처리할 수 있습니다.',task_claimed:'보기 전용 · 다른 담당자가 처리 중입니다.',scope_forbidden:'보기 전용 · 업무 참여 권한이 필요합니다.',run_closed:'종료된 진행 건 · 당시 기록을 조회하고 있습니다.'}[saved.permission_reason || run.permission_reason] || '보기 전용 · 현재 계정은 이 작업을 수행할 수 없습니다.'))}</p>`:node.result_block==='change_request'?(saved.can_request===false?'<p>보기 전용 · EES 요청 권한이 있는 담당자가 처리할 수 있습니다.</p>':button('요청 내용 확인…','request_intent',`data-mutation class="ew-primary"${workRequestFields(node,data.operations?.tools)===null?' disabled data-own-disabled="true"':''}`)):node.mode==='human'?(workHumanCheckItems(node).length?'':button('확인 완료','confirm','data-mutation class="ew-primary"')):button(saved.evidence_access==='requires_current_source_access'&&node.mode==='tool'?'현재 권한으로 다시 조회':['failed','unknown'].includes(saved.status)&&node.mode==='tool'?'다시 조회':saved.attempt_id?'다시 실행':'지금 실행','execute',`data-mutation class="ew-primary"${sharedBlocked?' disabled data-own-disabled="true"':''}`)+(saved.can_decide!==false&&!saved.decisions?.job&&node.human_confirmation!==false&&!['list_confirm','item_verdict','checklist'].includes(node.result_block)?button(node.completion?.kind==='delivery'?'본문 검토 확정':'판정 확정','confirm','data-mutation class="ew-secondary"'):'')}</footer>`));
   }
   function panel(){if(!host)return;const s=selection(),data=state(),stage=!snapshot.target_loading&&!snapshot.scope_loading&&!snapshot.evidence_unavailable&&snapshot.state?workStageTarget(data,s):null;
     // Each stage and tab restores its own viewport. Chat visibility and width

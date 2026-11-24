@@ -2,6 +2,11 @@
 function createWorkApiPicker(){
   const esc = value => workUI.esc(String(value ?? ''));
   const fieldTypes = {string:'text', integer:'number', number:'number', boolean:'boolean', array:'list', object:'json_object'};
+  const compatibleParameterTypes = {
+    string:['text','single','datetime'], integer:['number'], number:['number'],
+    boolean:['boolean'], array:['list','multi'], object:['json_object']
+  };
+  const runInputPrefix = 'run_input:';
   const clone = value => JSON.parse(JSON.stringify(value));
   const writable = op => !['GET', 'HEAD', 'OPTIONS'].includes(op.method);
   function address(raw) {
@@ -27,14 +32,12 @@ function createWorkApiPicker(){
     return candidates;
   }
   function selectable(operation) { return operation.can_use !== false && operation.state === 'active'; }
-  function summary(node, catalog, jobs, compact=false) {
+  function summary(node, catalog, jobs, compact=false, parameters=[]) {
     const b = node.api_binding;
     if (!b) return '';
     const op = catalog.apis.find(api => api.id === b.operation_id);
     if (!op) return '<div data-api-job-binding><small>연결한 API의 현재 사용 권한을 확인해 주세요.</small></div>';
-    const entries=Object.entries(b.inputs);
-    const compactRows=compact&&entries.some(([,ref])=>ref.result)?entries.filter(([,ref])=>ref.result):entries;
-    const rows = compactRows.map(([name, ref]) => {
+    const rows = Object.entries(b.inputs).map(([name, ref]) => {
       const field = op.inputs.find(f => f.name === name);
       const label = field?.label || name;
       if (ref.result) {
@@ -42,9 +45,13 @@ function createWorkApiPicker(){
         const labelForSource=catalog.apis.find(api=>api.id===upstream?.api_binding?.operation_id)?.fields.find(f=>f.path===ref.result.field)?.label||ref.result.field;
         return label+' ← '+(upstream?.name || '앞 작업')+(compact?'에서 선택한 결과':' · '+labelForSource);
       }
-      if ('constant' in ref) return label+' '+(typeof ref.constant==='string'?ref.constant:JSON.stringify(ref.constant));
-      if ('context' in ref) return label+' · 현재 업무의 '+(ref.context==='system_id'?'시스템':'공장');
-      return label+' · 실행 시 입력';
+      if ('constant' in ref) return label+' ← 고정값 '+(typeof ref.constant==='string'?ref.constant:JSON.stringify(ref.constant));
+      if ('context' in ref) return label+' ← 현재 업무의 '+(ref.context==='system_id'?'시스템':'공장');
+      if ('run_input' in ref) {
+        const parameter = parameters.find(item=>item.id===ref.run_input);
+        return label+' ← '+(parameter?'시작할 때 입력 · '+(parameter.name || parameter.id):'실행 파라미터 연결 확인');
+      }
+      return label+' ← 이 작업에서 입력';
     });
     const outputs = b.outputs.map(path=>op.fields.find(f=>f.path===path)?.label || path);
     return `<div data-api-job-binding class="ew-api-job-binding">${rows.map(r=>'<div>'+esc(r)+'</div>').join('')}${outputs.length?'<small>받는 결과 · '+esc(outputs.join(', '))+'</small>':''}<small>${esc(serviceName(catalog,op))}　${esc(op.method)}　${esc(address(op.url))}</small></div>`;
@@ -64,22 +71,34 @@ function createWorkApiPicker(){
     if (!valid) throw Error('입력 형식에 맞는 값을 입력해 주세요.');
     return parsed;
   }
+  function compatibleParameters(parameters, field) {
+    return parameters.filter(parameter=>(parameter.scope || 'run')==='run' &&
+      compatibleParameterTypes[field.type]?.includes(parameter.type) &&
+      (parameter.options_source || 'manual')==='manual' && !parameter.depends_on?.length &&
+      (!field.required || parameter.required===true));
+  }
   const option = (value, text, current) => '<option value="'+esc(value)+'"'+(value===current?' selected':'')+'>'+esc(text)+'</option>';
-  function mappingFields(op, draft, node, jobs, catalog) {
+  function mappingFields(op, draft, node, jobs, catalog, parameters, factoryAvailable) {
     return op.inputs.map(field => {
       const src = draft.inputs[field.name] || {};
       const sources = sourceChoices(jobs,node,catalog,field);
-      const method = 'constant' in src?'constant':src.input?'input':src.context?src.context:src.result?'result':'omit';
-      const modes = [...(!field.required?[['omit','전달하지 않음']]:[]), ['constant','고정값'], ...(fieldTypes[field.type]?[['input','실행 시 입력']]:[]),
-        ...(field.type==='string'?[['system_id','현재 업무의 시스템'],['factory_id','현재 업무의 공장']]:[]),
-        ...(sources.length || src.result?[['result','앞 작업에서 선택한 결과']]:[])];
+      const method = 'constant' in src?'constant':src.input?'input':src.run_input?runInputPrefix+src.run_input:src.context?src.context:src.result?'result':'omit';
+      const shared = compatibleParameters(parameters,field).map(parameter=>
+        [runInputPrefix+parameter.id,'시작할 때 입력 · '+(parameter.name || parameter.id)]);
+      const context = field.type==='string'?[['system_id','현재 업무의 시스템']]:[];
+      if(field.type==='string'&&(factoryAvailable||src.context==='factory_id'))context.push(['factory_id','현재 업무의 공장']);
+      const modes = [...(!field.required?[['omit','전달하지 않음']]:[]),
+        ...shared, ...(fieldTypes[field.type]?[['input','이 작업에서 입력']]:[]),
+        ...context, ...(sources.length || src.result?[['result','앞 작업에서 선택한 결과']]:[]),
+        ['constant','고정값']];
+      if(src.run_input&&!shared.some(([key])=>key===method))modes.unshift([method,'실행 파라미터 연결 확인']);
       const raw = draft.raw[field.name] ?? (typeof src.constant==='string'?src.constant:JSON.stringify(src.constant)??'');
       const selected = src.result ? JSON.stringify([src.result.job_id,src.result.field]) : '';
       const choice = method==='result' ? `<select data-api-result="${esc(field.name)}" aria-label="${esc(field.label||field.name)} 결과 필드"><option value="">결과 선택</option>${sources.map(s=>option(s.value,s.label,selected)).join('')}</select>` : '';
-      return `<div class="ew-api-map-row"><label>${esc(field.label || field.name)}${field.required?' <small>필수</small>':''}<select data-api-source="${esc(field.name)}">${modes.map(pair=>option(...pair,method)).join('')}</select></label>${method==='constant'?`<label>값<input data-api-value="${esc(field.name)}" value="${esc(raw)}" placeholder="${esc(field.type==='object'?'{}':field.type==='array'?'[]':'')}"></label>`:choice}</div>`;
+      return `<div class="ew-api-map-row"><label>${esc(field.label || field.name)}${field.required?' <small>필수</small>':''}<select data-api-source="${esc(field.name)}" aria-label="${esc(field.label || field.name)} 값 가져오는 곳">${modes.map(pair=>option(...pair,method)).join('')}</select></label>${method==='constant'?`<label>값<input data-api-value="${esc(field.name)}" value="${esc(raw)}" placeholder="${esc(field.type==='object'?'{}':field.type==='array'?'[]':'')}"></label>`:choice}</div>`;
     }).join('');
   }
-  function buildNode(node, op, draft, jobs) {
+  function buildNode(node, op, draft, jobs, parameters=[]) {
     const inputs = {};
     const oldInputs = node.inputs || [];
     const local = oldInputs.filter(f=>!f.source?.api_operation_id && !f.source?.shared_tool_id);
@@ -104,6 +123,11 @@ function createWorkApiPicker(){
           local.push(input);
         }
         inputs[field.name] = {input:id};
+      } else if ('run_input' in ref) {
+        if(!compatibleParameters(parameters,field).some(parameter=>parameter.id===ref.run_input)){
+          throw Error((field.label || field.name)+'에 연결할 실행 파라미터의 형식과 필수 여부를 확인해 주세요.');
+        }
+        inputs[field.name] = {run_input:ref.run_input};
       } else if (ref.context) inputs[field.name] = {context:ref.context};
       else if (ref.result?.field && jobs.some(n=>n.id===ref.result.job_id)) {
         inputs[field.name] = clone(ref);
@@ -122,7 +146,7 @@ function createWorkApiPicker(){
     next.api_binding = {operation_id:op.id,version:op.version,inputs,outputs:[...draft.outputs]};
     return next;
   }
-  async function open({node,catalog,jobs,confirm,initial={},restoreFocus}) {
+  async function open({node,catalog,jobs,parameters=[],factoryAvailable=true,confirm,initial={},restoreFocus}) {
     let query = initial.query || '', selected = initial.id || node.api_binding?.operation_id || '';
     const drafts = initial.drafts || new Map();
     const choices = catalog.apis.filter(selectable);
@@ -147,7 +171,7 @@ function createWorkApiPicker(){
     const draw=()=>{
       const op=getOp(),draft=getDraft();
       dialog.querySelector('[data-dialog-confirm]').disabled=!op;
-      dialog.querySelector('[data-api-config]').innerHTML=!op?'<p>이 작업에서 사용할 API를 선택하세요.</p>':`<h3>${esc(op.name)}</h3><p>${esc(op.purpose)}</p><small>${esc(serviceName(catalog,op))} · ${esc(op.method)} ${esc(address(op.url))}</small><h4>이 작업에서 사용할 입력</h4>${mappingFields(op,draft,node,jobs,catalog)||'<p>필요한 입력이 없습니다.</p>'}<h4>받는 결과</h4>${op.fields.map(f=>`<label><input type="checkbox" data-api-output="${esc(f.path)}" ${draft.outputs.includes(f.path)?'checked':''}> ${esc(f.label||f.path)}</label>`).join('') || '<p>응답 본문 없음</p>'}<details><summary>API 상세 보기</summary><p>${esc(op.method)} ${esc(op.url)}</p>${op.example!==null&&op.example!==undefined?'<pre>'+esc(JSON.stringify(op.example,null,2))+'</pre>':''}</details>`;
+      dialog.querySelector('[data-api-config]').innerHTML=!op?'<p>이 작업에서 사용할 API를 선택하세요.</p>':`<h3>${esc(op.name)}</h3><p>${esc(op.purpose)}</p><small>${esc(serviceName(catalog,op))} · ${esc(op.method)} ${esc(address(op.url))}</small><h4>이 작업에서 사용할 입력</h4>${mappingFields(op,draft,node,jobs,catalog,parameters,factoryAvailable)||'<p>필요한 입력이 없습니다.</p>'}<h4>받는 결과</h4>${op.fields.map(f=>`<label><input type="checkbox" data-api-output="${esc(f.path)}" ${draft.outputs.includes(f.path)?'checked':''}> ${esc(f.label||f.path)}</label>`).join('') || '<p>응답 본문 없음</p>'}<details><summary>API 상세 보기</summary><p>${esc(op.method)} ${esc(op.url)}</p>${op.example!==null&&op.example!==undefined?'<pre>'+esc(JSON.stringify(op.example,null,2))+'</pre>':''}</details>`;
     };
     let next=null, registering=false;
     const events=(event)=>{
@@ -165,6 +189,7 @@ function createWorkApiPicker(){
           if(mode==='omit')delete draft.inputs[name];
           else if(mode==='constant')draft.inputs[name]={constant:''};
           else if(mode==='input')draft.inputs[name]={input:name};
+          else if(mode.startsWith(runInputPrefix))draft.inputs[name]={run_input:mode.slice(runInputPrefix.length)};
           else if(mode==='result')draft.inputs[name]={result:{job_id:'',field:'',confirmed:true}};
           else draft.inputs[name]={context:mode};
           draw();
@@ -174,7 +199,7 @@ function createWorkApiPicker(){
       if(target.closest?.('[data-api-register]')){registering=true;dialog.eesClose();return;}
       const candidate=target.closest?.('[data-api-candidate]');
       if(candidate){selected=candidate.dataset.apiCandidate;dialog.querySelector('[data-api-picker-error]').textContent='';drawList();draw();return;}
-      if(target.closest?.('[data-dialog-confirm]')){try{next=buildNode(node,getOp(),getDraft(),jobs);}catch(e){event.preventDefault();event.stopImmediatePropagation();dialog.querySelector('[data-api-picker-error]').textContent=e.message;}}
+      if(target.closest?.('[data-dialog-confirm]')){try{next=buildNode(node,getOp(),getDraft(),jobs,parameters);}catch(e){event.preventDefault();event.stopImmediatePropagation();dialog.querySelector('[data-api-picker-error]').textContent=e.message;}}
     };
     const handlers=['input','change','click'];
     if (!dialog) return null;
