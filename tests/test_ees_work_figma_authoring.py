@@ -49,7 +49,7 @@ await h.open('q');await h.open('w');assert.deepEqual(h.draft().definition.schedu
         self.run_contract(r"""
 (async()=>{
 const h=harness(),record=h.workflows.get('w');record.draft.mode='periodic';record.draft.schedule={timezone:'Asia/Seoul',anchor:'2026-10-06T09:00',frequency:'weekly',interval:2};h.render();
-for(const tab of ['content','rules','history']){h.click('tab',{tab});await flush();
+for(const tab of ['content','try','rules','history']){h.click('tab',{tab});await flush();
   assert.doesNotMatch(h.markup,/name="anchor"|name="frequency"|name="name_template"|data-author-action="schedule_preview"|data-author-action="schedule_create"|단계 기한|회차 열기와 닫기/);}
 h.click('schedule_preview');h.click('schedule_create');await flush();
 assert.equal(h.operations.length,0);assert.equal(h.writes.length,0);assert.equal(h.draft().dirty,false);
@@ -129,8 +129,11 @@ record.draft.nodes.j.mode='tool';record.draft.nodes.j.instructions='게시 이�
 h.render();await h.node();assert.equal(h.draft().definition.nodes.j.mode,'tool');assert.doesNotMatch(h.markup,/name="read_retry_count"/);
 h.field('job_guidance','현재 편집 중인 초안');h.render();assert.equal(h.draft().definition.nodes.j.instructions,'현재 편집 중인 초안');assert.equal(record.published.nodes.j.mode,'human');
 h.click('save');await flush();assert.equal(h.writes[0].definition.nodes.j.mode,'tool');assert.equal(h.writes[0].definition.nodes.j.instructions,'현재 편집 중인 초안');
-assert.equal(h.writes[0].publication_state,'published');assert.equal(record.published.nodes.j.mode,'tool');assert.equal(record.published.nodes.j.instructions,'현재 편집 중인 초안');assert.equal(record.definition.nodes.j.instructions,'원래 안내');
+// Design mock 21 revision 2: saving keeps the draft; the published version changes only through 게시.
+assert.equal(Object.hasOwn(h.writes[0],'publication_state'),false);assert.equal(record.published.nodes.j.mode,'human');assert.equal(record.published_version,1);assert.equal(record.definition.nodes.j.instructions,'원래 안내');
+assert.match(h.markup,/EMS · 게시 v1 · 게시 안 한 변경 있음/);
 h.render();assert.equal(h.draft().definition.nodes.j.mode,'tool');assert.equal(h.draft().dirty,false);
+h.click('publish');await flush();assert.equal(h.writes[1].action,'publish_workflow');assert.equal(record.published_version,2);assert.equal(record.published.nodes.j.mode,'tool');assert.equal(record.published.nodes.j.instructions,'현재 편집 중인 초안');assert.equal(h.draft().definition.nodes.j.instructions,'현재 편집 중인 초안');
 const wrapped=copy(record.draft);wrapped.name='중첩 초안';record.draft={definition:wrapped};h.render();assert.equal(h.draft().definition.name,'중첩 초안');
 })().catch(e=>{console.error(e);process.exitCode=1;});
 """)

@@ -124,7 +124,7 @@ const workUI = (() => {
     };
     if(event.type==='click'&&summary.contains(target)){
       event.preventDefault();
-      if(!details.open||content.getAttribute('data-ees-motion')==='closing')opening();else closeMenu();
+      if(!details.open||content.getAttribute('data-ees-motion')==='closing'){opening();if(details.matches?.('.ew-procedure-menu'))content.querySelector('button:not(:disabled)')?.focus?.({preventScroll:true});}else closeMenu();
       return true;
     }
     // Search repaints may supply a fresh, already-open details node.
@@ -778,6 +778,18 @@ function workPublishedDefinition(data={}){
   return workflow.versions?.find(item=>item.version===workflow.published_version)?.definition || {};
 }
 function workOperationDefinition(data={}){return data?.run?.definition || workPublishedDefinition(data);}
+// What a job row reads of its run: the current attempt's result and the decisions of that result by item. The
+// launcher applies it to the workspace's run and the editor to its try (2026-11-20, design mock 21 revision 2).
+function workNormalizeRun(run,operations={}){
+  const attempts=run.attempts || [];
+  for(const [id,job] of Object.entries(run.jobs || {})){
+    const attempt=attempts.find(item=>item.id===job.current_attempt) || attempts.filter(item=>item.job_id===id).at(-1);
+    if(attempt){job.result=attempt.result;job.attempt_id=attempt.id;job.evidence_access=attempt.evidence_access;}
+    if(Array.isArray(job.decisions)){job.decision_history=workUI.clone(job.decisions);job.decisions=Object.fromEntries(job.decisions.filter(item=>item.result_revision===job.result_revision).map(item=>[item.item_id,item]));}
+    const external=(operations?.requests || []).filter(item=>item.job_id===id).at(-1);if(external)job.request=external;
+  }
+  return run;
+}
 function workParallelRuns(workflow={}){
   const published=workPublishedDefinition({workflow}),definition=Object.keys(published).length?published:workflow;
   return ['periodic','emergency'].includes(definition.mode || definition.execution_mode)||definition.category==='incident';
@@ -873,9 +885,9 @@ function workStageRowCarriesValues(node={}){
   return workHumanCheckItems(node).length>0||!['item_verdict','list_confirm','checklist','ai_review','change_request'].includes(node.result_block);
 }
 // A value that is asked of the whole procedure or of a stage is asked once, when the round starts, also when a job
-// names the same value.
-function workStageAskFields(node={},definition={}){
-  const atStart=new Set(Object.values(definition.nodes || {}).filter(item=>item&&item.type!=='j').flatMap(item=>Array.isArray(item.inputs)?item.inputs:[]).filter(field=>field&&(field.scope || 'run')==='run').map(field=>field.id));
+// names the same value. The editor's try has no start form (startForm false): there the job that names it asks it.
+function workStageAskFields(node={},definition={},{startForm=true}={}){
+  const atStart=new Set(startForm?Object.values(definition.nodes || {}).filter(item=>item&&item.type!=='j').flatMap(item=>Array.isArray(item.inputs)?item.inputs:[]).filter(field=>field&&(field.scope || 'run')==='run').map(field=>field.id):[]);
   if(!workStageRowCarriesValues(node))return [];
   return (Array.isArray(node.inputs)?node.inputs:[]).filter(field=>workStageAsksInRow(field)&&!atStart.has(field.id));
 }
@@ -905,15 +917,16 @@ function workStageResultView(node={},saved={}){
   const labels=result.field_labels || {},paths=(Array.isArray(node.api_binding.outputs)?node.api_binding.outputs:Object.keys(labels)).filter(path=>typeof path==='string');
   return {items:result.items,fields:paths.map(path=>({path,label:labels[path] || path}))};
 }
-function workStageHasValues(row,data){
+// options come from the editor's try only (see workStageRowHTML).
+function workStageHasValues(row,data,options={}){
   const {node,saved}=row;
   const definition=workOperationDefinition(data);
-  return workStageAskFields(node,definition).length>0||workStageGivenValues(node,definition,data.run || {}).length>0||Boolean(data.run&&workStageResultView(node,saved));
+  return workStageAskFields(node,definition,options).length>0||workStageGivenValues(node,definition,data.run || {}).length>0||Boolean(data.run&&workStageResultView(node,saved))||Boolean(options.problem);
 }
-function workStageJobValuesHTML(row,data,selection){
+function workStageJobValuesHTML(row,data,selection,options={}){
   const {esc,time}=workUI,{node,saved,attempt}=row,run=data.run || {},id=node.id,definition=workOperationDefinition(data);
-  const asks=workStageAskFields(node,definition),given=workStageGivenValues(node,definition,run),result=data.run?workStageResultView(node,saved):null;
-  if(!asks.length&&!given.length&&!result)return '';
+  const asks=workStageAskFields(node,definition,options),given=workStageGivenValues(node,definition,run),result=data.run&&!row.retyped?workStageResultView(node,saved):null;
+  if(!asks.length&&!given.length&&!result&&!options.problem)return '';
   const errors=selection.stage_value_errors?.[workStageValueScope(data,selection)] || {};
   // Before the run a person's job is not started from its row, so its fields wait for 시작 as its answer does.
   // A field is open only while something on the row can save it: 실행 of a tool or AI job (also while it waits for
@@ -936,13 +949,14 @@ function workStageJobValuesHTML(row,data,selection){
       :result.items.length?`<ol class="ew-vd-rows" aria-label="${esc(node.name)} 결과">${result.items.map(item=>`<li>${result.fields.map(field=>`<span>${esc(text(item?.row?.[field.path]))}</span>`).join('')}</li>`).join('')}</ol>`:'';
     came=`<section data-stage-result><h4>결과${note?`<span>${esc(note)}</span>`:''}</h4>${body}</section>`;
   }
-  return `<div class="ew-vd-evidence ew-vd-job-values" id="stage-values-${esc(id)}"><div class="ew-vd-tool-detail" data-stage-values data-job-id="${esc(id)}">${asked}${came}</div></div>`;
+  return `<div class="ew-vd-evidence ew-vd-job-values" id="stage-values-${esc(id)}"><div class="ew-vd-tool-detail" data-stage-values data-job-id="${esc(id)}">${options.problem || ''}${asked}${came}</div></div>`;
 }
 // A list that came back is confirmed from its row; the confirmation itself (what is kept, the reason) is the one of the job screen.
 function workStageCanConfirmList(node,saved={},run={}){
   return node.result_block==='list_confirm'&&!workUI.finished(run)&&run.can_write!==false&&saved.can_decide!==false&&saved.can_execute!==false&&Boolean(saved.attempt_id || saved.current_attempt)&&!saved.evidence_access&&!saved.result_stale&&['waiting_confirmation','awaiting_confirmation'].includes(saved.status);
 }
-function workStageRows(data,stage){
+// options.try: the rows of the editor's try (workTryRow). The work screen passes none.
+function workStageRows(data,stage,options={}){
   const run=data.run || {},definition=workOperationDefinition(data);
   return workOrderedNodes(definition).filter(node=>node.type==='j'&&workUI.lineage(node.id,definition).some(parent=>parent.id===stage.id)).map(node=>{
     const saved=run.jobs?.[node.id] || {},awaits=workStageAwaitsValue(node,definition,run),attempts=(run.attempts || []).filter(item=>item.job_id===node.id),attempt=attempts.find(item=>item.id===(saved.attempt_id || saved.current_attempt)),decision=workStageDecision(node,saved,definition,attempt),automatic=workStageAutomatic(node),state=saved.status || 'unstarted';
@@ -960,8 +974,22 @@ function workStageRows(data,stage){
     else if((node.mode || 'human')==='human')label='확인 필요';
     else if(['waiting_confirmation','awaiting_confirmation'].includes(state))label='판정 필요';
     else label='실행 필요';
-    return {node,saved,attempt,attempts,decision,automatic,state,group,label,tone,toolMissing:workToolConnectionRequired(node),awaits,canDecide:Boolean(data.run)&&workStageCanDecide(node,saved,run),canExecute:Boolean(data.run)&&!awaits&&workStageCanExecute(node,saved,run,data)};
+    const row={node,saved,attempt,attempts,decision,automatic,state,group,label,tone,toolMissing:workToolConnectionRequired(node),awaits,canDecide:Boolean(data.run)&&workStageCanDecide(node,saved,run),canExecute:Boolean(data.run)&&!awaits&&workStageCanExecute(node,saved,run,data)};
+    return options.try?workTryRow(row,data,options):row;
   });
+}
+// What a row of the editor's try says differently from the work screen (2026-11-20, design mock 21 revision 2):
+// an EES change request is never sent from a try; a job being run from this window shows as running before the
+// server says so; a value changed since the last run asks for another run (rule 9); a failure is counted by what
+// went wrong (rule 11, failures: job id -> word); a verdict other than 적합 stays a choice (rule 10).
+function workTryRow(row,data,{failures={},retyped={},running=''}={}){
+  const {node,saved}=row,id=node.id,run=data.run || {};
+  if(node.result_block==='change_request')return {...row,group:'waiting',label:'시험에서는 보내지 않아요',tone:'none',canDecide:false,canExecute:false,unsent:true};
+  if(running===id||row.state==='running')return {...row,state:'running',group:'running',label:'실행 중',tone:'none',canDecide:false,canExecute:false};
+  if(retyped[id])return {...row,state:'unstarted',group:'waiting',label:'실행 필요',tone:'none',decision:null,canDecide:false,retyped:true};
+  if(failures[id])return {...row,group:'waiting',label:failures[id],tone:'none',canDecide:false};
+  const again=Boolean(row.decision)&&row.tone!=='ok'&&!row.canDecide&&!workUI.finished(run)&&run.can_write!==false&&saved.can_decide!==false&&saved.can_execute!==false&&!saved.evidence_access&&!saved.result_stale&&!['running','excluded'].includes(saved.status)&&!['item_verdict','list_confirm','checklist','ai_review'].includes(node.result_block);
+  return again?{...row,canDecide:true}:row;
 }
 // Items a person ticks one by one (2026-11-18). Same rule as the server's human_check_items:
 // only a human job whose confirmation kind is the check list has them.
@@ -1043,11 +1071,14 @@ function workStageEvidenceHTML(row,data,selection){
   const details=`<div class="ew-vd-tool-detail" id="stage-tool-${esc(id)}"><section><h4>입력 <span>Input</span></h4>${workStageValuesHTML(argumentsUsed)}</section><section><h4>출력 <span>Output</span></h4>${workStageValuesHTML(result)}</section>${criterion?`<section><h4>실행 당시 작업 기준</h4><p>${esc(criterion)}</p></section>`:''}${skills.length?`<section><h4>실행 당시 연결 지침</h4>${skills.map(skill=>`<p>${esc(skill.name || skill.title || skill.id || '지침')}</p>${skill.body || skill.content || skill.instructions?`<p>${esc(skill.body || skill.content || skill.instructions)}</p>`:''}`).join('')}</section>`:''}<section class="ew-vd-tool-result"><h4>실행 결과 · <span>${esc(status)}</span></h4>${typeof result.summary==='string'?`<p>${esc(result.summary)}</p>`:''}</section></div>`;
   return `<div class="ew-vd-evidence ew-vd-service-evidence" id="stage-evidence-${esc(id)}">${pending}${selector}<p class="ew-attempt-caption" data-attempt-number="${esc(attempt.number)}"><b>${old?'이전 실행 결과':'현재 실행 결과'} · ${esc(attempt.number)}차</b><span>${esc(time(attempt.finished_at || attempt.created_at))}</span></p><div class="ew-vd-evidence-caption"><b>${node.mode==='tool'&&['succeeded','failed','partial'].includes(attempt.status)?'실행 도구 1개':'실행 기록'}</b></div><section class="ew-vd-tool"><button type="button" class="ew-vd-tool-toggle" data-action="stage_tool" data-job-id="${esc(id)}" data-tool-key="${esc(toolKey)}" aria-expanded="${opened}"${opened?' aria-controls="stage-tool-'+esc(id)+'"':''}><span class="ew-vd-tool-heading"><span><b>${esc(toolName)}</b></span><small>${esc(status)} · ${esc(time(attempt.finished_at || attempt.created_at))}</small></span>${icon('f17e6')}</button>${opened?details:''}</section>${attemptDecision?`<p class="ew-vd-task-result"><b>${old?'당시 작업 판정':'작업 판정'} · ${esc(attemptDecision.label)}</b>${attemptDecision.note?`<span>${esc(attemptDecision.note)}</span>`:''}</p>`:''}</div>`;
 }
-function workStageRowHTML(row,data,selection,number){
+// options, from the editor's try only (2026-11-20, design mock 21 revision 2): try (no way to the work job screen;
+// a running job keeps its control focusable), startForm, changed ('바뀜'), fix (markup at the end of the row's
+// controls) and problem (markup said first under the row). The work screen passes none and draws as before.
+function workStageRowHTML(row,data,selection,number,options={}){
   if(workAuthoredStageTool(row,data))return workAuthoredStageRowHTML(row,data,selection,number);
   const {esc,icon}=workUI,{node,saved,automatic,group,label,tone,canDecide,canExecute}=row,id=node.id,opened=selection.stage_evidence===id;
-  const hasExecution=['tool','ai'].includes(node.mode)&&node.result_block!=='change_request',runLabel=row.state==='running'?'실행 중':row.attempts.length?'다시 실행':'실행';
-  const execution=hasExecution?`<button type="button" class="ew-vd-run" data-action="${data.run?'stage_execute':'stage_start'}" data-job-id="${esc(id)}" aria-label="${esc(node.name+' '+runLabel)}"${data.run?' data-mutation':''}${row.toolMissing?' disabled data-own-disabled="true" data-run-blocked title="도구가 연결되지 않아 실행할 수 없습니다"':(!data.run&&!row.awaits)||canExecute?'':` disabled data-own-disabled="true"${row.state==='running'?'':' data-run-blocked'}`}>${row.attempts.length?workStageActionIcons.retry:workStageActionIcons.play}<span>${runLabel}</span></button>`:'';
+  const hasExecution=['tool','ai'].includes(node.mode)&&node.result_block!=='change_request',runLabel=row.state==='running'?'실행 중':row.attempts.length?'다시 실행':'실행',held=options.try&&row.state==='running';
+  const execution=hasExecution?`<button type="button" class="ew-vd-run" data-action="${data.run?'stage_execute':'stage_start'}" data-job-id="${esc(id)}" aria-label="${esc(node.name+' '+runLabel)}"${data.run&&!held?' data-mutation':''}${row.toolMissing?' disabled data-own-disabled="true" data-run-blocked title="도구가 연결되지 않아 실행할 수 없습니다"':(!data.run&&!row.awaits)||canExecute?'':held?' aria-disabled="true"':` disabled data-own-disabled="true"${row.state==='running'?'':' data-run-blocked'}`}>${row.attempts.length?workStageActionIcons.retry:workStageActionIcons.play}<span>${runLabel}</span></button>`:'';
   const dot=group==='result'?`<i class="ew-vd-dot" data-verdict="${tone}"></i>`:'',primary=workStagePrimaryJudgment(row,data),others=primary?workStageJudgments(node,workOperationDefinition(data)).filter(word=>word.id!==primary.id):[];
   const state=`<span class="${group==='result'?'ew-vd-final':'ew-vd-state'}" data-decision-status>${dot}<span>${esc(label)}</span></span>`;
   const choice=primary?`<span class="ew-vd-confirm"><button type="button" class="ew-vd-confirm-main" data-action="stage_decide" data-job-id="${esc(id)}"${primary.legacy?'':` data-judgment-id="${esc(primary.id)}"`} data-verdict="${esc(primary.status)}" data-mutation aria-label="${esc(node.name+' '+primary.label)}">${esc(primary.label)}</button>${others.length?`<button type="button" class="ew-vd-confirm-more" data-action="stage_verdict" data-job-id="${esc(id)}" aria-haspopup="menu" aria-expanded="${selection.stage_verdict_job===id}" aria-controls="ees-stage-verdict-menu" aria-label="${esc(node.name)} 다른 판정">${icon('f17e6')}</button>`:''}</span>`
@@ -1056,16 +1087,26 @@ function workStageRowHTML(row,data,selection,number){
   // A job with values opens under its row by its name: what it asks for and what came back. The record the product
   // keeps there (판정 근거 · 판정 기록) is added by its own control, as before. A job without values is as it was:
   // its name goes to the job screen and its record opens by that control.
-  const hasValues=workStageHasValues(row,data),record=opened&&(!hasValues||selection.stage_record===id);
+  const hasValues=workStageHasValues(row,data,options),record=opened&&(!hasValues||selection.stage_record===id);
   const hasEvidence=!workHumanCheckItems(node).length&&((!node.mode||node.mode==='human')||row.attempts.length),evidenceLabel=(!node.mode||node.mode==='human')?'판정 기록':'판정 근거',evidence=hasEvidence?`<button type="button" class="ew-vd-evidence-toggle" data-action="stage_evidence" data-job-id="${esc(id)}" aria-expanded="${record}"${record?` aria-controls="stage-evidence-${esc(id)}"`:''} aria-label="${esc(node.name+' '+evidenceLabel+' '+(record?'접기':'펼치기'))}">${evidenceLabel}${icon('f17e6')}</button>`:'';
-  const values=opened&&hasValues?workStageJobValuesHTML(row,data,selection):'';
+  const values=opened&&hasValues?workStageJobValuesHTML(row,data,selection,options):'';
   const description=node.description || node.instructions || '',actor=automatic?'자동 판정':'직접 판정';
   // A person's check list is ticked on the row. A tick is a record, so a ticked item is no longer a control.
   const checks=workHumanCheckItems(node),ticks=workCheckDecisions(saved),recheck=workCheckStale(saved),checked=checks.filter(item=>ticks[item.id]),canCheck=Boolean(data.run)&&workStageCanCheck(node,saved,data.run || {});
   const person=decision=>{const found=(data.people || []).find(item=>item.id===decision.actor_id||item.value?.id===decision.actor_id);return found?.name || found?.label || decision.actor_id;};
   const checkList=checks.length?`<ol class="ew-vd-checks" aria-label="${esc(node.name)} 확인 항목">${checks.map(item=>{const decision=ticks[item.id];return `<li data-done="${Boolean(decision)}">${decision?`<span class="ew-vd-check-done" role="img" aria-label="확인함">${icon('9d8d5')}</span><span>${esc(item.name)}</span><small>${esc(workUI.time(decision.created_at))} · ${esc(person(decision))}</small>`:`<label><input type="checkbox" data-stage-check data-job-id="${esc(id)}" data-item-id="${esc(item.id)}"${canCheck?' data-mutation':' disabled data-own-disabled="true"'}><span>${esc(item.name)}</span></label>`}</li>`;}).join('')}</ol>`:'';
   const progress=checks.length&&group!=='result'?`${recheck?`<span class="ew-vd-state" data-recheck>${esc(label)}</span>`:''}<span class="ew-vd-count" data-decision-status>${checked.length} / ${checks.length}</span>`:'';
-  return `<section class="ew-vd-entry ew-center-task-row" data-key="stage-job-${esc(id)}" data-stage-job="${esc(id)}" data-vd-item="${esc(id)}" data-handler="${automatic?'service':'human'}" data-expanded="${opened}"><div class="ew-vd-item"><span class="ew-center-task-number" aria-hidden="true">${number}</span><div class="ew-vd-item-top">${hasValues?`<button type="button" class="ew-vd-name" data-action="stage_values" data-job-id="${esc(id)}" aria-expanded="${opened}"${opened?` aria-controls="stage-under-${esc(id)}"`:''}>${esc(node.name)}</button>`:`<button type="button" class="ew-vd-name" data-action="job" data-job-id="${esc(id)}">${esc(node.name)}</button>`}<small class="ew-center-task-description"><b data-decision-actor>${actor}</b>${description?' · '+esc(description):''}</small></div><div class="ew-vd-item-meta">${execution}<div class="ew-vd-decision">${progress || choice}${evidence}</div></div></div>${checkList}${!opened?'':hasValues?`<div class="ew-vd-under" id="stage-under-${esc(id)}">${values}${record&&hasEvidence?workStageEvidenceHTML(row,data,selection):''}<p class="ew-vd-more"><button type="button" class="ew-text" data-action="job" data-job-id="${esc(id)}" aria-label="${esc(node.name)} 자세히">자세히</button></p></div>`:workStageEvidenceHTML(row,data,selection)}</section>`;
+  const changed=options.changed?'<span class="ew-try-changed">바뀜</span>':'';
+  const name=hasValues?`<button type="button" class="ew-vd-name" data-action="stage_values" data-job-id="${esc(id)}" aria-expanded="${opened}"${opened?` aria-controls="stage-under-${esc(id)}"`:''}>${esc(node.name)}${changed}</button>`:options.try?`<button type="button" class="ew-vd-name">${esc(node.name)}${changed}</button>`:`<button type="button" class="ew-vd-name" data-action="job" data-job-id="${esc(id)}">${esc(node.name)}</button>`;
+  const more=options.try?'':`<p class="ew-vd-more"><button type="button" class="ew-text" data-action="job" data-job-id="${esc(id)}" aria-label="${esc(node.name)} 자세히">자세히</button></p>`;
+  return `<section class="ew-vd-entry ew-center-task-row" data-key="stage-job-${esc(id)}" data-stage-job="${esc(id)}" data-vd-item="${esc(id)}" data-handler="${automatic?'service':'human'}" data-expanded="${opened}"><div class="ew-vd-item"><span class="ew-center-task-number" aria-hidden="true">${number}</span><div class="ew-vd-item-top">${name}<small class="ew-center-task-description"><b data-decision-actor>${actor}</b>${description?' · '+esc(description):''}</small></div><div class="ew-vd-item-meta">${execution}<div class="ew-vd-decision">${progress || choice}${evidence}</div>${options.fix || ''}</div></div>${checkList}${!opened?'':hasValues?`<div class="ew-vd-under" id="stage-under-${esc(id)}">${values}${record&&hasEvidence?workStageEvidenceHTML(row,data,selection):''}${more}</div>`:workStageEvidenceHTML(row,data,selection)}</section>`;
+}
+// The verdict menu opens under its control, inside the frame that positions it (work screen and editor's try).
+function workPlaceStageMenu(frame,menu,trigger){
+  const bounds=frame.getBoundingClientRect(),anchor=trigger.getBoundingClientRect(),rect=menu.getBoundingClientRect();
+  const top=anchor.bottom+6+rect.height<=bounds.bottom-8?anchor.bottom+6:anchor.top-6-rect.height;
+  menu.style.left=Math.max(8,Math.min(anchor.left-bounds.left,bounds.width-rect.width-8))+'px';
+  menu.style.top=Math.max(8,top-bounds.top)+'px';
 }
 function workStageMenuHTML(data,selection,rows){
   const row=rows.find(item=>item.node.id===selection.stage_verdict_job);if(!row?.canDecide)return '';
@@ -1090,6 +1131,12 @@ function workStagePositiveGroup(rows,selection={}){
   const rest=positive.filter(row=>row!==visible);
   return {positive,visible,rest,expanded:selection.stage_approved_expanded!==false||rest.some(row=>row.node.id===selection.stage_evidence)};
 }
+// The counts above a stage's rows: how many are done, and one count per state word (work screen and editor's try).
+function workStageTally(rows){
+  const {esc}=workUI,completed=rows.filter(row=>row.state==='completed').length,counts=new Map();
+  for(const row of rows){const key=row.tone+'|'+row.label;if(!counts.has(key))counts.set(key,{label:row.label,tone:row.tone,n:0});counts.get(key).n++;}
+  return {completed,legend:[...counts.values()].map(({label,tone,n})=>`<span><i class="ew-vd-dot" data-verdict="${esc(tone)}"></i>${esc(label)} ${n}</span>`).join('')};
+}
 function workStageHTML(data,selection,stage,options={}){
   const {esc,icon}=workUI,run=data.run || {},definition=workOperationDefinition(data),rows=workStageRows(data,stage);
   const scopes=(data.operations?.scope_runs || []).filter(scope=>scope.run_id===run.id&&(scope.node_id===stage.id||(scope.job_ids || []).some(id=>rows.some(row=>row.node.id===id)))&&['queued','running','waiting'].includes(scope.status));
@@ -1108,9 +1155,7 @@ function workStageHTML(data,selection,stage,options={}){
   const scopeNotice=scopes.filter(scope=>scope.reason).map(scope=>`<p class="ew-muted" role="status">${esc(workReasonText(scope.reason,data.operations?.shared_tool_messages))}</p>`).join('');
   const blocked=toolBlocked.length?`<p class="ew-warning" data-tool-connection-required>도구 연결 필요 ${toolBlocked.length}개 · 워크스페이스에서 연결해 다시 게시해야 실행됩니다</p>`:'';
   const runtime=modelControls||scopeNotice||blocked?`<div class="ew-stage-runtime">${modelControls}${scopeNotice}${blocked}</div>`:'';
-  const completed=rows.filter(row=>row.state==='completed').length,counts=new Map();
-  for(const row of rows){const key=row.tone+'|'+row.label;if(!counts.has(key))counts.set(key,{label:row.label,tone:row.tone,n:0});counts.get(key).n++;}
-  const legend=[...counts.values()].map(({label,tone,n})=>`<span><i class="ew-vd-dot" data-verdict="${esc(tone)}"></i>${esc(label)} ${n}</span>`).join('');
+  const {completed,legend}=workStageTally(rows);
   const heading=(label,detail='')=>`<div class="ew-center-task-heading"><h3>${esc(label)}${label==='작업'?` <small>${rows.length}개</small>`:''}</h3>${detail?`<span>${esc(detail)}</span>`:''}</div>`;
   const {rest,expanded}=workStagePositiveGroup(rows,selection);
   // A scope execution can contain different judgment vocabularies. Only fold
@@ -1226,7 +1271,9 @@ function createWorkView({callbacks}){
     const paint=html=>{if(sameTarget)workPatchContent(host,html);else host.innerHTML=html;};
     const overview=!snapshot.target_loading&&!snapshot.scope_loading&&snapshot.state&&s.mode!=='author'&&s.workflow_id&&!s.job_id&&(['overview','start'].includes(s.tab)||!data.run&&s.tab==='run_details')&&!workStageTarget(data,s)&&(!data.run||Object.values(definition().nodes || {}).some(node=>node.type==='t'));
     const stageScreen=stage?workStageHTML(data,s,stage,{modelControls:Object.values(data.run?.definition?.nodes || {}).some(node=>node.type==='j'&&node.mode==='ai'&&workUI.lineage(node.id,data.run.definition).some(parent=>parent.id===stage.id))?executionModels():''}):null;
-    host.classList?.toggle('ew-vd',Boolean(stageScreen||overview));
+    // The editor's try draws work rows inside the editor (design mock 21 revision 2); they need the scope too.
+    const authorTry=s.mode==='author'&&Boolean($('#ees-work-designer[data-author-tab="try"]',host));
+    host.classList?.toggle('ew-vd',Boolean(stageScreen||overview||authorTry));
     if(snapshot.evidence_unavailable){paint(`<div id="ees-work-content" class="ew-scroll ew-center-content"><div class="ew-error" role="alert"><p>${esc(snapshot.error || '기록을 다시 조회해 주세요.')}</p>${button('다시 조회','refresh')}</div></div>`);setBusy(snapshot.busy);return;}
     if(!snapshot.target_loading&&!(snapshot.scope_loading&&snapshot.error)&&snapshot.state&&s.mode==='author'){if(!workCanCreate(data.capabilities)){paint('<div id="ees-work-content" class="ew-scroll ew-center-content"><p class="ew-empty">'+(workNativeTargets.some(target=>workNativeAllowed(data.capabilities,target.id))?'왼쪽 메뉴에서 사용할 화면을 여세요.':'현재 계정으로 EES Workflow에서 열 수 있는 항목이 없습니다.')+'</p></div>');return;}if(!$('#ees-work-authoring-panel',host))paint('<div id="ees-work-authoring-panel" class="ew-scroll"></div>');return;}
     let body='';currentDraftKey='';
