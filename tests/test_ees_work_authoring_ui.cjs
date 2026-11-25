@@ -264,6 +264,38 @@ test('empty workspace listing does not create drafts or runs',async()=>{const h=
 test('direct editing saves only the chosen definition with current revision and request ID',async()=>{const h=harness();await h.node();h.field('job_guidance','직접 수정');h.click('save');await flush();assert.equal(h.writes[0].action,'save_draft');assert.equal(h.writes[0].workflow_id,'w');assert.equal(h.writes[0].expected_revision,1);assert.ok(h.writes[0].request_id);assert.equal(h.writes[0].definition.nodes.j.instructions,'직접 수정');assert.equal(h.workflows.get('q').draft.nodes.j.instructions,'원래 안내');assert.equal(h.draft().revision,2);assert.equal(h.draft().dirty,false);});
 test('dirty drafts and per-workflow node selection survive navigation',async()=>{const h=harness();await h.node();h.field('job_guidance','W 비공개 초안');await h.open('q');await h.node();h.field('job_guidance','Q 초안');await h.open('w');assert.equal(h.draft().definition.nodes.j.instructions,'W 비공개 초안');assert.match(h.markup,/W 비공개 초안/);assert.equal(h.writes.length,0);});
 test('typing during save preserves later edits and acknowledges only own base revision',async()=>{const h=harness(),pending=deferred();await h.node();h.field('job_guidance','저장 요청');h.writeOverride=()=>pending.promise;h.click('save');await flush();h.field('job_guidance','요청 뒤 새 글');pending.resolve({ok:true,revision:2});await flush();assert.equal(h.draft().definition.nodes.j.instructions,'요청 뒤 새 글');assert.equal(h.draft().revision,2);assert.equal(h.draft().dirty,true);});
+// 2026-11-25 (PR #156 review): the add row that is open while my own save is on its way keeps what is typed into it,
+// and moves to the revision that save acknowledges, so the name is added afterwards and not refused as a conflict.
+test('a job name typed into the open add row while my save is pending is kept and added after the save',async()=>{
+ const h=harness(),pending=deferred();installDefinition(h,stagedDefinition(1,1));
+ h.click('stage_toggle',{id:'t0'});await flush();h.click('add_job',{parent:'t0'});await flush();
+ const name=()=>h.host.querySelector('#ew-stage-editor [name=name]');
+ const type=value=>{const field=name();assert.ok(field,'the add row is open');field.value=value;field.focus();h.designer.handleEvent({type:'input',target:field});};
+ const names=()=>Object.values(h.draft().definition.nodes).filter(node=>node.type==='j').map(node=>node.name);
+ type('먼저 넣은 작업');await submitInline(h);assert.ok(names().includes('먼저 넣은 작업'));
+ // The save is held on its way; when it lands the server keeps it, as the product's server does.
+ h.writeOverride=async body=>{await pending.promise;const record=h.workflows.get('w');record.draft=copy(body.definition);record.revision++;return {ok:true,revision:record.revision};};
+ h.click('save');await flush();assert.equal(h.writes.length,1);
+ // The row that opened by itself is still on screen during the request, on the revision the save was sent from.
+ assert.equal(name()?.value,'');type('저장 중에 적은 작업');
+ pending.resolve();await flush();h.writeOverride=null;h.render();await flush();
+ assert.equal(h.draft().revision,2);assert.equal(name()?.value,'저장 중에 적은 작업');assert.doesNotMatch(h.markup,/id="ew-stage-inline-warning"/);
+ await submitInline(h);
+ assert.ok(names().includes('저장 중에 적은 작업'),JSON.stringify(names()));assert.doesNotMatch(h.markup,/id="ew-stage-inline-warning"/);
+});
+// 2026-11-25 (PR #156 review): the job chooser of 판정 단어 only moves between jobs, so a reader can use it.
+test('read-only 판정 단어: the job chooser stays usable while the definition fields stay off',async()=>{
+ const value=stagedDefinition(1,2);for(const id of ['j0-0','j0-1'])Object.assign(value.nodes[id],{mode:'human',result_block:'checklist',confirmation_items:[{id:'i1',name:'항목'}]});
+ const h=harness();installDefinition(h,value);h.state.capabilities.can_author=false;h.state.capabilities.managed_systems=[];h.state.workflow.can_manage=false;h.render();
+ h.click('tab',{tab:'rules'});await flush();
+ const chooser=()=>h.fields.find(field=>field.name==='rule_job_id');assert.ok(chooser());assert.equal(chooser().disabled,false);
+ assert.equal(chooser().value,'j0-0');
+ const others=h.fields.filter(field=>field.name!=='rule_job_id'&&field.closest?.('#ew-author-rules'));
+ chooser().value='j0-1';h.designer.handleEvent({type:'change',target:chooser()});await flush();
+ assert.equal(chooser().value,'j0-1');assert.equal(chooser().disabled,false);
+ for(const field of h.fields.filter(field=>field.name!=='rule_job_id'&&!['ew-author-search','ew-draft-search'].includes(field.id)))assert.equal(field.disabled,true,field.name);
+ assert.equal(h.writes.length,0);
+});
 test('same failed payload reuses request identity; different payload receives new identity',async()=>{const h=harness();await h.node();h.writeOverride=async()=>{throw new Error('response lost');};h.field('job_guidance','첫 글');h.click('save');await flush();h.click('save');await flush();assert.equal(h.writes[0].request_id,h.writes[1].request_id);h.field('job_guidance','다른 글');h.click('save');await flush();assert.notEqual(h.writes[1].request_id,h.writes[2].request_id);});
 test('revision conflict preserves unsaved text and never silently rebases',async()=>{const h=harness();await h.node();h.field('job_guidance','충돌 전 글');h.writeOverride=async()=>({ok:false,error:{code:'revision_conflict',message:'다른 담당자가 저장했습니다.'}});h.click('save');await flush();assert.equal(h.draft().revision,1);assert.equal(h.draft().dirty,true);assert.equal(h.draft().definition.nodes.j.instructions,'충돌 전 글');assert.match(h.markup,/최신 저장본과 비교/);});
 test('authorization denial preserves private draft and blocks subsequent mutation',async()=>{const h=harness();await h.node();h.field('job_guidance','권한 회수 전 글');h.writeOverride=async()=>{throw Object.assign(new Error('권한 회수'),{status:403});};h.click('save');await flush();h.click('save');await flush();assert.equal(h.writes.length,1);assert.equal(h.designer.canAuthor(),false);assert.equal(h.draft().definition.nodes.j.instructions,'권한 회수 전 글');});
