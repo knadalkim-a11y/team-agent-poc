@@ -94,6 +94,7 @@ function createWorkDesigner({callbacks}) {
   const summaryEdits=new Map();
   const summaryEdit=()=>summaryEdits.get(key());
   const categories={setup:'셋업',ops:'운영',incident:'장애대응'};
+  const procedureTabs={content:'업무 내용',history:'게시 기록'};
   const judgmentStates={completed:'완료',failed:'실패',unknown:'미확인',action_required:'사람 조치 필요'};
   const defaultJudgments=[{id:'complete',label:'완료',status:'completed'},{id:'failed',label:'실패',status:'failed'},{id:'unknown',label:'미확인',status:'unknown'},{id:'action',label:'사람 조치 필요',status:'action_required'}];
   const toolKinds={read:'정보 읽기',request:'EES에 작업 부탁',direct:'직접 실행 · 예외'};
@@ -130,7 +131,7 @@ function createWorkDesigner({callbacks}) {
   let resources={skills:[],available:false},resourcesLoaded=false,resourcesLoading=false,resourcesError='';
   let search='',pendingProposal=null,renderedProposal=null;
   let expandedStage='',inlineEdit=null,returnedJob='',jobMenu='',focusRequest=null,moveAnnouncement='';
-  let ruleNodeId='',validationCheckedAt='';
+  let validationCheckedAt='';
   const jobPanels=new Map(),jobFormBaselines=new WeakMap(),jobArgumentDrafts=new Map();
   let jobModePending=false,jobToolSetupPending=false;
   const toolDrafts=new Map(),procedureStarts=new Map(),pendingProcedureDescriptions=new Map(),drafts=new Map(),requests=new Map(),formBaselines=new Map();
@@ -262,20 +263,20 @@ function createWorkDesigner({callbacks}) {
   const statusState=()=>unsaved()?'dirty':justPublished&&justPublished===key()?'published':'saved';
   const saveStatus=()=>({dirty:'저장하지 않은 변경 있음',published:'게시함 · 방금',saved:'저장됨'})[statusState()];
   const statusHTML=()=>statusState()==='published'?saveStatus()+b('업무에서 보기','view_in_work','class="ew-text"'):saveStatus();
-  const authorTabs=()=>canAuthor()?{content:'업무 내용',try:'시험해 보기',rules:'판정 단어',history:'게시 기록'}:{content:'업무 내용',rules:'판정 단어',history:'게시 기록'};
+  const authorTabs=()=>canAuthor()?{content:procedureTabs.content,try:'시험해 보기',history:procedureTabs.history}:procedureTabs;
   const orderedNodes=()=>{const all=nodes(editor),map=new Map(all.map(n=>[n.id,n])),ordered=[];const walk=id=>{const n=map.get(id);if(!n||ordered.includes(n))return;ordered.push(n);(n.children || []).forEach(walk);};all.filter(n=>n.type==='p').forEach(n=>walk(n.id));return [...ordered,...all.filter(n=>!ordered.includes(n))];};
-  const b=(label,action,attrs='')=>editor&&tab!=='tools'&&!canAuthor()&&['delete_node','move_up','move_down','input_add','input_edit','input_delete','start_input_add','start_input_edit','start_input_delete','summary_edit','edit_workflow','copy','skill_remove','pick_job_tool','job_tool_setup','save','validate','publish','unpublish','factory_settings','schedule_disable','judgment_add','judgment_edit','suggestion_add','suggestion_edit'].includes(action)?'':`<button type="button" data-author-action="${esc(action)}" ${attrs}>${label}</button>`;
+  const b=(label,action,attrs='')=>editor&&tab!=='tools'&&!canAuthor()&&['delete_node','move_up','move_down','input_add','input_edit','input_delete','start_input_add','start_input_edit','start_input_delete','summary_edit','edit_workflow','copy','skill_remove','pick_job_tool','job_tool_setup','save','validate','publish','unpublish','factory_settings','schedule_disable','judgment_add','judgment_edit','judgment_delete','suggestion_add','suggestion_edit'].includes(action)?'':`<button type="button" data-author-action="${esc(action)}" ${attrs}>${label}</button>`;
   const textInput=(name,label,value='',attrs='')=>`<label>${esc(label)}<input name="${esc(name)}" value="${esc(value)}" ${attrs}></label>`;
   const area=(name,label,value='',attrs='')=>`<label>${esc(label)}<textarea name="${esc(name)}" ${attrs}>${esc(value)}</textarea></label>`;
   const select=(name,label,value,options,attrs='')=>`<label>${esc(label)}<select name="${esc(name)}" ${attrs}>${Object.entries(options).map(([id,title])=>`<option value="${esc(id)}" ${id===String(value)?'selected':''}>${esc(title)}</option>`).join('')}</select></label>`;
   const check=(name,label,value)=>`<label class="ew-author-inline"><input type="checkbox" name="${esc(name)}" ${value?'checked':''}>${esc(label)}</label>`;
   const optionList=values=>Object.fromEntries(values.map(item=>[item.id,item.name || item.id]));
-  function stash() {if(tab!=='tools'&&editor&&workflowId())drafts.set(key(),{editor:clone(editor),revision,dirty,selectedNode,tab,factory,ruleNodeId,expandedStage,inlineEdit:inlineEdit?clone(inlineEdit):null});}
+  function stash() {if(tab!=='tools'&&editor&&workflowId())drafts.set(key(),{editor:clone(editor),revision,dirty,selectedNode,tab,factory,expandedStage,inlineEdit:inlineEdit?clone(inlineEdit):null});}
   function clearProposal(){pendingProposal=null;renderedProposal=null;}
   function accept(value,{discard=false}={}) {
     record=clone(value || {});const cached=!discard&&drafts.get(key());
-    if(cached){editor=clone(cached.editor);revision=cached.revision;dirty=cached.dirty;selectedNode=cached.selectedNode;tab=cached.tab;factory=cached.factory;ruleNodeId=cached.ruleNodeId || '';expandedStage=cached.expandedStage || '';inlineEdit=cached.inlineEdit?clone(cached.inlineEdit):null;}
-    else{editor=clone(definitionOf(value) || null);revision=revisionOf(value);dirty=false;selectedNode='';tab='content';factory='';ruleNodeId='';expandedStage='';inlineEdit=null;}
+    if(cached){editor=clone(cached.editor);revision=cached.revision;dirty=cached.dirty;selectedNode=cached.selectedNode;tab=cached.tab;factory=cached.factory;expandedStage=cached.expandedStage || '';inlineEdit=cached.inlineEdit?clone(cached.inlineEdit):null;}
+    else{editor=clone(definitionOf(value) || null);revision=revisionOf(value);dirty=false;selectedNode='';tab='content';factory='';expandedStage='';inlineEdit=null;}
     if(!dirty){editor=clone(definitionOf(value) || null);revision=revisionOf(value);}
     tryRemember(record);
     if(selection.tab==='tools')tab='tools';
@@ -327,8 +328,10 @@ function createWorkDesigner({callbacks}) {
   function validationTarget(value){
     const message=typeof value==='string'?value:value.message || '',explicit=typeof value==='object'?value:{};
     const node=nodes(editor).find(item=>item.id===explicit.node_id || message.startsWith(item.id+':') || message.startsWith(item.id+' ') || message.includes(item.name+':'));
-    const tab=explicit.tab || (/판정|제안 규칙|송부|미승인/.test(message)?'rules':'content');
-    return {message,node,tab};
+    const target = /송부|미승인|(?:completion|unapproved|delivery)_policy:/.test(message) || explicit.tab==='policies' ? 'policies' :
+      explicit.tab==='rules' || explicit.tab==='judgments' || /판정|제안 규칙/.test(message) ?
+        (node?.type==='j'?'judgments':'policies') : 'content';
+    return {message,node,target};
   }
   function validationHTML(){
     const validation=record?.validation || record?.draft?.validation;if(!validation)return '<p class="ew-author-empty">저장한 절차의 작업 연결·입력·도구 권한을 검사합니다. PC 설치 성공 검사가 아닙니다. 저장한 뒤 메뉴의 내용 확인을 눌러 주세요. 확인 결과와 관계없이 게시할 수 있습니다.</p>';
@@ -380,18 +383,11 @@ function createWorkDesigner({callbacks}) {
   function publicationBadge(){
     return `<span class="ew-author-tag" data-state="${record?.published_version?'published':'draft'}">${record?.published_version?'게시':'미게시'}</span>`;
   }
-  let apiStructureEditKey=null;
-  function apiWorkflow(){
-    const jobsHere=editor?jobs(editor):[];
-    return Boolean(catalogFeature() && jobsHere.length && jobsHere.every(n=>n.mode==='tool' && (n.api_binding || !jobConnected(n))));
-  }
-  function compactApiStructure(){
-    return apiWorkflow() && tab==='content' && !selectedNode && !summaryEdit() && (!inlineEdit || idleInline()) && apiStructureEditKey!==key();
-  }
   function definitionHeader(){
     const title=editor?.name || record?.name || '업무 절차';
     const published=Boolean(record?.published_version);
-    return `${isJobDetail()||listBeside()?'':`<nav class="ew-author-breadcrumb" aria-label="현재 위치">${b(icon('9acc8')+'업무 절차 목록','list','class="ew-author-back"')}</nav>`}<div class="ew-author-definition-head"><div class="ew-author-heading"><h2>${esc(title)}</h2>${publicationBadge()}${canAuthor()?`<details class="ew-procedure-menu"><summary aria-label="업무 절차 메뉴">${icon('cb8e2')}</summary><div>${apiWorkflow()?b(compactApiStructure()?'절차 편집':'도구 연결 보기','api_structure_edit','class="ew-author-link"'):''}${b('업무 절차 정보·분류 수정','edit_workflow','class="ew-author-link"')}${b('다른 이름으로 저장','copy','class="ew-author-link"')}${b('내용 확인','validate',`class="ew-author-link" data-mutation ${unsaved()?'disabled':''}`)}${published?b('게시 내림','unpublish','class="ew-author-link" data-mutation'):''}</div></details>`:''}</div><p class="ew-author-muted">${esc(workflowSystemName())}${published?' · 게시 v'+esc(record.published_version)+(record.unpublished_changes===true?' · 게시 안 한 변경 있음':''):''}</p></div><nav class="ew-author-tabs" role="tablist" aria-label="업무 절차 편집">${Object.entries(authorTabs()).map(([id,label])=>b(label,'tab',`data-tab="${id}" role="tab" aria-selected="${tab===id}" tabindex="${tab===id?'0':'-1'}"`)).join('')}</nav>`;
+    const activeTab=['judgments','policies'].includes(tab)?'content':tab;
+    return `${isJobDetail()||listBeside()?'':`<nav class="ew-author-breadcrumb" aria-label="현재 위치">${b(icon('9acc8')+'업무 절차 목록','list','class="ew-author-back"')}</nav>`}<div class="ew-author-definition-head"><div class="ew-author-heading"><h2>${esc(title)}</h2>${publicationBadge()}${canAuthor()?`<details class="ew-procedure-menu"><summary aria-label="업무 절차 메뉴">${icon('cb8e2')}</summary><div>${b('업무 절차 정보·분류 수정','edit_workflow','class="ew-author-link"')}${b('실행 파라미터','execution_parameters','class="ew-author-link" aria-haspopup="dialog"')}${b('업무 완료·송부 정책','policy_settings','class="ew-author-link"')}${b('다른 이름으로 저장','copy','class="ew-author-link"')}${b('내용 확인','validate',`class="ew-author-link" data-mutation ${unsaved()?'disabled':''}`)}${published?b('게시 내림','unpublish','class="ew-author-link" data-mutation'):''}</div></details>`:''}</div><p class="ew-author-muted">${esc(workflowSystemName())}${published?' · 게시 v'+esc(record.published_version)+(record.unpublished_changes===true?' · 게시 안 한 변경 있음':''):''}</p></div><nav class="ew-author-tabs" role="tablist" aria-label="업무 절차 편집">${Object.entries(authorTabs()).map(([id,label])=>b(label,'tab',`data-tab="${id}" role="tab" aria-selected="${activeTab===id}" tabindex="${activeTab===id?'0':'-1'}"`)).join('')}</nav>`;
   }
   function procedureInfoHTML(){
     const edit=summaryEdit();
@@ -457,7 +453,7 @@ function createWorkDesigner({callbacks}) {
     const error=next&&inlineEdit?.kind===next.kind&&inlineEdit.parent===next.parent?inlineEdit.error:'';
     inlineEdit=next?{...next,revision,values:{name:''},initial:{name:''},error,blocked:false,auto:true}:null;
   }
-  function focusAction(action,id='',parent=''){focusRequest={action,id,parent};}
+  function focusAction(action,id='',parent=''){focusRequest={action,id,parent,reveal:action==='add_stage'||action==='add_job'};}
   function nodeMenuAction(id){return nodes(editor).find(node=>node.id===id)?.type==='t'?'stage_menu':'job_menu';}
   function showFactoryView(){return tab==='content'&&!procedureStart&&Boolean(workflowId())&&!selectedNode&&Boolean(editor)&&factories().length>0&&(editor.execution_scope==='factory'||(record?.settings || []).some(item=>Boolean(item.factory_id)));}
   function clearReturnedJob(){returnedJob='';host?.querySelectorAll?.('[data-returned="true"]').forEach(row=>row.setAttribute('data-returned','false'));}
@@ -473,13 +469,13 @@ function createWorkDesigner({callbacks}) {
     if(!existing){
       // The concurrent-edit notice stays the first element of the form; a name error belongs to the field.
       const number=addingStage?nodes(editor).filter(node=>node.type==='t').length+1:0;
-      return `<form id="ew-stage-editor" class="ew-stage-editor ew-add-row" novalidate aria-label="${label}">${conflict||edit.blocked?`<p id="ew-stage-inline-warning" class="ew-inline-error" role="alert">${esc(conflict || '편집 중인 항목을 먼저 적용하거나 취소해 주세요.')}</p>`:''}${number?`<i aria-hidden="true">${number}</i>`:''}<input name="name" value="${esc(edit.values.name)}" required maxlength="160" autocomplete="off" aria-label="${label}" placeholder="${addingStage?'단계 이름 · 예: 점검':'작업 이름 · 예: 설비 외관 확인'}"${nameError?' aria-invalid="true" aria-describedby="ew-stage-name-error"':''}>${conflict?'':b('추가','inline_apply',`class="ew-primary" data-mutation aria-label="${submit}"`)}${!edit.auto||inlineChanged()?b('취소','inline_cancel'):''}${nameError?`<p id="ew-stage-name-error" class="ew-inline-error" role="alert">${esc(nameError)}</p>`:''}</form>`;
+      return `<form id="ew-stage-editor" class="ew-stage-editor ew-add-row" novalidate aria-label="${label}">${conflict||edit.blocked?`<p id="ew-stage-inline-warning" class="ew-inline-error" role="alert">${esc(conflict || '편집 중인 항목을 먼저 적용하거나 취소해 주세요.')}</p>`:''}${number?`<i aria-hidden="true">${number}</i>`:''}<input name="name" value="${esc(edit.values.name)}" required maxlength="160" autocomplete="off" aria-label="${label}" placeholder="${addingStage?'단계 이름 · 예: 점검':'작업 이름 · 예: 설비 외관 확인'}"${nameError?' aria-invalid="true" aria-describedby="ew-stage-name-error"':''}>${conflict?'':b(submit,'inline_apply',`class="ew-primary" data-mutation aria-label="${submit}"`)}${!edit.auto||inlineChanged()?b('취소','inline_cancel'):''}${nameError?`<p id="ew-stage-name-error" class="ew-inline-error" role="alert">${esc(nameError)}</p>`:''}</form>`;
     }
     return `<form id="ew-stage-editor" class="ew-stage-editor" novalidate aria-label="${label}">${conflict||edit.blocked?`<p id="ew-stage-inline-warning" class="ew-inline-error" role="alert">${esc(conflict || '편집 중인 항목을 먼저 적용하거나 취소해 주세요.')}</p>`:''}${textInput('name',label,edit.values.name,'required maxlength="160" autocomplete="off"'+(nameError?' aria-invalid="true" aria-describedby="ew-stage-name-error"':''))}${nameError?`<p id="ew-stage-name-error" class="ew-inline-error" role="alert">${esc(nameError)}</p>`:''}${area('description','이 단계에서 하는 일 (선택)',edit.values.description,'rows="3"')+advanced}${conflict?'':'<p class="ew-author-muted">적용: 저장 전 초안에 반영 · 취소: 이 편집만 버림</p>'}<div class="ew-summary-actions">${b('취소','inline_cancel')}${conflict?'':b(submit,'inline_apply','class="ew-primary" data-mutation')}</div></form>`;
   }
   function openInline(kind,id='',parent=''){
     const node=nodes(editor).find(item=>item.id===id),values=kind==='stage'?{name:node?.name || '',description:node?.description || ''}:{name:''};
-    inlineEdit={kind,id,parent,revision,values,initial:clone(values),error:'',blocked:false};jobMenu='';tab='content';selectedNode='';if(kind==='stage'||kind==='add_job')expandedStage=id || parent;focusRequest={field:'#ew-stage-editor [name=name]'};stash();paint();
+    inlineEdit={kind,id,parent,revision,values,initial:clone(values),error:'',blocked:false};jobMenu='';tab='content';selectedNode='';if(kind==='stage'||kind==='add_job')expandedStage=id || parent;focusRequest={field:'#ew-stage-editor [name=name]',reveal:kind!=='stage'};stash();paint();
   }
   function applyInline(){
     if(!inlineEdit||!canAuthor())return;captureInline();const edit=inlineEdit,name=edit.values.name.trim();
@@ -488,7 +484,7 @@ function createWorkDesigner({callbacks}) {
     if(edit.kind==='stage'){const node=nodes(editor).find(item=>item.id===edit.id);if(!node)return;const before=JSON.stringify(node);node.name=name;node.description=edit.values.description;if(before!==JSON.stringify(node))dirty=true;focusAction('stage_edit',node.id);}
     else{const type=edit.kind==='add_stage'?'t':'j',id=(type==='t'?'stage-':'job-')+workUI.newId(),parent=edit.parent || nodes(editor).find(node=>node.type==='p')?.id || null;
       putNode(editor,{id,type,parent,name,description:'',instructions:'',children:[],mode:'human',inputs:[],result_block:'human_confirm',deps:[],human_confirmation:true,completion:{rule:''}});const owner=nodes(editor).find(node=>node.id===parent);if(owner){owner.children ||= [];owner.children.push(id);}dirty=true;
-      if(type==='t'){expandedStage=id;focusRequest={field:'#ew-stage-editor [name=name]'};}else{expandedStage=parent;selectedNode=id;focusRequest={field:'#ew-author-node [name=name]'};}
+      if(type==='t'){expandedStage=id;focusRequest={field:'#ew-stage-editor [name=name]',reveal:true};}else{expandedStage=parent;selectedNode=id;focusRequest={field:'#ew-author-node [name=name]'};}
     }
     inlineEdit=null;stash();paint();
   }
@@ -528,6 +524,127 @@ function createWorkDesigner({callbacks}) {
     return `<section class="ew-factory-differences" aria-label="공장별 적용 내용"><h3>${esc(heading)}</h3>${preview ? `<p>저장한 절차 기준 · 제외 작업 ${skipped}개 · 확인 필요 ${undecided}개</p>` : ''}${values ? `<dl class="ew-factory-values">${values}</dl>` : ''}</section>`;
   }
 
+  const parameterRoot = () => nodes(editor).find(node=>node.type==='p');
+  const executionParameterTypes={...workAuthoring.inputTypes,json_object:'JSON 객체'};
+  function executionParameterFields(){
+    return (parameterRoot()?.inputs || []).filter(field=>field && typeof field.id==='string' && (field.scope || 'run')==='run');
+  }
+
+  function availableExecutionParameters(){
+    const counts=new Map();
+    for(const node of nodes(editor)){
+      for(const field of node.inputs || [])counts.set(field.id,(counts.get(field.id) || 0)+1);
+    }
+    return executionParameterFields().filter(field=>counts.get(field.id)===1);
+  }
+
+  function executionParameterUses(id){
+    return nodes(editor).filter(node=>Object.values(node.api_binding?.inputs || {}).some(source=>
+      source?.run_input===id || source?.input===id) || node.deadline?.input===id ||
+      (node.inputs || []).some(field=>
+        (node.type==='j'&&field.id===id) || (Array.isArray(field.depends_on)?field.depends_on.includes(id):field.depends_on===id)));
+  }
+
+  function executionParametersHTML(){
+    const fields=executionParameterFields();
+    const rows=fields.map(field=>{
+      const users=executionParameterUses(field.id), name=field.name || field.id;
+      return `<section class="ew-execution-parameter" data-execution-parameter-id="${esc(field.id)}">
+        <div class="ew-author-heading"><h3>${esc(name)}</h3>
+          <button type="button" data-execution-parameter-action="edit" data-id="${esc(field.id)}" aria-label="${esc(name)} 편집">편집</button>
+          <button type="button" data-execution-parameter-action="delete" data-id="${esc(field.id)}" aria-label="${esc(name)} 삭제" ${users.length?'disabled':''}>삭제</button>
+        </div>
+        <dl><dt>형식</dt><dd>${esc(executionParameterTypes[field.type] || field.type)} · ${field.required?'필수':'선택'}</dd>
+          <dt>사용하는 작업</dt><dd data-execution-parameter-uses>${esc(users.map(job=>job.name || job.id).join(', ') || '연결된 작업 없음')}</dd>
+        </dl>
+        ${users.length?'<p class="ew-author-muted">연결을 해제한 뒤 삭제할 수 있습니다.</p>':''}
+      </section>`;
+    }).join('');
+    return `<div class="ew-execution-parameters">${rows || '<p>등록된 실행 파라미터가 없습니다.</p>'}
+      <button type="button" class="ew-author-link" data-execution-parameter-action="add">＋ 파라미터 추가</button></div>`;
+  }
+
+  async function editExecutionParameter(field,current,restoreFocus){
+    const locked=Boolean(field&&(executionParameterUses(field.id).length ||
+      (field.options_source || 'manual')!=='manual' || field.depends_on?.length || !executionParameterTypes[field.type]));
+    const snapshot=JSON.stringify(field);
+    const selectionType=type=>['single','multi'].includes(type);
+    const options=Array.isArray(field?.options)?field.options:[];
+    const optionLabel=option=>typeof option==='string'?option:option?.name || option?.id || '';
+    const optionLabels=options.map(optionLabel).join('\n');
+    const editableOptions=locked?'':`<div data-execution-parameter-options ${selectionType(field?.type)?'':'hidden'}>
+      ${area('options','선택지 · 한 줄에 하나',optionLabels)}</div>`;
+    const result=await formDialog(field?'실행 파라미터 편집':'실행 파라미터 추가',
+      `<div class="ew-author-fields">
+        ${textInput('name','파라미터 이름',field?.name || '','required maxlength="160"')}
+        ${locked?`<p>형식 · ${esc(executionParameterTypes[field.type] || field.type)} · ${field.required?'필수':'선택'}</p>`:
+          select('type','형식',field?.type || 'text',executionParameterTypes)+check('required','필수 값',field?.required ?? true)}
+        ${area('description','설명 · 선택',field?.description || '')}${editableOptions}</div>`,
+      '적용',element=>{
+        const type=element?.querySelector?.('[name=type]'), options=element?.querySelector?.('[data-execution-parameter-options]');
+        const sync=()=>{if(options)options.hidden=!selectionType(type?.value);};
+        type?.addEventListener?.('change',sync);
+        sync();
+        return ()=>type?.removeEventListener?.('change',sync);
+      },restoreFocus);
+    if(!result||!current()||field&&JSON.stringify(executionParameterFields().find(item=>item.id===field.id))!==snapshot)return;
+    const name=result.name?.trim();
+    if(!name){error='파라미터 이름을 입력해 주세요.';paint();return;}
+    const type=locked?field.type:result.type;
+    const required=locked?Boolean(field.required):result.required===true;
+    const description=result.description || '';
+    const value={...(field || {id:'field-'+workUI.newId(),scope:'run',execution_parameter:true}),name,type};
+    if(!field||Object.hasOwn(field,'required')||required)value.required=required;
+    if(!field||Object.hasOwn(field,'description')||description)value.description=description;
+    if(!locked&&selectionType(type)&&(type!==field?.type||result.options!==optionLabels)){
+      const labels=String(result.options || '').split('\n').map(item=>item.trim()).filter(Boolean);
+      value.options=labels.map(label=>options.find(option=>optionLabel(option)===label) || label);
+    }
+    if(field&&JSON.stringify(value)===snapshot)return;
+    const root=parameterRoot();
+    root.inputs ||= [];
+    if(field)root.inputs=root.inputs.map(item=>item.id===value.id?value:item);
+    else root.inputs.push(value);
+    dirty=true;stash();paint();
+  }
+
+  async function openExecutionParameters(){
+    const boundary={key:key(),revision,epoch,tab,selectedNode};
+    const current=()=>canAuthor()&&Boolean(parameterRoot())&&
+      boundary.key===key()&&boundary.revision===revision&&boundary.epoch===epoch&&
+      boundary.tab===tab&&boundary.selectedNode===selectedNode;
+    const restoreFocus=()=>{if(current())host?.querySelector?.('.ew-procedure-menu > summary')?.focus?.({preventScroll:true});};
+    while(current()){
+      let request;
+      const pending=dialog({title:'실행 파라미터',html:executionParametersHTML(),readOnlyDetail:true,restoreFocus});
+      const element=workUI.$('#ees-work-dialog');
+      const choose=event=>{
+        const button=event.target.closest?.('[data-execution-parameter-action]');
+        if(!button||button.disabled||!current())return;
+        request={action:button.dataset.executionParameterAction,id:button.dataset.id};
+        element.eesClose?.();
+      };
+      element?.addEventListener('click',choose);
+      try{await pending;}finally{element?.removeEventListener?.('click',choose);}
+      if(!request||!current())return;
+      const field=executionParameterFields().find(item=>item.id===request.id);
+      if(request.action==='add'||request.action==='edit'&&field){
+        await editExecutionParameter(field,current,restoreFocus);
+      }else if(request.action==='delete'&&field&&!executionParameterUses(field.id).length){
+        const accepted=await confirmDialog({title:'실행 파라미터를 삭제할까요?',
+          html:`<p>${esc(field.name || field.id)}</p>`,confirmLabel:'삭제',restoreFocus});
+        if(accepted&&current()&&!executionParameterUses(field.id).length){
+          const root=parameterRoot();
+          root.inputs=root.inputs.filter(item=>item.id!==field.id);
+          dirty=true;stash();paint();
+        }
+      }
+    }
+  }
+
+  function structureAdd(label, action, attrs=''){
+    return b('<span class="ew-structure-plus" aria-hidden="true"></span>'+label, action, `class="ew-structure-add" ${attrs}`);
+  }
   function structureHTML(diff){
     const all=orderedNodes(),stages=all.filter(node=>node.type==='t'),detachedInline=inlineEdit&&inlineEdit.kind!=='add_stage'&&!stages.some(stage=>stage.id===(inlineEdit.kind==='stage'?inlineEdit.id:inlineEdit.parent));
     const selectedSite = !scopeLoading && factories().find(item => item.id === selection.factory_id && (!item.system_id || item.system_id === workflowSystemName()));
@@ -539,14 +656,54 @@ function createWorkDesigner({callbacks}) {
       if (result === null) return '<small class="ew-author-tag" data-factory-condition="unknown">공장 조건 확인 필요</small>';
       return '';
     };
-    const stageHTML=(stage,index)=>{const children=all.filter(node=>node.type==='j'&&(node.parent_id || node.parent)===stage.id),open=expandedStage===stage.id;
-      return `<section class="ew-content-stage" data-stage-id="${esc(stage.id)}"><div class="ew-stage-head">${b(`<span class="ew-author-stage-number">${index+1}</span><span class="ew-stage-name">${esc(stage.name)}${proposalMark(stage.id,diff)}</span>${conditionBadge(stage.id)}<small class="ew-stage-count">${children.length}개 작업</small>${icon(open?'e1049':'f0554')}`,'stage_toggle',`data-id="${esc(stage.id)}" class="ew-stage-toggle" aria-expanded="${open}" aria-controls="ew-stage-body-${esc(stage.id)}"`)}${open&&canAuthor()?b(icon('a953c'),'stage_menu',`data-id="${esc(stage.id)}" class="ew-job-menu-button ew-stage-menu-button" aria-label="${esc(stage.name)} 메뉴" aria-expanded="${jobMenu===stage.id}" aria-haspopup="menu"`):''}${open&&jobMenu===stage.id&&canAuthor()?`<div class="ew-job-menu" role="menu" aria-label="${esc(stage.name)} 메뉴">${mutationButtons(stage,index,stages.length)}</div>`:''}</div>${open?`<div id="ew-stage-body-${esc(stage.id)}" class="ew-stage-body">${inlineEdit?.kind==='stage'&&inlineEdit.id===stage.id?inlineHTML():`<div class="ew-stage-description"><p>${esc(stage.description || '설명 없음')}</p>${canAuthor()?b('단계 정보 수정','stage_edit',`data-id="${esc(stage.id)}" class="ew-author-link"`):''}</div>`}<div class="ew-stage-jobs">${children.map((job,jobIndex)=>`<div class="ew-job-row" data-job-id="${esc(job.id)}" data-returned="${returnedJob===job.id}">${b(`<span class="ew-job-row-label"><span>${compactApiStructure()?String(jobIndex+1)+'. ':''}${esc(job.name)}</span><small class="ew-job-meta">${esc(jobModeText(job))}</small></span>${conditionBadge(job.id)}${job.mode==='tool'&&!jobConnected(job)&&!compactApiStructure()?'<small class="ew-author-tag ew-procedure-unconnected">도구 연결 전</small>':''}${proposalMark(job.id,diff)}${icon('f0554')}`,'node',`data-id="${esc(job.id)}" class="ew-author-job"`)}${canAuthor()?b(icon('a953c'),'job_menu',`data-id="${esc(job.id)}" class="ew-job-menu-button" aria-label="${esc(job.name)} 메뉴" aria-expanded="${jobMenu===job.id}" aria-haspopup="menu"`):''}${catalogFeature()&&job.mode==='tool'&&canAuthor()?b(icon('cb8e2')+(job.api_binding?'도구 변경':'도구 연결'),'job_api_setup',`data-id="${esc(job.id)}" class="ew-author-link ew-api-row-action"`):''}${job.api_binding&&catalogFeature()?workApiPicker.summary(job,catalogFeature(),all,true):''}${jobMenu===job.id&&canAuthor()?`<div class="ew-job-menu" role="menu" aria-label="${esc(job.name)} 메뉴">${mutationButtons(job,jobIndex,children.length)}</div>`:''}</div>`).join('')}${!children.length&&!canAuthor()?'<p class="ew-author-empty">이 단계에는 아직 작업이 없습니다.</p>':''}${canAuthor()&&children.length&&!inlineEdit?b(icon('9ce50')+'작업 추가','add_job',`data-parent="${esc(stage.id)}" class="ew-author-link"`):''}</div>${inlineEdit?.kind==='add_job'&&inlineEdit.parent===stage.id?inlineHTML():''}</div>`:''}</section>`;
-    };
-    const expandedJobs=all.filter(n=>n.type==='j' && (n.parent_id||n.parent)===expandedStage && n.api_binding);
-    const exampleJob=expandedJobs.find(n=>catalogFeature()?.apis.some(op=>op.id===n.api_binding.operation_id && op.can_use!==false && op.example!=null));
-    const mappedJob=expandedJobs.find(n=>Object.values(n.api_binding.inputs).some(source=>source.result));
-    const apiActions=compactApiStructure() && expandedJobs.length ? `<div class="ew-api-stage-actions">${exampleJob?b('조회 결과 예시 보기','job_api_example',`data-id="${esc(exampleJob.id)}"`):''}${mappedJob&&canAuthor()?b('입력 연결 변경','job_api_setup',`data-id="${esc(mappedJob.id)}" class="ew-author-link"`):''}</div>`:'';
-    return `<section class="ew-work-content" ${compactApiStructure()?'data-api-structure="true"':''}>${proposalHTML(diff)}<section class="ew-content-overview">${procedureInfoHTML()}</section>${factoryDifferencesHTML(selectedSite,preview)}<div class="ew-content-heading"><h3>단계와 작업</h3><small>${stages.length}개 단계</small>${b(icon('41b38'), 'help','data-id="stages_and_jobs" class="ew-help-trigger" aria-label="단계와 작업 도움말" aria-haspopup="dialog"')}</div><div class="ew-stage-list">${stages.map(stageHTML).join('') || (canAuthor()?'':'<p class="ew-author-empty">아직 단계가 없습니다.</p>')}</div>${apiActions}${canAuthor()&&stages.length&&(!inlineEdit||idleInline())?b(icon('9ce50')+'단계 추가','add_stage','class="ew-author-link ew-stage-add"'):''}${inlineEdit?.kind==='add_stage'||detachedInline?inlineHTML():''}<section class="ew-schedule-section ew-content-start-inputs">${startInputsHTML(nodes(editor).find(node=>node.type==='p'))}</section>${canAuthor()&&inputList(editor).some(input=>input.scope==='workflow')?b('업무 설정 값 편집','factory_settings','class="ew-author-link"'):''}</section>`;
+    const catalog = catalogFeature(), editable = canAuthor();
+    function jobHTML(job, index, length){
+      const control = `data-id="${esc(job.id)}"`;
+      const binding = catalog && job.api_binding;
+      const op = binding && catalog.apis.find(api=>api.id===binding.operation_id && api.can_use!==false);
+      const toolAction = catalog && job.mode==='tool' && editable
+        ? b(icon('cb8e2')+(binding?'도구 변경':'도구 연결'),'job_api_setup',`${control} class="ew-author-link ew-api-row-action" aria-haspopup="dialog"`)
+        : '';
+      const exampleAction = op && op.example!=null
+        ? b('조회 결과 예시 보기','job_api_example',`${control} class="ew-author-link ew-api-row-action" aria-haspopup="dialog"`)
+        : '';
+      const inputAction = editable && binding
+        ? b('입력 연결 변경','job_api_setup',`${control} data-key="api-inputs" data-api-setup="inputs" class="ew-author-link ew-api-row-action" aria-haspopup="dialog"`)
+        : '';
+      const actions = toolAction+exampleAction+inputAction;
+      return `<div class="ew-job-row" data-job-id="${esc(job.id)}" data-returned="${returnedJob===job.id}">
+        ${b(`<span class="ew-job-row-label"><span>${esc(job.name)}</span><small class="ew-job-meta">${esc(jobModeText(job))}</small></span>${conditionBadge(job.id)}${job.mode==='tool'&&!jobConnected(job)?'<small class="ew-author-tag ew-procedure-unconnected">도구 연결 전</small>':''}${proposalMark(job.id,diff)}${icon('f0554')}`,'node',`${control} class="ew-author-job"`)}
+        ${editable?b(icon('a953c'),'job_menu',`${control} class="ew-job-menu-button" aria-label="${esc(job.name)} 메뉴" aria-expanded="${jobMenu===job.id}" aria-haspopup="menu"`):''}
+        ${actions?`<div class="ew-api-row-actions">${actions}</div>`:''}
+        ${binding?workApiPicker.summary(job,catalog,all,true,executionParameterFields()):''}
+        ${jobMenu===job.id&&editable?`<div class="ew-job-menu" role="menu" aria-label="${esc(job.name)} 메뉴">${mutationButtons(job,index,length)}</div>`:''}
+      </div>`;
+    }
+    function stageHTML(stage,index){
+      const children = all.filter(node=>node.type==='j'&&(node.parent_id || node.parent)===stage.id);
+      const open = expandedStage===stage.id;
+      const id = esc(stage.id);
+      const toggle = b(`<span class="ew-author-stage-number">${index+1}</span><span class="ew-stage-name">${esc(stage.name)}${proposalMark(stage.id,diff)}</span>${conditionBadge(stage.id)}<small class="ew-stage-count">${children.length}개 작업</small>${icon(open?'e1049':'f0554')}`,'stage_toggle',`data-id="${id}" class="ew-stage-toggle" aria-expanded="${open}" aria-controls="ew-stage-body-${id}"`);
+      const menu = open && editable
+        ? b(icon('a953c'),'stage_menu',`data-id="${id}" class="ew-job-menu-button ew-stage-menu-button" aria-label="${esc(stage.name)} 메뉴" aria-expanded="${jobMenu===stage.id}" aria-haspopup="menu"`)
+        : '';
+      const add = open && editable && children.length && !inlineEdit
+        ? structureAdd('작업 추가','add_job',`data-parent="${id}"`)
+        : '';
+      const description = inlineEdit?.kind==='stage' && inlineEdit.id===stage.id ? inlineHTML() :
+        `<div class="ew-stage-description"><p>${esc(stage.description || '설명 없음')}</p>${editable?b('단계 정보 수정','stage_edit',`data-id="${id}" class="ew-author-link"`):''}</div>`;
+      const body = open ? `<div id="ew-stage-body-${id}" class="ew-stage-body">${description}
+        <div class="ew-stage-jobs">${children.map((job,i)=>jobHTML(job,i,children.length)).join('')}${!children.length&&!editable?'<p class="ew-author-empty">이 단계에는 아직 작업이 없습니다.</p>':''}</div>
+        ${inlineEdit?.kind==='add_job'&&inlineEdit.parent===stage.id?inlineHTML():''}</div>` : '';
+      return `<section class="ew-content-stage" data-stage-id="${id}"><div class="ew-stage-head">${toggle}${menu}${add}
+        ${open&&jobMenu===stage.id&&editable?`<div class="ew-job-menu" role="menu" aria-label="${esc(stage.name)} 메뉴">${mutationButtons(stage,index,stages.length)}</div>`:''}</div>${body}</section>`;
+    }
+    const addStage = editable && stages.length && (!inlineEdit || idleInline()) ? structureAdd('단계 추가','add_stage') : '';
+    return `<section class="ew-work-content">${proposalHTML(diff)}<section class="ew-content-overview">${procedureInfoHTML()}</section>${factoryDifferencesHTML(selectedSite,preview)}
+      <div class="ew-content-heading"><h3>단계와 작업</h3><small>${stages.length}개 단계</small>${b(icon('41b38'),'help','data-id="stages_and_jobs" class="ew-help-trigger" aria-label="단계와 작업 도움말" aria-haspopup="dialog"')}${addStage}</div>
+      <div class="ew-stage-list">${stages.map(stageHTML).join('') || (editable?'':'<p class="ew-author-empty">아직 단계가 없습니다.</p>')}</div>
+      ${inlineEdit?.kind==='add_stage'||detachedInline?inlineHTML():''}
+      ${editable&&inputList(editor).some(input=>input.scope==='workflow')?b('업무 설정 값 편집','factory_settings','class="ew-author-link"'):''}</section>`;
   }
   const jobPanelKey=node=>key()+'/'+node.id;
   function jobPanel(node){const id=jobPanelKey(node);if(!jobPanels.has(id))jobPanels.set(id,{argument:'',completion:false,advanced:false});return jobPanels.get(id);}
@@ -696,27 +853,35 @@ function createWorkDesigner({callbacks}) {
     try{const accepted=await pending;if(!accepted||!legacyAuthoring()||!canAuthor()||boundary.epoch!==epoch||boundary.context!==key()||boundary.revision!==revision||boundary.id!==selectedNode)return;const node=nodes(editor).find(item=>item.id===boundary.id),choice=chosen(),next=draft()?.node;if(!node||!next||JSON.stringify(node)!==boundary.snapshot)return;const latest=jobToolChoices().find(item=>item.key===choice.key);if((choice.key!==currentKey||choice.item.source==='authored')&&(!latest||JSON.stringify(latest.item)!==JSON.stringify(choice.item))){error='도구 상태가 바뀌었습니다. 다시 열어 확인해 주세요.';paint();return;}if(JSON.stringify(next)===boundary.snapshot)return;Object.assign(node,clone(next));for(const field of ['api_binding','api_generated_deps','shared_tool_id','tool_contract_id','tool_contract_revision','tool_reference','shared_tool_generated'])if(!Object.hasOwn(next,field))delete node[field];clearJobArgumentDrafts(node);dirty=true;stash();paint();}
     finally{jobToolSetupPending=false;element?.removeEventListener?.('input',onInput);element?.removeEventListener?.('change',onChange);element?.removeEventListener?.('click',onClick,true);restoreSetupFocus();}
   }
-  async function openApiJobSetup(jobId, initial={}){
+  async function openApiJobSetup(jobId, initial={}, setupKind=''){
     if(!catalogFeature()||!canAuthor()||busy||jobToolSetupPending)return;
     capture();
     const original=nodes(editor).find(job=>job.id===jobId&&job.type==='j');
     if(!original)return;
     const before=JSON.stringify(original),context=key(),atRevision=revision,view=selectedNode;
+    const parameters=clone(availableExecutionParameters()),parameterVersion=JSON.stringify(parameters);
     jobToolSetupPending=true;
     let result;
     try{
       result=await workApiPicker.open({
-        node:original,catalog:catalogFeature(),jobs:orderedNodes().filter(job=>job.type==='j'),initial,confirm:dialog,
-        restoreFocus:()=>{if(key()===context&&selectedNode===view)host?.querySelector?.('[data-author-action=job_api_setup]')?.focus?.({preventScroll:true});}
+        node:original,catalog:catalogFeature(),jobs:orderedNodes().filter(job=>job.type==='j'),
+        parameters,factoryAvailable:editor.execution_scope!=='system',initial,confirm:dialog,
+        restoreFocus:()=>{
+          if(key()!==context||selectedNode!==view)return;
+          const controls=Array.from(host?.querySelectorAll?.('[data-author-action=job_api_setup]') || [])
+            .filter(button=>button.dataset.id===jobId);
+          (controls.find(button=>(button.dataset.apiSetup || '')===setupKind) || controls[0])?.focus?.({preventScroll:true});
+        }
       });
     }finally{jobToolSetupPending=false;}
     const current=nodes(editor).find(job=>job.id===jobId);
-    if(!result||context!==key()||atRevision!==revision||view!==selectedNode||!canAuthor()||JSON.stringify(current)!==before)return;
+    if(!result||context!==key()||atRevision!==revision||view!==selectedNode||!canAuthor()||
+      JSON.stringify(current)!==before||JSON.stringify(availableExecutionParameters())!==parameterVersion)return;
     if(result.register){
       await openApiCatalogForJob(async id=>{
         if(context===key()&&atRevision===revision&&canAuthor()){
           const retained=nodes(editor).find(job=>job.id===jobId);
-          if(JSON.stringify(retained)===before)await openApiJobSetup(jobId,{...result.register,...(id?{id,query:''}:{})});
+          if(JSON.stringify(retained)===before&&JSON.stringify(availableExecutionParameters())===parameterVersion)await openApiJobSetup(jobId,{...result.register,...(id?{id,query:''}:{})},setupKind);
         }
       },jobId);
       return;
@@ -732,9 +897,11 @@ function createWorkDesigner({callbacks}) {
   function jobToolHTML(node){
     if(!legacyAuthoring()||catalogFeature()&&(node.api_binding||!jobConnected(node))){
       if(!catalogFeature())return apiUnavailableHTML();
-      const binding=node.api_binding?workApiPicker.summary(node,catalogFeature(),orderedNodes()):'';
+      const binding=node.api_binding?workApiPicker.summary(node,catalogFeature(),orderedNodes(),false,executionParameterFields()):'';
       const legacy=canAuthor()&&jobToolChoices().length?b('기존 도구 선택','job_tool_setup','class="ew-author-link" data-mutation aria-haspopup="dialog"'):'';
-      return `<section class="ew-job-tool-summary"><label>연결된 도구</label>${binding}${canAuthor()?b(icon('cb8e2')+(node.api_binding?'도구 변경':'도구 연결'),'job_api_setup',`data-id="${esc(node.id)}" class="ew-author-link" aria-haspopup="dialog"`):''}${legacy}</section>`;
+      const control=`data-id="${esc(node.id)}" class="ew-author-link" aria-haspopup="dialog"`;
+      const inputAction=canAuthor()&&node.api_binding?b('입력 연결 변경','job_api_setup',control+' data-api-setup="inputs" data-key="api-inputs"'):'';
+      return `<section class="ew-job-tool-summary"><label>연결된 도구</label>${binding}${canAuthor()?b(icon('cb8e2')+(node.api_binding?'도구 변경':'도구 연결'),'job_api_setup',control):''}${inputAction}${legacy}</section>`;
     }
     const tool=jobTool(node),messages=state.operations?.shared_tool_messages||{},unavailable=node.shared_tool_id&&(!tool||tool.state!=='available'||tool.can_use===false);
     const reason=unavailable?(!tool?state.operations?.shared_tools_notice||messages.shared_tool_review_required:tool.state==='disabled'?messages.shared_tool_disabled:tool.unavailable_message||messages[tool.can_use===false?'shared_tool_forbidden':'shared_tool_review_required']):'';
@@ -770,8 +937,11 @@ function createWorkDesigner({callbacks}) {
     const stage=nodes(editor).find(item=>item.id===(node.parent_id||node.parent)),siblings=orderedNodes().filter(item=>item.type==='j'&&(item.parent_id||item.parent)===stage?.id),index=siblings.findIndex(item=>item.id===node.id),mode=node.mode||'human',humanOptions={human_confirm:'사람 확인',checklist:'확인 항목 · 항목마다 체크',item_verdict:'항목별 판정',values:'사람이 정하는 값'};if(node.result_block&&!humanOptions[node.result_block])humanOptions[node.result_block]=workAuthoring.blocks[node.result_block]||node.result_block;
     const stageNumber = orderedNodes().filter(item => item.type === 't').findIndex(item => item.id === stage?.id) + 1;
     const assignment = assigneeHTML(node,'담당자 · 선택');
+    const judgmentChoices = hasJudgmentChoices(node)
+      ? b('판정 선택지','judgment_choices',`data-id="${esc(node.id)}" class="ew-author-link"`)
+      : '';
     const ai=`<p class="ew-author-muted">기존 AI 작업 설정을 유지합니다.</p>${area('job_guidance','수행 안내',jobGuidance(node))}${select('result_block','결과 형태',node.result_block||'human_confirm',workAuthoring.blocks)}${node.result_block==='item_verdict'?select('result_source_job_id','항목 목록의 근거 작업',node.result_source_job_id||'',{'':'근거 작업 선택',...Object.fromEntries(jobs(editor).filter(item=>item.id!==node.id).map(item=>[item.id,item.name]))}):''}${node.result_block==='ai_review'?`${select('completion_kind','이 작업의 완료 조건',node.completion?.kind||'review',{review:'초안 검토 완료',delivery:'실제 송부 완료 · 연결 전 차단',...(node.completion?.kind&&!['review','delivery'].includes(node.completion.kind)?{[node.completion.kind]:'기존 기준 · 게시 전 확인 필요'}:{})})}<p class="ew-author-note">본문의 검토 확정과 실제 송부 완료를 구분합니다. 송부 방식이 연결되기 전에는 실제 송부 완료를 확인할 수 없습니다.</p>${select('dependency_policy','보고 초안의 선행 확인',node.dependency_policy||'all_completed',{all_completed:'모두 완료된 근거만 사용',all_resolved:'모든 항목 판정이 기록되면 초안 가능 · 미승인 유지'})}`:''}${check('human_required','실행 후 사람이 확인해야 완료',node.human_confirmation!==false)}${area('completion_rule','완료 기준 설명',node.completion?.rule||'')}`;
-    return `<section class="ew-job-detail"><header class="ew-job-detail-header">${b(icon('9acc8')+'단계와 작업','node','data-id="" class="ew-author-back"')}<span>/ ${stageNumber ? stageNumber+' ' : ''}${esc(stage?.name||'')}</span>${canAuthor()?b(icon('cb8e2'),'job_menu',`data-id="${esc(node.id)}" class="ew-job-menu-button" aria-label="${esc(node.name)} 메뉴" aria-expanded="${jobMenu===node.id}" aria-haspopup="menu"`):''}${jobMenu===node.id&&canAuthor()?`<div class="ew-job-menu" role="menu" aria-label="${esc(node.name)} 메뉴">${mutationButtons(node,index,siblings.length)}</div>`:''}</header><form id="ew-author-node"><section class="ew-job-card ew-job-main" data-job-mode="${esc(mode)}">${mode==='human'?'<div class="ew-job-col">':''}<label><span class="ew-job-field-label">작업 이름</span><input name="name" value="${esc(node.name)}" required maxlength="160"></label><fieldset class="ew-job-method" role="radiogroup"><legend>수행 방법</legend><div>${Object.entries({human:'사람이 확인',tool:'도구로 처리'}).map(([value,label])=>`<label><input type="radio" name="mode" id="ew-job-mode-${value}" value="${value}" ${mode===value?'checked':''}><span>${label}</span></label>`).join('')}</div></fieldset>${mode==='tool'?`${jobToolHTML(node)}${jobResultHTML(node)}${jobConnected(node)&&jobResultMode(node)==='manual'?area('completion_rule','담당자 확인 기준',node.completion?.rule||''):''}`:mode==='human'?`${area('job_guidance','무엇을 확인하나요',jobGuidance(node),'placeholder="예: 설비 외관에 누수나 파손이 없는지 봅니다."')}</div><div class="ew-job-col">${humanConfirmHTML(node,humanOptions)}${area('completion_rule','완료 기준',node.completion?.rule||'','rows="1" class="ew-job-completion-rule" placeholder="예: 이상이 없으면 완료합니다."')}`:ai}${mode==='tool'?area('job_guidance','작업 안내 · 선택',jobGuidance(node)):''}<details class="ew-job-assignment"><summary>담당자 설정${node.assignee?' · 지정됨':''}</summary>${assignment}</details>${mode==='human'?'</div>':''}</section></form></section>`;
+    return `<section class="ew-job-detail"><header class="ew-job-detail-header">${b(icon('9acc8')+'단계와 작업','node','data-id="" class="ew-author-back"')}<span>/ ${stageNumber ? stageNumber+' ' : ''}${esc(stage?.name||'')}</span>${canAuthor()?b(icon('cb8e2'),'job_menu',`data-id="${esc(node.id)}" class="ew-job-menu-button" aria-label="${esc(node.name)} 메뉴" aria-expanded="${jobMenu===node.id}" aria-haspopup="menu"`):''}${jobMenu===node.id&&canAuthor()?`<div class="ew-job-menu" role="menu" aria-label="${esc(node.name)} 메뉴">${mutationButtons(node,index,siblings.length)}</div>`:''}</header><form id="ew-author-node"><section class="ew-job-card ew-job-main" data-job-mode="${esc(mode)}">${mode==='human'?'<div class="ew-job-col">':''}<label><span class="ew-job-field-label">작업 이름</span><input name="name" value="${esc(node.name)}" required maxlength="160"></label><fieldset class="ew-job-method" role="radiogroup"><legend>수행 방법</legend><div>${Object.entries({human:'사람이 확인',tool:'도구로 처리'}).map(([value,label])=>`<label><input type="radio" name="mode" id="ew-job-mode-${value}" value="${value}" ${mode===value?'checked':''}><span>${label}</span></label>`).join('')}</div></fieldset>${mode==='tool'?`${jobToolHTML(node)}${jobResultHTML(node)}${jobConnected(node)&&jobResultMode(node)==='manual'?area('completion_rule','담당자 확인 기준',node.completion?.rule||''):''}`:mode==='human'?`${area('job_guidance','무엇을 확인하나요',jobGuidance(node),'placeholder="예: 설비 외관에 누수나 파손이 없는지 봅니다."')}</div><div class="ew-job-col">${humanConfirmHTML(node,humanOptions)}${judgmentChoices}${area('completion_rule','완료 기준',node.completion?.rule||'','rows="1" class="ew-job-completion-rule" placeholder="예: 이상이 없으면 완료합니다."')}`:ai}${mode==='tool'?area('job_guidance','작업 안내 · 선택',jobGuidance(node)):''}${mode==='human'?'':judgmentChoices}<details class="ew-job-assignment"><summary>담당자 설정${node.assignee?' · 지정됨':''}</summary>${assignment}</details>${mode==='human'?'</div>':''}</section></form></section>`;
   }
   function captureJob(form,node){
     const v=new FormData(form),baseline=jobFormBaselines.get(form)||[],entries=Array.from(v.entries()),before=JSON.stringify(node),values=(list,name)=>list.filter(([key])=>key===name).map(([,value])=>value),changed=name=>JSON.stringify(values(entries,name))!==JSON.stringify(values(baseline,name)),group=names=>names.some(changed);
@@ -856,32 +1026,45 @@ function createWorkDesigner({callbacks}) {
   async function loadResources(){const generation=epoch;resourcesLoading=true;resourcesError='';try{const result=await callbacks.resources();if(generation!==epoch)return;capture();resources={skills:result.skills || [],available:result.available!==false};resourcesLoaded=true;if(!resources.available)resourcesError='Native 스킬 목록을 확인하지 못했습니다. 기존 연결은 유지합니다.';}catch(reason){if(generation===epoch){resources={skills:[],available:false};resourcesLoaded=true;resourcesError='Native 스킬 목록을 읽지 못했습니다. 기존 연결은 유지합니다.';}}finally{if(generation===epoch){resourcesLoading=false;paint();}}}
   function inputTable(node){const inputs=node.inputs || [];return `<table><thead><tr><th>값 이름</th><th>형식</th><th>쓰이는 곳</th><th>저장 범위</th><th>편집</th></tr></thead><tbody>${inputs.map(input=>`<tr><td>${canAuthor()?b(esc(input.name || input.title || input.id),'input_edit',`data-id="${esc(input.id)}"`):esc(input.name || input.title || input.id)}</td><td>${esc(workAuthoring.inputTypes[input.type] || input.type)}</td><td>${esc(input.tool_argument || input.description || '미연결')}</td><td>${esc({workflow:'업무 설정',factory:'공장별',run:'이번 진행 건'}[input.scope] || '이번 진행 건')}</td><td>${b('삭제','input_delete',`data-id="${esc(input.id)}" aria-label="${esc(input.name || input.id)} 삭제"`)}</td></tr>`).join('') || '<tr><td colspan="5">선언한 값이 없습니다.</td></tr>'}</tbody></table>`;}
   function conditionHTML(node){const c=node.condition&&typeof node.condition==='object'?node.condition:{};return `<div class="ew-author-fields">${select('condition_kind','조건 종류',c.all||c.any?'compound':c.field==='factory_id'?'factory':c.field?'attribute':'',{'':'모든 공장',attribute:'공장 속성',factory:'특정 공장',...(c.all||c.any?{compound:'기존 복합 조건 유지'}:{})})}${textInput('condition_field','공장 속성 ID',c.field || '')}${select('condition_op','비교',c.op || 'eq',{eq:'같음',ne:'다름',in:'목록에 포함',not_in:'목록에 없음',gt:'초과',gte:'이상',lt:'미만',lte:'이하'})}${textInput('condition_value','비교 값',Array.isArray(c.value)?JSON.stringify(c.value):String(c.value ?? ''))}${select('condition_type','값 형식',Array.isArray(c.value)?'list':typeof c.value==='boolean'?'boolean':typeof c.value==='number'?'number':'text',{text:'문자',number:'숫자',boolean:'예 / 아니오',list:'목록 · JSON 배열'})}</div>`;}
-  function startInputsHTML(root){const inputs=(root?.inputs||[]).filter(input=>(input.scope||'run')==='run');return `<div class="ew-author-heading ew-start-row"><h3>시작할 때 물어볼 것</h3><small>${inputs.length}개</small>${b('＋ 추가','start_input_add','class="ew-author-link" data-mutation aria-label="시작할 때 물어볼 것 추가"')}</div>${inputs.map((input,index)=>{const attrs=`data-start-input-id="${esc(input.id)}"`,control=(key,label,value,type='input',extra='')=>(type==='textarea'?area(key,label,value,`${attrs} data-definition-field="${key}" ${extra}`):textInput(key,label,value,`${attrs} data-definition-field="${key}" ${extra}`));return `<section class="ew-start-input-definition"><div class="ew-author-heading"><h4>입력 ${index+1}</h4>${b('삭제','start_input_delete',`data-id="${esc(input.id)}" class="ew-author-link" aria-label="${esc(input.name||'입력 '+(index+1))} 삭제"`)}</div><div class="ew-author-fields">${control('name','값 이름',input.name||'','input','maxlength="160"')}${select('input_type','형식',input.type,workAuthoring.inputTypes,`${attrs} data-definition-field="type"`)}${control('description','설명 · 선택',input.description||'','textarea')}${input.type==='number'?control('unit','단위 · 선택',input.unit||''):''}${['single','multi'].includes(input.type)?(!input.options_source||input.options_source==='manual'?control('options','선택지 · 한 줄에 하나',(input.options||[]).map(option=>typeof option==='string'?option:option.name||option.id).join('\n'),'textarea'):`<p class="ew-author-muted">기존 선택지 연결을 유지합니다. ${b('설정 확인','start_input_edit',`data-id="${esc(input.id)}" class="ew-author-link"`)}</p>`):''}<div class="ew-author-inline"><small>저장 범위 · 이번 진행 건</small><label><input type="checkbox" ${attrs} data-definition-field="required" ${input.required?'checked':''}>필수 값</label></div></div></section>`;}).join('')}`;}
-  function definitionFieldEvent(event){const target=event.target,key=target.dataset?.definitionField,inputId=target.dataset?.startInputId,judgmentId=target.dataset?.judgmentJobId;if(!key||inputId===undefined&&judgmentId===undefined)return false;if(!canAuthor())return true;if(!['input','change'].includes(event.type))return false;let object,judgmentNode,judgmentIndex;
-    if(inputId!==undefined)object=nodes(editor).find(node=>node.type==='p')?.inputs?.find(input=>input.id===inputId);else{const node=jobs(editor).find(item=>item.id===judgmentId),index=Number(target.dataset.judgmentIndex);if(!node||!nodeJudgments(node)?.[index])return true;judgmentNode=node;judgmentIndex=index;object=nodeJudgments(node)[index];}
-    if(!object)return true;const before=JSON.stringify(object);let value=target.type==='checkbox'?target.checked:target.value;if(key==='options'){const current=(object.options||[]).map(option=>typeof option==='string'?option:option.name||option.id).join('\n');if(value===current)return true;value=String(value).split('\n').map(item=>item.trim()).filter(Boolean);}if(!['name','type','description','unit','options','required','label','status','consequence'].includes(key))return true;if(JSON.stringify(object[key]??(target.type==='checkbox'?false:''))===JSON.stringify(value))return true;if(judgmentNode){if(!judgmentNode.judgments)judgmentNode.judgments=clone(nodeJudgments(judgmentNode));object=judgmentNode.judgments[judgmentIndex];}object[key]=value;if(JSON.stringify(object)!==before){dirty=true;justPublished='';stash();updateFooter();if(key==='type'){focusRequest={field:'[data-start-input-id="'+inputId+'"][data-definition-field="type"]'};paint();}}return true;
+  function judgmentFieldEvent(event){
+    const {target,type}=event,key=target.dataset?.definitionField,id=target.dataset?.judgmentJobId;
+    if(id===undefined||!['label','status','consequence'].includes(key)||!['input','change'].includes(type))return false;
+    if(!canAuthor())return true;
+    const node=judgmentJob(),index=Number(target.dataset.judgmentIndex);
+    if(node?.id!==id)return true;
+    const words=nodeJudgments(node),word=words[index];
+    if(!word||(word[key]??'')===target.value)return true;
+    if(!node.judgments)node.judgments=clone(words);
+    node.judgments[index][key]=target.value;
+    dirty=true;justPublished='';stash();updateFooter();return true;
   }
-  const ruleJobs=()=>jobs(editor).filter(node=>['checklist','item_verdict'].includes(node.result_block));
-  const ruleNode=()=>ruleJobs().find(node=>node.id===ruleNodeId) || ruleJobs()[0];
+  const selectedJob=()=>jobs(editor).find(node=>node.id===selectedNode);
+  const judgmentJob=()=>tab==='judgments'?selectedJob():null;
+  function hasJudgmentChoices(node){
+    return node.result_block==='item_verdict'||Array.isArray(node.judgments)||node.suggestion_rules||node.confirmation_notes||
+      node.result_block==='checklist'&&editor.judgments?.length;
+  }
   const nodeJudgments=node=>node?.judgments || editor.judgments || defaultJudgments;
-  function rulesHTML(){
-    const node=ruleNode(),words=node?nodeJudgments(node):[],guidance=node?.suggestion_rules || {},rules=guidance.rules || [];
-    const jobOptions=Object.fromEntries(ruleJobs().map(job=>{const stage=nodes(editor).find(item=>item.id===(job.parent_id || job.parent));return [job.id,(stage?stage.name+' · ':'')+job.name];}));
+  function judgmentChoicesHTML(node){
+    const words=nodeJudgments(node),guidance=node.suggestion_rules || {},rules=guidance.rules || [];
     const rows=words.map((word,index)=>{const attrs=`data-judgment-job-id="${esc(node.id)}" data-judgment-index="${index}"`;return `<section class="ew-judgment-definition"><div class="ew-author-heading"><h4>판정 ${index+1}</h4>${b('삭제','judgment_delete',`data-id="${index}" class="ew-author-link" aria-label="${esc(word.label||'판정 '+(index+1))} 삭제"`)}</div><div class="ew-author-fields">${textInput('judgment_label','판정 단어',word.label,`${attrs} data-definition-field="label" maxlength="80"`)}${select('judgment_status','기본 상태',word.status,judgmentStates,`${attrs} data-definition-field="status"`)}${area('judgment_consequence','이 판정이면 · 후속 설명',word.consequence||'',`${attrs} data-definition-field="consequence"`)}</div></section>`;}).join('');
     const legacy=node&&(node.suggestion_rules||node.confirmation_notes)?`<details class="ew-author-legacy-rules"><summary>기존 제안 설정</summary><form id="ew-author-rules">${area('suggestion_description','제안 기준',guidance.description||'')}${check('suggestion_provisional','임시값 · 확인 필요',guidance.provisional!==false)}<ol class="ew-author-rule-list">${rules.map((rule,index)=>`<li><span>${esc(rule.condition)}</span><span>→ ${rule.judgment_id?esc(words.find(word=>word.id===rule.judgment_id)?.label||'판정 연결 확인')+' 제안':'제안 없음 · 사람이 판단'}</span>${b('편집','suggestion_edit',`data-id="${index}" class="ew-author-link"`)}</li>`).join('')}</ol>${b('제안 규칙 추가','suggestion_add','class="ew-author-link"')}<fieldset><legend>사람만 고를 수 있는 판정</legend>${words.map(word=>check('human_only:'+word.id,word.label,(guidance.human_only_judgment_ids||[]).includes(word.id))).join('')}</fieldset>${area('confirmation_notes','확정 후 수정 방법 · 확인 사항',node.confirmation_notes||'')}</form><p class="ew-author-muted">기존 제안 지침을 보존합니다. 판정은 사람이 확정합니다.</p></details>`:'';
+    return `<section class="ew-author-rule-card">${b(icon('9acc8')+'작업 상세','judgment_back','class="ew-author-back"')}<h3 id="ew-author-judgments-title" tabindex="-1">판정 선택지</h3><p class="ew-author-muted">${esc(node.name)}</p>${rows}${b('＋ 판정 선택지 추가','judgment_add','class="ew-author-link"')}<p class="ew-author-muted">후속 설명은 업무 화면에 표시합니다.</p>${legacy}</section>`;
+  }
+  function procedurePoliciesHTML(){
     const policy=(title,key,normal,label,notesKey,notesLabel)=>`<section class="ew-author-policy-row"><h4>${title}</h4><p>${esc(!editor[key]||editor[key]===normal?label:'기존 정책 · 지원 여부 확인 필요')}</p>${area(notesKey,notesLabel,editor[notesKey]||'')}</section>`;
-    return `<section class="ew-author-rule-card"><h3>판정 규칙</h3><p class="ew-author-muted">확인 항목·항목별 판정 작업에서 사용하는 단어와 뜻을 정합니다. 단순 확인이나 문서 목록 확정에는 만들지 않아도 됩니다.</p>${node?`${select('rule_job_id','작업',node.id,jobOptions)}<div class="ew-author-heading"><h4>판정 단어</h4><small>각 단어를 기본 상태 하나에 연결</small></div>${rows}${b('＋ 판정 단어 추가','judgment_add','class="ew-author-link"')}<p class="ew-author-muted">후속 설명은 안내입니다. 이 설정만으로 다음 작업을 실행하거나 판정을 자동 확정하지 않습니다.</p>${legacy}`:'<div class="ew-author-empty"><p>판정 규칙을 정할 작업이 없습니다.</p><p>작업 상세의 확인 방법에서 ‘확인 항목 · 항목마다 체크’ 또는 ‘항목별 판정’을 선택하면 이곳에서 판정 단어를 정할 수 있습니다.</p></div>'+b('단계와 작업 보기','node','data-id="" class="ew-author-link"')}</section><details class="ew-author-rule-policy"><summary>업무 전체 완료·송부 정책</summary><form id="ew-author-policies">${policy('업무 완료 정책','completion_policy','all_required_approved','모든 필수 항목이 완료 판정이어야 완료','completion_notes','업무 완료 정책 설명')}${policy('미승인 항목 후속 정책','unapproved_policy','hold','보류 · 자동 포함·제외하지 않음','unapproved_notes','미승인 후속 검토 사항')}${policy('결과 송부 정책','delivery_policy','draft_only','결과 초안 저장 · 실제 송부 미연결','delivery_notes','결과 송부 검토 사항')}<p class="ew-author-muted">미승인 항목 처리와 실제 송부는 자동으로 수행하지 않습니다.</p></form></details>`;
+    return `${b(icon('9acc8')+'업무 내용','policy_back','class="ew-author-back"')}<details class="ew-author-rule-policy" open><summary id="ew-author-policies-title">업무 완료·송부 정책</summary><form id="ew-author-policies">${policy('업무 완료 정책','completion_policy','all_required_approved','모든 필수 항목이 완료 판정이어야 완료','completion_notes','업무 완료 정책 설명')}${policy('미승인 항목 후속 정책','unapproved_policy','hold','보류 · 자동 포함·제외하지 않음','unapproved_notes','미승인 후속 검토 사항')}${policy('결과 송부 정책','delivery_policy','draft_only','결과 초안 저장 · 실제 송부 미연결','delivery_notes','결과 송부 검토 사항')}<p class="ew-author-muted">미승인 항목 처리와 실제 송부는 자동으로 수행하지 않습니다.</p></form></details>`;
   }
   async function editJudgment(index){
-    const node=ruleNode();if(!node)return;const words=nodeJudgments(node),existing=index===null?null:words[index];if(index!==null&&!existing)return;
+    const node=judgmentJob();if(!node)return;const words=nodeJudgments(node),existing=index===null?null:words[index];if(index!==null&&!existing)return;
     const value=await formDialog(existing?'판정 단어 편집':'판정 단어 추가',`<div class="ew-author-fields">${textInput('label','판정 단어',existing?.label || '','required maxlength="80"')}${select('status','기본 상태',existing?.status || 'unknown',judgmentStates)}${area('consequence','이 판정이면 · 후속 설명',existing?.consequence || '')}</div><p>후속 설명은 안내입니다. 실제 선행 관계와 완료 정책은 구조에서 정합니다.</p>`);
-    if(!value)return;if(!value.label?.trim()){error='판정 단어를 입력해 주세요.';paint();return;}
+    if(!value||!canAuthor())return;if(!value.label?.trim()){error='판정 이름을 입력해 주세요.';paint();return;}
     node.judgments=clone(words);const judgment={...(existing || {id:'judgment-'+workUI.newId()}),label:value.label.trim(),status:value.status,consequence:value.consequence || ''};if(existing)node.judgments[index]=judgment;else node.judgments.push(judgment);dirty=true;stash();paint();
   }
   async function editSuggestion(index){
-    const node=ruleNode();if(!node)return;const guidance=node.suggestion_rules || {},rules=guidance.rules || [],existing=index===null?null:rules[index];if(index!==null&&!existing)return;
+    const node=judgmentJob();if(!node)return;const guidance=node.suggestion_rules || {},rules=guidance.rules || [],existing=index===null?null:rules[index];if(index!==null&&!existing)return;
     const answer=await formDialog(existing?'AI 제안 규칙 편집':'AI 제안 규칙 추가',`<div class="ew-author-fields">${area('condition','조건',existing?.condition || '','required maxlength="2000"')}${select('judgment_id','제안 결과',existing?.judgment_id || '',{'':'제안 없음 · 사람이 판단',...optionList(nodeJudgments(node).filter(word=>!(guidance.human_only_judgment_ids || []).includes(word.id)).map(word=>({id:word.id,name:word.label})))})}</div><p>위에서부터 차례로 참고하는 제안 지침입니다. 판정을 자동 확정하지 않습니다.</p>`);
-    if(!answer)return;if(!answer.condition?.trim()){error='제안 조건을 입력해 주세요.';paint();return;}
+    if(!answer||!canAuthor())return;if(!answer.condition?.trim()){error='제안 조건을 입력해 주세요.';paint();return;}
     node.suggestion_rules={provisional:true,...guidance,rules:clone(rules)};const rule={...(existing || {id:'rule-'+workUI.newId()}),condition:answer.condition.trim(),outcome:answer.judgment_id?'judgment':'none',judgment_id:answer.judgment_id || ''};if(existing)node.suggestion_rules.rules[index]=rule;else node.suggestion_rules.rules.push(rule);dirty=true;stash();paint();
   }
   function historyHTML(){const versions=record?.versions||state.versions||[];return `<section class="ew-author-history"><div class="ew-author-heading"><h3>게시 기록</h3><small>${versions.length}개</small></div>${versions.length?`<ol>${versions.map(version=>{const at=version.published_at||version.created_at||'',rev=version.draft_revision??version.revision;return `<li><div><strong>게시 v${esc(version.version)}</strong>${rev!==undefined?`<small>저장본 r${esc(rev)}</small>`:''}</div>${at?`<time>${esc(workUI.time?.(at)||at)}</time>`:''}${version.publisher_name||version.publisher||version.published_by?`<p>${esc(version.publisher_name||version.publisher||version.published_by)}</p>`:''}${version.definition?`<details><summary>게시 내용</summary><pre>${esc(JSON.stringify(version.definition,null,2))}</pre></details>`:''}</li>`;}).join('')}</ol>`:'<p class="ew-author-empty">아직 게시한 버전이 없습니다. ‘게시’를 누르면 첫 기록이 생깁니다.</p>'}<p class="ew-author-muted">기존 진행 건은 시작할 때의 게시 버전과 기록을 유지합니다.</p>${legacySchedulesHTML()}</section>`;}
@@ -1285,7 +1468,7 @@ function createWorkDesigner({callbacks}) {
   async function tryClick(control){
     const action=control.dataset.action,id=control.dataset.jobId,now=tryState(),row=tryRowIn(now,id);if(!row)return;
     if(action==='stage_values'){const open=now.selection.stage_evidence===id;if(open)tryCaptureValues(id);tryUI.open=open?'':id;tryUI.record='';tryUI.tool='';tryUI.menu='';paint();return;}
-    if(action==='stage_evidence'){const values=workStageHasValues(row,now.data,{startForm:false,problem:row.problem?'problem':''}),shown=now.selection.stage_evidence===id&&(now.selection.stage_record===id||!values);if(now.selection.stage_evidence===id)tryCaptureValues(id);tryUI.open=shown?'':id;tryUI.record=shown?'':id;tryUI.tool='';tryUI.menu='';paint();return;}
+    if(action==='stage_evidence'){const values=workStageHasValues(row,now.data,now.selection,{startForm:false,problem:row.problem?'problem':''}),shown=now.selection.stage_evidence===id&&(now.selection.stage_record===id||!values);if(now.selection.stage_evidence===id)tryCaptureValues(id);tryUI.open=shown?'':id;tryUI.record=shown?'':id;tryUI.tool='';tryUI.menu='';paint();return;}
     if(action==='stage_tool'){tryUI.open=id;tryUI.record=id;tryUI.tool=tryUI.tool===control.dataset.toolKey?'':control.dataset.toolKey;paint();return;}
     if(action==='stage_verdict'){if(!row.canDecide)return;tryUI.menu=tryUI.menu===id?'':id;paint();if(tryUI.menu){const options=[...(host?.querySelectorAll?.('[role="menuitemradio"]') || [])];(options.find(item=>item.getAttribute?.('aria-checked')==='true') || options[0])?.focus?.({preventScroll:true});}return;}
     if(action==='stage_decide'){const judgment=workStageJudgments(row.node,now.data.run.definition).find(item=>String(item.id)===(control.dataset.judgmentId || control.dataset.verdict)&&String(item.status)===control.dataset.verdict);if(judgment)await tryDecide(row,judgment);return;}
@@ -1731,14 +1914,14 @@ function createWorkDesigner({callbacks}) {
   }
   const itemScroller=()=>host?.querySelector?.('.ew-api-main')||host?.querySelector?.('.ew-author-scroll');
   function capturePosition(){if(!paintedTarget||!host||host.isConnected===false)return;const box=host.querySelector?.('.ew-author-scroll');if(box)panelPositions.set(paintedTarget,{scroll:itemScroller().scrollTop,details:[...(box.querySelectorAll?.('details:not(.ew-stage-advanced):not(.ew-tool-advanced):not(.ew-proposal-other)') || [])].map(item=>item.open)});}
-  function paint(){if(!host)return;capturePosition();captureProposalDetails();captureToolAdvanced();const focus=host.contains?.(document.activeElement)?document.activeElement:null,tryFocus=focus?.closest?.('#ew-try')?tryFocusKey(focus):null,focusData=focus?{button:focus.tagName==='BUTTON',name:focus.name,id:focus.id,start:focus.selectionStart,end:focus.selectionEnd,create:focus.dataset?.authorAction==='create',action:focus.dataset?.authorAction,nodeId:focus.dataset?.id,parent:focus.dataset?.parent,tab:focus.dataset?.tab,value:focus.value}:null,scroll=itemScroller()?.scrollTop || 0,paneBefore=host.querySelector?.('.ew-author-pane,.ew-api-pane'),paneScroll=paneBefore?.scrollTop || 0;
+  function paint(){if(!host)return;capturePosition();captureProposalDetails();captureToolAdvanced();const focus=host.contains?.(document.activeElement)?document.activeElement:null,tryFocus=focus?.closest?.('#ew-try')?tryFocusKey(focus):null,focusData=focus?{button:focus.tagName==='BUTTON',name:focus.name,id:focus.id,start:focus.selectionStart,end:focus.selectionEnd,create:focus.dataset?.authorAction==='create',action:focus.dataset?.authorAction,nodeId:focus.dataset?.id,parent:focus.dataset?.parent,tab:focus.dataset?.tab,apiSetup:focus.dataset?.apiSetup,value:focus.value}:null,scroll=itemScroller()?.scrollTop || 0,paneBefore=host.querySelector?.('.ew-author-pane,.ew-api-pane'),paneScroll=paneBefore?.scrollTop || 0;
     if(!showFactoryView())factory='';
     syncAutoInline();
     wide=measureWide();watchWidth();
     const target=JSON.stringify([key(),selection.factory_id || '',tab,selectedNode,toolId,procedureStart,procedureChoice,toolStart,toolChanging,authoredTool?.id,authoredView,authoredPart,authoredImport,authoredModal?.type,catalogActive()?apiCatalog.signature():null]),sameTarget=paintedTarget===target&&paintedWide===wide;paintedTarget=target;paintedWide=wide;
     const diff=pendingProposal&&editor?workAuthoring.proposalChanges(editor,pendingProposal.definition):null;
     const commonTools=tab==='tools'&&!toolDraft&&!toolStart;
-    const html=`<section class="ew-author ${readStartContext()?'ew-author-procedure-start':''}" id="ees-work-designer" data-ees-work aria-label="${tab==='tools'?'도구 작성':'업무 절차 작성'}" data-author-tab="${esc(tab)}" data-api-overview="${compactApiStructure()}" data-author-detail="${isJobDetail()}" data-author-split="${listBeside()}" data-tool-draft="${tab==='tools'&&legacyAuthoring()&&(authoredEnabled()||Boolean(authoredTool))}"><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true">${esc(moveAnnouncement)}</span>${listBeside()?`<aside class="ew-author-pane" aria-label="업무 절차 목록">${listHTML()}</aside>`:''}<div class="ew-author-scroll">${error?`<p role="alert" class="ew-author-error">${esc(error)}</p>${editor&&!authoredTool?b('최신 저장본과 비교','compare','class="ew-author-link"'):''}`:''}${notice?`<p role="status" class="ew-author-note">${esc(notice)}</p>`:''}${loading?'<p role="status">절차를 읽고 있습니다…</p>':''}${!canAuthor()&&!toolContextLoading&&(!commonTools||toolDraft)?'<p class="ew-author-warning">이 범위를 수정할 담당 권한이 없습니다. 작성 중인 내용은 이 로그인 세션에 보존됩니다.</p>':''}${tab==='tools'?(legacyListOpen&&legacyAuthoring()&&catalogFeature()?b('‹  API 명세 목록','api_catalog_return','class="ew-author-back"'):'')+toolsHTML():procedureStart?procedureStartHTML():!workflowId()?listHTML():!editor?'<p class="ew-author-empty">절차를 선택하거나 다시 조회해 주세요.</p>':definitionHeader()+(tab==='validation'?validationHTML():tab==='history'?historyHTML():tab==='rules'?rulesHTML():tab==='try'?tryHTML():selectedNode?nodeHTML(diff):structureHTML(diff))}</div><footer>${footerHTML(diff)}</footer></section>`;
+    const html=`<section class="ew-author ${readStartContext()?'ew-author-procedure-start':''}" id="ees-work-designer" data-ees-work aria-label="${tab==='tools'?'도구 작성':'업무 절차 작성'}" data-author-tab="${esc(tab)}" data-author-detail="${isJobDetail()}" data-author-split="${listBeside()}" data-tool-draft="${tab==='tools'&&legacyAuthoring()&&(authoredEnabled()||Boolean(authoredTool))}"><span class="ew-visually-hidden" data-author-live aria-live="polite" aria-atomic="true">${esc(moveAnnouncement)}</span>${listBeside()?`<aside class="ew-author-pane" aria-label="업무 절차 목록">${listHTML()}</aside>`:''}<div class="ew-author-scroll">${error?`<p role="alert" class="ew-author-error">${esc(error)}</p>${editor&&!authoredTool?b('최신 저장본과 비교','compare','class="ew-author-link"'):''}`:''}${notice?`<p role="status" class="ew-author-note">${esc(notice)}</p>`:''}${loading?'<p role="status">절차를 읽고 있습니다…</p>':''}${!canAuthor()&&!toolContextLoading&&(!commonTools||toolDraft)?'<p class="ew-author-warning">이 범위를 수정할 담당 권한이 없습니다. 작성 중인 내용은 이 로그인 세션에 보존됩니다.</p>':''}${tab==='tools'?(legacyListOpen&&legacyAuthoring()&&catalogFeature()?b('‹  API 명세 목록','api_catalog_return','class="ew-author-back"'):'')+toolsHTML():procedureStart?procedureStartHTML():!workflowId()?listHTML():!editor?'<p class="ew-author-empty">절차를 선택하거나 다시 조회해 주세요.</p>':definitionHeader()+(tab==='validation'?validationHTML():tab==='history'?historyHTML():tab==='policies'?procedurePoliciesHTML():tab==='judgments'&&judgmentJob()?judgmentChoicesHTML(judgmentJob()):tab==='try'?tryHTML():selectedNode?nodeHTML(diff):structureHTML(diff))}</div><footer>${footerHTML(diff)}</footer></section>`;
     if(sameTarget&&typeof workPatchContent==='function')workPatchContent(host,html);else host.innerHTML=html;
     if(catalogActive())apiCatalog.afterPaint(host);
     if(authoredModal?.type==='connection'){const secret=host.querySelector?.('[name=draft_connection_token]');if(secret)secret.value=authoredModal.token;}
@@ -1746,8 +1929,20 @@ function createWorkDesigner({callbacks}) {
     const box=host.querySelector?.('.ew-author-scroll'),position=panelPositions.get(target);if(box){if(position)[...(box.querySelectorAll?.('details:not(.ew-stage-advanced):not(.ew-tool-advanced):not(.ew-proposal-other)') || [])].forEach((item,index)=>{if(index<position.details.length)item.open=position.details[index];});itemScroller().scrollTop=position?.scroll ?? (sameTarget?scroll:0);}
     // The list beside the item keeps its place; when it first appears the opened row is brought into view.
     const pane=host.querySelector?.('.ew-author-pane,.ew-api-pane');if(pane){if(paneBefore?.className===pane.className)pane.scrollTop=paneScroll;else pane.querySelector?.('[aria-current=true]')?.scrollIntoView?.({block:'nearest'});}
-    if(tryFocus)tryRestoreFocus(tryFocus);else if(focusData){let field=focusData.create?host.querySelector?.('[data-author-action=create]'):focusData.action?Array.from(host.querySelectorAll?.('[data-author-action]') || []).find(item=>item.dataset.authorAction===focusData.action&&item.dataset.id===focusData.nodeId&&item.dataset.parent===focusData.parent&&item.dataset.tab===focusData.tab):Array.from(host.querySelectorAll?.('input,select,textarea') || []).find(item=>focusData.id?item.id===focusData.id:item.name===focusData.name);if(!field&&focusData.button&&inlineConflict())field=host.querySelector?.('[data-author-action=inline_cancel]');field?.focus?.({preventScroll:true});if(typeof focusData.start==='number'&&field?.setSelectionRange&&['text','search','textarea','url',''].includes(field.type || ''))try{field.setSelectionRange(focusData.start,focusData.end);}catch(_){} }
-    if(focusRequest){const request=focusRequest;focusRequest=null;const field=request.field?host.querySelector?.(request.field) || (request.fallback?host.querySelector?.(request.fallback):null):Array.from(host.querySelectorAll?.('[data-author-action]') || []).find(item=>item.dataset.authorAction===request.action&&(!request.id||item.dataset.id===request.id)&&(!request.parent||item.dataset.parent===request.parent));(field || (['add_stage','add_job'].includes(request.action)?host.querySelector?.('#ew-stage-editor [name=name]'):null))?.focus?.({preventScroll:true});}
+    if(tryFocus)tryRestoreFocus(tryFocus);else if(focusData){let field=focusData.create?host.querySelector?.('[data-author-action=create]'):focusData.action?Array.from(host.querySelectorAll?.('[data-author-action]') || []).find(item=>item.dataset.authorAction===focusData.action&&item.dataset.id===focusData.nodeId&&item.dataset.parent===focusData.parent&&item.dataset.tab===focusData.tab&&item.dataset.apiSetup===focusData.apiSetup):Array.from(host.querySelectorAll?.('input,select,textarea') || []).find(item=>focusData.id?item.id===focusData.id:item.name===focusData.name);if(!field&&focusData.button&&inlineConflict())field=host.querySelector?.('[data-author-action=inline_cancel]');field?.focus?.({preventScroll:true});if(typeof focusData.start==='number'&&field?.setSelectionRange&&['text','search','textarea','url',''].includes(field.type || ''))try{field.setSelectionRange(focusData.start,focusData.end);}catch(_){} }
+    if(focusRequest){
+      const request=focusRequest;focusRequest=null;
+      const button=()=>Array.from(host.querySelectorAll?.('[data-author-action]') || []).find(item=>item.dataset.authorAction===request.action&&(!request.id||item.dataset.id===request.id)&&(!request.parent||item.dataset.parent===request.parent));
+      const field=(request.field?host.querySelector?.(request.field) || (request.fallback?host.querySelector?.(request.fallback):null):button()) ||
+        (['add_stage','add_job'].includes(request.action)?host.querySelector?.('#ew-stage-editor [name=name]'):null);
+      field?.focus?.({preventScroll:true});
+      if(request.reveal&&field){
+        const bounds=field.getBoundingClientRect?.(),viewport=box?.getBoundingClientRect?.();
+        if(bounds&&viewport&&(bounds.top<viewport.top||bounds.bottom>viewport.bottom)){
+          field.scrollIntoView?.({block:'nearest',inline:'nearest'});
+        }
+      }
+    }
     // The work rows of the try need the work panel's row scope (the view sets it too when it repaints).
     host.closest?.('#ees-work-panel')?.classList?.toggle?.('ew-vd',tab==='try');
     if(tab==='try')placeTryMenu();
@@ -1770,7 +1965,7 @@ function createWorkDesigner({callbacks}) {
     if(el.closest?.('#ew-try')){el.disabled=busy||Boolean(tryWork)||tryLocked()||!canAuthor();return;}
     el.disabled=busy||!canAuthor()||(el.dataset.authorAction==='validate'&&unsaved())||(el.dataset.authorAction==='publish'&&!canPublish())||(el.dataset.authorAction==='procedure_create'&&Boolean(procedureCreateReason()))||(el.dataset.authorAction==='tool_review'&&Boolean(toolSubmitReason()))||(el.dataset.authorAction==='save'&&!savable())||el.dataset.fixedDisabled==='true'||(pendingProposal&&['save','validate','publish','unpublish'].includes(el.dataset.authorAction));});host?.querySelectorAll?.('input,select,textarea').forEach(el=>{if(el.closest?.('#ew-try'))return;if(!['ew-author-search','ew-draft-search'].includes(el.id))el.disabled=el.dataset.preserve==='true'||!canAuthor()||(Boolean(readStartContext())&&busy);});host?.querySelectorAll?.('[data-author-action=procedure_cancel]').forEach(el=>{el.disabled=busy;});syncHelpState();}
   function capture(){captureAuthoredLifecycle();captureAuthored();captureSummary();captureInline();capturePosition();if(!host||!canAuthor())return;captureProcedure();const form=host.querySelector?.('#ew-author-node');if(form&&editor&&formChanged(form)){const node=nodes(editor).find(n=>n.id===selectedNode);if(node?.type==='j')captureJob(form,node);else if(node){const before=JSON.stringify(node),priorTool=node.tool_contract_id,v=new FormData(form);for(const name of ['name','description','instructions','mode','result_block','tool_contract_id','deadline_notes','effect_job_id','result_source_job_id','dependency_policy'])if(v.has(name))node[name]=String(v.get(name));if(node.type==='j'){if(v.has('assignee')){const value=String(v.get('assignee') || ''),current=node.assignee?node.assignee.kind+':'+node.assignee.id:'';if(value!==current){const person=people().find(item=>item.id===value);if(person)node.assignee=clone(person.value);else if(!value)delete node.assignee;else error='현재 Native 사용자·그룹에서 담당자를 선택해 주세요.';}}const chosen=allTools().find(tool=>tool.id===node.tool_contract_id);if(chosen&&(!node.tool_reference||priorTool!==node.tool_contract_id||node.tool_contract_revision===undefined)){node.tool_reference=clone(chosen.reference || chosen.tool_reference);node.tool_contract_revision=chosen.revision;}else if(v.has('tool_contract_id')&&!node.tool_contract_id){delete node.tool_reference;delete node.tool_contract_revision;}if(node.tool_contract_id==='__existing__')delete node.tool_contract_id;if(v.has('deadline_input')){const input=String(v.get('deadline_input') || '');if(input)node.deadline={input,offset_days:Number(v.get('deadline_offset') || 0),timezone:String(v.get('deadline_timezone') || ''),calendar:String(v.get('deadline_calendar') || 'calendar')};else delete node.deadline;}if(v.has('result_job_id')){const argument=String(v.get('result_argument') || '').trim(),sourceJob=String(v.get('result_job_id') || '');const previous=Object.entries(node.argument_bindings || {}).find(([,binding])=>binding.result);if(!previous||previous[0]!==argument||previous[1].result.job_id!==sourceJob){if(previous)delete node.argument_bindings[previous[0]];if(argument&&sourceJob){node.argument_bindings ||= {};node.argument_bindings[argument]={result:{job_id:sourceJob,path:['items'],value_field:'id',confirmed:true}};}}}const knownSkills=new Set((resources.skills || []).map(skill=>skill.id));node.skills=[...new Set([...(node.skills || []).filter(id=>!knownSkills.has(id)),...v.getAll('skills')])];if(v.has('read_retry_count')){const countText=String(v.get('read_retry_count') || ''),deadlineText=String(v.get('read_retry_deadline') || ''),beforeCount=String(node.read_retry?.count ?? 0),beforeDeadline=String(node.read_retry?.deadline_seconds ?? '');if(countText!==beforeCount||deadlineText!==beforeDeadline){const count=countText===''?null:Number(countText);if(count===0)delete node.read_retry;else node.read_retry={...(node.read_retry || {}),count,deadline_seconds:deadlineText===''?null:Number(deadlineText)};}}node.human_confirmation=v.has('human_required');const triggerKind=String(v.get('trigger_kind') || '');if(triggerKind==='offset')node.trigger={offset_seconds:Number(v.get('trigger_offset'))};else if(triggerKind==='at')node.trigger={at:String(v.get('trigger_at') || '')};else delete node.trigger;node.completion={...(node.completion || {}),rule:String(v.get('completion_rule') || '')};if(v.has('completion_kind')){const kind=String(v.get('completion_kind') || '');if(kind!==(node.completion.kind || 'review')){if(kind==='review')delete node.completion.kind;else node.completion.kind=kind;}}node.deps=[...new Set([...(node.deps || []).filter(id=>!nodes(editor).some(n=>n.id===id)),...v.getAll('depends_on')])];node.approval_count=Number(v.get('approvals_required') || 0);if(v.has('effect_description'))node.effect_criterion={...(node.effect_criterion || {}),description:String(v.get('effect_description') || ''),...(node.effect_job_id?{job_id:node.effect_job_id}:{})};const kind=String(v.get('condition_kind') || '');if(kind!=='compound'){const raw=String(v.get('condition_value') || ''),type=String(v.get('condition_type') || 'text');let value=raw;if(type==='number')value=raw===''?null:Number(raw);else if(type==='boolean')value=raw==='true';else if(type==='list'){try{value=JSON.parse(raw);}catch(_){value=raw;}}node.condition=kind?{field:kind==='factory'?'factory_id':String(v.get('condition_field') || ''),op:String(v.get('condition_op') || 'eq'),value}:null;}}if(JSON.stringify(node)!==before)dirty=true;}}
-    const rules=host.querySelector?.('#ew-author-rules');if(rules&&editor&&formChanged(rules)){const node=ruleNode();if(node){const v=new FormData(rules),before=JSON.stringify(node),current=node.suggestion_rules || {};node.suggestion_rules={...current,description:String(v.get('suggestion_description') || ''),provisional:v.has('suggestion_provisional'),rules:clone(current.rules || []),human_only_judgment_ids:nodeJudgments(node).filter(word=>v.has('human_only:'+word.id)).map(word=>word.id)};node.confirmation_notes=String(v.get('confirmation_notes') || '');if(before!==JSON.stringify(node))dirty=true;}}
+    const rules=host.querySelector?.('#ew-author-rules');if(rules&&editor&&formChanged(rules)){const node=judgmentJob();if(node){const v=new FormData(rules),before=JSON.stringify(node),current=node.suggestion_rules || {};node.suggestion_rules={...current,description:String(v.get('suggestion_description') || ''),provisional:v.has('suggestion_provisional'),rules:clone(current.rules || []),human_only_judgment_ids:nodeJudgments(node).filter(word=>v.has('human_only:'+word.id)).map(word=>word.id)};node.confirmation_notes=String(v.get('confirmation_notes') || '');if(before!==JSON.stringify(node))dirty=true;}}
     const policies=host.querySelector?.('#ew-author-policies');if(policies&&editor&&formChanged(policies)){const v=new FormData(policies),before=JSON.stringify(editor);for(const name of ['completion_policy','unapproved_policy','delivery_policy','completion_notes','unapproved_notes','delivery_notes'])if(v.has(name))editor[name]=String(v.get(name) || '');if(before!==JSON.stringify(editor))dirty=true;}
     const toolForm=host.querySelector?.('#ew-author-tool');if(toolForm&&toolDraft&&formChanged(toolForm)){const before=JSON.stringify(toolDraft),previousSchemaText=toolSchemaText,v=new FormData(toolForm);for(const [name,value] of v.entries())if(name!=='output_schema_json'&&!name.startsWith('exception:'))toolDraft[name]=['timeout_seconds','completion_wait_seconds'].includes(name)?(value?Number(value):null):String(value);if(toolDraft.kind==='direct'&&v.has('exception:api_unavailable_reason')){toolDraft.exception_contract={...(toolDraft.exception_contract || {}),api_unavailable_reason:String(v.get('exception:api_unavailable_reason') || ''),owner_user_id:String(v.get('exception:owner_user_id') || ''),allowed_commands:String(v.get('exception:allowed_commands') || '').split('\n').map(value=>value.trim()).filter(Boolean),account_reference:String(v.get('exception:account_reference') || ''),least_privilege:v.has('exception:least_privilege')};}toolSchemaText=String(v.get('output_schema_json') || '');toolSchemaError='';try{if(toolSchemaText.trim()){const schema=JSON.parse(toolSchemaText);if(!schema||typeof schema!=='object'||Array.isArray(schema))throw new Error('object required');toolDraft.output_schema=schema;}else delete toolDraft.output_schema;}catch(_){toolSchemaError='출력 계약은 올바른 JSON Schema 객체로 입력해 주세요. 입력한 내용은 보존되며 아직 저장하지 않았습니다.';}if(before!==JSON.stringify(toolDraft)||previousSchemaText!==toolSchemaText)toolDirty=true;}
     captureInline();const model=host.querySelector?.('[name=model_id]');if(model&&models.some(m=>m.id===model.value))modelId=model.value;
@@ -1788,7 +1983,7 @@ function createWorkDesigner({callbacks}) {
     }catch(reason){if(generation===epoch&&context===key()&&(!options.current||options.current())){error=(options.operations&&action.startsWith('tool_')?toolErrors[reason.code]:'') || reason.message || '변경을 저장하지 못했습니다.';if([401,403,404].includes(reason.status)){record={...(record || {}),can_edit:false};clearProposal();}if(reason.status===409)error+=' 작성 중인 변경을 유지했습니다. 최신 저장본과 비교해 주세요.';}return null;}
     finally{if(operation===writeSerial){busy=false;paint();}}
   }
-  async function formDialog(title,html,label='적용',onMount=null,restoreFocus=null){const boundary={epoch,key:key(),revision,selectedNode,toolId,ruleNodeId};let values=null;const promise=dialog({title,html,confirmLabel:label,restoreFocus});const element=workUI.$('#ees-work-dialog');element?.addEventListener('click',event=>{if(event.target.closest('[data-dialog-confirm]')){const entries=Array.from(element.querySelectorAll('input,select,textarea')).filter(input=>!['checkbox','radio'].includes(input.type)||input.checked).map(input=>[input.name,input.type==='checkbox'?true:input.multiple?Array.from(input.selectedOptions).map(option=>option.value):input.value]);values=Object.fromEntries(entries);} },true);const helpClick=event=>{const trigger=event.target.closest?.('[data-author-action=help]');if(!trigger)return;event.preventDefault();event.stopPropagation();workUI.showHelp?.({termId:trigger.dataset.id,help:state.help,context:{...helpContext(),screen:title,draftName:element.querySelector?.('[name=name]')?.value || helpContext().draftName},trigger,onAsk:callbacks.askHelp});};element?.addEventListener('click',helpClick);const cleanup=onMount?.(element);element?.querySelector?.('input:not([type=hidden]):not([readonly]),select,textarea')?.focus?.();const accepted=await promise;element?.removeEventListener?.('click',helpClick);workUI.closeHelp?.({restoreFocus:false});cleanup?.();return accepted&&boundary.epoch===epoch&&boundary.key===key()&&boundary.revision===revision&&boundary.selectedNode===selectedNode&&boundary.toolId===toolId&&boundary.ruleNodeId===ruleNodeId?values:null;}
+  async function formDialog(title,html,label='적용',onMount=null,restoreFocus=null){const boundary={epoch,key:key(),revision,selectedNode,toolId,tab};let values=null;const promise=dialog({title,html,confirmLabel:label,restoreFocus});const element=workUI.$('#ees-work-dialog');element?.addEventListener('click',event=>{if(event.target.closest('[data-dialog-confirm]')){const entries=Array.from(element.querySelectorAll('input,select,textarea')).filter(input=>!['checkbox','radio'].includes(input.type)||input.checked).map(input=>[input.name,input.type==='checkbox'?true:input.multiple?Array.from(input.selectedOptions).map(option=>option.value):input.value]);values=Object.fromEntries(entries);} },true);const helpClick=event=>{const trigger=event.target.closest?.('[data-author-action=help]');if(!trigger)return;event.preventDefault();event.stopPropagation();workUI.showHelp?.({termId:trigger.dataset.id,help:state.help,context:{...helpContext(),screen:title,draftName:element.querySelector?.('[name=name]')?.value || helpContext().draftName},trigger,onAsk:callbacks.askHelp});};element?.addEventListener('click',helpClick);const cleanup=onMount?.(element);element?.querySelector?.('input:not([type=hidden]):not([readonly]),select,textarea')?.focus?.();const accepted=await promise;element?.removeEventListener?.('click',helpClick);workUI.closeHelp?.({restoreFocus:false});cleanup?.();return accepted&&boundary.epoch===epoch&&boundary.key===key()&&boundary.revision===revision&&boundary.selectedNode===selectedNode&&boundary.toolId===toolId&&boundary.tab===tab?values:null;}
   async function confirmDialog(options){const boundary={epoch,key:key(),revision,selectedNode,toolId,definition:JSON.stringify(editor)};const accepted=await dialog(options);return Boolean(accepted&&canAuthor()&&boundary.epoch===epoch&&boundary.key===key()&&boundary.revision===revision&&boundary.selectedNode===selectedNode&&boundary.toolId===toolId&&boundary.definition===JSON.stringify(editor));}
   async function compare(){
     const context=key(),generation=epoch;const response=await callbacks.read({system_id:selection.system_id,workflow_id:workflowId(),include:'authoring'});
@@ -1867,14 +2062,13 @@ function createWorkDesigner({callbacks}) {
     if(action==='stage_toggle'){expandedStage=expandedStage===target.dataset.id?'':target.dataset.id;jobMenu='';focusAction('stage_toggle',target.dataset.id);stash();paint();return;}
     if(action==='job_menu'||action==='stage_menu'){if(!canAuthor())return;jobMenu=jobMenu===target.dataset.id?'':target.dataset.id;focusAction(action,target.dataset.id);paint();return;}
     if(action==='api_catalog_return'){legacyListOpen=false;apiCatalog.showList();return;}
-    if(action==='api_structure_edit'){apiStructureEditKey=compactApiStructure()?key():null;paint();return;}
     if(action==='job_api_example'){
       const binding=nodes(editor).find(job=>job.id===target.dataset.id)?.api_binding;
       const op=catalogFeature()?.apis.find(api=>api.id===binding?.operation_id&&api.can_use!==false);
       if(op && op.example!=null)await dialog({title:'조회 결과 예시',html:`<p>${esc(op.name)}</p><pre class="ew-api-result-example">${esc(JSON.stringify(op.example,null,2))}</pre>`});
       return;
     }
-    if(action==='job_api_setup'){await openApiJobSetup(target.dataset.id||selectedNode);return;}
+    if(action==='job_api_setup'){await openApiJobSetup(target.dataset.id||selectedNode,{},target.dataset.apiSetup || '');return;}
     if(action==='job_tool_setup'){await openJobToolSetup();return;}
     if(action.startsWith('shared_')||action==='pick_job_tool'){await sharedAction(action,target);return;}
     if(action==='procedure_cancel'){closeStart();focusRequest={field:'[data-author-action=create]'};paint();return;}
@@ -1883,10 +2077,45 @@ function createWorkDesigner({callbacks}) {
     if(pendingProposal&&(['save','validate','publish','unpublish'].includes(action)||savesFirst)){error='업무 도우미 제안을 반영하거나 버린 뒤 저장합니다.';paint();return;}
     if(action==='open'){closeStart();stash();clearProposal();await callbacks.openWorkflow?.(target.dataset.id,target.dataset.systemId);return;}
     if(action==='list'){stash();clearProposal();await callbacks.openWorkflow?.('');return;}
-    if(action==='validation_open'){const [kind,index]=String(target.dataset.id).split(':'),value=record?.validation?.[kind]?.[Number(index)];if(value!==undefined){const destination=validationTarget(value);tab=['summary','structure'].includes(destination.tab)?'content':destination.tab;selectedNode=tab==='content'?destination.node?.id || '':'';if(tab==='rules')ruleNodeId=destination.node?.id || '';paint();}return;}
-    if(action==='tab'){const next=['summary','structure','schedule'].includes(target.dataset.tab)?'content':target.dataset.tab;if(next==='try'){await openTry({focus:!target.keyboard});return;}tab=next;selectedNode='';jobMenu='';tryUI.menu='';focusRequest={field:'[data-author-action=tab][data-tab="'+tab+'"]'};paint();return;}
+    if(action==='validation_open'){
+      const [kind,index]=String(target.dataset.id).split(':');
+      const value=record?.validation?.[kind]?.[Number(index)];
+      if(value===undefined)return;
+      const destination=validationTarget(value);
+      tab=destination.target;
+      selectedNode=tab==='policies'?'':destination.node?.id || '';
+      if(destination.node?.type==='j'&&tab!=='policies')expandedStage=destination.node.parent_id || destination.node.parent;
+      if(tab==='judgments')focusRequest={field:'#ew-author-judgments-title'};
+      if(tab==='policies')focusRequest={field:'#ew-author-policies-title'};
+      stash();paint();return;
+    }
+    if(action==='tab'){
+      const next=Object.keys(authorTabs()).includes(target.dataset.tab)?target.dataset.tab:'content';
+      if(next==='try'){await openTry({focus:!target.keyboard});return;}
+      tab=next;selectedNode='';jobMenu='';tryUI.menu='';focusRequest={field:'[data-author-action=tab][data-tab="'+tab+'"]'};stash();paint();return;
+    }
     if(action==='view_in_work'){justPublished='';await callbacks.navigate?.('work',{tab:'overview',workflow_id:workflowId(),run_id:'',job_id:'',stage_id:'',stage_overview:false});return;}
     if(['try_fix','try_reset','try_refix','try_edit'].includes(action)){await tryAction(action,target);return;}
+    if(action==='judgment_choices'&&tab==='content'){
+      const node=selectedJob();
+      if(!node||node.id!==target.dataset.id||!hasJudgmentChoices(node))return;
+      tab='judgments';focusRequest={field:'#ew-author-judgments-title'};stash();paint();return;
+    }
+    if(action==='judgment_back'&&tab==='judgments'){
+      const node=judgmentJob();
+      tab='content';
+      if(node&&hasJudgmentChoices(node))focusAction('judgment_choices',selectedNode);
+      else focusRequest={field:'#ew-author-node [name=name]'};
+      stash();paint();return;
+    }
+    if(action==='policy_settings'&&canAuthor()){
+      const menu=target.closest?.('.ew-procedure-menu');
+      if(menu)menu.open=false;
+      tab='policies';focusRequest={field:'#ew-author-policies-title'};stash();paint();return;
+    }
+    if(action==='policy_back'&&tab==='policies'){
+      tab='content';focusRequest={field:canAuthor()?'.ew-procedure-menu > summary':'[data-author-action=tab][data-tab=content]'};stash();paint();return;
+    }
     if(action==='factory'){factory=target.dataset.id || '';selectedNode='';paint();return;}
     if(action==='node'){const previous=nodes(editor).find(node=>node.id===selectedNode),next=nodes(editor).find(node=>node.id===target.dataset.id);tab='content';jobMenu='';selectedNode=next?.id || '';if(next){if(next.type==='j')expandedStage=next.parent_id || next.parent;else if(next.type==='t')expandedStage=next.id;}else if(previous?.type==='j'){returnedJob=previous.id;focusAction('node',previous.id);}else if(previous?.type==='t')focusAction('stage_toggle',previous.id);stash();paint();return;}
     if(action==='tool_open'){sharedToolId='';const tool=allTools().find(tool=>tool.id===target.dataset.id);if(!tool)return;openTool(tool);await loadToolContext();return;}
@@ -1898,11 +2127,10 @@ function createWorkDesigner({callbacks}) {
     if(action==='summary_edit')openSummary(target.dataset.id);
     else if(action==='summary_cancel'){const section=summaryEdit()?.section;summaryEdits.delete(key());paint();host?.querySelector?.('[data-author-action=summary_edit][data-id="'+section+'"]')?.focus?.();}
     else if(action==='summary_apply')applySummary();
-    else if(action==='judgment_delete'){const node=ruleNode(),index=Number(target.dataset.id);if(node&&Number.isInteger(index)&&nodeJudgments(node)[index]){node.judgments=clone(nodeJudgments(node));node.judgments.splice(index,1);dirty=true;stash();paint();}}
+    else if(action==='judgment_delete'){const node=judgmentJob(),index=Number(target.dataset.id);if(node&&Number.isInteger(index)&&nodeJudgments(node)[index]){node.judgments=clone(nodeJudgments(node));node.judgments.splice(index,1);dirty=true;stash();paint();}}
     else if(action==='judgment_add'||action==='judgment_edit')await editJudgment(action==='judgment_add'?null:Number(target.dataset.id));
     else if(action==='suggestion_add'||action==='suggestion_edit')await editSuggestion(action==='suggestion_add'?null:Number(target.dataset.id));
-    else if(action==='start_input_add'||action==='start_input_edit'){const root=nodes(editor).find(node=>node.type==='p');if(root)await editInput(target.dataset.id || '',root.id);}
-    else if(action==='start_input_delete'){const root=nodes(editor).find(node=>node.type==='p'),field=root?.inputs?.find(input=>input.id===target.dataset.id);if(field&&await confirmDialog({title:'시작 입력을 삭제할까요?',html:`<p>${esc(field.name || field.id)} 입력 선언을 초안에서 삭제합니다. 기존 진행 건과 기록은 유지하며 남은 참조는 내용 확인에서 검사합니다.</p>`,confirmLabel:'입력 삭제'})){root.inputs=root.inputs.filter(input=>input.id!==field.id);dirty=true;stash();paint();}}
+    else if(action==='execution_parameters')await openExecutionParameters();
     else if(action==='compare')await compare();else if(action==='create')await create();else if(action==='guide_create'){const guide=scopeGuideTemplate();if(guide)await create(guide.id);}else if(action==='procedure_create')await createProcedure();else if(action==='edit_workflow')await editWorkflow();else if(action==='save'){if(await command(actions.save,{definition:clone(editor)})){focusRequest={field:canPublish()?'[data-author-action=publish]':'[data-author-status]'};paint();}}
     // 게시 publishes the saved content; with unsaved edits it saves and publishes them in one command (rule 2).
     else if(action==='publish'){if(await (unsaved()?command(actions.save,{definition:clone(editor),publication_state:'published'}):command(actions.publish))){justPublished=key();tab='content';tryUI.menu='';focusRequest={field:'[data-author-action=view_in_work]'};stash();paint();}}
@@ -1971,9 +2199,9 @@ function createWorkDesigner({callbacks}) {
   function handleEvent(event){if(!host)return {handled:false,preventDefault:false};if(event.type==='click'&&jobMenu&&!event.target.closest?.('.ew-job-menu,.ew-job-menu-button,#ees-work-dialog')){capture();jobMenu='';paint();}if(event.type==='click'&&tryUI.menu&&!event.target.closest?.('#ees-stage-verdict-menu,[data-action="stage_verdict"]')){tryUI.menu='';paint();}if(!event.target.closest?.('#ees-work-designer'))return {handled:false,preventDefault:false};const target=event.target;if(catalogActive()){const result=apiCatalog.handle(event);if(result)return result;}const tryResult=tryEvent(event);if(tryResult)return tryResult;const authoredResult=legacyAuthoring()&&authoredEvent(event);if(authoredResult)return authoredResult;if(['input','change'].includes(event.type)&&target.closest?.('#ew-procedure-info')&&['overview_name','overview_description'].includes(target.name)){
       if(canAuthor()&&editor)capture();
       return {handled:true,preventDefault:false};
-    }if(definitionFieldEvent(event))return {handled:true,preventDefault:false};if(event.type==='keydown'&&target.closest?.('[data-author-action=tab]')&&['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){const tabs=Object.keys(authorTabs()),index=tabs.indexOf(tab),next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;handleAction('tab',{dataset:{tab:tabs[next]},keyboard:true});host?.querySelector?.('[data-author-action=tab][data-tab="'+tabs[next]+'"]')?.focus?.();return {handled:true,preventDefault:true};}const jobEvent=jobDetailEvent(event);if(jobEvent)return jobEvent;if(returnedJob&&['click','keydown','input','change'].includes(event.type))clearReturnedJob();if(event.type==='keydown'&&event.key==='Escape'&&target.closest?.('#ew-procedure-create')){handleAction('procedure_cancel',{dataset:{}});return {handled:true,preventDefault:true};}if(event.type==='keydown'&&event.key==='Escape'&&target.closest?.('#ew-stage-editor')){handleAction('inline_cancel',{dataset:{}});return {handled:true,preventDefault:true};}if(event.type==='keydown'&&event.key==='Escape'&&jobMenu&&target.closest?.('.ew-job-menu,.ew-job-menu-button')){const id=jobMenu;jobMenu='';focusAction(nodeMenuAction(id),id);paint();return {handled:true,preventDefault:true};}if(event.type==='keydown'&&event.key==='Escape'&&target.closest?.('#ew-summary-editor')){handleAction('summary_cancel',{dataset:{}});return {handled:true,preventDefault:true};}if(event.type==='keydown'&&event.key==='Escape'&&target.closest?.('.ew-shared-picker')){const picker=target.closest('.ew-shared-picker');picker.open=false;picker.querySelector('summary')?.focus();return {handled:true,preventDefault:true};}if(event.type==='input'||event.type==='change'){if(target.name==='procedure_template'){if(target.checked&&target.value!==procedureChoice&&canAuthor()&&!busy){captureProcedure();procedureChoice=target.value;procedureSession++;stashProcedure();paint();}}else if(target.id==='ew-procedure-name'||target.id==='ew-procedure-description'){captureProcedure();updateProcedureFooter();reportStartContext();}else if(target.id==='ew-author-search'){search=target.value;paint();}else if(target.id==='ew-shared-picker-search'){sharedPickerSearch=target.value;paint();const picker=host?.querySelector?.('.ew-shared-picker');if(picker)picker.open=true;host?.querySelector?.('#ew-shared-picker-search')?.focus();}else if(target.id==='ew-tool-search'){if(toolSearch!==target.value){toolSearch=target.value;paint();}}else{capture();if(target.closest?.('#ew-stage-editor')){stash();return {handled:true,preventDefault:false};}if(summaryEdit()&&tab==='content'&&target.closest?.('#ew-summary-editor'))return {handled:true,preventDefault:false};if(target.name==='rule_job_id'){ruleNodeId=target.value;stash();paint();}if(['result_block','mode','frequency'].includes(target.name))paint();else if(tab==='tools')updateToolFooter();}return {handled:true,preventDefault:false};}if(event.type==='submit'){capture();if(target.id==='ew-procedure-create')createProcedure();else if(target.id==='ew-stage-editor')applyInline();else if(target.id==='ew-summary-editor'||target.id==='ew-procedure-info')applySummary();else paint();return {handled:true,preventDefault:true};}if(event.type==='click'){const control=target.closest('[data-author-action]');if(control&&!control.disabled){handleAction(control.dataset.authorAction,control).catch(reason=>{error=reason.message;paint();});return {handled:true,preventDefault:true};}}return {handled:false,preventDefault:false};}
+    }if(judgmentFieldEvent(event))return {handled:true,preventDefault:false};if(event.type==='keydown'&&target.closest?.('[data-author-action=tab]')&&['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){const tabs=Object.keys(authorTabs()),index=tabs.indexOf(target.dataset.tab),next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;handleAction('tab',{dataset:{tab:tabs[next]},keyboard:true});host?.querySelector?.('[data-author-action=tab][data-tab="'+tabs[next]+'"]')?.focus?.();return {handled:true,preventDefault:true};}const jobEvent=jobDetailEvent(event);if(jobEvent)return jobEvent;if(returnedJob&&['click','keydown','input','change'].includes(event.type))clearReturnedJob();if(event.type==='keydown'&&event.key==='Escape'&&target.closest?.('#ew-procedure-create')){handleAction('procedure_cancel',{dataset:{}});return {handled:true,preventDefault:true};}if(event.type==='keydown'&&event.key==='Escape'&&target.closest?.('#ew-stage-editor')){handleAction('inline_cancel',{dataset:{}});return {handled:true,preventDefault:true};}if(event.type==='keydown'&&event.key==='Escape'&&jobMenu&&target.closest?.('.ew-job-menu,.ew-job-menu-button')){const id=jobMenu;jobMenu='';focusAction(nodeMenuAction(id),id);paint();return {handled:true,preventDefault:true};}if(event.type==='keydown'&&event.key==='Escape'&&target.closest?.('#ew-summary-editor')){handleAction('summary_cancel',{dataset:{}});return {handled:true,preventDefault:true};}if(event.type==='keydown'&&event.key==='Escape'&&target.closest?.('.ew-shared-picker')){const picker=target.closest('.ew-shared-picker');picker.open=false;picker.querySelector('summary')?.focus();return {handled:true,preventDefault:true};}if(event.type==='input'||event.type==='change'){if(target.name==='procedure_template'){if(target.checked&&target.value!==procedureChoice&&canAuthor()&&!busy){captureProcedure();procedureChoice=target.value;procedureSession++;stashProcedure();paint();}}else if(target.id==='ew-procedure-name'||target.id==='ew-procedure-description'){captureProcedure();updateProcedureFooter();reportStartContext();}else if(target.id==='ew-author-search'){search=target.value;paint();}else if(target.id==='ew-shared-picker-search'){sharedPickerSearch=target.value;paint();const picker=host?.querySelector?.('.ew-shared-picker');if(picker)picker.open=true;host?.querySelector?.('#ew-shared-picker-search')?.focus();}else if(target.id==='ew-tool-search'){if(toolSearch!==target.value){toolSearch=target.value;paint();}}else{capture();if(target.closest?.('#ew-stage-editor')){stash();return {handled:true,preventDefault:false};}if(summaryEdit()&&tab==='content'&&target.closest?.('#ew-summary-editor'))return {handled:true,preventDefault:false};if(['result_block','mode','frequency'].includes(target.name))paint();else if(tab==='tools')updateToolFooter();}return {handled:true,preventDefault:false};}if(event.type==='submit'){capture();if(target.id==='ew-procedure-create')createProcedure();else if(target.id==='ew-stage-editor')applyInline();else if(target.id==='ew-summary-editor'||target.id==='ew-procedure-info')applySummary();else paint();return {handled:true,preventDefault:true};}if(event.type==='click'){const control=target.closest('[data-author-action]');if(control&&!control.disabled){handleAction(control.dataset.authorAction,control).catch(reason=>{error=reason.message;paint();});return {handled:true,preventDefault:true};}}return {handled:false,preventDefault:false};}
   function closePrivateDialogs(){if(tab==='tools'){authoredTargetElement?.eesClose?.();authoredTargetElement=null;authoredWorkflowLoading=false;clearAuthoredEvidenceObserver();authoredModal=null;authoredSession++;authoredTrialPending=false;}}
   function readDraft(){capture();return {definition:clone(editor),revision,dirty};}
-  function reset(){widthObserver?.disconnect();widthObserver=null;observedHost=null;wide=false;paintedWide=false;legacyListOpen=false;previousLegacyMode=false;apiCatalog.reset();apiJobOrigin=null;authoredTargetElement?.eesClose?.();authoredTargetElement=null;authoredWorkflows=null;authoredWorkflowError='';authoredWorkflowLoading=false;authoredTargetPending=false;clearAuthoredEvidenceObserver();authoredTool=null;authoredDirty=false;authoredView='basic';authoredPart='inputs';authoredCheck=null;authoredChecked='';authoredSession++;authoredPreview=false;authoredImport=false;authoredSearch='';authoredFilter='all';authoredLatest=null;authoredCache.clear();authoredModal=null;authoredSaved=null;authoredTrialValues={};authoredTrialErrors={};authoredEvidence='';authoredTrialPending=false;authoredTrialUncertain=false;toolOwner='';toolOperations=null;toolContextLoading=false;toolSession++;jobPanels.clear();jobArgumentDrafts.clear();jobModePending=false;summaryEdits.clear();sharedToolId='';sharedPickerSearch='';panelPositions.clear();paintedTarget='';clearProposal();ruleNodeId='';validationCheckedAt='';epoch++;readSerial++;writeSerial++;procedureSession++;procedureStarts.clear();pendingProcedureDescriptions.clear();procedureStart=false;procedureChoice='';procedureNames={};procedureDescriptions={};procedureScopes={};toolDrafts.clear();drafts.clear();requests.clear();formBaselines.clear();state={};selection={};actor='';record=null;editor=null;revision=0;dirty=false;justPublished='';tryView=null;tryReads++;tryWork=null;tryOpening=null;tryPending=null;tryRefused=null;trySaved=null;tryUI=tryUIFor('');tryValues.clear();tryFailures.clear();tryModels.clear();tryWindowKey='';selectedNode='';tab='content';factory='';toolId='';toolDraft=null;toolDirty=false;toolSchemaText='';toolSchemaError='';toolStart=false;toolChanging=false;toolSearch='';reviewerChanging=false;renderedToolSession=-1;toolAdvancedOpen=false;resources={skills:[],available:false};resourcesLoaded=false;resourcesLoading=false;resourcesError='';expandedStage='';inlineEdit=null;returnedJob='';jobMenu='';focusRequest=null;moveAnnouncement='';busy=false;loading=false;error='';notice='';if(host)host.innerHTML='';reportStartContext();}
+  function reset(){widthObserver?.disconnect();widthObserver=null;observedHost=null;wide=false;paintedWide=false;legacyListOpen=false;previousLegacyMode=false;apiCatalog.reset();apiJobOrigin=null;authoredTargetElement?.eesClose?.();authoredTargetElement=null;authoredWorkflows=null;authoredWorkflowError='';authoredWorkflowLoading=false;authoredTargetPending=false;clearAuthoredEvidenceObserver();authoredTool=null;authoredDirty=false;authoredView='basic';authoredPart='inputs';authoredCheck=null;authoredChecked='';authoredSession++;authoredPreview=false;authoredImport=false;authoredSearch='';authoredFilter='all';authoredLatest=null;authoredCache.clear();authoredModal=null;authoredSaved=null;authoredTrialValues={};authoredTrialErrors={};authoredEvidence='';authoredTrialPending=false;authoredTrialUncertain=false;toolOwner='';toolOperations=null;toolContextLoading=false;toolSession++;jobPanels.clear();jobArgumentDrafts.clear();jobModePending=false;summaryEdits.clear();sharedToolId='';sharedPickerSearch='';panelPositions.clear();paintedTarget='';clearProposal();validationCheckedAt='';epoch++;readSerial++;writeSerial++;procedureSession++;procedureStarts.clear();pendingProcedureDescriptions.clear();procedureStart=false;procedureChoice='';procedureNames={};procedureDescriptions={};procedureScopes={};toolDrafts.clear();drafts.clear();requests.clear();formBaselines.clear();state={};selection={};actor='';record=null;editor=null;revision=0;dirty=false;justPublished='';tryView=null;tryReads++;tryWork=null;tryOpening=null;tryPending=null;tryRefused=null;trySaved=null;tryUI=tryUIFor('');tryValues.clear();tryFailures.clear();tryModels.clear();tryWindowKey='';selectedNode='';tab='content';factory='';toolId='';toolDraft=null;toolDirty=false;toolSchemaText='';toolSchemaError='';toolStart=false;toolChanging=false;toolSearch='';reviewerChanging=false;renderedToolSession=-1;toolAdvancedOpen=false;resources={skills:[],available:false};resourcesLoaded=false;resourcesLoading=false;resourcesError='';expandedStage='';inlineEdit=null;returnedJob='';jobMenu='';focusRequest=null;moveAnnouncement='';busy=false;loading=false;error='';notice='';if(host)host.innerHTML='';reportStartContext();}
   return Object.freeze({render,handleEvent,reset,setBusy,refreshTry,tryActive,syncHelpState,readDraft,canNavigate:()=>!busy&&!loading&&!apiCatalog.pending(),canAuthor,load,command,acceptProposal,readStartContext,readApiContext,applyApiSuggestion:(value,expected)=>catalogActive()&&apiCatalog.suggest(value,expected),closeStart,closePrivateDialogs,startProcedure:()=>create('blank')});
 }

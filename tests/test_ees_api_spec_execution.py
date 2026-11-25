@@ -95,7 +95,7 @@ class RegisteredApiExecutionTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(response["ok"], response)
         return response
 
-    async def register_backup(self, method="GET"):
+    async def register_backup(self, method="GET", *, line_type="string", extra_inputs=()):
         record = await self.service.operations.command(self.users["admin"], self.command(
             "api_service_save", service={"name": "Backup service"}))
         self.assertTrue(record["ok"], record)
@@ -105,8 +105,8 @@ class RegisteredApiExecutionTests(unittest.IsolatedAsyncioTestCase):
         api = {
             "service_id": service_id, "name": "Backup history", "purpose": "Verify completion",
             "method": method, "url": self.base_url + "/backups",
-            "inputs": [{"name": "line", "in": "query" if method == "GET" else "body", "type": "string",
-                        "required": True, "label": "Line"}],
+            "inputs": [{"name": "line", "in": "query" if method == "GET" else "body", "type": line_type,
+                        "required": True, "label": "Line"}, *extra_inputs],
             "result_path": "backup.entries",
             "fields": [{"path": "label", "label": "Backup name", "type": "string"}],
             "example": {"backup": {"entries": [{"label": "registration-example-only"}]}},
@@ -115,7 +115,7 @@ class RegisteredApiExecutionTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(saved["ok"], saved)
         return saved["api"]
 
-    async def start_workflow(self, api_record, *, handoff=False, approvals=0, map_previous=True):
+    async def prepare_workflow(self, api_record, *, handoff=False, approvals=0, map_previous=True):
         created = await self.workspace("create_workflow", name="Backup verification", system_id="EMS")
         definition = created["workflow"]["draft"]
         root_id = next(iter(definition["nodes"]))
@@ -144,7 +144,9 @@ class RegisteredApiExecutionTests(unittest.IsolatedAsyncioTestCase):
                 successor["api_binding"]["inputs"] = {"line": {"result": source}}
             definition["nodes"]["stage"]["children"].append("follow-up")
             definition["nodes"]["follow-up"] = successor
-        workflow_id = created["workflow_id"]
+        return created["workflow_id"], definition
+
+    async def publish_workflow(self, workflow_id, definition):
         await self.workspace("save_draft", workflow_id=workflow_id, expected_revision=1, definition=definition)
         saved = await self.service.workspace_state(self.users["admin"], workflow_id=workflow_id)
         self.assertTrue(saved["ok"], saved)
@@ -153,6 +155,11 @@ class RegisteredApiExecutionTests(unittest.IsolatedAsyncioTestCase):
         await self.workspace("publish_workflow", workflow_id=workflow_id, expected_revision=2)
         await self.workspace("save_access", principal_kind="user", principal_id="operator",
                              system_id="EMS", factory_id="*", roles=["participant", "requester"])
+
+    async def start_workflow(self, api_record, *, handoff=False, approvals=0, map_previous=True):
+        workflow_id, definition = await self.prepare_workflow(api_record, handoff=handoff, approvals=approvals,
+                                                               map_previous=map_previous)
+        await self.publish_workflow(workflow_id, definition)
         started = await self.workspace("start_run", actor="operator", workflow_id=workflow_id,
                                        expected_revision=3, inputs={})
         self.assertEqual(self.http.requests, [], "Authoring and opening a run dispatched HTTP")
@@ -254,6 +261,122 @@ class RegisteredApiExecutionTests(unittest.IsolatedAsyncioTestCase):
             "execute_job", run_id=run_id, job_id="follow-up", expected_revision=confirmed["run"]["revision"]))
         self.assertEqual(result["attempt"]["status"], "succeeded", result)
         self.assertEqual(self.http.requests[-1], ("/backups", {"line": ["nightly-ok"]}))
+
+    async def test_run_parameter_reused_with_job_input_and_old_attempts_preserved(self):
+        api = await self.register_backup(extra_inputs=(
+            {"name": "window", "in": "query", "type": "integer", "required": True, "label": "Hours"},
+        ))
+        workflow_id, definition = await self.prepare_workflow(api, handoff=True, map_previous=False)
+        nodes = definition["nodes"]
+        root = next(node for node in nodes.values() if node["type"] == "p")
+        root["inputs"] = [
+            {"id": "line-id", "name": "Line ID", "type": "text", "scope": "run",
+             "required": True, "execution_parameter": True},
+            {"id": "not-used", "name": "Unlinked", "type": "text", "scope": "run",
+             "required": True, "execution_parameter": True},
+        ]
+        nodes["backup-job"]["api_binding"]["inputs"] = {
+            "line": {"run_input": "line-id"}, "window": {"input": "hours"},
+        }
+        nodes["backup-job"]["inputs"] = [
+            {"id": "hours", "name": "Hours", "type": "number", "scope": "run", "required": True},
+        ]
+        nodes["follow-up"]["api_binding"]["inputs"] = {
+            "line": {"run_input": "line-id"}, "window": {"constant": 48},
+        }
+        await self.publish_workflow(workflow_id, definition)
+        actor = self.users["operator"]
+        for missing in ({}, {"line-id": "   "}, {"line-id": None}):
+            denied = await self.service.workspace_command(actor, self.command(
+                "start_run", workflow_id=workflow_id, expected_revision=3, inputs=missing))
+            self.assertEqual(denied["error"]["code"], "invalid_inputs", denied)
+        with self.service._db() as db:
+            self.assertEqual(db.execute("SELECT COUNT(*) FROM work_runs").fetchone()[0], 0)
+
+        opened = await self.workspace("start_run", actor="operator", workflow_id=workflow_id,
+                                      expected_revision=3, inputs={"line-id": "00123"})
+        run_id = opened["run_id"]
+        self.assertEqual(opened["run"]["inputs"], {"line-id": "00123"})
+        self.assertEqual(opened["run"]["jobs"]["follow-up"]["effective_inputs"], {"line-id": "00123"})
+        self.assertEqual(self.http.requests, [])
+        saved = await self.workspace("save_inputs", actor="operator", run_id=run_id, expected_revision=1,
+                                     inputs={"line-id": "00123", "hours": 24})
+        first = await self.service.operations.command(actor, self.command(
+            "execute_job", run_id=run_id, job_id="backup-job", expected_revision=saved["revision"]))
+        first_state = await self.service.workspace_state(actor, run_id=run_id)
+        confirmed = await self.workspace("decide", actor="operator", run_id=run_id, job_id="backup-job",
+                                         expected_revision=first_state["run"]["revision"],
+                                         result_revision=first["attempt"]["number"],
+                                         item_id="job", verdict="completed")
+        second = await self.service.operations.command(actor, self.command(
+            "execute_job", run_id=run_id, job_id="follow-up", expected_revision=confirmed["run"]["revision"]))
+        self.assertEqual(second["attempt"]["status"], "succeeded")
+        self.assertEqual(self.http.requests, [
+            ("/backups", {"line": ["00123"], "window": ["24"]}),
+            ("/backups", {"line": ["00123"], "window": ["48"]}),
+        ])
+        self.assertEqual(second["attempt"]["inputs"], {"line-id": "00123"})
+
+        second_state = await self.service.workspace_state(actor, run_id=run_id)
+        revision = second_state["run"]["revision"]
+        refused = await self.service.workspace_command(actor, self.command(
+            "save_inputs", run_id=run_id, expected_revision=revision, inputs={"hours": 24}))
+        self.assertEqual(refused["error"]["code"], "invalid_inputs", refused)
+        changed = await self.workspace("save_inputs", actor="operator", run_id=run_id,
+                                       expected_revision=revision, inputs={"line-id": "00456", "hours": 24})
+        self.assertEqual({job["status"] for job in changed["run"]["jobs"].values()}, {"review_required"})
+        attempts = await self.history(run_id)
+        self.assertEqual({attempt["inputs"]["line-id"] for attempt in attempts}, {"00123"})
+
+    async def test_integer_run_parameter_rejects_fraction_before_opening_run(self):
+        api = await self.register_backup(line_type="integer")
+        workflow_id, definition = await self.prepare_workflow(api)
+        root = next(node for node in definition["nodes"].values() if node["type"] == "p")
+        root["inputs"] = [{"id": "line-number", "name": "Line number", "type": "number", "required": True}]
+        definition["nodes"]["backup-job"]["api_binding"]["inputs"] = {"line": {"run_input": "line-number"}}
+        await self.publish_workflow(workflow_id, definition)
+        actor = self.users["operator"]
+        refused = await self.service.workspace_command(actor, self.command(
+            "start_run", workflow_id=workflow_id, expected_revision=3, inputs={"line-number": 1.5}))
+        self.assertEqual(refused["error"]["code"], "execution_not_ready", refused)
+        self.assertIn("Line number", refused["error"]["message"])
+        with self.service._db() as db:
+            self.assertEqual(db.execute("SELECT COUNT(*) FROM work_runs").fetchone()[0], 0)
+        accepted = await self.workspace("start_run", actor="operator", workflow_id=workflow_id,
+                                        expected_revision=3, inputs={"line-number": 17})
+        refused_edit = await self.service.workspace_command(actor, self.command(
+            "save_inputs", run_id=accepted["run_id"], expected_revision=1, inputs={"line-number": 17.0}))
+        self.assertEqual(refused_edit["error"]["code"], "invalid_inputs", refused_edit)
+        result = await self.service.operations.command(actor, self.execution_command(accepted["run_id"]))
+        self.assertEqual(result["attempt"]["status"], "succeeded")
+        self.assertEqual(self.http.requests, [("/backups", {"line": ["17"]})])
+
+    async def test_only_active_jobs_require_shared_inputs_and_optional_null_is_omitted(self):
+        api = await self.register_backup(extra_inputs=(
+            {"name": "group", "in": "query", "type": "string", "required": False, "label": "Group"},
+        ))
+        workflow_id, definition = await self.prepare_workflow(api, handoff=True, map_previous=False)
+        definition["execution_scope"] = "factory"
+        nodes = definition["nodes"]
+        root = next(node for node in nodes.values() if node["type"] == "p")
+        root["inputs"] = [
+            {"id": "line-id", "name": "Line ID", "type": "text", "required": True},
+            {"id": "group-id", "name": "Group ID", "type": "text", "required": False},
+        ]
+        nodes["backup-job"]["condition"] = {"field": "active", "op": "eq", "value": True}
+        nodes["backup-job"]["api_binding"]["inputs"] = {"line": {"run_input": "line-id"}}
+        nodes["follow-up"]["deps"] = []
+        nodes["follow-up"]["api_binding"]["inputs"]["group"] = {"run_input": "group-id"}
+        await self.workspace("save_factory", factory_id="line", system_id="EMS", name="Line",
+                             attributes={"active": False})
+        await self.publish_workflow(workflow_id, definition)
+        started = await self.workspace("start_run", actor="operator", workflow_id=workflow_id, factory_id="line",
+                                       expected_revision=3, inputs={"group-id": None})
+        self.assertEqual(started["run"]["jobs"]["backup-job"]["status"], "excluded")
+        result = await self.service.operations.command(self.users["operator"], self.command(
+            "execute_job", run_id=started["run_id"], job_id="follow-up", expected_revision=1))
+        self.assertEqual(result["attempt"]["status"], "succeeded")
+        self.assertEqual(self.http.requests, [("/backups", {"line": ["Line A/2"]})])
 
     async def test_reviewer_revoked_while_dispatch_is_resolving_inputs_blocks_http(self):
         api = await self.register_backup('POST')

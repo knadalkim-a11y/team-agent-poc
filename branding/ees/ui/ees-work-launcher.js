@@ -40,7 +40,7 @@
   const available=()=>{const current=screen();return Boolean(token()&&current.active&&!current.native&&(current.workReady ?? current.chatReady));};
   let state=null,identity='',epoch=0,serial=0,busy=false,scheduled=false,error='',commandError='',route='',readyRoute='',refreshTimer=null,uiTimer=null,uiRevision=0,restored=false,initialSelectionPatch=null;
   let savedUIState={},accountGeneration=0;
-  let procedureStart=null,nativeCapabilities=null,nativeScope=null,stateKey='',targetLoading=false,scopeLoading=false,evidenceUnavailable=false;
+  let procedureStart=null,inlineStart=null,nativeCapabilities=null,nativeScope=null,stateKey='',targetLoading=false,scopeLoading=false,evidenceUnavailable=false;
   // stageValueBases keeps, per typed value, the saved value it was typed over: a value someone else saves in between
   // is shown before it is overwritten, as the job screen does with its drafts.
   const workspaceCache=new Map(),stageNotes=new Map(),stageValues=new Map(),stageValueErrors=new Map(),stageValueBases=new Map();
@@ -51,6 +51,7 @@
   const receipts=new Map(),optionCache=new Map(),chatCreations=new Map(),chatAliases=new Map();let workEpoch=0;let referenceChat='',referenceTimer=null,referenceRead=0,messageReferences=new Map();let uiWrites=Promise.resolve(),optionTimer=null,pendingInputProposal=null,inputProposalApplied=null,reviewTimer=null,reviewSaving=null;
   let apiContextGeneration=0, apiContextSignature="", purposeRequest=null;
   const context=()=>JSON.stringify([epoch,token()===identity,location.pathname,location.search,selection.system_id,selection.factory_id,selection.workflow_id,selection.run_id,selection.job_id]);
+  const inlineStartKey=()=>context()+'#'+state?.workflow?.published_version;
   const view=createWorkView({callbacks:{panelWidth:width=>{if(!restored)initialSelectionPatch={...initialSelectionPatch,panel_width:width};selection.panel_width=width;remember(width);}}});
   const designer=createWorkDesigner({callbacks:{command,read,openNative,models:models,askHelp,apiContextChanged:syncApiContext,helpState:()=>source()?.helpState?.(),startContextChanged:value=>{procedureStart=value;if(state&&available()&&chatPrepared())view.sync(snapshot());},openTools:async()=>select({mode:'author',tab:'tools',workflow_id:'',run_id:'',job_id:''}),openWorkflow:async(id,systemId)=>select({...(systemId&&systemId!==selection.system_id?{system_id:systemId,factory_id:''}:{}),workflow_id:id,run_id:'',job_id:'',mode:'author',tab:'overview'}),changed:refresh,navigate:(mode,patch={})=>select({mode,...patch}),operationsRead,operationsCommand,tryRead:async body=>{const at=context();const result=await api('workspace/try',body);return at===context()?result:null;},tryCommand:(path,body)=>sendCommand(path,body,{quiet:true}),options:async body=>{const at=context();const result=await api('workspace/options',body);if(at!==context())throw new Error('작업 위치가 바뀌어 선택 목록을 적용하지 않았습니다.');return result;},resources:async()=>{const at=context();const result=await api('resources');return at===context()?result:null;}}});
   function currentApiContext(){
@@ -111,7 +112,7 @@
     const job=definition?.nodes?.[ref.job_id]?.name;
     return [workflow,job,ref.reference_kind==='historical'?'실행 기록':''].filter(Boolean).join(' / ');
   }
-  const snapshot=()=>{const destination=nativeReturnPreview();return {state:state?{...state,input_proposal:pendingInputProposal?{values:pendingInputProposal.values,warnings:pendingInputProposal.warnings}:null,input_proposal_applied:inputProposalApplied}:null,native_capabilities:nativeCapabilities,native_scope:nativeScope,target_loading:targetLoading||Boolean(destination),scope_loading:scopeLoading,evidence_unavailable:evidenceUnavailable,selection:{...clone(selection),stage_notes:Object.fromEntries(stageNotes),stage_values:Object.fromEntries(stageValues),stage_value_errors:Object.fromEntries(stageValueErrors),...(destination?{mode:destination.mode,tab:destination.tab}:{}),chat_id:chatId()},chat_reference_label:currentReferenceLabel(),api_assistant:apiAssistantState(),native_return_pending:Boolean(destination),native_shell:nativePage()&&!destination,native_id:nativePage()&&!destination?(workNativeTargets.find(item=>location.pathname===item.path||location.pathname.startsWith(item.path+'/'))?.id || (adminNativePage()?'admin':'native')):'',busy,error:error || commandError,procedure_start:destination?null:procedureStart};};
+  const snapshot=()=>{const destination=nativeReturnPreview(),starting=inlineStart?.key===inlineStartKey();return {state:state?{...state,input_proposal:pendingInputProposal?{values:pendingInputProposal.values,warnings:pendingInputProposal.warnings}:null,input_proposal_applied:inputProposalApplied}:null,native_capabilities:nativeCapabilities,native_scope:nativeScope,target_loading:targetLoading||Boolean(destination),scope_loading:scopeLoading,evidence_unavailable:evidenceUnavailable,selection:{...clone(selection),inline_start:starting,inline_start_values:starting?inlineStart.values:null,stage_notes:Object.fromEntries(stageNotes),stage_values:Object.fromEntries(stageValues),stage_value_errors:Object.fromEntries(stageValueErrors),...(destination?{mode:destination.mode,tab:destination.tab}:{}),chat_id:chatId()},chat_reference_label:currentReferenceLabel(),api_assistant:apiAssistantState(),native_return_pending:Boolean(destination),native_shell:nativePage()&&!destination,native_id:nativePage()&&!destination?(workNativeTargets.find(item=>location.pathname===item.path||location.pathname.startsWith(item.path+'/'))?.id || (adminNativePage()?'admin':'native')):'',busy,error:error || commandError,procedure_start:destination?null:procedureStart};};
   // The last successful workspace remains visible during route validation.
   // References and queued actions still wait for the current route and Chat.
   const chatPrepared=()=>screen().chatReady && readyRoute===route&&(!route||route===location.pathname+location.search+'#chat')&&(!nativeTicket||nativeTicket.phase==='leaving');
@@ -750,28 +751,44 @@
     if(definition.execution_scope==='factory'&&!factory){await dialog({title:'공장을 선택해 주세요',readOnlyDetail:true,html:'<p>왼쪽 작업 위치에서 공장을 선택한 뒤 다시 실행해 주세요.</p>'});return null;}
     const active=workUnitActiveRuns(state,selection);
     if(!parallel&&active.length){await select({run_id:active.length===1?active[0].id:'',job_id:'',stage_id:'',stage_overview:false,tab:active.length===1?'overview':'active_runs'});return null;}
-    let version=workflow.published_version,inputs={};
-    // The start control starts the run. A form appears only for what is asked of the whole procedure; a job asks
-    // for its own values under its row on the stage screen (2026-11-19).
-    if(workRunStartFields(definition).length){
+    const version=workflow.published_version,conditions=workPublishedFactoryConditions(state,selection),startFields=workRunStartFields(definition,conditions),parameters=workRunParameterFields(definition,conditions);
+    let inputs={};
+    // New common parameters are entered in the overview before creating the run.
+    // Legacy fields and starts from a stage retain the existing setup dialog.
+    if(target.dataset.inlineStart==='true'){
+      if(!fromOverview||inlineStart?.key!==inlineStartKey()||!parameters.length)return null;
+      const form=source()?.hosts?.()?.panel?.querySelector?.('#ees-work-start[data-inline-start]');
+      if(!form||form.reportValidity?.()===false)return null;
+      try{inputs=workReadInputs(form);inlineStart.values=inputs;}
+      catch(failure){commandError=failure.message;render();return null;}
+    }else if(fromOverview&&parameters.length){
+      commandError='';inlineStart={key:inlineStartKey(),values:null};render();
+      source()?.hosts?.()?.panel?.querySelector?.('#ees-work-start [data-work-input]:not(:disabled)')?.focus?.();
+      return null;
+    }else if(startFields.length){
       const html=workRunStartFieldsHTML(state,selection,definition);
       const pending=dialog({title:'실행 준비',note:'선택한 게시 버전과 이번 진행 건을 따로 보존합니다.',html,confirmLabel:'시작'}),element=$('#ees-work-dialog');
+      let inputError='';
       const read=()=>{
         if(at!==context()||auth!==token()||owner!==actor())return;
-        const form=element.querySelector('#ees-work-start');if(!form)return;inputs=workReadInputs(form);
+        const form=element.querySelector('#ees-work-start');if(!form)return;
+        try{inputs=workReadInputs(form);inputError='';}
+        catch(failure){inputError=failure.message;}
       };
       read();element.addEventListener('input',read);element.addEventListener('change',read);
       // Capture before the dialog removes itself, including reduced-motion closes.
       element.addEventListener('click',event=>{if(event.target.closest?.('[data-dialog-confirm]'))read();},true);
       if(!await pending||at!==context()||auth!==token()||owner!==actor())return;
+      if(inputError){commandError=inputError;render();return null;}
     }
     // Values typed under a job before the run exists start with it.
     const typedScope=workStageValueScope(state,selection),typed=stageValues.get(typedScope) || {};
-    inputs={...inputs,...typed};
+    const parameterIds=new Set(parameters.map(field=>field.id));
+    inputs={...inputs,...Object.fromEntries(Object.entries(typed).filter(([id])=>!parameterIds.has(id)))};
     const result=await mutate({action:'start_run',expected_revision:workflow.revision,workflow_id:workflow.id,factory_id:factory,version,inputs},{refreshAfter:false});
     if(!result||at!==context())return;
     const id=result.run?.id || result.run_id || result.id;
-    delete selection.start_inputs?.[workflow.id];stageValues.delete(typedScope);stageValueErrors.delete(typedScope);stageValueBases.delete(typedScope);
+    inlineStart=null;delete selection.start_inputs?.[workflow.id];stageValues.delete(typedScope);stageValueErrors.delete(typedScope);stageValueBases.delete(typedScope);
     const openJob=selection.stage_evidence;
     await select({factory_id:factory,run_id:id,start_stage_id:'',tab:'overview'});
     if(returnStage&&state?.run?.id===id&&state.run.definition?.nodes?.[returnStage]?.type==='t')await select({stage_id:returnStage,stage_overview:false,stage_evidence:openJob,tab:'overview'},{fetch:false});
@@ -880,7 +897,7 @@
     const done=row=>['completed','excluded'].includes(row.state),open=rows.find(row=>row.node.id===selection.stage_evidence);
     if(open&&!done(open)){if(focus)focusStageValue(open.node.id);return;}
     const definition=workOperationDefinition(state),run=state.run || {};
-    const next=rows.find(row=>!done(row)&&!workAuthoredStageTool(row,state)&&(workStageAskFields(row.node,definition).length||workStageGivenValues(row.node,definition,run).length));
+    const next=rows.find(row=>!done(row)&&!workAuthoredStageTool(row,state)&&(workStageAskFields(row.node,definition).length||workStageGivenValues(row.node,definition,run,state,selection).length));
     if(!next&&!open)return;
     selection.stage_evidence=next?next.node.id:'';selection.stage_record='';selection.stage_tool='';selection.stage_verdict_job='';render();
     if(focus&&next)focusStageValue(next.node.id);
@@ -893,7 +910,7 @@
     if(!checkStageValues(current)){openStageValues(jobId);render();focusStageValue(jobId);return;}
     if(!state.run){
       const stage=workStageTarget(state,selection);if(!stage)return;
-      if(workStageHasValues({node:current.node,saved:{}},state))openStageValues(jobId);
+      if(workStageHasValues({node:current.node,saved:{}},state,selection))openStageValues(jobId);
       const started=await startRun({dataset:{startStageId:stage.id}});
       if(!started){showStageValueFailure({message:commandError},jobId);return;}
       current=stageJob(jobId);if(!current||state.run?.id!==started)return;
@@ -905,7 +922,7 @@
       setBusy(true);
       try{const model=executionModel();await operationsCommand({action:'execute_job',run_id:current.run.id,job_id:current.node.id,expected_revision:current.run.revision,...(model?{model_id:model}:{})});await refresh();}
       finally{setBusy(false);}
-      if(workStageHasValues({node:current.node,saved:state?.run?.jobs?.[jobId] || {}},state)){openStageValues(jobId);render();}
+      if(workStageHasValues({node:current.node,saved:state?.run?.jobs?.[jobId] || {}},state,selection)){openStageValues(jobId);render();}
     }catch(failure){if(!showStageValueFailure(failure,jobId))throw failure;}
   }
   async function stageAction(action,target){
@@ -937,7 +954,7 @@
     }
     // 판정 근거 · 판정 기록 opens and closes the record. Under a job with values the record is added to the open area.
     if(action==='stage_evidence'){
-      const shown=selection.stage_evidence===node.id&&(selection.stage_record===node.id||!workStageHasValues({node,saved},state));
+      const shown=selection.stage_evidence===node.id&&(selection.stage_record===node.id||!workStageHasValues({node,saved},state,selection));
       if(data.attemptId){if(!(run.attempts || []).some(attempt=>attempt.id===data.attemptId&&attempt.job_id===node.id))return;selection.stage_attempts={...(selection.stage_attempts || {}),[node.id]:data.attemptId};selection.stage_tab='work';selection.stage_evidence=node.id;selection.stage_record=node.id;}
       else{if(selection.stage_evidence===node.id)captureStageValues(node.id);selection.stage_evidence=shown?'':node.id;selection.stage_record=shown?'':node.id;}
       selection.stage_tool='';selection.stage_verdict_job='';render();return;
@@ -1004,7 +1021,7 @@
       if(!decided&&showStageValueFailure({message:commandError},node.id))return;
       [...(source()?.hosts?.()?.panel?.querySelectorAll?.('[data-action="stage_verdict"]') || [])].find(item=>item.dataset.jobId===node.id)?.focus?.({preventScroll:true});
       // An answered job that was open closes and the next job that asks for a value opens.
-      if(decided&&selection.stage_evidence===node.id&&workStageHasValues({node,saved:state?.run?.jobs?.[node.id] || {}},state))openNextStageJob({focus:true});
+      if(decided&&selection.stage_evidence===node.id&&workStageHasValues({node,saved:state?.run?.jobs?.[node.id] || {}},state,selection))openNextStageJob({focus:true});
       return;
     }
   }
@@ -1086,7 +1103,12 @@
     if(action==='native_open')return openNative(target.dataset.nativeId);
     if(action==='new_chat'){return source()?.newChat?.();}
     if(action==='start_run')return startRun(target);
-    if(action==='overview_start'){if(await startRun({dataset:{overview:'true'}}))openNextStageJob({focus:true});return;}
+    if(action==='overview_start'){if(await startRun({dataset:{overview:'true',inlineStart:target.dataset.inlineStart}}))openNextStageJob({focus:true});return;}
+    if(action==='overview_start_cancel'){
+      inlineStart=null;commandError='';render();
+      source()?.hosts?.()?.panel?.querySelector?.('[data-action="overview_start"]')?.focus?.();
+      return;
+    }
     // Finishing is offered only when every job is settled, so it needs no further question.
     if(action==='finish_run'){
       if(busy||!state?.run||!workRunFinishable(state))return;
@@ -1158,7 +1180,7 @@
   function handleEvent(event){
     if(stageMenuEvent(event)||workUI.menuEvent(event))return;
     const author=designer.handleEvent?.(event);if(author?.handled){if(author.preventDefault){event.preventDefault();if(event.type==='keydown'&&event.key==='Escape')event.stopPropagation();}return;}
-    const target=event.target;if(event.type==='submit'&&target.closest?.('[data-ees-work]')){event.preventDefault();return;}if(event.type==='keydown'&&event.repeat&&target.closest?.('[data-mutation]')){event.preventDefault();event.stopImmediatePropagation();return;}if(!target?.closest?.('[data-ees-work]'))return;
+    const target=event.target;if(event.type==='submit'&&target.closest?.('[data-ees-work]')){event.preventDefault();if(target.matches?.('#ees-work-start[data-inline-start]'))return sourceAction({action:'overview_start',inlineStart:'true'});return;}if(event.type==='keydown'&&event.repeat&&target.closest?.('[data-mutation]')){event.preventDefault();event.stopImmediatePropagation();return;}if(!target?.closest?.('[data-ees-work]'))return;
     if(event.type==='click'){const buttonTarget=target.closest('button[data-action]');if(!buttonTarget||buttonTarget.disabled)return;event.preventDefault();if(nativePage()&&buttonTarget.closest('#ees-work-entry')&&!['native_open','refresh'].includes(buttonTarget.dataset.action)){returnFromNative(buttonTarget);return;}Promise.resolve(handleClick(buttonTarget)).catch(failure=>{error=failure.message;render();});}
     // Values typed under a job row are kept until they are saved with the run. The field in use is never redrawn
     // while it is typed in: a mark of a wrong value is taken off in place.
@@ -1167,6 +1189,21 @@
       const scope=workStageValueScope(state,selection),errors=stageValueErrors.get(scope);
       if(errors&&Object.hasOwn(errors,target.name)){const next={...errors};delete next[target.name];setStageValueErrors(next);target.removeAttribute('aria-invalid');target.removeAttribute('aria-describedby');target.closest('dd')?.querySelector('.ew-vd-ask-error')?.remove();}
       return;
+    }
+    if(['input','change'].includes(event.type)&&target.closest?.('#ees-work-start')){
+      const form=target.closest('#ees-work-start');
+      let inputs;
+      try{inputs=workReadInputs(form);}catch(_){return;}
+      if(form.matches?.('[data-inline-start]')){
+        if(inlineStart?.key===inlineStartKey())inlineStart.values=inputs;
+        return;
+      }
+      // Keep the existing private draft for legacy questions. A linked value
+      // belongs to this dialog and target, including when the dialog is cancelled.
+      const shared=workRunParameterFields(workPublishedDefinition(state));
+      for(const field of shared)delete inputs[field.id];
+      if(shared.length&&workValuesEqual(inputs,selection.start_inputs?.[selection.workflow_id] || {}))return;
+      selection.start_inputs ||= {};selection.start_inputs[selection.workflow_id]=inputs;remember();return;
     }
     // Enter in a value field moves to the next field of the job, then does what the row's control does.
     if(event.type==='keydown'&&event.key==='Enter'&&!event.isComposing&&event.keyCode!==229&&target.matches?.('input[data-work-input]')&&target.closest?.('[data-stage-values]')){
@@ -1182,7 +1219,6 @@
     }
     if(event.type==='input'){
       if(target.matches?.('[data-stage-note]')){const current=stageJob(target.dataset.jobId);if(current&&state.run&&!target.readOnly&&workStageCanDecide(current.node,current.saved,current.run)&&!current.saved.decisions?.job)stageNotes.set(workStageNoteKey(state,current.node),String(target.value));return;}
-      if(target.closest?.('#ees-work-start')){const form=target.closest('#ees-work-start');selection.start_inputs ||= {};selection.start_inputs[selection.workflow_id]=workReadInputs(form);remember();return;}
       if(target.id==='ees-request-reason'){selection.request_reasons ||= {};selection.request_reasons[selection.run_id+'/'+selection.job_id]=target.value;remember();return;}
       if(target.id==='ees-review-text'){view.capture();scheduleReviewSave();}
     }
@@ -1210,7 +1246,7 @@
     if(event.type==='change'&&target.matches?.('[data-list-include]')){view.refreshResults();return;}
     if(event.type==='change'&&(target.matches?.('[data-item-verdict]')||target.matches?.('[data-item-confirm]'))){const verdict=target.matches('[data-item-confirm]')?(target.checked?'completed':'unknown'):target.value;if(verdict)mutate({action:'decide',run_id:selection.run_id,job_id:selection.job_id,item_id:target.dataset.itemId,result_revision:state?.run?.jobs?.[selection.job_id]?.result_revision,verdict});}
   }
-  function reset(){purposeRequest=null;apiContextSignature='';apiContextGeneration++;accountGeneration++;stageNotes.clear();stageValues.clear();stageValueErrors.clear();stageValueBases.clear();helpWriting=null;nativeCapabilities=null;nativeScope=null;workspaceCache.clear();stateKey='';targetLoading=false;scopeLoading=false;evidenceUnavailable=false;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;inputProposalApplied=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;savedUIState={};source()?.modelCount?.(0);selection=initialSelection();lastLocalSelection=initialSelection();}
+  function reset(){purposeRequest=null;apiContextSignature='';apiContextGeneration++;accountGeneration++;stageNotes.clear();stageValues.clear();stageValueErrors.clear();stageValueBases.clear();helpWriting=null;nativeCapabilities=null;nativeScope=null;workspaceCache.clear();stateKey='';targetLoading=false;scopeLoading=false;evidenceUnavailable=false;readyRoute='';pendingNativeAction=null;clearNativeTicket();nativeNavigationBusy=false;procedureStart=null;inlineStart=null;workUI.closeHelp({restoreFocus:false});reviewSaving=null;clearTimeout(reviewTimer);clearTimeout(referenceTimer);referenceTimer=null;referenceRead++;referenceChat='';messageReferences.clear();clearMessageReferences();epoch++;workEpoch++;serial++;chatCreations.clear();chatAliases.clear();clearTimeout(refreshTimer);clearTimeout(uiTimer);state=null;pendingInputProposal=null;inputProposalApplied=null;error='';commandError='';receipts.clear();optionCache.clear();clearTimeout(optionTimer);view.reset();designer.reset();restored=false;initialSelectionPatch=null;uiRevision=0;savedUIState={};source()?.modelCount?.(0);selection=initialSelection();lastLocalSelection=initialSelection();}
   function sync(){
     scheduled=false;bindHosts();syncHelpState();const auth=token();if(auth!==identity){reset();identity=auth;route='';}
     syncNativeReturn();

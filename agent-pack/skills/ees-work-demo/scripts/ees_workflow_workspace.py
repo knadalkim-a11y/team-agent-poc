@@ -21,7 +21,9 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from .ees_workflow_authoring import WorkflowError, _value, _resolve, _now, _hash, _fail
 from .ees_workflow_definition import SYSTEMS, CATEGORIES, IDENTIFIER, MAX_DOCUMENT_BYTES, _dump, tool_connection_required, concurrent_runs_allowed
 from .ees_workflow_view import workflow_help
-from .ees_workflow_api_binding import binding_errors, binding_shape, retired_binding_errors
+from .ees_workflow_api_binding import (
+    binding_errors, binding_run_input_ids, binding_shape, procedure_run_inputs, retired_binding_errors,
+)
 
 INPUT_TYPES = ('text', 'number', 'datetime', 'single', 'multi', 'list', 'person', 'boolean', 'json_object')
 BLOCKS = ('values', 'schedule', 'checklist', 'list_confirm', 'item_verdict', 'ai_review', 'human_confirm', 'change_request')
@@ -226,6 +228,53 @@ def human_check_items(node):
             if isinstance(item, dict) and _id(item.get('id')) and isinstance(item.get('name'), str) and item['name'].strip()]
 
 
+def _bound_run_input_definition_errors(nodes, root_fields):
+    referenced, marked, errors = set(), set(), []
+    declared = []
+    for node in nodes.values():
+        if not isinstance(node, dict):
+            continue
+        referenced.update(binding_run_input_ids(node))
+        fields = node.get('inputs', [])
+        for field in fields if isinstance(fields, list) else ():
+            if not isinstance(field, dict):
+                continue
+            key = field.get('id')
+            if isinstance(key, str):
+                declared.append(key)
+            if 'execution_parameter' in field:
+                if field['execution_parameter'] is not True or not isinstance(key, str) or root_fields.get(key) is not field:
+                    errors.append('실행 파라미터를 절차의 이번 실행 입력으로 선언해 주세요.')
+                else:
+                    marked.add(key)
+    seen = set()
+    checked = referenced | marked
+    for key in declared:
+        if key not in checked:
+            continue
+        if key in seen:
+            errors.append(f'{key}: 실행 파라미터 ID는 절차에서 한 번만 선언해 주세요.')
+        seen.add(key)
+    for key in sorted(checked.intersection(root_fields)):
+        field = root_fields[key]
+        name = field.get('name')
+        if (not _id(key) or SECRET_KEYS.search(key) or not isinstance(name, str) or not name.strip() or len(name) > 160
+                or field.get('type') not in INPUT_TYPES or type(field.get('required', False)) is not bool):
+            errors.append(f'{key}: 실행 파라미터의 이름·형식·필수 여부를 확인해 주세요.')
+        if field.get('options_source', 'manual') != 'manual' or field.get('depends_on'):
+            errors.append(f'{key}: 실행 파라미터에서 사용할 선택지는 직접 지정해 주세요.')
+        if field.get('type') in ('single', 'multi') and not isinstance(field.get('options', []), list):
+            errors.append(f'{key}: 실행 파라미터의 선택지 목록을 확인해 주세요.')
+    return errors
+
+
+def _job_input_fields(definition, job):
+    ids = binding_run_input_ids(job)
+    if not ids:
+        return job.get('inputs', [])
+    return [*job.get('inputs', []), *(field for key, field in procedure_run_inputs(definition).items() if key in ids)]
+
+
 def definition_check(definition, complete=True):
     """Validation is independent of the editor and never evaluates expressions."""
     errors, warnings = [], []
@@ -248,6 +297,8 @@ def definition_check(definition, complete=True):
     nodes = definition.get('nodes')
     if not isinstance(nodes, dict) or len(nodes) > 250:
         return errors + ['절차·단계·작업 구조를 확인해 주세요.'], warnings
+    root_fields = procedure_run_inputs(definition)
+    errors.extend(_bound_run_input_definition_errors(nodes, root_fields))
     # 2026-11-02: schedules are no longer authored with the procedure. A rule
     # left in an earlier draft is kept as data but cannot be edited on screen,
     # so it no longer blocks publication. Reservations validate their own rule.
@@ -385,7 +436,7 @@ def definition_check(definition, complete=True):
             if not _id(node['shared_tool_id']) or node.get('tool_reference') or node.get('tool_contract_id') or node.get('tool_contract_revision') or node.get('mode') != 'tool':
                 errors.append(f'{key}: 공용 도구 ID와 이전 방식 도구를 함께 저장할 수 없습니다.')
         if 'api_binding' in node:
-            error = binding_shape(node, WorkspaceMixin._work_prerequisite_jobs(definition, node['id']))
+            error = binding_shape(node, WorkspaceMixin._work_prerequisite_jobs(definition, node['id']), root_fields)
             if error:
                 errors.append(f'{key}: {error}')
         if node.get('mode') == 'tool' and complete and not node.get('shared_tool_id') and 'api_binding' not in node:
@@ -541,6 +592,20 @@ def input_errors(fields, values, complete=True, options_snapshot=None):
         if complete and field.get('required') and value in ('', []):
             errors.append(f'{key}: 필수값을 입력해 주세요.')
     return errors
+
+
+def _run_parameter_errors(definition, conditions, inputs):
+    ids = set().union(*(binding_run_input_ids(node) for key, node in definition['nodes'].items()
+                        if conditions.get(key) is not False))
+    if not ids:
+        return []
+    fields = [field for key, field in procedure_run_inputs(definition).items() if key in ids]
+    values = {key: value for key, value in inputs.items() if key in ids}
+    for field in fields:
+        value = values.get(field['id'])
+        if field.get('required') and isinstance(value, str) and not value.strip():
+            values[field['id']] = None
+    return input_errors(fields, values)
 
 
 class WorkspaceMixin:
@@ -864,7 +929,11 @@ class WorkspaceMixin:
         deadline = self._work_deadline(job, values)
         deadline_id = (job.get('deadline') or {}).get('input')
         deadline_source = {'input': deadline_id, 'value': deepcopy(values.get(deadline_id)), 'source': sources.get(deadline_id)} if deadline_id else None
-        values = {field['id']: values[field['id']] for field in job.get('inputs', []) if field['id'] in values and (field.get('scope') != 'factory' or sources[field['id']]['scope'] == 'factory')}
+        shared_inputs = binding_run_input_ids(job)
+        values = {field['id']: values[field['id']] for field in _job_input_fields(definition, job)
+                  if field['id'] in values
+                  and (field.get('scope') != 'factory' or sources[field['id']]['scope'] == 'factory')
+                  and (field['id'] not in shared_inputs or sources[field['id']]['scope'] == 'run')}
         pin = None
         if job.get('shared_tool_id'):
             row = db.execute('SELECT data FROM work_shared_tool_pins WHERE run_kind=? AND run_id=? AND tool_id=?', ('work', run['id'], job['shared_tool_id'])).fetchone()
@@ -1037,7 +1106,8 @@ class WorkspaceMixin:
             context = record.get('context', {})
             if context.get('run_id') != run_id or context.get('job_id') != job_id or context.get('revision') != run['revision'] or context.get('input_hash') != _hash(snapshot['inputs']) or context.get('authorization_hash') != self._work_options_authority(db, actor, groups, run['system_id']):
                 _fail('options_context_changed', '입력이 바뀌었습니다. 선택지를 다시 확인해 주세요.')
-        errors = self._work_input_errors(db, snapshot['definition'], job.get('inputs', []), snapshot['inputs'], options_snapshot=options_snapshot, run_id=run_id)
+        errors = self._work_input_errors(db, snapshot['definition'], _job_input_fields(snapshot['definition'], job),
+                                         snapshot['inputs'], options_snapshot=options_snapshot, run_id=run_id)
         if errors:
             _fail('input_required', '\n'.join(errors))
         number = db.execute('SELECT COALESCE(MAX(number),0)+1 FROM work_attempts WHERE run_id=? AND job_id=?', (run_id, job_id)).fetchone()[0]
@@ -1224,7 +1294,9 @@ class WorkspaceMixin:
             job['effective_inputs'] = effective['inputs']
             job['deadline'] = effective.get('deadline')
             job['settings_sources'] = effective['settings_sources']
-            job['missing_inputs'] = self._work_input_errors(db, value['definition'], value['definition']['nodes'][job['job_id']].get('inputs', []), effective['inputs'], options_snapshot=(current or {}).get('snapshot', {}).get('options'), run_id=row['id'])
+            fields = _job_input_fields(value['definition'], value['definition']['nodes'][job['job_id']])
+            job['missing_inputs'] = self._work_input_errors(db, value['definition'], fields, effective['inputs'],
+                                                           options_snapshot=(current or {}).get('snapshot', {}).get('options'), run_id=row['id'])
             job['result_stale'] = bool(not _closed(row) and current and current['actor_id'] == _value(actor, 'id') and not current.get('evidence_access') and (current['inputs'] != effective['inputs'] or (current['snapshot'].get('deadline_source') or {}).get('value') != (effective.get('deadline_source') or {}).get('value') or not self._work_sources_current(db, row, current['snapshot'])))
             job['decisions'] = [dict(item) for item in db.execute('SELECT * FROM work_decisions WHERE run_id=? AND job_id=? ORDER BY created_at,id', (row['id'], job['job_id']))]
             job['partial_confirmed'] = self._work_partial_confirmed(db, row, job)
@@ -1592,13 +1664,18 @@ class WorkspaceMixin:
                     # The picker includes denied names. Only the authorized factory
                     # collection carries attributes that can contribute to a preview.
                     site = next((item for item in factories if item['id'] == factory_id), None)
-                    definition = selected_workflow.get('draft') or selected_workflow['published']
-                    if site and isinstance(site['attributes'], dict) and isinstance(definition, dict) and definition.get('execution_scope') != 'system':
+                    published = selected_workflow['published']
+                    definition = selected_workflow.get('draft') or published
+                    if site and isinstance(site['attributes'], dict):
                         attributes = {**site['attributes'], 'factory_id': factory_id}
-                        selected_workflow['factory_preview'] = {
-                            'factory_id': factory_id, 'revision': selected_workflow['revision'],
-                            'conditions': _factory_condition_results(definition, attributes),
-                        }
+                        conditions = {}
+                        for key, snapshot in (('conditions', definition), ('published_conditions', published)):
+                            if isinstance(snapshot, dict) and snapshot.get('execution_scope') != 'system':
+                                conditions[key] = _factory_condition_results(snapshot, attributes)
+                        if conditions:
+                            selected_workflow['factory_preview'] = {
+                                'factory_id': factory_id, 'revision': selected_workflow['revision'], **conditions,
+                            }
                 ui = db.execute('SELECT * FROM work_ui WHERE actor_id=?', (_value(actor, 'id'),)).fetchone()
                 capabilities['managed_systems'] = []
                 for system in systems:
@@ -2059,9 +2136,11 @@ class WorkspaceMixin:
             if errors: _fail('invalid_inputs', '\n'.join(errors))
             attributes = json.loads(factory['attributes']) if factory else {}; attributes['factory_id'] = factory_id
             conditions = _factory_condition_results(definition, attributes)
+            errors = _run_parameter_errors(definition, conditions, inputs)
+            if errors: _fail('invalid_inputs', '\n'.join(errors))
             snapshot = {'definition': definition, 'definition_hash': published['hash'], 'factory': dict(factory) | {'attributes': attributes} if factory else None, 'condition_results': conditions}
             key = str(uuid4()); mode = definition.get('mode', 'on_demand')
-            api_errors = binding_errors(self, db, groups, definition)
+            api_errors = binding_errors(self, db, groups, definition, run_values=inputs, condition_results=conditions)
             if api_errors:
                 _fail('execution_not_ready', '\n'.join(api_errors))
             active_definition = {'nodes': {job_id: node for job_id, node in definition['nodes'].items() if node['type'] == 'j' and conditions[job_id] is not False}}
@@ -2091,15 +2170,24 @@ class WorkspaceMixin:
                 db.execute('INSERT OR IGNORE INTO work_chat_links VALUES(?,?,?,?)', (actor_id, body['chat_id'], row['id'], now))
                 return {'run_id': row['id'], 'revision': row['revision']}
             if action == 'save_inputs':
-                inputs = body.get('inputs', {}); definition = json.loads(row['snapshot'])['definition']
+                inputs = body.get('inputs', {}); snapshot = json.loads(row['snapshot']); definition = snapshot['definition']
                 fields = {field['id']: field for node in definition['nodes'].values() for field in node.get('inputs', []) if field.get('scope', 'run') == 'run'}
                 if not isinstance(inputs, dict): _fail('invalid_inputs', '이번 입력 형식을 확인해 주세요.')
                 errors = self._work_input_errors(db, definition, list(fields.values()), inputs, False, run_id=row['id'])
+                before = json.loads(row['inputs'])
+                shared_ids = set().union(*(binding_run_input_ids(node) for node in definition['nodes'].values()))
+                changed = {key for key in set(before) | set(inputs)
+                           if key not in before or key not in inputs or before[key] != inputs[key]
+                           or key in shared_ids and _dump(before[key]) != _dump(inputs[key])}
+                if changed & shared_ids:
+                    conditions = snapshot.get('condition_results', {})
+                    errors.extend(_run_parameter_errors(definition, conditions, inputs))
+                    if not errors:
+                        errors.extend(binding_errors(self, db, groups, definition, run_values=inputs, condition_results=conditions))
                 if errors: _fail('invalid_inputs', '\n'.join(errors))
-                before = json.loads(row['inputs']); changed = {key for key in set(before) | set(inputs) if key not in before or key not in inputs or before[key] != inputs[key]}
                 db.execute('UPDATE work_runs SET inputs=? WHERE id=?', (_dump(inputs), row['id']))
                 for key, node in definition['nodes'].items():
-                    if changed.intersection({field['id'] for field in node.get('inputs', [])} | {(node.get('deadline') or {}).get('input')}):
+                    if changed.intersection({field['id'] for field in node.get('inputs', [])} | binding_run_input_ids(node) | {(node.get('deadline') or {}).get('input')}):
                         for affected in {key} | self._work_dependent_ids(definition, key):
                             db.execute("UPDATE work_jobs SET status='review_required',revision=revision+1,reason='입력 변경 후 재확인 필요' WHERE run_id=? AND job_id=? AND status IN ('completed','waiting_confirmation','partial')", (row['id'], affected))
             elif action in ('close_run', 'cancel_run'):

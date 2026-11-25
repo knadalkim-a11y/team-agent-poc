@@ -282,7 +282,7 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.screenshot('shared-panel-authoring-1366')
         self.open_author_job_ui('job-0')
         capture_style('author-job', '.ew-author-tabs')
-        for tab in ('rules', 'history'):
+        for tab in ('history',):
             self.click('[data-author-action=tab][data-tab=' + tab + ']')
             self.wait("document.querySelector('.ew-author-tabs [data-tab=" + tab + "]')?.getAttribute('aria-selected') === 'true'")
             capture_style('author-' + tab, '.ew-author-tabs')

@@ -53,6 +53,10 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
             mapping:rect('[data-api-mapping]'), foot:rect('.ew-api-foot'),
             fields:['url','name','purpose'].map(name=>rect('[name=api-'+name+']')),
             stage:rect('[data-stage-id=stage]'), jobs:['job-0','job-1'].map(id=>rect('[data-job-id='+id+']')),
+            overview:rect('.ew-content-overview'), stageHeading:rect('.ew-content-heading'),
+            addStage:rect('.ew-content-heading > [data-author-action=add_stage]'),
+            stageHead:rect('[data-stage-id=stage] .ew-stage-head'),
+            addJob:rect('[data-stage-id=stage] .ew-stage-head > [data-author-action=add_job]'),
             bindings:[...document.querySelectorAll('[data-api-job-binding]')].map(e=>e.innerText)};
         })()""")
         report['scene'] = name
@@ -96,11 +100,17 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
             self.assertAlmostEqual(purpose['width'], 960, delta=1)
             self.assertGreater(report['mapping']['y'], purpose['y'] + purpose['height'])
         if name.startswith('task-'):
-            self.assertAlmostEqual(report['stage']['x'], 328, delta=2)
-            self.assertAlmostEqual(report['stage']['width'], 960, delta=2)
-            # 2026-11-18: the publication state sits in the title row on every editor screen,
-            # which makes that row 3px taller than the status tag it replaces here.
-            self.assertAlmostEqual(report['stage']['y'], 237, delta=2)
+            overview, heading, stage = (report[key] for key in ('overview', 'stageHeading', 'stage'))
+            self.assertGreater(overview['height'], 0)
+            self.assertGreaterEqual(heading['y'], overview['y'] + overview['height'])
+            self.assertGreaterEqual(stage['y'], heading['y'] + heading['height'])
+            self.assertAlmostEqual(stage['x'], overview['x'], delta=2)
+            self.assertAlmostEqual(stage['width'], overview['width'], delta=2)
+            for control, row in ((report['addStage'], heading), (report['addJob'], report['stageHead'])):
+                self.assertGreaterEqual(control['height'], 32)
+                self.assertGreater(control['width'], 24)
+                self.assertGreaterEqual(control['y'], row['y'])
+                self.assertLessEqual(control['y'] + control['height'], row['y'] + row['height'])
         if name == 'tools-edit':
             # Save stays below the settings, at the right edge of the form and the bottom edge of the pane.
             self.assertGreater(report['save']['x'], report['form']['x'] + 800)
@@ -356,7 +366,8 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         service = self.register_service('EMS 설비 이력')
         reader = self.seed_api(service, 'GET', 'https://ems.example/equipment/{equipmentId}/alarms',
             '설비 알람 조회', '설비에서 발생한 알람을 조회합니다.',
-            inputs=[dict(name='equipmentId', label='설비 번호', required=True, type='string', **{'in':'path'})],
+            inputs=[dict(name='equipmentId', label='설비 번호', required=True, type='string', **{'in':'path'}),
+                    dict(name='hours', label='조회 기간', required=True, type='integer', **{'in':'query'})],
             fields=[dict(path='code', label='알람 코드', type='string'), dict(path='state', label='알람 상태', type='string')],
             example=[{'code':'F101','state':'점검 필요'}, {'code':'F205','state':'정지'}])
         writer = self.seed_api(service, 'POST', 'https://ems.example/equipment/{equipmentId}/alarms',
@@ -364,7 +375,10 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
             inputs=[dict(name='equipmentId', label='설비 번호', required=True, type='string', **{'in':'path'}),
                     dict(name='code', label='알람 코드', required=True, type='string', **{'in':'body'})],
             fields=[dict(path='receipt', label='접수 번호', type='string')], example={'receipt':'ACK-104'})
-        key = self.author(name='설비 알람 처리')
+        key = self.author(name='설비 알람 처리', start_fields=[
+            {'id': 'target-equipment', 'name': '대상 설비 번호', 'type': 'text',
+             'scope': 'run', 'required': True},
+        ])
         workflow = self.state(workflow_id=key)['workflow']
         definition = deepcopy(workflow['draft'])
         nodes = definition['nodes']
@@ -376,32 +390,97 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.open_initialized_author_list()
         self.click('[data-author-action=open][data-id="' + key + '"]')
         self.click('[data-author-action=tab][data-tab=content]')
+        add_stage = '.ew-content-heading > [data-author-action=add_stage]'
+        add_job = '[data-stage-id=stage] .ew-stage-head > [data-author-action=add_job]'
+        self.wait(f'document.querySelector({json.dumps(add_stage)})?.checkVisibility()')
+        self.assertFalse(self.read('[data-author-action=api_structure_edit]', 'isConnected'))
+        self.assertFalse(self.read('.ew-work-content .ew-content-start-inputs', 'isConnected'))
+        self.assertEqual(self.browser.evaluate("Array.from(document.querySelectorAll('.ew-author-tabs [role=tab]'), button => button.dataset.tab)"),
+                         ['content', 'try', 'history'])
         first = '[data-job-id=job-0] [data-author-action=job_api_setup]'
         if not self.read(first, 'isConnected'):
             self.click('[data-author-action=stage_toggle][data-id=stage]')
+        self.wait(f'document.querySelector({json.dumps(add_job)})?.checkVisibility()')
         self.capture_state('task-connection', first)
         self.assertFalse(self.read('[data-api-job-binding]', 'isConnected'))
         for job, op in (('job-0', reader), ('job-1', writer)):
             self.click('[data-job-id="' + job + '"] [data-author-action=job_api_setup]')
             self.click('[data-api-candidate="' + op['id'] + '"]')
-            self.choose('[data-api-source="equipmentId"]', 'constant')
-            self.fill('[data-api-value="equipmentId"]', 'EQ-100')
+            self.choose('[data-api-source="equipmentId"]', 'run_input:target-equipment')
             if job == 'job-1':
                 self.choose('[data-api-source="code"]', 'result')
                 self.choose('[data-api-result="code"]', '["job-0","code"]')
             self.click('#ees-work-dialog [data-dialog-confirm]')
             self.wait("!document.querySelector('#ees-work-dialog[open]')")
         self.capture_state('task-mapped', '[data-api-job-binding]')
-        self.click('[data-author-action=job_api_example]')
+        self.click('[data-job-id=job-0] [data-author-action=job_api_example]')
         self.wait("document.querySelector('#ees-work-dialog[open] .ew-api-result-example')?.textContent.includes('F101')")
         self.key('Escape', 27)
+        self.click('[data-job-id=job-1] [data-author-action=job_api_setup][data-api-setup=inputs]')
+        self.assertEqual(self.read('#ees-work-dialog [data-api-result="code"]', 'value'), '["job-0","code"]')
+        self.assertEqual(self.read('#ees-work-dialog [data-api-source="equipmentId"]', 'value'),
+                         'run_input:target-equipment')
+        self.key('Escape', 27)
+        self.wait("!document.querySelector('#ees-work-dialog[open]')")
+        self.click('.ew-procedure-menu summary')
+        self.click('[data-author-action=execution_parameters]')
+        self.wait("document.querySelector('#ees-work-dialog[open] [data-execution-parameter-uses]')")
+        uses = self.text('#ees-work-dialog [data-execution-parameter-uses]')
+        self.assertIn('설비 알람 조회', uses)
+        self.assertIn('알람 확인 등록', uses)
+        self.key('Escape', 27)
+        self.wait("!document.querySelector('#ees-work-dialog[open]')")
+
+        self.click(add_stage)
+        inline_name = '#ew-stage-editor [name=name]'
+        self.wait(f'document.activeElement?.matches({json.dumps(inline_name)})')
+        self.fill(inline_name, '결과 검토')
+        self.click('[data-author-action=inline_apply]')
+        self.wait(f'document.activeElement?.matches({json.dumps(inline_name)}) && document.activeElement.getAttribute("aria-label") === "새 작업 이름"')
+        self.fill(inline_name, '요청 등록 결과 확인')
+        self.click('[data-author-action=inline_apply]')
+        self.wait("document.querySelector('#ew-author-node [name=name]')?.value === '요청 등록 결과 확인'")
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('[data-author-status]')?.dataset.dirty === 'false'")
         saved = self.state(workflow_id=key)['workflow']['draft']['nodes']
         self.assertEqual(saved['job-0']['api_binding']['operation_id'], reader['id'])
         self.assertEqual(saved['job-1']['api_binding']['operation_id'], writer['id'])
+        for job_id in ['job-0', 'job-1']:
+            self.assertEqual(saved[job_id]['api_binding']['inputs']['equipmentId'],
+                             {'run_input': 'target-equipment'})
+            self.assertFalse(any(field['id'] == 'target-equipment' for field in saved[job_id]['inputs']))
         source = saved['job-1']['api_binding']['inputs']['code']['result']
         self.assertEqual(source, {'job_id':'job-0', 'field':'code', 'confirmed':True})
+        added_stage = next(node for node in saved.values() if node['name'] == '결과 검토')
+        added_job = next(node for node in saved.values() if node['name'] == '요청 등록 결과 확인')
+        self.assertEqual(added_job['parent'], added_stage['id'])
+
+        # The authored run field is collected once. The reader's hours still
+        # belongs to the reader, so the start form must not collect it.
+        revision = self.state(workflow_id=key)['workflow']['revision']
+        self.command('publish_workflow', workflow_id=key, expected_revision=revision)
+        self.refresh()
+        self.click('[data-action=mode][data-mode=work]')
+        self.open_sidebar()
+        self.click('[data-action=workflow][data-workflow-id="' + key + '"]')
+        self.click('[data-action=overview_start]')
+        start_form = '#ees-work-start[data-inline-start]'
+        target = start_form + ' [data-work-input][name=target-equipment]'
+        self.wait("document.querySelector(" + json.dumps(target) + ")?.checkVisibility()")
+        self.assertEqual(self.browser.evaluate("Array.from(document.querySelectorAll('#ees-work-start[data-inline-start] [data-work-input]'), input => input.name)"),
+                         ['target-equipment'])
+        self.fill(target, 'EQ-001')
+        self.click(start_form + ' [type=submit]')
+        self.wait("window.__eesNativeWorkV1.captureReference()?.run_id")
+        run_id = self.browser.evaluate("window.__eesNativeWorkV1.captureReference().run_id")
+        self.assertEqual(self.state(run_id=run_id)['run']['inputs'], {'target-equipment': 'EQ-001'})
+        self.click('[data-action=stage_open][data-node-id=stage]')
+        period = saved['job-0']['api_binding']['inputs']['hours']['input']
+        period_control = '#stage-values-job-0 [data-work-input][name="' + period + '"]'
+        self.wait("document.querySelector(" + json.dumps(period_control) + ")?.checkVisibility()")
+        self.assertIn('EQ-001', self.text('#stage-values-job-0'))
+        self.assertIn('시작할 때 입력', self.text('#stage-values-job-0 .ew-vd-given'))
+        self.assertFalse(self.read('#stage-values-job-0 [name=target-equipment]', 'isConnected'))
 
     def test_registered_query_reaches_service_and_result_reopens_from_records(self):
         http = self.enterContext(backup_service())

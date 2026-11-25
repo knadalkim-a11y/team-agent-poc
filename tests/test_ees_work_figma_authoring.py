@@ -21,9 +21,7 @@ class FigmaAuthoringScheduleTests(unittest.TestCase):
                                 timeout=30, check=False)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    # 2026-11-02 user decision: the execution-mode tab and schedule authoring are
-    # removed. Saved modes/schedules remain data, start inputs move to the content
-    # tab, and reservations made earlier can only be listed and stopped.
+    # Saved modes and schedules survive editing run parameters from the title menu.
     def test_no_run_mode_tab_keeps_saved_mode_and_schedule_through_editing_and_save(self):
         self.run_contract(r"""
 (async()=>{
@@ -31,13 +29,17 @@ const h=harness(),record=h.workflows.get('w');
 const schedule={frequency:'weekly',interval:2,weekday:1,anchor:'2026-10-06T09:00',timezone:'Asia/Seoul',name_template:'{date} 회차',stage_deadlines:{t:{offset_days:-8,end_offset_days:-6}},opening:'on_schedule',closing:'after_last_stage',non_working_days:'notify_no_shift'};
 record.draft.mode='periodic';record.draft.schedule=copy(schedule);h.render();const original=copy(h.draft().definition);
 assert.doesNotMatch(h.markup,/실행 방식|data-tab="schedule"|data-author-action="run_mode"|data-author-action="schedule_tools"|일정 미리보기·서버 예약/);
-for(const tab of ['content','rules','history'])assert.match(h.markup,new RegExp('data-tab="'+tab+'"'));
+for(const tab of ['content','history'])assert.match(h.markup,new RegExp('data-tab="'+tab+'"'));
+assert.doesNotMatch(h.markup,/data-tab="rules"/);
 h.click('tab',{tab:'schedule'});await flush();
-assert.match(h.markup,/data-author-tab="content"/);assert.match(h.markup,/시작할 때 물어볼 것/);assert.match(h.markup,/단계와 작업/);
+assert.match(h.markup,/data-author-tab="content"/);assert.doesNotMatch(h.markup,/시작할 때 물어볼 것/);assert.match(h.markup,/단계와 작업/);
 assert.deepEqual(h.draft().definition,original);assert.equal(h.draft().dirty,false);assert.equal(h.forms['ew-author-schedule'],undefined);
 h.click('run_mode',{id:'emergency'});h.click('schedule_tools');await flush();assert.equal(h.draft().definition.mode,'periodic');assert.equal(h.draft().dirty,false);
-h.dialogs.push({id:'release_date',name:'배포일',type:'datetime',scope:'run',required:true,options_source:'manual',options:''});
-h.click('start_input_add');await flush();assert.equal(h.draft().definition.nodes.p.inputs.at(-1).id,'release_date');
+await openExecutionParameters(h);
+await executionParameterClick(h,'add',undefined,{name:'배포일',type:'datetime',required:true});
+const parameter=h.draft().definition.nodes.p.inputs.at(-1);
+assert.match(parameter.id,/^field-/);assert.equal(parameter.name,'배포일');assert.equal(parameter.execution_parameter,true);
+await h.modalClose();
 h.click('save');await flush();
 assert.equal(h.writes[0].action,'save_draft');assert.equal(h.writes[0].expected_revision,1);
 assert.equal(h.writes[0].definition.mode,'periodic');assert.deepEqual(h.writes[0].definition.schedule,schedule);
@@ -49,7 +51,7 @@ await h.open('q');await h.open('w');assert.deepEqual(h.draft().definition.schedu
         self.run_contract(r"""
 (async()=>{
 const h=harness(),record=h.workflows.get('w');record.draft.mode='periodic';record.draft.schedule={timezone:'Asia/Seoul',anchor:'2026-10-06T09:00',frequency:'weekly',interval:2};h.render();
-for(const tab of ['content','try','rules','history']){h.click('tab',{tab});await flush();
+for(const tab of ['content','try','history']){h.click('tab',{tab});await flush();
   assert.doesNotMatch(h.markup,/name="anchor"|name="frequency"|name="name_template"|data-author-action="schedule_preview"|data-author-action="schedule_create"|단계 기한|회차 열기와 닫기/);}
 h.click('schedule_preview');h.click('schedule_create');await flush();
 assert.equal(h.operations.length,0);assert.equal(h.writes.length,0);assert.equal(h.draft().dirty,false);
@@ -60,13 +62,15 @@ assert.equal(h.operations.length,0);assert.equal(h.writes.length,0);assert.equal
         self.run_contract(r"""
 (async()=>{
 const h=harness();await flush();
-const at=label=>h.markup.indexOf(label);assert.ok(at('시작할 때 물어볼 것')>=0);assert.ok(at('단계와 작업')>=0);assert.ok(at('시작할 때 물어볼 것')>at('단계와 작업'));
-h.dialogs.push({id:'incident_at',name:'발생 시각',type:'datetime',scope:'run',required:true,options_source:'manual',options:''});
-h.click('start_input_add');await flush();
-assert.equal(h.draft().definition.nodes.p.inputs[0].id,'incident_at');assert.equal(h.draft().definition.nodes.p.inputs[0].scope,'run');assert.equal(h.draft().definition.nodes.j.inputs.length,0);assert.equal(h.writes.length,0);
+assert.match(h.markup,/단계와 작업/);assert.doesNotMatch(h.markup,/시작할 때 물어볼 것/);
+await openExecutionParameters(h);
+await executionParameterClick(h,'add',undefined,{name:'발생 시각',type:'datetime',required:true});
+const parameter=h.draft().definition.nodes.p.inputs[0];
+assert.equal(parameter.name,'발생 시각');assert.equal(parameter.scope,'run');assert.equal(h.draft().definition.nodes.j.inputs.length,0);assert.equal(h.writes.length,0);
 assert.match(h.markup,/data-author-tab="content"/);
-h.dialogs.push(null);h.click('start_input_delete',{id:'incident_at'});await flush();assert.equal(h.draft().definition.nodes.p.inputs.length,1);
-h.click('save');await flush();assert.equal(h.writes[0].definition.nodes.p.inputs[0].id,'incident_at');
+await executionParameterClick(h,'delete',parameter.id,null);assert.equal(h.draft().definition.nodes.p.inputs.length,1);
+await h.modalClose();
+h.click('save');await flush();assert.equal(h.writes[0].definition.nodes.p.inputs[0].id,parameter.id);
 })().catch(e=>{console.error(e);process.exitCode=1;});
 """)
 
