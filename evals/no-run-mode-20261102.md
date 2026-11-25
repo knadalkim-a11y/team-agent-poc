@@ -347,6 +347,22 @@ CI456 (`77ca5cd`)의 실제 전체 제품과 새 미완성 게시/360px 흐름�
 - **미실행:** 사내 적용·기동·화면 확인(사용자 실행 결과로 따로 기록한다).
 - **사내 적용 결과(사용자 보고, 2026-11-19):** 사용자가 적용 명령을 실행해 두었다고 알렸고(2026-11-18), 결과를 묻자 ‘성공, 새 판으로 동작 중’이라고 답했다. 선택지로 받은 답이며 결과 줄 원문과 화면 확인 내용은 받지 않았다. 이 세션에서 따로 확인하지 않았다. 다음 적용 블록의 설치 기준은 `88667199157da5a9688a91ac74273c1362c3f8a7`이고, 블록이 Status의 커밋을 서버를 멈추기 전에 확인하므로 실제 설치본이 다르면 그 자리에서 멈춘다.
 
+<a id="main-bb55e36-full-check-failure-20261125"></a>
+
+## 2026-11-25 · main bb55e36 전체 검사 실패: Windows에서만 걸리는 시험 코드 두 곳
+
+- **증상:** [PR #156](https://github.com/knadalkim-a11y/team-agent-poc/pull/156)을 병합한 main `bb55e365d26e6cfb7a37d4c2b4acbcdb097d0874`의 전체 검사 [실행 634](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/45569247081)가 실패했다(Python 3.11.9, windows-2022). 작업 31개 가운데 Windows `services` 묶음 하나가 실패했다. 성공 26개, 건너뜀 2개(빠른 검사, 프로그램 ZIP 만들기)이고 최종 집계 둘은 그 실패 때문에 실패·취소로 끝났다. 프로그램 ZIP은 만들어지지 않았다. Linux의 모든 묶음과 Windows의 다른 묶음은 통과했다.
+- **실패한 시험 11개(세 모듈):**
+  - `test_ees_work_figma_authoring` 8개와 `test_ees_work_figma_schedule` 2개: `FileNotFoundError: [WinError 206] The filename or extension is too long`.
+  - `test_ees_work_try`의 `test_try_open_makes_a_try_of_an_unpublished_draft_stored_for_rollback` 1개: 임시 폴더를 지우다 `PermissionError: [WinError 32]`(`work.sqlite3`가 사용 중).
+- **확인된 원인 1(길이를 재서 확인):** 앞의 두 모듈은 `tests/test_ees_work_authoring_ui.cjs`의 첫 시험 앞부분(시험용 화면 틀)을 읽어 `node -e`의 인자로 넘겼다. 그 앞부분은 사내 판 `e494605`에서 30,135자였고, ‘게시 전에 시험해 보기’([PR #157](https://github.com/knadalkim-a11y/team-agent-poc/pull/157), main `80493e3`)에서 38,530자가 됐다. 지금은 38,576자다. Windows는 32,767자를 넘는 명령줄을 거절한다. Linux의 한도는 훨씬 커서 통과한다.
+- **원인 2(코드로 확인, Windows에서 따로 재현하지 않음):** PR #157이 더한 그 시험이 `with sqlite3.connect(...)`로 DB를 열었다. 이 구문은 거래만 끝내고 연결을 닫지 않는다. Windows는 열린 파일을 지우지 못한다. 같은 모듈의 다른 30개는 제품의 연결 함수만 써서 통과했다.
+- **왜 이제 드러났나:** PR #157은 병합 전에 빠른 검사와 `browser` 범위(Linux)만 실행했다. Windows 묶음은 전체 검사에만 있고, #157 뒤 main의 전체 검사는 이번이 처음이다. 마지막으로 성공한 전체 검사는 `e494605`의 실행 611이다. PR #154·#155·#156의 병합 전 검증도 같은 범위였다.
+- **조치(`7ea9890`):** 세 곳의 스크립트를 명령줄 대신 표준 입력으로 넘긴다(`node -`). 그러면 스크립트 뒤의 첫 인자가 한 칸 뒤로 가므로 두 스크립트의 인자 위치를 맞췄다. DB 연결은 `closing()`으로 닫는다. 제품 코드는 바꾸지 않았다. 시험을 끄거나 건너뛰지 않았다.
+- **검증:** 로컬(Linux, Python 3.11)에서 세 모듈 8·22·31개 통과. 작업 브랜치 `7ea9890`에서 `windows` 범위의 `services` 묶음만 실행한 [실행 635](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/45572142657)가 첫 시도에 성공했다(windows-2022, 묶음 약 7분 30초). 로그에서 33개 모듈에 실패가 없고, 앞서 실패한 세 모듈의 시험이 실행돼 통과한 것을 확인했다.
+- **재발 방지와 남은 것:** 명령줄로 스크립트를 넘기던 곳은 이 세 곳뿐이었고 모두 표준 입력으로 바꿔 길이 한도가 없어졌다. 연결을 닫지 않는 `with sqlite3.connect()`는 Windows에서 도는 시험 가운데 이 한 곳뿐이었다(같은 구문이 `tests/ees_work_integrated_app.py`에 한 번 더 있으나 Linux에서만 도는 점검이라 그대로 두었다). 다음에 쓸 판단 기준: Python 시험이 다른 프로세스를 띄우는 방식이나 임시 DB 파일을 여는 코드를 바꾼 변경은, 병합 전에 브랜치에서 `windows` 범위의 그 묶음을 한 번 실행한다(이번 확인은 약 10분). 첫 사례라 `AGENTS.md`에는 넣지 않았다.
+- **사용자 승인:** 실패와 원인을 알리고 수정용 PR을 만들어 병합해도 되는지 묻자 사용자가 “PR 만들어 병합”을 골랐다(2026-11-25, 선택지 답).
+
 <a id="main-e494605-apply-prep-20261119"></a>
 
 ## 2026-11-19 · main e494605 전체 검사와 사내 적용 준비(작업 아래에서 값 묻기)
