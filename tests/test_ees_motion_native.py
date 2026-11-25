@@ -544,7 +544,8 @@ class MotionNativeTests(IntegratedNativeCase):
         self.wait("document.activeElement?.matches('.ew-procedure-menu > summary')")
         self.activate()
         self.wait("document.querySelector('.ew-procedure-menu')?.open")
-        self.key('Tab', 9)
+        # 2026-11-24 (design mock 21): the menu opens on its first item, so one Tab reaches the next one.
+        self.wait("document.activeElement?.matches('.ew-procedure-menu [data-author-action=edit_workflow]')")
         self.key('Tab', 9)
         self.wait("document.activeElement?.matches('[data-author-action=copy]')")
         self.activate()

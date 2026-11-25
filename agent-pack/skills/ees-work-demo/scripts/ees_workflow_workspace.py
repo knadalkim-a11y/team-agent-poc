@@ -8,7 +8,9 @@ history endpoint. All changes are transactional authenticated user commands.
 from copy import deepcopy
 from datetime import datetime, timezone, timedelta
 import hashlib
+import hmac
 import json
+import logging
 import math
 from pathlib import Path
 import re
@@ -28,6 +30,41 @@ BLOCKS = ('values', 'schedule', 'checklist', 'list_confirm', 'item_verdict', 'ai
 TERMINAL = {'completed', 'cancelled'}
 SECRET_KEYS = re.compile(r'(^|_)(pat|password|secret|token|authorization|api_key|credential)(_|$)', re.I)
 ROLES = ('viewer', 'participant', 'manager', 'requester', 'reviewer')
+# A try ('시험해 보기', mock 21) is a work_runs row with mode='try' that belongs to
+# the browser window holding this random key. Only its SHA-256 is stored.
+TRY_WINDOW = re.compile(r'[!-~]{16,256}')
+TRY_IDLE_SECONDS = 24 * 3600
+# try_open sweeps a few idle tries inside its own transaction; the background
+# loop sweeps more (operations TRY_SWEEP_LIMIT).
+TRY_SWEEP_OPEN_LIMIT = 5
+# Ids per receipt-deleting statement, well under SQLite's parameter and expression depth limits.
+TRY_RECEIPT_CHUNK = 100
+TRY_NOT_SUPPORTED = '시험에서는 할 수 없어요.'
+
+
+def _draft_hash(definition):
+    """Content identity of a draft. Publication adds resource_versions, so a
+    published definition and its unchanged draft hash alike."""
+    return _hash({key: value for key, value in definition.items() if key != 'resource_versions'})
+
+
+def _is_try(row):
+    return row is not None and row['mode'] == 'try'
+
+
+def _closed(row):
+    # A try is stored as cancelled so the previous program ignores it (rollback);
+    # mode='try' is live here.
+    return row['status'] in TERMINAL and not _is_try(row)
+
+
+def _run_not_found():
+    _fail('run_not_found', '접근할 수 있는 진행 건이 없습니다.')
+
+
+def _try_window_hash(body):
+    key = body.get('try_window') if isinstance(body, dict) else None
+    return hashlib.sha256(key.encode()).hexdigest() if isinstance(key, str) and TRY_WINDOW.fullmatch(key) else ''
 
 
 def _procedure_examples():
@@ -521,12 +558,22 @@ def _options_query_valid(field):
     return isinstance(path, list) and len(path) <= 8 and all(_id(key) for key in path) and _id(query.get('value_field')) and _id(query.get('label_field'))
 
 
-def settings_errors(definition, settings):
+def settings_errors(definition, settings, strict=True):
+    """Stored work settings that conflict with a definition.
+
+    strict=False is for starting a run or a try: saving no longer publishes
+    (mock 21), so a stored key may belong to the saved draft or to another
+    version. A key this definition does not declare is never read by its run
+    (_work_snapshot keeps declared inputs only); a key it declares with another
+    scope still blocks the start.
+    """
     declared = {field['id']: field for node in definition['nodes'].values() for field in node.get('inputs', [])}
     errors = []
     for setting in settings:
         for key in json.loads(setting['values_json']):
             field = declared.get(key)
+            if not field and not strict:
+                continue
             if not field or field.get('scope', 'run') == 'run' or (field.get('scope') == 'factory' and not setting['factory_id']):
                 errors.append(f'{key}: 삭제되거나 저장 범위가 바뀐 업무 설정을 먼저 정리해 주세요.')
     return errors
@@ -715,13 +762,27 @@ class WorkspaceMixin:
         db.execute('CREATE INDEX IF NOT EXISTS work_run_scope ON work_runs(system_id,factory_id,status)')
         db.execute('CREATE TABLE IF NOT EXISTS work_initial_procedures (system_id TEXT PRIMARY KEY, created_by TEXT NOT NULL, created_at TEXT NOT NULL)')
         db.execute('CREATE INDEX IF NOT EXISTS work_attempt_job ON work_attempts(run_id,job_id,number)')
+        # Additive indexes: the draft save time and try deletion read the audit by
+        # target, and tries are looked up by mode. Older programs ignore both.
+        db.execute('CREATE INDEX IF NOT EXISTS work_audit_target ON work_audit(target,action)')
+        db.execute('CREATE INDEX IF NOT EXISTS work_run_try ON work_runs(mode,workflow_id)')
         db.execute("CREATE TRIGGER IF NOT EXISTS work_attempt_finished_immutable BEFORE UPDATE ON work_attempts WHEN OLD.status <> 'running' BEGIN SELECT RAISE(ABORT,'immutable completed attempt'); END")
-        db.execute("CREATE TRIGGER IF NOT EXISTS work_attempt_delete_immutable BEFORE DELETE ON work_attempts BEGIN SELECT RAISE(ABORT,'immutable attempt history'); END")
         # Published evidence and human decisions are append-only, including for
         # a later program version accidentally using an UPDATE.
         for table in ('work_versions', 'work_decisions', 'work_review_revisions'):
             for action in ('UPDATE', 'DELETE'):
+                if action == 'DELETE' and table != 'work_versions':
+                    continue  # Replaced below by triggers that let only a try be deleted.
                 db.execute(f"CREATE TRIGGER IF NOT EXISTS {table}_{action.lower()}_immutable BEFORE {action} ON {table} BEGIN SELECT RAISE(ABORT,'immutable work evidence'); END")
+        # Real attempts, decisions and review revisions still cannot be deleted.
+        # A try's can: '처음부터' and the 24 hour cleanup remove it whole. The
+        # relaxed triggers have new names, so a previous program re-creates its
+        # strict ones on start; it never deletes, and the next start drops them.
+        for name in ('work_attempt_delete_immutable', 'work_decisions_delete_immutable', 'work_review_revisions_delete_immutable'):
+            db.execute(f'DROP TRIGGER IF EXISTS {name}')
+        db.execute("CREATE TRIGGER IF NOT EXISTS work_attempt_delete_keep_work BEFORE DELETE ON work_attempts WHEN NOT EXISTS (SELECT 1 FROM work_runs WHERE id=OLD.run_id AND mode='try') BEGIN SELECT RAISE(ABORT,'immutable attempt history'); END")
+        db.execute("CREATE TRIGGER IF NOT EXISTS work_decisions_delete_keep_work BEFORE DELETE ON work_decisions WHEN NOT EXISTS (SELECT 1 FROM work_runs WHERE id=OLD.run_id AND mode='try') BEGIN SELECT RAISE(ABORT,'immutable work evidence'); END")
+        db.execute("CREATE TRIGGER IF NOT EXISTS work_review_revisions_delete_keep_work BEFORE DELETE ON work_review_revisions WHEN NOT EXISTS (SELECT 1 FROM work_attempts a JOIN work_runs r ON r.id=a.run_id WHERE a.id=OLD.attempt_id AND r.mode='try') BEGIN SELECT RAISE(ABORT,'immutable work evidence'); END")
 
     async def _work_actor(self, user):
         actor = await self._user(user)
@@ -803,13 +864,43 @@ class WorkspaceMixin:
 
     def _work_check_run(self, db, actor, groups, row, write=False, *, read=None):
         if not row:
-            _fail('run_not_found', '접근할 수 있는 진행 건이 없습니다.')
+            _run_not_found()
         # Runs belong to their factory/system, including records created before
         # this policy. Keep owner/sharing as historical data, not an access ACL.
+        # The window key of a try is checked at the HTTP entry points instead:
+        # background workers call this without one.
         self._work_authorize_scope(db, actor, groups, row['system_id'], row['factory_id'], 'participant' if write else 'viewer', read=read)
-        if write and row['status'] in TERMINAL:
+        if write and _closed(row):
             _fail('run_closed', '종료된 진행 건은 기록으로 보존됩니다.')
         return row
+
+    def _work_real_run(self, db, actor, groups, run_id, write=False, *, read=None):
+        """A run for paths that never see tries: GET routes, exports and chat."""
+        row = db.execute('SELECT * FROM work_runs WHERE id=?', (run_id,)).fetchone()
+        if _is_try(row):
+            _run_not_found()
+        return self._work_check_run(db, actor, groups, row, write=write, read=read)
+
+    def _work_try_gate(self, db, actor, groups, row, body):
+        """Another window's try, or a try without its key, looks like no run at all.
+
+        A try shows the procedure's draft, so like the draft it is for the
+        procedure's managers only.
+        """
+        if _is_try(row):
+            stored = (json.loads(row['snapshot']).get('try') or {}).get('window')
+            supplied = _try_window_hash(body)
+            if not isinstance(stored, str) or not supplied or not hmac.compare_digest(stored, supplied):
+                _run_not_found()
+            self._work_definition(db, actor, groups, row['workflow_id'], True)
+        return row
+
+    @staticmethod
+    def _work_try_window(body):
+        supplied = _try_window_hash(body)
+        if not supplied:
+            _fail('try_window_required', '이 창의 시험 정보를 확인하지 못했습니다. 화면을 새로 고쳐 주세요.')
+        return supplied
 
     def _work_deadline(self, job, values):
         rule = job.get('deadline')
@@ -918,7 +1009,7 @@ class WorkspaceMixin:
             return False
         if (node.get('completion') or {}).get('kind') == 'delivery': return False
         current = self._work_snapshot(db, run, job['job_id'])
-        if run['status'] not in TERMINAL and (json.loads(attempt['inputs']) != current['inputs'] or
+        if not _closed(run) and (json.loads(attempt['inputs']) != current['inputs'] or
                 (prior.get('deadline_source') or {}).get('value') != (current.get('deadline_source') or {}).get('value') or
                 not self._work_sources_current(db, run, prior)):
             return False
@@ -1005,7 +1096,8 @@ class WorkspaceMixin:
 
     def _work_job_due(self, db, run, job):
         trigger = job.get('trigger', {})
-        if not trigger: return None
+        # A try is for trying a job now; scheduled offsets apply to real work only.
+        if not trigger or _is_try(run): return None
         if 'at' in trigger:
             return datetime.fromisoformat(trigger['at'].replace('Z', '+00:00')).timestamp()
         anchor = datetime.fromisoformat(run['created_at'].replace('Z', '+00:00')).timestamp()
@@ -1055,6 +1147,7 @@ class WorkspaceMixin:
         for dependent in self._work_dependent_ids(snapshot['definition'], job_id):
             db.execute("UPDATE work_jobs SET status='review_required',revision=revision+1,reason='선행 작업 재실행' WHERE run_id=? AND job_id=? AND status NOT IN ('excluded','running')", (run_id, dependent))
         db.execute('UPDATE work_runs SET revision=revision+1,updated_at=? WHERE id=?', (now, run_id))
+        self._work_touch_try(db, run_id)
         return {'id': attempt_id, 'run_id': run_id, 'job_id': job_id, 'number': number, 'actor_id': actor_id, 'inputs': snapshot['inputs'], 'snapshot': snapshot, 'status': 'running', 'revision': run['revision'] + 1}
 
     @staticmethod
@@ -1144,7 +1237,9 @@ class WorkspaceMixin:
         allowed, records = set(), []
         with self._db() as db:
             read = {}
-            for run in db.execute('SELECT * FROM work_runs' + (' WHERE id=?' if run_id else ''), (run_id,) if run_id else ()):
+            # The scan over all runs is for real work. A try is read by its id,
+            # after the caller checked its window key.
+            for run in db.execute('SELECT * FROM work_runs' + (' WHERE id=?' if run_id else " WHERE mode<>'try'"), (run_id,) if run_id else ()):
                 try: self._work_check_run(db, actor, groups, run, read=read)
                 except WorkflowError: continue
                 records.extend(dict(row) for row in db.execute('SELECT * FROM work_attempts WHERE run_id=? AND actor_id=?', (run['id'], _value(actor, 'id'))))
@@ -1175,6 +1270,12 @@ class WorkspaceMixin:
                 request_roles[role] = False
         value['sharing'] = json.loads(value['sharing']); value['inputs'] = json.loads(value['inputs'])
         snapshot = json.loads(value.pop('snapshot')); value.update(snapshot)
+        trying = _is_try(row)
+        if trying:
+            # A try is stored as cancelled so the previous program ignores it
+            # (rollback); mode='try' is live here. The window hash never leaves.
+            binding = value.pop('try', None) or {}
+            value['status'] = 'open'
         jobs = {item['job_id']: dict(item) for item in db.execute('SELECT * FROM work_jobs WHERE run_id=?', (row['id'],))}
         attempts = []
         for attempt in db.execute('SELECT * FROM work_attempts WHERE run_id=? ORDER BY job_id,number', (row['id'],)):
@@ -1203,9 +1304,10 @@ class WorkspaceMixin:
             job['can_decide'] = bool(job['can_execute'] and assigned and (not current or not current.get('evidence_access')))
             # Request preparation/approval/status lookup have distinct existing
             # server roles; an approver need not be the current job claimant.
-            job['can_request'] = bool(value['can_write'] and request_roles['requester'])
-            job['can_review_request'] = bool(value['can_write'] and request_roles['reviewer'])
-            job['can_reconcile'] = request_roles['requester']
+            # A try never sends an EES change request.
+            job['can_request'] = bool(value['can_write'] and request_roles['requester'] and not trying)
+            job['can_review_request'] = bool(value['can_write'] and request_roles['reviewer'] and not trying)
+            job['can_reconcile'] = request_roles['requester'] and not trying
             job['can_manage_settings'] = True
             try:
                 self._work_authorize_scope(db, actor, groups, row['system_id'], row['factory_id'], 'manager', read=read)
@@ -1213,14 +1315,14 @@ class WorkspaceMixin:
                 job['can_manage_settings'] = False
             job['review_draft'] = deepcopy(current['review_history'][-1]) if current and current.get('review_history') else None
             job['result_revision'] = current['number'] if current else None
-            effective = ({'inputs': current['inputs'], 'settings_sources': current.get('snapshot', {}).get('settings_sources', {}), 'deadline': current.get('snapshot', {}).get('deadline')} if row['status'] in TERMINAL and current else self._work_snapshot(db, row, job['job_id'], read=read))
+            effective = ({'inputs': current['inputs'], 'settings_sources': current.get('snapshot', {}).get('settings_sources', {}), 'deadline': current.get('snapshot', {}).get('deadline')} if _closed(row) and current else self._work_snapshot(db, row, job['job_id'], read=read))
             job['effective_inputs'] = effective['inputs']
             job['deadline'] = effective.get('deadline')
             job['settings_sources'] = effective['settings_sources']
             fields = _job_input_fields(value['definition'], value['definition']['nodes'][job['job_id']])
             job['missing_inputs'] = self._work_input_errors(db, value['definition'], fields, effective['inputs'],
                                                            options_snapshot=(current or {}).get('snapshot', {}).get('options'), run_id=row['id'])
-            job['result_stale'] = bool(row['status'] not in TERMINAL and current and current['actor_id'] == _value(actor, 'id') and not current.get('evidence_access') and (current['inputs'] != effective['inputs'] or (current['snapshot'].get('deadline_source') or {}).get('value') != (effective.get('deadline_source') or {}).get('value') or not self._work_sources_current(db, row, current['snapshot'])))
+            job['result_stale'] = bool(not _closed(row) and current and current['actor_id'] == _value(actor, 'id') and not current.get('evidence_access') and (current['inputs'] != effective['inputs'] or (current['snapshot'].get('deadline_source') or {}).get('value') != (effective.get('deadline_source') or {}).get('value') or not self._work_sources_current(db, row, current['snapshot'])))
             job['decisions'] = [dict(item) for item in db.execute('SELECT * FROM work_decisions WHERE run_id=? AND job_id=? ORDER BY created_at,id', (row['id'], job['job_id']))]
             job['partial_confirmed'] = self._work_partial_confirmed(db, row, job)
             job['partial_prerequisites'] = (current.get('snapshot', {}).get('partial_prerequisites') if current else None)
@@ -1244,6 +1346,10 @@ class WorkspaceMixin:
                              'confirmed_partial': sum(item['partial_confirmed'] for item in jobs.values())}
         value['progress']['remaining'] = value['progress']['total'] - value['progress']['completed'] - value['progress']['confirmed_partial']
         value['chat_links'] = [item['chat_id'] for item in db.execute('SELECT chat_id FROM work_chat_links WHERE actor_id=? AND run_id=?', (_value(actor, 'id'), row['id']))]
+        if trying:
+            started = bool(attempts or value['inputs'] or any(job['decisions'] for job in jobs.values()))
+            value['try'] = {'draft_hash': binding.get('draft_hash'), 'saved_at': binding.get('saved_at'),
+                            'changed': list(binding.get('changed', [])), 'started': started}
         return value
 
     def _work_workflow_view(self, db, actor, groups, row, *, read=None):
@@ -1257,10 +1363,15 @@ class WorkspaceMixin:
         versions = list(db.execute('SELECT * FROM work_versions WHERE workflow_id=? ORDER BY version DESC', (row['id'],)))
         value['versions'] = [{**{key: version[key] for key in ('version', 'hash', 'publisher', 'published_at')}, 'definition': json.loads(version['definition'])} for version in versions]
         value['published'] = next((json.loads(version['definition']) for version in versions if version['version'] == row['published_version']), None)
-        value['name'] = (value.get('draft') or value['published'] or {}).get('name', '')
-        value['mode'] = (value.get('draft') or value['published'] or {}).get('mode', 'on_demand')
-        value['execution_scope'] = (value.get('draft') or value['published'] or {}).get('execution_scope')
-        value['category'] = (value.get('draft') or value['published'] or {}).get('category', 'ops')
+        if value['can_manage']:
+            value.update(self._work_draft_state(db, row, value['draft'], value['published']))
+        # Saving no longer publishes (mock 21). The team's work list shows what
+        # was published; an unpublished draft keeps its own values for managers.
+        shown = value['published'] or value.get('draft') or {}
+        value['name'] = shown.get('name', '')
+        value['mode'] = shown.get('mode', 'on_demand')
+        value['execution_scope'] = shown.get('execution_scope')
+        value['category'] = shown.get('category', 'ops')
         value['settings'] = []
         for setting in db.execute('SELECT * FROM work_settings WHERE workflow_id=?', (row['id'],)):
             try:
@@ -1269,6 +1380,21 @@ class WorkspaceMixin:
                 continue
             value['settings'].append({'factory_id': setting['factory_id'], 'values': json.loads(setting['values_json']), 'revision': setting['revision']})
         return value
+
+    @staticmethod
+    def _work_draft_saved_at(db, row):
+        # The audit holds one row per successful command, so its newest content
+        # write is the draft's save time; updated_at also moves on publication.
+        saved = db.execute("SELECT MAX(created_at) FROM work_audit WHERE target=? AND action IN ('save_draft','create_workflow','copy_workflow')", (row['id'],)).fetchone()[0]
+        return saved or row['updated_at']
+
+    @classmethod
+    def _work_draft_state(cls, db, row, draft, published):
+        """Draft content identity for managers. Publishing and unpublishing bump the
+        revision without changing content, so tries compare draft_hash instead."""
+        draft_hash = _draft_hash(draft)
+        return {'draft_hash': draft_hash, 'draft_saved_at': cls._work_draft_saved_at(db, row),
+                'unpublished_changes': published is not None and _draft_hash(published) != draft_hash}
 
     @staticmethod
     def _work_options_authority(db, actor, groups, system_id):
@@ -1391,6 +1517,10 @@ class WorkspaceMixin:
     async def input_options(self, user, body):
         try:
             if not isinstance(body, dict): _fail('invalid_inputs', '선택지 조회 대상을 확인해 주세요.')
+            if isinstance(body.get('run_id'), str) and body['run_id']:
+                actor, _, groups = await self._work_actor(user)
+                with self._db() as db:
+                    self._work_try_gate(db, actor, groups, db.execute('SELECT * FROM work_runs WHERE id=?', (body['run_id'],)).fetchone(), body)
             return await self._work_input_options(user, body)
         except WorkflowError as error:
             return {'ok': False, 'error': {'code': error.code, 'message': error.message}}
@@ -1518,7 +1648,8 @@ class WorkspaceMixin:
                         if item['can_manage'] or item['published_version'] is not None: workflows.append(item)
                     except WorkflowError:
                         continue
-                for row in db.execute('SELECT * FROM work_runs ORDER BY created_at DESC,id'):
+                # A try is not real work: never a record, ongoing work or last result.
+                for row in db.execute("SELECT * FROM work_runs WHERE mode<>'try' ORDER BY created_at DESC,id"):
                     if workflow_id and row['workflow_id'] == workflow_id and row['status'] not in TERMINAL:
                         try:
                             self._work_check_run(db, actor, groups, row, read=read)
@@ -1535,14 +1666,15 @@ class WorkspaceMixin:
                 selected_workflow = None
                 historical_run = bool(self.confluence_guide and run_id and workflow_id and db.execute(
                     'SELECT 1 FROM work_guide_archive_definitions d JOIN work_runs r ON r.workflow_id=d.id '
-                    'WHERE d.id=? AND r.id=?', (workflow_id, run_id)).fetchone())
+                    "WHERE d.id=? AND r.id=? AND r.mode<>'try'", (workflow_id, run_id)).fetchone())
                 if workflow_id and not historical_run:
                     row = self._work_definition(db, actor, groups, workflow_id, read=read)
                     existing = next((item for item in workflows if item['id'] == workflow_id), None)
                     selected_workflow = deepcopy(existing) if existing is not None else self._work_workflow_view(db, actor, groups, row, read=read)
                 selected_run = None
                 if run_id:
-                    row = self._work_run(db, actor, groups, run_id, read=read)
+                    # GET has no window key: a try is read only through try_state.
+                    row = self._work_real_run(db, actor, groups, run_id, read=read)
                     existing = next((item for item in runs if item['id'] == run_id), None)
                     selected_run = deepcopy(existing) if existing is not None else self._work_run_view(db, actor, groups, row, evidence_access, read=read)
                 if (selected_workflow and system_id and selected_workflow['system_id'] != system_id
@@ -1628,16 +1760,50 @@ class WorkspaceMixin:
         if body.get('action') == 'initialize_procedures':
             self._work_authorize_scope(db, actor, groups, body.get('system_id'), '', 'manager')
         if response.get('run_id'):
-            run = self._work_run(db, actor, groups, response['run_id'])
+            run = self._work_try_gate(db, actor, groups, self._work_run(db, actor, groups, response['run_id']), body)
             if response.get('run'):
                 response['run'] = self._work_run_view(db, actor, groups, run, evidence_access)
         if response.get('workflow_id'):
-            self._work_definition(db, actor, groups, response['workflow_id'], body.get('action') in {'create_workflow', 'copy_workflow', 'save_draft', 'validate_workflow', 'publish_workflow', 'unpublish_workflow'})
+            self._work_definition(db, actor, groups, response['workflow_id'], body.get('action') in {'create_workflow', 'copy_workflow', 'save_draft', 'validate_workflow', 'publish_workflow', 'unpublish_workflow', 'try_open', 'try_restart'})
             if body.get('action') == 'save_settings':
                 definition = self._work_definition(db, actor, groups, response['workflow_id'])
                 self._work_authorize_scope(db, actor, groups, definition['system_id'], body.get('factory_id', ''), 'manager')
         if body.get('action') in ('save_access', 'save_factory') and _value(actor, 'role') != 'admin':
             _fail('admin_required', '현재 관리자 권한을 확인해 주세요.')
+
+    async def _work_skill_resources(self, actor, definition):
+        """Skill revisions a run checks before each job (operations _skills), as publication stores them."""
+        skills, errors = {}, []
+        if any(node.get('skills') for node in definition.get('nodes', {}).values()):
+            assets = await self._assets(actor)
+            allowed_skills = {entry.get('id') if isinstance(entry, dict) else entry for entry in assets.get('skills', [])}
+            requested_ids = {key for node in definition.get('nodes', {}).values() for key in node.get('skills', []) if isinstance(key, str)}
+            skills = {key: {'revision': assets.get('skill_versions', {}).get(key), 'content_hash': hashlib.sha256(str(assets.get('skill_bodies', {}).get(key, '')).encode()).hexdigest()} for key in requested_ids if key in allowed_skills}
+            for node in definition.get('nodes', {}).values():
+                requested = node.get('skills', [])
+                if not isinstance(requested, list) or any(not isinstance(key, str) or key not in allowed_skills for key in requested):
+                    errors.append(node.get('id', '') + ': 현재 사용할 수 있는 Native 스킬을 선택해 주세요.')
+        return skills, errors
+
+    async def _work_try_prepare(self, actor, groups, body):
+        """Read the saved draft before the write transaction; skill versions need Native reads.
+
+        Returns the skill versions, the draft hash they belong to and the id of
+        this window's existing try (try_open), whose evidence the reply shows.
+        """
+        window = self._work_try_window(body)
+        existing = None
+        with self._db() as db:
+            if body.get('action') == 'try_restart':
+                workflow_id = self._work_run(db, actor, groups, body.get('run_id'))['workflow_id']
+            else:
+                workflow_id = body.get('workflow_id')
+            row = self._work_definition(db, actor, groups, workflow_id, True)
+            draft = json.loads(row['draft'])
+            if body.get('action') == 'try_open':
+                existing = self._work_find_try(db, row['id'], draft, body, window)
+        skills, _ = await self._work_skill_resources(actor, draft)
+        return skills, _draft_hash(draft), existing['id'] if existing else ''
 
     async def workspace_command(self, user, body):
         try:
@@ -1648,6 +1814,10 @@ class WorkspaceMixin:
             action, request_id = body.get('action'), body.get('request_id')
             if not _id(request_id): _fail('request_id_required', '변경 요청 식별자가 필요합니다.')
             actor_id, fingerprint = _value(actor, 'id'), _hash(body)
+            if isinstance(body.get('run_id'), str) and body['run_id']:
+                # Before any other read: another window learns nothing of a try.
+                with self._db() as db:
+                    self._work_try_gate(db, actor, groups, db.execute('SELECT * FROM work_runs WHERE id=?', (body['run_id'],)).fetchone(), body)
             # Native lookups run outside the write transaction.
             native_groups = await self._native_groups() if action in ('save_access', 'start_run', 'run_start') else []
             if action == 'link_chat': await self._chat(actor, body.get('chat_id'))
@@ -1666,6 +1836,25 @@ class WorkspaceMixin:
             options_snapshot = await self._work_resolve_job_options(actor, body.get('run_id'), body.get('job_id')) if action in ('human_confirm', 'amend_items', 'confirm_list') else {}
             publication_errors = []
             publication_resources = {'skills': {}}
+            try_basis = None
+            if action in ('try_open', 'try_restart'):
+                # A lost-response retry replays the stored reply before anything
+                # reads the try it names: try_restart has deleted that one.
+                with self._db() as db:
+                    receipt = db.execute('SELECT * FROM work_receipts WHERE actor_id=? AND request_id=?', (actor_id, request_id)).fetchone()
+                if receipt:
+                    if receipt['payload_hash'] != fingerprint:
+                        _fail('request_conflict', '같은 요청 식별자에 다른 내용이 있습니다.')
+                    previous = json.loads(receipt['response'])
+                    # The reply shows the try it made or reopened, with that try's evidence.
+                    evidence_access = await self._work_evidence_access(actor, groups, previous['run_id']) if previous.get('run_id') else set()
+                    actor, capabilities, groups = await self._work_actor(actor)
+                    with self._db() as db:
+                        self._work_receipt_authorize(db, actor, groups, body, previous, evidence_access)
+                    return previous
+                publication_resources['skills'], try_basis, existing_try = await self._work_try_prepare(actor, groups, body)
+                if existing_try:
+                    evidence_access = await self._work_evidence_access(actor, groups, existing_try)
             save_publication = action == 'save_draft' and 'publication_state' in body
             if save_publication and body['publication_state'] not in ('published', 'unpublished'):
                 _fail('invalid_publication_state', '게시 또는 미게시를 선택해 주세요.')
@@ -1690,15 +1879,8 @@ class WorkspaceMixin:
                     retired = retired_binding_errors(definition)
                     if retired:
                         _fail('invalid_definition', '\n'.join(retired))
-                if any(node.get('skills') for node in definition.get('nodes', {}).values()):
-                    assets = await self._assets(actor)
-                    allowed_skills = {entry.get('id') if isinstance(entry, dict) else entry for entry in assets.get('skills', [])}
-                    requested_ids = {key for node in definition.get('nodes', {}).values() for key in node.get('skills', []) if isinstance(key, str)}
-                    publication_resources['skills'] = {key: {'revision': assets.get('skill_versions', {}).get(key), 'content_hash': hashlib.sha256(str(assets.get('skill_bodies', {}).get(key, '')).encode()).hexdigest()} for key in requested_ids if key in allowed_skills}
-                    for node in definition.get('nodes', {}).values():
-                        requested = node.get('skills', [])
-                        if not isinstance(requested, list) or any(not isinstance(key, str) or key not in allowed_skills for key in requested):
-                            publication_errors.append(node.get('id', '') + ': 현재 사용할 수 있는 Native 스킬을 선택해 주세요.')
+                publication_resources['skills'], skill_errors = await self._work_skill_resources(actor, definition)
+                publication_errors.extend(skill_errors)
                 bridge = getattr(getattr(self, 'operations', None), 'bridge', None) or getattr(getattr(self, 'execution', None), 'bridge', None)
                 option_references = [field['options_query']['reference'] for node in definition.get('nodes', {}).values() for field in node.get('inputs', []) if field.get('options_source') == 'tool' and _options_query_valid(field)]
                 for reference in option_references:
@@ -1745,7 +1927,7 @@ class WorkspaceMixin:
                     previous = json.loads(receipt['response'])
                     self._work_receipt_authorize(db, actor, groups, body, previous, evidence_access)
                     return previous
-                result = self._workspace_mutation(db, actor, capabilities, groups, body, native_groups, publication_errors, publication_resources, options_snapshot, evidence_access)
+                result = self._workspace_mutation(db, actor, capabilities, groups, body, native_groups, publication_errors, publication_resources, options_snapshot, evidence_access, try_basis=try_basis)
                 result = {'ok': True, **result}
                 db.execute('INSERT INTO work_receipts VALUES(?,?,?,?)', (actor_id, request_id, fingerprint, _dump(result)))
                 db.execute('INSERT INTO work_audit(actor_id,action,target,before_revision,after_revision,request_id,payload_hash,created_at) VALUES(?,?,?,?,?,?,?,?)',
@@ -1757,7 +1939,7 @@ class WorkspaceMixin:
         except (sqlite3.Error, ValueError, TypeError, KeyError):
             return {'ok': False, 'error': {'code': 'invalid_command', 'message': '업무 변경을 저장하지 못했습니다. 입력과 저장소 상태를 확인해 주세요.'}}
 
-    def _workspace_mutation(self, db, actor, capabilities, groups, body, native_groups, publication_errors=(), publication_resources=None, options_snapshot=None, evidence_access=None):
+    def _workspace_mutation(self, db, actor, capabilities, groups, body, native_groups, publication_errors=(), publication_resources=None, options_snapshot=None, evidence_access=None, *, try_basis=None):
         action, actor_id, now = body['action'], _value(actor, 'id'), _now()
         if action == 'initialize_procedures':
             system = body.get('system_id')
@@ -1782,6 +1964,11 @@ class WorkspaceMixin:
             revision = row['revision'] if row else 0; _revision(body, revision)
             state = body.get('state', {})
             if not isinstance(state, dict) or len(_dump(state)) > 40000: _fail('invalid_ui_state', '개인 화면 상태 크기를 확인해 주세요.')
+            selection = state.get('selection')
+            if (isinstance(selection, dict) and isinstance(selection.get('run_id'), str) and selection['run_id']
+                    and db.execute("SELECT 1 FROM work_runs WHERE id=? AND mode='try'", (selection['run_id'],)).fetchone()):
+                # A try belongs to one browser window, never to the account-wide screen state.
+                state = deepcopy(state); state['selection']['run_id'] = ''
             db.execute('INSERT INTO work_ui VALUES(?,?,?) ON CONFLICT(actor_id) DO UPDATE SET revision=excluded.revision,state=excluded.state', (actor_id, revision + 1, _dump(state)))
             return {'revision': revision + 1, 'ui_state': state}
         if action == 'save_factory':
@@ -1853,11 +2040,22 @@ class WorkspaceMixin:
                 factory = body.get('factory_id', ''); self._work_authorize_scope(db, actor, groups, row['system_id'], factory, 'manager')
                 if factory and not db.execute('SELECT 1 FROM work_factories WHERE id=? AND system_id=?', (factory, row['system_id'])).fetchone(): _fail('invalid_factory', '공장 범위를 확인해 주세요.')
                 saved = db.execute('SELECT * FROM work_settings WHERE workflow_id=? AND factory_id=?', (row['id'], factory)).fetchone(); revision = saved['revision'] if saved else 0; _revision(body, revision)
-                values = body.get('values', {}); fields = {field['id']: field for node in definition['nodes'].values() for field in node.get('inputs', []) if field.get('scope', 'run') == 'workflow' or (factory and field.get('scope') == 'factory')}
+                values = body.get('values', {})
                 if not isinstance(values, dict): _fail('invalid_inputs', '업무 설정 형식을 확인해 주세요.')
-                errors = self._work_input_errors(db, definition, list(fields.values()), values, False)
+                # Saving no longer publishes (mock 21): runs of the published
+                # version and tries of the saved draft both read these settings.
+                # A key may be declared by either; it is checked against the
+                # declaration it came from, the published version first.
+                def settable(source):
+                    return {field['id']: field for node in source['nodes'].values() for field in node.get('inputs', []) if field.get('scope', 'run') == 'workflow' or (factory and field.get('scope') == 'factory')}
+                version = db.execute('SELECT definition FROM work_versions WHERE workflow_id=? AND version=?', (row['id'], row['published_version'])).fetchone()
+                published = json.loads(version['definition']) if version else None
+                published_fields = settable(published) if published else {}
+                errors = self._work_input_errors(db, published, list(published_fields.values()), {key: value for key, value in values.items() if key in published_fields}, False) if published_fields else []
+                # The rest go to the draft, which refuses a key declared in neither.
+                errors.extend(self._work_input_errors(db, definition, list(settable(definition).values()), {key: value for key, value in values.items() if key not in published_fields}, False))
                 if errors: _fail('invalid_inputs', '\n'.join(errors))
-                active_runs = list(db.execute("SELECT * FROM work_runs WHERE workflow_id=? AND status NOT IN ('completed','cancelled')", (row['id'],)))
+                active_runs = list(db.execute("SELECT * FROM work_runs WHERE workflow_id=? AND status NOT IN ('completed','cancelled') AND mode<>'try'", (row['id'],)))
                 def evidence_values(run, job_id):
                     snapshot = self._work_snapshot(db, run, job_id)
                     return snapshot['inputs'], (snapshot.get('deadline_source') or {}).get('value')
@@ -1881,12 +2079,15 @@ class WorkspaceMixin:
                 if errors: _fail('invalid_definition', '\n'.join(errors))
                 if definition['id'] != row['id'] or definition['system_id'] != row['system_id']: _fail('immutable_identity', '절차 ID와 관리 시스템은 바꿀 수 없습니다.')
                 if 'publication_state' not in body:
-                    # Keep the older draft-only API for existing clients.
+                    # '저장' saves the draft only, even for a published procedure
+                    # (mock 21). The draft hash lets this window know its own save.
                     db.execute('UPDATE work_definitions SET draft=?,revision=revision+1,validation=NULL,updated_at=? WHERE id=?', (_dump(definition), now, row['id']))
-                    return {'workflow_id': row['id'], 'revision': row['revision'] + 1}
+                    return {'workflow_id': row['id'], 'revision': row['revision'] + 1, 'draft_hash': _draft_hash(definition)}
+                # Kept for browser tabs opened before mock 21, and for '게시' with
+                # unsaved edits, which saves and publishes in one transaction.
                 if body['publication_state'] == 'unpublished':
                     db.execute('UPDATE work_definitions SET draft=?,published_version=NULL,revision=revision+1,validation=NULL,updated_at=? WHERE id=?', (_dump(definition), now, row['id']))
-                    return {'workflow_id': row['id'], 'revision': row['revision'] + 1, 'published_version': None}
+                    return {'workflow_id': row['id'], 'revision': row['revision'] + 1, 'published_version': None, 'draft_hash': _draft_hash(definition)}
                 # Save content and the new publication in the same transaction below.
                 db.execute('UPDATE work_definitions SET draft=? WHERE id=?', (_dump(definition), row['id']))
             if action == 'unpublish_workflow':
@@ -1897,6 +2098,7 @@ class WorkspaceMixin:
             if api_errors and action != 'validate_workflow':
                 _fail('api_binding_invalid', '\n'.join(api_errors))
             errors.extend(api_errors)
+            # Strict and advisory here: it names settings this draft would leave unused.
             errors.extend(settings_errors(definition, db.execute('SELECT factory_id,values_json FROM work_settings WHERE workflow_id=?', (row['id'],))))
             errors.extend(publication_errors)
             if hasattr(self, 'operations') and hasattr(self.operations, 'validate_publication'):
@@ -1911,15 +2113,30 @@ class WorkspaceMixin:
             # History survives unpublishing, so the next version must not use the
             # nullable publication pointer as its counter.
             version = db.execute('SELECT COALESCE(MAX(version),0)+1 FROM work_versions WHERE workflow_id=?', (row['id'],)).fetchone()[0]
+            draft_hash = _draft_hash(definition)
             definition = {**definition, 'resource_versions': validation['resource_versions']}
             db.execute('INSERT INTO work_versions VALUES(?,?,?,?,?,?)', (row['id'], version, _dump(definition), _hash(definition), actor_id, now))
             db.execute('UPDATE work_definitions SET published_version=?,revision=revision+1,validation=NULL,updated_at=? WHERE id=?', (version, now, row['id']))
-            return {'workflow_id': row['id'], 'revision': row['revision'] + 1, 'version': version, 'published_version': version}
+            return {'workflow_id': row['id'], 'revision': row['revision'] + 1, 'version': version, 'published_version': version, 'draft_hash': draft_hash}
         if action in ('start_run', 'run_start'):
-            row = self._work_definition(db, actor, groups, body.get('workflow_id')); _revision(body, row['revision'])
+            row = self._work_definition(db, actor, groups, body.get('workflow_id'))
+            requested = body.get('version')
+            # Saving a draft no longer publishes (mock 21), so a save must not make
+            # other screens' starts fail: a start naming the current published
+            # version does not depend on the draft revision. Publishing or
+            # unpublishing moves published_version, so a stale screen still fails.
+            # Without a version (earlier clients), and for an explicitly chosen
+            # earlier version such as a schedule's, the revision is checked as before.
+            if requested is None:
+                _revision(body, row['revision'])
+            elif row['published_version'] is not None and requested != row['published_version']:
+                try:
+                    _revision(body, row['revision'])
+                except WorkflowError:
+                    _fail('publication_changed', '게시된 판이 바뀌었습니다. 화면을 새로 고친 뒤 다시 시작해 주세요.')
             if row['published_version'] is None:
                 _fail('publication_required', '미게시 업무절차입니다. 게시한 뒤 새 진행 건을 시작해 주세요.')
-            version = body.get('version', row['published_version'])
+            version = row['published_version'] if requested is None else requested
             published = db.execute('SELECT * FROM work_versions WHERE workflow_id=? AND version=?', (row['id'], version)).fetchone()
             if not published: _fail('publication_required', '게시된 절차 버전을 선택해 주세요.')
             definition = json.loads(published['definition']); factory_id = body.get('factory_id', '')
@@ -1928,11 +2145,12 @@ class WorkspaceMixin:
                 _fail('factory_required', '시작할 공장을 선택해 주세요.')
             self._work_authorize_scope(db, actor, groups, row['system_id'], factory_id, 'participant')
             errors, _ = definition_check(definition)
-            errors.extend(settings_errors(definition, db.execute('SELECT factory_id,values_json FROM work_settings WHERE workflow_id=? AND factory_id IN (?,?)', (row['id'], '', factory_id))))
+            # A setting of a field only the saved draft declares does not block this version.
+            errors.extend(settings_errors(definition, db.execute('SELECT factory_id,values_json FROM work_settings WHERE workflow_id=? AND factory_id IN (?,?)', (row['id'], '', factory_id)), strict=False))
             if errors: _fail('execution_not_ready', '실행 전에 업무절차를 보완해 주세요.\n' + '\n'.join(errors))
             factory = db.execute('SELECT * FROM work_factories WHERE id=? AND system_id=?', (factory_id, row['system_id'])).fetchone() if factory_id else None
             if factory_id and not factory: _fail('factory_not_found', '등록된 공장을 선택해 주세요.')
-            if not concurrent_runs_allowed(definition) and db.execute("SELECT 1 FROM work_runs WHERE workflow_id=? AND system_id=? AND factory_id=? AND status NOT IN ('completed','cancelled') LIMIT 1", (row['id'], row['system_id'], factory_id)).fetchone():
+            if not concurrent_runs_allowed(definition) and db.execute("SELECT 1 FROM work_runs WHERE workflow_id=? AND system_id=? AND factory_id=? AND status NOT IN ('completed','cancelled') AND mode<>'try' LIMIT 1", (row['id'], row['system_id'], factory_id)).fetchone():
                 _fail('factory_run_active' if factory_id else 'system_run_active', ('이 공장' if factory_id else '이 시스템') + '에서 같은 업무가 진행 중입니다. 기존 진행 건을 확인해 주세요.')
             # Earlier clients may still send sharing. New runs use scope access
             # only, so do not validate, adopt, or persist that obsolete input.
@@ -1965,8 +2183,14 @@ class WorkspaceMixin:
             # also wait for an explicit stage or job run.
             run = self._work_run_view(db, actor, groups, self._work_run(db, actor, groups, key))
             return {'run_id': key, 'workflow_id': row['id'], 'revision': 1, 'run': run}
+        if action in ('try_open', 'try_restart'):
+            return self._work_try_command(db, actor, groups, body, (publication_resources or {}).get('skills', {}), try_basis, evidence_access)
         if action in ('save_inputs', 'claim_task', 'human_confirm', 'decide', 'confirm_verdicts', 'close_run', 'cancel_run', 'link_chat', 'amend_items', 'release_task', 'confirm_list', 'save_review_draft'):
-            row = self._work_run(db, actor, groups, body.get('run_id'), write=True); _revision(body, row['revision'])
+            row = self._work_try_gate(db, actor, groups, self._work_run(db, actor, groups, body.get('run_id'), write=True), body)
+            if _is_try(row) and action in ('close_run', 'cancel_run', 'link_chat'):
+                # A try has no start or finish ('처음부터' clears it) and no chat.
+                _fail('try_not_supported', TRY_NOT_SUPPORTED)
+            _revision(body, row['revision'])
             if action == 'link_chat':
                 db.execute('INSERT OR IGNORE INTO work_chat_links VALUES(?,?,?,?)', (actor_id, body['chat_id'], row['id'], now))
                 return {'run_id': row['id'], 'revision': row['revision']}
@@ -2159,6 +2383,7 @@ class WorkspaceMixin:
                             body = {**body, 'result_revision': attempt['number'], 'item_id': 'job', 'verdict': body.get('verdict', 'completed')}
                     self._work_decide(db, actor, row, job, node, body)
             db.execute('UPDATE work_runs SET revision=revision+1,updated_at=? WHERE id=?', (now, row['id']))
+            self._work_touch_try(db, row['id'])
             current = self._work_run(db, actor, groups, row['id'])
             return {'run_id': row['id'], 'revision': current['revision'], 'run': self._work_run_view(db, actor, groups, current, evidence_access)}
         _fail('unknown_command', '지원하지 않는 업무 명령입니다.')
@@ -2167,7 +2392,10 @@ class WorkspaceMixin:
         if not job['current_attempt']:
             _fail('result_revision_conflict', '현재 결과를 다시 확인한 뒤 판정해 주세요.')
         attempt = db.execute('SELECT * FROM work_attempts WHERE id=?', (job['current_attempt'],)).fetchone()
-        if job['status'] == 'completed' and db.execute('SELECT 1 FROM work_decisions WHERE attempt_id=?', (attempt['id'],)).fetchone():
+        # Rule 10 of mock 21: a verdict in a try can be changed in place. Real
+        # decisions stay append-only evidence.
+        trying = _is_try(run)
+        if job['status'] == 'completed' and not trying and db.execute('SELECT 1 FROM work_decisions WHERE attempt_id=?', (attempt['id'],)).fetchone():
             _fail('decision_conflict', '이미 확정한 판정입니다. 새 근거 없이 변경할 수 없습니다.')
         if node.get('result_block') == 'change_request':
             external = db.execute("SELECT data FROM work_external_requests WHERE run_id=? AND job_id=? AND state='effect_verified'", (run['id'], job['job_id'])).fetchall()
@@ -2220,7 +2448,9 @@ class WorkspaceMixin:
         # Every decision is evidence-bound. A second click cannot override an
         # earlier verdict; changing evidence requires another attempt.
         if db.execute('SELECT 1 FROM work_decisions WHERE run_id=? AND job_id=? AND item_id=? AND attempt_id=?', (run['id'], job['job_id'], item_id, attempt['id'])).fetchone():
-            _fail('decision_conflict', '이 근거에 대한 판정이 이미 저장되었습니다.')
+            if not trying:
+                _fail('decision_conflict', '이 근거에 대한 판정이 이미 저장되었습니다.')
+            db.execute('DELETE FROM work_decisions WHERE run_id=? AND job_id=? AND item_id=? AND attempt_id=?', (run['id'], job['job_id'], item_id, attempt['id']))
         review = None
         if node.get('result_block') == 'ai_review':
             review = db.execute('SELECT * FROM work_review_revisions WHERE attempt_id=? ORDER BY revision DESC LIMIT 1', (attempt['id'],)).fetchone()
@@ -2246,3 +2476,240 @@ class WorkspaceMixin:
             # No delivery adapter or channel policy is configured by this UI.
             state, reason = 'blocked', 'delivery_unconfigured'
         db.execute('UPDATE work_jobs SET status=?,reason=?,revision=revision+1,claim_actor=? WHERE run_id=? AND job_id=?', (state, reason, _value(actor, 'id'), run['id'], job['job_id']))
+
+    # ---- Trying a saved draft before publication ('시험해 보기', mock 21) ----
+    # A try is one work_runs row: mode='try', status 'cancelled' with no
+    # closed_at, version 0. A try is stored as cancelled so the previous program
+    # ignores it (rollback): there it is only a cancelled record and nothing runs
+    # in it or is blocked by it. mode='try' is live here, and only the browser
+    # window holding its key reads or writes it.
+
+    def _work_clock(self):
+        return self.operations.clock() if hasattr(self, 'operations') else datetime.now(timezone.utc).timestamp()
+
+    def _work_clock_text(self):
+        return datetime.fromtimestamp(self._work_clock(), timezone.utc).isoformat(timespec='milliseconds')
+
+    @staticmethod
+    def _work_try_factory(definition, body):
+        factory_id = body.get('factory_id') or ''
+        if not isinstance(factory_id, str):
+            _fail('invalid_factory', '공장 범위를 확인해 주세요.')
+        return '' if definition.get('execution_scope') == 'system' else factory_id
+
+    @classmethod
+    def _work_find_try(cls, db, workflow_id, draft, body, window):
+        """This window's newest try of the procedure in the factory the current
+        saved draft runs in (none for a system-wide draft).
+
+        A try made before the draft moved between system-wide and per-factory is
+        not found; try_open makes a new one and the old one waits for the sweep.
+        """
+        factory_id = cls._work_try_factory(draft, body)
+        if draft.get('execution_scope') == 'factory' and not factory_id:
+            return None  # try_open answers factory_required
+        for row in db.execute("SELECT * FROM work_runs WHERE mode='try' AND workflow_id=? AND factory_id=? ORDER BY created_at DESC,id", (workflow_id, factory_id)):
+            stored = (json.loads(row['snapshot']).get('try') or {}).get('window')
+            if isinstance(stored, str) and hmac.compare_digest(stored, window):
+                return row
+        return None
+
+    def _work_try_lookup(self, db, actor, groups, body, window):
+        row = self._work_definition(db, actor, groups, body.get('workflow_id'), True)
+        if body.get('system_id') not in (None, '', row['system_id']):
+            _fail('target_mismatch', '선택한 절차·진행 건·작업 위치가 서로 다릅니다. 대상을 다시 선택해 주세요.')
+        found = self._work_find_try(db, row['id'], json.loads(row['draft']), body, window)
+        return row, (self._work_check_run(db, actor, groups, found) if found else None)
+
+    @staticmethod
+    def _work_try_busy(db, run_id):
+        """A job still running, holding a lease or queued keeps the try from being deleted."""
+        return bool(db.execute("SELECT 1 FROM work_jobs WHERE run_id=? AND status='running' LIMIT 1", (run_id,)).fetchone()
+                    or db.execute("SELECT 1 FROM work_job_claims c JOIN work_attempts a ON a.id=c.attempt_id WHERE a.run_id=? AND c.state='running' LIMIT 1", (run_id,)).fetchone()
+                    or db.execute("SELECT 1 FROM work_scope_runs WHERE run_id=? AND status IN ('queued','running','waiting') LIMIT 1", (run_id,)).fetchone())
+
+    @staticmethod
+    def _work_delete_try(db, run_id):
+        """Delete a try with everything that belongs to it; a real run is refused.
+
+        Children go first: the delete triggers allow a row only while its try exists.
+        """
+        row = db.execute('SELECT mode FROM work_runs WHERE id=?', (run_id,)).fetchone()
+        if not _is_try(row):
+            _fail('try_required', '시험만 지울 수 있습니다.')
+        attempts = 'SELECT id FROM work_attempts WHERE run_id=?'
+        db.execute(f'DELETE FROM work_review_revisions WHERE attempt_id IN ({attempts})', (run_id,))
+        db.execute('DELETE FROM work_decisions WHERE run_id=?', (run_id,))
+        db.execute(f'DELETE FROM work_job_claims WHERE attempt_id IN ({attempts})', (run_id,))
+        db.execute('DELETE FROM work_scope_runs WHERE run_id=?', (run_id,))
+        db.execute("DELETE FROM work_shared_tool_pins WHERE run_kind='work' AND run_id=?", (run_id,))
+        db.execute('DELETE FROM work_chat_links WHERE run_id=?', (run_id,))
+        # Operation events of a try target the run or its attempts (read retries).
+        db.execute(f'DELETE FROM work_operation_events WHERE target=? OR target IN ({attempts})', (run_id, run_id))
+        # Its execution receipts name the run and the attempt inside the stored
+        # outcome; either is enough, so an outcome naming only its attempt goes
+        # too. The receipts have no run column: one scan per chunk of ids.
+        marks = ['"' + key + '"' for key in [run_id, *(item[0] for item in db.execute(attempts, (run_id,)))]]
+        for start in range(0, len(marks), TRY_RECEIPT_CHUNK):
+            chunk = marks[start:start + TRY_RECEIPT_CHUNK]
+            db.execute('DELETE FROM work_operation_receipts WHERE ' + ' OR '.join(['instr(outcome,?)>0'] * len(chunk)), chunk)
+        db.execute('DELETE FROM work_attempts WHERE run_id=?', (run_id,))
+        db.execute('DELETE FROM work_jobs WHERE run_id=?', (run_id,))
+        # Every workspace command stores its receipt with one audit row naming the run.
+        db.execute('DELETE FROM work_receipts WHERE (actor_id,request_id) IN (SELECT actor_id,request_id FROM work_audit WHERE target=?)', (run_id,))
+        db.execute('DELETE FROM work_audit WHERE target=?', (run_id,))
+        db.execute("DELETE FROM work_runs WHERE id=? AND mode='try'", (run_id,))
+
+    def _work_sweep_tries_inline(self, db):
+        """try_open's share of the cleanup, inside try_open's write transaction.
+
+        Bounded, and behind a savepoint: a failing deletion undoes only the
+        sweep and never stops the opening. The background sweep retries.
+        """
+        db.execute('SAVEPOINT work_try_sweep')
+        try:
+            self._work_sweep_tries(db, self._work_clock(), TRY_SWEEP_OPEN_LIMIT)
+        except Exception as error:
+            db.execute('ROLLBACK TO work_try_sweep')
+            logging.getLogger(__name__).warning('try_sweep_failed: %s', type(error).__name__)
+        db.execute('RELEASE work_try_sweep')
+
+    def _work_sweep_tries(self, db, now_seconds, limit):
+        """Delete tries nobody wrote to for 24 hours (decision 10), skipping running ones."""
+        removed = []
+        for row in db.execute("SELECT id,snapshot,updated_at FROM work_runs WHERE mode='try' ORDER BY created_at,id").fetchall():
+            touched = (json.loads(row['snapshot']).get('try') or {}).get('touched_at') or row['updated_at']
+            try:
+                idle = now_seconds - datetime.fromisoformat(touched).timestamp() > TRY_IDLE_SECONDS
+            except (TypeError, ValueError):
+                idle = True
+            if idle and not self._work_try_busy(db, row['id']):
+                self._work_delete_try(db, row['id'])
+                removed.append(row['id'])
+                if len(removed) >= limit:
+                    break
+        return removed
+
+    def _work_touch_try(self, db, run_id):
+        row = db.execute("SELECT snapshot FROM work_runs WHERE id=? AND mode='try'", (run_id,)).fetchone()
+        if row:
+            snapshot = json.loads(row['snapshot'])
+            snapshot['try']['touched_at'] = self._work_clock_text()
+            db.execute('UPDATE work_runs SET snapshot=? WHERE id=?', (_dump(snapshot), run_id))
+
+    def _work_create_try(self, db, actor, groups, row, factory_id, window, skills, basis, previous_nodes=None):
+        """A try of the saved draft, checked like start_run minus publication and
+        the one-open-run rule: a try and real work never block each other."""
+        definition = json.loads(row['draft'])
+        if basis is not None and _draft_hash(definition) != basis:
+            _fail('revision_conflict', '다른 변경이 있습니다. 최신 내용을 다시 확인해 주세요.')
+        if definition.get('execution_scope') == 'system': factory_id = ''
+        if definition.get('execution_scope') == 'factory' and not factory_id:
+            _fail('factory_required', '시작할 공장을 선택해 주세요.')
+        self._work_authorize_scope(db, actor, groups, row['system_id'], factory_id, 'participant')
+        errors, _ = definition_check(definition)
+        # A setting of a field only the published version declares does not block the try.
+        errors.extend(settings_errors(definition, db.execute('SELECT factory_id,values_json FROM work_settings WHERE workflow_id=? AND factory_id IN (?,?)', (row['id'], '', factory_id)), strict=False))
+        if errors: _fail('execution_not_ready', '실행 전에 업무절차를 보완해 주세요.\n' + '\n'.join(errors))
+        factory = db.execute('SELECT * FROM work_factories WHERE id=? AND system_id=?', (factory_id, row['system_id'])).fetchone() if factory_id else None
+        if factory_id and not factory: _fail('factory_not_found', '등록된 공장을 선택해 주세요.')
+        attributes = json.loads(factory['attributes']) if factory else {}; attributes['factory_id'] = factory_id
+        conditions = _factory_condition_results(definition, attributes)
+        api_errors = binding_errors(self, db, groups, definition)
+        if api_errors:
+            _fail('execution_not_ready', '\n'.join(api_errors))
+        active_definition = {'nodes': {job_id: node for job_id, node in definition['nodes'].items() if node['type'] == 'j' and conditions[job_id] is not False}}
+        # Real work may start before a tool is chosen; such a draft cannot be
+        # tried, so no try is made (implementation contract, decision 3).
+        unconnected = [f'{job_id}: 도구가 연결되지 않았습니다.' for job_id, node in active_definition['nodes'].items() if tool_connection_required(node)]
+        if unconnected:
+            _fail('execution_not_ready', '실행 전에 업무절차를 보완해 주세요.\n' + '\n'.join(unconnected))
+        if hasattr(self, 'operations') and hasattr(self.operations, 'validate_publication'):
+            errors = self.operations.validate_publication(db, {**definition, 'nodes': active_definition['nodes']}, actor, groups, authoring=False, factory_id=factory_id)
+            if errors: _fail('execution_not_ready', '실행 전에 업무절차를 보완해 주세요.\n' + '\n'.join(errors))
+        key, now, draft_hash = str(uuid4()), _now(), _draft_hash(definition)
+        self.shared_tools.pin(db, actor, groups, 'work', key, active_definition)
+        # '바뀜' marks the jobs that differ from this window's previous try.
+        changed = [] if previous_nodes is None else sorted(
+            job_id for job_id, node in definition['nodes'].items()
+            if node['type'] == 'j' and (job_id not in previous_nodes or _hash(previous_nodes[job_id]) != _hash(node)))
+        # Skills are pinned the way publication pins them, or jobs with skills
+        # would fail with skill_version_changed.
+        snapshot = {'definition': {**definition, 'resource_versions': {'skills': skills}}, 'definition_hash': draft_hash,
+                    'factory': dict(factory) | {'attributes': attributes} if factory else None, 'condition_results': conditions,
+                    'try': {'window': window, 'draft_hash': draft_hash, 'saved_at': self._work_draft_saved_at(db, row),
+                            'changed': changed, 'touched_at': self._work_clock_text()}}
+        # A try is stored as cancelled so the previous program ignores it
+        # (rollback); mode='try' is live here. Version 0 is never published.
+        db.execute("INSERT INTO work_runs VALUES(?,?,0,?,?,?,?,'try','cancelled',1,?,?,?,?,NULL)",
+                   (key, row['id'], row['system_id'], factory_id, _value(actor, 'id'), _dump({'group_ids': []}), _dump({}), _dump(snapshot), now, now))
+        for job_id, node in definition['nodes'].items():
+            if node['type'] == 'j':
+                condition = conditions[job_id]; status = 'excluded' if condition is False else 'blocked' if condition is None else 'pending'
+                db.execute('INSERT INTO work_jobs VALUES(?,?,?,0,NULL,NULL,?)', (key, job_id, status, '공장 조건 미충족' if condition is False else '공장 속성 확인 필요' if condition is None else ''))
+        return self._work_run(db, actor, groups, key)
+
+    def _work_try_command(self, db, actor, groups, body, skills, basis, evidence_access):
+        window = self._work_try_window(body)
+        if body['action'] == 'try_open':
+            row = self._work_definition(db, actor, groups, body.get('workflow_id'), True)
+            if body.get('system_id') not in (None, '', row['system_id']):
+                _fail('target_mismatch', '선택한 절차·진행 건·작업 위치가 서로 다릅니다. 대상을 다시 선택해 주세요.')
+            self._work_sweep_tries_inline(db)
+            draft = json.loads(row['draft'])
+            existing = self._work_find_try(db, row['id'], draft, body, window)
+            if existing:
+                # Opened again in this window: kept as it is even if a newer save
+                # exists (the screen offers to start over); only its cleanup waits.
+                self._work_check_run(db, actor, groups, existing)
+                self._work_touch_try(db, existing['id'])
+                run = db.execute('SELECT * FROM work_runs WHERE id=?', (existing['id'],)).fetchone()
+            else:
+                run = self._work_create_try(db, actor, groups, row, self._work_try_factory(draft, body), window, skills, basis)
+        else:
+            old = self._work_try_gate(db, actor, groups, self._work_run(db, actor, groups, body.get('run_id'), write=True), body)
+            if not _is_try(old):
+                _run_not_found()
+            row = self._work_definition(db, actor, groups, old['workflow_id'], True)
+            if body.get('workflow_id') not in (None, '', row['id']) or body.get('system_id') not in (None, '', row['system_id']):
+                _fail('target_mismatch', '선택한 절차·진행 건·작업 위치가 서로 다릅니다. 대상을 다시 선택해 주세요.')
+            if self._work_try_busy(db, old['id']):
+                _fail('try_running', '실행 중인 작업이 끝난 뒤 다시 해 주세요.')
+            previous_nodes = json.loads(old['snapshot'])['definition']['nodes']
+            # The new try runs where the current saved draft runs: a draft that
+            # moved between system-wide and per-factory must not inherit the old
+            # try's factory. A request without factory_id (earlier screens) keeps it.
+            factory_id = self._work_try_factory(json.loads(row['draft']), body if 'factory_id' in body else {'factory_id': old['factory_id']})
+            # In one transaction: a draft that cannot be tried keeps the old try.
+            self._work_delete_try(db, old['id'])
+            run = self._work_create_try(db, actor, groups, row, factory_id, window, skills, basis, previous_nodes)
+        return {'run_id': run['id'], 'workflow_id': row['id'], 'revision': run['revision'],
+                'run': self._work_run_view(db, actor, groups, run, evidence_access)}
+
+    async def try_state(self, user, body):
+        """This window's try of a procedure for the editor (POST workspace/try).
+
+        A read: no receipt, audit or touch. Managers only, since the draft is theirs.
+        """
+        try:
+            actor, _, groups = await self._work_actor(user)
+            if not isinstance(body, dict): _fail('invalid_command', '업무 명령을 확인해 주세요.')
+            _public(body)
+            window = self._work_try_window(body)
+            with self._db() as db:
+                _, found = self._work_try_lookup(db, actor, groups, body, window)
+            evidence_access = await self._work_evidence_access(actor, groups, found['id']) if found else set()
+            # Access may change during the Native evidence reads above.
+            actor, _, groups = await self._work_actor(actor)
+            with self._db() as db:
+                row, found = self._work_try_lookup(db, actor, groups, body, window)
+                view = self._work_run_view(db, actor, groups, found, evidence_access) if found else None
+                published = db.execute('SELECT definition FROM work_versions WHERE workflow_id=? AND version=?', (row['id'], row['published_version'])).fetchone()
+                workflow = {key: row[key] for key in ('id', 'revision', 'published_version')}
+                workflow.update(self._work_draft_state(db, row, json.loads(row['draft']), json.loads(published[0]) if published else None))
+            operations = await self.operations.state(actor, system_id=row['system_id'], run_id=found['id'] if found else '', allow_try=True)
+            return {'ok': True, 'try': view, 'operations': operations, 'workflow': workflow}
+        except WorkflowError as error:
+            return {'ok': False, 'error': {'code': error.code, 'message': error.message}}
+        except (sqlite3.Error, ValueError, TypeError, KeyError):
+            return {'ok': False, 'error': {'code': 'workspace_unavailable', 'message': '업무 저장 상태를 확인하지 못했습니다. 기존 자료를 초기화하지 않았습니다.'}}

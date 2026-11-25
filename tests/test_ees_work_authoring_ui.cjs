@@ -25,21 +25,22 @@ const flush=async()=>{for(let i=0;i<8;i++)await new Promise(r=>setImmediate(r));
 const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};};
 const decode=value=>String(value).replaceAll('&quot;','"').replaceAll('&#39;',"'").replaceAll('&lt;','<').replaceAll('&gt;','>').replaceAll('&amp;','&');
 const attr=(text,name)=>decode(text.match(new RegExp('(?:^|\\s)'+name+'="([^"]*)"'))?.[1] || '');
-function controlAttributes(text){const attributes=Object.fromEntries([...text.matchAll(/([\w-]+)="([^"]*)"/g)].map(([,key,value])=>[key,decode(value)]));for(const key of ['disabled','readonly','required','checked','data-dialog-confirm','data-dialog-cancel','data-tool-workflow','data-tool-stage','data-tool-job'])if(new RegExp('\\b'+key+'\\b').test(text))attributes[key]='';return attributes;}
+const isDisabled=text=>/(?:^|\s)disabled(?![\w-])/.test(text.replace(/"[^"]*"/g,'""'));
+function controlAttributes(text){const attributes=Object.fromEntries([...text.matchAll(/([\w-]+)="([^"]*)"/g)].map(([,key,value])=>[key,decode(value)]));const bare=text.replace(/"[^"]*"/g,'""');for(const key of ['disabled','readonly','required','checked','data-dialog-confirm','data-dialog-cancel','data-tool-workflow','data-tool-stage','data-tool-job'])if(new RegExp('(?:^|\\s)'+key+'(?![\\w-])').test(bare))attributes[key]='';for(const [,key] of bare.matchAll(/(?:^|\s)([\w-]+)(?=\s|$)/g))if(!Object.hasOwn(attributes,key))attributes[key]='';return attributes;}
 function controls(html){
  const result=[];
- for(const m of html.matchAll(/<input\b([^>]*)>/g))result.push({offset:m.index,name:attr(m[1],'name'),id:attr(m[1],'id'),value:attr(m[1],'value'),type:attr(m[1],'type'),checked:/\bchecked\b/.test(m[1]),disabled:/\bdisabled\b/.test(m[1]),attributes:controlAttributes(m[1])});
- for(const m of html.matchAll(/<textarea\b([^>]*)>([\s\S]*?)<\/textarea>/g))result.push({offset:m.index,name:attr(m[1],'name'),id:attr(m[1],'id'),value:decode(m[2]),type:'textarea',disabled:/\bdisabled\b/.test(m[1]),attributes:controlAttributes(m[1])});
- for(const m of html.matchAll(/<select\b([^>]*)>([\s\S]*?)<\/select>/g)){const options=[...m[2].matchAll(/<option\b([^>]*)>([^<]*)<\/option>/g)],o=options.find(o=>/\bselected\b/.test(o[1])) || options[0];result.push({offset:m.index,name:attr(m[1],'name'),id:attr(m[1],'id'),value:o?attr(o[1],'value'):'',type:'select',disabled:/\bdisabled\b/.test(m[1]),attributes:controlAttributes(m[1])});}
+ for(const m of html.matchAll(/<input\b([^>]*)>/g))result.push({offset:m.index,name:attr(m[1],'name'),id:attr(m[1],'id'),value:attr(m[1],'value'),type:attr(m[1],'type'),checked:/\bchecked\b/.test(m[1]),disabled:isDisabled(m[1]),attributes:controlAttributes(m[1])});
+ for(const m of html.matchAll(/<textarea\b([^>]*)>([\s\S]*?)<\/textarea>/g))result.push({offset:m.index,name:attr(m[1],'name'),id:attr(m[1],'id'),value:decode(m[2]),type:'textarea',disabled:isDisabled(m[1]),attributes:controlAttributes(m[1])});
+ for(const m of html.matchAll(/<select\b([^>]*)>([\s\S]*?)<\/select>/g)){const options=[...m[2].matchAll(/<option\b([^>]*)>([^<]*)<\/option>/g)],o=options.find(o=>/\bselected\b/.test(o[1])) || options[0];result.push({offset:m.index,name:attr(m[1],'name'),id:attr(m[1],'id'),value:o?attr(o[1],'value'):'',type:'select',disabled:isDisabled(m[1]),attributes:controlAttributes(m[1])});}
  return result;
 }
 function ancestorMap(html){
- const parents=new Map(),stack=[],voids=new Set(['input','img','br','hr','meta','link']);
+ const parents=new Map(),stack=[],nodes=[],voids=new Set(['input','img','br','hr','meta','link']);
  for(const match of html.matchAll(/<(\/?)([a-z][\w-]*)\b([^>]*)>/gi)){
   const [,closing,tag,raw]=match;if(closing){for(let i=stack.length-1;i>=0;i--)if(stack[i].tagName===tag){stack.length=i;break;}continue;}
-  const parent=stack.at(-1)||null,node={offset:match.index,tagName:tag,id:attr(raw,'id'),className:attr(raw,'class'),attributes:controlAttributes(raw),parentElement:parent};parents.set(match.index,parent);if(!voids.has(tag))stack.push(node);
+  const parent=stack.at(-1)||null,node={offset:match.index,tagName:tag,id:attr(raw,'id'),className:attr(raw,'class'),attributes:controlAttributes(raw),parentElement:parent};nodes.push(node);parents.set(match.index,parent);if(!voids.has(tag))stack.push(node);
  }
- return parents;
+ parents.nodes=nodes;return parents;
 }
 
 function definition(id='w'){return {id,name:'절차 '+id,system_id:'EMS',category:'ops',mode:'on_demand',nodes:{p:{id:'p',type:'p',parent:null,children:['t'],deps:[],name:'절차'},t:{id:'t',type:'t',parent:'p',children:['j'],deps:[],name:'단계'},j:{id:'j',type:'j',parent:'t',children:[],deps:[],name:'확인 작업',instructions:'원래 안내',mode:'human',inputs:[],result_block:'human_confirm',human_confirmation:true}}};}
@@ -61,8 +62,10 @@ function assertUnavailableInline(h,message){
 async function submitInline(h){const result=h.designer.handleEvent({type:'submit',target:h.forms['ew-stage-editor']});await flush();assert.deepEqual(copy(result),{handled:true,preventDefault:true});}
 async function beginInline(h,kind){h.click(kind==='stage'?'stage_edit':kind,kind==='stage'?{id:'t0'}:kind==='add_job'?{parent:'t0'}:{});await flush();}
 
+// The work screen's row functions the editor's try calls; the product assembles them into one scope with the editor.
+const tryViewFunctions=['workExecutionModelHTML','workNormalizeRun','workOrderedNodes','workStageRows','workStageRowHTML','workStageMenuHTML','workStageTally','workStageAskFields','workStageGivenValues','workStageValueScope','workStageJudgments','workStageNoteKey','workStageNoteLimit','workStageCanCheck','workStageCanConfirmList','workHumanCheckItems','workCheckDecisions','workReadInputs','workValuesEqual','workListItems','workPlaceStageMenu','workStageHasValues','workStagePrimaryJudgment'];
 function footerNodes(html){const result={};for(const m of html.matchAll(/<(small|p)\b([^>]*)>([\s\S]*?)<\/\1>/g)){const attributes=m[2],id=attr(attributes,'id'),summary=attributes.match(/data-(procedure|tool)-summary/)?.[0],node={textContent:decode(m[3])};if(id)result['#'+id]=node;if(summary)result['['+summary+']']=node;}return result;}
-function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObserver,legacyToolAuthoring=true}={}){const h={startContexts:[],writes:[],operations:[],reads:[],dialogs:[],proposals:[],markup:'',forms:{},buttons:[],fields:[]};h.workflows=new Map(['w','q'].map(id=>[id,{id,name:'절차 '+id,system_id:'EMS',can_manage:true,revision:1,published_version:null,draft:definition(id),validation:{revision:1,errors:[],warnings:[]},versions:[]}]));h.state={help:workflowHelp,capabilities:{actor_id:'a',can_author:true,managed_systems:['EMS']},workflows:[...h.workflows.values()],workflow:h.workflows.get('w'),factories:[{id:'f',name:'공장'}],tools:[],native_functions:[],tool_examples:copy(toolExamples),procedure_examples:copy(procedureExamples)};h.selection={system_id:'EMS',workflow_id:'w',mode:'author',chat_id:'private-chat'};
+function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObserver,legacyToolAuthoring=true,sessionStorage=null}={}){const h={startContexts:[],writes:[],operations:[],reads:[],dialogs:[],proposals:[],markup:'',forms:{},buttons:[],fields:[]};h.hashOf=value=>JSON.stringify(value,(name,item)=>item&&typeof item==='object'&&!Array.isArray(item)?Object.fromEntries(Object.keys(item).sort().map(key=>[key,item[key]])):item);h.withDraftState=record=>Object.defineProperties(record,{draft_hash:{get(){return h.hashOf(this.draft);},enumerable:true,configurable:true},unpublished_changes:{get(){return Boolean(this.published_version&&this.published&&h.hashOf(this.published)!==h.hashOf(this.draft));},enumerable:true,configurable:true}});h.saves=0;h.workflows=new Map(['w','q'].map(id=>[id,h.withDraftState({id,name:'절차 '+id,system_id:'EMS',can_manage:true,revision:1,published_version:null,draft:definition(id),draft_saved_at:'2026-11-20T02:42:00Z',validation:{revision:1,errors:[],warnings:[]},versions:[]})]));h.state={help:workflowHelp,capabilities:{actor_id:'a',can_author:true,managed_systems:['EMS']},workflows:[...h.workflows.values()],workflow:h.workflows.get('w'),factories:[{id:'f',name:'공장'}],tools:[],native_functions:[],tool_examples:copy(toolExamples),procedure_examples:copy(procedureExamples)};h.selection={system_id:'EMS',workflow_id:'w',mode:'author',chat_id:'private-chat'};
  const noop=()=>{};let dialog=null;
  const matches=(node,selector)=>{
   if(selector.includes(','))return selector.split(',').some(part=>matches(node,part.trim()));
@@ -73,7 +76,7 @@ function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObser
  };
  const decorate=(node,attributes={})=>{
   let disabled=Boolean(node.disabled);Object.defineProperty(node,'disabled',{get:()=>disabled,set:value=>{disabled=Boolean(value);},enumerable:true,configurable:true});node.attributes=attributes;node.dataset ||= {};for(const [key,value] of Object.entries(attributes))if(key.startsWith('data-'))node.dataset[key.slice(5).replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]=value;node.isConnected=true;if(resizeObserver){node.style={};node.scrollHeight=21;}node.focus=()=>{h.document.activeElement=node;};node.setSelectionRange=(start,end)=>{node.selectionStart=start;node.selectionEnd=end;};
-  node.scrollIntoView=options=>{(h.scrollRequests ||= []).push({node,options});};node.getAttribute=name=>Object.hasOwn(node.attributes,name)?node.attributes[name]:null;node.setAttribute=(name,value)=>{node.attributes[name]=String(value);};
+  node.scrollIntoView=options=>{(h.scrollRequests ||= []).push({node,options});};node.matches=selector=>matches(node,selector);node.hasAttribute=name=>Object.hasOwn(node.attributes,name);node.removeAttribute=name=>{delete node.attributes[name];};node.select=()=>{h.selected=node;};node.classList={toggle(name,on){const list=new Set(String(node.className || '').split(' ').filter(Boolean));if(on===undefined?!list.has(name):on)list.add(name);else list.delete(name);node.className=[...list].join(' ');node.attributes.class=node.className;return list.has(name);},contains:name=>String(node.className || '').split(' ').includes(name)};node.getAttribute=name=>Object.hasOwn(node.attributes,name)?node.attributes[name]:null;node.setAttribute=(name,value)=>{node.attributes[name]=String(value);};
   node.closest=selector=>{if(selector==='#ees-work-designer')return host;if(selector==='#'+node.formId)return h.forms[node.formId];for(let current=node;current;current=current.parentElement)if(matches(current,selector))return current;return null;};
   return node;
  };
@@ -85,10 +88,10 @@ function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObser
   const namedFormControl=selector.match(/^#([^ ]+) (\[name=[^\]]+\])$/);if(namedFormControl)return h.forms[namedFormControl[1]]?.controls.find(field=>matches(field,namedFormControl[2])) || null;
   const formControl=selector.match(/^#([^ ]+) (input|select|textarea)/);if(formControl)return h.forms[formControl[1]]?.controls.find(field=>field.type!=='hidden') || null;
   if(selector.startsWith('#')&&h.forms[selector.slice(1)])return h.forms[selector.slice(1)];
-  return [...h.fields,...h.buttons,...(h.details || [])].find(node=>matches(node,selector)) || null;
+  return [...h.fields,...h.buttons,...(h.details || []),...(h.elements || [])].find(node=>matches(node,selector)) || null;
  },querySelectorAll(selector){
   if(selector==='[data-mutation]')return h.buttons.filter(b=>b.mutation);if(selector==='input,select,textarea')return h.fields;
-  return [...h.buttons,...h.fields].filter(node=>matches(node,selector));
+  return [...h.buttons,...h.fields,...(h.elements || [])].filter(node=>matches(node,selector));
  },set innerHTML(html){
   const ownedFocus=host.contains(h.document?.activeElement);for(const node of [...h.fields,...h.buttons])node.isConnected=false;if(ownedFocus)h.document.activeElement=null;
   h.markup=html;h.draftTitle=html.includes('data-draft-title')?{textContent:decode(html.match(/<h2 data-draft-title>(.*?)<\/h2>/)?.[1] || '')}:null;const parents=ancestorMap(html);h.status={textContent:decode(html.match(/data-author-status[^>]*>([^<]*)/)?.[1] || ''),dataset:{}};const statusDirty=html.match(/data-author-status[^>]*data-dirty="([^"]*)"/)?.[1];if(statusDirty!==undefined)h.status.dataset.dirty=statusDirty;
@@ -96,22 +99,43 @@ function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObser
   if(h.footer)Object.defineProperty(h.footer,'innerHTML',{get:()=>footer,set:value=>{h.footerReplacements=(h.footerReplacements || 0)+1;h.footerNodes=footerNodes(value);h.buttons=h.buttons.map(button=>['procedure_create','procedure_cancel','tool_save','tool_review','tool_approve','tool_reject'].includes(button.dataset.authorAction)?{...button}:button);}});
   h.summaries=[...html.matchAll(/<summary\b([^>]*)>/g)].map(m=>decorate({tagName:'SUMMARY',parentElement:parents.get(m.index)},controlAttributes(m[1])));
   h.details=[...html.matchAll(/<details\b([^>]*)>/g)].map(m=>decorate({className:attr(m[1],'class'),open:/\bopen\b/.test(m[1])},{class:attr(m[1],'class')}));h.composer=h.details.find(node=>node.className==='ew-author-ai') || null;
-  h.scroll={scrollTop:0,querySelectorAll:selector=>h.details.filter(node=>![...selector.matchAll(/:not\(\.([^)]*)\)/g)].some(([,name])=>(node.className || '').split(' ').includes(name)))};h.fields=controls(html).map(field=>decorate({...field,parentElement:parents.get(field.offset)},field.attributes));h.forms={};
+  h.scroll={scrollTop:0,querySelectorAll:selector=>h.details.filter(node=>![...selector.matchAll(/:not\(\.([^)]*)\)/g)].some(([,name])=>(node.className || '').split(' ').includes(name)))};
+  h.elements=parents.nodes.filter(node=>!['button','input','select','textarea','option','summary','details'].includes(node.tagName)).map(node=>Object.assign(node,{dataset:Object.fromEntries(Object.entries(node.attributes).filter(([name])=>name.startsWith('data-')).map(([name,value])=>[name.slice(5).replace(/-([a-z])/g,(_,c)=>c.toUpperCase()),value])),isConnected:true,getAttribute:name=>Object.hasOwn(node.attributes,name)?node.attributes[name]:null,setAttribute:(name,value)=>{node.attributes[name]=String(value);},focus:()=>{h.document.activeElement=node;},querySelectorAll:selector=>h.fields.filter(field=>{for(let parent=field.parentElement;parent;parent=parent.parentElement)if(parent===node)return matches(field,selector);return false;})}));h.fields=controls(html).map(field=>decorate({...field,parentElement:parents.get(field.offset)},field.attributes));h.forms={};
   const formMatches=[...html.matchAll(/<form\b([^>]*)>([\s\S]*?)<\/form>/g)];
   for(const m of formMatches){
    const id=attr(m[1],'id'),c=controls(m[2]).map(field=>decorate({...field,offset:m.index+m[0].indexOf('>')+1+field.offset,formId:id,parentElement:parents.get(m.index+m[0].indexOf('>')+1+field.offset)},field.attributes));
    h.forms[id]=decorate({id,controls:c});if(m[2].includes('class="ew-inline-error"'))h.forms[id].inlineError=decorate({className:'ew-inline-error',formId:id});
    for(const field of c){const old=h.fields.findIndex(f=>f.offset===field.offset);if(old>=0)h.fields[old]=field;}
   }
-  h.buttons=[...html.matchAll(/<button\b([^>]*)>/g)].map(m=>{const attributes=Object.fromEntries([...m[1].matchAll(/([\w-]+)="([^"]*)"/g)].map(([,k,v])=>[k,decode(v)]));const formMatch=formMatches.find(form=>m.index>form.index&&m.index<form.index+form[0].length);return decorate({tagName:'BUTTON',parentElement:parents.get(m.index),formId:formMatch?attr(formMatch[1],'id'):'',id:attr(m[1],'id'),className:attr(m[1],'class'),dataset:{authorAction:attr(m[1],'data-author-action'),id:attr(m[1],'data-id'),tab:attr(m[1],'data-tab'),parent:attr(m[1],'data-parent')},disabled:/\bdisabled\b/.test(m[1]),mutation:/data-mutation/.test(m[1])},attributes);});
+  h.buttons=[...html.matchAll(/<button\b([^>]*)>/g)].map(m=>{const attributes=Object.fromEntries([...m[1].matchAll(/([\w-]+)="([^"]*)"/g)].map(([,k,v])=>[k,decode(v)]));const formMatch=formMatches.find(form=>m.index>form.index&&m.index<form.index+form[0].length);return decorate({tagName:'BUTTON',parentElement:parents.get(m.index),formId:formMatch?attr(formMatch[1],'id'):'',id:attr(m[1],'id'),className:attr(m[1],'class'),dataset:{authorAction:attr(m[1],'data-author-action'),id:attr(m[1],'data-id'),tab:attr(m[1],'data-tab'),parent:attr(m[1],'data-parent')},disabled:isDisabled(m[1]),mutation:/data-mutation/.test(m[1])},attributes);});
   const previewMatch=html.match(/<section class="ew-schedule-preview"[^>]*>([\s\S]*?)<\/section>/);h.schedulePreview=previewMatch?{}:null;
   if(h.schedulePreview){let value=previewMatch[1];Object.defineProperty(h.schedulePreview,'innerHTML',{get:()=>value,set:next=>{
    value=next;h.markup=h.markup.replace(/(<section class="ew-schedule-preview"[^>]*>)[\s\S]*?(<\/section>)/,(_,start,end)=>start+next+end);
    for(const button of h.buttons.filter(b=>b.dataset.authorAction==='schedule_preview'))button.isConnected=false;
-   h.buttons=h.buttons.filter(b=>b.dataset.authorAction!=='schedule_preview');for(const m of next.matchAll(/<button\b([^>]*)>/g)){const attributes=controlAttributes(m[1]);h.buttons.push(decorate({tagName:'BUTTON',className:attr(m[1],'class'),disabled:/\bdisabled\b/.test(m[1]),mutation:/data-mutation/.test(m[1])},attributes));}
+   h.buttons=h.buttons.filter(b=>b.dataset.authorAction!=='schedule_preview');for(const m of next.matchAll(/<button\b([^>]*)>/g)){const attributes=controlAttributes(m[1]);h.buttons.push(decorate({tagName:'BUTTON',className:attr(m[1],'class'),disabled:isDisabled(m[1]),mutation:/data-mutation/.test(m[1])},attributes));}
   }});}
  },get innerHTML(){return h.markup;}};
- const callbacks={startContextChanged:value=>h.startContexts.push(value),read:async query=>{h.reads.push(copy(query));if(h.readOverride)return h.readOverride(query);return query.workflow_id?{workflow:copy(h.workflows.get(query.workflow_id)),capabilities:copy(h.state.capabilities)}:{workflows:copy([...h.workflows.values()]),capabilities:copy(h.state.capabilities)};},command:async body=>{h.writes.push(copy(body));if(h.writeOverride)return h.writeOverride(body);if(body.action==='create_workflow'){const id='created-'+h.writes.length,draft=definition(id);draft.name=body.name;draft.system_id=body.system_id;if(body.description&&!h.ignoreCreateDescription)draft.description=body.description;draft.nodes={p:{id:'p',type:'p',name:body.name,parent:null,children:[]}};const record={id,name:body.name,system_id:body.system_id,can_manage:true,revision:1,published_version:null,draft,validation:null,versions:[]};h.workflows.set(id,record);h.state.workflows=[...h.workflows.values()];return {ok:true,workflow_id:id,revision:1,workflow:copy(record)};}const record=h.workflows.get(body.workflow_id);if(body.action==='save_draft'){record.draft=copy(body.definition);record.revision++;record.validation=null;if(body.publication_state==='published'){record.published_version=Math.max(record.published_version||0,...record.versions.map(v=>v.version))+1;record.published=copy(record.draft);record.versions.push({version:record.published_version,definition:copy(record.draft)});}else if(body.publication_state==='unpublished')record.published_version=null;return {ok:true,revision:record.revision,published_version:record.published_version};}if(body.action==='validate_workflow'){record.validation={revision:record.revision,errors:[],warnings:[]};return {ok:true,revision:record.revision,validation:copy(record.validation)};}if(body.action==='unpublish_workflow'){record.revision++;record.published_version=null;record.validation=null;return {ok:true,revision:record.revision};}if(body.action==='publish_workflow'){record.revision++;record.published_version=(record.published_version || 0)+1;record.validation=null;return {ok:true,revision:record.revision,version:record.published_version};}return {ok:true};},operationsRead:async query=>{(h.operationReads ||= []).push(copy(query));return h.operationReadOverride?h.operationReadOverride(query):{reviewers:copy(h.state.reviewers || []),can_author_direct:h.state.can_author_direct ?? h.state.operations?.can_author_direct ?? false};},operationsCommand:async body=>{h.operations.push(copy(body));if(h.operationOverride)return h.operationOverride(body);return {ok:true,tool:{...copy(body.tool || h.state.tools.find(t=>t.id===body.tool_contract_id)),id:'tool',revision:2,state:body.action==='tool_submit'?'review_requested':'draft'}};},models:async()=>{h.modelReads=(h.modelReads || 0)+1;return h.modelsOverride?h.modelsOverride():{models:[{id:'m',name:'Native 모델'}],preferred:['m']};},propose:async body=>{h.proposals.push(body);return h.proposeOverride?h.proposeOverride(body):{workflow_id:body.workflow_id,base_revision:body.expected_revision,context_id:body.context_id,definition:{...copy(body.definition),name:'AI 제안'},summary:'초안 제안'};},openWorkflow:async id=>{h.selection.workflow_id=id;h.state.workflow=h.workflows.get(id) || null;h.designer.render({state:h.state,selection:h.selection,host});},changed:async()=>{h.state.workflow=h.workflows.get(h.selection.workflow_id) || null;h.designer.render({state:h.state,selection:h.selection,host});}};
+ const callbacks={startContextChanged:value=>h.startContexts.push(value),read:async query=>{h.reads.push(copy(query));if(h.readOverride)return h.readOverride(query);return query.workflow_id?{workflow:copy(h.workflows.get(query.workflow_id)),capabilities:copy(h.state.capabilities)}:{workflows:copy([...h.workflows.values()]),capabilities:copy(h.state.capabilities)};},command:async body=>{h.writes.push(copy(body));if(h.writeOverride)return h.writeOverride(body);if(body.action==='create_workflow'){const id='created-'+h.writes.length,draft=definition(id);draft.name=body.name;draft.system_id=body.system_id;if(body.description&&!h.ignoreCreateDescription)draft.description=body.description;draft.nodes={p:{id:'p',type:'p',name:body.name,parent:null,children:[]}};const record=h.withDraftState({id,name:body.name,system_id:body.system_id,can_manage:true,revision:1,published_version:null,draft,draft_saved_at:'2026-11-20T02:42:00Z',validation:null,versions:[]});h.workflows.set(id,record);h.state.workflows=[...h.workflows.values()];return {ok:true,workflow_id:id,revision:1,workflow:copy(record)};}const record=h.workflows.get(body.workflow_id);if(body.action==='save_draft'){record.draft=copy(body.definition);record.revision++;record.validation=null;record.draft_saved_at=new Date(Date.UTC(2026,10,20,2,42+5*++h.saves)).toISOString();if(body.publication_state==='published'){record.published_version=Math.max(record.published_version||0,...record.versions.map(v=>v.version))+1;record.published=copy(record.draft);record.versions.push({version:record.published_version,definition:copy(record.draft)});}else if(body.publication_state==='unpublished')record.published_version=null;return {ok:true,revision:record.revision,published_version:record.published_version};}if(body.action==='validate_workflow'){record.validation={revision:record.revision,errors:[],warnings:[]};return {ok:true,revision:record.revision,validation:copy(record.validation)};}if(body.action==='unpublish_workflow'){record.revision++;record.published_version=null;record.validation=null;return {ok:true,revision:record.revision};}if(body.action==='publish_workflow'){record.revision++;record.published_version=Math.max(record.published_version||0,...record.versions.map(v=>v.version))+1;record.published=copy(record.draft);record.versions.push({version:record.published_version,definition:copy(record.draft)});record.validation=null;return {ok:true,revision:record.revision,version:record.published_version,published_version:record.published_version};}return {ok:true};},operationsRead:async query=>{(h.operationReads ||= []).push(copy(query));return h.operationReadOverride?h.operationReadOverride(query):{reviewers:copy(h.state.reviewers || []),can_author_direct:h.state.can_author_direct ?? h.state.operations?.can_author_direct ?? false};},operationsCommand:async body=>{h.operations.push(copy(body));if(h.operationOverride)return h.operationOverride(body);return {ok:true,tool:{...copy(body.tool || h.state.tools.find(t=>t.id===body.tool_contract_id)),id:'tool',revision:2,state:body.action==='tool_submit'?'review_requested':'draft'}};},models:async()=>{h.modelReads=(h.modelReads || 0)+1;return h.modelsOverride?h.modelsOverride():{models:[{id:'m',name:'Native 모델'}],preferred:['m']};},propose:async body=>{h.proposals.push(body);return h.proposeOverride?h.proposeOverride(body):{workflow_id:body.workflow_id,base_revision:body.expected_revision,context_id:body.context_id,definition:{...copy(body.definition),name:'AI 제안'},summary:'초안 제안'};},openWorkflow:async id=>{h.selection.workflow_id=id;h.state.workflow=h.workflows.get(id) || null;h.designer.render({state:h.state,selection:h.selection,host});},changed:async()=>{h.state.workflow=h.workflows.get(h.selection.workflow_id) || null;h.designer.render({state:h.state,selection:h.selection,host});},tryRead:body=>h.tryRead(body),tryCommand:(path,body)=>h.tryCommand(path,body),navigate:async(mode,patch)=>{(h.navigations ||= []).push({mode,...copy(patch || {})});}};
+ // A simulated try server (2026-11-20, mock 21 rev 2): one try per workflow and window key; another key sees none.
+ h.tries=new Map();h.tryReads=[];h.tryWrites=[];h.tryCount=0;
+ const tryJobs=draft=>Object.fromEntries(Object.values(draft.nodes).filter(node=>node.type==='j').map(node=>[node.id,{job_id:node.id,status:'pending',current_attempt:null,result_revision:null,decisions:[],can_execute:true,can_decide:true}]));
+ const newTry=(record,window,changed=[])=>({id:'try-'+(++h.tryCount),workflow_id:record.id,mode:'try',status:'open',revision:1,can_write:true,inputs:{},definition:copy(record.draft),jobs:tryJobs(record.draft),attempts:[],try:{draft_hash:h.hashOf(record.draft),saved_at:record.draft_saved_at,changed,started:false},window});
+ const tryFail=(code,message,result)=>{throw Object.assign(new Error(message),{code,result,status:400});};
+ // As on the server: a try is of one procedure, window and factory; a system-wide draft has one try whatever factory is chosen.
+ const tryPlace=(record,body)=>record.id+'|'+body.try_window+'|'+(record.draft.execution_scope==='factory'?body.factory_id || '':'');
+ h.tryRead=async body=>{h.tryReads.push(copy(body));if(h.tryReadOverride){const value=await h.tryReadOverride(body);if(value!==undefined)return value;}const record=h.workflows.get(body.workflow_id),found=h.tries.get(tryPlace(record,body)),{window,...view}=found || {};return {ok:true,try:found?copy(view):null,operations:copy(h.tryOperations || {}),workflow:{id:record.id,revision:record.revision,draft_hash:record.draft_hash,draft_saved_at:record.draft_saved_at,published_version:record.published_version,unpublished_changes:record.unpublished_changes}};};
+ h.tryCommand=async(path,body)=>{h.tryWrites.push({path,...copy(body)});if(h.tryOverride){const value=await h.tryOverride(path,body);if(value!==undefined)return value;}
+  if(body.action==='try_open'){const record=h.workflows.get(body.workflow_id),key=tryPlace(record,body);if(!h.tries.has(key))h.tries.set(key,newTry(record,body.try_window));return {ok:true,run_id:h.tries.get(key).id};}
+  const entry=[...h.tries.entries()].find(([,item])=>item.id===body.run_id&&item.window===body.try_window);if(!entry)tryFail('run_not_found','접근할 수 있는 진행 건이 없습니다.');
+  const [key,run]=entry;if(body.expected_revision!==run.revision)tryFail('revision_conflict','다른 변경이 있습니다.');
+  if(body.action==='try_restart'){const record=h.workflows.get(run.workflow_id),old=run.definition.nodes,changed=Object.values(record.draft.nodes).filter(node=>node.type==='j'&&h.hashOf(old[node.id] || null)!==h.hashOf(node)).map(node=>node.id).sort(),next=newTry(record,run.window,changed);h.tries.set(key,next);return {ok:true,run_id:next.id};}
+  const job=run.jobs[body.job_id],node=run.definition.nodes[body.job_id];run.revision++;run.try.started=true;
+  if(body.action==='save_inputs'){run.inputs=copy(body.inputs);return {ok:true,run_id:run.id,revision:run.revision};}
+  if(body.action==='human_confirm'&&body.item_id!=='job'){job.result_revision ||= 1;job.decisions.push({id:'tick-'+run.revision,item_id:body.item_id,result_revision:job.result_revision,verdict:'completed',actor_id:'a',created_at:'2026-11-20T02:44:00Z'});if((node.confirmation_items || []).every(item=>job.decisions.some(decision=>decision.item_id===item.id)))job.status='completed';return {ok:true,run_id:run.id,revision:run.revision};}
+  if(['human_confirm','decide'].includes(body.action)){if(node.mode==='human')job.result_revision ||= 1;job.decisions=job.decisions.filter(decision=>!(decision.item_id==='job'&&decision.result_revision===job.result_revision));job.decisions.push({id:'decision-'+run.revision,item_id:'job',attempt_id:job.current_attempt,result_revision:job.result_revision,verdict:body.verdict,actor_id:'a',created_at:'2026-11-20T02:45:00Z',note:body.note || ''});job.status=body.verdict==='completed'?'completed':body.verdict==='failed'?'failed':'unknown';return {ok:true,run_id:run.id,revision:run.revision};}
+  if(body.action==='execute_job'){const outcome=h.tryExecute?.(body,run) || {};if(outcome.thrown)tryFail(outcome.thrown.code,outcome.thrown.message);const number=run.attempts.filter(item=>item.job_id===body.job_id).length+1,failed=Boolean(outcome.http_status),attempt={id:body.job_id+'-attempt-'+number,job_id:body.job_id,number,status:failed?'failed':'succeeded',actor_id:'a',created_at:'2026-11-20T02:49:00Z',finished_at:'2026-11-20T02:49:00Z',inputs:copy(run.inputs),snapshot:{job:copy(node)},result:failed?{source:'api',http_status:outcome.http_status,items:[],error:{code:'api_http_error'}}:{source:'api',items:[{id:'1',row:{title:'주간 설비 점검 기준'}}],field_labels:{title:'문서 제목'}}};run.attempts.push(attempt);job.current_attempt=attempt.id;job.result_revision=number;job.status=failed?'failed':'waiting_confirmation';if(failed)tryFail(undefined,'요청을 처리하지 못했습니다.',{ok:false,attempt:copy(attempt)});return {ok:true,attempt:copy(attempt)};}
+  return {ok:true,run_id:run.id,revision:run.revision};
+ };
  // Model only the existing dialog host lifecycle. Candidate/value listeners below
  // are the product handlers; the fixture does not apply drafts on their behalf.
  function toolDialog(options){
@@ -146,7 +170,7 @@ function harness({cryptoProvider=crypto,proposalChangesObserver=null,resizeObser
  }
  const workUI={showHelp:options=>{(h.helpCalls ||= []).push(options);},newId:run(renderer({crypto:cryptoProvider}),'workUI.newId'),esc:value=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'),icon:id=>'<img src="/_ees13/v4/'+id+'.svg" alt="">',$:selector=>selector==='#ees-work-dialog'?dialog:null,dialog:options=>{h.dialogHistory ||= [];h.dialogHistory.push(options);if(['ew-workflow-tool-setup','ew-tool-workflow-target','ew-execution-parameters','ew-stage-group-form'].some(name=>options.html?.includes(name)))return toolDialog(options);const answer=h.dialogs.shift();assert.notEqual(answer,undefined,'dialog answer is explicit');const listeners={};dialog={addEventListener:(event,cb)=>{(listeners[event] ||= []).push(cb);},querySelectorAll:()=>Object.entries(answer || {}).map(([name,value])=>({name,value,type:typeof value==='boolean'?'checkbox':'text',checked:!!value}))};return Promise.resolve().then(async()=>{await h.dialogHook?.();for(const listener of listeners.click || [])listener({target:{closest:selector=>selector==='[data-dialog-confirm]'?true:null},preventDefault:noop,stopPropagation:noop});return answer!==null;});}};
  const FormData=class{constructor(form){this.data=form.controls.filter(c=>c.name&&!c.disabled&&(!['checkbox','radio'].includes(c.type)||c.checked)).map(c=>[c.name,c.value || (c.type==='checkbox'?'on':'')]);}has(key){return this.data.some(([name])=>name===key);}get(key){return this.data.find(([name])=>name===key)?.[1]??null;}getAll(key){return this.data.filter(([name])=>name===key).map(([,v])=>v);}entries(){return this.data.values();}};
- const context={workToolCatalog:run(renderer(),'workToolCatalog'),workToolMatchesScope:run(renderer(),'workToolMatchesScope'),workUI,URL,ResizeObserver:resizeObserver,crypto:cryptoProvider,AbortController,FormData,document:{activeElement:null},console,proposalChangesObserver};vm.createContext(context);const observedSource=proposalChangesObserver?source.replace('function proposalChanges(before,after) {','function proposalChanges(before,after) { proposalChangesObserver();'):source;vm.runInContext(apiSources,context);vm.runInContext(taskLayoutSource,context);vm.runInContext(observedSource,context);context.callbacks=callbacks;h.designer=vm.runInContext('createWorkDesigner({callbacks})',context);h.helpers=vm.runInContext('workAuthoring',context);h.host=host;h.callbacks=callbacks;h.document=context.document;
+ const viewContext=renderer(),context={workToolCatalog:run(viewContext,'workToolCatalog'),workToolMatchesScope:run(viewContext,'workToolMatchesScope'),...Object.fromEntries(tryViewFunctions.map(name=>[name,run(viewContext,name)])),...(sessionStorage?{sessionStorage}:{}),workUI,URL,ResizeObserver:resizeObserver,crypto:cryptoProvider,AbortController,FormData,document:{activeElement:null},console,proposalChangesObserver};vm.createContext(context);const observedSource=proposalChangesObserver?source.replace('function proposalChanges(before,after) {','function proposalChanges(before,after) { proposalChangesObserver();'):source;vm.runInContext(apiSources,context);vm.runInContext(taskLayoutSource,context);vm.runInContext(observedSource,context);context.callbacks=callbacks;h.designer=vm.runInContext('createWorkDesigner({callbacks})',context);h.helpers=vm.runInContext('workAuthoring',context);h.host=host;h.callbacks=callbacks;h.document=context.document;
  h.render=()=>{if(legacyToolAuthoring)(h.state.operations ||= {}).legacy_tool_authoring=true;h.designer.render({state:h.state,selection:h.selection,host});};h.render();
  h.click=(action,data={})=>{const button=h.buttons.find(node=>node.dataset.authorAction===action&&Object.entries(data).every(([key,value])=>node.dataset[key]===value));button?.focus();const control={dataset:{authorAction:action,...data}};h.designer.handleEvent({type:'click',target:button || {closest:selector=>selector==='#ees-work-designer'?host:selector==='[data-author-action]'?control:null}});};
  // The outer work host captures overlay clicks before workUI.dialog settles its promise.
@@ -278,7 +302,18 @@ test('revision conflict preserves unsaved text and never silently rebases',async
 test('authorization denial preserves private draft and blocks subsequent mutation',async()=>{const h=harness();await h.node();h.field('job_guidance','권한 회수 전 글');h.writeOverride=async()=>{throw Object.assign(new Error('권한 회수'),{status:403});};h.click('save');await flush();h.click('save');await flush();assert.equal(h.writes.length,1);assert.equal(h.designer.canAuthor(),false);assert.equal(h.draft().definition.nodes.j.instructions,'권한 회수 전 글');});
 test('account reset rejects late save and clears draft cache',async()=>{const h=harness(),pending=deferred();await h.node();h.field('job_guidance','A 비공개');h.writeOverride=()=>pending.promise;h.click('save');await flush();h.state.capabilities.actor_id='b';h.render();pending.resolve({ok:true,revision:99});await flush();assert.doesNotMatch(h.markup,/A 비공개/);assert.notEqual(h.draft().revision,99);});
 test('late workflow reads cannot overwrite newer selection',async()=>{const h=harness(),pending=deferred();h.state.workflow=null;h.state.workflows=h.state.workflows.map(({draft,...rest})=>rest);h.readOverride=q=>q.workflow_id==='q'?pending.promise:Promise.resolve({workflow:copy(h.workflows.get('w'))});await h.open('q');await h.open('w');pending.resolve({workflow:copy(h.workflows.get('q'))});await flush();assert.equal(h.draft().definition.id,'w');});
-test('publication state is a local edit and Save commits it together with content',async()=>{const h=harness();await h.node();h.field('job_guidance','저장 전 변경');h.field('publication_state','published','change');assert.equal(h.writes.length,0);assert.equal(h.draft().dirty,true);assert.equal(h.workflows.get('w').published_version,null);assert.doesNotMatch(h.markup,/data-author-action="(?:publish|unpublish)"/);h.click('save');await flush();assert.equal(h.writes.length,1);assert.equal(h.writes[0].action,'save_draft');assert.equal(h.writes[0].publication_state,'published');assert.equal(h.writes[0].definition.nodes.j.instructions,'저장 전 변경');assert.equal(h.workflows.get('w').published_version,1);assert.equal(h.draft().dirty,false);assert.equal(h.dialogHistory?.length||0,0);});
+test('mock 21: 저장 keeps the draft only and 게시 with unsaved edits saves and publishes in one command',async()=>{
+ const h=harness();await h.node();h.field('job_guidance','저장 전 변경');assert.doesNotMatch(h.markup,/id="ew-publication-state"|ew-publication-field/);
+ h.click('save');await flush();
+ assert.equal(h.writes.length,1);assert.equal(h.writes[0].action,'save_draft');assert.equal(Object.hasOwn(h.writes[0],'publication_state'),false);assert.equal(h.workflows.get('w').published_version,null);assert.equal(h.draft().dirty,false);
+ // 저장 leaves 게시 to press next: the cursor goes there.
+ assert.equal(h.document.activeElement,actionButton(h,'publish'));
+ h.field('job_guidance','게시 전 변경');h.click('publish');await flush();
+ assert.equal(h.writes.length,2,'one command, not a save and then a publish');assert.equal(h.writes[1].action,'save_draft');assert.equal(h.writes[1].publication_state,'published');assert.equal(h.writes[1].expected_revision,2);assert.equal(h.writes[1].definition.nodes.j.instructions,'게시 전 변경');
+ assert.equal(h.workflows.get('w').published_version,1);assert.equal(h.draft().dirty,false);assert.equal(h.dialogHistory?.length||0,0);
+ // Published with nothing to publish: 게시 is off.
+ assert.equal(actionButton(h,'publish').disabled,true);h.click('publish');await flush();assert.equal(h.writes.length,2);
+});
 
 test('all eight input types and result blocks are represented without workflow-specific HTML',()=>{const h=harness();assert.equal(Object.keys(h.helpers.inputTypes).length,8);assert.equal(Object.keys(h.helpers.blocks).length,8);assert.deepEqual(Object.keys(h.helpers.inputTypes),['text','number','datetime','single','multi','list','person','boolean']);assert.ok(h.helpers.blocks.change_request);});
 test('declared input and tool argument binding are saved together',async()=>{const h=harness();await h.node();h.dialogs.push({id:'project',name:'Jira 프로젝트',type:'single',scope:'workflow',required:true,unit:'',options_source:'manual',options:'PROJA\nPROJB',depends_on:'',tool_argument:'project_key'});h.click('input_add');await flush();const node=h.draft().definition.nodes.j;assert.equal(node.inputs[0].id,'project');assert.equal(node.inputs[0].required,true);assert.deepEqual(node.inputs[0].options,['PROJA','PROJB']);assert.deepEqual(node.argument_bindings.project_key,{input:'project'});assert.equal(node.inputs[0].scope,'workflow');});
@@ -308,17 +343,23 @@ test('late Native proposal after reset cannot expose the previous account previe
 
 test('centered procedure keeps edits and selected tab while switching to tools; only Save writes them',async()=>{
  const h=harness();
- h.field('overview_name','업무 1차 점검');h.field('overview_description','입력 중인 업무 설명');h.field('publication_state','published','change');
+ h.field('overview_name','업무 1차 점검');h.field('overview_description','입력 중인 업무 설명');
  h.click('policy_settings');await flush();h.selection.tab='tools';h.render();h.render();
  h.selection.tab='overview';h.render();
  assert.match(h.markup,/data-author-tab="policies"/);
  h.click('tab',{tab:'content'});await flush();
  assert.equal(h.fields.find(field=>field.name==='overview_description').value,'입력 중인 업무 설명');assert.equal(h.writes.length,0);
  h.click('save');await flush();
- assert.equal(h.writes.length,1);assert.equal(h.writes[0].publication_state,'published');
+ assert.equal(h.writes.length,1);assert.equal(Object.hasOwn(h.writes[0],'publication_state'),false);
  assert.equal(h.writes[0].definition.name,'업무 1차 점검');assert.equal(h.writes[0].definition.description,'입력 중인 업무 설명');
 });
-test('unsaved publication state stays with its workflow across navigation',async()=>{const h=harness();h.field('publication_state','published','change');await h.open('q');assert.equal(h.draft().publication_state,'unpublished');assert.equal(h.draft().dirty,false);await h.open('w');assert.equal(h.draft().publication_state,'published');assert.equal(h.draft().dirty,true);assert.equal(h.writes.length,0);h.field('publication_state','unpublished','change');assert.equal(h.draft().dirty,false);assert.equal(actionButton(h,'save').disabled,true);});
+test('mock 21: the state mark and the unpublished-changes line follow each saved record across navigation',async()=>{
+ const h=harness(),record=h.workflows.get('w');record.published_version=1;record.published=copy(record.draft);record.versions=[{version:1,definition:copy(record.draft)}];h.render();
+ assert.match(h.markup,/<h2>절차 w<\/h2><span class="ew-author-tag" data-state="published">게시<\/span><details class="ew-procedure-menu">/);assert.match(h.markup,/<p class="ew-author-muted">EMS · 게시 v1<\/p>/);
+ record.draft.nodes.j.instructions='다른 창에서 저장한 안내';record.revision=2;h.render();assert.match(h.markup,/<p class="ew-author-muted">EMS · 게시 v1 · 게시 안 한 변경 있음<\/p>/);
+ await h.open('q');assert.match(h.markup,/<span class="ew-author-tag" data-state="draft">미게시<\/span>/);assert.match(h.markup,/<p class="ew-author-muted">EMS<\/p>/);assert.doesNotMatch(h.markup,/data-author-action="unpublish"/);assert.equal(actionButton(h,'publish').disabled,false);
+ await h.open('w');assert.match(h.markup,/게시 안 한 변경 있음/);assert.match(h.markup,/data-author-action="unpublish"/);assert.equal(h.draft().dirty,false);assert.equal(h.writes.length,0);
+});
 
 test('conflict comparison can discard only by explicit choice and load exact new revision',async()=>{const h=harness();await h.node();h.field('job_guidance','내 변경');h.workflows.get('w').revision=3;h.workflows.get('w').draft.nodes.j.instructions='서버 변경';h.dialogs.push({choice:'keep'});h.click('compare');await flush();assert.equal(h.draft().definition.nodes.j.instructions,'내 변경');assert.equal(h.draft().revision,1);h.dialogs.push({choice:'discard'});h.click('compare');await flush();assert.equal(h.draft().definition.nodes.j.instructions,'서버 변경');assert.equal(h.draft().revision,3);assert.equal(h.draft().dirty,false);});
 // 2026-11-17: the product calls this a 업무 절차. Labels inside a closed menu and
@@ -420,10 +461,10 @@ test('content checks open judgment choices for the job and preserve the selected
 });
 test('readiness errors remain visible without disabling manual publication',async()=>{
  const h=harness(),record=h.workflows.get('w');h.writeOverride=async body=>{if(body.action==='validate_workflow'){record.validation={revision:1,checked_at:'2026-10-05T08:00:00Z',errors:[],warnings:['j: 송부 방식이 정해지지 않았습니다'],checks:['결과 형태 확인']};return {ok:true,validation:copy(record.validation)};}return {ok:true};};
- h.click('validate');await flush();assert.match(h.markup,/실행 전 보완 0/);assert.match(h.markup,/확인 권장 1/);assert.match(h.markup,/통과 1/);assert.match(h.markup,/2026-10-05T08:00:00Z/);assert.equal(h.fields.find(field=>field.name==='publication_state').disabled,false);
+ h.click('validate');await flush();assert.match(h.markup,/실행 전 보완 0/);assert.match(h.markup,/확인 권장 1/);assert.match(h.markup,/통과 1/);assert.match(h.markup,/2026-10-05T08:00:00Z/);assert.equal(actionButton(h,'publish').disabled,false);
  h.click('validation_open',{id:'warnings:0'});await flush();assert.match(h.markup,/ew-author-rule-policy/);
- h.writeOverride=async()=>{record.validation={revision:1,errors:['j: 결과 형태 없음'],warnings:[],checks:[]};return {ok:true,validation:copy(record.validation)};};h.click('validate');await flush();assert.match(h.markup,/실행 전 보완 1/);assert.equal(h.fields.find(field=>field.name==='publication_state').disabled,false);
- h.field('publication_state','published','change');h.click('save');await flush();assert.equal(h.writes.filter(body=>body.action==='save_draft'&&body.publication_state==='published').length,1);h.click('validation_open',{id:'errors:0'});await flush();assert.match(h.markup,/id="ew-author-node"/);
+ h.writeOverride=async body=>{if(body.action==='validate_workflow'){record.validation={revision:1,errors:['j: 결과 형태 없음'],warnings:[],checks:[]};return {ok:true,validation:copy(record.validation)};}return {ok:true};};h.click('validate');await flush();assert.match(h.markup,/실행 전 보완 1/);assert.equal(actionButton(h,'publish').disabled,false);
+ h.click('publish');await flush();assert.equal(h.writes.filter(body=>body.action==='publish_workflow').length,1);assert.equal(h.writes.some(body=>body.action==='save_draft'),false);h.click('validation_open',{id:'errors:0'});await flush();assert.match(h.markup,/id="ew-author-node"/);
 });
 test('B5 direct execution stores only declared exception metadata and retains absent adapter reason',async()=>{
  const h=harness();h.selection.tab='tools';h.state.native_users=[{id:'owner',name:'시스템 담당자'}];h.state.reviewers=[{id:'owner',name:'시스템 담당자'}];h.state.can_author_direct=true;h.render();await h.example('restart-service');h.click('tool_direct');await flush();
@@ -586,7 +627,10 @@ test('needed information remains direct-editable without a model and publication
  const h=harness();assert.doesNotMatch(h.markup,/정해야 할 것|data-author-action="summary_open"/);assert.match(h.markup,/내용 확인/);
  await h.node();h.field('job_guidance','직접 고침');h.click('validate');await flush();
  assert.equal(actionButton(h,'validate').disabled,true);assert.equal(h.writes.length,0);assert.equal(h.draft().definition.nodes.j.instructions,'직접 고침');
- h.click('publish');await flush();assert.equal(h.writes.length,0);assert.equal(h.modelReads || 0,0);
+ // Only an explicit 게시 publishes; with the unsaved edit it saves and publishes it in one command.
+ h.click('publish');await flush();assert.deepEqual(h.writes.map(body=>[body.action,body.publication_state]),[['save_draft','published']]);assert.equal(h.writes[0].definition.nodes.j.instructions,'직접 고침');assert.equal(h.modelReads || 0,0);
+ // Publishing from a job's screen keeps that job open, as saving does.
+ assert.ok(h.forms['ew-author-node']);assert.equal(h.document.activeElement?.dataset.authorAction,'view_in_work');
 });
 test('removed additional settings preserve stored deadline notes on save',async()=>{const h=harness();h.workflows.get('w').draft.nodes.j.deadline_notes='기존 기한 메모';h.render();await h.node();assert.equal(c66Section(h,'advanced'),undefined);h.field('job_guidance','작업 안내');h.click('save');await flush();assert.equal(h.writes[0].definition.nodes.j.deadline_notes,'기존 기한 메모');assert.equal(h.writes[0].definition.nodes.j.instructions,'작업 안내');});
 
@@ -719,10 +763,10 @@ test('stored optional review metadata does not control publication',async()=>{
  // C66 retires summary review controls, not stored authoring_review decisions or server validation.
  const h=harness(),review={inputs:true,rules:true,unknown_review:{keep:true}};h.workflows.get('w').validation=null;h.workflows.get('w').draft.authoring_review=copy(review);h.render();
  assert.doesNotMatch(h.markup,/6개 중|data-author-action="summary_optional"|정해야 할 것/);
- assert.equal(h.fields.some(field=>field.name==='publication_state'&&!field.disabled),true);assert.equal(h.writes.length,0);
+ assert.equal(actionButton(h,'publish').disabled,false);assert.equal(h.writes.length,0);
  await h.node();h.field('result_block','item_verdict');await flush();assert.deepEqual(h.draft().definition.authoring_review,review);
  h.click('save');await flush();assert.deepEqual(h.writes.at(-1).definition.authoring_review,review);assert.equal(h.workflows.get('w').validation,null);
- h.field('publication_state','published','change');h.click('save');await flush();assert.equal(h.writes.at(-1).publication_state,'published');
+ h.click('publish');await flush();assert.equal(h.writes.at(-1).action,'publish_workflow');
  await h.open('q');await h.open('w');h.click('tab',{tab:'content'});await flush();assert.deepEqual(h.draft().definition.authoring_review,review);
 });
 test('C44 summary edits preserve stored schedule extensions without a mode editor',async()=>{
@@ -1311,9 +1355,10 @@ test('read-only judgment choices do not reveal mutation controls or change the d
 });
 test('A12 followup tab clicks and arrow keys focus the selected tab without changing the definition',async()=>{
  const h=harness(),before=h.draft();for(const tab of ['history','content']){h.click('tab',{tab});await flush();const selected=h.buttons.find(button=>button.dataset.authorAction==='tab'&&button.dataset.tab===tab);assert.equal(h.document.activeElement,selected);assert.equal(selected.getAttribute('aria-selected'),'true');}
- assert.deepEqual(h.buttons.filter(button=>button.dataset.authorAction==='tab').map(button=>button.dataset.tab),['content','history']);
- for(const [key,expected] of [['ArrowRight','history'],['ArrowRight','content'],['ArrowLeft','history'],['End','history'],['Home','content']]){h.designer.handleEvent({type:'keydown',key,target:h.document.activeElement});await flush();assert.equal(h.document.activeElement.dataset.tab,expected);}
- assert.deepEqual(h.draft(),before);assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);
+ assert.deepEqual(h.buttons.filter(button=>button.dataset.authorAction==='tab').map(button=>button.dataset.tab),['content','try','history']);
+ // Mock 21 revision 2: 시험해 보기 follows 업무 내용. An arrow key opens it and leaves the cursor on its tab.
+ for(const [key,expected] of [['ArrowRight','try'],['ArrowRight','history'],['ArrowRight','content'],['ArrowLeft','history'],['End','history'],['Home','content']]){h.designer.handleEvent({type:'keydown',key,target:h.document.activeElement});await flush();assert.equal(h.document.activeElement.dataset.tab,expected);}
+ assert.deepEqual(h.draft(),before);assert.equal(h.writes.length,0);assert.equal(h.operations.length,0);assert.deepEqual(h.tryWrites.map(body=>body.action),['try_open']);
 });
 test('A12 followup tool dialog close restores the new trigger after immediate or animated apply and cancel',async()=>{
  for(const immediate of [false,true])for(const kind of ['apply','cancel']){const h=harness();await c66SelectShared(h);const before=h.draft();await a12Open(h);h.modalField('data-job-tool-runtime','query',false,'change');h.modalField('data-job-tool-value','query','새 검색어');await h.modalClose(kind,{immediate});assert.equal(h.document.activeElement,actionButton(h,'job_tool_setup'));assert.equal(h.document.activeElement.isConnected,true);if(kind==='cancel')assert.deepEqual(h.draft(),before);else assert.deepEqual(h.draft().definition.nodes.j.argument_bindings.query,{constant:'새 검색어'});assert.equal(h.writes.length,0);}
@@ -1400,19 +1445,33 @@ test('late legacy tool details cannot overwrite a different tool owner context',
  assert.match(h.markup,/FDC 담당/);assert.doesNotMatch(h.markup,/EMS 담당|직접 실행 · 예외로 작성/);
 });
 
-test('published content and inline fields are refreshed with one Save',async()=>{
- const h=harness();h.workflows.get('w').published_version=2;h.render();assert.equal(h.draft().publication_state,'published');assert.match(h.markup,/>저장됨</);assert.doesNotMatch(h.markup,/data-author-action="(?:publish|unpublish)"/);
- h.click('edit_workflow');await flush();h.field('name','직접 저장');h.click('save');await flush();assert.equal(h.writes.length,1);assert.equal(h.writes[0].definition.name,'직접 저장');assert.equal(h.workflows.get('w').published_version,3);assert.equal(h.workflows.get('w').published.name,'직접 저장');assert.equal(h.draft().dirty,false);
- h.field('publication_state','unpublished','change');assert.equal(h.workflows.get('w').published_version,3);assert.equal(h.draft().dirty,true);h.click('save');await flush();assert.equal(h.workflows.get('w').published_version,null);assert.equal(h.draft().dirty,false);
+test('mock 21 T9: saving a published procedure keeps its version until 게시, and 게시 내림 sits in the menu',async()=>{
+ const h=harness(),record=h.workflows.get('w');record.published_version=2;record.published=copy(record.draft);record.versions=[{version:1,definition:copy(record.draft)},{version:2,definition:copy(record.draft)}];h.render();
+ assert.match(h.markup,/>저장됨</);assert.equal(actionButton(h,'publish').disabled,true);assert.match(h.markup,/>내용 확인<\/button><button type="button" data-author-action="unpublish" class="ew-author-link" data-mutation>게시 내림<\/button><\/div><\/details>/);
+ h.click('edit_workflow');await flush();h.field('name','직접 저장');h.click('save');await flush();
+ assert.equal(h.writes.length,1);assert.equal(h.writes[0].definition.name,'직접 저장');assert.equal(Object.hasOwn(h.writes[0],'publication_state'),false);assert.equal(record.published_version,2);assert.notEqual(record.published.name,'직접 저장');assert.equal(h.draft().dirty,false);
+ assert.match(h.markup,/<p class="ew-author-muted">EMS · 게시 v2 · 게시 안 한 변경 있음<\/p>/);assert.equal(actionButton(h,'publish').disabled,false);assert.equal(h.document.activeElement,actionButton(h,'publish'));
+ h.click('publish');await flush();
+ assert.equal(h.writes.at(-1).action,'publish_workflow');assert.equal(h.writes.at(-1).expected_revision,2);assert.equal(record.published_version,3);assert.equal(record.published.name,'직접 저장');
+ assert.match(h.markup,/<p class="ew-author-muted">EMS · 게시 v3<\/p>/);assert.match(h.markup,/>게시함 · 방금<button type="button" data-author-action="view_in_work" class="ew-text">업무에서 보기<\/button><\/small>/);assert.equal(h.document.activeElement?.dataset.authorAction,'view_in_work');
+ h.click('view_in_work');await flush();assert.deepEqual(h.navigations,[{mode:'work',tab:'overview',workflow_id:'w',run_id:'',job_id:'',stage_id:'',stage_overview:false}]);
+ h.click('unpublish');await flush();
+ assert.equal(h.writes.at(-1).action,'unpublish_workflow');assert.equal(h.writes.at(-1).expected_revision,3);assert.equal(record.published_version,null);
+ assert.match(h.markup,/<span class="ew-author-tag" data-state="draft">미게시<\/span>/);assert.match(h.markup,/<p class="ew-author-muted">EMS<\/p>/);assert.doesNotMatch(h.markup,/data-author-action="unpublish"|게시함 · 방금|role="status" class="ew-author-note"/);
+ assert.equal(h.details.find(item=>item.className==='ew-procedure-menu').open,false);assert.equal(h.document.activeElement?.tagName,'SUMMARY');
 });
 test('saving a new stage includes its inline name without a separate apply',async()=>{
  const h=harness();h.click('add_stage');await flush();h.field('name','미완성 단계');h.click('save');await flush();assert.equal(h.writes.length,1);assert.ok(Object.values(h.writes[0].definition.nodes).some(n=>n.name==='미완성 단계'));assert.equal(h.draft().dirty,false);
 });
-test('failed status save preserves both unsaved content and state for retry',async()=>{
- const h=harness();h.workflows.get('w').published_version=1;h.render();await h.node();h.field('job_guidance','미저장 안내');h.field('publication_state','unpublished','change');h.writeOverride=async()=>({ok:false,error:{code:'revision_conflict',message:'다른 담당자가 저장했습니다.'}});h.click('save');await flush();assert.equal(h.draft().revision,1);assert.equal(h.draft().dirty,true);assert.equal(h.draft().publication_state,'unpublished');assert.equal(h.draft().definition.nodes.j.instructions,'미저장 안내');assert.equal(h.workflows.get('w').published_version,1);await h.open('q');await h.open('w');assert.equal(h.draft().publication_state,'unpublished');h.writeOverride=null;h.click('save');await flush();assert.equal(h.writes.at(-1).expected_revision,1);assert.equal(h.workflows.get('w').published_version,null);assert.equal(h.draft().dirty,false);
+test('a failed save keeps the unsaved content for a retry and never changes the publication',async()=>{
+ const h=harness();h.workflows.get('w').published_version=1;h.render();await h.node();h.field('job_guidance','미저장 안내');h.writeOverride=async()=>({ok:false,error:{code:'revision_conflict',message:'다른 담당자가 저장했습니다.'}});h.click('save');await flush();
+ assert.equal(h.draft().revision,1);assert.equal(h.draft().dirty,true);assert.equal(h.draft().definition.nodes.j.instructions,'미저장 안내');assert.equal(h.workflows.get('w').published_version,1);
+ await h.open('q');await h.open('w');assert.equal(h.draft().dirty,true);h.writeOverride=null;h.click('save');await flush();
+ assert.equal(h.writes.at(-1).expected_revision,1);assert.equal(Object.hasOwn(h.writes.at(-1),'publication_state'),false);assert.equal(h.workflows.get('w').published_version,1);assert.equal(h.draft().dirty,false);
 });
-test('publication-only edits survive an external refresh and account reset clears them',async()=>{
- const h=harness();h.field('publication_state','published','change');h.workflows.get('w').revision=2;h.render();assert.equal(h.draft().revision,1);assert.equal(h.draft().dirty,true);assert.equal(h.draft().publication_state,'published');h.state.capabilities.actor_id='b';h.render();assert.equal(h.draft().publication_state,'unpublished');assert.equal(h.draft().dirty,false);
+test('unsaved edits survive an external refresh and an account reset clears them',async()=>{
+ const h=harness();await h.node();h.field('job_guidance','미저장 안내');h.workflows.get('w').revision=2;h.render();assert.equal(h.draft().revision,1);assert.equal(h.draft().dirty,true);
+ h.state.capabilities.actor_id='b';h.render();assert.equal(h.draft().dirty,false);assert.doesNotMatch(h.markup,/미저장 안내/);
 });
 
 // Tools phase 1: global, non-executable code drafts use the operations contract.
@@ -1925,13 +1984,15 @@ test('an empty managed system can create the Confluence guide from its template 
 // Design mock 17 revision 2, step 1 (docs/mockups/ees-work/TASK.md#workspace-product-step1-20261116).
 test('workspace procedure list is one table with a count and no second title or description',async()=>{
  const h=harness();
- h.state.workflows=[{id:'w',name:'배포 산출물 점검',system_id:'EMS',category:'ops',published_version:3,draft:{definition:{...definition('w'),description:'정기 배포 전 문서를 확인하는 업무'}}},
-  {id:'q',name:'설비 알람 처리',system_id:'EMS',category:'incident',published_version:null,draft:{definition:definition('q')}}];
+ // The editor's list shows each saved draft; the team's list shows the published version (mock 21 rule 1).
+ h.state.workflows=[{id:'w',name:'게시된 이름',system_id:'EMS',category:'setup',published_version:3,draft:{definition:{...definition('w'),name:'배포 산출물 점검',description:'정기 배포 전 문서를 확인하는 업무'}}},
+  {id:'q',name:'설비 알람 처리',system_id:'EMS',category:'incident',published_version:null,draft:{definition:{...definition('q'),name:'설비 알람 처리',category:'incident'}}}];
  await h.open('');
  assert.match(h.markup,/<h2 class="ew-list-count">2개<\/h2>/);
  assert.match(h.markup,/class="ew-list-thead"[^>]*><span>이름<\/span><span>분류<\/span><span>단계 · 작업<\/span><span>게시<\/span>/);
  assert.match(h.markup,/<strong>배포 산출물 점검<\/strong><small>정기 배포 전 문서를 확인하는 업무<\/small><\/span><span class="ew-list-cell">운영<\/span><span class="ew-list-cell">단계 1 · 작업 1<\/span><span class="ew-author-tag" data-state="published">게시<\/span>/);
  assert.match(h.markup,/<strong>설비 알람 처리<\/strong><\/span><span class="ew-list-cell">장애대응<\/span><span class="ew-list-cell">단계 1 · 작업 1<\/span><span class="ew-author-tag" data-state="draft">미게시<\/span>/);
+ assert.doesNotMatch(h.markup,/게시된 이름/);h.field('ew-author-search','배포');assert.match(h.markup,/2개 중 1개/);h.field('ew-author-search','');
  // The header band names the menu; the list repeats neither that name nor what the screen is for.
  assert.doesNotMatch(h.markup,/워크플로우|에서 사용할 업무를 작성합니다|미완성이어도/);
  assert.ok(h.markup.indexOf('data-author-action="create"')<h.markup.indexOf('class="ew-author-list"'),'the new-procedure button sits in the search row');
@@ -1973,20 +2034,23 @@ test('an opened API shows what is sent beside what comes back and editing keeps 
 });
 
 // First-user flow (2026-11-18, mock 18 revision 2): the next step is a visible control, not a sentence.
-test('first-user: the save button says what saving does to the publication state',async()=>{
- const h=harness(),label=()=>h.markup.match(/<button\b[^>]*data-author-action="save"[^>]*>([^<]*)<\/button>/)[1];
- assert.equal(label(),'저장');assert.equal(actionButton(h,'save').disabled,true);
- h.field('publication_state','published','change');assert.equal(actionButton(h,'save').textContent,'저장 · 게시');assert.equal(actionButton(h,'save').disabled,false);
- h.render();assert.equal(label(),'저장 · 게시');
- h.field('publication_state','unpublished','change');h.render();assert.equal(label(),'저장');assert.equal(h.writes.length,0);
+test('first-user: 저장 and 게시 are separate buttons and only one of them is the main button',async()=>{
+ const h=harness(),buttons=()=>[...h.markup.matchAll(/<button\b[^>]*data-author-action="(save|publish)"[^>]*>([^<]*)<\/button>/g)].map(match=>[match[1],match[2],/ew-primary/.test(match[0])]);
+ assert.deepEqual(buttons(),[['save','저장',false],['publish','게시',false]]);assert.equal(actionButton(h,'save').disabled,true);assert.equal(actionButton(h,'publish').disabled,false);
+ await h.node();h.field('job_guidance','고친 안내');
+ // While typing the footer changes in place: 저장 becomes the main button, 게시 stays a second one.
+ assert.equal(actionButton(h,'save').classList.contains('ew-primary'),true);assert.equal(actionButton(h,'publish').classList.contains('ew-primary'),false);assert.equal(actionButton(h,'save').disabled,false);assert.equal(actionButton(h,'publish').disabled,false);
+ h.render();assert.deepEqual(buttons(),[['save','저장',true],['publish','게시',false]]);assert.equal(h.writes.length,0);
 });
-test('first-user: the publication state sits in the title row and the first card holds only name and purpose',async()=>{
+test('first-user: the publication mark sits in the title row and the first card holds only name and purpose',async()=>{
  const h=harness();installDefinition(h,stagedDefinition(1,1));
- const head=h.markup.match(/<div class="ew-author-heading"><h2>[\s\S]*?<details class="ew-procedure-menu">/)[0];assert.match(head,/<select id="ew-publication-state"/);
+ const head=h.markup.match(/<div class="ew-author-heading"><h2>[\s\S]*?<details class="ew-procedure-menu">/)[0];assert.match(head,/<span class="ew-author-tag" data-state="draft">미게시<\/span>/);assert.doesNotMatch(head,/<select/);
  const info=h.markup.match(/<form class="ew-procedure-info"[\s\S]*?<\/form>/)[0];
  assert.doesNotMatch(info,/publication/);assert.match(info,/업무 목적<textarea/);assert.match(info,/>분류·범위<\/button>/);
- assert.equal([...h.markup.matchAll(/id="ew-publication-state"/g)].length,1);assert.doesNotMatch(h.markup,/게시본 없음|업무 설명|분류·수행 범위|판정 규칙<\/button>/);assert.doesNotMatch(h.markup,/>판정 단어<\/button>/);
- h.click('stage_toggle',{id:'t0'});h.click('node',{id:'j0-0'});await flush();assert.ok(h.forms['ew-author-node']);assert.equal([...h.markup.matchAll(/id="ew-publication-state"/g)].length,1);
+ const marks=()=>[...h.markup.matchAll(/data-state="draft">미게시</g)].length;
+ assert.equal(marks(),1);assert.doesNotMatch(h.markup,/id="ew-publication-state"|게시본 없음|업무 설명|분류·수행 범위|판정 규칙<\/button>/);assert.doesNotMatch(h.markup,/>판정 단어<\/button>/);
+ assert.deepEqual([...h.markup.matchAll(/data-author-action="tab" data-tab="([^"]+)" role="tab"[^>]*>([^<]*)</g)].map(match=>[match[1],match[2]]),[['content','업무 내용'],['try','시험해 보기'],['history','게시 기록']]);
+ h.click('stage_toggle',{id:'t0'});h.click('node',{id:'j0-0'});await flush();assert.ok(h.forms['ew-author-node']);assert.equal(marks(),1);
 });
 test('first-user: a new procedure shows its scope as a chip and puts the add button first',async()=>{
  const h=harness();await beginCreation(h);const form=h.markup.match(/<form id="ew-procedure-create"[\s\S]*?<\/form>/)[0];
@@ -2014,6 +2078,17 @@ test('first-user: the global task name persists across tabs, can be cancelled, a
  h.click('loose_cancel');await flush();assert.equal(h.host.querySelector(looseInput).value,'');assert.equal(actionButton(h,'save').disabled,true);
  formName(h,'ew-loose-job-editor','저장할 작업');h.click('save');await flush();
  assert.equal(h.writes.length,2);assert.deepEqual(Object.values(h.writes[1].definition.nodes).filter(node=>node.type==='j').map(node=>node.name),['저장할 작업']);
+});
+// Aligned to main's 저장/게시 and 시험해 보기 (2026-11-24): both save first, so a typed task name goes with them as with 저장.
+test('task list on main: a typed task name is added before 게시 and before entering 시험해 보기',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(0));const names=body=>Object.values(body.definition.nodes).filter(node=>node.type==='j').map(node=>node.name);
+ formName(h,'ew-loose-job-editor','게시할 작업');assert.equal(actionButton(h,'save').classList.contains('ew-primary'),true);
+ h.click('publish');await flush();
+ assert.equal(h.writes.length,1);assert.equal(h.writes[0].publication_state,'published');assert.deepEqual(names(h.writes[0]),['게시할 작업']);
+ assert.equal(h.host.querySelector(looseInput).value,'');
+ formName(h,'ew-loose-job-editor','시험할 작업');h.click('tab',{tab:'try'});await flush();
+ assert.equal(h.writes.length,2);assert.equal(h.writes[1].publication_state,undefined);assert.deepEqual(names(h.writes[1]),['게시할 작업','시험할 작업']);
+ assert.match(h.markup,/data-author-tab="try"/);assert.deepEqual(h.tryWrites.map(body=>body.action),['try_open']);
 });
 
 // Check items (2026-11-18): a person's check list is written where the job is edited.
@@ -2048,4 +2123,451 @@ test('check items: going back to 한 번에 확인 hides the list and keeps what
  assert.deepEqual(h.fields.filter(f=>f.name==='check_item_name').map(f=>f.value),['하나','둘','']);assert.equal(h.draft().dirty,false);
  const once=h.fields.find(f=>f.name==='result_block'&&f.value==='human_confirm');h.fields.filter(f=>f.name==='result_block').forEach(f=>{f.checked=f===once;});h.designer.handleEvent({type:'change',target:once});
  assert.equal(h.fields.some(f=>f.name==='check_item_name'),false);assert.equal(h.draft().definition.nodes.j.result_block,'human_confirm');assert.deepEqual(h.draft().definition.nodes.j.confirmation_items,value.nodes.j.confirmation_items);
+});
+
+// ---- 시험해 보기 (2026-11-20, design mock 21 revision 2; docs/mockups/ees-work/TASK.md#try-before-publish-implementation-20261124) ----
+// A procedure like the mock's: a checklist job and an API tool job that asks for a page ID.
+function tryDefinition(){
+ const value=definition();delete value.nodes.j;value.nodes.t.name='점검';value.nodes.t.children=['checks','doc'];
+ value.nodes.checks={id:'checks',type:'j',parent:'t',children:[],deps:[],name:'설비 세 곳 점검',instructions:'펌프, 밸브, 배관을 차례로 봅니다.',mode:'human',inputs:[],result_block:'checklist',human_confirmation:true,confirmation_items:[{id:'i1',name:'펌프 누수 없음'},{id:'i2',name:'밸브 개폐 정상'}]};
+ value.nodes.doc={id:'doc',type:'j',parent:'t',children:[],deps:[],name:'점검 기준 문서 찾기',instructions:'점검 기준 문서의 페이지 ID를 넣습니다.',mode:'tool',api_binding:{operation_id:'guide-confluence-page',version:1,inputs:{id:{input:'page_id'}},outputs:['title']},inputs:[{id:'page_id',name:'페이지 ID',type:'text',scope:'run',required:true}],result_block:'human_confirm',human_confirmation:true};
+ return value;
+}
+const tryCatalog=()=>({apis:[{id:'guide-confluence-page',service_id:'confluence-readonly-pilot',name:'Confluence 페이지 조회',method:'GET',url:'/{id}',version:1,state:'active',can_use:true,inputs:[{name:'id',in:'path',type:'string',required:true,label:'페이지 ID'}],fields:[{path:'title',type:'string',label:'문서 제목'}],result_path:''}],services:[{id:'confluence-readonly-pilot',name:'사내 Confluence'}],can_manage:true});
+function tryHarness(options={},value=tryDefinition()){const h=harness(options);installDefinition(h,value);return h;}
+async function enterTry(h){h.click('tab',{tab:'try'});await flush();await flush();}
+const tryMarkup=h=>h.markup.match(/<div class="ew-vd ew-try-rows" id="ew-try">[\s\S]*?<\/div><footer>/)?.[0] || '';
+// One row of the try, up to the next row, stage heading, closing line or menu (rows hold sections of their own).
+function rowMarkup(h,id){const start=h.markup.indexOf('<section class="ew-vd-entry ew-center-task-row" data-key="stage-job-'+id+'"');if(start<0)return '';const ends=['<section class="ew-vd-entry','<div class="ew-center-task-heading','<p class="ew-try-done"','<div id="ees-stage-verdict-menu"','</div></div><footer>'].map(mark=>h.markup.indexOf(mark,start+1)).filter(at=>at>0);return h.markup.slice(start,Math.min(...ends));}
+const tryControl=(h,action,job)=>h.buttons.find(button=>button.attributes['data-action']===action&&(job===undefined||button.attributes['data-job-id']===job));
+const tryBox=(h,item)=>h.fields.find(field=>Object.hasOwn(field.attributes,'data-stage-check')&&field.attributes['data-item-id']===item);
+const tryInput=(h,job,field)=>h.fields.find(item=>item.id==='ew-stage-'+job+'-'+field);
+async function tryTick(h,item){const box=tryBox(h,item);assert.ok(box,'check item '+item);box.focus();box.checked=true;h.designer.handleEvent({type:'change',target:box});await flush();await flush();}
+async function tryPress(h,control){assert.ok(control,'try control');control.focus();h.designer.handleEvent({type:'click',target:control});await flush();await flush();}
+function tryType(h,job,field,value){const input=tryInput(h,job,field);assert.ok(input,'field '+field);input.focus();input.value=value;h.designer.handleEvent({type:'input',target:input});return input;}
+async function tryEnter(h,input){h.designer.handleEvent({type:'keydown',key:'Enter',target:input,preventDefault(){}});await flush();await flush();}
+const tryClock=value=>new Intl.DateTimeFormat('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(value));
+const sessionStore=()=>{const values=new Map();return {values,getItem:key=>values.has(key)?values.get(key):null,setItem:(key,value)=>{values.set(key,String(value));},removeItem:key=>{values.delete(key);}};};
+
+test('mock 21: 시험해 보기 is the second tab for authors only and draws the work rows with its bar',async()=>{
+ const h=tryHarness();await enterTry(h);
+ assert.match(h.markup,/data-author-tab="try"/);assert.deepEqual(h.tryWrites.map(body=>body.action),['try_open']);
+ const view=tryMarkup(h),saved=tryClock(h.workflows.get('w').draft_saved_at);
+ assert.match(view,new RegExp('^<div class="ew-vd ew-try-rows" id="ew-try"><div class="ew-try-bar" id="ew-try-bar" role="status"><span class="ew-try-tag">시험</span><span>팀에 안 보임</span><small>'+saved+' 저장본</small></div>'));
+ assert.match(view,/<div class="ew-center-task-heading ew-stage-summary"><h3>1 점검<\/h3><span class="ew-stage-completed">0 \/ 2 완료<\/span><div class="ew-center-counts"><span><i class="ew-vd-dot" data-verdict="none"><\/i>확인 필요 1<\/span><span><i class="ew-vd-dot" data-verdict="none"><\/i>실행 필요 1<\/span><\/div><\/div><div class="ew-vd-body ew-center-task-list"><section/);
+ // The work screen's rows, without its way to the job screen, with 고치기 at the end of each row.
+ assert.doesNotMatch(view,/data-action="job"|자세히|처음부터|모두 적합|ew-try-changed/);
+ assert.match(rowMarkup(h,'checks'),/<button type="button" class="ew-vd-name">설비 세 곳 점검<\/button>/);
+ assert.match(rowMarkup(h,'checks'),/<\/div><button type="button" data-author-action="try_fix" data-id="checks" class="ew-try-fix" aria-label="설비 세 곳 점검 고치기">고치기<\/button><\/div><\/div><ol class="ew-vd-checks"/);
+ assert.match(rowMarkup(h,'doc'),/data-expanded="true"/);assert.match(rowMarkup(h,'doc'),/<label for="ew-stage-doc-page_id">페이지 ID<\/label>/);
+ // Not started: the cursor is on the first item to tick.
+ assert.equal(h.document.activeElement,tryBox(h,'i1'));
+ const reader=harness();reader.state.capabilities.can_author=false;reader.state.capabilities.managed_systems=[];reader.state.workflow.can_manage=false;reader.render();
+ assert.doesNotMatch(reader.markup,/data-tab="try"/);reader.click('tab',{tab:'try'});await flush();assert.equal(reader.tryReads.length,0);assert.doesNotMatch(reader.markup,/id="ew-try"/);
+});
+
+test('mock 21: entering 시험해 보기 with unsaved edits saves the draft first and opens only when that worked',async()=>{
+ const h=tryHarness();await h.node('checks');h.field('job_guidance','먼저 저장할 안내');
+ h.writeOverride=async()=>({ok:false,error:{code:'revision_conflict',message:'다른 담당자가 저장했습니다.'}});
+ await enterTry(h);
+ assert.equal(h.writes.length,1);assert.equal(h.writes[0].action,'save_draft');assert.equal(Object.hasOwn(h.writes[0],'publication_state'),false);
+ assert.match(h.markup,/data-author-tab="content"/);assert.equal(h.tryReads.length,0);assert.equal(h.tryWrites.length,0);assert.equal(h.draft().dirty,true);
+ h.writeOverride=null;await enterTry(h);
+ assert.equal(h.writes.length,2);assert.match(h.markup,/data-author-tab="try"/);assert.equal(h.draft().dirty,false);
+ assert.deepEqual(h.tryWrites.map(body=>body.action),['try_open']);assert.equal([...h.tries.values()][0].definition.nodes.checks.instructions,'먼저 저장할 안내');
+});
+
+test('mock 21: a try is read and written only with this window key, kept per window and account, never through editor commands',async()=>{
+ const session=sessionStore(),h=tryHarness({sessionStorage:session});await enterTry(h);
+ const stored=JSON.parse(session.values.get('ees.work.try.window')),key=stored.key;
+ assert.equal(stored.actor,'a');assert.match(key,/^[!-~]{16,256}$/);
+ assert.ok(h.tryReads.length>=2&&h.tryReads.every(body=>body.try_window===key&&body.workflow_id==='w'&&body.system_id==='EMS'&&body.factory_id===''));
+ await tryTick(h,'i1');const run=[...h.tries.values()][0],tick=h.tryWrites.at(-1);
+ assert.deepEqual({path:tick.path,action:tick.action,run_id:tick.run_id,job_id:tick.job_id,item_id:tick.item_id,try_window:tick.try_window,expected_revision:tick.expected_revision},{path:'workspace/command',action:'human_confirm',run_id:run.id,job_id:'checks',item_id:'i1',try_window:key,expected_revision:1});
+ assert.equal(h.writes.length,0,'no editor command carries the try');assert.doesNotMatch(JSON.stringify(h.selection),/try/);
+ // The same window after a reload keeps its key; another account in this window gets its own.
+ const again=tryHarness({sessionStorage:session});await enterTry(again);assert.equal(again.tryReads[0].try_window,key);
+ const other=harness({sessionStorage:session});other.state.capabilities.actor_id='b';other.render();installDefinition(other,tryDefinition());await enterTry(other);assert.notEqual(other.tryReads[0].try_window,key);
+ // A browser without session storage keeps the key in memory for the window's life.
+ const plain=tryHarness();await enterTry(plain);const memory=plain.tryReads[0].try_window;assert.match(memory,/^[!-~]{16,256}$/);plain.designer.refreshTry();await flush();assert.ok(plain.tryReads.every(body=>body.try_window===memory));
+});
+
+test('mock 21: ticks, a run and verdicts follow the cursor rules; 모두 적합 makes 게시 the main button',async()=>{
+ const h=tryHarness();await enterTry(h);
+ await tryTick(h,'i1');assert.equal(h.document.activeElement,tryBox(h,'i2'));
+ await tryTick(h,'i2');assert.match(rowMarkup(h,'checks'),/<i class="ew-vd-dot" data-verdict="ok"><\/i><span>완료<\/span>/);
+ // The next job's empty field, its row open under it.
+ const page=tryInput(h,'doc','page_id');assert.equal(h.document.activeElement,page);
+ tryType(h,'doc','page_id','123456789');await tryEnter(h,page);
+ assert.deepEqual(h.tryWrites.slice(-2).map(body=>[body.action,body.path]),[['save_inputs','workspace/command'],['execute_job','operations']]);assert.deepEqual(h.tryWrites.at(-2).inputs,{page_id:'123456789'});assert.equal(h.tryWrites.at(-1).job_id,'doc');
+ assert.match(rowMarkup(h,'doc'),/<section data-stage-result><h4>결과/);assert.match(rowMarkup(h,'doc'),/주간 설비 점검 기준/);
+ const pick=tryControl(h,'stage_verdict','doc');assert.equal(h.document.activeElement,pick,'after a result the verdict control has the cursor');
+ // The product's verdict menu inside the try's frame, with arrow keys, Escape back to its control.
+ await tryPress(h,pick);assert.match(tryMarkup(h),/<div id="ees-stage-verdict-menu" class="ew-vd-menu" role="menu" data-job-id="doc"/);
+ const options=()=>h.buttons.filter(button=>button.attributes.role==='menuitemradio');assert.equal(h.document.activeElement,options()[0]);
+ for(const [key,index] of [['ArrowDown',1],['End',2],['ArrowDown',0],['ArrowUp',2],['Home',0]]){h.designer.handleEvent({type:'keydown',key,target:h.document.activeElement});await flush();assert.equal(h.document.activeElement,options()[index],key);}
+ assert.deepEqual(copy(h.designer.handleEvent({type:'keydown',key:'Escape',target:h.document.activeElement})),{handled:true,preventDefault:true});await flush();
+ assert.doesNotMatch(tryMarkup(h),/id="ees-stage-verdict-menu"/);assert.equal(h.document.activeElement,tryControl(h,'stage_verdict','doc'));
+ // Tab out of the menu closes it and lets the browser move on from the control.
+ await tryPress(h,tryControl(h,'stage_verdict','doc'));assert.deepEqual(copy(h.designer.handleEvent({type:'keydown',key:'Tab',target:h.document.activeElement})),{handled:true,preventDefault:false});await flush();
+ assert.doesNotMatch(tryMarkup(h),/id="ees-stage-verdict-menu"/);assert.equal(h.document.activeElement,tryControl(h,'stage_verdict','doc'));
+ // 미흡 stays on the control so it can be changed (rule 10).
+ await tryPress(h,tryControl(h,'stage_verdict','doc'));await tryPress(h,options().find(button=>button.attributes['data-verdict']==='failed'));
+ assert.equal(h.tryWrites.at(-1).action,'decide');assert.equal(h.tryWrites.at(-1).verdict,'failed');assert.equal(h.tryWrites.at(-1).result_revision,1);
+ assert.match(rowMarkup(h,'doc'),/<button type="button" class="ew-vd-pick" data-action="stage_verdict" data-job-id="doc" data-verdict="bad"[^>]*><i class="ew-vd-dot" data-verdict="bad"><\/i><span>미흡<\/span>/);assert.equal(h.document.activeElement,tryControl(h,'stage_verdict','doc'));
+ assert.doesNotMatch(tryMarkup(h),/모두 적합/);
+ await tryPress(h,tryControl(h,'stage_verdict','doc'));await tryPress(h,options().find(button=>button.attributes['data-verdict']==='completed'));
+ assert.equal(h.tryWrites.at(-1).verdict,'completed');assert.equal([...h.tries.values()][0].jobs.doc.decisions.length,1,'the try replaced the decision');
+ assert.match(tryMarkup(h),/<\/div><p class="ew-try-done" role="status" tabindex="-1"><i class="ew-vd-dot" data-verdict="ok"><\/i>모두 적합<\/p>/);assert.match(tryMarkup(h),/<span class="ew-stage-completed">2 \/ 2 완료<\/span>/);
+ assert.match(h.markup,/data-author-action="publish" data-mutation class="ew-primary">게시<\/button>/);assert.doesNotMatch(h.markup,/data-author-action="save" data-mutation class="ew-primary"/);
+ assert.equal(h.document.activeElement,actionButton(h,'publish'),'at the end the cursor is on 게시');
+ assert.equal(h.writes.length,0);
+});
+
+test('mock 21 rule 9: a value typed after a result hides the result and the verdict and asks for another run',async()=>{
+ const h=tryHarness();await enterTry(h);await tryTick(h,'i1');await tryTick(h,'i2');tryType(h,'doc','page_id','123');await tryPress(h,tryControl(h,'stage_execute','doc'));
+ assert.ok(tryControl(h,'stage_verdict','doc'));assert.match(rowMarkup(h,'doc'),/data-stage-result/);
+ tryType(h,'doc','page_id','1234');
+ assert.equal(tryControl(h,'stage_verdict','doc'),undefined);assert.doesNotMatch(rowMarkup(h,'doc'),/data-stage-result/);assert.match(rowMarkup(h,'doc'),/<span>다시 실행<\/span>/);assert.match(rowMarkup(h,'doc'),/<span class="ew-vd-state" data-decision-status><span>실행 필요<\/span><\/span>/);
+ assert.equal(h.document.activeElement,tryInput(h,'doc','page_id'),'the field in use keeps the cursor');
+ tryType(h,'doc','page_id','123');assert.ok(tryControl(h,'stage_verdict','doc'));assert.match(rowMarkup(h,'doc'),/data-stage-result/);
+});
+
+test('mock 21 T10 T11: failures are said under their row, counted by what went wrong and never on the top error line',async()=>{
+ const h=tryHarness();h.state.operations={...(h.state.operations || {}),api_catalog:tryCatalog()};h.render();await enterTry(h);
+ tryType(h,'doc','page_id','123456789');
+ h.tryExecute=()=>({thrown:{code:'api_auth_required',message:'사용자별 인증 헤더가 없습니다.'}});await tryPress(h,tryControl(h,'stage_execute','doc'));
+ assert.match(rowMarkup(h,'doc'),/<div class="ew-vd-tool-detail" data-stage-values data-job-id="doc"><div class="ew-try-problem" role="alert"><strong>사내 Confluence에 연결되어 있지 않아요<\/strong><small>운영자가 Workflow 서버에서 연결을 설정해야 해요.<\/small><\/div><section><h4>입력<\/h4>/);
+ assert.match(tryMarkup(h),/<i class="ew-vd-dot" data-verdict="none"><\/i>연결 안 됨 1<\/span>/);assert.match(rowMarkup(h,'doc'),/<span>연결 안 됨<\/span>/);
+ assert.doesNotMatch(h.markup,/ew-author-error|사용자별 인증 헤더/);assert.doesNotMatch(h.markup,/연결 설정 열기/);
+ // A recorded 404: the field's own name, and one way back to it with its value selected.
+ h.tryExecute=()=>({http_status:404});tryType(h,'doc','page_id','99999');await tryPress(h,tryControl(h,'stage_execute','doc'));
+ assert.match(rowMarkup(h,'doc'),/<div class="ew-try-problem" role="alert"><strong>이 페이지 ID의 문서를 열 수 없어요<\/strong><small>없는 문서이거나 볼 권한이 없어요.<\/small><button type="button" data-author-action="try_refix" data-id="doc" data-field="page_id">페이지 ID 고치기<\/button><\/div>/);
+ assert.match(tryMarkup(h),/열 수 없음 1<\/span>/);assert.doesNotMatch(tryMarkup(h),/연결 안 됨/);assert.match(rowMarkup(h,'doc'),/<span>다시 실행<\/span>/);
+ const refix=h.buttons.find(button=>button.dataset.authorAction==='try_refix');assert.equal(h.document.activeElement,refix,'after the failure its one action has the cursor');
+ h.click('try_refix',{id:'doc'});await flush();assert.equal(h.document.activeElement,tryInput(h,'doc','page_id'));assert.equal(h.selected,tryInput(h,'doc','page_id'));
+ // Anything else keeps the product's word and says the server's line.
+ h.tryExecute=()=>({thrown:{code:'execution_failed',message:'도구가 응답하지 않았습니다.'}});await tryPress(h,tryControl(h,'stage_execute','doc'));
+ assert.match(rowMarkup(h,'doc'),/<div class="ew-try-problem" role="alert"><strong>실행하지 못했어요<\/strong><small>도구가 응답하지 않았습니다.<\/small><\/div>/);assert.doesNotMatch(tryMarkup(h),/열 수 없음|연결 안 됨/);
+ // Another service's API: plain words for a value that found nothing.
+ const inventory=tryDefinition();inventory.nodes.doc.api_binding.operation_id='inventory-read';
+ const other=tryHarness({},inventory);await enterTry(other);tryType(other,'doc','page_id','1');other.tryExecute=()=>({http_status:403});await tryPress(other,tryControl(other,'stage_execute','doc'));
+ assert.match(rowMarkup(other,'doc'),/<strong>이 값으로 찾을 수 없어요<\/strong><small>없거나 볼 권한이 없어요.<\/small><button type="button" data-author-action="try_refix"/);
+ // Without the catalog a guide API still names Confluence.
+ const bare=tryHarness();await enterTry(bare);tryType(bare,'doc','page_id','1');bare.tryExecute=()=>({thrown:{code:'api_service_unconfigured',message:'설정 없음'}});await tryPress(bare,tryControl(bare,'stage_execute','doc'));
+ assert.match(rowMarkup(bare,'doc'),/<strong>Confluence에 연결되어 있지 않아요<\/strong>/);
+});
+
+test('mock 21 T5 T8: a save from this window starts a new try with 바뀜 and the typed values; a save elsewhere is announced',async()=>{
+ const h=tryHarness();await enterTry(h);await tryTick(h,'i1');tryType(h,'doc','page_id','123456789');await tryPress(h,tryControl(h,'stage_execute','doc'));
+ const first=[...h.tries.values()][0].id;assert.match(tryMarkup(h),/data-author-action="try_reset" class="ew-text">처음부터<\/button>/);
+ // T4 → T5: fix the check list in the editor, then try again; 시험해 보기 saves first and starts over.
+ h.click('try_fix',{id:'checks'});await flush();h.field('ew-check-item-2','압력계 수치 정상');await enterTry(h);
+ assert.deepEqual(h.writes.map(body=>body.action),['save_draft']);assert.deepEqual(h.tryWrites.map(body=>body.action).slice(-1),['try_restart']);
+ const second=[...h.tries.values()][0];assert.notEqual(second.id,first);assert.deepEqual(second.try.changed,['checks']);
+ assert.match(rowMarkup(h,'checks'),/<button type="button" class="ew-vd-name">설비 세 곳 점검<span class="ew-try-changed">바뀜<\/span><\/button>/);assert.doesNotMatch(rowMarkup(h,'doc'),/바뀜/);
+ assert.equal(tryInput(h,'doc','page_id').value,'123456789','values typed in this window fill the new try');
+ assert.match(tryMarkup(h),new RegExp('<small>'+tryClock(h.workflows.get('w').draft_saved_at)+' 저장본</small></div>'));assert.equal(h.document.activeElement,tryBox(h,'i1'));
+ await tryTick(h,'i1');assert.doesNotMatch(rowMarkup(h,'checks'),/바뀜/,'바뀜 goes once the row has a result');
+ // T8: another window saves; this window's try stays and says so.
+ const record=h.workflows.get('w');record.draft.nodes.checks.confirmation_items.push({id:'i4',name:'오일 누유 없음'});record.revision++;record.draft_saved_at='2026-11-20T02:50:00Z';h.render();h.designer.refreshTry();await flush();await flush();
+ assert.equal([...h.tries.values()][0].id,second.id);assert.match(tryMarkup(h),new RegExp('<span class="ew-try-note">새 저장본 있음 · '+tryClock('2026-11-20T02:50:00Z')+'</span><button type="button" data-author-action="try_reset" class="ew-text">새 저장본으로 처음부터</button></div>'));
+ h.click('try_reset');await flush();await flush();
+ const third=[...h.tries.values()][0];assert.notEqual(third.id,second.id);assert.equal(third.definition.nodes.checks.confirmation_items.length,4);assert.doesNotMatch(tryMarkup(h),/새 저장본 있음/);assert.equal(h.dialogHistory?.length||0,0);assert.equal(h.document.activeElement,tryBox(h,'i1'));
+});
+
+test('mock 21: 처음부터 needs no reason, and while a job runs its control keeps the cursor and the reset waits',async()=>{
+ const h=tryHarness();await enterTry(h);assert.doesNotMatch(tryMarkup(h),/try_reset/);
+ await tryTick(h,'i1');assert.match(tryMarkup(h),/>처음부터<\/button>/);
+ h.click('try_reset');await flush();await flush();assert.equal(h.tryWrites.at(-1).action,'try_restart');assert.doesNotMatch(tryMarkup(h),/try_reset/);assert.equal(h.document.activeElement,tryBox(h,'i1'));assert.equal(h.dialogHistory?.length||0,0);
+ await tryTick(h,'i1');tryType(h,'doc','page_id','123');
+ const pending=deferred();h.tryOverride=(path,body)=>body.action==='execute_job'?pending.promise:undefined;
+ const run=tryControl(h,'stage_execute','doc');run.focus();h.designer.handleEvent({type:'click',target:run});await flush();
+ const held=tryControl(h,'stage_execute','doc');assert.match(rowMarkup(h,'doc'),/aria-label="점검 기준 문서 찾기 실행 중" aria-disabled="true"><svg/);assert.equal(held.mutation,false);assert.equal(held.disabled,false);
+ assert.equal(h.document.activeElement,held);assert.match(tryMarkup(h),/data-author-action="try_reset" class="ew-text" aria-disabled="true">처음부터<\/button>/);assert.equal(h.designer.tryActive(),true);
+ const writes=h.tryWrites.length;h.click('try_reset');await flush();h.designer.handleEvent({type:'click',target:held});await flush();assert.equal(h.tryWrites.length,writes);
+ h.tryOverride=null;pending.resolve({ok:true,attempt:{id:'x'}});await flush();await flush();assert.equal(h.designer.tryActive(),false);
+});
+
+test('mock 21 T4: 고치기 opens the job editor with the cursor where that fix is made',async()=>{
+ const value=tryDefinition();value.nodes.t.children.push('legacy','person');
+ value.nodes.legacy={id:'legacy',type:'j',parent:'t',children:[],deps:[],name:'예전 도구 작업',mode:'tool',inputs:[],result_block:'human_confirm'};
+ value.nodes.person={id:'person',type:'j',parent:'t',children:[],deps:[],name:'담당자 확인',mode:'human',inputs:[],result_block:'human_confirm',human_confirmation:true};
+ const legacy=tryHarness({},value);await enterTry(legacy);
+ legacy.click('try_fix',{id:'checks'});await flush();assert.match(legacy.markup,/data-author-tab="content" data-author-detail="true"/);assert.equal(legacy.document.activeElement?.id,'ew-check-item-2');
+ await enterTry(legacy);legacy.click('try_fix',{id:'legacy'});await flush();assert.equal(legacy.document.activeElement?.dataset.authorAction,'job_tool_setup');
+ await enterTry(legacy);legacy.click('try_fix',{id:'person'});await flush();assert.equal(legacy.document.activeElement?.name,'name');
+ const api=harness({legacyToolAuthoring:false});api.state.operations={api_catalog:tryCatalog()};api.render();installDefinition(api,tryDefinition());await enterTry(api);
+ api.click('try_fix',{id:'doc'});await flush();assert.equal(api.document.activeElement?.dataset.authorAction,'job_api_setup');
+ // A job the editor no longer has cannot be fixed from the try.
+ const gone=tryHarness();await enterTry(gone);delete gone.workflows.get('w').draft.nodes.doc;gone.workflows.get('w').draft.nodes.t.children=['checks'];gone.render();gone.designer.refreshTry();await flush();
+ assert.doesNotMatch(rowMarkup(gone,'doc'),/try_fix/);assert.match(rowMarkup(gone,'checks'),/try_fix/);
+});
+
+test('mock 21: a procedure that cannot be tried yet says why under the bar with one way back to 업무 내용',async()=>{
+ const h=tryHarness();h.tryOverride=(path,body)=>body.action==='try_open'?Promise.reject(Object.assign(new Error('실행 전에 업무절차를 보완해 주세요.\ndoc: 도구가 연결되지 않았습니다.'),{code:'execution_not_ready'})):undefined;
+ await enterTry(h);
+ assert.match(tryMarkup(h),/<\/div><div class="ew-try-problem" role="alert"><strong>시험을 시작할 수 없어요<\/strong><small>실행 전에 업무절차를 보완해 주세요.<\/small><small>doc: 도구가 연결되지 않았습니다.<\/small><button type="button" data-author-action="try_edit"\s*>업무 내용에서 고치기<\/button><\/div><\/div>/);
+ assert.doesNotMatch(h.markup,/ew-author-error|ew-center-task-row/);
+ h.click('try_edit');await flush();assert.match(h.markup,/data-author-tab="content"/);assert.equal(h.document.activeElement?.dataset.tab,'content');
+});
+
+test('mock 21: an EES change request is never sent from a try and is left out of 모두 적합',async()=>{
+ const value=tryDefinition();value.nodes.t.children=['checks','request'];delete value.nodes.doc;
+ value.nodes.request={id:'request',type:'j',parent:'t',children:[],deps:[],name:'EES 변경 요청',mode:'tool',inputs:[],result_block:'change_request'};
+ const h=tryHarness({},value);await enterTry(h);
+ assert.match(rowMarkup(h,'request'),/<span class="ew-vd-state" data-decision-status><span>시험에서는 보내지 않아요<\/span><\/span>/);assert.doesNotMatch(rowMarkup(h,'request'),/ew-vd-run/);
+ await tryTick(h,'i1');await tryTick(h,'i2');assert.match(tryMarkup(h),/모두 적합/);assert.equal(h.tryWrites.some(body=>/request/.test(body.action)),false);
+});
+
+test('mock 21 rule 12: 게시 is the main button only after a passed try of the current saved content and is never held back',async()=>{
+ const h=tryHarness();await enterTry(h);
+ assert.doesNotMatch(h.markup,/class="ew-primary">게시/);assert.equal(actionButton(h,'publish').disabled,false);
+ await tryTick(h,'i1');await tryTick(h,'i2');tryType(h,'doc','page_id','1');await tryPress(h,tryControl(h,'stage_execute','doc'));
+ await tryPress(h,tryControl(h,'stage_verdict','doc'));await tryPress(h,h.buttons.find(button=>button.attributes.role==='menuitemradio'&&button.attributes['data-verdict']==='completed'));
+ assert.match(h.markup,/class="ew-primary">게시/);
+ h.click('tab',{tab:'content'});await flush();assert.match(h.markup,/class="ew-primary">게시/,'the passed try still counts on the other tabs');
+ h.field('overview_name','새 이름');assert.equal(actionButton(h,'publish').classList.contains('ew-primary'),false);assert.equal(actionButton(h,'save').classList.contains('ew-primary'),true);
+ h.click('save');await flush();assert.doesNotMatch(h.markup,/class="ew-primary">게시/,'the try was of the earlier saved content');
+ h.click('publish');await flush();assert.equal(h.writes.at(-1).action,'publish_workflow');assert.match(h.markup,/data-author-tab="content"/);assert.equal(h.document.activeElement?.dataset.authorAction,'view_in_work');
+});
+
+test('mock 21: try values, rows and keys stay in the editor; busy updates keep each control that says why it is off',async()=>{
+ const h=tryHarness();await enterTry(h);const box=tryBox(h,'i1');
+ h.designer.setBusy(true);h.designer.setBusy(false);assert.equal(tryBox(h,'i1').disabled,false);
+ const drafted=h.designer.readDraft();assert.equal(JSON.stringify(drafted).includes('try'),false);assert.equal(Object.hasOwn(drafted,'publication_state'),false);
+ // Input inside the try is not a draft edit and never reaches the editor's capture.
+ tryType(h,'doc','page_id','456');assert.equal(h.draft().dirty,false);assert.match(h.status.textContent,/저장됨/);
+ // A refresh while nothing runs re-reads the try once; nothing polls while the tab is not shown.
+ const reads=h.tryReads.length;h.designer.refreshTry();await flush();assert.equal(h.tryReads.length,reads+1);
+ h.click('tab',{tab:'content'});await flush();h.designer.refreshTry();await flush();assert.equal(h.tryReads.length,reads+1);assert.equal(h.designer.tryActive(),false);
+ assert.ok(box);
+});
+
+// ---- 2026-11-24, independent review of the try (mock 21 revision 2): each fix keeps a reproduction ----
+// The person goes to the chat composer: an element outside the editor.
+function tryAway(h){const composer={id:'chat-input',tagName:'TEXTAREA',closest:()=>null,getAttribute:()=>null,focus(){h.document.activeElement=composer;}};composer.focus();return composer;}
+const tryGate=(h,action)=>{const gate=deferred();h.tryOverride=async(path,body)=>{if(body.action===action)await gate.promise;return undefined;};return gate;};
+const tryErrors=h=>[...tryMarkup(h).matchAll(/<p role="alert" class="ew-author-error">([^<]*)<\/p>/g)].map(match=>decode(match[1]));
+async function tryFixChecks(h){h.click('try_fix',{id:'checks'});await flush();h.field('ew-check-item-2','압력계 수치 정상');}
+const tryRefusal=(code,message)=>Object.assign(new Error(message),{code,status:code==='try_running'||code==='revision_conflict'?409:400});
+
+test('mock 21 review 1: what arrives while the person is elsewhere never takes the cursor; staying, it goes on',async()=>{
+ // A tick saved while the person went to the chat.
+ {const h=tryHarness();await enterTry(h);const gate=tryGate(h,'human_confirm');
+  const box=tryBox(h,'i1');box.focus();box.checked=true;h.designer.handleEvent({type:'change',target:box});await flush();
+  const chat=tryAway(h);gate.resolve();await flush();await flush();
+  assert.equal(h.document.activeElement,chat);assert.match(rowMarkup(h,'checks'),/>1 \/ 2</);}
+ // The last tick while the person went to 업무 내용 and its name field.
+ {const h=tryHarness();await enterTry(h);await tryTick(h,'i1');const gate=tryGate(h,'human_confirm');
+  const box=tryBox(h,'i2');box.focus();box.checked=true;h.designer.handleEvent({type:'change',target:box});await flush();
+  h.click('tab',{tab:'content'});await flush();h.fields.find(field=>field.name==='overview_name').focus();
+  gate.resolve();await flush();await flush();
+  assert.match(h.markup,/data-author-tab="content"/);assert.equal(h.document.activeElement?.name,'overview_name');}
+ // The last 적합 while in the chat: 게시 becomes the main button and still does not take the cursor.
+ {const h=tryHarness();await enterTry(h);await tryTick(h,'i1');await tryTick(h,'i2');tryType(h,'doc','page_id','1');await tryPress(h,tryControl(h,'stage_execute','doc'));
+  await tryPress(h,tryControl(h,'stage_verdict','doc'));const gate=tryGate(h,'decide');
+  const fit=h.buttons.find(button=>button.attributes.role==='menuitemradio'&&button.attributes['data-verdict']==='completed');fit.focus();h.designer.handleEvent({type:'click',target:fit});await flush();
+  const chat=tryAway(h);gate.resolve();await flush();await flush();
+  assert.match(h.markup,/data-author-action="publish" data-mutation class="ew-primary">게시/);assert.equal(h.document.activeElement,chat);}
+ // Entering the tab, then the chat while the try opens.
+ {const h=tryHarness(),gate=tryGate(h,'try_open');h.click('tab',{tab:'try'});await flush();
+  const chat=tryAway(h);gate.resolve();await flush();await flush();
+  assert.match(rowMarkup(h,'checks'),/data-stage-check/);assert.equal(h.document.activeElement,chat);}
+ // 처음부터, then the chat.
+ {const h=tryHarness();await enterTry(h);await tryTick(h,'i1');const gate=tryGate(h,'try_restart');h.click('try_reset');await flush();
+  const chat=tryAway(h);gate.resolve();await flush();await flush();
+  assert.equal(h.tries.size,1);assert.match(rowMarkup(h,'checks'),/>0 \/ 2</);assert.equal(h.document.activeElement,chat);}
+ // A run whose result comes while the person is in the chat.
+ {const h=tryHarness();await enterTry(h);await tryTick(h,'i1');await tryTick(h,'i2');tryType(h,'doc','page_id','1');const gate=tryGate(h,'execute_job');
+  const run=tryControl(h,'stage_execute','doc');run.focus();h.designer.handleEvent({type:'click',target:run});await flush();
+  assert.equal(h.document.activeElement?.attributes?.['data-action'],'stage_execute','while it runs its control keeps the cursor');
+  const chat=tryAway(h);gate.resolve();await flush();await flush();
+  assert.match(rowMarkup(h,'doc'),/data-stage-result/);assert.equal(h.document.activeElement,chat);}
+ // A list confirmed from its row while the person is in the chat.
+ {const value=tryDefinition();value.nodes.doc.result_block='list_confirm';
+  const h=tryHarness({},value);await enterTry(h);tryType(h,'doc','page_id','1');await tryPress(h,tryControl(h,'stage_execute','doc'));
+  const confirm=tryControl(h,'stage_confirm_list','doc'),gate=tryGate(h,'confirm_list');assert.ok(confirm,'목록 확정');
+  confirm.focus();h.designer.handleEvent({type:'click',target:confirm});await flush();
+  const chat=tryAway(h);gate.resolve();await flush();await flush();
+  assert.equal(h.tryWrites.at(-1).action,'confirm_list');assert.equal(h.document.activeElement,chat);}
+ // Staying on the control that started it (redrawn in its place), the cursor goes on.
+ {const h=tryHarness(),gate=tryGate(h,'try_open');h.click('tab',{tab:'try'});await flush();gate.resolve();await flush();await flush();
+  assert.equal(h.document.activeElement,tryBox(h,'i1'));}
+});
+
+test('mock 21 review 2: one try action at a time; a held Enter or a second press does nothing more',async()=>{
+ // A held Enter and a second press of 실행 while the first save is read again: one save, one run, no conflict.
+ {const h=tryHarness();await enterTry(h);await tryTick(h,'i1');await tryTick(h,'i2');
+  const input=tryType(h,'doc','page_id','123456789'),gate=deferred();let held=false;
+  h.tryReadOverride=async()=>{if(!held&&h.tryWrites.at(-1)?.action==='save_inputs'){held=true;await gate.promise;}return undefined;};
+  h.designer.handleEvent({type:'keydown',key:'Enter',target:input,preventDefault(){}});await flush();
+  assert.deepEqual(copy(h.designer.handleEvent({type:'keydown',key:'Enter',repeat:true,target:input,preventDefault(){}})),{handled:true,preventDefault:true});
+  h.designer.handleEvent({type:'click',target:tryControl(h,'stage_execute','doc')});await flush();
+  gate.resolve();for(let i=0;i<4;i++)await flush();
+  assert.deepEqual(h.tryWrites.filter(body=>['save_inputs','execute_job'].includes(body.action)).map(body=>[body.action,body.expected_revision]),[['save_inputs',3],['execute_job',4]]);
+  assert.deepEqual(tryErrors(h),[]);assert.match(rowMarkup(h,'doc'),/data-stage-result/);}
+ // A held Enter that answered a person's job does not run the next job the cursor moved to.
+ {const value=tryDefinition();value.nodes.t.children=['ask','doc'];delete value.nodes.checks;
+  value.nodes.ask={id:'ask',type:'j',parent:'t',children:[],deps:[],name:'담당자 확인',mode:'human',inputs:[{id:'memo',name:'메모',type:'text',scope:'run',required:true}],result_block:'human_confirm',human_confirmation:true};
+  value.nodes.doc.inputs[0].required=false;
+  const h=tryHarness({},value);await enterTry(h);const memo=tryType(h,'ask','memo','확인함');
+  await tryEnter(h,memo);assert.equal(h.document.activeElement,tryInput(h,'doc','page_id'));
+  h.designer.handleEvent({type:'keydown',key:'Enter',repeat:true,target:h.document.activeElement,preventDefault(){}});await flush();await flush();
+  assert.deepEqual(h.tryWrites.map(body=>body.action),['try_open','save_inputs','human_confirm']);}
+ // A tick while another holds the try is put back and sent by nobody; the controls are off until the first ends.
+ {const h=tryHarness();await enterTry(h);const gate=deferred();let held=false;
+  h.tryReadOverride=async()=>{if(!held&&h.tryWrites.at(-1)?.action==='human_confirm'){held=true;await gate.promise;}return undefined;};
+  const first=tryBox(h,'i1');first.focus();first.checked=true;h.designer.handleEvent({type:'change',target:first});await flush();
+  const second=tryBox(h,'i2');second.checked=true;h.designer.handleEvent({type:'change',target:second});await flush();
+  assert.equal(h.tryWrites.filter(body=>body.action==='human_confirm').length,1);assert.equal(tryBox(h,'i2').checked,false);
+  assert.equal(tryControl(h,'stage_execute','doc').disabled,true,'held, the try controls are off');
+  gate.resolve();await flush();await flush();
+  assert.equal(tryControl(h,'stage_execute','doc').disabled,false);assert.equal(h.document.activeElement,tryBox(h,'i2'));assert.match(rowMarkup(h,'checks'),/>1 \/ 2</);}
+});
+
+test('mock 21 review 3: a restart of this window\'s save that cannot be tried shows the box, never the old rows',async()=>{
+ for(const code of ['execution_not_ready','factory_required','factory_not_found','invalid_factory']){
+  const h=tryHarness();await enterTry(h);await tryTick(h,'i1');await tryFixChecks(h);
+  h.tryOverride=(path,body)=>body.action==='try_restart'?Promise.reject(tryRefusal(code,'실행 전에 업무절차를 보완해 주세요.\ndoc: 도구가 연결되지 않았습니다.')):undefined;
+  await enterTry(h);
+  const view=tryMarkup(h),saved=tryClock(h.workflows.get('w').draft_saved_at);
+  assert.match(view,new RegExp('^<div class="ew-vd ew-try-rows" id="ew-try"><div class="ew-try-bar" id="ew-try-bar" role="status"><span class="ew-try-tag">시험</span><span>팀에 안 보임</span><small>'+saved+' 저장본</small></div><div class="ew-try-problem" role="alert"><strong>시험을 시작할 수 없어요</strong><small>실행 전에 업무절차를 보완해 주세요.</small><small>doc: 도구가 연결되지 않았습니다.</small><button type="button" data-author-action="try_edit"\\s*>업무 내용에서 고치기</button></div></div>'),code);
+  assert.doesNotMatch(view,/ew-center-task-row|새 저장본|ew-author-error/,code);assert.equal(h.designer.tryActive(),false);assert.doesNotMatch(h.markup,/class="ew-primary">게시/);
+ }
+ // A job of the old try still running: that try stays, the restart goes once nothing runs, and its line goes with it.
+ const h=tryHarness();await enterTry(h);await tryTick(h,'i1');const old=[...h.tries.values()][0];old.jobs.doc.status='running';await tryFixChecks(h);
+ h.tryOverride=(path,body)=>body.action==='try_restart'&&[...h.tries.values()][0].jobs.doc.status==='running'?Promise.reject(tryRefusal('try_running','실행 중인 작업이 끝난 뒤 다시 해 주세요.')):undefined;
+ await enterTry(h);
+ assert.match(rowMarkup(h,'checks'),/>1 \/ 2</);assert.doesNotMatch(tryMarkup(h),/새 저장본/);assert.deepEqual(tryErrors(h),['실행 중인 작업이 끝난 뒤 다시 해 주세요.']);assert.equal(h.designer.tryActive(),true);
+ for(let i=0;i<3;i++){h.designer.refreshTry();await flush();await flush();}
+ assert.equal(h.tryWrites.filter(body=>body.action==='try_restart').length,1,'nothing is sent again while the job runs');
+ old.jobs.doc.status='pending';h.designer.refreshTry();await flush();await flush();
+ assert.equal(h.tryWrites.filter(body=>body.action==='try_restart').length,2);assert.notEqual([...h.tries.values()][0].id,old.id);
+ assert.match(rowMarkup(h,'checks'),/바뀜/);assert.deepEqual(tryErrors(h),[]);
+});
+
+test('mock 21 review 4: entering again while the try opens waits for it, then draws its rows',async()=>{
+ const h=tryHarness(),gate=tryGate(h,'try_open');h.click('tab',{tab:'try'});await flush();
+ assert.match(tryMarkup(h),/<p role="status" class="ew-author-muted">받는 중<\/p>/);
+ h.click('tab',{tab:'try'});await flush();await flush();
+ assert.match(tryMarkup(h),/받는 중/,'still opening');assert.doesNotMatch(tryMarkup(h),/ew-center-task-row/);
+ gate.resolve();await flush();await flush();
+ assert.equal(h.tryWrites.filter(body=>body.action==='try_open').length,1);assert.equal(h.tries.size,1);
+ assert.match(rowMarkup(h,'checks'),/data-stage-check/);assert.doesNotMatch(tryMarkup(h),/받는 중/);assert.equal(h.document.activeElement,tryBox(h,'i1'));
+});
+
+test('mock 21 review 5: a read\'s failure line goes with the next read; a command\'s stays with its try only',async()=>{
+ const h=tryHarness();await enterTry(h);
+ h.tryReadOverride=async()=>{throw Object.assign(new Error('업무 저장 상태를 확인하지 못했습니다.'),{code:'workspace_unavailable'});};
+ h.designer.refreshTry();await flush();assert.deepEqual(tryErrors(h),['업무 저장 상태를 확인하지 못했습니다.']);assert.match(rowMarkup(h,'checks'),/data-stage-check/,'the rows stay');
+ h.tryReadOverride=null;h.designer.refreshTry();await flush();assert.deepEqual(tryErrors(h),[]);
+ // A refused tick: its line stays while the same try is read again, and goes when another try arrives.
+ h.tryOverride=(path,body)=>body.action==='human_confirm'?Promise.reject(tryRefusal('access_denied','이 시험을 바꿀 수 없습니다.')):undefined;
+ await tryTick(h,'i1');assert.deepEqual(tryErrors(h),['이 시험을 바꿀 수 없습니다.']);
+ h.tryOverride=null;h.designer.refreshTry();await flush();assert.deepEqual(tryErrors(h),['이 시험을 바꿀 수 없습니다.']);
+ h.tries.clear();h.designer.refreshTry();await flush();await flush();
+ assert.equal(h.tries.size,1);assert.match(rowMarkup(h,'checks'),/data-stage-check/);assert.deepEqual(tryErrors(h),[]);
+});
+
+test('mock 21 review 6: the refresh never sends again a start the server refused for the same saved content',async()=>{
+ const h=tryHarness(),opens=()=>h.tryWrites.filter(body=>body.action==='try_open').length;
+ h.tryOverride=(path,body)=>body.action==='try_open'?Promise.reject(tryRefusal('execution_not_ready','실행 전에 업무절차를 보완해 주세요.')):undefined;
+ await enterTry(h);assert.equal(opens(),1);assert.match(tryMarkup(h),/시험을 시작할 수 없어요/);
+ for(let i=0;i<3;i++){h.designer.refreshTry();await flush();}
+ assert.equal(opens(),1);assert.match(tryMarkup(h),/시험을 시작할 수 없어요/);
+ // The person entering again sends it once more.
+ await enterTry(h);assert.equal(opens(),2);assert.match(tryMarkup(h),/시험을 시작할 수 없어요/);h.designer.refreshTry();await flush();assert.equal(opens(),2);
+ // Another save (here from another window) is new content to try.
+ const record=h.workflows.get('w');record.draft.nodes.checks.name='설비 네 곳 점검';record.revision++;h.render();
+ h.tryOverride=null;h.designer.refreshTry();await flush();await flush();
+ assert.equal(opens(),3);assert.match(rowMarkup(h,'checks'),/설비 네 곳 점검/);assert.doesNotMatch(tryMarkup(h),/시험을 시작할 수 없어요/);
+});
+
+test('mock 21 review 7: AI jobs of a try use the model chosen above their stage, kept off the saved screen',async()=>{
+ const value=tryDefinition();value.nodes.doc.mode='ai';delete value.nodes.doc.api_binding;
+ const h=tryHarness({},value);h.tryOperations={models:[{id:'m1',name:'모델 1'},{id:'m2',name:'모델 2'}]};await enterTry(h);
+ assert.match(tryMarkup(h),/<\/div><div class="ew-stage-runtime"><label class="ew-model-select">AI 모델 <select id="ew-try-model-t" data-try-model><option value="">모델 선택<\/option><option value="m1">모델 1<\/option><option value="m2">모델 2<\/option><\/select><\/label><\/div><div class="ew-center-task-heading ew-stage-summary"><h3>1 점검<\/h3>/);
+ assert.doesNotMatch(h.markup,/ees-work-execution-model/);
+ const pick=h.fields.find(field=>field.id==='ew-try-model-t');pick.focus();pick.value='m2';h.designer.handleEvent({type:'change',target:pick});
+ assert.match(tryMarkup(h),/<option value="m2" selected>모델 2<\/option>/);assert.equal(h.draft().dirty,false);
+ await tryTick(h,'i1');await tryTick(h,'i2');tryType(h,'doc','page_id','1');await tryPress(h,tryControl(h,'stage_execute','doc'));
+ assert.equal(h.tryWrites.find(body=>body.action==='execute_job').model_id,'m2');
+ assert.doesNotMatch(JSON.stringify(h.designer.readDraft())+JSON.stringify(h.selection),/m2/);assert.equal(h.writes.length,0);
+ // One model offered: no control, and that model is sent.
+ const single=tryHarness({},value);single.tryOperations={models:[{id:'only',name:'모델'}]};await enterTry(single);
+ assert.doesNotMatch(tryMarkup(single),/data-try-model|ew-stage-runtime/);
+ tryType(single,'doc','page_id','1');await tryPress(single,tryControl(single,'stage_execute','doc'));assert.equal(single.tryWrites.find(body=>body.action==='execute_job').model_id,'only');
+ // A stage without AI jobs has no control.
+ const tools=tryHarness();tools.tryOperations={models:[{id:'m1'},{id:'m2'}]};await enterTry(tools);assert.doesNotMatch(tryMarkup(tools),/data-try-model/);
+});
+
+test('mock 21 review 8: every restart carries the procedure, system and factory with the try it replaces',async()=>{
+ const h=tryHarness();await enterTry(h);await tryTick(h,'i1');
+ h.click('try_reset');await flush();await flush();
+ await tryFixChecks(h);await enterTry(h);
+ const restarts=h.tryWrites.filter(body=>body.action==='try_restart'),key=h.tryReads[0].try_window;
+ assert.equal(restarts.length,2);
+ for(const body of restarts){assert.deepEqual({workflow_id:body.workflow_id,system_id:body.system_id,factory_id:body.factory_id,try_window:body.try_window},{workflow_id:'w',system_id:'EMS',factory_id:'',try_window:key});assert.match(body.run_id,/^try-\d+$/);assert.ok(Number.isInteger(body.expected_revision));}
+ assert.deepEqual(restarts.map(body=>body.run_id),['try-1','try-2']);
+});
+
+test('mock 21 review 9: a start refused by a save at the same moment, or for a try already gone, is read again and sent once more',async()=>{
+ const h=tryHarness();let conflicts=1;
+ h.tryOverride=(path,body)=>body.action==='try_open'&&conflicts-->0?Promise.reject(tryRefusal('revision_conflict','다른 변경이 있습니다.')):undefined;
+ await enterTry(h);
+ assert.equal(h.tryWrites.filter(body=>body.action==='try_open').length,2);assert.match(rowMarkup(h,'checks'),/data-stage-check/);assert.doesNotMatch(tryMarkup(h),/시험을 시작할 수 없어요/);assert.deepEqual(tryErrors(h),[]);
+ // Refused again: the server's line, no box, and the next refresh sends it again.
+ const again=tryHarness();again.tryOverride=(path,body)=>body.action==='try_open'?Promise.reject(tryRefusal('revision_conflict','다른 변경이 있습니다.')):undefined;
+ await enterTry(again);
+ assert.equal(again.tryWrites.filter(body=>body.action==='try_open').length,2);assert.doesNotMatch(tryMarkup(again),/시험을 시작할 수 없어요/);assert.deepEqual(tryErrors(again),['다른 변경이 있습니다.']);
+ again.tryOverride=null;again.designer.refreshTry();await flush();await flush();
+ assert.equal(again.tryWrites.filter(body=>body.action==='try_open').length,3);assert.match(rowMarkup(again,'checks'),/data-stage-check/);assert.deepEqual(tryErrors(again),[]);
+ // The try this window's save was to replace is gone (a day untouched): read again, and a new try opens.
+ const gone=tryHarness();await enterTry(gone);await tryTick(gone,'i1');await tryFixChecks(gone);
+ gone.tryOverride=(path,body)=>{if(body.action!=='try_restart')return undefined;gone.tries.clear();return Promise.reject(tryRefusal('run_not_found','접근할 수 있는 진행 건이 없습니다.'));};
+ await enterTry(gone);
+ assert.deepEqual(gone.tryWrites.map(body=>body.action).slice(-2),['try_restart','try_open']);assert.match(rowMarkup(gone,'checks'),/>0 \/ 3</);assert.deepEqual(tryErrors(gone),[]);
+});
+
+test('mock 21 review 10: entering the tab after this window saved shows 받는 중 until the new try is read',async()=>{
+ const h=tryHarness();await enterTry(h);await tryTick(h,'i1');await tryFixChecks(h);
+ const gate=tryGate(h,'try_restart');h.click('tab',{tab:'try'});await flush();await flush();
+ assert.match(tryMarkup(h),new RegExp('<small>'+tryClock(h.workflows.get('w').draft_saved_at)+' 저장본</small></div><p role="status" class="ew-author-muted">받는 중</p></div></div><footer>$'));
+ assert.doesNotMatch(tryMarkup(h),/ew-center-task-row|data-stage-check|새 저장본/);
+ gate.resolve();await flush();await flush();
+ assert.match(rowMarkup(h,'checks'),/바뀜/);assert.match(rowMarkup(h,'checks'),/>0 \/ 3</);assert.doesNotMatch(tryMarkup(h),/받는 중/);
+});
+
+test('mock 21 review 11: a refused 게시 내림 still returns the cursor to the menu control',async()=>{
+ const h=harness(),record=h.workflows.get('w');record.published_version=1;record.published=copy(record.draft);record.versions=[{version:1,definition:copy(record.draft)}];h.render();
+ h.details.find(item=>item.className==='ew-procedure-menu').open=true;
+ h.writeOverride=async body=>body.action==='unpublish_workflow'?{ok:false,error:{code:'access_denied',message:'게시를 내릴 권한이 없습니다.'}}:undefined;
+ h.click('unpublish');await flush();
+ assert.equal(h.writes.at(-1).action,'unpublish_workflow');assert.equal(record.published_version,1);assert.match(h.markup,/<p role="alert" class="ew-author-error">게시를 내릴 권한이 없습니다./);
+ assert.equal(h.details.find(item=>item.className==='ew-procedure-menu').open,false);assert.equal(h.document.activeElement?.tagName,'SUMMARY');
+});
+
+// PR #157 review: the factory chosen on the left is part of what a try is.
+test('mock 21 PR review: the try of another factory is never drawn or acted on while the new one is read',async()=>{
+ const value=tryDefinition();value.execution_scope='factory';
+ const h=harness();h.selection={...h.selection,factory_id:'F1'};installDefinition(h,value);await enterTry(h);tryType(h,'doc','page_id','123');
+ assert.match(rowMarkup(h,'checks'),/data-stage-check/);assert.equal(h.tryReads.at(-1).factory_id,'F1');
+ // The person picks another factory; its try is still being read.
+ let answer;h.tryReadOverride=()=>new Promise(resolve=>{answer=resolve;});
+ const reads=h.tryReads.length,writes=h.tryWrites.length;
+ h.selection={...h.selection,factory_id:'F2'};h.render();await flush();
+ assert.equal(h.tryReads.length,reads+1);assert.equal(h.tryReads.at(-1).factory_id,'F2');
+ assert.equal(rowMarkup(h,'checks'),'','the other factory\'s rows are not on screen');assert.equal(tryBox(h,'i1'),undefined);assert.equal(tryControl(h,'stage_execute','doc'),undefined);
+ assert.match(tryMarkup(h),/<p role="status" class="ew-author-muted">받는 중<\/p>/);assert.equal(h.tryWrites.length,writes,'nothing is sent with the other factory\'s try');
+ // A failed read leaves no rows either.
+ h.tryReadOverride=null;answer(Promise.reject(Object.assign(new Error('업무 저장 상태를 확인하지 못했습니다.'),{code:'workspace_unavailable'})));await flush();await flush();
+ assert.equal(rowMarkup(h,'checks'),'');assert.deepEqual(tryErrors(h),['업무 저장 상태를 확인하지 못했습니다.']);assert.equal(h.tryWrites.length,writes);
+ // Read again for that factory: its own try opens with that factory, and values typed for the first are not carried over.
+ h.designer.refreshTry();await flush();await flush();
+ const opened=h.tryWrites.filter(body=>body.action==='try_open').at(-1);assert.equal(opened.factory_id,'F2');
+ assert.match(rowMarkup(h,'checks'),/data-stage-check/);assert.equal(tryInput(h,'doc','page_id').value,'');
+ // Back at the first factory its typed value is still there.
+ h.selection={...h.selection,factory_id:'F1'};h.render();await flush();await flush();
+ assert.equal(h.tryReads.at(-1).factory_id,'F1');assert.equal(tryInput(h,'doc','page_id').value,'123');assert.equal(h.tries.size,2,'one try per factory');
 });

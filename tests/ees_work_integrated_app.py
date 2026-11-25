@@ -793,17 +793,15 @@ def integrated_flow(gate):
     g.click('[data-author-action="open"][data-id="'+identifier+'"]')
     g.wait('document.querySelector("[data-author-status]")?.dataset.authorRevision === '+json.dumps(str(prepared['revision'])))
     g.click('.ew-procedure-menu>summary');g.click('[data-author-action="validate"]')
-    g.wait('!!document.querySelector(\'#ew-publication-state\')')
     g.wait('!!document.querySelector(".ew-author-validation")')
     checked=g.api('/api/ees-work/workspace?workflow_id='+identifier)['workflow']
     assert checked['validation']['revision']==checked['revision'] and not checked['validation']['errors']
-    g.wait('document.querySelector(\'#ew-publication-state\')?.disabled===false')
-    assert g.browser.evaluate('!document.querySelector(\'#ew-publication-state\').disabled')
+    g.wait('document.querySelector(\'[data-author-action="publish"]\')?.disabled===false')
+    assert g.browser.evaluate('!document.querySelector(\'[data-author-action="publish"]\').disabled')
     g.capture('figma-b23-publish-review')
-    g.select('#ew-publication-state','published')
     assert g.api('/api/ees-work/workspace?workflow_id='+identifier)['workflow']['published_version'] is None
-    g.click('[data-author-action=save]')
-    g.wait('document.querySelector("[data-author-status]")?.dataset.dirty === "false"')
+    g.click('[data-author-action="publish"]')
+    g.wait('document.querySelector("[data-author-status]")?.dataset.status === "published"')
     assert not g.browser.evaluate('!!document.querySelector("#ees-work-dialog")')
     g.capture('publication-state-saved')
     g.click('[data-author-action="tab"][data-tab="history"]')
@@ -1286,7 +1284,7 @@ def figma_delta_flow(g):
     g.wait('!!document.querySelector("[data-author-action=tab][data-tab=content]")')
     # 2026-11-02: no execution-mode tab or schedule authoring. A schedule saved
     # earlier stays data in the draft and in the immutable publication.
-    assert g.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim()).join('|')")=='업무 내용|게시 기록'
+    assert g.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim()).join('|')")=='업무 내용|시험해 보기|게시 기록'
     assert not g.browser.evaluate('!!document.querySelector("#ew-author-schedule,[data-author-action=run_mode],[data-author-action=schedule_tools],[data-author-action=schedule_preview]")')
     assert not g.browser.evaluate('!!document.querySelector(".ew-content-start-inputs")')
     assert g.browser.evaluate('!!document.querySelector("[data-author-action=execution_parameters]")')
@@ -1463,11 +1461,11 @@ def figma_delta_flow(g):
     # The validation panel can render while its follow-up workspace read is
     # still pending. Require the physical publish action to be ready before
     # assessing advisory-only publication; never enable it from the fixture.
-    g.wait('document.querySelector(\'#ew-publication-state\')?.disabled === false')
-    assert g.browser.evaluate('!document.querySelector(\'#ew-publication-state\').disabled')
+    g.wait('document.querySelector(\'[data-author-action="publish"]\')?.disabled === false')
+    assert g.browser.evaluate('!document.querySelector(\'[data-author-action="publish"]\').disabled')
     g.capture('figma-b23-delivery-advisory-publish-enabled')
-    g.select('#ew-publication-state','published');g.click('[data-author-action=save]')
-    g.wait('!document.querySelector("#ees-work-dialog")')
+    g.click('[data-author-action="publish"]')
+    g.wait('!document.querySelector("#ees-work-dialog") && document.querySelector("[data-author-status]")?.dataset.status === "published"')
     g.click('[data-author-action="tab"][data-tab="history"]')
     g.wait('document.querySelector(".ew-author-history")?.innerText.includes("게시 v1")')
     assert g.api('/api/ees-work/workspace?workflow_id='+delivery_id)['workflow']['published_version']==1

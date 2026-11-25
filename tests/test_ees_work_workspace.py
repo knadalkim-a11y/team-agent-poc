@@ -924,14 +924,20 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
                 published = await self.command('publish_workflow', workflow_id=key, expected_revision=saved['revision'])
                 self.assertTrue(published['ok'], published)
                 self.assertIn(key, {item['id'] for item in (await self.state())['workflows']})
-                blocked = await self.command('start_run', actor='a', workflow_id=key, expected_revision=published['revision'])
-                self.assertEqual(blocked.get('error', {}).get('code'), 'execution_not_ready', blocked)
-                self.assertIn('저장 범위', blocked['error']['message'])
-                with self.service._db() as db:
-                    self.assertEqual(db.execute('SELECT COUNT(*) FROM work_runs WHERE workflow_id=?', (key,)).fetchone()[0], 0)
-                cleared = await self.command('save_settings', workflow_id=key, values={}, expected_revision=1)
-                self.assertTrue(cleared['ok'], cleared)
-                run = await self.start(key, revision=published['revision'])
+                if scope == 'deleted':
+                    # 2026-11-24 (mock 21): saving no longer publishes, so a stored setting may
+                    # belong to the saved draft or another version. One this version does
+                    # not declare is never read by its run and no longer blocks the start.
+                    run = await self.start(key, revision=published['revision'])
+                else:
+                    blocked = await self.command('start_run', actor='a', workflow_id=key, expected_revision=published['revision'])
+                    self.assertEqual(blocked.get('error', {}).get('code'), 'execution_not_ready', blocked)
+                    self.assertIn('저장 범위', blocked['error']['message'])
+                    with self.service._db() as db:
+                        self.assertEqual(db.execute('SELECT COUNT(*) FROM work_runs WHERE workflow_id=?', (key,)).fetchone()[0], 0)
+                    cleared = await self.command('save_settings', workflow_id=key, values={}, expected_revision=1)
+                    self.assertTrue(cleared['ok'], cleared)
+                    run = await self.start(key, revision=published['revision'])
                 with self.service._db() as db:
                     row = db.execute('SELECT * FROM work_runs WHERE id=?', (run['id'],)).fetchone()
                     self.assertNotIn('target', self.service._work_snapshot(db, row, 'j')['inputs'])

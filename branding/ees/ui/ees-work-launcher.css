@@ -1760,10 +1760,8 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 .ew-authored-result[data-compact=true] .ew-authored-document>div{flex-direction:row;flex-wrap:wrap;gap:6px;}
 .ew-authored-result[data-compact=true] .ew-authored-document small{font-size:13px;line-height:21px;}
 
-/* Procedure visibility is an editable field committed by the single Save action. */
+/* The title row wraps its state mark and menu; 저장 and 게시 sit in the footer (design mock 21 revision 2). */
 #ees-work-designer .ew-author-definition-head>.ew-author-heading{flex-wrap:wrap;}
-#ees-work-designer .ew-publication-field{display:flex;align-items:center;gap:6px;margin:0;flex:none;white-space:nowrap;font-size:12px;font-weight:400;color:var(--ees-text-secondary);}
-#ees-work-designer #ew-publication-state{appearance:auto;width:82px;min-height:32px;height:32px;margin:0;padding:4px 8px;background:var(--ees-surface-default);color:var(--ees-text-primary);font-size:12px;}
 
 /* Work-centered layout, revision 1. The shell owns the column sizes. Keep the
    scroll hosts full width so their scrollbars stay at the pane boundary. */
@@ -1975,7 +1973,6 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 }
 [data-ees-work-surface] #ees-work-designer .ew-procedure-info .ew-procedure-description { grid-column: 1 / -1; }
 [data-ees-work-surface] #ees-work-designer .ew-procedure-info :is(input, textarea, select) { width: 100%; min-width: 0; }
-[data-ees-work-surface] #ees-work-designer .ew-procedure-info #ew-publication-state { width: 100%; min-height: 42px; }
 [data-ees-work-surface] #ees-work-designer .ew-stage-list {
   display: grid;
   gap: 0;
@@ -2086,6 +2083,53 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
   margin-top: 8px;
 }
 [data-ees-work-surface] #ees-work-panel #ees-work-designer:has(.ew-procedure-info) .ew-author-tabs { margin: 10px 0 12px; }
+/* 2026-11-20, design mock 21 revision 2: trying a procedure from where it is written, before it is published. The job
+   rows are the work screen's rows; what is new is the try bar above them, '고치기' at the end of each row, the mark of a
+   changed job, the line that says the try went through, a failure said under the row, and the publish control in the
+   footer. The head keeps its place between 업무 내용 and 시험해 보기: the B2 spacing above also on the try tab. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=try]>.ew-author-scroll{padding-top:14px}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=try] .ew-author-breadcrumb{gap:6px;margin:0 0 10px;font-size:14px;line-height:22px}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=try] .ew-author-breadcrumb>button{min-height:22px;margin:0}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=try] .ew-author-definition-head>.ew-author-muted{margin-top:8px}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=try] .ew-author-tabs{margin:10px 0 12px}
+/* The try bar: what this is, that the team does not see it, which saved content it uses. It stays in view while the
+   rows scroll; it sticks as far above the scroller's top padding as that padding is (14px here, 30px beside the list). */
+[data-ees-work-surface] #ees-work-panel .ew-try-bar{position:sticky;top:-14px;z-index:5;display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;min-height:40px;margin:0 0 20px;padding:6px 12px;border-radius:6px;background:var(--ees-status-attention-bg);font-size:13px;line-height:20px;color:var(--ees-text-primary)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-split=true] .ew-try-bar{top:-30px}
+[data-ees-work-surface] #ees-work-panel .ew-try-tag{display:inline-flex;align-items:center;min-height:20px;padding:0 6px;border-radius:4px;background:var(--ees-status-attention);color:var(--ees-text-inverse);font-size:12px;line-height:18px;font-weight:600}
+[data-ees-work-surface] #ees-work-panel .ew-try-bar small{font-size:12px;color:var(--ees-text-secondary)}
+[data-ees-work-surface] #ees-work-panel .ew-try-bar .ew-try-note{font-size:12px;font-weight:500;color:var(--ees-status-attention)}
+[data-ees-work-surface] #ees-work-panel .ew-try-bar .ew-text{min-height:24px;padding:0 6px;border-radius:4px;font-size:13px;font-weight:500;color:var(--ees-text-primary);text-decoration:underline;text-underline-offset:3px}
+[data-ees-work-surface] #ees-work-panel .ew-try-bar .ew-text:hover:not(:disabled){background:var(--ees-surface-panel-hover)}
+/* '고치기' at the end of a row: plain words, the size of the words */
+[data-ees-work-surface] #ees-work-panel .ew-try-fix{flex:none;min-height:28px;padding:0 6px;border:0;border-radius:4px;background:transparent;font:inherit;font-size:13px;color:var(--ees-text-secondary);cursor:pointer}
+[data-ees-work-surface] #ees-work-panel .ew-try-fix:hover{background:var(--ees-surface-panel-hover);color:var(--ees-text-primary)}
+[data-ees-work-surface] #ees-work-panel .ew-try-changed{display:inline-flex;flex:none;align-items:center;min-height:18px;margin-left:8px;padding:0 6px;border-radius:4px;background:var(--ees-status-attention-bg);color:var(--ees-status-attention);font-size:12px;line-height:18px;font-weight:500;vertical-align:1px}
+/* the try went through: one line under the last row */
+[data-ees-work-surface] #ees-work-panel .ew-try-done{display:flex;align-items:center;gap:8px;margin:12px 0 0;padding:0 16px;font-size:14px;line-height:20px;font-weight:600}
+/* a failure is said under its row (or under the bar when the try cannot start) with the one thing to do */
+[data-ees-work-surface] #ees-work-panel .ew-try-problem{display:grid;gap:2px;justify-items:start;margin:0 0 12px;padding:10px 12px;border-left:3px solid var(--ees-status-danger);border-radius:4px;background:var(--ees-status-danger-bg)}
+[data-ees-work-surface] #ees-work-panel .ew-try-problem strong{font-size:13px;line-height:20px;font-weight:600}
+[data-ees-work-surface] #ees-work-panel .ew-try-problem small{font-size:12px;line-height:18px;color:var(--ees-text-secondary)}
+[data-ees-work-surface] #ees-work-panel .ew-try-problem button{margin-top:6px;min-height:28px;padding:0 10px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-default);font:inherit;font-size:13px;font-weight:500;cursor:pointer}
+[data-ees-work-surface] #ees-work-panel .ew-try-problem button:hover{background:var(--ees-surface-hover)}
+/* 1920: what is asked and what came back sit side by side under a row; narrower, they stack */
+@container ew-try (min-width:760px){
+ [data-ees-work-surface] #ees-work-panel .ew-try-rows .ew-vd-tool-detail{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:32px;align-items:start}
+ [data-ees-work-surface] #ees-work-panel .ew-try-rows .ew-vd-tool-detail>.ew-try-problem{grid-column:1/-1}
+}
+/* the rows' frame positions the product's verdict menu under its control */
+[data-ees-work-surface] #ees-work-panel .ew-try-rows{position:relative;container:ew-try / inline-size}
+/* The AI model control above a stage with AI jobs is the work screen's control and looks as it does there: 'AI 모델'
+   and its select on one line, not the editor's stacked form field. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-try-rows .ew-stage-runtime{font-size:14px;line-height:22px;letter-spacing:-.042px;color:var(--ees-text-primary)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-try-rows .ew-model-select{display:inline;gap:normal;font:inherit;letter-spacing:inherit;color:inherit}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-try-rows .ew-model-select>select{display:inline-block;width:auto;min-height:0;padding:7px 9px;border-radius:5px;font-size:14px;color:var(--ees-text-primary)}
+/* above a later stage it keeps the bar's distance from the stage before, so it reads as that stage's */
+[data-ees-work-surface] #ees-work-panel .ew-try-rows .ew-center-task-list+.ew-stage-runtime{margin-top:20px}
+/* the title row: a state mark instead of the select; the footer holds 저장 and 게시 */
+[data-ees-work-surface] #ees-work-panel .ew-author-heading>.ew-author-tag{flex:none;align-self:center}
+[data-ees-work-surface] #ees-work-panel .ew-author footer small .ew-text{margin-left:8px;font-size:12px;font-weight:500;color:var(--ees-text-primary);text-decoration:underline;text-underline-offset:3px}
 [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-work-content { gap: 12px; padding-top: 0; }
 [data-ees-work-surface] #ees-work-panel #ees-work-designer .ew-procedure-info > label {
   gap: 6px;

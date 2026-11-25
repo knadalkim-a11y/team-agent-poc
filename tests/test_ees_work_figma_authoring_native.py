@@ -27,17 +27,17 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.open_initialized_author_list()
         item = next(row for row in self.state()['workflows'] if row['name'] == '배포 산출물 점검')
         self.click('[data-author-action=open][data-id="' + item['id'] + '"]')
-        self.wait("document.querySelector('#ew-publication-state') && document.querySelector('.ew-work-content .ew-stage-list')")
+        self.wait("document.querySelector('.ew-author-definition-head .ew-author-tag') && document.querySelector('.ew-work-content .ew-stage-list')")
         self.assertEqual(self.text('.ew-author-definition-head h2'), item['name'])
-        self.assertEqual(self.read('#ew-publication-state', 'value'), 'unpublished')
+        self.assertEqual((self.read('.ew-author-definition-head .ew-author-tag', 'dataset.state'), self.text('.ew-author-definition-head .ew-author-tag')), ('draft', '미게시'))
         self.assertEqual(self.browser.evaluate("Array.from(document.querySelectorAll('.ew-author-tabs [role=tab]'), e=>e.textContent.trim())"),
-                         ['업무 내용', '게시 기록'])
+                         ['업무 내용', '시험해 보기', '게시 기록'])
         self.screenshot('parity-b2-ems-procedure-1920')
 
-    def save_publication(self, state='published'):
-        self.choose('#ew-publication-state', state)
-        if not self.read('[data-author-action=save]', 'disabled'):
-            self.click('[data-author-action=save]')
+    def publish_from_editor(self):
+        if not self.read('[data-author-action=publish]', 'disabled'):
+            self.click('[data-author-action=publish]')
+            self.wait("document.querySelector('[data-author-status]')?.dataset.status === 'published'")
         self.wait("document.querySelector('[data-author-status]')?.dataset.dirty === 'false'")
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ees-work-dialog')"))
 
@@ -110,47 +110,61 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         key = created['workflow_id']
         self.refresh()
         self.click('[data-author-action=open][data-id="' + key + '"]')
-        self.wait("document.querySelector('#ew-publication-state')?.value === 'unpublished'")
+        self.wait("document.querySelector('.ew-author-definition-head .ew-author-tag')?.dataset.state === 'draft'")
+        self.assertEqual(self.text('.ew-author-definition-head .ew-author-tag'), '미게시')
         self.assertEqual(self.text('[data-author-action=save]'), '저장')
+        self.assertTrue(self.read('[data-author-action=save]', 'disabled'))
         self.assertEqual(self.text('[data-author-status]'), '저장됨')
-        self.assertFalse(self.read('#ew-publication-state', 'disabled'))
+        self.assertFalse(self.read('[data-author-action=publish]', 'disabled'))
         self.fill('#ew-procedure-info [name=overview_description]', '작성 중인 절차도 목록에 표시')
-        self.click('[data-author-action=save]')
-        self.wait("!document.querySelector('#ew-summary-editor') && !document.querySelector('#ew-publication-state').disabled")
-        self.assertEqual(self.state(workflow_id=key)['workflow']['draft']['description'], '작성 중인 절차도 목록에 표시')
-        writes = len(self.server.workspace_commands)
-        self.choose('#ew-publication-state', 'published')
-        self.assertIsNone(self.state(workflow_id=key)['workflow']['published_version'])
-        # Navigation preferences can flush while the user changes the select.
-        commands = self.server.workspace_commands[writes:]
-        self.assertEqual([body['action'] for body in commands if body['action'] != 'save_ui'], [])
         self.assertEqual(self.text('[data-author-status]'), '저장하지 않은 변경 있음')
-        self.assertFalse(self.read('[data-author-action=save]', 'disabled'))
         self.click('[data-author-action=save]')
-        self.wait("document.querySelector('#ew-publication-state')?.value === 'published' && document.querySelector('[data-author-status]')?.dataset.dirty === 'false'")
+        self.wait("!document.querySelector('#ew-summary-editor') && document.querySelector('[data-author-status]')?.dataset.dirty === 'false'")
+        saved = self.state(workflow_id=key)['workflow']
+        self.assertEqual(saved['draft']['description'], '작성 중인 절차도 목록에 표시')
+        # 저장 keeps the draft only; 게시 is its own command.
+        self.assertIsNone(saved['published_version'])
+        writes = len(self.server.workspace_commands)
+        self.click('[data-author-action=publish]')
+        self.wait("document.querySelector('[data-author-status]')?.dataset.status === 'published'")
+        commands = self.server.workspace_commands[writes:]
+        self.assertEqual([body['action'] for body in commands if body['action'] != 'save_ui'], ['publish_workflow'])
         self.assertEqual(self.state(workflow_id=key)['workflow']['published_version'], 1)
+        self.assertEqual(self.read('.ew-author-definition-head .ew-author-tag', 'dataset.state'), 'published')
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-status] [data-author-action=view_in_work]')"))
         self.screenshot('procedure-manual-publication-incomplete')
         self.authoring_viewport(360, 768, overlay=True)
         self.assertLessEqual(self.browser.evaluate("document.querySelector('.ew-author').scrollWidth-document.querySelector('.ew-author').clientWidth"), 1)
         self.screenshot('procedure-manual-publication-narrow')
-        self.assertTrue(self.read('#ew-publication-state', 'checkVisibility()'))
-        self.assertGreaterEqual(self.read('#ew-publication-state', 'getBoundingClientRect().width'), 60)
+        self.assertTrue(self.read('.ew-author-definition-head .ew-author-tag', 'checkVisibility()'))
         self.authoring_viewport(1920, 1080, overlay=False)
-        self.fill('#ew-procedure-info [name=overview_description]', '게시 상태에서 저장한 최신 내용')
+        self.fill('#ew-procedure-info [name=overview_description]', '게시하지 않고 저장한 내용')
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('[data-author-status]')?.dataset.dirty === 'false'")
+        draft_only = self.state(workflow_id=key)['workflow']
+        self.assertEqual(draft_only['published_version'], 1)
+        self.assertEqual(draft_only['published']['description'], '작성 중인 절차도 목록에 표시')
+        self.assertIn('게시 안 한 변경 있음', self.text('.ew-author-definition-head .ew-author-muted'))
+        # 게시 with unsaved edits saves and publishes them in one command.
+        self.fill('#ew-procedure-info [name=overview_description]', '게시하며 저장한 최신 내용')
+        writes = len(self.server.workspace_commands)
+        self.click('[data-author-action=publish]')
+        self.wait("document.querySelector('[data-author-status]')?.dataset.status === 'published'")
+        commands = [body for body in self.server.workspace_commands[writes:] if body['action'] != 'save_ui']
+        self.assertEqual([(body['action'], body.get('publication_state')) for body in commands], [('save_draft', 'published')])
         published = self.state(workflow_id=key)['workflow']
         self.assertEqual(published['published_version'], 2)
-        self.assertEqual(published['published']['description'], '게시 상태에서 저장한 최신 내용')
+        self.assertEqual(published['published']['description'], '게시하며 저장한 최신 내용')
+        self.assertNotIn('게시 안 한 변경 있음', self.text('.ew-author-definition-head .ew-author-muted'))
         self.click('[data-action=mode][data-mode=work]')
         self.wait('document.querySelector(' + json.dumps('[data-action=workflow][data-workflow-id="' + key + '"]') + ')')
         self.click('[data-action=mode][data-mode=author]')
-        self.wait("document.querySelector('#ew-publication-state')")
-        self.choose('#ew-publication-state', 'unpublished')
-        self.assertEqual(self.state(workflow_id=key)['workflow']['published_version'], 2)
-        self.click('[data-author-action=save]')
-        self.wait("document.querySelector('[data-author-status]')?.dataset.dirty === 'false'")
-        self.wait("document.querySelector('#ew-publication-state')?.value === 'unpublished'")
+        self.wait("document.querySelector('.ew-author-definition-head .ew-author-tag')?.dataset.state === 'published'")
+        self.click('.ew-procedure-menu>summary')
+        self.click('[data-author-action=unpublish]')
+        self.wait("document.querySelector('.ew-author-definition-head .ew-author-tag')?.dataset.state === 'draft'")
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('.ew-procedure-menu>summary')"))
+        self.assertEqual(self.text('.ew-author-definition-head .ew-author-muted'), 'EMS')
         hidden = self.state(workflow_id=key)['workflow']
         self.assertIsNone(hidden['published_version'])
         self.assertEqual(len(hidden['versions']), 2)
@@ -174,7 +188,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.authoring_viewport(width, 768, overlay=width <= 480)
             self.assertEqual(self.browser.evaluate(
                 "[...document.querySelectorAll('.ew-author-tabs > button')].map(button=>button.dataset.tab)"),
-                ['content', 'history'])
+                ['content', 'try', 'history'])
             self.open_author_job_ui('job-0')
             choice = '[data-author-action=judgment_choices][data-id=job-0]'
             self.click(choice)
@@ -395,7 +409,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.click('[data-author-action=validate]')
             self.wait("document.querySelector('.ew-author-validation')")
             self.assertTrue(self.state(workflow_id=key)['workflow']['validation']['errors'])
-            self.assertFalse(self.read('#ew-publication-state', 'disabled'))
+            self.assertFalse(self.read('[data-author-action=publish]', 'disabled'))
             self.click('[data-author-action=tab][data-tab=content]')
             self.open_author_job_ui('job-0')
             self.open_job_tool_setup()
@@ -417,7 +431,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 self.assertEqual(self.text('[data-author-status]'), clean_status)
             self.click('.ew-procedure-menu>summary')
             self.click('[data-author-action=validate]')
-            self.wait("document.querySelector('#ew-publication-state')?.disabled===false")
+            self.wait("document.querySelector('[data-author-action=publish]')?.disabled===false")
             self.assertEqual(self.state(workflow_id=key)['workflow']['validation']['errors'], [])
             saved_tool = deepcopy(self.state(workflow_id=key)['workflow'])
             self.click('[data-author-action=tab][data-tab=content]')
@@ -491,6 +505,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertEqual(job['deadline_notes'], original['nodes']['job-0']['deadline_notes'])
             self.assertEqual(job['completion'], original['nodes']['job-0']['completion'])
             self.assertEqual(cleaned['authoring_review'], original['authoring_review'])
+            self.assertEqual(self.state(workflow_id=key)['workflow']['published_version'], 1)
+            self.click('[data-author-action=publish]')
+            self.wait("document.querySelector('[data-author-status]')?.dataset.status === 'published'")
             self.assertGreater(self.state(workflow_id=key)['workflow']['published_version'], 1)
             self.assertEqual(self.state(workflow_id=key)['workflow']['published']['nodes']['job-0'], job)
             # A read tool permits automatic completion, and changing that UI
@@ -1318,15 +1335,15 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
               return {panel:bounds('[data-ees-work-surface]'),frame:bounds('[data-ees-source-shell]'),sidebar:bounds('#sidebar'),
                 chatState:document.querySelector('[data-ees-source-shell]').dataset.eesChatState,chat:bounds('[data-ees-chat-surface]'),header:bounds('[data-ees-work-toolbar]'),
                 card:bounds('.ew-work-content'),purpose:bounds('#ew-procedure-info'),steps:bounds('.ew-content-heading'),list:bounds('.ew-stage-list'),footer:bounds('.ew-author>footer'),
-                titleRow:bounds('.ew-author-definition-head>.ew-author-heading'),title:bounds('.ew-author-definition-head h2'),badgeBounds:bounds('.ew-author-definition-head .ew-publication-field'),
+                titleRow:bounds('.ew-author-definition-head>.ew-author-heading'),title:bounds('.ew-author-definition-head h2'),badgeBounds:bounds('.ew-author-definition-head .ew-author-tag'),
                 menu:bounds('.ew-procedure-menu'),menuOpacity:getComputedStyle(document.querySelector('.ew-procedure-menu')).opacity,
                 footerItems:[...document.querySelector('.ew-author>footer').children].map(rect),
                 retiredSummary:!!document.querySelector('.ew-content-needs,[data-author-action=summary_open]'),
                 redundantOverview:!!document.querySelector('.ew-content-overview h3,.ew-content-meta,.ew-work-order-note'),
                 availableWidth:document.querySelector('[data-ees-work-surface]').parentElement.getBoundingClientRect().width,
-                badge:style('#ew-publication-state'),detail:style('#ew-procedure-info textarea'),
+                badge:style('.ew-author-definition-head .ew-author-tag'),detail:style('#ew-procedure-info textarea'),
                 tabs:style('.ew-author-tabs>button'),heading:style('.ew-author h2'),
-                footerStyle:style('.ew-author>footer'),footerButton:style('.ew-author>footer>button'),primaryButton:style('.ew-author>footer>.ew-primary'),
+                footerStyle:style('.ew-author>footer'),footerButton:style('.ew-author>footer>button'),primaryButton:document.querySelector('.ew-author>footer>.ew-primary')&&style('.ew-author>footer>.ew-primary'),
                 extraHeader:document.querySelectorAll('#ees-work-panel>.ew-panel-header').length,
                 factoryTabs:document.querySelectorAll('.ew-author-factories').length,
                 factoryLabel:document.querySelector('.ew-author-factories')?.getAttribute('aria-label')??null,
@@ -1363,9 +1380,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertLess(metrics['purpose']['y'], metrics['steps']['y'])
             self.assertLess(metrics['steps']['y'], metrics['list']['y'])
             self.assertEqual(self.browser.evaluate("document.querySelectorAll('[data-author-action=stage_toggle]').length"), 0)
-            self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim())"), ['업무 내용', '게시 기록'])
+            self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim())"), ['업무 내용', '시험해 보기', '게시 기록'])
             self.assertGreaterEqual(metrics['footer']['height'], 44)
-            self.assertEqual(len(metrics['footerItems']), 2)
+            self.assertEqual(len(metrics['footerItems']), 3)
             for item in metrics['footerItems']:
                 self.assertGreaterEqual(item['y'], metrics['footer']['y'] - 1)
                 self.assertLessEqual(item['y'] + item['height'], metrics['footer']['y'] + metrics['footer']['height'] + 1)
@@ -1377,7 +1394,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertGreaterEqual(int(metrics['detail']['size'].removesuffix('px')), 12)
             self.assertGreaterEqual(int(metrics['tabs']['size'].removesuffix('px')), 12)
             self.assertLessEqual(metrics['overflow'], 1)
-            self.assertEqual(self.read('#ew-publication-state', 'value'), 'unpublished')
+            self.assertEqual(self.read('.ew-author-definition-head .ew-author-tag', 'dataset.state'), 'draft')
             self.assertIn('저장됨', self.text('[data-author-status]'))
             directory = self.screenshot('procedure-visual-content-empty-' + str(width))
             (directory / ('procedure-visual-content-empty-' + str(width) + '-geometry.json')).write_text(
@@ -1560,9 +1577,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(stored['read_retry'], {'count': 1, 'deadline_seconds': 30})
         self.click('.ew-procedure-menu>summary')
         self.click('[data-author-action=validate]')
-        self.wait("document.querySelector('#ew-publication-state')?.disabled === false")
+        self.wait("document.querySelector('[data-author-action=publish]')?.disabled === false")
         self.assertEqual(self.state(workflow_id=wid)['workflow']['validation']['errors'], [])
-        self.save_publication()
+        self.publish_from_editor()
         self.wait_for_publication()
         self.screenshot('shared-b10-5-read-retry-published')
         self.command('save_access', principal_kind='user', principal_id=self.server.user['id'],
@@ -2125,9 +2142,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(validation['errors'], [])
         self.assertEqual([warning for warning in validation['warnings'] if warning.startswith('job-0:')],
                          ['job-0: 도구가 연결되지 않았습니다. 게시는 되지만, 도구를 연결해 다시 게시하기 전까지 이 작업과 이 작업이 있는 단계는 실행할 수 없습니다.'])
-        self.assertFalse(self.read('#ew-publication-state', 'disabled'))
+        self.assertFalse(self.read('[data-author-action=publish]', 'disabled'))
         self.screenshot('tools-phase3-t08a-incomplete-publication-1920')
-        self.save_publication()
+        self.publish_from_editor()
         self.wait_for_publication()
         before = deepcopy(self.state(workflow_id=key)['workflow'])
         self.click('[data-author-action=tab][data-tab=content]')
@@ -2197,7 +2214,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('.ew-procedure-menu>summary'); self.click('[data-author-action=validate]')
         self.wait("document.querySelector('.ew-author-validation')")
         self.assertEqual(self.state(workflow_id=key)['workflow']['validation']['errors'], [])
-        self.save_publication()
+        self.publish_from_editor()
         self.wait_for_publication()
         self.assertEqual(self.authored_native.execution_calls, [])
         self.assertEqual(self.server.completions, [])
@@ -3497,7 +3514,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         validated = self.state(workflow_id=record['id'])['workflow']
         self.assertEqual(validated['validation']['errors'], [])
         self.assertIn('도구가 연결되지 않았습니다', ' '.join(validated['validation']['warnings']))
-        self.assertFalse(self.read('#ew-publication-state', 'disabled'))
+        self.assertFalse(self.read('[data-author-action=publish]', 'disabled'))
         self.assertIsNone(validated['published_version'])
         self.assertEqual(len(self.server.completions), 0)
         self.screenshot('procedure-examples-created-publication-warning')
@@ -3588,7 +3605,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.wait('window.__eesNativeWorkV1?.captureReference()?.workflow_id === ' + json.dumps(key))
         self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
         self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim())"),
-                         ['업무 내용', '게시 기록'])
+                         ['업무 내용', '시험해 보기', '게시 기록'])
         self.assertFalse(self.browser.evaluate("!!document.querySelector('#ew-author-schedule,[data-author-action=run_mode],[data-author-action=schedule_tools]')"))
         self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-content-start-inputs')"))
         self.click('.ew-procedure-menu > summary')
@@ -3677,7 +3694,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(len(incomplete['validation']['errors']), 1)
         self.assertIn('job-0: 조회 재시도는 검증된 읽기 작업에만 0~3회, 전체 1~300초',
                       incomplete['validation']['errors'][0])
-        self.assertFalse(self.read('#ew-publication-state', 'disabled'))
+        self.assertFalse(self.read('[data-author-action=publish]', 'disabled'))
         self.screenshot('integrated-figma-read-retry-publication-blocker')
         corrected = deepcopy(incomplete['draft'])
         corrected['nodes']['job-0']['read_retry']['deadline_seconds'] = 30
@@ -3698,9 +3715,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.click('.ew-procedure-menu>summary')
         self.wait("document.querySelector('.ew-procedure-menu')?.open === true")
         self.click('[data-author-action="validate"]')
-        self.wait("document.querySelector('#ew-publication-state')?.disabled === false")
+        self.wait("document.querySelector('[data-author-action=publish]')?.disabled === false")
         self.assertEqual(self.state(workflow_id=key)['workflow']['validation']['errors'], [])
-        self.save_publication()
+        self.publish_from_editor()
         self.wait_for_publication()
 
         async def invoke(actor, reference, arguments, context):

@@ -735,10 +735,10 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         # Saving straight from the row being typed takes one click.
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
-        self.select_native('#ew-publication-state', 'published')
-        self.assertEqual(self.text('[data-author-action=save]'), '저장 · 게시')
-        self.click('[data-author-action=save]')
-        self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
+        # 저장 keeps the draft; 게시 publishes it (mock 21 rev 2).
+        self.assertEqual(self.text('[data-author-action=publish]'), '게시')
+        self.click('[data-author-action=publish]')
+        self.wait("document.querySelector('[data-author-status]')?.dataset.status === 'published'")
         saved = self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['workflow']
         job = next(node for node in saved['draft']['nodes'].values() if node['type'] == 'j')
         self.assertEqual(saved['published_version'], 1)
@@ -893,9 +893,9 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         stage_id = self.group_jobs_ui('현장 확인', [job_id])
         self.open_author_job_ui(job_id, stage_id)
         self.click('[data-author-action="save"]');self.wait("document.querySelector('[data-author-status]')?.dataset.authorRevision === '2'")
-        self.click('.ew-procedure-menu>summary');self.click('[data-author-action="validate"]');self.wait("document.querySelector('#ew-publication-state')")
-        self.choose('#ew-publication-state','published');self.click('[data-author-action=save]')
-        self.wait("!document.querySelector('#ees-work-dialog') && document.querySelector('#ees-work-designer [role=status]')?.textContent.includes('저장했습니다')")
+        self.click('.ew-procedure-menu>summary');self.click('[data-author-action="validate"]');self.wait("document.querySelector('.ew-author-validation')")
+        self.click('[data-author-action=publish]')
+        self.wait("!document.querySelector('#ees-work-dialog') && document.querySelector('[data-author-status]')?.dataset.status === 'published'")
         self.click('[data-author-action=tab][data-tab=history]')
         self.wait("[...document.querySelectorAll('.ew-author-history strong')].some(node=>node.textContent.trim()==='게시 v1')")
         published=self.browser_api('GET','/api/ees-work/workspace?workflow_id='+key)['data']['workflow']

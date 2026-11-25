@@ -1,0 +1,106 @@
+{
+ "revision": 1,
+ "status": "review_mock_ready",
+ "date": "2026-11-20",
+ "request": "그럼 '처음 들어와서 가이드를 끝내기까지'를 한 흐름으로 설계를 해보자",
+ "context": "배포는 성공했지만 현재 ux는 여전히 초심자에게 직관적이지 않아. 여기서 말하는 초심자는 이 ui를 처음 사용하는 사람이기도 하고, 코딩에 대해 아무것도 모르는 시스템 담당자/관리자야.",
+ "base_commit": "b6eede0",
+ "product_commit": "e494605",
+ "implementation_revision": null,
+ "mock": {
+  "file": "docs/mockups/ees-work/design-mock-20-first-guide.html",
+  "sha256": "d9e13e7b1166ed0a5c81f6f70be9e1c8851d7b10fb74942338aed39342d4771f",
+  "bytes": 536306,
+  "source": "docs/mockups/ees-work/design-mock-src/20-first-guide.html",
+  "source_sha256": "9b10c7562aaa2efc04dd89453bd2becd1c910bb102b2b4b4bfe05a7f923696c4",
+  "product_css": {
+   "chat-theme.css": "b0c9b3298702fe77d758839265370080b9cf33f403c558c96dc4e95e114f222e",
+   "ees-work-launcher.css": "59c2170c40472a8c604ed81d72c7154d218368e6f5ed9d5871478c043242c718"
+  }
+ },
+ "screens": {
+  "GF1": "처음 화면 · 할 수 있는 업무 목록(목적·시작)",
+  "GF2": "시작한 뒤 · 바로 할 일 화면, 문서 주소 칸과 바로 옆 찾기",
+  "GF3": "주소가 비었거나 Confluence 주소가 아닐 때 · 칸 아래에 표시",
+  "GF4": "문서를 찾은 뒤 · 이 문서가 맞나요? 맞아요/아니에요",
+  "GF5": "맞다고 한 뒤 · 첫 할 일은 문서 제목으로 접히고 둘째가 열림",
+  "GF6": "하위 문서를 찾은 뒤 · 이 목록으로 할까요? 네",
+  "GF7": "다 했을 때 · 흐름 끝에 다 했어요와 끝내기",
+  "GF8": "Confluence 연결이 안 되어 있을 때 · 그 할 일 아래에 할 일 하나와 함께",
+  "GF9": "문서를 열 수 없을 때 · 주소 칸이 남아 바로 다시 찾기"
+ },
+ "window": {
+  "1920x1080": "왼쪽 메뉴 256px 펼침, 가운데 1104px, 대화 560px 열림",
+  "1366x768": "왼쪽 메뉴 256px 펼침(제품은 이 폭에서 그림만 남긴다. 이 시안은 재현하지 않음), 가운데 690px, 대화 420px"
+ },
+ "captures": [
+  {
+   "file": "GF1.png",
+   "shows": "처음 화면 · 할 수 있는 업무 목록(목적·시작)",
+   "sha256": "1fac1e538cc1ed68ea0a9880e028a80776feb0001a9402c2403d185f801f46e2"
+  },
+  {
+   "file": "GF2.png",
+   "shows": "시작한 뒤 · 바로 할 일 화면, 문서 주소 칸과 바로 옆 찾기",
+   "sha256": "a93cdaa74cbf076599487f25150a54bc18226627d6283bc6737db7d4ffd4f845"
+  },
+  {
+   "file": "GF3.png",
+   "shows": "주소가 비었거나 Confluence 주소가 아닐 때 · 칸 아래에 표시",
+   "sha256": "f81b0a7c34a062e978943513bf01db4061e836229d1633f295314782315ecee4"
+  },
+  {
+   "file": "GF4.png",
+   "shows": "문서를 찾은 뒤 · 이 문서가 맞나요? 맞아요/아니에요",
+   "sha256": "59c88868dd4392b6ac89a6da6c9e5b8f9be1d3862041f3638cd2354b03607b7a"
+  },
+  {
+   "file": "GF5.png",
+   "shows": "맞다고 한 뒤 · 첫 할 일은 문서 제목으로 접히고 둘째가 열림",
+   "sha256": "aa8f965c966c8596daaeb2ca59833801a7967fdb61d47f75b85feb0ca5d56624"
+  },
+  {
+   "file": "GF6.png",
+   "shows": "하위 문서를 찾은 뒤 · 이 목록으로 할까요? 네",
+   "sha256": "421eb05c13fcc0acd0b96b731e46389e2551158fdfa4a4e5699e042f62414efc"
+  },
+  {
+   "file": "GF7.png",
+   "shows": "다 했을 때 · 흐름 끝에 다 했어요와 끝내기",
+   "sha256": "022c8c2c0ad14f906c809227811af7693684fdc1c3ae6304775e897e3ce9a79a"
+  },
+  {
+   "file": "GF8.png",
+   "shows": "Confluence 연결이 안 되어 있을 때 · 그 할 일 아래에 할 일 하나와 함께",
+   "sha256": "6012e49ecca5659088443f3272971995999019c5b36e58d2b15c47a6d2d3bdb5"
+  },
+  {
+   "file": "GF9.png",
+   "shows": "문서를 열 수 없을 때 · 주소 칸이 남아 바로 다시 찾기",
+   "sha256": "fd8e511fb6005d3e159708cf376a60ff5813d4d6dac2c2a0eba8f7338874016f"
+  },
+  {
+   "file": "GF2-1366.png",
+   "shows": "GF2 · 1366x768",
+   "sha256": "39d1eb1734acb009e5f42f415833b50b6cf54b7c7b233d42d975d6e68f8177ab"
+  },
+  {
+   "file": "GF4-1366.png",
+   "shows": "GF4 · 1366x768",
+   "sha256": "5e3803fa213d79734417e841e56361a548197a760caa6de3bb07ff3fed22c7cc"
+  },
+  {
+   "file": "GF7-1366.png",
+   "shows": "GF7 · 1366x768",
+   "sha256": "5d2a06a6f2e27e2cc623c6bf21abd74e56e31f84c4f09d1562a75053918515d8"
+  }
+ ],
+ "validation": {
+  "report": "evals/artifacts/first-user-usability-20261118/mock20-validation-report.json",
+  "checks": 150,
+  "passed": 150,
+  "page_errors": 0,
+  "console_errors": 0,
+  "requests": 0
+ }
+}

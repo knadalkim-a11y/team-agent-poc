@@ -437,7 +437,8 @@ async def _workspace_input_context(service, user, body):
             or not isinstance(body.get("run_id"), str) or not isinstance(body.get("job_id"), str)):
         raise WorkflowError("invalid_proposal", "제안 대상과 현재 작업 위치를 확인해 주세요.")
     with service._db() as db:
-        run = service._work_run(db, actor, groups, body["run_id"], write=True)
+        # AI input suggestions come from chat, which never sees a try.
+        run = service._work_real_run(db, actor, groups, body["run_id"], write=True)
         _revision(body, run["revision"])
         if body.get("workflow_id", run["workflow_id"]) != run["workflow_id"]:
             raise WorkflowError("invalid_proposal", "진행 건의 절차를 확인해 주세요.")
@@ -489,7 +490,7 @@ async def _workspace_input_context(service, user, body):
         raise WorkflowError("proposal_fields_unavailable", "현재 권한의 선택지를 먼저 조회하거나 선행 입력을 보완해 주세요.")
     actor, _caps, groups = await service._work_actor(actor)
     with service._db() as db:
-        current = service._work_run(db, actor, groups, run["id"], write=True)
+        current = service._work_real_run(db, actor, groups, run["id"], write=True)
         _revision(body, current["revision"])
         if service._work_snapshot(db, current, node["id"]) != snapshot:
             raise WorkflowError("revision_conflict", "업무 설정이나 입력이 바뀌었습니다. 최신 상태로 다시 제안해 주세요.")
@@ -787,7 +788,8 @@ def install(app, verified_user):
                 "execution_overlap", "execution_service_required", "result_confirmation_required", "run_completed",
                 "draft_revision_conflict", "workflow_baseline_changed", "validation_required",
                 "api_version_changed", "api_import_changed", "api_duplicate", "api_service_duplicate", "api_service_in_use",
-                "legacy_execution_retired", "tool_authoring_retired", "intent_expired", "intent_changed", "already_claimed"} else 404 if code in {"process_not_found", "workflow_not_found", "run_not_found",
+                "legacy_execution_retired", "tool_authoring_retired", "intent_expired", "intent_changed", "already_claimed",
+                "publication_changed", "try_running"} else 404 if code in {"process_not_found", "workflow_not_found", "run_not_found",
                     "api_not_found", "api_service_not_found"} else 503 if code in {
                     "authoring_authorization_unavailable", "authoring_unavailable", "api_catalog_unavailable"} else 400
         return JSONResponse(value, status_code=status, headers={"Cache-Control": "no-store"})
@@ -815,6 +817,11 @@ def install(app, verified_user):
     @app.post("/api/ees-work/workspace/options", include_in_schema=False)
     async def workspace_options_route(body: dict = Body(...), user=Depends(verified_user)):
         return response(await _production_service().input_options(user, body))
+
+    # A POST read: the window key of a try never goes into a URL.
+    @app.post("/api/ees-work/workspace/try", include_in_schema=False)
+    async def workspace_try_route(body: dict = Body(...), user=Depends(verified_user)):
+        return response(await _production_service().try_state(user, body))
 
     @app.get("/api/ees-work/resources", include_in_schema=False)
     async def resources_route(user=Depends(verified_user)):

@@ -42,7 +42,7 @@ SUITES = {
         "test_ees_workflow_model.py", "test_ees_workflow_tool.py", "test_ees_integrated*.py",
         "test_ees_work_workspace.py", "test_ees_work_operations.py", "test_ees_delivery_artifacts.py",
         "test_ees_work_figma_authoring.py", "test_ees_work_figma_contracts.py",
-        "test_ees_work_figma_schedule.py", "test_ees_work_history_reference.py", "test_ees_tool_drafts.py",
+        "test_ees_work_figma_schedule.py", "test_ees_work_history_reference.py", "test_ees_work_try.py", "test_ees_tool_drafts.py",
         "test_ees_tool_draft_check.py", "test_ees_tool_lifecycle.py", "test_ees_tool_runtime.py",
         "test_ees_api_spec_execution.py", "test_ees_api_http.py", "test_ees_api_catalog.py", "test_ees_api_binding.py"],
     "contracts": ["test_ees_workflow_execution.py", "test_ees_shared_tools_native.py",
