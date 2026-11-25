@@ -544,10 +544,12 @@ class MotionNativeTests(IntegratedNativeCase):
         self.wait("document.activeElement?.matches('.ew-procedure-menu > summary')")
         self.activate()
         self.wait("document.querySelector('.ew-procedure-menu')?.open")
-        # 2026-11-24 (design mock 21): the menu opens on its first item, so one Tab reaches the next one.
+        # 2026-11-24 (design mock 21): the menu opens on its first item, so Tab walks to the items after it.
+        # 실행 파라미터 and 업무 완료·송부 정책 come before 다른 이름으로 저장 in this menu.
         self.wait("document.activeElement?.matches('.ew-procedure-menu [data-author-action=edit_workflow]')")
-        self.key('Tab', 9)
-        self.wait("document.activeElement?.matches('[data-author-action=copy]')")
+        for action in ('execution_parameters', 'policy_settings', 'copy'):
+            self.key('Tab', 9)
+            self.wait("document.activeElement?.matches('.ew-procedure-menu [data-author-action=" + action + "]')")
         self.activate()
         self.wait("document.querySelector('#ees-work-dialog [name=name]')")
         copy_name = self.read('#ees-work-dialog [name=name]', 'value')

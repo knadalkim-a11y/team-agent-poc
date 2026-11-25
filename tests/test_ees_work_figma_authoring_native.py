@@ -998,7 +998,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 return {formBottom:box.bottom,scrollBottom:scroll.bottom,bottomVisible:box.bottom<=scroll.bottom+1,
                     buttons:[...form.querySelectorAll('.ew-summary-actions button, :scope > button')].map(button=>{
                         const r=button.getBoundingClientRect();return {action:button.dataset.authorAction,top:r.top,bottom:r.bottom,
-                            withinScroll:r.top>=scroll.top&&r.bottom<=scroll.bottom,
+                            // Half a pixel: scrolling to the end leaves a fraction when a row above has a fractional height.
+                            withinScroll:r.top>=scroll.top&&r.bottom<=scroll.bottom+0.5,
                             hitTest:button.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2))};})};
             })()""")
             self.assertTrue(geometry['bottomVisible'], geometry)
@@ -1088,7 +1089,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                     rect=button.getBoundingClientRect();
                 return {x:rect.x+rect.width/2,y:rect.y+rect.height/2,top:current.top,
                     scroll:document.querySelector('.ew-author-scroll').scrollTop,
-                    step:next.height+next.top-current.bottom,hitTest:button.contains(document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2))};
+                    step:next.height+next.top-current.bottom,gap:next.top-current.bottom,hitTest:button.contains(document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2))};
             })()""")
             self.assertTrue(before_move['hitTest'], before_move)
             for kind in ('mousePressed', 'mouseReleased'):
@@ -1101,10 +1102,14 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                     stage=document.querySelector('[data-stage-id=stage-0]'),
                     live=document.querySelector('[data-author-live]'),rect=live.getBoundingClientRect(),style=getComputedStyle(live);
                 return {top:stage.getBoundingClientRect().top,scroll:document.querySelector('.ew-author-scroll').scrollTop,
+                    above:document.querySelector('[data-stage-id=stage-1]').getBoundingClientRect().height,
                     focus:document.activeElement===button,menu:!!document.querySelector('[data-stage-id=stage-0] [role=menu]'),live:live.textContent,livePosition:style.position,
                     liveWidth:rect.width,liveHeight:rect.height};
             })()""")
-            self.assertAlmostEqual(move['top'] + move['scroll'] - before_move['top'] - before_move['scroll'], before_move['step'], delta=1)
+            # The moved stage lands right under the stage that is now above it. At 480 that stage's row has a different
+            # height in its new place, so its height is read after the move.
+            self.assertAlmostEqual(move['top'] + move['scroll'] - before_move['top'] - before_move['scroll'],
+                                   move['above'] + before_move['gap'], delta=1, msg=repr((before_move, move)))
             self.assertTrue(move['focus'], move)
             self.assertFalse(move['menu'], move)
             self.assertEqual(move['livePosition'], 'absolute', move)
@@ -1378,7 +1383,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertTrue(self.read('#ew-loose-job-editor [name=name]', 'checkVisibility()'))
             self.assertTrue(self.browser.evaluate("!!document.querySelector('#ew-procedure-info [name=overview_description]')"))
             self.assertLess(metrics['purpose']['y'], metrics['steps']['y'])
-            self.assertLess(metrics['steps']['y'], metrics['list']['y'])
+            # An empty procedure has no stage rows: the empty list is not drawn and the task name field follows the heading.
+            self.assertEqual(metrics['list']['height'], 0)
+            self.assertLess(metrics['steps']['y'], self.browser.evaluate("document.querySelector('#ew-loose-job-editor').getBoundingClientRect().y"))
             self.assertEqual(self.browser.evaluate("document.querySelectorAll('[data-author-action=stage_toggle]').length"), 0)
             self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim())"), ['업무 내용', '시험해 보기', '게시 기록'])
             self.assertGreaterEqual(metrics['footer']['height'], 44)
