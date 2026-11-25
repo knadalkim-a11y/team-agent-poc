@@ -275,6 +275,30 @@ def _job_input_fields(definition, job):
     return [*job.get('inputs', []), *(field for key, field in procedure_run_inputs(definition).items() if key in ids)]
 
 
+def _ungrouped_stage_errors(definition, nodes):
+    """Keep existing runtime stages for loose jobs without hiding stage rules in the editor."""
+    containers = {key: node for key, node in nodes.items() if isinstance(node, dict) and 'ungrouped' in node}
+    if not containers:
+        return []
+    errors = []
+    structure = {'id', 'type', 'name', 'parent', 'children', 'ungrouped'}
+    schedule = definition.get('schedule')
+    deadlines = schedule.get('stage_deadlines', {}) if isinstance(schedule, dict) else {}
+    overrides = definition.get('factory_overrides', {})
+    for key, node in containers.items():
+        if node.get('ungrouped') is not True or node.get('type') != 't' or node.get('name') != '작업' or not node.get('children'):
+            errors.append(f'{key}: 단계에 속하지 않은 작업의 연결을 확인해 주세요.')
+        if (any(value not in (None, '', [], {}) for field, value in node.items() if field not in structure)
+                or isinstance(deadlines, dict) and key in deadlines
+                or isinstance(overrides, dict) and key in overrides):
+            errors.append(f'{key}: 기존 단계 설정을 유지하려면 작업을 해당 단계에 두세요.')
+    for key, node in nodes.items():
+        deps = node.get('deps') if isinstance(node, dict) else None
+        if isinstance(deps, list) and any(isinstance(dep, str) and dep in containers for dep in deps):
+            errors.append(f'{key}: 선행 조건에는 이름을 붙인 단계나 개별 작업을 선택해 주세요.')
+    return errors
+
+
 def definition_check(definition, complete=True):
     """Validation is independent of the editor and never evaluates expressions."""
     errors, warnings = [], []
@@ -299,6 +323,7 @@ def definition_check(definition, complete=True):
         return errors + ['절차·단계·작업 구조를 확인해 주세요.'], warnings
     root_fields = procedure_run_inputs(definition)
     errors.extend(_bound_run_input_definition_errors(nodes, root_fields))
+    errors.extend(_ungrouped_stage_errors(definition, nodes))
     # 2026-11-02: schedules are no longer authored with the procedure. A rule
     # left in an earlier draft is kept as data but cannot be edited on screen,
     # so it no longer blocks publication. Reservations validate their own rule.

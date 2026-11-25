@@ -20,6 +20,8 @@ import unittest
 from unittest.mock import patch
 from uuid import uuid4
 
+from ees_work_integrated_fixture import IntegratedNativeCase
+
 
 ROOT = Path(__file__).resolve().parents[1]
 UPSTREAM = os.environ.get("EES_TEST_UPSTREAM_WHEEL")
@@ -281,6 +283,10 @@ class NativeAccountAPITests(unittest.TestCase):
 
 
 class NativeAuthoringBrowserTests(unittest.TestCase):
+    add_loose_job_ui = IntegratedNativeCase.add_loose_job_ui
+    group_jobs_ui = IntegratedNativeCase.group_jobs_ui
+    open_author_job_ui = IntegratedNativeCase.open_author_job_ui
+
     @classmethod
     def setUpClass(cls):
         from test_ees_work_demo import EESWorkNativeBrowserTests
@@ -587,28 +593,9 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.wait("document.querySelector('#ew-procedure-create #ew-procedure-name')")
         self.fill('#ew-procedure-name',name);self.click('[data-author-action=procedure_create]')
         self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
-        # A new procedure has no stage yet: its stage name field is already open.
-        self.wait("document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 단계 이름\"]')")
+        self.wait("document.activeElement?.matches('#ew-loose-job-editor [name=name]')")
         state=self.browser_api("GET","/api/ees-work/workspace")["data"]
         return next(item["id"] for item in state["workflows"] if item["name"]==name)
-
-    def add_stage_ui(self, name):
-        # With no stage yet the stage name field is already open.
-        if not self.browser.evaluate("!!document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 단계 이름\"]')"):
-            self.click('[data-author-action=add_stage]')
-        self.wait("document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 단계 이름\"]')")
-        self.fill('#ew-stage-editor [name=name]', name)
-        self.click('[data-author-action=inline_apply]')
-        # A new stage opens with its job name field ready.
-        self.wait("document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 작업 이름\"]')")
-
-    def add_job_ui(self, name):
-        if not self.browser.evaluate("!!document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 작업 이름\"]')"):
-            self.click('[data-author-action=add_job]')
-        self.wait("document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 작업 이름\"]')")
-        self.fill('#ew-stage-editor [name=name]', name)
-        self.click('[data-author-action=inline_apply]')
-        self.wait("document.querySelector('#ew-author-node [name=job_guidance]')")
 
     def send_native_chat_question(self, question):
         before = len(self.server.completions)
@@ -662,7 +649,8 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
     def test_native_authoring_conflict_keeps_unsaved_draft_and_published_version(self):
         self.login_ui("administrator@example.test","Fixture-admin-only-42!")
         key=self.create_ui_procedure("동시 편집 검증")
-        self.add_stage_ui('아직 저장하지 않은 단계')
+        job_id=self.add_loose_job_ui('아직 저장하지 않은 작업')
+        self.group_jobs_ui('아직 저장하지 않은 단계', [job_id])
         prior=self.browser_api("GET","/api/ees-work/workspace?workflow_id="+key)["data"]["workflow"]
         changed=deepcopy(prior["draft"]);changed["name"]='다른 요청의 저장'
         saved=self.work_command('save_draft',expected_revision=prior['revision'],workflow_id=key,definition=changed)
@@ -682,8 +670,9 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.fixture.chats[chat['id']] = chat
         self.navigate('/c/' + chat['id'])
         key = self.create_ui_procedure("제안 경계 검증")
-        self.add_stage_ui('제안 검증 단계')
-        self.add_job_ui('직접 편집할 작업')
+        job_id = self.add_loose_job_ui('직접 편집할 작업')
+        stage_id = self.group_jobs_ui('제안 검증 단계', [job_id])
+        self.open_author_job_ui(job_id, stage_id)
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('[data-author-status]')?.dataset.authorRevision === '2'")
         before = self.browser_api('GET', '/api/ees-work/workspace?workflow_id=' + key)['data']['workflow']
@@ -721,8 +710,9 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         # 2026-11-18: a person's check list is written with the job and ticked on the job row.
         self.login_ui("administrator@example.test", "Fixture-admin-only-42!")
         key = self.create_ui_procedure("확인 항목 검증")
-        self.add_stage_ui('점검')
-        self.add_job_ui('설비 두 곳 점검')
+        job_id = self.add_loose_job_ui('설비 두 곳 점검')
+        stage_id = self.group_jobs_ui('점검', [job_id])
+        self.open_author_job_ui(job_id, stage_id)
         kinds = "[...document.querySelectorAll('#ew-author-node [name=result_block]')].filter(e=>e.checked).map(e=>e.value).join()"
         self.assertEqual(self.browser.evaluate(kinds), 'human_confirm')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-check-items')"))
@@ -899,8 +889,9 @@ class NativeAuthoringBrowserTests(unittest.TestCase):
         self.wait("document.querySelector('[data-action=choose_system][data-system-id=EMS]')")
         self.click('[data-action=choose_system][data-system-id=EMS]')
         key=self.create_ui_procedure('합성 담당자 작성 절차')
-        self.add_stage_ui('현장 확인')
-        self.add_job_ui('사람의 명시적 판정')
+        job_id = self.add_loose_job_ui('사람의 명시적 판정')
+        stage_id = self.group_jobs_ui('현장 확인', [job_id])
+        self.open_author_job_ui(job_id, stage_id)
         self.click('[data-author-action="save"]');self.wait("document.querySelector('[data-author-status]')?.dataset.authorRevision === '2'")
         self.click('.ew-procedure-menu>summary');self.click('[data-author-action="validate"]');self.wait("document.querySelector('.ew-author-validation')")
         self.click('[data-author-action=publish]')

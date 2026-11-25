@@ -30,6 +30,7 @@ from zipfile import ZipFile
 
 import httpx
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from ees_work_integrated_fixture import IntegratedNativeCase
 from test_ees_chat_theme import ChromePipe
 from ees_work_c_phase3_fullapp import SyntheticProvider
 
@@ -59,6 +60,9 @@ def historical_request_route(payload, question, query_template):
 
 
 class ProductGate:
+    add_loose_job_ui = IntegratedNativeCase.add_loose_job_ui
+    group_jobs_ui = IntegratedNativeCase.group_jobs_ui
+
     def __init__(self, args):
         self.args = args
         self.out = args.output.resolve(); self.out.mkdir(parents=True, exist_ok=True)
@@ -198,6 +202,8 @@ if(performance.now()>end)return resolve(null);requestAnimationFrame(check)}check
         for kind in ('keyDown','keyUp'):
             self.browser.call('Input.dispatchKeyEvent',{'type':kind,'key':'a','code':'KeyA','windowsVirtualKeyCode':65,'modifiers':2})
         self.browser.call('Input.insertText',{'text':value})
+
+    fill = type
 
     def open_initialized_author_list(self):
         # Match the Native authoring gate: first entry registers procedures and
@@ -740,19 +746,12 @@ def integrated_flow(gate):
     g.type('#ew-procedure-create [name=description]',purpose)
     g.click('[data-author-action="procedure_create"]')
     g.wait('!!document.querySelector("[data-author-action=tab][data-tab=content]")')
-    # 2026-11-18: a new procedure opens with its stage name field ready, and a new stage
-    # with its job name field ready; there is no add control to press first.
-    g.wait('!!document.querySelector(\'#ew-stage-editor input[name="name"][aria-label="새 단계 이름"]\')')
-    assert not g.browser.evaluate('!!document.querySelector(\'[data-author-action="add_stage"]\')')
-    g.type('#ew-stage-editor input[name="name"]','자료 검토')
-    g.click('[data-author-action=inline_apply]')
-    g.wait('!!document.querySelector(\'#ew-stage-editor input[name="name"][aria-label="새 작업 이름"]\')')
-    g.type('#ew-stage-editor input[name="name"]','사람의 근거 확인')
-    g.click('[data-author-action=inline_apply]')
+    g.wait("document.activeElement?.matches('#ew-loose-job-editor [name=name]')")
+    authored_job = g.add_loose_job_ui('사람의 근거 확인')
+    g.group_jobs_ui('자료 검토', [authored_job])
     # Add the run parameter through the procedure menu before preparing the
     # legacy job-input regression fixture below.
     assert not g.browser.evaluate('!!document.querySelector(\'[data-author-action="tab"][data-tab="schedule"]\')')
-    g.click('.ew-job-detail-header [data-author-action="node"].ew-author-back')
     g.click('.ew-procedure-menu > summary')
     g.click('[data-author-action="execution_parameters"]')
     g.click('#ees-work-dialog [data-execution-parameter-action=add]')

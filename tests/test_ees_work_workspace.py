@@ -73,6 +73,83 @@ class WorkspaceTests(unittest.IsolatedAsyncioTestCase):
         listed = await self.service.workspace_state(self.users['admin'])
         self.assertNotIn('잘못된 목적', [item['name'] for item in listed['workflows']])
 
+    async def test_mixed_task_list_saves_order_without_replacing_jobs_or_old_versions(self):
+        field = {'id': 'notice', 'name': '확인 문구', 'type': 'text', 'scope': 'run', 'required': True}
+        key, original, revision = await self.create(dependent=True, fields=[field])
+        definition = deepcopy(original)
+        nodes = definition['nodes']
+        root = next(key for key, node in nodes.items() if node['type'] == 'p')
+        nodes[root]['children'] = ['loose-first', 't', 'loose-last']
+        nodes['t']['children'] = ['next']
+        for container, job in (('loose-first', 'j'), ('loose-last', 'independent')):
+            nodes[container] = {'id': container, 'type': 't', 'name': '작업', 'parent': root,
+                                'children': [job], 'deps': [], 'ungrouped': True, 'condition': None}
+            nodes[job]['parent'] = container
+        saved = await self.command('save_draft', actor='a', workflow_id=key, expected_revision=revision,
+                                   definition=definition)
+        self.assertTrue(saved['ok'], saved)
+        await self.command('save_access', principal_kind='user', principal_id='c', system_id='EMS',
+                           factory_id='*', roles=['participant'])
+        self.service = self.new_service()
+        editor = (await self.state('a', workflow_id=key))['workflow']
+        self.assertTrue(editor['can_manage'])
+        self.assertEqual(editor['draft'], definition)
+        self.assertEqual(editor['published']['nodes'], original['nodes'])
+        reader = (await self.state('c', workflow_id=key))['workflow']
+        self.assertFalse(reader['can_manage'])
+        self.assertNotIn('draft', reader)
+        refused = await self.command('save_draft', actor='c', workflow_id=key, expected_revision=saved['revision'],
+                                     definition=definition)
+        self.assertFalse(refused['ok'], refused)
+
+        published = await self.command('publish_workflow', actor='a', workflow_id=key,
+                                       expected_revision=saved['revision'])
+        self.assertTrue(published['ok'], published)
+        reader = (await self.state('c', workflow_id=key))['workflow']
+        self.assertEqual(reader['published']['nodes'], nodes)
+        copied = await self.command('copy_workflow', actor='a', workflow_id=key, system_id='EMS',
+                                    expected_revision=published['revision'])
+        self.assertTrue(copied['ok'], copied)
+        copied_nodes = copied['workflow']['draft']['nodes']
+        copy_root = next(node for node in copied_nodes.values() if node['type'] == 'p')
+        self.assertEqual([copied_nodes[stage].get('ungrouped', False) for stage in copy_root['children']],
+                         [True, False, True])
+
+        run = await self.start(key, revision=published['revision'], inputs={'notice': '장비 A'})
+        self.assertEqual(run['definition']['nodes'], nodes)
+        self.assertEqual(run['jobs']['j']['effective_inputs'], {'notice': '장비 A'})
+        early = await self.command('human_confirm', actor='a', run_id=run['id'], job_id='next',
+                                   expected_revision=run['revision'])
+        self.assertEqual(early['error']['code'], 'prerequisite_required')
+        first = await self.command('human_confirm', actor='a', run_id=run['id'], job_id='j',
+                                   expected_revision=run['revision'])
+        self.assertTrue(first['ok'], first)
+        next_job = await self.command('human_confirm', actor='a', run_id=run['id'], job_id='next',
+                                      expected_revision=first['revision'])
+        self.assertTrue(next_job['ok'], next_job)
+
+    async def test_loose_task_stages_cannot_hide_group_settings_or_dependencies(self):
+        key, definition, revision = await self.create(dependent=True)
+        definition['nodes']['t'].update(name='작업', ungrouped=True)
+        invalid_definitions = (
+            {'nodes': {'j': {'ungrouped': True}}},
+            {'nodes': {'t': {'ungrouped': 'true'}}},
+            {'nodes': {'t': {'condition': {'field': 'active', 'op': 'eq', 'value': True}}}},
+            {'nodes': {'next': {'deps': ['t']}}},
+            {'schedule': {'stage_deadlines': {'t': {'day_offset': 1}}}},
+            {'factory_overrides': {'t': {'name': '특수 공장'}}},
+        )
+        for edits in invalid_definitions:
+            with self.subTest(edits=edits):
+                changed = deepcopy(definition)
+                changed.update({field: value for field, value in edits.items() if field != 'nodes'})
+                for node, values in edits.get('nodes', {}).items():
+                    changed['nodes'][node].update(values)
+                refused = await self.command('save_draft', workflow_id=key, expected_revision=revision,
+                                             definition=changed)
+                self.assertEqual(refused['error']['code'], 'invalid_definition', refused)
+        self.assertEqual((await self.state('admin', workflow_id=key))['workflow']['revision'], revision)
+
     async def check_list_procedure(self, items, fields=None):
         created = await self.command('create_workflow', name='주간 설비 점검', system_id='EMS')
         key = created['workflow_id']; definition = created['workflow']['draft']; root = next(iter(definition['nodes']))

@@ -602,7 +602,7 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
             control = '#sidebar [data-action=workflow][data-workflow-id="' + item + '"]'
             self.wait('document.querySelector(' + json.dumps(control) + ')')
             self.click(control)
-            self.wait("document.querySelector('#ees-work-designer')?.textContent.includes(" + json.dumps(workflows[item]['name']) + ") && document.querySelector('[data-author-action=add_stage],#ew-stage-editor [name=name]')")
+            self.wait("document.querySelector('#ees-work-designer')?.textContent.includes(" + json.dumps(workflows[item]['name']) + ") && document.querySelector('#ew-loose-job-editor [name=name]')")
             self.screenshot('authoring-unpublished-kept-' + label)
             self.assertEqual(self.state(workflow_id=item)['workflow'], workflows[item])
         self.click('[data-action=mode][data-mode=work]')

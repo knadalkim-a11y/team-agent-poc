@@ -658,8 +658,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertTrue(self.state(workflow_id=identifier)['workflow']['validation']['errors'])
         self.click('[data-author-action=validation_open][data-id="errors:0"]')
         self.click('[data-author-action=tab][data-tab=content]')
-        self.add_stage_ui('개발 환경 준비')
-        stage_id = self.browser.evaluate("document.querySelector('[data-author-action=stage_edit]').dataset.id")
+        job_id = self.add_loose_job_ui('Python 버전 확인')
+        stage_id = self.group_jobs_ui('개발 환경 준비', [job_id])
         self.click('[data-author-action=stage_edit][data-id="' + stage_id + '"]')
         self.assertIn('아직 설정 없음', self.text('#ew-stage-editor .ew-stage-advanced > summary'))
         self.click('#ew-stage-editor .ew-stage-advanced > summary')
@@ -676,7 +676,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('#ees-work-dialog [data-dialog-confirm]')
         self.wait("!document.querySelector('#ees-work-dialog')")
         self.click('[data-author-action=node][data-id=""]')
-        self.add_job_ui('Python 버전 확인')
+        self.open_author_job_ui(job_id, stage_id)
         self.fill('#ew-author-node [name=job_guidance]', '터미널에서 Python 버전을 확인하고 결과를 기록합니다.')
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('[data-author-status]')?.textContent.includes('저장됨')")
@@ -860,9 +860,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual([body for body in self.server.workspace_commands[writes:] if body.get('action') != 'save_ui'], [])
         capture_unavailable_inline('e1-deleted-stage-buffer-preserved')
         self.click('[data-author-action=inline_cancel]')
-        # With no stage left, the stage name field stays open, empty, and takes the focus.
-        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('#ew-stage-editor [name=name]')"))
-        self.assertEqual(self.read('#ew-stage-editor [name=name]', 'value'), '')
+        self.assertTrue(self.browser.evaluate("document.activeElement?.matches('#ew-loose-job-editor [name=name]')"))
+        self.assertEqual(self.read('#ew-loose-job-editor [name=name]', 'value'), '')
         self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-author-action=add_stage],[data-author-action=inline_cancel]')"))
         latest = self.state(workflow_id=identifier)['workflow']
         self.assertEqual(latest['draft'], removed)
@@ -999,7 +998,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 return {formBottom:box.bottom,scrollBottom:scroll.bottom,bottomVisible:box.bottom<=scroll.bottom+1,
                     buttons:[...form.querySelectorAll('.ew-summary-actions button, :scope > button')].map(button=>{
                         const r=button.getBoundingClientRect();return {action:button.dataset.authorAction,top:r.top,bottom:r.bottom,
-                            withinScroll:r.top>=scroll.top&&r.bottom<=scroll.bottom,
+                            // Half a pixel: scrolling to the end leaves a fraction when a row above has a fractional height.
+                            withinScroll:r.top>=scroll.top&&r.bottom<=scroll.bottom+0.5,
                             hitTest:button.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2))};})};
             })()""")
             self.assertTrue(geometry['bottomVisible'], geometry)
@@ -1036,14 +1036,14 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             key, original = fixtures[6]
             self.click('[data-author-action=stage_toggle][data-id=stage-5]')
             self.click('[data-author-action=stage_menu][data-id=stage-5]')
-            self.assertTrue(self.read('[data-author-action=move_down][data-id=stage-5]', 'disabled'))
+            self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-author-action=move_down][data-id=stage-5]')"))
+            self.assertTrue(self.read('[data-stage-id=stage-5] [data-author-action=delete_node]', 'checkVisibility()'))
             capture('c66-stage-last-menu-' + str(width))
             self.key('Escape', 27)
             self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=stage_menu][data-id=stage-5]')"))
             self.click('[data-author-action=stage_toggle][data-id=stage-0]')
             self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-author-action=move_up][data-id=stage-0]')"))
             self.click('[data-author-action=stage_menu][data-id=stage-0]')
-            self.assertEqual(self.read('[data-author-action=move_up][data-id=stage-0]', 'disabled'), True)
             self.key('Escape', 27)
             self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-stage-id=stage-0] [role=menu]')"))
             self.assertTrue(self.browser.evaluate("document.activeElement?.matches('[data-author-action=stage_menu][data-id=stage-0]')"))
@@ -1081,20 +1081,15 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 self.key('Escape', 27)
                 self.wait("document.querySelector('[data-ees-source-shell]').dataset.eesChatState === 'closed'")
                 self.assertTrue(self.read('[data-stage-id=stage-0]', 'checkVisibility()'))
-            # C66 moves the actions into the expanded-stage menu. Preserve the
-            # physical click/order/scroll checks, measuring its persistent
-            # trigger because the menu must close after the move.
-            self.browser.evaluate("document.querySelector('[data-author-action=stage_menu][data-id=stage-0]').scrollIntoView({block:'center'})")
-            self.click('[data-author-action=stage_menu][data-id=stage-0]')
+            self.browser.evaluate("document.querySelector('[data-author-action=move_down][data-id=stage-0]').scrollIntoView({block:'center'})")
             before_move = self.browser.evaluate("""(() => {
                 const button=document.querySelector('[data-author-action=move_down][data-id=stage-0]'),
-                    trigger=document.querySelector('[data-author-action=stage_menu][data-id=stage-0]'),
                     current=document.querySelector('[data-stage-id=stage-0]').getBoundingClientRect(),
                     next=document.querySelector('[data-stage-id=stage-1]').getBoundingClientRect(),
                     rect=button.getBoundingClientRect();
-                return {x:rect.x+rect.width/2,y:rect.y+rect.height/2,top:trigger.getBoundingClientRect().top,
+                return {x:rect.x+rect.width/2,y:rect.y+rect.height/2,top:current.top,
                     scroll:document.querySelector('.ew-author-scroll').scrollTop,
-                    step:next.height+next.top-current.bottom,hitTest:button.contains(document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2))};
+                    step:next.height+next.top-current.bottom,gap:next.top-current.bottom,hitTest:button.contains(document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2))};
             })()""")
             self.assertTrue(before_move['hitTest'], before_move)
             for kind in ('mousePressed', 'mouseReleased'):
@@ -1103,13 +1098,18 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.wait("document.querySelector('[data-author-live]')?.textContent === '2번째로 옮겼습니다'")
             self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-author-scroll > .ew-author-note[role=status]')"))
             move = self.browser.evaluate("""(() => {
-                const button=document.querySelector('[data-author-action=stage_menu][data-id=stage-0]'),
+                const button=document.querySelector('[data-author-action=move_down][data-id=stage-0]'),
+                    stage=document.querySelector('[data-stage-id=stage-0]'),
                     live=document.querySelector('[data-author-live]'),rect=live.getBoundingClientRect(),style=getComputedStyle(live);
-                return {top:button.getBoundingClientRect().top,scroll:document.querySelector('.ew-author-scroll').scrollTop,
+                return {top:stage.getBoundingClientRect().top,scroll:document.querySelector('.ew-author-scroll').scrollTop,
+                    above:document.querySelector('[data-stage-id=stage-1]').getBoundingClientRect().height,
                     focus:document.activeElement===button,menu:!!document.querySelector('[data-stage-id=stage-0] [role=menu]'),live:live.textContent,livePosition:style.position,
                     liveWidth:rect.width,liveHeight:rect.height};
             })()""")
-            self.assertAlmostEqual(move['top'] + move['scroll'] - before_move['top'] - before_move['scroll'], before_move['step'], delta=1)
+            # The moved stage lands right under the stage that is now above it. At 480 that stage's row has a different
+            # height in its new place, so its height is read after the move.
+            self.assertAlmostEqual(move['top'] + move['scroll'] - before_move['top'] - before_move['scroll'],
+                                   move['above'] + before_move['gap'], delta=1, msg=repr((before_move, move)))
             self.assertTrue(move['focus'], move)
             self.assertFalse(move['menu'], move)
             self.assertEqual(move['livePosition'], 'absolute', move)
@@ -1157,29 +1157,38 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertIn('저장하지 않은 변경 있음', self.text('[data-author-status]'))
             self.assertEqual(self.state(workflow_id=key)['workflow'], before_cancel)
             self.assertEqual([body for body in self.server.workspace_commands[cancel_writes:] if body.get('action') != 'save_ui'], [])
-            self.click('[data-author-action=add_stage]')
-            self.assertEqual(self.read('#ew-stage-editor [name=name]', 'placeholder'), '단계 이름 · 예: 점검')
-            capture('e1-c2-stage-add-' + str(width))
-            capture_inline_bottom('e1-c2-stage-add-bottom-' + str(width))
-            self.click('[data-author-action=inline_apply]')
-            self.assertIn('단계 이름을 입력해 주세요.', self.text('#ew-stage-editor'))
-            capture('e1-example6-empty-name-' + str(width))
-            self.fill('#ew-stage-editor [name=name]', '운영 인계')
-            self.click('[data-author-action=inline_apply]')
-            # A stage with no job opens with its job name field ready; no sentence, no extra click.
+            job_id = self.add_loose_job_ui('운영 인계 대상 확인')
+            self.wait("document.activeElement?.matches('#ew-loose-job-editor [name=name]')")
+            second_id = self.add_loose_job_ui('운영 인계 결과 기록')
+            self.assertEqual(self.browser.evaluate("document.querySelectorAll('.ew-content-stage').length"), 6)
+            capture('e1-loose-job-add-' + str(width))
+            stage_id = self.group_jobs_ui('운영 인계', [job_id, second_id])
+            capture('e1-group-loose-job-' + str(width))
+            self.click('[data-author-action=add_job][data-parent="' + stage_id + '"]')
             self.wait("document.activeElement?.matches('#ew-stage-editor [name=name]')")
-            self.assertNotIn('아직 작업이 없습니다', self.text('.ew-stage-body'))
-            self.assertFalse(self.browser.evaluate("!!document.querySelector('[data-author-action=add_job]')"))
-            capture('e1-example2-empty-stage-' + str(width))
             self.assertEqual(self.read('#ew-stage-editor [name=name]', 'placeholder'), '작업 이름 · 예: 설비 외관 확인')
             capture('e1-example5-job-add-' + str(width))
-            # The row that opens by itself has nothing to cancel.
-            capture_inline_bottom('e1-example5-job-add-bottom-' + str(width), buttons=1)
+            capture_inline_bottom('e1-example5-job-add-bottom-' + str(width))
+            entry = '#ew-stage-editor [name=name]'
+            for name in ('권한 확인', '문서 확인'):
+                self.fill(entry, name)
+                self.click(entry)
+                self.key('Enter', 13)
+                self.wait("document.activeElement?.matches('#ew-stage-editor [name=name]') && document.activeElement.value === ''")
+            row_ids = ("[...document.querySelectorAll(" + json.dumps('[data-stage-id="' + stage_id + '"] .ew-job-row') + ")]"
+                       ".map(row => row.dataset.jobId)")
+            grouped = self.browser.evaluate(row_ids)
+            self.assertEqual(grouped[:2], [job_id, second_id])
+            self.assertEqual(len(set(grouped)), 4)
             self.key('Escape', 27)
+            self.click('[data-author-action=ungroup_stage][data-id="' + stage_id + '"]')
+            self.wait("document.activeElement?.dataset.id === " + json.dumps(job_id))
+            self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-ungrouped-jobs .ew-job-row')].map(row => row.dataset.jobId)"), grouped)
+            self.assertEqual(self.browser.evaluate("document.querySelectorAll('.ew-content-stage').length"), 6)
             self.click('[data-author-action=help][data-id=stages_and_jobs]')
             self.wait("document.querySelector('#ees-work-help')")
-            self.assertIn('단계는 작업을 묶는 이름입니다. 개수·이름·순서는 업무에 맞게 정합니다.', self.text('#ees-work-help'))
-            self.assertIn('단계와 작업은 적힌 순서대로 진행합니다.', self.text('#ees-work-help'))
+            self.assertIn('목록에서 이어지는 작업은 단계로 묶을 수 있습니다.', self.text('#ees-work-help'))
+            self.assertIn('먼저 끝내야 하는 작업은 작업 상세의 앞 작업에서 지정합니다.', self.text('#ees-work-help'))
             self.assertNotIn('기존에 정한', self.text('#ees-work-help'))
             # The box stays on the work surface its question mark belongs to (it used to open
             # over the left menu when the question mark sat near the left edge).
@@ -1217,8 +1226,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
 
             with patch.object(self.server.workflow, 'workspace_state', side_effect=read_only_state):
                 self.refresh()
-                self.wait("!document.querySelector('[data-author-action=add_stage]')")
-                self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-stage-actions,.ew-job-menu-button,[data-author-action=stage_menu],[data-author-action=stage_edit],[data-author-action=add_job]')"))
+                self.wait("!document.querySelector('#ew-loose-job-editor')")
+                self.assertFalse(self.browser.evaluate("!!document.querySelector('.ew-structure-move,.ew-job-menu-button,[data-author-action=stage_menu],[data-author-action=stage_edit],[data-author-action=add_job],[data-author-action=group_jobs]')"))
                 self.click('[data-author-action=stage_toggle][data-id=stage-1]')
                 self.click('[data-author-action=stage_toggle][data-id=stage-0]')
                 capture('e1-example9-read-only-' + str(width))
@@ -1371,10 +1380,12 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             # The flat overview precedes stages, with no retired summary card.
             self.assertFalse(metrics['retiredSummary'])
             self.assertFalse(metrics['redundantOverview'])
-            self.assertEqual(self.text('.ew-content-heading>small'), '0개 단계')
+            self.assertTrue(self.read('#ew-loose-job-editor [name=name]', 'checkVisibility()'))
             self.assertTrue(self.browser.evaluate("!!document.querySelector('#ew-procedure-info [name=overview_description]')"))
             self.assertLess(metrics['purpose']['y'], metrics['steps']['y'])
-            self.assertLess(metrics['steps']['y'], metrics['list']['y'])
+            # An empty procedure has no stage rows: the empty list is not drawn and the task name field follows the heading.
+            self.assertEqual(metrics['list']['height'], 0)
+            self.assertLess(metrics['steps']['y'], self.browser.evaluate("document.querySelector('#ew-loose-job-editor').getBoundingClientRect().y"))
             self.assertEqual(self.browser.evaluate("document.querySelectorAll('[data-author-action=stage_toggle]').length"), 0)
             self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim())"), ['업무 내용', '시험해 보기', '게시 기록'])
             self.assertGreaterEqual(metrics['footer']['height'], 44)
@@ -2532,9 +2543,10 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action=open][data-id="' + workflow_id + '"]')
         self.wait("document.querySelector('[data-author-action=tab][data-tab=content]')")
         self.click('[data-author-action=tab][data-tab=content]')
-        self.wait("document.querySelector('[data-author-action=add_stage],#ew-stage-editor [name=name]')")
-        self.add_stage_ui('아직 저장하지 않은 메뉴 단계')
-        self.add_job_ui('아직 저장하지 않은 메뉴 작업')
+        self.wait("document.querySelector('#ew-loose-job-editor [name=name]')")
+        job_id = self.add_loose_job_ui('아직 저장하지 않은 메뉴 작업')
+        stage_id = self.group_jobs_ui('아직 저장하지 않은 메뉴 단계', [job_id])
+        self.open_author_job_ui(job_id, stage_id)
         self.fill('#ew-author-node [name=job_guidance]', '복귀 후에도 유지할 미저장 설명')
         saved = self.state(workflow_id=workflow_id)['workflow']
         self.screenshot('menu-c18-admin-workspace')
@@ -3442,9 +3454,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             const section = document.querySelector('.ew-work-content');
             const heading = section.querySelector('.ew-content-heading');
             const stages = section.querySelector('.ew-stage-list');
-            const add = heading?.querySelector(':scope > [data-author-action=add_stage]');
+            const add = section.querySelector('#ew-loose-job-editor [data-author-action=loose_apply]');
             return add?.checkVisibility() && !!stages &&
-                add.getBoundingClientRect().bottom <= stages.getBoundingClientRect().top;
+                heading.getBoundingClientRect().top <= add.getBoundingClientRect().top;
         })()"""))
         self.screenshot('procedure-initial-editable')
         self.click('.ew-procedure-menu summary')
@@ -3551,8 +3563,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         record = next(item for item in self.state()['workflows']
                       if item['name'] == created['name'])
         key = record['id']
-        self.add_stage_ui('HTTP 생성 단계')
-        self.add_job_ui('HTTP 생성 작업')
+        job_id = self.add_loose_job_ui('HTTP 생성 작업')
+        self.group_jobs_ui('HTTP 생성 단계', [job_id])
         self.click('[data-author-action="save"]')
         self.wait("!document.querySelector('[data-author-action=validate]')?.disabled")
         saved = self.state(workflow_id=key)['workflow']
