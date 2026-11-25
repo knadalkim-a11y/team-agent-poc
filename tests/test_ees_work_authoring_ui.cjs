@@ -283,6 +283,21 @@ test('a job name typed into the open add row while my save is pending is kept an
  await submitInline(h);
  assert.ok(names().includes('저장 중에 적은 작업'),JSON.stringify(names()));assert.doesNotMatch(h.markup,/id="ew-stage-inline-warning"/);
 });
+test('a job name typed into the open add row while my 게시 is pending is kept and added after it',async()=>{
+ const h=harness(),pending=deferred();installDefinition(h,stagedDefinition(1,0));
+ h.click('stage_toggle',{id:'t0'});await flush();
+ const name=()=>h.host.querySelector('#ew-stage-editor [name=name]');
+ const names=()=>Object.values(h.draft().definition.nodes).filter(node=>node.type==='j').map(node=>node.name);
+ assert.equal(name()?.value,'');assert.equal(h.draft().dirty,false);
+ // A saved draft is published as it is; the server answers with the next revision.
+ h.writeOverride=async body=>{assert.equal(body.action,'publish_workflow');await pending.promise;const record=h.workflows.get('w');record.revision++;record.published=copy(record.draft);record.published_version=1;return {ok:true,revision:record.revision,published_version:1};};
+ h.click('publish');await flush();assert.equal(h.writes.length,1);
+ const field=name();assert.ok(field,'the add row is still open');field.value='게시 중에 적은 작업';field.focus();h.designer.handleEvent({type:'input',target:field});
+ pending.resolve();await flush();h.writeOverride=null;h.render();await flush();
+ assert.equal(name()?.value,'게시 중에 적은 작업');assert.doesNotMatch(h.markup,/id="ew-stage-inline-warning"/);
+ await submitInline(h);
+ assert.deepEqual(names(),['게시 중에 적은 작업']);assert.doesNotMatch(h.markup,/id="ew-stage-inline-warning"/);
+});
 // 2026-11-25 (PR #156 review): the job chooser of 판정 단어 only moves between jobs, so a reader can use it.
 test('read-only 판정 단어: the job chooser stays usable while the definition fields stay off',async()=>{
  const value=stagedDefinition(1,2);for(const id of ['j0-0','j0-1'])Object.assign(value.nodes[id],{mode:'human',result_block:'checklist',confirmation_items:[{id:'i1',name:'항목'}]});
