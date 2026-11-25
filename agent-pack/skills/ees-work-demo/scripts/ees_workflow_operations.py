@@ -1785,10 +1785,6 @@ class OperationsRuntime:
                 arguments[name] = deepcopy(source['constant'])
             elif 'input' in source:
                 if source['input'] in inputs: arguments[name] = inputs[source['input']]
-            elif 'run_input' in source:
-                # Snapshot inputs include linked parameters from this run only.
-                if inputs.get(source['run_input']) is not None:
-                    arguments[name] = inputs[source['run_input']]
             elif source.get('context') in ('system_id','factory_id'):
                 arguments[name] = run[source['context']]
             else:
@@ -1831,6 +1827,7 @@ class OperationsRuntime:
                 api_http.authorize_service(self._api_operation(db,source_ref,groups),actor)
         deadline = (snapshot.get('deadline_source') or {}).get('value')
         prior_deadline = (previous.get('deadline_source') or {}).get('value')
+        # digest, not ==: Python treats [1] and [True] as equal, and a result read with the old value must not pass.
         if (digest(current) != digest(arguments) or current_sources != sources or snapshot['inputs'] != previous['inputs']
                 or deadline != prior_deadline or not self.service._work_sources_current(db, run, previous)):
             fail('result_source_changed')

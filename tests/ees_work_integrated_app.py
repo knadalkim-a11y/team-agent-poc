@@ -30,7 +30,6 @@ from zipfile import ZipFile
 
 import httpx
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from ees_work_integrated_fixture import IntegratedNativeCase
 from test_ees_chat_theme import ChromePipe
 from ees_work_c_phase3_fullapp import SyntheticProvider
 
@@ -60,9 +59,6 @@ def historical_request_route(payload, question, query_template):
 
 
 class ProductGate:
-    add_loose_job_ui = IntegratedNativeCase.add_loose_job_ui
-    group_jobs_ui = IntegratedNativeCase.group_jobs_ui
-
     def __init__(self, args):
         self.args = args
         self.out = args.output.resolve(); self.out.mkdir(parents=True, exist_ok=True)
@@ -202,8 +198,6 @@ if(performance.now()>end)return resolve(null);requestAnimationFrame(check)}check
         for kind in ('keyDown','keyUp'):
             self.browser.call('Input.dispatchKeyEvent',{'type':kind,'key':'a','code':'KeyA','windowsVirtualKeyCode':65,'modifiers':2})
         self.browser.call('Input.insertText',{'text':value})
-
-    fill = type
 
     def open_initialized_author_list(self):
         # Match the Native authoring gate: first entry registers procedures and
@@ -746,19 +740,25 @@ def integrated_flow(gate):
     g.type('#ew-procedure-create [name=description]',purpose)
     g.click('[data-author-action="procedure_create"]')
     g.wait('!!document.querySelector("[data-author-action=tab][data-tab=content]")')
-    g.wait("document.activeElement?.matches('#ew-loose-job-editor [name=name]')")
-    authored_job = g.add_loose_job_ui('사람의 근거 확인')
-    g.group_jobs_ui('자료 검토', [authored_job])
-    # Add the run parameter through the procedure menu before preparing the
-    # legacy job-input regression fixture below.
+    # 2026-11-18: a new procedure opens with its stage name field ready, and a new stage
+    # with its job name field ready; there is no add control to press first.
+    g.wait('!!document.querySelector(\'#ew-stage-editor input[name="name"][aria-label="새 단계 이름"]\')')
+    assert not g.browser.evaluate('!!document.querySelector(\'[data-author-action="add_stage"]\')')
+    g.type('#ew-stage-editor input[name="name"]','자료 검토')
+    g.click('[data-author-action=inline_apply]')
+    g.wait('!!document.querySelector(\'#ew-stage-editor input[name="name"][aria-label="새 작업 이름"]\')')
+    g.type('#ew-stage-editor input[name="name"]','사람의 근거 확인')
+    g.click('[data-author-action=inline_apply]')
+    # 2026-11-02 moves run start inputs from the removed execution-mode tab to
+    # the content tab's stage-and-job view. Check it from the stage after
+    # adding the task before preparing the legacy job-input fixture below.
     assert not g.browser.evaluate('!!document.querySelector(\'[data-author-action="tab"][data-tab="schedule"]\')')
-    g.click('.ew-procedure-menu > summary')
-    g.click('[data-author-action="execution_parameters"]')
-    g.click('#ees-work-dialog [data-execution-parameter-action=add]')
+    g.click('.ew-content-start-inputs [data-author-action="start_input_add"]')
     g.type('#ees-work-dialog input[name="name"]','확인할 자료')
+    g.click('#ees-work-dialog .ew-input-advanced > summary')
+    g.type('#ees-work-dialog input[name="id"]','evidence_note')
+    g.click('#ees-work-dialog input[name="required"]')
     g.click('#ees-work-dialog [data-dialog-confirm]')
-    g.wait('!!document.querySelector("#ees-work-dialog [data-execution-parameter-id]")')
-    g.click('#ees-work-dialog [data-dialog-close]')
     g.click('[data-author-action="save"]')
     g.wait('document.querySelector("[data-author-status]")?.textContent.includes("저장됨")')
     g.capture('b3-saved-authoring')
@@ -768,27 +768,23 @@ def integrated_flow(gate):
     authored=g.api('/api/ees-work/workspace?workflow_id='+identifier)['workflow']
     assert authored['draft']['description']==purpose
     root=next(node for node in authored['draft']['nodes'].values() if node['type']=='p')
-    evidence=next(field for field in root['inputs'] if field['name']=='확인할 자료')
-    evidence_id=evidence['id']
-    assert evidence['execution_parameter'] and evidence['scope']=='run' and evidence['required']
+    evidence=next(field for field in root['inputs'] if field['id']=='evidence_note')
+    assert evidence['name']=='확인할 자료' and evidence['scope']=='run' and evidence['required']
     assert not authored['published_version']
     assert g.browser.evaluate('document.querySelector("#chat-input").innerText.trim()')==authoring_chat_draft
     g.record('physical authoring create and draft save',workflow_id=identifier,
-        revision=authored['revision'],purpose_saved=True,start_input=evidence_id,chat_draft_preserved=True)
+        revision=authored['revision'],purpose_saved=True,start_input='evidence_note',chat_draft_preserved=True)
     # Runtime job forms intentionally list job.inputs, not root start inputs.
     # Existing job-local input definitions remain supported even though their
-    # authoring control was retired. Copy this field using its legacy shape
+    # authoring control was retired. Copy this exact field through the real API
     # only as an isolated compatibility fixture; do not claim a UI edit for it.
     runtime_definition=json.loads(json.dumps(authored['draft']))
-    legacy_root=next(node for node in runtime_definition['nodes'].values() if node['type']=='p')
-    legacy_input=next(field for field in legacy_root['inputs'] if field['id']==evidence_id)
-    legacy_input.pop('execution_parameter')
     legacy_job=next(node for node in runtime_definition['nodes'].values() if node['type']=='j')
-    legacy_job['inputs']=[dict(legacy_input)]
+    legacy_job['inputs']=[dict(evidence)]
     prepared=g.api('/api/ees-work/workspace/command',{'action':'save_draft','workflow_id':identifier,
         'expected_revision':authored['revision'],'request_id':str(uuid4()),'definition':runtime_definition})
     g.record('explicit legacy job-input API fixture',workflow_id=identifier,job_id=legacy_job['id'],
-        field_id=evidence_id,revision=prepared['revision'],ui_creation_claimed=False)
+        field_id='evidence_note',revision=prepared['revision'],ui_creation_claimed=False)
     g.click('[data-author-action="list"]')
     g.click('[data-author-action="open"][data-id="'+identifier+'"]')
     g.wait('document.querySelector("[data-author-status]")?.dataset.authorRevision === '+json.dumps(str(prepared['revision'])))
@@ -815,20 +811,20 @@ def integrated_flow(gate):
     g.click('[data-action="mode"][data-mode="work"]')
     g.click('[data-action="workflow"][data-workflow-id="'+identifier+'"]')
     g.open_operation_start(expect_form=True)
-    g.type(f'#ees-work-start [name="{evidence_id}"]','개발용 시작 근거')
+    g.type('#ees-work-start [name="evidence_note"]','개발용 시작 근거')
     g.capture('figma-a8-first-start')
     g.click('#ees-work-dialog [data-dialog-confirm]')
     run_id=g.wait_work_ready(workflow_id=identifier,require_run=True,selector='[data-action="job"]')['reference']['run_id']
     run=g.api('/api/ees-work/workspace?run_id='+run_id)['run']
     assert run['workflow_id']==identifier
-    assert run['inputs'][evidence_id]=='개발용 시작 근거'
+    assert run['inputs']['evidence_note']=='개발용 시작 근거'
     job_id=next(key for key,node in run['definition']['nodes'].items() if node['type']=='j')
     g.click('[data-action="job"][data-job-id="'+job_id+'"]')
-    g.type(f'#ees-work-inputs [name="{evidence_id}"]','개발용 합성 근거 v1')
+    g.type('#ees-work-inputs [name="evidence_note"]','개발용 합성 근거 v1')
     g.click('[data-action="save_inputs"]')
     g.wait('!document.querySelector(\'[data-action="save_inputs"]\')?.disabled')
     saved=g.api('/api/ees-work/workspace?run_id='+run_id)['run']
-    assert saved['inputs'][evidence_id]=='개발용 합성 근거 v1'
+    assert saved['inputs']['evidence_note']=='개발용 합성 근거 v1'
     assert saved['jobs'][job_id]['status']!='completed'
     g.capture('a1-input-saved-not-complete')
     q1_native_geometry(g,'figma-q1-1366x768-human-action',require_action=True)
@@ -1247,10 +1243,8 @@ def figma_delta_flow(g):
     g.click('[data-action="mode"][data-mode="author"]');g.click('[data-action="procedures"]')
     g.click('[data-author-action="open"][data-id="'+rule_id+'"]')
     g.wait('!!document.querySelector("[data-author-action=tab][data-tab=content]")')
-    g.click('[data-author-action="stage_toggle"][data-id="rule-stage"]')
-    g.click('[data-author-action="node"][data-id="rule-checklist"]')
-    g.click('[data-author-action="judgment_choices"][data-id="rule-checklist"]')
-    g.wait('document.querySelector("#ew-author-judgments-title")?.textContent==="판정 선택지"')
+    g.click('.ew-author-tabs [data-author-action="tab"][data-tab="rules"]')
+    g.wait('document.querySelector(\'select[name="rule_job_id"]\')?.value==="rule-checklist"')
     assert g.browser.evaluate('document.querySelectorAll(".ew-judgment-definition").length>0')
     judgment_label='합성 근거 확인'
     judgment_consequence='근거를 확인한 뒤 담당자가 완료를 결정합니다.'
@@ -1284,10 +1278,9 @@ def figma_delta_flow(g):
     g.wait('!!document.querySelector("[data-author-action=tab][data-tab=content]")')
     # 2026-11-02: no execution-mode tab or schedule authoring. A schedule saved
     # earlier stays data in the draft and in the immutable publication.
-    assert g.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim()).join('|')")=='업무 내용|시험해 보기|게시 기록'
+    assert g.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim()).join('|')")=='업무 내용|시험해 보기|판정 단어|게시 기록'
     assert not g.browser.evaluate('!!document.querySelector("#ew-author-schedule,[data-author-action=run_mode],[data-author-action=schedule_tools],[data-author-action=schedule_preview]")')
-    assert not g.browser.evaluate('!!document.querySelector(".ew-content-start-inputs")')
-    assert g.browser.evaluate('!!document.querySelector("[data-author-action=execution_parameters]")')
+    assert '시작할 때 물어볼 것' in g.browser.evaluate('document.querySelector(".ew-content-start-inputs")?.innerText || ""')
     g.capture('no-run-mode-content-tab')
     saved=g.api('/api/ees-work/workspace?workflow_id='+workflow_id)['workflow']
     assert saved['draft']['schedule']==saved['published']['schedule'] and saved['draft']['schedule']['opening']=='after_previous_closed'

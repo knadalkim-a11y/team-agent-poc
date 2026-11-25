@@ -7,6 +7,35 @@ class RegisterFromJobTests(IntegratedNativeCase):
     open_initialized_author_list = _AuthoringHelpers.open_initialized_author_list
     authoring_viewport = _AuthoringHelpers.authoring_viewport
 
+    def test_factory_is_an_input_source_only_where_the_procedure_runs_for_a_factory(self):
+        # 2026-11-25: a procedure run for a whole system has no factory to pass to an API.
+        service_id=self.phase3_command('api_service_save',service={'name':'테스트 EMS'})['service']['id']
+        api=self.phase3_command('api_save',api={'name':'공장 조회','purpose':'확인','service_id':service_id,
+            'method':'GET','url':'https://ems.example/site','inputs':[{'name':'site','type':'string','in':'query','required':True}],'fields':[]})['api']
+        keys={}
+        for scope in ('factory','system'):
+            keys[scope]=self.author(name='공장 선택지 확인 '+scope,jobs=1,mode='tool')
+            current=self.state(workflow_id=keys[scope])['workflow']
+            draft=current['draft']; draft['execution_scope']=scope
+            self.command('save_draft',workflow_id=keys[scope],expected_revision=current['revision'],definition=draft)
+        self.authoring_viewport(1920,1080,overlay=False)
+        cta='[data-job-id=job-0] [data-author-action=job_api_setup]'
+        offered={}
+        for scope in ('factory','system'):
+            self.open_initialized_author_list()
+            self.click('[data-author-action=open][data-id="'+keys[scope]+'"]')
+            self.click('[data-author-action=tab][data-tab=content]')
+            if not self.read(cta,'isConnected'):
+                self.click('[data-author-action=stage_toggle][data-id=stage]')
+            self.click(cta)
+            self.click('[data-api-candidate="'+api['id']+'"]')
+            offered[scope]=self.browser.evaluate("[...document.querySelectorAll('#ees-work-dialog [data-api-source=site] option')].map(option=>option.value)")
+            self.click('#ees-work-dialog [data-dialog-cancel]')
+            self.wait("!document.querySelector('#ees-work-dialog[open]')")
+        self.assertIn('factory_id',offered['factory'])
+        self.assertIn('system_id',offered['system'])
+        self.assertNotIn('factory_id',offered['system'])
+
     def test_staged_mapping_survives_cancel_and_saved_registration_requires_connect(self):
         service_id=self.phase3_command('api_service_save',service={'name':'테스트 EMS'})['service']['id']
         original=self.phase3_command('api_save',api={'name':'기존 조회','purpose':'확인','service_id':service_id,

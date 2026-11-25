@@ -1603,16 +1603,12 @@ class SourceShellNativeTests(IntegratedNativeCase):
         selector = '[data-author-action=open][data-id="' + workflow_id + '"]'
         self.wait('document.querySelector(' + json.dumps(selector) + ')')
         self.click(selector)
-        self.wait("document.querySelector('[data-author-action=policy_settings]')")
-        self.click('.ew-procedure-menu > summary')
-        self.click('[data-author-action=policy_settings]')
+        self.wait("document.querySelector('[data-author-action=tab][data-tab=rules]')")
+        self.click('[data-author-action=tab][data-tab=rules]')
+        self.click('.ew-author-rule-policy > summary')
         field = '#ew-author-policies [name=completion_notes]'
         self.fill(field, '자동 갱신 중에도 유지할 미저장 완료 설명')
         self.wait("document.querySelector('.ew-author-rule-policy')?.open")
-        self.browser.call('Emulation.setDeviceMetricsOverride',
-                          {'width': 1920, 'height': 600, 'deviceScaleFactor': 1, 'mobile': False})
-        self.wait("document.querySelector('.ew-author-scroll').scrollHeight > "
-                  "document.querySelector('.ew-author-scroll').clientHeight + 20")
         # A real wheel gesture creates a nonzero scroll position. Saving DOM
         # references below only observes identity; it never pins/masks nodes.
         point = self.browser.evaluate("(()=>{const r=document.querySelector('.ew-author-scroll').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};})()")

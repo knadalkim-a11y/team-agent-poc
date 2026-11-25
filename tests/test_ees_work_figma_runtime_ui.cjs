@@ -1100,6 +1100,30 @@ test('preview execution opens preparation over the same stage and cancel creates
  const action=h.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});assert.equal(dialog.options[0].title,'실행 준비');assert.equal(h.api.snapshot().selection.tab,'overview');assert.equal(h.api.snapshot().selection.stage_id,'t');dialog.pending.resolve(false);await action;
  assert.equal(h.calls.filter(call=>call.body&&call.body.action!=='save_ui').length,0);assert.equal(h.api.snapshot().selection.stage_id,'t');
 });
+// 2026-11-25 (PR #156 review): a required value that cannot be read yet when the window opens (an empty required
+// number) must not end the start before the person has typed it; what is wrong is said when 시작 is pressed.
+test('start window: an empty required value at opening keeps the window working, and is refused only at 시작',async()=>{
+ const required=()=>({name:'count',value:'',dataset:{inputType:'number',authoredSchema:JSON.stringify({type:'integer'}),authoredRequired:'true'},setCustomValidity(){}});
+ const started=h=>h.calls.filter(call=>call.body?.action==='start_run');
+ const flush=async()=>{for(let i=0;i<8;i++)await new Promise(resolve=>setImmediate(resolve));};
+ const filled=stagePreviewFixture(),dialog=stageStartDialog(filled);dialog.fields.splice(0,dialog.fields.length,required());
+ filled.setReply(call=>{if(call.body?.action==='start_run'){filled.state.run={id:'new-run',workflow_id:'w',definition:html('workPublishedDefinition(state)',{state:filled.state}),status:'open',jobs:{},attempts:[],revision:1};return {ok:true,run:filled.state.run};}return call.url.includes('workspace?')?filled.state:{ok:true};});
+ await filled.api.handleClick({dataset:{action:'stage_open',nodeId:'t'}});
+ const action=filled.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});await flush();
+ assert.equal(dialog.options.length,1);dialog.fields[0].value='3';dialog.confirm();await action;
+ assert.equal(started(filled).length,1);assert.deepEqual(started(filled)[0].body.inputs,{count:3});
+ const empty=stagePreviewFixture(),second=stageStartDialog(empty);second.fields.splice(0,second.fields.length,required());
+ await empty.api.handleClick({dataset:{action:'stage_open',nodeId:'t'}});
+ const refused=empty.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});await flush();second.confirm();await refused;
+ assert.equal(started(empty).length,0);
+});
+test('start window: typing that cannot be read yet does not break, and the last readable values stay as the draft',async()=>{
+ const h=stagePreviewFixture(),field={name:'count',value:'3',dataset:{inputType:'number',authoredSchema:JSON.stringify({type:'integer'}),authoredRequired:'true'},setCustomValidity(){}};
+ const form={querySelectorAll:selector=>selector==='[data-work-input]'?[field]:[]};
+ const type=()=>h.api.handleEvent({type:'input',target:{dataset:{},matches:()=>false,closest:selector=>selector==='[data-ees-work]'?{}:selector==='#ees-work-start'?form:null}});
+ type();assert.deepEqual(copy(h.api.snapshot().selection.start_inputs.w),{count:3});
+ field.value='';assert.doesNotThrow(type);assert.deepEqual(copy(h.api.snapshot().selection.start_inputs.w),{count:3});
+});
 test('unpublished workflows never expose author drafts to operations preview',()=>{
  const h=stagePreviewFixture();delete h.state.workflow.published;delete h.state.workflow.published_version;
  assert.deepEqual(JSON.parse(JSON.stringify(html('workPublishedDefinition(state)',{state:h.state}))),{});
@@ -1443,112 +1467,6 @@ function askFixture({started=true}={}){
  const sent=(...actions)=>h.calls.filter(call=>actions.includes(call.body?.action)).map(call=>call.body);
  return {...h,run,type,seen,body,row,sent,unmarked,typed,panelOf,target};
 }
-function runParameterFixture({started=false}={}){
- const h=askFixture({started}),nodes=h.state.workflow.published.nodes;
- nodes.p.inputs=[{id:'target',name:'실행 대상',type:'number',scope:'run',required:true,execution_parameter:true},{id:'unused',name:'미연결 입력',type:'text',scope:'run',required:true,execution_parameter:true}];
- nodes.a.api_binding.inputs={id:{run_input:'target'},filter:{input:'page-id'},site:{context:'factory_id'}};
- nodes.b.api_binding.inputs.target={run_input:'target'};
- Object.assign(h.state.workflow,{system_id:'EMS'});
- Object.assign(h.state.workflow.published,{execution_scope:'factory'});
- h.state.factories=[{id:'fab',system_id:'EMS',name:'기흥'}];
- h.api.setSelection({factory_id:'fab',system_id:'EMS',...(!started?{run_id:'',stage_id:''}:{})});
- const overview=()=>html('workOperationOverviewHTML(state,selection)',{state:h.state,selection:h.seen()});
- return {...h,overview};
-}
-test('shared start parameters are listed once and only when a published consumer can run',()=>{
- const h=runParameterFixture();
- const {state}=h,stateWithPreview={...state,workflow:{...state.workflow,factory_preview:{factory_id:'fab',revision:3,conditions:{a:true,b:true},published_conditions:{a:false,b:false}}}};
- const form=(data,selection)=>html('workOperationOverviewHTML(data,selection)',{data,selection:{...h.seen(),inline_start:true,...selection}});
- const shown=form(state,{});
- assert.equal((shown.match(/name="target"/g) || []).length,1);
- assert.doesNotMatch(shown,/name="unused"|name="page-id"/);
- assert.doesNotMatch(form(stateWithPreview,{}),/data-inline-start/,'the draft conditions do not drive execution');
- assert.match(form(stateWithPreview,{factory_id:'other'}),/data-inline-start/,'only apply the selected factory’s preview');
- stateWithPreview.workflow.factory_preview.published_conditions.b=null;
- assert.match(form(stateWithPreview,{}),/data-inline-start/,'uncertain conditions cannot skip a potentially required input');
-});
-test('shared and automatic values stay read-only next to the job-local control',()=>{
- const h=runParameterFixture({started:true});
- Object.assign(h.run,{factory_id:'fab',system_id:'EMS',inputs:{target:0,'page-id':'27182'}});
- h.api.setSelection({stage_evidence:'a'});
- assert.match(h.row('a'),/<dt>실행 대상<\/dt><dd><span>0<\/span><span class="ew-vd-given">시작할 때 입력<\/span><\/dd>/);
- assert.match(h.row('a'),/<dt>공장<\/dt><dd><span>기흥<\/span><span class="ew-vd-given">현재 업무의 공장<\/span><\/dd>/);
- assert.match(h.row('a'),/<input name="page-id"[^>]*value="27182"/);
- assert.doesNotMatch(h.row('a'),/<input name="target"|<input name="site"/);
- h.api.setSelection({stage_evidence:'b'});
- assert.match(h.row('b'),/<dt>실행 대상<\/dt><dd><span>0<\/span><span class="ew-vd-given">시작할 때 입력/);
- assert.doesNotMatch(h.row('b'),/<input/);
-});
-function inlineStartFixture(){
- const h=runParameterFixture(),{state}=h;
- let focused=0;
- const field={name:'target',dataset:{inputType:'number'},value:'2.5',focus(){focused++;}};
- const form={querySelectorAll:()=>[field],reportValidity:()=>true,closest:selector=>selector==='[data-ees-work]'?{}:null,matches:selector=>selector==='#ees-work-start[data-inline-start]'};
- const panel={addEventListener(){},removeEventListener(){},querySelector:selector=>selector==='#ees-work-start[data-inline-start]'?form:selector.startsWith('#ees-work-start ')?field:null};
- h.context.window.__eesSourceShellV1.hosts=()=>({panel});
- h.setDialog(()=>assert.fail('the overview must keep its own inline form'));
- const start=()=>h.api.handleClick({dataset:{action:'overview_start'}});
- const submit=async()=>{
-  let prevented=0;
-  await h.api.handleEvent({type:'submit',target:form,preventDefault(){prevented++;}});
-  assert.equal(prevented,1);
- };
- h.setReply(call=>{
-  if(call.body?.action==='start_run'){
-   if(call.body.inputs.target===2.5)return {ok:false,httpError:true,status:400,error:{message:'실행 대상은 정수여야 합니다.'}};
-   state.run=h.run;return {ok:true,run_id:h.run.id};
-  }
-  return call.url.startsWith('/api/ees-work/workspace?')?state:{ok:true};
- });
- return {...h,field,start,submit,focused:()=>focused};
-}
-test('overview start takes shared parameters from one form and keeps the value after rejection',async()=>{
- const h=inlineStartFixture();
- assert.doesNotMatch(h.overview(),/data-inline-start/);
- await h.start();
- assert.equal(h.focused(),1);assert.equal(h.sent('start_run').length,0);assert.match(h.overview(),/data-inline-start/);
- await h.submit();
- assert.match(h.api.snapshot().error,/실행 대상은 정수/);assert.match(h.overview(),/value="2.5"/);
- assert.doesNotMatch(h.overview(),/name="page-id"/);
- h.field.value='0';await h.submit();
- assert.deepEqual(h.sent('start_run').map(call=>[call.version,call.inputs]),[[1,{target:2.5}],[1,{target:0}]]);
- assert.doesNotMatch(h.overview(),/data-inline-start/);
- assert.equal(h.calls.some(call=>call.body?.action==='save_ui'&&call.body.state?.start_inputs?.w?.target!==undefined),false);
-});
-test('inline shared parameter submission expires when the factory or published version changes',async()=>{
- for(const changed of ['factory','version']){
-  const h=inlineStartFixture();await h.start();await h.submit();
-  if(changed==='factory')h.api.setSelection({factory_id:'another-factory'});
-  else h.state.workflow.published_version=2;
-  await h.submit();
-  assert.equal(h.sent('start_run').length,1);
-  assert.doesNotMatch(h.overview(),/data-inline-start/);
-  await h.start();
-  assert.match(h.overview(),/data-inline-start/);
-  assert.doesNotMatch(h.overview(),/value="2.5"/);
- }
-});
-test('stage start keeps legacy draft values without carrying a shared value to a different factory',async()=>{
- const h=runParameterFixture(),dialogs=[];
- h.state.workflow.published.nodes.p.inputs.push({id:'legacy-note',name:'기존 메모',type:'text',scope:'run'});
- const fields=[{name:'target',value:'18',dataset:{inputType:'number'}},{name:'legacy-note',value:'메모',dataset:{inputType:'text'}}];
- const form={querySelectorAll:()=>fields},dialog={querySelector:selector=>selector==='#ees-work-start'?form:null,addEventListener(){}};
- h.context.document.querySelector=selector=>selector==='#ees-work-dialog'?dialog:null;
- h.setDialog(options=>{dialogs.push(options);return Promise.resolve(false);});
- h.api.setSelection({stage_id:'t'});
- const start=()=>h.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});
- const waiting=start();
- const target={closest:selector=>selector==='#ees-work-start'?form:selector==='[data-ees-work]'?{}:null};
- h.api.handleEvent({type:'input',target});
- await waiting;
- const draft=h.api.snapshot().selection.start_inputs.w;
- assert.equal(draft['legacy-note'],'메모');assert.equal(Object.hasOwn(draft,'target'),false);
- h.api.setSelection({factory_id:'other'});await start();
- assert.equal(dialogs.length,2);
- assert.match(dialogs[1].html,/name="target"[^>]*value=""/);
- assert.match(dialogs[1].html,/name="legacy-note"[^>]*value="메모"/);
- assert.equal(h.sent('start_run').length,0);
-});
 test('values of a job: the row is unchanged, its name opens the area under it, and the area holds what is asked',()=>{
  const h=askFixture(),closed=h.row('a');
  assert.match(closed,/<button type="button" class="ew-vd-name" data-action="stage_values" data-job-id="a" aria-expanded="false">기준 문서 확인<\/button>/);

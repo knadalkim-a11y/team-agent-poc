@@ -424,28 +424,25 @@ class IntegratedNativeCase(unittest.TestCase):
         self.command('publish_workflow', workflow_id=key, expected_revision=2)
         return key
 
-    def add_loose_job_ui(self, name):
-        form = '#ew-loose-job-editor'
-        before = self.browser.evaluate(
-            "[...document.querySelectorAll('.ew-ungrouped-jobs .ew-job-row')].map(row => row.dataset.jobId)")
-        self.fill(form + ' [name=name]', name)
-        self.click(form + ' [data-author-action=loose_apply]')
-        added = ("[...document.querySelectorAll('.ew-ungrouped-jobs .ew-job-row')]"
-                 ".find(row => !" + json.dumps(before) + ".includes(row.dataset.jobId))?.dataset.jobId")
-        self.wait(added)
-        return self.browser.evaluate(added)
+    def add_stage_ui(self, name):
+        # With no stage yet the stage name field is already open.
+        if not self.browser.evaluate("!!document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 단계 이름\"]')"):
+            self.click('[data-author-action=add_stage]')
+        self.wait("document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 단계 이름\"]')")
+        self.fill('#ew-stage-editor [name=name]', name)
+        self.click('[data-author-action=inline_apply]')
+        # A new stage opens with its job name field ready.
+        self.wait("document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 작업 이름\"]')")
 
-    def group_jobs_ui(self, name, ids):
-        self.click('[data-author-action=group_jobs]')
-        self.wait("document.querySelector('#ees-work-dialog[open] .ew-stage-group-form')")
-        self.fill('#ees-work-dialog .ew-stage-group-form [name=name]', name)
-        for job_id in ids:
-            self.click('#ees-work-dialog [data-group-job][name="job:' + job_id + '"]')
-        self.click('#ees-work-dialog [data-dialog-confirm]')
-        selector = json.dumps('[data-job-id="' + ids[0] + '"]')
-        stage = "document.querySelector(" + selector + ")?.closest('.ew-content-stage')?.dataset.stageId"
-        self.wait(stage)
-        return self.browser.evaluate(stage)
+    def add_job_ui(self, name):
+        if not self.browser.evaluate("!!document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 작업 이름\"]')"):
+            self.click('[data-author-action=add_job]')
+        self.wait("document.querySelector('#ew-stage-editor [name=name][aria-label=\"새 작업 이름\"]')")
+        self.fill('#ew-stage-editor [name=name]', name)
+        self.click('[data-author-action=inline_apply]')
+        self.wait("document.activeElement?.matches('#ew-stage-editor [name=name]') && document.activeElement.value === ''")
+        self.click('.ew-stage-body .ew-job-row:last-child [data-author-action=node]')
+        self.wait("document.querySelector('#ew-author-node [name=job_guidance]')")
 
     def open_author_job_ui(self, job_id, stage_id='stage'):
         selector = '[data-author-action=node][data-id="' + job_id + '"]'

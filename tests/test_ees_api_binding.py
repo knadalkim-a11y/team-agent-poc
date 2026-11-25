@@ -96,43 +96,6 @@ class WorkflowApiBindingTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotEqual(source['id'],'lookup')
         self.assertEqual(source['id'],target['api_binding']['inputs']['code']['result']['job_id'])
 
-    async def test_run_input_requires_a_unique_compatible_root_declaration(self):
-        _, wf, definition = await self.prepare()
-        nodes = definition['nodes']
-        root_id = next(key for key, node in nodes.items() if node['type'] == 'p')
-        field = {'id':'target', 'name':'알람 코드', 'type':'text', 'scope':'run',
-                 'required':True, 'execution_parameter':True}
-        nodes[root_id]['inputs'] = [field]
-        nodes['confirm']['api_binding']['inputs']['code'] = {'run_input':'target'}
-        saved = await self.work('save_draft', workflow_id=wf, expected_revision=2, definition=definition)
-        self.assertTrue(saved['ok'], saved)
-        self.assertEqual(saved['revision'], 3)
-
-        for fields, expected in (
-            ([], '연결된 실행 파라미터'),
-            ([field, field], '한 번만 선언'),
-            ([{**field, 'required':False}], '필수로 지정'),
-            ([{**field, 'type':'number'}], '입력 형식'),
-            ([{**field, 'scope':'factory'}], '이번 실행 입력'),
-            ([{**field, 'execution_parameter':'true'}], '이번 실행 입력'),
-            ([{**field, 'depends_on':'other'}], '선택지는 직접 지정'),
-        ):
-            with self.subTest(fields=fields):
-                changed = deepcopy(definition)
-                changed['nodes'][root_id]['inputs'] = fields
-                result = await self.work('save_draft', workflow_id=wf, expected_revision=3, definition=changed)
-                self.assertEqual(result['error']['code'], 'invalid_definition', result)
-                self.assertIn(expected, result['error']['message'])
-
-        copied = await self.work('copy_workflow', workflow_id=wf, system_id='EMS', expected_revision=3)
-        self.assertTrue(copied['ok'], copied)
-        copy_nodes = copied['workflow']['draft']['nodes']
-        copy_root = next(node for node in copy_nodes.values() if node['type'] == 'p')
-        copy_job = next(node for node in copy_nodes.values() if node['name'] == '등록')
-        self.assertNotEqual(copy_root['id'], root_id)
-        self.assertEqual(copy_root['inputs'], [field])
-        self.assertEqual(copy_job['api_binding']['inputs']['code'], {'run_input':'target'})
-
     async def test_removing_a_field_can_move_dependent_inputs_to_runtime_prompt(self):
         query, wf, definition = await self.prepare()
         await self.api('api_save',api={**query,'fields':[]},expected_revision=1,repairs=[
