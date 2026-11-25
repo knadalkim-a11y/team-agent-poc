@@ -88,7 +88,7 @@ class ScheduleContracts(unittest.IsolatedAsyncioTestCase):
         prelude = (repo / 'tests/test_ees_work_authoring_ui.cjs').read_text(encoding='utf-8').split('\ntest(', 1)[0]
         script = r"""
 (async()=>{
-const h=harness(),draft=JSON.parse(process.argv[1]);
+const h=harness(),draft=JSON.parse(process.argv[2]);
 h.workflows.get('w').draft=draft;h.render();await h.node('t1');
 h.dialogs.push({});h.click('delete_node',{id:'t1'});await flush();
 const result=h.draft();assert.equal(result.dirty,true);assert.equal(h.writes.length,0);
@@ -97,8 +97,10 @@ assert.match(h.dialogHistory.at(-1).html,/이 단계의 기간 설정도 함께 
 process.stdout.write(JSON.stringify(result.definition));
 })().catch(error=>{console.error(error);process.exitCode=1;});
 """
-        result = subprocess.run([shutil.which('node'), '-e', prelude + '\n' + script,
-                                 json.dumps(definition, ensure_ascii=False)],
+        # Standard input, not `-e`: the prelude is longer than the Windows command line limit (32,767).
+        # With `-` the first argument after the script is process.argv[2].
+        result = subprocess.run([shutil.which('node'), '-', json.dumps(definition, ensure_ascii=False)],
+                                input=prelude + '\n' + script,
                                 cwd=repo / 'tests', capture_output=True, encoding='utf-8',
                                 timeout=30, check=False)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -127,7 +129,7 @@ process.stdout.write(JSON.stringify(result.definition));
         prelude = (repo / 'tests/test_ees_work_authoring_ui.cjs').read_text(encoding='utf-8').split('\ntest(', 1)[0]
         script = r"""
 (async()=>{
-const h=harness(),draft=JSON.parse(process.argv[1]);
+const h=harness(),draft=JSON.parse(process.argv[2]);
 h.workflows.set(draft.id,{...h.workflows.get('w'),id:draft.id,draft});
 h.selection.workflow_id=draft.id;h.state.workflow=h.workflows.get(draft.id);h.render();
 const proposed=copy(draft),root=Object.values(proposed.nodes).find(node=>node.type==='p');
@@ -139,8 +141,10 @@ assert.equal(result.definition.nodes.t1,undefined);assert.equal(result.definitio
 process.stdout.write(JSON.stringify(result.definition));
 })().catch(error=>{console.error(error);process.exitCode=1;});
 """
-        result = subprocess.run([shutil.which('node'), '-e', prelude + '\n' + script,
-                                 json.dumps(definition, ensure_ascii=False)],
+        # Standard input, not `-e`: the prelude is longer than the Windows command line limit (32,767).
+        # With `-` the first argument after the script is process.argv[2].
+        result = subprocess.run([shutil.which('node'), '-', json.dumps(definition, ensure_ascii=False)],
+                                input=prelude + '\n' + script,
                                 cwd=repo / 'tests', capture_output=True, encoding='utf-8',
                                 timeout=30, check=False)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

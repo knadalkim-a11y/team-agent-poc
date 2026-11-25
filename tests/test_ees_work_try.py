@@ -5,7 +5,7 @@ work_runs row with mode='try' that the previous program sees as a cancelled
 record; only the browser window holding its key can read or change it.
 """
 import asyncio
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib
@@ -409,7 +409,8 @@ class TryTests(unittest.IsolatedAsyncioTestCase):
         binding = json.loads(stored['snapshot'])['try']
         self.assertEqual(binding['window'], hashlib.sha256(WINDOW.encode()).hexdigest())
         self.assertNotIn('window', json.dumps(run))
-        with sqlite3.connect(self.database) as db:
+        # closing(): `with sqlite3.connect()` only ends the transaction. A file left open cannot be removed on Windows.
+        with closing(sqlite3.connect(self.database)) as db:
             dump = '\n'.join(db.iterdump())
         self.assertNotIn(WINDOW, dump, 'only the hash of the window key is stored')
         self.assertEqual(dump.count(binding['window']), 1, 'the hash stays in the try row, never in receipts')
