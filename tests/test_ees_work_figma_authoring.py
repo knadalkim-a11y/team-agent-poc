@@ -16,7 +16,9 @@ PRELUDE = (ROOT / 'tests/test_ees_work_authoring_ui.cjs').read_text(encoding='ut
 @unittest.skipUnless(shutil.which('node'), 'Node is required for authoring contracts.')
 class FigmaAuthoringScheduleTests(unittest.TestCase):
     def run_contract(self, script):
-        result = subprocess.run([shutil.which('node'), '-e', PRELUDE + '\n' + script],
+        # The script goes in on standard input, not on the command line: Windows refuses a command line
+        # over 32,767 characters, and the shared prelude alone is longer than that.
+        result = subprocess.run([shutil.which('node'), '-'], input=PRELUDE + '\n' + script,
                                 cwd=ROOT / 'tests', capture_output=True, encoding='utf-8',
                                 timeout=30, check=False)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
