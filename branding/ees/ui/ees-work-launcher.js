@@ -1188,7 +1188,12 @@
     }
     if(event.type==='input'){
       if(target.matches?.('[data-stage-note]')){const current=stageJob(target.dataset.jobId);if(current&&state.run&&!target.readOnly&&workStageCanDecide(current.node,current.saved,current.run)&&!current.saved.decisions?.job)stageNotes.set(workStageNoteKey(state,current.node),String(target.value));return;}
-      if(target.closest?.('#ees-work-start')){const form=target.closest('#ees-work-start');selection.start_inputs ||= {};selection.start_inputs[selection.workflow_id]=workReadInputs(form);remember();return;}
+      if(target.closest?.('#ees-work-start')){
+        // What cannot be read yet (a required number just emptied) is not kept as the draft; typing goes on.
+        const form=target.closest('#ees-work-start');let typed;
+        try{typed=workReadInputs(form);}catch(_){return;}
+        selection.start_inputs ||= {};selection.start_inputs[selection.workflow_id]=typed;remember();return;
+      }
       if(target.id==='ees-request-reason'){selection.request_reasons ||= {};selection.request_reasons[selection.run_id+'/'+selection.job_id]=target.value;remember();return;}
       if(target.id==='ees-review-text'){view.capture();scheduleReviewSave();}
     }

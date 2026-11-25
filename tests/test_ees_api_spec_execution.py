@@ -95,7 +95,7 @@ class RegisteredApiExecutionTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(response["ok"], response)
         return response
 
-    async def register_backup(self, method="GET"):
+    async def register_backup(self, method="GET", *, line_type="string"):
         record = await self.service.operations.command(self.users["admin"], self.command(
             "api_service_save", service={"name": "Backup service"}))
         self.assertTrue(record["ok"], record)
@@ -105,7 +105,7 @@ class RegisteredApiExecutionTests(unittest.IsolatedAsyncioTestCase):
         api = {
             "service_id": service_id, "name": "Backup history", "purpose": "Verify completion",
             "method": method, "url": self.base_url + "/backups",
-            "inputs": [{"name": "line", "in": "query" if method == "GET" else "body", "type": "string",
+            "inputs": [{"name": "line", "in": "query" if method == "GET" else "body", "type": line_type,
                         "required": True, "label": "Line"}],
             "result_path": "backup.entries",
             "fields": [{"path": "label", "label": "Backup name", "type": "string"}],
@@ -115,7 +115,7 @@ class RegisteredApiExecutionTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(saved["ok"], saved)
         return saved["api"]
 
-    async def start_workflow(self, api_record, *, handoff=False, approvals=0, map_previous=True):
+    async def start_workflow(self, api_record, *, handoff=False, approvals=0, map_previous=True, adjust=None):
         created = await self.workspace("create_workflow", name="Backup verification", system_id="EMS")
         definition = created["workflow"]["draft"]
         root_id = next(iter(definition["nodes"]))
@@ -145,6 +145,8 @@ class RegisteredApiExecutionTests(unittest.IsolatedAsyncioTestCase):
             definition["nodes"]["stage"]["children"].append("follow-up")
             definition["nodes"]["follow-up"] = successor
         workflow_id = created["workflow_id"]
+        if adjust:
+            adjust(definition)
         await self.workspace("save_draft", workflow_id=workflow_id, expected_revision=1, definition=definition)
         saved = await self.service.workspace_state(self.users["admin"], workflow_id=workflow_id)
         self.assertTrue(saved["ok"], saved)
@@ -328,6 +330,33 @@ class RegisteredApiExecutionTests(unittest.IsolatedAsyncioTestCase):
         history = await self.history(run_id)
         self.assertIsNone(history[0]['result'])
         self.assertNotIn('nightly-ok',json.dumps(history))
+
+    async def test_dispatch_discards_read_after_an_input_changes_to_an_equal_looking_value(self):
+        # Python treats [1] and [True] as equal. A result read with [1] must not be kept for [True].
+        api = await self.register_backup(line_type="array")
+        def typed_list(definition):
+            job = definition["nodes"]["backup-job"]
+            job["inputs"] = [{"id": "lines", "name": "Lines", "type": "list", "scope": "run", "required": True}]
+            job["api_binding"]["inputs"] = {"line": {"input": "lines"}}
+        run_id = await self.start_workflow(api, adjust=typed_list)
+        actor, runtime = self.users['operator'], self.service.operations
+        saved = await self.workspace('save_inputs', actor='operator', run_id=run_id, expected_revision=1,
+                                     inputs={'lines': [1]})
+        module = importlib.import_module(package.__name__+'.ees_workflow_api_http')
+        invoke = module.invoke_http
+        async def retype_after_response(*args, **kwargs):
+            response = await invoke(*args, **kwargs)
+            state = await self.service.workspace_state(actor, run_id=run_id)
+            await self.workspace('save_inputs', actor='operator', run_id=run_id,
+                                 expected_revision=state['run']['revision'], inputs={'lines': [True]})
+            return response
+        with patch.object(module, 'invoke_http', retype_after_response):
+            result = await runtime.command(actor, self.command(
+                'execute_job', run_id=run_id, job_id='backup-job', expected_revision=saved['revision']))
+        self.assertEqual(self.http.requests, [('/backups', {'line': ['1']})])
+        self.assertEqual(result['attempt']['status'], 'unknown', result)
+        self.assertEqual(result['attempt']['result']['error']['code'], 'result_source_changed')
+        self.assertNotIn('nightly-ok', json.dumps(result['attempt']['result']))
 
     async def test_dispatch_discards_read_after_a_declared_prerequisite_is_reopened(self):
         api = await self.register_backup()

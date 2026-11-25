@@ -296,6 +296,22 @@ test('read-only 판정 단어: the job chooser stays usable while the definition
  for(const field of h.fields.filter(field=>field.name!=='rule_job_id'&&!['ew-author-search','ew-draft-search'].includes(field.id)))assert.equal(field.disabled,true,field.name);
  assert.equal(h.writes.length,0);
 });
+test('read-only 판정 단어: no 삭제 or 추가 control is shown next to the words',async()=>{
+ const h=harness(),value=definition();value.nodes.j.result_block='item_verdict';installDefinition(h,value);
+ h.state.capabilities.can_author=false;h.state.capabilities.managed_systems=[];h.state.workflow.can_manage=false;h.render();
+ h.click('tab',{tab:'rules'});await flush();
+ assert.match(h.markup,/<h4>판정 1<\/h4>/);
+ assert.equal(actionButton(h,'judgment_delete'),undefined);assert.equal(actionButton(h,'judgment_add'),undefined);
+});
+test('a job opened from 내용 확인 has its stage open when the person goes back to the list',async()=>{
+ const h=harness(),record=()=>h.workflows.get('w');installDefinition(h,stagedDefinition(2,2));
+ h.click('stage_toggle',{id:'t0'});await flush();assert.equal(stageButton(h,'t0').getAttribute('aria-expanded'),'true');
+ h.writeOverride=async body=>{if(body.action==='validate_workflow'){record().validation={revision:record().revision,errors:['j1-0: 결과 형태 없음'],warnings:[],checks:[]};return {ok:true,validation:copy(record().validation)};}return {ok:true};};
+ h.click('validate');await flush();h.click('validation_open',{id:'errors:0'});await flush();assert.match(h.markup,/id="ew-author-node"/);
+ h.click('node');await flush();
+ assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');
+ assert.equal(h.document.activeElement?.dataset.authorAction,'node');assert.equal(h.document.activeElement?.dataset.id,'j1-0');
+});
 test('same failed payload reuses request identity; different payload receives new identity',async()=>{const h=harness();await h.node();h.writeOverride=async()=>{throw new Error('response lost');};h.field('job_guidance','첫 글');h.click('save');await flush();h.click('save');await flush();assert.equal(h.writes[0].request_id,h.writes[1].request_id);h.field('job_guidance','다른 글');h.click('save');await flush();assert.notEqual(h.writes[1].request_id,h.writes[2].request_id);});
 test('revision conflict preserves unsaved text and never silently rebases',async()=>{const h=harness();await h.node();h.field('job_guidance','충돌 전 글');h.writeOverride=async()=>({ok:false,error:{code:'revision_conflict',message:'다른 담당자가 저장했습니다.'}});h.click('save');await flush();assert.equal(h.draft().revision,1);assert.equal(h.draft().dirty,true);assert.equal(h.draft().definition.nodes.j.instructions,'충돌 전 글');assert.match(h.markup,/최신 저장본과 비교/);});
 test('authorization denial preserves private draft and blocks subsequent mutation',async()=>{const h=harness();await h.node();h.field('job_guidance','권한 회수 전 글');h.writeOverride=async()=>{throw Object.assign(new Error('권한 회수'),{status:403});};h.click('save');await flush();h.click('save');await flush();assert.equal(h.writes.length,1);assert.equal(h.designer.canAuthor(),false);assert.equal(h.draft().definition.nodes.j.instructions,'권한 회수 전 글');});
@@ -908,6 +924,16 @@ test('stage and job creation require names and retain existing add defaults with
  assert.equal(h.buttons.some(button=>['add_stage','inline_cancel'].includes(button.dataset.authorAction)),false);assert.equal(Object.values(h.draft().definition.nodes).length,1);h.click('inline_apply');await flush();assert.match(h.markup,/class="ew-inline-error"/);assert.match(h.markup,/단계 이름을 입력해 주세요./);assert.equal(Object.values(h.draft().definition.nodes).length,1);
  await h.inline('  운영 인계  ');const stage=Object.values(h.draft().definition.nodes).find(node=>node.type==='t');assert.deepEqual(stage,{id:stage.id,type:'t',parent:'p',name:'운영 인계',...expected});assert.deepEqual(h.draft().definition.nodes.p.children,[stage.id]);assert.equal(stageButton(h,stage.id).getAttribute('aria-expanded'),'true');assert.equal(h.document.activeElement,h.forms['ew-stage-editor'].controls.find(field=>field.name==='name'));assert.match(inlineMarkup(h),/aria-label="새 작업 이름"/);assert.doesNotMatch(h.markup,/아직 작업이 없습니다/);assert.equal(h.buttons.some(button=>button.dataset.authorAction==='add_job'),false);assert.ok(h.buttons.some(button=>button.dataset.authorAction==='add_stage'));
  assert.equal(Object.values(h.draft().definition.nodes).filter(node=>node.type==='j').length,0);h.field('name','   ');h.click('inline_apply');await flush();assert.match(h.markup,/작업 이름을 입력해 주세요./);await h.inline('첫 인계 작업');const job=Object.values(h.draft().definition.nodes).find(node=>node.type==='j');assert.deepEqual(job,{id:job.id,type:'j',parent:stage.id,name:'첫 인계 작업',...expected});assert.deepEqual(h.draft().definition.nodes[stage.id].children,[job.id]);assert.equal(h.forms['ew-author-node'],undefined);assert.equal(h.document.activeElement,h.host.querySelector('#ew-stage-editor [name=name]'));assert.equal(h.document.activeElement.value,'');assert.equal(h.draft().dirty,true);assert.equal(h.writes.length,0);
+});
+test('Esc pressed while a job name is still being composed leaves the open row and the name alone',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(2,1));
+ h.click('stage_toggle',{id:'t1'});await flush();h.click('add_job',{parent:'t1'});await flush();
+ const input=()=>h.host.querySelector('#ew-stage-editor [name=name]');
+ h.field('name','온');
+ const composing=h.designer.handleEvent({type:'keydown',key:'Escape',keyCode:229,isComposing:true,target:input()});
+ assert.deepEqual(copy(composing),{handled:false,preventDefault:false});assert.equal(input().value,'온');
+ const plain=h.designer.handleEvent({type:'keydown',key:'Escape',target:input()});await flush();
+ assert.equal(plain.preventDefault,true);assert.equal(h.host.querySelector('#ew-stage-editor'),null);
 });
 test('repeated tasks stay in the chosen stage and save with stable ordered IDs',async()=>{
  const h=harness(),original=stagedDefinition(2,1);installDefinition(h,original);

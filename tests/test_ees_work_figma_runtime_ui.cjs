@@ -1117,6 +1117,13 @@ test('start window: an empty required value at opening keeps the window working,
  const refused=empty.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});await flush();second.confirm();await refused;
  assert.equal(started(empty).length,0);
 });
+test('start window: typing that cannot be read yet does not break, and the last readable values stay as the draft',async()=>{
+ const h=stagePreviewFixture(),field={name:'count',value:'3',dataset:{inputType:'number',authoredSchema:JSON.stringify({type:'integer'}),authoredRequired:'true'},setCustomValidity(){}};
+ const form={querySelectorAll:selector=>selector==='[data-work-input]'?[field]:[]};
+ const type=()=>h.api.handleEvent({type:'input',target:{dataset:{},matches:()=>false,closest:selector=>selector==='[data-ees-work]'?{}:selector==='#ees-work-start'?form:null}});
+ type();assert.deepEqual(copy(h.api.snapshot().selection.start_inputs.w),{count:3});
+ field.value='';assert.doesNotThrow(type);assert.deepEqual(copy(h.api.snapshot().selection.start_inputs.w),{count:3});
+});
 test('unpublished workflows never expose author drafts to operations preview',()=>{
  const h=stagePreviewFixture();delete h.state.workflow.published;delete h.state.workflow.published_version;
  assert.deepEqual(JSON.parse(JSON.stringify(html('workPublishedDefinition(state)',{state:h.state}))),{});

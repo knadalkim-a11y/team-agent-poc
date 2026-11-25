@@ -1827,7 +1827,8 @@ class OperationsRuntime:
                 api_http.authorize_service(self._api_operation(db,source_ref,groups),actor)
         deadline = (snapshot.get('deadline_source') or {}).get('value')
         prior_deadline = (previous.get('deadline_source') or {}).get('value')
-        if (current != arguments or current_sources != sources or snapshot['inputs'] != previous['inputs']
+        # digest, not ==: Python treats [1] and [True] as equal, and a result read with the old value must not pass.
+        if (digest(current) != digest(arguments) or current_sources != sources or snapshot['inputs'] != previous['inputs']
                 or deadline != prior_deadline or not self.service._work_sources_current(db, run, previous)):
             fail('result_source_changed')
         claim = db.execute('SELECT c.*, a.status AS attempt_state, j.status AS job_state, j.current_attempt FROM work_job_claims c JOIN work_attempts a ON c.attempt_id=a.id JOIN work_jobs j ON j.run_id=a.run_id AND j.job_id=a.job_id WHERE c.attempt_id=?', (attempt['id'],)).fetchone()
