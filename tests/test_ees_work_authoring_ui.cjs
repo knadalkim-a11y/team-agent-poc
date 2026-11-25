@@ -327,6 +327,37 @@ test('a job opened from 내용 확인 has its stage open when the person goes ba
  assert.equal(stageButton(h,'t1').getAttribute('aria-expanded'),'true');
  assert.equal(h.document.activeElement?.dataset.authorAction,'node');assert.equal(h.document.activeElement?.dataset.id,'j1-0');
 });
+// 2026-11-25 (user: decide and merge): what is asked at the start is always kept with that run.
+test('시작할 때 물어볼 것: the dialog offers no 저장 범위, and the value added stays in the list',async()=>{
+ const h=harness();installDefinition(h,stagedDefinition(1,1));
+ h.dialogs.push({name:'대상 라인',type:'text',description:'',required:true,id:'line',unit:'',options_source:'manual',options:'',depends_on:''});
+ h.click('start_input_add');await flush();
+ const dialog=h.dialogHistory.at(-1);assert.equal(dialog.title,'값 추가');assert.doesNotMatch(dialog.html,/name="scope"/);assert.doesNotMatch(dialog.html,/업무 설정/);
+ const root=Object.values(h.draft().definition.nodes).find(node=>node.type==='p');
+ assert.equal(root.inputs.length,1);assert.equal(root.inputs[0].scope,'run');assert.equal(root.inputs[0].name,'대상 라인');
+ assert.match(h.markup,/<h3>시작할 때 물어볼 것<\/h3><small>1개<\/small>/);
+ // A job's own value still chooses where it is kept.
+ await h.node('j0-0');h.dialogs.push(null);h.click('input_add');await flush();
+ assert.match(h.dialogHistory.at(-1).html,/name="scope"/);assert.match(h.dialogHistory.at(-1).html,/업무 설정 · 공장별 값 지원/);
+});
+function apiPickerConfig({factoryAvailable,inputs={}}={}){
+ const slots={'[data-api-choices]':{innerHTML:'',children:[1]},'[data-api-config]':{innerHTML:''},'[data-dialog-confirm]':{disabled:false},'[data-api-picker-error]':{textContent:''}};
+ const dialog={classList:{add(){}},querySelector:selector=>slots[selector],addEventListener(){},removeEventListener(){}};
+ const factory=vm.runInNewContext(apiSources+'\ncreateWorkApiPicker',{URL,workUI:{esc:value=>String(value??'').replaceAll('"','&quot;').replaceAll('<','&lt;'),$:()=>dialog}});
+ const api={id:'a',version:1,state:'active',service_id:'s',name:'백업 조회',purpose:'확인',method:'GET',url:'https://example.test/backups',inputs:[{name:'site',type:'string',required:true,label:'공장'}],fields:[{path:'label',label:'이름',type:'string'}]};
+ const node={id:'j',name:'조회',api_binding:{operation_id:'a',version:1,inputs,outputs:['label']}};
+ const options=factoryAvailable===undefined?{}:{factoryAvailable};
+ factory().open({node,catalog:{services:[{id:'s',name:'사내'}],apis:[api]},jobs:[node],confirm:()=>new Promise(()=>{}),...options});
+ return slots['[data-api-config]'].innerHTML;
+}
+test('도구 연결: 현재 업무의 공장 is offered only where the procedure runs for a factory',()=>{
+ assert.match(apiPickerConfig(),/<option value="factory_id"/);
+ assert.match(apiPickerConfig({factoryAvailable:true}),/<option value="factory_id"/);
+ const system=apiPickerConfig({factoryAvailable:false});
+ assert.doesNotMatch(system,/value="factory_id"/);assert.match(system,/<option value="system_id"/);
+ // A connection that already uses it stays visible, so the author can see and change it.
+ assert.match(apiPickerConfig({factoryAvailable:false,inputs:{site:{context:'factory_id'}}}),/<option value="factory_id" selected/);
+});
 test('same failed payload reuses request identity; different payload receives new identity',async()=>{const h=harness();await h.node();h.writeOverride=async()=>{throw new Error('response lost');};h.field('job_guidance','첫 글');h.click('save');await flush();h.click('save');await flush();assert.equal(h.writes[0].request_id,h.writes[1].request_id);h.field('job_guidance','다른 글');h.click('save');await flush();assert.notEqual(h.writes[1].request_id,h.writes[2].request_id);});
 test('revision conflict preserves unsaved text and never silently rebases',async()=>{const h=harness();await h.node();h.field('job_guidance','충돌 전 글');h.writeOverride=async()=>({ok:false,error:{code:'revision_conflict',message:'다른 담당자가 저장했습니다.'}});h.click('save');await flush();assert.equal(h.draft().revision,1);assert.equal(h.draft().dirty,true);assert.equal(h.draft().definition.nodes.j.instructions,'충돌 전 글');assert.match(h.markup,/최신 저장본과 비교/);});
 test('authorization denial preserves private draft and blocks subsequent mutation',async()=>{const h=harness();await h.node();h.field('job_guidance','권한 회수 전 글');h.writeOverride=async()=>{throw Object.assign(new Error('권한 회수'),{status:403});};h.click('save');await flush();h.click('save');await flush();assert.equal(h.writes.length,1);assert.equal(h.designer.canAuthor(),false);assert.equal(h.draft().definition.nodes.j.instructions,'권한 회수 전 글');});

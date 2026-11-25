@@ -1973,6 +1973,8 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 [data-ees-work-surface] #ees-work-designer .ew-stage-list > .ew-content-stage + .ew-content-stage {
   border-top: 1px solid var(--ees-line-divider);
 }
+/* A procedure with no stage yet: no empty box above the row where the first stage is typed. */
+[data-ees-work-surface] #ees-work-designer .ew-stage-list:empty { display: none; }
 [data-ees-work-surface] #ees-work-designer .ew-tool-definition-nav {
   display: flex;
   flex-wrap: wrap;

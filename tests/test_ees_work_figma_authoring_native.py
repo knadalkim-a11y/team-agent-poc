@@ -1429,7 +1429,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertEqual(self.text('.ew-content-heading>small'), '0개 단계')
             self.assertTrue(self.browser.evaluate("!!document.querySelector('#ew-procedure-info [name=overview_description]')"))
             self.assertLess(metrics['purpose']['y'], metrics['steps']['y'])
-            self.assertLess(metrics['steps']['y'], metrics['list']['y'])
+            # An empty procedure has no stage rows: the empty list is not drawn and the row for the first stage follows the heading.
+            self.assertEqual(metrics['list']['height'], 0)
+            self.assertLess(metrics['steps']['y'], self.browser.evaluate("document.querySelector('#ew-stage-editor')?.getBoundingClientRect().y ?? -1"))
             self.assertEqual(self.browser.evaluate("document.querySelectorAll('[data-author-action=stage_toggle]').length"), 0)
             self.assertEqual(self.browser.evaluate("[...document.querySelectorAll('.ew-author-tabs>button')].map(e=>e.textContent.trim())"), ['업무 내용', '시험해 보기', '판정 단어', '게시 기록'])
             self.assertGreaterEqual(metrics['footer']['height'], 44)

@@ -65,13 +65,15 @@ function createWorkApiPicker(){
     return parsed;
   }
   const option = (value, text, current) => '<option value="'+esc(value)+'"'+(value===current?' selected':'')+'>'+esc(text)+'</option>';
-  function mappingFields(op, draft, node, jobs, catalog) {
+  function mappingFields(op, draft, node, jobs, catalog, factoryAvailable) {
     return op.inputs.map(field => {
       const src = draft.inputs[field.name] || {};
       const sources = sourceChoices(jobs,node,catalog,field);
       const method = 'constant' in src?'constant':src.input?'input':src.context?src.context:src.result?'result':'omit';
       const modes = [...(!field.required?[['omit','전달하지 않음']]:[]), ['constant','고정값'], ...(fieldTypes[field.type]?[['input','실행 시 입력']]:[]),
-        ...(field.type==='string'?[['system_id','현재 업무의 시스템'],['factory_id','현재 업무의 공장']]:[]),
+        // A procedure run for a whole system has no factory: the choice is offered only where there is one,
+        // and stays visible where an earlier version already chose it, so the author can see and change it.
+        ...(field.type==='string'?[['system_id','현재 업무의 시스템'],...(factoryAvailable||src.context==='factory_id'?[['factory_id','현재 업무의 공장']]:[])]:[]),
         ...(sources.length || src.result?[['result','앞 작업에서 선택한 결과']]:[])];
       const raw = draft.raw[field.name] ?? (typeof src.constant==='string'?src.constant:JSON.stringify(src.constant)??'');
       const selected = src.result ? JSON.stringify([src.result.job_id,src.result.field]) : '';
@@ -122,7 +124,7 @@ function createWorkApiPicker(){
     next.api_binding = {operation_id:op.id,version:op.version,inputs,outputs:[...draft.outputs]};
     return next;
   }
-  async function open({node,catalog,jobs,confirm,initial={},restoreFocus}) {
+  async function open({node,catalog,jobs,factoryAvailable=true,confirm,initial={},restoreFocus}) {
     let query = initial.query || '', selected = initial.id || node.api_binding?.operation_id || '';
     const drafts = initial.drafts || new Map();
     const choices = catalog.apis.filter(selectable);
@@ -147,7 +149,7 @@ function createWorkApiPicker(){
     const draw=()=>{
       const op=getOp(),draft=getDraft();
       dialog.querySelector('[data-dialog-confirm]').disabled=!op;
-      dialog.querySelector('[data-api-config]').innerHTML=!op?'<p>이 작업에서 사용할 API를 선택하세요.</p>':`<h3>${esc(op.name)}</h3><p>${esc(op.purpose)}</p><small>${esc(serviceName(catalog,op))} · ${esc(op.method)} ${esc(address(op.url))}</small><h4>이 작업에서 사용할 입력</h4>${mappingFields(op,draft,node,jobs,catalog)||'<p>필요한 입력이 없습니다.</p>'}<h4>받는 결과</h4>${op.fields.map(f=>`<label><input type="checkbox" data-api-output="${esc(f.path)}" ${draft.outputs.includes(f.path)?'checked':''}> ${esc(f.label||f.path)}</label>`).join('') || '<p>응답 본문 없음</p>'}<details><summary>API 상세 보기</summary><p>${esc(op.method)} ${esc(op.url)}</p>${op.example!==null&&op.example!==undefined?'<pre>'+esc(JSON.stringify(op.example,null,2))+'</pre>':''}</details>`;
+      dialog.querySelector('[data-api-config]').innerHTML=!op?'<p>이 작업에서 사용할 API를 선택하세요.</p>':`<h3>${esc(op.name)}</h3><p>${esc(op.purpose)}</p><small>${esc(serviceName(catalog,op))} · ${esc(op.method)} ${esc(address(op.url))}</small><h4>이 작업에서 사용할 입력</h4>${mappingFields(op,draft,node,jobs,catalog,factoryAvailable)||'<p>필요한 입력이 없습니다.</p>'}<h4>받는 결과</h4>${op.fields.map(f=>`<label><input type="checkbox" data-api-output="${esc(f.path)}" ${draft.outputs.includes(f.path)?'checked':''}> ${esc(f.label||f.path)}</label>`).join('') || '<p>응답 본문 없음</p>'}<details><summary>API 상세 보기</summary><p>${esc(op.method)} ${esc(op.url)}</p>${op.example!==null&&op.example!==undefined?'<pre>'+esc(JSON.stringify(op.example,null,2))+'</pre>':''}</details>`;
     };
     let next=null, registering=false;
     const events=(event)=>{
